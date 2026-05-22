@@ -24,3 +24,6 @@ test_data/v2_1_args.json
 # Local temp
 tmp/
 /image.png
+
+
+.claude
