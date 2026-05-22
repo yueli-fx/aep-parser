@@ -71,5 +71,6 @@ func NewProject(target ...AETarget) *Project {
 	if err != nil {
 		panic(fmt.Sprintf("aep: corrupt embedded template for AE %d (build bug): %v", int(t), err))
 	}
+	p.target = t
 	return p
 }

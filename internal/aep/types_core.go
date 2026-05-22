@@ -104,6 +104,7 @@ type Project struct {
 	// V2: derived state for structural mutation (NewComposition / 未来 NewFootage etc.)
 	nextItemID uint32      // monotonic Item ID counter; never reused (see Invariants #9)
 	rootFold   *rifx.Chunk // cached root Fold LIST reference; derived cache, never owned (see Invariants #8)
+	target     AETarget    // which AE-version template NewProject loaded; drives per-target builder chunk selection
 }
 
 // CompositionByID returns the first composition whose ID matches id, or
