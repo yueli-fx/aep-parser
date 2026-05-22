@@ -164,3 +164,52 @@ func TestNewComposition_RejectsInvalid(t *testing.T) {
 		})
 	}
 }
+
+func TestNewComposition_OnOpenedProject_NoIDCollision(t *testing.T) {
+	p, err := aep.Open("../../test_data/re_batch.aep")
+	if err != nil {
+		t.Skipf("re_batch.aep not present: %v", err)
+	}
+	var maxOld uint32
+	for _, c := range p.Compositions {
+		if c.ID > maxOld {
+			maxOld = c.ID
+		}
+	}
+	for _, f := range p.Footage {
+		if f.ID > maxOld {
+			maxOld = f.ID
+		}
+	}
+
+	c, err := p.NewComposition("Added", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.ID <= maxOld {
+		t.Errorf("new comp ID %d should be > existing max %d", c.ID, maxOld)
+	}
+}
+
+func TestNewComposition_EmptyLayrListPreserved(t *testing.T) {
+	p := aep.NewProject()
+	c, _ := p.NewComposition("EmptyL", 1920, 1080, 30, 5)
+	if len(c.Layers) != 0 {
+		t.Errorf("fresh NewComposition has %d layers, want 0", len(c.Layers))
+	}
+
+	// Roundtrip: AE should not auto-insert sentinel layer
+	var buf bytes.Buffer
+	if err := p.WriteAEP(&buf); err != nil {
+		t.Fatal(err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, recomp := range re.Compositions {
+		if recomp.Name == "EmptyL" && len(recomp.Layers) != 0 {
+			t.Errorf("post-rt EmptyL has %d layers, want 0", len(recomp.Layers))
+		}
+	}
+}
