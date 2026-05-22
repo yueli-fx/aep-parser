@@ -305,3 +305,29 @@ func staticValueOf(p *aep.Property) any {
 
 // ───── manual kerning (Wave 3) ─────
 
+func TestProjectInitDerived_EmptyProject(t *testing.T) {
+	data := buildMinimalAEP()
+	proj, err := aep.FromReader(bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var maxExisting uint32
+	for _, c := range proj.Compositions {
+		if c.ID > maxExisting {
+			maxExisting = c.ID
+		}
+	}
+	for _, f := range proj.Footage {
+		if f.ID > maxExisting {
+			maxExisting = f.ID
+		}
+	}
+	got := proj.NextItemIDForTest()
+	if got <= maxExisting {
+		t.Errorf("nextItemID = %d, want > max existing %d", got, maxExisting)
+	}
+	if proj.RootFoldForTest() == nil {
+		t.Error("rootFold not cached after parseProject")
+	}
+}
+
