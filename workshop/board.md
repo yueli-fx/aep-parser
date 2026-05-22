@@ -2,13 +2,13 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 1 runtime types 落地, ldta_layout + capability_matrix skeleton + PropertyStream[T] + shape graph + ShapeLayer wrapper; PASS = **141 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ShapeLayer creation Phase 1 已 close (5 个新 .go + 3 个 test file, +19 PASS)。下一步: Phase 2 serializer primitives (`lower_property_stream.go` / `lower_shape_node.go` / `lower_layer.go` + rename `lower_item_siblings.go`)。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 2 serializer primitives 落地, lower_property_stream + lower_shape_node + lower_layer + lower_item_siblings refactor; PASS = **154 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ShapeLayer creation Phase 2 已 close (4 个新 lower_*.go + 3 个 test file + V2.1 item-siblings rename, +13 PASS)。下一步: Phase 3 public API entry (`new_layer.go` `comp.NewShapeLayer` + AddRect/AddEllipse/AddPath/AddFill/AddStroke + escape hatch)。
 
 ## Next session 进来先做
 
-1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **141** + `go vet ./...` clean
-2. 按 `workshop/plans/v2-2-layer-creation-plan.md` Phase 2 task 2.x 顺序开搞 serializer lowering
+1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **154** + `go vet ./...` clean
+2. 按 `workshop/plans/v2-2-layer-creation-plan.md` Phase 3 task 3.x 顺序开搞 NewShapeLayer + node attachment API
 3. 走 `superpowers:executing-plans` 流程，每 phase 完一段 update board.md 归档
 4. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
 
@@ -28,6 +28,51 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-23 V2.2 Phase 2 serializer primitives complete (141 → 154 PASS, +13)
+
+Phase 2 落 4 个 `lower_*.go` 序列化 primitive。每个 file = 一个责任 (Inv-2)。
+Byte layouts 来自 Phase 0 RE finding (spec §8 RE-S1..S9)；非 Phase 0 已 freeze
+的字段标 TODO + Phase 4 roundtrip 校。
+
+- **`lower_property_stream.go`** (Task 2.1, +4 PASS) — 5 个 typed lowering func:
+  `LowerFloat64Stream` / `LowerVec2Stream` / `LowerVec3Stream` / `LowerColorStream`
+  / `LowerPathStream`。generic core `lowerStream[T]` 覆盖 scalar / vector /
+  color；Path 走单独 om-s / omks / shap / lhd3 / ldat f32 path per RE-S5b/S8。
+  chunk builders: `padMatchName` (40B NUL-pad) + `makeTd{mn,sb,sn,b4}` +
+  `makeCdat`。keyframe encoding mirror parse_keyframe.go layout (spatial-style
+  bpk=0x38+3*dim*8; non-spatial bpk=0x08+5*dim*8); time = round(seconds × tickRate).
+  `encodeBezier` bbox-normalize over verts ∪ verts+inTan ∪ verts+outTan →
+  24×f32 BE per N-vertex path.
+- **`lower_shape_node.go`** (Task 2.2, +6 PASS) — `shapeMatchNames` table +
+  dispatcher `lowerShapeNode` + 5 per-kind funcs。Hot path emits typed:
+  Rect (Size/Position/Roundness), Ellipse (Size/Position), Fill (Color/Opacity),
+  Stroke (Color/Opacity/Width), Path (Path)。非-hot props (Direction / Blend
+  Mode / Composite Order / Line Cap / Dashes / Taper / Wave 等) 用
+  `emptySubPropPlaceholder` (per RE-S5d 3-child header-only group pattern)。
+  `lowerVectorGroup` 按 RE-S3: tdsb + tdsn + N × (tdmn + LIST tdgp) + Group End.
+- **`lower_layer.go`** (Task 2.3, +3 PASS) — `lowerShapeLayer` 出 LIST(Layr)。
+  Children per RE-S1: ldta (160B AE 2020) + Utf8 + 可选 tdmn(Root Vectors Group)
+  + LIST(tdgp) + tdmn(Transform Group) + LIST(tdgp, transform body)。
+  `buildLdtaBytes` 填 160B canonical 经 ldta_layout.go constants (LayerID @0x00 /
+  Quality=Best @0x04 / LayerSubtype=4 @0x80 / Visible bit @0x27 / etc.)。
+  `lowerLayerTransform` 出 V2.2 user-facing 2D 5-stream form (Anchor/Position/
+  Scale/Rotate Z/Opacity) — 不是 RE-S2 内部 6-axis schema；matches V1 parser
+  convention。
+- **`lower_item_siblings.go`** (Task 2.4, +0 PASS, pure refactor) — V2.1
+  `Project.NewComposition` 内 inline siblingChunks loop 提到 `lowerItemSiblings(_
+  *lowerCtx) []*rifx.Chunk`。行为不变（仍 deep-clone from AE 2020 dummy 模板），
+  只是给 V3 brainstorm 一个 named primitive。
+- **V2.2 strategy**: 始终 emit cdat (即使 value == default)。AE 自己 elide
+  defaults，我们不复制 — AE 接受 non-elided form。Phase 4 roundtrip 是 byte-exact
+  闸门。
+- **Deferred to Phase 4 roundtrip**: tdb4 byte 0x08..0x0B observed 0x0 vs 0xffffffff
+  (RE-S2 vs S5a)；cdat per-dim padding (40/48/56/96)；lhd3 bytes @0x14..0x1F
+  常量。可能需调整。
+- **commits**: `3a2321c` (2.1) / `0b74ef8` (2.2) / `4a8b151` (2.3) / `00f5b1d` (2.4) /
+  本 docs commit
+- **下一步**: Phase 3 public API entry — `comp.NewShapeLayer(name)` + Add*
+  attach API + escape hatch β (generic property tree)
 
 ### 2026-05-23 V2.2 Phase 1 runtime types complete (122 → 141 PASS, +19)
 
