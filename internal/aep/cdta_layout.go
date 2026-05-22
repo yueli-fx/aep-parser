@@ -13,7 +13,8 @@ const (
 	cdtaTicksPerFrame      = 0x06 // uint16 BE — fps-derived (1024 for 24/25/30; 512 for 50/60; 800 for 29.97; 400 for 59.94)
 	cdtaTickRate           = 0x08 // uint32 BE — ticks_per_frame × fps
 	cdtaTimeBaseDivisor    = 0x10 // uint32 BE — always 600 (matches WorkArea divisor)
-	cdtaTickRateMirror18   = 0x18 // uint32 BE — mirror of cdtaTickRate
+	cdtaSecondaryDivisor18 = 0x18 // uint32 BE — 600 for fresh comps; AE rewrites to TickRate on user mod
+
 	cdtaWorkAreaStart      = 0x1C // uint32 BE dividend
 	cdtaWorkAreaStartDiv   = 0x20 // uint32 BE divisor
 	cdtaWorkAreaEnd        = 0x24 // uint32 BE dividend; 0xFFFFFFFF = sentinel

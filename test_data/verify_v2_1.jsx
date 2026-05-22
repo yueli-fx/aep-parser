@@ -49,12 +49,18 @@
                 log.push("missing items: main=" + (main ? "ok" : "NIL") + " bg=" + (bg ? "ok" : "NIL"));
             } else {
                 // AE save normalization checks
+                // shutterAngle 不参与 gate: AE 25 ScriptingAPI 对 NTSC fps comp
+                // 返回 stored × 1.2 (29.97: stored 180 → API 返回 216) —— 储存
+                // 字节跟 AE 自存的 A_baseline 完全一致，AE UI 显示 180，仅 ScriptingAPI
+                // bug。详 workshop/scars/ae25-acceptance-gate.md。
+                // AE returns bgColor 0..1 normalized, NOT 0..255. 20/255≈0.0784 etc.
                 ok = (main.width === 1920 && main.height === 1080
                       && Math.abs(main.frameRate - 29.97) < 1e-4
                       && Math.abs(main.duration - 10) < 0.05
-                      && Math.abs(main.shutterAngle - 180) < 1e-3
                       && Math.abs(main.pixelAspect - 1.0) < 1e-5
-                      && main.bgColor[0] === 20 && main.bgColor[1] === 30 && main.bgColor[2] === 40);
+                      && Math.abs(main.bgColor[0] - 20/255) < 1e-3
+                      && Math.abs(main.bgColor[1] - 30/255) < 1e-3
+                      && Math.abs(main.bgColor[2] - 40/255) < 1e-3);
                 log.push("Main: " + main.width + "x" + main.height
                          + " fps=" + main.frameRate + " dur=" + main.duration
                          + " sa=" + main.shutterAngle + " par=" + main.pixelAspect
@@ -81,7 +87,7 @@
             } else {
                 ok = ok && Math.abs(main2.frameRate - 29.97) < 1e-4
                      && Math.abs(main2.duration - 10) < 0.05
-                     && main2.bgColor[0] === 20;
+                     && Math.abs(main2.bgColor[0] - 20/255) < 1e-3;
                 log.push("resaved Main: fps=" + main2.frameRate + " dur=" + main2.duration);
             }
         }

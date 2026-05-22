@@ -47,34 +47,41 @@ func decodeFrameRate(enc frameRateEncoding) float64 {
 	return float64(enc.whole) + float64(enc.frac)/65536.0
 }
 
-// fpsTiming 是 cdta 里 fps-依赖的 4 个 secondary 字段集合。AE 25 写新 comp 时
-// 这些字段必须填充正确值（实测 RE_fps_* fixtures from test_data/re_tickrate.aep），
-// 否则 AE 25 打开会 crash —— parser 不读这些字段但 AE 自身做时间轴 sanity 检查时
-// 会用到。
+// fpsTiming 是 cdta 里 fps-依赖的 secondary 字段集合。AE 25 写新 comp 时
+// 这些字段必须填充正确值（实测 fixtures from re_tickrate.aep / re_cdta_probe.aep），
+// 否则 AE 25 显示错误（duration/shutter）或拒绝打开。
 //
-// 字段 RE 来源: dump_cdta test_data/re_tickrate.aep 各 RE_fps_* comp。
+// 实测两组 tick rate：
+//   - tickRate (actual)  = ticksPerFrame × fps_actual (NTSC 含 .97/.94)
+//   - nominalTickRate   = ticksPerFrame × fps_nominal_whole (NTSC nominal = 24/30/60)
+//
+// 整数 fps 下两者相等；NTSC 下不等。AE 用 nominalTickRate 当 @0x2C 的"duration in ticks"
+// 单位（cdta @0x2C = duration_seconds × nominalTickRate），但 @0x08 / @0x18 / @0x30
+// 存 actual tickRate（per RE_fps_29_97 / A_baseline 实证）。
+//
+// 字段 RE 来源:
+//   - test_data/re_tickrate.aep 各 RE_fps_* comp 的 cdta @0x04..@0x33（actual tickRate）
+//   - test_data/re_cdta_probe.aep A_baseline / F_shutter_angle_360（10s comps，验证
+//     nominalTickRate × duration 公式）
 type fpsTiming struct {
-	ticksPerFrame uint16 // cdta @0x06 (uint16 BE)
-	tickRate      uint32 // cdta @0x08 / @0x18 / @0x30 (uint32 BE; = ticksPerFrame × fps)
-	masterTicks   uint32 // cdta @0x2C (uint32 BE; = ticksPerFrame × 5 × fps_nominal_whole)
+	ticksPerFrame   uint16 // cdta @0x06 (uint16 BE)
+	tickRate        uint32 // cdta @0x08 / @0x18 / @0x30 (uint32 BE; = ticksPerFrame × fps_actual)
+	nominalTickRate uint32 // cdta @0x2C divisor (uint32; = ticksPerFrame × fps_nominal_whole)
 }
 
-// canonicalFpsTiming 是 AE 25 实测 fps → cdta secondary fields 表。
-// 验证: test_data/re_tickrate.aep 各 RE_fps_* comp 的 cdta @0x04..@0x33。
+// canonicalFpsTiming: AE 25 实测 fps → tickRate / nominalTickRate 表。
 //
-// NTSC nominal_whole: 23.976→24 / 29.97→30 / 59.94→60（@0x2C 计算用此值，不是 floor(fps)）。
-//
-// 23.976 行为推算（fixture 缺）: ticksPerFrame=1000 保持 TickRate ≈ 23976 与 29.97/59.94
-// 共享 NTSC 时间基。不实证但 mathematically consistent，且 ship gate 测 29.97 不依赖。
+// NTSC nominal_whole: 23.976→24 / 29.97→30 / 59.94→60（@0x2C 算 duration 用此 base，
+// 不是 floor(fps)）。23.976 fixture 缺，用 1000 t/f 数学推算（其它 NTSC 实证）。
 var canonicalFpsTiming = map[float64]fpsTiming{
-	24:     {ticksPerFrame: 1024, tickRate: 24576, masterTicks: 122880},
-	25:     {ticksPerFrame: 1024, tickRate: 25600, masterTicks: 128000},
-	30:     {ticksPerFrame: 1024, tickRate: 30720, masterTicks: 153600},
-	50:     {ticksPerFrame: 512, tickRate: 25600, masterTicks: 128000},
-	60:     {ticksPerFrame: 512, tickRate: 30720, masterTicks: 153600},
-	23.976: {ticksPerFrame: 1000, tickRate: 23976, masterTicks: 120000}, // computed, no fixture
-	29.97:  {ticksPerFrame: 800, tickRate: 23976, masterTicks: 120000},
-	59.94:  {ticksPerFrame: 400, tickRate: 23976, masterTicks: 120000},
+	24:     {ticksPerFrame: 1024, tickRate: 24576, nominalTickRate: 24576},
+	25:     {ticksPerFrame: 1024, tickRate: 25600, nominalTickRate: 25600},
+	30:     {ticksPerFrame: 1024, tickRate: 30720, nominalTickRate: 30720},
+	50:     {ticksPerFrame: 512, tickRate: 25600, nominalTickRate: 25600},
+	60:     {ticksPerFrame: 512, tickRate: 30720, nominalTickRate: 30720},
+	23.976: {ticksPerFrame: 1000, tickRate: 23976, nominalTickRate: 24000}, // no fixture; computed
+	29.97:  {ticksPerFrame: 800, tickRate: 23976, nominalTickRate: 24000},
+	59.94:  {ticksPerFrame: 400, tickRate: 23976, nominalTickRate: 24000},
 }
 
 // lookupFpsTiming 返回 fps 对应的 cdta timing 字段。
@@ -84,10 +91,10 @@ var canonicalFpsTiming = map[float64]fpsTiming{
 //   - 其它 fps → 启发式:
 //     ticksPerFrame = 1024 if fps ≤ 30 else 512
 //     tickRate = round(ticksPerFrame × fps)
-//     masterTicks = ticksPerFrame × 5 × round(fps)
+//     nominalTickRate = ticksPerFrame × round(fps) (假设非 NTSC)
 //
 // 启发式 fallback 对 AE 25 是否完全 safe 未实证 — 但比全零安全；
-// 非 canonical fps 需进一步 RE 才能保证 AE 25 不 crash。
+// 非 canonical fps 需进一步 RE 才能保证 AE 25 不 crash / 显示正确。
 func lookupFpsTiming(fps float64) fpsTiming {
 	for canonical, t := range canonicalFpsTiming {
 		if math.Abs(fps-canonical) < ntscTolerance {
@@ -100,10 +107,10 @@ func lookupFpsTiming(fps float64) fpsTiming {
 	} else {
 		tpf = 512
 	}
-	rounded := math.Round(fps)
+	rounded := uint32(math.Round(fps))
 	return fpsTiming{
-		ticksPerFrame: tpf,
-		tickRate:      uint32(math.Round(float64(tpf) * fps)),
-		masterTicks:   uint32(tpf) * 5 * uint32(rounded),
+		ticksPerFrame:   tpf,
+		tickRate:        uint32(math.Round(float64(tpf) * fps)),
+		nominalTickRate: uint32(tpf) * rounded,
 	}
 }

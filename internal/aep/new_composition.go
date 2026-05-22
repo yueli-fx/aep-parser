@@ -111,14 +111,18 @@ func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	binary.BigEndian.PutUint16(d[cdtaResolutionFactorX:cdtaResolutionFactorX+2], 1)
 	binary.BigEndian.PutUint16(d[cdtaResolutionFactorY:cdtaResolutionFactorY+2], 1)
 
-	// fps timing prologue @0x06 / @0x08 / @0x18 / @0x30
+	// fps timing prologue @0x06 / @0x08 / @0x30
 	binary.BigEndian.PutUint16(d[cdtaTicksPerFrame:cdtaTicksPerFrame+2], timing.ticksPerFrame)
 	binary.BigEndian.PutUint32(d[cdtaTickRate:cdtaTickRate+4], timing.tickRate)
-	binary.BigEndian.PutUint32(d[cdtaTickRateMirror18:cdtaTickRateMirror18+4], timing.tickRate)
 	binary.BigEndian.PutUint32(d[cdtaTickRateMirror30:cdtaTickRateMirror30+4], timing.tickRate)
 
 	// TimeBaseDivisor @0x10 — always 600 (matches WorkArea divisor)
+	// Secondary divisor @0x18 — 600 for fresh comps (实测 A_baseline + dummy_comp).
+	// AE rewrites to TickRate after user mods（E_shutter/F_shutter/RE_fps_*）—
+	// builder 出 fresh comp，必须用 600，否则 AE 25 把 ShutterAngle 按 NTSC 因子重算
+	// (实测 Phase 6 ship gate: stored 180 → AE display 216 when @0x18=TickRate)。
 	binary.BigEndian.PutUint32(d[cdtaTimeBaseDivisor:cdtaTimeBaseDivisor+4], 600)
+	binary.BigEndian.PutUint32(d[cdtaSecondaryDivisor18:cdtaSecondaryDivisor18+4], 600)
 
 	// WorkArea @0x1C..@0x2B：start=0/600, end=sentinel/600
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaStart:cdtaWorkAreaStart+4], 0)
@@ -126,8 +130,11 @@ func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaEnd:cdtaWorkAreaEnd+4], 0xFFFFFFFF) // sentinel "use Duration"
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaEndDiv:cdtaWorkAreaEndDiv+4], 600)
 
-	// MasterTicks @0x2C — fps-derived; ticks_per_frame × 5 × fps_nominal_whole
-	binary.BigEndian.PutUint32(d[cdtaMasterTicks:cdtaMasterTicks+4], timing.masterTicks)
+	// MasterTicks @0x2C = round(duration_seconds × nominalTickRate)。
+	// AE 25 display duration ≈ @0x2C / tickRate (per RE_cdta_probe A_baseline + ship gate
+	// 实测：错值导致 AE 显示 错 duration + 触发其它字段误算如 ShutterAngle)。
+	masterTicks := uint32(math.Round(duration * float64(timing.nominalTickRate)))
+	binary.BigEndian.PutUint32(d[cdtaMasterTicks:cdtaMasterTicks+4], masterTicks)
 
 	// BGColor @0x34..@0x36 default {0,0,0}（bytes 已 0）
 
