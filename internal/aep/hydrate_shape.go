@@ -1,27 +1,34 @@
 // internal/aep/hydrate_shape.go
 //
-// V2.2 Phase 4 Task 4.1 — chunk tree → runtime VectorGroup tree.
+// V2.2 Phase 4 — chunk tree → runtime ShapeLayer state.
 //
-// Inverse of lower_layer.go/lowerShapeLayer + lower_shape_node.go. Walks
-// the parsed Layr LIST, finds the "ADBE Root Vectors Group" subtree, and
-// rebuilds the typed runtime ShapeNode graph. Reuses V1 parseLeafProperty
-// (parse_properties.go) so per-property cdat / tdb4 decoding stays in one
-// place (Inv-1: serializer artifacts ↔ runtime values are bijective).
+// Inverse of lower_layer.go/lowerShapeLayer + lower_shape_node.go +
+// lower_property_stream.go. Walks the parsed Layr LIST and populates two
+// runtime trees on the Layer:
 //
-// V2.2 scope: static values only. Keyframe hydration (animated streams)
-// arrives with Task 4.2's canonical roundtrip — V1's prop.Keyframes is
-// the source, translation lives there.
+//   - layer.shapeRootGroup — the VectorGroup tree (Rect/Ellipse/Path/Fill/
+//     Stroke), via hydrateShapeNodes.
+//   - layer.shapeTransform — the Layer-level Transform streams (Anchor /
+//     Position / Scale / Rotate Z / Opacity), via hydrateLayerTransform.
+//
+// Both static and animated streams are handled. The static path uses
+// V1 parseLeafProperty's StaticValue (any); the animated path translates
+// V1 prop.Keyframes ([]*Keyframe) into typed StreamKeyframe[T] via the
+// PropertyStream.AddKeyframeLinear API, which also flips the stream into
+// Animated mode. Per Inv-1: a roundtrip preserves runtime semantics.
 package aep
 
 import (
+	"encoding/binary"
+	"math"
+
 	"github.com/example/aep-parser/internal/rifx"
 )
 
 // hydrateShapeNodes walks a parsed Layr LIST and returns the runtime
 // VectorGroup tree (root of the shape graph). Returns nil when the Layr
 // has no "ADBE Root Vectors Group" subtree — caller (WrapShapeLayer)
-// falls back to a fresh empty VectorGroup so user-built ShapeLayers and
-// parsed-but-empty ones share the same wrapper code path.
+// falls back to a fresh empty VectorGroup.
 func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	for i := 0; i+1 < len(layr.Children); i++ {
 		ch := layr.Children[i]
@@ -37,10 +44,9 @@ func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	return nil
 }
 
-// hydrateVectorGroup turns a vector-group tdgp (the body of "ADBE Root
-// Vectors Group" or a nested "ADBE Vector Group") into a runtime
-// VectorGroup. Children render in serialized order — Children[0] = first
-// emitted = bottom of stack per spec §3.2.
+// hydrateVectorGroup turns a vector-group tdgp into a runtime VectorGroup.
+// Children render in serialized order — Children[0] = first emitted =
+// bottom of stack per spec §3.2.
 func hydrateVectorGroup(tdgp *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	g := NewVectorGroup()
 	walkTdmnPairs(tdgp, func(matchName string, payload *rifx.Chunk) bool {
@@ -74,10 +80,168 @@ func hydrateVectorGroup(tdgp *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	return g
 }
 
+// hydrateLayerTransform populates layer.shapeTransform from the V1
+// layer.Properties list (which parseProperties has already extracted from
+// the Layr's Transform Group). Called from parseLayer's LayerTypeShape
+// branch.
+func hydrateLayerTransform(layer *Layer) {
+	if layer.shapeTransform == nil {
+		layer.shapeTransform = newLayerTransform()
+	}
+	for _, p := range layer.Properties {
+		switch p.MatchName {
+		case MatchNameAnchorPoint:
+			hydrateVec2Stream(layer.shapeTransform.anchorPoint, p)
+		case MatchNamePosition:
+			hydrateVec2Stream(layer.shapeTransform.position, p)
+		case MatchNameScale:
+			hydrateVec2Stream(layer.shapeTransform.scale, p)
+		case MatchNameRotateZ:
+			hydrateFloat64Stream(layer.shapeTransform.rotation, p)
+		case MatchNameOpacity:
+			hydrateFloat64Stream(layer.shapeTransform.opacity, p)
+		}
+	}
+}
+
+// --- per-node hydrators ---------------------------------------------------
+
+func hydrateRectNode(body *rifx.Chunk, ctx *parseCtx) *RectNode {
+	r := NewRectNode()
+	props := nodeStreamValues(body, ctx)
+	hydrateVec2Stream(r.size, props["ADBE Vector Rect Size"])
+	hydrateVec2Stream(r.position, props["ADBE Vector Rect Position"])
+	hydrateFloat64Stream(r.roundness, props["ADBE Vector Rect Roundness"])
+	return r
+}
+
+func hydrateEllipseNode(body *rifx.Chunk, ctx *parseCtx) *EllipseNode {
+	e := NewEllipseNode()
+	props := nodeStreamValues(body, ctx)
+	hydrateVec2Stream(e.size, props["ADBE Vector Ellipse Size"])
+	hydrateVec2Stream(e.position, props["ADBE Vector Ellipse Position"])
+	return e
+}
+
+func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
+	f := NewFillNode()
+	props := nodeStreamValues(body, ctx)
+	hydrateColor4Stream(f.color, props["ADBE Vector Fill Color"])
+	hydrateFloat64Stream(f.opacity, props["ADBE Vector Fill Opacity"])
+	return f
+}
+
+func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
+	s := NewStrokeNode()
+	props := nodeStreamValues(body, ctx)
+	hydrateColor4Stream(s.color, props["ADBE Vector Stroke Color"])
+	hydrateFloat64Stream(s.opacity, props["ADBE Vector Stroke Opacity"])
+	hydrateFloat64Stream(s.width, props["ADBE Vector Stroke Width"])
+	return s
+}
+
+// hydratePathNode reads the om-s/omks/shap subtree the serializer emits
+// for a PathNode (RE-S5b). Recovers vertex count + Closed flag; vertex
+// positions are bbox-normalized f32 in the on-disk form so byte-exact
+// vertex roundtrip isn't free — V2.2 hydration recovers the structural
+// shape (n vertices, closed/open) which is what callers see through
+// PathNode.Path().StaticValue().Vertices.
+func hydratePathNode(body *rifx.Chunk, _ *parseCtx) *PathNode {
+	p := NewPathNode()
+	// Find the om-s LIST under the node body's tdmn pairs.
+	var oms *rifx.Chunk
+	walkTdmnPairs(body, func(name string, payload *rifx.Chunk) bool {
+		if name == "ADBE Vector Shape" && payload.IsList() && payload.FormType == rifx.IDOmS {
+			oms = payload
+			return false
+		}
+		return true
+	})
+	if oms == nil {
+		return p
+	}
+	// om-s → LIST(omks) → LIST(shap) → shph + LIST(kfl) → lhd3 + ldat
+	var shap *rifx.Chunk
+	for _, ch := range oms.Children {
+		if ch.IsList() && ch.FormType == rifx.IDOmks {
+			for _, sub := range ch.Children {
+				if sub.IsList() && sub.FormType == rifx.IDShap {
+					shap = sub
+					break
+				}
+			}
+		}
+	}
+	if shap == nil {
+		return p
+	}
+	var shph, lhd3, ldat *rifx.Chunk
+	for _, ch := range shap.Children {
+		switch {
+		case ch.ID == rifx.IDShph:
+			shph = ch
+		case ch.IsList() && ch.FormType == rifx.IDkfl:
+			for _, sub := range ch.Children {
+				switch sub.ID {
+				case rifx.IDLhd3:
+					lhd3 = sub
+				case rifx.IDLdat:
+					ldat = sub
+				}
+			}
+		}
+	}
+	closed := true
+	if shph != nil && len(shph.Data) >= 4 {
+		// Per lower_property_stream.go encodeBezier: flags bytes [2..3] =
+		// 0x0201 closed, 0x0200 open.
+		closed = shph.Data[3] == 0x01
+	}
+	verts := decodeBezierVertices(shph, lhd3, ldat)
+	bp := BezierPath{
+		Vertices:    verts,
+		InTangents:  make([][2]float64, len(verts)),
+		OutTangents: make([][2]float64, len(verts)),
+		Closed:      closed,
+	}
+	_ = p.path.SetStaticValue(bp)
+	return p
+}
+
+// decodeBezierVertices reads the bbox-normalized f32 ldat and denormalizes
+// using the shph bbox. Returns a slice of len = lhd3 vertex count (zero if
+// any chunk is missing or sizes don't add up).
+func decodeBezierVertices(shph, lhd3, ldat *rifx.Chunk) [][2]float64 {
+	if lhd3 == nil || ldat == nil || len(lhd3.Data) < 0x10 {
+		return nil
+	}
+	n := int(binary.BigEndian.Uint32(lhd3.Data[0x0C:0x10]))
+	if n <= 0 || len(ldat.Data) < n*24 {
+		return nil
+	}
+	var minX, minY, maxX, maxY float64
+	if shph != nil && len(shph.Data) >= 20 {
+		minX = float64(math.Float32frombits(binary.BigEndian.Uint32(shph.Data[4:8])))
+		minY = float64(math.Float32frombits(binary.BigEndian.Uint32(shph.Data[8:12])))
+		maxX = float64(math.Float32frombits(binary.BigEndian.Uint32(shph.Data[12:16])))
+		maxY = float64(math.Float32frombits(binary.BigEndian.Uint32(shph.Data[16:20])))
+	}
+	rangeX := maxX - minX
+	rangeY := maxY - minY
+	out := make([][2]float64, n)
+	for i := 0; i < n; i++ {
+		base := i * 24
+		nx := float64(math.Float32frombits(binary.BigEndian.Uint32(ldat.Data[base : base+4])))
+		ny := float64(math.Float32frombits(binary.BigEndian.Uint32(ldat.Data[base+4 : base+8])))
+		out[i] = [2]float64{minX + nx*rangeX, minY + ny*rangeY}
+	}
+	return out
+}
+
+// --- helpers ---------------------------------------------------------------
+
 // nodeStreamValues walks a per-node body tdgp and returns the map
-// matchName → V1 *Property for every tdbs leaf encountered. Sub-properties
-// the V2.2 serializer emitted as empty placeholders (Direction / Blend Mode
-// / etc.) yield nil from parseLeafProperty and are dropped silently.
+// matchName → V1 *Property for every tdbs leaf encountered.
 func nodeStreamValues(body *rifx.Chunk, ctx *parseCtx) map[string]*Property {
 	out := map[string]*Property{}
 	walkTdmnPairs(body, func(name string, payload *rifx.Chunk) bool {
@@ -91,90 +255,63 @@ func nodeStreamValues(body *rifx.Chunk, ctx *parseCtx) map[string]*Property {
 	return out
 }
 
-func hydrateRectNode(body *rifx.Chunk, ctx *parseCtx) *RectNode {
-	r := NewRectNode()
-	props := nodeStreamValues(body, ctx)
-	if p, ok := props["ADBE Vector Rect Size"]; ok {
-		if v, ok := vec2Of(p.StaticValue); ok {
-			_ = r.SetSize(v)
-		}
+// hydrateFloat64Stream populates dst from a V1 *Property. Animated when
+// p.Keyframes is non-empty; otherwise static (or no-op if p is nil).
+func hydrateFloat64Stream(dst *PropertyStream[float64], p *Property) {
+	if dst == nil || p == nil {
+		return
 	}
-	if p, ok := props["ADBE Vector Rect Position"]; ok {
-		if v, ok := vec2Of(p.StaticValue); ok {
-			_ = r.SetPosition(v)
+	if len(p.Keyframes) > 0 {
+		for _, kf := range p.Keyframes {
+			if v, ok := scalarOf(kf.Value); ok {
+				_ = dst.AddKeyframeLinear(kf.Time, v)
+			}
 		}
+		return
 	}
-	if p, ok := props["ADBE Vector Rect Roundness"]; ok {
-		if v, ok := scalarOf(p.StaticValue); ok {
-			_ = r.SetRoundness(v)
-		}
+	if v, ok := scalarOf(p.StaticValue); ok {
+		_ = dst.SetStaticValue(v)
 	}
-	return r
 }
 
-func hydrateEllipseNode(body *rifx.Chunk, ctx *parseCtx) *EllipseNode {
-	e := NewEllipseNode()
-	props := nodeStreamValues(body, ctx)
-	if p, ok := props["ADBE Vector Ellipse Size"]; ok {
-		if v, ok := vec2Of(p.StaticValue); ok {
-			_ = e.SetSize(v)
-		}
+// hydrateVec2Stream populates dst from a V1 *Property.
+func hydrateVec2Stream(dst *PropertyStream[[2]float64], p *Property) {
+	if dst == nil || p == nil {
+		return
 	}
-	if p, ok := props["ADBE Vector Ellipse Position"]; ok {
-		if v, ok := vec2Of(p.StaticValue); ok {
-			_ = e.SetPosition(v)
+	if len(p.Keyframes) > 0 {
+		for _, kf := range p.Keyframes {
+			if v, ok := vec2Of(kf.Value); ok {
+				_ = dst.AddKeyframeLinear(kf.Time, v)
+			}
 		}
+		return
 	}
-	return e
+	if v, ok := vec2Of(p.StaticValue); ok {
+		_ = dst.SetStaticValue(v)
+	}
 }
 
-// hydratePathNode reads the om-s / omks / shap subtree the serializer
-// emits for a PathNode (RE-S5b). V2.2 hydration is a placeholder — full
-// bbox-normalized BezierPath decoding lands when Task 4.2 demands it.
-func hydratePathNode(body *rifx.Chunk, _ *parseCtx) *PathNode {
-	return NewPathNode()
+// hydrateColor4Stream populates dst from a V1 *Property (RGBA).
+func hydrateColor4Stream(dst *PropertyStream[[4]float64], p *Property) {
+	if dst == nil || p == nil {
+		return
+	}
+	if len(p.Keyframes) > 0 {
+		for _, kf := range p.Keyframes {
+			if v, ok := color4Of(kf.Value); ok {
+				_ = dst.AddKeyframeLinear(kf.Time, v)
+			}
+		}
+		return
+	}
+	if v, ok := color4Of(p.StaticValue); ok {
+		_ = dst.SetStaticValue(v)
+	}
 }
 
-func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
-	f := NewFillNode()
-	props := nodeStreamValues(body, ctx)
-	if p, ok := props["ADBE Vector Fill Color"]; ok {
-		if v, ok := color4Of(p.StaticValue); ok {
-			_ = f.SetColor(v)
-		}
-	}
-	if p, ok := props["ADBE Vector Fill Opacity"]; ok {
-		if v, ok := scalarOf(p.StaticValue); ok {
-			_ = f.SetOpacity(v)
-		}
-	}
-	return f
-}
-
-func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
-	s := NewStrokeNode()
-	props := nodeStreamValues(body, ctx)
-	if p, ok := props["ADBE Vector Stroke Color"]; ok {
-		if v, ok := color4Of(p.StaticValue); ok {
-			_ = s.SetColor(v)
-		}
-	}
-	if p, ok := props["ADBE Vector Stroke Opacity"]; ok {
-		if v, ok := scalarOf(p.StaticValue); ok {
-			_ = s.SetOpacity(v)
-		}
-	}
-	if p, ok := props["ADBE Vector Stroke Width"]; ok {
-		if v, ok := scalarOf(p.StaticValue); ok {
-			_ = s.SetWidth(v)
-		}
-	}
-	return s
-}
-
-// scalarOf extracts a 1D float64 from a V1 Property.StaticValue. The
-// 1-component code path in decodeCdatValue returns a bare float64 (not a
-// []float64).
+// scalarOf extracts 1D float64 from V1 Property.StaticValue / Keyframe.Value.
+// decodeCdatValue returns float64 for 1D, []float64 for ND.
 func scalarOf(v any) (float64, bool) {
 	if f, ok := v.(float64); ok {
 		return f, true
@@ -185,8 +322,7 @@ func scalarOf(v any) (float64, bool) {
 	return 0, false
 }
 
-// vec2Of extracts [2]float64 from a V1 Property.StaticValue ([]float64
-// len>=2).
+// vec2Of extracts [2]float64.
 func vec2Of(v any) ([2]float64, bool) {
 	s, ok := v.([]float64)
 	if !ok || len(s) < 2 {
@@ -195,7 +331,7 @@ func vec2Of(v any) ([2]float64, bool) {
 	return [2]float64{s[0], s[1]}, true
 }
 
-// color4Of extracts [4]float64 RGBA from a V1 Property.StaticValue.
+// color4Of extracts [4]float64 RGBA.
 func color4Of(v any) ([4]float64, bool) {
 	s, ok := v.([]float64)
 	if !ok || len(s) < 4 {
