@@ -2,13 +2,13 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-22 by claude (文档大重组 — 删 INDEX.md / refactor.md，合并文档地图；PASS = **109 / 0 FAIL**)
-**Active focus**: 🟢 主线收尾 —— 可达字段约 99% 已 ship。继续动需要新方向（同-renderer setter / ldta 零值区 probe / footage 字段 / project nhed 扩展）
+**Last updated**: 2026-05-22 by claude (V2.1 Foundation ship — NewProject + NewComposition + AE 2020/25 ship gates PASS；PASS = **122 / 0 FAIL**)
+**Active focus**: 🟢 V2.1 完工 —— 下个方向 V3 design phase（scene-graph IR / capability matrix / serializer split；详 `workshop/specs/v3-direction.md`） 或 V2.2 (Layer 创建)。等 brainstorm。
 
 ## Next session 进来先做
 
-1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **109** + `go vet ./...` clean
-2. 看 `workshop/plans/coverage.md` 已 ship / 暂搁 / 不可达 三段；剩余可探方向写在该文末
+1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **122** + `go vet ./...` clean
+2. 看 `workshop/specs/v3-direction.md` 决定下个 phase 走 V3 (scene-graph 重构 brainstorm) 还是 V2.2 (Layer 创建 RE)
 3. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
 
 ## 永久知识（不要再 RE）
@@ -27,6 +27,30 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-22 V2.1 Foundation ship — NewProject + NewComposition (109 → 122 PASS, +13)
+
+V2 第一个 sub-project：从零创建 .aep 通过 AE 2020 / AE 2025 ship gate。
+
+- **Public API**:
+  - `aep.NewProject(target ...AETarget) *Project` (零参 = TargetAE2020)
+  - `proj.NewComposition(name, w, h, fps, duration) (*Composition, error)`
+  - `AETarget` enum: `TargetAE2020 / TargetAE2022 / TargetAE2025`
+- **AE 接受 gate 找到 5 道梯度症状** —— 详 `scars/ae25-acceptance-gate.md`:
+  1. cdta 二级 timing 字段空 → AE 崩
+  2. head counter < itemID → "数据丢失"
+  3. Item Fold-level siblings 缺 → "数据丢失"
+  4. cdta masterTicks 错值 → duration 显示错
+  5. per-version Item internals 差异 → AE 2020 拒开 AE 25 写的 items
+- **Canonical seed 收敛**: AE 高版本 back-compat 读低版本 → builder 永远输出 AE 2020 最小子集，一个 `templates/2020_dummy_comp.aep` 即可跨 AE 2020/22/25。`Project.target` 字段管 empty-project skeleton (svap/nhed)，不管 Item internals。
+- **新文件**:
+  - `internal/aep/new_project.go` / `new_composition.go` / `cdta_layout.go` / `framerate_canonical.go`
+  - `internal/aep/templates/2020_dummy_comp.aep` (唯一 canonical seed)
+  - `test_data/verify_v2_1.jsx` + `test_data/v2_smoke{,_ae2020}.aep`
+  - `tmp_debug/gen_dummy_comp.jsx` + `tmp_debug/v2_smoke/main.go`
+- **修改**: `Project.target / nextItemID / rootFold` (types_core) / `parseProject.initDerived` (parse) / `write.go` `syncHeadCounters`
+- **教训**: builder ≠ parser 反向（parser 容错 / AE 严格）。多信号区分根因（崩溃 / 数据丢失 / 显示错值 / ScriptingAPI 偏移）。ScriptingAPI 至少 NTSC `shutterAngle` 返回 stored × 1.2 quirk —— 储存字节跟 AE-saved 一致即可。
+- **commits**: `e4e5b00 / 9dab01f / 9d6a938 / 728e5af / 270bdae` —— 共 5 个 Phase 6 commits + Phase 7 docs sync。
 
 ### 2026-05-22 文档大重组 (109 PASS 不变)
 

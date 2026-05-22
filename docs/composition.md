@@ -23,6 +23,44 @@ for _, m := range comp.Markers {
 
 ---
 
+## Creation
+
+### Project.NewComposition
+
+```go
+func (p *Project) NewComposition(name string, width, height uint16, frameRate, duration float64) (*Composition, error)
+```
+
+#### Description
+
+在 project 根目录新建一个空 composition（0 layers）。
+
+Required 参数（任一不合法返 error，project 不被修改）：
+- `name` — 非空 string
+- `width` / `height` — uint16, > 0
+- `frameRate` — > 0 (Hz)；NTSC 容差内的 23.976 / 29.97 / 59.94 映射到 AE canonical 编码
+- `duration` — > 0 (秒)；内部换算为整帧数
+
+可选属性默认值（用 `Set*` 方法在 New 后修改）：BGColor=[0,0,0] / PixelAspect=1.0 / ResolutionFactor=[1,1] / ShutterAngle=180 / ShutterPhase=0 / MotionBlurAdaptive=128 / MotionBlurSamples=16。
+
+ID 自动分配（monotonic，never reuse）。新 comp append 到 project root folder。与 `Open(...)` 出来的 comp 完全同构 —— 所有 `Set*` 方法立即可用。
+
+```go
+proj := aep.NewProject()
+main, err := proj.NewComposition("Main", 1920, 1080, 29.97, 10)
+if err != nil { log.Fatal(err) }
+main.SetBGColor([3]uint8{20, 30, 40})
+main.SetResolutionFactor(2, 2)
+```
+
+输出文件用 AE 跨版本通用结构 —— builder 永远写最小 canonical seed (AE 2020 兼容)，AE 25 / 22 / 20 都能开。详见 [project.md NewProject 段](project.md#aepnewproject)。
+
+#### Atomicity
+
+`NewComposition` 是原子操作：如果内部 chunk parse 失败或产生 parser warning，回滚 project 到 pre-call 状态并返 error。调用者不会看到半成品 comp。
+
+---
+
 ## Attributes
 
 ### Composition.ID

@@ -11,6 +11,13 @@
 
 ## ✅ 已 ship
 
+### V2 结构性创建 (2026-05-22)
+
+- `aep.NewProject(target ...AETarget) *Project` — 全新空 project，零参 = TargetAE2020；支持 TargetAE2020 / 2022 / 2025
+- `proj.NewComposition(name, w, h, fps, duration) (*Composition, error)` — 在 root folder 新建空 comp，原子（warning/error → rollback），跟 `Open(...)` 出来的 comp 同构（所有 Set\* 立即可用）
+- AE 2020 + AE 2025 ship gate PASS（`AE_SHIP_GATE=1 go test -run TestV2_1_AEShipGate -v`）
+- 详 `../scars/ae25-acceptance-gate.md` 5 阶段 RE findings + canonical seed 策略
+
 ### Project / Composition / Item
 
 - Project: `BitsPerChannel` R/W

@@ -59,6 +59,37 @@ proj, err := aep.FromReader(bytes.NewReader(data))
 
 ---
 
+### aep.NewProject
+
+```go
+func NewProject(target ...AETarget) *Project
+```
+
+#### Description
+
+返回一个全新空 `Project`，可继续调 `NewComposition` 等添加内容。零参数 = `TargetAE2020`（最大兼容）。支持显式 `TargetAE2020 / TargetAE2022 / TargetAE2025`。
+
+`target` 决定**输出文件的版本标签**（svap / nhed 等头字段）—— 不影响 comp items 本身的字节结构（详见 V3 planning 段：builder 用单一 canonical seed，items 永远 AE 2020 兼容，靠 AE 的向后读取能力跨版本工作）。
+
+**Never returns error**。模板是 build-time trusted；如果 panic 出 "build bug" 信息，那是库自身 bug，不是用户输入问题。`AETarget` 不向前兼容 —— 升库时旧二进制传 unknown target 会 panic。
+
+```go
+proj := aep.NewProject()                      // AE 2020 兼容（默认）
+proj25 := aep.NewProject(aep.TargetAE2025)    // 写出 AE 25 格式标签
+```
+
+#### AETarget enum
+
+```go
+const (
+    TargetAE2020 AETarget = 2020 // 默认；任何 AE 2020+ 可开
+    TargetAE2022 AETarget = 2022
+    TargetAE2025 AETarget = 2025
+)
+```
+
+---
+
 ## Attributes
 
 ### Project.Compositions
