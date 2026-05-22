@@ -1073,9 +1073,9 @@ RE 期间发现但归类未决的 concept / artifact。允许临时驻留，防�
 | `FEEHasPpSn` | false / true / true | V2.2 **不入 matrix** (同上) |
 | `MaterialLightingGroups` | none / none / 10 groups | V2.2 **不入 matrix** (V2.2 不出 Material groups) |
 | `TdgpDefaultChildren` | 19 / 19 / 37 | V2.2 **不入 matrix** |
-| `ShapeMatchNameVariants` | RE-S9 实测 | V2.2 待 RE-S9 决议 |
-| `PathBezierEncoding` | RE-S8 实测 | tangent 编码格式跨版本是否一致；若不一致 → admission |
-| `KeyframeEaseEncoding` | RE-S6/S7 实测 | 若跨版本不同 → admission |
+| `ShapeMatchNameVariants` | RE-S9 实测：跨版本 byte-identical | V2.2 **不入 matrix** (条件 1 不满足) |
+| `PathBezierEncoding` | RE-S9 实测：shap/shph/lhd3/ldat 跨版本 byte-identical | V2.2 **不入 matrix** (条件 1 不满足；单一 canonical) |
+| `KeyframeEaseEncoding` | RE-S9 实测：lhd3[7] 1B flag + ldat 符号 bit diff，runtime f64 数值相同 | V2.2 **不入 matrix** (条件 2 不满足；cosmetic only，AE 2025 加载 AE 2020 ldat OK) |
 
 **V2.2 ship 时 `AECapabilities` 大概率仍空 struct**。
 
@@ -1566,6 +1566,41 @@ Phase 6  Docs sync + ship gate
 - 影响:
   - `lower_property_stream.go` lowerPathStream: 单一编码格式 (无 if-linear-omit-tangent 分支)；先 compute bbox over (verts ∪ verts+inTan ∪ verts+outTan)，再归一化 f32 BE
   - V2.2 spec §3.3 `PathNode.SetVertices`: freeze `len(verts) >= 2` 校验（AE 行为未实证，作 conservative API design）
+
+### RE-S9 finding: cross-version diff (AE 2020 vs 2025) + capability matrix admission
+
+- Date: 2026-05-23
+- Source: `tmp_debug/re_v22/{1rect,1fill,kf_2,1path}_ae{2020,2025}.aep` + `.full.dump`
+- Method: 4 scenario pairs (1rect / 1fill / kf_2 / 1path_4vtx)；同 JSX (gen_shape_dummy.jsx)；AE 2020 v17.7x45 vs AE 2025 v25.1x68；`dump_root` 输出 diff + `dump_kf` 逐 keyframe 解码
+
+**Per-scenario diff (按 admission rule §1.4 三条筛过)**:
+
+| Scenario | Observed differences (AE 2025 vs AE 2020) |
+|---|---|
+| 1rect | ldta 160→164 (+4 zero tail bytes per RE-S1); Layer Transform tdgp 17→37 children (+10 Material 头部 + +10 Lighting 尾部); FEE 0→1 child (`ppSn 4062c00000000000` = f64 150.5, likely renderer feature flag); root-level new chunks `pcms`+Utf8(`{"lutInterpolationMethod":1}`) / `PwCs`+Utf8(`{}`) / `pdvc`+Utf8(`{}`); "Solids" folder name re-encoded `536f6c696473` → UTF-8 `e7baafe889b2` (Chinese loc); svap/head/nhed metadata; Rhed timestamp; fdta zeroed; svap codec bump `0b0b862d`→`0f088644` |
+| 1fill | 与 1rect 字节级 pattern 完全一致 — Fill 节点本身 (matchName / tdb4 / cdat) zero byte diff |
+| kf_2 | 同 1rect + **keyframe ldat 内部差异**：(a) lhd3[7] `03`→`01` (1 byte flag/version)；(b) per-keyframe trailing 24 B (3 × f64) 从 AE 2020 `8000000000000000`(-0) 改为 AE 2025 `0000000000000000`(+0) — **f64 数值相同，仅符号 bit**；ldat size 不变 (256 B = 2 × 128 bpk) |
+| 1path | 同 1rect + **path shap/shph/lhd3/ldat byte-identical** — BezierPath encoding 跨 AE 2020/2025 单一 canonical |
+
+**Admission decisions (per §1.4 三条同时满足)**:
+
+| Trait | Cross-version evidence | Decision | 理由 |
+|---|---|---|---|
+| `LdtaSize` (160/160/164) | 实测 +4 tail bytes | **[no 入 matrix]** | escape hatch = AE 2020 canonical (160 B)；条件 3 不满足 (lowering 单一 160-B 路径) |
+| `MaterialLightingGroups` (17/17/37 children) | 实测 +20 tdgp children | **[no 入 matrix]** | V2.2 不出 Material/Lighting groups；escape hatch 走 AE 2020 17-children canonical；条件 3 不满足 |
+| `FEEHasPpSn` (false/-/true) | FEE 0 vs 1 ppSn child | **[no 入 matrix]** | AE 加载 0-child FEE 不报错 (RE-S1 已验)；条件 2 满足 (cosmetic) 但条件 3 不满足 (单一空 FEE canonical) |
+| `RootMetadataChunks` (pcms/PwCs/pdvc) | AE 2025 多 6 个 root chunks | **[no 入 matrix]** | metadata only；AE 2020 缺这些 chunk 仍可加载；条件 3 不满足 |
+| `PathBezierEncoding` | **跨版本 byte-identical** | **[no 入 matrix]** | 条件 1 不满足 (无实测 divergence)；单一 encoding 已 V3 不需重审 |
+| `KeyframeEaseEncoding` | lhd3[7] 1-byte flag diff + ldat 符号 bit diff | **[no 入 matrix]** | 条件 2 不满足 — divergence 不影响 runtime semantics (f64 值相同)；AE 2025 加载 AE 2020 ldat 不报错 (RE-S1 cross-version load 已验)；走 AE 2020 canonical 即可 |
+| `ShapeMatchNameVariants` | 跨版本 matchName 字节级一致 | **[no 入 matrix]** | 条件 1 不满足 |
+
+**V2.2 capability matrix decision**: `AECapabilities` 仍 **empty struct** ship。所有跨版本差异通过 escape hatch (AE 2020 canonical lowering) 覆盖；§6.5 7 candidates 全部判 `[no 入 matrix]`；保留为 V3 重审候选。
+
+- Classification: [capability-cand 文档]
+- 影响:
+  - spec §6.5 admission decisions finalize (本 RE update §6.5 表格 status)
+  - `capability_matrix.go` Phase 1 ship 时仍空 struct (`type AECapabilities struct{}`)
+  - V3 重审窗口：若 V2.2 ship 后用户报告 AE 2020 canonical 在 AE 24/25 兼容性问题 → 触发 candidate 再审
 
 ---
 

@@ -690,7 +690,7 @@ git commit -m "re(v2.2): RE-S8 BezierPath tangent encoding + min vertices"
 - Generate AE 2025 versions of selected fixtures
 - Update: spec §8
 
-- [ ] **Step 1: AE 2025 跑 1rect / 1fill / kf_2 / 1path_4vtx**
+- [x] **Step 1: AE 2025 跑 1rect / 1fill / kf_2 / 1path_4vtx**
 
 ```bash
 for scenario in 1rect 1fill kf_2 1path_4vtx; do
@@ -704,7 +704,7 @@ EOF
 done
 ```
 
-- [ ] **Step 2: Diff each scenario AE 2020 vs AE 2025**
+- [x] **Step 2: Diff each scenario AE 2020 vs AE 2025**
 
 ```bash
 for scenario in 1rect 1fill kf_2 1path_4vtx; do
@@ -716,7 +716,7 @@ for scenario in 1rect 1fill kf_2 1path_4vtx; do
 done
 ```
 
-- [ ] **Step 3: spec §8 finding — Capability candidates admission**
+- [x] **Step 3: spec §8 finding — Capability candidates admission**
 
 ```markdown
 ### RE-S9 finding: cross-version diff + capability matrix admission
@@ -734,7 +734,7 @@ done
 - 影响: spec §6.5 admission decisions finalize；capability_matrix.go 仍空 struct
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tmp_debug/re_v22/*_ae2025.aep workshop/specs/v2-2-layer-creation-design.md
