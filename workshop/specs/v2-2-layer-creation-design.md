@@ -1236,7 +1236,37 @@ Phase 6  Docs sync + ship gate
   - 空 ShapeLayer fixture **不需要** 同步预先创建 `ADBE Root Vectors Group` — 只有第一次 `addProperty("ADBE Vector Shape - Rect")` 等 shape contents 操作触发后，AE 才会生成 Vector Materials/Root Vectors Group tdmn 节点（待 RE-S4 实测）
   - V2.2 layer creation runtime 推 ShapeLayer 时, 可借用 dummy_comp template 的 Camera/Light layer 模板 + 修改 ldta @0x04 layer kind 字段即可（绝大多数 property tree 复用）
 
-(空)
+### RE-S2 finding: Layer Transform group default values
+
+- Date: 2026-05-23
+- Source: `tmp_debug/re_v22/empty_ae2020.aep` (RE-S1 produced)
+- Method: `go run ./tmp_debug/dump_root tmp_debug/re_v22/empty_ae2020.aep | sed -n '42,90p' > tmp_debug/re_v22/empty_ae2020.transform.dump`（plan 原 awk `/ADBE Vector Materials Group/` 不存在; 改用行号 — RE-S1 已记录 Layr 子树不含 Vector*）。tdb4 / cdat 字节用 `tmp_debug/extract_ldta/main.go`（一次性脚本，已删除）解码：tdb4 @0x03 dim byte 决定 cdat 取多少个 float64 BE。
+- **关键发现**: 空 ShapeLayer 的 Layr `ADBE Transform Group` **不是**用户视角的 2D Transform (Anchor / Position / Scale / Rotation / Opacity)，而是 AE 内部为所有 3D 兼容 layer 通用的 6-axis 形式（与 Light / Camera 同 schema）。这与 RE-S1 "空 ShapeLayer binary structure 与 light/camera 占位层无法区分" 结论吻合。用户面 2D 属性大概率在 **ShapeLayer contents tree**（Root Vectors Group 等，待 RE-S4）通过 transform-on-shape 而非 Layr-level 暴露。
+- **Transform group 子节点顺序 (`LIST tdgp, 15 children` — tdsb + tdsn + 6 个 named property + Group End)**:
+
+  | idx (在 LIST 中) | tdmn name | sibling LIST | tdb4 dim (@0x03) | cdat size | observed default value(s) |
+  |---:|---|---|---:|---:|---|
+  | 2  | `ADBE Position_0`              | `tdbs` (6 children: tdsb / tdsn / tdb4 / cdat / tdum / tduM) | 1 | 40 B | `0.0` |
+  | 4  | `ADBE Position_1`              | `tdbs` (6 children) | 1 | 40 B | `0.0` |
+  | 6  | `ADBE Orientation`             | `otst` (2 children: tdbs + otky) — tdbs 内 tdb4@0x03=0x01 | 1 | 24 B | `0.0` (cdat 24B 实际 = 3 个 float64 BE 全 0；只有第一个属 dim=1 语义值) |
+  | 8  | `ADBE Rotate X`                | `tdbs` (4 children: tdsb / tdsn / tdb4 / cdat) | 1 | 40 B | `0.0` |
+  | 10 | `ADBE Rotate Y`                | `tdbs` (4 children) | 1 | 40 B | `0.0` |
+  | 12 | `ADBE Envir Appear in Reflect` | `tdbs` (4 children) | 1 | 40 B | `1.0` (hex `3ff0000000000000`) |
+  | 14 | `ADBE Group End`               | (无 sibling, terminator)               | - | -    | - |
+
+- **缺位的用户面 2D 属性**: `ADBE Anchor Point` / `ADBE Position` (无 _0/_1 后缀的合并版) / `ADBE Scale` / `ADBE Rotate Z` / `ADBE Opacity` 在 Layr Transform group **均未出现**。Position_0 / Position_1 可能是 AE 把 split-Position 写入了 schema (而合并 Position 走另一路径，或当无 keyframe / split disabled 时被 elide)。Rotate Z 不在此 group — 大概率与 AE 的"3D layer always stores X/Y/Z rotation, Z 在 2D 层时通过 user-facing 'Rotation' 别名暴露"有关。
+- **cdat 占地 vs 实际值**: 即使 dim=1，AE 把 cdat padding 到 40 B (5 × float64) 或 24 B。剩余 bytes 全 0 — 是 channel storage 上限的预留 (RGBA-style 5 通道？)，不是值。仅前 `dim * 8` 字节有语义。
+- **tdb4 字节速读** (本 RE 涉及到的 6 个 property tdb4 head[0..0x10])：
+  - Position_0/_1, Rotate X/Y: `db99000100010000 0001ffff00007800` — @0x03=0x01 (1D), @0x05=0x01, @0x07=0x00
+  - Orientation: `db99000100070000 00060007 00007800` — @0x03=0x01 但 @0x07=0x07，@0x0E..0x0F = `0007` (与其他不同, 可能编码 'spatial 3D + axis count')
+  - Envir Appear in Reflect: `db99000100010000 ffff000400007800` — @0x05=0x00, @0x08..0x09=`ffff`, @0x0A..0x0B=`0004` (不同 mask)
+- Classification: [serialization defaults, negative — 缺 user-facing 2D Transform props]
+- 影响:
+  - `lower_layer.go` 实现 Layer Transform group 时, **不能** 假设它含 Anchor/Position/Scale/Rotate Z/Opacity — 空 ShapeLayer 的 Layr Transform group 是 6-axis 内部 schema。
+  - V2.2 ShapeLayer creation **必须**完整 splice 这 6 个 named property + tdsb/tdsn header + Group End；其值用本表观察到的 defaults：5 个 0.0 + Envir 1.0。
+  - `ShapeLayer.Transform()` typed setter 的 user-facing API 设计需推迟到 **RE-S4**（Root Vectors Group 实测）— 用户视角的 2D Transform 可能不在 Layr 而在 contents subtree。
+  - V1 `Layer.SetPosition/SetScale/SetRotation/SetOpacity` 等 API **不能直接复用**在新生成的空 ShapeLayer 上 — 这些 API 默认 Layr-level Transform 含合并的 2D Position 等，但 RE-S2 证伪。需要 (a) 文档警告 或 (b) typed setter 拒绝在空 contents 状态下写入并要求先创建一个 shape。
+  - `cdat` 写入需保留 40B / 24B padding 以维持 length-preserving — 仅前 `dim * 8` 字节是有效 value。
 
 ---
 
