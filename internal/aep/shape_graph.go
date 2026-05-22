@@ -125,7 +125,21 @@ func (r *RectNode) Roundness() *PropertyStream[float64]   { return r.roundness }
 func (r *RectNode) SetSize(v [2]float64) error            { return r.size.SetStaticValue(v) }
 func (r *RectNode) SetPosition(v [2]float64) error        { return r.position.SetStaticValue(v) }
 func (r *RectNode) SetRoundness(v float64) error          { return r.roundness.SetStaticValue(v) }
-func (r *RectNode) Properties() *PropertyGroup            { return nil /* Phase 3 escape hatch */ }
+
+// Properties returns the escape-hatch β view onto this RectNode's streams
+// (spec §3.5). Streams returned via PropertyGroup.Vec2Stream / Float64Stream
+// are the same instances as the typed accessors (r.Size() etc.) — mutating
+// one reflects through the other.
+func (r *RectNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Rect",
+		streams: map[string]any{
+			"Size":      r.size,
+			"Position":  r.position,
+			"Roundness": r.roundness,
+		},
+	}
+}
 
 // EllipseNode — `ADBE Vector Shape - Ellipse`. Default Size=[100,100],
 // Position=[0,0] (RE-S5a). AE child[1] = `ADBE Vector Shape Direction` —
@@ -150,7 +164,17 @@ func (e *EllipseNode) Size() *PropertyStream[[2]float64]     { return e.size }
 func (e *EllipseNode) Position() *PropertyStream[[2]float64] { return e.position }
 func (e *EllipseNode) SetSize(v [2]float64) error            { return e.size.SetStaticValue(v) }
 func (e *EllipseNode) SetPosition(v [2]float64) error        { return e.position.SetStaticValue(v) }
-func (e *EllipseNode) Properties() *PropertyGroup            { return nil }
+
+// Properties returns the escape-hatch β view (spec §3.5).
+func (e *EllipseNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Ellipse",
+		streams: map[string]any{
+			"Size":     e.size,
+			"Position": e.position,
+		},
+	}
+}
 
 // PathNode — `ADBE Vector Shape - Group`. Default = empty Vertices,
 // Closed=true. V2.2 SetVertices builds linear segments (tangents=0); per
@@ -169,7 +193,16 @@ func NewPathNode() *PathNode {
 
 func (p *PathNode) Kind() ShapeNodeKind                { return ShapeKindPath }
 func (p *PathNode) Path() *PropertyStream[BezierPath]  { return p.path }
-func (p *PathNode) Properties() *PropertyGroup         { return nil }
+
+// Properties returns the escape-hatch β view (spec §3.5).
+func (p *PathNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Path",
+		streams: map[string]any{
+			"Path": p.path,
+		},
+	}
+}
 
 // SetVertices replaces the path's vertex list with linear segments
 // (tangents zeroed). Preserves the current `Closed` flag. Requires
@@ -218,7 +251,17 @@ func (f *FillNode) Color() *PropertyStream[[4]float64] { return f.color }
 func (f *FillNode) Opacity() *PropertyStream[float64]  { return f.opacity }
 func (f *FillNode) SetColor(v [4]float64) error        { return f.color.SetStaticValue(v) }
 func (f *FillNode) SetOpacity(v float64) error         { return f.opacity.SetStaticValue(v) }
-func (f *FillNode) Properties() *PropertyGroup         { return nil }
+
+// Properties returns the escape-hatch β view (spec §3.5).
+func (f *FillNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Fill",
+		streams: map[string]any{
+			"Color":   f.color,
+			"Opacity": f.opacity,
+		},
+	}
+}
 
 // StrokeNode — `ADBE Vector Graphic - Stroke`. Default Color=[0,0,0,1]
 // black, Width=2, Opacity=100 (per spec §3.6).
@@ -248,7 +291,18 @@ func (s *StrokeNode) Width() *PropertyStream[float64]    { return s.width }
 func (s *StrokeNode) SetColor(v [4]float64) error        { return s.color.SetStaticValue(v) }
 func (s *StrokeNode) SetOpacity(v float64) error         { return s.opacity.SetStaticValue(v) }
 func (s *StrokeNode) SetWidth(v float64) error           { return s.width.SetStaticValue(v) }
-func (s *StrokeNode) Properties() *PropertyGroup         { return nil }
+
+// Properties returns the escape-hatch β view (spec §3.5).
+func (s *StrokeNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Stroke",
+		streams: map[string]any{
+			"Color":   s.color,
+			"Opacity": s.opacity,
+			"Width":   s.width,
+		},
+	}
+}
 
 // PropertyGroup is the escape-hatch β surface (spec §3.5). Phase 1 ships
 // the minimal struct — `Name` and the empty `Children` / `streams` maps —
@@ -268,4 +322,81 @@ type PropertyGroup struct {
 // until the escape hatch wires it (Phase 3+).
 func newGroupTransform() *PropertyGroup {
 	return &PropertyGroup{Name: "Transform"}
+}
+
+// Child returns the nested PropertyGroup by name, or nil if not present.
+// Use for walking deeper-than-leaf escape-hatch trees (V2.3+ nested groups).
+func (pg *PropertyGroup) Child(name string) *PropertyGroup {
+	if pg == nil || pg.Children == nil {
+		return nil
+	}
+	return pg.Children[name]
+}
+
+// Float64Stream returns the PropertyStream[float64] under the given name, or
+// an error if no stream by that name exists or it isn't the expected type.
+// Mutations on the returned stream are visible through the typed accessor
+// (Inv-1 / spec §3.5).
+func (pg *PropertyGroup) Float64Stream(name string) (*PropertyStream[float64], error) {
+	v, ok := pg.streams[name]
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
+	}
+	ps, ok := v.(*PropertyStream[float64])
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not float64", pg.Name, name)
+	}
+	return ps, nil
+}
+
+// Vec2Stream returns the PropertyStream[[2]float64] under the given name.
+func (pg *PropertyGroup) Vec2Stream(name string) (*PropertyStream[[2]float64], error) {
+	v, ok := pg.streams[name]
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
+	}
+	ps, ok := v.(*PropertyStream[[2]float64])
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [2]float64", pg.Name, name)
+	}
+	return ps, nil
+}
+
+// Vec3Stream returns the PropertyStream[[3]float64] under the given name.
+func (pg *PropertyGroup) Vec3Stream(name string) (*PropertyStream[[3]float64], error) {
+	v, ok := pg.streams[name]
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
+	}
+	ps, ok := v.(*PropertyStream[[3]float64])
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [3]float64", pg.Name, name)
+	}
+	return ps, nil
+}
+
+// ColorStream returns the PropertyStream[[4]float64] (RGBA) under the given name.
+func (pg *PropertyGroup) ColorStream(name string) (*PropertyStream[[4]float64], error) {
+	v, ok := pg.streams[name]
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
+	}
+	ps, ok := v.(*PropertyStream[[4]float64])
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [4]float64", pg.Name, name)
+	}
+	return ps, nil
+}
+
+// PathStream returns the PropertyStream[BezierPath] under the given name.
+func (pg *PropertyGroup) PathStream(name string) (*PropertyStream[BezierPath], error) {
+	v, ok := pg.streams[name]
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
+	}
+	ps, ok := v.(*PropertyStream[BezierPath])
+	if !ok {
+		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not BezierPath", pg.Name, name)
+	}
+	return ps, nil
 }
