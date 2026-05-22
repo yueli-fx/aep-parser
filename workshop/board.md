@@ -2,21 +2,19 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 partial — JSX driver + Go shipgate + Tier 3 preservation test all 落，AE 实跑待你；PASS = **172 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ShapeLayer creation — Phase 0-4 ✅, Phase 5 = AE 实测要你机器跑。**用户行动**: 跑 5.3 + 5.7 见 "Next session" 段。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate FAIL — AE 2020+2025 都拒；3 个结构 fix 已 RE 出来；PASS = **173 / 0 FAIL** Go 端不变)
+**Active focus**: 🔴 V2.2 ship gate iteration — AE 实测拒收 canonical aep。Fix list 已 RE 出来落 `workshop/scars/v2-2-aelayer-structure.md`，下次进来读 scar + tolerance.aep dump 直接接手 fix。
 
 ## Next session 进来先做
 
-1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **172** + `go vet ./...` clean
-2. **你（用户）的 AE 机器活** — 这部分 Claude 干不了：
-   - **Task 5.3 fixture**: 关 AE → 跑 `tmp_debug/gen_shape_tolerance.jsx` → 等 `test_data/v2_2_shape_tolerance.done` PASS → `test_data/v2_2_shape_tolerance.aep` 出。然后 commit fixture + done file。
-   - **Task 5.7 ship gate AE 2025**: 关 AE → `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` → 看 PASS/FAIL；FAIL 把 `.done` 内容贴回来 debug
-   - **Task 5.7 ship gate AE 2020**: 同上，AE2020 — 关 2025 + 2020 单跑
-3. **5.3 fixture 出后我能续的**:
-   - Task 5.5: `TestV2_2_OpaquePreservation_UnknownChunks` + `Project.RootChunk()` test-only accessor + chunk-signature helper (collect / equal / preserved-kind)
-   - Task 5.6: `TestV2_2_NestedGroup_AEReopens_AE2020/2025` (类似 5.2，独立 JSX 子集)
-4. **Phase 5 ship gate 跑通后** → Phase 6 docs sync (Phase 3+4+5 public API 一起补 — docs/shape.md / coverage.md / coverage-detail.md)
-5. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
+1. 确认 PASS = **173** + vet clean (5.4 现在不再 SKIP — fixture 已生成 commit)
+2. **进 ship gate fix 模式**：读 `workshop/scars/v2-2-aelayer-structure.md` —— 3 个 RE 出的结构差异 (按优先级)：
+   - **C tdum/tduM**: spatial-style stream tdbs 在 cdat 后缺 tdum (8 B) + tduM (8 B)。最 local，先 fix
+   - **B Transform schema**: lower_layer.go 用了 2D 5-stream，AE 要 6-axis (Position_0/_1/Orientation/RotateX/Y/Envir Appear)。先补 RE 看 Scale 在哪 stream
+   - **A Layr outer LIST(tdgp) wrapper**: 我们直接 flat 给 Layr，AE 要外套一层 tdgp。最 invasive，需 review tolerance.aep outer 子项清单加 empty placeholder
+3. 每 fix 跑 ship gate 验：`AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` (Claude 可自跑，AE 路径在 5.2 test 默认填)
+4. **诊断工具齐**: `tmp_debug/gen_canonical_failing/` 重建失败 aep；`tmp_debug/dump_chunks/<path>` chunk 树 dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` 已 commit 留作 baseline
+5. ship gate PASS 后 → Phase 5 剩余 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
 
 ## V2.2 进度地图（本会话快照）
 
@@ -27,7 +25,7 @@
 | 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
 | 3 Public API | ✅ 4/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3 / 3e56a49` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β |
 | 4 Roundtrip | ✅ 5/5 | 167→172 (+5) | (本会话 4 commits + 本 docs commit) | hydrateShapeNodes + write-time sync + canonical 3-layer roundtrip + atomicity ×3 + mutate-existing (skip) |
-| 5 Ship gate | 🟡 3/8 | 172 不变 (skip-default) | `0fb6e9e / 7854dd8 / 6dad000` + 本 docs commit | 5.1 verify_v2_2.jsx / 5.2 Go shipgate skip-default / 5.4 NestedGroup preservation skip-if-missing 全 ✅; 5.3 / 5.6 / 5.7 等用户 AE 机器；5.5 等 5.3 fixture |
+| 5 Ship gate | 🔴 4/8 + fix-needed | 172→173 (+1, 5.4 unblocked) | `0fb6e9e / 7854dd8 / 6dad000 / a409171 / 本 fixture+tools+scar commit` | 5.1/5.2/5.3 (Claude 自跑 AE)/5.4 ✅; **5.7 first run FAIL** — 3 个 RE 出的结构 fix (tdum/tduM + 6-axis Transform + outer tdgp wrapper) 待下次实施 |
 | 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
 
 ## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）
