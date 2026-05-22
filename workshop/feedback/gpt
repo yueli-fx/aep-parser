@@ -1,0 +1,543 @@
+这版已经明显从“好的设计”进入“可长期维护的 binary-format 工程设计”了。
+
+你把前一版里真正危险的地方基本都补上了，尤其：
+
+rootFold cache
+single-source-of-truth invariant
+cdta_layout.go
+reopen-save-reopen ship gate
+RE prerequisites 显式 blocking
+
+这些会极大降低后面 V2.2–V2.6 的结构债。
+
+我下面主要看“还有哪些隐蔽风险”和“哪些地方已经足够稳定可以 freeze”。
+
+现在这个 spec，我认为已经可以 freeze 的部分
+
+以下我认为已经是正确长期方向，不建议再反复推翻。
+
+1. template-based NewProject
+
+这个已经是正确路线。
+
+尤其：
+
+p, err := FromReader(bytes.NewReader(tmpl))
+
+而不是：
+
+clone(preparsedTemplate)
+
+这是对的。
+
+原因不只是省 deep clone。
+
+更重要的是：
+
+parser path = constructor path
+
+这会让未来 parser regression 更早暴露。
+
+这是非常健康的 architecture property。
+
+2. chunk tree = source of truth
+
+这是整个 V2 真正的核心 invariant。
+
+你现在明确写：
+
+RIFX chunk tree 是 single source of truth
+
+这个极其重要。
+
+因为后面：
+
+reorder layer
+move folder
+duplicate comp
+delete effect
+
+typed slice 一定会失真。
+
+只要 chunk tree 是唯一真相，你永远还能：
+
+WriteAEP → FromReader
+
+自愈。
+
+这是 binary AST 项目的正确路线。
+
+3. parse-after-build
+
+这个我仍然认为是整个 V2 最关键决定。
+
+尤其你现在已经明确：
+
+mutation → append chunk → parse subtree
+
+很好。
+
+建议未来：
+
+NewSolidLayer
+AddEffect
+AddMask
+
+全部遵守。
+
+不要引入：
+
+newLayerFromScratch()
+
+这种 parallel object model。
+
+4. cdta_layout.go
+
+这个补得非常对。
+
+这是 RE 项目最容易烂掉的地方：
+
+parser offset
+writer offset
+builder offset
+
+三份 magic number 漂移。
+
+现在统一 source 后：
+
+parser
+writer
+builder
+
+都绑定同一 layout authority。
+
+长期维护成本会低很多。
+
+5. RE prerequisites blocking
+
+这个也是成熟很多的信号。
+
+你已经意识到：
+
+“先写代码再 RE”
+
+是 binary format 项目里最危险的路线。
+
+现在：
+
+RE-1
+RE-2
+RE-3
+RE-4
+
+变成 implementation blockers。
+
+这是对的。
+
+我认为还需要强化的几个地方
+一、rootFold cache 需要 lifecycle invariant
+
+你现在：
+
+rootFold *rifx.Chunk
+
+是对的。
+
+但建议明确：
+
+invariant
+p.rootFold 永远指向当前 live chunk tree 内的 Fold LIST。
+
+因为未来可能出现：
+
+ReplaceRoot()
+reparsing whole project
+deep copy project
+future compact/rebuild operation
+
+导致 dangling pointer。
+
+建议文档明确：
+
+rootFold is derived cache, never ownership.
+
+否则后面有人可能：
+
+newProj.rootFold = oldProj.rootFold
+
+直接炸。
+
+二、nextItemID 需要 monotonic invariant
+
+建议明确：
+
+nextItemID 单调递增，永不 reuse。
+
+即使：
+
+item delete
+undo-like operation
+folder remove
+
+也不 reuse。
+
+这是 Adobe/AVID/NLE 类软件最稳策略。
+
+否则：
+
+itemByID
+cached references
+future expressions
+
+都可能出事。
+
+建议写进 invariants。
+
+三、你现在缺一个“mutation atomicity”原则
+
+这是后面 V2.2 开始很重要的。
+
+现在：
+
+append chunk
+parseComposition
+append typed slice
+
+如果 parse 失败：
+
+chunk 已经 append 了。
+
+typed slice 没 append。
+
+tree/index divergence。
+
+建议现在就规定：
+
+mutation atomicity invariant
+任何 mutation 要么：
+- chunk tree + typed index 全成功
+- 要么完全 rollback
+
+建议实现方式：
+
+oldLen := len(root.Children)
+append(...)
+parse(...)
+if err {
+    root.Children = root.Children[:oldLen]
+    return err
+}
+
+虽然现在 parse 理论不会失败。
+
+但未来：
+
+AddEffect
+AddMask
+AddProperty
+
+会失败。
+
+早点形成 invariant 很值。
+
+四、Warnings 行为需要定义
+
+你现在：
+
+parseComposition(itemList, &p.Warnings)
+
+这里有个隐患。
+
+新建 comp 时：
+
+如果 builder 有 bug：
+
+warnings 会 silently append。
+
+但 API 仍返回 success。
+
+建议明确：
+
+invariant
+NewProject/NewComposition 不允许产生 parser warnings。
+
+即：
+
+before := len(p.Warnings)
+parse(...)
+if len(p.Warnings) != before {
+    rollback
+    return internal error
+}
+
+否则：
+
+parser degraded
+unknown chunk layout drift
+
+会 silently accumulate。
+
+五、buildCompItem children order：建议 freeze fixture
+
+你现在写：
+
+iide / idpc / idta / Utf8 / LIST(dats) / cdta / cdrp / comr / Layr
+
+很好。
+
+建议 implementation plan 增加：
+
+golden fixture dump
+
+即：
+
+fixtures/comp_item_children.txt
+
+记录：
+
+exact order
+chunk sizes
+LIST nesting
+
+因为 AE binary 最危险的问题之一：
+
+“看起来顺序不重要”
+
+但未来某版本 silently 开始依赖。
+
+golden dump 能防 accidental reorder。
+
+六、RE-2 (idpc) 我认为比你现在写的更危险
+
+你现在还在：
+
+8-byte? 16-byte?
+
+但我建议重点检查：
+
+“是否 cross-reference key”
+
+因为 AE 内部：
+
+expressions
+essential graphics
+dynamic link
+render queue
+proxies
+
+可能都引用 item persistent key。
+
+如果：
+
+duplicate idpc
+
+AE 很可能：
+
+不立即报错
+但后面 feature silently malfunction
+
+所以我建议：
+
+即使当前全 0 也优先随机唯一
+
+除非明确证明：
+
+idpc is ignored
+
+否则 safest path：
+
+crypto/rand
+
+因为“过度唯一”通常安全。
+
+“错误复用”风险更高。
+
+七、RE-1 (fdta) 我怀疑不只是 child count
+
+你已经正确提高了它优先级。
+
+我补一个推测：
+
+f422
+
+很像：
+
+flags
+timestamp-ish token
+allocator hint
+folder capability bitset
+
+不一定是 count。
+
+建议：
+
+不只做 item-count diff
+
+而是：
+
+empty
+1 comp
+2 comp
+delete comp
+nested folder
+
+全部 dump。
+
+看：
+
+哪些字段 monotonic
+哪些字段 topology-sensitive
+
+否则容易误判。
+
+八、frame rate canonicalization：建议 API-level freeze
+
+这个现在已经到了该“定规则”的阶段。
+
+建议明确：
+
+内部 canonical representation
+
+例如：
+
+23.976  => 24000/1001
+29.97   => 30000/1001
+59.94   => 60000/1001
+
+而不是 generic float split。
+
+否则未来：
+
+SetFrameRate(29.97)
+SetFrameRate(30000.0/1001.0)
+
+写出不同 binary。
+
+然后：
+
+tests flaky
+AE save rewrite
+binary diff impossible
+
+建议：
+
+canonical NTSC table
+
+提前定死。
+
+九、建议增加 “AE save normalization” 测试
+
+你现在已经有：
+
+open → save → reopen
+
+很好。
+
+我建议再加：
+
+compare normalized fields after AE resave
+
+比如：
+
+duration
+work area
+shutter
+bg color
+PAR
+
+确认：
+
+AE 没 silently canonicalize
+
+否则说明 builder 写法不 canonical。
+
+这是非常有价值的信号。
+
+十、建议增加一个长期 invariant：
+“unknown chunks must survive untouched”
+
+这个其实是你架构天然支持的。
+
+但值得显式写。
+
+因为后面：
+
+AddEffect
+RewriteLayer
+DeleteMask
+
+很容易 accidentally rebuild subtree。
+
+建议明确：
+
+mutation 必须 preserve unrelated unknown chunks byte-for-byte
+
+这是 parser/writer 项目的生命线。
+
+十一、你已经开始接近“binary AST editor”
+
+这意味着一个未来方向建议。
+
+你现在：
+
+builder functions
+
+还比较 procedural。
+
+后面 V2.3+ 可能逐渐值得引入：
+
+type ChunkMutation interface
+
+或者：
+
+transaction-style mutation
+
+因为：
+
+rollback
+validation
+repair
+warning handling
+
+会越来越复杂。
+
+现在不用做。
+
+但 architecture 已经开始朝那个方向长了。
+
+我现在对整个 V2 的判断
+
+我觉得你已经成功避免了：
+
+“写 writer 比 parser 还复杂”
+
+这是很多 binary reverse-engineering 项目最后失败的原因。
+
+你现在路线本质上是：
+
+Preserve unknowns
+Inject minimal valid structure
+Reuse parser everywhere
+Treat AE as canonical validator
+
+这是非常稳的策略。
+
+最后结论
+
+这版 spec 我认为已经：
+
+implementation-ready
+architecture-stable
+API 基本可 freeze
+测试策略已经成熟
+长期扩展路线清晰
+
+我现在只会要求 implementation plan 阶段重点盯：
+
+mutation rollback invariant
+warnings-as-failure invariant
+idpc uniqueness semantics
+fdta topology semantics
+NTSC canonicalization table
+
+除此之外，这已经不像“一个功能 spec”，而更像一个成熟 binary format editing subsystem 的 foundation design。

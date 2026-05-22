@@ -1,0 +1,121 @@
+package aep
+
+import (
+	"encoding/binary"
+	"encoding/json"
+	"path/filepath"
+	"strings"
+
+	"github.com/example/aep-parser/internal/rifx"
+)
+
+// parseFootage reads footage metadata from an Item list.
+//
+// Real .aep files wrap footage descriptors in a "Pin " sublist holding:
+//   - sspc  : width/height (+ framerate in extended versions)
+//   - opti  : type tag ("png!", "ZPEG", "Soli", "Plac", ...) and sometimes a name
+//   - Als2/alas : JSON alias data with "fullpath" — most reliable source of name
+func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, error) {
+	footage := &Footage{ID: id, Name: fallbackName}
+
+	pin := item.FindFirstList(rifx.IDPin)
+	src := item
+	if pin != nil {
+		src = pin
+	}
+
+	if cpth := src.FindFirst(rifx.IDCpth); cpth != nil {
+		footage.Path = cpth.Text()
+		footage.cpthChunk = cpth
+	}
+
+	if sspc := src.FindFirst(rifx.IDSspc); sspc != nil && len(sspc.Data) >= 4 {
+		footage.Width = binary.BigEndian.Uint16(sspc.Data[0:2])
+		footage.Height = binary.BigEndian.Uint16(sspc.Data[2:4])
+	}
+
+	if opti := src.FindFirst(rifx.IDOpti); opti != nil {
+		kind, name := parseOpti(opti.Data)
+		if name != "" && footage.Name == "" {
+			footage.Name = name
+		}
+		if kind == "Soli" {
+			footage.IsSolid = true
+		}
+	}
+
+	// Look for Als2/alas JSON anywhere in this Item subtree.
+	if alas, path, base := findAliasPath(item); alas != nil {
+		footage.aliasChunk = alas
+		footage.Path = path
+		if base != "" {
+			footage.Name = base
+		}
+	}
+
+	// If we still have nothing and no path, treat as solid (boltframe convention).
+	if footage.Name == "" && footage.Path == "" {
+		footage.IsSolid = true
+	}
+
+	return footage, nil
+}
+
+// parseOpti decodes the footage-options chunk. The kind tag is 4 bytes at
+// offset 0 (case- and order-significant). Names live at kind-specific offsets:
+//
+//	"Soli"      solid color        — name at 0x1A (boltframe)
+//	"Plac"      placeholder        — name at 0x0A (boltframe)
+//	"png!", "ZPEG", ... (file)     — name/ext at 0x3A; the real filename is
+//	                                 usually in the sibling Als2/alas chunk
+func parseOpti(d []byte) (kind, name string) {
+	if len(d) < 4 {
+		return "", ""
+	}
+	kind = string(d[:4])
+	start := 0
+	switch kind {
+	case "Plac":
+		start = 0x0A
+	case "Soli":
+		start = 0x1A
+	default:
+		start = 0x3A
+	}
+	if start >= len(d) {
+		return kind, ""
+	}
+	end := start
+	for end < len(d) && d[end] != 0 {
+		end++
+	}
+	return kind, strings.TrimSpace(string(d[start:end]))
+}
+
+// findAliasPath walks an Item subtree looking for an alas JSON blob with a
+// "fullpath" field. Returns (chunk, fullpath, basename) — chunk is nil when
+// no alas was found.
+func findAliasPath(item *rifx.Chunk) (chunk *rifx.Chunk, fullpath, base string) {
+	var visit func(c *rifx.Chunk)
+	visit = func(c *rifx.Chunk) {
+		if chunk != nil {
+			return
+		}
+		if c.ID == rifx.IDAlas && len(c.Data) > 0 && c.Data[0] == '{' {
+			var alias struct {
+				FullPath string `json:"fullpath"`
+			}
+			if err := json.Unmarshal(c.Data, &alias); err == nil && alias.FullPath != "" {
+				chunk = c
+				fullpath = alias.FullPath
+				base = filepath.Base(strings.ReplaceAll(fullpath, `\`, `/`))
+			}
+			return
+		}
+		for _, ch := range c.Children {
+			visit(ch)
+		}
+	}
+	visit(item)
+	return chunk, fullpath, base
+}

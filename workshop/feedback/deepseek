@@ -1,0 +1,18 @@
+尚可优化但不阻塞的细节
+AE 测试路径仍硬编码。Go test 中仅写了注释流程，尚未确定 .aep 和 .done 的路径生成方式。可接受在 plan 中补充——建议明确使用临时目录 + 环境变量 AE_SHIP_GATE_DIR 或 TEMP，避免在不同开发者机器上路径失效。
+
+并发安全声明依旧缺失。考虑到 V2.1 无并发需求，不阻塞。
+
+新增的亮点
+cdta_layout.go 单一权威源：将 write_composition.go 中散落的 hex 偏移抽成统一常量，parser/writer/builder 三方共享，维护性大幅提升。
+
+Invariants 第 7 条：明确 RIFX chunk tree 是 single source of truth，typed index 同步 append，为后续 DeleteComposition 等复杂变更提供了正确的设计约束。
+
+AETarget 底层值改为具体年份数字，panic 消息包含 "forward-incompat; upgrade library"，向前兼容语义清晰。
+
+结论
+Spec 已从“design approved”充分演进为“implementation-ready”。
+所有之前审阅指出的高风险和中风险项均已落实为具体的 RE 预备任务、测试用例或内部设计调整。plan 阶段只需按顺序打通 RE‑1 到 RE‑4，即可安全开始编码。
+
+建议将 spec 状态更新为 plan in progress，并在 plan 文档中重点列出 RE‑1~4 的完成顺序与阻塞关系。
+

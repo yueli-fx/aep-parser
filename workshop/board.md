@@ -1,0 +1,72 @@
+# Board — aep-parser 项目看板
+
+> 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
+
+**Last updated**: 2026-05-22 by claude (文档大重组 — 删 INDEX.md / refactor.md，合并文档地图；PASS = **109 / 0 FAIL**)
+**Active focus**: 🟢 主线收尾 —— 可达字段约 99% 已 ship。继续动需要新方向（同-renderer setter / ldta 零值区 probe / footage 字段 / project nhed 扩展）
+
+## Next session 进来先做
+
+1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **109** + `go vet ./...` clean
+2. 看 `workshop/plans/coverage.md` 已 ship / 暂搁 / 不可达 三段；剩余可探方向写在该文末
+3. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
+
+## 永久知识（不要再 RE）
+
+- `CompItem.dropFrame` / `TextDocument.fontLocation` / variable fonts axes **写** —— runtime-only 或 ScriptingAPI 不存在（详 `scars/runtime-only-fields.md` / `variable-fonts-write-noop.md`）
+- 手动 kerning **首次启用** = 结构性（详 `scars/kerning-first-enable.md`）
+- AE 脚本 `setAlternateSource(item)` 自动包 wrapper precomp，blsi 指 wrapper 不指 item（详 `scars/altsource-wrapper-precomp.md`）
+- Shutter setter 触发 AE 端 work-area divisor 重编码到 24008 —— AE cosmetic optimization，我们 setter 单点写就行（详 `scars/shutter-side-effect-divisors.md`）
+- Camera FilmSize 在 ldta `@0x98`（102.0472=36mm×72PPI），但 ScriptingAPI 不可写 → 不 ship setter（详 `scars/camera-filmsize-ldta-write-blocked.md`）
+- cdta 总长 0xCC=204 字节，**无 tail**；layout AE 2020 ↔ 2025 完全一致
+
+## 项目史（Wave 1-3 全收）
+
+`Wave 1` 文本字段解封 / `Wave 2` AE 22+ 已有未 RE / `Wave 3` AE 24+ 新概念 + 文本扩展 —— 三个 Wave 在 2026-05-18 ~ 2026-05-22 期间全部 🟢 主体完工。暂搁项: `environmentLayer`（需 360° 素材）/ `ligature`（需 OT liga 字体）/ `maskFeatherFalloff`（位置未 RE）。
+
+---
+
+## 最近归档（≤ 2 周）
+
+### 2026-05-22 文档大重组 (109 PASS 不变)
+
+- **目的**: workshop/ 内多文档重复 + 过时（PASS count 在 4 处显示不同值；INDEX/CLAUDE/coverage 各自有"文档地图"；architecture.md 文件地图早就过时；refactor.md Phase 1-3 全完成但还挂着）。
+- **删除**: `workshop/INDEX.md`（与 CLAUDE.md 场景触发器表重复）、`workshop/plans/refactor.md`（Phase 1-3 全完成，历史归档到本文件）。
+- **重写**: `CLAUDE.md`（场景触发器表设为**唯一权威文档地图**）/ `workshop/specs/architecture.md`（文件地图刷到当前 25 production + 18 test 文件现状）/ 本 `board.md`（修内部 PASS count 矛盾）。
+- **更新**: `coverage.md` 删 "下一步候选" 全做完段 + "文档分工提醒" 重复段；`coverage-detail.md` 删 "优先级聚合 P0-P3" + "Wave Roadmap" 历史段（已归档）；`playbooks/verify.md` PASS=109。
+- **PASS count 单一权威源规则**：以后 PASS 数字只在本文件 `Last updated` 一处出现，其他文档说 "见 board.md" 或不提具体数字（防漂移）。
+
+### 2026-05-22 自由探索批次 (100 → 109 PASS, +9)
+
+整体收尾：cdta tail / effect param setter / 跨版本 / Material / Geometry / Renderer / typed accessor cleanup。
+
+- **`Composition.ResolutionFactor [2]uint16` R/W** (新发现) — cdta `@0x00`/`@0x02`（之前完全没 RE 过的头 4 字节）。`[1,1]`=Full / `[2,2]`=Half / `[3,4]`=非方形合法。新 fixture `re_cdta_probe.{jsx,aep}`。
+- **`Composition.Renderer string` R only** (新发现) — `PRin` LIST → `prin` chunk @offset 4，NUL-sep 双段 ASCII（match-name + locale 名）。surface match-name (`ADBE Escher`=Advanced 3D / `ADBE Ernst`=Cinema 4D / `ADBE Standard`=Classic 3D)。新 rifx chunk IDs `IDPRin / IDPrin / IDPrda`。setter 是 P3（prda 长度随 renderer 变）。新 fixture `re_renderer.{jsx,aep}`。
+- **Material Options 3D AV layer**: 17 getter + 17 setter + `MaterialCastsShadowsMode` 三态 enum（Off/On/Only）。`ADBE Casts Shadows` 同 match name 在 light 是双态、AV 3D 是三态 —— light 用 `SetLightCastsShadows(bool)`、AV 3D 用 `SetMaterialCastsShadows(mode)`。**AE 序列化陷阱**：设回默认值时 AE 会裁掉 property 不写盘；getter 可能 nil。新 fixture `re_material_options.{jsx,aep}`。
+- **Geometry Options**: 3 getter + 3 setter（PlaneCurvature / PlaneSubdivision / BevelDirection）。新 fixture `re_geometry_options.{jsx,aep}`。
+- **Camera/Light typed setter 全集**: 24 setter（13 Camera + 11 Light）+ 共享 `setScalarProperty` helper（nil → "property not present" 错误）。`SetCameraDepthOfField(bool) / SetLightCastsShadows(bool)` 用 bool 自动 → 1.0/0.0。`SetLightColor([]float64)` dim 校验由 SetStaticValue 处理。
+- **Transform + AudioLevels typed setter**: 9 setter（AnchorPoint / Position / Scale / Rotation / RotateX / RotateY / Orientation / Opacity / AudioLevels）+ 3 新 getter (RotateX/Y/Orientation, 3D-only)。
+- **Effect param 用 Property.SetStaticValue 即可** (验证) — `Layer.Effects[i].Parameters[j]` 就是普通 `*Property`，复用既有 setter。无新代码。
+- **跨 AE 版本 cdta diff** (negative) — AE 2020 跑 `re_cdta_ae2020.jsx` 跟 AE 2025 跑 `re_cdta_probe.jsx`，cdta bit-for-bit 完全一致（5 年 stable）。不需要版本-条件分支。
+- **副发现**: ldta `@0x80..0x83` = LayerSubtype enum (0=AV / 1=Light / 2=Camera / 3=Text / 4=Shape / 5=3DModel)，parser 已用。ldta `@0x98..0x9F` 疑似 camera FilmSize 但写路径堵死 (scar)。
+
+### 2026-05-22 重构 Phase 1+2+3 全收 (100 PASS 不变)
+
+文件级拆分，纯移位 0 改逻辑 0 改 public API。脚本 `scripts/split_{tests,parse_text,write}.py`。
+
+- **Phase 1**: `aep_test.go` 6667 → 307；拆 12 个 test 文件 + 6 个 testutil。`split_tests.py` 一次性扫完，**比手动拆省 ~10× token**。教训：纯机械批量移动直接写脚本。
+- **Phase 2**: `parse_text.go` 1016 → 354 + 新 `text_types.go` (326) + `postscript.go` (347)。`split_parse_text.py` 按行号 slice。
+- **Phase 3**: `write.go` 805 → 171 + 新 `write_keyframe.go` (252) + `write_property.go` (306) + `Layer.SetText` 并入 `write_layer.go` (729→830)。`split_write.py` 含 append 模式。**教训**: import 检测 regex 用 `\bpkg\.\w` 强制要求 `.` 后跟标识符首字符，否则注释里 "ldat bytes. Used" 句号误中。
+- **Phase 4 不做**: `write_layer.go (830)` 单一类型偏大但可接受；`types_core.go (705)` 几乎纯类型；`json.go (536)` cohesive。不在 budget。
+
+### 2026-05-21 Phase 1.1 testutil 拆 5 文件 (100 PASS 不变)
+
+aep_test.go 6667 → 5780。`testutil_aep24/mask/text/keyframe/layer_test.go` 出。后续 1.2 用脚本批量。
+
+### 在此之前（≤ 2 周前里程碑摘要）
+
+- Wave 3 主体完工：文本扩展 7 字段 / alternateSource (Media Replacement) / manual kerning R/W / variable fonts axes R / `fontLocation` negative finding
+- Wave 2 主体完工：trackMatteLayer / TimeRemap / LightKind / DisplayStartTime；negative: `dropFrame` runtime-only / `timeRemapEnabled toggle` structural / ldta 第三长度未发现
+- Wave 1 主体完工：CapsOption / BaselineOption / StrokeOverFill / 段缩进×5 / AutoHyphenate
+- 文档骨架重构：CLAUDE.md / COORDINATOR.md / REFERENCE.md 三件套（后整合到 `workshop/`）
+- 之前：文本 16 setter + AddFont / Composition 标志位 + pixelAspect / Keyframe 增删 / Item-level comment + label / Project bitsPerChannel

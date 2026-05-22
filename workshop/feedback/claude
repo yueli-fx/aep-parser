@@ -1,0 +1,25 @@
+07:30
+V2.1 第二版 spec 质量明显提升——我上次提的 4 条 action item 全部落地了，新增的 invariant #7（chunk tree 是 single source of truth）是我没提但很有价值的补充。下面只说还值得看的地方。
+
+剩余问题
+1. buildCompIdta 中 @0x14 的偏移量疑问
+cdta_layout.go 里 idtaItemID = 0x14，对应 20 字节偏移。但 idta 全长才 84 字节，@0x14 之前只有 20 字节空间放 type code + 未知字段。这个值是经过 RE 确认的，还是暂时的猜测？如果是猜测，RE-3 完成前不应该把它写进常量文件——常量给人"已确认"的信号，但旁边注释写了"TODO（plan RE-3）"，两者矛盾。
+
+建议：RE-3 完成前，idtaItemID / idtaLabel 这两个常量加 // tentative: RE-3 pending 注释，或者干脆留 TODO 占位、不写具体值，防止实现者直接用未确认的 offset。
+
+2. TestNewCompositionOnOpenedProject 缺少一个更有价值的断言
+当前测试只验证"新 ID > 既有 max ID"。但这个测试的真正价值是验证 initDerived 里扫描了全部三种 item 类型（Compositions / Footage / Folders）。一个项目如果只有 Footage（ID = 5）没有 Composition，新 Composition 应该拿到 ID = 6。建议用一个 fixture（或手动构造）覆盖"最大 ID 来自 Footage / Folder 而非 Composition"的场景。
+
+3. ship gate .done 文件路径硬编码
+JSX 里路径是 e:/projects/tools/aep-parser/...。其他人（或 CI 将来接入 Windows agent）跑测试会因路径不对而静默失败——doneFile.open("w") 失败走了内层 catch，Go 端 timeout。
+
+建议：JSX 接受参数（AfterFX 命令行 -r script.jsx arg1 arg2）或者从环境变量 / 约定相对路径读。Go test 里构造完整路径后通过命令行传入，比硬编码灵活。这是个小改动，但影响 spec 里 Go test 的 AfterFX.exe -r verify_v2_1.jsx 调用方式。
+
+4. buildCompItem children 顺序里多了几个未说明的 chunk
+注释里写了 LIST(dats) / cdrp / comr，但正文没有说这三个是什么，也没有在 chunk builders 小节里列出对应函数。如果这几个是从 template 里直接复制的固定 bytes（最可能），需要说清楚"复制自 template，builder 不构造，直接嵌固定字节"。如果需要动态构造，需要加 builder 说明。现在的状态是"buildCompItem 里会用到但没人知道从哪来"。
+
+可合并的小问题
+TestNewProject 里验证 len(p.Warnings) == 0 是很好的补充，但 TestEmbeddedTemplateNotCorrupt 和 TestNewProject 的覆盖范围有重叠（都是"parse 不 panic + 非 nil"）。可以合并成一个表格行，或者把 TestEmbeddedTemplateNotCorrupt 改成专门跑三个 target 的 smoke test，跟 TestNewProject（只测 default target 的字段值）职责分开。
+Reopen-save-resave-reopen 那段逻辑在 JSX 里是内联的，将来 V2.2+ ship gate 会复制粘贴。建议把这段提取成 JSX helper function，这样是一处维护。
+总结
+核心实现风险还是 RE-1 到 RE-4——这不是文档的问题，文档已经明确标出来了。文档本身的剩余问题里最值得在进 plan 之前处理的是第 3 条（JSX 路径硬编码）和第 4 条（dats / cdrp / comr 来源未说明），因为这两个会直接影响 plan 里的任务边界。其余的可以在实现阶段处理。
