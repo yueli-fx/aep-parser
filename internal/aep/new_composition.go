@@ -274,6 +274,76 @@ func isDatsList(c *rifx.Chunk) bool {
 	return c.IsList() && string(c.FormType[:]) == "dats"
 }
 
+// NewComposition adds an empty composition to the project's root folder.
+// 详 spec: workshop/specs/v2-1-foundation-design.md §Public API
+//
+// Required:
+//   name        — non-empty string
+//   width/height — > 0 (uint16; AE max 30000)
+//   frameRate   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
+//   duration    — > 0 (seconds; converted to whole frames via fps internally)
+//
+// Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16).
+// Override via existing Set* methods after the call.
+//
+// Composition.ID is auto-assigned (Project.nextItemID++, monotonic).
+// New comp appends to the project's root folder.
+//
+// Atomic mutation (Invariant #10): if chunk parse fails or warnings appear,
+// rollback chunk-tree + typed index + warnings to pre-call state.
+//
+// Warnings-as-failure (Invariant #11): builder must produce zero parser warnings —
+// if any appear, that's a builder bug; rollback + return internal error.
+func (p *Project) NewComposition(
+	name string,
+	width, height uint16,
+	frameRate, duration float64,
+) (*Composition, error) {
+	// 1. Validate
+	if err := validateNewCompositionInputs(name, width, height, frameRate, duration); err != nil {
+		return nil, err
+	}
+
+	// 2. Allocate ID (monotonic; never reuses — Invariant #9)
+	id := p.allocItemID()
+
+	// 3. Build chunks
+	cdtaBytes := buildCompCdta(width, height, frameRate, duration)
+	itemList := buildCompItem(id, name, cdtaBytes)
+
+	// 4. Atomic mutation prep
+	if p.rootFold == nil {
+		return nil, fmt.Errorf("internal: project missing root Fold (template malformed?)")
+	}
+	oldChildLen := len(p.rootFold.Children)
+	oldWarningsLen := len(p.Warnings)
+
+	// 5. Append to rootFold + reparse closed loop
+	p.rootFold.Children = append(p.rootFold.Children, itemList)
+	comp, err := parseComposition(itemList, id, name, &p.Warnings)
+	if err != nil {
+		// Rollback
+		p.rootFold.Children = p.rootFold.Children[:oldChildLen]
+		p.Warnings = p.Warnings[:oldWarningsLen]
+		return nil, fmt.Errorf("internal: re-parsing new composition: %w", err)
+	}
+
+	// 6. Warnings-as-failure (Invariant #11)
+	if len(p.Warnings) != oldWarningsLen {
+		newWarnings := append([]string(nil), p.Warnings[oldWarningsLen:]...)
+		p.rootFold.Children = p.rootFold.Children[:oldChildLen]
+		p.Warnings = p.Warnings[:oldWarningsLen]
+		return nil, fmt.Errorf("internal: builder produced %d parser warning(s): %v", len(newWarnings), newWarnings)
+	}
+
+	// 7. Wire back-pointer + register in typed index
+	comp.proj = p
+	// comp.itemList 已由 parseComposition 设置 (Phase 4 wiring)
+	p.Compositions = append(p.Compositions, comp)
+
+	return comp, nil
+}
+
 // validateNewCompositionInputs returns nil if all inputs are valid, or
 // an error naming the offending field + value.
 func validateNewCompositionInputs(name string, w, h uint16, fps, duration float64) error {
