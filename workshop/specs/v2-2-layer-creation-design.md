@@ -1525,6 +1525,22 @@ Phase 6  Docs sync + ship gate
 - Classification: [serialization encoding] — 与 V1 既有 `parse_keyframe.go` 既定 layout 完全吻合；本 RE 主要作 V2.2 正向 lowering 路径的 freeze
 - 影响: `lower_property_stream.go` lowerVec2Stream 走 spatial-style 编码 (bpk=0x80, header07=0x07, valueOff=0x38)；时间编码用 ctx.tickRate × seconds (V1 `write_keyframe.go` 既有路径)
 
+### RE-S7 finding: PropertyStream 2-keyframe stride 校验
+
+- Date: 2026-05-22
+- Source: `tmp_debug/re_v22/kf_2_ae2020.aep` (kind=kf_2) — Layer Position setValueAtTime(0, [0,0]) + setValueAtTime(2, [500,300])
+- Method: `tmp_debug/dump_kf` (RE-S6 同款工具)
+- **lhd3 (52 B)** hex `00d00bee000000000000000200000001000000800000000400000001000000040000000000000000000000000000000000000000`:
+  - **numKeyframes [0x08..0x0B]** = 2 ✓ (与 setValueAtTime 次数一致)
+  - **bpk [0x10..0x13]** = 128 ✓ (与 RE-S6 单 keyframe stride 完全一致)
+  - 其余字段 (magic / 0x14 / 0x18 / 0x1C) 与 RE-S6 完全相同 — **lhd3 layout 与 keyframe count 无关，唯一变化是 numKeyframes 字段**
+- **ldat size** = 256 B = 2 × 128 ✓ (numKeyframes × bpk)
+- **kf[0]**: time=0 ticks → 0.0s；value=[0, 0] ✓
+- **kf[1]**: time=61440 ticks → 61440 / 30720 = 2.0s ✓ (TickRate 30720 来自 cdta @0x08, AE 2020 default for 30 fps comp)；value=[500, 300] ✓
+- **关键 freeze**: per-keyframe stride 与 keyframe count 无关；lowerVec2Stream 写 N 个 keyframe 直接 `ldat_size = N × 128`，不需 padding / alignment
+- Classification: [serialization encoding]
+- 影响: `lower_property_stream.go` lowerVec2Stream N-keyframe 路径直接 stride freeze；validates RE-S6 layout
+
 ---
 
 ## 9. 关联文档
