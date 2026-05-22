@@ -1268,6 +1268,35 @@ Phase 6  Docs sync + ship gate
   - V1 `Layer.SetPosition/SetScale/SetRotation/SetOpacity` 等 API **不能直接复用**在新生成的空 ShapeLayer 上 — 这些 API 默认 Layr-level Transform 含合并的 2D Position 等，但 RE-S2 证伪。需要 (a) 文档警告 或 (b) typed setter 拒绝在空 contents 状态下写入并要求先创建一个 shape。
   - `cdat` 写入需保留 40B / 24B padding 以维持 length-preserving — 仅前 `dim * 8` 字节是有效 value。
 
+### RE-S4 finding: RectNode defaults (AE 完全 elides default-valued Rect 子属性)
+
+- Date: 2026-05-23
+- Source: `tmp_debug/re_v22/1rect_ae2020.aep` (kind=1rect, AE 17.7x45)
+- Method: `tmp_debug/gen_shape_dummy.jsx` (kind=1rect) → AE 用 ExtendScript `addProperty("ADBE Vector Shape - Rect")` 添加一个 Rect 到 Root Vectors Group；`go run ./tmp_debug/dump_root` 全量 dump → `1rect_ae2020.full.dump`；Rect 子树切片到 `tmp_debug/re_v22/1rect.dump` (full dump 行 42-51)。
+- **关键 negative finding**: 在用户脚本只调用 `addProperty("ADBE Vector Shape - Rect")` 没显式 setValue 的状态下，**AE 不为 Rect 节点写任何 Size / Position / Roundness tdmn / tdb4 / cdat**。整个 fixture 中 grep `4144424520566563746f7220526563` ("ADBE Vector Rec") 零命中——Size/Position/Roundness 三个属性的 match-name 字节序列**完全不出现**。
+- **Rect 节点 binary 实测结构** (Root Vectors Group LIST tdgp,5 children → Rect LIST tdgp,3 children):
+  ```
+  chunk tdmn (40 B) head=4144424520566563746f722053686170   # "ADBE Vector Shape - Rect"
+  LIST tdgp (3 children)
+    chunk tdsb hex=00000001                                  # subprop flags
+    chunk tdsn hex=557466380000000ee79fa9e5bda2e8b7afe5be842031
+                                                              # Utf8 len=0x0e localized name "矩形路径 1"
+    chunk tdmn (40 B) head=414442452047726f757020456e640000   # "ADBE Group End"
+  ```
+- **没有任何子属性 tdmn (Size/Position/Roundness)**: Rect LIST tdgp 只含 header (tdsb + tdsn) + terminator (Group End)，**没有 tdmn "ADBE Vector Rect Size" / "ADBE Vector Rect Position" / "ADBE Vector Rect Roundness"** 出现。
+- **观察到的 defaults** (从 binary 缺位 + match-name table 反推): Size / Position / Roundness 无任何 binary 表达 — 这些值的 default 必须**由 parser 在缺位时填入**。
+  - **Default Size**: `[?, ?]` — fixture 不解 (AE 用 ExtendScript 默认 100×100，可在 host code 校准时通过 boltframe `defaults.go` 或 AE schema 反查；本 RE 不能从 binary 决定)
+  - **Default Position**: `[?, ?]` — fixture 不解 (默认为 comp center [0,0]，与 RE-S2 Layer Transform Position_0/_1 一致;非合并 Position)
+  - **Default Roundness**: `?` — fixture 不解 (默认 0.0)
+  - tdb4 dimensions (Size=2, Position=2, Roundness=1) 与 RE 无关——本 fixture 无 tdb4/cdat 出现
+- **重要 implication**: V2.2 ShapeLayer creation 路径**不能**靠 length-preserving splice 来插入 Rect 默认属性子树——AE serialization 本身就不写这些字节。要么 (a) 在新建 Rect 时显式 splice 缺位的 tdmn + LIST tdbs + tdb4 + cdat 节点 (length-variable 路径)，要么 (b) 与 AE 同向：runtime 创建时 Rect node 子属性 tree 全空，由 parser default-fill。
+- 仅当用户对某个子属性显式 `setValue` 或加 keyframe 时，AE 才会在 Rect LIST tdgp 内追加该子属性的 tdmn + LIST tdbs 节点 (待 RE-S5 / RE-S6 实测确认追加点 vs 替换点)。
+- Classification: [serialization defaults, negative]
+- 影响:
+  - `lower_shape_node.go` lowerRectNode runtime → serializer 路径必须能输出**两种**形态: 全 default 时输出 3-child empty LIST tdgp; 任一子属性被 explicit set 时按需追加对应 tdmn + tdbs subtree
+  - V2.2 spec §3.6 defaults table 校准: Rect 子属性 defaults 不能从 RE 取，需查 boltframe 源或 AE schema（运行时 default 表）
+  - Parser default 填充逻辑（如果有）需对齐 AE 缺位语义；当前 `internal/aep/parse_shape.go` 的行为待 cross-check (本 RE 不动 parser)
+
 ---
 
 ## 9. 关联文档
