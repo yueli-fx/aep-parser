@@ -1,0 +1,47 @@
+// internal/aep/cdta_layout.go
+package aep
+
+// Composition cdta byte offsets — single source of truth shared by
+// parser (parse_composition.go), writer (write_composition.go), and
+// builder (new_composition.go).
+//
+// cdta total size is 204 bytes (0xCC); layout is stable AE 2020 → AE 2025
+// (bit-for-bit verified, see workshop/scars/).
+const (
+	cdtaResolutionFactorX  = 0x00 // uint16 BE
+	cdtaResolutionFactorY  = 0x02 // uint16 BE
+	cdtaTickRate           = 0x08 // uint32 BE
+	cdtaWorkAreaStart      = 0x1C // uint32 BE dividend
+	cdtaWorkAreaStartDiv   = 0x20 // uint32 BE divisor
+	cdtaWorkAreaEnd        = 0x24 // uint32 BE dividend; 0xFFFFFFFF = sentinel
+	cdtaWorkAreaEndDiv     = 0x28 // uint32 BE divisor
+	cdtaBGColorR           = 0x34 // uint8
+	cdtaBGColorG           = 0x35 // uint8
+	cdtaBGColorB           = 0x36 // uint8
+	cdtaFlagsByte8A        = 0x8A // bit 0 = Draft3D
+	cdtaFlagsByte8B        = 0x8B // bit 0/3/4/5/7 = various comp flags
+	cdtaWidth              = 0x8C // uint16 BE
+	cdtaHeight             = 0x8E // uint16 BE
+	cdtaPixelAspectNum     = 0x90 // uint32 BE numerator
+	cdtaPixelAspectDen     = 0x94 // uint32 BE denominator
+	cdtaFrameRateWhole     = 0x9C // uint16 BE whole part
+	cdtaFrameRateFrac      = 0x9E // uint16 BE fractional part (frac / 65536)
+	cdtaDisplayStartTime   = 0xA4 // uint32 BE dividend
+	cdtaDisplayStartDiv    = 0xA8 // uint32 BE divisor
+	cdtaShutterAngle       = 0xAE // uint16 BE
+	cdtaDuration           = 0xB0 // uint32 BE frames
+	cdtaShutterPhase       = 0xB4 // int32 BE
+	cdtaMotionBlurAdaptive = 0xC4 // int32 BE
+	cdtaMotionBlurSamples  = 0xC8 // int32 BE
+	cdtaSize               = 0xCC // 总长 = 204
+)
+
+// Item idta byte offsets (84 bytes total).
+// Full layout RE'd in workshop/plans/v2-1-foundation-plan.md RE-3 finding.
+// Builder strategy: template-copy 84B + overwrite @0x14 (Item ID).
+const (
+	idtaTypeCode = 0x00 // uint16 BE; 0x04 = Composition / 0x01 = Folder
+	idtaItemID   = 0x14 // uint32 BE; per-item ID
+	idtaLabel    = 0x3A // uint8; label color index 0..16 (0 = none)
+	idtaSize     = 84
+)
