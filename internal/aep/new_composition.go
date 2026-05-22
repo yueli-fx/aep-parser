@@ -403,12 +403,10 @@ func (p *Project) NewComposition(
 	// 5. Append to rootFold + reparse closed loop。
 	// AE 在 Fold 里要求每个 Item LIST 后面都跟 8 个 sibling chunks
 	// (FEE LIST + fvdv/fiop/ftts/foac/fiac/fipc/fifl) —— 否则报 "文件数据丢失"
-	// (实测 Phase 6 ship gate)。从 target 版 dummy_comp 模板 deep-clone。
-	tmpl := templateFor(p.target)
+	// (实测 Phase 6 ship gate)。Phase 2 Task 2.4 把 inline clone 逻辑提到
+	// `lower_item_siblings.go` 的 lowerItemSiblings primitive，行为不变。
 	p.rootFold.Children = append(p.rootFold.Children, itemList)
-	for _, sib := range tmpl.siblingChunks {
-		p.rootFold.Children = append(p.rootFold.Children, deepCloneChunk(sib))
-	}
+	p.rootFold.Children = append(p.rootFold.Children, lowerItemSiblings(nil)...)
 	comp, err := parseComposition(itemList, id, name, &p.Warnings)
 	if err != nil {
 		// Rollback
