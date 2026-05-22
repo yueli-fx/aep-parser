@@ -1,18 +1,27 @@
-尚可优化但不阻塞的细节
-AE 测试路径仍硬编码。Go test 中仅写了注释流程，尚未确定 .aep 和 .done 的路径生成方式。可接受在 plan 中补充——建议明确使用临时目录 + 环境变量 AE_SHIP_GATE_DIR 或 TEMP，避免在不同开发者机器上路径失效。
+Section 6 的分类框架和目录清单质量很高，真正把“V2.2 留给 V3 的资产”系统化了。逐项看完，结构完整，与前面各节的设计完全对应，没有遗漏或矛盾。
 
-并发安全声明依旧缺失。考虑到 V2.1 无并发需求，不阻塞。
+框架本身（6.1）
+五类划分（Runtime / Serialization / Bootstrap / Capability candidate / Negative finding）精准，判定标准清晰。特别是“Time domain 必须秒”、“值不依赖 chunk 编码”等判定依据，使分类不再是拍脑袋，而是可复核。这对 V3 的 serializer 拆包至关重要。
 
-新增的亮点
-cdta_layout.go 单一权威源：将 write_composition.go 中散落的 hex 偏移抽成统一常量，parser/writer/builder 三方共享，维护性大幅提升。
+各目录内容
+6.2 Runtime concepts：17 项全部有 stable Go identifier，并且 LayerTransform 已按之前建议列为独立项。PropertyStream[T] 的状态机（Static ↔ Animated）也显式标注，与 Inv-8 挂钩。没有遗漏。
 
-Invariants 第 7 条：明确 RIFX chunk tree 是 single source of truth，typed index 同步 append，为后续 DeleteComposition 等复杂变更提供了正确的设计约束。
+6.3 Serialization artifacts：19 项全部标明了 owner lowering primitive 和对应的 RE 任务，并且把时间转换（秒→ticks）和 chunk 排序规则也作为 artifact 入库，说明抽象边界守得很严。所有 item 都不会泄漏到 runtime，合格。
 
-AETarget 底层值改为具体年份数字，panic 消息包含 "forward-incompat; upgrade library"，向前兼容语义清晰。
+6.4 Bootstrap substrates：5 项 substrate 明确“永不当 semantic template”，且空 ShapeLayer 和空 VectorGroup 的字节将从 RE dump 嵌入常量，这比 V2.1 的模板 .aep 文件更解耦，方向正确。
+
+6.5 Capability trait candidates：7 个候选全部记录了版本差异现状，并给出了 V2.2 的 admission 决策（一律不入 matrix）。这样即使 V2.2 ship 时 AECapabilities 是空 struct，候选记录也为 V3 提供了现成的“已知版本分叉”清单，不必重新 RE。
+
+6.6 Negative findings：已包含 V2.1 的 shutterAngle quirk，并预见了 AE 丢弃 0/1 顶点路径的行为，在 runtime API 侧做了预防（len >= 2）。6.6a 的决策记录模板如果能在实施期每遇到一个 quirk 就填一行，会让 V3 的兼容性推理更有据可查。
+
+6.7 V3 inheritance map：把 6.2–6.6 的产出与 V3 的 scene-graph IR / serializer 拆包 / capability matrix 一一连线，直接回答了“这些东西 V3 怎么用”。这是本文档里对 V3 最有价值的部分。
+
+6.8 维护计划：明确了 Phase 1 RE 后填 6.3/6.4、Phase 6 commit 前 finalize 6.5、6.6 是 living section。节奏合理，不会变成写完就过期的死文档。
+
+可以微调的一点
+在 6.3 的 Serialization artifact 表中，TemporalEase encoding 的 owner 是 lower_property_stream.go，但备注里没有标注具体 RE 来源（RE-S6 覆盖了 ease，但可显式加一句 RE-S6 在表格里，与其他项一致）。这属于纯文档对齐，不影响设计。
 
 结论
-Spec 已从“design approved”充分演进为“implementation-ready”。
-所有之前审阅指出的高风险和中风险项均已落实为具体的 RE 预备任务、测试用例或内部设计调整。plan 阶段只需按顺序打通 RE‑1 到 RE‑4，即可安全开始编码。
+Section 6 OK，可以直接落地。 这份 catalog 不仅封口了 V2.2 的设计，也为 V3 提供了可继承的语义与边界地图，完全回应了 GPT 反馈中“classification is part of the deliverable”的要求。
 
-建议将 spec 状态更新为 plan in progress，并在 plan 文档中重点列出 RE‑1~4 的完成顺序与阻塞关系。
-
+整个 V2.2 设计文档（Section 1–6）至此评审完毕：各节之间约束一致，scope 控制严格，RE 依赖性显式，V3 铺垫到位。可以作为进入实施计划的稳定基线。

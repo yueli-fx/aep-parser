@@ -1,25 +1,29 @@
-07:30
-V2.1 第二版 spec 质量明显提升——我上次提的 4 条 action item 全部落地了，新增的 invariant #7（chunk tree 是 single source of truth）是我没提但很有价值的补充。下面只说还值得看的地方。
+Section 6 是全文最有长期价值的部分，classification framework 本身设计得很好。反馈较少，主要是几个完整性问题。
 
-剩余问题
-1. buildCompIdta 中 @0x14 的偏移量疑问
-cdta_layout.go 里 idtaItemID = 0x14，对应 20 字节偏移。但 idta 全长才 84 字节，@0x14 之前只有 20 字节空间放 type code + 未知字段。这个值是经过 RE 确认的，还是暂时的猜测？如果是猜测，RE-3 完成前不应该把它写进常量文件——常量给人"已确认"的信号，但旁边注释写了"TODO（plan RE-3）"，两者矛盾。
+需要修改的地方
+6.5 admission rule 的"三条件"没有在 Section 6 内定义
+多处写"走 Section 1 admission rule 三条件检查"，但 Section 6 是独立阅读时的封口文档。V3 brainstorm 阶段的人直接看 6.5 时不知道三条件是什么。建议在 6.5 顶部加一个 inline 引用框：
 
-建议：RE-3 完成前，idtaItemID / idtaLabel 这两个常量加 // tentative: RE-3 pending 注释，或者干脆留 TODO 占位、不写具体值，防止实现者直接用未确认的 offset。
+Admission rule（定义在 Section 1）：(1) 跨版本有实测差异 (2) escape hatch 单一 canonical 不能覆盖 (3) lowering 必须 branch。三条同时满足才入 capability matrix。
 
-2. TestNewCompositionOnOpenedProject 缺少一个更有价值的断言
-当前测试只验证"新 ID > 既有 max ID"。但这个测试的真正价值是验证 initDerived 里扫描了全部三种 item 类型（Compositions / Footage / Folders）。一个项目如果只有 Footage（ID = 5）没有 Composition，新 Composition 应该拿到 ID = 6。建议用一个 fixture（或手动构造）覆盖"最大 ID 来自 Footage / Folder 而非 Composition"的场景。
+不需要重复全文，一句话锚点就够。
 
-3. ship gate .done 文件路径硬编码
-JSX 里路径是 e:/projects/tools/aep-parser/...。其他人（或 CI 将来接入 Windows agent）跑测试会因路径不对而静默失败——doneFile.open("w") 失败走了内层 catch，Go 端 timeout。
+需要补充的地方
+6.2 缺少两个 V2.2 明确引入的 runtime concept
+对照 Section 3/4，以下两个概念在 6.2 catalog 里没有出现：
 
-建议：JSX 接受参数（AfterFX 命令行 -r script.jsx arg1 arg2）或者从环境变量 / 约定相对路径读。Go test 里构造完整路径后通过命令行传入，比硬编码灵活。这是个小改动，但影响 spec 里 Go test 的 AfterFX.exe -r verify_v2_1.jsx 调用方式。
+StreamMode enum (Static / Animated) — 已在 catalog 末尾，实际有，只是我看漏了。但 KeyframeBuilder 没有出现。即使 Section 3.4 建议不用 Builder，如果最终 ship 了这个类型，它需要归类（runtime semantic 还是 internal implementation detail？建议明确标注为 internal，不入 runtime catalog）
+Layer Position 的 2D/3D 维度 — 这是 Section 5 的 OQ，但如果 V2.2 定为 2D，layer.Position() 返回 *PropertyStream[[2]float64] 这个维度决策本身应该在 6.2 里标注，因为它是跨 AE 版本的 runtime semantic（AE 内部 3D layer 和 2D layer 的 Position stream 维度不同）
 
-4. buildCompItem children 顺序里多了几个未说明的 chunk
-注释里写了 LIST(dats) / cdrp / comr，但正文没有说这三个是什么，也没有在 chunk builders 小节里列出对应函数。如果这几个是从 template 里直接复制的固定 bytes（最可能），需要说清楚"复制自 template，builder 不构造，直接嵌固定字节"。如果需要动态构造，需要加 builder 说明。现在的状态是"buildCompItem 里会用到但没人知道从哪来"。
+6.6 PathNode 最少顶点数量没有确定
+6.6 写了"AE drops 0-vertex / 1-vertex Path"，处理是"SetVertices 校 len >= 2"。但 Section 3.3 留的 OQ 是"最少几个顶点"，这里给出了答案（>= 2）但没有标注这是 RE-S8 确认的还是推测。如果是推测，应该标注"待 RE-S8 确认"；如果是确认的，应该移到 6.2 的 PathNode 条目里作为 runtime invariant。
 
-可合并的小问题
-TestNewProject 里验证 len(p.Warnings) == 0 是很好的补充，但 TestEmbeddedTemplateNotCorrupt 和 TestNewProject 的覆盖范围有重叠（都是"parse 不 panic + 非 nil"）。可以合并成一个表格行，或者把 TestEmbeddedTemplateNotCorrupt 改成专门跑三个 target 的 smoke test，跟 TestNewProject（只测 default target 的字段值）职责分开。
-Reopen-save-resave-reopen 那段逻辑在 JSX 里是内联的，将来 V2.2+ ship gate 会复制粘贴。建议把这段提取成 JSX helper function，这样是一处维护。
+小问题
+
+6.3 表格里 "Chunk ordering rules (S-Inv-2)" 的 "S-Inv-2" 前缀不一致——其他地方写的是 "Inv-2"，这里多了 "S-"，建议统一
+6.7 "V3 可换格式（e.g. byte const → external .aep）" 这句话值得多说一句：byte const 嵌在 Go 源码里是 V2 的 bootstrap 策略，V3 换成外部文件是为了 RE 友好。这个方向判断正确，但如果不写原因，V3 的人可能不明白为什么要改
+6.8 维护节奏合理，但没有说明谁负责维护。建议加一句"每个 Phase 的 subagent 在 commit 前负责更新对应段"，否则容易漂移
+
+
 总结
-核心实现风险还是 RE-1 到 RE-4——这不是文档的问题，文档已经明确标出来了。文档本身的剩余问题里最值得在进 plan 之前处理的是第 3 条（JSX 路径硬编码）和第 4 条（dats / cdrp / comr 来源未说明），因为这两个会直接影响 plan 里的任务边界。其余的可以在实现阶段处理。
+Section 6 作为封口文档是合格的，classification framework 是 V3 真正能用的输入。两个需要在 Phase 1 RE 前处理的点：admission rule 三条件 inline 引用，以及 PathNode 最少顶点的 RE vs 推测标注。其余可以在 Phase 6 commit 时一起填。

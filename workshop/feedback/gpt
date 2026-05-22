@@ -1,543 +1,314 @@
-这版已经明显从“好的设计”进入“可长期维护的 binary-format 工程设计”了。
+整体方向是成立的，且这是目前文档里最“V3-ready”的部分。它真正把：
 
-你把前一版里真正危险的地方基本都补上了，尤其：
+runtime semantic
+serializer artifact
+bootstrap substrate
+capability candidate
+negative finding
 
-rootFold cache
-single-source-of-truth invariant
-cdta_layout.go
-reopen-save-reopen ship gate
-RE prerequisites 显式 blocking
+五类概念拆开了。
 
-这些会极大降低后面 V2.2–V2.6 的结构债。
+这一步比具体 API 更重要，因为它决定未来 V3 不会再次退化成 “parser struct = runtime model”。
 
-我下面主要看“还有哪些隐蔽风险”和“哪些地方已经足够稳定可以 freeze”。
+几个关键点评估：
 
-现在这个 spec，我认为已经可以 freeze 的部分
+1. 6.1 分类框架：正确，而且是长期资产
 
-以下我认为已经是正确长期方向，不建议再反复推翻。
+这是整个 V2.2 文档里最有价值的部分之一。
 
-1. template-based NewProject
+尤其这条：
 
-这个已经是正确路线。
+runtime semantic 必须跨 AE 版本含义一致
+
+非常关键。
+
+它天然排除了：
+
+chunk ordering
+offsets
+match-name
+padding
+hidden counters
+tdgp child count
+AE rewrite quirks
+
+这些东西进入 runtime。
+
+这实际上是在给 V3 scene IR 立法。
+
+建议：
+
+把这一句提升为正式 invariant：
+
+Inv-X:
+Runtime semantic MUST NOT depend on:
+- chunk ordering
+- chunk IDs
+- byte offsets
+- match-name strings
+- AE version-specific serialization behavior
+
+这会成为未来 reviewer 的判断标准。
+
+2. 6.2 Runtime semantic catalog：已经接近 V3 IR registry
+
+这里已经不是“V2.2 spec”。
+
+实际上是：
+
+scene graph primitive registry
+animation primitive registry
 
 尤其：
 
-p, err := FromReader(bytes.NewReader(tmpl))
+PropertyStream[T]
+PropertyGroup
+BezierPath
+ShapeNodeKind
+Time domain = seconds
 
-而不是：
+这些已经是 V3 runtime core。
 
-clone(preparsedTemplate)
+这是好事。
 
-这是对的。
+说明 V2.2 没在继续“patch-based thinking”。
 
-原因不只是省 deep clone。
+3. PropertyGroup 的 runtime-name 决策是对的
 
-更重要的是：
+这是 Section 6 最正确的设计之一。
 
-parser path = constructor path
+你已经明确：
 
-这会让未来 parser regression 更早暴露。
+runtime name stable
+match-name serializer-only
 
-这是非常健康的 architecture property。
+这非常重要。
 
-2. chunk tree = source of truth
-
-这是整个 V2 真正的核心 invariant。
-
-你现在明确写：
-
-RIFX chunk tree 是 single source of truth
-
-这个极其重要。
-
-因为后面：
-
-reorder layer
-move folder
-duplicate comp
-delete effect
-
-typed slice 一定会失真。
-
-只要 chunk tree 是唯一真相，你永远还能：
-
-WriteAEP → FromReader
-
-自愈。
-
-这是 binary AST 项目的正确路线。
-
-3. parse-after-build
-
-这个我仍然认为是整个 V2 最关键决定。
-
-尤其你现在已经明确：
-
-mutation → append chunk → parse subtree
-
-很好。
-
-建议未来：
-
-NewSolidLayer
-AddEffect
-AddMask
-
-全部遵守。
-
-不要引入：
-
-newLayerFromScratch()
-
-这种 parallel object model。
-
-4. cdta_layout.go
-
-这个补得非常对。
-
-这是 RE 项目最容易烂掉的地方：
-
-parser offset
-writer offset
-builder offset
-
-三份 magic number 漂移。
-
-现在统一 source 后：
-
-parser
-writer
-builder
-
-都绑定同一 layout authority。
-
-长期维护成本会低很多。
-
-5. RE prerequisites blocking
-
-这个也是成熟很多的信号。
-
-你已经意识到：
-
-“先写代码再 RE”
-
-是 binary format 项目里最危险的路线。
-
-现在：
-
-RE-1
-RE-2
-RE-3
-RE-4
-
-变成 implementation blockers。
-
-这是对的。
-
-我认为还需要强化的几个地方
-一、rootFold cache 需要 lifecycle invariant
-
-你现在：
-
-rootFold *rifx.Chunk
-
-是对的。
-
-但建议明确：
-
-invariant
-p.rootFold 永远指向当前 live chunk tree 内的 Fold LIST。
-
-因为未来可能出现：
-
-ReplaceRoot()
-reparsing whole project
-deep copy project
-future compact/rebuild operation
-
-导致 dangling pointer。
-
-建议文档明确：
-
-rootFold is derived cache, never ownership.
-
-否则后面有人可能：
-
-newProj.rootFold = oldProj.rootFold
-
-直接炸。
-
-二、nextItemID 需要 monotonic invariant
-
-建议明确：
-
-nextItemID 单调递增，永不 reuse。
-
-即使：
-
-item delete
-undo-like operation
-folder remove
-
-也不 reuse。
-
-这是 Adobe/AVID/NLE 类软件最稳策略。
-
-否则：
-
-itemByID
-cached references
-future expressions
-
-都可能出事。
-
-建议写进 invariants。
-
-三、你现在缺一个“mutation atomicity”原则
-
-这是后面 V2.2 开始很重要的。
-
-现在：
-
-append chunk
-parseComposition
-append typed slice
-
-如果 parse 失败：
-
-chunk 已经 append 了。
-
-typed slice 没 append。
-
-tree/index divergence。
-
-建议现在就规定：
-
-mutation atomicity invariant
-任何 mutation 要么：
-- chunk tree + typed index 全成功
-- 要么完全 rollback
-
-建议实现方式：
-
-oldLen := len(root.Children)
-append(...)
-parse(...)
-if err {
-    root.Children = root.Children[:oldLen]
-    return err
-}
-
-虽然现在 parse 理论不会失败。
-
-但未来：
-
-AddEffect
-AddMask
-AddProperty
-
-会失败。
-
-早点形成 invariant 很值。
-
-四、Warnings 行为需要定义
-
-你现在：
-
-parseComposition(itemList, &p.Warnings)
-
-这里有个隐患。
-
-新建 comp 时：
-
-如果 builder 有 bug：
-
-warnings 会 silently append。
-
-但 API 仍返回 success。
-
-建议明确：
-
-invariant
-NewProject/NewComposition 不允许产生 parser warnings。
-
-即：
-
-before := len(p.Warnings)
-parse(...)
-if len(p.Warnings) != before {
-    rollback
-    return internal error
-}
-
-否则：
-
-parser degraded
-unknown chunk layout drift
-
-会 silently accumulate。
-
-五、buildCompItem children order：建议 freeze fixture
-
-你现在写：
-
-iide / idpc / idta / Utf8 / LIST(dats) / cdta / cdrp / comr / Layr
-
-很好。
-
-建议 implementation plan 增加：
-
-golden fixture dump
-
-即：
-
-fixtures/comp_item_children.txt
-
-记录：
-
-exact order
-chunk sizes
-LIST nesting
-
-因为 AE binary 最危险的问题之一：
-
-“看起来顺序不重要”
-
-但未来某版本 silently 开始依赖。
-
-golden dump 能防 accidental reorder。
-
-六、RE-2 (idpc) 我认为比你现在写的更危险
-
-你现在还在：
-
-8-byte? 16-byte?
-
-但我建议重点检查：
-
-“是否 cross-reference key”
-
-因为 AE 内部：
-
-expressions
-essential graphics
-dynamic link
-render queue
-proxies
-
-可能都引用 item persistent key。
-
-如果：
-
-duplicate idpc
-
-AE 很可能：
-
-不立即报错
-但后面 feature silently malfunction
-
-所以我建议：
-
-即使当前全 0 也优先随机唯一
-
-除非明确证明：
-
-idpc is ignored
-
-否则 safest path：
-
-crypto/rand
-
-因为“过度唯一”通常安全。
-
-“错误复用”风险更高。
-
-七、RE-1 (fdta) 我怀疑不只是 child count
-
-你已经正确提高了它优先级。
-
-我补一个推测：
-
-f422
-
-很像：
-
-flags
-timestamp-ish token
-allocator hint
-folder capability bitset
-
-不一定是 count。
-
-建议：
-
-不只做 item-count diff
-
-而是：
-
-empty
-1 comp
-2 comp
-delete comp
-nested folder
-
-全部 dump。
-
-看：
-
-哪些字段 monotonic
-哪些字段 topology-sensitive
-
-否则容易误判。
-
-八、frame rate canonicalization：建议 API-level freeze
-
-这个现在已经到了该“定规则”的阶段。
-
-建议明确：
-
-内部 canonical representation
+否则 AE match-name 会污染整个 public API。
 
 例如：
 
-23.976  => 24000/1001
-29.97   => 30000/1001
-59.94   => 60000/1001
+"ADBE Vector Rect Size"
 
-而不是 generic float split。
+根本不该进入用户世界。
+
+runtime-facing：
+
+Stream("Size")
+
+才对。
+
+这会让未来：
+
+Resolve()
+expression binding
+graph traversal
+UI abstraction
+
+都更干净。
+
+4. 6.3 Serialization artifact catalog：owner mapping 非常重要
+
+这里真正有价值的不是 artifact 本身。
+
+而是：
+
+artifact -> lowering primitive owner
+
+例如：
+
+BezierPath ldat encoding
+  owner = lower_property_stream.go
+
+这意味着：
+
+未来 serializer 重写知道责任边界
+bug 知道归谁
+capability branch 知道放哪
+V3 migration 知道迁哪个包
+
+这是 architecture mapping。
+
+非常对。
+
+5. “Chunk ordering rules = implementation-defined except AE compatibility”
+
+这是成熟判断。
+
+不要把：
+
+exact ordering
+
+升级成 semantic contract。
+
+否则未来 serializer 永远不能重构。
+
+你现在定义的是：
+
+AE-compatible ordering
+
+而不是：
+
+historical byte identity
+
+这非常健康。
+
+6. 6.4 substrate 分类：已经明显优于“template-copy”
+
+你已经完成了最关键的认知转变：
+
+template != semantic object
+
+dummy_comp.aep：
+
+是 bootstrap substrate
+不是 runtime archetype
+不是 serializer truth
+
+这是正确的。
 
 否则未来：
 
-SetFrameRate(29.97)
-SetFrameRate(30000.0/1001.0)
+1000 effects
+10 layer kinds
+nested shape systems
 
-写出不同 binary。
+都会爆炸。
 
-然后：
+7. 6.5 capability candidate：现在这个状态是健康的
 
-tests flaky
-AE save rewrite
-binary diff impossible
+这里最成熟的一点：
 
-建议：
+记录 candidate
+但不提前 admission
 
-canonical NTSC table
+这是正确的。
 
-提前定死。
+否则 V2.2 会重新陷入：
 
-九、建议增加 “AE save normalization” 测试
+if AE2020
+if AE2025
 
-你现在已经有：
+地狱。
 
-open → save → reopen
+现在：
 
-很好。
+capability matrix 概念存在
+serializer 有入口
+但不提前复杂化
 
-我建议再加：
+这是最佳平衡。
 
-compare normalized fields after AE resave
+8. “AECapabilities 大概率仍空 struct” 是好信号
 
-比如：
+这实际上意味着：
 
-duration
-work area
-shutter
-bg color
-PAR
+minimum canonical subset strategy works
 
-确认：
+这是 V2.1 最大验证成果之一。
 
-AE 没 silently canonicalize
+如果 V2.2 还能继续：
 
-否则说明 builder 写法不 canonical。
+单 canonical lowering
+AE auto-fill defaults
+cross-version readable
 
-这是非常有价值的信号。
+那 V3 serializer 会轻很多。
 
-十、建议增加一个长期 invariant：
-“unknown chunks must survive untouched”
+9. 6.6 Negative findings：必须保留
 
-这个其实是你架构天然支持的。
-
-但值得显式写。
-
-因为后面：
-
-AddEffect
-RewriteLayer
-DeleteMask
-
-很容易 accidentally rebuild subtree。
-
-建议明确：
-
-mutation 必须 preserve unrelated unknown chunks byte-for-byte
-
-这是 parser/writer 项目的生命线。
-
-十一、你已经开始接近“binary AST editor”
-
-这意味着一个未来方向建议。
-
-你现在：
-
-builder functions
-
-还比较 procedural。
-
-后面 V2.3+ 可能逐渐值得引入：
-
-type ChunkMutation interface
-
-或者：
-
-transaction-style mutation
+这是很多 RE 项目最缺的东西。
 
 因为：
 
-rollback
-validation
-repair
-warning handling
+quirk != capability
+quirk != runtime semantic
 
-会越来越复杂。
+例如：
 
-现在不用做。
+NTSC shutter ×1.2
 
-但 architecture 已经开始朝那个方向长了。
+这是：
 
-我现在对整个 V2 的判断
+AE scripting bug/quirk
+不是 runtime truth
+不是 serializer invariant
 
-我觉得你已经成功避免了：
+分类正确。
 
-“写 writer 比 parser 还复杂”
+否则 runtime model 会越来越脏。
 
-这是很多 binary reverse-engineering 项目最后失败的原因。
+10. 6.6a Decision log：强烈建议保留
 
-你现在路线本质上是：
+这个非常好。
 
-Preserve unknowns
-Inject minimal valid structure
-Reuse parser everywhere
-Treat AE as canonical validator
+因为未来最容易丢失的是：
 
-这是非常稳的策略。
+“为什么当时归到 serialization，而不是 runtime？”
 
-最后结论
+decision log 能保住 reasoning。
 
-这版 spec 我认为已经：
+尤其对 V3 很重要。
 
-implementation-ready
-architecture-stable
-API 基本可 freeze
-测试策略已经成熟
-长期扩展路线清晰
+11. 6.7 inheritance map：这是 V3 onboarding 文档
 
-我现在只会要求 implementation plan 阶段重点盯：
+这一段其实已经：
 
-mutation rollback invariant
-warnings-as-failure invariant
-idpc uniqueness semantics
-fdta topology semantics
-NTSC canonicalization table
+不是 V2.2 内容
+而是 V3 migration index
 
-除此之外，这已经不像“一个功能 spec”，而更像一个成熟 binary format editing subsystem 的 foundation design。
+非常有价值。
+
+尤其：
+
+serialization artifacts -> owner mapping
+
+未来迁 serializer 包时会极其有用。
+
+12. 一个建议：增加 “Unclassified / pending” 临时区
+
+RE 阶段一定会遇到：
+
+不知道属于 runtime 还是 serialization
+
+建议允许：
+
+[unclassified]
+
+避免实施期间为了推进而错误归类。
+
+等 RE 完成再 finalize。
+
+否则会出现：
+
+premature semanticization
+accidental serializer leakage
+13. Section 6 实际意义
+
+你现在做的已经不是：
+
+“支持 ShapeLayer”
+
+而是在建立：
+
+AE runtime ontology
+
+也就是：
+
+哪些概念是真实 runtime object
+哪些只是 wire format
+哪些是 bootstrap bytes
+哪些是 version capability
+哪些只是 AE 怪异行为
+
+这正是 V3 需要的基础。
+
+结论：
+
+Section 6 是 OK 的，而且可能是整个 V2.2 spec 最重要的部分。
+
+它真正解决了：
+
+parser struct ≠ runtime model
+
+这个 V2.1 暴露出的核心架构债。
