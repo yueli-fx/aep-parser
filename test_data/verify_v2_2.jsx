@@ -54,6 +54,14 @@
         args = eval("(" + s + ")");
         doneFile = new File(args.done);
 
+        // Pre-clean any prior project so app.open doesn't prompt about
+        // unsaved changes from a leftover session.
+        try {
+            if (app.project) {
+                app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+            }
+        } catch (ePre) { /* no prior project — fine */ }
+
         app.open(new File(args.input));
         var c = app.project.items[1];
         log.push("opened comp: " + c.name + " layers=" + c.layers.length);
@@ -146,4 +154,16 @@
         doneFile.write((ok ? "PASS\n" : "FAIL\n") + log.join("\n"));
         doneFile.close();
     } catch (e2) { /* swallow */ }
+
+    // Tear down AE cleanly so it doesn't prompt user about unsaved
+    // changes on the next launch. Order matters: close project (no save)
+    // first, then quit.
+    try {
+        if (app.project) {
+            app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+        }
+    } catch (eClose) { /* swallow */ }
+    try {
+        app.quit();
+    } catch (eQuit) { /* swallow */ }
 })();

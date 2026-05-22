@@ -45,4 +45,16 @@
         doneFile.write((ok ? "PASS\n" : "FAIL\n") + log.join("\n"));
         doneFile.close();
     } catch (e2) { /* swallow */ }
+
+    // Tear down AE cleanly so it doesn't prompt user about unsaved
+    // changes on the next launch. Close project (no save — we already
+    // saved via project.save above) then quit.
+    try {
+        if (app.project) {
+            app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+        }
+    } catch (eClose) { /* swallow */ }
+    try {
+        app.quit();
+    } catch (eQuit) { /* swallow */ }
 })();
