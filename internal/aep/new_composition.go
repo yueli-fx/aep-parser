@@ -241,12 +241,15 @@ func buildCompItem(itemID uint32, name string, cdta []byte) *rifx.Chunk {
 		ID:   rifx.IDCdta,
 		Data: cdta,
 	}
-	layrList := buildEmptyLayrList()
 
 	children := []*rifx.Chunk{iide, idpc, idta, utf8}
 
 	// fixture 中 template chunks[0] = LIST(dats)，必须插在 cdta 之前。
-	// 其余 template chunks 全部插到 cdta 之后、Layr 之前。
+	// 其余 template chunks 全部插到 cdta 之后。
+	//
+	// 不写 empty Layr：AE 自己 saved 的 empty comp 也不带 Layr（dummy template
+	// 验证：只有 SLay/CLay/SecL，没有 Layr）。若写 empty Layr，parseLayer 会在
+	// ldta 缺失时返回 stub 层，污染 comp.Layers（V2.2 AddLayer 时再 build Layr）。
 	if len(templateCompItemChunks) > 0 && isDatsList(templateCompItemChunks[0]) {
 		children = append(children, deepCloneChunk(templateCompItemChunks[0]))
 		children = append(children, cdtaChunk)
@@ -260,8 +263,6 @@ func buildCompItem(itemID uint32, name string, cdta []byte) *rifx.Chunk {
 			children = append(children, deepCloneChunk(tc))
 		}
 	}
-
-	children = append(children, layrList)
 
 	return &rifx.Chunk{
 		ID:       rifx.IDList,
