@@ -713,3 +713,88 @@ type Keyframe struct {
 	dims     int         // dimensionality (mirrors Property.Components)
 	tickRate float64     // owning composition's TickRate (for SetTime)
 }
+
+// ShapeLayer is the V2.2 typed wrapper around *Layer (spec §2.1). V1 callers
+// keep using *Layer directly; V2.2 creation / hydration paths return
+// *ShapeLayer, exposing shape-specific API (RootGroup, Transform, shorthand
+// transform accessors) on top of the embedded layer.
+//
+// The wrapper holds runtime state only — it does NOT carry rifx.Chunk refs
+// (Inv-1). Lowering (Phase 2 `lower_layer.go`) consumes the runtime tree
+// and produces chunks; hydration rebuilds the runtime tree from chunks.
+type ShapeLayer struct {
+	*Layer                    // embed: V1 setters/getters continue to work
+	rootGroup *VectorGroup    // default empty group (spec §3.2)
+	transform *LayerTransform // typed Layer-level Transform (spec §3.3a)
+}
+
+// WrapShapeLayer wraps a parsed/created *Layer as a ShapeLayer. Caller is
+// responsible for ensuring layer.Type == LayerTypeShape (matches V1 contract
+// pattern: typed wrappers trust the caller).
+func WrapShapeLayer(layer *Layer) *ShapeLayer {
+	return &ShapeLayer{
+		Layer:     layer,
+		rootGroup: NewVectorGroup(),
+		transform: newLayerTransform(),
+	}
+}
+
+// RootGroup returns the default RootGroup. Newly attached nodes go to the
+// end of `RootGroup().Children` (top of render stack; spec §3.2).
+func (s *ShapeLayer) RootGroup() *VectorGroup { return s.rootGroup }
+
+// Transform returns the typed Layer-level Transform surface (spec §3.3a).
+func (s *ShapeLayer) Transform() *LayerTransform { return s.transform }
+
+// Position is shorthand for s.Transform().Position(). V2.2 ShapeLayer is
+// 2D-only (3D ShapeLayer = V2.3+); returns the 2D stream.
+func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.transform.position }
+
+// Scale is shorthand for s.Transform().Scale().
+func (s *ShapeLayer) Scale() *PropertyStream[[2]float64] { return s.transform.scale }
+
+// Rotation is shorthand for s.Transform().Rotation().
+func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.transform.rotation }
+
+// Opacity is shorthand for s.Transform().Opacity().
+func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.transform.opacity }
+
+// LayerTransform is the typed wrapper for a layer's Transform property
+// group (spec §3.3a). V2.2 ShapeLayer is 2D, so Position / Scale /
+// AnchorPoint are 2D streams; 3D layers are V2.3+.
+//
+// Default values (runtime-facing; lowering elides defaults per RE-S2):
+//
+//	AnchorPoint = [0, 0]
+//	Position    = [0, 0]
+//	Scale       = [100, 100]
+//	Rotation    = 0
+//	Opacity     = 100
+type LayerTransform struct {
+	anchorPoint *PropertyStream[[2]float64]
+	position    *PropertyStream[[2]float64]
+	scale       *PropertyStream[[2]float64]
+	rotation    *PropertyStream[float64]
+	opacity     *PropertyStream[float64]
+}
+
+// newLayerTransform constructs a default-valued LayerTransform.
+func newLayerTransform() *LayerTransform {
+	lt := &LayerTransform{
+		anchorPoint: NewPropertyStream[[2]float64](),
+		position:    NewPropertyStream[[2]float64](),
+		scale:       NewPropertyStream[[2]float64](),
+		rotation:    NewPropertyStream[float64](),
+		opacity:     NewPropertyStream[float64](),
+	}
+	// Defaults per spec §3.6 runtime-facing convention.
+	_ = lt.scale.SetStaticValue([2]float64{100, 100})
+	_ = lt.opacity.SetStaticValue(100)
+	return lt
+}
+
+func (t *LayerTransform) AnchorPoint() *PropertyStream[[2]float64] { return t.anchorPoint }
+func (t *LayerTransform) Position() *PropertyStream[[2]float64]    { return t.position }
+func (t *LayerTransform) Scale() *PropertyStream[[2]float64]       { return t.scale }
+func (t *LayerTransform) Rotation() *PropertyStream[float64]       { return t.rotation }
+func (t *LayerTransform) Opacity() *PropertyStream[float64]        { return t.opacity }
