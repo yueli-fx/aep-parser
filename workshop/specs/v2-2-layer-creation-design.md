@@ -1328,6 +1328,34 @@ Phase 6  Docs sync + ship gate
   - V2.2 spec §3.6 defaults table 校准: Rect 子属性 defaults 不能从 RE 取，需查 boltframe 源或 AE schema（运行时 default 表）
   - Parser default 填充逻辑（如果有）需对齐 AE 缺位语义；当前 `internal/aep/parse_shape.go` 的行为待 cross-check (本 RE 不动 parser)
 
+### RE-S5a finding: EllipseNode defaults + Size/Position encoding
+
+- Date: 2026-05-23
+- Source:
+  - `tmp_debug/re_v22/1ellipse_ae2020.aep` (kind=1ellipse, AE 17.7x45) — base (无 setValue)
+  - `tmp_debug/re_v22/1ellipse_set_ae2020.aep` (kind=1ellipse_set) — Size=[120,80], Position=[10,20] explicit setValue
+- Method: `gen_shape_dummy.jsx` _set 分支 + `tmp_debug/dump_cdat_seq` 工具 (一次性 Go scaffold, 已 add) 定位 Ellipse 子树 + 解码 cdat float64 BE
+- **matchNames 实测** (from `addProperty()` 后 child enumeration; AE 自动创建)：
+  - `ADBE Vector Shape Direction` (child[1], 1D, scalar — direction flag)
+  - `ADBE Vector Ellipse Size` (child[2], dim@03=2)
+  - `ADBE Vector Ellipse Position` (child[3], dim@03=2)
+- **Base 默认值情况** (1ellipse): Ellipse LIST tdgp 仅 **3 children** (`tdsb + tdsn + tdmn(Group End)`)，完全无任何子属性 tdmn。**elision pattern 与 RE-S4 一致** —— AE 在 default 状态下不写 Direction / Size / Position 任何字节。
+- **Set 时实测** (1ellipse_set): Ellipse LIST tdgp **7 children** = header(tdsb + tdsn) + 2 × (tdmn + tdbs LIST) + Group End。**Direction 仍被 elide**（仅 Size 和 Position 出现，因为只对这两个 setValue）。
+- **Size encoding** (`ADBE Vector Ellipse Size` setValue=[120,80]):
+  - tdb4 (124B) `db99000200010000ffffffff00007800`，@0x03=`02`(dim=2)
+  - cdat **80B** = 10 × float64 BE = `[120.0, 80.0, 0, 0, 0, 0, 0, 0, 0, 0]`
+  - hex 前 16B: `405e000000000000 4054000000000000`
+  - 仅前 `dim*8 = 16B` 是 value，后续 64B = 8 个 padding float64 0 (channel storage 上限预留)
+  - tdbs 还含 `tdum`/`tduM` siblings (min/max=`±0xc0df_400000000000`= ±32000.0 等？ — 用户范围 hint, 与 cdat encoding 无关)
+- **Position encoding** (`ADBE Vector Ellipse Position` setValue=[10,20]):
+  - tdb4 (124B) `db990002000f0003ffffffff00007800`，@0x03=`02`(dim=2)；@0x05=`0f`、@0x06-0x07=`00 03` 与 Size 不同 (`00 01 0000`) — 可能是 'spatial 2D position' marker (与 Layer Transform Position_0/_1 dim=1 但 flag 不同 fashion)
+  - cdat **48B** = 6 × float64 BE = `[10.0, 20.0, 0, 0, 0, 0]` (padding 32B = 4 个 0)
+  - hex 前 16B: `4024000000000000 4034000000000000`
+  - 注意：Position 的 tdbs **4 children** (无 tdum/tduM)，Size 的 tdbs **6 children** (含 tdum/tduM) —— 标量 hint range chunks 是 per-property 决策
+- **跨子属性 cdat padding 不一致**: Size 80B (10 float64) vs Position 48B (6 float64) — padding 大小是 per-property 决策, 不是固定 5-channel
+- Classification: [serialization encoding]
+- 影响: `lower_shape_node.go` lowerEllipseNode 编码路径 (length-variable 当任一 sub-property 显式被 set 时)
+
 ---
 
 ## 9. 关联文档
