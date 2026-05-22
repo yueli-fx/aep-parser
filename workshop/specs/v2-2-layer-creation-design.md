@@ -1199,6 +1199,43 @@ Phase 6  Docs sync + ship gate
 - 影响: ...
 ```
 
+### RE-S1 finding: empty ShapeLayer Layr LIST 结构 (跨 AE 2020/2022/2025)
+
+- Date: 2026-05-23
+- Source: `tmp_debug/re_v22/empty_ae{2020,2022,2025}.aep`
+- Method: `tmp_debug/gen_shape_dummy.jsx` (kind=empty) on AE 17.7x45 / 22.6x64 / 25.1x68; structure dumped via `go run ./tmp_debug/dump_root <aep>` → `empty_ae<year>.dump`
+- AE versions captured: `app.version` = 17.7x45 (AE 2020) / 22.6x64 (AE 2022) / 25.1x68 (AE 2025)
+- **Layr LIST children 顺序 (canonical, 全部三个版本一致)**:
+  1. `ldta` — 见 ldta 尺寸表
+  2. `Utf8` (2 bytes) — layer name `"S1"` (hex `5331`)
+  3. `LIST(tdgp)` — 15 children, 外层 layer property group, 内含 tdsb + tdsn + 6 个 named sub-tdgp + 终止 tdmn
+  4. `LIST(Gide)` — 2 children: `gdta` (8B) + `LIST(list)` 内嵌单 `lhd3` (52B)
+- 外层 `LIST(tdgp, 15)` 的命名 sub-tdgp 顺序 (tdmn → LIST(tdgp)):
+  1. `ADBE Transform Group` → `LIST(tdgp, 15)` — Position_0 / Position_1 / Orientation / RotateX / RotateY / Envir Appear + 各自 tdbs
+  2. `ADBE Layer Styles` → `LIST(tdgp, 25)` — Blend Options + dropShadow / innerShadow / outerGlow / innerGlow / bevelEmboss / chromeFX / solidFill / gradientFill / patternFill / frameFX 全部 disabled placeholder
+  3. `ADBE Extrsn Options` → `LIST(tdgp, 5)` — Bevel Direction
+  4. `ADBE Material Options` → `LIST(tdgp, 17/37)` — 见跨版本 diff 下方
+  5. `ADBE Audio Group` → `LIST(tdgp, 3)` — 空
+  6. `ADBE Layer Sets` → `LIST(tdgp, 3)` — 空
+  7. `ADBE Group End` (terminator tdmn)
+- **关键 negative finding**: 当 `shape.addShape()` 被调用但 Root Vectors Group 未追加任何子节点时，**Layr 子树完全不出现 `ADBE Root Vectors Group` 或 `ADBE Vector Materials Group` 的 tdmn**。验证: 在三个 fixture 的整棵 Layr 子树中 grep `566563746f72` (= "Vector") 零命中。空 ShapeLayer 的 binary structure **与一个普通 light/camera 占位层无法区分**，唯一辨识来自 `ldta` 的 layer type 字段。
+- **ldta 尺寸跨版本 diff**:
+  - AE 2020: 160 bytes
+  - AE 2022: 160 bytes (**与 AE 2020 byte-identical**, 整 160B 全等)
+  - AE 2025: 164 bytes (160B 前缀与 2020/2022 全等 + 4 bytes 零填充 @ offset `0xA0..0xA3` = `00 00 00 00`)
+- ldta 关键字段（基于 head 16B + 整段对照已有 `cdta_layout.go` / `aep_test.go` 注释）：
+  - `@0x00` u32 = `0x0000000D` (index = 13, AE 内部为 ShapeLayer 分配的 layer id)
+  - `@0x04` u16 = `0x0002` (layer kind bits — Shape Layer 标识；与 Camera/Light/Null 不同)
+  - `@0x88` u32 LightKind 字段 (Shape 层为 0x00000004 — 但与 LightKind 同 offset 复用，语义视 layer type 而定)
+  - `@0x40` 8B = `53 31 00 00 00 00 00 00` ("S1" + zero pad — ldta-internal 7-bit 名字缓冲，与 Utf8 chunk 重复)
+- **V2.2 escape hatch**: 选 **AE 2020 的 160-byte ldta** 为 minimum canonical baseline。AE 2025 多出的尾 4 字节为常量零填充，length-preserving 写入路径无需感知此差异——只要 `addShape` runtime 路径在生成 ShapeLayer 时按"读到的 ldta size 原样保留"即可向上兼容；AE 2025 字段差**不入 capability matrix**。
+- Classification: [serialization, negative]
+- 影响:
+  - `lower_layer.go` ldta layout: 三版本 160B 前缀完全一致, AE 2025 的 4B 尾部按 ldta size 透传即可
+  - `LayerCreate` 的 Layr LIST 子节点顺序 **freeze 为 4-tuple**: `ldta + Utf8 + LIST(tdgp,15) + LIST(Gide,2)`
+  - 空 ShapeLayer fixture **不需要** 同步预先创建 `ADBE Root Vectors Group` — 只有第一次 `addProperty("ADBE Vector Shape - Rect")` 等 shape contents 操作触发后，AE 才会生成 Vector Materials/Root Vectors Group tdmn 节点（待 RE-S4 实测）
+  - V2.2 layer creation runtime 推 ShapeLayer 时, 可借用 dummy_comp template 的 Camera/Light layer 模板 + 修改 ldta @0x04 layer kind 字段即可（绝大多数 property tree 复用）
+
 (空)
 
 ---
