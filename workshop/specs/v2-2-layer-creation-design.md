@@ -1493,6 +1493,38 @@ Phase 6  Docs sync + ship gate
   - Color cdat 12 float64 (dim=4 + padding) 的精确 component order 待复核 — V2.2 lowering 可先按"4 × float64 BE in 0-255 range, 顺序待定"实现 + 用 typed setter 单元测试 round-trip 验证 AE 行为
   - V2.2 spec §3.6 提案 `StrokeNode Color=[0,0,0,1] black / Width=2 / Opacity=100` defaults 合理（与 base elision 一致）
 
+### RE-S6 finding: PropertyStream 1-keyframe encoding (Layer Position 2D)
+
+- Date: 2026-05-22
+- Source: `tmp_debug/re_v22/kf_1_ae2020.aep` (kind=kf_1) — ShapeLayer + 1 Rect + Layer Position setValueAtTime(0, [960,540])
+- Method: `tmp_debug/dump_kf` (新工具，dump first tdbs→list→{lhd3, ldat}); cross-check 用 V1 既有 `parse_keyframe.go`
+- **lhd3 (52 B)** hex `00d00bee000000000000000100000001000000800000000400000001000000040000000000000000000000000000000000000000`:
+  - `[0x00..0x03]` magic `00d00bee` (BE u32 = 13634542)
+  - `[0x04..0x07]` `00000000` (reserved / 0)
+  - `[0x08..0x0B]` **numKeyframes** = u32 BE = 1 (与 V1 `parse_keyframe.go` 既定 layout 一致)
+  - `[0x0C..0x0F]` `00000001` (常量？; 待跨 fixture 复核)
+  - `[0x10..0x13]` **bytesPerKeyframe (bpk)** = u32 BE = 128 (= 0x80; V1 parser 既定)
+  - `[0x14..0x17]` `00000004` (待解；可能 = dims*2)
+  - `[0x18..0x1B]` `00000001`、`[0x1C..0x1F]` `00000004` (待解；可能 spatial-style flag + bpk re-hint)
+  - `[0x20..0x33]` zeros (padding)
+  - **关键 negative**: TickRate **不在 lhd3**；TickRate 来自 comp's `cdta @0x08` (`parseCtx.tickRate`) — V1 `parseKeyframes` 也是用 ctx.tickRate 推算 time
+- **ldat per-keyframe (bpk=128 B; layout = spatial-style for Position 2D)**:
+  - `[0x00..0x03]` **time** = u32 BE in comp ticks → seconds = ticks / tickRate (验证: kf_1 time=0 → 0/30720 = 0.0s ✓)
+  - `[0x04]` inInterp byte (0x01=linear, 0x02=bezier, 0x03=hold) = `0x01`
+  - `[0x05]` outInterp byte = `0x01`
+  - `[0x06]` flags = `0x00`
+  - `[0x07]` **header07** = `0x07` (spatial-style 标记; layoutFor returns valueOff=0x38, spatialStyle=true)
+  - `[0x08..0x37]` reserved + temporal ease (per V1 parse_keyframe layout):
+    - `[0x18..0x1F]` inSpd (f64 BE) `[0x20..0x27]` inInf
+    - `[0x28..0x2F]` outSpd `[0x30..0x37]` outInf
+  - `[0x38..0x47]` **value** = 2 × f64 BE = (960, 540) ✓ 与 setValueAtTime 输入一致
+  - `[0x48..0x57]` in-spatial-tangent = 2 × f64 BE = (0, 0)
+  - `[0x58..0x67]` out-spatial-tangent = 2 × f64 BE = (0, 0)  
+    - 实测出现 `8000000000000000` (negative-zero) 不是正零 — 不影响数值，但是 byte-for-byte 重写需保留
+  - `[0x68..0x7F]` padding zeros
+- Classification: [serialization encoding] — 与 V1 既有 `parse_keyframe.go` 既定 layout 完全吻合；本 RE 主要作 V2.2 正向 lowering 路径的 freeze
+- 影响: `lower_property_stream.go` lowerVec2Stream 走 spatial-style 编码 (bpk=0x80, header07=0x07, valueOff=0x38)；时间编码用 ctx.tickRate × seconds (V1 `write_keyframe.go` 既有路径)
+
 ---
 
 ## 9. 关联文档
