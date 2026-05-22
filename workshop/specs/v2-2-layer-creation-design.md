@@ -1541,6 +1541,32 @@ Phase 6  Docs sync + ship gate
 - Classification: [serialization encoding]
 - 影响: `lower_property_stream.go` lowerVec2Stream N-keyframe 路径直接 stride freeze；validates RE-S6 layout
 
+### RE-S8 finding: BezierPath tangent encoding format + min vertices
+
+- Date: 2026-05-22
+- Source:
+  - `tmp_debug/re_v22/1path_ae2020.aep` (RE-S5b, kind=1path_4vtx, 4 vertices closed, **tangents = all 0**)
+  - `tmp_debug/re_v22/path_tangent_ae2020.aep` (kind=path_tangent, 4 vertices closed, **tangents = ±10 各方向**)
+- Method: `diff` 两 fixture 的 `dump_root` 输出 + `tmp_debug/dump_ldat_f32` 解码 f32 BE
+- **单一 encoding format 确认 (单格式)**:
+  - 两 fixture **AEP 字节数完全相同** (58299 B) — tangent 字段始终占位 24 B / vertex (6 × f32 BE per vertex)
+  - **lhd3 (52 B) hex 字节完全相同** = `00d00bee000000000000000c00000004000000080000000400000001000000100000000000000000000000000000000000000000` — vertex count (4) / encoding flags 与 tangent 是否为 0 无关
+  - **ldat size 完全相同** = 96 B = 24 × f32 BE = 4 vertices × 6 f32 per vertex
+  - **唯一 byte-level 差异** (`diff *.full.dump` 输出 3 行):
+    - `fdta` (file-level timestamp): irrelevant
+    - **shph (24 B) bbox**: linear `b3de0201_00000000_00000000_42c80000_42c80000_01000000` (bbox `[(0,0)..(100,100)]`) vs tangent `b3de0201_c1200000_c1200000_42dc0000_42dc0000_01000000` (bbox `[(-10,-10)..(110,110)]`) — tangents 扩张 bbox，**bbox 编码受 tangent 影响**
+    - `ldat`: linear case 24 个 f32 = bbox-normalized 0/1；tangent case = bbox-normalized 0.0833 / 0.1667 / 0.8333 / 0.9167 / 1 (验证: anchor_x=0 raw → (0-(-10))/120 = 0.0833 ✓)
+- **决议**: lowerPathStream 用**单一编码格式**，tangent 字段始终 24 B/vertex 写出（即使全 0 也不 omit）。lowerPathStream 必须先 compute bbox = `min/max(vertex, vertex+inTan, vertex+outTan)` 再用 bbox 做坐标归一化（RE-S5b 推断本 RE 双 fixture 确认）。
+- **Min vertices behavior**:
+  - **AE Scripting API 未直接 UI 实证** — `Shape.vertices` Doc 不强制最小数；0 顶点 closed 在 ExtendScript 通常抛错，1 顶点 closed 不渲染但可写入
+  - 已知 V1 `parse_mask.go` 也假设 path stream 至少 2 顶点 (与 mask path 同 schema)
+  - **推荐 runtime invariant**: `PathNode.SetVertices` 校 `len(verts) >= 2`，Closed=true / Closed=false 同。注释成 "API contract, not AE-enforced limit"
+  - 若用户需 1 顶点 path → workaround = SetVertices([{x,y}, {x,y}])
+- Classification: [serialization encoding] + [runtime invariant for SetVertices min check]
+- 影响:
+  - `lower_property_stream.go` lowerPathStream: 单一编码格式 (无 if-linear-omit-tangent 分支)；先 compute bbox over (verts ∪ verts+inTan ∪ verts+outTan)，再归一化 f32 BE
+  - V2.2 spec §3.3 `PathNode.SetVertices`: freeze `len(verts) >= 2` 校验（AE 行为未实证，作 conservative API design）
+
 ---
 
 ## 9. 关联文档
