@@ -2,14 +2,15 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-22 by claude (V2.1 Foundation ship — NewProject + NewComposition + AE 2020/25 ship gates PASS；PASS = **122 / 0 FAIL**)
-**Active focus**: 🟢 V2.1 完工 —— 下个方向 V3 design phase（scene-graph IR / capability matrix / serializer split；详 `workshop/specs/v3-direction.md`） 或 V2.2 (Layer 创建)。等 brainstorm。
+**Last updated**: 2026-05-22 by claude (V2.2 brainstorm 完，spec 已 ship — `workshop/specs/v2-2-layer-creation-design.md`；PASS = **122 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ShapeLayer creation —— dual-track (V2 ship + V3 增量提取)。Brainstorm 完成 (Section 1-6 + 7 个 phase 落地路径 + classification deliverable)。下一步: writing-plans 产 `workshop/plans/v2-2-layer-creation-plan.md` → 执行。
 
 ## Next session 进来先做
 
 1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **122** + `go vet ./...` clean
-2. 看 `workshop/specs/v3-direction.md` 决定下个 phase 走 V3 (scene-graph 重构 brainstorm) 还是 V2.2 (Layer 创建 RE)
-3. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
+2. 看 `workshop/plans/v2-2-layer-creation-plan.md`（若已 ship），按 Phase 0 RE prerequisites 先 unblock 实施
+3. 走 `superpowers:executing-plans` 流程，每 phase 完一段 update board.md 归档
+4. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
 
 ## 永久知识（不要再 RE）
 
@@ -27,6 +28,16 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-22 V2.2 brainstorm 完，spec ship (PASS 不变)
+
+- **Spec**: `workshop/specs/v2-2-layer-creation-design.md` (1213 行；commit `5b5ba6f`)
+- **范围**: ShapeLayer end-to-end — 空 ShapeLayer + Rect/Ellipse/Path/Fill/Stroke 节点 + PropertyStream 静态+keyframe + AE 2020/25 ship gate
+- **架构**: 10 条 Architecture Invariant + 4 条 Serializer Invariant + Capability admission rule（3 条件）+ 5 个 reusable serializer primitive 给 V3 inherit
+- **Classification deliverable**: 17 runtime concepts / 19 serialization artifacts / 5 substrates / 7 capability candidates 显式归类 —— V3 brainstorm 直接 input
+- **Dual-track 战略**（per GPT feedback）: V2 RE/prototyping continues + V3 abstractions 增量提取 from V2 work
+- **3 路 LLM 反馈**绕了 6 轮（每 section 一轮），全部 absorb 进 spec
+- **下一步**: writing-plans 产 `workshop/plans/v2-2-layer-creation-plan.md`，按 7 phase 拆 task 执行
 
 ### 2026-05-22 V2.1 Foundation ship — NewProject + NewComposition (109 → 122 PASS, +13)
 
