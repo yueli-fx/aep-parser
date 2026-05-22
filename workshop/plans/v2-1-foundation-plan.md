@@ -276,7 +276,38 @@ git add test_data/idpc_collision.jsx workshop/plans/v2-1-foundation-plan.md
 git commit -m "re(v2): idpc semantics — use crypto/rand for safety"
 ```
 
-**[finding output slot]** _(populated by engineer after running this Task) — Record dumped bytes, classify monotonic / topology-sensitive / static fields, and decide whether builder needs `updateFdtaOnAppend` step (RE-1) / which idpc length + generation strategy (RE-2) / final idta 84-byte layout (RE-3) / WorkArea sentinel + frame rate canonical table values (RE-4) per task scope above._
+**[finding] — idpc 全 0，不是 UUID；Item 唯一性走 idta @0x14（不是 idpc）**
+
+**Dump（AE 2020 / 2025 共 6 个 comp Item LIST 的 idpc）**：
+
+```
+AE2025 1comp [0]      idpc (8 B) hex=0000000000000000
+AE2025 2comp [0]      idpc (8 B) hex=0000000000000000
+AE2025 2comp [1]      idpc (8 B) hex=0000000000000000
+AE2025 nested folder  idpc (8 B) hex=0000000000000000
+AE2025 nested inside  idpc (8 B) hex=0000000000000000
+AE2020 1comp [0]      idpc (8 B) hex=0000000000000000
+AE2020 2comp [0/1]    idpc (8 B) hex=0000000000000000 (both)
+```
+
+**Key**: 6 different items（含 folder / 1 nested comp）跨 2 个 AE 版本，**全部 idpc = 同 `0000000000000000` 8B**。AE 不写唯一值。
+
+**真正的 per-item ID 在 idta @0x14**（spec 之前已规划，本次 dump 实证）：
+
+```
+AE2025 2comp [0]   idta head: 0004 ... 0014: 00 00 00 01  (ID 1)
+AE2025 2comp [1]   idta head: 0004 ... 0014: 00 00 00 0d  (ID 13)
+AE2025 nested fold idta head: 0001 ... 0014: 00 00 00 01  (ID 1, folder)
+AE2025 nested in   idta head: 0004 ... 0014: 00 00 00 02  (ID 2, comp inside)
+```
+
+idta @0x00 也是 type 区分器：`0x0004` = comp / `0x0001` = folder。这跟 spec 已知一致。
+
+**结论 — idpc 用全零，不用 crypto/rand**：
+- AE 自己写全零 ⇒ AE 接受全零 ⇒ 我们也写全零，跟 AE 行为一致最稳
+- Item 唯一性走 idta @0x14（既有 nextItemID 分配机制覆盖）
+- **Phase 4 Task 4.2 改方案**：`buildCompIdpc` 不引 `crypto/rand`，直接返 8B 零 slice
+- 后续如果 AE 24+ 真把 idpc 当唯一 key（目前实证否），再考虑切 crypto/rand —— 但当前 v2.1 范围内确认全零安全
 
 ---
 
@@ -343,7 +374,42 @@ git add test_data/comp_item_children.golden.txt workshop/plans/v2-1-foundation-p
 git commit -m "re(v2): idta layout + Item children golden fixture"
 ```
 
-**[finding output slot]** _(populated by engineer after running this Task) — Record dumped bytes, classify monotonic / topology-sensitive / static fields, and decide whether builder needs `updateFdtaOnAppend` step (RE-1) / which idpc length + generation strategy (RE-2) / final idta 84-byte layout (RE-3) / WorkArea sentinel + frame rate canonical table values (RE-4) per task scope above._
+**[finding] — idta 84-byte layout 完整 RE'd；template-copy 策略**
+
+**Full hex（AE 2025 1comp ID 1）**：
+
+```
+000400000000000000000000000000000000000100000020
+000000000000000000000000000000000000000000000000
+0000000000000f000000000000000000000000000000000000000000e6355e03
+```
+
+**字节级 layout**：
+
+| Offset | Size | 类型 | 值 / 含义 |
+| --- | --- | --- | --- |
+| `@0x00` | 2 B | uint16 BE | type code; `0x0004` = comp (RE 已知)；`0x0001` = folder (实证 2025 nested folder fixture) |
+| `@0x02..0x13` | 18 B | padding | all 0 |
+| `@0x14` | 4 B | uint32 BE | **Item ID** (builder overwrite 处) |
+| `@0x18` | 4 B | uint32 BE | constant `0x20` = 32（AE 固定，语义未知） |
+| `@0x1C..0x39` | 30 B | padding | all 0 |
+| `@0x3A` | 1 B | uint8 | **label color**（spec 已知；现有 SetLabel 改这里） |
+| `@0x3B` | 1 B | padding | 0 |
+| `@0x3C` | 4 B | uint32 BE | constant `0x0F` = 15（AE 固定，语义未知） |
+| `@0x40..0x4F` | 16 B | padding | all 0 |
+| `@0x50` | 4 B | uint32 BE | **session token**（每 save session 不同；同 session 内多 comp 一致；AE 2020 `e6355e82` vs AE 2025 `e6355e03`） |
+
+**Builder 策略（template-copy）**：
+
+1. 在 `new_composition.go` 声明 `var idtaCompDefaultBytes = [84]byte{ ... }` —— 把 AE 2025 fixture 的 idta 84 字节字面复制
+2. `buildCompIdta(itemID uint32)`:
+   - `data := make([]byte, 84); copy(data, idtaCompDefaultBytes[:])`
+   - `binary.BigEndian.PutUint32(data[0x14:], itemID)` （只 overwrite ID）
+   - label 默认 0；session token 留 template 值（AE 重 save 会自己重写）
+   - return chunk
+3. 其余 75 字节（含 @0x18 = 0x20 和 @0x3C = 0x0F 常量）通过 template copy 一次到位
+
+**Golden fixture 已生成**：`test_data/comp_item_children.golden.txt`（Item LIST 完整 children 顺序 + idta 84B 字节级 layout 注释）。Task 4.7 测试以此对比。
 
 ---
 
@@ -406,7 +472,54 @@ git add workshop/plans/v2-1-foundation-plan.md
 git commit -m "re(v2): WorkArea sentinel + NTSC frame rate canonical table"
 ```
 
-**[finding output slot]** _(populated by engineer after running this Task) — Record dumped bytes, classify monotonic / topology-sensitive / static fields, and decide whether builder needs `updateFdtaOnAppend` step (RE-1) / which idpc length + generation strategy (RE-2) / final idta 84-byte layout (RE-3) / WorkArea sentinel + frame rate canonical table values (RE-4) per task scope above._
+**[finding] — WorkArea sentinel = `0xFFFFFFFF`；NTSC canonical fps table 精确 frac 值**
+
+**WorkArea**（每个 fixture cdta `@0x20..@0x2B` 都一致）：
+
+```
+@0x1C..0x1F: 00 00 00 00          WorkAreaStart dividend  = 0
+@0x20..0x23: 00 00 02 58 (or var)  WorkAreaStart divisor  = 600 (或 30720 with NTSC)
+@0x24..0x27: ff ff ff ff          WorkAreaEnd dividend   = 0xFFFFFFFF ★ SENTINEL
+@0x28..0x2B: 00 00 02 58 (or var)  WorkAreaEnd divisor    = 600
+```
+
+**结论**：AE 新建 comp 默认 WorkAreaEnd = sentinel `0xFFFFFFFF`（含义 "use Duration"）。Builder 写 sentinel + divisor = 600。**spec 之前预设的 sentinel 写法正确，无需改。**
+
+**Frame rate canonical table**（实测 + 数学校验）：
+
+| fps | whole | frac (hex) | frac (decimal) | round-trip 验证 |
+| --- | --- | --- | --- | --- |
+| 24    | 24 | `0x0000` | 0 | 24.000000 |
+| 25    | 25 | `0x0000` | 0 | 25.000000 |
+| 30    | 30 | `0x0000` | 0 | 30.000000 |
+| 50    | 50 | `0x0000` | 0 | 50.000000 |
+| 60    | 60 | `0x0000` | 0 | 60.000000 |
+| **29.97** | 29 | `0xF852` | 63570 | 29 + 63570/65536 = **29.96994** ≈ 29.97 ✓ |
+| **59.94** | 59 | `0xF0A4` | 61604 | 59 + 61604/65536 = **59.94000** ✓ |
+| **23.976** | 23 | `0xF9DA` | 63962 | 23 + 63962/65536 = **23.97601** ≈ 23.976（**数学计算**；本 fixture 无 23.976 comp，但 24000/1001 = 23.97602...，round to nearest 65536 fraction → 0xF9DA） |
+
+**Source data**: `test_data/re_tickrate.aep` 各 fps comp 的 cdta `@0x9C..@0x9F`：
+
+```
+RE_fps_29_97   00 1d f8 52   whole=29 frac=0xF852
+RE_fps_59_94   00 3b f0 a4   whole=59 frac=0xF0A4
+RE_fps_24      00 18 00 00   whole=24 frac=0x0000
+... (etc.)
+```
+
+**Plan Phase 1 Task 1.3 改动**：
+
+`framerate_canonical.go` 的 `ntscCanonical` map 用上面验证过的实际 frac 值：
+
+```go
+var ntscCanonical = map[float64]frameRateEncoding{
+    23.976: {whole: 23, frac: 0xF9DA},  // math-computed; no fixture实证, but tight
+    29.97:  {whole: 29, frac: 0xF852},  // fixture实证 (re_tickrate.aep::RE_fps_29_97)
+    59.94:  {whole: 59, frac: 0xF0A4},  // fixture实证 (re_tickrate.aep::RE_fps_59_94)
+}
+```
+
+**Phase 1 Task 1.4 framerate canonical round-trip test** 的预期值（spec 段已经写对，仅 23.976 的 frac 把 spec 默认值 `0xF9DB` 更新为 `0xF9DA`，差 1 不影响测试 `< 1e-5` 通过）。
 
 ---
 
