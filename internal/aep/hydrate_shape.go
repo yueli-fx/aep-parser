@@ -25,23 +25,39 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-// hydrateShapeNodes walks a parsed Layr LIST and returns the runtime
-// VectorGroup tree (root of the shape graph). Returns nil when the Layr
-// has no "ADBE Root Vectors Group" subtree — caller (WrapShapeLayer)
-// falls back to a fresh empty VectorGroup.
+// hydrateShapeNodes walks a parsed Layr LIST (descending into nested
+// LIST(tdgp) wrappers — V2.2 fix A introduced an outer property-group
+// wrapper between Layr and its property tdmn siblings) and returns the
+// runtime VectorGroup tree. Returns nil when no "ADBE Root Vectors
+// Group" subtree exists; WrapShapeLayer then falls back to a fresh
+// empty VectorGroup.
 func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
-	for i := 0; i+1 < len(layr.Children); i++ {
-		ch := layr.Children[i]
-		if ch.ID != rifx.IDTdmn || trimNUL(ch.Data) != "ADBE Root Vectors Group" {
-			continue
+	var found *VectorGroup
+	var visit func(c *rifx.Chunk)
+	visit = func(c *rifx.Chunk) {
+		if found != nil {
+			return
 		}
-		next := layr.Children[i+1]
-		if !next.IsList() || next.FormType != rifx.IDTdgp {
-			continue
+		kids := c.Children
+		for i := 0; i < len(kids); i++ {
+			ch := kids[i]
+			if ch.ID == rifx.IDTdmn && trimNUL(ch.Data) == "ADBE Root Vectors Group" && i+1 < len(kids) {
+				next := kids[i+1]
+				if next.IsList() && next.FormType == rifx.IDTdgp {
+					found = hydrateVectorGroup(next, ctx)
+					return
+				}
+			}
+			if ch.IsList() {
+				visit(ch)
+				if found != nil {
+					return
+				}
+			}
 		}
-		return hydrateVectorGroup(next, ctx)
 	}
-	return nil
+	visit(layr)
+	return found
 }
 
 // hydrateVectorGroup turns a vector-group tdgp into a runtime VectorGroup.

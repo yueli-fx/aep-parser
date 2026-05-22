@@ -37,6 +37,9 @@ func (p *Project) syncCompositionShapeLayers(c *Composition) error {
 		if l.shapeRootGroup == nil || l.layrList == nil {
 			continue
 		}
+		if !l.shapeDirty {
+			continue // parser-loaded, not user-mutated; on-disk chunks are authoritative
+		}
 		s := WrapShapeLayer(l)
 		ctx := &lowerCtx{
 			tickRate:     c.TickRate,

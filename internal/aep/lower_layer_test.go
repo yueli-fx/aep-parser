@@ -60,19 +60,24 @@ func TestLowerShapeLayer_WithShape_HasRootVectorsGroup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// With a shape: Layr should hold tdmn("ADBE Root Vectors Group") +
-	// LIST(tdgp, root vectors children).
-	foundRoot := false
-	for _, ch := range chunk.Children {
-		if ch.ID == rifx.IDTdmn && len(ch.Data) >= 23 {
-			// "ADBE Root Vectors Group" = 23 ASCII bytes.
-			if string(ch.Data[0:23]) == "ADBE Root Vectors Group" {
-				foundRoot = true
-				break
+	// With a shape: Layr's outer LIST(tdgp) wrapper (fix A) holds
+	// tdmn("ADBE Root Vectors Group") + LIST(tdgp, root vectors children).
+	// Walk descendants — the wrapper depth can change as more
+	// property-group placeholders are added in future ship-gate iters.
+	var walk func(c *rifx.Chunk) bool
+	walk = func(c *rifx.Chunk) bool {
+		for _, ch := range c.Children {
+			if ch.ID == rifx.IDTdmn && len(ch.Data) >= 23 &&
+				string(ch.Data[0:23]) == "ADBE Root Vectors Group" {
+				return true
+			}
+			if ch.IsList() && walk(ch) {
+				return true
 			}
 		}
+		return false
 	}
-	if !foundRoot {
+	if !walk(chunk) {
 		t.Fatal("Layr missing tdmn(ADBE Root Vectors Group) when shape present")
 	}
 }

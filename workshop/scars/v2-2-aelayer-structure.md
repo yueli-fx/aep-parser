@@ -110,11 +110,32 @@ tdum/tduM 估计是 min/max spatial bound（uniform pair? 64-bit float each）�
 
 ## Phase 5 fix order
 
-1. **C 先**（最 local）: tdum/tduM emit。cdat padding 算清楚再写。
-2. **B**: Transform 6-axis schema。先补 RE 一份完整 AE-saved shape layer Transform → 看 Scale 在哪。
-3. **A 最后**（最 invasive）: Layr outer tdgp wrapper。需读 tolerance.aep 完整 outer 子项清单，加 N 个 empty placeholder group。
+**注**: fix A 已落 (commit 见 board)。AE 2025 仍同错 — 单 A 不够。需 + B + C 至少。
 
-每 fix 跑 ship gate 验。预计 5-8 个 commits。
+~~1. **C 先**（最 local）: tdum/tduM emit。cdat padding 算清楚再写。~~
+~~2. **B**: Transform 6-axis schema。~~
+~~3. **A 最后**（最 invasive）: Layr outer tdgp wrapper。~~
+
+修正后顺序（基于 fix A 已落 + AE 仍拒）:
+
+1. **A done** — Layr 外层 LIST(tdgp) wrapper 已加。outer 现含 Root Vectors Group + Transform Group + Group End。Test 全过，AE 仍拒同错。**结论**: wrapper 是结构必需，但 outer 内容还不够。
+2. **下一步候选** (按 AE 错误信号"默认色彩管理无效"猜):
+   - **Layer Styles placeholder**: outer 加 `tdmn(ADBE Layer Styles) + LIST(tdgp, empty with Blend Options + 10 fx/enabled subprops + Group End)`。tolerance dump line 144-211 是完整列表。AE 也许严格要求这个 placeholder。
+   - **Material Options placeholder**: outer 加 `tdmn(ADBE Material Options Group) + LIST(tdgp, 16+ default scalar props)`。tolerance dump line 222-345。
+   - **Extrsn Options / Audio Group / Layer Sets**: 三个 empty placeholder。
+3. **B Transform schema** (6-axis): 单独验。可能 AE 2D 5-stream 也接受（runtime API 角度），但 tolerance 显示 AE 自己存的是 6-axis。先 RE 一个 user-created shape layer Transform（不是 nested，是平 Shape） — 看 AE 存 Scale/Opacity 到哪。
+4. **C tdum/tduM**: 看是否仅 placeholder 不够 / 还得加这些细节。
+
+诊断方法 (token 用完前留): 每次加一组 placeholder → rebuild canonical → AE 试 → 错误变了说明那组是 critical → 继续；错误同说明无关 → revert 那组。
+
+## fix A 实施记 (本 commit)
+
+- `lower_layer.go::lowerShapeLayer`: outer `LIST(tdgp)` wrapper 加，含 tdsb + tdsn("") + (Root Vectors Group / Transform Group pair) + Group End。Layr direct children 现仅 `[ldta, Utf8, outer LIST(tdgp)]`。
+- `hydrate_shape.go::hydrateShapeNodes`: 递归 visit 子树找 Root Vectors Group（不再只看 Layr 直 child）。
+- `types_core.go` + `new_layer.go` + `sync_shape_layers.go`: 加 `Layer.shapeDirty bool`；NewShapeLayer 设 true；syncShapeLayerChunks 只对 dirty layer re-lower（防 parser-loaded layer 被 hydrate-roundtrip 损坏 — hydrate 还没支持 nested VectorGroup 等）。
+- `lower_layer_test.go`: `TestLowerShapeLayer_WithShape_HasRootVectorsGroup` 测改用递归 walk 找 Root Vectors Group tdmn（不再 assume Layr 直 child）。
+
+PASS 173 不变，0 FAIL，vet clean。
 
 ## 永久教训 → CLAUDE.md / scars
 

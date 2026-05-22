@@ -70,6 +70,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	//    (syncShapeLayerChunks) re-lower the runtime tree into this same
 	//    chunk in place before WriteAEP serializes it.
 	base.layrList = layrChunk
+	base.shapeDirty = true // gate for syncShapeLayerChunks
 	c.itemList.Children = append(c.itemList.Children, layrChunk)
 	c.Layers = append(c.Layers, base)
 

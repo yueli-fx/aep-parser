@@ -43,31 +43,42 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 		Data: []byte(s.Name),
 	})
 
-	// Root Vectors Group (only when the runtime carries at least one shape
-	// child — per RE-S1 negative finding, empty ShapeLayer doesn't emit any
-	// "Vector" tdmn at all).
+	// Layer-level property groups live INSIDE an outer LIST(tdgp) — AE
+	// rejects the flat-Layr-children form (Phase 5 ship gate FAIL repro;
+	// scars/v2-2-aelayer-structure.md fix A). Outer body shape per
+	// tolerance.aep:
+	//   tdsb + tdsn("") + (tdmn + LIST(tdgp))* + tdmn("ADBE Group End")
+	//
+	// V2.2 minimum outer body emits: Root Vectors Group (when shapes
+	// present) + Transform Group. Additional layer-property groups AE
+	// emits at default (Layer Styles / Extrsn Options / Material Options
+	// / Audio Group / Layer Sets) get added if AE 2020/25 still rejects.
+	outer := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	outer.Children = append(outer.Children, makeTdsb(), makeTdsn(""))
+
 	if s.shapeRootGroup != nil && len(s.shapeRootGroup.Children) > 0 {
-		layr.Children = append(layr.Children, makeTdmn("ADBE Root Vectors Group"))
+		outer.Children = append(outer.Children, makeTdmn("ADBE Root Vectors Group"))
 		rootGroupTdgp, err := lowerVectorGroup(s.shapeRootGroup, ctx)
 		if err != nil {
 			return nil, err
 		}
-		layr.Children = append(layr.Children, rootGroupTdgp)
+		outer.Children = append(outer.Children, rootGroupTdgp)
 	}
 
-	// Layer Transform Group (V2.2 user-facing 2D form). The lowering
-	// function returns a LIST(tdgp) whose children start with tdmn(name);
-	// we inline so the outer Layr holds `tdmn + LIST(tdgp, body)` as
-	// flat siblings per RE-S1.
 	transformWrapper, err := lowerLayerTransform(s.shapeTransform, ctx)
 	if err != nil {
 		return nil, err
 	}
-	// transformWrapper.Children[0] = tdmn("ADBE Transform Group")
-	// transformWrapper.Children[1..] = the tdgp body chunks (tdsb / tdsn / streams / Group End)
-	layr.Children = append(layr.Children, transformWrapper.Children[0])
+	// transformWrapper.Children[0] = tdmn("ADBE Transform Group");
+	// transformWrapper.Children[1..] = the tdgp body chunks. Append both:
+	// the tdmn becomes the property-group name marker, the second is the
+	// body LIST(tdgp).
+	outer.Children = append(outer.Children, transformWrapper.Children[0])
 	transformBody := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: transformWrapper.Children[1:]}
-	layr.Children = append(layr.Children, transformBody)
+	outer.Children = append(outer.Children, transformBody)
+
+	outer.Children = append(outer.Children, makeTdmn("ADBE Group End"))
+	layr.Children = append(layr.Children, outer)
 
 	return layr, nil
 }

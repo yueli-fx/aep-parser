@@ -466,6 +466,14 @@ type Layer struct {
 	// layers. Same ownership rules as shapeRootGroup.
 	shapeTransform *LayerTransform
 
+	// shapeDirty gates write-time sync (syncShapeLayerChunks). True for
+	// layers built via NewShapeLayer (the lowered chunk is initially a
+	// placeholder; sync must rewrite it with the user's mutations).
+	// False for parser-loaded layers (the on-disk chunks ARE the source
+	// of truth; re-lowering would lose content our hydrators don't yet
+	// understand — nested VectorGroup, ADBE Vector Transform Group, etc).
+	shapeDirty bool
+
 	// btdsChunk is the btds LIST holding the text source bytes
 	// (TextSourceRaw is an alias of this chunk's Data). Length-variable
 	// text writes (per-run setters) update this chunk's Data to point
