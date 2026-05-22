@@ -24,12 +24,12 @@ func (c *Composition) SetBGColor(rgb [3]uint8) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0x37 {
+	if len(c.cdta.Data) < cdtaBGColorB+1 {
 		return fmt.Errorf("comp %q: cdta too short for BGColor write (len=%d)", c.Name, len(c.cdta.Data))
 	}
-	c.cdta.Data[0x34] = rgb[0]
-	c.cdta.Data[0x35] = rgb[1]
-	c.cdta.Data[0x36] = rgb[2]
+	c.cdta.Data[cdtaBGColorR] = rgb[0]
+	c.cdta.Data[cdtaBGColorG] = rgb[1]
+	c.cdta.Data[cdtaBGColorB] = rgb[2]
 	c.BGColor = rgb
 	return nil
 }
@@ -42,14 +42,14 @@ func (c *Composition) SetSize(width, height uint16) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0x90 {
+	if len(c.cdta.Data) < cdtaHeight+2 {
 		return fmt.Errorf("comp %q: cdta too short for Size write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if width == 0 || height == 0 {
 		return fmt.Errorf("comp %q: SetSize requires non-zero width and height (got %dx%d)", c.Name, width, height)
 	}
-	binary.BigEndian.PutUint16(c.cdta.Data[0x8C:0x8E], width)
-	binary.BigEndian.PutUint16(c.cdta.Data[0x8E:0x90], height)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaWidth:cdtaWidth+2], width)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaHeight:cdtaHeight+2], height)
 	c.Width = width
 	c.Height = height
 	return nil
@@ -65,14 +65,14 @@ func (c *Composition) SetResolutionFactor(x, y uint16) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0x04 {
+	if len(c.cdta.Data) < cdtaResolutionFactorY+2 {
 		return fmt.Errorf("comp %q: cdta too short for ResolutionFactor write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if x == 0 || y == 0 {
 		return fmt.Errorf("comp %q: SetResolutionFactor requires non-zero X and Y (got %dx%d)", c.Name, x, y)
 	}
-	binary.BigEndian.PutUint16(c.cdta.Data[0x00:0x02], x)
-	binary.BigEndian.PutUint16(c.cdta.Data[0x02:0x04], y)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaResolutionFactorX:cdtaResolutionFactorX+2], x)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaResolutionFactorY:cdtaResolutionFactorY+2], y)
 	c.ResolutionFactor = [2]uint16{x, y}
 	return nil
 }
@@ -84,10 +84,10 @@ func (c *Composition) SetShutterAngle(degrees uint16) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xB0 {
+	if len(c.cdta.Data) < cdtaShutterAngle+2 {
 		return fmt.Errorf("comp %q: cdta too short for ShutterAngle write (len=%d)", c.Name, len(c.cdta.Data))
 	}
-	binary.BigEndian.PutUint16(c.cdta.Data[0xAE:0xB0], degrees)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaShutterAngle:cdtaShutterAngle+2], degrees)
 	c.ShutterAngle = degrees
 	return nil
 }
@@ -100,10 +100,10 @@ func (c *Composition) SetShutterPhase(phase int32) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xB8 {
+	if len(c.cdta.Data) < cdtaShutterPhase+4 {
 		return fmt.Errorf("comp %q: cdta too short for ShutterPhase write (len=%d)", c.Name, len(c.cdta.Data))
 	}
-	binary.BigEndian.PutUint32(c.cdta.Data[0xB4:0xB8], uint32(phase))
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaShutterPhase:cdtaShutterPhase+4], uint32(phase))
 	c.ShutterPhase = phase
 	return nil
 }
@@ -115,10 +115,10 @@ func (c *Composition) SetMotionBlurAdaptiveSampleLimit(limit int32) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xC8 {
+	if len(c.cdta.Data) < cdtaMotionBlurAdaptive+4 {
 		return fmt.Errorf("comp %q: cdta too short for MotionBlurAdaptiveSampleLimit write (len=%d)", c.Name, len(c.cdta.Data))
 	}
-	binary.BigEndian.PutUint32(c.cdta.Data[0xC4:0xC8], uint32(limit))
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaMotionBlurAdaptive:cdtaMotionBlurAdaptive+4], uint32(limit))
 	c.MotionBlurAdaptiveSampleLimit = limit
 	return nil
 }
@@ -130,10 +130,10 @@ func (c *Composition) SetMotionBlurSamplesPerFrame(n int32) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xCC {
+	if len(c.cdta.Data) < cdtaMotionBlurSamples+4 {
 		return fmt.Errorf("comp %q: cdta too short for MotionBlurSamplesPerFrame write (len=%d)", c.Name, len(c.cdta.Data))
 	}
-	binary.BigEndian.PutUint32(c.cdta.Data[0xC8:0xCC], uint32(n))
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaMotionBlurSamples:cdtaMotionBlurSamples+4], uint32(n))
 	c.MotionBlurSamplesPerFrame = n
 	return nil
 }
@@ -162,7 +162,7 @@ func (c *Composition) SetFrameRate(fps float64) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xA0 {
+	if len(c.cdta.Data) < cdtaFrameRateFrac+2 {
 		return fmt.Errorf("comp %q: cdta too short for FrameRate write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if fps <= 0 {
@@ -170,13 +170,13 @@ func (c *Composition) SetFrameRate(fps float64) error {
 	}
 	whole := uint16(fps)
 	frac := uint16(math.Round((fps - float64(whole)) * 65536.0))
-	binary.BigEndian.PutUint16(c.cdta.Data[0x9C:0x9E], whole)
-	binary.BigEndian.PutUint16(c.cdta.Data[0x9E:0xA0], frac)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaFrameRateWhole:cdtaFrameRateWhole+2], whole)
+	binary.BigEndian.PutUint16(c.cdta.Data[cdtaFrameRateFrac:cdtaFrameRateFrac+2], frac)
 	c.FrameRate = float64(whole) + float64(frac)/65536.0
 	// Frame count at @0xB0 is unchanged; recompute Duration from
 	// frames / new fps.
-	if len(c.cdta.Data) >= 0xB4 && c.FrameRate > 0 {
-		frames := binary.BigEndian.Uint32(c.cdta.Data[0xB0:0xB4])
+	if len(c.cdta.Data) >= cdtaDuration+4 && c.FrameRate > 0 {
+		frames := binary.BigEndian.Uint32(c.cdta.Data[cdtaDuration : cdtaDuration+4])
 		c.Duration = float64(frames) / c.FrameRate
 	}
 	return nil
@@ -190,7 +190,7 @@ func (c *Composition) SetDuration(seconds float64) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xB4 {
+	if len(c.cdta.Data) < cdtaDuration+4 {
 		return fmt.Errorf("comp %q: cdta too short for Duration write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if c.FrameRate <= 0 {
@@ -200,7 +200,7 @@ func (c *Composition) SetDuration(seconds float64) error {
 		return fmt.Errorf("comp %q: Duration %g must be non-negative", c.Name, seconds)
 	}
 	frames := uint32(math.Round(seconds * c.FrameRate))
-	binary.BigEndian.PutUint32(c.cdta.Data[0xB0:0xB4], frames)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaDuration:cdtaDuration+4], frames)
 	c.Duration = float64(frames) / c.FrameRate
 	return nil
 }
@@ -225,12 +225,12 @@ type cdtaFlagBit struct {
 }
 
 var (
-	flagDraft3D                  = cdtaFlagBit{0x8A, 0x01}
-	flagHideShyLayers            = cdtaFlagBit{0x8B, 0x01}
-	flagCompMotionBlur           = cdtaFlagBit{0x8B, 0x08}
-	flagFrameBlending            = cdtaFlagBit{0x8B, 0x10}
-	flagPreserveNestedFrameRate  = cdtaFlagBit{0x8B, 0x20}
-	flagPreserveNestedResolution = cdtaFlagBit{0x8B, 0x80}
+	flagDraft3D                  = cdtaFlagBit{cdtaFlagsByte8A, 0x01}
+	flagHideShyLayers            = cdtaFlagBit{cdtaFlagsByte8B, 0x01}
+	flagCompMotionBlur           = cdtaFlagBit{cdtaFlagsByte8B, 0x08}
+	flagFrameBlending            = cdtaFlagBit{cdtaFlagsByte8B, 0x10}
+	flagPreserveNestedFrameRate  = cdtaFlagBit{cdtaFlagsByte8B, 0x20}
+	flagPreserveNestedResolution = cdtaFlagBit{cdtaFlagsByte8B, 0x80}
 )
 
 // setCdtaFlagBit flips a single cdta flag bit length-preserving.
@@ -299,7 +299,7 @@ func (c *Composition) SetPixelAspect(par float64) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0x98 {
+	if len(c.cdta.Data) < cdtaPixelAspectDen+4 {
 		return fmt.Errorf("comp %q: cdta too short for PixelAspect write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if par <= 0 {
@@ -312,8 +312,8 @@ func (c *Composition) SetPixelAspect(par float64) error {
 		num = uint32(math.Round(par * 100))
 		den = 100
 	}
-	binary.BigEndian.PutUint32(c.cdta.Data[0x90:0x94], num)
-	binary.BigEndian.PutUint32(c.cdta.Data[0x94:0x98], den)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaPixelAspectNum:cdtaPixelAspectNum+4], num)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaPixelAspectDen:cdtaPixelAspectDen+4], den)
 	c.PixelAspect = float64(num) / float64(den)
 	return nil
 }
@@ -334,26 +334,26 @@ func (c *Composition) SetWorkArea(startSeconds, endSeconds float64) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0x2C {
+	if len(c.cdta.Data) < cdtaWorkAreaEndDiv+4 {
 		return fmt.Errorf("comp %q: cdta too short for WorkArea write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if startSeconds < 0 || endSeconds < 0 {
 		return fmt.Errorf("comp %q: WorkArea times must be non-negative (got start=%g end=%g)", c.Name, startSeconds, endSeconds)
 	}
-	startDivisor := binary.BigEndian.Uint32(c.cdta.Data[0x20:0x24])
+	startDivisor := binary.BigEndian.Uint32(c.cdta.Data[cdtaWorkAreaStartDiv : cdtaWorkAreaStartDiv+4])
 	if startDivisor == 0 {
 		startDivisor = 600
 	}
-	endDivisor := binary.BigEndian.Uint32(c.cdta.Data[0x28:0x2C])
+	endDivisor := binary.BigEndian.Uint32(c.cdta.Data[cdtaWorkAreaEndDiv : cdtaWorkAreaEndDiv+4])
 	if endDivisor == 0 {
 		endDivisor = 600
 	}
 	startDividend := uint32(math.Round(startSeconds * float64(startDivisor)))
 	endDividend := uint32(math.Round(endSeconds * float64(endDivisor)))
-	binary.BigEndian.PutUint32(c.cdta.Data[0x1C:0x20], startDividend)
-	binary.BigEndian.PutUint32(c.cdta.Data[0x20:0x24], startDivisor)
-	binary.BigEndian.PutUint32(c.cdta.Data[0x24:0x28], endDividend)
-	binary.BigEndian.PutUint32(c.cdta.Data[0x28:0x2C], endDivisor)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaWorkAreaStart:cdtaWorkAreaStart+4], startDividend)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaWorkAreaStartDiv:cdtaWorkAreaStartDiv+4], startDivisor)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaWorkAreaEnd:cdtaWorkAreaEnd+4], endDividend)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaWorkAreaEndDiv:cdtaWorkAreaEndDiv+4], endDivisor)
 	c.WorkAreaStart = float64(startDividend) / float64(startDivisor)
 	c.WorkAreaEnd = float64(endDividend) / float64(endDivisor)
 	return nil
@@ -376,15 +376,15 @@ func (c *Composition) SetDisplayStartTime(seconds float64) error {
 	if c.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
 	}
-	if len(c.cdta.Data) < 0xAC {
+	if len(c.cdta.Data) < cdtaDisplayStartDiv+4 {
 		return fmt.Errorf("comp %q: cdta too short for DisplayStartTime write (len=%d)", c.Name, len(c.cdta.Data))
 	}
 	if seconds < 0 {
 		return fmt.Errorf("comp %q: DisplayStartTime must be non-negative (got %g)", c.Name, seconds)
 	}
 	if seconds == 0 {
-		binary.BigEndian.PutUint32(c.cdta.Data[0xA4:0xA8], 0)
-		binary.BigEndian.PutUint32(c.cdta.Data[0xA8:0xAC], 0)
+		binary.BigEndian.PutUint32(c.cdta.Data[cdtaDisplayStartTime:cdtaDisplayStartTime+4], 0)
+		binary.BigEndian.PutUint32(c.cdta.Data[cdtaDisplayStartDiv:cdtaDisplayStartDiv+4], 0)
 		c.DisplayStartTime = 0
 		return nil
 	}
@@ -394,8 +394,8 @@ func (c *Composition) SetDisplayStartTime(seconds float64) error {
 	}
 	divisor := uint32(math.Round(tickRate))
 	dividend := uint32(math.Round(seconds * float64(divisor)))
-	binary.BigEndian.PutUint32(c.cdta.Data[0xA4:0xA8], dividend)
-	binary.BigEndian.PutUint32(c.cdta.Data[0xA8:0xAC], divisor)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaDisplayStartTime:cdtaDisplayStartTime+4], dividend)
+	binary.BigEndian.PutUint32(c.cdta.Data[cdtaDisplayStartDiv:cdtaDisplayStartDiv+4], divisor)
 	c.DisplayStartTime = float64(dividend) / float64(divisor)
 	return nil
 }
