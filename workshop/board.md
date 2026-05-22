@@ -2,19 +2,21 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 4 roundtrip + hydration complete — 5 tasks landed; PASS = **172 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ShapeLayer creation — Phase 0-4 全收 ✅。Phase 4 = chunk↔runtime closure (hydrate + write-time sync)。下一步: **Phase 5 — AE 2020/25 ship gate** (verify_v2_2.jsx + Tier 3 preservation) → Phase 6 docs sync (含 Phase 3+4 public API).
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 partial — JSX driver + Go shipgate + Tier 3 preservation test all 落，AE 实跑待你；PASS = **172 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ShapeLayer creation — Phase 0-4 ✅, Phase 5 = AE 实测要你机器跑。**用户行动**: 跑 5.3 + 5.7 见 "Next session" 段。
 
 ## Next session 进来先做
 
 1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **172** + `go vet ./...` clean
-2. **Phase 5 — AE ship gate**（plan lines 3195+；尚未读，先读再动）：
-   - 起点是写 `verify_v2_2.jsx`（仿 V2.1 `verify_v2_1.jsx`）+ 把 canonical 3-layer test 输出的 `.aep` 喂 AE 2020 / 2025 看接受
-   - 预期可能补 byte-layout 漏（plan Phase 2 deferred 段已列 tdb4 0x08/cdat padding/lhd3 0x14..1F 等）
-3. Phase 5 后 Phase 6 — docs sync (Phase 3 + Phase 4 public API 一起补)：
-   - `docs/shape.md` 加 NewShapeLayer + VectorGroup.AddX + PropertyGroup escape hatch β + PropertyStream 创作侧
-   - `coverage.md` / `coverage-detail.md` 收 14 个新 public API 入口
-4. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
+2. **你（用户）的 AE 机器活** — 这部分 Claude 干不了：
+   - **Task 5.3 fixture**: 关 AE → 跑 `tmp_debug/gen_shape_tolerance.jsx` → 等 `test_data/v2_2_shape_tolerance.done` PASS → `test_data/v2_2_shape_tolerance.aep` 出。然后 commit fixture + done file。
+   - **Task 5.7 ship gate AE 2025**: 关 AE → `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` → 看 PASS/FAIL；FAIL 把 `.done` 内容贴回来 debug
+   - **Task 5.7 ship gate AE 2020**: 同上，AE2020 — 关 2025 + 2020 单跑
+3. **5.3 fixture 出后我能续的**:
+   - Task 5.5: `TestV2_2_OpaquePreservation_UnknownChunks` + `Project.RootChunk()` test-only accessor + chunk-signature helper (collect / equal / preserved-kind)
+   - Task 5.6: `TestV2_2_NestedGroup_AEReopens_AE2020/2025` (类似 5.2，独立 JSX 子集)
+4. **Phase 5 ship gate 跑通后** → Phase 6 docs sync (Phase 3+4+5 public API 一起补 — docs/shape.md / coverage.md / coverage-detail.md)
+5. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
 
 ## V2.2 进度地图（本会话快照）
 
@@ -25,7 +27,7 @@
 | 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
 | 3 Public API | ✅ 4/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3 / 3e56a49` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β |
 | 4 Roundtrip | ✅ 5/5 | 167→172 (+5) | (本会话 4 commits + 本 docs commit) | hydrateShapeNodes + write-time sync + canonical 3-layer roundtrip + atomicity ×3 + mutate-existing (skip) |
-| 5 Ship gate | ⏳ 0/8 | target 175+ | — | verify_v2_2.jsx + AE 2020/25 ship gate + Tier 3 preservation |
+| 5 Ship gate | 🟡 3/8 | 172 不变 (skip-default) | `0fb6e9e / 7854dd8 / 6dad000` + 本 docs commit | 5.1 verify_v2_2.jsx / 5.2 Go shipgate skip-default / 5.4 NestedGroup preservation skip-if-missing 全 ✅; 5.3 / 5.6 / 5.7 等用户 AE 机器；5.5 等 5.3 fixture |
 | 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
 
 ## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）
@@ -56,6 +58,17 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-23 V2.2 Phase 5 partial — JSX + Go shipgate + Tier 3 preservation (PASS 不变 172, +2 SKIP)
+
+落 3 个 AE-independent task；剩 5 个 (5.3/5.5/5.6/5.7/5.8) 等用户 AE 机器或依赖 5.3 fixture。
+
+- **Task 5.1 `verify_v2_2.jsx`** (commit `0fb6e9e`): JSX ship gate driver；per-check log；try/catch 包到 .done 必写防 Go 端 timeout-hang。Drives 3 canonical ShapeLayer (A animated / B static / C path)。
+- **Task 5.2 `shape_layer_shipgate_test.go`** (commit `7854dd8`): `TestV2_2_AEShipGate_AE2020/2025`，仿 V2.1 runAEShipGate pattern。AE_SHIP_GATE env gate；CI / no-AE auto SKIP。
+- **Task 5.4 `shape_preservation_test.go`** (commit `6dad000`): `TestV2_2_NestedGroup_Preservation`，skip-if-fixture-missing。Roundtrip 后 layer count / name / ShapePrimitive count unchanged。
+- **`tmp_debug/gen_shape_tolerance.jsx`** (本 commit): Phase 5 Task 5.3 jsx — 用户跑 AE 2025 产 `test_data/v2_2_shape_tolerance.aep` fixture (nested VectorGroup + Rect + Fill)。
+- **下一步 (用户)**: 跑 gen_shape_tolerance.jsx → commit fixture → 跑 ship gate (AE_SHIP_GATE=1)。
+- **下一步 (Claude, 5.3 之后)**: Task 5.5 opaque chunk preservation + Project.RootChunk() + chunk-signature helper；Task 5.6 nested-group AE reopen test。
 
 ### 2026-05-23 V2.2 Phase 4 roundtrip + hydration (167 → 172 PASS, +5)
 
