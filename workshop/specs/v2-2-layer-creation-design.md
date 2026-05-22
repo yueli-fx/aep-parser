@@ -1268,6 +1268,37 @@ Phase 6  Docs sync + ship gate
   - V1 `Layer.SetPosition/SetScale/SetRotation/SetOpacity` 等 API **不能直接复用**在新生成的空 ShapeLayer 上 — 这些 API 默认 Layr-level Transform 含合并的 2D Position 等，但 RE-S2 证伪。需要 (a) 文档警告 或 (b) typed setter 拒绝在空 contents 状态下写入并要求先创建一个 shape。
   - `cdat` 写入需保留 40B / 24B padding 以维持 length-preserving — 仅前 `dim * 8` 字节是有效 value。
 
+### RE-S3 finding: Root Vectors Group (root) defaults (uses 1rect fixture per RE-S1 negative)
+
+- Date: 2026-05-23
+- Source: `tmp_debug/re_v22/1rect_ae2020.aep` (kind=1rect, AE 17.7x45)
+- Method: full dump 文件 `1rect_ae2020.full.dump` 行 42-51 切片到 `tmp_debug/re_v22/1rect_ae2020.contents.dump`。fixture 是 RE-S4 同源生成，单 Rect 在 contents tree。
+- **Note**: RE-S1 已证 empty ShapeLayer 完全无 Vector* tdmn 出现 (negative)；本 RE 改用 1rect fixture 观察 AE 在有 1 个 Rect 时，Root Vectors Group 实际写的子结构。
+- **关键 negative finding**: AE 在添加单 Rect 后**不**新增 "ADBE Vector Materials Group" 或 "ADBE Vector Transform Group" tdmn。整 fixture grep 对应 hex 序列 (`4144424520566563746f72204d6174657269616c73` / `4144424520566563746f72205472616e73666f726d`) 零命中。Plan task 0.4 原假设的 "Materials Group + 子 Transform Group + Anchor/Position/Scale/Rotation/Opacity/Skew/SkewAxis" 完全**未在 binary 出现**。
+- **Layr LIST tdgp 17 children** (vs RE-S1 empty 的 15 children) — 多出的 2 children 是 `tdmn(ADBE Root Vectors Group) + LIST(tdgp, 5)`，插入位置在原 15-child sequence 的最前 (`tdsb + tdsn` 之后，`tdmn(ADBE Transform Group)` 之前)。
+- **Root Vectors Group binary 实测结构**:
+  ```
+  chunk tdmn (40 B) head=4144424520526f6f7420566563746f72   # "ADBE Root Vectors Group"
+  LIST tdgp (5 children)
+    chunk tdsb hex=00000401                                  # subprop flags (与 Layer Transform 的 0x00000001 不同;
+                                                              # 高 byte 0x04 疑为 "shape contents container" flag)
+    chunk tdsn hex=55746638000000062d5f305f2f2d              # Utf8 len=6 "-_0_/-" (沿用 RE-S2 sibling tdsn 同模式)
+    chunk tdmn (40 B) head=4144424520566563746f722053686170   # "ADBE Vector Shape - Rect" (单子节点 Rect)
+    LIST tdgp (3 children)                                    # Rect body (见 RE-S4)
+    chunk tdmn (40 B) head=414442452047726f757020456e640000   # "ADBE Group End" terminator
+  ```
+- **5-child 命名 sub-structure** (含 header + terminator): `tdsb + tdsn + tdmn(子项) + LIST(子项 body) + tdmn(Group End)` —— 与一般 named-property tdgp 同 schema (与 RE-S1 Layer Transform LIST tdgp,15 相比，本处只有 1 个 named property=Rect，所以 child count = 2 header + 1 tdmn + 1 LIST + 1 terminator = 5)。
+- **缺位 children** (Plan task 0.4 原期望但未观察到):
+  - 无 `tdmn "ADBE Vector Group"` (Plan task 0.4 step 1 期望的 root group identifier) — 实际只有 `tdmn "ADBE Root Vectors Group"` 作为 Layr-level sibling，contents container LIST tdgp 内**不再有**任何 group identifier tdmn
+  - 无 `LIST tdgp "ADBE Vectors Group"` (children container — 期望嵌套 LIST 实际不存在；Root Vectors Group LIST tdgp 直接装 shape primitives)
+  - 无 `LIST tdgp "ADBE Vector Transform Group"` (group-level Transform — 完全不在 binary 中)
+  - 无 Anchor Point / Position / Scale / Rotation / Opacity / Skew / Skew Axis 7 个 default-valued sub-property 的 tdmn/tdb4/cdat
+- Classification: [serialization defaults, negative — 缺多个 plan 假定的中间 tdgp 层]
+- 影响:
+  - `lower_shape_node.go` lowerVectorGroup defaults: 不能生成 "ADBE Vector Materials Group" / "ADBE Vector Transform Group" 这两层 — 它们在 AE 默认序列化中**不存在**
+  - V2.2 spec §3 / §4 中 "Vector Materials Group" / "Vector Transform Group" 命名需要 reframe — runtime API 概念可能保留 (用户视角的 "group-level transform")，但 serializer 路径必须按 AE 实测 schema: 单层 Root Vectors Group → 直接装 shape primitives
+  - 若 user runtime 显式给 VectorGroup 加 sub-Transform (e.g. 用户调 `group.Transform().SetScale(...)`)，serializer 才需要追加 "ADBE Vector Transform Group" subtree (length-variable 路径，与 RE-S4 同向：缺位 = default)
+
 ### RE-S4 finding: RectNode defaults (AE 完全 elides default-valued Rect 子属性)
 
 - Date: 2026-05-23
