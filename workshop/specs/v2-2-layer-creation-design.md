@@ -1439,6 +1439,60 @@ Phase 6  Docs sync + ship gate
   - Color 编码同 RE-S5d Stroke Color (12 float64 cdat, dim=4) — 推迟实证
   - V2.2 spec §3.6 defaults table 提案的 Fill default `Color=[1,1,1,1] white` **可能错误** — 待与 boltframe / AE schema 复核 (若实际默认是 [1,0,0,1] 红色则修正)
 
+### RE-S5d finding: StrokeNode defaults + Color/Width/Opacity encoding
+
+- Date: 2026-05-23
+- Source:
+  - `tmp_debug/re_v22/1stroke_ae2020.aep` (kind=1stroke) — base
+  - `tmp_debug/re_v22/1stroke_set_ae2020.aep` (kind=1stroke_set) — Color=[0,0,1,1], Width=5, Opacity=80 setValue
+- Method: `gen_shape_dummy.jsx` _set 分支 + `tmp_debug/dump_cdat_seq`
+- **matchNames 实测** (Stroke addProperty 后 11 children)：
+  - `ADBE Vector Blend Mode` (child[1])
+  - `ADBE Vector Composite Order` (child[2])
+  - `ADBE Vector Stroke Color` (child[3])
+  - `ADBE Vector Stroke Opacity` (child[4])
+  - `ADBE Vector Stroke Width` (child[5])
+  - `ADBE Vector Stroke Line Cap` (child[6])
+  - `ADBE Vector Stroke Line Join` (child[7])
+  - `ADBE Vector Stroke Miter Limit` (child[8])
+  - `ADBE Vector Stroke Dashes` (child[9])
+  - `ADBE Vector Stroke Taper` (child[10])
+  - `ADBE Vector Stroke Wave` (child[11])
+- **Base 默认值情况** (1stroke): Stroke LIST tdgp **9 children** — **不是** 3 child! 与 RE-S4 (Rect) / RE-S5a (Ellipse) 的纯 elision 不同。base 子树为：
+  ```
+  tdsb + tdsn + (3 个 named group tdmn + 3-child empty LIST tdgp) × 3 + Group End
+  ```
+  即 `Dashes` / `Taper` / `Wave` **三个 nested-group sub-properties 即使默认状态也保留 tdmn + 空 LIST tdgp** (3-child header-only group)。这与 scalar/vector default elision **行为不同**。其余 8 个 scalar/vector default sub-properties (Blend Mode / Composite Order / Color / Opacity / Width / Line Cap / Line Join / Miter Limit) 全 elide。
+- **Set 时实测** (1stroke_set): Stroke LIST tdgp **15 children** = base 9 + 6 (3 个新增 named property = Color/Opacity/Width 各 2 children)。Color/Opacity/Width 三个全部持久化成功。
+- **Color encoding** (`ADBE Vector Stroke Color` setValue=[0,0,1,1]):
+  - tdb4 (124B) `db990004000700000002ffff00007800`，@0x03=`04`(dim=4)
+  - cdat **96B** = 12 × float64 BE
+  - 解码: `[255.0, 0, 0, 0, 0, 0, 255.0, 0, 0, 0, 0, 0]` (offsets 0、48 处的 255.0)
+  - hex: `406fe00000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 406fe00000000000 0000000000000000 ...rest zeros`
+  - **关键观察**: setValue input `[R=0,G=0,B=1,A=1]` (0-1 range)。saved 12-float cdat 中前 4 个 (dim=4 part) = `[255, 0, 0, 0]` — 这看似不直接是 RGBA 缩放，但前 4 + 第 7 位 = 255。
+  - **可能 encoding**: 0-255 scaled + component order ≠ RGBA。Hypothesis: AE 实际写 `[A*255, R*255, G*255, B*255]` (ARGB) 对 dim=4 head, 第 7 个 float (offset 48 = 6×8) = 第 2 行起点 = 重复或备用通道。
+  - 验证 ARGB hypothesis: `[A=1, R=0, G=0, B=1] × 255 = [255, 0, 0, 255]` — 但 saved 是 `[255, 0, 0, 0, 0, 0, 255, 0, ...]`, 第 4 位是 0 不是 255 — 不完全匹配
+  - **更精确 layout 待 RE 跟进** (e.g. 加 1stroke_set_red 设 [1,0,0,0.5] 半透明红色对比)
+- **Width encoding** (`ADBE Vector Stroke Width` setValue=5):
+  - tdb4 (124B) `db99000100010000ffffffff00007800`，@0x03=`01`(dim=1)
+  - cdat **40B** = 5 × float64 BE = `[5.0, 0, 0, 0, 0]`
+  - hex 前 8B: `4014000000000000`
+  - tdbs 6 children 含 tdum=0.0 / tduM=100.0
+- **Opacity encoding** (`ADBE Vector Stroke Opacity` setValue=80):
+  - tdb4 (124B) `db99000100010000ffffffff00007800` — 与 Width 同 layout
+  - cdat **40B** = 5 × float64 BE = `[80.0, 0, 0, 0, 0]`
+  - hex 前 8B: `4054000000000000`
+- **其它 Stroke sub-properties 状态** (base 与 _set 同):
+  - Line Cap / Line Join / Miter Limit: 默认 elide (无 tdmn)
+  - Dashes / Taper / Wave: 默认即保留为 3-child empty LIST tdgp (header-only, non-elided container)
+- Classification: [serialization encoding]
+- 影响:
+  - `lower_shape_node.go` lowerStrokeNode：**两种 elision 模式并存**
+    - scalar/vector sub-property: 完全 elide (Rect / Ellipse pattern)
+    - nested-group sub-property (Dashes/Taper/Wave): 始终保留 3-child empty LIST tdgp
+  - Color cdat 12 float64 (dim=4 + padding) 的精确 component order 待复核 — V2.2 lowering 可先按"4 × float64 BE in 0-255 range, 顺序待定"实现 + 用 typed setter 单元测试 round-trip 验证 AE 行为
+  - V2.2 spec §3.6 提案 `StrokeNode Color=[0,0,0,1] black / Width=2 / Opacity=100` defaults 合理（与 base elision 一致）
+
 ---
 
 ## 9. 关联文档
