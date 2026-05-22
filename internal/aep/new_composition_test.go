@@ -3,6 +3,7 @@ package aep_test
 import (
 	"bytes"
 	"math"
+	"strings"
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
@@ -110,4 +111,56 @@ func findCompByName(p *aep.Project, name string) *aep.Composition {
 		}
 	}
 	return nil
+}
+
+func TestNewComposition_RejectsInvalid(t *testing.T) {
+	cases := []struct {
+		name        string
+		fn          func(p *aep.Project) error
+		wantInError string
+	}{
+		{"empty name", func(p *aep.Project) error {
+			_, e := p.NewComposition("", 1920, 1080, 30, 5)
+			return e
+		}, "name cannot be empty"},
+		{"zero width", func(p *aep.Project) error {
+			_, e := p.NewComposition("x", 0, 1080, 30, 5)
+			return e
+		}, "size must be > 0"},
+		{"zero height", func(p *aep.Project) error {
+			_, e := p.NewComposition("x", 1920, 0, 30, 5)
+			return e
+		}, "size must be > 0"},
+		{"zero fps", func(p *aep.Project) error {
+			_, e := p.NewComposition("x", 1920, 1080, 0, 5)
+			return e
+		}, "frame rate must be > 0"},
+		{"negative fps", func(p *aep.Project) error {
+			_, e := p.NewComposition("x", 1920, 1080, -29.97, 5)
+			return e
+		}, "frame rate must be > 0"},
+		{"zero duration", func(p *aep.Project) error {
+			_, e := p.NewComposition("x", 1920, 1080, 30, 0)
+			return e
+		}, "duration must be > 0"},
+		{"negative duration", func(p *aep.Project) error {
+			_, e := p.NewComposition("x", 1920, 1080, 30, -1)
+			return e
+		}, "duration must be > 0"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			p := aep.NewProject()
+			err := tc.fn(p)
+			if err == nil {
+				t.Fatalf("expected error, got nil")
+			}
+			if !strings.Contains(err.Error(), tc.wantInError) {
+				t.Errorf("err = %q, want contains %q", err.Error(), tc.wantInError)
+			}
+			if len(p.Compositions) != 0 {
+				t.Errorf("project polluted on failure: %d comps", len(p.Compositions))
+			}
+		})
+	}
 }
