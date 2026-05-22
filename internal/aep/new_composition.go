@@ -273,3 +273,21 @@ func buildCompItem(itemID uint32, name string, cdta []byte) *rifx.Chunk {
 func isDatsList(c *rifx.Chunk) bool {
 	return c.IsList() && string(c.FormType[:]) == "dats"
 }
+
+// validateNewCompositionInputs returns nil if all inputs are valid, or
+// an error naming the offending field + value.
+func validateNewCompositionInputs(name string, w, h uint16, fps, duration float64) error {
+	if name == "" {
+		return fmt.Errorf("composition name cannot be empty")
+	}
+	if w == 0 || h == 0 {
+		return fmt.Errorf("composition size must be > 0 (got %dx%d)", w, h)
+	}
+	if fps <= 0 {
+		return fmt.Errorf("frame rate must be > 0 (got %g)", fps)
+	}
+	if duration <= 0 {
+		return fmt.Errorf("duration must be > 0 (got %g)", duration)
+	}
+	return nil
+}
