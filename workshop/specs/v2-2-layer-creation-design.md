@@ -248,11 +248,11 @@ type StrokeNode struct {
 
 ### 2.3 Transform：layer-level + group-level
 
-- **Layer-level Transform** (ldta 内): 所有 Layer 共有 — anchor / position / scale / rotation / opacity
-- **Group-level Transform** (tdgp 内 "ADBE Vector Transform Group"): 每个 VectorGroup 自带 — 同 5 字段
+- **Layer-level Transform** (Layr LIST 内 `ADBE Transform Group` tdgp): 所有 Layer 共有内部 6-axis schema — Position_0 / Position_1 / Orientation / RotateX / RotateY / Envir Appear in Reflect (RE-S2). 用户视角的合并 2D Position / Anchor Point / Scale / Rotation / Opacity 在 **空 ShapeLayer 的 Layr-level Transform 子树中并不出现** — they surface via the contents subtree once a Root Vectors Group is attached, or via shape-node transforms (out of V2.2 ship scope).
+- **Group-level Transform**: AE's default serialized form has **no `ADBE Vector Transform Group` tdgp at all** under `ADBE Root Vectors Group` (RE-S3). The runtime `VectorGroup.Transform *PropertyGroup` field exists as escape-hatch surface for hydration of user-created nested Vector Groups (preservation path), but V2.2 lowering does not synthesize one for default groups.
 - **Shape-node-level Transform**: V2.2 不开放（preservation territory 时 parse / write 不破坏）
 
-V2.2 hot path 走 layer-level：`shapeLayer.SetPosition(...)`（V1 既有，通过 embedded `*Layer`）+ typed `shapeLayer.Transform()` (Section 3.3a)。Group-level Transform 内部保留（runtime 默认 identity；serializer 必须写 chunk 否则 AE 拒），**不暴露 typed setter** —— 走 escape hatch β。
+V2.2 hot path 走 layer-level：`shapeLayer.SetPosition(...)`（V1 既有，通过 embedded `*Layer`）+ typed `shapeLayer.Transform()` (Section 3.3a)。Group-level Transform 内部保留为 escape-hatch β surface（runtime 默认 nil — V2.2 lowering 永不为 default group 输出 group Transform tdgp；只有当 hydration 从已存在的 AE 文件读到 group Transform 时才 preserve），**不暴露 typed setter**。
 
 ### 2.4 PropertyStream（含 separated dimensions 预留）
 
@@ -484,19 +484,28 @@ func (pg *PropertyGroup) PathStream(name string)    (*PropertyStream[BezierPath]
 
 V2.3+ 加新 T 时增方法。
 
-### 3.6 Defaults（基于 Phase 1 RE 校准）
+### 3.6 Defaults (frozen per Phase 0 RE)
 
-| 对象 | 字段 | 默认 (provisional, RE confirm 前) |
-|---|---|---|
-| ShapeLayer | InPoint=0 / OutPoint=comp.Duration / 3D=false / Visible=true / BlendingMode=Normal | V1 NewComposition 既有 + RE-S1 |
-| RootGroup | Transform=identity（anchor [0,0], position [0,0], scale [100,100], rotation 0, opacity 100）| RE-S3 |
-| RectNode | Size=[100,100] / Position=[0,0] / Roundness=0 | RE-S4 校准前 provisional |
-| EllipseNode | Size=[100,100] / Position=[0,0] | RE-S5a 校准前 provisional |
-| PathNode | Vertices=empty / Closed=true / Tangents=all 0 | API 要求用户 SetVertices 才能写盘 |
-| FillNode | Color=[1,1,1,1] white / Opacity=100 | RE-S5c |
-| StrokeNode | Color=[0,0,0,1] black / Width=2 / Opacity=100 | RE-S5d |
+**Convention**: AE elides default-valued scalar/vector sub-properties — the runtime carries a canonical default (used for typed setters / `StaticValue()` reads / round-trip equality) and lowering emits zero bytes for that property when it equals the default. Nested-group sub-properties (Stroke Dashes/Taper/Wave) are an exception: AE retains an empty 3-child `tdgp` at default (RE-S5d).
 
-Phase 1 RE 校准前 RectNode/EllipseNode default 不进 user-facing docs。
+| 对象 | 字段 | Runtime default | AE-binary state | Source |
+|---|---|---|---|---|
+| ShapeLayer | InPoint=0 / OutPoint=comp.Duration / 3D=false / Visible=true / BlendingMode=Normal | as listed | Layr LIST = `ldta + Utf8 + LIST(tdgp,15) + LIST(Gide,2)` (no Vector* tdmn) | RE-S1 |
+| ShapeLayer.Transform (Layr-internal, 6-axis) | Position_0=0 / Position_1=0 / Orientation=0 / Rotate X=0 / Rotate Y=0 / Envir Appear in Reflect=1.0 | full 6-axis present even at default | always emitted (15-child tdgp incl. tdsb/tdsn/Group End) | RE-S2 |
+| Root Vectors Group (`ADBE Root Vectors Group`) | empty (no children) | absent | tdmn + LIST(tdgp,5) only appears once first ShapeNode is attached (RE-S3) | RE-S3 |
+| RectNode | Size=[100,100] / Position=[0,0] / Roundness=0 | as listed (runtime defaults; AE ScriptingAPI matches) | AE elides — Rect LIST tdgp = 3-child (tdsb + tdsn + Group End); no Size/Position/Roundness tdmn | RE-S4 |
+| EllipseNode | Size=[100,100] / Position=[0,0] / Direction=1 (CCW) | as listed (runtime defaults) | AE elides — Ellipse LIST tdgp = 3-child; no Direction/Size/Position tdmn | RE-S5a |
+| PathNode | Vertices=empty / Closed=true / Tangents=all 0 | empty runtime; `SetVertices` requires len>=2 (RE-S8) | AE writes om-s/omks/shap/list(lhd3+ldat f32) only after `setValue`; lhd3=52B fixed, ldat stride=24B/vertex; bbox-normalized | RE-S5b / RE-S8 |
+| FillNode | Color=[1,0,0,1] red / Opacity=100 / BlendMode=Normal / CompositeOrder=Above / FillRule=Non-Zero | as listed (RE-S5c hypothesis 3: Color default = red, Opacity=100) | AE elides — Fill LIST tdgp = 3-child; only explicit non-default setValue triggers tdmn (Opacity=75 confirmed; Color setValue=[1,0,0,1] elided ⇒ confirms red default) | RE-S5c |
+| StrokeNode | Color=[0,0,0,1] black / Opacity=100 / Width=2 / LineCap / LineJoin / MiterLimit defaults / Dashes/Taper/Wave empty | as listed | AE partial-elide — Stroke LIST tdgp = 9-child at default (scalar/vector sub-props elide; Dashes/Taper/Wave retain 3-child empty tdgp container); explicit setValue triggers per-property tdmn (RE-S5d Color [0,0,1,1] / Width=5 / Opacity=80 all persisted) | RE-S5d |
+
+**AE elides — runtime default in builder source** (these never appear in AE-saved binary at default; lowering emits zero bytes; runtime holds the value for user-facing reads):
+- Rect.Size / Rect.Position / Rect.Roundness
+- Ellipse.Direction / Ellipse.Size / Ellipse.Position
+- Fill.BlendMode / Fill.CompositeOrder / Fill.FillRule / Fill.Color / Fill.Opacity
+- Stroke.BlendMode / Stroke.CompositeOrder / Stroke.Color / Stroke.Opacity / Stroke.Width / Stroke.LineCap / Stroke.LineJoin / Stroke.MiterLimit (scalar/vector only — Dashes/Taper/Wave nested groups always retained)
+
+`RootGroup` runtime concept maps to AE's `ADBE Root Vectors Group` tdmn + LIST(tdgp,5). It has no group-level Transform tdgp in default-serialized form — there is no `ADBE Vector Transform Group` at all in default binary (RE-S3 confirms this is fictional in V2.2 scope). `VectorGroup.Transform` field remains in runtime as an escape-hatch surface; lowering only emits group-level Transform tdmn when the user explicitly mutates it (out of V2.2 ship scope — preservation path only).
 
 ### 3.7 Mutation atomicity
 
@@ -516,10 +525,11 @@ Phase 1 RE 校准前 RectNode/EllipseNode default 不进 user-facing docs。
 
 | Chunk class | Ownership | 含义 |
 |---|---|---|
-| ldta (Layer header) | **synthesized** | 每次 lowering 重写；defaults from RE |
-| tdgp Transform (layer-level) | **synthesized** | layer Transform group |
-| tdgp Vector Transform (group-level) | **synthesized** | RootGroup Transform group |
-| tdgp Shape contents | **synthesized** | Rect/Ellipse/Path/Fill/Stroke 的 tdgp |
+| ldta (Layer header) | **synthesized** | 每次 lowering 重写；defaults from RE-S1 (160 B canonical) |
+| tdgp `ADBE Transform Group` (layer-level 6-axis; RE-S2) | **synthesized** | layer Transform group — always emitted; 6 named props (Position_0/_1, Orientation, RotateX/Y, Envir Appear) |
+| tdgp `ADBE Root Vectors Group` (RE-S3) | **synthesized** | shape contents root — emitted only when 1+ ShapeNode attached; directly wraps children (no intermediate Vector Materials / Vector Transform containers) |
+| tdgp `ADBE Vector Transform Group` (group-level) | **not emitted in V2.2** | RE-S3 confirms AE default serialization has none; would be length-variable splice if user mutates `group.Transform` via escape hatch β — out of V2.2 ship scope |
+| tdgp Shape contents (Rect/Ellipse/Path/Fill/Stroke) | **synthesized** | per-node bodies with default-elision rules (RE-S4..RE-S5d) |
 | tdb4 / cdat / lhd3 / ldat | **synthesized** | PropertyStream lowering 产物 |
 | FEE / fvdv / fiop / ftts / foac / fiac / fipc / fifl | **cloned substrate** | 来自 2020_dummy_comp.aep |
 | 未识别 tdgp child（plugin / future field） | **preserved** | byte-identical 透传 |
@@ -555,14 +565,22 @@ type lowerCtx struct {
 }
 
 // 输出 LIST(Layr) children 顺序 (per V1 parse_layer + RE-S1 实测 freeze):
-//   ldta (160 B for AE 2020 canonical)
+//   ldta (160 B for AE 2020 canonical; 164 B for AE 2025 with 4B zero tail)
 //   Utf8 (layer name; length-variable)
-//   LIST(tdgp, "ADBE Transform Group")
-//   LIST(tdgp, "ADBE Vector Materials Group")  ← shape contents root
-//   ... 其它 chunks per RE-S1 dump
+//   LIST(tdgp, 15 or 17 children) — outer layer property tdgp:
+//     tdsb + tdsn  (header)
+//     [tdmn("ADBE Root Vectors Group") + LIST(tdgp,5)]  ← only present once a ShapeNode is attached (RE-S3)
+//     tdmn("ADBE Transform Group") + LIST(tdgp,15)      ← 6-axis Layer Transform (RE-S2)
+//     tdmn("ADBE Layer Styles") + LIST(tdgp,25)
+//     tdmn("ADBE Extrsn Options") + LIST(tdgp,5)
+//     tdmn("ADBE Material Options") + LIST(tdgp,17|37)  ← 37 children in AE 2025 (RE-S9, not in capability matrix)
+//     tdmn("ADBE Audio Group") + LIST(tdgp,3)
+//     tdmn("ADBE Layer Sets") + LIST(tdgp,3)
+//     tdmn("ADBE Group End")  (terminator)
+//   LIST(Gide, 2)  (gdta + LIST(list) → lhd3)
 ```
 
-ldta byte layout：复用 V1 `parse_layer.go` offset 注释 + 新建 `ldta_layout.go`（mirror `cdta_layout.go`）。RE-S1 任务包括 dump empty ShapeLayer ldta 默认字节。
+ldta byte layout：复用 V1 `parse_layer.go` offset 注释 + 新建 `ldta_layout.go`（mirror `cdta_layout.go`）。RE-S1 freeze: 160-B canonical (AE 2020/2022 byte-identical; AE 2025 tail 4B zero padding → length-preserving 透传, 不入 capability matrix)。
 
 ### 4.3 Shape node lowering (`lower_shape_node.go`)
 
@@ -570,15 +588,47 @@ ldta byte layout：复用 V1 `parse_layer.go` offset 注释 + 新建 `ldta_layou
 func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error)
 // 返回完整 LIST(tdgp) chunk，children: tdmn + N × lowerPropertyStream(...)
 
-// match-name 表（serializer-only）
+// match-name 表（serializer-only；observed in RE-S3..RE-S5d）
 var shapeMatchNames = map[ShapeNodeKind]string{
-    ShapeKindRect:    "ADBE Vector Shape - Rect",
-    ShapeKindEllipse: "ADBE Vector Shape - Ellipse",
-    ShapeKindPath:    "ADBE Vector Shape - Group",
-    ShapeKindFill:    "ADBE Vector Graphic - Fill",
-    ShapeKindStroke:  "ADBE Vector Graphic - Stroke",
-    ShapeKindGroup:   "ADBE Vector Group",
+    ShapeKindRect:    "ADBE Vector Shape - Rect",      // RE-S4
+    ShapeKindEllipse: "ADBE Vector Shape - Ellipse",   // RE-S5a
+    ShapeKindPath:    "ADBE Vector Shape - Group",     // RE-S5b
+    ShapeKindFill:    "ADBE Vector Graphic - Fill",    // RE-S5c
+    ShapeKindStroke:  "ADBE Vector Graphic - Stroke",  // RE-S5d
+    ShapeKindGroup:   "ADBE Vector Group",             // V2.3+ user-created nested group
     // V2.3+: ...
+}
+
+// Per-node child match-name tables (observed; emitted only when sub-property is non-default)
+var rectChildMatchNames = []string{
+    "ADBE Vector Rect Size",
+    "ADBE Vector Rect Position",
+    "ADBE Vector Rect Roundness",
+}
+var ellipseChildMatchNames = []string{
+    "ADBE Vector Shape Direction",       // RE-S5a: AE-emitted child[1]
+    "ADBE Vector Ellipse Size",          // RE-S5a (dim=2, cdat 80B = 10×f64 BE)
+    "ADBE Vector Ellipse Position",      // RE-S5a (dim=2, cdat 48B = 6×f64 BE; spatial flag bytes differ from Size)
+}
+var fillChildMatchNames = []string{
+    "ADBE Vector Blend Mode",            // RE-S5c child[1]
+    "ADBE Vector Composite Order",       // RE-S5c child[2]
+    "ADBE Vector Fill Rule",             // RE-S5c child[3]
+    "ADBE Vector Fill Color",            // RE-S5c child[4] (dim=4; cdat 96B = 12×f64 BE; component order: same encoding as Stroke Color per RE-S5d — empirical layout pending Phase 2 round-trip test)
+    "ADBE Vector Fill Opacity",          // RE-S5c child[5] (dim=1; cdat 40B)
+}
+var strokeChildMatchNames = []string{
+    "ADBE Vector Blend Mode",            // RE-S5d child[1]
+    "ADBE Vector Composite Order",       // child[2]
+    "ADBE Vector Stroke Color",          // child[3] (dim=4; cdat 96B)
+    "ADBE Vector Stroke Opacity",        // child[4] (dim=1; cdat 40B)
+    "ADBE Vector Stroke Width",          // child[5] (dim=1; cdat 40B)
+    "ADBE Vector Stroke Line Cap",       // child[6]
+    "ADBE Vector Stroke Line Join",      // child[7]
+    "ADBE Vector Stroke Miter Limit",    // child[8]
+    "ADBE Vector Stroke Dashes",         // child[9]  ← nested-group; ALWAYS retain 3-child empty tdgp at default
+    "ADBE Vector Stroke Taper",          // child[10] ← nested-group; default-retained
+    "ADBE Vector Stroke Wave",           // child[11] ← nested-group; default-retained
 }
 
 // 每个 kind 对应 lowering function (switch dispatch)
@@ -590,16 +640,18 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error)
 func lowerVectorGroup(g *VectorGroup, ctx *lowerCtx) (*rifx.Chunk, error)
 ```
 
-**RootGroup Transform 归属**: `lowerVectorGroup` 内部:
-1. lower Transform PropertyGroup → tdgp("ADBE Vector Transform Group")
-2. lower each ShapeNode in Children → tdgp(...)
-3. wrap into outer tdgp("ADBE Vector Group")
+**RootGroup serialization** (RE-S3 freeze): `lowerVectorGroup` for the ShapeLayer's RootGroup emits **a single layer of `ADBE Root Vectors Group` tdmn + LIST(tdgp, N children)**. There is no intermediate `ADBE Vector Materials Group`, no `ADBE Vectors Group` children container, and no `ADBE Vector Transform Group` at default — the plan's earlier assumption of these three intermediate containers was fictional per RE-S3. The Root Vectors Group LIST(tdgp) directly contains:
+1. `tdsb + tdsn` header (Root Vectors Group has `tdsb hex=00000401` — high byte 0x04 distinguishes "shape contents container" from Layer-Transform's 0x01)
+2. For each `ShapeNode` in `g.Children`: `tdmn(<node match-name>) + LIST(<node body>)`
+3. `tdmn("ADBE Group End")` terminator
 
-Escape hatch β 通过 `group.Properties().Child("Transform").Vec2Stream("Position")` 改的 Transform 修改通过 group.Transform PropertyGroup 反映。
+If a user explicitly mutates `group.Transform` (escape hatch β; not exposed via typed setter in V2.2), lowering may need to splice an `ADBE Vector Transform Group` subtree before the geometry children — this is length-variable territory and **out of V2.2 ship scope**. Default groups: do not emit it.
+
+Sub-property emission per node (Inv-4): scalar/vector sub-properties at runtime-default are **elided** (emit zero bytes; Rect/Ellipse/Fill bodies at default = 3-child empty LIST tdgp per RE-S4 / RE-S5a / RE-S5c). Stroke is the exception: scalar/vector sub-properties elide, but the three nested-group sub-properties `Dashes` / `Taper` / `Wave` retain 3-child empty `LIST tdgp` containers even at default (RE-S5d). Stroke default body = 9 children (not 3).
 
 **lowerVectorGroup 递归深度**: V2.2 只支持 depth = 1 (RootGroup → ShapeNode 直接子项)。嵌套 group 是 V2.3 关注点（届时加 maxDepth 防护 + 循环引用检测）。V2.2 hydration 路径可能从 AE 文件遇到嵌套 group (preservation territory) → 标 unsupported nesting 但**不破坏 byte-for-byte preservation**。
 
-**Inv-4 合规**: 每个节点的子属性（Size / Position / Color / ...）都走 `lowerPropertyStream`，不写自己的 chunk 编码逻辑。
+**Inv-4 合规**: 每个节点的子属性（Size / Position / Color / ...）都走 `lowerPropertyStream`，不写自己的 chunk 编码逻辑。Path 是例外 — `ADBE Vector Shape` 不走 tdbs/tdb4/cdat (float64) 路径，而是 `om-s + omks + shap + list(lhd3 + ldat f32 bbox-normalized)` (RE-S5b / RE-S8) — 走专用 `lowerPathStream` (§4.4 PropertyStream lowering 内部分支)。
 
 ### 4.4 PropertyStream lowering (`lower_property_stream.go`) — V3 核心
 
@@ -1041,13 +1093,19 @@ dummy_shape_layer_path_tangent.aep ← RE-S8 expand (tangent vs no-tangent encod
 
 ### 6.4 Bootstrap substrate
 
-| Substrate | 文件 | 用途 |
-|---|---|---|
-| Empty project (AE 2020) | `internal/aep/templates/2020.aep` | V2.1 既有 |
-| Empty project (AE 2025) | `internal/aep/templates/2025.aep` | V2.1 既有；svap/nhed 不同 |
-| Single-comp dummy (AE 2020 minimum) | `internal/aep/templates/2020_dummy_comp.aep` | V2.1 collapsed |
-| Empty ShapeLayer canonical bytes | V2.2 实施期 embed from RE-S1 | `lower_layer.go` 内部 const |
-| Empty VectorGroup Transform 字节 | V2.2 实施期 embed from RE-S3 | `lower_shape_node.go` 内部 const |
+| Substrate | 文件 | 用途 | 来源 |
+|---|---|---|---|
+| Empty project (AE 2020) | `internal/aep/templates/2020.aep` | V2.1 既有 | V2.1 ship gate |
+| Empty project (AE 2025) | `internal/aep/templates/2025.aep` | V2.1 既有；svap/nhed 不同 | V2.1 ship gate |
+| Single-comp dummy (AE 2020 minimum) | `internal/aep/templates/2020_dummy_comp.aep` | V2.1 collapsed canonical seed | V2.1 ship gate |
+| Empty ShapeLayer canonical bytes (Layr LIST = `ldta(160B) + Utf8 + LIST(tdgp,15) + LIST(Gide,2)`) | embedded byte const in `lower_layer.go` | 用作 `lowerShapeLayer` 起点；ldta @0x04 layer-kind = `0x0002` (Shape); Utf8 替换为用户层名 | 提取 from `tmp_debug/re_v22/empty_ae2020.aep` (RE-S1) |
+| Layer Transform group (6-axis canonical: Position_0=0 / Position_1=0 / Orientation=0 / RotateX=0 / RotateY=0 / Envir Appear=1.0) | embedded byte const in `lower_layer.go` | 空 ShapeLayer 强制带的 layer-level Transform tdgp | 提取 from `tmp_debug/re_v22/empty_ae2020.aep` (RE-S2) |
+| Root Vectors Group container bytes (`tdmn("ADBE Root Vectors Group") + LIST(tdgp,5)`) | embedded byte const in `lower_shape_node.go` | 首次 `AddRect/Ellipse/...` 时插入 Layr 子树最前 (tdsb/tdsn 后, Transform Group 前)；LIST(tdgp,5) = `tdsb + tdsn + tdmn(child) + LIST(child body) + tdmn(Group End)` 模板 | 提取 from `tmp_debug/re_v22/1rect_ae2020.aep` (RE-S3) |
+| Empty Rect body (Rect LIST tdgp = 3-child `tdsb + tdsn + Group End`) | embedded byte const in `lower_shape_node.go` | RectNode default 落盘形态 — Size/Position/Roundness 全 elided | 提取 from `tmp_debug/re_v22/1rect_ae2020.aep` (RE-S4) |
+| Empty Ellipse body (Ellipse LIST tdgp = 3-child) | embedded byte const in `lower_shape_node.go` | EllipseNode default 落盘形态 | 提取 from `tmp_debug/re_v22/1ellipse_ae2020.aep` (RE-S5a) |
+| Empty Fill body (Fill LIST tdgp = 3-child) | embedded byte const in `lower_shape_node.go` | FillNode default 落盘形态 | 提取 from `tmp_debug/re_v22/1fill_ae2020.aep` (RE-S5c) |
+| Stroke default body (Stroke LIST tdgp = 9-child, 含 Dashes/Taper/Wave nested empty groups) | embedded byte const in `lower_shape_node.go` | StrokeNode default 落盘形态 — scalar/vector subprops elide, nested groups retained | 提取 from `tmp_debug/re_v22/1stroke_ae2020.aep` (RE-S5d) |
+| Empty PathNode body (`om-s` LIST + tdbs flag-cdat + omks/shap/list(lhd3+ldat) skeleton) | runtime synthesizes on first `SetVertices` (no substrate const — bbox/vertex count varies) | PathNode lowering 用 RE-S5b/RE-S8 freeze 的 layout 直接构造，不 splice 来自 fixture | RE-S5b / RE-S8 schema freeze |
 
 ### 6.4a Unclassified / Pending (RE 期临时区)
 
@@ -1084,7 +1142,7 @@ RE 期间发现但归类未决的 concept / artifact。允许临时驻留，防�
 | Finding | 来源 | 处理 |
 |---|---|---|
 | NTSC `compItem.shutterAngle` ScriptingAPI 返回 stored × 1.2 | V2.1 scar | runtime API 不修补；JSX gate 不校 NTSC shutter |
-| AE drops 0-vertex / 1-vertex Path (推测，待 RE-S8 确认) | RE-S8 任务 | runtime API 拒 (PathNode.SetVertices 校 len >= 2)；待 RE 确认 |
+| AE 行为对 0/1-vertex Path 未直接 UI 实证 (RE-S8 已查 Scripting API doc) | RE-S8 | runtime API: PathNode.SetVertices 校 len>=2 — conservative invariant, not AE-enforced |
 | 同上 V2.2 可能新发现的 quirks | V2.2 RE / ship gate | 单条 finding 一条；scar 段更新 |
 
 ### 6.6a Decision log

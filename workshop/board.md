@@ -2,13 +2,13 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-22 by claude (V2.2 brainstorm 完，spec 已 ship — `workshop/specs/v2-2-layer-creation-design.md`；PASS = **122 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ShapeLayer creation —— dual-track (V2 ship + V3 增量提取)。Brainstorm 完成 (Section 1-6 + 7 个 phase 落地路径 + classification deliverable)。下一步: writing-plans 产 `workshop/plans/v2-2-layer-creation-plan.md` → 执行。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 0 RE 完，spec §3.6/§4/§6.4/§8 freeze；PASS = **122 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ShapeLayer creation Phase 0 已 close (14 fixture / 9 finding RE-S1..S9, spec schema corrections 落)。下一步: Phase 1 runtime types (`ShapeLayer` / `VectorGroup` / `PropertyStream[T]` 落地, PASS ≥ 130 target)。
 
 ## Next session 进来先做
 
 1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **122** + `go vet ./...` clean
-2. 看 `workshop/plans/v2-2-layer-creation-plan.md`（若已 ship），按 Phase 0 RE prerequisites 先 unblock 实施
+2. 按 `workshop/plans/v2-2-layer-creation-plan.md` Phase 1 task 1.x 顺序开搞 runtime types
 3. 走 `superpowers:executing-plans` 流程，每 phase 完一段 update board.md 归档
 4. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
 
@@ -28,6 +28,19 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-23 V2.2 Phase 0 RE 完 (122 PASS 不变)
+
+V2.2 实施前 RE：14 个 fixture (12 AE 2020 + 4 AE 2025) → 9 个 RE finding (RE-S1..S9) 填 spec §8。
+
+- 2 个改变 spec 的大发现:
+  1. matchName "Vector Materials/Vectors/Vector Transform Group" 全是虚构 → 真名 ADBE Root Vectors Group
+  2. AE 默认值 elide — empty shape body = 3-child tdgp (tdsb+tdsn+Group End); cdat 只在 explicit setValue 时出现
+- 其它发现: Path 用 shap/shph/lhd3/ldat 族 (非 cdat float64) + bbox-normalized float32; keyframe lhd3=52B (TickRate 不在 lhd3); Stroke nested-group 子树 (Dashes/Taper/Wave) 即便 default 也保留 3-child tdgp; ldta size 160 (2020/22) vs 164 (2025) — tail 4B 零填充, 不入 capability matrix
+- AECapabilities ship V2.2 时空 struct (7 candidates 全 [no 入 matrix])
+- 工具: gen_shape_dummy.jsx 12 scenarios; dump_root/dump_kf/dump_cdat_seq/dump_ldat_f32/dump_path_bytes 5 RE scaffolds
+- spec §3.6 defaults table + §4.0/4.2/4.3 schema 校准 + §6.4 substrate source attribution 全 freeze (本 task 0.14)
+- next: Phase 1 runtime types (PASS ≥ 130 target)
 
 ### 2026-05-22 V2.2 brainstorm 完，spec ship (PASS 不变)
 
