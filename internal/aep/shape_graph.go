@@ -47,6 +47,45 @@ func NewVectorGroup() *VectorGroup {
 	return &VectorGroup{Transform: newGroupTransform()}
 }
 
+// AddRect appends a default-valued RectNode and returns it. The new node is
+// placed at the top of the render stack (Children[len-1]; spec §3.2).
+func (g *VectorGroup) AddRect() (*RectNode, error) {
+	r := NewRectNode()
+	g.Children = append(g.Children, r)
+	return r, nil
+}
+
+// AddEllipse appends a default-valued EllipseNode and returns it.
+func (g *VectorGroup) AddEllipse() (*EllipseNode, error) {
+	e := NewEllipseNode()
+	g.Children = append(g.Children, e)
+	return e, nil
+}
+
+// AddPath appends an empty (closed) PathNode and returns it. Caller must
+// call SetVertices to give it geometry (min 2 vertices per RE-S8).
+func (g *VectorGroup) AddPath() (*PathNode, error) {
+	p := NewPathNode()
+	g.Children = append(g.Children, p)
+	return p, nil
+}
+
+// AddFill appends a default-valued FillNode (white, 100% opacity) and
+// returns it.
+func (g *VectorGroup) AddFill() (*FillNode, error) {
+	f := NewFillNode()
+	g.Children = append(g.Children, f)
+	return f, nil
+}
+
+// AddStroke appends a default-valued StrokeNode (black, width=2, 100%
+// opacity) and returns it.
+func (g *VectorGroup) AddStroke() (*StrokeNode, error) {
+	s := NewStrokeNode()
+	g.Children = append(g.Children, s)
+	return s, nil
+}
+
 // BezierPath is the runtime geometry object — NOT a serializer encoding
 // mirror. `Vertices` are the path control points; `InTangents` /
 // `OutTangents` are the per-vertex bezier tangent offsets (zero = linear
