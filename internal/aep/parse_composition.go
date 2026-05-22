@@ -88,7 +88,7 @@ func (c *parseCtx) warn(format string, args ...any) {
 //	0xC4–0xC7 : motion_blur_adaptive_sample_limit (int32; AE default 128)                              [py-aep + fixture]
 //	0xC8–0xCB : motion_blur_samples_per_frame (int32; AE default 16)                                   [py-aep + fixture]
 func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]string) (*Composition, error) {
-	comp := &Composition{ID: id, Name: name}
+	comp := &Composition{ID: id, Name: name, itemList: item}
 	if utf8 := item.FindFirst(rifx.IDUtf8); utf8 != nil {
 		comp.nameChunk = utf8
 	}

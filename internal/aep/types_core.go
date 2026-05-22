@@ -258,6 +258,11 @@ type Composition struct {
 	// nameChunk is the comp's Utf8 name chunk (length-variable Set name).
 	nameChunk *rifx.Chunk
 
+	// V2: cached owning Item LIST chunk; populated by parseComposition.
+	// Used by NewComposition (re-parse closed loop) + future structural
+	// mutations. derived cache, never owned (see Invariant #8).
+	itemList *rifx.Chunk
+
 	// Item-level metadata shared with Footage / Folder. Populated by
 	// parseItem from the surrounding Item LIST (cmta child + idta byte).
 	Comment string // Item.comment — AE's project-panel comment column

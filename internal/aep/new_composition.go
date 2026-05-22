@@ -6,10 +6,22 @@
 package aep
 
 import (
+	"bytes"
+	_ "embed"
 	"encoding/binary"
+	"fmt"
 	"math"
+	"sync"
 
 	"github.com/example/aep-parser/internal/rifx"
+)
+
+//go:embed templates/2025_dummy_comp.aep
+var embeddedDummyCompTemplate []byte
+
+var (
+	templateInit           sync.Once
+	templateCompItemChunks []*rifx.Chunk
 )
 
 // buildCompIide 构造 4-byte iide chunk（Item index entry header）。
@@ -146,4 +158,118 @@ func buildEmptyLayrList() *rifx.Chunk {
 		FormType: rifx.IDLayr,
 		Children: nil,
 	}
+}
+
+// ensureTemplateCompItemChunks lazy-init template-copy chunks，即 builder 不合成
+// 但 AE 期望存在的 sibling chunks (dats / cdrp / comr / PRin / DLay 等)。
+// 一次性从 embedded dummy-comp 模板 parse 出 dummy comp 的 Item LIST，剔除
+// builder-managed children (iide/idpc/idta/Utf8/cdta/Layr)，余下 deep-cloned
+// 存到 templateCompItemChunks。
+func ensureTemplateCompItemChunks() {
+	templateInit.Do(func() {
+		p, err := FromReader(bytes.NewReader(embeddedDummyCompTemplate))
+		if err != nil {
+			panic(fmt.Sprintf("aep: corrupt dummy-comp template (build bug): %v", err))
+		}
+		if len(p.Compositions) == 0 {
+			panic("aep: dummy-comp template missing comp (build bug)")
+		}
+		comp := p.Compositions[0]
+		if comp.itemList == nil {
+			panic("aep: parseComposition didn't wire itemList (build bug)")
+		}
+		for _, ch := range comp.itemList.Children {
+			if isBuilderManagedChunk(ch) {
+				continue
+			}
+			templateCompItemChunks = append(templateCompItemChunks, deepCloneChunk(ch))
+		}
+	})
+}
+
+// isBuilderManagedChunk: builder 自己合成的 chunk，不从 template 复制。
+// Builder-managed: iide / idpc / idta / Utf8 / cdta / LIST(Layr)
+// Template-copy:   dats / cdrp / comr / LIST(PRin) / LIST(DLay) / LIST(SLay) 等
+func isBuilderManagedChunk(c *rifx.Chunk) bool {
+	tag := string(c.ID[:])
+	switch tag {
+	case "iide", "idpc", "idta", "Utf8", "cdta":
+		return true
+	}
+	if c.IsList() && c.FormType == rifx.IDLayr {
+		return true
+	}
+	return false
+}
+
+// deepCloneChunk: 递归深拷贝 *rifx.Chunk（防止 NewComposition 间共享 mutation）。
+func deepCloneChunk(c *rifx.Chunk) *rifx.Chunk {
+	clone := &rifx.Chunk{
+		ID:       c.ID,
+		FormType: c.FormType,
+		Data:     append([]byte(nil), c.Data...),
+	}
+	for _, ch := range c.Children {
+		clone.Children = append(clone.Children, deepCloneChunk(ch))
+	}
+	return clone
+}
+
+// buildCompItem 包成完整 LIST formType=Item。
+// Children 顺序（按 AE 2025 saved fixture 实测，见
+// test_data/comp_item_children.golden.txt）：
+//
+//	iide / idpc / idta / Utf8 / LIST(dats) / cdta / cdrp / comr /
+//	LIST(PRin) / LIST(DLay) ... / LIST(Layr)
+//
+// builder-managed: iide / idpc / idta / Utf8 / cdta / Layr (6 chunks)
+// template-copy:   dats / cdrp / comr / PRin / DLay etc.
+//
+// 关键：fixture 中 LIST(dats) 在 cdta 之前；其余 template chunks 在 cdta 之后；
+// LIST(Layr) 永远是最后一个。这个顺序对 AE 重开兼容性很重要。
+func buildCompItem(itemID uint32, name string, cdta []byte) *rifx.Chunk {
+	ensureTemplateCompItemChunks()
+
+	iide := buildCompIide()
+	idpc := buildCompIdpc()
+	idta := buildCompIdta(itemID)
+	utf8 := &rifx.Chunk{
+		ID:   rifx.IDUtf8,
+		Data: []byte(name),
+	}
+	cdtaChunk := &rifx.Chunk{
+		ID:   rifx.IDCdta,
+		Data: cdta,
+	}
+	layrList := buildEmptyLayrList()
+
+	children := []*rifx.Chunk{iide, idpc, idta, utf8}
+
+	// fixture 中 template chunks[0] = LIST(dats)，必须插在 cdta 之前。
+	// 其余 template chunks 全部插到 cdta 之后、Layr 之前。
+	if len(templateCompItemChunks) > 0 && isDatsList(templateCompItemChunks[0]) {
+		children = append(children, deepCloneChunk(templateCompItemChunks[0]))
+		children = append(children, cdtaChunk)
+		for _, tc := range templateCompItemChunks[1:] {
+			children = append(children, deepCloneChunk(tc))
+		}
+	} else {
+		// fallback: dats 不在 [0]，直接 cdta 然后所有 template chunks
+		children = append(children, cdtaChunk)
+		for _, tc := range templateCompItemChunks {
+			children = append(children, deepCloneChunk(tc))
+		}
+	}
+
+	children = append(children, layrList)
+
+	return &rifx.Chunk{
+		ID:       rifx.IDList,
+		FormType: rifx.IDItem,
+		Children: children,
+	}
+}
+
+func isDatsList(c *rifx.Chunk) bool {
+	return c.IsList() && string(c.FormType[:]) == "dats"
 }
