@@ -2,13 +2,13 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 0 RE 完，spec §3.6/§4/§6.4/§8 freeze；PASS = **122 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ShapeLayer creation Phase 0 已 close (14 fixture / 9 finding RE-S1..S9, spec schema corrections 落)。下一步: Phase 1 runtime types (`ShapeLayer` / `VectorGroup` / `PropertyStream[T]` 落地, PASS ≥ 130 target)。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 1 runtime types 落地, ldta_layout + capability_matrix skeleton + PropertyStream[T] + shape graph + ShapeLayer wrapper; PASS = **141 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ShapeLayer creation Phase 1 已 close (5 个新 .go + 3 个 test file, +19 PASS)。下一步: Phase 2 serializer primitives (`lower_property_stream.go` / `lower_shape_node.go` / `lower_layer.go` + rename `lower_item_siblings.go`)。
 
 ## Next session 进来先做
 
-1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **122** + `go vet ./...` clean
-2. 按 `workshop/plans/v2-2-layer-creation-plan.md` Phase 1 task 1.x 顺序开搞 runtime types
+1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **141** + `go vet ./...` clean
+2. 按 `workshop/plans/v2-2-layer-creation-plan.md` Phase 2 task 2.x 顺序开搞 serializer lowering
 3. 走 `superpowers:executing-plans` 流程，每 phase 完一段 update board.md 归档
 4. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
 
@@ -28,6 +28,22 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-23 V2.2 Phase 1 runtime types complete (122 → 141 PASS, +19)
+
+Phase 1 落 spec §2 所有 runtime concept 的 Go 类型骨架。纯类型 + 内部状态机；无 serializer / 无 NewShapeLayer 入口。
+
+- **5 个新文件 + 3 个 test**:
+  - `ldta_layout.go` — ldta offset 常量 (160 AE 2020/22 / 164 AE 2025 zero-pad tail)
+  - `capability_matrix.go` — `AECapabilities` 空 struct + `Capabilities(target)` 纯函数；7 个 RE-S9 候选全不入 matrix (admission rule 不满足)
+  - `property_stream.go` — `PropertyStream[T]` 泛型 + `StreamMode` enum + `StreamKeyframe[T]` (rename 避免跟 V1 非泛型 Keyframe 冲突)；reuse 既有 V1 `TemporalEase`
+  - `shape_graph.go` — `ShapeNodeKind` enum / `ShapeNode` interface / `VectorGroup` / `BezierPath` / 5 个 typed node (Rect/Ellipse/Path/Fill/Stroke) + `PropertyGroup` placeholder
+  - `types_core.go` 追加 — `ShapeLayer` (embed `*Layer`) + `LayerTransform` typed wrapper + 4 shorthand (Position/Scale/Rotation/Opacity)
+- **TDD 全走**: 每个文件先写测试 → 跑见 compile fail → 实现 → PASS。
+- **Defaults 校准 per spec §3.6**: RectNode Size=[100,100] / EllipseNode Size=[100,100] / FillNode Color=[1,1,1,1] white / StrokeNode Color=[0,0,0,1] black + Width=2 / LayerTransform Scale=[100,100] + Opacity=100.
+- **2 个 spec ambiguity 已记**: (1) spec §3.6 表格 FillNode Color 写"[1,0,0,1] red"但 elide 段说 Color 是 elided default，user prompt + plan test 均要求 white — 取 white；(2) plan code 用 `type Keyframe[T]` 名跟 V1 非泛型 `Keyframe` Go 编译冲突，rename `StreamKeyframe[T]`。
+- **commits**: `9ad612b / 63a6f8c / bfc0293 / 40dd34f / e858d29` — 5 个 Phase 1 commits + 本 docs commit
+- **下一步**: Phase 2 serializer primitives (lower_property_stream + lower_shape_node + lower_layer + 5 个 typed lowering function)
 
 ### 2026-05-23 V2.2 Phase 0 RE 完 (122 PASS 不变)
 
