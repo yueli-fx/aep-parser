@@ -2,15 +2,44 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 2 serializer primitives 落地, lower_property_stream + lower_shape_node + lower_layer + lower_item_siblings refactor; PASS = **154 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ShapeLayer creation Phase 2 已 close (4 个新 lower_*.go + 3 个 test file + V2.1 item-siblings rename, +13 PASS)。下一步: Phase 3 public API entry (`new_layer.go` `comp.NewShapeLayer` + AddRect/AddEllipse/AddPath/AddFill/AddStroke + escape hatch)。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 3 public API 3/4 done — NewShapeLayer + AddX × 5 + escape hatch β; PASS = **167 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ShapeLayer creation — Phase 0-2 全收 ✅；Phase 3 已 3/4 done (Tasks 3.1/3.2/3.3 commit `80a5ac5 / 7627204 / 785f6b3`)。下一步: Phase 3.4 收尾 docs commit → Phase 4 roundtrip + hydration → Phase 5 AE ship gate → Phase 6 docs sync.
 
 ## Next session 进来先做
 
-1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **154** + `go vet ./...` clean
-2. 按 `workshop/plans/v2-2-layer-creation-plan.md` Phase 3 task 3.x 顺序开搞 NewShapeLayer + node attachment API
-3. 走 `superpowers:executing-plans` 流程，每 phase 完一段 update board.md 归档
-4. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
+1. 确认 `go test ./internal/aep/... -count=1 -v | grep -c '^--- PASS'` = **167** + `go vet ./...` clean
+2. 走 `superpowers:subagent-driven-development`（本会话用过；plan 推荐路径）
+3. **Phase 3.4 收尾**: 一句 docs commit + Phase 3 done。然后进 **Phase 4 — roundtrip + hydration**：
+   - Task 4.1: `hydrateShapeNodes` (chunk tree → runtime VectorGroup tree)
+   - Task 4.2: `TestV2_2_CanonicalShapeGraph_Roundtrip` (3-layer canonical Go roundtrip)
+   - Task 4.3-4.5: atomicity tests / mutate-existing / collect
+   - 详 `workshop/plans/v2-2-layer-creation-plan.md` lines 2717-3192
+4. Phase 4 闭环跑通后才进 Phase 5 (AE 2020/25 ship gate 实测)
+5. 改 public API 必同步 `docs/`、`coverage.md`、`coverage-detail.md`、本文件最近归档段
+
+## V2.2 进度地图（本会话快照）
+
+| Phase | 状态 | PASS | Commits | 关键产出 |
+|---|---|---|---|---|
+| 0 RE | ✅ 14/14 | 122 不变 | `d78c3af`..`8f35a63` | 9 RE finding (RE-S1..S9) 进 spec §8；schema corrections (matchName 真名 = `ADBE Root Vectors Group`；AE elides defaults；Path 用 om-s/shap/f32 bbox-norm) |
+| 1 Runtime | ✅ 6/6 | 122→141 (+19) | `9ad612b`..`e1ab3a6` | ldta_layout / capability_matrix / PropertyStream[T] / shape_graph (5 typed nodes) / ShapeLayer wrapper |
+| 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
+| 3 Public API | 🟡 3/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β。**Task 3.4 board archive 没写** |
+| 4 Roundtrip | ⏳ 0/5 | target 150+ | — | hydrateShapeNodes + canonical 3-layer roundtrip + atomicity tests |
+| 5 Ship gate | ⏳ 0/8 | target 155+ | — | verify_v2_2.jsx + AE 2020/25 ship gate + Tier 3 preservation |
+| 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
+
+## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）
+
+- ShapeLayer 内容 root matchName = `ADBE Root Vectors Group`（plan 早期写错"Vector Materials Group"等都是虚构）
+- AE 默认值会被 elide — `addProperty()` 无 setValue 时 sub-prop tdmn/cdat 完全不写盘。V2.2 builder 选"always emit"策略；ship gate 验证 AE 接受
+- 嵌套 shape sub-groups (Dashes/Taper/Wave) 即便 default 也保留 3-child empty LIST tdgp — 不同 scalar/vector elision
+- BezierPath 编码: `LIST(om-s)→omks→shap`，shph(24B) + lhd3(52B) + ldat(96B = 24×float32 BE = 4 verts × 6 f32 anchor.xy/in.xy/out.xy)。**bbox-normalized 0..1**，linear 和 tangent 同一格式
+- keyframe lhd3 = 52 B；TickRate 不在 lhd3（来自 cdta @0x08）；numKeyframes @0x08；bytesPerKeyframe @0x10；2D 空间 stride = 128 B
+- ldta 160B AE 2020 / 164B AE 2025 (后 4B 全 0 padding) → escape hatch AE 2020 minimum + length-preserving 跨版本 zero issue
+- AECapabilities ship V2.2 时空 struct — 7 candidates 全 [no入 matrix]（escape hatch single canonical 全覆盖）
+- ShapeLayer Layr 级 Transform Group 是 6-axis form (Position_0/_1, Orientation, RotateX/Y, Envir Appear) — 不是 2D user-facing 5-stream。V2.2 lowering 选 5-stream user-facing form（与 V1 parser convention 一致），与底层 6-axis 差异 Phase 4 roundtrip 校
+- 12 fixtures + 5 RE scaffold tools 留在 `tmp_debug/{re_v22,dump_root,dump_kf,dump_cdat_seq,dump_ldat_f32,dump_path_bytes}`
 
 ## 永久知识（不要再 RE）
 
@@ -28,6 +57,16 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-23 V2.2 Phase 3 public API 3/4 (154 → 167 PASS, +13)
+
+Phase 3 wired 用户可见入口。Tasks 3.1/3.2/3.3 落，3.4 (board archive) 即本段。
+
+- **Task 3.1 `new_layer.go`** (commit `80a5ac5`) — `(c *Composition) NewShapeLayer(name string) (*ShapeLayer, error)`：原子 mutation（empty name → error before any state change；warnings-as-failure rollback per V2.1 pattern）。allocItemID via existing V2.1 helper。lowerCtx 接 c.TickRate / target / nextLayerID。
+- **Task 3.2 VectorGroup.AddX** (commit `7627204`) — 5 个 Add{Rect,Ellipse,Path,Fill,Stroke}：append-to-Children = render-order top（first add = bottom = Children[0]）。
+- **Task 3.3 escape hatch β** (commit `785f6b3`) — `PropertyGroup.{Float64,Vec2,Vec3,Color,Path}Stream(name)` typed accessors + Child(name) 嵌套。每个 ShapeNode 的 Properties() 从 Phase 1 占位 nil 改返实际 PropertyGroup（streams map 持有 typed *PropertyStream[T]）。escape hatch 用 runtime name (`"Size"`, `"Color"`) — 不暴露 AE matchName。
+- **commits**: `80a5ac5` (3.1) / `7627204` (3.2) / `785f6b3` (3.3) / 本 docs commit
+- **下一步**: Phase 4 — roundtrip + hydration (Task 4.1 hydrateShapeNodes + Task 4.2 canonical 3-layer roundtrip + 4.3 atomicity tests + 4.4 mutate-existing + 4.5 collect)
 
 ### 2026-05-23 V2.2 Phase 2 serializer primitives complete (141 → 154 PASS, +13)
 
