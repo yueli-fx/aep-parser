@@ -7,7 +7,14 @@ import (
 	"math"
 	"path/filepath"
 	"strings"
+
+	"github.com/example/aep-parser/internal/rifx"
 )
+
+// chunkIDHead 是 root-level "head" chunk 的 ChunkID。包含 project 级 counter
+// (max item ID + a save-sequence counter)，AE 25 打开时校验 —— 若 counter
+// 低于实际 item IDs，AE 报 "文件数据丢失" (实测 Phase 6 ship gate, 2026-05-22)。
+var chunkIDHead = rifx.ChunkID{'h', 'e', 'a', 'd'}
 
 // WriteAEP serializes the (possibly mutated) project back to RIFX binary
 // form. Sizes are recomputed from the current chunk data, so mutations
@@ -20,7 +27,42 @@ func (p *Project) WriteAEP(w io.Writer) error {
 	if p.root == nil {
 		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
 	}
+	p.syncHeadCounters()
 	return p.root.Write(w)
+}
+
+// syncHeadCounters 把 root head chunk 里的两个 32-bit counter 同步到至少
+// nextItemID。AE 25 用这两个 counter 校验文件完整性 (item ID upper bound);
+// counter < 实际 item ID 触发 "文件数据丢失" 错误。
+//
+// 行为: counter = max(currentValue, nextItemID)。parse-then-write 路径不
+// 破坏既有文件 (existing counter ≥ nextItemID)；NewProject+NewComposition
+// 路径覆盖模板默认 1 → 实际下一个可用 ID。
+//
+// head chunk layout (20 bytes total):
+//
+//	[0..3]   flags/version (opaque)
+//	[4..7]   svap mirror (file UUID prefix)
+//	[8..11]  constant 0x80000000
+//	[12..15] counter A (uint32 BE; ~next item ID)
+//	[16..19] counter B (uint32 BE; ~save-sequence; pattern not fully RE'd
+//	         but ≥ nextItemID empirically opens in AE 25)
+func (p *Project) syncHeadCounters() {
+	if p.root == nil {
+		return
+	}
+	head := p.root.FindFirst(chunkIDHead)
+	if head == nil || len(head.Data) < 20 {
+		return
+	}
+	curA := binary.BigEndian.Uint32(head.Data[12:16])
+	curB := binary.BigEndian.Uint32(head.Data[16:20])
+	if p.nextItemID > curA {
+		binary.BigEndian.PutUint32(head.Data[12:16], p.nextItemID)
+	}
+	if p.nextItemID > curB {
+		binary.BigEndian.PutUint32(head.Data[16:20], p.nextItemID)
+	}
 }
 
 // SetPath updates the footage's source path. The change is propagated to

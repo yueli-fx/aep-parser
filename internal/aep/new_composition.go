@@ -20,8 +20,9 @@ import (
 var embeddedDummyCompTemplate []byte
 
 var (
-	templateInit           sync.Once
-	templateCompItemChunks []*rifx.Chunk
+	templateInit              sync.Once
+	templateCompItemChunks    []*rifx.Chunk
+	templateItemSiblingChunks []*rifx.Chunk // 8 chunks AE 25 expects after each Item in Fold (FEE LIST + fvdv/fiop/ftts/foac/fiac/fipc/fifl)
 )
 
 // buildCompIide 构造 4-byte iide chunk（Item index entry header）。
@@ -95,24 +96,38 @@ func buildCompIdta(itemID uint32) *rifx.Chunk {
 	}
 }
 
-// buildCompCdta 构造 204-byte cdta，5 个必填 + AE 默认值。
-// Frame rate 经 encodeFrameRate 走 NTSC canonical 表（RE-4）。
-// WorkAreaEnd 写 sentinel 0xFFFFFFFF（per RE-4 finding）。
+// buildCompCdta 构造 204-byte cdta。
+// Frame rate 经 encodeFrameRate 走 NTSC canonical 表 (RE-4)。
+// fps-derived timing 字段 (TickRate / mirrors / masterTicks) 经 lookupFpsTiming
+// 查表 —— 这些字段 parser 不读，但 AE 25 打开做时间轴 sanity check 时必读，
+// 全零会让 AE 25 crash (实测 Phase 6 ship gate, 2026-05-22)。
+// WorkAreaEnd 写 sentinel 0xFFFFFFFF (per RE-4 finding)。
 func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	d := make([]byte, cdtaSize)
+
+	timing := lookupFpsTiming(fps)
 
 	// ResolutionFactor @0x00/0x02 default [1,1]
 	binary.BigEndian.PutUint16(d[cdtaResolutionFactorX:cdtaResolutionFactorX+2], 1)
 	binary.BigEndian.PutUint16(d[cdtaResolutionFactorY:cdtaResolutionFactorY+2], 1)
 
-	// TickRate @0x08 — AE 25 新 comp 写 0x400=1024（实测 AE2025 fixture）；fallback safe value
-	binary.BigEndian.PutUint32(d[cdtaTickRate:cdtaTickRate+4], 1024)
+	// fps timing prologue @0x06 / @0x08 / @0x18 / @0x30
+	binary.BigEndian.PutUint16(d[cdtaTicksPerFrame:cdtaTicksPerFrame+2], timing.ticksPerFrame)
+	binary.BigEndian.PutUint32(d[cdtaTickRate:cdtaTickRate+4], timing.tickRate)
+	binary.BigEndian.PutUint32(d[cdtaTickRateMirror18:cdtaTickRateMirror18+4], timing.tickRate)
+	binary.BigEndian.PutUint32(d[cdtaTickRateMirror30:cdtaTickRateMirror30+4], timing.tickRate)
+
+	// TimeBaseDivisor @0x10 — always 600 (matches WorkArea divisor)
+	binary.BigEndian.PutUint32(d[cdtaTimeBaseDivisor:cdtaTimeBaseDivisor+4], 600)
 
 	// WorkArea @0x1C..@0x2B：start=0/600, end=sentinel/600
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaStart:cdtaWorkAreaStart+4], 0)
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaStartDiv:cdtaWorkAreaStartDiv+4], 600)
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaEnd:cdtaWorkAreaEnd+4], 0xFFFFFFFF) // sentinel "use Duration"
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaEndDiv:cdtaWorkAreaEndDiv+4], 600)
+
+	// MasterTicks @0x2C — fps-derived; ticks_per_frame × 5 × fps_nominal_whole
+	binary.BigEndian.PutUint32(d[cdtaMasterTicks:cdtaMasterTicks+4], timing.masterTicks)
 
 	// BGColor @0x34..@0x36 default {0,0,0}（bytes 已 0）
 
@@ -136,9 +151,10 @@ func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	// ShutterAngle @0xAE default 180
 	binary.BigEndian.PutUint16(d[cdtaShutterAngle:cdtaShutterAngle+2], 180)
 
-	// Duration @0xB0 = round(duration_seconds * fps) frames
+	// Duration @0xB0 + mirror @0xB8 (= round(duration_seconds × fps) frames)
 	durationFrames := uint32(math.Round(duration * fps))
 	binary.BigEndian.PutUint32(d[cdtaDuration:cdtaDuration+4], durationFrames)
+	binary.BigEndian.PutUint32(d[cdtaDurationMirror:cdtaDurationMirror+4], durationFrames)
 
 	// ShutterPhase @0xB4 default 0（已是 0）
 
@@ -165,6 +181,10 @@ func buildEmptyLayrList() *rifx.Chunk {
 // 一次性从 embedded dummy-comp 模板 parse 出 dummy comp 的 Item LIST，剔除
 // builder-managed children (iide/idpc/idta/Utf8/cdta/Layr)，余下 deep-cloned
 // 存到 templateCompItemChunks。
+//
+// 同时提取 Item LIST 之后的 8 个 sibling chunks (FEE LIST + 7 small chunks)
+// 存到 templateItemSiblingChunks —— AE 25 要求每个 Item 后面都跟这一组 chunks，
+// 否则报 "文件数据丢失" (实测 Phase 6 ship gate)。
 func ensureTemplateCompItemChunks() {
 	templateInit.Do(func() {
 		p, err := FromReader(bytes.NewReader(embeddedDummyCompTemplate))
@@ -183,6 +203,33 @@ func ensureTemplateCompItemChunks() {
 				continue
 			}
 			templateCompItemChunks = append(templateCompItemChunks, deepCloneChunk(ch))
+		}
+
+		// Walk root → Fold → find Item LIST，提取其后的 8 个 sibling chunks。
+		// dummy_comp.aep Fold layout (10 children): fdta / Item / FEE / fvdv /
+		// fiop / ftts / foac / fiac / fipc / fifl. 跳过 fdta + Item，取剩余 8 个。
+		var foldList *rifx.Chunk
+		for _, ch := range p.root.Children {
+			if ch.IsList() && ch.FormType == rifx.IDFold {
+				foldList = ch
+				break
+			}
+		}
+		if foldList == nil {
+			panic("aep: dummy-comp template missing Fold LIST (build bug)")
+		}
+		seenItem := false
+		for _, ch := range foldList.Children {
+			if !seenItem {
+				if ch.IsList() && ch.FormType == rifx.IDItem {
+					seenItem = true
+				}
+				continue
+			}
+			templateItemSiblingChunks = append(templateItemSiblingChunks, deepCloneChunk(ch))
+		}
+		if len(templateItemSiblingChunks) == 0 {
+			panic("aep: dummy-comp template missing Item sibling chunks (build bug)")
 		}
 	})
 }
@@ -319,8 +366,14 @@ func (p *Project) NewComposition(
 	oldChildLen := len(p.rootFold.Children)
 	oldWarningsLen := len(p.Warnings)
 
-	// 5. Append to rootFold + reparse closed loop
+	// 5. Append to rootFold + reparse closed loop。
+	// AE 25 在 Fold 里要求每个 Item LIST 后面都跟 8 个 sibling chunks
+	// (FEE LIST + fvdv/fiop/ftts/foac/fiac/fipc/fifl) —— 否则报 "文件数据丢失"
+	// (实测 Phase 6 ship gate)。从 dummy_comp 模板 deep-clone。
 	p.rootFold.Children = append(p.rootFold.Children, itemList)
+	for _, sib := range templateItemSiblingChunks {
+		p.rootFold.Children = append(p.rootFold.Children, deepCloneChunk(sib))
+	}
 	comp, err := parseComposition(itemList, id, name, &p.Warnings)
 	if err != nil {
 		// Rollback

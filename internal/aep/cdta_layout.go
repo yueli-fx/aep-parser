@@ -10,11 +10,16 @@ package aep
 const (
 	cdtaResolutionFactorX  = 0x00 // uint16 BE
 	cdtaResolutionFactorY  = 0x02 // uint16 BE
-	cdtaTickRate           = 0x08 // uint32 BE
+	cdtaTicksPerFrame      = 0x06 // uint16 BE — fps-derived (1024 for 24/25/30; 512 for 50/60; 800 for 29.97; 400 for 59.94)
+	cdtaTickRate           = 0x08 // uint32 BE — ticks_per_frame × fps
+	cdtaTimeBaseDivisor    = 0x10 // uint32 BE — always 600 (matches WorkArea divisor)
+	cdtaTickRateMirror18   = 0x18 // uint32 BE — mirror of cdtaTickRate
 	cdtaWorkAreaStart      = 0x1C // uint32 BE dividend
 	cdtaWorkAreaStartDiv   = 0x20 // uint32 BE divisor
 	cdtaWorkAreaEnd        = 0x24 // uint32 BE dividend; 0xFFFFFFFF = sentinel
 	cdtaWorkAreaEndDiv     = 0x28 // uint32 BE divisor
+	cdtaMasterTicks        = 0x2C // uint32 BE — ticks_per_frame × 5 × fps_nominal_whole
+	cdtaTickRateMirror30   = 0x30 // uint32 BE — mirror of cdtaTickRate
 	cdtaBGColorR           = 0x34 // uint8
 	cdtaBGColorG           = 0x35 // uint8
 	cdtaBGColorB           = 0x36 // uint8
@@ -31,6 +36,7 @@ const (
 	cdtaShutterAngle       = 0xAE // uint16 BE
 	cdtaDuration           = 0xB0 // uint32 BE frames
 	cdtaShutterPhase       = 0xB4 // int32 BE
+	cdtaDurationMirror     = 0xB8 // uint32 BE — mirror of cdtaDuration
 	cdtaMotionBlurAdaptive = 0xC4 // int32 BE
 	cdtaMotionBlurSamples  = 0xC8 // int32 BE
 	cdtaSize               = 0xCC // 总长 = 204
