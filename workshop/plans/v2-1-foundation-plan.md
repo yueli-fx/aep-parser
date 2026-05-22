@@ -188,7 +188,42 @@ git add tmp_debug/dump_fdta test_data/fdta_probe_AE*.jsx test_data/fdta_probe/ w
 git commit -m "re(v2): dump fdta semantics across AE 2020/2025 × 5 topologies"
 ```
 
-**[finding output slot]** _(populated by engineer after running this Task) — Record dumped bytes, classify monotonic / topology-sensitive / static fields, and decide whether builder needs `updateFdtaOnAppend` step (RE-1) / which idpc length + generation strategy (RE-2) / final idta 84-byte layout (RE-3) / WorkArea sentinel + frame rate canonical table values (RE-4) per task scope above._
+**[finding] — fdta 完全无害，builder 不需要 updateFdtaOnAppend**
+
+**Dump 矩阵**（14B fdta hex；2 AE 版本 × 5 拓扑 = 10 行 + 3 baseline templates）：
+
+```
+=== baseline templates (saved by AE during normal use) ===
+templates/2020.aep   00 00 00 00 00 00 00 00 00 00 f4 22 00 00
+templates/2022.aep   00 00 00 00 00 00 00 00 00 00 da 00 00 00
+templates/2025.aep   00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+=== AE 2020 probe (5 topologies; all identical to each other) ===
+empty / 1comp / 2comp / 1comp_after_delete / nested
+                      00 00 00 00 00 00 00 00 00 00 62 b0 00 00
+
+=== AE 2025 probe (5 topologies; all identical, match template) ===
+empty / 1comp / 2comp / 1comp_after_delete / nested
+                      00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
+
+**字节级分类**：
+
+| 范围 | 跨拓扑 | 跨版本 | 跨 session | 解释 |
+| --- | --- | --- | --- | --- |
+| @0x00..@0x09 (10B) | 不变 | 不变 | 不变 | reserved padding |
+| @0x0A..@0x0B (2B) | **不变** | 不同（2020 `f4 22` 或 `62 b0` / 2022 `da 00` / 2025 `00 00`） | **不同**（template 2020 `f4 22` vs probe 2020 `62 b0`） | opaque session-state token |
+| @0x0C..@0x0D (2B) | 不变 | 不变 | 不变 | reserved padding |
+
+**关键**：
+1. 同 AE 版本下 fdta 100% 静态 — empty / 1 comp / 2 comp / delete / nested 全 byte-identical
+2. `@0x0A..@0x0B` 不是 child count / next-id / topology pointer，是跨 session 漂移的 opaque marker
+3. AE 2025 干脆全写零，证明语义上 AE 自己也不依赖
+
+**结论 — builder 不动 fdta**：
+- 嵌入 template 的 fdta 字节原样保留
+- NewComposition append 新 Item 后**不**重写 fdta
+- 不追加 `updateFdtaOnAppend` 子任务，Phase 4/5 不受影响
 
 ---
 
