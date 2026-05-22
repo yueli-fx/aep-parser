@@ -38,10 +38,16 @@ const (
 
 // Item idta byte offsets (84 bytes total).
 // Full layout RE'd in workshop/plans/v2-1-foundation-plan.md RE-3 finding.
-// Builder strategy: template-copy 84B + overwrite @0x14 (Item ID).
+// Builder strategy: template-copy 84B + overwrite @0x10 (Item ID).
+//
+// NOTE: Item ID offset is @0x10 (verified by parse.classifyItem reading
+// idta.U32(16) + AE2025_1comp.aep/AE2025_2comp.aep fixture dumps showing
+// IDs 1 and 13 at offset 0x10..0x13). Earlier comment said @0x14 — that
+// was a documentation error; the constant was declared but unused until
+// now, so no behavior change.
 const (
 	idtaTypeCode = 0x00 // uint16 BE; 0x04 = Composition / 0x01 = Folder
-	idtaItemID   = 0x14 // uint32 BE; per-item ID
+	idtaItemID   = 0x10 // uint32 BE; per-item ID
 	idtaLabel    = 0x3A // uint8; label color index 0..16 (0 = none)
 	idtaSize     = 84
 )
