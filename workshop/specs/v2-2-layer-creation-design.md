@@ -1356,6 +1356,55 @@ Phase 6  Docs sync + ship gate
 - Classification: [serialization encoding]
 - 影响: `lower_shape_node.go` lowerEllipseNode 编码路径 (length-variable 当任一 sub-property 显式被 set 时)
 
+### RE-S5b finding: PathNode + BezierPath linear encoding
+
+- Date: 2026-05-23
+- Source: `tmp_debug/re_v22/1path_ae2020.aep` (kind=1path_4vtx, AE 17.7x45)
+- Method: ExtendScript `new Shape()` 4 顶点 closed 全 0 tangent → AE 保存；dump 工具 `tmp_debug/dump_cdat_seq` + 一次性 `tmp_debug/dump_path_bytes` + `tmp_debug/dump_ldat_f32` (本 RE 内 ad-hoc, 已 add)
+- **Path 节点 binary 实测结构** (`ADBE Vector Shape - Group` LIST tdgp 5 children):
+  ```
+  chunk tdsb hex=00000001
+  chunk tdsn hex=5574663800000008e8b7afe5be842031   # Utf8 len=8 "路径 1"
+  chunk tdmn name="ADBE Vector Shape"
+  LIST om-s (2 children)
+    LIST tdbs (4 children: tdsb + tdsn + tdb4 + cdat)
+      tdb4 (124B) dim@03=1 head=db990001000700010002000700007800
+      cdat (4B) hex=00000000              # 仅 4 字节, 非 float64
+    LIST omks (1 child)
+      LIST shap (3 children)
+        chunk shph (24B)                  # path header + bbox
+        LIST list (2 children: lhd3 + ldat)
+          lhd3 (52B)
+          ldat (96B)
+        chunk omtn (0B)
+  chunk tdmn name="ADBE Group End"
+  ```
+- **关键 negative finding**: `ADBE Vector Shape` 不走 tdbs/tdb4/cdat (float64) 路径，而是 `om-s` LIST 包裹 — 与 Mask path encoding 同 schema (`parse_mask.go` 注释)。tdbs sibling 内的 `cdat` 仅 **4B = `00000000`**，看似是 enable/flag byte 而非数值，与 RE-S2 cdat 40B/24B 完全不同 layout。
+- **shph (24B header)** `b3de0201_00000000_00000000_42c80000_42c80000_01000000`:
+  - bytes 0-1: `b3de` magic
+  - bytes 2-3: `0201` flags (lowest bit = closed?；high byte 02 待 RE-S8)
+  - bytes 4-11: 0 (likely bbox min = [0,0] in f32 BE)
+  - bytes 12-15: `42c80000` = float32 BE = 100.0 (bbox max x)
+  - bytes 16-19: `42c80000` = 100.0 (bbox max y)
+  - bytes 20-23: `01000000` (trailer flag)
+- **lhd3 (52B header)** `00d00bee_00000000_0000000c_00000004_00000008_00000004_00000001_00000010_00000000 ...`:
+  - bytes 0-3: `00d00bee` magic
+  - bytes 8-11: u32 BE = 12 (待解；可能是 "stride bytes" 或 "value count")
+  - bytes 12-15: u32 BE = 4 = **vertex count**
+  - bytes 16-19: u32 BE = 8
+  - bytes 20-23: u32 BE = 4
+  - bytes 24-27: u32 BE = 1 (closed?)
+- **ldat (96B)** = 24 × float32 BE = **4 vertices × 6 f32 each** (与 `parse_mask.go` "3 consecutive float32 X/Y pairs: anchor, in-tangent, out-tangent" 一致)。**关键 negative**: 解码后值非 raw `[0,0],[100,0],[100,100],[0,100]`，而是 **bbox-normalized** 0/1 pattern：
+  - vert 0: f32[0..5] = `(0, 0, 0, 0, 1, 0)` — anchor=(0,0) in=(0,0) out=(1,0)?
+  - vert 1: f32[6..11] = `(1, 0, 1, 0, 1, 1)` — anchor=(1,0) out shifts
+  - vert 2: f32[12..17] = `(1, 1, 1, 1, 0, 1)`
+  - vert 3: f32[18..23] = `(0, 1, 0, 1, 0, 0)`
+  - 注意：tangent 全 0 input 但 f32 解码出现 1.0 — 待 RE-S8 (tangent vs no-tangent) 联合复核才能精准 attribute 每个 f32 slot 的语义；本 RE 仅记观察。
+- **Per-vertex stride**: 24B (6 × f32)。对 zero-tangent case：tangent bytes **不被 omit**, 占用完整 stride (但写的 1.0 而非 0.0 — 待 RE-S8 决议是否 normalization 副产物)
+- Classification: [serialization encoding]
+- 影响: `lower_property_stream.go` lowerPathStream encoding (linear case) 需走 om-s + omks + shap + list(lhd3 + ldat f32) 路径，不复用 tdbs/cdat float64 path
+- 待 RE-S8 决议: tangent vs no-tangent 是否同一 encoding format / ldat f32 值是否 bbox-normalized 还是 raw coords / lhd3 头部各 u32 字段语义
+
 ---
 
 ## 9. 关联文档
