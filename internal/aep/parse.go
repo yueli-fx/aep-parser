@@ -72,7 +72,47 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 	if err := walk(root); err != nil {
 		return nil, err
 	}
+	proj.initDerived(root)
 	return proj, nil
+}
+
+// initDerived 在 parseProject 收尾时调用，初始化 Project 的 derived state：
+//   - nextItemID = max(已有所有 item IDs) + 1（monotonic counter for NewComposition）
+//   - rootFold = root Egg! 下第一个 formType=Fold 的 LIST（cached for V2 mutations）
+//
+// 参数 rifxRoot 是 parseProject 顶层 *rifx.Chunk（formType=Egg!）。
+func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
+	var maxID uint32
+	for _, c := range p.Compositions {
+		if c.ID > maxID {
+			maxID = c.ID
+		}
+	}
+	for _, f := range p.Footage {
+		if f.ID > maxID {
+			maxID = f.ID
+		}
+	}
+	for _, fo := range p.Folders {
+		if fo.ID > maxID {
+			maxID = fo.ID
+		}
+	}
+	p.nextItemID = maxID + 1
+
+	for _, c := range rifxRoot.Children {
+		if c.IsList() && c.FormType == rifx.IDFold {
+			p.rootFold = c
+			break
+		}
+	}
+}
+
+// allocItemID 返回下一个可用 Item ID 并递增计数器。Monotonic，不 reuse（见 Invariant #9）。
+func (p *Project) allocItemID() uint32 {
+	id := p.nextItemID
+	p.nextItemID++
+	return id
 }
 
 // parseItem classifies an Item list and dispatches to the right handler.
