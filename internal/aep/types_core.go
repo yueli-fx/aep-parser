@@ -100,6 +100,10 @@ type Project struct {
 	// (0=8 / 1=16 / 2=32). SetBitsPerChannel writes both for consistency.
 	nhedChunk *rifx.Chunk
 	nnhdChunk *rifx.Chunk
+
+	// V2: derived state for structural mutation (NewComposition / 未来 NewFootage etc.)
+	nextItemID uint32      // monotonic Item ID counter; never reused (see Invariants #9)
+	rootFold   *rifx.Chunk // cached root Fold LIST reference; derived cache, never owned (see Invariants #8)
 }
 
 // CompositionByID returns the first composition whose ID matches id, or
