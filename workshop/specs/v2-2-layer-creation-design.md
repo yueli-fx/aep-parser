@@ -1405,6 +1405,40 @@ Phase 6  Docs sync + ship gate
 - 影响: `lower_property_stream.go` lowerPathStream encoding (linear case) 需走 om-s + omks + shap + list(lhd3 + ldat f32) 路径，不复用 tdbs/cdat float64 path
 - 待 RE-S8 决议: tangent vs no-tangent 是否同一 encoding format / ldat f32 值是否 bbox-normalized 还是 raw coords / lhd3 头部各 u32 字段语义
 
+### RE-S5c finding: FillNode defaults + Color/Opacity encoding (Color setValue silent fail)
+
+- Date: 2026-05-23
+- Source:
+  - `tmp_debug/re_v22/1fill_ae2020.aep` (kind=1fill) — base
+  - `tmp_debug/re_v22/1fill_set_ae2020.aep` (kind=1fill_set) — Color=[1,0,0,1], Opacity=75 setValue
+- Method: `gen_shape_dummy.jsx` _set 分支 + `tmp_debug/dump_cdat_seq`
+- **matchNames 实测** (Fill addProperty 后 5 children)：
+  - `ADBE Vector Blend Mode` (child[1])
+  - `ADBE Vector Composite Order` (child[2])
+  - `ADBE Vector Fill Rule` (child[3])
+  - `ADBE Vector Fill Color` (child[4])
+  - `ADBE Vector Fill Opacity` (child[5])
+- **Base 默认值情况** (1fill): Fill LIST tdgp **3 children** — elision 与 RE-S4 / RE-S5a 一致
+- **Set 时实测** (1fill_set): Fill LIST tdgp **5 children**：
+  - 只有 `ADBE Vector Fill Opacity` 子属性出现 (Opacity=75 持久化成功)
+  - **`ADBE Vector Fill Color` 设置静默失败** — `setValue([1,0,0,1])` 调用成功 (script log 显示 "set Color [1,0,0,1]")，但 binary fixture 中**无 `ADBE Vector Fill Color` tdmn**。
+  - **possible causes**:
+    1. ExtendScript Color setValue 在 AE 17.7 期望 0-1 范围但格式不对（无 error throw）
+    2. AE 当 setValue 等于 default 值时 elide（但 [1,0,0,1] != default white [1,1,1,1]）
+    3. Fill default Color 实际是 red [1,0,0]，setValue 与 default 一致触发 elision
+  - 优先猜测 (3) — 见 Stroke (RE-S5d) Color 持久化成功且 setValue [0,0,1] 与 default black 不同
+- **Opacity encoding** (`ADBE Vector Fill Opacity` setValue=75):
+  - tdb4 (124B) `db99000100010000ffffffff00007800`，@0x03=`01`(dim=1)
+  - cdat **40B** = 5 × float64 BE = `[75.0, 0, 0, 0, 0]`
+  - hex 前 8B: `4052c00000000000`
+  - tdbs sibling 含 tdum=`00000000_00000000` (0.0) / tduM=`4059000000000000` (100.0) hint range
+- **Color encoding**: 本 RE 未能观察 (setValue 未持久化)；推迟到下一轮 RE w/ setValue=非 default 颜色 (e.g. [0.5, 0.5, 0.5, 1]) 或参考 RE-S5d Stroke Color
+- Classification: [serialization encoding]
+- 影响:
+  - `lower_shape_node.go` lowerFillNode + Opacity 走标准 tdbs/tdb4/cdat float64 path
+  - Color 编码同 RE-S5d Stroke Color (12 float64 cdat, dim=4) — 推迟实证
+  - V2.2 spec §3.6 defaults table 提案的 Fill default `Color=[1,1,1,1] white` **可能错误** — 待与 boltframe / AE schema 复核 (若实际默认是 [1,0,0,1] 红色则修正)
+
 ---
 
 ## 9. 关联文档
