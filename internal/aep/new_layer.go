@@ -66,6 +66,10 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	oldWarningsLen := len(c.proj.Warnings)
 
 	// 4. Commit: append Layr to itemList + base layer to typed index.
+	//    base.layrList back-ref lets the write-time sync pass
+	//    (syncShapeLayerChunks) re-lower the runtime tree into this same
+	//    chunk in place before WriteAEP serializes it.
+	base.layrList = layrChunk
 	c.itemList.Children = append(c.itemList.Children, layrChunk)
 	c.Layers = append(c.Layers, base)
 

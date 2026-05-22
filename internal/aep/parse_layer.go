@@ -202,6 +202,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 		layer.Type = LayerTypeShape
 		layer.ShapePaths = collectShapePaths(layr)
 		layer.ShapePrimitives = collectShapePrimitives(layr, ctx)
+		layer.shapeRootGroup = hydrateShapeNodes(layr, ctx)
 	}
 	return layer, nil
 }

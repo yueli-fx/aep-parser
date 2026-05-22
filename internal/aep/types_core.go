@@ -455,6 +455,17 @@ type Layer struct {
 	// has to insert a fresh cmta chunk (no existing one to mutate).
 	layrList *rifx.Chunk
 
+	// shapeRootGroup is the runtime VectorGroup tree for LayerTypeShape
+	// layers. Populated by parseLayer (via hydrateShapeNodes) when a Layr
+	// is parsed; lazily initialized by WrapShapeLayer on first wrap of a
+	// freshly-built layer. The wrapper does NOT own this — mutations
+	// persist across wrap calls and feed the Phase 4 write-time sync.
+	shapeRootGroup *VectorGroup
+
+	// shapeTransform is the runtime Layer-level Transform for shape
+	// layers. Same ownership rules as shapeRootGroup.
+	shapeTransform *LayerTransform
+
 	// btdsChunk is the btds LIST holding the text source bytes
 	// (TextSourceRaw is an alias of this chunk's Data). Length-variable
 	// text writes (per-run setters) update this chunk's Data to point
@@ -723,41 +734,43 @@ type Keyframe struct {
 // (Inv-1). Lowering (Phase 2 `lower_layer.go`) consumes the runtime tree
 // and produces chunks; hydration rebuilds the runtime tree from chunks.
 type ShapeLayer struct {
-	*Layer                    // embed: V1 setters/getters continue to work
-	rootGroup *VectorGroup    // default empty group (spec §3.2)
-	transform *LayerTransform // typed Layer-level Transform (spec §3.3a)
+	*Layer // embed: V1 setters/getters + private shape state live here
 }
 
 // WrapShapeLayer wraps a parsed/created *Layer as a ShapeLayer. Caller is
 // responsible for ensuring layer.Type == LayerTypeShape (matches V1 contract
-// pattern: typed wrappers trust the caller).
+// pattern: typed wrappers trust the caller). Lazily initializes the
+// runtime shape state on the Layer itself so all wrappers of the same
+// Layer share the same state — the wrapper is a thin façade.
 func WrapShapeLayer(layer *Layer) *ShapeLayer {
-	return &ShapeLayer{
-		Layer:     layer,
-		rootGroup: NewVectorGroup(),
-		transform: newLayerTransform(),
+	if layer.shapeRootGroup == nil {
+		layer.shapeRootGroup = NewVectorGroup()
 	}
+	if layer.shapeTransform == nil {
+		layer.shapeTransform = newLayerTransform()
+	}
+	return &ShapeLayer{Layer: layer}
 }
 
 // RootGroup returns the default RootGroup. Newly attached nodes go to the
 // end of `RootGroup().Children` (top of render stack; spec §3.2).
-func (s *ShapeLayer) RootGroup() *VectorGroup { return s.rootGroup }
+func (s *ShapeLayer) RootGroup() *VectorGroup { return s.shapeRootGroup }
 
 // Transform returns the typed Layer-level Transform surface (spec §3.3a).
-func (s *ShapeLayer) Transform() *LayerTransform { return s.transform }
+func (s *ShapeLayer) Transform() *LayerTransform { return s.shapeTransform }
 
 // Position is shorthand for s.Transform().Position(). V2.2 ShapeLayer is
 // 2D-only (3D ShapeLayer = V2.3+); returns the 2D stream.
-func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.transform.position }
+func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.shapeTransform.position }
 
 // Scale is shorthand for s.Transform().Scale().
-func (s *ShapeLayer) Scale() *PropertyStream[[2]float64] { return s.transform.scale }
+func (s *ShapeLayer) Scale() *PropertyStream[[2]float64] { return s.shapeTransform.scale }
 
 // Rotation is shorthand for s.Transform().Rotation().
-func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.transform.rotation }
+func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.shapeTransform.rotation }
 
 // Opacity is shorthand for s.Transform().Opacity().
-func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.transform.opacity }
+func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeTransform.opacity }
 
 // LayerTransform is the typed wrapper for a layer's Transform property
 // group (spec §3.3a). V2.2 ShapeLayer is 2D, so Position / Scale /

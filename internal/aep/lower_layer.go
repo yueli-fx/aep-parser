@@ -46,9 +46,9 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// Root Vectors Group (only when the runtime carries at least one shape
 	// child — per RE-S1 negative finding, empty ShapeLayer doesn't emit any
 	// "Vector" tdmn at all).
-	if s.rootGroup != nil && len(s.rootGroup.Children) > 0 {
+	if s.shapeRootGroup != nil && len(s.shapeRootGroup.Children) > 0 {
 		layr.Children = append(layr.Children, makeTdmn("ADBE Root Vectors Group"))
-		rootGroupTdgp, err := lowerVectorGroup(s.rootGroup, ctx)
+		rootGroupTdgp, err := lowerVectorGroup(s.shapeRootGroup, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +59,7 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// function returns a LIST(tdgp) whose children start with tdmn(name);
 	// we inline so the outer Layr holds `tdmn + LIST(tdgp, body)` as
 	// flat siblings per RE-S1.
-	transformWrapper, err := lowerLayerTransform(s.transform, ctx)
+	transformWrapper, err := lowerLayerTransform(s.shapeTransform, ctx)
 	if err != nil {
 		return nil, err
 	}
