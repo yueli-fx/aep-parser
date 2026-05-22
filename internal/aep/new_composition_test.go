@@ -2,9 +2,14 @@ package aep_test
 
 import (
 	"bytes"
+	"fmt"
 	"math"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	aep "github.com/example/aep-parser/internal/aep"
 )
@@ -212,4 +217,102 @@ func TestNewComposition_EmptyLayrListPreserved(t *testing.T) {
 			t.Errorf("post-rt EmptyL has %d layers, want 0", len(recomp.Layers))
 		}
 	}
+}
+
+// runAEShipGate 是 AE ship gate 共享 helper：
+//   1. NewProject(target) + 2 个 NewComposition + WriteAEP → tempDir/v2_1.aep
+//   2. 写 args.json 到固定路径
+//   3. AfterFX -r verify_v2_1.jsx
+//   4. 等 .done with timeout
+//   5. 读结果 assert PASS
+//
+// 由 AE_SHIP_GATE env var gate（CI 无 AE 自动跳过）。
+func runAEShipGate(t *testing.T, target aep.AETarget, aeExe string) {
+	t.Helper()
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+
+	tempDir := t.TempDir()
+	inputAEP := filepath.Join(tempDir, "v2_1_test.aep")
+	resavedAEP := filepath.Join(tempDir, "v2_1_test.resaved.aep")
+	doneFile := filepath.Join(tempDir, "v2_1_test.done")
+	// args.json 路径必须跟 verify_v2_1.jsx 里 hardcoded 路径一致
+	argsPath := `e:/projects/tools/aep-parser/test_data/v2_1_args.json`
+
+	// 1. 构造 + write
+	p := aep.NewProject(target)
+	main, err := p.NewComposition("Main", 1920, 1080, 29.97, 10)
+	if err != nil {
+		t.Fatalf("NewComposition Main: %v", err)
+	}
+	if err := main.SetBGColor([3]uint8{20, 30, 40}); err != nil {
+		t.Fatalf("SetBGColor: %v", err)
+	}
+	if _, err := p.NewComposition("BG_loop", 1920, 1080, 30, 5); err != nil {
+		t.Fatalf("NewComposition BG_loop: %v", err)
+	}
+	out, err := os.Create(inputAEP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.WriteAEP(out); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	out.Close()
+
+	// 2. args.json (forward-slash for AE 兼容)
+	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
+		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
+	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(argsPath)
+	os.Remove(doneFile) // 防上轮残留
+
+	// 3. AfterFX -r
+	jsxPath := `E:/projects/tools/aep-parser/test_data/verify_v2_1.jsx`
+	cmd := exec.Command(aeExe, "-r", jsxPath)
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("start AE: %v", err)
+	}
+
+	// 4. wait for .done (90s timeout — AE cold start may take ~60s)
+	deadline := time.Now().Add(90 * time.Second)
+	for {
+		if _, err := os.Stat(doneFile); err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("timeout waiting for %s (90s)", doneFile)
+		}
+		time.Sleep(2 * time.Second)
+	}
+
+	// 5. read + assert PASS
+	content, err := os.ReadFile(doneFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.SplitN(string(content), "\n", 2)
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) != "PASS" {
+		t.Errorf("ship gate FAIL:\n%s", string(content))
+	}
+}
+
+func TestV2_1_AEShipGate_AE2025(t *testing.T) {
+	aeExe := os.Getenv("AE2025_EXE")
+	if aeExe == "" {
+		aeExe = `E:/adobe/Adobe After Effects 2025/Support Files/AfterFX.exe`
+	}
+	runAEShipGate(t, aep.TargetAE2025, aeExe)
+}
+
+func TestV2_1_AEShipGate_AE2020(t *testing.T) {
+	aeExe := os.Getenv("AE2020_EXE")
+	if aeExe == "" {
+		aeExe = `E:/adobe/Adobe After Effects 2020/Support Files/AfterFX.exe`
+	}
+	runAEShipGate(t, aep.TargetAE2020, aeExe)
 }
