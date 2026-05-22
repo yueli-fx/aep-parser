@@ -52,7 +52,43 @@
         marker.write(log.join("\n"));
         marker.close();
     });
+
+    // ⚠️ 必须！tear down 否则 AE 留 "未保存改动" 状态，下次任何操作弹框
+    // 烦死人 + 阻塞 unattended ship-gate run。顺序：先 close 再 quit。
+    // 各裹 try/catch 防 quit 路径失败影响 .done 写入。
+    try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); } catch (e) {}
+    try { app.quit(); } catch (e) {}
 })();
+```
+
+## AE 退出不弹框（关键陷阱）
+
+`AfterFX.exe -r foo.jsx` 跑完 JSX 后 AE **不会自动退**。如果 JSX 用 `app.open(...)`
+打开过文件 / 用 `app.newProject()` 起新 project，AE 会觉得 "用户打开了东西可能
+要保存"，留在 GUI 等待。下次任何启动 / 用户切换/ 关 AE 都弹 "save changes?" 框。
+对自动化是阻塞的（Go 端 ship-gate 没法 unattended 跑）；对人是骚扰（必须手点
+"不保存"）。
+
+**修法**：JSX 末尾（写完 .done 后）显式两步收尾，**顺序不能反**：
+
+```js
+try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); } catch (e) {}
+try { app.quit(); } catch (e) {}
+```
+
+- `app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES)` — 丢弃任何"未保存"状态，
+  这样 `app.quit()` 不弹框
+- 顺序反了 `app.quit()` 先发现 project 脏 → 弹框
+- 两步都裹 try/catch 防异常吞掉 .done 写入（.done 必须在 close/quit 之前完成）
+- pre-clean（开头那段 `app.project.close + app.newProject`）防 -r 多轮残留，
+  end-cleanup 防遗害下次 launch — **两段都要**
+
+验证（确认 AE 真退）:
+
+```bash
+AE_SHIP_GATE=1 go test ... # 或 RE 命令
+sleep 3
+tasklist 2>/dev/null | grep -i afterfx  # 应该返空
 ```
 
 ## 执行 + 等待 marker
