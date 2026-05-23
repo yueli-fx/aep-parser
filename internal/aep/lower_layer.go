@@ -211,61 +211,128 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	return d
 }
 
-// lowerLayerTransform emits the Layer Transform Group LIST(tdgp). V2.2
-// emits user-facing 2D form (5 streams: Anchor / Position / Scale /
-// Rotate Z / Opacity) — matches V1 parser convention. The 6-axis schema
-// observed in RE-S2 is AE's internal 3D-compatible form; runtime users
-// drive 2D, lowering writes 2D.
+// lowerLayerTransform emits the Layer Transform Group LIST(tdgp) using the
+// ShapeLayer-canonical 6-axis schema (per iter 2 RE of tolerance.aep —
+// scars/v2-2-aelayer-structure.md "iter 2 新 RE 发现"):
 //
-// Structure per RE-S1: LIST(tdgp) holding tdsb + tdsn + N × (tdmn +
-// LIST(tdbs, sub-stream)) + tdmn(Group End). Same shape as Vector Group
-// — handled via direct child append (the typed lowering funcs return
-// LIST(tdgp) wrappers with tdmn as child[0]; we inline).
+//   - ADBE Anchor Point         (2-vec, always emit, runtime t.anchorPoint)
+//   - ADBE Position_0           (1-d, t.position[0] / X-axis projection)
+//   - ADBE Position_1           (1-d, t.position[1] / Y-axis projection)
+//   - ADBE Scale                (2-vec, always emit, runtime t.scale)
+//   - ADBE Rotate Z             (1-d, runtime t.rotation)
+//   - ADBE Opacity              (1-d, runtime t.opacity)
+//   - ADBE Orientation          (3-vec via otst wrapper, default [0,0,0])
+//   - ADBE Rotate X             (1-d, default 0)
+//   - ADBE Rotate Y             (1-d, default 0)
+//   - ADBE Envir Appear in Reflect (1-d, default 100)
+//
+// V2.2 over-emit strategy: even default-valued streams get emitted. AE's
+// own elide-default convention is more compact, but AE accepts non-elided
+// form. If AE rejects, iter 4 may need selective emit (PropertyStream Mode
+// Unset state). Position is split into Position_0/Position_1 because
+// tolerance.aep does NOT contain a combined "ADBE Position" on ShapeLayer.
 func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) {
 	tdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	tdgp.Children = append(tdgp.Children, makeTdsb(), makeTdsn("Transform"))
 
-	type stream2D struct {
-		ps        *PropertyStream[[2]float64]
+	posX, posY := splitVec2Stream(t.position)
+
+	// Step 1: Anchor Point (2-vec).
+	if c, err := LowerVec2Stream(t.anchorPoint, MatchNameAnchorPoint, "Anchor Point", ctx); err == nil {
+		tdgp.Children = append(tdgp.Children, c.Children...)
+	} else {
+		return nil, err
+	}
+
+	// Step 2: Position split into Position_0 (X) + Position_1 (Y).
+	if c, err := LowerFloat64Stream(posX, MatchNamePosition0, "X Position", ctx); err == nil {
+		tdgp.Children = append(tdgp.Children, c.Children...)
+	} else {
+		return nil, err
+	}
+	if c, err := LowerFloat64Stream(posY, MatchNamePosition1, "Y Position", ctx); err == nil {
+		tdgp.Children = append(tdgp.Children, c.Children...)
+	} else {
+		return nil, err
+	}
+
+	// Step 3: Scale (2-vec).
+	if c, err := LowerVec2Stream(t.scale, MatchNameScale, "Scale", ctx); err == nil {
+		tdgp.Children = append(tdgp.Children, c.Children...)
+	} else {
+		return nil, err
+	}
+
+	// Step 4: Rotate Z (1-d).
+	if c, err := LowerFloat64Stream(t.rotation, MatchNameRotateZ, "Rotation", ctx); err == nil {
+		tdgp.Children = append(tdgp.Children, c.Children...)
+	} else {
+		return nil, err
+	}
+
+	// Step 5: Opacity (1-d).
+	if c, err := LowerFloat64Stream(t.opacity, MatchNameOpacity, "Opacity", ctx); err == nil {
+		tdgp.Children = append(tdgp.Children, c.Children...)
+	} else {
+		return nil, err
+	}
+
+	// Step 6: Orientation (3-vec, default [0,0,0]) — emitted via otst wrapper.
+	tdgp.Children = append(tdgp.Children, makeTdmn(MatchNameOrientation), lowerOrientationDefault())
+
+	// Steps 7-9: Rotate X / Rotate Y / Envir Appear in Reflect — default emits.
+	for _, axis := range []struct {
 		matchName string
 		display   string
-	}
-	type stream1D struct {
-		ps        *PropertyStream[float64]
-		matchName string
-		display   string
-	}
-	streams2D := []stream2D{
-		{t.anchorPoint, MatchNameAnchorPoint, "Anchor Point"},
-		{t.position, MatchNamePosition, "Position"},
-		{t.scale, MatchNameScale, "Scale"},
-	}
-	streams1D := []stream1D{
-		{t.rotation, MatchNameRotateZ, "Rotation"},
-		{t.opacity, MatchNameOpacity, "Opacity"},
-	}
-	for _, s := range streams2D {
-		c, err := LowerVec2Stream(s.ps, s.matchName, s.display, ctx)
+		defaultV  float64
+	}{
+		{MatchNameRotateX, "X Rotation", 0},
+		{MatchNameRotateY, "Y Rotation", 0},
+		{MatchNameEnvirAppear, "Envir Appear", 100},
+	} {
+		ps := &PropertyStream[float64]{mode: StreamModeStatic, static: axis.defaultV}
+		c, err := LowerFloat64Stream(ps, axis.matchName, axis.display, ctx)
 		if err != nil {
 			return nil, err
 		}
 		tdgp.Children = append(tdgp.Children, c.Children...)
 	}
-	for _, s := range streams1D {
-		c, err := LowerFloat64Stream(s.ps, s.matchName, s.display, ctx)
-		if err != nil {
-			return nil, err
-		}
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	}
+
 	tdgp.Children = append(tdgp.Children, makeTdmn("ADBE Group End"))
 
-	// Top-level tdmn naming the Transform Group lives in the parent Layr
-	// directly above this tdgp — handled by lowerShapeLayer via child
-	// ordering. We attach the tdmn here so the caller can pair-emit.
-	// Wrap: return a LIST(tdgp) whose first child is tdmn(name).
 	wrapper := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	wrapper.Children = append(wrapper.Children, makeTdmn("ADBE Transform Group"))
 	wrapper.Children = append(wrapper.Children, tdgp.Children...)
 	return wrapper, nil
+}
+
+// lowerOrientationDefault emits the LIST(otst) wrapper holding a default
+// Orientation stream — tolerance.aep dump line 117-125 canonical shape:
+//
+//	[LIST otst]
+//	  [LIST tdbs]
+//	    tdsb (4 B) + tdsn (14 B) + tdb4 (124 B) + cdat (24 B = 3 × f64 = 0,0,0)
+//	  [LIST otky]
+//	    otda (24 B = 3 × f64 = 0,0,0)
+//
+// Orientation is a 3D quaternion-style stream — AE uses a unique chunk
+// structure (otst / otky / otda) distinct from regular tdbs cdat / keyframe
+// LIST(list). V2.2 only emits the default form; user-driven orientation
+// keyframes are V2.3+.
+func lowerOrientationDefault() *rifx.Chunk {
+	otst := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOtst}
+
+	innerTdbs := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdbs}
+	innerTdbs.Children = append(innerTdbs.Children,
+		makeTdsb(),
+		makeTdsn("Orientation"),
+		makeTdb4(valueLayout{dim: 3, headerByte: 0x07, spatial: true}),
+		&rifx.Chunk{ID: rifx.IDCdat, Data: make([]byte, 24)}, // 3 × f64 = 0,0,0
+	)
+
+	otky := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOtky}
+	otky.Children = append(otky.Children, &rifx.Chunk{ID: rifx.IDOtda, Data: make([]byte, 24)})
+
+	otst.Children = append(otst.Children, innerTdbs, otky)
+	return otst
 }

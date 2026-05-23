@@ -2,22 +2,21 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 2 — 5 placeholder 落 (Layer Styles + Extrsn + Material + Audio + Layer Sets)；AE 2025 同错 → placeholder ≠ critical, fix B (Transform 6-axis) 才是；PASS = **173 / 0 FAIL**)
-**Active focus**: 🔴 V2.2 ship gate iter 3 — fix B Transform 6-axis schema 重写。iter 2 RE 发现 tolerance.aep ShapeLayer Transform 只 6 stream (Position_0/_1 + Orientation + RotateX/Y + Envir Appear)，**无 Anchor/Scale/Opacity/RotateZ**。当前 V2.2 emit 2D 5-stream AE 拒。scar 已更新 + 描述 fix B 真实形态。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 3 — fix B 6-axis Transform schema (min-viable over-emit + Orientation otst + Position_0/_1 split + hydrate combine)；AE 2025 仍同错 (14s reject)；3 fixes necessary but not yet sufficient；PASS = **173 / 0 FAIL**)
+**Active focus**: 🔴 V2.2 ship gate iter 4 — fix C (tdum/tduM + cdat per-dim padding) 或 minimum-failing bisection。fix A+iter2+iter3 三组 structural 修都对了但 AE 还拒。需缩范围。
 
 ## Next session 进来先做
 
 1. 确认 PASS = **173** + vet clean
-2. **ship gate iter 3 — fix B Transform 6-axis schema 重写**。详见 `workshop/scars/v2-2-aelayer-structure.md` "## iter 2 新 RE 发现" 段:
-   - `lowerLayerTransform` 改 emit 6-axis defaults: Position_0/_1, Orientation, RotateX, RotateY, Envir Appear（always emit）
-   - runtime `t.position` [x,y] → 拆 Position_0 (X) + Position_1 (Y)
-   - Anchor/Scale/Opacity/RotateZ 仅在 user 显式 set (Mode != Unset) 时 emit；需 PropertyStream 加 Unset state
-   - 同步改 `hydrate_shape.go::hydrateLayerTransform`：读 Position_0/_1 → 合 [2]float64
-   - 改完跑 `AE_SHIP_GATE=1 go test ./internal/aep/ -run TestV2_2_AEShipGate_AE2025` 验
-3. iter 3 PASS → fix C (tdum/tduM 暂未碰)
-4. 全 PASS → Phase 5 剩 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
-5. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` (无需关 2020；2020 跑前要关 2025)
-6. 诊断工具齐: `tmp_debug/gen_canonical_failing/` 重建；`tmp_debug/dump_chunks/<path>` dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` baseline；`tmp_debug/test_hydrate/` 直 hydrate 验
+2. **ship gate iter 4 — 二选一**:
+   - **路线 A: fix C (tdum/tduM + cdat per-dim padding)**：详见 `workshop/scars/v2-2-aelayer-structure.md` "Phase 5 fix order 修正后" 第 2 步。Tolerance 详:
+     - `ADBE Position_0` static: `cdat (40B) + tdum (8B) + tduM (8B)`
+     - `ADBE Vector Rect Size` static: `cdat (80B)` ← 我们 emit 48B (per-dim padding 错)
+     - 改 `lower_property_stream.go::makeCdat` + `canonicalCdatSize`，spatial property 后 append tdum + tduM
+   - **路线 B: minimum-failing bisection**：写 `tmp_debug/gen_minimum_failing/main.go` 出 1 个 empty ShapeLayer (无 shape 节点 / 无 keyframe / default transform)。跑 AE → 看是否仍同错。若 fail 同错 = 问题在 Layer 骨架；若 PASS = 问题在 shape/keyframe emit。
+3. iter 4 PASS → Phase 5 剩 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
+4. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` (无需关 2020；2020 跑前要关 2025)
+5. 诊断工具齐: `tmp_debug/gen_canonical_failing/` 重建；`tmp_debug/dump_chunks/<path>` dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` baseline；`tmp_debug/test_hydrate/` 直 hydrate 验
 
 ## V2.2 进度地图（本会话快照）
 
@@ -28,7 +27,7 @@
 | 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
 | 3 Public API | ✅ 4/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3 / 3e56a49` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β |
 | 4 Roundtrip | ✅ 5/5 | 167→172 (+5) | (本会话 4 commits + 本 docs commit) | hydrateShapeNodes + write-time sync + canonical 3-layer roundtrip + atomicity ×3 + mutate-existing (skip) |
-| 5 Ship gate | 🔴 4/8 + fix-iter-2 | 173 不变 | (Phase 5 commits + fix-A + iter-2 commits) | 5.1/5.2/5.3/5.4 ✅; **5.7 iter 1**: fix A outer wrapper ✅; **5.7 iter 2**: 5 placeholder (Layer Styles + Extrsn + Material + Audio + Layer Sets) ✅；AE 同错→placeholder 非 critical, fix B (Transform 6-axis) 才是；fix B + C 仍待 |
+| 5 Ship gate | 🔴 4/8 + fix-iter-3 | 173 不变 | (Phase 5 commits + iter-1/2/3 commits) | 5.1/5.2/5.3/5.4 ✅; **5.7 iter 1**: outer wrapper ✅; **5.7 iter 2**: 5 placeholder ✅; **5.7 iter 3**: Transform 6-axis schema + Position_0/_1 split + Orientation otst ✅；AE 2025 同错 (14s reject) — 3 structural 修必须但不充分；下一步 fix C (tdum/tduM + cdat padding) 或 minimum-failing bisection |
 | 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
 
 ## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）

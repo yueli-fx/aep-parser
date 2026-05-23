@@ -202,6 +202,27 @@ func lowerStream[T any](
 	return tdgp, nil
 }
 
+// splitVec2Stream splits a PropertyStream[[2]float64] into per-axis
+// PropertyStream[float64] streams (X, Y). Preserves mode + keyframe count +
+// per-keyframe time/ease — the keyframe value is projected onto each axis.
+//
+// Used by lowerLayerTransform: AE ShapeLayer canonical Transform encodes
+// Position as separate `ADBE Position_0` (X) + `ADBE Position_1` (Y)
+// streams, not the combined `ADBE Position` 2-vec. (iter 2 RE finding.)
+func splitVec2Stream(ps *PropertyStream[[2]float64]) (*PropertyStream[float64], *PropertyStream[float64]) {
+	psX := &PropertyStream[float64]{mode: ps.mode, static: ps.static[0]}
+	psY := &PropertyStream[float64]{mode: ps.mode, static: ps.static[1]}
+	for _, kf := range ps.keyframes {
+		psX.keyframes = append(psX.keyframes, StreamKeyframe[float64]{
+			Time: kf.Time, Value: kf.Value[0], InEase: kf.InEase, OutEase: kf.OutEase,
+		})
+		psY.keyframes = append(psY.keyframes, StreamKeyframe[float64]{
+			Time: kf.Time, Value: kf.Value[1], InEase: kf.InEase, OutEase: kf.OutEase,
+		})
+	}
+	return psX, psY
+}
+
 // --- Chunk builders -------------------------------------------------------
 
 // padMatchName returns a 40-byte NUL-padded ASCII buffer carrying the

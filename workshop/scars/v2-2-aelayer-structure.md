@@ -183,12 +183,32 @@ dump_failing.txt 结构对照 tolerance.aep dump 145-361 行 **完全一致**（
 
 **hydrate 端**：parseLayer 的 hydrateLayerTransform 跟着改 — 读 Position_0/_1 → 合成 [2]float64 position；其它 stream 按 matchName fallback。
 
-## Phase 5 fix order 修正后 (iter 2 后)
+## Phase 5 fix order 修正后 (iter 3 后)
 
-1. **A done** + **iter 2 done** — outer wrapper + 5 placeholder。结构 OK，AE 同错。
-2. **下一步 fix B** — Transform 6-axis schema rewrite (上节详)。预测：fix B 落 → AE 错误信号变 (不再 parse-time hard reject 或换错号)。若仍同错，则 fix C 也是必需的组合。
-3. **fix C** — spatial property tdum/tduM emit + cdat per-dim padding 矫正。
-4. fix C 后仍 reject → 启动 byte-level diff (hex compare 单 Layr block)。
+1. **A done** + **iter 2 done** + **iter 3 done** — outer wrapper + 5 placeholder + Transform 6-axis schema (Anchor + Position_0/_1 split + Scale + RotateZ + Opacity + Orientation otst + RotateX/Y + EnvirAppear)。**AE 2025 仍同错 + 同信号** ("默认/imager/颜色管理/自定义 渲染设置可能无效")。结论：现 3 个 fix 都是 necessary 但 not yet sufficient。
+2. **下一步候选 fix C** — spatial property tdum/tduM emit + cdat per-dim padding 矫正。Tolerance 详:
+   - `ADBE Position_0` static: `cdat (40B) + tdum (8B) + tduM (8B)` (tdum/tduM 在 cdat 后)
+   - `ADBE Vector Rect Size` static: `cdat (80B)` — 我们 emit 48B → **per-dim padding 错**！dim=2 spatial 应该是 80 不是 48。
+   - 8B tdum / 8B tduM 推测 = 单 f64 min/max bound
+   - **animated** form 的 tdum/tduM 落点未知 — tolerance 只有 static 例子
+3. **fix C 后仍 reject** → 必须启动**1-layer 最小失败 bisection**：
+   - 写 `tmp_debug/gen_minimum_failing/main.go`: 只 1 个 empty ShapeLayer (无 shape 节点 / 无 keyframe / 默认 transform)
+   - AE 跑 → 若 still fail 同错 = 问题在 layer 骨架 (ldta? Layr wrapper? Transform Group emit?)
+   - 若 PASS = 问题在 shape 节点 emit / keyframe emit / cdat padding
+4. byte-level diff: 把 minimum failing aep 跟 tolerance.aep 同段 hex diff (`xxd` / `dump_chunks` 比较)。
+
+## iter 3 实施记 — fix B Transform 6-axis schema (本 commit)
+
+- `internal/rifx/rifx.go`: 新 chunk IDs `IDOtst / IDOtky / IDOtda` (Orientation 特殊三件套)
+- `types_core.go`: 新 `MatchNamePosition0 / MatchNamePosition1 / MatchNameEnvirAppear` 常量
+- `lower_property_stream.go`: 新 `splitVec2Stream` helper — `PropertyStream[[2]float64]` → 两个 `PropertyStream[float64]` (X / Y)，保留 mode + keyframe time/ease
+- `lower_layer.go::lowerLayerTransform`: 重写 emit 10 stream：Anchor + Position_0/_1 (split) + Scale + RotateZ + Opacity + Orientation (otst) + RotateX (default 0) + RotateY (default 0) + EnvirAppear (default 100)
+- `lower_layer.go::lowerOrientationDefault`: 新 helper — otst → (tdbs cdat 24B + otky → otda 24B), 全 0
+- `hydrate_shape.go::hydrateLayerTransform`: 加 Position_0/_1 case + `combinePositionXY` helper, 把 V1 Property layer X/Y 重新合 [2]float64 keyframe 流
+
+dump_failing.txt 现 Transform Group 结构 = 10 stream 6-axis form, 跟 tolerance.aep DLay 那块完全一致 (但 ShapeLayer 那块更简, tolerance ShapeLayer 只 emit 6 axis defaults; user-touched extras (Anchor/Scale/etc) 在我们这里 over-emit).
+
+PASS 173 不变 / 0 FAIL / vet clean。AE 2025 ship gate 同错 (14s reject, 比 iter 2 的 46s 快很多, AE 可能在 ldta/Layr parse 阶段更早 reject)。
 
 ## 永久教训 → CLAUDE.md / scars
 

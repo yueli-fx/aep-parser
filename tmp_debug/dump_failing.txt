@@ -1323,14 +1323,22 @@
               tdsn (20 B)
               tdb4 (124 B)
               cdat (48 B)
-            tdmn = ADBE Position (40 B)
+            tdmn = ADBE Position_0 (40 B)
             [LIST tdbs]
               tdsb (4 B)
-              tdsn (16 B)
+              tdsn (18 B)
               tdb4 (124 B)
               [LIST list]
                 lhd3 (52 B)
-                ldat (208 B)
+                ldat (96 B)
+            tdmn = ADBE Position_1 (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              [LIST list]
+                lhd3 (52 B)
+                ldat (96 B)
             tdmn = ADBE Scale (40 B)
             [LIST tdbs]
               tdsb (4 B)
@@ -1347,6 +1355,33 @@
             [LIST tdbs]
               tdsb (4 B)
               tdsn (15 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Orientation (40 B)
+            [LIST otst]
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (19 B)
+                tdb4 (124 B)
+                cdat (24 B)
+              [LIST otky]
+                otda (24 B)
+            tdmn = ADBE Rotate X (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Rotate Y (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Envir Appear in Reflect (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (20 B)
               tdb4 (124 B)
               cdat (40 B)
             tdmn = ADBE Group End (40 B)
@@ -1542,12 +1577,18 @@
               tdsn (20 B)
               tdb4 (124 B)
               cdat (48 B)
-            tdmn = ADBE Position (40 B)
+            tdmn = ADBE Position_0 (40 B)
             [LIST tdbs]
               tdsb (4 B)
-              tdsn (16 B)
+              tdsn (18 B)
               tdb4 (124 B)
-              cdat (48 B)
+              cdat (40 B)
+            tdmn = ADBE Position_1 (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
             tdmn = ADBE Scale (40 B)
             [LIST tdbs]
               tdsb (4 B)
@@ -1564,6 +1605,33 @@
             [LIST tdbs]
               tdsb (4 B)
               tdsn (15 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Orientation (40 B)
+            [LIST otst]
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (19 B)
+                tdb4 (124 B)
+                cdat (24 B)
+              [LIST otky]
+                otda (24 B)
+            tdmn = ADBE Rotate X (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Rotate Y (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Envir Appear in Reflect (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (20 B)
               tdb4 (124 B)
               cdat (40 B)
             tdmn = ADBE Group End (40 B)
@@ -1788,12 +1856,18 @@
               tdsn (20 B)
               tdb4 (124 B)
               cdat (48 B)
-            tdmn = ADBE Position (40 B)
+            tdmn = ADBE Position_0 (40 B)
             [LIST tdbs]
               tdsb (4 B)
-              tdsn (16 B)
+              tdsn (18 B)
               tdb4 (124 B)
-              cdat (48 B)
+              cdat (40 B)
+            tdmn = ADBE Position_1 (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
             tdmn = ADBE Scale (40 B)
             [LIST tdbs]
               tdsb (4 B)
@@ -1810,6 +1884,33 @@
             [LIST tdbs]
               tdsb (4 B)
               tdsn (15 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Orientation (40 B)
+            [LIST otst]
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (19 B)
+                tdb4 (124 B)
+                cdat (24 B)
+              [LIST otky]
+                otda (24 B)
+            tdmn = ADBE Rotate X (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Rotate Y (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (18 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Envir Appear in Reflect (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (20 B)
               tdb4 (124 B)
               cdat (40 B)
             tdmn = ADBE Group End (40 B)

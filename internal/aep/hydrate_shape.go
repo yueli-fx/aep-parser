@@ -104,12 +104,20 @@ func hydrateLayerTransform(layer *Layer) {
 	if layer.shapeTransform == nil {
 		layer.shapeTransform = newLayerTransform()
 	}
+	// Phase 5 fix B: ShapeLayer canonical Transform splits Position into
+	// Position_0 (X) + Position_1 (Y). We re-combine on hydrate so
+	// shapeTransform.position remains the [2]float64 API surface.
+	var posX, posY *Property
 	for _, p := range layer.Properties {
 		switch p.MatchName {
 		case MatchNameAnchorPoint:
 			hydrateVec2Stream(layer.shapeTransform.anchorPoint, p)
 		case MatchNamePosition:
 			hydrateVec2Stream(layer.shapeTransform.position, p)
+		case MatchNamePosition0:
+			posX = p
+		case MatchNamePosition1:
+			posY = p
 		case MatchNameScale:
 			hydrateVec2Stream(layer.shapeTransform.scale, p)
 		case MatchNameRotateZ:
@@ -117,6 +125,68 @@ func hydrateLayerTransform(layer *Layer) {
 		case MatchNameOpacity:
 			hydrateFloat64Stream(layer.shapeTransform.opacity, p)
 		}
+	}
+	if posX != nil || posY != nil {
+		combinePositionXY(layer.shapeTransform.position, posX, posY)
+	}
+}
+
+// combinePositionXY re-combines split Position_0 + Position_1 V1 properties
+// into a single PropertyStream[[2]float64]. Static streams merge values
+// directly; animated streams pair keyframes by index (AE-canonical split
+// emits X and Y keyframes at the same times in the same order).
+func combinePositionXY(ps *PropertyStream[[2]float64], px, py *Property) {
+	getXY := func(p *Property) (float64, []*Keyframe) {
+		if p == nil {
+			return 0, nil
+		}
+		var v float64
+		switch x := p.StaticValue.(type) {
+		case float64:
+			v = x
+		case []float64:
+			if len(x) > 0 {
+				v = x[0]
+			}
+		}
+		return v, p.Keyframes
+	}
+	xVal, xKfs := getXY(px)
+	yVal, yKfs := getXY(py)
+	if len(xKfs) == 0 && len(yKfs) == 0 {
+		_ = ps.SetStaticValue([2]float64{xVal, yVal})
+		return
+	}
+	n := len(xKfs)
+	if len(yKfs) > n {
+		n = len(yKfs)
+	}
+	kfVal := func(kfs []*Keyframe, i int) float64 {
+		if i >= len(kfs) {
+			return 0
+		}
+		switch x := kfs[i].Value.(type) {
+		case float64:
+			return x
+		case []float64:
+			if len(x) > 0 {
+				return x[0]
+			}
+		}
+		return 0
+	}
+	kfTime := func(kfs []*Keyframe, i int) float64 {
+		if i < len(kfs) {
+			return kfs[i].Time
+		}
+		return 0
+	}
+	for i := 0; i < n; i++ {
+		t := kfTime(xKfs, i)
+		if i >= len(xKfs) {
+			t = kfTime(yKfs, i)
+		}
+		_ = ps.AddKeyframeLinear(t, [2]float64{kfVal(xKfs, i), kfVal(yKfs, i)})
 	}
 }
 

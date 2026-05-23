@@ -69,6 +69,9 @@ var (
 	IDPRin = ChunkID{'P', 'R', 'i', 'n'} // LIST formType: comp's pre-render-info container (renderer + renderer-data)
 	IDPrin = ChunkID{'p', 'r', 'i', 'n'} // pre-render-info chunk (104 bytes; renderer name as ASCII @offset 4)
 	IDPrda = ChunkID{'p', 'r', 'd', 'a'} // pre-render data chunk (renderer-specific options; variable length)
+	IDOtst = ChunkID{'o', 't', 's', 't'} // LIST formType: orientation wrapper (holds tdbs + otky)
+	IDOtky = ChunkID{'o', 't', 'k', 'y'} // LIST formType: orientation-keyframe container (holds otda)
+	IDOtda = ChunkID{'o', 't', 'd', 'a'} // orientation default value chunk (24 B = 3 × f64)
 )
 
 // opaqueListTypes is the set of LIST formTypes whose payload is non-chunk
