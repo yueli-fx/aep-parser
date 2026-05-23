@@ -254,6 +254,33 @@ tdmn = ADBE Root Vectors Group
 
 修复：`lower_layer.go::lowerShapeLayer` Root Vectors Group 改 emit 完整 5-层嵌套。`lowerVectorGroup` 输出 Vectors Group level 内容; 上面包 `ADBE Vector Group + ADBE Vector Transform Group + ADBE Vector Materials Group` 三 child。`hydrate_shape.go` 镜像改。
 
+### iter 4 残留盲区 — 3 处 magic bytes 没独立验证
+
+bug 4 / bug 7 实施时为减少 AE 跑次数，把多个 byte 一起改后再验。下列字节是"tolerance.aep 有 → 我们补上"的盲跟随，**机制理解为 0**：
+
+| 位置 | 值 | 来源 | 是否独立验证 |
+|---|---|---|---|
+| ldta `@0x25` (AttrByte0) | `0x01` | tolerance 有，parse_layer.go 文档未覆盖此 bit | ❌ 跟其它 byte 一起改的 |
+| ldta `@0x3B` | `0x01` | tolerance 有，无任何文档 | ❌ |
+| cdta `@0x18` (secondaryDivisor) | `TickRate` (改 600) | cdta_layout.go doc 写 "AE rewrites to TickRate on user mod"；我们 explicit 写 | ❌ |
+
+未来 iter（bug 8 修完 AE 显层后）应 **toggle 验** 这三处：单独把每处改回原值，跑 bisect_v2_2，若 AE 仍显层 = 该字节非必需可去。可能简化 builder。
+
+ldta `@0x27=0x87` (visible + audio + effects + collapse-transform) 也是 batch 改的，但其中 bit0 visible (0x01) 历史已验证为必需，其余 3 bit 是 AE-default 行为，相对可信。
+
+### iter 4 永久教训 — silent-drop vs hard-reject 是不同诊断类别
+
+AE 的拒接有**两种独立失败模式**，需要不同 JSX 验证：
+
+| 模式 | JSX 信号 | 含义 |
+|---|---|---|
+| hard reject | `app.open()` 抛异常 | 文件结构 fatal corruption — parser 在 chunk-level fail |
+| silent drop | `app.open()` 不抛，但 `comp.layers.length` 少了我们加的层 | 文件 parser 接受 chunk 结构，但 AE 内部某 layer-validation 把我们的 layer 当 deleted/invalid/phantom 丢弃 |
+
+`test_data/verify_v2_2.jsx` (Phase 5 Task 5.1) 只验 PASS/FAIL 不验 silent drop。`test_data/verify_open.jsx` (iter 4 新写) 显式 dump `items[i].typeName / layers.length / layers[k].name` 才暴露 silent drop。
+
+未来 ship gate / 任何 JSX driver **必须打印 layers.length + 每层 name**，不然 silent drop 假阳性 PASS 难抓。
+
 ## Phase 5 fix order 修正后 (iter 3 后)
 
 1. **A done** + **iter 2 done** + **iter 3 done** — outer wrapper + 5 placeholder + Transform 6-axis schema (Anchor + Position_0/_1 split + Scale + RotateZ + Opacity + Orientation otst + RotateX/Y + EnvirAppear)。**AE 2025 仍同错 + 同信号** ("默认/imager/颜色管理/自定义 渲染设置可能无效")。结论：现 3 个 fix 都是 necessary 但 not yet sufficient。
