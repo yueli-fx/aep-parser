@@ -2,7 +2,7 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 4 partial — bisection 找出 **7 个独立 structural bugs** (Layr 位置/ldta 164B/time-tick encoding/AttrBytes/LayerID collision/head counter/cdta @0x18) 全修；AE 2025 从 hard-reject → opens-file-without-exception；但 comp.layers.length 仍 = 0 (AE 静默 drop layer)；候选 bug 8 = Root Vectors Group 缺 Vector Group + Vectors Group 中间嵌套；PASS = **173 / 0 FAIL**)
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 4 partial — bisection 找出 **7 个独立 structural bugs** (Layr 位置/ldta 164B/time-tick encoding/AttrBytes/LayerID collision/head counter/cdta @0x18) 全修；AE 2025 从 hard-reject → opens-file-without-exception；但 comp.layers.length 仍 = 0 (AE 静默 drop layer)；候选 bug 8 = Root Vectors Group 缺 Vector Group + Vectors Group 中间嵌套；PASS = **173 / 0 FAIL**；副线：本会话把 `workshop-workflow` skill ship 到独立仓库 [Yuelioi/workshop](https://github.com/Yuelioi/workshop)@v0.2.0，aep-parser/workshop/feedback 残留归档至 critiques/ + specs/finish/)
 **Active focus**: 🟡 V2.2 ship gate iter 5 — bug 8 候选 (Root Vectors Group 5-层嵌套 emit)。详 scar `iter 4 实施记`。
 
 ## Next session 进来先做
@@ -69,6 +69,16 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-23 副线 — `workshop-workflow` skill 设计 → ship 独立仓库（PASS 不变；aep-parser 主线无推进）
+
+本会话从 aep-parser/workshop/specs/ 的设计稿 + 3 家 AI critique 提炼出通用 `workshop-workflow` skill，做成独立可分发仓库 [Yuelioi/workshop](https://github.com/Yuelioi/workshop) v0.2.0。aep-parser 自己 V2.2 iter 5 仍未启动。本条仅说明为何 `workshop/feedback/` 消失、`critiques/` + `specs/finish/` 出现。
+
+- **Skill 仓库 ship**: Yuelioi/workshop@v0.2.0 —— 4 个 AI 工具 plugin manifest（Claude tested / Codex / Cursor / Gemini 三者 manifest 到位未测）、tool-neutral skill 内容、中英文 README、`/plugin marketplace add Yuelioi/workshop` + `/plugin install workshop@workshop-marketplace` 已验证可装。
+- **Spec 归档**: `workshop/specs/2026-05-23-workshop-workflow-skill-design.md` → `workshop/specs/finish/`（设计稿，对照 [Yuelioi/workshop](https://github.com/Yuelioi/workshop) 看实施落地差异）。
+- **3 家 AI critique 归档**: `workshop/feedback/{claude,deepseek,gpt}` → `workshop/critiques/2026-05-23-workshop-workflow-skill-design-{claude,deepseek,gpt}.md`，按 workshop critique 模板包装（原文 verbatim + 处置段：每条反馈标 adopt / reject / defer 并指向 skill 仓库实际落地路径）。`workshop/feedback/` 目录删除（非 workshop 标准 10 文件夹之一）。
+- **处置统计**: 11 adopt（entry checklist 具体化 / wip 强制 lifecycle / critique 处置必填 / minimal setup / scar Status 字段 / authority order / INDEX AUTO 标记 / 跨文件夹引用语法 / Usage 段 / 跨 AI 工具支持 / 中文 README）/ 1 reject（GPT 的 "memory entropy" 概念正式命名 — 营销层不进 spec）/ 3 defer（synthesis 压缩、MCP/agent runtime 演化、"接着干活" benchmark — workshop README roadmap 已标）
+- **下一步 (aep-parser 主线)**: 不变，仍是 V2.2 iter 5（见 "Next session 进来先做"）。
 
 ### 2026-05-23 V2.2 Phase 5 partial — JSX + Go shipgate + Tier 3 preservation (PASS 不变 172, +2 SKIP)
 
