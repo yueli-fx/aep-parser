@@ -2,33 +2,32 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 3 完 — Transform 6-axis schema + Orientation otst + Position_0/_1 split + hydrate combine 落；AE 2025 仍同错但 14s reject (iter 2 是 46s) 暗示 reject 点前移；用户决定下 session 切 **bisection 优先**，不再 stack schema fix；PASS = **173 / 0 FAIL**)
-**Active focus**: 🟡 V2.2 ship gate iter 4 — **minimum-failing bisection**。用户判：iter 2+3 没 shift error signal = 继续 stack 收益下降，应该先找 AE "第一个不可接受点"。dump 结构已基本对齐 tolerance，问题转入 AE decode 规则层。fix C (tdum/tduM + cdat padding) 仍待，但放 bisection 框架里验。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 4 partial — bisection 找出 **7 个独立 structural bugs** (Layr 位置/ldta 164B/time-tick encoding/AttrBytes/LayerID collision/head counter/cdta @0x18) 全修；AE 2025 从 hard-reject → opens-file-without-exception；但 comp.layers.length 仍 = 0 (AE 静默 drop layer)；候选 bug 8 = Root Vectors Group 缺 Vector Group + Vectors Group 中间嵌套；PASS = **173 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ship gate iter 5 — bug 8 候选 (Root Vectors Group 5-层嵌套 emit)。详 scar `iter 4 实施记`。
 
 ## Next session 进来先做
 
 1. 确认 PASS = **173** + vet clean
-2. **iter 4 — minimum-failing bisection**。背景：V2.1 (无 Layr) 已 PASS AE 2025；V2.2 (3 ShapeLayer) FAIL。中间梯度逐档加，找**第一个 FAIL 的变体**。每变体 → AE 跑 → 看错号变 / 同 / PASS。
-3. **Bisection 矩阵**（baseline → 复杂度递增）:
-   | # | 变体 | 预期 |
-   |---|---|---|
-   | 0 | V2.1 empty project (无 comp) | PASS (已知) |
-   | 1 | V2.1 + empty comp | PASS (已知 — V2.1 ship gate baseline) |
-   | 2 | + 1 × `NewShapeLayer("L")` 无 mutation | ? |
-   | 3 | + `L.RootGroup().AddRect()` 默认值 | ? |
-   | 4 | + `rect.SetSize([2]float64{200,200})` 静态 | ? |
-   | 5 | + `L.RootGroup().AddFill()` 静态 color | ? |
-   | 6 | + `rect.Size().AddKeyframeLinear(0, ...)` 单 keyframe | ? |
-   | 7 | + `L.Position().AddKeyframeLinear` 空间 keyframe | ? |
-4. **实施建议**：写 `tmp_debug/gen_minimum_failing/main.go` 接 `-variant N` flag (2..7)，每跑改 flag + 重跑 ship gate。或更简单：直接改 main.go body 用 `// step N` 注释切，linear progression。
-5. **结论用法**:
-   - **#2 FAIL 同错** = 问题在 Layer 骨架 (ldta? Layr wrapper? Transform Group emit?) — fix B 后还有别的
-   - **#2 PASS, #3 FAIL** = shape 节点 emit (lower_shape_node.go)
-   - **#4 PASS, #6 FAIL** = keyframe encoding (lhd3/ldat 字节布局)
-   - **#6 PASS, #7 FAIL** = spatial-specific (tdum/tduM / spatial cdat padding) — 此时 fix C 是答案
-6. **找到 first FAIL 之后**：byte-level diff first-FAIL aep vs tolerance.aep (同一 chunk type 段)，hex compare 找差异点。`tmp_debug/dump_chunks/<path>` + xxd 配合。
-7. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s`。**注意**：当前 ship gate test 写死了 3-ShapeLayer canonical 项目；bisection 时要么改 test，要么 bypass test 直接跑 `gen_minimum_failing/main.go` 出 aep + 手动 AfterFX 试。后者更简单。
-8. 诊断工具齐: `tmp_debug/gen_canonical_failing/` 重建；`tmp_debug/dump_chunks/<path>` dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` baseline
+2. **iter 5 — bug 8: Root Vectors Group 嵌套深度**。tolerance.aep ShapeLayer 实际结构:
+   ```
+   tdmn = ADBE Root Vectors Group
+   [LIST tdgp]
+     tdmn = ADBE Vector Group          ← 我们 emit 缺这层
+     [LIST tdgp]
+       tdmn = ADBE Vectors Group       ← AND 这层 (plural!)
+       [LIST tdgp]
+         tdmn = ADBE Vector Shape - Rect (actual shapes here)
+         ...
+       tdmn = ADBE Vector Transform Group
+       tdmn = ADBE Vector Materials Group
+   ```
+   我们现在 emit `Root Vectors Group → [shape children direct]`，跳过 Vector Group + Vectors Group 两层 wrapper。AE 可能因此把 ShapeLayer 视作 malformed → silent drop。
+3. 修法：`lower_layer.go::lowerShapeLayer` 把 Root Vectors Group 改 emit 5-层嵌套。`lowerVectorGroup` 出 Vectors Group level；上面包 `Vector Group + Vector Transform Group + Vector Materials Group` 3 child。`hydrate_shape.go` 镜像改 (走 Root → Vector Group → Vectors Group → shape kids)。
+4. 验证：`go run tmp_debug/bisect_v2_2/main.go` — 看 layers.length 变 0 → 1。
+5. iter 5 PASS (即 AE 看到 user Layer) → 跑 full ship gate `TestV2_2_AEShipGate_AE2025` 看 Phase 5 是否真闭环
+6. 全 PASS → Phase 5 剩 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
+7. 诊断工具齐: `tmp_debug/bisect_v2_2/`（6 变体 + AE 跑 + 报告）；`tmp_debug/dump_ldta_hex/` (ldta hex)；`tmp_debug/dump_cdta_diff/` (cdta diff)；`tmp_debug/dump_head_hex/`；`tmp_debug/dump_idta_hex/`；`tmp_debug/dump_first_tdsb/` — iter 4 留下的全套
+8. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s`
 
 ## V2.2 进度地图（本会话快照）
 
@@ -39,7 +38,7 @@
 | 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
 | 3 Public API | ✅ 4/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3 / 3e56a49` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β |
 | 4 Roundtrip | ✅ 5/5 | 167→172 (+5) | (本会话 4 commits + 本 docs commit) | hydrateShapeNodes + write-time sync + canonical 3-layer roundtrip + atomicity ×3 + mutate-existing (skip) |
-| 5 Ship gate | 🔴 4/8 + fix-iter-3 | 173 不变 | (Phase 5 commits + iter-1/2/3 commits) | 5.1/5.2/5.3/5.4 ✅; **5.7 iter 1**: outer wrapper ✅; **5.7 iter 2**: 5 placeholder ✅; **5.7 iter 3**: Transform 6-axis schema + Position_0/_1 split + Orientation otst ✅；AE 2025 同错 (14s reject) — 3 structural 修必须但不充分；下一步 fix C (tdum/tduM + cdat padding) 或 minimum-failing bisection |
+| 5 Ship gate | 🔴 4/8 + iter-1/2/3/4 | 173 不变 | (Phase 5 + iter-1/2/3/4 commits) | 5.1/5.2/5.3/5.4 ✅; iter 1 outer wrapper ✅; iter 2 placeholders ✅; iter 3 Transform 6-axis ✅; **iter 4 bisection** 找出 7 个 bug 全修 (Layr 位置/ldta 164B/time-tick/AttrBytes/LayerID/head counter/cdta @0x18)；AE 2025 从 hard-reject → opens-file，但 layers.length=0；候选 bug 8 = Root Vectors Group 嵌套深度 (待 iter 5) |
 | 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
 
 ## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）

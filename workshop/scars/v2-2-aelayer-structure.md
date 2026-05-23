@@ -183,6 +183,77 @@ dump_failing.txt 结构对照 tolerance.aep dump 145-361 行 **完全一致**（
 
 **hydrate 端**：parseLayer 的 hydrateLayerTransform 跟着改 — 读 Position_0/_1 → 合成 [2]float64 position；其它 stream 按 matchName fallback。
 
+## iter 4 实施记 — minimum-failing bisection 揭出 6+ structural bugs
+
+iter 4 用户决定不再 stack schema fix，改写 `tmp_debug/bisect_v2_2/` 跑 6 变体矩阵 (empty ShapeLayer → +AddRect → +SetSize → +AddFill → +keyframed → +spatial-keyframed)。结果：**#2 (empty ShapeLayer) 已 FAIL 同错**，证明问题在 Layer 骨架而非 shape/keyframe/spatial。
+
+随后通过 byte-level diff against tolerance.aep + 反复跑 AE 验证，找出并修复 **6 个独立 structural bugs**：
+
+### bug 1: Layr 位置错 — 必须在 DLay/SLay/CLay/SecL **之前**
+- 之前：`c.itemList.Children = append(c.itemList.Children, layrChunk)` → Layr 在最末
+- 修复：`insertLayrPosition` 找第一个 DLay/SLay/CLay/SecL，Layr 插那之前。`new_layer.go::insertLayrPosition` + `templateServiceLayerInsertTypes` map
+- **效果**：AE 2025 不再 hard-reject 文件（从 "默认/imager/颜色管理/自定义 渲染设置可能无效" 弹框 → 文件正常打开）
+
+### bug 2: ldta 必须 164B（不是 160B）
+- 之前：`ldtaSize2020 = 160` for ShapeLayer
+- 修复：`buildLdtaBytes` 用 `ldtaSize2025 = 164` (trailing 4 zero bytes)
+- test 改名 `TestLowerShapeLayer_LdtaIs160Bytes` → `TestLowerShapeLayer_LdtaIs164Bytes`
+
+### bug 3: ldta time fields 编码错 — 必须用 TickRate 作 divisor
+- 之前：`InPointDivs=1, OutPointDivd=0xFFFFFFFF(sentinel), OutPointDivs=1` → AE 读 OutPointDivd = -1 (int32 BE) → 负 duration → 静默 drop layer
+- 修复：所有 time field divisors = TickRate (30720 for 30fps); `OutPointDivd = duration * TickRate`; `Stretch = 1/1` not `100/100`
+- 需要 `compDuration` plumb 到 `lowerCtx`，新加 field；`sync_shape_layers.go` 同步加
+
+### bug 4: AttrByte0 @0x25 = 0x01 必须设 + @0x3B/@0x3D/@0x63 等
+- 之前：`d[0x25] = 0x00`，AttrByte2 = `0x01` (只 visible)
+- 修复：`d[0x25] = 0x01` (未文档化 bit), `d[0x27] = 0x87` (visible + audio + effects + collapse-transform), `d[0x3B] = 0x01` (unknown), `d[0x3D] = 0x08` (label color), `d[0x63] = 0x02` (BlendingMode)
+
+### bug 5: LayerID **collision** with DLay
+- 之前：`base.ID = c.proj.allocItemID()` → 项目级 nextItemID = 2，但模板 DLay 已用 LayerID=2 → AE 把我们 Layr 视作"被 DLay 标记 deleted"
+- 修复：`maxLayerIDInItemList(c.itemList)` 扫所有 Layr/DLay/SLay/CLay/SecL 的 ldta @0x00，取 max+1。Template service layers 占 2..12，所以 user Layr 起 13.
+
+### bug 6: head counter 没 cover layer ID
+- 之前：`p.nextItemID` 没 bump 到 layer.ID 之上 → `write.go::syncHeadCounters` 把 head counter 设到 nextItemID（仍 = 2）→ AE 看 head < layer.ID → drop layer
+- 修复：NewShapeLayer 里 `if layerID >= c.proj.nextItemID { c.proj.nextItemID = layerID + 1 }`
+
+### bug 7: cdta @0x18 secondary divisor 错
+- 之前：`buildCompCdta` emit 600 (fresh-comp marker，per cdta_layout.go doc)
+- 修复：NewShapeLayer 加 user Layr 后，把 `c.cdta.Data[@0x18..0x1B]` 写成 TickRate (30720)
+- doc 注释说 "AE rewrites to TickRate on user mod"，我们 explicit 写
+
+### 当前状态 + 残留 bug 8 候选: Root Vectors Group 嵌套不够
+
+修了 bug 1-7 后，AE 2025 现在：
+- **opens file without exception** (huge progress)
+- 但 `comp.layers.length=0` — AE 静默 drop layer 还有别的原因
+
+byte-level diff 之 ldta + cdta + idta + head 都对了。剩下差异在 `LIST(tdgp)` 内部嵌套深度：
+
+**Tolerance.aep ShapeLayer 内 Root Vectors Group 结构（5 层嵌套）**:
+```
+tdmn = ADBE Root Vectors Group
+[LIST tdgp]
+  tdmn = ADBE Vector Group         ← we miss this intermediate
+  [LIST tdgp]
+    tdmn = ADBE Vectors Group      ← AND this (plural!)
+    [LIST tdgp]
+      tdmn = ADBE Vector Shape - Rect (actual shape)
+      ...
+    tdmn = ADBE Vector Transform Group
+    tdmn = ADBE Vector Materials Group
+```
+
+**Our V2.2 builder 现状**:
+```
+tdmn = ADBE Root Vectors Group
+[LIST tdgp]
+  [shape children direct here, no Vector Group / Vectors Group wrappers]
+```
+
+**iter 5 hypothesis**: AE 检查 `ADBE Root Vectors Group → ADBE Vector Group → ADBE Vectors Group` 嵌套 — 缺这两层 wrapper 就把 layer 视作 malformed Shape Layer 并 drop。
+
+修复：`lower_layer.go::lowerShapeLayer` Root Vectors Group 改 emit 完整 5-层嵌套。`lowerVectorGroup` 输出 Vectors Group level 内容; 上面包 `ADBE Vector Group + ADBE Vector Transform Group + ADBE Vector Materials Group` 三 child。`hydrate_shape.go` 镜像改。
+
 ## Phase 5 fix order 修正后 (iter 3 后)
 
 1. **A done** + **iter 2 done** + **iter 3 done** — outer wrapper + 5 placeholder + Transform 6-axis schema (Anchor + Position_0/_1 split + Scale + RotateZ + Opacity + Orientation otst + RotateX/Y + EnvirAppear)。**AE 2025 仍同错 + 同信号** ("默认/imager/颜色管理/自定义 渲染设置可能无效")。结论：现 3 个 fix 都是 necessary 但 not yet sufficient。

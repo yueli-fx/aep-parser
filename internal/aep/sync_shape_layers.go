@@ -43,6 +43,7 @@ func (p *Project) syncCompositionShapeLayers(c *Composition) error {
 		s := WrapShapeLayer(l)
 		ctx := &lowerCtx{
 			tickRate:     c.TickRate,
+			compDuration: c.Duration,
 			capabilities: Capabilities(p.target),
 			nextLayerID:  p.allocItemID,
 		}

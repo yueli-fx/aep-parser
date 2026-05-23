@@ -35,7 +35,7 @@ func TestLowerShapeLayer_EmptyHasLayrChunk(t *testing.T) {
 	}
 }
 
-func TestLowerShapeLayer_LdtaIs160Bytes(t *testing.T) {
+func TestLowerShapeLayer_LdtaIs164Bytes(t *testing.T) {
 	base := &aep.Layer{Type: aep.LayerTypeShape, Name: "S1", ID: 13}
 	s := aep.WrapShapeLayer(base)
 	chunk, err := aep.LowerShapeLayerForTest(s)
@@ -46,9 +46,11 @@ func TestLowerShapeLayer_LdtaIs160Bytes(t *testing.T) {
 	if ldta == nil {
 		t.Fatal("ldta missing")
 	}
-	// AE 2020 canonical = 160 bytes (RE-S1; spec §4.2).
-	if len(ldta.Data) != 160 {
-		t.Fatalf("ldta size = %d, want 160 (AE 2020 canonical per RE-S1)", len(ldta.Data))
+	// Iter 4 RE: AE 2025 saves ShapeLayer ldta as 164 B (trailing 4 B zero).
+	// V2.2 builder bumped to 164 B so user Layr matches AE-saved fixture
+	// byte-for-byte. AE 2020 has been observed to accept 164 B too.
+	if len(ldta.Data) != 164 {
+		t.Fatalf("ldta size = %d, want 164 (AE 2025 canonical per iter 4 RE)", len(ldta.Data))
 	}
 }
 

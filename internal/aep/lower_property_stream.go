@@ -31,6 +31,7 @@ import (
 // see capability_matrix.go); nextLayerID is plumbed for Phase 3.
 type lowerCtx struct {
 	tickRate     float64
+	compDuration float64 // seconds — owning comp's Duration (for ldta out-point)
 	capabilities AECapabilities
 	nextLayerID  func() uint32
 }

@@ -56,14 +56,20 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	outer := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	outer.Children = append(outer.Children, makeTdsb(), makeTdsn(""))
 
-	if s.shapeRootGroup != nil && len(s.shapeRootGroup.Children) > 0 {
-		outer.Children = append(outer.Children, makeTdmn("ADBE Root Vectors Group"))
-		rootGroupTdgp, err := lowerVectorGroup(s.shapeRootGroup, ctx)
-		if err != nil {
-			return nil, err
-		}
-		outer.Children = append(outer.Children, rootGroupTdgp)
+	// Root Vectors Group is ALWAYS emitted on ShapeLayer (per iter 4 bisection
+	// #2 finding: AE 2025 rejects ShapeLayer even with zero shapes when Root
+	// Vectors Group is absent; tolerance.aep dumps confirm AE always emits it).
+	// lowerVectorGroup handles an empty VectorGroup (3-child LIST(tdgp): tdsb +
+	// tdsn("Contents") + Group End).
+	if s.shapeRootGroup == nil {
+		s.shapeRootGroup = NewVectorGroup()
 	}
+	outer.Children = append(outer.Children, makeTdmn("ADBE Root Vectors Group"))
+	rootGroupTdgp, err := lowerVectorGroup(s.shapeRootGroup, ctx)
+	if err != nil {
+		return nil, err
+	}
+	outer.Children = append(outer.Children, rootGroupTdgp)
 
 	transformWrapper, err := lowerLayerTransform(s.shapeTransform, ctx)
 	if err != nil {
@@ -161,7 +167,23 @@ func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 // is at byte 0x27 bit0 (per parse_layer.go decoder); default Visible = true
 // → 0x01.
 func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
-	d := make([]byte, ldtaSize2020)
+	// 164 B (AE 2025 canonical) — trailing 4 B zero. AE 2020 has been observed
+	// to accept 164 B too (template's DLay is 160 B, but our user Layr matches
+	// AE-saved ShapeLayer fixtures = 164 B).
+	d := make([]byte, ldtaSize2025)
+
+	tickRate := uint32(0)
+	if ctx != nil && ctx.tickRate > 0 {
+		tickRate = uint32(ctx.tickRate)
+	}
+	if tickRate == 0 {
+		tickRate = 30720 // AE default 30 fps tick rate
+	}
+	duration := 1.0
+	if ctx != nil && ctx.compDuration > 0 {
+		duration = ctx.compDuration
+	}
+	outTicks := uint32(duration * float64(tickRate))
 
 	// @0x00 — layer-local ID.
 	binary.BigEndian.PutUint32(d[ldtaLayerID:ldtaLayerID+4], s.ID)
@@ -169,27 +191,40 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	// @0x04 — Quality. 2 = Best (AE default for new layers).
 	binary.BigEndian.PutUint16(d[ldtaQuality:ldtaQuality+2], 2)
 
-	// @0x08 — StretchDividend. 100 (= 100% stretch).
-	binary.BigEndian.PutUint32(d[ldtaStretchDivd:ldtaStretchDivd+4], 100)
-	// @0x6C — StretchDivisor. 100 (paired with dividend for 1× speed).
-	binary.BigEndian.PutUint32(d[ldtaStretchDivs:ldtaStretchDivs+4], 100)
+	// @0x08 — StretchDividend = 1 (per tolerance.aep iter 4 RE).
+	// @0x6C — StretchDivisor = 1 (1/1 = 1× speed).
+	binary.BigEndian.PutUint32(d[ldtaStretchDivd:ldtaStretchDivd+4], 1)
+	binary.BigEndian.PutUint32(d[ldtaStretchDivs:ldtaStretchDivs+4], 1)
 
-	// In/Out points: span the full source / comp default. AE writes
-	// dividend=0, divisor=1 for fresh layers; out-point dividend = sentinel
-	// (-1 cast to u32). Keep both divisors = 1 to avoid div-by-zero in
-	// parsers.
-	binary.BigEndian.PutUint32(d[ldtaInPointDivd:ldtaInPointDivd+4], 0)
-	binary.BigEndian.PutUint32(d[ldtaInPointDivs:ldtaInPointDivs+4], 1)
-	binary.BigEndian.PutUint32(d[ldtaOutPointDivd:ldtaOutPointDivd+4], 0xFFFFFFFF)
-	binary.BigEndian.PutUint32(d[ldtaOutPointDivs:ldtaOutPointDivs+4], 1)
-
-	// StartTime: 0/1.
+	// Time fields are encoded as (ticks_dividend, ticks/sec_divisor). Per
+	// iter 4 RE of tolerance.aep: divisor = TickRate (30720 for 30fps), NOT
+	// 1. Our previous 0/1 encoding made AE compute zero-duration layers and
+	// silently drop them from comp.layers.
 	binary.BigEndian.PutUint32(d[ldtaStartTimeDivd:ldtaStartTimeDivd+4], 0)
-	binary.BigEndian.PutUint32(d[ldtaStartTimeDivs:ldtaStartTimeDivs+4], 1)
+	binary.BigEndian.PutUint32(d[ldtaStartTimeDivs:ldtaStartTimeDivs+4], tickRate)
+	binary.BigEndian.PutUint32(d[ldtaInPointDivd:ldtaInPointDivd+4], 0)
+	binary.BigEndian.PutUint32(d[ldtaInPointDivs:ldtaInPointDivs+4], tickRate)
+	binary.BigEndian.PutUint32(d[ldtaOutPointDivd:ldtaOutPointDivd+4], outTicks)
+	binary.BigEndian.PutUint32(d[ldtaOutPointDivs:ldtaOutPointDivs+4], tickRate)
 
-	// Attr bytes — visible bit at byte 0x27 bit0 (parse_layer.go decoder).
-	// Default Visible = true for fresh ShapeLayer.
-	d[ldtaAttrByte2] = 0x01
+	// Attr bytes — tolerance.aep ShapeLayer @0x27 = 0x87 (visible + audio +
+	// effects + collapse-transform). Per write_layer.go flag map:
+	//   bit0 0x01 visible / bit1 0x02 audio-enabled / bit2 0x04 effects-enabled
+	//   bit3 0x08 motion-blur / bit7 0x80 collapse-transform
+	d[ldtaAttrByte2] = 0x87
+
+	// AttrByte0 @0x25: tolerance has bit0 set (0x01). Not in the documented
+	// bit map (parse_layer.go doc covers bit1/2/4/6). Empirically required —
+	// AE 2025 silently drops ShapeLayer from comp.layers without it (iter 4
+	// RE finding). Speculated as "layer-real" / "ready" / "validated" flag.
+	d[0x25] = 0x01
+
+	// @0x3B: tolerance sets to 0x01 (unknown semantics; iter 4 RE match).
+	d[0x3B] = 0x01
+	// @0x3D: label color index. AE default Shape = 0x08 (per tolerance.aep).
+	d[0x3D] = 0x08
+	// @0x63: blending mode (parse_layer.go doc). Tolerance ShapeLayer = 0x02.
+	d[0x63] = 0x02
 
 	// @0x40 — legacy 32-byte name slot. Mirror up to 31 bytes of name +
 	// NUL terminator. Parser ignores this in favor of the Utf8 chunk, but
@@ -207,7 +242,6 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	// @0x84 — ParentID. 0 = no parent.
 	binary.BigEndian.PutUint32(d[ldtaParentID:ldtaParentID+4], s.ParentID)
 
-	_ = ctx // reserved for capability-driven branches (V3)
 	return d
 }
 
