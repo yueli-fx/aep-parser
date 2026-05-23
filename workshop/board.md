@@ -2,21 +2,33 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 3 — fix B 6-axis Transform schema (min-viable over-emit + Orientation otst + Position_0/_1 split + hydrate combine)；AE 2025 仍同错 (14s reject)；3 fixes necessary but not yet sufficient；PASS = **173 / 0 FAIL**)
-**Active focus**: 🔴 V2.2 ship gate iter 4 — fix C (tdum/tduM + cdat per-dim padding) 或 minimum-failing bisection。fix A+iter2+iter3 三组 structural 修都对了但 AE 还拒。需缩范围。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 3 完 — Transform 6-axis schema + Orientation otst + Position_0/_1 split + hydrate combine 落；AE 2025 仍同错但 14s reject (iter 2 是 46s) 暗示 reject 点前移；用户决定下 session 切 **bisection 优先**，不再 stack schema fix；PASS = **173 / 0 FAIL**)
+**Active focus**: 🟡 V2.2 ship gate iter 4 — **minimum-failing bisection**。用户判：iter 2+3 没 shift error signal = 继续 stack 收益下降，应该先找 AE "第一个不可接受点"。dump 结构已基本对齐 tolerance，问题转入 AE decode 规则层。fix C (tdum/tduM + cdat padding) 仍待，但放 bisection 框架里验。
 
 ## Next session 进来先做
 
 1. 确认 PASS = **173** + vet clean
-2. **ship gate iter 4 — 二选一**:
-   - **路线 A: fix C (tdum/tduM + cdat per-dim padding)**：详见 `workshop/scars/v2-2-aelayer-structure.md` "Phase 5 fix order 修正后" 第 2 步。Tolerance 详:
-     - `ADBE Position_0` static: `cdat (40B) + tdum (8B) + tduM (8B)`
-     - `ADBE Vector Rect Size` static: `cdat (80B)` ← 我们 emit 48B (per-dim padding 错)
-     - 改 `lower_property_stream.go::makeCdat` + `canonicalCdatSize`，spatial property 后 append tdum + tduM
-   - **路线 B: minimum-failing bisection**：写 `tmp_debug/gen_minimum_failing/main.go` 出 1 个 empty ShapeLayer (无 shape 节点 / 无 keyframe / default transform)。跑 AE → 看是否仍同错。若 fail 同错 = 问题在 Layer 骨架；若 PASS = 问题在 shape/keyframe emit。
-3. iter 4 PASS → Phase 5 剩 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
-4. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` (无需关 2020；2020 跑前要关 2025)
-5. 诊断工具齐: `tmp_debug/gen_canonical_failing/` 重建；`tmp_debug/dump_chunks/<path>` dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` baseline；`tmp_debug/test_hydrate/` 直 hydrate 验
+2. **iter 4 — minimum-failing bisection**。背景：V2.1 (无 Layr) 已 PASS AE 2025；V2.2 (3 ShapeLayer) FAIL。中间梯度逐档加，找**第一个 FAIL 的变体**。每变体 → AE 跑 → 看错号变 / 同 / PASS。
+3. **Bisection 矩阵**（baseline → 复杂度递增）:
+   | # | 变体 | 预期 |
+   |---|---|---|
+   | 0 | V2.1 empty project (无 comp) | PASS (已知) |
+   | 1 | V2.1 + empty comp | PASS (已知 — V2.1 ship gate baseline) |
+   | 2 | + 1 × `NewShapeLayer("L")` 无 mutation | ? |
+   | 3 | + `L.RootGroup().AddRect()` 默认值 | ? |
+   | 4 | + `rect.SetSize([2]float64{200,200})` 静态 | ? |
+   | 5 | + `L.RootGroup().AddFill()` 静态 color | ? |
+   | 6 | + `rect.Size().AddKeyframeLinear(0, ...)` 单 keyframe | ? |
+   | 7 | + `L.Position().AddKeyframeLinear` 空间 keyframe | ? |
+4. **实施建议**：写 `tmp_debug/gen_minimum_failing/main.go` 接 `-variant N` flag (2..7)，每跑改 flag + 重跑 ship gate。或更简单：直接改 main.go body 用 `// step N` 注释切，linear progression。
+5. **结论用法**:
+   - **#2 FAIL 同错** = 问题在 Layer 骨架 (ldta? Layr wrapper? Transform Group emit?) — fix B 后还有别的
+   - **#2 PASS, #3 FAIL** = shape 节点 emit (lower_shape_node.go)
+   - **#4 PASS, #6 FAIL** = keyframe encoding (lhd3/ldat 字节布局)
+   - **#6 PASS, #7 FAIL** = spatial-specific (tdum/tduM / spatial cdat padding) — 此时 fix C 是答案
+6. **找到 first FAIL 之后**：byte-level diff first-FAIL aep vs tolerance.aep (同一 chunk type 段)，hex compare 找差异点。`tmp_debug/dump_chunks/<path>` + xxd 配合。
+7. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s`。**注意**：当前 ship gate test 写死了 3-ShapeLayer canonical 项目；bisection 时要么改 test，要么 bypass test 直接跑 `gen_minimum_failing/main.go` 出 aep + 手动 AfterFX 试。后者更简单。
+8. 诊断工具齐: `tmp_debug/gen_canonical_failing/` 重建；`tmp_debug/dump_chunks/<path>` dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` baseline
 
 ## V2.2 进度地图（本会话快照）
 
