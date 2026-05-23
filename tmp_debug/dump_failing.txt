@@ -1241,396 +1241,663 @@
       [LIST Layr]
         ldta (160 B)
         Utf8 (19 B)
-        tdmn = ADBE Root Vectors Group (40 B)
         [LIST tdgp]
           tdsb (4 B)
-          tdsn (16 B)
-          tdmn = ADBE Vector Shape - Rect (40 B)
+          tdsn (8 B)
+          tdmn = ADBE Root Vectors Group (40 B)
           [LIST tdgp]
-            tdsb (4 B)
-            tdsn (22 B)
-            tdmn = ADBE Vector Shape Direction (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (17 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Rect Size (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (12 B)
-              tdb4 (124 B)
-              [LIST list]
-                lhd3 (52 B)
-                ldat (208 B)
-            tdmn = ADBE Vector Rect Position (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (16 B)
-              tdb4 (124 B)
-              cdat (48 B)
-            tdmn = ADBE Vector Rect Roundness (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (17 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Group End (40 B)
-          tdmn = ADBE Vector Graphic - Fill (40 B)
-          [LIST tdgp]
-            tdsb (4 B)
-            tdsn (12 B)
-            tdmn = ADBE Vector Blend Mode (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (18 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Composite Order (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (23 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Fill Rule (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (17 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Fill Color (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdb4 (124 B)
-              [LIST list]
-                lhd3 (52 B)
-                ldat (336 B)
-            tdmn = ADBE Vector Fill Opacity (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (15 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Group End (40 B)
-          tdmn = ADBE Group End (40 B)
-        tdmn = ADBE Transform Group (40 B)
-        [LIST tdgp]
-          tdsb (4 B)
-          tdsn (17 B)
-          tdmn = ADBE Anchor Point (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (20 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Position (40 B)
-          [LIST tdbs]
             tdsb (4 B)
             tdsn (16 B)
-            tdb4 (124 B)
-            [LIST list]
-              lhd3 (52 B)
-              ldat (208 B)
-          tdmn = ADBE Scale (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (13 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Rotate Z (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (16 B)
-            tdb4 (124 B)
-            cdat (40 B)
-          tdmn = ADBE Opacity (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (15 B)
-            tdb4 (124 B)
-            cdat (40 B)
-          tdmn = ADBE Group End (40 B)
-      [LIST Layr]
-        ldta (160 B)
-        Utf8 (22 B)
-        tdmn = ADBE Root Vectors Group (40 B)
-        [LIST tdgp]
-          tdsb (4 B)
-          tdsn (16 B)
-          tdmn = ADBE Vector Shape - Ellipse (40 B)
-          [LIST tdgp]
-            tdsb (4 B)
-            tdsn (20 B)
-            tdmn = ADBE Vector Shape Direction (40 B)
+            tdmn = ADBE Vector Shape - Rect (40 B)
             [LIST tdgp]
               tdsb (4 B)
-              tdsn (17 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Ellipse Size (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (12 B)
-              tdb4 (124 B)
-              cdat (48 B)
-            tdmn = ADBE Vector Ellipse Position (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (16 B)
-              tdb4 (124 B)
-              cdat (48 B)
-            tdmn = ADBE Group End (40 B)
-          tdmn = ADBE Vector Graphic - Stroke (40 B)
-          [LIST tdgp]
-            tdsb (4 B)
-            tdsn (14 B)
-            tdmn = ADBE Vector Blend Mode (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (18 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Composite Order (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (23 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Color (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdb4 (124 B)
-              cdat (96 B)
-            tdmn = ADBE Vector Stroke Opacity (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (15 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Vector Stroke Width (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Vector Stroke Line Cap (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (16 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Line Join (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (17 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Miter Limit (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (19 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Dashes (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (14 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Taper (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Wave (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (12 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Group End (40 B)
-          tdmn = ADBE Group End (40 B)
-        tdmn = ADBE Transform Group (40 B)
-        [LIST tdgp]
-          tdsb (4 B)
-          tdsn (17 B)
-          tdmn = ADBE Anchor Point (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (20 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Position (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (16 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Scale (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (13 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Rotate Z (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (16 B)
-            tdb4 (124 B)
-            cdat (40 B)
-          tdmn = ADBE Opacity (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (15 B)
-            tdb4 (124 B)
-            cdat (40 B)
-          tdmn = ADBE Group End (40 B)
-      [LIST Layr]
-        ldta (160 B)
-        Utf8 (23 B)
-        tdmn = ADBE Root Vectors Group (40 B)
-        [LIST tdgp]
-          tdsb (4 B)
-          tdsn (16 B)
-          tdmn = ADBE Vector Shape - Group (40 B)
-          [LIST tdgp]
-            tdsb (4 B)
-            tdsn (12 B)
-            tdmn = ADBE Vector Shape (40 B)
-            [LIST om-s]
+              tdsn (22 B)
+              tdmn = ADBE Vector Shape Direction (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Rect Size (40 B)
               [LIST tdbs]
                 tdsb (4 B)
                 tdsn (12 B)
                 tdb4 (124 B)
-                cdat (4 B)
-              [LIST omks]
-                [LIST shap]
-                  shph (24 B)
-                  [LIST list]
-                    lhd3 (52 B)
-                    ldat (96 B)
-                  omtn (0 B)
-            tdmn = ADBE Group End (40 B)
-          tdmn = ADBE Vector Graphic - Fill (40 B)
-          [LIST tdgp]
-            tdsb (4 B)
-            tdsn (12 B)
-            tdmn = ADBE Vector Blend Mode (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (18 B)
+                [LIST list]
+                  lhd3 (52 B)
+                  ldat (208 B)
+              tdmn = ADBE Vector Rect Position (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (16 B)
+                tdb4 (124 B)
+                cdat (48 B)
+              tdmn = ADBE Vector Rect Roundness (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdb4 (124 B)
+                cdat (40 B)
               tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Composite Order (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (23 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Fill Rule (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (17 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Fill Color (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdb4 (124 B)
-              cdat (96 B)
-            tdmn = ADBE Vector Fill Opacity (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (15 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Group End (40 B)
-          tdmn = ADBE Vector Graphic - Stroke (40 B)
-          [LIST tdgp]
-            tdsb (4 B)
-            tdsn (14 B)
-            tdmn = ADBE Vector Blend Mode (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (18 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Composite Order (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (23 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Color (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdb4 (124 B)
-              cdat (96 B)
-            tdmn = ADBE Vector Stroke Opacity (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (15 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Vector Stroke Width (40 B)
-            [LIST tdbs]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdb4 (124 B)
-              cdat (40 B)
-            tdmn = ADBE Vector Stroke Line Cap (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (16 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Line Join (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (17 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Miter Limit (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (19 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Dashes (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (14 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Taper (40 B)
-            [LIST tdgp]
-              tdsb (4 B)
-              tdsn (13 B)
-              tdmn = ADBE Group End (40 B)
-            tdmn = ADBE Vector Stroke Wave (40 B)
+            tdmn = ADBE Vector Graphic - Fill (40 B)
             [LIST tdgp]
               tdsb (4 B)
               tdsn (12 B)
+              tdmn = ADBE Vector Blend Mode (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (18 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Composite Order (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (23 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Fill Rule (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Fill Color (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdb4 (124 B)
+                [LIST list]
+                  lhd3 (52 B)
+                  ldat (336 B)
+              tdmn = ADBE Vector Fill Opacity (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (15 B)
+                tdb4 (124 B)
+                cdat (40 B)
               tdmn = ADBE Group End (40 B)
             tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Transform Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (17 B)
+            tdmn = ADBE Anchor Point (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (20 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Position (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (16 B)
+              tdb4 (124 B)
+              [LIST list]
+                lhd3 (52 B)
+                ldat (208 B)
+            tdmn = ADBE Scale (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (13 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Rotate Z (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (16 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Opacity (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (15 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Layer Styles (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Blend Options Group (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Adv Blend Group (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (8 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = dropShadow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = innerShadow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = outerGlow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = innerGlow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = bevelEmboss/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = chromeFX/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = solidFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = gradientFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = patternFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = frameFX/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Extrsn Options Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Material Options Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Audio Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Layer Sets (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
           tdmn = ADBE Group End (40 B)
-        tdmn = ADBE Transform Group (40 B)
+      [LIST Layr]
+        ldta (160 B)
+        Utf8 (22 B)
         [LIST tdgp]
           tdsb (4 B)
-          tdsn (17 B)
-          tdmn = ADBE Anchor Point (40 B)
-          [LIST tdbs]
-            tdsb (4 B)
-            tdsn (20 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Position (40 B)
-          [LIST tdbs]
+          tdsn (8 B)
+          tdmn = ADBE Root Vectors Group (40 B)
+          [LIST tdgp]
             tdsb (4 B)
             tdsn (16 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Scale (40 B)
-          [LIST tdbs]
+            tdmn = ADBE Vector Shape - Ellipse (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (20 B)
+              tdmn = ADBE Vector Shape Direction (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Ellipse Size (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (12 B)
+                tdb4 (124 B)
+                cdat (48 B)
+              tdmn = ADBE Vector Ellipse Position (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (16 B)
+                tdb4 (124 B)
+                cdat (48 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Vector Graphic - Stroke (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (14 B)
+              tdmn = ADBE Vector Blend Mode (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (18 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Composite Order (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (23 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Color (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdb4 (124 B)
+                cdat (96 B)
+              tdmn = ADBE Vector Stroke Opacity (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (15 B)
+                tdb4 (124 B)
+                cdat (40 B)
+              tdmn = ADBE Vector Stroke Width (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdb4 (124 B)
+                cdat (40 B)
+              tdmn = ADBE Vector Stroke Line Cap (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (16 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Line Join (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Miter Limit (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (19 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Dashes (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (14 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Taper (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Wave (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (12 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Transform Group (40 B)
+          [LIST tdgp]
             tdsb (4 B)
-            tdsn (13 B)
-            tdb4 (124 B)
-            cdat (48 B)
-          tdmn = ADBE Rotate Z (40 B)
-          [LIST tdbs]
+            tdsn (17 B)
+            tdmn = ADBE Anchor Point (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (20 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Position (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (16 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Scale (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (13 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Rotate Z (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (16 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Opacity (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (15 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Layer Styles (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Blend Options Group (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Adv Blend Group (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (8 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = dropShadow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = innerShadow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = outerGlow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = innerGlow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = bevelEmboss/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = chromeFX/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = solidFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = gradientFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = patternFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = frameFX/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Extrsn Options Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Material Options Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Audio Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Layer Sets (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Group End (40 B)
+      [LIST Layr]
+        ldta (160 B)
+        Utf8 (23 B)
+        [LIST tdgp]
+          tdsb (4 B)
+          tdsn (8 B)
+          tdmn = ADBE Root Vectors Group (40 B)
+          [LIST tdgp]
             tdsb (4 B)
             tdsn (16 B)
-            tdb4 (124 B)
-            cdat (40 B)
-          tdmn = ADBE Opacity (40 B)
-          [LIST tdbs]
+            tdmn = ADBE Vector Shape - Group (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (12 B)
+              tdmn = ADBE Vector Shape (40 B)
+              [LIST om-s]
+                [LIST tdbs]
+                  tdsb (4 B)
+                  tdsn (12 B)
+                  tdb4 (124 B)
+                  cdat (4 B)
+                [LIST omks]
+                  [LIST shap]
+                    shph (24 B)
+                    [LIST list]
+                      lhd3 (52 B)
+                      ldat (96 B)
+                    omtn (0 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Vector Graphic - Fill (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (12 B)
+              tdmn = ADBE Vector Blend Mode (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (18 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Composite Order (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (23 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Fill Rule (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Fill Color (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdb4 (124 B)
+                cdat (96 B)
+              tdmn = ADBE Vector Fill Opacity (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (15 B)
+                tdb4 (124 B)
+                cdat (40 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Vector Graphic - Stroke (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (14 B)
+              tdmn = ADBE Vector Blend Mode (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (18 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Composite Order (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (23 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Color (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdb4 (124 B)
+                cdat (96 B)
+              tdmn = ADBE Vector Stroke Opacity (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (15 B)
+                tdb4 (124 B)
+                cdat (40 B)
+              tdmn = ADBE Vector Stroke Width (40 B)
+              [LIST tdbs]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdb4 (124 B)
+                cdat (40 B)
+              tdmn = ADBE Vector Stroke Line Cap (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (16 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Line Join (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (17 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Miter Limit (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (19 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Dashes (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (14 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Taper (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (13 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Vector Stroke Wave (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (12 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Transform Group (40 B)
+          [LIST tdgp]
             tdsb (4 B)
-            tdsn (15 B)
-            tdb4 (124 B)
-            cdat (40 B)
+            tdsn (17 B)
+            tdmn = ADBE Anchor Point (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (20 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Position (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (16 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Scale (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (13 B)
+              tdb4 (124 B)
+              cdat (48 B)
+            tdmn = ADBE Rotate Z (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (16 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Opacity (40 B)
+            [LIST tdbs]
+              tdsb (4 B)
+              tdsn (15 B)
+              tdb4 (124 B)
+              cdat (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Layer Styles (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Blend Options Group (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Adv Blend Group (40 B)
+              [LIST tdgp]
+                tdsb (4 B)
+                tdsn (8 B)
+                tdmn = ADBE Group End (40 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = dropShadow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = innerShadow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = outerGlow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = innerGlow/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = bevelEmboss/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = chromeFX/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = solidFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = gradientFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = patternFill/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = frameFX/enabled (40 B)
+            [LIST tdgp]
+              tdsb (4 B)
+              tdsn (8 B)
+              tdmn = ADBE Group End (40 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Extrsn Options Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Material Options Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Audio Group (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
+          tdmn = ADBE Layer Sets (40 B)
+          [LIST tdgp]
+            tdsb (4 B)
+            tdsn (8 B)
+            tdmn = ADBE Group End (40 B)
           tdmn = ADBE Group End (40 B)
     [LIST FEE ]
     fvdv (4 B)

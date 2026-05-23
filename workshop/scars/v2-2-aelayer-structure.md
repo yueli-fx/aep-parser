@@ -137,6 +137,59 @@ tdum/tduM 估计是 min/max spatial bound（uniform pair? 64-bit float each）�
 
 PASS 173 不变，0 FAIL，vet clean。
 
+## iter 2 实施记 — 5 placeholder 落 (本 commit)
+
+`lower_layer.go::lowerShapeLayer` outer LIST(tdgp) 在 Transform Group 之后、Group End 之前，加 5 个 placeholder property group：
+
+1. **ADBE Layer Styles** — 完整嵌套结构（Blend Options Group + Adv Blend Group + 10×fx/enabled empty 3-child + Group End）— `appendLayerStylesPlaceholder` helper。
+2. **ADBE Extrsn Options Group** — 空 3-child。
+3. **ADBE Material Options Group** — 空 3-child。
+4. **ADBE Audio Group** — 空 3-child。
+5. **ADBE Layer Sets** — 空 3-child。
+
+新 helper `emptyPropGroup()` 出空 3-child LIST(tdgp) [tdsb + tdsn("") + tdmn("ADBE Group End")]。
+
+dump_failing.txt 结构对照 tolerance.aep dump 145-361 行 **完全一致**（除 cdat/tdbs body 内部细节 = fix C）。
+
+**AE 2025 ship gate**: 同错（"默认/imager/颜色管理/自定义 渲染设置可能无效"，46s timeout 内 FAIL）。按本 scar 诊断规则 "错误同说明无关"，placeholder 不是 critical 项。但 placeholder 结构正确，留下不害事 — fix B/C 实测前不必 revert。
+
+## iter 2 新 RE 发现 — Transform Group 6-axis pure schema
+
+读 tolerance.aep dump 101-144 行（**真正的 ShapeLayer Transform Group**，不是 DLay 的）发现:
+
+- ShapeLayer 的 Transform Group **只含 6 stream**: `ADBE Position_0 / Position_1 / Orientation / Rotate X / Rotate Y / Envir Appear in Reflect`
+- **完全没有** Anchor Point / Position (2-vec) / Scale / Rotate Z / Opacity
+- 对比 DLay (camera/3D) Transform Group (lines 392-444) 有 Anchor + Position_0/_1/_2 + Scale + Rotate Z + Opacity + Envir Appear — schema 是 layer-subtype 相关的
+
+**结论**: AE 的 ShapeLayer "always emit" set = 6-axis defaults (Position_0/_1 + Orientation + RotateX/Y + Envir Appear)。Anchor/Scale/Opacity/RotateZ 在用户没显式 set 时全部 elide。
+
+**我们 V2.2 现行的 2D 5-stream 形式 (Anchor / Position / Scale / Rotate Z / Opacity) AE 不认**。即便 Phase 4 Go roundtrip PASS — 我们 parser 容错 + always-emit 自洽 — AE 严格 reject。
+
+**fix B 真实形态**:
+
+`lowerLayerTransform(t *LayerTransform, ctx)` 改写为 ShapeLayer-flavored:
+- 总 emit 6 stream defaults: Position_0/_1, Orientation, RotateX, RotateY, Envir Appear (always emit per AE convention)
+- runtime `t.position` ([2]float64) → 拆 Position_0 (X) + Position_1 (Y)；keyframe 同样拆
+- runtime `t.anchorPoint` / `t.scale` / `t.rotation` / `t.opacity` **仅在 stream.Mode != ModeUnset (= 用户调过)** 时额外 emit `ADBE Anchor Point` / `ADBE Scale` / `ADBE Rotate Z` / `ADBE Opacity` (combined-vector form, sit 在 6-axis defaults 之后)
+
+策略变更：从 "always emit" 改 "selective emit" (defaults elide except 6-axis defaults)。需:
+1. PropertyStream.Mode 加 "Unset" 区分（默认值且未触发 setter）
+2. NewShapeLayer 初始化 stream 时不预设值（Unset 状态）
+3. SetXxx() 触发 Mode → ModeStatic + 值
+4. AddKeyframeLinear() 触发 Mode → ModeAnimated
+5. lower 时只 emit 非 Unset 的 stream
+
+或更简单方案：保留 always-emit 但改 schema 名 (Position 拆成 Position_0/_1 + 加 4 个 defaults Orientation/RotateX/Y/EnvirAppear)，accept AE 接受 over-emit。需 RE 验证。
+
+**hydrate 端**：parseLayer 的 hydrateLayerTransform 跟着改 — 读 Position_0/_1 → 合成 [2]float64 position；其它 stream 按 matchName fallback。
+
+## Phase 5 fix order 修正后 (iter 2 后)
+
+1. **A done** + **iter 2 done** — outer wrapper + 5 placeholder。结构 OK，AE 同错。
+2. **下一步 fix B** — Transform 6-axis schema rewrite (上节详)。预测：fix B 落 → AE 错误信号变 (不再 parse-time hard reject 或换错号)。若仍同错，则 fix C 也是必需的组合。
+3. **fix C** — spatial property tdum/tduM emit + cdat per-dim padding 矫正。
+4. fix C 后仍 reject → 启动 byte-level diff (hex compare 单 Layr block)。
+
 ## 永久教训 → CLAUDE.md / scars
 
 V2.2 Phase 4 Go roundtrip PASS **不代表 AE 接受**。Go parser 写 tolerant，AE parse 严格。下次类似 "writer + ship gate" 流程 phase 顺序要把 ship gate 提前。

@@ -77,10 +77,79 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	transformBody := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: transformWrapper.Children[1:]}
 	outer.Children = append(outer.Children, transformBody)
 
+	// Layer-property-group placeholders AE 2020/25 emit on every ShapeLayer
+	// (tolerance.aep dump line 145-361). Ship-gate iter 1 (fix A only) still
+	// rejected — iter 2 adds these placeholders. Layer Styles has the
+	// canonical Blend Options + 10 fx/enabled nested-empty structure; the
+	// other four are emitted as empty 3-child LIST(tdgp).
+	appendLayerStylesPlaceholder(outer)
+	outer.Children = append(outer.Children,
+		makeTdmn("ADBE Extrsn Options Group"), emptyPropGroup(),
+		makeTdmn("ADBE Material Options Group"), emptyPropGroup(),
+		makeTdmn("ADBE Audio Group"), emptyPropGroup(),
+		makeTdmn("ADBE Layer Sets"), emptyPropGroup(),
+	)
+
 	outer.Children = append(outer.Children, makeTdmn("ADBE Group End"))
 	layr.Children = append(layr.Children, outer)
 
 	return layr, nil
+}
+
+// emptyPropGroup returns an empty 3-child LIST(tdgp) placeholder:
+// [tdsb, tdsn(""), tdmn("ADBE Group End")]. AE emits this shape for every
+// layer-property group at default (Audio / Layer Sets / Extrsn / Material).
+func emptyPropGroup() *rifx.Chunk {
+	g := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	g.Children = append(g.Children,
+		makeTdsb(),
+		makeTdsn(""),
+		makeTdmn("ADBE Group End"),
+	)
+	return g
+}
+
+// appendLayerStylesPlaceholder appends `tdmn(ADBE Layer Styles) +
+// LIST(tdgp, canonical nested structure)` to outer. The canonical body
+// per tolerance.aep dump line 145-209 holds:
+//   - tdsb + tdsn
+//   - tdmn(ADBE Blend Options Group) + LIST(tdgp){ tdsb + tdsn +
+//     tdmn(ADBE Adv Blend Group) + emptyPropGroup() + Group End }
+//   - 10 × (tdmn(fxName/enabled) + emptyPropGroup())
+//   - tdmn(ADBE Group End)
+func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
+	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	body.Children = append(body.Children, makeTdsb(), makeTdsn(""))
+
+	blendOpts := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	blendOpts.Children = append(blendOpts.Children,
+		makeTdsb(),
+		makeTdsn(""),
+		makeTdmn("ADBE Adv Blend Group"), emptyPropGroup(),
+		makeTdmn("ADBE Group End"),
+	)
+	body.Children = append(body.Children,
+		makeTdmn("ADBE Blend Options Group"), blendOpts,
+	)
+
+	fxNames := []string{
+		"dropShadow/enabled",
+		"innerShadow/enabled",
+		"outerGlow/enabled",
+		"innerGlow/enabled",
+		"bevelEmboss/enabled",
+		"chromeFX/enabled",
+		"solidFill/enabled",
+		"gradientFill/enabled",
+		"patternFill/enabled",
+		"frameFX/enabled",
+	}
+	for _, n := range fxNames {
+		body.Children = append(body.Children, makeTdmn(n), emptyPropGroup())
+	}
+	body.Children = append(body.Children, makeTdmn("ADBE Group End"))
+
+	outer.Children = append(outer.Children, makeTdmn("ADBE Layer Styles"), body)
 }
 
 // buildLdtaBytes returns the 160-byte canonical ldta payload for a

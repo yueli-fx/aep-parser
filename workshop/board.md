@@ -2,18 +2,20 @@
 
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
-**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 1 — fix A 已落 + dirty gate；AE 2025 仍同错（同错信号 → 单 A 不够，需 + outer placeholders）；PASS = **173 / 0 FAIL**)
-**Active focus**: 🔴 V2.2 ship gate iteration — fix A (outer LIST(tdgp) wrapper) 落，AE 同错→需进 outer 加 Layer Styles + Material Options + Audio Group + Layer Sets placeholder。scar 已更新实施记 + 修正 fix 顺序。
+**Last updated**: 2026-05-23 by claude (V2.2 Phase 5 ship gate iter 2 — 5 placeholder 落 (Layer Styles + Extrsn + Material + Audio + Layer Sets)；AE 2025 同错 → placeholder ≠ critical, fix B (Transform 6-axis) 才是；PASS = **173 / 0 FAIL**)
+**Active focus**: 🔴 V2.2 ship gate iter 3 — fix B Transform 6-axis schema 重写。iter 2 RE 发现 tolerance.aep ShapeLayer Transform 只 6 stream (Position_0/_1 + Orientation + RotateX/Y + Envir Appear)，**无 Anchor/Scale/Opacity/RotateZ**。当前 V2.2 emit 2D 5-stream AE 拒。scar 已更新 + 描述 fix B 真实形态。
 
 ## Next session 进来先做
 
 1. 确认 PASS = **173** + vet clean
-2. **直接 ship gate iter 2** — 读 `workshop/scars/v2-2-aelayer-structure.md` "## Phase 5 fix order" 修正后段：
-   - 当前 outer 只含 Root Vectors + Transform + Group End。AE 同错 = 不够。
-   - 加 Layer Styles + Material Options + Extrsn Options + Audio Group + Layer Sets empty placeholder（tolerance dump line 144-345 全 chunk 列表）
-   - 每加一组跑 ship gate → 错误变了说明 critical；错误同说明无关
-3. ship gate PASS 后 → fix B Transform schema (6-axis)，fix C tdum/tduM。每 fix 跑 ship gate 验。
-4. ship gate 全 PASS → Phase 5 剩 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
+2. **ship gate iter 3 — fix B Transform 6-axis schema 重写**。详见 `workshop/scars/v2-2-aelayer-structure.md` "## iter 2 新 RE 发现" 段:
+   - `lowerLayerTransform` 改 emit 6-axis defaults: Position_0/_1, Orientation, RotateX, RotateY, Envir Appear（always emit）
+   - runtime `t.position` [x,y] → 拆 Position_0 (X) + Position_1 (Y)
+   - Anchor/Scale/Opacity/RotateZ 仅在 user 显式 set (Mode != Unset) 时 emit；需 PropertyStream 加 Unset state
+   - 同步改 `hydrate_shape.go::hydrateLayerTransform`：读 Position_0/_1 → 合 [2]float64
+   - 改完跑 `AE_SHIP_GATE=1 go test ./internal/aep/ -run TestV2_2_AEShipGate_AE2025` 验
+3. iter 3 PASS → fix C (tdum/tduM 暂未碰)
+4. 全 PASS → Phase 5 剩 Task 5.5 (opaque preservation) + 5.6 (AE reopen) → Phase 6 docs sync
 5. Claude 可自跑 AE: `AE_SHIP_GATE=1 go test -count=1 ./internal/aep/ -run TestV2_2_AEShipGate_AE2025 -v -timeout 180s` (无需关 2020；2020 跑前要关 2025)
 6. 诊断工具齐: `tmp_debug/gen_canonical_failing/` 重建；`tmp_debug/dump_chunks/<path>` dump；`tmp_debug/dump_failing.txt` / `tmp_debug/dump_tolerance.txt` baseline；`tmp_debug/test_hydrate/` 直 hydrate 验
 
@@ -26,7 +28,7 @@
 | 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
 | 3 Public API | ✅ 4/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3 / 3e56a49` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β |
 | 4 Roundtrip | ✅ 5/5 | 167→172 (+5) | (本会话 4 commits + 本 docs commit) | hydrateShapeNodes + write-time sync + canonical 3-layer roundtrip + atomicity ×3 + mutate-existing (skip) |
-| 5 Ship gate | 🔴 4/8 + fix-iter-1 | 173 不变 | (Phase 5 commits + fix-A commit) | 5.1/5.2/5.3/5.4 ✅; **5.7 iter 1**: fix A (outer LIST(tdgp) wrapper + dirty gate) 落，AE 2025 同错→需加 outer placeholders；fix B (Transform schema) + C (tdum/tduM) 仍待 |
+| 5 Ship gate | 🔴 4/8 + fix-iter-2 | 173 不变 | (Phase 5 commits + fix-A + iter-2 commits) | 5.1/5.2/5.3/5.4 ✅; **5.7 iter 1**: fix A outer wrapper ✅; **5.7 iter 2**: 5 placeholder (Layer Styles + Extrsn + Material + Audio + Layer Sets) ✅；AE 同错→placeholder 非 critical, fix B (Transform 6-axis) 才是；fix B + C 仍待 |
 | 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
 
 ## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）
