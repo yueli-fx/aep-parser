@@ -1,3 +1,9 @@
+---
+when_to_read: implementing or debugging Layer.SetAlternateSource; touching Essential Properties slot / blsi chunk; comparing JSX-saved vs Go-built media-replacement layers
+applies_to: [layer, alternate-source, blsi, jsx-quirk, media-replacement, ae24]
+last_updated: 2026-05-21
+---
+
 # setAlternateSource 自动包 wrapper precomp（AE 脚本 quirk）
 
 ## 症状

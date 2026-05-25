@@ -1,3 +1,9 @@
+---
+when_to_read: preparing a commit message; deciding type/scope/subject format
+applies_to: [commit-format, conventional-commits, workshop, type-scope, commit-style]
+last_updated: 2026-05-22
+---
+
 # Commit 规范
 
 ## 格式

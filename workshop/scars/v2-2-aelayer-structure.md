@@ -1,3 +1,9 @@
+---
+when_to_read: building / debugging ShapeLayer write path; AE accepts file but layers.length=0 (silent drop); considering byte-level patches to Layr Transform Group or shape body emit
+applies_to: [v2-2, shape-layer, layr, transform-group, silent-drop, transplant, embed-bytes, ship-gate, root-vectors-group, rect-body, fill-body]
+last_updated: 2026-05-25
+---
+
 # V2.2 ship gate FAIL — Layr 结构 + Transform schema + tdum/tduM 缺
 
 2026-05-23 — Phase 5 Task 5.7 first run. AE 2025 + AE 2020 都拒收 V2.2 builder 产的 canonical 3-ShapeLayer .aep。

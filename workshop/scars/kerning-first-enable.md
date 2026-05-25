@@ -1,3 +1,9 @@
+---
+when_to_read: implementing or debugging Layer.SetManualKerning; deciding between length-preserving splice and structural-add for text setters
+applies_to: [text, kerning, btdk, structural-vs-splice, length-preserving, write-refused]
+last_updated: 2026-05-19
+---
+
 # 手动 kerning 首次启用 = 结构性添加
 
 ## 症状

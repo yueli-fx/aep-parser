@@ -1,3 +1,9 @@
+---
+when_to_read: writing new JSX RE fixture; rerunning AfterFX -r against existing .aep; Go test finding stale field values
+applies_to: [jsx, re-fixture, state-leak, project-reset, fixture-workflow]
+last_updated: 2026-05-20
+---
+
 # JSX -r 多轮累积 duplicate comps
 
 ## 症状

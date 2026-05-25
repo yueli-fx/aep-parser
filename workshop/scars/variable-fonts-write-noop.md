@@ -1,3 +1,9 @@
+---
+when_to_read: implementing TextDocument variable-fonts setter; JSX-side property assignment shows zero byte diff in btdk; assuming any ExtendScript assignment that does not throw is effective
+applies_to: [text, variable-fonts, btdk, scripting-api-gap, negative-finding, fonts-axes]
+last_updated: 2026-05-22
+---
+
 # Variable fonts axes 写 = ScriptingAPI 不存在该字段
 
 ## 症状

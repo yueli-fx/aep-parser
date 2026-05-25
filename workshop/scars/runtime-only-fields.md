@@ -1,3 +1,9 @@
+---
+when_to_read: tempted to add a setter for a "weird" field; ScriptingAPI doc says read-only or "from system registry"; diff baseline shows zero byte change
+applies_to: [runtime-only, dropframe, fontlocation, variable-fonts, negative-finding, coverage, scripting-api-gap]
+last_updated: 2026-05-22
+---
+
 # Runtime-only fields（AE 不持久化到 .aep）
 
 ## 现状名单

@@ -1,3 +1,9 @@
+---
+when_to_read: adding Camera layer setter; RE'ing ldta @0x98..0x9F; tempted to ship a SetFilmSize / SetSensorSize API
+applies_to: [camera, ldta, scripting-api-gap, write-blocked, negative-finding]
+last_updated: 2026-05-22
+---
+
 # Camera FilmSize 在 ldta @0x98 但 ScriptingAPI 不可写
 
 ## 现象

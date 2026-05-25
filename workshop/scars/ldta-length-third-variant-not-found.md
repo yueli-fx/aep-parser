@@ -1,3 +1,9 @@
+---
+when_to_read: hypothesizing AE 24+/25 added bytes to ldta tail; planning a "new long ldta" RE pass
+applies_to: [ldta, wave-2, negative-finding, re-strategy, coverage]
+last_updated: 2026-05-21
+---
+
 # AE 24/25 ldta 第三种长度 — 找不到 (negative finding)
 
 ## 症状

@@ -1,3 +1,9 @@
+---
+when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against board.md
+applies_to: [verify, test, vet, pass-count, pre-commit, ship-gate]
+last_updated: 2026-05-25
+---
+
 # 验证流程
 
 ## 提交前自查

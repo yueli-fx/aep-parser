@@ -1,3 +1,9 @@
+---
+when_to_read: implementing Comp.SetShutterAngle / SetShutterPhase; debugging unexpected cdta @0x18/@0x20/@0x28 changes after shutter setter
+applies_to: [composition, shutter, cdta, work-area, ae-cosmetic, side-effect]
+last_updated: 2026-05-22
+---
+
 # shutter setter 在 AE 端触发 work-area divisor 重编码
 
 ## 现象

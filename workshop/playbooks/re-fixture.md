@@ -1,3 +1,9 @@
+---
+when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison
+applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy]
+last_updated: 2026-05-22
+---
+
 # JSX RE 工作流
 
 ## 总览
