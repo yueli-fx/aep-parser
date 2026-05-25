@@ -85,17 +85,72 @@ func TestLowerVectorGroup_EmitsRootVectorsGroupChildren(t *testing.T) {
 	if chunk == nil || !chunk.IsList() || chunk.FormType != rifx.IDTdgp {
 		t.Fatalf("expected LIST(tdgp), got %+v", chunk)
 	}
-	// Per RE-S3: tdsb + tdsn + N × (tdmn + LIST tdgp) + tdmn(Group End).
-	// For 2 children: 2 + 4 + 1 = 7 children.
-	if len(chunk.Children) != 2+2*2+1 {
-		t.Fatalf("vector group tdgp child count = %d, want 7 (header + 2×2 + Group End)", len(chunk.Children))
+	// iter-5: Root Vectors Group body = tdsb + tdsn + tdmn(Vector Group) +
+	// LIST(tdgp, Vector Group body) + tdmn(Group End) = 5 children.
+	if len(chunk.Children) != 5 {
+		t.Fatalf("root vectors group body child count = %d, want 5", len(chunk.Children))
 	}
 	if chunk.Children[0].ID.String() != "tdsb" {
 		t.Fatalf("group child[0] id = %q, want tdsb", chunk.Children[0].ID)
 	}
-	// Last child must be the Group End tdmn.
-	last := chunk.Children[len(chunk.Children)-1]
-	if last.ID != rifx.IDTdmn {
-		t.Fatalf("group last child id = %q, want tdmn (Group End)", last.ID)
+	// Shape kids live 2 levels deep — Vector Group body → Vectors Group body.
+	// Confirm both wrappers are emitted and Rect+Fill are reachable.
+	var findShapeKids func(c *rifx.Chunk) []string
+	findShapeKids = func(c *rifx.Chunk) []string {
+		var out []string
+		for i, ch := range c.Children {
+			if ch.ID == rifx.IDTdmn && len(ch.Data) > 0 {
+				name := string(ch.Data)
+				if n := indexNUL(name); n >= 0 {
+					name = name[:n]
+				}
+				switch name {
+				case "ADBE Vector Shape - Rect", "ADBE Vector Graphic - Fill":
+					out = append(out, name)
+				}
+				_ = i
+			}
+			if ch.IsList() {
+				out = append(out, findShapeKids(ch)...)
+			}
+		}
+		return out
 	}
+	kids := findShapeKids(chunk)
+	if len(kids) != 2 || kids[0] != "ADBE Vector Shape - Rect" || kids[1] != "ADBE Vector Graphic - Fill" {
+		t.Fatalf("shape kids reachable = %v, want [Rect, Fill]", kids)
+	}
+	// Vector Group + Vectors Group wrappers must appear.
+	saw := map[string]bool{}
+	var walkNames func(c *rifx.Chunk)
+	walkNames = func(c *rifx.Chunk) {
+		for _, ch := range c.Children {
+			if ch.ID == rifx.IDTdmn && len(ch.Data) > 0 {
+				name := string(ch.Data)
+				if n := indexNUL(name); n >= 0 {
+					name = name[:n]
+				}
+				saw[name] = true
+			}
+			if ch.IsList() {
+				walkNames(ch)
+			}
+		}
+	}
+	walkNames(chunk)
+	for _, want := range []string{"ADBE Vector Group", "ADBE Vectors Group", "ADBE Vector Transform Group", "ADBE Vector Materials Group"} {
+		if !saw[want] {
+			t.Errorf("missing wrapper tdmn %q", want)
+		}
+	}
+}
+
+// indexNUL returns the first NUL byte position or -1.
+func indexNUL(s string) int {
+	for i := 0; i < len(s); i++ {
+		if s[i] == 0 {
+			return i
+		}
+	}
+	return -1
 }

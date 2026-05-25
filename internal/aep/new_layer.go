@@ -18,6 +18,11 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
+// CompItemListForTest exposes a Composition's underlying Item LIST chunk
+// for tests that need to inspect Item-level structure (Layr placement +
+// Ewst siblings). Not part of public API.
+func CompItemListForTest(c *Composition) *rifx.Chunk { return c.itemList }
+
 // templateServiceLayerTypes are the LIST formTypes AE writes after the user
 // Layr block — dummy template "service" layers carried through from the
 // 2020_dummy_comp.aep template. AE expects user Layr to precede these.
@@ -163,17 +168,27 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	oldLayersLen := len(c.Layers)
 	oldWarningsLen := len(c.proj.Warnings)
 
-	// 4. Commit: insert Layr into itemList BEFORE first template service
-	//    layer (DLay/SLay/CLay/SecL) — AE 2025 rejects when user Layr
-	//    appears after these (iter 4 bisection #2). Multiple user Layr
-	//    additions stack in insertion order before the service block.
+	// 4. Commit: insert Layr (+ its Ewst sibling) into itemList BEFORE
+	//    first template service layer (DLay/SLay/CLay/SecL) — AE 2025
+	//    rejects when user Layr appears after these (iter 4 bisection #2).
+	//    Multiple user Layr additions stack in insertion order before
+	//    the service block.
+	//
+	//    iter-5 RE finding: every AE-saved Layr in the Item LIST is
+	//    immediately followed by an empty LIST(Ewst, 0 children) sibling.
+	//    Template service layers carry their own Ewst (already in the
+	//    template). User-built Layrs must emit one too — without it, AE
+	//    2025 silently drops the layer at instantiation stage (variant #2
+	//    empty ShapeLayer reproduces this even with zero shape kids).
 	base.layrList = layrChunk
 	base.shapeDirty = true // gate for syncShapeLayerChunks
+	ewstSibling := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDEwst}
 	insertIdx := insertLayrPosition(c.itemList.Children)
-	c.itemList.Children = append(c.itemList.Children,
-		nil) // grow slice by 1
-	copy(c.itemList.Children[insertIdx+1:], c.itemList.Children[insertIdx:len(c.itemList.Children)-1])
+	// Grow slice by 2 (Layr + Ewst) and shift any existing tail two slots.
+	c.itemList.Children = append(c.itemList.Children, nil, nil)
+	copy(c.itemList.Children[insertIdx+2:], c.itemList.Children[insertIdx:len(c.itemList.Children)-2])
 	c.itemList.Children[insertIdx] = layrChunk
+	c.itemList.Children[insertIdx+1] = ewstSibling
 	c.Layers = append(c.Layers, base)
 
 	// 5. Warnings-as-failure (Inv-11): if any warnings appeared, rollback.

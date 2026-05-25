@@ -308,6 +308,218 @@ dump_failing.txt 现 Transform Group 结构 = 10 stream 6-axis form, 跟 toleran
 
 PASS 173 不变 / 0 FAIL / vet clean。AE 2025 ship gate 同错 (14s reject, 比 iter 2 的 46s 快很多, AE 可能在 ldta/Layr parse 阶段更早 reject)。
 
+## iter 5 实施记 — Root Vectors Group 5-层嵌套 + tdsb container flag + hydrate transparent passthrough (本 commit)
+
+iter 4 用 dump_root/main.go (升级版含 tdmn/tdsn 解码) dump tolerance.aep + 多 AE-saved fixture (re_shapes.aep) 验证：**所有 AE-saved ShapeLayer 都是 5-层嵌套**。
+
+我们 iter-4 emit `Root Vectors Group → [shapes 直挂]` 是 V2.1/2.2 早期对 Shape Layer schema 的误读 (以为 Root Vectors Group 自己就是 "Contents" 用户加 shapes 的地方)。实际 AE schema 是：
+
+- `ADBE Root Vectors Group` (Layr 子树根) — 用户 addProperty(`ADBE Vector Group`) 在这里挂
+- `ADBE Vector Group` (= UI "Group N") — 用户的命名分组容器
+  - `ADBE Vectors Group` (= 该 Group 内的 "Contents" 集合) — 用户 addProperty(shape) 在这里挂
+    - 实际 shape 子: Rect / Ellipse / Path / Fill / Stroke
+  - `ADBE Vector Transform Group` (= 该 Group 的 transform; V2.2 always empty)
+  - `ADBE Vector Materials Group` (= 该 Group 的 materials placeholder; V2.2 always empty)
+
+V2.2 把 runtime `shapeRootGroup.Children = [Rect, Fill, ...]` 映射到 **单个 Vector Group wrapper** (语义 = AE 自动建的 "Group 1")；V2.3+ 可暴露多组。
+
+### 修改清单
+
+1. **`lower_shape_node.go::lowerVectorGroup`** 重写：返 Root Vectors Group body LIST(tdgp)，内部嵌 Vector Group → Vector Group body → Vectors Group → Vectors Group body (放 shape kids) + Vector Transform Group (empty) + Vector Materials Group (empty)。
+2. **`lower_property_stream.go` 新 `makeTdsbContainer()`** — 出 `0x00000401` 这个 user-extensible flag。仅 Root Vectors Group body + Vectors Group body 用；其它 (Vector Group routing body / empty placeholders / leaf tdbs) 保持 `makeTdsb()` = `0x00000001`。这俩值都来自 tolerance.aep + re_shapes.aep RE 观测，无 AE doc 但跨多 fixture 一致。
+3. **`hydrate_shape.go` 重写 `hydrateVectorGroup`**：内部 `collectShapeKids` 递归 helper — 看见 `ADBE Vector Group` / `ADBE Vectors Group` 就 transparent 递归下去；看见 typed shape (Rect/Ellipse/Path/Fill/Stroke) 就 hydrate 进 `g.Children`；忽略 Vector Transform Group / Vector Materials Group。多 Vector Group siblings 全部 flatten 进同一个 `shapeRootGroup.Children` (V2.2 不分 group)。
+4. **`types_core.go::WrapShapeLayer` 改 always 标 `shapeDirty = true`** — iter-4 之前的"仅 NewShapeLayer 标 dirty"是 hydrate 不完整时的临时防御。iter 5 hydrate 完整后契约改为：**WrapShapeLayer 是 V2.2 opt-in；调它 = write-sync 从 runtime tree re-lower**。V1-only path (Property.SetStaticValue 等) 不经 WrapShapeLayer → 不受影响 (V1 测试 TestShapePrimitivesReal 通)。
+5. **`lower_shape_node_test.go::TestLowerVectorGroup_*` 重写** — 校验 Root Vectors Group body 5 child + 必须含 Vector Group / Vectors Group / Vector Transform Group / Vector Materials Group 四个 tdmn marker。
+6. **`tmp_debug/dump_root/main.go` 升级** — 解码 tdmn matchName 为 ASCII (NUL-terminated 取 prefix) + 解码 tdsn embedded Utf8 record (skip "Utf8" magic + 4B size → 拿 name 字节)。原来全 hex 输出，无法肉眼看 matchName。
+7. **新 `tmp_debug/gen_iter5_check/main.go`** — 出仿 tolerance.aep 内容的 .aep (1 ShapeLayer + Rect 200×100 + Fill gray) 用作 byte-diff baseline。
+
+### 验证
+
+- `go vet ./... && go test ./...` — PASS=174 (+1; `TestV2_2_MutateExistingShape` 之前 silent skip 因 hydrate 找不到 shape kids；iter 5 hydrate 后实际跑通 mutate→write→re-parse→读 Size=500 闭环)
+- byte-level 验证: `go run tmp_debug/gen_iter5_check/main.go && go run tmp_debug/dump_root/main.go tmp_debug/iter5_check.aep | sed -n '45,135p'` — 跟 tolerance.aep 同段 (45-100 行 Root Vectors Group 子树) 结构 + matchName 序列 + tdsb 标志位 **完全一致**
+
+### 残留待启动 — fix C (spatial cdat padding + tdum/tduM)
+
+iter5_check.aep vs tolerance.aep 还有以下差异 (V2.2 always-emit 策略 + 未做 fix C)：
+
+- Rect body: 我们 11 child (Direction + Size + Position + Roundness)，tolerance 5 child (只 Size — elide default)
+- Fill body: 我们 13 child (Blend Mode + Composite Order + Fill Rule + Color + Opacity)，tolerance 5 child (只 Color)
+- tdsn display name: 我们 "Rectangle Path" / "Size" / "Fill"，tolerance "" 或 "-_0_/-" sentinel
+- cdat sizes: 我们 Vec2 spatial = 48B；tolerance 80B + tdum(8B) + tduM(8B)。**fix C**: per-dim padding + 后置 tdum/tduM bound chunks (推测 spatial property 的 min/max envelope, f64 each, 静态时 = current value)
+
+V2.2 always-emit 策略选择：AE 自己 elide default — 我们 over-emit，AE 接受 (Phase 4 Go roundtrip PASS 已证)。display name 差异同理 — AE 用 sentinel 占位串，我们用 English display name，AE 不在乎。**cdat padding 是真问题** — 48B → 80B 不是 elide，是字段缺。fix C 启动顺序按 AE bisect 反馈定：iter 5 后 AE 仍 layers.length=0 → 必须做。
+
+### iter 5 永久教训
+
+1. **byte-diff 必须解码语义字段** — iter 4 之前 dump_root 全 hex 输出，看不到 tdmn matchName，6 iter 才发现 5-层嵌套。任何 V2.x ship gate diff 必须有"解码 tdmn + tdsn"的 dump 工具。
+2. **WrapShapeLayer 这种"opt-in" 入口 API 的语义敏感** — iter-1 ~ iter-4 时 shapeDirty 仅 NewShapeLayer 标，因 hydrate 不完整。iter 5 hydrate 完整后 contract 立即收紧 (WrapShapeLayer always 标)。**任何 V2.2 入口 API 在 hydrate 演进的同时要 reconsider 其副作用契约**。
+3. **AE schema 层级 "User-extensible container" vs "Fixed routing"** 是有结构性表达 (tdsb 0x00000401 vs 0x00000001)。任何新 V2.x property tree 设计前先扫该位 — 直接告诉你这个层级是"用户加 property 的入口" 还是 "AE 内部固定结构"。
+
+## iter-5b 实施记 — Gide + Ewst layer-skel boilerplate (本 commit)
+
+iter 5 ship 完用户跑 bisect_v2_2 6 变体全 PASS (AE 不 hard-reject) **但 layers.length=0 全 0**，包括 variant #2 (empty ShapeLayer, 零 shape kid 零 keyframe 零任何 content)。
+
+GPT 看完 bisect 输出立刻指出 (引用):
+
+> 这个 bisect 很关键：连 variant #2 的 empty ShapeLayer 都被 AE 丢弃，说明问题已经不在 shape payload（cdat/tdum/tduM）层，而是在 layer instantiation / comp membership 层。
+> 下一步不要再 bisect property streams，直接对比 AE-native empty ShapeLayer 与 generated variant #2 的 layer-root structure：重点看 comp layer refs、layer type discriminator、LIST ordering、tdmn/tdsn/tdgp/id linkage，以及可能缺失的 side chunks。
+> 现在的证据表明 AE 还没进入 shape-content validation，就已经在 create-layer 阶段 silently drop 了 layer。
+
+完全正确。立刻 pivot byte-diff `minfail_v2.aep` vs `tolerance.aep` 在 Item-level + Layr-children level，找出 2 个 layer-skel 真正缺的 chunk。
+
+### 发现 1: LIST Gide 是 Layr 第 4 必需 child
+
+tolerance.aep 的 "Nested" Layr 有 4 child：ldta + Utf8 + LIST tdgp (property tree) + **LIST Gide**。我们 V2.2 builder 只 emit 3 child (Gide 缺)。
+
+Gide 内容跨所有 11 个 AE-saved Layr (Nested + DLay + 6 SLay + 3 CLay + SecL) **byte-identical**:
+
+```
+LIST Gide (2 children)
+  chunk gdta (8 B) = 00 × 8
+  LIST list (1 child)
+    chunk lhd3 (52 B) = 00d00bee 00000000 00000000 00000001 00000010 00000002 00000001 00000002 00000000... (16B trailing zero)
+```
+
+"Gide" 推测 = layer-side guide/handle。lhd3 在这里跟 keyframe-list 的 lhd3 同 chunk ID 但不同语义 (52B 头但内容不是 keyframe header) — treat 完全 opaque 常量。
+
+### 发现 2: LIST Ewst 是 Item-level Layr sibling
+
+Item LIST 直接 children 中，每个 Layr/DLay/SLay/CLay/SecL **之后紧跟一个 `LIST Ewst (0 children)` 空 sibling**。tolerance.aep 12 个 layer 各带一个 Ewst (1 user Layr + 1 DLay + 6 SLay + 3 CLay + 1 SecL = 12 Ewst)。
+
+我们 V2.2 之前的代码 `new_layer.go::NewShapeLayer` 插入 Layr 时只插 1 个 chunk。template 自带 11 个 service layer 各自的 Ewst (template 复制时一并进来)，但**用户 NewShapeLayer 加的 Layr 不带 Ewst** → Item LIST 里出现 `[user Layr] → [DLay] → [DLay's Ewst]` 顺序，跟 tolerance 的 `[Layr] → [Layr's Ewst] → [DLay] → [DLay's Ewst]` 不同。AE 视作 layer 结构不合法 → silent drop。
+
+Item-level child 类型计数 (iter-5b 后):
+
+| LIST type | iter5_check (我们) | tolerance | 一致? |
+|---|---|---|---|
+| Layr (user) | 1 | 1 | ✅ |
+| DLay | 1 | 1 | ✅ |
+| SLay | 6 | 6 | ✅ |
+| CLay | 3 | 3 | ✅ |
+| SecL | 1 | 1 | ✅ |
+| **Ewst** | **12** (was 11) | 12 | ✅ |
+| PRin | 1 | 1 | ✅ |
+| dats | 1 | 1 | ✅ |
+
+iter-5b 之前我们 11 个 Ewst (只 template service layers 自带)。修后 12 个 (用户 Layr 也有 Ewst)。
+
+### 修改清单
+
+1. **`internal/rifx/rifx.go`**: 新 3 个 chunk ID 常量 `IDGide / IDGdta / IDEwst`。
+2. **`internal/aep/lower_layer.go::lowerShapeLayer`**: 在最后 `layr.Children = append(layr.Children, outer)` 之后，append `makeGideBoilerplate()` 作为 4th child。新 helper `makeGideBoilerplate()` + 52B `gideLhd3Boilerplate` 常量 byte slice。
+3. **`internal/aep/new_layer.go::NewShapeLayer`** insert 路径: 把"insert 1 chunk"改"insert Layr + Ewst sibling 2 chunks" (slice grow by 2 / copy shift by 2 / 两个 slot 分别 set Layr 和 Ewst LIST 0 child)。
+4. **测试**:
+   - `lower_layer_test.go::TestLowerShapeLayer_EmptyHasLayrChunk` 加 Gide 存在断言 (FindFirstList(IDGide) != nil + Gide children == 2 + Gide[0] == gdta 8B)
+   - 新 `new_shape_layer_test.go::TestNewShapeLayer_EmitsEwstSibling` (+1 PASS) — 校验 itemList.Children 里 user Layr 紧跟一个 `LIST(Ewst, 0 children)` sibling
+   - 新 `CompItemListForTest(c *Composition) *rifx.Chunk` 测试辅助 (new_layer.go) 暴露 Composition.itemList
+5. **`tmp_debug/dump_gide/`** 新工具 — 跨所有 Layr dump Gide 内容，验证 byte-identical。本 commit 用它确认 iter5_check.aep 的 Gide 跟 tolerance.aep 的 Gide 完全一致。
+
+### 验证
+
+- PASS=175 (was 174, +1 from new Ewst test)
+- vet clean
+- `go run tmp_debug/gen_iter5_check/main.go && go run tmp_debug/dump_gide/main.go tmp_debug/iter5_check.aep` 输出第一个 Gide (user Layr 的) byte-identical 跟 tolerance.aep 的第一个 Gide
+- `grep formType=(Layr|Ewst|DLay|SLay|CLay|SecL|Gide) tmp_debug/dump_iter5_check.txt` 计数跟 tolerance 完全一致
+
+### head counter B 残留差异 (推测无关 silent-drop)
+
+iter5_check head bytes [16..19] = `0000000e` (= 14)，tolerance = `00000024` (= 36)。iter 4 RE doc 写 "≥ nextItemID 即可" — 我们 nextItemID=14, counter B=14, 满足 gate。Tolerance 的 36 推测是 AE 多次 save 之后的累计 counter (cosmetic save-sequence)。不再优先 — 若 iter-5b 后 AE 仍 drop 再 RE。
+
+### 不确定项 / 下一 iter 候选
+
+- **head counter B 真语义** (14 vs 36 — gate "≥ nextItemID" 够不够，还是另有 minimum?)
+- **fix C: spatial cdat per-dim padding + tdum/tduM** 真的还需要么？iter-5b 后 AE 若 accept variant #2 (empty layer) → 进入 shape-content validation → 这时 cdat 48B vs 80B 才可能有戏。但 iter-5b 之前根本没走到这一步，所以 fix C 之前的"必须"判断是 over-stated。
+
+## iter-5b 永久教训
+
+1. **silent-drop 用 bisect "最简变体 (zero content)" 第一步定位 instantiation vs content** — variant #2 (empty ShapeLayer 零 shape kid) 也 silent drop = 问题在 instantiation 层不在 content 层。iter 5 之前我们已经做了 iter 3 (Transform schema) + iter 4 (7 个 byte-level fix) 没碰到 instantiation 层，因为 bisect 没 zero-content 变体。bisect_v2_2 加 #2 之后立刻看见。
+2. **byte-diff "AE-saved 跟 our-built" 在 layer-skel level** 是最高 ROI 的 RE — Item LIST direct children type 计数 + Layr direct children 计数 + Item-level structural LIST 出现位置/顺序。比 cdat 内部字节 RE 高一两个数量级，且找到的 bug 通常是 "缺整 chunk" 而非 "字节错"，修起来确定性高。
+3. **GPT 反馈很有信息量** — bisect 数据 + 一段 prose 分析就能 pivot 整个 fix 方向。下次 ship gate 类问题如果不动，主动找 LLM critique，对照 AE-saved fixture 跟 our-built 的结构-级 diff。
+
+## iter-7 实施记 — embed tolerance Transform Group bytes (跨第一道 silent-drop 闸门 ✓)
+
+iter-5b 之后我用户陪跑了 7 轮 AE bisect (iter-6a..6f) 测各种 byte-level 修改候选 (tdsb / 3D 升 dim / spatial bounds / trailing chunks / placeholder flags) 全没动 silent drop。GPT 看完 7 轮无果后写 `workshop/wip/gpt`:
+
+> 你已经连续得到: AE accepts file BUT layer count still 0
+> 这说明: parser path 已经过去了, object materialization path 没过去
+> 这是两个不同阶段。你之前一直在修 parser-level corruption。现在问题明显已经上升到: registration / indexing / ownership / linkage / class tagging / hierarchy admission
+> 不建议继续 6g/6h 式 blind patching。byte-level diff 阶段已经结束了。下一阶段该换: object graph / semantic model / importer behavior
+
+GPT 给的具体 3 步法救了项目:
+
+### 3 步 semantic RE
+
+1. **排除 epistemic hole** — 验证 measurement pipeline 是否可信。Tolerance.aep 用同一个 JSX probe 跑一遍, 看 layers.length 是否 = 1。
+   - 写 `test_data/verify_baseline.jsx` + `tmp_debug/verify_baseline/main.go` (dump 完整 metrics: items count / comp count / activeItem / selection / per-item class+typeName / per-comp layers + 每 layer class+enabled+index)
+   - tolerance 跑出 `comp.layers.length=1, layer[1]: name=Nested class=ShapeLayer enabled=true` ✓ → measurement sound, silent drop 真问题
+   
+2. **Transplant 法 isolate 触发器** — 不 byte-diff, 直接 swap chunk 看 AE 反应。逐级缩小范围:
+   - `tmp_debug/transplant_layr/`: tolerance.aep 整个 user Layr 换成 ours minfail_v2 的 → layers=0 → 触发器在 Layr 内部
+   - `tmp_debug/transplant_tdgp/`: 只换 outer LIST(tdgp) → layers=0 → 触发器在 property tree
+   - `tmp_debug/swap_propgroup/`: 5 变体 batch (各 swap 一组 prop group)
+     | swap | layers.length |
+     |---|---|
+     | RootVectors+Transform+LayerStyles | **0** |
+     | Extrsn+Material+Audio+LayerSets (4 placeholders) | **1** ✓ |
+     | **Transform only** | **0** ← 唯一触发 |
+     | RootVectors only | **1** ✓ |
+     | LayerStyles only | **1** ✓ |
+   - `tmp_debug/swap_reverse/`: 反向 (ours base + tolerance Transform) → **layers=1, layer[1]: name=L class=ShapeLayer** ✓ — 100% 确认
+   - 结论: 其它 6 个 prop group 我们 emit 都 byte-OK; **silent drop 唯一来源 = Layr Transform Group body**
+
+3. **iter-7 解法 — embed tolerance bytes**: byte-level RE 阶段已结束, 不再 from-scratch 构造。直接 embed tolerance Transform Group bytes 作 boilerplate。
+
+### iter-7 实现
+
+- `tmp_debug/extract_transform_group/main.go`: 加载 tolerance.aep, 找 first user Layr 的 LIST(tdgp) (Transform Group body, 15 children = tdsb + tdsn + Position_0/_1 tdbs(6-child) + Orientation otst(2-child) + RotateX/Y tdbs(4-child) + EnvirAppear tdbs(4-child) + Group End), 用 `rifx.Chunk.Write` 序列化 → `internal/aep/templates/v2_2_transform_group_body.bin` (1842 B)
+- `internal/rifx/rifx.go`: 新 public `ReadChunk(r io.ReadSeeker) (*Chunk, error)` — `Parse` 的单 chunk 版 (无 RIFX root 包裹要求)。embedded blob 用这个 parse
+- `internal/aep/lower_layer.go`:
+  - `//go:embed templates/v2_2_transform_group_body.bin var v22TransformGroupBodyBytes []byte`
+  - `sync.Once` cache + `cloneShapeTransformGroupBody()` + `cloneChunk()` deep-clone helper
+  - `lowerLayerTransform` 重写: 不再 LowerVec2Stream/LowerFloat64Stream from-scratch 构造, 直接 clone embedded body + 用 `overwriteScalarCdat(body, "ADBE Position_0/1", t.position.static[*])` 覆写 cdat scalar 用 runtime 值。Animated Position fallback: 用 first keyframe value 作 static slot
+  - 删 dead code: `lowerOrientationDefault` (otst wrapper 已在 embedded body 内); `splitVec2Stream` (无需手 split Position_0/_1, 直接覆 cdat); 早期 emit 用到的 `LowerVec2Stream(t.anchorPoint/.scale)` / `LowerFloat64Stream(t.rotation/.opacity)` 调用全 retire (V2.2 限制声明)
+- `internal/aep/lower_property_stream.go`: 删 `splitVec2Stream`
+- `internal/aep/shape_graph_roundtrip_test.go::TestV2_2_CanonicalShapeGraph_Roundtrip`: Layr Position 期望从 "2 keyframes [0,0]→[500,300]" 改为 "static fallback = first kf [0,0]" (V2.3 RE byte 布局后做全 Layr Position 持久化)
+
+### V2.2 限制声明 (写进 docs/shape.md Phase 6)
+
+- ShapeLayer Layr-level Transform: 仅 **Position** static 值持久化到磁盘 (单次覆写 Position_0/_1 cdat)
+- **Anchor Point / Scale / Rotate Z / Opacity**: runtime-only, **不持久化到磁盘** (in-memory API surface 仍可读写, write→re-parse 后值丢失回默认)
+- **Position keyframes**: 不持久化 (V2.2 用 first kf 作 static fallback)
+- 完整 Layr Transform 持久化 = **V2.3 工作** (byte-level RE for Position keyframe + Anchor/Scale 3D 布局)
+
+### iter-7 验证
+
+- PASS=175 不变, vet clean
+- `tmp_debug/bisect_v2_2/main.go` 跑 AE 6 变体:
+  | variant | iter-7 前 | iter-7 后 |
+  |---|---|---|
+  | #2 empty ShapeLayer | drop layers=0 | **PASS layers=1, layer[1]: name=L class=ShapeLayer enabled=true** ✓✓ |
+  | #3 + AddRect | drop | drop (shape content level silent drop, 跟 Layr Transform 无关) |
+  | #4 + SetSize | drop | drop |
+  | #5 + AddFill | drop | drop |
+  | #6 + size keyframed | drop | drop |
+  | #7 + position keyframed | drop | drop |
+
+### iter-7 永久教训
+
+1. **silent-drop 类问题第一步 transplant 法 isolate, 不 byte-diff 猜字段**。Byte-diff 适合 "AE 拒收文件" (hard reject) 类问题; silent drop = AE 接受文件但内部 object materialization fail, 这是 semantic-level 问题, byte-level diff 看不出来。
+2. **GPT 反馈在 6 轮无果时及时 pivot 救项目**。如果继续 iter-6g/6h byte-patch 我估计还得 5-10 轮才能撞对。GPT 的"object graph / class admission"分类法 + 具体 3 步建议 = 一次 pivot 直接缩 1 个变量定位。
+3. **Embed boilerplate 是 V2.x ship-gate 的合法路径**。当 chunk 内部 byte 布局复杂到 from-scratch 构造太脆 (Transform Group 多 sub-stream + 多 cdat padding + spatial tdum/tduM + 6-axis 3D 跟 2D 区分等), embed AE-saved bytes + post-process 覆值是更稳的方式。runtime 持久化能力有限 (cdat scalar 值能改, 其它字节固定) 是接受的代价, 文档声明清楚, 后续 iter 再 RE 全 byte 布局。
+4. **测量 (probe) 跟实测分离**。GPT 第一步排除"epistemic hole"= 验 probe 自己是否可信。如果之前 5 轮 silent drop 其实是 probe 写错 (例如忘 select active comp), 后面所有 fix 都白做。这是 5 分钟 sanity check, 千万省不得。
+5. **`workshop/wip/gpt`** 文件用法: 高难度卡死时让 LLM 反馈写进这里, claude 直接 read 当作"另一个 RE 专家的建议"参考。Pivot 信息密度比单条 chat 消息高 5x。
+
+### iter-8 候选 (下次会话)
+
+variant #3-7 仍 drop = shape content 级 silent drop 触发器。同样 transplant 法 isolate:
+- 拿 iter-7 状态 minfail_v3.aep (含 Rect) + swap in tolerance 的 Root Vectors Group → AE 跑看 layers.length
+- =1 → 同 iter-7 思路 embed tolerance Root Vectors Group / Rect body bytes 作 boilerplate (V2.2 限制声明: 只支持 tolerance 那个 Rect 200×100 + Fill gray 配置? 或者 embed multiple shape templates?)
+- =0 → 触发器在别处 (5-层 nesting wrapper / Vectors Group inner / shape kid 加进 Item LIST 后变化的 chunks?)
+
+iter-8 别再盲改, 用 `tmp_debug/swap_propgroup/` 类似的 transplant batch 工具 isolate 真凶到具体 chunk 后再选 strategy.
+
 ## 永久教训 → CLAUDE.md / scars
 
 V2.2 Phase 4 Go roundtrip PASS **不代表 AE 接受**。Go parser 写 tolerant，AE parse 严格。下次类似 "writer + ship gate" 流程 phase 顺序要把 ship gate 提前。
+
+silent-drop 类问题 (AE 接受文件但内部 hide layer) = **semantic-level**, 不是 byte-level corruption。第一步用 **transplant 法** isolate 真凶到具体 chunk，第二步若 from-scratch 构造太脆就 **embed AE-saved bytes 作 boilerplate** + post-process 覆 runtime 值，第三步 docs 声明 V2.x 限制 (持久化能力 vs runtime API surface) + 留 V2.x+1 RE 任务。**不要再像 iter-6a..6f 那样盲改 byte-level fields**。

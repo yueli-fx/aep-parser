@@ -182,23 +182,72 @@ func emptySubPropPlaceholder(matchName, displayName string) *rifx.Chunk {
 }
 
 // lowerVectorGroup wraps shape-node children into the Root Vectors Group's
-// inner LIST(tdgp). Per RE-S3, the structure for N children is:
+// inner LIST(tdgp). The on-disk shape per iter-5 RE of tolerance.aep +
+// re_shapes.aep (every AE-saved fixture observed) is a 5-level nesting:
 //
-//	tdsb + tdsn + N × (tdmn(<shape>) + LIST(tdgp, shape body)) + tdmn(Group End)
+//	[LIST tdgp]                      ← Root Vectors Group body (this return)
+//	  tdsb(0x00000401) + tdsn
+//	  tdmn("ADBE Vector Group")
+//	  [LIST tdgp]                    ← Vector Group body (3-child fixed routing)
+//	    tdsb(0x00000001) + tdsn
+//	    tdmn("ADBE Vectors Group")
+//	    [LIST tdgp]                  ← Vectors Group body (holds user shapes)
+//	      tdsb(0x00000401) + tdsn
+//	      N × (tdmn(<shape>) + LIST(tdgp, shape body))
+//	      tdmn("ADBE Group End")
+//	    tdmn("ADBE Vector Transform Group") + empty LIST(tdgp)
+//	    tdmn("ADBE Vector Materials Group") + empty LIST(tdgp)
+//	    tdmn("ADBE Group End")
+//	  tdmn("ADBE Group End")
 //
-// V2.2 depth = 1 (no nested user groups — V2.3+). Children render in order:
-// Children[0] = bottom, Children[len-1] = top (spec §3.2).
+// iter-4 had us flatten everything into Root Vectors Group body directly —
+// AE 2025 parsed the file without exception but silently dropped the layer
+// from comp.layers (iter-4 scar "bug 8 candidate"). The wrappers are
+// structural: AE Shape Layer's Contents always holds one or more
+// "ADBE Vector Group" entries (each is what UI shows as "Group N"), and
+// each Vector Group always carries the 3-child fixed routing (Vectors Group
+// for shape kids + Transform + Materials).
+//
+// V2.2 maps the runtime `shapeRootGroup.Children = [Rect, Fill, ...]` to a
+// SINGLE Vector Group wrapper (semantic = AE's auto-created "Group 1"). V2.3+
+// may expose multiple user-named groups.
+//
+// Children render in order: Children[0] = bottom, Children[len-1] = top
+// (spec §3.2).
 func lowerVectorGroup(g *VectorGroup, ctx *lowerCtx) (*rifx.Chunk, error) {
-	root := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
-	root.Children = append(root.Children, makeTdsb(), makeTdsn("Contents"))
+	// Innermost: Vectors Group body — holds the actual shape kids.
+	vectorsGroupBody := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	vectorsGroupBody.Children = append(vectorsGroupBody.Children, makeTdsbContainer(), makeTdsn(""))
 	for _, child := range g.Children {
 		mn := shapeMatchNames[child.Kind()]
 		body, err := lowerShapeNode(child, ctx)
 		if err != nil {
 			return nil, err
 		}
-		root.Children = append(root.Children, makeTdmn(mn), body)
+		vectorsGroupBody.Children = append(vectorsGroupBody.Children, makeTdmn(mn), body)
 	}
-	root.Children = append(root.Children, makeTdmn("ADBE Group End"))
+	vectorsGroupBody.Children = append(vectorsGroupBody.Children, makeTdmn("ADBE Group End"))
+
+	// Middle: Vector Group body — fixed 3-child routing (Vectors Group +
+	// Vector Transform Group + Vector Materials Group). The latter two are
+	// per-group transform / materials property groups that AE always emits
+	// even when default; tolerance.aep dumps them as 3-child empty
+	// placeholders (tdsb + tdsn + Group End).
+	vectorGroupBody := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	vectorGroupBody.Children = append(vectorGroupBody.Children, makeTdsb(), makeTdsn(""))
+	vectorGroupBody.Children = append(vectorGroupBody.Children,
+		makeTdmn("ADBE Vectors Group"), vectorsGroupBody,
+		makeTdmn("ADBE Vector Transform Group"), emptyPropGroup(),
+		makeTdmn("ADBE Vector Materials Group"), emptyPropGroup(),
+		makeTdmn("ADBE Group End"),
+	)
+
+	// Outermost: Root Vectors Group body — holds one Vector Group wrapper.
+	root := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	root.Children = append(root.Children, makeTdsbContainer(), makeTdsn(""))
+	root.Children = append(root.Children,
+		makeTdmn("ADBE Vector Group"), vectorGroupBody,
+		makeTdmn("ADBE Group End"),
+	)
 	return root, nil
 }

@@ -72,6 +72,9 @@ var (
 	IDOtst = ChunkID{'o', 't', 's', 't'} // LIST formType: orientation wrapper (holds tdbs + otky)
 	IDOtky = ChunkID{'o', 't', 'k', 'y'} // LIST formType: orientation-keyframe container (holds otda)
 	IDOtda = ChunkID{'o', 't', 'd', 'a'} // orientation default value chunk (24 B = 3 × f64)
+	IDGide = ChunkID{'G', 'i', 'd', 'e'} // LIST formType: layer-side guide chunk (4th Layr child; AE-required boilerplate per iter-5 RE)
+	IDGdta = ChunkID{'g', 'd', 't', 'a'} // chunk inside Gide (8 B all zero observed)
+	IDEwst = ChunkID{'E', 'w', 's', 't'} // LIST formType: empty 0-child sibling of every Layr at Item level (AE-required boilerplate per iter-5 RE)
 )
 
 // opaqueListTypes is the set of LIST formTypes whose payload is non-chunk
@@ -282,6 +285,11 @@ func Parse(r io.ReadSeeker) (*Chunk, error) {
 	}
 	return root, nil
 }
+
+// ReadChunk parses a single chunk (header + body) from r, recursing into
+// LIST containers. Unlike Parse, the input is not required to be a RIFX
+// root — useful for embedded resource blobs that store a single LIST chunk.
+func ReadChunk(r io.ReadSeeker) (*Chunk, error) { return readChunk(r) }
 
 func readChunk(r io.ReadSeeker) (*Chunk, error) {
 	var id ChunkID

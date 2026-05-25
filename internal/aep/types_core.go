@@ -766,6 +766,14 @@ func WrapShapeLayer(layer *Layer) *ShapeLayer {
 	if layer.shapeTransform == nil {
 		layer.shapeTransform = newLayerTransform()
 	}
+	// WrapShapeLayer is the V2.2 opt-in: callers signal "I'm going to use
+	// V2.2 mutation APIs (RootGroup / Transform)". Mark dirty so write-time
+	// sync re-lowers from the runtime tree. V1-only code paths (Property /
+	// ShapePrimitives) never call WrapShapeLayer and remain unaffected.
+	// Caveat: re-lowering loses on-disk content V2.2 hydration doesn't
+	// preserve (V2.2-unsupported shape kinds, per-group transforms with
+	// non-default values, opaque material settings).
+	layer.shapeDirty = true
 	return &ShapeLayer{Layer: layer}
 }
 

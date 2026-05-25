@@ -1,22 +1,23 @@
 // tmp_debug/bisect_v2_2/main.go
 //
-// V2.2 Phase 5 ship-gate iter 4 — minimum-failing bisection runner.
+// V2.2 Phase 5 ship-gate bisection runner (batch mode, iter-5b).
 //
-// Builds 6 variants of increasing complexity, invokes AE 2025 on each via
-// verify_open.jsx, records PASS/FAIL + error message. The first FAIL variant
-// localizes the failure category (layer skel / shape emit / static value /
-// keyframe encoding / spatial-specific).
+// Builds 6 variants of increasing complexity, then launches AE 2025 ONCE
+// to verify all of them in sequence via verify_open_batch.jsx. The script
+// opens each .aep, dumps comp.layers.length + names to a per-variant .done
+// file, closes the project, moves to the next. AE quits at the end.
 //
-// Matrix (board.md "Next session" 第 3 节):
+// Previous flow re-launched AE per variant — ~9 minutes for 6 variants.
+// Batch flow is bounded by AE startup (~10s) + per-variant open+verify
+// (~5-8s) ≈ 1 minute total.
+//
+// Matrix:
 //   #2: empty NewShapeLayer (no mutation)
 //   #3: + AddRect() (default values)
 //   #4: + rect.SetSize (static)
-//   #5: + AddFill() (static color)
+//   #5: + AddFill (static color)
 //   #6: + rect.Size keyframed (non-spatial 2D)
 //   #7: + L.Position keyframed (spatial 2D)
-//
-// Each variant writes tmp_debug/minfail_v<N>.aep, launches AE, waits for
-// .done file (90s timeout), parses first line, prints matrix row.
 //
 // Run: go run tmp_debug/bisect_v2_2/main.go
 package main
@@ -34,10 +35,10 @@ import (
 
 const (
 	aeExe       = `E:/adobe/Adobe After Effects 2025/Support Files/AfterFX.exe`
-	jsxPath     = `E:/projects/tools/aep-parser/test_data/verify_open.jsx`
-	argsPath    = `e:/projects/tools/aep-parser/test_data/verify_open_args.json`
-	repoRoot    = `e:/projects/tools/aep-parser`
-	openTimeout = 90 * time.Second
+	jsxPath     = `E:/projects/tools/aep-parser/test_data/verify_open_batch.jsx`
+	argsPath    = `e:/projects/tools/aep-parser/test_data/verify_open_batch_args.json`
+	summaryPath = `e:/projects/tools/aep-parser/test_data/verify_open_batch_summary.txt`
+	totalTO     = 6 * time.Minute // safety upper bound for all 6 variants
 )
 
 type result struct {
@@ -48,28 +49,95 @@ type result struct {
 }
 
 func main() {
-	results := []result{}
+	// 1. Build all 6 variants up front.
+	type plan struct {
+		variant  int
+		desc     string
+		aepPath  string
+		donePath string
+	}
+	var plans []plan
+	results := make(map[int]*result)
 	for v := 2; v <= 7; v++ {
-		r := runVariant(v)
-		results = append(results, r)
-		fmt.Printf("=== variant %d %-30s → %s\n", r.variant, r.desc, r.status)
-		if r.detail != "" {
-			fmt.Printf("    %s\n", truncate(r.detail, 200))
+		aepPath := filepath.Join("tmp_debug", fmt.Sprintf("minfail_v%d.aep", v))
+		donePath := filepath.Join("tmp_debug", fmt.Sprintf("minfail_v%d.done", v))
+		if err := buildVariant(v, aepPath); err != nil {
+			results[v] = &result{variant: v, desc: variantDesc(v), status: "BUILD_ERR", detail: err.Error()}
+			continue
 		}
-		// First-FAIL is the diagnostic answer; continuing past it adds no
-		// signal (we already know AE rejects). But print remaining variants
-		// as SKIPPED for the matrix display, then exit.
-		if r.status != "PASS" {
-			for skip := v + 1; skip <= 7; skip++ {
-				results = append(results, result{variant: skip, desc: variantDesc(skip), status: "SKIPPED"})
+		plans = append(plans, plan{variant: v, desc: variantDesc(v), aepPath: aepPath, donePath: donePath})
+		_ = os.Remove(donePath)
+	}
+
+	// 2. Write args.json batch payload.
+	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
+	var entries []string
+	for _, pl := range plans {
+		absAep, _ := filepath.Abs(pl.aepPath)
+		absDone, _ := filepath.Abs(pl.donePath)
+		entries = append(entries, fmt.Sprintf(`{"input":%q,"done":%q}`, toFwd(absAep), toFwd(absDone)))
+	}
+	argsJSON := fmt.Sprintf(`{"items":[%s]}`, strings.Join(entries, ","))
+	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		fmt.Fprintln(os.Stderr, "write args:", err)
+		os.Exit(1)
+	}
+	_ = os.Remove(summaryPath)
+
+	// 3. Launch AE once.
+	fmt.Printf("Launching AE 2025 (one process for %d variants)...\n", len(plans))
+	cmd := exec.Command(aeExe, "-r", jsxPath)
+	if err := cmd.Start(); err != nil {
+		fmt.Fprintln(os.Stderr, "AE start:", err)
+		os.Exit(1)
+	}
+
+	// 4. Poll for .done files in order; report each as it lands.
+	deadline := time.Now().Add(totalTO)
+	for _, pl := range plans {
+		seen := false
+		for !seen {
+			if _, err := os.Stat(pl.donePath); err == nil {
+				seen = true
+				break
 			}
-			break
+			if _, err := os.Stat(summaryPath); err == nil {
+				// JSX finished early (possibly an early error) — break inner
+				// loop; outer loop will treat any missing .done as TIMEOUT.
+				break
+			}
+			if time.Now().After(deadline) {
+				_ = cmd.Process.Kill()
+				results[pl.variant] = &result{variant: pl.variant, desc: pl.desc, status: "TIMEOUT", detail: fmt.Sprintf("batch deadline %s exceeded", totalTO)}
+				goto teardown
+			}
+			time.Sleep(1 * time.Second)
+		}
+		if !seen {
+			results[pl.variant] = &result{variant: pl.variant, desc: pl.desc, status: "MISSING", detail: "no .done before JSX summary written"}
+			continue
+		}
+		results[pl.variant] = readDone(pl)
+		fmt.Printf("=== variant %d %-30s → %s\n", pl.variant, pl.desc, results[pl.variant].status)
+		if results[pl.variant].detail != "" {
+			for _, line := range strings.Split(results[pl.variant].detail, "\n") {
+				fmt.Printf("    %s\n", line)
+			}
 		}
 	}
 
+teardown:
+	_ = cmd.Wait()
+
+	// 5. Print final matrix.
 	fmt.Println()
-	fmt.Println("--- bisection matrix ---")
-	for _, r := range results {
+	fmt.Println("--- bisection matrix (batch single-launch) ---")
+	for v := 2; v <= 7; v++ {
+		r, ok := results[v]
+		if !ok {
+			fmt.Printf("  #%d %-32s (no result)\n", v, variantDesc(v))
+			continue
+		}
 		fmt.Printf("  #%d %-32s %s\n", r.variant, r.desc, r.status)
 	}
 }
@@ -92,48 +160,15 @@ func variantDesc(v int) string {
 	return "?"
 }
 
-func runVariant(v int) result {
-	desc := variantDesc(v)
-	aepPath := filepath.Join("tmp_debug", fmt.Sprintf("minfail_v%d.aep", v))
-	donePath := filepath.Join("tmp_debug", fmt.Sprintf("minfail_v%d.done", v))
-
-	if err := buildVariant(v, aepPath); err != nil {
-		return result{variant: v, desc: desc, status: "BUILD_ERR", detail: err.Error()}
-	}
-
-	absAep, _ := filepath.Abs(aepPath)
-	absDone, _ := filepath.Abs(donePath)
-	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
-
-	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q}`, toFwd(absAep), toFwd(absDone))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
-		return result{variant: v, desc: desc, status: "BUILD_ERR", detail: "write args: " + err.Error()}
-	}
-	os.Remove(donePath)
-
-	cmd := exec.Command(aeExe, "-r", jsxPath)
-	if err := cmd.Start(); err != nil {
-		return result{variant: v, desc: desc, status: "BUILD_ERR", detail: "AE start: " + err.Error()}
-	}
-
-	deadline := time.Now().Add(openTimeout)
-	for {
-		if _, err := os.Stat(donePath); err == nil {
-			break
-		}
-		if time.Now().After(deadline) {
-			_ = cmd.Process.Kill()
-			return result{variant: v, desc: desc, status: "TIMEOUT", detail: fmt.Sprintf("no .done after %s", openTimeout)}
-		}
-		time.Sleep(2 * time.Second)
-	}
-
-	// Wait for AE to actually quit before next variant (avoids singleton conflict).
-	_ = cmd.Wait()
-
-	data, err := os.ReadFile(donePath)
+func readDone(pl struct {
+	variant  int
+	desc     string
+	aepPath  string
+	donePath string
+}) *result {
+	data, err := os.ReadFile(pl.donePath)
 	if err != nil {
-		return result{variant: v, desc: desc, status: "BUILD_ERR", detail: "read .done: " + err.Error()}
+		return &result{variant: pl.variant, desc: pl.desc, status: "BUILD_ERR", detail: "read .done: " + err.Error()}
 	}
 	lines := strings.SplitN(string(data), "\n", 2)
 	status := strings.TrimSpace(lines[0])
@@ -141,7 +176,7 @@ func runVariant(v int) result {
 	if len(lines) > 1 {
 		detail = strings.TrimSpace(lines[1])
 	}
-	return result{variant: v, desc: desc, status: status, detail: detail}
+	return &result{variant: pl.variant, desc: pl.desc, status: status, detail: detail}
 }
 
 // buildVariant constructs the aep for a given variant and writes it to out.
@@ -202,11 +237,4 @@ func buildVariant(variant int, out string) error {
 	}
 	defer f.Close()
 	return p.WriteAEP(f)
-}
-
-func truncate(s string, n int) string {
-	if len(s) <= n {
-		return s
-	}
-	return s[:n] + "..."
 }

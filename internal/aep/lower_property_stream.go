@@ -203,26 +203,11 @@ func lowerStream[T any](
 	return tdgp, nil
 }
 
-// splitVec2Stream splits a PropertyStream[[2]float64] into per-axis
-// PropertyStream[float64] streams (X, Y). Preserves mode + keyframe count +
-// per-keyframe time/ease — the keyframe value is projected onto each axis.
-//
-// Used by lowerLayerTransform: AE ShapeLayer canonical Transform encodes
-// Position as separate `ADBE Position_0` (X) + `ADBE Position_1` (Y)
-// streams, not the combined `ADBE Position` 2-vec. (iter 2 RE finding.)
-func splitVec2Stream(ps *PropertyStream[[2]float64]) (*PropertyStream[float64], *PropertyStream[float64]) {
-	psX := &PropertyStream[float64]{mode: ps.mode, static: ps.static[0]}
-	psY := &PropertyStream[float64]{mode: ps.mode, static: ps.static[1]}
-	for _, kf := range ps.keyframes {
-		psX.keyframes = append(psX.keyframes, StreamKeyframe[float64]{
-			Time: kf.Time, Value: kf.Value[0], InEase: kf.InEase, OutEase: kf.OutEase,
-		})
-		psY.keyframes = append(psY.keyframes, StreamKeyframe[float64]{
-			Time: kf.Time, Value: kf.Value[1], InEase: kf.InEase, OutEase: kf.OutEase,
-		})
-	}
-	return psX, psY
-}
+// iter-7: splitVec2Stream removed — lowerLayerTransform no longer
+// constructs Position_0/_1 from scratch; tolerance-boilerplate approach
+// embeds them ready-formed and lowerLayerTransform only overwrites cdat
+// scalar values via overwriteScalarCdat. V2.3 may re-introduce when
+// proper Layr Transform keyframe persistence is built.
 
 // --- Chunk builders -------------------------------------------------------
 
@@ -245,6 +230,15 @@ func makeTdmn(matchName string) *rifx.Chunk {
 // Group per RE-S3 — handled separately at the call site if needed.)
 func makeTdsb() *rifx.Chunk {
 	return &rifx.Chunk{ID: rifx.ChunkID{'t', 'd', 's', 'b'}, Data: []byte{0x00, 0x00, 0x00, 0x01}}
+}
+
+// makeTdsbContainer returns the `0x00000401` variant observed at user-extensible
+// shape-container levels per tolerance.aep iter-5 RE: the Root Vectors Group
+// body, the Vectors Group body. AE appears to set the 0x0400 bit to mark
+// "this group accepts addProperty()" — non-extensible structural bodies
+// (Vector Group routing body, empty placeholders, leaf tdbs) keep 0x00000001.
+func makeTdsbContainer() *rifx.Chunk {
+	return &rifx.Chunk{ID: rifx.ChunkID{'t', 'd', 's', 'b'}, Data: []byte{0x00, 0x00, 0x04, 0x01}}
 }
 
 // makeTdsn returns a tdsn chunk carrying an embedded Utf8 record for the

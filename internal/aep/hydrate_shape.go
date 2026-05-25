@@ -60,16 +60,39 @@ func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	return found
 }
 
-// hydrateVectorGroup turns a vector-group tdgp into a runtime VectorGroup.
+// hydrateVectorGroup turns the Root Vectors Group body into a runtime
+// VectorGroup. Per iter-5 RE, the on-disk shape is a 5-level nesting:
+//
+//	Root Vectors Group body → tdmn(Vector Group) + tdgp →
+//	  tdmn(Vectors Group) + tdgp → [shape kids]
+//	  tdmn(Vector Transform Group) + tdgp(empty)
+//	  tdmn(Vector Materials Group) + tdgp(empty)
+//
+// V2.2 collapses this into a flat shapeRootGroup.Children — the user
+// API sees [Rect, Fill, ...] directly. Vector Group / Vectors Group /
+// Vector Transform Group / Vector Materials Group are transparent on
+// hydrate; lower deterministically reconstructs them.
+//
 // Children render in serialized order — Children[0] = first emitted =
 // bottom of stack per spec §3.2.
 func hydrateVectorGroup(tdgp *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	g := NewVectorGroup()
+	collectShapeKids(tdgp, g, ctx)
+	return g
+}
+
+// collectShapeKids walks a tdgp body, descending transparently through
+// Vector Group / Vectors Group wrappers, and appends typed shape nodes
+// to g.Children. Vector Transform Group / Vector Materials Group are
+// ignored (V2.2 doesn't expose per-group transforms / materials).
+func collectShapeKids(tdgp *rifx.Chunk, g *VectorGroup, ctx *parseCtx) {
 	walkTdmnPairs(tdgp, func(matchName string, payload *rifx.Chunk) bool {
 		if !payload.IsList() || payload.FormType != rifx.IDTdgp {
 			return true
 		}
 		switch matchName {
+		case "ADBE Vector Group", "ADBE Vectors Group":
+			collectShapeKids(payload, g, ctx)
 		case "ADBE Vector Shape - Rect":
 			if n := hydrateRectNode(payload, ctx); n != nil {
 				g.Children = append(g.Children, n)
@@ -93,7 +116,6 @@ func hydrateVectorGroup(tdgp *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 		}
 		return true
 	})
-	return g
 }
 
 // hydrateLayerTransform populates layer.shapeTransform from the V1

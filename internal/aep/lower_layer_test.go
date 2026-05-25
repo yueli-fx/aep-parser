@@ -33,6 +33,20 @@ func TestLowerShapeLayer_EmptyHasLayrChunk(t *testing.T) {
 	if chunk.FindFirstList(rifx.IDTdgp) == nil {
 		t.Fatal("Layr missing LIST(tdgp) — Transform Group")
 	}
+	// iter-5b: every AE-saved Layr carries a 4th LIST(Gide) boilerplate
+	// child. Absent → AE 2025 silently drops layer from comp.layers at
+	// instantiation stage (verified via tmp_debug/bisect_v2_2 variant #2
+	// empty ShapeLayer also dropping).
+	gide := chunk.FindFirstList(rifx.IDGide)
+	if gide == nil {
+		t.Fatal("Layr missing LIST(Gide) boilerplate (iter-5b)")
+	}
+	if len(gide.Children) != 2 {
+		t.Fatalf("Gide children = %d, want 2 (gdta + LIST list)", len(gide.Children))
+	}
+	if gide.Children[0].ID != rifx.IDGdta || len(gide.Children[0].Data) != 8 {
+		t.Errorf("Gide[0] = %q (%dB), want gdta (8B)", gide.Children[0].ID, len(gide.Children[0].Data))
+	}
 }
 
 func TestLowerShapeLayer_LdtaIs164Bytes(t *testing.T) {

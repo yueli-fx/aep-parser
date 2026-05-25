@@ -17,10 +17,80 @@
 package aep
 
 import (
+	"bytes"
+	_ "embed"
 	"encoding/binary"
+	"fmt"
+	"math"
+	"sync"
 
 	"github.com/example/aep-parser/internal/rifx"
 )
+
+// v2_2 ShapeLayer Transform Group body — byte-exact extracted from
+// tolerance.aep (1842 B LIST(tdgp) with 15 children: tdsb + tdsn + 6 stream
+// tdmn-LIST pairs + Group End). iter-7 ship-gate: transplant tests proved
+// constructing this byte-correctly from scratch is too fragile (silent-drop
+// trigger). V2.3 may RE the full byte layout and replace this blob with
+// constructor code.
+//
+//go:embed templates/v2_2_transform_group_body.bin
+var v22TransformGroupBodyBytes []byte
+
+var (
+	v22TransformGroupOnce  sync.Once
+	v22TransformGroupCache *rifx.Chunk
+	v22TransformGroupErr   error
+)
+
+// cloneShapeTransformGroupBody returns a deep clone of the cached tolerance
+// Transform Group body. Caller may modify the returned tree freely (typically
+// to overwrite Position_0/_1 cdat with runtime values).
+func cloneShapeTransformGroupBody() (*rifx.Chunk, error) {
+	v22TransformGroupOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22TransformGroupBodyBytes))
+		if err != nil {
+			v22TransformGroupErr = fmt.Errorf("parse v22TransformGroupBodyBytes: %w", err)
+			return
+		}
+		v22TransformGroupCache = ch
+	})
+	if v22TransformGroupErr != nil {
+		return nil, v22TransformGroupErr
+	}
+	return cloneChunk(v22TransformGroupCache), nil
+}
+
+// cloneChunk deep-copies a chunk tree. Caller modifications to clone don't
+// affect the cached source.
+func cloneChunk(c *rifx.Chunk) *rifx.Chunk {
+	out := &rifx.Chunk{
+		ID:       c.ID,
+		Size:     c.Size,
+		FormType: c.FormType,
+		Trailing: append([]byte(nil), c.Trailing...),
+	}
+	if c.Data != nil {
+		out.Data = append([]byte(nil), c.Data...)
+	}
+	if len(c.Children) > 0 {
+		out.Children = make([]*rifx.Chunk, len(c.Children))
+		for i, ch := range c.Children {
+			out.Children[i] = cloneChunk(ch)
+		}
+	}
+	return out
+}
+
+// trimChunkNUL returns the prefix of d up to the first NUL byte.
+func trimChunkNUL(d []byte) string {
+	for i := 0; i < len(d); i++ {
+		if d[i] == 0 {
+			return string(d[:i])
+		}
+	}
+	return string(d)
+}
 
 // LowerShapeLayerForTest exports lowerShapeLayer for unit tests.
 func LowerShapeLayerForTest(s *ShapeLayer) (*rifx.Chunk, error) {
@@ -99,12 +169,57 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	outer.Children = append(outer.Children, makeTdmn("ADBE Group End"))
 	layr.Children = append(layr.Children, outer)
 
+	// 4th Layr child: Gide boilerplate. Every AE-saved Layr (user shape +
+	// template service layers DLay/SLay/CLay/SecL) carries an identical
+	// LIST(Gide) at this position. iter-5 bisect proof: AE 2025 silently
+	// drops user Layr from comp.layers when this chunk is absent — even
+	// for variant #2 (empty ShapeLayer with no shape kids). AE never
+	// reaches shape-content validation; drop happens at layer-instantiation
+	// stage.
+	//
+	// Content (byte-identical across all 10+ Layrs observed in
+	// tolerance.aep + minfail_v2.aep template service layers):
+	//
+	//	[LIST Gide]
+	//	  chunk gdta (8 B all zero)
+	//	  [LIST list]
+	//	    chunk lhd3 (52 B, observed constant)
+	//
+	// "Gide" likely stands for layer-side guide/handle; lhd3 here is NOT
+	// the keyframe-list header form (despite sharing chunk ID). Treated as
+	// opaque AE-internal boilerplate.
+	layr.Children = append(layr.Children, makeGideBoilerplate())
+
 	return layr, nil
 }
 
+// gideLhd3Boilerplate is the 52-byte lhd3 content observed identical across
+// every Layr's LIST(Gide → list → lhd3) in tolerance.aep + the template
+// service layers. iter-5 RE — no AE doc; treated as opaque constant.
+var gideLhd3Boilerplate = []byte{
+	0x00, 0xd0, 0x0b, 0xee, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+	0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00,
+}
+
+// makeGideBoilerplate returns the constant LIST(Gide) every Layr must carry
+// as 4th child. iter-5 finding (see lowerShapeLayer caller comment).
+func makeGideBoilerplate() *rifx.Chunk {
+	innerList := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
+	innerList.Children = append(innerList.Children, &rifx.Chunk{
+		ID:   rifx.IDLhd3,
+		Data: append([]byte(nil), gideLhd3Boilerplate...),
+	})
+	g := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDGide}
+	g.Children = append(g.Children, &rifx.Chunk{ID: rifx.IDGdta, Data: make([]byte, 8)}, innerList)
+	return g
+}
+
 // emptyPropGroup returns an empty 3-child LIST(tdgp) placeholder:
-// [tdsb, tdsn(""), tdmn("ADBE Group End")]. AE emits this shape for every
-// layer-property group at default (Audio / Layer Sets / Extrsn / Material).
+// [tdsb(0x01), tdsn(""), tdmn("ADBE Group End")]. Used for nested shape
+// sub-property placeholders (e.g. Vector Transform Group inside Vector Group;
+// Adv Blend Group inside Layer Styles).
 func emptyPropGroup() *rifx.Chunk {
 	g := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	g.Children = append(g.Children,
@@ -245,99 +360,68 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	return d
 }
 
-// lowerLayerTransform emits the Layer Transform Group LIST(tdgp) using the
-// ShapeLayer-canonical 6-axis schema (per iter 2 RE of tolerance.aep —
-// scars/v2-2-aelayer-structure.md "iter 2 新 RE 发现"):
+// lowerLayerTransform emits the Layer Transform Group LIST(tdgp) for a
+// ShapeLayer. iter-7 approach (post-bisect): use the byte-exact Transform
+// Group body extracted from tolerance.aep as boilerplate, then overwrite
+// the Position_0/_1 inner cdat with runtime t.position values.
 //
-//   - ADBE Anchor Point         (2-vec, always emit, runtime t.anchorPoint)
-//   - ADBE Position_0           (1-d, t.position[0] / X-axis projection)
-//   - ADBE Position_1           (1-d, t.position[1] / Y-axis projection)
-//   - ADBE Scale                (2-vec, always emit, runtime t.scale)
-//   - ADBE Rotate Z             (1-d, runtime t.rotation)
-//   - ADBE Opacity              (1-d, runtime t.opacity)
-//   - ADBE Orientation          (3-vec via otst wrapper, default [0,0,0])
-//   - ADBE Rotate X             (1-d, default 0)
-//   - ADBE Rotate Y             (1-d, default 0)
-//   - ADBE Envir Appear in Reflect (1-d, default 100)
+// Background: iter-5b..iter-6f attempted to construct the Transform Group
+// from scratch (Anchor / Position_0/_1 / Scale / RotateZ / Opacity + 6-axis
+// 3D defaults). AE 2025 accepted those files but silently dropped the
+// ShapeLayer from comp.layers. Transplant tests (tmp_debug/swap_propgroup)
+// isolated the silent-drop trigger to the Transform Group body alone —
+// 4 other property groups (Root Vectors, Layer Styles, Extrsn/Material/
+// Audio/Layer Sets placeholders) emit byte-identically to tolerance and
+// pass AE acceptance; only Transform Group construction had subtle
+// byte errors (tdsb 0x03 vs 0x01, tdb4 head bytes, missing tdum/tduM,
+// over-emit of Anchor/Scale/RotateZ/Opacity as Vec2 instead of 3D).
 //
-// V2.2 over-emit strategy: even default-valued streams get emitted. AE's
-// own elide-default convention is more compact, but AE accepts non-elided
-// form. If AE rejects, iter 4 may need selective emit (PropertyStream Mode
-// Unset state). Position is split into Position_0/Position_1 because
-// tolerance.aep does NOT contain a combined "ADBE Position" on ShapeLayer.
-func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) {
-	tdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
-	tdgp.Children = append(tdgp.Children, makeTdsb(), makeTdsn("Transform"))
-
-	posX, posY := splitVec2Stream(t.position)
-
-	// Step 1: Anchor Point (2-vec).
-	if c, err := LowerVec2Stream(t.anchorPoint, MatchNameAnchorPoint, "Anchor Point", ctx); err == nil {
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	} else {
+// V2.2 ship gate uses verbatim tolerance bytes; runtime user-set values
+// for non-Position streams (Anchor / Scale / Rotation / Opacity) are
+// runtime-only — they don't persist to disk in V2.2. V2.3 will RE the
+// proper byte layout for full Transform persistence.
+func lowerLayerTransform(t *LayerTransform, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeTransformGroupBody()
+	if err != nil {
 		return nil, err
 	}
-
-	// Step 2: Position split into Position_0 (X) + Position_1 (Y).
-	if c, err := LowerFloat64Stream(posX, MatchNamePosition0, "X Position", ctx); err == nil {
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	} else {
-		return nil, err
+	// Overwrite Position_0 / Position_1 cdat values with runtime user input.
+	// Tolerance's Position_0/_1 cdat are 40B with the f64 value at bytes 0..7.
+	overwriteScalarCdat(body, MatchNamePosition0, t.position.static[0])
+	overwriteScalarCdat(body, MatchNamePosition1, t.position.static[1])
+	if t.position.mode == StreamModeAnimated && len(t.position.keyframes) > 0 {
+		// Fall back to first keyframe value as static slot. Full animated
+		// persistence on Layr Transform is V2.3 work.
+		overwriteScalarCdat(body, MatchNamePosition0, t.position.keyframes[0].Value[0])
+		overwriteScalarCdat(body, MatchNamePosition1, t.position.keyframes[0].Value[1])
 	}
-	if c, err := LowerFloat64Stream(posY, MatchNamePosition1, "Y Position", ctx); err == nil {
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	} else {
-		return nil, err
-	}
-
-	// Step 3: Scale (2-vec).
-	if c, err := LowerVec2Stream(t.scale, MatchNameScale, "Scale", ctx); err == nil {
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	} else {
-		return nil, err
-	}
-
-	// Step 4: Rotate Z (1-d).
-	if c, err := LowerFloat64Stream(t.rotation, MatchNameRotateZ, "Rotation", ctx); err == nil {
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	} else {
-		return nil, err
-	}
-
-	// Step 5: Opacity (1-d).
-	if c, err := LowerFloat64Stream(t.opacity, MatchNameOpacity, "Opacity", ctx); err == nil {
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	} else {
-		return nil, err
-	}
-
-	// Step 6: Orientation (3-vec, default [0,0,0]) — emitted via otst wrapper.
-	tdgp.Children = append(tdgp.Children, makeTdmn(MatchNameOrientation), lowerOrientationDefault())
-
-	// Steps 7-9: Rotate X / Rotate Y / Envir Appear in Reflect — default emits.
-	for _, axis := range []struct {
-		matchName string
-		display   string
-		defaultV  float64
-	}{
-		{MatchNameRotateX, "X Rotation", 0},
-		{MatchNameRotateY, "Y Rotation", 0},
-		{MatchNameEnvirAppear, "Envir Appear", 100},
-	} {
-		ps := &PropertyStream[float64]{mode: StreamModeStatic, static: axis.defaultV}
-		c, err := LowerFloat64Stream(ps, axis.matchName, axis.display, ctx)
-		if err != nil {
-			return nil, err
-		}
-		tdgp.Children = append(tdgp.Children, c.Children...)
-	}
-
-	tdgp.Children = append(tdgp.Children, makeTdmn("ADBE Group End"))
 
 	wrapper := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	wrapper.Children = append(wrapper.Children, makeTdmn("ADBE Transform Group"))
-	wrapper.Children = append(wrapper.Children, tdgp.Children...)
+	wrapper.Children = append(wrapper.Children, body.Children...)
 	return wrapper, nil
+}
+
+// overwriteScalarCdat finds the tdmn `name` inside `body` and overwrites the
+// first 8 bytes of the inner cdat (scalar value) with the f64 BE encoding of v.
+// Used by lowerLayerTransform's iter-7 Position post-process.
+func overwriteScalarCdat(body *rifx.Chunk, name string, v float64) {
+	kids := body.Children
+	for i := 0; i < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == name && i+1 < len(kids) {
+			tdbs := kids[i+1]
+			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
+				return
+			}
+			for _, ch := range tdbs.Children {
+				if ch.ID == rifx.IDCdat && len(ch.Data) >= 8 {
+					binary.BigEndian.PutUint64(ch.Data[0:8], math.Float64bits(v))
+					return
+				}
+			}
+			return
+		}
+	}
 }
 
 // lowerOrientationDefault emits the LIST(otst) wrapper holding a default
@@ -349,24 +433,7 @@ func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) 
 //	  [LIST otky]
 //	    otda (24 B = 3 × f64 = 0,0,0)
 //
-// Orientation is a 3D quaternion-style stream — AE uses a unique chunk
-// structure (otst / otky / otda) distinct from regular tdbs cdat / keyframe
-// LIST(list). V2.2 only emits the default form; user-driven orientation
-// keyframes are V2.3+.
-func lowerOrientationDefault() *rifx.Chunk {
-	otst := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOtst}
-
-	innerTdbs := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdbs}
-	innerTdbs.Children = append(innerTdbs.Children,
-		makeTdsb(),
-		makeTdsn("Orientation"),
-		makeTdb4(valueLayout{dim: 3, headerByte: 0x07, spatial: true}),
-		&rifx.Chunk{ID: rifx.IDCdat, Data: make([]byte, 24)}, // 3 × f64 = 0,0,0
-	)
-
-	otky := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOtky}
-	otky.Children = append(otky.Children, &rifx.Chunk{ID: rifx.IDOtda, Data: make([]byte, 24)})
-
-	otst.Children = append(otst.Children, innerTdbs, otky)
-	return otst
-}
+// iter-7: lowerOrientationDefault no longer called — Transform Group body is
+// now embedded as tolerance bytes (templates/v2_2_transform_group_body.bin)
+// and includes its own Orientation otst wrapper. Retired here; keep the
+// chunk-IDs (IDOtst/IDOtky/IDOtda) in rifx.go for parser-side use.
