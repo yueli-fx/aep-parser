@@ -194,3 +194,86 @@ for _, prim := range layer.ShapePrimitives {
 - 增删 primitive 不支持（需要重排 Vector Group 子节点）
 - AE 默认值（Rect Position [0,0]、Star StarType 1 等）不会写 cdat，对应字段为 nil — 调用方需要 nil-check
 - AE 的 match-name 拼写 `"ADBE Vector Star Inner Roundess"` / `"Outer Roundess"` 是 AE 自己的错字，本库匹配时按字面值，但 Go 字段名修正为 `InnerRoundness` / `OuterRoundness`
+
+---
+
+# V2.2 alpha — Builder API（从零构造 ShapeLayer）
+
+新写路径：用 `aep.NewProject` + `Composition.NewShapeLayer` 构造可被 AE 2025 接受的 .aep（不需要在 AE 里手动建图层）。已经通过 6-variant ship gate，AE 打开后 `comp.layers.length=1, layer[1].class=ShapeLayer`。
+
+## Example — 一个红色 200×200 矩形
+
+```go
+proj := aep.NewProject(aep.TargetAE2025)
+comp, _ := proj.NewComposition("Main", 1920, 1080, 30, 5) // 5 seconds @ 30 fps
+
+shape, _ := comp.NewShapeLayer("MyRect")
+rect, _ := shape.RootGroup().AddRect()
+_ = rect.SetSize([2]float64{200, 200})
+
+fill, _ := shape.RootGroup().AddFill()
+_ = fill.SetColor([4]float64{1, 0, 0, 1}) // RGBA 0..1
+
+out, _ := os.Create("out.aep")
+_ = proj.WriteAEP(out)
+out.Close()
+```
+
+打开 `out.aep`：AE 显示 1 个 ShapeLayer，名字 "MyRect"，含一个 Rect + Fill 子节点。
+
+## API surface
+
+| API | 描述 |
+|---|---|
+| `aep.NewProject(target ...AETarget)` | 新空 project（V2.1）。`AETarget` = `TargetAE2020/2022/2025` |
+| `proj.NewComposition(name, w, h, fps, duration)` | 新建空 comp（V2.1）|
+| `(c *Composition) NewShapeLayer(name) (*ShapeLayer, error)` | 在 comp 里加新空 ShapeLayer，原子（warning/error → rollback）|
+| `(s *ShapeLayer) RootGroup() *VectorGroup` | 取顶层 Contents 容器 |
+| `(g *VectorGroup) AddRect() (*RectNode, error)` | 加 Rect 子节点 |
+| `(g *VectorGroup) AddFill() (*FillNode, error)` | 加 Fill 子节点 |
+| `(r *RectNode) SetSize([w, h] float64)` | 设矩形尺寸（static）|
+| `(f *FillNode) SetColor([r, g, b, a] float64)` | 设填充色（RGBA 0..1，static）|
+
+ShapeLayer 跟 V1 parse 出来的 `Layer` 同构 — `comp.Layers[i]` 既是 V1 `*Layer` 也能 `WrapShapeLayer(layer)` 拿到 V2.2 视图。
+
+## V2.2 alpha 限制
+
+V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `workshop/scars/v2-2-aelayer-structure.md` iter-7/8 实施记）：3 处 "complex multi-stream container" 字节直接从 tolerance.aep 拷出来作 `//go:embed` 资源，runtime 只覆盖 cdat 数值。这意味着：
+
+### 不持久化（runtime-only）
+
+调用 setter API 不报错，runtime 内存中能读到改后值，但 `WriteAEP` 后磁盘字节不变；再读回来是默认值。
+
+| 字段 | 状态 |
+|---|---|
+| `ShapeLayer.Transform().AnchorPoint / Scale / Rotation / Opacity` | runtime-only |
+| `ShapeLayer.Transform().Position` keyframes | 仅 first kf 作 static fallback |
+| `RectNode.Position / Roundness / Direction` | runtime-only |
+| `RectNode.Size` keyframes | 仅 first kf 作 static fallback |
+| `FillNode.Opacity / BlendMode / CompositeOrder / FillRule` | runtime-only |
+| `FillNode.Color` keyframes | 仅 first kf 作 static fallback |
+
+### 不支持的 shape kind
+
+| 字段 | 状态 |
+|---|---|
+| `VectorGroup.AddEllipse / AddPath / AddStroke` | Go 端能 emit + parse，但 AE 打开后 **silent drop layer**（layers.length=0）— V2.2.1 需要各自 AE fixture + embed 字节 |
+
+### Fill Color 编码不准
+
+tolerance.aep 存 Fill Color 在 cdat[0..32] 但跟 JSX 0..1 输入不对齐（实测 JSX 0.5 → tolerance 字节 0x406fe0... ≈ 255）。我们 emit 用户值时直接写 f64 BE，AE 可能对值做内部 scaling，**可见色可能跟 SetColor 入参不一致**。V2.2.1 RE 真实编码。
+
+### Keyframes 不持久化
+
+所有 shape 子流 + Layr Position 的 keyframe 调用（`AddKeyframeLinear`）在 V2.2 alpha 里都仅作 *runtime* tracking + **first keyframe value 作 static fallback** 写盘。完整 keyframe 持久化需要 RE `LIST(list) lhd3/ldat` 在 embed body 里的注入方式，V2.2.1 工作。
+
+## RE 路线 — 为什么是 embed 而不是 from-scratch 构造
+
+V2.2 Phase 5 ship gate 经历了 iter-1 到 iter-8 共 8 轮。iter-6a/b/c/d/e/f 走 byte-level RE 路线（猜 tdsb / tdb4 head bytes / tdum / placeholder flags / trailing chunks 等单字段）6 轮无果。GPT 看完 bisect 数据 pivot 到 semantic-level：
+
+1. `verify_baseline` 排除 measurement bug（tolerance 跑同样 probe 报 layers=1）
+2. `swap_propgroup` / `transplant_*` 系列工具用 chunk-level swap 测试 isolate silent-drop 的 chunk
+3. iter-7: 锁定 trigger = Layr Transform Group body → `//go:embed templates/v2_2_transform_group_body.bin` + 覆 Position cdat
+4. iter-8: 同思路缩到 shape body → embed Rect + Fill bodies 各自 → 覆 Size / Color cdat
+
+**教训**: silent-drop 类问题（AE 接受文件但内部不实例化 layer）是 semantic-level，不是 byte-level corruption。byte 路线在 silent-drop 场景是 dead end；transplant + embed 是正确 tool。完整 RE 历史见 `workshop/scars/v2-2-aelayer-structure.md`。

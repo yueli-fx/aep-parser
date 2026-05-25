@@ -1109,17 +1109,19 @@ dummy_shape_layer_path_tangent.aep ← RE-S8 expand (tangent vs no-tangent encod
 
 ### 6.4a Unclassified / Pending (RE 期临时区)
 
-RE 期间发现但归类未决的 concept / artifact。允许临时驻留，防止 premature semanticization 或 accidental serializer leakage。每条记录：
+**Closed at Phase 6 (2026-05-25)** — V2.2 alpha 通过 embed boilerplate approach (iter-7/8, §10) 闭环，所有原 pending RE items 改为：
 
-```
-[pending]
-  - 名字 + 简述
-  - 发现来源 (Phase 1 RE / ship gate / implementation)
-  - pending 原因 (still RE-ing / cross-version data 缺 / 语义 unclear)
-  - 决议 deadline (Phase 6 commit 前必清空)
-```
+- **Layr Transform Group full byte layout** (原 pending: tdsb 0x03 / tdb4 metadata bytes / tdum-tduM bounds): 不再做 from-scratch RE，整段从 tolerance.aep 抽 1842B 字节 embed (`templates/v2_2_transform_group_body.bin`)。byte 布局延后到 V2.2.1 / V3 工作。
+- **Shape body sub-prop schema** (原 pending: Rect Direction / Position / Roundness elide rules, Fill Opacity / Blend Mode 等 placeholder format): 同样改 embed (`templates/v2_2_shape_rect_body.bin` / `_fill_body.bin`)，AE-canonical elide-default 形式直接拷字节。
+- **Color cdat 编码 scale**: tolerance.aep 字节跟 JSX 0-1 input 不对齐 (0.5 → 0x406fe0... ≈ 255)，**V2.2.1 RE 留**。V2.2 alpha 接受 "可见色可能跟 SetColor 入参不一致"。
 
-**V2.2 ship 前此段必须空。** 所有 pending item 全归入 §6.2 / §6.3 / §6.4 / §6.5 / §6.6 之一。
+### 6.4a 历史 — RE pending items (Phase 5 期间，已 resolved)
+
+保留作历史 reference，无 action required：
+
+- ~~Layr Transform Group 6-axis schema byte details~~ → iter-7 embed 解
+- ~~Shape body tdsb container flag 区分 0x01/0x03/0x0401~~ → swap_propgroup transplant 锁定到 Transform body alone，其它 wrappers byte-OK
+- ~~Position spatial tdum/tduM 是否必需~~ → 单独 swap 不解 silent drop，integrated in embed body
 
 ### 6.5 Capability trait candidates
 
@@ -1135,7 +1137,7 @@ RE 期间发现但归类未决的 concept / artifact。允许临时驻留，防�
 | `PathBezierEncoding` | RE-S9 实测：shap/shph/lhd3/ldat 跨版本 byte-identical | V2.2 **不入 matrix** (条件 1 不满足；单一 canonical) |
 | `KeyframeEaseEncoding` | RE-S9 实测：lhd3[7] 1B flag + ldat 符号 bit diff，runtime f64 数值相同 | V2.2 **不入 matrix** (条件 2 不满足；cosmetic only，AE 2025 加载 AE 2020 ldat OK) |
 
-**V2.2 ship 时 `AECapabilities` 大概率仍空 struct**。
+**V2.2 ship 时 `AECapabilities` 仍空 struct (确认 2026-05-25)**：iter-7/8 ship 走 embed boilerplate 路线 (从 AE 2025 saved tolerance.aep 抽字节)，所有跨版本差异通过"输出 AE 2025-canonical bytes + AE 2020/2022 兼容读"模式回避。capability matrix 真正落地预计在 V2.2.1+ (引入 Ellipse/Path/Stroke 各自 fixture 时如发现跨版本 byte diff 才需 admission)。
 
 ### 6.6 Negative findings / ScriptingAPI quirks
 
@@ -1670,3 +1672,117 @@ Phase 6  Docs sync + ship gate
 - V3 direction: `workshop/specs/v3-direction.md`
 - 当前架构: `workshop/specs/architecture.md`
 - 项目 board: `workshop/board.md`
+- **iter-7/8 ship 完整实施 + 教训**: `workshop/scars/v2-2-aelayer-structure.md` (Phase 5 ship gate 全过程 — iter-1 to iter-8)
+
+---
+
+## 10. Phase 5/6 实际 shipped — iter-7/8 embed approach (2026-05-25)
+
+V2.2 实际落地路径**与 §0-§4 原 design 显著不同**。本节记录实际 shipped 的策略 + 跟原 design 的差距，作为 V2.2.1+ 工作的 baseline。
+
+### 10.1 原 design vs 实际 shipped 差距
+
+| 原 design (§4 serializer primitives) | 实际 shipped (iter-7/8) |
+|---|---|
+| `lower_layer.go::lowerLayerTransform` 从 6-axis schema from-scratch 构造 Transform Group | **embed tolerance.aep 抽出的 1842B Transform Group body** → clone + 仅覆 Position cdat scalar |
+| `lower_shape_node.go::lowerRectNode/FillNode` 从 sub-prop typed streams from-scratch 构造 | **embed Rect (448B) + Fill (426B) body bytes** → clone + 仅覆 Size / Color cdat scalar |
+| Position split as Position_0 / Position_1 via `splitVec2Stream`, custom tdb4 makeTdb4 + makeTdsb 等 | **删除 from-scratch helper**: `splitVec2Stream` / `lowerOrientationDefault` / `lowerVec2AsVec3TransformStream` / `stampTransformStreamTdsb` 等全 retired (iter-7/8 cleanup) |
+| RE-S1..S9 byte-level findings 作为 serializer 实现指导 | 改作 hydration / parse-side reference; serializer 走 embed 路线不依赖单字段 RE |
+| AECapabilities 跨版本 admission matrix (§6.5) | 仍空 struct ship（embed AE 2025-canonical bytes 兼容向下读）|
+
+### 10.2 Strategy — Embed boilerplate pattern
+
+适用范围：**complex multi-stream property containers**（每个 container 含 N 个 sub-stream，子布局相互依赖，byte-level RE 高风险）
+
+| Container | embed size | 覆写哪些值 |
+|---|---|---|
+| `LIST(tdgp)` Layer Transform Group body | 1842 B | Position_0 / Position_1 cdat scalar (Float64 BE) |
+| `LIST(tdgp)` Rect body | 448 B | Vector Rect Size cdat (2 × Float64 BE) |
+| `LIST(tdgp)` Fill body | 426 B | Vector Fill Color cdat (4 × Float64 BE) |
+
+实现模式 (`lower_layer.go` + `lower_shape_node.go`):
+```go
+//go:embed templates/v2_2_<name>_body.bin
+var v22<Name>BodyBytes []byte
+
+var v22<Name>Once sync.Once
+var v22<Name>Cache *rifx.Chunk
+
+func cloneV22<Name>Body() (*rifx.Chunk, error) {
+    v22<Name>Once.Do(func() {
+        ch, _ := rifx.ReadChunk(bytes.NewReader(v22<Name>BodyBytes))
+        v22<Name>Cache = ch
+    })
+    return cloneChunk(v22<Name>Cache), nil
+}
+```
+
+`rifx.ReadChunk(r io.ReadSeeker) (*Chunk, error)` 是 iter-7 时新加的 public API — `Parse` 的单 chunk 版（无 RIFX root 包裹要求），专门给 embedded resource 用。
+
+### 10.3 透明 wrappers — 仍 from-scratch 构造
+
+ship 实测确认这些仍由 V2.2 builder from-scratch emit 且 byte-OK (transplant tests 全 PASS):
+
+- Item LIST 直接 children (iide / idpc / idta / cdta / cdrp / comr / PRin / Layr 等)
+- Layr 4-child 结构 (ldta + Utf8 + outer LIST tdgp + LIST Gide)
+- Outer LIST(tdgp) 17-child (7 prop group placeholders + tdsb/tdsn/Group End)
+- Root Vectors Group body wrapper (tdsb 0x0401 + Vector Group)
+- Vector Group body wrapper (tdsb 0x01 + Vectors Group + Vector Transform/Materials Group)
+- Vectors Group body wrapper (tdsb 0x0401 + shape kids)
+- Vector Transform Group / Vector Materials Group placeholder bodies
+- Layer Styles full nested body (Blend Options + 10 fx/enabled groups)
+- Extrsn Options / Material Options / Audio Group / Layer Sets placeholders (3-child empty)
+- Item-level Ewst sibling 紧跟 Layr
+
+这些 wrappers 跟 tolerance.aep byte-level 一致。**未来添加新 shape kind 不需要再 embed wrapper bytes**，只需 embed 该 shape body 内部。
+
+### 10.4 V2.2 alpha 限制 (V2.2.1 候选)
+
+| 限制 | 根因 | V2.2.1 解法 |
+|---|---|---|
+| Ellipse / Path / Stroke silent drop | 没 tolerance fixture 提供 boilerplate bytes | 用户用 AE create 各 shape kind fixture (`re_v2_2_ellipse.aep` 等)，抽 body bytes，extend `extract_shape_bodies` |
+| Fill Color 编码不准 | tolerance bytes 跟 JSX 0..1 input 不对齐 (0.5 → 0x406fe0... ≈ 255) | RE Color cdat 真实编码 (linear-light scale / gamma / 0-255 range / etc) |
+| 所有 keyframe 不持久化 | embed body 只有 static cdat slot | 加 LIST(list) lhd3/ldat keyframe encoding 注入路径，本质是回到 byte-level RE 子集 |
+| Layr Anchor / Scale / Rotation / Opacity 不持久化 | embed body 仅 6-axis schema (Position_0/1, Orientation, Rotate X/Y, Envir Appear), 无 Anchor / Scale / Rotate Z / Opacity stream | RE schema 找正确字节位置 (iter-5c/iter-6b 试过 from-scratch 但 byte-level 错) |
+| Rect Position / Roundness / Direction 不持久化 | tolerance Rect body 5-child only (Size sub-prop), Direction / Position / Roundness elide-default | embed body 加这些 sub-prop slot, 或 RE Phase 6.x sub-prop 编码 |
+
+### 10.5 RE methodology — transplant + embed (V3 inheritable)
+
+iter-7/8 sealed methodology 适用未来任何 "AE 接受文件但 silent-drop"-type silent-drop 类问题：
+
+```
+Step 1: verify_baseline 排除 measurement bug
+        (跑 AE 在 AE-saved baseline 上 dump 同 probe metrics)
+
+Step 2: chunk-level transplant 系列 tools (tmp_debug/swap_propgroup/ + 类似)
+        - 拿 AE-accepted baseline 作 base
+        - swap in ours 各候选 chunk 子树
+        - 跑 AE verify_baseline 看 layers.length
+        - 二分缩小到具体 chunk = silent-drop trigger
+
+Step 3: extract trigger chunk bytes (tmp_debug/extract_*/) → //go:embed
+        - 用 rifx.Chunk.Write 序列化
+        - 放进 internal/aep/templates/
+
+Step 4: refactor lower_* 函数: clone embed + overwriteShapeStreamCdat 覆 scalar 值
+        - 跑 AE bisect 验证全 variants PASS
+```
+
+工具齐 (本 RE 流程的 reusable infrastructure):
+- `tmp_debug/verify_baseline/` (single-variant AE probe)
+- `tmp_debug/transplant_layr/` / `transplant_tdgp/` (chunk-level swap base test)
+- `tmp_debug/swap_propgroup/` (batch swap 6 variants in 1 AE session)
+- `tmp_debug/swap_*body/` (per-shape-body swap)
+- `tmp_debug/swap_reverse/` (反向 ours+tolerance-piece confirm)
+- `tmp_debug/extract_transform_group/` / `extract_shape_bodies/` (binary extraction)
+- `tmp_debug/bisect_v2_2/` (batch 6-variant AE run)
+- `tmp_debug/dump_root/` (decode tdmn / tdsn names)
+- `tmp_debug/diff_*` (multi-level byte diffs)
+
+### 10.6 永久教训 (Phase 5 ship gate close)
+
+1. **byte-level RE 在 silent-drop 场景是 dead end**。iter-6a..f 6 轮盲改 (tdsb / dim upgrades / spatial bounds / trailing chunks / placeholder flags) 无果证明。silent-drop = AE 接受文件但内部 object materialization fail，是 semantic-level，不是 byte-level corruption。
+2. **transplant 法 isolate 真凶到具体 chunk** 然后 embed AE-saved bytes 作 boilerplate + post-process 覆 runtime 值。
+3. **AE-saved fixtures 是 ship-gate-class V2.x 项目的核心资源**。tolerance.aep 一个 fixture 解了 3 处 silent drop (Transform / Rect / Fill)。V2.2.1+ 需要更多 fixtures (Ellipse / Path / Stroke each AE-saved)。
+4. **V2.x alpha 限制 ≠ 失败**。docs 声明清楚 + V2.x+1 subplan 接力，先 ship 后扩展。比起追求完整 6 轮死循环更有价值。
+5. **LLM pivot 反馈** 是 ship-gate-stuck 时的关键工具。6+ iter 没进展时主动找另一个 LLM 看 bisect 数据 + 建议结构 (本 V2.2 用了 `workshop/wip/gpt`)，信息密度比单条 chat 高 5x。

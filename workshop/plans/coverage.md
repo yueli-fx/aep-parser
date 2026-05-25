@@ -57,6 +57,20 @@
 - 自由路径: `Layer.ShapePaths` R only
 - 参数化 Rect / Ellipse / Star: `ShapePrimitives` R/W（子字段 `*Property`）
 
+### V2.2 alpha ShapeLayer 写路径 (2026-05-25, iter-7/8)
+
+- `(c *Composition) NewShapeLayer(name string) (*ShapeLayer, error)` — 新建空 ShapeLayer，AE 2025 接受 + comp.layers.length=1
+- `(s *ShapeLayer) RootGroup() *VectorGroup` — 取顶层 Contents 容器
+- `(g *VectorGroup) AddRect() (*RectNode, error)` / `AddFill() (*FillNode, error)` — 加入参数化 shape kid
+- Setter: `RectNode.SetSize([w, h]) / FillNode.SetColor([r,g,b,a])` static-only
+- **AE 接受 gate**: 通过 embed tolerance.aep 抽出的 3 处 boilerplate 字节 (Transform Group 1842B + Rect body 448B + Fill body 426B in `internal/aep/templates/`)；详 `../scars/v2-2-aelayer-structure.md`
+- **V2.2 alpha 限制**（V2.2.1 候选）:
+  - Ellipse / Path / Stroke: Go 端能 emit + parse，AE 会 silent drop（需各自 fixture + embed bytes）
+  - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
+  - Keyframe 持久化（Rect Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
+  - Layr Transform 的 Anchor / Scale / Rotation / Opacity: runtime-only 不持久化
+  - Rect Direction / Position / Roundness: runtime-only 不持久化
+
 ### Text
 
 - 基础: `Text` R/W (length-preserving)；`Fonts []string` + `AddFont(name)` 追加；`FontIndex` R/W
