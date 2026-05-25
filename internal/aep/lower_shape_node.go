@@ -9,10 +9,100 @@
 package aep
 
 import (
+	"bytes"
+	_ "embed"
+	"encoding/binary"
 	"fmt"
+	"math"
+	"sync"
 
 	"github.com/example/aep-parser/internal/rifx"
 )
+
+// iter-8 embed: tolerance shape body bytes used as boilerplate skeleton.
+// Validator boundary RE'd via tmp_debug/swap_rect_body + swap_fill_body +
+// swap_both_bodies: each shape primitive body in our from-scratch emit
+// triggers AE silent drop independently. embed-tolerance-bytes approach
+// (same pattern as iter-7 lowerLayerTransform) bypasses byte-level RE.
+//
+//go:embed templates/v2_2_shape_rect_body.bin
+var v22ShapeRectBodyBytes []byte
+
+//go:embed templates/v2_2_shape_fill_body.bin
+var v22ShapeFillBodyBytes []byte
+
+var (
+	v22ShapeRectOnce  sync.Once
+	v22ShapeRectCache *rifx.Chunk
+	v22ShapeRectErr   error
+
+	v22ShapeFillOnce  sync.Once
+	v22ShapeFillCache *rifx.Chunk
+	v22ShapeFillErr   error
+)
+
+func cloneShapeRectBody() (*rifx.Chunk, error) {
+	v22ShapeRectOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeRectBodyBytes))
+		if err != nil {
+			v22ShapeRectErr = fmt.Errorf("parse v22ShapeRectBodyBytes: %w", err)
+			return
+		}
+		v22ShapeRectCache = ch
+	})
+	if v22ShapeRectErr != nil {
+		return nil, v22ShapeRectErr
+	}
+	return cloneChunk(v22ShapeRectCache), nil
+}
+
+func cloneShapeFillBody() (*rifx.Chunk, error) {
+	v22ShapeFillOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeFillBodyBytes))
+		if err != nil {
+			v22ShapeFillErr = fmt.Errorf("parse v22ShapeFillBodyBytes: %w", err)
+			return
+		}
+		v22ShapeFillCache = ch
+	})
+	if v22ShapeFillErr != nil {
+		return nil, v22ShapeFillErr
+	}
+	return cloneChunk(v22ShapeFillCache), nil
+}
+
+// overwriteShapeStreamCdat finds the tdmn matching `streamName` inside
+// `body` (LIST tdgp), descends into the inner LIST(tdbs), and overwrites
+// the first `valueBytes` of the cdat with `data`. Used to inject runtime
+// Size / Color / etc values into the embedded tolerance template.
+func overwriteShapeStreamCdat(body *rifx.Chunk, streamName string, data []byte) {
+	kids := body.Children
+	for i := 0; i < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == streamName && i+1 < len(kids) {
+			tdbs := kids[i+1]
+			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
+				return
+			}
+			for _, ch := range tdbs.Children {
+				if ch.ID == rifx.IDCdat && len(ch.Data) >= len(data) {
+					copy(ch.Data[:len(data)], data)
+					return
+				}
+			}
+			return
+		}
+	}
+}
+
+// encodeF64sBE returns the BE bytes for a slice of f64 values, packed
+// without padding.
+func encodeF64sBE(vs ...float64) []byte {
+	out := make([]byte, len(vs)*8)
+	for i, v := range vs {
+		binary.BigEndian.PutUint64(out[i*8:(i+1)*8], math.Float64bits(v))
+	}
+	return out
+}
 
 // shapeMatchNames maps runtime ShapeNodeKind → AE match-name string. The
 // table is serializer-only; runtime API uses the Go enum (Inv-2). Strings
@@ -71,21 +161,27 @@ func nodeBodyTdgp(displayName string, subProps []*rifx.Chunk) *rifx.Chunk {
 	return body
 }
 
-func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	size, err := LowerVec2Stream(r.size, "ADBE Vector Rect Size", "Size", ctx)
+// lowerRectNode emits a Rect shape body using iter-8 embedded tolerance
+// bytes (templates/v2_2_shape_rect_body.bin). From-scratch construction
+// triggered silent drop (transplant-isolated via swap_rect_body); embedding
+// the canonical body + overwriting Size cdat with runtime user values is
+// the validator-safe path.
+//
+// V2.2 alpha limitations (V2.2.1 work):
+//   - Rect Position / Roundness: runtime-only, NOT persisted (tolerance
+//     elides them; embedded body has no slot to overwrite).
+//   - Rect Direction: AE default ("ToTheRight"), no runtime customization.
+//   - Animated Size: first keyframe value used as static fallback.
+func lowerRectNode(r *RectNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeRectBody()
 	if err != nil {
 		return nil, err
 	}
-	pos, err := LowerVec2Stream(r.position, "ADBE Vector Rect Position", "Position", ctx)
-	if err != nil {
-		return nil, err
+	val := r.size.static
+	if r.size.mode == StreamModeAnimated && len(r.size.keyframes) > 0 {
+		val = r.size.keyframes[0].Value
 	}
-	rnd, err := LowerFloat64Stream(r.roundness, "ADBE Vector Rect Roundness", "Roundness", ctx)
-	if err != nil {
-		return nil, err
-	}
-	direction := emptySubPropPlaceholder("ADBE Vector Shape Direction", "Direction")
-	body := nodeBodyTdgp("Rectangle Path", []*rifx.Chunk{direction, size, pos, rnd})
+	overwriteShapeStreamCdat(body, "ADBE Vector Rect Size", encodeF64sBE(val[0], val[1]))
 	return body, nil
 }
 
@@ -112,22 +208,31 @@ func lowerPathNode(p *PathNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	return body, nil
 }
 
-func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	// Per RE-S5c: Fill children are Blend Mode / Composite Order / Fill Rule /
-	// Color / Opacity (5 total). V2.2 hot path emits Color + Opacity typed;
-	// the 3 enum-style props get empty-placeholder tdgp groups.
-	blendMode := emptySubPropPlaceholder("ADBE Vector Blend Mode", "Blend Mode")
-	compOrder := emptySubPropPlaceholder("ADBE Vector Composite Order", "Composite Order")
-	fillRule := emptySubPropPlaceholder("ADBE Vector Fill Rule", "Fill Rule")
-	color, err := LowerColorStream(f.color, "ADBE Vector Fill Color", "Color", ctx)
+// lowerFillNode emits a Fill graphic body using iter-8 embedded tolerance
+// bytes (templates/v2_2_shape_fill_body.bin). Same rationale as
+// lowerRectNode — transplant tests proved from-scratch Fill body triggers
+// silent drop; embedded canonical body + cdat overwrite for Color values
+// is the validator-safe path.
+//
+// V2.2 alpha limitations (V2.2.1 work):
+//   - Fill Opacity / Blend Mode / Composite Order / Fill Rule: tolerance
+//     elides; embedded body has no slot to overwrite. Runtime-only API.
+//   - Color encoding: tolerance.aep stores Fill Color cdat in a non-obvious
+//     scale (bytes don't match user 0-1 input as f64 BE; e.g. JSX 0.5 →
+//     disk byte 0x406fe... ≈ 255). iter-8 writes user's [r,g,b,a] as f64
+//     BE in cdat[0..32] regardless — if AE applies internal scaling, visible
+//     color may not match user input. V2.2.1 will RE the encoding.
+//   - Animated Color: first keyframe value used as static fallback.
+func lowerFillNode(f *FillNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeFillBody()
 	if err != nil {
 		return nil, err
 	}
-	op, err := LowerFloat64Stream(f.opacity, "ADBE Vector Fill Opacity", "Opacity", ctx)
-	if err != nil {
-		return nil, err
+	val := f.color.static
+	if f.color.mode == StreamModeAnimated && len(f.color.keyframes) > 0 {
+		val = f.color.keyframes[0].Value
 	}
-	body := nodeBodyTdgp("Fill", []*rifx.Chunk{blendMode, compOrder, fillRule, color, op})
+	overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeF64sBE(val[0], val[1], val[2], val[3]))
 	return body, nil
 }
 

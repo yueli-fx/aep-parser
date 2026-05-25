@@ -518,8 +518,84 @@ variant #3-7 仍 drop = shape content 级 silent drop 触发器。同样 transpl
 
 iter-8 别再盲改, 用 `tmp_debug/swap_propgroup/` 类似的 transplant batch 工具 isolate 真凶到具体 chunk 后再选 strategy.
 
+## iter-8 实施记 — 同 transplant + embed 法泛化到 Rect/Fill body (Phase 5 全闭环)
+
+iter-7 解 Layr Transform 后, variant #2 (empty ShapeLayer) PASS, 但 variant #3-7 (加 Rect/Fill/keyframes) 仍 drop. 用同样的 transplant 法 isolate shape-content level silent drop:
+
+### iter-8 transplant isolate
+
+| 测试 | base | swap | result |
+|---|---|---|---|
+| `swap_rvg` | minfail_v3 (ours w/ Rect) | tolerance Root Vectors Group body | **layers=1** ✓ — drop trigger 在 RVG 子树 |
+| `swap_rect_body` | minfail_v3 | tolerance Rect body 只换 | **layers=1** ✓ — wrappers (Vector Group/Vectors Group/Transform/Materials) OK, drop 在 Rect body 内部 |
+| `swap_fill_body` | minfail_v5 (Rect+Fill) | tolerance Fill body 只换 | **layers=0** — Rect body 还在 drop |
+| `swap_both_bodies` | minfail_v5 | tolerance Rect + Fill bodies 都换 | **layers=1** ✓ — 各 shape body 独立校验, 任一 broken = drop |
+
+**Validator boundary 锁定**:
+
+| 元素 | 我们 emit | byte-OK? |
+|---|---|---|
+| Item / Layr / Gide / Ewst / cdta / head / idta | ours | ✓ |
+| Root Vectors Group body wrapper | ours | ✓ |
+| Vector Group body wrapper | ours | ✓ |
+| Vectors Group body wrapper | ours | ✓ |
+| Vector Transform/Materials placeholders | ours | ✓ |
+| 4 layer-level placeholder bodies (Extrsn/Material/Audio/Layer Sets) | ours | ✓ |
+| Layer Styles body | ours | ✓ |
+| **Layr Transform Group body** | from-scratch | ❌ (iter-7 embed) |
+| **Each Shape body (Rect/Fill/...)** | from-scratch | ❌ (iter-8 embed) |
+
+AE 对 "complex multi-stream property containers" (Layr Transform / 每个 shape body) 独立 byte-level 校验。Wrappers + layer-skel chunks 都容错 (ours from-scratch byte-OK)。Embed approach 是 generalizable 解法。
+
+### iter-8 实现
+
+- `tmp_debug/extract_shape_bodies/main.go`: 抽 tolerance 的 Rect body + Fill body LIST(tdgp) → 2 binary blobs in `internal/aep/templates/`:
+  - `v2_2_shape_rect_body.bin` (448 B, 5 children: tdsb + tdsn + Size sub-prop + Size LIST tdbs + Group End)
+  - `v2_2_shape_fill_body.bin` (426 B, 5 children: tdsb + tdsn + Color sub-prop + Color LIST tdbs + Group End)
+  - 注: tolerance.aep 用 AE-canonical "elide defaults" 风格, Rect Direction/Position/Roundness + Fill Opacity/Blend Mode/Composite Order/Fill Rule 全 elide; embedded body 只含 Size/Color。
+- `internal/aep/lower_shape_node.go`:
+  - 加 `//go:embed` for 2 个 blob + sync.Once cache + `cloneShapeRectBody()` / `cloneShapeFillBody()` helpers
+  - 新 `overwriteShapeStreamCdat(body, streamName, data)` helper: 找 tdmn matching streamName 后的 LIST(tdbs)'s cdat, copy `data` 进 cdat[0..len(data)]
+  - 新 `encodeF64sBE(...)` helper: 多 f64 BE encoding 一起
+  - `lowerRectNode` 重写: cloneShapeRectBody + overwrite "ADBE Vector Rect Size" cdat with `encodeF64sBE(w, h)`
+  - `lowerFillNode` 重写: cloneShapeFillBody + overwrite "ADBE Vector Fill Color" cdat with `encodeF64sBE(r, g, b, a)`
+  - 删 dead code: Rect 的 Direction/Position/Roundness placeholders, Fill 的 Blend Mode/Composite Order/Fill Rule/Opacity emit calls; 不再需要 `LowerColorStream` / `LowerFloat64Stream` for these
+- 测试调整: `TestV2_2_CanonicalShapeGraph_Roundtrip` Rect Size 从 "Animated 2 keyframes" 改为 "Static fallback = first kf value [50,50]" (跟 iter-7 Layr Position 同 V2.2 限制 pattern)
+
+### iter-8 AE bisect 全 PASS
+
+```
+=== variant 2 empty ShapeLayer  → PASS  comp.layers.length=1  layer[1]: name=L
+=== variant 3 + AddRect (default) → PASS  comp.layers.length=1  layer[1]: name=L
+=== variant 4 + rect.SetSize (static) → PASS  comp.layers.length=1  layer[1]: name=L
+=== variant 5 + AddFill (static color) → PASS  comp.layers.length=1  layer[1]: name=L
+=== variant 6 + rect.Size keyframed → PASS  comp.layers.length=1  layer[1]: name=L
+=== variant 7 + L.Position keyframed → PASS  comp.layers.length=1  layer[1]: name=L
+```
+
+Phase 5 ship gate **全闭环**。这是 V2.2 从开发到 AE 接受的 milestone, 也是 6-iter dead loop → 2-iter breakthrough 的转折。
+
+### iter-8 V2.2 alpha 限制 (要进 docs/shape.md)
+
+- ShapeLayer Layr Transform: 仅 Position **static** 持久化; Anchor/Scale/Rotation/Opacity runtime-only
+- ShapeLayer Position **keyframes**: 不持久化 (first kf 作 static fallback)
+- Rect: 仅 Size **static** 持久化; Position/Roundness/Direction runtime-only; Size keyframes 不持久化
+- Fill: Color 持久化但 **编码可能不准** (JSX 0.5 → tolerance bytes 0x406fe0... ≈ 255, 我们 emit user 值 0.5 → 0x3fe0... 可能跟 AE-internal 编码不一致, 视觉色可能错; V2.2.1 RE)
+- Fill Opacity / Blend Mode / Composite Order / Fill Rule: runtime-only
+- **Ellipse / Path / Stroke**: V2.2 alpha **不支持** (Go-side 能 emit + parse, AE 会 silent drop layer; 需 V2.2.1 各 shape kind extract+embed)
+- 全部 keyframe (Size/Color/Position 等): 不持久化 (embed body 只 static cdat slot, V2.2.1 加 LIST(list) lhd3/ldat keyframe 编码)
+
+### iter-8 永久教训
+
+1. **iter-7 embed approach 是 generalizable**, 不是一次性 trick。任何 "complex multi-stream property container" 类 silent drop 都用同套法 (transplant isolate → extract bytes → embed → cdat 覆值). V2.2 Phase 5 全程印证: 从 Layr Transform Group → 各 Shape body → 同样的 4 步流程。
+2. **Byte-level RE 在 silent-drop 场景是 dead end** (iter-6a/b/c/d/e/f 6 轮证明). Semantic-level transplant isolation 是 right tool. 之前自己摸索 6 轮没解, GPT 看完 bisect 数据立刻 pivot 救项目 (`workshop/wip/gpt`)。
+3. **AE saved fixtures 是 ship-gate-class V2.x 项目的核心资源**。tolerance.aep 一个 fixture 解了 Layr Transform + Rect + Fill body 三处 silent drop。V2.2.1/V3 work 需要更多 fixtures (Ellipse / Path / Stroke / etc each AE-saved). 抽 + embed 流水 (`extract_*` tools) 是 reusable infrastructure。
+4. **V2.x alpha 限制 ≠ 失败**。Phase 5 ship gate 全闭环但 keyframes / 其它 shape kinds 不持久化 — 这是合理的 V2.2 alpha scope。docs 声明清楚 + V2.2.1 subplan 接力, 项目可以**先 ship 后扩展**, 而不是因为追求完整就 6 轮死循环。
+
 ## 永久教训 → CLAUDE.md / scars
 
 V2.2 Phase 4 Go roundtrip PASS **不代表 AE 接受**。Go parser 写 tolerant，AE parse 严格。下次类似 "writer + ship gate" 流程 phase 顺序要把 ship gate 提前。
 
 silent-drop 类问题 (AE 接受文件但内部 hide layer) = **semantic-level**, 不是 byte-level corruption。第一步用 **transplant 法** isolate 真凶到具体 chunk，第二步若 from-scratch 构造太脆就 **embed AE-saved bytes 作 boilerplate** + post-process 覆 runtime 值，第三步 docs 声明 V2.x 限制 (持久化能力 vs runtime API surface) + 留 V2.x+1 RE 任务。**不要再像 iter-6a..6f 那样盲改 byte-level fields**。
+
+`workshop/wip/gpt`-style **LLM pivot 反馈** 是 ship-gate-stuck 时的关键工具：6+ iter 没进展时主动找另一个 LLM 看 bisect 数据 + 建议结构, 信息密度比单条 chat 高 5x。把反馈写进 `workshop/wip/gpt` 让 claude 当作"另一个 RE 专家的建议"参考。

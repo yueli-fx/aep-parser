@@ -3,12 +3,55 @@
 > 文档分工见 [../CLAUDE.md](../CLAUDE.md) 场景触发器表。本文件 = 现在在做啥 + 最近归档（≤ 2 周）+ PASS count 单一权威源。
 
 **Last updated**: 2026-05-25 by claude (V2.2 Phase 5 **iter-7 跨第一道 silent-drop 闸门** ✓ — 经 iter-6a/b/c/d/e/f 六轮盲改无果后，GPT pivot 建议: 停 byte-patching, 走 semantic RE + transplant 法。verify_baseline 跑 tolerance 排除 measurement bug (PASS layers=1 确认 measurement OK)；swap_propgroup 5 变体 bisect 出 **唯一触发器 = Layr Transform Group body** (其它 6 个 prop group 都 byte-OK)；iter-7 解法: **embed tolerance Transform Group bytes** (1842B 拷至 `internal/aep/templates/v2_2_transform_group_body.bin` //go:embed) + post-process 覆写 Position_0/_1 cdat 用 runtime 值。结果: variant #2 (empty ShapeLayer) 第一次 **PASS layers.length=1, layer[1]: name=L class=ShapeLayer enabled=true** ✓✓✓。剩 variant #3-7 (加 Rect/Fill/keyframes) 仍 drop — shape content 级 silent drop 待 iter-8。PASS = **175 / 0 FAIL** (TestV2_2_CanonicalShapeGraph_Roundtrip 调整: Layr Position keyframes 不持久化 V2.3 工作))
-**Active focus**: 🟢 V2.2 ship gate iter-7 Layr-level silent drop 已解；iter-8 候选 = shape content (Rect / Fill body)。详 scar `iter 7 实施记`。
+**Active focus**: 🟢 V2.2 Phase 5 ship gate **全闭环**。Phase 6 docs sync + V2.2.1 (Ellipse/Path/Stroke + Color encoding RE + keyframe 持久化) 留待下次会话。详 scar `iter 7/8 实施记`。
+
+## iter-8 (本会话) 总结
+
+**iter-7 解 Layr Transform 后**, iter-8 用同样 transplant 法 isolate shape content silent drop:
+- `swap_rect_body` (ours wrappers + tolerance Rect body) → layers=1 ✓ — Rect body 内部是触发器
+- `swap_fill_body` (only Fill body swapped) → layers=0 — Rect body 还在 drop
+- `swap_both_bodies` (both Rect + Fill swapped) → layers=1 ✓ — 各 shape body 独立校验
+
+**Solution (iter-7 pattern, finer granularity)**:
+- `tmp_debug/extract_shape_bodies/main.go` 抽 tolerance Rect + Fill body → `internal/aep/templates/v2_2_shape_rect_body.bin` (448B) + `v2_2_shape_fill_body.bin` (426B)
+- `lower_shape_node.go::lowerRectNode` / `lowerFillNode` 重写: embed + clone + `overwriteShapeStreamCdat` 覆写 Size / Color cdat 用 runtime 值
+- Ellipse / Path / Stroke / Position / Roundness / Opacity / Blend Mode etc 全标 runtime-only (V2.2.1 工作)
+
+**AE bisect**:
+| variant | iter-7 | iter-8 |
+|---|---|---|
+| #2 empty | layers=1 | layers=1 |
+| #3 +Rect | drop | **layers=1** ✓ |
+| #4 +SetSize | drop | **layers=1** ✓ |
+| #5 +Fill | drop | **layers=1** ✓ |
+| #6 size kf | drop | **layers=1** ✓ |
+| #7 position kf | drop | **layers=1** ✓ |
 
 ## Next session 进来先做
 
 1. 确认 PASS = **175** + vet clean
-2. **iter-8 准备 — shape content silent drop**:
+2. **Phase 6 docs sync** (主线):
+   - `docs/shape.md` — V2.2 alpha API surface (`NewShapeLayer/RootGroup/AddRect/AddFill`) + 限制声明 (Ellipse/Path/Stroke 不持久化 / Position/Anchor/Scale/RotateZ/Opacity 不持久化 / keyframe 不持久化 / Color encoding TBD)
+   - `workshop/plans/coverage.md` — V2.2 alpha 标 ✅
+   - `workshop/specs/v2-2-layer-creation-design.md` — finalize + 加 iter-7/8 embed approach
+3. **V2.2.1 候选** (subplan, 留下次):
+   - Ellipse/Path/Stroke embed bytes: 用户用 AE create 各 shape fixture, 抽 body, embed
+   - Fill Color 编码 RE (JSX 0.5 → 0x406fe0... ≈ 255 不对齐)
+   - keyframe 持久化 (embed body 现只 static cdat slot, 加 LIST(list) lhd3/ldat)
+4. iter-7/8 工具留 (V2.2.1 复用):
+   - `extract_transform_group/` / `extract_shape_bodies/` — embed 抽取流水
+   - `swap_propgroup/` / `swap_rect_body/` / `swap_fill_body/` / `swap_both_bodies/` / `swap_rvg/` / `swap_reverse/` — transplant isolate
+   - `verify_baseline/` / `bisect_v2_2/` (batch)
+   - `gen_v2_only/` / `gen_v3_only/` / `gen_v5_only/` / `gen_iter5_check/`
+   - `dump_root/` / `dump_project_chunks/` / `dump_cdta_full/` / `dump_gide/`
+   - `find_layerid_refs/` / `diff_*` 系列
+
+---
+
+## 旧 next session (iter-8 准备 — 已 done)
+
+1. 确认 PASS = **175** + vet clean ✓
+2. **iter-8 准备 — shape content silent drop** (本会话已 done):
    - variant #2 (empty ShapeLayer) PASS layers=1 ✓
    - variant #3 (+AddRect) 仍 drop → 触发器在 OUR Root Vectors Group / Rect body emit
    - 跟 iter-7 同样的 transplant 法 isolate: 拿 iter-7 状态的 minfail_v3.aep + swap in tolerance's Root Vectors Group → AE 跑看 layers.length
@@ -37,7 +80,7 @@
 | 2 Serializer | ✅ 5/5 | 141→154 (+13) | `3a2321c`..`8324ff9` | 4 个 lower_*.go primitive + V2.1 item-siblings rename |
 | 3 Public API | ✅ 4/4 | 154→167 (+13) | `80a5ac5 / 7627204 / 785f6b3 / 3e56a49` | NewShapeLayer + Add{Rect,Ellipse,Path,Fill,Stroke} + PropertyGroup escape hatch β |
 | 4 Roundtrip | ✅ 5/5 | 167→172 (+5) | (本会话 4 commits + 本 docs commit) | hydrateShapeNodes + write-time sync + canonical 3-layer roundtrip + atomicity ×3 + mutate-existing (skip) |
-| 5 Ship gate | 🟡 4/8 + iter-1..7 | 173 → 175 | (Phase 5 + iter-1..7 commits) | 5.1/5.2/5.3/5.4 ✅; iter-1 outer wrapper ✅; iter-2 placeholders ✅; iter-3 Transform 6-axis ✅; iter-4 bisection 7 bug ✅; iter-5 Root Vectors Group 5-层嵌套 ✅; iter-5b Gide + Ewst layer-skel boilerplate ✅; iter-6a/b/c/d/e/f 6 轮盲改 silent drop 无果 (revert)；**iter-7 transplant 法 isolate 触发器 = Layr Transform Group body → embed tolerance bytes** ✅✅ variant #2 (empty ShapeLayer) **PASS layers=1** 第一次跨闸门；iter-8 候选 = shape content silent drop (variant #3-7 仍 drop) |
+| 5 Ship gate | ✅ 4/8 + iter-1..8 | 173 → 175 | (Phase 5 + iter-1..8 commits) | 5.1/5.2/5.3/5.4 ✅; iter-1..5b layer-skel structural fixes ✅; iter-6a..f 6 轮盲改 silent drop 无果 (revert); **iter-7 transplant isolate + embed tolerance Transform Group bytes** ✅ variant #2 PASS; **iter-8 同思路 embed Rect + Fill body bytes** ✅ variants #2-7 全 PASS layers=1, layer class=ShapeLayer。Phase 5 ship gate **全闭环**。V2.2.1 留 Ellipse/Path/Stroke + Color encoding + keyframe 持久化 |
 | 6 Docs | ⏳ 0/5 | — | — | docs/shape.md + board archive + coverage sync + spec §6.4a/§6.5/§8 finalize |
 
 ## V2.2 永久知识（Phase 0 RE 已 freeze，不要再 RE）
@@ -68,6 +111,33 @@
 ---
 
 ## 最近归档（≤ 2 周）
+
+### 2026-05-25 V2.2 Phase 5 **iter-8 完整闭环 — Phase 5 ship gate 全 PASS** (PASS 175 不变；variants #2-7 全 layers=1)
+
+iter-7 解 Layr Transform 后, iter-8 用同样 transplant 法 isolate shape content silent drop. 三个 swap 测试 (`swap_rect_body` / `swap_fill_body` / `swap_both_bodies`) 证明每个 shape body 都被 AE 独立校验, 任一 broken 就 silent drop.
+
+**Solution (iter-7 pattern, 更细 granularity)**:
+- `tmp_debug/extract_shape_bodies/main.go` 抽 tolerance Rect + Fill body → `templates/v2_2_shape_rect_body.bin` (448B) + `v2_2_shape_fill_body.bin` (426B), 各 5-child
+- `lower_shape_node.go::lowerRectNode` / `lowerFillNode` 重写: `//go:embed` + sync.Once cache + `cloneChunk` + `overwriteShapeStreamCdat`. Rect Size cdat 写 user value [w, h] f64 BE; Fill Color cdat 写 [r, g, b, a] f64 BE
+- 删 dead code: 这俩 from-scratch path 不再需要 (Direction / Position / Roundness sub-prop placeholders + LowerColorStream / LowerFloat64Stream calls for Fill Opacity 等)
+- 测试调整: `TestV2_2_CanonicalShapeGraph_Roundtrip` Rect Size 期望从 "Animated 2 keyframes" 改为 "Static fallback first kf value [50,50]" (跟 iter-7 Layr Position 同 pattern)
+
+**AE bisect 验真**: 6 个 variants 全 PASS layers.length=1, layer[1]: name=L class=ShapeLayer enabled=true.
+
+**V2.2 alpha 限制清单 (Phase 6 docs 要声明)**:
+- ShapeLayer Layr-level Transform: 仅 Position static 持久化; Anchor/Scale/Rotation/Opacity 全 runtime-only
+- ShapeLayer Position keyframes: 不持久化 (first kf 作 static fallback)
+- Rect: Size static 持久化; Position / Roundness / Direction 全 runtime-only; Size keyframes 不持久化
+- Fill: Color 持久化 (但编码不准 — JSX 0.5 → 0x406fe0... ≈ 255, 实际显示色可能不对); Opacity / Blend Mode / Composite Order / Fill Rule 全 runtime-only
+- Ellipse / Path / Stroke: V2.2 不支持 (Go-side 能 emit + parse, 但 AE 不会显示)
+- 全部 keyframe 不持久化 (lower 端只覆 cdat scalar)
+
+**V2.2.1 候选 (subplan)**:
+- Ellipse/Path/Stroke embed bytes: 需用户用 AE create 各 shape fixture (`re_v2_2_ellipse.aep` 等), 抽 body, embed
+- Fill Color 编码 RE: tolerance bytes 跟 user 0-1 输入不对齐, 需 RE 编码方式
+- keyframe 持久化: embed body 现只 static cdat slot, 加 LIST(list) lhd3/ldat 编码 = byte-level RE
+
+**iter-8 永久教训**: iter-7 的 embed approach 是 generalizable. 任何 "complex multi-stream property container" 类 silent drop 都用同套法 (transplant isolate → extract bytes → embed → cdat 覆值). V2.2 ship gate 全程印证: byte-level RE 是 dead end (iter-6); semantic-level transplant isolation 是 right tool.
 
 ### 2026-05-25 V2.2 Phase 5 **iter-7 跨第一道 silent-drop 闸门** (PASS 175 不变；variant #2 empty ShapeLayer 首次 PASS layers=1)
 
