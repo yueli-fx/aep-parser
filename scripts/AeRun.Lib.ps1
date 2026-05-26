@@ -270,3 +270,20 @@ function Invoke-Ocr {
         Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue
     }
 }
+
+function Capture-WindowBitmap {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AeRunWin32+RECT]$Rect)
+
+    Add-Type -AssemblyName System.Drawing
+    $w = [Math]::Max(1, $Rect.Right - $Rect.Left)
+    $h = [Math]::Max(1, $Rect.Bottom - $Rect.Top)
+    $bmp = New-Object System.Drawing.Bitmap $w, $h
+    $g   = [System.Drawing.Graphics]::FromImage($bmp)
+    try {
+        $g.CopyFromScreen($Rect.Left, $Rect.Top, 0, 0, (New-Object System.Drawing.Size $w, $h))
+    } finally {
+        $g.Dispose()
+    }
+    return $bmp
+}

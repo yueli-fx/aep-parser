@@ -267,3 +267,17 @@ Describe 'Invoke-Ocr (sub-shell to powershell.exe + ocr_helper.ps1)' {
         $text | Should -Match 'HELLO'
     }
 }
+
+Describe 'Capture-WindowBitmap' {
+    It 'returns a Bitmap of the given rect dimensions' {
+        Initialize-Win32
+        $rect = New-Object AeRunWin32+RECT -Property @{ Left=100; Top=100; Right=300; Bottom=200 }
+        $bmp = Capture-WindowBitmap -Rect $rect
+        try {
+            $bmp.Width  | Should -Be 200
+            $bmp.Height | Should -Be 100
+        } finally {
+            $bmp.Dispose()
+        }
+    }
+}
