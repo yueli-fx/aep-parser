@@ -684,6 +684,11 @@ type Property struct {
 	// tdbs is the property's owning tdbs LIST — used by SetExpression
 	// to insert/remove the Utf8 chunk holding the JS source.
 	tdbs *rifx.Chunk
+	// tdb4 is the property metadata chunk under tdbs (124 bytes); holds
+	// the dimension, type flags, spatial / animated / no_value / color /
+	// integer / vector bits. Populated by parseLeafProperty. Used by
+	// tdb4 flag readers (IsSpatial, IsAnimated, etc.).
+	tdb4 *rifx.Chunk
 	// exprChunk is the Utf8 chunk holding the expression JS source.
 	// Nil when the property has no expression; SetExpression creates
 	// or removes it as needed.

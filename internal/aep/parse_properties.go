@@ -119,6 +119,13 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 
 	if tdb4 := tdbs.FindFirst(rifx.IDtdb4); tdb4 != nil {
 		prop.Components = decodeTdb4Components(tdb4.Data)
+		prop.tdb4 = tdb4
+	}
+	// Some shape primitive paths use uppercase IDTdb4 — record either.
+	if prop.tdb4 == nil {
+		if tdb4 := tdbs.FindFirst(rifx.IDTdb4); tdb4 != nil {
+			prop.tdb4 = tdb4
+		}
 	}
 
 	cdat := tdbs.FindFirst(rifx.IDCdat)
