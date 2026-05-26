@@ -235,3 +235,35 @@ Describe 'Get-AeModals' {
         ($list | Where-Object { $_.Title -eq $title }).Count | Should -Be 0
     }
 }
+
+Describe 'Invoke-Ocr (sub-shell to powershell.exe + ocr_helper.ps1)' {
+    It 'Initialize-Ocr returns $true when helper + powershell.exe + OCR engine all work' {
+        $ok = Initialize-Ocr
+        if (-not $ok) {
+            Set-ItResult -Skipped -Because 'OCR backend not available (helper missing or no language pack)'
+            return
+        }
+        $ok | Should -Be $true
+        # idempotent: cached
+        Initialize-Ocr | Should -Be $true
+    }
+
+    It 'reads "HELLO OCR" from a programmatically drawn bitmap' {
+        if (-not (Initialize-Ocr)) {
+            Set-ItResult -Skipped -Because 'OCR backend unavailable'
+            return
+        }
+        Add-Type -AssemblyName System.Drawing
+        $bmp = New-Object System.Drawing.Bitmap 600, 150
+        $g = [System.Drawing.Graphics]::FromImage($bmp)
+        $g.Clear([System.Drawing.Color]::White)
+        $font = New-Object System.Drawing.Font 'Arial', 60, ([System.Drawing.FontStyle]::Bold)
+        $g.DrawString('HELLO OCR', $font, [System.Drawing.Brushes]::Black, 20, 20)
+        $g.Dispose()
+
+        $text = Invoke-Ocr -Bitmap $bmp
+        $bmp.Dispose()
+
+        $text | Should -Match 'HELLO'
+    }
+}

@@ -212,3 +212,61 @@ function Get-AeModals {
     [void][AeRunWin32]::EnumWindows($cb, [IntPtr]::Zero)
     return $results
 }
+
+$script:_ocrAvailable = $null
+$script:_ocrHelperPath = Join-Path $PSScriptRoot 'ocr_helper.ps1'
+
+function Initialize-Ocr {
+    # PowerShell 7 (.NET 6+) dropped WinRT projection. Windows.Media.Ocr is still
+    # reachable from Windows PowerShell 5.1, so we shell out to powershell.exe
+    # with a tiny helper script that prints recognized text to stdout.
+    # Caches availability after first check.
+    if ($null -ne $script:_ocrAvailable) { return $script:_ocrAvailable }
+    if (-not (Test-Path -LiteralPath $script:_ocrHelperPath)) {
+        $script:_ocrAvailable = $false
+        return $false
+    }
+    if (-not (Get-Command powershell.exe -ErrorAction SilentlyContinue)) {
+        $script:_ocrAvailable = $false
+        return $false
+    }
+    # ping the helper with a 1x1 white PNG to verify the engine instantiates
+    Add-Type -AssemblyName System.Drawing
+    $bmp = New-Object System.Drawing.Bitmap 50, 50
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.Clear([System.Drawing.Color]::White)
+    $g.Dispose()
+    $ping = Join-Path $env:TEMP "ocr-ping-$(New-Guid).png"
+    $bmp.Save($ping, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    try {
+        $null = & powershell.exe -NoProfile -File $script:_ocrHelperPath -ImagePath $ping 2>&1
+        $script:_ocrAvailable = ($LASTEXITCODE -eq 0)
+    } catch {
+        $script:_ocrAvailable = $false
+    } finally {
+        Remove-Item -LiteralPath $ping -ErrorAction SilentlyContinue
+    }
+    return $script:_ocrAvailable
+}
+
+function Invoke-Ocr {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][System.Drawing.Bitmap]$Bitmap)
+
+    if (-not (Initialize-Ocr)) {
+        throw "OCR helper unavailable (scripts/ocr_helper.ps1 + Windows PowerShell 5.1 required)"
+    }
+
+    $tmp = Join-Path $env:TEMP "ocr-$(New-Guid).png"
+    $Bitmap.Save($tmp, [System.Drawing.Imaging.ImageFormat]::Png)
+    try {
+        $text = & powershell.exe -NoProfile -File $script:_ocrHelperPath -ImagePath $tmp 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "ocr_helper.ps1 exit=$LASTEXITCODE output=$text"
+        }
+        return ($text -join "`n")
+    } finally {
+        Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue
+    }
+}
