@@ -76,3 +76,35 @@ function Match-Rule {
     }
     return $null
 }
+
+function New-Cooldown {
+    return @{}
+}
+
+function Add-Cooldown {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][hashtable]$Cooldown,
+        [Parameter(Mandatory)]$Hwnd,
+        [Parameter(Mandatory)][string]$Rule,
+        [Parameter(Mandatory)][int]$DurationMs
+    )
+    $key = "$Hwnd|$Rule"
+    $Cooldown[$key] = (Get-Date).AddMilliseconds($DurationMs)
+}
+
+function Test-InCooldown {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][hashtable]$Cooldown,
+        [Parameter(Mandatory)]$Hwnd,
+        [Parameter(Mandatory)][string]$Rule
+    )
+    $key = "$Hwnd|$Rule"
+    if (-not $Cooldown.ContainsKey($key)) { return $false }
+    if ((Get-Date) -ge $Cooldown[$key]) {
+        $Cooldown.Remove($key) | Out-Null
+        return $false
+    }
+    return $true
+}

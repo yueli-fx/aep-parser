@@ -163,3 +163,30 @@ Describe 'Match-Rule' {
         Match-Rule -HwndInfo $info -Rules $script:rules | Should -BeNullOrEmpty
     }
 }
+
+Describe 'Cooldown set' {
+    It 'starts empty' {
+        $cd = New-Cooldown
+        Test-InCooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'foo' | Should -Be $false
+    }
+
+    It 'remembers a key for the given duration' {
+        $cd = New-Cooldown
+        Add-Cooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'foo' -DurationMs 200
+        Test-InCooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'foo' | Should -Be $true
+        Start-Sleep -Milliseconds 250
+        Test-InCooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'foo' | Should -Be $false
+    }
+
+    It 'distinguishes hwnd' {
+        $cd = New-Cooldown
+        Add-Cooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'foo' -DurationMs 5000
+        Test-InCooldown -Cooldown $cd -Hwnd 0x5678 -Rule 'foo' | Should -Be $false
+    }
+
+    It 'distinguishes rule' {
+        $cd = New-Cooldown
+        Add-Cooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'foo' -DurationMs 5000
+        Test-InCooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'bar' | Should -Be $false
+    }
+}
