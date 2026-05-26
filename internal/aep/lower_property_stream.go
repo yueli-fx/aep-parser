@@ -10,7 +10,7 @@
 // AE accepts the non-elided form. Phase 4 roundtrip is the byte-exact gate.
 //
 // Byte layouts are sourced from Phase 0 RE findings recorded in
-// `workshop/specs/v2-2-layer-creation-design.md` §8 (RE-S2 / S5a / S6 / S7 /
+// `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §8 (RE-S2 / S5a / S6 / S7 /
 // S8). Where a single byte was observed but its meaning is unverified, the
 // constant carries an "observed" comment and the layout falls back to a
 // canonical fixture value rather than a synthesized guess.

@@ -3,7 +3,7 @@
 **Status**: spec, ready for plan phase
 **Created**: 2026-05-22
 **Brainstorm**: chat 转录已整合；3 路 LLM 反馈（deepseek / gpt / claude）已 absorb 进各 section
-**Predecessor**: V2.1 (NewProject + NewComposition) — `workshop/plans/v2-1-foundation-plan.md` + `workshop/scars/ae25-acceptance-gate.md`
+**Predecessor**: V2.1 (NewProject + NewComposition) — `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md` + `workshop/scars/ae25-acceptance-gate.md`
 **Successor planning input**: `workshop/specs/v3-direction.md`
 
 ## 0. Context & 范围决策
@@ -1240,7 +1240,7 @@ Phase 6  Docs sync + ship gate
          Phase 6 hard ship criterion: PASS ≥ 155
 ```
 
-具体 task 拆分由 writing-plans skill 产出 `workshop/plans/v2-2-layer-creation-plan.md` 接管。
+具体 task 拆分由 writing-plans skill 产出 `workshop/plans/2026-05-22-v2-2-layer-creation-plan.md` 接管。
 
 ---
 
@@ -1668,7 +1668,7 @@ Phase 6  Docs sync + ship gate
 
 - 反馈源: `workshop/feedback/{gpt,deepseek,claude}`
 - V2.1 实践基础: `workshop/scars/ae25-acceptance-gate.md`
-- V2.1 plan: `workshop/plans/v2-1-foundation-plan.md`
+- V2.1 plan: `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md`
 - V3 direction: `workshop/specs/v3-direction.md`
 - 当前架构: `workshop/specs/architecture.md`
 - 项目 board: `workshop/board.md`

@@ -44,7 +44,7 @@ const (
 )
 
 // Item idta byte offsets (84 bytes total).
-// Full layout RE'd in workshop/plans/v2-1-foundation-plan.md RE-3 finding.
+// Full layout RE'd in workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md RE-3 finding.
 // Builder strategy: template-copy 84B + overwrite @0x10 (Item ID).
 //
 // NOTE: Item ID offset is @0x10 (verified by parse.classifyItem reading

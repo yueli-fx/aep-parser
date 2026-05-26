@@ -13,9 +13,10 @@ Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/af
    - `workshop/plans/coverage-detail.md` — AE attr 详细交叉表
    - `workshop/board.md` — "最近归档" + PASS count（**唯一权威**，其它文档不写 PASS 数）
 5. **所有 superpower 产物落 `workshop/`**（不进 `docs/superpowers/` 默认位置）：
-   - brainstorming 产出的 design spec → `workshop/specs/<topic>-design.md`
-   - writing-plans 产出的 implementation plan → `workshop/plans/<topic>-plan.md`
+   - brainstorming 产出的 design spec → `workshop/specs/YYYY-MM-DD-<topic>-design.md`（workshop v0.8.0 命名约定，时间戳前缀）
+   - writing-plans 产出的 implementation plan → `workshop/plans/YYYY-MM-DD-<topic>-plan.md`
    - 跟既有 `workshop/specs/architecture.md` + `workshop/plans/coverage*.md` 同目录，统一文档入口。
+   - 完工后 `git mv` 到对应 `finish/` 子目录（specs/finish/ 或 plans/finish/）归档。
 6. **嵌入资源（templates / fixtures）的目录命名复数**：`internal/aep/templates/` / 不是 `template/`。Go `//go:embed` 限制资源必须在 package 同目录或子目录，所以不能放项目根的 `templates/`。
 
 ## 项目入口命令
@@ -55,6 +56,6 @@ Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/af
 
 ## 进来第一件事
 
-读 `workshop/board.md` 的 "Next session 进来先做"：
+读 `workshop/board.md` 的 "Next session"：
 - 空 / 跟 `Last updated` 对不上 / 跟当前 `git status` 矛盾 → **先核对再动**
 - 一致 → 按第一句执行

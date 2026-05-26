@@ -4,11 +4,11 @@
 
 **Goal:** Ship `comp.NewShapeLayer(name)` + Rect/Ellipse/Path/Fill/Stroke 节点合成 + PropertyStream (static + keyframe) + AE 2020/2025 ship gate，作为 V2 第二个 sub-project，同时为 V3 brainstorm 提取 runtime / serializer 分层基础。
 
-**Architecture:** Spec 已收齐 (`workshop/specs/v2-2-layer-creation-design.md`)。10 条 Architecture Invariant + 4 条 Serializer Invariant 钉死 runtime ↔ serializer 边界。Builder 走 `lower_*.go` primitives；runtime types 不持 chunk refs。Escape hatch (AE 2020 canonical minimum) 避免 per-version branch。Capability matrix 接口预留，V2.2 实施期增量加。
+**Architecture:** Spec 已收齐 (`workshop/specs/2026-05-22-v2-2-layer-creation-design.md`)。10 条 Architecture Invariant + 4 条 Serializer Invariant 钉死 runtime ↔ serializer 边界。Builder 走 `lower_*.go` primitives；runtime types 不持 chunk refs。Escape hatch (AE 2020 canonical minimum) 避免 per-version branch。Capability matrix 接口预留，V2.2 实施期增量加。
 
 **Tech Stack:** Go 1.21+ (generics for `PropertyStream[T]`), 现有 `internal/aep/` package, `internal/rifx/` framing, ExtendScript (JSX) for RE + ship gate, AfterFX.exe (2020 / 2022 / 2025) for ship gate validation.
 
-**Spec reference:** `workshop/specs/v2-2-layer-creation-design.md` — 1213 行；所有 invariant / API surface / classification 在 spec 里查。Plan 内 cross-ref spec §N 节即可。
+**Spec reference:** `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` — 1213 行；所有 invariant / API surface / classification 在 spec 里查。Plan 内 cross-ref spec §N 节即可。
 
 **Pre-flight check (any phase 开工前)：**
 
@@ -159,7 +159,7 @@ git commit -m "tool(re): gen_shape_dummy.jsx — V2.2 RE fixture generator (9 sc
 
 **Files:**
 - Generate: `tmp_debug/re_v22/empty_ae{2020,2022,2025}.aep`
-- Update: `workshop/specs/v2-2-layer-creation-design.md` §8
+- Update: `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §8
 
 - [ ] **Step 1: 创建 RE 输出目录**
 
@@ -201,7 +201,7 @@ diff tmp_debug/re_v22/empty_ae2020.dump tmp_debug/re_v22/empty_ae2025.dump | hea
 
 - [ ] **Step 6: 写 RE-S1 finding 进 spec §8**
 
-打开 `workshop/specs/v2-2-layer-creation-design.md`，定位 `## 8. RE Findings`，追加：
+打开 `workshop/specs/2026-05-22-v2-2-layer-creation-design.md`，定位 `## 8. RE Findings`，追加：
 
 ```markdown
 ### RE-S1 finding: empty ShapeLayer Layr LIST 结构
@@ -225,7 +225,7 @@ diff tmp_debug/re_v22/empty_ae2020.dump tmp_debug/re_v22/empty_ae2025.dump | hea
 - [ ] **Step 7: Commit**
 
 ```bash
-git add tmp_debug/re_v22/empty_ae*.aep tmp_debug/re_v22/empty_ae*.dump workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/empty_ae*.aep tmp_debug/re_v22/empty_ae*.dump workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S1 empty ShapeLayer Layr LIST + cross-version baseline"
 ```
 
@@ -270,7 +270,7 @@ head -50 tmp_debug/re_v22/empty_ae2020.transform.dump
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/specs/v2-2-layer-creation-design.md
+git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S2 Layer Transform group default values"
 ```
 
@@ -315,7 +315,7 @@ cat tmp_debug/re_v22/empty_ae2020.contents.dump
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/specs/v2-2-layer-creation-design.md
+git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S3 VectorGroup (root) defaults + group-level Transform"
 ```
 
@@ -370,7 +370,7 @@ cat tmp_debug/re_v22/1rect.dump
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/1rect_ae2020.aep tmp_debug/re_v22/1rect.dump workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1rect_ae2020.aep tmp_debug/re_v22/1rect.dump workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S4 RectNode defaults"
 ```
 
@@ -400,7 +400,7 @@ go run ./tmp_debug/dump_root tmp_debug/re_v22/1ellipse_ae2020.aep | \
 格式同 RE-S4。Finding 写 EllipseNode Size / Position defaults。
 
 ```bash
-git add tmp_debug/re_v22/1ellipse* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1ellipse* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5a EllipseNode defaults"
 ```
 
@@ -456,7 +456,7 @@ cat tmp_debug/re_v22/1path.dump
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/1path* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1path* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5b PathNode + BezierPath linear encoding"
 ```
 
@@ -487,7 +487,7 @@ Finding 关注：
 - Composite + FillRule 默认 enum 值
 
 ```bash
-git add tmp_debug/re_v22/1fill* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1fill* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5c FillNode defaults + Color RGBA encoding"
 ```
 
@@ -517,7 +517,7 @@ Finding 关注:
 - 各 default 值
 
 ```bash
-git add tmp_debug/re_v22/1stroke* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1stroke* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5d StrokeNode defaults"
 ```
 
@@ -585,7 +585,7 @@ go test ./internal/aep/ -run TestKeyframe -v  # 既有测试通过即 parser 可
 - [ ] **Step 5: Commit**
 
 ```bash
-git add tmp_debug/re_v22/kf_1* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/kf_1* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S6 PropertyStream 1-keyframe encoding"
 ```
 
@@ -622,7 +622,7 @@ go run ./tmp_debug/dump_root tmp_debug/re_v22/kf_2_ae2020.aep | \
 ```
 
 ```bash
-git add tmp_debug/re_v22/kf_2* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/kf_2* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S7 PropertyStream 2-keyframe stride validation"
 ```
 
@@ -678,7 +678,7 @@ diff tmp_debug/re_v22/path_linear.dump tmp_debug/re_v22/path_tangent.dump
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/path_* workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/path_* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S8 BezierPath tangent encoding + min vertices"
 ```
 
@@ -737,7 +737,7 @@ done
 - [x] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/*_ae2025.aep workshop/specs/v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/*_ae2025.aep workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S9 cross-version diff + capability admission decisions"
 ```
 
@@ -746,7 +746,7 @@ git commit -m "re(v2.2): RE-S9 cross-version diff + capability admission decisio
 ### Task 0.14: Phase 0 收尾 — defaults table freeze + Phase 1 unblock
 
 **Files:**
-- Update: `workshop/specs/v2-2-layer-creation-design.md` §3.6 defaults table (RE 校准后 freeze)
+- Update: `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §3.6 defaults table (RE 校准后 freeze)
 - Update: `workshop/board.md` 标 Phase 0 完
 
 - [ ] **Step 1: Spec §3.6 defaults table 把 RE 实测值填入，去掉 "provisional" 标记**
@@ -775,7 +775,7 @@ V2.2 实施前 RE：9 个 fixture 跑 AE 2020 + 2022 + 2025 → 12 个 RE findin
 ```bash
 cd E:/projects/tools/aep-parser
 # 全文搜索剩余 "provisional" / "TBD" / "待 RE" 应该清零
-grep -nE 'provisional|TBD|TODO|待 RE-S' workshop/specs/v2-2-layer-creation-design.md
+grep -nE 'provisional|TBD|TODO|待 RE-S' workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 ```
 
 Expected: 仅 `§8 finding template` 模板内的 placeholder 残留（无实际 pending）。
@@ -783,7 +783,7 @@ Expected: 仅 `§8 finding template` 模板内的 placeholder 残留（无实际
 - [ ] **Step 5: Commit**
 
 ```bash
-git add workshop/specs/v2-2-layer-creation-design.md workshop/board.md
+git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md workshop/board.md
 git commit -m "re(v2.2): Phase 0 RE complete — defaults freeze + Phase 1 unblock"
 ```
 
@@ -3885,7 +3885,7 @@ runtime name (`"Opacity"`) 是 stable identifier；AE match-name (`"ADBE Vector 
 - Path with tangents typed setter (V2.2 默认 linear)
 - Effect / Mask 创建 on ShapeLayer
 
-详 `workshop/specs/v2-2-layer-creation-design.md` §V2.2 范围外段。
+详 `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §V2.2 范围外段。
 ```
 
 - [ ] **Step 3: docs/layer.md 加 ShapeLayer typed wrapper 段**
@@ -3961,7 +3961,7 @@ git commit -m "docs(board): V2.2 ShapeLayer ship archive"
   - PropertyStream typed (state machine Static ↔ Animated)
   - AE 2020 + AE 2025 ship gate PASS
   - 5 reusable serializer primitives for V3 inheritance
-  - 详 `../specs/v2-2-layer-creation-design.md`
+  - 详 `../specs/2026-05-22-v2-2-layer-creation-design.md`
 ```
 
 - [ ] **Step 2: coverage-detail.md 加 ShapeLayer / ShapeNode 段**
@@ -3998,13 +3998,13 @@ git commit -m "docs(coverage): V2.2 ShapeLayer + ShapeNode coverage rows"
 ### Task 6.4: Spec finalize — §8 RE Findings / §6.4a clear / §6.5 admission decisions / scar updates
 
 **Files:**
-- Modify: `workshop/specs/v2-2-layer-creation-design.md`
+- Modify: `workshop/specs/2026-05-22-v2-2-layer-creation-design.md`
 - Modify (if new quirks): `workshop/scars/ae25-acceptance-gate.md` or new scar
 
 - [ ] **Step 1: 确认 §8 RE Findings 段含完整 RE-S1 到 RE-S9 finding records (Phase 0 已填)**
 
 ```bash
-grep -c "^### RE-S" workshop/specs/v2-2-layer-creation-design.md
+grep -c "^### RE-S" workshop/specs/2026-05-22-v2-2-layer-creation-design.md
 ```
 
 Expected: ≥ 9 (RE-S1..S9 + 可能 RE-S5a/b/c/d).
@@ -4012,7 +4012,7 @@ Expected: ≥ 9 (RE-S1..S9 + 可能 RE-S5a/b/c/d).
 - [ ] **Step 2: 确认 §6.4a Unclassified 段空**
 
 ```bash
-sed -n '/### 6.4a/,/^### 6\.5/p' workshop/specs/v2-2-layer-creation-design.md | grep "^\[pending\]"
+sed -n '/### 6.4a/,/^### 6\.5/p' workshop/specs/2026-05-22-v2-2-layer-creation-design.md | grep "^\[pending\]"
 ```
 
 Expected: 0 matches (Phase 6 commit 前 V2.2 spec 必须清空 6.4a).
@@ -4030,7 +4030,7 @@ Expected: 0 matches (Phase 6 commit 前 V2.2 spec 必须清空 6.4a).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add workshop/specs/v2-2-layer-creation-design.md workshop/scars/
+git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md workshop/scars/
 git commit -m "docs(v2.2): spec §8 RE finalize + §6.4a clear + §6.5 admission decisions"
 ```
 

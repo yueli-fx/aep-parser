@@ -1,8 +1,8 @@
 // internal/aep/new_composition.go
 //
 // V2: Project.NewComposition + chunk builders for synthesizing comp
-// Item LIST from scratch. See workshop/specs/v2-1-foundation-design.md
-// and workshop/plans/v2-1-foundation-plan.md for design + RE findings.
+// Item LIST from scratch. See workshop/specs/finish/2026-05-22-v2-1-foundation-design.md
+// and workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md for design + RE findings.
 package aep
 
 import (
@@ -51,7 +51,7 @@ func buildCompIide() *rifx.Chunk {
 
 // buildCompIdpc 构造 8-byte idpc chunk。
 //
-// RE-2 finding (workshop/plans/v2-1-foundation-plan.md Task 0.2): AE 自己写全零，
+// RE-2 finding (workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md Task 0.2): AE 自己写全零，
 // 多 comp 同 project 也共享同样 8B 零字节。idpc 不是 per-item UUID — 真正的 Item
 // 唯一性走 idta @0x10（由 nextItemID 分配）。
 //
@@ -357,7 +357,7 @@ func isDatsList(c *rifx.Chunk) bool {
 }
 
 // NewComposition adds an empty composition to the project's root folder.
-// 详 spec: workshop/specs/v2-1-foundation-design.md §Public API
+// 详 spec: workshop/specs/finish/2026-05-22-v2-1-foundation-design.md §Public API
 //
 // Required:
 //   name        — non-empty string
