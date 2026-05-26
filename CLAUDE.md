@@ -8,10 +8,10 @@ Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/af
 2. **public API 不动**。重构 / 拆文件 / 移函数都不能改 exported 类型 / 方法签名 / JSON 输出字段。
 3. **`internal/aep` 单 package**。不引子包（会强制 API 重排）。
 4. **改任何 public API 必须同步**：
-   - `docs/{layer,property,text,…}.md` — 该 API 的用户文档
    - `workshop/plans/coverage.md` — 状态行（✅ / 🟢 / 🗑️ / ❌）
    - `workshop/plans/coverage-detail.md` — AE attr 详细交叉表
    - `workshop/board.md` — "最近归档" + PASS count（**唯一权威**，其它文档不写 PASS 数）
+   - `docs/{layer,property,text,…}.md` — **大批量 parity / 多 phase 工作期间可滞后**，完工后专项一次"读源码遍历重生 docs/"。中途零散小改照常同步。源码 + coverage 是权威；docs 是给外部用户读，落后于源码也不阻塞。
 5. **所有 superpower 产物落 `workshop/`**（不进 `docs/superpowers/` 默认位置）：
    - brainstorming 产出的 design spec → `workshop/specs/YYYY-MM-DD-<topic>-design.md`（workshop v0.8.0 命名约定，时间戳前缀）
    - writing-plans 产出的 implementation plan → `workshop/plans/YYYY-MM-DD-<topic>-plan.md`

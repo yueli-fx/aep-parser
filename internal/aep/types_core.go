@@ -337,6 +337,10 @@ type Footage struct {
 	Duration  float64
 	IsStill   bool
 	IsSolid   bool
+	// IsPlaceholder is true when opti tag = "Plac" (AE's placeholder
+	// footage — name + dimensions only, no source file). Mutually
+	// exclusive with IsSolid and with having a non-empty Path.
+	IsPlaceholder bool
 
 	// Comment / Label — Item-level metadata (project-panel comment +
 	// timeline color chip). Populated by parseItem from the cmta + idta
@@ -568,6 +572,22 @@ func (l *Layer) SourceComposition() *Composition {
 		return nil
 	}
 	return l.comp.proj.CompositionByID(l.SourceID)
+}
+
+// SourceFootage returns the footage item this layer references as its
+// source (a solid / file / placeholder footage), or nil when the source
+// is a composition / no source / outside the parser. Use Project.FootageByName
+// or iterate Project.Footage for arbitrary lookups.
+func (l *Layer) SourceFootage() *Footage {
+	if l.comp == nil || l.comp.proj == nil || l.SourceID == 0 {
+		return nil
+	}
+	for _, f := range l.comp.proj.Footage {
+		if f.ID == l.SourceID {
+			return f
+		}
+	}
+	return nil
 }
 
 // TrackMatteLayer returns the layer used as this layer's track matte

@@ -42,6 +42,9 @@ func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, e
 		if kind == "Soli" {
 			footage.IsSolid = true
 		}
+		if kind == "Plac" {
+			footage.IsPlaceholder = true
+		}
 	}
 
 	// Look for Als2/alas JSON anywhere in this Item subtree.
