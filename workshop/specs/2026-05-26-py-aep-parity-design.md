@@ -329,7 +329,7 @@ P1 子项 ~50+ API，其中：
 
 ## 5. 进度跟踪
 
-- Phase 1 plan: [`../plans/2026-05-26-py-aep-parity-p1-plan.md`](../plans/2026-05-26-py-aep-parity-p1-plan.md)
+- Phase 1 plan: [`../plans/finish/2026-05-26-py-aep-parity-p1-plan.md`](../plans/finish/2026-05-26-py-aep-parity-p1-plan.md) (executed, archived 2026-05-26)
 - Phase 2/3 plans: 写完 Phase 1 后再起，按需切
 - Board `Active focus` 反映**当前 phase**
 - Coverage docs 每个子任务完工同步更新
