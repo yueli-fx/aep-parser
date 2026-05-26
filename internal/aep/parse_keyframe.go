@@ -69,6 +69,7 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 			offset:   offset,
 			dims:     prop.Components,
 			tickRate: ctx.tickRate,
+			compFps:  ctx.compFps,
 		}
 		kf.Time = float64(binary.BigEndian.Uint32(ldat.Data[offset:offset+4])) / ctx.tickRate
 		kf.Value = readKFValue(ldat.Data, offset, prop.Components)

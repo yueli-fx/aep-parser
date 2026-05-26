@@ -760,6 +760,7 @@ type Keyframe struct {
 	offset   int         // start of this keyframe block within ldat.Data
 	dims     int         // dimensionality (mirrors Property.Components)
 	tickRate float64     // owning composition's TickRate (for SetTime)
+	compFps  float64     // owning composition's FrameRate (for FrameTime / SetFrameTime)
 }
 
 // ShapeLayer is the V2.2 typed wrapper around *Layer (spec §2.1). V1 callers

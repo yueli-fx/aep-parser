@@ -72,6 +72,7 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 			ldat:       ldat,
 			ldatOffset: off,
 			tickRate:   ctx.tickRate,
+			compFps:    ctx.compFps,
 		}
 		if i < len(nmrds) {
 			m.nmrd = nmrds[i]

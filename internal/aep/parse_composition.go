@@ -25,6 +25,12 @@ type parseCtx struct {
 	// decoders. Defaults to aeLegacyTimeBase when zero.
 	tickRate float64
 
+	// compFps is the owning composition's user-facing frame rate
+	// (Composition.FrameRate). Propagated into Keyframe.compFps and
+	// Marker.compFps so seconds↔frames conversion (FrameTime,
+	// SetFrameTime) doesn't need a back-pointer to the comp.
+	compFps float64
+
 	// compName is the owning composition's display name, prepended to
 	// warnings so callers can locate which comp produced an anomaly.
 	// Empty when the comp has no Utf8 name chunk.
@@ -44,6 +50,16 @@ func newParseCtx(tickRate float64, compName string, warnings *[]string) *parseCt
 		tickRate = aeLegacyTimeBase
 	}
 	return &parseCtx{tickRate: tickRate, compName: compName, warnings: warnings}
+}
+
+// newParseCtxFPS extends newParseCtx with the comp's user-facing frame
+// rate, used by frame-time accessors. Existing call sites still use
+// newParseCtx (compFps stays 0; FrameTime methods then fall back to a
+// default if needed).
+func newParseCtxFPS(tickRate, fps float64, compName string, warnings *[]string) *parseCtx {
+	ctx := newParseCtx(tickRate, compName, warnings)
+	ctx.compFps = fps
+	return ctx
 }
 
 // warn records a non-fatal parsing anomaly. Safe to call on a nil ctx or a
@@ -194,7 +210,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 		}
 	}
 
-	ctx := newParseCtx(comp.TickRate, comp.Name, warnings)
+	ctx := newParseCtxFPS(comp.TickRate, comp.FrameRate, comp.Name, warnings)
 
 	for i, layrList := range item.FindAllList(rifx.IDLayr) {
 		layer, err := parseLayer(layrList, i, ctx)

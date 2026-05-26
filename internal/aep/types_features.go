@@ -39,6 +39,7 @@ type Marker struct {
 	nmHd       *rifx.Chunk // per-marker NmHd chunk (Duration/Label)
 	nmrd       *rifx.Chunk // parent Nmrd LIST (for Utf8 text children)
 	tickRate   float64     // owning composition's TickRate (for SetTime)
+	compFps    float64     // owning composition's FrameRate (for FrameTime / SetFrameTime)
 }
 
 // MaskMode is the compositing mode for a mask (matches AE C++ SDK values).

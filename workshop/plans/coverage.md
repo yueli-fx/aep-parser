@@ -31,6 +31,11 @@
 - **Composition convenience (P1 1F)**: `NumLayers / HasAudio / TimeScale` — 3 个 helper（ActiveCamera + Markers field 早已 ship）
 - **Layer convenience (P1 1E)**: `ContainingComp / HasVideo / HasAudio / AudioActive / AudioActiveAtTime / ActiveAtTime / Width / Height / HasTrackMatte / IsTrackMatte / AutoName / IsNameFromSource / RemoveTrackMatte` — 13 个 helper (Index / Type 早已直接 field 暴露)
 - **Application wrapper (P1 1I)**: `Application{Project} / Parse / ParseReader / Application.Version()` — py-aep `parse()` 入口对齐；Version 从 head chunk 解 (e.g. "17.7x45" = AE 2020 build 45)
+- **Frame-time accessor (P1 1C)** — 用 owning comp 的 FrameRate 换算：
+  - Layer: `InPoint() / OutPoint()` getters (filled gap of 既有 SetInPoint/SetOutPoint without R)；`FrameInPoint / FrameOutPoint / FrameStartTime` R/W (3 pair)
+  - Composition: `DisplayStartFrame R` (SetDisplayStartFrame 早有)；`WorkAreaStartFrame / WorkAreaEndFrame / WorkAreaDurationFrame` R/W (3 pair)；`FrameDuration R`
+  - Keyframe: `FrameTime` R/W (用 compFps，parser 注入)
+  - Marker: `FrameTime / FrameDuration` R/W (用 compFps)
 - **Footage discriminator**: 新增 `IsPlaceholder` 字段（opti tag = "Plac"）;`Footage.{IsSolid, IsPlaceholder}` 互斥三态（file / solid / placeholder）
 
 ### Layer
