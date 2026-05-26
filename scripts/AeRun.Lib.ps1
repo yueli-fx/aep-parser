@@ -63,6 +63,26 @@ function Match-Rule {
         return $false
     }
 
+    # OCR-specific: Windows.Media.Ocr returns CJK glyphs space-separated
+    # ("修 复 选 项"); patterns are typically written contiguous ("修复选项").
+    # Retry match on whitespace-stripped versions of BOTH so English rules
+    # ("file data is missing") still hit literal matches above, and CJK
+    # rules hit the stripped fallback below.
+    function _matchAnyOcr([string]$text, $needles) {
+        if (_matchAny $text $needles) { return $true }
+        if ([string]::IsNullOrEmpty($text)) { return $false }
+        $stripped = ($text -replace '\s+', '')
+        if ([string]::IsNullOrEmpty($stripped)) { return $false }
+        foreach ($n in $needles) {
+            if (-not $n) { continue }
+            $needleStripped = ($n -replace '\s+', '')
+            if ($needleStripped -and $stripped.IndexOf($needleStripped, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+                return $true
+            }
+        }
+        return $false
+    }
+
     foreach ($rule in $Rules) {
         if (_matchAny $HwndInfo.Title $rule.windowTitle) {
             return @{ rule = $rule; layer = 'title' }
@@ -70,7 +90,7 @@ function Match-Rule {
         if (_matchAny $HwndInfo.Class $rule.windowClass) {
             return @{ rule = $rule; layer = 'class' }
         }
-        if (_matchAny $HwndInfo.Ocr $rule.ocrMatch) {
+        if (_matchAnyOcr $HwndInfo.Ocr $rule.ocrMatch) {
             return @{ rule = $rule; layer = 'ocr' }
         }
     }

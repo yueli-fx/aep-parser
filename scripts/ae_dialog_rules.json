@@ -28,5 +28,25 @@
     "keys": "{ENTER}",
     "cooldownMs": 2000,
     "comment": "Mode 3 — fixture broken; press OK to let JSX catch + write .done(ERR)"
+  },
+  {
+    "name": "ae2025-performance-preferences",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["性能首选项", "效果性能", "performance preferences"],
+    "action": "SendKeys",
+    "keys": "{ESC}",
+    "cooldownMs": 3000,
+    "comment": "AE 2025 first-launch Performance Preferences wizard — ESC dismisses without committing, falls back to defaults"
+  },
+  {
+    "name": "ae-safe-mode-recovery",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["修复选项", "安全模式", "safe mode", "recovery options"],
+    "action": "SendKeys",
+    "keys": "{ESC}",
+    "cooldownMs": 3000,
+    "comment": "AE 'Safe Mode' / Recovery dialog after wrapper force-kill on prior run — ESC declines safe-mode, continues normal launch"
   }
 ]

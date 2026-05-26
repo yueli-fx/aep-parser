@@ -153,6 +153,13 @@ Describe 'Match-Rule' {
         $m.rule.name | Should -Be 'by-ocr'
     }
 
+    It 'matches Chinese OCR with space-separated glyphs (Windows.Media.Ocr behaviour)' {
+        # Windows.Media.Ocr inserts spaces between CJK glyphs even within a single phrase.
+        $info = @{ Title = ''; Class = ''; Ocr = '错 误 : 文 件 数 据 丢 失 。 请 检 查 项 目 。' }
+        $m = Match-Rule -HwndInfo $info -Rules $script:rules
+        $m.rule.name | Should -Be 'by-ocr'
+    }
+
     It 'returns $null when nothing matches' {
         $info = @{ Title = 'unknown'; Class = 'unknown'; Ocr = 'unknown' }
         Match-Rule -HwndInfo $info -Rules $script:rules | Should -BeNullOrEmpty
