@@ -39,17 +39,16 @@
 - **Property tdb4 flag readers (P1 1G)**: `IsSpatial / IsAnimated / IsColor / IsInteger / IsVector / IsNoValue / CanVaryOverTime` — 7 个 R only flag readers, 从 tdb4 metadata chunk (124B) 解 (offsets 来自 py-aep `binary/property_chunks.py::Tdb4Chunk`)；parser 新加 `Property.tdb4` 私有 ref。Standalone Property (tdb4=nil) 全 false fallback, IsAnimated 用 len(Keyframes) > 0.
 - **Footage convenience (P1 1H)**: `AssetType / File / FootageMissing / HasAudio / StartFrame / EndFrame` — 6 个 helper. parser 新加 `Footage.sspcChunk` ref。**修复 latent bug**: 真实 AE sspc 222B 布局，Width/Height 在 @0x20/@0x24 (不是 @0/2)；synthetic 4B sspc fallback 保留。Real AE 文件 W/H 之前一直读 0，现 OK。
 - **Project views (P1 1B)**: `Footages() / RootFolder() / LayerByID(id) / EffectNames()` — 4 个 API. EffectNames 从 root-level `Pefl` LIST → `pjef` Utf8 entries (rifx 加 IDPefl/IDPjef 常量)。LayerByID 是跨 comp lookup. RootFolder 拿 Folders[0]. Footages 是 .Footage slice 的命名 alias.
-- **Project single-field setting chunks (P1 1D)**: 8 个 R/W (Revision 仅 R)
+- **Project single-field setting chunks (P1 1D)**: 8 个 R/W (Revision 仅 R)，**AE 2020/2025 ship-gate PASS**（bisect 8/8 + combined run accept；AE-visible 值 byte-identical with Go-side input）
   - `Revision()` R — head[18..19] uint16 BE (per-save counter)
-  - `LinearBlending` R/W — lnrb 出现/不出现 toggle (add/remove chunk)
-  - `LinearizeWorkingSpace` R/W — lnrp toggle
+  - `LinearBlending` R/W — lnrb add/remove chunk (1 byte `0x01` payload, insert 在 `cpid` 之后)；AE ScriptingAPI 读出 true ✓
+  - `LinearizeWorkingSpace` R/W — lnrp 同 lnrb pattern；**chunk 写法 AE-byte-identical** 但 ScriptingAPI 读 false (OCIO/CMS联动 quirk，AE 自己 set 后 reload 也读 false，详 `scars/project-flag-chunks-lnrb-lnrp.md`)
   - `CompensateForSceneReferredProfiles` R/W — acer[0] bool
   - `AudioSampleRate` R/W — adfr f64 BE, validate {22050/32000/44100/48000/96000}
   - `WorkingGamma` R/W — dwga[0] selector (0→2.2, ≠0→2.4)
   - `GpuAccelType` R/W — gpuG → Utf8 (length-variable splice)
   - `ExpressionEngine` R/W — ExEn → Utf8, validate {"extendscript", "javascript-1.0"}
   - rifx 加 IDAcer/IDAdfr/IDDwga/IDLnrb/IDLnrp/IDGpuG/IDExEn 常量
-  - Roundtrip-tested (5 subtests PASS); AE 2020/2025 ship gate 留下次 user 操作时验证
 - **Footage discriminator**: 新增 `IsPlaceholder` 字段（opti tag = "Plac"）;`Footage.{IsSolid, IsPlaceholder}` 互斥三态（file / solid / placeholder）
 
 ### Layer

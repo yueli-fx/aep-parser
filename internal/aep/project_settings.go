@@ -62,9 +62,18 @@ func (p *Project) rootChunkPresent(id rifx.ChunkID) bool {
 }
 
 // setRootFlagChunk adds (when on=true) or removes (when on=false) a
-// presence-encoded flag chunk on root. Insert position for new chunks
-// is after the last existing setting chunk, matching AE's observed
-// emission order; we just append for simplicity.
+// presence-encoded flag chunk on root.
+//
+// **Layout** (RE'd 2026-05-26 against AE 2025-saved fixture
+// `re_linear_blending_on.aep`): the chunk carries **1 byte 0x01**, NOT
+// zero-length. Empty payload makes AE reject the file with "文件数据
+// 丢失"/"file data missing".
+//
+// **Position** matters: AE inserts lnrb / lnrp immediately AFTER the
+// root `cpid` chunk (color-management profile id) and before `dwga`.
+// Append-to-end likewise causes "file data missing". We insert right
+// after the existing cpid (or fall back to before dwga, or append if
+// neither anchor exists).
 func (p *Project) setRootFlagChunk(id rifx.ChunkID, on bool) error {
 	if p.root == nil {
 		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", id)
@@ -77,14 +86,39 @@ func (p *Project) setRootFlagChunk(id rifx.ChunkID, on bool) error {
 		}
 	}
 	if on && idx < 0 {
-		// Append a zero-length flag chunk.
-		p.root.Children = append(p.root.Children, &rifx.Chunk{ID: id, Data: nil})
+		insertAt := flagChunkInsertPosition(p.root)
+		newChunk := &rifx.Chunk{ID: id, Data: []byte{0x01}}
+		p.root.Children = append(p.root.Children, nil)
+		copy(p.root.Children[insertAt+1:], p.root.Children[insertAt:])
+		p.root.Children[insertAt] = newChunk
 	}
 	if !on && idx >= 0 {
 		p.root.Children = append(p.root.Children[:idx], p.root.Children[idx+1:]...)
 	}
 	return nil
 }
+
+// flagChunkInsertPosition returns the index where a new lnrb / lnrp
+// flag chunk should be inserted on root. Per RE: after `cpid`,
+// otherwise before `dwga`, otherwise at end.
+func flagChunkInsertPosition(root *rifx.Chunk) int {
+	for i, c := range root.Children {
+		if !c.IsList() && c.ID == chunkIDCpid {
+			return i + 1
+		}
+	}
+	for i, c := range root.Children {
+		if !c.IsList() && c.ID == rifx.IDDwga {
+			return i
+		}
+	}
+	return len(root.Children)
+}
+
+// chunkIDCpid is the root-level color-profile id chunk, used as the
+// insertion anchor for lnrb / lnrp flag chunks. Not exposed in rifx
+// since no other code path needs it.
+var chunkIDCpid = rifx.ChunkID{'c', 'p', 'i', 'd'}
 
 // LinearBlending reports whether the project uses linear blending
 // (presence of lnrb chunk under root).

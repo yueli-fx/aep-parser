@@ -1,14 +1,24 @@
 ---
-when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison
-applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy]
-last_updated: 2026-05-22
+when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file
+applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes]
+last_updated: 2026-05-26
 ---
 
-# JSX RE 工作流
+# JSX RE 工作流 + ship-gate
 
 ## 总览
 
-写 fixture 用 ExtendScript（JSX）→ 让 AE 跑一次 → 拿到 `.aep` → Go 端 parse_btdk diff 找字段。
+写 fixture 用 ExtendScript（JSX）→ 让 AE 跑一次 → 拿到 `.aep` → Go 端 parse_btdk diff 找字段。Ship-gate 反过来：Go 写改过的 `.aep` → AE 打开 → 读出值跟 Go 写入比对。
+
+## 何时启用 ship-gate
+
+任何**结构性 / chunk-level 改动**入 main 前必须跑：
+- 加新 chunk / 删 chunk / 改 chunk size（length-variable splice 含 Utf8 / expression / 字体名）
+- Project-level setting chunk（lnrb/lnrp 等 toggle / acer/adfr/dwga 类单字段）
+- NewProject / NewComposition / NewShapeLayer 等结构性创建
+- 跨 AE 版本字段（AE 24+ 解封 / ldta 长度变化）
+
+length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtrip Go test 够，不必走 ship-gate。
 
 ## Adobe 软件路径
 
@@ -17,6 +27,34 @@ last_updated: 2026-05-22
 - AE 2020 — `E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe`
 
 跨版本对比时切对应 AE。Wave 1-3 字段默认用 AE 2025（24+ ScriptingAPI 解封）。
+
+**版本匹配规则（避免 conversion prompt）**：
+- 用 **fixture 源版本** 的 AE 打开 (检查方式: `Application.Version()` 读 head 解出 e.g. `17.7x45` = AE 17.7 = AE 2020)
+- 例：`re_cameralight.aep` 是 AE 2020 写的 → 用 AE 2020 跑 ship-gate / RE，**不要用 AE 2025**（触发 17.1→25 转换提示，可能弹 GUI 阻塞 unattended run）
+- 跨版本测必须时，用 AE 高版本测低版本文件（向后兼容更稳）；反向高版本→低版本经常崩
+
+## AE 打开 .aep 的 3 种失败模式
+
+调 AE-side ship-gate 不能盲信单一信号，先**辨别模式**：
+
+| 模式 | 信号 | 处理 |
+|---|---|---|
+| **1. 完全崩溃** | `tasklist`/Get-Process 看不到 AfterFX.exe；没有 `.done`；exit code 非 0 | builder 写的字段触发 AE 内部 sanity-check fail (e.g. cdta timing 空)。看 `scars/ae25-acceptance-gate.md` Stage 1 / 4 类 |
+| **2. 打开但需转换** | GUI 弹 "Convert?" 对话框 → JSX 跑不到 `app.open` 返回，要么 catch 到 error，要么 hang。`.done` 含 ERR 信息（或根本写不出） | 版本不匹配。换匹配版本 AE 跑，或后期上 GDI 自动化点 "确定" |
+| **3. 打开但报数据损坏** | JSX 跑通；`app.open(...)` 在 try/catch 里 throw "After Effects 错误: 文件数据丢失" 类错误字符串 | builder chunk 写法 / 位置 / 大小破坏 AE 检查。这是最常见且最有 RE 价值的 — bisect 隔离哪个 setter 触发 |
+
+诊断流程（按这个 order）：
+1. AE process 是否仍 alive (`tasklist /v | grep -i afterfx`)
+2. `.done` 是否生成（生成 = mode 3 / OK；不生成 = mode 1 / 2）
+3. 看 `.done` 里 step error 信息：开头 fresh/open OK 但 open_modified ERR = mode 3；纯 fresh ERR = mode 1/2
+
+**不要直接归 mode 3** 去 RE 字节，先排除 mode 1 / 2。
+
+## GDI / 屏幕截图自动化 (planned, 未实现)
+
+目前 ship-gate 还遇 GUI 拦截需要 fall back 到匹配版本绕开。**计划**：`scripts/ae_run.ps1` 包 AfterFX -r，用 PowerShell `[System.Drawing]::CopyFromScreen` 截图 + `[System.Windows.Forms.SendKeys]` 模拟键盘，自动点掉常见对话框 (convert / save changes / OK)。Claude 读截图认对话框文本 → 决定按哪个键。**目标**：unattended 跑任意 AE 版本，不被弹框阻塞。
+
+当前权宜：版本匹配 + .done timeout 失败时人工排查。
 
 ## 工作流
 
