@@ -101,6 +101,15 @@ type Project struct {
 	nhedChunk *rifx.Chunk
 	nnhdChunk *rifx.Chunk
 
+	// Project-level single-field setting chunks (P1 1D, py-aep parity).
+	// Captured by parseProject when present; mutated by Set* methods.
+	// All exist as direct root children — see project_settings.go.
+	acerChunk *rifx.Chunk // 1B bool — compensate_for_scene_referred_profiles
+	adfrChunk *rifx.Chunk // 8B f64 BE — audio_sample_rate
+	dwgaChunk *rifx.Chunk // 1-4B — byte 0 = working_gamma selector
+	gpugUtf8  *rifx.Chunk // Utf8 inside gpuG LIST — gpu_accel_type (UUID)
+	exenUtf8  *rifx.Chunk // Utf8 inside ExEn LIST — expression_engine
+
 	// V2: derived state for structural mutation (NewComposition / 未来 NewFootage etc.)
 	nextItemID uint32      // monotonic Item ID counter; never reused (see Invariants #9)
 	rootFold   *rifx.Chunk // cached root Fold LIST reference; derived cache, never owned (see Invariants #8)

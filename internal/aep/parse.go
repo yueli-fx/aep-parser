@@ -50,6 +50,31 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 		proj.nnhdChunk = nnhd
 	}
 
+	// Project-level setting chunks (P1 Task 1D). All sit as direct root
+	// children — capture refs for the Set* methods in project_settings.go.
+	for _, c := range root.Children {
+		switch c.ID {
+		case rifx.IDAcer:
+			proj.acerChunk = c
+		case rifx.IDAdfr:
+			proj.adfrChunk = c
+		case rifx.IDDwga:
+			proj.dwgaChunk = c
+		}
+		if c.IsList() {
+			switch c.FormType {
+			case rifx.IDGpuG:
+				if k := c.FindFirst(rifx.IDUtf8); k != nil {
+					proj.gpugUtf8 = k
+				}
+			case rifx.IDExEn:
+				if k := c.FindFirst(rifx.IDUtf8); k != nil {
+					proj.exenUtf8 = k
+				}
+			}
+		}
+	}
+
 	// In real .aep files, Item lists are nested inside Fold/Sfdr containers,
 	// not direct children of the root. Walk the whole tree.
 	var walk func(c *rifx.Chunk) error

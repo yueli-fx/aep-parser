@@ -77,6 +77,15 @@ var (
 	IDEwst = ChunkID{'E', 'w', 's', 't'} // LIST formType: empty 0-child sibling of every Layr at Item level (AE-required boilerplate per iter-5 RE)
 	IDPefl = ChunkID{'P', 'e', 'f', 'l'} // LIST formType: project-level effect-list container (children = pjef Utf8 entries naming used effects)
 	IDPjef = ChunkID{'p', 'j', 'e', 'f'} // Utf8 chunk: one effect match-name inside Pefl
+
+	// Project-level setting chunks (P1 Task 1D, py-aep parity)
+	IDAcer = ChunkID{'a', 'c', 'e', 'r'} // U1: compensate_for_scene_referred_profiles
+	IDAdfr = ChunkID{'a', 'd', 'f', 'r'} // F8: audio sample rate (Hz)
+	IDDwga = ChunkID{'d', 'w', 'g', 'a'} // Variable (1-4B observed): byte 0 = working gamma selector (0 → 2.2, ≠0 → 2.4)
+	IDLnrb = ChunkID{'l', 'n', 'r', 'b'} // flag chunk: linear_blending (presence = true)
+	IDLnrp = ChunkID{'l', 'n', 'r', 'p'} // flag chunk: linearize_working_space (presence = true)
+	IDGpuG = ChunkID{'g', 'p', 'u', 'G'} // LIST formType: GPU device id container (single Utf8 child = UUID)
+	IDExEn = ChunkID{'E', 'x', 'E', 'n'} // LIST formType: expression engine container (single Utf8 child = "extendscript" / "javascript-1.0")
 )
 
 // opaqueListTypes is the set of LIST formTypes whose payload is non-chunk
