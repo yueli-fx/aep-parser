@@ -203,3 +203,35 @@ Describe 'Initialize-Win32' {
         [AeRunWin32]::GetForegroundWindow() | Should -Not -Be ([IntPtr]::Zero)
     }
 }
+
+Describe 'Get-AeModals' {
+    BeforeAll {
+        Initialize-Win32
+    }
+
+    It 'returns empty list when no AE-pid windows exist' {
+        Get-AeModals -AeRootPid 999999 -MainTitleHints @('Adobe After Effects') | Should -BeNullOrEmpty
+    }
+
+    It 'returns at least one window for own pid with non-matching main title' {
+        $self = Get-Process -Id $PID
+        if ([string]::IsNullOrEmpty($self.MainWindowTitle)) {
+            Set-ItResult -Skipped -Because 'headless pwsh has no own visible window to enumerate'
+            return
+        }
+        $list = Get-AeModals -AeRootPid $PID -MainTitleHints @('___NOPE___')
+        $list.Count | Should -BeGreaterThan 0
+        $list[0].Pid | Should -Be $PID
+    }
+
+    It 'filters out own window when its title matches MainTitleHints' {
+        $self = Get-Process -Id $PID
+        $title = $self.MainWindowTitle
+        if ([string]::IsNullOrEmpty($title)) {
+            Set-ItResult -Skipped -Because 'no console title to test with'
+            return
+        }
+        $list = Get-AeModals -AeRootPid $PID -MainTitleHints @($title)
+        ($list | Where-Object { $_.Title -eq $title }).Count | Should -Be 0
+    }
+}

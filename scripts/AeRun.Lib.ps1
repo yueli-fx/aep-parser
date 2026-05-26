@@ -154,3 +154,61 @@ function Initialize-Win32 {
         }
 "@
 }
+
+function Get-AeModals {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][int]$AeRootPid,
+        [string[]]$MainTitleHints = @()
+    )
+    Initialize-Win32
+    $results = New-Object System.Collections.Generic.List[hashtable]
+
+    $cb = [AeRunWin32+EnumWindowsProc]{
+        param([IntPtr]$hWnd, [IntPtr]$lParam)
+        try {
+            if (-not [AeRunWin32]::IsWindowVisible($hWnd)) { return $true }
+
+            $procId = 0
+            [void][AeRunWin32]::GetWindowThreadProcessId($hWnd, [ref]$procId)
+            if ($procId -ne $AeRootPid) { return $true }
+
+            $sb = New-Object System.Text.StringBuilder 512
+            [void][AeRunWin32]::GetWindowTextW($hWnd, $sb, 512)
+            $title = $sb.ToString()
+
+            $sb.Clear() | Out-Null
+            [void][AeRunWin32]::GetClassNameW($hWnd, $sb, 512)
+            $cls = $sb.ToString()
+
+            $owner   = [AeRunWin32]::GetWindow($hWnd, [AeRunWin32]::GW_OWNER)
+            $exStyle = [AeRunWin32]::GetWindowLong($hWnd, [AeRunWin32]::GWL_EXSTYLE)
+            $isDlgFrame = ($exStyle -band [AeRunWin32]::WS_EX_DLGMODALFRAME) -ne 0
+
+            $titleIsMain = $false
+            foreach ($hint in $MainTitleHints) {
+                if ($title -and $title.IndexOf($hint, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+                    $titleIsMain = $true; break
+                }
+            }
+
+            $isModalCandidate = (-not $titleIsMain) -or ($owner -ne [IntPtr]::Zero) -or $isDlgFrame
+            if (-not $isModalCandidate) { return $true }
+
+            $rect = New-Object AeRunWin32+RECT
+            [void][AeRunWin32]::GetWindowRect($hWnd, [ref]$rect)
+
+            $results.Add(@{
+                Hwnd  = $hWnd
+                Title = $title
+                Class = $cls
+                Rect  = $rect
+                Pid   = $procId
+            }) | Out-Null
+        } catch {}
+        return $true
+    }
+
+    [void][AeRunWin32]::EnumWindows($cb, [IntPtr]::Zero)
+    return $results
+}
