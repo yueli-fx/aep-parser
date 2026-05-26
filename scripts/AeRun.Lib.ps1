@@ -44,3 +44,35 @@ function Parse-Rules {
     }
     return ,$parsed
 }
+
+function Match-Rule {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][hashtable]$HwndInfo,
+        [Parameter(Mandatory)]$Rules
+    )
+
+    function _matchAny([string]$text, $needles) {
+        if ([string]::IsNullOrEmpty($text)) { return $false }
+        foreach ($n in $needles) {
+            if (-not $n) { continue }
+            if ($text.IndexOf($n, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+                return $true
+            }
+        }
+        return $false
+    }
+
+    foreach ($rule in $Rules) {
+        if (_matchAny $HwndInfo.Title $rule.windowTitle) {
+            return @{ rule = $rule; layer = 'title' }
+        }
+        if (_matchAny $HwndInfo.Class $rule.windowClass) {
+            return @{ rule = $rule; layer = 'class' }
+        }
+        if (_matchAny $HwndInfo.Ocr $rule.ocrMatch) {
+            return @{ rule = $rule; layer = 'ocr' }
+        }
+    }
+    return $null
+}
