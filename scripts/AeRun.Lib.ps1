@@ -22,3 +22,25 @@ function Test-FileStable {
     }
     return $true
 }
+
+function Parse-Rules {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path)
+
+    $raw = Get-Content -LiteralPath $Path -Raw -ErrorAction Stop
+    $parsed = $raw | ConvertFrom-Json -ErrorAction Stop
+
+    foreach ($rule in $parsed) {
+        if (-not $rule.name) { throw "rule missing 'name': $($rule | ConvertTo-Json -Compress)" }
+        $wt = @($rule.windowTitle)
+        $wc = @($rule.windowClass)
+        $om = @($rule.ocrMatch)
+        if ($wt.Count -eq 0 -and $wc.Count -eq 0 -and $om.Count -eq 0) {
+            throw "rule '$($rule.name)': at least one of windowTitle/windowClass/ocrMatch must be non-empty"
+        }
+        if (-not $rule.action) { throw "rule '$($rule.name)': missing 'action'" }
+        if (-not $rule.keys)   { throw "rule '$($rule.name)': missing 'keys'" }
+        if ($null -eq $rule.cooldownMs) { throw "rule '$($rule.name)': missing 'cooldownMs'" }
+    }
+    return ,$parsed
+}
