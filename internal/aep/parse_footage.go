@@ -30,8 +30,18 @@ func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, e
 	}
 
 	if sspc := src.FindFirst(rifx.IDSspc); sspc != nil && len(sspc.Data) >= 4 {
-		footage.Width = binary.BigEndian.Uint16(sspc.Data[0:2])
-		footage.Height = binary.BigEndian.Uint16(sspc.Data[2:4])
+		footage.sspcChunk = sspc
+		// Real AE sspc is 222 bytes with width/height at @0x20/@0x24
+		// (py-aep binary/footage_chunks.py::SspcChunk). Synthesized test
+		// fixtures use a short 4-byte sspc with width/height at byte 0/2.
+		// Pick the layout based on chunk length.
+		if len(sspc.Data) >= 38 {
+			footage.Width = binary.BigEndian.Uint16(sspc.Data[0x20:0x22])
+			footage.Height = binary.BigEndian.Uint16(sspc.Data[0x24:0x26])
+		} else {
+			footage.Width = binary.BigEndian.Uint16(sspc.Data[0:2])
+			footage.Height = binary.BigEndian.Uint16(sspc.Data[2:4])
+		}
 	}
 
 	if opti := src.FindFirst(rifx.IDOpti); opti != nil {

@@ -352,6 +352,12 @@ type Footage struct {
 	// found; SetPath mutates these for write-back.
 	aliasChunk *rifx.Chunk // Pin/Als2/alas — JSON with "fullpath"
 	cpthChunk  *rifx.Chunk // legacy Cpth chunk, when present
+	// sspcChunk is the source-settings chunk (~222 bytes). Holds width /
+	// height (already on Footage) plus audio sample rate, start/end
+	// frame, footage_missing flag, etc. — used by P1 1H convenience
+	// helpers (FootageMissing / HasAudio / StartFrame / EndFrame).
+	// Offsets per py-aep binary/footage_chunks.py::SspcChunk.
+	sspcChunk *rifx.Chunk
 
 	// Item-level write-back references (used by SetComment / SetLabel).
 	itemCmtaChunk *rifx.Chunk
