@@ -309,3 +309,68 @@ function Invoke-SendKeysSafe {
     [System.Windows.Forms.SendKeys]::SendWait($Keys)
     return [pscustomobject]@{ Sent = $true; FocusActual = $actual }
 }
+
+function Write-ActionLog {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$DumpDir,
+        [Parameter(Mandatory)][string]$Event,
+        [hashtable]$Data
+    )
+    if (-not (Test-Path -LiteralPath $DumpDir)) {
+        New-Item -ItemType Directory -Path $DumpDir | Out-Null
+    }
+    $ts = (Get-Date).ToString('HH:mm:ss.fff')
+    $kv = if ($Data) {
+        ($Data.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ' '
+    } else { '' }
+    $line = "$ts  $Event  $kv".TrimEnd()
+    Add-Content -LiteralPath (Join-Path $DumpDir 'actions.log') -Value $line
+}
+
+function Write-ForensicsDump {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$DumpDir,
+        [Parameter(Mandatory)][int]$ExitCode,
+        [Parameter(Mandatory)][string]$Reason,
+        $Modals      = @(),
+        [hashtable]$OcrTexts = @{},
+        [hashtable]$Meta     = @{}
+    )
+
+    if (-not (Test-Path -LiteralPath $DumpDir)) {
+        New-Item -ItemType Directory -Path $DumpDir | Out-Null
+    }
+
+    Add-Type -AssemblyName System.Drawing
+    Add-Type -AssemblyName System.Windows.Forms
+    $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+    $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+    $g   = [System.Drawing.Graphics]::FromImage($bmp)
+    try {
+        $g.CopyFromScreen($bounds.X, $bounds.Y, 0, 0, $bounds.Size)
+    } finally {
+        $g.Dispose()
+    }
+    $bmp.Save((Join-Path $DumpDir 'screenshot.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+
+    $winLines = @()
+    foreach ($m in $Modals) {
+        $winLines += "hwnd=0x$('{0:X}' -f [int64]$m.Hwnd) pid=$($m.Pid) title='$($m.Title)' class='$($m.Class)' rect=($($m.Rect.Left),$($m.Rect.Top))-($($m.Rect.Right),$($m.Rect.Bottom))"
+    }
+    Set-Content -LiteralPath (Join-Path $DumpDir 'windows.txt') -Value $winLines
+
+    $ocrLines = @()
+    foreach ($k in $OcrTexts.Keys) {
+        $ocrLines += "=== hwnd=$k ==="
+        $ocrLines += $OcrTexts[$k]
+    }
+    Set-Content -LiteralPath (Join-Path $DumpDir 'ocr.txt') -Value $ocrLines
+
+    $Meta.exitCode  = $ExitCode
+    $Meta.reason    = $Reason
+    $Meta.timestamp = (Get-Date).ToString('o')
+    $Meta | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $DumpDir 'meta.json')
+}

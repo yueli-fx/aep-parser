@@ -299,3 +299,47 @@ Describe 'Invoke-SendKeysSafe' {
         $r.PSObject.Properties['FocusActual'] | Should -Not -BeNullOrEmpty
     }
 }
+
+Describe 'Write-ActionLog' {
+    BeforeEach {
+        $script:dump = Join-Path $env:TEMP "dump-$(New-Guid)"
+        New-Item -ItemType Directory -Path $script:dump | Out-Null
+    }
+    AfterEach {
+        Remove-Item -Recurse -Force $script:dump -ErrorAction SilentlyContinue
+    }
+
+    It 'creates actions.log and appends timestamped lines' {
+        Write-ActionLog -DumpDir $script:dump -Event 'ae-start' -Data @{ pid = 12345 }
+        Write-ActionLog -DumpDir $script:dump -Event 'sendkeys' -Data @{ keys = '{ENTER}' }
+        $log = Get-Content (Join-Path $script:dump 'actions.log')
+        $log.Count | Should -Be 2
+        $log[0] | Should -Match '^\d{2}:\d{2}:\d{2}\.\d{3}\s+ae-start\s+pid=12345$'
+        $log[1] | Should -Match 'keys=\{ENTER\}'
+    }
+}
+
+Describe 'Write-ForensicsDump' {
+    BeforeEach {
+        $script:dump = Join-Path $env:TEMP "fdump-$(New-Guid)"
+    }
+    AfterEach {
+        Remove-Item -Recurse -Force $script:dump -ErrorAction SilentlyContinue
+    }
+
+    It 'creates dump dir with all 4 artifacts on call' {
+        Initialize-Win32
+        $modals = Get-AeModals -AeRootPid $PID -MainTitleHints @('___nope___')
+        Write-ForensicsDump -DumpDir $script:dump -ExitCode 1 -Reason 'timeout' `
+                            -Modals $modals -OcrTexts @{} -Meta @{ aeVersion='2025' }
+
+        (Test-Path (Join-Path $script:dump 'screenshot.png')) | Should -Be $true
+        (Test-Path (Join-Path $script:dump 'windows.txt'))    | Should -Be $true
+        (Test-Path (Join-Path $script:dump 'ocr.txt'))        | Should -Be $true
+        (Test-Path (Join-Path $script:dump 'meta.json'))      | Should -Be $true
+
+        $meta = Get-Content (Join-Path $script:dump 'meta.json') | ConvertFrom-Json
+        $meta.exitCode | Should -Be 1
+        $meta.reason   | Should -Be 'timeout'
+    }
+}
