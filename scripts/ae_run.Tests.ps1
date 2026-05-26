@@ -281,3 +281,21 @@ Describe 'Capture-WindowBitmap' {
         }
     }
 }
+
+Describe 'Invoke-SendKeysSafe' {
+    BeforeAll {
+        Initialize-Win32
+        Add-Type -AssemblyName System.Windows.Forms
+    }
+
+    It 'returns Sent=$false when SetForegroundWindow fails / focus mismatch' {
+        $r = Invoke-SendKeysSafe -Hwnd ([IntPtr]0xDEADBEEF) -Keys '{ENTER}' -DelayMs 50
+        $r.Sent | Should -Be $false
+    }
+
+    It 'returns FocusActual reflecting current foreground when target hwnd cannot be made foreground' {
+        $r = Invoke-SendKeysSafe -Hwnd ([IntPtr]0xDEADBEEF) -Keys '{ENTER}' -DelayMs 50
+        # may be IntPtr::Zero in headless env; key invariant is Sent=$false
+        $r.PSObject.Properties['FocusActual'] | Should -Not -BeNullOrEmpty
+    }
+}

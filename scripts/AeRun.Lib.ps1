@@ -287,3 +287,25 @@ function Capture-WindowBitmap {
     }
     return $bmp
 }
+
+function Invoke-SendKeysSafe {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][IntPtr]$Hwnd,
+        [Parameter(Mandatory)][string]$Keys,
+        [int]$DelayMs = 200
+    )
+    Initialize-Win32
+    Add-Type -AssemblyName System.Windows.Forms
+
+    $brought = [AeRunWin32]::SetForegroundWindow($Hwnd)
+    Start-Sleep -Milliseconds $DelayMs
+    $actual = [AeRunWin32]::GetForegroundWindow()
+
+    if (-not $brought -or $actual -ne $Hwnd) {
+        return [pscustomobject]@{ Sent = $false; FocusActual = $actual }
+    }
+
+    [System.Windows.Forms.SendKeys]::SendWait($Keys)
+    return [pscustomobject]@{ Sent = $true; FocusActual = $actual }
+}
