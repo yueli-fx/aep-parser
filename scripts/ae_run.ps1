@@ -64,10 +64,12 @@ if (-not $aeProc -or $aeProc.HasExited) {
 $aeRootPid = $aeProc.Id
 Write-ActionLog -DumpDir $dumpDir -Event 'ae-start' -Data @{ pid = $aeRootPid; exe = $AeExe }
 
-$cooldown   = New-Cooldown
-$deadline   = (Get-Date).AddSeconds($TimeoutSec)
-$exitCode   = 0
-$exitReason = 'ok'
+$cooldown          = New-Cooldown
+$unknownFirstSeen  = @{}    # hwnd-hex → DateTime first seen as unknown modal
+$unknownGraceSec   = 15     # how long an unknown modal can persist before exit-2 (splash dismisses well within this)
+$deadline          = (Get-Date).AddSeconds($TimeoutSec)
+$exitCode          = 0
+$exitReason        = 'ok'
 
 try {
     while ($true) {
@@ -92,8 +94,13 @@ try {
             continue
         }
 
-        $handledOrCooling = $false
-        $anyUnknown = $false
+        # Prune unknownFirstSeen entries whose hwnd no longer appears
+        $currentHwnds = @($modals | ForEach-Object { ('0x{0:X}' -f [int64]$_.Hwnd) })
+        $stale = @($unknownFirstSeen.Keys | Where-Object { $_ -notin $currentHwnds })
+        foreach ($k in $stale) { $unknownFirstSeen.Remove($k) | Out-Null }
+
+        $persistentUnknownHwnd = $null
+        $persistentUnknownInfo = $null
 
         foreach ($m in $modals) {
             # Layer B — title/class
@@ -111,18 +118,27 @@ try {
             }
 
             if (-not $match) {
-                $anyUnknown = $true
-                Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal' -Data @{
-                    hwnd = ('0x{0:X}' -f [int64]$m.Hwnd)
-                    title = $m.Title; class = $m.Class
-                    ocr = if ($usedOcr) { ($info.Ocr -replace "`n", ' / ') } else { '<not-attempted>' }
+                # Track first-seen for grace-period escalation. Splash + transient
+                # AE startup windows naturally dismiss well within $unknownGraceSec.
+                $hwndKey = '0x{0:X}' -f [int64]$m.Hwnd
+                if (-not $unknownFirstSeen.ContainsKey($hwndKey)) {
+                    $unknownFirstSeen[$hwndKey] = Get-Date
+                    Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal-seen' -Data @{
+                        hwnd  = $hwndKey
+                        title = $m.Title; class = $m.Class
+                        ocr   = if ($usedOcr) { ($info.Ocr -replace "`n", ' / ') } else { '<not-attempted>' }
+                    }
+                }
+                $age = ((Get-Date) - $unknownFirstSeen[$hwndKey]).TotalSeconds
+                if ($age -ge $unknownGraceSec) {
+                    $persistentUnknownHwnd = $hwndKey
+                    $persistentUnknownInfo = $info
                 }
                 continue
             }
 
             # cooldown?
             if (Test-InCooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule $match.rule.name) {
-                $handledOrCooling = $true
                 continue
             }
 
@@ -143,11 +159,14 @@ try {
             }
             Write-ActionLog -DumpDir $dumpDir -Event 'sendkeys' -Data @{ keys = $match.rule.keys }
             Add-Cooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule $match.rule.name -DurationMs $match.rule.cooldownMs
-            $handledOrCooling = $true
             break
         }
 
-        if ($anyUnknown -and -not $handledOrCooling) {
+        if ($persistentUnknownHwnd) {
+            Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal-persistent' -Data @{
+                hwnd = $persistentUnknownHwnd
+                graceSec = $unknownGraceSec
+            }
             $exitCode = 2; $exitReason = 'unknown-modal'; break
         }
 

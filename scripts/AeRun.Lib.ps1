@@ -259,15 +259,18 @@ function Invoke-Ocr {
     }
 
     $tmp = Join-Path $env:TEMP "ocr-$(New-Guid).png"
+    $out = Join-Path $env:TEMP "ocr-$(New-Guid).txt"
     $Bitmap.Save($tmp, [System.Drawing.Imaging.ImageFormat]::Png)
     try {
-        $text = & powershell.exe -NoProfile -File $script:_ocrHelperPath -ImagePath $tmp 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            throw "ocr_helper.ps1 exit=$LASTEXITCODE output=$text"
+        # OCR helper writes UTF-8 text to -OutFile to avoid pipe encoding mojibake.
+        & powershell.exe -NoProfile -File $script:_ocrHelperPath -ImagePath $tmp -OutFile $out 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $out)) {
+            throw "ocr_helper.ps1 exit=$LASTEXITCODE"
         }
-        return ($text -join "`n")
+        return (Get-Content -LiteralPath $out -Raw -Encoding UTF8)
     } finally {
         Remove-Item -LiteralPath $tmp -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $out -ErrorAction SilentlyContinue
     }
 }
 

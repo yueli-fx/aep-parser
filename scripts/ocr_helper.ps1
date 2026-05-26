@@ -6,7 +6,8 @@
 # shells out to:  powershell.exe -NoProfile -File ocr_helper.ps1 -ImagePath ...
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)][string]$ImagePath
+    [Parameter(Mandatory)][string]$ImagePath,
+    [string]$OutFile = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -42,4 +43,9 @@ $decoder = _Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream
 $sb      = _Await $decoder.GetSoftwareBitmapAsync() ([Windows.Graphics.Imaging.SoftwareBitmap])
 $result  = _Await ($engine.RecognizeAsync($sb)) ([Windows.Media.Ocr.OcrResult])
 
-Write-Output $result.Text
+if ($OutFile) {
+    # Write UTF-8 with no BOM to avoid mojibake when read back from pwsh.
+    [System.IO.File]::WriteAllText($OutFile, $result.Text, [System.Text.UTF8Encoding]::new($false))
+} else {
+    Write-Output $result.Text
+}
