@@ -1,0 +1,32 @@
+[
+  {
+    "name": "convert-old-project",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["convert", "转换", "升级项目"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "AE high-version opening low-version .aep — accept convert with Enter"
+  },
+  {
+    "name": "save-changes-on-quit",
+    "windowTitle": ["Adobe After Effects"],
+    "windowClass": [],
+    "ocrMatch": ["save changes", "保存更改"],
+    "action": "SendKeys",
+    "keys": "{TAB}{TAB}{ENTER}",
+    "cooldownMs": 3000,
+    "comment": "Leftover from prev JSX missing app.quit — walk to 'Don't Save' button (locale-sensitive)"
+  },
+  {
+    "name": "file-data-missing",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["file data is missing", "文件数据丢失"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "Mode 3 — fixture broken; press OK to let JSX catch + write .done(ERR)"
+  }
+]
