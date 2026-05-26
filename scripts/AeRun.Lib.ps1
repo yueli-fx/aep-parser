@@ -108,3 +108,49 @@ function Test-InCooldown {
     }
     return $true
 }
+
+function Initialize-Win32 {
+    if ('AeRunWin32' -as [type]) { return }
+    Add-Type -Namespace '' -Name 'AeRunWin32' -MemberDefinition @"
+        public delegate bool EnumWindowsProc(System.IntPtr hWnd, System.IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, System.IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern uint GetWindowThreadProcessId(System.IntPtr hWnd, out uint lpdwProcessId);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet=System.Runtime.InteropServices.CharSet.Unicode)]
+        public static extern int GetWindowTextW(System.IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet=System.Runtime.InteropServices.CharSet.Unicode)]
+        public static extern int GetClassNameW(System.IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(System.IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern System.IntPtr GetWindow(System.IntPtr hWnd, uint uCmd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern int GetWindowLong(System.IntPtr hWnd, int nIndex);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        public static extern bool GetWindowRect(System.IntPtr hWnd, out RECT lpRect);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(System.IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern System.IntPtr GetForegroundWindow();
+
+        public const uint GW_OWNER = 4;
+        public const int GWL_EXSTYLE = -20;
+        public const int WS_EX_DLGMODALFRAME = 0x00000001;
+
+        public struct RECT {
+            public int Left; public int Top; public int Right; public int Bottom;
+        }
+"@
+}

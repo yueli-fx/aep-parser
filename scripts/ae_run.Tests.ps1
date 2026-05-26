@@ -190,3 +190,16 @@ Describe 'Cooldown set' {
         Test-InCooldown -Cooldown $cd -Hwnd 0x1234 -Rule 'bar' | Should -Be $false
     }
 }
+
+Describe 'Initialize-Win32' {
+    It 'creates the AeRunWin32 type and is idempotent' {
+        Initialize-Win32
+        ([AeRunWin32]) | Should -Not -BeNullOrEmpty
+        { Initialize-Win32 } | Should -Not -Throw
+    }
+
+    It 'GetForegroundWindow returns a non-zero hwnd' {
+        Initialize-Win32
+        [AeRunWin32]::GetForegroundWindow() | Should -Not -Be ([IntPtr]::Zero)
+    }
+}
