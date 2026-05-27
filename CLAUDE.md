@@ -21,10 +21,15 @@ internal/aep/*       ── AEP 语义层 (Chunk 树 → Project / Composition /
 
 ## 硬约束（不可破）
 
-1. **写回默认 length-preserving**。改字段不准动 chunk 大小。少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。
-2. **public API 不动**。重构 / 拆文件 / 移函数都不能改 exported 类型 / 方法签名 / JSON 输出字段。
-3. **`internal/aep` 单 package**。不引子包（会强制 API 重排）。
+1. **写回 default 是 length-preserving**。改字段不准动 chunk 大小；少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。结构性 ops（NewComposition / NewShapeLayer / V3 的 Layer.Remove 等）走 V2.1 atomic invariants：warnings-as-failure + rollback to pre-call state + AE 双版本 ship-gate 验证。详 `scars/ae25-acceptance-gate.md`。
+2. **public API 分级**：
+   - **Stable**: V1 核心 + V2.1 NewProject/NewComposition + 已通过双版本 ship-gate 的 R/W 字段。重构不能动签名 / 类型 / JSON 字段。
+   - **Alpha**: 显式标 alpha 或 deferred 的（V2.2 ShapeLayer / 未 ship-gate 的新加 API）。可改可删，commit message 标 BREAKING。
+   - review 时撤销新加但已知 broken 的 API（如曾删 `ImportPlaceholder`）不算违反此约束。
+3. **`internal/aep` 单 package**。V3 用**文件名规约**（`scene_*.go` / `serialize_*.go` / `parse_*.go` / `back_*.go`）+ lint 维护内部边界，不用子包 —— 子包带来的 re-export 噪音 > 隔离收益。
 4. **嵌入资源目录命名复数**：`internal/aep/templates/`（非 `template/`）。Go `//go:embed` 限制资源必须在 package 同目录或子目录。
+5. **Opaque preservation**（V2.2 教训）：parser 未解的 chunk 必须 byte-identical round-trip。scene types 携带 opaque shard，serializer 原位重发。任何 "regenerate from scene" 路径必须保留它，否则 AE 会 silent-drop。
+6. **AE 接受 gate**：任何新结构性写路径（NewX / DeleteX / DuplicateX / V3 mutation API）必须跑 AE 2020 + AE 2025 双版本 ship-gate 才算 ship。详 `scars/ae25-acceptance-gate.md` + `playbooks/re-fixture.md` § GDI 自动化。
 
 非显然内部不变量（gotcha 错题集）：
 - TickRate per-composition，非全局 → `scars/tickrate-per-composition.md`
