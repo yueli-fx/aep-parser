@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/example/aep-parser/internal/rifx"
 )
@@ -504,47 +505,29 @@ func (p *Project) SetTransparencyGridThumbnails(v bool) error {
 // or "colorManagementSystem" in its content.
 
 // cmsSettings returns the CMS settings as a map, or nil if no CMS chunk.
+// Records a parser Warning on malformed JSON so callers can surface the
+// issue instead of seeing the chunk as silently absent.
 func (p *Project) cmsSettings() map[string]interface{} {
 	if p.cmsUtf8 == nil {
 		return nil
 	}
-	// Parse JSON from the Utf8 chunk
 	var settings map[string]interface{}
 	if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
+		p.Warnings = append(p.Warnings, fmt.Sprintf("project: CMS JSON parse failed: %v", err))
 		return nil
 	}
 	return settings
 }
 
-// cmsDefaultSettings returns the default CMS settings.
-func cmsDefaultSettings() map[string]interface{} {
-	return map[string]interface{}{
-		"colorManagementSystem":   0,
-		"lutInterpolationMethod":  0,
-		"ocioConfigurationFile":   "",
-	}
-}
-
 // updateCmsSetting updates a single key in the CMS settings JSON.
+// Refuses when no CMS chunk is present — the chunk's on-disk container
+// position is AE-version-dependent and not yet RE'd, so synthesizing a
+// new one risks producing files AE rejects. To enable CMS settings,
+// open the project in AE 24+, toggle one CMS field, save, and reopen.
 func (p *Project) updateCmsSetting(key string, value interface{}) error {
 	if p.cmsUtf8 == nil {
-		// Create new CMS chunk with defaults + the new setting
-		settings := cmsDefaultSettings()
-		settings[key] = value
-		data, err := json.Marshal(settings)
-		if err != nil {
-			return fmt.Errorf("project: failed to marshal CMS settings: %w", err)
-		}
-		p.cmsUtf8 = &rifx.Chunk{ID: rifx.IDUtf8, Data: data}
-		// Insert into root children
-		if p.root != nil {
-			p.root.Children = append(p.root.Children, p.cmsUtf8)
-		} else {
-			return fmt.Errorf("project: no root chunk — cannot create CMS chunk")
-		}
-		return nil
+		return fmt.Errorf("project: no CMS chunk — cannot set %s (only AE 24+ projects with CMS already saved are supported)", key)
 	}
-	// Update existing CMS chunk
 	var settings map[string]interface{}
 	if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
 		return fmt.Errorf("project: failed to parse CMS settings: %w", err)
@@ -572,7 +555,13 @@ func (p *Project) ColorManagementSystem() ColorManagementSystem {
 }
 
 // SetColorManagementSystem sets the color management system.
+// Rejects values other than the defined enum members.
 func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error {
+	switch v {
+	case ColorManagementSystemAdobe, ColorManagementSystemOCIO:
+	default:
+		return fmt.Errorf("project: color_management_system %d invalid; must be Adobe(0) or OCIO(1)", v)
+	}
 	return p.updateCmsSetting("colorManagementSystem", int(v))
 }
 
@@ -590,7 +579,13 @@ func (p *Project) LutInterpolationMethod() LutInterpolationMethod {
 }
 
 // SetLutInterpolationMethod sets the LUT interpolation method.
+// Rejects values other than the defined enum members.
 func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error {
+	switch v {
+	case LutInterpolationMethodTrilinear, LutInterpolationMethodTetrahedral:
+	default:
+		return fmt.Errorf("project: lut_interpolation_method %d invalid; must be Trilinear(0) or Tetrahedral(1)", v)
+	}
 	return p.updateCmsSetting("lutInterpolationMethod", int(v))
 }
 
@@ -613,35 +608,25 @@ func (p *Project) SetOcioConfigurationFile(v string) error {
 }
 
 // WorkingSpace returns the working color space name (R only).
-// Returns "None" when the chunk is absent.
+// Returns "None" when the chunk is absent or has no baseColorProfile.
 func (p *Project) WorkingSpace() string {
 	if p.cmsUtf8 == nil {
 		return "None"
 	}
-	// Check for baseColorProfile in the content
-	content := string(p.cmsUtf8.Data)
-	if contains(content, "baseColorProfile") {
-		// Parse and extract baseColorProfile
-		var settings map[string]interface{}
-		if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
-			return "None"
-		}
-		if profile, ok := settings["baseColorProfile"].(map[string]interface{}); ok {
-			if name, ok := profile["colorProfileName"].(string); ok {
-				return name
-			}
-		}
-	}
-	return "None"
-}
-
-// DisplayColorSpace returns the display color space name (R only).
-// Returns "None" when the chunk is absent.
-func (p *Project) DisplayColorSpace() string {
-	if p.cmsUtf8 == nil {
+	if !strings.Contains(string(p.cmsUtf8.Data), "baseColorProfile") {
 		return "None"
 	}
-	// Display color space is typically in a separate Utf8 chunk
-	// For now, return None as it's not directly accessible
-	return "None"
+	var settings map[string]interface{}
+	if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
+		return "None"
+	}
+	profile, ok := settings["baseColorProfile"].(map[string]interface{})
+	if !ok {
+		return "None"
+	}
+	name, ok := profile["colorProfileName"].(string)
+	if !ok {
+		return "None"
+	}
+	return name
 }

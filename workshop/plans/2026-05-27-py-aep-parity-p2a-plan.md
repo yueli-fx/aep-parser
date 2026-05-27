@@ -130,7 +130,9 @@ func (l *Layer) ReplaceSource(target Item, fixExpressions bool) error
 
 ---
 
-## Task 5 — 2E ImportPlaceholder（NewComposition pattern，atomic）
+## Task 5 — 2E ImportPlaceholder（NewComposition pattern，atomic）— 🗑️ 暂搁 2026-05-27
+
+**状态**: deferred — 合成 opti tag AE 拒收，删 builder + tests。重起需要真 AE-saved placeholder fixture 把 opti / sspc / idta 字段 RE 出来。
 
 **目标**: `Project.ImportPlaceholder(name, width, height, frameRate, duration)` 在 root folder 新建 placeholder Footage item。
 

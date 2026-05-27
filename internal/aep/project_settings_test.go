@@ -381,8 +381,24 @@ func TestProjectSettings_CmsRead(t *testing.T) {
 	_ = proj.LutInterpolationMethod()
 	_ = proj.OcioConfigurationFile()
 	_ = proj.WorkingSpace()
-	_ = proj.DisplayColorSpace()
 }
+
+// TestProjectSettings_CmsRefuseWhenAbsent verifies CMS setters refuse on
+// projects without a CMS chunk — the on-disk container position is not
+// yet RE'd, so synthesizing a chunk would risk producing invalid AEP.
+func TestProjectSettings_CmsRefuseWhenAbsent(t *testing.T) {
+	p := &aep.Project{}
+	if err := p.SetColorManagementSystem(aep.ColorManagementSystemOCIO); err == nil {
+		t.Error("SetColorManagementSystem on project without CMS chunk: expected error")
+	}
+	if err := p.SetLutInterpolationMethod(aep.LutInterpolationMethodTetrahedral); err == nil {
+		t.Error("SetLutInterpolationMethod on project without CMS chunk: expected error")
+	}
+	if err := p.SetOcioConfigurationFile("/foo"); err == nil {
+		t.Error("SetOcioConfigurationFile on project without CMS chunk: expected error")
+	}
+}
+
 
 // TestProjectSettings_CmsRoundtrip verifies CMS field writers roundtrip correctly.
 func TestProjectSettings_CmsRoundtrip(t *testing.T) {

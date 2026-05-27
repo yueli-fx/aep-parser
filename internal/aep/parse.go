@@ -6,6 +6,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"strings"
 
 	"github.com/example/aep-parser/internal/rifx"
 )
@@ -82,7 +83,7 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 			content := string(c.Data)
 			if len(content) > 0 && (content[0] == '{' || content[0] == '[') {
 				// Looks like JSON, check for CMS markers
-				if contains(content, "lutInterpolationMethod") || contains(content, "colorManagementSystem") {
+				if strings.Contains(content, "lutInterpolationMethod") || strings.Contains(content, "colorManagementSystem") {
 					proj.cmsUtf8 = c
 					break
 				}
@@ -302,16 +303,3 @@ func readFloat64BE(b []byte, offset int) (float64, bool) {
 	return math.Float64frombits(binary.BigEndian.Uint64(b[offset:])), true
 }
 
-// contains reports whether s contains substr.
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && (s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || findSubstring(s, substr)))
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
-}

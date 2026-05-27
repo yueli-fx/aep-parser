@@ -38,9 +38,8 @@
   - Keyframe: `FrameTime` R/W (用 compFps，parser 注入)
   - Marker: `FrameTime / FrameDuration` R/W (用 compFps)
 - **Property tdb4 flag readers (P1 1G)**: `IsSpatial / IsAnimated / IsColor / IsInteger / IsVector / IsNoValue / CanVaryOverTime` — 7 个 R only flag readers, 从 tdb4 metadata chunk (124B) 解 (offsets 来自 py-aep `binary/property_chunks.py::Tdb4Chunk`)；parser 新加 `Property.tdb4` 私有 ref。Standalone Property (tdb4=nil) 全 false fallback, IsAnimated 用 len(Keyframes) > 0.
-- **Property tdsb flag readers/writers (P2a 2D, Task 3)**: `LockedRatio() / SetLockedRatio(v bool)` — 从 tdsb subprop flags chunk (4B) 读写 byte 2 bit 4 (py-aep: `locked_ratio` = bit 4)。parser 新加 `Property.tdsb` 私有 ref。Standalone Property (tdsb=nil) 返回 false；SetLockedRatio 返回 error。length-preserving。
+- **Property tdsb flag readers/writers (P2a 2D, Task 3)**: `LockedRatio() / SetLockedRatio(v bool)` — 从 tdsb subprop flags chunk (4B) 读写 byte 2 bit 4 (py-aep: `locked_ratio` = bit 4)。parser 新加 `Property.tdsb` 私有 ref。Standalone Property (tdsb=nil) 返回 false；SetLockedRatio 返回 error。length-preserving。内部测试直接挂 tdsb 验证 reader/writer/邻位保留。
 - **Layer ReplaceSource (P2a 2F, Task 4)**: `Layer.ReplaceSource(target AVItem, fixExpressions bool)` — 镜像 py-aep API；底层走既有 `SetSource` 路径。fixExpressions=true 时记 warning 到 Project.Warnings（不实现 symbolic execution）。
-- **Project ImportPlaceholder (P2a 2E, Task 5)**: `Project.ImportPlaceholder(name, width, height, frameRate, duration)` — 在 root folder 新建 placeholder Footage item；NewComposition 同模式，原子 mutation + 警告回滚。AE 2020+2025 ship-gate 待跑。
 - **Footage convenience (P1 1H)**: `AssetType / File / FootageMissing / HasAudio / StartFrame / EndFrame` — 6 个 helper. parser 新加 `Footage.sspcChunk` ref。**修复 latent bug**: 真实 AE sspc 222B 布局，Width/Height 在 @0x20/@0x24 (不是 @0/2)；synthetic 4B sspc fallback 保留。Real AE 文件 W/H 之前一直读 0，现 OK。
 - **Project views (P1 1B)**: `Footages() / RootFolder() / LayerByID(id) / EffectNames()` — 4 个 API. EffectNames 从 root-level `Pefl` LIST → `pjef` Utf8 entries (rifx 加 IDPefl/IDPjef 常量)。LayerByID 是跨 comp lookup. RootFolder 拿 Folders[0]. Footages 是 .Footage slice 的命名 alias.
 - **Project single-field setting chunks (P1 1D)**: 8 个 R/W (Revision 仅 R)，**AE 2020/2025 ship-gate PASS**（bisect 8/8 + combined run accept；AE-visible 值 byte-identical with Go-side input）
@@ -63,11 +62,11 @@
   - `TimeDisplayType` R/W — byte 8 bits 6-0 (0=Timecode, 1=Frames)
   - `TransparencyGridThumbnails` R/W — byte 25 bool
 - **Project CMS settings (P2b 2B, AE 24+)**: JSON Utf8 chunk — py-aep `NnhdChunk` parity
-  - `ColorManagementSystem` R/W — 0=Adobe, 1=OCIO
-  - `LutInterpolationMethod` R/W — 0=Trilinear, 1=Tetrahedral
+  - `ColorManagementSystem` R/W — 0=Adobe, 1=OCIO（enum 校验）
+  - `LutInterpolationMethod` R/W — 0=Trilinear, 1=Tetrahedral（enum 校验）
   - `OcioConfigurationFile` R/W — string path
-  - `WorkingSpace` R only — color profile name
-  - `DisplayColorSpace` R only — display color space name
+  - `WorkingSpace` R only — 从 CMS JSON `baseColorProfile.colorProfileName` 取
+  - **Setters 仅在 `cmsUtf8 != nil` 时工作**：CMS chunk 的容器位置 / 是否需 LIST 包装尚未 RE，无 fixture 时拒绝写而非自动创建（避免产生 AE 拒收的文件）。`cmsSettings` JSON 解析失败时 emit `p.Warnings` 而非静默 fallback。`DisplayColorSpace` 暂搁（separate chunk 没 RE，旧 stub 永远返回 "None"，2026-05-27 删除）。
 - **Footage discriminator**: 新增 `IsPlaceholder` 字段（opti tag = "Plac"）;`Footage.{IsSolid, IsPlaceholder}` 互斥三态（file / solid / placeholder）
 
 ### Layer
@@ -135,6 +134,9 @@
 | mkif 残余字节 `@0x10 / @0x18 / @0x20-0x27` | 未 RE；roundtrip 走 `Mask.MkifRaw` 保留原字节，不假设 48 字节全已知 |
 | **Gradient XML (P2b 2C)** | 需 gradient effect fixture (ADBE Vector Grad Colors)，test_data 中无 |
 | **Property metadata (P2b 2D)** | 需 pard chunk reader + specs.py schema table 端口，复杂 RE 工作 |
+| **ImportPlaceholder (P2a 2E)** | opti chunk format 未 RE；user fixture (`re_placeholder_ae20.aep`) 显示生成的 opti tag AE 不识别。2026-05-27 删除合成 builder，等真 fixture 出来后再起 |
+| **CMS chunk 创建（P2b 2B）** | 文件原本没 CMS chunk 时 setter 拒写。CMS Utf8 在 root 下的精确位置 / 容器（裸 Utf8 vs LIST 包装）未 RE；空挂 AE 可能拒文件 |
+| **`DisplayColorSpace`（P2b 2B）** | py-aep 提示 separate chunk，位置未 RE；旧 stub 永远 "None"，2026-05-27 删除 |
 
 ## ❌ 不可达（length-preserving 写约束之外 / AE 限制）
 

@@ -107,9 +107,15 @@ func (p *Project) SetLutInterpolationMethod(v string) error
 func (p *Project) OcioConfigurationFile() string
 func (p *Project) SetOcioConfigurationFile(v string) error
 
-func (p *Project) WorkingSpace() string  // R only
-func (p *Project) DisplayColorSpace() string  // R only
+func (p *Project) WorkingSpace() string  // R only — CMS JSON baseColorProfile.colorProfileName
+// DisplayColorSpace: 暂搁 — separate chunk 位置未 RE
 ```
+
+**2026-05-27 后续校正**：
+- `SetX` 在 `cmsUtf8 == nil` 时**拒写**（chunk 容器位置未 RE，自动创建会产生 AE 拒收的文件）
+- `SetColorManagementSystem` / `SetLutInterpolationMethod` 加 enum 校验
+- `cmsSettings` JSON 解析失败时 emit `p.Warnings` 而非静默 fallback
+- `DisplayColorSpace` 删除（曾是永远返回 "None" 的 stub）
 
 **RE prereq**: 需要 AE 24+ fixture with CMS settings.
 

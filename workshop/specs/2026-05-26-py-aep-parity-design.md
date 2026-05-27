@@ -74,14 +74,14 @@
 | `ColorManagementSystem` (CMS JSON, AE 24+) | ✅ R/W enum | ✅ R/W | ✅ R/W | done | P2b 2B |
 | `LutInterpolationMethod` (CMS) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2B |
 | `OcioConfigurationFile` (CMS) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2B |
-| `WorkingSpace` (ws Utf8) | ✅ R only | 🟢 R only | 🟢 R only | done | P2b 2B；ICC blob 写需 Adobe ICC files |
-| `DisplayColorSpace` (dcs Utf8) | ✅ R only | 🟢 R only | 🟢 R only | done | P2b 2B；同上 |
+| `WorkingSpace` (CMS JSON `baseColorProfile.colorProfileName`) | ✅ R only | 🟢 R only | 🟢 R only | done | P2b 2B |
+| `DisplayColorSpace` (separate chunk) | ✅ R only | 🗑️ deferred | 🗑️ deferred | deferred | P2b 2B；separate chunk 位置未 RE，旧 stub 已删 |
 | `XmpPacket` | ✅ R/W (raw XML) | ❌ | 🟡 R only | P2 | XML mutation 风险高，初版 R only |
 | `EffectNames` (Pefl/pjef list) | ✅ R only | ✅ R only | ✅ R only | done | P1 1B |
 | `Compositions / Folders / Footages` filter | ✅ | ✅ | ✅ | done | P1 1B |
 | `RootFolder` | ✅ | ✅ | ✅ | done | P1 1B |
 | `LayerByID(id)` | ✅ | ✅ | ✅ | done | P1 1B |
-| `ImportPlaceholder(name, w, h, fps, dur)` | ✅ | ✅ | ✅ | done | P2a Task 5 |
+| `ImportPlaceholder(name, w, h, fps, dur)` | ✅ | 🗑️ deferred | 🗑️ deferred | deferred | P2a Task 5；opti format 未 RE，合成 builder AE 拒收，2026-05-27 删除 |
 | `Save(path)` | 🟡 alpha 全重写 | 🟢 WriteAEP 任意 io.Writer | — | done | 我们已有 |
 
 ### 2.2 CompItem 域
@@ -265,10 +265,10 @@
 子任务：
 
 - **2A** nnhd 字节布局 RE：`FeetFramesFilmType / FootageTimecodeDisplayStartType / TimecodeDefaultBase / FramesCountType / DisplayStartFrame / FramesUseFeetFrames / TimeDisplayType / TransparencyGridThumbnails`（一次 RE 出 8 个字段）
-- **2B** CMS JSON (AE 24+) `ColorManagementSystem / LutInterpolationMethod / OcioConfigurationFile`；`WorkingSpace / DisplayColorSpace` R only；XMP R only
+- **2B** CMS JSON (AE 24+) `ColorManagementSystem / LutInterpolationMethod / OcioConfigurationFile`（setter 在 `cmsUtf8 == nil` 时拒写）；`WorkingSpace` R only；`DisplayColorSpace` 暂搁（separate chunk 位置未 RE）；XMP R only
 - **2C** Gradient (XML in cdat): `Gradient { ColorStops, AlphaStops }` + `ADBE Vector Grad Colors` Property 类型识别 → 解析 XML → 暴露结构化访问 + 写回（XML 重序列化）
 - **2D** 类型化 Footage Sources: `FileSource / SolidSource / PlaceholderSource` 区分 + `Footage.MainSource` typed return + `MinValue / MaxValue / UnitsText / DefaultValue / LastValue / NbOptions / PropertyControlType / PropertyValueType` Property 读
-- **2E** ImportPlaceholder: `Project.ImportPlaceholder(name, w, h, fps, dur)` — 跟 NewComposition 同模式
+- **2E** ImportPlaceholder: `Project.ImportPlaceholder(name, w, h, fps, dur)` — 跟 NewComposition 同模式。**2026-05-27 暂搁**：合成 opti tag AE 不识别，需真 placeholder fixture 才能 RE 出 opti/sspc/idta 字段
 - **2F** ReplaceSource (Layer 级): `Layer.ReplaceSource(newSource, fixExpressions=false)` — splice source id
 - **2G** PropertyGroup 链式访问: `Layer.PropertyGroup("ADBE Transform Group").Property("ADBE Opacity")` — public API 加 hierarchical accessor
 - **2H** Marker properties on Layer + PropertyGroup access for Transform/Effects/Masks/Text
