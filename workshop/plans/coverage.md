@@ -53,6 +53,15 @@
   - `GpuAccelType` R/W — gpuG → Utf8 (length-variable splice)
   - `ExpressionEngine` R/W — ExEn → Utf8, validate {"extendscript", "javascript-1.0"}
   - rifx 加 IDAcer/IDAdfr/IDDwga/IDLnrb/IDLnrp/IDGpuG/IDExEn 常量
+- **Project nnhd display settings (P2b 2A)**: 8 个 R/W，nnhd chunk (40 bytes) — py-aep `NnhdChunk` parity
+  - `FeetFramesFilmType` R/W — byte 8 bit 7 (0=MM35, 1=MM16)
+  - `FootageTimecodeDisplayStartType` R/W — byte 9 (0=Start0, 1=UseSourceMedia)
+  - `TimecodeDefaultBase` R/W — bytes 14-15 u2 BE (1-999)
+  - `FramesCountType` R/W — byte 20 (0=Start0, 1=Start1, 2=TimecodeConversion)
+  - `DisplayStartFrame` R/W — derived from frames_count_type % 2
+  - `FramesUseFeetFrames` R/W — byte 11 bit 0
+  - `TimeDisplayType` R/W — byte 8 bits 6-0 (0=Timecode, 1=Frames)
+  - `TransparencyGridThumbnails` R/W — byte 25 bool
 - **Footage discriminator**: 新增 `IsPlaceholder` 字段（opti tag = "Plac"）;`Footage.{IsSolid, IsPlaceholder}` 互斥三态（file / solid / placeholder）
 
 ### Layer

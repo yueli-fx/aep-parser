@@ -204,3 +204,166 @@ func TestProjectSettings_StandaloneProject(t *testing.T) {
 		t.Error("SetAudioSampleRate on standalone: expected error")
 	}
 }
+
+// TestProjectSettings_NnhdRead verifies nnhd field readers against
+// re_cameralight.aep (AE 2020 project).
+func TestProjectSettings_NnhdRead(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+
+	// Verify nnhd fields have reasonable values (AE 2020 project)
+	// Note: Actual values depend on the fixture; we just verify they're valid
+	if got := proj.FeetFramesFilmType(); got != aep.FeetFramesFilmTypeMM35 && got != aep.FeetFramesFilmTypeMM16 {
+		t.Errorf("FeetFramesFilmType = %v, want MM35 or MM16", got)
+	}
+	// FootageTimecodeDisplayStartType can be either value
+	if got := proj.FootageTimecodeDisplayStartType(); got != aep.FootageTimecodeDisplayStartTypeStart0 && got != aep.FootageTimecodeDisplayStartTypeUseSourceMedia {
+		t.Errorf("FootageTimecodeDisplayStartType = %v, want Start0 or UseSourceMedia", got)
+	}
+	if got := proj.TimecodeDefaultBase(); got < 1 || got > 999 {
+		t.Errorf("TimecodeDefaultBase = %d, want 1-999", got)
+	}
+	if got := proj.FramesCountType(); got > 2 {
+		t.Errorf("FramesCountType = %d, want 0-2", got)
+	}
+	if got := proj.DisplayStartFrame(); got != 0 && got != 1 {
+		t.Errorf("DisplayStartFrame = %d, want 0 or 1", got)
+	}
+	if got := proj.TimeDisplayType(); got != aep.TimeDisplayTypeTimecode && got != aep.TimeDisplayTypeFrames {
+		t.Errorf("TimeDisplayType = %v, want Timecode or Frames", got)
+	}
+}
+
+// TestProjectSettings_NnhdRoundtrip verifies nnhd field writers roundtrip correctly.
+func TestProjectSettings_NnhdRoundtrip(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+
+	// Change all nnhd fields
+	if err := proj.SetFeetFramesFilmType(aep.FeetFramesFilmTypeMM16); err != nil {
+		t.Fatalf("SetFeetFramesFilmType: %v", err)
+	}
+	if err := proj.SetFootageTimecodeDisplayStartType(aep.FootageTimecodeDisplayStartTypeUseSourceMedia); err != nil {
+		t.Fatalf("SetFootageTimecodeDisplayStartType: %v", err)
+	}
+	if err := proj.SetTimecodeDefaultBase(123); err != nil {
+		t.Fatalf("SetTimecodeDefaultBase: %v", err)
+	}
+	if err := proj.SetFramesCountType(aep.FramesCountTypeStart1); err != nil {
+		t.Fatalf("SetFramesCountType: %v", err)
+	}
+	if err := proj.SetDisplayStartFrame(1); err != nil {
+		t.Fatalf("SetDisplayStartFrame: %v", err)
+	}
+	if err := proj.SetFramesUseFeetFrames(true); err != nil {
+		t.Fatalf("SetFramesUseFeetFrames: %v", err)
+	}
+	if err := proj.SetTimeDisplayType(aep.TimeDisplayTypeFrames); err != nil {
+		t.Fatalf("SetTimeDisplayType: %v", err)
+	}
+	if err := proj.SetTransparencyGridThumbnails(true); err != nil {
+		t.Fatalf("SetTransparencyGridThumbnails: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+
+	proj2, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader after write: %v", err)
+	}
+
+	// Verify roundtrip values
+	if got := proj2.FeetFramesFilmType(); got != aep.FeetFramesFilmTypeMM16 {
+		t.Errorf("after roundtrip: FeetFramesFilmType = %v, want MM16", got)
+	}
+	if got := proj2.FootageTimecodeDisplayStartType(); got != aep.FootageTimecodeDisplayStartTypeUseSourceMedia {
+		t.Errorf("after roundtrip: FootageTimecodeDisplayStartType = %v, want UseSourceMedia", got)
+	}
+	if got := proj2.TimecodeDefaultBase(); got != 123 {
+		t.Errorf("after roundtrip: TimecodeDefaultBase = %d, want 123", got)
+	}
+	if got := proj2.FramesCountType(); got != aep.FramesCountTypeStart1 {
+		t.Errorf("after roundtrip: FramesCountType = %v, want Start1", got)
+	}
+	if got := proj2.DisplayStartFrame(); got != 1 {
+		t.Errorf("after roundtrip: DisplayStartFrame = %d, want 1", got)
+	}
+	if got := proj2.FramesUseFeetFrames(); got != true {
+		t.Errorf("after roundtrip: FramesUseFeetFrames = %v, want true", got)
+	}
+	if got := proj2.TimeDisplayType(); got != aep.TimeDisplayTypeFrames {
+		t.Errorf("after roundtrip: TimeDisplayType = %v, want Frames", got)
+	}
+	if got := proj2.TransparencyGridThumbnails(); got != true {
+		t.Errorf("after roundtrip: TransparencyGridThumbnails = %v, want true", got)
+	}
+}
+
+// TestProjectSettings_NnhdValidation verifies nnhd field validation.
+func TestProjectSettings_NnhdValidation(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+
+	// TimecodeDefaultBase must be 1-999
+	if err := proj.SetTimecodeDefaultBase(0); err == nil {
+		t.Error("SetTimecodeDefaultBase(0): expected error")
+	}
+	if err := proj.SetTimecodeDefaultBase(1000); err == nil {
+		t.Error("SetTimecodeDefaultBase(1000): expected error")
+	}
+
+	// DisplayStartFrame must be 0 or 1
+	if err := proj.SetDisplayStartFrame(2); err == nil {
+		t.Error("SetDisplayStartFrame(2): expected error")
+	}
+	if err := proj.SetDisplayStartFrame(-1); err == nil {
+		t.Error("SetDisplayStartFrame(-1): expected error")
+	}
+}
+
+// TestProjectSettings_NnhdStandalone verifies nnhd readers return defaults
+// when nnhd chunk is absent (standalone project).
+func TestProjectSettings_NnhdStandalone(t *testing.T) {
+	p := &aep.Project{}
+	if got := p.FeetFramesFilmType(); got != aep.FeetFramesFilmTypeMM35 {
+		t.Errorf("standalone FeetFramesFilmType = %v, want MM35", got)
+	}
+	if got := p.FootageTimecodeDisplayStartType(); got != aep.FootageTimecodeDisplayStartTypeStart0 {
+		t.Errorf("standalone FootageTimecodeDisplayStartType = %v, want Start0", got)
+	}
+	if got := p.TimecodeDefaultBase(); got != 0 {
+		t.Errorf("standalone TimecodeDefaultBase = %d, want 0", got)
+	}
+	if got := p.FramesCountType(); got != aep.FramesCountTypeStart0 {
+		t.Errorf("standalone FramesCountType = %v, want Start0", got)
+	}
+	if got := p.DisplayStartFrame(); got != 0 {
+		t.Errorf("standalone DisplayStartFrame = %d, want 0", got)
+	}
+	if got := p.FramesUseFeetFrames(); got != false {
+		t.Errorf("standalone FramesUseFeetFrames = %v, want false", got)
+	}
+	if got := p.TimeDisplayType(); got != aep.TimeDisplayTypeTimecode {
+		t.Errorf("standalone TimeDisplayType = %v, want Timecode", got)
+	}
+	if got := p.TransparencyGridThumbnails(); got != false {
+		t.Errorf("standalone TransparencyGridThumbnails = %v, want false", got)
+	}
+
+	// Setters refuse on standalone project (no nnhd chunk to mutate).
+	if err := p.SetFeetFramesFilmType(aep.FeetFramesFilmTypeMM16); err == nil {
+		t.Error("SetFeetFramesFilmType on standalone: expected error")
+	}
+	if err := p.SetTimecodeDefaultBase(123); err == nil {
+		t.Error("SetTimecodeDefaultBase on standalone: expected error")
+	}
+}

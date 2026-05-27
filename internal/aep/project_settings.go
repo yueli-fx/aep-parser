@@ -301,3 +301,191 @@ func (p *Project) SetExpressionEngine(engine string) error {
 	p.exenUtf8.Data = []byte(engine)
 	return nil
 }
+
+// ──────────────────────────────────────────────
+// nnhd (40 bytes — project display settings)
+// ──────────────────────────────────────────────
+//
+// Byte layout (from py-aep item_chunks.py NnhdChunk):
+// - Bytes 0-7: reserved
+// - Byte 8: _display_byte
+//   - bit 7 = feet_frames_film_type (0=MM35, 1=MM16)
+//   - bits 6-0 = time_display_type (0=TIMECODE, 1=FRAMES)
+// - Byte 9: footage_timecode_display_start_type (0=Start0, 1=UseSourceMedia)
+// - Byte 10: reserved
+// - Byte 11: _feet_byte
+//   - bit 0 = frames_use_feet_frames
+// - Bytes 12-13: reserved
+// - Bytes 14-15: timecode_default_base (u2 BE, 1-999)
+// - Bytes 16-19: unknown (default 0x00000010)
+// - Byte 20: frames_count_type (0=Start0, 1=Start1, 2=TimecodeConversion)
+// - Bytes 21-23: reserved
+// - Byte 24: bits_per_channel (already implemented)
+// - Byte 25: transparency_grid_thumbnails (bool)
+// - Bytes 26-39: unknown
+
+// FeetFramesFilmType returns the film type for feet+frames timecode display.
+// Returns FeetFramesFilmTypeMM35 (0) when nnhd chunk is absent.
+func (p *Project) FeetFramesFilmType() FeetFramesFilmType {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 9 {
+		return FeetFramesFilmTypeMM35
+	}
+	// Byte 8, bit 7
+	if p.nnhdChunk.Data[8]&0x80 != 0 {
+		return FeetFramesFilmTypeMM16
+	}
+	return FeetFramesFilmTypeMM35
+}
+
+// SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.
+func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 9 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetFeetFramesFilmType")
+	}
+	if v == FeetFramesFilmTypeMM16 {
+		p.nnhdChunk.Data[8] |= 0x80
+	} else {
+		p.nnhdChunk.Data[8] &^= 0x80
+	}
+	return nil
+}
+
+// FootageTimecodeDisplayStartType returns how timecode is displayed for footage.
+// Returns FootageTimecodeDisplayStartTypeStart0 (0) when nnhd chunk is absent.
+func (p *Project) FootageTimecodeDisplayStartType() FootageTimecodeDisplayStartType {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 10 {
+		return FootageTimecodeDisplayStartTypeStart0
+	}
+	return FootageTimecodeDisplayStartType(p.nnhdChunk.Data[9])
+}
+
+// SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9.
+func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 10 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetFootageTimecodeDisplayStartType")
+	}
+	p.nnhdChunk.Data[9] = byte(v)
+	return nil
+}
+
+// TimecodeDefaultBase returns the default timecode base (1-999).
+// Returns 0 when nnhd chunk is absent.
+func (p *Project) TimecodeDefaultBase() int {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 16 {
+		return 0
+	}
+	return int(binary.BigEndian.Uint16(p.nnhdChunk.Data[14:16]))
+}
+
+// SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15.
+func (p *Project) SetTimecodeDefaultBase(v int) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 16 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetTimecodeDefaultBase")
+	}
+	if v < 1 || v > 999 {
+		return fmt.Errorf("project: timecode_default_base %d invalid; must be 1-999", v)
+	}
+	binary.BigEndian.PutUint16(p.nnhdChunk.Data[14:16], uint16(v))
+	return nil
+}
+
+// FramesCountType returns how frames are counted in the project.
+// Returns FramesCountTypeStart0 (0) when nnhd chunk is absent.
+func (p *Project) FramesCountType() FramesCountType {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 21 {
+		return FramesCountTypeStart0
+	}
+	return FramesCountType(p.nnhdChunk.Data[20])
+}
+
+// SetFramesCountType writes the frames count type to nnhd byte 20.
+func (p *Project) SetFramesCountType(v FramesCountType) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 21 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesCountType")
+	}
+	p.nnhdChunk.Data[20] = byte(v)
+	return nil
+}
+
+// DisplayStartFrame returns the display start frame (0 or 1).
+// This is derived from frames_count_type % 2.
+// Returns 0 when nnhd chunk is absent.
+func (p *Project) DisplayStartFrame() int {
+	return int(p.FramesCountType()) % 2
+}
+
+// SetDisplayStartFrame sets the display start frame (0 or 1).
+// This modifies frames_count_type to preserve the value.
+func (p *Project) SetDisplayStartFrame(v int) error {
+	if v != 0 && v != 1 {
+		return fmt.Errorf("project: display_start_frame %d invalid; must be 0 or 1", v)
+	}
+	current := p.FramesCountType()
+	newValue := FramesCountType((int(current) &^ 1) | v)
+	return p.SetFramesCountType(newValue)
+}
+
+// FramesUseFeetFrames returns whether frames use feet+frames display.
+// Returns false when nnhd chunk is absent.
+func (p *Project) FramesUseFeetFrames() bool {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 12 {
+		return false
+	}
+	// Byte 11, bit 0
+	return p.nnhdChunk.Data[11]&0x01 != 0
+}
+
+// SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0.
+func (p *Project) SetFramesUseFeetFrames(v bool) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 12 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesUseFeetFrames")
+	}
+	if v {
+		p.nnhdChunk.Data[11] |= 0x01
+	} else {
+		p.nnhdChunk.Data[11] &^= 0x01
+	}
+	return nil
+}
+
+// TimeDisplayType returns how time is displayed in the project.
+// Returns TimeDisplayTypeTimecode (0) when nnhd chunk is absent.
+func (p *Project) TimeDisplayType() TimeDisplayType {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 9 {
+		return TimeDisplayTypeTimecode
+	}
+	// Byte 8, bits 6-0
+	return TimeDisplayType(p.nnhdChunk.Data[8] & 0x7F)
+}
+
+// SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0.
+func (p *Project) SetTimeDisplayType(v TimeDisplayType) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 9 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetTimeDisplayType")
+	}
+	// Preserve bit 7 (feet_frames_film_type)
+	p.nnhdChunk.Data[8] = (p.nnhdChunk.Data[8] & 0x80) | (byte(v) & 0x7F)
+	return nil
+}
+
+// TransparencyGridThumbnails returns whether transparency grid is shown in thumbnails.
+// Returns false when nnhd chunk is absent.
+func (p *Project) TransparencyGridThumbnails() bool {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 26 {
+		return false
+	}
+	return p.nnhdChunk.Data[25] != 0
+}
+
+// SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25.
+func (p *Project) SetTransparencyGridThumbnails(v bool) error {
+	if p.nnhdChunk == nil || len(p.nnhdChunk.Data) < 26 {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetTransparencyGridThumbnails")
+	}
+	if v {
+		p.nnhdChunk.Data[25] = 1
+	} else {
+		p.nnhdChunk.Data[25] = 0
+	}
+	return nil
+}

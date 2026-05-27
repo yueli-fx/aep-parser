@@ -54,6 +54,85 @@ func (b BitsPerChannel) String() string {
 	}
 }
 
+// FeetFramesFilmType represents the film type for feet+frames timecode display.
+type FeetFramesFilmType uint8
+
+const (
+	FeetFramesFilmTypeMM35 FeetFramesFilmType = 0 // 35mm film
+	FeetFramesFilmTypeMM16 FeetFramesFilmType = 1 // 16mm film
+)
+
+func (f FeetFramesFilmType) String() string {
+	switch f {
+	case FeetFramesFilmTypeMM35:
+		return "MM35 (35mm)"
+	case FeetFramesFilmTypeMM16:
+		return "MM16 (16mm)"
+	default:
+		return fmt.Sprintf("unknown(%d)", f)
+	}
+}
+
+// FootageTimecodeDisplayStartType represents how timecode is displayed for footage.
+type FootageTimecodeDisplayStartType uint8
+
+const (
+	FootageTimecodeDisplayStartTypeStart0 FootageTimecodeDisplayStartType = 0 // Start at 0
+	FootageTimecodeDisplayStartTypeUseSourceMedia FootageTimecodeDisplayStartType = 1 // Use source media
+)
+
+func (f FootageTimecodeDisplayStartType) String() string {
+	switch f {
+	case FootageTimecodeDisplayStartTypeStart0:
+		return "Start at 0"
+	case FootageTimecodeDisplayStartTypeUseSourceMedia:
+		return "Use source media"
+	default:
+		return fmt.Sprintf("unknown(%d)", f)
+	}
+}
+
+// FramesCountType represents how frames are counted in the project.
+type FramesCountType uint8
+
+const (
+	FramesCountTypeStart0 FramesCountType = 0 // Start at 0
+	FramesCountTypeStart1 FramesCountType = 1 // Start at 1
+	FramesCountTypeTimecodeConversion FramesCountType = 2 // Timecode conversion
+)
+
+func (f FramesCountType) String() string {
+	switch f {
+	case FramesCountTypeStart0:
+		return "Start at 0"
+	case FramesCountTypeStart1:
+		return "Start at 1"
+	case FramesCountTypeTimecodeConversion:
+		return "Timecode conversion"
+	default:
+		return fmt.Sprintf("unknown(%d)", f)
+	}
+}
+
+// TimeDisplayType represents how time is displayed in the project.
+type TimeDisplayType uint8
+
+const (
+	TimeDisplayTypeTimecode TimeDisplayType = 0 // Timecode
+	TimeDisplayTypeFrames TimeDisplayType = 1   // Frames
+)
+
+func (t TimeDisplayType) String() string {
+	switch t {
+	case TimeDisplayTypeTimecode:
+		return "Timecode"
+	case TimeDisplayTypeFrames:
+		return "Frames"
+	default:
+		return fmt.Sprintf("unknown(%d)", t)
+	}
+}
+
 // LayerType classifies the kind of layer.
 type LayerType string
 

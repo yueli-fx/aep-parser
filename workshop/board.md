@@ -1,28 +1,33 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-27 by claude (P2a Task 1+2+3+4+5 ship — ThreeDModelLayer R / LightSource R/W / LockedRatio R/W / ReplaceSource R/W / ImportPlaceholder)
+**Last updated**: 2026-05-27 by claude (P2b Task 1 ship — nnhd byte layout RE 8 fields)
 **Active focus**: py-aep parity P2b — next phase
 
 ## Next session
 
-**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2a-plan.md`](plans/2026-05-27-py-aep-parity-p2a-plan.md) § Deferred to P2b。
+**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md) § Task 2-4。
 
 进度（本次会话）：
-- ✅ **Task 1 (2J)** — `LayerType3DModel` 枚举 + `inferLayerType` byte 0x05 派发 + `Layer.IsThreeDModelLayer()` accessor + synthetic byte-dispatch test。
-- ✅ **Task 2 (2I)** — `Layer.LightSource() / SetLightSource(target *Layer)`（AE 24+ Environment-type light）；底层走 ldta `@0x28`（与 AV `SourceID` 共用 slot 按 Type 重解释），sentinel `0xFFFFFFFF` = 无源。py-aep `LightLayer.light_source` parity 含 6 个 validation 错误路径 test。
-- ✅ **Task 3 (2D)** — `Property.LockedRatio() / SetLockedRatio(v bool)`；底层走 tdsb `@0x02 bit 4`；parser 新加 `Property.tdsb` 私有 ref；IDTdsb 常量加到 rifx。length-preserving，roundtrip test + fallback test 全 PASS。
-- ✅ **Task 4 (2F)** — `Layer.ReplaceSource(target AVItem, fixExpressions bool)`；底层走既有 `SetSource` 路径；fixExpressions=true 时记 warning。roundtrip + warning test 全 PASS。
-- ✅ **Task 5 (2E)** — `Project.ImportPlaceholder(name, width, height, frameRate, duration)`；NewComposition 同模式，原子 mutation + 警告回滚。roundtrip test 全 PASS。
+- ✅ **Task 1 (2A)** — nnhd byte layout RE (8 fields)：
+  - `FeetFramesFilmType` R/W — byte 8 bit 7 (0=MM35, 1=MM16)
+  - `FootageTimecodeDisplayStartType` R/W — byte 9 (0=Start0, 1=UseSourceMedia)
+  - `TimecodeDefaultBase` R/W — bytes 14-15 u2 BE (1-999)
+  - `FramesCountType` R/W — byte 20 (0=Start0, 1=Start1, 2=TimecodeConversion)
+  - `DisplayStartFrame` R/W — derived from frames_count_type % 2
+  - `FramesUseFeetFrames` R/W — byte 11 bit 0
+  - `TimeDisplayType` R/W — byte 8 bits 6-0 (0=Timecode, 1=Frames)
+  - `TransparencyGridThumbnails` R/W — byte 25 bool
+  - roundtrip + validation + standalone tests 全 PASS
 
 **未提交残留**（待 user 处理或下次 batch commit）：
-- 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 Task 1+2 代码 + 我新加的 board/coverage/docs 行。
-- 注意 `workshop/plans/coverage.md` 的 commit 含 prior session 2 行未提交内容（4D 32bpc / mkif 残余字节 negative findings），跟我的 P2a 1+2 row 混在一起。
+- 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 Task 1 代码 + 我新加的 board/coverage/docs 行。
+- P2b Task 1 (nnhd) 代码已写但未 commit：`types_core.go` (4 enum types), `project_settings.go` (8 getters/setters), `project_settings_test.go` (4 test functions)
 
 **并行候选**（不阻塞 P2a）：V2.2.1 ShapeLayer 拓展 / V3 brainstorm。
 
 ## In flight
 
-- **py-aep parity P2a** — plan [`plans/2026-05-27-py-aep-parity-p2a-plan.md`](plans/2026-05-27-py-aep-parity-p2a-plan.md)（ready to execute）；spec [`specs/2026-05-26-py-aep-parity-design.md`](specs/2026-05-26-py-aep-parity-design.md) § 2.1-2.5
+- **py-aep parity P2b** — plan [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md)（Task 1 done, Task 2-4 pending）；spec [`specs/2026-05-26-py-aep-parity-design.md`](specs/2026-05-26-py-aep-parity-design.md) § 2.1-2.5
 
 ## Blockers
 
