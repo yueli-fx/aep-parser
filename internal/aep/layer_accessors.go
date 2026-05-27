@@ -521,7 +521,9 @@ func (l *Layer) SetOpacity(v float64) error {
 // `AVLayer.addToMotionGraphicsTemplateAs()` on the source-side layer +
 // the parent comp using the precomp as a layer). Without the slot,
 // SetAlternateSource cannot length-preservingly write a new id.
-func (l *Layer) HasAlternateSourceSlot() bool { return l.alternateSourceBlsi != nil }
+func (l *Layer) HasAlternateSourceSlot() bool {
+	return l.back != nil && l.back.alternateSourceBlsi != nil
+}
 
 // AlternateSource returns the AVItem (*Composition or *Footage) used as
 // this layer's media-replacement override, or nil when no override is

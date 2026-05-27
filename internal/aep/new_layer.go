@@ -126,6 +126,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 		Name: name,
 		ID:   layerID,
 		comp: c,
+		back: &layerBackrefs{},
 	}
 	// Bump project nextItemID so head-chunk counter sync (write.go::
 	// syncHeadCounters) covers our layer ID. AE 2025 validates head counter
@@ -180,7 +181,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	//    template). User-built Layrs must emit one too — without it, AE
 	//    2025 silently drops the layer at instantiation stage (variant #2
 	//    empty ShapeLayer reproduces this even with zero shape kids).
-	base.layrList = layrChunk
+	base.back.layrList = layrChunk
 	base.shapeDirty = true // gate for syncShapeLayerChunks
 	ewstSibling := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDEwst}
 	insertIdx := insertLayrPosition(c.itemList.Children)

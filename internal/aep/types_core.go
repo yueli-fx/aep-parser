@@ -575,23 +575,9 @@ type Layer struct {
 	// without going through the parser.
 	comp *Composition
 
-	// ldta is the underlying ldta chunk reference, captured by parseLayer.
-	// Used by SetVisible/SetBlendingMode/etc. for length-preserving
-	// flag-bit and byte-field writes. Nil for layers built outside the
-	// parser; setters refuse with an error in that case.
-	ldta *rifx.Chunk
-
-	// nameChunk is the layer's name Utf8 chunk. Used by SetName for
-	// length-variable text replacement.
-	nameChunk *rifx.Chunk
-
-	// commentChunk is the layer's cmta chunk (may be nil when no
-	// comment was set). SetComment replaces its data or creates one.
-	commentChunk *rifx.Chunk
-
-	// layrList is the owning Layr LIST itself — needed when SetComment
-	// has to insert a fresh cmta chunk (no existing one to mutate).
-	layrList *rifx.Chunk
+	// back holds the underlying RIFX chunk refs that power length-preserving
+	// writes. Nil for layers built outside the parser. See back_layer.go.
+	back *layerBackrefs
 
 	// shapeRootGroup is the runtime VectorGroup tree for LayerTypeShape
 	// layers. Populated by parseLayer (via hydrateShapeNodes) when a Layr
@@ -612,12 +598,6 @@ type Layer struct {
 	// understand — nested VectorGroup, ADBE Vector Transform Group, etc).
 	shapeDirty bool
 
-	// btdsChunk is the btds LIST holding the text source bytes
-	// (TextSourceRaw is an alias of this chunk's Data). Length-variable
-	// text writes (per-run setters) update this chunk's Data to point
-	// at a fresh splice; WriteAEP recomputes parent LIST sizes.
-	btdsChunk *rifx.Chunk
-
 	// AlternateSourceID is the AVItem id overriding this layer's source via
 	// the Essential Properties → Media Replacement workflow (AE 18+). 0
 	// means no override is in effect (either the layer has no Essential
@@ -627,12 +607,6 @@ type Layer struct {
 	// pattern in `parse_layer.go::findAlternateSourceBlsi`). Use
 	// AlternateSource() to resolve to the *Composition / *Footage item.
 	AlternateSourceID uint32
-
-	// alternateSourceBlsi is the underlying blsi chunk (4-byte BE uint32
-	// holding the alt source AVItem id). nil for layers without an
-	// Essential Properties media-replacement slot. SetAlternateSource
-	// rewrites its first 4 data bytes in place (length-preserving).
-	alternateSourceBlsi *rifx.Chunk
 
 	// propertyTree is the hierarchical mirror of the layer's tdgp property
 	// tree (P2c PropertyGroup hierarchy). Built by buildPropertyGroupTree

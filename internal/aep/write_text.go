@@ -27,10 +27,10 @@ import (
 // bytes with newSrc. Returns an error if the path doesn't resolve or
 // the layer has no decoded text source.
 func (l *Layer) splicePSValue(path string, newSrc []byte) error {
-	if l.btdsChunk == nil {
+	if l.back == nil || l.back.btdsChunk == nil {
 		return fmt.Errorf("layer %q: not a text layer", l.Name)
 	}
-	body, bodyOff, err := extractBtdkBody(l.btdsChunk.Data)
+	body, bodyOff, err := extractBtdkBody(l.back.btdsChunk.Data)
 	if err != nil {
 		return fmt.Errorf("layer %q: %w", l.Name, err)
 	}
@@ -49,7 +49,7 @@ func (l *Layer) splicePSValue(path string, newSrc []byte) error {
 	absEnd := bodyOff + target.srcEnd
 	delta := len(newSrc) - (absEnd - absStart)
 
-	old := l.btdsChunk.Data
+	old := l.back.btdsChunk.Data
 	newRaw := make([]byte, 0, len(old)+delta)
 	newRaw = append(newRaw, old[:absStart]...)
 	newRaw = append(newRaw, newSrc...)
@@ -70,7 +70,7 @@ func (l *Layer) splicePSValue(path string, newSrc []byte) error {
 		binary.BigEndian.PutUint32(newRaw[sizeOff:sizeOff+4], uint32(int(oldSize)+delta))
 	}
 
-	l.btdsChunk.Data = newRaw
+	l.back.btdsChunk.Data = newRaw
 	l.TextSourceRaw = newRaw
 	ts, _ := decodeTextSource(newRaw)
 	if ts != nil {
@@ -402,13 +402,13 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 // Returns an error if the layer isn't a text layer or the btdk Fonts
 // array can't be located.
 func (l *Layer) AddFont(fontName string) (int, error) {
-	if l.btdsChunk == nil || l.TextSource == nil {
+	if l.back == nil || l.back.btdsChunk == nil || l.TextSource == nil {
 		return -1, fmt.Errorf("layer %q: not a text layer", l.Name)
 	}
 	if fontName == "" {
 		return -1, fmt.Errorf("layer %q: fontName must be non-empty", l.Name)
 	}
-	body, bodyOff, err := extractBtdkBody(l.btdsChunk.Data)
+	body, bodyOff, err := extractBtdkBody(l.back.btdsChunk.Data)
 	if err != nil {
 		return -1, fmt.Errorf("layer %q: %w", l.Name, err)
 	}
@@ -438,7 +438,7 @@ func (l *Layer) AddFont(fontName string) (int, error) {
 	injected = append(injected, ' ')
 	injected = append(injected, newEntry...)
 
-	old := l.btdsChunk.Data
+	old := l.back.btdsChunk.Data
 	abs := bodyOff + insertAt
 	newRaw := make([]byte, 0, len(old)+len(injected))
 	newRaw = append(newRaw, old[:abs]...)
@@ -452,7 +452,7 @@ func (l *Layer) AddFont(fontName string) (int, error) {
 		binary.BigEndian.PutUint32(newRaw[sizeOff:sizeOff+4], uint32(int(oldSize)+len(injected)))
 	}
 
-	l.btdsChunk.Data = newRaw
+	l.back.btdsChunk.Data = newRaw
 	l.TextSourceRaw = newRaw
 	ts, _ := decodeTextSource(newRaw)
 	if ts != nil {

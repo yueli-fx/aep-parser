@@ -62,23 +62,23 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 		Index:   index,
 		Visible: true,
 		Stretch: 1.0,
+		back:    &layerBackrefs{layrList: layr},
 	}
 
-	layer.layrList = layr
 	if utf8 := layr.FindFirst(rifx.IDUtf8); utf8 != nil {
 		layer.Name = utf8.Text()
-		layer.nameChunk = utf8
+		layer.back.nameChunk = utf8
 	}
 	if cmta := layr.FindFirst(rifx.IDCmta); cmta != nil {
 		layer.Comment = decodeCmta(cmta.Data)
-		layer.commentChunk = cmta
+		layer.back.commentChunk = cmta
 	}
 
 	ldta := layr.FindFirst(rifx.IDLdta)
 	if ldta == nil {
 		return layer, nil
 	}
-	layer.ldta = ldta
+	layer.back.ldta = ldta
 
 	d := ldta.Data
 
@@ -180,7 +180,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	}
 
 	if blsi := findAlternateSourceBlsi(layr); blsi != nil && len(blsi.Data) >= 4 {
-		layer.alternateSourceBlsi = blsi
+		layer.back.alternateSourceBlsi = blsi
 		layer.AlternateSourceID = binary.BigEndian.Uint32(blsi.Data[0:4])
 	}
 
@@ -189,9 +189,9 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	layer.Masks = parseMasks(layr, ctx)
 	layer.propertyTree = buildAEPropertyGroupTree(layr)
 	wirePropertyTreeLeaves(layer.propertyTree, layer.Properties)
-	layer.btdsChunk = findTextSourceChunk(layr)
-	if layer.btdsChunk != nil {
-		layer.TextSourceRaw = layer.btdsChunk.Data
+	layer.back.btdsChunk = findTextSourceChunk(layr)
+	if layer.back.btdsChunk != nil {
+		layer.TextSourceRaw = layer.back.btdsChunk.Data
 		layer.Type = LayerTypeText
 		ts, warn := decodeTextSource(layer.TextSourceRaw)
 		layer.TextSource = ts
@@ -372,8 +372,8 @@ func hasShapeLayerRoot(layr *rifx.Chunk) bool {
 // layer has no ldta. Read-only access for debugging / RE tools — the
 // underlying byte slice is the live chunk data; do not mutate.
 func (l *Layer) LdtaRawBytes() []byte {
-	if l.ldta == nil {
+	if l.back == nil || l.back.ldta == nil {
 		return nil
 	}
-	return l.ldta.Data
+	return l.back.ldta.Data
 }
