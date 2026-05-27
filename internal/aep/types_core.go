@@ -633,6 +633,12 @@ type Layer struct {
 	// Essential Properties media-replacement slot. SetAlternateSource
 	// rewrites its first 4 data bytes in place (length-preserving).
 	alternateSourceBlsi *rifx.Chunk
+
+	// propertyTree is the hierarchical mirror of the layer's tdgp property
+	// tree (P2c PropertyGroup hierarchy). Built by buildPropertyGroupTree
+	// alongside the flat Layer.Properties slice; nil for layers built
+	// outside the parser. See AEPropertyGroup in property_group.go.
+	propertyTree *AEPropertyGroup
 }
 
 // AVItem is the polymorphic "AV item" set used by Media Replacement

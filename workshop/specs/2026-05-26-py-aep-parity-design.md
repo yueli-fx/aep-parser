@@ -137,7 +137,7 @@
 | `ReplaceSource(newSource, fixExpressions=false)` | ✅ | ✅ | ✅ | done | P2a Task 4 |
 | `ContainingComp` | ✅ | 🟢 implicit | ✅ | P1 | back-ref |
 | `Marker` (PropertyGroup) + `Markers` (flat list) | ✅ | 🟢 layer.Markers | ✅ | done |
-| `Effects / Masks / Text / Transform` PropertyGroup accessors | ✅ | 🟢 Property tree | ✅ | P2 | 加 PropertyGroup hierarchy |
+| `Effects / Masks / Text / Transform` PropertyGroup accessors | ✅ | ✅ R | ✅ | done | P2c — Layer.TransformGroup/AudioGroup/EffectsParade/MaskParade/etc. |
 | `Remove()` | ✅ | ❌ | ✅ | P3 | 结构性，V3 capability |
 | `Duplicate()` | ✅ | ❌ | ✅ | P3 | 结构性 |
 | `CopyToComp(comp)` | ✅ | ❌ | ✅ | P3 | 结构性 |
@@ -171,7 +171,7 @@
 | `EssentialPropertySource` | ✅ R | ❌ | 🗑️ | — | runtime/EG |
 | `AlternateSource / CanSetAlternateSource` (Layer-level, on Property) | ✅ R | 🟢 Layer.AlternateSource | ✅ | done |
 | `ValueText` (formatted value) | ✅ R | ❌ | ✅ R | P3 | |
-| **PropertyGroup ops**: `Properties / Property(key) / NumProperties / CanAddProperty` | ✅ | ❌ | ✅ | P2 | hierarchical access |
+| **PropertyGroup ops**: `Properties / Property(key) / NumProperties / CanAddProperty` | ✅ | ✅ R (sans CanAddProperty) | ✅ | done | P2c — `AEPropertyGroup.Property/Group/ChildByIndex/NumProperties/ParentGroup/PropertyByPath`；CanAdd 结构性 P3 |
 | `PropertyBase.Remove / Duplicate / MoveTo` | ✅ R/W | ❌ | ✅ R/W | P3 | 结构性 |
 | `Keyframe.Time / FrameTime / Value / InInterpType / OutInterpType / TemporalEase / SpatialTangent` | ✅ | ✅ R/W | ✅ | done |
 | `InsertKeyframe / DeleteKeyframe` | 🚧 limited | ✅ | ✅ | done |
