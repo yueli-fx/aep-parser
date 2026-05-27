@@ -113,3 +113,52 @@ func TestLightSource_NonLightReadReturnsNil(t *testing.T) {
 		t.Errorf("LightSource on non-light = %v, want nil", got)
 	}
 }
+
+func TestReplaceSource_RoundtripAndWarning(t *testing.T) {
+	proj := &Project{}
+	comp := &Composition{proj: proj}
+	proj.Compositions = []*Composition{comp}
+
+	// Create synthetic footage items with IDs
+	footage1 := &Footage{ID: 100, Name: "Footage1"}
+	footage2 := &Footage{ID: 200, Name: "Footage2"}
+	proj.Footage = []*Footage{footage1, footage2}
+
+	// Create a layer with initial source
+	layer := newSyntheticLayer(LayerTypeAV, "AV1", 1)
+	layer.comp = comp
+	layer.SourceID = 100 // initially points to footage1
+	comp.Layers = []*Layer{layer}
+
+	// Test ReplaceSource with footage2
+	if err := layer.ReplaceSource(footage2, false); err != nil {
+		t.Fatalf("ReplaceSource(footage2, false): %v", err)
+	}
+	if layer.SourceID != 200 {
+		t.Errorf("after ReplaceSource, SourceID = %d, want 200", layer.SourceID)
+	}
+	if got := binary.BigEndian.Uint32(layer.ldta.Data[0x28:0x2C]); got != 200 {
+		t.Errorf("after ReplaceSource, ldta@0x28 = %d, want 200", got)
+	}
+
+	// Test ReplaceSource with fixExpressions=true (should add warning)
+	proj.Warnings = nil
+	if err := layer.ReplaceSource(footage1, true); err != nil {
+		t.Fatalf("ReplaceSource(footage1, true): %v", err)
+	}
+	if len(proj.Warnings) != 1 {
+		t.Errorf("expected 1 warning, got %d", len(proj.Warnings))
+	}
+	if !strings.Contains(proj.Warnings[0], "fixExpressions=true not implemented") {
+		t.Errorf("warning = %q, want substring 'fixExpressions=true not implemented'", proj.Warnings[0])
+	}
+
+	// Test ReplaceSource with nil target
+	err := layer.ReplaceSource(nil, false)
+	if err == nil {
+		t.Error("ReplaceSource(nil) should return error")
+	}
+	if !strings.Contains(err.Error(), "target is nil") {
+		t.Errorf("err = %q, want substring 'target is nil'", err.Error())
+	}
+}

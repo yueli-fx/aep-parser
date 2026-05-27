@@ -839,3 +839,22 @@ func (l *Layer) SetLightShadowDarkness(v float64) error {
 func (l *Layer) SetLightShadowDiffusion(v float64) error {
 	return setScalarProperty(l.LightShadowDiffusion(), l.Name, "Light Shadow Diffusion", v)
 }
+
+// ReplaceSource replaces the layer's source with the given AV item
+// (Composition or Footage). This mirrors py-aep's Layer.ReplaceSource API.
+//
+// The fixExpressions parameter is accepted for API compatibility but not
+// implemented (symbolic execution of expressions is out of scope). When
+// fixExpressions=true, a warning is added to Project.Warnings.
+//
+// Internally calls SetSource with the item's ID.
+func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error {
+	if target == nil {
+		return fmt.Errorf("layer %q: target is nil", l.Name)
+	}
+	if fixExpressions && l.comp != nil && l.comp.proj != nil {
+		l.comp.proj.Warnings = append(l.comp.proj.Warnings,
+			fmt.Sprintf("layer %q: fixExpressions=true not implemented (expressions not auto-updated)", l.Name))
+	}
+	return l.SetSource(target.ItemID())
+}
