@@ -1,11 +1,11 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-27 by claude (P2b Task 1 ship — nnhd byte layout RE 8 fields)
+**Last updated**: 2026-05-27 by claude (P2b Task 1+2 ship — nnhd 8 fields + CMS JSON)
 **Active focus**: py-aep parity P2b — next phase
 
 ## Next session
 
-**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md) § Task 2-4。
+**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md) § Task 3-4。
 
 进度（本次会话）：
 - ✅ **Task 1 (2A)** — nnhd byte layout RE (8 fields)：
@@ -18,10 +18,16 @@
   - `TimeDisplayType` R/W — byte 8 bits 6-0 (0=Timecode, 1=Frames)
   - `TransparencyGridThumbnails` R/W — byte 25 bool
   - roundtrip + validation + standalone tests 全 PASS
+- ✅ **Task 2 (2B)** — CMS JSON (AE 24+)：
+  - `ColorManagementSystem` R/W — 0=Adobe, 1=OCIO
+  - `LutInterpolationMethod` R/W — 0=Trilinear, 1=Tetrahedral
+  - `OcioConfigurationFile` R/W — string path
+  - `WorkingSpace` R only — color profile name
+  - `DisplayColorSpace` R only — display color space name
+  - roundtrip + standalone tests 全 PASS
 
 **未提交残留**（待 user 处理或下次 batch commit）：
-- 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 Task 1 代码 + 我新加的 board/coverage/docs 行。
-- P2b Task 1 (nnhd) 代码已写但未 commit：`types_core.go` (4 enum types), `project_settings.go` (8 getters/setters), `project_settings_test.go` (4 test functions)
+- 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 P2b Task 1 代码 + 我新加的 board/coverage/docs 行。
 
 **并行候选**（不阻塞 P2a）：V2.2.1 ShapeLayer 拓展 / V3 brainstorm。
 

@@ -133,6 +133,44 @@ func (t TimeDisplayType) String() string {
 	}
 }
 
+// ColorManagementSystem represents the color management system used by the project.
+type ColorManagementSystem uint8
+
+const (
+	ColorManagementSystemAdobe ColorManagementSystem = 0 // Adobe color management
+	ColorManagementSystemOCIO  ColorManagementSystem = 1 // OCIO color management
+)
+
+func (c ColorManagementSystem) String() string {
+	switch c {
+	case ColorManagementSystemAdobe:
+		return "Adobe"
+	case ColorManagementSystemOCIO:
+		return "OCIO"
+	default:
+		return fmt.Sprintf("unknown(%d)", c)
+	}
+}
+
+// LutInterpolationMethod represents the LUT interpolation method for the project.
+type LutInterpolationMethod uint8
+
+const (
+	LutInterpolationMethodTrilinear    LutInterpolationMethod = 0 // Trilinear
+	LutInterpolationMethodTetrahedral  LutInterpolationMethod = 1 // Tetrahedral
+)
+
+func (l LutInterpolationMethod) String() string {
+	switch l {
+	case LutInterpolationMethodTrilinear:
+		return "Trilinear"
+	case LutInterpolationMethodTetrahedral:
+		return "Tetrahedral"
+	default:
+		return fmt.Sprintf("unknown(%d)", l)
+	}
+}
+
 // LayerType classifies the kind of layer.
 type LayerType string
 
@@ -189,6 +227,7 @@ type Project struct {
 	dwgaChunk *rifx.Chunk // 1-4B — byte 0 = working_gamma selector
 	gpugUtf8  *rifx.Chunk // Utf8 inside gpuG LIST — gpu_accel_type (UUID)
 	exenUtf8  *rifx.Chunk // Utf8 inside ExEn LIST — expression_engine
+	cmsUtf8   *rifx.Chunk // Utf8 — CMS settings JSON (AE 24+)
 
 	// V2: derived state for structural mutation (NewComposition / 未来 NewFootage etc.)
 	nextItemID uint32      // monotonic Item ID counter; never reused (see Invariants #9)

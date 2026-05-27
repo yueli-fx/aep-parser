@@ -2,6 +2,7 @@ package aep
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math"
 
@@ -488,4 +489,159 @@ func (p *Project) SetTransparencyGridThumbnails(v bool) error {
 		p.nnhdChunk.Data[25] = 0
 	}
 	return nil
+}
+
+// ──────────────────────────────────────────────
+// CMS (Color Management System) settings (AE 24+)
+// ──────────────────────────────────────────────
+//
+// CMS settings are stored as a Utf8 chunk containing JSON with keys:
+// - colorManagementSystem: 0=Adobe, 1=OCIO
+// - lutInterpolationMethod: 0=Trilinear, 1=Tetrahedral
+// - ocioConfigurationFile: string path
+//
+// The Utf8 chunk is identified by the presence of "lutInterpolationMethod"
+// or "colorManagementSystem" in its content.
+
+// cmsSettings returns the CMS settings as a map, or nil if no CMS chunk.
+func (p *Project) cmsSettings() map[string]interface{} {
+	if p.cmsUtf8 == nil {
+		return nil
+	}
+	// Parse JSON from the Utf8 chunk
+	var settings map[string]interface{}
+	if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
+		return nil
+	}
+	return settings
+}
+
+// cmsDefaultSettings returns the default CMS settings.
+func cmsDefaultSettings() map[string]interface{} {
+	return map[string]interface{}{
+		"colorManagementSystem":   0,
+		"lutInterpolationMethod":  0,
+		"ocioConfigurationFile":   "",
+	}
+}
+
+// updateCmsSetting updates a single key in the CMS settings JSON.
+func (p *Project) updateCmsSetting(key string, value interface{}) error {
+	if p.cmsUtf8 == nil {
+		// Create new CMS chunk with defaults + the new setting
+		settings := cmsDefaultSettings()
+		settings[key] = value
+		data, err := json.Marshal(settings)
+		if err != nil {
+			return fmt.Errorf("project: failed to marshal CMS settings: %w", err)
+		}
+		p.cmsUtf8 = &rifx.Chunk{ID: rifx.IDUtf8, Data: data}
+		// Insert into root children
+		if p.root != nil {
+			p.root.Children = append(p.root.Children, p.cmsUtf8)
+		} else {
+			return fmt.Errorf("project: no root chunk — cannot create CMS chunk")
+		}
+		return nil
+	}
+	// Update existing CMS chunk
+	var settings map[string]interface{}
+	if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
+		return fmt.Errorf("project: failed to parse CMS settings: %w", err)
+	}
+	settings[key] = value
+	data, err := json.Marshal(settings)
+	if err != nil {
+		return fmt.Errorf("project: failed to marshal CMS settings: %w", err)
+	}
+	p.cmsUtf8.Data = data
+	return nil
+}
+
+// ColorManagementSystem returns the color management system used by the project.
+// Returns ColorManagementSystemAdobe (0) when CMS chunk is absent.
+func (p *Project) ColorManagementSystem() ColorManagementSystem {
+	settings := p.cmsSettings()
+	if settings == nil {
+		return ColorManagementSystemAdobe
+	}
+	if v, ok := settings["colorManagementSystem"].(float64); ok {
+		return ColorManagementSystem(v)
+	}
+	return ColorManagementSystemAdobe
+}
+
+// SetColorManagementSystem sets the color management system.
+func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error {
+	return p.updateCmsSetting("colorManagementSystem", int(v))
+}
+
+// LutInterpolationMethod returns the LUT interpolation method.
+// Returns LutInterpolationMethodTrilinear (0) when CMS chunk is absent.
+func (p *Project) LutInterpolationMethod() LutInterpolationMethod {
+	settings := p.cmsSettings()
+	if settings == nil {
+		return LutInterpolationMethodTrilinear
+	}
+	if v, ok := settings["lutInterpolationMethod"].(float64); ok {
+		return LutInterpolationMethod(v)
+	}
+	return LutInterpolationMethodTrilinear
+}
+
+// SetLutInterpolationMethod sets the LUT interpolation method.
+func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error {
+	return p.updateCmsSetting("lutInterpolationMethod", int(v))
+}
+
+// OcioConfigurationFile returns the OCIO configuration file path.
+// Returns empty string when CMS chunk is absent.
+func (p *Project) OcioConfigurationFile() string {
+	settings := p.cmsSettings()
+	if settings == nil {
+		return ""
+	}
+	if v, ok := settings["ocioConfigurationFile"].(string); ok {
+		return v
+	}
+	return ""
+}
+
+// SetOcioConfigurationFile sets the OCIO configuration file path.
+func (p *Project) SetOcioConfigurationFile(v string) error {
+	return p.updateCmsSetting("ocioConfigurationFile", v)
+}
+
+// WorkingSpace returns the working color space name (R only).
+// Returns "None" when the chunk is absent.
+func (p *Project) WorkingSpace() string {
+	if p.cmsUtf8 == nil {
+		return "None"
+	}
+	// Check for baseColorProfile in the content
+	content := string(p.cmsUtf8.Data)
+	if contains(content, "baseColorProfile") {
+		// Parse and extract baseColorProfile
+		var settings map[string]interface{}
+		if err := json.Unmarshal(p.cmsUtf8.Data, &settings); err != nil {
+			return "None"
+		}
+		if profile, ok := settings["baseColorProfile"].(map[string]interface{}); ok {
+			if name, ok := profile["colorProfileName"].(string); ok {
+				return name
+			}
+		}
+	}
+	return "None"
+}
+
+// DisplayColorSpace returns the display color space name (R only).
+// Returns "None" when the chunk is absent.
+func (p *Project) DisplayColorSpace() string {
+	if p.cmsUtf8 == nil {
+		return "None"
+	}
+	// Display color space is typically in a separate Utf8 chunk
+	// For now, return None as it's not directly accessible
+	return "None"
 }

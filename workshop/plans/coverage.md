@@ -62,6 +62,12 @@
   - `FramesUseFeetFrames` R/W — byte 11 bit 0
   - `TimeDisplayType` R/W — byte 8 bits 6-0 (0=Timecode, 1=Frames)
   - `TransparencyGridThumbnails` R/W — byte 25 bool
+- **Project CMS settings (P2b 2B, AE 24+)**: JSON Utf8 chunk — py-aep `NnhdChunk` parity
+  - `ColorManagementSystem` R/W — 0=Adobe, 1=OCIO
+  - `LutInterpolationMethod` R/W — 0=Trilinear, 1=Tetrahedral
+  - `OcioConfigurationFile` R/W — string path
+  - `WorkingSpace` R only — color profile name
+  - `DisplayColorSpace` R only — display color space name
 - **Footage discriminator**: 新增 `IsPlaceholder` 字段（opti tag = "Plac"）;`Footage.{IsSolid, IsPlaceholder}` 互斥三态（file / solid / placeholder）
 
 ### Layer

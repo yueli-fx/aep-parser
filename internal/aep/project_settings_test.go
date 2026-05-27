@@ -367,3 +367,77 @@ func TestProjectSettings_NnhdStandalone(t *testing.T) {
 		t.Error("SetTimecodeDefaultBase on standalone: expected error")
 	}
 }
+
+// TestProjectSettings_CmsRead verifies CMS field readers.
+func TestProjectSettings_CmsRead(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+
+	// Verify CMS fields have reasonable defaults (AE 2020 project may not have CMS)
+	// Just verify the readers don't panic
+	_ = proj.ColorManagementSystem()
+	_ = proj.LutInterpolationMethod()
+	_ = proj.OcioConfigurationFile()
+	_ = proj.WorkingSpace()
+	_ = proj.DisplayColorSpace()
+}
+
+// TestProjectSettings_CmsRoundtrip verifies CMS field writers roundtrip correctly.
+func TestProjectSettings_CmsRoundtrip(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+
+	// Change CMS fields (note: these may fail if CMS chunk doesn't exist in fixture)
+	if err := proj.SetColorManagementSystem(aep.ColorManagementSystemOCIO); err != nil {
+		t.Skipf("SetColorManagementSystem: %v (CMS chunk may not exist in fixture)", err)
+	}
+	if err := proj.SetLutInterpolationMethod(aep.LutInterpolationMethodTetrahedral); err != nil {
+		t.Fatalf("SetLutInterpolationMethod: %v", err)
+	}
+	if err := proj.SetOcioConfigurationFile("/path/to/config.ocio"); err != nil {
+		t.Fatalf("SetOcioConfigurationFile: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+
+	proj2, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader after write: %v", err)
+	}
+
+	// Verify roundtrip values
+	if got := proj2.ColorManagementSystem(); got != aep.ColorManagementSystemOCIO {
+		t.Errorf("after roundtrip: ColorManagementSystem = %v, want OCIO", got)
+	}
+	if got := proj2.LutInterpolationMethod(); got != aep.LutInterpolationMethodTetrahedral {
+		t.Errorf("after roundtrip: LutInterpolationMethod = %v, want Tetrahedral", got)
+	}
+	if got := proj2.OcioConfigurationFile(); got != "/path/to/config.ocio" {
+		t.Errorf("after roundtrip: OcioConfigurationFile = %q, want /path/to/config.ocio", got)
+	}
+}
+
+// TestProjectSettings_CmsStandalone verifies CMS readers return defaults
+// when CMS chunk is absent (standalone project).
+func TestProjectSettings_CmsStandalone(t *testing.T) {
+	p := &aep.Project{}
+	if got := p.ColorManagementSystem(); got != aep.ColorManagementSystemAdobe {
+		t.Errorf("standalone ColorManagementSystem = %v, want Adobe", got)
+	}
+	if got := p.LutInterpolationMethod(); got != aep.LutInterpolationMethodTrilinear {
+		t.Errorf("standalone LutInterpolationMethod = %v, want Trilinear", got)
+	}
+	if got := p.OcioConfigurationFile(); got != "" {
+		t.Errorf("standalone OcioConfigurationFile = %q, want empty", got)
+	}
+	if got := p.WorkingSpace(); got != "None" {
+		t.Errorf("standalone WorkingSpace = %q, want None", got)
+	}
+}

@@ -75,6 +75,21 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 		}
 	}
 
+	// CMS settings JSON (AE 24+) — stored as a Utf8 chunk containing JSON.
+	// Identified by the presence of "lutInterpolationMethod" in the content.
+	for _, c := range root.Children {
+		if !c.IsList() && c.ID == rifx.IDUtf8 {
+			content := string(c.Data)
+			if len(content) > 0 && (content[0] == '{' || content[0] == '[') {
+				// Looks like JSON, check for CMS markers
+				if contains(content, "lutInterpolationMethod") || contains(content, "colorManagementSystem") {
+					proj.cmsUtf8 = c
+					break
+				}
+			}
+		}
+	}
+
 	// In real .aep files, Item lists are nested inside Fold/Sfdr containers,
 	// not direct children of the root. Walk the whole tree.
 	var walk func(c *rifx.Chunk) error
@@ -285,4 +300,18 @@ func readFloat64BE(b []byte, offset int) (float64, bool) {
 		return 0, false
 	}
 	return math.Float64frombits(binary.BigEndian.Uint64(b[offset:])), true
+}
+
+// contains reports whether s contains substr.
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && (s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || findSubstring(s, substr)))
+}
+
+func findSubstring(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
 }
