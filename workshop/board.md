@@ -29,13 +29,13 @@
 - 🗑️ **Task 4 (2D)** — Property metadata — deferred (需要 pard chunk reader + specs.py schema table)
 
 **未提交残留**（待 user 处理或下次 batch commit）：
-- 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 P2b Task 1 代码 + 我新加的 board/coverage/docs 行。
+- 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 P2b Task 1+2 代码 + 我新加的 board/coverage/docs 行。
 
 **并行候选**（不阻塞 P2a）：V2.2.1 ShapeLayer 拓展 / V3 brainstorm。
 
 ## In flight
 
-- **py-aep parity P2b** — plan [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md)（Task 1 done, Task 2-4 pending）；spec [`specs/2026-05-26-py-aep-parity-design.md`](specs/2026-05-26-py-aep-parity-design.md) § 2.1-2.5
+- **py-aep parity P2b** — plan [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md)（Task 1-2 done, Task 3-4 deferred）；spec [`specs/2026-05-26-py-aep-parity-design.md`](specs/2026-05-26-py-aep-parity-design.md) § 2.1-2.5
 
 ## Blockers
 
