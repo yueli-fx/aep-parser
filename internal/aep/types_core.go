@@ -832,36 +832,9 @@ type Property struct {
 	// properties.
 	Gradient *Gradient
 
-	// Write-back references — non-nil when SetValue / SetKeyframes can
-	// modify the underlying RIFX bytes in-place.
-	cdat       *rifx.Chunk // current/static value chunk (no keyframes)
-	ldat       *rifx.Chunk // keyframe stream chunk (with keyframes)
-	lhd3       *rifx.Chunk // keyframe-list header chunk (count @0x08, bpk @0x10)
-	bytesPerKF int         // bytes per keyframe block within ldat.Data
-
-	// tdbs is the property's owning tdbs LIST — used by SetExpression
-	// to insert/remove the Utf8 chunk holding the JS source.
-	tdbs *rifx.Chunk
-	// tdb4 is the property metadata chunk under tdbs (124 bytes); holds
-	// the dimension, type flags, spatial / animated / no_value / color /
-	// integer / vector bits. Populated by parseLeafProperty. Used by
-	// tdb4 flag readers (IsSpatial, IsAnimated, etc.).
-	tdb4 *rifx.Chunk
-	// tdsb is the property subprop flags chunk (4 bytes); holds
-	// locked_ratio (byte 2 bit 4), dimensions_separated (byte 3 bit 1),
-	// enabled (byte 3 bit 0), roto_bezier (byte 0 bit 0).
-	tdsb *rifx.Chunk
-	// exprChunk is the Utf8 chunk holding the expression JS source.
-	// Nil when the property has no expression; SetExpression creates
-	// or removes it as needed.
-	exprChunk *rifx.Chunk
-
-	// tdum / tduM are the property min/max value chunks under tdbs.
-	// Populated by parseLeafProperty; nil when absent. Decoded by
-	// MinValue() / MaxValue(). Layout depends on tdb4 type flags:
-	// color → 4×f32, integer → 1×u32, otherwise N×f64.
-	tdum *rifx.Chunk
-	tduM *rifx.Chunk
+	// back holds the underlying RIFX chunk refs that power length-preserving
+	// writes. nil for properties built outside the parser. See back_property.go.
+	back *propertyBackrefs
 
 	// parentTreeGroup is the AEPropertyGroup that contains this leaf in
 	// the layer's hierarchical property tree (P2c). Populated by

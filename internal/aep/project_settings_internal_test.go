@@ -94,7 +94,7 @@ func TestProperty_LockedRatio_Positive(t *testing.T) {
 		ID:   rifx.IDTdsb,
 		Data: []byte{0x00, 0x00, 0x10, 0x00}, // byte 2 = bit 4 set
 	}
-	p := &Property{MatchName: "test", Components: 1, tdsb: tdsb}
+	p := &Property{MatchName: "test", Components: 1, back: &propertyBackrefs{tdsb: tdsb}}
 
 	if !p.LockedRatio() {
 		t.Error("LockedRatio with bit-4-set tdsb = false, want true")

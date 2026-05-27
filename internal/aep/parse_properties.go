@@ -92,7 +92,7 @@ func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCt
 		// Even when the inner tdbs has no decodable cdat (the placeholder
 		// in real fixtures is only 4 bytes), we still want to surface the
 		// gradient. Fabricate a minimal Property carrying the XML.
-		prop = &Property{MatchName: matchName, Name: matchName, Components: 1, tdbs: innerTdbs}
+		prop = &Property{MatchName: matchName, Name: matchName, Components: 1, back: &propertyBackrefs{tdbs: innerTdbs}}
 	}
 	gcky := gcst.FindFirstList(rifx.IDGCky)
 	if gcky == nil {
@@ -186,30 +186,30 @@ func descend(c *rifx.Chunk, parentName string, out *[]*Property, ctx *parseCtx) 
 // expression source (JavaScript). If present, it's surfaced as
 // Property.Expression.
 func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Property {
-	prop := &Property{MatchName: matchName, Name: matchName, Components: 1}
+	prop := &Property{MatchName: matchName, Name: matchName, Components: 1, back: &propertyBackrefs{}}
 
 	if tdb4 := tdbs.FindFirst(rifx.IDtdb4); tdb4 != nil {
 		prop.Components = decodeTdb4Components(tdb4.Data)
-		prop.tdb4 = tdb4
+		prop.back.tdb4 = tdb4
 	}
 	// Some shape primitive paths use uppercase IDTdb4 — record either.
-	if prop.tdb4 == nil {
+	if prop.back.tdb4 == nil {
 		if tdb4 := tdbs.FindFirst(rifx.IDTdb4); tdb4 != nil {
-			prop.tdb4 = tdb4
+			prop.back.tdb4 = tdb4
 		}
 	}
 
 	// Parse tdsb subprop flags chunk (4 bytes) if present.
 	if tdsb := tdbs.FindFirst(rifx.IDTdsb); tdsb != nil {
-		prop.tdsb = tdsb
+		prop.back.tdsb = tdsb
 	}
 
 	// Parse tdum/tduM min/max value chunks if present.
 	if tdum := tdbs.FindFirst(rifx.IDtdum); tdum != nil {
-		prop.tdum = tdum
+		prop.back.tdum = tdum
 	}
 	if tduM := tdbs.FindFirst(rifx.IDtduM); tduM != nil {
-		prop.tduM = tduM
+		prop.back.tduM = tduM
 	}
 
 	cdat := tdbs.FindFirst(rifx.IDCdat)
@@ -222,10 +222,10 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 	}
 
 	// Expression: a Utf8 chunk inside the tdbs (sibling to tdb4/cdat).
-	prop.tdbs = tdbs
+	prop.back.tdbs = tdbs
 	if utf8 := tdbs.FindFirst(rifx.IDUtf8); utf8 != nil {
 		prop.Expression = utf8.Text()
-		prop.exprChunk = utf8
+		prop.back.exprChunk = utf8
 	}
 
 	// ExpressionEnabled: tdb4 @0x78 is an INVERTED "disabled" byte —
@@ -248,7 +248,7 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 			parseKeyframes(prop, lhd3, ldat, ctx)
 		}
 	} else if cdat != nil && len(cdat.Data) >= 8 {
-		prop.cdat = cdat
+		prop.back.cdat = cdat
 		prop.StaticValue = decodeCdatValue(cdat.Data, prop.Components)
 	} else if prop.Expression == "" {
 		// Nothing useful in this tdbs.

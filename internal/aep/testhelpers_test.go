@@ -17,10 +17,12 @@ func (p *Project) RootForTest() *rifx.Chunk { return p.root }
 // chunks for white-box testing. All chunk refs are optional (pass nil to omit).
 func NewTestProperty(matchName string, components int, tdb4, tdsb, tdum, tduM *rifx.Chunk) *Property {
 	p := &Property{MatchName: matchName, Name: matchName, Components: components}
-	p.tdb4 = tdb4
-	p.tdsb = tdsb
-	p.tdum = tdum
-	p.tduM = tduM
+	p.back = &propertyBackrefs{
+		tdb4: tdb4,
+		tdsb: tdsb,
+		tdum: tdum,
+		tduM: tduM,
+	}
 	return p
 }
 

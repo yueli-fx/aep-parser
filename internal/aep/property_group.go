@@ -195,8 +195,8 @@ func (r *propertyTreeLeafRef) PropertyName() string      { return r.matchName }
 func wirePropertyTreeLeaves(root *AEPropertyGroup, props []*Property) {
 	byTdbs := make(map[*rifx.Chunk]*Property, len(props))
 	for _, p := range props {
-		if p.tdbs != nil {
-			byTdbs[p.tdbs] = p
+		if p.back != nil && p.back.tdbs != nil {
+			byTdbs[p.back.tdbs] = p
 		}
 	}
 	var walk func(g *AEPropertyGroup)

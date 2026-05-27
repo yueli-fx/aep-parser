@@ -22,7 +22,7 @@ func TestProperty_Enabled_DefaultTrue(t *testing.T) {
 func TestProperty_Enabled_TdsbByte3Bit0(t *testing.T) {
 	// tdsb byte 3 bit 0 = 1 → enabled
 	tdsb := &rifx.Chunk{ID: rifx.IDTdsb, Data: []byte{0, 0, 0, 0x01}}
-	p := &Property{MatchName: "test", tdsb: tdsb}
+	p := &Property{MatchName: "test", back: &propertyBackrefs{tdsb: tdsb}}
 	if !p.Enabled() {
 		t.Error("Enabled() with tdsb byte3 bit0 set = false; want true")
 	}

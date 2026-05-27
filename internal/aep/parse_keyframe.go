@@ -37,9 +37,12 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 			prop.MatchName, count, bpk, len(ldat.Data))
 		return
 	}
-	prop.ldat = ldat
-	prop.lhd3 = lhd3
-	prop.bytesPerKF = bpk
+	if prop.back == nil {
+		prop.back = &propertyBackrefs{}
+	}
+	prop.back.ldat = ldat
+	prop.back.lhd3 = lhd3
+	prop.back.bytesPerKF = bpk
 	prop.Keyframes = make([]*Keyframe, 0, count)
 
 	// Pre-flight: check bpk against the layout deduced from the first

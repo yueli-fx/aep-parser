@@ -15,7 +15,7 @@ import (
 // SetStaticValue rewrites a property's constant value in-place (only valid
 // for properties without keyframes — those with a cdat chunk).
 func (p *Property) SetStaticValue(v any) error {
-	if p.cdat == nil {
+	if p.back == nil || p.back.cdat == nil {
 		return fmt.Errorf("property %q: no static-value chunk (has keyframes?)", p.MatchName)
 	}
 	switch x := v.(type) {
@@ -23,7 +23,7 @@ func (p *Property) SetStaticValue(v any) error {
 		if p.Components != 1 {
 			return fmt.Errorf("property %q is %dD, expected []float64", p.MatchName, p.Components)
 		}
-		if err := writeFloat64(p.cdat.Data, 0, x); err != nil {
+		if err := writeFloat64(p.back.cdat.Data, 0, x); err != nil {
 			return err
 		}
 		p.StaticValue = x
@@ -33,7 +33,7 @@ func (p *Property) SetStaticValue(v any) error {
 			return fmt.Errorf("property %q: got %d components, property is %dD", p.MatchName, len(x), p.Components)
 		}
 		for i, f := range x {
-			if err := writeFloat64(p.cdat.Data, i*8, f); err != nil {
+			if err := writeFloat64(p.back.cdat.Data, i*8, f); err != nil {
 				return err
 			}
 		}
@@ -57,12 +57,12 @@ func (p *Property) SetStaticValue(v any) error {
 // present for properties parsed from real .aep files). Returns an
 // error otherwise.
 func (p *Property) SetExpressionEnabled(enabled bool) error {
-	if p.tdbs == nil {
+	if p.back == nil || p.back.tdbs == nil {
 		return fmt.Errorf("property %q: no tdbs reference", p.MatchName)
 	}
-	tdb4 := p.tdbs.FindFirst(rifx.IDtdb4)
+	tdb4 := p.back.tdbs.FindFirst(rifx.IDtdb4)
 	if tdb4 == nil {
-		tdb4 = p.tdbs.FindFirst(rifx.IDTdb4)
+		tdb4 = p.back.tdbs.FindFirst(rifx.IDTdb4)
 	}
 	if tdb4 == nil {
 		return fmt.Errorf("property %q: tdb4 chunk missing", p.MatchName)
@@ -99,10 +99,10 @@ func (p *Property) SetExpressionEnabled(enabled bool) error {
 // are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent
 // on the returned Keyframe to refine.
 func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, error) {
-	if p.ldat == nil || p.lhd3 == nil {
+	if p.back == nil || p.back.ldat == nil || p.back.lhd3 == nil {
 		return nil, -1, fmt.Errorf("property %q: no existing keyframes (insert from scratch not supported)", p.MatchName)
 	}
-	if p.bytesPerKF <= 0 {
+	if p.back.bytesPerKF <= 0 {
 		return nil, -1, fmt.Errorf("property %q: bytesPerKF is zero", p.MatchName)
 	}
 	if time < 0 {
@@ -128,11 +128,11 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 
 	// Build the new block: clone header byte @0x07 from an existing
 	// keyframe (sample[0]) so layout matches; zero everything else.
-	bpk := p.bytesPerKF
-	if len(p.ldat.Data) < bpk {
-		return nil, -1, fmt.Errorf("property %q: ldat shorter than one block (%d bytes, bpk=%d)", p.MatchName, len(p.ldat.Data), bpk)
+	bpk := p.back.bytesPerKF
+	if len(p.back.ldat.Data) < bpk {
+		return nil, -1, fmt.Errorf("property %q: ldat shorter than one block (%d bytes, bpk=%d)", p.MatchName, len(p.back.ldat.Data), bpk)
 	}
-	headerByte := p.ldat.Data[0x07]
+	headerByte := p.back.ldat.Data[0x07]
 	block := make([]byte, bpk)
 	binary.BigEndian.PutUint32(block[0:4], uint32(math.Round(time*tickRate)))
 	block[0x04] = byte(InterpLinear)
@@ -164,17 +164,17 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 
 	// Splice the block into ldat at insertIdx * bpk.
 	splice := insertIdx * bpk
-	old := p.ldat.Data
+	old := p.back.ldat.Data
 	newData := make([]byte, 0, len(old)+bpk)
 	newData = append(newData, old[:splice]...)
 	newData = append(newData, block...)
 	newData = append(newData, old[splice:]...)
-	p.ldat.Data = newData
+	p.back.ldat.Data = newData
 
 	// Bump count in lhd3 @0x08.
-	if len(p.lhd3.Data) >= 0x0C {
-		newCount := binary.BigEndian.Uint32(p.lhd3.Data[0x08:0x0C]) + 1
-		binary.BigEndian.PutUint32(p.lhd3.Data[0x08:0x0C], newCount)
+	if len(p.back.lhd3.Data) >= 0x0C {
+		newCount := binary.BigEndian.Uint32(p.back.lhd3.Data[0x08:0x0C]) + 1
+		binary.BigEndian.PutUint32(p.back.lhd3.Data[0x08:0x0C], newCount)
 	}
 
 	// Rebuild Property.Keyframes — the simplest correct path. Re-points
@@ -192,29 +192,29 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 // ldat stream and decrements the lhd3 count header. Returns an error
 // when i is out of range or the property has no keyframe stream.
 func (p *Property) DeleteKeyframe(i int) error {
-	if p.ldat == nil || p.lhd3 == nil {
+	if p.back == nil || p.back.ldat == nil || p.back.lhd3 == nil {
 		return fmt.Errorf("property %q: no keyframe stream", p.MatchName)
 	}
 	if i < 0 || i >= len(p.Keyframes) {
 		return fmt.Errorf("property %q: keyframe index %d out of range [0,%d)", p.MatchName, i, len(p.Keyframes))
 	}
-	bpk := p.bytesPerKF
+	bpk := p.back.bytesPerKF
 	splice := i * bpk
-	old := p.ldat.Data
+	old := p.back.ldat.Data
 	if splice+bpk > len(old) {
 		return fmt.Errorf("property %q: ldat shorter than expected (off=%d, bpk=%d, len=%d)", p.MatchName, splice, bpk, len(old))
 	}
 	newData := make([]byte, 0, len(old)-bpk)
 	newData = append(newData, old[:splice]...)
 	newData = append(newData, old[splice+bpk:]...)
-	p.ldat.Data = newData
+	p.back.ldat.Data = newData
 
-	if len(p.lhd3.Data) >= 0x0C {
-		newCount := binary.BigEndian.Uint32(p.lhd3.Data[0x08:0x0C])
+	if len(p.back.lhd3.Data) >= 0x0C {
+		newCount := binary.BigEndian.Uint32(p.back.lhd3.Data[0x08:0x0C])
 		if newCount > 0 {
 			newCount--
 		}
-		binary.BigEndian.PutUint32(p.lhd3.Data[0x08:0x0C], newCount)
+		binary.BigEndian.PutUint32(p.back.lhd3.Data[0x08:0x0C], newCount)
 	}
 
 	tickRate := aeLegacyTimeBase
@@ -231,30 +231,30 @@ func (p *Property) DeleteKeyframe(i int) error {
 // ldat/lhd3 bytes. Used after InsertKeyframe / DeleteKeyframe so
 // Keyframe.offset / Value / etc. reflect the new stream layout.
 func (p *Property) reparseKeyframes(tickRate float64) error {
-	if p.ldat == nil || p.lhd3 == nil {
+	if p.back == nil || p.back.ldat == nil || p.back.lhd3 == nil {
 		return fmt.Errorf("property %q: missing ldat/lhd3", p.MatchName)
 	}
-	if len(p.lhd3.Data) < 0x14 {
-		return fmt.Errorf("property %q: lhd3 too short (%d bytes)", p.MatchName, len(p.lhd3.Data))
+	if len(p.back.lhd3.Data) < 0x14 {
+		return fmt.Errorf("property %q: lhd3 too short (%d bytes)", p.MatchName, len(p.back.lhd3.Data))
 	}
-	count := int(binary.BigEndian.Uint32(p.lhd3.Data[0x08:0x0C]))
-	bpk := int(binary.BigEndian.Uint32(p.lhd3.Data[0x10:0x14]))
-	if count < 0 || bpk <= 0 || count*bpk > len(p.ldat.Data) {
-		return fmt.Errorf("property %q: lhd3 says count=%d bpk=%d but ldat has %d bytes", p.MatchName, count, bpk, len(p.ldat.Data))
+	count := int(binary.BigEndian.Uint32(p.back.lhd3.Data[0x08:0x0C]))
+	bpk := int(binary.BigEndian.Uint32(p.back.lhd3.Data[0x10:0x14]))
+	if count < 0 || bpk <= 0 || count*bpk > len(p.back.ldat.Data) {
+		return fmt.Errorf("property %q: lhd3 says count=%d bpk=%d but ldat has %d bytes", p.MatchName, count, bpk, len(p.back.ldat.Data))
 	}
-	p.bytesPerKF = bpk
+	p.back.bytesPerKF = bpk
 	p.Keyframes = make([]*Keyframe, 0, count)
 	for i := 0; i < count; i++ {
 		off := i * bpk
 		kf := &Keyframe{
-			ldat:     p.ldat,
+			ldat:     p.back.ldat,
 			offset:   off,
 			dims:     p.Components,
 			tickRate: tickRate,
 		}
-		kf.Time = float64(binary.BigEndian.Uint32(p.ldat.Data[off:off+4])) / tickRate
-		kf.Value = readKFValue(p.ldat.Data, off, p.Components)
-		decodeEasing(kf, p.ldat.Data[off:off+bpk])
+		kf.Time = float64(binary.BigEndian.Uint32(p.back.ldat.Data[off:off+4])) / tickRate
+		kf.Value = readKFValue(p.back.ldat.Data, off, p.Components)
+		decodeEasing(kf, p.back.ldat.Data[off:off+bpk])
 		p.Keyframes = append(p.Keyframes, kf)
 	}
 	return nil
@@ -275,31 +275,31 @@ func (p *Property) reparseKeyframes(tickRate float64) error {
 // Returns an error if the property is one built outside the parser
 // (no owning tdbs LIST reference).
 func (p *Property) SetExpression(source string) error {
-	if p.tdbs == nil {
+	if p.back == nil || p.back.tdbs == nil {
 		return fmt.Errorf("property %q: no tdbs reference (built outside parser?)", p.MatchName)
 	}
 	if source == "" {
 		// Remove existing expression chunk if present.
-		if p.exprChunk != nil {
-			out := p.tdbs.Children[:0]
-			for _, ch := range p.tdbs.Children {
-				if ch == p.exprChunk {
+		if p.back.exprChunk != nil {
+			out := p.back.tdbs.Children[:0]
+			for _, ch := range p.back.tdbs.Children {
+				if ch == p.back.exprChunk {
 					continue
 				}
 				out = append(out, ch)
 			}
-			p.tdbs.Children = out
-			p.exprChunk = nil
+			p.back.tdbs.Children = out
+			p.back.exprChunk = nil
 		}
 		p.Expression = ""
 		return nil
 	}
-	if p.exprChunk != nil {
-		p.exprChunk.Data = []byte(source)
+	if p.back.exprChunk != nil {
+		p.back.exprChunk.Data = []byte(source)
 	} else {
 		newUtf8 := &rifx.Chunk{ID: rifx.IDUtf8, Data: []byte(source)}
-		p.tdbs.Children = append(p.tdbs.Children, newUtf8)
-		p.exprChunk = newUtf8
+		p.back.tdbs.Children = append(p.back.tdbs.Children, newUtf8)
+		p.back.exprChunk = newUtf8
 	}
 	p.Expression = source
 	return nil
