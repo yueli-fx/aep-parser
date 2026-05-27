@@ -1,16 +1,23 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-28 by claude (V3 Phase 1 完成 — 6 个 backref shard 全抽完，PASS 259 全过，public API 零 delta)
-**Active focus**: V3 Phase 2 候选 —— `Composition.DeleteLayer(idx)` 首个走 scene+backref 拆分的结构性 mutation。
+**Last updated**: 2026-05-28 by claude (V3 Phase 2 plan 落 — DeleteLayer via V2.1 atomic invariants + AE 双版本 ship-gate)
+**Active focus**: V3 Phase 2 起步 —— `Composition.DeleteLayer(idx)` 走 RE → 决策 → 实现 → ship-gate 四段，plan: `plans/2026-05-28-v3-phase2-deletelayer-plan.md`。
 
 ## Next session
 
-**V3 Phase 2 候选**：`Composition.DeleteLayer(idx)` —— 第一个走 V2.1 atomic invariants + AE 双版本 ship-gate (CLAUDE.md #6) 的结构性 mutation API。Phase 1 已经把 chunk refs 全抽到 `back *<type>Backrefs` shard，scene 侧改 `Composition.Layers` 切片 + back 侧改 `back.itemList.Children`，原位 byte-level mutation。spec § 4 Phase 2 candidate。
+**V3 Phase 2 起步**：执行 `plans/2026-05-28-v3-phase2-deletelayer-plan.md` Task 1 —— RE harness 写 `test_data/re_delete_layer.jsx`（4 mode: baseline/middle/parent/matte），user 跑 AE 2025 产 4 个 fixture，回答 RE-Q1..Q6（itemList splice 还是 gap / 孤儿 ParentID 怎么清 / Ewst sibling 同删 / head counter 调不调 / 表达式 string 引用怎么办）。RE 决策完进 Task 2-3 实现，最后 Task 5 user 跑 AE 2020 + 2025 ship-gate（8 次开盘 PASS 才算 ship）。
 
-**起步 checklist（待 user 拍）**：
-1. 决定先做 DeleteLayer 还是先补 V2.2 ShapeLayer 拓展（spec § 4 vs deferred 列表）—— 当前 V3 path 推荐 DeleteLayer 因为它驱动 V3 capability framework 早期暴露
-2. AE acceptance fixture 准备 —— 多 layer comp 删中间一个，AE 2020 + AE 2025 双版本读回校验
-3. plan 写 `plans/2026-05-XX-v3-phase2-deletelayer-plan.md`
+**user 需要先做的事**：
+1. 确认 spec § 4 Phase 2 决策点（DeleteLayer scope；refuse-on-parent/matte 是否可接受）
+2. 跑 4 次 `scripts/ae_run.ps1` 产 RE fixture（步骤详 plan Task 1）
+3. Task 5 ship-gate 跑 8 次 AE 打开（4 mode × 2 版本）
+
+**并行 R-only 仍 deferred**（不阻塞 V3）：
+- **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
+- **DisplayColorSpace R**: separate chunk 位置未 RE
+- **ValueText**: per-type formatter — P3
+
+**并行候选**：V2.2.1 ShapeLayer 拓展（其实最好压到 V3 Phase 5 一起做，避免 alpha API 重复）。
 
 **并行 R-only 仍 deferred**（不阻塞 V3）：
 - **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
