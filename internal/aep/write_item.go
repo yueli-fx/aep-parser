@@ -51,7 +51,10 @@ func setItemLabel(idta *rifx.Chunk, index uint8) error {
 // Item LIST size. When no cmta chunk exists yet, a fresh one is
 // inserted into the Item LIST.
 func (c *Composition) SetComment(comment string) error {
-	if err := setItemComment(c.itemLayrParent, &c.itemCmtaChunk, comment); err != nil {
+	if c.back == nil {
+		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)
+	}
+	if err := setItemComment(c.back.itemLayrParent, &c.back.itemCmtaChunk, comment); err != nil {
 		return fmt.Errorf("comp %q: %w", c.Name, err)
 	}
 	c.Comment = comment
@@ -62,7 +65,10 @@ func (c *Composition) SetComment(comment string) error {
 // composition (Item-level). Indices outside 0..16 are written verbatim
 // (AE shows index 0 for unknown values). length-preserving (1 byte).
 func (c *Composition) SetLabel(index uint8) error {
-	if err := setItemLabel(c.itemIdtaChunk, index); err != nil {
+	if c.back == nil {
+		return fmt.Errorf("comp %q: no idta chunk reference", c.Name)
+	}
+	if err := setItemLabel(c.back.itemIdtaChunk, index); err != nil {
 		return fmt.Errorf("comp %q: %w", c.Name, err)
 	}
 	c.Label = index

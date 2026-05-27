@@ -52,7 +52,7 @@ func (p *Project) syncCompositionShapeLayers(c *Composition) error {
 			return fmt.Errorf("layer %q (ID %d): %w", l.Name, l.ID, err)
 		}
 		// Overwrite the existing Layr LIST's children in place. The
-		// chunk pointer stays the same, so c.itemList.Children
+		// chunk pointer stays the same, so c.back.itemList.Children
 		// (and any other holder of the layrList pointer) remains
 		// consistent.
 		l.back.layrList.Children = fresh.Children

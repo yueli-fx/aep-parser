@@ -189,9 +189,12 @@ func parseItem(item *rifx.Chunk, proj *Project) error {
 		comp.proj = proj // wire back-pointer so Layer.SourceComposition() works
 		comp.Comment = comment
 		comp.Label = label
-		comp.itemCmtaChunk = cmta
-		comp.itemIdtaChunk = idta
-		comp.itemLayrParent = item
+		if comp.back == nil {
+			comp.back = &compositionBackrefs{}
+		}
+		comp.back.itemCmtaChunk = cmta
+		comp.back.itemIdtaChunk = idta
+		comp.back.itemLayrParent = item
 		proj.Compositions = append(proj.Compositions, comp)
 
 	case ItemTypeFootage:

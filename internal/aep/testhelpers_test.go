@@ -8,7 +8,12 @@ func (p *Project) NextItemIDForTest() uint32    { return p.nextItemID }
 func (p *Project) RootFoldForTest() *rifx.Chunk { return p.rootFold }
 
 // ItemListForTest 暴露 Composition.itemList 给 Phase 5+ golden tests 用。
-func (c *Composition) ItemListForTest() *rifx.Chunk { return c.itemList }
+func (c *Composition) ItemListForTest() *rifx.Chunk {
+	if c.back == nil {
+		return nil
+	}
+	return c.back.itemList
+}
 
 // RootForTest 暴露 Project.root 给 debug tests 用。
 func (p *Project) RootForTest() *rifx.Chunk { return p.root }

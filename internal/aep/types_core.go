@@ -378,39 +378,24 @@ type Composition struct {
 	// minimal; nil for comps built outside the parser.
 	proj *Project
 
-	// cdta is the underlying cdta chunk reference, captured by
-	// parseComposition. Used by SetBGColor / SetShutterAngle /
-	// SetMotionBlur* / SetWorkArea for length-preserving writes.
-	// Nil for comps built outside the parser; setters refuse.
-	cdta *rifx.Chunk
-
-	// nameChunk is the comp's Utf8 name chunk (length-variable Set name).
-	nameChunk *rifx.Chunk
-
-	// V2: cached owning Item LIST chunk; populated by parseComposition.
-	// Used by NewComposition (re-parse closed loop) + future structural
-	// mutations. derived cache, never owned (see Invariant #8).
-	itemList *rifx.Chunk
-
 	// Item-level metadata shared with Footage / Folder. Populated by
 	// parseItem from the surrounding Item LIST (cmta child + idta byte).
 	Comment string // Item.comment — AE's project-panel comment column
 	Label   uint8  // Item.label — project-panel color index 0..16 (idta @0x3A)
 
-	// Underlying chunk refs for the comment / label writers.
-	itemCmtaChunk  *rifx.Chunk // cmta sibling under the Item LIST
-	itemIdtaChunk  *rifx.Chunk // idta sibling — Label byte at payload @0x3A
-	itemLayrParent *rifx.Chunk // Item LIST itself — needed for cmta insertion when missing
+	// back holds the underlying RIFX chunk refs that power length-preserving
+	// writes. Nil for comps built outside the parser. See back_composition.go.
+	back *compositionBackrefs
 }
 
 // CdtaRawBytes returns the comp's cdta chunk Data slice, or nil if the
 // comp has no cdta. Read-only access for debugging / RE tools — the
 // underlying byte slice is the live chunk data; do not mutate.
 func (c *Composition) CdtaRawBytes() []byte {
-	if c.cdta == nil {
+	if c.back == nil || c.back.cdta == nil {
 		return nil
 	}
-	return c.cdta.Data
+	return c.back.cdta.Data
 }
 
 // LayerByID returns the first layer in this composition whose ID matches

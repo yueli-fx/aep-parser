@@ -21,7 +21,12 @@ import (
 // CompItemListForTest exposes a Composition's underlying Item LIST chunk
 // for tests that need to inspect Item-level structure (Layr placement +
 // Ewst siblings). Not part of public API.
-func CompItemListForTest(c *Composition) *rifx.Chunk { return c.itemList }
+func CompItemListForTest(c *Composition) *rifx.Chunk {
+	if c.back == nil {
+		return nil
+	}
+	return c.back.itemList
+}
 
 // templateServiceLayerTypes are the LIST formTypes AE writes after the user
 // Layr block — dummy template "service" layers carried through from the
@@ -111,7 +116,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	if c.proj == nil {
 		return nil, fmt.Errorf("internal: comp has no project back-ref")
 	}
-	if c.itemList == nil {
+	if c.back == nil || c.back.itemList == nil {
 		return nil, fmt.Errorf("internal: comp has no itemList chunk")
 	}
 
@@ -120,7 +125,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	//    iter 4 RE: template service layers DLay/SLay/CLay/SecL hold IDs 2..12
 	//    in the comp's itemList; user Layr ID must not collide, otherwise
 	//    AE treats the user Layr as deleted via the DLay ID match).
-	layerID := maxLayerIDInItemList(c.itemList) + 1
+	layerID := maxLayerIDInItemList(c.back.itemList) + 1
 	base := &Layer{
 		Type: LayerTypeShape,
 		Name: name,
@@ -140,13 +145,13 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	// iter 4 RE: tolerance.aep (which AE 2025 accepts as a real comp with
 	// real user layers) has this field = TickRate, our fresh comp has 600.
 	// Hypothesis: AE uses this as a "comp has user content" gate.
-	if c.cdta != nil && len(c.cdta.Data) >= cdtaSecondaryDivisor18+4 {
+	if c.back.cdta != nil && len(c.back.cdta.Data) >= cdtaSecondaryDivisor18+4 {
 		tr := uint32(c.TickRate)
 		if tr > 0 {
-			c.cdta.Data[cdtaSecondaryDivisor18+0] = byte(tr >> 24)
-			c.cdta.Data[cdtaSecondaryDivisor18+1] = byte(tr >> 16)
-			c.cdta.Data[cdtaSecondaryDivisor18+2] = byte(tr >> 8)
-			c.cdta.Data[cdtaSecondaryDivisor18+3] = byte(tr)
+			c.back.cdta.Data[cdtaSecondaryDivisor18+0] = byte(tr >> 24)
+			c.back.cdta.Data[cdtaSecondaryDivisor18+1] = byte(tr >> 16)
+			c.back.cdta.Data[cdtaSecondaryDivisor18+2] = byte(tr >> 8)
+			c.back.cdta.Data[cdtaSecondaryDivisor18+3] = byte(tr)
 		}
 	}
 	s := WrapShapeLayer(base)
@@ -165,7 +170,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 
 	// 3. Snapshot pre-mutation state (Inv-10 atomicity). For itemList we
 	//    save a slice copy (since the insert is mid-slice now, not append-end).
-	oldItemChildren := append([]*rifx.Chunk(nil), c.itemList.Children...)
+	oldItemChildren := append([]*rifx.Chunk(nil), c.back.itemList.Children...)
 	oldLayersLen := len(c.Layers)
 	oldWarningsLen := len(c.proj.Warnings)
 
@@ -184,19 +189,19 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	base.back.layrList = layrChunk
 	base.shapeDirty = true // gate for syncShapeLayerChunks
 	ewstSibling := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDEwst}
-	insertIdx := insertLayrPosition(c.itemList.Children)
+	insertIdx := insertLayrPosition(c.back.itemList.Children)
 	// Grow slice by 2 (Layr + Ewst) and shift any existing tail two slots.
-	c.itemList.Children = append(c.itemList.Children, nil, nil)
-	copy(c.itemList.Children[insertIdx+2:], c.itemList.Children[insertIdx:len(c.itemList.Children)-2])
-	c.itemList.Children[insertIdx] = layrChunk
-	c.itemList.Children[insertIdx+1] = ewstSibling
+	c.back.itemList.Children = append(c.back.itemList.Children, nil, nil)
+	copy(c.back.itemList.Children[insertIdx+2:], c.back.itemList.Children[insertIdx:len(c.back.itemList.Children)-2])
+	c.back.itemList.Children[insertIdx] = layrChunk
+	c.back.itemList.Children[insertIdx+1] = ewstSibling
 	c.Layers = append(c.Layers, base)
 
 	// 5. Warnings-as-failure (Inv-11): if any warnings appeared, rollback.
 	// Phase 3 doesn't re-parse, so this is a defensive guard for Phase 4 to
 	// rely on (re-parse closed loop arrives there).
 	if len(c.proj.Warnings) != oldWarningsLen {
-		c.itemList.Children = oldItemChildren
+		c.back.itemList.Children = oldItemChildren
 		c.Layers = c.Layers[:oldLayersLen]
 		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
 		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
