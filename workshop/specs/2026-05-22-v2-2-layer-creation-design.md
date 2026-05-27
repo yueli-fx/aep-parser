@@ -1670,7 +1670,7 @@ Phase 6  Docs sync + ship gate
 - V2.1 实践基础: `workshop/scars/ae25-acceptance-gate.md`
 - V2.1 plan: `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md`
 - V3 direction: `workshop/specs/v3-direction.md`
-- 当前架构: `workshop/specs/architecture.md`
+- 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束
 - 项目 board: `workshop/board.md`
 - **iter-7/8 ship 完整实施 + 教训**: `workshop/scars/v2-2-aelayer-structure.md` (Phase 5 ship gate 全过程 — iter-1 to iter-8)
 

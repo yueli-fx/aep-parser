@@ -1,7 +1,7 @@
 ---
-when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file
-applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes]
-last_updated: 2026-05-26
+when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file; looking up "which AE version introduced field X"; invoking ae_run.ps1 wrapper for unattended ship-gate
+applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch]
+last_updated: 2026-05-27
 ---
 
 # JSX RE 工作流 + ship-gate
@@ -9,6 +9,20 @@ last_updated: 2026-05-26
 ## 总览
 
 写 fixture 用 ExtendScript（JSX）→ 让 AE 跑一次 → 拿到 `.aep` → Go 端 parse_btdk diff 找字段。Ship-gate 反过来：Go 写改过的 `.aep` → AE 打开 → 读出值跟 Go 写入比对。
+
+## RE fixture 双轨
+
+`test_data/` 下两类 fixture 文件名：
+
+- `re_*.jsx` — AE 2020 ScriptingAPI 写的 fixture。**默认走这个**，覆盖 AE 2020 共有字段
+- `re_*_ae24.jsx` — AE 24+ 才解封的字段（`fontCapsOption / strokeOverFill / autoHyphenate` 等），AE 2020 写不出来，必须 AE 24+ 跑
+
+Test 代码 `t.Skipf("fixture missing", ...)` 缺文件跳过，不阻塞 CI。
+
+## 参考资料常驻仓内
+
+- `after-effects-scripting-guide/` — docsforadobe ScriptingAPI 镜像
+- `Types-for-Adobe/AfterEffects/{8.0..26.0}/` — **判断"某字段在哪个 AE 版本引入"看这里最准**。按 AE 版本目录的 TS 类型定义，diff 两个版本目录就能看新字段引入点
 
 ## 何时启用 ship-gate
 
@@ -28,10 +42,11 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 
 跨版本对比时切对应 AE。Wave 1-3 字段默认用 AE 2025（24+ ScriptingAPI 解封）。
 
-**版本匹配规则（避免 conversion prompt）**：
+**版本匹配规则（建议，非强制）**：
 - 用 **fixture 源版本** 的 AE 打开 (检查方式: `Application.Version()` 读 head 解出 e.g. `17.7x45` = AE 17.7 = AE 2020)
-- 例：`re_cameralight.aep` 是 AE 2020 写的 → 用 AE 2020 跑 ship-gate / RE，**不要用 AE 2025**（触发 17.1→25 转换提示，可能弹 GUI 阻塞 unattended run）
-- 跨版本测必须时，用 AE 高版本测低版本文件（向后兼容更稳）；反向高版本→低版本经常崩
+- 例：`re_cameralight.aep` 是 AE 2020 写的 → 优先用 AE 2020 跑（避无意义 convert 流程）
+- 反向（高版本 fixture → 低版本 AE）经常崩，仍**避免**
+- 跨版本测：`scripts/ae_run.ps1` wrapper 自动消化 convert 对话框，不再被 GUI 阻塞 unattended run（详 § GDI 自动化）
 
 ## AE 打开 .aep 的 3 种失败模式
 
@@ -40,7 +55,7 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 | 模式 | 信号 | 处理 |
 |---|---|---|
 | **1. 完全崩溃** | `tasklist`/Get-Process 看不到 AfterFX.exe；没有 `.done`；exit code 非 0 | builder 写的字段触发 AE 内部 sanity-check fail (e.g. cdta timing 空)。看 `scars/ae25-acceptance-gate.md` Stage 1 / 4 类 |
-| **2. 打开但需转换** | GUI 弹 "Convert?" 对话框 → JSX 跑不到 `app.open` 返回，要么 catch 到 error，要么 hang。`.done` 含 ERR 信息（或根本写不出） | 版本不匹配。换匹配版本 AE 跑，或后期上 GDI 自动化点 "确定" |
+| **2. 打开但需转换** | GUI 弹 "Convert?" 对话框 → JSX 跑不到 `app.open` 返回，要么 catch 到 error，要么 hang。`.done` 含 ERR 信息（或根本写不出） | 用 `scripts/ae_run.ps1` wrapper 自动消化 convert 对话框；裸 `AfterFX -r` 仍需版本匹配 |
 | **3. 打开但报数据损坏** | JSX 跑通；`app.open(...)` 在 try/catch 里 throw "After Effects 错误: 文件数据丢失" 类错误字符串 | builder chunk 写法 / 位置 / 大小破坏 AE 检查。这是最常见且最有 RE 价值的 — bisect 隔离哪个 setter 触发 |
 
 诊断流程（按这个 order）：
@@ -50,22 +65,48 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 
 **不要直接归 mode 3** 去 RE 字节，先排除 mode 1 / 2。
 
-## GDI / 屏幕截图自动化 (planned, 未实现)
+## GDI 自动化 — `scripts/ae_run.ps1`
 
-目前 ship-gate 还遇 GUI 拦截需要 fall back 到匹配版本绕开。**计划**：`scripts/ae_run.ps1` 包 AfterFX -r，用 PowerShell `[System.Drawing]::CopyFromScreen` 截图 + `[System.Windows.Forms.SendKeys]` 模拟键盘，自动点掉常见对话框 (convert / save changes / OK)。Claude 读截图认对话框文本 → 决定按哪个键。**目标**：unattended 跑任意 AE 版本，不被弹框阻塞。
+Ship-gate 用 `scripts/ae_run.ps1` 替代裸 `AfterFX -r`：OCR + multi-signal dispatch 自动消化 convert / save / data-loss modal。任意 AE 版本 × 任意 fixture 都能 unattended 跑。**Cross-version smoke PASS**：AE 2020 fixture 用 AE 2025 跑，convert 对话框被自动消化（2026-05-27 验证）。
 
-当前权宜：版本匹配 + .done timeout 失败时人工排查。
+**调用契约**：
+
+```powershell
+pwsh -NoProfile -File scripts/ae_run.ps1 `
+    -AeExe   $aeExe `
+    -Jsx     $jsxPath `
+    -Done    $doneFile `
+    -TimeoutSec 180
+```
+
+退出码：
+- `0` — `.done` 出现且 stable，按 PASS contract 走
+- `1` — timeout
+- `2` — 未知 modal（OCR 命中但没规则）
+- `3` — OCR engine init 失败
+- `4` — AE 进程启动失败
+
+失败时 dump 落 `<doneFile>.fail/`：`screenshot.png` / `ocr.txt` / `windows.txt` / `actions.log` / `meta.json`。
+
+**Go 端 ship-gate**用 `runAeRunShipGate(t, aeExe, jsxPath, doneFile, timeoutSec)` helper (`internal/aep/ship_gate_helpers_test.go`)，不要再直接 `exec.Command(aeExe, "-r", ...)`。
+
+**新对话框出现的流程**：
+1. ship-gate FAIL, exit code 2
+2. 看 `<doneFile>.fail/screenshot.png` + `ocr.txt`
+3. 加规则到 `scripts/ae_dialog_rules.json`（substring 进 `ocrMatch`，或抄稳定 `windowTitle` / `windowClass`）
+4. `Parse-Rules` 跑通 → re-run ship-gate
 
 ## 工作流
 
 ```
 1. 写 test_data/re_<feature>.jsx
-2. 让用户开 AE
-3. AfterFX.exe -r path.jsx 执行（不需要交互）
-4. JSX 末尾写 .done marker 标记完成
-5. Go 端读 .aep → parse_btdk dump → 看新字段在哪
-6. 写 test_data/re_<feature>_*_test.go 用 fixture 测试
+2. pwsh -File scripts/ae_run.ps1 -AeExe ... -Jsx ... -Done ...  (unattended)
+3. JSX 末尾写 .done marker 标记完成
+4. Go 端读 .aep → parse_btdk dump → 看新字段在哪
+5. 写 test_data/re_<feature>_*_test.go 用 fixture 测试
 ```
+
+裸 `AfterFX -r` 仍可手动用做 quick RE，但 ship-gate / 自动化场景一律走 wrapper。
 
 ## JSX 模板（关键防陷阱）
 

@@ -231,5 +231,5 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 
 - 反馈源: `workshop/feedback/gpt`
 - V2.1 实践: `workshop/scars/ae25-acceptance-gate.md`
-- 当前架构: `workshop/specs/architecture.md`
+- 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束（架构 ground truth 已并入 CLAUDE.md，原 architecture.md 内容拆分到 scars/ + playbooks/ + coverage.md）
 - V2.1 plan: `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md`

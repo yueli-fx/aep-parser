@@ -27,3 +27,8 @@ tmp/
 
 
 .claude
+
+test_data/
+tmp_debug/
+
+workshop/reference

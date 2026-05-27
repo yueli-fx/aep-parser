@@ -1,7 +1,7 @@
 ---
-when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against board.md
-applies_to: [verify, test, vet, pass-count, pre-commit, ship-gate]
-last_updated: 2026-05-25
+when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against board.md; writing a new test (conventions for fixture / corruption / AE 24 fields)
+applies_to: [verify, test, vet, pass-count, pre-commit, ship-gate, test-conventions, fixture, t-skipf]
+last_updated: 2026-05-27
 ---
 
 # 验证流程
@@ -73,3 +73,13 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 - `split_write.go` — 按 func name + append 模式拆 `write.go`（Phase 3）
 
 教训：纯机械批量移动写脚本（比手动 ~10× 省 token）。import 检测 regex 用 `\bpkg\.\w` 避免注释里 "ldat bytes. Used" 误中。
+
+## 测试惯例
+
+- **合成 RIFX fixture 优于真实文件**。`rifxBuilder` + `build*` helpers 让 corruption 类测试 reproducible。新增解析路径时优先合成 fixture。
+- **真实文件走 `TestManualFile`**：`go test -aep "C:/path/to/your.aep"`，dump 整个 Project 结构供肉眼核对。不入 CI baseline。
+- **每个解析改动都应该有对应 fixture 测试 + roundtrip 测试**。`TestKeyframeRoundtrip` 是好模板。
+- **警告路径用 `buildCorruptKeyframedLeaf` 注入异常 lhd3**。不要改 `leafKeyframed` 的健康 helper，**分开 corruption 与正常 case**。
+- **AE 24 字段 fixture 走 `re_*_ae24.jsx`**。详 `re-fixture.md` § RE fixture 双轨。
+- **`*_test.go` 全部 `package aep_test`**（公开测试，强制走 exported API）。
+- 新加 fixture 用 `t.Skipf` 缺文件跳过，不阻塞 CI。

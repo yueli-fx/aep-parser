@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	aep "github.com/example/aep-parser/internal/aep"
 )
@@ -271,26 +269,11 @@ func runAEShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	defer os.Remove(argsPath)
 	os.Remove(doneFile) // 防上轮残留
 
-	// 3. AfterFX -r
+	// 3. ae_run.ps1 (drop-in for AfterFX -r — handles convert / save-changes / data-loss modals)
 	jsxPath := `E:/projects/tools/aep-parser/test_data/verify_v2_1.jsx`
-	cmd := exec.Command(aeExe, "-r", jsxPath)
-	if err := cmd.Start(); err != nil {
-		t.Fatalf("start AE: %v", err)
-	}
+	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
 
-	// 4. wait for .done (90s timeout — AE cold start may take ~60s)
-	deadline := time.Now().Add(90 * time.Second)
-	for {
-		if _, err := os.Stat(doneFile); err == nil {
-			break
-		}
-		if time.Now().After(deadline) {
-			t.Fatalf("timeout waiting for %s (90s)", doneFile)
-		}
-		time.Sleep(2 * time.Second)
-	}
-
-	// 5. read + assert PASS
+	// 4. read + assert PASS (.done guaranteed to exist after ps1 exit 0)
 	content, err := os.ReadFile(doneFile)
 	if err != nil {
 		t.Fatal(err)

@@ -339,7 +339,7 @@ P1 子项 ~50+ API，其中：
 ## 6. 相关文档
 
 - 参照源: [`workshop/reference/py-aep/`](../reference/py-aep)
-- 当前架构: [`architecture.md`](architecture.md)
+- 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束
 - 覆盖矩阵: [`../plans/coverage.md`](../plans/coverage.md) / [`../plans/coverage-detail.md`](../plans/coverage-detail.md)
 - V2.2 ShapeLayer alpha: [`2026-05-22-v2-2-layer-creation-design.md`](2026-05-22-v2-2-layer-creation-design.md)
 - V3 方向: [`2026-05-22-v3-direction.md`](2026-05-22-v3-direction.md)
