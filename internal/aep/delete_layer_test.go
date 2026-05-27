@@ -263,6 +263,60 @@ func TestDeleteLayer_ResetsTrackMatteID_AE25(t *testing.T) {
 	}
 }
 
+// Structural equivalence: Go-side Open(baseline) → DeleteLayer(1) ≈
+// AE-saved middle fixture. Both should have the same itemList.Children
+// shape (same chunk IDs / FormTypes in the same order). Byte-identical
+// comparison is impossible due to AE timestamp/UUID variance, but
+// chunk shape is the deterministic surface that affects parsing.
+func TestDeleteLayer_StructuralEquivalence_Middle(t *testing.T) {
+	projBaseline := openDeleteLayerFixture(t, "baseline")
+	if projBaseline == nil {
+		return
+	}
+	projMiddle := openDeleteLayerFixture(t, "middle")
+	if projMiddle == nil {
+		return
+	}
+
+	cb := projBaseline.Compositions[0]
+	if err := cb.DeleteLayer(1); err != nil {
+		t.Fatalf("DeleteLayer(1): %v", err)
+	}
+
+	cm := projMiddle.Compositions[0]
+
+	if len(cb.Layers) != len(cm.Layers) {
+		t.Errorf("layer count: Go=%d, AE-middle=%d", len(cb.Layers), len(cm.Layers))
+	}
+	for i := range cb.Layers {
+		if i >= len(cm.Layers) {
+			break
+		}
+		if cb.Layers[i].ID != cm.Layers[i].ID {
+			t.Errorf("layer[%d].ID: Go=%d, AE-middle=%d", i, cb.Layers[i].ID, cm.Layers[i].ID)
+		}
+	}
+
+	goChildren := cb.ItemListForTest().Children
+	aeChildren := cm.ItemListForTest().Children
+
+	if len(goChildren) != len(aeChildren) {
+		t.Fatalf("itemList children count: Go=%d, AE-middle=%d", len(goChildren), len(aeChildren))
+	}
+	for i, ae := range aeChildren {
+		goCh := goChildren[i]
+		if goCh.ID != ae.ID {
+			t.Errorf("children[%d] ID: Go=%q, AE-middle=%q", i, string(goCh.ID[:]), string(ae.ID[:]))
+		}
+		if goCh.IsList() != ae.IsList() {
+			t.Errorf("children[%d] IsList: Go=%v, AE-middle=%v", i, goCh.IsList(), ae.IsList())
+		}
+		if goCh.IsList() && goCh.FormType != ae.FormType {
+			t.Errorf("children[%d] FormType: Go=%q, AE-middle=%q", i, string(goCh.FormType[:]), string(ae.FormType[:]))
+		}
+	}
+}
+
 func TestDeleteLayer_RoundTrip(t *testing.T) {
 	proj := openDeleteLayerFixture(t, "baseline")
 	if proj == nil {

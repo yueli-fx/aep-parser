@@ -35,8 +35,9 @@ import (
 // Project.Warnings; on any new parser warning surfaced during the
 // call, roll all of them back and return the warnings as an error.
 //
-// Alpha-stable until AE 2020 + AE 2025 ship-gate green (CLAUDE.md
-// hard constraints #2 + #6). Future RE can lift the non-AV refuse
+// Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS across baseline /
+// middle / parent / matte modes, 2026-05-28; see scars/ae-deletelayer-re.md
+// and verify_ge_delete_layer.jsx). Future RE can lift the non-AV refuse
 // and the single-layer-comp refuse — both are conservative defaults
 // because AE's behavior for those scenarios hasn't been verified.
 func (c *Composition) DeleteLayer(index int) error {

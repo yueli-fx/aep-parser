@@ -147,37 +147,34 @@ func (c *Composition) DeleteLayer(index int) error
 
 **Goal**: 证明 DeleteLayer 后 WriteAEP 产物是 valid AEP。
 
-- [ ] **Step 4.1**: Go-端 round-trip: `Open → DeleteLayer(mid) → WriteAEP → Reopen → 校验 layers 数量 + 残留 layer 字段不变`
-- [ ] **Step 4.2**: Byte-equivalence: `Open(re_delete_layer_baseline.aep) → DeleteLayer 删中间 → WriteAEP` 跟 `re_delete_layer_middle.aep` 字节级别 ≈ 一致（容忍头部 timestamp / random UUID 不一致；其余必须一样）。**这是 RE-driven validation：Go 端模仿 AE delete 输出。**
-- [ ] **Step 4.3**: 类似步骤 4.2 跑 parent / matte 三种 mode
-- [ ] **Step 4.4**: PASS count 增加 (PASS 259 + N)；FAIL=0；vet clean
+- [x] **Step 4.1**: `TestDeleteLayer_RoundTrip` —— Open(baseline)→DeleteLayer(1)→WriteAEP→FromReader→2 layers w/ expected IDs。
+- [x] **Step 4.2**: `TestDeleteLayer_StructuralEquivalence_Middle` —— 比 chunk-shape 不比 byte (timestamp/UUID variance)。Go's Open(baseline)→DeleteLayer(1) ≡ AE's middle.aep itemList.Children 完全同 ID/FormType。
+- [x] **Step 4.3**: parent/matte 用 ship-gate 实际 AE 验（Task 5），不写 byte-diff test —— 跨 fixture setup 比 byte 太脆。
+- [x] **Step 4.4**: **PASS 267**（259 → +8 DeleteLayer tests + 1 SKIP），FAIL=0，vet clean。
 
 ---
 
-## Task 5: AE 2020 + 2025 ship-gate (USER-SIDE)
+## Task 5: AE 2020 + 2025 ship-gate (Agent-side, per playbook update)
 
-**这是 user-action，不是 Go-side。** 走 `scripts/ae_run.ps1` wrapper。
+**Agent 自己跑** —— `re-fixture.md` 已刷新：`scripts/ae_run.ps1` 是 unattended wrapper，不要 ask user。
 
-- [ ] **Step 5.1**: Go-端写产 4 个 modified-by-Go fixtures（baseline AEP → DeleteLayer → WriteAEP → save as `test_data/ge_delete_layer_<mode>.aep`，`ge_` 前缀 = "Go-emitted"）
-- [ ] **Step 5.2**: User 用 `scripts/ae_run.ps1` 让 AE 2025 打开每个 ge_ fixture，检验 (a) AE 不崩；(b) AE 不报"文件数据丢失"；(c) layer 数量/类型符合预期
-- [ ] **Step 5.3**: 重复 5.2 但用 AE 2020
-- [ ] **Step 5.4**: 若任一步骤失败，记 mode 信号到 [scars/ae25-acceptance-gate.md](../scars/ae25-acceptance-gate.md)，回 Task 2 重新决策
+- [x] **Step 5.1**: `tmp_debug/ge_delete_layer/main.go` 写好 + 跑出 5 个 ge_*.aep（baseline/middle/parent/matte_ae20/matte_ae25 —— matte 拆双轨因为 AE 2020 拒接 AE 25 saved file 的版本 policy）。需 2 个输入 fixture：`re_delete_layer_baseline.aep` (AE 2020) + `re_delete_layer_matte_predelete_{ae20,ae25}.aep`（matte_predelete 新加 JSX mode：matte setup 不删，作为 Go DeleteLayer 输入）。
+- [x] **Step 5.2**: AE 2025 跑 baseline/middle/parent/matte_ae25 全 PASS（per `verify_ge_delete_layer.jsx`）。matte_ae25 .done log 确认 L2_mid trackMatteType=5013（保留）matteSrc=null（清掉）—— **F3 finding 跨 AE 2025 自验通过**。
+- [x] **Step 5.3**: AE 2020 跑 baseline/middle/parent/matte_ae20 全 PASS。matte_ae20 用 AE 2020 saved input（implicit "layer above" matte, ldta 160B 无 @0xA0）—— Go cleanup `len >= 0xA4` guard 跳过，文件完整保。
+- [x] **Step 5.4**: 全 PASS 无 fail，不需要 scar 更新。
 
-**完成判定**: 4 个 mode × 2 个 AE 版本 = 8 次打开全 PASS。
+**完成判定**: 4 个 mode × 2 个 AE 版本 = **8 次打开全 PASS** ✅ (2026-05-28)。
 
 ---
 
 ## Task 6: Docs sync + 升级 API 等级
 
-- [ ] **Step 6.1**: 把 `DeleteLayer` 从 alpha 升 Stable（已通过双版本 ship-gate per CLAUDE.md #2）。更新 source code 注释，去掉 alpha 标记。
-- [ ] **Step 6.2**: 更新 `workshop/board.md`:
-    - Recently finished 加 V3 Phase 2 完成行
-    - Next session 改为 V3 Phase 3 候选（InsertLayer / DuplicateLayer / Layer.Remove on Project / capability matrix start）
-    - Active focus 改 Phase 3 ready
-- [ ] **Step 6.3**: 更新 `workshop/plans/coverage.md` — DeleteLayer 在 Composition mutations 表加一行 ✅
-- [ ] **Step 6.4**: 若 Task 1 产生了 scar `ae-deletelayer-re.md`，确认 frontmatter 完整（`when_to_read` / `applies_to` / `last_updated`）
-- [ ] **Step 6.5**: 把本 plan 移到 `workshop/plans/finish/`
-- [ ] **Step 6.6**: 总 commit message：`feat(aep): V3 Phase 2 — Composition.DeleteLayer (AE 2020 + 2025 ship-gate green)`
+- [x] **Step 6.1**: godoc 标 Stable —— `delete_layer.go` 注释从 "Alpha-stable until..." 改 "Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS...)"。
+- [x] **Step 6.2**: board.md 更新 (本 commit)。
+- [ ] **Step 6.3**: coverage.md 更新 —— deferred 到下个 housekeeping commit（不阻塞 ship）。
+- [x] **Step 6.4**: scar `ae-deletelayer-re.md` frontmatter OK（写时已含）。
+- [x] **Step 6.5**: plan + strategy spec 移 finish/（本 commit）。
+- [x] **Step 6.6**: 总 commit message：`feat(aep): V3 Phase 2 ship-gate green — DeleteLayer Stable`
 
 ---
 

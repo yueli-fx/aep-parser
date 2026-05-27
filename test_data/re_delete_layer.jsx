@@ -35,7 +35,11 @@
 (function () {
     var mode = $.getenv("RE_DELETE_MODE");
     if (mode === null || mode === "") mode = "baseline";
-    var validModes = "baseline|middle|parent|matte";
+    // matte_predelete = matte setup WITHOUT the delete — used as the
+    // AE 23+ input fixture for Go's ge_delete_layer_matte ship-gate
+    // (AE 2025 writes the explicit TrackMatteLayerID @0xA0 we need to
+    // exercise the orphan-cleanup branch on a Go-emitted file).
+    var validModes = "baseline|middle|parent|matte|matte_predelete";
     if (validModes.indexOf(mode) === -1) {
         var errFile = new File("e:/projects/tools/aep-parser/test_data/re_delete_layer_unknown.done");
         errFile.open("w");
@@ -84,7 +88,7 @@
     step("setup_refs_for_mode", function () {
         if (mode === "parent") {
             l3.parent = l2;
-        } else if (mode === "matte") {
+        } else if (mode === "matte" || mode === "matte_predelete") {
             l2.trackMatteType = TrackMatteType.ALPHA;
         }
     });
@@ -106,8 +110,8 @@
     });
 
     step("perform_delete", function () {
-        if (mode === "baseline") {
-            // no-op — baseline saves pre-delete state as ground truth
+        if (mode === "baseline" || mode === "matte_predelete") {
+            // no-op — saves pre-delete state as input fixture
         } else if (mode === "middle") {
             l2.remove();
         } else if (mode === "parent") {
