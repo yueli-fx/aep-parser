@@ -251,3 +251,115 @@ func (p *Property) PropertyDepth() int {
 	}
 	return p.parentTreeGroup.Depth()
 }
+
+// Enabled reports whether the property is enabled (UI toggle next to
+// the property name in AE's timeline). Read from tdsb byte 3 bit 0;
+// defaults to true when the tdsb chunk is absent — matches py-aep's
+// `TdsbChunk._enable_flags` default of 1.
+func (p *Property) Enabled() bool {
+	if p.tdsb == nil || len(p.tdsb.Data) < 4 {
+		return true
+	}
+	return p.tdsb.Data[3]&0x01 != 0
+}
+
+// Active is an alias for Enabled — mirrors py-aep's `property.active`
+// which returns `self.enabled`. Kept as a separate accessor for parity
+// even though it's a thin wrapper.
+func (p *Property) Active() bool { return p.Enabled() }
+
+// IsModified reports whether the property has been changed from its
+// default state. A property is considered modified when it has keyframes,
+// has an expression (regardless of enabled state), or its StaticValue
+// differs from DefaultValue. Mirrors py-aep's `Property.is_modified`
+// minus the always-modified special-cases (Source Text, mask-index,
+// effect-NoValue) which depend on parser context we don't yet track.
+func (p *Property) IsModified() bool {
+	if p.IsAnimated() {
+		return true
+	}
+	if p.Expression != "" {
+		return true
+	}
+	if p.DefaultValue == nil {
+		return false
+	}
+	return !valuesEqualForModified(p.StaticValue, p.DefaultValue)
+}
+
+// valuesEqualForModified compares two property value slots (any). Equal
+// when both nil, or both same kind and value(s) match. []float64 are
+// compared element-wise with a small epsilon to absorb float64↔float32
+// round-trip noise from tdum/tduM color decoding.
+func valuesEqualForModified(a, b any) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	switch av := a.(type) {
+	case float64:
+		bv, ok := b.(float64)
+		if !ok {
+			return false
+		}
+		return math.Abs(av-bv) < 1e-6
+	case []float64:
+		bv, ok := b.([]float64)
+		if !ok || len(av) != len(bv) {
+			return false
+		}
+		for i := range av {
+			if math.Abs(av[i]-bv[i]) > 1e-6 {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// Elided reports whether the property is hidden from the AE UI. py-aep
+// sets this for parser-synthesized placeholder groups; we don't
+// synthesize anything yet, so this always returns false. Reserved for
+// future implementations that materialize missing slots.
+func (p *Property) Elided() bool { return false }
+
+// IsNameSet reports whether the property has an explicit display name
+// set (different from its match-name). Currently a thin proxy:
+// `Name != "" && Name != MatchName`. py-aep checks the underlying tdsn
+// Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name
+// (always defaults to MatchName), so this returns false for parsed
+// properties until tdsn decode lands.
+func (p *Property) IsNameSet() bool {
+	return p.Name != "" && p.Name != p.MatchName
+}
+
+// IsModified reports whether any child of this group has been modified.
+// For indexed groups (Effects Parade, Mask Parade), the group is
+// considered modified when it has any children. Mirrors py-aep's
+// `PropertyGroup.is_modified`.
+func (g *AEPropertyGroup) IsModified() bool {
+	if g == nil {
+		return false
+	}
+	// Indexed groups: presence of children = modification.
+	switch g.MatchName {
+	case MatchNameGroupEffectParade, MatchNameGroupMaskParade, MatchNameGroupShapeContents:
+		return len(g.Children) > 0
+	}
+	for _, c := range g.Children {
+		switch v := c.(type) {
+		case *Property:
+			if v.IsModified() {
+				return true
+			}
+		case *AEPropertyGroup:
+			if v.IsModified() {
+				return true
+			}
+		}
+	}
+	return false
+}

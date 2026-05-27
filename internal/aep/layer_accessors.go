@@ -871,6 +871,59 @@ func (l *Layer) SetLightShadowDiffusion(v float64) error {
 	return setScalarProperty(l.LightShadowDiffusion(), l.Name, "Light Shadow Diffusion", v)
 }
 
+// AVSource resolves this layer's source to an AVItem (Composition or
+// Footage), or nil when SourceID is 0 or the layer was built outside
+// the parser. Mirrors py-aep's `Layer.source`.
+func (l *Layer) AVSource() AVItem {
+	if l.SourceID == 0 || l.comp == nil || l.comp.proj == nil {
+		return nil
+	}
+	return l.comp.proj.AVItemByID(l.SourceID)
+}
+
+// CanSetCollapseTransformation reports whether AE will let the user
+// toggle CollapseTransform on this layer. Mirrors py-aep's
+// `AVLayer.can_set_collapse_transformation`:
+//
+//   - precomp source → true
+//   - solid footage source → true
+//   - otherwise (file footage, placeholder, no source, text/shape/null/camera/light) → false
+//
+// Conservative: returns false when the source can't be resolved (layer
+// built outside parser).
+func (l *Layer) CanSetCollapseTransformation() bool {
+	src := l.AVSource()
+	if src == nil {
+		return false
+	}
+	if _, isComp := src.(*Composition); isComp {
+		return true
+	}
+	if f, isFootage := src.(*Footage); isFootage {
+		return f.IsSolid
+	}
+	return false
+}
+
+// CanSetTimeRemapEnabled reports whether AE will let the user enable
+// time remapping on this layer. Mirrors py-aep's
+// `AVLayer.can_set_time_remap_enabled`: true when the source has a
+// non-zero duration. Still images, text layers, and shape sources don't
+// qualify.
+func (l *Layer) CanSetTimeRemapEnabled() bool {
+	src := l.AVSource()
+	if src == nil {
+		return false
+	}
+	if c, isComp := src.(*Composition); isComp {
+		return c.Duration > 0
+	}
+	if f, isFootage := src.(*Footage); isFootage {
+		return f.Duration > 0 && !f.IsStill
+	}
+	return false
+}
+
 // ReplaceSource replaces the layer's source with the given AV item
 // (Composition or Footage). This mirrors py-aep's Layer.ReplaceSource API.
 //

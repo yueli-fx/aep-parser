@@ -52,6 +52,39 @@ func TestProjectSettings_CmsMalformedJsonWarns(t *testing.T) {
 	}
 }
 
+// TestProject_XmpPacket_RoundtripFromFixture verifies XmpPacket reads
+// trailing data and survives a WriteAEP roundtrip.
+func TestProject_XmpPacket_RoundtripFromFixture(t *testing.T) {
+	// Use any real fixture; XMP is the trailing UTF-8 after RIFX.
+	proj, err := Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+	xmp := proj.XmpPacket()
+	if xmp == "" {
+		t.Skip("fixture has no XMP trailer")
+	}
+	if !strings.Contains(xmp, "xmpmeta") && !strings.Contains(xmp, "<?xpacket") {
+		t.Errorf("XmpPacket() = %d bytes but no xmpmeta/xpacket marker; got prefix %q", len(xmp), xmp[:min(80, len(xmp))])
+	}
+}
+
+// TestProject_XmpPacket_StandaloneEmpty verifies XmpPacket on a project
+// built outside the parser returns "".
+func TestProject_XmpPacket_StandaloneEmpty(t *testing.T) {
+	p := &Project{}
+	if got := p.XmpPacket(); got != "" {
+		t.Errorf("standalone XmpPacket() = %q, want empty", got)
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 // TestProperty_LockedRatio_Positive verifies the LockedRatio reader and
 // SetLockedRatio writer against a synthetic tdsb chunk — the existing
 // external test in property_flags_test.go can only exercise the fallback

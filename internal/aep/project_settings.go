@@ -30,6 +30,21 @@ import (
 // Revision (head[18..19] uint16 BE)
 // ──────────────────────────────────────────────
 
+// XmpPacket returns the project's XMP metadata packet (trailing UTF-8
+// XML after the RIFX root chunk). Returns "" when the file has no XMP
+// trailer or the project was built outside the parser.
+//
+// py-aep parity: matches `Project.xmp_packet` reader. Currently R only —
+// SetXmpPacket would require care to keep the AEP loader happy (AE may
+// validate XML structure). Round-tripping through WriteAEP preserves
+// the original bytes verbatim via Chunk.Trailing.
+func (p *Project) XmpPacket() string {
+	if p.root == nil || len(p.root.Trailing) == 0 {
+		return ""
+	}
+	return string(p.root.Trailing)
+}
+
 // Revision returns the project's file revision counter — incremented
 // by AE on each save. Read-only here since the head chunk also carries
 // the next-item-id counter that our writer manages independently.

@@ -76,7 +76,7 @@
 | `OcioConfigurationFile` (CMS) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2B |
 | `WorkingSpace` (CMS JSON `baseColorProfile.colorProfileName`) | ✅ R only | 🟢 R only | 🟢 R only | done | P2b 2B |
 | `DisplayColorSpace` (separate chunk) | ✅ R only | 🗑️ deferred | 🗑️ deferred | deferred | P2b 2B；separate chunk 位置未 RE，旧 stub 已删 |
-| `XmpPacket` | ✅ R/W (raw XML) | ❌ | 🟡 R only | P2 | XML mutation 风险高，初版 R only |
+| `XmpPacket` | ✅ R/W (raw XML) | 🟡 R only | 🟡 R only | done | P2c followup#2；trailing UTF-8 after RIFX，已通过 `root.Trailing` 透传 roundtrip。`Project.XmpPacket()` R only；W deferred（AE 可能校验 XML 结构） |
 | `EffectNames` (Pefl/pjef list) | ✅ R only | ✅ R only | ✅ R only | done | P1 1B |
 | `Compositions / Folders / Footages` filter | ✅ | ✅ | ✅ | done | P1 1B |
 | `RootFolder` | ✅ | ✅ | ✅ | done | P1 1B |
@@ -125,7 +125,7 @@
 | `LightSource` (light source layer ref, AE 24+) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2a Task 2 |
 | `FrameInPoint / FrameOutPoint / FrameStartTime / FrameTime` | ✅ | ✅ R/W | ✅ R/W | done | P1 1C |
 | `Index` (within comp, 0-based) | ✅ | 🟢 implicit | ✅ | P1 | accessor |
-| `LayerType` (string discriminator) | ✅ R only | 🟢 typed dispatch | ✅ | P1 | accessor returning class name |
+| `LayerType` (string discriminator) | ✅ R only | ✅ via `Layer.Type` enum | ✅ | done | P1; typed dispatch in `inferLayerType` |
 | `HasVideo / HasAudio / AudioActive / AudioActiveAtTime(t)` | ✅ | ✅ | ✅ | done | P1 1E |
 | `Active / ActiveAtTime(t)` | ✅ | 🗑️ | 🗑️ | done | N/A (AE runtime) |
 | `AdjustmentLayer / EnvironmentLayer / GuideLayer / ThreeDLayer / ThreeDPerChar` (typed) | ✅ | 🟢 ldta bit R/W | ✅ | P1 | rename to py-aep style helpers |
@@ -143,7 +143,7 @@
 | `CopyToComp(comp)` | ✅ | ❌ | ✅ | P3 | 结构性 |
 | `MoveAfter/MoveBefore/MoveToBeginning/MoveToEnd` | ✅ | ❌ | ✅ | P3 | 结构性 |
 | `SetParentWithJump(layer)` | ✅ | ❌ | ✅ | P3 | preserve world transform |
-| `CanSetCollapseTransformation / CanSetTimeRemapEnabled` | ✅ | ❌ | ✅ | P2 | capability query |
+| `CanSetCollapseTransformation / CanSetTimeRemapEnabled` | ✅ | ✅ R | ✅ | done | P2c followup#2；纯派生 capability query — `Layer.AVSource()` 解 source 后判 type/duration |
 | `TimeRemapEnabled / SetTimeRemap*` | ✅ | 🟢 R only | ✅ R/W | P2 | enable=structural |
 | `ThreeDModelLayer`（Cinema 4D / GLB） | ✅ | ✅ R only | ✅ R only | done | P2a Task 1 |
 
@@ -164,7 +164,7 @@
 | `Expression / ExpressionEnabled / CanSetExpression` | ✅ R/W | ✅ R/W | ✅ | done |
 | `PropertyControlType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
 | `PropertyValueType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
-| `IsModified / Active / Elided / IsName Set` | ✅ R | ❌ | ✅ R | P2 | |
+| `IsModified / Active / Elided / IsNameSet` | ✅ R | ✅ R | ✅ R | done | P2c followup#2；Property + AEPropertyGroup. Elided=false placeholder (no synthesis yet)；IsNameSet 用 `Name != MatchName` proxy（tdsn decode deferred） |
 | `PropertyIndex / PropertyDepth` | ✅ R | ✅ R | ✅ R | done | P2c followup; via parentTreeGroup |
 | `ParentProperty` (PropertyGroup back-ref) | ✅ R | ✅ R | ✅ R | done | P2c followup; ParentGroup() |
 | `Selected / SelectedKeys` | ✅ R | 🗑️ | 🗑️ | done | runtime-only |
@@ -187,7 +187,7 @@
 | `FootageMissing / HasAudio` | ✅ R | ✅ R | ✅ R | done | P1 1H |
 | `StartFrame / EndFrame` | ✅ R | ✅ R | ✅ R | done | P1 1H |
 | `AssetType` (placeholder/solid/file) | ✅ R | ✅ R | ✅ R | done | P1 1H |
-| `MainSource` (typed: FileSource / SolidSource / PlaceholderSource) | ✅ | ❌ | ✅ | P2 | 加 typed sources |
+| `MainSource` (typed: FileSource / SolidSource / PlaceholderSource) | ✅ | ✅ R | ✅ | done | P2c followup；`Footage.MainSource()` 返回 typed interface。SolidSource.Color 零值占位（sspc 颜色字段未 RE） |
 | `File` (FootageItem.file convenience) | ✅ R | ✅ R | ✅ | done | P1 1H |
 | `ReplaceWithPlaceholder / ReplaceWithSolid` | ✅ R/W | ❌ | ✅ R/W | P2 | 结构性 source 替换 |
 | `Proxy / UseProxy / ProxySource` | ❌ py-aep 没| ❌ | ❌ | — | py-aep 也没 |
@@ -232,7 +232,7 @@
 | API | py-aep | 我们 | 目标 | Phase |
 |---|---|---|---|---|
 | `Application` 顶层 (version / project / etc) | 🚧 | 🟢 `*Project` 等价 | ✅ | P1 | 加 `Application` 或 `App` wrapper |
-| `Application.Version` | ✅ R | ❌ | ✅ R | P1 | 从 head 解 |
+| `Application.Version` | ✅ R | ✅ R | ✅ R | done | P1 1I；`internal/aep/application.go::Application.Version()` 从 head 解 |
 | `Viewer / ViewOptions / View` | ✅ R only | ❌ | 🗑️ | — | UI state, runtime |
 | `ImportOptions` | ❌ py-aep 也没 | ❌ | ❌ | — |
 
