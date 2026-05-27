@@ -665,6 +665,33 @@ func (l *Layer) LightShadowDiffusion() *Property {
 	return l.PropertyByMatchName(MatchNameLightShadowDiffusion)
 }
 
+// LightSource returns the layer used as the environment-light source for
+// this Light layer (AE 24+). Returns nil for non-light layers, lights with
+// no source (sentinels 0 / 0xFFFFFFFF), or when the source ID doesn't
+// resolve to a layer in the owning composition.
+//
+// AE stores the source layer ID in ldta @0x28 (same slot as Layer.SourceID
+// for AV layers; the field is repurposed per Layer.Type). Only meaningful
+// when Type == LayerTypeLight and LightKind == LightKindAmbient (the
+// "Environment" light in AE 24+).
+//
+// Mirrors py-aep `LightLayer.light_source`.
+func (l *Layer) LightSource() *Layer {
+	if l.Type != LayerTypeLight || l.comp == nil {
+		return nil
+	}
+	sid := l.SourceID
+	if sid == 0 || sid == lightSourceUndefined {
+		return nil
+	}
+	return l.comp.LayerByID(sid)
+}
+
+// lightSourceUndefined is the ldta @0x28 sentinel AE writes for lights
+// with no environment source. py-aep transforms this to 0 on read /
+// 0xFFFFFFFF on write; we keep the raw value in Layer.SourceID.
+const lightSourceUndefined uint32 = 0xFFFFFFFF
+
 // ──────────────────────────────────────────────
 // Typed convenience setters (Camera + Light)
 // ──────────────────────────────────────────────

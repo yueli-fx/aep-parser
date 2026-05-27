@@ -65,6 +65,7 @@ const (
 	LayerTypeLight   LayerType = "light"      // 3D light
 	LayerTypeCamera  LayerType = "camera"     // 3D camera
 	LayerTypeAdjust  LayerType = "adjustment" // adjustment layer
+	LayerType3DModel LayerType = "3d-model"   // 3D Model layer (AE 24+, py-aep ThreeDModelLayer)
 	LayerTypeUnknown LayerType = "unknown"
 )
 

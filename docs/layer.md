@@ -74,6 +74,7 @@ Type LayerType
 | `"light"` | 灯光 |
 | `"camera"` | 摄像机 |
 | `"adjustment"` | 调整图层 |
+| `"3d-model"` | 3D Model 图层（AE 24+，py-aep `ThreeDModelLayer`）；用 [`IsThreeDModelLayer()`](#layeristhreedmodellayer) 做 typed 判别 |
 
 #### Type
 
@@ -275,6 +276,16 @@ IsShapeLayer bool
 ```
 
 `true` 当图层含 `"ADBE Root Vectors Group"` 属性树（= Shape Layer）。`Type` 也会被设为 `"shape"`。read-only。
+
+---
+
+### Layer.IsThreeDModelLayer
+
+```go
+func (l *Layer) IsThreeDModelLayer() bool
+```
+
+`true` 当 `Layer.Type == LayerType3DModel`（AE 24+，py-aep `ThreeDModelLayer`）。ldta byte `@0x83 == 0x05` 在 parse 时识别；见 [`inferLayerType`](../internal/aep/parse_layer.go)。read-only typed accessor。
 
 ---
 
@@ -1061,6 +1072,38 @@ spot.SetLightColor([]float64{200, 100, 50, 255})   // RGBA 0..255
 spot.SetLightIntensity(120)
 spot.SetLightCastsShadows(true)
 ```
+
+### Layer.LightSource / SetLightSource (AE 24+)
+
+```go
+func (l *Layer) LightSource() *Layer
+func (l *Layer) SetLightSource(target *Layer) error
+```
+
+AE 24+ Environment-type light 指向同 comp 里另一个 layer 作为环境光源。底层走 ldta `@0x28`（跟 AV layer `SourceID` 共用 slot，按 `Layer.Type` 重新解释）。length-preserving (4 字节)。
+
+读：`LightSource()` 仅在 `Layer.Type == LayerTypeLight` 才查；source_id 是 `0` 或 sentinel `0xFFFFFFFF` 返回 nil（py-aep 内部把 sentinel 转 0，我们保留原值给 `Layer.SourceID`）；ID 解析失败也返 nil。
+
+写：`SetLightSource(nil)` 写 sentinel `0xFFFFFFFF` 清除。验证规则镜像 py-aep `LightLayer.light_source.setter`：
+
+- 调用层必须 `Type == LayerTypeLight`
+- target 必须在同一 comp（`l.comp == target.comp`）
+- target 不能是 Light/Camera 自身
+- target 不能 3D（`Is3D == false`）
+- target 不能 == self
+
+任一不满足返回 error，字节不动。
+
+```go
+if light.Type == aep.LayerTypeLight && light.LightKind == aep.LightKindAmbient {
+    bg := comp.Layers[0] // 2D AV layer in same comp
+    if err := light.SetLightSource(bg); err != nil { /* validation */ }
+    fmt.Println(light.LightSource() == bg) // true
+    light.SetLightSource(nil) // 清除
+}
+```
+
+> AE 24.3 之前 `light_source` 字段不存在；旧版本 AE 打开 Set 过的工程会忽略该字段。
 
 ---
 

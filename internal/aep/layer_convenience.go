@@ -178,3 +178,10 @@ func (l *Layer) IsNameFromSource() bool {
 func (l *Layer) RemoveTrackMatte() error {
 	return l.ClearTrackMatteLayer()
 }
+
+// IsThreeDModelLayer reports whether the layer is a 3D Model layer
+// (AE 24+, py-aep `ThreeDModelLayer`). Identified by ldta byte 0x83 == 0x05
+// at parse time; see [inferLayerType].
+func (l *Layer) IsThreeDModelLayer() bool {
+	return l.Type == LayerType3DModel
+}

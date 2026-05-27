@@ -281,9 +281,9 @@ func findBlsiInOverrideTdgp(tdgp *rifx.Chunk) *rifx.Chunk {
 // inferLayerType picks a LayerType from the ldta byte at 0x83 (py-aep's
 // LayerType enum: 0=AV, 1=Light, 2=Camera, 3=Text, 4=Shape, 5=3DModel)
 // plus the parsed flag bits and SourceID. The 0x83 byte distinguishes
-// AE's built-in 3D layer kinds (Light/Camera); text/shape are also
-// detected via the property tree (findTextSource / hasShapeLayerRoot in
-// parseLayer), so this function focuses on the cases the property tree
+// AE's built-in 3D layer kinds (Light/Camera/3DModel); text/shape are
+// also detected via the property tree (findTextSource / hasShapeLayerRoot
+// in parseLayer), so this function focuses on the cases the property tree
 // can't tell us about.
 func inferLayerType(ldta []byte, l *Layer) LayerType {
 	if len(ldta) > 0x83 {
@@ -292,6 +292,8 @@ func inferLayerType(ldta []byte, l *Layer) LayerType {
 			return LayerTypeLight
 		case 0x02:
 			return LayerTypeCamera
+		case 0x05:
+			return LayerType3DModel
 		}
 	}
 	if l.IsAdjust {

@@ -30,6 +30,7 @@
 - **Composition filter views (py-aep parity P1 1A)**: `TextLayers / ShapeLayers / CameraLayers / LightLayers / NullLayers / AdjustmentLayers / ThreeDLayers / GuideLayers / SoloLayers / AVLayers / CompositionLayers / FootageLayers / FileLayers / SolidLayers / PlaceholderLayers` — 15 个 filter helper，无写
 - **Composition convenience (P1 1F)**: `NumLayers / HasAudio / TimeScale` — 3 个 helper（ActiveCamera + Markers field 早已 ship）
 - **Layer convenience (P1 1E)**: `ContainingComp / HasVideo / HasAudio / AudioActive / AudioActiveAtTime / ActiveAtTime / Width / Height / HasTrackMatte / IsTrackMatte / AutoName / IsNameFromSource / RemoveTrackMatte` — 13 个 helper (Index / Type 早已直接 field 暴露)
+- **ThreeDModelLayer R (P2a 2J)**: `LayerType3DModel` 枚举 + `Layer.IsThreeDModelLayer()` typed accessor；ldta byte `@0x83 == 0x05` (py-aep `LayerType.THREE_D_MODEL = 5`) 在 `inferLayerType` 派发。AE 24+ 3D Model layer 类型识别。read-only，无 fixture（synthetic byte-dispatch test）。
 - **Application wrapper (P1 1I)**: `Application{Project} / Parse / ParseReader / Application.Version()` — py-aep `parse()` 入口对齐；Version 从 head chunk 解 (e.g. "17.7x45" = AE 2020 build 45)
 - **Frame-time accessor (P1 1C)** — 用 owning comp 的 FrameRate 换算：
   - Layer: `InPoint() / OutPoint()` getters (filled gap of 既有 SetInPoint/SetOutPoint without R)；`FrameInPoint / FrameOutPoint / FrameStartTime` R/W (3 pair)
@@ -61,6 +62,7 @@
 - **AudioLevels**: `SetAudioLevels([L, R])`
 - **Camera 专属**: 13 typed accessor pair (`CameraZoom / DepthOfField / FocusDistance / Aperture / BlurLevel + Iris × 8`)，`SetCameraDepthOfField(bool)` 自动 0/1
 - **Light 专属**: 11 typed accessor pair (`LightColor / Intensity / ConeAngle / ConeFeather / FalloffType / FalloffStart / FalloffDistance / CastsShadows / ShadowDarkness / ShadowDiffusion`) + `LightKind` ldta `@0x88` R/W；`SetLightCastsShadows(bool)`
+- **LightSource R/W (P2a 2I, AE 24+)**: `Layer.LightSource() / SetLightSource(target *Layer)` — Environment-type light 指向同 comp 另一 layer 做光源；底层走 ldta `@0x28`（跟 AV `SourceID` 共用 slot，按 `Layer.Type` 重解释），sentinel `0xFFFFFFFF` = 无源。py-aep `LightLayer.light_source` parity，验证规则：caller 必须 Light / target 同 comp / target 不能 Light/Camera/3D/self。length-preserving，roundtrip + 6 validation test 全 PASS。
 - **Material Options 3D AV**: 17 typed accessor pair + `MaterialCastsShadowsMode` 三态 enum（Off/On/Only）
 - **Geometry Options 3D AV**: 3 typed accessor pair（PlaneCurvature / PlaneSubdivision / BevelDirection）
 
@@ -111,6 +113,8 @@
 | `AVLayer.environmentLayer` | 需 equirectangular 360° 视频素材 |
 | `TextDocument.ligature` | 默认字体 ligature=false 设值无 diff；需带 OT `liga` feature 的字体 fixture |
 | `maskFeatherFalloff` | JSX 设值后 mkif 字节零变化；疑似在 mask sub-property 树，需深挖 RE |
+| 4D 颜色 32bpc 范围 (0..1 vs 0..255) | 需 32bpc 项目 fixture 验证 |
+| mkif 残余字节 `@0x10 / @0x18 / @0x20-0x27` | 未 RE；roundtrip 走 `Mask.MkifRaw` 保留原字节，不假设 48 字节全已知 |
 
 ## ❌ 不可达（length-preserving 写约束之外 / AE 限制）
 

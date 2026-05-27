@@ -157,3 +157,24 @@ func TestLayerConvenience_StandaloneLayer(t *testing.T) {
 		t.Errorf("Width/Height = %d/%d, want 0/0 (no source/comp)", l.Width(), l.Height())
 	}
 }
+
+func TestLayer_IsThreeDModelLayer(t *testing.T) {
+	cases := []struct {
+		ltype aep.LayerType
+		want  bool
+	}{
+		{aep.LayerType3DModel, true},
+		{aep.LayerTypeAV, false},
+		{aep.LayerTypeLight, false},
+		{aep.LayerTypeCamera, false},
+		{aep.LayerTypeShape, false},
+		{aep.LayerTypeText, false},
+		{aep.LayerTypeNull, false},
+	}
+	for _, c := range cases {
+		l := &aep.Layer{Type: c.ltype}
+		if got := l.IsThreeDModelLayer(); got != c.want {
+			t.Errorf("Type=%q IsThreeDModelLayer() = %v, want %v", c.ltype, got, c.want)
+		}
+	}
+}

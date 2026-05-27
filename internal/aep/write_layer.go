@@ -685,6 +685,54 @@ func (l *Layer) SetLightKind(k LightKind) error {
 	return nil
 }
 
+// SetLightSource writes the environment-light source layer ID for a Light
+// layer (AE 24+). Stored in ldta @0x28 (same slot as AV SourceID; the
+// field is repurposed per Layer.Type). Pass nil to clear — writes sentinel
+// 0xFFFFFFFF. length-preserving (4 bytes).
+//
+// Validation (matches py-aep LightLayer.light_source.setter):
+//   - layer must be a Light layer (Type == LayerTypeLight)
+//   - target (if non-nil) must be in the same composition
+//   - target must not be Light or Camera
+//   - target must not be 3D (py-aep: 3D AV layers can't drive env lights)
+//   - target must not be self
+//
+// On error the bytes are not modified.
+func (l *Layer) SetLightSource(target *Layer) error {
+	if l.ldta == nil {
+		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
+	}
+	if l.Type != LayerTypeLight {
+		return fmt.Errorf("layer %q: SetLightSource only valid for Light layers (Type=%q)", l.Name, l.Type)
+	}
+	if len(l.ldta.Data) < 0x2C {
+		return fmt.Errorf("layer %q: ldta too short for LightSource write (len=%d)", l.Name, len(l.ldta.Data))
+	}
+	if target == nil {
+		binary.BigEndian.PutUint32(l.ldta.Data[0x28:0x2C], lightSourceUndefined)
+		l.SourceID = lightSourceUndefined
+		return nil
+	}
+	if target == l || (target.ID != 0 && target.ID == l.ID) {
+		return fmt.Errorf("layer %q: SetLightSource self-source not allowed", l.Name)
+	}
+	if target.ID == 0 {
+		return fmt.Errorf("layer %q: SetLightSource target has zero ID", l.Name)
+	}
+	if l.comp != nil && target.comp != nil && target.comp != l.comp {
+		return fmt.Errorf("layer %q: SetLightSource target must be in same composition", l.Name)
+	}
+	if target.Type == LayerTypeLight || target.Type == LayerTypeCamera {
+		return fmt.Errorf("layer %q: SetLightSource target cannot be Light/Camera (got %q)", l.Name, target.Type)
+	}
+	if target.Is3D {
+		return fmt.Errorf("layer %q: SetLightSource target cannot be a 3D layer", l.Name)
+	}
+	binary.BigEndian.PutUint32(l.ldta.Data[0x28:0x2C], target.ID)
+	l.SourceID = target.ID
+	return nil
+}
+
 // SetAlternateSource overrides this layer's source via the Essential
 // Properties → Media Replacement slot (4-byte blsi write, length-
 // preserving). Pass nil (or a zero-id item) to clear the override —
