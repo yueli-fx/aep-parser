@@ -1,25 +1,34 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-28 by claude (V3 Phase 2 完 — DeleteLayer ship-gate 8/8 PASS, alpha → Stable)
-**Active focus**: V3 Phase 3 候选评估（InsertLayer / DuplicateLayer / Layer.Remove on Project / capability matrix start）—— Phase 2 跑通了 "RE → strategy spec → impl → ship-gate" 完整流程，可复用。
+**Last updated**: 2026-05-28 by claude (V3 Phase 3 起步 — DuplicateLayer plan 落，Task 1 RE 准备)
+**Active focus**: V3 Phase 3 —— `Composition.DuplicateLayer(idx) (*Layer, error)`，mirror Phase 2 工作流（RE → spec → impl → ship-gate）。Plan: `plans/2026-05-28-v3-phase3-duplicatelayer-plan.md`。
 
 ## Next session
 
-**V3 Phase 3 起步**：从下列候选选 1-2 个起 plan：
+**V3 Phase 3 Task 1 — DuplicateLayer RE**：
+1. 写 `test_data/re_duplicate_layer.jsx`（4 mode via `$.getenv("RE_DUP_MODE")` — solo/dup_parent/dup_child/dup_matted），mirror `re_delete_layer.jsx`
+2. Agent 自跑 ae_run.ps1 × 4 (AE 2020 17.7x45)
+3. `go run ./tmp_debug/dump_layers re_duplicate_layer_*.aep` 出 chunk diff
+4. 写 `scars/ae-duplicatelayer-re.md` 落 6-8 Findings 答 RE-Q1..Q7：
+   - Q1 新 layer 落位（top/below source/bottom？）
+   - Q2 ID 分配（head counter +1？）
+   - Q3 14 follower chunks verbatim clone？
+   - Q4 children 的 ParentID 跟新 dup 走还是仍指 source？
+   - Q5 source.parent → 新 layer 复制 vs 清零？
+   - Q6 source.matte → 新 layer 复制 vs 清零？
+   - Q7 名 auto " 2" 后缀？
+   - Q8 shape/text embed bytes — 保守起见 Phase 3 拒接 non-AV
 
-1. **`Composition.DuplicateLayer(idx) (*Layer, error)`** —— 反过来加，比 InsertLayer 简单（克隆已有 layer 而非合成）。但要 RE：AE duplicate 后 Layr 的 ID 怎么分（一定是新 ID）？fvdv/fiop/ftts/etc 14 follower chunks 也得复制？bytecode 完全 byte-clone 还是要 mutate 某些 ID/timestamp 字段？
-2. **`Composition.InsertLayer(srcLayer, atIdx)`** —— 跟 DuplicateLayer 接近但 source layer 来自外部（跨 comp 移图层场景）。
-3. **`Project.RemoveItem(itemID)`** —— Composition / Footage / Folder 级别 delete。Item delete 的引用清理面更大（Composition 删了之后所有引用它的 Layer.SourceID 要清；Footage 删了之后所有 Layer.SourceID 要清）。
-4. **Capability matrix start** —— spec V3 deep-think § M2 提到「不同 chunk 类型 capability 不同」的元数据表。Phase 3 不一定要做但 Phase 4+ 必需。
+**接 Task 2-6** 走 Phase 2 同 pattern（strategy spec → impl → structural test → 8 次 ship-gate → Stable + finish/）。
 
-**推荐**: DuplicateLayer 起手 —— smallest scope，最大复用 Phase 2 经验，把 "16-chunk delete unit" 反向变 "16-chunk clone unit" 验证我们对 follower chunks 的理解。
+**为什么 DuplicateLayer 起手**: smallest scope of V3 Phase 3 候选；最大复用 Phase 2 工具链（ae_run.ps1 / dump_layers / ship-gate verifier 模板）；反向验「16-chunk delete unit」对 follower chunks 的理解（DeleteLayer 证明可以 splice 走，DuplicateLayer 证明可以 verbatim clone）。
 
-**Phase 2 完整产物**（git ship）：
+**Phase 2 完整产物**（reference，git ship）：
 - 代码: `internal/aep/delete_layer.go` + `_test.go` (9 test, 8 PASS 1 SKIP)
-- 工具: `tmp_debug/dump_layers/main.go` (Item LIST diff) + `tmp_debug/ge_delete_layer/main.go` (ship-gate fixture producer)
-- JSX: `test_data/re_delete_layer.jsx` (5 modes incl matte_predelete) + `test_data/verify_ge_delete_layer.jsx` (ship-gate verifier)
-- 文档: `scars/ae-deletelayer-re.md` (6 findings) + `specs/finish/2026-05-28-v3-phase2-deletelayer-strategy.md` (9 sections) + `plans/finish/2026-05-28-v3-phase2-deletelayer-plan.md`
-- Playbook 刷新: re-fixture.md (agent 自跑 AE / AE 2020 默认) + verify.md (+ dump_layers)
+- 工具: `tmp_debug/dump_layers/main.go` + `tmp_debug/ge_delete_layer/main.go`
+- JSX: `test_data/re_delete_layer.jsx` (5 modes) + `test_data/verify_ge_delete_layer.jsx`
+- 文档: `scars/ae-deletelayer-re.md` + `specs/finish/2026-05-28-v3-phase2-deletelayer-strategy.md` + `plans/finish/2026-05-28-v3-phase2-deletelayer-plan.md`
+- Playbook 刷新: re-fixture.md + verify.md
 
 **并行 R-only 仍 deferred**（不阻塞 V3）：
 - **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
