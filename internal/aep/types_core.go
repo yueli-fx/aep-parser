@@ -705,6 +705,10 @@ type Property struct {
 	// integer / vector bits. Populated by parseLeafProperty. Used by
 	// tdb4 flag readers (IsSpatial, IsAnimated, etc.).
 	tdb4 *rifx.Chunk
+	// tdsb is the property subprop flags chunk (4 bytes); holds
+	// locked_ratio (byte 2 bit 4), dimensions_separated (byte 3 bit 1),
+	// enabled (byte 3 bit 0), roto_bezier (byte 0 bit 0).
+	tdsb *rifx.Chunk
 	// exprChunk is the Utf8 chunk holding the expression JS source.
 	// Nil when the property has no expression; SetExpression creates
 	// or removes it as needed.

@@ -60,6 +60,7 @@ var (
 	IDOmtn = ChunkID{'o', 'm', 't', 'n'} // mask/shape title/name (Utf8-like)
 	IDMkif = ChunkID{'m', 'k', 'i', 'f'} // mask info (48 bytes; mode, inverted, color)
 	IDSecL = ChunkID{'S', 'e', 'c', 'L'} // section-layer LIST (pseudo-layer holding comp-level props like "Markers")
+	IDTdsb = ChunkID{'t', 'd', 's', 'b'} // property subprop flags (4 bytes: byte 2 bit 4 = locked_ratio, etc.)
 	IDTdsn = ChunkID{'t', 'd', 's', 'n'} // property / group display-name carrier (embeds a "Utf8" sub-record in its payload)
 	IDNhed = ChunkID{'n', 'h', 'e', 'd'} // project header (32-byte payload, holds BitsPerChannel @0x0F)
 	IDNnhd = ChunkID{'n', 'n', 'h', 'd'} // project secondary header (40-byte payload, BitsPerChannel mirror @0x18)

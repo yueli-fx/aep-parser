@@ -128,6 +128,11 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 		}
 	}
 
+	// Parse tdsb subprop flags chunk (4 bytes) if present.
+	if tdsb := tdbs.FindFirst(rifx.IDTdsb); tdsb != nil {
+		prop.tdsb = tdsb
+	}
+
 	cdat := tdbs.FindFirst(rifx.IDCdat)
 	var kfList *rifx.Chunk
 	for _, ch := range tdbs.Children {

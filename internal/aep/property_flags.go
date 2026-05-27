@@ -1,5 +1,7 @@
 package aep
 
+import "fmt"
+
 // Property tdb4 flag readers — mirror of py-aep's `property.is_spatial`,
 // `property.is_animated`, etc. All read from the 124-byte tdb4 metadata
 // chunk under each tdbs LIST. Byte offsets sourced from py-aep's
@@ -73,4 +75,36 @@ func (p *Property) IsNoValue() bool {
 // properties cannot. Read from tdb4 @0x0B bit 1.
 func (p *Property) CanVaryOverTime() bool {
 	return p.tdb4Bit(0x0B, 1)
+}
+
+// tdsbBit returns bit `b` of tdsb byte at offset `off`. Returns false
+// when the tdsb chunk is absent or too short.
+func (p *Property) tdsbBit(off, b int) bool {
+	if p.tdsb == nil || len(p.tdsb.Data) <= off {
+		return false
+	}
+	return (p.tdsb.Data[off]>>uint(b))&1 == 1
+}
+
+// LockedRatio reports whether the property's locked ratio flag is set.
+// Read from tdsb @0x02 bit 4 (py-aep: byte 2 bit 4 = locked_ratio).
+func (p *Property) LockedRatio() bool {
+	return p.tdsbBit(0x02, 4)
+}
+
+// SetLockedRatio sets the locked ratio flag on the property.
+// Writes to tdsb @0x02 bit 4 (length-preserving).
+func (p *Property) SetLockedRatio(v bool) error {
+	if p.tdsb == nil {
+		return fmt.Errorf("property has no tdsb chunk (cannot set LockedRatio)")
+	}
+	if len(p.tdsb.Data) < 3 {
+		return fmt.Errorf("tdsb chunk too short (len=%d)", len(p.tdsb.Data))
+	}
+	if v {
+		p.tdsb.Data[0x02] |= 1 << 4
+	} else {
+		p.tdsb.Data[0x02] &^= 1 << 4
+	}
+	return nil
 }
