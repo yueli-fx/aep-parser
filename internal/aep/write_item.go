@@ -78,7 +78,10 @@ func (c *Composition) SetLabel(index uint8) error {
 // SetComment writes a project-panel comment on the footage item.
 // Length-variable; same semantics as Composition.SetComment.
 func (f *Footage) SetComment(comment string) error {
-	if err := setItemComment(f.itemLayrParent, &f.itemCmtaChunk, comment); err != nil {
+	if f.back == nil {
+		return fmt.Errorf("footage %q: no Item LIST reference (built outside parser?)", f.Name)
+	}
+	if err := setItemComment(f.back.itemLayrParent, &f.back.itemCmtaChunk, comment); err != nil {
 		return fmt.Errorf("footage %q: %w", f.Name, err)
 	}
 	f.Comment = comment
@@ -87,7 +90,10 @@ func (f *Footage) SetComment(comment string) error {
 
 // SetLabel writes the project-panel color label index for the footage.
 func (f *Footage) SetLabel(index uint8) error {
-	if err := setItemLabel(f.itemIdtaChunk, index); err != nil {
+	if f.back == nil {
+		return fmt.Errorf("footage %q: no idta chunk reference", f.Name)
+	}
+	if err := setItemLabel(f.back.itemIdtaChunk, index); err != nil {
 		return fmt.Errorf("footage %q: %w", f.Name, err)
 	}
 	f.Label = index

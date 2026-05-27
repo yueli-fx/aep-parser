@@ -16,7 +16,7 @@ import (
 //   - opti  : type tag ("png!", "ZPEG", "Soli", "Plac", ...) and sometimes a name
 //   - Als2/alas : JSON alias data with "fullpath" — most reliable source of name
 func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, error) {
-	footage := &Footage{ID: id, Name: fallbackName}
+	footage := &Footage{ID: id, Name: fallbackName, back: &footageBackrefs{}}
 
 	pin := item.FindFirstList(rifx.IDPin)
 	src := item
@@ -26,11 +26,11 @@ func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, e
 
 	if cpth := src.FindFirst(rifx.IDCpth); cpth != nil {
 		footage.Path = cpth.Text()
-		footage.cpthChunk = cpth
+		footage.back.cpthChunk = cpth
 	}
 
 	if sspc := src.FindFirst(rifx.IDSspc); sspc != nil && len(sspc.Data) >= 4 {
-		footage.sspcChunk = sspc
+		footage.back.sspcChunk = sspc
 		// Real AE sspc is 222 bytes with width/height at @0x20/@0x24
 		// (py-aep binary/footage_chunks.py::SspcChunk). Synthesized test
 		// fixtures use a short 4-byte sspc with width/height at byte 0/2.
@@ -59,7 +59,7 @@ func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, e
 
 	// Look for Als2/alas JSON anywhere in this Item subtree.
 	if alas, path, base := findAliasPath(item); alas != nil {
-		footage.aliasChunk = alas
+		footage.back.aliasChunk = alas
 		footage.Path = path
 		if base != "" {
 			footage.Name = base

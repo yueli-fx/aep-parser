@@ -204,9 +204,12 @@ func parseItem(item *rifx.Chunk, proj *Project) error {
 		}
 		footage.Comment = comment
 		footage.Label = label
-		footage.itemCmtaChunk = cmta
-		footage.itemIdtaChunk = idta
-		footage.itemLayrParent = item
+		if footage.back == nil {
+			footage.back = &footageBackrefs{}
+		}
+		footage.back.itemCmtaChunk = cmta
+		footage.back.itemIdtaChunk = idta
+		footage.back.itemLayrParent = item
 		proj.Footage = append(proj.Footage, footage)
 
 	case ItemTypeFolder:
