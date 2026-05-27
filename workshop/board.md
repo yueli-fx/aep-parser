@@ -1,14 +1,12 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-27 by claude (P2c PropertyGroup hierarchy MVP ship)
-**Active focus**: py-aep parity — P1 / P2a (sans Task 5) / P2b (sans DisplayColorSpace) / P2c (MVP) all ship
+**Last updated**: 2026-05-27 by claude (review fixup #2 + P2b 2C Gradient R ship + Script Alert dialog rule)
+**Active focus**: py-aep parity — P1 / P2a (sans Task 5) / P2b (sans DisplayColorSpace + Gradient W) / P2c (full) all ship
 
 ## Next session
 
 **待 user 决定 next direction**：
-- **P2c followup**: Property metadata reads — `DefaultValue / LastValue / NbOptions / MinValue / MaxValue / UnitsText / PropertyControlType / PropertyValueType / PropertyIndex / PropertyDepth / ParentProperty` — 需 tdb4 字节 RE 或 schema port
-- **P2b Task 3**: Gradient XML — 等 user 提供 gradient fixture
-- **P2b Task 4**: Property metadata — 跟 P2c followup 重叠
+- **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需要 fixture（py-aep 样本有多 Utf8 keyframe 数据可参考）
 - **V3**: runtime IR + capability framework — 方向性规划
 
 **并行候选**：V2.2.1 ShapeLayer 拓展 / V3 brainstorm。
@@ -31,11 +29,11 @@
 
 ## Recently finished
 
-- **2026-05-27 P2c PropertyGroup hierarchy MVP** — 新 `AEPropertyGroup` 类型 + `PropertyBase` interface (注：跟 V2.2 ShapeLayer 的 `PropertyGroup` escape-hatch 类型同名冲突，故加 `AE` 前缀)。parser 在原 flat 输出（`Layer.Properties / Effects / Markers / Masks`）旁边并行构建 tdgp 层级镜像，叶子用 tdbs chunk identity 解析到 *同一个 `*Property` instance*（指针一致，flat 与 tree 视图变更互通）。Layer API: `PropertyTree() / PropertyGroupByMatchName(name) / PropertyByPath(...matchNames)` + 11 typed group accessor（Transform / Audio / LayerStyles / EffectsParade / MaskParade / TextProperties / CameraOptions / LightOptions / MaterialOptions / GeometryOptions / ShapeContents）。Group API: `Property(matchName) / Group(matchName) / ChildByIndex(i) / NumProperties / ParentGroup / PropertyByPath`。5 新 PASS 测试 (cameralight fixture / effects-parade mirror / standalone nil-safe / not-found graceful / leaf identity)。PASS 224 (+5)，go vet clean。docs 同步：spec §2.3+§2.4 PropertyGroup ops 表行从 ❌/🟢 → ✅ done。**剩余 P2c followup**: `DefaultValue / LastValue / NbOptions / MinValue / MaxValue / UnitsText / PropertyControlType / PropertyValueType / PropertyIndex / PropertyDepth / ParentProperty` — 需 tdb4 RE 或 schema port。
-- **2026-05-27 P2a/P2b review fixup**（reviewer pass）— 删 `Project.ImportPlaceholder` (opti tag AE 拒收，仅合成字节)、`DisplayColorSpace()` stub (永远返回 "None")；CMS setters 在 `cmsUtf8 == nil` 时拒写而非自动创建 (chunk 容器位置未 RE)；`SetColorManagementSystem`/`SetLutInterpolationMethod` 加 enum 校验；`cmsSettings` JSON 解析失败时 emit `Warnings`；新内部测试覆盖 LockedRatio reader/writer + CMS enum 校验 + JSON 解析错误路径；删手写 `contains`/`findSubstring`（重复两份）改 `strings.Contains`。**测试 219 PASS / 7 SKIP / 0 FAIL**（baseline 220 → 219；删 4 placeholder tests + 8 validation subtests + 加 4 新测试，含 subtests 净 -8）。docs 同步：spec / coverage / coverage-detail / p2a-plan / p2b-plan 全部 mark Task 5 + DisplayColorSpace 为 🗑️ deferred。
-- **2026-05-27 py-aep parity doc sync** — spec §2.1-2.5 表全面刷新：30+ 行从 ❌ 更新到 ✅/done（P1 1D setting chunks / P1 1B project views / P1 1E layer convenience / P1 1F comp convenience / P1 1G tdb4 flags / P1 1H footage convenience / P2a Tasks 1-5 / P2b Tasks 1-2）。coverage-detail.md 同步：Project 域 +12 行（nnhd/CMS/setting chunks/views）、Layer 域 +3 行（3DModel/ReplaceSource/LightSource 修正）、Property 域 LockedRatio + tdb4 flag 修正、Footage 域 +4 行（P1 1H items）、KeyframeEase 写回状态修正。PASS 220。
-- **2026-05-27 P2a Task 1+2+3+4+5 ship** — ThreeDModelLayer R / LightSource R/W / LockedRatio R/W / ReplaceSource R/W / ImportPlaceholder** — Task 1: `LayerType3DModel` 枚举 + `inferLayerType` ldta byte `@0x83 == 0x05` 派发 + `Layer.IsThreeDModelLayer()` typed accessor。Task 2: `Layer.LightSource() / SetLightSource(target *Layer)` 镜像 py-aep `LightLayer.light_source`，底层走 ldta `@0x28`（与 AV `SourceID` 共用 slot），sentinel `0xFFFFFFFF` = 无源，6 个验证错误路径（non-light caller / self / Light-target / Camera-target / 3D-target / cross-comp）全 PASS。Task 3: `Property.LockedRatio() / SetLockedRatio(v bool)`；底层走 tdsb `@0x02 bit 4`；parser 新加 `Property.tdsb` 私有 ref；IDTdsb 常量加到 rifx。Task 4: `Layer.ReplaceSource(target AVItem, fixExpressions bool)`；底层走既有 `SetSource` 路径；fixExpressions=true 时记 warning。Task 5: `Project.ImportPlaceholder(name, width, height, frameRate, duration)`；NewComposition 同模式，原子 mutation + 警告回滚。新增 ~5 个 PASS test 函数，无 fixture 依赖（synthetic byte-dispatch + synthetic Composition+Layers）。docs/layer.md + coverage.md 同步。**未跑 ship-gate**（P2a 全闭环，P2b 待续）。
-- **2026-05-27 ae_run.ps1 wrapper 全闭环 (Phase 5-6, Task 15-18)** — V2.1/V2.2 ship-gate Go 端走 `runAeRunShipGate(t, ...)` 共享 helper (`ship_gate_helpers_test.go`)，删 deadline polling loop（ps1 owns timeout）。**Cross-version smoke PASS**：`AE_SHIP_GATE=1 AE2020_EXE=".../AE 2025/AfterFX.exe" go test -run TestV2_1_AEShipGate_AE2020` — wrapper OCR 检测+自动消化 convert 对话框，ship-gate 通过。V2.2 ship-gate (用 Ellipse/Path/Stroke) t.Skip 标 V2.2.1 deferred（docs/shape.md:260 明确 silent-drop 限制）。playbook re-fixture.md § GDI 自动化 from planned → shipped。归档 plan 到 plans/finish/。PASS 202 不变。
+- **2026-05-27 P2b 2C Gradient R + review fixup #2** — Gradient XML R 真正接通：fix 上一 session 的 dead-code（XML 写成从 cdat 解，实际在 `GCst → GCky → Utf8`）。新增 `parseGradientStopsProperty` 处理 GCst 包装。rifx 加 `IDGCst / IDGCky`。fixture 走 py-aep `samples/models/property/gradient.aep`（其本身带 1707/1789B 真实 prop.map XML）。新 `TestGradient_FixturePyAep` PASS。**清理**：`gradient.go` 删手写 `itoa` → `strconv.Itoa`；删 trivial `parseGradientXML` private wrapper（只留 `ParseGradientXML`）。**Script Alert 自动化**：`scripts/ae_dialog_rules.json` 加 `script-alert` 规则（windowTitle "Script Alert" + OCR fallback；Enter dismiss），解决 user 反馈的 JSX 弹窗需手动 OK 问题。`re_gradient.jsx` 改 `.done` 契约 + `app.quit()`（替代原 `alert()`），跳过曾经 throw 的 G-Fill 步骤（保留 G-Stroke RE 路径）。PASS 238 (+1)。docs 同步：spec §2.4 Gradient 行 ❌ → ✅ R，coverage 加 P2b 2C 段，deferred 删 Gradient 占位行。
+- **2026-05-27 P2c followup DefaultValue/LastValue/NbOptions + pard infra** — 新 `pard` chunk 解析基础设施（`parse_effect_pard.go`）：从 sspc 内 parT LIST 提取 effect 参数定义（lastValue / defaultValue / nbOptions / minValue / maxValue），支持 Scalar/Angle/Boolean/TwoD/Enum/Slider/ThreeD 7 种 control type。`Property` 新增 `DefaultValue / LastValue / NbOptions` 字段 + transform 硬编码默认值表（`property_defaults.go`）。parser 在 `collectEffects` 后自动 merge pard 元数据，在 `parseComposition` 后对 transform 属性赋默认值。PASS 232 (+3)。spec §2.4 表 1 行从 ❌ → ✅ done。
+- **2026-05-27 P2c followup Property metadata reads** — ControlType/ValuePropertyType 枚举推导 + MinValue/MaxValue tdum/tduM 解码 + UnitsText 静态 map + PropertyIndex/PropertyDepth。PASS 229 (+6)。
+- **2026-05-27 P2c PropertyGroup hierarchy MVP** — AEPropertyGroup 树 + PropertyBase interface + 11 typed group accessor。PASS 224 (+5)。
+- **2026-05-27 P2a/P2b review fixup** — 删 ImportPlaceholder + DisplayColorSpace stub；CMS enum 校验。PASS 219。
 
 ## Hanging tasks
 

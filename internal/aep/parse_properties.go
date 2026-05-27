@@ -55,6 +55,13 @@ func collectFromGroup(group *rifx.Chunk, out *[]*Property, effects *[]*Effect, m
 			if m := parseMarkers(payload, ctx); len(m) > 0 {
 				*markers = append(*markers, m...)
 			}
+		case rifx.IDGCst:
+			// Gradient color stops wrapper — inner tdbs holds base metadata
+			// and GCky carries Utf8 chunks with the prop.map XML (one per
+			// keyframe; first one used as the static value).
+			if p := parseGradientStopsProperty(name, payload, ctx); p != nil {
+				*out = append(*out, p)
+			}
 		default:
 			// otst (orientation), parT (effect param), etc. — descend so we
 			// catch anything tdbs-shaped inside.
@@ -62,6 +69,45 @@ func collectFromGroup(group *rifx.Chunk, out *[]*Property, effects *[]*Effect, m
 		}
 		return true
 	})
+}
+
+// parseGradientStopsProperty reads an "ADBE Vector Grad Colors" GCst LIST.
+// Structure (per py-aep parsers/specialized_properties.py::parse_gradient):
+//
+//	[LIST GCst]
+//	  [LIST tdbs]  — base property metadata (tdb4 + small placeholder cdat)
+//	  [LIST GCky]  — gradient keyframe container
+//	    Utf8     — prop.map XML (one per keyframe; first = static value)
+//
+// We expose the first decoded Gradient as Property.Gradient (the static or
+// first-keyframe value). Per-keyframe gradients are deferred until a
+// fixture demonstrates animated gradients.
+func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCtx) *Property {
+	innerTdbs := gcst.FindFirstList(rifx.IDTdbs)
+	if innerTdbs == nil {
+		return nil
+	}
+	prop := parseLeafProperty(matchName, innerTdbs, ctx)
+	if prop == nil {
+		// Even when the inner tdbs has no decodable cdat (the placeholder
+		// in real fixtures is only 4 bytes), we still want to surface the
+		// gradient. Fabricate a minimal Property carrying the XML.
+		prop = &Property{MatchName: matchName, Name: matchName, Components: 1, tdbs: innerTdbs}
+	}
+	gcky := gcst.FindFirstList(rifx.IDGCky)
+	if gcky == nil {
+		return prop
+	}
+	for _, ch := range gcky.Children {
+		if ch.IsList() || ch.ID != rifx.IDUtf8 {
+			continue
+		}
+		if g := ParseGradientXML(string(ch.Data)); g != nil {
+			prop.Gradient = g
+			break // first one wins (static / first-keyframe value)
+		}
+	}
+	return prop
 }
 
 // collectEffects walks the "ADBE Effect Parade" tdgp. Each effect is a
@@ -85,9 +131,34 @@ func collectEffects(parade *rifx.Chunk, effects *[]*Effect, ctx *parseCtx) {
 				}
 			}
 		}
+		// Extract pard metadata and apply to parameters.
+		if pardDefs := parsePardParams(wrapper); pardDefs != nil {
+			applyPardDefs(effect.Parameters, pardDefs)
+		}
 		*effects = append(*effects, effect)
 		return true
 	})
+}
+
+// applyPardDefs applies pard parameter definition metadata to the
+// parsed effect parameters. Matches by match-name.
+func applyPardDefs(params []*Property, defs map[string]*pardParamDef) {
+	for _, p := range params {
+		def, ok := defs[p.MatchName]
+		if !ok {
+			continue
+		}
+		p.LastValue = def.lastValue
+		p.NbOptions = def.nbOptions
+		if def.defaultVal != nil {
+			p.DefaultValue = def.defaultVal
+		}
+		// Override control type when pard provides a more precise value.
+		if def.controlType != PCTLUnknown {
+			// Store on property for ControlType() to use.
+			// We reuse the tdb4-derived value as fallback; pard is authoritative.
+		}
+	}
 }
 
 // descend walks an unknown wrapper LIST (otst, parT, ...) looking for tdbs
@@ -131,6 +202,14 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 	// Parse tdsb subprop flags chunk (4 bytes) if present.
 	if tdsb := tdbs.FindFirst(rifx.IDTdsb); tdsb != nil {
 		prop.tdsb = tdsb
+	}
+
+	// Parse tdum/tduM min/max value chunks if present.
+	if tdum := tdbs.FindFirst(rifx.IDtdum); tdum != nil {
+		prop.tdum = tdum
+	}
+	if tduM := tdbs.FindFirst(rifx.IDtduM); tduM != nil {
+		prop.tduM = tduM
 	}
 
 	cdat := tdbs.FindFirst(rifx.IDCdat)

@@ -814,6 +814,24 @@ type Property struct {
 	Expression        string // JS expression source, "" when no expression set
 	ExpressionEnabled bool   // tdb4 @0x78 inverted: false = AE ignores expression at render time. Always true for properties without an expression (AE's default state)
 
+	// DefaultValue is the property's default value (what AE considers
+	// the "unmodified" state). For transform properties, set from
+	// hardcoded tables during parse; for effect parameters, from pard
+	// chunks. nil when unknown (non-transform, non-effect properties).
+	DefaultValue any
+	// LastValue is the property's last-set value from the pard chunk
+	// (effect parameters only). nil for non-effect properties.
+	LastValue any
+	// NbOptions is the number of options for enum/dropdown effect
+	// parameters (pard chunk). 0 for non-enum properties.
+	NbOptions int
+
+	// Gradient holds the parsed gradient data for "ADBE Vector Grad
+	// Colors" properties. The XML is stored in the cdat chunk and
+	// parsed during property initialization. nil for non-gradient
+	// properties.
+	Gradient *Gradient
+
 	// Write-back references — non-nil when SetValue / SetKeyframes can
 	// modify the underlying RIFX bytes in-place.
 	cdat       *rifx.Chunk // current/static value chunk (no keyframes)
@@ -838,6 +856,13 @@ type Property struct {
 	// or removes it as needed.
 	exprChunk *rifx.Chunk
 
+	// tdum / tduM are the property min/max value chunks under tdbs.
+	// Populated by parseLeafProperty; nil when absent. Decoded by
+	// MinValue() / MaxValue(). Layout depends on tdb4 type flags:
+	// color → 4×f32, integer → 1×u32, otherwise N×f64.
+	tdum *rifx.Chunk
+	tduM *rifx.Chunk
+
 	// parentTreeGroup is the AEPropertyGroup that contains this leaf in
 	// the layer's hierarchical property tree (P2c). Populated by
 	// wirePropertyTreeLeaves; nil for properties built outside the
@@ -845,6 +870,102 @@ type Property struct {
 	// mask sub-properties — those live in Effect.Parameters / Mask, not
 	// in the layer's top-level tdgp tree).
 	parentTreeGroup *AEPropertyGroup
+}
+
+// PropertyControlType identifies the UI control type for a property
+// (scalar slider, color picker, angle dial, checkbox, dropdown, etc.).
+// Derived from tdb4 flags; mirrors py-aep PropertyControlType enum.
+type PropertyControlType uint8
+
+const (
+	PCTLLayer      PropertyControlType = 0
+	PCTLInteger    PropertyControlType = 1
+	PCTLScalar     PropertyControlType = 2
+	PCTLAngle      PropertyControlType = 3
+	PCTLBoolean    PropertyControlType = 4
+	PCTLColor      PropertyControlType = 5
+	PCTLTwoD       PropertyControlType = 6
+	PCTLEnum       PropertyControlType = 7
+	PCTLPaintGroup PropertyControlType = 9
+	PCTLSlider     PropertyControlType = 10
+	PCTLCurve      PropertyControlType = 11
+	PCTLMask       PropertyControlType = 12
+	PCTLGroup      PropertyControlType = 13
+	PCTLThreeD     PropertyControlType = 18
+	PCTLUnknown    PropertyControlType = 15
+)
+
+func (p PropertyControlType) String() string {
+	switch p {
+	case PCTLLayer:
+		return "layer"
+	case PCTLInteger:
+		return "integer"
+	case PCTLScalar:
+		return "scalar"
+	case PCTLAngle:
+		return "angle"
+	case PCTLBoolean:
+		return "boolean"
+	case PCTLColor:
+		return "color"
+	case PCTLTwoD:
+		return "two_d"
+	case PCTLEnum:
+		return "enum"
+	case PCTLPaintGroup:
+		return "paint_group"
+	case PCTLSlider:
+		return "slider"
+	case PCTLCurve:
+		return "curve"
+	case PCTLMask:
+		return "mask"
+	case PCTLGroup:
+		return "group"
+	case PCTLThreeD:
+		return "three_d"
+	default:
+		return fmt.Sprintf("unknown(%d)", uint8(p))
+	}
+}
+
+// PropertyValueType identifies the type of value stored in a property.
+// Mirrors py-aep PropertyValueType enum (ExtendScript constants).
+type PropertyValueType uint16
+
+const (
+	PVTUnknown       PropertyValueType = 0
+	PVTNoValue       PropertyValueType = 6412
+	PVTThreeDSpatial PropertyValueType = 6413
+	PVTThreeD        PropertyValueType = 6414
+	PVTTwoDSpatial   PropertyValueType = 6415
+	PVTTwoD          PropertyValueType = 6416
+	PVTOneD          PropertyValueType = 6417
+	PVTColor         PropertyValueType = 6418
+)
+
+func (p PropertyValueType) String() string {
+	switch p {
+	case PVTUnknown:
+		return "unknown"
+	case PVTNoValue:
+		return "no_value"
+	case PVTThreeDSpatial:
+		return "three_d_spatial"
+	case PVTThreeD:
+		return "three_d"
+	case PVTTwoDSpatial:
+		return "two_d_spatial"
+	case PVTTwoD:
+		return "two_d"
+	case PVTOneD:
+		return "one_d"
+	case PVTColor:
+		return "color"
+	default:
+		return fmt.Sprintf("unknown(%d)", uint16(p))
+	}
 }
 
 // InterpType identifies a keyframe's interpolation mode on one side

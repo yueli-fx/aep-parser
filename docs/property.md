@@ -136,6 +136,128 @@ if pos.Expression != "" {
 
 ---
 
+### Property.DefaultValue
+
+```go
+DefaultValue any
+```
+
+属性的默认值（AE 认为的"未修改"状态）。Transform 属性从硬编码表赋值（Scale→[100,100,100]，Opacity→100 等）；Effect 参数从 `pard` chunk 提取。非 transform、非 effect 属性为 nil。
+
+---
+
+### Property.LastValue
+
+```go
+LastValue any
+```
+
+Effect 参数的上次设置值（从 `pard` chunk 提取）。非 effect 属性为 nil。
+
+---
+
+### Property.NbOptions
+
+```go
+NbOptions int
+```
+
+Dropdown/Enum effect 参数的选项数量（从 `pard` chunk 的 `nb_options >> 16` 提取）。非 enum 属性为 0。
+
+---
+
+### Property.ControlType
+
+```go
+func (p *Property) ControlType() PropertyControlType
+```
+
+UI 控件类型（标量滑块、颜色选择器、角度盘、复选框、下拉菜单等）。从 tdb4 flags 推导。
+
+| 常量 | 值 | 含义 |
+|---|---|---|
+| `PCTLLayer` | 0 | 图层引用 |
+| `PCTLInteger` | 1 | 整数 |
+| `PCTLScalar` | 2 | 标量滑块 |
+| `PCTLAngle` | 3 | 角度盘 |
+| `PCTLBoolean` | 4 | 复选框 |
+| `PCTLColor` | 5 | 颜色选择器 |
+| `PCTLTwoD` | 6 | 2D 点 |
+| `PCTLEnum` | 7 | 下拉菜单 |
+| `PCTLThreeD` | 18 | 3D 点 |
+| `PCTLUnknown` | 15 | 未知 |
+
+---
+
+### Property.ValuePropertyType
+
+```go
+func (p *Property) ValuePropertyType() PropertyValueType
+```
+
+属性存储的值类型（1D / 2D / 3D / Color / NoValue 等）。从 tdb4 flags 推导。对应 ExtendScript 的 `Property.propertyValueType`。
+
+| 常量 | 值 | 含义 |
+|---|---|---|
+| `PVTUnknown` | 0 | 未知 |
+| `PVTNoValue` | 6412 | 无值（分隔符/按钮） |
+| `PVTThreeDSpatial` | 6413 | 3D 空间（Position） |
+| `PVTThreeD` | 6414 | 3D 非空间（Scale） |
+| `PVTTwoDSpatial` | 6415 | 2D 空间 |
+| `PVTTwoD` | 6416 | 2D 非空间 |
+| `PVTOneD` | 6417 | 标量 |
+| `PVTColor` | 6418 | RGBA 颜色 |
+
+---
+
+### Property.MinValue / MaxValue
+
+```go
+func (p *Property) MinValue() any
+func (p *Property) MaxValue() any
+```
+
+属性的最小/最大允许值。从 tdbs LIST 内的 `tdum` / `tduM` sibling chunks 解码。返回类型取决于属性种类：
+
+- 颜色属性 → `[]float64`（长度 4）
+- 整数属性 → `float64`（从 uint32 解码）
+- 标量 → `float64`
+- 多维 → `[]float64`
+
+无 tdum/tduM chunk 时返回 `nil`。
+
+---
+
+### Property.UnitsText
+
+```go
+func (p *Property) UnitsText() string
+```
+
+属性值的单位描述（`"pixels"` / `"degrees"` / `"percent"` / `"seconds"` / `"dB"` 等）。从静态 match-name 映射表查找。无已知单位时返回空字符串。
+
+---
+
+### Property.PropertyIndex
+
+```go
+func (p *Property) PropertyIndex() int
+```
+
+属性在其父 `AEPropertyGroup` 中的 0-based 位置。无父组时返回 -1（parser 外构建的属性）。
+
+---
+
+### Property.PropertyDepth
+
+```go
+func (p *Property) PropertyDepth() int
+```
+
+从该属性到包含图层之间的父组层数。顶层组（Transform / Effects 等）为 1，其直接子属性为 2，依此类推。无父组时返回 -1。
+
+---
+
 ## Methods
 
 ### Property.SetStaticValue

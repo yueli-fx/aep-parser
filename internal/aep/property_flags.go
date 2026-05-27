@@ -1,6 +1,11 @@
 package aep
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+
+	"github.com/example/aep-parser/internal/rifx"
+)
 
 // Property tdb4 flag readers — mirror of py-aep's `property.is_spatial`,
 // `property.is_animated`, etc. All read from the 124-byte tdb4 metadata
@@ -107,4 +112,142 @@ func (p *Property) SetLockedRatio(v bool) error {
 		p.tdsb.Data[0x02] &^= 1 << 4
 	}
 	return nil
+}
+
+// determinePropertyTypes derives PropertyControlType and PropertyValueType
+// from tdb4 flags. Port of py-aep's _determine_property_types().
+func (p *Property) determinePropertyTypes() (PropertyControlType, PropertyValueType) {
+	pct := PCTLUnknown
+	pvt := PVTUnknown
+
+	if p.IsNoValue() {
+		pvt = PVTNoValue
+	}
+	if p.IsColor() {
+		pct = PCTLColor
+		pvt = PVTColor
+	} else if p.IsInteger() && p.Components <= 1 {
+		pct = PCTLBoolean
+		pvt = PVTOneD
+	} else if p.IsVector() || (p.IsInteger() && p.Components > 1) {
+		switch p.Components {
+		case 1:
+			pct = PCTLScalar
+			pvt = PVTOneD
+		case 2:
+			pct = PCTLTwoD
+			if p.IsSpatial() {
+				pvt = PVTTwoDSpatial
+			} else {
+				pvt = PVTTwoD
+			}
+		case 3:
+			pct = PCTLThreeD
+			if p.IsSpatial() {
+				pvt = PVTThreeDSpatial
+			} else {
+				pvt = PVTThreeD
+			}
+		}
+	}
+
+	return pct, pvt
+}
+
+// ControlType returns the UI control type for the property (scalar slider,
+// color picker, angle dial, etc.). Derived from tdb4 flags.
+func (p *Property) ControlType() PropertyControlType {
+	pct, _ := p.determinePropertyTypes()
+	return pct
+}
+
+// PropertyValueType returns the type of value stored in the property
+// (OneD, TwoD, ThreeD, Color, NoValue, etc.). Derived from tdb4 flags.
+func (p *Property) ValuePropertyType() PropertyValueType {
+	_, pvt := p.determinePropertyTypes()
+	return pvt
+}
+
+// decodeTdumValue reads a tdum/tduM chunk's payload. Layout depends on
+// tdb4 type flags: color → 4×float32 BE, integer → 1×uint32 BE,
+// otherwise N×float64 BE (N = size/8).
+func (p *Property) decodeTdumValue(c *rifx.Chunk) any {
+	if c == nil || len(c.Data) == 0 {
+		return nil
+	}
+	d := c.Data
+	if p.IsColor() && len(d) >= 16 {
+		// 4 × float32 BE
+		vals := make([]float64, 4)
+		for i := 0; i < 4; i++ {
+			bits := uint32(d[i*4])<<24 | uint32(d[i*4+1])<<16 | uint32(d[i*4+2])<<8 | uint32(d[i*4+3])
+			vals[i] = float64(math.Float32frombits(bits))
+		}
+		return vals
+	}
+	if p.IsInteger() && len(d) >= 4 {
+		v := uint32(d[0])<<24 | uint32(d[1])<<16 | uint32(d[2])<<8 | uint32(d[3])
+		return float64(v)
+	}
+	// Default: N × float64 BE
+	count := len(d) / 8
+	if count == 1 {
+		v, _ := readFloat64BE(d, 0)
+		return v
+	}
+	vals := make([]float64, count)
+	for i := 0; i < count; i++ {
+		v, _ := readFloat64BE(d, i*8)
+		vals[i] = v
+	}
+	return vals
+}
+
+// MinValue returns the minimum permitted value for the property, or nil
+// if no tdum chunk is present. Type depends on property kind: float64
+// for scalars, []float64 for multi-component, float64 (from uint32) for
+// integer properties.
+func (p *Property) MinValue() any {
+	return p.decodeTdumValue(p.tdum)
+}
+
+// MaxValue returns the maximum permitted value for the property, or nil
+// if no tduM chunk is present.
+func (p *Property) MaxValue() any {
+	return p.decodeTdumValue(p.tduM)
+}
+
+// UnitsText returns the text description of the units for the property
+// (e.g. "pixels", "degrees", "percent", "seconds", "dB"). Returns ""
+// when the property has no known unit.
+func (p *Property) UnitsText() string {
+	if u, ok := unitsTextMap[p.MatchName]; ok {
+		return u
+	}
+	if p.ControlType() == PCTLAngle {
+		return "degrees"
+	}
+	return ""
+}
+
+// PropertyIndex returns the 0-based position of this property within its
+// parent AEPropertyGroup, or -1 when the property has no parent group
+// (i.e. was built outside the parser or is a top-level item).
+func (p *Property) PropertyIndex() int {
+	if p.parentTreeGroup == nil {
+		return -1
+	}
+	return p.parentTreeGroup.PropertyIndex(p)
+}
+
+// PropertyDepth returns the number of levels of parent groups between
+// this property and the containing layer. Returns 0 for top-level
+// property groups (Transform, Effects, etc.), 1 for their direct
+// children, and so on. Returns -1 when the property has no parent tree
+// group wired up.
+func (p *Property) PropertyDepth() int {
+	if p.parentTreeGroup == nil {
+		return -1
+	}
+	return p.parentTreeGroup.Depth()
 }

@@ -218,6 +218,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 			continue // best-effort
 		}
 		layer.comp = comp // wire back-pointer so Layer.Parent() works
+		assignTransformDefaults(layer.Properties, comp, layer.Type)
 		comp.Layers = append(comp.Layers, layer)
 	}
 

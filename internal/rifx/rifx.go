@@ -61,6 +61,8 @@ var (
 	IDMkif = ChunkID{'m', 'k', 'i', 'f'} // mask info (48 bytes; mode, inverted, color)
 	IDSecL = ChunkID{'S', 'e', 'c', 'L'} // section-layer LIST (pseudo-layer holding comp-level props like "Markers")
 	IDTdsb = ChunkID{'t', 'd', 's', 'b'} // property subprop flags (4 bytes: byte 2 bit 4 = locked_ratio, etc.)
+	IDtdum = ChunkID{'t', 'd', 'u', 'm'} // property min value (variable: f32×4 color | u32 integer | f64×N)
+	IDtduM = ChunkID{'t', 'd', 'u', 'M'} // property max value (same layout as tdum)
 	IDTdsn = ChunkID{'t', 'd', 's', 'n'} // property / group display-name carrier (embeds a "Utf8" sub-record in its payload)
 	IDNhed = ChunkID{'n', 'h', 'e', 'd'} // project header (32-byte payload, holds BitsPerChannel @0x0F)
 	IDNnhd = ChunkID{'n', 'n', 'h', 'd'} // project secondary header (40-byte payload, BitsPerChannel mirror @0x18)
@@ -78,6 +80,10 @@ var (
 	IDEwst = ChunkID{'E', 'w', 's', 't'} // LIST formType: empty 0-child sibling of every Layr at Item level (AE-required boilerplate per iter-5 RE)
 	IDPefl = ChunkID{'P', 'e', 'f', 'l'} // LIST formType: project-level effect-list container (children = pjef Utf8 entries naming used effects)
 	IDPjef = ChunkID{'p', 'j', 'e', 'f'} // Utf8 chunk: one effect match-name inside Pefl
+	IDparT = ChunkID{'p', 'a', 'r', 'T'} // LIST formType: effect parameter definitions container (pard entries)
+	IDpard = ChunkID{'p', 'a', 'r', 'd'} // effect parameter definition chunk (variable-length, keyed by control type)
+	IDGCst = ChunkID{'G', 'C', 's', 't'} // LIST formType: gradient color stops wrapper (contains tdbs + GCky)
+	IDGCky = ChunkID{'G', 'C', 'k', 'y'} // LIST formType: gradient keyframe container (Utf8 children holding prop.map XML, one per keyframe)
 
 	// Project-level setting chunks (P1 Task 1D, py-aep parity)
 	IDAcer = ChunkID{'a', 'c', 'e', 'r'} // U1: compensate_for_scene_referred_profiles

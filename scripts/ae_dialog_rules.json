@@ -48,5 +48,15 @@
     "keys": "{ESC}",
     "cooldownMs": 3000,
     "comment": "AE 'Safe Mode' / Recovery dialog after wrapper force-kill on prior run — ESC declines safe-mode, continues normal launch"
+  },
+  {
+    "name": "script-alert",
+    "windowTitle": ["Script Alert", "ExtendScript", "脚本警告"],
+    "windowClass": [],
+    "ocrMatch": ["script alert", "脚本警告"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "ExtendScript alert() popup — Enter clicks OK. RE fixture JSX should write .done instead of alert(), but this is the defensive fallback for legacy scripts (see test_data/re_gradient.jsx)"
   }
 ]

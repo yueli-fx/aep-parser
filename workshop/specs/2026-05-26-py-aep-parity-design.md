@@ -22,7 +22,7 @@
 | NewProject/NewComposition | 无（save 整体）| ✅ V2.1 双 ship gate PASS |
 | Render Queue | ✅ 完整 + format options | ❌ |
 | Essential Graphics | 🚧 controllers exposed | ❌ |
-| Gradient | ✅ XML 解析（color_stops/alpha_stops）| ❌ |
+| Gradient | ✅ XML 解析（color_stops/alpha_stops）| ✅ R (P2b 2C)；W 待 fixture |
 | Project 多字段 | ✅ ~10 个（nnhd/head/CMS/XMP/flag chunks）| 🚧 只 BitsPerChannel |
 | Layer 结构性 | ✅ remove/duplicate/copy_to_comp/move_*| ❌（仅 keyframe add/remove） |
 
@@ -156,17 +156,17 @@
 | `LockedRatio` (tdsb) | ✅ R only | ✅ R/W | ✅ R/W | done | P2a Task 3 |
 | `IsSpatial` (tdb4) | ✅ R | ✅ R | ✅ R | done | P1 1G |
 | `Animated / Color / Integer / NoValue / Vector` (tdb4 flags) | ✅ R | ✅ R | ✅ R | done | P1 1G |
-| `DefaultValue / LastValue / NbOptions` | ✅ R | ❌ | ✅ R | P2 | tdb4 字节 RE |
-| `MinValue / MaxValue / UnitsText` | ✅ R | ❌ | ✅ R | P2 | 内置 schema |
+| `DefaultValue / LastValue / NbOptions` | ✅ R | ✅ R | ✅ R | done | P2c followup; transform defaults table + pard chunk parsing |
+| `MinValue / MaxValue / UnitsText` | ✅ R | ✅ R | ✅ R | done | P2c followup; tdum/tduM chunk + unitsTextMap |
 | `Value` (current) | ✅ R/W | ✅ R/W StaticValue | ✅ | done |
 | `CanVaryOverTime` | ✅ R | ✅ R | ✅ R | done | P1 1G |
 | `DimensionsSeparated` | ✅ R/W | ❌ | ✅ R/W | P3 | structural toggle |
 | `Expression / ExpressionEnabled / CanSetExpression` | ✅ R/W | ✅ R/W | ✅ | done |
-| `PropertyControlType` | ✅ R | ❌ | ✅ R | P2 | enum |
-| `PropertyValueType` | ✅ R | ❌ | ✅ R | P2 | enum |
+| `PropertyControlType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
+| `PropertyValueType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
 | `IsModified / Active / Elided / IsName Set` | ✅ R | ❌ | ✅ R | P2 | |
-| `PropertyIndex / PropertyDepth` | ✅ R | ❌ | ✅ R | P2 | |
-| `ParentProperty` (PropertyGroup back-ref) | ✅ R | ❌ | ✅ R | P2 | |
+| `PropertyIndex / PropertyDepth` | ✅ R | ✅ R | ✅ R | done | P2c followup; via parentTreeGroup |
+| `ParentProperty` (PropertyGroup back-ref) | ✅ R | ✅ R | ✅ R | done | P2c followup; ParentGroup() |
 | `Selected / SelectedKeys` | ✅ R | 🗑️ | 🗑️ | done | runtime-only |
 | `EssentialPropertySource` | ✅ R | ❌ | 🗑️ | — | runtime/EG |
 | `AlternateSource / CanSetAlternateSource` (Layer-level, on Property) | ✅ R | 🟢 Layer.AlternateSource | ✅ | done |
@@ -175,7 +175,7 @@
 | `PropertyBase.Remove / Duplicate / MoveTo` | ✅ R/W | ❌ | ✅ R/W | P3 | 结构性 |
 | `Keyframe.Time / FrameTime / Value / InInterpType / OutInterpType / TemporalEase / SpatialTangent` | ✅ | ✅ R/W | ✅ | done |
 | `InsertKeyframe / DeleteKeyframe` | 🚧 limited | ✅ | ✅ | done |
-| **Gradient** (ADBE Vector Grad Colors XML 解析 → color_stops + alpha_stops) | ✅ R/W | ❌ | ✅ R/W | P2 | XML in cdat |
+| **Gradient** (ADBE Vector Grad Colors XML 解析 → color_stops + alpha_stops) | ✅ R/W | ✅ R | ✅ R/W | P2b 2C R done | XML 在 `GCst → GCky → Utf8`（不在 cdat）；写回 deferred |
 | **MaskPropertyGroup** | ✅ | 🟢 Mask 类型化 | ✅ | done |
 
 ### 2.5 Footage / Source 域

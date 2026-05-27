@@ -203,6 +203,37 @@ func (l *Layer) TimeRemapEnabled() bool {
 	return len(p.Keyframes) > 0
 }
 
+// SetTimeRemapEnabled enables or disables time remapping on this layer.
+//
+// Enabling sets a static value of 0.0 (identity mapping). For full
+// remapping, call TimeRemap().SetStaticValue() or insert keyframes
+// after enabling. Disabling clears the static value.
+//
+// Returns an error when the layer has no TimeRemap property slot
+// (non-AV layers) or the property has existing keyframes (delete them
+// first before disabling).
+func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
+	p := l.TimeRemap()
+	if p == nil {
+		return fmt.Errorf("layer %q has no TimeRemap property", l.Name)
+	}
+	if enabled {
+		if len(p.Keyframes) > 0 {
+			return nil // already enabled with keyframes
+		}
+		if p.StaticValue != nil {
+			return nil // already enabled with static value
+		}
+		return p.SetStaticValue(0.0)
+	}
+	// Disable: clear static value.
+	if len(p.Keyframes) > 0 {
+		return fmt.Errorf("layer %q: delete TimeRemap keyframes before disabling", l.Name)
+	}
+	p.StaticValue = nil
+	return nil
+}
+
 // AudioLevels returns the layer's Audio Levels property (2D, [left, right]
 // channel levels in dB). Present on layers with audio content; nil
 // otherwise.
