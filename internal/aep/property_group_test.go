@@ -164,6 +164,52 @@ func TestAEPropertyGroup_PropertyByPath_NotFound(t *testing.T) {
 	}
 }
 
+// TestAEPropertyGroup_ParentGroupBackRef verifies a leaf's ParentGroup()
+// resolves back to the group that lists it as a Child.
+func TestAEPropertyGroup_ParentGroupBackRef(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	if err != nil {
+		t.Skipf("re_cameralight.aep not present: %v", err)
+	}
+	var pos *aep.Property
+	var transformGroup *aep.AEPropertyGroup
+	for _, c := range proj.Compositions {
+		for _, l := range c.Layers {
+			if tg := l.TransformGroup(); tg != nil {
+				if p := tg.Property(aep.MatchNamePosition); p != nil {
+					pos = p
+					transformGroup = tg
+					break
+				}
+			}
+		}
+		if pos != nil {
+			break
+		}
+	}
+	if pos == nil {
+		t.Skip("no Position in fixture")
+	}
+	got := pos.ParentGroup()
+	if got != transformGroup {
+		t.Errorf("Position.ParentGroup() = %p, want %p (TransformGroup)", got, transformGroup)
+	}
+	// Depth of TransformGroup should be 1 (one hop from root).
+	if d := transformGroup.Depth(); d != 1 {
+		t.Errorf("TransformGroup.Depth() = %d, want 1", d)
+	}
+	if d := transformGroup.ParentGroup().Depth(); d != 0 {
+		t.Errorf("root.Depth() = %d, want 0", d)
+	}
+	// PropertyIndex finds the leaf in its parent.
+	if idx := transformGroup.PropertyIndex(pos); idx < 0 {
+		t.Errorf("TransformGroup.PropertyIndex(Position) = %d (not found)", idx)
+	}
+	if idx := transformGroup.PropertyIndex(nil); idx != -1 {
+		t.Errorf("PropertyIndex(nil) = %d, want -1", idx)
+	}
+}
+
 // TestAEPropertyGroup_LeafResolutionByTdbsIdentity verifies the tree
 // nodes are the SAME *Property instances as Layer.Properties (pointer
 // identity), so mutations through the flat API are visible through the

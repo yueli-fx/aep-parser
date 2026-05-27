@@ -837,6 +837,14 @@ type Property struct {
 	// Nil when the property has no expression; SetExpression creates
 	// or removes it as needed.
 	exprChunk *rifx.Chunk
+
+	// parentTreeGroup is the AEPropertyGroup that contains this leaf in
+	// the layer's hierarchical property tree (P2c). Populated by
+	// wirePropertyTreeLeaves; nil for properties built outside the
+	// parser or not reachable from the tree (e.g. effect parameters,
+	// mask sub-properties — those live in Effect.Parameters / Mask, not
+	// in the layer's top-level tdgp tree).
+	parentTreeGroup *AEPropertyGroup
 }
 
 // InterpType identifies a keyframe's interpolation mode on one side

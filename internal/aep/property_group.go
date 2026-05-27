@@ -190,7 +190,8 @@ func (r *propertyTreeLeafRef) PropertyName() string      { return r.matchName }
 // chunk pointer identity (each tdbs has exactly one *Property; the parser
 // records it as Property.tdbs). Unresolved placeholders (e.g. leaves
 // parseLeafProperty rejected as "nothing useful") are dropped from the
-// tree to keep PropertyByPath / Group / Property accessors honest.
+// tree. Resolved leaves get their `parentTreeGroup` back-ref set so
+// Property.ParentGroup() works.
 func wirePropertyTreeLeaves(root *AEPropertyGroup, props []*Property) {
 	byTdbs := make(map[*rifx.Chunk]*Property, len(props))
 	for _, p := range props {
@@ -205,6 +206,7 @@ func wirePropertyTreeLeaves(root *AEPropertyGroup, props []*Property) {
 			switch v := c.(type) {
 			case *propertyTreeLeafRef:
 				if p, ok := byTdbs[v.tdbs]; ok {
+					p.parentTreeGroup = g
 					filtered = append(filtered, p)
 				}
 				// else: parseLeafProperty rejected this tdbs — drop placeholder.
@@ -218,4 +220,35 @@ func wirePropertyTreeLeaves(root *AEPropertyGroup, props []*Property) {
 		g.Children = filtered
 	}
 	walk(root)
+}
+
+// ParentGroup returns the AEPropertyGroup that contains this property in
+// the layer's hierarchical property tree, or nil when the property was
+// built outside the parser, lives inside an Effect/Mask (not the
+// layer-level tdgp), or hasn't been wired through wirePropertyTreeLeaves.
+func (p *Property) ParentGroup() *AEPropertyGroup { return p.parentTreeGroup }
+
+// PropertyIndex returns the position of child within this group's
+// Children slice (0-based), or -1 when child is not a direct child of g.
+// Compared by pointer identity.
+func (g *AEPropertyGroup) PropertyIndex(child PropertyBase) int {
+	for i, c := range g.Children {
+		// Compare by interface equality, which collapses to pointer
+		// equality for *Property and *AEPropertyGroup (both pointer types).
+		if c == child {
+			return i
+		}
+	}
+	return -1
+}
+
+// Depth returns the number of hops from this group to the synthetic
+// root: 0 for the root itself, 1 for top-level subgroups
+// (Transform Group, etc.), 2 for nested subgroups, and so on.
+func (g *AEPropertyGroup) Depth() int {
+	d := 0
+	for cur := g.parent; cur != nil; cur = cur.parent {
+		d++
+	}
+	return d
 }
