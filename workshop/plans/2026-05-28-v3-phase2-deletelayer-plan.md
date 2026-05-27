@@ -100,16 +100,9 @@ app.quit();
 
 **Goal**: 基于 Task 1 的 RE 答案，定下 DeleteLayer 的策略矩阵。**不写代码**，写决策。
 
-- [ ] **Step 2.1**: 把 RE-Q1..Q6 答案塞进决策表（写在 plan 末尾，或新建 spec 文件 `specs/2026-05-28-v3-phase2-deletelayer-strategy.md`）。表至少含：
-    - `itemList.Children` 删法（splice / gap）
-    - Ewst sibling 同删 / 留
-    - Layer.ParentID 清理：reset to 0 / lift to grandparent / refuse delete
-    - TrackMatteLayerID 清理：reset to 0 / re-pick neighbor / refuse delete
-    - head chunk counter 调整：none / down-adjust
-    - opaque shard 启用：no / yes（若 RE 发现孤儿 chunks）
-- [ ] **Step 2.2**: 决策"refuse delete"的所有场景表（unsupported 状态），落到 error message：
-    - 比如 layer 0 (camera/light/audio)? 索引越界？ 单层 comp 删剩 0 个 AE 接受吗？
-- [ ] **Step 2.3**: 决策被 commit/board 接受后，进 Task 3
+- [x] **Step 2.1**: 决策表落到 [`specs/2026-05-28-v3-phase2-deletelayer-strategy.md`](../specs/2026-05-28-v3-phase2-deletelayer-strategy.md) § 2。**关键调整：F4 "16-chunk delete unit" 改成 adaptive splice**——发现 NewShapeLayer 只插 Layr+Ewst（2 chunk）且 ship-gate 过，说明 14 follower 不是 layer-bound 必需品。算法：locate Layr → assert Ewst → 消 leaves 直到下一个 LIST/EOF。两种状态都对（AE-saved 16，Go-built 2）。
+- [x] **Step 2.2**: refuse-cases 表 → strategy spec § 5（5 个 case + 每个的 detection + reason）。重点：**Phase 2 拒接 camera/light/audio 删除 + 单层 comp 删剩 0 个**（保守，RE 没覆盖；future RE 可 lift）。
+- [x] **Step 2.3**: 决策 commit (本 commit) 后，下个 session 直接 Task 3 实现（spec § 9 file map：新 `delete_layer.go` + `_test.go`，复用 `new_layer.go` 抽 `findLayrIndexInItemList` helper）。
 
 ---
 
