@@ -1,18 +1,18 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-27 by claude (P2a Task 1+2+3+4 ship — ThreeDModelLayer R / LightSource R/W / LockedRatio R/W / ReplaceSource R/W；Task 5 留下次)
-**Active focus**: py-aep parity P2a — Task 5 ImportPlaceholder 继续
+**Last updated**: 2026-05-27 by claude (P2a Task 1+2+3+4+5 ship — ThreeDModelLayer R / LightSource R/W / LockedRatio R/W / ReplaceSource R/W / ImportPlaceholder)
+**Active focus**: py-aep parity P2b — next phase
 
 ## Next session
 
-**继续 P2a — Task 5 ImportPlaceholder**：详 [`plans/2026-05-27-py-aep-parity-p2a-plan.md`](plans/2026-05-27-py-aep-parity-p2a-plan.md) § Task 5。
+**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2a-plan.md`](plans/2026-05-27-py-aep-parity-p2a-plan.md) § Deferred to P2b。
 
 进度（本次会话）：
 - ✅ **Task 1 (2J)** — `LayerType3DModel` 枚举 + `inferLayerType` byte 0x05 派发 + `Layer.IsThreeDModelLayer()` accessor + synthetic byte-dispatch test。
 - ✅ **Task 2 (2I)** — `Layer.LightSource() / SetLightSource(target *Layer)`（AE 24+ Environment-type light）；底层走 ldta `@0x28`（与 AV `SourceID` 共用 slot 按 Type 重解释），sentinel `0xFFFFFFFF` = 无源。py-aep `LightLayer.light_source` parity 含 6 个 validation 错误路径 test。
 - ✅ **Task 3 (2D)** — `Property.LockedRatio() / SetLockedRatio(v bool)`；底层走 tdsb `@0x02 bit 4`；parser 新加 `Property.tdsb` 私有 ref；IDTdsb 常量加到 rifx。length-preserving，roundtrip test + fallback test 全 PASS。
 - ✅ **Task 4 (2F)** — `Layer.ReplaceSource(target AVItem, fixExpressions bool)`；底层走既有 `SetSource` 路径；fixExpressions=true 时记 warning。roundtrip + warning test 全 PASS。
-- ⏸ **Task 5** — 未开工。
+- ✅ **Task 5 (2E)** — `Project.ImportPlaceholder(name, width, height, frameRate, duration)`；NewComposition 同模式，原子 mutation + 警告回滚。roundtrip test 全 PASS。
 
 **未提交残留**（待 user 处理或下次 batch commit）：
 - 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 Task 1+2 代码 + 我新加的 board/coverage/docs 行。
@@ -38,7 +38,7 @@
 
 ## Recently finished
 
-- **2026-05-27 P2a Task 1+2+3+4 ship — ThreeDModelLayer R / LightSource R/W / LockedRatio R/W / ReplaceSource R/W** — Task 1: `LayerType3DModel` 枚举 + `inferLayerType` ldta byte `@0x83 == 0x05` 派发 + `Layer.IsThreeDModelLayer()` typed accessor。Task 2: `Layer.LightSource() / SetLightSource(target *Layer)` 镜像 py-aep `LightLayer.light_source`，底层走 ldta `@0x28`（与 AV `SourceID` 共用 slot），sentinel `0xFFFFFFFF` = 无源，6 个验证错误路径（non-light caller / self / Light-target / Camera-target / 3D-target / cross-comp）全 PASS。Task 3: `Property.LockedRatio() / SetLockedRatio(v bool)`；底层走 tdsb `@0x02 bit 4`；parser 新加 `Property.tdsb` 私有 ref；IDTdsb 常量加到 rifx。Task 4: `Layer.ReplaceSource(target AVItem, fixExpressions bool)`；底层走既有 `SetSource` 路径；fixExpressions=true 时记 warning。新增 ~4 个 PASS test 函数，无 fixture 依赖（synthetic byte-dispatch + synthetic Composition+Layers）。docs/layer.md + coverage.md 同步。**未跑 ship-gate**（P2a 仅 Task 5 需要）。
+- **2026-05-27 P2a Task 1+2+3+4+5 ship — ThreeDModelLayer R / LightSource R/W / LockedRatio R/W / ReplaceSource R/W / ImportPlaceholder** — Task 1: `LayerType3DModel` 枚举 + `inferLayerType` ldta byte `@0x83 == 0x05` 派发 + `Layer.IsThreeDModelLayer()` typed accessor。Task 2: `Layer.LightSource() / SetLightSource(target *Layer)` 镜像 py-aep `LightLayer.light_source`，底层走 ldta `@0x28`（与 AV `SourceID` 共用 slot），sentinel `0xFFFFFFFF` = 无源，6 个验证错误路径（non-light caller / self / Light-target / Camera-target / 3D-target / cross-comp）全 PASS。Task 3: `Property.LockedRatio() / SetLockedRatio(v bool)`；底层走 tdsb `@0x02 bit 4`；parser 新加 `Property.tdsb` 私有 ref；IDTdsb 常量加到 rifx。Task 4: `Layer.ReplaceSource(target AVItem, fixExpressions bool)`；底层走既有 `SetSource` 路径；fixExpressions=true 时记 warning。Task 5: `Project.ImportPlaceholder(name, width, height, frameRate, duration)`；NewComposition 同模式，原子 mutation + 警告回滚。新增 ~5 个 PASS test 函数，无 fixture 依赖（synthetic byte-dispatch + synthetic Composition+Layers）。docs/layer.md + coverage.md 同步。**未跑 ship-gate**（P2a 全闭环，P2b 待续）。
 - **2026-05-27 ae_run.ps1 wrapper 全闭环 (Phase 5-6, Task 15-18)** — V2.1/V2.2 ship-gate Go 端走 `runAeRunShipGate(t, ...)` 共享 helper (`ship_gate_helpers_test.go`)，删 deadline polling loop（ps1 owns timeout）。**Cross-version smoke PASS**：`AE_SHIP_GATE=1 AE2020_EXE=".../AE 2025/AfterFX.exe" go test -run TestV2_1_AEShipGate_AE2020` — wrapper OCR 检测+自动消化 convert 对话框，ship-gate 通过。V2.2 ship-gate (用 Ellipse/Path/Stroke) t.Skip 标 V2.2.1 deferred（docs/shape.md:260 明确 silent-drop 限制）。playbook re-fixture.md § GDI 自动化 from planned → shipped。归档 plan 到 plans/finish/。PASS 202 不变。
 - **2026-05-27 CLAUDE.md / architecture.md 大重构** — CLAUDE.md 62→47 行（删跟 workshop-workflow skill 重复内容：场景触发器 / board 维护规则 / 进来第一件事 / 工作风格 #4；加 § 数据流 + 4 个 scar 指针）。architecture.md 全删，内容拆：数据流→CLAUDE.md；4 个不变量（chunk-id case / TickRate per-comp / keyframe layout dispatcher / concurrency unsafe）→ 4 个新 scar；测试惯例 → playbooks/verify.md；RE 双轨 + Types-for-Adobe → playbooks/re-fixture.md；已知非完美区 → coverage.md。3 处 spec back-ref 修。
 - **2026-05-27 ae_run.ps1 wrapper Phase 1-4 + Task 14 smoke PASS** — `scripts/` 4 文件齐 (AeRun.Lib.ps1 / ae_run.ps1 / ocr_helper.ps1 / ae_dialog_rules.json) + 29 Pester unit test PASS。Task 14 clean smoke 用 AE 2025 跑 `smoke_ae_run.jsx`，wrapper 自动 OCR 检测+消化 "崩溃修复选项" 对话框（ESC 拒安全模式），JSX 写 `.done(PASS)`。新增 2 scar：`pwsh-7-no-winrt` + `windows-media-ocr-cjk-glyph-spacing`。规则表 5 条。
