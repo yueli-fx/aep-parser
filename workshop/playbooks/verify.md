@@ -1,7 +1,7 @@
 ---
-when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against board.md; writing a new test (conventions for fixture / corruption / AE 24 fields)
-applies_to: [verify, test, vet, pass-count, pre-commit, ship-gate, test-conventions, fixture, t-skipf]
-last_updated: 2026-05-27
+when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against board.md; writing a new test (conventions for fixture / corruption / AE 24 fields); needing a tmp_debug tool to inspect chunks / layers / properties
+applies_to: [verify, test, vet, pass-count, pre-commit, ship-gate, test-conventions, fixture, t-skipf, tmp-debug-tools]
+last_updated: 2026-05-28
 ---
 
 # 验证流程
@@ -60,6 +60,7 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 | `list_props` | `go run ./tmp_debug/list_props <file.aep> [comp]` | 列每个 layer 的所有 Property |
 | `list_item_chunks` | `go run ./tmp_debug/list_item_chunks <file.aep> [prefix]` | dump comp Item LIST 完整 chunk 树（找 PRin / prda 这种 sibling chunk） |
 | `probe_effects` | `go run ./tmp_debug/probe_effects <file.aep>` | 列每个 layer 的 effects + params |
+| `dump_layers` | `go run ./tmp_debug/dump_layers <file.aep> [<file2> ...]` | 每 comp parsed layers (ID/Type/Name/ParentID/TrackMatteLayerID/SourceID) + raw Item LIST 子 chunk 顺序 + Layr/Ewst pairing 检测 — DeleteLayer / InsertLayer 结构性 mutation 的 fixture diff 主力 |
 | `dump_comp` / `dump_text` / `demo_*` | 类似 | RE 时核对字节 |
 
 不放进 `internal/aep`，避免污染 public API。

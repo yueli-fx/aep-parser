@@ -87,10 +87,10 @@ proj.save(new File("test_data/re_delete_layer_" + mode + ".aep"));
 app.quit();
 ```
 
-- [ ] **Step 1.1**: 写 `test_data/re_delete_layer.jsx`（按上面大纲，加 `.done` 契约 + try/catch 错误写文件）
-- [ ] **Step 1.2**: User 跑 4 遍 `scripts/ae_run.ps1` 产 4 个 fixture（AE 2025；4 个 mode = baseline/middle/parent/matte）
-- [ ] **Step 1.3**: 用 `go run ./cmd/aep_dump` （如果不存在就写个简易 `cmd/dump_layers` 列 Layr ID + ParentID + TrackMatteLayerID + itemList.Children 顺序）输出 4 个 fixture 的 layer 表
-- [ ] **Step 1.4**: 把差异点（fixture diff 表）写进 `workshop/scars/ae-deletelayer-re.md`（新 scar）—— 这是后续 Task 3 的 source of truth
+- [x] **Step 1.1**: 写 `test_data/re_delete_layer.jsx`（多 mode via `$.getenv("RE_DELETE_MODE")`；per-mode setup 隔离 RE-Q1..Q4；teardown close + quit；done marker）。layout: `l1`=index 1, `l2`=index 2, `l3`=index 3 (add 反序)；matte 走 implicit "layer above"（AE 2020 兼容），AE 23+ 自动写显式 ID。
+- [x] **Step 1.2**: Agent 自己跑 — baseline/middle/parent 用 **AE 2020 17.7x45**，matte 用 **AE 2025 25.1x68**（因 `TrackMatteLayerID` 是 AE 23+ 字段）。所有 4 fixture exit=0 PASS。
+- [x] **Step 1.3 (tool ready)**: `tmp_debug/dump_layers/main.go` 已写好 + 4 fixture dump 过 — Item LIST baseline=237 children, middle/parent/matte=221 (Δ-16)。
+- [x] **Step 1.4**: scar `workshop/scars/ae-deletelayer-re.md` 落地（含 6 个 Finding + impl rules）。**关键结果**：(F1) splice 不 gap；(F2) ParentID reset to 0；(F3) TrackMatteLayerID reset 但 trackMatteType byte 不动；(F4) 每 layer = 16 chunk delete unit（Layr + Ewst + 14 follower fvdv/fiop/ftts/foac/fiac/fipc/fifl ×2）；(F5) DLay/SLay/CLay/SecL 同样 16-chunk pattern 但 DeleteLayer 拒接；(F6) 不复用 ID（head counter 不动）。
 
 **完成判定**: scar 文件包含 RE-Q1..Q4 的 AE-验证答案，每条带 fixture name + Go-端 dump 引用。
 

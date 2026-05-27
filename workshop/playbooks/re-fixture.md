@@ -1,7 +1,7 @@
 ---
-when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file; looking up "which AE version introduced field X"; invoking ae_run.ps1 wrapper for unattended ship-gate
-applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch]
-last_updated: 2026-05-27
+when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file; looking up "which AE version introduced field X"; invoking ae_run.ps1 wrapper for unattended ship-gate; deciding which AE version to use for a new fixture
+applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch, agent-runs-ae, version-choice]
+last_updated: 2026-05-28
 ---
 
 # JSX RE 工作流 + ship-gate
@@ -9,6 +9,53 @@ last_updated: 2026-05-27
 ## 总览
 
 写 fixture 用 ExtendScript（JSX）→ 让 AE 跑一次 → 拿到 `.aep` → Go 端 parse_btdk diff 找字段。Ship-gate 反过来：Go 写改过的 `.aep` → AE 打开 → 读出值跟 Go 写入比对。
+
+## Agent 自己调 AE — 不要 ask user
+
+`scripts/ae_run.ps1` 是 **unattended wrapper**（OCR + multi-signal modal 自动消化，exit code 0/1/2/3/4/5）。Agent 应直接通过 Bash/PowerShell tool 调它，**不要**把 "请 user 跑 AE" 当默认。
+
+调用模板（用 `$env:` 传 JSX 内 `$.getenv()` 读到的 mode/参数）：
+
+```powershell
+$env:MY_VAR = "value"   # 如果 JSX 用 $.getenv() 读 mode
+Remove-Item -ErrorAction SilentlyContinue test_data/re_X.done
+pwsh -NoProfile -File scripts/ae_run.ps1 `
+    -AeExe "E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe" `
+    -Jsx   "E:\projects\tools\aep-parser\test_data\re_X.jsx" `
+    -Done  "E:\projects\tools\aep-parser\test_data\re_X.done" `
+    -TimeoutSec 180
+```
+
+每次跑前先删旧 `.done`（wrapper 等的是新 `.done` 出现）。跑完读 `cat test_data/re_X.done` 看 JSX 步骤 log。
+
+何时**应该** ask user：(a) AE 没装在标准路径需要他指路；(b) wrapper 反复 exit 2（未知 modal），rules 加完仍 fail；(c) 跨 monitor 输出 hang 等 GUI 异常。其他情况一律自己跑。
+
+## 新 fixture 默认走 AE 2020
+
+项目读取下限 = AE 2020（CLAUDE.md "读取下限 AE 2020"）。**新 RE fixture 默认用 AE 2020 跑**，理由：
+
+1. AE 2020 = 项目语义基线，behavior 跟低版本读路径一致
+2. AE 24+ 引入的字段（`fontCapsOption / strokeOverFill / autoHyphenate / trackMatteLayer / setTrackMatte` etc）在 AE 2020 跑会 throw 或 no-op，反而暴露不出来
+3. AE 2020 不会"自动补"高版本字段（fresh save 干净），适合 byte-diff 找字段
+
+**例外 — 升 AE 23+ 当且仅当**：被 RE 的字段是 AE 23+ 引入的。判断方法：diff `Types-for-Adobe/AfterEffects/22.0/` 跟 `Types-for-Adobe/AfterEffects/23.0/` TS 类型定义。引入版本对照：
+
+| Field | 引入版本 | 旧版本回退 |
+|---|---|---|
+| `Layer.trackMatteLayer` / `Layer.setTrackMatte()` 显式 ID | AE 23 | implicit "layer above" (`l.trackMatteType = ALPHA`) |
+| `TextDocument.fontCapsOption / strokeOverFill / fauxBold` etc | AE 24 | 不能 RE，必须 AE 24+ |
+| `TextDocument.autoHyphenate / firstLineIndent` etc | AE 24 | 同上 |
+
+混合 fixture 怎么办：跑大部分 mode 用 AE 2020，仅高版本字段那个 mode 单独切 AE 25。例：`re_delete_layer.jsx` baseline/middle/parent 用 AE 2020，matte mode 切 AE 2025（`TrackMatteLayerID` ldta @0xA0 是 AE 23+ 才有）。
+
+## RE fixture 双轨
+
+`test_data/` 下两类 fixture 文件名：
+
+- `re_*.jsx` — AE 2020 ScriptingAPI 写的 fixture。**默认走这个**，覆盖 AE 2020 共有字段
+- `re_*_ae24.jsx` — AE 24+ 才解封的字段（`fontCapsOption / strokeOverFill / autoHyphenate` 等），AE 2020 写不出来，必须 AE 24+ 跑
+
+Test 代码 `t.Skipf("fixture missing", ...)` 缺文件跳过，不阻塞 CI。
 
 ## RE fixture 双轨
 
