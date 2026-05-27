@@ -4,8 +4,13 @@ import "github.com/example/aep-parser/internal/rifx"
 
 // White-box accessors for unexported fields.
 // `_test.go` 后缀使这些方法仅在 test build 时编译，不污染 production binary。
-func (p *Project) NextItemIDForTest() uint32    { return p.nextItemID }
-func (p *Project) RootFoldForTest() *rifx.Chunk { return p.rootFold }
+func (p *Project) NextItemIDForTest() uint32 { return p.nextItemID }
+func (p *Project) RootFoldForTest() *rifx.Chunk {
+	if p.back == nil {
+		return nil
+	}
+	return p.back.rootFold
+}
 
 // ItemListForTest 暴露 Composition.itemList 给 Phase 5+ golden tests 用。
 func (c *Composition) ItemListForTest() *rifx.Chunk {
@@ -16,7 +21,12 @@ func (c *Composition) ItemListForTest() *rifx.Chunk {
 }
 
 // RootForTest 暴露 Project.root 给 debug tests 用。
-func (p *Project) RootForTest() *rifx.Chunk { return p.root }
+func (p *Project) RootForTest() *rifx.Chunk {
+	if p.back == nil {
+		return nil
+	}
+	return p.back.root
+}
 
 // NewTestProperty creates a Property with synthetic tdb4/tdsb/tdum/tduM
 // chunks for white-box testing. All chunk refs are optional (pass nil to omit).

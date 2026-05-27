@@ -233,7 +233,7 @@ func loadCompTemplate(raw []byte) *compTemplate {
 	// fvdv / fiop / ftts / foac / fiac / fipc / fifl]. AE expects these to
 	// follow every Item; missing them → AE 25 reports "文件数据丢失".
 	var foldList *rifx.Chunk
-	for _, ch := range p.root.Children {
+	for _, ch := range p.back.root.Children {
 		if ch.IsList() && ch.FormType == rifx.IDFold {
 			foldList = ch
 			break
@@ -394,10 +394,10 @@ func (p *Project) NewComposition(
 	itemList := buildCompItem(p.target, id, name, cdtaBytes)
 
 	// 4. Atomic mutation prep
-	if p.rootFold == nil {
+	if p.back.rootFold == nil {
 		return nil, fmt.Errorf("internal: project missing root Fold (template malformed?)")
 	}
-	oldChildLen := len(p.rootFold.Children)
+	oldChildLen := len(p.back.rootFold.Children)
 	oldWarningsLen := len(p.Warnings)
 
 	// 5. Append to rootFold + reparse closed loop。
@@ -405,12 +405,12 @@ func (p *Project) NewComposition(
 	// (FEE LIST + fvdv/fiop/ftts/foac/fiac/fipc/fifl) —— 否则报 "文件数据丢失"
 	// (实测 Phase 6 ship gate)。Phase 2 Task 2.4 把 inline clone 逻辑提到
 	// `lower_item_siblings.go` 的 lowerItemSiblings primitive，行为不变。
-	p.rootFold.Children = append(p.rootFold.Children, itemList)
-	p.rootFold.Children = append(p.rootFold.Children, lowerItemSiblings(nil)...)
+	p.back.rootFold.Children = append(p.back.rootFold.Children, itemList)
+	p.back.rootFold.Children = append(p.back.rootFold.Children, lowerItemSiblings(nil)...)
 	comp, err := parseComposition(itemList, id, name, &p.Warnings)
 	if err != nil {
 		// Rollback
-		p.rootFold.Children = p.rootFold.Children[:oldChildLen]
+		p.back.rootFold.Children = p.back.rootFold.Children[:oldChildLen]
 		p.Warnings = p.Warnings[:oldWarningsLen]
 		return nil, fmt.Errorf("internal: re-parsing new composition: %w", err)
 	}
@@ -418,7 +418,7 @@ func (p *Project) NewComposition(
 	// 6. Warnings-as-failure (Invariant #11)
 	if len(p.Warnings) != oldWarningsLen {
 		newWarnings := append([]string(nil), p.Warnings[oldWarningsLen:]...)
-		p.rootFold.Children = p.rootFold.Children[:oldChildLen]
+		p.back.rootFold.Children = p.back.rootFold.Children[:oldChildLen]
 		p.Warnings = p.Warnings[:oldWarningsLen]
 		return nil, fmt.Errorf("internal: builder produced %d parser warning(s): %v", len(newWarnings), newWarnings)
 	}

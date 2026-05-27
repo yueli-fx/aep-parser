@@ -55,10 +55,10 @@ func ParseReader(r io.ReadSeeker) (*Application, error) {
 //
 // Source: py-aep `binary/item_chunks.py::HeadChunk`.
 func (a *Application) Version() string {
-	if a.Project == nil || a.Project.root == nil {
+	if a.Project == nil || a.Project.back == nil || a.Project.back.root == nil {
 		return ""
 	}
-	head := a.Project.root.FindFirst(chunkIDHead)
+	head := a.Project.back.root.FindFirst(chunkIDHead)
 	if head == nil || len(head.Data) < 8 {
 		return ""
 	}

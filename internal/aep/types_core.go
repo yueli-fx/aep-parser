@@ -28,8 +28,6 @@ package aep
 
 import (
 	"fmt"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // BitsPerChannel represents color depth.
@@ -210,29 +208,14 @@ type Project struct {
 	// produces a best-effort Project. Empty (nil) on a clean parse.
 	Warnings []string
 
-	// root keeps the original RIFX chunk tree so callers can mutate leaf
-	// chunks (e.g. Footage.SetPath) and re-serialize via WriteAEP.
-	root *rifx.Chunk
-
-	// Project header chunks. nhed @0x0F + nnhd @0x18 both hold BPC enum
-	// (0=8 / 1=16 / 2=32). SetBitsPerChannel writes both for consistency.
-	nhedChunk *rifx.Chunk
-	nnhdChunk *rifx.Chunk
-
-	// Project-level single-field setting chunks (P1 1D, py-aep parity).
-	// Captured by parseProject when present; mutated by Set* methods.
-	// All exist as direct root children — see project_settings.go.
-	acerChunk *rifx.Chunk // 1B bool — compensate_for_scene_referred_profiles
-	adfrChunk *rifx.Chunk // 8B f64 BE — audio_sample_rate
-	dwgaChunk *rifx.Chunk // 1-4B — byte 0 = working_gamma selector
-	gpugUtf8  *rifx.Chunk // Utf8 inside gpuG LIST — gpu_accel_type (UUID)
-	exenUtf8  *rifx.Chunk // Utf8 inside ExEn LIST — expression_engine
-	cmsUtf8   *rifx.Chunk // Utf8 — CMS settings JSON (AE 24+)
+	// back holds the underlying RIFX root + project-level single-field chunk
+	// refs that power length-preserving writes. Nil for projects built outside
+	// the parser. See back_project.go.
+	back *projectBackrefs
 
 	// V2: derived state for structural mutation (NewComposition / 未来 NewFootage etc.)
-	nextItemID uint32      // monotonic Item ID counter; never reused (see Invariants #9)
-	rootFold   *rifx.Chunk // cached root Fold LIST reference; derived cache, never owned (see Invariants #8)
-	target     AETarget    // which AE-version template NewProject loaded; drives per-target builder chunk selection
+	nextItemID uint32   // monotonic Item ID counter; never reused (see Invariants #9)
+	target     AETarget // which AE-version template NewProject loaded; drives per-target builder chunk selection
 }
 
 // CompositionByID returns the first composition whose ID matches id, or

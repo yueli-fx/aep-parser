@@ -49,10 +49,10 @@ func (p *Project) LayerByID(id uint32) *Layer {
 //
 // Mirrors py-aep's `project.effect_names`.
 func (p *Project) EffectNames() []string {
-	if p.root == nil {
+	if p.back == nil || p.back.root == nil {
 		return nil
 	}
-	pefl := findRootListByType(p.root, rifx.IDPefl)
+	pefl := findRootListByType(p.back.root, rifx.IDPefl)
 	if pefl == nil {
 		return nil
 	}

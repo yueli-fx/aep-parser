@@ -13,9 +13,11 @@ import (
 // up a synthetic cmsUtf8 chunk without exporting a test hook.
 func TestProjectSettings_CmsEnumValidation(t *testing.T) {
 	p := &Project{
-		cmsUtf8: &rifx.Chunk{
-			ID:   rifx.IDUtf8,
-			Data: []byte(`{"colorManagementSystem":0,"lutInterpolationMethod":0,"ocioConfigurationFile":""}`),
+		back: &projectBackrefs{
+			cmsUtf8: &rifx.Chunk{
+				ID:   rifx.IDUtf8,
+				Data: []byte(`{"colorManagementSystem":0,"lutInterpolationMethod":0,"ocioConfigurationFile":""}`),
+			},
 		},
 	}
 
@@ -38,9 +40,11 @@ func TestProjectSettings_CmsEnumValidation(t *testing.T) {
 // surface the issue) instead of silently returning defaults.
 func TestProjectSettings_CmsMalformedJsonWarns(t *testing.T) {
 	p := &Project{
-		cmsUtf8: &rifx.Chunk{
-			ID:   rifx.IDUtf8,
-			Data: []byte(`{not valid json`),
+		back: &projectBackrefs{
+			cmsUtf8: &rifx.Chunk{
+				ID:   rifx.IDUtf8,
+				Data: []byte(`{not valid json`),
+			},
 		},
 	}
 	_ = p.ColorManagementSystem() // triggers cmsSettings()

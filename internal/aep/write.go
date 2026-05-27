@@ -24,14 +24,14 @@ var chunkIDHead = rifx.ChunkID{'h', 'e', 'a', 'd'}
 // subset of the .aep format; chunks we don't know about pass through
 // byte-for-byte. If After Effects rejects the output, file a sample.
 func (p *Project) WriteAEP(w io.Writer) error {
-	if p.root == nil {
+	if p.back == nil || p.back.root == nil {
 		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
 	}
 	if err := p.syncShapeLayerChunks(); err != nil {
 		return fmt.Errorf("sync shape layers: %w", err)
 	}
 	p.syncHeadCounters()
-	return p.root.Write(w)
+	return p.back.root.Write(w)
 }
 
 // syncHeadCounters 把 root head chunk 里的两个 32-bit counter 同步到至少
@@ -51,10 +51,10 @@ func (p *Project) WriteAEP(w io.Writer) error {
 //	[16..19] counter B (uint32 BE; ~save-sequence; pattern not fully RE'd
 //	         but ≥ nextItemID empirically opens in AE 25)
 func (p *Project) syncHeadCounters() {
-	if p.root == nil {
+	if p.back == nil || p.back.root == nil {
 		return
 	}
-	head := p.root.FindFirst(chunkIDHead)
+	head := p.back.root.FindFirst(chunkIDHead)
 	if head == nil || len(head.Data) < 20 {
 		return
 	}
@@ -200,17 +200,17 @@ func jsonEscapeString(s string) []byte {
 //
 // length-preserving (2 bytes total).
 func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
-	if p.nhedChunk == nil || p.nnhdChunk == nil {
+	if p.back == nil || p.back.nhedChunk == nil || p.back.nnhdChunk == nil {
 		return fmt.Errorf("project: header chunks missing (built outside parser?)")
 	}
-	if len(p.nhedChunk.Data) <= 0x0F {
-		return fmt.Errorf("project: nhed too short (len=%d) for BitsPerChannel write", len(p.nhedChunk.Data))
+	if len(p.back.nhedChunk.Data) <= 0x0F {
+		return fmt.Errorf("project: nhed too short (len=%d) for BitsPerChannel write", len(p.back.nhedChunk.Data))
 	}
-	if len(p.nnhdChunk.Data) <= 0x18 {
-		return fmt.Errorf("project: nnhd too short (len=%d) for BitsPerChannel write", len(p.nnhdChunk.Data))
+	if len(p.back.nnhdChunk.Data) <= 0x18 {
+		return fmt.Errorf("project: nnhd too short (len=%d) for BitsPerChannel write", len(p.back.nnhdChunk.Data))
 	}
-	p.nhedChunk.Data[0x0F] = byte(bpc)
-	p.nnhdChunk.Data[0x18] = byte(bpc)
+	p.back.nhedChunk.Data[0x0F] = byte(bpc)
+	p.back.nnhdChunk.Data[0x18] = byte(bpc)
 	p.BitsPerChannel = bpc
 	return nil
 }
