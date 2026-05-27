@@ -55,33 +55,33 @@
 | API | py-aep | 我们 | 目标 | Phase | 备注 |
 |---|---|---|---|---|---|
 | `BitsPerChannel` | ✅ | ✅ R/W | ✅ | done | |
-| `Revision` (head @ next_item_id+revision) | ✅ R/W | ❌ | ✅ R only | P1 | user-action counter；写无意义 |
-| `LinearBlending` (lnrb flag chunk) | ✅ toggle | ❌ | ✅ R/W | P1 | toggle = add/remove chunk |
-| `LinearizeWorkingSpace` (lnrp) | ✅ toggle | ❌ | ✅ R/W | P1 | 同上 |
-| `CompensateForSceneReferredProfiles` (acer.value) | ✅ R/W | ❌ | ✅ R/W | P1 | bool, 1 byte |
-| `AudioSampleRate` (adfr.value) | ✅ R/W enum{22050,32000,44100,48000,96000} | ❌ | ✅ R/W | P1 | f64 |
-| `WorkingGamma` (dwga) | ✅ R/W enum{2.2, 2.4} | ❌ | ✅ R/W | P1 | f64 + validate |
-| `GpuAccelType` (gpug.Utf8) | ✅ R/W enum | ❌ | ✅ R/W | P1 | Utf8 length-variable, splice OK |
-| `ExpressionEngine` (ExEn LIST→Utf8) | ✅ R/W enum{"extendscript","javascript-1.0"} | ❌ | ✅ R/W | P1 | 设过/未设两路径 |
-| `FeetFramesFilmType` (nnhd) | ✅ R/W enum{16mm/35mm} | ❌ | ✅ R/W | P2 | nnhd 字节布局未 RE |
-| `FootageTimecodeDisplayStartType` (nnhd) | ✅ R/W | ❌ | ✅ R/W | P2 | 同上 |
-| `TimecodeDefaultBase` (nnhd) | ✅ R/W [1..999] | ❌ | ✅ R/W | P2 | int |
-| `FramesCountType` (nnhd) | ✅ R/W enum | ❌ | ✅ R/W | P2 | |
-| `DisplayStartFrame` (nnhd, 0/1) | ✅ R/W | ❌ | ✅ R/W | P2 | |
-| `FramesUseFeetFrames` (nnhd) | ✅ R/W | ❌ | ✅ R/W | P2 | |
-| `TimeDisplayType` (nnhd) | ✅ R/W enum | ❌ | ✅ R/W | P2 | |
-| `TransparencyGridThumbnails` (nnhd) | ✅ R/W | ❌ | ✅ R/W | P2 | |
-| `ColorManagementSystem` (CMS JSON, AE 24+) | ✅ R/W enum | ❌ | ✅ R/W | P2 | JSON Utf8 chunk |
-| `LutInterpolationMethod` (CMS) | ✅ R/W | ❌ | ✅ R/W | P2 | |
-| `OcioConfigurationFile` (CMS) | ✅ R/W | ❌ | ✅ R/W | P2 | |
-| `WorkingSpace` (ws Utf8) | ✅ R only | ❌ | ✅ R only | P2 | ICC blob 写需 Adobe ICC files, R only |
-| `DisplayColorSpace` (dcs Utf8) | ✅ R only | ❌ | ✅ R only | P2 | 同上 |
+| `Revision` (head @ next_item_id+revision) | ✅ R/W | ✅ R | ✅ R only | done | P1 1D；user-action counter；写无意义 |
+| `LinearBlending` (lnrb flag chunk) | ✅ toggle | ✅ R/W | ✅ R/W | done | P1 1D；toggle = add/remove chunk |
+| `LinearizeWorkingSpace` (lnrp) | ✅ toggle | ✅ R/W | ✅ R/W | done | P1 1D；同上 |
+| `CompensateForSceneReferredProfiles` (acer.value) | ✅ R/W | ✅ R/W | ✅ R/W | done | P1 1D；bool, 1 byte |
+| `AudioSampleRate` (adfr.value) | ✅ R/W enum{22050,32000,44100,48000,96000} | ✅ R/W | ✅ R/W | done | P1 1D；f64 |
+| `WorkingGamma` (dwga) | ✅ R/W enum{2.2, 2.4} | ✅ R/W | ✅ R/W | done | P1 1D；f64 + validate |
+| `GpuAccelType` (gpug.Utf8) | ✅ R/W enum | ✅ R/W | ✅ R/W | done | P1 1D；Utf8 length-variable, splice OK |
+| `ExpressionEngine` (ExEn LIST→Utf8) | ✅ R/W enum{"extendscript","javascript-1.0"} | ✅ R/W | ✅ R/W | done | P1 1D；设过/未设两路径 |
+| `FeetFramesFilmType` (nnhd) | ✅ R/W enum{16mm/35mm} | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `FootageTimecodeDisplayStartType` (nnhd) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `TimecodeDefaultBase` (nnhd) | ✅ R/W [1..999] | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `FramesCountType` (nnhd) | ✅ R/W enum | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `DisplayStartFrame` (nnhd, 0/1) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `FramesUseFeetFrames` (nnhd) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `TimeDisplayType` (nnhd) | ✅ R/W enum | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `TransparencyGridThumbnails` (nnhd) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2A |
+| `ColorManagementSystem` (CMS JSON, AE 24+) | ✅ R/W enum | ✅ R/W | ✅ R/W | done | P2b 2B |
+| `LutInterpolationMethod` (CMS) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2B |
+| `OcioConfigurationFile` (CMS) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2b 2B |
+| `WorkingSpace` (ws Utf8) | ✅ R only | 🟢 R only | 🟢 R only | done | P2b 2B；ICC blob 写需 Adobe ICC files |
+| `DisplayColorSpace` (dcs Utf8) | ✅ R only | 🟢 R only | 🟢 R only | done | P2b 2B；同上 |
 | `XmpPacket` | ✅ R/W (raw XML) | ❌ | 🟡 R only | P2 | XML mutation 风险高，初版 R only |
-| `EffectNames` (Pefl/pjef list) | ✅ R only | ❌ | ✅ R only | P1 | list of effect names used |
-| `Compositions / Folders / Footages` filter | ✅ | 🟢 only Compositions | ✅ | P1 | 加 Folders / Footages helper |
-| `RootFolder` | ✅ | 🟢（in items tree）| ✅ | P1 | typed accessor |
-| `LayerByID(id)` | ✅ | ❌ | ✅ | P1 | 跨 comp 查找 |
-| `ImportPlaceholder(name, w, h, fps, dur)` | ✅ | ❌ | ✅ | P2 | NewProject pattern |
+| `EffectNames` (Pefl/pjef list) | ✅ R only | ✅ R only | ✅ R only | done | P1 1B |
+| `Compositions / Folders / Footages` filter | ✅ | ✅ | ✅ | done | P1 1B |
+| `RootFolder` | ✅ | ✅ | ✅ | done | P1 1B |
+| `LayerByID(id)` | ✅ | ✅ | ✅ | done | P1 1B |
+| `ImportPlaceholder(name, w, h, fps, dur)` | ✅ | ✅ | ✅ | done | P2a Task 5 |
 | `Save(path)` | 🟡 alpha 全重写 | 🟢 WriteAEP 任意 io.Writer | — | done | 我们已有 |
 
 ### 2.2 CompItem 域
@@ -91,23 +91,23 @@
 | `Name / FrameRate / Duration / Size / BGColor / Shutter*` | ✅ | ✅ R/W | ✅ | done |
 | `PixelAspect / ResolutionFactor / WorkArea*` | ✅ | ✅ R/W | ✅ | done |
 | `DisplayStartTime` | ✅ | ✅ R/W | ✅ | done |
-| `DisplayStartFrame` | ✅ | ❌ | ✅ R/W | P1 | 我们有 Time，加 Frame 双轨 |
-| `WorkAreaStartFrame / WorkAreaDurationFrame` | ✅ | ❌ | ✅ R/W | P1 | frame-time 伴生 |
+| `DisplayStartFrame` | ✅ | ✅ R/W | ✅ R/W | done | P1 1C |
+| `WorkAreaStartFrame / WorkAreaDurationFrame` | ✅ | ✅ R/W | ✅ R/W | done | P1 1C |
 | `DropFrame` | ✅ R only | 🗑️ | 🗑️ | done | runtime-only |
 | `Renderer` | ✅ R/W | 🟢 R only | ✅ R/W | P3 | prda 长度随 renderer 变（结构性） |
-| `Markers` flat list | ✅ | 🟢 markerProperty only | ✅ | P1 | 加 `Composition.Markers` flat slice |
-| `NumLayers / HasAudio / ActiveCamera` | ✅ | ❌ | ✅ | P1 | pure helper |
-| `TextLayers / ShapeLayers / CameraLayers / LightLayers` | ✅ | ❌ | ✅ | P1 | filter helper |
-| `NullLayers / SolidLayers / AdjustmentLayers` | ✅ | ❌ | ✅ | P1 | |
-| `ThreeDLayers / GuideLayers / SoloLayers` | ✅ | ❌ | ✅ | P1 | |
-| `AVLayers / CompositionLayers / FootageLayers / FileLayers / PlaceholderLayers` | ✅ | ❌ | ✅ | P1 | 按 source 类型 |
-| `TimeScale` | ✅ R only | 🟢 TickRate | ✅ | P1 | 重命名/别名 |
+| `Markers` flat list | ✅ | ✅ | ✅ | done | P1 1C |
+| `NumLayers / HasAudio / ActiveCamera` | ✅ | ✅ | ✅ | done | P1 1F |
+| `TextLayers / ShapeLayers / CameraLayers / LightLayers` | ✅ | ✅ | ✅ | done | P1 1A |
+| `NullLayers / SolidLayers / AdjustmentLayers` | ✅ | ✅ | ✅ | done | P1 1A |
+| `ThreeDLayers / GuideLayers / SoloLayers` | ✅ | ✅ | ✅ | done | P1 1A |
+| `AVLayers / CompositionLayers / FootageLayers / FileLayers / PlaceholderLayers` | ✅ | ✅ | ✅ | done | P1 1A |
+| `TimeScale` | ✅ R only | ✅ TickRate alias | ✅ | done | P1 1F |
 | `MotionGraphicsTemplateName` | ✅ R/W | ❌ | ✅ R/W | P3 | Essential Graphics |
 | `MotionGraphicsControllers` | ✅ R only | ❌ | ✅ R only | P3 | |
 | `MotionGraphicsTemplateController{Count,Names}` | ✅ | ❌ | ✅ | P3 | |
 | `Guides` (ruler 辅助线) | ✅ R only | ❌ | ✅ R/W | P3 | UI-only chunk |
 | `Time` (current time) | ✅ R/W | ❌ | ✅ R/W | P2 | UI state, low priority |
-| `FrameDuration` (total in frames) | ✅ | ❌ | ✅ | P1 | helper |
+| `FrameDuration` (total in frames) | ✅ | ✅ | ✅ | done | P1 1C |
 
 ### 2.3 Layer / AVLayer / 类型化 Layer 域
 
@@ -122,19 +122,19 @@
 | `AudioLevels` | ✅ | ✅ R/W | ✅ | done |
 | Camera 13 fields (Zoom/DOF/Focus/Aperture/BlurLevel/Iris×8) | ✅ | ✅ R/W | ✅ | done |
 | Light 11 fields (Color/Intensity/Cone*/Falloff*/Shadow*) + LightKind | ✅ | ✅ R/W | ✅ | done |
-| `LightSource` (light source layer ref, AE 24+) | ✅ R/W | ❌ | ✅ R/W | P2 | light-source linking |
-| `FrameInPoint / FrameOutPoint / FrameStartTime / FrameTime` | ✅ | ❌ | ✅ R/W | P1 | frame-time 伴生 |
+| `LightSource` (light source layer ref, AE 24+) | ✅ R/W | ✅ R/W | ✅ R/W | done | P2a Task 2 |
+| `FrameInPoint / FrameOutPoint / FrameStartTime / FrameTime` | ✅ | ✅ R/W | ✅ R/W | done | P1 1C |
 | `Index` (within comp, 0-based) | ✅ | 🟢 implicit | ✅ | P1 | accessor |
 | `LayerType` (string discriminator) | ✅ R only | 🟢 typed dispatch | ✅ | P1 | accessor returning class name |
-| `HasVideo / HasAudio / AudioActive / AudioActiveAtTime(t)` | ✅ | ❌ | ✅ | P1 | helper |
-| `Active / ActiveAtTime(t)` | ✅ | ❌ | ✅ | P1 | (visible && t in range) |
+| `HasVideo / HasAudio / AudioActive / AudioActiveAtTime(t)` | ✅ | ✅ | ✅ | done | P1 1E |
+| `Active / ActiveAtTime(t)` | ✅ | 🗑️ | 🗑️ | done | N/A (AE runtime) |
 | `AdjustmentLayer / EnvironmentLayer / GuideLayer / ThreeDLayer / ThreeDPerChar` (typed) | ✅ | 🟢 ldta bit R/W | ✅ | P1 | rename to py-aep style helpers |
-| `Width / Height` (from source) | ✅ | ❌ | ✅ | P1 | proxy to source |
+| `Width / Height` (from source) | ✅ | ✅ | ✅ | done | P1 1E |
 | `HasTrackMatte / IsTrackMatte / TrackMatteLayer` | ✅ | 🟢 R/W TrackMatteLayer | ✅ | P1 | add helpers |
-| `AutoName / IsNameFromSource` | ✅ | ❌ | ✅ | P1 | helper |
+| `AutoName / IsNameFromSource` | ✅ | ✅ | ✅ | done | P1 1E |
 | `SetTrackMatte(layer, type)` | ✅ | 🟢 SetTrackMatteLayer | ✅ | P1 | 增 type 参数 |
-| `RemoveTrackMatte()` | ✅ | ❌ | ✅ | P1 | |
-| `ReplaceSource(newSource, fixExpressions=false)` | ✅ | 🟢 SetSource (low-level) | ✅ | P2 | fixExpressions 是 ScriptingAPI 行为 |
+| `RemoveTrackMatte()` | ✅ | ✅ | ✅ | done | P1 1E |
+| `ReplaceSource(newSource, fixExpressions=false)` | ✅ | ✅ | ✅ | done | P2a Task 4 |
 | `ContainingComp` | ✅ | 🟢 implicit | ✅ | P1 | back-ref |
 | `Marker` (PropertyGroup) + `Markers` (flat list) | ✅ | 🟢 layer.Markers | ✅ | done |
 | `Effects / Masks / Text / Transform` PropertyGroup accessors | ✅ | 🟢 Property tree | ✅ | P2 | 加 PropertyGroup hierarchy |
@@ -145,7 +145,7 @@
 | `SetParentWithJump(layer)` | ✅ | ❌ | ✅ | P3 | preserve world transform |
 | `CanSetCollapseTransformation / CanSetTimeRemapEnabled` | ✅ | ❌ | ✅ | P2 | capability query |
 | `TimeRemapEnabled / SetTimeRemap*` | ✅ | 🟢 R only | ✅ R/W | P2 | enable=structural |
-| `ThreeDModelLayer`（Cinema 4D / GLB） | ✅ | ❌ | ✅ R only | P2 | |
+| `ThreeDModelLayer`（Cinema 4D / GLB） | ✅ | ✅ R only | ✅ R only | done | P2a Task 1 |
 
 ### 2.4 Property / PropertyBase / PropertyGroup 域
 
@@ -153,13 +153,13 @@
 |---|---|---|---|---|
 | `MatchName / Name` | ✅ | ✅ R | ✅ | done |
 | `Components / Dimensions` | ✅ | ✅ R (Components) | ✅ | done |
-| `LockedRatio` (tdsb) | ✅ R only | ❌ | ✅ R/W | P2 |
-| `IsSpatial` (tdb4) | ✅ R | ❌ | ✅ R | P1 |
-| `Animated / Color / Integer / NoValue / Vector` (tdb4 flags) | ✅ R | 🟢 partial via Components | ✅ R | P1 |
+| `LockedRatio` (tdsb) | ✅ R only | ✅ R/W | ✅ R/W | done | P2a Task 3 |
+| `IsSpatial` (tdb4) | ✅ R | ✅ R | ✅ R | done | P1 1G |
+| `Animated / Color / Integer / NoValue / Vector` (tdb4 flags) | ✅ R | ✅ R | ✅ R | done | P1 1G |
 | `DefaultValue / LastValue / NbOptions` | ✅ R | ❌ | ✅ R | P2 | tdb4 字节 RE |
 | `MinValue / MaxValue / UnitsText` | ✅ R | ❌ | ✅ R | P2 | 内置 schema |
 | `Value` (current) | ✅ R/W | ✅ R/W StaticValue | ✅ | done |
-| `CanVaryOverTime` | ✅ R | ❌ | ✅ R | P1 | |
+| `CanVaryOverTime` | ✅ R | ✅ R | ✅ R | done | P1 1G |
 | `DimensionsSeparated` | ✅ R/W | ❌ | ✅ R/W | P3 | structural toggle |
 | `Expression / ExpressionEnabled / CanSetExpression` | ✅ R/W | ✅ R/W | ✅ | done |
 | `PropertyControlType` | ✅ R | ❌ | ✅ R | P2 | enum |
@@ -184,11 +184,11 @@
 |---|---|---|---|---|
 | `Path` | ✅ R/W | ✅ R/W | ✅ | done |
 | `Width / Height / Duration / FrameRate / FrameDuration / PixelAspect` | ✅ R | 🟢 partial | ✅ R | P1 | proxy to source |
-| `FootageMissing / HasAudio` | ✅ R | ❌ | ✅ R | P1 | |
-| `StartFrame / EndFrame` | ✅ R | ❌ | ✅ R | P1 | |
-| `AssetType` (placeholder/solid/file) | ✅ R | 🟢 implicit | ✅ R | P1 | discriminator |
+| `FootageMissing / HasAudio` | ✅ R | ✅ R | ✅ R | done | P1 1H |
+| `StartFrame / EndFrame` | ✅ R | ✅ R | ✅ R | done | P1 1H |
+| `AssetType` (placeholder/solid/file) | ✅ R | ✅ R | ✅ R | done | P1 1H |
 | `MainSource` (typed: FileSource / SolidSource / PlaceholderSource) | ✅ | ❌ | ✅ | P2 | 加 typed sources |
-| `File` (FootageItem.file convenience) | ✅ R | 🟢 via Source.Path | ✅ | P1 | |
+| `File` (FootageItem.file convenience) | ✅ R | ✅ R | ✅ | done | P1 1H |
 | `ReplaceWithPlaceholder / ReplaceWithSolid` | ✅ R/W | ❌ | ✅ R/W | P2 | 结构性 source 替换 |
 | `Proxy / UseProxy / ProxySource` | ❌ py-aep 没| ❌ | ❌ | — | py-aep 也没 |
 
