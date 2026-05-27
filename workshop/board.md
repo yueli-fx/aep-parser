@@ -5,7 +5,7 @@
 
 ## Next session
 
-**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md) § Task 3-4。
+**继续 P2b — next py-aep parity tasks**：详 [`plans/2026-05-27-py-aep-parity-p2b-plan.md`](plans/2026-05-27-py-aep-parity-p2b-plan.md) § Task 3-4 (deferred)。
 
 进度（本次会话）：
 - ✅ **Task 1 (2A)** — nnhd byte layout RE (8 fields)：
@@ -25,6 +25,8 @@
   - `WorkingSpace` R only — color profile name
   - `DisplayColorSpace` R only — display color space name
   - roundtrip + standalone tests 全 PASS
+- 🗑️ **Task 3 (2C)** — Gradient XML — deferred (需要 gradient fixture，test_data 中无)
+- 🗑️ **Task 4 (2D)** — Property metadata — deferred (需要 pard chunk reader + specs.py schema table)
 
 **未提交残留**（待 user 处理或下次 batch commit）：
 - 前一 session 大堆 session-exit 残留（CLAUDE.md 重构 / 4 新 scar / ship_gate_helpers / spec 更新 / ae_run plan moved to finish/ 等）—— 我**没动** WT 里这些，本次只提交了 P2b Task 1 代码 + 我新加的 board/coverage/docs 行。

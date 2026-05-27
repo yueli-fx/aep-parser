@@ -133,6 +133,8 @@
 | `maskFeatherFalloff` | JSX 设值后 mkif 字节零变化；疑似在 mask sub-property 树，需深挖 RE |
 | 4D 颜色 32bpc 范围 (0..1 vs 0..255) | 需 32bpc 项目 fixture 验证 |
 | mkif 残余字节 `@0x10 / @0x18 / @0x20-0x27` | 未 RE；roundtrip 走 `Mask.MkifRaw` 保留原字节，不假设 48 字节全已知 |
+| **Gradient XML (P2b 2C)** | 需 gradient effect fixture (ADBE Vector Grad Colors)，test_data 中无 |
+| **Property metadata (P2b 2D)** | 需 pard chunk reader + specs.py schema table 端口，复杂 RE 工作 |
 
 ## ❌ 不可达（length-preserving 写约束之外 / AE 限制）
 
