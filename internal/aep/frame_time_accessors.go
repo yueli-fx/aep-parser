@@ -200,17 +200,20 @@ func (c *Composition) FrameDuration() int {
 // (Time × owning-comp FrameRate, rounded). Returns 0 when the keyframe
 // was built outside the parser (FrameRate unknown).
 func (k *Keyframe) FrameTime() int {
-	return secondsToFrames(k.Time, k.compFps)
+	if k.back == nil {
+		return 0
+	}
+	return secondsToFrames(k.Time, k.back.compFps)
 }
 
 // SetFrameTime writes the keyframe's time from an integer frame,
 // delegating to SetTime. Returns an error when the owning comp's
 // FrameRate is unknown.
 func (k *Keyframe) SetFrameTime(frame int) error {
-	if k.compFps <= 0 {
+	if k.back == nil || k.back.compFps <= 0 {
 		return fmt.Errorf("keyframe: SetFrameTime requires owning composition FrameRate > 0")
 	}
-	return k.SetTime(framesToSeconds(frame, k.compFps))
+	return k.SetTime(framesToSeconds(frame, k.back.compFps))
 }
 
 // ──────────────────────────────────────────────

@@ -119,8 +119,8 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 	}
 
 	tickRate := aeLegacyTimeBase
-	if len(p.Keyframes) > 0 {
-		tickRate = p.Keyframes[0].tickRate
+	if len(p.Keyframes) > 0 && p.Keyframes[0].back != nil {
+		tickRate = p.Keyframes[0].back.tickRate
 	}
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase
@@ -218,8 +218,8 @@ func (p *Property) DeleteKeyframe(i int) error {
 	}
 
 	tickRate := aeLegacyTimeBase
-	if len(p.Keyframes) > 0 {
-		tickRate = p.Keyframes[0].tickRate
+	if len(p.Keyframes) > 0 && p.Keyframes[0].back != nil {
+		tickRate = p.Keyframes[0].back.tickRate
 	}
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase
@@ -247,10 +247,12 @@ func (p *Property) reparseKeyframes(tickRate float64) error {
 	for i := 0; i < count; i++ {
 		off := i * bpk
 		kf := &Keyframe{
-			ldat:     p.back.ldat,
-			offset:   off,
-			dims:     p.Components,
-			tickRate: tickRate,
+			back: &keyframeBackrefs{
+				ldat:     p.back.ldat,
+				offset:   off,
+				dims:     p.Components,
+				tickRate: tickRate,
+			},
 		}
 		kf.Time = float64(binary.BigEndian.Uint32(p.back.ldat.Data[off:off+4])) / tickRate
 		kf.Value = readKFValue(p.back.ldat.Data, off, p.Components)

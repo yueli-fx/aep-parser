@@ -68,11 +68,13 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 	for i := 0; i < count; i++ {
 		offset := i * bpk
 		kf := &Keyframe{
-			ldat:     ldat,
-			offset:   offset,
-			dims:     prop.Components,
-			tickRate: ctx.tickRate,
-			compFps:  ctx.compFps,
+			back: &keyframeBackrefs{
+				ldat:     ldat,
+				offset:   offset,
+				dims:     prop.Components,
+				tickRate: ctx.tickRate,
+				compFps:  ctx.compFps,
+			},
 		}
 		kf.Time = float64(binary.BigEndian.Uint32(ldat.Data[offset:offset+4])) / ctx.tickRate
 		kf.Value = readKFValue(ldat.Data, offset, prop.Components)
@@ -124,7 +126,10 @@ func decodeEasing(kf *Keyframe, blk []byte) {
 	}
 	kf.InInterp = InterpType(blk[0x04])
 	kf.OutInterp = InterpType(blk[0x05])
-	dims := kf.dims
+	dims := 0
+	if kf.back != nil {
+		dims = kf.back.dims
+	}
 	if dims <= 0 {
 		dims = 1
 	}
@@ -194,7 +199,7 @@ func readKFValue(d []byte, kfOffset, components int) any {
 
 // kfValueOffset is a thin wrapper around layoutFor for callers that only
 // need the value offset (e.g. write.go's SetValue, which already knows
-// the dim count via k.dims).
+// the dim count via k.back.dims).
 func kfValueOffset(d []byte, kfOffset, dims int) int {
 	if kfOffset+8 > len(d) {
 		return 0x08

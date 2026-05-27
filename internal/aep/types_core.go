@@ -1006,12 +1006,10 @@ type Keyframe struct {
 	InTemporalEase  []TemporalEase // length 1 for spatial+1D, length N for non-spatial N-D
 	OutTemporalEase []TemporalEase
 
-	// Write-back references — set by the parser.
-	ldat     *rifx.Chunk // owning ldat chunk
-	offset   int         // start of this keyframe block within ldat.Data
-	dims     int         // dimensionality (mirrors Property.Components)
-	tickRate float64     // owning composition's TickRate (for SetTime)
-	compFps  float64     // owning composition's FrameRate (for FrameTime / SetFrameTime)
+	// back holds the underlying RIFX chunk ref + cached layout metadata that
+	// power length-preserving keyframe writes. Nil for keyframes built outside
+	// the parser. See back_keyframe.go.
+	back *keyframeBackrefs
 }
 
 // ShapeLayer is the V2.2 typed wrapper around *Layer (spec §2.1). V1 callers

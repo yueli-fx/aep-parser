@@ -14,21 +14,24 @@ import (
 // composition's TickRate (decoded at parse time from cdta). Chunk size
 // does not change, so writing the project back never relocates anything.
 func (k *Keyframe) SetTime(seconds float64) error {
-	if k.ldat == nil {
-		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.offset)
+	if k.back == nil {
+		return fmt.Errorf("keyframe: no underlying ldat chunk")
+	}
+	if k.back.ldat == nil {
+		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.back.offset)
 	}
 	if seconds < 0 {
 		return fmt.Errorf("keyframe time %v: negative not supported", seconds)
 	}
-	if k.offset+4 > len(k.ldat.Data) {
-		return fmt.Errorf("keyframe time write: offset %d out of bounds (ldat=%d bytes)", k.offset, len(k.ldat.Data))
+	if k.back.offset+4 > len(k.back.ldat.Data) {
+		return fmt.Errorf("keyframe time write: offset %d out of bounds (ldat=%d bytes)", k.back.offset, len(k.back.ldat.Data))
 	}
-	rate := k.tickRate
+	rate := k.back.tickRate
 	if rate == 0 {
 		rate = aeLegacyTimeBase
 	}
 	ticks := uint32(math.Round(seconds * rate))
-	binary.BigEndian.PutUint32(k.ldat.Data[k.offset:k.offset+4], ticks)
+	binary.BigEndian.PutUint32(k.back.ldat.Data[k.back.offset:k.back.offset+4], ticks)
 	k.Time = float64(ticks) / rate
 	return nil
 }
@@ -36,29 +39,32 @@ func (k *Keyframe) SetTime(seconds float64) error {
 // SetValue rewrites this keyframe's numeric value in-place.
 //
 // For a 1D property pass a float64. For a multi-component property pass
-// []float64 of exact length k.dims. Length-preserving: chunk size is
-// unchanged.
+// []float64 of exact length equal to the property's component count.
+// Length-preserving: chunk size is unchanged.
 func (k *Keyframe) SetValue(v any) error {
-	if k.ldat == nil {
-		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.offset)
+	if k.back == nil {
+		return fmt.Errorf("keyframe: no underlying ldat chunk")
 	}
-	valOffset := kfValueOffset(k.ldat.Data, k.offset, k.dims)
+	if k.back.ldat == nil {
+		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.back.offset)
+	}
+	valOffset := kfValueOffset(k.back.ldat.Data, k.back.offset, k.back.dims)
 	switch x := v.(type) {
 	case float64:
-		if k.dims != 1 {
-			return fmt.Errorf("keyframe: property is %dD, expected []float64 value", k.dims)
+		if k.back.dims != 1 {
+			return fmt.Errorf("keyframe: property is %dD, expected []float64 value", k.back.dims)
 		}
-		if err := writeFloat64(k.ldat.Data, k.offset+valOffset, x); err != nil {
+		if err := writeFloat64(k.back.ldat.Data, k.back.offset+valOffset, x); err != nil {
 			return err
 		}
 		k.Value = x
 		return nil
 	case []float64:
-		if len(x) != k.dims {
-			return fmt.Errorf("keyframe: got %d components, property is %dD", len(x), k.dims)
+		if len(x) != k.back.dims {
+			return fmt.Errorf("keyframe: got %d components, property is %dD", len(x), k.back.dims)
 		}
 		for i, f := range x {
-			if err := writeFloat64(k.ldat.Data, k.offset+valOffset+i*8, f); err != nil {
+			if err := writeFloat64(k.back.ldat.Data, k.back.offset+valOffset+i*8, f); err != nil {
 				return err
 			}
 		}
@@ -82,13 +88,16 @@ func (k *Keyframe) SetOutInterp(t InterpType) error {
 }
 
 func (k *Keyframe) setInterpByte(off int, t InterpType, sync func()) error {
-	if k.ldat == nil {
-		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.offset)
+	if k.back == nil {
+		return fmt.Errorf("keyframe: no underlying ldat chunk")
 	}
-	if k.offset+off+1 > len(k.ldat.Data) {
-		return fmt.Errorf("keyframe interp write: offset %d out of bounds", k.offset+off)
+	if k.back.ldat == nil {
+		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.back.offset)
 	}
-	k.ldat.Data[k.offset+off] = byte(t)
+	if k.back.offset+off+1 > len(k.back.ldat.Data) {
+		return fmt.Errorf("keyframe interp write: offset %d out of bounds", k.back.offset+off)
+	}
+	k.back.ldat.Data[k.back.offset+off] = byte(t)
 	sync()
 	return nil
 }
@@ -111,14 +120,17 @@ func (k *Keyframe) SetOutTemporalEase(eases []TemporalEase) error {
 }
 
 func (k *Keyframe) setTemporalEase(eases []TemporalEase, inSide bool) error {
-	if k.ldat == nil {
-		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.offset)
+	if k.back == nil {
+		return fmt.Errorf("keyframe: no underlying ldat chunk")
+	}
+	if k.back.ldat == nil {
+		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.back.offset)
 	}
 	blk, err := k.blockSlice()
 	if err != nil {
 		return err
 	}
-	dims := k.dims
+	dims := k.back.dims
 	if dims <= 0 {
 		dims = 1
 	}
@@ -131,10 +143,10 @@ func (k *Keyframe) setTemporalEase(eases []TemporalEase, inSide bool) error {
 		if !inSide {
 			speedOff, infOff = 0x28, 0x30
 		}
-		if err := writeFloat64(k.ldat.Data, k.offset+speedOff, eases[0].Speed); err != nil {
+		if err := writeFloat64(k.back.ldat.Data, k.back.offset+speedOff, eases[0].Speed); err != nil {
 			return err
 		}
-		if err := writeFloat64(k.ldat.Data, k.offset+infOff, eases[0].Influence); err != nil {
+		if err := writeFloat64(k.back.ldat.Data, k.back.offset+infOff, eases[0].Influence); err != nil {
 			return err
 		}
 		dst := &k.InTemporalEase
@@ -155,10 +167,10 @@ func (k *Keyframe) setTemporalEase(eases []TemporalEase, inSide bool) error {
 		speedBase, infBase = 3*dims, 4*dims
 	}
 	for i := 0; i < dims; i++ {
-		if err := writeFloat64(k.ldat.Data, k.offset+8+(speedBase+i)*8, eases[i].Speed); err != nil {
+		if err := writeFloat64(k.back.ldat.Data, k.back.offset+8+(speedBase+i)*8, eases[i].Speed); err != nil {
 			return err
 		}
-		if err := writeFloat64(k.ldat.Data, k.offset+8+(infBase+i)*8, eases[i].Influence); err != nil {
+		if err := writeFloat64(k.back.ldat.Data, k.back.offset+8+(infBase+i)*8, eases[i].Influence); err != nil {
 			return err
 		}
 	}
@@ -184,14 +196,17 @@ func (k *Keyframe) SetOutSpatialTangent(v []float64) error {
 }
 
 func (k *Keyframe) setSpatialTangent(v []float64, inSide bool) error {
-	if k.ldat == nil {
-		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.offset)
+	if k.back == nil {
+		return fmt.Errorf("keyframe: no underlying ldat chunk")
+	}
+	if k.back.ldat == nil {
+		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.back.offset)
 	}
 	blk, err := k.blockSlice()
 	if err != nil {
 		return err
 	}
-	dims := k.dims
+	dims := k.back.dims
 	if dims <= 0 {
 		dims = 1
 	}
@@ -207,7 +222,7 @@ func (k *Keyframe) setSpatialTangent(v []float64, inSide bool) error {
 		tanBase += dims * 8 // out tangents follow in tangents
 	}
 	for i, x := range v {
-		if err := writeFloat64(k.ldat.Data, k.offset+tanBase+i*8, x); err != nil {
+		if err := writeFloat64(k.back.ldat.Data, k.back.offset+tanBase+i*8, x); err != nil {
 			return err
 		}
 	}
@@ -222,14 +237,17 @@ func (k *Keyframe) setSpatialTangent(v []float64, inSide bool) error {
 // blockSlice returns the bpk-byte slice for this keyframe's block, or
 // an error if bounds don't permit.
 func (k *Keyframe) blockSlice() ([]byte, error) {
-	if k.ldat == nil {
-		return nil, fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.offset)
+	if k.back == nil {
+		return nil, fmt.Errorf("keyframe: no underlying ldat chunk")
 	}
-	end := k.offset + k.blockSize()
-	if end > len(k.ldat.Data) {
-		return nil, fmt.Errorf("keyframe block at offset %d exceeds ldat (%d bytes, end=%d)", k.offset, len(k.ldat.Data), end)
+	if k.back.ldat == nil {
+		return nil, fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", k.back.offset)
 	}
-	return k.ldat.Data[k.offset:end], nil
+	end := k.back.offset + k.blockSize()
+	if end > len(k.back.ldat.Data) {
+		return nil, fmt.Errorf("keyframe block at offset %d exceeds ldat (%d bytes, end=%d)", k.back.offset, len(k.back.ldat.Data), end)
+	}
+	return k.back.ldat.Data[k.back.offset:end], nil
 }
 
 // blockSize returns the bpk for this keyframe. We don't have the
@@ -237,14 +255,14 @@ func (k *Keyframe) blockSlice() ([]byte, error) {
 // reference), so re-derive from the layout: spatial → 0x38 + 3*N*8,
 // non-spatial → 0x08 + 5*N*8.
 func (k *Keyframe) blockSize() int {
-	if k.ldat == nil || k.offset+8 > len(k.ldat.Data) {
+	if k.back == nil || k.back.ldat == nil || k.back.offset+8 > len(k.back.ldat.Data) {
 		return 0
 	}
-	dims := k.dims
+	dims := k.back.dims
 	if dims <= 0 {
 		dims = 1
 	}
-	l := layoutFor(k.ldat.Data[k.offset+0x07], dims)
+	l := layoutFor(k.back.ldat.Data[k.back.offset+0x07], dims)
 	if l.spatialStyle {
 		return 0x38 + 3*dims*8
 	}
