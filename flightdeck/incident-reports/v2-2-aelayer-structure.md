@@ -444,7 +444,7 @@ iter5_check head bytes [16..19] = `0000000e` (= 14)，tolerance = `00000024` (= 
 
 ## iter-7 实施记 — embed tolerance Transform Group bytes (跨第一道 silent-drop 闸门 ✓)
 
-iter-5b 之后我用户陪跑了 7 轮 AE bisect (iter-6a..6f) 测各种 byte-level 修改候选 (tdsb / 3D 升 dim / spatial bounds / trailing chunks / placeholder flags) 全没动 silent drop。GPT 看完 7 轮无果后写 `workshop/wip/gpt`:
+iter-5b 之后我用户陪跑了 7 轮 AE bisect (iter-6a..6f) 测各种 byte-level 修改候选 (tdsb / 3D 升 dim / spatial bounds / trailing chunks / placeholder flags) 全没动 silent drop。GPT 看完 7 轮无果后写 `flightdeck/kneeboard/gpt`:
 
 > 你已经连续得到: AE accepts file BUT layer count still 0
 > 这说明: parser path 已经过去了, object materialization path 没过去
@@ -513,7 +513,7 @@ GPT 给的具体 3 步法救了项目:
 2. **GPT 反馈在 6 轮无果时及时 pivot 救项目**。如果继续 iter-6g/6h byte-patch 我估计还得 5-10 轮才能撞对。GPT 的"object graph / class admission"分类法 + 具体 3 步建议 = 一次 pivot 直接缩 1 个变量定位。
 3. **Embed boilerplate 是 V2.x ship-gate 的合法路径**。当 chunk 内部 byte 布局复杂到 from-scratch 构造太脆 (Transform Group 多 sub-stream + 多 cdat padding + spatial tdum/tduM + 6-axis 3D 跟 2D 区分等), embed AE-saved bytes + post-process 覆值是更稳的方式。runtime 持久化能力有限 (cdat scalar 值能改, 其它字节固定) 是接受的代价, 文档声明清楚, 后续 iter 再 RE 全 byte 布局。
 4. **测量 (probe) 跟实测分离**。GPT 第一步排除"epistemic hole"= 验 probe 自己是否可信。如果之前 5 轮 silent drop 其实是 probe 写错 (例如忘 select active comp), 后面所有 fix 都白做。这是 5 分钟 sanity check, 千万省不得。
-5. **`workshop/wip/gpt`** 文件用法: 高难度卡死时让 LLM 反馈写进这里, claude 直接 read 当作"另一个 RE 专家的建议"参考。Pivot 信息密度比单条 chat 消息高 5x。
+5. **`flightdeck/kneeboard/gpt`** 文件用法: 高难度卡死时让 LLM 反馈写进这里, claude 直接 read 当作"另一个 RE 专家的建议"参考。Pivot 信息密度比单条 chat 消息高 5x。
 
 ### iter-8 候选 (下次会话)
 
@@ -594,7 +594,7 @@ Phase 5 ship gate **全闭环**。这是 V2.2 从开发到 AE 接受的 mileston
 ### iter-8 永久教训
 
 1. **iter-7 embed approach 是 generalizable**, 不是一次性 trick。任何 "complex multi-stream property container" 类 silent drop 都用同套法 (transplant isolate → extract bytes → embed → cdat 覆值). V2.2 Phase 5 全程印证: 从 Layr Transform Group → 各 Shape body → 同样的 4 步流程。
-2. **Byte-level RE 在 silent-drop 场景是 dead end** (iter-6a/b/c/d/e/f 6 轮证明). Semantic-level transplant isolation 是 right tool. 之前自己摸索 6 轮没解, GPT 看完 bisect 数据立刻 pivot 救项目 (`workshop/wip/gpt`)。
+2. **Byte-level RE 在 silent-drop 场景是 dead end** (iter-6a/b/c/d/e/f 6 轮证明). Semantic-level transplant isolation 是 right tool. 之前自己摸索 6 轮没解, GPT 看完 bisect 数据立刻 pivot 救项目 (`flightdeck/kneeboard/gpt`)。
 3. **AE saved fixtures 是 ship-gate-class V2.x 项目的核心资源**。tolerance.aep 一个 fixture 解了 Layr Transform + Rect + Fill body 三处 silent drop。V2.2.1/V3 work 需要更多 fixtures (Ellipse / Path / Stroke / etc each AE-saved). 抽 + embed 流水 (`extract_*` tools) 是 reusable infrastructure。
 4. **V2.x alpha 限制 ≠ 失败**。Phase 5 ship gate 全闭环但 keyframes / 其它 shape kinds 不持久化 — 这是合理的 V2.2 alpha scope。docs 声明清楚 + V2.2.1 subplan 接力, 项目可以**先 ship 后扩展**, 而不是因为追求完整就 6 轮死循环。
 
@@ -604,4 +604,4 @@ V2.2 Phase 4 Go roundtrip PASS **不代表 AE 接受**。Go parser 写 tolerant�
 
 silent-drop 类问题 (AE 接受文件但内部 hide layer) = **semantic-level**, 不是 byte-level corruption。第一步用 **transplant 法** isolate 真凶到具体 chunk，第二步若 from-scratch 构造太脆就 **embed AE-saved bytes 作 boilerplate** + post-process 覆 runtime 值，第三步 docs 声明 V2.x 限制 (持久化能力 vs runtime API surface) + 留 V2.x+1 RE 任务。**不要再像 iter-6a..6f 那样盲改 byte-level fields**。
 
-`workshop/wip/gpt`-style **LLM pivot 反馈** 是 ship-gate-stuck 时的关键工具：6+ iter 没进展时主动找另一个 LLM 看 bisect 数据 + 建议结构, 信息密度比单条 chat 高 5x。把反馈写进 `workshop/wip/gpt` 让 claude 当作"另一个 RE 专家的建议"参考。
+`flightdeck/kneeboard/gpt`-style **LLM pivot 反馈** 是 ship-gate-stuck 时的关键工具：6+ iter 没进展时主动找另一个 LLM 看 bisect 数据 + 建议结构, 信息密度比单条 chat 高 5x。把反馈写进 `flightdeck/kneeboard/gpt` 让 claude 当作"另一个 RE 专家的建议"参考。

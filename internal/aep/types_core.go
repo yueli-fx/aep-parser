@@ -690,7 +690,7 @@ const (
 	// ShapeLayer-canonical 6-axis Transform stream names (per iter 2 RE
 	// of tolerance.aep): AE saves ShapeLayer Position split into Position_0
 	// (X) + Position_1 (Y) and always emits Orientation / Rotate X / Rotate Y
-	// / Envir Appear at default. See workshop/scars/v2-2-aelayer-structure.md
+	// / Envir Appear at default. See flightdeck/incident-reports/v2-2-aelayer-structure.md
 	// "iter 2 新 RE 发现" for the schema.
 	MatchNamePosition0   = "ADBE Position_0"
 	MatchNamePosition1   = "ADBE Position_1"

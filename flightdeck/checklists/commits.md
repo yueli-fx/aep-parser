@@ -50,9 +50,9 @@ docs(workshop): reorganize CLAUDE/board/specs structure
 
 新加 / 修改 / 删除任何 public API 时，必须同步：
 
-1. `workshop/plans/coverage.md` —— 对应行从 🟢 R / 🗑️ 暂搁 升 ✅ R/W（或反向降级）
-2. `workshop/plans/coverage-detail.md` —— AE attr 详细交叉表对应行
+1. `flightdeck/flight-plans/coverage.md` —— 对应行从 🟢 R / 🗑️ 暂搁 升 ✅ R/W（或反向降级）
+2. `flightdeck/flight-plans/coverage-detail.md` —— AE attr 详细交叉表对应行
 3. `docs/{layer,property,text,…}.md` —— public API 文档（API 文档优先级最高）
-4. `workshop/board.md` —— "最近归档" 一条 + PASS count
+4. `flightdeck/cockpit.md` —— "最近归档" 一条 + PASS count
 
 只改行为不改 API 表面：仅更 board.md。

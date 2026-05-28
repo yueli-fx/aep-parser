@@ -238,7 +238,7 @@ ShapeLayer 跟 V1 parse 出来的 `Layer` 同构 — `comp.Layers[i]` 既是 V1 
 
 ## V2.2 alpha 限制
 
-V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `workshop/scars/v2-2-aelayer-structure.md` iter-7/8 实施记）：3 处 "complex multi-stream container" 字节直接从 tolerance.aep 拷出来作 `//go:embed` 资源，runtime 只覆盖 cdat 数值。这意味着：
+V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident-reports/v2-2-aelayer-structure.md` iter-7/8 实施记）：3 处 "complex multi-stream container" 字节直接从 tolerance.aep 拷出来作 `//go:embed` 资源，runtime 只覆盖 cdat 数值。这意味着：
 
 ### 不持久化（runtime-only）
 
@@ -276,4 +276,4 @@ V2.2 Phase 5 ship gate 经历了 iter-1 到 iter-8 共 8 轮。iter-6a/b/c/d/e/f
 3. iter-7: 锁定 trigger = Layr Transform Group body → `//go:embed templates/v2_2_transform_group_body.bin` + 覆 Position cdat
 4. iter-8: 同思路缩到 shape body → embed Rect + Fill bodies 各自 → 覆 Size / Color cdat
 
-**教训**: silent-drop 类问题（AE 接受文件但内部不实例化 layer）是 semantic-level，不是 byte-level corruption。byte 路线在 silent-drop 场景是 dead end；transplant + embed 是正确 tool。完整 RE 历史见 `workshop/scars/v2-2-aelayer-structure.md`。
+**教训**: silent-drop 类问题（AE 接受文件但内部不实例化 layer）是 semantic-level，不是 byte-level corruption。byte 路线在 silent-drop 场景是 dead end；transplant + embed 是正确 tool。完整 RE 历史见 `flightdeck/incident-reports/v2-2-aelayer-structure.md`。

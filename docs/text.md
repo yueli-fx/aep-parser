@@ -916,7 +916,7 @@ proj.WriteAEP(f)
 
 ## 当前未结构化暴露的字段
 
-绝大多数 AE 24+ TextDocument 字段已 R/W —— 详见 [../workshop/plans/coverage-detail.md](../workshop/plans/coverage-detail.md) 文本字段表。仍未实现：
+绝大多数 AE 24+ TextDocument 字段已 R/W —— 详见 [../flightdeck/flight-plans/coverage-detail.md](../flightdeck/flight-plans/coverage-detail.md) 文本字段表。仍未实现：
 
 - `ligature`（位置未 RE；AE 默认 false 且 set false 无 diff，需 ligature-enabled 字体 fixture）
 - character-level selection runs（字符级选区，运行时 UI 状态，不太可能持久化）

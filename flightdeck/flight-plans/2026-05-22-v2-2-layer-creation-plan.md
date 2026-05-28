@@ -4,11 +4,11 @@
 
 **Goal:** Ship `comp.NewShapeLayer(name)` + Rect/Ellipse/Path/Fill/Stroke 节点合成 + PropertyStream (static + keyframe) + AE 2020/2025 ship gate，作为 V2 第二个 sub-project，同时为 V3 brainstorm 提取 runtime / serializer 分层基础。
 
-**Architecture:** Spec 已收齐 (`workshop/specs/2026-05-22-v2-2-layer-creation-design.md`)。10 条 Architecture Invariant + 4 条 Serializer Invariant 钉死 runtime ↔ serializer 边界。Builder 走 `lower_*.go` primitives；runtime types 不持 chunk refs。Escape hatch (AE 2020 canonical minimum) 避免 per-version branch。Capability matrix 接口预留，V2.2 实施期增量加。
+**Architecture:** Spec 已收齐 (`flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md`)。10 条 Architecture Invariant + 4 条 Serializer Invariant 钉死 runtime ↔ serializer 边界。Builder 走 `lower_*.go` primitives；runtime types 不持 chunk refs。Escape hatch (AE 2020 canonical minimum) 避免 per-version branch。Capability matrix 接口预留，V2.2 实施期增量加。
 
 **Tech Stack:** Go 1.21+ (generics for `PropertyStream[T]`), 现有 `internal/aep/` package, `internal/rifx/` framing, ExtendScript (JSX) for RE + ship gate, AfterFX.exe (2020 / 2022 / 2025) for ship gate validation.
 
-**Spec reference:** `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` — 1213 行；所有 invariant / API surface / classification 在 spec 里查。Plan 内 cross-ref spec §N 节即可。
+**Spec reference:** `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md` — 1213 行；所有 invariant / API surface / classification 在 spec 里查。Plan 内 cross-ref spec §N 节即可。
 
 **Pre-flight check (any phase 开工前)：**
 
@@ -159,7 +159,7 @@ git commit -m "tool(re): gen_shape_dummy.jsx — V2.2 RE fixture generator (9 sc
 
 **Files:**
 - Generate: `tmp_debug/re_v22/empty_ae{2020,2022,2025}.aep`
-- Update: `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §8
+- Update: `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md` §8
 
 - [ ] **Step 1: 创建 RE 输出目录**
 
@@ -201,7 +201,7 @@ diff tmp_debug/re_v22/empty_ae2020.dump tmp_debug/re_v22/empty_ae2025.dump | hea
 
 - [ ] **Step 6: 写 RE-S1 finding 进 spec §8**
 
-打开 `workshop/specs/2026-05-22-v2-2-layer-creation-design.md`，定位 `## 8. RE Findings`，追加：
+打开 `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md`，定位 `## 8. RE Findings`，追加：
 
 ```markdown
 ### RE-S1 finding: empty ShapeLayer Layr LIST 结构
@@ -225,7 +225,7 @@ diff tmp_debug/re_v22/empty_ae2020.dump tmp_debug/re_v22/empty_ae2025.dump | hea
 - [ ] **Step 7: Commit**
 
 ```bash
-git add tmp_debug/re_v22/empty_ae*.aep tmp_debug/re_v22/empty_ae*.dump workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/empty_ae*.aep tmp_debug/re_v22/empty_ae*.dump flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S1 empty ShapeLayer Layr LIST + cross-version baseline"
 ```
 
@@ -270,7 +270,7 @@ head -50 tmp_debug/re_v22/empty_ae2020.transform.dump
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S2 Layer Transform group default values"
 ```
 
@@ -315,7 +315,7 @@ cat tmp_debug/re_v22/empty_ae2020.contents.dump
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S3 VectorGroup (root) defaults + group-level Transform"
 ```
 
@@ -370,7 +370,7 @@ cat tmp_debug/re_v22/1rect.dump
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/1rect_ae2020.aep tmp_debug/re_v22/1rect.dump workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1rect_ae2020.aep tmp_debug/re_v22/1rect.dump flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S4 RectNode defaults"
 ```
 
@@ -400,7 +400,7 @@ go run ./tmp_debug/dump_root tmp_debug/re_v22/1ellipse_ae2020.aep | \
 格式同 RE-S4。Finding 写 EllipseNode Size / Position defaults。
 
 ```bash
-git add tmp_debug/re_v22/1ellipse* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1ellipse* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5a EllipseNode defaults"
 ```
 
@@ -456,7 +456,7 @@ cat tmp_debug/re_v22/1path.dump
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/1path* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1path* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5b PathNode + BezierPath linear encoding"
 ```
 
@@ -487,7 +487,7 @@ Finding 关注：
 - Composite + FillRule 默认 enum 值
 
 ```bash
-git add tmp_debug/re_v22/1fill* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1fill* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5c FillNode defaults + Color RGBA encoding"
 ```
 
@@ -517,7 +517,7 @@ Finding 关注:
 - 各 default 值
 
 ```bash
-git add tmp_debug/re_v22/1stroke* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/1stroke* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S5d StrokeNode defaults"
 ```
 
@@ -585,7 +585,7 @@ go test ./internal/aep/ -run TestKeyframe -v  # 既有测试通过即 parser 可
 - [ ] **Step 5: Commit**
 
 ```bash
-git add tmp_debug/re_v22/kf_1* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/kf_1* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S6 PropertyStream 1-keyframe encoding"
 ```
 
@@ -622,7 +622,7 @@ go run ./tmp_debug/dump_root tmp_debug/re_v22/kf_2_ae2020.aep | \
 ```
 
 ```bash
-git add tmp_debug/re_v22/kf_2* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/kf_2* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S7 PropertyStream 2-keyframe stride validation"
 ```
 
@@ -678,7 +678,7 @@ diff tmp_debug/re_v22/path_linear.dump tmp_debug/re_v22/path_tangent.dump
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/path_* workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/path_* flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S8 BezierPath tangent encoding + min vertices"
 ```
 
@@ -737,7 +737,7 @@ done
 - [x] **Step 4: Commit**
 
 ```bash
-git add tmp_debug/re_v22/*_ae2025.aep workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+git add tmp_debug/re_v22/*_ae2025.aep flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 git commit -m "re(v2.2): RE-S9 cross-version diff + capability admission decisions"
 ```
 
@@ -746,8 +746,8 @@ git commit -m "re(v2.2): RE-S9 cross-version diff + capability admission decisio
 ### Task 0.14: Phase 0 收尾 — defaults table freeze + Phase 1 unblock
 
 **Files:**
-- Update: `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §3.6 defaults table (RE 校准后 freeze)
-- Update: `workshop/board.md` 标 Phase 0 完
+- Update: `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md` §3.6 defaults table (RE 校准后 freeze)
+- Update: `flightdeck/cockpit.md` 标 Phase 0 完
 
 - [ ] **Step 1: Spec §3.6 defaults table 把 RE 实测值填入，去掉 "provisional" 标记**
 
@@ -775,7 +775,7 @@ V2.2 实施前 RE：9 个 fixture 跑 AE 2020 + 2022 + 2025 → 12 个 RE findin
 ```bash
 cd E:/projects/tools/aep-parser
 # 全文搜索剩余 "provisional" / "TBD" / "待 RE" 应该清零
-grep -nE 'provisional|TBD|TODO|待 RE-S' workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+grep -nE 'provisional|TBD|TODO|待 RE-S' flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 ```
 
 Expected: 仅 `§8 finding template` 模板内的 placeholder 残留（无实际 pending）。
@@ -783,7 +783,7 @@ Expected: 仅 `§8 finding template` 模板内的 placeholder 残留（无实际
 - [ ] **Step 5: Commit**
 
 ```bash
-git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md workshop/board.md
+git add flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md flightdeck/cockpit.md
 git commit -m "re(v2.2): Phase 0 RE complete — defaults freeze + Phase 1 unblock"
 ```
 
@@ -1575,7 +1575,7 @@ Expected: 122 baseline + Phase 1 加测 (~10) ≈ 132 PASS, 0 FAIL.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/board.md
+git add flightdeck/cockpit.md
 git commit -m "docs(board): V2.2 Phase 1 runtime types complete (~132 PASS)"
 ```
 
@@ -2282,7 +2282,7 @@ Expected: ~140 PASS (122 + Phase 1 ~10 + Phase 2 ~8).
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/board.md
+git add flightdeck/cockpit.md
 git commit -m "docs(board): V2.2 Phase 2 serializer primitives skeleton complete (~140 PASS)"
 ```
 
@@ -2706,7 +2706,7 @@ Expected: ~150 PASS.
 - [ ] **Step 2: board.md + commit**
 
 ```bash
-git add workshop/board.md
+git add flightdeck/cockpit.md
 git commit -m "docs(board): V2.2 Phase 3 public API complete (~150 PASS)"
 ```
 
@@ -3184,7 +3184,7 @@ Expected: ~155 PASS.
 - [ ] **Step 2: board.md + commit**
 
 ```bash
-git add workshop/board.md
+git add flightdeck/cockpit.md
 git commit -m "docs(board): V2.2 Phase 4 roundtrip + hydration complete (~155 PASS)"
 ```
 
@@ -3767,7 +3767,7 @@ Expected: total PASS ≥ 155 (122 baseline + Phase 1-4 + Phase 5 tests); AE ship
 - [ ] **Step 2: board.md + commit**
 
 ```bash
-git add workshop/board.md
+git add flightdeck/cockpit.md
 git commit -m "docs(board): V2.2 Phase 5 AE ship gate + preservation tolerance PASS"
 ```
 
@@ -3885,7 +3885,7 @@ runtime name (`"Opacity"`) 是 stable identifier；AE match-name (`"ADBE Vector 
 - Path with tangents typed setter (V2.2 默认 linear)
 - Effect / Mask 创建 on ShapeLayer
 
-详 `workshop/specs/2026-05-22-v2-2-layer-creation-design.md` §V2.2 范围外段。
+详 `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md` §V2.2 范围外段。
 ```
 
 - [ ] **Step 3: docs/layer.md 加 ShapeLayer typed wrapper 段**
@@ -3901,16 +3901,16 @@ git commit -m "docs(v2.2): NewShapeLayer + ShapeLayer + ShapeNode API reference"
 
 ---
 
-### Task 6.2: `workshop/board.md` V2.2 ship archive
+### Task 6.2: `flightdeck/cockpit.md` V2.2 ship archive
 
 **Files:**
-- Modify: `workshop/board.md`
+- Modify: `flightdeck/cockpit.md`
 
 - [ ] **Step 1: 更新 Last updated + Active focus**
 
 ```markdown
 **Last updated**: 2026-MM-DD by claude (V2.2 ShapeLayer ship — 5 nodes + PropertyStream + AE 2020/25 ship gates PASS；PASS = **155+ / 0 FAIL**)
-**Active focus**: 🟢 V2.2 完工 —— 下个候选: V3 brainstorm (scene-graph IR; `workshop/specs/v3-direction.md`) 或 V2.3 (Layer 类型扩展 + 嵌套 group 合成)。
+**Active focus**: 🟢 V2.2 完工 —— 下个候选: V3 brainstorm (scene-graph IR; `flightdeck/specs/v3-direction.md`) 或 V2.3 (Layer 类型扩展 + 嵌套 group 合成)。
 ```
 
 - [ ] **Step 2: 加最近归档段**
@@ -3939,7 +3939,7 @@ V2 第二个 sub-project。dual-track 战略 (V2 ship + V3 增量提取) 验证.
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/board.md
+git add flightdeck/cockpit.md
 git commit -m "docs(board): V2.2 ShapeLayer ship archive"
 ```
 
@@ -3948,8 +3948,8 @@ git commit -m "docs(board): V2.2 ShapeLayer ship archive"
 ### Task 6.3: `coverage.md` / `coverage-detail.md` V2.2 段
 
 **Files:**
-- Modify: `workshop/plans/coverage.md`
-- Modify: `workshop/plans/coverage-detail.md`
+- Modify: `flightdeck/flight-plans/coverage.md`
+- Modify: `flightdeck/flight-plans/coverage-detail.md`
 
 - [ ] **Step 1: coverage.md 在 V2 段加 V2.2**
 
@@ -3989,7 +3989,7 @@ git commit -m "docs(board): V2.2 ShapeLayer ship archive"
 - [ ] **Step 3: Commit**
 
 ```bash
-git add workshop/plans/coverage.md workshop/plans/coverage-detail.md
+git add flightdeck/flight-plans/coverage.md flightdeck/flight-plans/coverage-detail.md
 git commit -m "docs(coverage): V2.2 ShapeLayer + ShapeNode coverage rows"
 ```
 
@@ -3998,13 +3998,13 @@ git commit -m "docs(coverage): V2.2 ShapeLayer + ShapeNode coverage rows"
 ### Task 6.4: Spec finalize — §8 RE Findings / §6.4a clear / §6.5 admission decisions / scar updates
 
 **Files:**
-- Modify: `workshop/specs/2026-05-22-v2-2-layer-creation-design.md`
-- Modify (if new quirks): `workshop/scars/ae25-acceptance-gate.md` or new scar
+- Modify: `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md`
+- Modify (if new quirks): `flightdeck/incident-reports/ae25-acceptance-gate.md` or new scar
 
 - [ ] **Step 1: 确认 §8 RE Findings 段含完整 RE-S1 到 RE-S9 finding records (Phase 0 已填)**
 
 ```bash
-grep -c "^### RE-S" workshop/specs/2026-05-22-v2-2-layer-creation-design.md
+grep -c "^### RE-S" flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md
 ```
 
 Expected: ≥ 9 (RE-S1..S9 + 可能 RE-S5a/b/c/d).
@@ -4012,7 +4012,7 @@ Expected: ≥ 9 (RE-S1..S9 + 可能 RE-S5a/b/c/d).
 - [ ] **Step 2: 确认 §6.4a Unclassified 段空**
 
 ```bash
-sed -n '/### 6.4a/,/^### 6\.5/p' workshop/specs/2026-05-22-v2-2-layer-creation-design.md | grep "^\[pending\]"
+sed -n '/### 6.4a/,/^### 6\.5/p' flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md | grep "^\[pending\]"
 ```
 
 Expected: 0 matches (Phase 6 commit 前 V2.2 spec 必须清空 6.4a).
@@ -4025,12 +4025,12 @@ Expected: 0 matches (Phase 6 commit 前 V2.2 spec 必须清空 6.4a).
 
 - [ ] **Step 4: 加 scar (if Phase 5 ship gate 发现 V2.2 新 ScriptingAPI quirks or 字节 quirks)**
 
-例如：若发现某 shape ScriptingAPI 返回 stored × 1.x quirk → 新 scar `workshop/scars/v2-2-shape-quirks.md` 或追加到 既有 `ae25-acceptance-gate.md`.
+例如：若发现某 shape ScriptingAPI 返回 stored × 1.x quirk → 新 scar `flightdeck/incident-reports/v2-2-shape-quirks.md` 或追加到 既有 `ae25-acceptance-gate.md`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add workshop/specs/2026-05-22-v2-2-layer-creation-design.md workshop/scars/
+git add flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md flightdeck/incident-reports/
 git commit -m "docs(v2.2): spec §8 RE finalize + §6.4a clear + §6.5 admission decisions"
 ```
 
@@ -4099,9 +4099,9 @@ V2.2 ship 完产出：
 - **Reusable serializer primitives**: `lower_layer / lower_shape_node / lower_property_stream / lower_item_siblings / capability_matrix` 5 个 V3 直接 inherit
 - **Tests**: ~35 new Go tests + 2 AE ship gates + 2 Tier 3 preservation tests
 - **Classification deliverable** (spec §6): 17 runtime concepts / 19 serialization artifacts / 5 substrates / 7 capability candidates 显式归类
-- **Docs sync**: docs/composition + layer + shape; workshop/board + coverage + coverage-detail + spec
+- **Docs sync**: docs/composition + layer + shape; flightdeck/cockpit + coverage + coverage-detail + spec
 - **scars** (if quirks): new V2.2 ScriptingAPI / 字节 quirks records
 
-V3 brainstorm 输入完备 (`workshop/specs/v3-direction.md` + V2.2 实践数据).
+V3 brainstorm 输入完备 (`flightdeck/specs/v3-direction.md` + V2.2 实践数据).
 
 

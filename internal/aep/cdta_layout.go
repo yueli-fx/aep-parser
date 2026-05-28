@@ -6,7 +6,7 @@ package aep
 // builder (new_composition.go).
 //
 // cdta total size is 204 bytes (0xCC); layout is stable AE 2020 → AE 2025
-// (bit-for-bit verified, see workshop/scars/).
+// (bit-for-bit verified, see flightdeck/incident-reports/).
 const (
 	cdtaResolutionFactorX  = 0x00 // uint16 BE
 	cdtaResolutionFactorY  = 0x02 // uint16 BE
@@ -44,7 +44,7 @@ const (
 )
 
 // Item idta byte offsets (84 bytes total).
-// Full layout RE'd in workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md RE-3 finding.
+// Full layout RE'd in flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md RE-3 finding.
 // Builder strategy: template-copy 84B + overwrite @0x10 (Item ID).
 //
 // NOTE: Item ID offset is @0x10 (verified by parse.classifyItem reading

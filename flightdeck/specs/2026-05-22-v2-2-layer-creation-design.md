@@ -3,14 +3,14 @@
 **Status**: spec, ready for plan phase
 **Created**: 2026-05-22
 **Brainstorm**: chat 转录已整合；3 路 LLM 反馈（deepseek / gpt / claude）已 absorb 进各 section
-**Predecessor**: V2.1 (NewProject + NewComposition) — `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md` + `workshop/scars/ae25-acceptance-gate.md`
-**Successor planning input**: `workshop/specs/v3-direction.md`
+**Predecessor**: V2.1 (NewProject + NewComposition) — `flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md` + `flightdeck/incident-reports/ae25-acceptance-gate.md`
+**Successor planning input**: `flightdeck/specs/v3-direction.md`
 
 ## 0. Context & 范围决策
 
 V2.2 = V2 第二个 sub-project：在 V2.1 NewComposition 基础上加 **ShapeLayer end-to-end**（含节点合成 + PropertyStream 动画 + AE 2020/2025 ship gate）。
 
-**Dual-track 战略**（per `workshop/feedback/gpt`）:
+**Dual-track 战略**（per `flightdeck/kneeboard/gpt`）:
 - **V2 track**: 继续 ship 实际 RE 进度 + 字段覆盖
 - **V3 track**: 从 V2 work 中增量提取 runtime IR + serializer split + capability matrix
 
@@ -515,7 +515,7 @@ V2.3+ 加新 T 时增方法。
 
 不引入 `func (proj *Project) WithMutation(fn func() error) error` 类 transaction API —— V2.2 scope 不需要。
 
-*V3 重新评估 transaction API*: 见 `workshop/specs/v3-direction.md` §M6 Mutation API。
+*V3 重新评估 transaction API*: 见 `flightdeck/specs/v3-direction.md` §M6 Mutation API。
 
 ---
 
@@ -1231,8 +1231,8 @@ Phase 5  AE ship gate (Tier 2)
 Phase 6  Docs sync + ship gate
          docs/composition.md + docs/layer.md NewShapeLayer ref
          docs/shape.md ShapeNode hierarchy
-         workshop/board.md V2.2 archive entry
-         workshop/plans/coverage.md / coverage-detail.md V2.2 段
+         flightdeck/cockpit.md V2.2 archive entry
+         flightdeck/flight-plans/coverage.md / coverage-detail.md V2.2 段
          §8 RE Findings 段 finalize
          §6.4a Unclassified 清空
          §6.5 admission decision finalize
@@ -1240,7 +1240,7 @@ Phase 6  Docs sync + ship gate
          Phase 6 hard ship criterion: PASS ≥ 155
 ```
 
-具体 task 拆分由 writing-plans skill 产出 `workshop/plans/2026-05-22-v2-2-layer-creation-plan.md` 接管。
+具体 task 拆分由 writing-plans skill 产出 `flightdeck/flight-plans/2026-05-22-v2-2-layer-creation-plan.md` 接管。
 
 ---
 
@@ -1666,13 +1666,13 @@ Phase 6  Docs sync + ship gate
 
 ## 9. 关联文档
 
-- 反馈源: `workshop/feedback/{gpt,deepseek,claude}`
-- V2.1 实践基础: `workshop/scars/ae25-acceptance-gate.md`
-- V2.1 plan: `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md`
-- V3 direction: `workshop/specs/v3-direction.md`
+- 反馈源: `flightdeck/kneeboard/{gpt,deepseek,claude}`
+- V2.1 实践基础: `flightdeck/incident-reports/ae25-acceptance-gate.md`
+- V2.1 plan: `flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md`
+- V3 direction: `flightdeck/specs/v3-direction.md`
 - 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束
-- 项目 board: `workshop/board.md`
-- **iter-7/8 ship 完整实施 + 教训**: `workshop/scars/v2-2-aelayer-structure.md` (Phase 5 ship gate 全过程 — iter-1 to iter-8)
+- 项目 board: `flightdeck/cockpit.md`
+- **iter-7/8 ship 完整实施 + 教训**: `flightdeck/incident-reports/v2-2-aelayer-structure.md` (Phase 5 ship gate 全过程 — iter-1 to iter-8)
 
 ---
 
@@ -1785,4 +1785,4 @@ Step 4: refactor lower_* 函数: clone embed + overwriteShapeStreamCdat 覆 scal
 2. **transplant 法 isolate 真凶到具体 chunk** 然后 embed AE-saved bytes 作 boilerplate + post-process 覆 runtime 值。
 3. **AE-saved fixtures 是 ship-gate-class V2.x 项目的核心资源**。tolerance.aep 一个 fixture 解了 3 处 silent drop (Transform / Rect / Fill)。V2.2.1+ 需要更多 fixtures (Ellipse / Path / Stroke each AE-saved)。
 4. **V2.x alpha 限制 ≠ 失败**。docs 声明清楚 + V2.x+1 subplan 接力，先 ship 后扩展。比起追求完整 6 轮死循环更有价值。
-5. **LLM pivot 反馈** 是 ship-gate-stuck 时的关键工具。6+ iter 没进展时主动找另一个 LLM 看 bisect 数据 + 建议结构 (本 V2.2 用了 `workshop/wip/gpt`)，信息密度比单条 chat 高 5x。
+5. **LLM pivot 反馈** 是 ship-gate-stuck 时的关键工具。6+ iter 没进展时主动找另一个 LLM 看 bisect 数据 + 建议结构 (本 V2.2 用了 `flightdeck/kneeboard/gpt`)，信息密度比单条 chat 高 5x。

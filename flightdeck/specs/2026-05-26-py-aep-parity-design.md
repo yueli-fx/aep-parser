@@ -2,9 +2,9 @@
 
 **Status**: spec, ready for phased plans
 **Created**: 2026-05-26
-**Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](workshop/reference/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
+**Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](flightdeck/charts/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
 
-参照源: `workshop/reference/py-aep/`（v0.x，自标 "save() highly experimental"，写区 alpha）。
+参照源: `flightdeck/charts/py-aep/`（v0.x，自标 "save() highly experimental"，写区 alpha）。
 
 ---
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 2. API 全表（对照 [py-aep ExtendScript coverage](workshop/reference/py-aep/docs/extendscript_coverage.md)）
+## 2. API 全表（对照 [py-aep ExtendScript coverage](flightdeck/charts/py-aep/docs/extendscript_coverage.md)）
 
 每行: ✅ = 已 ship | 🟢 = 部分 | 🟡 = R only | ❌ = 缺 | 🗑️ = 暂搁 (runtime-only/structural-blocked)
 列含义: **py-aep** = py-aep 状态 / **我们** = 当前 / **目标** = parity 后
@@ -246,7 +246,7 @@
 
 **Target**: 50+ 新 API，零结构性写，纯 reader + 现有 chunk slice 设字段。
 
-子任务（详 `workshop/plans/2026-05-26-py-aep-parity-p1-plan.md`）：
+子任务（详 `flightdeck/flight-plans/2026-05-26-py-aep-parity-p1-plan.md`）：
 
 - **1A** CompItem filter views (15+)：`TextLayers / ShapeLayers / CameraLayers / LightLayers / NullLayers / SolidLayers / AdjustmentLayers / ThreeDLayers / GuideLayers / SoloLayers / AVLayers / CompositionLayers / FootageLayers / FileLayers / PlaceholderLayers`
 - **1B** Project filter views: `Folders / Footages / RootFolder / LayerByID(id) / EffectNames`
@@ -338,7 +338,7 @@ P1 子项 ~50+ API，其中：
 
 ## 6. 相关文档
 
-- 参照源: [`workshop/reference/py-aep/`](../reference/py-aep)
+- 参照源: [`flightdeck/charts/py-aep/`](../reference/py-aep)
 - 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束
 - 覆盖矩阵: [`../plans/coverage.md`](../plans/coverage.md) / [`../plans/coverage-detail.md`](../plans/coverage-detail.md)
 - V2.2 ShapeLayer alpha: [`2026-05-22-v2-2-layer-creation-design.md`](2026-05-22-v2-2-layer-creation-design.md)

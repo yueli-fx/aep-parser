@@ -7,7 +7,7 @@
 //
 // Background: AE expects each Item LIST in a Fold to be followed by 8
 // sibling chunks (FEE LIST + fvdv / fiop / ftts / foac / fiac / fipc / fifl).
-// Missing them → AE 25 reports "文件数据丢失" (per workshop/scars/
+// Missing them → AE 25 reports "文件数据丢失" (per flightdeck/incident-reports/
 // ae25-acceptance-gate.md). V2.1 deep-cloned them from the embedded dummy
 // template inline in `Project.NewComposition`; Phase 2 extracts to give the
 // primitive a name + dedicated file (Inv-2: one file, one responsibility).

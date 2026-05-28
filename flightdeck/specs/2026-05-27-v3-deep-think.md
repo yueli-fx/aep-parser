@@ -254,7 +254,7 @@ Before writing the V3 Phase 1 plan, want explicit answer on:
 3. **Phase 1 scope** — confirm "back-ref struct extraction only, no behavior change"? Or include something user-visible to make the phase feel like progress?
 4. **Timeline expectations** — comfortable with multi-week V3 timeline (per `2026-05-22-v3-direction.md` projection)?
 
-If all four answers are yes/yes/yes/yes, the next step is `writing-plans` → `workshop/plans/2026-05-28-v3-phase1-backrefs-plan.md`.
+If all four answers are yes/yes/yes/yes, the next step is `writing-plans` → `flightdeck/flight-plans/2026-05-28-v3-phase1-backrefs-plan.md`.
 
 ---
 

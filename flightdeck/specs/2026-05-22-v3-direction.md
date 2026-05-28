@@ -2,7 +2,7 @@
 
 **Status**: Planning note, not a plan. No implementation yet. Drafted 2026-05-22 after V2.1 ship.
 
-GPT 反馈整合 (`workshop/feedback/gpt`) + V2.1 Phase 6 实践经验 (`scars/ae25-acceptance-gate.md`)。
+GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`scars/ae25-acceptance-gate.md`)。
 
 ## 动机：V2.1 暴露的架构债
 
@@ -211,8 +211,8 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 
 ## V3 落地建议路径
 
-1. **brainstorm** (`superpowers:brainstorming` skill) → `workshop/specs/v3-runtime-design.md`
-2. **plan** (`superpowers:writing-plans`) → `workshop/plans/v3-runtime-plan.md`，多 phase：
+1. **brainstorm** (`superpowers:brainstorming` skill) → `flightdeck/specs/v3-runtime-design.md`
+2. **plan** (`superpowers:writing-plans`) → `flightdeck/flight-plans/v3-runtime-plan.md`，多 phase：
    - Phase 1: scene types + parse 闭环（不动 serializer，只 wrap）
    - Phase 2: 1 个 layer kind 完整 round-trip via scene API
    - Phase 3: capability matrix + serializer 分包
@@ -229,7 +229,7 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 
 ## 关联文档
 
-- 反馈源: `workshop/feedback/gpt`
-- V2.1 实践: `workshop/scars/ae25-acceptance-gate.md`
+- 反馈源: `flightdeck/kneeboard/gpt`
+- V2.1 实践: `flightdeck/incident-reports/ae25-acceptance-gate.md`
 - 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束（架构 ground truth 已并入 CLAUDE.md，原 architecture.md 内容拆分到 scars/ + playbooks/ + coverage.md）
-- V2.1 plan: `workshop/plans/finish/2026-05-22-v2-1-foundation-plan.md`
+- V2.1 plan: `flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md`

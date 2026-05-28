@@ -40,8 +40,8 @@ Project
 | [text.md](text.md) | `TextSource`, `TextStyleRun`, `TextParagraph`, `TextJustification`, `SetText`, `TextEncodedByteLen` |
 | [json.md](json.md) | JSON 视图（`JSON*` 类型 + `ToJSON` / `MarshalJSON` / `WriteJSON`） |
 | [constants.md](constants.md) | 枚举常量速查（`LayerType`, `BlendingMode`, `TrackMatteType`, `AutoOrientType`, `LayerQuality`, `MaskMode`, `InterpType`, `TextJustification`, `BitsPerChannel`） |
-| [../workshop/plans/coverage.md](../workshop/plans/coverage.md) | **覆盖度概览（精简）** —— 已 ship / 暂搁 / 不可达 / 下一步候选 |
-| [../workshop/plans/coverage-detail.md](../workshop/plans/coverage-detail.md) | **AE attr 详细交叉表** —— 对照 AE 脚本指南逐项标注 ✅R/W / 🟢R / ❌ 状态 |
+| [../flightdeck/flight-plans/coverage.md](../flightdeck/flight-plans/coverage.md) | **覆盖度概览（精简）** —— 已 ship / 暂搁 / 不可达 / 下一步候选 |
+| [../flightdeck/flight-plans/coverage-detail.md](../flightdeck/flight-plans/coverage-detail.md) | **AE attr 详细交叉表** —— 对照 AE 脚本指南逐项标注 ✅R/W / 🟢R / ❌ 状态 |
 
 ---
 
@@ -127,7 +127,7 @@ proj.WriteJSON(os.Stdout)
 
 ## 操作能力 / 边界一览
 
-> 本表是高频能力的速查，**不是穷举清单**。AE 全字段覆盖矩阵以 [../workshop/plans/coverage-detail.md](../workshop/plans/coverage-detail.md) 为权威 —— 每个 AE 脚本字段都有 ✅R/W / 🟢R / ⚠ / ❌ 标注 + 引用代码位置。
+> 本表是高频能力的速查，**不是穷举清单**。AE 全字段覆盖矩阵以 [../flightdeck/flight-plans/coverage-detail.md](../flightdeck/flight-plans/coverage-detail.md) 为权威 —— 每个 AE 脚本字段都有 ✅R/W / 🟢R / ⚠ / ❌ 标注 + 引用代码位置。
 
 | 类别 | 操作 | 状态 |
 | --- | --- | --- |
