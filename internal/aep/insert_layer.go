@@ -106,7 +106,11 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	newID := c.proj.allocItemID()
 	clonedLayr := cloneBlock[0]
 	clonedLdta := clonedLayr.FindFirst(rifx.IDLdta)
-	if clonedLdta == nil || len(clonedLdta.Data) < 0x88 {
+	if clonedLdta == nil {
+		c.proj.nextItemID = oldNextItemID
+		return nil, fmt.Errorf("InsertLayer: cloned Layr has no ldta chunk")
+	}
+	if len(clonedLdta.Data) < 0x88 {
 		c.proj.nextItemID = oldNextItemID
 		return nil, fmt.Errorf("InsertLayer: cloned Layr ldta too short for ParentID write (got %d bytes, need >=0x88)", len(clonedLdta.Data))
 	}
