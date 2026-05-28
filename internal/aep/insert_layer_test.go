@@ -137,3 +137,62 @@ func TestInsertLayer_RefuseCrossProject(t *testing.T) {
 		t.Fatalf("want 'cross-Project' error, got %v", err)
 	}
 }
+
+// R8: src not AV (camera/light/text/shape refused in Phase 5C)
+func TestInsertLayer_RefuseNonAV(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	origType := src.Type
+	src.Type = aep.LayerTypeCamera
+	defer func() { src.Type = origType }()
+	_, err := dest.InsertLayer(src, 0)
+	if err == nil || !strings.Contains(err.Error(), "non-AV") {
+		t.Fatalf("want 'non-AV' error, got %v", err)
+	}
+}
+
+// R9: direct pre-comp loop — src.SourceID points at dest comp itself
+func TestInsertLayer_RefuseDirectPrecompLoop(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	origSourceID := src.SourceID
+	src.SourceID = dest.ID
+	defer func() { src.SourceID = origSourceID }()
+	if dest.ID == 0 {
+		t.Skip("fixture dest comp has ID 0; can't trigger R9 (SourceID==0 means 'no source')")
+	}
+	_, err := dest.InsertLayer(src, 0)
+	if err == nil || !strings.Contains(err.Error(), "pre-comp loop") {
+		t.Fatalf("want 'pre-comp loop' error, got %v", err)
+	}
+}
+
+// R10: src has no layrList backref (built outside parser)
+func TestInsertLayer_RefuseSrcMissingLayrList(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	aep.ClearLayerLayrListForTest(src)
+	_, err := dest.InsertLayer(src, 0)
+	if err == nil || !strings.Contains(err.Error(), "Layr chunk back-ref") {
+		t.Fatalf("want 'Layr chunk back-ref' error, got %v", err)
+	}
+}
+
+// R11: structural corruption (FormType mismatch) — exercised via test hook.
+func TestInsertLayer_RefuseStructuralCorruption(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	aep.CorruptSrcLayrFormTypeForTest(src)
+	_, err := dest.InsertLayer(src, 0)
+	if err == nil || !strings.Contains(err.Error(), "non-Layr") {
+		t.Fatalf("want 'non-Layr' corruption error, got %v", err)
+	}
+}

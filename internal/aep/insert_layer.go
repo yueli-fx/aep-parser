@@ -2,6 +2,8 @@ package aep
 
 import (
 	"fmt"
+
+	"github.com/example/aep-parser/internal/rifx"
 )
 
 // InsertLayer deep-clones src (from a sibling comp in the SAME Project)
@@ -30,5 +32,28 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	if src.comp.proj != c.proj {
 		return nil, fmt.Errorf("InsertLayer: src and dest in different Projects — cross-Project insert deferred to Phase 5C.1")
 	}
-	return nil, fmt.Errorf("InsertLayer: not yet implemented")
+	if src.Type != LayerTypeAV {
+		return nil, fmt.Errorf("InsertLayer: refuse non-AV src (Type=%s); only AV layers supported in Phase 5C", src.Type)
+	}
+	if src.SourceID != 0 && src.SourceID == c.ID {
+		return nil, fmt.Errorf("InsertLayer: refuse direct pre-comp loop (src.SourceID=%d == dest.ID=%d)", src.SourceID, c.ID)
+	}
+	if src.back == nil || src.back.layrList == nil {
+		return nil, fmt.Errorf("InsertLayer: src layer %q has no Layr chunk back-ref", src.Name)
+	}
+	srcChildren := src.comp.back.itemList.Children
+	srcLayrIdx := findLayrIndexInItemList(src.comp.back.itemList, src.back.layrList)
+	if srcLayrIdx < 0 {
+		return nil, fmt.Errorf("InsertLayer: src layer %q Layr chunk not found in its comp's itemList", src.Name)
+	}
+	if !srcChildren[srcLayrIdx].IsList() || srcChildren[srcLayrIdx].FormType != rifx.IDLayr {
+		return nil, fmt.Errorf("InsertLayer: src layer %q backref points to non-Layr chunk (FormType=%s)", src.Name, chunkIDString(srcChildren[srcLayrIdx].FormType))
+	}
+	if srcLayrIdx+1 >= len(srcChildren) {
+		return nil, fmt.Errorf("InsertLayer: src layer %q Layr at end of itemList (no Ewst sibling)", src.Name)
+	}
+	if !srcChildren[srcLayrIdx+1].IsList() || srcChildren[srcLayrIdx+1].FormType != rifx.IDEwst {
+		return nil, fmt.Errorf("InsertLayer: src layer %q expected Ewst sibling after Layr, found %s", src.Name, chunkIDString(srcChildren[srcLayrIdx+1].FormType))
+	}
+	return nil, fmt.Errorf("InsertLayer: not yet implemented (happy path forthcoming in Phase B)")
 }
