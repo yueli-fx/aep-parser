@@ -1,16 +1,26 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-28 by claude (V3 Phase 3 Task 5 完 — ship-gate 6/6 PASS; DuplicateLayer ready for Stable promotion)
-**Active focus**: V3 Phase 3 Task 6 (godoc alpha → Stable + finish/ migration + commit)。Plan: `plans/2026-05-28-v3-phase3-duplicatelayer-plan.md` Task 6。
+**Last updated**: 2026-05-28 by claude (V3 Phase 3 完 — DuplicateLayer Stable shipped via commit b2d3e18; 6/6 ship-gate PASS)
+**Active focus**: 空。V3 Phase 4 候选待定 — V3 deep-think spec § 4 列表里挑下一个结构性 mutation。
 
 ## Next session
 
-**V3 Phase 3 Task 6 — Stable promotion + finish/ migration**：
-1. `internal/aep/duplicate_layer.go` godoc: 去掉 "Alpha: AE 2020 + AE 2025 ship-gate pending" 一行，标记 Stable
-2. `workshop/plans/coverage.md`: + DuplicateLayer row (Layer.Duplicate via Composition.DuplicateLayer)
-3. 移 `plans/2026-05-28-v3-phase3-duplicatelayer-plan.md` → `plans/finish/`
-4. 移 `specs/2026-05-28-v3-phase3-duplicatelayer-strategy.md` → `specs/finish/`
-5. Commit: `feat(aep): V3 Phase 3 ship-gate green — DuplicateLayer Stable`
+**Phase 4 候选**（从 `specs/2026-05-27-v3-deep-think.md` § 4 picklist）：
+- **`Composition.InsertLayer(src *Layer, atIdx int)`** — 跨 comp 拷贝；扩展 DuplicateLayer 的 deep-clone 到 cross-tree（要解 SourceID 冲突 / cross-comp footage ref）
+- **`Composition.MoveLayer(from, to int)`** — itemList.Children 内 reorder + c.Layers reorder；最简单的 V3 mutation，无 ID alloc，单 splice
+- **`Project.DuplicateItem(item Item, name string)`** — comp / footage / folder 通用；扩展 V2.1 NewComposition + V3 DuplicateLayer 的 deep-clone 到 item 级
+- **`Layer.SetTrackMatte(srcLayer *Layer, mode TrackMatteType)`** — V3 风格 atomic setter；同时维护双向引用 + ldta @0x6B + AE 23+ @0xA0 (TrackMatteLayerID)
+- **V2.2.1 ShapeLayer 拓展**（Ellipse/Path/Stroke/Fill Color/keyframes） — 现在压一起做避免 alpha API 重复，详 Deferred
+
+建议起手 `MoveLayer`（最简单，复用 itemList splice machinery；不用 RE，AE 行为已知）或 `Layer.SetTrackMatte`（解 DuplicateLayer F2 quirk 的 prereq — 一旦 SetTrackMatte 能让 caller clear/set matte，DuplicateLayer 的 matte refuse-case 可以软化）。
+
+**V3 Phase 3 完整产物**（reference，git ship via b2d3e18）：
+- 代码: `internal/aep/duplicate_layer.go` (~210 LOC) + `_test.go` (9 tests, all PASS) — Stable
+- 工具: `tmp_debug/ge_duplicate_layer/main.go` + `test_data/verify_ge_duplicate_layer.jsx` (3 mode)
+- RE: `test_data/re_duplicate_layer.jsx` (4 mode) + 4 AE-saved fixtures
+- Scar: `workshop/scars/ae-duplicatelayer-re.md` (10 Findings)
+- 文档: `specs/finish/2026-05-28-v3-phase3-duplicatelayer-strategy.md` + `plans/finish/2026-05-28-v3-phase3-duplicatelayer-plan.md` + coverage.md V3 section
+- Ship-gate 6/6 PASS (AE 2020 + 2025 × solo/dup_parent/dup_child)
 
 **Task 5 产物（已 ship 6/6 PASS）**:
 - `tmp_debug/ge_duplicate_layer/main.go` — 3 mode ge_*.aep (solo/dup_parent/dup_child) producer; baseline = re_delete_layer_baseline.aep
@@ -21,38 +31,10 @@
   - **dup_child**: F7-inverse confirmed — both L1_clone (idx 1, clone) and L1_top (idx 2, source) show parent=L2_mid
 - matte mode by-design refused per strategy spec §5 — no ge fixture, no AE verify (expected, not coverage gap)
 
-**Task 3 产物（已 ship）**:
-- `internal/aep/duplicate_layer.go` (~210 LOC) — `DuplicateLayer(int, string) (*Layer, error)`，按 spec §3 algorithm 12 步实现。reuse `deepCloneChunk` from new_composition.go（不要重写！）；reuse `findLayrIndexInItemList` from delete_layer.go (同 package 可直接调)。选项 a — 重跑 `parseLayer(clonedLayr, index, ctx)` 建 cloneLayer with backrefs into cloned chunks。
-- `internal/aep/duplicate_layer_test.go` (9 tests, all PASS): RefuseEmptyName / RefuseOutOfRange / RefuseMissingBackref / RefuseNonAV / RefuseTrackMatte / HappyPath_Middle (验 ID alloc + name + 4 layers + delta=16 + nextItemID bumped) / FreshDataSlices (concurrent-mutate scar 防护) / RoundTrip (Open→Dup→Write→Reopen) / LdtaBodyVerbatim (F10 字节级验证：clone 仅 @0x00..0x03 变)
-- PASS 267→277 (+10)；FAIL=0；vet clean (info-level 是 pre-existing 与 task 无关)
-- **Stable promotion 在 Task 6** (godoc 现标 alpha；ship-gate green 后转 Stable)
-
-**Task 2 产物（已 ship）**:
-- `workshop/specs/2026-05-28-v3-phase3-duplicatelayer-strategy.md`（9 sections：signature / decision matrix / clone algorithm / no-ref-cleanup / refuse-cases / atomic / deferred / ship-gate / file map）
-- 镜像 DeleteLayer strategy 结构；scar 10 Findings 全部翻译成 impl 决策；ship-gate target 6/6（matte 模式 by design 拒接，文档化为 expected）
-
-**为什么 DuplicateLayer 起手**: smallest scope of V3 Phase 3 候选；最大复用 Phase 2 工具链；反向验「16-chunk delete unit」对 follower chunks 的理解 —— Finding 10 已 nail down: 14 follower 全 byte-identical clone，AE 不 mutate 任何 follower 字段。
-
-**Phase 2 完整产物**（reference，git ship）：
-- 代码: `internal/aep/delete_layer.go` + `_test.go` (9 test, 8 PASS 1 SKIP)
-- 工具: `tmp_debug/dump_layers/main.go` + `tmp_debug/ge_delete_layer/main.go`
-- JSX: `test_data/re_delete_layer.jsx` (5 modes) + `test_data/verify_ge_delete_layer.jsx`
-- 文档: `scars/ae-deletelayer-re.md` + `specs/finish/2026-05-28-v3-phase2-deletelayer-strategy.md` + `plans/finish/2026-05-28-v3-phase2-deletelayer-plan.md`
-- Playbook 刷新: re-fixture.md + verify.md
-
 **并行 R-only 仍 deferred**（不阻塞 V3）：
 - **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
 - **DisplayColorSpace R**: separate chunk 位置未 RE
 - **ValueText**: per-type formatter — P3
-
-**并行候选**：V2.2.1 ShapeLayer 拓展（其实最好压到 V3 Phase 5 一起做，避免 alpha API 重复）。
-
-**并行 R-only 仍 deferred**（不阻塞 V3）：
-- **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
-- **DisplayColorSpace R**: separate chunk 位置未 RE
-- **ValueText**: per-type formatter — P3
-
-**并行候选**：V2.2.1 ShapeLayer 拓展（其实最好压到 V3 Phase 5 一起做，避免 alpha API 重复）。
 
 ## In flight
 
@@ -72,6 +54,7 @@
 
 ## Recently finished
 
+- **2026-05-28 V3 Phase 3 完 — Composition.DuplicateLayer ship-gate green (Stable)** (commit b2d3e18) — 完整 RE→spec→impl→ship-gate 闭环。`duplicate_layer.go` (~210 LOC) + 9 unit tests + structural equivalence test 全 PASS；PASS 267→278。**Ship-gate 6/6 PASS** (AE 2020 + AE 2025 × solo/dup_parent/dup_child)，matte mode 按 strategy §5 by-design refuse 不产 ge fixture (F2 quirk Phase 3.1 候选)。Tooling: `tmp_debug/ge_duplicate_layer` 3 mode producer 复用 Phase 2 baseline + Go SetParent，省一套 RE fixture；`verify_ge_duplicate_layer.jsx` mode 切换验 numLayers==4 / clone identity / parent refs per mode。godoc 从 alpha → Stable。Plan + spec 移 finish/。Coverage.md 加 V3 structural ops 段（含 Phase 2 DeleteLayer 同时落账）。Next: Phase 4 候选 (MoveLayer / SetTrackMatte / InsertLayer / Project.DuplicateItem) per V3 deep-think §4。
 - **2026-05-28 V3 Phase 3 Task 5 完 — ship-gate 6/6 PASS** — `tmp_debug/ge_duplicate_layer/main.go` 产 3 mode ge_*.aep (solo/dup_parent/dup_child)，baseline 复用 Phase 2 的 `re_delete_layer_baseline.aep`（3-solid pre-mutation；dup_parent/dup_child 用 Go SetParent 设引用再 dup，省一套 RE fixture）。`test_data/verify_ge_duplicate_layer.jsx` mode 切换验 (a) AE 不拒接 (b) numLayers==4 (c) clone 在 expected AE idx + 名字 (d) parent 关系 per mode。**6/6 PASS** (AE 2020 × 3 + AE 2025 × 3): solo 验 clone L2_clone @ idx 2 + 推 source L2_mid 到 idx 3；dup_parent 验 F6 — L3 仍 parents to L2_mid (orig) 不是 clone；dup_child 验 F7-inverse — L1_clone + L1_top 都 parents to L2_mid。matte mode 按 spec §5 by-design refuse，不产 ge fixture（expected absence，非 coverage gap）。Next: Task 6 godoc alpha → Stable + plan/spec → finish/ + commit。
 - **2026-05-28 V3 Phase 3 Task 4 完 — Structural equivalence test PASS first try** — `TestDuplicateLayer_StructuralEquivalence_Solo` in `duplicate_layer_test.go`: opens `re_delete_layer_baseline.aep` (3-solid baseline) → `DuplicateLayer(1, "L2_mid")` → compares Composition[0].itemList.Children (ID + IsList + FormType, in order) vs AE's `re_duplicate_layer_solo.aep`. **PASS 一次过** —— Go-side dup 产的 itemList chunk shape 与 AE solo post-dup 完全对齐（chunk 数 + 每个 child 的 ID/IsList/FormType）。这是 ship-gate 前最强的"Go 实现行为对的"信号——AE 接受的 layout pattern (F1/F4/F5/F10) 我们 byte 不一致但 shape 一致，符合 length-preserving + verbatim deep-clone 预期。helper 加 `openDupFixture(t, mode)` 复用其他 mode。PASS 277→278；FAIL=0；vet clean。Next: Task 5 ship-gate (agent-side `tmp_debug/ge_duplicate_layer` + `verify_ge_duplicate_layer.jsx` × 3 mode × 2 version = 6 次 AE 开盘验证)。
 - **2026-05-28 V3 Phase 3 Task 3 完 — DuplicateLayer 实现 + 9 tests PASS (alpha)** — `internal/aep/duplicate_layer.go` (~210 LOC) 按 spec §3 algorithm 12 步直翻：validate → snapshot (含 `proj.nextItemID`) → locate source Layr → defensive Ewst assert → adaptive block scan → deep clone block → alloc newID + 写 ldta @0x00..0x03 → rewrite Utf8 name → splice itemList @ srcLayrIdx → re-parse clonedLayr (选项 a — backrefs auto-bound to cloned chunks) → splice c.Layers @ index → warnings-as-failure rollback。**关键复用**：`deepCloneChunk` 已存在于 `new_composition.go`（不要重写！我第一次写时撞了 DuplicateDecl）；`findLayrIndexInItemList` 已存在于 `delete_layer.go` 同 package 可直接调用。**9 tests all PASS**: 5 refuse (EmptyName/OutOfRange/MissingBackref/NonAV/TrackMatte) + 4 happy (HappyPath_Middle 验 ID+name+count+delta=16+nextItemID bump / FreshDataSlices 验 concurrent-mutate scar 防护 / RoundTrip Open→Dup→Write→Reopen / LdtaBodyVerbatim F10 字节级验 clone 仅 @0x00..0x03 变)。**PASS 267→277** (+10 含子测试)；FAIL=0；vet clean。Alpha 标在 godoc — ship-gate (Task 5) green 后 Task 6 转 Stable。Next: Task 4 structural equivalence (vs `re_duplicate_layer_solo.aep`) + Task 5 ship-gate (`tmp_debug/ge_duplicate_layer` + `verify_ge_duplicate_layer.jsx` 跑 AE 2020/2025 × 3 mode = 6 次).
