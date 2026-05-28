@@ -255,19 +255,16 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 
 func TestInsertLayer_HappyPath_Basic_MidAndAppend(t *testing.T) {
 	for _, tc := range []struct {
-		name     string
-		atIdxFn  func(dest *aep.Composition) int
-		wantSlot func(dest *aep.Composition, clone *aep.Layer) bool
+		name    string
+		atIdxFn func(dest *aep.Composition) int
 	}{
 		{
-			name:     "middle",
-			atIdxFn:  func(dest *aep.Composition) int { return len(dest.Layers) / 2 },
-			wantSlot: func(dest *aep.Composition, clone *aep.Layer) bool { return dest.Layers[len(dest.Layers)/2-0] == clone },
+			name:    "middle",
+			atIdxFn: func(dest *aep.Composition) int { return len(dest.Layers) / 2 },
 		},
 		{
-			name:     "append",
-			atIdxFn:  func(dest *aep.Composition) int { return len(dest.Layers) },
-			wantSlot: func(dest *aep.Composition, clone *aep.Layer) bool { return dest.Layers[len(dest.Layers)-1] == clone },
+			name:    "append",
+			atIdxFn: func(dest *aep.Composition) int { return len(dest.Layers) },
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -280,8 +277,8 @@ func TestInsertLayer_HappyPath_Basic_MidAndAppend(t *testing.T) {
 			if err != nil {
 				t.Fatalf("InsertLayer(src, %d): %v", atIdx, err)
 			}
-			if !tc.wantSlot(dest, clone) {
-				t.Errorf("clone not at expected slot for %s; dest.Layers=%v", tc.name, layerIDs(dest.Layers))
+			if dest.Layers[atIdx] != clone {
+				t.Errorf("clone not at expected slot %d for %s; dest.Layers=%v", atIdx, tc.name, layerIDs(dest.Layers))
 			}
 		})
 	}
