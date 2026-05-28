@@ -139,7 +139,7 @@ proj.WriteJSON(os.Stdout)
 | **静态值 / 表达式** | 表达式写回（创建 / 替换 / 清空 / 启用切换） | ✅ `Property.SetExpression`（length-variable）+ `SetExpressionEnabled` —— [property.md](property.md#propertysetexpression) |
 | **Layer 标志位** | Visible / Solo / Shy / Locked / 3D / Null / Adjust / Guide / MotionBlur / EffectsEnabled / AudioEnabled / FrameBlend / CollapseTransform / MarkersLocked / Sampling / FrameBlendMode | ✅ 共 16 个 `Layer.Set*` flag-bit setter —— [layer.md](layer.md#flag-bit-setters) |
 | **Layer 字节字段** | BlendingMode / TrackMatte / Label / Quality / PreserveTransparency / AutoOrient | ✅ `Layer.SetBlendingMode` / `SetTrackMatte` / `SetLabel` / `SetQuality` / `SetPreserveTransparency` / `SetAutoOrient` |
-| **Layer 字节字段** | TrackMatteLayer (AE 23+，ldta `@0xA0` 显式 source) | ✅ `Layer.TrackMatteLayerID` / `TrackMatteLayer()` / `SetTrackMatteLayer` / `ClearTrackMatteLayer` |
+| **Layer 字节字段** | TrackMatteLayer (AE 23+，ldta `@0xA0` 显式 source) | ✅ `Layer.TrackMatteLayerID` / `TrackMatteLayer()` / `SetTrackMatteLayer` (id 入参) / `SetTrackMatteSource` (`*Layer` 入参，AE ScriptingAPI parity) / `ClearTrackMatteLayer` |
 | **Layer 字节字段** | LightKind (AE 23+，ldta `@0x88`) | ✅ `Layer.LightKind` / `SetLightKind` —— 取代旧 `LightTypeID`（已 deprecated） |
 | **Layer 字节字段** | Parent / Source ID / StartTime / InPoint / OutPoint / Stretch | ✅ `Layer.SetParent` / `SetSource` / `SetStartTime` / `SetInPoint` / `SetOutPoint` / `SetStretch` |
 | **Layer 文本字段** | Name / Comment | ✅ `Layer.SetName` / `SetComment`（length-variable）—— [layer.md](layer.md#text-field-setters-length-variable) |

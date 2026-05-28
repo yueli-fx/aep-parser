@@ -118,7 +118,11 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 }
 
 // initDerived 在 parseProject 收尾时调用，初始化 Project 的 derived state：
-//   - nextItemID = max(已有所有 item IDs) + 1（monotonic counter for NewComposition）
+//   - nextItemID = max(已有所有 item IDs) + 1（monotonic counter for NewComposition / Duplicate）
+//     Must include LAYER IDs too — AE often assigns layer.id > footage.id within
+//     a comp, so excluding layers can leave nextItemID below an in-use layer ID
+//     (collision on next allocItemID, surfaced by Phase 5B on AE 23+ matte
+//     fixtures where layer IDs run higher than any folder/comp/footage).
 //   - rootFold = root Egg! 下第一个 formType=Fold 的 LIST（cached for V2 mutations）
 //
 // 参数 rifxRoot 是 parseProject 顶层 *rifx.Chunk（formType=Egg!）。
@@ -127,6 +131,11 @@ func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
 	for _, c := range p.Compositions {
 		if c.ID > maxID {
 			maxID = c.ID
+		}
+		for _, l := range c.Layers {
+			if l.ID > maxID {
+				maxID = l.ID
+			}
 		}
 	}
 	for _, f := range p.Footage {

@@ -37,8 +37,12 @@ import (
 //   - index out of range
 //   - comp lacks parsed itemList back-ref
 //   - source is not an AV layer (camera/light/audio behavior not RE'd)
-//   - source has TrackMatte != None (F2 quirk: AE relocates clone for
-//     matte preservation; ~30 LOC special-case deferred to Phase 3.1)
+//   - source has implicit TrackMatte (TrackMatte != None &&
+//     TrackMatteLayerID == 0). F2 quirk: AE relocates clone above the
+//     positional matte source to preserve original's matte; not yet
+//     supported. AE 23+ explicit matte (TrackMatteLayerID != 0) is
+//     ALLOWED (Phase 5B Stable — clone byte-copies @0xA0 + @0x6B
+//     verbatim; AE 2025 ship-gate green 2026-05-28).
 //   - backref corruption (Layr formType / Ewst sibling mismatch)
 //
 // Atomic mutation (Inv-10 / Inv-11): snapshot pre-call state of
@@ -65,8 +69,12 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	if source.Type != LayerTypeAV {
 		return nil, fmt.Errorf("DuplicateLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported in Phase 3", index, source.Type)
 	}
-	if source.TrackMatte != TrackMatteNone {
-		return nil, fmt.Errorf("DuplicateLayer: refuse layer %q (idx=%d) with TrackMatte=%d set; AE relocates clone to preserve original's matte (F2 quirk), not yet supported in Phase 3", source.Name, index, source.TrackMatte)
+	// Phase 5B: F2 quirk applies only to implicit "layer-above" matte
+	// where matte source is positional. AE 23+ explicit matte
+	// (TrackMatteLayerID != 0) decouples matte from layer order — clone
+	// keeps the explicit ID via byte-verbatim ldta @0xA0 + @0x6B copy.
+	if source.TrackMatte != TrackMatteNone && source.TrackMatteLayerID == 0 {
+		return nil, fmt.Errorf("DuplicateLayer: refuse layer %q (idx=%d) with implicit TrackMatte=%d (TrackMatteLayerID=0); AE relocates clone to preserve original's matte (F2 quirk), not yet supported", source.Name, index, source.TrackMatte)
 	}
 	if source.back == nil || source.back.layrList == nil {
 		return nil, fmt.Errorf("DuplicateLayer: layer %q at idx %d has no Layr chunk back-ref", source.Name, index)

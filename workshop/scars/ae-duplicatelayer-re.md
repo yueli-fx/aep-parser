@@ -63,6 +63,8 @@ New L2 itself: trackMatteType=5013 (copied), but now no layer above → matte in
 
 Strategy spec § (TBD) picks (a) for Phase 3 MVP.
 
+**Phase 5B amendment (2026-05-28)**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed in Phase 5B). AE 2025 ship-gate via `ge_duplicate_layer_explicit_matte.aep` (uses `re_trackmatte_ae24.aep` as source). See [`plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md).
+
 ---
 
 ## Finding 3: Layer ID allocation = head counter +1 (monotonic, Inv-9 holds)

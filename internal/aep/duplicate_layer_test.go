@@ -119,19 +119,25 @@ func TestDuplicateLayer_RefuseNonAV(t *testing.T) {
 	}
 }
 
-func TestDuplicateLayer_RefuseTrackMatte(t *testing.T) {
+// Phase 5B: implicit matte (TrackMatte != None && TrackMatteLayerID == 0)
+// is still refused — F2 quirk applies to positional "layer-above" matte.
+func TestDuplicateLayer_RefuseImplicitTrackMatte(t *testing.T) {
 	proj := openDupBaseline(t)
 	if proj == nil {
 		return
 	}
 	c := proj.Compositions[0]
 	c.Layers[1].TrackMatte = aep.TrackMatteAlpha
+	// TrackMatteLayerID stays 0 — implicit matte path.
+	if c.Layers[1].TrackMatteLayerID != 0 {
+		t.Fatalf("test precondition: TrackMatteLayerID should be 0 for implicit case, got %d", c.Layers[1].TrackMatteLayerID)
+	}
 	_, err := c.DuplicateLayer(1, "X")
 	if err == nil {
-		t.Fatal("expected refuse on layer with TrackMatte set, got nil")
+		t.Fatal("expected refuse on layer with implicit TrackMatte, got nil")
 	}
-	if !strings.Contains(err.Error(), "TrackMatte") {
-		t.Errorf("error should mention 'TrackMatte', got %q", err.Error())
+	if !strings.Contains(err.Error(), "implicit TrackMatte") {
+		t.Errorf("error should mention 'implicit TrackMatte', got %q", err.Error())
 	}
 	if len(c.Layers) != 3 {
 		t.Errorf("Layers count changed after refused dup: got %d, want 3", len(c.Layers))
@@ -363,5 +369,232 @@ func TestDuplicateLayer_StructuralEquivalence_Solo(t *testing.T) {
 		if goCh.IsList() && goCh.FormType != ae.FormType {
 			t.Errorf("children[%d] FormType: Go=%q, AE-solo=%q", i, string(goCh.FormType[:]), string(ae.FormType[:]))
 		}
+	}
+}
+
+// layerIndexInComp returns the 0-based c.Layers index of `target` via
+// pointer identity, or -1 if not found.
+func layerIndexInComp(c *aep.Composition, target *aep.Layer) int {
+	for i, l := range c.Layers {
+		if l == target {
+			return i
+		}
+	}
+	return -1
+}
+
+// Phase 5B happy path: duplicating an explicit-matte layer (AE 23+
+// TrackMatteLayerID != 0) succeeds and produces a clone with the same
+// matte source/mode. F2 position-shift quirk does NOT apply — clone is
+// inserted at source's old slice index like the solo/dup_parent/dup_child
+// modes.
+func TestDuplicateLayer_ExplicitMatte_HappyPath(t *testing.T) {
+	proj, c := openTrackMatteAE24(t)
+	if proj == nil || c == nil {
+		return
+	}
+	src := layerBySourceName(proj, c, "mt_alpha_to_solidA")
+	if src == nil {
+		t.Fatal("fixture missing layer 'mt_alpha_to_solidA'")
+	}
+	idx := layerIndexInComp(c, src)
+	if idx < 0 {
+		t.Fatal("can't locate mt_alpha_to_solidA in c.Layers")
+	}
+	if src.TrackMatte == aep.TrackMatteNone {
+		t.Fatalf("test precondition: src.TrackMatte should be non-None, got %d", src.TrackMatte)
+	}
+	if src.TrackMatteLayerID == 0 {
+		t.Fatalf("test precondition: src.TrackMatteLayerID should be non-zero (explicit matte), got 0")
+	}
+	srcMode := src.TrackMatte
+	srcMatteID := src.TrackMatteLayerID
+	preLayerCount := len(c.Layers)
+	preChildCount := len(c.ItemListForTest().Children)
+	preNextItemID := proj.NextItemIDForTest()
+
+	clone, err := c.DuplicateLayer(idx, "mt_alpha_clone")
+	if err != nil {
+		t.Fatalf("DuplicateLayer on explicit-matte layer: %v", err)
+	}
+	if clone == nil {
+		t.Fatal("clone is nil with no error")
+	}
+	if len(c.Layers) != preLayerCount+1 {
+		t.Errorf("layer count: got %d, want %d", len(c.Layers), preLayerCount+1)
+	}
+	if c.Layers[idx] != clone {
+		t.Errorf("clone should occupy source's old idx %d; got different layer", idx)
+	}
+	if c.Layers[idx+1] != src {
+		t.Errorf("source should be pushed to idx %d; got different layer", idx+1)
+	}
+	if clone.Name != "mt_alpha_clone" {
+		t.Errorf("clone.Name: got %q, want %q", clone.Name, "mt_alpha_clone")
+	}
+	if clone.ID == src.ID {
+		t.Errorf("clone.ID must differ from source; both = %d", clone.ID)
+	}
+	if clone.ID != preNextItemID {
+		t.Errorf("clone.ID: got %d, want %d", clone.ID, preNextItemID)
+	}
+	if clone.TrackMatte != srcMode {
+		t.Errorf("clone.TrackMatte: got %d, want %d (verbatim from source)", clone.TrackMatte, srcMode)
+	}
+	if clone.TrackMatteLayerID != srcMatteID {
+		t.Errorf("clone.TrackMatteLayerID: got %d, want %d (verbatim from source)", clone.TrackMatteLayerID, srcMatteID)
+	}
+	// itemList grew by per-layer block size (16 for AE-saved layer).
+	delta := len(c.ItemListForTest().Children) - preChildCount
+	if delta != 16 {
+		t.Errorf("itemList children delta: got %d, want 16", delta)
+	}
+}
+
+// Phase 5B byte-verbatim: clone's ldta @0xA0..0xA3 (TrackMatteLayerID) and
+// @0x6B (TrackMatte mode) match source byte-for-byte. Only @0x00..0x03
+// (layer ID) differs per F10.
+func TestDuplicateLayer_ExplicitMatte_VerbatimBytes(t *testing.T) {
+	proj, c := openTrackMatteAE24(t)
+	if proj == nil || c == nil {
+		return
+	}
+	src := layerBySourceName(proj, c, "mt_luma_to_solidB")
+	if src == nil {
+		t.Fatal("fixture missing layer 'mt_luma_to_solidB'")
+	}
+	idx := layerIndexInComp(c, src)
+	if idx < 0 {
+		t.Fatal("can't locate mt_luma_to_solidB in c.Layers")
+	}
+	srcLdtaBytes := append([]byte(nil), src.LdtaForTest().Data...)
+	if len(srcLdtaBytes) < 0xA4 {
+		t.Fatalf("source ldta too short for AE 23+ matte slot: %d bytes", len(srcLdtaBytes))
+	}
+
+	clone, err := c.DuplicateLayer(idx, "mt_luma_clone")
+	if err != nil {
+		t.Fatalf("DuplicateLayer: %v", err)
+	}
+	cloneLdtaBytes := clone.LdtaForTest().Data
+	if len(cloneLdtaBytes) != len(srcLdtaBytes) {
+		t.Fatalf("ldta length mismatch: clone=%d src=%d", len(cloneLdtaBytes), len(srcLdtaBytes))
+	}
+	// @0x00..0x03 — clone ID (must differ from source).
+	gotCloneID := binary.BigEndian.Uint32(cloneLdtaBytes[0x00:0x04])
+	if gotCloneID != clone.ID {
+		t.Errorf("clone ldta @0x00..0x03: got %d, want %d", gotCloneID, clone.ID)
+	}
+	// @0x6B — TrackMatte mode byte (verbatim).
+	if cloneLdtaBytes[0x6B] != srcLdtaBytes[0x6B] {
+		t.Errorf("ldta @0x6B (TrackMatte): clone=0x%02X src=0x%02X — must be verbatim copy", cloneLdtaBytes[0x6B], srcLdtaBytes[0x6B])
+	}
+	// @0xA0..0xA3 — TrackMatteLayerID (verbatim).
+	if !bytes.Equal(cloneLdtaBytes[0xA0:0xA4], srcLdtaBytes[0xA0:0xA4]) {
+		t.Errorf("ldta @0xA0..0xA3 (TrackMatteLayerID): clone=% X src=% X — must be verbatim copy", cloneLdtaBytes[0xA0:0xA4], srcLdtaBytes[0xA0:0xA4])
+	}
+	// F10 strict: everything past the ID field must match byte-for-byte.
+	if !bytes.Equal(srcLdtaBytes[4:], cloneLdtaBytes[4:]) {
+		for i := 4; i < len(srcLdtaBytes); i++ {
+			if srcLdtaBytes[i] != cloneLdtaBytes[i] {
+				t.Fatalf("ldta @0x%02X: src=0x%02X clone=0x%02X — F10 says only @0x00..0x03 should differ", i, srcLdtaBytes[i], cloneLdtaBytes[i])
+			}
+		}
+	}
+}
+
+// Phase 5B round-trip: explicit matte survives WriteAEP + reparse.
+func TestDuplicateLayer_ExplicitMatte_RoundTrip(t *testing.T) {
+	proj, c := openTrackMatteAE24(t)
+	if proj == nil || c == nil {
+		return
+	}
+	src := layerBySourceName(proj, c, "mt_alphainv_to_solidC")
+	if src == nil {
+		t.Fatal("fixture missing layer 'mt_alphainv_to_solidC'")
+	}
+	idx := layerIndexInComp(c, src)
+	if idx < 0 {
+		t.Fatal("can't locate mt_alphainv_to_solidC in c.Layers")
+	}
+	srcMode := src.TrackMatte
+	srcMatteID := src.TrackMatteLayerID
+
+	clone, err := c.DuplicateLayer(idx, "mt_alphainv_clone")
+	if err != nil {
+		t.Fatalf("DuplicateLayer: %v", err)
+	}
+	cloneID := clone.ID
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	proj2, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	var clone2 *aep.Layer
+	for _, c2 := range proj2.Compositions {
+		for _, l := range c2.Layers {
+			if l.ID == cloneID {
+				clone2 = l
+				break
+			}
+		}
+		if clone2 != nil {
+			break
+		}
+	}
+	if clone2 == nil {
+		t.Fatalf("clone (ID=%d) not found after round-trip", cloneID)
+	}
+	if clone2.Name != "mt_alphainv_clone" {
+		t.Errorf("post-roundtrip clone.Name: got %q, want %q", clone2.Name, "mt_alphainv_clone")
+	}
+	if clone2.TrackMatte != srcMode {
+		t.Errorf("post-roundtrip clone.TrackMatte: got %d, want %d", clone2.TrackMatte, srcMode)
+	}
+	if clone2.TrackMatteLayerID != srcMatteID {
+		t.Errorf("post-roundtrip clone.TrackMatteLayerID: got %d, want %d", clone2.TrackMatteLayerID, srcMatteID)
+	}
+}
+
+// Phase 5B sibling-matte: clone and source BOTH carry the same explicit
+// matte pointer post-dup; AE should render two matted layers from the
+// same source layer.
+func TestDuplicateLayer_ExplicitMatte_BothPointToSameSource(t *testing.T) {
+	proj, c := openTrackMatteAE24(t)
+	if proj == nil || c == nil {
+		return
+	}
+	src := layerBySourceName(proj, c, "mt_alpha_to_solidA")
+	if src == nil {
+		t.Fatal("fixture missing layer 'mt_alpha_to_solidA'")
+	}
+	idx := layerIndexInComp(c, src)
+	if idx < 0 {
+		t.Fatal("can't locate mt_alpha_to_solidA in c.Layers")
+	}
+	originalMatteID := src.TrackMatteLayerID
+	if originalMatteID == 0 {
+		t.Fatalf("test precondition: source must have explicit matte")
+	}
+
+	clone, err := c.DuplicateLayer(idx, "mt_alpha_clone")
+	if err != nil {
+		t.Fatalf("DuplicateLayer: %v", err)
+	}
+	// Source unchanged.
+	if src.TrackMatteLayerID != originalMatteID {
+		t.Errorf("source matte ID changed after dup: was %d, now %d", originalMatteID, src.TrackMatteLayerID)
+	}
+	// Clone matches.
+	if clone.TrackMatteLayerID != originalMatteID {
+		t.Errorf("clone matte ID: got %d, want %d (same source as original)", clone.TrackMatteLayerID, originalMatteID)
+	}
+	// Both reference a real layer in the comp.
+	if c.LayerByID(originalMatteID) == nil {
+		t.Errorf("matte source layer (ID=%d) not found in comp — broken explicit matte ref", originalMatteID)
 	}
 }

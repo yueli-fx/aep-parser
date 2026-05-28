@@ -190,7 +190,7 @@ BlendingMode BlendingMode
 TrackMatte TrackMatteType
 ```
 
-轨道蒙版模式：`None` / `Alpha` / `AlphaInverse` / `Luma` / `LumaInverse`。来自 ldta `@0x6B`。read / write via [`SetTrackMatte`](#layersettrackmatte)（仅改模式）或 [`SetTrackMatteLayer`](#layersettrackmattelayer)（模式 + 显式 source ID 一起写）。
+轨道蒙版模式：`None` / `Alpha` / `AlphaInverse` / `Luma` / `LumaInverse`。来自 ldta `@0x6B`。read / write via [`SetTrackMatte`](#layersettrackmatte)（仅改模式）/ [`SetTrackMatteLayer`](#layersettrackmattelayer)（模式 + 显式 source ID 一起写）/ [`SetTrackMatteSource`](#layersettrackmattesource)（`*Layer` 入参 parity wrapper）。
 
 ---
 
@@ -202,7 +202,7 @@ TrackMatteLayerID uint32
 
 显式 track matte 源 layer ID（ldta `@0xA0`，AE 23+ 引入）。`0` = 无显式 source（AE ≤ 22 用隐式"上一层"约定，AE 23+ 也支持但 ScriptingAPI 默认走显式 ID）。read。
 
-要 resolve 成 `*Layer` 用 [`TrackMatteLayer()`](#layertrackmattelayer)。要写改用 [`SetTrackMatteLayer`](#layersettrackmattelayer)。
+要 resolve 成 `*Layer` 用 [`TrackMatteLayer()`](#layertrackmattelayer)。要写改用 [`SetTrackMatteLayer`](#layersettrackmattelayer)（`uint32` 入参）或 [`SetTrackMatteSource`](#layersettrackmattesource)（`*Layer` 入参）。
 
 > **AE 版本要求**：写入要求 ldta 长度 ≥ 0xA4（AE 22 写的 ldta 是 160 字节，AE 23+ 写的是 164 字节）。AE 22 文件强写会返回 error；先在 AE 23+ 打开重存一次 ldta 才会加长。
 
@@ -729,6 +729,38 @@ mtLayer.SetTrackMatteLayer(srcLayer.ID, aep.TrackMatteAlpha)
 // 清除
 mtLayer.ClearTrackMatteLayer()
 ```
+
+### Layer.SetTrackMatteSource
+
+```go
+func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error
+```
+
+AE ScriptingAPI 23+ `layer.setTrackMatte(srcLayer, type)` 的 parity wrapper —— 跟 [`SetTrackMatteLayer`](#layersettrackmattelayer) 同写 ldta `@0xA0` + `@0x6B`，但入参收 `*Layer` 而非 `uint32 sourceID`。底层 byte 写完全 delegate 到 SetTrackMatteLayer。length-preserving。
+
+相比 SetTrackMatteLayer 多做：
+
+- `src == nil` 早 fail（明确错误信息），不让 nil 走到底层去解 ID。
+- `l.comp` / `src.comp` nil 检查 —— 拒绝 parser 之外构造的 layer。
+- 跨 comp matte（`src.comp != l.comp`）早 refuse，错误信息含两个 comp 名字。
+
+适用场景：调用方手里已经持有 `*Layer` 指针（来自 `comp.Layers[i]` / `LayerByName` 等），不必再 `.ID` 取。AE 22 / 2020 ldta 限制同 SetTrackMatteLayer。
+
+```go
+// matte_target 用 srcLayer 作 LUMA matte（AE 23+ 显式模式）
+mtTarget.SetTrackMatteSource(srcLayer, aep.TrackMatteLuma)
+
+// 清除：用 ClearTrackMatteLayer
+mtTarget.ClearTrackMatteLayer()
+```
+
+**三个 matte setter 怎么选**：
+
+| 用 | 场景 |
+|---|---|
+| [`SetTrackMatte`](#layersettrackmatte) | 只想改 mode byte，source 用 AE ≤ 22 的"上一层"隐式约定（旧文件迁移场景） |
+| [`SetTrackMatteLayer`](#layersettrackmattelayer) | 有 `sourceID` (uint32) 在手，AE 23+ 显式 source |
+| `SetTrackMatteSource` | 有 `*Layer` 在手，AE 23+ 显式 source（最常见） |
 
 ### Layer.SetAlternateSource
 
