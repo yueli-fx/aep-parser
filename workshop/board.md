@@ -1,18 +1,24 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-28 by claude (V3 Phase 3 完 — DuplicateLayer Stable shipped via commit b2d3e18; 6/6 ship-gate PASS)
-**Active focus**: 空。V3 Phase 4 候选待定 — V3 deep-think spec § 4 列表里挑下一个结构性 mutation。
+**Last updated**: 2026-05-28 by claude (V3 Phase 4 完 — MoveLayer Stable; 6/6 ship-gate PASS)
+**Active focus**: 空。V3 Phase 5 候选待定 — `Layer.SetTrackMatte` (解 DuplicateLayer F2 quirk prereq) / `Composition.InsertLayer` (跨 comp) / `Project.DuplicateItem` (item 级 dup) / V2.2.1 ShapeLayer。
 
 ## Next session
 
-**Phase 4 候选**（从 `specs/2026-05-27-v3-deep-think.md` § 4 picklist）：
-- **`Composition.InsertLayer(src *Layer, atIdx int)`** — 跨 comp 拷贝；扩展 DuplicateLayer 的 deep-clone 到 cross-tree（要解 SourceID 冲突 / cross-comp footage ref）
-- **`Composition.MoveLayer(from, to int)`** — itemList.Children 内 reorder + c.Layers reorder；最简单的 V3 mutation，无 ID alloc，单 splice
-- **`Project.DuplicateItem(item Item, name string)`** — comp / footage / folder 通用；扩展 V2.1 NewComposition + V3 DuplicateLayer 的 deep-clone 到 item 级
-- **`Layer.SetTrackMatte(srcLayer *Layer, mode TrackMatteType)`** — V3 风格 atomic setter；同时维护双向引用 + ldta @0x6B + AE 23+ @0xA0 (TrackMatteLayerID)
-- **V2.2.1 ShapeLayer 拓展**（Ellipse/Path/Stroke/Fill Color/keyframes） — 现在压一起做避免 alpha API 重复，详 Deferred
+**Phase 5 候选**（从 `specs/2026-05-27-v3-deep-think.md` § 4 picklist）：
+- **`Layer.SetTrackMatte(srcLayer *Layer, mode TrackMatteType)`** — 双向引用 + ldta @0x6B + AE 23+ @0xA0；unblock DuplicateLayer F2 matte refuse-case（解决后软化 refuse → 真实支持）
+- **`Composition.InsertLayer(src *Layer, atIdx int)`** — 跨 comp deep-clone；扩展 DuplicateLayer 到 cross-tree（要解 SourceID 冲突 / cross-comp footage ref）
+- **`Project.DuplicateItem(item Item, name string)`** — comp / footage / folder 通用；扩展 V2.1 NewComposition + V3 DuplicateLayer 到 item 级
+- **V2.2.1 ShapeLayer 拓展**（Ellipse/Path/Stroke embed bytes / Fill Color 编码 / keyframe 持久化）
 
-建议起手 `MoveLayer`（最简单，复用 itemList splice machinery；不用 RE，AE 行为已知）或 `Layer.SetTrackMatte`（解 DuplicateLayer F2 quirk 的 prereq — 一旦 SetTrackMatte 能让 caller clear/set matte，DuplicateLayer 的 matte refuse-case 可以软化）。
+建议起手 `SetTrackMatte`（V3 Phase 3 留下的 matte refuse-case 是当下唯一明确债务，且为后续 InsertLayer / DuplicateItem 提供 setter 基础）。
+
+**V3 Phase 4 完整产物**（reference，git ship 下一个 commit）：
+- 代码: `internal/aep/move_layer.go` (~190 LOC) + `_test.go` (9 tests, all PASS) — Stable from start (no RE uncertainty)
+- 工具: `tmp_debug/ge_move_layer/main.go` + `test_data/verify_ge_move_layer.jsx` (3 mode)
+- Plan: `plans/finish/2026-05-28-v3-phase4-movelayer-plan.md`（无 strategy spec — AE 行为已知，single plan doc 即可）
+- Ship-gate 6/6 PASS (AE 2020 + 2025 × first_to_last/last_to_first/mid_swap)
+- **首个不需 RE / 不需 alpha gate 的 V3 mutation** — Phase 2/3 的 block-splice machinery 已经够 strong
 
 **V3 Phase 3 完整产物**（reference，git ship via b2d3e18）：
 - 代码: `internal/aep/duplicate_layer.go` (~210 LOC) + `_test.go` (9 tests, all PASS) — Stable
@@ -54,6 +60,7 @@
 
 ## Recently finished
 
+- **2026-05-28 V3 Phase 4 完 — Composition.MoveLayer Stable, ship-gate 6/6 PASS** — 纯 reorder mutation，没 RE 步（AE 行为已知 = layer order is order of Layr LISTs in itemList.Children）。`move_layer.go` (~190 LOC) 复用 Phase 2/3 的 adaptive block-splice machinery：locate source Layr → adaptive scan to next LIST/EOF → cut block → find insertIdx in cutChildren via cutLayers[to].back.layrList pointer search → splice in → reorder c.Layers → refresh Layer.Index for all。9 tests all PASS (refuse from/to OOR / refuse missing backref / no-op same idx / 3 happy paths first_to_last/last_to_first/mid_swap / round-trip / Index field updated / itemList chunk set identical via pointer compare)。Ship-gate 6/6 PASS (AE 2020 + AE 2025 × 3 modes)。No alpha gate — Stable from start。Plan only (no separate strategy spec) since decision surface ≈ 0。Next: Phase 5 候选 SetTrackMatte (unblock matte refuse) / InsertLayer / DuplicateItem。
 - **2026-05-28 V3 Phase 3 完 — Composition.DuplicateLayer ship-gate green (Stable)** (commit b2d3e18) — 完整 RE→spec→impl→ship-gate 闭环。`duplicate_layer.go` (~210 LOC) + 9 unit tests + structural equivalence test 全 PASS；PASS 267→278。**Ship-gate 6/6 PASS** (AE 2020 + AE 2025 × solo/dup_parent/dup_child)，matte mode 按 strategy §5 by-design refuse 不产 ge fixture (F2 quirk Phase 3.1 候选)。Tooling: `tmp_debug/ge_duplicate_layer` 3 mode producer 复用 Phase 2 baseline + Go SetParent，省一套 RE fixture；`verify_ge_duplicate_layer.jsx` mode 切换验 numLayers==4 / clone identity / parent refs per mode。godoc 从 alpha → Stable。Plan + spec 移 finish/。Coverage.md 加 V3 structural ops 段（含 Phase 2 DeleteLayer 同时落账）。Next: Phase 4 候选 (MoveLayer / SetTrackMatte / InsertLayer / Project.DuplicateItem) per V3 deep-think §4。
 - **2026-05-28 V3 Phase 3 Task 5 完 — ship-gate 6/6 PASS** — `tmp_debug/ge_duplicate_layer/main.go` 产 3 mode ge_*.aep (solo/dup_parent/dup_child)，baseline 复用 Phase 2 的 `re_delete_layer_baseline.aep`（3-solid pre-mutation；dup_parent/dup_child 用 Go SetParent 设引用再 dup，省一套 RE fixture）。`test_data/verify_ge_duplicate_layer.jsx` mode 切换验 (a) AE 不拒接 (b) numLayers==4 (c) clone 在 expected AE idx + 名字 (d) parent 关系 per mode。**6/6 PASS** (AE 2020 × 3 + AE 2025 × 3): solo 验 clone L2_clone @ idx 2 + 推 source L2_mid 到 idx 3；dup_parent 验 F6 — L3 仍 parents to L2_mid (orig) 不是 clone；dup_child 验 F7-inverse — L1_clone + L1_top 都 parents to L2_mid。matte mode 按 spec §5 by-design refuse，不产 ge fixture（expected absence，非 coverage gap）。Next: Task 6 godoc alpha → Stable + plan/spec → finish/ + commit。
 - **2026-05-28 V3 Phase 3 Task 4 完 — Structural equivalence test PASS first try** — `TestDuplicateLayer_StructuralEquivalence_Solo` in `duplicate_layer_test.go`: opens `re_delete_layer_baseline.aep` (3-solid baseline) → `DuplicateLayer(1, "L2_mid")` → compares Composition[0].itemList.Children (ID + IsList + FormType, in order) vs AE's `re_duplicate_layer_solo.aep`. **PASS 一次过** —— Go-side dup 产的 itemList chunk shape 与 AE solo post-dup 完全对齐（chunk 数 + 每个 child 的 ID/IsList/FormType）。这是 ship-gate 前最强的"Go 实现行为对的"信号——AE 接受的 layout pattern (F1/F4/F5/F10) 我们 byte 不一致但 shape 一致，符合 length-preserving + verbatim deep-clone 预期。helper 加 `openDupFixture(t, mode)` 复用其他 mode。PASS 277→278；FAIL=0；vet clean。Next: Task 5 ship-gate (agent-side `tmp_debug/ge_duplicate_layer` + `verify_ge_duplicate_layer.jsx` × 3 mode × 2 version = 6 次 AE 开盘验证)。
