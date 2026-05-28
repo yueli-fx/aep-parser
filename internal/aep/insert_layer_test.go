@@ -252,3 +252,64 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 		t.Errorf("proj.nextItemID: got %d, want %d (pre+1)", postNextItemID, preNextItemID+1)
 	}
 }
+
+func TestInsertLayer_HappyPath_Basic_MidAndAppend(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		atIdxFn  func(dest *aep.Composition) int
+		wantSlot func(dest *aep.Composition, clone *aep.Layer) bool
+	}{
+		{
+			name:     "middle",
+			atIdxFn:  func(dest *aep.Composition) int { return len(dest.Layers) / 2 },
+			wantSlot: func(dest *aep.Composition, clone *aep.Layer) bool { return dest.Layers[len(dest.Layers)/2-0] == clone },
+		},
+		{
+			name:     "append",
+			atIdxFn:  func(dest *aep.Composition) int { return len(dest.Layers) },
+			wantSlot: func(dest *aep.Composition, clone *aep.Layer) bool { return dest.Layers[len(dest.Layers)-1] == clone },
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dest, src := openInsertPair(t)
+			if dest == nil {
+				return
+			}
+			atIdx := tc.atIdxFn(dest)
+			clone, err := dest.InsertLayer(src, atIdx)
+			if err != nil {
+				t.Fatalf("InsertLayer(src, %d): %v", atIdx, err)
+			}
+			if !tc.wantSlot(dest, clone) {
+				t.Errorf("clone not at expected slot for %s; dest.Layers=%v", tc.name, layerIDs(dest.Layers))
+			}
+		})
+	}
+}
+
+func TestInsertLayer_HappyPath_EmptyDest(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	// Manually drain dest.Layers to simulate empty-dest path. We keep the
+	// underlying itemList chunks intact (insertLayrPosition walks them);
+	// only the Go-side []*Layer slice is empty. This exercises the
+	// "case len(c.Layers) == 0" branch in InsertLayer.
+	dest.Layers = nil
+	clone, err := dest.InsertLayer(src, 0)
+	if err != nil {
+		t.Fatalf("InsertLayer into emptied dest: %v", err)
+	}
+	if len(dest.Layers) != 1 || dest.Layers[0] != clone {
+		t.Errorf("empty-dest result: want single clone, got %v", layerIDs(dest.Layers))
+	}
+}
+
+func layerIDs(ls []*aep.Layer) []uint32 {
+	ids := make([]uint32, len(ls))
+	for i, l := range ls {
+		ids[i] = l.ID
+	}
+	return ids
+}
