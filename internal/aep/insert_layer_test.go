@@ -1,6 +1,7 @@
 package aep_test
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -309,4 +310,66 @@ func layerIDs(ls []*aep.Layer) []uint32 {
 		ids[i] = l.ID
 	}
 	return ids
+}
+
+func TestInsertLayer_FreshDataSlices(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	srcLdtaBefore := append([]byte(nil), src.LdtaForTest().Data...)
+	clone, err := dest.InsertLayer(src, 0)
+	if err != nil {
+		t.Fatalf("InsertLayer: %v", err)
+	}
+	cloneLdta := clone.LdtaForTest()
+	if cloneLdta == nil {
+		t.Fatal("clone has no ldta backref")
+	}
+	if &cloneLdta.Data[0] == &src.LdtaForTest().Data[0] {
+		t.Fatal("clone ldta shares Data slice header with src — must be fresh allocation")
+	}
+	for i := 4; i < len(cloneLdta.Data); i++ {
+		cloneLdta.Data[i] ^= 0xFF
+	}
+	if !bytes.Equal(srcLdtaBefore, src.LdtaForTest().Data) {
+		t.Fatal("src ldta bytes changed after mutating clone — Data slice sharing detected")
+	}
+}
+
+func TestInsertLayer_RoundTrip(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	proj := dest.ProjForTest()
+	clone, err := dest.InsertLayer(src, 0)
+	if err != nil {
+		t.Fatalf("InsertLayer: %v", err)
+	}
+	wantCloneID := clone.ID
+	wantCloneName := clone.Name
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	proj2, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader after insert+write: %v", err)
+	}
+	if len(proj2.Compositions) < 2 {
+		t.Fatalf("re-opened comps=%d, want >=2", len(proj2.Compositions))
+	}
+	destReopen := proj2.Compositions[1]
+	if destReopen.Layers[0].ID != wantCloneID {
+		t.Errorf("re-opened dest.Layers[0].ID: got %d, want %d", destReopen.Layers[0].ID, wantCloneID)
+	}
+	if destReopen.Layers[0].Name != wantCloneName {
+		t.Errorf("re-opened dest.Layers[0].Name: got %q, want %q", destReopen.Layers[0].Name, wantCloneName)
+	}
+	if destReopen.Layers[0].ParentID != 0 || destReopen.Layers[0].TrackMatteLayerID != 0 {
+		t.Errorf("re-opened clone refs not reset: ParentID=%d TrackMatteLayerID=%d",
+			destReopen.Layers[0].ParentID, destReopen.Layers[0].TrackMatteLayerID)
+	}
 }
