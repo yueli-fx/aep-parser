@@ -1,14 +1,15 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-29 by claude (Phase 5C InsertLayer design committed, awaiting user review → plan)
-**Active focus**: V3 Phase 5C InsertLayer — cross-comp deep-clone (same-Project sibling)。Design spec `specs/2026-05-29-v3-phase5c-insertlayer-design.md` committed (`d5ba860`)；下一步 writing-plans → impl → ship-gate (3 modes × 2 versions = 6 PASS)。
+**Last updated**: 2026-05-29 by claude (Phase 5C InsertLayer plan committed, ready for impl execution)
+**Active focus**: V3 Phase 5C InsertLayer — design + plan 都已 committed。下一步选执行路径 → Phase A 起 R1-R11 refuse (Go-side, 无 fixture 依赖) → Phase B happy-path impl → Phase C 用户 JSX → Phase D ship-gate 6/6 PASS → Stable。
 
 ## Next session
 
-1. **User 复核 Phase 5C 设计 spec** (`specs/2026-05-29-v3-phase5c-insertlayer-design.md`)；如有修改先 patch 再起 plan
-2. **Approved → writing-plans skill** → `flight-plans/2026-05-29-v3-phase5c-insertlayer-plan.md`
-3. **Impl + Go unit tests** (refuse-cases + 3 happy modes + round-trip + concurrent-mutate safety)
-4. **AE ship-gate** — user 跑 `re_insert_layer.jsx` 产 3 mode RE fixtures → `tmp_debug/ge_insert_layer` produce ge files → `scripts/ae_run.ps1` 双版本验 6/6 PASS → godoc alpha → Stable
+1. **选执行路径**: subagent-driven (per-task A.1→D.1) vs inline (`executing-plans` w/ checkpoints after B.2 + D.1)
+2. **Phase A R1-R11 refuse** — A.1 (R1 nil) / A.2 (R2-R7 + fixture helper) / A.3 (R8-R11 corruption defense)；Go-side only，无 fixture 依赖直跑
+3. **Phase B happy-path impl** — B.2 完整 InsertLayer (clone block + 4 ldta deltas @0x00/0x6B/0x84/0xA0 + 3-branch splice + parseLayer + warnings-as-failure rollback)；B.3 splice positions；B.4 round-trip + concurrent-mutate
+4. **Phase C 用户 JSX** — `re_insert_layer.jsx` × 3 modes × 2 states under AE 2020 + 2025 → 6 `.aep` fixtures populate `test_data/`
+5. **Phase D ship-gate + 收尾** — `scripts/ae_run.ps1` 双版本 6/6 PASS → coverage doc + godoc Alpha→Stable
 
 **Phase 5 后续候选**（5C 完后回到三选一）：
 - **`Project.DuplicateItem(item Item, name string)`** — comp / footage / folder 通用；扩展 V2.1 NewComposition + V3 DuplicateLayer 到 item 级
