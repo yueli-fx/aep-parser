@@ -46,8 +46,6 @@ import (
 // any parser warning surfaced during the re-parse, roll all of them
 // back (including the nextItemID bump) and return the warnings as an
 // error.
-//
-// Alpha: AE 2020 + AE 2025 ship-gate pending (CLAUDE.md #2 + #6).
 func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	// 1. Validate refuse-cases.
 	if name == "" {
