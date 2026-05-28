@@ -1,27 +1,27 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-28 by claude (V3 Phase 3 起步 — DuplicateLayer plan 落，Task 1 RE 准备)
-**Active focus**: V3 Phase 3 —— `Composition.DuplicateLayer(idx) (*Layer, error)`，mirror Phase 2 工作流（RE → spec → impl → ship-gate）。Plan: `plans/2026-05-28-v3-phase3-duplicatelayer-plan.md`。
+**Last updated**: 2026-05-28 by claude (V3 Phase 3 Task 1 完 — DuplicateLayer RE done, 10 Findings 落 scar)
+**Active focus**: V3 Phase 3 Task 2 —— 按 scar `ae-duplicatelayer-re.md` 10 Findings 写 strategy spec，然后 Task 3 实现 + Task 4 测试 + Task 5 ship-gate。Plan: `plans/2026-05-28-v3-phase3-duplicatelayer-plan.md`。
 
 ## Next session
 
-**V3 Phase 3 Task 1 — DuplicateLayer RE**：
-1. 写 `test_data/re_duplicate_layer.jsx`（4 mode via `$.getenv("RE_DUP_MODE")` — solo/dup_parent/dup_child/dup_matted），mirror `re_delete_layer.jsx`
-2. Agent 自跑 ae_run.ps1 × 4 (AE 2020 17.7x45)
-3. `go run ./tmp_debug/dump_layers re_duplicate_layer_*.aep` 出 chunk diff
-4. 写 `scars/ae-duplicatelayer-re.md` 落 6-8 Findings 答 RE-Q1..Q7：
-   - Q1 新 layer 落位（top/below source/bottom？）
-   - Q2 ID 分配（head counter +1？）
-   - Q3 14 follower chunks verbatim clone？
-   - Q4 children 的 ParentID 跟新 dup 走还是仍指 source？
-   - Q5 source.parent → 新 layer 复制 vs 清零？
-   - Q6 source.matte → 新 layer 复制 vs 清零？
-   - Q7 名 auto " 2" 后缀？
-   - Q8 shape/text embed bytes — 保守起见 Phase 3 拒接 non-AV
+**V3 Phase 3 Task 2 — strategy spec**：把 scar 10 个 Findings 翻译成决策矩阵，落 `specs/2026-05-28-v3-phase3-duplicatelayer-strategy.md`。关键决策已经被 RE 锁定，写起来快：
 
-**接 Task 2-6** 走 Phase 2 同 pattern（strategy spec → impl → structural test → 8 次 ship-gate → Stable + finish/）。
+1. **Signature**: `func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error)` —— 取 explicit name 参数（Finding 9 AE 不 auto-suffix；让 caller 控制更干净）
+2. **Insertion**: new layer at `oldIndexOf(source)` (Finding 1)。Phase 3 MVP **refuse 当 source 有 trackMatteType 设置**（Finding 2 quirk —— defer 复杂特殊处理）
+3. **ID**: `proj.allocItemID()` 同 NewShapeLayer (Finding 3)
+4. **16-chunk verbatim clone** + mutate ldta @0x00..0x03 为新 ID (Finding 10)。Data slice 必须 fresh copy (concurrent-mutate scar)
+5. **Refuse-cases**: Type≠AV / index 越界 / back==nil / source.TrackMatte≠None (Phase 3 conservative) / source 是 shape/text (Q8 deferred)
+6. **不动**: children's ParentID (Finding 6 — 仍指 source)
+7. **V2.1 atomic**: snapshot itemList children + Layers + Warnings + proj.nextItemID + 任何 ldta 写过的 neighbor (实际只动 clone 自己的 ldta @0x00；不会动 neighbor，但保 rollback 完整)
 
-**为什么 DuplicateLayer 起手**: smallest scope of V3 Phase 3 候选；最大复用 Phase 2 工具链（ae_run.ps1 / dump_layers / ship-gate verifier 模板）；反向验「16-chunk delete unit」对 follower chunks 的理解（DeleteLayer 证明可以 splice 走，DuplicateLayer 证明可以 verbatim clone）。
+**Task 1 产物（已 ship）**:
+- `test_data/re_duplicate_layer.jsx` (4 modes)
+- 4 AE 2020 fixtures (gitignored)
+- `tmp_debug/diff_dup_blocks/main.go` (clone vs source byte-diff helper) + `tmp_debug/probe_ldta/main.go` (ldta first-32B + key offset dump)
+- `workshop/scars/ae-duplicatelayer-re.md` (10 Findings incl byte-level verification — clone 14 followers + ldta-body 全 byte-identical except @0x00..0x03)
+
+**为什么 DuplicateLayer 起手**: smallest scope of V3 Phase 3 候选；最大复用 Phase 2 工具链；反向验「16-chunk delete unit」对 follower chunks 的理解 —— Finding 10 已 nail down: 14 follower 全 byte-identical clone，AE 不 mutate 任何 follower 字段。
 
 **Phase 2 完整产物**（reference，git ship）：
 - 代码: `internal/aep/delete_layer.go` + `_test.go` (9 test, 8 PASS 1 SKIP)
