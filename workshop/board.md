@@ -1,51 +1,11 @@
 # Board — aep-parser
 
-**Last updated**: 2026-05-28 by claude (V3 Phase 5A + 5B Stable — Phase 5B ship-gate AE 2025 PASS via `ae_run.ps1` unattended; 313 PASS / 0 FAIL; commit pending)
-**Active focus**: V3 Phase 5 已闭环 (5A SetTrackMatteSource + 5B DuplicateLayer explicit matte 都 Stable)；下一步选 Phase 5C InsertLayer / DuplicateItem / V2.2.1 ShapeLayer 拓展。
+**Last updated**: 2026-05-28 by claude (V3 Phase 5A + 5B Stable shipped as commit 36832af; working tree clean)
+**Active focus**: V3 Phase 5 闭环；下一步从三等量候选挑：Phase 5C InsertLayer / Project.DuplicateItem / V2.2.1 ShapeLayer 拓展。
 
 ## Next session
 
-**首要：commit Phase 5A + 5B 一起**（ship-gate 已绿，promote Stable 已落，文件已全部 sync，就差 `git commit`；上轮被 token 打断没 commit）。要 add 的文件（test_data/ + tmp_debug/ 是 gitignored，不收）：
-
-```
-M  docs/README.md                           # Phase 5A SetTrackMatteSource 行
-M  docs/layer.md                            # Phase 5A SetTrackMatteSource 段 + 三 setter mini-table
-M  internal/aep/duplicate_layer.go          # Phase 5B refuse-split (~5 LOC) + godoc Stable
-M  internal/aep/duplicate_layer_test.go     # +4 explicit-matte tests + rename Refuse→RefuseImplicit
-M  internal/aep/parse.go                    # initDerived: nextItemID must include layer IDs (scar)
-M  workshop/board.md                        # 此版本
-M  workshop/plans/coverage-detail.md        # trackMatteLayer 行 5A+5B
-M  workshop/scars/ae-duplicatelayer-re.md   # F2 amendment (Phase 5B 解 explicit)
-?? internal/aep/layer_matte.go              # Phase 5A SetTrackMatteSource
-?? internal/aep/layer_matte_test.go         # Phase 5A tests
-?? workshop/plans/finish/2026-05-28-v3-phase5a-settrackmattesource-plan.md
-?? workshop/plans/finish/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md
-?? workshop/scars/nextitemid-must-include-layer-ids.md
-```
-
-建议 commit message（一条 commit 拍 5A + 5B，commit body 分两段）：
-
-```
-feat(aep): V3 Phase 5A + 5B — Layer.SetTrackMatteSource Stable + DuplicateLayer 允许 explicit matte Stable
-
-Phase 5A (no ship-gate): Layer.SetTrackMatteSource(src *Layer, mode TrackMatteType) error
-- AE ScriptingAPI 23+ `layer.setTrackMatte(srcLayer, type)` parity wrapper
-- delegate 到 existing SetTrackMatteLayer(src.ID, mode) + *Layer-specific validation
-- 11 tests (4 happy × mode / 1 intent-without-mode / 4 refuse / 1 round-trip / 1 byte-parity)
-
-Phase 5B (AE 2025 ship-gate PASS 2026-05-28): Composition.DuplicateLayer 解 explicit matte refuse
-- refuse-split: implicit (TrackMatteLayerID==0, F2 quirk) still refused; explicit (AE 23+) allowed
-- clone byte-copy ldta @0xA0 + @0x6B verbatim via existing deep-clone path; ~5 LOC delta
-- 4 new tests + RefuseTrackMatte→RefuseImplicitTrackMatte rename
-- ship-gate: scripts/ae_run.ps1 unattended; .done PASS
-
-Side-bug fix: parse.go initDerived nextItemID 漏算 layer ID（AE 用同一 head counter 给
-item 和 layer 分 ID） → scar workshop/scars/nextitemid-must-include-layer-ids.md
-
-PASS 307→313 / FAIL=0 / vet clean.
-```
-
-**然后挑下一 milestone**（按用户偏好 / 当下兴趣，三个等量候选）：
+**挑下一 milestone**（按用户偏好 / 当下兴趣，三个等量候选）：
 
 **Phase 5 残余候选**（从 `specs/2026-05-27-v3-deep-think.md` § 4 picklist）：
 - **`Composition.InsertLayer(src *Layer, atIdx int)`** — 跨 comp deep-clone；扩展 DuplicateLayer 到 cross-tree（要解 SourceID 冲突 / cross-comp footage ref）
@@ -79,8 +39,7 @@ PASS 307→313 / FAIL=0 / vet clean.
 - **2026-05-28 V3 Phase 5A 完 — Layer.SetTrackMatteSource Stable, no ship-gate** — `(l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error` —— AE ScriptingAPI 23+ `layer.setTrackMatte(srcLayer, type)` parity wrapper。纯 delegate 到 existing `SetTrackMatteLayer(src.ID, mode)` after `*Layer`-specific validation (nil / cross-comp / self / layer 缺 comp back-ref)。**关键设计决策**：existing `SetTrackMatte(t TrackMatteType)` 1-arg 是 Stable API（CLAUDE.md #2 不能改），所以新方法走 `SetTrackMatteSource` 名（match codebase `SetLightSource(*Layer)` precedent）。**无 ship-gate** 因为 underlying setter 已 ship green + `re_trackmatte_ae24.aep` 已证 AE 23+ explicit @0xA0 模式不需 reorder。**无 RE** 因 fixture 已存在。11 tests all PASS (4 happy × mode / 1 intent-without-mode / 4 refuse / 1 round-trip / 1 parity-byte-equal-vs-SetTrackMatteLayer)。PASS 287→307+（含子测试），FAIL=0，vet clean。Stable from start in godoc。docs/layer.md 加 SetTrackMatteSource 段 + 三 setter 选用 mini-table；docs/README.md TrackMatteLayer API 矩阵更新；coverage-detail.md trackMatteLayer 行加 `*Layer`-arg wrapper。Plan in finish/，无 strategy spec (mirrors Layer.Move* shipping pattern)。Phase 5B (DuplicateLayer matte 软化) 已落 plan §10 preview。Next: Phase 5B 起手 or Phase 5C InsertLayer/DuplicateItem。
 - **2026-05-28 V3 Phase 4 follow-up — Layer.Move* convenience wrappers** — `(l *Layer) MoveAfter/MoveBefore/MoveToBeginning/MoveToEnd` 4 个方法，py-aep / AE ScriptingAPI parity。每个走 `l.comp.Layers` pointer-identity locate 拿当前 slice idx (避免 Layer.Index parse-time stale 的坑)，arithmetic 算出 MoveLayer 的 `from`/`to` 参数（MoveAfter/MoveBefore 各分 from<other / from>other 两支以正确处理 cut shift）→ delegate to `Composition.MoveLayer`. 9 tests PASS (4 happy permutations + 2 RefuseSelf + 2 RefuseNil + 1 RefuseCrossComp)。无 ship-gate (underlying MoveLayer 已 6/6 PASS)。Layer.Move* 是 V3 Phase 4 之后第一个纯 user-API convenience layer。
 - **2026-05-28 V3 Phase 4 完 — Composition.MoveLayer Stable, ship-gate 6/6 PASS** — 纯 reorder mutation，没 RE 步（AE 行为已知 = layer order is order of Layr LISTs in itemList.Children）。`move_layer.go` (~190 LOC) 复用 Phase 2/3 的 adaptive block-splice machinery：locate source Layr → adaptive scan to next LIST/EOF → cut block → find insertIdx in cutChildren via cutLayers[to].back.layrList pointer search → splice in → reorder c.Layers → refresh Layer.Index for all。9 tests all PASS (refuse from/to OOR / refuse missing backref / no-op same idx / 3 happy paths first_to_last/last_to_first/mid_swap / round-trip / Index field updated / itemList chunk set identical via pointer compare)。Ship-gate 6/6 PASS (AE 2020 + AE 2025 × 3 modes)。No alpha gate — Stable from start。Plan only (no separate strategy spec) since decision surface ≈ 0。Next: Phase 5 候选 SetTrackMatte (unblock matte refuse) / InsertLayer / DuplicateItem。
-- **2026-05-28 V3 Phase 3 完 — Composition.DuplicateLayer ship-gate green (Stable)** (commit b2d3e18) — 完整 RE→spec→impl→ship-gate 闭环。`duplicate_layer.go` (~210 LOC) + 9 unit tests + structural equivalence test 全 PASS；PASS 267→278。**Ship-gate 6/6 PASS** (AE 2020 + AE 2025 × solo/dup_parent/dup_child)，matte mode 按 strategy §5 by-design refuse 不产 ge fixture (F2 quirk Phase 3.1 候选)。Tooling: `tmp_debug/ge_duplicate_layer` 3 mode producer 复用 Phase 2 baseline + Go SetParent，省一套 RE fixture；`verify_ge_duplicate_layer.jsx` mode 切换验 numLayers==4 / clone identity / parent refs per mode。godoc 从 alpha → Stable。Plan + spec 移 finish/。Coverage.md 加 V3 structural ops 段（含 Phase 2 DeleteLayer 同时落账）。Next: Phase 4 候选 (MoveLayer / SetTrackMatte / InsertLayer / Project.DuplicateItem) per V3 deep-think §4。
-- **2026-05-28 V3 Phase 3 Task 5 完 — ship-gate 6/6 PASS** — `tmp_debug/ge_duplicate_layer/main.go` 产 3 mode ge_*.aep (solo/dup_parent/dup_child)，baseline 复用 Phase 2 的 `re_delete_layer_baseline.aep`（3-solid pre-mutation；dup_parent/dup_child 用 Go SetParent 设引用再 dup，省一套 RE fixture）。`test_data/verify_ge_duplicate_layer.jsx` mode 切换验 (a) AE 不拒接 (b) numLayers==4 (c) clone 在 expected AE idx + 名字 (d) parent 关系 per mode。**6/6 PASS** (AE 2020 × 3 + AE 2025 × 3): solo 验 clone L2_clone @ idx 2 + 推 source L2_mid 到 idx 3；dup_parent 验 F6 — L3 仍 parents to L2_mid (orig) 不是 clone；dup_child 验 F7-inverse — L1_clone + L1_top 都 parents to L2_mid。matte mode 按 spec §5 by-design refuse，不产 ge fixture（expected absence，非 coverage gap）。Next: Task 6 godoc alpha → Stable + plan/spec → finish/ + commit。
+- **2026-05-28 V3 Phase 3 完 — Composition.DuplicateLayer ship-gate green (Stable)** (commit b2d3e18) — 完整 RE→spec→impl→ship-gate 闭环。`duplicate_layer.go` (~210 LOC) + 9 unit tests + structural equivalence test 全 PASS；PASS 267→278。**Ship-gate 6/6 PASS** (AE 2020 + AE 2025 × solo/dup_parent/dup_child)，matte mode 按 strategy §5 by-design refuse 不产 ge fixture (F2 quirk Phase 3.1 候选)。Tooling: `tmp_debug/ge_duplicate_layer` 3 mode producer 复用 Phase 2 baseline + Go SetParent，省一套 RE fixture。godoc 从 alpha → Stable。Plan + spec 移 finish/。Coverage.md 加 V3 structural ops 段（含 Phase 2 DeleteLayer 同时落账）。
 
 ## Hanging tasks
 
