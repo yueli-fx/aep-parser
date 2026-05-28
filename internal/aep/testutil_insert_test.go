@@ -21,3 +21,6 @@ func CorruptSrcLayrFormTypeForTest(l *Layer) {
 		l.back.layrList.FormType = rifx.ChunkID{'X', 'X', 'X', 'X'}
 	}
 }
+
+// ProjForTest exposes Composition.proj for InsertLayer tests.
+func (c *Composition) ProjForTest() *Project { return c.proj }

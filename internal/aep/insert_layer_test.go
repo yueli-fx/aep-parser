@@ -196,3 +196,59 @@ func TestInsertLayer_RefuseStructuralCorruption(t *testing.T) {
 		t.Fatalf("want 'non-Layr' corruption error, got %v", err)
 	}
 }
+
+func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
+	dest, src := openInsertPair(t)
+	if dest == nil {
+		return
+	}
+	srcID := src.ID
+	srcName := src.Name
+	srcSourceID := src.SourceID
+	preLen := len(dest.Layers)
+	preChildCount := len(dest.ItemListForTest().Children)
+	preNextItemID := dest.ProjForTest().NextItemIDForTest()
+
+	clone, err := dest.InsertLayer(src, 0)
+	if err != nil {
+		t.Fatalf("InsertLayer(src, 0): %v", err)
+	}
+	if clone == nil {
+		t.Fatal("InsertLayer returned nil clone with no error")
+	}
+	if len(dest.Layers) != preLen+1 {
+		t.Fatalf("dest.Layers count: got %d, want %d", len(dest.Layers), preLen+1)
+	}
+	if dest.Layers[0] != clone {
+		t.Errorf("dest.Layers[0] should be the clone")
+	}
+	if clone.ID == srcID {
+		t.Errorf("clone.ID must differ from source; both = %d", clone.ID)
+	}
+	if clone.ID != preNextItemID {
+		t.Errorf("clone.ID: got %d, want %d (preNextItemID head counter+1)", clone.ID, preNextItemID)
+	}
+	if clone.Name != srcName {
+		t.Errorf("clone.Name: got %q, want %q (verbatim from src)", clone.Name, srcName)
+	}
+	if clone.SourceID != srcSourceID {
+		t.Errorf("clone.SourceID: got %d, want %d (verbatim from src)", clone.SourceID, srcSourceID)
+	}
+	if clone.ParentID != 0 {
+		t.Errorf("clone.ParentID: got %d, want 0 (reset for cross-comp)", clone.ParentID)
+	}
+	if clone.TrackMatteLayerID != 0 {
+		t.Errorf("clone.TrackMatteLayerID: got %d, want 0 (reset for cross-comp)", clone.TrackMatteLayerID)
+	}
+	if clone.TrackMatte != aep.TrackMatteNone {
+		t.Errorf("clone.TrackMatte: got %d, want TrackMatteNone (reset for cross-comp)", clone.TrackMatte)
+	}
+	postChildCount := len(dest.ItemListForTest().Children)
+	if postChildCount <= preChildCount {
+		t.Errorf("dest itemList children should grow; pre=%d post=%d", preChildCount, postChildCount)
+	}
+	postNextItemID := dest.ProjForTest().NextItemIDForTest()
+	if postNextItemID != preNextItemID+1 {
+		t.Errorf("proj.nextItemID: got %d, want %d (pre+1)", postNextItemID, preNextItemID+1)
+	}
+}
