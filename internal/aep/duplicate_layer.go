@@ -1,0 +1,191 @@
+package aep
+
+import (
+	"encoding/binary"
+	"fmt"
+
+	"github.com/example/aep-parser/internal/rifx"
+)
+
+// DuplicateLayer clones the layer at the given 0-based index in c.Layers
+// and inserts the clone at that same position, pushing source and
+// everything below down by one (mirrors AE ScriptingAPI's
+// layer.duplicate()). Returns the cloned *Layer on success, or an error
+// if a refuse-case triggers.
+//
+// Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff,
+// scars/ae-duplicatelayer-re.md F1/F3/F4/F5/F7/F8/F10):
+//
+//   - new layer ID = proj.allocItemID() (head counter +1, monotonic)
+//   - clone's 16-chunk block (Layr + Ewst + 14 follower leaves in
+//     AE-saved files; 2 chunks in Go-built layers) is a deep byte-clone
+//     of source's block, with ldta @0x00..0x03 overwritten with the new
+//     ID. All other body bytes (SourceID @0x28, ParentID @0x84,
+//     TrackMatte @0x6B) are verbatim from source.
+//   - Layer.SourceID/ParentID/TrackMatteLayerID/TrackMatte struct fields
+//     on the clone = source values (no footage duplication; no
+//     reference rewrites).
+//   - Name = caller-supplied (AE keeps source's name verbatim; we
+//     require an explicit name to avoid silent duplicate-name confusion).
+//   - Children's outgoing ParentID is NOT updated — clone is a fresh
+//     sibling shadow; source remains the canonical parent for any
+//     incoming refs (F6).
+//
+// Refuse-cases (Phase 3 conservative; strategy spec §5):
+//
+//   - name empty
+//   - index out of range
+//   - comp lacks parsed itemList back-ref
+//   - source is not an AV layer (camera/light/audio behavior not RE'd)
+//   - source has TrackMatte != None (F2 quirk: AE relocates clone for
+//     matte preservation; ~30 LOC special-case deferred to Phase 3.1)
+//   - backref corruption (Layr formType / Ewst sibling mismatch)
+//
+// Atomic mutation (Inv-10 / Inv-11): snapshot pre-call state of
+// itemList.Children, c.Layers, proj.nextItemID, and proj.Warnings; on
+// any parser warning surfaced during the re-parse, roll all of them
+// back (including the nextItemID bump) and return the warnings as an
+// error.
+//
+// Alpha: AE 2020 + AE 2025 ship-gate pending (CLAUDE.md #2 + #6).
+func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
+	// 1. Validate refuse-cases.
+	if name == "" {
+		return nil, fmt.Errorf("DuplicateLayer: name cannot be empty")
+	}
+	if index < 0 || index >= len(c.Layers) {
+		return nil, fmt.Errorf("DuplicateLayer: index %d out of range (have %d layers)", index, len(c.Layers))
+	}
+	if c.back == nil || c.back.itemList == nil {
+		return nil, fmt.Errorf("DuplicateLayer: comp %q has no itemList back-ref (built outside parser?)", c.Name)
+	}
+	if c.proj == nil {
+		return nil, fmt.Errorf("DuplicateLayer: comp %q has no project back-ref", c.Name)
+	}
+
+	source := c.Layers[index]
+	if source.Type != LayerTypeAV {
+		return nil, fmt.Errorf("DuplicateLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported in Phase 3", index, source.Type)
+	}
+	if source.TrackMatte != TrackMatteNone {
+		return nil, fmt.Errorf("DuplicateLayer: refuse layer %q (idx=%d) with TrackMatte=%d set; AE relocates clone to preserve original's matte (F2 quirk), not yet supported in Phase 3", source.Name, index, source.TrackMatte)
+	}
+	if source.back == nil || source.back.layrList == nil {
+		return nil, fmt.Errorf("DuplicateLayer: layer %q at idx %d has no Layr chunk back-ref", source.Name, index)
+	}
+
+	// 2. Locate source Layr in itemList.Children.
+	children := c.back.itemList.Children
+	srcLayrIdx := findLayrIndexInItemList(c.back.itemList, source.back.layrList)
+	if srcLayrIdx < 0 {
+		return nil, fmt.Errorf("DuplicateLayer: layer %q Layr chunk not found in itemList", source.Name)
+	}
+
+	// 3. Defensive structural assertions — FormType and Ewst sibling.
+	if !children[srcLayrIdx].IsList() || children[srcLayrIdx].FormType != rifx.IDLayr {
+		return nil, fmt.Errorf("DuplicateLayer: layer %q backref points to non-Layr chunk (FormType=%s)", source.Name, chunkIDString(children[srcLayrIdx].FormType))
+	}
+	if srcLayrIdx+1 >= len(children) {
+		return nil, fmt.Errorf("DuplicateLayer: layer %q Layr at end of itemList (no Ewst sibling)", source.Name)
+	}
+	ewstCandidate := children[srcLayrIdx+1]
+	if !ewstCandidate.IsList() || ewstCandidate.FormType != rifx.IDEwst {
+		return nil, fmt.Errorf("DuplicateLayer: layer %q expected Ewst sibling after Layr, found %s", source.Name, chunkIDString(ewstCandidate.FormType))
+	}
+
+	// 4. Adaptive block end — consume leaf followers until next LIST/EOF
+	//    (mirrors DeleteLayer §3 — handles AE-saved 16-chunk and
+	//    Go-built 2-chunk forms alike).
+	endIdx := srcLayrIdx + 2
+	for endIdx < len(children) && !children[endIdx].IsList() {
+		endIdx++
+	}
+
+	// 5. Snapshot for rollback (strategy spec §6). Key diff vs DeleteLayer:
+	//    we DO snapshot proj.nextItemID (the clone bumps it; rollback must
+	//    un-bump so a subsequent New/Duplicate gets the right ID).
+	oldItemChildren := append([]*rifx.Chunk(nil), children...)
+	oldLayers := append([]*Layer(nil), c.Layers...)
+	oldNextItemID := c.proj.nextItemID
+	oldWarningsLen := len(c.proj.Warnings)
+
+	// 6. Deep-clone source's [srcLayrIdx, endIdx) block. Every Data slice
+	//    is freshly allocated — required by
+	//    scars/concurrency-unsafe-shared-chunk-bytes.md.
+	cloneBlock := make([]*rifx.Chunk, endIdx-srcLayrIdx)
+	for k := srcLayrIdx; k < endIdx; k++ {
+		cloneBlock[k-srcLayrIdx] = deepCloneChunk(children[k])
+	}
+
+	// 7. Allocate new ID, mutate clone's ldta @0x00..0x03 — the ONLY byte
+	//    change to the cloned block per Finding 10.
+	newID := c.proj.allocItemID()
+	clonedLayr := cloneBlock[0]
+	clonedLdta := clonedLayr.FindFirst(rifx.IDLdta)
+	if clonedLdta == nil || len(clonedLdta.Data) < 4 {
+		c.proj.nextItemID = oldNextItemID
+		return nil, fmt.Errorf("DuplicateLayer: cloned Layr missing ldta or ldta data too short (got %d bytes)", len(clonedLdta.Data))
+	}
+	binary.BigEndian.PutUint32(clonedLdta.Data[0x00:0x04], newID)
+
+	// 8. Rewrite clone's name Utf8 chunk (length-variable; same mechanic
+	//    as Layer.SetName — replace Data slice, WriteAEP recomputes
+	//    ancestor LIST sizes).
+	clonedNameUtf8 := clonedLayr.FindFirst(rifx.IDUtf8)
+	if clonedNameUtf8 == nil {
+		c.proj.nextItemID = oldNextItemID
+		return nil, fmt.Errorf("DuplicateLayer: cloned Layr %q missing Utf8 name chunk", source.Name)
+	}
+	clonedNameUtf8.Data = []byte(name)
+
+	// 9. Splice clone block into itemList.Children at srcLayrIdx (BEFORE
+	//    source, pushing source down — matches F1 for solo/dup_parent/
+	//    dup_child modes).
+	newChildren := make([]*rifx.Chunk, 0, len(children)+len(cloneBlock))
+	newChildren = append(newChildren, children[:srcLayrIdx]...)
+	newChildren = append(newChildren, cloneBlock...)
+	newChildren = append(newChildren, children[srcLayrIdx:]...)
+	c.back.itemList.Children = newChildren
+
+	// 10. Re-parse cloneLayr to build a fresh *Layer with backrefs into
+	//     cloned chunks. parseLayer reads ID from cloned ldta @0x00 (now
+	//     newID), name from cloned Utf8 (now caller-supplied), and all
+	//     other fields verbatim from cloned bytes.
+	var localWarnings []string
+	ctx := newParseCtxFPS(c.TickRate, c.FrameRate, c.Name, &localWarnings)
+	cloneLayer, parseErr := parseLayer(clonedLayr, index, ctx)
+	if parseErr != nil {
+		c.back.itemList.Children = oldItemChildren
+		c.proj.nextItemID = oldNextItemID
+		return nil, fmt.Errorf("DuplicateLayer: re-parse cloned layer: %w", parseErr)
+	}
+	cloneLayer.comp = c
+	assignTransformDefaults(cloneLayer.Properties, c, cloneLayer.Type)
+
+	// 11. Insert cloneLayer into c.Layers at index.
+	newLayers := make([]*Layer, 0, len(c.Layers)+1)
+	newLayers = append(newLayers, c.Layers[:index]...)
+	newLayers = append(newLayers, cloneLayer)
+	newLayers = append(newLayers, c.Layers[index:]...)
+	c.Layers = newLayers
+
+	// 12. Warnings-as-failure (Inv-11). Append local re-parse warnings to
+	//     project, then rollback ALL state if any new warnings appeared.
+	if len(localWarnings) > 0 {
+		c.proj.Warnings = append(c.proj.Warnings, localWarnings...)
+	}
+	if len(c.proj.Warnings) > oldWarningsLen {
+		c.back.itemList.Children = oldItemChildren
+		c.Layers = oldLayers
+		c.proj.nextItemID = oldNextItemID
+		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
+		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
+		return nil, fmt.Errorf("DuplicateLayer: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
+	}
+
+	return cloneLayer, nil
+}
+
+// deepCloneChunk is defined in new_composition.go — recursive deep copy
+// with fresh Data slices (concurrent-mutate safe per
+// scars/concurrency-unsafe-shared-chunk-bytes.md).
