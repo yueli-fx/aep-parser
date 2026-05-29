@@ -1,19 +1,19 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-05-29 by claude (V2.2.1 全 5 shape kind ship：Ellipse/Path/Stroke embed + Fill/Stroke Color ARGB×255 编码修复 + AE 2020 ldta 地基 + encodeBezier ldat 修复；全部双版本 ship-gate PASS，直接在 main HEAD 3aee822；vet 0 + test ok)
-**Active focus**: 无 active 实现线。**V2.2.1 ShapeLayer 拓展全部收口**：5 个 shape kind（Rect/Ellipse/Path/Fill/Stroke）全部 embed + 双版本 ship-gate PASS；AE 2020 ldta 地基 bug、encodeBezier ldat 顶点编码 bug、Fill/Stroke 颜色 ARGB×255 编码三个潜伏 bug 均修复。剩 deferred 仅正交项（keyframe 持久化 + 各 shape 次要子属性 runtime-only）。〔历史：子项① Ellipse embed bytes 落地〕（AE 2020+2025 双版本 ship-gate PASS）：embed `v2_2_shape_ellipse_body.bin`（从 AE 2025 tolerance fixture 提取的 730B body，经双版本 gate 证 cross-version 兼容）+ overwrite Size/Position cdat，镜像已 ship 的 Rect 路径。**意外重大收获**：跑 AE 2020 ship-gate 时发现 `buildLdtaBytes` 硬编码 164B ldta，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判损坏并跳过——长期未发现因 AE-2020 shape gate 一直 t.Skip()。修复：ldta 大小进 capability matrix（`LdtaSize` 160 AE2020/22 / 164 AE25）。Ellipse 实现 + ldta 修复 + 单测 + 双版本 ship-gate + incident report + docs/coverage 收口全部落地。
+**Active focus**: 无 active 实现线。**V2.2.1 ShapeLayer 拓展 + shape keyframe 持久化（Size/Color）全部收口**：5 个 shape kind 全 embed；3 个潜伏 bug（AE 2020 ldta 地基、encodeBezier ldat 顶点编码、Fill/Stroke ARGB×255 颜色编码）修复；keyframe 持久化 Rect/Ellipse **Size** + Fill/Stroke **Color** 落地（`injectAnimatedStream`：cdat↔LIST(list) + tdb4 标志 patch）。全部双版本 ship-gate PASS。HEAD 0751962。（AE 2020+2025 双版本 ship-gate PASS）：embed `v2_2_shape_ellipse_body.bin`（从 AE 2025 tolerance fixture 提取的 730B body，经双版本 gate 证 cross-version 兼容）+ overwrite Size/Position cdat，镜像已 ship 的 Rect 路径。**意外重大收获**：跑 AE 2020 ship-gate 时发现 `buildLdtaBytes` 硬编码 164B ldta，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判损坏并跳过——长期未发现因 AE-2020 shape gate 一直 t.Skip()。修复：ldta 大小进 capability matrix（`LdtaSize` 160 AE2020/22 / 164 AE25）。Ellipse 实现 + ldta 修复 + 单测 + 双版本 ship-gate + incident report + docs/coverage 收口全部落地。
 
 ## Next session
 
 **先合并** `v3-phase5d-ellipse-embed` 到 main（Ellipse + ldta 修复）。
 
-**V2.2.1 剩余（均正交，需用户拍板再起）**：
-1. **Keyframe 持久化** — 跨所有 shape 流 + Layr Position，现仅 first-kf static fallback。需 RE lhd3/ldat 多关键帧注入（最重）。
-2. **各 shape 次要子属性持久化** — Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction/Position/Roundness、Layr Transform Anchor/Scale/Rotation/Opacity。多数现 runtime-only；逐个 RE cdat 槽或 embed slot。
+**V2.2.1 剩余 keyframe / 子属性**（自主推进，勿停下问）：
+1. **Layr/shape Position keyframe**（spatial 真运动路径）— RE 已起：bpk=128（dim2，value@0x38 后 9 f64，≠ color 的 3·dim），含 spatial 切线，走 transform-group 路径（`lowerLayerTransform`）+ 分离维 Position_0/_1。dump 工具 `tmp_debug/dump_kf`、fixture `test_data/v2_2_shape_kf_re.aep` 已备。
+2. **Ellipse Position keyframe** — 疑非 spatial Vec2（同 Size），可 `injectAnimatedVec2` 直接接，但需先建 animated Ellipse fixture 验证。
+3. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级。
+4. **各 shape 次要子属性** — Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform。多数 runtime-only；逐个 RE。
 
-**其它候选**（需用户拍板）：泛型 `DuplicateItem`、`ImportComposition`（需求驱动）。
-
-**其它候选**（需用户拍板）：泛型 `DuplicateItem`（低优先，无 scripting API）、`ImportComposition`（需求驱动）。
+**其它候选**：泛型 `DuplicateItem`（低优先，无 scripting API）、`ImportComposition`（需求驱动）。
 
 **V2.2.1 子项① RE 收获**（写进 spec §0 / incident report）：
 - AE 2020 ldta 必须 160B（AE 2025 才 164B）；164B 被 AE 2020 判损坏跳层。任何 NewX 写路径必须**真跑** AE 2020+2025 双版本 gate，skip 的 gate = 没验证。

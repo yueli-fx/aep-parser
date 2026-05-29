@@ -136,9 +136,15 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - `(g *VectorGroup) AddStroke() (*StrokeNode, error)` + `SetColor/SetWidth/SetOpacity` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_stroke_body.bin`（全 child set 含 Dashes/Taper/Wave 嵌套组）+ overwrite Color/Opacity/Width cdat。`TestV2_2_Stroke_AEShipGate_AE20{20,25}`（distinct 值 + re-save cdat 解码）。
 - **shape 颜色编码 RE 修复**：AE 存 `[A,R,G,B]×255` f64（非原始 `[r,g,b,a]×1.0`）。`encodeShapeColorBE` 统一 Fill+Stroke。修了长期 deferred 的"Fill Color 编码不准"——`lowerFillNode` 此前写原始 RGBA，可见色错。`TestLowerFillNode_ColorEncodingARGB255` + Ellipse gate re-save Fill 颜色校验。
 - 清理：移除 from-scratch 死代码 `nodeBodyTdgp` / `emptySubPropPlaceholder`（5 个 shape kind 全 embed）。
-- **V2.2.1 全部 5 shape kind（Rect/Ellipse/Path/Fill/Stroke）+ 地基 ldta + 颜色编码均 ship**。剩 deferred（正交）:
-  - Keyframe 持久化（所有 shape 流 + Layr Position）: first kf static fallback，需 RE lhd3/ldat 多关键帧注入。
-  - 各 shape 的次要子属性（Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction/Position/Roundness、Layr Transform Anchor/Scale/Rotation/Opacity）: runtime-only 不持久化。
+- **V2.2.1 全部 5 shape kind（Rect/Ellipse/Path/Fill/Stroke）+ 地基 ldta + 颜色编码均 ship**。
+
+#### V2.2.1 子项④ (2026-05-29) — shape keyframe 持久化（Size + Color）
+- **Rect/Ellipse Size**（non-spatial Vec2）+ **Fill/Stroke Color**（spatial-style dim4 ARGB×255）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_RectKf_*` + `TestV2_2_FillKf_*`；re-save 解 numKf+值）。
+- 机制 `injectAnimatedStream`：static tdbs 的 cdat ↔ animated `LIST(list)(lhd3+ldat)`；patch tdb4 标志（@0x05 `&=~1`、@0x44 `=1`、@0x4f `&=~1`）。ldat 与 AE 原生字节一致。`encodeKeyframes` non-spatial（value@0x08 bpk 88）/ spatial（value@0x38）两布局。**坑**：`rifx.IDTdb4` 是大写 legacy，实际小写 `tdb4`。
+- **仍 deferred keyframe**:
+  - **Layr/shape Position**（spatial 真运动路径）：bpk=128（dim2，value@0x38 后 9 f64，≠ color 的 3·dim），布局含 spatial 切线，且走 transform-group 路径（`lowerLayerTransform`，非 shape node）+ 分离维 Position_0/_1。需独立 RE。
+  - **Path**（bezier keyframe，逐帧 shap）：V2.3+ 级别。
+- **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Keyframe 持久化（Rect/Ellipse Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity: runtime-only 不持久化

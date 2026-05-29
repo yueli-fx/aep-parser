@@ -267,9 +267,15 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 
 AE 存 shape 颜色为 **`[A,R,G,B] × 255` 的 f64 BE**（offset 0/8/16/24），不是原始 `[r,g,b,a] × 1.0`（RE 自 stroke tolerance fixture：JSX `[0,0,1,1]` → 磁盘 `[255,0,0,255]`，0x406fe0=255）。`encodeShapeColorBE` 统一编码，Fill + Stroke 共用。修复前 Fill 写原始 RGBA 导致可见色错；现经 AE round-trip 验证正确（Ellipse gate 解 re-saved Fill Color = ARGB×255）。
 
-### Keyframes 不持久化
+### Keyframes 持久化（V2.2.1 部分落地）
 
-所有 shape 子流 + Layr Position 的 keyframe 调用（`AddKeyframeLinear`）在 V2.2 alpha 里都仅作 *runtime* tracking + **first keyframe value 作 static fallback** 写盘。完整 keyframe 持久化需要 RE `LIST(list) lhd3/ldat` 在 embed body 里的注入方式，V2.2.1 工作。
+| 流 | keyframe 状态 |
+|---|---|
+| **Rect/Ellipse Size**（non-spatial Vec2） | ✅ **持久化**（AE 2020+2025 ship-gate PASS）— `injectAnimatedVec2`，non-spatial 块（value@0x08，bpk 88） |
+| **Fill/Stroke Color**（spatial-style dim4） | ✅ **持久化**（AE 2020+2025 ship-gate PASS）— `injectAnimatedColor`，spatial 块（value@0x38 ARGB×255，bpk 152） |
+| Layr/shape Position、Path | 仍 first-kf static fallback — spatial Vec2 bpk=128 ≠ `encodeKeyframes` 现公式，待 RE |
+
+通用机制：static tdbs `[tdsb tdsn tdb4 cdat tdum tduM]` ↔ animated `[tdsb tdsn tdb4 LIST(list)(lhd3+ldat) tdum tduM]`；`injectAnimatedStream` 共享：patch tdb4 static→animated 标志（@0x05 `&=~1`、@0x44 `=1`、@0x4f `&=~1`）+ cdat→LIST(list)。每帧块 = time@0 + interp(01 01)@4 + headerByte@7 + value（non-spatial@0x08 / spatial@0x38）+ ease。ldat 与 AE 原生字节一致。注意 `rifx.IDTdb4` 是**大写** legacy，现代 AE 用**小写** `tdb4`（大小写敏感坑）。
 
 ## RE 路线 — 为什么是 embed 而不是 from-scratch 构造
 
