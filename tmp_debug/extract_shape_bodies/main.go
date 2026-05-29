@@ -29,7 +29,10 @@ var extractions = []extraction{
 	// non-default in v2_2_shape_rect_full.aep so AE emits each as a flippable
 	// cdat (the old tolerance source had Size only). Regen via gen_shape_rect_full.jsx.
 	{"test_data/v2_2_shape_rect_full.aep", "ADBE Vector Shape - Rect", "internal/aep/templates/v2_2_shape_rect_body.bin"},
-	{"test_data/v2_2_shape_tolerance.aep", "ADBE Vector Graphic - Fill", "internal/aep/templates/v2_2_shape_fill_body.bin"},
+	// V2.2.1 子项⑨: richer fill body — Fill Opacity set static non-default (60)
+	// in v2_2_shape_fill_full.aep so AE emits an Opacity cdat slot (default 100
+	// elided). Regen via gen_shape_fill_full.jsx.
+	{"test_data/v2_2_shape_fill_full.aep", "ADBE Vector Graphic - Fill", "internal/aep/templates/v2_2_shape_fill_body.bin"},
 	{"test_data/v2_2_shape_ellipse_tolerance.aep", "ADBE Vector Shape - Ellipse", "internal/aep/templates/v2_2_shape_ellipse_body.bin"},
 	{"test_data/v2_2_shape_path_tolerance.aep", "ADBE Vector Shape - Group", "internal/aep/templates/v2_2_shape_path_body.bin"},
 	{"test_data/v2_2_shape_stroke_tolerance.aep", "ADBE Vector Graphic - Stroke", "internal/aep/templates/v2_2_shape_stroke_body.bin"},

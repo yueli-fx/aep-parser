@@ -469,10 +469,10 @@ func findListByForm(c *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
 // silent drop; embedded canonical body + cdat overwrite for Color values
 // is the validator-safe path.
 //
-// V2.2 alpha limitations (V2.2.1 work):
-//   - Fill Opacity / Blend Mode / Composite Order / Fill Rule: tolerance
-//     elides; embedded body has no slot to overwrite. Runtime-only API.
-//   - Animated Color: first keyframe value used as static fallback.
+// V2.2.1: Fill Color (static + keyframe) and Fill Opacity (static + keyframe,
+// raw %, 1D non-spatial bpk-48 — 子项⑨, richer fill body template) persist.
+// Blend Mode / Composite Order / Fill Rule stay at the embed defaults (no
+// runtime setter).
 //
 // Color encoding (V2.2.1 RE, via the stroke tolerance fixture): AE stores
 // shape colors as [A,R,G,B] × 255 f64 BE (encodeShapeColorBE), NOT raw
@@ -486,9 +486,15 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		if err := injectAnimatedColor(body, "ADBE Vector Fill Color", f.color.keyframes, ctx); err != nil {
 			return nil, err
 		}
-		return body, nil
+	} else {
+		overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(f.color.static))
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(f.color.static))
+	// Opacity (raw %) — 1D non-spatial (bpk-48, value@0x08). V2.2.1 子项⑨: the
+	// richer fill body template now carries an Opacity cdat slot (default 100 was
+	// elided), so static/animated Opacity persists.
+	if err := lowerShapeScalar(body, "ADBE Vector Fill Opacity", f.opacity, ctx); err != nil {
+		return nil, err
+	}
 	return body, nil
 }
 

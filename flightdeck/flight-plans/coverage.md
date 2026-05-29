@@ -171,7 +171,11 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
 - **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
 - stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
-- **仍 deferred（shape-node 次要）**: Rect/Ellipse Direction（模板 elide）；Fill Opacity·BlendMode·CompositeOrder（fill body elide，需富化）；Stroke Line Cap/Join/Miter/Dashes/Taper/Wave（runtime 模型暂无 setter）。
+#### V2.2.1 子项⑨ (2026-05-30) — Fill Opacity 持久化（static + keyframe）
+- **Fill Opacity** static + keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_FillOpKf_*`；AE 读回 opacity 40 + re-save numKf/bpk；FillKf 重跑双版本仍 PASS）。
+- **磁盘编码**（RE 自 `v2_2_fill_kf_re.aep`）：1D non-spatial（bpk-48，value@0x08，**原始 %**，同 Stroke Opacity）。之前 lowerFillNode 完全丢弃 opacity（连 static 都没写）。
+- 富化 fill body 模板（7 children；源 `v2_2_shape_fill_full.aep`，Fill Opacity 设静态 60）。仅 fill body 变更。`lowerFillNode` 现持久化 Color + Opacity。
+- **仍 deferred（shape-node 次要）**: Rect/Ellipse Direction（模板 elide）；Fill/Stroke BlendMode·CompositeOrder（无 runtime setter）；Stroke Line Cap/Join/Miter/Dashes/Taper/Wave（runtime 模型暂无 setter）。
 - **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）

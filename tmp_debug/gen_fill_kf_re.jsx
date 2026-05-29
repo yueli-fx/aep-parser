@@ -1,0 +1,6 @@
+// V2.2.1 子项⑨ RE: Fill Opacity keyframe layout (animated 100→40).
+(function(){var o=new File("e:/projects/tools/aep-parser/test_data/v2_2_fill_kf_re.aep"),d=new File("e:/projects/tools/aep-parser/test_data/v2_2_fill_kf_re.done"),L=[],ok=false;
+function kf(p,t,v){for(var i=0;i<t.length;i++)p.setValueAtTime(t[i],v[i]);for(var k=1;k<=p.numKeys;k++)p.setInterpolationTypeAtKey(k,KeyframeInterpolationType.LINEAR,KeyframeInterpolationType.LINEAR);}
+try{app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);app.newProject();var c=app.project.items.addComp("FillKfRE",1920,1080,1,5,30);var s=c.layers.addShape();s.name="FillAnim";var sc=s.property("ADBE Root Vectors Group").addProperty("ADBE Vector Group").property("ADBE Vectors Group");sc.addProperty("ADBE Vector Shape - Rect").property("ADBE Vector Rect Size").setValue([200,100]);var f=sc.addProperty("ADBE Vector Graphic - Fill");kf(f.property("ADBE Vector Fill Opacity"),[0,2],[100,40]);app.project.save(o);L.push("saved");ok=true;}catch(e){L.push("ERROR: "+e);}
+try{d.open("w");d.write((ok?"PASS\n":"FAIL\n")+L.join("\n"));d.close();}catch(e2){}
+try{if(app.project)app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);}catch(e3){}try{app.quit();}catch(e4){}})();
