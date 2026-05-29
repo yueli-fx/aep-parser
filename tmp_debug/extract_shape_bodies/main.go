@@ -25,7 +25,10 @@ type extraction struct {
 }
 
 var extractions = []extraction{
-	{"test_data/v2_2_shape_tolerance.aep", "ADBE Vector Shape - Rect", "internal/aep/templates/v2_2_shape_rect_body.bin"},
+	// V2.2.1 子项⑦: richer rect body — Size/Position/Roundness all set static
+	// non-default in v2_2_shape_rect_full.aep so AE emits each as a flippable
+	// cdat (the old tolerance source had Size only). Regen via gen_shape_rect_full.jsx.
+	{"test_data/v2_2_shape_rect_full.aep", "ADBE Vector Shape - Rect", "internal/aep/templates/v2_2_shape_rect_body.bin"},
 	{"test_data/v2_2_shape_tolerance.aep", "ADBE Vector Graphic - Fill", "internal/aep/templates/v2_2_shape_fill_body.bin"},
 	{"test_data/v2_2_shape_ellipse_tolerance.aep", "ADBE Vector Shape - Ellipse", "internal/aep/templates/v2_2_shape_ellipse_body.bin"},
 	{"test_data/v2_2_shape_path_tolerance.aep", "ADBE Vector Shape - Group", "internal/aep/templates/v2_2_shape_path_body.bin"},

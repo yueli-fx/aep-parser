@@ -160,7 +160,14 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **归一化非对称（坑）**：写盘归一（scale/opacity ÷100），但 parser 读**原始**盘值（`list_props`: Scale `[1.2,1.3,1]`、Opacity `0.8`）→ 不反归一。ship-gate 用 AE `keyValue` 验 user 单位（AE 自己反归一），Go re-parse 只验 numKf/bpk。
 - 新 helper（`lower_layer.go`）：`lowerTransformVec2Spatial`（Anchor/Position）、`lowerTransformScale`、`lowerTransformScalar`（Rotation scale=1 / Opacity scale=0.01）；animated→inject，static→overwrite cdat。
 - 模板再扩到 **25 children**（源 `v2_2_shape_transform_full.aep`：5 通道全设静态非默认值；旧默认值被 AE elide）。模板 shared → 全部既有 shape ship-gate 重跑双版本仍 PASS。新增 public API `ShapeLayer.AnchorPoint()`（补齐 5 通道 shorthand；alpha）。
-- **仍 deferred**: shape-node 内 Rect Position（runtime-only，模板 elide）；3D 通道（Orientation/RotateX/Y/Position_Z）；Path keyframe（V2.3）。
+- **仍 deferred**: 3D 通道（Orientation/RotateX/Y/Position_Z）；Path keyframe（V2.3）。
+
+#### V2.2.1 子项⑦ (2026-05-30) — Rect Position + Roundness 持久化（static + keyframe）
+- **Rect Position + Roundness** static + keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_RectSubKf_*`；AE 读回 pos 40/50·roundness 20 + re-save numKf/bpk 往返）。
+- **磁盘编码**（RE 自 `v2_2_rect_subprops.aep`）：**Rect Position** = spatial Vec2 motion-path（bpk-104，value@0x38，[x,y]）— 与 Ellipse Position 同布局；**Roundness** = 1D non-spatial（bpk-48，value@0x08，原值）。
+- 新 helper `lowerShapeVec2 / lowerShapeScalar`（`lower_shape_node.go`）：animated→inject，static→overwrite cdat。`lowerRectNode` 现持久化 Size+Position+Roundness 三流。
+- 富化 rect body 模板（9 children；源 `v2_2_shape_rect_full.aep`，Size/Position/Roundness 全设静态非默认 → AE 不 elide）。仅 rect body 变更（其它 4 shape body 字节不变）。
+- **仍 deferred（shape-node 次要）**: Rect/Ellipse Direction（模板 elide）；Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Fill/Stroke Opacity·BlendMode·CompositeOrder（多数 runtime-only，逐个需富化对应 body 模板 + RE）。
 - **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）

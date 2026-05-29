@@ -102,6 +102,50 @@ func TestLowerTransformScale_Bpk128NonSpatial(t *testing.T) {
 	}
 }
 
+// TestLowerShapeRectSubProps pins Rect Position (spatial Vec2 motion-path,
+// bpk-104, value@0x38, like Ellipse Position) + Roundness (1D non-spatial,
+// bpk-48) — RE'd from test_data/v2_2_rect_subprops.aep. KF2: pos=(40,50), rnd=20.
+func TestLowerShapeRectSubProps(t *testing.T) {
+	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	minimalTransformLeaf(body, "ADBE Vector Rect Position", valueLayout{dim: 2, headerByte: 0x07, spatial: true})
+	minimalTransformLeaf(body, "ADBE Vector Rect Roundness", valueLayout{dim: 1, headerByte: 0x00})
+
+	pos := NewPropertyStream[[2]float64]()
+	_ = pos.AddKeyframeLinear(0, [2]float64{0, 0})
+	_ = pos.AddKeyframeLinear(2, [2]float64{40, 50})
+	rnd := NewPropertyStream[float64]()
+	_ = rnd.AddKeyframeLinear(0, 0)
+	_ = rnd.AddKeyframeLinear(2, 20)
+	ctx := &lowerCtx{tickRate: 30720}
+
+	if err := lowerShapeVec2(body, "ADBE Vector Rect Position", pos, ctx, valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
+		t.Fatal(err)
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Rect Roundness", rnd, ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	plhd3, pldat := kfListOf(t, body, "ADBE Vector Rect Position")
+	if binary.BigEndian.Uint32(plhd3.Data[0x10:0x14]) != 104 {
+		t.Errorf("Position bpk = %d, want 104", binary.BigEndian.Uint32(plhd3.Data[0x10:0x14]))
+	}
+	pblk := pldat.Data[104:208]
+	if pblk[0x07] != 0x07 || binary.BigEndian.Uint32(pblk[0x08:0x0C]) != 1 {
+		t.Errorf("Position KF2 header/motion-path wrong")
+	}
+	if f64At(pblk, 0x38) != 40 || f64At(pblk, 0x40) != 50 {
+		t.Errorf("Position KF2 = (%v,%v), want (40,50)", f64At(pblk, 0x38), f64At(pblk, 0x40))
+	}
+
+	rlhd3, rldat := kfListOf(t, body, "ADBE Vector Rect Roundness")
+	if binary.BigEndian.Uint32(rlhd3.Data[0x10:0x14]) != 48 {
+		t.Errorf("Roundness bpk = %d, want 48", binary.BigEndian.Uint32(rlhd3.Data[0x10:0x14]))
+	}
+	if v := f64At(rldat.Data[48:96], 0x08); v != 20 {
+		t.Errorf("Roundness KF2 = %v, want 20", v)
+	}
+}
+
 // TestLowerTransformScalar pins Rotation (degrees as-is) + Opacity (÷100):
 // 1D non-spatial, bpk-48, value@0x08.
 func TestLowerTransformScalar(t *testing.T) {

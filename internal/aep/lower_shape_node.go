@@ -235,15 +235,45 @@ func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if r.size.mode == StreamModeAnimated && len(r.size.keyframes) > 0 {
-		if err := injectAnimatedVec2(body, "ADBE Vector Rect Size", r.size.keyframes, ctx); err != nil {
-			return nil, err
-		}
-		return body, nil
+	// Size — non-spatial Vec2 (bpk-88). Position — spatial Vec2 motion-path
+	// (bpk-104, value@0x38; identical layout to Ellipse Position). Roundness —
+	// 1D non-spatial (bpk-48). V2.2.1 子项⑦: Position/Roundness persisted via the
+	// richer rect body template (Size/Position/Roundness all cdat slots).
+	if err := lowerShapeVec2(body, "ADBE Vector Rect Size", r.size, ctx, valueLayout{dim: 2, headerByte: 0x00, spatial: false}); err != nil {
+		return nil, err
 	}
-	val := r.size.static
-	overwriteShapeStreamCdat(body, "ADBE Vector Rect Size", encodeF64sBE(val[0], val[1]))
+	if err := lowerShapeVec2(body, "ADBE Vector Rect Position", r.position, ctx, valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Rect Roundness", r.roundness, ctx); err != nil {
+		return nil, err
+	}
 	return body, nil
+}
+
+// lowerShapeVec2 persists a shape Vec2 stream into an embedded body: animated →
+// inject the keyframe container (using the supplied layout); static → overwrite
+// the cdat with the 2 × f64 value.
+func lowerShapeVec2(body *rifx.Chunk, name string, ps *PropertyStream[[2]float64], ctx *lowerCtx, layout valueLayout) error {
+	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
+		return injectAnimatedVec2L(body, name, ps.keyframes, ctx, layout)
+	}
+	overwriteShapeStreamCdat(body, name, encodeF64sBE(ps.static[0], ps.static[1]))
+	return nil
+}
+
+// lowerShapeScalar persists a shape 1D stream (e.g. Rect Roundness): animated →
+// inject a 1D non-spatial keyframe container (bpk-48); static → overwrite cdat.
+func lowerShapeScalar(body *rifx.Chunk, name string, ps *PropertyStream[float64], ctx *lowerCtx) error {
+	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
+		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, encode1D, ctx)
+		if err != nil {
+			return err
+		}
+		return injectAnimatedStream(body, name, kfList)
+	}
+	overwriteShapeStreamCdat(body, name, encode1D(ps.static))
+	return nil
 }
 
 // injectAnimatedVec2 converts a static shape Vec2 stream in an embedded body
