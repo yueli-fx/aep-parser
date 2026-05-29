@@ -132,6 +132,10 @@ type valueLayout struct {
 	dim        int  // 1 / 2 / 3 / 4
 	headerByte byte // header07 value: 0x07 spatial / 0x01 4D-style / 0x00 non-spatial
 	spatial    bool // mirrors layoutFor (parse_keyframe.go) spatialStyle field
+	// motionPath: true for true spatial-motion-path streams (layer/shape
+	// Position) — the keyframe block carries a 0x00000001 marker at 0x08.
+	// Color uses the spatial block shape but is NOT a motion path (0x08 = 0).
+	motionPath bool
 }
 
 type encodeFunc[T any] func(T) []byte
@@ -399,6 +403,11 @@ func writeKeyframeBlock[T any](blk []byte, kf StreamKeyframe[T], layout valueLay
 	if layout.spatial {
 		// Spatial-style: ease at 0x18/0x20/0x28/0x30; value at 0x38;
 		// spatial tangents follow (RE-S6 / parse_keyframe.go kfLayout).
+		// Motion-path streams (Position) carry a 0x00000001 marker at 0x08
+		// (RE'd from layer/shape Position kf fixtures); Color does not.
+		if layout.motionPath {
+			binary.BigEndian.PutUint32(blk[0x08:0x0C], 1)
+		}
 		binary.BigEndian.PutUint64(blk[0x18:0x20], math.Float64bits(kf.InEase.Speed))
 		binary.BigEndian.PutUint64(blk[0x20:0x28], math.Float64bits(kf.InEase.Influence))
 		binary.BigEndian.PutUint64(blk[0x28:0x30], math.Float64bits(kf.OutEase.Speed))

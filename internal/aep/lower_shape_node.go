@@ -253,7 +253,14 @@ func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // tdum/tduM unchanged — only cdat ↔ LIST(list) flips). Non-spatial dim-2
 // layout (header07=0x00) per the kf RE fixture (Rect/Ellipse Size).
 func injectAnimatedVec2(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx) error {
-	kfList, err := encodeKeyframes(kfs, valueLayout{dim: 2, headerByte: 0x00, spatial: false}, encode2D, ctx)
+	return injectAnimatedVec2L(body, streamName, kfs, ctx, valueLayout{dim: 2, headerByte: 0x00, spatial: false})
+}
+
+// injectAnimatedVec2L injects an animated Vec2 stream with an explicit layout
+// (Size = non-spatial header07=0x00 bpk 88; shape Position = spatial header07=
+// 0x07 bpk 104 value@0x38).
+func injectAnimatedVec2L(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx, layout valueLayout) error {
+	kfList, err := encodeKeyframes(kfs, layout, encode2D, ctx)
 	if err != nil {
 		return err
 	}
@@ -319,7 +326,9 @@ func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chun
 // V2.2.1 limitations:
 //   - Direction: AE default (the AE-saved body elides the Direction sub-prop;
 //     embedded body has no slot to overwrite).
-//   - Animated Size / Position: first keyframe value used as static fallback.
+//   - Animated Size: keyframes persisted (non-spatial Vec2). Animated Position:
+//     keyframes persisted (spatial Vec2, bpk 104 value@0x38 — RE'd from the
+//     ellipse-kf fixture; AE recomputes spatial tangents on load).
 func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeEllipseBody()
 	if err != nil {
@@ -332,11 +341,14 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	} else {
 		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(e.size.static[0], e.size.static[1]))
 	}
-	ps := e.position.static
 	if e.position.mode == StreamModeAnimated && len(e.position.keyframes) > 0 {
-		ps = e.position.keyframes[0].Value
+		if err := injectAnimatedVec2L(body, "ADBE Vector Ellipse Position", e.position.keyframes, ctx,
+			valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
+			return nil, err
+		}
+	} else {
+		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(e.position.static[0], e.position.static[1]))
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(ps[0], ps[1]))
 	return body, nil
 }
 
