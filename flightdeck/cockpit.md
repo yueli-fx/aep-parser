@@ -17,6 +17,11 @@
 - **V2.2.1 ShapeLayer 拓展**
 - Phase 5C.1 cross-Project InsertLayer
 
+**并行 R-only 仍 deferred**（不阻塞 V3）：
+- **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
+- **DisplayColorSpace R**: separate chunk 位置未 RE
+- **ValueText**: per-type formatter — P3
+
 ## Hanging tasks
 
 无。
