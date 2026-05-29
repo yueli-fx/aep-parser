@@ -5,10 +5,13 @@
 
 ## Next session
 
-**V2.2.1 剩余 keyframe / 子属性**（自主推进，勿停下问）：
-1. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级。
-2. **Layr Transform 3D 通道** — Orientation / Rotate X / Rotate Y / Position_Z（模板已含 Orientation/RotateX/Y stream slot）；需 RE 各自 keyframe 布局（多为非 spatial dim-1/3）。
-3. **各 shape 次要子属性**（Rect Position+Roundness 已 ship 子项⑦，套路：富化对应 body 模板 + RE 布局 + `lowerShapeVec2/Scalar`）— 剩 Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction。多数 runtime-only；逐个 RE。
+> **shape/transform keyframe+子属性 backlog 已基本 drain**（子项⑤-⑨：Layr Transform 全 5 通道 + Rect Position/Roundness + Stroke Opacity/Width + Fill Opacity）。剩下都是**大 arc 或缺 runtime setter**：
+
+1. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级，大 arc。
+2. **Layr Transform 3D 通道** — Orientation / Rotate X/Y / Position_Z；**需先有 3D layer 支持**（runtime 无 3D switch，V2.3）。
+3. **Stroke Line Cap/Join/Miter**（enum/scalar）— stroke body **已含 slot**（15 children），套路同子项⑧但**需先加 runtime model 字段+setter**（StrokeNode 暂无）。中等价值、可做。
+4. **Gradient W**（SetGradient）— **大 arc**。子项⑩ groundwork findings：① 默认 gradient 被 AE elide（连 G-Fill 默认都不写 prop.map Utf8）→ 须设自定义 stops 强制 emit；② re_gradient.aep 是 gradient **effect**（无 GCst/GCky）不是 shape gradient-fill，**无现成 in-repo fixture**；③ 存储 = `GCst > GCky > Utf8(prop.map XML)`（parse_properties.go:85），写=序列化 XML + 替换 Utf8 + length-variable（镜像 SetExpression）。需：gradient-fill fixture(自定义 stops) + XML 格式 RE + 序列化器 + API（Property.SetGradient 或新 G-Fill shape kind）+ 双版本 gate。
+5. **Fill/Stroke BlendMode·CompositeOrder、Rect/Ellipse Direction** — enum，低价值，缺 runtime setter。
 
 **其它候选**：泛型 `DuplicateItem`（低优先，无 scripting API）、`ImportComposition`（需求驱动）。
 
