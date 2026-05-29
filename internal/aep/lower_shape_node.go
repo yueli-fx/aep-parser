@@ -257,22 +257,45 @@ func injectAnimatedVec2(body *rifx.Chunk, streamName string, kfs []StreamKeyfram
 	if err != nil {
 		return err
 	}
+	return injectAnimatedStream(body, streamName, kfList)
+}
+
+// injectAnimatedColor converts a static shape Color stream into an animated
+// one. Color keyframes use the spatial-style block (value at 0x38, bpk
+// 0x38+3*dim*8 = 152 for dim=4) with the [A,R,G,B]×255 value encoding — RE'd
+// from the kf fixture (Fill/Stroke Color).
+func injectAnimatedColor(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[4]float64], ctx *lowerCtx) error {
+	encColor := func(c [4]float64) []byte { return encodeShapeColorBE(c) }
+	kfList, err := encodeKeyframes(kfs, valueLayout{dim: 4, headerByte: 0x01, spatial: true}, encColor, ctx)
+	if err != nil {
+		return err
+	}
+	return injectAnimatedStream(body, streamName, kfList)
+}
+
+// injectAnimatedStream flips a static shape stream in an embedded body to
+// animated: it finds the tdmn matching streamName, descends into the following
+// LIST(tdbs), patches the tdb4 static→animated flags, and replaces the static
+// cdat with the supplied LIST(list)(lhd3+ldat) keyframe container. AE keeps
+// tdsb/tdsn/tdb4/tdum/tduM otherwise unchanged.
+func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chunk) error {
 	kids := body.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == streamName {
 			tdbs := kids[i+1]
 			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
-				return fmt.Errorf("injectAnimatedVec2: %s next chunk not LIST(tdbs)", streamName)
+				return fmt.Errorf("injectAnimatedStream: %s next chunk not LIST(tdbs)", streamName)
 			}
-			// Flip the tdb4 static→animated flags (RE: static @0x05=0x01 @0x44=0x00,
-			// animated @0x05=0x00 @0x44=0x01). Without this AE expects a cdat per the
-			// static tdb4 and reports "file data missing" on the LIST(list) we inject.
+			// tdb4 static→animated flags (RE across Rect Size + Fill Color):
+			// @0x05 clear bit0, @0x44 = 0x01, @0x4f clear bit0. Without this AE
+			// expects a cdat per the static tdb4 and reports "file data missing".
 			// NB: modern AE writes lowercase "tdb4"; rifx.IDTdb4 is the legacy
-			// UPPERCASE "Tdb4" (chunk IDs are case-sensitive — see incident
-			// report chunk-id-case-tdb4.md), so match the lowercase literal.
-			if tdb4 := findChildID(tdbs, rifx.ChunkID{'t', 'd', 'b', '4'}); tdb4 != nil && len(tdb4.Data) > 0x44 {
-				tdb4.Data[0x05] = 0x00
+			// UPPERCASE "Tdb4" (chunk IDs are case-sensitive — incident report
+			// chunk-id-case-tdb4.md), so match the lowercase literal.
+			if tdb4 := findChildID(tdbs, rifx.ChunkID{'t', 'd', 'b', '4'}); tdb4 != nil && len(tdb4.Data) > 0x4f {
+				tdb4.Data[0x05] &^= 0x01
 				tdb4.Data[0x44] = 0x01
+				tdb4.Data[0x4f] &^= 0x01
 			}
 			for j, ch := range tdbs.Children {
 				if ch.ID == rifx.IDCdat {
@@ -280,10 +303,10 @@ func injectAnimatedVec2(body *rifx.Chunk, streamName string, kfs []StreamKeyfram
 					return nil
 				}
 			}
-			return fmt.Errorf("injectAnimatedVec2: %s no cdat to replace", streamName)
+			return fmt.Errorf("injectAnimatedStream: %s no cdat to replace", streamName)
 		}
 	}
-	return fmt.Errorf("injectAnimatedVec2: %s tdmn not found", streamName)
+	return fmt.Errorf("injectAnimatedStream: %s tdmn not found", streamName)
 }
 
 // lowerEllipseNode emits an Ellipse shape body using V2.2.1 embedded tolerance
@@ -412,16 +435,18 @@ func findListByForm(c *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
 // Color encoding (V2.2.1 RE, via the stroke tolerance fixture): AE stores
 // shape colors as [A,R,G,B] × 255 f64 BE (encodeShapeColorBE), NOT raw
 // [r,g,b,a] × 1.0. The pre-V2.2.1 raw encoding produced wrong visible colors.
-func lowerFillNode(f *FillNode, _ *lowerCtx) (*rifx.Chunk, error) {
+func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeFillBody()
 	if err != nil {
 		return nil, err
 	}
-	val := f.color.static
 	if f.color.mode == StreamModeAnimated && len(f.color.keyframes) > 0 {
-		val = f.color.keyframes[0].Value
+		if err := injectAnimatedColor(body, "ADBE Vector Fill Color", f.color.keyframes, ctx); err != nil {
+			return nil, err
+		}
+		return body, nil
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(val))
+	overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(f.color.static))
 	return body, nil
 }
 
@@ -435,16 +460,18 @@ func lowerFillNode(f *FillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 // V2.2.1 limitations: Blend Mode / Composite Order / Line Cap / Line Join /
 // Miter Limit / Dashes / Taper / Wave stay at the embed's defaults; animated
 // Color/Opacity/Width use the first keyframe as a static fallback.
-func lowerStrokeNode(s *StrokeNode, _ *lowerCtx) (*rifx.Chunk, error) {
+func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeStrokeBody()
 	if err != nil {
 		return nil, err
 	}
-	col := s.color.static
 	if s.color.mode == StreamModeAnimated && len(s.color.keyframes) > 0 {
-		col = s.color.keyframes[0].Value
+		if err := injectAnimatedColor(body, "ADBE Vector Stroke Color", s.color.keyframes, ctx); err != nil {
+			return nil, err
+		}
+	} else {
+		overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(s.color.static))
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(col))
 
 	op := s.opacity.static
 	if s.opacity.mode == StreamModeAnimated && len(s.opacity.keyframes) > 0 {
