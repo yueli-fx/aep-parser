@@ -21,7 +21,6 @@ import (
 	_ "embed"
 	"encoding/binary"
 	"fmt"
-	"math"
 	"sync"
 
 	"github.com/example/aep-parser/internal/rifx"
@@ -399,20 +398,22 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 // for non-Position streams (Anchor / Scale / Rotation / Opacity) are
 // runtime-only — they don't persist to disk in V2.2. V2.3 will RE the
 // proper byte layout for full Transform persistence.
-func lowerLayerTransform(t *LayerTransform, _ *lowerCtx) (*rifx.Chunk, error) {
+func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeTransformGroupBody()
 	if err != nil {
 		return nil, err
 	}
-	// Overwrite Position_0 / Position_1 cdat values with runtime user input.
-	// Tolerance's Position_0/_1 cdat are 40B with the f64 value at bytes 0..7.
-	overwriteScalarCdat(body, MatchNamePosition0, t.position.static[0])
-	overwriteScalarCdat(body, MatchNamePosition1, t.position.static[1])
 	if t.position.mode == StreamModeAnimated && len(t.position.keyframes) > 0 {
-		// Fall back to first keyframe value as static slot. Full animated
-		// persistence on Layr Transform is V2.3 work.
-		overwriteScalarCdat(body, MatchNamePosition0, t.position.keyframes[0].Value[0])
-		overwriteScalarCdat(body, MatchNamePosition1, t.position.keyframes[0].Value[1])
+		// V2.2.1 Path B: persist keyframes on the combined "ADBE Position"
+		// stream (bpk-128 spatial dim-3, z=0) — AE's default keyframed-position
+		// form (RE'd from test_data/v2_2_shape_kf_re.aep).
+		if err := injectAnimatedLayerPosition(body, t.position.keyframes, ctx); err != nil {
+			return nil, err
+		}
+	} else {
+		// Static: overwrite the combined Position cdat value (3 × f64; z = 0).
+		overwriteShapeStreamCdat(body, MatchNamePosition,
+			encodeF64sBE(t.position.static[0], t.position.static[1], 0))
 	}
 
 	wrapper := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
@@ -421,27 +422,21 @@ func lowerLayerTransform(t *LayerTransform, _ *lowerCtx) (*rifx.Chunk, error) {
 	return wrapper, nil
 }
 
-// overwriteScalarCdat finds the tdmn `name` inside `body` and overwrites the
-// first 8 bytes of the inner cdat (scalar value) with the f64 BE encoding of v.
-// Used by lowerLayerTransform's iter-7 Position post-process.
-func overwriteScalarCdat(body *rifx.Chunk, name string, v float64) {
-	kids := body.Children
-	for i := 0; i < len(kids); i++ {
-		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == name && i+1 < len(kids) {
-			tdbs := kids[i+1]
-			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
-				return
-			}
-			for _, ch := range tdbs.Children {
-				if ch.ID == rifx.IDCdat && len(ch.Data) >= 8 {
-					binary.BigEndian.PutUint64(ch.Data[0:8], math.Float64bits(v))
-					return
-				}
-			}
-			return
-		}
+// injectAnimatedLayerPosition flips the combined "ADBE Position" stream in the
+// embedded transform body from static cdat to an animated keyframe container.
+// Layer Position is 2D in the runtime API ([2]float64) but AE stores it on disk
+// as a 3D spatial motion-path stream (bpk-128, value@0x38 X/Y/Z with Z=0) — see
+// the bpk-128 RE in test_data/v2_2_shape_kf_re.aep. Mirrors the Ellipse Position
+// path (injectAnimatedVec2L) but at dim=3 with the Z component pinned to 0.
+func injectAnimatedLayerPosition(body *rifx.Chunk, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx) error {
+	encXYZ := func(v [2]float64) []byte { return encode3D([3]float64{v[0], v[1], 0}) }
+	kfList, err := encodeKeyframes(kfs, valueLayout{dim: 3, headerByte: 0x07, spatial: true, motionPath: true}, encXYZ, ctx)
+	if err != nil {
+		return err
 	}
+	return injectAnimatedStream(body, MatchNamePosition, kfList)
 }
+
 
 // lowerOrientationDefault emits the LIST(otst) wrapper holding a default
 // Orientation stream — tolerance.aep dump line 117-125 canonical shape:

@@ -142,12 +142,17 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Rect/Ellipse Size**（non-spatial Vec2）+ **Fill/Stroke Color**（spatial-style dim4 ARGB×255）+ **Ellipse Position**（spatial motion-path Vec2 bpk 104）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_RectKf_*` + `TestV2_2_FillKf_*` + `TestV2_2_EllKf_*`；re-save 解 numKf+值）。Ellipse Position 仅 AE 自动 ~0 spatial 切线与原生不同（AE recompute），值往返正确；`valueLayout.motionPath` 在 0x08 写标志。
 - 机制 `injectAnimatedStream`：static tdbs 的 cdat ↔ animated `LIST(list)(lhd3+ldat)`；patch tdb4 标志（@0x05 `&=~1`、@0x44 `=1`、@0x4f `&=~1`）。ldat 与 AE 原生字节一致。`encodeKeyframes` non-spatial（value@0x08 bpk 88）/ spatial（value@0x38）两布局。**坑**：`rifx.IDTdb4` 是大写 legacy，实际小写 `tdb4`。
 - **仍 deferred keyframe**:
-  - **Layr/shape Position**（spatial 真运动路径）：bpk=128（dim2，value@0x38 后 9 f64，≠ color 的 3·dim），布局含 spatial 切线，且走 transform-group 路径（`lowerLayerTransform`，非 shape node）+ 分离维 Position_0/_1。需独立 RE。
   - **Path**（bezier keyframe，逐帧 shap）：V2.3+ 级别。
+
+#### V2.2.1 子项⑤ (2026-05-30) — Layr Transform Position keyframe 持久化（Path B：combined ADBE Position）
+- **Layr Position**（spatial 真运动路径）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_LayrPosKf_*`；re-save 解 numKf+值）。
+- **磁盘形态**：combined `ADBE Position`（comp=3 spatial dim-3，bpk **128** = 0x38 + 3·3·8），value@0x38 X / @0x40 Y / @0x48 Z(=0)；motion-path 标志@0x08。runtime API 仍是 2D（`[2]float64`，Z 钉 0）。复用 `encodeKeyframes`（spatial 分支已泛化到 dim3）+ `injectAnimatedStream`，新 helper `injectAnimatedLayerPosition`（`lower_layer.go`）。
+- **关键 RE 发现（坑）**：AE 仅在 Position 被 **set/animated** 时才写 combined `ADBE Position` cdat；默认/未触碰时只留分离维 `Position_0/_1`（旧 tolerance 模板即此态，故无 combined slot）。新模板 `templates/v2_2_transform_group_body.bin` 改从 `v2_2_shape_transform_pos.aep`（position 设为静态非默认值 [500,300] 的 shape 图层）提取 → 含 combined Position 静态 cdat（17 children，旧 15 + combined Position）。重生：`gen_shape_transform_pos.jsx` → `extract_transform_group`。
+- 模板为 **shared**（所有 from-scratch shape 图层 transform group 都用它）→ swap 后重跑全部 shape ship-gate（Ellipse/Path/Stroke/RectKf/FillKf/EllKf）双版本均仍 PASS。
+- **仍 deferred**: shape-node 内 Rect Position（runtime-only，模板 elide）；Layr Anchor/Scale/Rotation/Opacity keyframe（V2.3）。
 - **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
-  - Keyframe 持久化（Rect/Ellipse Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
-  - Layr Transform 的 Anchor / Scale / Rotation / Opacity: runtime-only 不持久化
+  - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）
   - Rect/Ellipse Direction、Rect Position/Roundness: runtime-only 不持久化
 
 ### Text

@@ -107,18 +107,19 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 		t.Errorf("A Rect Size kf values = %v / %v, want [50,50] / [300,200]", kfs[0].Value, kfs[1].Value)
 	}
 
-	// iter-7 V2.2 limitation: Layr-level Position keyframes are NOT persisted
-	// to disk (the boilerplate Transform Group body from tolerance.aep is
-	// extracted from a static-Position layer; we overwrite cdat with the
-	// first keyframe value, losing keyframe data). V2.3 will RE the
-	// keyframe encoding for full Layr Transform persistence. For now assert
-	// the static fallback: Position == first keyframe value [0,0].
-	posVal, posIsStatic := sa.Position().StaticValue()
-	if !posIsStatic {
-		t.Errorf("A Position should be static post-roundtrip (V2.2 iter-7 limitation); got animated %v", sa.Position().Keyframes())
+	// V2.2.1 Path B: Layr-level Position keyframes ARE persisted to disk —
+	// injected into the combined "ADBE Position" stream (bpk-128 spatial dim-3,
+	// Z=0) in the embedded transform-group template. Roundtrip recovers the 2
+	// linear keyframes.
+	if _, posIsStatic := sa.Position().StaticValue(); posIsStatic {
+		t.Errorf("A Position should be animated post-roundtrip (V2.2.1 Layr Position keyframe persistence)")
 	}
-	if posIsStatic && posVal != [2]float64{0, 0} {
-		t.Errorf("A Position static fallback = %v, want [0,0] (first kf value)", posVal)
+	posKfs := sa.Position().Keyframes()
+	if len(posKfs) != 2 {
+		t.Fatalf("A Position keyframes = %d, want 2", len(posKfs))
+	}
+	if posKfs[0].Value != [2]float64{0, 0} || posKfs[1].Value != [2]float64{500, 300} {
+		t.Errorf("A Position kf values = %v / %v, want [0,0] / [500,300]", posKfs[0].Value, posKfs[1].Value)
 	}
 
 	// Layer B (static)

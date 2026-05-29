@@ -14,10 +14,22 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-const outputPath = "internal/aep/templates/v2_2_transform_group_body.bin"
+var outputPath = "internal/aep/templates/v2_2_transform_group_body.bin"
 
 func main() {
-	f, err := os.Open("test_data/v2_2_shape_tolerance.aep")
+	// V2.2.1 (Path B): source switched to v2_2_shape_transform_pos.aep — a shape
+	// layer whose COMBINED "ADBE Position" is set to a static non-default value,
+	// so AE writes it as a flippable cdat (the old tolerance fixture had Separate
+	// Dimensions, i.e. Position_0/_1 only). Regenerate the source via
+	// tmp_debug/gen_shape_transform_pos.jsx.
+	srcPath := "test_data/v2_2_shape_transform_pos.aep"
+	if len(os.Args) > 1 {
+		srcPath = os.Args[1]
+	}
+	if len(os.Args) > 2 {
+		outputPath = os.Args[2]
+	}
+	f, err := os.Open(srcPath)
 	if err != nil {
 		panic(err)
 	}
