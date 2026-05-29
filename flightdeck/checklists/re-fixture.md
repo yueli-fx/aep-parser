@@ -137,6 +137,8 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 
 **Go 端 ship-gate**用 `runAeRunShipGate(t, aeExe, jsxPath, doneFile, timeoutSec)` helper (`internal/aep/ship_gate_helpers_test.go`)，不要再直接 `exec.Command(aeExe, "-r", ...)`。
 
+**⚠️ verify JSX `.done` 文件名必须 per-version 唯一**：ship-gate 同一 mode 跨 AE 2020/2025 跑两遍时，verify JSX 若把 `.done` 文件名只按 mode 命名，会(a)第二版覆盖第一版结果、(b)`ae_run.ps1 -Done` 等的是带 version-tag 的名 → 永远等不到 → 每次空等满 `TimeoutSec` 报 exit 1（实际验证早已跑通，假阴性）。修法：JSX 读一个 `$.getenv("..._TAG")`（如 `ae2020_basic`）拼进 `.done` 名，调用方 `-Done` 传同名。见 `verify_ge_insert_layer.jsx` + 2026-05-29 logbook。
+
 **新对话框出现的流程**：
 1. ship-gate FAIL, exit code 2
 2. 看 `<doneFile>.fail/screenshot.png` + `ocr.txt`
