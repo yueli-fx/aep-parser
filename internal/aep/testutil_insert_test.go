@@ -24,3 +24,14 @@ func CorruptSrcLayrFormTypeForTest(l *Layer) {
 
 // ProjForTest exposes Composition.proj for InsertLayer tests.
 func (c *Composition) ProjForTest() *Project { return c.proj }
+
+// DestFootageByPathForTest exposes destFootageByPath for cross-Project tests.
+func DestFootageByPathForTest(p *Project, path string) *Footage { return destFootageByPath(p, path) }
+
+// LocateItemBlockByIDForTest exposes locateItemBlockByID over a Project's root Fold.
+func LocateItemBlockByIDForTest(p *Project, id uint32) (int, int) {
+	if p.back == nil || p.back.rootFold == nil {
+		return -1, -1
+	}
+	return locateItemBlockByID(p.back.rootFold, id)
+}
