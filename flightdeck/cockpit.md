@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-29 by claude (V2.2.1 子项① Ellipse embed bytes 已 ship + 发现并修复 AE 2020 ldta 地基 bug；branch `v3-phase5d-ellipse-embed`，**待合并 main**)
+**Last updated**: 2026-05-29 by claude (V2.2.1 子项① Ellipse embed bytes 已 ship + 修复 AE 2020 ldta 地基 bug；**已合并 main** HEAD c97d45c，branch 已删；vet 0 + test ok 复核通过)
 **Active focus**: V2.2.1 ShapeLayer 拓展 — 子项① **Ellipse embed bytes 已落地**（AE 2020+2025 双版本 ship-gate PASS）：embed `v2_2_shape_ellipse_body.bin`（从 AE 2025 tolerance fixture 提取的 730B body，经双版本 gate 证 cross-version 兼容）+ overwrite Size/Position cdat，镜像已 ship 的 Rect 路径。**意外重大收获**：跑 AE 2020 ship-gate 时发现 `buildLdtaBytes` 硬编码 164B ldta，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判损坏并跳过——长期未发现因 AE-2020 shape gate 一直 t.Skip()。修复：ldta 大小进 capability matrix（`LdtaSize` 160 AE2020/22 / 164 AE25）。Ellipse 实现 + ldta 修复 + 单测 + 双版本 ship-gate + incident report + docs/coverage 收口全部落地。
 
 ## Next session
