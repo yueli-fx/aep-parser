@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-29 by claude (Phase 5C.1 cross-Project InsertLayer Stable，12/12 ship-gate PASS；branch `v3-phase5c1-cross-project-insertlayer`)
-**Active focus**: 无 active 实现线。Phase 5C.1 cross-Project InsertLayer 收口：抬 R7 折入现有 `InsertLayer`，跨 Project 时导入源层 item 闭包（footage+precomp，`locateItemBlockByID` 递归进 folder Sfdr）到 dest 根级取新 ID、footage 按 Path 去重、remap SourceID/AltSourceID；共享 `spliceLayerClone` 核（sourceRemap=identity 同 Project / itemIDMap 跨 Project）。Go 实现 + 单测 + 12/12 ship-gate + godoc Stable + coverage 收口。**待合并到 main**（subagent-driven 全 7 task done）。Phase 5 三选一已全落（#1 DuplicateComposition、#2 cross-Project InsertLayer、#3 解锁）。
+**Last updated**: 2026-05-29 by claude (Phase 5C.1 cross-Project InsertLayer 已合并 main，HEAD 156ee6a；vet 0 + `go test ./internal/aep/...` ok 复核通过)
+**Active focus**: 无 active 实现线。Phase 5C.1 cross-Project InsertLayer 已 ship 并合并到 main（branch `v3-phase5c1-cross-project-insertlayer` 已清理）：抬 R7 折入现有 `InsertLayer`，跨 Project 时导入源层 item 闭包（footage+precomp，`locateItemBlockByID` 递归进 folder Sfdr）到 dest 根级取新 ID、footage 按 Path 去重、remap SourceID/AltSourceID；共享 `spliceLayerClone` 核（sourceRemap=identity 同 Project / itemIDMap 跨 Project）。Go 实现 + 单测 + 12/12 ship-gate + godoc Stable + coverage 收口全部落地。Phase 5 三选一已全落（#1 DuplicateComposition、#2 cross-Project InsertLayer、#3 解锁）。
 
 ## Next session
 
