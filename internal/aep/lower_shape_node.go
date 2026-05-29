@@ -31,6 +31,9 @@ var v22ShapeRectBodyBytes []byte
 //go:embed templates/v2_2_shape_fill_body.bin
 var v22ShapeFillBodyBytes []byte
 
+//go:embed templates/v2_2_shape_ellipse_body.bin
+var v22ShapeEllipseBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -39,6 +42,10 @@ var (
 	v22ShapeFillOnce  sync.Once
 	v22ShapeFillCache *rifx.Chunk
 	v22ShapeFillErr   error
+
+	v22ShapeEllipseOnce  sync.Once
+	v22ShapeEllipseCache *rifx.Chunk
+	v22ShapeEllipseErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -69,6 +76,21 @@ func cloneShapeFillBody() (*rifx.Chunk, error) {
 		return nil, v22ShapeFillErr
 	}
 	return cloneChunk(v22ShapeFillCache), nil
+}
+
+func cloneShapeEllipseBody() (*rifx.Chunk, error) {
+	v22ShapeEllipseOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeEllipseBodyBytes))
+		if err != nil {
+			v22ShapeEllipseErr = fmt.Errorf("parse v22ShapeEllipseBodyBytes: %w", err)
+			return
+		}
+		v22ShapeEllipseCache = ch
+	})
+	if v22ShapeEllipseErr != nil {
+		return nil, v22ShapeEllipseErr
+	}
+	return cloneChunk(v22ShapeEllipseCache), nil
 }
 
 // overwriteShapeStreamCdat finds the tdmn matching `streamName` inside
@@ -185,17 +207,32 @@ func lowerRectNode(r *RectNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	return body, nil
 }
 
-func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	size, err := LowerVec2Stream(e.size, "ADBE Vector Ellipse Size", "Size", ctx)
+// lowerEllipseNode emits an Ellipse shape body using V2.2.1 embedded tolerance
+// bytes (templates/v2_2_shape_ellipse_body.bin). Same rationale as
+// lowerRectNode — from-scratch emit triggered AE silent-drop (the body's
+// boilerplate, not the values, fails AE's semantic validation); embedding the
+// canonical AE-saved body + overwriting Size/Position cdat with runtime values
+// is the validator-safe path.
+//
+// V2.2.1 limitations:
+//   - Direction: AE default (the AE-saved body elides the Direction sub-prop;
+//     embedded body has no slot to overwrite).
+//   - Animated Size / Position: first keyframe value used as static fallback.
+func lowerEllipseNode(e *EllipseNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeEllipseBody()
 	if err != nil {
 		return nil, err
 	}
-	pos, err := LowerVec2Stream(e.position, "ADBE Vector Ellipse Position", "Position", ctx)
-	if err != nil {
-		return nil, err
+	sz := e.size.static
+	if e.size.mode == StreamModeAnimated && len(e.size.keyframes) > 0 {
+		sz = e.size.keyframes[0].Value
 	}
-	direction := emptySubPropPlaceholder("ADBE Vector Shape Direction", "Direction")
-	body := nodeBodyTdgp("Ellipse Path", []*rifx.Chunk{direction, size, pos})
+	overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(sz[0], sz[1]))
+	ps := e.position.static
+	if e.position.mode == StreamModeAnimated && len(e.position.keyframes) > 0 {
+		ps = e.position.keyframes[0].Value
+	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(ps[0], ps[1]))
 	return body, nil
 }
 

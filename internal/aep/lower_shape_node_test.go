@@ -5,6 +5,8 @@
 package aep_test
 
 import (
+	"encoding/binary"
+	"math"
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
@@ -28,15 +30,75 @@ func TestLowerRectNode_HasTdmnAndSubProps(t *testing.T) {
 	}
 }
 
-func TestLowerEllipseNode_DispatcherWorks(t *testing.T) {
+func TestLowerEllipseNode_OverwritesSizeAndPosition(t *testing.T) {
 	e := aep.NewEllipseNode()
+	_ = e.SetSize([2]float64{321, 123})
+	_ = e.SetPosition([2]float64{40, 60})
 	chunk, err := aep.LowerShapeNodeForTest(e)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if chunk == nil {
-		t.Fatal("nil chunk")
+	if chunk == nil || !chunk.IsList() || chunk.FormType != rifx.IDTdgp {
+		t.Fatalf("expected LIST(tdgp), got %+v", chunk)
 	}
+	// Structural contract: the body must be the AE-saved embed boilerplate
+	// (tdsb + tdsn + Size + Position + Group End = 7 children, NO Direction
+	// sub-prop), not the from-scratch emit (which prepends a "ADBE Vector
+	// Shape Direction" placeholder → AE silent-drop). This is the bit byte
+	// values alone can't catch — the from-scratch path also wrote correct
+	// cdat, but its surrounding boilerplate triggered the drop.
+	var topTdmns []string
+	for _, ch := range chunk.Children {
+		if ch.ID == rifx.IDTdmn {
+			topTdmns = append(topTdmns, trimTestNUL(string(ch.Data)))
+		}
+	}
+	wantTdmns := []string{"ADBE Vector Ellipse Size", "ADBE Vector Ellipse Position", "ADBE Group End"}
+	if len(topTdmns) != len(wantTdmns) {
+		t.Fatalf("embed body top-level tdmns = %v, want %v", topTdmns, wantTdmns)
+	}
+	for i, w := range wantTdmns {
+		if topTdmns[i] != w {
+			t.Fatalf("embed body top-level tdmns = %v, want %v", topTdmns, wantTdmns)
+		}
+	}
+	assertEllipseStreamCdat(t, chunk, "ADBE Vector Ellipse Size", []float64{321, 123})
+	assertEllipseStreamCdat(t, chunk, "ADBE Vector Ellipse Position", []float64{40, 60})
+}
+
+// assertEllipseStreamCdat finds the tdmn matching name inside body, descends
+// to its tdbs cdat, and asserts the leading f64 BE values equal want.
+func assertEllipseStreamCdat(t *testing.T, body *rifx.Chunk, name string, want []float64) {
+	t.Helper()
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimTestNUL(string(kids[i].Data)) == name {
+			tdbs := kids[i+1]
+			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
+				t.Fatalf("%s: next chunk not LIST(tdbs)", name)
+			}
+			for _, ch := range tdbs.Children {
+				if ch.ID == rifx.IDCdat {
+					for j, w := range want {
+						got := math.Float64frombits(binary.BigEndian.Uint64(ch.Data[j*8 : j*8+8]))
+						if got != w {
+							t.Errorf("%s[%d] = %v, want %v", name, j, got, w)
+						}
+					}
+					return
+				}
+			}
+			t.Fatalf("%s: no cdat under tdbs", name)
+		}
+	}
+	t.Fatalf("%s: tdmn not found in lowered body", name)
+}
+
+func trimTestNUL(s string) string {
+	if n := indexNUL(s); n >= 0 {
+		return s[:n]
+	}
+	return s
 }
 
 func TestLowerFillNode_HasColorAndOpacity(t *testing.T) {
