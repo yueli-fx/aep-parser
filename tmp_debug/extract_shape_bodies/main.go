@@ -19,30 +19,31 @@ import (
 )
 
 type extraction struct {
+	srcPath   string
 	matchName string
 	outPath   string
 }
 
 var extractions = []extraction{
-	{"ADBE Vector Shape - Rect", "internal/aep/templates/v2_2_shape_rect_body.bin"},
-	{"ADBE Vector Graphic - Fill", "internal/aep/templates/v2_2_shape_fill_body.bin"},
+	{"test_data/v2_2_shape_tolerance.aep", "ADBE Vector Shape - Rect", "internal/aep/templates/v2_2_shape_rect_body.bin"},
+	{"test_data/v2_2_shape_tolerance.aep", "ADBE Vector Graphic - Fill", "internal/aep/templates/v2_2_shape_fill_body.bin"},
+	{"test_data/v2_2_shape_ellipse_tolerance.aep", "ADBE Vector Shape - Ellipse", "internal/aep/templates/v2_2_shape_ellipse_body.bin"},
 }
 
 func main() {
-	f, err := os.Open("test_data/v2_2_shape_tolerance.aep")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	root, err := rifx.Parse(f)
-	if err != nil {
-		panic(err)
-	}
-
 	for _, ex := range extractions {
+		f, err := os.Open(ex.srcPath)
+		if err != nil {
+			panic(err)
+		}
+		root, err := rifx.Parse(f)
+		f.Close()
+		if err != nil {
+			panic(err)
+		}
 		body := findShapeBody(root, ex.matchName)
 		if body == nil {
-			fmt.Printf("MISS: %s not found in tolerance.aep\n", ex.matchName)
+			fmt.Printf("MISS: %s not found in %s\n", ex.matchName, ex.srcPath)
 			continue
 		}
 		out, err := os.Create(ex.outPath)
