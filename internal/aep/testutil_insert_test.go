@@ -35,3 +35,8 @@ func LocateItemBlockByIDForTest(p *Project, id uint32) (int, int) {
 	}
 	return locateItemBlockByID(p.back.rootFold, id)
 }
+
+// ImportFootageBlockForTest exposes importFootageBlock for cross-Project tests.
+func ImportFootageBlockForTest(dest, src *Project, srcID uint32, name string) (uint32, error) {
+	return importFootageBlock(dest, src, srcID, name)
+}

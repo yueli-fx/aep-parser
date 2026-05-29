@@ -91,3 +91,45 @@ func TestImportHelpers_LocateItemBlockByID(t *testing.T) {
 		t.Errorf("LocateItemBlockByID(unknown) start = %d, want -1", s2)
 	}
 }
+
+func TestImportFootageBlock(t *testing.T) {
+	srcProj, _, destProj, _ := openXProjPair(t)
+	if srcProj == nil {
+		return
+	}
+	// pick a file-backed footage in srcProj that is NOT already in destProj by path
+	var srcF *aep.Footage
+	for _, f := range srcProj.Footage {
+		if f.Path != "" && !f.IsSolid && !f.IsPlaceholder && aep.DestFootageByPathForTest(destProj, f.Path) == nil {
+			srcF = f
+			break
+		}
+	}
+	if srcF == nil {
+		t.Skip("no importable (non-dup) file footage in fixture")
+	}
+	preCount := len(destProj.Footage)
+	preNext := destProj.NextItemIDForTest()
+	destID, err := aep.ImportFootageBlockForTest(destProj, srcProj, srcF.ID, srcF.Name)
+	if err != nil {
+		t.Fatalf("importFootageBlock: %v", err)
+	}
+	if destID != preNext {
+		t.Errorf("imported footage destID = %d, want %d (head counter)", destID, preNext)
+	}
+	if len(destProj.Footage) != preCount+1 {
+		t.Errorf("destProj.Footage count = %d, want %d", len(destProj.Footage), preCount+1)
+	}
+	if destProj.CompositionByID(destID) != nil {
+		t.Errorf("destID resolved as a comp, want footage")
+	}
+	var ok bool
+	for _, f := range destProj.Footage {
+		if f.ID == destID && f.Path == srcF.Path {
+			ok = true
+		}
+	}
+	if !ok {
+		t.Errorf("imported footage not found with id=%d path=%q", destID, srcF.Path)
+	}
+}

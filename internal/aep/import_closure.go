@@ -2,6 +2,7 @@ package aep
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
 )
@@ -49,4 +50,81 @@ func locateItemBlockByID(rootFold *rifx.Chunk, id uint32) (int, int) {
 		return i, end
 	}
 	return -1, -1
+}
+
+// importFootageBlock deep-clones srcID's footage Item block from src's root
+// Fold into dest's root Fold with a fresh dest item ID (idta @idtaItemID),
+// parses it into dest.Footage, and returns the new dest item ID. On error the
+// CALLER (insertLayerCrossProject) restores dest via its outer snapshot — this
+// helper does not self-rollback.
+func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, error) {
+	srcRoot := src.back.rootFold
+	start, end := locateItemBlockByID(srcRoot, srcID)
+	if start < 0 {
+		return 0, fmt.Errorf("footage Item block id=%d not found in src root Fold", srcID)
+	}
+	dup := deepCloneChunk(srcRoot.Children[start])
+	destID := dest.allocItemID()
+	idta := dup.FindFirst(rifx.IDIdta)
+	if idta == nil || len(idta.Data) < idtaItemID+4 {
+		return 0, fmt.Errorf("cloned footage id=%d idta missing/short", srcID)
+	}
+	binary.BigEndian.PutUint32(idta.Data[idtaItemID:idtaItemID+4], destID)
+
+	destRoot := dest.back.rootFold
+	destRoot.Children = append(destRoot.Children, dup)
+	for k := start + 1; k < end; k++ {
+		destRoot.Children = append(destRoot.Children, deepCloneChunk(srcRoot.Children[k]))
+	}
+
+	f, err := parseFootage(dup, destID, name)
+	if err != nil {
+		return 0, fmt.Errorf("re-parse cloned footage id=%d: %w", srcID, err)
+	}
+	dest.Footage = append(dest.Footage, f)
+	return destID, nil
+}
+
+// remapClonedCompLayerLayrs walks dupItemList's Layr LIST children, allocates a
+// fresh dest layer ID per layer (rewriting ldta @0x00 and remapping intra-comp
+// ParentID @0x84 / explicit matte @0xA0 through the local srcLayerID→destLayerID
+// map), and returns the Layr LIST chunks (for the later cross-comp source-ref
+// remap pass). Mirrors DuplicateComposition's two-pass pattern locally (the 5D
+// file is deliberately left untouched).
+func remapClonedCompLayerLayrs(p *Project, dupItemList *rifx.Chunk) ([]*rifx.Chunk, error) {
+	idMap := make(map[uint32]uint32)
+	var layrs []*rifx.Chunk
+	for _, ch := range dupItemList.Children {
+		if !ch.IsList() || ch.FormType != rifx.IDLayr {
+			continue
+		}
+		ldta := ch.FindFirst(rifx.IDLdta)
+		if ldta == nil {
+			continue
+		}
+		if len(ldta.Data) < 0x88 {
+			return nil, fmt.Errorf("cloned Layr ldta too short for ParentID write (got %d bytes, need >=0x88)", len(ldta.Data))
+		}
+		oldID := binary.BigEndian.Uint32(ldta.Data[0x00:0x04])
+		newID := p.allocItemID()
+		idMap[oldID] = newID
+		binary.BigEndian.PutUint32(ldta.Data[0x00:0x04], newID)
+		layrs = append(layrs, ch)
+	}
+	for _, ch := range layrs {
+		ldta := ch.FindFirst(rifx.IDLdta)
+		if parent := binary.BigEndian.Uint32(ldta.Data[0x84:0x88]); parent != 0 {
+			if mapped, ok := idMap[parent]; ok {
+				binary.BigEndian.PutUint32(ldta.Data[0x84:0x88], mapped)
+			}
+		}
+		if len(ldta.Data) >= 0xA4 {
+			if matte := binary.BigEndian.Uint32(ldta.Data[0xA0:0xA4]); matte != 0 {
+				if mapped, ok := idMap[matte]; ok {
+					binary.BigEndian.PutUint32(ldta.Data[0xA0:0xA4], mapped)
+				}
+			}
+		}
+	}
+	return layrs, nil
 }
