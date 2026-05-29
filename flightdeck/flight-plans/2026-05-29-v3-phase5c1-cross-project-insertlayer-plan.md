@@ -609,7 +609,7 @@ And, immediately after the R10/R11 block computes `srcChildren` and `srcLayrIdx`
 	if crossProject {
 		return insertLayerCrossProject(c, src, atIdx, srcLayrIdx, srcChildren)
 	}
-	return spliceLayerClone(c, src, atIdx, srcLayrIdx, srcChildren, func(id uint32) uint32 { return id })
+	return spliceLayerClone(c, atIdx, srcLayrIdx, srcChildren, func(id uint32) uint32 { return id })
 ```
 
 - [ ] **Step 2: Implement `insertLayerCrossProject`**
@@ -784,7 +784,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 	}
 
 	// === PHASE 2: splice the layer with SourceID/AltSourceID remapped ===
-	clone, err := spliceLayerClone(c, src, atIdx, srcLayrIdx, srcChildren, remap)
+	clone, err := spliceLayerClone(c, atIdx, srcLayrIdx, srcChildren, remap)
 	if err != nil {
 		rollback()
 		return nil, err
