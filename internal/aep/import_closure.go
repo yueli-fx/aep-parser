@@ -201,6 +201,9 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 				rootFold.Children = append(rootFold.Children, deepCloneChunk(container.Children[k]))
 			}
 			itemIDMap[srcID] = destID
+			// layrs come from remapClonedCompLayerLayrs, which already errored
+			// out unless every layer's ldta is >= 0x88 — so the @0x28 SourceID
+			// read here (and in Pass 2 below) is safe without a length guard.
 			for _, layr := range layrs {
 				ldta := layr.FindFirst(rifx.IDLdta)
 				if sid := binary.BigEndian.Uint32(ldta.Data[0x28:0x2C]); sid != 0 {
