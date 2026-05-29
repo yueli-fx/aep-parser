@@ -85,6 +85,17 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 		return nil, fmt.Errorf("InsertLayer: src layer %q expected Ewst sibling after Layr, found %s", src.Name, chunkIDString(srcChildren[srcLayrIdx+1].FormType))
 	}
 
+	return spliceLayerClone(c, src, atIdx, srcLayrIdx, srcChildren, func(id uint32) uint32 { return id })
+}
+
+// spliceLayerClone deep-clones the source Layr block at srcLayrIdx (within
+// srcChildren — src.comp's itemList) into c at atIdx, applying the standard
+// cross-comp ldta mutations (new layer ID, ParentID/matte reset) plus
+// sourceRemap to SourceID @0x28 and AlternateSourceID (blsi). sourceRemap is
+// identity for same-Project inserts (bytes unchanged) and an itemIDMap lookup
+// for cross-Project inserts. Atomic over c.itemList / c.Layers / proj.nextItemID
+// / proj.Warnings.
+func spliceLayerClone(c *Composition, src *Layer, atIdx, srcLayrIdx int, srcChildren []*rifx.Chunk, sourceRemap func(uint32) uint32) (*Layer, error) {
 	// === Adaptive block end — scan leaf followers until next LIST/EOF ===
 	endIdx := srcLayrIdx + 2
 	for endIdx < len(srcChildren) && !srcChildren[endIdx].IsList() {
@@ -120,6 +131,14 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	binary.BigEndian.PutUint32(clonedLdta.Data[0x84:0x88], 0)
 	if len(clonedLdta.Data) >= 0xA4 {
 		binary.BigEndian.PutUint32(clonedLdta.Data[0xA0:0xA4], 0)
+	}
+	// SourceID remap (identity for same-Project — byte-preserving).
+	srcSourceID := binary.BigEndian.Uint32(clonedLdta.Data[0x28:0x2C])
+	binary.BigEndian.PutUint32(clonedLdta.Data[0x28:0x2C], sourceRemap(srcSourceID))
+	// AlternateSourceID remap (Media Replacement override; blsi @0x00).
+	if blsi := findAlternateSourceBlsi(clonedLayr); blsi != nil && len(blsi.Data) >= 4 {
+		altID := binary.BigEndian.Uint32(blsi.Data[0:4])
+		binary.BigEndian.PutUint32(blsi.Data[0:4], sourceRemap(altID))
 	}
 
 	// === Compute dest splice index ===
@@ -163,7 +182,7 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	newDestChildren = append(newDestChildren, destChildren[insertChunkIdx:]...)
 	c.back.itemList.Children = newDestChildren
 
-	// === Re-parse cloned Layr → fresh *Layer with backrefs into clones ===
+	// === Re-parse cloned Layr → fresh *Layer ===
 	var localWarnings []string
 	ctx := newParseCtxFPS(c.TickRate, c.FrameRate, c.Name, &localWarnings)
 	cloneLayer, parseErr := parseLayer(clonedLayr, atIdx, ctx)
