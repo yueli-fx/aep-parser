@@ -7,11 +7,12 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-// InsertLayer deep-clones src (from a sibling comp in the SAME Project as c)
-// into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). Returns
-// the inserted clone *Layer on success.
+// InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx ==
+// len(c.Layers) appends). Returns the inserted clone *Layer on success. src may
+// live in a sibling comp of the same Project (Phase 5C) or in a different
+// Project (Phase 5C.1, cross-Project).
 //
-// Cross-comp clone semantics (Phase 5C; same-Project only — see
+// Same-Project clone semantics (src.comp.proj == c.proj — see
 // flightdeck/specs/2026-05-29-v3-phase5c-insertlayer-design.md):
 //
 //   - new layer ID = c.proj.allocItemID() (head counter +1, monotonic)
@@ -21,23 +22,34 @@ import (
 //     @0x6B       ← TrackMatteNone (cross-comp matte source is invalid)
 //     @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in src.comp)
 //     @0xA0..0xA3 ← 0 (explicit matte ID, guarded by len(ldta) >= 0xA4)
-//   - clone.SourceID = src.SourceID (verbatim — Footage/Comp item lives in
-//     the shared Project; no item duplication).
+//   - clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
 //   - clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
 //
-// Refuse-cases (R1..R11; spec §2): nil src, dest backref missing, atIdx
-// out of range, src detached, same-comp redirect, cross-Project,
-// non-AV, direct pre-comp loop, src backref missing, structural
-// corruption.
+// Cross-Project semantics (src.comp.proj != c.proj — Phase 5C.1, see
+// flightdeck/specs/2026-05-29-v3-phase5c1-cross-project-insertlayer-design.md):
+// additionally imports src's reachable ITEM CLOSURE (footage + precomp,
+// transitively) into c's Project at root level with fresh dest item IDs, then
+// remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the
+// srcItemID→destItemID map. File-backed footage already present in dest (matched
+// by Path) is reused, not re-cloned; comps and solids/placeholders are always
+// cloned. ParentID / track matte are still reset (cross-comp). Folders are not
+// recreated. ALPHA — pending AE 2020 + AE 2025 ship-gate.
+//
+// Refuse-cases (R1..R11; spec §2): nil src, dest backref missing, atIdx out of
+// range, src detached, same-comp redirect, non-AV, direct pre-comp loop
+// (same-Project only), src backref missing, structural corruption. Cross-Project
+// adds: dest/src Project has no root Fold; dangling closure source.
 //
 // Atomic mutation (Inv-10 / Inv-11): snapshot dest itemList.Children +
-// c.Layers + c.proj.nextItemID + len(c.proj.Warnings); on any new
+// c.Layers + c.proj.nextItemID + len(c.proj.Warnings) (cross-Project also
+// snapshots rootFold.Children + Compositions + Footage); on any new
 // parser warning during re-parse, roll all back including the
 // nextItemID bump.
 //
-// Stable — passed AE 2020 + AE 2025 ship-gate (3 modes [basic/footage/precomp]
-// × 2 versions = 6/6 PASS, 2026-05-29): AE accepts the Go-emitted file and the
-// clone references the source item verbatim with parent + track matte reset.
+// Same-Project: Stable — passed AE 2020 + AE 2025 ship-gate (3 modes
+// [basic/footage/precomp] × 2 versions = 6/6 PASS, 2026-05-29): AE accepts the
+// Go-emitted file and the clone references the source item verbatim with parent
+// + track matte reset.
 func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	// === Refuse-case matrix R1-R11 ===
 	if src == nil {
