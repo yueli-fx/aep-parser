@@ -97,13 +97,24 @@ func LowerShapeLayerForTest(s *ShapeLayer) (*rifx.Chunk, error) {
 	return lowerShapeLayer(s, NewLowerCtxForTest())
 }
 
+// LowerShapeLayerForTargetForTest lowers a ShapeLayer with the capability set
+// of the given AE target — used to assert target-conditional serialization
+// (e.g. ldta size: 160 B for AE 2020/2022, 164 B for AE 2025).
+func LowerShapeLayerForTargetForTest(s *ShapeLayer, target AETarget) (*rifx.Chunk, error) {
+	ctx := &lowerCtx{
+		tickRate:     30720,
+		capabilities: Capabilities(target),
+	}
+	return lowerShapeLayer(s, ctx)
+}
+
 // lowerShapeLayer → LIST(Layr).
 func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	layr := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDLayr}
 
-	// ldta (160 B AE 2020 canonical per RE-S1; capability matrix doesn't
-	// branch — AE 2025's +4 zero-pad tail isn't ours to emit, the higher
-	// AE just reads our 160 B fine).
+	// ldta — target-conditional size (capability matrix LdtaSize): 160 B for
+	// AE 2020/22, 164 B for AE 2025. AE 2020 rejects a 164-B ldta as corrupt
+	// (incident: ae2020-shape-ldta-164-corrupt.md).
 	ldta := &rifx.Chunk{ID: rifx.IDLdta, Data: buildLdtaBytes(s, ctx)}
 	layr.Children = append(layr.Children, ldta)
 
@@ -273,19 +284,27 @@ func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 	outer.Children = append(outer.Children, makeTdmn("ADBE Layer Styles"), body)
 }
 
-// buildLdtaBytes returns the 160-byte canonical ldta payload for a
-// ShapeLayer. Fills the well-known offsets via ldta_layout.go constants;
-// everything else is zero (AE-friendly default per RE-S1).
+// buildLdtaBytes returns the ldta payload for a ShapeLayer, sized per the
+// target's capability matrix (160 B AE 2020/22, 164 B AE 2025). Fills the
+// well-known offsets via ldta_layout.go constants; everything else is zero
+// (AE-friendly default per RE-S1).
 //
 // Layer subtype byte (@0x80) = 4 (Shape) per ldta_layout.go ldtaLayerSubtype
 // comment. Quality (@0x04) = 2 (Best) — AE's typical default. Visible bit
 // is at byte 0x27 bit0 (per parse_layer.go decoder); default Visible = true
 // → 0x01.
 func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
-	// 164 B (AE 2025 canonical) — trailing 4 B zero. AE 2020 has been observed
-	// to accept 164 B too (template's DLay is 160 B, but our user Layr matches
-	// AE-saved ShapeLayer fixtures = 164 B).
-	d := make([]byte, ldtaSize2025)
+	// ldta size is target-conditional (capability matrix LdtaSize): AE 2020/22
+	// accept 160 B, AE 2025 accepts its native 164 B. Emitting 164 B for an
+	// AE 2020 target makes AE 2020 reject the layer as corrupt and skip it
+	// (incident: ae2020-shape-ldta-164-corrupt.md). All written fields fit in
+	// the first 0x88 bytes, so the size choice only varies the trailing
+	// zero-pad. Fall back to 164 if a caller left LdtaSize unset.
+	size := ldtaSize2025
+	if ctx != nil && ctx.capabilities.LdtaSize > 0 {
+		size = ctx.capabilities.LdtaSize
+	}
+	d := make([]byte, size)
 
 	tickRate := uint32(0)
 	if ctx != nil && ctx.tickRate > 0 {

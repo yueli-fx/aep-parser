@@ -49,22 +49,35 @@ func TestLowerShapeLayer_EmptyHasLayrChunk(t *testing.T) {
 	}
 }
 
-func TestLowerShapeLayer_LdtaIs164Bytes(t *testing.T) {
-	base := &aep.Layer{Type: aep.LayerTypeShape, Name: "S1", ID: 13}
-	s := aep.WrapShapeLayer(base)
-	chunk, err := aep.LowerShapeLayerForTest(s)
-	if err != nil {
-		t.Fatal(err)
+func TestLowerShapeLayer_LdtaSizeByTarget(t *testing.T) {
+	// AE 2020's ldta reader rejects a 164-B ShapeLayer ldta as corrupt
+	// ("项目文件似乎已损坏（跳过部分：1）"), silently skipping the layer; AE 2025
+	// reads its native 164 B. Each target must emit its native ldta size:
+	// 160 B for AE 2020/2022, 164 B for AE 2025. Confirmed by AE-2020-native
+	// reference (ldta 160 B) + AE 2020 ship-gate (see incident report
+	// flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md).
+	cases := []struct {
+		target aep.AETarget
+		want   int
+	}{
+		{aep.TargetAE2020, 160},
+		{aep.TargetAE2022, 160},
+		{aep.TargetAE2025, 164},
 	}
-	ldta := chunk.FindFirst(rifx.IDLdta)
-	if ldta == nil {
-		t.Fatal("ldta missing")
-	}
-	// Iter 4 RE: AE 2025 saves ShapeLayer ldta as 164 B (trailing 4 B zero).
-	// V2.2 builder bumped to 164 B so user Layr matches AE-saved fixture
-	// byte-for-byte. AE 2020 has been observed to accept 164 B too.
-	if len(ldta.Data) != 164 {
-		t.Fatalf("ldta size = %d, want 164 (AE 2025 canonical per iter 4 RE)", len(ldta.Data))
+	for _, tc := range cases {
+		base := &aep.Layer{Type: aep.LayerTypeShape, Name: "S1", ID: 13}
+		s := aep.WrapShapeLayer(base)
+		chunk, err := aep.LowerShapeLayerForTargetForTest(s, tc.target)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ldta := chunk.FindFirst(rifx.IDLdta)
+		if ldta == nil {
+			t.Fatalf("target %d: ldta missing", tc.target)
+		}
+		if len(ldta.Data) != tc.want {
+			t.Errorf("target %d: ldta size = %d, want %d", tc.target, len(ldta.Data), tc.want)
+		}
 	}
 }
 

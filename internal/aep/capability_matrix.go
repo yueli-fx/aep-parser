@@ -12,10 +12,20 @@ package aep
 //  2. escape hatch single canonical cannot cover both versions; AND
 //  3. lowering must actually branch on the trait.
 //
-// All three conditions must be met. Phase 0 RE-S9 evaluated seven candidates
-// and none qualified for V2.2 — listed here for §6.5 traceability:
+// All three conditions must be met. Phase 0 RE-S9 evaluated seven candidates.
 //
-//   - LdtaSize             (160 AE 2020/22 vs 164 AE 25 zero-pad tail)
+// V2.2.1 ADMITTED LdtaSize: the AE 2020 ShapeLayer ship-gate disproved the
+// escape-hatch single-canonical assumption. AE 2020's ldta reader treats a
+// 164-B ShapeLayer ldta as corrupt and silently skips the layer ("项目文件似乎
+// 已损坏（跳过部分：1）"); AE 2025 reads its native 164 B. All three §1.4
+// conditions now hold — measured difference (AE-2020-native ldta = 160 B,
+// AE-2025-native = 164 B), single canonical cannot cover both, lowering
+// branches in buildLdtaBytes. See
+// flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md.
+//
+// The remaining six RE-S9 candidates still don't qualify for V2.2 — listed
+// here for §6.5 traceability:
+//
 //   - FEEHasPpSn           (FEE LIST ppSn child absent in AE 2020)
 //   - MaterialLightingGroups (10 extra Material groups in AE 2025)
 //   - TdgpDefaultChildren  (19 in AE 2020/22 vs 37 in AE 2025)
@@ -27,15 +37,20 @@ package aep
 // + lookup function reserves the API surface so a future trait addition is
 // non-breaking to call sites that already do `caps := Capabilities(target)`.
 type AECapabilities struct {
-	// V2.2: empty by design. Add fields only when §1.4 admission rule holds.
+	// LdtaSize is the ShapeLayer ldta payload size (bytes) the target AE
+	// version accepts: 160 for AE 2020/2022, 164 for AE 2025. Emitting the
+	// wrong size makes AE 2020 reject the layer as corrupt. 0 is never
+	// returned by Capabilities (buildLdtaBytes falls back to 164 if unset).
+	LdtaSize int
 }
 
 // Capabilities returns the capability set for the given AE target. Pure
 // function lookup — intentionally NOT a method on *Project so a future V3
 // auto-derive path (OQ-1) can plug in without disturbing call sites.
-//
-// V2.2: returns the same empty struct for every target.
 func Capabilities(target AETarget) AECapabilities {
-	_ = target
-	return AECapabilities{}
+	c := AECapabilities{LdtaSize: ldtaSize2020}
+	if target >= TargetAE2025 {
+		c.LdtaSize = ldtaSize2025
+	}
+	return c
 }
