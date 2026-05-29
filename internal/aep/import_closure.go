@@ -98,6 +98,7 @@ func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, 
 func remapClonedCompLayerLayrs(p *Project, dupItemList *rifx.Chunk) ([]*rifx.Chunk, error) {
 	idMap := make(map[uint32]uint32)
 	var layrs []*rifx.Chunk
+	var ldtas []*rifx.Chunk
 	for _, ch := range dupItemList.Children {
 		if !ch.IsList() || ch.FormType != rifx.IDLayr {
 			continue
@@ -114,9 +115,9 @@ func remapClonedCompLayerLayrs(p *Project, dupItemList *rifx.Chunk) ([]*rifx.Chu
 		idMap[oldID] = newID
 		binary.BigEndian.PutUint32(ldta.Data[0x00:0x04], newID)
 		layrs = append(layrs, ch)
+		ldtas = append(ldtas, ldta)
 	}
-	for _, ch := range layrs {
-		ldta := ch.FindFirst(rifx.IDLdta)
+	for _, ldta := range ldtas {
 		if parent := binary.BigEndian.Uint32(ldta.Data[0x84:0x88]); parent != 0 {
 			if mapped, ok := idMap[parent]; ok {
 				binary.BigEndian.PutUint32(ldta.Data[0x84:0x88], mapped)

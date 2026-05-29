@@ -141,9 +141,9 @@ func TestImportFootageBlock(t *testing.T) {
 			break
 		}
 	}
-	// re_duplicate_item_after.aep only contains solids; importFootageBlock cannot
-	// locate solid items in the root Fold (they are not stored as Item LISTs).
-	// Fall back to re_batch.aep which has file-backed footage.
+	// re_duplicate_item_after.aep contains only solid footage; this test imports
+	// file-backed footage (the !IsSolid filter above leaves srcF nil here), so
+	// fall back to re_batch.aep which has file-backed footage.
 	if srcF == nil {
 		batchPath := filepath.Join("../../test_data", "re_batch.aep")
 		srcProj, destProj = openFileBacked(t, batchPath)
