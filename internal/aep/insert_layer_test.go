@@ -122,8 +122,9 @@ func TestInsertLayer_RefuseSameComp(t *testing.T) {
 	}
 }
 
-// R7: cross-Project (src and dest in different Projects)
-func TestInsertLayer_RefuseCrossProject(t *testing.T) {
+// R7 lifted (Phase 5C.1): cross-Project insert is now supported — verify it
+// does not error with the old "cross-Project insert deferred" refusal.
+func TestInsertLayer_CrossProjectNoLongerRefused(t *testing.T) {
 	dest, _ := openInsertPair(t)
 	if dest == nil {
 		return
@@ -134,9 +135,11 @@ func TestInsertLayer_RefuseCrossProject(t *testing.T) {
 	}
 	_ = otherDest
 	_, err := dest.InsertLayer(otherSrc, 0)
-	if err == nil || !strings.Contains(err.Error(), "cross-Project") {
-		t.Fatalf("want 'cross-Project' error, got %v", err)
+	if err != nil && strings.Contains(err.Error(), "deferred to Phase 5C.1") {
+		t.Fatalf("R7 still active — cross-Project insert should be accepted now, got %v", err)
 	}
+	// Any other error (e.g. fixture-specific parsing issue) is acceptable here;
+	// full cross-Project happy-path coverage lives in Task 5 tests.
 }
 
 // R8: src not AV (camera/light/text/shape refused in Phase 5C)

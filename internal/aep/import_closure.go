@@ -89,6 +89,185 @@ func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, 
 	return destID, nil
 }
 
+// insertLayerCrossProject handles InsertLayer when src lives in a different
+// Project than c. It imports src's reachable item closure (footage + precomp,
+// transitively) into c's Project at root level with fresh item IDs, dedup'ing
+// file-backed footage by Path, then splices the layer via spliceLayerClone with
+// SourceID/AlternateSourceID remapped to the imported dest items. Atomic: a
+// seven-way dest snapshot + warnings-as-failure rollback covers both phases.
+// srcChildren/srcLayrIdx are the located src Layr position from InsertLayer.
+func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, srcChildren []*rifx.Chunk) (*Layer, error) {
+	destProj := c.proj
+	srcProj := src.comp.proj
+
+	if destProj.back == nil || destProj.back.rootFold == nil {
+		return nil, fmt.Errorf("InsertLayer: dest Project has no root Fold back-ref (built outside parser?)")
+	}
+	if srcProj == nil {
+		return nil, fmt.Errorf("InsertLayer: src layer's Project is unknown (src.comp.proj == nil)")
+	}
+	if srcProj.back == nil || srcProj.back.rootFold == nil {
+		return nil, fmt.Errorf("InsertLayer: src Project has no root Fold back-ref")
+	}
+	rootFold := destProj.back.rootFold
+
+	// === Outer snapshot (covers closure import + the layer splice) ===
+	oldRootChildren := append([]*rifx.Chunk(nil), rootFold.Children...)
+	oldComps := append([]*Composition(nil), destProj.Compositions...)
+	oldFootage := append([]*Footage(nil), destProj.Footage...)
+	oldDestItemList := append([]*rifx.Chunk(nil), c.back.itemList.Children...)
+	oldDestLayers := append([]*Layer(nil), c.Layers...)
+	oldNextItemID := destProj.nextItemID
+	oldWarningsLen := len(destProj.Warnings)
+	rollback := func() {
+		rootFold.Children = oldRootChildren
+		destProj.Compositions = oldComps
+		destProj.Footage = oldFootage
+		c.back.itemList.Children = oldDestItemList
+		c.Layers = oldDestLayers
+		destProj.nextItemID = oldNextItemID
+		if len(destProj.Warnings) > oldWarningsLen {
+			destProj.Warnings = destProj.Warnings[:oldWarningsLen]
+		}
+	}
+
+	// === PHASE 1: import the source item closure (BFS) ===
+	itemIDMap := make(map[uint32]uint32)
+	type pendingComp struct {
+		dup   *rifx.Chunk
+		id    uint32
+		name  string
+		layrs []*rifx.Chunk
+	}
+	var pending []pendingComp
+
+	worklist := make([]uint32, 0, 2)
+	if src.SourceID != 0 {
+		worklist = append(worklist, src.SourceID)
+	}
+	if src.AlternateSourceID != 0 {
+		worklist = append(worklist, src.AlternateSourceID)
+	}
+
+	for len(worklist) > 0 {
+		srcID := worklist[0]
+		worklist = worklist[1:]
+		if srcID == 0 {
+			continue
+		}
+		if _, done := itemIDMap[srcID]; done {
+			continue
+		}
+		item := srcProj.AVItemByID(srcID)
+		if item == nil {
+			rollback()
+			return nil, fmt.Errorf("InsertLayer: cross-Project source item id=%d not found in src Project (dangling)", srcID)
+		}
+		switch it := item.(type) {
+		case *Footage:
+			if isFileBacked(it) {
+				if existing := destFootageByPath(destProj, it.Path); existing != nil {
+					itemIDMap[srcID] = existing.ID // dedup hit — reuse, no clone
+					continue
+				}
+			}
+			destID, err := importFootageBlock(destProj, srcProj, srcID, it.Name)
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+			itemIDMap[srcID] = destID
+		case *Composition:
+			container, start, end := locateItemBlockByID(srcProj.back.rootFold, srcID)
+			if container == nil {
+				rollback()
+				return nil, fmt.Errorf("InsertLayer: cross-Project comp id=%d Item block not found in src Project", srcID)
+			}
+			dup := deepCloneChunk(container.Children[start])
+			destID := destProj.allocItemID()
+			idta := dup.FindFirst(rifx.IDIdta)
+			if idta == nil || len(idta.Data) < idtaItemID+4 {
+				rollback()
+				return nil, fmt.Errorf("InsertLayer: cloned comp id=%d idta missing/short", srcID)
+			}
+			binary.BigEndian.PutUint32(idta.Data[idtaItemID:idtaItemID+4], destID)
+			layrs, err := remapClonedCompLayerLayrs(destProj, dup)
+			if err != nil {
+				rollback()
+				return nil, fmt.Errorf("InsertLayer: comp id=%d: %w", srcID, err)
+			}
+			rootFold.Children = append(rootFold.Children, dup)
+			for k := start + 1; k < end; k++ {
+				rootFold.Children = append(rootFold.Children, deepCloneChunk(container.Children[k]))
+			}
+			itemIDMap[srcID] = destID
+			for _, layr := range layrs {
+				ldta := layr.FindFirst(rifx.IDLdta)
+				if sid := binary.BigEndian.Uint32(ldta.Data[0x28:0x2C]); sid != 0 {
+					worklist = append(worklist, sid)
+				}
+				if blsi := findAlternateSourceBlsi(layr); blsi != nil && len(blsi.Data) >= 4 {
+					if aid := binary.BigEndian.Uint32(blsi.Data[0:4]); aid != 0 {
+						worklist = append(worklist, aid)
+					}
+				}
+			}
+			pending = append(pending, pendingComp{dup: dup, id: destID, name: it.Name, layrs: layrs})
+		}
+	}
+
+	// === PHASE 1 Pass 2: remap imported comps' layer source refs ===
+	remap := func(id uint32) uint32 {
+		if id == 0 {
+			return 0
+		}
+		if mapped, ok := itemIDMap[id]; ok {
+			return mapped
+		}
+		return id
+	}
+	for _, pc := range pending {
+		for _, layr := range pc.layrs {
+			ldta := layr.FindFirst(rifx.IDLdta)
+			if sid := binary.BigEndian.Uint32(ldta.Data[0x28:0x2C]); sid != 0 {
+				binary.BigEndian.PutUint32(ldta.Data[0x28:0x2C], remap(sid))
+			}
+			if blsi := findAlternateSourceBlsi(layr); blsi != nil && len(blsi.Data) >= 4 {
+				if aid := binary.BigEndian.Uint32(blsi.Data[0:4]); aid != 0 {
+					binary.BigEndian.PutUint32(blsi.Data[0:4], remap(aid))
+				}
+			}
+		}
+	}
+
+	// === Reparse imported comps (after source remap so refs resolve) ===
+	for _, pc := range pending {
+		dupComp, err := parseComposition(pc.dup, pc.id, pc.name, &destProj.Warnings)
+		if err != nil {
+			rollback()
+			return nil, fmt.Errorf("InsertLayer: re-parse imported comp %q: %w", pc.name, err)
+		}
+		dupComp.proj = destProj
+		destProj.Compositions = append(destProj.Compositions, dupComp)
+	}
+
+	// === PHASE 2: splice the layer with SourceID/AltSourceID remapped ===
+	clone, err := spliceLayerClone(c, atIdx, srcLayrIdx, srcChildren, remap)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+
+	// === Warnings-as-failure (covers import + splice) ===
+	if len(destProj.Warnings) > oldWarningsLen {
+		newWarnings := append([]string(nil), destProj.Warnings[oldWarningsLen:]...)
+		rollback()
+		return nil, fmt.Errorf("InsertLayer: cross-Project produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
+	}
+
+	return clone, nil
+}
+
 // remapClonedCompLayerLayrs walks dupItemList's Layr LIST children, allocates a
 // fresh dest layer ID per layer (rewriting ldta @0x00 and remapping intra-comp
 // ParentID @0x84 / explicit matte @0xA0 through the local srcLayerID→destLayerID

@@ -58,13 +58,11 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	if src.comp == c {
 		return nil, fmt.Errorf("InsertLayer: src and dest are the same comp %q — use DuplicateLayer instead", c.Name)
 	}
-	if src.comp.proj != c.proj {
-		return nil, fmt.Errorf("InsertLayer: src and dest in different Projects — cross-Project insert deferred to Phase 5C.1")
-	}
+	crossProject := src.comp.proj != c.proj
 	if src.Type != LayerTypeAV {
 		return nil, fmt.Errorf("InsertLayer: refuse non-AV src (Type=%s); only AV layers supported in Phase 5C", src.Type)
 	}
-	if src.SourceID != 0 && src.SourceID == c.ID {
+	if !crossProject && src.SourceID != 0 && src.SourceID == c.ID {
 		return nil, fmt.Errorf("InsertLayer: refuse direct pre-comp loop (src.SourceID=%d == dest.ID=%d)", src.SourceID, c.ID)
 	}
 	if src.back == nil || src.back.layrList == nil {
@@ -85,6 +83,9 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 		return nil, fmt.Errorf("InsertLayer: src layer %q expected Ewst sibling after Layr, found %s", src.Name, chunkIDString(srcChildren[srcLayrIdx+1].FormType))
 	}
 
+	if crossProject {
+		return insertLayerCrossProject(c, src, atIdx, srcLayrIdx, srcChildren)
+	}
 	return spliceLayerClone(c, atIdx, srcLayrIdx, srcChildren, func(id uint32) uint32 { return id })
 }
 
