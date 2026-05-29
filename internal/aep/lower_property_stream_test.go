@@ -6,6 +6,8 @@
 package aep_test
 
 import (
+	"encoding/binary"
+	"math"
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
@@ -119,4 +121,66 @@ func TestLowerPathStream_Static_EmitsOmS(t *testing.T) {
 	if oms := chunk.FindFirstList(rifx.IDOmS); oms == nil {
 		t.Fatal("path stream: tdgp missing LIST(om-s)")
 	}
+}
+
+// TestEncodeBezier_LdatMatchesAELayout pins the ldat per-vertex layout RE'd
+// from AE-native fixtures (test_data/v2_2_shape_path_re.aep, decoded via
+// tmp_debug/decode_path_ldat): each vertex stores 6 f32 (bbox-normalized) =
+//   [ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]
+// i.e. anchor, THIS vertex's out-control, and the NEXT vertex's in-control
+// (wraps mod n). The pre-V2.2.1 encoder wrote [anchor, in_i, out_i] (this
+// vertex's own in/out) — AE renders that as the wrong shape.
+func TestEncodeBezier_LdatMatchesAELayout(t *testing.T) {
+	// Distinct coords (not the ambiguous 0/1 square) so each slot is identifiable.
+	ps := aep.NewPropertyStream[aep.BezierPath]()
+	if err := ps.SetStaticValue(aep.BezierPath{
+		Vertices:    [][2]float64{{10, 20}, {70, 30}, {40, 90}},
+		InTangents:  [][2]float64{{0, 0}, {0, 0}, {0, 0}},
+		OutTangents: [][2]float64{{0, 0}, {0, 0}, {0, 0}},
+		Closed:      true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	chunk, err := aep.LowerPathStream(ps, "ADBE Vector Shape", "Path", aep.NewLowerCtxForTest())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ldat := findIDRec(chunk, rifx.IDLdat)
+	if ldat == nil {
+		t.Fatal("no ldat")
+	}
+	if len(ldat.Data) != 3*24 {
+		t.Fatalf("ldat len = %d, want 72", len(ldat.Data))
+	}
+	rf := func(off int) float64 {
+		return float64(math.Float32frombits(binary.BigEndian.Uint32(ldat.Data[off : off+4])))
+	}
+	// bbox min(10,20) max(70,90) → rx=60 ry=70. Expected normalized 6-tuples.
+	want := [][6]float64{
+		{0, 0, /*out*/ 0, 0, /*next-in*/ 1, 10.0 / 70.0},
+		{1, 10.0 / 70.0, /*out*/ 1, 10.0 / 70.0, /*next-in*/ 0.5, 1},
+		{0.5, 1, /*out*/ 0.5, 1, /*next-in*/ 0, 0},
+	}
+	for v := 0; v < 3; v++ {
+		for k := 0; k < 6; k++ {
+			got := rf(v*24 + k*4)
+			if math.Abs(got-want[v][k]) > 1e-5 {
+				t.Errorf("vertex %d slot %d = %.6g, want %.6g", v, k, got, want[v][k])
+			}
+		}
+	}
+}
+
+func findIDRec(c *rifx.Chunk, id rifx.ChunkID) *rifx.Chunk {
+	for _, ch := range c.Children {
+		if ch.ID == id {
+			return ch
+		}
+		if ch.IsList() {
+			if g := findIDRec(ch, id); g != nil {
+				return g
+			}
+		}
+	}
+	return nil
 }

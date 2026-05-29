@@ -528,19 +528,26 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	binary.BigEndian.PutUint32(lhd3Data[0x18:0x1C], closedFlag)
 	binary.BigEndian.PutUint32(lhd3Data[0x1C:0x20], 16)
 
-	// ldat — 24 × f32 BE per vertex (6 × f32: anchor.xy + in.xy + out.xy).
+	// ldat — 24 B/vertex (6 × f32 BE), bbox-normalized. Per-vertex layout RE'd
+	// from AE-native fixtures (decode_path_ldat on v2_2_shape_path_re.aep):
+	//   [ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]
+	// i.e. anchor, THIS vertex's out-control, then the NEXT vertex's in-control
+	// (wraps mod n). NOT this vertex's own in/out — that mis-encoding rendered
+	// the wrong shape in AE (V2.2.1 RE; path was never ship-gated before).
 	ldatData := make([]byte, n*24)
 	for i := 0; i < n; i++ {
 		v := p.Vertices[i]
-		in := getIn(i)
 		out := getOut(i)
+		ni := (i + 1) % n
+		nv := p.Vertices[ni]
+		nin := getIn(ni)
 		base := i * 24
 		binary.BigEndian.PutUint32(ldatData[base+0:base+4], math.Float32bits(norm(v[0], minX, rangeX)))
 		binary.BigEndian.PutUint32(ldatData[base+4:base+8], math.Float32bits(norm(v[1], minY, rangeY)))
-		binary.BigEndian.PutUint32(ldatData[base+8:base+12], math.Float32bits(norm(v[0]+in[0], minX, rangeX)))
-		binary.BigEndian.PutUint32(ldatData[base+12:base+16], math.Float32bits(norm(v[1]+in[1], minY, rangeY)))
-		binary.BigEndian.PutUint32(ldatData[base+16:base+20], math.Float32bits(norm(v[0]+out[0], minX, rangeX)))
-		binary.BigEndian.PutUint32(ldatData[base+20:base+24], math.Float32bits(norm(v[1]+out[1], minY, rangeY)))
+		binary.BigEndian.PutUint32(ldatData[base+8:base+12], math.Float32bits(norm(v[0]+out[0], minX, rangeX)))
+		binary.BigEndian.PutUint32(ldatData[base+12:base+16], math.Float32bits(norm(v[1]+out[1], minY, rangeY)))
+		binary.BigEndian.PutUint32(ldatData[base+16:base+20], math.Float32bits(norm(nv[0]+nin[0], minX, rangeX)))
+		binary.BigEndian.PutUint32(ldatData[base+20:base+24], math.Float32bits(norm(nv[1]+nin[1], minY, rangeY)))
 	}
 
 	shph = &rifx.Chunk{ID: rifx.IDShph, Data: shphData}
