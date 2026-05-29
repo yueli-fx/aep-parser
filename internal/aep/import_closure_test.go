@@ -90,6 +90,21 @@ func TestImportHelpers_LocateItemBlockByID(t *testing.T) {
 	if s2, _ := aep.LocateItemBlockByIDForTest(srcProj, 0xFFFFFF); s2 != -1 {
 		t.Errorf("LocateItemBlockByID(unknown) start = %d, want -1", s2)
 	}
+
+	// A folder-nested item (e.g. a solid in the "Solids" folder) must also be
+	// found via recursion into the Sfdr sub-container.
+	var nested *aep.Footage
+	for _, f := range srcProj.Footage {
+		if f.IsSolid {
+			nested = f
+			break
+		}
+	}
+	if nested != nil {
+		if s, _ := aep.LocateItemBlockByIDForTest(srcProj, nested.ID); s < 0 {
+			t.Errorf("nested solid footage id=%d not located — recursion into folder Sfdr failed", nested.ID)
+		}
+	}
 }
 
 // openFileBacked opens path twice, returning (srcProj, destProj) if the file

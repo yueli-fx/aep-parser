@@ -27,29 +27,36 @@ func destFootageByPath(p *Project, path string) *Footage {
 	return nil
 }
 
-// locateItemBlockByID finds the Item LIST in rootFold.Children whose idta
-// item-ID (@idtaItemID) equals id, returning [start, end) covering the Item
-// LIST plus its trailing non-Item sibling run. Returns (-1,-1) if not found.
-func locateItemBlockByID(rootFold *rifx.Chunk, id uint32) (int, int) {
-	children := rootFold.Children
+// locateItemBlockByID searches container.Children (recursing into folder Sfdr
+// sub-containers) for the Item LIST whose idta item-ID (@idtaItemID) equals id.
+// On match it returns the CONTAINER holding the Item plus [start, end) covering
+// the Item LIST and its trailing non-Item sibling run within that container.
+// Returns (nil, -1, -1) if not found. Recursion handles items nested in project
+// folders (e.g. solids in the "Solids" folder), which parseProject also walks
+// recursively; imports flatten such items to the dest root regardless.
+func locateItemBlockByID(container *rifx.Chunk, id uint32) (*rifx.Chunk, int, int) {
+	children := container.Children
 	for i, ch := range children {
 		if !isItemList(ch) {
 			continue
 		}
 		idta := ch.FindFirst(rifx.IDIdta)
-		if idta == nil || len(idta.Data) < idtaItemID+4 {
-			continue
+		if idta != nil && len(idta.Data) >= idtaItemID+4 &&
+			binary.BigEndian.Uint32(idta.Data[idtaItemID:idtaItemID+4]) == id {
+			end := i + 1
+			for end < len(children) && !isItemList(children[end]) {
+				end++
+			}
+			return container, i, end
 		}
-		if binary.BigEndian.Uint32(idta.Data[idtaItemID:idtaItemID+4]) != id {
-			continue
+		// Folder items hold their member items under an Sfdr LIST — recurse.
+		if sfdr := ch.FindFirstList(rifx.IDSfdr); sfdr != nil {
+			if c, s, e := locateItemBlockByID(sfdr, id); c != nil {
+				return c, s, e
+			}
 		}
-		end := i + 1
-		for end < len(children) && !isItemList(children[end]) {
-			end++
-		}
-		return i, end
 	}
-	return -1, -1
+	return nil, -1, -1
 }
 
 // importFootageBlock deep-clones srcID's footage Item block from src's root
@@ -58,25 +65,22 @@ func locateItemBlockByID(rootFold *rifx.Chunk, id uint32) (int, int) {
 // CALLER (insertLayerCrossProject) restores dest via its outer snapshot — this
 // helper does not self-rollback.
 func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, error) {
-	srcRoot := src.back.rootFold
-	start, end := locateItemBlockByID(srcRoot, srcID)
-	if start < 0 {
-		return 0, fmt.Errorf("footage Item block id=%d not found in src root Fold", srcID)
+	container, start, end := locateItemBlockByID(src.back.rootFold, srcID)
+	if container == nil {
+		return 0, fmt.Errorf("footage Item block id=%d not found in src project", srcID)
 	}
-	dup := deepCloneChunk(srcRoot.Children[start])
+	dup := deepCloneChunk(container.Children[start])
 	destID := dest.allocItemID()
 	idta := dup.FindFirst(rifx.IDIdta)
 	if idta == nil || len(idta.Data) < idtaItemID+4 {
 		return 0, fmt.Errorf("cloned footage id=%d idta missing/short", srcID)
 	}
 	binary.BigEndian.PutUint32(idta.Data[idtaItemID:idtaItemID+4], destID)
-
 	destRoot := dest.back.rootFold
 	destRoot.Children = append(destRoot.Children, dup)
 	for k := start + 1; k < end; k++ {
-		destRoot.Children = append(destRoot.Children, deepCloneChunk(srcRoot.Children[k]))
+		destRoot.Children = append(destRoot.Children, deepCloneChunk(container.Children[k]))
 	}
-
 	f, err := parseFootage(dup, destID, name)
 	if err != nil {
 		return 0, fmt.Errorf("re-parse cloned footage id=%d: %w", srcID, err)
