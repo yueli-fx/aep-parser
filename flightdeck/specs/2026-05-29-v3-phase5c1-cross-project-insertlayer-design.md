@@ -1,7 +1,7 @@
 # V3 Phase 5C.1 Cross-Project InsertLayer — Design Strategy
 
 **Status**: design draft — pending user review → plan + implementation
-**Builds on**: `2026-05-29-v3-phase5c-insertlayer-design.md` (same-Project sibling-comp clone, Stable post-gate — this doc lifts its R7 cross-Project refuse), `2026-05-29-v3-phase5d-duplicatecomposition-design.md` (intra-comp layer-ID remap two-pass — the *pattern* this reuses, the *file* it does NOT touch).
+**Builds on**: `landed/specs/2026-05-29-v3-phase5c-insertlayer-design.md` (same-Project sibling-comp clone, Stable post-gate — this doc lifts its R7 cross-Project refuse), `landed/specs/2026-05-29-v3-phase5d-duplicatecomposition-design.md` (intra-comp layer-ID remap two-pass — the *pattern* this reuses, the *file* it does NOT touch).
 **Picklist origin**: 5C design §8 "Open / deferred to Phase 5C.1+" — cross-Project InsertLayer. Cockpit Next-session candidate #2 ("现已解锁").
 **Unblocks**: a future generic cross-Project import / `Project.ImportComposition`; nothing depends on this yet.
 
@@ -270,8 +270,8 @@ No AE op produces a cross-Project "after" baseline (§0.1). The gate confirms **
 
 ## 9. Related
 
-- `2026-05-29-v3-phase5c-insertlayer-design.md` — same-Project base this lifts R7 from; §8 lean(a) superseded by §0 here.
-- `2026-05-29-v3-phase5d-duplicatecomposition-design.md` — intra-comp layer-ID remap two-pass pattern reused (not shared).
+- `landed/specs/2026-05-29-v3-phase5c-insertlayer-design.md` — same-Project base this lifts R7 from; §8 lean(a) superseded by §0 here.
+- `landed/specs/2026-05-29-v3-phase5d-duplicatecomposition-design.md` — intra-comp layer-ID remap two-pass pattern reused (not shared).
 - `incident-reports/nextitemid-must-include-layer-ids.md` — `allocItemID` correctness across the mixed comp/footage/layer alloc sequence.
 - `incident-reports/concurrency-unsafe-shared-chunk-bytes.md` — `deepCloneChunk` fresh-Data-slice requirement (every cloned item/layer).
 - `incident-reports/ae25-acceptance-gate.md` + `checklists/re-fixture.md` — ship-gate playbook; this phase uses its assert-based variant (per-version `.done` tag).
