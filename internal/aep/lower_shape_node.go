@@ -34,6 +34,9 @@ var v22ShapeFillBodyBytes []byte
 //go:embed templates/v2_2_shape_ellipse_body.bin
 var v22ShapeEllipseBodyBytes []byte
 
+//go:embed templates/v2_2_shape_path_body.bin
+var v22ShapePathBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -46,6 +49,10 @@ var (
 	v22ShapeEllipseOnce  sync.Once
 	v22ShapeEllipseCache *rifx.Chunk
 	v22ShapeEllipseErr   error
+
+	v22ShapePathOnce  sync.Once
+	v22ShapePathCache *rifx.Chunk
+	v22ShapePathErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -91,6 +98,21 @@ func cloneShapeEllipseBody() (*rifx.Chunk, error) {
 		return nil, v22ShapeEllipseErr
 	}
 	return cloneChunk(v22ShapeEllipseCache), nil
+}
+
+func cloneShapePathBody() (*rifx.Chunk, error) {
+	v22ShapePathOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapePathBodyBytes))
+		if err != nil {
+			v22ShapePathErr = fmt.Errorf("parse v22ShapePathBodyBytes: %w", err)
+			return
+		}
+		v22ShapePathCache = ch
+	})
+	if v22ShapePathErr != nil {
+		return nil, v22ShapePathErr
+	}
+	return cloneChunk(v22ShapePathCache), nil
 }
 
 // overwriteShapeStreamCdat finds the tdmn matching `streamName` inside
@@ -236,13 +258,75 @@ func lowerEllipseNode(e *EllipseNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	return body, nil
 }
 
-func lowerPathNode(p *PathNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	path, err := LowerPathStream(p.path, "ADBE Vector Shape", "Path", ctx)
+// lowerPathNode emits a Path shape body using V2.2.1 embedded tolerance bytes
+// (templates/v2_2_shape_path_body.bin). From-scratch emit CRASHED AE 2020
+// ("After Effects 已崩溃 (0::42)") — the om-s/tdb4 scaffolding is too fragile
+// to hand-build. We clone the AE-native body and splice in the user's geometry
+// (shph/lhd3/ldat from encodeBezier, whose layout matches AE byte-for-byte per
+// V2.2.1 ldat RE), keeping AE's exact scaffolding (om-s header + omks + omtn).
+//
+// V2.2.1 limitations: linear segments only (SetVertices zeroes tangents);
+// animated paths use the first keyframe as a static fallback.
+func lowerPathNode(p *PathNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapePathBody()
 	if err != nil {
 		return nil, err
 	}
-	body := nodeBodyTdgp("Path", []*rifx.Chunk{path})
+	bp := p.path.static
+	if p.path.mode == StreamModeAnimated && len(p.path.keyframes) > 0 {
+		bp = p.path.keyframes[0].Value
+	}
+	if err := splicePathGeometry(body, bp); err != nil {
+		return nil, err
+	}
 	return body, nil
+}
+
+// splicePathGeometry replaces the shph/lhd3/ldat geometry chunks inside the
+// embedded path body's LIST(shap) with freshly-encoded geometry for bp,
+// leaving AE's scaffolding (om-s header, omks/shap/kfl wrappers, omtn) intact.
+func splicePathGeometry(body *rifx.Chunk, bp BezierPath) error {
+	shap := findListByForm(body, rifx.IDShap)
+	if shap == nil {
+		return fmt.Errorf("splicePathGeometry: LIST(shap) not found in embed body")
+	}
+	newShph, newLhd3, newLdat := encodeBezier(bp)
+	kfl := findListByForm(shap, rifx.IDkfl)
+	if kfl == nil {
+		return fmt.Errorf("splicePathGeometry: LIST(kfl) not found in shap")
+	}
+	// Replace shph (direct child of shap) and lhd3/ldat (children of kfl) in
+	// place, preserving sibling order (shph, kfl, omtn) and (lhd3, ldat).
+	for i, ch := range shap.Children {
+		if ch.ID == rifx.IDShph {
+			shap.Children[i] = newShph
+		}
+	}
+	for i, ch := range kfl.Children {
+		switch ch.ID {
+		case rifx.IDLhd3:
+			kfl.Children[i] = newLhd3
+		case rifx.IDLdat:
+			kfl.Children[i] = newLdat
+		}
+	}
+	return nil
+}
+
+// findListByForm returns the first descendant LIST chunk with the given
+// FormType (depth-first), or nil.
+func findListByForm(c *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
+	for _, ch := range c.Children {
+		if ch.IsList() && ch.FormType == form {
+			return ch
+		}
+		if ch.IsList() {
+			if g := findListByForm(ch, form); g != nil {
+				return g
+			}
+		}
+	}
+	return nil
 }
 
 // lowerFillNode emits a Fill graphic body using iter-8 embedded tolerance
