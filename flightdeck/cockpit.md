@@ -1,21 +1,19 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-29 by claude (Phase 5C InsertLayer impl + JSX shipped Alpha; awaiting AE ship-gate)
-**Active focus**: V3 Phase 5C InsertLayer Alpha — Go-side complete (refuse R1-R11 + happy-path × 3 splice positions + round-trip + concurrent-mutate). Waiting on user JSX run → AE ship-gate (3 modes × 2 versions = 6 PASS) for Stable promotion.
+**Last updated**: 2026-05-29 by claude (Phase 5C InsertLayer **Stable** — 6/6 AE 2020+2025 ship-gate PASS)
+**Active focus**: 无 active 实现线。Phase 5C InsertLayer 完整收口（Go-side + 6/6 ship-gate + godoc Stable + coverage）。下一步是 Phase 5 三选一，需用户定方向。
 
 ## Next session
 
-1. **User runs `re_insert_layer.jsx`** under AE 2020 + AE 2025 — 12 invocations total:
-   `for mode in basic footage precomp; for state in before after: $env:RE_INSERT_MODE=$mode; $env:RE_INSERT_STATE=$state; afterfx.exe -r test_data/re_insert_layer.jsx`
-   Produces `test_data/re_insert_layer_{basic,footage,precomp}_{before,after}.aep` (6 files).
-2. **Re-run Go tests** to lift fixture skips: `go test -count=1 ./internal/aep/ -run TestInsertLayer -v` — expect 11 refuse + 6 happy/structural PASS.
-3. **AE ship-gate** — `scripts/ae_run.ps1` opens each `ge_insert_layer_<mode>.aep` (Go-emitted post-InsertLayer) in both AE versions and byte-diffs against the `_after` baseline. 6/6 PASS → promote to Stable.
-4. **Promote godoc tag** Alpha → Stable in `internal/aep/insert_layer.go` + add coverage row.
+**Phase 5 三选一**（需用户拍板再起 brainstorming → design → plan）：
+1. **`Project.DuplicateItem(item Item, name string)`** — comp / footage / folder 通用 item 复制（project-level，区别于 layer-level DuplicateLayer）
+2. **V2.2.1 ShapeLayer 拓展** — Ellipse/Path/Stroke embed bytes / Fill Color 编码 RE / keyframe 持久化（需 AE create fixture）
+3. **Phase 5C.1 cross-Project InsertLayer** — 现 InsertLayer refuse 的 cross-Project 分支解封（src/dest 不同 Project，需复制 source item 进 dest Project）
 
-**Phase 5 后续候选**（5C 完后回到三选一）：
-- **`Project.DuplicateItem(item Item, name string)`** — comp / footage / folder 通用
-- **V2.2.1 ShapeLayer 拓展**
-- Phase 5C.1 cross-Project InsertLayer
+**自验留痕**（无需人工，已全绿，仅供复核）：
+- `go vet ./... && go test -count=1 ./internal/aep/...` 全绿（最近一次 48.9s ok）
+- InsertLayer ship-gate done 文件：`test_data/verify_ge_insert_layer_ae20{20,25}_{basic,footage,precomp}.done` 末行均 `PASS`（gitignored，本地留存）
+- baseline/ge 文件 gitignored；要重生：`go run ./tmp_debug/ge_insert_layer` + `re_insert_layer.jsx`（见 logbook 2026-05-29 条）
 
 **并行 R-only 仍 deferred**（不阻塞 V3）：
 - **Gradient W**: XML 重序列化 / SetGradient / per-keyframe gradients — 需 fixture
