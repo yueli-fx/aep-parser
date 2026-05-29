@@ -33,7 +33,7 @@ import (
 // srcItemID→destItemID map. File-backed footage already present in dest (matched
 // by Path) is reused, not re-cloned; comps and solids/placeholders are always
 // cloned. ParentID / track matte are still reset (cross-comp). Folders are not
-// recreated. ALPHA — pending AE 2020 + AE 2025 ship-gate.
+// recreated.
 //
 // Refuse-cases (R1..R11; spec §2): nil src, dest backref missing, atIdx out of
 // range, src detached, same-comp redirect, non-AV, direct pre-comp loop
@@ -46,10 +46,11 @@ import (
 // parser warning during re-parse, roll all back including the
 // nextItemID bump.
 //
-// Same-Project: Stable — passed AE 2020 + AE 2025 ship-gate (3 modes
-// [basic/footage/precomp] × 2 versions = 6/6 PASS, 2026-05-29): AE accepts the
-// Go-emitted file and the clone references the source item verbatim with parent
-// + track matte reset.
+// Stable (both paths) — same-Project passed AE 2020 + AE 2025 ship-gate (3 modes
+// [basic/footage/precomp] × 2 = 6/6 PASS, 2026-05-29); cross-Project passed the
+// assert-based AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup] × 2 = 6/6
+// PASS, 2026-05-29): AE accepts the Go-emitted file, the inserted clone's source
+// resolves (imported / dedup'd), and footage is not duplicated on path match.
 func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	// === Refuse-case matrix R1-R11 ===
 	if src == nil {
