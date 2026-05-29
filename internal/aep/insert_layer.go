@@ -35,8 +35,9 @@ import (
 // parser warning during re-parse, roll all back including the
 // nextItemID bump.
 //
-// ALPHA — pending AE 2020 + AE 2025 ship-gate (3 modes × 2 versions =
-// 6 PASS). Will be promoted to Stable in godoc after ship-gate green.
+// Stable — passed AE 2020 + AE 2025 ship-gate (3 modes [basic/footage/precomp]
+// × 2 versions = 6/6 PASS, 2026-05-29): AE accepts the Go-emitted file and the
+// clone references the source item verbatim with parent + track matte reset.
 func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	// === Refuse-case matrix R1-R11 ===
 	if src == nil {
