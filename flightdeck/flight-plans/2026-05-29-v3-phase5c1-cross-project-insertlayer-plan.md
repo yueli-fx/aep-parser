@@ -707,12 +707,12 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 			}
 			itemIDMap[srcID] = destID
 		case *Composition:
-			start, end := locateItemBlockByID(srcProj.back.rootFold, srcID)
-			if start < 0 {
+			container, start, end := locateItemBlockByID(srcProj.back.rootFold, srcID)
+			if container == nil {
 				rollback()
 				return nil, fmt.Errorf("InsertLayer: cross-Project comp id=%d Item block not found in src Project", srcID)
 			}
-			dup := deepCloneChunk(srcProj.back.rootFold.Children[start])
+			dup := deepCloneChunk(container.Children[start])
 			destID := destProj.allocItemID()
 			idta := dup.FindFirst(rifx.IDIdta)
 			if idta == nil || len(idta.Data) < idtaItemID+4 {
@@ -725,10 +725,11 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 				rollback()
 				return nil, fmt.Errorf("InsertLayer: comp id=%d: %w", srcID, err)
 			}
-			// splice into dest root Fold (append after existing items)
+			// splice into dest root Fold (append after existing items — flatten
+			// nested-folder source comps to the dest root per spec §0)
 			rootFold.Children = append(rootFold.Children, dup)
 			for k := start + 1; k < end; k++ {
-				rootFold.Children = append(rootFold.Children, deepCloneChunk(srcProj.back.rootFold.Children[k]))
+				rootFold.Children = append(rootFold.Children, deepCloneChunk(container.Children[k]))
 			}
 			itemIDMap[srcID] = destID
 			// collect this comp's layers' source refs (still SRC-project IDs)

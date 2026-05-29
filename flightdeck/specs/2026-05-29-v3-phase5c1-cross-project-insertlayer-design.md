@@ -21,6 +21,8 @@ This doc is the strategy matrix. Once approved → plan in `flight-plans/2026-05
 
 3. **"footage 无 scripting API" ≠ "我们搬不动它".** AE exposes no `FootageItem.duplicate()`, but we fully parse footage Item chunks; deep-cloning a footage Item LIST into dest `rootFold` with a fresh idta ID is pure file manipulation. The only open question is whether AE *accepts* the result — exactly what the ship-gate answers.
 
+**RE finding (2026-05-29, during impl)**: AEP nests project items inside folders — a folder is an Item LIST whose children include an `Sfdr` LIST holding the folder's member Items (e.g. solids live in the "Solids" folder). `parseProject` walks these recursively, so the closure locator MUST recurse into `Sfdr` sub-containers to find a source item by ID (a top-level `rootFold` scan misses solids and any user-foldered footage/comp). Imports still flatten to the dest root (folders not recreated, per below). The locator returns the containing chunk + `[start,end)` so trailing-sibling runs are sliced relative to the real container.
+
 **Decisions locked in brainstorming** (user-approved 2026-05-29):
 - **Full closure clone** — always bring the layer's whole reachable item closure (footage + precomp + nested), no "comp-source only" / "footage-source only" carve-out.
 - **Footage cross-call dedup by file path** — a file-backed footage whose `Path` equals an existing dest footage's `Path` is **reused** (remap to the existing dest ID), not re-cloned. Comps are always cloned fresh. Solids / placeholders (no path) are always cloned fresh.
