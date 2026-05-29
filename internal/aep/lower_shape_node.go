@@ -515,17 +515,16 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(s.color.static))
 	}
 
-	op := s.opacity.static
-	if s.opacity.mode == StreamModeAnimated && len(s.opacity.keyframes) > 0 {
-		op = s.opacity.keyframes[0].Value
+	// Opacity (raw %) + Width (raw px) — 1D non-spatial scalars (bpk-48,
+	// value@0x08, no normalization; RE'd from v2_2_stroke_kf_re.aep). The stroke
+	// body template already carries both cdat slots, so animated streams flip in
+	// place (V2.2.1 子项⑧ — previously collapsed to the first keyframe value).
+	if err := lowerShapeScalar(body, "ADBE Vector Stroke Opacity", s.opacity, ctx); err != nil {
+		return nil, err
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Opacity", encodeF64sBE(op))
-
-	w := s.width.static
-	if s.width.mode == StreamModeAnimated && len(s.width.keyframes) > 0 {
-		w = s.width.keyframes[0].Value
+	if err := lowerShapeScalar(body, "ADBE Vector Stroke Width", s.width, ctx); err != nil {
+		return nil, err
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Width", encodeF64sBE(w))
 	return body, nil
 }
 

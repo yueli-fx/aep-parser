@@ -167,7 +167,11 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **磁盘编码**（RE 自 `v2_2_rect_subprops.aep`）：**Rect Position** = spatial Vec2 motion-path（bpk-104，value@0x38，[x,y]）— 与 Ellipse Position 同布局；**Roundness** = 1D non-spatial（bpk-48，value@0x08，原值）。
 - 新 helper `lowerShapeVec2 / lowerShapeScalar`（`lower_shape_node.go`）：animated→inject，static→overwrite cdat。`lowerRectNode` 现持久化 Size+Position+Roundness 三流。
 - 富化 rect body 模板（9 children；源 `v2_2_shape_rect_full.aep`，Size/Position/Roundness 全设静态非默认 → AE 不 elide）。仅 rect body 变更（其它 4 shape body 字节不变）。
-- **仍 deferred（shape-node 次要）**: Rect/Ellipse Direction（模板 elide）；Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Fill/Stroke Opacity·BlendMode·CompositeOrder（多数 runtime-only，逐个需富化对应 body 模板 + RE）。
+#### V2.2.1 子项⑧ (2026-05-30) — Stroke Opacity + Width keyframe 持久化
+- **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
+- **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
+- stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
+- **仍 deferred（shape-node 次要）**: Rect/Ellipse Direction（模板 elide）；Fill Opacity·BlendMode·CompositeOrder（fill body elide，需富化）；Stroke Line Cap/Join/Miter/Dashes/Taper/Wave（runtime 模型暂无 setter）。
 - **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）
