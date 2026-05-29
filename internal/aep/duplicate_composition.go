@@ -32,7 +32,9 @@ import (
 // p.Compositions + p.nextItemID + len(p.Warnings); on any new parser
 // warning during the re-parse, roll all back including the nextItemID bump.
 //
-// ALPHA — pending AE 2020 + AE 2025 ship-gate before Stable promotion.
+// Stable — passed AE 2020 + AE 2025 ship-gate (2026-05-29): AE accepts the
+// Go-emitted file and the dup's intra-comp parent ref resolves to the dup's
+// own layer (remap confirmed by AE), with sources shared with the original.
 func (p *Project) DuplicateComposition(src *Composition, name string) (*Composition, error) {
 	// === Refuse-case matrix R1-R7 ===
 	if src == nil {
