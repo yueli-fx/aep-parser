@@ -37,6 +37,9 @@ var v22ShapeEllipseBodyBytes []byte
 //go:embed templates/v2_2_shape_path_body.bin
 var v22ShapePathBodyBytes []byte
 
+//go:embed templates/v2_2_shape_stroke_body.bin
+var v22ShapeStrokeBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -53,6 +56,10 @@ var (
 	v22ShapePathOnce  sync.Once
 	v22ShapePathCache *rifx.Chunk
 	v22ShapePathErr   error
+
+	v22ShapeStrokeOnce  sync.Once
+	v22ShapeStrokeCache *rifx.Chunk
+	v22ShapeStrokeErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -113,6 +120,29 @@ func cloneShapePathBody() (*rifx.Chunk, error) {
 		return nil, v22ShapePathErr
 	}
 	return cloneChunk(v22ShapePathCache), nil
+}
+
+func cloneShapeStrokeBody() (*rifx.Chunk, error) {
+	v22ShapeStrokeOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStrokeBodyBytes))
+		if err != nil {
+			v22ShapeStrokeErr = fmt.Errorf("parse v22ShapeStrokeBodyBytes: %w", err)
+			return
+		}
+		v22ShapeStrokeCache = ch
+	})
+	if v22ShapeStrokeErr != nil {
+		return nil, v22ShapeStrokeErr
+	}
+	return cloneChunk(v22ShapeStrokeCache), nil
+}
+
+// encodeShapeColorBE returns the AE shape-color cdat bytes for an [r,g,b,a]
+// (0..1) color: AE stores colors as [A,R,G,B] × 255 as f64 BE (RE'd from the
+// stroke tolerance fixture — JSX [0,0,1,1] → disk [255,0,0,255]). This is the
+// long-deferred "Fill Color encoding" too; both Stroke and Fill use it.
+func encodeShapeColorBE(c [4]float64) []byte {
+	return encodeF64sBE(c[3]*255, c[0]*255, c[1]*255, c[2]*255)
 }
 
 // overwriteShapeStreamCdat finds the tdmn matching `streamName` inside
@@ -187,22 +217,6 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
-}
-
-// nodeBodyTdgp builds the inner LIST(tdgp) carried after each shape's tdmn.
-// Standard shape: tdsb + tdsn + N × sub-property tdgp + tdmn(Group End).
-func nodeBodyTdgp(displayName string, subProps []*rifx.Chunk) *rifx.Chunk {
-	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
-	body.Children = append(body.Children, makeTdsb(), makeTdsn(displayName))
-	// Each sub-property is a LIST(tdgp) preceded by its own tdmn; the
-	// `LowerXxxStream` funcs return the LIST(tdgp) with tdmn already as
-	// child[0]. Inline their children into the parent body so the on-disk
-	// tdmn + LIST(tdbs) pattern appears flat (matching RE observations).
-	for _, sp := range subProps {
-		body.Children = append(body.Children, sp.Children...)
-	}
-	body.Children = append(body.Children, makeTdmn("ADBE Group End"))
-	return body
 }
 
 // lowerRectNode emits a Rect shape body using iter-8 embedded tolerance
@@ -357,54 +371,39 @@ func lowerFillNode(f *FillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	return body, nil
 }
 
-func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	// Per RE-S5d: Stroke children (11) =
-	//   Blend Mode / Composite Order / Stroke Color / Stroke Opacity /
-	//   Stroke Width / Line Cap / Line Join / Miter Limit /
-	//   Dashes (nested group) / Taper (nested group) / Wave (nested group).
-	// V2.2 hot path emits Color + Opacity + Width typed; the 8 remaining
-	// children get 3-child empty placeholders (RE-S5d showed Dashes / Taper /
-	// Wave persist 3-child header-only group even at default).
-	blendMode := emptySubPropPlaceholder("ADBE Vector Blend Mode", "Blend Mode")
-	compOrder := emptySubPropPlaceholder("ADBE Vector Composite Order", "Composite Order")
-	color, err := LowerColorStream(s.color, "ADBE Vector Stroke Color", "Color", ctx)
+// lowerStrokeNode emits a Stroke graphic body using V2.2.1 embedded tolerance
+// bytes (templates/v2_2_shape_stroke_body.bin). Same rationale as the other
+// shape kinds — from-scratch emit triggers AE silent-drop; the embedded
+// AE-native body carries the full child set (Blend Mode / Composite Order /
+// Line Cap / Line Join / Miter Limit + Dashes/Taper/Wave nested groups), and
+// we overwrite only the Color/Opacity/Width cdat with runtime values.
+//
+// V2.2.1 limitations: Blend Mode / Composite Order / Line Cap / Line Join /
+// Miter Limit / Dashes / Taper / Wave stay at the embed's defaults; animated
+// Color/Opacity/Width use the first keyframe as a static fallback.
+func lowerStrokeNode(s *StrokeNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeStrokeBody()
 	if err != nil {
 		return nil, err
 	}
-	op, err := LowerFloat64Stream(s.opacity, "ADBE Vector Stroke Opacity", "Opacity", ctx)
-	if err != nil {
-		return nil, err
+	col := s.color.static
+	if s.color.mode == StreamModeAnimated && len(s.color.keyframes) > 0 {
+		col = s.color.keyframes[0].Value
 	}
-	width, err := LowerFloat64Stream(s.width, "ADBE Vector Stroke Width", "Width", ctx)
-	if err != nil {
-		return nil, err
-	}
-	lineCap := emptySubPropPlaceholder("ADBE Vector Stroke Line Cap", "Line Cap")
-	lineJoin := emptySubPropPlaceholder("ADBE Vector Stroke Line Join", "Line Join")
-	miter := emptySubPropPlaceholder("ADBE Vector Stroke Miter Limit", "Miter Limit")
-	dashes := emptySubPropPlaceholder("ADBE Vector Stroke Dashes", "Dashes")
-	taper := emptySubPropPlaceholder("ADBE Vector Stroke Taper", "Taper")
-	wave := emptySubPropPlaceholder("ADBE Vector Stroke Wave", "Wave")
-	body := nodeBodyTdgp("Stroke", []*rifx.Chunk{
-		blendMode, compOrder, color, op, width,
-		lineCap, lineJoin, miter, dashes, taper, wave,
-	})
-	return body, nil
-}
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(col))
 
-// emptySubPropPlaceholder returns a `tdmn + LIST(tdgp)(tdsb + tdsn +
-// tdmn(Group End))` pair for sub-properties V2.2 doesn't expose as typed
-// setters. The pair matches RE-S5d's "Dashes/Taper/Wave 3-child empty
-// header-only" placeholder pattern. Returned chunk is shaped as a tdgp
-// container holding two children (tdmn + LIST tdgp) so callers can inline
-// via nodeBodyTdgp's expansion logic.
-func emptySubPropPlaceholder(matchName, displayName string) *rifx.Chunk {
-	holder := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
-	holder.Children = append(holder.Children, makeTdmn(matchName))
-	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
-	body.Children = append(body.Children, makeTdsb(), makeTdsn(displayName), makeTdmn("ADBE Group End"))
-	holder.Children = append(holder.Children, body)
-	return holder
+	op := s.opacity.static
+	if s.opacity.mode == StreamModeAnimated && len(s.opacity.keyframes) > 0 {
+		op = s.opacity.keyframes[0].Value
+	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Opacity", encodeF64sBE(op))
+
+	w := s.width.static
+	if s.width.mode == StreamModeAnimated && len(s.width.keyframes) > 0 {
+		w = s.width.keyframes[0].Value
+	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Width", encodeF64sBE(w))
+	return body, nil
 }
 
 // lowerVectorGroup wraps shape-node children into the Root Vectors Group's

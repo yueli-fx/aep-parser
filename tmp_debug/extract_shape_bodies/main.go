@@ -29,6 +29,7 @@ var extractions = []extraction{
 	{"test_data/v2_2_shape_tolerance.aep", "ADBE Vector Graphic - Fill", "internal/aep/templates/v2_2_shape_fill_body.bin"},
 	{"test_data/v2_2_shape_ellipse_tolerance.aep", "ADBE Vector Shape - Ellipse", "internal/aep/templates/v2_2_shape_ellipse_body.bin"},
 	{"test_data/v2_2_shape_path_tolerance.aep", "ADBE Vector Shape - Group", "internal/aep/templates/v2_2_shape_path_body.bin"},
+	{"test_data/v2_2_shape_stroke_tolerance.aep", "ADBE Vector Graphic - Stroke", "internal/aep/templates/v2_2_shape_stroke_body.bin"},
 }
 
 func main() {
