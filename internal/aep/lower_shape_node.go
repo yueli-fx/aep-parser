@@ -229,18 +229,61 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 //   - Rect Position / Roundness: runtime-only, NOT persisted (tolerance
 //     elides them; embedded body has no slot to overwrite).
 //   - Rect Direction: AE default ("ToTheRight"), no runtime customization.
-//   - Animated Size: first keyframe value used as static fallback.
-func lowerRectNode(r *RectNode, _ *lowerCtx) (*rifx.Chunk, error) {
+//   - Animated Size: persisted as keyframes (V2.2.1 — cdat→LIST(list) inject).
+func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeRectBody()
 	if err != nil {
 		return nil, err
 	}
-	val := r.size.static
 	if r.size.mode == StreamModeAnimated && len(r.size.keyframes) > 0 {
-		val = r.size.keyframes[0].Value
+		if err := injectAnimatedVec2(body, "ADBE Vector Rect Size", r.size.keyframes, ctx); err != nil {
+			return nil, err
+		}
+		return body, nil
 	}
+	val := r.size.static
 	overwriteShapeStreamCdat(body, "ADBE Vector Rect Size", encodeF64sBE(val[0], val[1]))
 	return body, nil
+}
+
+// injectAnimatedVec2 converts a static shape Vec2 stream in an embedded body
+// into an animated one: it finds the tdmn matching streamName, descends into
+// the following LIST(tdbs), and replaces the static cdat child with the
+// animated LIST(list)(lhd3+ldat) keyframe container (AE keeps tdsb/tdsn/tdb4/
+// tdum/tduM unchanged — only cdat ↔ LIST(list) flips). Non-spatial dim-2
+// layout (header07=0x00) per the kf RE fixture (Rect/Ellipse Size).
+func injectAnimatedVec2(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx) error {
+	kfList, err := encodeKeyframes(kfs, valueLayout{dim: 2, headerByte: 0x00, spatial: false}, encode2D, ctx)
+	if err != nil {
+		return err
+	}
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == streamName {
+			tdbs := kids[i+1]
+			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
+				return fmt.Errorf("injectAnimatedVec2: %s next chunk not LIST(tdbs)", streamName)
+			}
+			// Flip the tdb4 static→animated flags (RE: static @0x05=0x01 @0x44=0x00,
+			// animated @0x05=0x00 @0x44=0x01). Without this AE expects a cdat per the
+			// static tdb4 and reports "file data missing" on the LIST(list) we inject.
+			// NB: modern AE writes lowercase "tdb4"; rifx.IDTdb4 is the legacy
+			// UPPERCASE "Tdb4" (chunk IDs are case-sensitive — see incident
+			// report chunk-id-case-tdb4.md), so match the lowercase literal.
+			if tdb4 := findChildID(tdbs, rifx.ChunkID{'t', 'd', 'b', '4'}); tdb4 != nil && len(tdb4.Data) > 0x44 {
+				tdb4.Data[0x05] = 0x00
+				tdb4.Data[0x44] = 0x01
+			}
+			for j, ch := range tdbs.Children {
+				if ch.ID == rifx.IDCdat {
+					tdbs.Children[j] = kfList
+					return nil
+				}
+			}
+			return fmt.Errorf("injectAnimatedVec2: %s no cdat to replace", streamName)
+		}
+	}
+	return fmt.Errorf("injectAnimatedVec2: %s tdmn not found", streamName)
 }
 
 // lowerEllipseNode emits an Ellipse shape body using V2.2.1 embedded tolerance
@@ -254,16 +297,18 @@ func lowerRectNode(r *RectNode, _ *lowerCtx) (*rifx.Chunk, error) {
 //   - Direction: AE default (the AE-saved body elides the Direction sub-prop;
 //     embedded body has no slot to overwrite).
 //   - Animated Size / Position: first keyframe value used as static fallback.
-func lowerEllipseNode(e *EllipseNode, _ *lowerCtx) (*rifx.Chunk, error) {
+func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeEllipseBody()
 	if err != nil {
 		return nil, err
 	}
-	sz := e.size.static
 	if e.size.mode == StreamModeAnimated && len(e.size.keyframes) > 0 {
-		sz = e.size.keyframes[0].Value
+		if err := injectAnimatedVec2(body, "ADBE Vector Ellipse Size", e.size.keyframes, ctx); err != nil {
+			return nil, err
+		}
+	} else {
+		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(e.size.static[0], e.size.static[1]))
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(sz[0], sz[1]))
 	ps := e.position.static
 	if e.position.mode == StreamModeAnimated && len(e.position.keyframes) > 0 {
 		ps = e.position.keyframes[0].Value
@@ -322,6 +367,16 @@ func splicePathGeometry(body *rifx.Chunk, bp BezierPath) error {
 			kfl.Children[i] = newLhd3
 		case rifx.IDLdat:
 			kfl.Children[i] = newLdat
+		}
+	}
+	return nil
+}
+
+// findChildID returns the first direct child with the given chunk ID, or nil.
+func findChildID(c *rifx.Chunk, id rifx.ChunkID) *rifx.Chunk {
+	for _, ch := range c.Children {
+		if ch.ID == id {
+			return ch
 		}
 	}
 	return nil

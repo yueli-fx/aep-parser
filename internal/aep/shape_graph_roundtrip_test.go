@@ -92,17 +92,19 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 	if !ok {
 		t.Fatalf("A[0] type = %T, want *RectNode", sa.RootGroup().Children[0])
 	}
-	// iter-8 V2.2 alpha limitation: Rect Size keyframes are NOT persisted
-	// to disk (embedded tolerance Rect body has static Size cdat slot only,
-	// no keyframe encoding). lowerRectNode overwrites cdat with first kf
-	// value as static fallback. V2.2.1 will add keyframe encoding for
-	// shape sub-streams.
-	sizeVal, sizeIsStatic := reRectA.Size().StaticValue()
-	if !sizeIsStatic {
-		t.Errorf("A Rect Size should be static post-roundtrip (V2.2 iter-8 limitation); got animated %v", reRectA.Size().Keyframes())
+	// V2.2.1: Rect Size keyframes ARE persisted (cdat→LIST(list) inject;
+	// non-spatial Vec2 layout byte-identical to AE). Roundtrip recovers the
+	// 2 linear keyframes.
+	_, sizeIsStatic := reRectA.Size().StaticValue()
+	if sizeIsStatic {
+		t.Errorf("A Rect Size should be animated post-roundtrip (V2.2.1 keyframe persistence)")
 	}
-	if sizeIsStatic && sizeVal != [2]float64{50, 50} {
-		t.Errorf("A Rect Size static fallback = %v, want [50,50] (first kf value)", sizeVal)
+	kfs := reRectA.Size().Keyframes()
+	if len(kfs) != 2 {
+		t.Fatalf("A Rect Size keyframes = %d, want 2", len(kfs))
+	}
+	if kfs[0].Value != [2]float64{50, 50} || kfs[1].Value != [2]float64{300, 200} {
+		t.Errorf("A Rect Size kf values = %v / %v, want [50,50] / [300,200]", kfs[0].Value, kfs[1].Value)
 	}
 
 	// iter-7 V2.2 limitation: Layr-level Position keyframes are NOT persisted
