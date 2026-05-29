@@ -403,17 +403,25 @@ func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) 
 	if err != nil {
 		return nil, err
 	}
-	if t.position.mode == StreamModeAnimated && len(t.position.keyframes) > 0 {
-		// V2.2.1 Path B: persist keyframes on the combined "ADBE Position"
-		// stream (bpk-128 spatial dim-3, z=0) — AE's default keyframed-position
-		// form (RE'd from test_data/v2_2_shape_kf_re.aep).
-		if err := injectAnimatedLayerPosition(body, t.position.keyframes, ctx); err != nil {
-			return nil, err
-		}
-	} else {
-		// Static: overwrite the combined Position cdat value (3 × f64; z = 0).
-		overwriteShapeStreamCdat(body, MatchNamePosition,
-			encodeF64sBE(t.position.static[0], t.position.static[1], 0))
+	// Each transform channel is persisted to disk in its RE'd on-disk encoding
+	// (test_data/v2_2_transform_kf_re.aep): Anchor/Position are 3D spatial
+	// motion-path ([x,y,0]); Scale is 3D non-spatial (÷100, Z=1.0); Rotation is
+	// 1D non-spatial (degrees); Opacity is 1D non-spatial (÷100). Animated →
+	// inject keyframes; otherwise overwrite the embedded template's static cdat.
+	if err := lowerTransformVec2Spatial(body, MatchNameAnchorPoint, t.anchorPoint, ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerTransformVec2Spatial(body, MatchNamePosition, t.position, ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerTransformScale(body, t.scale, ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerTransformScalar(body, MatchNameRotateZ, t.rotation, ctx, 1); err != nil {
+		return nil, err
+	}
+	if err := lowerTransformScalar(body, MatchNameOpacity, t.opacity, ctx, 0.01); err != nil {
+		return nil, err
 	}
 
 	wrapper := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
@@ -422,19 +430,52 @@ func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) 
 	return wrapper, nil
 }
 
-// injectAnimatedLayerPosition flips the combined "ADBE Position" stream in the
-// embedded transform body from static cdat to an animated keyframe container.
-// Layer Position is 2D in the runtime API ([2]float64) but AE stores it on disk
-// as a 3D spatial motion-path stream (bpk-128, value@0x38 X/Y/Z with Z=0) — see
-// the bpk-128 RE in test_data/v2_2_shape_kf_re.aep. Mirrors the Ellipse Position
-// path (injectAnimatedVec2L) but at dim=3 with the Z component pinned to 0.
-func injectAnimatedLayerPosition(body *rifx.Chunk, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx) error {
+// lowerTransformVec2Spatial persists a 2D spatial transform channel (Anchor /
+// Position) into the embedded template: 3D spatial motion-path on disk (bpk-128,
+// value@0x38 X/Y/Z with Z=0). The runtime API is 2D ([2]float64); Z is pinned 0.
+func lowerTransformVec2Spatial(body *rifx.Chunk, name string, ps *PropertyStream[[2]float64], ctx *lowerCtx) error {
 	encXYZ := func(v [2]float64) []byte { return encode3D([3]float64{v[0], v[1], 0}) }
-	kfList, err := encodeKeyframes(kfs, valueLayout{dim: 3, headerByte: 0x07, spatial: true, motionPath: true}, encXYZ, ctx)
-	if err != nil {
-		return err
+	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
+		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 3, headerByte: 0x07, spatial: true, motionPath: true}, encXYZ, ctx)
+		if err != nil {
+			return err
+		}
+		return injectAnimatedStream(body, name, kfList)
 	}
-	return injectAnimatedStream(body, MatchNamePosition, kfList)
+	overwriteShapeStreamCdat(body, name, encXYZ(ps.static))
+	return nil
+}
+
+// lowerTransformScale persists Scale: 3D non-spatial on disk (bpk-128,
+// value@0x08), values are percent÷100 with the Z (depth) component pinned to
+// 1.0 (= 100%). Runtime API is 2D percent ([2]float64).
+func lowerTransformScale(body *rifx.Chunk, ps *PropertyStream[[2]float64], ctx *lowerCtx) error {
+	encScale := func(v [2]float64) []byte { return encode3D([3]float64{v[0] / 100, v[1] / 100, 1}) }
+	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
+		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 3, headerByte: 0x00, spatial: false}, encScale, ctx)
+		if err != nil {
+			return err
+		}
+		return injectAnimatedStream(body, MatchNameScale, kfList)
+	}
+	overwriteShapeStreamCdat(body, MatchNameScale, encScale(ps.static))
+	return nil
+}
+
+// lowerTransformScalar persists a 1D non-spatial transform channel (Rotation /
+// Opacity): bpk-48, value@0x08. `scale` converts the runtime value to its
+// on-disk form (Rotation 1.0 = degrees as-is; Opacity 0.01 = percent÷100).
+func lowerTransformScalar(body *rifx.Chunk, name string, ps *PropertyStream[float64], ctx *lowerCtx, scale float64) error {
+	enc := func(v float64) []byte { return encode1D(v * scale) }
+	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
+		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, enc, ctx)
+		if err != nil {
+			return err
+		}
+		return injectAnimatedStream(body, name, kfList)
+	}
+	overwriteShapeStreamCdat(body, name, enc(ps.static))
+	return nil
 }
 
 

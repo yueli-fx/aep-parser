@@ -149,7 +149,18 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **磁盘形态**：combined `ADBE Position`（comp=3 spatial dim-3，bpk **128** = 0x38 + 3·3·8），value@0x38 X / @0x40 Y / @0x48 Z(=0)；motion-path 标志@0x08。runtime API 仍是 2D（`[2]float64`，Z 钉 0）。复用 `encodeKeyframes`（spatial 分支已泛化到 dim3）+ `injectAnimatedStream`，新 helper `injectAnimatedLayerPosition`（`lower_layer.go`）。
 - **关键 RE 发现（坑）**：AE 仅在 Position 被 **set/animated** 时才写 combined `ADBE Position` cdat；默认/未触碰时只留分离维 `Position_0/_1`（旧 tolerance 模板即此态，故无 combined slot）。新模板 `templates/v2_2_transform_group_body.bin` 改从 `v2_2_shape_transform_pos.aep`（position 设为静态非默认值 [500,300] 的 shape 图层）提取 → 含 combined Position 静态 cdat（17 children，旧 15 + combined Position）。重生：`gen_shape_transform_pos.jsx` → `extract_transform_group`。
 - 模板为 **shared**（所有 from-scratch shape 图层 transform group 都用它）→ swap 后重跑全部 shape ship-gate（Ellipse/Path/Stroke/RectKf/FillKf/EllKf）双版本均仍 PASS。
-- **仍 deferred**: shape-node 内 Rect Position（runtime-only，模板 elide）；Layr Anchor/Scale/Rotation/Opacity keyframe（V2.3）。
+
+#### V2.2.1 子项⑥ (2026-05-30) — Layr Transform 全通道 keyframe + static 持久化（Anchor/Scale/Rotation/Opacity）
+- **Anchor / Scale / Rotation / Opacity** keyframe + 静态持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_XfKf_*`；AE 读回 user 单位 anchor 50/60·scale 150/200·rot 90·opacity 50 正确 + re-save numKf/bpk 往返）。
+- **各通道磁盘编码**（RE 自 `v2_2_transform_kf_re.aep`）：
+  - **Anchor**：3D spatial motion-path（bpk-128，value@0x38，[x,y,0]）— 与 Position 同布局。
+  - **Scale**：3D **non-spatial**（bpk-128 = 0x08+5·3·8，value@0x08），值 **÷100**，Z(depth)=**1.0**（=100%）。
+  - **Rotation**：1D non-spatial（bpk-48，value@0x08），degrees 原值。
+  - **Opacity**：1D non-spatial（bpk-48，value@0x08），值 **÷100**。
+- **归一化非对称（坑）**：写盘归一（scale/opacity ÷100），但 parser 读**原始**盘值（`list_props`: Scale `[1.2,1.3,1]`、Opacity `0.8`）→ 不反归一。ship-gate 用 AE `keyValue` 验 user 单位（AE 自己反归一），Go re-parse 只验 numKf/bpk。
+- 新 helper（`lower_layer.go`）：`lowerTransformVec2Spatial`（Anchor/Position）、`lowerTransformScale`、`lowerTransformScalar`（Rotation scale=1 / Opacity scale=0.01）；animated→inject，static→overwrite cdat。
+- 模板再扩到 **25 children**（源 `v2_2_shape_transform_full.aep`：5 通道全设静态非默认值；旧默认值被 AE elide）。模板 shared → 全部既有 shape ship-gate 重跑双版本仍 PASS。新增 public API `ShapeLayer.AnchorPoint()`（补齐 5 通道 shorthand；alpha）。
+- **仍 deferred**: shape-node 内 Rect Position（runtime-only，模板 elide）；3D 通道（Orientation/RotateX/Y/Position_Z）；Path keyframe（V2.3）。
 - **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）

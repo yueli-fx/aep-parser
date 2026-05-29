@@ -17,12 +17,14 @@ import (
 var outputPath = "internal/aep/templates/v2_2_transform_group_body.bin"
 
 func main() {
-	// V2.2.1 (Path B): source switched to v2_2_shape_transform_pos.aep — a shape
-	// layer whose COMBINED "ADBE Position" is set to a static non-default value,
-	// so AE writes it as a flippable cdat (the old tolerance fixture had Separate
-	// Dimensions, i.e. Position_0/_1 only). Regenerate the source via
-	// tmp_debug/gen_shape_transform_pos.jsx.
-	srcPath := "test_data/v2_2_shape_transform_pos.aep"
+	// V2.2.1 子项⑥: source is v2_2_shape_transform_full.aep — a shape layer whose
+	// Anchor / Position / Scale / Rotation / Opacity are ALL set to static
+	// non-default values so AE emits each as a flippable cdat (default values get
+	// elided; the old tolerance fixture had only separated Position_0/_1).
+	// lowerLayerTransform overwrites / flips each channel. 25 children. Regenerate
+	// via tmp_debug/gen_shape_transform_full.jsx. (子项⑤'s v2_2_shape_transform_pos.aep
+	// — Position-only, 17 children — is the simpler historical RE artifact.)
+	srcPath := "test_data/v2_2_shape_transform_full.aep"
 	if len(os.Args) > 1 {
 		srcPath = os.Args[1]
 	}

@@ -984,6 +984,11 @@ func (s *ShapeLayer) RootGroup() *VectorGroup { return s.shapeRootGroup }
 // Transform returns the typed Layer-level Transform surface (spec §3.3a).
 func (s *ShapeLayer) Transform() *LayerTransform { return s.shapeTransform }
 
+// AnchorPoint is shorthand for s.Transform().AnchorPoint().
+func (s *ShapeLayer) AnchorPoint() *PropertyStream[[2]float64] {
+	return s.shapeTransform.anchorPoint
+}
+
 // Position is shorthand for s.Transform().Position(). V2.2 ShapeLayer is
 // 2D-only (3D ShapeLayer = V2.3+); returns the 2D stream.
 func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.shapeTransform.position }

@@ -1,13 +1,13 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-30 by claude (V2.2.1 子项⑤ **Layr Transform Position keyframe 持久化** ship：combined `ADBE Position` bpk-128 spatial dim-3，Z=0；新 helper `injectAnimatedLayerPosition` + 新 transform-group 模板（含 combined Position cdat，从 `v2_2_shape_transform_pos.aep` 提取）；`TestV2_2_LayrPosKf_*` 双版本 PASS + 全部既有 shape ship-gate 重跑双版本仍 PASS（模板 shared）；vet 0 + test ok)
-**Active focus**: 无 active 实现线。**Layr Position keyframe（Path B / combined）收口**：runtime API 仍 2D，磁盘 dim-3 spatial（value@0x38 X/Y/Z，motion-path 标志@0x08），`encodeKeyframes` spatial 分支已泛化 dim3。**关键 RE**：AE 仅在 Position set/animated 时才写 combined `ADBE Position` cdat；默认/未触碰 → 只有分离维 Position_0/_1（旧模板即此态，无 combined slot），故换新模板。详 `coverage.md` 子项⑤。
+**Last updated**: 2026-05-30 by claude (V2.2.1 子项⑤+⑥ **Layr Transform 全通道持久化** ship：⑤ Position（combined `ADBE Position` bpk-128 spatial dim-3）；⑥ Anchor/Scale/Rotation/Opacity（Anchor=spatial 同 Position；Scale=3D non-spatial ÷100 Z=1.0；Rotation=1D degrees；Opacity=1D ÷100）；helper `lowerTransformVec2Spatial/Scale/Scalar`；transform 模板扩到 25 children（源 `v2_2_shape_transform_full.aep`）；`TestV2_2_LayrPosKf_*`+`TestV2_2_XfKf_*` 双版本 PASS + 全部既有 shape ship-gate 重跑双版本仍 PASS（模板 shared）；新 API `ShapeLayer.AnchorPoint()`；vet 0 + test ok)
+**Active focus**: 无 active 实现线。**Layr Transform 5 通道（Anchor/Position/Scale/Rotation/Opacity）static + keyframe 持久化全收口**。runtime API 2D，磁盘各通道独立编码（详 `coverage.md` 子项⑤⑥）。**关键坑**：① AE 仅在通道 set/animated 时才写其 cdat，默认值 elide → 模板须从「全通道设静态非默认」fixture 提取；② Scale/Opacity 写盘 ÷100 但 parser 读原始盘值（不反归一），ship-gate 用 AE keyValue 验 user 单位。
 
 ## Next session
 
 **V2.2.1 剩余 keyframe / 子属性**（自主推进，勿停下问）：
 1. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级。
-2. **Layr Transform 其余 keyframe** — Anchor / Scale / Rotation / Opacity（镜像 Position：combined stream，多数非 spatial）。Position 套路（`injectAnimatedLayerPosition` + 新模板已含这些 stream 的 cdat slot）可直接参照。
+2. **Layr Transform 3D 通道** — Orientation / Rotate X / Rotate Y / Position_Z（模板已含 Orientation/RotateX/Y stream slot）；需 RE 各自 keyframe 布局（多为非 spatial dim-1/3）。
 3. **各 shape 次要子属性** — Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction。多数 runtime-only；逐个 RE。
 
 **其它候选**：泛型 `DuplicateItem`（低优先，无 scripting API）、`ImportComposition`（需求驱动）。

@@ -8,81 +8,132 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-// TestInjectAnimatedLayerPosition_Bpk128 pins the combined "ADBE Position"
-// keyframe encoding (Path B) against the bytes RE'd from
-// test_data/v2_2_shape_kf_re.aep (tmp_debug/dump_kf "ADBE Position"):
-//
-//	lhd3 bpk@0x10 = 128 (= 0x38 + 3*dim*8 for dim=3 spatial)
-//	per-keyframe block (128 B):
-//	  @0x07 = 0x07 (spatial header)
-//	  @0x08 = 0x00000001 (motion-path marker)
-//	  @0x38 = X (f64 BE)   @0x40 = Y   @0x48 = Z (= 0; layer pos is 2D-in/3D-on-disk)
-//
-// Fixture KF2 = (500, 300) at t=2s; tickRate 30720 → time field 61440.
-func TestInjectAnimatedLayerPosition_Bpk128(t *testing.T) {
-	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+// minimalTransformLeaf builds a tdmn(name) + LIST(tdbs)(tdsb+tdsn+tdb4+cdat)
+// scaffold so the inject/overwrite helpers have a flippable static stream.
+func minimalTransformLeaf(body *rifx.Chunk, name string, layout valueLayout) {
 	tdbs := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdbs}
 	tdbs.Children = append(tdbs.Children,
 		makeTdsb(),
-		makeTdsn("Position"),
-		makeTdb4(valueLayout{dim: 3, headerByte: 0x07, spatial: true}),
-		makeCdat(encode3D([3]float64{0, 0, 0}), valueLayout{dim: 3}),
+		makeTdsn(name),
+		makeTdb4(layout),
+		makeCdat(make([]byte, layout.dim*8), layout),
 	)
-	body.Children = append(body.Children, makeTdmn(MatchNamePosition), tdbs)
+	body.Children = append(body.Children, makeTdmn(name), tdbs)
+}
 
-	ctx := &lowerCtx{tickRate: 30720}
-	kfs := []StreamKeyframe[[2]float64]{
-		{Time: 0, Value: [2]float64{0, 0}},
-		{Time: 2, Value: [2]float64{500, 300}},
+func kfListOf(t *testing.T, body *rifx.Chunk, name string) (lhd3, ldat *rifx.Chunk) {
+	t.Helper()
+	for i := 0; i+1 < len(body.Children); i++ {
+		if body.Children[i].ID == rifx.IDTdmn && trimChunkNUL(body.Children[i].Data) == name {
+			tdbs := body.Children[i+1]
+			kfl := tdbs.FindFirstList(rifx.ChunkID{'l', 'i', 's', 't'})
+			if kfl == nil {
+				t.Fatalf("%s: not flipped to animated (no LIST(list))", name)
+			}
+			if tdbs.FindFirst(rifx.IDCdat) != nil {
+				t.Fatalf("%s: static cdat should have been replaced", name)
+			}
+			return kfl.FindFirst(rifx.IDLhd3), kfl.FindFirst(rifx.IDLdat)
+		}
 	}
-	if err := injectAnimatedLayerPosition(body, kfs, ctx); err != nil {
-		t.Fatalf("injectAnimatedLayerPosition: %v", err)
-	}
+	t.Fatalf("%s: tdmn not found", name)
+	return nil, nil
+}
 
-	kfList := tdbs.FindFirstList(rifx.ChunkID{'l', 'i', 's', 't'})
-	if kfList == nil {
-		t.Fatal("position not flipped to animated: no LIST(list) keyframe container")
-	}
-	if tdbs.FindFirst(rifx.IDCdat) != nil {
-		t.Fatal("static cdat should have been replaced by keyframe container")
-	}
-	lhd3 := kfList.FindFirst(rifx.IDLhd3)
-	ldat := kfList.FindFirst(rifx.IDLdat)
-	if lhd3 == nil || ldat == nil {
-		t.Fatal("keyframe container missing lhd3/ldat")
-	}
+func f64At(b []byte, off int) float64 {
+	return math.Float64frombits(binary.BigEndian.Uint64(b[off : off+8]))
+}
 
-	if got := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]); got != 2 {
-		t.Errorf("lhd3 keyframe count = %d, want 2", got)
+// TestLowerTransformVec2Spatial_Bpk128 pins Anchor/Position encoding (combined
+// 3D spatial motion-path, bpk-128) against the RE'd fixture
+// (test_data/v2_2_transform_kf_re.aep / v2_2_shape_kf_re.aep): value@0x38 X/Y/Z
+// (Z=0), motion-path marker@0x08, header@0x07=0x07. KF2 = (500,300) at t=2s.
+func TestLowerTransformVec2Spatial_Bpk128(t *testing.T) {
+	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	minimalTransformLeaf(body, MatchNamePosition, valueLayout{dim: 3, headerByte: 0x07, spatial: true})
+	ps := NewPropertyStream[[2]float64]()
+	_ = ps.AddKeyframeLinear(0, [2]float64{0, 0})
+	_ = ps.AddKeyframeLinear(2, [2]float64{500, 300})
+
+	if err := lowerTransformVec2Spatial(body, MatchNamePosition, ps, &lowerCtx{tickRate: 30720}); err != nil {
+		t.Fatal(err)
 	}
-	if got := binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]); got != 128 {
-		t.Errorf("lhd3 bpk = %d, want 128", got)
+	lhd3, ldat := kfListOf(t, body, MatchNamePosition)
+	if binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]) != 128 {
+		t.Errorf("bpk = %d, want 128", binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
 	}
 	if len(ldat.Data) != 256 {
-		t.Fatalf("ldat len = %d, want 256 (2 × 128)", len(ldat.Data))
+		t.Fatalf("ldat len = %d, want 256", len(ldat.Data))
 	}
-
-	// KF2 = second 128-byte block.
 	blk := ldat.Data[128:256]
 	if blk[0x07] != 0x07 {
-		t.Errorf("KF2 @0x07 = %#x, want 0x07 (spatial header)", blk[0x07])
+		t.Errorf("@0x07 = %#x, want 0x07", blk[0x07])
 	}
-	if got := binary.BigEndian.Uint32(blk[0x08:0x0C]); got != 1 {
-		t.Errorf("KF2 @0x08 motion-path marker = %d, want 1", got)
+	if binary.BigEndian.Uint32(blk[0x08:0x0C]) != 1 {
+		t.Errorf("motion-path marker@0x08 != 1")
 	}
-	if got := binary.BigEndian.Uint32(blk[0x00:0x04]); got != 61440 {
-		t.Errorf("KF2 time = %d, want 61440 (2s × 30720)", got)
+	if f64At(blk, 0x38) != 500 || f64At(blk, 0x40) != 300 || f64At(blk, 0x48) != 0 {
+		t.Errorf("value = (%v,%v,%v), want (500,300,0)", f64At(blk, 0x38), f64At(blk, 0x40), f64At(blk, 0x48))
 	}
-	rf := func(off int) float64 {
-		return math.Float64frombits(binary.BigEndian.Uint64(blk[off : off+8]))
+}
+
+// TestLowerTransformScale_Bpk128NonSpatial pins Scale: 3D non-spatial (bpk-128,
+// value@0x08), percent÷100 with Z=1.0. KF2 = [150,200] → (1.5, 2.0, 1.0).
+func TestLowerTransformScale_Bpk128NonSpatial(t *testing.T) {
+	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+	minimalTransformLeaf(body, MatchNameScale, valueLayout{dim: 3, headerByte: 0x00})
+	ps := NewPropertyStream[[2]float64]()
+	_ = ps.AddKeyframeLinear(0, [2]float64{100, 100})
+	_ = ps.AddKeyframeLinear(2, [2]float64{150, 200})
+
+	if err := lowerTransformScale(body, ps, &lowerCtx{tickRate: 30720}); err != nil {
+		t.Fatal(err)
 	}
-	if x := rf(0x38); x != 500 {
-		t.Errorf("KF2 X @0x38 = %v, want 500", x)
+	lhd3, ldat := kfListOf(t, body, MatchNameScale)
+	if binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]) != 128 {
+		t.Errorf("bpk = %d, want 128", binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
 	}
-	if y := rf(0x40); y != 300 {
-		t.Errorf("KF2 Y @0x40 = %v, want 300", y)
+	blk := ldat.Data[128:256]
+	if blk[0x07] != 0x00 {
+		t.Errorf("@0x07 = %#x, want 0x00 (non-spatial)", blk[0x07])
 	}
-	if z := rf(0x48); z != 0 {
-		t.Errorf("KF2 Z @0x48 = %v, want 0", z)
+	if f64At(blk, 0x08) != 1.5 || f64At(blk, 0x10) != 2.0 || f64At(blk, 0x18) != 1.0 {
+		t.Errorf("value = (%v,%v,%v), want (1.5,2.0,1.0)", f64At(blk, 0x08), f64At(blk, 0x10), f64At(blk, 0x18))
+	}
+}
+
+// TestLowerTransformScalar pins Rotation (degrees as-is) + Opacity (÷100):
+// 1D non-spatial, bpk-48, value@0x08.
+func TestLowerTransformScalar(t *testing.T) {
+	cases := []struct {
+		name  string
+		match string
+		scale float64
+		in    float64
+		want  float64
+	}{
+		{"rotation", MatchNameRotateZ, 1, 90, 90},
+		{"opacity", MatchNameOpacity, 0.01, 50, 0.5},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
+			minimalTransformLeaf(body, tc.match, valueLayout{dim: 1, headerByte: 0x00})
+			ps := NewPropertyStream[float64]()
+			_ = ps.AddKeyframeLinear(0, 0)
+			_ = ps.AddKeyframeLinear(2, tc.in)
+
+			if err := lowerTransformScalar(body, tc.match, ps, &lowerCtx{tickRate: 30720}, tc.scale); err != nil {
+				t.Fatal(err)
+			}
+			lhd3, ldat := kfListOf(t, body, tc.match)
+			if binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]) != 48 {
+				t.Errorf("bpk = %d, want 48", binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
+			}
+			blk := ldat.Data[48:96]
+			if got := f64At(blk, 0x08); got != tc.want {
+				t.Errorf("KF2 value = %v, want %v", got, tc.want)
+			}
+		})
 	}
 }
