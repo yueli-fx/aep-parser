@@ -50,13 +50,13 @@
     });
 
     step("setup_shared_items", function () {
-        if (mode === "footage") {
-            // Solid footage as shared asset (no external file required).
-            footageF1 = app.project.items.addSolid([0.25, 0.25, 0.75], "F1_shared", 200, 200, 1, 5);
-        } else if (mode === "precomp") {
+        if (mode === "precomp") {
             compC = app.project.items.addComp("compC_precomp", 320, 240, 1, 5, 24);
             compC.layers.addSolid([0.5, 0.5, 0.5], "compC_filler", 100, 100, 1);
         }
+        // footage mode: solid footage is created in setup_compA (ItemCollection
+        // has no addSolid; LayerCollection.addSolid creates the FootageItem in a
+        // "Solids" folder, then footageF1 = src.source captures the shared asset).
     });
 
     step("setup_compA", function () {
@@ -64,8 +64,8 @@
         if (mode === "basic") {
             src = compA.layers.addSolid([1, 0, 0], "Src", 100, 100, 1);
         } else if (mode === "footage") {
-            src = compA.layers.add(footageF1);
-            src.name = "Src_footage";
+            src = compA.layers.addSolid([0.25, 0.25, 0.75], "Src_footage", 200, 200, 1);
+            footageF1 = src.source;
         } else if (mode === "precomp") {
             src = compA.layers.add(compC);
             src.name = "Src_precomp";
