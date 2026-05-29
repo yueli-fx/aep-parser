@@ -92,22 +92,73 @@ func TestImportHelpers_LocateItemBlockByID(t *testing.T) {
 	}
 }
 
+// openFileBacked opens path twice, returning (srcProj, destProj) if the file
+// exists and contains at least one file-backed footage item. Returns nil,nil
+// if the file is missing or has no file-backed footage.
+func openFileBacked(t *testing.T, path string) (*aep.Project, *aep.Project) {
+	t.Helper()
+	src, err := aep.Open(path)
+	if err != nil {
+		return nil, nil
+	}
+	for _, f := range src.Footage {
+		if f.Path != "" && !f.IsSolid && !f.IsPlaceholder {
+			dest, err2 := aep.Open(path)
+			if err2 != nil {
+				t.Fatalf("second open of %s: %v", path, err2)
+			}
+			return src, dest
+		}
+	}
+	return nil, nil
+}
+
 func TestImportFootageBlock(t *testing.T) {
 	srcProj, _, destProj, _ := openXProjPair(t)
 	if srcProj == nil {
 		return
 	}
-	// pick a file-backed footage in srcProj that is NOT already in destProj by path
+	// pick any file-backed footage in srcProj
 	var srcF *aep.Footage
 	for _, f := range srcProj.Footage {
-		if f.Path != "" && !f.IsSolid && !f.IsPlaceholder && aep.DestFootageByPathForTest(destProj, f.Path) == nil {
+		if f.Path != "" && !f.IsSolid && !f.IsPlaceholder {
 			srcF = f
 			break
 		}
 	}
+	// re_duplicate_item_after.aep only contains solids; importFootageBlock cannot
+	// locate solid items in the root Fold (they are not stored as Item LISTs).
+	// Fall back to re_batch.aep which has file-backed footage.
 	if srcF == nil {
-		t.Skip("no importable (non-dup) file footage in fixture")
+		batchPath := filepath.Join("../../test_data", "re_batch.aep")
+		srcProj, destProj = openFileBacked(t, batchPath)
+		if srcProj == nil {
+			t.Skip("no file-backed footage in any available fixture")
+		}
+		for _, f := range srcProj.Footage {
+			if f.Path != "" && !f.IsSolid && !f.IsPlaceholder {
+				srcF = f
+				break
+			}
+		}
 	}
+	if srcF == nil {
+		t.Skip("no file-backed footage in fixture")
+	}
+	// openXProjPair / openFileBacked open the same file twice, so destProj
+	// already has srcF's Path → it would be a dedup hit. Drop dest footage
+	// sharing that Path so the fresh-import path is genuinely exercised.
+	var kept []*aep.Footage
+	for _, f := range destProj.Footage {
+		if f.Path != srcF.Path {
+			kept = append(kept, f)
+		}
+	}
+	destProj.Footage = kept
+	if aep.DestFootageByPathForTest(destProj, srcF.Path) != nil {
+		t.Fatalf("precondition: dest still has footage with path %q", srcF.Path)
+	}
+
 	preCount := len(destProj.Footage)
 	preNext := destProj.NextItemIDForTest()
 	destID, err := aep.ImportFootageBlockForTest(destProj, srcProj, srcF.ID, srcF.Name)
@@ -117,19 +168,25 @@ func TestImportFootageBlock(t *testing.T) {
 	if destID != preNext {
 		t.Errorf("imported footage destID = %d, want %d (head counter)", destID, preNext)
 	}
+	if destProj.NextItemIDForTest() != preNext+1 {
+		t.Errorf("nextItemID = %d, want %d (+1)", destProj.NextItemIDForTest(), preNext+1)
+	}
 	if len(destProj.Footage) != preCount+1 {
 		t.Errorf("destProj.Footage count = %d, want %d", len(destProj.Footage), preCount+1)
 	}
 	if destProj.CompositionByID(destID) != nil {
 		t.Errorf("destID resolved as a comp, want footage")
 	}
-	var ok bool
+	var found *aep.Footage
 	for _, f := range destProj.Footage {
-		if f.ID == destID && f.Path == srcF.Path {
-			ok = true
+		if f.ID == destID {
+			found = f
 		}
 	}
-	if !ok {
-		t.Errorf("imported footage not found with id=%d path=%q", destID, srcF.Path)
+	if found == nil {
+		t.Fatalf("imported footage id=%d not found in destProj.Footage", destID)
+	}
+	if found.Path != srcF.Path {
+		t.Errorf("imported footage Path = %q, want %q", found.Path, srcF.Path)
 	}
 }
