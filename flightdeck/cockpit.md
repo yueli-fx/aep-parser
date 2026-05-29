@@ -9,7 +9,7 @@
 
 1. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级，大 arc。
 2. **Layr Transform 3D 通道** — Orientation / Rotate X/Y / Position_Z；**需先有 3D layer 支持**（runtime 无 3D switch，V2.3）。
-3. **Stroke Line Cap/Join/Miter**（enum/scalar）— stroke body **已含 slot**（15 children），套路同子项⑧但**需先加 runtime model 字段+setter**（StrokeNode 暂无）。中等价值、可做。
+3. **Stroke Line Cap/Join/Miter**（enum/scalar）— 中等价值。**子项⑩ groundwork 更正**：stroke body **不含** 这些 slot（template 只有 Color/Opacity/Width/Dashes/Taper/Wave；旧注释说"含 full child set"是错的，默认值被 elide）；且 matchName **不是** `ADBE Vector Stroke Line Cap`（JSX 报 property-not-found）。需先查真实 matchName + 富化 stroke body（设非默认）+ 加 runtime model 字段/enum/setter。
 4. **Gradient W**（SetGradient）— **大 arc**。子项⑩ groundwork findings：① 默认 gradient 被 AE elide（连 G-Fill 默认都不写 prop.map Utf8）→ 须设自定义 stops 强制 emit；② re_gradient.aep 是 gradient **effect**（无 GCst/GCky）不是 shape gradient-fill，**无现成 in-repo fixture**；③ 存储 = `GCst > GCky > Utf8(prop.map XML)`（parse_properties.go:85），写=序列化 XML + 替换 Utf8 + length-variable（镜像 SetExpression）。需：gradient-fill fixture(自定义 stops) + XML 格式 RE + 序列化器 + API（Property.SetGradient 或新 G-Fill shape kind）+ 双版本 gate。
 5. **Fill/Stroke BlendMode·CompositeOrder、Rect/Ellipse Direction** — enum，低价值，缺 runtime setter。
 
