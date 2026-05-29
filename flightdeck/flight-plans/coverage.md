@@ -131,8 +131,14 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - `(g *VectorGroup) AddPath() (*PathNode, error)` + `SetVertices / SetClosed` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_path_body.bin`（AE-native scaffolding）+ splice `encodeBezier` 几何。`TestV2_2_Path_AEShipGate_AE20{20,25}`（distinct 三角形，re-save + 解析器反归一化解 anchor 验证）。
 - **ldat 顶点编码 bug 修复**：`encodeBezier` 曾存 `[anchor, in_i, out_i]`（本顶点 in/out），AE 实为 `[anchor, anchor+out_i, anchor_{i+1}+in_{i+1}]`（本顶点 out 控制点 + 下一顶点 in 控制点，wrap mod n，bbox 归一化）。`TestEncodeBezier_LdatMatchesAELayout`，验证与 AE-native 字节一致。详 RE：`../sketches/2026-05-29-path-embed-re-findings.md`。
 - **from-scratch path 崩溃 AE 2020**（0::42）→ 必须 embed（同 Ellipse 教训，但 path 是变长几何 splice，非 overwrite-in-place）。
-- **仍 deferred（V2.2.1 后续子项）**:
-  - Stroke: Go 端能 emit + parse，AE silent drop（需 fixture + embed bytes，Dashes/Taper/Wave 嵌套组）
+
+#### V2.2.1 子项③ (2026-05-29) — Stroke embed + Fill/Stroke Color 编码 RE 修复
+- `(g *VectorGroup) AddStroke() (*StrokeNode, error)` + `SetColor/SetWidth/SetOpacity` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_stroke_body.bin`（全 child set 含 Dashes/Taper/Wave 嵌套组）+ overwrite Color/Opacity/Width cdat。`TestV2_2_Stroke_AEShipGate_AE20{20,25}`（distinct 值 + re-save cdat 解码）。
+- **shape 颜色编码 RE 修复**：AE 存 `[A,R,G,B]×255` f64（非原始 `[r,g,b,a]×1.0`）。`encodeShapeColorBE` 统一 Fill+Stroke。修了长期 deferred 的"Fill Color 编码不准"——`lowerFillNode` 此前写原始 RGBA，可见色错。`TestLowerFillNode_ColorEncodingARGB255` + Ellipse gate re-save Fill 颜色校验。
+- 清理：移除 from-scratch 死代码 `nodeBodyTdgp` / `emptySubPropPlaceholder`（5 个 shape kind 全 embed）。
+- **V2.2.1 全部 5 shape kind（Rect/Ellipse/Path/Fill/Stroke）+ 地基 ldta + 颜色编码均 ship**。剩 deferred（正交）:
+  - Keyframe 持久化（所有 shape 流 + Layr Position）: first kf static fallback，需 RE lhd3/ldat 多关键帧注入。
+  - 各 shape 的次要子属性（Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction/Position/Roundness、Layr Transform Anchor/Scale/Rotation/Opacity）: runtime-only 不持久化。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Keyframe 持久化（Rect/Ellipse Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity: runtime-only 不持久化

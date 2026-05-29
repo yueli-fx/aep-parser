@@ -259,13 +259,13 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 |---|---|
 | `VectorGroup.AddEllipse` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_ellipse_body.bin` + overwrite Size/Position cdat。Direction 仍 AE 默认；动画仍 first-kf static fallback |
 | `VectorGroup.AddPath` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_path_body.bin` + splice `encodeBezier` 几何（shph/lhd3/ldat）。ldat 逐顶点布局 = `[anchor, anchor+outTangent_i, anchor_{i+1}+inTangent_{i+1}]`（bbox 归一化，wrap mod n；V2.2.1 RE 修正，曾错存本顶点 in/out）。`SetVertices` 仅线性段（切线置零）；动画仍 first-kf fallback。**注**：from-scratch path 曾 **崩溃 AE 2020**（0::42），故走 embed |
-| `VectorGroup.AddStroke` | Go 端能 emit + parse，但 AE 打开后 **silent drop layer** — 仍 deferred，需 AE fixture + embed 字节（Dashes/Taper/Wave 嵌套组） |
+| `VectorGroup.AddStroke` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_stroke_body.bin`（含 Blend Mode/Composite Order/Line Cap/Join/Miter + Dashes/Taper/Wave 嵌套组）+ overwrite Color/Opacity/Width cdat。其余子属性留 embed 默认；动画仍 first-kf fallback |
 
 > **AE 2020 地基修复（V2.2.1）**：ShapeLayer 的 ldta 大小现按 target 分支（160B AE 2020/22，164B AE 2025）。此前 buildLdtaBytes 硬编码 164B，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判为损坏并跳过——因 AE-2020 shape ship-gate 长期 skip 而未发现。详 `flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md`。
 
-### Fill Color 编码不准
+### Fill / Stroke Color 编码（V2.2.1 已 RE 修正）
 
-tolerance.aep 存 Fill Color 在 cdat[0..32] 但跟 JSX 0..1 输入不对齐（实测 JSX 0.5 → tolerance 字节 0x406fe0... ≈ 255）。我们 emit 用户值时直接写 f64 BE，AE 可能对值做内部 scaling，**可见色可能跟 SetColor 入参不一致**。V2.2.1 RE 真实编码。
+AE 存 shape 颜色为 **`[A,R,G,B] × 255` 的 f64 BE**（offset 0/8/16/24），不是原始 `[r,g,b,a] × 1.0`（RE 自 stroke tolerance fixture：JSX `[0,0,1,1]` → 磁盘 `[255,0,0,255]`，0x406fe0=255）。`encodeShapeColorBE` 统一编码，Fill + Stroke 共用。修复前 Fill 写原始 RGBA 导致可见色错；现经 AE round-trip 验证正确（Ellipse gate 解 re-saved Fill Color = ARGB×255）。
 
 ### Keyframes 不持久化
 
