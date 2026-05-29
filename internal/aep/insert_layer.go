@@ -85,7 +85,7 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 		return nil, fmt.Errorf("InsertLayer: src layer %q expected Ewst sibling after Layr, found %s", src.Name, chunkIDString(srcChildren[srcLayrIdx+1].FormType))
 	}
 
-	return spliceLayerClone(c, src, atIdx, srcLayrIdx, srcChildren, func(id uint32) uint32 { return id })
+	return spliceLayerClone(c, atIdx, srcLayrIdx, srcChildren, func(id uint32) uint32 { return id })
 }
 
 // spliceLayerClone deep-clones the source Layr block at srcLayrIdx (within
@@ -95,7 +95,7 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 // identity for same-Project inserts (bytes unchanged) and an itemIDMap lookup
 // for cross-Project inserts. Atomic over c.itemList / c.Layers / proj.nextItemID
 // / proj.Warnings.
-func spliceLayerClone(c *Composition, src *Layer, atIdx, srcLayrIdx int, srcChildren []*rifx.Chunk, sourceRemap func(uint32) uint32) (*Layer, error) {
+func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx.Chunk, sourceRemap func(uint32) uint32) (*Layer, error) {
 	// === Adaptive block end — scan leaf followers until next LIST/EOF ===
 	endIdx := srcLayrIdx + 2
 	for endIdx < len(srcChildren) && !srcChildren[endIdx].IsList() {
