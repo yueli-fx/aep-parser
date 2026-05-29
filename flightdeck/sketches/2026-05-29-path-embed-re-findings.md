@@ -1,6 +1,6 @@
 # Path embed bytes — RE findings（V2.2.1 子项②预备）
 
-**日期**: 2026-05-29　**状态**: sketch（RE 已起，未实现）
+**日期**: 2026-05-29　**状态**: ✅ RESOLVED — 子项② Path 已 ship（embed+splice，AE 2020+2025 双版本 ship-gate PASS，HEAD 8a85fb5）。ldat 编码已修（见下"待办 1"），from-scratch 崩溃 AE 2020 故走 embed（待办 2）。本文件保留 RE 过程供 Stroke 子项参考。
 
 ## 背景
 

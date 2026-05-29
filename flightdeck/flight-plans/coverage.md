@@ -127,8 +127,12 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 #### V2.2.1 (2026-05-29) — Ellipse embed bytes + AE 2020 ldta 地基修复
 - `(g *VectorGroup) AddEllipse() (*EllipseNode, error)` + `SetSize / SetPosition` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_ellipse_body.bin` + overwrite Ellipse Size/Position cdat（offset 0, f64 BE）。`TestV2_2_Ellipse_AEShipGate_AE20{20,25}`（assert-based：AE 接受层不 silent-drop + re-save cdat 保留值）。
 - **AE 2020 地基 bug 修复**：`buildLdtaBytes` 此前硬编码 164B ldta，AE 2020 判**所有** shape 图层（含 Rect+Fill）损坏并跳过；从未发现因 AE-2020 shape gate 长期 skip。改为按 target 分支（capability matrix `LdtaSize`：160 AE2020/22 / 164 AE25）。`TestLowerShapeLayer_LdtaSizeByTarget`。**Rect+Fill 在 AE 2020 现亦有效**（同 ldta 路径，Ellipse gate 已证该路径）。详 `../incident-reports/ae2020-shape-ldta-164-corrupt.md`。
+#### V2.2.1 子项② (2026-05-29) — Path embed+splice + ldat 编码 RE 修复
+- `(g *VectorGroup) AddPath() (*PathNode, error)` + `SetVertices / SetClosed` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_path_body.bin`（AE-native scaffolding）+ splice `encodeBezier` 几何。`TestV2_2_Path_AEShipGate_AE20{20,25}`（distinct 三角形，re-save + 解析器反归一化解 anchor 验证）。
+- **ldat 顶点编码 bug 修复**：`encodeBezier` 曾存 `[anchor, in_i, out_i]`（本顶点 in/out），AE 实为 `[anchor, anchor+out_i, anchor_{i+1}+in_{i+1}]`（本顶点 out 控制点 + 下一顶点 in 控制点，wrap mod n，bbox 归一化）。`TestEncodeBezier_LdatMatchesAELayout`，验证与 AE-native 字节一致。详 RE：`../sketches/2026-05-29-path-embed-re-findings.md`。
+- **from-scratch path 崩溃 AE 2020**（0::42）→ 必须 embed（同 Ellipse 教训，但 path 是变长几何 splice，非 overwrite-in-place）。
 - **仍 deferred（V2.2.1 后续子项）**:
-  - Path / Stroke: Go 端能 emit + parse，AE silent drop（需各自 fixture + embed bytes）
+  - Stroke: Go 端能 emit + parse，AE silent drop（需 fixture + embed bytes，Dashes/Taper/Wave 嵌套组）
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Keyframe 持久化（Rect/Ellipse Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity: runtime-only 不持久化

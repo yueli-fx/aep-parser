@@ -258,7 +258,8 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 | 字段 | 状态 |
 |---|---|
 | `VectorGroup.AddEllipse` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_ellipse_body.bin` + overwrite Size/Position cdat。Direction 仍 AE 默认；动画仍 first-kf static fallback |
-| `VectorGroup.AddPath / AddStroke` | Go 端能 emit + parse，但 AE 打开后 **silent drop layer** — 仍 deferred，需各自 AE fixture + embed 字节 |
+| `VectorGroup.AddPath` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_path_body.bin` + splice `encodeBezier` 几何（shph/lhd3/ldat）。ldat 逐顶点布局 = `[anchor, anchor+outTangent_i, anchor_{i+1}+inTangent_{i+1}]`（bbox 归一化，wrap mod n；V2.2.1 RE 修正，曾错存本顶点 in/out）。`SetVertices` 仅线性段（切线置零）；动画仍 first-kf fallback。**注**：from-scratch path 曾 **崩溃 AE 2020**（0::42），故走 embed |
+| `VectorGroup.AddStroke` | Go 端能 emit + parse，但 AE 打开后 **silent drop layer** — 仍 deferred，需 AE fixture + embed 字节（Dashes/Taper/Wave 嵌套组） |
 
 > **AE 2020 地基修复（V2.2.1）**：ShapeLayer 的 ldta 大小现按 target 分支（160B AE 2020/22，164B AE 2025）。此前 buildLdtaBytes 硬编码 164B，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判为损坏并跳过——因 AE-2020 shape ship-gate 长期 skip 而未发现。详 `flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md`。
 
