@@ -273,7 +273,8 @@ AE 存 shape 颜色为 **`[A,R,G,B] × 255` 的 f64 BE**（offset 0/8/16/24）�
 |---|---|
 | **Rect/Ellipse Size**（non-spatial Vec2） | ✅ **持久化**（AE 2020+2025 ship-gate PASS）— `injectAnimatedVec2`，non-spatial 块（value@0x08，bpk 88） |
 | **Fill/Stroke Color**（spatial-style dim4） | ✅ **持久化**（AE 2020+2025 ship-gate PASS）— `injectAnimatedColor`，spatial 块（value@0x38 ARGB×255，bpk 152） |
-| Layr/shape Position、Path | 仍 first-kf static fallback — spatial Vec2 bpk=128 ≠ `encodeKeyframes` 现公式，待 RE |
+| **Ellipse Position**（spatial motion-path Vec2） | ✅ **持久化**（AE 2020+2025 ship-gate PASS）— spatial 块 bpk 104 value@0x38 + 0x08 motion-path 标志（`valueLayout.motionPath`）。仅 AE 自动算的 ~0 spatial 切线与原生不同（AE 加载 recompute），值往返正确 |
+| Layr Position、Path | 仍 first-kf static fallback — Layr Position 是另一 spatial 变体（bpk=128，多于 Ellipse 的 104）且走 transform-group 路径，待 RE |
 
 通用机制：static tdbs `[tdsb tdsn tdb4 cdat tdum tduM]` ↔ animated `[tdsb tdsn tdb4 LIST(list)(lhd3+ldat) tdum tduM]`；`injectAnimatedStream` 共享：patch tdb4 static→animated 标志（@0x05 `&=~1`、@0x44 `=1`、@0x4f `&=~1`）+ cdat→LIST(list)。每帧块 = time@0 + interp(01 01)@4 + headerByte@7 + value（non-spatial@0x08 / spatial@0x38）+ ease。ldat 与 AE 原生字节一致。注意 `rifx.IDTdb4` 是**大写** legacy，现代 AE 用**小写** `tdb4`（大小写敏感坑）。
 

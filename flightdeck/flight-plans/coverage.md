@@ -138,8 +138,8 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - 清理：移除 from-scratch 死代码 `nodeBodyTdgp` / `emptySubPropPlaceholder`（5 个 shape kind 全 embed）。
 - **V2.2.1 全部 5 shape kind（Rect/Ellipse/Path/Fill/Stroke）+ 地基 ldta + 颜色编码均 ship**。
 
-#### V2.2.1 子项④ (2026-05-29) — shape keyframe 持久化（Size + Color）
-- **Rect/Ellipse Size**（non-spatial Vec2）+ **Fill/Stroke Color**（spatial-style dim4 ARGB×255）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_RectKf_*` + `TestV2_2_FillKf_*`；re-save 解 numKf+值）。
+#### V2.2.1 子项④ (2026-05-29) — shape keyframe 持久化（Size + Color + Ellipse Position）
+- **Rect/Ellipse Size**（non-spatial Vec2）+ **Fill/Stroke Color**（spatial-style dim4 ARGB×255）+ **Ellipse Position**（spatial motion-path Vec2 bpk 104）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_RectKf_*` + `TestV2_2_FillKf_*` + `TestV2_2_EllKf_*`；re-save 解 numKf+值）。Ellipse Position 仅 AE 自动 ~0 spatial 切线与原生不同（AE recompute），值往返正确；`valueLayout.motionPath` 在 0x08 写标志。
 - 机制 `injectAnimatedStream`：static tdbs 的 cdat ↔ animated `LIST(list)(lhd3+ldat)`；patch tdb4 标志（@0x05 `&=~1`、@0x44 `=1`、@0x4f `&=~1`）。ldat 与 AE 原生字节一致。`encodeKeyframes` non-spatial（value@0x08 bpk 88）/ spatial（value@0x38）两布局。**坑**：`rifx.IDTdb4` 是大写 legacy，实际小写 `tdb4`。
 - **仍 deferred keyframe**:
   - **Layr/shape Position**（spatial 真运动路径）：bpk=128（dim2，value@0x38 后 9 f64，≠ color 的 3·dim），布局含 spatial 切线，且走 transform-group 路径（`lowerLayerTransform`，非 shape node）+ 分离维 Position_0/_1。需独立 RE。

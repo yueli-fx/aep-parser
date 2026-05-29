@@ -8,9 +8,8 @@
 **先合并** `v3-phase5d-ellipse-embed` 到 main（Ellipse + ldta 修复）。
 
 **V2.2.1 剩余 keyframe / 子属性**（自主推进，勿停下问）：
-1. **Layr/shape Position keyframe**（spatial 真运动路径）— RE 已起：bpk=128（dim2，value@0x38 后 9 f64，≠ color 的 3·dim），含 spatial 切线，走 transform-group 路径（`lowerLayerTransform`）+ 分离维 Position_0/_1。dump 工具 `tmp_debug/dump_kf`、fixture `test_data/v2_2_shape_kf_re.aep` 已备。
-2. **Ellipse Position keyframe** — 疑非 spatial Vec2（同 Size），可 `injectAnimatedVec2` 直接接，但需先建 animated Ellipse fixture 验证。
-3. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级。
+1. **Layr Position keyframe**（spatial 真运动路径）— RE 已起：bpk=**128**（dim2，比 Ellipse Position 的 104 多，value@0x38 后更多字段），走 transform-group 路径（`lowerLayerTransform`，非 shape node）+ 分离维 Position_0/_1。dump 工具 `tmp_debug/dump_kf`、fixture `test_data/v2_2_shape_kf_re.aep` 已备。注：Ellipse Position（bpk 104）已落地，可参照其 spatial+motionPath 套路，但 Layr 的 bpk-128 布局需再 RE 差异字段。
+2. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级。
 4. **各 shape 次要子属性** — Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Line Cap/Join/Miter/Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform。多数 runtime-only；逐个 RE。
 
 **其它候选**：泛型 `DuplicateItem`（低优先，无 scripting API）、`ImportComposition`（需求驱动）。
