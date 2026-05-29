@@ -122,13 +122,17 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - `(s *ShapeLayer) RootGroup() *VectorGroup` — 取顶层 Contents 容器
 - `(g *VectorGroup) AddRect() (*RectNode, error)` / `AddFill() (*FillNode, error)` — 加入参数化 shape kid
 - Setter: `RectNode.SetSize([w, h]) / FillNode.SetColor([r,g,b,a])` static-only
-- **AE 接受 gate**: 通过 embed tolerance.aep 抽出的 3 处 boilerplate 字节 (Transform Group 1842B + Rect body 448B + Fill body 426B in `internal/aep/templates/`)；详 `../scars/v2-2-aelayer-structure.md`
-- **V2.2 alpha 限制**（V2.2.1 候选）:
-  - Ellipse / Path / Stroke: Go 端能 emit + parse，AE 会 silent drop（需各自 fixture + embed bytes）
+- **AE 接受 gate**: 通过 embed tolerance.aep 抽出的 boilerplate 字节 (Transform Group 1842B + Rect 448B + Fill 426B + **Ellipse 730B** in `internal/aep/templates/`)；详 `../scars/v2-2-aelayer-structure.md`
+
+#### V2.2.1 (2026-05-29) — Ellipse embed bytes + AE 2020 ldta 地基修复
+- `(g *VectorGroup) AddEllipse() (*EllipseNode, error)` + `SetSize / SetPosition` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_ellipse_body.bin` + overwrite Ellipse Size/Position cdat（offset 0, f64 BE）。`TestV2_2_Ellipse_AEShipGate_AE20{20,25}`（assert-based：AE 接受层不 silent-drop + re-save cdat 保留值）。
+- **AE 2020 地基 bug 修复**：`buildLdtaBytes` 此前硬编码 164B ldta，AE 2020 判**所有** shape 图层（含 Rect+Fill）损坏并跳过；从未发现因 AE-2020 shape gate 长期 skip。改为按 target 分支（capability matrix `LdtaSize`：160 AE2020/22 / 164 AE25）。`TestLowerShapeLayer_LdtaSizeByTarget`。**Rect+Fill 在 AE 2020 现亦有效**（同 ldta 路径，Ellipse gate 已证该路径）。详 `../incident-reports/ae2020-shape-ldta-164-corrupt.md`。
+- **仍 deferred（V2.2.1 后续子项）**:
+  - Path / Stroke: Go 端能 emit + parse，AE silent drop（需各自 fixture + embed bytes）
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
-  - Keyframe 持久化（Rect Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
+  - Keyframe 持久化（Rect/Ellipse Size / Fill Color / Layr Position 全部）: 不持久化，first kf 作 static fallback
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity: runtime-only 不持久化
-  - Rect Direction / Position / Roundness: runtime-only 不持久化
+  - Rect/Ellipse Direction、Rect Position/Roundness: runtime-only 不持久化
 
 ### Text
 

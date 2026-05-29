@@ -253,11 +253,14 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 | `FillNode.Opacity / BlendMode / CompositeOrder / FillRule` | runtime-only |
 | `FillNode.Color` keyframes | 仅 first kf 作 static fallback |
 
-### 不支持的 shape kind
+### shape kind 支持状态
 
 | 字段 | 状态 |
 |---|---|
-| `VectorGroup.AddEllipse / AddPath / AddStroke` | Go 端能 emit + parse，但 AE 打开后 **silent drop layer**（layers.length=0）— V2.2.1 需要各自 AE fixture + embed 字节 |
+| `VectorGroup.AddEllipse` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_ellipse_body.bin` + overwrite Size/Position cdat。Direction 仍 AE 默认；动画仍 first-kf static fallback |
+| `VectorGroup.AddPath / AddStroke` | Go 端能 emit + parse，但 AE 打开后 **silent drop layer** — 仍 deferred，需各自 AE fixture + embed 字节 |
+
+> **AE 2020 地基修复（V2.2.1）**：ShapeLayer 的 ldta 大小现按 target 分支（160B AE 2020/22，164B AE 2025）。此前 buildLdtaBytes 硬编码 164B，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判为损坏并跳过——因 AE-2020 shape ship-gate 长期 skip 而未发现。详 `flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md`。
 
 ### Fill Color 编码不准
 
