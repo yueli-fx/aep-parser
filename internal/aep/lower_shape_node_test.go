@@ -112,6 +112,20 @@ func TestLowerFillNode_HasColorAndOpacity(t *testing.T) {
 	}
 }
 
+// TestLowerFillNode_ColorEncodingARGB255 pins the V2.2.1 shape-color encoding:
+// AE stores Fill/Stroke colors as [A,R,G,B] × 255 f64 BE, NOT raw [r,g,b,a].
+// RE'd from the stroke tolerance fixture (JSX [0,0,1,1] → disk [255,0,0,255]).
+func TestLowerFillNode_ColorEncodingARGB255(t *testing.T) {
+	f := aep.NewFillNode()
+	_ = f.SetColor([4]float64{1, 0, 0, 1}) // red, alpha 1
+	chunk, err := aep.LowerShapeNodeForTest(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Expected ARGB×255 = [255, 255, 0, 0].
+	assertEllipseStreamCdat(t, chunk, "ADBE Vector Fill Color", []float64{255, 255, 0, 0})
+}
+
 func TestLowerStrokeNode_HasFullChildSet(t *testing.T) {
 	s := aep.NewStrokeNode()
 	chunk, err := aep.LowerShapeNodeForTest(s)

@@ -196,6 +196,21 @@ func runV2_2EllipseShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	// re-saved (sidesteps the .value ExtendScript quirk). AE writes the value
 	// at cdat offset 0 (BE f64), same as the native tolerance fixture.
 	assertResavedEllipse(t, resavedAEP, [2]float64{260, 140}, [2]float64{70, 90})
+
+	// Fill color round-trips with the V2.2.1 ARGB×255 encoding (fill set to
+	// [0.5,0.5,0.5,1] → ARGB×255 [255,127.5,127.5,127.5]).
+	root := parseAEP(t, resavedAEP)
+	if fc := streamCdat(root, "ADBE Vector Fill Color"); len(fc) >= 32 {
+		rd := func(off int) float64 { return math.Float64frombits(binary.BigEndian.Uint64(fc[off : off+8])) }
+		want := []float64{255, 127.5, 127.5, 127.5}
+		for i, w := range want {
+			if got := rd(i * 8); math.Abs(got-w) > 1.0 {
+				t.Errorf("resaved fill color[%d] = %.4g, want %.4g (ARGB×255)", i, got, w)
+			}
+		}
+	} else {
+		t.Errorf("resaved fill color cdat missing/short")
+	}
 }
 
 // assertResavedEllipse parses an AE-resaved .aep, locates the Ellipse Size /

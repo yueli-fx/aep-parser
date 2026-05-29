@@ -352,12 +352,11 @@ func findListByForm(c *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
 // V2.2 alpha limitations (V2.2.1 work):
 //   - Fill Opacity / Blend Mode / Composite Order / Fill Rule: tolerance
 //     elides; embedded body has no slot to overwrite. Runtime-only API.
-//   - Color encoding: tolerance.aep stores Fill Color cdat in a non-obvious
-//     scale (bytes don't match user 0-1 input as f64 BE; e.g. JSX 0.5 →
-//     disk byte 0x406fe... ≈ 255). iter-8 writes user's [r,g,b,a] as f64
-//     BE in cdat[0..32] regardless — if AE applies internal scaling, visible
-//     color may not match user input. V2.2.1 will RE the encoding.
 //   - Animated Color: first keyframe value used as static fallback.
+//
+// Color encoding (V2.2.1 RE, via the stroke tolerance fixture): AE stores
+// shape colors as [A,R,G,B] × 255 f64 BE (encodeShapeColorBE), NOT raw
+// [r,g,b,a] × 1.0. The pre-V2.2.1 raw encoding produced wrong visible colors.
 func lowerFillNode(f *FillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeFillBody()
 	if err != nil {
@@ -367,7 +366,7 @@ func lowerFillNode(f *FillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	if f.color.mode == StreamModeAnimated && len(f.color.keyframes) > 0 {
 		val = f.color.keyframes[0].Value
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeF64sBE(val[0], val[1], val[2], val[3]))
+	overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(val))
 	return body, nil
 }
 
