@@ -1,11 +1,12 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-30 by claude（`internal/aep` package 重组 **landed on main**：`<stage>_<domain>` 7 前缀命名轴（scene_/codec_/parse_/lower_/write_/back_/mutate_）+ 拆 types_core/layer_accessors + 测试按 feature 拆 + AST 边界守卫 `arch_boundary_test.go`（scene_ 禁 import rifx / codec_ 禁 scene 类型）。零行为变更：byte-identical 115 fixture + API-set 不变 + AE 双版本 ship-gate 24/24 PASS。详见 logbook + `landed/specs/2026-05-30-aep-package-reorg-design.md`。）
+**Last updated**: 2026-05-30 by claude（注释纪律清理 pass **landed on main**（merge of `chore/comment-discipline-cleanup`，cleanup commit 4fcdf0c）：51 文件，`internal/aep` ~234 处 process-meta 注释债（Phase/Inv/iter/RE-S/spec §/doc 路径/日期戳/TODO）清空，保留 Mirrors py-aep·AE-script 参照 + deprecated 域事实 + 每条 RE finding 事实。手工 19 处定 rubric 后 6 并行 subagent 分文件清 + 中央复核补漏 1 处。`go vet` + `go test ./...` 全绿，零行为/零 API 变更。残留 14 处坐标在 string literal 留作可选 follow-up。详 logbook。）
 **Active focus**: 无 active 实现线。
 
 ## Next session
 
-1. **注释纪律清理 pass**（comments.md §6，**单独分支**）：`internal/aep` 源文件约 **233 处** §3 违规（`spec §` / `Phase N` / `Inv-N` / `iter N` / 日期戳 / 历史考古等），系预存债（重组只原样搬运注释）。跨 ~30 文件，逐条删/改写/搬 commit-msg；按 comments.md §6 grep 收口。
+1. **（可选，小）string-literal 内 process-坐标清理** — 清 14 处藏在 `fmt.Errorf` 报错串 + test 诊断串里的 Phase/RE-S/Inv 坐标（`insert_layer_test.go:138` 断言 `strings.Contains(…, "deferred to Phase 5C.1")` 与产线串耦合，须两侧同改）→ 让 §6 grep 含代码串也零命中。非注释、出 comments.md scope，纯洁癖。
+2. **否则从下方长线 backlog 选下一条实现线**（用户定方向）。
 
 > **长线 backlog**（大 arc 或缺 runtime setter）：
 
