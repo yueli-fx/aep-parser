@@ -17,10 +17,10 @@
 ```powershell
 # 1. 编译 + vet + 单测全绿
 go build ./... ; if ($LASTEXITCODE) { throw } ; go vet ./internal/aep/ ; if ($LASTEXITCODE) { throw } ; go test -count=1 ./internal/aep/ ; if ($LASTEXITCODE) { throw }
-# 2. 公共 API 零 diff（基线 tmp/api_before.txt 于 Task 0 生成）
-#    go doc -all 输出**内嵌源文件名行**(`internal/aep/foo.go`)且改名会重排文件分组、移动其周围**空行** → 二者都是噪声。
-#    指纹须同时滤掉「文件名行」+「空行」，否则改名假阳性。基线 api_before.txt 已是此归一化形式(~3506 行)。
-(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' -notmatch '^\s*$' > tmp/api_after.txt ; (Compare-Object (Get-Content tmp/api_before.txt) (Get-Content tmp/api_after.txt))  # 输出须为空
+# 2. 公共 API 零变更（基线 tmp/api_before.txt 是**排序归一化**指纹, ~3506 行; 实现者**禁止重新生成它**）
+#    go doc -all 输出: ① 内嵌源文件名行(`internal/aep/foo.go`) ② 改名/拆分会重排声明顺序+移动空行 → 全是噪声。
+#    指纹须: 滤文件名行 + 滤空行 + **Sort-Object**(集合比对, 消除重排假阳性)。base 与 after 都排序后比, 空 = exported API 集合不变。
+(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' -notmatch '^\s*$' | Sort-Object > tmp/api_after.txt ; (Compare-Object (Get-Content tmp/api_before.txt) (Get-Content tmp/api_after.txt))  # 输出须为空
 # 3. round-trip 字节稳定（基线 Task 1 生成）
 go test -count=1 ./internal/aep/ -run TestReorgRoundtripBaseline   # 须 PASS
 ```
@@ -46,9 +46,9 @@ git checkout -b refactor/aep-package-reorg
 
 ```powershell
 New-Item -ItemType Directory -Force tmp | Out-Null
-(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' -notmatch '^\s*$' > tmp/api_before.txt
+(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' -notmatch '^\s*$' | Sort-Object > tmp/api_before.txt
 ```
-`go doc -all` 在每个文件声明前加一行源文件名（`internal/aep/foo.go`），且改名会重排文件分组、移动周围空行。**两者都滤掉**（文件名行 + 空行），剩下的 exported 声明集合才是稳定 API 指纹。
+`go doc -all` 每个文件声明前加源文件名行，且改名/拆分会重排声明顺序、移动空行。指纹须滤文件名行 + 滤空行 + **排序**（变成顺序无关的集合指纹）。一旦生成，**整个重组期间不可重新生成**（重排或新增 test 文件都会变；后续 Gate 只读它做比对）。
 
 - [ ] **Step 3: 确认基线非空且无文件名残留**
 
