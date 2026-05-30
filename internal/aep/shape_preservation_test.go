@@ -1,17 +1,17 @@
 // internal/aep/shape_preservation_test.go
 //
-// V2.2 Phase 5 Task 5.4 — Tier 3 nested-group semantic preservation.
+// Tier 3 nested-group semantic preservation.
 //
-// Fixture `test_data/v2_2_shape_tolerance.aep` is produced by Phase 5
-// Task 5.3 via tmp_debug/gen_shape_tolerance.jsx (requires AE). Until
+// Fixture `test_data/v2_2_shape_tolerance.aep` is produced
+// via tmp_debug/gen_shape_tolerance.jsx (requires AE). Until
 // the fixture lands the test SKIPs cleanly per V1 pattern.
 //
-// Semantic-level assertions (V2.2 minimum preservation set per spec §4.0):
+// Semantic-level assertions (minimum preservation set):
 //   - layer count unchanged across roundtrip
 //   - layer name unchanged across roundtrip
 //   - V1 ShapePrimitive count unchanged (proxy for "nested group topology
 //     intact" without needing per-byte chunk-tree walk — opaque chunk
-//     fidelity is the subject of Task 5.5)
+//     fidelity is covered separately)
 package aep_test
 
 import (

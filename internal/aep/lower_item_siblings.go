@@ -1,19 +1,17 @@
 // internal/aep/lower_item_siblings.go
 //
-// Phase 2 Task 2.4 — formalize V2.1's "item sibling chunks" logic as a
-// Phase 2 serializer primitive. Pure refactor: behavior unchanged from V2.1
-// (still deep-clones from the AE 2020 dummy substrate); only the call shape
-// moves to give V3 brainstorm a named primitive to reference.
+// The "item sibling chunks" serializer primitive. Behavior unchanged from V2.1
+// (still deep-clones from the AE 2020 dummy substrate); the call shape moves to
+// give a named primitive to reference.
 //
 // Background: AE expects each Item LIST in a Fold to be followed by 8
 // sibling chunks (FEE LIST + fvdv / fiop / ftts / foac / fiac / fipc / fifl).
-// Missing them → AE 25 reports "文件数据丢失" (per flightdeck/incident-reports/
-// ae25-acceptance-gate.md). V2.1 deep-cloned them from the embedded dummy
-// template inline in `Project.NewComposition`; Phase 2 extracts to give the
-// primitive a name + dedicated file (Inv-2: one file, one responsibility).
+// Missing them → AE 25 reports "文件数据丢失". V2.1 deep-cloned them from the
+// embedded dummy template inline in `Project.NewComposition`; this extracts the
+// primitive to its own file (one file, one responsibility).
 //
-// V2.2 escape hatch: substrate is bootstrap (Inv-6), not semantic template —
-// chunks are deep-cloned per call so mutation doesn't leak.
+// The substrate is bootstrap, not a semantic template — chunks are deep-cloned
+// per call so mutation doesn't leak.
 package aep
 
 import "github.com/example/aep-parser/internal/rifx"

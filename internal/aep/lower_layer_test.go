@@ -1,6 +1,6 @@
 // internal/aep/lower_layer_test.go
 //
-// Phase 2 Task 2.3 tests — chunk-shape level only. ShapeLayer → LIST(Layr).
+// Chunk-shape level tests only. ShapeLayer → LIST(Layr).
 package aep_test
 
 import (
@@ -54,8 +54,7 @@ func TestLowerShapeLayer_LdtaSizeByTarget(t *testing.T) {
 	// ("项目文件似乎已损坏（跳过部分：1）"), silently skipping the layer; AE 2025
 	// reads its native 164 B. Each target must emit its native ldta size:
 	// 160 B for AE 2020/2022, 164 B for AE 2025. Confirmed by AE-2020-native
-	// reference (ldta 160 B) + AE 2020 ship-gate (see incident report
-	// flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md).
+	// reference (ldta 160 B) + AE 2020 ship-gate.
 	cases := []struct {
 		target aep.AETarget
 		want   int

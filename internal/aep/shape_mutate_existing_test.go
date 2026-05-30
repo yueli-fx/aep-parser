@@ -1,8 +1,8 @@
 // internal/aep/shape_mutate_existing_test.go
 //
-// V2.2 Phase 4 Task 4.4 — exercises the "open existing → mutate →
-// roundtrip" path. Fixture v2_2_shape_tolerance.aep is produced by
-// Phase 5 Task 5.3; until then this test skips cleanly so it doesn't
+// Exercises the "open existing → mutate →
+// roundtrip" path. Fixture v2_2_shape_tolerance.aep is produced by AE;
+// until it exists this test skips cleanly so it doesn't
 // block PASS counts.
 package aep_test
 

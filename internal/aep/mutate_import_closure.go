@@ -14,7 +14,7 @@ func isFileBacked(f *Footage) bool {
 }
 
 // destFootageByPath returns the first file-backed footage in p whose Path
-// equals path, or nil. Used for cross-Project footage dedup (5C.1).
+// equals path, or nil. Used for cross-Project footage dedup.
 func destFootageByPath(p *Project, path string) *Footage {
 	if path == "" {
 		return nil
@@ -275,8 +275,8 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 // fresh dest layer ID per layer (rewriting ldta @0x00 and remapping intra-comp
 // ParentID @0x84 / explicit matte @0xA0 through the local srcLayerID→destLayerID
 // map), and returns the Layr LIST chunks (for the later cross-comp source-ref
-// remap pass). Mirrors DuplicateComposition's two-pass pattern locally (the 5D
-// file is deliberately left untouched).
+// remap pass). Runs the same two-pass remap (alloc IDs, then rewrite refs)
+// that DuplicateComposition uses.
 func remapClonedCompLayerLayrs(p *Project, dupItemList *rifx.Chunk) ([]*rifx.Chunk, error) {
 	idMap := make(map[uint32]uint32)
 	var layrs []*rifx.Chunk

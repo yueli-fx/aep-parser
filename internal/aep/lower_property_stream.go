@@ -1,19 +1,17 @@
 // internal/aep/lower_property_stream.go
 //
-// Phase 2 Task 2.1 — 5 typed lowering primitives that turn PropertyStream[T]
-// into a LIST(tdgp) chunk subtree (tdmn + LIST(tdbs)(tdsb + tdsn + tdb4 +
-// cdat OR LIST(list)(lhd3 + ldat))).
+// 5 typed lowering primitives that turn PropertyStream[T] into a LIST(tdgp)
+// chunk subtree (tdmn + LIST(tdbs)(tdsb + tdsn + tdb4 + cdat OR
+// LIST(list)(lhd3 + ldat))).
 //
-// Per V2.2 strategy (see spec §3.6 / §4.4): the builder ALWAYS emits cdat /
-// the full keyframe substructure even when values equal AE defaults. AE
-// elides defaults in its own writer; we don't replicate that (V3 may revisit).
-// AE accepts the non-elided form. Phase 4 roundtrip is the byte-exact gate.
+// The builder ALWAYS emits cdat / the full keyframe substructure even when
+// values equal AE defaults. AE elides defaults in its own writer; we don't
+// replicate that (V3 may revisit). AE accepts the non-elided form.
 //
-// Byte layouts are sourced from Phase 0 RE findings recorded in
-// `flightdeck/specs/2026-05-22-v2-2-layer-creation-design.md` §8 (RE-S2 / S5a / S6 / S7 /
-// S8). Where a single byte was observed but its meaning is unverified, the
-// constant carries an "observed" comment and the layout falls back to a
-// canonical fixture value rather than a synthesized guess.
+// Byte layouts are sourced from RE findings of AE-saved fixtures. Where a
+// single byte was observed but its meaning is unverified, the constant carries
+// an "observed" comment and the layout falls back to a canonical fixture value
+// rather than a synthesized guess.
 package aep
 
 import (
@@ -24,11 +22,11 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-// lowerCtx is the serializer-side lowering state (spec §4.2). Per Inv-2 +
-// "Inv strengthening: lowerCtx carries lowering state only", it does NOT
-// hold runtime-graph handles. tickRate converts seconds → ticks for keyframe
-// time fields; capabilities is reserved for V3 (currently always empty —
-// see capability_matrix.go); nextLayerID is plumbed for Phase 3.
+// lowerCtx is the serializer-side lowering state. It carries lowering state
+// only — it does NOT hold runtime-graph handles. tickRate converts seconds →
+// ticks for keyframe time fields; capabilities is reserved for V3 (currently
+// always empty — see capability_matrix.go); nextLayerID is plumbed for the
+// layer-creation entry points.
 type lowerCtx struct {
 	tickRate     float64
 	compDuration float64 // seconds — owning comp's Duration (for ldta out-point)
@@ -37,11 +35,11 @@ type lowerCtx struct {
 }
 
 // NewLowerCtxForTest exports a default lowerCtx for unit tests. Production
-// code should not call this — lowerCtx is constructed internally by Phase
-// 3+ entry points (NewShapeLayer, WriteAEP).
+// code should not call this — lowerCtx is constructed internally by the
+// layer-creation entry points (NewShapeLayer, WriteAEP).
 func NewLowerCtxForTest() *lowerCtx {
 	return &lowerCtx{
-		tickRate:     30720, // AE 30 fps default per RE-S6 (cdta @0x08)
+		tickRate:     30720, // AE 30 fps default (cdta @0x08)
 		capabilities: Capabilities(TargetAE2020),
 	}
 }
@@ -54,7 +52,7 @@ func LowerFloat64Stream(ps *PropertyStream[float64], matchName, displayName stri
 }
 
 // LowerVec2Stream emits LIST(tdgp) for a 2D PropertyStream[[2]float64].
-// Hot-path use is Layer Position (spatial 2D, per RE-S6 header07=0x07).
+// Hot-path use is Layer Position (spatial 2D, header07=0x07).
 func LowerVec2Stream(ps *PropertyStream[[2]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	return lowerStream[[2]float64](ps.mode, encode2D, valueLayout{dim: 2, headerByte: 0x07, spatial: true}, matchName, displayName, ps.static, ps.keyframes, ctx)
 }
@@ -71,7 +69,7 @@ func LowerColorStream(ps *PropertyStream[[4]float64], matchName, displayName str
 
 // LowerPathStream emits LIST(tdgp) for a BezierPath PropertyStream. Unlike
 // the scalar/vector streams, AE encodes BezierPath via LIST(om-s) holding a
-// shap/shph/lhd3/ldat (f32 BE) substructure — NOT cdat float64 (RE-S5b).
+// shap/shph/lhd3/ldat (f32 BE) substructure — NOT cdat float64.
 func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	tdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	tdgp.Children = append(tdgp.Children, makeTdmn(matchName))
@@ -79,7 +77,7 @@ func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName stri
 	oms := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOmS}
 
 	// First child of om-s: a tdbs holding tdsb + tdsn + tdb4 + cdat(4B flag).
-	// Per RE-S5b: tdb4 dim@0x03=1, cdat is 4 bytes 0x00000000 (enable/flag).
+	// tdb4 dim@0x03=1, cdat is 4 bytes 0x00000000 (enable/flag).
 	innerTdbs := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdbs}
 	innerTdbs.Children = append(innerTdbs.Children,
 		makeTdsb(),
@@ -127,7 +125,7 @@ func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName stri
 // --- Generic stream core --------------------------------------------------
 
 // valueLayout captures the per-property byte-layout knobs needed by tdb4
-// + keyframe encoding (dimension count + RE-S6 header07 byte).
+// + keyframe encoding (dimension count + header07 byte).
 type valueLayout struct {
 	dim        int  // 1 / 2 / 3 / 4
 	headerByte byte // header07 value: 0x07 spatial / 0x01 4D-style / 0x00 non-spatial
@@ -207,17 +205,17 @@ func lowerStream[T any](
 	return tdgp, nil
 }
 
-// iter-7: splitVec2Stream removed — lowerLayerTransform no longer
-// constructs Position_0/_1 from scratch; tolerance-boilerplate approach
-// embeds them ready-formed and lowerLayerTransform only overwrites cdat
-// scalar values via overwriteScalarCdat. V2.3 may re-introduce when
-// proper Layr Transform keyframe persistence is built.
+// splitVec2Stream removed — lowerLayerTransform no longer constructs
+// Position_0/_1 from scratch; the tolerance-boilerplate approach embeds them
+// ready-formed and lowerLayerTransform only overwrites cdat scalar values via
+// overwriteScalarCdat. V2.3 may re-introduce when proper Layr Transform
+// keyframe persistence is built.
 
 // --- Chunk builders -------------------------------------------------------
 
 // padMatchName returns a 40-byte NUL-padded ASCII buffer carrying the
-// match-name. AE writes tdmn names as a fixed 40-byte slot (RE observation
-// across every probed fixture).
+// match-name. AE writes tdmn names as a fixed 40-byte slot (observed across
+// every probed fixture).
 func padMatchName(s string) []byte {
 	b := make([]byte, 40)
 	copy(b, []byte(s))
@@ -229,18 +227,18 @@ func makeTdmn(matchName string) *rifx.Chunk {
 }
 
 // makeTdsb returns a tdsb chunk carrying the standard subprop-flag bits.
-// RE-S2/S4/S5a all observed hex `00000001` on user-facing leaf properties.
-// (Container groups use other flag values, e.g. `00000401` for Root Vectors
-// Group per RE-S3 — handled separately at the call site if needed.)
+// AE-saved fixtures all observed hex `00000001` on user-facing leaf
+// properties. (Container groups use other flag values, e.g. `00000401` for
+// Root Vectors Group — handled separately at the call site if needed.)
 func makeTdsb() *rifx.Chunk {
 	return &rifx.Chunk{ID: rifx.ChunkID{'t', 'd', 's', 'b'}, Data: []byte{0x00, 0x00, 0x00, 0x01}}
 }
 
 // makeTdsbContainer returns the `0x00000401` variant observed at user-extensible
-// shape-container levels per tolerance.aep iter-5 RE: the Root Vectors Group
-// body, the Vectors Group body. AE appears to set the 0x0400 bit to mark
-// "this group accepts addProperty()" — non-extensible structural bodies
-// (Vector Group routing body, empty placeholders, leaf tdbs) keep 0x00000001.
+// shape-container levels in tolerance.aep: the Root Vectors Group body, the
+// Vectors Group body. AE appears to set the 0x0400 bit to mark "this group
+// accepts addProperty()" — non-extensible structural bodies (Vector Group
+// routing body, empty placeholders, leaf tdbs) keep 0x00000001.
 func makeTdsbContainer() *rifx.Chunk {
 	return &rifx.Chunk{ID: rifx.ChunkID{'t', 'd', 's', 'b'}, Data: []byte{0x00, 0x00, 0x04, 0x01}}
 }
@@ -261,12 +259,12 @@ func makeTdsn(displayName string) *rifx.Chunk {
 }
 
 // tdb4CanonicalHead is the 16-byte tdb4 head observed across every probed
-// scalar/vector fixture in RE-S2 / RE-S5a / RE-S5c / RE-S5d:
+// scalar/vector fixture:
 //
 //	db99 [dim_u16_BE] [headerByte byte] [flags 0x00] ...
 //
-// Bytes 0x04..0x05 = 0x0001 (constant); byte 0x06 = headerByte (RE-S2
-// observed 0x07 for Orientation; 0x00 for scalars; etc.); byte 0x07 = 0x00.
+// Bytes 0x04..0x05 = 0x0001 (constant); byte 0x06 = headerByte (observed
+// 0x07 for Orientation; 0x00 for scalars; etc.); byte 0x07 = 0x00.
 // The remaining 108 bytes are AE-internal padding + a trailing constant
 // `00 00 78 00` at 0x0C..0x0F (observed everywhere). V2.2 emits the
 // canonical 124-byte tdb4 with the head + zero padding to total 124.
@@ -274,15 +272,15 @@ func makeTdb4(layout valueLayout) *rifx.Chunk {
 	d := make([]byte, 124)
 	d[0] = 0xdb
 	d[1] = 0x99
-	// @0x02..0x03: dim count u16 BE. RE observed 0x0001/0x0002/0x0004 at @0x02-0x03.
+	// @0x02..0x03: dim count u16 BE. Observed 0x0001/0x0002/0x0004 at @0x02-0x03.
 	binary.BigEndian.PutUint16(d[2:4], uint16(layout.dim))
 	d[4] = 0x00
-	d[5] = 0x01 // constant per RE
+	d[5] = 0x01 // constant
 	d[6] = layout.headerByte
 	d[7] = 0x00
-	// @0x08..0x0B: observed 0x00000000 (RE-S2 Position_0) or 0xffffffff (RE-S5a Ellipse Size).
+	// @0x08..0x0B: observed 0x00000000 (Position_0) or 0xffffffff (Ellipse Size).
 	// AE accepts 0; that's what we emit. The 4-byte trailing constant @0x0C..0x0F = `00 00 78 00`
-	// (RE-S2 / S5a observed).
+	// (observed).
 	d[0x0C] = 0x00
 	d[0x0D] = 0x00
 	d[0x0E] = 0x78
@@ -295,15 +293,13 @@ func makeTdb4(layout valueLayout) *rifx.Chunk {
 // makeCdat returns a cdat chunk holding `valueBytes` in the first
 // `dim * 8` bytes, padded with zeros up to AE's canonical footprint.
 //
-// AE's cdat padding (RE-S2 / S5a observed): 40B for dim=1, 48B for dim=2
-// non-spatial (RE-S5a Position), 80B for dim=2 with hint-range / spatial
-// (RE-S5a Size), 96B for dim=4 (RE-S5d Stroke Color). V2.2 picks a single
-// canonical size per dim — value bytes only depend on `dim*8`. The exact
-// padding chosen is the AE-observed minimum that's been seen to round-trip:
+// AE's cdat padding (observed): 40B for dim=1, 48B for dim=2 non-spatial
+// (Position), 80B for dim=2 with hint-range / spatial (Size), 96B for dim=4
+// (Stroke Color). V2.2 picks a single canonical size per dim — value bytes
+// only depend on `dim*8`. The exact padding chosen is the AE-observed minimum
+// that's been seen to round-trip:
 //
 //	dim=1 → 40B   dim=2 → 48B   dim=3 → 56B   dim=4 → 96B
-//
-// Phase 4 roundtrip will validate; if AE rejects, adjust per-dim padding.
 func makeCdat(valueBytes []byte, layout valueLayout) *rifx.Chunk {
 	size := canonicalCdatSize(layout.dim)
 	d := make([]byte, size)
@@ -314,13 +310,13 @@ func makeCdat(valueBytes []byte, layout valueLayout) *rifx.Chunk {
 func canonicalCdatSize(dim int) int {
 	switch dim {
 	case 1:
-		return 40 // RE-S2 (Position_0), RE-S5c (Opacity), RE-S5d (Width / Opacity)
+		return 40 // Position_0, Opacity, Width / Opacity
 	case 2:
-		return 48 // RE-S5a (Ellipse Position; 6 × f64)
+		return 48 // Ellipse Position; 6 × f64
 	case 3:
-		return 56 // 7 × f64 (extrapolated; Phase 4 may adjust)
+		return 56 // 7 × f64 (extrapolated)
 	case 4:
-		return 96 // RE-S5d (Stroke Color: 12 × f64)
+		return 96 // Stroke Color: 12 × f64
 	default:
 		return dim * 8
 	}
@@ -328,14 +324,14 @@ func canonicalCdatSize(dim int) int {
 
 // --- Keyframe encoding ----------------------------------------------------
 
-// encodeKeyframes builds the LIST(list)(lhd3 + ldat) container per RE-S6/S7.
+// encodeKeyframes builds the LIST(list)(lhd3 + ldat) container.
 // lhd3 is 52 bytes (magic + numKeyframes + bpk + a handful of canonical
 // constants). ldat carries N × bpk bytes; bpk depends on the layout style:
 //
-//	spatial-style (RE-S6): bpk = 0x38 + 3*dim*8 (128 for dim=2)
-//	non-spatial:           bpk = 0x08 + 5*dim*8 (48 for dim=1, 88 for dim=2)
+//	spatial-style: bpk = 0x38 + 3*dim*8 (128 for dim=2)
+//	non-spatial:   bpk = 0x08 + 5*dim*8 (48 for dim=1, 88 for dim=2)
 //
-// Time field within each block = seconds * ctx.tickRate (RE-S6/S7 confirmed).
+// Time field within each block = seconds * ctx.tickRate.
 func encodeKeyframes[T any](kfs []StreamKeyframe[T], layout valueLayout, enc encodeFunc[T], ctx *lowerCtx) (*rifx.Chunk, error) {
 	if len(kfs) == 0 {
 		return nil, fmt.Errorf("encodeKeyframes: empty keyframe slice (caller should pick StreamModeStatic)")
@@ -346,19 +342,19 @@ func encodeKeyframes[T any](kfs []StreamKeyframe[T], layout valueLayout, enc enc
 
 	bpk := bytesPerKeyframe(layout)
 
-	// lhd3 — 52 bytes per RE-S6. Magic + numKeyframes @0x08 + bpk @0x10.
-	// Bytes @0x0C/0x14/0x18/0x1C have RE-observed constants; we replicate
-	// the most-common values (Phase 0 RE-S6 dump of Layer Position 2D).
+	// lhd3 — 52 bytes. Magic + numKeyframes @0x08 + bpk @0x10.
+	// Bytes @0x0C/0x14/0x18/0x1C have observed constants; we replicate
+	// the most-common values (from the Layer Position 2D dump).
 	lhd3Data := make([]byte, 52)
 	lhd3Data[0] = 0x00
 	lhd3Data[1] = 0xd0
 	lhd3Data[2] = 0x0b
 	lhd3Data[3] = 0xee
 	binary.BigEndian.PutUint32(lhd3Data[0x08:0x0C], uint32(len(kfs)))
-	binary.BigEndian.PutUint32(lhd3Data[0x0C:0x10], 1) // RE-S6 constant
+	binary.BigEndian.PutUint32(lhd3Data[0x0C:0x10], 1) // observed constant
 	binary.BigEndian.PutUint32(lhd3Data[0x10:0x14], uint32(bpk))
-	// @0x14..0x1F: RE-S6 observed `00000004 00000001 00000004`. Semantics
-	// not pinned; replicating verbatim. TODO: confirm via Phase 4 roundtrip.
+	// @0x14..0x1F: observed `00000004 00000001 00000004`. Semantics
+	// not pinned; replicating verbatim.
 	binary.BigEndian.PutUint32(lhd3Data[0x14:0x18], 4)
 	binary.BigEndian.PutUint32(lhd3Data[0x18:0x1C], 1)
 	binary.BigEndian.PutUint32(lhd3Data[0x1C:0x20], 4)
@@ -380,7 +376,7 @@ func encodeKeyframes[T any](kfs []StreamKeyframe[T], layout valueLayout, enc enc
 
 func bytesPerKeyframe(layout valueLayout) int {
 	if layout.spatial {
-		return 0x38 + 3*layout.dim*8 // RE-S6: 128 for dim=2
+		return 0x38 + 3*layout.dim*8 // 128 for dim=2
 	}
 	return 0x08 + 5*layout.dim*8 // mirrors layoutFor / decodeEasing (non-spatial)
 }
@@ -402,9 +398,9 @@ func writeKeyframeBlock[T any](blk []byte, kf StreamKeyframe[T], layout valueLay
 
 	if layout.spatial {
 		// Spatial-style: ease at 0x18/0x20/0x28/0x30; value at 0x38;
-		// spatial tangents follow (RE-S6 / parse_keyframe.go kfLayout).
+		// spatial tangents follow (parse_keyframe.go kfLayout).
 		// Motion-path streams (Position) carry a 0x00000001 marker at 0x08
-		// (RE'd from layer/shape Position kf fixtures); Color does not.
+		// (from layer/shape Position kf fixtures); Color does not.
 		if layout.motionPath {
 			binary.BigEndian.PutUint32(blk[0x08:0x0C], 1)
 		}
@@ -428,13 +424,12 @@ func writeKeyframeBlock[T any](blk []byte, kf StreamKeyframe[T], layout valueLay
 	}
 }
 
-// --- BezierPath encoding (RE-S5b + RE-S8) ---------------------------------
+// --- BezierPath encoding ---------------------------------------------------
 
 // encodeBezier emits (shph, lhd3, ldat) for one BezierPath. The encoding is
-// the single canonical format per RE-S8: tangents always occupy 24B/vertex
-// (6 × f32 BE per vertex; zero tangents are NOT omitted), and coordinates
-// are bbox-normalized to 0..1 over the union of (verts, verts+inTan,
-// verts+outTan).
+// the single canonical format: tangents always occupy 24B/vertex (6 × f32 BE
+// per vertex; zero tangents are NOT omitted), and coordinates are
+// bbox-normalized to 0..1 over the union of (verts, verts+inTan, verts+outTan).
 func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	n := len(p.Vertices)
 	// Generalize per-vertex tangent slices; treat missing as zero.
@@ -494,15 +489,15 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 		return float32((v - lo) / r)
 	}
 
-	// shph (24 B). Layout per RE-S5b/S8:
+	// shph (24 B). Layout:
 	//   [0..1] magic 0xb3de; [2..3] flags (0x0201 closed-with-trailer);
 	//   [4..7] bboxMinX f32; [8..11] bboxMinY f32;
 	//   [12..15] bboxMaxX f32; [16..19] bboxMaxY f32; [20..23] trailer 0x01000000.
 	shphData := make([]byte, 24)
 	shphData[0] = 0xb3
 	shphData[1] = 0xde
-	// flags: RE-S5b observed 0x0201 (closed); open shapes likely 0x0200.
-	// V2.2 emits 0x0201 when Closed, else 0x0200 — Phase 4 to confirm.
+	// flags: observed 0x0201 (closed); open shapes likely 0x0200.
+	// V2.2 emits 0x0201 when Closed, else 0x0200.
 	if p.Closed {
 		shphData[2] = 0x02
 		shphData[3] = 0x01
@@ -516,7 +511,7 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	binary.BigEndian.PutUint32(shphData[16:20], math.Float32bits(float32(maxY)))
 	shphData[20] = 0x01
 
-	// lhd3 (52 B) — RE-S5b observed hex for 4-vertex linear:
+	// lhd3 (52 B) — observed hex for 4-vertex linear:
 	//   00d00bee 00000000 0000000c 00000004 00000008 00000004 00000001 00000010 00...
 	// The @0x08 u32 = 12 (= n*3, "stride bytes"?); @0x0C u32 = n (vertex count);
 	// @0x10 u32 = 8; @0x14 u32 = 4 (= n? or per-vertex word count?);
@@ -538,11 +533,11 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	binary.BigEndian.PutUint32(lhd3Data[0x1C:0x20], 16)
 
 	// ldat — 24 B/vertex (6 × f32 BE), bbox-normalized. Per-vertex layout RE'd
-	// from AE-native fixtures (decode_path_ldat on v2_2_shape_path_re.aep):
+	// from AE-native fixtures (v2_2_shape_path_re.aep):
 	//   [ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]
 	// i.e. anchor, THIS vertex's out-control, then the NEXT vertex's in-control
 	// (wraps mod n). NOT this vertex's own in/out — that mis-encoding rendered
-	// the wrong shape in AE (V2.2.1 RE; path was never ship-gated before).
+	// the wrong shape in AE.
 	ldatData := make([]byte, n*24)
 	for i := 0; i < n; i++ {
 		v := p.Vertices[i]

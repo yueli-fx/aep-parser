@@ -12,7 +12,7 @@ func (p *Project) RootFoldForTest() *rifx.Chunk {
 	return p.back.rootFold
 }
 
-// ItemListForTest 暴露 Composition.itemList 给 Phase 5+ golden tests 用。
+// ItemListForTest 暴露 Composition.itemList 给 golden tests 用。
 func (c *Composition) ItemListForTest() *rifx.Chunk {
 	if c.back == nil {
 		return nil

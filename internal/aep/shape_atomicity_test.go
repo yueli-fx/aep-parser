@@ -1,7 +1,7 @@
 // internal/aep/shape_atomicity_test.go
 //
-// V2.2 Phase 4 Task 4.3 — atomicity / rollback tests. Verifies that
-// failed mutations leave no observable side effect (Inv-10).
+// Atomicity / rollback tests. Verifies that
+// failed mutations leave no observable side effect.
 package aep_test
 
 import (

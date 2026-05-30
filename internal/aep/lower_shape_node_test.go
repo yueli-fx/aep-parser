@@ -1,7 +1,7 @@
 // internal/aep/lower_shape_node_test.go
 //
-// Phase 2 Task 2.2 tests — chunk-shape level only. Validates the dispatcher
-// + per-node lowering + VectorGroup wrapping per Phase 0 RE-S3/S4/S5a-d.
+// Chunk-shape level tests only. Validates the dispatcher
+// + per-node lowering + VectorGroup wrapping.
 package aep_test
 
 import (

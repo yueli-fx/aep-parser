@@ -13,8 +13,7 @@ import (
 // layer.duplicate()). Returns the cloned *Layer on success, or an error
 // if a refuse-case triggers.
 //
-// Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff,
-// scars/ae-duplicatelayer-re.md F1/F3/F4/F5/F7/F8/F10):
+// Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff):
 //
 //   - new layer ID = proj.allocItemID() (head counter +1, monotonic)
 //   - clone's 16-chunk block (Layr + Ewst + 14 follower leaves in
@@ -31,7 +30,7 @@ import (
 //     sibling shadow; source remains the canonical parent for any
 //     incoming refs (F6).
 //
-// Refuse-cases (Phase 3 conservative; strategy spec §5):
+// Refuse-cases (conservative):
 //
 //   - name empty
 //   - index out of range
@@ -41,15 +40,14 @@ import (
 //     TrackMatteLayerID == 0). F2 quirk: AE relocates clone above the
 //     positional matte source to preserve original's matte; not yet
 //     supported. AE 23+ explicit matte (TrackMatteLayerID != 0) is
-//     ALLOWED (Phase 5B Stable — clone byte-copies @0xA0 + @0x6B
-//     verbatim; AE 2025 ship-gate green 2026-05-28).
+//     ALLOWED (Stable — clone byte-copies @0xA0 + @0x6B verbatim;
+//     passed AE 2025 ship-gate).
 //   - backref corruption (Layr formType / Ewst sibling mismatch)
 //
-// Atomic mutation (Inv-10 / Inv-11): snapshot pre-call state of
-// itemList.Children, c.Layers, proj.nextItemID, and proj.Warnings; on
-// any parser warning surfaced during the re-parse, roll all of them
-// back (including the nextItemID bump) and return the warnings as an
-// error.
+// Atomic mutation: snapshot pre-call state of itemList.Children,
+// c.Layers, proj.nextItemID, and proj.Warnings; on any parser warning
+// surfaced during the re-parse, roll all of them back (including the
+// nextItemID bump) and return the warnings as an error.
 func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	// 1. Validate refuse-cases.
 	if name == "" {
@@ -69,10 +67,10 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	if source.Type != LayerTypeAV {
 		return nil, fmt.Errorf("DuplicateLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported in Phase 3", index, source.Type)
 	}
-	// Phase 5B: F2 quirk applies only to implicit "layer-above" matte
-	// where matte source is positional. AE 23+ explicit matte
-	// (TrackMatteLayerID != 0) decouples matte from layer order — clone
-	// keeps the explicit ID via byte-verbatim ldta @0xA0 + @0x6B copy.
+	// F2 quirk applies only to implicit "layer-above" matte where matte
+	// source is positional. AE 23+ explicit matte (TrackMatteLayerID !=
+	// 0) decouples matte from layer order — clone keeps the explicit ID
+	// via byte-verbatim ldta @0xA0 + @0x6B copy.
 	if source.TrackMatte != TrackMatteNone && source.TrackMatteLayerID == 0 {
 		return nil, fmt.Errorf("DuplicateLayer: refuse layer %q (idx=%d) with implicit TrackMatte=%d (TrackMatteLayerID=0); AE relocates clone to preserve original's matte (F2 quirk), not yet supported", source.Name, index, source.TrackMatte)
 	}
@@ -100,24 +98,23 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	}
 
 	// 4. Adaptive block end — consume leaf followers until next LIST/EOF
-	//    (mirrors DeleteLayer §3 — handles AE-saved 16-chunk and
-	//    Go-built 2-chunk forms alike).
+	//    (handles AE-saved 16-chunk and Go-built 2-chunk forms alike).
 	endIdx := srcLayrIdx + 2
 	for endIdx < len(children) && !children[endIdx].IsList() {
 		endIdx++
 	}
 
-	// 5. Snapshot for rollback (strategy spec §6). Key diff vs DeleteLayer:
-	//    we DO snapshot proj.nextItemID (the clone bumps it; rollback must
-	//    un-bump so a subsequent New/Duplicate gets the right ID).
+	// 5. Snapshot for rollback. Key diff vs DeleteLayer: we DO snapshot
+	//    proj.nextItemID (the clone bumps it; rollback must un-bump so a
+	//    subsequent New/Duplicate gets the right ID).
 	oldItemChildren := append([]*rifx.Chunk(nil), children...)
 	oldLayers := append([]*Layer(nil), c.Layers...)
 	oldNextItemID := c.proj.nextItemID
 	oldWarningsLen := len(c.proj.Warnings)
 
 	// 6. Deep-clone source's [srcLayrIdx, endIdx) block. Every Data slice
-	//    is freshly allocated — required by
-	//    scars/concurrency-unsafe-shared-chunk-bytes.md.
+	//    is freshly allocated — Set* mutates share chunk bytes, so a
+	//    shared slice would let a later edit corrupt the source layer.
 	cloneBlock := make([]*rifx.Chunk, endIdx-srcLayrIdx)
 	for k := srcLayrIdx; k < endIdx; k++ {
 		cloneBlock[k-srcLayrIdx] = deepCloneChunk(children[k])
@@ -175,8 +172,8 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	newLayers = append(newLayers, c.Layers[index:]...)
 	c.Layers = newLayers
 
-	// 12. Warnings-as-failure (Inv-11). Append local re-parse warnings to
-	//     project, then rollback ALL state if any new warnings appeared.
+	// 12. Warnings-as-failure. Append local re-parse warnings to project,
+	//     then rollback ALL state if any new warnings appeared.
 	if len(localWarnings) > 0 {
 		c.proj.Warnings = append(c.proj.Warnings, localWarnings...)
 	}
@@ -193,5 +190,5 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 }
 
 // deepCloneChunk is defined in new_composition.go — recursive deep copy
-// with fresh Data slices (concurrent-mutate safe per
-// scars/concurrency-unsafe-shared-chunk-bytes.md).
+// with fresh Data slices (concurrent-mutate safe; Set* mutates share
+// chunk bytes, so clones must not alias the source's slices).

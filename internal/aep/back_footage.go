@@ -12,7 +12,7 @@ import "github.com/example/aep-parser/internal/rifx"
 //   - Nil for footage items built outside the parser.
 //   - opaque is reserved for future V3 phases that need to round-trip
 //     unrecognized sibling chunks under the footage's owning Item LIST
-//     (per CLAUDE.md hard constraint #5). Phase 1 leaves it nil.
+//     (per CLAUDE.md hard constraint #5); currently nil.
 type footageBackrefs struct {
 	// Underlying chunks holding the source path. Set by the parser when
 	// found; SetPath mutates these for write-back.

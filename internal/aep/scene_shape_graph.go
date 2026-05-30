@@ -5,16 +5,16 @@ import "fmt"
 
 // ShapeNodeKind identifies a shape-graph node's runtime kind. AE match-name
 // strings (`ADBE Vector Shape - Rect` etc.) are intentionally NOT exposed
-// here — they belong to the serializer (Inv-2). Lowering maps Kind → match
-// name via the `shapeMatchNames` table in `lower_shape_node.go` (Phase 2).
+// here — they belong to the serializer. Lowering maps Kind → match
+// name via the `shapeMatchNames` table in `lower_shape_node.go`.
 type ShapeNodeKind int
 
 const (
-	ShapeKindRect    ShapeNodeKind = iota // `ADBE Vector Shape - Rect` (RE-S4)
-	ShapeKindEllipse                      // `ADBE Vector Shape - Ellipse` (RE-S5a)
-	ShapeKindPath                         // `ADBE Vector Shape - Group` (RE-S5b)
-	ShapeKindFill                         // `ADBE Vector Graphic - Fill` (RE-S5c)
-	ShapeKindStroke                       // `ADBE Vector Graphic - Stroke` (RE-S5d)
+	ShapeKindRect    ShapeNodeKind = iota // `ADBE Vector Shape - Rect`
+	ShapeKindEllipse                      // `ADBE Vector Shape - Ellipse`
+	ShapeKindPath                         // `ADBE Vector Shape - Group`
+	ShapeKindFill                         // `ADBE Vector Graphic - Fill`
+	ShapeKindStroke                       // `ADBE Vector Graphic - Stroke`
 	ShapeKindGroup                        // `ADBE Vector Group` (V2.3+ user-created nested group)
 	// V2.3+ candidates: PolyStar / GradientFill / GradientStroke / Trim / Merge /
 	// Repeater / Transform.
@@ -25,16 +25,16 @@ const (
 // the V2.3+ container VectorGroup) satisfy it.
 type ShapeNode interface {
 	Kind() ShapeNodeKind
-	Properties() *PropertyGroup // escape hatch β (spec §3.5); Phase 1 returns nil
+	Properties() *PropertyGroup // escape hatch β; currently returns nil
 }
 
 // VectorGroup is the shape-graph container node. Every ShapeLayer carries
 // one default RootGroup (constructed by WrapShapeLayer). Children render in
 // order: Children[0] = bottom; Children[len-1] = top / most recently
-// appended (spec §3.2 render-order convention).
+// appended (render-order convention).
 //
 // `Transform` is the group-level Transform PropertyGroup placeholder. V2.2
-// default-serialized form has no `ADBE Vector Transform Group` (RE-S3); the
+// default-serialized form has no `ADBE Vector Transform Group`; the
 // field exists for the escape-hatch / hydration path on user-created nested
 // Vector Groups (V2.3+).
 type VectorGroup struct {
@@ -48,7 +48,7 @@ func NewVectorGroup() *VectorGroup {
 }
 
 // AddRect appends a default-valued RectNode and returns it. The new node is
-// placed at the top of the render stack (Children[len-1]; spec §3.2).
+// placed at the top of the render stack (Children[len-1]).
 func (g *VectorGroup) AddRect() (*RectNode, error) {
 	r := NewRectNode()
 	g.Children = append(g.Children, r)
@@ -63,7 +63,7 @@ func (g *VectorGroup) AddEllipse() (*EllipseNode, error) {
 }
 
 // AddPath appends an empty (closed) PathNode and returns it. Caller must
-// call SetVertices to give it geometry (min 2 vertices per RE-S8).
+// call SetVertices to give it geometry (min 2 vertices).
 func (g *VectorGroup) AddPath() (*PathNode, error) {
 	p := NewPathNode()
 	g.Children = append(g.Children, p)
@@ -98,7 +98,7 @@ type BezierPath struct {
 }
 
 // RectNode — `ADBE Vector Shape - Rect`. Default Size=[100,100],
-// Position=[0,0], Roundness=0 (RE-S4; AE elides all three at default).
+// Position=[0,0], Roundness=0 (AE elides all three at default).
 type RectNode struct {
 	size      *PropertyStream[[2]float64]
 	position  *PropertyStream[[2]float64]
@@ -126,8 +126,8 @@ func (r *RectNode) SetSize(v [2]float64) error            { return r.size.SetSta
 func (r *RectNode) SetPosition(v [2]float64) error        { return r.position.SetStaticValue(v) }
 func (r *RectNode) SetRoundness(v float64) error          { return r.roundness.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view onto this RectNode's streams
-// (spec §3.5). Streams returned via PropertyGroup.Vec2Stream / Float64Stream
+// Properties returns the escape-hatch β view onto this RectNode's streams.
+// Streams returned via PropertyGroup.Vec2Stream / Float64Stream
 // are the same instances as the typed accessors (r.Size() etc.) — mutating
 // one reflects through the other.
 func (r *RectNode) Properties() *PropertyGroup {
@@ -142,7 +142,7 @@ func (r *RectNode) Properties() *PropertyGroup {
 }
 
 // EllipseNode — `ADBE Vector Shape - Ellipse`. Default Size=[100,100],
-// Position=[0,0] (RE-S5a). AE child[1] = `ADBE Vector Shape Direction` —
+// Position=[0,0]. AE child[1] = `ADBE Vector Shape Direction` —
 // runtime-default CCW; not exposed as a typed setter in V2.2.
 type EllipseNode struct {
 	size, position *PropertyStream[[2]float64]
@@ -165,7 +165,7 @@ func (e *EllipseNode) Position() *PropertyStream[[2]float64] { return e.position
 func (e *EllipseNode) SetSize(v [2]float64) error            { return e.size.SetStaticValue(v) }
 func (e *EllipseNode) SetPosition(v [2]float64) error        { return e.position.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view (spec §3.5).
+// Properties returns the escape-hatch β view.
 func (e *EllipseNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Ellipse",
@@ -177,9 +177,9 @@ func (e *EllipseNode) Properties() *PropertyGroup {
 }
 
 // PathNode — `ADBE Vector Shape - Group`. Default = empty Vertices,
-// Closed=true. V2.2 SetVertices builds linear segments (tangents=0); per
-// RE-S8, min 2 vertices is enforced runtime-side (conservative invariant —
-// AE itself was not directly probed for 0/1-vertex rejection, see §6.6).
+// Closed=true. V2.2 SetVertices builds linear segments (tangents=0); min
+// 2 vertices is enforced runtime-side (conservative invariant — AE itself
+// was not directly probed for 0/1-vertex rejection).
 type PathNode struct {
 	path *PropertyStream[BezierPath]
 }
@@ -194,7 +194,7 @@ func NewPathNode() *PathNode {
 func (p *PathNode) Kind() ShapeNodeKind                { return ShapeKindPath }
 func (p *PathNode) Path() *PropertyStream[BezierPath]  { return p.path }
 
-// Properties returns the escape-hatch β view (spec §3.5).
+// Properties returns the escape-hatch β view.
 func (p *PathNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Path",
@@ -206,7 +206,7 @@ func (p *PathNode) Properties() *PropertyGroup {
 
 // SetVertices replaces the path's vertex list with linear segments
 // (tangents zeroed). Preserves the current `Closed` flag. Requires
-// len(verts) >= 2 (RE-S8).
+// len(verts) >= 2.
 func (p *PathNode) SetVertices(verts [][2]float64) error {
 	if len(verts) < 2 {
 		return fmt.Errorf("PathNode.SetVertices: need >= 2 vertices, got %d (RE-S8)", len(verts))
@@ -229,7 +229,7 @@ func (p *PathNode) SetClosed(closed bool) error {
 }
 
 // FillNode — `ADBE Vector Graphic - Fill`. Default Color=[1,1,1,1] white,
-// Opacity=100 (per spec §3.6 runtime defaults; AE elides at default).
+// Opacity=100 (runtime defaults; AE elides at default).
 type FillNode struct {
 	color   *PropertyStream[[4]float64]
 	opacity *PropertyStream[float64]
@@ -252,7 +252,7 @@ func (f *FillNode) Opacity() *PropertyStream[float64]  { return f.opacity }
 func (f *FillNode) SetColor(v [4]float64) error        { return f.color.SetStaticValue(v) }
 func (f *FillNode) SetOpacity(v float64) error         { return f.opacity.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view (spec §3.5).
+// Properties returns the escape-hatch β view.
 func (f *FillNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Fill",
@@ -264,7 +264,7 @@ func (f *FillNode) Properties() *PropertyGroup {
 }
 
 // StrokeNode — `ADBE Vector Graphic - Stroke`. Default Color=[0,0,0,1]
-// black, Width=2, Opacity=100 (per spec §3.6).
+// black, Width=2, Opacity=100.
 type StrokeNode struct {
 	color   *PropertyStream[[4]float64]
 	opacity *PropertyStream[float64]
@@ -292,7 +292,7 @@ func (s *StrokeNode) SetColor(v [4]float64) error        { return s.color.SetSta
 func (s *StrokeNode) SetOpacity(v float64) error         { return s.opacity.SetStaticValue(v) }
 func (s *StrokeNode) SetWidth(v float64) error           { return s.width.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view (spec §3.5).
+// Properties returns the escape-hatch β view.
 func (s *StrokeNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Stroke",
@@ -304,11 +304,11 @@ func (s *StrokeNode) Properties() *PropertyGroup {
 	}
 }
 
-// PropertyGroup is the escape-hatch β surface (spec §3.5). Phase 1 ships
-// the minimal struct — `Name` and the empty `Children` / `streams` maps —
+// PropertyGroup is the escape-hatch β surface. Currently the minimal
+// struct — `Name` and the empty `Children` / `streams` maps —
 // so the field exists on VectorGroup.Transform / node Properties() but
 // none of the typed lookup methods (`Float64Stream`, `Vec2Stream`, ...)
-// are wired yet. Phase 3 fills the escape-hatch methods.
+// are wired yet.
 type PropertyGroup struct {
 	Name      string
 	Children  map[string]*PropertyGroup
@@ -318,8 +318,8 @@ type PropertyGroup struct {
 
 // newGroupTransform constructs the identity Transform PropertyGroup placeholder
 // for a fresh VectorGroup. RootGroup default-serialized form has no
-// `ADBE Vector Transform Group` (RE-S3) — this placeholder stays nil-children
-// until the escape hatch wires it (Phase 3+).
+// `ADBE Vector Transform Group` — this placeholder stays nil-children
+// until the escape hatch wires it.
 func newGroupTransform() *PropertyGroup {
 	return &PropertyGroup{Name: "Transform"}
 }
@@ -335,8 +335,7 @@ func (pg *PropertyGroup) Child(name string) *PropertyGroup {
 
 // Float64Stream returns the PropertyStream[float64] under the given name, or
 // an error if no stream by that name exists or it isn't the expected type.
-// Mutations on the returned stream are visible through the typed accessor
-// (Inv-1 / spec §3.5).
+// Mutations on the returned stream are visible through the typed accessor.
 func (pg *PropertyGroup) Float64Stream(name string) (*PropertyStream[float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {

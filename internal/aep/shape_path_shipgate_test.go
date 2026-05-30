@@ -1,6 +1,6 @@
 // internal/aep/shape_path_shipgate_test.go
 //
-// V2.2 Phase 5 Task 5.2 — AE ship gate: Path + Fill focused gate.
+// AE ship gate: Path + Fill focused gate.
 // Gated by AE_SHIP_GATE env var; CI / no-AE runs SKIP cleanly.
 package aep_test
 

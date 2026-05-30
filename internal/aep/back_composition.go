@@ -15,7 +15,7 @@ import "github.com/example/aep-parser/internal/rifx"
 //     explicitly via the re-parse closed loop).
 //   - opaque is reserved for future V3 phases that need to round-trip
 //     unrecognized sibling chunks under the comp's owning Item LIST
-//     (per CLAUDE.md hard constraint #5). Phase 1 leaves it nil.
+//     (per CLAUDE.md hard constraint #5); currently nil.
 type compositionBackrefs struct {
 	// cdta is the underlying cdta chunk reference, captured by
 	// parseComposition. Used by SetBGColor / SetShutterAngle /

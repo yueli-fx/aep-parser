@@ -13,7 +13,7 @@ import (
 // layer / target is not an AV layer / backref corruption).
 //
 // Reference cleanup — per AE's own delete behavior (RE'd via the
-// re_delete_layer_*.aep fixtures, see scars/ae-deletelayer-re.md):
+// re_delete_layer_*.aep fixtures):
 //
 //   - any other layer's Layer.ParentID == deleted.ID → reset to 0
 //     (ldta @0x84..0x87)
@@ -24,24 +24,23 @@ import (
 //     UNTOUCHED to match AE: the matte intent flag persists even after
 //     the matte source is gone (AE re-resolves via implicit "layer
 //     above" at render time, which now returns nothing — matches AE)
-//   - Project.nextItemID counter: untouched (IDs not reused; Inv-9)
+//   - Project.nextItemID counter: untouched (IDs never reused)
 //
 // String-level references to the deleted layer's ID (expressions,
-// render queue, essential graphics) are out of scope for Phase 2 —
-// callers must scrub these manually if needed.
+// render queue, essential graphics) are out of scope — callers must
+// scrub these manually if needed.
 //
-// Atomic mutation (Inv-10 / Inv-11): snapshot pre-call state of
-// itemList.Children, c.Layers, neighbor refs / ldta bytes, and
-// Project.Warnings; on any new parser warning surfaced during the
-// call, roll all of them back and return the warnings as an error.
+// Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers,
+// neighbor refs / ldta bytes, and Project.Warnings; on any new parser
+// warning surfaced during the call, roll all of them back and return the
+// warnings as an error.
 //
 // Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS across baseline /
-// middle / parent / matte modes, 2026-05-28; see scars/ae-deletelayer-re.md
-// and verify_ge_delete_layer.jsx). Future RE can lift the non-AV refuse
+// middle / parent / matte modes). Future RE can lift the non-AV refuse
 // and the single-layer-comp refuse — both are conservative defaults
 // because AE's behavior for those scenarios hasn't been verified.
 func (c *Composition) DeleteLayer(index int) error {
-	// 1. Validate refuse-cases (strategy spec § 5).
+	// 1. Validate refuse-cases.
 	if index < 0 || index >= len(c.Layers) {
 		return fmt.Errorf("DeleteLayer: index %d out of range (have %d layers)", index, len(c.Layers))
 	}
@@ -79,16 +78,16 @@ func (c *Composition) DeleteLayer(index int) error {
 		return fmt.Errorf("DeleteLayer: layer %q expected Ewst sibling after Layr, found %s", deleted.Name, chunkIDString(ewstCandidate.FormType))
 	}
 
-	// 4. Adaptive splice — find end of trailing leaf block (strategy
-	//    spec § 3). Consumes the 14 fvdv/fiop/ftts/foac/fiac/fipc/fifl
-	//    follower leaves in AE-saved files; consumes 0 in Go-built
-	//    layers (NewShapeLayer inserts only Layr+Ewst).
+	// 4. Adaptive splice — find end of trailing leaf block. Consumes the
+	//    14 fvdv/fiop/ftts/foac/fiac/fipc/fifl follower leaves in AE-saved
+	//    files; consumes 0 in Go-built layers (NewShapeLayer inserts only
+	//    Layr+Ewst).
 	endIdx := layrIdx + 2
 	for endIdx < len(children) && !children[endIdx].IsList() {
 		endIdx++
 	}
 
-	// 5. Snapshot for rollback (strategy spec § 6).
+	// 5. Snapshot for rollback.
 	oldChildren := append([]*rifx.Chunk(nil), children...)
 	oldLayers := append([]*Layer(nil), c.Layers...)
 	oldWarningsLen := 0
@@ -167,10 +166,10 @@ func (c *Composition) DeleteLayer(index int) error {
 	// 8. Splice c.Layers.
 	c.Layers = append(append([]*Layer(nil), c.Layers[:index]...), c.Layers[index+1:]...)
 
-	// 9. Warnings-as-failure (Inv-11). DeleteLayer doesn't re-parse so
-	//    warnings won't increase in practice — this is a defensive
-	//    rollback path matching the V2.1 pattern, so future re-parse
-	//    extensions (Phase 4+) get it for free.
+	// 9. Warnings-as-failure. DeleteLayer doesn't re-parse so warnings
+	//    won't increase in practice — this is a defensive rollback path
+	//    matching the V2.1 pattern, so future re-parse extensions get it
+	//    for free.
 	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
 		c.back.itemList.Children = oldChildren
 		c.Layers = oldLayers

@@ -1,6 +1,6 @@
 // internal/aep/hydrate_shape.go
 //
-// V2.2 Phase 4 — chunk tree → runtime ShapeLayer state.
+// chunk tree → runtime ShapeLayer state.
 //
 // Inverse of lower_layer.go/lowerShapeLayer + lower_shape_node.go +
 // lower_property_stream.go. Walks the parsed Layr LIST and populates two
@@ -15,7 +15,7 @@
 // V1 parseLeafProperty's StaticValue (any); the animated path translates
 // V1 prop.Keyframes ([]*Keyframe) into typed StreamKeyframe[T] via the
 // PropertyStream.AddKeyframeLinear API, which also flips the stream into
-// Animated mode. Per Inv-1: a roundtrip preserves runtime semantics.
+// Animated mode. A roundtrip preserves runtime semantics.
 package aep
 
 import (
@@ -26,11 +26,10 @@ import (
 )
 
 // hydrateShapeNodes walks a parsed Layr LIST (descending into nested
-// LIST(tdgp) wrappers — V2.2 fix A introduced an outer property-group
-// wrapper between Layr and its property tdmn siblings) and returns the
-// runtime VectorGroup tree. Returns nil when no "ADBE Root Vectors
-// Group" subtree exists; WrapShapeLayer then falls back to a fresh
-// empty VectorGroup.
+// LIST(tdgp) wrappers — an outer property-group wrapper sits between Layr
+// and its property tdmn siblings) and returns the runtime VectorGroup tree.
+// Returns nil when no "ADBE Root Vectors Group" subtree exists; WrapShapeLayer
+// then falls back to a fresh empty VectorGroup.
 func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	var found *VectorGroup
 	var visit func(c *rifx.Chunk)
@@ -61,7 +60,7 @@ func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 }
 
 // hydrateVectorGroup turns the Root Vectors Group body into a runtime
-// VectorGroup. Per iter-5 RE, the on-disk shape is a 5-level nesting:
+// VectorGroup. The on-disk shape is a 5-level nesting:
 //
 //	Root Vectors Group body → tdmn(Vector Group) + tdgp →
 //	  tdmn(Vectors Group) + tdgp → [shape kids]
@@ -74,7 +73,7 @@ func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 // hydrate; lower deterministically reconstructs them.
 //
 // Children render in serialized order — Children[0] = first emitted =
-// bottom of stack per spec §3.2.
+// bottom of stack.
 func hydrateVectorGroup(tdgp *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 	g := NewVectorGroup()
 	collectShapeKids(tdgp, g, ctx)
@@ -126,9 +125,9 @@ func hydrateLayerTransform(layer *Layer) {
 	if layer.shapeTransform == nil {
 		layer.shapeTransform = newLayerTransform()
 	}
-	// Phase 5 fix B: ShapeLayer canonical Transform splits Position into
-	// Position_0 (X) + Position_1 (Y). We re-combine on hydrate so
-	// shapeTransform.position remains the [2]float64 API surface.
+	// ShapeLayer canonical Transform splits Position into Position_0 (X) +
+	// Position_1 (Y). We re-combine on hydrate so shapeTransform.position
+	// remains the [2]float64 API surface.
 	var posX, posY *Property
 	for _, p := range layer.Properties {
 		switch p.MatchName {
@@ -249,10 +248,10 @@ func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
 }
 
 // hydratePathNode reads the om-s/omks/shap subtree the serializer emits
-// for a PathNode (RE-S5b). Recovers vertex count + Closed flag; vertex
-// positions are bbox-normalized f32 in the on-disk form so byte-exact
-// vertex roundtrip isn't free — V2.2 hydration recovers the structural
-// shape (n vertices, closed/open) which is what callers see through
+// for a PathNode. Recovers vertex count + Closed flag; vertex positions are
+// bbox-normalized f32 in the on-disk form so byte-exact vertex roundtrip
+// isn't free — V2.2 hydration recovers the structural shape (n vertices,
+// closed/open) which is what callers see through
 // PathNode.Path().StaticValue().Vertices.
 func hydratePathNode(body *rifx.Chunk, _ *parseCtx) *PathNode {
 	p := NewPathNode()

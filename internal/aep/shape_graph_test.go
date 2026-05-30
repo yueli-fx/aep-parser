@@ -21,7 +21,7 @@ func TestRectNode_Construct_Defaults(t *testing.T) {
 	if r.Kind() != aep.ShapeKindRect {
 		t.Fatalf("kind = %v, want ShapeKindRect", r.Kind())
 	}
-	// Defaults per RE-S4 (Phase 0 校准):
+	// Defaults:
 	v, _ := r.Size().StaticValue()
 	if v != [2]float64{100, 100} {
 		t.Fatalf("Rect default Size = %v, want [100,100] (RE-S4)", v)

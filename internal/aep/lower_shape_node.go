@@ -1,11 +1,11 @@
 // internal/aep/lower_shape_node.go
 //
-// Phase 2 Task 2.2 — 5 per-node lowering funcs (Rect / Ellipse / Path / Fill
-// / Stroke) + lowerVectorGroup for the Root Vectors Group container.
+// 5 per-node lowering funcs (Rect / Ellipse / Path / Fill / Stroke) +
+// lowerVectorGroup for the Root Vectors Group container.
 //
-// Match-names per RE-S5a-d Phase 0 observations. V2.2 emits ALL sub-props
+// Match-names are from AE-saved fixture observations. V2.2 emits ALL sub-props
 // even when default-valued (AE elides; we don't — see lower_property_stream.go
-// preamble); Phase 4 roundtrip validates AE accepts the non-elided form.
+// preamble); AE accepts the non-elided form.
 package aep
 
 import (
@@ -19,11 +19,10 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-// iter-8 embed: tolerance shape body bytes used as boilerplate skeleton.
-// Validator boundary RE'd via tmp_debug/swap_rect_body + swap_fill_body +
-// swap_both_bodies: each shape primitive body in our from-scratch emit
-// triggers AE silent drop independently. embed-tolerance-bytes approach
-// (same pattern as iter-7 lowerLayerTransform) bypasses byte-level RE.
+// Tolerance shape body bytes used as boilerplate skeleton. Transplant tests
+// proved each shape primitive body in our from-scratch emit triggers AE silent
+// drop independently. The embed-tolerance-bytes approach (same pattern as
+// lowerLayerTransform) bypasses byte-level RE.
 //
 //go:embed templates/v2_2_shape_rect_body.bin
 var v22ShapeRectBodyBytes []byte
@@ -139,8 +138,8 @@ func cloneShapeStrokeBody() (*rifx.Chunk, error) {
 
 // encodeShapeColorBE returns the AE shape-color cdat bytes for an [r,g,b,a]
 // (0..1) color: AE stores colors as [A,R,G,B] × 255 as f64 BE (RE'd from the
-// stroke tolerance fixture — JSX [0,0,1,1] → disk [255,0,0,255]). This is the
-// long-deferred "Fill Color encoding" too; both Stroke and Fill use it.
+// stroke tolerance fixture — JSX [0,0,1,1] → disk [255,0,0,255]). Both Stroke
+// and Fill use it.
 func encodeShapeColorBE(c [4]float64) []byte {
 	return encodeF64sBE(c[3]*255, c[0]*255, c[1]*255, c[2]*255)
 }
@@ -179,8 +178,8 @@ func encodeF64sBE(vs ...float64) []byte {
 }
 
 // shapeMatchNames maps runtime ShapeNodeKind → AE match-name string. The
-// table is serializer-only; runtime API uses the Go enum (Inv-2). Strings
-// match Phase 0 RE fixture observations (RE-S4 / RE-S5a-d).
+// table is serializer-only; runtime API uses the Go enum. Strings match
+// AE-saved fixture observations.
 var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindRect:    "ADBE Vector Shape - Rect",
 	ShapeKindEllipse: "ADBE Vector Shape - Ellipse",
@@ -219,17 +218,16 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	}
 }
 
-// lowerRectNode emits a Rect shape body using iter-8 embedded tolerance
-// bytes (templates/v2_2_shape_rect_body.bin). From-scratch construction
-// triggered silent drop (transplant-isolated via swap_rect_body); embedding
-// the canonical body + overwriting Size cdat with runtime user values is
-// the validator-safe path.
+// lowerRectNode emits a Rect shape body using embedded tolerance bytes
+// (templates/v2_2_shape_rect_body.bin). From-scratch construction triggered
+// silent drop (transplant-isolated); embedding the canonical body +
+// overwriting Size cdat with runtime user values is the validator-safe path.
 //
-// V2.2 alpha limitations (V2.2.1 work):
+// Limitations:
 //   - Rect Position / Roundness: runtime-only, NOT persisted (tolerance
 //     elides them; embedded body has no slot to overwrite).
 //   - Rect Direction: AE default ("ToTheRight"), no runtime customization.
-//   - Animated Size: persisted as keyframes (V2.2.1 — cdat→LIST(list) inject).
+//   - Animated Size: persisted as keyframes (cdat→LIST(list) inject).
 func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeRectBody()
 	if err != nil {
@@ -237,8 +235,8 @@ func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	}
 	// Size — non-spatial Vec2 (bpk-88). Position — spatial Vec2 motion-path
 	// (bpk-104, value@0x38; identical layout to Ellipse Position). Roundness —
-	// 1D non-spatial (bpk-48). V2.2.1 子项⑦: Position/Roundness persisted via the
-	// richer rect body template (Size/Position/Roundness all cdat slots).
+	// 1D non-spatial (bpk-48). Position/Roundness persisted via the richer rect
+	// body template (Size/Position/Roundness all cdat slots).
 	if err := lowerShapeVec2(body, "ADBE Vector Rect Size", r.size, ctx, valueLayout{dim: 2, headerByte: 0x00, spatial: false}); err != nil {
 		return nil, err
 	}
@@ -323,12 +321,12 @@ func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chun
 			if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
 				return fmt.Errorf("injectAnimatedStream: %s next chunk not LIST(tdbs)", streamName)
 			}
-			// tdb4 static→animated flags (RE across Rect Size + Fill Color):
+			// tdb4 static→animated flags (RE'd across Rect Size + Fill Color):
 			// @0x05 clear bit0, @0x44 = 0x01, @0x4f clear bit0. Without this AE
 			// expects a cdat per the static tdb4 and reports "file data missing".
 			// NB: modern AE writes lowercase "tdb4"; rifx.IDTdb4 is the legacy
-			// UPPERCASE "Tdb4" (chunk IDs are case-sensitive — incident report
-			// chunk-id-case-tdb4.md), so match the lowercase literal.
+			// UPPERCASE "Tdb4" (chunk IDs are case-sensitive), so match the
+			// lowercase literal.
 			if tdb4 := findChildID(tdbs, rifx.ChunkID{'t', 'd', 'b', '4'}); tdb4 != nil && len(tdb4.Data) > 0x4f {
 				tdb4.Data[0x05] &^= 0x01
 				tdb4.Data[0x44] = 0x01
@@ -346,14 +344,14 @@ func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chun
 	return fmt.Errorf("injectAnimatedStream: %s tdmn not found", streamName)
 }
 
-// lowerEllipseNode emits an Ellipse shape body using V2.2.1 embedded tolerance
+// lowerEllipseNode emits an Ellipse shape body using embedded tolerance
 // bytes (templates/v2_2_shape_ellipse_body.bin). Same rationale as
 // lowerRectNode — from-scratch emit triggered AE silent-drop (the body's
 // boilerplate, not the values, fails AE's semantic validation); embedding the
 // canonical AE-saved body + overwriting Size/Position cdat with runtime values
 // is the validator-safe path.
 //
-// V2.2.1 limitations:
+// Limitations:
 //   - Direction: AE default (the AE-saved body elides the Direction sub-prop;
 //     embedded body has no slot to overwrite).
 //   - Animated Size: keyframes persisted (non-spatial Vec2). Animated Position:
@@ -382,15 +380,15 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	return body, nil
 }
 
-// lowerPathNode emits a Path shape body using V2.2.1 embedded tolerance bytes
+// lowerPathNode emits a Path shape body using embedded tolerance bytes
 // (templates/v2_2_shape_path_body.bin). From-scratch emit CRASHED AE 2020
 // ("After Effects 已崩溃 (0::42)") — the om-s/tdb4 scaffolding is too fragile
 // to hand-build. We clone the AE-native body and splice in the user's geometry
-// (shph/lhd3/ldat from encodeBezier, whose layout matches AE byte-for-byte per
-// V2.2.1 ldat RE), keeping AE's exact scaffolding (om-s header + omks + omtn).
+// (shph/lhd3/ldat from encodeBezier, whose layout matches AE byte-for-byte),
+// keeping AE's exact scaffolding (om-s header + omks + omtn).
 //
-// V2.2.1 limitations: linear segments only (SetVertices zeroes tangents);
-// animated paths use the first keyframe as a static fallback.
+// Limitations: linear segments only (SetVertices zeroes tangents); animated
+// paths use the first keyframe as a static fallback.
 func lowerPathNode(p *PathNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapePathBody()
 	if err != nil {
@@ -463,20 +461,19 @@ func findListByForm(c *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
 	return nil
 }
 
-// lowerFillNode emits a Fill graphic body using iter-8 embedded tolerance
-// bytes (templates/v2_2_shape_fill_body.bin). Same rationale as
-// lowerRectNode — transplant tests proved from-scratch Fill body triggers
-// silent drop; embedded canonical body + cdat overwrite for Color values
-// is the validator-safe path.
+// lowerFillNode emits a Fill graphic body using embedded tolerance bytes
+// (templates/v2_2_shape_fill_body.bin). Same rationale as lowerRectNode —
+// transplant tests proved from-scratch Fill body triggers silent drop;
+// embedded canonical body + cdat overwrite for Color values is the
+// validator-safe path.
 //
-// V2.2.1: Fill Color (static + keyframe) and Fill Opacity (static + keyframe,
-// raw %, 1D non-spatial bpk-48 — 子项⑨, richer fill body template) persist.
-// Blend Mode / Composite Order / Fill Rule stay at the embed defaults (no
-// runtime setter).
+// Fill Color (static + keyframe) and Fill Opacity (static + keyframe, raw %,
+// 1D non-spatial bpk-48, richer fill body template) persist. Blend Mode /
+// Composite Order / Fill Rule stay at the embed defaults (no runtime setter).
 //
-// Color encoding (V2.2.1 RE, via the stroke tolerance fixture): AE stores
-// shape colors as [A,R,G,B] × 255 f64 BE (encodeShapeColorBE), NOT raw
-// [r,g,b,a] × 1.0. The pre-V2.2.1 raw encoding produced wrong visible colors.
+// Color encoding (RE'd via the stroke tolerance fixture): AE stores shape
+// colors as [A,R,G,B] × 255 f64 BE (encodeShapeColorBE), NOT raw
+// [r,g,b,a] × 1.0. The raw encoding produced wrong visible colors.
 func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeFillBody()
 	if err != nil {
@@ -489,24 +486,24 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	} else {
 		overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(f.color.static))
 	}
-	// Opacity (raw %) — 1D non-spatial (bpk-48, value@0x08). V2.2.1 子项⑨: the
-	// richer fill body template now carries an Opacity cdat slot (default 100 was
-	// elided), so static/animated Opacity persists.
+	// Opacity (raw %) — 1D non-spatial (bpk-48, value@0x08). The richer fill
+	// body template carries an Opacity cdat slot (default 100 was elided), so
+	// static/animated Opacity persists.
 	if err := lowerShapeScalar(body, "ADBE Vector Fill Opacity", f.opacity, ctx); err != nil {
 		return nil, err
 	}
 	return body, nil
 }
 
-// lowerStrokeNode emits a Stroke graphic body using V2.2.1 embedded tolerance
+// lowerStrokeNode emits a Stroke graphic body using embedded tolerance
 // bytes (templates/v2_2_shape_stroke_body.bin). Same rationale as the other
 // shape kinds — from-scratch emit triggers AE silent-drop; the embedded
 // AE-native body carries the full child set (Blend Mode / Composite Order /
 // Line Cap / Line Join / Miter Limit + Dashes/Taper/Wave nested groups), and
 // we overwrite only the Color/Opacity/Width cdat with runtime values.
 //
-// V2.2.1 limitations: Blend Mode / Composite Order / Line Cap / Line Join /
-// Miter Limit / Dashes / Taper / Wave stay at the embed's defaults; animated
+// Limitations: Blend Mode / Composite Order / Line Cap / Line Join / Miter
+// Limit / Dashes / Taper / Wave stay at the embed's defaults; animated
 // Color/Opacity/Width use the first keyframe as a static fallback.
 func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeStrokeBody()
@@ -524,7 +521,7 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// Opacity (raw %) + Width (raw px) — 1D non-spatial scalars (bpk-48,
 	// value@0x08, no normalization; RE'd from v2_2_stroke_kf_re.aep). The stroke
 	// body template already carries both cdat slots, so animated streams flip in
-	// place (V2.2.1 子项⑧ — previously collapsed to the first keyframe value).
+	// place (previously collapsed to the first keyframe value).
 	if err := lowerShapeScalar(body, "ADBE Vector Stroke Opacity", s.opacity, ctx); err != nil {
 		return nil, err
 	}
@@ -535,8 +532,8 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 }
 
 // lowerVectorGroup wraps shape-node children into the Root Vectors Group's
-// inner LIST(tdgp). The on-disk shape per iter-5 RE of tolerance.aep +
-// re_shapes.aep (every AE-saved fixture observed) is a 5-level nesting:
+// inner LIST(tdgp). The on-disk shape (every AE-saved fixture observed —
+// tolerance.aep + re_shapes.aep) is a 5-level nesting:
 //
 //	[LIST tdgp]                      ← Root Vectors Group body (this return)
 //	  tdsb(0x00000401) + tdsn
@@ -553,20 +550,18 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 //	    tdmn("ADBE Group End")
 //	  tdmn("ADBE Group End")
 //
-// iter-4 had us flatten everything into Root Vectors Group body directly —
-// AE 2025 parsed the file without exception but silently dropped the layer
-// from comp.layers (iter-4 scar "bug 8 candidate"). The wrappers are
-// structural: AE Shape Layer's Contents always holds one or more
-// "ADBE Vector Group" entries (each is what UI shows as "Group N"), and
-// each Vector Group always carries the 3-child fixed routing (Vectors Group
-// for shape kids + Transform + Materials).
+// Flattening everything into the Root Vectors Group body directly made AE 2025
+// parse the file without exception but silently drop the layer from
+// comp.layers. The wrappers are structural: AE Shape Layer's Contents always
+// holds one or more "ADBE Vector Group" entries (each is what UI shows as
+// "Group N"), and each Vector Group always carries the 3-child fixed routing
+// (Vectors Group for shape kids + Transform + Materials).
 //
 // V2.2 maps the runtime `shapeRootGroup.Children = [Rect, Fill, ...]` to a
 // SINGLE Vector Group wrapper (semantic = AE's auto-created "Group 1"). V2.3+
 // may expose multiple user-named groups.
 //
-// Children render in order: Children[0] = bottom, Children[len-1] = top
-// (spec §3.2).
+// Children render in order: Children[0] = bottom, Children[len-1] = top.
 func lowerVectorGroup(g *VectorGroup, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// Innermost: Vectors Group body — holds the actual shape kids.
 	vectorsGroupBody := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}

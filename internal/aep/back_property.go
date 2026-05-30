@@ -15,7 +15,7 @@ import "github.com/example/aep-parser/internal/rifx"
 //   - opaque captures parsed-but-undecoded sibling chunks under the property's
 //     owning tdbs/tdgp container; serializer re-emits them in original order
 //     to satisfy CLAUDE.md hard constraint #5 (opaque preservation). Populated
-//     by future V3 phases; nil-map in Phase 1.
+//     by future V3 phases; currently a nil map.
 type propertyBackrefs struct {
 	// tdbs is the property's owning tdbs LIST — used by SetExpression
 	// to insert/remove the Utf8 chunk holding the JS source.

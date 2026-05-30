@@ -14,8 +14,7 @@ import (
 // (footage / precomp items) are shared verbatim, not duplicated — matching
 // AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition.
 //
-// Clone semantics (Phase 5D; same-Project comp only — see
-// flightdeck/specs/2026-05-29-v3-phase5d-duplicatecomposition-design.md):
+// Clone semantics (same-Project comp only):
 //
 //   - new comp item ID = p.allocItemID()             (idta @0x10)
 //   - per layer: new layer ID = p.allocItemID()      (ldta @0x00)
@@ -24,15 +23,15 @@ import (
 //   - SourceID @0x28 verbatim (shared Footage/Comp items)
 //   - comp name = caller-supplied (length-variable Utf8 rewrite)
 //
-// Refuse-cases (R1..R7; spec §2): nil src, project backref missing, src
-// itemList backref missing, src not in this Project, empty name, src Item
-// not found in rootFold, layer ldta too short for ParentID write.
+// Refuse-cases (R1..R7): nil src, project backref missing, src itemList
+// backref missing, src not in this Project, empty name, src Item not
+// found in rootFold, layer ldta too short for ParentID write.
 //
-// Atomic mutation (Inv-10 / Inv-11): snapshot rootFold.Children +
-// p.Compositions + p.nextItemID + len(p.Warnings); on any new parser
-// warning during the re-parse, roll all back including the nextItemID bump.
+// Atomic mutation: snapshot rootFold.Children + p.Compositions +
+// p.nextItemID + len(p.Warnings); on any new parser warning during the
+// re-parse, roll all back including the nextItemID bump.
 //
-// Stable — passed AE 2020 + AE 2025 ship-gate (2026-05-29): AE accepts the
+// Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the
 // Go-emitted file and the dup's intra-comp parent ref resolves to the dup's
 // own layer (remap confirmed by AE), with sources shared with the original.
 func (p *Project) DuplicateComposition(src *Composition, name string) (*Composition, error) {

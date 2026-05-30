@@ -119,7 +119,7 @@ func TestDuplicateLayer_RefuseNonAV(t *testing.T) {
 	}
 }
 
-// Phase 5B: implicit matte (TrackMatte != None && TrackMatteLayerID == 0)
+// Implicit matte (TrackMatte != None && TrackMatteLayerID == 0)
 // is still refused — F2 quirk applies to positional "layer-above" matte.
 func TestDuplicateLayer_RefuseImplicitTrackMatte(t *testing.T) {
 	proj := openDupBaseline(t)
@@ -383,7 +383,7 @@ func layerIndexInComp(c *aep.Composition, target *aep.Layer) int {
 	return -1
 }
 
-// Phase 5B happy path: duplicating an explicit-matte layer (AE 23+
+// Happy path: duplicating an explicit-matte layer (AE 23+
 // TrackMatteLayerID != 0) succeeds and produces a clone with the same
 // matte source/mode. F2 position-shift quirk does NOT apply — clone is
 // inserted at source's old slice index like the solo/dup_parent/dup_child
@@ -451,7 +451,7 @@ func TestDuplicateLayer_ExplicitMatte_HappyPath(t *testing.T) {
 	}
 }
 
-// Phase 5B byte-verbatim: clone's ldta @0xA0..0xA3 (TrackMatteLayerID) and
+// Byte-verbatim: clone's ldta @0xA0..0xA3 (TrackMatteLayerID) and
 // @0x6B (TrackMatte mode) match source byte-for-byte. Only @0x00..0x03
 // (layer ID) differs per F10.
 func TestDuplicateLayer_ExplicitMatte_VerbatimBytes(t *testing.T) {
@@ -503,7 +503,7 @@ func TestDuplicateLayer_ExplicitMatte_VerbatimBytes(t *testing.T) {
 	}
 }
 
-// Phase 5B round-trip: explicit matte survives WriteAEP + reparse.
+// Round-trip: explicit matte survives WriteAEP + reparse.
 func TestDuplicateLayer_ExplicitMatte_RoundTrip(t *testing.T) {
 	proj, c := openTrackMatteAE24(t)
 	if proj == nil || c == nil {
@@ -560,7 +560,7 @@ func TestDuplicateLayer_ExplicitMatte_RoundTrip(t *testing.T) {
 	}
 }
 
-// Phase 5B sibling-matte: clone and source BOTH carry the same explicit
+// Sibling-matte: clone and source BOTH carry the same explicit
 // matte pointer post-dup; AE should render two matted layers from the
 // same source layer.
 func TestDuplicateLayer_ExplicitMatte_BothPointToSameSource(t *testing.T) {

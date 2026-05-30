@@ -1,8 +1,7 @@
 // internal/aep/lower_property_stream_test.go
 //
-// Phase 2 Task 2.1 tests — chunk-shape level only. Byte-exact validation is
-// deferred to Phase 4 roundtrip (per V2.2 plan §Phase 2 "Skeleton-level checks
-// for chunk shape; byte-exact tests deferred to Phase 4 roundtrip.").
+// Chunk-shape level tests only. Byte-exact validation is
+// deferred to the roundtrip tests.
 package aep_test
 
 import (
@@ -117,7 +116,7 @@ func TestLowerPathStream_Static_EmitsOmS(t *testing.T) {
 	if chunk == nil {
 		t.Fatal("nil chunk")
 	}
-	// Path uses om-s + omks + shap encoding, not cdat (RE-S5b).
+	// Path uses om-s + omks + shap encoding, not cdat.
 	if oms := chunk.FindFirstList(rifx.IDOmS); oms == nil {
 		t.Fatal("path stream: tdgp missing LIST(om-s)")
 	}

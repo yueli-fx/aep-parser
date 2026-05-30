@@ -1,6 +1,6 @@
 // internal/aep/shape_graph_roundtrip_test.go
 //
-// V2.2 Phase 4 Task 4.2 — canonical 3-layer roundtrip. Drives every
+// Canonical 3-layer roundtrip. Drives every
 // node kind (Rect/Ellipse/Path/Fill/Stroke), both stream modes
 // (static + animated), and the Layer-level Transform keyframe path
 // through WriteAEP → FromReader.

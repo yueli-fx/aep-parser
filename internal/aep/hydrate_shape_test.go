@@ -1,6 +1,6 @@
 // internal/aep/hydrate_shape_test.go
 //
-// V2.2 Phase 4 Task 4.1 — hydrateShapeNodes minimum test.
+// hydrateShapeNodes minimum test.
 // Round-trips a single RectNode through WriteAEP → FromReader and asserts
 // the hydrated runtime tree carries Size=[200,100].
 package aep_test

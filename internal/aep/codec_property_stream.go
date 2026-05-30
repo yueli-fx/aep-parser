@@ -3,8 +3,8 @@ package aep
 
 import "fmt"
 
-// StreamMode is the PropertyStream state machine mode (Inv-8: Static ↔
-// Animated mutually exclusive).
+// StreamMode is the PropertyStream state machine mode (Static ↔ Animated
+// are mutually exclusive).
 type StreamMode int
 
 const (
@@ -14,15 +14,15 @@ const (
 	StreamModeAnimated
 )
 
-// PropertyStream[T] is the canonical V2.2 animation primitive (Inv-4 /
-// spec §2.4). T parameterizes the value shape:
+// PropertyStream[T] is the canonical V2.2 animation primitive. T
+// parameterizes the value shape:
 //
 //	float64, [2]float64, [3]float64, [4]float64, BezierPath
 //
-// Time domain is seconds (Inv-7). Serializer-side `lower_property_stream.go`
+// Time domain is seconds. Serializer-side `lower_property_stream.go`
 // converts to ticks using `lowerCtx.tickRate` (composition tick rate).
 //
-// State machine (Inv-8): a stream starts Static (zero `static` value), flips
+// State machine: a stream starts Static (zero `static` value), flips
 // to Animated on first `AddKeyframe*`, and returns to Static on `Clear()`.
 // `SetStaticValue` is an error in Animated mode — callers must `Clear()`
 // first if they want to revert to a static value.
@@ -38,7 +38,7 @@ type PropertyStream[T any] struct {
 // and `any` value). Named with the `Stream` prefix to avoid Go's type-name
 // collision between generic and non-generic declarations in one package.
 type StreamKeyframe[T any] struct {
-	Time            float64 // seconds (Inv-7)
+	Time            float64 // seconds
 	Value           T
 	InEase, OutEase TemporalEase // reuses V1 TemporalEase {Speed, Influence}
 }
@@ -68,33 +68,33 @@ func (ps *PropertyStream[T]) Keyframes() []StreamKeyframe[T] { return ps.keyfram
 // HasKeyframes reports whether the stream has at least one keyframe.
 func (ps *PropertyStream[T]) HasKeyframes() bool { return len(ps.keyframes) > 0 }
 
-// SetStaticValue updates the static value. Errors in Animated mode (Inv-8):
+// SetStaticValue updates the static value. Errors in Animated mode:
 // callers must Clear() first.
 func (ps *PropertyStream[T]) SetStaticValue(v T) error {
 	if ps.mode == StreamModeAnimated {
-		return fmt.Errorf("SetStaticValue: stream is in Animated mode; call Clear() first (Inv-8)")
+		return fmt.Errorf("SetStaticValue: stream is in Animated mode; call Clear() first")
 	}
 	ps.static = v
 	return nil
 }
 
 // AddKeyframeLinear adds a linear-interp keyframe (zero ease both sides).
-// Triggers Static → Animated transition on first call (Inv-8).
+// Triggers Static → Animated transition on first call.
 //
-// Constraints: time >= 0 (Inv-7); duplicate `time` rejected.
+// Constraints: time >= 0; duplicate `time` rejected.
 func (ps *PropertyStream[T]) AddKeyframeLinear(time float64, value T) error {
 	return ps.addKeyframe(StreamKeyframe[T]{Time: time, Value: value})
 }
 
 // AddKeyframeWithEase adds a keyframe with explicit in/out temporal ease.
-// Triggers Static → Animated transition on first call (Inv-8).
+// Triggers Static → Animated transition on first call.
 func (ps *PropertyStream[T]) AddKeyframeWithEase(time float64, value T, in, out TemporalEase) error {
 	return ps.addKeyframe(StreamKeyframe[T]{Time: time, Value: value, InEase: in, OutEase: out})
 }
 
 func (ps *PropertyStream[T]) addKeyframe(kf StreamKeyframe[T]) error {
 	if kf.Time < 0 {
-		return fmt.Errorf("AddKeyframe: time < 0 (got %g; Inv-7: seconds-only, non-negative)", kf.Time)
+		return fmt.Errorf("AddKeyframe: time < 0 (got %g; seconds-only, non-negative)", kf.Time)
 	}
 	for _, existing := range ps.keyframes {
 		if existing.Time == kf.Time {
@@ -102,7 +102,7 @@ func (ps *PropertyStream[T]) addKeyframe(kf StreamKeyframe[T]) error {
 		}
 	}
 	if ps.mode == StreamModeStatic {
-		ps.mode = StreamModeAnimated // Inv-8 transition
+		ps.mode = StreamModeAnimated // Static → Animated transition
 	}
 	ps.keyframes = append(ps.keyframes, kf)
 	// Maintain ascending time order so lowering can iterate directly.

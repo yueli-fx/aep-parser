@@ -122,7 +122,7 @@ func TestInsertLayer_RefuseSameComp(t *testing.T) {
 	}
 }
 
-// R7 lifted (Phase 5C.1): cross-Project insert is now supported — verify it
+// R7 lifted: cross-Project insert is now supported — verify it
 // does not error with the old "cross-Project insert deferred" refusal.
 func TestInsertLayer_CrossProjectNoLongerRefused(t *testing.T) {
 	dest, _ := openInsertPair(t)
@@ -142,7 +142,7 @@ func TestInsertLayer_CrossProjectNoLongerRefused(t *testing.T) {
 	// full cross-Project happy-path coverage lives in Task 5 tests.
 }
 
-// R8: src not AV (camera/light/text/shape refused in Phase 5C)
+// R8: src not AV (camera/light/text/shape refused)
 func TestInsertLayer_RefuseNonAV(t *testing.T) {
 	dest, src := openInsertPair(t)
 	if dest == nil {

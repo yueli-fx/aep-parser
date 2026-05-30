@@ -5,13 +5,12 @@ package aep
 // (parse_layer.go), writer (write_layer.go), and builder (V2.2 lower_layer.go).
 //
 // ldta canonical total size: 160 bytes (AE 2020 / 2022). AE 2025 emits 164
-// bytes with the trailing 4 bytes always zero (RE-S9 Phase 0). V2.2 builder
-// targets the 160-B canonical layout; the trailing AE 2025 padding is treated
-// as length-preserving passthrough and does NOT enter the capability matrix
-// (admission rule §1.4 condition 3 not satisfied; see spec §6.5).
+// bytes with the trailing 4 bytes always zero. V2.2 builder targets the 160-B
+// canonical layout; the trailing AE 2025 padding is treated as
+// length-preserving passthrough and does NOT enter the capability matrix.
 //
 // Offsets here are sourced from V1 parse_layer.go header comment block plus
-// Phase 0 RE-S1 / RE-S2 dumps of canonical empty ShapeLayer.
+// RE dumps of a canonical empty ShapeLayer.
 const (
 	ldtaLayerID        = 0x00 // uint32 BE — layer-local ID (referenced by child Layer.ParentID)
 	ldtaQuality        = 0x04 // uint16 BE — LayerQuality enum (0=Wireframe / 1=Draft / 2=Best)

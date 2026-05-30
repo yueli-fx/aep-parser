@@ -9,11 +9,10 @@ import (
 
 // InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx ==
 // len(c.Layers) appends). Returns the inserted clone *Layer on success. src may
-// live in a sibling comp of the same Project (Phase 5C) or in a different
-// Project (Phase 5C.1, cross-Project).
+// live in a sibling comp of the same Project, or in a different Project
+// (cross-Project).
 //
-// Same-Project clone semantics (src.comp.proj == c.proj — see
-// flightdeck/specs/2026-05-29-v3-phase5c-insertlayer-design.md):
+// Same-Project clone semantics (src.comp.proj == c.proj):
 //
 //   - new layer ID = c.proj.allocItemID() (head counter +1, monotonic)
 //   - clone block = deep byte-clone of src's [Layr, Ewst, leaf-followers)
@@ -25,8 +24,7 @@ import (
 //   - clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
 //   - clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
 //
-// Cross-Project semantics (src.comp.proj != c.proj — Phase 5C.1, see
-// flightdeck/specs/2026-05-29-v3-phase5c1-cross-project-insertlayer-design.md):
+// Cross-Project semantics (src.comp.proj != c.proj):
 // additionally imports src's reachable ITEM CLOSURE (footage + precomp,
 // transitively) into c's Project at root level with fresh dest item IDs, then
 // remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the
@@ -35,22 +33,21 @@ import (
 // cloned. ParentID / track matte are still reset (cross-comp). Folders are not
 // recreated.
 //
-// Refuse-cases (R1..R11; spec §2): nil src, dest backref missing, atIdx out of
-// range, src detached, same-comp redirect, non-AV, direct pre-comp loop
-// (same-Project only), src backref missing, structural corruption. Cross-Project
-// adds: dest/src Project has no root Fold; dangling closure source.
+// Refuse-cases: nil src, dest backref missing, atIdx out of range, src
+// detached, same-comp redirect, non-AV, direct pre-comp loop (same-Project
+// only), src backref missing, structural corruption. Cross-Project adds:
+// dest/src Project has no root Fold; dangling closure source.
 //
-// Atomic mutation (Inv-10 / Inv-11): snapshot dest itemList.Children +
-// c.Layers + c.proj.nextItemID + len(c.proj.Warnings) (cross-Project also
-// snapshots rootFold.Children + Compositions + Footage); on any new
-// parser warning during re-parse, roll all back including the
-// nextItemID bump.
+// Atomic mutation: snapshot dest itemList.Children + c.Layers +
+// c.proj.nextItemID + len(c.proj.Warnings) (cross-Project also snapshots
+// rootFold.Children + Compositions + Footage); on any new parser warning
+// during re-parse, roll all back including the nextItemID bump.
 //
 // Stable (both paths) — same-Project passed AE 2020 + AE 2025 ship-gate (3 modes
-// [basic/footage/precomp] × 2 = 6/6 PASS, 2026-05-29); cross-Project passed the
-// assert-based AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup] × 2 = 6/6
-// PASS, 2026-05-29): AE accepts the Go-emitted file, the inserted clone's source
-// resolves (imported / dedup'd), and footage is not duplicated on path match.
+// [basic/footage/precomp] × 2 = 6/6 PASS); cross-Project passed the assert-based
+// AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup] × 2 = 6/6 PASS): AE
+// accepts the Go-emitted file, the inserted clone's source resolves (imported /
+// dedup'd), and footage is not duplicated on path match.
 func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	// === Refuse-case matrix R1-R11 ===
 	if src == nil {

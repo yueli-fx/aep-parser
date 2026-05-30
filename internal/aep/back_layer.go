@@ -12,7 +12,7 @@ import "github.com/example/aep-parser/internal/rifx"
 //     builders construct it explicitly per their archetype).
 //   - opaque is reserved for future V3 phases that need to round-trip
 //     unrecognized sibling chunks under the layer's owning Layr LIST
-//     (per CLAUDE.md hard constraint #5). Phase 1 leaves it nil.
+//     (per CLAUDE.md hard constraint #5); currently nil.
 type layerBackrefs struct {
 	// ldta is the underlying ldta chunk reference, captured by parseLayer.
 	// Used by SetVisible/SetBlendingMode/etc. for length-preserving

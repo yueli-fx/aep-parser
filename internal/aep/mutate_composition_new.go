@@ -1,8 +1,7 @@
 // internal/aep/new_composition.go
 //
 // V2: Project.NewComposition + chunk builders for synthesizing comp
-// Item LIST from scratch. See flightdeck/landed/specs/2026-05-22-v2-1-foundation-design.md
-// and flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md for design + RE findings.
+// Item LIST from scratch.
 package aep
 
 import (
@@ -18,8 +17,8 @@ import (
 
 // Builder uses ONE comp template — AE 2020's. Higher AE versions open AE 2020
 // items via back-compat, so per-target dummy_comp templates aren't needed
-// (verified Phase 6 ship gate 2026-05-22: AE 2025 + AE 2020 both PASS with
-// AE-2020 items wrapped in their respective project skeletons).
+// (verified via ship-gate: AE 2025 + AE 2020 both PASS with AE-2020 items
+// wrapped in their respective project skeletons).
 //
 // AE-version divergence (AE 24+ adds 10 Material/Lighting property groups,
 // ldta 160→164B, FEE ppSn) lives in the higher-version *Item* internals;
@@ -51,9 +50,8 @@ func buildCompIide() *rifx.Chunk {
 
 // buildCompIdpc 构造 8-byte idpc chunk。
 //
-// RE-2 finding (flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md Task 0.2): AE 自己写全零，
-// 多 comp 同 project 也共享同样 8B 零字节。idpc 不是 per-item UUID — 真正的 Item
-// 唯一性走 idta @0x10（由 nextItemID 分配）。
+// 实测：AE 自己写全零，多 comp 同 project 也共享同样 8B 零字节。idpc 不是
+// per-item UUID — 真正的 Item 唯一性走 idta @0x10（由 nextItemID 分配）。
 //
 // 我们写全零跟 AE 行为一致，不引 crypto/rand。
 func buildCompIdpc() *rifx.Chunk {
@@ -67,7 +65,7 @@ func buildCompIdpc() *rifx.Chunk {
 // (test_data/fdta_probe/AE2025_1comp.aep) verbatim 拷贝。Builder 只 overwrite
 // @0x10 (Item ID) + 显式归零 @0x3A (Label)；其余字节保持 AE-default 不动（含
 // @0x14..0x17 const 0x20、@0x3A 在 fixture 中残留=0x0F 我们 reset 为 0、
-// @0x50 session token 等 RE-3 未完全语义化字段）。
+// @0x50 session token 等未完全语义化字段）。
 //
 // 注意 ID offset 是 @0x10 (parse.classifyItem reads idta.U32(16))，不是 @0x14。
 // 早期文档把 @0x14 当作 ID — 实测 fixture (ID 1, 13) 与 parse 行为一致 @0x10。
@@ -111,11 +109,11 @@ func buildCompIdta(itemID uint32) *rifx.Chunk {
 }
 
 // buildCompCdta 构造 204-byte cdta。
-// Frame rate 经 encodeFrameRate 走 NTSC canonical 表 (RE-4)。
+// Frame rate 经 encodeFrameRate 走 NTSC canonical 表。
 // fps-derived timing 字段 (TickRate / mirrors / masterTicks) 经 lookupFpsTiming
 // 查表 —— 这些字段 parser 不读，但 AE 25 打开做时间轴 sanity check 时必读，
-// 全零会让 AE 25 crash (实测 Phase 6 ship gate, 2026-05-22)。
-// WorkAreaEnd 写 sentinel 0xFFFFFFFF (per RE-4 finding)。
+// 全零会让 AE 25 crash（实测）。
+// WorkAreaEnd 写 sentinel 0xFFFFFFFF（实测 AE default）。
 func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	d := make([]byte, cdtaSize)
 
@@ -132,9 +130,9 @@ func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 
 	// TimeBaseDivisor @0x10 — always 600 (matches WorkArea divisor)
 	// Secondary divisor @0x18 — 600 for fresh comps (实测 A_baseline + dummy_comp).
-	// AE rewrites to TickRate after user mods（E_shutter/F_shutter/RE_fps_*）—
+	// AE rewrites to TickRate after user mods —
 	// builder 出 fresh comp，必须用 600，否则 AE 25 把 ShutterAngle 按 NTSC 因子重算
-	// (实测 Phase 6 ship gate: stored 180 → AE display 216 when @0x18=TickRate)。
+	// (实测: stored 180 → AE display 216 when @0x18=TickRate)。
 	binary.BigEndian.PutUint32(d[cdtaTimeBaseDivisor:cdtaTimeBaseDivisor+4], 600)
 	binary.BigEndian.PutUint32(d[cdtaSecondaryDivisor18:cdtaSecondaryDivisor18+4], 600)
 
@@ -145,8 +143,8 @@ func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	binary.BigEndian.PutUint32(d[cdtaWorkAreaEndDiv:cdtaWorkAreaEndDiv+4], 600)
 
 	// MasterTicks @0x2C = round(duration_seconds × nominalTickRate)。
-	// AE 25 display duration ≈ @0x2C / tickRate (per RE_cdta_probe A_baseline + ship gate
-	// 实测：错值导致 AE 显示 错 duration + 触发其它字段误算如 ShutterAngle)。
+	// AE 25 display duration ≈ @0x2C / tickRate（实测：错值导致 AE 显示错
+	// duration + 触发其它字段误算如 ShutterAngle)。
 	masterTicks := uint32(math.Round(duration * float64(timing.nominalTickRate)))
 	binary.BigEndian.PutUint32(d[cdtaMasterTicks:cdtaMasterTicks+4], masterTicks)
 
@@ -357,7 +355,6 @@ func isDatsList(c *rifx.Chunk) bool {
 }
 
 // NewComposition adds an empty composition to the project's root folder.
-// 详 spec: flightdeck/landed/specs/2026-05-22-v2-1-foundation-design.md §Public API
 //
 // Required:
 //   name        — non-empty string
@@ -371,10 +368,10 @@ func isDatsList(c *rifx.Chunk) bool {
 // Composition.ID is auto-assigned (Project.nextItemID++, monotonic).
 // New comp appends to the project's root folder.
 //
-// Atomic mutation (Invariant #10): if chunk parse fails or warnings appear,
-// rollback chunk-tree + typed index + warnings to pre-call state.
+// Atomic mutation: if chunk parse fails or warnings appear, rollback
+// chunk-tree + typed index + warnings to pre-call state.
 //
-// Warnings-as-failure (Invariant #11): builder must produce zero parser warnings —
+// Warnings-as-failure: builder must produce zero parser warnings —
 // if any appear, that's a builder bug; rollback + return internal error.
 func (p *Project) NewComposition(
 	name string,
@@ -386,7 +383,7 @@ func (p *Project) NewComposition(
 		return nil, err
 	}
 
-	// 2. Allocate ID (monotonic; never reuses — Invariant #9)
+	// 2. Allocate ID (monotonic; never reuses)
 	id := p.allocItemID()
 
 	// 3. Build chunks
@@ -403,8 +400,8 @@ func (p *Project) NewComposition(
 	// 5. Append to rootFold + reparse closed loop。
 	// AE 在 Fold 里要求每个 Item LIST 后面都跟 8 个 sibling chunks
 	// (FEE LIST + fvdv/fiop/ftts/foac/fiac/fipc/fifl) —— 否则报 "文件数据丢失"
-	// (实测 Phase 6 ship gate)。Phase 2 Task 2.4 把 inline clone 逻辑提到
-	// `lower_item_siblings.go` 的 lowerItemSiblings primitive，行为不变。
+	// (实测)。inline clone 逻辑提到 `lower_item_siblings.go` 的
+	// lowerItemSiblings primitive，行为不变。
 	p.back.rootFold.Children = append(p.back.rootFold.Children, itemList)
 	p.back.rootFold.Children = append(p.back.rootFold.Children, lowerItemSiblings(nil)...)
 	comp, err := parseComposition(itemList, id, name, &p.Warnings)
@@ -415,7 +412,7 @@ func (p *Project) NewComposition(
 		return nil, fmt.Errorf("internal: re-parsing new composition: %w", err)
 	}
 
-	// 6. Warnings-as-failure (Invariant #11)
+	// 6. Warnings-as-failure
 	if len(p.Warnings) != oldWarningsLen {
 		newWarnings := append([]string(nil), p.Warnings[oldWarningsLen:]...)
 		p.back.rootFold.Children = p.back.rootFold.Children[:oldChildLen]
@@ -425,7 +422,7 @@ func (p *Project) NewComposition(
 
 	// 7. Wire back-pointer + register in typed index
 	comp.proj = p
-	// comp.itemList 已由 parseComposition 设置 (Phase 4 wiring)
+	// comp.itemList 已由 parseComposition 设置
 	p.Compositions = append(p.Compositions, comp)
 
 	return comp, nil

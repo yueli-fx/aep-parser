@@ -1,19 +1,17 @@
 // internal/aep/lower_layer.go
 //
-// Phase 2 Task 2.3 — lowerShapeLayer produces a LIST(Layr) chunk from a
-// runtime *ShapeLayer. Children per RE-S1 (empty ShapeLayer canonical):
+// lowerShapeLayer produces a LIST(Layr) chunk from a runtime *ShapeLayer.
+// Children of a canonical empty ShapeLayer:
 //
 //	ldta (160 B AE 2020 canonical)
 //	Utf8 (layer name, length-variable)
 //	LIST(tdgp) — layer Transform Group (V2.2: user-facing 2D 5-stream)
 //	[if root has shapes:] tdmn("ADBE Root Vectors Group") + LIST(tdgp, root)
 //
-// Per RE-S2 the Phase-0 fixture observed a 6-axis 3D-compatible Transform
-// schema (Position_0 / Position_1 / Orientation / RotateX / RotateY /
-// Envir Appear). V2.2 instead emits the user-facing 2D form (Anchor /
-// Position / Scale / Rotate Z / Opacity) per spec §3.3a + V1 parser
-// convention — AE accepts both per the prompt's hot-path 2D guidance.
-// Phase 4 roundtrip is the AE accept gate.
+// AE's canonical fixture observed a 6-axis 3D-compatible Transform schema
+// (Position_0 / Position_1 / Orientation / RotateX / RotateY / Envir Appear).
+// V2.2 instead emits the user-facing 2D form (Anchor / Position / Scale /
+// Rotate Z / Opacity) per V1 parser convention — AE accepts both.
 package aep
 
 import (
@@ -28,10 +26,9 @@ import (
 
 // v2_2 ShapeLayer Transform Group body — byte-exact extracted from
 // tolerance.aep (1842 B LIST(tdgp) with 15 children: tdsb + tdsn + 6 stream
-// tdmn-LIST pairs + Group End). iter-7 ship-gate: transplant tests proved
-// constructing this byte-correctly from scratch is too fragile (silent-drop
-// trigger). V2.3 may RE the full byte layout and replace this blob with
-// constructor code.
+// tdmn-LIST pairs + Group End). Transplant tests proved constructing this
+// byte-correctly from scratch is too fragile (silent-drop trigger). V2.3 may
+// RE the full byte layout and replace this blob with constructor code.
 //
 //go:embed templates/v2_2_transform_group_body.bin
 var v22TransformGroupBodyBytes []byte
@@ -112,8 +109,7 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	layr := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDLayr}
 
 	// ldta — target-conditional size (capability matrix LdtaSize): 160 B for
-	// AE 2020/22, 164 B for AE 2025. AE 2020 rejects a 164-B ldta as corrupt
-	// (incident: ae2020-shape-ldta-164-corrupt.md).
+	// AE 2020/22, 164 B for AE 2025. AE 2020 rejects a 164-B ldta as corrupt.
 	ldta := &rifx.Chunk{ID: rifx.IDLdta, Data: buildLdtaBytes(s, ctx)}
 	layr.Children = append(layr.Children, ldta)
 
@@ -124,8 +120,7 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	})
 
 	// Layer-level property groups live INSIDE an outer LIST(tdgp) — AE
-	// rejects the flat-Layr-children form (Phase 5 ship gate FAIL repro;
-	// scars/v2-2-aelayer-structure.md fix A). Outer body shape per
+	// rejects the flat-Layr-children form. Outer body shape per
 	// tolerance.aep:
 	//   tdsb + tdsn("") + (tdmn + LIST(tdgp))* + tdmn("ADBE Group End")
 	//
@@ -136,11 +131,11 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	outer := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	outer.Children = append(outer.Children, makeTdsb(), makeTdsn(""))
 
-	// Root Vectors Group is ALWAYS emitted on ShapeLayer (per iter 4 bisection
-	// #2 finding: AE 2025 rejects ShapeLayer even with zero shapes when Root
-	// Vectors Group is absent; tolerance.aep dumps confirm AE always emits it).
-	// lowerVectorGroup handles an empty VectorGroup (3-child LIST(tdgp): tdsb +
-	// tdsn("Contents") + Group End).
+	// Root Vectors Group is ALWAYS emitted on ShapeLayer: AE 2025 rejects
+	// ShapeLayer even with zero shapes when Root Vectors Group is absent;
+	// tolerance.aep dumps confirm AE always emits it. lowerVectorGroup handles
+	// an empty VectorGroup (3-child LIST(tdgp): tdsb + tdsn("Contents") +
+	// Group End).
 	if s.shapeRootGroup == nil {
 		s.shapeRootGroup = NewVectorGroup()
 	}
@@ -164,10 +159,10 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	outer.Children = append(outer.Children, transformBody)
 
 	// Layer-property-group placeholders AE 2020/25 emit on every ShapeLayer
-	// (tolerance.aep dump line 145-361). Ship-gate iter 1 (fix A only) still
-	// rejected — iter 2 adds these placeholders. Layer Styles has the
-	// canonical Blend Options + 10 fx/enabled nested-empty structure; the
-	// other four are emitted as empty 3-child LIST(tdgp).
+	// (tolerance.aep dump line 145-361). AE rejects the layer without these
+	// placeholders. Layer Styles has the canonical Blend Options + 10
+	// fx/enabled nested-empty structure; the other four are emitted as empty
+	// 3-child LIST(tdgp).
 	appendLayerStylesPlaceholder(outer)
 	outer.Children = append(outer.Children,
 		makeTdmn("ADBE Extrsn Options Group"), emptyPropGroup(),
@@ -181,11 +176,10 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 
 	// 4th Layr child: Gide boilerplate. Every AE-saved Layr (user shape +
 	// template service layers DLay/SLay/CLay/SecL) carries an identical
-	// LIST(Gide) at this position. iter-5 bisect proof: AE 2025 silently
-	// drops user Layr from comp.layers when this chunk is absent — even
-	// for variant #2 (empty ShapeLayer with no shape kids). AE never
-	// reaches shape-content validation; drop happens at layer-instantiation
-	// stage.
+	// LIST(Gide) at this position. AE 2025 silently drops user Layr from
+	// comp.layers when this chunk is absent — even for an empty ShapeLayer
+	// with no shape kids. AE never reaches shape-content validation; drop
+	// happens at layer-instantiation stage.
 	//
 	// Content (byte-identical across all 10+ Layrs observed in
 	// tolerance.aep + minfail_v2.aep template service layers):
@@ -205,7 +199,7 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 
 // gideLhd3Boilerplate is the 52-byte lhd3 content observed identical across
 // every Layr's LIST(Gide → list → lhd3) in tolerance.aep + the template
-// service layers. iter-5 RE — no AE doc; treated as opaque constant.
+// service layers. No AE doc; treated as opaque constant.
 var gideLhd3Boilerplate = []byte{
 	0x00, 0xd0, 0x0b, 0xee, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
 	0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
@@ -214,7 +208,7 @@ var gideLhd3Boilerplate = []byte{
 }
 
 // makeGideBoilerplate returns the constant LIST(Gide) every Layr must carry
-// as 4th child. iter-5 finding (see lowerShapeLayer caller comment).
+// as 4th child (see lowerShapeLayer caller comment).
 func makeGideBoilerplate() *rifx.Chunk {
 	innerList := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
 	innerList.Children = append(innerList.Children, &rifx.Chunk{
@@ -286,7 +280,7 @@ func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 // buildLdtaBytes returns the ldta payload for a ShapeLayer, sized per the
 // target's capability matrix (160 B AE 2020/22, 164 B AE 2025). Fills the
 // well-known offsets via ldta_layout.go constants; everything else is zero
-// (AE-friendly default per RE-S1).
+// (AE-friendly default).
 //
 // Layer subtype byte (@0x80) = 4 (Shape) per ldta_layout.go ldtaLayerSubtype
 // comment. Quality (@0x04) = 2 (Best) — AE's typical default. Visible bit
@@ -295,10 +289,10 @@ func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	// ldta size is target-conditional (capability matrix LdtaSize): AE 2020/22
 	// accept 160 B, AE 2025 accepts its native 164 B. Emitting 164 B for an
-	// AE 2020 target makes AE 2020 reject the layer as corrupt and skip it
-	// (incident: ae2020-shape-ldta-164-corrupt.md). All written fields fit in
-	// the first 0x88 bytes, so the size choice only varies the trailing
-	// zero-pad. Fall back to 164 if a caller left LdtaSize unset.
+	// AE 2020 target makes AE 2020 reject the layer as corrupt and skip it.
+	// All written fields fit in the first 0x88 bytes, so the size choice only
+	// varies the trailing zero-pad. Fall back to 164 if a caller left LdtaSize
+	// unset.
 	size := ldtaSize2025
 	if ctx != nil && ctx.capabilities.LdtaSize > 0 {
 		size = ctx.capabilities.LdtaSize
@@ -324,15 +318,15 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	// @0x04 — Quality. 2 = Best (AE default for new layers).
 	binary.BigEndian.PutUint16(d[ldtaQuality:ldtaQuality+2], 2)
 
-	// @0x08 — StretchDividend = 1 (per tolerance.aep iter 4 RE).
+	// @0x08 — StretchDividend = 1 (per tolerance.aep).
 	// @0x6C — StretchDivisor = 1 (1/1 = 1× speed).
 	binary.BigEndian.PutUint32(d[ldtaStretchDivd:ldtaStretchDivd+4], 1)
 	binary.BigEndian.PutUint32(d[ldtaStretchDivs:ldtaStretchDivs+4], 1)
 
 	// Time fields are encoded as (ticks_dividend, ticks/sec_divisor). Per
-	// iter 4 RE of tolerance.aep: divisor = TickRate (30720 for 30fps), NOT
-	// 1. Our previous 0/1 encoding made AE compute zero-duration layers and
-	// silently drop them from comp.layers.
+	// tolerance.aep: divisor = TickRate (30720 for 30fps), NOT 1. A 0/1
+	// encoding makes AE compute zero-duration layers and silently drop them
+	// from comp.layers.
 	binary.BigEndian.PutUint32(d[ldtaStartTimeDivd:ldtaStartTimeDivd+4], 0)
 	binary.BigEndian.PutUint32(d[ldtaStartTimeDivs:ldtaStartTimeDivs+4], tickRate)
 	binary.BigEndian.PutUint32(d[ldtaInPointDivd:ldtaInPointDivd+4], 0)
@@ -348,11 +342,11 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 
 	// AttrByte0 @0x25: tolerance has bit0 set (0x01). Not in the documented
 	// bit map (parse_layer.go doc covers bit1/2/4/6). Empirically required —
-	// AE 2025 silently drops ShapeLayer from comp.layers without it (iter 4
-	// RE finding). Speculated as "layer-real" / "ready" / "validated" flag.
+	// AE 2025 silently drops ShapeLayer from comp.layers without it.
+	// Speculated as "layer-real" / "ready" / "validated" flag.
 	d[0x25] = 0x01
 
-	// @0x3B: tolerance sets to 0x01 (unknown semantics; iter 4 RE match).
+	// @0x3B: tolerance sets to 0x01 (unknown semantics).
 	d[0x3B] = 0x01
 	// @0x3D: label color index. AE default Shape = 0x08 (per tolerance.aep).
 	d[0x3D] = 0x08
@@ -379,19 +373,18 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 }
 
 // lowerLayerTransform emits the Layer Transform Group LIST(tdgp) for a
-// ShapeLayer. iter-7 approach (post-bisect): use the byte-exact Transform
-// Group body extracted from tolerance.aep as boilerplate, then overwrite
-// the Position_0/_1 inner cdat with runtime t.position values.
+// ShapeLayer. Uses the byte-exact Transform Group body extracted from
+// tolerance.aep as boilerplate, then overwrites the Position_0/_1 inner cdat
+// with runtime t.position values.
 //
-// Background: iter-5b..iter-6f attempted to construct the Transform Group
-// from scratch (Anchor / Position_0/_1 / Scale / RotateZ / Opacity + 6-axis
-// 3D defaults). AE 2025 accepted those files but silently dropped the
-// ShapeLayer from comp.layers. Transplant tests (tmp_debug/swap_propgroup)
-// isolated the silent-drop trigger to the Transform Group body alone —
-// 4 other property groups (Root Vectors, Layer Styles, Extrsn/Material/
-// Audio/Layer Sets placeholders) emit byte-identically to tolerance and
-// pass AE acceptance; only Transform Group construction had subtle
-// byte errors (tdsb 0x03 vs 0x01, tdb4 head bytes, missing tdum/tduM,
+// Background: constructing the Transform Group from scratch (Anchor /
+// Position_0/_1 / Scale / RotateZ / Opacity + 6-axis 3D defaults) made AE 2025
+// accept the file but silently drop the ShapeLayer from comp.layers.
+// Transplant tests isolated the silent-drop trigger to the Transform Group
+// body alone — 4 other property groups (Root Vectors, Layer Styles,
+// Extrsn/Material/Audio/Layer Sets placeholders) emit byte-identically to
+// tolerance and pass AE acceptance; only Transform Group construction had
+// subtle byte errors (tdsb 0x03 vs 0x01, tdb4 head bytes, missing tdum/tduM,
 // over-emit of Anchor/Scale/RotateZ/Opacity as Vec2 instead of 3D).
 //
 // V2.2 ship gate uses verbatim tolerance bytes; runtime user-set values
@@ -478,7 +471,6 @@ func lowerTransformScalar(body *rifx.Chunk, name string, ps *PropertyStream[floa
 	return nil
 }
 
-
 // lowerOrientationDefault emits the LIST(otst) wrapper holding a default
 // Orientation stream — tolerance.aep dump line 117-125 canonical shape:
 //
@@ -488,7 +480,7 @@ func lowerTransformScalar(body *rifx.Chunk, name string, ps *PropertyStream[floa
 //	  [LIST otky]
 //	    otda (24 B = 3 × f64 = 0,0,0)
 //
-// iter-7: lowerOrientationDefault no longer called — Transform Group body is
-// now embedded as tolerance bytes (templates/v2_2_transform_group_body.bin)
-// and includes its own Orientation otst wrapper. Retired here; keep the
-// chunk-IDs (IDOtst/IDOtky/IDOtda) in rifx.go for parser-side use.
+// lowerOrientationDefault no longer called — Transform Group body is now
+// embedded as tolerance bytes (templates/v2_2_transform_group_body.bin) and
+// includes its own Orientation otst wrapper. Retired here; keep the chunk-IDs
+// (IDOtst/IDOtky/IDOtda) in rifx.go for parser-side use.

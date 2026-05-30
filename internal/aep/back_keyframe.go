@@ -18,7 +18,7 @@ import "github.com/example/aep-parser/internal/rifx"
 //     length-variable splice rewrites the ldat.Data.
 //   - Nil for keyframes built outside the parser.
 //   - opaque is reserved for future V3 phases (per-keyframe-block ancillary
-//     chunks if/when we identify any). Phase 1 leaves it nil.
+//     chunks if/when we identify any); currently nil.
 type keyframeBackrefs struct {
 	ldat     *rifx.Chunk
 	offset   int

@@ -50,9 +50,9 @@ const (
 // Shape / text 3D layers carry additional bevel + extrusion match
 // names not enumerated here; this set is the universal solid-layer set.
 const (
-	MatchNameGeometryPlaneCurvature  = "ADBE Plane Curvature"
+	MatchNameGeometryPlaneCurvature   = "ADBE Plane Curvature"
 	MatchNameGeometryPlaneSubdivision = "ADBE Plane Subdivision"
-	MatchNameGeometryBevelDirection  = "ADBE Bevel Direction"
+	MatchNameGeometryBevelDirection   = "ADBE Bevel Direction"
 )
 
 // Material Options match-names. These properties exist only on 3D-enabled

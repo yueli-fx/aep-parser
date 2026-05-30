@@ -1,6 +1,6 @@
 // internal/aep/shape_rect_shipgate_test.go
 //
-// V2.2 Phase 5 Task 5.2 — AE ship gate: canonical 3-ShapeLayer project
+// AE ship gate: canonical 3-ShapeLayer project
 // (Rect+Fill animated, Ellipse+Stroke static, Path+Fill+Stroke static).
 // Gated by AE_SHIP_GATE env var; CI / no-AE runs SKIP cleanly.
 package aep_test
@@ -27,7 +27,7 @@ func runV2_2ShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	doneFile := filepath.Join(tempDir, "v2_2_test.done")
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_args.json`
 
-	// 1. Build canonical shape graph (spec §5.2) — must match the layer
+	// 1. Build canonical shape graph — must match the layer
 	//    names and values verify_v2_2.jsx is checking against.
 	p := aep.NewProject(target)
 	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)

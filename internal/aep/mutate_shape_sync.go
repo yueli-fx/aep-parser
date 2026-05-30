@@ -1,6 +1,6 @@
 // internal/aep/sync_shape_layers.go
 //
-// V2.2 Phase 4 — write-time bridge from runtime ShapeLayer state to the
+// V2.2 — write-time bridge from runtime ShapeLayer state to the
 // owning Layr chunk. NewShapeLayer pre-lowers an empty Layr at construction
 // time; subsequent VectorGroup mutations (AddRect, SetSize, ...) only touch
 // the runtime tree. This pass walks every layer where shapeRootGroup is
@@ -18,8 +18,8 @@ import (
 // in place. Safe to call on parse-then-write paths too: parsed layers
 // have shapeRootGroup populated by parseLayer/hydrateShapeNodes and
 // layrList populated by parseLayer; if the user never wrapped/mutated,
-// the re-lowering reconstructs structurally-equivalent chunks (Phase 4
-// roundtrip is the byte-fidelity gate).
+// the re-lowering reconstructs structurally-equivalent chunks (roundtrip
+// is the byte-fidelity gate).
 func (p *Project) syncShapeLayerChunks() error {
 	for _, c := range p.Compositions {
 		if err := p.syncCompositionShapeLayers(c); err != nil {

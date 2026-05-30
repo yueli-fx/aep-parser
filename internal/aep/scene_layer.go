@@ -99,7 +99,7 @@ type Layer struct {
 	// layers. Populated by parseLayer (via hydrateShapeNodes) when a Layr
 	// is parsed; lazily initialized by WrapShapeLayer on first wrap of a
 	// freshly-built layer. The wrapper does NOT own this — mutations
-	// persist across wrap calls and feed the Phase 4 write-time sync.
+	// persist across wrap calls and feed the write-time sync.
 	shapeRootGroup *VectorGroup
 
 	// shapeTransform is the runtime Layer-level Transform for shape
@@ -200,11 +200,9 @@ const (
 	MatchNameRotateZ     = "ADBE Rotate Z"
 	MatchNameOpacity     = "ADBE Opacity"
 
-	// ShapeLayer-canonical 6-axis Transform stream names (per iter 2 RE
-	// of tolerance.aep): AE saves ShapeLayer Position split into Position_0
-	// (X) + Position_1 (Y) and always emits Orientation / Rotate X / Rotate Y
-	// / Envir Appear at default. See flightdeck/incident-reports/v2-2-aelayer-structure.md
-	// "iter 2 新 RE 发现" for the schema.
+	// ShapeLayer-canonical 6-axis Transform stream names: AE saves ShapeLayer
+	// Position split into Position_0 (X) + Position_1 (Y) and always emits
+	// Orientation / Rotate X / Rotate Y / Envir Appear at default.
 	MatchNamePosition0   = "ADBE Position_0"
 	MatchNamePosition1   = "ADBE Position_1"
 	MatchNameEnvirAppear = "ADBE Envir Appear in Reflect"
@@ -238,13 +236,13 @@ func (l *Layer) Rotation() *Property { return l.PropertyByMatchName(MatchNameRot
 // Opacity returns the layer's Opacity property (1D, 0..1), or nil.
 func (l *Layer) Opacity() *Property { return l.PropertyByMatchName(MatchNameOpacity) }
 
-// ShapeLayer is the V2.2 typed wrapper around *Layer (spec §2.1). V1 callers
+// ShapeLayer is the V2.2 typed wrapper around *Layer. V1 callers
 // keep using *Layer directly; V2.2 creation / hydration paths return
 // *ShapeLayer, exposing shape-specific API (RootGroup, Transform, shorthand
 // transform accessors) on top of the embedded layer.
 //
-// The wrapper holds runtime state only — it does NOT carry rifx.Chunk refs
-// (Inv-1). Lowering (Phase 2 `lower_layer.go`) consumes the runtime tree
+// The wrapper holds runtime state only — it does NOT carry rifx.Chunk refs.
+// Lowering (`lower_layer.go`) consumes the runtime tree
 // and produces chunks; hydration rebuilds the runtime tree from chunks.
 type ShapeLayer struct {
 	*Layer // embed: V1 setters/getters + private shape state live here
@@ -274,10 +272,10 @@ func WrapShapeLayer(layer *Layer) *ShapeLayer {
 }
 
 // RootGroup returns the default RootGroup. Newly attached nodes go to the
-// end of `RootGroup().Children` (top of render stack; spec §3.2).
+// end of `RootGroup().Children` (top of render stack).
 func (s *ShapeLayer) RootGroup() *VectorGroup { return s.shapeRootGroup }
 
-// Transform returns the typed Layer-level Transform surface (spec §3.3a).
+// Transform returns the typed Layer-level Transform surface.
 func (s *ShapeLayer) Transform() *LayerTransform { return s.shapeTransform }
 
 // AnchorPoint is shorthand for s.Transform().AnchorPoint().
@@ -299,10 +297,10 @@ func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.shapeTransfo
 func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeTransform.opacity }
 
 // LayerTransform is the typed wrapper for a layer's Transform property
-// group (spec §3.3a). V2.2 ShapeLayer is 2D, so Position / Scale /
+// group. V2.2 ShapeLayer is 2D, so Position / Scale /
 // AnchorPoint are 2D streams; 3D layers are V2.3+.
 //
-// Default values (runtime-facing; lowering elides defaults per RE-S2):
+// Default values (runtime-facing; lowering elides defaults):
 //
 //	AnchorPoint = [0, 0]
 //	Position    = [0, 0]
@@ -326,7 +324,7 @@ func newLayerTransform() *LayerTransform {
 		rotation:    NewPropertyStream[float64](),
 		opacity:     NewPropertyStream[float64](),
 	}
-	// Defaults per spec §3.6 runtime-facing convention.
+	// Defaults per runtime-facing convention.
 	_ = lt.scale.SetStaticValue([2]float64{100, 100})
 	_ = lt.opacity.SetStaticValue(100)
 	return lt

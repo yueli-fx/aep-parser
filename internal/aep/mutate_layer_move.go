@@ -14,7 +14,7 @@ import (
 // every layer's Layer.Index field is refreshed to match its new slice
 // position.
 //
-// Refuse-cases (Phase 4 conservative):
+// Refuse-cases (conservative):
 //
 //   - `from` or `to` out of range (note: `to == len(c.Layers)-1` IS in
 //     range and means "move to last slot")
@@ -28,18 +28,15 @@ import (
 // layer Type or TrackMatte — pure reorder works for AV / Camera / Light
 // / Audio / Shape / Text / matted layers alike.
 //
-// Atomic mutation (Inv-10 / Inv-11): snapshot pre-call itemList.Children
-// + c.Layers + each layer's Index + Warnings count; on any new parser
-// warning during the call, roll all of them back. No re-parse and no
-// new chunks created, so the warnings path is defensive (mirrors V2.1
-// pattern for symmetry).
+// Atomic mutation: snapshot pre-call itemList.Children + c.Layers +
+// each layer's Index + Warnings count; on any new parser warning during
+// the call, roll all of them back. No re-parse and no new chunks
+// created, so the warnings path is defensive.
 //
 // Stable: no Alpha gate — AE behavior is known (layer order = order of
 // Layr LISTs in itemList.Children, same model that DeleteLayer and
-// DuplicateLayer already exercise and ship-gate via 14/14 PASS runs
-// across AE 2020 + AE 2025). Phase 4 ship-gate (`verify_ge_move_layer.jsx`,
-// 3 modes × 2 versions = 6 runs) re-validates AE acceptance for the
-// reorder path specifically.
+// DuplicateLayer already exercise and ship-gate across AE 2020 + AE
+// 2025). The reorder path is ship-gate validated for AE acceptance.
 func (c *Composition) MoveLayer(from, to int) error {
 	// 1. Validate refuse-cases.
 	if c.back == nil || c.back.itemList == nil {
@@ -164,8 +161,8 @@ func (c *Composition) MoveLayer(from, to int) error {
 		l.Index = i
 	}
 
-	// 13. Warnings-as-failure (Inv-11). Defensive — no re-parse here, but
-	//     pattern stays consistent with DeleteLayer/DuplicateLayer.
+	// 13. Warnings-as-failure. Defensive — no re-parse here, but pattern
+	//     stays consistent with DeleteLayer/DuplicateLayer.
 	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
 		c.back.itemList.Children = oldChildren
 		c.Layers = oldLayers
@@ -194,14 +191,12 @@ func indexOfChunk(children []*rifx.Chunk, target *rifx.Chunk) int {
 // Layer-level convenience wrappers over Composition.MoveLayer, mirroring
 // AE ScriptingAPI's layer.moveAfter / moveBefore / moveToBeginning /
 // moveToEnd. All delegate to the comp's MoveLayer (already ship-gated
-// against AE 2020 + AE 2025; see scars/ae-deletelayer-re.md F4 + the
-// move_layer ship-gate).
+// against AE 2020 + AE 2025).
 //
 // Each wrapper finds the current slice index of the receiver via pointer
 // identity in `l.comp.Layers`; this avoids relying on `Layer.Index`,
 // which is parse-time and may be stale if the comp was previously
-// mutated by DeleteLayer / DuplicateLayer (those don't re-index, see
-// V3 Phase 4 plan §1 commentary).
+// mutated by DeleteLayer / DuplicateLayer (those don't re-index).
 
 // MoveToBeginning moves the receiver to position 0 (top of layer stack
 // in AE's display, AE-index 1).

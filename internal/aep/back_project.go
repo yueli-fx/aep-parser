@@ -13,8 +13,8 @@ import "github.com/example/aep-parser/internal/rifx"
 //   - For projects built via NewProject the template-loader populates these
 //     fields from the bundled .aep template (parsed re-parse closed loop).
 //   - opaque is reserved for future V3 phases that need to round-trip
-//     unrecognized root-level chunks (per CLAUDE.md hard constraint #5).
-//     Phase 1 leaves it nil.
+//     unrecognized root-level chunks (per CLAUDE.md hard constraint #5);
+//     currently nil.
 type projectBackrefs struct {
 	// root keeps the original RIFX chunk tree so callers can mutate leaf
 	// chunks (e.g. Footage.SetPath) and re-serialize via WriteAEP.

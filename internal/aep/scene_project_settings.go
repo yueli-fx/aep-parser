@@ -81,7 +81,7 @@ func (p *Project) rootChunkPresent(id rifx.ChunkID) bool {
 // setRootFlagChunk adds (when on=true) or removes (when on=false) a
 // presence-encoded flag chunk on root.
 //
-// **Layout** (RE'd 2026-05-26 against AE 2025-saved fixture
+// **Layout** (against AE 2025-saved fixture
 // `re_linear_blending_on.aep`): the chunk carries **1 byte 0x01**, NOT
 // zero-length. Empty payload makes AE reject the file with "文件数据
 // 丢失"/"file data missing".

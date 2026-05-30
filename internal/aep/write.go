@@ -13,7 +13,7 @@ import (
 
 // chunkIDHead 是 root-level "head" chunk 的 ChunkID。包含 project 级 counter
 // (max item ID + a save-sequence counter)，AE 25 打开时校验 —— 若 counter
-// 低于实际 item IDs，AE 报 "文件数据丢失" (实测 Phase 6 ship gate, 2026-05-22)。
+// 低于实际 item IDs，AE 报 "文件数据丢失"（实测）。
 var chunkIDHead = rifx.ChunkID{'h', 'e', 'a', 'd'}
 
 // WriteAEP serializes the (possibly mutated) project back to RIFX binary
@@ -149,7 +149,6 @@ outer:
 	return -1
 }
 
-
 func writeFloat64(d []byte, offset int, f float64) error {
 	if offset < 0 || offset+8 > len(d) {
 		return fmt.Errorf("float64 write at offset %d: out of bounds (len=%d)", offset, len(d))
@@ -188,7 +187,6 @@ func jsonEscapeString(s string) []byte {
 	}
 	return b
 }
-
 
 // SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc)
 // to BOTH the nhed @0x0F and nnhd @0x18 header bytes. AE stores the

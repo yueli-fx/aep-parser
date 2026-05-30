@@ -51,8 +51,8 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 		proj.back.nnhdChunk = nnhd
 	}
 
-	// Project-level setting chunks (P1 Task 1D). All sit as direct root
-	// children — capture refs for the Set* methods in project_settings.go.
+	// Project-level setting chunks. All sit as direct root children — capture
+	// refs for the Set* methods in project_settings.go.
 	for _, c := range root.Children {
 		switch c.ID {
 		case rifx.IDAcer:
@@ -121,8 +121,8 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 //   - nextItemID = max(已有所有 item IDs) + 1（monotonic counter for NewComposition / Duplicate）
 //     Must include LAYER IDs too — AE often assigns layer.id > footage.id within
 //     a comp, so excluding layers can leave nextItemID below an in-use layer ID
-//     (collision on next allocItemID, surfaced by Phase 5B on AE 23+ matte
-//     fixtures where layer IDs run higher than any folder/comp/footage).
+//     (collision on next allocItemID, surfaced on AE 23+ matte fixtures where
+//     layer IDs run higher than any folder/comp/footage).
 //   - rootFold = root Egg! 下第一个 formType=Fold 的 LIST（cached for V2 mutations）
 //
 // 参数 rifxRoot 是 parseProject 顶层 *rifx.Chunk（formType=Egg!）。
@@ -161,7 +161,7 @@ func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
 	}
 }
 
-// allocItemID 返回下一个可用 Item ID 并递增计数器。Monotonic，不 reuse（见 Invariant #9）。
+// allocItemID 返回下一个可用 Item ID 并递增计数器。Monotonic，不 reuse。
 func (p *Project) allocItemID() uint32 {
 	id := p.nextItemID
 	p.nextItemID++
@@ -320,4 +320,3 @@ func readFloat64BE(b []byte, offset int) (float64, bool) {
 	}
 	return math.Float64frombits(binary.BigEndian.Uint64(b[offset:])), true
 }
-
