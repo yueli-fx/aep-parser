@@ -11,7 +11,7 @@
 
 1. **Path keyframe**（逐帧 bezier）— V2.3+ 级大 arc。
 2. **Layr Transform 3D 通道**（Orientation / Rotate X/Y / Position_Z）— 需先有 3D layer 支持（runtime 无 3D switch，V2.3）。
-3. **Stroke Line Cap/Join/Miter**（enum/scalar）— 中等价值。groundwork：stroke body **不含**这些 slot（默认值被 elide），matchName **不是** `ADBE Vector Stroke Line Cap`（JSX property-not-found）。需先查真实 matchName + 富化 stroke body + 加 runtime model 字段/enum/setter。
+3. **Stroke Line Cap/Join/Miter**（enum/scalar）— 中等价值。**RE 完**（详 `incident-reports/stroke-line-cap-join-miter-re.md`）：matchName 就是文档的 `ADBE Vector Stroke Line {Cap,Join} / Miter Limit`（旧 "property-not-found" 说法是错的）；OneD float64-BE @ cdat[0:8]（Cap 1=Butt/2=Round/3=Proj，Join 1=Miter/2=Round/3=Bevel，Miter scalar 默认 4）；AE 三者绑定一起写 + Miter 在 Join≠Miter 时 hidden。剩工：富化 stroke body 模板（含三 slot）+ runtime model 字段/enum/setter + AE 双版本 ship-gate。
 4. **Gradient W**（SetGradient）— 大 arc。groundwork：默认 gradient 被 AE elide（须自定义 stops 强制 emit）；无现成 in-repo fixture；存储 `GCst > GCky > Utf8(prop.map XML)`（parse_properties.go）。需 gradient-fill fixture + XML RE + 序列化器 + API + 双版本 gate。
 5. **Fill/Stroke BlendMode·CompositeOrder、Rect/Ellipse Direction** — enum，低价值，缺 runtime setter。
 
