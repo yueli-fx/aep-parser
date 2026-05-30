@@ -1,11 +1,13 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-05-30 by claude (V2.2.1 子项⑨ **Fill Opacity 持久化**(static+kf) ship：1D non-spatial bpk-48 原始 %（同 Stroke Opacity）；富化 fill body 模板 7 children（源 `v2_2_shape_fill_full.aep`）；`TestV2_2_FillOpKf_*` 双版本 PASS + FillKf 重跑 PASS。前序：子项⑧ **Stroke Opacity+Width keyframe** ship：均 1D non-spatial bpk-48 原值（Stroke Opacity 存原始 %，**不**÷100，区别于 Layr Opacity）；stroke body 已含 slot→无需富化模板，animated 路径改真 inject；`TestV2_2_StrokeKf_*` 双版本 PASS。前序：子项⑦ **Rect Position+Roundness 持久化** ship：Position=spatial Vec2 motion-path bpk-104（同 Ellipse Position）、Roundness=1D non-spatial bpk-48；helper `lowerShapeVec2/lowerShapeScalar`；富化 rect body 模板 9 children（源 `v2_2_shape_rect_full.aep`）；`TestV2_2_RectSubKf_*` 双版本 PASS + 全 shape ship-gate 重跑双版本 PASS（V2.1 AE2025 一次 OCR-occlusion flake，clean 重试 PASS）。前序：子项⑤+⑥ **Layr Transform 全通道持久化** ship：⑤ Position（combined `ADBE Position` bpk-128 spatial dim-3）；⑥ Anchor/Scale/Rotation/Opacity（Anchor=spatial 同 Position；Scale=3D non-spatial ÷100 Z=1.0；Rotation=1D degrees；Opacity=1D ÷100）；helper `lowerTransformVec2Spatial/Scale/Scalar`；transform 模板扩到 25 children（源 `v2_2_shape_transform_full.aep`）；`TestV2_2_LayrPosKf_*`+`TestV2_2_XfKf_*` 双版本 PASS + 全部既有 shape ship-gate 重跑双版本仍 PASS（模板 shared）；新 API `ShapeLayer.AnchorPoint()`；vet 0 + test ok)
-**Active focus**: 无 active 实现线。**Layr Transform 5 通道（Anchor/Position/Scale/Rotation/Opacity）static + keyframe 持久化全收口**。runtime API 2D，磁盘各通道独立编码（详 `coverage.md` 子项⑤⑥）。**关键坑**：① AE 仅在通道 set/animated 时才写其 cdat，默认值 elide → 模板须从「全通道设静态非默认」fixture 提取；② Scale/Opacity 写盘 ÷100 但 parser 读原始盘值（不反归一），ship-gate 用 AE keyValue 验 user 单位。
+**Active focus**: **`internal/aep` package 重组 in flight**（分支 `refactor/aep-package-reorg`）。方案①=单包内 `<stage>_<domain>` 命名轴重组（非物理分包；理由见 spec §0：Go 方法同包+Stable API+循环依赖）。spec `specs/2026-05-30-aep-package-reorg-design.md`、plan `flight-plans/2026-05-30-aep-package-reorg-plan.md`（13 任务 / strangler 六阶段，subagent 驱动执行中）。零行为变更：每任务跑 Gate（编译+vet+test + API 零 diff + round-trip 字节稳定）。新增常驻护栏 `arch_boundary_test.go`（AST：scene_ 禁 import rifx / codec_ 禁 scene 类型）。
 
 ## Next session
 
-> **shape/transform keyframe+子属性 backlog 已基本 drain**（子项⑤-⑨：Layr Transform 全 5 通道 + Rect Position/Roundness + Stroke Opacity/Width + Fill Opacity）。剩下都是**大 arc 或缺 runtime setter**：
+1. **续跑 aep 重组 plan**（subagent 执行）：T0 已完成（分支 + `tmp/api_before.txt` API 基线，**已过滤 go doc 内嵌文件名行**）。下一步 T1（round-trip 字节基线 harness）。完成路径见 plan checkbox。
+
+> **以下为重组完成后的 backlog**（shape/transform keyframe+子属性已 drain，子项⑤-⑨）。剩下都是**大 arc 或缺 runtime setter**：
 
 1. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级，大 arc。
 2. **Layr Transform 3D 通道** — Orientation / Rotate X/Y / Position_Z；**需先有 3D layer 支持**（runtime 无 3D switch，V2.3）。
@@ -38,4 +40,5 @@
 
 ## Hanging tasks
 
-无。
+- **aep 重组 in flight**（分支 `refactor/aep-package-reorg`，未合并）：plan 13 任务执行中，最后 T12 收口（CLAUDE.md #3 更正 + 终验 AE 双版本 ship-gate + 删重组期 baseline harness + 本 cockpit 改回）。session 中断时从 plan 未勾选项续。
+- 临时文件 `flightdeck/safety-reviews/{ds,claude,gpt}`（外审记录，未跟踪；disposition 已并入 spec §13）—— 用完可删。

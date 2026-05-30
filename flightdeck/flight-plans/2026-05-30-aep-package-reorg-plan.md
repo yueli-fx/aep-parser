@@ -18,12 +18,15 @@
 # 1. 编译 + vet + 单测全绿
 go build ./... ; if ($LASTEXITCODE) { throw } ; go vet ./internal/aep/ ; if ($LASTEXITCODE) { throw } ; go test -count=1 ./internal/aep/ ; if ($LASTEXITCODE) { throw }
 # 2. 公共 API 零 diff（基线 tmp/api_before.txt 于 Task 0 生成）
-go doc -all ./internal/aep > tmp/api_after.txt ; (Compare-Object (Get-Content tmp/api_before.txt) (Get-Content tmp/api_after.txt))  # 输出须为空
+#    注意：go doc -all 输出**内嵌源文件名行**（形如 `internal/aep/foo.go`），改名会动这些行 → 必须先过滤再比，否则假阳性。
+(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' > tmp/api_after.txt ; (Compare-Object (Get-Content tmp/api_before.txt) (Get-Content tmp/api_after.txt))  # 输出须为空
 # 3. round-trip 字节稳定（基线 Task 1 生成）
 go test -count=1 ./internal/aep/ -run TestReorgRoundtripBaseline   # 须 PASS
 ```
 
 > **改名纪律**：一律 `git mv`（保 rename 追踪）；同包内改名**不触碰任何引用处**（symbol 包内可见，引用与文件名无关）——故 Gate 第 1 步若编译失败，必是漏移了某个文件或拆分时漏带 import，不是「引用没改」。每批 `git mv` 独立 commit。
+
+> **注释纪律**（写/改任何注释或拆分搬运注释时遵守 `flightdeck/checklists/comments.md`）：注释只写 why / 不变量 / 坑；**禁止** spec/plan 引用（`// §6`、`// 详见 spec`）、阶段码（`// Phase 5`、`// P4`、`// T7`）、reviewer 出处、日期/署名、历史考古（`// 之前用 X`）。本计划代码块里的标识符开头 doc 注释已合规；搬运既有注释时**不得**注入上述过程元信息。错误信息/日志文案同样**自描述**（写"scene model must stay chunk-free"而非"§6 violation"）。
 
 ---
 
@@ -38,20 +41,24 @@ go test -count=1 ./internal/aep/ -run TestReorgRoundtripBaseline   # 须 PASS
 git checkout -b refactor/aep-package-reorg
 ```
 
-- [ ] **Step 2: 捕获公共 API 基线**
+- [ ] **Step 2: 捕获公共 API 基线（过滤内嵌文件名行）**
 
 ```powershell
 New-Item -ItemType Directory -Force tmp | Out-Null
-go doc -all ./internal/aep > tmp/api_before.txt
+(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' > tmp/api_before.txt
 ```
+`go doc -all` 会把每个文件的声明前加一行源文件名（`internal/aep/foo.go`）；改名必动这些行。**过滤掉它们**，剩下纯 exported 声明集合才是稳定的 API 指纹。
 
-- [ ] **Step 3: 确认基线非空**
+- [ ] **Step 3: 确认基线非空且无文件名残留**
 
 ```powershell
-(Get-Content tmp/api_before.txt | Measure-Object -Line).Lines   # 应 > 0
+(Get-Content tmp/api_before.txt | Measure-Object -Line).Lines               # 应 > 4000
+(Select-String -Path tmp/api_before.txt -Pattern '^internal/aep/.*\.go$').Count   # 应 = 0
 ```
 
-预期：输出几百行 exported decl。此文件是后续每个 Gate 第 2 步的比对基准，**整个重组期间不可重新生成**。
+此文件是后续每个 Gate 第 2 步的比对基准，**整个重组期间不可重新生成**。
+
+> **注**：Task 0 已由 controller 执行（分支 `refactor/aep-package-reorg` 已建、`tmp/api_before.txt` 已生成过滤版 4416 行）。此任务留作记录与重跑依据。
 
 ---
 
@@ -250,12 +257,15 @@ func archStageOf(name string) string {
 	return ""
 }
 
-// sceneRifxWhitelist: scene_ 文件暂允许 import rifx（§6 P6 前清零）。
+// sceneRifxWhitelist names scene_ files still permitted to import rifx.
+// Each entry is a known boundary violation pending removal; the guard fails
+// for any scene_ file NOT listed here that imports rifx.
 var sceneRifxWhitelist = map[string]bool{
-	// 首跑后据失败输出填入
+	// filled from this guard's first run after the scene_ rename
 }
 
-// sceneTypeNames: codec_ 文件禁止引用的 scene 类型标识符。
+// sceneTypeNames are the runtime types a codec_ file must never reference —
+// codec_ handles only value objects, byte streams, and rifx structures.
 var sceneTypeNames = map[string]bool{
 	"Project": true, "Composition": true, "Layer": true, "ShapeLayer": true,
 	"Property": true, "ShapeNode": true, "VectorGroup": true, "Footage": true,
@@ -291,10 +301,10 @@ func TestArchBoundary_SceneNoRifxImport(t *testing.T) {
 		for _, imp := range af.Imports {
 			if strings.Trim(imp.Path.Value, `"`) == rifxImportPath {
 				if sceneRifxWhitelist[f] {
-					t.Logf("WHITELIST: %s imports rifx — must clear by P6", f)
+					t.Logf("WHITELIST: %s imports rifx — pending removal", f)
 					continue
 				}
-				t.Errorf("scene_ file %s imports rifx (§6 violation)", f)
+				t.Errorf("scene_ file %s imports rifx: scene model must stay chunk-free", f)
 			}
 		}
 	}
@@ -313,7 +323,7 @@ func TestArchBoundary_CodecNoSceneRef(t *testing.T) {
 		ast.Inspect(af, func(n ast.Node) bool {
 			id, ok := n.(*ast.Ident)
 			if ok && sceneTypeNames[id.Name] {
-				t.Errorf("codec_ file %s references scene type %q (§2 violation)", f, id.Name)
+				t.Errorf("codec_ file %s references scene type %q: codec must stay scene-free", f, id.Name)
 			}
 			return true
 		})
