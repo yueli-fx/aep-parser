@@ -24,7 +24,7 @@ func TestRectNode_Construct_Defaults(t *testing.T) {
 	// Defaults:
 	v, _ := r.Size().StaticValue()
 	if v != [2]float64{100, 100} {
-		t.Fatalf("Rect default Size = %v, want [100,100] (RE-S4)", v)
+		t.Fatalf("Rect default Size = %v, want [100,100]", v)
 	}
 	pos, _ := r.Position().StaticValue()
 	if pos != [2]float64{0, 0} {
@@ -106,17 +106,17 @@ func TestPathNode_SetVertices(t *testing.T) {
 		t.Fatalf("Vertices count = %d, want 4", len(bz.Vertices))
 	}
 	if !bz.Closed {
-		t.Fatal("PathNode default Closed = false, want true (RE-S5b)")
+		t.Fatal("PathNode default Closed = false, want true")
 	}
 }
 
 func TestPathNode_SetVertices_RejectsEmpty(t *testing.T) {
 	p := aep.NewPathNode()
 	if err := p.SetVertices(nil); err == nil {
-		t.Fatal("nil vertices should error (per RE-S8 min check)")
+		t.Fatal("nil vertices should error")
 	}
 	if err := p.SetVertices([][2]float64{{0, 0}}); err == nil {
-		t.Fatal("single vertex should error (per RE-S8 min check)")
+		t.Fatal("single vertex should error")
 	}
 }
 

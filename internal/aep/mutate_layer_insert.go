@@ -70,7 +70,7 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	}
 	crossProject := src.comp.proj != c.proj
 	if src.Type != LayerTypeAV {
-		return nil, fmt.Errorf("InsertLayer: refuse non-AV src (Type=%s); only AV layers supported in Phase 5C", src.Type)
+		return nil, fmt.Errorf("InsertLayer: refuse non-AV src (Type=%s); only AV layers supported", src.Type)
 	}
 	if !crossProject && src.SourceID != 0 && src.SourceID == c.ID {
 		return nil, fmt.Errorf("InsertLayer: refuse direct pre-comp loop (src.SourceID=%d == dest.ID=%d)", src.SourceID, c.ID)

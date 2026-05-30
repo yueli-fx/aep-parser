@@ -53,7 +53,7 @@ func (c *Composition) DeleteLayer(index int) error {
 
 	deleted := c.Layers[index]
 	if deleted.Type != LayerTypeAV {
-		return fmt.Errorf("DeleteLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported in Phase 2", index, deleted.Type)
+		return fmt.Errorf("DeleteLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported", index, deleted.Type)
 	}
 	if deleted.back == nil || deleted.back.layrList == nil {
 		return fmt.Errorf("DeleteLayer: layer %q at idx %d has no Layr chunk back-ref", deleted.Name, index)

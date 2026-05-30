@@ -23,7 +23,7 @@ import (
 //
 // 这个 skip-stub 留作未来如果需要 explicit byte-level golden diff 时的占位。
 func TestBuildCompItemMatchesGoldenStructure(t *testing.T) {
-	t.Skip("Deferred to Phase 5: NewComposition roundtrip implicitly verifies golden order")
+	t.Skip("NewComposition roundtrip implicitly verifies golden order")
 }
 
 func TestNewComposition_Fields(t *testing.T) {

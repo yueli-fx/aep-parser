@@ -42,7 +42,7 @@ func TestPropertyStream_AddKeyframe_TransitionsToAnimated(t *testing.T) {
 		t.Fatalf("after AddKeyframe: mode = %v, want Animated", ps.Mode())
 	}
 	if _, isStatic := ps.StaticValue(); isStatic {
-		t.Fatalf("StaticValue() ok = true in Animated mode, want false (Inv-8)")
+		t.Fatalf("StaticValue() ok = true in Animated mode, want false")
 	}
 }
 

@@ -10,7 +10,7 @@ func TestPropertyGroup_Vec2Stream(t *testing.T) {
 	r := aep.NewRectNode()
 	props := r.Properties()
 	if props == nil {
-		t.Fatal("RectNode.Properties() returned nil after Phase 3 wiring")
+		t.Fatal("RectNode.Properties() returned nil")
 	}
 	sizeStream, err := props.Vec2Stream("Size")
 	if err != nil {

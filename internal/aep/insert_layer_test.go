@@ -135,7 +135,7 @@ func TestInsertLayer_CrossProjectNoLongerRefused(t *testing.T) {
 	}
 	_ = otherDest
 	_, err := dest.InsertLayer(otherSrc, 0)
-	if err != nil && strings.Contains(err.Error(), "deferred to Phase 5C.1") {
+	if err != nil && strings.Contains(err.Error(), "different Projects") {
 		t.Fatalf("R7 still active — cross-Project insert should be accepted now, got %v", err)
 	}
 	// Any other error (e.g. fixture-specific parsing issue) is acceptable here;

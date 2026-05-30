@@ -209,7 +209,7 @@ func (p *PathNode) Properties() *PropertyGroup {
 // len(verts) >= 2.
 func (p *PathNode) SetVertices(verts [][2]float64) error {
 	if len(verts) < 2 {
-		return fmt.Errorf("PathNode.SetVertices: need >= 2 vertices, got %d (RE-S8)", len(verts))
+		return fmt.Errorf("PathNode.SetVertices: need >= 2 vertices, got %d", len(verts))
 	}
 	current, _ := p.path.StaticValue()
 	zeroTangents := make([][2]float64, len(verts))

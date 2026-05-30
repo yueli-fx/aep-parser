@@ -65,7 +65,7 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 
 	source := c.Layers[index]
 	if source.Type != LayerTypeAV {
-		return nil, fmt.Errorf("DuplicateLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported in Phase 3", index, source.Type)
+		return nil, fmt.Errorf("DuplicateLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported", index, source.Type)
 	}
 	// F2 quirk applies only to implicit "layer-above" matte where matte
 	// source is positional. AE 23+ explicit matte (TrackMatteLayerID !=

@@ -16,7 +16,7 @@ import (
 func TestV2_2_MutateExistingShape(t *testing.T) {
 	p, err := aep.Open("../../test_data/v2_2_shape_tolerance.aep")
 	if err != nil {
-		t.Skipf("v2_2_shape_tolerance.aep not present: %v (Phase 5 Task 5.3 produces)", err)
+		t.Skipf("v2_2_shape_tolerance.aep not present: %v (produced via AE)", err)
 	}
 	if len(p.Compositions) == 0 || len(p.Compositions[0].Layers) == 0 {
 		t.Skip("fixture empty")

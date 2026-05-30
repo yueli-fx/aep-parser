@@ -97,7 +97,7 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 	// 2 linear keyframes.
 	_, sizeIsStatic := reRectA.Size().StaticValue()
 	if sizeIsStatic {
-		t.Errorf("A Rect Size should be animated post-roundtrip (V2.2.1 keyframe persistence)")
+		t.Errorf("A Rect Size should be animated post-roundtrip (keyframe persistence)")
 	}
 	kfs := reRectA.Size().Keyframes()
 	if len(kfs) != 2 {
@@ -112,7 +112,7 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 	// Z=0) in the embedded transform-group template. Roundtrip recovers the 2
 	// linear keyframes.
 	if _, posIsStatic := sa.Position().StaticValue(); posIsStatic {
-		t.Errorf("A Position should be animated post-roundtrip (V2.2.1 Layr Position keyframe persistence)")
+		t.Errorf("A Position should be animated post-roundtrip (Layr Position keyframe persistence)")
 	}
 	posKfs := sa.Position().Keyframes()
 	if len(posKfs) != 2 {

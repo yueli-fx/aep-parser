@@ -24,7 +24,7 @@ import (
 func TestV2_2_NestedGroup_Preservation(t *testing.T) {
 	p, err := aep.Open("../../test_data/v2_2_shape_tolerance.aep")
 	if err != nil {
-		t.Skipf("fixture v2_2_shape_tolerance.aep missing: %v (Phase 5 Task 5.3 produces via AE)", err)
+		t.Skipf("fixture v2_2_shape_tolerance.aep missing: %v (produced via AE)", err)
 	}
 	if len(p.Compositions) == 0 || len(p.Compositions[0].Layers) == 0 {
 		t.Skip("fixture empty")
