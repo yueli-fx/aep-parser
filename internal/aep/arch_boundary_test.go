@@ -25,6 +25,11 @@ func archStageOf(name string) string {
 // for any scene_ file NOT listed here that imports rifx.
 var sceneRifxWhitelist = map[string]bool{
 	// filled from this guard's first run after the scene_ rename
+	"scene_features.go":        true,
+	"scene_project_settings.go": true,
+	"scene_project_views.go":   true,
+	"scene_property_flags.go":  true,
+	"scene_property_group.go":  true,
 }
 
 // sceneTypeNames are the runtime types a codec_ file must never reference —
