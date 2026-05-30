@@ -244,7 +244,21 @@ func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
 	hydrateColor4Stream(s.color, props["ADBE Vector Stroke Color"])
 	hydrateFloat64Stream(s.opacity, props["ADBE Vector Stroke Opacity"])
 	hydrateFloat64Stream(s.width, props["ADBE Vector Stroke Width"])
+	hydrateScalarStatic(props["ADBE Vector Stroke Line Cap"], func(v float64) { s.lineCap = StrokeLineCap(v) })
+	hydrateScalarStatic(props["ADBE Vector Stroke Line Join"], func(v float64) { s.lineJoin = StrokeLineJoin(v) })
+	hydrateScalarStatic(props["ADBE Vector Stroke Miter Limit"], func(v float64) { s.miterLimit = v })
 	return s
+}
+
+// hydrateScalarStatic applies the static 1D value of p (if present) via set.
+// For non-animated enum/scalar properties that are not modeled as streams.
+func hydrateScalarStatic(p *Property, set func(float64)) {
+	if p == nil {
+		return
+	}
+	if v, ok := scalarOf(p.StaticValue); ok {
+		set(v)
+	}
 }
 
 // hydratePathNode reads the om-s/omks/shap subtree the serializer emits

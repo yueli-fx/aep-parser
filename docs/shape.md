@@ -231,8 +231,13 @@ out.Close()
 | `(s *ShapeLayer) RootGroup() *VectorGroup` | 取顶层 Contents 容器 |
 | `(g *VectorGroup) AddRect() (*RectNode, error)` | 加 Rect 子节点 |
 | `(g *VectorGroup) AddFill() (*FillNode, error)` | 加 Fill 子节点 |
+| `(g *VectorGroup) AddStroke() (*StrokeNode, error)` | 加 Stroke 子节点 |
 | `(r *RectNode) SetSize([w, h] float64)` | 设矩形尺寸（static）|
 | `(f *FillNode) SetColor([r, g, b, a] float64)` | 设填充色（RGBA 0..1，static）|
+| `(s *StrokeNode) SetColor/SetWidth/SetOpacity` | 设描边色 / 宽度 px / 不透明度 %（static）|
+| `(s *StrokeNode) SetLineCap(StrokeLineCap)` | 端点样式：`StrokeLineCapButt`(1,默认)/`Round`(2)/`Projecting`(3) |
+| `(s *StrokeNode) SetLineJoin(StrokeLineJoin)` | 拐角样式：`StrokeLineJoinMiter`(1,默认)/`Round`(2)/`Bevel`(3) |
+| `(s *StrokeNode) SetMiterLimit(float64)` | 斜接限制（默认 4，拒 <1；AE 仅在 Join=Miter 时应用，但值始终存盘）|
 
 ShapeLayer 跟 V1 parse 出来的 `Layer` 同构 — `comp.Layers[i]` 既是 V1 `*Layer` 也能 `WrapShapeLayer(layer)` 拿到 V2.2 视图。
 
@@ -259,7 +264,7 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 |---|---|
 | `VectorGroup.AddEllipse` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_ellipse_body.bin` + overwrite Size/Position cdat。Direction 仍 AE 默认；动画仍 first-kf static fallback |
 | `VectorGroup.AddPath` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_path_body.bin` + splice `encodeBezier` 几何（shph/lhd3/ldat）。ldat 逐顶点布局 = `[anchor, anchor+outTangent_i, anchor_{i+1}+inTangent_{i+1}]`（bbox 归一化，wrap mod n；V2.2.1 RE 修正，曾错存本顶点 in/out）。`SetVertices` 仅线性段（切线置零）；动画仍 first-kf fallback。**注**：from-scratch path 曾 **崩溃 AE 2020**（0::42），故走 embed |
-| `VectorGroup.AddStroke` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_stroke_body.bin`（含 Blend Mode/Composite Order/Line Cap/Join/Miter + Dashes/Taper/Wave 嵌套组）+ overwrite Color/Opacity/Width cdat。其余子属性留 embed 默认；动画仍 first-kf fallback |
+| `VectorGroup.AddStroke` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_stroke_body.bin`（21 children，含 Line Cap/Join/Miter + Dashes/Taper/Wave 嵌套组）+ overwrite Color/Opacity/Width **及 Line Cap/Join/Miter** cdat（static，详 `incident-reports/stroke-line-cap-join-miter-re.md`）。Blend Mode/Composite Order/Dashes/Taper/Wave 仍留 embed 默认；Color/Opacity/Width 动画仍 first-kf fallback，Cap/Join/Miter static-only |
 
 > **AE 2020 地基修复（V2.2.1）**：ShapeLayer 的 ldta 大小现按 target 分支（160B AE 2020/22，164B AE 2025）。此前 buildLdtaBytes 硬编码 164B，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判为损坏并跳过——因 AE-2020 shape ship-gate 长期 skip 而未发现。详 `flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md`。
 

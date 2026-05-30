@@ -498,13 +498,18 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // lowerStrokeNode emits a Stroke graphic body using embedded tolerance
 // bytes (templates/v2_2_shape_stroke_body.bin). Same rationale as the other
 // shape kinds — from-scratch emit triggers AE silent-drop; the embedded
-// AE-native body carries the full child set (Blend Mode / Composite Order /
-// Line Cap / Line Join / Miter Limit + Dashes/Taper/Wave nested groups), and
-// we overwrite only the Color/Opacity/Width cdat with runtime values.
+// AE-native body carries the child set (Color / Opacity / Width / Line Cap /
+// Line Join / Miter Limit + Dashes/Taper/Wave nested groups), and we overwrite
+// only the cdat slots we model with runtime values.
 //
-// Limitations: Blend Mode / Composite Order / Line Cap / Line Join / Miter
-// Limit / Dashes / Taper / Wave stay at the embed's defaults; animated
-// Color/Opacity/Width use the first keyframe as a static fallback.
+// Line Cap / Line Join / Miter Limit are 1D scalars at cdat[0:8] (float64 BE;
+// enums store a 1-based index). The template was re-extracted from a fixture
+// with all three set non-default so the slots exist to overwrite (AE elides
+// defaults). RE: incident-reports/stroke-line-cap-join-miter-re.md.
+//
+// Limitations: Blend Mode / Composite Order / Dashes / Taper / Wave stay at
+// the embed's defaults; animated Color/Opacity/Width use the first keyframe as
+// a static fallback. Line Cap / Join / Miter are static-only.
 func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeStrokeBody()
 	if err != nil {
@@ -528,6 +533,9 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeScalar(body, "ADBE Vector Stroke Width", s.width, ctx); err != nil {
 		return nil, err
 	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Cap", encodeF64sBE(float64(s.lineCap)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Join", encodeF64sBE(float64(s.lineJoin)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(s.miterLimit))
 	return body, nil
 }
 

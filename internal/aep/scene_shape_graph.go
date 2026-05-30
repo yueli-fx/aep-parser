@@ -263,20 +263,49 @@ func (f *FillNode) Properties() *PropertyGroup {
 	}
 }
 
+// StrokeLineCap is the stroke end-cap style (`ADBE Vector Stroke Line Cap`).
+// Stored on disk as a 1-based float64 enum index.
+type StrokeLineCap int
+
+const (
+	StrokeLineCapButt       StrokeLineCap = 1 // default
+	StrokeLineCapRound      StrokeLineCap = 2
+	StrokeLineCapProjecting StrokeLineCap = 3
+)
+
+// StrokeLineJoin is the stroke corner-join style (`ADBE Vector Stroke Line
+// Join`). Stored on disk as a 1-based float64 enum index.
+type StrokeLineJoin int
+
+const (
+	StrokeLineJoinMiter StrokeLineJoin = 1 // default
+	StrokeLineJoinRound StrokeLineJoin = 2
+	StrokeLineJoinBevel StrokeLineJoin = 3
+)
+
 // StrokeNode — `ADBE Vector Graphic - Stroke`. Default Color=[0,0,0,1]
-// black, Width=2, Opacity=100.
+// black, Width=2, Opacity=100, Line Cap=Butt, Line Join=Miter, Miter Limit=4.
 type StrokeNode struct {
 	color   *PropertyStream[[4]float64]
 	opacity *PropertyStream[float64]
 	width   *PropertyStream[float64]
+
+	// Line Cap / Line Join are enums; Miter Limit is a scalar. AE does not
+	// animate them, so they are plain values rather than PropertyStreams.
+	lineCap    StrokeLineCap
+	lineJoin   StrokeLineJoin
+	miterLimit float64
 }
 
 // NewStrokeNode constructs a default-valued StrokeNode.
 func NewStrokeNode() *StrokeNode {
 	s := &StrokeNode{
-		color:   NewPropertyStream[[4]float64](),
-		opacity: NewPropertyStream[float64](),
-		width:   NewPropertyStream[float64](),
+		color:      NewPropertyStream[[4]float64](),
+		opacity:    NewPropertyStream[float64](),
+		width:      NewPropertyStream[float64](),
+		lineCap:    StrokeLineCapButt,
+		lineJoin:   StrokeLineJoinMiter,
+		miterLimit: 4,
 	}
 	_ = s.color.SetStaticValue([4]float64{0, 0, 0, 1}) // black
 	_ = s.opacity.SetStaticValue(100)
@@ -291,6 +320,38 @@ func (s *StrokeNode) Width() *PropertyStream[float64]    { return s.width }
 func (s *StrokeNode) SetColor(v [4]float64) error        { return s.color.SetStaticValue(v) }
 func (s *StrokeNode) SetOpacity(v float64) error         { return s.opacity.SetStaticValue(v) }
 func (s *StrokeNode) SetWidth(v float64) error           { return s.width.SetStaticValue(v) }
+
+func (s *StrokeNode) LineCap() StrokeLineCap   { return s.lineCap }
+func (s *StrokeNode) LineJoin() StrokeLineJoin { return s.lineJoin }
+func (s *StrokeNode) MiterLimit() float64      { return s.miterLimit }
+
+// SetLineCap sets the end-cap style. Rejects values outside {Butt,Round,Projecting}.
+func (s *StrokeNode) SetLineCap(v StrokeLineCap) error {
+	if v < StrokeLineCapButt || v > StrokeLineCapProjecting {
+		return fmt.Errorf("StrokeNode.SetLineCap: invalid value %d (want 1..3)", v)
+	}
+	s.lineCap = v
+	return nil
+}
+
+// SetLineJoin sets the corner-join style. Rejects values outside {Miter,Round,Bevel}.
+func (s *StrokeNode) SetLineJoin(v StrokeLineJoin) error {
+	if v < StrokeLineJoinMiter || v > StrokeLineJoinBevel {
+		return fmt.Errorf("StrokeNode.SetLineJoin: invalid value %d (want 1..3)", v)
+	}
+	s.lineJoin = v
+	return nil
+}
+
+// SetMiterLimit sets the miter limit. AE only applies it when Line Join =
+// Miter, but the value is stored regardless. Rejects values < 1.
+func (s *StrokeNode) SetMiterLimit(v float64) error {
+	if v < 1 {
+		return fmt.Errorf("StrokeNode.SetMiterLimit: %g out of range (want >= 1)", v)
+	}
+	s.miterLimit = v
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (s *StrokeNode) Properties() *PropertyGroup {

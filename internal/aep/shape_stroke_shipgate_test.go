@@ -57,6 +57,15 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	_ = stroke.SetColor(color)
 	_ = stroke.SetWidth(width)
 	_ = stroke.SetOpacity(opacity)
+	// Line Cap / Join non-default (no coupling) → assert strict round-trip.
+	// Miter Limit read empirically: AE may normalize it to 4 on save when
+	// Line Join != Miter (RE'd hidden-property behavior).
+	lineCap := aep.StrokeLineCapProjecting // 3
+	lineJoin := aep.StrokeLineJoinRound     // 2
+	miterLimit := 12.0
+	_ = stroke.SetLineCap(lineCap)
+	_ = stroke.SetLineJoin(lineJoin)
+	_ = stroke.SetMiterLimit(miterLimit)
 
 	out, err := os.Create(inputAEP)
 	if err != nil {
@@ -112,6 +121,34 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	}
 	if got := rdF64(opCdat, 0); math.Abs(got-opacity) > 0.01 {
 		t.Errorf("resaved stroke opacity = %.3g, want %.3g", got, opacity)
+	}
+
+	// Line Cap / Line Join: non-default, no coupling → must survive AE resave.
+	capCdat := streamCdat(root, "ADBE Vector Stroke Line Cap")
+	joinCdat := streamCdat(root, "ADBE Vector Stroke Line Join")
+	if capCdat == nil || joinCdat == nil {
+		t.Fatalf("resaved Line Cap/Join cdat missing (cap=%v join=%v) — AE dropped the slot?",
+			capCdat != nil, joinCdat != nil)
+	}
+	if got := rdF64(capCdat, 0); math.Abs(got-float64(lineCap)) > 0.01 {
+		t.Errorf("resaved Line Cap = %.3g, want %d (Projecting)", got, lineCap)
+	}
+	if got := rdF64(joinCdat, 0); math.Abs(got-float64(lineJoin)) > 0.01 {
+		t.Errorf("resaved Line Join = %.3g, want %d (Round)", got, lineJoin)
+	}
+	// Miter Limit: empirical. AE keeps it only when Line Join = Miter; with
+	// Join = Round it normalizes to default 4. Accept either our value or 4,
+	// and surface which so the behavior is recorded rather than silently passing.
+	if miterCdat := streamCdat(root, "ADBE Vector Stroke Miter Limit"); miterCdat != nil {
+		got := rdF64(miterCdat, 0)
+		switch {
+		case math.Abs(got-miterLimit) < 0.01:
+			t.Logf("resaved Miter Limit = %.3g (our value preserved)", got)
+		case math.Abs(got-4) < 0.01:
+			t.Logf("resaved Miter Limit = 4 (AE normalized; Join != Miter hides it)")
+		default:
+			t.Errorf("resaved Miter Limit = %.3g, want %.3g or normalized 4", got, miterLimit)
+		}
 	}
 }
 
