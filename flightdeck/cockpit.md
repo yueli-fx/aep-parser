@@ -1,13 +1,14 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-30 by claude (V2.2.1 子项⑨ **Fill Opacity 持久化**(static+kf) ship：1D non-spatial bpk-48 原始 %（同 Stroke Opacity）；富化 fill body 模板 7 children（源 `v2_2_shape_fill_full.aep`）；`TestV2_2_FillOpKf_*` 双版本 PASS + FillKf 重跑 PASS。前序：子项⑧ **Stroke Opacity+Width keyframe** ship：均 1D non-spatial bpk-48 原值（Stroke Opacity 存原始 %，**不**÷100，区别于 Layr Opacity）；stroke body 已含 slot→无需富化模板，animated 路径改真 inject；`TestV2_2_StrokeKf_*` 双版本 PASS。前序：子项⑦ **Rect Position+Roundness 持久化** ship：Position=spatial Vec2 motion-path bpk-104（同 Ellipse Position）、Roundness=1D non-spatial bpk-48；helper `lowerShapeVec2/lowerShapeScalar`；富化 rect body 模板 9 children（源 `v2_2_shape_rect_full.aep`）；`TestV2_2_RectSubKf_*` 双版本 PASS + 全 shape ship-gate 重跑双版本 PASS（V2.1 AE2025 一次 OCR-occlusion flake，clean 重试 PASS）。前序：子项⑤+⑥ **Layr Transform 全通道持久化** ship：⑤ Position（combined `ADBE Position` bpk-128 spatial dim-3）；⑥ Anchor/Scale/Rotation/Opacity（Anchor=spatial 同 Position；Scale=3D non-spatial ÷100 Z=1.0；Rotation=1D degrees；Opacity=1D ÷100）；helper `lowerTransformVec2Spatial/Scale/Scalar`；transform 模板扩到 25 children（源 `v2_2_shape_transform_full.aep`）；`TestV2_2_LayrPosKf_*`+`TestV2_2_XfKf_*` 双版本 PASS + 全部既有 shape ship-gate 重跑双版本仍 PASS（模板 shared）；新 API `ShapeLayer.AnchorPoint()`；vet 0 + test ok)
-**Active focus**: **`internal/aep` package 重组 in flight**（分支 `refactor/aep-package-reorg`）。方案①=单包内 `<stage>_<domain>` 命名轴重组（非物理分包；理由见 spec §0：Go 方法同包+Stable API+循环依赖）。spec `specs/2026-05-30-aep-package-reorg-design.md`、plan `flight-plans/2026-05-30-aep-package-reorg-plan.md`（13 任务 / strangler 六阶段，subagent 驱动执行中）。零行为变更：每任务跑 Gate（编译+vet+test + API 零 diff + round-trip 字节稳定）。新增常驻护栏 `arch_boundary_test.go`（AST：scene_ 禁 import rifx / codec_ 禁 scene 类型）。
+**Last updated**: 2026-05-30 by claude（`internal/aep` package 重组 **landed**：`<stage>_<domain>` 7 前缀命名轴（scene_/codec_/parse_/lower_/write_/back_/mutate_）+ 拆 `types_core`(→scene_{project,composition,layer,property}) + 拆 `scene_layer_accessors` + 测试按 feature 拆 + 测试 helper 归并 + AST 边界守卫 `arch_boundary_test.go`（scene_ 禁 import rifx / codec_ 禁 scene 类型；scene→rifx 残留 5 项入白名单，V3 M8 清零）。分支 `refactor/aep-package-reorg`，~16 commits；全程 byte-identical round-trip(115 fixture) + API-set 不变(sorted go-doc) + AE 双版本 ship-gate 24/24 PASS。CLAUDE.md 硬约束#3 已更正（Go 方法同包+Stable API 理由 + 7 前缀轴）。前序里程碑 V2.2.1 子项⑤-⑨（Layr Transform 全通道 + Rect/Stroke/Fill keyframe 持久化）见 git log / `coverage.md`。）
+**Active focus**: 无 active 实现线。aep package 重组刚 landed（分支 `refactor/aep-package-reorg`，**待 merge/PR** —— finishing-a-development-branch 处理）。
 
 ## Next session
 
-1. **续跑 aep 重组 plan**（subagent 执行）：T0 已完成（分支 + `tmp/api_before.txt` API 基线，**已过滤 go doc 内嵌文件名行**）。下一步 T1（round-trip 字节基线 harness）。完成路径见 plan checkbox。
+1. **merge/land aep 重组分支**（finishing-a-development-branch：merge `refactor/aep-package-reorg` → main 或开 PR）。
+2. **注释纪律清理 pass**（comments.md §6，**单独分支**）：重组期发现 `internal/aep` 源文件 **233 处** comments.md §3 违规（`spec §`、`Phase N`、`Inv-N`、`iter N`、日期戳、`Mirrors`/历史考古等），是**预存债非重组引入**（重组只原样搬运）。跨 ~30 文件，需逐条删/改写/搬 commit-msg。建议另开分支按 comments.md §6 grep 收口。
 
-> **以下为重组完成后的 backlog**（shape/transform keyframe+子属性已 drain，子项⑤-⑨）。剩下都是**大 arc 或缺 runtime setter**：
+> **以下为长线 backlog**（shape/transform keyframe+子属性已 drain，子项⑤-⑨）。剩下都是**大 arc 或缺 runtime setter**：
 
 1. **Path keyframe**（逐帧 bezier shap）— V2.3+ 级，大 arc。
 2. **Layr Transform 3D 通道** — Orientation / Rotate X/Y / Position_Z；**需先有 3D layer 支持**（runtime 无 3D switch，V2.3）。
@@ -40,5 +41,5 @@
 
 ## Hanging tasks
 
-- **aep 重组 in flight**（分支 `refactor/aep-package-reorg`，未合并）：plan 13 任务执行中，最后 T12 收口（CLAUDE.md #3 更正 + 终验 AE 双版本 ship-gate + 删重组期 baseline harness + 本 cockpit 改回）。session 中断时从 plan 未勾选项续。
+- 分支 `refactor/aep-package-reorg` 已完成全部 13 任务 + 终验，**待 merge/PR**（见 Next session #1）。
 - 临时文件 `flightdeck/safety-reviews/{ds,claude,gpt}`（外审记录，未跟踪；disposition 已并入 spec §13）—— 用完可删。
