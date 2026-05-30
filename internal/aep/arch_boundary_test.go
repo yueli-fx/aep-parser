@@ -21,15 +21,16 @@ func archStageOf(name string) string {
 }
 
 // sceneRifxWhitelist names scene_ files still permitted to import rifx.
-// Each entry is a known boundary violation pending removal; the guard fails
-// for any scene_ file NOT listed here that imports rifx.
+// Each holds chunk-coupled logic whose proper home is a back_/parse_/write_
+// file; relocating it is deferred until the model/serializer boundary is
+// physically split. The guard blocks any NEW scene->rifx coupling beyond
+// this list, so the debt cannot grow.
 var sceneRifxWhitelist = map[string]bool{
-	// filled from this guard's first run after the scene_ rename
-	"scene_features.go":        true,
-	"scene_project_settings.go": true,
-	"scene_project_views.go":   true,
-	"scene_property_flags.go":  true,
-	"scene_property_group.go":  true,
+	"scene_features.go":         true, // Marker/Mask backref structs (*rifx.Chunk) -> back_
+	"scene_project_settings.go": true, // root flag-chunk read/write -> write_
+	"scene_project_views.go":    true, // root-LIST navigation helper -> parse_
+	"scene_property_flags.go":   true, // decodeTdumValue chunk decoder -> parse_
+	"scene_property_group.go":   true, // chunk-backed property-tree builder -> parse_
 }
 
 // sceneTypeNames are the runtime types a codec_ file must never reference —

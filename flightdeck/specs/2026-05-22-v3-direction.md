@@ -223,9 +223,24 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 
 预计跨越多周。期间 V2 path 继续 (V2.2 Layer 创建 可走当前 chunk-patch 套路，作为 RE 补充，但**不再深化**：V2.x 接下来每个 sub-project 都要权衡：是补 V3 brainstorm 输入，还是真的 V2 path 必要 ship）。
 
+## scene→rifx 残留解耦项（方案① 重组遗留，方案② M8 清零）
+
+2026-05-30 的 aep package 命名轴重组（方案①，`specs/2026-05-30-aep-package-reorg-design.md`）把 `internal/aep` 沿 `<stage>_<domain>` 收口，并加 `arch_boundary_test.go` 守卫「`scene_*` 禁 import rifx」。守卫枚举出 **5 个 `scene_*` 文件仍 import rifx**，均因持有 chunk 耦合逻辑，其干净归位正是 M8 serializer/scene 物理分包要做的。重组期暂入白名单（不阻塞、且守卫禁止新增 scene→rifx 耦合）。M8 落地时按下表迁出，迁完即清空白名单：
+
+| scene_ 文件 | rifx 用法 | M8 迁往 |
+|---|---|---|
+| `scene_features.go` | Marker/Mask backref 结构持 `*rifx.Chunk`（ldat/nmHd/nmrd/mkif/shph） | `back_marker.go` / `back_mask.go` |
+| `scene_project_settings.go` | root flag-chunk 读写（lnrb/lnrp/dwga，length-preserving patch） | `write_project_settings.go`（write 阶段） |
+| `scene_project_views.go` | root LIST 导航 `findRootListByType`（Pefl/Pjef） | `parse_*`（读阶段导航） |
+| `scene_property_flags.go` | `decodeTdumValue(*rifx.Chunk)` 解码 helper | `parse_properties.go` |
+| `scene_property_group.go` | `AEPropertyGroup` 持 `*rifx.Chunk` + tdgp 树构建 | `parse_*`（chunk→tree 构建） |
+
+> 这 5 项是 M8「scene 纯逻辑、零 chunk 引用」的具体待办；守卫白名单与本表是 M8 的 ready-made checklist。
+
 ## 决策记录
 
 - 2026-05-22 V2.1 完工 + GPT 反馈 + escape-hatch 实证 → V3 brainstorm 当作"主线下个 phase 候选"。等用户确认起步。
+- 2026-05-30 aep package 命名轴重组（方案①）ship；scene→rifx 残留 5 项入守卫白名单 + 上表，作为 M8 前置解耦清单。
 
 ## 关联文档
 
