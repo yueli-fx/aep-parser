@@ -238,6 +238,9 @@ out.Close()
 | `(s *StrokeNode) SetLineCap(StrokeLineCap)` | 端点样式：`StrokeLineCapButt`(1,默认)/`Round`(2)/`Projecting`(3) |
 | `(s *StrokeNode) SetLineJoin(StrokeLineJoin)` | 拐角样式：`StrokeLineJoinMiter`(1,默认)/`Round`(2)/`Bevel`(3) |
 | `(s *StrokeNode) SetMiterLimit(float64)` | 斜接限制（默认 4，拒 <1；AE 仅在 Join=Miter 时应用，但值始终存盘）|
+| `(r *RectNode) SetDirection(ShapeDirection)` / `(e *EllipseNode) SetDirection(...)` | 路径方向：`ShapeDirectionNormal`(1,默认)/`ShapeDirectionReversed`(3) |
+| `(f *FillNode) SetBlendMode/SetCompositeOrder/SetFillRule` | 混合模式（AE index，Normal=1）/ 合成顺序（`ShapeCompositeOrderAbovePrevious`(1)/`BelowPrevious`(2)）/ 填充规则（`FillRuleNonzeroWinding`(1)/`EvenOdd`(2)）|
+| `(s *StrokeNode) SetBlendMode/SetCompositeOrder` | 同 Fill 的混合模式 / 合成顺序 |
 
 ShapeLayer 跟 V1 parse 出来的 `Layer` 同构 — `comp.Layers[i]` 既是 V1 `*Layer` 也能 `WrapShapeLayer(layer)` 拿到 V2.2 视图。
 
