@@ -171,6 +171,11 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
 - **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
 - stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
+#### V2.2.1 子项⑪ (2026-05-31) — Shape enum sweep: Direction / Blend Mode / Composite Order / Fill Rule (static)
+- Rect/Ellipse `Direction`、Fill `BlendMode`/`CompositeOrder`/`FillRule`、Stroke `BlendMode`/`CompositeOrder` getter/setter — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_ShapeEnums_AEShipGate_AE20{20,25}`：一层 rect+ellipse+fill+stroke 全设 enum，re-save cdat 校验 Direction=3/FillRule=2/BlendMode=3/CompositeOrder=2）。
+- **类型**：`ShapeDirection`（Normal 1/Reversed 3）、`ShapeBlendMode`（AE 1-based index，Normal=1，不枚举全表）、`ShapeCompositeOrder`（AbovePrevious 1/BelowPrevious 2）、`FillRule`（NonzeroWinding 1/EvenOdd 2）。全 OneD float64-BE @ cdat[0:8]，默认皆 1（RE 同 `re_shape_enums.jsx`，详 incident-report）。
+- **模板**：rect/ellipse/fill/stroke body 全部从单一 `v2_2_shape_all_full.aep`(`gen_shape_all_full.jsx`，每 prop 设非默认)重抽 → 4 模板含 enum slot（path body 不变）。**重跑全部 shape ship-gate 双版本**（Ellipse/EllKf/FillKf/FillOpKf/RectKf/RectSubKf/Stroke/StrokeKf/ShapeEnums × AE2020+2025）均 PASS，模板 swap 零回归。
+- RE gotcha：addProperty reindex 使旧 handle 失效（须按 matchName 重取）；详 incident-report。
 #### V2.2.1 子项⑩ (2026-05-31) — Stroke Line Cap / Line Join / Miter Limit (static)
 - `(s *StrokeNode) LineCap/LineJoin/MiterLimit` getters + `SetLineCap/SetLineJoin/SetMiterLimit` — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_Stroke_AEShipGate_AE20{20,25}` 扩展：Cap=Projecting(3)/Join=Round(2)/Miter=12，re-save cdat 解码校验）。
 - **类型**：`StrokeLineCap`（Butt 1/Round 2/Projecting 3，默认 Butt）、`StrokeLineJoin`（Miter 1/Round 2/Bevel 3，默认 Miter）enum；`MiterLimit` float64（默认 4，setter 拒 <1）。
@@ -181,8 +186,8 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Fill Opacity** static + keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_FillOpKf_*`；AE 读回 opacity 40 + re-save numKf/bpk；FillKf 重跑双版本仍 PASS）。
 - **磁盘编码**（RE 自 `v2_2_fill_kf_re.aep`）：1D non-spatial（bpk-48，value@0x08，**原始 %**，同 Stroke Opacity）。之前 lowerFillNode 完全丢弃 opacity（连 static 都没写）。
 - 富化 fill body 模板（7 children；源 `v2_2_shape_fill_full.aep`，Fill Opacity 设静态 60）。仅 fill body 变更。`lowerFillNode` 现持久化 Color + Opacity。
-- **仍 deferred（shape-node 次要）**: Rect/Ellipse Direction（模板 elide）；Fill/Stroke BlendMode·CompositeOrder（无 runtime setter）；Stroke Dashes/Taper/Wave（嵌套组，runtime 模型暂无 setter）。〔Stroke Line Cap/Join/Miter 已 ship，见子项⑩〕
-- **次要子属性**（多数 runtime-only）: Fill/Stroke Opacity·BlendMode·CompositeOrder、Stroke Dashes/Taper/Wave、Rect/Ellipse Direction、Layr Transform Anchor/Scale/Rotation/Opacity。
+- **仍 deferred（shape-node 次要）**: Stroke Dashes/Taper/Wave（嵌套组，runtime 模型暂无 setter）。〔Stroke Line Cap/Join/Miter 见子项⑩；Rect/Ellipse Direction + Fill/Stroke BlendMode·CompositeOrder + Fill Rule 已 ship，见子项⑪〕
+- **次要子属性**（多数 runtime-only）: Stroke Dashes/Taper/Wave、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）
   - Rect/Ellipse Direction、Rect Position/Roundness: runtime-only 不持久化

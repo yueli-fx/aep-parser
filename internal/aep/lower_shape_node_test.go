@@ -41,19 +41,19 @@ func TestLowerEllipseNode_OverwritesSizeAndPosition(t *testing.T) {
 	if chunk == nil || !chunk.IsList() || chunk.FormType != rifx.IDTdgp {
 		t.Fatalf("expected LIST(tdgp), got %+v", chunk)
 	}
-	// Structural contract: the body must be the AE-saved embed boilerplate
-	// (tdsb + tdsn + Size + Position + Group End = 7 children, NO Direction
-	// sub-prop), not the from-scratch emit (which prepends a "ADBE Vector
-	// Shape Direction" placeholder → AE silent-drop). This is the bit byte
-	// values alone can't catch — the from-scratch path also wrote correct
-	// cdat, but its surrounding boilerplate triggered the drop.
+	// Structural contract: the body must be the AE-saved embed boilerplate,
+	// not the from-scratch emit (which triggered AE silent-drop). The enriched
+	// template (v2_2_shape_all_full.aep) carries the Shape Direction enum slot
+	// ahead of Size/Position. This is the bit byte values alone can't catch —
+	// the from-scratch path also wrote correct cdat, but its surrounding
+	// boilerplate triggered the drop.
 	var topTdmns []string
 	for _, ch := range chunk.Children {
 		if ch.ID == rifx.IDTdmn {
 			topTdmns = append(topTdmns, trimTestNUL(string(ch.Data)))
 		}
 	}
-	wantTdmns := []string{"ADBE Vector Ellipse Size", "ADBE Vector Ellipse Position", "ADBE Group End"}
+	wantTdmns := []string{"ADBE Vector Shape Direction", "ADBE Vector Ellipse Size", "ADBE Vector Ellipse Position", "ADBE Group End"}
 	if len(topTdmns) != len(wantTdmns) {
 		t.Fatalf("embed body top-level tdmns = %v, want %v", topTdmns, wantTdmns)
 	}

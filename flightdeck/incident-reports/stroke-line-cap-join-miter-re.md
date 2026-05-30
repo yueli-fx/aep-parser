@@ -61,3 +61,27 @@ WITHOUT these slots. To emit Cap/Join/Miter, either re-extract a richer template
 (stroke with all six scalar props non-default) and overwrite each `cdat[0:8]`, or
 inject the three `tdbs` sub-trees on demand (mirrors AE elision). Whichever path,
 it is a new structural write → AE 2020 + 2025 ship-gate required before ship.
+
+## Addendum (2026-05-31): the rest of the shape enums
+
+Same RE run family (`re_shape_enums.jsx` + combined template `gen_shape_all_full.jsx`)
+covered the remaining OneD shape enums — all identical encoding (float64-BE @
+cdat[0:8], 1-based index, default 1, AE elides default):
+
+| Property | matchName | node(s) | default | values |
+|---|---|---|---|---|
+| Direction | `ADBE Vector Shape Direction` | Rect, Ellipse | 1 | 1=Normal, 3=Reversed (no 2) |
+| Blend Mode | `ADBE Vector Blend Mode` | Fill, Stroke | 1 | AE 1-based index (Normal=1), large enum |
+| Composite Order | `ADBE Vector Composite Order` | Fill, Stroke | 1 | 1=Above Previous, 2=Below Previous |
+| Fill Rule | `ADBE Vector Fill Rule` | Fill | 1 | 1=Nonzero Winding, 2=Even-Odd |
+
+Blend Mode / Composite Order are the first two children of every Fill/Stroke
+group; Direction is the first child of every parametric shape (Rect/Ellipse).
+
+**ExtendScript RE gotcha**: `group.addProperty(...)` reindexes the collection and
+**invalidates handles obtained before later adds** — a handle to `rect` taken
+before adding `stroke` throws `ReferenceError: 引用无效` on use. Re-fetch each
+child by matchName after all adds (`re_shape_enums.jsx` `refetch()`).
+
+Shipped as coverage 子项⑪ (template re-extracted for rect/ellipse/fill/stroke from
+one combined `v2_2_shape_all_full.aep`; all shape ship-gates re-run dual-version).

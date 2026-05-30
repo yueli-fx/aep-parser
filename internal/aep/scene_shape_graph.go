@@ -99,10 +99,44 @@ type BezierPath struct {
 
 // RectNode — `ADBE Vector Shape - Rect`. Default Size=[100,100],
 // Position=[0,0], Roundness=0 (AE elides all three at default).
+// ShapeDirection is the parametric-shape path direction (`ADBE Vector Shape
+// Direction`), shared by Rect/Ellipse. Stored as a float64 enum index.
+type ShapeDirection int
+
+const (
+	ShapeDirectionNormal   ShapeDirection = 1 // default
+	ShapeDirectionReversed ShapeDirection = 3
+)
+
+// ShapeBlendMode is a Fill/Stroke graphic blend mode (`ADBE Vector Blend
+// Mode`). Stored as AE's 1-based blend-mode index (Normal=1); the full mode
+// list is large, so pass the AE index directly.
+type ShapeBlendMode int
+
+const ShapeBlendModeNormal ShapeBlendMode = 1 // default
+
+// ShapeCompositeOrder controls how a Fill/Stroke composites within its group
+// (`ADBE Vector Composite Order`).
+type ShapeCompositeOrder int
+
+const (
+	ShapeCompositeOrderAbovePrevious ShapeCompositeOrder = 1 // default
+	ShapeCompositeOrderBelowPrevious ShapeCompositeOrder = 2
+)
+
+// FillRule is the Fill winding rule (`ADBE Vector Fill Rule`).
+type FillRule int
+
+const (
+	FillRuleNonzeroWinding FillRule = 1 // default
+	FillRuleEvenOdd        FillRule = 2
+)
+
 type RectNode struct {
 	size      *PropertyStream[[2]float64]
 	position  *PropertyStream[[2]float64]
 	roundness *PropertyStream[float64]
+	direction ShapeDirection
 }
 
 // NewRectNode constructs a default-valued RectNode.
@@ -111,6 +145,7 @@ func NewRectNode() *RectNode {
 		size:      NewPropertyStream[[2]float64](),
 		position:  NewPropertyStream[[2]float64](),
 		roundness: NewPropertyStream[float64](),
+		direction: ShapeDirectionNormal,
 	}
 	_ = r.size.SetStaticValue([2]float64{100, 100})
 	_ = r.position.SetStaticValue([2]float64{0, 0})
@@ -122,9 +157,11 @@ func (r *RectNode) Kind() ShapeNodeKind                   { return ShapeKindRect
 func (r *RectNode) Size() *PropertyStream[[2]float64]     { return r.size }
 func (r *RectNode) Position() *PropertyStream[[2]float64] { return r.position }
 func (r *RectNode) Roundness() *PropertyStream[float64]   { return r.roundness }
+func (r *RectNode) Direction() ShapeDirection             { return r.direction }
 func (r *RectNode) SetSize(v [2]float64) error            { return r.size.SetStaticValue(v) }
 func (r *RectNode) SetPosition(v [2]float64) error        { return r.position.SetStaticValue(v) }
 func (r *RectNode) SetRoundness(v float64) error          { return r.roundness.SetStaticValue(v) }
+func (r *RectNode) SetDirection(v ShapeDirection) error   { return setShapeDirection(&r.direction, v) }
 
 // Properties returns the escape-hatch β view onto this RectNode's streams.
 // Streams returned via PropertyGroup.Vec2Stream / Float64Stream
@@ -146,13 +183,15 @@ func (r *RectNode) Properties() *PropertyGroup {
 // runtime-default CCW; not exposed as a typed setter in V2.2.
 type EllipseNode struct {
 	size, position *PropertyStream[[2]float64]
+	direction      ShapeDirection
 }
 
 // NewEllipseNode constructs a default-valued EllipseNode.
 func NewEllipseNode() *EllipseNode {
 	e := &EllipseNode{
-		size:     NewPropertyStream[[2]float64](),
-		position: NewPropertyStream[[2]float64](),
+		size:      NewPropertyStream[[2]float64](),
+		position:  NewPropertyStream[[2]float64](),
+		direction: ShapeDirectionNormal,
 	}
 	_ = e.size.SetStaticValue([2]float64{100, 100})
 	_ = e.position.SetStaticValue([2]float64{0, 0})
@@ -162,8 +201,20 @@ func NewEllipseNode() *EllipseNode {
 func (e *EllipseNode) Kind() ShapeNodeKind                   { return ShapeKindEllipse }
 func (e *EllipseNode) Size() *PropertyStream[[2]float64]     { return e.size }
 func (e *EllipseNode) Position() *PropertyStream[[2]float64] { return e.position }
+func (e *EllipseNode) Direction() ShapeDirection             { return e.direction }
 func (e *EllipseNode) SetSize(v [2]float64) error            { return e.size.SetStaticValue(v) }
 func (e *EllipseNode) SetPosition(v [2]float64) error        { return e.position.SetStaticValue(v) }
+func (e *EllipseNode) SetDirection(v ShapeDirection) error   { return setShapeDirection(&e.direction, v) }
+
+// setShapeDirection validates and assigns a ShapeDirection (Normal=1 or
+// Reversed=3; AE has no value 2 for parametric shapes).
+func setShapeDirection(dst *ShapeDirection, v ShapeDirection) error {
+	if v != ShapeDirectionNormal && v != ShapeDirectionReversed {
+		return fmt.Errorf("SetDirection: invalid value %d (want 1=Normal or 3=Reversed)", v)
+	}
+	*dst = v
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (e *EllipseNode) Properties() *PropertyGroup {
@@ -229,28 +280,69 @@ func (p *PathNode) SetClosed(closed bool) error {
 }
 
 // FillNode — `ADBE Vector Graphic - Fill`. Default Color=[1,1,1,1] white,
-// Opacity=100 (runtime defaults; AE elides at default).
+// Opacity=100, Blend Mode=Normal, Composite Order=Above Previous, Fill
+// Rule=Nonzero Winding (runtime defaults; AE elides at default).
 type FillNode struct {
-	color   *PropertyStream[[4]float64]
-	opacity *PropertyStream[float64]
+	color          *PropertyStream[[4]float64]
+	opacity        *PropertyStream[float64]
+	blendMode      ShapeBlendMode
+	compositeOrder ShapeCompositeOrder
+	fillRule       FillRule
 }
 
 // NewFillNode constructs a default-valued FillNode.
 func NewFillNode() *FillNode {
 	f := &FillNode{
-		color:   NewPropertyStream[[4]float64](),
-		opacity: NewPropertyStream[float64](),
+		color:          NewPropertyStream[[4]float64](),
+		opacity:        NewPropertyStream[float64](),
+		blendMode:      ShapeBlendModeNormal,
+		compositeOrder: ShapeCompositeOrderAbovePrevious,
+		fillRule:       FillRuleNonzeroWinding,
 	}
 	_ = f.color.SetStaticValue([4]float64{1, 1, 1, 1}) // white
 	_ = f.opacity.SetStaticValue(100)
 	return f
 }
 
-func (f *FillNode) Kind() ShapeNodeKind                { return ShapeKindFill }
-func (f *FillNode) Color() *PropertyStream[[4]float64] { return f.color }
-func (f *FillNode) Opacity() *PropertyStream[float64]  { return f.opacity }
-func (f *FillNode) SetColor(v [4]float64) error        { return f.color.SetStaticValue(v) }
-func (f *FillNode) SetOpacity(v float64) error         { return f.opacity.SetStaticValue(v) }
+func (f *FillNode) Kind() ShapeNodeKind                  { return ShapeKindFill }
+func (f *FillNode) Color() *PropertyStream[[4]float64]   { return f.color }
+func (f *FillNode) Opacity() *PropertyStream[float64]    { return f.opacity }
+func (f *FillNode) BlendMode() ShapeBlendMode            { return f.blendMode }
+func (f *FillNode) CompositeOrder() ShapeCompositeOrder  { return f.compositeOrder }
+func (f *FillNode) FillRule() FillRule                   { return f.fillRule }
+func (f *FillNode) SetColor(v [4]float64) error          { return f.color.SetStaticValue(v) }
+func (f *FillNode) SetOpacity(v float64) error           { return f.opacity.SetStaticValue(v) }
+func (f *FillNode) SetBlendMode(v ShapeBlendMode) error  { return setShapeBlendMode(&f.blendMode, v) }
+func (f *FillNode) SetCompositeOrder(v ShapeCompositeOrder) error {
+	return setShapeCompositeOrder(&f.compositeOrder, v)
+}
+
+// SetFillRule sets the winding rule (NonzeroWinding=1 / EvenOdd=2).
+func (f *FillNode) SetFillRule(v FillRule) error {
+	if v != FillRuleNonzeroWinding && v != FillRuleEvenOdd {
+		return fmt.Errorf("SetFillRule: invalid value %d (want 1=Nonzero or 2=EvenOdd)", v)
+	}
+	f.fillRule = v
+	return nil
+}
+
+// setShapeBlendMode validates (>= 1) and assigns a ShapeBlendMode.
+func setShapeBlendMode(dst *ShapeBlendMode, v ShapeBlendMode) error {
+	if v < 1 {
+		return fmt.Errorf("SetBlendMode: invalid value %d (want >= 1)", v)
+	}
+	*dst = v
+	return nil
+}
+
+// setShapeCompositeOrder validates (AbovePrevious=1 / BelowPrevious=2).
+func setShapeCompositeOrder(dst *ShapeCompositeOrder, v ShapeCompositeOrder) error {
+	if v != ShapeCompositeOrderAbovePrevious && v != ShapeCompositeOrderBelowPrevious {
+		return fmt.Errorf("SetCompositeOrder: invalid value %d (want 1 or 2)", v)
+	}
+	*dst = v
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (f *FillNode) Properties() *PropertyGroup {
@@ -295,6 +387,9 @@ type StrokeNode struct {
 	lineCap    StrokeLineCap
 	lineJoin   StrokeLineJoin
 	miterLimit float64
+
+	blendMode      ShapeBlendMode
+	compositeOrder ShapeCompositeOrder
 }
 
 // NewStrokeNode constructs a default-valued StrokeNode.
@@ -303,9 +398,11 @@ func NewStrokeNode() *StrokeNode {
 		color:      NewPropertyStream[[4]float64](),
 		opacity:    NewPropertyStream[float64](),
 		width:      NewPropertyStream[float64](),
-		lineCap:    StrokeLineCapButt,
-		lineJoin:   StrokeLineJoinMiter,
-		miterLimit: 4,
+		lineCap:        StrokeLineCapButt,
+		lineJoin:       StrokeLineJoinMiter,
+		miterLimit:     4,
+		blendMode:      ShapeBlendModeNormal,
+		compositeOrder: ShapeCompositeOrderAbovePrevious,
 	}
 	_ = s.color.SetStaticValue([4]float64{0, 0, 0, 1}) // black
 	_ = s.opacity.SetStaticValue(100)
@@ -321,9 +418,15 @@ func (s *StrokeNode) SetColor(v [4]float64) error        { return s.color.SetSta
 func (s *StrokeNode) SetOpacity(v float64) error         { return s.opacity.SetStaticValue(v) }
 func (s *StrokeNode) SetWidth(v float64) error           { return s.width.SetStaticValue(v) }
 
-func (s *StrokeNode) LineCap() StrokeLineCap   { return s.lineCap }
-func (s *StrokeNode) LineJoin() StrokeLineJoin { return s.lineJoin }
-func (s *StrokeNode) MiterLimit() float64      { return s.miterLimit }
+func (s *StrokeNode) LineCap() StrokeLineCap              { return s.lineCap }
+func (s *StrokeNode) LineJoin() StrokeLineJoin            { return s.lineJoin }
+func (s *StrokeNode) MiterLimit() float64                 { return s.miterLimit }
+func (s *StrokeNode) BlendMode() ShapeBlendMode           { return s.blendMode }
+func (s *StrokeNode) CompositeOrder() ShapeCompositeOrder { return s.compositeOrder }
+func (s *StrokeNode) SetBlendMode(v ShapeBlendMode) error { return setShapeBlendMode(&s.blendMode, v) }
+func (s *StrokeNode) SetCompositeOrder(v ShapeCompositeOrder) error {
+	return setShapeCompositeOrder(&s.compositeOrder, v)
+}
 
 // SetLineCap sets the end-cap style. Rejects values outside {Butt,Round,Projecting}.
 func (s *StrokeNode) SetLineCap(v StrokeLineCap) error {

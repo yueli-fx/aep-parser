@@ -253,9 +253,8 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 |---|---|
 | `ShapeLayer.Transform().AnchorPoint / Scale / Rotation / Opacity` | runtime-only |
 | `ShapeLayer.Transform().Position` keyframes | 仅 first kf 作 static fallback |
-| `RectNode.Position / Roundness / Direction` | runtime-only |
+| `RectNode.Position / Roundness` | runtime-only |
 | `RectNode.Size` keyframes | 仅 first kf 作 static fallback |
-| `FillNode.Opacity / BlendMode / CompositeOrder / FillRule` | runtime-only |
 | `FillNode.Color` keyframes | 仅 first kf 作 static fallback |
 
 ### shape kind 支持状态

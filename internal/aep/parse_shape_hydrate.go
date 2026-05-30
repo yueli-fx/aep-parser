@@ -219,6 +219,7 @@ func hydrateRectNode(body *rifx.Chunk, ctx *parseCtx) *RectNode {
 	hydrateVec2Stream(r.size, props["ADBE Vector Rect Size"])
 	hydrateVec2Stream(r.position, props["ADBE Vector Rect Position"])
 	hydrateFloat64Stream(r.roundness, props["ADBE Vector Rect Roundness"])
+	hydrateScalarStatic(props["ADBE Vector Shape Direction"], func(v float64) { r.direction = ShapeDirection(v) })
 	return r
 }
 
@@ -227,6 +228,7 @@ func hydrateEllipseNode(body *rifx.Chunk, ctx *parseCtx) *EllipseNode {
 	props := nodeStreamValues(body, ctx)
 	hydrateVec2Stream(e.size, props["ADBE Vector Ellipse Size"])
 	hydrateVec2Stream(e.position, props["ADBE Vector Ellipse Position"])
+	hydrateScalarStatic(props["ADBE Vector Shape Direction"], func(v float64) { e.direction = ShapeDirection(v) })
 	return e
 }
 
@@ -235,6 +237,9 @@ func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
 	props := nodeStreamValues(body, ctx)
 	hydrateColor4Stream(f.color, props["ADBE Vector Fill Color"])
 	hydrateFloat64Stream(f.opacity, props["ADBE Vector Fill Opacity"])
+	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { f.blendMode = ShapeBlendMode(v) })
+	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { f.compositeOrder = ShapeCompositeOrder(v) })
+	hydrateScalarStatic(props["ADBE Vector Fill Rule"], func(v float64) { f.fillRule = FillRule(v) })
 	return f
 }
 
@@ -247,6 +252,8 @@ func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
 	hydrateScalarStatic(props["ADBE Vector Stroke Line Cap"], func(v float64) { s.lineCap = StrokeLineCap(v) })
 	hydrateScalarStatic(props["ADBE Vector Stroke Line Join"], func(v float64) { s.lineJoin = StrokeLineJoin(v) })
 	hydrateScalarStatic(props["ADBE Vector Stroke Miter Limit"], func(v float64) { s.miterLimit = v })
+	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { s.blendMode = ShapeBlendMode(v) })
+	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { s.compositeOrder = ShapeCompositeOrder(v) })
 	return s
 }
 

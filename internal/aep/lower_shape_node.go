@@ -243,6 +243,7 @@ func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeVec2(body, "ADBE Vector Rect Position", r.position, ctx, valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
 		return nil, err
 	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(r.direction)))
 	if err := lowerShapeScalar(body, "ADBE Vector Rect Roundness", r.roundness, ctx); err != nil {
 		return nil, err
 	}
@@ -377,6 +378,7 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	} else {
 		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(e.position.static[0], e.position.static[1]))
 	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(e.direction)))
 	return body, nil
 }
 
@@ -492,6 +494,9 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeScalar(body, "ADBE Vector Fill Opacity", f.opacity, ctx); err != nil {
 		return nil, err
 	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(f.blendMode)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(f.compositeOrder)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Fill Rule", encodeF64sBE(float64(f.fillRule)))
 	return body, nil
 }
 
@@ -536,6 +541,8 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Cap", encodeF64sBE(float64(s.lineCap)))
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Join", encodeF64sBE(float64(s.lineJoin)))
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(s.miterLimit))
+	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(s.blendMode)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(s.compositeOrder)))
 	return body, nil
 }
 
