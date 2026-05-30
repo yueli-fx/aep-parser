@@ -18,8 +18,9 @@
 # 1. 编译 + vet + 单测全绿
 go build ./... ; if ($LASTEXITCODE) { throw } ; go vet ./internal/aep/ ; if ($LASTEXITCODE) { throw } ; go test -count=1 ./internal/aep/ ; if ($LASTEXITCODE) { throw }
 # 2. 公共 API 零 diff（基线 tmp/api_before.txt 于 Task 0 生成）
-#    注意：go doc -all 输出**内嵌源文件名行**（形如 `internal/aep/foo.go`），改名会动这些行 → 必须先过滤再比，否则假阳性。
-(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' > tmp/api_after.txt ; (Compare-Object (Get-Content tmp/api_before.txt) (Get-Content tmp/api_after.txt))  # 输出须为空
+#    go doc -all 输出**内嵌源文件名行**(`internal/aep/foo.go`)且改名会重排文件分组、移动其周围**空行** → 二者都是噪声。
+#    指纹须同时滤掉「文件名行」+「空行」，否则改名假阳性。基线 api_before.txt 已是此归一化形式(~3506 行)。
+(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' -notmatch '^\s*$' > tmp/api_after.txt ; (Compare-Object (Get-Content tmp/api_before.txt) (Get-Content tmp/api_after.txt))  # 输出须为空
 # 3. round-trip 字节稳定（基线 Task 1 生成）
 go test -count=1 ./internal/aep/ -run TestReorgRoundtripBaseline   # 须 PASS
 ```
@@ -45,20 +46,20 @@ git checkout -b refactor/aep-package-reorg
 
 ```powershell
 New-Item -ItemType Directory -Force tmp | Out-Null
-(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' > tmp/api_before.txt
+(go doc -all ./internal/aep) -notmatch '^internal/aep/.*\.go$' -notmatch '^\s*$' > tmp/api_before.txt
 ```
-`go doc -all` 会把每个文件的声明前加一行源文件名（`internal/aep/foo.go`）；改名必动这些行。**过滤掉它们**，剩下纯 exported 声明集合才是稳定的 API 指纹。
+`go doc -all` 在每个文件声明前加一行源文件名（`internal/aep/foo.go`），且改名会重排文件分组、移动周围空行。**两者都滤掉**（文件名行 + 空行），剩下的 exported 声明集合才是稳定 API 指纹。
 
 - [ ] **Step 3: 确认基线非空且无文件名残留**
 
 ```powershell
-(Get-Content tmp/api_before.txt | Measure-Object -Line).Lines               # 应 > 4000
+(Get-Content tmp/api_before.txt | Measure-Object -Line).Lines               # 应 ~3506
 (Select-String -Path tmp/api_before.txt -Pattern '^internal/aep/.*\.go$').Count   # 应 = 0
 ```
 
 此文件是后续每个 Gate 第 2 步的比对基准，**整个重组期间不可重新生成**。
 
-> **注**：Task 0 已由 controller 执行（分支 `refactor/aep-package-reorg` 已建、`tmp/api_before.txt` 已生成过滤版 4416 行）。此任务留作记录与重跑依据。
+> **注**：Task 0 已由 controller 执行（分支 `refactor/aep-package-reorg` 已建、`tmp/api_before.txt` 已归一化为 3506 行）。此任务留作记录与重跑依据。
 
 ---
 
