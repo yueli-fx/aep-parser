@@ -1,12 +1,11 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-30 by claude（注释纪律清理 pass **landed on main**（merge of `chore/comment-discipline-cleanup`，cleanup commit 4fcdf0c）：51 文件，`internal/aep` ~234 处 process-meta 注释债（Phase/Inv/iter/RE-S/spec §/doc 路径/日期戳/TODO）清空，保留 Mirrors py-aep·AE-script 参照 + deprecated 域事实 + 每条 RE finding 事实。手工 19 处定 rubric 后 6 并行 subagent 分文件清 + 中央复核补漏 1 处。`go vet` + `go test ./...` 全绿，零行为/零 API 变更。残留 14 处坐标在 string literal 留作可选 follow-up。详 logbook。）
+**Last updated**: 2026-05-31 by claude（string-literal process-坐标清理 **landed on main**（commit d4338d4）：16 处坐标（production fmt.Errorf 4 + test 诊断/skip 串 12）清空，`insert_layer_test:138` 守卫改锚语义子串 `"different Projects"`。`go vet` clean + `go test ./internal/aep/` green + §6 grep 含代码串零命中，零行为/零 API 变更。注释 + string-literal 两轮 process-meta 清理至此收口。详 logbook。）
 **Active focus**: 无 active 实现线。
 
 ## Next session
 
-1. **（可选，小）string-literal 内 process-坐标清理** — 清 14 处藏在 `fmt.Errorf` 报错串 + test 诊断串里的 Phase/RE-S/Inv 坐标（`insert_layer_test.go:138` 断言 `strings.Contains(…, "deferred to Phase 5C.1")` 与产线串耦合，须两侧同改）→ 让 §6 grep 含代码串也零命中。非注释、出 comments.md scope，纯洁癖。
-2. **否则从下方长线 backlog 选下一条实现线**（用户定方向）。
+1. **从下方长线 backlog 选下一条实现线**（用户定方向）。
 
 > **长线 backlog**（大 arc 或缺 runtime setter）：
 
