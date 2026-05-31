@@ -30,6 +30,16 @@
     "comment": "Mode 3 — fixture broken; press OK to let JSX catch + write .done(ERR)"
   },
   {
+    "name": "project-corrupt-skip",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["已损坏", "跳过部分", "appears to be damaged", "skipping a portion"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "Real data reject — '项目文件似乎已损坏（跳过部分：N）(26::0)': builder output has a structural/size bug so AE skips a layer/stream. Press OK so the project opens (with the part dropped) and the JSX catches the missing layer/path → writes .done(FAIL). Previously surfaced as exit 2 (unknown-modal) when OCR was occluded, masking a genuine reject as a flake — see incident-reports/ae2020-shape-ldta-164-corrupt.md + path-keyframe-write-re.md."
+  },
+  {
     "name": "ae2025-performance-preferences",
     "windowTitle": [],
     "windowClass": [],
