@@ -45,6 +45,7 @@ internal/aep/*       ── AEP 语义层 (Chunk 树 → Project / Composition /
 
 ## 工作风格
 
+- **一律用中文跟用户交流**（含解释、提案、报告、commit body 可英文按既有惯例）
 - 代码优先，设计讨论精简
 - 重构 / 迁移**先读源码再动**，不瞎猜
 - 不写注释，除非 WHY 不明显
