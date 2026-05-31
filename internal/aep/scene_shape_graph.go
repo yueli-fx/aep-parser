@@ -391,8 +391,9 @@ type StrokeNode struct {
 	blendMode      ShapeBlendMode
 	compositeOrder ShapeCompositeOrder
 
-	taper *StrokeTaper
-	wave  *StrokeWave
+	taper  *StrokeTaper
+	wave   *StrokeWave
+	dashes *StrokeDashes
 }
 
 // NewStrokeNode constructs a default-valued StrokeNode.
@@ -408,6 +409,7 @@ func NewStrokeNode() *StrokeNode {
 		compositeOrder: ShapeCompositeOrderAbovePrevious,
 		taper:          newStrokeTaper(),
 		wave:           newStrokeWave(),
+		dashes:         newStrokeDashes(),
 	}
 	_ = s.color.SetStaticValue([4]float64{0, 0, 0, 1}) // black
 	_ = s.opacity.SetStaticValue(100)
@@ -467,6 +469,9 @@ func (s *StrokeNode) Taper() *StrokeTaper { return s.taper }
 // Wave returns the stroke's Wave group (`ADBE Vector Stroke Wave`).
 func (s *StrokeNode) Wave() *StrokeWave { return s.wave }
 
+// Dashes returns the stroke's Dashes group (`ADBE Vector Stroke Dashes`).
+func (s *StrokeNode) Dashes() *StrokeDashes { return s.dashes }
+
 // StrokeTaper models the Stroke "Taper" group's %-mode scalar controls
 // (`ADBE Vector Stroke Taper`): Start/End Length, Start/End Width, Start/End
 // Ease — all plain float64 percentages stored on disk as float64 BE at
@@ -521,6 +526,57 @@ func (w *StrokeWave) Phase() float64      { return w.phase }
 func (w *StrokeWave) SetAmount(v float64) error     { w.amount = v; return nil }
 func (w *StrokeWave) SetWavelength(v float64) error { w.wavelength = v; return nil }
 func (w *StrokeWave) SetPhase(v float64) error      { w.phase = v; return nil }
+
+// StrokeDashes models the Stroke "Dashes" group (`ADBE Vector Stroke Dashes`):
+// a single Dash + Gap pair, stored on disk as float64 BE at cdat[0:8] —
+// identical encoding to the other stroke scalars, nested one level deeper inside
+// the group's LIST(tdgp). The group is hidden-by-default: a default stroke emits
+// the Dashes group as an empty placeholder (solid line). When Enabled, the
+// serializer swaps to a dashed stroke-body template that carries the Dash 1 /
+// Gap 1 slots and overwrites them with these values.
+//
+// V2.2 models exactly one Dash + Gap pair (the common dashed/dotted-line case).
+// Deferred: additional Dash 2/3 + Gap 2/3 pairs (AE emits only enabled pairs,
+// each pair is a separate template variant), and Offset — which AE keeps hidden
+// until a dash is enabled and refuses to set via ScriptingAPI, so no template
+// can carry its slot. Dash/Gap are not animated in V2.2.
+type StrokeDashes struct {
+	enabled   bool
+	dash, gap float64
+}
+
+// newStrokeDashes returns a disabled Dashes group with AE's default Dash/Gap
+// of 10 (the values AE shows when you first add a dash).
+func newStrokeDashes() *StrokeDashes { return &StrokeDashes{dash: 10, gap: 10} }
+
+func (d *StrokeDashes) Enabled() bool { return d.enabled }
+func (d *StrokeDashes) Dash() float64 { return d.dash }
+func (d *StrokeDashes) Gap() float64  { return d.gap }
+
+// Enable turns dashing on (the serializer emits the Dash + Gap slots). Disable
+// reverts to a solid stroke.
+func (d *StrokeDashes) Enable()  { d.enabled = true }
+func (d *StrokeDashes) Disable() { d.enabled = false }
+
+// SetDash sets the dash length and enables dashing. Rejects negative values.
+func (d *StrokeDashes) SetDash(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("StrokeDashes.SetDash: %g out of range (want >= 0)", v)
+	}
+	d.dash = v
+	d.enabled = true
+	return nil
+}
+
+// SetGap sets the gap length and enables dashing. Rejects negative values.
+func (d *StrokeDashes) SetGap(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("StrokeDashes.SetGap: %g out of range (want >= 0)", v)
+	}
+	d.gap = v
+	d.enabled = true
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (s *StrokeNode) Properties() *PropertyGroup {

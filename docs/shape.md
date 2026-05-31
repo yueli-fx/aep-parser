@@ -243,6 +243,7 @@ out.Close()
 | `(s *StrokeNode) SetBlendMode/SetCompositeOrder` | 同 Fill 的混合模式 / 合成顺序 |
 | `(s *StrokeNode) Taper() *StrokeTaper` | Taper 组：`SetStartLength/SetEndLength/SetStartWidth/SetEndWidth/SetStartEase/SetEndEase`（% 模式标量，默认全 0，static）|
 | `(s *StrokeNode) Wave() *StrokeWave` | Wave 组：`SetAmount`(%)/`SetWavelength`(px,默认 100)/`SetPhase`(deg)（Wavelength 模式，static）|
+| `(s *StrokeNode) Dashes() *StrokeDashes` | Dashes 组：`Enable/Disable`、`SetDash`/`SetGap`(px,默认 10，自动 enable，拒负)、`Enabled/Dash/Gap` getter。单 Dash+Gap 对，hidden-until-enabled（enable 时序列化器切 dashed 模板）；static |
 
 ShapeLayer 跟 V1 parse 出来的 `Layer` 同构 — `comp.Layers[i]` 既是 V1 `*Layer` 也能 `WrapShapeLayer(layer)` 拿到 V2.2 视图。
 
@@ -262,7 +263,7 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 | `RectNode.Size` keyframes | 仅 first kf 作 static fallback |
 | `FillNode.Color` keyframes | 仅 first kf 作 static fallback |
 | `StrokeNode` Taper Length Units / Px 宽度镜像、Wave Units / Cycles | 不建模（% / Wavelength 默认模式被 AE elide，无 slot 可覆）|
-| `StrokeNode` Dashes（Dash/Gap/Offset） | 不建模（变长嵌套组 + hidden-until-enabled，待后续接力）|
+| `StrokeNode` Dashes Dash 2/3·Gap 2/3·Offset | 不建模（仅一 Dash+Gap 对；额外对各需独立模板变体，Offset 在 AE 端 hidden / script-ungettable，无 slot 可覆）|
 
 ### shape kind 支持状态
 
@@ -270,7 +271,7 @@ V2.2 ship gate 走的是 **embed boilerplate** 路线（详 `flightdeck/incident
 |---|---|
 | `VectorGroup.AddEllipse` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_ellipse_body.bin` + overwrite Size/Position cdat。Direction 仍 AE 默认；动画仍 first-kf static fallback |
 | `VectorGroup.AddPath` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_path_body.bin` + splice `encodeBezier` 几何（shph/lhd3/ldat）。ldat 逐顶点布局 = `[anchor, anchor+outTangent_i, anchor_{i+1}+inTangent_{i+1}]`（bbox 归一化，wrap mod n；V2.2.1 RE 修正，曾错存本顶点 in/out）。`SetVertices` 仅线性段（切线置零）；动画仍 first-kf fallback。**注**：from-scratch path 曾 **崩溃 AE 2020**（0::42），故走 embed |
-| `VectorGroup.AddStroke` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_stroke_body.bin`（25 children，含 Line Cap/Join/Miter + Taper/Wave 填充组 + Dashes 空 placeholder）+ overwrite Color/Opacity/Width / Cap/Join/Miter / BlendMode/CompositeOrder / **Taper 6 + Wave 3 标量** cdat（static，详 `incident-reports/stroke-line-cap-join-miter-re.md` 含 Taper/Wave addendum）。**Taper/Wave** 经 `findGroupBody` 下钻组 `LIST(tdgp)` 覆 cdat（子项⑫）；Taper Length Units/Px + Wave Units/Cycles（% / Wavelength 模式被 elide）+ **Dashes**（变长嵌套组）仍 deferred；Color/Opacity/Width 动画仍 first-kf fallback，Cap/Join/Miter + Taper/Wave static-only |
+| `VectorGroup.AddStroke` | ✅ **V2.2.1 已 ship**（AE 2020+2025 双版本 ship-gate PASS）— embed `v2_2_shape_stroke_body.bin`（25 children，含 Line Cap/Join/Miter + Taper/Wave 填充组 + Dashes 空 placeholder）+ overwrite Color/Opacity/Width / Cap/Join/Miter / BlendMode/CompositeOrder / **Taper 6 + Wave 3 标量** cdat（static，详 `incident-reports/stroke-line-cap-join-miter-re.md` 含 Taper/Wave + Dashes addendum）。**Taper/Wave** 经 `findGroupBody` 下钻组 `LIST(tdgp)` 覆 cdat（子项⑫）；**Dashes**（单 Dash+Gap 对）enable 时切第二模板 `v2_2_shape_stroke_dashed_body.bin`（子项⑬）。Taper Length Units/Px + Wave Units/Cycles（% / Wavelength 模式被 elide）+ Dashes Dash 2/3·Gap 2/3·Offset 仍 deferred；Color/Opacity/Width 动画仍 first-kf fallback，Cap/Join/Miter + Taper/Wave + Dashes static-only |
 
 > **AE 2020 地基修复（V2.2.1）**：ShapeLayer 的 ldta 大小现按 target 分支（160B AE 2020/22，164B AE 2025）。此前 buildLdtaBytes 硬编码 164B，导致 **所有** from-scratch shape 图层（含已"ship"的 Rect+Fill）被 AE 2020 判为损坏并跳过——因 AE-2020 shape ship-gate 长期 skip 而未发现。详 `flightdeck/incident-reports/ae2020-shape-ldta-164-corrupt.md`。
 

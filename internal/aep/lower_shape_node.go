@@ -39,6 +39,9 @@ var v22ShapePathBodyBytes []byte
 //go:embed templates/v2_2_shape_stroke_body.bin
 var v22ShapeStrokeBodyBytes []byte
 
+//go:embed templates/v2_2_shape_stroke_dashed_body.bin
+var v22ShapeStrokeDashedBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -59,6 +62,10 @@ var (
 	v22ShapeStrokeOnce  sync.Once
 	v22ShapeStrokeCache *rifx.Chunk
 	v22ShapeStrokeErr   error
+
+	v22ShapeStrokeDashedOnce  sync.Once
+	v22ShapeStrokeDashedCache *rifx.Chunk
+	v22ShapeStrokeDashedErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -134,6 +141,24 @@ func cloneShapeStrokeBody() (*rifx.Chunk, error) {
 		return nil, v22ShapeStrokeErr
 	}
 	return cloneChunk(v22ShapeStrokeCache), nil
+}
+
+// cloneShapeStrokeDashedBody returns a clone of the dashed-stroke template — a
+// superset of the solid stroke body that additionally carries the Dashes group's
+// Dash 1 / Gap 1 slots. lowerStrokeNode selects it when dashes are enabled.
+func cloneShapeStrokeDashedBody() (*rifx.Chunk, error) {
+	v22ShapeStrokeDashedOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStrokeDashedBodyBytes))
+		if err != nil {
+			v22ShapeStrokeDashedErr = fmt.Errorf("parse v22ShapeStrokeDashedBodyBytes: %w", err)
+			return
+		}
+		v22ShapeStrokeDashedCache = ch
+	})
+	if v22ShapeStrokeDashedErr != nil {
+		return nil, v22ShapeStrokeDashedErr
+	}
+	return cloneChunk(v22ShapeStrokeDashedCache), nil
 }
 
 // encodeShapeColorBE returns the AE shape-color cdat bytes for an [r,g,b,a]
@@ -516,7 +541,13 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // the embed's defaults; animated Color/Opacity/Width use the first keyframe as
 // a static fallback. Line Cap / Join / Miter are static-only.
 func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	body, err := cloneShapeStrokeBody()
+	// Dashes enabled → swap to the dashed template (carries Dash 1 / Gap 1
+	// slots); else the solid template (Dashes group is an empty placeholder).
+	clone := cloneShapeStrokeBody
+	if s.dashes != nil && s.dashes.enabled {
+		clone = cloneShapeStrokeDashedBody
+	}
+	body, err := clone()
 	if err != nil {
 		return nil, err
 	}
@@ -545,7 +576,24 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(s.compositeOrder)))
 	lowerStrokeTaper(body, s.taper)
 	lowerStrokeWave(body, s.wave)
+	lowerStrokeDashes(body, s.dashes)
 	return body, nil
+}
+
+// lowerStrokeDashes overwrites the Dashes group's Dash 1 / Gap 1 cdats inside
+// the embedded dashed-stroke body. No-op when dashes are disabled (the solid
+// template was cloned and has no Dash/Gap slots to overwrite). Offset is not
+// modeled (AE keeps it hidden / script-ungettable — no template slot exists).
+func lowerStrokeDashes(strokeBody *rifx.Chunk, d *StrokeDashes) {
+	if d == nil || !d.enabled {
+		return
+	}
+	g := findGroupBody(strokeBody, "ADBE Vector Stroke Dashes")
+	if g == nil {
+		return
+	}
+	overwriteShapeStreamCdat(g, "ADBE Vector Stroke Dash 1", encodeF64sBE(d.dash))
+	overwriteShapeStreamCdat(g, "ADBE Vector Stroke Gap 1", encodeF64sBE(d.gap))
 }
 
 // lowerStrokeTaper overwrites the Taper group's %-mode scalar cdats inside the

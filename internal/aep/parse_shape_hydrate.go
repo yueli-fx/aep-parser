@@ -256,7 +256,28 @@ func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
 	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { s.compositeOrder = ShapeCompositeOrder(v) })
 	hydrateStrokeTaper(body, s.taper, ctx)
 	hydrateStrokeWave(body, s.wave, ctx)
+	hydrateStrokeDashes(body, s.dashes, ctx)
 	return s
+}
+
+// hydrateStrokeDashes reads the Dashes group's Dash 1 / Gap 1 sub-streams back
+// into the runtime StrokeDashes and flags it enabled. The presence of a Dash 1
+// or Gap 1 leaf is the enable signal: a solid stroke serializes the Dashes group
+// as an empty placeholder (no Dash/Gap leaves), so enabled stays false. Offset
+// is not modeled (no template slot).
+func hydrateStrokeDashes(strokeBody *rifx.Chunk, d *StrokeDashes, ctx *parseCtx) {
+	g := findGroupBody(strokeBody, "ADBE Vector Stroke Dashes")
+	if g == nil || d == nil {
+		return
+	}
+	p := nodeStreamValues(g, ctx)
+	dash, gap := p["ADBE Vector Stroke Dash 1"], p["ADBE Vector Stroke Gap 1"]
+	if dash == nil && gap == nil {
+		return
+	}
+	d.enabled = true
+	hydrateScalarStatic(dash, func(v float64) { d.dash = v })
+	hydrateScalarStatic(gap, func(v float64) { d.gap = v })
 }
 
 // hydrateStrokeTaper reads the Taper group's %-mode scalar sub-streams back

@@ -138,3 +138,43 @@ Template re-extracted from `gen_shape_all_full.jsx` (now sets Taper+Wave with
 Units left at %, so the 9 active slots emit). Serializer descends into the
 Taper/Wave `LIST(tdgp)` via `findGroupBody` then reuses `overwriteShapeStreamCdat`.
 Dual-version ship-gate (AE 2020 + 2025) PASS. RE fixture: `re_stroke_dtw.jsx`.
+
+## Addendum (2026-05-31): Stroke Dashes shipped — single Dash+Gap pair (子项⑬)
+
+Dashes turned out to be tractable for the common case despite the
+variable-cardinality worry. Modeled **one Dash + Gap pair** — the dashed/dotted
+line that covers most real use.
+
+### Enable = template swap (not in-place reveal)
+
+A solid stroke serializes the Dashes group as an **empty placeholder** (the
+`tdmn` is immediately followed by `ADBE Group End`, no Dash/Gap leaves), so you
+can't overwrite slots that aren't there. Rather than splice the group open at
+runtime, the serializer keeps **two** embedded stroke bodies:
+
+- `v2_2_shape_stroke_body.bin` — solid (Dashes empty placeholder), **unchanged**
+- `v2_2_shape_stroke_dashed_body.bin` — superset carrying `ADBE Vector Stroke
+  Dash 1` + `Gap 1` slots, extracted from an AE-saved dashed fixture
+  (`v2_2_stroke_dashed.aep`)
+
+`lowerStrokeNode` clones the dashed body iff `dashes.enabled`, then overwrites
+Dash 1 / Gap 1 cdats (OneD f64-BE @ `[0:8]`, nested one level in the group's
+`LIST(tdgp)` — same depth as Taper/Wave). Because the solid body is byte-identical
+to before, every existing stroke-touching gate is regression-free **without
+re-running them** (the `DisabledStaysSolid` round-trip proves the solid path is
+unchanged). Hydrate flags `enabled` by the presence of a Dash 1 / Gap 1 leaf.
+
+### Offset stays deferred (hard ScriptingAPI block, not a scope choice)
+
+`v2_2_stroke_dashed.done` from the dashed-fixture RE recorded:
+`offset SET failed (hidden): ... 无法对set value...因为属性或父级属性被隐藏`.
+AE keeps Dashes Offset **hidden until a dash is enabled** AND refuses `setValue`
+on it even then (same hidden-property class as Wave Cycles / Miter-unless-Join).
+No JSX path can produce a fixture with a non-default Offset slot, so no template
+can carry it — Offset is unreachable by the embed strategy, not merely descoped.
+Dash 2/3 + Gap 2/3 are deferred too (each enabled pair is a distinct on-disk
+cardinality → a separate template variant).
+
+Dual-version ship-gate (AE 2020 + 2025) PASS (`TestV2_2_StrokeDashes_AEShipGate_*`,
+Dash=18 / Gap=7 decoded from AE's resave). RE fixtures: `re_stroke_dtw.jsx` +
+`v2_2_stroke_dashed.aep`.

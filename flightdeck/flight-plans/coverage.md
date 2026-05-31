@@ -171,11 +171,17 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
 - **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
 - stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
+#### V2.2.1 子项⑬ (2026-05-31) — Stroke Dashes (single Dash+Gap pair, hidden-until-enabled)
+- `(s *StrokeNode) Dashes()` → `StrokeDashes`（`Enable/Disable`、`SetDash`/`SetGap` 自动 enable + 拒负、`Enabled/Dash/Gap` getter）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeDashes_AEShipGate_AE20{20,25}`：一层 rect+stroke，Dash=18/Gap=7，re-save cdat 解码校验）。
+- **磁盘编码**：Dash 1 / Gap 1 均 OneD float64-BE @ cdat[0:8]，嵌套于 `ADBE Vector Stroke Dashes` group `LIST(tdgp)` 内（同 Taper/Wave，`findGroupBody` 下钻 + `overwriteShapeStreamCdat`）。默认 Dash/Gap=10。
+- **enable 语义 = 模板切换**：solid stroke 的 Dashes 组是空 placeholder（无 Dash/Gap leaf）。enable 时 `lowerStrokeNode` 切到第二嵌入模板 `v2_2_shape_stroke_dashed_body.bin`（携 Dash 1/Gap 1 slot）；solid `v2_2_shape_stroke_body.bin` **不变** → 现有 stroke/enum/taper-wave gate 零回归（`DisabledStaysSolid` round-trip 证 solid 路径 byte 一致）。hydrate 以 Dash/Gap leaf 存在与否回判 enabled。
+- **deferred**：Dash 2/3 + Gap 2/3（AE 只 emit enabled pair，每对需独立模板变体）、**Offset**（AE 端 hidden-until-enabled 且 `setValue` 抛 hidden-property，script-ungettable，无 slot 可建模——RE `v2_2_stroke_dashed.done` 实证）。static-only（不建模 keyframe）。
+- RE：`re_stroke_dtw.jsx` + `v2_2_stroke_dashed.aep`（dashed 模板源），详 `incident-reports/stroke-line-cap-join-miter-re.md` Dashes addendum。
 #### V2.2.1 子项⑫ (2026-05-31) — Stroke Taper + Wave (static, %/Wavelength-mode)
 - `(s *StrokeNode) Taper()/Wave()` → `StrokeTaper` / `StrokeWave`，各 getter/setter — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeTaperWave_AEShipGate_AE20{20,25}`：一层 rect+stroke，Taper 6 + Wave 3 标量设非默认，re-save cdat 解码校验全 9 值）。
 - **Taper**（6 字段）：Start/End Length、Start/End Width、Start/End Ease，默认全 0。**Wave**（3 字段）：Amount(默认 0)、Wavelength(默认 100)、Phase(默认 0)。全 OneD float64-BE @ cdat[0:8]，嵌套于 group `LIST(tdgp)` 内（比顶层 stroke 标量深一层；`findGroupBody` 下钻 + 复用 `overwriteShapeStreamCdat`）。
 - **模板**：`gen_shape_all_full.jsx` 扩展设 Taper+Wave（Units 留 % → 9 active slot emit）→ 仅 stroke body 变更（rect/ellipse/fill/path body md5 不变，零回归）。
-- **deferred（elision/coupling 陷阱，见 incident-report）**：Taper Length Units + StartWidthPx/EndWidthPx（% 模式被 elide）、Wave Units + Cycles（Wavelength 模式被 elide / Cycles hidden）；**Stroke Dashes**（变长 N×Dash/Gap 对 + Offset hidden-until-enabled，需 enable/reveal runtime 模型）下一条接力。
+- **deferred（elision/coupling 陷阱，见 incident-report）**：Taper Length Units + StartWidthPx/EndWidthPx（% 模式被 elide）、Wave Units + Cycles（Wavelength 模式被 elide / Cycles hidden）。**Stroke Dashes** 已 ship 见子项⑬。
 - RE：`re_stroke_dtw.jsx`（probe+set 枚举三组子属性），详 `incident-reports/stroke-line-cap-join-miter-re.md` Taper/Wave addendum。static-only（不建模 keyframe）。
 #### V2.2.1 子项⑪ (2026-05-31) — Shape enum sweep: Direction / Blend Mode / Composite Order / Fill Rule (static)
 - Rect/Ellipse `Direction`、Fill `BlendMode`/`CompositeOrder`/`FillRule`、Stroke `BlendMode`/`CompositeOrder` getter/setter — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_ShapeEnums_AEShipGate_AE20{20,25}`：一层 rect+ellipse+fill+stroke 全设 enum，re-save cdat 校验 Direction=3/FillRule=2/BlendMode=3/CompositeOrder=2）。
@@ -192,8 +198,8 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Fill Opacity** static + keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_FillOpKf_*`；AE 读回 opacity 40 + re-save numKf/bpk；FillKf 重跑双版本仍 PASS）。
 - **磁盘编码**（RE 自 `v2_2_fill_kf_re.aep`）：1D non-spatial（bpk-48，value@0x08，**原始 %**，同 Stroke Opacity）。之前 lowerFillNode 完全丢弃 opacity（连 static 都没写）。
 - 富化 fill body 模板（7 children；源 `v2_2_shape_fill_full.aep`，Fill Opacity 设静态 60）。仅 fill body 变更。`lowerFillNode` 现持久化 Color + Opacity。
-- **仍 deferred（shape-node 次要）**: Stroke **Dashes**（变长嵌套组，下一条接力）。〔Stroke Taper/Wave 见子项⑫；Line Cap/Join/Miter 见子项⑩；Rect/Ellipse Direction + Fill/Stroke BlendMode·CompositeOrder + Fill Rule 见子项⑪〕
-- **次要子属性**（多数 runtime-only）: Stroke Dashes、Layr Transform Anchor/Scale/Rotation/Opacity。
+- **仍 deferred（shape-node 次要）**: Stroke Dashes Dash 2/3·Gap 2/3·Offset（单对已 ship 见子项⑬）。〔Stroke Dashes 见子项⑬；Taper/Wave 见子项⑫；Line Cap/Join/Miter 见子项⑩；Rect/Ellipse Direction + Fill/Stroke BlendMode·CompositeOrder + Fill Rule 见子项⑪〕
+- **次要子属性**（多数 runtime-only）: Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）
   - Rect/Ellipse Direction、Rect Position/Roundness: runtime-only 不持久化
