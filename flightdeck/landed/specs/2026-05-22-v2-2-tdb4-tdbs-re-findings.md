@@ -1,7 +1,7 @@
 # V2.2 iter-5 byte-level RE — tdb4 / tdbs / cdat schema differences
 
 **Date**: 2026-05-25
-**State**: code reverted to iter-5b (PASS but layers.length=0 + AE 警告 "Anchor dim 2 → 3")
+**State**: **已解决并归档（2026-05-31）**。这是 V2.2 RE 期间的离线字节级 catalogue；当时停在 iter-5b（layers.length=0）。其全部结论已吸收进 V2.2 ShapeLayer ship 代码（silent-drop 触发器已定位修复，详 `incident-reports/v2-2-aelayer-structure.md` + `ae2020-shape-ldta-164-corrupt.md`）。保留作历史 RE 参考，非待办。
 **Purpose**: offline catalogue of every byte-level diff between our V2.2 builder output (iter5_check.aep) and AE-saved tolerance.aep, with hypothesis on which trigger silent-drop vs cosmetic-warning.
 
 Tools used (all offline, no AE):

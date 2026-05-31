@@ -1,25 +1,34 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-31 by claude（**Shape path keyframe write landed on main**（大 arc #1 Path keyframe 收官）：`PathNode.Path().AddKeyframeLinear(t, BezierPath)` 逐帧 bezier 形状路径动画，linear，static-geometry per frame。**接力上个会话留树上的 Phase 2 lower 代码**——Go 全绿但双版本 gate 从未真过、cockpit 误记 exit 2 为 flake。**本会话核心 = 把"flake"翻案成真数据 bug**：用户截图「项目文件似乎已损坏（跳过部分：1）(26::0)」是真损坏框（同 ae2020-shape-ldta 签名），切屏只叠加了 OCR 遮挡。根因 = 上个会话 RE 结论被误读通道带偏三处：①time-block 1.0 实在 @0x10 非 @0x30；②@0x07=0x01 全帧 + u32 2@0x08 全帧（非"首帧@0x07=2"）；③动画 time-table tdbs **保留** tdb4(124B)+patch @0x05/@0x44/@0x4f flag（同 `injectAnimatedStream`），上会话错误删了整个 tdb4。修 `encodePathTimeTable`+`spliceAnimatedPath` 后损坏框消失，再破 JSX 导航太浅（path 嵌 3 层→递归 `findByMatch`）+ 测试 `findShipChunk(IDOmS)` 按 ID 找不到 LIST（→新 `findShipListByForm`）。**双版本 ship-gate 终 PASS**（AE2020 25.4s / AE2025 20.0s，亲眼确认 `--- PASS`）。改动文件：`lower_shape_node.go`、`verify_v2_2_pathkf.jsx`、`testutil_shipgate_test.go`、`shape_pathkf_shipgate_test.go`、`path-keyframe-write-re.md`（三处误读纠错）、coverage 子项⑮、logbook、本 cockpit。**教训**：cockpit "exit 2 默认当 flake" 是危险默认——先抓真实弹框（截图/`capture_dialog.ps1`）区分 flake vs reject，再决定重试 vs 改字节。deferred：temporal ease（linear only）、mask path write、open-path closed 语义。〔前一条：Gradient fill write (SetGradient) landed on main（子项⑭，承 Stroke Dashes 之后；用户选 "build it, gate empirically"）：`VectorGroup.AddGradientFill()` → `GradientFillNode`（`SetColorStops`/`SetAlphaStops` ≥2 stop + 范围校验、`Gradient()` getter），static 色标。**read 早已 ship**（`ParseGradientXML`+`Property.Gradient`），本条补 **write**。色标存 `ADBE Vector Grad Colors` 的 `LIST(GCst)→LIST(GCky)→Utf8` prop.map XML（v4；色标 6-float `[off,mid,r,g,b,1]`，alpha 3-float，Alpha Stops 在前+各带 Stops Size，尾 `Gradient Colors=1.0`）。`EncodeGradientXML` = `ParseGradientXML` 逆，round-trip 自洽。**length-variable 写几乎免费**：覆 Utf8 XML 改长 → `rifx.Chunk.Write` 自动 bottom-up 重算所有 LIST size（同 `Footage.SetPath`）；GCst 的 tdb4 非冗余长度头。embed 模板 `v2_2_shape_gradfill_body.bin`（仅含 Grad Colors；Grad Type/Start/End 在 fixture 为默认被 elide → 无 slot，AE 套默认线性 ramp，deferred）。**关键跨版本发现**：唯一带色标 fixture 是 AE 25.6-saved（AE 2020 拒开整个项目），但 **from-scratch AE25-shaped 渐变体 AE 2020 仍接受**（渐变格式 version-portable），一份 AE25 模板服务双版本 gate。**新 Gradient ship-gate 双版本 AE2020+2025 均 PASS**（`TestV2_2_GradientFill_AEShipGate_*`，3 色标 RGB re-save 解码校验）。Go round-trip 全绿，Stable API。详 `incident-reports/gradient-fill-write-re.md` + coverage 子项⑭。**deferred**：Grad Type/Start/End（elided）、动画色标、gradient **stroke**（G-Stroke，同 GCst 路径直接接力）。〔前一条：Stroke Dashes，子项⑬，commit d29fcd0〕详 logbook。〕
-
-〔历史：**Stroke Dashes landed on main**（子项⑬，承 Taper/Wave 之后）：`StrokeNode.Dashes()` → `StrokeDashes`（`Enable/Disable`、`SetDash`/`SetGap` 自动 enable + 拒负、`Enabled/Dash/Gap` getter），单 Dash+Gap 对，static。Dash 1/Gap 1 均 OneD float64-BE @ cdat[0:8]，嵌套于 `ADBE Vector Stroke Dashes` group `LIST(tdgp)`（同 Taper/Wave，`findGroupBody` 下钻 + `overwriteShapeStreamCdat`）。**enable = 模板切换**：solid stroke 的 Dashes 组是空 placeholder，故引入第二嵌入模板 `v2_2_shape_stroke_dashed_body.bin`（携 Dash 1/Gap 1 slot，源 `v2_2_stroke_dashed.aep`）；solid `v2_2_shape_stroke_body.bin` **字节不变** → 现有 stroke/enum/taper-wave gate 零回归（`DisabledStaysSolid` round-trip 证 solid 路径 byte 一致，无需重跑）。hydrate 以 Dash/Gap leaf 存在与否回判 enabled。**新 Dashes ship-gate 双版本 AE2020+2025 均 PASS**（`TestV2_2_StrokeDashes_AEShipGate_*`，Dash=18/Gap=7 resave 解码）。Go round-trip 全绿，Stable API。详 `incident-reports/stroke-line-cap-join-miter-re.md` Dashes addendum + coverage 子项⑬。**deferred**：Dash 2/3·Gap 2/3（每对需独立模板变体）+ **Offset**（AE 端 hidden 且 `setValue` 拒，script-ungettable，无 slot 可建模——`v2_2_stroke_dashed.done` 实证）。〔前一条：Stroke Taper + Wave，子项⑫，commit ae23664〕详 logbook。〕
-
-〔历史：**shape-node enum sweep**（commit 8c8f43d，承 Stroke Line Cap/Join/Miter 之后）：Rect/Ellipse `Direction` + Fill `BlendMode`/`CompositeOrder`/`FillRule` + Stroke `BlendMode`/`CompositeOrder` getter/setter（typed enum + 校验）。全 OneD float64-BE @ cdat[0:8]。rect/ellipse/fill/stroke 4 模板从单一 `v2_2_shape_all_full.aep` 重抽（含 enum slot）→ **重跑全部 shape ship-gate（9 gate × AE2020+2025）均 PASS，模板 swap 零回归**。Go round-trip 全绿，Stable API。RE 详 `incident-reports/stroke-line-cap-join-miter-re.md`（含 enum addendum）+ coverage 子项⑪。〔前一条：Stroke Line Cap/Join/Miter，commit 4beb7fd〕详 logbook。〕
-**Active focus**: **无 active 线（Path Keyframe arc 已收官 ship）**。最近：shape path keyframe write 双版本 ship-gate PASS（见 Last-updated）。下条从 backlog 选，等用户定方向。
+**Last updated**: 2026-05-31 by claude
+**Active focus**: 无 active 线 — Path Keyframe arc 已收官 ship。下条从 backlog 选，等用户定方向。无 in-flight WIP，工作树 commit 后应为 clean。
 
 ## Next session
 
-1. **从 backlog 选下一条（等用户定方向）**。剩余大 arc / 候选见下方 backlog。无 in-flight WIP，工作树 commit 后应为 clean。
+1. **从 backlog 选下一条（等用户定方向）**。
 
-> **长线 backlog**（大 arc 或缺 runtime setter）：
+## Backlog（长线大 arc / 缺 runtime setter）
 
-1. ~~**Path keyframe**~~ — ✅ **已 ship**（2026-05-31, 子项⑮, shape path linear keyframe；temporal ease + mask path write deferred。见 Last-updated + logbook + coverage 子项⑮ + `incident-reports/path-keyframe-write-re.md`）。
-2. **Layr Transform 3D 通道**（Orientation / Rotate X/Y / Position_Z）— 需先有 3D layer 支持（runtime 无 3D switch，V2.3）。**当前最大候选**。
-3. ~~**Stroke Line Cap/Join/Miter**~~ — ✅ **已 ship**（2026-05-31, commit 4beb7fd, 见 Last-updated + logbook + coverage 子项⑩）。
-4. ~~**Gradient W**（SetGradient）~~ — ✅ **已 ship**（2026-05-31, 子项⑭, gradient **fill** 色标 write；Grad Type/Start/End + 动画色标 + gradient **stroke** deferred。见 Last-updated + logbook + coverage 子项⑭ + `incident-reports/gradient-fill-write-re.md`）。
-5. ~~**Stroke Dashes**~~ — ✅ **已 ship**（2026-05-31, 子项⑬, 单 Dash+Gap 对 + 模板切换；Dash 2/3·Gap 2/3·Offset deferred，见 Last-updated + logbook + coverage 子项⑬）。
+**暂停中的大 arc（spec 部分完成，非 pending 非 done）**：
 
-**其它候选**：泛型 `DuplicateItem`（无 scripting API）、`ImportComposition`（需求驱动）。其余 deferred R-only（DisplayColorSpace / ValueText 等）见 logbook § Deferred。
+- **py-aep parity P3** — Render Queue 全域（~3-5k LOC）/ Essential Graphics / Guides / Composition.Renderer W / Property.ValueText / DimensionsSeparated。详 `specs/2026-05-26-py-aep-parity-design.md`（P1/P2 已落，P3 未启动）。
+- **V3 收尾** — M8 物理分包（scene/serializer 拆包，scene→rifx 残留 5 项白名单清零）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema。详 `specs/2026-05-22-v3-direction.md`（结构性 Phase 1-5 + 包重组方案① 已落）。
+
+**单条候选**：
+
+1. **Layr Transform 3D 通道**（Orientation / Rotate X·Y / Position_Z）— 需先有 3D layer 支持（runtime 无 3D switch，V2.3）。**当前最大候选**。
+2. 泛型 `DuplicateItem`（无 scripting API，需纯 RE）。
+3. `ImportComposition`（需求驱动）。
+
+其余 deferred R-only（DisplayColorSpace / ValueText 等）+ shape 次要子属性见 logbook § Deferred + `flight-plans/coverage.md`。
+
+## Recently finished（≤5，详 logbook.md）
+
+- 2026-05-31 Shape path keyframe write（子项⑮，linear）— 双版本 ship-gate PASS
+- 2026-05-31 Gradient fill write SetGradient（子项⑭）— 双版本 ship-gate PASS
+- 2026-05-31 Stroke Dashes（子项⑬，单 Dash+Gap 对）— 双版本 ship-gate PASS
+- 2026-05-31 shape-node enum sweep（子项⑪，commit 8c8f43d）— 双版本 ship-gate PASS
+- 2026-05-31 Stroke Line Cap/Join/Miter（子项⑩，commit 4beb7fd）— 双版本 ship-gate PASS
 
 ## Hanging tasks
 

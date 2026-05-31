@@ -1,6 +1,9 @@
 # py-aep parity — API 全覆盖路线图
 
-**Status**: spec, ready for phased plans
+**Status**: **部分完成（partial / paused）— 更新 2026-05-31**。
+- **P1 ✅ 全落**（landed `2026-05-26-py-aep-parity-p1-plan`）
+- **P2 ✅ 大部分**（landed P2a/P2b plans）；剩 deferred 少数：2C Gradient **W**（2026-05-31 已 ship gradient fill write，stroke/Type-Start-End 仍 deferred）、2E ImportPlaceholder（AE 拒收，删除）、2K TimeRemap enable（结构性）、Composition.Time（low-pri）、ReplaceWithPlaceholder/Solid
+- **P3 ❌ 基本未启动**——剩余大块：Render Queue 全域（~3-5k LOC）、Essential Graphics、Guides、Composition.Renderer W、Property.ValueText、DimensionsSeparated。**例外**：P3 §2.3 表里 Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表已改 ✅）
 **Created**: 2026-05-26
 **Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](flightdeck/charts/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
 
@@ -138,11 +141,11 @@
 | `ContainingComp` | ✅ | 🟢 implicit | ✅ | P1 | back-ref |
 | `Marker` (PropertyGroup) + `Markers` (flat list) | ✅ | 🟢 layer.Markers | ✅ | done |
 | `Effects / Masks / Text / Transform` PropertyGroup accessors | ✅ | ✅ R | ✅ | done | P2c — Layer.TransformGroup/AudioGroup/EffectsParade/MaskParade/etc. |
-| `Remove()` | ✅ | ❌ | ✅ | P3 | 结构性，V3 capability |
-| `Duplicate()` | ✅ | ❌ | ✅ | P3 | 结构性 |
-| `CopyToComp(comp)` | ✅ | ❌ | ✅ | P3 | 结构性 |
-| `MoveAfter/MoveBefore/MoveToBeginning/MoveToEnd` | ✅ | ❌ | ✅ | P3 | 结构性 |
-| `SetParentWithJump(layer)` | ✅ | ❌ | ✅ | P3 | preserve world transform |
+| `Remove()` | ✅ | ✅ | ✅ | done | V3 Phase2 DeleteLayer，双版本 ship-gate PASS |
+| `Duplicate()` | ✅ | ✅ | ✅ | done | V3 Phase3 DuplicateLayer |
+| `CopyToComp(comp)` | ✅ | ✅ | ✅ | done | V3 Phase5C InsertLayer（+ 5C1 cross-Project） |
+| `MoveAfter/MoveBefore/MoveToBeginning/MoveToEnd` | ✅ | ✅ | ✅ | done | V3 Phase4 MoveLayer |
+| `SetParentWithJump(layer)` | ✅ | ❌ | ✅ | P3 | preserve world transform（未做） |
 | `CanSetCollapseTransformation / CanSetTimeRemapEnabled` | ✅ | ✅ R | ✅ | done | P2c followup#2；纯派生 capability query — `Layer.AVSource()` 解 source 后判 type/duration |
 | `TimeRemapEnabled / SetTimeRemap*` | ✅ | 🟢 R only | ✅ R/W | P2 | enable=structural |
 | `ThreeDModelLayer`（Cinema 4D / GLB） | ✅ | ✅ R only | ✅ R only | done | P2a Task 1 |

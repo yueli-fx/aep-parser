@@ -1,6 +1,6 @@
 # V3 deep think — open questions, risk register, migration strategy
 
-**Status**: brainstorm. Not a plan. Builds on `2026-05-22-v3-direction.md` (M1-M8 framework) with the questions that need answers before writing the plan.
+**Status**: **brainstorm（部分结论已采纳）— 更新 2026-05-31**。仍是开放问题/风险册，非 plan。TL;DR 的关键决策已落地：①in-place refactor（已做，方案①包重组 landed）②eager 已知字段 + lazy V3-only 结构性写（已遵循）③opaque preservation（已为铁律，CLAUDE.md §5）④capability matrix 按需提升。剩余 M8 物理分包 / ShapeGraph / EffectSchema 仍 open。Builds on `2026-05-22-v3-direction.md`（M1-M8 framework）。
 
 **Created**: 2026-05-27 after P2 parity 收尾 (PASS 259).
 

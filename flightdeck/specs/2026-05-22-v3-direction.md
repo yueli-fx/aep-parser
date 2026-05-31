@@ -1,6 +1,6 @@
 # V3 direction — scene-graph IR + capability matrix + serializer split
 
-**Status**: Planning note, not a plan. No implementation yet. Drafted 2026-05-22 after V2.1 ship.
+**Status**: **部分实现（partial / paused）— 更新 2026-05-31**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）。**剩余未做**：M8 物理分包（scene/serializer 拆包，被单 package Go 语义挡，scene→rifx 残留 5 项白名单待清零）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
 
 GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`scars/ae25-acceptance-gate.md`)。
 
