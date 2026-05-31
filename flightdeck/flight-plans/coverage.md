@@ -141,8 +141,7 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 #### V2.2.1 子项④ (2026-05-29) — shape keyframe 持久化（Size + Color + Ellipse Position）
 - **Rect/Ellipse Size**（non-spatial Vec2）+ **Fill/Stroke Color**（spatial-style dim4 ARGB×255）+ **Ellipse Position**（spatial motion-path Vec2 bpk 104）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_RectKf_*` + `TestV2_2_FillKf_*` + `TestV2_2_EllKf_*`；re-save 解 numKf+值）。Ellipse Position 仅 AE 自动 ~0 spatial 切线与原生不同（AE recompute），值往返正确；`valueLayout.motionPath` 在 0x08 写标志。
 - 机制 `injectAnimatedStream`：static tdbs 的 cdat ↔ animated `LIST(list)(lhd3+ldat)`；patch tdb4 标志（@0x05 `&=~1`、@0x44 `=1`、@0x4f `&=~1`）。ldat 与 AE 原生字节一致。`encodeKeyframes` non-spatial（value@0x08 bpk 88）/ spatial（value@0x38）两布局。**坑**：`rifx.IDTdb4` 是大写 legacy，实际小写 `tdb4`。
-- **仍 deferred keyframe**:
-  - **Path**（bezier keyframe，逐帧 shap）：V2.3+ 级别。
+- **shape path keyframe** 已 ship 见子项⑮（2026-05-31，linear，逐帧 shap + time-table tdbs）。
 
 #### V2.2.1 子项⑤ (2026-05-30) — Layr Transform Position keyframe 持久化（Path B：combined ADBE Position）
 - **Layr Position**（spatial 真运动路径）keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_LayrPosKf_*`；re-save 解 numKf+值）。
@@ -171,6 +170,12 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
 - **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
 - stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
+#### V2.2.1 子项⑮ (2026-05-31) — Shape path keyframe write (animated ADBE Vector Shape, linear)
+- `(p *PathNode) Path().AddKeyframeLinear(t, BezierPath)` — 逐帧 bezier 形状路径动画 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_PathKf_AEShipGate_AE20{20,25}`：3 linear 关键帧、各帧顶点数/几何不同；AE 开文件不损坏不 drop、JSX 确认 path numKeys≥2、re-save 后 Go re-decode resaved om-s 确认 ≥3 shap + time-table kfl 存活）。
+- **磁盘形态（== 动画 mask path）**：`numKeys≥2` 时 `lowerPathNode` 走 `spliceAnimatedPath`——克隆 embed `v2_2_shape_path_body.bin` 的 om-s，①value tdbs → time-table tdbs（**保留 tdb4** + patch @0x05/@0x44/@0x4f flag，删 cdat，接 `LIST(kfl){lhd3,ldat}` 时间表，每帧 64B block）；②omks 单 shap 克隆成 N shap，各 `spliceShapGeometry`（`encodeBezier` bbox 归一化几何）。`numKeys≤1` 走原 static splice。
+- **time-block 64B 布局（byte-match `re_path_anim.aep`）**：time u32@0x00 / inInterp@0x04=1 / outInterp@0x05=1 / const 0x01@0x07 / const u32 2@0x08 / f64 1.0@0x10（除末帧）/ runtime 指针@0x38 置零。详 `incident-reports/path-keyframe-write-re.md`（含上个会话三处误读的纠错）。
+- **三关踩坑（gate 走通前）**：首跑 exit 2 被 cockpit "默认当 flake" 误导（实为字节错触发 "项目文件似乎已损坏（跳过部分）"）→ 改 time-block + tdb4 字节；JSX 导航太浅（path 嵌 3 层）→ 递归 `findByMatch`；测试 `findShipChunk(IDOmS)` 按 ID 找不到 LIST → 新 `findShipListByForm`。
+- **deferred**：temporal ease（首版 linear only）、mask path write（只做 shape path）、open path 的 shph closed 语义。
 #### V2.2.1 子项⑭ (2026-05-31) — Gradient fill (SetGradient: color + alpha stops)
 - `(g *VectorGroup) AddGradientFill()` → `GradientFillNode`（`SetColorStops`/`SetAlphaStops` ≥2 stop + 范围校验、`Gradient()` getter）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_GradientFill_AEShipGate_AE20{20,25}`：一层 rect+gradient-fill，3 色标 red/green/blue，re-save 经 read 路径解码校验）。
 - **磁盘编码**：色标存 `ADBE Vector Grad Colors` 的 `LIST(GCst) → LIST(GCky) → Utf8` prop.map XML（version='4'）。色标数组 6 float `[off,mid,r,g,b,1]`，alpha 3 float `[off,mid,a]`，Alpha Stops 在 Color Stops 前 + 各带 Stops Size，尾 `Gradient Colors=1.0`。`EncodeGradientXML` = `ParseGradientXML` 的逆，round-trip 自洽。

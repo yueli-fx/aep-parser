@@ -443,12 +443,20 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // (shph/lhd3/ldat from encodeBezier, whose layout matches AE byte-for-byte),
 // keeping AE's exact scaffolding (om-s header + omks + omtn).
 //
-// Limitations: linear segments only (SetVertices zeroes tangents); animated
-// paths use the first keyframe as a static fallback.
-func lowerPathNode(p *PathNode, _ *lowerCtx) (*rifx.Chunk, error) {
+// A path with ≥2 keyframes is lowered as an animated shape path (N shaps + a
+// tdbs time table, == animated mask path — see spliceAnimatedPath). ≤1
+// keyframe stays a single static snapshot. Linear interp only (SetVertices
+// zeroes tangents; temporal ease is V2.3+).
+func lowerPathNode(p *PathNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapePathBody()
 	if err != nil {
 		return nil, err
+	}
+	if p.path.mode == StreamModeAnimated && len(p.path.keyframes) >= 2 {
+		if err := spliceAnimatedPath(body, p.path.keyframes, ctx); err != nil {
+			return nil, err
+		}
+		return body, nil
 	}
 	bp := p.path.static
 	if p.path.mode == StreamModeAnimated && len(p.path.keyframes) > 0 {
@@ -461,20 +469,26 @@ func lowerPathNode(p *PathNode, _ *lowerCtx) (*rifx.Chunk, error) {
 }
 
 // splicePathGeometry replaces the shph/lhd3/ldat geometry chunks inside the
-// embedded path body's LIST(shap) with freshly-encoded geometry for bp,
-// leaving AE's scaffolding (om-s header, omks/shap/kfl wrappers, omtn) intact.
+// embedded path body's (single) LIST(shap) with freshly-encoded geometry for
+// bp, leaving AE's scaffolding (om-s header, omks/shap/kfl wrappers, omtn)
+// intact. Static path path.
 func splicePathGeometry(body *rifx.Chunk, bp BezierPath) error {
 	shap := findListByForm(body, rifx.IDShap)
 	if shap == nil {
 		return fmt.Errorf("splicePathGeometry: LIST(shap) not found in embed body")
 	}
-	newShph, newLhd3, newLdat := encodeBezier(bp)
+	return spliceShapGeometry(shap, bp)
+}
+
+// spliceShapGeometry replaces shph/lhd3/ldat inside one LIST(shap) with freshly
+// encoded geometry for bp, preserving the shap's (shph, kfl, omtn) sibling
+// order and (lhd3, ldat) within kfl.
+func spliceShapGeometry(shap *rifx.Chunk, bp BezierPath) error {
 	kfl := findListByForm(shap, rifx.IDkfl)
 	if kfl == nil {
-		return fmt.Errorf("splicePathGeometry: LIST(kfl) not found in shap")
+		return fmt.Errorf("spliceShapGeometry: LIST(kfl) not found in shap")
 	}
-	// Replace shph (direct child of shap) and lhd3/ldat (children of kfl) in
-	// place, preserving sibling order (shph, kfl, omtn) and (lhd3, ldat).
+	newShph, newLhd3, newLdat := encodeBezier(bp)
 	for i, ch := range shap.Children {
 		if ch.ID == rifx.IDShph {
 			shap.Children[i] = newShph
@@ -489,6 +503,138 @@ func splicePathGeometry(body *rifx.Chunk, bp BezierPath) error {
 		}
 	}
 	return nil
+}
+
+// spliceAnimatedPath converts the embedded static path body into an animated
+// shape path, byte-matching AE's own output (re_path_anim.aep; identical to an
+// animated MASK path). Two edits inside the cloned om-s, reusing all of AE's
+// scaffolding (om-s wrapper + its omtn, the tdbs's tdsb/tdsn, each shap's
+// kfl/omtn):
+//
+//  1. The value tdbs (tdsb + tdsn + tdb4 + cdat) becomes a TIME-table tdbs:
+//     tdb4 is KEPT with its static→animated flags patched (@0x05/@0x44/@0x4f,
+//     same as injectAnimatedStream), only the cdat is dropped and a
+//     LIST(kfl){lhd3, ldat} time table appended (one 64B block per keyframe —
+//     see encodePathTimeTable). Byte-verified against re_path_anim.aep: the
+//     animated time-table tdbs DOES carry a tdb4 (an earlier RE note claiming
+//     "no tdb4" was a misread).
+//  2. The single shap in omks is replaced by one shap per keyframe, each
+//     spliced with that frame's geometry (encodeBezier, bbox-normalized).
+//
+// See incident-reports/path-keyframe-write-re.md.
+func spliceAnimatedPath(body *rifx.Chunk, kfs []StreamKeyframe[BezierPath], ctx *lowerCtx) error {
+	oms := findListByForm(body, rifx.IDOmS)
+	if oms == nil {
+		return fmt.Errorf("spliceAnimatedPath: LIST(om-s) not found in embed body")
+	}
+	var tdbs, omks *rifx.Chunk
+	for _, ch := range oms.Children {
+		if !ch.IsList() {
+			continue
+		}
+		switch ch.FormType {
+		case rifx.IDTdbs:
+			tdbs = ch
+		case rifx.IDOmks:
+			omks = ch
+		}
+	}
+	if tdbs == nil || omks == nil {
+		return fmt.Errorf("spliceAnimatedPath: om-s missing tdbs/omks")
+	}
+
+	// 1. value tdbs → time-table tdbs: keep tdsb/tdsn/tdb4 (patch tdb4's
+	// static→animated flags), drop only cdat, append the kfl time table.
+	// (Match tdb4 by literal — chunk IDs are case-sensitive and modern AE
+	// writes lowercase "tdb4".)
+	kept := tdbs.Children[:0:0]
+	for _, ch := range tdbs.Children {
+		if ch.ID == rifx.IDCdat {
+			continue
+		}
+		if id := string(ch.ID[:]); id == "tdb4" || id == "Tdb4" {
+			if len(ch.Data) > 0x4f {
+				ch.Data[0x05] &^= 0x01
+				ch.Data[0x44] = 0x01
+				ch.Data[0x4f] &^= 0x01
+			}
+		}
+		kept = append(kept, ch)
+	}
+	tdbs.Children = append(kept, encodePathTimeTable(kfs, ctx))
+
+	// 2. omks single shap → N shaps. The embed's lone shap is the structural
+	// prototype (shph + kfl + omtn); clone it per keyframe and splice geometry.
+	var proto *rifx.Chunk
+	for _, ch := range omks.Children {
+		if ch.IsList() && ch.FormType == rifx.IDShap {
+			proto = ch
+			break
+		}
+	}
+	if proto == nil {
+		return fmt.Errorf("spliceAnimatedPath: omks has no prototype shap")
+	}
+	shaps := make([]*rifx.Chunk, 0, len(kfs))
+	for _, kf := range kfs {
+		s := cloneChunk(proto)
+		if err := spliceShapGeometry(s, kf.Value); err != nil {
+			return err
+		}
+		shaps = append(shaps, s)
+	}
+	omks.Children = shaps
+	return nil
+}
+
+// encodePathTimeTable builds the LIST(kfl){lhd3, ldat} keyframe TIME table for
+// an animated shape path: one 64-byte block per keyframe (bpk = 64), inverse of
+// readMaskPathTimes (parse_mask.go) and byte-matched to AE's re_path_anim.aep.
+//
+// Per block (byte-verified against re_path_anim.aep): time ticks @0x00
+// (round(sec * tickRate)); linear interp @0x04/0x05; a constant 0x01 @0x07 and
+// u32 0x00000002 @0x08 on EVERY block; a 1.0 f64 @0x10 on every keyframe except
+// the last; an 8-byte runtime-pointer trailer @0x38 that AE recomputes on load
+// (we leave it zero for deterministic output). lhd3 mirrors encodeKeyframes'
+// header constants with count@0x08 = #kf and bpk@0x10 = 64. (An earlier RE note
+// placing the 1.0 at @0x30 and 0x02 at @0x07-of-first-block was a misread.)
+func encodePathTimeTable(kfs []StreamKeyframe[BezierPath], ctx *lowerCtx) *rifx.Chunk {
+	const bpk = 64
+	n := len(kfs)
+
+	lhd3 := make([]byte, 52)
+	lhd3[0], lhd3[1], lhd3[2], lhd3[3] = 0x00, 0xd0, 0x0b, 0xee
+	binary.BigEndian.PutUint32(lhd3[0x08:0x0C], uint32(n))
+	binary.BigEndian.PutUint32(lhd3[0x0C:0x10], 1)
+	binary.BigEndian.PutUint32(lhd3[0x10:0x14], bpk)
+	binary.BigEndian.PutUint32(lhd3[0x14:0x18], 4)
+	binary.BigEndian.PutUint32(lhd3[0x18:0x1C], 1)
+	binary.BigEndian.PutUint32(lhd3[0x1C:0x20], 4)
+
+	tickRate := ctx.tickRate
+	if tickRate <= 0 {
+		tickRate = 30720
+	}
+	ldat := make([]byte, n*bpk)
+	for i, kf := range kfs {
+		blk := ldat[i*bpk : (i+1)*bpk]
+		binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(kf.Time*tickRate)))
+		blk[0x04] = byte(InterpLinear)
+		blk[0x05] = byte(InterpLinear)
+		blk[0x07] = 0x01
+		binary.BigEndian.PutUint32(blk[0x08:0x0C], 2)
+		if i != n-1 {
+			binary.BigEndian.PutUint64(blk[0x10:0x18], math.Float64bits(1.0))
+		}
+		// @0x38 trailer left zero (AE runtime cache pointer; rebuilt on load).
+	}
+
+	kfl := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
+	kfl.Children = append(kfl.Children,
+		&rifx.Chunk{ID: rifx.IDLhd3, Data: lhd3},
+		&rifx.Chunk{ID: rifx.IDLdat, Data: ldat},
+	)
+	return kfl
 }
 
 // findChildID returns the first direct child with the given chunk ID, or nil.

@@ -370,10 +370,16 @@ func hydrateScalarStatic(p *Property, set func(float64)) {
 // hydratePathNode reads the om-s/omks/shap subtree the serializer emits
 // for a PathNode. Recovers vertex count + Closed flag; vertex positions are
 // bbox-normalized f32 in the on-disk form so byte-exact vertex roundtrip
-// isn't free — V2.2 hydration recovers the structural shape (n vertices,
-// closed/open) which is what callers see through
-// PathNode.Path().StaticValue().Vertices.
-func hydratePathNode(body *rifx.Chunk, _ *parseCtx) *PathNode {
+// isn't free — hydration recovers the structural shape (n vertices,
+// closed/open) which is what callers see through PathNode.Path().
+//
+// A static path has ONE shap inside omks → Path() stays Static. An animated
+// path has N shaps (one geometry per keyframe, == animated mask) plus a
+// sibling tdbs time table → Path() becomes Animated with N linear keyframes
+// (times read from tdbs.kfl via readMaskPathTimes). Temporal ease is V2.3+;
+// V2.2 hydrates animated paths as linear. See
+// incident-reports/path-keyframe-write-re.md.
+func hydratePathNode(body *rifx.Chunk, ctx *parseCtx) *PathNode {
 	p := NewPathNode()
 	// Find the om-s LIST under the node body's tdmn pairs.
 	var oms *rifx.Chunk
@@ -387,21 +393,49 @@ func hydratePathNode(body *rifx.Chunk, _ *parseCtx) *PathNode {
 	if oms == nil {
 		return p
 	}
-	// om-s → LIST(omks) → LIST(shap) → shph + LIST(kfl) → lhd3 + ldat
-	var shap *rifx.Chunk
+	// om-s → { tdbs (time table), LIST(omks) → N × LIST(shap) }
+	var tdbs *rifx.Chunk
+	var shaps []*rifx.Chunk
 	for _, ch := range oms.Children {
-		if ch.IsList() && ch.FormType == rifx.IDOmks {
+		if !ch.IsList() {
+			continue
+		}
+		switch ch.FormType {
+		case rifx.IDTdbs:
+			tdbs = ch
+		case rifx.IDOmks:
 			for _, sub := range ch.Children {
 				if sub.IsList() && sub.FormType == rifx.IDShap {
-					shap = sub
-					break
+					shaps = append(shaps, sub)
 				}
 			}
 		}
 	}
-	if shap == nil {
+	if len(shaps) == 0 {
 		return p
 	}
+	if len(shaps) == 1 {
+		// Static path — single snapshot, stream stays Static.
+		_ = p.path.SetStaticValue(bezierFromShap(shaps[0]))
+		return p
+	}
+	// Animated: pair each shap's geometry with its tdbs time entry.
+	times := readMaskPathTimes(tdbs, ctx)
+	for i, s := range shaps {
+		t := 0.0
+		if i < len(times) {
+			t = times[i].time
+		}
+		_ = p.path.AddKeyframeLinear(t, bezierFromShap(s))
+	}
+	return p
+}
+
+// bezierFromShap decodes one shap LIST (shph + kfl{lhd3,ldat}) into a
+// BezierPath with denormalized vertices. Tangents are zeroed (V2.2 linear
+// scope; on-disk tangent fidelity is deferred — see
+// incident-reports/path-keyframe-write-re.md).
+func bezierFromShap(shap *rifx.Chunk) BezierPath {
 	var shph, lhd3, ldat *rifx.Chunk
 	for _, ch := range shap.Children {
 		switch {
@@ -425,14 +459,12 @@ func hydratePathNode(body *rifx.Chunk, _ *parseCtx) *PathNode {
 		closed = shph.Data[3] == 0x01
 	}
 	verts := decodeBezierVertices(shph, lhd3, ldat)
-	bp := BezierPath{
+	return BezierPath{
 		Vertices:    verts,
 		InTangents:  make([][2]float64, len(verts)),
 		OutTangents: make([][2]float64, len(verts)),
 		Closed:      closed,
 	}
-	_ = p.path.SetStaticValue(bp)
-	return p
 }
 
 // decodeBezierVertices reads the bbox-normalized f32 ldat and denormalizes

@@ -59,6 +59,23 @@ func findShipChunk(root *rifx.Chunk, id rifx.ChunkID) *rifx.Chunk {
 	return nil
 }
 
+// findShipListByForm returns the first descendant LIST chunk whose FormType
+// matches form (depth-first), or nil. Use this for container chunks like om-s
+// that are LISTs (ID == "LIST", FormType == "om-s"), not leaf chunk IDs.
+func findShipListByForm(root *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
+	for _, ch := range root.Children {
+		if ch.IsList() {
+			if ch.FormType == form {
+				return ch
+			}
+			if g := findShipListByForm(ch, form); g != nil {
+				return g
+			}
+		}
+	}
+	return nil
+}
+
 // findShipList finds the tdmn matching name, then returns the LIST(list/kfl)
 // keyframe container inside the following LIST(tdbs), or nil (static stream).
 func findShipList(root *rifx.Chunk, name string) *rifx.Chunk {
