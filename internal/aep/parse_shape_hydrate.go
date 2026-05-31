@@ -254,7 +254,40 @@ func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
 	hydrateScalarStatic(props["ADBE Vector Stroke Miter Limit"], func(v float64) { s.miterLimit = v })
 	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { s.blendMode = ShapeBlendMode(v) })
 	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { s.compositeOrder = ShapeCompositeOrder(v) })
+	hydrateStrokeTaper(body, s.taper, ctx)
+	hydrateStrokeWave(body, s.wave, ctx)
 	return s
+}
+
+// hydrateStrokeTaper reads the Taper group's %-mode scalar sub-streams back
+// into the runtime StrokeTaper. Descends into the nested LIST(tdgp) following
+// the "ADBE Vector Stroke Taper" tdmn (walkTdmnPairs stops at Group End and is
+// not recursive, so the top-level nodeStreamValues skips it).
+func hydrateStrokeTaper(strokeBody *rifx.Chunk, t *StrokeTaper, ctx *parseCtx) {
+	g := findGroupBody(strokeBody, "ADBE Vector Stroke Taper")
+	if g == nil || t == nil {
+		return
+	}
+	p := nodeStreamValues(g, ctx)
+	hydrateScalarStatic(p["ADBE Vector Taper Start Length"], func(v float64) { t.startLength = v })
+	hydrateScalarStatic(p["ADBE Vector Taper End Length"], func(v float64) { t.endLength = v })
+	hydrateScalarStatic(p["ADBE Vector Taper Start Width"], func(v float64) { t.startWidth = v })
+	hydrateScalarStatic(p["ADBE Vector Taper End Width"], func(v float64) { t.endWidth = v })
+	hydrateScalarStatic(p["ADBE Vector Taper Start Ease"], func(v float64) { t.startEase = v })
+	hydrateScalarStatic(p["ADBE Vector Taper End Ease"], func(v float64) { t.endEase = v })
+}
+
+// hydrateStrokeWave reads the Wave group's Wavelength-mode scalars (Amount /
+// Wavelength / Phase) back into the runtime StrokeWave.
+func hydrateStrokeWave(strokeBody *rifx.Chunk, w *StrokeWave, ctx *parseCtx) {
+	g := findGroupBody(strokeBody, "ADBE Vector Stroke Wave")
+	if g == nil || w == nil {
+		return
+	}
+	p := nodeStreamValues(g, ctx)
+	hydrateScalarStatic(p["ADBE Vector Taper Wave Amount"], func(v float64) { w.amount = v })
+	hydrateScalarStatic(p["ADBE Vector Taper Wavelength"], func(v float64) { w.wavelength = v })
+	hydrateScalarStatic(p["ADBE Vector Taper Wave Phase"], func(v float64) { w.phase = v })
 }
 
 // hydrateScalarStatic applies the static 1D value of p (if present) via set.

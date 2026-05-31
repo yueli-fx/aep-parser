@@ -133,7 +133,7 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **from-scratch path 崩溃 AE 2020**（0::42）→ 必须 embed（同 Ellipse 教训，但 path 是变长几何 splice，非 overwrite-in-place）。
 
 #### V2.2.1 子项③ (2026-05-29) — Stroke embed + Fill/Stroke Color 编码 RE 修复
-- `(g *VectorGroup) AddStroke() (*StrokeNode, error)` + `SetColor/SetWidth/SetOpacity` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_stroke_body.bin`（全 child set 含 Dashes/Taper/Wave 嵌套组）+ overwrite Color/Opacity/Width cdat。`TestV2_2_Stroke_AEShipGate_AE20{20,25}`（distinct 值 + re-save cdat 解码）。
+- `(g *VectorGroup) AddStroke() (*StrokeNode, error)` + `SetColor/SetWidth/SetOpacity` + Cap/Join/Miter（子项⑩）+ BlendMode/CompositeOrder（子项⑪）+ `Taper()/Wave()`（子项⑫）— ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_stroke_body.bin`（含 Taper 6 + Wave 3 active slot；Dashes 仍空 placeholder）+ overwrite cdat。`TestV2_2_Stroke_AEShipGate_AE20{20,25}` + `TestV2_2_StrokeTaperWave_AEShipGate_AE20{20,25}`。
 - **shape 颜色编码 RE 修复**：AE 存 `[A,R,G,B]×255` f64（非原始 `[r,g,b,a]×1.0`）。`encodeShapeColorBE` 统一 Fill+Stroke。修了长期 deferred 的"Fill Color 编码不准"——`lowerFillNode` 此前写原始 RGBA，可见色错。`TestLowerFillNode_ColorEncodingARGB255` + Ellipse gate re-save Fill 颜色校验。
 - 清理：移除 from-scratch 死代码 `nodeBodyTdgp` / `emptySubPropPlaceholder`（5 个 shape kind 全 embed）。
 - **V2.2.1 全部 5 shape kind（Rect/Ellipse/Path/Fill/Stroke）+ 地基 ldta + 颜色编码均 ship**。
@@ -171,6 +171,12 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
 - **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
 - stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
+#### V2.2.1 子项⑫ (2026-05-31) — Stroke Taper + Wave (static, %/Wavelength-mode)
+- `(s *StrokeNode) Taper()/Wave()` → `StrokeTaper` / `StrokeWave`，各 getter/setter — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeTaperWave_AEShipGate_AE20{20,25}`：一层 rect+stroke，Taper 6 + Wave 3 标量设非默认，re-save cdat 解码校验全 9 值）。
+- **Taper**（6 字段）：Start/End Length、Start/End Width、Start/End Ease，默认全 0。**Wave**（3 字段）：Amount(默认 0)、Wavelength(默认 100)、Phase(默认 0)。全 OneD float64-BE @ cdat[0:8]，嵌套于 group `LIST(tdgp)` 内（比顶层 stroke 标量深一层；`findGroupBody` 下钻 + 复用 `overwriteShapeStreamCdat`）。
+- **模板**：`gen_shape_all_full.jsx` 扩展设 Taper+Wave（Units 留 % → 9 active slot emit）→ 仅 stroke body 变更（rect/ellipse/fill/path body md5 不变，零回归）。
+- **deferred（elision/coupling 陷阱，见 incident-report）**：Taper Length Units + StartWidthPx/EndWidthPx（% 模式被 elide）、Wave Units + Cycles（Wavelength 模式被 elide / Cycles hidden）；**Stroke Dashes**（变长 N×Dash/Gap 对 + Offset hidden-until-enabled，需 enable/reveal runtime 模型）下一条接力。
+- RE：`re_stroke_dtw.jsx`（probe+set 枚举三组子属性），详 `incident-reports/stroke-line-cap-join-miter-re.md` Taper/Wave addendum。static-only（不建模 keyframe）。
 #### V2.2.1 子项⑪ (2026-05-31) — Shape enum sweep: Direction / Blend Mode / Composite Order / Fill Rule (static)
 - Rect/Ellipse `Direction`、Fill `BlendMode`/`CompositeOrder`/`FillRule`、Stroke `BlendMode`/`CompositeOrder` getter/setter — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_ShapeEnums_AEShipGate_AE20{20,25}`：一层 rect+ellipse+fill+stroke 全设 enum，re-save cdat 校验 Direction=3/FillRule=2/BlendMode=3/CompositeOrder=2）。
 - **类型**：`ShapeDirection`（Normal 1/Reversed 3）、`ShapeBlendMode`（AE 1-based index，Normal=1，不枚举全表）、`ShapeCompositeOrder`（AbovePrevious 1/BelowPrevious 2）、`FillRule`（NonzeroWinding 1/EvenOdd 2）。全 OneD float64-BE @ cdat[0:8]，默认皆 1（RE 同 `re_shape_enums.jsx`，详 incident-report）。
@@ -186,8 +192,8 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Fill Opacity** static + keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_FillOpKf_*`；AE 读回 opacity 40 + re-save numKf/bpk；FillKf 重跑双版本仍 PASS）。
 - **磁盘编码**（RE 自 `v2_2_fill_kf_re.aep`）：1D non-spatial（bpk-48，value@0x08，**原始 %**，同 Stroke Opacity）。之前 lowerFillNode 完全丢弃 opacity（连 static 都没写）。
 - 富化 fill body 模板（7 children；源 `v2_2_shape_fill_full.aep`，Fill Opacity 设静态 60）。仅 fill body 变更。`lowerFillNode` 现持久化 Color + Opacity。
-- **仍 deferred（shape-node 次要）**: Stroke Dashes/Taper/Wave（嵌套组，runtime 模型暂无 setter）。〔Stroke Line Cap/Join/Miter 见子项⑩；Rect/Ellipse Direction + Fill/Stroke BlendMode·CompositeOrder + Fill Rule 已 ship，见子项⑪〕
-- **次要子属性**（多数 runtime-only）: Stroke Dashes/Taper/Wave、Layr Transform Anchor/Scale/Rotation/Opacity。
+- **仍 deferred（shape-node 次要）**: Stroke **Dashes**（变长嵌套组，下一条接力）。〔Stroke Taper/Wave 见子项⑫；Line Cap/Join/Miter 见子项⑩；Rect/Ellipse Direction + Fill/Stroke BlendMode·CompositeOrder + Fill Rule 见子项⑪〕
+- **次要子属性**（多数 runtime-only）: Stroke Dashes、Layr Transform Anchor/Scale/Rotation/Opacity。
   - Fill Color 编码: cdat scalar 跟 JSX 0-1 input 不对齐（tolerance 0.5 → 0x406fe0... ≈ 255），可见色可能错
   - Layr Transform 的 Anchor / Scale / Rotation / Opacity keyframe: runtime-only 不持久化（Position keyframe 已 ship，见子项⑤）
   - Rect/Ellipse Direction、Rect Position/Roundness: runtime-only 不持久化

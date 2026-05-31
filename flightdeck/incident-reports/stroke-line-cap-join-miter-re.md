@@ -85,3 +85,56 @@ child by matchName after all adds (`re_shape_enums.jsx` `refetch()`).
 
 Shipped as coverage 子项⑪ (template re-extracted for rect/ellipse/fill/stroke from
 one combined `v2_2_shape_all_full.aep`; all shape ship-gates re-run dual-version).
+
+## Addendum (2026-05-31): Stroke Taper + Wave nested groups
+
+RE'd via `test_data/re_stroke_dtw.jsx` (AE 2020) — a probe+set fixture that
+enumerates each group's children and sets them non-default. Three nested groups
+hang off the stroke (`ADBE Vector Stroke Dashes / Taper / Wave`); the old stroke
+template carried them as **empty placeholders** (`tdmn` immediately followed by
+`ADBE Group End`) because `gen_shape_stroke_full.jsx` never set them and AE elides
+default groups.
+
+### Structure — all three are fixed-slot scalar groups (NOT free-form)
+
+The cockpit's "variable nested group" worry was wrong. Each group's sub-children
+pre-exist; you don't build them, you reveal/set them. Every sub-stream is a OneD
+`float64` BE at `cdat[0:8]` — identical encoding to Cap/Join/Miter, one nesting
+level deeper (inside the group's `LIST(tdgp)`, not the stroke body directly).
+
+| Group | matchName | on-disk children | notes |
+|---|---|---|---|
+| Taper | `ADBE Vector Stroke Taper` | Length Units (enum), Start/End Length, StartWidthPx/EndWidthPx, Start/End Width, Start/End Ease (9 when Units≠default) | emits as a unit |
+| Wave | `ADBE Vector Stroke Wave` | Amount, Units (enum), Wavelength, Cycles, Phase (angle) | emits as a unit |
+| Dashes | `ADBE Vector Stroke Dashes` | Dash 1/2/3, Gap 1/2/3, Offset | **variable** — AE emits only the enabled Dash/Gap pairs |
+
+Sub-stream tdbs shapes (same as the existing stroke scalars): scalar-with-range
+= 6-child (`tdsb/tdsn/tdb4/cdat/tdum/tduM`); enum/angle = 4-child (no tdum/tduM,
+tdb4 head carries `0002` / `0002ffff`).
+
+### Elision + UI-coupling quirks (the load-bearing findings)
+
+1. **Length Units = % (1, default) → Length Units + StartWidthPx/EndWidthPx are
+   elided**, leaving Taper with 6 always-active slots (Start/End Length, Start/End
+   Width, Start/End Ease, all `tdsb=00000001`). Setting Units = px (2) un-elides
+   those three BUT flips Start/End Length into an inert `tdsb=00000003` state.
+2. **Wave Units = Wavelength (1, default) → Units + Cycles elided**, leaving 3
+   active slots (Amount, Wavelength, Phase). Setting `Wave Cycles` while
+   Units=Wavelength throws *"属性或父级属性被隐藏"* (hidden-property) — same class
+   as Miter-hidden-unless-Join=Miter.
+3. **Dashes Offset is hidden until a dash is enabled**; `Offset.setValue` throws
+   the same hidden-property error.
+
+### V2.2 scope decision (子项⑫)
+
+Modeled the 9 always-active `%`/Wavelength-mode scalars only — Taper Start/End
+Length, Start/End Width, Start/End Ease; Wave Amount, Wavelength, Phase. Length
+Units / Px mirrors / Wave Units / Cycles are deferred (their slots vanish or go
+inert at the % default — same elision trap that hid Cap/Join/Miter). **Dashes is
+deferred** to a follow-on: it is genuinely variable-cardinality on disk
+(N enabled Dash/Gap pairs) and needs an enable/reveal runtime model.
+
+Template re-extracted from `gen_shape_all_full.jsx` (now sets Taper+Wave with
+Units left at %, so the 9 active slots emit). Serializer descends into the
+Taper/Wave `LIST(tdgp)` via `findGroupBody` then reuses `overwriteShapeStreamCdat`.
+Dual-version ship-gate (AE 2020 + 2025) PASS. RE fixture: `re_stroke_dtw.jsx`.

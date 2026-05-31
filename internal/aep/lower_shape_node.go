@@ -543,7 +543,57 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(s.miterLimit))
 	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(s.blendMode)))
 	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(s.compositeOrder)))
+	lowerStrokeTaper(body, s.taper)
+	lowerStrokeWave(body, s.wave)
 	return body, nil
+}
+
+// lowerStrokeTaper overwrites the Taper group's %-mode scalar cdats inside the
+// embedded stroke body. The body template (re-extracted from a fixture with the
+// Taper group's % controls set non-default) carries the 6 always-active slots:
+// Start/End Length, Start/End Width, Start/End Ease — each a float64 BE at
+// cdat[0:8]. Length Units / StartWidthPx / EndWidthPx are AE-elided in % mode
+// and absent from the template (not modeled in V2.2).
+func lowerStrokeTaper(strokeBody *rifx.Chunk, t *StrokeTaper) {
+	g := findGroupBody(strokeBody, "ADBE Vector Stroke Taper")
+	if g == nil || t == nil {
+		return
+	}
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Length", encodeF64sBE(t.startLength))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Length", encodeF64sBE(t.endLength))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Width", encodeF64sBE(t.startWidth))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Width", encodeF64sBE(t.endWidth))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Ease", encodeF64sBE(t.startEase))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Ease", encodeF64sBE(t.endEase))
+}
+
+// lowerStrokeWave overwrites the Wave group's Wavelength-mode scalar cdats
+// (Amount / Wavelength / Phase). Units / Cycles are AE-elided in Wavelength mode
+// and absent from the template (not modeled in V2.2).
+func lowerStrokeWave(strokeBody *rifx.Chunk, w *StrokeWave) {
+	g := findGroupBody(strokeBody, "ADBE Vector Stroke Wave")
+	if g == nil || w == nil {
+		return
+	}
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wave Amount", encodeF64sBE(w.amount))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wavelength", encodeF64sBE(w.wavelength))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wave Phase", encodeF64sBE(w.phase))
+}
+
+// findGroupBody returns the LIST(tdgp) group body following the tdmn matching
+// groupName among body.Children (one level), or nil. Used to descend into a
+// nested shape group (Stroke Taper / Wave) before overwriting its sub-stream
+// cdats with overwriteShapeStreamCdat.
+func findGroupBody(body *rifx.Chunk, groupName string) *rifx.Chunk {
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == groupName {
+			if next := kids[i+1]; next.IsList() && next.FormType == rifx.IDTdgp {
+				return next
+			}
+		}
+	}
+	return nil
 }
 
 // lowerVectorGroup wraps shape-node children into the Root Vectors Group's

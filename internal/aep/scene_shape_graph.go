@@ -390,6 +390,9 @@ type StrokeNode struct {
 
 	blendMode      ShapeBlendMode
 	compositeOrder ShapeCompositeOrder
+
+	taper *StrokeTaper
+	wave  *StrokeWave
 }
 
 // NewStrokeNode constructs a default-valued StrokeNode.
@@ -403,6 +406,8 @@ func NewStrokeNode() *StrokeNode {
 		miterLimit:     4,
 		blendMode:      ShapeBlendModeNormal,
 		compositeOrder: ShapeCompositeOrderAbovePrevious,
+		taper:          newStrokeTaper(),
+		wave:           newStrokeWave(),
 	}
 	_ = s.color.SetStaticValue([4]float64{0, 0, 0, 1}) // black
 	_ = s.opacity.SetStaticValue(100)
@@ -455,6 +460,67 @@ func (s *StrokeNode) SetMiterLimit(v float64) error {
 	s.miterLimit = v
 	return nil
 }
+
+// Taper returns the stroke's Taper group (`ADBE Vector Stroke Taper`).
+func (s *StrokeNode) Taper() *StrokeTaper { return s.taper }
+
+// Wave returns the stroke's Wave group (`ADBE Vector Stroke Wave`).
+func (s *StrokeNode) Wave() *StrokeWave { return s.wave }
+
+// StrokeTaper models the Stroke "Taper" group's %-mode scalar controls
+// (`ADBE Vector Stroke Taper`): Start/End Length, Start/End Width, Start/End
+// Ease — all plain float64 percentages stored on disk as float64 BE at
+// cdat[0:8]. AE does not animate them in V2.2, so they are stored as values,
+// not PropertyStreams. All default to 0 (no taper).
+//
+// V2.2 supports only the always-active %-mode controls. The Length Units enum
+// and the pixel-mode mirror streams (StartWidthPx/EndWidthPx) are AE-elided at
+// the % default and not modeled — see lowerStrokeNode limitations.
+type StrokeTaper struct {
+	startLength, endLength float64
+	startWidth, endWidth   float64
+	startEase, endEase     float64
+}
+
+func newStrokeTaper() *StrokeTaper { return &StrokeTaper{} }
+
+func (t *StrokeTaper) StartLength() float64 { return t.startLength }
+func (t *StrokeTaper) EndLength() float64   { return t.endLength }
+func (t *StrokeTaper) StartWidth() float64  { return t.startWidth }
+func (t *StrokeTaper) EndWidth() float64    { return t.endWidth }
+func (t *StrokeTaper) StartEase() float64   { return t.startEase }
+func (t *StrokeTaper) EndEase() float64     { return t.endEase }
+
+func (t *StrokeTaper) SetStartLength(v float64) error { t.startLength = v; return nil }
+func (t *StrokeTaper) SetEndLength(v float64) error   { t.endLength = v; return nil }
+func (t *StrokeTaper) SetStartWidth(v float64) error  { t.startWidth = v; return nil }
+func (t *StrokeTaper) SetEndWidth(v float64) error    { t.endWidth = v; return nil }
+func (t *StrokeTaper) SetStartEase(v float64) error   { t.startEase = v; return nil }
+func (t *StrokeTaper) SetEndEase(v float64) error     { t.endEase = v; return nil }
+
+// StrokeWave models the Stroke "Wave" group's Wavelength-mode scalars
+// (`ADBE Vector Stroke Wave`): Amount (%), Wavelength (px), Phase (deg) — stored
+// on disk as float64 BE at cdat[0:8]. Defaults: Amount 0, Wavelength 100,
+// Phase 0.
+//
+// V2.2 supports only the Wavelength-mode controls. The Units enum (Wavelength
+// vs Cycles) and the Cycles stream are AE-elided at the Wavelength default and
+// not modeled — Wave is always emitted in Wavelength mode.
+type StrokeWave struct {
+	amount     float64
+	wavelength float64
+	phase      float64
+}
+
+func newStrokeWave() *StrokeWave { return &StrokeWave{wavelength: 100} }
+
+func (w *StrokeWave) Amount() float64     { return w.amount }
+func (w *StrokeWave) Wavelength() float64 { return w.wavelength }
+func (w *StrokeWave) Phase() float64      { return w.phase }
+
+func (w *StrokeWave) SetAmount(v float64) error     { w.amount = v; return nil }
+func (w *StrokeWave) SetWavelength(v float64) error { w.wavelength = v; return nil }
+func (w *StrokeWave) SetPhase(v float64) error      { w.phase = v; return nil }
 
 // Properties returns the escape-hatch β view.
 func (s *StrokeNode) Properties() *PropertyGroup {
