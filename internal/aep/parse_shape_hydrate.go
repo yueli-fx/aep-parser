@@ -112,6 +112,10 @@ func collectShapeKids(tdgp *rifx.Chunk, g *VectorGroup, ctx *parseCtx) {
 			if n := hydrateStrokeNode(payload, ctx); n != nil {
 				g.Children = append(g.Children, n)
 			}
+		case "ADBE Vector Graphic - G-Fill":
+			if n := hydrateGradientFillNode(payload, ctx); n != nil {
+				g.Children = append(g.Children, n)
+			}
 		}
 		return true
 	})
@@ -241,6 +245,47 @@ func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
 	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { f.compositeOrder = ShapeCompositeOrder(v) })
 	hydrateScalarStatic(props["ADBE Vector Fill Rule"], func(v float64) { f.fillRule = FillRule(v) })
 	return f
+}
+
+// hydrateGradientFillNode reads the gradient-fill body back into a runtime
+// GradientFillNode: descends the Grad Colors GCst→GCky→Utf8 and decodes the
+// prop.map XML via ParseGradientXML. Grad Type / Start Pt / End Pt are not
+// modeled (elided in the serialized form). Returns a default-gradient node if
+// the stops XML is absent (keeps the node visible rather than dropping it).
+func hydrateGradientFillNode(body *rifx.Chunk, _ *parseCtx) *GradientFillNode {
+	n := NewGradientFillNode()
+	if xml := findGradientStopsXML(body, "ADBE Vector Grad Colors"); xml != "" {
+		if g := ParseGradientXML(xml); g != nil {
+			n.gradient = g
+		}
+	}
+	return n
+}
+
+// findGradientStopsXML returns the prop.map XML string in the GCst→GCky→Utf8
+// leaf following the tdmn matching streamName, or "".
+func findGradientStopsXML(body *rifx.Chunk, streamName string) string {
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID != rifx.IDTdmn || trimChunkNUL(kids[i].Data) != streamName {
+			continue
+		}
+		gcst := kids[i+1]
+		if !gcst.IsList() || gcst.FormType != rifx.IDGCst {
+			return ""
+		}
+		for _, c := range gcst.Children {
+			if c.IsList() && c.FormType == rifx.IDGCky {
+				for _, u := range c.Children {
+					if u.ID == rifx.IDUtf8 {
+						return string(u.Data)
+					}
+				}
+			}
+		}
+		return ""
+	}
+	return ""
 }
 
 func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {

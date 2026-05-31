@@ -42,6 +42,9 @@ var v22ShapeStrokeBodyBytes []byte
 //go:embed templates/v2_2_shape_stroke_dashed_body.bin
 var v22ShapeStrokeDashedBodyBytes []byte
 
+//go:embed templates/v2_2_shape_gradfill_body.bin
+var v22ShapeGradFillBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -66,6 +69,10 @@ var (
 	v22ShapeStrokeDashedOnce  sync.Once
 	v22ShapeStrokeDashedCache *rifx.Chunk
 	v22ShapeStrokeDashedErr   error
+
+	v22ShapeGradFillOnce  sync.Once
+	v22ShapeGradFillCache *rifx.Chunk
+	v22ShapeGradFillErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -161,6 +168,25 @@ func cloneShapeStrokeDashedBody() (*rifx.Chunk, error) {
 	return cloneChunk(v22ShapeStrokeDashedCache), nil
 }
 
+// cloneShapeGradFillBody returns a clone of the gradient-fill template. The
+// body carries only `ADBE Vector Grad Colors` (GCst→GCky→Utf8 stops XML); Grad
+// Type / Start Pt / End Pt were default in the source fixture and AE elided
+// them, so the ramp geometry is not overwritable (default linear on open).
+func cloneShapeGradFillBody() (*rifx.Chunk, error) {
+	v22ShapeGradFillOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeGradFillBodyBytes))
+		if err != nil {
+			v22ShapeGradFillErr = fmt.Errorf("parse v22ShapeGradFillBodyBytes: %w", err)
+			return
+		}
+		v22ShapeGradFillCache = ch
+	})
+	if v22ShapeGradFillErr != nil {
+		return nil, v22ShapeGradFillErr
+	}
+	return cloneChunk(v22ShapeGradFillCache), nil
+}
+
 // encodeShapeColorBE returns the AE shape-color cdat bytes for an [r,g,b,a]
 // (0..1) color: AE stores colors as [A,R,G,B] × 255 as f64 BE (RE'd from the
 // stroke tolerance fixture — JSX [0,0,1,1] → disk [255,0,0,255]). Both Stroke
@@ -210,8 +236,9 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindEllipse: "ADBE Vector Shape - Ellipse",
 	ShapeKindPath:    "ADBE Vector Shape - Group",
 	ShapeKindFill:    "ADBE Vector Graphic - Fill",
-	ShapeKindStroke:  "ADBE Vector Graphic - Stroke",
-	ShapeKindGroup:   "ADBE Vector Group",
+	ShapeKindStroke:       "ADBE Vector Graphic - Stroke",
+	ShapeKindGroup:        "ADBE Vector Group",
+	ShapeKindGradientFill: "ADBE Vector Graphic - G-Fill",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -238,6 +265,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerFillNode(node, ctx)
 	case *StrokeNode:
 		return lowerStrokeNode(node, ctx)
+	case *GradientFillNode:
+		return lowerGradientFillNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -523,6 +552,52 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(f.compositeOrder)))
 	overwriteShapeStreamCdat(body, "ADBE Vector Fill Rule", encodeF64sBE(float64(f.fillRule)))
 	return body, nil
+}
+
+// lowerGradientFillNode emits a gradient-fill graphic body from the embedded
+// template (templates/v2_2_shape_gradfill_body.bin), overwriting the Grad
+// Colors stops XML with the runtime gradient. The XML length changes per stop
+// count → length-variable; the Utf8 chunk's Data is swapped and rifx.Chunk.Write
+// recomputes the enclosing GCky / GCst / tdgp LIST sizes on serialization.
+//
+// Only the color/alpha stops are modeled. Grad Type / Start Pt / End Pt were
+// elided in the source fixture (no slot); AE applies the default linear ramp.
+func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeGradFillBody()
+	if err != nil {
+		return nil, err
+	}
+	if n.gradient != nil {
+		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", EncodeGradientXML(n.gradient))
+	}
+	return body, nil
+}
+
+// overwriteGradientStopsXML finds the tdmn matching streamName inside body,
+// descends into the following LIST(GCst) → LIST(GCky), and replaces the first
+// Utf8 leaf's Data with xml. No-op if the structure is absent.
+func overwriteGradientStopsXML(body *rifx.Chunk, streamName, xml string) {
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID != rifx.IDTdmn || trimChunkNUL(kids[i].Data) != streamName {
+			continue
+		}
+		gcst := kids[i+1]
+		if !gcst.IsList() || gcst.FormType != rifx.IDGCst {
+			return
+		}
+		for _, c := range gcst.Children {
+			if c.IsList() && c.FormType == rifx.IDGCky {
+				for _, u := range c.Children {
+					if u.ID == rifx.IDUtf8 {
+						u.Data = []byte(xml)
+						return
+					}
+				}
+			}
+		}
+		return
+	}
 }
 
 // lowerStrokeNode emits a Stroke graphic body using embedded tolerance

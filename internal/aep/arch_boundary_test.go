@@ -39,7 +39,7 @@ var sceneTypeNames = map[string]bool{
 	"Project": true, "Composition": true, "Layer": true, "ShapeLayer": true,
 	"Property": true, "ShapeNode": true, "VectorGroup": true, "Footage": true,
 	"LayerTransform": true, "RectNode": true, "EllipseNode": true, "PathNode": true,
-	"FillNode": true, "StrokeNode": true,
+	"FillNode": true, "StrokeNode": true, "GradientFillNode": true,
 }
 
 func archSrcFiles(t *testing.T) []string {

@@ -115,6 +115,95 @@ func parseAlphaStops(sl *propList) []GradientAlphaStop {
 	return stops
 }
 
+// EncodeGradientXML renders a *Gradient back into AE's prop.map XML form
+// (the inverse of ParseGradientXML). The byte layout — element order
+// (Alpha Stops before Color Stops), the 6-float color array
+// [offset, midpoint, r, g, b, 1], the 3-float alpha array
+// [offset, midpoint, alpha], the trailing "Gradient Colors" = "1.0" marker,
+// and flat newline-separated lines with no indentation — mirrors an
+// AE 25.6-saved gradient fill verbatim so AE re-parses it without complaint.
+//
+// Exposed so the serializer (lowerGradientFillNode) and tests can produce the
+// Utf8 chunk payload. The output round-trips through ParseGradientXML.
+func EncodeGradientXML(g *Gradient) string {
+	var b strings.Builder
+	b.WriteString("<?xml version='1.0'?>\n")
+	b.WriteString("<prop.map version='4'>\n")
+	b.WriteString("<prop.list>\n")
+	b.WriteString("<prop.pair>\n")
+	b.WriteString("<key>Gradient Color Data</key>\n")
+	b.WriteString("<prop.list>\n")
+
+	// Alpha Stops first.
+	writeStopGroup(&b, "Alpha Stops", len(g.AlphaStops), func(i int) {
+		s := g.AlphaStops[i]
+		writeStopArray(&b, "Stops Alpha", s.Offset, s.Midpoint, s.Alpha)
+	})
+	// Color Stops second.
+	writeStopGroup(&b, "Color Stops", len(g.ColorStops), func(i int) {
+		s := g.ColorStops[i]
+		writeStopArray(&b, "Stops Color", s.Offset, s.Midpoint, s.Color[0], s.Color[1], s.Color[2], 1)
+	})
+
+	b.WriteString("</prop.list>\n") // end Gradient Color Data
+	b.WriteString("</prop.pair>\n")
+	b.WriteString("<prop.pair>\n")
+	b.WriteString("<key>Gradient Colors</key>\n")
+	b.WriteString("<string>1.0</string>\n")
+	b.WriteString("</prop.pair>\n")
+	b.WriteString("</prop.list>\n")
+	b.WriteString("</prop.map>\n")
+	return b.String()
+}
+
+// writeStopGroup emits one "Alpha Stops" / "Color Stops" prop.pair: a
+// "Stops List" holding n "Stop-i" entries (each filled by emit) plus a
+// trailing "Stops Size" int.
+func writeStopGroup(b *strings.Builder, groupKey string, n int, emit func(i int)) {
+	b.WriteString("<prop.pair>\n")
+	b.WriteString("<key>" + groupKey + "</key>\n")
+	b.WriteString("<prop.list>\n")
+	b.WriteString("<prop.pair>\n")
+	b.WriteString("<key>Stops List</key>\n")
+	b.WriteString("<prop.list>\n")
+	for i := 0; i < n; i++ {
+		b.WriteString("<prop.pair>\n")
+		b.WriteString("<key>Stop-" + strconv.Itoa(i) + "</key>\n")
+		b.WriteString("<prop.list>\n")
+		emit(i)
+		b.WriteString("</prop.list>\n")
+		b.WriteString("</prop.pair>\n")
+	}
+	b.WriteString("</prop.list>\n") // end Stops List
+	b.WriteString("</prop.pair>\n")
+	b.WriteString("<prop.pair>\n")
+	b.WriteString("<key>Stops Size</key>\n")
+	b.WriteString("<int type='unsigned' size='32'>" + strconv.Itoa(n) + "</int>\n")
+	b.WriteString("</prop.pair>\n")
+	b.WriteString("</prop.list>\n") // end group
+	b.WriteString("</prop.pair>\n")
+}
+
+// writeStopArray emits one "Stops Alpha" / "Stops Color" prop.pair holding a
+// float array.
+func writeStopArray(b *strings.Builder, key string, vals ...float64) {
+	b.WriteString("<prop.pair>\n")
+	b.WriteString("<key>" + key + "</key>\n")
+	b.WriteString("<array>\n")
+	b.WriteString("<array.type><float/></array.type>\n")
+	for _, v := range vals {
+		b.WriteString("<float>" + fmtGradFloat(v) + "</float>\n")
+	}
+	b.WriteString("</array>\n")
+	b.WriteString("</prop.pair>\n")
+}
+
+// fmtGradFloat formats a gradient scalar the way AE's XML does: integral
+// values as bare ints ("1", "0"), everything else as a minimal decimal.
+func fmtGradFloat(v float64) string {
+	return strconv.FormatFloat(v, 'g', -1, 64)
+}
+
 // --- XML helper types for prop.map / prop.list / prop.pair ---
 
 type propMap struct {

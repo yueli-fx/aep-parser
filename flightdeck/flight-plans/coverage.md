@@ -171,6 +171,13 @@ AE-acceptance gate via `re_delete_layer_baseline.aep` 3-solid baseline + per-mod
 - **Stroke Opacity + Width** keyframe 持久化 — ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeKf_*`；AE 读回 opacity 50·width 20 + re-save numKf/bpk）。
 - **磁盘编码**（RE 自 `v2_2_stroke_kf_re.aep`）：两者均 **1D non-spatial（bpk-48，value@0x08，原值无归一化）**。注意：Stroke Opacity 存**原始 %**（100/50），**不**像 Layr Opacity ÷100。Width = 原始 px。
 - stroke body 模板**已含** Opacity/Width cdat slot（无需富化模板）→ 仅把 animated 路径从「first-kf 折叠为 static」改为真正 `lowerShapeScalar` inject。static 路径字节不变（`encode1D`==`encodeF64sBE`）。
+#### V2.2.1 子项⑭ (2026-05-31) — Gradient fill (SetGradient: color + alpha stops)
+- `(g *VectorGroup) AddGradientFill()` → `GradientFillNode`（`SetColorStops`/`SetAlphaStops` ≥2 stop + 范围校验、`Gradient()` getter）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_GradientFill_AEShipGate_AE20{20,25}`：一层 rect+gradient-fill，3 色标 red/green/blue，re-save 经 read 路径解码校验）。
+- **磁盘编码**：色标存 `ADBE Vector Grad Colors` 的 `LIST(GCst) → LIST(GCky) → Utf8` prop.map XML（version='4'）。色标数组 6 float `[off,mid,r,g,b,1]`，alpha 3 float `[off,mid,a]`，Alpha Stops 在 Color Stops 前 + 各带 Stops Size，尾 `Gradient Colors=1.0`。`EncodeGradientXML` = `ParseGradientXML` 的逆，round-trip 自洽。
+- **length-variable 写**：覆 Utf8 XML 改字节长 → **rifx.Chunk.Write 自动 bottom-up 重算所有 LIST size**（同 `Footage.SetPath` 机制），GCst 的 tdb4-124B 非冗余长度头，无需手动 fixup。
+- **read 早已 ship**（`ParseGradientXML` + `Property.Gradient`，`TestGradient_FixturePyAep`）；本子项补 write。
+- **deferred（elision/coupling + ScriptingAPI 封锁）**：Grad Type/Start Pt/End Pt（模板源 fixture 为默认被 AE elide，无 slot；AE 套默认线性 ramp）；动画色标；gradient **stroke**（G-Stroke，同 GCst 路径，直接接力）。
+- **跨版本关键发现**：唯一带色标的 fixture 是 AE 25.6-saved（AE 2020 拒开整个项目文件），但 **from-scratch AE25-shaped 渐变体 AE 2020 仍接受**——渐变格式 version-portable，一份 AE25 模板服务双版本 gate。详 `incident-reports/gradient-fill-write-re.md`。RE/模板源 `v2_2_gradient_src.aep`（← py-aep gradient.aep）。
 #### V2.2.1 子项⑬ (2026-05-31) — Stroke Dashes (single Dash+Gap pair, hidden-until-enabled)
 - `(s *StrokeNode) Dashes()` → `StrokeDashes`（`Enable/Disable`、`SetDash`/`SetGap` 自动 enable + 拒负、`Enabled/Dash/Gap` getter）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_StrokeDashes_AEShipGate_AE20{20,25}`：一层 rect+stroke，Dash=18/Gap=7，re-save cdat 解码校验）。
 - **磁盘编码**：Dash 1 / Gap 1 均 OneD float64-BE @ cdat[0:8]，嵌套于 `ADBE Vector Stroke Dashes` group `LIST(tdgp)` 内（同 Taper/Wave，`findGroupBody` 下钻 + `overwriteShapeStreamCdat`）。默认 Dash/Gap=10。

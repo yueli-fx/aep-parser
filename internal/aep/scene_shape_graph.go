@@ -16,8 +16,9 @@ const (
 	ShapeKindFill                         // `ADBE Vector Graphic - Fill`
 	ShapeKindStroke                       // `ADBE Vector Graphic - Stroke`
 	ShapeKindGroup                        // `ADBE Vector Group` (V2.3+ user-created nested group)
-	// V2.3+ candidates: PolyStar / GradientFill / GradientStroke / Trim / Merge /
-	// Repeater / Transform.
+	ShapeKindGradientFill                 // `ADBE Vector Graphic - G-Fill`
+	// V2.3+ candidates: PolyStar / GradientStroke / Trim / Merge / Repeater /
+	// Transform.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
@@ -84,6 +85,15 @@ func (g *VectorGroup) AddStroke() (*StrokeNode, error) {
 	s := NewStrokeNode()
 	g.Children = append(g.Children, s)
 	return s, nil
+}
+
+// AddGradientFill appends a default-valued GradientFillNode (2-stop black→white
+// linear gradient, fully opaque) and returns it. Set the stops via
+// SetColorStops / SetAlphaStops.
+func (g *VectorGroup) AddGradientFill() (*GradientFillNode, error) {
+	n := NewGradientFillNode()
+	g.Children = append(g.Children, n)
+	return n, nil
 }
 
 // BezierPath is the runtime geometry object — NOT a serializer encoding
@@ -353,6 +363,105 @@ func (f *FillNode) Properties() *PropertyGroup {
 			"Opacity": f.opacity,
 		},
 	}
+}
+
+// GradientFillNode — `ADBE Vector Graphic - G-Fill`. Models the gradient's
+// color + alpha stops (`ADBE Vector Grad Colors`), the headline of a gradient
+// fill. The ramp geometry (`Grad Type` / `Start Pt` / `End Pt`) is NOT modeled:
+// the embedded template was extracted from an AE-saved fixture where those were
+// default and therefore elided (no cdat slot to overwrite — same elision trap
+// as Stroke Taper Units). AE reconstructs the default linear ramp on open.
+//
+// Stops are static (V2.2 does not model animated gradients). The serializer
+// re-encodes the stops to prop.map XML and overwrites the GCky/Utf8 chunk
+// (length-variable; rifx recomputes the enclosing LIST sizes).
+type GradientFillNode struct {
+	gradient *Gradient
+}
+
+// NewGradientFillNode constructs a default 2-stop black→white linear gradient
+// (fully opaque). Callers override via SetColorStops / SetAlphaStops.
+func NewGradientFillNode() *GradientFillNode {
+	return &GradientFillNode{gradient: defaultGradient()}
+}
+
+// defaultGradient returns a 2-stop black→white gradient with two opaque alpha
+// stops — the values AE shows for a freshly-added gradient fill.
+func defaultGradient() *Gradient {
+	return &Gradient{
+		Version: "4",
+		ColorStops: []GradientColorStop{
+			{Offset: 0, Midpoint: 0.5, Color: [3]float64{0, 0, 0}},
+			{Offset: 1, Midpoint: 0.5, Color: [3]float64{1, 1, 1}},
+		},
+		AlphaStops: []GradientAlphaStop{
+			{Offset: 0, Midpoint: 0.5, Alpha: 1},
+			{Offset: 1, Midpoint: 0.5, Alpha: 1},
+		},
+	}
+}
+
+func (n *GradientFillNode) Kind() ShapeNodeKind { return ShapeKindGradientFill }
+
+// Gradient returns the live gradient (color + alpha stops). Mutating the
+// returned struct's slices directly also works, but prefer SetColorStops /
+// SetAlphaStops for range validation.
+func (n *GradientFillNode) Gradient() *Gradient { return n.gradient }
+
+// SetColorStops replaces the gradient's color stops. Requires ≥ 2 stops; each
+// Offset/Midpoint in [0,1] and each Color component in [0,1].
+func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
+	if len(stops) < 2 {
+		return fmt.Errorf("SetColorStops: need ≥ 2 stops, got %d", len(stops))
+	}
+	for i, s := range stops {
+		if err := checkUnit("offset", i, s.Offset); err != nil {
+			return err
+		}
+		if err := checkUnit("midpoint", i, s.Midpoint); err != nil {
+			return err
+		}
+		for c, v := range s.Color {
+			if v < 0 || v > 1 {
+				return fmt.Errorf("SetColorStops: stop %d color[%d] = %g out of range [0,1]", i, c, v)
+			}
+		}
+	}
+	n.gradient.ColorStops = append([]GradientColorStop(nil), stops...)
+	return nil
+}
+
+// SetAlphaStops replaces the gradient's alpha (opacity) stops. Requires ≥ 2
+// stops; each Offset/Midpoint/Alpha in [0,1].
+func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
+	if len(stops) < 2 {
+		return fmt.Errorf("SetAlphaStops: need ≥ 2 stops, got %d", len(stops))
+	}
+	for i, s := range stops {
+		if err := checkUnit("offset", i, s.Offset); err != nil {
+			return err
+		}
+		if err := checkUnit("midpoint", i, s.Midpoint); err != nil {
+			return err
+		}
+		if s.Alpha < 0 || s.Alpha > 1 {
+			return fmt.Errorf("SetAlphaStops: stop %d alpha = %g out of range [0,1]", i, s.Alpha)
+		}
+	}
+	n.gradient.AlphaStops = append([]GradientAlphaStop(nil), stops...)
+	return nil
+}
+
+func checkUnit(what string, i int, v float64) error {
+	if v < 0 || v > 1 {
+		return fmt.Errorf("gradient stop %d %s = %g out of range [0,1]", i, what, v)
+	}
+	return nil
+}
+
+// Properties returns the escape-hatch β view.
+func (n *GradientFillNode) Properties() *PropertyGroup {
+	return &PropertyGroup{Name: "Gradient Fill"}
 }
 
 // StrokeLineCap is the stroke end-cap style (`ADBE Vector Stroke Line Cap`).
