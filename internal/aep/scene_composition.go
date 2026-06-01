@@ -121,6 +121,17 @@ func (c *Composition) CdtaRawBytes() []byte {
 	return c.back.cdta.Data
 }
 
+// PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific
+// options), or nil if the comp has no PRin LIST. Read-only access for
+// debugging / RE tools — the underlying byte slice is the live chunk data;
+// do not mutate.
+func (c *Composition) PrdaRawBytes() []byte {
+	if c.back == nil || c.back.prdaChunk == nil {
+		return nil
+	}
+	return c.back.prdaChunk.Data
+}
+
 // LayerByID returns the first layer in this composition whose ID matches
 // id, or nil if no such layer exists. ID 0 is treated as no-match (it's
 // the sentinel used by Layer.ParentID to mean "no parent"); real AE

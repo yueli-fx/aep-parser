@@ -201,6 +201,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 	// (e.g. "Advanced 3D" / "Cinema 4D"). We surface the match-name.
 	if prinList := item.FindFirstList(rifx.IDPRin); prinList != nil {
 		if prinChunk := prinList.FindFirst(rifx.IDPrin); prinChunk != nil && len(prinChunk.Data) > 4 {
+			comp.back.prinChunk = prinChunk
 			payload := prinChunk.Data[4:]
 			if i := bytes.IndexByte(payload, 0); i >= 0 {
 				comp.Renderer = string(payload[:i])
@@ -208,6 +209,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 				comp.Renderer = string(payload)
 			}
 		}
+		comp.back.prdaChunk = prinList.FindFirst(rifx.IDPrda)
 	}
 
 	ctx := newParseCtxFPS(comp.TickRate, comp.FrameRate, comp.Name, warnings)

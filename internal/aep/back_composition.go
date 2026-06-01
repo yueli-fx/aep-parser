@@ -25,6 +25,15 @@ type compositionBackrefs struct {
 	// nameChunk is the comp's Utf8 name chunk (length-variable Set name).
 	nameChunk *rifx.Chunk
 
+	// prinChunk / prdaChunk are the comp's renderer chunks under the PRin
+	// LIST sibling. prin is a fixed 104-byte chunk (renderer match-name +
+	// display name, NUL-padded); prda carries renderer-specific options and
+	// is variable-length. SetRenderer patches prin in place (length-
+	// preserving name fields) and replaces prda wholesale (structural).
+	// Both nil when the comp has no PRin LIST.
+	prinChunk *rifx.Chunk
+	prdaChunk *rifx.Chunk
+
 	// itemList is the cached owning Item LIST chunk; populated by
 	// parseComposition. Used by NewComposition (re-parse closed loop) +
 	// future structural mutations. derived cache, never owned (see
