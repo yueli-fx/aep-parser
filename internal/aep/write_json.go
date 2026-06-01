@@ -61,10 +61,36 @@ type JSONRenderSettings struct {
 
 // JSONOutputModule is the JSON representation of an OutputModule.
 type JSONOutputModule struct {
-	Name         string                   `json:"name,omitempty"`
-	FileTemplate string                   `json:"file_template,omitempty"`
-	FullPath     string                   `json:"full_path,omitempty"`
-	Settings     JSONOutputModuleSettings `json:"settings"`
+	Name          string                   `json:"name,omitempty"`
+	FileTemplate  string                   `json:"file_template,omitempty"`
+	FullPath      string                   `json:"full_path,omitempty"`
+	Settings      JSONOutputModuleSettings `json:"settings"`
+	FormatOptions *JSONFormatOptions       `json:"format_options,omitempty"`
+}
+
+// JSONFormatOptions mirrors FormatOptions (only the active Kind's fields are
+// meaningful).
+type JSONFormatOptions struct {
+	Kind                  string  `json:"kind"`
+	TenBitBlackPoint      int     `json:"ten_bit_black_point,omitempty"`
+	TenBitWhitePoint      int     `json:"ten_bit_white_point,omitempty"`
+	ConvertedBlackPoint   float64 `json:"converted_black_point,omitempty"`
+	ConvertedWhitePoint   float64 `json:"converted_white_point,omitempty"`
+	CurrentGamma          float64 `json:"current_gamma,omitempty"`
+	HighlightExpansion    int     `json:"highlight_expansion,omitempty"`
+	LogarithmicConversion bool    `json:"logarithmic_conversion,omitempty"`
+	CineonFileFormat      int     `json:"cineon_file_format,omitempty"`
+	Quality               int     `json:"quality,omitempty"`
+	ThirtyTwoBitFloat     bool    `json:"thirty_two_bit_float,omitempty"`
+	LuminanceChroma       bool    `json:"luminance_chroma,omitempty"`
+	BitsPerPixel          int     `json:"bits_per_pixel,omitempty"`
+	RLECompression        bool    `json:"rle_compression,omitempty"`
+	LZWCompression        bool    `json:"lzw_compression,omitempty"`
+	IBMPCByteOrder        bool    `json:"ibm_pc_byte_order,omitempty"`
+	Width                 int     `json:"width,omitempty"`
+	Height                int     `json:"height,omitempty"`
+	BitDepth              int     `json:"bit_depth,omitempty"`
+	Compression           int     `json:"compression,omitempty"`
 }
 
 // JSONOutputModuleSettings mirrors OutputModuleSettings.
@@ -353,6 +379,34 @@ func (p *Project) ToJSON() *JSONProject {
 	return jp
 }
 
+func formatOptionsToJSON(fo *FormatOptions) *JSONFormatOptions {
+	if fo == nil {
+		return nil
+	}
+	return &JSONFormatOptions{
+		Kind:                  fo.Kind,
+		TenBitBlackPoint:      fo.TenBitBlackPoint,
+		TenBitWhitePoint:      fo.TenBitWhitePoint,
+		ConvertedBlackPoint:   fo.ConvertedBlackPoint,
+		ConvertedWhitePoint:   fo.ConvertedWhitePoint,
+		CurrentGamma:          fo.CurrentGamma,
+		HighlightExpansion:    fo.HighlightExpansion,
+		LogarithmicConversion: fo.LogarithmicConversion,
+		CineonFileFormat:      fo.CineonFileFormat,
+		Quality:               fo.Quality,
+		ThirtyTwoBitFloat:     fo.ThirtyTwoBitFloat,
+		LuminanceChroma:       fo.LuminanceChroma,
+		BitsPerPixel:          fo.BitsPerPixel,
+		RLECompression:        fo.RLECompression,
+		LZWCompression:        fo.LZWCompression,
+		IBMPCByteOrder:        fo.IBMPCByteOrder,
+		Width:                 fo.Width,
+		Height:                fo.Height,
+		BitDepth:              fo.BitDepth,
+		Compression:           fo.Compression,
+	}
+}
+
 func renderQueueToJSON(rq *RenderQueue) *JSONRenderQueue {
 	jrq := &JSONRenderQueue{NumItems: rq.NumItems()}
 	for _, it := range rq.Items {
@@ -420,6 +474,7 @@ func renderQueueToJSON(rq *RenderQueue) *JSONRenderQueue {
 					AudioChannels:       om.Settings.AudioChannels,
 					AudioEnabled:        om.Settings.AudioEnabled,
 				},
+				FormatOptions: formatOptionsToJSON(om.FormatOptions),
 			})
 		}
 		jrq.Items = append(jrq.Items, ji)

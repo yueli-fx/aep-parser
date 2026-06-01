@@ -332,6 +332,38 @@ func TestRenderQueueOutputModuleFlags(t *testing.T) {
 	}
 }
 
+// Format options (slice-4): Ropt variant dispatch. Cineon fixtures encode the
+// expected value in the fixture name; converted_white_point is stored
+// normalized (253/255). Offsets verified against format_options/cineon/*.
+func TestRenderQueueFormatOptionsCineon(t *testing.T) {
+	first := func(fixture string) *aep.FormatOptions {
+		proj, err := aep.Open("../../test_data/" + fixture)
+		if err != nil {
+			t.Fatalf("Open %s: %v", fixture, err)
+		}
+		fo := proj.RenderQueue.Items[0].OutputModules[0].FormatOptions
+		if fo == nil {
+			t.Fatalf("%s: FormatOptions nil", fixture)
+		}
+		if fo.Kind != "cineon" {
+			t.Fatalf("%s: Kind = %q, want cineon", fixture, fo.Kind)
+		}
+		return fo
+	}
+	if got := first("rq_cineon_blackpoint.aep").TenBitBlackPoint; got != 1023 {
+		t.Errorf("TenBitBlackPoint = %d, want 1023", got)
+	}
+	if got := first("rq_cineon_gamma.aep").CurrentGamma; got != 5 {
+		t.Errorf("CurrentGamma = %v, want 5", got)
+	}
+	if got := first("rq_cineon_highlight.aep").HighlightExpansion; got != 150 {
+		t.Errorf("HighlightExpansion = %d, want 150", got)
+	}
+	if got := first("rq_cineon_whitepoint.aep").ConvertedWhitePoint; math.Abs(got-253.0/255.0) > 1e-9 {
+		t.Errorf("ConvertedWhitePoint = %v, want %v", got, 253.0/255.0)
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

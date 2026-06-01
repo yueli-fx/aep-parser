@@ -144,3 +144,71 @@ func ascii4(b []byte) string {
 	}
 	return strings.TrimRight(string(b[:4]), "\x00")
 }
+
+// decodeRoptFormatOptions decodes a Ropt chunk into typed format options,
+// dispatching on the 4-byte format_code. Returns nil for unknown/too-short
+// bodies (e.g. XML-based formats AVI/H264/QuickTime carry no Ropt variant).
+// Field offsets mirror py-aep binary/render_chunks.py Ropt variant classes;
+// cineon offsets verified against the format_options/cineon/* fixtures.
+func decodeRoptFormatOptions(d []byte) *FormatOptions {
+	if len(d) < 4 {
+		return nil
+	}
+	be := binary.BigEndian
+	f64 := func(off int) float64 { return math.Float64frombits(be.Uint64(d[off:])) }
+	switch string(d[:4]) {
+	case "sDPX": // Cineon / DPX
+		if len(d) < 47 {
+			return nil
+		}
+		return &FormatOptions{
+			Kind:                  "cineon",
+			TenBitBlackPoint:      int(be.Uint16(d[14:])),
+			TenBitWhitePoint:      int(be.Uint16(d[16:])),
+			ConvertedBlackPoint:   f64(18),
+			ConvertedWhitePoint:   f64(26),
+			CurrentGamma:          f64(34),
+			HighlightExpansion:    int(be.Uint16(d[42:])),
+			LogarithmicConversion: d[44] != 0,
+			CineonFileFormat:      int(d[45]),
+			BitDepth:              int(d[46]),
+		}
+	case "JPEG":
+		if len(d) < 58 {
+			return nil
+		}
+		return &FormatOptions{Kind: "jpeg", Quality: int(be.Uint16(d[52:]))}
+	case "oEXR": // OpenEXR
+		if len(d) < 17 {
+			return nil
+		}
+		return &FormatOptions{
+			Kind:              "openexr",
+			Compression:       int(d[14]),
+			ThirtyTwoBitFloat: d[15] != 0,
+			LuminanceChroma:   d[16] != 0,
+		}
+	case "TPIC": // Targa
+		if len(d) < 83 {
+			return nil
+		}
+		return &FormatOptions{Kind: "targa", BitsPerPixel: int(d[77]), RLECompression: d[82] != 0}
+	case "TIF ":
+		if len(d) < 602 {
+			return nil
+		}
+		return &FormatOptions{Kind: "tiff", IBMPCByteOrder: d[600] != 0, LZWCompression: d[601] != 0}
+	case "png!":
+		if len(d) < 34 {
+			return nil
+		}
+		return &FormatOptions{
+			Kind:        "png",
+			Width:       int(be.Uint32(d[18:])),
+			Height:      int(be.Uint32(d[22:])),
+			BitDepth:    int(be.Uint16(d[28:])),
+			Compression: int(be.Uint32(d[30:])),
+		}
+	}
+	return nil
+}

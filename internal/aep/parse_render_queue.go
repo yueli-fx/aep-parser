@@ -181,6 +181,10 @@ func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
 			applyRoou(om, ch.Data)
 			continue
 		}
+		if ch.ID == rifx.IDRopt {
+			om.FormatOptions = decodeRoptFormatOptions(ch.Data)
+			continue
+		}
 		if ch.IsList() && ch.FormType == rifx.IDAls2 {
 			als2Seen = true
 			if alas := ch.FindFirst(rifx.IDAlas); alas != nil {

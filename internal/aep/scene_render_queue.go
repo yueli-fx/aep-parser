@@ -110,6 +110,52 @@ type OutputModule struct {
 	// Settings holds the output-module settings (128B OutputModuleSettingsItem
 	// + Roou). slice-3, read-only.
 	Settings OutputModuleSettings
+
+	// FormatOptions holds the format-specific render options (from the Ropt
+	// chunk), or nil for XML-based formats (AVI/H264/QuickTime) which carry no
+	// Ropt variant. slice-4, read-only.
+	FormatOptions *FormatOptions
+}
+
+// FormatOptions is a typed view of the Ropt chunk (format-specific render
+// options). Kind names the active format; only that format's fields are
+// populated. Read-only (P3 §3A slice-4). HDR10 metadata + XML format options
+// (AVI/H264) are deferred.
+type FormatOptions struct {
+	Kind string // cineon / jpeg / openexr / png / targa / tiff
+
+	// cineon (sDPX)
+	TenBitBlackPoint      int
+	TenBitWhitePoint      int
+	ConvertedBlackPoint   float64
+	ConvertedWhitePoint   float64
+	CurrentGamma          float64
+	HighlightExpansion    int
+	LogarithmicConversion bool
+	CineonFileFormat      int
+
+	// jpeg
+	Quality int
+
+	// openexr (oEXR)
+	ThirtyTwoBitFloat bool
+	LuminanceChroma   bool
+
+	// targa (TPIC)
+	BitsPerPixel   int
+	RLECompression bool
+
+	// tiff (TIF )
+	LZWCompression bool
+	IBMPCByteOrder bool
+
+	// png (png!)
+	Width  int
+	Height int
+
+	// shared: BitDepth (cineon/png), Compression (openexr/png)
+	BitDepth    int
+	Compression int
 }
 
 // OutputModuleSettings is the per-output-module settings (ExtendScript

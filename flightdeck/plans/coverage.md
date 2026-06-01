@@ -130,9 +130,11 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 - `RenderSettings`（slice-2，R）：Quality/ColorDepth/Effects/FieldRender/Pulldown/FrameBlending/MotionBlur/ProxyUse/SoloSwitches/GuideLayers/DiskCache/FrameRate/Resolution[2]/SkipExistingFiles — 值用 py-aep NUMBER 语义（0xFFFF→-1 current-settings）；offset 对 4 个判别 fixture 交叉验证
 - `OutputModule.{Name（Als2 后 Utf8[0]）, FileTemplate（Als2 后 Utf8[1]）, FullPath（alas JSON fullpath）, Settings}`
 - `OutputModuleSettings`（slice-3，R）：128B `OutputModuleSettingsItem`（Channels/ResizeQuality/Resize/LockAspectRatio/Crop+4 边/OutputAudio/IncludeProjectLink/PostRenderAction/ConvertToLinear/4 flag-bit）+ 154B `Roou`（VideoCodec/FormatID/StartingNumber/Width/Height/Depth/VideoOutput/AudioSampleRate/AudioBitDepth/AudioChannels/AudioEnabled）。om-settings ldat 在每个 LItm-item 的 `list` 内；按 OM index 配对；2 个正交 flag fixture 交叉验证
-- JSON 导出 `render_queue` 节点（snake_case 自有 schema，含 `render_settings` + OM `settings`）
-- chunk family：`LRdr → {list→lhd3+ldat(RenderSettingsItem 2246B×N), LItm→per-item [RCom]+list(ldat=OMSettings 128B×M)+'LOm '(Roou 组)}`；新 rifx ID `LRdr/LItm/'LOm '/RCom/Roou/Ropt/Rout`
-- **defer 后续 slice**：format options×7（Cineon/Jpeg/.../Xml from Ropt）/ Format·OutputAudio·Color 派生枚举映射 / SkipFrames（派生）/ `file` 模板变量解析 / LogType·Status·PostRenderAction 的 3xxx 命名空间枚举 / 任何写。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`
+- `OutputModule.FormatOptions *FormatOptions`（slice-4，R）：Ropt 按 format_code 分发的 6 个二进制格式 —— Cineon(sDPX)/Jpeg(JPEG)/OpenExr(oEXR)/Targa(TPIC)/Tiff(TIF )/Png(png!)。XML 格式（AVI/H264/QuickTime 无 Ropt 变体）→ nil。offset 对 cineon 4 个 fixture-name-encoded 值交叉验证（converted_white_point 存归一化 253/255）
+- JSON 导出 `render_queue` 节点（snake_case 自有 schema，含 `render_settings` + OM `settings` + `format_options`）
+- chunk family：`LRdr → {list→lhd3+ldat(RenderSettingsItem 2246B×N), LItm→per-item [RCom]+list(ldat=OMSettings 128B×M)+'LOm '(Roou 组+Ropt)}`；新 rifx ID `LRdr/LItm/'LOm '/RCom/Roou/Ropt/Rout`
+- **RQ reader R-only 主体完成**（slice-1 结构 + 2 render settings + 3 OM settings + 4 format options）
+- **defer**：XML format options（AVI/H264 从 Als2 旁 JSON，独立解析路径）/ Cineon·Png HDR10 metadata / Format·OutputAudio·Color 派生枚举映射 / SkipFrames（派生）/ `file` 模板变量解析 / LogType·Status·PostRenderAction 的 3xxx 命名空间枚举 / 任何写。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`
 - gotcha：comp duration 两套表示分歧 → [`incidents/cdta-duration-two-representations.md`](../incidents/cdta-duration-two-representations.md)
 
 ### V2.2 alpha ShapeLayer 写路径 (2026-05-25, iter-7/8)
