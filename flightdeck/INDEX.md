@@ -1,7 +1,7 @@
 # flightdeck — INDEX
 
 <!-- AUTO:root -->
-- sketches/ — 2 active
+- sketches/ — 3 active
 - specs/ — 3 (1 active, 2 blocked)
 - plans/ — 3 (2 active, 1 done)
 - incidents/ — 27 active

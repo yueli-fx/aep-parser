@@ -1,6 +1,11 @@
-# flightdeck rules — aep-parser
-
+---
 git: true
+emit_agents_md: false
+disabled_folders: []
+disabled_gates: []
+---
+
+# flightdeck rules — aep-parser
 
 ## House rules
 
