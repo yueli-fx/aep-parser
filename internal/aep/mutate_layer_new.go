@@ -184,13 +184,21 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	//    zero shape kids).
 	base.back.layrList = layrChunk
 	base.shapeDirty = true // gate for syncShapeLayerChunks
-	ewstSibling := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDEwst}
+	// AE's per-Layr serialized unit is: Layr LIST, empty Ewst LIST, then two
+	// fvdv/fiop/ftts/foac/fiac/fipc/fifl groups (lowerLayerSiblings). The Ewst
+	// alone passes a single user layer, but AE silent-drops every layer past
+	// the first without the fvdv… siblings — they delimit one layer's unit from
+	// the next (RE: multi-layer-silent-drop).
+	unit := append([]*rifx.Chunk{
+		layrChunk,
+		{ID: rifx.IDList, FormType: rifx.IDEwst},
+	}, lowerLayerSiblings()...)
 	insertIdx := insertLayrPosition(c.back.itemList.Children)
-	// Grow slice by 2 (Layr + Ewst) and shift any existing tail two slots.
-	c.back.itemList.Children = append(c.back.itemList.Children, nil, nil)
-	copy(c.back.itemList.Children[insertIdx+2:], c.back.itemList.Children[insertIdx:len(c.back.itemList.Children)-2])
-	c.back.itemList.Children[insertIdx] = layrChunk
-	c.back.itemList.Children[insertIdx+1] = ewstSibling
+	n := len(unit)
+	// Grow slice by n and shift any existing tail n slots.
+	c.back.itemList.Children = append(c.back.itemList.Children, make([]*rifx.Chunk, n)...)
+	copy(c.back.itemList.Children[insertIdx+n:], c.back.itemList.Children[insertIdx:len(c.back.itemList.Children)-n])
+	copy(c.back.itemList.Children[insertIdx:insertIdx+n], unit)
 	c.Layers = append(c.Layers, base)
 
 	// 5. Warnings-as-failure: if any warnings appeared, rollback.

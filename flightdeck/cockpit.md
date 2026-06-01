@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-05-31 by claude
-**Active focus**: 无 active 线 — Path Keyframe arc 已收官 ship。下条从 backlog 选，等用户定方向。无 in-flight WIP，工作树 commit 后应为 clean。
+**Last updated**: 2026-06-01 by claude
+**Active focus**: 无 active 线 — multi-ShapeLayer silent-drop 已修复 ship。下条从 backlog 选，等用户定方向。无 in-flight WIP，工作树 commit 后应为 clean。
 
 ## Next session
 
@@ -24,11 +24,11 @@
 
 ## Recently finished（≤5，详 logbook.md）
 
+- 2026-06-01 multi-ShapeLayer 同合成 silent-drop 修复（layer-level siblings fvdv×2）— 双版本 ship-gate PASS（3 层 + 8 层）
 - 2026-05-31 Shape path keyframe write（子项⑮，linear）— 双版本 ship-gate PASS
 - 2026-05-31 Gradient fill write SetGradient（子项⑭）— 双版本 ship-gate PASS
 - 2026-05-31 Stroke Dashes（子项⑬，单 Dash+Gap 对）— 双版本 ship-gate PASS
 - 2026-05-31 shape-node enum sweep（子项⑪，commit 8c8f43d）— 双版本 ship-gate PASS
-- 2026-05-31 Stroke Line Cap/Join/Miter（子项⑩，commit 4beb7fd）— 双版本 ship-gate PASS
 
 ## Hanging tasks
 

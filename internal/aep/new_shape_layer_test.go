@@ -83,3 +83,56 @@ func TestNewShapeLayer_EmptyName_Error(t *testing.T) {
 		t.Fatalf("comp polluted on failure: %d layers", len(c.Layers))
 	}
 }
+
+// TestNewShapeLayer_MultiLayer_EmitsLayerSiblings — every user Layr's
+// serialized unit is Layr LIST + empty Ewst + two fvdv/fiop/ftts/foac/fiac/
+// fipc/fifl groups. The Ewst alone passes a single user layer, but AE
+// silent-drops every layer past the first without the fvdv… siblings
+// (RE: multi-layer-silent-drop). Two NewShapeLayer calls must each emit them.
+func TestNewShapeLayer_MultiLayer_EmitsLayerSiblings(t *testing.T) {
+	p := aep.NewProject(aep.TargetAE2025)
+	c, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.NewShapeLayer("L1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.NewShapeLayer("L2"); err != nil {
+		t.Fatal(err)
+	}
+
+	fv := rifx.ChunkID{'f', 'v', 'd', 'v'}
+	fi := rifx.ChunkID{'f', 'i', 'o', 'p'}
+	ft := rifx.ChunkID{'f', 't', 't', 's'}
+	fo := rifx.ChunkID{'f', 'o', 'a', 'c'}
+	fa := rifx.ChunkID{'f', 'i', 'a', 'c'}
+	fp := rifx.ChunkID{'f', 'i', 'p', 'c'}
+	ff := rifx.ChunkID{'f', 'i', 'f', 'l'}
+	want := []rifx.ChunkID{rifx.IDEwst, fv, fi, ft, fo, fa, fp, ff, fv, fi, ft, fo, fa, fp, ff}
+
+	il := aep.CompItemListForTest(c)
+	userLayrs := 0
+	for i, ch := range il.Children {
+		if !ch.IsList() || ch.FormType != rifx.IDLayr {
+			continue
+		}
+		userLayrs++
+		for j, w := range want {
+			if i+1+j >= len(il.Children) {
+				t.Fatalf("user Layr #%d: ran out of children expecting sibling %d", userLayrs, j)
+			}
+			sib := il.Children[i+1+j]
+			got := sib.ID
+			if sib.IsList() {
+				got = sib.FormType
+			}
+			if got != w {
+				t.Errorf("user Layr #%d sibling[%d] = %q, want %q", userLayrs, j, got, w)
+			}
+		}
+	}
+	if userLayrs != 2 {
+		t.Fatalf("user Layr count = %d, want 2", userLayrs)
+	}
+}
