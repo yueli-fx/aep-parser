@@ -506,6 +506,38 @@ func TestRenderQueueItemScalarWriteRoundTrip(t *testing.T) {
 	}
 }
 
+// Time span writes (slice-8): switch source to CUSTOM and write start/duration
+// as reduced fractions. Round-trip exact for decimal values.
+func TestRenderQueueTimeSpanWriteRoundTrip(t *testing.T) {
+	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	proj, err := aep.FromReader(bytes.NewReader(orig))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	item := proj.RenderQueue.Items[0]
+	item.SetTimeSpanStart(2.5)
+	item.SetTimeSpanDuration(4.0)
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	it := re.RenderQueue.Items[0]
+	if it.TimeSpanStart != 2.5 {
+		t.Errorf("TimeSpanStart = %v, want 2.5", it.TimeSpanStart)
+	}
+	if it.TimeSpanDuration != 4.0 {
+		t.Errorf("TimeSpanDuration = %v, want 4.0", it.TimeSpanDuration)
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

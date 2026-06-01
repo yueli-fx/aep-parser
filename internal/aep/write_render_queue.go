@@ -188,6 +188,69 @@ func (it *RenderQueueItem) SetLogType(v uint16) {
 	}
 }
 
+// patchU32 writes a big-endian u32 at fieldOffset in the settings block.
+func (it *RenderQueueItem) patchU32(fieldOffset int, v uint32) bool {
+	if it == nil || len(it.settingsBlock) < fieldOffset+4 {
+		return false
+	}
+	binary.BigEndian.PutUint32(it.settingsBlock[fieldOffset:], v)
+	return true
+}
+
+// secondsToFraction reduces a non-negative seconds value to a dividend/divisor
+// pair (scale 1e6 + gcd reduction). Exact for values with ≤6 decimal places;
+// denominator stays ≤ 1e6 so both fit u32.
+func secondsToFraction(v float64) (uint32, uint32) {
+	if v <= 0 {
+		return 0, 1
+	}
+	const scale = 1000000
+	num := int64(v*scale + 0.5)
+	den := int64(scale)
+	g := gcdInt64(num, den)
+	return uint32(num / g), uint32(den / g)
+}
+
+func gcdInt64(a, b int64) int64 {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	if a == 0 {
+		return 1
+	}
+	return a
+}
+
+// SetTimeSpanStart sets the render start time (seconds), switching the time
+// span source to CUSTOM. Length-preserving.
+func (it *RenderQueueItem) SetTimeSpanStart(seconds float64) {
+	if seconds < 0 {
+		return
+	}
+	num, den := secondsToFraction(seconds)
+	if !it.patchU16(rsTimeSpanSource, timeSpanCustom) {
+		return
+	}
+	it.patchU32(rsTimeSpanStartDividend, num)
+	it.patchU32(rsTimeSpanStartDivisor, den)
+	it.TimeSpanStart = seconds
+}
+
+// SetTimeSpanDuration sets the render duration (seconds), switching the time
+// span source to CUSTOM. Length-preserving.
+func (it *RenderQueueItem) SetTimeSpanDuration(seconds float64) {
+	if seconds <= 0 {
+		return
+	}
+	num, den := secondsToFraction(seconds)
+	if !it.patchU16(rsTimeSpanSource, timeSpanCustom) {
+		return
+	}
+	it.patchU32(rsTimeSpanDurDividend, num)
+	it.patchU32(rsTimeSpanDurDivisor, den)
+	it.TimeSpanDuration = seconds
+}
+
 // --- output module settings setters -----------------------------------------
 
 func boolByte(v bool) byte {
