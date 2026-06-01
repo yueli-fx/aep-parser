@@ -22,11 +22,11 @@ func findProp(proj *aep.Project, matchName string) *aep.Property {
 // "ADBE Position" leader carries dimensionsSeparated=true and the
 // ADBE Position_0/1/2 followers carry separationDimension 0/1/2.
 //
-// NOTE: this fixture is a 3D layer; our parser currently truncates its
-// Transform Group after Position_1 (Position_2 / Scale / Rotate Z / Opacity
-// dropped, Orientation mis-parsed as a group) — see
-// incidents/transform-group-3d-truncation.md. The assertions below only
-// touch the properties our parser surfaces (Position leader + Position_0/1).
+// NOTE: this fixture is a 3D layer. AE omits unmodified-default transform
+// properties from the .aep, so Position_2 / Scale / Anchor Point / etc. are
+// physically absent from the binary (py-aep synthesizes them; we don't —
+// see incidents/transform-group-default-omission.md). The assertions below
+// only touch the properties actually present (Position leader + Position_0/1).
 func TestProperty_DimensionsSeparated(t *testing.T) {
 	sep, err := aep.Open("../../test_data/transform_separated.aep")
 	if err != nil {

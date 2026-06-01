@@ -25,7 +25,7 @@
 - [shutter-side-effect-divisors.md](shutter-side-effect-divisors.md) — active — shutter setter 在 AE 端触发 work-area divisor 重编码
 - [stroke-line-cap-join-miter-re.md](stroke-line-cap-join-miter-re.md) — active — Stroke Line Cap / Line Join / Miter Limit — RE findings
 - [tickrate-per-composition.md](tickrate-per-composition.md) — active — TickRate 是 per-composition 的，不是全局常量
-- [transform-group-3d-truncation.md](transform-group-3d-truncation.md) — active — 3D 层 Transform Group 解析截断（Orientation 起 desync，Position_2/Scale/Opacity 丢失）
+- [transform-group-default-omission.md](transform-group-default-omission.md) — active — Transform Group 比 py-aep 短 = AE 省略默认属性（非 parser bug）；py-aep 合成 schema 我们不合成
 - [v2-2-aelayer-structure.md](v2-2-aelayer-structure.md) — active — V2.2 ship gate FAIL — Layr 结构 + Transform schema + tdum/tduM 缺
 - [variable-fonts-write-noop.md](variable-fonts-write-noop.md) — active — Variable fonts axes 写 = ScriptingAPI 不存在该字段
 - [windows-media-ocr-cjk-glyph-spacing.md](windows-media-ocr-cjk-glyph-spacing.md) — active — Windows.Media.Ocr 用空格分隔 CJK 字形
