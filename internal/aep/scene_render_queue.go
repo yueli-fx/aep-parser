@@ -1,0 +1,71 @@
+package aep
+
+// Render queue runtime model (P3 §3A slice-1, read-only). Mirrors py-aep
+// RenderQueue / RenderQueueItem / OutputModule, exposing only the fields that
+// cross-validate byte-for-byte against py-aep golden JSON. Write paths, the
+// full render-settings enum surface, format options and the 128-byte
+// OutputModuleSettingsItem are deferred to later slices (see
+// flightdeck/plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md).
+
+// RenderQueue is the project's render queue (LIST:LRdr).
+type RenderQueue struct {
+	Items []*RenderQueueItem
+}
+
+// NumItems returns the number of render queue items.
+func (rq *RenderQueue) NumItems() int {
+	if rq == nil {
+		return 0
+	}
+	return len(rq.Items)
+}
+
+// RenderQueueItem is one entry in the render queue.
+type RenderQueueItem struct {
+	// Comp is the composition this item renders, linked by comp_id from the
+	// render-settings ldat. Nil if the referenced comp id was not found.
+	Comp *Composition
+
+	// Status is the raw render status code (RenderSettingsItem @0x0C). py-aep
+	// maps this to its RQItemStatus enum; we expose the raw value for now.
+	Status uint32
+
+	// Name is the render-settings template name (RenderSettingsItem @0x5A,
+	// windows-1252). Empty when the item uses custom (modified) settings.
+	Name string
+
+	// Comment is the item comment (RCom → Utf8), empty when no RCom present.
+	Comment string
+
+	// TimeSpanStart / TimeSpanDuration are resolved (seconds) per the item's
+	// time_span_source: LENGTH_OF_COMP → (0, comp.Duration); WORK_AREA_ONLY →
+	// (comp.WorkAreaStart, comp.WorkAreaEnd-Start); CUSTOM → ldat dividends.
+	TimeSpanStart    float64
+	TimeSpanDuration float64
+
+	OutputModules []*OutputModule
+}
+
+// NumOutputModules returns the number of output modules for this item.
+func (it *RenderQueueItem) NumOutputModules() int {
+	if it == nil {
+		return 0
+	}
+	return len(it.OutputModules)
+}
+
+// OutputModule is one output module of a render queue item (a Roou-delimited
+// group inside LIST:'LOm ').
+type OutputModule struct {
+	// Name is the output-module template name shown in the UI (first Utf8
+	// after the Als2 LIST, e.g. "H.264 - Match Render Settings - 15 Mbps").
+	Name string
+
+	// FileTemplate is the raw file-name template (second Utf8 after Als2,
+	// e.g. "[compName].[fileextension]"); template variables are not resolved.
+	FileTemplate string
+
+	// FullPath is the output folder/full path from the alas JSON "fullpath"
+	// field inside the Als2 LIST. Empty when no alas/fullpath present.
+	FullPath string
+}

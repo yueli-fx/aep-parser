@@ -16,6 +16,31 @@ type JSONProject struct {
 	Compositions []*JSONComposition `json:"compositions"`
 	Footage      []*JSONFootage     `json:"footage"`
 	Folders      []*JSONFolder      `json:"folders"`
+	RenderQueue  *JSONRenderQueue   `json:"render_queue,omitempty"`
+}
+
+// JSONRenderQueue is the JSON representation of a RenderQueue (read-only).
+type JSONRenderQueue struct {
+	NumItems int                    `json:"num_items"`
+	Items    []*JSONRenderQueueItem `json:"items,omitempty"`
+}
+
+// JSONRenderQueueItem is the JSON representation of a RenderQueueItem.
+type JSONRenderQueueItem struct {
+	CompName         string              `json:"comp_name,omitempty"`
+	Status           uint32              `json:"status"`
+	Name             string              `json:"name,omitempty"`
+	Comment          string              `json:"comment,omitempty"`
+	TimeSpanStart    float64             `json:"time_span_start_seconds"`
+	TimeSpanDuration float64             `json:"time_span_duration_seconds"`
+	OutputModules    []*JSONOutputModule `json:"output_modules,omitempty"`
+}
+
+// JSONOutputModule is the JSON representation of an OutputModule.
+type JSONOutputModule struct {
+	Name         string `json:"name,omitempty"`
+	FileTemplate string `json:"file_template,omitempty"`
+	FullPath     string `json:"full_path,omitempty"`
 }
 
 // JSONComposition is the JSON representation of a Composition.
@@ -265,8 +290,36 @@ func (p *Project) ToJSON() *JSONProject {
 	for _, f := range p.Folders {
 		jp.Folders = append(jp.Folders, &JSONFolder{ID: f.ID, Name: f.Name})
 	}
+	if p.RenderQueue != nil {
+		jp.RenderQueue = renderQueueToJSON(p.RenderQueue)
+	}
 
 	return jp
+}
+
+func renderQueueToJSON(rq *RenderQueue) *JSONRenderQueue {
+	jrq := &JSONRenderQueue{NumItems: rq.NumItems()}
+	for _, it := range rq.Items {
+		ji := &JSONRenderQueueItem{
+			Status:           it.Status,
+			Name:             it.Name,
+			Comment:          it.Comment,
+			TimeSpanStart:    roundFloat(it.TimeSpanStart, 4),
+			TimeSpanDuration: roundFloat(it.TimeSpanDuration, 4),
+		}
+		if it.Comp != nil {
+			ji.CompName = it.Comp.Name
+		}
+		for _, om := range it.OutputModules {
+			ji.OutputModules = append(ji.OutputModules, &JSONOutputModule{
+				Name:         om.Name,
+				FileTemplate: om.FileTemplate,
+				FullPath:     om.FullPath,
+			})
+		}
+		jrq.Items = append(jrq.Items, ji)
+	}
+	return jrq
 }
 
 func compToJSON(c *Composition) *JSONComposition {

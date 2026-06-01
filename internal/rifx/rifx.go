@@ -93,6 +93,15 @@ var (
 	IDLnrp = ChunkID{'l', 'n', 'r', 'p'} // flag chunk: linearize_working_space (presence = true)
 	IDGpuG = ChunkID{'g', 'p', 'u', 'G'} // LIST formType: GPU device id container (single Utf8 child = UUID)
 	IDExEn = ChunkID{'E', 'x', 'E', 'n'} // LIST formType: expression engine container (single Utf8 child = "extendscript" / "javascript-1.0")
+
+	// Render queue chunk family (P3 §3A, py-aep parity). IDAls2/IDAlas/IDLhd3/IDLdat already above; "list" = IDkfl.
+	IDLRdr = ChunkID{'L', 'R', 'd', 'r'} // LIST formType: render queue container (direct root child)
+	IDLItm = ChunkID{'L', 'I', 't', 'm'} // LIST formType: render-queue item collection (per-item RCom/list/LOm groups)
+	IDLOm  = ChunkID{'L', 'O', 'm', ' '} // LIST formType: output-module group (Roou-delimited modules + Als2 + Utf8 name/template)
+	IDRCom = ChunkID{'R', 'C', 'o', 'm'} // non-LIST container leaf: render-queue item comment (embeds a Utf8 chunk in Data)
+	IDRoou = ChunkID{'R', 'o', 'o', 'u'} // leaf: output-module settings (154+ bytes); delimits output modules within LOm
+	IDRopt = ChunkID{'R', 'o', 'p', 't'} // leaf: format-specific render options (polymorphic by format_code)
+	IDRout = ChunkID{'R', 'o', 'u', 't'} // leaf: render-queue item flags (4B header + 4B/item)
 )
 
 // opaqueListTypes is the set of LIST formTypes whose payload is non-chunk

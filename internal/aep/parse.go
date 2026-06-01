@@ -114,6 +114,7 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 		return nil, err
 	}
 	proj.initDerived(root)
+	parseRenderQueue(root, proj)
 	return proj, nil
 }
 

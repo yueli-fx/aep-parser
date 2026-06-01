@@ -1,11 +1,11 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-01 by claude（flightdeck 1.x→1.2 迁移：status frontmatter + INDEX；logbook→landed/HISTORY.md）
-**Active focus**: 无 active 线 — multi-ShapeLayer silent-drop 已修复 ship。下条从 backlog 选，等用户定方向。无 in-flight WIP，工作树 commit 后应为 clean。
+**Last updated**: 2026-06-01 by claude（P3 §3A slice-1 Render Queue R-only reader 已 ship + commit；CLAUDE.md 瘦身 + 新增 rules.md）
+**Active focus**: **py-aep parity P3** — §3A Render Queue R-only reader 已 ship（`Project.RenderQueue`/Items/OutputModules，7 测试 PASS + byte-identical round-trip）。下一刀从 P3 写区或其它子项选（等用户定方向）。
 
 ## Next session
 
-1. **从 backlog 选下一条（等用户定方向）**。
+1. **P3 下一刀（等用户定方向）**：Render Queue 写区（settings enum / OM 128B settings / format options×7）｜ Composition.Renderer W ｜ Property.ValueText ｜ DimensionsSeparated。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` § 非目标。
 
 ## Backlog（长线大 arc / 缺 runtime setter）
 

@@ -7,7 +7,7 @@ status: blocked
 **Status**: **部分完成（partial / paused）— 更新 2026-05-31**。
 - **P1 ✅ 全落**（landed `2026-05-26-py-aep-parity-p1-plan`）
 - **P2 ✅ 大部分**（landed P2a/P2b plans）；剩 deferred 少数：2C Gradient **W**（2026-05-31 已 ship gradient fill write，stroke/Type-Start-End 仍 deferred）、2E ImportPlaceholder（AE 拒收，删除）、2K TimeRemap enable（结构性）、Composition.Time（low-pri）、ReplaceWithPlaceholder/Solid
-- **P3 ❌ 基本未启动**——剩余大块：Render Queue 全域（~3-5k LOC）、Essential Graphics、Guides、Composition.Renderer W、Property.ValueText、DimensionsSeparated。**例外**：P3 §2.3 表里 Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表已改 ✅）
+- **P3 🚧 已启动**——**§3A slice-1 Render Queue R-only reader 已落**（2026-06-01，`Project.RenderQueue` + Items/OutputModules 只读，无写无 ship-gate；详 `../plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`）。剩余大块：Render Queue 写区（全 settings enum / format options×7 / OM 写）、Essential Graphics、Guides、Composition.Renderer W、Property.ValueText、DimensionsSeparated。**例外**：P3 §2.3 表里 Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表已改 ✅）
 **Created**: 2026-05-26
 **Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](../charts/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
 

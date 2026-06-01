@@ -186,6 +186,11 @@ type Project struct {
 	Folders        []*Folder
 	BitsPerChannel BitsPerChannel
 
+	// RenderQueue holds the parsed render queue (LIST:LRdr). Nil when the
+	// project has no LRdr chunk; non-nil with empty Items for an empty queue.
+	// Read-only (P3 §3A slice-1).
+	RenderQueue *RenderQueue
+
 	// Warnings collects non-fatal parsing anomalies — chunks whose header
 	// looked sane enough to attempt decoding but whose payload did not
 	// match the expected layout (length mismatch, impossible counts, etc).
