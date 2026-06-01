@@ -321,3 +321,13 @@ func readFloat64BE(b []byte, offset int) (float64, bool) {
 	}
 	return math.Float64frombits(binary.BigEndian.Uint64(b[offset:])), true
 }
+
+// readFloat64LE decodes a little-endian IEEE 754 double from b at offset.
+// Only the otst orientation cdat stores values little-endian (see
+// parseOrientationProperty); everything else is big-endian.
+func readFloat64LE(b []byte, offset int) (float64, bool) {
+	if offset < 0 || offset+8 > len(b) {
+		return 0, false
+	}
+	return math.Float64frombits(binary.LittleEndian.Uint64(b[offset:])), true
+}

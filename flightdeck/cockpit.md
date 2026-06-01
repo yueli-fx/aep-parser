@@ -1,12 +1,12 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-02 by claude（Property DimensionsSeparated + IsSeparation* R 落地；并查清"3D transform 缺属性"实为 AE 默认值省略而非 parser bug —— incident 已纠正改名 transform-group-default-omission）
+**Last updated**: 2026-06-02 by claude（3D Orientation R fidelity 落地：otst wrapper → Components=3 + cdat 小端 + otda keyframe 值，3 fixture 验证；剩 animated easing/tangents 未校验）
 **Active focus**: **py-aep parity P3** — §3A Render Queue read+write 主体完成（`fb657cb`→`54f65f1`，Alpha length-preserving）。**Composition.SetRenderer 已 ship**（`420020c`/`b13358b`，双版本 ship-gate 绿，off-alpha）。**Composition Guides R/W 已落**（Alpha）。**Property 分离维度 R 已落**（DimensionsSeparated + leader/follower/dimension）。剩 RQ 结构性增删 + comment 写 + 派生枚举/XML format options。
 
 ## Next session
 
 1. **其余 P3**：需 ship-gate（DimensionsSeparated **W** / RQ 结构性增删）或大 RE（ValueText / Essential Graphics）。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
-2. **Property synthesis**（可选大 feature，暂搁）：AE 省略未改的默认属性，py-aep 合成完整 transform schema 我们不合成。补合成 + `Elided` 是唯一让 transform group 对齐 py-aep 长度的路。详 `incidents/transform-group-default-omission.md`。次要 fidelity：otst Orientation 的 otky 关键帧 + Components=3。
+2. **Property synthesis**（可选大 feature，暂搁）：AE 省略未改的默认属性，py-aep 合成完整 transform schema 我们不合成。补合成 + `Elided` 是唯一让 transform group 对齐 py-aep 长度的路。详 `incidents/transform-group-default-omission.md`。次要 fidelity：animated orientation 的 easing/tangents（旧 1D layout 未校验）。
 2. **ship-gate wrapper 改进已落**（`19d8922`）：splash Ignore action + grace 15→30s。后续若 OCR 被其他窗口遮挡（occlusion）仍可能误报，见 `incidents/ae-automation-occlusion-crashstate.md`。
 
 ## Backlog（长线大 arc / 缺 runtime setter）

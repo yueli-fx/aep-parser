@@ -36,10 +36,13 @@ synthesize anything yet"）。所以我们的 flat/tree 只列文件里真实存
 
 3D 层的 Orientation payload 是 `LIST:otst`（含 `tdbs` 值 + `otky` 关键帧），不是裸 `tdbs`：
 
-- **flat parser**：`parse_properties.go::descend()` 命中 otst 内的 tdbs，正确 surface
-  "ADBE Orientation" 叶子（value 解出）。⚠ 但 descend 只找 tdbs，**忽略 otky 关键帧**；
-  且当前 Orientation 解成 Components=1（3D 应是 3 分量）—— 这两点是真实的小 fidelity 缺口，
-  独立于本条，需要时另立。
+- **flat parser**：`parse_properties.go::collectFromGroup` 现有专门的 `case rifx.IDOtst`
+  → `parseOrientationProperty`（2026-06-02 落地）。静态值修对：Components=3、cdat 按
+  **小端**解（`decodeCdatValueLE`），fixture `orientation_5_0_0`/`orientation_0_279_0` 验证
+  `[5,0,0]`/`[0,279,0]`。动画值修对：keyframe 的 X/Y/Z 从 **otky/otda**（大端，每 otda 一个 kf）
+  取，fixture `orientation_with_keyframes` 验证 `[5,0,0]`→`[0,0,0]`。
+  ⚠ **仍缺**：animated orientation 的 easing/tangents 是用 Components=1 的旧 layout 解的，未校验，
+  需要时再修（值已对，影响的是缓动）。
 - **tree builder**：`scene_property_group.go::addNamedChildren()` 的 `default:` 分支**有意**
   把 otst/parT/mrst 这类未知 wrapper 包成 opaque 空 group（注释写明 "don't descend further"）。
   所以 tree 里 Orientation 显示成 0-child group —— **by design**，非 bug。flat 列表才是值的来源。
@@ -54,5 +57,5 @@ Position_2（文件里没有）和 unseparated leader（Position 整个被省略
 
 1. **Property synthesis**（大 feature，暂搁）：补出 AE 省略的默认 transform 属性，对齐 py-aep
    的完整 schema + `Elided()`。这是唯一能让我们的 transform group "看起来和 py-aep 一样长"的路。
-2. **otst Orientation fidelity**（小）：descend 解 otky 关键帧 + 修 Components=3；tree 里把
-   otst 当叶子而非空 group。需要时另立 incident/sketch。
+2. **otst Orientation fidelity**：静态值 + keyframe 值已修（见上 § 2）。剩 animated orientation
+   的 easing/tangents（旧 1D layout）+ tree 里把 otst 当叶子而非空 group。需要时另立。

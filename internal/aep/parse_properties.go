@@ -62,6 +62,11 @@ func collectFromGroup(group *rifx.Chunk, out *[]*Property, effects *[]*Effect, m
 			if p := parseGradientStopsProperty(name, payload, ctx); p != nil {
 				*out = append(*out, p)
 			}
+		case rifx.IDOtst:
+			// 3D Orientation wrapper — cdat is little-endian and 3-component.
+			if p := parseOrientationProperty(name, payload, ctx); p != nil {
+				*out = append(*out, p)
+			}
 		default:
 			// otst (orientation), parT (effect param), etc. — descend so we
 			// catch anything tdbs-shaped inside.
@@ -108,6 +113,68 @@ func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCt
 		}
 	}
 	return prop
+}
+
+// parseOrientationProperty reads the otst wrapper that holds a 3D layer's
+// Orientation. The wrapper nests a tdbs whose cdat stores the X/Y/Z value
+// LITTLE-ENDIAN (py-aep: cdat is_le when its grandparent LIST is otst) plus
+// an otky keyframe container. Orientation is always 3-component even though
+// its tdb4 dimension byte reads 0x01, so Components/StaticValue are fixed up
+// after the shared parseLeafProperty pass.
+//
+// Keyframe VALUES come from the otky/otda chunks (each otda = one keyframe's
+// X/Y/Z, big-endian), NOT from the kfl ldat (whose value slot is zero for
+// orientation). Keyframe timing is taken from the shared parseLeafProperty
+// pass; easing/tangents on animated orientation are not yet validated
+// (see incidents/transform-group-default-omission.md § otst fidelity).
+func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx) *Property {
+	tdbs := otst.FindFirstList(rifx.IDTdbs)
+	if tdbs == nil {
+		return nil
+	}
+	prop := parseLeafProperty(matchName, tdbs, ctx)
+	if prop == nil {
+		prop = &Property{MatchName: matchName, Name: matchName, back: &propertyBackrefs{tdbs: tdbs}}
+	}
+	prop.Components = 3
+
+	if len(prop.Keyframes) > 0 {
+		// Animated: replace the (zero) ldat values with the real per-keyframe
+		// X/Y/Z from otda, in order.
+		if otky := otst.FindFirstList(rifx.IDOtky); otky != nil {
+			ki := 0
+			for _, ch := range otky.Children {
+				if ch.ID != rifx.IDOtda || len(ch.Data) < 24 {
+					continue
+				}
+				if ki >= len(prop.Keyframes) {
+					break
+				}
+				prop.Keyframes[ki].Value = decodeCdatValue(ch.Data, 3) // otda is big-endian
+				ki++
+			}
+		}
+	} else if cdat := tdbs.FindFirst(rifx.IDCdat); cdat != nil && len(cdat.Data) >= 24 {
+		// Static: the cdat value is little-endian inside an otst.
+		prop.back.cdat = cdat
+		prop.StaticValue = decodeCdatValueLE(cdat.Data, 3)
+	}
+	return prop
+}
+
+// decodeCdatValueLE reads `components` little-endian float64 from a cdat
+// chunk. Always returns []float64 (orientation is multi-component); the
+// big-endian counterpart is decodeCdatValue.
+func decodeCdatValueLE(d []byte, components int) any {
+	vals := make([]float64, components)
+	for i := 0; i < components; i++ {
+		v, ok := readFloat64LE(d, i*8)
+		if !ok {
+			break
+		}
+		vals[i] = v
+	}
+	return vals
 }
 
 // collectEffects walks the "ADBE Effect Parade" tdgp. Each effect is a
