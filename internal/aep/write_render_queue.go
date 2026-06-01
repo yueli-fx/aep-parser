@@ -141,3 +141,171 @@ func (it *RenderQueueItem) SetSkipExistingFiles(v bool) {
 		it.RenderSettings.SkipExistingFiles = v
 	}
 }
+
+// --- output module settings setters -----------------------------------------
+
+func boolByte(v bool) byte {
+	if v {
+		return 1
+	}
+	return 0
+}
+
+// omPatchU8 / omPatchU16BE / omPatchU32BE / omSetBit patch the 128B settings
+// block in place; ok reports whether the block is present and long enough.
+func (om *OutputModule) omPatchU8(off int, v byte) bool {
+	if om == nil || len(om.settingsBlock) <= off {
+		return false
+	}
+	om.settingsBlock[off] = v
+	return true
+}
+
+func (om *OutputModule) omPatchU16BE(off int, v uint16) bool {
+	if om == nil || len(om.settingsBlock) < off+2 {
+		return false
+	}
+	binary.BigEndian.PutUint16(om.settingsBlock[off:], v)
+	return true
+}
+
+func (om *OutputModule) omPatchU32BE(off int, v uint32) bool {
+	if om == nil || len(om.settingsBlock) < off+4 {
+		return false
+	}
+	binary.BigEndian.PutUint32(om.settingsBlock[off:], v)
+	return true
+}
+
+func (om *OutputModule) omSetBit(byteOff, bit int, v bool) bool {
+	if om == nil || len(om.settingsBlock) <= byteOff {
+		return false
+	}
+	mask := byte(1 << bit)
+	if v {
+		om.settingsBlock[byteOff] |= mask
+	} else {
+		om.settingsBlock[byteOff] &^= mask
+	}
+	return true
+}
+
+// SetChannels sets the output channels (0 RGB / 1 RGBA / 2 Alpha).
+func (om *OutputModule) SetChannels(v int) {
+	if om.omPatchU8(omsChannels, byte(v)) {
+		om.Settings.Channels = v
+	}
+}
+
+// SetResizeQuality sets the resize quality.
+func (om *OutputModule) SetResizeQuality(v int) {
+	if om.omPatchU8(omsResizeQuality, byte(v)) {
+		om.Settings.ResizeQuality = v
+	}
+}
+
+// SetResize toggles resize.
+func (om *OutputModule) SetResize(v bool) {
+	if om.omPatchU8(omsResize, boolByte(v)) {
+		om.Settings.Resize = v
+	}
+}
+
+// SetLockAspectRatio toggles lock-aspect-ratio.
+func (om *OutputModule) SetLockAspectRatio(v bool) {
+	if om.omPatchU8(omsLockAspectRatio, boolByte(v)) {
+		om.Settings.LockAspectRatio = v
+	}
+}
+
+// SetCrop toggles crop (flag byte @0x1F bit 0).
+func (om *OutputModule) SetCrop(v bool) {
+	if om.omSetBit(omsFlagByte22, 0, v) {
+		om.Settings.Crop = v
+	}
+}
+
+// SetCropTop/Left/Bottom/Right set the crop insets (px).
+func (om *OutputModule) SetCropTop(v int) {
+	if om.omPatchU16BE(omsCropTop, uint16(v)) {
+		om.Settings.CropTop = v
+	}
+}
+
+func (om *OutputModule) SetCropLeft(v int) {
+	if om.omPatchU16BE(omsCropLeft, uint16(v)) {
+		om.Settings.CropLeft = v
+	}
+}
+
+func (om *OutputModule) SetCropBottom(v int) {
+	if om.omPatchU16BE(omsCropBottom, uint16(v)) {
+		om.Settings.CropBottom = v
+	}
+}
+
+func (om *OutputModule) SetCropRight(v int) {
+	if om.omPatchU16BE(omsCropRight, uint16(v)) {
+		om.Settings.CropRight = v
+	}
+}
+
+// SetIncludeProjectLink toggles the "include project link" flag.
+func (om *OutputModule) SetIncludeProjectLink(v bool) {
+	if om.omPatchU8(omsIncludeProjectLink, boolByte(v)) {
+		om.Settings.IncludeProjectLink = v
+	}
+}
+
+// SetPostRenderAction sets the raw post-render action code.
+func (om *OutputModule) SetPostRenderAction(v uint32) {
+	if om.omPatchU32BE(omsPostRenderAction, v) {
+		om.Settings.PostRenderAction = v
+	}
+}
+
+// SetUseCompFrameNumber toggles "use comp frame number" (flag byte @0x07 bit 3).
+func (om *OutputModule) SetUseCompFrameNumber(v bool) {
+	if om.omSetBit(omsFlagByte07, 3, v) {
+		om.Settings.UseCompFrameNumber = v
+	}
+}
+
+// SetUseRegionOfInterest toggles "use region of interest" (bit 4).
+func (om *OutputModule) SetUseRegionOfInterest(v bool) {
+	if om.omSetBit(omsFlagByte07, 4, v) {
+		om.Settings.UseRegionOfInterest = v
+	}
+}
+
+// SetIncludeSourceXMP toggles "include source XMP metadata" (bit 6).
+func (om *OutputModule) SetIncludeSourceXMP(v bool) {
+	if om.omSetBit(omsFlagByte07, 6, v) {
+		om.Settings.IncludeSourceXMP = v
+	}
+}
+
+// SetPreserveRGB toggles "preserve RGB" (bit 7).
+func (om *OutputModule) SetPreserveRGB(v bool) {
+	if om.omSetBit(omsFlagByte07, 7, v) {
+		om.Settings.PreserveRGB = v
+	}
+}
+
+// SetDepth sets the output color depth (Roou @0x47), e.g. 24/32/48/64/96/128.
+func (om *OutputModule) SetDepth(v int) {
+	if om == nil || len(om.roouData) <= roouDepth {
+		return
+	}
+	om.roouData[roouDepth] = byte(v)
+	om.Settings.Depth = v
+}
+
+// SetStartingNumber sets the image-sequence starting frame number (Roou @0x10).
+func (om *OutputModule) SetStartingNumber(v uint32) {
+	if om == nil || len(om.roouData) < roouStartingNumber+4 {
+		return
+	}
+	binary.BigEndian.PutUint32(om.roouData[roouStartingNumber:], v)
+	om.Settings.StartingNumber = v
+}

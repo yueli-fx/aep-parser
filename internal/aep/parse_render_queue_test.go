@@ -417,6 +417,59 @@ func TestRenderQueueRenderSettingsWriteRoundTrip(t *testing.T) {
 	}
 }
 
+// Output module settings writes (slice-6): in-place patches to the 128B block
+// (incl flag bits) and the Roou chunk. Round-trip through WriteAEP.
+func TestRenderQueueOutputModuleWriteRoundTrip(t *testing.T) {
+	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	proj, err := aep.FromReader(bytes.NewReader(orig))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	om := proj.RenderQueue.Items[0].OutputModules[0]
+	om.SetChannels(1)            // 0 -> 1
+	om.SetLockAspectRatio(false) // true -> false
+	om.SetCrop(true)             // false -> true (flag bit)
+	om.SetCropTop(5)
+	om.SetUseCompFrameNumber(false) // true -> false (flag bit)
+	om.SetIncludeProjectLink(false) // true -> false
+	om.SetDepth(32)                 // Roou: 24 -> 32
+	om.SetStartingNumber(101)       // Roou u32
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	s := re.RenderQueue.Items[0].OutputModules[0].Settings
+	if s.Channels != 1 {
+		t.Errorf("Channels = %d, want 1", s.Channels)
+	}
+	if s.LockAspectRatio {
+		t.Error("LockAspectRatio = true, want false")
+	}
+	if !s.Crop || s.CropTop != 5 {
+		t.Errorf("Crop = %v CropTop = %d, want true 5", s.Crop, s.CropTop)
+	}
+	if s.UseCompFrameNumber {
+		t.Error("UseCompFrameNumber = true, want false")
+	}
+	if s.IncludeProjectLink {
+		t.Error("IncludeProjectLink = true, want false")
+	}
+	if s.Depth != 32 {
+		t.Errorf("Depth = %d, want 32", s.Depth)
+	}
+	if s.StartingNumber != 101 {
+		t.Errorf("StartingNumber = %d, want 101", s.StartingNumber)
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

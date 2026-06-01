@@ -121,6 +121,13 @@ type OutputModule struct {
 	// chunk), or nil for XML-based formats (AVI/H264/QuickTime) which carry no
 	// Ropt variant. slice-4, read-only.
 	FormatOptions *FormatOptions
+
+	// settingsBlock aliases this module's 128B OutputModuleSettingsItem; roouData
+	// aliases the Roou chunk bytes. Both share the backing chunk array, powering
+	// the length-preserving Set* methods in write_render_queue.go. nil outside
+	// the parser.
+	settingsBlock []byte
+	roouData      []byte
 }
 
 // FormatOptions is a typed view of the Ropt chunk (format-specific render

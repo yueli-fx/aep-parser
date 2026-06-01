@@ -174,11 +174,12 @@ func parseOutputModules(lom *rifx.Chunk, omBlocks [][]byte) []*OutputModule {
 }
 
 func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
-	om := &OutputModule{}
+	om := &OutputModule{settingsBlock: omBlock}
 	als2Seen := false
 	var postAls2 []string
 	for _, ch := range group {
 		if ch.ID == rifx.IDRoou {
+			om.roouData = ch.Data
 			applyRoou(om, ch.Data)
 			continue
 		}
