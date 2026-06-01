@@ -134,6 +134,7 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 - JSON 导出 `render_queue` 节点（snake_case 自有 schema，含 `render_settings` + OM `settings` + `format_options`）
 - chunk family：`LRdr → {list→lhd3+ldat(RenderSettingsItem 2246B×N), LItm→per-item [RCom]+list(ldat=OMSettings 128B×M)+'LOm '(Roou 组+Ropt)}`；新 rifx ID `LRdr/LItm/'LOm '/RCom/Roou/Ropt/Rout`
 - **RQ reader R-only 主体完成**（slice-1 结构 + 2 render settings + 3 OM settings + 4 format options）
+- `RenderQueueItem` 渲染设置 **W**（slice-5，**Alpha** — 未 ship-gate）：`SetQuality/SetColorDepth/SetEffects/SetFieldRender/SetPulldown/SetFrameBlending/SetMotionBlur/SetProxyUse/SetSoloSwitches/SetGuideLayers/SetDiskCache/SetFrameRate/SetResolution/SetSkipExistingFiles`。length-preserving in-place ldat patch（settingsBlock 别名 chunk bytes，sentinel -1↔0xFFFF），非结构性故不走 ship-gate；round-trip 字节验证。AE 接受未在 app 内验，标 Alpha
 - **defer**：XML format options（AVI/H264 从 Als2 旁 JSON，独立解析路径）/ Cineon·Png HDR10 metadata / Format·OutputAudio·Color 派生枚举映射 / SkipFrames（派生）/ `file` 模板变量解析 / LogType·Status·PostRenderAction 的 3xxx 命名空间枚举 / 任何写。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`
 - gotcha：comp duration 两套表示分歧 → [`incidents/cdta-duration-two-representations.md`](../incidents/cdta-duration-two-representations.md)
 

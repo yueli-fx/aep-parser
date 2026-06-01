@@ -61,6 +61,12 @@ type RenderQueueItem struct {
 	TimeSpanDuration float64
 
 	OutputModules []*OutputModule
+
+	// settingsBlock aliases the 2246-byte slice of the render-settings ldat
+	// for this item (Go subslices share the backing array, so patching it
+	// mutates the chunk in place). nil for items built outside the parser.
+	// Powers the length-preserving Set* methods in write_render_queue.go.
+	settingsBlock []byte
 }
 
 // RenderSettings is the per-item render settings (ExtendScript

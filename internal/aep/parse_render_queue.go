@@ -90,6 +90,7 @@ func renderSettingsBlocks(lrdr *rifx.Chunk) [][]byte {
 func buildRenderQueueItem(blocks [][]byte, idx int, comment string, itemList, lom *rifx.Chunk, proj *Project) *RenderQueueItem {
 	item := &RenderQueueItem{Comment: comment}
 	if idx < len(blocks) {
+		item.settingsBlock = blocks[idx]
 		if rs, ok := decodeRenderSettings(blocks[idx]); ok {
 			item.Status = rs.status
 			item.Name = rs.templateName

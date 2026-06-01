@@ -364,6 +364,59 @@ func TestRenderQueueFormatOptionsCineon(t *testing.T) {
 	}
 }
 
+// Render settings writes (slice-5): length-preserving in-place ldat patches.
+// Set values, WriteAEP, re-parse, confirm persisted (incl -1 sentinel).
+func TestRenderQueueRenderSettingsWriteRoundTrip(t *testing.T) {
+	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	proj, err := aep.FromReader(bytes.NewReader(orig))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	item := proj.RenderQueue.Items[0]
+	item.SetQuality(0)       // best(2) -> wireframe(0)
+	item.SetColorDepth(2)    // current(-1) -> 32bpc(2)
+	item.SetMotionBlur(-1)   // 1 -> current(-1, sentinel 0xFFFF)
+	item.SetResolution(2, 3) // [1,1] -> [2,3]
+	item.SetSkipExistingFiles(true)
+	item.SetEffects(0)
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	// In-memory struct reflects the writes.
+	if item.RenderSettings.Quality != 0 || item.RenderSettings.MotionBlur != -1 {
+		t.Errorf("in-memory not updated: %+v", item.RenderSettings)
+	}
+	// Persisted bytes re-parse to the new values.
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rs := re.RenderQueue.Items[0].RenderSettings
+	if rs.Quality != 0 {
+		t.Errorf("Quality = %d, want 0", rs.Quality)
+	}
+	if rs.ColorDepth != 2 {
+		t.Errorf("ColorDepth = %d, want 2", rs.ColorDepth)
+	}
+	if rs.MotionBlur != -1 {
+		t.Errorf("MotionBlur = %d, want -1", rs.MotionBlur)
+	}
+	if rs.Resolution != [2]int{2, 3} {
+		t.Errorf("Resolution = %v, want [2 3]", rs.Resolution)
+	}
+	if !rs.SkipExistingFiles {
+		t.Error("SkipExistingFiles = false, want true")
+	}
+	if rs.Effects != 0 {
+		t.Errorf("Effects = %d, want 0", rs.Effects)
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {
