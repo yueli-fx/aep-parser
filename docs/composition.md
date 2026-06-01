@@ -322,6 +322,31 @@ for _, m := range comp.Markers {
 
 ---
 
+### Composition.Renderer
+
+```go
+Renderer string
+```
+
+#### Description
+
+合成的 3D 渲染引擎，存为 `PRin` LIST → `prin` chunk 里的 binary match_name（AE 内部画家代号）。AE Scripting 的 `CompItem.renderer` 暴露的是另一套 module name —— 只有 `ADBE Escher`（binary）↔ `ADBE Advanced 3d`（ExtendScript）不同名，其余三个两套相同：
+
+| binary match_name | ExtendScript | UI |
+|---|---|---|
+| `ADBE Escher` | `ADBE Advanced 3d` | Advanced 3D（旧版 AE 为 Classic 3D） |
+| `ADBE Calder` | `ADBE Calder` | Advanced 3D（AE 2025） |
+| `ADBE Ernst` | `ADBE Ernst` | Cinema 4D |
+| `ADBE Picasso` | `ADBE Picasso` | Ray-traced 3D |
+
+各 AE 版本暴露的引擎不同（AE 2020 = Escher/Standard/Ernst；AE 2025 = Calder/Ernst/Picasso，且 load 时把废弃 Escher/Picasso 自动提升为 Advanced 3D）。空字符串表示该 comp 无 `PRin` LIST（罕见，仅见于跳过 AE 序列化的程序化 comp）。
+
+#### Type
+
+`string`；read / write via [`SetRenderer`](#compositionsetrenderer)。
+
+---
+
 ## Methods
 
 ### Composition.LayerByID
@@ -604,3 +629,25 @@ func (c *Composition) SetLabel(index uint8) error
 ```
 
 写 project 面板的色卡索引（0..16；idta payload `@0x3A` 单字节，length-preserving）。
+
+## Renderer setter (structural)
+
+### Composition.SetRenderer
+
+```go
+func (c *Composition) SetRenderer(name string) error
+```
+
+切换合成的 3D 渲染引擎。`name` 可传 binary match_name（`ADBE Escher` / `ADBE Calder` / `ADBE Ernst` / `ADBE Picasso`）或 ExtendScript 名（`ADBE Advanced 3d` → 归一为 `ADBE Escher`），见 [`Renderer`](#compositionrenderer) 对照表。`prin` 的 match_name + display_name 原地改（length-preserving），`prda`（引擎专属选项）整块换成目标引擎默认模板（**结构性** —— 父 `PRin` LIST size 变，`WriteAEP` 重算）。切换会把引擎选项重置为默认（与 AE 在 Composition Settings 改 renderer 的行为一致）。
+
+未知引擎 / comp 无 `prin·prda` back-ref（程序化 comp）/ `prin` 非 104B / 触发 parser warning（回滚）时返回 error。原子写：snapshot + warnings-as-failure + rollback。
+
+Ship-gate：AE 2025（4/4，废弃 Escher/Picasso 被 AE load 时提升为 Advanced 3D，文件仍接受）+ AE 2020（Ernst 精确、Escher → `ADBE Advanced 3d`）双版本绿。
+
+#### Composition.PrdaRawBytes
+
+```go
+func (c *Composition) PrdaRawBytes() []byte
+```
+
+只读返回 `prda` chunk 的 Data（引擎专属选项原始字节），无 `PRin` LIST 时返回 nil。调试 / RE 用，勿改返回的 slice（是 live chunk 数据）。

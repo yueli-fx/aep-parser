@@ -178,7 +178,7 @@ AE 文档：[CompItem](../charts/after-effects-scripting-guide/docs/item/compite
 | `CompItem.numLayers`                                                       | `Composition.NumLayers()`                                                                   | ✅ R            | P1 1F                                                                                                                                                                            |
 | `CompItem.preserveNestedFrameRate`                                         | `Composition.SetPreserveNestedFrameRate(bool)`                                              | ✅ W only       | cdta `@0x8B` bit 5                                                                                                                                                             |
 | `CompItem.preserveNestedResolution`                                        | `Composition.SetPreserveNestedResolution(bool)`                                             | ✅ W only       | cdta `@0x8B` bit 7                                                                                                                                                             |
-| `CompItem.renderer` / `renderers`                                        | —                                                                                            | ❌              | 当前 / 可用渲染器（Classic 3D / Cinema 4D / Ray-Traced）。**P3**                                                                                                           |
+| `CompItem.renderer`                                        | `Composition.Renderer` / `SetRenderer`                                                                                            | ✅ R/W              | binary match_name；`SetRenderer` 接受 binary 或 ExtendScript 名；prin 改名 + prda 换模板（structural）；ship-gate AE 2025 4/4 + AE 2020 Ernst/Escher 绿                                                                                                          |
 | `CompItem.resolutionFactor`                                                | `Composition.ResolutionFactor [2]uint16` + `SetResolutionFactor(x, y uint16)`                | ✅ R/W          | cdta `@0x00`（X uint16）/ `@0x02`（Y uint16）。`[1,1]` Full / `[2,2]` Half / `[4,4]` Quarter / 非方形（如 `[3,4]`）合法。RE: re_cdta_probe.aep                                |
 | `CompItem.selectedLayers` / `selectedProperties`                         | —                                                                                            | N/A             | UI 选择                                                                                                                                                                          |
 | `CompItem.shutterAngle`                                                    | +`SetShutterAngle`                                                                          | ✅ R/W          |                                                                                                                                                                                  |
@@ -190,7 +190,7 @@ AE 文档：[CompItem](../charts/after-effects-scripting-guide/docs/item/compite
 | `CompItem.name` (from Item)                                                | `Composition.Name` + `SetName`                                                            | ✅ R/W          | length-variable Utf8 替换                                                                                                                                                        |
 | Methods:`duplicate / openInViewer / saveFrameToPng / setProxyToNone / ...` | —                                                                                            | ❌              | 大多结构性或 UI                                                                                                                                                                  |
 
-> **cdta 字段 setter 现状**：HideShyLayers / CompMotionBlur / PreserveNestedFrameRate / Draft3D / FrameBlending / PreserveNestedResolution / DisplayStartTime / Size 等均已 ship。`dropFrame` 不持久化（runtime-only）。`renderer` AE 24+ 只接受默认渲染器，未暴露 setter |
+> **cdta 字段 setter 现状**：HideShyLayers / CompMotionBlur / PreserveNestedFrameRate / Draft3D / FrameBlending / PreserveNestedResolution / DisplayStartTime / Size 等均已 ship。`dropFrame` 不持久化（runtime-only）。`renderer` R/W 已 ship（`SetRenderer`，prin/prda，非 cdta；双版本 ship-gate 绿） |
 
 ---
 
@@ -402,8 +402,8 @@ Fixtures: `re_text_ae24_more.aep` / `re_altsource_ae24.aep` / `re_varfont_ae24.a
 
 ### Wave 4 — 收尾批次（2026-05-22 自由探索）
 
-✅ `Composition.ResolutionFactor [2]uint16` R/W (cdta `@0x00`/`@0x02`) / `Composition.Renderer string` R only (PRin LIST → prin chunk `@0x04`) / 53 typed setter（Camera 13 + Light 11 + Material 17 + Geometry 3 + Transform 8 + AudioLevels 1） + `MaterialCastsShadowsMode` 三态 enum + `setScalarProperty` 共享 helper。
-❌ Camera `FilmSize` (ldta `@0x98`)、setter ScriptingAPI 不可写 / Renderer setter（prda 长度随 renderer 变）/ cdta tail 不存在（总长 0xCC）。
+✅ `Composition.ResolutionFactor [2]uint16` R/W (cdta `@0x00`/`@0x02`) / `Composition.Renderer string` R/W (PRin LIST → prin `@0x04` 改名 + prda 换模板，`SetRenderer`，双版本 ship-gate 绿) / 53 typed setter（Camera 13 + Light 11 + Material 17 + Geometry 3 + Transform 8 + AudioLevels 1） + `MaterialCastsShadowsMode` 三态 enum + `setScalarProperty` 共享 helper。
+❌ Camera `FilmSize` (ldta `@0x98`)、setter ScriptingAPI 不可写 / cdta tail 不存在（总长 0xCC）。
 Fixtures: `re_cdta_probe.aep` / `re_cdta_ae2020.aep`（跨版本 diff 实证）/ `re_camera_filmsize.aep` / `re_material_options.aep` / `re_geometry_options.aep` / `re_renderer.aep`。
 
 ---

@@ -27,7 +27,7 @@ implements: specs/2026-05-26-py-aep-parity-design.md
 
 - Project: `BitsPerChannel` R/W
 - Composition（cdta）: `Name / FrameRate / Duration / Size / BGColor / ShutterAngle / ShutterPhase / MotionBlurAdaptive / MotionBlurSamplesPerFrame / WorkArea / DisplayStartTime / DisplayStartFrame / PixelAspect / ResolutionFactor` R/W
-- Composition（PRin LIST）: `Renderer` **R only**（match-name；`ADBE Escher` = Advanced 3D / `ADBE Ernst` = Cinema 4D / `ADBE Standard` = Classic 3D）
+- Composition（PRin LIST）: `Renderer` **R/W**（binary match_name；`SetRenderer` 接受 binary 或 ExtendScript 名；prin 改名 length-preserving + prda 换模板 structural；ship-gate AE 2025 4/4 + AE 2020 Ernst/Escher 绿）
 - Composition（cdta flag bits）: `HideShyLayers / CompMotionBlur / Draft3D / FrameBlending / PreserveNestedFrameRate / PreserveNestedResolution` R/W
 - Item: `Name / Comment / Label` R/W（Composition + Footage 共用）
 - Footage: `Path` R/W
@@ -274,7 +274,7 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 | `lineOrientation` 横/竖排切换 | layer-local 坐标重排 + 多字段连锁 |
 | `MaskPropertyGroup.rotoBezier` | 切换重写整个 shape 顶点表示（+16 字节，4500+ byte-diff） |
 | Motion Graphics Template / EP 模板 binding（除 `alternateSource`） | 跨 chunk 复杂结构，P3 罕用 |
-| Project 渲染设置（`gpuAccel / colorSpace / expressionEngine`） | P3，AE 24+ 大多锁定为 default。`renderer` 已 ship R；setter 仍是 P3（prin 双段 NUL-sep + prda 长度随 renderer 变） |
+| Project 渲染设置（`gpuAccel / colorSpace / expressionEngine`） | P3，AE 24+ 大多锁定为 default。（`Composition.renderer` R/W 已 ship — `SetRenderer` 双版本 ship-gate 绿） |
 | Adobe World-Ready composer 切换 | P3 |
 | 手动 kerning **首次启用** | 结构性添加（需 AE 先 emit `/8` slot） |
 | Camera `FilmSize` setter | ldta `@0x98` 持久化但 ScriptingAPI 不暴露写路径（详 `incidents/camera-filmsize-ldta-write-blocked.md`） |
@@ -297,7 +297,6 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 
 可达字段约 99% 已 ship。继续动需要：
 
-1. **同-renderer 范围内 `Composition.SetRenderer`** — 跨 renderer 切换属结构性（prda 长度变），同 renderer 安全；价值小。
-2. **ldta `@0x60-0x82` / `@0x8C-0x9F` 零值区 probe** — 高密度 JSX layer-flag 探针，可能挖出 1-2 个零散 flag 或全 negative。
+1. **ldta `@0x60-0x82` / `@0x8C-0x9F` 零值区 probe** — 高密度 JSX layer-flag 探针，可能挖出 1-2 个零散 flag 或全 negative。
 3. **Footage proxy 字段** — 大部分结构性。
 4. **Project nhed/nnhd 扩展字段** — 除 BitsPerChannel 外的字节，可能持 ColorSpace / Working Color Profile。

@@ -1,12 +1,12 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-01 by claude（P3 §3A RQ read+write 8 slice 全 ship + commit；Renderer W RE 探明记 sketch）
-**Active focus**: **py-aep parity P3** — §3A Render Queue **read+write 主体完成**（8 commit `fb657cb`→`54f65f1`）：reader（结构/RenderSettings/OMSettings/FormatOptions）+ writer（render settings / OM settings / item scalar / time span，**Alpha** length-preserving）。剩 RQ 结构性增删 + comment 写 + 派生枚举/XML format options。
+**Last updated**: 2026-06-01 by claude（Composition.SetRenderer ship 全绿：AE 2025 4/4 + AE 2020 Ernst+Escher；ship-gate wrapper 加 splash Ignore action）
+**Active focus**: **py-aep parity P3** — §3A Render Queue read+write 主体完成（`fb657cb`→`54f65f1`，Alpha length-preserving）。**Composition.SetRenderer 已 ship**（`420020c`/`b13358b`，双版本 ship-gate 绿，off-alpha）。剩 RQ 结构性增删 + comment 写 + 派生枚举/XML format options。
 
 ## Next session
 
-1. **Renderer W 结构性 arc**（RE 已探明 → `sketches/2026-06-01-renderer-write-re-findings.md`）：prin 改名 length-preserving + prda 变长替换 = 结构性 → 抽 4 prda 模板 + atomic SetRenderer + **AE 2020+2025 双版本 ship-gate**（AE 在 `E:\adobe`）。⚠ 进入 ship-gate 慢档。
-2. 其余 P3 同需 ship-gate（DimensionsSeparated / RQ 增删）或大 RE（ValueText / Essential Graphics / Guides）。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
+1. **其余 P3**：需 ship-gate（DimensionsSeparated / RQ 结构性增删）或大 RE（ValueText / Essential Graphics / Guides）。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
+2. **ship-gate wrapper 改进已落**（`19d8922`）：splash Ignore action + grace 15→30s。后续若 OCR 被其他窗口遮挡（occlusion）仍可能误报，见 `incidents/ae-automation-occlusion-crashstate.md`。
 
 ## Backlog（长线大 arc / 缺 runtime setter）
 
