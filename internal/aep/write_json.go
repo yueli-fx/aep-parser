@@ -145,6 +145,13 @@ type JSONComposition struct {
 	MotionBlurSamplesPerFrame     int32         `json:"motion_blur_samples_per_frame"`
 	Layers                        []*JSONLayer  `json:"layers,omitempty"`
 	Markers                       []*JSONMarker `json:"markers,omitempty"` // composition-level markers
+	Guides                        []*JSONGuide  `json:"guides,omitempty"`  // composition ruler guides
+}
+
+// JSONGuide is the JSON representation of a composition ruler guide.
+type JSONGuide struct {
+	Orientation string  `json:"orientation"` // "horizontal" / "vertical"
+	Position    float64 `json:"position"`    // pixels from top (horizontal) / left (vertical)
 }
 
 // JSONLayer is the JSON representation of a Layer.
@@ -514,6 +521,12 @@ func compToJSON(c *Composition) *JSONComposition {
 			URL:          m.URL,
 			FrameTarget:  m.FrameTarget,
 			CuePointName: m.CuePointName,
+		})
+	}
+	for _, g := range c.Guides {
+		jc.Guides = append(jc.Guides, &JSONGuide{
+			Orientation: g.Orientation.String(),
+			Position:    roundFloat(g.Position, 4),
 		})
 	}
 	return jc

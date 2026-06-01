@@ -32,6 +32,7 @@ implements: specs/2026-05-26-py-aep-parity-design.md
 - Item: `Name / Comment / Label` R/W（Composition + Footage 共用）
 - Footage: `Path` R/W
 - Composition markers: 全 8 个 setter
+- **Composition guides (P3, py-aep parity, Alpha)**: `Composition.Guides []*Guide` R + `Guide.SetPosition / SetOrientation` W（length-preserving in-place ldat patch，block 别名 chunk bytes）。`GuideOrientation` 枚举（binary 2=horizontal / 1=vertical，py-aep logical 0/1 经 `.String()` 桥接）；JSON 导出 `guides[]{orientation,position}`。无 AE scripting 等价物（标尺参考线 UI-only，不影响渲染）。结构性增删 guide 暂搁。AE 接受未在 app 内验，标 Alpha。fixture `test_data/guides.aep`（py-aep 样本）
 - **Composition filter views (py-aep parity P1 1A)**: `TextLayers / ShapeLayers / CameraLayers / LightLayers / NullLayers / AdjustmentLayers / ThreeDLayers / GuideLayers / SoloLayers / AVLayers / CompositionLayers / FootageLayers / FileLayers / SolidLayers / PlaceholderLayers` — 15 个 filter helper，无写
 - **Composition convenience (P1 1F)**: `NumLayers / HasAudio / TimeScale` — 3 个 helper（ActiveCamera + Markers field 早已 ship）
 - **Layer convenience (P1 1E)**: `ContainingComp / HasVideo / HasAudio / AudioActive / AudioActiveAtTime / ActiveAtTime / Width / Height / HasTrackMatte / IsTrackMatte / AutoName / IsNameFromSource / RemoveTrackMatte` — 13 个 helper (Index / Type 早已直接 field 暴露)

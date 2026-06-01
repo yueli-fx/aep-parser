@@ -322,6 +322,38 @@ for _, m := range comp.Markers {
 
 ---
 
+### Composition.Guides
+
+```go
+Guides []*Guide
+```
+
+#### Description
+
+合成的**标尺参考线**（AE 从标尺拖出的对齐线）。纯 UI，不影响渲染，无 ExtendScript 等价物（py-aep parity）。底层存在 Item 级 `LIST:Gide → list → ldat`，每条 guide 16 字节。
+
+```go
+for _, g := range comp.Guides {
+    fmt.Printf("%s @ %.0fpx\n", g.Orientation, g.Position) // horizontal @ 270px
+}
+```
+
+`Guide` 字段：
+
+- `Orientation GuideOrientation` —— `GuideHorizontal`（binary 2，Position = 距顶边像素）/ `GuideVertical`（binary 1，距左边像素）。`.String()` → `"horizontal"` / `"vertical"`。
+- `Position float64` —— 像素偏移。
+
+#### 写（length-preserving，Alpha）
+
+```go
+comp.Guides[0].SetPosition(540)
+comp.Guides[0].SetOrientation(aep.GuideVertical)
+```
+
+原地 patch ldat 的 16 字节槽，不改 chunk 大小。共享 chunk bytes，调用方自己锁（见 [并发约束](#)）。增删 guide 是结构性操作，暂未实现。JSON 导出为 `guides[]{orientation, position}`。
+
+---
+
 ### Composition.Renderer
 
 ```go

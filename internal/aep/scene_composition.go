@@ -95,6 +95,11 @@ type Composition struct {
 	// property — decoded with the same machinery as layer markers.
 	Markers []*Marker
 
+	// Guides holds the composition's ruler guides (AE's drag-from-ruler
+	// alignment lines; UI-only, no render effect). Decoded from the comp's
+	// Item-level LIST:Gide. See scene_guide.go.
+	Guides []*Guide
+
 	// proj is the owning project, set by parseProject after the comp is
 	// appended. Used by Layer.SourceComposition() to walk the project's
 	// other comps via Project.CompositionByID. Unexported to keep the API
