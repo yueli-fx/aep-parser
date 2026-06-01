@@ -1,8 +1,12 @@
+---
+status: blocked
+---
+
 # V3 direction — scene-graph IR + capability matrix + serializer split
 
 **Status**: **部分实现（partial / paused）— 更新 2026-05-31**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）。**剩余未做**：M8 物理分包（scene/serializer 拆包，被单 package Go 语义挡，scene→rifx 残留 5 项白名单待清零）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
 
-GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`scars/ae25-acceptance-gate.md`)。
+GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`incidents/ae25-acceptance-gate.md`)。
 
 ## 动机：V2.1 暴露的架构债
 
@@ -212,7 +216,7 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 ## V3 落地建议路径
 
 1. **brainstorm** (`superpowers:brainstorming` skill) → `flightdeck/specs/v3-runtime-design.md`
-2. **plan** (`superpowers:writing-plans`) → `flightdeck/flight-plans/v3-runtime-plan.md`，多 phase：
+2. **plan** (`superpowers:writing-plans`) → `flightdeck/plans/v3-runtime-plan.md`，多 phase：
    - Phase 1: scene types + parse 闭环（不动 serializer，只 wrap）
    - Phase 2: 1 个 layer kind 完整 round-trip via scene API
    - Phase 3: capability matrix + serializer 分包
@@ -245,6 +249,6 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 ## 关联文档
 
 - 反馈源: `flightdeck/kneeboard/gpt`
-- V2.1 实践: `flightdeck/incident-reports/ae25-acceptance-gate.md`
-- 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束（架构 ground truth 已并入 CLAUDE.md，原 architecture.md 内容拆分到 scars/ + playbooks/ + coverage.md）
-- V2.1 plan: `flightdeck/landed/flight-plans/2026-05-22-v2-1-foundation-plan.md`
+- V2.1 实践: `flightdeck/incidents/ae25-acceptance-gate.md`
+- 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束（架构 ground truth 已并入 CLAUDE.md，原 architecture.md 内容拆分到 incidents/ + checklists/ + coverage.md）
+- V2.1 plan: `flightdeck/landed/plans/2026-05-22-v2-1-foundation-plan.md`

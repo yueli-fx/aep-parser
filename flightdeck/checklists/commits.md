@@ -1,4 +1,5 @@
 ---
+status: active
 last_updated: 2026-05-29
 when_to_read: before writing a commit message / staging files / preparing a PR
 applies_to: [commit, git, staging, message, push, pr, conventional-commits, type-scope]
@@ -111,8 +112,8 @@ chore(flightdeck): archive shipped designs/plans to landed/
 
 新加 / 修改 / 删除任何 public API 时, 必须同步:
 
-1. `flightdeck/flight-plans/coverage.md` —— 对应行从 🟢 R / 🗑️ 暂搁 升 ✅ R/W (或反向降级)
-2. `flightdeck/flight-plans/coverage-detail.md` —— AE attr 详细交叉表对应行
+1. `flightdeck/plans/coverage.md` —— 对应行从 🟢 R / 🗑️ 暂搁 升 ✅ R/W (或反向降级)
+2. `flightdeck/plans/coverage-detail.md` —— AE attr 详细交叉表对应行
 3. `docs/{layer,property,text,…}.md` —— public API 文档 (API 文档优先级最高)
 4. `flightdeck/cockpit.md` —— "最近归档" 一条 + ship-gate PASS count
 

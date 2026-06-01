@@ -1,5 +1,6 @@
 ---
-when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against board.md; writing a new test (conventions for fixture / corruption / AE 24 fields); needing a tmp_debug tool to inspect chunks / layers / properties
+status: active
+when_to_read: preparing to commit; verifying tests + vet pass; reconciling PASS count against cockpit.md; writing a new test (conventions for fixture / corruption / AE 24 fields); needing a tmp_debug tool to inspect chunks / layers / properties
 applies_to: [verify, test, vet, pass-count, pre-commit, ship-gate, test-conventions, fixture, t-skipf, tmp-debug-tools]
 last_updated: 2026-05-28
 ---
@@ -17,17 +18,17 @@ go test ./...      # 必须全绿
 
 ## 当前基线
 
-PASS count 见 `../board.md` `Last updated` 行（**唯一权威**）。
+PASS count 见 `../cockpit.md` `Last updated` 行（**唯一权威**）。
 
 校对命令：
 
 ```bash
-go test -count=1 ./internal/aep/... -v | grep -c '^--- PASS'    # 应等于 board.md 写的数字
+go test -count=1 ./internal/aep/... -v | grep -c '^--- PASS'    # 应等于 cockpit.md 写的数字
 go test -count=1 ./internal/aep/... -v | grep -c '^--- FAIL'    # 应 = 0
 go vet ./...                                                       # 应 clean
 ```
 
-如果 PASS 数对不上 board.md，先查最近改动是否漏了同步。
+如果 PASS 数对不上 cockpit.md，先查最近改动是否漏了同步。
 
 ## 跑单个测试
 

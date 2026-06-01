@@ -1,3 +1,7 @@
+---
+status: active
+---
+
 # V3 deep think — open questions, risk register, migration strategy
 
 **Status**: **brainstorm（部分结论已采纳）— 更新 2026-05-31**。仍是开放问题/风险册，非 plan。TL;DR 的关键决策已落地：①in-place refactor（已做，方案①包重组 landed）②eager 已知字段 + lazy V3-only 结构性写（已遵循）③opaque preservation（已为铁律，CLAUDE.md §5）④capability matrix 按需提升。剩余 M8 物理分包 / ShapeGraph / EffectSchema 仍 open。Builds on `2026-05-22-v3-direction.md`（M1-M8 framework）。
@@ -254,7 +258,7 @@ Before writing the V3 Phase 1 plan, want explicit answer on:
 3. **Phase 1 scope** — confirm "back-ref struct extraction only, no behavior change"? Or include something user-visible to make the phase feel like progress?
 4. **Timeline expectations** — comfortable with multi-week V3 timeline (per `2026-05-22-v3-direction.md` projection)?
 
-If all four answers are yes/yes/yes/yes, the next step is `writing-plans` → `flightdeck/flight-plans/2026-05-28-v3-phase1-backrefs-plan.md`.
+If all four answers are yes/yes/yes/yes, the next step is `writing-plans` → `flightdeck/plans/2026-05-28-v3-phase1-backrefs-plan.md`.
 
 ---
 
@@ -263,4 +267,4 @@ If all four answers are yes/yes/yes/yes, the next step is `writing-plans` → `f
 - `2026-05-22-v3-direction.md` — M1-M8 framework (this builds on it, doesn't replace it)
 - `2026-05-26-py-aep-parity-design.md` — what V3 inherits (P2 fully ✅, remaining ❌ all V3/P3)
 - `CLAUDE.md` § 硬约束 — length-preserving + public API + single package constraints V3 must respect
-- `scars/ae25-acceptance-gate.md` — the empirical ground for "AE silently drops things we don't synthesize correctly"
+- `incidents/ae25-acceptance-gate.md` — the empirical ground for "AE silently drops things we don't synthesize correctly"

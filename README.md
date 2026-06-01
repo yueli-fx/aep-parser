@@ -3,7 +3,7 @@
 一个从头实现的 Adobe After Effects `.aep` 项目文件解析器，纯 Go 编写，无需 AE 运行实例。
 支持**读取**项目结构（合成 / 素材 / 图层 / 属性 / 关键帧 / 蒙版 / 文本 / 标记）和**字节长度保持的写回**（修改素材路径、关键帧值/时间、静态属性值、文本字符串）。
 
-**兼容下限：After Effects 2020（CC 17.0）**。新版本 AE 写的 .aep 也能读，但 AE 24+ 才引入的字段（如 `fontCapsOption` / `alternateSource`）本库不主动解码，对调用方返回 nil 而非错误。详见 [flightdeck/flight-plans/coverage-detail.md](flightdeck/flight-plans/coverage-detail.md) 的兼容性章节。
+**兼容下限：After Effects 2020（CC 17.0）**。新版本 AE 写的 .aep 也能读，但 AE 24+ 才引入的字段（如 `fontCapsOption` / `alternateSource`）本库不主动解码，对调用方返回 nil 而非错误。详见 [flightdeck/plans/coverage-detail.md](flightdeck/plans/coverage-detail.md) 的兼容性章节。
 
 > **每个分类支持哪些字段、哪些 API 是只读还是可写、示例片段**：见 [docs/](docs/README.md) —— 每个核心类型一个 markdown，结构参考 [docsforadobe/after-effects-scripting-guide](https://github.com/docsforadobe/after-effects-scripting-guide)。
 

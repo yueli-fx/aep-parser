@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-01 by claude
+**Last updated**: 2026-06-01 by claude（flightdeck 1.x→1.2 迁移：status frontmatter + INDEX；logbook→landed/HISTORY.md）
 **Active focus**: 无 active 线 — multi-ShapeLayer silent-drop 已修复 ship。下条从 backlog 选，等用户定方向。无 in-flight WIP，工作树 commit 后应为 clean。
 
 ## Next session
@@ -20,15 +20,9 @@
 2. 泛型 `DuplicateItem`（无 scripting API，需纯 RE）。
 3. `ImportComposition`（需求驱动）。
 
-其余 deferred R-only（DisplayColorSpace / ValueText 等）+ shape 次要子属性见 logbook § Deferred + `flight-plans/coverage.md`。
+其余 deferred R-only（DisplayColorSpace / ValueText 等）+ shape 次要子属性见 [sketches/deferred-backlog.md](sketches/deferred-backlog.md) + [plans/coverage.md](plans/coverage.md)。
 
-## Recently finished（≤5，详 logbook.md）
-
-- 2026-06-01 multi-ShapeLayer 同合成 silent-drop 修复（layer-level siblings fvdv×2）— 双版本 ship-gate PASS（3 层 + 8 层）
-- 2026-05-31 Shape path keyframe write（子项⑮，linear）— 双版本 ship-gate PASS
-- 2026-05-31 Gradient fill write SetGradient（子项⑭）— 双版本 ship-gate PASS
-- 2026-05-31 Stroke Dashes（子项⑬，单 Dash+Gap 对）— 双版本 ship-gate PASS
-- 2026-05-31 shape-node enum sweep（子项⑪，commit 8c8f43d）— 双版本 ship-gate PASS
+（已落条目历史见 `git log` + [landed/HISTORY.md](landed/HISTORY.md)，不在 cockpit 留存。）
 
 ## Hanging tasks
 

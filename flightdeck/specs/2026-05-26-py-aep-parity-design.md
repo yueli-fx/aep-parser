@@ -1,3 +1,7 @@
+---
+status: blocked
+---
+
 # py-aep parity — API 全覆盖路线图
 
 **Status**: **部分完成（partial / paused）— 更新 2026-05-31**。
@@ -5,7 +9,7 @@
 - **P2 ✅ 大部分**（landed P2a/P2b plans）；剩 deferred 少数：2C Gradient **W**（2026-05-31 已 ship gradient fill write，stroke/Type-Start-End 仍 deferred）、2E ImportPlaceholder（AE 拒收，删除）、2K TimeRemap enable（结构性）、Composition.Time（low-pri）、ReplaceWithPlaceholder/Solid
 - **P3 ❌ 基本未启动**——剩余大块：Render Queue 全域（~3-5k LOC）、Essential Graphics、Guides、Composition.Renderer W、Property.ValueText、DimensionsSeparated。**例外**：P3 §2.3 表里 Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表已改 ✅）
 **Created**: 2026-05-26
-**Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](flightdeck/charts/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
+**Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](../charts/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
 
 参照源: `flightdeck/charts/py-aep/`（v0.x，自标 "save() highly experimental"，写区 alpha）。
 
@@ -34,8 +38,8 @@
 1. **length-preserving 默认路径不动** — 新加字段优先 splice；结构性 ops 走 V2.x capability framework
 2. **public API 不动** — 现有 `Layer.SetXxx` 系列保留；新加镜像 py-aep 命名（English snake_case 改 Go PascalCase）的 typed pair
 3. **单 `internal/aep` package** — 不引子包；新功能进同 package
-4. **文档铁律** — 每个 phase 完成同步 [docs/](../../docs/)、[coverage.md](../plans/coverage.md)、[coverage-detail.md](../plans/coverage-detail.md)、[board.md](../board.md)
-5. **alpha 写区严格 ship-gate** — 任何新结构性写都跑 AE 2020 + AE 2025 双开 fixture 校验（详 [`scars/ae25-acceptance-gate.md`](../scars/ae25-acceptance-gate.md)）
+4. **文档铁律** — 每个 phase 完成同步 [docs/](../../docs/)、[coverage.md](../plans/coverage.md)、[coverage-detail.md](../plans/coverage-detail.md)、[cockpit.md](../cockpit.md)
+5. **alpha 写区严格 ship-gate** — 任何新结构性写都跑 AE 2020 + AE 2025 双开 fixture 校验（详 [`incidents/ae25-acceptance-gate.md`](../incidents/ae25-acceptance-gate.md)）
 
 ### 1.3 显式 non-goals（py-aep 有但我们不抄）
 
@@ -43,12 +47,12 @@
 - **Pythonic iterator protocol** — Go 用 slice 直接 range，无 `__iter__`
 - **Property descriptor metaclass** — Go 写 typed getter/setter pair（已是项目惯例，~53 个）
 - **save(new_path) 全重写** — 跟 length-preserving invariant 冲突；写新文件走 `WriteAEP` 现有 API
-- **Runtime-only / ScriptingAPI-only 字段** — `dropFrame` / `fontLocation` / `selection` 等已经在 [`scars/runtime-only-fields.md`](../scars/runtime-only-fields.md) 证实不可写；不重复 RE
+- **Runtime-only / ScriptingAPI-only 字段** — `dropFrame` / `fontLocation` / `selection` 等已经在 [`incidents/runtime-only-fields.md`](../incidents/runtime-only-fields.md) 证实不可写；不重复 RE
 - **Expression evaluation** — py-aep 也明确不支持，符号执行不在 scope
 
 ---
 
-## 2. API 全表（对照 [py-aep ExtendScript coverage](flightdeck/charts/py-aep/docs/extendscript_coverage.md)）
+## 2. API 全表（对照 [py-aep ExtendScript coverage](../charts/py-aep/docs/extendscript_coverage.md)）
 
 每行: ✅ = 已 ship | 🟢 = 部分 | 🟡 = R only | ❌ = 缺 | 🗑️ = 暂搁 (runtime-only/structural-blocked)
 列含义: **py-aep** = py-aep 状态 / **我们** = 当前 / **目标** = parity 后
@@ -249,7 +253,7 @@
 
 **Target**: 50+ 新 API，零结构性写，纯 reader + 现有 chunk slice 设字段。
 
-子任务（详 `flightdeck/flight-plans/2026-05-26-py-aep-parity-p1-plan.md`）：
+子任务（详 `flightdeck/plans/2026-05-26-py-aep-parity-p1-plan.md`）：
 
 - **1A** CompItem filter views (15+)：`TextLayers / ShapeLayers / CameraLayers / LightLayers / NullLayers / SolidLayers / AdjustmentLayers / ThreeDLayers / GuideLayers / SoloLayers / AVLayers / CompositionLayers / FootageLayers / FileLayers / PlaceholderLayers`
 - **1B** Project filter views: `Folders / Footages / RootFolder / LayerByID(id) / EffectNames`
@@ -332,7 +336,7 @@ P1 子项 ~50+ API，其中：
 
 ## 5. 进度跟踪
 
-- Phase 1 plan: [`../plans/finish/2026-05-26-py-aep-parity-p1-plan.md`](../plans/finish/2026-05-26-py-aep-parity-p1-plan.md) (executed, archived 2026-05-26)
+- Phase 1 plan: [`../plans/finish/2026-05-26-py-aep-parity-p1-plan.md`](../landed/plans/2026-05-26-py-aep-parity-p1-plan.md) (executed, archived 2026-05-26)
 - Phase 2/3 plans: 写完 Phase 1 后再起，按需切
 - Board `Active focus` 反映**当前 phase**
 - Coverage docs 每个子任务完工同步更新
@@ -341,9 +345,9 @@ P1 子项 ~50+ API，其中：
 
 ## 6. 相关文档
 
-- 参照源: [`flightdeck/charts/py-aep/`](../reference/py-aep)
+- 参照源: [`flightdeck/charts/py-aep/`](../charts/py-aep)
 - 当前架构概览: 项目根 `CLAUDE.md` § 数据流 + § 硬约束
 - 覆盖矩阵: [`../plans/coverage.md`](../plans/coverage.md) / [`../plans/coverage-detail.md`](../plans/coverage-detail.md)
-- V2.2 ShapeLayer alpha: [`2026-05-22-v2-2-layer-creation-design.md`](2026-05-22-v2-2-layer-creation-design.md)
+- V2.2 ShapeLayer alpha: [`2026-05-22-v2-2-layer-creation-design.md`](../landed/specs/2026-05-22-v2-2-layer-creation-design.md)
 - V3 方向: [`2026-05-22-v3-direction.md`](2026-05-22-v3-direction.md)
-- 已知陷阱: [`../scars/`](../scars)
+- 已知陷阱: [`../incidents/`](../incidents)
