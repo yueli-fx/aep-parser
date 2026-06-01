@@ -128,10 +128,11 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 - `Project.RenderQueue *RenderQueue`（无 LRdr 时 nil；空队列 non-nil + 0 items）+ `RenderQueue.NumItems() / .Items`
 - `RenderQueueItem.{Comp（via comp_id@0x08→Composition）, Status（raw u32@0x0C）, Name（template_name@0x5A win-1252）, Comment（RCom→Utf8）, LogType（raw u16@0x50）, QueueItemNotify（flag@0x07 bit2）, ElapsedSeconds（u32@0x89A）, TimeSpanStart/Duration（按 time_span_source@2148 解析：LENGTH_OF_COMP/WORK_AREA/CUSTOM）, RenderSettings, OutputModules, NumOutputModules()}`
 - `RenderSettings`（slice-2，R）：Quality/ColorDepth/Effects/FieldRender/Pulldown/FrameBlending/MotionBlur/ProxyUse/SoloSwitches/GuideLayers/DiskCache/FrameRate/Resolution[2]/SkipExistingFiles — 值用 py-aep NUMBER 语义（0xFFFF→-1 current-settings）；offset 对 4 个判别 fixture 交叉验证
-- `OutputModule.{Name（Als2 后 Utf8[0]）, FileTemplate（Als2 后 Utf8[1]）, FullPath（alas JSON fullpath）}`
-- JSON 导出 `render_queue` 节点（snake_case 自有 schema，含 `render_settings`）
-- chunk family：`LRdr → {list→lhd3+ldat(RenderSettingsItem 2246B×N), LItm→per-item [RCom]+list+'LOm '}`；新 rifx ID `LRdr/LItm/'LOm '/RCom/Roou/Ropt/Rout`
-- **defer 后续 slice**：OutputModule 128B settings（PostRenderAction/Crop/Channels/Depth…）/ format options×7 / SkipFrames（派生）/ 任何写 / `file` 模板变量解析 / LogType·Status 的 3xxx 命名空间枚举映射。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`
+- `OutputModule.{Name（Als2 后 Utf8[0]）, FileTemplate（Als2 后 Utf8[1]）, FullPath（alas JSON fullpath）, Settings}`
+- `OutputModuleSettings`（slice-3，R）：128B `OutputModuleSettingsItem`（Channels/ResizeQuality/Resize/LockAspectRatio/Crop+4 边/OutputAudio/IncludeProjectLink/PostRenderAction/ConvertToLinear/4 flag-bit）+ 154B `Roou`（VideoCodec/FormatID/StartingNumber/Width/Height/Depth/VideoOutput/AudioSampleRate/AudioBitDepth/AudioChannels/AudioEnabled）。om-settings ldat 在每个 LItm-item 的 `list` 内；按 OM index 配对；2 个正交 flag fixture 交叉验证
+- JSON 导出 `render_queue` 节点（snake_case 自有 schema，含 `render_settings` + OM `settings`）
+- chunk family：`LRdr → {list→lhd3+ldat(RenderSettingsItem 2246B×N), LItm→per-item [RCom]+list(ldat=OMSettings 128B×M)+'LOm '(Roou 组)}`；新 rifx ID `LRdr/LItm/'LOm '/RCom/Roou/Ropt/Rout`
+- **defer 后续 slice**：format options×7（Cineon/Jpeg/.../Xml from Ropt）/ Format·OutputAudio·Color 派生枚举映射 / SkipFrames（派生）/ `file` 模板变量解析 / LogType·Status·PostRenderAction 的 3xxx 命名空间枚举 / 任何写。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`
 - gotcha：comp duration 两套表示分歧 → [`incidents/cdta-duration-two-representations.md`](../incidents/cdta-duration-two-representations.md)
 
 ### V2.2 alpha ShapeLayer 写路径 (2026-05-25, iter-7/8)

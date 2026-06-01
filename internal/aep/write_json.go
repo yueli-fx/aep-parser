@@ -61,38 +61,71 @@ type JSONRenderSettings struct {
 
 // JSONOutputModule is the JSON representation of an OutputModule.
 type JSONOutputModule struct {
-	Name         string `json:"name,omitempty"`
-	FileTemplate string `json:"file_template,omitempty"`
-	FullPath     string `json:"full_path,omitempty"`
+	Name         string                   `json:"name,omitempty"`
+	FileTemplate string                   `json:"file_template,omitempty"`
+	FullPath     string                   `json:"full_path,omitempty"`
+	Settings     JSONOutputModuleSettings `json:"settings"`
+}
+
+// JSONOutputModuleSettings mirrors OutputModuleSettings.
+type JSONOutputModuleSettings struct {
+	Channels            int     `json:"channels"`
+	ResizeQuality       int     `json:"resize_quality"`
+	Resize              bool    `json:"resize"`
+	LockAspectRatio     bool    `json:"lock_aspect_ratio"`
+	Crop                bool    `json:"crop"`
+	CropTop             int     `json:"crop_top"`
+	CropLeft            int     `json:"crop_left"`
+	CropBottom          int     `json:"crop_bottom"`
+	CropRight           int     `json:"crop_right"`
+	OutputAudio         int     `json:"output_audio"`
+	IncludeProjectLink  bool    `json:"include_project_link"`
+	PostRenderAction    uint32  `json:"post_render_action"`
+	ConvertToLinear     int     `json:"convert_to_linear"`
+	UseCompFrameNumber  bool    `json:"use_comp_frame_number"`
+	UseRegionOfInterest bool    `json:"use_region_of_interest"`
+	IncludeSourceXMP    bool    `json:"include_source_xmp"`
+	PreserveRGB         bool    `json:"preserve_rgb"`
+	VideoCodec          string  `json:"video_codec,omitempty"`
+	FormatID            string  `json:"format_id,omitempty"`
+	StartingNumber      uint32  `json:"starting_number"`
+	Width               int     `json:"width"`
+	Height              int     `json:"height"`
+	Depth               int     `json:"depth"`
+	VideoOutput         bool    `json:"video_output"`
+	AudioSampleRate     float64 `json:"audio_sample_rate"`
+	AudioBitDepth       int     `json:"audio_bit_depth"`
+	AudioChannels       int     `json:"audio_channels"`
+	AudioEnabled        bool    `json:"audio_enabled"`
 }
 
 // JSONComposition is the JSON representation of a Composition.
 type JSONComposition struct {
-	ID            uint32       `json:"id"`
-	Name          string       `json:"name"`
-	Width         uint16       `json:"width"`
-	Height        uint16       `json:"height"`
-	FrameRate     float64      `json:"frame_rate"`
-	Duration      float64      `json:"duration_seconds"`
-	TickRate      float64      `json:"tick_rate,omitempty"`
-	BGColor          string    `json:"bg_color"`
-	ResolutionFactor [2]uint16 `json:"resolution_factor,omitempty"`
-	Renderer         string    `json:"renderer,omitempty"`
-	WorkAreaStart float64      `json:"work_area_start_seconds"`
-	WorkAreaEnd   float64      `json:"work_area_end_seconds"`
-	ShutterAngle  uint16       `json:"shutter_angle_degrees"`
-	ShutterPhase  int32        `json:"shutter_phase"`
-	MotionBlurAdaptiveSampleLimit int32 `json:"motion_blur_adaptive_sample_limit"`
-	MotionBlurSamplesPerFrame     int32 `json:"motion_blur_samples_per_frame"`
-	Layers        []*JSONLayer `json:"layers,omitempty"`
-	Markers       []*JSONMarker `json:"markers,omitempty"` // composition-level markers
+	ID                            uint32        `json:"id"`
+	Name                          string        `json:"name"`
+	Width                         uint16        `json:"width"`
+	Height                        uint16        `json:"height"`
+	FrameRate                     float64       `json:"frame_rate"`
+	Duration                      float64       `json:"duration_seconds"`
+	TickRate                      float64       `json:"tick_rate,omitempty"`
+	BGColor                       string        `json:"bg_color"`
+	ResolutionFactor              [2]uint16     `json:"resolution_factor,omitempty"`
+	Renderer                      string        `json:"renderer,omitempty"`
+	WorkAreaStart                 float64       `json:"work_area_start_seconds"`
+	WorkAreaEnd                   float64       `json:"work_area_end_seconds"`
+	ShutterAngle                  uint16        `json:"shutter_angle_degrees"`
+	ShutterPhase                  int32         `json:"shutter_phase"`
+	MotionBlurAdaptiveSampleLimit int32         `json:"motion_blur_adaptive_sample_limit"`
+	MotionBlurSamplesPerFrame     int32         `json:"motion_blur_samples_per_frame"`
+	Layers                        []*JSONLayer  `json:"layers,omitempty"`
+	Markers                       []*JSONMarker `json:"markers,omitempty"` // composition-level markers
 }
 
 // JSONLayer is the JSON representation of a Layer.
 type JSONLayer struct {
-	Index    int    `json:"index"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
+	Index      int    `json:"index"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
 	ID         uint32 `json:"id,omitempty"`
 	ParentID   uint32 `json:"parent_id,omitempty"`
 	ParentName string `json:"parent_name,omitempty"`
@@ -110,29 +143,29 @@ type JSONLayer struct {
 	AutoOrient           string `json:"auto_orient,omitempty"`
 	Comment              string `json:"comment,omitempty"`
 
-	Is3D                  bool             `json:"is_3d,omitempty"`
-	Solo                  bool             `json:"solo,omitempty"`
-	Shy                   bool             `json:"shy,omitempty"`
-	Locked                bool             `json:"locked,omitempty"`
-	Visible               bool             `json:"visible"`
-	IsAdjust              bool             `json:"is_adjustment,omitempty"`
-	IsNull                bool             `json:"is_null,omitempty"`
-	IsGuide               bool             `json:"is_guide,omitempty"`
-	MarkersLocked         bool             `json:"markers_locked,omitempty"`
-	MotionBlur            bool             `json:"motion_blur,omitempty"`
-	EffectsEnabled        bool             `json:"effects_enabled,omitempty"`
-	AudioEnabled          bool             `json:"audio_enabled,omitempty"`
-	FrameBlendEnabled     bool             `json:"frame_blend_enabled,omitempty"`
-	CollapseTransform     bool             `json:"collapse_transform,omitempty"`
-	IsShapeLayer          bool             `json:"is_shape_layer,omitempty"`
-	Properties            []*JSONProperty  `json:"properties,omitempty"`
-	Effects               []*JSONEffect    `json:"effects,omitempty"`
-	Markers               []*JSONMarker    `json:"markers,omitempty"`
-	Masks                 []*JSONMask      `json:"masks,omitempty"`
-	ShapePaths            []*JSONShapePath      `json:"shape_paths,omitempty"`
-	ShapePrimitives       []*JSONShapePrimitive `json:"shape_primitives,omitempty"`
-	HasTextSource         bool                  `json:"has_text_source,omitempty"`
-	TextSource            *JSONTextSource  `json:"text_source,omitempty"`
+	Is3D              bool                  `json:"is_3d,omitempty"`
+	Solo              bool                  `json:"solo,omitempty"`
+	Shy               bool                  `json:"shy,omitempty"`
+	Locked            bool                  `json:"locked,omitempty"`
+	Visible           bool                  `json:"visible"`
+	IsAdjust          bool                  `json:"is_adjustment,omitempty"`
+	IsNull            bool                  `json:"is_null,omitempty"`
+	IsGuide           bool                  `json:"is_guide,omitempty"`
+	MarkersLocked     bool                  `json:"markers_locked,omitempty"`
+	MotionBlur        bool                  `json:"motion_blur,omitempty"`
+	EffectsEnabled    bool                  `json:"effects_enabled,omitempty"`
+	AudioEnabled      bool                  `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled bool                  `json:"frame_blend_enabled,omitempty"`
+	CollapseTransform bool                  `json:"collapse_transform,omitempty"`
+	IsShapeLayer      bool                  `json:"is_shape_layer,omitempty"`
+	Properties        []*JSONProperty       `json:"properties,omitempty"`
+	Effects           []*JSONEffect         `json:"effects,omitempty"`
+	Markers           []*JSONMarker         `json:"markers,omitempty"`
+	Masks             []*JSONMask           `json:"masks,omitempty"`
+	ShapePaths        []*JSONShapePath      `json:"shape_paths,omitempty"`
+	ShapePrimitives   []*JSONShapePrimitive `json:"shape_primitives,omitempty"`
+	HasTextSource     bool                  `json:"has_text_source,omitempty"`
+	TextSource        *JSONTextSource       `json:"text_source,omitempty"`
 }
 
 // JSONTextSource is the JSON view of a decoded TextSource.
@@ -245,18 +278,18 @@ type JSONMaskVertex struct {
 // sub-property fields are omitted; present ones serialize as nested
 // JSONProperty records.
 type JSONShapePrimitive struct {
-	Kind           string         `json:"kind"`
-	GroupName      string         `json:"group_name,omitempty"`
-	Size           *JSONProperty  `json:"size,omitempty"`
-	Position       *JSONProperty  `json:"position,omitempty"`
-	Roundness      *JSONProperty  `json:"roundness,omitempty"`
-	StarType       *JSONProperty  `json:"star_type,omitempty"`
-	Points         *JSONProperty  `json:"points,omitempty"`
-	Rotation       *JSONProperty  `json:"rotation,omitempty"`
-	InnerRadius    *JSONProperty  `json:"inner_radius,omitempty"`
-	OuterRadius    *JSONProperty  `json:"outer_radius,omitempty"`
-	InnerRoundness *JSONProperty  `json:"inner_roundness,omitempty"`
-	OuterRoundness *JSONProperty  `json:"outer_roundness,omitempty"`
+	Kind           string        `json:"kind"`
+	GroupName      string        `json:"group_name,omitempty"`
+	Size           *JSONProperty `json:"size,omitempty"`
+	Position       *JSONProperty `json:"position,omitempty"`
+	Roundness      *JSONProperty `json:"roundness,omitempty"`
+	StarType       *JSONProperty `json:"star_type,omitempty"`
+	Points         *JSONProperty `json:"points,omitempty"`
+	Rotation       *JSONProperty `json:"rotation,omitempty"`
+	InnerRadius    *JSONProperty `json:"inner_radius,omitempty"`
+	OuterRadius    *JSONProperty `json:"outer_radius,omitempty"`
+	InnerRoundness *JSONProperty `json:"inner_roundness,omitempty"`
+	OuterRoundness *JSONProperty `json:"outer_roundness,omitempty"`
 }
 
 type JSONShapePath struct {
@@ -357,6 +390,36 @@ func renderQueueToJSON(rq *RenderQueue) *JSONRenderQueue {
 				Name:         om.Name,
 				FileTemplate: om.FileTemplate,
 				FullPath:     om.FullPath,
+				Settings: JSONOutputModuleSettings{
+					Channels:            om.Settings.Channels,
+					ResizeQuality:       om.Settings.ResizeQuality,
+					Resize:              om.Settings.Resize,
+					LockAspectRatio:     om.Settings.LockAspectRatio,
+					Crop:                om.Settings.Crop,
+					CropTop:             om.Settings.CropTop,
+					CropLeft:            om.Settings.CropLeft,
+					CropBottom:          om.Settings.CropBottom,
+					CropRight:           om.Settings.CropRight,
+					OutputAudio:         om.Settings.OutputAudio,
+					IncludeProjectLink:  om.Settings.IncludeProjectLink,
+					PostRenderAction:    om.Settings.PostRenderAction,
+					ConvertToLinear:     om.Settings.ConvertToLinear,
+					UseCompFrameNumber:  om.Settings.UseCompFrameNumber,
+					UseRegionOfInterest: om.Settings.UseRegionOfInterest,
+					IncludeSourceXMP:    om.Settings.IncludeSourceXMP,
+					PreserveRGB:         om.Settings.PreserveRGB,
+					VideoCodec:          om.Settings.VideoCodec,
+					FormatID:            om.Settings.FormatID,
+					StartingNumber:      om.Settings.StartingNumber,
+					Width:               om.Settings.Width,
+					Height:              om.Settings.Height,
+					Depth:               om.Settings.Depth,
+					VideoOutput:         om.Settings.VideoOutput,
+					AudioSampleRate:     om.Settings.AudioSampleRate,
+					AudioBitDepth:       om.Settings.AudioBitDepth,
+					AudioChannels:       om.Settings.AudioChannels,
+					AudioEnabled:        om.Settings.AudioEnabled,
+				},
 			})
 		}
 		jrq.Items = append(jrq.Items, ji)
@@ -366,20 +429,20 @@ func renderQueueToJSON(rq *RenderQueue) *JSONRenderQueue {
 
 func compToJSON(c *Composition) *JSONComposition {
 	jc := &JSONComposition{
-		ID:            c.ID,
-		Name:          c.Name,
-		Width:         c.Width,
-		Height:        c.Height,
-		FrameRate:     roundFloat(c.FrameRate, 3),
-		Duration:      roundFloat(c.Duration, 4),
-		TickRate:      c.TickRate,
-		BGColor:          fmt.Sprintf("#%02X%02X%02X", c.BGColor[0], c.BGColor[1], c.BGColor[2]),
-		ResolutionFactor: c.ResolutionFactor,
-		Renderer:         c.Renderer,
-		WorkAreaStart:    roundFloat(c.WorkAreaStart, 4),
-		WorkAreaEnd:   roundFloat(c.WorkAreaEnd, 4),
-		ShutterAngle:  c.ShutterAngle,
-		ShutterPhase:  c.ShutterPhase,
+		ID:                            c.ID,
+		Name:                          c.Name,
+		Width:                         c.Width,
+		Height:                        c.Height,
+		FrameRate:                     roundFloat(c.FrameRate, 3),
+		Duration:                      roundFloat(c.Duration, 4),
+		TickRate:                      c.TickRate,
+		BGColor:                       fmt.Sprintf("#%02X%02X%02X", c.BGColor[0], c.BGColor[1], c.BGColor[2]),
+		ResolutionFactor:              c.ResolutionFactor,
+		Renderer:                      c.Renderer,
+		WorkAreaStart:                 roundFloat(c.WorkAreaStart, 4),
+		WorkAreaEnd:                   roundFloat(c.WorkAreaEnd, 4),
+		ShutterAngle:                  c.ShutterAngle,
+		ShutterPhase:                  c.ShutterPhase,
 		MotionBlurAdaptiveSampleLimit: c.MotionBlurAdaptiveSampleLimit,
 		MotionBlurSamplesPerFrame:     c.MotionBlurSamplesPerFrame,
 	}
@@ -403,49 +466,49 @@ func compToJSON(c *Composition) *JSONComposition {
 
 func layerToJSON(l *Layer) *JSONLayer {
 	jl := &JSONLayer{
-		Index:                 l.Index,
-		Name:                  l.Name,
-		Type:                  string(l.Type),
-		ID:                    l.ID,
-		ParentID:              l.ParentID,
-		SourceID:              l.SourceID,
+		Index:    l.Index,
+		Name:     l.Name,
+		Type:     string(l.Type),
+		ID:       l.ID,
+		ParentID: l.ParentID,
+		SourceID: l.SourceID,
 		ParentName: func() string {
 			if p := l.Parent(); p != nil {
 				return p.Name
 			}
 			return ""
 		}(),
-		StartTime:             roundFloat(l.StartTime, 4),
-		Duration:              roundFloat(l.Duration, 4),
-		Stretch:               roundFloat(l.Stretch, 4),
-		Quality:               uint16(l.Quality),
-		Label:                 l.Label,
-		BlendingMode:          uint8(l.BlendingMode),
-		TrackMatte:            uint8(l.TrackMatte),
-		PreserveTransparency:  l.PreserveTransparency,
-		Comment:               l.Comment,
+		StartTime:            roundFloat(l.StartTime, 4),
+		Duration:             roundFloat(l.Duration, 4),
+		Stretch:              roundFloat(l.Stretch, 4),
+		Quality:              uint16(l.Quality),
+		Label:                l.Label,
+		BlendingMode:         uint8(l.BlendingMode),
+		TrackMatte:           uint8(l.TrackMatte),
+		PreserveTransparency: l.PreserveTransparency,
+		Comment:              l.Comment,
 		AutoOrient: func() string {
 			if l.AutoOrient == AutoOrientNone {
 				return ""
 			}
 			return l.AutoOrient.String()
 		}(),
-		Is3D:                  l.Is3D,
-		Solo:                  l.Solo,
-		Shy:                   l.Shy,
-		Locked:                l.Locked,
-		Visible:               l.Visible,
-		IsAdjust:              l.IsAdjust,
-		IsNull:                l.IsNull,
-		IsGuide:               l.IsGuide,
-		MarkersLocked:         l.MarkersLocked,
-		MotionBlur:            l.MotionBlur,
-		EffectsEnabled:        l.EffectsEnabled,
-		AudioEnabled:          l.AudioEnabled,
-		FrameBlendEnabled:     l.FrameBlendEnabled,
-		CollapseTransform:     l.CollapseTransform,
-		IsShapeLayer:          l.IsShapeLayer,
-		HasTextSource:         l.TextSourceRaw != nil,
+		Is3D:              l.Is3D,
+		Solo:              l.Solo,
+		Shy:               l.Shy,
+		Locked:            l.Locked,
+		Visible:           l.Visible,
+		IsAdjust:          l.IsAdjust,
+		IsNull:            l.IsNull,
+		IsGuide:           l.IsGuide,
+		MarkersLocked:     l.MarkersLocked,
+		MotionBlur:        l.MotionBlur,
+		EffectsEnabled:    l.EffectsEnabled,
+		AudioEnabled:      l.AudioEnabled,
+		FrameBlendEnabled: l.FrameBlendEnabled,
+		CollapseTransform: l.CollapseTransform,
+		IsShapeLayer:      l.IsShapeLayer,
+		HasTextSource:     l.TextSourceRaw != nil,
 	}
 	if l.TextSource != nil {
 		jts := &JSONTextSource{

@@ -246,6 +246,92 @@ func TestRenderQueueRenderSettingsVariants(t *testing.T) {
 	}
 }
 
+// Output module settings (slice-3): 128B OutputModuleSettingsItem + 154B Roou.
+// Golden from renderqueue/numItems_1.json outputModules[0].settings.
+func TestRenderQueueOutputModuleSettings(t *testing.T) {
+	proj, err := aep.Open("../../test_data/rq_numitems_1.aep")
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	if proj.RenderQueue == nil || proj.RenderQueue.NumItems() != 1 {
+		t.Fatalf("want 1 render queue item")
+	}
+	om := proj.RenderQueue.Items[0].OutputModules[0]
+	s := om.Settings
+	if s.Depth != 24 {
+		t.Errorf("Depth = %d, want 24", s.Depth)
+	}
+	if s.AudioSampleRate != 48000 {
+		t.Errorf("AudioSampleRate = %v, want 48000", s.AudioSampleRate)
+	}
+	if s.Channels != 0 {
+		t.Errorf("Channels = %d, want 0", s.Channels)
+	}
+	if s.Crop || s.CropTop != 0 || s.CropLeft != 0 || s.CropBottom != 0 || s.CropRight != 0 {
+		t.Errorf("Crop = %v top/left/bottom/right = %d/%d/%d/%d, want false 0/0/0/0",
+			s.Crop, s.CropTop, s.CropLeft, s.CropBottom, s.CropRight)
+	}
+	if !s.LockAspectRatio {
+		t.Error("LockAspectRatio = false, want true")
+	}
+	if !s.IncludeProjectLink {
+		t.Error("IncludeProjectLink = false, want true")
+	}
+	if s.Resize {
+		t.Error("Resize = true, want false")
+	}
+	if s.ResizeQuality != 1 {
+		t.Errorf("ResizeQuality = %d, want 1", s.ResizeQuality)
+	}
+	if !s.UseCompFrameNumber {
+		t.Error("UseCompFrameNumber = false, want true")
+	}
+	if s.UseRegionOfInterest {
+		t.Error("UseRegionOfInterest = true, want false")
+	}
+	if s.IncludeSourceXMP {
+		t.Error("IncludeSourceXMP = true, want false")
+	}
+	if s.PostRenderAction != 0 {
+		t.Errorf("PostRenderAction = %d, want 0", s.PostRenderAction)
+	}
+	if s.StartingNumber != 0 {
+		t.Errorf("StartingNumber = %d, want 0", s.StartingNumber)
+	}
+	if !s.VideoOutput {
+		t.Error("VideoOutput = false, want true")
+	}
+	if s.FormatID != "H264" {
+		t.Errorf("FormatID = %q, want H264", s.FormatID)
+	}
+}
+
+// Orthogonal flag discriminators guard the 128B flag-byte bit decoding.
+func TestRenderQueueOutputModuleFlags(t *testing.T) {
+	cases := []struct {
+		fixture            string
+		lockAspect, useCFN bool
+	}{
+		{"rq_lock_aspect_off.aep", false, true},
+		{"rq_use_comp_frame_off.aep", true, false},
+	}
+	for _, c := range cases {
+		t.Run(c.fixture, func(t *testing.T) {
+			proj, err := aep.Open("../../test_data/" + c.fixture)
+			if err != nil {
+				t.Fatalf("Open: %v", err)
+			}
+			s := proj.RenderQueue.Items[0].OutputModules[0].Settings
+			if s.LockAspectRatio != c.lockAspect {
+				t.Errorf("LockAspectRatio = %v, want %v", s.LockAspectRatio, c.lockAspect)
+			}
+			if s.UseCompFrameNumber != c.useCFN {
+				t.Errorf("UseCompFrameNumber = %v, want %v", s.UseCompFrameNumber, c.useCFN)
+			}
+		})
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

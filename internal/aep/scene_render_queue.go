@@ -106,4 +106,45 @@ type OutputModule struct {
 	// FullPath is the output folder/full path from the alas JSON "fullpath"
 	// field inside the Als2 LIST. Empty when no alas/fullpath present.
 	FullPath string
+
+	// Settings holds the output-module settings (128B OutputModuleSettingsItem
+	// + Roou). slice-3, read-only.
+	Settings OutputModuleSettings
+}
+
+// OutputModuleSettings is the per-output-module settings (ExtendScript
+// OutputModule.getSettings). Read-only (P3 §3A slice-3). Derived/mapped fields
+// (Format enum, Output Audio derivation, resolved file path) are deferred.
+type OutputModuleSettings struct {
+	// from the 128B OutputModuleSettingsItem
+	Channels            int // 0 RGB / 1 RGBA / 2 Alpha
+	ResizeQuality       int
+	Resize              bool
+	LockAspectRatio     bool
+	Crop                bool
+	CropTop             int
+	CropLeft            int
+	CropBottom          int
+	CropRight           int
+	OutputAudio         int // raw (py-aep derives ON/OFF/AUTO)
+	IncludeProjectLink  bool
+	PostRenderAction    uint32 // raw
+	ConvertToLinear     int
+	UseCompFrameNumber  bool
+	UseRegionOfInterest bool
+	IncludeSourceXMP    bool
+	PreserveRGB         bool
+
+	// from the 154B Roou chunk
+	VideoCodec      string
+	FormatID        string // 4-char output format id (e.g. "H264", "TIF ")
+	StartingNumber  uint32
+	Width           int
+	Height          int
+	Depth           int // bits: 24/32/48/64/96/128
+	VideoOutput     bool
+	AudioSampleRate float64
+	AudioBitDepth   int
+	AudioChannels   int
+	AudioEnabled    bool
 }

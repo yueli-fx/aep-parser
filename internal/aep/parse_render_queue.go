@@ -33,24 +33,39 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 
 	idx := 0
 	var pendingComment string
-	haveList := false
+	var pendingList *rifx.Chunk
 	for _, ch := range litm.Children {
 		switch {
 		case ch.ID == rifx.IDRCom:
 			pendingComment = decodeRComComment(ch.Data)
 		case ch.IsList() && ch.FormType == rifx.IDkfl:
-			haveList = true
+			pendingList = ch
 		case ch.IsList() && ch.FormType == rifx.IDLOm:
-			if !haveList {
+			if pendingList == nil {
 				continue
 			}
-			item := buildRenderQueueItem(settingsBlocks, idx, pendingComment, ch, proj)
+			item := buildRenderQueueItem(settingsBlocks, idx, pendingComment, pendingList, ch, proj)
 			rq.Items = append(rq.Items, item)
 			idx++
 			pendingComment = ""
-			haveList = false
+			pendingList = nil
 		}
 	}
+}
+
+// outputModuleSettingsBlocks splits an LItm-item's LIST:list ldat into 128-byte
+// blocks, one per output module. Nil when absent/empty.
+func outputModuleSettingsBlocks(itemList *rifx.Chunk) [][]byte {
+	ldat := itemList.FindFirst(rifx.IDLdat)
+	if ldat == nil {
+		return nil
+	}
+	n := len(ldat.Data) / outputModuleSettingsItemSize
+	blocks := make([][]byte, 0, n)
+	for i := 0; i < n; i++ {
+		blocks = append(blocks, ldat.Data[i*outputModuleSettingsItemSize:(i+1)*outputModuleSettingsItemSize])
+	}
+	return blocks
 }
 
 // renderSettingsBlocks returns the raw per-item settings ldat split into
@@ -72,7 +87,7 @@ func renderSettingsBlocks(lrdr *rifx.Chunk) [][]byte {
 	return blocks
 }
 
-func buildRenderQueueItem(blocks [][]byte, idx int, comment string, lom *rifx.Chunk, proj *Project) *RenderQueueItem {
+func buildRenderQueueItem(blocks [][]byte, idx int, comment string, itemList, lom *rifx.Chunk, proj *Project) *RenderQueueItem {
 	item := &RenderQueueItem{Comment: comment}
 	if idx < len(blocks) {
 		if rs, ok := decodeRenderSettings(blocks[idx]); ok {
@@ -101,7 +116,7 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, lom *rifx.Ch
 			}
 		}
 	}
-	item.OutputModules = parseOutputModules(lom)
+	item.OutputModules = parseOutputModules(lom, outputModuleSettingsBlocks(itemList))
 	return item
 }
 
@@ -132,13 +147,18 @@ func ratio(dividend, divisor uint32) float64 {
 }
 
 // parseOutputModules splits a 'LOm ' LIST into per-module groups (each starts
-// at a Roou chunk) and extracts the read-only fields for each.
-func parseOutputModules(lom *rifx.Chunk) []*OutputModule {
+// at a Roou chunk) and extracts the read-only fields for each. omBlocks holds
+// the per-module 128B settings, paired by module index.
+func parseOutputModules(lom *rifx.Chunk, omBlocks [][]byte) []*OutputModule {
 	var oms []*OutputModule
 	var group []*rifx.Chunk
 	flush := func() {
 		if len(group) > 0 {
-			oms = append(oms, buildOutputModule(group))
+			var block []byte
+			if len(oms) < len(omBlocks) {
+				block = omBlocks[len(oms)]
+			}
+			oms = append(oms, buildOutputModule(group, block))
 			group = nil
 		}
 	}
@@ -152,11 +172,15 @@ func parseOutputModules(lom *rifx.Chunk) []*OutputModule {
 	return oms
 }
 
-func buildOutputModule(group []*rifx.Chunk) *OutputModule {
+func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
 	om := &OutputModule{}
 	als2Seen := false
 	var postAls2 []string
 	for _, ch := range group {
+		if ch.ID == rifx.IDRoou {
+			applyRoou(om, ch.Data)
+			continue
+		}
 		if ch.IsList() && ch.FormType == rifx.IDAls2 {
 			als2Seen = true
 			if alas := ch.FindFirst(rifx.IDAlas); alas != nil {
@@ -174,7 +198,44 @@ func buildOutputModule(group []*rifx.Chunk) *OutputModule {
 	if len(postAls2) > 1 {
 		om.FileTemplate = postAls2[1]
 	}
+	if s, ok := decodeOMSettings(omBlock); ok {
+		om.Settings.Channels = s.channels
+		om.Settings.ResizeQuality = s.resizeQuality
+		om.Settings.Resize = s.resize
+		om.Settings.LockAspectRatio = s.lockAspectRatio
+		om.Settings.Crop = s.crop
+		om.Settings.CropTop = s.cropTop
+		om.Settings.CropLeft = s.cropLeft
+		om.Settings.CropBottom = s.cropBottom
+		om.Settings.CropRight = s.cropRight
+		om.Settings.OutputAudio = s.outputAudio
+		om.Settings.IncludeProjectLink = s.includeProjectLink
+		om.Settings.PostRenderAction = s.postRenderAction
+		om.Settings.ConvertToLinear = s.convertToLinear
+		om.Settings.UseCompFrameNumber = s.useCompFrameNumber
+		om.Settings.UseRegionOfInterest = s.useRegionOfInterest
+		om.Settings.IncludeSourceXMP = s.includeSourceXMP
+		om.Settings.PreserveRGB = s.preserveRGB
+	}
 	return om
+}
+
+func applyRoou(om *OutputModule, data []byte) {
+	r, ok := decodeRoou(data)
+	if !ok {
+		return
+	}
+	om.Settings.VideoCodec = r.videoCodec
+	om.Settings.FormatID = r.formatID
+	om.Settings.StartingNumber = r.startingNumber
+	om.Settings.Width = r.width
+	om.Settings.Height = r.height
+	om.Settings.Depth = r.depth
+	om.Settings.VideoOutput = r.width > 0 || r.height > 0
+	om.Settings.AudioSampleRate = r.audioSampleRate
+	om.Settings.AudioBitDepth = r.audioBitDepth
+	om.Settings.AudioChannels = r.audioChannels
+	om.Settings.AudioEnabled = r.audioEnabled
 }
 
 // decodeRComComment extracts the comment string from an RCom leaf. RCom is a

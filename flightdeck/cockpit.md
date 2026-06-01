@@ -1,11 +1,11 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-01 by claude（P3 §3A RQ reader slice-1 + slice-2 render settings 已 ship + commit）
-**Active focus**: **py-aep parity P3** — §3A Render Queue R-only reader：slice-1（顶层结构）+ slice-2（RenderSettings 14 字段 + LogType/QueueItemNotify/ElapsedSeconds）均 ship，9 测试 PASS（含 4 判别 fixture 交叉验证 + byte-identical round-trip）。
+**Last updated**: 2026-06-01 by claude（P3 §3A RQ reader slice-1+2+3 已 ship + commit）
+**Active focus**: **py-aep parity P3** — §3A Render Queue R-only reader：slice-1（结构）+ slice-2（RenderSettings 14 字段）+ slice-3（OutputModuleSettings：128B + Roou）均 ship，11 测试 PASS（含判别 fixture 交叉验证 + byte-identical round-trip）。RQ reader 主体覆盖完成。
 
 ## Next session
 
-1. **P3 下一刀（等用户定方向）**：RQ slice-3 = OutputModule 128B settings（PostRenderAction/Crop/Channels/Depth/Roou 字段）｜ Composition.Renderer W ｜ Property.ValueText ｜ DimensionsSeparated。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` § 非目标。
+1. **P3 下一刀（等用户定方向）**：RQ slice-4 = format options×7（从 Ropt：Cineon/Jpeg/OpenExr/Png/Targa/Tiff/Xml）+ 派生枚举（Format/OutputAudio/Color）｜ 或换方向 Composition.Renderer W ｜ Property.ValueText ｜ DimensionsSeparated。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` § 非目标。
 
 ## Backlog（长线大 arc / 缺 runtime setter）
 
