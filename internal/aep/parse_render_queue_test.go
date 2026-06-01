@@ -538,6 +538,103 @@ func TestRenderQueueTimeSpanWriteRoundTrip(t *testing.T) {
 	}
 }
 
+// Comment write (P3 §3A): RCom is a wrapper chunk holding one Utf8 child
+// ("Utf8" + u32 len + UTF-8 payload + even-pad). length-variable: replace the
+// text on an existing RCom, or insert a fresh RCom (before the item's settings
+// list) when the item has none. WriteAEP recomputes the LItm/LRdr LIST sizes.
+func TestRenderQueueCommentWriteRoundTrip(t *testing.T) {
+	t.Run("replace", func(t *testing.T) {
+		orig, err := os.ReadFile("../../test_data/rq_comment.aep")
+		if err != nil {
+			t.Fatalf("ReadFile: %v", err)
+		}
+		proj, err := aep.FromReader(bytes.NewReader(orig))
+		if err != nil {
+			t.Fatalf("FromReader: %v", err)
+		}
+		item := proj.RenderQueue.Items[0]
+		if item.Comment != "aaaaa" {
+			t.Fatalf("precondition: Comment = %q, want aaaaa", item.Comment)
+		}
+		if err := item.SetComment("a much longer render comment"); err != nil {
+			t.Fatalf("SetComment: %v", err)
+		}
+		if item.Comment != "a much longer render comment" {
+			t.Errorf("in-memory Comment = %q", item.Comment)
+		}
+		var buf bytes.Buffer
+		if err := proj.WriteAEP(&buf); err != nil {
+			t.Fatalf("WriteAEP: %v", err)
+		}
+		re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+		if err != nil {
+			t.Fatalf("re-parse: %v", err)
+		}
+		if got := re.RenderQueue.Items[0].Comment; got != "a much longer render comment" {
+			t.Errorf("persisted Comment = %q", got)
+		}
+	})
+
+	t.Run("insert", func(t *testing.T) {
+		orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+		if err != nil {
+			t.Fatalf("ReadFile: %v", err)
+		}
+		proj, err := aep.FromReader(bytes.NewReader(orig))
+		if err != nil {
+			t.Fatalf("FromReader: %v", err)
+		}
+		item := proj.RenderQueue.Items[0]
+		if item.Comment != "" {
+			t.Fatalf("precondition: Comment = %q, want empty", item.Comment)
+		}
+		wantOMs := item.NumOutputModules()
+		if err := item.SetComment("inserted comment"); err != nil {
+			t.Fatalf("SetComment: %v", err)
+		}
+		var buf bytes.Buffer
+		if err := proj.WriteAEP(&buf); err != nil {
+			t.Fatalf("WriteAEP: %v", err)
+		}
+		re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+		if err != nil {
+			t.Fatalf("re-parse: %v", err)
+		}
+		it := re.RenderQueue.Items[0]
+		if it.Comment != "inserted comment" {
+			t.Errorf("persisted Comment = %q, want inserted comment", it.Comment)
+		}
+		// Inserting RCom must not disturb item↔settings↔OM pairing.
+		if got := it.NumOutputModules(); got != wantOMs {
+			t.Errorf("NumOutputModules = %d, want %d (insert broke pairing)", got, wantOMs)
+		}
+		if it.Comp == nil || it.Comp.Name != "TestComp" {
+			t.Errorf("Comp link broke after insert: %v", it.Comp)
+		}
+	})
+
+	t.Run("same-value-byte-identical", func(t *testing.T) {
+		orig, err := os.ReadFile("../../test_data/rq_comment.aep")
+		if err != nil {
+			t.Fatalf("ReadFile: %v", err)
+		}
+		proj, err := aep.FromReader(bytes.NewReader(orig))
+		if err != nil {
+			t.Fatalf("FromReader: %v", err)
+		}
+		if err := proj.RenderQueue.Items[0].SetComment("aaaaa"); err != nil {
+			t.Fatalf("SetComment: %v", err)
+		}
+		var buf bytes.Buffer
+		if err := proj.WriteAEP(&buf); err != nil {
+			t.Fatalf("WriteAEP: %v", err)
+		}
+		if !bytes.Equal(buf.Bytes(), orig) {
+			t.Errorf("re-encoding same comment not byte-identical: in=%d out=%d", len(orig), buf.Len())
+		}
+	})
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

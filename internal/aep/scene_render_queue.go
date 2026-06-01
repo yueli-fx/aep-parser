@@ -67,6 +67,11 @@ type RenderQueueItem struct {
 	// mutates the chunk in place). nil for items built outside the parser.
 	// Powers the length-preserving Set* methods in write_render_queue.go.
 	settingsBlock []byte
+
+	// back holds the RIFX chunk references that power the length-variable
+	// SetComment write (RCom insert/replace). Nil outside the parser. See
+	// back_render_queue.go.
+	back *renderQueueItemBackrefs
 }
 
 // RenderSettings is the per-item render settings (ExtendScript

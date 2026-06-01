@@ -33,11 +33,12 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 
 	idx := 0
 	var pendingComment string
-	var pendingList *rifx.Chunk
+	var pendingRcom, pendingList *rifx.Chunk
 	for _, ch := range litm.Children {
 		switch {
 		case ch.ID == rifx.IDRCom:
 			pendingComment = decodeRComComment(ch.Data)
+			pendingRcom = ch
 		case ch.IsList() && ch.FormType == rifx.IDkfl:
 			pendingList = ch
 		case ch.IsList() && ch.FormType == rifx.IDLOm:
@@ -45,9 +46,15 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 				continue
 			}
 			item := buildRenderQueueItem(settingsBlocks, idx, pendingComment, pendingList, ch, proj)
+			item.back = &renderQueueItemBackrefs{
+				litm:          litm,
+				itemListChunk: pendingList,
+				rcomChunk:     pendingRcom,
+			}
 			rq.Items = append(rq.Items, item)
 			idx++
 			pendingComment = ""
+			pendingRcom = nil
 			pendingList = nil
 		}
 	}
