@@ -226,6 +226,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 
 	comp.Markers = findCompMarkers(item, ctx)
 	comp.Guides = parseGuides(item)
+	comp.MotionGraphicsTemplateName, comp.EssentialGraphicsControllers = parseEssentialGraphics(item)
 
 	return comp, nil
 }

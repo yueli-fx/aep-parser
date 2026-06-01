@@ -100,6 +100,16 @@ type Composition struct {
 	// Item-level LIST:Gide. See scene_guide.go.
 	Guides []*Guide
 
+	// MotionGraphicsTemplateName is the Essential Graphics / .mogrt template
+	// name (AE default "Untitled" when the comp has no EG panel). Decoded
+	// from the comp's Item-level LIST:CIF3. See scene_essential_graphics.go.
+	MotionGraphicsTemplateName string
+
+	// EssentialGraphicsControllers holds the comp's Essential Graphics panel
+	// controllers (exposed properties / .mogrt controls), in panel order.
+	// Empty when the comp has no EG panel.
+	EssentialGraphicsControllers []*EssentialGraphicsController
+
 	// proj is the owning project, set by parseProject after the comp is
 	// appended. Used by Layer.SourceComposition() to walk the project's
 	// other comps via Project.CompositionByID. Unexported to keep the API

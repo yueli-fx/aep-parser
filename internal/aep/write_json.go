@@ -127,31 +127,40 @@ type JSONOutputModuleSettings struct {
 
 // JSONComposition is the JSON representation of a Composition.
 type JSONComposition struct {
-	ID                            uint32        `json:"id"`
-	Name                          string        `json:"name"`
-	Width                         uint16        `json:"width"`
-	Height                        uint16        `json:"height"`
-	FrameRate                     float64       `json:"frame_rate"`
-	Duration                      float64       `json:"duration_seconds"`
-	TickRate                      float64       `json:"tick_rate,omitempty"`
-	BGColor                       string        `json:"bg_color"`
-	ResolutionFactor              [2]uint16     `json:"resolution_factor,omitempty"`
-	Renderer                      string        `json:"renderer,omitempty"`
-	WorkAreaStart                 float64       `json:"work_area_start_seconds"`
-	WorkAreaEnd                   float64       `json:"work_area_end_seconds"`
-	ShutterAngle                  uint16        `json:"shutter_angle_degrees"`
-	ShutterPhase                  int32         `json:"shutter_phase"`
-	MotionBlurAdaptiveSampleLimit int32         `json:"motion_blur_adaptive_sample_limit"`
-	MotionBlurSamplesPerFrame     int32         `json:"motion_blur_samples_per_frame"`
-	Layers                        []*JSONLayer  `json:"layers,omitempty"`
-	Markers                       []*JSONMarker `json:"markers,omitempty"` // composition-level markers
-	Guides                        []*JSONGuide  `json:"guides,omitempty"`  // composition ruler guides
+	ID                            uint32              `json:"id"`
+	Name                          string              `json:"name"`
+	Width                         uint16              `json:"width"`
+	Height                        uint16              `json:"height"`
+	FrameRate                     float64             `json:"frame_rate"`
+	Duration                      float64             `json:"duration_seconds"`
+	TickRate                      float64             `json:"tick_rate,omitempty"`
+	BGColor                       string              `json:"bg_color"`
+	ResolutionFactor              [2]uint16           `json:"resolution_factor,omitempty"`
+	Renderer                      string              `json:"renderer,omitempty"`
+	WorkAreaStart                 float64             `json:"work_area_start_seconds"`
+	WorkAreaEnd                   float64             `json:"work_area_end_seconds"`
+	ShutterAngle                  uint16              `json:"shutter_angle_degrees"`
+	ShutterPhase                  int32               `json:"shutter_phase"`
+	MotionBlurAdaptiveSampleLimit int32               `json:"motion_blur_adaptive_sample_limit"`
+	MotionBlurSamplesPerFrame     int32               `json:"motion_blur_samples_per_frame"`
+	Layers                        []*JSONLayer        `json:"layers,omitempty"`
+	Markers                       []*JSONMarker       `json:"markers,omitempty"` // composition-level markers
+	Guides                        []*JSONGuide        `json:"guides,omitempty"`  // composition ruler guides
+	MotionGraphicsTemplateName    string              `json:"motion_graphics_template_name,omitempty"`
+	EssentialGraphics             []*JSONEGController `json:"essential_graphics,omitempty"` // EG panel controllers
 }
 
 // JSONGuide is the JSON representation of a composition ruler guide.
 type JSONGuide struct {
 	Orientation string  `json:"orientation"` // "horizontal" / "vertical"
 	Position    float64 `json:"position"`    // pixels from top (horizontal) / left (vertical)
+}
+
+// JSONEGController is the JSON representation of an Essential Graphics controller.
+type JSONEGController struct {
+	Name string `json:"name"`
+	Type string `json:"type"` // "slider" / "color" / "checkbox" / ...
+	UUID string `json:"uuid"`
 }
 
 // JSONLayer is the JSON representation of a Layer.
@@ -527,6 +536,14 @@ func compToJSON(c *Composition) *JSONComposition {
 		jc.Guides = append(jc.Guides, &JSONGuide{
 			Orientation: g.Orientation.String(),
 			Position:    roundFloat(g.Position, 4),
+		})
+	}
+	jc.MotionGraphicsTemplateName = c.MotionGraphicsTemplateName
+	for _, ctrl := range c.EssentialGraphicsControllers {
+		jc.EssentialGraphics = append(jc.EssentialGraphics, &JSONEGController{
+			Name: ctrl.Name,
+			Type: ctrl.Type.String(),
+			UUID: ctrl.UUID,
 		})
 	}
 	return jc

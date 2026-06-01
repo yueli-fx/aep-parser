@@ -109,7 +109,7 @@ status: blocked
 | `ThreeDLayers / GuideLayers / SoloLayers` | ✅ | ✅ | ✅ | done | P1 1A |
 | `AVLayers / CompositionLayers / FootageLayers / FileLayers / PlaceholderLayers` | ✅ | ✅ | ✅ | done | P1 1A |
 | `TimeScale` | ✅ R only | ✅ TickRate alias | ✅ | done | P1 1F |
-| `MotionGraphicsTemplateName` | ✅ R/W | ❌ | ✅ R/W | P3 | Essential Graphics |
+| `MotionGraphicsTemplateName` | ✅ R/W | ✅ R | ✅ R/W | R done (P3) | Essential Graphics；W deferred（结构性 .mogrt binding） |
 | `MotionGraphicsControllers` | ✅ R only | ❌ | ✅ R only | P3 | |
 | `MotionGraphicsTemplateController{Count,Names}` | ✅ | ❌ | ✅ | P3 | |
 | `Guides` (ruler 辅助线) | ✅ R only | ❌ | ✅ R/W | P3 | UI-only chunk |
@@ -231,7 +231,7 @@ status: blocked
 
 | API | py-aep | 我们 | 目标 | Phase |
 |---|---|---|---|---|
-| `EssentialGraphicsController` (controllers + override UUIDs) | 🚧 controllers exposed | ❌ | 🚧 controllers R | P3 |
+| `EssentialGraphicsController` (controllers + override UUIDs) | 🚧 controllers exposed | ✅ controllers R | 🚧 controllers R | done (P3) | CIF3→CCtl: Name/Type/UUID + comp template name；10 fixture |
 | 自动 controller-override 解析 | ❌ | ❌ | ❌ | — |
 
 ### 2.9 杂项

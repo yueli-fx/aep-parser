@@ -85,6 +85,12 @@ var (
 	IDGCst = ChunkID{'G', 'C', 's', 't'} // LIST formType: gradient color stops wrapper (contains tdbs + GCky)
 	IDGCky = ChunkID{'G', 'C', 'k', 'y'} // LIST formType: gradient keyframe container (Utf8 children holding prop.map XML, one per keyframe)
 
+	// Essential Graphics panel (P3 §2.8, py-aep parity). Item-level CIF3.
+	IDCif3 = ChunkID{'C', 'I', 'F', '3'} // LIST formType: EG panel definition (template-name CpS2 + CCtl controllers)
+	IDCctl = ChunkID{'C', 'C', 't', 'l'} // LIST formType: one EG controller (CpS2 name + Utf8 uuid + CTyp type)
+	IDCpS2 = ChunkID{'C', 'p', 'S', '2'} // LIST formType: localized string (Utf8 value + locale)
+	IDCTyp = ChunkID{'C', 'T', 'y', 'p'} // U4: EG controller type (1=Checkbox 2=Slider 4=Color 5=Point 6=Text 8=Comment 9=MultiDim 10=Group 13=Dropdown)
+
 	// Project-level setting chunks (P1 Task 1D, py-aep parity)
 	IDAcer = ChunkID{'a', 'c', 'e', 'r'} // U1: compensate_for_scene_referred_profiles
 	IDAdfr = ChunkID{'a', 'd', 'f', 'r'} // F8: audio sample rate (Hz)

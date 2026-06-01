@@ -354,6 +354,36 @@ comp.Guides[0].SetOrientation(aep.GuideVertical)
 
 ---
 
+### Composition.MotionGraphicsTemplateName / EssentialGraphicsControllers
+
+```go
+MotionGraphicsTemplateName   string
+EssentialGraphicsControllers []*EssentialGraphicsController
+```
+
+#### Description
+
+合成的 **Essential Graphics 面板**（.mogrt 模板）定义。底层存在 Item 级 `LIST:CIF3`。read-only —— 写（暴露属性 / 绑定 .mogrt）是结构性操作，暂未实现。无 EG 面板时 `MotionGraphicsTemplateName` 默认 `"Untitled"`，controllers 为空。
+
+```go
+fmt.Println(comp.MotionGraphicsTemplateName)              // "My Custom Template"
+for _, c := range comp.EssentialGraphicsControllers {
+    fmt.Printf("%s [%s] %s\n", c.Name, c.Type, c.UUID)    // "Intensity [slider] c20ffded-..."
+}
+```
+
+`EssentialGraphicsController` 字段：
+
+- `Name string` —— 控制器显示名。
+- `Type EGControllerType` —— `EGCheckbox`(1) / `EGSlider`(2) / `EGColor`(4) / `EGPoint`(5) / `EGText`(6) / `EGComment`(8) / `EGMultiDimensional`(9) / `EGGroup`(10) / `EGDropdown`(13)。`.String()` → `"slider"` 等。
+- `UUID string` —— AE 用来把控制器关联到源属性的 36 字符 GUID。
+
+便捷访问器（对齐 AE ScriptingAPI）：`MotionGraphicsTemplateControllerCount() int`、`MotionGraphicsTemplateControllerNames() []string`。
+
+JSON 导出为 `motion_graphics_template_name` + `essential_graphics[]{name, type, uuid}`。
+
+---
+
 ### Composition.Renderer
 
 ```go

@@ -1,11 +1,11 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-02 by claude（3D Orientation R fidelity 落地：otst wrapper → Components=3 + cdat 小端 + otda keyframe 值，3 fixture 验证；剩 animated easing/tangents 未校验）
-**Active focus**: **py-aep parity P3** — §3A Render Queue read+write 主体完成（`fb657cb`→`54f65f1`，Alpha length-preserving）。**Composition.SetRenderer 已 ship**（`420020c`/`b13358b`，双版本 ship-gate 绿，off-alpha）。**Composition Guides R/W 已落**（Alpha）。**Property 分离维度 R 已落**（DimensionsSeparated + leader/follower/dimension）。剩 RQ 结构性增删 + comment 写 + 派生枚举/XML format options。
+**Last updated**: 2026-06-02 by claude（Essential Graphics R 落地：Composition.MotionGraphicsTemplateName + EssentialGraphicsControllers{Name,Type,UUID}，CIF3→CCtl，10 fixture 验证 + JSON 导出）
+**Active focus**: **py-aep parity P3** — §3A Render Queue read+write 主体完成（`fb657cb`→`54f65f1`，Alpha length-preserving）。**SetRenderer / Guides R/W / 分离维度 R / 3D Orientation R / Essential Graphics R 已落**。剩 RQ 结构性增删 + comment 写 + ValueText + DimensionsSeparated W。
 
 ## Next session
 
-1. **其余 P3**：需 ship-gate（DimensionsSeparated **W** / RQ 结构性增删）或大 RE（ValueText / Essential Graphics）。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
+1. **其余 P3**：需 ship-gate（DimensionsSeparated **W** / RQ 结构性增删 / RQ comment 写）或大 RE（ValueText 需 AE schema DB）。Essential Graphics R 已落。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
 2. **Property synthesis**（可选大 feature，暂搁）：AE 省略未改的默认属性，py-aep 合成完整 transform schema 我们不合成。补合成 + `Elided` 是唯一让 transform group 对齐 py-aep 长度的路。详 `incidents/transform-group-default-omission.md`。次要 fidelity：animated orientation 的 easing/tangents（旧 1D layout 未校验）。
 2. **ship-gate wrapper 改进已落**（`19d8922`）：splash Ignore action + grace 15→30s。后续若 OCR 被其他窗口遮挡（occlusion）仍可能误报，见 `incidents/ae-automation-occlusion-crashstate.md`。
 
