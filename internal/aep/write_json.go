@@ -31,9 +31,32 @@ type JSONRenderQueueItem struct {
 	Status           uint32              `json:"status"`
 	Name             string              `json:"name,omitempty"`
 	Comment          string              `json:"comment,omitempty"`
+	LogType          uint16              `json:"log_type,omitempty"`
+	QueueItemNotify  bool                `json:"queue_item_notify,omitempty"`
+	ElapsedSeconds   uint32              `json:"elapsed_seconds,omitempty"`
 	TimeSpanStart    float64             `json:"time_span_start_seconds"`
 	TimeSpanDuration float64             `json:"time_span_duration_seconds"`
+	RenderSettings   JSONRenderSettings  `json:"render_settings"`
 	OutputModules    []*JSONOutputModule `json:"output_modules,omitempty"`
+}
+
+// JSONRenderSettings mirrors RenderSettings (values follow py-aep NUMBER
+// semantics: -1 = current settings).
+type JSONRenderSettings struct {
+	Quality           int    `json:"quality"`
+	ColorDepth        int    `json:"color_depth"`
+	Effects           int    `json:"effects"`
+	FieldRender       int    `json:"field_render"`
+	Pulldown          int    `json:"pulldown"`
+	FrameBlending     int    `json:"frame_blending"`
+	MotionBlur        int    `json:"motion_blur"`
+	ProxyUse          int    `json:"proxy_use"`
+	SoloSwitches      int    `json:"solo_switches"`
+	GuideLayers       int    `json:"guide_layers"`
+	DiskCache         int    `json:"disk_cache"`
+	FrameRate         int    `json:"frame_rate"`
+	Resolution        [2]int `json:"resolution"`
+	SkipExistingFiles bool   `json:"skip_existing_files"`
 }
 
 // JSONOutputModule is the JSON representation of an OutputModule.
@@ -304,8 +327,27 @@ func renderQueueToJSON(rq *RenderQueue) *JSONRenderQueue {
 			Status:           it.Status,
 			Name:             it.Name,
 			Comment:          it.Comment,
+			LogType:          it.LogType,
+			QueueItemNotify:  it.QueueItemNotify,
+			ElapsedSeconds:   it.ElapsedSeconds,
 			TimeSpanStart:    roundFloat(it.TimeSpanStart, 4),
 			TimeSpanDuration: roundFloat(it.TimeSpanDuration, 4),
+			RenderSettings: JSONRenderSettings{
+				Quality:           it.RenderSettings.Quality,
+				ColorDepth:        it.RenderSettings.ColorDepth,
+				Effects:           it.RenderSettings.Effects,
+				FieldRender:       it.RenderSettings.FieldRender,
+				Pulldown:          it.RenderSettings.Pulldown,
+				FrameBlending:     it.RenderSettings.FrameBlending,
+				MotionBlur:        it.RenderSettings.MotionBlur,
+				ProxyUse:          it.RenderSettings.ProxyUse,
+				SoloSwitches:      it.RenderSettings.SoloSwitches,
+				GuideLayers:       it.RenderSettings.GuideLayers,
+				DiskCache:         it.RenderSettings.DiskCache,
+				FrameRate:         it.RenderSettings.FrameRate,
+				Resolution:        it.RenderSettings.Resolution,
+				SkipExistingFiles: it.RenderSettings.SkipExistingFiles,
+			},
 		}
 		if it.Comp != nil {
 			ji.CompName = it.Comp.Name

@@ -80,6 +80,25 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, lom *rifx.Ch
 			item.Name = rs.templateName
 			item.Comp = proj.CompositionByID(rs.compID)
 			item.TimeSpanStart, item.TimeSpanDuration = resolveTimeSpan(rs, item.Comp)
+			item.LogType = rs.logType
+			item.QueueItemNotify = rs.queueItemNotify
+			item.ElapsedSeconds = rs.elapsedSeconds
+			item.RenderSettings = RenderSettings{
+				Quality:           currentSettingsInt(rs.quality),
+				ColorDepth:        currentSettingsInt(rs.colorDepth),
+				Effects:           currentSettingsInt(rs.effects),
+				FieldRender:       int(rs.fieldRender),
+				Pulldown:          int(rs.pulldown),
+				FrameBlending:     currentSettingsInt(rs.frameBlending),
+				MotionBlur:        currentSettingsInt(rs.motionBlur),
+				ProxyUse:          currentSettingsInt(rs.proxyUse),
+				SoloSwitches:      currentSettingsInt(rs.soloSwitches),
+				GuideLayers:       currentSettingsInt(rs.guideLayers),
+				DiskCache:         currentSettingsInt(rs.diskCache),
+				FrameRate:         int(rs.useThisFrameRate),
+				Resolution:        [2]int{int(rs.resolutionX), int(rs.resolutionY)},
+				SkipExistingFiles: rs.skipExistingFiles,
+			}
 		}
 	}
 	item.OutputModules = parseOutputModules(lom)

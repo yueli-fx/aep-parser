@@ -157,6 +157,95 @@ func TestRenderQueueRoundTripByteIdentical(t *testing.T) {
 	}
 }
 
+// Render settings (slice-2). Golden NUMBER values from
+// renderqueue/numItems_1.json "settings" — these enum values equal the raw
+// binary values (0xFFFF -> -1 sentinel for "current settings").
+func TestRenderQueueRenderSettings(t *testing.T) {
+	proj, err := aep.Open("../../test_data/rq_numitems_1.aep")
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	if proj.RenderQueue == nil || proj.RenderQueue.NumItems() != 1 {
+		t.Fatalf("want 1 render queue item")
+	}
+	item := proj.RenderQueue.Items[0]
+	rs := item.RenderSettings
+	cases := []struct {
+		name string
+		got  int
+		want int
+	}{
+		{"Quality", rs.Quality, 2},
+		{"ColorDepth", rs.ColorDepth, -1},
+		{"Effects", rs.Effects, 2},
+		{"FieldRender", rs.FieldRender, 0},
+		{"FrameBlending", rs.FrameBlending, 1},
+		{"MotionBlur", rs.MotionBlur, 1},
+		{"ProxyUse", rs.ProxyUse, 0},
+		{"Pulldown", rs.Pulldown, 0},
+		{"SoloSwitches", rs.SoloSwitches, 2},
+		{"GuideLayers", rs.GuideLayers, 0},
+		{"DiskCache", rs.DiskCache, 0},
+		{"FrameRate", rs.FrameRate, 0},
+	}
+	for _, c := range cases {
+		if c.got != c.want {
+			t.Errorf("RenderSettings.%s = %d, want %d", c.name, c.got, c.want)
+		}
+	}
+	if rs.Resolution != [2]int{1, 1} {
+		t.Errorf("Resolution = %v, want [1 1]", rs.Resolution)
+	}
+	if rs.SkipExistingFiles {
+		t.Error("SkipExistingFiles = true, want false")
+	}
+	if item.QueueItemNotify {
+		t.Error("QueueItemNotify = true, want false")
+	}
+	if item.ElapsedSeconds != 0 {
+		t.Errorf("ElapsedSeconds = %d, want 0", item.ElapsedSeconds)
+	}
+}
+
+// Cross-check render-settings decode against fixtures with distinct values —
+// guards against offset swaps (e.g. Quality vs ColorDepth).
+func TestRenderQueueRenderSettingsVariants(t *testing.T) {
+	cases := []struct {
+		fixture                 string
+		quality, colorDepth, mb int
+		resolution              [2]int
+	}{
+		{"rq_quality_wireframe.aep", 0, -1, 1, [2]int{1, 1}},
+		{"rq_color_depth_8.aep", 2, 0, 1, [2]int{1, 1}},
+		{"rq_resolution_half.aep", 2, -1, 1, [2]int{2, 2}},
+		{"rq_motion_blur_off.aep", 2, -1, 0, [2]int{1, 1}},
+	}
+	for _, c := range cases {
+		t.Run(c.fixture, func(t *testing.T) {
+			proj, err := aep.Open("../../test_data/" + c.fixture)
+			if err != nil {
+				t.Fatalf("Open: %v", err)
+			}
+			if proj.RenderQueue == nil || proj.RenderQueue.NumItems() == 0 {
+				t.Fatal("no render queue items")
+			}
+			rs := proj.RenderQueue.Items[0].RenderSettings
+			if rs.Quality != c.quality {
+				t.Errorf("Quality = %d, want %d", rs.Quality, c.quality)
+			}
+			if rs.ColorDepth != c.colorDepth {
+				t.Errorf("ColorDepth = %d, want %d", rs.ColorDepth, c.colorDepth)
+			}
+			if rs.MotionBlur != c.mb {
+				t.Errorf("MotionBlur = %d, want %d", rs.MotionBlur, c.mb)
+			}
+			if rs.Resolution != c.resolution {
+				t.Errorf("Resolution = %v, want %v", rs.Resolution, c.resolution)
+			}
+		})
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

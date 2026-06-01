@@ -37,6 +37,23 @@ type RenderQueueItem struct {
 	// Comment is the item comment (RCom → Utf8), empty when no RCom present.
 	Comment string
 
+	// LogType is the raw log-type code (RenderSettingsItem @0x50). py-aep
+	// maps this to its 3xxx-namespaced LogType enum; we expose raw.
+	LogType uint16
+
+	// QueueItemNotify mirrors the "notify on completion" flag (flag byte @0x07
+	// bit 2).
+	QueueItemNotify bool
+
+	// ElapsedSeconds is render elapsed time (RenderSettingsItem @0x89A), 0 when
+	// not yet rendered.
+	ElapsedSeconds uint32
+
+	// RenderSettings holds the per-item render settings (the ExtendScript
+	// get_settings() dict). Values follow py-aep NUMBER semantics: -1 means
+	// "current settings" (binary 0xFFFF).
+	RenderSettings RenderSettings
+
 	// TimeSpanStart / TimeSpanDuration are resolved (seconds) per the item's
 	// time_span_source: LENGTH_OF_COMP → (0, comp.Duration); WORK_AREA_ONLY →
 	// (comp.WorkAreaStart, comp.WorkAreaEnd-Start); CUSTOM → ldat dividends.
@@ -44,6 +61,27 @@ type RenderQueueItem struct {
 	TimeSpanDuration float64
 
 	OutputModules []*OutputModule
+}
+
+// RenderSettings is the per-item render settings (ExtendScript
+// RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics:
+// -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
+// no current-settings sentinel.
+type RenderSettings struct {
+	Quality           int    // -1 current / 0 wireframe / 1 draft / 2 best
+	ColorDepth        int    // -1 current / 0 8bpc / 1 16bpc / 2 32bpc
+	Effects           int    // 0 all-off / 1 all-on / 2 current
+	FieldRender       int    // 0 off / 1 upper-first / 2 lower-first
+	Pulldown          int    // 0 off / 1..5 phase
+	FrameBlending     int    // 0 off-all / 1 on-checked / 2 current
+	MotionBlur        int    // 0 off-all / 1 on-checked / 2 current
+	ProxyUse          int    // 0 none / 1 all / 2 current / 3 comp-only
+	SoloSwitches      int    // 0 off / 2 current
+	GuideLayers       int    // 0 off / 2 current
+	DiskCache         int    // 0 read-only / 2 current
+	FrameRate         int    // 0 use comp / 1 use this
+	Resolution        [2]int // [x, y] divisors
+	SkipExistingFiles bool
 }
 
 // NumOutputModules returns the number of output modules for this item.
