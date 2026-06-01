@@ -39,7 +39,7 @@ function Parse-Rules {
             throw "rule '$($rule.name)': at least one of windowTitle/windowClass/ocrMatch must be non-empty"
         }
         if (-not $rule.action) { throw "rule '$($rule.name)': missing 'action'" }
-        if (-not $rule.keys)   { throw "rule '$($rule.name)': missing 'keys'" }
+        if ($rule.action -ne 'Ignore' -and -not $rule.keys) { throw "rule '$($rule.name)': missing 'keys'" }
         if ($null -eq $rule.cooldownMs) { throw "rule '$($rule.name)': missing 'cooldownMs'" }
     }
     return ,$parsed

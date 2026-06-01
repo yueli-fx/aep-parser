@@ -68,5 +68,15 @@
     "keys": "{ENTER}",
     "cooldownMs": 2000,
     "comment": "ExtendScript alert() popup — Enter clicks OK. RE fixture JSX should write .done instead of alert(), but this is the defensive fallback for legacy scripts (see test_data/re_gradient.jsx)"
+  },
+  {
+    "name": "startup-splash",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["rights reserved", "All rights", "Creative Cloud", "1992"],
+    "action": "Ignore",
+    "keys": "",
+    "cooldownMs": 5000,
+    "comment": "AE startup splash / About screen (class #32770, empty title, copyright text). On this machine AE 2020/2025 cold-start can linger 30-45s — longer than the unknown-modal grace — so without this it gets force-killed mid-init, which then cascades into a safe-mode dialog next launch (see incidents/ae-automation-occlusion-crashstate.md). action=Ignore: known-benign, do NOT send keys and do NOT escalate to exit-2 — wait it out (bounded by TimeoutSec) until AE finishes loading and the JSX writes .done. OCR-only match (never windowClass) so real #32770 dialogs (convert/corrupt/data-missing/safe-mode) still hit their specific CJK rules; localized error dialogs never contain the English copyright tokens."
   }
 ]

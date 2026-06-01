@@ -66,7 +66,7 @@ Write-ActionLog -DumpDir $dumpDir -Event 'ae-start' -Data @{ pid = $aeRootPid; e
 
 $cooldown          = New-Cooldown
 $unknownFirstSeen  = @{}    # hwnd-hex → DateTime first seen as unknown modal
-$unknownGraceSec   = 15     # how long an unknown modal can persist before exit-2 (splash dismisses well within this)
+$unknownGraceSec   = 30     # how long an unknown modal can persist before exit-2 (AE 2020 cold-start splash can linger ~20s on this machine)
 $deadline          = (Get-Date).AddSeconds($TimeoutSec)
 $exitCode          = 0
 $exitReason        = 'ok'
@@ -147,6 +147,14 @@ try {
                 title = $m.Title; class = $m.Class
             }
             Write-ActionLog -DumpDir $dumpDir -Event "rule-match-$($match.layer)" -Data @{ name = $match.rule.name }
+
+            # Ignore action: known-benign window (e.g. startup splash). Don't
+            # send keys, don't escalate — let it clear on its own (bounded by
+            # TimeoutSec). Cooldown suppresses per-tick log spam.
+            if ($match.rule.action -eq 'Ignore') {
+                Add-Cooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule $match.rule.name -DurationMs $match.rule.cooldownMs
+                continue
+            }
 
             $r = Invoke-SendKeysSafe -Hwnd $m.Hwnd -Keys $match.rule.keys -DelayMs 200
             if (-not $r.Sent) {
