@@ -114,6 +114,52 @@ func (p *Property) SetLockedRatio(v bool) error {
 	return nil
 }
 
+// DimensionsSeparated reports whether a multidimensional property has its
+// dimensions split into separate per-axis followers (AE's "Separate
+// Dimensions" on Position). Read from tdsb byte 3 (_enable_flags) bit 1;
+// defaults to false when the tdsb chunk is absent. Only the leader (the
+// "ADBE Position" property) carries this flag set. W (the structural
+// separate/merge toggle) is deferred — it restructures the property group.
+func (p *Property) DimensionsSeparated() bool {
+	return p.tdsbBit(0x03, 1)
+}
+
+// separationFollowers are the per-axis component match-names AE creates when
+// Position dimensions are separated (X / Y / Z). Position is the only
+// property AE allows to separate; mirrors py-aep's _SEPARATION_FOLLOWERS.
+var separationFollowers = [...]string{"ADBE Position_0", "ADBE Position_1", "ADBE Position_2"}
+
+// IsSeparationLeader reports whether the property is the multidimensional
+// leader that can be separated into per-axis followers — true for
+// "ADBE Position" regardless of whether it is currently separated (use
+// DimensionsSeparated for the actual state). Mirrors py-aep.
+func (p *Property) IsSeparationLeader() bool {
+	return p.MatchName == MatchNamePosition
+}
+
+// IsSeparationFollower reports whether the property is a per-axis component
+// of a separated multidimensional property (X / Y / Z Position).
+func (p *Property) IsSeparationFollower() bool {
+	for _, mn := range separationFollowers {
+		if p.MatchName == mn {
+			return true
+		}
+	}
+	return false
+}
+
+// SeparationDimension returns the axis a separation follower represents
+// (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower.
+// (-1 stands in for py-aep's None.)
+func (p *Property) SeparationDimension() int {
+	for i, mn := range separationFollowers {
+		if p.MatchName == mn {
+			return i
+		}
+	}
+	return -1
+}
+
 // determinePropertyTypes derives PropertyControlType and PropertyValueType
 // from tdb4 flags. Port of py-aep's _determine_property_types().
 func (p *Property) determinePropertyTypes() (PropertyControlType, PropertyValueType) {
