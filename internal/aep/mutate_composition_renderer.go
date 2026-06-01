@@ -26,19 +26,49 @@ import (
 // Atomic mutation: snapshot prin.Data / prda.Data / c.Renderer / warnings;
 // on any new parser warning, roll all back and return them as an error.
 //
-// Alpha: NOT yet double-version ship-gated. prin/prda templates were RE'd
-// from py-aep's renderer_{classic_3d,advanced_3d,cinema_4d,ray_traced}.aep
-// fixtures (single comp each). AE 2020 + AE 2025 acceptance pending.
+// prin/prda templates were RE'd from py-aep's renderer_{classic_3d,advanced_3d,
+// cinema_4d,ray_traced}.aep fixtures (single comp each). The binary match_name
+// is the stable engine identity; the prda template is keyed by it (Escher 12B /
+// Calder 52B / Ernst 20B / Picasso 16B).
+//
+// Ship-gate: AE 2025 green for all 4 engines (Calder/Ernst exact, legacy
+// Escher/Picasso auto-promoted to Advanced 3D on load); AE 2020 green for the
+// engines it exposes (Ernst exact, Escher→"ADBE Advanced 3d"). See
+// composition_renderer_shipgate_test.go.
 //
 // Concurrency: like all mutate paths these touch shared chunk bytes; callers
 // serialize their own access (see incidents/concurrency-unsafe-shared-chunk-bytes).
 
+// prin layout (104B), per py-aep binary/misc_chunks.py PrinChunk:
+//   [0,4)    reserved (constant 00000000)
+//   [4,52)   match_name   — ASCII NUL-padded, 48B
+//   [52,100) display_name — ASCII NUL-padded, 48B (cosmetic; AE re-derives)
+//   [100,103) reserved
+//   [103]    end marker 0x01
 const (
-	prinMatchNameOff = 4    // match-name field start
-	prinDisplayOff   = 0x34 // display-name field start (= 52)
-	prinDisplayEnd   = 0x60 // display-name field end (= 96); @96..103 constant trailer
+	prinMatchNameOff = 4    // match_name field start
+	prinDisplayOff   = 0x34 // display_name field start (= 52)
+	prinDisplayEnd   = 0x64 // display_name field end (= 100); [100,104) reserved + end marker
 	prinSize         = 104
 )
+
+// rendererExtendscriptToBinary maps the ExtendScript module name (what
+// CompItem.renderer exposes) to the binary prin match_name (what's stored on
+// disk). Mirrors py-aep composition.py _RENDERER_EXTENDSCRIPT_TO_BINARY. Only
+// "ADBE Advanced 3d" differs from its binary name ("ADBE Escher"); the other
+// three are identical in both namespaces. SetRenderer accepts either name.
+var rendererExtendscriptToBinary = map[string]string{
+	"ADBE Advanced 3d": "ADBE Escher",
+}
+
+// normalizeRendererName resolves an ExtendScript module name to its binary
+// match_name; binary names (and unknowns) pass through unchanged.
+func normalizeRendererName(name string) string {
+	if bin, ok := rendererExtendscriptToBinary[name]; ok {
+		return bin
+	}
+	return name
+}
 
 // rendererTemplate carries the per-engine bytes SetRenderer emits: the
 // localized display name written into prin's display field, and the full
@@ -84,20 +114,28 @@ func knownRenderers() string {
 	return strings.Join(names, ", ")
 }
 
-// SetRenderer switches the composition's 3D rendering engine to the given
-// internal match-name (one of "ADBE Escher" / "ADBE Calder" / "ADBE Ernst" /
-// "ADBE Picasso"). The match-name + localized display name are rewritten in
-// the prin chunk (length-preserving) and the prda chunk is replaced with the
-// engine's default options (structural). Returns an error for an unknown
-// renderer, a comp built outside the parser (no prin/prda back-ref), a comp
-// whose prin is not the expected 104 bytes, or if the mutation surfaces a
-// parser warning (rolled back).
+// SetRenderer switches the composition's 3D rendering engine. The name may be
+// either a binary prin match_name ("ADBE Escher" / "ADBE Calder" /
+// "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module name
+// ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary name.
+// The binary match_name + display name are rewritten in the prin chunk
+// (length-preserving) and the prda chunk is replaced with the engine's default
+// options (structural). Returns an error for an unknown renderer, a comp built
+// outside the parser (no prin/prda back-ref), a comp whose prin is not the
+// expected 104 bytes, or if the mutation surfaces a parser warning (rolled back).
 //
-// Alpha — not yet AE-ship-gated.
-func (c *Composition) SetRenderer(matchName string) error {
+// Which engines a given AE version actually exposes differs (AE 2020:
+// Escher/Ernst + a Standard variant; AE 2025: Calder/Ernst + Picasso; AE 2025
+// auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary
+// match_name is the stable engine identity — see
+// sketches/2026-06-01-renderer-write-re-findings.md.
+//
+// Ship-gated: AE 2025 (4/4) + AE 2020 (Ernst + Escher) green.
+func (c *Composition) SetRenderer(name string) error {
+	matchName := normalizeRendererName(name)
 	tmpl, ok := rendererTemplates[matchName]
 	if !ok {
-		return fmt.Errorf("SetRenderer: unknown renderer %q (known: %s)", matchName, knownRenderers())
+		return fmt.Errorf("SetRenderer: unknown renderer %q (known: %s)", name, knownRenderers())
 	}
 	if c.back == nil || c.back.prinChunk == nil || c.back.prdaChunk == nil {
 		return fmt.Errorf("SetRenderer: comp %q has no prin/prda back-ref (built outside parser, or has no PRin LIST)", c.Name)

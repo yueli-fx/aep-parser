@@ -78,6 +78,26 @@ func TestSetRendererRoundTrip(t *testing.T) {
 	}
 }
 
+// TestSetRendererExtendscriptAlias accepts the ExtendScript module name
+// "ADBE Advanced 3d" and normalizes it to the binary match_name "ADBE Escher".
+func TestSetRendererExtendscriptAlias(t *testing.T) {
+	const src = "../../test_data/renderer_cinema_4d.aep"
+	proj, err := aep.Open(src)
+	if err != nil {
+		t.Skipf("%s not present: %v", src, err)
+	}
+	comp := proj.Compositions[0]
+	if err := comp.SetRenderer("ADBE Advanced 3d"); err != nil {
+		t.Fatalf("SetRenderer(\"ADBE Advanced 3d\"): %v", err)
+	}
+	if comp.Renderer != "ADBE Escher" {
+		t.Errorf("Renderer = %q, want binary name \"ADBE Escher\"", comp.Renderer)
+	}
+	if got := len(comp.PrdaRawBytes()); got != 12 {
+		t.Errorf("prda len = %d, want 12 (Escher template)", got)
+	}
+}
+
 // TestSetRendererUnknown rejects an unknown match-name without mutating.
 func TestSetRendererUnknown(t *testing.T) {
 	const src = "../../test_data/renderer_classic_3d.aep"
