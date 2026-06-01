@@ -470,6 +470,42 @@ func TestRenderQueueOutputModuleWriteRoundTrip(t *testing.T) {
 	}
 }
 
+// Item-level scalar writes (slice-7): template name (64B fixed), notify flag
+// bit, log type. All length-preserving; round-trip.
+func TestRenderQueueItemScalarWriteRoundTrip(t *testing.T) {
+	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	proj, err := aep.FromReader(bytes.NewReader(orig))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	item := proj.RenderQueue.Items[0]
+	item.SetName("Best Settings")
+	item.SetQueueItemNotify(true)
+	item.SetLogType(2)
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	it := re.RenderQueue.Items[0]
+	if it.Name != "Best Settings" {
+		t.Errorf("Name = %q, want Best Settings", it.Name)
+	}
+	if !it.QueueItemNotify {
+		t.Error("QueueItemNotify = false, want true")
+	}
+	if it.LogType != 2 {
+		t.Errorf("LogType = %d, want 2", it.LogType)
+	}
+}
+
 func TestRenderQueueReaderEmpty(t *testing.T) {
 	proj, err := aep.Open("../../test_data/rq_empty.aep")
 	if err != nil {

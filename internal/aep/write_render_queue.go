@@ -142,6 +142,52 @@ func (it *RenderQueueItem) SetSkipExistingFiles(v bool) {
 	}
 }
 
+// SetName sets the render-settings template name (template_name @0x5A, a fixed
+// 64-byte windows-1252 NUL-padded field). Names longer than 64 bytes are
+// truncated; non-latin-1 runes are dropped. Length-preserving.
+func (it *RenderQueueItem) SetName(name string) {
+	if it == nil || len(it.settingsBlock) < rsTemplateName+rsTemplateNameLen {
+		return
+	}
+	field := it.settingsBlock[rsTemplateName : rsTemplateName+rsTemplateNameLen]
+	for i := range field {
+		field[i] = 0
+	}
+	n := 0
+	for _, r := range name {
+		if n >= rsTemplateNameLen {
+			break
+		}
+		if r < 0x100 { // windows-1252 / latin-1 representable
+			field[n] = byte(r)
+			n++
+		}
+	}
+	it.Name = decodeWin1252(field)
+}
+
+// SetQueueItemNotify toggles the notify-on-completion flag (flag byte @0x07
+// bit 2).
+func (it *RenderQueueItem) SetQueueItemNotify(v bool) {
+	if it == nil || len(it.settingsBlock) <= rsFlagByte {
+		return
+	}
+	mask := byte(1 << 2)
+	if v {
+		it.settingsBlock[rsFlagByte] |= mask
+	} else {
+		it.settingsBlock[rsFlagByte] &^= mask
+	}
+	it.QueueItemNotify = v
+}
+
+// SetLogType sets the raw log-type code (@0x50).
+func (it *RenderQueueItem) SetLogType(v uint16) {
+	if it.patchU16(rsLogType, v) {
+		it.LogType = v
+	}
+}
+
 // --- output module settings setters -----------------------------------------
 
 func boolByte(v bool) byte {
