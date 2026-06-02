@@ -23,6 +23,7 @@
 - [pwsh-7-no-winrt.md](pwsh-7-no-winrt.md) — active — pwsh 7 无 WinRT projection — 用 powershell.exe 5.1 子壳
 - [rq-comment-no-scripting-api.md](rq-comment-no-scripting-api.md) — active — RQItem.comment 无 ScriptingAPI — binary-only 字段 ship-gate 走接受+保留
 - [runtime-only-fields.md](runtime-only-fields.md) — active — Runtime-only fields（AE 不持久化到 .aep）
+- [separate-dimensions-write-mechanics.md](separate-dimensions-write-mechanics.md) — active — Separate Dimensions 写 = 值迁移 + Position_2 合成 + 组件数分支（非翻 bit）
 - [shutter-side-effect-divisors.md](shutter-side-effect-divisors.md) — active — shutter setter 在 AE 端触发 work-area divisor 重编码
 - [stroke-line-cap-join-miter-re.md](stroke-line-cap-join-miter-re.md) — active — Stroke Line Cap / Line Join / Miter Limit — RE findings
 - [tickrate-per-composition.md](tickrate-per-composition.md) — active — TickRate 是 per-composition 的，不是全局常量

@@ -39,6 +39,27 @@ type AEPropertyGroup struct {
 
 	parent *AEPropertyGroup
 	chunk  *rifx.Chunk // the underlying tdgp LIST; nil for the synthetic root
+
+	// layer back-ref, set only on the synthetic root by parseLayer. Lets a
+	// leaf reach its owning Layer (walk parent → root → layer) for structural
+	// mutations like SetDimensionsSeparated that must append a new follower
+	// Property to Layer.Properties. nil for groups built outside the parser.
+	layer *Layer
+}
+
+// ownerLayer walks from a parsed leaf up to the synthetic property-tree root
+// and returns the owning Layer, or nil when the property was built outside
+// the parser / lives under an Effect or Mask subtree (those roots carry no
+// layer back-ref).
+func (p *Property) ownerLayer() *Layer {
+	g := p.parentTreeGroup
+	for g != nil {
+		if g.layer != nil {
+			return g.layer
+		}
+		g = g.parent
+	}
+	return nil
 }
 
 // PropertyMatchName implements PropertyBase.

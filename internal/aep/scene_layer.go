@@ -205,6 +205,7 @@ const (
 	// Orientation / Rotate X / Rotate Y / Envir Appear at default.
 	MatchNamePosition0   = "ADBE Position_0"
 	MatchNamePosition1   = "ADBE Position_1"
+	MatchNamePosition2   = "ADBE Position_2"
 	MatchNameEnvirAppear = "ADBE Envir Appear in Reflect"
 )
 

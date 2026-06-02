@@ -188,6 +188,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	layer.Properties, layer.Effects, layer.Markers = parseProperties(layr, ctx)
 	layer.Masks = parseMasks(layr, ctx)
 	layer.propertyTree = buildAEPropertyGroupTree(layr)
+	layer.propertyTree.layer = layer
 	wirePropertyTreeLeaves(layer.propertyTree, layer.Properties)
 	layer.back.btdsChunk = findTextSourceChunk(layr)
 	if layer.back.btdsChunk != nil {
