@@ -13,7 +13,7 @@
 
 **暂停中的大 arc（spec 部分完成，非 pending 非 done）**：
 
-- **py-aep parity P3** — **§3A Render Queue read+write 已落**（2026-06-01，8 slice + 2026-06-02 SetComment ship-gated）；剩 Property.ValueText / DimensionsSeparated W / RQ 结构性增删（Guides R/W + Essential Graphics R + RQ SetComment 已落 2026-06-02；Composition.Renderer W 已 ship）。详 `specs/2026-05-26-py-aep-parity-design.md`。
+- **py-aep parity P3** — **§3A Render Queue read+write+结构性增删 完整**（2026-06-01 8 slice + 2026-06-02 SetComment/RemoveItem/AddItem ship-gated）；**DimensionsSeparated R/W 双向 2D+3D 已落**（2026-06-02）。剩 Property.ValueText（需 AE schema DB）+ DimensionsSeparated animated + 3C Remove/Duplicate/MoveTo + 3G marker 增删。详 `specs/2026-05-26-py-aep-parity-design.md`。
 - **V3 收尾** — M8 物理分包（scene/serializer 拆包，scene→rifx 残留 5 项白名单清零）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema。详 `specs/2026-05-22-v3-direction.md`（结构性 Phase 1-5 + 包重组方案① 已落）。
 
 **单条候选**：
