@@ -22,7 +22,7 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 	if lrdr == nil {
 		return
 	}
-	rq := &RenderQueue{}
+	rq := &RenderQueue{back: &renderQueueBackrefs{lrdr: lrdr}}
 	proj.RenderQueue = rq
 
 	settingsBlocks := renderSettingsBlocks(lrdr)

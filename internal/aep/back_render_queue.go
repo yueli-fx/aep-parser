@@ -2,6 +2,15 @@ package aep
 
 import "github.com/example/aep-parser/internal/rifx"
 
+// renderQueueBackrefs holds the RIFX chunk reference that powers the structural
+// RenderQueue.RemoveItem write. Nil for queues built outside the parser.
+type renderQueueBackrefs struct {
+	// lrdr is the owning LIST:LRdr container. RemoveItem reaches the
+	// LRdr-level settings list (lhd3 + ldat of 2246B blocks) and the Rout
+	// per-item flags chunk through it.
+	lrdr *rifx.Chunk
+}
+
 // renderQueueItemBackrefs holds the RIFX chunk references that power the
 // length-variable RenderQueueItem.SetComment write. Nil for items built outside
 // the parser.

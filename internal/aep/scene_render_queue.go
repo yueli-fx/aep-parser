@@ -10,6 +10,11 @@ package aep
 // RenderQueue is the project's render queue (LIST:LRdr).
 type RenderQueue struct {
 	Items []*RenderQueueItem
+
+	// back holds the LIST:LRdr chunk reference powering the structural
+	// RemoveItem write (settings ldat + lhd3 count + Rout per-item block).
+	// nil for queues built outside the parser. See back_render_queue.go.
+	back *renderQueueBackrefs
 }
 
 // NumItems returns the number of render queue items.

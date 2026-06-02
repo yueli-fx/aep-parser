@@ -1,11 +1,11 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-02 by claude（Property.SetDimensionsSeparated R/W **双向完整**：separate↔merge × static Position 2D+3D，AE 2020+2025 ship-gate 6/6 PASS，Go 输出 byte-structural 等同 AE 自存。关键发现：merge≠separate 逆（删全部 follower，AE resave 重新预分配 zeroed Pos0/1）、2D/3D 靠 `layer.Is3D` 区分非 Components —— `incidents/separate-dimensions-write-mechanics.md`。仅 animated 暂搁）
-**Active focus**: **py-aep parity P3** — §3A Render Queue read+write 主体完成。**SetRenderer / Guides R/W / 分离维度 R+W(双向, 仅 animated 剩) / 3D Orientation R / Essential Graphics R / RQ SetComment(ship-gated) 已落**。剩 RQ 结构性增删 + ValueText。
+**Last updated**: 2026-06-02 by claude（RenderQueue.RemoveItem 落地：结构性删 item，AE 2020+2025 ship-gate PASS，Go 输出 LRdr 子树 byte-structural 等同 AE `item.remove()`。关键：删 item 联动 LItm+settings ldat+lhd3 count+Rout 四处，settingsBlock 别名需重挂 —— `incidents/render-queue-delete-mechanics.md`。同会话早先：DimensionsSeparated R/W 双向 2D+3D 6/6 ship-gate PASS）
+**Active focus**: **py-aep parity P3** — §3A Render Queue read+write 主体完成。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + RemoveItem(ship-gated) 已落**。剩 RQ item add/insert + ValueText。
 
 ## Next session
 
-1. **其余 P3**：需 ship-gate（RQ 结构性增删）或大 RE（ValueText 需 AE schema DB）。DimensionsSeparated 仅剩 animated Position 子方向暂搁（keyframe 流迁移未 RE，见 `incidents/separate-dimensions-write-mechanics.md`）。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
+1. **其余 P3**：RQ item **add/insert**（需从零合成 2246B RenderSettingsItem + OM/Roou/Als2 或克隆既有 item 重映射 comp_id，比 delete 重，见 `incidents/render-queue-delete-mechanics.md`）或大 RE（ValueText 需 AE schema DB）。DimensionsSeparated 仅剩 animated 子方向。详 `plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md` + spec §2.6。
 2. **Property synthesis**（可选大 feature，暂搁）：AE 省略未改的默认属性，py-aep 合成完整 transform schema 我们不合成。补合成 + `Elided` 是唯一让 transform group 对齐 py-aep 长度的路。详 `incidents/transform-group-default-omission.md`。次要 fidelity：animated orientation 的 easing/tangents（旧 1D layout 未校验）。
 2. **ship-gate wrapper 改进已落**（`19d8922`）：splash Ignore action + grace 15→30s。后续若 OCR 被其他窗口遮挡（occlusion）仍可能误报，见 `incidents/ae-automation-occlusion-crashstate.md`。
 

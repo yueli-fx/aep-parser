@@ -22,6 +22,7 @@
 - [project-flag-chunks-lnrb-lnrp.md](project-flag-chunks-lnrb-lnrp.md) — active — lnrb / lnrp flag chunks — 位置敏感；lnrp ScriptingAPI readback quirk
 - [pwsh-7-no-winrt.md](pwsh-7-no-winrt.md) — active — pwsh 7 无 WinRT projection — 用 powershell.exe 5.1 子壳
 - [rq-comment-no-scripting-api.md](rq-comment-no-scripting-api.md) — active — RQItem.comment 无 ScriptingAPI — binary-only 字段 ship-gate 走接受+保留
+- [render-queue-delete-mechanics.md](render-queue-delete-mechanics.md) — active — RQ delete = LItm + settings ldat + lhd3 count + Rout 四处联动；settingsBlock 别名需重挂
 - [runtime-only-fields.md](runtime-only-fields.md) — active — Runtime-only fields（AE 不持久化到 .aep）
 - [separate-dimensions-write-mechanics.md](separate-dimensions-write-mechanics.md) — active — Separate Dimensions 写 = 值迁移 + Position_2 合成 + 组件数分支（非翻 bit）
 - [shutter-side-effect-divisors.md](shutter-side-effect-divisors.md) — active — shutter setter 在 AE 端触发 work-area divisor 重编码
