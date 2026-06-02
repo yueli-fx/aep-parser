@@ -59,6 +59,83 @@ func TestRenderQueueRemoveItem(t *testing.T) {
 	assertOne(t, re, "round-trip")
 }
 
+// compByName returns the first composition with the given name, or nil.
+func compByName(proj *aep.Project, name string) *aep.Composition {
+	for _, c := range proj.Compositions {
+		if c.Name == name {
+			return c
+		}
+	}
+	return nil
+}
+
+// TestRenderQueueAddItem clones the queue's last item for a second comp and
+// confirms the new item + comp linkage survive WriteAEP.
+func TestRenderQueueAddItem(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_rq_add_before.aep")
+	if err != nil {
+		t.Skipf("re_rq_add_before.aep not present; run test_data/re_rq_add.jsx in AE 2020")
+	}
+	rq := proj.RenderQueue
+	if rq == nil || rq.NumItems() != 1 {
+		t.Fatalf("base fixture: want 1 render queue item, got %d", rq.NumItems())
+	}
+	rqb := compByName(proj, "RQB")
+	if rqb == nil {
+		t.Fatal("fixture: comp RQB not found")
+	}
+
+	added, err := rq.AddItem(rqb)
+	if err != nil {
+		t.Fatalf("AddItem(RQB): %v", err)
+	}
+	if added == nil || added.Comp == nil || added.Comp.Name != "RQB" {
+		t.Fatalf("AddItem returned item with comp %v, want RQB", added.Comp)
+	}
+	if rq.NumItems() != 2 {
+		t.Fatalf("after add: NumItems = %d, want 2", rq.NumItems())
+	}
+
+	assertTwo := func(t *testing.T, p *aep.Project, tag string) {
+		t.Helper()
+		if p.RenderQueue == nil || p.RenderQueue.NumItems() != 2 {
+			t.Fatalf("%s: NumItems = %d, want 2", tag, p.RenderQueue.NumItems())
+		}
+		i0, i1 := p.RenderQueue.Items[0], p.RenderQueue.Items[1]
+		if i0.Comp == nil || i0.Comp.Name != "RQA" {
+			t.Errorf("%s: item0 comp = %v, want RQA", tag, i0.Comp)
+		}
+		if i1.Comp == nil || i1.Comp.Name != "RQB" {
+			t.Errorf("%s: item1 comp = %v, want RQB", tag, i1.Comp)
+		}
+		if i1.NumOutputModules() < 1 {
+			t.Errorf("%s: added item has no output module", tag)
+		}
+	}
+	assertTwo(t, proj, "in-memory")
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	assertTwo(t, re, "round-trip")
+}
+
+// TestRenderQueueAddItem_Refuse covers nil-comp + empty-queue guards.
+func TestRenderQueueAddItem_Refuse(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_rq_add_before.aep")
+	if err != nil {
+		t.Skipf("re_rq_add_before.aep not present")
+	}
+	if _, err := proj.RenderQueue.AddItem(nil); err == nil {
+		t.Error("AddItem(nil) should refuse")
+	}
+}
+
 // TestRenderQueueRemoveItem_Refuse covers out-of-range + missing-backref guards.
 func TestRenderQueueRemoveItem_Refuse(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_rq_delete_before.aep")

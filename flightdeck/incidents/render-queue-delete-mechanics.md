@@ -33,7 +33,15 @@ LRdr
 
 Go `RemoveItem(1)` 输出的 LRdr 子树 **byte-structural 等同** AE 自身 `item(2).remove()`（dump_lrdr diff 空）。双版本 ship-gate PASS（`render_queue_remove_shipgate_test.go`：AE 2020 + 2025 读回 numItems=1 + 存活 comp=RQA）。
 
+## ADD（clone + remap）
+
+`RenderQueue.AddItem(comp)` 走 **clone 末位 item + remap comp_id**（同 InsertLayer 思路），不从零合成：deep-clone 模板的 2246B settings block（改 @0x08 comp_id = comp.ID）+ `[list, 'LOm ']` 组 + Rout per-item block，append 三处 + lhd3/Rout header 增。**双版本 ship-gate PASS**（`render_queue_remove_shipgate_test.go`：AE 2020 + 2025 接受 cloned item，读回 numItems+1 + item(n).comp = 目标 comp）。
+
+- 克隆的 OM 保留模板的 output path/template（AE 接受；fresh add 会按 comp 命名输出 —— deferred 细节，不影响接受/comp 链接）。
+- 空队列无模板可克隆 → refuse（同 NewComposition 需 template 的限制）。
+- ldat append 触发 realloc → **全部** item（含既有）的 settingsBlock 别名重挂。
+
 ## scope / 未知
 
 - **Rout per-item stride 仅在单 OM/item 上 RE 过**（20B = 5×u32）。多 output module 的 item 是否 per-OM 扩展 Rout 未验 —— `mutate_render_queue.go` 用计算 stride `(len-4)/count` + 比例 header，对均匀 item 正确；多 OM 混合需补 RE。
-- **ADD/insert 未做**：需从零合成 AE-valid 的 2246B RenderSettingsItem + 128B OM settings + Roou(154B) + Als2 JSON + Rout block，或克隆既有 item 重映射 comp_id。比 delete 重得多，deferred。
+- Rout per-item block 内容（item1 `00000013..` vs item2 `40000013..` 不同）疑为 per-item 进度/状态；clone 时照搬，AE 接受未现问题。语义未细 RE。
