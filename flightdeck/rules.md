@@ -1,4 +1,5 @@
 ---
+version: 2.2
 git: true
 emit_agents_md: false
 disabled_folders: []
