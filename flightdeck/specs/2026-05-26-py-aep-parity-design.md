@@ -167,7 +167,7 @@ status: blocked
 | `MinValue / MaxValue / UnitsText` | ✅ R | ✅ R | ✅ R | done | P2c followup; tdum/tduM chunk + unitsTextMap |
 | `Value` (current) | ✅ R/W | ✅ R/W StaticValue | ✅ | done |
 | `CanVaryOverTime` | ✅ R | ✅ R | ✅ R | done | P1 1G |
-| `DimensionsSeparated` | ✅ R/W | ✅ R/W | ✅ R/W | done (P3 §3C) | R done; W (Alpha) merge→separate static 3D Position only, AE 2020+2025 ship-gate; merge/2D/animated deferred. See `incidents/separate-dimensions-write-mechanics.md` |
+| `DimensionsSeparated` | ✅ R/W | ✅ R/W | ✅ R/W | done (P3 §3C) | R + W both directions (Alpha); static Position 2D+3D, AE 2020+2025 ship-gate 6/6; only animated deferred. See `incidents/separate-dimensions-write-mechanics.md` |
 | `Expression / ExpressionEnabled / CanSetExpression` | ✅ R/W | ✅ R/W | ✅ | done |
 | `PropertyControlType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
 | `PropertyValueType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
@@ -291,7 +291,7 @@ status: blocked
 
 - **3A** Render Queue 全栈 (`RenderQueue / RenderQueueItem / OutputModule`)，含全 enum + Settings + format options × 7 — 整个新域 (~3-5k LOC)
 - **3B** Layer 结构性 ops: `Remove / Duplicate / CopyToComp / MoveAfter / MoveBefore / MoveToBeginning / MoveToEnd / SetParentWithJump`（全 V3 capability framework 内做）
-- **3C** PropertyBase 结构性: `Remove / Duplicate / MoveTo / DimensionsSeparated R/W`（`DimensionsSeparated W` done 2026-06-02 — separate 方向 static 3D Position，双版本 ship-gate；merge/2D/animated 暂搁。Remove/Duplicate/MoveTo 仍 deferred）
+- **3C** PropertyBase 结构性: `Remove / Duplicate / MoveTo / DimensionsSeparated R/W`（`DimensionsSeparated R/W` done 2026-06-02 — separate↔merge 双向 static Position 2D+3D，双版本 ship-gate 6/6；仅 animated 暂搁。Remove/Duplicate/MoveTo 仍 deferred）
 - **3D** Composition.Renderer 写（跨 renderer 切换 → prda 长度变结构性）
 - **3E** Essential Graphics R only (controllers + override UUIDs，不做自动解析)
 - **3F** Guides R/W (ruler 标尺辅助线，UI-only chunk)

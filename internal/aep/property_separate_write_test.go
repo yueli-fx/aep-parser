@@ -106,6 +106,90 @@ func TestSetDimensionsSeparated_3D(t *testing.T) {
 	assertSeparated(t, re, "round-trip")
 }
 
+// TestSetDimensionsSeparated_Merge collapses a separated 3D Position back to
+// merged: leader takes the [X,Y,Z] value, all Position_0/1/2 followers vanish.
+func TestSetDimensionsSeparated_Merge(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_sepdim_merge_before.aep")
+	if err != nil {
+		t.Skipf("re_sepdim_merge_before.aep not present; run test_data/re_separate_dims_ext.jsx in AE 2020")
+	}
+	pos := findProp(proj, aep.MatchNamePosition)
+	if pos == nil || !pos.DimensionsSeparated() {
+		t.Fatal("precondition: merge fixture not separated")
+	}
+	// Capture migrated follower values to predict the merged leader value.
+	wantX, _ := scalarVal(findProp(proj, aep.MatchNamePosition0).StaticValue)
+	wantY, _ := scalarVal(findProp(proj, aep.MatchNamePosition1).StaticValue)
+	wantZ, _ := scalarVal(findProp(proj, aep.MatchNamePosition2).StaticValue)
+
+	if err := pos.SetDimensionsSeparated(false); err != nil {
+		t.Fatalf("SetDimensionsSeparated(false): %v", err)
+	}
+
+	assertMerged := func(t *testing.T, p *aep.Project, tag string) {
+		t.Helper()
+		leader := findProp(p, aep.MatchNamePosition)
+		if leader == nil {
+			t.Fatalf("%s: leader missing", tag)
+		}
+		if leader.DimensionsSeparated() {
+			t.Errorf("%s: leader still separated", tag)
+		}
+		lv, ok := leader.StaticValue.([]float64)
+		if !ok || len(lv) < 3 {
+			t.Fatalf("%s: leader value not 3D: %v", tag, leader.StaticValue)
+		}
+		if lv[0] != wantX || lv[1] != wantY || lv[2] != wantZ {
+			t.Errorf("%s: merged leader value = %v, want [%g %g %g]", tag, lv, wantX, wantY, wantZ)
+		}
+		for _, mn := range []string{aep.MatchNamePosition0, aep.MatchNamePosition1, aep.MatchNamePosition2} {
+			if findProp(p, mn) != nil {
+				t.Errorf("%s: follower %s still present after merge", tag, mn)
+			}
+		}
+	}
+	assertMerged(t, proj, "in-memory")
+	assertMerged(t, reopenWritten(t, proj), "round-trip")
+}
+
+// TestSetDimensionsSeparated_2D separates a 2D layer's Position: only X/Y
+// followers appear (no Position_2 — that is 3D-only).
+func TestSetDimensionsSeparated_2D(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_sepdim_2d_before.aep")
+	if err != nil {
+		t.Skipf("re_sepdim_2d_before.aep not present; run test_data/re_separate_dims_ext.jsx in AE 2020")
+	}
+	pos := findProp(proj, aep.MatchNamePosition)
+	if pos == nil || pos.DimensionsSeparated() {
+		t.Fatal("precondition: 2D fixture missing/already separated")
+	}
+	xy := pos.StaticValue.([]float64)
+	wantX, wantY := xy[0], xy[1]
+
+	if err := pos.SetDimensionsSeparated(true); err != nil {
+		t.Fatalf("SetDimensionsSeparated(true) on 2D: %v", err)
+	}
+
+	assert2D := func(t *testing.T, p *aep.Project, tag string) {
+		t.Helper()
+		leader := findProp(p, aep.MatchNamePosition)
+		if !leader.DimensionsSeparated() {
+			t.Errorf("%s: 2D leader not separated", tag)
+		}
+		if x, _ := scalarVal(findProp(p, aep.MatchNamePosition0).StaticValue); x != wantX {
+			t.Errorf("%s: Position_0 = %g, want %g", tag, x, wantX)
+		}
+		if y, _ := scalarVal(findProp(p, aep.MatchNamePosition1).StaticValue); y != wantY {
+			t.Errorf("%s: Position_1 = %g, want %g", tag, y, wantY)
+		}
+		if findProp(p, aep.MatchNamePosition2) != nil {
+			t.Errorf("%s: 2D separation must NOT create Position_2", tag)
+		}
+	}
+	assert2D(t, proj, "in-memory")
+	assert2D(t, reopenWritten(t, proj), "round-trip")
+}
+
 // TestSetDimensionsSeparated_IdempotentRefuse verifies double-separate and
 // non-leader calls are refused without mutating state.
 func TestSetDimensionsSeparated_Refuse(t *testing.T) {
