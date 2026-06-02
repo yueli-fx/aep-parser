@@ -20,6 +20,7 @@
 - [nextitemid-must-include-layer-ids.md](nextitemid-must-include-layer-ids.md) — active — initDerived 计算 nextItemID 必须 walk LAYER IDs
 - [path-keyframe-write-re.md](path-keyframe-write-re.md) — active — Shape-path keyframe write — Phase 0 RE
 - [project-flag-chunks-lnrb-lnrp.md](project-flag-chunks-lnrb-lnrp.md) — active — lnrb / lnrp flag chunks — 位置敏感；lnrp ScriptingAPI readback quirk
+- [property-indexed-group-structural-re.md](property-indexed-group-structural-re.md) — active — PropertyBase Remove/Duplicate/MoveTo — INDEXED_GROUP 谓词 + 纯 tdmn+payload pair splice（无 count chunk）
 - [pwsh-7-no-winrt.md](pwsh-7-no-winrt.md) — active — pwsh 7 无 WinRT projection — 用 powershell.exe 5.1 子壳
 - [rq-comment-no-scripting-api.md](rq-comment-no-scripting-api.md) — active — RQItem.comment 无 ScriptingAPI — binary-only 字段 ship-gate 走接受+保留
 - [render-queue-delete-mechanics.md](render-queue-delete-mechanics.md) — active — RQ delete = LItm + settings ldat + lhd3 count + Rout 四处联动；settingsBlock 别名需重挂
