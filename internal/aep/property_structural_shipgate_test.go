@@ -123,3 +123,17 @@ func TestPropStructMove_AEShipGate_AE2025(t *testing.T) {
 	runPropStructShipGate(t, ae2025(), "move-AE2025", moveLastEffectToFront,
 		[]string{"ADBE Fill", "ADBE Gaussian Blur 2", "ADBE Tint"})
 }
+
+func duplicateFirstEffect(l *aep.Layer) error {
+	_, err := l.EffectsParade().ChildByIndex(0).(*aep.AEPropertyGroup).Duplicate()
+	return err
+}
+
+func TestPropStructDuplicate_AEShipGate_AE2020(t *testing.T) {
+	runPropStructShipGate(t, ae2020(), "duplicate-AE2020", duplicateFirstEffect,
+		[]string{"ADBE Gaussian Blur 2", "ADBE Gaussian Blur 2", "ADBE Tint", "ADBE Fill"})
+}
+func TestPropStructDuplicate_AEShipGate_AE2025(t *testing.T) {
+	runPropStructShipGate(t, ae2025(), "duplicate-AE2025", duplicateFirstEffect,
+		[]string{"ADBE Gaussian Blur 2", "ADBE Gaussian Blur 2", "ADBE Tint", "ADBE Fill"})
+}

@@ -360,6 +360,157 @@ func (g *AEPropertyGroup) MoveTo(index int) error {
 	return nil
 }
 
+// Duplicate inserts a copy of this group immediately after it among its parent
+// INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural
+// effect — and returns the clone. The receiver must be a direct child of an
+// indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text
+// Animators); Duplicate returns an error otherwise, mirroring AE's refuse.
+//
+// The clone reuses the source's match-name and on-disk payload verbatim. AE's
+// own .duplicate() additionally persists a deduplicated display name (the
+// localized "<name> 2") into a length-variable tdsn on the clone's inner tdgp
+// (RE'd 2026-06-03, see incidents/property-indexed-group-structural-re.md
+// slice 2: the source carries NO tdsn, the clone gains one reading "高斯模糊 2").
+// We deliberately do NOT synthesize that suffix: the base is AE's *localized*
+// effect name, which needs the AE schema/localization DB we don't carry (the
+// same blocker as Property.ValueText), and a clone with no tdsn is byte-for-byte
+// an "add the same effect twice" project — which AE accepts and re-derives the
+// runtime dedup name from on open. The persisted suffix is cosmetic; AE
+// recomputes it. The structural duplicate is faithful.
+//
+// Chunk mechanics: pure (tdmn, payload) pair insert immediately after the
+// source pair, no count/index chunk (RE: parade 9→11 children, nothing else
+// touched).
+//
+// Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat
+// slice, and Project.Warnings; on any new parser warning — or a flat-mirror
+// re-parse that fails to reproduce exactly one clone — everything rolls back
+// and an error is returned.
+//
+// Alpha — see file header for ship-gate status.
+func (g *AEPropertyGroup) Duplicate() (*AEPropertyGroup, error) {
+	parent := g.parent
+	if parent == nil {
+		return nil, fmt.Errorf("Duplicate: property group %q has no parent (root or built outside parser)", g.MatchName)
+	}
+	if !parent.IsIndexedGroup() {
+		return nil, fmt.Errorf("Duplicate: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be duplicated", parent.MatchName)
+	}
+	idx := parent.PropertyIndex(g)
+	if idx < 0 {
+		return nil, fmt.Errorf("Duplicate: group %q not found among parent %q children", g.MatchName, parent.MatchName)
+	}
+	srcTdmn, srcPayload, ok := parent.childTdmnPayload(g)
+	if !ok {
+		return nil, fmt.Errorf("Duplicate: group %q chunk pair not located in parent LIST", g.MatchName)
+	}
+	pi := indexOfChunk(parent.chunk.Children, srcPayload)
+	if pi < 1 {
+		return nil, fmt.Errorf("Duplicate: group %q payload chunk not in parent LIST", g.MatchName)
+	}
+
+	layer := parent.ownerLayer()
+
+	// Snapshot for rollback.
+	oldChunkChildren := append([]*rifx.Chunk(nil), parent.chunk.Children...)
+	oldSceneChildren := append([]PropertyBase(nil), parent.Children...)
+	var oldEffects []*Effect
+	var oldMasks []*Mask
+	if layer != nil {
+		oldEffects = append([]*Effect(nil), layer.Effects...)
+		oldMasks = append([]*Mask(nil), layer.Masks...)
+	}
+	oldWarningsLen := warningsLen(layer)
+
+	rollback := func() {
+		parent.chunk.Children = oldChunkChildren
+		parent.Children = oldSceneChildren
+		if layer != nil {
+			layer.Effects = oldEffects
+			layer.Masks = oldMasks
+		}
+		rollbackWarnings(layer, oldWarningsLen)
+	}
+
+	// Clone the (tdmn, payload) pair verbatim — opaque content rides along
+	// unchanged (CLAUDE.md #5).
+	tdmnClone := deepCloneChunk(srcTdmn)
+	payloadClone := deepCloneChunk(srcPayload)
+
+	// Chunk: splice the clone pair immediately after the source payload.
+	ch := parent.chunk.Children
+	spliced := make([]*rifx.Chunk, 0, len(ch)+2)
+	spliced = append(spliced, ch[:pi+1]...)
+	spliced = append(spliced, tdmnClone, payloadClone)
+	spliced = append(spliced, ch[pi+1:]...)
+	parent.chunk.Children = spliced
+
+	// Scene: insert a stand-in group node right after the source.
+	cloneNode := &AEPropertyGroup{MatchName: g.MatchName, Name: g.Name, parent: parent, chunk: payloadClone}
+	insertChildAfter(parent, g, cloneNode)
+
+	// Flat mirror: re-parse the clone pair so the typed slice entry's back-refs
+	// point at the CLONE's chunks (never aliased to the source). Skip silently
+	// for indexed groups with no flat mirror (Root Vectors / Text Animators).
+	if layer != nil && layer.comp != nil && layer.comp.proj != nil {
+		ctx := newParseCtxFPS(layer.comp.TickRate, layer.comp.FrameRate, layer.comp.Name, &layer.comp.proj.Warnings)
+		switch parent.MatchName {
+		case "ADBE Effect Parade":
+			tmpParade := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{tdmnClone, payloadClone}}
+			var tmp []*Effect
+			collectEffects(tmpParade, &tmp, ctx)
+			if len(tmp) != 1 {
+				rollback()
+				return nil, fmt.Errorf("Duplicate: clone re-parse produced %d effects (want 1)", len(tmp))
+			}
+			layer.Effects = insertEffectAt(layer.Effects, idx+1, tmp[0])
+		case "ADBE Mask Parade":
+			m := decodeMask(payloadClone, ctx)
+			if m == nil {
+				rollback()
+				return nil, fmt.Errorf("Duplicate: clone mask re-parse failed")
+			}
+			layer.Masks = insertMaskAt(layer.Masks, idx+1, m)
+		}
+	}
+
+	if newWarn := newWarningsSince(layer, oldWarningsLen); len(newWarn) > 0 {
+		rollback()
+		return nil, fmt.Errorf("Duplicate: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
+	}
+	return cloneNode, nil
+}
+
+// insertEffectAt returns s with e inserted at position i (clamped to [0,len]).
+func insertEffectAt(s []*Effect, i int, e *Effect) []*Effect {
+	if i < 0 {
+		i = 0
+	}
+	if i > len(s) {
+		i = len(s)
+	}
+	out := make([]*Effect, 0, len(s)+1)
+	out = append(out, s[:i]...)
+	out = append(out, e)
+	out = append(out, s[i:]...)
+	return out
+}
+
+// insertMaskAt returns s with m inserted at position i (clamped to [0,len]).
+func insertMaskAt(s []*Mask, i int, m *Mask) []*Mask {
+	if i < 0 {
+		i = 0
+	}
+	if i > len(s) {
+		i = len(s)
+	}
+	out := make([]*Mask, 0, len(s)+1)
+	out = append(out, s[:i]...)
+	out = append(out, m)
+	out = append(out, s[i:]...)
+	return out
+}
+
 // moveIndexPermutation returns the new→old index mapping for moving the element
 // at `from` to position `to` in a slice of length n (other elements keep their
 // relative order).

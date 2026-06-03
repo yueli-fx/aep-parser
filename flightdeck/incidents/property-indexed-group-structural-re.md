@@ -77,22 +77,34 @@ Effect Parade tdgp 直接 children 布局：
 parent.chunk.Children，保留 prefix（tdsb/tdsn）+ suffix（Group End），每个 child
 复用**原 chunk 指针对** → opaque 内容原样带走（CLAUDE.md #5）。
 
-## Duplicate 的 display-name 后缀（slice 2 待解）
+## Duplicate 的 display-name 后缀（slice 2 已解 2026-06-03）
 
-`.duplicate()` 后 clone 的 **display name** = "高斯模糊 2"（源 = "高斯模糊"），
-但 **match-name 不变**。display name 存在 effect 内层 `tdgp → tdsn → Utf8`
-（length-variable）。**未确认** clone 的 tdsn 里是 AE 存了 " 2" 还是 runtime
-auto-dedup（py-aep auto_name 逻辑暗示可能是 runtime 派生）。Duplicate slice 落地
-前要先 byte-check 这点 —— 若 AE 存了，需 length-variable 改 Utf8；若 runtime 派生，
-byte-identical clone 即可，AE 打开自动去重。
+byte-check 结论（`tmp_debug/dump_prop_tdsn` 对 baseline vs duplicate fixture）：
+
+- **baseline**：每个 effect 内层 tdgp **无 tdsn** —— 默认显示名（"高斯模糊"）
+  从 match-name **运行时派生**，不存盘。
+- **duplicate**：clone（源紧后那个）内层 tdgp **多一个 length-variable `tdsn → Utf8`**
+  = "高斯模糊 2"；源仍无 tdsn。
+
+即 **AE 把去重后缀存进了 clone 的 tdsn**，且 base 是 AE 的**本地化**名（"高斯模糊"
+= Gaussian Blur 的中文显示名）。要字节级复刻这后缀需 AE schema/本地化 DB ——
+跟 `Property.ValueText` 同 blocker。
+
+**实现决策（不复刻后缀）**：clone = 源 `(tdmn, payload)` 对的 verbatim deep-copy，
+**不注入 tdsn**。理由：无 tdsn 的 clone 字节上等价于"同一 effect Add 两次"——
+AE 完全合法，打开时运行时重算去重名（" 2"）。那后缀纯 cosmetic、AE 自己会算。
+结构性 duplicate 是忠实的。**双版本 ship-gate 实测证实**：AE 2020 + 2025 都接受
+该 clone（无数据丢失），读回 4 effects 顺序正确，resave 保留。
 
 ## 落地状态
 
-- **Remove + MoveTo**：`mutate_property_structural.go`，Go round-trip + AE 2020/2025
-  双版本 ship-gate（`property_structural_shipgate_test.go`）。Effect Parade 已 gate；
+- **Remove + MoveTo + Duplicate**：`mutate_property_structural.go`，Go round-trip +
+  AE 2020/2025 双版本 ship-gate（`property_structural_shipgate_test.go`：remove /
+  move / duplicate × 双版本 = 6/6 PASS）。Effect Parade 已 gate；
   Mask Parade / Root Vectors / Text Animators 同机制、Go round-trip 过，但未单独
   ship-gate → Alpha。
-- **Duplicate**：deferred（display-name 后缀机制待 byte-check）。
+- Duplicate clone 的 flat mirror（`Layer.Effects` / `Layer.Masks`）走 clone chunk
+  **重解**（`collectEffects` / `decodeMask`），back-ref 指向 clone chunk 不 alias 源。
 
 相关：[[separate-dimensions-write-mechanics]]（同 tdmn+payload pair 机制的姊妹案例）、
 [[ae-deletelayer-re]]（同 V2.1 atomic invariants pattern）。
