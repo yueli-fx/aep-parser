@@ -88,10 +88,12 @@ comp 无 marker 伪层时新建整条 SecL→...→mrst 链 = canonical seed RE�
 
 ## 6. 落地切片顺序
 
-1. **back-ref 捕获**（parser sidecar）+ Remove + 测试 → commit（Alpha，标 BREAKING 若动签名）。
-2. **Add（clone-template）** + 测试 → commit（Alpha）。
-3. **AE 双版本 ship-gate**（Remove + Add）→ 过则升 stable，更新 coverage.md / spec §3G / cockpit。
+1. ✅ **back-ref 捕获**（parser `markerList` sidecar）+ `Marker.Remove()` + 测试 → `6d1bdcf`（Alpha，无签名破坏）。
+2. ✅ **`Composition.AddMarker`（clone-template）** + 测试 → `44aa03f`（Alpha）。go vet + go test ./... 全绿。
+3. ⏳ **AE 双版本 ship-gate**（Remove + Add）→ 过则升 stable，更新 coverage.md / spec §3G / cockpit。**下一步**。
 4. （可选）time 排序约束 RE + add-to-empty seed slice。
+
+> 说明：①②为纯字节结构性 splice + WriteAEP round-trip 验证（Go 层证毕），AE 接受性待 ③ ship-gate。clone-template 已规避 opaque 默认值 RE，③ 主要验证 AE 是否接受我们 splice 后的 ldat/lhd3/mrky 长度变化 + 顺序（tail-insert 是否需按 time 排序）。
 
 ## 7. 风险
 
