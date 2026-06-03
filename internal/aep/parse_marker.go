@@ -64,6 +64,11 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 		}
 	}
 
+	// Shared container for structural ops (Remove/Add). owner is wired later
+	// by bindMarkerListOwner once the slice has been assigned to its public
+	// Composition.Markers / Layer.Markers field.
+	ml := &markerList{lhd3: lhd3, ldat: ldat, mrky: mrky}
+
 	markers := make([]*Marker, 0, count)
 	for i := 0; i < count; i++ {
 		off := i * bpk
@@ -73,6 +78,7 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 			ldatOffset: off,
 			tickRate:   ctx.tickRate,
 			compFps:    ctx.compFps,
+			list:       ml,
 		}
 		if i < len(nmrds) {
 			m.nmrd = nmrds[i]
@@ -85,6 +91,20 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 		markers = append(markers, m)
 	}
 	return markers
+}
+
+// bindMarkerListOwner records, on the shared markerList behind a parsed marker
+// set, a pointer to the public []*Marker field the set lives in (a comp's or a
+// layer's Markers). Structural ops (Remove/Add) use it to keep that slice in
+// sync with the chunk tree. No-op for an empty set. Call once, right after the
+// slice has been assigned to its owning field.
+func bindMarkerListOwner(field *[]*Marker) {
+	for _, m := range *field {
+		if m.list != nil {
+			m.list.owner = field
+			return
+		}
+	}
 }
 
 // decodeNmHd populates the marker's Duration + Label from a NmHd chunk

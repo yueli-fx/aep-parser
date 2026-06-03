@@ -40,6 +40,25 @@ type Marker struct {
 	nmrd       *rifx.Chunk // parent Nmrd LIST (for Utf8 text children)
 	tickRate   float64     // owning composition's TickRate (for SetTime)
 	compFps    float64     // owning composition's FrameRate (for FrameTime / SetFrameTime)
+
+	// list back-references the owning marker-set container, shared by every
+	// marker in the same "ADBE Marker" set. Populated by parseMarkers; nil for
+	// markers built outside the parser. Required by the structural ops
+	// (Marker.Remove / Composition.AddMarker).
+	list *markerList
+}
+
+// markerList is the internal container behind one "ADBE Marker" set (a comp's
+// or a layer's markers). It holds the chunk references the structural ops
+// splice — the keyframe count (lhd3), the keyframe blocks (ldat), and the
+// Nmrd-bearing mrky LIST — plus owner, a pointer to the public Markers field
+// these markers live in, so Remove/Add can keep that slice in sync. All
+// markers in one set share a single *markerList.
+type markerList struct {
+	lhd3  *rifx.Chunk // kfl count chunk: count @0x08, bpk @0x10 = 16
+	ldat  *rifx.Chunk // keyframe blocks: count × 16 bytes
+	mrky  *rifx.Chunk // Nmrd container (nil when the set has no mrky branch)
+	owner *[]*Marker  // the public Composition.Markers / Layer.Markers field
 }
 
 // MaskMode is the compositing mode for a mask (matches AE C++ SDK values).

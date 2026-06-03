@@ -186,6 +186,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 
 	layer.Type = inferLayerType(d, layer)
 	layer.Properties, layer.Effects, layer.Markers = parseProperties(layr, ctx)
+	bindMarkerListOwner(&layer.Markers)
 	layer.Masks = parseMasks(layr, ctx)
 	layer.propertyTree = buildAEPropertyGroupTree(layr)
 	layer.propertyTree.layer = layer
