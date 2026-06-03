@@ -345,12 +345,41 @@ func temporalEaseLinear(es []TemporalEase) bool {
 	return true
 }
 
+// aeSepDimSpeedFactor is AE's per-axis speed conversion for separated
+// dimensions: speed = (centralDifference of axis values) × 100, i.e.
+// speed = Δ × (100/6). AE's stored factor is NOT the clean f64 100.0/6.0
+// (0x4030aaaaaaaaaaab) — empirically it is 0x4030aaaaaaac192b
+// (≈16.666666666999998, the f64 one ULP below the literal 16.666666667),
+// carrying a ~2e-11 relative offset that comes from AE's internal tick-time
+// quantization. Using it reproduces AE's stored speeds exactly for most Δ
+// (200/−50/400/650) and within 1 ULP for the rest (e.g. Δ=300) — vs ~2e-7
+// off for a clean Δ/6×100. time / value / influence are byte-identical to AE
+// regardless; the ≤1-ULP speed residual is AE's per-keyframe tick rounding,
+// not replicated here. RE'd from re_sepdim_anim{,2,3}_after.aep (AE 2020).
+var aeSepDimSpeedFactor = math.Float64frombits(0x4030aaaaaaac192b)
+
 // buildSeparatedAxisKfl builds a LIST(kfl)(lhd3 + ldat) for one axis of a
 // separated Position, mapping the leader's 3D spatial keyframes to 1D temporal
 // keyframes (bpk=48, header07=0x08). See separatePositionAnimated for the map.
+//
+// The per-axis temporal speed AE writes is NOT the leader's stored spatial
+// tangent (which is timing-weighted / asymmetric for non-uniform spacing).
+// It is the timing-independent central difference of the axis VALUES:
+//
+//	speed[i] = (v[min(n-1,i+1)] − v[max(0,i-1)]) / 6 × 100  (same on in+out side)
+//
+// while the per-side influence carries the timing:
+//
+//	in_influence[i]  = 0.01 / (t[i] − t[i-1])   (0 at the first keyframe)
+//	out_influence[i] = 0.01 / (t[i+1] − t[i])   (0 at the last keyframe)
+//
+// RE'd byte-exact across three AE 2020 fixtures: uniform 1.0s, non-uniform
+// 0.5/1.0/1.5s, uniform 0.5s (re_sepdim_anim{,2,3}_after.aep).
 func buildSeparatedAxisKfl(leaderKfs []*Keyframe, axis int, tickRate float64) *rifx.Chunk {
 	const bpk = 48
 	n := len(leaderKfs)
+
+	val := func(i int) float64 { return leaderKfs[i].Value.([]float64)[axis] }
 
 	lhd3 := make([]byte, 52)
 	lhd3[1], lhd3[2], lhd3[3] = 0xd0, 0x0b, 0xee
@@ -364,25 +393,33 @@ func buildSeparatedAxisKfl(leaderKfs []*Keyframe, axis int, tickRate float64) *r
 	ldat := make([]byte, n*bpk)
 	for i, kf := range leaderKfs {
 		blk := ldat[i*bpk : (i+1)*bpk]
-		value := kf.Value.([]float64)[axis]
-		outSpeed := kf.OutSpatialTangent[axis] * 100
-		inSpeed := -kf.InSpatialTangent[axis] * 100
+
+		lo, hi := i-1, i+1
+		if lo < 0 {
+			lo = 0
+		}
+		if hi > n-1 {
+			hi = n - 1
+		}
+		speed := (val(hi) - val(lo)) * aeSepDimSpeedFactor
+
 		inInf, outInf := 0.0, 0.0
 		if i > 0 {
-			inInf = 0.01
+			inInf = 0.01 / (kf.Time - leaderKfs[i-1].Time)
 		}
 		if i < n-1 {
-			outInf = 0.01
+			outInf = 0.01 / (leaderKfs[i+1].Time - kf.Time)
 		}
+
 		binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(kf.Time*tickRate)))
 		blk[0x04] = byte(InterpBezier)
 		blk[0x05] = byte(InterpBezier)
 		blk[0x06] = 0x00
 		blk[0x07] = 0x08
-		binary.BigEndian.PutUint64(blk[0x08:0x10], math.Float64bits(value))
-		binary.BigEndian.PutUint64(blk[0x10:0x18], math.Float64bits(inSpeed))
+		binary.BigEndian.PutUint64(blk[0x08:0x10], math.Float64bits(val(i)))
+		binary.BigEndian.PutUint64(blk[0x10:0x18], math.Float64bits(speed))
 		binary.BigEndian.PutUint64(blk[0x18:0x20], math.Float64bits(inInf))
-		binary.BigEndian.PutUint64(blk[0x20:0x28], math.Float64bits(outSpeed))
+		binary.BigEndian.PutUint64(blk[0x20:0x28], math.Float64bits(speed))
 		binary.BigEndian.PutUint64(blk[0x28:0x30], math.Float64bits(outInf))
 	}
 

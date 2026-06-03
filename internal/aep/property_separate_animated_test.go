@@ -22,8 +22,10 @@ type kfExp struct {
 // TestSetDimensionsSeparated_Animated separates an animated 3D Position and
 // asserts the leader collapses to its static default while each per-axis
 // follower becomes an animated 1D temporal stream whose keyframes match AE's
-// own split (out_speed = outSpatTan×100, in_speed = −inSpatTan×100, influence
-// 0.01 on adjacent sides / 0 at the boundary, bezier both sides).
+// own split (speed = central-difference of values × 100, same in/out; influence
+// 0.01/segmentDuration = 0.01 here for 1.0s segments / 0 at the boundary,
+// bezier both sides). See TestSetDimensionsSeparated_Animated_NonUniform for
+// the timing-dependent influence.
 func TestSetDimensionsSeparated_Animated(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_sepdim_anim_before.aep")
 	if err != nil {
@@ -129,6 +131,66 @@ func TestSetDimensionsSeparated_Animated(t *testing.T) {
 
 	assertSep(t, proj, "in-memory")
 	assertSep(t, reopenWritten(t, proj), "round-trip")
+}
+
+// TestSetDimensionsSeparated_Animated_NonUniform separates an animated 3D
+// Position with NON-uniform keyframe spacing (0.5 / 1.0 / 1.5s) and asserts the
+// per-axis follower influence follows 0.01/segmentDuration (0 at boundaries) —
+// the timing-dependent rule that a constant-0.01 mapping would get wrong. Guards
+// the central-difference + per-side-influence generalization fix.
+func TestSetDimensionsSeparated_Animated_NonUniform(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_sepdim_anim2_before.aep")
+	if err != nil {
+		t.Skipf("re_sepdim_anim2_before.aep not present; run test_data/re_sepdim_anim2.jsx in AE 2020")
+	}
+	pos := findProp(proj, aep.MatchNamePosition)
+	if pos == nil || pos.DimensionsSeparated() || !pos.IsAnimated() {
+		t.Fatal("precondition: animated merged non-uniform fixture missing/wrong state")
+	}
+	if err := pos.SetDimensionsSeparated(true); err != nil {
+		t.Fatalf("SetDimensionsSeparated(true): %v", err)
+	}
+
+	// segments 0.5/1.0/1.5 → influence 0.02/0.01/0.006667 on the adjacent side.
+	type inf struct{ in, out float64 }
+	wantInf := []inf{
+		{0, 0.02},           // KF1: boundary in, seg1 out
+		{0.02, 0.01},        // KF2: seg1 in, seg2 out
+		{0.01, 1.0 / 150.0}, // KF3: seg2 in, seg3 out (0.01/1.5)
+		{1.0 / 150.0, 0},    // KF4: seg3 in, boundary out
+	}
+	wantVal := map[string][]float64{
+		aep.MatchNamePosition0: {0, 200, -50, 600},
+		aep.MatchNamePosition1: {0, -100, 400, 50},
+		aep.MatchNamePosition2: {0, 300, 100, -200},
+	}
+
+	check := func(t *testing.T, p *aep.Project, tag string) {
+		t.Helper()
+		for mn, vals := range wantVal {
+			f := findProp(p, mn)
+			if f == nil || !f.IsAnimated() {
+				t.Errorf("%s: %s missing/not animated", tag, mn)
+				continue
+			}
+			if len(f.Keyframes) != len(vals) {
+				t.Errorf("%s: %s has %d kf, want %d", tag, mn, len(f.Keyframes), len(vals))
+				continue
+			}
+			for i, kf := range f.Keyframes {
+				if gv, _ := kf.Value.(float64); math.Abs(gv-vals[i]) > 1e-6 {
+					t.Errorf("%s: %s kf%d value=%g want %g", tag, mn, i, gv, vals[i])
+				}
+				if math.Abs(kf.InTemporalEase[0].Influence-wantInf[i].in) > 1e-6 ||
+					math.Abs(kf.OutTemporalEase[0].Influence-wantInf[i].out) > 1e-6 {
+					t.Errorf("%s: %s kf%d influence in/out=%g/%g want %g/%g", tag, mn, i,
+						kf.InTemporalEase[0].Influence, kf.OutTemporalEase[0].Influence, wantInf[i].in, wantInf[i].out)
+				}
+			}
+		}
+	}
+	check(t, proj, "in-memory")
+	check(t, reopenWritten(t, proj), "round-trip")
 }
 
 // TestSetDimensionsSeparated_Merge_Animated collapses the separated animated

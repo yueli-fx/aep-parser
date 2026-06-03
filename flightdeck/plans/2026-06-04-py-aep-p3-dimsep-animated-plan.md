@@ -108,7 +108,8 @@ follower.in/out interp  = bezier
 1. ✅ **Phase 0 RE**（cut-1 结构同构 + cut-2 tangent 映射破解，见 §0.1/§0.2；incident 已升级）。`b41359f` + 本次。
 2. ✅ **separate animated 实现** + Go round-trip 测试（2026-06-04）。`separatePositionAnimated`（3D linear-path-ease 首切片）：解 leader kf 流 → per-axis 映射 → 3 follower static→animated stream（直接建 kfl，bpk=48 hdr07=0x08）→ leader 重置 static 默认（72B cdat=[def, kf0 in/out spatTan]）→ 合成 Pos2。`TestSetDimensionsSeparated_Animated` 通过；separate 后 4 个 Position* tdbs **byte-identical AE after fixture**（`tmp_debug/verify_sep_anim`）。字节细节升级进 incident。
 3. ✅ **merge animated 实现 + 测试**（2026-06-04，`mergePositionAnimated`）。`mergePosition` 加 animated follower 检测 → 解 3 follower 1D temporal kf → 合成 1 条 3D spatial leader 流（`outSpatTan=out_speed/100`、`inSpatTan=−in_speed/100`），leader static→animated flag 反向，followers 删除。`TestSetDimensionsSeparated_Merge_Animated` 通过；leader block value+in/out tangent **byte-exact AE 自存 merge fixture**（`tmp_debug/verify_merge_anim`），仅 @0x08/@0x10 缓存字段（AE 不校验）+ 末 kf outTan 不同。AE merge ground-truth fixture `re_sepdim_anim_merge_after.aep` 由 `re_sepdim_anim_merge.jsx` 生成（AE2020 self-serve）。
-4. ⏳ **AE 双版本 ship-gate**（separate+merge，含**第二 fixture 不同时距/值**验 100/0.01 + 弧长常数泛化）→ 升 stable。**下一步**。separate byte-identical AE 输出、merge 值/切线 byte-exact，预期稳过；仍按 #6 跑双版本。需写 animated-readback verify JSX（读 leader/follower keyframe 值+speed）。
+4. ✅ **AE 双版本 ship-gate 8/8 PASS**（2026-06-04，AE2020+2025 × separate/merge × uniform/非均匀）。`property_separate_anim_shipgate_test.go` + `verify_sepdim_anim.jsx`。
+5. ✅ **cut-3 修正**（第二 fixture `re_sepdim_anim2` 非均匀 0.5/1.0/1.5s 抓出 fixture-specific bug）：speed = **值中心差分 ×(100/6)**（时距无关，非 leader 存盘 spatTan×100），influence = **0.01/segDur**（非常数 0.01）。time/value/influence byte-identical AE，speed ≤1 ULP（AE tick 量化）。第三 fixture `re_sepdim_anim3` uniform 0.5s 确认 speed 时距无关。`aeSepDimSpeedFactor` 常数 = `0x4030aaaaaaac192b`。**→ 可升 stable。**
 
 ## 5. 风险
 

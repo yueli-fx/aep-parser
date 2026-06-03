@@ -162,3 +162,18 @@ func TestMergeDimsAnim_AEShipGate_AE2020(t *testing.T) {
 func TestMergeDimsAnim_AEShipGate_AE2025(t *testing.T) {
 	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim_after.aep", false)
 }
+
+// Non-uniform keyframe spacing (0.5/1.0/1.5s, 4 keyframes) — exercises the
+// timing-dependent influence (0.01/segDur) + central-difference speed mapping.
+func TestSeparateDimsAnimNonUniform_AEShipGate_AE2020(t *testing.T) {
+	runSepDimAnimShipGate(t, ae2020(), "../../test_data/re_sepdim_anim2_before.aep", true)
+}
+func TestSeparateDimsAnimNonUniform_AEShipGate_AE2025(t *testing.T) {
+	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim2_before.aep", true)
+}
+func TestMergeDimsAnimNonUniform_AEShipGate_AE2020(t *testing.T) {
+	runSepDimAnimShipGate(t, ae2020(), "../../test_data/re_sepdim_anim2_after.aep", false)
+}
+func TestMergeDimsAnimNonUniform_AEShipGate_AE2025(t *testing.T) {
+	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim2_after.aep", false)
+}
