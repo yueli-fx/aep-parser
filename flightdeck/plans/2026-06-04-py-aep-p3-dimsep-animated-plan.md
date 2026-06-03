@@ -37,6 +37,30 @@ Pos2(Z): out k1=+1666.7  in/out k2=+3333.3  in k3=+1666.7
 
 **剩余硬 RE（cut 2）**：(a) leader 3D spatial kf 流的 ldat byte 解码（已有 `lowerTransformVec2Spatial` 编码端，需对称解码取每 kf 的 spatial in/out tangent）；(b) spatial tangent → per-axis temporal speed/influence 的换算（observed speeds 是否能从 spatial bezile 切线纯几何推出，还是 AE 另存？需 byte-diff leader kf ldat vs follower kf ldat）；(c) per-axis 1D temporal kf 的 ldat 编码（speed/influence 落 keyframe block 哪几个 offset）。**先 byte-diff，勿臆测（path-keyframe 三处误读教训）。**
 
+## 0.2 RE findings — cut 2（2026-06-04，`tmp_debug/dump_sepdim_kf` 解码 before/after kf）
+
+我方 parser 已全解码两布局（`parse_keyframe.go`）：leader **spatial-style** bpk=128（path 单 ease @0x18-0x30 + 3D value @0x38 + 3D spatial in-tan @0x50 + out-tan @0x68）；follower **non-spatial 1D** bpk=48（value @0x08 + in speed/inf @0x10/0x18 + out speed/inf @0x20/0x28）。
+
+**leader（merged）实测**：in/out interp = linear，path ease = {spd 0, inf 0}，但 **spatial tangent 非零**（auto-bezier）。每 kf 的 `outSpatTan[axis] = (P_next−P_prev)/6`（内部）、端点 /6 的边段；in-tan = −out-tan（对称 auto-bezier）。
+
+**映射（leader spatial tangent → follower per-axis temporal，9/9 kf-side 全对上含符号）**：
+```
+follower.value[axis]    = leader.value[axis]                 // 直接拷
+follower.out_speed      = leader.outSpatTan[axis] × 100
+follower.in_speed       = −leader.inSpatTan[axis]  × 100
+follower.influence      = 0.01（有相邻段的 side）, 0（首 kf in-side / 末 kf out-side）
+follower.in/out interp  = bezier
+```
+常数 `100 = 1/0.01`，即 `spatialTan = speed × influence`。leader 的 spatial tangent 是 AE 存盘的现成值，**直接读不重算**。
+
+**merge 反向**：`outSpatTan[axis] = follower.out_speed/100`，`inSpatTan[axis] = −follower.in_speed/100`，value 合并 3 轴；leader interp 设 linear + path ease 0。
+
+**实现含义**：
+- separate animated = 解 leader kf 流（已有 `parse_keyframe` 给全字段）→ 对每轴每 kf 套上式生成 1D temporal kf → 把 3 个 static 占位 follower **转 animated stream**（建 tdbs→kfl→{lhd3,ldat(bpk=48)}，复用 `lowerTransformScalar` 编码 + `layoutFor`）→ leader 重置 static 默认（同 static 路径 tdsb/cdat）→ 合成 Pos2。
+- **未决小项**（impl 时 byte-check）：① path ease 非默认（leader 自身有 temporal ease）时映射是否仍成立——首切片限定 leader path-ease≈linear，非默认暂 refuse；② 100/0.01 常数是否随 keyframe 时距变——**ship-gate 用不同时距/值的第二 fixture 验证**（防 fixture-specific）；③ follower 转 animated 后 tdb4 flag（@0x05 等）取值需对 after fixture 的 follower tdbs byte-check。
+
+**∴ cut-2 完成：核心 tangent 映射破解，实现路径清晰，剩 byte-level 编码细节在 impl 时对 after fixture 逐字段校验。**
+
 ## 1. RE 计划（Phase 0，先做）
 
 - `test_data/re_separate_dims_anim.jsx`（改自 `re_separate_dims.jsx`）：建 3D 层，Position 打 **2-3 个 keyframe**（不同 time + 不同 3D 值 + 至少一个非 linear easing），save before → `pos.dimensionsSeparated=true` → save after。AE 2020 生成。
@@ -61,10 +85,10 @@ Pos2(Z): out k1=+1666.7  in/out k2=+3333.3  in k3=+1666.7
 
 ## 4. 切片顺序
 
-1. **Phase 0 RE**：生成 animated before/after fixture + byte-diff + findings 文档化（incident）。**当前 / 下一步**。
-2. separate animated 实现 + Go round-trip 测试。
-3. merge animated 实现 + 测试。
-4. AE 双版本 ship-gate → 升 stable。
+1. ✅ **Phase 0 RE**（cut-1 结构同构 + cut-2 tangent 映射破解，见 §0.1/§0.2；incident 已升级）。`b41359f` + 本次。
+2. ⏳ **separate animated 实现** + Go round-trip 测试。**下一步**。`separatePosition` animated 分支：解 leader kf 流 → per-axis 映射 → 3 follower static→animated stream（`lowerTransformScalar` + bpk=48）→ leader 重置 static 默认 → 合成 Pos2。impl 时对 after fixture 逐字段 byte-check（tdb4 flag / ldat offset）。
+3. merge animated 实现 + 测试（反向映射）。
+4. AE 双版本 ship-gate（含**第二 fixture 不同时距/值**验 100/0.01 常数）→ 升 stable。
 
 ## 5. 风险
 

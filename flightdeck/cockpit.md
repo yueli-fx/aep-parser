@@ -14,7 +14,7 @@
 - [coverage.md](plans/coverage.md) — 字段覆盖概览（精简入口）
 <!-- /AUTO -->
 
-**DimensionsSeparated animated 子方向进行中** — plan `plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md`，Phase 0 RE **cut-1 已成**：确认 animated separate 与 static 同构（separated 态 leader 退回 static 默认 + followers 变 animated kf 流 + 合成 Pos2），per-axis 语义 = 每轴 (value, temporal speed/influence)，speed=空间速度分量。**下一步 = cut-2 byte-diff**：leader 3D spatial kf ldat ↔ follower 1D temporal kf ldat，锁定 spatial tangent→per-axis speed/influence 的编码换算（先 byte 真相再写代码）。fixtures `re_sepdim_anim_{before,after}.aep`（本地）。
+**DimensionsSeparated animated 子方向进行中** — plan `plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md`。**Phase 0 RE 完成（cut-1 结构同构 + cut-2 tangent 映射破解）**：separate = 解 leader 3D spatial kf 流 → per-axis `out_speed=outSpatTan×100 / in_speed=−inSpatTan×100 / inf=0.01`（边界 0）→ 3 follower static→animated stream + 合成 Pos2 → leader 重置 static 默认；merge 反向。**下一步 = Phase 1 separate 实现**（`separatePosition` animated 分支，复用 `lowerTransformScalar`/bpk=48，对 after fixture 逐字段 byte-check）→ merge → 双版本 ship-gate（含第二 fixture 验常数）。
 之后：`Property.ValueText`（最大 RE，需 AE schema DB，多会话）。
 
 ## Backlog（单条候选 / 缺 runtime setter）

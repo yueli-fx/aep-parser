@@ -57,4 +57,20 @@ last_updated: 2026-06-02
 
 shipped：**静态 Position 的 separate（2D + 3D）+ merge 双向**，AE 2020 + AE 2025 ship-gate 6/6 PASS（`property_separate_shipgate_test.go`：3D sep / merge / 2D sep × 2 版本）。Go 输出 chunk 树 byte-structural 等同 AE 自存。
 
-未做：**animated Position**（keyframe 流的迁移/合并未 RE）—— 当前 `StaticValue` 非 `[]float64` / follower 非 scalar 时一律 refuse。
+未实现（**已 RE，2026-06-04**）：**animated Position** 的 keyframe 流迁移。当前 `StaticValue` 非 `[]float64` / follower 非 scalar 时一律 refuse；映射已破解，待实现 + ship-gate（plan `2026-06-04-py-aep-p3-dimsep-animated-plan.md`）。
+
+## animated 子方向 — keyframe 流迁移映射（RE 2026-06-04）
+
+结构与 static 同构，仅 stream 类型互换：separated 态 leader 退回 **static 默认**（kf 流清空，tdsb/cdat 同 static separate）+ Position_0/1/2 变 **animated**（per-axis 1D temporal kf 流）+ 合成 Pos2；merged 态 leader 是 animated 3D spatial kf 流、Position_0/1 static-0 占位。
+
+**leader（3D spatial, bpk=128）→ follower（1D non-spatial, bpk=48）逐 kf 映射**（AE 2020 `re_separate_dims_anim.jsx` before/after，`tmp_debug/dump_sepdim_kf` 解码，9/9 kf-side 全对上含符号）：
+```
+follower.value[axis] = leader.value[axis]
+follower.out_speed   = leader.outSpatTan[axis] × 100      (= /influence)
+follower.in_speed    = −leader.inSpatTan[axis]  × 100
+follower.influence   = 0.01 (相邻段 side) | 0 (首 kf in / 末 kf out)
+follower interp      = bezier 双侧
+```
+`spatialTan = speed × influence`，常数 100=1/0.01。leader spatial tangent 是 AE 存盘现成值（auto-bezier `(P_next−P_prev)/6`），**读取不重算**。merge 反向：`outSpatTan=out_speed/100`、`inSpatTan=−in_speed/100`。
+
+⚠ 未决（impl byte-check）：leader 自身 path temporal ease 非默认时映射待验（首切片限 path-ease≈linear）；100/0.01 是否随时距变 → ship-gate 用第二 fixture 防 fixture-specific；follower static→animated 的 tdb4 flag 取值对 after fixture 校验。
