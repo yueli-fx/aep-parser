@@ -465,6 +465,13 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 		return fmt.Errorf("SetDimensionsSeparated: Position already merged")
 	}
 
+	// Animated followers route to the stream-merge path.
+	for _, mn := range []string{MatchNamePosition0, MatchNamePosition1, MatchNamePosition2} {
+		if f := grp.Property(mn); f != nil && f.IsAnimated() {
+			return p.mergePositionAnimated(grp)
+		}
+	}
+
 	var followers []*Property
 	axisVal := [3]float64{} // Z stays 0 when no Position_2 (2D)
 	for axis, mn := range []string{MatchNamePosition0, MatchNamePosition1, MatchNamePosition2} {
@@ -494,7 +501,144 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 	binary.BigEndian.PutUint64(p.back.cdat.Data[16:24], math.Float64bits(axisVal[2]))
 	p.StaticValue = []float64{axisVal[0], axisVal[1], axisVal[2]}
 
-	// Remove every follower's tdmn+tdbs pair from the group LIST + scene tree.
+	removeFollowerChunks(grp, followers)
+	return nil
+}
+
+// mergePositionAnimated collapses ANIMATED per-axis followers back into the
+// Position leader by rebuilding a single 3D spatial motion-path keyframe
+// stream — the inverse of separatePositionAnimated:
+//
+//	leader.kf[i].Value                   = [pos0,pos1,pos2 value at kf i]
+//	leader.kf[i].OutSpatialTangent[axis] =  follower[axis].kf[i].out_speed / 100
+//	leader.kf[i].InSpatialTangent[axis]  = −follower[axis].kf[i].in_speed  / 100
+//	leader temporal ease = 0; interp linear (path rebuilt linear).
+//
+// The leader spatial block's @0x08 / @0x10 (segment count / arc-length) are
+// recompute-on-load cache fields — AE writes inconsistent values there and does
+// not validate them (confirmed against AE's own merge output
+// re_sepdim_anim_merge_after.aep: @0x08 = 0/1/0, @0x10 constant), so they are
+// emitted as 0. Followers are removed; AE re-allocates zeroed placeholders on
+// load, same as the static merge.
+//
+// First slice: 3D (Position_0/1/2 present), keyframe times aligned across axes.
+//
+// Atomicity: all fallible work (validation + stream construction + locating the
+// leader cdat) runs before any in-place mutation.
+func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
+	if p.back.tdbs == nil || p.back.tdb4 == nil || len(p.back.tdb4.Data) <= 0x4f {
+		return fmt.Errorf("SetDimensionsSeparated: separated leader missing tdbs/tdb4 back-refs")
+	}
+	pos0 := grp.Property(MatchNamePosition0)
+	pos1 := grp.Property(MatchNamePosition1)
+	pos2 := grp.Property(MatchNamePosition2)
+	if pos0 == nil || pos1 == nil || pos2 == nil {
+		return fmt.Errorf("SetDimensionsSeparated: animated Position merge currently requires 3D (Position_0/1/2 present)")
+	}
+	followers := []*Property{pos0, pos1, pos2}
+	n := len(pos0.Keyframes)
+	if n == 0 {
+		return fmt.Errorf("SetDimensionsSeparated: animated follower Position_0 has no keyframes")
+	}
+	tickRate := 0.0
+	if pos0.Keyframes[0].back != nil {
+		tickRate = pos0.Keyframes[0].back.tickRate
+	}
+	if tickRate <= 0 {
+		return fmt.Errorf("SetDimensionsSeparated: animated follower tickRate unavailable")
+	}
+	for ai, f := range followers {
+		if f.back == nil || f.back.tdbs == nil {
+			return fmt.Errorf("SetDimensionsSeparated: follower %q missing tdbs back-ref", f.MatchName)
+		}
+		if len(f.Keyframes) != n {
+			return fmt.Errorf("SetDimensionsSeparated: follower axis %d has %d kf, want %d (misaligned keyframes unsupported)", ai, len(f.Keyframes), n)
+		}
+		for i, kf := range f.Keyframes {
+			if _, ok := kf.Value.(float64); !ok {
+				return fmt.Errorf("SetDimensionsSeparated: follower axis %d kf%d value not scalar", ai, i)
+			}
+			if math.Abs(kf.Time-pos0.Keyframes[i].Time) > 1e-9 {
+				return fmt.Errorf("SetDimensionsSeparated: follower axis %d kf%d time misaligned with axis 0 (first slice requires aligned keyframes)", ai, i)
+			}
+			if len(kf.InTemporalEase) < 1 || len(kf.OutTemporalEase) < 1 {
+				return fmt.Errorf("SetDimensionsSeparated: follower axis %d kf%d missing temporal ease", ai, i)
+			}
+		}
+	}
+
+	leaderKfl := buildMergedLeaderKfl(followers, n, tickRate)
+
+	leaderCdatIdx := -1
+	for j, ch := range p.back.tdbs.Children {
+		if ch.ID == rifx.IDCdat {
+			leaderCdatIdx = j
+			break
+		}
+	}
+	if leaderCdatIdx < 0 {
+		return fmt.Errorf("SetDimensionsSeparated: separated leader has no cdat to replace")
+	}
+
+	// === Commit: static-default leader → animated; clear separated flags. ===
+	p.back.tdsb.Data[2] = 0x00
+	p.back.tdsb.Data[3] &^= 0x02
+	p.back.tdb4.Data[0x05] &^= 0x01
+	p.back.tdb4.Data[0x44] = 0x01
+	p.back.tdb4.Data[0x4f] &^= 0x01
+	p.back.tdbs.Children[leaderCdatIdx] = leaderKfl
+	p.back.cdat = nil
+	p.StaticValue = nil
+	var warns []string
+	ctx := newParseCtx(tickRate, "", &warns)
+	parseKeyframes(p, leaderKfl.FindFirst(rifx.IDLhd3), leaderKfl.FindFirst(rifx.IDLdat), ctx)
+
+	removeFollowerChunks(grp, followers)
+	return nil
+}
+
+// buildMergedLeaderKfl builds the leader's 3D spatial motion-path keyframe
+// stream (bpk=128, header07=0x07) from the per-axis animated followers. See
+// mergePositionAnimated for the tangent map; @0x08/@0x10 are emitted 0
+// (AE-recomputed cache fields).
+func buildMergedLeaderKfl(followers []*Property, n int, tickRate float64) *rifx.Chunk {
+	const bpk = 128
+	lhd3 := make([]byte, 52)
+	lhd3[1], lhd3[2], lhd3[3] = 0xd0, 0x0b, 0xee
+	binary.BigEndian.PutUint32(lhd3[0x08:0x0C], uint32(n))
+	binary.BigEndian.PutUint32(lhd3[0x0C:0x10], 1)
+	binary.BigEndian.PutUint32(lhd3[0x10:0x14], bpk)
+	binary.BigEndian.PutUint32(lhd3[0x14:0x18], 4)
+	binary.BigEndian.PutUint32(lhd3[0x18:0x1C], 1)
+	binary.BigEndian.PutUint32(lhd3[0x1C:0x20], 4)
+
+	ldat := make([]byte, n*bpk)
+	for i := 0; i < n; i++ {
+		blk := ldat[i*bpk : (i+1)*bpk]
+		binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(followers[0].Keyframes[i].Time*tickRate)))
+		blk[0x04] = byte(InterpLinear)
+		blk[0x05] = byte(InterpLinear)
+		blk[0x06] = 0x00
+		blk[0x07] = 0x07
+		for axis := 0; axis < 3; axis++ {
+			kf := followers[axis].Keyframes[i]
+			val, _ := kf.Value.(float64)
+			binary.BigEndian.PutUint64(blk[0x38+axis*8:0x40+axis*8], math.Float64bits(val))
+			binary.BigEndian.PutUint64(blk[0x50+axis*8:0x58+axis*8], math.Float64bits(-kf.InTemporalEase[0].Speed/100))
+			binary.BigEndian.PutUint64(blk[0x68+axis*8:0x70+axis*8], math.Float64bits(kf.OutTemporalEase[0].Speed/100))
+		}
+	}
+	kfl := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
+	kfl.Children = append(kfl.Children,
+		&rifx.Chunk{ID: rifx.IDLhd3, Data: lhd3},
+		&rifx.Chunk{ID: rifx.IDLdat, Data: ldat},
+	)
+	return kfl
+}
+
+// removeFollowerChunks drops every follower's tdmn+tdbs pair from the group
+// LIST + the scene tree (leader-only merged form; AE re-allocates placeholders).
+func removeFollowerChunks(grp *AEPropertyGroup, followers []*Property) {
 	remove := make(map[*rifx.Chunk]bool, len(followers)*2)
 	for _, f := range followers {
 		idx := indexOfChunk(grp.chunk.Children, f.back.tdbs)
@@ -520,8 +664,6 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 	}
 	grp.Children = filterPropertyBase(grp.Children, removeFollowers)
 	filterLayerProperties(grp, followers)
-
-	return nil
 }
 
 // filterLayerProperties drops the given followers from the owning layer's flat

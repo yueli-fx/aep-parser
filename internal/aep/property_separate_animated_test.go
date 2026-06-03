@@ -130,3 +130,84 @@ func TestSetDimensionsSeparated_Animated(t *testing.T) {
 	assertSep(t, proj, "in-memory")
 	assertSep(t, reopenWritten(t, proj), "round-trip")
 }
+
+// TestSetDimensionsSeparated_Merge_Animated collapses the separated animated
+// fixture back into a single 3D spatial Position stream and asserts the leader
+// recovers its keyframe values + spatial tangents (in/out tangent = ∓follower
+// speed / 100) and the per-axis followers are gone.
+func TestSetDimensionsSeparated_Merge_Animated(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_sepdim_anim_after.aep")
+	if err != nil {
+		t.Skipf("re_sepdim_anim_after.aep not present; run test_data/re_separate_dims_anim.jsx in AE 2020")
+	}
+	pos := findProp(proj, aep.MatchNamePosition)
+	if pos == nil {
+		t.Fatal("separated: ADBE Position leader not found")
+	}
+	if !pos.DimensionsSeparated() {
+		t.Fatal("precondition: animated fixture not separated")
+	}
+
+	if err := pos.SetDimensionsSeparated(false); err != nil {
+		t.Fatalf("SetDimensionsSeparated(false) on animated: %v", err)
+	}
+
+	type leaderKF struct {
+		time   float64
+		value  [3]float64
+		inTan  [3]float64
+		outTan [3]float64
+	}
+	want := []leaderKF{
+		{0, [3]float64{100, 200, 50}, [3]float64{-33.3333333, -33.3333333, -16.6666667}, [3]float64{33.3333333, 33.3333333, 16.6666667}},
+		{1, [3]float64{300, 400, 150}, [3]float64{-66.6666667, 16.6666667, -33.3333333}, [3]float64{66.6666667, -16.6666667, 33.3333333}},
+		{2, [3]float64{500, 100, 250}, [3]float64{-33.3333333, 50, -16.6666667}, [3]float64{33.3333333, -50, 16.6666667}},
+	}
+
+	assertMerged := func(t *testing.T, p *aep.Project, tag string) {
+		t.Helper()
+		leader := findProp(p, aep.MatchNamePosition)
+		if leader == nil {
+			t.Fatalf("%s: leader missing", tag)
+		}
+		if leader.DimensionsSeparated() {
+			t.Errorf("%s: leader still separated", tag)
+		}
+		if !leader.IsAnimated() {
+			t.Errorf("%s: merged leader not animated", tag)
+		}
+		for _, mn := range []string{aep.MatchNamePosition0, aep.MatchNamePosition1, aep.MatchNamePosition2} {
+			if findProp(p, mn) != nil {
+				t.Errorf("%s: follower %s still present after merge", tag, mn)
+			}
+		}
+		if len(leader.Keyframes) != len(want) {
+			t.Fatalf("%s: leader has %d kf, want %d", tag, len(leader.Keyframes), len(want))
+		}
+		for i, w := range want {
+			kf := leader.Keyframes[i]
+			v, ok := kf.Value.([]float64)
+			if !ok || len(v) < 3 {
+				t.Errorf("%s: kf%d value not 3D: %v", tag, i, kf.Value)
+				continue
+			}
+			if math.Abs(kf.Time-w.time) > 1e-9 {
+				t.Errorf("%s: kf%d time=%g, want %g", tag, i, kf.Time, w.time)
+			}
+			for a := 0; a < 3; a++ {
+				if math.Abs(v[a]-w.value[a]) > 1e-6 {
+					t.Errorf("%s: kf%d value[%d]=%g, want %g", tag, i, a, v[a], w.value[a])
+				}
+				if len(kf.InSpatialTangent) < 3 || math.Abs(kf.InSpatialTangent[a]-w.inTan[a]) > 1e-4 {
+					t.Errorf("%s: kf%d inTan[%d]=%v, want %g", tag, i, a, kf.InSpatialTangent, w.inTan[a])
+				}
+				if len(kf.OutSpatialTangent) < 3 || math.Abs(kf.OutSpatialTangent[a]-w.outTan[a]) > 1e-4 {
+					t.Errorf("%s: kf%d outTan[%d]=%v, want %g", tag, i, a, kf.OutSpatialTangent, w.outTan[a])
+				}
+			}
+		}
+	}
+
+	assertMerged(t, proj, "in-memory")
+	assertMerged(t, reopenWritten(t, proj), "round-trip")
+}

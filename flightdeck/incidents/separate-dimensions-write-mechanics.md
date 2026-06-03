@@ -57,7 +57,7 @@ last_updated: 2026-06-04
 
 shipped：**静态 Position 的 separate（2D + 3D）+ merge 双向**，AE 2020 + AE 2025 ship-gate 6/6 PASS（`property_separate_shipgate_test.go`：3D sep / merge / 2D sep × 2 版本）。Go 输出 chunk 树 byte-structural 等同 AE 自存。
 
-**animated Position separate 方向已实现**（2026-06-04，`separatePositionAnimated`，3D linear-path-ease 首切片）：Go round-trip 通过，且 separate 后 4 个 Position* tdbs **byte-identical AE 自存 after fixture**（`tmp_debug/verify_sep_anim`）。**merge animated 方向 + AE 双版本 ship-gate 待做**（plan `2026-06-04-py-aep-p3-dimsep-animated-plan.md` Phase 3-4）。当前 merge animated 仍 refuse（mergePosition 拒绝非 scalar follower）。
+**animated Position separate + merge 双向已实现**（2026-06-04，`separatePositionAnimated` / `mergePositionAnimated`，3D 首切片）：Go round-trip 双向通过。separate 后 4 个 Position* tdbs **byte-identical AE 自存 after fixture**（`tmp_debug/verify_sep_anim`）。merge 后 leader spatial block 的 value + in/out tangent 全 byte-exact AE 自存 merge fixture（`tmp_debug/verify_merge_anim`，对 `re_sepdim_anim_merge_after.aep`），仅 @0x08/@0x10 缓存字段 + 末 kf out-tangent 不同（见下）。**剩 AE 双版本 ship-gate**（plan Phase 4）。
 
 ## animated 子方向 — keyframe 流迁移映射（RE 2026-06-04）
 
@@ -82,3 +82,9 @@ follower interp      = bezier 双侧
 **follower tdbs static→animated**：tdb4 `@0x05 &^= 0x01`、`@0x44 = 0x01`（= 既有 shape `injectAnimatedStream` 配方）；tdsb `byte3 &^= 0x02`（0x03→0x01）；cdat child 原位换成 LIST(kfl)（保留 tdum/tduM）。
 
 **leader animated→static-separated**：tdb4 `@0x05 |= 0x01`、`@0x44 = 0x00`、`@0x4f |= 0x01`（与 follower 方向相反，注意 @0x4f）；tdsb byte2=0x08+byte3 bit1（同 static separate）；LIST(kfl) child 原位换成 **72B cdat = [default(3 f64), kf0.inSpatTan(3), kf0.outSpatTan(3)]**（AE 把首 kf 的 in/out 空间切线塞进 cdat 尾，非零）。
+
+### merge animated（leader 3D spatial block, bpk=128）— RE `re_sepdim_anim_merge_after.aep`
+
+反向：leader static-separated→animated。**block**：time@0x00 / interp@0x04/0x05=0x01(linear) / hdr07@0x07=0x07 / temporal ease@0x18-0x30=0 / value@0x38(3 f64) / **inTan@0x50**(3 f64)=`−follower.in_speed/100` / **outTan@0x68**(3 f64)=`follower.out_speed/100`。bpk=0x38+3×3×8=128。tdb4 反向 flag：`@0x05 &^= 0x01`、`@0x44 = 0x01`、`@0x4f &^= 0x01`；tdsb byte2=0x00+byte3 bit1 清。followers 物理删除（AE 加载时重新预分配 zeroed 占位）。
+
+⚠ **@0x08（段 marker）/ @0x10（出段 bezier 弧长）= recompute-on-load 缓存字段，AE 不校验**：AE 自存 merge fixture 里 @0x08=0/1/0、@0x10 三 kf 全 309.557（含末 kf，明显 stale），且把末 kf outTan 清零（出段无意义）。故我方 merge **写 @0x08=@0x10=0**，末 kf outTan 保留 follower 值（= before fixture 形，AE 同样接受）。`@0x10` 经验证 = 出段 3D bezier 弧长（KF1 309.557 ≈ chord 300 的 bezier 弧长）。
