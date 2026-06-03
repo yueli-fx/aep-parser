@@ -112,6 +112,86 @@ func TestMarkerRemoveAllRoundtrip(t *testing.T) {
 	}
 }
 
+// TestMarkerAddRoundtrip appends a third composition marker via clone-template,
+// sets its comment, and verifies all three round-trip with the new marker a
+// clean point marker (duration 0, label 0) at the requested time.
+func TestMarkerAddRoundtrip(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	if err != nil {
+		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
+	}
+	comp := findRECM(t, proj)
+	if len(comp.Markers) != 2 {
+		t.Fatalf("expected 2 comp markers; got %d", len(comp.Markers))
+	}
+
+	nm, err := comp.AddMarker(4.0)
+	if err != nil {
+		t.Fatalf("AddMarker: %v", err)
+	}
+	if len(comp.Markers) != 3 {
+		t.Fatalf("after AddMarker: Markers = %d, want 3", len(comp.Markers))
+	}
+	if nm.Duration != 0 || nm.Label != 0 || nm.Comment != "" {
+		t.Errorf("new marker not clean: dur=%g label=%d comment=%q", nm.Duration, nm.Label, nm.Comment)
+	}
+	if err := nm.SetComment("added marker"); err != nil {
+		t.Fatalf("SetComment on new marker: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	proj2, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	comp2 := findRECM(t, proj2)
+	if len(comp2.Markers) != 3 {
+		t.Fatalf("roundtrip Markers = %d, want 3", len(comp2.Markers))
+	}
+	// Originals intact.
+	if comp2.Markers[0].Comment != "comp marker A" {
+		t.Errorf("roundtrip Markers[0].Comment = %q", comp2.Markers[0].Comment)
+	}
+	if comp2.Markers[1].Comment != "second marker" {
+		t.Errorf("roundtrip Markers[1].Comment = %q", comp2.Markers[1].Comment)
+	}
+	// New marker (appended at the tail).
+	added := comp2.Markers[2]
+	if math.Abs(added.Time-4.0) > 1e-3 {
+		t.Errorf("added.Time = %g, want 4.0", added.Time)
+	}
+	if added.Comment != "added marker" {
+		t.Errorf("added.Comment = %q, want %q", added.Comment, "added marker")
+	}
+	if added.Duration != 0 {
+		t.Errorf("added.Duration = %g, want 0 (point marker)", added.Duration)
+	}
+	if added.Label != 0 {
+		t.Errorf("added.Label = %d, want 0", added.Label)
+	}
+}
+
+// TestMarkerAddIntoEmptyRejects confirms AddMarker refuses an empty marker set
+// (the canonical-seed path is a separate, not-yet-implemented slice).
+func TestMarkerAddIntoEmptyRejects(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	if err != nil {
+		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
+	}
+	comp := findRECM(t, proj)
+	for len(comp.Markers) > 0 {
+		if err := comp.Markers[0].Remove(); err != nil {
+			t.Fatalf("Remove: %v", err)
+		}
+	}
+	if _, err := comp.AddMarker(1.0); err == nil {
+		t.Error("AddMarker into emptied comp: expected error")
+	}
+}
+
 // TestMarkerRemoveRejectsStandalone ensures a Marker built outside the parser
 // (no list back-ref) refuses Remove rather than panicking.
 func TestMarkerRemoveRejectsStandalone(t *testing.T) {

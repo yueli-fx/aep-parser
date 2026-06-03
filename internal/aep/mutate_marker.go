@@ -3,6 +3,9 @@ package aep
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
+
+	"github.com/example/aep-parser/internal/rifx"
 )
 
 // Marker structural ops (P3 §3G). Comp/layer markers are a keyframe-backed
@@ -91,4 +94,93 @@ func (m *Marker) Remove() error {
 	*ml.owner = append(markers[:idx:idx], markers[idx+1:]...)
 	m.list = nil
 	return nil
+}
+
+// AddMarker appends a new composition marker at the given time (seconds) and
+// returns it for further Set* calls. The new marker is a clean point marker:
+// no duration, no label color, empty text fields.
+//
+// Mechanics (clone-template): to avoid reverse-engineering the canonical
+// defaults of the ldat block's opaque metadata (0x04-0x0F) and the NmHd's
+// reserved/flag bytes, the new marker clones an existing marker's ldat block
+// and NmHd verbatim (opaque preservation, CLAUDE.md #5), then resets the time
+// plus the known semantic NmHd fields (duration @0x08, label @0x10) to zero.
+// The Nmrd gets five empty Utf8 slots, matching AE's always-five layout.
+//
+// length-variable — the ldat and mrky LISTs grow; WriteAEP recomputes the
+// mrst-chain LIST sizes. Alpha until the AE 2020 + 2025 ship-gate passes.
+//
+// Restriction: requires the comp to already have ≥1 marker (the clone
+// template). Seeding the entire "Markers" pseudo-layer for an empty comp is a
+// separate slice (needs a canonical seed); AddMarker returns an error there.
+func (c *Composition) AddMarker(seconds float64) (*Marker, error) {
+	if seconds < 0 {
+		return nil, fmt.Errorf("marker: negative time %g not supported", seconds)
+	}
+	if len(c.Markers) == 0 {
+		return nil, fmt.Errorf("marker: AddMarker into an empty comp marker set is unsupported (no template to clone; needs a canonical seed)")
+	}
+	tmpl := c.Markers[len(c.Markers)-1]
+	ml := tmpl.list
+	if ml == nil || ml.owner == nil || ml.ldat == nil || ml.lhd3 == nil {
+		return nil, fmt.Errorf("marker: AddMarker missing marker-set references")
+	}
+	if ml.mrky == nil {
+		return nil, fmt.Errorf("marker: AddMarker requires an mrky branch (none in this set)")
+	}
+	if tmpl.nmHd == nil {
+		return nil, fmt.Errorf("marker: AddMarker template marker has no NmHd to clone")
+	}
+	if len(ml.lhd3.Data) < 0x0C {
+		return nil, fmt.Errorf("marker: lhd3 too short for count (len=%d)", len(ml.lhd3.Data))
+	}
+	if tmpl.ldatOffset < 0 || tmpl.ldatOffset+16 > len(ml.ldat.Data) {
+		return nil, fmt.Errorf("marker: template ldat block out of range")
+	}
+	rate := tmpl.tickRate
+	if rate == 0 {
+		rate = aeLegacyTimeBase
+	}
+
+	// --- All preconditions passed; commit (no failure points below). ---
+
+	// 1. ldat: append a clone of the template's 16-byte block; set the time.
+	newOff := len(ml.ldat.Data)
+	block := make([]byte, 16)
+	copy(block, ml.ldat.Data[tmpl.ldatOffset:tmpl.ldatOffset+16])
+	ticks := uint32(math.Round(seconds * rate))
+	binary.BigEndian.PutUint32(block[0:4], ticks)
+	ml.ldat.Data = append(ml.ldat.Data, block...)
+
+	// 2. lhd3: increment the keyframe count.
+	count := binary.BigEndian.Uint32(ml.lhd3.Data[0x08:0x0C])
+	binary.BigEndian.PutUint32(ml.lhd3.Data[0x08:0x0C], count+1)
+
+	// 3. mrky: new Nmrd { NmHd(clone, reset to point marker) + 5 empty Utf8 }.
+	nmHdClone := deepCloneChunk(tmpl.nmHd)
+	if len(nmHdClone.Data) >= 0x0C {
+		binary.BigEndian.PutUint32(nmHdClone.Data[0x08:0x0C], 0) // duration → 0
+	}
+	if len(nmHdClone.Data) >= 0x11 {
+		nmHdClone.Data[0x10] = 0 // label → default
+	}
+	nmrd := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDNmrd, Children: []*rifx.Chunk{nmHdClone}}
+	for i := 0; i < 5; i++ {
+		nmrd.Children = append(nmrd.Children, &rifx.Chunk{ID: rifx.IDUtf8})
+	}
+	ml.mrky.Children = append(ml.mrky.Children, nmrd)
+
+	// 4. scene: the new Marker, fully back-referenced.
+	nm := &Marker{
+		Time:       float64(ticks) / rate,
+		ldat:       ml.ldat,
+		ldatOffset: newOff,
+		nmHd:       nmHdClone,
+		nmrd:       nmrd,
+		tickRate:   tmpl.tickRate,
+		compFps:    tmpl.compFps,
+		list:       ml,
+	}
+	*ml.owner = append(*ml.owner, nm)
+	return nm, nil
 }
