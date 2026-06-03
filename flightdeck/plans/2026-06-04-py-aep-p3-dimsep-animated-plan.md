@@ -10,6 +10,21 @@ summary: P3 DimensionsSeparated animated 子方向 — animated Position 的 key
 **前置**: static Position separate/merge 双向已 ship（`mutate_property_separate.go`，AE 2020+2025 6/6 PASS，`incidents/separate-dimensions-write-mechanics.md`）。**当前 animated 一律 refuse**（leader `StaticValue` 非 `[]float64` / follower 非 scalar 即报错）。
 **性质**: 结构性 + keyframe 流迁移 → V2.1 atomic + **AE 2020+2025 双版本 ship-gate**（CLAUDE.md #6）。RE-first。
 
+## 接力锚点（下次会话 Phase 1 起点）
+
+**状态**：Phase 0 RE **完成**（cut-1 结构同构 §0.1 + cut-2 tangent 映射 §0.2，已破解；commit `b41359f` `a9ef782`）。映射全文档化 + incident 升级。**下一步 = Phase 1 separate animated 实现，先写测试（TDD）。**
+
+**起手步骤**：
+1. **先 byte-check after fixture 的 follower animated tdbs 结构**——用 `tmp_debug`（已有 `dump_sepdim_kf` dump 高层字段；如需原始 chunk 树用 `tmp_debug/list_item_chunks`）看 `re_sepdim_anim_after.aep` 的 `ADBE Position_0` tdbs：static 占位（`{tdsb,tdsn,tdb4,cdat,tdum,tduM}`）→ animated 后变成什么（cdat 换成 `kfl{lhd3,ldat}`？tdb4 @0x05 flag 值？）。**这是唯一剩的结构未知**，impl 前必看。
+2. 在 `mutate_property_separate.go` 的 `separatePosition` 加 animated 分支（`p.StaticValue` 非 `[]float64` 即走 animated；leader `p.Keyframes` 非空判定）。复用 leader 的已解码 `p.Keyframes`（含 `InSpatialTangent`/`OutSpatialTangent`/`Value`）。
+3. 每轴构造 1D temporal kf 流，套 §0.2 映射（`out_speed=outSpatTan[axis]×100`，`in_speed=−inSpatTan[axis]×100`，`inf=0.01`/边界 0，bezier）。编码复用 `lowerTransformScalar` + `valueLayout{dim:1,headerByte:0x00}`（bpk=48，offset 见 `parse_keyframe.go` non-spatial：value@0x08 / in spd@0x10 inf@0x18 / out spd@0x20 inf@0x28）。
+4. 3 个 static follower → animated（替 cdat 为 kfl 流 + tdb4 flag，按步骤 1 的 byte-check）；leader 重置 static 默认（**复用现有 static separate 的 tdsb/cdat 改动**）；合成 Pos2（leader 同样，但其 kf 流拆 Z 轴）。
+5. atomic：沿用 static 的 validate-then-commit（fallible 的 stream 构造/re-parse 前置）。
+6. **测试先行**：自建/用 `re_sepdim_anim_before.aep` → `SetDimensionsSeparated(true)` → WriteAEP → re-parse → 断言 3 follower 各 3 kf 的 time/value/speed/influence == after fixture（§0.2 数值）+ leader static 默认。
+7. 然后 merge 分支 + 双版本 ship-gate（**第二 fixture 不同时距/值验 100/0.01 常数泛化**）。
+
+**首切片限定**：leader path temporal ease ≈ linear（默认）；leader 自身有非默认 temporal ease 时暂 refuse（§0.2 未决①）。
+
 ## 0. 核心未知（gating RE）
 
 static 是值迁移；animated 是 **keyframe 流迁移**：
