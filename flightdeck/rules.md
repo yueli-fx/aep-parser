@@ -1,9 +1,10 @@
 ---
-version: 2.2
+version: 2.3
 git: true
 emit_agents_md: false
 disabled_folders: []
 disabled_gates: []
+commit_mode: confirm
 ---
 
 # flightdeck rules — aep-parser
