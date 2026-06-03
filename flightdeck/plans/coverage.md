@@ -33,6 +33,7 @@ summary: 字段覆盖概览（精简入口）
 - Item: `Name / Comment / Label` R/W（Composition + Footage 共用）
 - Footage: `Path` R/W
 - Composition markers: 全 8 个 setter
+- **Composition marker 增删 (P3 §3G, stable)**: `Marker.Remove()` + `Composition.AddMarker(seconds) (*Marker, error)`。结构性 splice：ldat 16B block + lhd3 count + mrky Nmrd 三处联动；AddMarker 走 clone-template（拷现存 marker 的 ldat block + NmHd，规避 opaque 默认值 RE）。AE 2020+2025 双版本 ship-gate 2/2 PASS（`TestMarker_AEShipGate_*`，Remove m0 + Add@4.0）。限制：AddMarker 需 comp 已有 ≥1 marker（空 comp seed 暂搁）；tail-insert 未做 time 排序（add@4.0 在末尾，AE 无需 resort）。Layer marker 增删共享 `markerList` infra 但未单独 ship。fixture `test_data/re_compmarker.aep`
 - **Composition guides (P3, py-aep parity, Alpha)**: `Composition.Guides []*Guide` R + `Guide.SetPosition / SetOrientation` W（length-preserving in-place ldat patch，block 别名 chunk bytes）。`GuideOrientation` 枚举（binary 2=horizontal / 1=vertical，py-aep logical 0/1 经 `.String()` 桥接）；JSON 导出 `guides[]{orientation,position}`。无 AE scripting 等价物（标尺参考线 UI-only，不影响渲染）。结构性增删 guide 暂搁。AE 接受未在 app 内验，标 Alpha。fixture `test_data/guides.aep`（py-aep 样本）
 - **Composition filter views (py-aep parity P1 1A)**: `TextLayers / ShapeLayers / CameraLayers / LightLayers / NullLayers / AdjustmentLayers / ThreeDLayers / GuideLayers / SoloLayers / AVLayers / CompositionLayers / FootageLayers / FileLayers / SolidLayers / PlaceholderLayers` — 15 个 filter helper，无写
 - **Composition convenience (P1 1F)**: `NumLayers / HasAudio / TimeScale` — 3 个 helper（ActiveCamera + Markers field 早已 ship）

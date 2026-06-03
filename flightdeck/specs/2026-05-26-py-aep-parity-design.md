@@ -1,6 +1,6 @@
 ---
 status: active
-summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向 + 3C PropertyBase Remove/MoveTo/Duplicate 已落，剩 ValueText/animated 子方向/3G marker）
+summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向 + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText/DimensionsSeparated animated 子方向）
 ---
 
 # py-aep parity — API 全覆盖路线图
@@ -296,7 +296,7 @@ summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+�
 - **3D** Composition.Renderer 写（跨 renderer 切换 → prda 长度变结构性）
 - **3E** Essential Graphics R only (controllers + override UUIDs，不做自动解析)
 - **3F** Guides R/W (ruler 标尺辅助线，UI-only chunk)
-- **3G** Composition Markers ：comp-level marker 增删（已 R/W setter；增删是结构性）
+- **3G** Composition Markers ：comp-level marker 增删 ✅ **done（stable）**——`Marker.Remove()` + `Composition.AddMarker`（clone-template 规避 opaque RE），AE 2020+2025 ship-gate 2/2 PASS（2026-06-04）。限制：AddMarker 需 ≥1 现存 marker（空 comp seed 暂搁）+ tail-insert 未做 time 排序。详 `../plans/2026-06-04-py-aep-p3-3g-comp-marker-structural-plan.md`
 - **3H** Property.ValueText (formatted, requires AE schema database)
 
 **估算**: V3 capability framework 完成后才动；多个会话独立子项，可并行。

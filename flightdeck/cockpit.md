@@ -1,22 +1,22 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-04 by claude（迁移 deck 2.3→3.0 + model-v4：sketches/debriefs 折叠、status 6→4、cockpit 进行中改为 active 集 AUTO 投影）
-**Active focus**: **py-aep parity P3** — §3A Render Queue read+write **完成（含结构性增删）**。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + Remove + Add / 3C PropertyBase Remove + MoveTo + Duplicate(ship-gated) 已落**。剩 ValueText（需 AE schema DB）+ DimensionsSeparated animated 子方向。
+**Active focus**: **py-aep parity P3** — §3A Render Queue read+write **完成（含结构性增删）**。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + Remove + Add / 3C PropertyBase Remove + MoveTo + Duplicate / 3G comp marker 增删(Remove+AddMarker, ship-gated) 已落**。剩 ValueText（需 AE schema DB）+ DimensionsSeparated animated 子方向。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
 - [2026-05-22-v3-direction.md](specs/2026-05-22-v3-direction.md) — V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① 已落；M8 物理分包待启） — [note: 大 arc 暂停 — M8 物理分包待启（scene/serializer 拆包，scene→rifx 残留 5 项白名单待清零）；结构性 Phase 1-5 + 包重组方案① 已落]
-- [2026-05-26-py-aep-parity-design.md](specs/2026-05-26-py-aep-parity-design.md) — py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向 + 3C PropertyBase Remove/MoveTo/Duplicate 已落，剩 ValueText/animated 子方向/3G marker）
+- [2026-05-26-py-aep-parity-design.md](specs/2026-05-26-py-aep-parity-design.md) — py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向 + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText/DimensionsSeparated animated 子方向）
 - [2026-05-27-v3-deep-think.md](specs/2026-05-27-v3-deep-think.md) — V3 deep think：open questions / risk register / migration strategy
-- [2026-06-04-py-aep-p3-3g-comp-marker-structural-plan.md](plans/2026-06-04-py-aep-p3-3g-comp-marker-structural-plan.md) — P3 §3G comp marker 增删（结构性：ldat block splice + lhd3 count + Nmrd splice，clone-template 规避 opaque RE，双版本 ship-gate）
 - [coverage-detail.md](plans/coverage-detail.md) — 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 - [coverage.md](plans/coverage.md) — 字段覆盖概览（精简入口）
 <!-- /AUTO -->
 
-## 下一步
-
-**执行 3G comp marker 增删** — plan 已落 `plans/2026-06-04-py-aep-p3-3g-comp-marker-structural-plan.md`。切片顺序：① parser back-ref sidecar + `Marker.Remove()`（零 RE）+ 测试 → ② `Composition.AddMarker`（clone-template）+ 测试 → ③ AE 双版本 ship-gate。其余 P3（ValueText 需 AE schema DB / DimensionsSeparated animated）排后。
+**3G comp marker 增删已落（ship-gated 2/2）**。剩余 P3 两项，按工作量/独立性挑：
+1. **DimensionsSeparated animated 子方向**（keyframe 流迁移）—— 中等，已有 static R/W 基础（`incidents/separate-dimensions-write-mechanics.md`），扩 animated 走 keyframe 流。
+2. **`Property.ValueText`**（formatted value）—— 最大 RE，需 AE schema database（每属性类型的格式化字符串），多会话。
+3G plan 已 done（待 land）。3G 可选增强（marker time 排序 + add-to-empty seed）按需另起 idea。
 
 ## Backlog（单条候选 / 缺 runtime setter）
 
