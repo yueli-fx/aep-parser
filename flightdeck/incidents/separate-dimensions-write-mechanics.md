@@ -57,7 +57,7 @@ last_updated: 2026-06-04
 
 shipped：**静态 Position 的 separate（2D + 3D）+ merge 双向**，AE 2020 + AE 2025 ship-gate 6/6 PASS（`property_separate_shipgate_test.go`：3D sep / merge / 2D sep × 2 版本）。Go 输出 chunk 树 byte-structural 等同 AE 自存。
 
-**animated Position separate + merge 双向已实现**（2026-06-04，`separatePositionAnimated` / `mergePositionAnimated`，3D 首切片）：Go round-trip 双向通过。separate 后 4 个 Position* tdbs **byte-identical AE 自存 after fixture**（`tmp_debug/verify_sep_anim`）。merge 后 leader spatial block 的 value + in/out tangent 全 byte-exact AE 自存 merge fixture（`tmp_debug/verify_merge_anim`，对 `re_sepdim_anim_merge_after.aep`），仅 @0x08/@0x10 缓存字段 + 末 kf out-tangent 不同（见下）。**剩 AE 双版本 ship-gate**（plan Phase 4）。
+**animated Position separate + merge 双向已 ship**（2026-06-04，`separatePositionAnimated` / `mergePositionAnimated`，3D 首切片）：Go round-trip 双向通过；**AE 2020 + AE 2025 双版本 ship-gate 4/4 PASS**（`property_separate_anim_shipgate_test.go`：separate + merge × 双版本，AE 读回 keyframe 值正确 + resave 保留）。separate 后 4 个 Position* tdbs **byte-identical AE 自存 after fixture**（`tmp_debug/verify_sep_anim`）。merge 后 leader spatial block 的 value + in/out tangent 全 byte-exact AE 自存 merge fixture（`tmp_debug/verify_merge_anim`，对 `re_sepdim_anim_merge_after.aep`），仅 @0x08/@0x10 缓存字段 + 末 kf out-tangent 不同（见下）。**限制**：3D layer + keyframe 跨轴时间对齐 + leader linear path-ease（其他情形 refuse）。
 
 ## animated 子方向 — keyframe 流迁移映射（RE 2026-06-04）
 
