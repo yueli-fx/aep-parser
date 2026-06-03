@@ -32,14 +32,14 @@ func (p *Property) SetDimensionsSeparated(separated bool) error {
 	if p.MatchName != MatchNamePosition {
 		return fmt.Errorf("SetDimensionsSeparated: only %q can be separated (got %q)", MatchNamePosition, p.MatchName)
 	}
-	if p.back == nil || p.back.tdsb == nil || p.back.cdat == nil {
-		return fmt.Errorf("SetDimensionsSeparated: Position built outside parser (no tdsb/cdat back-ref)")
+	if p.back == nil || p.back.tdsb == nil {
+		return fmt.Errorf("SetDimensionsSeparated: Position built outside parser (no tdsb back-ref)")
 	}
 	if p.Components != 3 {
 		return fmt.Errorf("SetDimensionsSeparated: only 3-component Position supported (Components=%d)", p.Components)
 	}
-	if len(p.back.tdsb.Data) < 4 || len(p.back.cdat.Data) < 24 {
-		return fmt.Errorf("SetDimensionsSeparated: Position tdsb/cdat too short (tdsb=%d cdat=%d)", len(p.back.tdsb.Data), len(p.back.cdat.Data))
+	if len(p.back.tdsb.Data) < 4 {
+		return fmt.Errorf("SetDimensionsSeparated: Position tdsb too short (tdsb=%d)", len(p.back.tdsb.Data))
 	}
 	grp := p.parentTreeGroup
 	if grp == nil || grp.chunk == nil {
@@ -48,6 +48,18 @@ func (p *Property) SetDimensionsSeparated(separated bool) error {
 	layer := p.ownerLayer()
 	if layer == nil {
 		return fmt.Errorf("SetDimensionsSeparated: cannot reach owning layer")
+	}
+
+	// An animated leader carries a keyframe stream (no cdat) instead of a
+	// static value; it routes to its own stream-migration path. Merging an
+	// animated-separated Position (leader is static-default, followers
+	// animated) is a later slice — that leader has a cdat and falls through to
+	// mergePosition, which refuses the non-scalar followers.
+	if separated && p.back.cdat == nil && len(p.Keyframes) > 0 {
+		return p.separatePositionAnimated(grp, layer)
+	}
+	if p.back.cdat == nil || len(p.back.cdat.Data) < 24 {
+		return fmt.Errorf("SetDimensionsSeparated: Position cdat too short or absent (cdat=%v)", p.back.cdat != nil)
 	}
 
 	if separated {
@@ -153,6 +165,296 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 	}
 
 	return nil
+}
+
+// separatePositionAnimated splits an ANIMATED merged Position leader (a 3D
+// spatial motion-path keyframe stream) into three per-axis animated 1D
+// temporal followers, then collapses the leader to its static default — the
+// stream-migration analogue of separatePosition.
+//
+// Byte mechanics REd from AE 2020 re_sepdim_anim_{before,after}.aep
+// (incidents/separate-dimensions-write-mechanics.md §animated):
+//
+//   - per follower keyframe i, axis a:
+//       value     = leader.kf[i].Value[a]
+//       out_speed = leader.kf[i].OutSpatialTangent[a] × 100
+//       in_speed  = −leader.kf[i].InSpatialTangent[a] × 100
+//       influence = 0.01 on a side that has an adjacent segment, 0 at the
+//                   first-kf in-side / last-kf out-side boundary
+//       in/out interp = bezier  (block header07 = 0x08, bpk = 48)
+//   - followers convert static→animated: tdb4 @0x05 clears bit0 + @0x44=0x01,
+//     tdsb clears bit1, cdat → LIST(kfl)(lhd3+ldat).
+//   - leader collapses animated→static: tdb4 @0x05 sets bit0, @0x44=0x00,
+//     @0x4f sets bit0; tdsb → separated (byte2=0x08, byte3 bit1); the kf
+//     stream is replaced by a 72-byte cdat = [default(3), kf0.inSpatTan(3),
+//     kf0.outSpatTan(3)].
+//
+// First slice limited to 3D layers with ~linear leader path-ease (no custom
+// temporal ease on the leader's spatial keyframes); other cases refuse.
+//
+// Atomicity: all fallible work (validation + Position_2 synthesis/re-parse)
+// runs before any in-place byte mutation, so failure leaves the project
+// untouched and there is nothing to roll back.
+func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) error {
+	if p.DimensionsSeparated() {
+		return fmt.Errorf("SetDimensionsSeparated: Position already separated")
+	}
+	if !layer.Is3D {
+		return fmt.Errorf("SetDimensionsSeparated: animated Position separate currently supports 3D layers only")
+	}
+	if p.back.tdbs == nil || p.back.tdb4 == nil || len(p.back.tdb4.Data) <= 0x4f {
+		return fmt.Errorf("SetDimensionsSeparated: animated leader missing tdbs/tdb4 back-refs")
+	}
+	def, ok := p.DefaultValue.([]float64)
+	if !ok || len(def) < 3 {
+		return fmt.Errorf("SetDimensionsSeparated: Position DefaultValue unavailable")
+	}
+
+	kfs := p.Keyframes
+	tickRate := 0.0
+	if kfs[0].back != nil {
+		tickRate = kfs[0].back.tickRate
+	}
+	if tickRate <= 0 {
+		return fmt.Errorf("SetDimensionsSeparated: animated leader tickRate unavailable")
+	}
+	// Every leader keyframe must be a 3D spatial sample with ~linear path-ease.
+	for i, kf := range kfs {
+		v, ok := kf.Value.([]float64)
+		if !ok || len(v) < 3 {
+			return fmt.Errorf("SetDimensionsSeparated: leader kf%d value not 3D: %v", i, kf.Value)
+		}
+		if len(kf.InSpatialTangent) < 3 || len(kf.OutSpatialTangent) < 3 {
+			return fmt.Errorf("SetDimensionsSeparated: leader kf%d missing spatial tangents", i)
+		}
+		if !temporalEaseLinear(kf.InTemporalEase) || !temporalEaseLinear(kf.OutTemporalEase) {
+			return fmt.Errorf("SetDimensionsSeparated: leader kf%d has non-default path temporal ease; animated separate limited to linear path-ease (first slice)", i)
+		}
+	}
+
+	pos0 := grp.Property(MatchNamePosition0)
+	pos1 := grp.Property(MatchNamePosition1)
+	if pos0 == nil || pos1 == nil {
+		return fmt.Errorf("SetDimensionsSeparated: merged Position missing pre-allocated Position_0/_1 followers")
+	}
+	if grp.Property(MatchNamePosition2) != nil {
+		return fmt.Errorf("SetDimensionsSeparated: Position_2 already present")
+	}
+	for _, f := range []*Property{pos0, pos1} {
+		if f.back == nil || f.back.tdsb == nil || f.back.cdat == nil || f.back.tdbs == nil || f.back.tdb4 == nil {
+			return fmt.Errorf("SetDimensionsSeparated: follower %q missing back-refs", f.MatchName)
+		}
+		if len(f.back.tdb4.Data) <= 0x44 || len(f.back.tdsb.Data) < 4 {
+			return fmt.Errorf("SetDimensionsSeparated: follower %q tdb4/tdsb too short", f.MatchName)
+		}
+	}
+
+	// Locate the leader's kf stream LIST + the Position_1 tdmn/tdbs splice
+	// point up front (pre-commit; refuse rather than half-mutate).
+	leaderKflIdx := -1
+	for j, ch := range p.back.tdbs.Children {
+		if ch.IsList() && ch.FormType == rifx.IDkfl {
+			leaderKflIdx = j
+			break
+		}
+	}
+	if leaderKflIdx < 0 {
+		return fmt.Errorf("SetDimensionsSeparated: animated leader has no kf stream to collapse")
+	}
+	groupChildren := grp.chunk.Children
+	pos1TdbsIdx := indexOfChunk(groupChildren, pos1.back.tdbs)
+	if pos1TdbsIdx < 1 {
+		return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
+	}
+	pos1Tdmn := groupChildren[pos1TdbsIdx-1]
+	if pos1Tdmn.ID != rifx.IDTdmn || len(pos1Tdmn.Data) == 0 {
+		return fmt.Errorf("SetDimensionsSeparated: expected tdmn before Position_1 tdbs, found %s", pos1Tdmn.ID)
+	}
+
+	// Build per-axis keyframe streams (pure construction, no mutation yet).
+	kfl0 := buildSeparatedAxisKfl(kfs, 0, tickRate)
+	kfl1 := buildSeparatedAxisKfl(kfs, 1, tickRate)
+	kfl2 := buildSeparatedAxisKfl(kfs, 2, tickRate)
+
+	// Synthesize the animated Z follower (the lone fallible step): clone
+	// Position_1's still-static tdbs, rename, convert to animated, re-parse.
+	newTdmn := deepCloneChunk(pos1Tdmn)
+	writeTdmnName(newTdmn, MatchNamePosition2)
+	newTdbs := deepCloneChunk(pos1.back.tdbs)
+	if err := convertFollowerTdbsToAnimated(newTdbs, kfl2); err != nil {
+		return fmt.Errorf("SetDimensionsSeparated: synthesize Position_2: %w", err)
+	}
+	var localWarnings []string
+	ctx := newParseCtx(tickRate, layer.Name, &localWarnings)
+	pos2 := parseLeafProperty(MatchNamePosition2, newTdbs, ctx)
+	if pos2 == nil {
+		return fmt.Errorf("SetDimensionsSeparated: synthesized Position_2 failed to parse")
+	}
+	if len(localWarnings) > 0 {
+		return fmt.Errorf("SetDimensionsSeparated: synthesized Position_2 produced parser warnings: %v", localWarnings)
+	}
+	if len(pos2.Keyframes) != len(kfs) {
+		return fmt.Errorf("SetDimensionsSeparated: synthesized Position_2 has %d kf, want %d", len(pos2.Keyframes), len(kfs))
+	}
+	pos2.DefaultValue = 0.0 // ADBE Position_2 fixed default
+	pos2.parentTreeGroup = grp
+	insertAt := pos1TdbsIdx + 1
+
+	// Leader's replacement static cdat (72B): default + kf0 spatial tangents.
+	leaderCdat := buildAnimatedLeaderStaticCdat(def, kfs[0])
+
+	// === Commit: in-place byte mutations (all bounds pre-validated) ===
+	// Leader: animated → static-default + separated flags.
+	p.back.tdsb.Data[2] = 0x08
+	p.back.tdsb.Data[3] |= 0x02
+	p.back.tdb4.Data[0x05] |= 0x01
+	p.back.tdb4.Data[0x44] = 0x00
+	p.back.tdb4.Data[0x4f] |= 0x01
+	p.back.tdbs.Children[leaderKflIdx] = leaderCdat
+	p.back.cdat = leaderCdat
+	p.back.lhd3 = nil
+	p.back.ldat = nil
+	p.back.bytesPerKF = 0
+	p.Keyframes = nil
+	p.StaticValue = []float64{def[0], def[1], def[2]}
+
+	// Followers Position_0/_1: static → animated, in place.
+	convertFollowerToAnimated(pos0, kfl0, ctx)
+	convertFollowerToAnimated(pos1, kfl1, ctx)
+
+	// Splice the synthesized Position_2 chunks + scene node after Position_1.
+	spliced := make([]*rifx.Chunk, 0, len(groupChildren)+2)
+	spliced = append(spliced, groupChildren[:insertAt]...)
+	spliced = append(spliced, newTdmn, newTdbs)
+	spliced = append(spliced, groupChildren[insertAt:]...)
+	grp.chunk.Children = spliced
+	insertChildAfter(grp, pos1, pos2)
+	layer.Properties = append(layer.Properties, pos2)
+
+	return nil
+}
+
+// temporalEaseLinear reports whether a side's temporal ease is the AE-default
+// "linear path" ease (speed + influence both ≈ 0) across all components.
+func temporalEaseLinear(es []TemporalEase) bool {
+	for _, e := range es {
+		if math.Abs(e.Speed) > 1e-9 || math.Abs(e.Influence) > 1e-9 {
+			return false
+		}
+	}
+	return true
+}
+
+// buildSeparatedAxisKfl builds a LIST(kfl)(lhd3 + ldat) for one axis of a
+// separated Position, mapping the leader's 3D spatial keyframes to 1D temporal
+// keyframes (bpk=48, header07=0x08). See separatePositionAnimated for the map.
+func buildSeparatedAxisKfl(leaderKfs []*Keyframe, axis int, tickRate float64) *rifx.Chunk {
+	const bpk = 48
+	n := len(leaderKfs)
+
+	lhd3 := make([]byte, 52)
+	lhd3[1], lhd3[2], lhd3[3] = 0xd0, 0x0b, 0xee
+	binary.BigEndian.PutUint32(lhd3[0x08:0x0C], uint32(n))
+	binary.BigEndian.PutUint32(lhd3[0x0C:0x10], 1)
+	binary.BigEndian.PutUint32(lhd3[0x10:0x14], bpk)
+	binary.BigEndian.PutUint32(lhd3[0x14:0x18], 4)
+	binary.BigEndian.PutUint32(lhd3[0x18:0x1C], 1)
+	binary.BigEndian.PutUint32(lhd3[0x1C:0x20], 4)
+
+	ldat := make([]byte, n*bpk)
+	for i, kf := range leaderKfs {
+		blk := ldat[i*bpk : (i+1)*bpk]
+		value := kf.Value.([]float64)[axis]
+		outSpeed := kf.OutSpatialTangent[axis] * 100
+		inSpeed := -kf.InSpatialTangent[axis] * 100
+		inInf, outInf := 0.0, 0.0
+		if i > 0 {
+			inInf = 0.01
+		}
+		if i < n-1 {
+			outInf = 0.01
+		}
+		binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(kf.Time*tickRate)))
+		blk[0x04] = byte(InterpBezier)
+		blk[0x05] = byte(InterpBezier)
+		blk[0x06] = 0x00
+		blk[0x07] = 0x08
+		binary.BigEndian.PutUint64(blk[0x08:0x10], math.Float64bits(value))
+		binary.BigEndian.PutUint64(blk[0x10:0x18], math.Float64bits(inSpeed))
+		binary.BigEndian.PutUint64(blk[0x18:0x20], math.Float64bits(inInf))
+		binary.BigEndian.PutUint64(blk[0x20:0x28], math.Float64bits(outSpeed))
+		binary.BigEndian.PutUint64(blk[0x28:0x30], math.Float64bits(outInf))
+	}
+
+	kfl := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
+	kfl.Children = append(kfl.Children,
+		&rifx.Chunk{ID: rifx.IDLhd3, Data: lhd3},
+		&rifx.Chunk{ID: rifx.IDLdat, Data: ldat},
+	)
+	return kfl
+}
+
+// buildAnimatedLeaderStaticCdat builds the 72-byte cdat AE synthesizes when an
+// animated 3D Position collapses to a separated static default: the default
+// value (3 f64) followed by the first keyframe's in/out spatial tangents.
+func buildAnimatedLeaderStaticCdat(def []float64, kf0 *Keyframe) *rifx.Chunk {
+	d := make([]byte, 72)
+	for i := 0; i < 3; i++ {
+		binary.BigEndian.PutUint64(d[i*8:i*8+8], math.Float64bits(def[i]))
+		binary.BigEndian.PutUint64(d[24+i*8:24+i*8+8], math.Float64bits(kf0.InSpatialTangent[i]))
+		binary.BigEndian.PutUint64(d[48+i*8:48+i*8+8], math.Float64bits(kf0.OutSpatialTangent[i]))
+	}
+	return &rifx.Chunk{ID: rifx.IDCdat, Data: d}
+}
+
+// findTdb4Chunk returns the property metadata chunk under a tdbs, accepting
+// either the modern lowercase "tdb4" or the legacy uppercase "Tdb4" ID.
+func findTdb4Chunk(tdbs *rifx.Chunk) *rifx.Chunk {
+	if t := tdbs.FindFirst(rifx.ChunkID{'t', 'd', 'b', '4'}); t != nil {
+		return t
+	}
+	return tdbs.FindFirst(rifx.IDTdb4)
+}
+
+// convertFollowerTdbsToAnimated rewrites a static per-axis follower tdbs into
+// its animated form in place: flips the tdb4 static→animated flags, clears the
+// tdsb dimensions-separated bit, and swaps the cdat child for the kf stream.
+// Used for the synthesized Position_2 clone (pre-commit, hence fallible).
+func convertFollowerTdbsToAnimated(tdbs, kfl *rifx.Chunk) error {
+	tdb4 := findTdb4Chunk(tdbs)
+	if tdb4 == nil || len(tdb4.Data) <= 0x44 {
+		return fmt.Errorf("follower tdbs missing/short tdb4")
+	}
+	tdb4.Data[0x05] &^= 0x01
+	tdb4.Data[0x44] = 0x01
+	if tdsb := tdbs.FindFirst(rifx.IDTdsb); tdsb != nil && len(tdsb.Data) >= 4 {
+		tdsb.Data[3] &^= 0x02
+	}
+	for j, ch := range tdbs.Children {
+		if ch.ID == rifx.IDCdat {
+			tdbs.Children[j] = kfl
+			return nil
+		}
+	}
+	return fmt.Errorf("follower tdbs has no cdat to replace")
+}
+
+// convertFollowerToAnimated converts an existing static per-axis follower
+// Property to animated in place (chunks + scene state), using its parsed
+// back-refs. All bounds are pre-validated by the caller, so it is infallible.
+func convertFollowerToAnimated(f *Property, kfl *rifx.Chunk, ctx *parseCtx) {
+	f.back.tdb4.Data[0x05] &^= 0x01
+	f.back.tdb4.Data[0x44] = 0x01
+	f.back.tdsb.Data[3] &^= 0x02
+	for j, ch := range f.back.tdbs.Children {
+		if ch.ID == rifx.IDCdat {
+			f.back.tdbs.Children[j] = kfl
+			break
+		}
+	}
+	f.back.cdat = nil
+	f.StaticValue = nil
+	parseKeyframes(f, kfl.FindFirst(rifx.IDLhd3), kfl.FindFirst(rifx.IDLdat), ctx)
 }
 
 // mergePosition collapses separated per-axis followers back into the Position

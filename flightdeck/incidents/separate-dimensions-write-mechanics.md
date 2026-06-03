@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing SetDimensionsSeparated merge direction / 2D / animated; debugging Position separation byte layout; extending separation to other multidimensional properties; reviewing mutate_property_separate.go
 applies_to: [property, dimensions-separated, separate-dimensions, position, structural-write, mutate, tdsb, cdat]
-last_updated: 2026-06-02
+last_updated: 2026-06-04
 ---
 
 # Separate Dimensions 写机制 — RE findings
@@ -57,7 +57,7 @@ last_updated: 2026-06-02
 
 shipped：**静态 Position 的 separate（2D + 3D）+ merge 双向**，AE 2020 + AE 2025 ship-gate 6/6 PASS（`property_separate_shipgate_test.go`：3D sep / merge / 2D sep × 2 版本）。Go 输出 chunk 树 byte-structural 等同 AE 自存。
 
-未实现（**已 RE，2026-06-04**）：**animated Position** 的 keyframe 流迁移。当前 `StaticValue` 非 `[]float64` / follower 非 scalar 时一律 refuse；映射已破解，待实现 + ship-gate（plan `2026-06-04-py-aep-p3-dimsep-animated-plan.md`）。
+**animated Position separate 方向已实现**（2026-06-04，`separatePositionAnimated`，3D linear-path-ease 首切片）：Go round-trip 通过，且 separate 后 4 个 Position* tdbs **byte-identical AE 自存 after fixture**（`tmp_debug/verify_sep_anim`）。**merge animated 方向 + AE 双版本 ship-gate 待做**（plan `2026-06-04-py-aep-p3-dimsep-animated-plan.md` Phase 3-4）。当前 merge animated 仍 refuse（mergePosition 拒绝非 scalar follower）。
 
 ## animated 子方向 — keyframe 流迁移映射（RE 2026-06-04）
 
@@ -73,4 +73,12 @@ follower interp      = bezier 双侧
 ```
 `spatialTan = speed × influence`，常数 100=1/0.01。leader spatial tangent 是 AE 存盘现成值（auto-bezier `(P_next−P_prev)/6`），**读取不重算**。merge 反向：`outSpatTan=out_speed/100`、`inSpatTan=−in_speed/100`。
 
-⚠ 未决（impl byte-check）：leader 自身 path temporal ease 非默认时映射待验（首切片限 path-ease≈linear）；100/0.01 是否随时距变 → ship-gate 用第二 fixture 防 fixture-specific；follower static→animated 的 tdb4 flag 取值对 after fixture 校验。
+⚠ 未决（impl byte-check）：leader 自身 path temporal ease 非默认时映射待验（首切片限 path-ease≈linear）；100/0.01 是否随时距变 → ship-gate 用第二 fixture 防 fixture-specific。
+
+### 实现确认的字节细节（2026-06-04 byte-check `re_sepdim_anim_after.aep`，已 byte-identical 复现）
+
+**follower kfl block**（bpk=48，1D non-spatial）：time@0x00（ticks，per-comp tickRate）/ in interp@0x04=0x02(bezier) / out@0x05=0x02 / @0x06=0x00 / **hdr07@0x07=0x08**（非 0x00！）/ value@0x08 / in_speed@0x10 / in_inf@0x18 / out_speed@0x20 / out_inf@0x28。`speed = spatTan×100` 在 float64 下 **bit-exact**（`33.333…×100` 的 bits 等于 AE 存盘 bits）。lhd3 52B：magic+count@0x08+`1`@0x0C+bpk@0x10+`4 1 4`@0x14/0x18/0x1C。
+
+**follower tdbs static→animated**：tdb4 `@0x05 &^= 0x01`、`@0x44 = 0x01`（= 既有 shape `injectAnimatedStream` 配方）；tdsb `byte3 &^= 0x02`（0x03→0x01）；cdat child 原位换成 LIST(kfl)（保留 tdum/tduM）。
+
+**leader animated→static-separated**：tdb4 `@0x05 |= 0x01`、`@0x44 = 0x00`、`@0x4f |= 0x01`（与 follower 方向相反，注意 @0x4f）；tdsb byte2=0x08+byte3 bit1（同 static separate）；LIST(kfl) child 原位换成 **72B cdat = [default(3 f64), kf0.inSpatTan(3), kf0.outSpatTan(3)]**（AE 把首 kf 的 in/out 空间切线塞进 cdat 尾，非零）。
