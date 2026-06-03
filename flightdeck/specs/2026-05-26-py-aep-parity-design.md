@@ -1,5 +1,6 @@
 ---
-status: blocked
+status: active
+summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向 + 3C PropertyBase Remove/MoveTo/Duplicate 已落，剩 ValueText/animated 子方向/3G marker）
 ---
 
 # py-aep parity — API 全覆盖路线图

@@ -1,5 +1,6 @@
 ---
-status: active
+status: idea
+summary: Composition.Renderer W — RE findings（prin 104B / prda 变长，结构性，待实现）
 ---
 
 # Composition.Renderer W — RE findings (P3, pre-implementation)

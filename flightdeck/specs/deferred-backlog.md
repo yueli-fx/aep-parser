@@ -1,5 +1,6 @@
 ---
-status: active
+status: idea
+summary: Deferred backlog 细项（从退役 logbook §Deferred 迁入）
 ---
 
 # Deferred backlog（细项）

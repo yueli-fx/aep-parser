@@ -1,5 +1,6 @@
 ---
 status: active
+summary: V3 deep think：open questions / risk register / migration strategy
 ---
 
 # V3 deep think — open questions, risk register, migration strategy

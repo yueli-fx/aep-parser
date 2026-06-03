@@ -1,5 +1,7 @@
 ---
-status: active
+status: done
+implements: specs/2026-05-26-py-aep-parity-design.md
+summary: P3 §3A slice-1 Render Queue R-only reader（已落 + 测试通过）
 ---
 
 # P3 §3A slice-1 — Render Queue R-only reader

@@ -1,5 +1,7 @@
 ---
-status: blocked
+status: active
+summary: V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① 已落；M8 物理分包待启）
+note: 大 arc 暂停 — M8 物理分包待启（scene/serializer 拆包，scene→rifx 残留 5 项白名单待清零）；结构性 Phase 1-5 + 包重组方案① 已落
 ---
 
 # V3 direction — scene-graph IR + capability matrix + serializer split

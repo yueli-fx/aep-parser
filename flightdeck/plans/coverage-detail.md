@@ -1,6 +1,7 @@
 ---
 status: active
 implements: specs/2026-05-26-py-aep-parity-design.md
+summary: 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 ---
 
 # Coverage matrix（详细参考）
