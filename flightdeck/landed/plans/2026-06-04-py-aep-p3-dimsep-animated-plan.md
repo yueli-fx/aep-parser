@@ -1,6 +1,7 @@
 ---
-status: active
+status: done
 implements: specs/2026-05-26-py-aep-parity-design.md
+last_updated: 2026-06-04
 summary: P3 DimensionsSeparated animated 子方向 — animated Position 的 keyframe 流拆分/合并（RE-first：先 byte-diff AE animated before/after，再实现 stream split/merge + ship-gate）
 ---
 

@@ -1,21 +1,23 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-04 by claude（迁移 deck 2.3→3.0 + model-v4：sketches/debriefs 折叠、status 6→4、cockpit 进行中改为 active 集 AUTO 投影）
-**Active focus**: **py-aep parity P3** — §3A Render Queue read+write **完成（含结构性增删）**。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + Remove + Add / 3C PropertyBase Remove + MoveTo + Duplicate / 3G comp marker 增删(Remove+AddMarker, ship-gated) 已落**。剩 ValueText（需 AE schema DB）+ DimensionsSeparated animated 子方向。
+**Last updated**: 2026-06-04 by claude（P3 §3C DimensionsSeparated animated 实现 + AE 双版本 ship-gate 8/8 完，cut-3 修正落 `b104e6f`，plan landing 归档）
+**Active focus**: **py-aep parity P3** — §3A Render Queue read+write **完成（含结构性增删）**。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + Remove + Add / 3C PropertyBase Remove + MoveTo + Duplicate / 3G comp marker 增删(Remove+AddMarker, ship-gated) / 3C DimensionsSeparated animated R+W(双向, ship-gate 8/8, Alpha) 已落**。剩 ValueText（需 AE schema DB）+ DimensionsSeparated animated 升 stable doc-sync（小尾）。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
 - [2026-05-22-v3-direction.md](specs/2026-05-22-v3-direction.md) — V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① 已落；M8 物理分包待启） — [note: 大 arc 暂停 — M8 物理分包待启（scene/serializer 拆包，scene→rifx 残留 5 项白名单待清零）；结构性 Phase 1-5 + 包重组方案① 已落]
-- [2026-05-26-py-aep-parity-design.md](specs/2026-05-26-py-aep-parity-design.md) — py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向 + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText/DimensionsSeparated animated 子方向）
+- [2026-05-26-py-aep-parity-design.md](specs/2026-05-26-py-aep-parity-design.md) — py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向(static+animated) + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText）
 - [2026-05-27-v3-deep-think.md](specs/2026-05-27-v3-deep-think.md) — V3 deep think：open questions / risk register / migration strategy
-- [2026-06-04-py-aep-p3-dimsep-animated-plan.md](plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md) — P3 DimensionsSeparated animated 子方向 — animated Position 的 keyframe 流拆分/合并（RE-first：先 byte-diff AE animated before/after，再实现 stream split/merge + ship-gate）
 - [coverage-detail.md](plans/coverage-detail.md) — 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 - [coverage.md](plans/coverage.md) — 字段覆盖概览（精简入口）
 <!-- /AUTO -->
 
-**DimensionsSeparated animated 子方向进行中** — plan `plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md`。**Phase 0 RE 完成（cut-1 结构同构 + cut-2 tangent 映射破解）**：separate = 解 leader 3D spatial kf 流 → per-axis `out_speed=outSpatTan×100 / in_speed=−inSpatTan×100 / inf=0.01`（边界 0）→ 3 follower static→animated stream + 合成 Pos2 → leader 重置 static 默认；merge 反向。**下一步 = Phase 1 separate 实现**（`separatePosition` animated 分支，复用 `lowerTransformScalar`/bpk=48，对 after fixture 逐字段 byte-check）→ merge → 双版本 ship-gate（含第二 fixture 验常数）。
-之后：`Property.ValueText`（最大 RE，需 AE schema DB，多会话）。
+## 下一步
+
+**`Property.ValueText`** — P3 最后大项（最大 RE，需 AE schema DB → 多会话）。先 RE：建 fixture 探 AE 各 effect/property 的 value-text schema 存储格式 + 定位字节。
+
+> 小尾（非阻塞）：DimensionsSeparated animated 已实现 + 双版本 ship-gate 8/8 PASS（landed `landed/plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md`），但升 stable 的 doc-sync（coverage / coverage-detail / docs / property.md）本会话按用户指示暂跳过，feature 现标 **Alpha**。需要时补这步即升 Stable。
 
 ## Backlog（单条候选 / 缺 runtime setter）
 
