@@ -514,6 +514,277 @@
       "rw": "read-write",
       "summary": "third Utf8 — web target"
     },
+    "Mask": {
+      "kind": "type",
+      "file": "mask.md",
+      "anchor": "#mask-object",
+      "summary": "Mask represents a single vector mask on a layer. Each mask has a closed or open path made of Bezier vertices."
+    },
+    "Mask.Closed": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskclosed",
+      "signature": "Closed bool",
+      "rw": "read-write",
+      "summary": "from shph[0x14] == 0x01"
+    },
+    "Mask.Color": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskcolor",
+      "signature": "Color [3]uint8",
+      "rw": "read-write",
+      "summary": "R, G, B from mkif @0x2D-0x2F (timeline label color)"
+    },
+    "Mask.Expansion": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskexpansion",
+      "signature": "Expansion float64",
+      "rw": "read-only"
+    },
+    "Mask.Feather": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskfeather",
+      "signature": "Feather [2]float64",
+      "rw": "read-only",
+      "summary": "Other mask-level properties, populated when their cdat values exist in the mask atom's property tree. Feather is 2D (X, Y) in pixels; Opacity is 0..1; Expansion (AE's \"Mask Expansion\", internally \"ADBE Mask Offset\") is in pixels."
+    },
+    "Mask.Index": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskindex",
+      "signature": "Index uint32",
+      "rw": "read-only",
+      "summary": "from mkif @0x08 (AE internal mask ID, not always sequential)"
+    },
+    "Mask.Inverted": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskinverted",
+      "signature": "Inverted bool",
+      "rw": "read-write",
+      "summary": "from mkif @0x00"
+    },
+    "Mask.Locked": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#masklocked",
+      "signature": "Locked bool",
+      "rw": "read-write",
+      "summary": "from mkif @0x01 (== 1 when AE timeline UI lock is on)"
+    },
+    "Mask.MkifRaw": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskmkifraw",
+      "signature": "MkifRaw []byte",
+      "rw": "read-only",
+      "summary": "48 bytes raw mask info (preserved for write-back)"
+    },
+    "Mask.Mode": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskmode",
+      "signature": "Mode MaskMode",
+      "rw": "read-write",
+      "summary": "from mkif @0x04"
+    },
+    "Mask.MotionBlur": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskmotionblur",
+      "signature": "MotionBlur MaskMotionBlurMode",
+      "rw": "read-only",
+      "summary": "from mkif @0x02 (0=SameAsLayer, 2=On, 3=Off)"
+    },
+    "Mask.Name": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskname",
+      "signature": "Name string",
+      "rw": "read-only",
+      "summary": "from omtn (\"\" when unnamed)"
+    },
+    "Mask.Opacity": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskopacity",
+      "signature": "Opacity float64",
+      "rw": "read-only",
+      "summary": "default 1.0 when no cdat present"
+    },
+    "Mask.PathKeyframes": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframes",
+      "signature": "PathKeyframes []MaskPathKeyframe",
+      "rw": "read-only",
+      "summary": "nil when path is not animated"
+    },
+    "Mask.Properties": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskproperties",
+      "signature": "Properties []*Property",
+      "rw": "read-only",
+      "summary": "Properties is every other tdmn+tdbs leaf inside the mask atom's property group (anything beyond Shape/Feather/Opacity/Offset, or those when keyframed). Useful for keyframed mask properties (e.g. animated feather)."
+    },
+    "Mask.SetClosed": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetclosed",
+      "signature": "func (m *Mask) SetClosed(v bool) error",
+      "summary": "SetClosed toggles whether the (first) path is closed (shph @0x14). length-preserving (1 byte). For animated masks this only affects the first snapshot; per-keyframe closed flags aren't exposed yet."
+    },
+    "Mask.SetColor": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetcolor",
+      "signature": "func (m *Mask) SetColor(rgb [3]uint8) error",
+      "example": true,
+      "summary": "SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. AE always keeps alpha (0x2C) at 0xFF; this setter does not touch it. length-preserving (3 bytes)."
+    },
+    "Mask.SetInverted": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetinverted",
+      "signature": "func (m *Mask) SetInverted(v bool) error",
+      "summary": "SetInverted toggles the mask Inverted flag (mkif @0x00). length-preserving (1 byte)."
+    },
+    "Mask.SetLocked": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetlocked",
+      "signature": "func (m *Mask) SetLocked(v bool) error",
+      "summary": "SetLocked toggles the mask's lock flag (mkif @0x01). When locked, AE refuses edits to the mask in the timeline UI; the bytes are still mutable through this library. length-preserving (1 byte)."
+    },
+    "Mask.SetMaskMotionBlur": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetmaskmotionblur",
+      "signature": "func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error",
+      "summary": "SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. Valid values: MaskMotionBlurSameAsLayer (0), MaskMotionBlurOn (2), MaskMotionBlurOff (3). length-preserving (1 byte)."
+    },
+    "Mask.SetMode": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetmode",
+      "signature": "func (m *Mask) SetMode(mode MaskMode) error",
+      "example": true,
+      "summary": "SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04. length-preserving (4 bytes)."
+    },
+    "Mask.ShphRaw": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskshphraw",
+      "signature": "ShphRaw []byte",
+      "rw": "read-only",
+      "summary": "24 bytes, path header"
+    },
+    "Mask.Vertices": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskvertices",
+      "signature": "Vertices []MaskVertex",
+      "rw": "read-only",
+      "summary": "first snapshot (or only one when static)"
+    },
+    "MaskMode": {
+      "kind": "type",
+      "file": "mask.md",
+      "anchor": "#maskmode-object",
+      "summary": "MaskMode is the compositing mode for a mask (matches AE C++ SDK values)."
+    },
+    "MaskMode.String": {
+      "kind": "getter",
+      "file": "mask.md",
+      "anchor": "#maskmodestring",
+      "signature": "func (m MaskMode) String() string",
+      "rw": "read-only"
+    },
+    "MaskMotionBlurMode": {
+      "kind": "type",
+      "file": "mask.md",
+      "anchor": "#maskmotionblurmode-object",
+      "summary": "MaskMotionBlurMode describes the per-mask motion-blur override. AE's MaskMotionBlur enum uses these stored values:"
+    },
+    "MaskPathKeyframe": {
+      "kind": "type",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframe-object",
+      "summary": "MaskPathKeyframe is one keyframe of an animated mask path. Time is in seconds. Vertices is the full path snapshot at that time. Easing follows the same scalar (one TemporalEase per side) layout as spatial keyframes."
+    },
+    "MaskPathKeyframe.InInterp": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframeininterp",
+      "signature": "InInterp InterpType",
+      "rw": "read-only"
+    },
+    "MaskPathKeyframe.InTemporalEase": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframeintemporalease",
+      "signature": "InTemporalEase TemporalEase",
+      "rw": "read-only"
+    },
+    "MaskPathKeyframe.OutInterp": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframeoutinterp",
+      "signature": "OutInterp InterpType",
+      "rw": "read-only"
+    },
+    "MaskPathKeyframe.OutTemporalEase": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframeouttemporalease",
+      "signature": "OutTemporalEase TemporalEase",
+      "rw": "read-only"
+    },
+    "MaskPathKeyframe.Time": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframetime",
+      "signature": "Time float64",
+      "rw": "read-only"
+    },
+    "MaskPathKeyframe.Vertices": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyframevertices",
+      "signature": "Vertices []MaskVertex",
+      "rw": "read-only"
+    },
+    "MaskVertex": {
+      "kind": "type",
+      "file": "mask.md",
+      "anchor": "#maskvertex-object",
+      "summary": "MaskVertex is one Bezier control point along a mask path. Coordinates are stored as ABSOLUTE positions (not offsets from the anchor):"
+    },
+    "MaskVertex.Anchor": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskvertexanchor",
+      "signature": "Anchor [2]float64",
+      "rw": "read-only"
+    },
+    "MaskVertex.InTangent": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskvertexintangent",
+      "signature": "InTangent [2]float64",
+      "rw": "read-only"
+    },
+    "MaskVertex.OutTangent": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskvertexouttangent",
+      "signature": "OutTangent [2]float64",
+      "rw": "read-only"
+    },
     "Property": {
       "kind": "type",
       "file": "property.md",

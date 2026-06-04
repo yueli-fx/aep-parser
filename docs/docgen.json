@@ -18,6 +18,12 @@
       "out": "footage.md",
       "roots": ["Footage"],
       "head": "_includes/footage.head.md"
+    },
+    {
+      "out": "mask.md",
+      "roots": ["Mask", "MaskVertex", "MaskPathKeyframe", "MaskMode", "MaskMotionBlurMode"],
+      "head": "_includes/mask.head.md",
+      "tail": "_includes/mask.tail.md"
     }
   ]
 }
