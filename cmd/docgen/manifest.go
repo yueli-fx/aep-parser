@@ -17,6 +17,7 @@ type manifest struct {
 type fileManifest struct {
 	Out   string   `json:"out"`
 	Roots []string `json:"roots"`
+	Funcs []string `json:"funcs"` // 可选：渲进 "## Functions" 的包级函数名
 	Head  string   `json:"head"`
 	Tail  string   `json:"tail"`
 }

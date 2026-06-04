@@ -56,6 +56,37 @@ func loadPackage(dir string) (*loadedPackage, error) {
 	return nil, fmt.Errorf("no buildable package in %s", dir)
 }
 
+// extractPackageFuncs 抽取 names 指定的包级函数（非方法）为 symbol（按 names 顺序）。
+// 用 RawFuncDocs 取注释（doc.NewFromFiles 会清空 Decl.Doc）。未找到的名字报错（防 manifest 拼写）。
+func extractPackageFuncs(lp *loadedPackage, names []string) ([]symbol, error) {
+	byName := map[string]*doc.Func{}
+	for _, fn := range lp.Doc.Funcs {
+		byName[fn.Name] = fn
+	}
+	// go/doc files a constructor-shaped func (NewT returning *T) under that
+	// type's Funcs rather than the package's, so scan both.
+	for _, ty := range lp.Doc.Types {
+		for _, fn := range ty.Funcs {
+			byName[fn.Name] = fn
+		}
+	}
+	out := make([]symbol, 0, len(names))
+	for _, n := range names {
+		fn := byName[n]
+		if fn == nil {
+			return nil, fmt.Errorf("package func %q not found", n)
+		}
+		rawDoc := lp.RawFuncDocs[fn.Decl.Pos()]
+		out = append(out, symbol{
+			name:      n,
+			kind:      kindMethod,
+			doc:       directiveStrippedText(rawDoc),
+			signature: normalizeSignature(lp.Fset, fn.Decl),
+		})
+	}
+	return out, nil
+}
+
 // findType 在 []*docType 中按名查找（生产 + 测试共用）。
 func findType(ts []*docType, name string) *docType {
 	for _, t := range ts {

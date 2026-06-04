@@ -37,6 +37,26 @@ func renderType(t *docType) string {
 	return b.String()
 }
 
+// renderFuncs 渲一个 "## Functions" 段（包级函数：签名 + prose + 可选 Example）。
+func renderFuncs(funcs []symbol) string {
+	var b strings.Builder
+	b.WriteString("## Functions\n")
+	for _, f := range funcs {
+		fmt.Fprintf(&b, "\n### %s\n\n```go\n%s\n```\n", f.name, f.signature)
+		if p := renderProse(f.doc); p != "" {
+			fmt.Fprintf(&b, "\n%s\n", p)
+		}
+		for _, ex := range f.examples {
+			label := "Example"
+			if ex.suffix != "" {
+				label = "Example (" + ex.suffix + ")"
+			}
+			fmt.Fprintf(&b, "\n**%s:**\n\n```go\n%s\n```\n", label, ex.code)
+		}
+	}
+	return b.String()
+}
+
 func renderSymbol(b *strings.Builder, typeName string, s symbol) {
 	fmt.Fprintf(b, "\n### %s.%s\n\n", typeName, s.name)
 	if s.kind == kindField {

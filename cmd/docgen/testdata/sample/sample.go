@@ -35,6 +35,9 @@ func (w *Widget) Size() int { return len(w.Tags) }
 //docgen:method
 func (w *Widget) Clone() *Widget { return &Widget{Name: w.Name} }
 
+// NewWidget 构造一个 Widget。包级构造函数（演示 package-level func 渲染）。
+func NewWidget(name string) *Widget { return &Widget{Name: name} }
+
 // Mode 是 widget 模式。
 type Mode int
 

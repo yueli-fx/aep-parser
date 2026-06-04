@@ -73,6 +73,14 @@ func generateFile(m *manifest, fm fileManifest) (string, error) {
 		b.WriteString("\n")
 		b.WriteString(renderType(dt))
 	}
+	if len(fm.Funcs) > 0 {
+		funcs, err := extractPackageFuncs(lp, fm.Funcs)
+		if err != nil {
+			return "", err
+		}
+		b.WriteString("\n")
+		b.WriteString(renderFuncs(funcs))
+	}
 	if fm.Tail != "" {
 		tl, err := os.ReadFile(m.resolve(fm.Tail))
 		if err != nil {

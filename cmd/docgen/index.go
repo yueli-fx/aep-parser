@@ -59,6 +59,21 @@ func buildIndex(m *manifest) (string, error) {
 				idx.Symbols[dt.name+"."+s.name] = symbolEntry(fm.Out, dt.name, s)
 			}
 		}
+		if len(fm.Funcs) > 0 {
+			funcs, err := extractPackageFuncs(lp, fm.Funcs)
+			if err != nil {
+				return "", err
+			}
+			for _, f := range funcs {
+				idx.Symbols[f.name] = indexEntry{
+					Kind:      "func",
+					File:      fm.Out,
+					Anchor:    "#" + anchorFor(f.name),
+					Signature: f.signature,
+					Summary:   summaryOf(f.doc),
+				}
+			}
+		}
 	}
 	b, err := json.MarshalIndent(idx, "", "  ")
 	if err != nil {
