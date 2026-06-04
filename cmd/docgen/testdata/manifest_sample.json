@@ -1,0 +1,6 @@
+{
+  "pkg": "./sample",
+  "files": [
+    { "out": "out/sample_file.md", "roots": ["Widget", "Mode"] }
+  ]
+}
