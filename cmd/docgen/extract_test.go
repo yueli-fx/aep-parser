@@ -70,3 +70,34 @@ func fieldNames(t *docType) []string {
 	}
 	return out
 }
+
+func TestExtractMethods_Classification(t *testing.T) {
+	lp, _ := loadPackage("./testdata/sample")
+	types := withMethods(extractTypes(lp), lp)
+	w := findType(types, "Widget")
+
+	// Name 字段因 SetName 存在 → RW。
+	if n := findSym(w.attributes, "Name"); n == nil || !n.readWrite {
+		t.Fatalf("Name should be RW: %+v", n)
+	}
+	// Tags 无 setter → R。
+	if tg := findSym(w.attributes, "Tags"); tg == nil || tg.readWrite {
+		t.Fatalf("Tags should be R: %+v", tg)
+	}
+	// Size 无参单返回非 Set → getter(Attributes,R)。
+	if s := findSym(w.attributes, "Size"); s == nil || s.kind != kindGetter {
+		t.Fatalf("Size should be getter: %+v", s)
+	}
+	// SetName → 动作方法，签名规范化单行。
+	sn := findSym(w.methods, "SetName")
+	if sn == nil || sn.signature != "func (w *Widget) SetName(name string) error" {
+		t.Fatalf("SetName sig wrong: %+v", sn)
+	}
+	// Clone 本是 getter-like，但 //docgen:method 强制进 Methods。
+	if c := findSym(w.methods, "Clone"); c == nil {
+		t.Fatal("Clone should be forced into methods by directive")
+	}
+	if c := findSym(w.attributes, "Clone"); c != nil {
+		t.Fatal("Clone must NOT be an attribute")
+	}
+}

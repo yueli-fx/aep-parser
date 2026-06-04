@@ -20,8 +20,9 @@ type symbol struct {
 	fieldDecl string // "Name string"（字段）；其它为 ""
 	doc       string // directive 已剥离的 prose
 	jsonName  string // struct tag json 名；无则 ""
-	readWrite bool   // Attributes 专用：RW=true / R=false
-	examples  []example
+	readWrite     bool // Attributes 专用：RW=true / R=false
+	fieldRWForced bool // 字段 R/RW 被 //docgen:rw|ro 显式锁定
+	examples      []example
 }
 
 type constBlock struct {

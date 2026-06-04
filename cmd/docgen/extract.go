@@ -12,10 +12,13 @@ import (
 )
 
 // loadedPackage 捆绑 go/doc 视图 + 共享 fset（签名打印 / 注释定位都要 fset）。
+// RawFuncDocs：go/doc 处理前从原始 AST 抓取的函数注释（key = FuncDecl.Pos()），
+// 因 doc.NewFromFiles 会清空 Decl.Doc，directive 扫描须用此副本。
 type loadedPackage struct {
-	Doc  *doc.Package
-	Fset *token.FileSet
-	Pkg  *ast.Package
+	Doc          *doc.Package
+	Fset         *token.FileSet
+	Pkg          *ast.Package
+	RawFuncDocs  map[token.Pos]*ast.CommentGroup
 }
 
 // loadPackage 解析 dir 下的 Go 包（含 _test.go，便于关联 Example），
@@ -35,11 +38,21 @@ func loadPackage(dir string) (*loadedPackage, error) {
 		for _, f := range astPkg.Files {
 			files = append(files, f)
 		}
+		// 捕获原始函数注释（go/doc.NewFromFiles 会清空 Decl.Doc）。
+		rawDocs := map[token.Pos]*ast.CommentGroup{}
+		for _, f := range astPkg.Files {
+			ast.Inspect(f, func(n ast.Node) bool {
+				if fd, ok := n.(*ast.FuncDecl); ok && fd.Doc != nil {
+					rawDocs[fd.Pos()] = fd.Doc
+				}
+				return true
+			})
+		}
 		dpkg, err := doc.NewFromFiles(fset, files, "github.com/example/aep-parser/"+dir, doc.AllDecls)
 		if err != nil {
 			return nil, fmt.Errorf("doc.NewFromFiles: %w", err)
 		}
-		return &loadedPackage{Doc: dpkg, Fset: fset, Pkg: astPkg}, nil
+		return &loadedPackage{Doc: dpkg, Fset: fset, Pkg: astPkg, RawFuncDocs: rawDocs}, nil
 	}
 	return nil, fmt.Errorf("no buildable package in %s", dir)
 }
@@ -78,13 +91,20 @@ func extractFields(lp *loadedPackage, ty *doc.Type) []symbol {
 				if !nm.IsExported() {
 					continue
 				}
-				out = append(out, symbol{
+				sym := symbol{
 					name:      nm.Name,
 					kind:      kindField,
 					fieldDecl: nm.Name + " " + printNode(lp.Fset, f.Type),
 					doc:       directiveStrippedText(f.Doc),
 					jsonName:  jsonTag(f.Tag),
-				})
+				}
+				switch directiveOf(f.Doc) {
+				case "rw":
+					sym.fieldRWForced, sym.readWrite = true, true
+				case "ro":
+					sym.fieldRWForced, sym.readWrite = true, false
+				}
+				out = append(out, sym)
 			}
 		}
 	}
@@ -133,4 +153,98 @@ func reflectStructTag(raw string) map[string]string {
 		}
 	}
 	return out
+}
+
+// withMethods 给已抽取的 types 填 methods/getters，并据 setter 存在性定字段 R/RW。
+func withMethods(types []*docType, lp *loadedPackage) []*docType {
+	byName := map[string]*docType{}
+	for _, t := range types {
+		byName[t.name] = t
+	}
+	for _, ty := range lp.Doc.Types {
+		dt := byName[ty.Name]
+		if dt == nil {
+			continue
+		}
+		setterTargets := map[string]bool{} // "Name" ← SetName
+		for _, fn := range ty.Methods {
+			if t := strings.TrimPrefix(fn.Name, "Set"); t != fn.Name && t != "" {
+				setterTargets[t] = true
+			}
+		}
+		// 字段 R/RW：默认按 setter 存在；被 directive 锁定者跳过。
+		for i := range dt.attributes {
+			a := &dt.attributes[i]
+			if a.kind != kindField || a.fieldRWForced {
+				continue
+			}
+			a.readWrite = setterTargets[a.name]
+		}
+		// 方法分类。
+		for _, fn := range ty.Methods {
+			if !ast.IsExported(fn.Name) {
+				continue
+			}
+			rawDoc := lp.RawFuncDocs[fn.Decl.Pos()]
+			sym := symbol{
+				name:      fn.Name,
+				doc:       directiveStrippedText(rawDoc),
+				signature: normalizeSignature(lp.Fset, fn.Decl),
+			}
+			switch classifyMethod(fn, rawDoc) {
+			case kindGetter:
+				sym.kind = kindGetter
+				sym.readWrite = false
+				dt.attributes = append(dt.attributes, sym)
+			default:
+				sym.kind = kindMethod
+				dt.methods = append(dt.methods, sym)
+			}
+		}
+	}
+	return types
+}
+
+// classifyMethod：directive 优先，否则启发式。rawDoc 是 go/doc 处理前的原始注释。
+func classifyMethod(fn *doc.Func, rawDoc *ast.CommentGroup) symKind {
+	switch directiveOf(rawDoc) {
+	case "method":
+		return kindMethod
+	case "attribute":
+		return kindGetter
+	}
+	if strings.HasPrefix(fn.Name, "Set") {
+		return kindMethod
+	}
+	ft := fn.Decl.Type
+	noParams := ft.Params == nil || len(ft.Params.List) == 0
+	oneResult := ft.Results != nil && len(ft.Results.List) == 1
+	if noParams && oneResult {
+		return kindGetter
+	}
+	return kindMethod
+}
+
+// directiveOf 扫注释组找首个 //docgen:<x>，返回 <x>（无则 ""）。
+func directiveOf(g *ast.CommentGroup) string {
+	if g == nil {
+		return ""
+	}
+	for _, c := range g.List {
+		line := strings.TrimSpace(strings.TrimPrefix(c.Text, "//"))
+		if rest := strings.TrimPrefix(line, "docgen:"); rest != line {
+			return strings.TrimSpace(rest)
+		}
+	}
+	return ""
+}
+
+// normalizeSignature 去函数体 + 折叠空白为单行。
+func normalizeSignature(fset *token.FileSet, decl *ast.FuncDecl) string {
+	cp := *decl
+	cp.Body = nil
+	cp.Doc = nil
+	s := printNode(fset, &cp)
+	s = strings.Join(strings.Fields(s), " ")
+	return s
 }
