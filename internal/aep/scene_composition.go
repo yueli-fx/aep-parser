@@ -17,13 +17,13 @@ package aep
 // For older 29.97-fps comps this is 8000; for new 30-fps comps it's
 // 30720; etc.
 type Composition struct {
-	ID        uint32
-	Name      string
-	Width     uint16
-	Height    uint16
+	ID        uint32  // AE internal item ID
+	Name      string  // composition display name (writable via SetName)
+	Width     uint16  // canvas width in pixels (writable via SetSize)
+	Height    uint16  // canvas height in pixels (writable via SetSize)
 	FrameRate float64 // frames per second
 	Duration  float64 // seconds
-	TickRate  float64 // keyframe/marker ticks per second
+	TickRate  float64 // keyframe/marker ticks per second (per-composition, not a global 8000)
 
 	// PixelAspect is the comp's pixel aspect ratio (1.0 = square, 2.0
 	// = anamorphic, 0.91 = NTSC D1, etc.). Decoded from cdta @0x90 /

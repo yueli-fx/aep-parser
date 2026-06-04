@@ -1,6 +1,704 @@
 {
   "go_version": "go1.25.1",
   "symbols": {
+    "Composition": {
+      "kind": "type",
+      "file": "composition.md",
+      "anchor": "#composition-object",
+      "summary": "Composition represents an After Effects composition."
+    },
+    "Composition.AVLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionavlayers",
+      "signature": "func (c *Composition) AVLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "AVLayers returns all layers backed by an audio/video source — pre-comps, footage files, solids, placeholders. Excludes camera / light / null / text / shape / adjustment-only layers (which carry no AVItem source)."
+    },
+    "Composition.ActiveCamera": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionactivecamera",
+      "signature": "func (c *Composition) ActiveCamera() *Layer",
+      "rw": "read-only",
+      "summary": "ActiveCamera returns the topmost enabled (Visible == true) camera layer in the comp, or nil when no enabled camera is present. AE uses this layer's transform + camera-options for the comp's render. Multiple cameras may coexist; AE picks the topmost enabled one."
+    },
+    "Composition.AddMarker": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionaddmarker",
+      "signature": "func (c *Composition) AddMarker(seconds float64) (*Marker, error)",
+      "summary": "AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields."
+    },
+    "Composition.AdjustmentLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionadjustmentlayers",
+      "signature": "func (c *Composition) AdjustmentLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "AdjustmentLayers returns all adjustment layers (IsAdjust flag set or Type classified as adjustment)."
+    },
+    "Composition.BGColor": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionbgcolor",
+      "signature": "BGColor [3]uint8",
+      "rw": "read-write",
+      "summary": "BGColor is the composition background color (R, G, B), 0..255 per channel. Decoded from cdta @0x34/0x35/0x36 (3 × uint8). Defaults to {0,0,0} (AE's default black)."
+    },
+    "Composition.CameraLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositioncameralayers",
+      "signature": "func (c *Composition) CameraLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "CameraLayers returns all camera layers in the composition."
+    },
+    "Composition.CdtaRawBytes": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositioncdtarawbytes",
+      "signature": "func (c *Composition) CdtaRawBytes() []byte",
+      "rw": "read-only",
+      "summary": "CdtaRawBytes returns the comp's cdta chunk Data slice, or nil if the comp has no cdta. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate."
+    },
+    "Composition.Comment": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositioncomment",
+      "signature": "Comment string",
+      "rw": "read-write",
+      "summary": "Item-level metadata shared with Footage / Folder. Populated by parseItem from the surrounding Item LIST (cmta child + idta byte)."
+    },
+    "Composition.CompositionLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositioncompositionlayers",
+      "signature": "func (c *Composition) CompositionLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "CompositionLayers returns layers whose source is another composition (pre-comp layers)."
+    },
+    "Composition.DeleteLayer": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositiondeletelayer",
+      "signature": "func (c *Composition) DeleteLayer(index int) error",
+      "summary": "DeleteLayer removes the layer at the given 0-based index in c.Layers. Returns nil on success, or an error if a refuse-case triggers (index out of range / comp lacks itemList back-ref / target is the last layer / target is not an AV layer / backref corruption)."
+    },
+    "Composition.DisplayStartFrame": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositiondisplaystartframe",
+      "signature": "func (c *Composition) DisplayStartFrame() int",
+      "rw": "read-only",
+      "summary": "DisplayStartFrame returns the comp's display-start frame (DisplayStartTime × FrameRate, rounded). Setter exists already as SetDisplayStartFrame."
+    },
+    "Composition.DisplayStartTime": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositiondisplaystarttime",
+      "signature": "DisplayStartTime float64",
+      "rw": "read-write",
+      "summary": "DisplayStartTime is the comp's display-time origin in seconds (AE scripting's CompItem.displayStartTime / displayStartFrame). Decoded from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE writes both 0 when displayStart is 0; non-zero pair encodes start-time in seconds. RE fixture: re_wave2_ae24.aep (RE_CDTA_DSF_120)."
+    },
+    "Composition.DuplicateLayer": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionduplicatelayer",
+      "signature": "func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error)",
+      "summary": "DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). Returns the cloned *Layer on success, or an error if a refuse-case triggers."
+    },
+    "Composition.Duration": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionduration",
+      "signature": "Duration float64",
+      "rw": "read-write",
+      "summary": "seconds"
+    },
+    "Composition.EssentialGraphicsControllers": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionessentialgraphicscontrollers",
+      "signature": "EssentialGraphicsControllers []*EssentialGraphicsController",
+      "rw": "read-only",
+      "summary": "EssentialGraphicsControllers holds the comp's Essential Graphics panel controllers (exposed properties / .mogrt controls), in panel order. Empty when the comp has no EG panel."
+    },
+    "Composition.FileLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionfilelayers",
+      "signature": "func (c *Composition) FileLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "FileLayers returns layers whose source is a file-backed footage item (not a solid and not a placeholder)."
+    },
+    "Composition.FootageLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionfootagelayers",
+      "signature": "func (c *Composition) FootageLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "FootageLayers returns layers whose source is a footage item (file / solid / placeholder)."
+    },
+    "Composition.FrameDuration": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionframeduration",
+      "signature": "func (c *Composition) FrameDuration() int",
+      "rw": "read-only",
+      "summary": "FrameDuration returns the comp's total Duration as a frame count."
+    },
+    "Composition.FrameRate": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionframerate",
+      "signature": "FrameRate float64",
+      "rw": "read-write",
+      "summary": "frames per second"
+    },
+    "Composition.GuideLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionguidelayers",
+      "signature": "func (c *Composition) GuideLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "GuideLayers returns all layers marked as guide (IsGuide flag set — invisible at render but visible in the timeline)."
+    },
+    "Composition.Guides": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionguides",
+      "signature": "Guides []*Guide",
+      "rw": "read-only",
+      "summary": "Guides holds the composition's ruler guides (AE's drag-from-ruler alignment lines; UI-only, no render effect). Decoded from the comp's Item-level LIST:Gide. See scene_guide.go."
+    },
+    "Composition.HasAudio": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionhasaudio",
+      "signature": "func (c *Composition) HasAudio() bool",
+      "rw": "read-only",
+      "summary": "HasAudio reports whether any layer in the composition has its audio switch enabled (ldta @0x27 bit 1). It does NOT verify the layer's source actually carries an audio track — only that AE would attempt audio playback for it."
+    },
+    "Composition.Height": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionheight",
+      "signature": "Height uint16",
+      "rw": "read-only",
+      "summary": "canvas height in pixels (writable via SetSize)"
+    },
+    "Composition.ID": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionid",
+      "signature": "ID uint32",
+      "rw": "read-only",
+      "summary": "AE internal item ID"
+    },
+    "Composition.InsertLayer": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositioninsertlayer",
+      "signature": "func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error)",
+      "summary": "InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). Returns the inserted clone *Layer on success. src may live in a sibling comp of the same Project, or in a different Project (cross-Project)."
+    },
+    "Composition.ItemID": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionitemid",
+      "signature": "func (c *Composition) ItemID() uint32",
+      "rw": "read-only",
+      "summary": "ItemID returns the composition's item id (mirrors the ID field). Provided so *Composition satisfies AVItem."
+    },
+    "Composition.ItemName": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionitemname",
+      "signature": "func (c *Composition) ItemName() string",
+      "rw": "read-only",
+      "summary": "ItemName returns the composition's name. Provided so *Composition satisfies AVItem."
+    },
+    "Composition.Label": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionlabel",
+      "signature": "Label uint8",
+      "rw": "read-write",
+      "summary": "Item.label — project-panel color index 0..16 (idta @0x3A)"
+    },
+    "Composition.LayerByID": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionlayerbyid",
+      "signature": "func (c *Composition) LayerByID(id uint32) *Layer",
+      "summary": "LayerByID returns the first layer in this composition whose ID matches id, or nil if no such layer exists. ID 0 is treated as no-match (it's the sentinel used by Layer.ParentID to mean \"no parent\"); real AE projects start layer IDs at 1."
+    },
+    "Composition.LayerByName": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionlayerbyname",
+      "signature": "func (c *Composition) LayerByName(name string) *Layer",
+      "example": true,
+      "summary": "LayerByName returns the first layer in this composition whose Name matches the given string, or nil if none does. Layer names aren't guaranteed unique within a comp; use LayerByID for precise identity."
+    },
+    "Composition.Layers": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionlayers",
+      "signature": "Layers []*Layer",
+      "rw": "read-only"
+    },
+    "Composition.LightLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionlightlayers",
+      "signature": "func (c *Composition) LightLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "LightLayers returns all light layers in the composition."
+    },
+    "Composition.Markers": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionmarkers",
+      "signature": "Markers []*Marker",
+      "rw": "read-only",
+      "summary": "Markers holds composition-level markers (AE's timeline-top chapter markers, distinct from per-layer markers). Stored in the AEP as a pseudo-layer (`LIST SecL` named \"Markers\") carrying an \"ADBE Marker\" property — decoded with the same machinery as layer markers."
+    },
+    "Composition.MotionBlurAdaptiveSampleLimit": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionmotionbluradaptivesamplelimit",
+      "signature": "MotionBlurAdaptiveSampleLimit int32",
+      "rw": "read-write",
+      "summary": "MotionBlurAdaptiveSampleLimit / MotionBlurSamplesPerFrame are AE's motion-blur quality knobs (Composition Settings → Advanced). Decoded from cdta @0xC4 / @0xC8 as int32 BE. AE clamps these to positive integers in the UI (defaults: 128 and 16)."
+    },
+    "Composition.MotionBlurSamplesPerFrame": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionmotionblursamplesperframe",
+      "signature": "MotionBlurSamplesPerFrame int32",
+      "rw": "read-write"
+    },
+    "Composition.MotionGraphicsTemplateControllerCount": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionmotiongraphicstemplatecontrollercount",
+      "signature": "func (c *Composition) MotionGraphicsTemplateControllerCount() int",
+      "rw": "read-only",
+      "summary": "MotionGraphicsTemplateControllerCount returns the number of Essential Graphics controllers — mirrors AE's CompItem.motionGraphicsTemplateControllerCount."
+    },
+    "Composition.MotionGraphicsTemplateControllerNames": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionmotiongraphicstemplatecontrollernames",
+      "signature": "func (c *Composition) MotionGraphicsTemplateControllerNames() []string",
+      "rw": "read-only",
+      "summary": "MotionGraphicsTemplateControllerNames returns the controller display names in panel order — mirrors AE's CompItem.motionGraphicsTemplateControllerName(i)."
+    },
+    "Composition.MotionGraphicsTemplateName": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionmotiongraphicstemplatename",
+      "signature": "MotionGraphicsTemplateName string",
+      "rw": "read-only",
+      "summary": "MotionGraphicsTemplateName is the Essential Graphics / .mogrt template name (AE default \"Untitled\" when the comp has no EG panel). Decoded from the comp's Item-level LIST:CIF3. See scene_essential_graphics.go."
+    },
+    "Composition.MoveLayer": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionmovelayer",
+      "signature": "func (c *Composition) MoveLayer(from, to int) error",
+      "summary": "MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). The source layer's entire chunk block — Layr + Ewst + leaf followers (adaptive scan to next LIST/EOF, same machinery as DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the target slot. After the call, c.Layers[to] == the moved layer, and every layer's Layer.Index field is refreshed to match its new slice position."
+    },
+    "Composition.Name": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionname",
+      "signature": "Name string",
+      "rw": "read-write",
+      "summary": "composition display name (writable via SetName)"
+    },
+    "Composition.NewShapeLayer": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionnewshapelayer",
+      "signature": "func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error)",
+      "summary": "NewShapeLayer adds a new empty ShapeLayer to the composition."
+    },
+    "Composition.NullLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionnulllayers",
+      "signature": "func (c *Composition) NullLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "NullLayers returns all null-object layers (IsNull flag set)."
+    },
+    "Composition.NumLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionnumlayers",
+      "signature": "func (c *Composition) NumLayers() int",
+      "rw": "read-only",
+      "summary": "NumLayers returns the number of layers in the composition. Equivalent to len(c.Layers); provided for py-aep API parity."
+    },
+    "Composition.PixelAspect": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionpixelaspect",
+      "signature": "PixelAspect float64",
+      "rw": "read-write",
+      "summary": "PixelAspect is the comp's pixel aspect ratio (1.0 = square, 2.0 = anamorphic, 0.91 = NTSC D1, etc.). Decoded from cdta @0x90 / @0x94 as an integer numerator/denominator pair."
+    },
+    "Composition.PlaceholderLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionplaceholderlayers",
+      "signature": "func (c *Composition) PlaceholderLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "PlaceholderLayers returns layers whose source is a placeholder footage item (AE's \"Missing Footage\" placeholder, opti tag = \"Plac\")."
+    },
+    "Composition.PrdaRawBytes": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionprdarawbytes",
+      "signature": "func (c *Composition) PrdaRawBytes() []byte",
+      "rw": "read-only",
+      "summary": "PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific options), or nil if the comp has no PRin LIST. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate."
+    },
+    "Composition.Renderer": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionrenderer",
+      "signature": "Renderer string",
+      "rw": "read-write",
+      "summary": "Renderer is the comp's 3D rendering engine (AE Scripting's CompItem.renderer). Stored as an internal match-name string in the `prin` chunk of the comp's `PRin` LIST sibling. Examples:"
+    },
+    "Composition.ResolutionFactor": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionresolutionfactor",
+      "signature": "ResolutionFactor [2]uint16",
+      "rw": "read-write",
+      "summary": "ResolutionFactor is the comp's preview-resolution downsample, X and Y. AE Scripting's CompItem.resolutionFactor: [1,1]=Full, [2,2]=Half, [3,3]=Third, [4,4]=Quarter, custom pairs allowed. Decoded from cdta @0x00 / @0x02 (two uint16 BE). Default [1,1]."
+    },
+    "Composition.SetBGColor": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetbgcolor",
+      "signature": "func (c *Composition) SetBGColor(rgb [3]uint8) error",
+      "summary": "SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. length-preserving (3 bytes)."
+    },
+    "Composition.SetComment": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetcomment",
+      "signature": "func (c *Composition) SetComment(comment string) error",
+      "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). length-variable: the cmta chunk's Data is replaced wholesale; WriteAEP recomputes the parent Item LIST size. When no cmta chunk exists yet, a fresh one is inserted into the Item LIST."
+    },
+    "Composition.SetCompMotionBlur": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetcompmotionblur",
+      "signature": "func (c *Composition) SetCompMotionBlur(v bool) error",
+      "summary": "SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B bit 3). Note: this is independent of per-layer `Layer.MotionBlur` — the layer renders motion blur only when both switches are on."
+    },
+    "Composition.SetDisplayStartFrame": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetdisplaystartframe",
+      "signature": "func (c *Composition) SetDisplayStartFrame(frame int) error",
+      "summary": "SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStartTime. Computes seconds = frame / FrameRate and writes the cdta pair. Errors when FrameRate \u003c= 0."
+    },
+    "Composition.SetDisplayStartTime": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetdisplaystarttime",
+      "signature": "func (c *Composition) SetDisplayStartTime(seconds float64) error",
+      "summary": "SetDisplayStartTime rewrites the comp's display-start-time origin (seconds) at cdta @0xA4 (dividend) / @0xA8 (divisor). length- preserving (8 bytes). Pass 0 to clear back to default."
+    },
+    "Composition.SetDraft3D": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetdraft3d",
+      "signature": "func (c *Composition) SetDraft3D(v bool) error",
+      "summary": "SetDraft3D toggles the comp's \"Draft 3D\" preview switch (cdta @0x8A bit 0). Disables shadows / motion blur / DOF in viewport for speed."
+    },
+    "Composition.SetDuration": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetduration",
+      "signature": "func (c *Composition) SetDuration(seconds float64) error",
+      "summary": "SetDuration writes a new composition duration (seconds) to cdta @0xB0 as a uint32 frame count (= round(seconds × FrameRate)). Requires `FrameRate \u003e 0`. length-preserving (4 bytes)."
+    },
+    "Composition.SetFrameBlending": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetframeblending",
+      "signature": "func (c *Composition) SetFrameBlending(v bool) error",
+      "summary": "SetFrameBlending toggles the comp-level frame-blend master switch (cdta @0x8B bit 4). Layers also need their own FrameBlendEnabled on to render with blending."
+    },
+    "Composition.SetFrameRate": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetframerate",
+      "signature": "func (c *Composition) SetFrameRate(fps float64) error",
+      "summary": "SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F. AE splits fps into a uint16 whole part and a uint16 fractional part (numerator over 65536); we use the same encoding so partial frame rates like 29.97 round-trip exactly. length-preserving (4 bytes)."
+    },
+    "Composition.SetHideShyLayers": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsethideshylayers",
+      "signature": "func (c *Composition) SetHideShyLayers(v bool) error",
+      "summary": "SetHideShyLayers toggles \"Hide Shy Layers\" on the comp (cdta @0x8B bit 0)."
+    },
+    "Composition.SetLabel": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetlabel",
+      "signature": "func (c *Composition) SetLabel(index uint8) error",
+      "summary": "SetLabel writes the project-panel color label index (0..16) for the composition (Item-level). Indices outside 0..16 are written verbatim (AE shows index 0 for unknown values). length-preserving (1 byte)."
+    },
+    "Composition.SetMotionBlurAdaptiveSampleLimit": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetmotionbluradaptivesamplelimit",
+      "signature": "func (c *Composition) SetMotionBlurAdaptiveSampleLimit(limit int32) error",
+      "summary": "SetMotionBlurAdaptiveSampleLimit writes the motion-blur adaptive sample limit (int32 BE, AE default 128) to cdta @0xC4. length-preserving (4 bytes)."
+    },
+    "Composition.SetMotionBlurSamplesPerFrame": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetmotionblursamplesperframe",
+      "signature": "func (c *Composition) SetMotionBlurSamplesPerFrame(n int32) error",
+      "summary": "SetMotionBlurSamplesPerFrame writes the per-frame motion-blur sample count (int32 BE, AE default 16) to cdta @0xC8. length-preserving (4 bytes)."
+    },
+    "Composition.SetName": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetname",
+      "signature": "func (c *Composition) SetName(newName string) error",
+      "summary": "SetName rewrites the composition's display name (length-variable Utf8 chunk replacement; WriteAEP recomputes parent Item LIST size). Returns an error if the comp has no Utf8 name chunk (rare)."
+    },
+    "Composition.SetPixelAspect": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetpixelaspect",
+      "signature": "func (c *Composition) SetPixelAspect(par float64) error",
+      "summary": "SetPixelAspect writes the pixel aspect ratio (PAR) to cdta as a numerator/denominator pair at @0x90 / @0x94 (uint32 BE each)."
+    },
+    "Composition.SetPreserveNestedFrameRate": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetpreservenestedframerate",
+      "signature": "func (c *Composition) SetPreserveNestedFrameRate(v bool) error",
+      "summary": "SetPreserveNestedFrameRate toggles \"Preserve frame rate when nested or in render queue\" on the comp (cdta @0x8B bit 5)."
+    },
+    "Composition.SetPreserveNestedResolution": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetpreservenestedresolution",
+      "signature": "func (c *Composition) SetPreserveNestedResolution(v bool) error",
+      "summary": "SetPreserveNestedResolution toggles \"Preserve resolution when nested\" (cdta @0x8B bit 7)."
+    },
+    "Composition.SetRenderer": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetrenderer",
+      "signature": "func (c *Composition) SetRenderer(name string) error",
+      "summary": "SetRenderer switches the composition's 3D rendering engine. The name may be either a binary prin match_name (\"ADBE Escher\" / \"ADBE Calder\" / \"ADBE Ernst\" / \"ADBE Picasso\") or an ExtendScript module name (\"ADBE Advanced 3d\" → \"ADBE Escher\"); it is normalized to the binary name. The binary match_name + display name are rewritten in the prin chunk (length-preserving) and the prda chunk is replaced with the engine's default options (structural). Returns an error for an unknown renderer, a comp built outside the parser (no prin/prda back-ref), a comp whose prin is not the expected 104 bytes, or if the mutation surfaces a parser warning (rolled back)."
+    },
+    "Composition.SetResolutionFactor": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetresolutionfactor",
+      "signature": "func (c *Composition) SetResolutionFactor(x, y uint16) error",
+      "example": true,
+      "summary": "SetResolutionFactor writes the comp's preview-resolution downsample factors (X, Y) to cdta @0x00 / @0x02 (two uint16 BE). Mirrors AE Scripting's CompItem.resolutionFactor. [1,1] = Full, [2,2] = Half, [4,4] = Quarter; custom non-square pairs allowed. Both factors must be ≥ 1 (AE clamps; we refuse 0 to surface caller bugs). length-preserving (4 bytes)."
+    },
+    "Composition.SetShutterAngle": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetshutterangle",
+      "signature": "func (c *Composition) SetShutterAngle(degrees uint16) error",
+      "summary": "SetShutterAngle writes the motion-blur shutter angle (uint16 BE, degrees, AE UI range 0..720, default 180) to cdta @0xAE. length-preserving (2 bytes)."
+    },
+    "Composition.SetShutterPhase": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetshutterphase",
+      "signature": "func (c *Composition) SetShutterPhase(phase int32) error",
+      "summary": "SetShutterPhase writes the motion-blur shutter phase (int32 BE) to cdta @0xB4. Unit is likely degrees (AE UI shows -90 / +90 / etc.) but not independently UI-verified — caller passes the raw int32 value. length-preserving (4 bytes)."
+    },
+    "Composition.SetSize": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetsize",
+      "signature": "func (c *Composition) SetSize(width, height uint16) error",
+      "summary": "SetSize writes a new canvas pixel size (width, height) to cdta @0x8C / @0x8E (uint16 BE pair). length-preserving (4 bytes). Does not touch pixel aspect ratio at @0x90/@0x94 — set that separately via SetPixelAspect."
+    },
+    "Composition.SetWorkArea": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetworkarea",
+      "signature": "func (c *Composition) SetWorkArea(startSeconds, endSeconds float64) error",
+      "example": true,
+      "summary": "SetWorkArea writes new work-area start/end times (seconds) to cdta @0x1C-0x2B. Both values are encoded as dividend/divisor pairs; we reuse the existing dividend divisor at @0x20 and @0x28 when non-zero (typically 600 — AE's standard work-area divisor) and pick 600 when the existing divisor is zero."
+    },
+    "Composition.SetWorkAreaDurationFrame": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetworkareadurationframe",
+      "signature": "func (c *Composition) SetWorkAreaDurationFrame(frame int) error",
+      "summary": "SetWorkAreaDurationFrame writes the work-area end so that end−start equals the given integer frame span, keeping start fixed."
+    },
+    "Composition.SetWorkAreaEndFrame": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetworkareaendframe",
+      "signature": "func (c *Composition) SetWorkAreaEndFrame(frame int) error",
+      "summary": "SetWorkAreaEndFrame writes the work-area end from an integer frame."
+    },
+    "Composition.SetWorkAreaStartFrame": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#compositionsetworkareastartframe",
+      "signature": "func (c *Composition) SetWorkAreaStartFrame(frame int) error",
+      "summary": "SetWorkAreaStartFrame writes the work-area start from an integer frame, preserving the existing end. Delegates to SetWorkArea."
+    },
+    "Composition.ShapeLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionshapelayers",
+      "signature": "func (c *Composition) ShapeLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "ShapeLayers returns all shape layers in the composition."
+    },
+    "Composition.ShutterAngle": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionshutterangle",
+      "signature": "ShutterAngle uint16",
+      "rw": "read-write",
+      "summary": "ShutterAngle is the motion-blur shutter angle in degrees (AE UI range 0..720, default 180). Decoded from cdta @0xAE as uint16 BE."
+    },
+    "Composition.ShutterPhase": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionshutterphase",
+      "signature": "ShutterPhase int32",
+      "rw": "read-write",
+      "summary": "ShutterPhase is the motion-blur shutter phase offset. Decoded from cdta @0xB4 as int32 BE. Likely degrees in the AE UI's -360..+360 range (fixture value -90 plausibly matches AE's -90° UI display) but the exact unit is not independently UI-verified — surface as raw int32 and let callers interpret."
+    },
+    "Composition.SolidLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionsolidlayers",
+      "signature": "func (c *Composition) SolidLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "SolidLayers returns layers whose source is a solid footage item."
+    },
+    "Composition.SoloLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionsololayers",
+      "signature": "func (c *Composition) SoloLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "SoloLayers returns all layers with the Solo flag set."
+    },
+    "Composition.TextLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositiontextlayers",
+      "signature": "func (c *Composition) TextLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "TextLayers returns all text layers in the composition."
+    },
+    "Composition.ThreeDLayers": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionthreedlayers",
+      "signature": "func (c *Composition) ThreeDLayers() []*Layer",
+      "rw": "read-only",
+      "summary": "ThreeDLayers returns all layers with the 3D-layer flag enabled (transform interpreted in 3D space)."
+    },
+    "Composition.TickRate": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositiontickrate",
+      "signature": "TickRate float64",
+      "rw": "read-only",
+      "summary": "keyframe/marker ticks per second (per-composition, not a global 8000)"
+    },
+    "Composition.TimeScale": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositiontimescale",
+      "signature": "func (c *Composition) TimeScale() float64",
+      "rw": "read-only",
+      "summary": "TimeScale is the per-comp ticks-per-second base used for keyframe and marker times. Alias of TickRate, matching py-aep's `comp.time_scale` naming for API parity. See [Composition.TickRate] for the full RE notes on cdta @0x08 / @0xA8 decoding."
+    },
+    "Composition.Width": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionwidth",
+      "signature": "Width uint16",
+      "rw": "read-only",
+      "summary": "canvas width in pixels (writable via SetSize)"
+    },
+    "Composition.WorkAreaDurationFrame": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionworkareadurationframe",
+      "signature": "func (c *Composition) WorkAreaDurationFrame() int",
+      "rw": "read-only",
+      "summary": "WorkAreaDurationFrame returns the work-area span (end − start) in frames."
+    },
+    "Composition.WorkAreaEnd": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionworkareaend",
+      "signature": "WorkAreaEnd float64",
+      "rw": "read-only"
+    },
+    "Composition.WorkAreaEndFrame": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionworkareaendframe",
+      "signature": "func (c *Composition) WorkAreaEndFrame() int",
+      "rw": "read-only",
+      "summary": "WorkAreaEndFrame returns the comp's work-area end as a frame count."
+    },
+    "Composition.WorkAreaStart": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#compositionworkareastart",
+      "signature": "WorkAreaStart float64",
+      "rw": "read-only",
+      "summary": "WorkAreaStart / WorkAreaEnd are the render-queue partial range in seconds (AE's \"Work Area\" — N and B in the timeline). Decoded from cdta dividend/divisor pairs at @0x1C/0x20 (start) and @0x24/0x28 (end). When AE leaves the work area \"unset\", it writes 0xFFFFFFFF for the end dividend; we substitute Duration so callers always see the effective range."
+    },
+    "Composition.WorkAreaStartFrame": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#compositionworkareastartframe",
+      "signature": "func (c *Composition) WorkAreaStartFrame() int",
+      "rw": "read-only",
+      "summary": "WorkAreaStartFrame returns the comp's work-area start as a frame count."
+    },
+    "EGControllerType": {
+      "kind": "type",
+      "file": "composition.md",
+      "anchor": "#egcontrollertype-object",
+      "summary": "EGControllerType is an Essential Graphics controller's type code, as stored in its CTyp chunk. Values mirror py-aep's controller_type."
+    },
+    "EGControllerType.String": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#egcontrollertypestring",
+      "signature": "func (t EGControllerType) String() string",
+      "rw": "read-only",
+      "summary": "String renders the controller type as AE's panel label (or \"unknown\")."
+    },
     "Effect": {
       "kind": "type",
       "file": "effect.md",
@@ -31,6 +729,36 @@
       "rw": "read-only",
       "example": true,
       "summary": "effect knobs (Blurriness, Completion, …)"
+    },
+    "EssentialGraphicsController": {
+      "kind": "type",
+      "file": "composition.md",
+      "anchor": "#essentialgraphicscontroller-object",
+      "summary": "EssentialGraphicsController is one controller in the Essential Graphics panel — an exposed property / .mogrt control."
+    },
+    "EssentialGraphicsController.Name": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#essentialgraphicscontrollername",
+      "signature": "Name string",
+      "rw": "read-only",
+      "summary": "Name is the controller's display name (from its CpS2 localized string)."
+    },
+    "EssentialGraphicsController.Type": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#essentialgraphicscontrollertype",
+      "signature": "Type EGControllerType",
+      "rw": "read-only",
+      "summary": "Type is the controller kind (checkbox / slider / color / ...)."
+    },
+    "EssentialGraphicsController.UUID": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#essentialgraphicscontrolleruuid",
+      "signature": "UUID string",
+      "rw": "read-only",
+      "summary": "UUID is the controller's unique identifier (the CCtl's Utf8 child), used by AE to link the controller to its source property."
     },
     "Folder": {
       "kind": "type",
@@ -255,6 +983,56 @@
       "anchor": "#fromreader",
       "signature": "func FromReader(r io.ReadSeeker) (*Project, error)",
       "summary": "FromReader parses an .aep file from an io.ReadSeeker."
+    },
+    "Guide": {
+      "kind": "type",
+      "file": "composition.md",
+      "anchor": "#guide-object",
+      "summary": "Guide is one composition ruler guide."
+    },
+    "Guide.Orientation": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#guideorientation",
+      "signature": "Orientation GuideOrientation",
+      "rw": "read-write",
+      "summary": "Orientation is GuideHorizontal (2) or GuideVertical (1)."
+    },
+    "Guide.Position": {
+      "kind": "field",
+      "file": "composition.md",
+      "anchor": "#guideposition",
+      "signature": "Position float64",
+      "rw": "read-write",
+      "summary": "Position is the guide's offset in pixels — from the top edge for a horizontal guide, from the left edge for a vertical guide."
+    },
+    "Guide.SetOrientation": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#guidesetorientation",
+      "signature": "func (g *Guide) SetOrientation(o GuideOrientation)",
+      "summary": "SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical). No-op when the guide has no backing block or the orientation is unrecognized."
+    },
+    "Guide.SetPosition": {
+      "kind": "method",
+      "file": "composition.md",
+      "anchor": "#guidesetposition",
+      "signature": "func (g *Guide) SetPosition(px float64)",
+      "summary": "SetPosition sets the guide's pixel offset (\u003e= 0). No-op when the guide has no backing block (built outside the parser) or position is negative."
+    },
+    "GuideOrientation": {
+      "kind": "type",
+      "file": "composition.md",
+      "anchor": "#guideorientation-object",
+      "summary": "GuideOrientation is a guide's binary orientation code (as stored in ldat @0)."
+    },
+    "GuideOrientation.String": {
+      "kind": "getter",
+      "file": "composition.md",
+      "anchor": "#guideorientationstring",
+      "signature": "func (o GuideOrientation) String() string",
+      "rw": "read-only",
+      "summary": "String renders the orientation as \"horizontal\" / \"vertical\" (or the raw code)."
     },
     "InterpType": {
       "kind": "type",

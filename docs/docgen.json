@@ -36,6 +36,12 @@
       "roots": ["Project", "Folder"],
       "funcs": ["Open", "FromReader", "NewProject"],
       "head": "_includes/project.head.md"
+    },
+    {
+      "out": "composition.md",
+      "roots": ["Composition", "Guide", "GuideOrientation", "EssentialGraphicsController", "EGControllerType"],
+      "head": "_includes/composition.head.md",
+      "tail": "_includes/composition.tail.md"
     }
   ]
 }
