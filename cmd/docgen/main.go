@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run . -manifest ../../docs/docgen.json
+
 import (
 	"flag"
 	"fmt"

@@ -258,6 +258,24 @@ func (p *Property) PropertyDepth() int
 
 ---
 
+### Property.DimensionsSeparated
+
+```go
+func (p *Property) DimensionsSeparated() bool
+```
+
+属性是否处于 AE "Separate Dimensions" 分离态（Position 拆成独立的 X / Y(/ Z) 子属性）。从 tdsb byte 3（`_enable_flags`）bit 1 读取。写入用 [`SetDimensionsSeparated`](#propertysetdimensionsseparated)。
+
+配套只读判定（纯 match-name 推导）：
+
+```go
+func (p *Property) IsSeparationLeader() bool   // 是分离 leader（如 "ADBE Position"）
+func (p *Property) IsSeparationFollower() bool // 是某轴 follower（"ADBE Position_0/1/2"）
+func (p *Property) SeparationDimension() int   // follower 的轴：0=X / 1=Y / 2=Z；非 follower 返回 -1
+```
+
+---
+
 ## Methods
 
 ### Property.SetStaticValue
@@ -397,6 +415,41 @@ pos.SetExpression("")        // 清空
 #### Returns
 
 `error`；当 Property 在 parser 之外构造（无 owning tdbs）返回错误。
+
+---
+
+### Property.SetDimensionsSeparated
+
+```go
+func (p *Property) SetDimensionsSeparated(separated bool) error
+```
+
+#### Description
+
+切换 AE 的 "Separate Dimensions"。**结构性写**（改 chunk 树结构，非 length-preserving in-place），走 V2.1 atomic invariants（fallible 步骤前置 → 失败无副作用）。仅作用于 3 维 Position leader（`MatchName == "ADBE Position"`、`Components == 3`）；其它属性返回 error。
+
+双向 + 静态 / 动画都支持：
+
+- **separate（merge → separated）**：leader 翻 tdsb 分离 flag 并重置为默认值 `[w/2, h/2, 0]`；真值迁入按轴拆分的 follower —— 3D 层 → `Position_0/1/2`（Z follower `Position_2` 合成），2D 层 → 仅 `Position_0/1`（X/Y）。
+- **merge（separated → merged）**：leader 取回 `[X, Y, Z]` 值，删除全部 `Position_0/1/2` follower。
+
+**动画 Position** 自动走 keyframe 流迁移：separate 把 leader 的 3D spatial keyframe 流按轴拆成 3 条 1D temporal follower 流（per-axis `speed` = 轴值中心差分、`influence` 按时距换算）；merge 反向合成回单条 3D spatial 流。
+
+```go
+pos := layer.Position() // "ADBE Position"，3 维
+// 拆分维度（之后用 layer.PropertyByMatchName("ADBE Position_0") 等访问各轴）
+if err := pos.SetDimensionsSeparated(true); err != nil { /* ... */ }
+// 合回
+pos.SetDimensionsSeparated(false)
+```
+
+验证：AE 2020 + AE 2025 双版本 ship-gate —— 静态 6/6（3D sep / merge / 2D sep）+ 动画 8/8（separate/merge × uniform/非均匀间距），Go 输出 chunk 树 byte-structural 等同 AE 自存。字节机制详 `incidents/separate-dimensions-write-mechanics.md`。
+
+> 注：3D 层 Transform Group 解出的属性比某些参考实现少不是 bug —— AE 省略未改的默认属性（见 `incidents/transform-group-default-omission.md`）。
+
+#### Returns
+
+`error`；非 Position / 非 3 维 / 在 parser 之外构造 / 缺 tdsb / cdat 状态不符 / 已是目标态都返回错误。
 
 ---
 
