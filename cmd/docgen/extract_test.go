@@ -44,15 +44,7 @@ func TestExtractType_FieldsAndConsts(t *testing.T) {
 	}
 }
 
-// 测试辅助（后续 Task 也复用，定义在此一次）。
-func findType(ts []*docType, name string) *docType {
-	for _, t := range ts {
-		if t.name == name {
-			return t
-		}
-	}
-	return nil
-}
+// 测试辅助（findType 在 extract.go，生产代码亦用）。
 func findSym(ss []symbol, name string) *symbol {
 	for i := range ss {
 		if ss[i].name == name {

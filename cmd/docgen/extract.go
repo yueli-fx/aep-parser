@@ -57,6 +57,16 @@ func loadPackage(dir string) (*loadedPackage, error) {
 	return nil, fmt.Errorf("no buildable package in %s", dir)
 }
 
+// findType 在 []*docType 中按名查找（生产 + 测试共用）。
+func findType(ts []*docType, name string) *docType {
+	for _, t := range ts {
+		if t.name == name {
+			return t
+		}
+	}
+	return nil
+}
+
 // extractTypes 把 loadedPackage 转成 []*docType（仅字段 + 常量；方法在 Task 4 补）。
 func extractTypes(lp *loadedPackage) []*docType {
 	var out []*docType
