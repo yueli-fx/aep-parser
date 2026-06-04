@@ -96,6 +96,13 @@ func extractFields(lp *loadedPackage, ty *doc.Type) []symbol {
 			continue
 		}
 		for _, f := range st.Fields.List {
+			// Prefer the leading doc comment; fall back to the trailing
+			// inline comment (`Field T // ...`), the common style for short
+			// field docs.
+			fdoc := f.Doc
+			if fdoc == nil {
+				fdoc = f.Comment
+			}
 			for _, nm := range f.Names {
 				if !nm.IsExported() {
 					continue
@@ -104,10 +111,10 @@ func extractFields(lp *loadedPackage, ty *doc.Type) []symbol {
 					name:      nm.Name,
 					kind:      kindField,
 					fieldDecl: nm.Name + " " + printNode(lp.Fset, f.Type),
-					doc:       directiveStrippedText(f.Doc),
+					doc:       directiveStrippedText(fdoc),
 					jsonName:  jsonTag(f.Tag),
 				}
-				switch directiveOf(f.Doc) {
+				switch directiveOf(fdoc) {
 				case "rw":
 					sym.fieldRWForced, sym.readWrite = true, true
 				case "ro":

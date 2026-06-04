@@ -28,6 +28,8 @@ Expression, if non-empty, holds the JavaScript expression source attached to the
 MatchName string
 ```
 
+ADBE identifier, e.g. "ADBE Position", "ADBE Opacity"
+
 read-only
 
 ### Property.Name
@@ -36,6 +38,8 @@ read-only
 Name string
 ```
 
+display name (often empty)
+
 read-only
 
 ### Property.Components
@@ -43,6 +47,8 @@ read-only
 ```go
 Components int
 ```
+
+1 for scalar, 2 for 2D point, 3 for 3D point, etc.
 
 read-only
 
@@ -68,6 +74,8 @@ read-write
 Expression string
 ```
 
+JS expression source, "" when no expression set
+
 read-write
 
 ### Property.ExpressionEnabled
@@ -75,6 +83,8 @@ read-write
 ```go
 ExpressionEnabled bool
 ```
+
+tdb4 @0x78 inverted: false = AE ignores expression at render time. Always true for properties without an expression (AE's default state)
 
 read-write
 
@@ -402,7 +412,7 @@ DeleteKeyframe removes the keyframe at index i from the property's ldat stream a
 
 ```go
 var op *aep.Property
-_ = op.DeleteKeyframe(2)
+_ = op.DeleteKeyframe(2)	// remove the 3rd keyframe
 ```
 
 ### Property.InsertKeyframe
@@ -457,8 +467,8 @@ pos := layer.Position()
 if err := pos.SetDimensionsSeparated(true); err != nil {
 	return
 }
-
-_ = pos.SetDimensionsSeparated(false)
+// access per-axis via layer.PropertyByMatchName("ADBE Position_0"), etc.
+_ = pos.SetDimensionsSeparated(false)	// merge back
 ```
 
 ### Property.SetExpression
@@ -480,7 +490,7 @@ Returns an error if the property is one built outside the parser (no owning tdbs
 ```go
 var pos *aep.Property
 _ = pos.SetExpression("wiggle(2, 30)")
-_ = pos.SetExpression("")
+_ = pos.SetExpression("")	// clear the expression
 ```
 
 ### Property.SetExpressionEnabled
@@ -500,8 +510,8 @@ Requires the property's tdbs to contain a `tdb4` chunk (always present for prope
 ```go
 var op *aep.Property
 _ = op.SetExpression("time * 50")
-_ = op.SetExpressionEnabled(false)
-_ = op.SetExpressionEnabled(true)
+_ = op.SetExpressionEnabled(false)	// keep source, stop evaluating
+_ = op.SetExpressionEnabled(true)	// resume
 ```
 
 ### Property.SetLockedRatio
@@ -525,7 +535,7 @@ SetStaticValue rewrites a property's constant value in-place (only valid for pro
 ```go
 var layer *aep.Layer
 if op := layer.Opacity(); op != nil && len(op.Keyframes) == 0 {
-	_ = op.SetStaticValue(0.5)
+	_ = op.SetStaticValue(0.5)	// Opacity → 50%
 }
 ```
 
@@ -534,7 +544,7 @@ if op := layer.Opacity(); op != nil && len(op.Keyframes) == 0 {
 ```go
 var layer *aep.Layer
 if pos := layer.Position(); pos != nil && len(pos.Keyframes) == 0 {
-	_ = pos.SetStaticValue([]float64{960, 540, 0})
+	_ = pos.SetStaticValue([]float64{960, 540, 0})	// Position → (960, 540, 0)
 }
 ```
 
@@ -590,6 +600,8 @@ read-write
 InSpatialTangent []float64
 ```
 
+length 3 when present; nil for non-spatial
+
 read-write
 
 ### Keyframe.OutSpatialTangent
@@ -605,6 +617,8 @@ read-write
 ```go
 InTemporalEase []TemporalEase
 ```
+
+length 1 for spatial+1D, length N for non-spatial N-D
 
 read-write
 
@@ -679,7 +693,7 @@ length-preserving (8 or 16 bytes per ease, fixed offsets per layout).
 ```go
 var layer *aep.Layer
 if opa := layer.Opacity(); opa != nil && len(opa.Keyframes) > 0 {
-
+	// 1D property: a single ease
 	_ = opa.Keyframes[0].SetInTemporalEase([]aep.TemporalEase{{Speed: 1.5, Influence: 0.25}})
 }
 ```

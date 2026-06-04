@@ -22,6 +22,8 @@ Marker represents a single timeline marker on a layer (or a comp). Times are in 
 Time float64
 ```
 
+marker position in seconds, decoded via the owning composition's TickRate
+
 read-write
 
 ### Marker.Duration
@@ -29,6 +31,8 @@ read-write
 ```go
 Duration float64
 ```
+
+seconds; 0 = point marker. Decoded from NmHd @0x08 / 600.
 
 read-write
 
@@ -38,6 +42,8 @@ read-write
 Label uint8
 ```
 
+timeline label color index (0..16); 0 = default. NmHd @0x10.
+
 read-write
 
 ### Marker.Comment
@@ -45,6 +51,8 @@ read-write
 ```go
 Comment string
 ```
+
+first Utf8 in the Nmrd block
 
 read-write
 
@@ -54,6 +62,8 @@ read-write
 Chapter string
 ```
 
+second Utf8 — chapter link
+
 read-write
 
 ### Marker.URL
@@ -61,6 +71,8 @@ read-write
 ```go
 URL string
 ```
+
+third Utf8 — web target
 
 read-write
 
@@ -70,6 +82,8 @@ read-write
 FrameTarget string
 ```
 
+fourth Utf8 — frame target id
+
 read-write
 
 ### Marker.CuePointName
@@ -77,6 +91,8 @@ read-write
 ```go
 CuePointName string
 ```
+
+fifth Utf8 — cue-point name (if used)
 
 read-write
 
@@ -201,7 +217,7 @@ SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10. Indices 
 ```go
 var proj *aep.Project
 if comp := proj.CompositionByID(1); comp != nil && len(comp.Markers) > 0 {
-	_ = comp.Markers[0].SetLabel(9)
+	_ = comp.Markers[0].SetLabel(9)	// timeline label color 0..16
 }
 ```
 

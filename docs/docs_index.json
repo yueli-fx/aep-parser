@@ -1,6 +1,201 @@
 {
   "go_version": "go1.25.1",
   "symbols": {
+    "Footage": {
+      "kind": "type",
+      "file": "footage.md",
+      "anchor": "#footage-object",
+      "summary": "Footage represents a source media file, an AE solid, or a placeholder."
+    },
+    "Footage.AssetType": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footageassettype",
+      "signature": "func (f *Footage) AssetType() string",
+      "rw": "read-only",
+      "summary": "AssetType returns the footage kind as a string: \"placeholder\" / \"solid\" / \"file\". Mirrors py-aep's `footage.asset_type` discriminator. Footage items with neither flag default to \"file\"."
+    },
+    "Footage.Comment": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footagecomment",
+      "signature": "Comment string",
+      "rw": "read-write",
+      "summary": "Comment / Label — Item-level metadata (project-panel comment + timeline color chip). Populated by parseItem from the cmta + idta chunks under the Item LIST."
+    },
+    "Footage.Duration": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageduration",
+      "signature": "Duration float64",
+      "rw": "read-only",
+      "summary": "duration in seconds; 0 for stills"
+    },
+    "Footage.EndFrame": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footageendframe",
+      "signature": "func (f *Footage) EndFrame() int",
+      "rw": "read-only",
+      "summary": "EndFrame returns the footage end frame (sspc @0xB0, uint32 BE). 0 for non-sequence footage and for fixtures without a full-size sspc."
+    },
+    "Footage.File": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footagefile",
+      "signature": "func (f *Footage) File() string",
+      "rw": "read-only",
+      "summary": "File returns the footage source file path. Empty string for solids and placeholders. Alias of [Footage.Path] for py-aep API parity."
+    },
+    "Footage.FootageMissing": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footagefootagemissing",
+      "signature": "func (f *Footage) FootageMissing() bool",
+      "rw": "read-only",
+      "summary": "FootageMissing reports whether the footage source file was missing at the time AE saved the project (per the `footage_missing_at_save` flag in sspc @0x78). Solids and placeholders never have a file, so this is always false for them (regardless of the on-disk flag bit)."
+    },
+    "Footage.FrameRate": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageframerate",
+      "signature": "FrameRate float64",
+      "rw": "read-only",
+      "summary": "frames per second (video footage)"
+    },
+    "Footage.HasAudio": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footagehasaudio",
+      "signature": "func (f *Footage) HasAudio() bool",
+      "rw": "read-only",
+      "summary": "HasAudio reports whether the footage has an audio stream — true when sspc's audio_sample_rate (8 byte f64 BE at @0xA0) is non-zero. Solids and placeholders never have audio."
+    },
+    "Footage.Height": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageheight",
+      "signature": "Height uint16",
+      "rw": "read-only",
+      "summary": "pixel height"
+    },
+    "Footage.ID": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageid",
+      "signature": "ID uint32",
+      "rw": "read-only",
+      "summary": "AE internal item ID"
+    },
+    "Footage.IsPlaceholder": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageisplaceholder",
+      "signature": "IsPlaceholder bool",
+      "rw": "read-only",
+      "summary": "IsPlaceholder is true when opti tag = \"Plac\" (AE's placeholder footage — name + dimensions only, no source file). Mutually exclusive with IsSolid and with having a non-empty Path."
+    },
+    "Footage.IsSolid": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageissolid",
+      "signature": "IsSolid bool",
+      "rw": "read-only",
+      "summary": "AE solid (generated solid-color source); solids have no disk path"
+    },
+    "Footage.IsStill": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footageisstill",
+      "signature": "IsStill bool",
+      "rw": "read-only",
+      "summary": "AE flagged this as a still image"
+    },
+    "Footage.ItemID": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footageitemid",
+      "signature": "func (f *Footage) ItemID() uint32",
+      "rw": "read-only",
+      "summary": "ItemID returns the footage's item id (mirrors the ID field). Provided so *Footage satisfies AVItem."
+    },
+    "Footage.ItemName": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footageitemname",
+      "signature": "func (f *Footage) ItemName() string",
+      "rw": "read-only",
+      "summary": "ItemName returns the footage's name. Provided so *Footage satisfies AVItem."
+    },
+    "Footage.Label": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footagelabel",
+      "signature": "Label uint8",
+      "rw": "read-write"
+    },
+    "Footage.MainSource": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footagemainsource",
+      "signature": "func (f *Footage) MainSource() FootageSource",
+      "rw": "read-only",
+      "summary": "MainSource returns the typed source metadata for this footage item. Returns *FileSource for file footage, *SolidSource for solids, *PlaceholderSource for placeholders. Returns nil if the footage was built outside the parser (no source chunks available)."
+    },
+    "Footage.Name": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footagename",
+      "signature": "Name string",
+      "rw": "read-only",
+      "summary": "display name; SetPath syncs this to the new path's basename"
+    },
+    "Footage.Path": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footagepath",
+      "signature": "Path string",
+      "rw": "read-write",
+      "summary": "source file path on disk; empty for solids/placeholders. Writable via SetPath"
+    },
+    "Footage.SetComment": {
+      "kind": "method",
+      "file": "footage.md",
+      "anchor": "#footagesetcomment",
+      "signature": "func (f *Footage) SetComment(comment string) error",
+      "summary": "SetComment writes a project-panel comment on the footage item. Length-variable; same semantics as Composition.SetComment."
+    },
+    "Footage.SetLabel": {
+      "kind": "method",
+      "file": "footage.md",
+      "anchor": "#footagesetlabel",
+      "signature": "func (f *Footage) SetLabel(index uint8) error",
+      "summary": "SetLabel writes the project-panel color label index for the footage."
+    },
+    "Footage.SetPath": {
+      "kind": "method",
+      "file": "footage.md",
+      "anchor": "#footagesetpath",
+      "signature": "func (f *Footage) SetPath(newPath string) error",
+      "example": true,
+      "summary": "SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's \"fullpath\" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path."
+    },
+    "Footage.StartFrame": {
+      "kind": "getter",
+      "file": "footage.md",
+      "anchor": "#footagestartframe",
+      "signature": "func (f *Footage) StartFrame() int",
+      "rw": "read-only",
+      "summary": "StartFrame returns the footage start frame (sspc @0xAC, uint32 BE). 0 for non-sequence footage and for fixtures without a full-size sspc."
+    },
+    "Footage.Width": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footagewidth",
+      "signature": "Width uint16",
+      "rw": "read-only",
+      "summary": "pixel width"
+    },
     "InterpType": {
       "kind": "type",
       "file": "property.md",
@@ -40,14 +235,16 @@
       "file": "property.md",
       "anchor": "#keyframeinspatialtangent",
       "signature": "InSpatialTangent []float64",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "length 3 when present; nil for non-spatial"
     },
     "Keyframe.InTemporalEase": {
       "kind": "field",
       "file": "property.md",
       "anchor": "#keyframeintemporalease",
       "signature": "InTemporalEase []TemporalEase",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "length 1 for spatial+1D, length N for non-spatial N-D"
     },
     "Keyframe.OutInterp": {
       "kind": "field",
@@ -162,28 +359,32 @@
       "file": "marker.md",
       "anchor": "#markerchapter",
       "signature": "Chapter string",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "second Utf8 — chapter link"
     },
     "Marker.Comment": {
       "kind": "field",
       "file": "marker.md",
       "anchor": "#markercomment",
       "signature": "Comment string",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "first Utf8 in the Nmrd block"
     },
     "Marker.CuePointName": {
       "kind": "field",
       "file": "marker.md",
       "anchor": "#markercuepointname",
       "signature": "CuePointName string",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "fifth Utf8 — cue-point name (if used)"
     },
     "Marker.Duration": {
       "kind": "field",
       "file": "marker.md",
       "anchor": "#markerduration",
       "signature": "Duration float64",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "seconds; 0 = point marker. Decoded from NmHd @0x08 / 600."
     },
     "Marker.FrameDuration": {
       "kind": "getter",
@@ -198,7 +399,8 @@
       "file": "marker.md",
       "anchor": "#markerframetarget",
       "signature": "FrameTarget string",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "fourth Utf8 — frame target id"
     },
     "Marker.FrameTime": {
       "kind": "getter",
@@ -213,7 +415,8 @@
       "file": "marker.md",
       "anchor": "#markerlabel",
       "signature": "Label uint8",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "timeline label color index (0..16); 0 = default. NmHd @0x10."
     },
     "Marker.Remove": {
       "kind": "method",
@@ -300,14 +503,16 @@
       "file": "marker.md",
       "anchor": "#markertime",
       "signature": "Time float64",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "marker position in seconds, decoded via the owning composition's TickRate"
     },
     "Marker.URL": {
       "kind": "field",
       "file": "marker.md",
       "anchor": "#markerurl",
       "signature": "URL string",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "third Utf8 — web target"
     },
     "Property": {
       "kind": "type",
@@ -336,7 +541,8 @@
       "file": "property.md",
       "anchor": "#propertycomponents",
       "signature": "Components int",
-      "rw": "read-only"
+      "rw": "read-only",
+      "summary": "1 for scalar, 2 for 2D point, 3 for 3D point, etc."
     },
     "Property.ControlType": {
       "kind": "getter",
@@ -391,14 +597,16 @@
       "file": "property.md",
       "anchor": "#propertyexpression",
       "signature": "Expression string",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "JS expression source, \"\" when no expression set"
     },
     "Property.ExpressionEnabled": {
       "kind": "field",
       "file": "property.md",
       "anchor": "#propertyexpressionenabled",
       "signature": "ExpressionEnabled bool",
-      "rw": "read-write"
+      "rw": "read-write",
+      "summary": "tdb4 @0x78 inverted: false = AE ignores expression at render time. Always true for properties without an expression (AE's default state)"
     },
     "Property.Gradient": {
       "kind": "field",
@@ -524,7 +732,8 @@
       "file": "property.md",
       "anchor": "#propertymatchname",
       "signature": "MatchName string",
-      "rw": "read-only"
+      "rw": "read-only",
+      "summary": "ADBE identifier, e.g. \"ADBE Position\", \"ADBE Opacity\""
     },
     "Property.MaxValue": {
       "kind": "getter",
@@ -547,7 +756,8 @@
       "file": "property.md",
       "anchor": "#propertyname",
       "signature": "Name string",
-      "rw": "read-only"
+      "rw": "read-only",
+      "summary": "display name (often empty)"
     },
     "Property.NbOptions": {
       "kind": "field",

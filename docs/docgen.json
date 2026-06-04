@@ -13,6 +13,11 @@
       "roots": ["Marker"],
       "head": "_includes/marker.head.md",
       "tail": "_includes/marker.tail.md"
+    },
+    {
+      "out": "footage.md",
+      "roots": ["Footage"],
+      "head": "_includes/footage.head.md"
     }
   ]
 }

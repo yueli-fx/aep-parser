@@ -75,7 +75,7 @@ func (f FeetFramesFilmType) String() string {
 type FootageTimecodeDisplayStartType uint8
 
 const (
-	FootageTimecodeDisplayStartTypeStart0 FootageTimecodeDisplayStartType = 0 // Start at 0
+	FootageTimecodeDisplayStartTypeStart0         FootageTimecodeDisplayStartType = 0 // Start at 0
 	FootageTimecodeDisplayStartTypeUseSourceMedia FootageTimecodeDisplayStartType = 1 // Use source media
 )
 
@@ -94,8 +94,8 @@ func (f FootageTimecodeDisplayStartType) String() string {
 type FramesCountType uint8
 
 const (
-	FramesCountTypeStart0 FramesCountType = 0 // Start at 0
-	FramesCountTypeStart1 FramesCountType = 1 // Start at 1
+	FramesCountTypeStart0             FramesCountType = 0 // Start at 0
+	FramesCountTypeStart1             FramesCountType = 1 // Start at 1
 	FramesCountTypeTimecodeConversion FramesCountType = 2 // Timecode conversion
 )
 
@@ -117,7 +117,7 @@ type TimeDisplayType uint8
 
 const (
 	TimeDisplayTypeTimecode TimeDisplayType = 0 // Timecode
-	TimeDisplayTypeFrames TimeDisplayType = 1   // Frames
+	TimeDisplayTypeFrames   TimeDisplayType = 1 // Frames
 )
 
 func (t TimeDisplayType) String() string {
@@ -154,8 +154,8 @@ func (c ColorManagementSystem) String() string {
 type LutInterpolationMethod uint8
 
 const (
-	LutInterpolationMethodTrilinear    LutInterpolationMethod = 0 // Trilinear
-	LutInterpolationMethodTetrahedral  LutInterpolationMethod = 1 // Tetrahedral
+	LutInterpolationMethodTrilinear   LutInterpolationMethod = 0 // Trilinear
+	LutInterpolationMethodTetrahedral LutInterpolationMethod = 1 // Tetrahedral
 )
 
 func (l LutInterpolationMethod) String() string {
@@ -281,17 +281,21 @@ func (p *Project) AVItemByID(id uint32) AVItem {
 	return nil
 }
 
-// Footage represents a source media file or solid/placeholder.
+// Footage represents a source media file, an AE solid, or a placeholder.
+//
+// Path is the one field with a length-variable writer (SetPath); it rewrites
+// the path chunk wholesale rather than patching bytes in place. Solids and
+// placeholders have no path.
 type Footage struct {
-	ID        uint32
-	Name      string
-	Path      string
-	Width     uint16
-	Height    uint16
-	FrameRate float64
-	Duration  float64
-	IsStill   bool
-	IsSolid   bool
+	ID        uint32  // AE internal item ID
+	Name      string  // display name; SetPath syncs this to the new path's basename
+	Path      string  // source file path on disk; empty for solids/placeholders. Writable via SetPath
+	Width     uint16  // pixel width
+	Height    uint16  // pixel height
+	FrameRate float64 // frames per second (video footage)
+	Duration  float64 // duration in seconds; 0 for stills
+	IsStill   bool    // AE flagged this as a still image
+	IsSolid   bool    // AE solid (generated solid-color source); solids have no disk path
 	// IsPlaceholder is true when opti tag = "Plac" (AE's placeholder
 	// footage — name + dimensions only, no source file). Mutually
 	// exclusive with IsSolid and with having a non-empty Path.
