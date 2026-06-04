@@ -1,7 +1,9 @@
 ---
-status: active
-summary: docs/*.md 改为从 Go doc comment 自动生成（Swagger 式，AST 推导结构 + 注释只写 prose + Example 函数）；先 pilot property.md
+status: done
+summary: docs/*.md 改为从 Go doc comment 自动生成（Swagger 式，AST 推导结构 + 注释只写 prose + Example 函数）。生成器 + 全 11 个符号 doc 已 ship（property/marker/footage/mask/effect/project/composition/constants/layer/text/shape），json/README 手写概念页。
 ---
+
+> **DONE（2026-06-04）**：docgen 全 arc 落地 —— 生成器 `cmd/docgen` ship + 5 项能力（formatter / JSON 索引 / inline field 注释 / example 注释 / package-level func）；**11 个符号 doc 全部生成物化**；`json.md`（概念页，英文化 + 方法 cross-ref project.md）/ `README.md`（导航）保持手写，不生成。drift gate `TestDocsUpToDate` 守 `go test ./...`。次要 follow-on（非阻塞）：README 英文化 + 链接核对；真正 CI pipeline（当前无，drift gate 代偿）。
 
 # docgen — 从 Go doc comment 自动生成 API 文档
 
@@ -160,12 +162,15 @@ Pilot plan `plans/...docgen-pilot-plan`（已 landed）跑通 + 验收。决策�
 - **example 注释保留**：formatExampleBody 用 `printer.CommentedNode` 打印（裸打 AST 子树丢注释 + 留空行），并在 `// Output:` marker 处截断。
 - **JSON 符号索引**：见上。
 
-### 剩余文件推广（增量，逐文件 .md 直接生成 + 验证）
+### 文件推广 —— 全部完成 ✅（11 生成 + 2 手写概念页）
 
-- **已落（clean，结构直映 Attributes/Methods）**：marker ✅ / footage ✅ / mask ✅（多 root + enum constants）。shape / constants / text 待推。
-- **有设计 wrinkle**：
-  - **composition** —— `Project.NewComposition` 在 `*Project` 上，不会渲进 Composition root；bespoke H2 分组（`## Creation` / `## Boolean flag setters` / `## Item-level`）会被拍平成 Attributes/Methods（spec 已接受「略松」）；Renderer 对照表走 tail include；`Guide` / `EssentialGraphicsController` 子类型考虑加 roots 或留 prose。
-  - **layer**（1192 行）/ **text**（928 行）—— 体量大，doc comment 成熟度需逐一核。
-  - **project** —— `NewComposition` / `NewProject` 等 creation 方法的归属（project root 渲得到）。
-- **不生成**：`README.md`（纯手写导航）；`json.md`（JSON 导出说明，非符号文档，待定）。
-- 之后：CLAUDE.md/rules House rule 已先行落（导出 doc comment = 源）。CI 门禁本仓库以 `go test` drift gate 替代（无 pipeline）。
+- **生成物化（11）**：property / marker / footage / mask / effect / project / composition / constants / layer / text / shape。
+- **手写概念页（不生成）**：`json.md`（一向 JSON 导出概念页，英文化 + 方法 cross-ref project.md）、`README.md`（纯手写导航）。
+- **每文件解法定论**：
+  - 跨类型 setter（text `Layer.SetRun*`）→ 渲在 owning type（layer.md）+ cross-ref。
+  - 包级函数 / 构造器（Open/FromReader/NewProject/TextEncodedByteLen）→ manifest `funcs` + `## Functions`（`extractPackageFuncs` 扫 pkg + type.Funcs）。
+  - 跨类型 enum 聚合 → constants.md 多 enum root（共享 enum 的 index key 由最后生成文件占；约定 constants.md 为 canonical home）。
+  - bespoke H2 分组（composition）→ 拍平 Attributes/Methods（已接受「略松」）；概念表（Renderer / Components / label 等）→ `_includes` tail。
+  - 体量大文件（layer 2620 行 / text）→ 完整 completeness（比手写 curated 更全）。
+  - 过期手写教程（shape V2.2 builder）→ 不照搬；tail 写当前准确的 alpha 注。
+- House rule 已落（导出 doc comment = 源）。CI 门禁以 `go test` drift gate 代偿（仓库无 pipeline）。
