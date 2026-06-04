@@ -1218,6 +1218,2056 @@
       "signature": "Value any",
       "rw": "read-write"
     },
+    "Layer": {
+      "kind": "type",
+      "file": "layer.md",
+      "anchor": "#layer-object",
+      "summary": "Layer represents a layer within a composition."
+    },
+    "Layer.AVSource": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeravsource",
+      "signature": "func (l *Layer) AVSource() AVItem",
+      "rw": "read-only",
+      "summary": "AVSource resolves this layer's source to an AVItem (Composition or Footage), or nil when SourceID is 0 or the layer was built outside the parser. Mirrors py-aep's `Layer.source`."
+    },
+    "Layer.ActiveAtTime": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layeractiveattime",
+      "signature": "func (l *Layer) ActiveAtTime(t float64) bool",
+      "summary": "ActiveAtTime reports whether the layer is on-screen at time t — visible switch enabled AND the time falls within the layer's in/out range. Mirrors AE script's `Layer.activeAtTime(t)`."
+    },
+    "Layer.AddFont": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layeraddfont",
+      "signature": "func (l *Layer) AddFont(fontName string) (int, error)",
+      "summary": "AddFont appends a new entry to the layer's Fonts table (btdk path /0/1/0) and returns the new font index. Subsequent SetRunFontIndex(runIdx, returnedIndex) calls can reference it."
+    },
+    "Layer.AlternateSource": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeralternatesource",
+      "signature": "func (l *Layer) AlternateSource() AVItem",
+      "rw": "read-only",
+      "summary": "AlternateSource returns the AVItem (*Composition or *Footage) used as this layer's media-replacement override, or nil when no override is active (AlternateSourceID == 0), the layer has no slot, the layer was built outside the parser (no owning project), or the override id doesn't resolve to any project AV item. Mirrors AE script's Property.alternateSource — except we surface the override on the layer rather than on a sub-property since AE persists one id per instance."
+    },
+    "Layer.AlternateSourceID": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layeralternatesourceid",
+      "signature": "AlternateSourceID uint32",
+      "rw": "read-only",
+      "summary": "AlternateSourceID is the AVItem id overriding this layer's source via the Essential Properties → Media Replacement workflow (AE 18+). 0 means no override is in effect (either the layer has no Essential Property slot, or it has one but the slot is unset). The slot is only persisted when AE has promoted the layer's source via `AVLayer.addToMotionGraphicsTemplateAs()` (see the override chunk pattern in `parse_layer.go::findAlternateSourceBlsi`). Use AlternateSource() to resolve to the *Composition / *Footage item."
+    },
+    "Layer.AnchorPoint": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeranchorpoint",
+      "signature": "func (l *Layer) AnchorPoint() *Property",
+      "rw": "read-only",
+      "summary": "AnchorPoint returns the layer's Anchor Point property (3D), or nil."
+    },
+    "Layer.AudioActive": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeraudioactive",
+      "signature": "func (l *Layer) AudioActive() bool",
+      "rw": "read-only",
+      "summary": "AudioActive reports whether the layer would produce audio output: it has a potential audio source AND the AudioEnabled switch is on. This is the design-time check; it does not consider time."
+    },
+    "Layer.AudioActiveAtTime": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layeraudioactiveattime",
+      "signature": "func (l *Layer) AudioActiveAtTime(t float64) bool",
+      "summary": "AudioActiveAtTime reports whether the layer would produce audio at the given time t (seconds, in the owning composition's timeline). Combines AudioActive with ActiveAtTime."
+    },
+    "Layer.AudioEnabled": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layeraudioenabled",
+      "signature": "AudioEnabled bool",
+      "rw": "read-write"
+    },
+    "Layer.AudioGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeraudiogroup",
+      "signature": "func (l *Layer) AudioGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "AudioGroup returns the layer's \"ADBE Audio Group\" subgroup, or nil if absent. Present on layers with audio content."
+    },
+    "Layer.AudioLevels": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeraudiolevels",
+      "signature": "func (l *Layer) AudioLevels() *Property",
+      "rw": "read-only",
+      "summary": "AudioLevels returns the layer's Audio Levels property (2D, [left, right] channel levels in dB). Present on layers with audio content; nil otherwise."
+    },
+    "Layer.AutoName": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerautoname",
+      "signature": "func (l *Layer) AutoName() string",
+      "rw": "read-only",
+      "summary": "AutoName returns the layer's display name. Mirrors py-aep's `layer.auto_name` — falls back to the source item's name when the layer has no user-set name. Empty string for layers without a source (camera/light/null/text/shape) and no user-set name."
+    },
+    "Layer.AutoOrient": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerautoorient",
+      "signature": "AutoOrient AutoOrientType",
+      "rw": "read-write",
+      "summary": "3 bits across ldta 0x25/0x26"
+    },
+    "Layer.BlendingMode": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerblendingmode",
+      "signature": "BlendingMode BlendingMode",
+      "rw": "read-write",
+      "summary": "ldta @0x63"
+    },
+    "Layer.CameraAperture": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercameraaperture",
+      "signature": "func (l *Layer) CameraAperture() *Property",
+      "rw": "read-only",
+      "summary": "CameraAperture returns the camera's Aperture property (1D, pixels). Nil for non-camera layers."
+    },
+    "Layer.CameraBlurLevel": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercamerablurlevel",
+      "signature": "func (l *Layer) CameraBlurLevel() *Property",
+      "rw": "read-only",
+      "summary": "CameraBlurLevel returns the camera's Blur Level property (1D, %). Nil for non-camera layers."
+    },
+    "Layer.CameraDepthOfField": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercameradepthoffield",
+      "signature": "func (l *Layer) CameraDepthOfField() *Property",
+      "rw": "read-only",
+      "summary": "CameraDepthOfField returns the camera's Depth of Field toggle (1D bool-as-float, 0 = off, 1 = on). Nil for non-camera layers."
+    },
+    "Layer.CameraFocusDistance": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercamerafocusdistance",
+      "signature": "func (l *Layer) CameraFocusDistance() *Property",
+      "rw": "read-only",
+      "summary": "CameraFocusDistance returns the camera's Focus Distance property (1D, pixels). Nil for non-camera layers."
+    },
+    "Layer.CameraOptionsGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercameraoptionsgroup",
+      "signature": "func (l *Layer) CameraOptionsGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "CameraOptionsGroup returns the camera layer's \"ADBE Camera Options Group\", or nil for non-camera layers."
+    },
+    "Layer.CameraZoom": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercamerazoom",
+      "signature": "func (l *Layer) CameraZoom() *Property",
+      "rw": "read-only",
+      "summary": "CameraZoom returns the camera's Zoom property (1D, pixels — AE's \"Zoom\" field; equivalent to focal length × 35mm conversion). Nil for non-camera layers."
+    },
+    "Layer.CanSetCollapseTransformation": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercansetcollapsetransformation",
+      "signature": "func (l *Layer) CanSetCollapseTransformation() bool",
+      "rw": "read-only",
+      "summary": "CanSetCollapseTransformation reports whether AE will let the user toggle CollapseTransform on this layer. Mirrors py-aep's `AVLayer.can_set_collapse_transformation`:"
+    },
+    "Layer.CanSetTimeRemapEnabled": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercansettimeremapenabled",
+      "signature": "func (l *Layer) CanSetTimeRemapEnabled() bool",
+      "rw": "read-only",
+      "summary": "CanSetTimeRemapEnabled reports whether AE will let the user enable time remapping on this layer. Mirrors py-aep's `AVLayer.can_set_time_remap_enabled`: true when the source has a non-zero duration. Still images, text layers, and shape sources don't qualify."
+    },
+    "Layer.ClearAlternateSource": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerclearalternatesource",
+      "signature": "func (l *Layer) ClearAlternateSource() error",
+      "rw": "read-only",
+      "summary": "ClearAlternateSource removes the media-replacement override (blsi = 0) so AE falls back to the wrapper precomp's default source. Equivalent to SetAlternateSource(nil)."
+    },
+    "Layer.ClearTrackMatteLayer": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercleartrackmattelayer",
+      "signature": "func (l *Layer) ClearTrackMatteLayer() error",
+      "rw": "read-only",
+      "summary": "ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone). Removes the explicit matte source AND the matte mode in one call."
+    },
+    "Layer.CollapseTransform": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layercollapsetransform",
+      "signature": "CollapseTransform bool",
+      "rw": "read-write"
+    },
+    "Layer.Comment": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layercomment",
+      "signature": "Comment string",
+      "rw": "read-write",
+      "summary": "Comment is the user-set layer comment (AE's \"Comments\" timeline column / Layer Settings dialog). Decoded from the sibling cmta chunk; \"\" when no cmta is present. CRLF in the source bytes is normalized to LF for Go-friendly multi-line strings."
+    },
+    "Layer.ContainingComp": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layercontainingcomp",
+      "signature": "func (l *Layer) ContainingComp() *Composition",
+      "rw": "read-only",
+      "summary": "ContainingComp returns the composition this layer belongs to, or nil when the layer was built outside the parser (no owning comp wired up)."
+    },
+    "Layer.Duration": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerduration",
+      "signature": "Duration float64",
+      "rw": "read-only",
+      "summary": "layer duration in seconds"
+    },
+    "Layer.Effects": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layereffects",
+      "signature": "Effects []*Effect",
+      "rw": "read-only",
+      "summary": "applied effects (see effect.md)"
+    },
+    "Layer.EffectsEnabled": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layereffectsenabled",
+      "signature": "EffectsEnabled bool",
+      "rw": "read-write"
+    },
+    "Layer.EffectsParade": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layereffectsparade",
+      "signature": "func (l *Layer) EffectsParade() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "EffectsParade returns the layer's \"ADBE Effect Parade\" subgroup, or nil if absent. The parade carries each effect as a sub-PropertyGroup named by the effect's match-name. For decoded effect parameter values prefer Layer.Effects (the parade tree captures the layout but does not re-parse effect parameters)."
+    },
+    "Layer.FrameBlendEnabled": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerframeblendenabled",
+      "signature": "FrameBlendEnabled bool",
+      "rw": "read-write"
+    },
+    "Layer.FrameBlendPixelMotion": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerframeblendpixelmotion",
+      "signature": "FrameBlendPixelMotion bool",
+      "rw": "read-write",
+      "summary": "false = Frame Mix, true = Pixel Motion"
+    },
+    "Layer.FrameInPoint": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerframeinpoint",
+      "signature": "func (l *Layer) FrameInPoint() int",
+      "rw": "read-only",
+      "summary": "FrameInPoint returns the layer in-point as an integer frame count (seconds × FrameRate, rounded). Returns 0 when the owning comp's FrameRate is unknown."
+    },
+    "Layer.FrameOutPoint": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerframeoutpoint",
+      "signature": "func (l *Layer) FrameOutPoint() int",
+      "rw": "read-only",
+      "summary": "FrameOutPoint returns the layer out-point as an integer frame count."
+    },
+    "Layer.FrameStartTime": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerframestarttime",
+      "signature": "func (l *Layer) FrameStartTime() int",
+      "rw": "read-only",
+      "summary": "FrameStartTime returns the layer start-time as an integer frame count."
+    },
+    "Layer.GeometryBevelDirection": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layergeometrybeveldirection",
+      "signature": "func (l *Layer) GeometryBevelDirection() *Property",
+      "rw": "read-only",
+      "summary": "GeometryBevelDirection returns the Bevel Direction property (1D enum, default 1; relevant for shape/text 3D layers with bevel — present on solid layers as a stub)."
+    },
+    "Layer.GeometryOptionsGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layergeometryoptionsgroup",
+      "signature": "func (l *Layer) GeometryOptionsGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "GeometryOptionsGroup returns the 3D layer's \"ADBE Extrsn Options Group\", or nil if absent (2D layers, AE 23 and older)."
+    },
+    "Layer.GeometryPlaneCurvature": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layergeometryplanecurvature",
+      "signature": "func (l *Layer) GeometryPlaneCurvature() *Property",
+      "rw": "read-only",
+      "summary": "GeometryPlaneCurvature returns the Plane Curvature property (1D, AE 24+ Advanced 3D renderer; for the \"Curved\" plane preset on a 3D solid)."
+    },
+    "Layer.GeometryPlaneSubdivision": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layergeometryplanesubdivision",
+      "signature": "func (l *Layer) GeometryPlaneSubdivision() *Property",
+      "rw": "read-only",
+      "summary": "GeometryPlaneSubdivision returns the Plane Subdivision property (1D int, default 4; mesh quality for the curved plane)."
+    },
+    "Layer.HasAlternateSourceSlot": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerhasalternatesourceslot",
+      "signature": "func (l *Layer) HasAlternateSourceSlot() bool",
+      "rw": "read-only",
+      "summary": "HasAlternateSourceSlot reports whether this layer has an Essential Properties media-replacement slot in its chunk tree. The slot exists when AE persisted an \"ADBE Layer Overrides\" + \"ADBE Layer Source Alternate\" pattern (typically created by `AVLayer.addToMotionGraphicsTemplateAs()` on the source-side layer + the parent comp using the precomp as a layer). Without the slot, SetAlternateSource cannot length-preservingly write a new id."
+    },
+    "Layer.HasAudio": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerhasaudio",
+      "signature": "func (l *Layer) HasAudio() bool",
+      "rw": "read-only",
+      "summary": "HasAudio reports whether the layer's source could carry audio. True when the source resolves to a Footage that is not a solid/placeholder or a Composition (which itself may contain audio layers). For camera / light / null / text / shape layers it returns false."
+    },
+    "Layer.HasTrackMatte": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerhastrackmatte",
+      "signature": "func (l *Layer) HasTrackMatte() bool",
+      "rw": "read-only",
+      "summary": "HasTrackMatte reports whether this layer uses ANOTHER layer as its alpha/luma matte source. True when TrackMatte != TrackMatteNone."
+    },
+    "Layer.HasVideo": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerhasvideo",
+      "signature": "func (l *Layer) HasVideo() bool",
+      "rw": "read-only",
+      "summary": "HasVideo reports whether the layer has a visual component. True for every non-audio layer kind we model — only pure audio-source layers (AV source with no video stream) would be false, and we don't model that distinction yet. Camera / Light layers have no video output but AE script's `layer.hasVideo` reports false for them, so we mirror that."
+    },
+    "Layer.Height": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerheight",
+      "signature": "func (l *Layer) Height() int",
+      "rw": "read-only",
+      "summary": "Height returns the layer's effective height in pixels — see Width."
+    },
+    "Layer.ID": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerid",
+      "signature": "ID uint32",
+      "rw": "read-only",
+      "summary": "own layer ID (ldta @0x00) — referenced by ParentID of children"
+    },
+    "Layer.InPoint": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerinpoint",
+      "signature": "func (l *Layer) InPoint() float64",
+      "rw": "read-only",
+      "summary": "InPoint returns the layer's in-point in seconds (ldta @0x14/@0x18, dividend/divisor pair). Returns 0 if the underlying ldta chunk is absent or too short."
+    },
+    "Layer.Index": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerindex",
+      "signature": "Index int",
+      "rw": "read-only",
+      "summary": "1-based timeline position (top of stack = 1)"
+    },
+    "Layer.IrisAspectRatio": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririsaspectratio",
+      "signature": "func (l *Layer) IrisAspectRatio() *Property",
+      "rw": "read-only",
+      "summary": "IrisAspectRatio returns the camera's Iris Aspect Ratio property (1D)."
+    },
+    "Layer.IrisDiffractionFringe": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririsdiffractionfringe",
+      "signature": "func (l *Layer) IrisDiffractionFringe() *Property",
+      "rw": "read-only",
+      "summary": "IrisDiffractionFringe returns the camera's Iris Diffraction Fringe property (1D, %)."
+    },
+    "Layer.IrisHighlightGain": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririshighlightgain",
+      "signature": "func (l *Layer) IrisHighlightGain() *Property",
+      "rw": "read-only",
+      "summary": "IrisHighlightGain returns the camera's Iris Highlight Gain property (1D)."
+    },
+    "Layer.IrisHighlightSaturation": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririshighlightsaturation",
+      "signature": "func (l *Layer) IrisHighlightSaturation() *Property",
+      "rw": "read-only",
+      "summary": "IrisHighlightSaturation returns the camera's Iris Highlight Saturation property (1D)."
+    },
+    "Layer.IrisHighlightThreshold": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririshighlightthreshold",
+      "signature": "func (l *Layer) IrisHighlightThreshold() *Property",
+      "rw": "read-only",
+      "summary": "IrisHighlightThreshold returns the camera's Iris Highlight Threshold property (1D, 0..1 normalized luminance)."
+    },
+    "Layer.IrisRotation": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririsrotation",
+      "signature": "func (l *Layer) IrisRotation() *Property",
+      "rw": "read-only",
+      "summary": "IrisRotation returns the camera's Iris Rotation property (1D, degrees)."
+    },
+    "Layer.IrisRoundness": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririsroundness",
+      "signature": "func (l *Layer) IrisRoundness() *Property",
+      "rw": "read-only",
+      "summary": "IrisRoundness returns the camera's Iris Roundness property (1D, %)."
+    },
+    "Layer.IrisShape": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeririsshape",
+      "signature": "func (l *Layer) IrisShape() *Property",
+      "rw": "read-only",
+      "summary": "IrisShape returns the camera's Iris Shape menu property (1D, enum: 1=Fast Rectangle, 3..10 = Triangle..Decagon). Nil for non-camera layers."
+    },
+    "Layer.Is3D": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layeris3d",
+      "signature": "Is3D bool",
+      "rw": "read-write",
+      "summary": "Flag bits from ldta @0x25-0x27. See parse_layer.go's decoder for exact bit positions."
+    },
+    "Layer.IsAdjust": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerisadjust",
+      "signature": "IsAdjust bool",
+      "rw": "read-write"
+    },
+    "Layer.IsGuide": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerisguide",
+      "signature": "IsGuide bool",
+      "rw": "read-write"
+    },
+    "Layer.IsNameFromSource": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerisnamefromsource",
+      "signature": "func (l *Layer) IsNameFromSource() bool",
+      "rw": "read-only",
+      "summary": "IsNameFromSource reports whether the layer's display name is inherited from its source AV item (i.e., the user did not set a custom layer name). True when Name == \"\" and a source exists."
+    },
+    "Layer.IsNull": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerisnull",
+      "signature": "IsNull bool",
+      "rw": "read-write"
+    },
+    "Layer.IsShapeLayer": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerisshapelayer",
+      "signature": "IsShapeLayer bool",
+      "rw": "read-only",
+      "summary": "IsShapeLayer is true when the layer has an \"ADBE Root Vectors Group\" property tree (= it's a Shape Layer with vector primitives)."
+    },
+    "Layer.IsThreeDModelLayer": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeristhreedmodellayer",
+      "signature": "func (l *Layer) IsThreeDModelLayer() bool",
+      "rw": "read-only",
+      "summary": "IsThreeDModelLayer reports whether the layer is a 3D Model layer (AE 24+, py-aep `ThreeDModelLayer`). Identified by ldta byte 0x83 == 0x05 at parse time; see [inferLayerType]."
+    },
+    "Layer.IsTrackMatte": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeristrackmatte",
+      "signature": "func (l *Layer) IsTrackMatte() bool",
+      "rw": "read-only",
+      "summary": "IsTrackMatte reports whether this layer is USED AS a matte by any other layer in the same composition. Walks the comp's layers to find references; O(n) on the comp's layer count."
+    },
+    "Layer.Label": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerlabel",
+      "signature": "Label uint8",
+      "rw": "read-write",
+      "summary": "timeline label color index (0..16) @0x3D"
+    },
+    "Layer.LayerStylesGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlayerstylesgroup",
+      "signature": "func (l *Layer) LayerStylesGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "LayerStylesGroup returns the layer's \"ADBE Layer Styles\" subgroup, or nil if absent. Carries Drop Shadow / Bevel / Glow / etc. effect-style sub-properties (separate from the \"ADBE Effect Parade\" effect list)."
+    },
+    "Layer.LdtaRawBytes": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerldtarawbytes",
+      "signature": "func (l *Layer) LdtaRawBytes() []byte",
+      "rw": "read-only",
+      "summary": "LdtaRawBytes returns the layer's ldta chunk Data slice, or nil if the layer has no ldta. Read-only access for debugging / RE tools — the underlying byte slice is the live chunk data; do not mutate."
+    },
+    "Layer.LightCastsShadows": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightcastsshadows",
+      "signature": "func (l *Layer) LightCastsShadows() *Property",
+      "rw": "read-only",
+      "summary": "LightCastsShadows returns the Casts Shadows toggle if present in the property tree. NOTE: AE may store this as a checkbox flag at the layer level rather than a property, so this accessor returns nil for many real-world projects. The exact ldta location is not RE'd yet."
+    },
+    "Layer.LightColor": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightcolor",
+      "signature": "func (l *Layer) LightColor() *Property",
+      "rw": "read-only",
+      "summary": "LightColor returns the light's Color property (4D color or 3D RGB depending on AE version — read Components to disambiguate). Nil for non-light layers."
+    },
+    "Layer.LightConeAngle": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightconeangle",
+      "signature": "func (l *Layer) LightConeAngle() *Property",
+      "rw": "read-only",
+      "summary": "LightConeAngle returns the spotlight cone-angle property (1D, degrees). Only meaningful for spot lights. Nil otherwise."
+    },
+    "Layer.LightConeFeather": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightconefeather",
+      "signature": "func (l *Layer) LightConeFeather() *Property",
+      "rw": "read-only",
+      "summary": "LightConeFeather returns the spotlight cone-feather property (1D, %). Only meaningful for spot lights."
+    },
+    "Layer.LightFalloffDistance": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightfalloffdistance",
+      "signature": "func (l *Layer) LightFalloffDistance() *Property",
+      "rw": "read-only",
+      "summary": "LightFalloffDistance returns the falloff distance property (1D, pixels)."
+    },
+    "Layer.LightFalloffStart": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightfalloffstart",
+      "signature": "func (l *Layer) LightFalloffStart() *Property",
+      "rw": "read-only",
+      "summary": "LightFalloffStart returns the falloff-start distance property (1D, pixels). Only meaningful when LightFalloffType != None."
+    },
+    "Layer.LightFalloffType": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightfallofftype",
+      "signature": "func (l *Layer) LightFalloffType() *Property",
+      "rw": "read-only",
+      "summary": "LightFalloffType returns the falloff-type menu property (1D enum)."
+    },
+    "Layer.LightIntensity": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightintensity",
+      "signature": "func (l *Layer) LightIntensity() *Property",
+      "rw": "read-only",
+      "summary": "LightIntensity returns the light's Intensity property (1D, %). Nil for non-light layers."
+    },
+    "Layer.LightKind": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerlightkind",
+      "signature": "LightKind LightKind",
+      "rw": "read-write",
+      "summary": "light type (Parallel / Spot / Point / Ambient) stored at ldta @0x88; only meaningful when Type == LayerTypeLight"
+    },
+    "Layer.LightOptionsGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightoptionsgroup",
+      "signature": "func (l *Layer) LightOptionsGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "LightOptionsGroup returns the light layer's \"ADBE Light Options Group\", or nil for non-light layers."
+    },
+    "Layer.LightShadowDarkness": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightshadowdarkness",
+      "signature": "func (l *Layer) LightShadowDarkness() *Property",
+      "rw": "read-only",
+      "summary": "LightShadowDarkness returns the Shadow Darkness property (1D, %)."
+    },
+    "Layer.LightShadowDiffusion": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightshadowdiffusion",
+      "signature": "func (l *Layer) LightShadowDiffusion() *Property",
+      "rw": "read-only",
+      "summary": "LightShadowDiffusion returns the Shadow Diffusion property (1D, pixels)."
+    },
+    "Layer.LightSource": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlightsource",
+      "signature": "func (l *Layer) LightSource() *Layer",
+      "rw": "read-only",
+      "summary": "LightSource returns the layer used as the environment-light source for this Light layer (AE 24+). Returns nil for non-light layers, lights with no source (sentinels 0 / 0xFFFFFFFF), or when the source ID doesn't resolve to a layer in the owning composition."
+    },
+    "Layer.LightType": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerlighttype",
+      "signature": "func (l *Layer) LightType() *Property",
+      "rw": "read-only",
+      "summary": "LightType returns the light's Type menu property if present in the property tree. NOTE: AE typically stores the light type at the layer level (similar to LayerType for camera vs light disambig) rather than as a regular property, so this accessor often returns nil for real-world projects — the type field's exact ldta location is not RE'd yet. Kept for future use / older AE versions that may have surfaced it as a property."
+    },
+    "Layer.Locked": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerlocked",
+      "signature": "Locked bool",
+      "rw": "read-write"
+    },
+    "Layer.Markers": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layermarkers",
+      "signature": "Markers []*Marker",
+      "rw": "read-only",
+      "summary": "layer markers (see marker.md)"
+    },
+    "Layer.MarkersLocked": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layermarkerslocked",
+      "signature": "MarkersLocked bool",
+      "rw": "read-write"
+    },
+    "Layer.MaskParade": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaskparade",
+      "signature": "func (l *Layer) MaskParade() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "MaskParade returns the layer's \"ADBE Mask Parade\" subgroup, or nil if absent. For decoded mask data prefer Layer.Masks."
+    },
+    "Layer.Masks": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layermasks",
+      "signature": "Masks []*Mask",
+      "rw": "read-only",
+      "summary": "vector masks (see mask.md)"
+    },
+    "Layer.MaterialAcceptsLights": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialacceptslights",
+      "signature": "func (l *Layer) MaterialAcceptsLights() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialAcceptsShadows": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialacceptsshadows",
+      "signature": "func (l *Layer) MaterialAcceptsShadows() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialAmbient": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialambient",
+      "signature": "func (l *Layer) MaterialAmbient() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialAppearsInReflections": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialappearsinreflections",
+      "signature": "func (l *Layer) MaterialAppearsInReflections() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialCastsShadows": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialcastsshadows",
+      "signature": "func (l *Layer) MaterialCastsShadows() *Property",
+      "rw": "read-only",
+      "summary": "MaterialCastsShadows returns the (shared with Light) Casts Shadows property. On 3D AV layers it carries a tri-state (Off/On/Only); on light layers it's bool. Same property as LightCastsShadows()."
+    },
+    "Layer.MaterialDiffuse": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialdiffuse",
+      "signature": "func (l *Layer) MaterialDiffuse() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialFresnel": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialfresnel",
+      "signature": "func (l *Layer) MaterialFresnel() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialGlossiness": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialglossiness",
+      "signature": "func (l *Layer) MaterialGlossiness() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialIndexOfRefraction": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialindexofrefraction",
+      "signature": "func (l *Layer) MaterialIndexOfRefraction() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialLightTransmission": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermateriallighttransmission",
+      "signature": "func (l *Layer) MaterialLightTransmission() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialMetal": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialmetal",
+      "signature": "func (l *Layer) MaterialMetal() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialOptionsGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialoptionsgroup",
+      "signature": "func (l *Layer) MaterialOptionsGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "MaterialOptionsGroup returns the 3D AV layer's \"ADBE Material Options Group\", or nil for 2D layers (Is3D == false)."
+    },
+    "Layer.MaterialReflection": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialreflection",
+      "signature": "func (l *Layer) MaterialReflection() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialShadowColor": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialshadowcolor",
+      "signature": "func (l *Layer) MaterialShadowColor() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialShininess": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialshininess",
+      "signature": "func (l *Layer) MaterialShininess() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialSpecular": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialspecular",
+      "signature": "func (l *Layer) MaterialSpecular() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialTranspRolloff": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialtransprolloff",
+      "signature": "func (l *Layer) MaterialTranspRolloff() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MaterialTransparency": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermaterialtransparency",
+      "signature": "func (l *Layer) MaterialTransparency() *Property",
+      "rw": "read-only"
+    },
+    "Layer.MotionBlur": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layermotionblur",
+      "signature": "MotionBlur bool",
+      "rw": "read-write"
+    },
+    "Layer.MoveAfter": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layermoveafter",
+      "signature": "func (l *Layer) MoveAfter(other *Layer) error",
+      "summary": "MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \u003c receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer is missing a comp back-ref."
+    },
+    "Layer.MoveBefore": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layermovebefore",
+      "signature": "func (l *Layer) MoveBefore(other *Layer) error",
+      "summary": "MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack)."
+    },
+    "Layer.MoveToBeginning": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermovetobeginning",
+      "signature": "func (l *Layer) MoveToBeginning() error",
+      "rw": "read-only",
+      "summary": "MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1)."
+    },
+    "Layer.MoveToEnd": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layermovetoend",
+      "signature": "func (l *Layer) MoveToEnd() error",
+      "rw": "read-only",
+      "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers)."
+    },
+    "Layer.Name": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layername",
+      "signature": "Name string",
+      "rw": "read-write",
+      "summary": "layer display name (writable via SetName)"
+    },
+    "Layer.Opacity": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeropacity",
+      "signature": "func (l *Layer) Opacity() *Property",
+      "rw": "read-only",
+      "summary": "Opacity returns the layer's Opacity property (1D, 0..1), or nil."
+    },
+    "Layer.Orientation": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerorientation",
+      "signature": "func (l *Layer) Orientation() *Property",
+      "rw": "read-only",
+      "summary": "Orientation returns the layer's 3D Orientation property (3 components, degrees per axis — separate from the animatable per-axis RotateX/Y/Z). Present only when Layer.Is3D."
+    },
+    "Layer.OutPoint": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layeroutpoint",
+      "signature": "func (l *Layer) OutPoint() float64",
+      "rw": "read-only",
+      "summary": "OutPoint returns the layer's out-point in seconds (ldta @0x1C/@0x20). Returns 0 if the underlying ldta chunk is absent or too short."
+    },
+    "Layer.Parent": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerparent",
+      "signature": "func (l *Layer) Parent() *Layer",
+      "rw": "read-only",
+      "summary": "Parent returns the layer's parent layer, or nil if this layer has no parent (ParentID == 0), the parent ID does not match any layer in the owning composition, or the layer was built outside the parser (no owning comp wired up). AE enforces same-comp parenting; cross-comp lookup is not performed. Returns the immediate parent only — call Parent() on the result to walk the chain."
+    },
+    "Layer.ParentID": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerparentid",
+      "signature": "ParentID uint32",
+      "rw": "read-only",
+      "summary": "parent layer's ID (ldta @0x84); 0 = no parent"
+    },
+    "Layer.Position": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerposition",
+      "signature": "func (l *Layer) Position() *Property",
+      "rw": "read-only",
+      "example": true,
+      "summary": "Position returns the layer's Position property (3D), or nil."
+    },
+    "Layer.PreserveTransparency": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerpreservetransparency",
+      "signature": "PreserveTransparency bool",
+      "rw": "read-write",
+      "summary": "ldta @0x67"
+    },
+    "Layer.Properties": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerproperties",
+      "signature": "Properties []*Property",
+      "rw": "read-only",
+      "summary": "top-level animatable properties (Transform group, etc.)"
+    },
+    "Layer.PropertyByMatchName": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layerpropertybymatchname",
+      "signature": "func (l *Layer) PropertyByMatchName(name string) *Property",
+      "summary": "PropertyByMatchName returns the first property on the layer whose MatchName equals name, or nil if no such property exists."
+    },
+    "Layer.PropertyByPath": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layerpropertybypath",
+      "signature": "func (l *Layer) PropertyByPath(matchNames ...string) *Property",
+      "summary": "PropertyByPath walks the property hierarchy following each match-name in turn. The last name must resolve to a leaf property; intermediate names must resolve to subgroups. Returns nil if the layer has no tree or any step fails."
+    },
+    "Layer.PropertyGroupByMatchName": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layerpropertygroupbymatchname",
+      "signature": "func (l *Layer) PropertyGroupByMatchName(matchName string) *AEPropertyGroup",
+      "summary": "PropertyGroupByMatchName returns the top-level subgroup of the layer's property tree whose match-name equals name. Equivalent to `l.PropertyTree().Group(name)`. Returns nil when the layer has no tree or the named subgroup isn't present."
+    },
+    "Layer.PropertyTree": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerpropertytree",
+      "signature": "func (l *Layer) PropertyTree() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "PropertyTree returns the layer's hierarchical PropertyGroup root, or nil for layers built outside the parser. The root has empty MatchName / Name; its Children are the named top-level groups AE writes under the Layr (Transform, Mask Parade, Effect Parade, etc.)."
+    },
+    "Layer.Quality": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerquality",
+      "signature": "Quality LayerQuality",
+      "rw": "read-write",
+      "summary": "ldta @0x04"
+    },
+    "Layer.RemoveTrackMatte": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerremovetrackmatte",
+      "signature": "func (l *Layer) RemoveTrackMatte() error",
+      "rw": "read-only",
+      "summary": "RemoveTrackMatte clears this layer's track matte assignment — both the mode (TrackMatte → None) and the explicit source pointer (TrackMatteLayerID → 0). Length-preserving write to ldta."
+    },
+    "Layer.ReplaceSource": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layerreplacesource",
+      "signature": "func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error",
+      "summary": "ReplaceSource replaces the layer's source with the given AV item (Composition or Footage). This mirrors py-aep's Layer.ReplaceSource API."
+    },
+    "Layer.RotateX": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerrotatex",
+      "signature": "func (l *Layer) RotateX() *Property",
+      "rw": "read-only",
+      "summary": "RotateX / RotateY are the per-axis 3D rotation properties (degrees). Present only when Layer.Is3D; nil otherwise."
+    },
+    "Layer.RotateY": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerrotatey",
+      "signature": "func (l *Layer) RotateY() *Property",
+      "rw": "read-only"
+    },
+    "Layer.Rotation": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerrotation",
+      "signature": "func (l *Layer) Rotation() *Property",
+      "rw": "read-only",
+      "summary": "Rotation returns the layer's Z-axis Rotation property (1D, degrees), or nil. On 3D layers the X- and Y-rotation properties have different match-names (ADBE Rotate X / ADBE Rotate Y) — use PropertyByMatchName for those."
+    },
+    "Layer.SamplingBicubic": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layersamplingbicubic",
+      "signature": "SamplingBicubic bool",
+      "rw": "read-write",
+      "summary": "false = Bilinear (default), true = Bicubic"
+    },
+    "Layer.Scale": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerscale",
+      "signature": "func (l *Layer) Scale() *Property",
+      "rw": "read-only",
+      "summary": "Scale returns the layer's Scale property (3D), or nil."
+    },
+    "Layer.SetAlternateSource": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetalternatesource",
+      "signature": "func (l *Layer) SetAlternateSource(item AVItem) error",
+      "summary": "SetAlternateSource overrides this layer's source via the Essential Properties → Media Replacement slot (4-byte blsi write, length- preserving). Pass nil (or a zero-id item) to clear the override — equivalent to ClearAlternateSource. Mirrors AE script's Property.setAlternateSource."
+    },
+    "Layer.SetAnchorPoint": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetanchorpoint",
+      "signature": "func (l *Layer) SetAnchorPoint(v []float64) error",
+      "summary": "SetAnchorPoint writes a new static anchor-point. Length of v must match the property's Components (2 or 3 depending on Is3D)."
+    },
+    "Layer.SetAudioEnabled": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetaudioenabled",
+      "signature": "func (l *Layer) SetAudioEnabled(v bool) error",
+      "summary": "SetAudioEnabled toggles the layer's audio switch. length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetAudioLevels": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetaudiolevels",
+      "signature": "func (l *Layer) SetAudioLevels(lr []float64) error",
+      "summary": "SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB). Errors when the layer has no audio levels property (i.e. layer has no audio track)."
+    },
+    "Layer.SetAutoOrient": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetautoorient",
+      "signature": "func (l *Layer) SetAutoOrient(t AutoOrientType) error",
+      "summary": "SetAutoOrient writes the layer's auto-orient mode by clearing the three mutually-exclusive bits across ldta @0x25/@0x26 and setting the one matching the requested AutoOrientType. length-preserving (touches 2 bytes)."
+    },
+    "Layer.SetBlendingMode": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetblendingmode",
+      "signature": "func (l *Layer) SetBlendingMode(m BlendingMode) error",
+      "summary": "SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. length-preserving (single byte)."
+    },
+    "Layer.SetCameraAperture": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcameraaperture",
+      "signature": "func (l *Layer) SetCameraAperture(v float64) error",
+      "summary": "SetCameraAperture writes the aperture property (pixels)."
+    },
+    "Layer.SetCameraBlurLevel": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcamerablurlevel",
+      "signature": "func (l *Layer) SetCameraBlurLevel(v float64) error",
+      "summary": "SetCameraBlurLevel writes the blur-level property (%)."
+    },
+    "Layer.SetCameraDepthOfField": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcameradepthoffield",
+      "signature": "func (l *Layer) SetCameraDepthOfField(enabled bool) error",
+      "summary": "SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0)."
+    },
+    "Layer.SetCameraFocusDistance": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcamerafocusdistance",
+      "signature": "func (l *Layer) SetCameraFocusDistance(v float64) error",
+      "summary": "SetCameraFocusDistance writes the focus-distance property (pixels)."
+    },
+    "Layer.SetCameraZoom": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcamerazoom",
+      "signature": "func (l *Layer) SetCameraZoom(v float64) error",
+      "summary": "SetCameraZoom writes a new static value to the camera's Zoom property (pixels). Errors on non-camera layers or keyframed Zoom."
+    },
+    "Layer.SetCollapseTransform": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcollapsetransform",
+      "signature": "func (l *Layer) SetCollapseTransform(v bool) error",
+      "summary": "SetCollapseTransform toggles \"Collapse Transformations\" (for nested comps) or \"Continuously Rasterize\" (for Illustrator / shape layers). length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetComment": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetcomment",
+      "signature": "func (l *Layer) SetComment(comment string) error",
+      "summary": "SetComment rewrites the layer's comment text (AE's \"Comments\" timeline column / Layer Settings dialog)."
+    },
+    "Layer.SetEffectsEnabled": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layerseteffectsenabled",
+      "signature": "func (l *Layer) SetEffectsEnabled(v bool) error",
+      "summary": "SetEffectsEnabled toggles the layer's fx switch (whether effects render). length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetFrameBlendEnabled": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetframeblendenabled",
+      "signature": "func (l *Layer) SetFrameBlendEnabled(v bool) error",
+      "summary": "SetFrameBlendEnabled toggles the layer's frame-blend switch. length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetFrameBlendPixelMotion": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetframeblendpixelmotion",
+      "signature": "func (l *Layer) SetFrameBlendPixelMotion(v bool) error",
+      "summary": "SetFrameBlendPixelMotion switches frame blending mode between Frame Mix (false) and Pixel Motion (true). Only relevant when FrameBlendEnabled is also true. length-preserving (single bit @ldta 0x25)."
+    },
+    "Layer.SetFrameInPoint": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetframeinpoint",
+      "signature": "func (l *Layer) SetFrameInPoint(frame int) error",
+      "summary": "SetFrameInPoint writes the layer in-point converting the integer frame back to seconds via the owning comp's FrameRate, then delegates to SetInPoint."
+    },
+    "Layer.SetFrameOutPoint": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetframeoutpoint",
+      "signature": "func (l *Layer) SetFrameOutPoint(frame int) error",
+      "summary": "SetFrameOutPoint writes the layer out-point from an integer frame."
+    },
+    "Layer.SetFrameStartTime": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetframestarttime",
+      "signature": "func (l *Layer) SetFrameStartTime(frame int) error",
+      "summary": "SetFrameStartTime writes the layer start-time from an integer frame."
+    },
+    "Layer.SetGeometryBevelDirection": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetgeometrybeveldirection",
+      "signature": "func (l *Layer) SetGeometryBevelDirection(v float64) error",
+      "summary": "SetGeometryBevelDirection writes Bevel Direction enum."
+    },
+    "Layer.SetGeometryPlaneCurvature": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetgeometryplanecurvature",
+      "signature": "func (l *Layer) SetGeometryPlaneCurvature(v float64) error",
+      "summary": "SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1)."
+    },
+    "Layer.SetGeometryPlaneSubdivision": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetgeometryplanesubdivision",
+      "signature": "func (l *Layer) SetGeometryPlaneSubdivision(v float64) error",
+      "summary": "SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality)."
+    },
+    "Layer.SetInPoint": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetinpoint",
+      "signature": "func (l *Layer) SetInPoint(seconds float64) error",
+      "summary": "SetInPoint writes the layer's source-media in-point (seconds) to ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in). length-preserving (8 bytes)."
+    },
+    "Layer.SetIrisAspectRatio": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirisaspectratio",
+      "signature": "func (l *Layer) SetIrisAspectRatio(v float64) error",
+      "summary": "SetIrisAspectRatio writes the Iris Aspect Ratio."
+    },
+    "Layer.SetIrisDiffractionFringe": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirisdiffractionfringe",
+      "signature": "func (l *Layer) SetIrisDiffractionFringe(v float64) error",
+      "summary": "SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%)."
+    },
+    "Layer.SetIrisHighlightGain": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirishighlightgain",
+      "signature": "func (l *Layer) SetIrisHighlightGain(v float64) error",
+      "summary": "SetIrisHighlightGain writes the Iris Highlight Gain."
+    },
+    "Layer.SetIrisHighlightSaturation": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirishighlightsaturation",
+      "signature": "func (l *Layer) SetIrisHighlightSaturation(v float64) error",
+      "summary": "SetIrisHighlightSaturation writes the Iris Highlight Saturation."
+    },
+    "Layer.SetIrisHighlightThreshold": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirishighlightthreshold",
+      "signature": "func (l *Layer) SetIrisHighlightThreshold(v float64) error",
+      "summary": "SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1)."
+    },
+    "Layer.SetIrisRotation": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirisrotation",
+      "signature": "func (l *Layer) SetIrisRotation(v float64) error",
+      "summary": "SetIrisRotation writes the Iris Rotation (degrees)."
+    },
+    "Layer.SetIrisRoundness": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirisroundness",
+      "signature": "func (l *Layer) SetIrisRoundness(v float64) error",
+      "summary": "SetIrisRoundness writes the Iris Roundness (%)."
+    },
+    "Layer.SetIrisShape": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetirisshape",
+      "signature": "func (l *Layer) SetIrisShape(v float64) error",
+      "summary": "SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon)."
+    },
+    "Layer.SetIs3D": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetis3d",
+      "signature": "func (l *Layer) SetIs3D(v bool) error",
+      "summary": "SetIs3D toggles the layer's 3D-layer switch. length-preserving (single bit @ldta 0x26)."
+    },
+    "Layer.SetIsAdjust": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetisadjust",
+      "signature": "func (l *Layer) SetIsAdjust(v bool) error",
+      "summary": "SetIsAdjust toggles the layer's \"Adjustment Layer\" switch. length-preserving (single bit @ldta 0x26)."
+    },
+    "Layer.SetIsGuide": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetisguide",
+      "signature": "func (l *Layer) SetIsGuide(v bool) error",
+      "summary": "SetIsGuide toggles the layer's \"Guide Layer\" switch (AE renders it in the comp viewer but excludes it from output). length-preserving (single bit @ldta 0x25)."
+    },
+    "Layer.SetIsNull": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetisnull",
+      "signature": "func (l *Layer) SetIsNull(v bool) error",
+      "summary": "SetIsNull toggles the Null-Object marker bit. AE's UI creates null layers via Layer \u003e New \u003e Null Object; flipping this post-hoc is supported by the byte but produces uncommon AE behavior — set only when you understand the consequences. length-preserving (single bit @ldta 0x26)."
+    },
+    "Layer.SetLabel": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlabel",
+      "signature": "func (l *Layer) SetLabel(index uint8) error",
+      "summary": "SetLabel writes a new timeline label-color index (0..16) to ldta @0x3D. Indices outside 0..16 are written verbatim (AE shows index 0 for any unknown value but the byte is preserved on round-trip). length-preserving (single byte)."
+    },
+    "Layer.SetLightCastsShadows": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightcastsshadows",
+      "signature": "func (l *Layer) SetLightCastsShadows(enabled bool) error",
+      "summary": "SetLightCastsShadows toggles the Casts Shadows switch (true=1, false=0)."
+    },
+    "Layer.SetLightColor": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightcolor",
+      "signature": "func (l *Layer) SetLightColor(rgba []float64) error",
+      "summary": "SetLightColor writes the light's Color property. The value's length must match the property's component count (3 for RGB, 4 for RGBA); SetStaticValue enforces this."
+    },
+    "Layer.SetLightConeAngle": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightconeangle",
+      "signature": "func (l *Layer) SetLightConeAngle(v float64) error",
+      "summary": "SetLightConeAngle writes the spotlight cone angle (degrees)."
+    },
+    "Layer.SetLightConeFeather": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightconefeather",
+      "signature": "func (l *Layer) SetLightConeFeather(v float64) error",
+      "summary": "SetLightConeFeather writes the spotlight cone-feather (%)."
+    },
+    "Layer.SetLightFalloffDistance": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightfalloffdistance",
+      "signature": "func (l *Layer) SetLightFalloffDistance(v float64) error",
+      "summary": "SetLightFalloffDistance writes the falloff distance (pixels)."
+    },
+    "Layer.SetLightFalloffStart": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightfalloffstart",
+      "signature": "func (l *Layer) SetLightFalloffStart(v float64) error",
+      "summary": "SetLightFalloffStart writes the falloff-start distance (pixels)."
+    },
+    "Layer.SetLightFalloffType": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightfallofftype",
+      "signature": "func (l *Layer) SetLightFalloffType(v float64) error",
+      "summary": "SetLightFalloffType writes the falloff type enum."
+    },
+    "Layer.SetLightIntensity": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightintensity",
+      "signature": "func (l *Layer) SetLightIntensity(v float64) error",
+      "summary": "SetLightIntensity writes the light intensity (%)."
+    },
+    "Layer.SetLightKind": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightkind",
+      "signature": "func (l *Layer) SetLightKind(k LightKind) error",
+      "summary": "SetLightKind rewrites the light layer's kind (ldta @0x88, 4 bytes BE uint32). length-preserving. Only meaningful when Type == LayerTypeLight; AE silently accepts the byte change on non-light layers but it has no visual effect."
+    },
+    "Layer.SetLightShadowDarkness": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightshadowdarkness",
+      "signature": "func (l *Layer) SetLightShadowDarkness(v float64) error",
+      "summary": "SetLightShadowDarkness writes the shadow darkness (%)."
+    },
+    "Layer.SetLightShadowDiffusion": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightshadowdiffusion",
+      "signature": "func (l *Layer) SetLightShadowDiffusion(v float64) error",
+      "summary": "SetLightShadowDiffusion writes the shadow diffusion (pixels)."
+    },
+    "Layer.SetLightSource": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlightsource",
+      "signature": "func (l *Layer) SetLightSource(target *Layer) error",
+      "summary": "SetLightSource writes the environment-light source layer ID for a Light layer (AE 24+). Stored in ldta @0x28 (same slot as AV SourceID; the field is repurposed per Layer.Type). Pass nil to clear — writes sentinel 0xFFFFFFFF. length-preserving (4 bytes)."
+    },
+    "Layer.SetLocked": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetlocked",
+      "signature": "func (l *Layer) SetLocked(v bool) error",
+      "summary": "SetLocked toggles the layer's Lock flag (🔒). When locked, AE refuses edits in the timeline UI; the AEP file itself is still mutable. length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetManualKerning": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmanualkerning",
+      "signature": "func (l *Layer) SetManualKerning(values []int) error",
+      "summary": "SetManualKerning writes per-character manual kerning values (in 1/1000 em units) into the btdk dict. The values slice length must equal the current per-character count (`len(TextSource.ManualKerning)`)."
+    },
+    "Layer.SetMarkersLocked": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmarkerslocked",
+      "signature": "func (l *Layer) SetMarkersLocked(v bool) error",
+      "summary": "SetMarkersLocked toggles \"Lock markers\" on the layer. length-preserving (single bit @ldta 0x26)."
+    },
+    "Layer.SetMaterialAcceptsLights": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialacceptslights",
+      "signature": "func (l *Layer) SetMaterialAcceptsLights(enabled bool) error",
+      "summary": "SetMaterialAcceptsLights toggles the Accepts Lights switch."
+    },
+    "Layer.SetMaterialAcceptsShadows": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialacceptsshadows",
+      "signature": "func (l *Layer) SetMaterialAcceptsShadows(enabled bool) error",
+      "summary": "SetMaterialAcceptsShadows toggles the Accepts Shadows switch."
+    },
+    "Layer.SetMaterialAmbient": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialambient",
+      "signature": "func (l *Layer) SetMaterialAmbient(v float64) error",
+      "summary": "SetMaterialAmbient / Diffuse / Specular / Shininess / Metal / Reflection / Glossiness / Fresnel / Transparency / TranspRolloff / IndexOfRefraction — physically-based material coefficients. All scalar; range varies by field (Ambient/Diffuse/Specular/Metal/Reflection typically 0..1 or 0..100, Shininess 0..150, IndexOfRefraction 1..3+). No range clamping is done; AE will accept any float."
+    },
+    "Layer.SetMaterialAppearsInReflections": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialappearsinreflections",
+      "signature": "func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error",
+      "summary": "SetMaterialAppearsInReflections toggles whether this layer appears in reflective surfaces of other 3D layers."
+    },
+    "Layer.SetMaterialCastsShadows": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialcastsshadows",
+      "signature": "func (l *Layer) SetMaterialCastsShadows(mode MaterialCastsShadowsMode) error",
+      "summary": "SetMaterialCastsShadows writes the tri-state Casts Shadows enum (Off/On/Only). Equivalent to SetLightCastsShadows(bool) when called with Off/On; \"Only\" is AV-3D-specific (renders shadows but hides the layer itself)."
+    },
+    "Layer.SetMaterialDiffuse": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialdiffuse",
+      "signature": "func (l *Layer) SetMaterialDiffuse(v float64) error"
+    },
+    "Layer.SetMaterialFresnel": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialfresnel",
+      "signature": "func (l *Layer) SetMaterialFresnel(v float64) error"
+    },
+    "Layer.SetMaterialGlossiness": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialglossiness",
+      "signature": "func (l *Layer) SetMaterialGlossiness(v float64) error"
+    },
+    "Layer.SetMaterialIndexOfRefraction": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialindexofrefraction",
+      "signature": "func (l *Layer) SetMaterialIndexOfRefraction(v float64) error"
+    },
+    "Layer.SetMaterialLightTransmission": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmateriallighttransmission",
+      "signature": "func (l *Layer) SetMaterialLightTransmission(v float64) error",
+      "summary": "SetMaterialLightTransmission writes light transmission (0..1)."
+    },
+    "Layer.SetMaterialMetal": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialmetal",
+      "signature": "func (l *Layer) SetMaterialMetal(v float64) error"
+    },
+    "Layer.SetMaterialReflection": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialreflection",
+      "signature": "func (l *Layer) SetMaterialReflection(v float64) error"
+    },
+    "Layer.SetMaterialShadowColor": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialshadowcolor",
+      "signature": "func (l *Layer) SetMaterialShadowColor(rgba []float64) error",
+      "summary": "SetMaterialShadowColor writes the shadow color (4-component RGBA)."
+    },
+    "Layer.SetMaterialShininess": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialshininess",
+      "signature": "func (l *Layer) SetMaterialShininess(v float64) error"
+    },
+    "Layer.SetMaterialSpecular": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialspecular",
+      "signature": "func (l *Layer) SetMaterialSpecular(v float64) error"
+    },
+    "Layer.SetMaterialTranspRolloff": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialtransprolloff",
+      "signature": "func (l *Layer) SetMaterialTranspRolloff(v float64) error"
+    },
+    "Layer.SetMaterialTransparency": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmaterialtransparency",
+      "signature": "func (l *Layer) SetMaterialTransparency(v float64) error"
+    },
+    "Layer.SetMotionBlur": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetmotionblur",
+      "signature": "func (l *Layer) SetMotionBlur(v bool) error",
+      "summary": "SetMotionBlur toggles the layer's motion-blur switch. length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetName": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetname",
+      "signature": "func (l *Layer) SetName(newName string) error",
+      "example": true,
+      "summary": "SetName rewrites the layer's display name (the AE timeline label). length-variable — the underlying Utf8 chunk's data slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes."
+    },
+    "Layer.SetOpacity": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetopacity",
+      "signature": "func (l *Layer) SetOpacity(v float64) error",
+      "summary": "SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). Callers that think in percent should divide by 100."
+    },
+    "Layer.SetOrientation": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetorientation",
+      "signature": "func (l *Layer) SetOrientation(v []float64) error",
+      "summary": "SetOrientation writes the 3D orientation (3-component degrees per axis). Errors on 2D layers."
+    },
+    "Layer.SetOutPoint": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetoutpoint",
+      "signature": "func (l *Layer) SetOutPoint(seconds float64) error",
+      "summary": "SetOutPoint writes the layer's source-media out-point (seconds) to ldta @0x1C/@0x20, then refreshes `Layer.Duration`. length-preserving (8 bytes)."
+    },
+    "Layer.SetParagraphAutoHyphenate": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphautohyphenate",
+      "signature": "func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error",
+      "summary": "SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx. Default in AE is true. AE 24+ writeable."
+    },
+    "Layer.SetParagraphDirection": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphdirection",
+      "signature": "func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) error",
+      "summary": "SetParagraphDirection writes the paragraph reading direction on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). Affects how mixed LTR/RTL text composes."
+    },
+    "Layer.SetParagraphEndIndent": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphendindent",
+      "signature": "func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error",
+      "summary": "SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx."
+    },
+    "Layer.SetParagraphFirstLineIndent": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphfirstlineindent",
+      "signature": "func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error",
+      "summary": "SetParagraphFirstLineIndent writes firstLineIndent (em points) on paragraph #paraIdx. AE 24+ writeable (AE 2020 ScriptingAPI no-op on point text)."
+    },
+    "Layer.SetParagraphHangingRoman": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphhangingroman",
+      "signature": "func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error",
+      "summary": "SetParagraphHangingRoman toggles Roman Hanging Punctuation on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). Only meaningful for box-text."
+    },
+    "Layer.SetParagraphJustification": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphjustification",
+      "signature": "func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) error",
+      "summary": "SetParagraphJustification writes a new alignment enum on paragraph #paraIdx."
+    },
+    "Layer.SetParagraphLeadingType": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphleadingtype",
+      "signature": "func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error",
+      "summary": "SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /8)."
+    },
+    "Layer.SetParagraphSpaceAfter": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphspaceafter",
+      "signature": "func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error",
+      "summary": "SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx."
+    },
+    "Layer.SetParagraphSpaceBefore": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphspacebefore",
+      "signature": "func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error",
+      "summary": "SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx."
+    },
+    "Layer.SetParagraphStartIndent": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparagraphstartindent",
+      "signature": "func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error",
+      "summary": "SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx."
+    },
+    "Layer.SetParent": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetparent",
+      "signature": "func (l *Layer) SetParent(parentID uint32) error",
+      "summary": "SetParent rewrites the layer's parent-layer ID (ldta @0x84) to `parentID`. Pass 0 to clear the parent (= \"no parent\", AE shows \"None\" in the timeline). length-preserving (4 bytes)."
+    },
+    "Layer.SetPosition": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetposition",
+      "signature": "func (l *Layer) SetPosition(v []float64) error",
+      "summary": "SetPosition writes a new static position. Length of v must match Position's Components (2 or 3)."
+    },
+    "Layer.SetPreserveTransparency": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetpreservetransparency",
+      "signature": "func (l *Layer) SetPreserveTransparency(v bool) error",
+      "summary": "SetPreserveTransparency toggles \"Preserve Underlying Transparency\" (ldta @0x67, single byte 0/1). length-preserving (single byte)."
+    },
+    "Layer.SetQuality": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetquality",
+      "signature": "func (l *Layer) SetQuality(q LayerQuality) error",
+      "summary": "SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). length-preserving (2 bytes)."
+    },
+    "Layer.SetRotateX": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrotatex",
+      "signature": "func (l *Layer) SetRotateX(deg float64) error",
+      "summary": "SetRotateX / SetRotateY write per-axis 3D rotation (degrees). Error on 2D layers (property not present)."
+    },
+    "Layer.SetRotateY": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrotatey",
+      "signature": "func (l *Layer) SetRotateY(deg float64) error"
+    },
+    "Layer.SetRotation": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrotation",
+      "signature": "func (l *Layer) SetRotation(deg float64) error",
+      "summary": "SetRotation writes the Z-axis rotation (degrees). Available on both 2D and 3D layers (it's the only rotation axis 2D layers have)."
+    },
+    "Layer.SetRunApplyStroke": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunapplystroke",
+      "signature": "func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error",
+      "summary": "SetRunApplyStroke toggles whether the stroke is rendered on style run #runIdx."
+    },
+    "Layer.SetRunAutoKernType": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunautokerntype",
+      "signature": "func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error",
+      "summary": "SetRunAutoKernType writes the auto-kerning mode on style run #runIdx. AE 24+ writeable (btdk style-run /11). Note: setting to TextAutoKernNoAuto without also assigning a manual kerning value will read as \"0 spacing\" in AE — manual kerning lives in a separate per-character sub-tree at btdk /1/1[0]/0/8 which this library does not yet expose for writing."
+    },
+    "Layer.SetRunAutoLeading": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunautoleading",
+      "signature": "func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error",
+      "summary": "SetRunAutoLeading toggles AE's \"auto leading\" flag on style run #runIdx. When true, the Leading value is computed by AE (typically FontSize × 1.2); when false, the explicit Leading value applies."
+    },
+    "Layer.SetRunBaselineOption": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunbaselineoption",
+      "signature": "func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error",
+      "summary": "SetRunBaselineOption writes the font baseline option on style run #runIdx. AE 24+ writeable; mirrors subscript / superscript readonly attrs."
+    },
+    "Layer.SetRunBaselineShift": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunbaselineshift",
+      "signature": "func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error",
+      "summary": "SetRunBaselineShift writes baseline shift (em points; positive = up) on style run #runIdx."
+    },
+    "Layer.SetRunCapsOption": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetruncapsoption",
+      "signature": "func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error",
+      "summary": "SetRunCapsOption writes the font caps option on style run #runIdx (AE 24+ writeable; underlying btdk byte exists in AE 2020 files too, but AE 2020 ScriptingAPI marks allCaps / smallCaps readonly so fixture generation requires AE 24)."
+    },
+    "Layer.SetRunDigitSet": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrundigitset",
+      "signature": "func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error",
+      "summary": "SetRunDigitSet writes the digit set on style run #runIdx (AE 24+ writeable, btdk style-run /70)."
+    },
+    "Layer.SetRunFauxBold": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunfauxbold",
+      "signature": "func (l *Layer) SetRunFauxBold(runIdx int, on bool) error",
+      "summary": "SetRunFauxBold toggles synthetic bold on style run #runIdx."
+    },
+    "Layer.SetRunFauxItalic": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunfauxitalic",
+      "signature": "func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error",
+      "summary": "SetRunFauxItalic toggles synthetic italic on style run #runIdx."
+    },
+    "Layer.SetRunFillColor": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunfillcolor",
+      "signature": "func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error",
+      "summary": "SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1) on style run #runIdx. Encoded as btdk's [A, R, G, B] array."
+    },
+    "Layer.SetRunFontIndex": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunfontindex",
+      "signature": "func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error",
+      "summary": "SetRunFontIndex repoints style run #runIdx at a different entry in the Fonts table (TextSource.Fonts). Caller is responsible for ensuring the index is in range; the underlying psValue is just an integer."
+    },
+    "Layer.SetRunFontSize": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunfontsize",
+      "signature": "func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error",
+      "summary": "SetRunFontSize writes a new font size (em points) to style run #runIdx. length-variable splice in the btdk PostScript body."
+    },
+    "Layer.SetRunHorizontalScale": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunhorizontalscale",
+      "signature": "func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error",
+      "summary": "SetRunHorizontalScale / SetRunVerticalScale write the raw scale values used by AE on style run #runIdx. See TextStyleRun docs for the unit notes (AE default is 1; scripted setter range 0..100)."
+    },
+    "Layer.SetRunLeading": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunleading",
+      "signature": "func (l *Layer) SetRunLeading(runIdx int, leading float64) error",
+      "summary": "SetRunLeading writes leading (em points) on style run #runIdx. Note: AE auto-leading is gated by the AutoLeading flag — to use this value the caller should also disable auto-leading via SetRunAutoLeading(runIdx, false), otherwise AE overrides it."
+    },
+    "Layer.SetRunLineJoinType": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunlinejointype",
+      "signature": "func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error",
+      "summary": "SetRunLineJoinType writes the stroke corner join style on style run #runIdx (AE 24+ writeable, btdk style-run /62)."
+    },
+    "Layer.SetRunNoBreak": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunnobreak",
+      "signature": "func (l *Layer) SetRunNoBreak(runIdx int, on bool) error",
+      "summary": "SetRunNoBreak toggles the \"do not break\" character flag on style run #runIdx (AE 24+ writeable, btdk style-run /52). When true, AE won't allow line breaks to fall inside the run."
+    },
+    "Layer.SetRunStrokeColor": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunstrokecolor",
+      "signature": "func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error",
+      "summary": "SetRunStrokeColor writes the stroke paint color [R, G, B, A] on style run #runIdx."
+    },
+    "Layer.SetRunStrokeOverFill": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunstrokeoverfill",
+      "signature": "func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error",
+      "summary": "SetRunStrokeOverFill toggles whether the stroke renders over the fill (true) or under it (false) on style run #runIdx. Default in AE is true."
+    },
+    "Layer.SetRunStrokeWidth": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunstrokewidth",
+      "signature": "func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error",
+      "summary": "SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx."
+    },
+    "Layer.SetRunTracking": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetruntracking",
+      "signature": "func (l *Layer) SetRunTracking(runIdx int, tracking float64) error",
+      "summary": "SetRunTracking writes character tracking (1/1000 em) on style run #runIdx."
+    },
+    "Layer.SetRunTsume": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetruntsume",
+      "signature": "func (l *Layer) SetRunTsume(runIdx int, tsume float64) error",
+      "summary": "SetRunTsume writes the CJK character-spacing adjustment (0..100) on style run #runIdx."
+    },
+    "Layer.SetRunVerticalScale": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetrunverticalscale",
+      "signature": "func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error"
+    },
+    "Layer.SetSamplingBicubic": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetsamplingbicubic",
+      "signature": "func (l *Layer) SetSamplingBicubic(v bool) error",
+      "summary": "SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling for the layer. length-preserving (single bit @ldta 0x25)."
+    },
+    "Layer.SetScale": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetscale",
+      "signature": "func (l *Layer) SetScale(v []float64) error",
+      "summary": "SetScale writes a new static scale (normalized 1.0 = 100%). Length of v must match Scale's Components (2 or 3)."
+    },
+    "Layer.SetShy": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetshy",
+      "signature": "func (l *Layer) SetShy(v bool) error",
+      "summary": "SetShy toggles the layer's Shy flag (hides from the shy-filter view). length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.SetSolo": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetsolo",
+      "signature": "func (l *Layer) SetSolo(v bool) error",
+      "summary": "SetSolo toggles the layer's Solo flag. length-preserving (single bit @ldta 0x26)."
+    },
+    "Layer.SetSource": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetsource",
+      "signature": "func (l *Layer) SetSource(sourceID uint32) error",
+      "summary": "SetSource rewrites the layer's source-item ID (ldta @0x28). For regular AV layers this is the footage or pre-comp ID. length- preserving (4 bytes)."
+    },
+    "Layer.SetStartTime": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetstarttime",
+      "signature": "func (l *Layer) SetStartTime(seconds float64) error",
+      "summary": "SetStartTime writes the layer's start time (seconds) to ldta @0x0C/@0x10. length-preserving (8 bytes)."
+    },
+    "Layer.SetStretch": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetstretch",
+      "signature": "func (l *Layer) SetStretch(ratio float64) error",
+      "summary": "SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) to ldta @0x08 (dividend) / @0x6C (divisor). Unlike the other time fields the dividend/divisor pair is **split across the ldta** — dividend lives near the top, divisor in the trailing section. length-preserving (8 bytes total in two 4-byte writes)."
+    },
+    "Layer.SetText": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersettext",
+      "signature": "func (l *Layer) SetText(newText string) error",
+      "summary": "SetText replaces a text layer's user-visible text in-place. The new text must encode to exactly the same number of bytes as the original PostScript string (length-preserving constraint — the surrounding btds/btdk chunk headers reference fixed byte counts that we won't rewrite). Returns an error when the byte budget doesn't match, when the layer isn't a text layer, or when the original text-string location wasn't recorded during parsing."
+    },
+    "Layer.SetTimeRemapEnabled": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersettimeremapenabled",
+      "signature": "func (l *Layer) SetTimeRemapEnabled(enabled bool) error",
+      "summary": "SetTimeRemapEnabled enables or disables time remapping on this layer."
+    },
+    "Layer.SetTrackMatte": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersettrackmatte",
+      "signature": "func (l *Layer) SetTrackMatte(t TrackMatteType) error",
+      "summary": "SetTrackMatte writes a new track-matte type byte to ldta @0x6B. length-preserving (single byte)."
+    },
+    "Layer.SetTrackMatteLayer": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersettrackmattelayer",
+      "signature": "func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error",
+      "summary": "SetTrackMatteLayer rewrites this layer's explicit track matte source (ldta @0xA0, AE 23+) to `sourceID` and updates the track matte mode (ldta @0x6B) to `mode`. Pass sourceID=0 with mode=TrackMatteNone to clear the matte. length-preserving (4 bytes + 1 byte)."
+    },
+    "Layer.SetTrackMatteSource": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersettrackmattesource",
+      "signature": "func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error",
+      "summary": "SetTrackMatteSource designates `src` as this layer's explicit track-matte source and writes the matte mode. Mirrors AE ScriptingAPI 23+ layer.setTrackMatte(srcLayer, type). Requires AE 23+ ldta (the @0xA0 slot — re-save through AE 23+ first on AE 22 / 2020 files)."
+    },
+    "Layer.SetVisible": {
+      "kind": "method",
+      "file": "layer.md",
+      "anchor": "#layersetvisible",
+      "signature": "func (l *Layer) SetVisible(v bool) error",
+      "example": true,
+      "summary": "SetVisible toggles the layer's video switch (the 👁️ icon). length-preserving (single bit @ldta 0x27)."
+    },
+    "Layer.ShapeContentsGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layershapecontentsgroup",
+      "signature": "func (l *Layer) ShapeContentsGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "ShapeContentsGroup returns a shape layer's \"ADBE Root Vectors Group\", or nil for non-shape layers. For typed access prefer the V2.2 ShapeLayer wrapper (see WrapShapeLayer)."
+    },
+    "Layer.ShapePaths": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layershapepaths",
+      "signature": "ShapePaths []*ShapePath",
+      "rw": "read-only",
+      "summary": "shape-layer Bezier paths (see shape.md)"
+    },
+    "Layer.ShapePrimitives": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layershapeprimitives",
+      "signature": "ShapePrimitives []*ShapePrimitive",
+      "rw": "read-only",
+      "summary": "Rect / Ellipse / Star parametric shapes"
+    },
+    "Layer.Shy": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layershy",
+      "signature": "Shy bool",
+      "rw": "read-write"
+    },
+    "Layer.Solo": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layersolo",
+      "signature": "Solo bool",
+      "rw": "read-write"
+    },
+    "Layer.SourceComposition": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layersourcecomposition",
+      "signature": "func (l *Layer) SourceComposition() *Composition",
+      "rw": "read-only",
+      "summary": "SourceComposition returns the composition this layer references as its source (a pre-comp layer), or nil when the source is footage / a solid / any non-composition item, when the SourceID does not resolve to any project item, or when the layer was built outside the parser (no owning comp/project wired up). Use Project.CompositionByID directly for arbitrary lookups."
+    },
+    "Layer.SourceFootage": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layersourcefootage",
+      "signature": "func (l *Layer) SourceFootage() *Footage",
+      "rw": "read-only",
+      "summary": "SourceFootage returns the footage item this layer references as its source (a solid / file / placeholder footage), or nil when the source is a composition / no source / outside the parser. Use Project.FootageByName or iterate Project.Footage for arbitrary lookups."
+    },
+    "Layer.SourceID": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layersourceid",
+      "signature": "SourceID uint32",
+      "rw": "read-only",
+      "summary": "item ID of the layer's source (footage or pre-comp), per ldta@0x28"
+    },
+    "Layer.StartTime": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerstarttime",
+      "signature": "StartTime float64",
+      "rw": "read-write",
+      "summary": "in-point in seconds (timeline start of the layer)"
+    },
+    "Layer.Stretch": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layerstretch",
+      "signature": "Stretch float64",
+      "rw": "read-write",
+      "summary": "time-stretch percentage (100 = normal speed)"
+    },
+    "Layer.TextPropertiesGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layertextpropertiesgroup",
+      "signature": "func (l *Layer) TextPropertiesGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "TextPropertiesGroup returns the layer's \"ADBE Text Properties\" subgroup, or nil for non-text layers."
+    },
+    "Layer.TextSource": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layertextsource",
+      "signature": "TextSource *TextSource",
+      "rw": "read-only",
+      "summary": "TextSource holds the decoded view of TextSourceRaw — text content, fonts, per-run styling, justification. Nil for non-text layers or when the btdk PostScript dict failed to parse (in which case the failure is collected on Project.Warnings)."
+    },
+    "Layer.TextSourceRaw": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layertextsourceraw",
+      "signature": "TextSourceRaw []byte",
+      "rw": "read-only",
+      "summary": "TextSourceRaw holds the opaque btds payload for text layers (CoolType PostScript-style serialization of font, size, color, and the actual text string). Nil for non-text layers; kept verbatim for round-trip writeback and downstream tools that need fields beyond TextSource."
+    },
+    "Layer.TimeRemap": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layertimeremap",
+      "signature": "func (l *Layer) TimeRemap() *Property",
+      "rw": "read-only",
+      "summary": "TimeRemap returns the layer's Time Remap property (1D, seconds) when time remapping is enabled. Returns the property slot even when time remap is disabled — check TimeRemapEnabled() for the on/off bit. To toggle time remap on / off requires structural property-tree changes (AE adds 2 default keyframes); not currently supported."
+    },
+    "Layer.TimeRemapEnabled": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layertimeremapenabled",
+      "signature": "func (l *Layer) TimeRemapEnabled() bool",
+      "rw": "read-only",
+      "summary": "TimeRemapEnabled reports whether the layer has time remapping turned on. AE always writes the TimeRemap property slot in the property tree (so PropertyByMatchName always finds it on AV layers / precomps), but only populates it with keyframes when remap is enabled — AE adds two default identity keyframes (t=0, t=duration) on enable. When disabled, Keyframes is empty."
+    },
+    "Layer.TrackMatte": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layertrackmatte",
+      "signature": "TrackMatte TrackMatteType",
+      "rw": "read-write",
+      "summary": "ldta @0x6B"
+    },
+    "Layer.TrackMatteLayer": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layertrackmattelayer",
+      "signature": "func (l *Layer) TrackMatteLayer() *Layer",
+      "rw": "read-only",
+      "summary": "TrackMatteLayer returns the layer used as this layer's track matte source (AE 23+ explicit pointer at ldta @0xA0). Returns nil when:"
+    },
+    "Layer.TrackMatteLayerID": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layertrackmattelayerid",
+      "signature": "TrackMatteLayerID uint32",
+      "rw": "read-only",
+      "summary": "explicit matte SOURCE layer ID (ldta @0xA0, AE 23+); 0 = no explicit matte. See Layer.TrackMatteLayer() to resolve to *Layer; SetTrackMatteLayer to assign."
+    },
+    "Layer.TransformGroup": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layertransformgroup",
+      "signature": "func (l *Layer) TransformGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "TransformGroup returns the layer's \"ADBE Transform Group\" subgroup, or nil if absent. Standard layers always have it; effect-only layers do not."
+    },
+    "Layer.Type": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layertype",
+      "signature": "Type LayerType",
+      "rw": "read-only",
+      "summary": "layer kind (AV / shape / text / camera / light / null / adjustment)"
+    },
+    "Layer.Visible": {
+      "kind": "field",
+      "file": "layer.md",
+      "anchor": "#layervisible",
+      "signature": "Visible bool",
+      "rw": "read-write",
+      "summary": "bit0 of 0x27 — \"video enabled\""
+    },
+    "Layer.Width": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#layerwidth",
+      "signature": "func (l *Layer) Width() int",
+      "rw": "read-only",
+      "summary": "Width returns the layer's effective width in pixels — proxies to the source AV item when present, or to the owning composition's width for layers without an AV source (cameras, lights, nulls, text, shapes). Returns 0 when neither resolves."
+    },
     "LayerQuality": {
       "kind": "type",
       "file": "constants.md",
@@ -1229,6 +3279,20 @@
       "file": "constants.md",
       "anchor": "#layertype-object",
       "summary": "LayerType classifies the kind of layer."
+    },
+    "LightKind": {
+      "kind": "type",
+      "file": "layer.md",
+      "anchor": "#lightkind-object",
+      "summary": "LightKind is the layer-level light type stored in ldta @0x88 (4-byte BE uint32, AE 23+ ldta layout). For light layers only; zero for non-light layers (the parser leaves Layer.LightKind as default 0 == Parallel for them, so always cross-check Layer.Type == LayerTypeLight before reading LightKind)."
+    },
+    "LightKind.String": {
+      "kind": "getter",
+      "file": "layer.md",
+      "anchor": "#lightkindstring",
+      "signature": "func (k LightKind) String() string",
+      "rw": "read-only",
+      "summary": "String returns a human-readable name for the light kind."
     },
     "Marker": {
       "kind": "type",

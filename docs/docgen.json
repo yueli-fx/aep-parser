@@ -48,6 +48,11 @@
       "roots": ["LayerType", "BlendingMode", "TrackMatteType", "AutoOrientType", "LayerQuality", "MaskMode", "InterpType", "TextJustification", "BitsPerChannel"],
       "head": "_includes/constants.head.md",
       "tail": "_includes/constants.tail.md"
+    },
+    {
+      "out": "layer.md",
+      "roots": ["Layer", "LightKind"],
+      "head": "_includes/layer.head.md"
     }
   ]
 }

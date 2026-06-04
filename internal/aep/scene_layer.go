@@ -17,18 +17,18 @@ const (
 
 // Layer represents a layer within a composition.
 type Layer struct {
-	Index    int
-	Name     string
-	Type     LayerType
-	ID                uint32 // own layer ID (ldta @0x00) — referenced by ParentID of children
-	ParentID          uint32 // parent layer's ID (ldta @0x84); 0 = no parent
-	SourceID          uint32 // item ID of the layer's source (footage or pre-comp), per ldta@0x28
-	TrackMatteLayerID uint32 // explicit matte SOURCE layer ID (ldta @0xA0, AE 23+); 0 = no explicit matte. See Layer.TrackMatteLayer() to resolve to *Layer; SetTrackMatteLayer to assign.
+	Index             int       // 1-based timeline position (top of stack = 1)
+	Name              string    // layer display name (writable via SetName)
+	Type              LayerType // layer kind (AV / shape / text / camera / light / null / adjustment)
+	ID                uint32    // own layer ID (ldta @0x00) — referenced by ParentID of children
+	ParentID          uint32    // parent layer's ID (ldta @0x84); 0 = no parent
+	SourceID          uint32    // item ID of the layer's source (footage or pre-comp), per ldta@0x28
+	TrackMatteLayerID uint32    // explicit matte SOURCE layer ID (ldta @0xA0, AE 23+); 0 = no explicit matte. See Layer.TrackMatteLayer() to resolve to *Layer; SetTrackMatteLayer to assign.
 	LightKind         LightKind // light type (Parallel / Spot / Point / Ambient) stored at ldta @0x88; only meaningful when Type == LayerTypeLight
 
-	StartTime float64
-	Duration  float64
-	Stretch   float64
+	StartTime float64 // in-point in seconds (timeline start of the layer)
+	Duration  float64 // layer duration in seconds
+	Stretch   float64 // time-stretch percentage (100 = normal speed)
 
 	Quality              LayerQuality   // ldta @0x04
 	Label                uint8          // timeline label color index (0..16) @0x3D
@@ -39,28 +39,28 @@ type Layer struct {
 
 	// Flag bits from ldta @0x25-0x27. See parse_layer.go's decoder for
 	// exact bit positions.
-	Is3D                 bool
-	Solo                 bool
-	Shy                  bool
-	Locked               bool
-	Visible              bool // bit0 of 0x27 — "video enabled"
-	IsAdjust             bool
-	IsNull               bool
-	IsGuide              bool
-	MarkersLocked        bool
-	MotionBlur           bool
-	EffectsEnabled       bool
-	AudioEnabled         bool
-	FrameBlendEnabled    bool
-	CollapseTransform    bool
-	SamplingBicubic      bool // false = Bilinear (default), true = Bicubic
+	Is3D                  bool
+	Solo                  bool
+	Shy                   bool
+	Locked                bool
+	Visible               bool // bit0 of 0x27 — "video enabled"
+	IsAdjust              bool
+	IsNull                bool
+	IsGuide               bool
+	MarkersLocked         bool
+	MotionBlur            bool
+	EffectsEnabled        bool
+	AudioEnabled          bool
+	FrameBlendEnabled     bool
+	CollapseTransform     bool
+	SamplingBicubic       bool // false = Bilinear (default), true = Bicubic
 	FrameBlendPixelMotion bool // false = Frame Mix, true = Pixel Motion
 
-	Properties      []*Property
-	Effects         []*Effect
-	Markers         []*Marker
-	Masks           []*Mask
-	ShapePaths      []*ShapePath
+	Properties      []*Property       // top-level animatable properties (Transform group, etc.)
+	Effects         []*Effect         // applied effects (see effect.md)
+	Markers         []*Marker         // layer markers (see marker.md)
+	Masks           []*Mask           // vector masks (see mask.md)
+	ShapePaths      []*ShapePath      // shape-layer Bezier paths (see shape.md)
 	ShapePrimitives []*ShapePrimitive // Rect / Ellipse / Star parametric shapes
 
 	// TextSourceRaw holds the opaque btds payload for text layers (CoolType
