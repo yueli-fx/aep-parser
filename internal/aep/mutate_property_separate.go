@@ -9,8 +9,10 @@ import (
 )
 
 // SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position
-// leader. Alpha / structural. Both directions are implemented for a static
-// Position; animated Position is refused pending its own RE + ship-gate.
+// leader. Alpha / structural. Both directions (separate↔merge) are
+// implemented for static AND animated Position; an animated leader routes to
+// the keyframe-stream migration paths (separatePositionAnimated /
+// mergePositionAnimated), both ship-gated AE 2020+2025.
 //
 // Byte mechanics REd from AE 2020 controlled before/after pairs (see
 // test_data/re_separate_dims*.jsx + incidents/separate-dimensions-write-mechanics.md):
@@ -51,10 +53,10 @@ func (p *Property) SetDimensionsSeparated(separated bool) error {
 	}
 
 	// An animated leader carries a keyframe stream (no cdat) instead of a
-	// static value; it routes to its own stream-migration path. Merging an
-	// animated-separated Position (leader is static-default, followers
-	// animated) is a later slice — that leader has a cdat and falls through to
-	// mergePosition, which refuses the non-scalar followers.
+	// static value; it routes to separatePositionAnimated. The merge direction
+	// of an animated-separated Position (leader is static-default with a cdat,
+	// followers animated) falls through to mergePosition, which detects the
+	// animated followers and routes to mergePositionAnimated.
 	if separated && p.back.cdat == nil && len(p.Keyframes) > 0 {
 		return p.separatePositionAnimated(grp, layer)
 	}
