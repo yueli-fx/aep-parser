@@ -42,6 +42,12 @@
       "roots": ["Composition", "Guide", "GuideOrientation", "EssentialGraphicsController", "EGControllerType"],
       "head": "_includes/composition.head.md",
       "tail": "_includes/composition.tail.md"
+    },
+    {
+      "out": "constants.md",
+      "roots": ["LayerType", "BlendingMode", "TrackMatteType", "AutoOrientType", "LayerQuality", "MaskMode", "InterpType", "TextJustification", "BitsPerChannel"],
+      "head": "_includes/constants.head.md",
+      "tail": "_includes/constants.tail.md"
     }
   ]
 }

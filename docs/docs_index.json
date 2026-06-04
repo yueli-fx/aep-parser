@@ -1,6 +1,38 @@
 {
   "go_version": "go1.25.1",
   "symbols": {
+    "AutoOrientType": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#autoorienttype-object",
+      "summary": "AutoOrientType is the layer's auto-orientation mode (Layer \u003e Transform \u003e Auto-Orient in AE). Encoded as 3 mutually-exclusive bits across ldta bytes 0x25 and 0x26 — see parse_layer.go's flag-bit doc. AE collapses the bits into one of four UI choices, which we mirror here."
+    },
+    "AutoOrientType.String": {
+      "kind": "getter",
+      "file": "constants.md",
+      "anchor": "#autoorienttypestring",
+      "signature": "func (a AutoOrientType) String() string",
+      "rw": "read-only"
+    },
+    "BitsPerChannel": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#bitsperchannel-object",
+      "summary": "BitsPerChannel represents color depth."
+    },
+    "BitsPerChannel.String": {
+      "kind": "getter",
+      "file": "constants.md",
+      "anchor": "#bitsperchannelstring",
+      "signature": "func (b BitsPerChannel) String() string",
+      "rw": "read-only"
+    },
+    "BlendingMode": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#blendingmode-object",
+      "summary": "BlendingMode is the layer's compositing blend mode (ldta @0x63). Values match py-aep's BlendingMode enum / AE's internal numbering."
+    },
     "Composition": {
       "kind": "type",
       "file": "composition.md",
@@ -1036,13 +1068,13 @@
     },
     "InterpType": {
       "kind": "type",
-      "file": "property.md",
+      "file": "constants.md",
       "anchor": "#interptype-object",
       "summary": "InterpType identifies a keyframe's interpolation mode on one side (in-side or out-side). AE stores these as single-byte enums in the keyframe block at offsets 0x04 (in-interp) and 0x05 (out-interp)."
     },
     "InterpType.String": {
       "kind": "getter",
-      "file": "property.md",
+      "file": "constants.md",
       "anchor": "#interptypestring",
       "signature": "func (it InterpType) String() string",
       "rw": "read-only"
@@ -1185,6 +1217,18 @@
       "anchor": "#keyframevalue",
       "signature": "Value any",
       "rw": "read-write"
+    },
+    "LayerQuality": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#layerquality-object",
+      "summary": "LayerQuality is the layer's render quality (ldta @0x04, uint16)."
+    },
+    "LayerType": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#layertype-object",
+      "summary": "LayerType classifies the kind of layer."
     },
     "Marker": {
       "kind": "type",
@@ -1531,13 +1575,13 @@
     },
     "MaskMode": {
       "kind": "type",
-      "file": "mask.md",
+      "file": "constants.md",
       "anchor": "#maskmode-object",
       "summary": "MaskMode is the compositing mode for a mask (matches AE C++ SDK values)."
     },
     "MaskMode.String": {
       "kind": "getter",
-      "file": "mask.md",
+      "file": "constants.md",
       "anchor": "#maskmodestring",
       "signature": "func (m MaskMode) String() string",
       "rw": "read-only"
@@ -2477,6 +2521,26 @@
       "anchor": "#temporaleasespeed",
       "signature": "Speed float64",
       "rw": "read-only"
+    },
+    "TextJustification": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#textjustification-object",
+      "summary": "TextJustification matches AE's paragraph alignment enum."
+    },
+    "TextJustification.String": {
+      "kind": "getter",
+      "file": "constants.md",
+      "anchor": "#textjustificationstring",
+      "signature": "func (j TextJustification) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TrackMatteType": {
+      "kind": "type",
+      "file": "constants.md",
+      "anchor": "#trackmattetype-object",
+      "summary": "TrackMatteType is the layer's track-matte mode (ldta @0x6B)."
     }
   }
 }
