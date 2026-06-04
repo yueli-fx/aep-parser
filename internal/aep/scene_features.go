@@ -184,44 +184,44 @@ type MaskVertex struct {
 type BlendingMode uint8
 
 const (
-	BlendingModeNormalCamera     BlendingMode = 0  // null/camera/light default
-	BlendingModeNormal           BlendingMode = 2
-	BlendingModeDissolve         BlendingMode = 3
-	BlendingModeAdd              BlendingMode = 4
-	BlendingModeMultiply         BlendingMode = 5
-	BlendingModeScreen           BlendingMode = 6
-	BlendingModeOverlay          BlendingMode = 7
-	BlendingModeSoftLight        BlendingMode = 8
-	BlendingModeHardLight        BlendingMode = 9
-	BlendingModeDarken           BlendingMode = 10
-	BlendingModeLighten          BlendingMode = 11
+	BlendingModeNormalCamera      BlendingMode = 0 // null/camera/light default
+	BlendingModeNormal            BlendingMode = 2
+	BlendingModeDissolve          BlendingMode = 3
+	BlendingModeAdd               BlendingMode = 4
+	BlendingModeMultiply          BlendingMode = 5
+	BlendingModeScreen            BlendingMode = 6
+	BlendingModeOverlay           BlendingMode = 7
+	BlendingModeSoftLight         BlendingMode = 8
+	BlendingModeHardLight         BlendingMode = 9
+	BlendingModeDarken            BlendingMode = 10
+	BlendingModeLighten           BlendingMode = 11
 	BlendingModeClassicDifference BlendingMode = 12
-	BlendingModeHue              BlendingMode = 13
-	BlendingModeSaturation       BlendingMode = 14
-	BlendingModeColor            BlendingMode = 15
-	BlendingModeLuminosity       BlendingMode = 16
-	BlendingModeStencilAlpha     BlendingMode = 17
-	BlendingModeStencilLuma      BlendingMode = 18
-	BlendingModeSilhouetteAlpha  BlendingMode = 19
-	BlendingModeSilhouetteLuma   BlendingMode = 20
+	BlendingModeHue               BlendingMode = 13
+	BlendingModeSaturation        BlendingMode = 14
+	BlendingModeColor             BlendingMode = 15
+	BlendingModeLuminosity        BlendingMode = 16
+	BlendingModeStencilAlpha      BlendingMode = 17
+	BlendingModeStencilLuma       BlendingMode = 18
+	BlendingModeSilhouetteAlpha   BlendingMode = 19
+	BlendingModeSilhouetteLuma    BlendingMode = 20
 	BlendingModeLuminescentPremul BlendingMode = 21
-	BlendingModeAlphaAdd         BlendingMode = 22
+	BlendingModeAlphaAdd          BlendingMode = 22
 	BlendingModeClassicColorDodge BlendingMode = 23
-	BlendingModeClassicColorBurn BlendingMode = 24
-	BlendingModeExclusion        BlendingMode = 25
-	BlendingModeDifference       BlendingMode = 26
-	BlendingModeColorDodge       BlendingMode = 27
-	BlendingModeColorBurn        BlendingMode = 28
-	BlendingModeLinearDodge      BlendingMode = 29
-	BlendingModeLinearBurn       BlendingMode = 30
-	BlendingModeLinearLight      BlendingMode = 31
-	BlendingModeVividLight       BlendingMode = 32
-	BlendingModePinLight         BlendingMode = 33
-	BlendingModeHardMix          BlendingMode = 34
-	BlendingModeLighterColor     BlendingMode = 35
-	BlendingModeDarkerColor      BlendingMode = 36
-	BlendingModeSubtract         BlendingMode = 37
-	BlendingModeDivide           BlendingMode = 38
+	BlendingModeClassicColorBurn  BlendingMode = 24
+	BlendingModeExclusion         BlendingMode = 25
+	BlendingModeDifference        BlendingMode = 26
+	BlendingModeColorDodge        BlendingMode = 27
+	BlendingModeColorBurn         BlendingMode = 28
+	BlendingModeLinearDodge       BlendingMode = 29
+	BlendingModeLinearBurn        BlendingMode = 30
+	BlendingModeLinearLight       BlendingMode = 31
+	BlendingModeVividLight        BlendingMode = 32
+	BlendingModePinLight          BlendingMode = 33
+	BlendingModeHardMix           BlendingMode = 34
+	BlendingModeLighterColor      BlendingMode = 35
+	BlendingModeDarkerColor       BlendingMode = 36
+	BlendingModeSubtract          BlendingMode = 37
+	BlendingModeDivide            BlendingMode = 38
 )
 
 // TrackMatteType is the layer's track-matte mode (ldta @0x6B).
@@ -279,11 +279,14 @@ const (
 //
 // Parametric shapes (Rect, Ellipse, Star) get their own ShapePrimitive
 // entries — see Layer.ShapePrimitives().
+// ShapePath is a freeform Bezier path inside a shape layer. Vertices reuse the
+// mask-vertex model (absolute coordinates; see MaskVertex). Editing the
+// geometry of a parsed path is not yet supported.
 type ShapePath struct {
-	Name     string // from omtn ("" when unnamed)
-	Closed   bool
-	Vertices []MaskVertex
-	ShphRaw  []byte
+	Name     string       // from omtn ("" when unnamed)
+	Closed   bool         // true = closed path; false = open
+	Vertices []MaskVertex // path control points (absolute coords; see MaskVertex)
+	ShphRaw  []byte       // raw shph path-header bytes (preserved for write-back)
 }
 
 // ShapePrimitiveKind identifies which AE parametric primitive a

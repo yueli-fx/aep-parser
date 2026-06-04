@@ -4566,6 +4566,148 @@
       "rw": "read-only",
       "summary": "PropertyValueType returns the type of value stored in the property (OneD, TwoD, ThreeD, Color, NoValue, etc.). Derived from tdb4 flags."
     },
+    "ShapePath": {
+      "kind": "type",
+      "file": "shape.md",
+      "anchor": "#shapepath-object",
+      "summary": "ShapePath is one custom Bezier path on a Shape Layer (the result of drawing with the Pen tool inside an \"ADBE Vector Shape - Group\"). It reuses MaskVertex for the per-vertex Anchor + InTangent + OutTangent triplet; the storage format is identical to mask paths."
+    },
+    "ShapePath.Closed": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapepathclosed",
+      "signature": "Closed bool",
+      "rw": "read-only",
+      "summary": "true = closed path; false = open"
+    },
+    "ShapePath.Name": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapepathname",
+      "signature": "Name string",
+      "rw": "read-only",
+      "summary": "from omtn (\"\" when unnamed)"
+    },
+    "ShapePath.ShphRaw": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapepathshphraw",
+      "signature": "ShphRaw []byte",
+      "rw": "read-only",
+      "summary": "raw shph path-header bytes (preserved for write-back)"
+    },
+    "ShapePath.Vertices": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapepathvertices",
+      "signature": "Vertices []MaskVertex",
+      "rw": "read-only",
+      "summary": "path control points (absolute coords; see MaskVertex)"
+    },
+    "ShapePrimitive": {
+      "kind": "type",
+      "file": "shape.md",
+      "anchor": "#shapeprimitive-object",
+      "summary": "ShapePrimitive is one parametric primitive (Rectangle / Ellipse / Star Polygon) inside a Shape Layer's vector tree. Sub-property fields are nil when AE didn't write a cdat for them (typically happens for defaulted values like Rect Position [0, 0])."
+    },
+    "ShapePrimitive.GroupName": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitivegroupname",
+      "signature": "GroupName string",
+      "rw": "read-only",
+      "summary": "owning Vector Group's display name (\"RectGroup\" etc.); empty when unnamed"
+    },
+    "ShapePrimitive.InnerRadius": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiveinnerradius",
+      "signature": "InnerRadius *Property",
+      "rw": "read-only"
+    },
+    "ShapePrimitive.InnerRoundness": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiveinnerroundness",
+      "signature": "InnerRoundness *Property",
+      "rw": "read-only",
+      "summary": "AE's own internal name uses \"Roundess\" (typo); we expose the corrected spelling"
+    },
+    "ShapePrimitive.Kind": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitivekind",
+      "signature": "Kind ShapePrimitiveKind",
+      "rw": "read-only"
+    },
+    "ShapePrimitive.OuterRadius": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiveouterradius",
+      "signature": "OuterRadius *Property",
+      "rw": "read-only"
+    },
+    "ShapePrimitive.OuterRoundness": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiveouterroundness",
+      "signature": "OuterRoundness *Property",
+      "rw": "read-only"
+    },
+    "ShapePrimitive.Points": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitivepoints",
+      "signature": "Points *Property",
+      "rw": "read-only",
+      "summary": "1D integer-valued"
+    },
+    "ShapePrimitive.Position": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiveposition",
+      "signature": "Position *Property",
+      "rw": "read-only",
+      "summary": "2D [x, y] — local offset within the owning group"
+    },
+    "ShapePrimitive.Rotation": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiverotation",
+      "signature": "Rotation *Property",
+      "rw": "read-only",
+      "summary": "1D degrees"
+    },
+    "ShapePrimitive.Roundness": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitiveroundness",
+      "signature": "Roundness *Property",
+      "rw": "read-only",
+      "summary": "Rect: 1D corner radius"
+    },
+    "ShapePrimitive.Size": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitivesize",
+      "signature": "Size *Property",
+      "rw": "read-only",
+      "summary": "Common fields (per-kind). Nil for primitives that don't carry the concept (e.g. Star.Size doesn't exist; Star has Inner/OuterRadius)."
+    },
+    "ShapePrimitive.StarType": {
+      "kind": "field",
+      "file": "shape.md",
+      "anchor": "#shapeprimitivestartype",
+      "signature": "StarType *Property",
+      "rw": "read-only",
+      "summary": "Star-only fields."
+    },
+    "ShapePrimitiveKind": {
+      "kind": "type",
+      "file": "shape.md",
+      "anchor": "#shapeprimitivekind-object",
+      "summary": "ShapePrimitiveKind identifies which AE parametric primitive a ShapePrimitive represents. The values are stable strings rather than integers so they round-trip cleanly through JSON."
+    },
     "TemporalEase": {
       "kind": "type",
       "file": "property.md",

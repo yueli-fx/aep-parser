@@ -59,6 +59,12 @@
       "roots": ["TextSource", "TextStyleRun", "TextParagraph", "TextCapsOption", "TextBaselineOption", "TextAutoKernType", "TextLineJoinType", "TextDigitSet", "TextLeadingType", "TextParagraphDirection"],
       "funcs": ["TextEncodedByteLen"],
       "head": "_includes/text.head.md"
+    },
+    {
+      "out": "shape.md",
+      "roots": ["ShapePath", "ShapePrimitive", "ShapePrimitiveKind"],
+      "head": "_includes/shape.head.md",
+      "tail": "_includes/shape.tail.md"
     }
   ]
 }
