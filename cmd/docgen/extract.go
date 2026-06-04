@@ -15,10 +15,9 @@ import (
 // RawFuncDocs：go/doc 处理前从原始 AST 抓取的函数注释（key = FuncDecl.Pos()），
 // 因 doc.NewFromFiles 会清空 Decl.Doc，directive 扫描须用此副本。
 type loadedPackage struct {
-	Doc          *doc.Package
-	Fset         *token.FileSet
-	Pkg          *ast.Package
-	RawFuncDocs  map[token.Pos]*ast.CommentGroup
+	Doc         *doc.Package
+	Fset        *token.FileSet
+	RawFuncDocs map[token.Pos]*ast.CommentGroup
 }
 
 // loadPackage 解析 dir 下的 Go 包（含 _test.go，便于关联 Example），
@@ -52,7 +51,7 @@ func loadPackage(dir string) (*loadedPackage, error) {
 		if err != nil {
 			return nil, fmt.Errorf("doc.NewFromFiles: %w", err)
 		}
-		return &loadedPackage{Doc: dpkg, Fset: fset, Pkg: astPkg, RawFuncDocs: rawDocs}, nil
+		return &loadedPackage{Doc: dpkg, Fset: fset, RawFuncDocs: rawDocs}, nil
 	}
 	return nil, fmt.Errorf("no buildable package in %s", dir)
 }

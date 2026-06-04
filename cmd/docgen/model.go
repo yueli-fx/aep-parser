@@ -14,14 +14,14 @@ type example struct {
 }
 
 type symbol struct {
-	name      string
-	kind      symKind
-	signature string // 规范化单行（方法/getter）；字段为 ""
-	fieldDecl string // "Name string"（字段）；其它为 ""
-	doc       string // directive 已剥离的 prose
-	jsonName  string // struct tag json 名；无则 ""
-	readWrite     bool // Attributes 专用：RW=true / R=false
-	fieldRWForced bool // 字段 R/RW 被 //docgen:rw|ro 显式锁定
+	name          string
+	kind          symKind
+	signature     string // 规范化单行（方法/getter）；字段为 ""
+	fieldDecl     string // "Name string"（字段）；其它为 ""
+	doc           string // directive 已剥离的 prose
+	jsonName      string // struct tag json 名；无则 ""
+	readWrite     bool   // Attributes 专用：RW=true / R=false
+	fieldRWForced bool   // 字段 R/RW 被 //docgen:rw|ro 显式锁定
 	examples      []example
 }
 
