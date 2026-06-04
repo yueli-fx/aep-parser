@@ -17,6 +17,12 @@ summary: docgen 生成器 pilot 实现计划 — cmd/docgen（go/doc+go/ast 抽�
 - `attachExamples` 静默吞解析错误——可加 stderr warning。
 - manifest 多文件时 package 被 2N 次重解析——效率项，真实 manifest 多文件时把 loadPackage 提到循环外。
 
+**生成器格式打磨项（gpt round-3 审 demo 输出，follow-on，非阻塞）：**
+- `comment.Printer.Markdown` **过度转义** `_ [ ] *` → `\_ \[ \] \*`（输出里 `\[]float64`/`Position\_0`/`re\_separate\_dims\*`，比手写脏）。修：renderProse 后加 formatter pass 反转义，或自己 walk comment AST。
+- 列表项 **缩进 2 空格**（`  - x`）非顶格，与源风格不一致 → 同 pass 顶格化。
+- 表格**整张丢失**（go/doc 注释无表格语义，生成输出 `^|`=0）→ 概念表走 `_includes/`（spec 已知 risk，pilot 验证清单已列）。
+- 注：gpt 担心的「列表前空行丢失」实测**不成立**（printer 保留空行）；输出已确定性，无 run-to-run 抖动。
+
 **Task 9 = 人工决策门（未启动）。** 只读 demo 已跑：生成器在真实 `internal/aep` 上产出 461 行 `property.md`（结构/R·RW 全对，见 `tmp/property_probe.gen.md`）。**关键发现**：真实 `.go` 已有部分**英文** doc comment，而手写 `docs/property.md` 是**中文**——「prose 用英文还是把中文搬进注释」是 Task 9 启动前需用户拍板的核心决策（连带 CLAUDE.md「不写注释」铁律调和）。
 
 # docgen Pilot Implementation Plan
