@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-04 by claude（docgen pilot 验收通过 + ship：property.md/marker.md 生成物化、drift gate 上 `go test`、directive 验证、铁律调和；pilot plan landed；剩余 ~11 文件推广待续）
-**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship + 加固（inline field comment / example 注释 / JSON 索引 / **package-level func 渲染**）。**已生成物化 6 个文件**：property（70 节）/ marker / footage / mask / effect / **project**（含 Open/FromReader/NewProject via funcs）；+ `docs/docs_index.json`；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。clean 域清完 + project（首个 wrinkle）已落，剩 composition/text/layer/shape/constants（见 § Pilot outcome）。
+**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship + 加固（inline field comment / example 注释 / JSON 索引 / package-level func 渲染）。**已生成物化 8 个文件**：property（70 节）/ marker / footage / mask / effect / project / composition / constants；+ `docs/docs_index.json`；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。**剩 3 个大 wrinkle 文件**：layer（1192）/ text（928）/ shape（含 builder 教程）+ json（特殊，JSON 导出说明非符号文档，待评估）。README 不生成（手写导航）。
 > 并行收尾：**py-aep parity P3 R/W 域实质收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；唯一小尾 DimensionsSeparated animated 升 stable doc-sync。
 
 ## 进行中
@@ -17,13 +17,11 @@
 
 ## 下一步
 
-**docgen 推广剩余 wrinkle 文件**（已落 6 个：property/marker/footage/mask/effect/project）。剩余每个仍需定方案：
-- **跨类型 setter**：text 的 `Layer.SetText`/`SetRun*` 在 `*Layer` 上 → 让它们落 layer.md，text.md 加 cross-ref 注（按 owning type 分组）。（composition 的 `NewComposition` 已解决：是 `*Project` 方法，渲在 project.md。）
-- **package-level 函数**：✅ 已加生成器 `funcs` 支持（`## Functions`），project.md 的 Open/FromReader/NewProject 已用。`TextEncodedByteLen` 同法。
-- **constants.md**：跨类型 enum 聚合，按多 enum root 渲 or include。
-- **shape.md**：含 V2.2 Builder API 手写教程（~100 行）→ 整段进 tail include 保留。
-- **composition.md**（716）：bespoke 分组拍平、Renderer 对照表 → tail include、Guide/EssentialGraphicsController 子类型加 roots；NewComposition 不在此（已在 project.md）。
-- 大文件 layer(1192)/text(928)：体量大但多为 verbose-mechanical，逐 root 推。
+**docgen 推广剩 3 个大文件 + json**（已落 8 个）。各自方案：
+- **layer.md**（1192）：linchpin 类型，最大。补 ~6 个裸字段（Index/Name/Type/StartTime/Duration/Stretch + 子集合）；text 的 `SetRun*` setter 都在 `*Layer` 上 → 自然渲在这。完整 camera/light/material/iris setter 会全出（completeness）。先推这个，text 可 cross-ref。
+- **text.md**（928）：多类型（TextSource/TextStyleRun/TextParagraph + 枚举）；`TextEncodedByteLen` 走 funcs；`Layer.SetText`/`SetRun*` 已在 layer.md → text.md 加 cross-ref 注。
+- **shape.md**：ShapePath/ShapePrimitive/ShapePrimitiveKind roots + **V2.2 Builder API 手写教程 ~100 行**（中文）→ 翻成英文进 tail include（或评估是否仍准）。
+- **json.md**：JSON 导出格式说明，非符号文档 → 大概率保持手写 or 走纯 include，待评估。
 每文件流程同 recipe：核 doc comment 英文成熟度 → 补缺 + Example + `_includes` → manifest 加节 → 生成过 drift gate。
 
 > 旁路小尾（py-aep P3，非阻塞）：DimensionsSeparated animated 已 ship-gate 8/8（landed），升 stable 的 doc-sync 暂跳过，feature 标 **Alpha**；或转 Backlog 最大候选 Layr Transform 3D 通道（需先做 3D layer 支持，V2.3）。
