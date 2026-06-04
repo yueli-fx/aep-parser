@@ -3,6 +3,22 @@ status: active
 summary: docgen 生成器 pilot 实现计划 — cmd/docgen（go/doc+go/ast 抽取 → markdown），TDD against testdata/sample，终点产出 docs/property.gen.md + 验证清单
 ---
 
+## 执行进度（2026-06-04）
+
+**Task 1-8 全部完成**（生成器 = 可用软件，7 测试全绿、vet/build 干净、opus 最终 review 判 sound）。commit 链 `b0de225`(T1)→`4fc8521`(T2)→`04f2ef2`(T3)→`bd05afd`(T4)→`879bf0d`(T5)→`acec054`(findType 修)→`6886622`(T6)→`ea6491d`(T7)→`3320d1e`(T8)→`13d1aee`(review 清理)。
+
+**执行中抓到并修掉的真实 plan bug：**
+- T4：`doc.NewFromFiles` 就地清空 `FuncDecl.Doc` → 加 `RawFuncDocs`（doc 处理前预捕获）扫 directive；字段 `f.Doc` 存活无需此处理（实测确认）。
+- T5：`findType` 被生产代码（attachExamples/generateFile）用，但原计划放在 `extract_test.go` → 搬到 `extract.go`（非测试构建才能 build）。
+
+**最终 review 的 defer 项（pilot 已知、非阻塞）：**
+- type-level Example（`ExampleWidget` 无方法名）当前被丢弃——需要时补。
+- 小写 suffix 约定（`ExampleX_setName` vs `_SetName`）未严格区分——无害（未导出方法本就不文档化）。
+- `attachExamples` 静默吞解析错误——可加 stderr warning。
+- manifest 多文件时 package 被 2N 次重解析——效率项，真实 manifest 多文件时把 loadPackage 提到循环外。
+
+**Task 9 = 人工决策门（未启动）。** 只读 demo 已跑：生成器在真实 `internal/aep` 上产出 461 行 `property.md`（结构/R·RW 全对，见 `tmp/property_probe.gen.md`）。**关键发现**：真实 `.go` 已有部分**英文** doc comment，而手写 `docs/property.md` 是**中文**——「prose 用英文还是把中文搬进注释」是 Task 9 启动前需用户拍板的核心决策（连带 CLAUDE.md「不写注释」铁律调和）。
+
 # docgen Pilot Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
