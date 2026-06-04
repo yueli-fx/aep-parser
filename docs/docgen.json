@@ -2,7 +2,7 @@
   "pkg": "../internal/aep",
   "files": [
     {
-      "out": "property.gen.md",
+      "out": "property.md",
       "roots": ["Property", "Keyframe", "TemporalEase", "InterpType"],
       "head": "_includes/property.head.md",
       "tail": "_includes/property.tail.md"
