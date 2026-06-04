@@ -24,6 +24,12 @@
       "roots": ["Mask", "MaskVertex", "MaskPathKeyframe", "MaskMode", "MaskMotionBlurMode"],
       "head": "_includes/mask.head.md",
       "tail": "_includes/mask.tail.md"
+    },
+    {
+      "out": "effect.md",
+      "roots": ["Effect"],
+      "head": "_includes/effect.head.md",
+      "tail": "_includes/effect.tail.md"
     }
   ]
 }

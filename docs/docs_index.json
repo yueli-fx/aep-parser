@@ -1,6 +1,37 @@
 {
   "go_version": "go1.25.1",
   "symbols": {
+    "Effect": {
+      "kind": "type",
+      "file": "effect.md",
+      "anchor": "#effect-object",
+      "summary": "Effect represents one effect instance applied to a layer (e.g. a Gaussian Blur applied to a footage layer). The MatchName identifies the effect type (\"ADBE Gaussian Blur 2\", \"ADBE Gradient Wipe\", etc.) and Parameters holds each tweakable knob as a Property. Parameter match-names are internal numeric suffixes like \"ADBE Gaussian Blur 2-0001\"."
+    },
+    "Effect.MatchName": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#effectmatchname",
+      "signature": "MatchName string",
+      "rw": "read-only",
+      "summary": "effect type, e.g. \"ADBE Gaussian Blur 2\""
+    },
+    "Effect.Name": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#effectname",
+      "signature": "Name string",
+      "rw": "read-only",
+      "summary": "user-set display name (currently mirrors MatchName)"
+    },
+    "Effect.Parameters": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#effectparameters",
+      "signature": "Parameters []*Property",
+      "rw": "read-only",
+      "example": true,
+      "summary": "effect knobs (Blurriness, Completion, …)"
+    },
     "Footage": {
       "kind": "type",
       "file": "footage.md",
