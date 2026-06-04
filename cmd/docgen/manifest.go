@@ -10,6 +10,7 @@ import (
 type manifest struct {
 	Pkg     string         `json:"pkg"`
 	Files   []fileManifest `json:"files"`
+	Index   string         `json:"index"` // 可选：JSON 符号索引输出路径（相对 baseDir）
 	baseDir string         // = filepath.Dir(manifestPath)，不序列化
 }
 

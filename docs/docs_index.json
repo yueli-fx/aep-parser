@@ -1,0 +1,691 @@
+{
+  "go_version": "go1.25.1",
+  "symbols": {
+    "InterpType": {
+      "kind": "type",
+      "file": "property.md",
+      "anchor": "#interptype-object",
+      "summary": "InterpType identifies a keyframe's interpolation mode on one side (in-side or out-side). AE stores these as single-byte enums in the keyframe block at offsets 0x04 (in-interp) and 0x05 (out-interp)."
+    },
+    "InterpType.String": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#interptypestring",
+      "signature": "func (it InterpType) String() string",
+      "rw": "read-only"
+    },
+    "Keyframe": {
+      "kind": "type",
+      "file": "property.md",
+      "anchor": "#keyframe-object",
+      "summary": "Keyframe represents a single keyframe on a property."
+    },
+    "Keyframe.FrameTime": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#keyframeframetime",
+      "signature": "func (k *Keyframe) FrameTime() int",
+      "rw": "read-only",
+      "summary": "FrameTime returns the keyframe's time as an integer frame count (Time × owning-comp FrameRate, rounded). Returns 0 when the keyframe was built outside the parser (FrameRate unknown)."
+    },
+    "Keyframe.InInterp": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframeininterp",
+      "signature": "InInterp InterpType",
+      "rw": "read-write"
+    },
+    "Keyframe.InSpatialTangent": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframeinspatialtangent",
+      "signature": "InSpatialTangent []float64",
+      "rw": "read-write"
+    },
+    "Keyframe.InTemporalEase": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframeintemporalease",
+      "signature": "InTemporalEase []TemporalEase",
+      "rw": "read-write"
+    },
+    "Keyframe.OutInterp": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframeoutinterp",
+      "signature": "OutInterp InterpType",
+      "rw": "read-write"
+    },
+    "Keyframe.OutSpatialTangent": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframeoutspatialtangent",
+      "signature": "OutSpatialTangent []float64",
+      "rw": "read-write"
+    },
+    "Keyframe.OutTemporalEase": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframeouttemporalease",
+      "signature": "OutTemporalEase []TemporalEase",
+      "rw": "read-write"
+    },
+    "Keyframe.SetFrameTime": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetframetime",
+      "signature": "func (k *Keyframe) SetFrameTime(frame int) error",
+      "summary": "SetFrameTime writes the keyframe's time from an integer frame, delegating to SetTime. Returns an error when the owning comp's FrameRate is unknown."
+    },
+    "Keyframe.SetInInterp": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetininterp",
+      "signature": "func (k *Keyframe) SetInInterp(t InterpType) error",
+      "summary": "SetInInterp / SetOutInterp write a new interpolation enum byte to the keyframe block @0x04 / @0x05. length-preserving (1 byte)."
+    },
+    "Keyframe.SetInSpatialTangent": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetinspatialtangent",
+      "signature": "func (k *Keyframe) SetInSpatialTangent(v []float64) error",
+      "example": true,
+      "summary": "SetInSpatialTangent / SetOutSpatialTangent write 3D Bezier tangent vectors. Only valid for spatial properties (Position / AnchorPoint with motion path enabled). Slice length must equal `Property.Components`. length-preserving (dims × 8 bytes)."
+    },
+    "Keyframe.SetInTemporalEase": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetintemporalease",
+      "signature": "func (k *Keyframe) SetInTemporalEase(eases []TemporalEase) error",
+      "example": true,
+      "summary": "SetInTemporalEase writes a new per-side temporal ease list to the keyframe. The slice length must match the keyframe's current ease shape:"
+    },
+    "Keyframe.SetOutInterp": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetoutinterp",
+      "signature": "func (k *Keyframe) SetOutInterp(t InterpType) error",
+      "summary": "SetOutInterp see SetInInterp."
+    },
+    "Keyframe.SetOutSpatialTangent": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetoutspatialtangent",
+      "signature": "func (k *Keyframe) SetOutSpatialTangent(v []float64) error",
+      "summary": "SetOutSpatialTangent see SetInSpatialTangent."
+    },
+    "Keyframe.SetOutTemporalEase": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetouttemporalease",
+      "signature": "func (k *Keyframe) SetOutTemporalEase(eases []TemporalEase) error",
+      "summary": "SetOutTemporalEase mirrors SetInTemporalEase for the out side."
+    },
+    "Keyframe.SetTime": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesettime",
+      "signature": "func (k *Keyframe) SetTime(seconds float64) error",
+      "example": true,
+      "summary": "SetTime rewrites this keyframe's time in-place using its owning composition's TickRate (decoded at parse time from cdta). Chunk size does not change, so writing the project back never relocates anything."
+    },
+    "Keyframe.SetValue": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#keyframesetvalue",
+      "signature": "func (k *Keyframe) SetValue(v any) error",
+      "example": true,
+      "summary": "SetValue rewrites this keyframe's numeric value in-place."
+    },
+    "Keyframe.Time": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframetime",
+      "signature": "Time float64",
+      "rw": "read-write"
+    },
+    "Keyframe.Value": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#keyframevalue",
+      "signature": "Value any",
+      "rw": "read-write"
+    },
+    "Marker": {
+      "kind": "type",
+      "file": "marker.md",
+      "anchor": "#marker-object",
+      "summary": "Marker represents a single timeline marker on a layer (or a comp). Times are in seconds. The remaining string fields hold the user- editable annotation data (most are empty unless the user filled them in inside AE's \"Marker Dialog\")."
+    },
+    "Marker.Chapter": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markerchapter",
+      "signature": "Chapter string",
+      "rw": "read-write"
+    },
+    "Marker.Comment": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markercomment",
+      "signature": "Comment string",
+      "rw": "read-write"
+    },
+    "Marker.CuePointName": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markercuepointname",
+      "signature": "CuePointName string",
+      "rw": "read-write"
+    },
+    "Marker.Duration": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markerduration",
+      "signature": "Duration float64",
+      "rw": "read-write"
+    },
+    "Marker.FrameDuration": {
+      "kind": "getter",
+      "file": "marker.md",
+      "anchor": "#markerframeduration",
+      "signature": "func (m *Marker) FrameDuration() int",
+      "rw": "read-only",
+      "summary": "FrameDuration returns the marker's duration as an integer frame count. 0 for point markers (Duration == 0)."
+    },
+    "Marker.FrameTarget": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markerframetarget",
+      "signature": "FrameTarget string",
+      "rw": "read-write"
+    },
+    "Marker.FrameTime": {
+      "kind": "getter",
+      "file": "marker.md",
+      "anchor": "#markerframetime",
+      "signature": "func (m *Marker) FrameTime() int",
+      "rw": "read-only",
+      "summary": "FrameTime returns the marker's time as an integer frame count."
+    },
+    "Marker.Label": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markerlabel",
+      "signature": "Label uint8",
+      "rw": "read-write"
+    },
+    "Marker.Remove": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markerremove",
+      "signature": "func (m *Marker) Remove() error",
+      "summary": "Remove deletes this marker from its owning composition / layer marker set."
+    },
+    "Marker.SetChapter": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetchapter",
+      "signature": "func (m *Marker) SetChapter(s string) error",
+      "summary": "SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block)."
+    },
+    "Marker.SetComment": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetcomment",
+      "signature": "func (m *Marker) SetComment(s string) error",
+      "example": true,
+      "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). length-variable — the Utf8 chunk's data slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes."
+    },
+    "Marker.SetCuePointName": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetcuepointname",
+      "signature": "func (m *Marker) SetCuePointName(s string) error",
+      "summary": "SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects)."
+    },
+    "Marker.SetDuration": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetduration",
+      "signature": "func (m *Marker) SetDuration(seconds float64) error",
+      "summary": "SetDuration writes a new marker duration (seconds) to NmHd @0x08. Encoded as uint32 BE in 600ths-of-a-second per py-aep documentation; see decodeNmHd doc comment for the offset rationale. length-preserving (4 bytes)."
+    },
+    "Marker.SetFrameDuration": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetframeduration",
+      "signature": "func (m *Marker) SetFrameDuration(frame int) error",
+      "summary": "SetFrameDuration writes the marker's duration from an integer frame."
+    },
+    "Marker.SetFrameTarget": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetframetarget",
+      "signature": "func (m *Marker) SetFrameTarget(s string) error",
+      "summary": "SetFrameTarget rewrites the marker's frame-target id (fourth Utf8)."
+    },
+    "Marker.SetFrameTime": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetframetime",
+      "signature": "func (m *Marker) SetFrameTime(frame int) error",
+      "summary": "SetFrameTime writes the marker's time from an integer frame."
+    },
+    "Marker.SetLabel": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersetlabel",
+      "signature": "func (m *Marker) SetLabel(index uint8) error",
+      "example": true,
+      "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10. Indices outside 0..16 are written verbatim (AE shows index 0 for unknown values but the byte round-trips). length-preserving (1 byte)."
+    },
+    "Marker.SetTime": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markersettime",
+      "signature": "func (m *Marker) SetTime(seconds float64) error",
+      "example": true,
+      "summary": "SetTime writes a new marker time (seconds) to the ldat keyframe slot using the owning composition's TickRate. length-preserving."
+    },
+    "Marker.SetURL": {
+      "kind": "method",
+      "file": "marker.md",
+      "anchor": "#markerseturl",
+      "signature": "func (m *Marker) SetURL(s string) error",
+      "summary": "SetURL rewrites the marker's web-target URL (third Utf8)."
+    },
+    "Marker.Time": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markertime",
+      "signature": "Time float64",
+      "rw": "read-write"
+    },
+    "Marker.URL": {
+      "kind": "field",
+      "file": "marker.md",
+      "anchor": "#markerurl",
+      "signature": "URL string",
+      "rw": "read-write"
+    },
+    "Property": {
+      "kind": "type",
+      "file": "property.md",
+      "anchor": "#property-object",
+      "summary": "Property represents an animatable layer property."
+    },
+    "Property.Active": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyactive",
+      "signature": "func (p *Property) Active() bool",
+      "rw": "read-only",
+      "summary": "Active is an alias for Enabled — mirrors py-aep's `property.active` which returns `self.enabled`. Kept as a separate accessor for parity even though it's a thin wrapper."
+    },
+    "Property.CanVaryOverTime": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertycanvaryovertime",
+      "signature": "func (p *Property) CanVaryOverTime() bool",
+      "rw": "read-only",
+      "summary": "CanVaryOverTime reports whether AE will accept keyframes on this property. Most properties can; group containers and some metadata-only properties cannot. Read from tdb4 @0x0B bit 1."
+    },
+    "Property.Components": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertycomponents",
+      "signature": "Components int",
+      "rw": "read-only"
+    },
+    "Property.ControlType": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertycontroltype",
+      "signature": "func (p *Property) ControlType() PropertyControlType",
+      "rw": "read-only",
+      "summary": "ControlType returns the UI control type for the property (scalar slider, color picker, angle dial, etc.). Derived from tdb4 flags."
+    },
+    "Property.DefaultValue": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertydefaultvalue",
+      "signature": "DefaultValue any",
+      "rw": "read-only",
+      "summary": "DefaultValue is the property's default value (what AE considers the \"unmodified\" state). For transform properties, set from hardcoded tables during parse; for effect parameters, from pard chunks. nil when unknown (non-transform, non-effect properties)."
+    },
+    "Property.DeleteKeyframe": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertydeletekeyframe",
+      "signature": "func (p *Property) DeleteKeyframe(i int) error",
+      "example": true,
+      "summary": "DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. Returns an error when i is out of range or the property has no keyframe stream."
+    },
+    "Property.DimensionsSeparated": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertydimensionsseparated",
+      "signature": "func (p *Property) DimensionsSeparated() bool",
+      "rw": "read-only",
+      "summary": "DimensionsSeparated reports whether a multidimensional property has its dimensions split into separate per-axis followers (AE's \"Separate Dimensions\" on Position). Read from tdsb byte 3 (_enable_flags) bit 1; defaults to false when the tdsb chunk is absent. Only the leader (the \"ADBE Position\" property) carries this flag set. W (the structural separate/merge toggle) is deferred — it restructures the property group."
+    },
+    "Property.Elided": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyelided",
+      "signature": "func (p *Property) Elided() bool",
+      "rw": "read-only",
+      "summary": "Elided reports whether the property is hidden from the AE UI. py-aep sets this for parser-synthesized placeholder groups; we don't synthesize anything yet, so this always returns false. Reserved for future implementations that materialize missing slots."
+    },
+    "Property.Enabled": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyenabled",
+      "signature": "func (p *Property) Enabled() bool",
+      "rw": "read-only",
+      "summary": "Enabled reports whether the property is enabled (UI toggle next to the property name in AE's timeline). Read from tdsb byte 3 bit 0; defaults to true when the tdsb chunk is absent — matches py-aep's `TdsbChunk._enable_flags` default of 1."
+    },
+    "Property.Expression": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertyexpression",
+      "signature": "Expression string",
+      "rw": "read-write"
+    },
+    "Property.ExpressionEnabled": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertyexpressionenabled",
+      "signature": "ExpressionEnabled bool",
+      "rw": "read-write"
+    },
+    "Property.Gradient": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertygradient",
+      "signature": "Gradient *Gradient",
+      "rw": "read-only",
+      "summary": "Gradient holds the parsed gradient data for \"ADBE Vector Grad Colors\" properties. The XML is stored in the cdat chunk and parsed during property initialization. nil for non-gradient properties."
+    },
+    "Property.InsertKeyframe": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertyinsertkeyframe",
+      "signature": "func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, error)",
+      "example": true,
+      "summary": "InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. Returns the new Keyframe and its index in Property.Keyframes (insertion is time-sorted; ties land after existing keys at the same time)."
+    },
+    "Property.IsAnimated": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisanimated",
+      "signature": "func (p *Property) IsAnimated() bool",
+      "rw": "read-only",
+      "summary": "IsAnimated reports whether the property has keyframes. When the tdb4 chunk is available it reads the explicit animated flag (byte 0x44 bool); otherwise it falls back to len(Keyframes) \u003e 0."
+    },
+    "Property.IsColor": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyiscolor",
+      "signature": "func (p *Property) IsColor() bool",
+      "rw": "read-only",
+      "summary": "IsColor reports whether the property is a color (RGBA). 4-channel color properties like Fill Color, Tritone Highlights/Midtones/Shadows. Read from tdb4 @0x3B bit 0."
+    },
+    "Property.IsInteger": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisinteger",
+      "signature": "func (p *Property) IsInteger() bool",
+      "rw": "read-only",
+      "summary": "IsInteger reports whether the property is integer-valued (some dropdowns / enum knobs). Read from tdb4 @0x3B bit 2."
+    },
+    "Property.IsModified": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyismodified",
+      "signature": "func (p *Property) IsModified() bool",
+      "rw": "read-only",
+      "summary": "IsModified reports whether the property has been changed from its default state. A property is considered modified when it has keyframes, has an expression (regardless of enabled state), or its StaticValue differs from DefaultValue. Mirrors py-aep's `Property.is_modified` minus the always-modified special-cases (Source Text, mask-index, effect-NoValue) which depend on parser context we don't yet track."
+    },
+    "Property.IsNameSet": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisnameset",
+      "signature": "func (p *Property) IsNameSet() bool",
+      "rw": "read-only",
+      "summary": "IsNameSet reports whether the property has an explicit display name set (different from its match-name). Currently a thin proxy: `Name != \"\" \u0026\u0026 Name != MatchName`. py-aep checks the underlying tdsn Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name (always defaults to MatchName), so this returns false for parsed properties until tdsn decode lands."
+    },
+    "Property.IsNoValue": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisnovalue",
+      "signature": "func (p *Property) IsNoValue() bool",
+      "rw": "read-only",
+      "summary": "IsNoValue reports whether the property has no stored value (group-like properties, dropdown markers). Read from tdb4 @0x39 bit 0."
+    },
+    "Property.IsSeparationFollower": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisseparationfollower",
+      "signature": "func (p *Property) IsSeparationFollower() bool",
+      "rw": "read-only",
+      "summary": "IsSeparationFollower reports whether the property is a per-axis component of a separated multidimensional property (X / Y / Z Position)."
+    },
+    "Property.IsSeparationLeader": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisseparationleader",
+      "signature": "func (p *Property) IsSeparationLeader() bool",
+      "rw": "read-only",
+      "summary": "IsSeparationLeader reports whether the property is the multidimensional leader that can be separated into per-axis followers — true for \"ADBE Position\" regardless of whether it is currently separated (use DimensionsSeparated for the actual state). Mirrors py-aep."
+    },
+    "Property.IsSpatial": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisspatial",
+      "signature": "func (p *Property) IsSpatial() bool",
+      "rw": "read-only",
+      "summary": "IsSpatial reports whether the property is spatial (motion-path) — Position and Anchor Point are spatial; Scale / Rotate / Opacity are not. Read from tdb4 @0x05 bit 3."
+    },
+    "Property.IsVector": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyisvector",
+      "signature": "func (p *Property) IsVector() bool",
+      "rw": "read-only",
+      "summary": "IsVector reports whether the property is a vector type — multi-axis point properties like Position, Scale. Read from tdb4 @0x3B bit 3."
+    },
+    "Property.Keyframes": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertykeyframes",
+      "signature": "Keyframes []*Keyframe",
+      "rw": "read-only"
+    },
+    "Property.LastValue": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertylastvalue",
+      "signature": "LastValue any",
+      "rw": "read-only",
+      "summary": "LastValue is the property's last-set value from the pard chunk (effect parameters only). nil for non-effect properties."
+    },
+    "Property.LockedRatio": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertylockedratio",
+      "signature": "func (p *Property) LockedRatio() bool",
+      "rw": "read-only",
+      "summary": "LockedRatio reports whether the property's locked ratio flag is set. Read from tdsb @0x02 bit 4 (py-aep: byte 2 bit 4 = locked_ratio)."
+    },
+    "Property.MatchName": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertymatchname",
+      "signature": "MatchName string",
+      "rw": "read-only"
+    },
+    "Property.MaxValue": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertymaxvalue",
+      "signature": "func (p *Property) MaxValue() any",
+      "rw": "read-only",
+      "summary": "MaxValue returns the maximum permitted value for the property, or nil if no tduM chunk is present."
+    },
+    "Property.MinValue": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyminvalue",
+      "signature": "func (p *Property) MinValue() any",
+      "rw": "read-only",
+      "summary": "MinValue returns the minimum permitted value for the property, or nil if no tdum chunk is present. Type depends on property kind: float64 for scalars, []float64 for multi-component, float64 (from uint32) for integer properties."
+    },
+    "Property.Name": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertyname",
+      "signature": "Name string",
+      "rw": "read-only"
+    },
+    "Property.NbOptions": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertynboptions",
+      "signature": "NbOptions int",
+      "rw": "read-only",
+      "summary": "NbOptions is the number of options for enum/dropdown effect parameters (pard chunk). 0 for non-enum properties."
+    },
+    "Property.ParentGroup": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyparentgroup",
+      "signature": "func (p *Property) ParentGroup() *AEPropertyGroup",
+      "rw": "read-only",
+      "summary": "ParentGroup returns the AEPropertyGroup that contains this property in the layer's hierarchical property tree, or nil when the property was built outside the parser, lives inside an Effect/Mask (not the layer-level tdgp), or hasn't been wired through wirePropertyTreeLeaves."
+    },
+    "Property.PropertyDepth": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertypropertydepth",
+      "signature": "func (p *Property) PropertyDepth() int",
+      "rw": "read-only",
+      "summary": "PropertyDepth returns the number of levels of parent groups between this property and the containing layer. Returns 0 for top-level property groups (Transform, Effects, etc.), 1 for their direct children, and so on. Returns -1 when the property has no parent tree group wired up."
+    },
+    "Property.PropertyIndex": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertypropertyindex",
+      "signature": "func (p *Property) PropertyIndex() int",
+      "rw": "read-only",
+      "summary": "PropertyIndex returns the 0-based position of this property within its parent AEPropertyGroup, or -1 when the property has no parent group (i.e. was built outside the parser or is a top-level item)."
+    },
+    "Property.PropertyMatchName": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertypropertymatchname",
+      "signature": "func (p *Property) PropertyMatchName() string",
+      "rw": "read-only",
+      "summary": "PropertyMatchName returns the property's AE match-name (e.g. \"ADBE Position\"). Implements PropertyBase."
+    },
+    "Property.PropertyName": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertypropertyname",
+      "signature": "func (p *Property) PropertyName() string",
+      "rw": "read-only",
+      "summary": "PropertyName returns the property's display name. Implements PropertyBase."
+    },
+    "Property.SeparationDimension": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyseparationdimension",
+      "signature": "func (p *Property) SeparationDimension() int",
+      "rw": "read-only",
+      "summary": "SeparationDimension returns the axis a separation follower represents (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower. (-1 stands in for py-aep's None.)"
+    },
+    "Property.SetDimensionsSeparated": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertysetdimensionsseparated",
+      "signature": "func (p *Property) SetDimensionsSeparated(separated bool) error",
+      "example": true,
+      "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader. Alpha / structural. Both directions (separate↔merge) are implemented for static AND animated Position; an animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated), both ship-gated AE 2020+2025."
+    },
+    "Property.SetExpression": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertysetexpression",
+      "signature": "func (p *Property) SetExpression(source string) error",
+      "example": true,
+      "summary": "SetExpression rewrites the JavaScript expression source attached to this property."
+    },
+    "Property.SetExpressionEnabled": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertysetexpressionenabled",
+      "signature": "func (p *Property) SetExpressionEnabled(enabled bool) error",
+      "example": true,
+      "summary": "SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself)."
+    },
+    "Property.SetLockedRatio": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertysetlockedratio",
+      "signature": "func (p *Property) SetLockedRatio(v bool) error",
+      "summary": "SetLockedRatio sets the locked ratio flag on the property. Writes to tdsb @0x02 bit 4 (length-preserving)."
+    },
+    "Property.SetStaticValue": {
+      "kind": "method",
+      "file": "property.md",
+      "anchor": "#propertysetstaticvalue",
+      "signature": "func (p *Property) SetStaticValue(v any) error",
+      "example": true,
+      "summary": "SetStaticValue rewrites a property's constant value in-place (only valid for properties without keyframes — those with a cdat chunk)."
+    },
+    "Property.StaticValue": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#propertystaticvalue",
+      "signature": "StaticValue any",
+      "rw": "read-write"
+    },
+    "Property.UnitsText": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyunitstext",
+      "signature": "func (p *Property) UnitsText() string",
+      "rw": "read-only",
+      "summary": "UnitsText returns the text description of the units for the property (e.g. \"pixels\", \"degrees\", \"percent\", \"seconds\", \"dB\"). Returns \"\" when the property has no known unit."
+    },
+    "Property.ValuePropertyType": {
+      "kind": "getter",
+      "file": "property.md",
+      "anchor": "#propertyvaluepropertytype",
+      "signature": "func (p *Property) ValuePropertyType() PropertyValueType",
+      "rw": "read-only",
+      "summary": "PropertyValueType returns the type of value stored in the property (OneD, TwoD, ThreeD, Color, NoValue, etc.). Derived from tdb4 flags."
+    },
+    "TemporalEase": {
+      "kind": "type",
+      "file": "property.md",
+      "anchor": "#temporalease-object",
+      "summary": "TemporalEase is one side's temporal ease for one component:"
+    },
+    "TemporalEase.Influence": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#temporaleaseinfluence",
+      "signature": "Influence float64",
+      "rw": "read-only"
+    },
+    "TemporalEase.Speed": {
+      "kind": "field",
+      "file": "property.md",
+      "anchor": "#temporaleasespeed",
+      "signature": "Speed float64",
+      "rw": "read-only"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 {
   "pkg": "../internal/aep",
+  "index": "docs_index.json",
   "files": [
     {
       "out": "property.md",

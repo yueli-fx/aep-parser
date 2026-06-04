@@ -37,4 +37,17 @@ func TestDocsUpToDate(t *testing.T) {
 			t.Errorf("%s is stale — run `go generate ./cmd/docgen` and commit", fm.Out)
 		}
 	}
+	if m.Index != "" {
+		got, err := buildIndex(m)
+		if err != nil {
+			t.Fatalf("buildIndex: %v", err)
+		}
+		want, err := os.ReadFile(m.resolve(m.Index))
+		if err != nil {
+			t.Fatalf("read %s: %v", m.Index, err)
+		}
+		if norm(got) != norm(string(want)) {
+			t.Errorf("%s is stale — run `go generate ./cmd/docgen` and commit", m.Index)
+		}
+	}
 }

@@ -31,6 +31,19 @@ func main() {
 		}
 		fmt.Println("docgen: wrote", dst)
 	}
+	if m.Index != "" {
+		idx, err := buildIndex(m)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "docgen:", err)
+			os.Exit(1)
+		}
+		dst := m.resolve(m.Index)
+		if err := os.WriteFile(dst, []byte(idx), 0o644); err != nil {
+			fmt.Fprintln(os.Stderr, "docgen:", err)
+			os.Exit(1)
+		}
+		fmt.Println("docgen: wrote", dst)
+	}
 }
 
 // generateFile 渲一个输出文件：version header + head include + 各 root type + tail include。
