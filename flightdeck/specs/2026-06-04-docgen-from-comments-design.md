@@ -144,6 +144,8 @@ CLAUDE.md「不写注释，除非 WHY 不明显」改述为：**「内部实现�
 
 Pilot plan `plans/...docgen-pilot-plan`（已 landed）跑通 + 验收。决策：**doc comment 英文为源**。生成器 `cmd/docgen` ship；`docs/property.md` + `docs/marker.md` 已是生成物；drift gate `TestDocsUpToDate` 上 `go test`。**所有验证项绿，含 directive**（`Marker.Remove` 误判 → `//docgen:method` 修正，不泄漏 `go doc`）。
 
+**JSON 符号索引**：manifest `index` 字段 → `docs/docs_index.json`，扁平 map 键=`Type.Name` 值=`{kind,file,anchor,signature,rw,json,example,summary}`，供工具/agent KV 定位文档（免扫 markdown）。同进 drift gate。
+
 ### 每文件 recipe（已证）
 
 1. 确认该域导出符号的 doc comment 是**英文 prose**（property/marker 已是；其余域成熟度不一，缺的要补写英文 doc comment —— 这是真实工作量，非纯机械）。

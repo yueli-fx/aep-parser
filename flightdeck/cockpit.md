@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-04 by claude（docgen pilot 验收通过 + ship：property.md/marker.md 生成物化、drift gate 上 `go test`、directive 验证、铁律调和；pilot plan landed；剩余 ~11 文件推广待续）
-**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship。`docs/property.md`（70 节完整）+ `docs/marker.md` 已是生成物（DO NOT EDIT），drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。下一步逐文件推广剩余 docs（recipe + 每文件 wrinkle 见 docgen spec § Pilot outcome）。
+**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship。`docs/property.md`（70 节完整）+ `docs/marker.md` 已是生成物（DO NOT EDIT），并吐 `docs/docs_index.json`（符号 KV 索引，按 `Type.Name` 查 file/anchor/签名/摘要）；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。下一步逐文件推广剩余 docs（recipe + 每文件 wrinkle 见 docgen spec § Pilot outcome）。
 > 并行收尾：**py-aep parity P3 R/W 域实质收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；唯一小尾 DimensionsSeparated animated 升 stable doc-sync。
 
 ## 进行中
