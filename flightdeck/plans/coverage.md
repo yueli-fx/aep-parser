@@ -302,6 +302,7 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 | `setAlternateSource(item)` AE 脚本行为 | 自动包 wrapper precomp；我们 setter 不包装 |
 | AE 24/25 ldta 加长 | 实测仍 164 字节（与 AE 23+ 一致），未见第三种长度 |
 | cdta tail (≥ 0xCC) | 不存在 —— cdta 总长就是 0xCC=204 |
+| `Property.valueText` / `propertyParameters`（§3H） | 通用不可达：内置枚举 label 不在文件（pard 只存 nbOptions 计数），需 Adobe 不公开的 per-effect×版本 schema DB；AE 26.0-only API；py-aep 自己也没做。仅自定义 Dropdown Menu Control 的 label 在 `pdnm` chunk 可 RE（有界子集，当前不做）。详 `incidents/valuetext-needs-schema-db.md` |
 
 ---
 

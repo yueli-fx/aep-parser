@@ -178,7 +178,7 @@ summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+�
 | `Selected / SelectedKeys` | ✅ R | 🗑️ | 🗑️ | done | runtime-only |
 | `EssentialPropertySource` | ✅ R | ❌ | 🗑️ | — | runtime/EG |
 | `AlternateSource / CanSetAlternateSource` (Layer-level, on Property) | ✅ R | 🟢 Layer.AlternateSource | ✅ | done |
-| `ValueText` (formatted value) | ✅ R | ❌ | ✅ R | P3 | |
+| `ValueText` (formatted value) | 🚧 py-aep 也没做 | ❌ | 🗑️ deferred | P3 §3H | **通用不可达**：内置枚举 label 不在文件（需 Adobe 不公开 schema DB），AE 26.0-only API；仅自定义 Dropdown Menu Control 子集可 RE。2026-06-04 决策 defer，详 `../incidents/valuetext-needs-schema-db.md` |
 | **PropertyGroup ops**: `Properties / Property(key) / NumProperties / CanAddProperty` | ✅ | ✅ R (sans CanAddProperty) | ✅ | done | P2c — `AEPropertyGroup.Property/Group/ChildByIndex/NumProperties/ParentGroup/PropertyByPath`；CanAdd 结构性 P3 |
 | `PropertyBase.Remove / Duplicate / MoveTo` | ✅ R/W | ❌ | ✅ R/W | P3 | 结构性 |
 | `Keyframe.Time / FrameTime / Value / InInterpType / OutInterpType / TemporalEase / SpatialTangent` | ✅ | ✅ R/W | ✅ | done |
@@ -297,7 +297,7 @@ summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+�
 - **3E** Essential Graphics R only (controllers + override UUIDs，不做自动解析)
 - **3F** Guides R/W (ruler 标尺辅助线，UI-only chunk)
 - **3G** Composition Markers ：comp-level marker 增删 ✅ **done（stable）**——`Marker.Remove()` + `Composition.AddMarker`（clone-template 规避 opaque RE），AE 2020+2025 ship-gate 2/2 PASS（2026-06-04）。限制：AddMarker 需 ≥1 现存 marker（空 comp seed 暂搁）+ tail-insert 未做 time 排序。详 `../plans/2026-06-04-py-aep-p3-3g-comp-marker-structural-plan.md`
-- **3H** Property.ValueText (formatted, requires AE schema database)
+- **3H** Property.ValueText 🗑️ **deferred / won't-implement（2026-06-04）**——通用不可达：内置枚举 label 不在 .aep（pard 只存 nbOptions 计数），需 Adobe 不公开的 per-effect×版本 schema DB；AE 26.0-only ScriptingAPI；py-aep 自己也没实现。仅自定义 Dropdown Menu Control 的 label 在 `pdnm` chunk 可 RE（有界子集，payoff 窄，不做）。详 `../incidents/valuetext-needs-schema-db.md`
 
 **估算**: V3 capability framework 完成后才动；多个会话独立子项，可并行。
 

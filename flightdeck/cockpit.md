@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-04 by claude（P3 §3C DimensionsSeparated animated 实现 + AE 双版本 ship-gate 8/8 完，cut-3 修正落 `b104e6f`，plan landing 归档）
-**Active focus**: **py-aep parity P3** — §3A Render Queue read+write **完成（含结构性增删）**。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + Remove + Add / 3C PropertyBase Remove + MoveTo + Duplicate / 3G comp marker 增删(Remove+AddMarker, ship-gated) / 3C DimensionsSeparated animated R+W(双向, ship-gate 8/8, Alpha) 已落**。剩 ValueText（需 AE schema DB）+ DimensionsSeparated animated 升 stable doc-sync（小尾）。
+**Last updated**: 2026-06-04 by claude（P3 §3H ValueText RE 调查 → 决策 defer/won't-implement：通用不可达需 Adobe 不公开 schema DB；落 incident + coverage/spec/cockpit 同步；P3 R/W 域实质收尾）
+**Active focus**: **py-aep parity P3 —— R/W 域实质收尾**。§3A Render Queue read+write **完成（含结构性增删）**。**SetRenderer / Guides R/W / 分离维度 R+W(双向) / 3D Orientation R / Essential Graphics R / RQ SetComment + Remove + Add / 3C PropertyBase Remove + MoveTo + Duplicate / 3G comp marker 增删(Remove+AddMarker, ship-gated) / 3C DimensionsSeparated animated R+W(双向, ship-gate 8/8, Alpha) 已落**。**§3H ValueText 2026-06-04 决策 defer/won't-implement**（通用不可达：内置枚举 label 不在文件，需 Adobe 不公开 schema DB；AE 26.0-only；py-aep 也没做。详 `incidents/valuetext-needs-schema-db.md`）。剩唯一小尾：DimensionsSeparated animated 升 stable doc-sync。
 
 ## 进行中
 
@@ -15,9 +15,9 @@
 
 ## 下一步
 
-**`Property.ValueText`** — P3 最后大项（最大 RE，需 AE schema DB → 多会话）。先 RE：建 fixture 探 AE 各 effect/property 的 value-text schema 存储格式 + 定位字节。
+**P3 R/W 域收尾，转 Backlog 候选**。ValueText 已 defer（见 Active focus）。下一个可达大项需从 Backlog 选——最大候选 **Layr Transform 3D 通道**（Orientation / Rotate X·Y / Position_Z）有前置：runtime 无 3D switch（需先做 3D layer 支持，V2.3）。其余单条候选见 Backlog。**待用户指方向**。
 
-> 小尾（非阻塞）：DimensionsSeparated animated 已实现 + 双版本 ship-gate 8/8 PASS（landed `landed/plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md`），但升 stable 的 doc-sync（coverage / coverage-detail / docs / property.md）本会话按用户指示暂跳过，feature 现标 **Alpha**。需要时补这步即升 Stable。
+> 小尾（非阻塞）：DimensionsSeparated animated 已实现 + 双版本 ship-gate 8/8 PASS（landed `landed/plans/2026-06-04-py-aep-p3-dimsep-animated-plan.md`），升 stable 的 doc-sync（coverage / coverage-detail / docs / property.md）暂跳过，feature 现标 **Alpha**。需要时补这步即升 Stable。
 
 ## Backlog（单条候选 / 缺 runtime setter）
 
