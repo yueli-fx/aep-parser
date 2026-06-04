@@ -1,0 +1,64 @@
+# Widget object
+
+Widget 是一个示例 widget。
+
+第二段：演示 docgen 抽取多段 prose。
+
+## Attributes
+
+### Widget.Name
+
+```go
+Name string
+```
+
+Name 是显示名。
+
+JSON: `name` · read-write
+
+### Widget.Tags
+
+```go
+Tags []string
+```
+
+Tags 是标签。
+
+JSON: `tags` · read-only
+
+### Widget.Size
+
+```go
+func (w *Widget) Size() int
+```
+
+Size 返回标签数。
+
+read-only
+
+## Methods
+
+### Widget.Clone
+
+```go
+func (w *Widget) Clone() *Widget
+```
+
+Clone 返回副本。
+
+### Widget.SetName
+
+```go
+func (w *Widget) SetName(name string) error
+```
+
+SetName 设置 Name。
+
+当 name 为空时返回 error。
+
+**Example:**
+
+```go
+w := &sample.Widget{}
+_ = w.SetName("hi")
+```
