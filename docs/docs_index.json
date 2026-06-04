@@ -32,6 +32,28 @@
       "example": true,
       "summary": "effect knobs (Blurriness, Completion, …)"
     },
+    "Folder": {
+      "kind": "type",
+      "file": "project.md",
+      "anchor": "#folder-object",
+      "summary": "Folder is a project panel folder."
+    },
+    "Folder.ID": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#folderid",
+      "signature": "ID uint32",
+      "rw": "read-only",
+      "summary": "AE internal item ID"
+    },
+    "Folder.Name": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#foldername",
+      "signature": "Name string",
+      "rw": "read-only",
+      "summary": "folder display name"
+    },
     "Footage": {
       "kind": "type",
       "file": "footage.md",
@@ -226,6 +248,13 @@
       "signature": "Width uint16",
       "rw": "read-only",
       "summary": "pixel width"
+    },
+    "FromReader": {
+      "kind": "func",
+      "file": "project.md",
+      "anchor": "#fromreader",
+      "signature": "func FromReader(r io.ReadSeeker) (*Project, error)",
+      "summary": "FromReader parses an .aep file from an io.ReadSeeker."
     },
     "InterpType": {
       "kind": "type",
@@ -815,6 +844,478 @@
       "anchor": "#maskvertexouttangent",
       "signature": "OutTangent [2]float64",
       "rw": "read-only"
+    },
+    "NewProject": {
+      "kind": "func",
+      "file": "project.md",
+      "anchor": "#newproject",
+      "signature": "func NewProject(target ...AETarget) *Project",
+      "summary": "NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target."
+    },
+    "Open": {
+      "kind": "func",
+      "file": "project.md",
+      "anchor": "#open",
+      "signature": "func Open(path string) (*Project, error)",
+      "summary": "Open parses an .aep file by path and returns the Project."
+    },
+    "Project": {
+      "kind": "type",
+      "file": "project.md",
+      "anchor": "#project-object",
+      "summary": "Project holds the fully parsed contents of an .aep file."
+    },
+    "Project.AVItemByID": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectavitembyid",
+      "signature": "func (p *Project) AVItemByID(id uint32) AVItem",
+      "summary": "AVItemByID returns the *Composition or *Footage with the given id, or nil if no AV item in the project matches (or id == 0). Folders are not AV items and are not consulted."
+    },
+    "Project.AudioSampleRate": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectaudiosamplerate",
+      "signature": "func (p *Project) AudioSampleRate() float64",
+      "rw": "read-only",
+      "summary": "AudioSampleRate returns the project's audio sample rate in Hz. Returns 0 when the adfr chunk is absent or too short."
+    },
+    "Project.BitsPerChannel": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectbitsperchannel",
+      "signature": "BitsPerChannel BitsPerChannel",
+      "rw": "read-write",
+      "summary": "project color depth (8 / 16 / 32 bpc)"
+    },
+    "Project.ColorManagementSystem": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectcolormanagementsystem",
+      "signature": "func (p *Project) ColorManagementSystem() ColorManagementSystem",
+      "rw": "read-only",
+      "summary": "ColorManagementSystem returns the color management system used by the project. Returns ColorManagementSystemAdobe (0) when CMS chunk is absent."
+    },
+    "Project.CompensateForSceneReferredProfiles": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectcompensateforscenereferredprofiles",
+      "signature": "func (p *Project) CompensateForSceneReferredProfiles() bool",
+      "rw": "read-only",
+      "summary": "CompensateForSceneReferredProfiles reports whether AE compensates for scene-referred profiles when rendering (acer byte 0 != 0). Returns false when the chunk is absent."
+    },
+    "Project.CompositionByID": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectcompositionbyid",
+      "signature": "func (p *Project) CompositionByID(id uint32) *Composition",
+      "summary": "CompositionByID returns the first composition whose ID matches id, or nil if no such composition exists. ID 0 is treated as no-match (mirrors Composition.LayerByID; real AE projects start item IDs at 1). Footage and Folder items share the same ID namespace but are stored in separate slices, so an ID belonging to a non-composition item returns nil here."
+    },
+    "Project.CompositionByName": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectcompositionbyname",
+      "signature": "func (p *Project) CompositionByName(name string) *Composition",
+      "summary": "CompositionByName returns the first composition whose Name matches the given string, or nil if none does. Matching is exact (case-sensitive). Comp names aren't guaranteed unique in AE; use CompositionByID when you need precise identity."
+    },
+    "Project.Compositions": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectcompositions",
+      "signature": "Compositions []*Composition",
+      "rw": "read-only",
+      "summary": "all compositions in the project"
+    },
+    "Project.DisplayStartFrame": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectdisplaystartframe",
+      "signature": "func (p *Project) DisplayStartFrame() int",
+      "rw": "read-only",
+      "summary": "DisplayStartFrame returns the display start frame (0 or 1). This is derived from frames_count_type % 2. Returns 0 when nnhd chunk is absent."
+    },
+    "Project.DuplicateComposition": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectduplicatecomposition",
+      "signature": "func (p *Project) DuplicateComposition(src *Composition, name string) (*Composition, error)",
+      "summary": "DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. The dup contains a fresh copy of every layer (new layer IDs), with intra-comp parent + track-matte refs remapped to the dup's own layers; layer SOURCES (footage / precomp items) are shared verbatim, not duplicated — matching AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition."
+    },
+    "Project.EffectNames": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projecteffectnames",
+      "signature": "func (p *Project) EffectNames() []string",
+      "rw": "read-only",
+      "summary": "EffectNames returns the match-names of every effect referenced by the project, from the root-level `Pefl` LIST → `pjef` Utf8 entries. Returns nil when the project has no Pefl LIST (e.g., projects with no effects applied anywhere or builder-synthesized projects)."
+    },
+    "Project.ExpressionEngine": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectexpressionengine",
+      "signature": "func (p *Project) ExpressionEngine() string",
+      "rw": "read-only",
+      "summary": "ExpressionEngine returns the project's expression engine name (\"extendscript\" or \"javascript-1.0\"). Defaults to \"extendscript\" when the ExEn chunk is absent — matches py-aep's behavior."
+    },
+    "Project.FeetFramesFilmType": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectfeetframesfilmtype",
+      "signature": "func (p *Project) FeetFramesFilmType() FeetFramesFilmType",
+      "rw": "read-only",
+      "summary": "FeetFramesFilmType returns the film type for feet+frames timecode display. Returns FeetFramesFilmTypeMM35 (0) when nnhd chunk is absent."
+    },
+    "Project.Folders": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectfolders",
+      "signature": "Folders []*Folder",
+      "rw": "read-only",
+      "summary": "project-panel folders"
+    },
+    "Project.Footage": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectfootage",
+      "signature": "Footage []*Footage",
+      "rw": "read-only",
+      "summary": "all footage items (files / solids / placeholders)"
+    },
+    "Project.FootageByName": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectfootagebyname",
+      "signature": "func (p *Project) FootageByName(name string) *Footage",
+      "summary": "FootageByName returns the first footage item whose Name matches the given string, or nil if none does. Matching is exact (case-sensitive)."
+    },
+    "Project.FootageTimecodeDisplayStartType": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectfootagetimecodedisplaystarttype",
+      "signature": "func (p *Project) FootageTimecodeDisplayStartType() FootageTimecodeDisplayStartType",
+      "rw": "read-only",
+      "summary": "FootageTimecodeDisplayStartType returns how timecode is displayed for footage. Returns FootageTimecodeDisplayStartTypeStart0 (0) when nnhd chunk is absent."
+    },
+    "Project.Footages": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectfootages",
+      "signature": "func (p *Project) Footages() []*Footage",
+      "rw": "read-only",
+      "summary": "Footages returns the project's footage items (alias of the Project.Footage slice field, named to match py-aep's `project.footages` for API parity)."
+    },
+    "Project.FramesCountType": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectframescounttype",
+      "signature": "func (p *Project) FramesCountType() FramesCountType",
+      "rw": "read-only",
+      "summary": "FramesCountType returns how frames are counted in the project. Returns FramesCountTypeStart0 (0) when nnhd chunk is absent."
+    },
+    "Project.FramesUseFeetFrames": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectframesusefeetframes",
+      "signature": "func (p *Project) FramesUseFeetFrames() bool",
+      "rw": "read-only",
+      "summary": "FramesUseFeetFrames returns whether frames use feet+frames display. Returns false when nnhd chunk is absent."
+    },
+    "Project.GpuAccelType": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectgpuacceltype",
+      "signature": "func (p *Project) GpuAccelType() string",
+      "rw": "read-only",
+      "summary": "GpuAccelType returns the project's GPU acceleration device id (UUID-style string inside the gpuG LIST → Utf8 child). py-aep models this as a labeled enum; we surface the raw string since AE writes a runtime-resolved device UUID. Empty string when the chunk is absent."
+    },
+    "Project.LayerByID": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectlayerbyid",
+      "signature": "func (p *Project) LayerByID(id uint32) *Layer",
+      "summary": "LayerByID searches every composition in the project for a layer with the matching ID and returns the first hit. Returns nil for id == 0 (the \"no layer\" sentinel) and when no comp owns this id. Mirrors py-aep's `project.layer_by_id(id)`."
+    },
+    "Project.LinearBlending": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectlinearblending",
+      "signature": "func (p *Project) LinearBlending() bool",
+      "rw": "read-only",
+      "summary": "LinearBlending reports whether the project uses linear blending (presence of lnrb chunk under root)."
+    },
+    "Project.LinearizeWorkingSpace": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectlinearizeworkingspace",
+      "signature": "func (p *Project) LinearizeWorkingSpace() bool",
+      "rw": "read-only",
+      "summary": "LinearizeWorkingSpace reports whether the working color space is linearized for blending (presence of lnrp chunk under root)."
+    },
+    "Project.LutInterpolationMethod": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectlutinterpolationmethod",
+      "signature": "func (p *Project) LutInterpolationMethod() LutInterpolationMethod",
+      "rw": "read-only",
+      "summary": "LutInterpolationMethod returns the LUT interpolation method. Returns LutInterpolationMethodTrilinear (0) when CMS chunk is absent."
+    },
+    "Project.MarshalJSON": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectmarshaljson",
+      "signature": "func (p *Project) MarshalJSON() ([]byte, error)",
+      "summary": "MarshalJSON serializes the Project as JSON."
+    },
+    "Project.NewComposition": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectnewcomposition",
+      "signature": "func (p *Project) NewComposition( name string, width, height uint16, frameRate, duration float64, ) (*Composition, error)",
+      "summary": "NewComposition adds an empty composition to the project's root folder."
+    },
+    "Project.OcioConfigurationFile": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectocioconfigurationfile",
+      "signature": "func (p *Project) OcioConfigurationFile() string",
+      "rw": "read-only",
+      "summary": "OcioConfigurationFile returns the OCIO configuration file path. Returns empty string when CMS chunk is absent."
+    },
+    "Project.RenderQueue": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectrenderqueue",
+      "signature": "RenderQueue *RenderQueue",
+      "rw": "read-only",
+      "summary": "RenderQueue holds the parsed render queue (LIST:LRdr). Nil when the project has no LRdr chunk; non-nil with empty Items for an empty queue. Read-only (P3 §3A slice-1)."
+    },
+    "Project.Revision": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectrevision",
+      "signature": "func (p *Project) Revision() uint16",
+      "rw": "read-only",
+      "summary": "Revision returns the project's file revision counter — incremented by AE on each save. Read-only here since the head chunk also carries the next-item-id counter that our writer manages independently. Returns 0 when the file has no head chunk or its data is too short."
+    },
+    "Project.RootFolder": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectrootfolder",
+      "signature": "func (p *Project) RootFolder() *Folder",
+      "rw": "read-only",
+      "summary": "RootFolder returns the project's root folder. AE projects always have a root folder at the top of the items tree; we return the first Folder slice entry, or nil when the project was built without folders (synthesized minimal fixtures)."
+    },
+    "Project.SetAudioSampleRate": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetaudiosamplerate",
+      "signature": "func (p *Project) SetAudioSampleRate(rate float64) error",
+      "summary": "SetAudioSampleRate writes the adfr f64 BE. Refuses unknown rates outside AE's UI-supported set."
+    },
+    "Project.SetBitsPerChannel": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetbitsperchannel",
+      "signature": "func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error",
+      "summary": "SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc) to BOTH the nhed @0x0F and nnhd @0x18 header bytes. AE stores the enum redundantly; we keep both in sync."
+    },
+    "Project.SetColorManagementSystem": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetcolormanagementsystem",
+      "signature": "func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error",
+      "summary": "SetColorManagementSystem sets the color management system. Rejects values other than the defined enum members."
+    },
+    "Project.SetCompensateForSceneReferredProfiles": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetcompensateforscenereferredprofiles",
+      "signature": "func (p *Project) SetCompensateForSceneReferredProfiles(v bool) error",
+      "summary": "SetCompensateForSceneReferredProfiles writes the acer byte. Refuses when the acer chunk is absent (no slot to mutate; AE 23+ writes it by default — files without it are rare)."
+    },
+    "Project.SetDisplayStartFrame": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetdisplaystartframe",
+      "signature": "func (p *Project) SetDisplayStartFrame(v int) error",
+      "summary": "SetDisplayStartFrame sets the display start frame (0 or 1). This modifies frames_count_type to preserve the value."
+    },
+    "Project.SetExpressionEngine": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetexpressionengine",
+      "signature": "func (p *Project) SetExpressionEngine(engine string) error",
+      "summary": "SetExpressionEngine writes the ExEn Utf8. Refuses values other than \"extendscript\" / \"javascript-1.0\" — matches py-aep's validator."
+    },
+    "Project.SetFeetFramesFilmType": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetfeetframesfilmtype",
+      "signature": "func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error",
+      "summary": "SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7."
+    },
+    "Project.SetFootageTimecodeDisplayStartType": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetfootagetimecodedisplaystarttype",
+      "signature": "func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error",
+      "summary": "SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9."
+    },
+    "Project.SetFramesCountType": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetframescounttype",
+      "signature": "func (p *Project) SetFramesCountType(v FramesCountType) error",
+      "summary": "SetFramesCountType writes the frames count type to nnhd byte 20."
+    },
+    "Project.SetFramesUseFeetFrames": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetframesusefeetframes",
+      "signature": "func (p *Project) SetFramesUseFeetFrames(v bool) error",
+      "summary": "SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0."
+    },
+    "Project.SetGpuAccelType": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetgpuacceltype",
+      "signature": "func (p *Project) SetGpuAccelType(s string) error",
+      "summary": "SetGpuAccelType replaces the gpuG Utf8 string in-place (length-variable splice; WriteAEP recomputes parent LIST size)."
+    },
+    "Project.SetLinearBlending": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetlinearblending",
+      "signature": "func (p *Project) SetLinearBlending(v bool) error",
+      "summary": "SetLinearBlending toggles the lnrb chunk under root."
+    },
+    "Project.SetLinearizeWorkingSpace": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetlinearizeworkingspace",
+      "signature": "func (p *Project) SetLinearizeWorkingSpace(v bool) error",
+      "summary": "SetLinearizeWorkingSpace toggles the lnrp chunk under root."
+    },
+    "Project.SetLutInterpolationMethod": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetlutinterpolationmethod",
+      "signature": "func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error",
+      "summary": "SetLutInterpolationMethod sets the LUT interpolation method. Rejects values other than the defined enum members."
+    },
+    "Project.SetOcioConfigurationFile": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetocioconfigurationfile",
+      "signature": "func (p *Project) SetOcioConfigurationFile(v string) error",
+      "summary": "SetOcioConfigurationFile sets the OCIO configuration file path."
+    },
+    "Project.SetTimeDisplayType": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsettimedisplaytype",
+      "signature": "func (p *Project) SetTimeDisplayType(v TimeDisplayType) error",
+      "summary": "SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0."
+    },
+    "Project.SetTimecodeDefaultBase": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsettimecodedefaultbase",
+      "signature": "func (p *Project) SetTimecodeDefaultBase(v int) error",
+      "summary": "SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15."
+    },
+    "Project.SetTransparencyGridThumbnails": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsettransparencygridthumbnails",
+      "signature": "func (p *Project) SetTransparencyGridThumbnails(v bool) error",
+      "summary": "SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25."
+    },
+    "Project.SetWorkingGamma": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectsetworkinggamma",
+      "signature": "func (p *Project) SetWorkingGamma(gamma float64) error",
+      "summary": "SetWorkingGamma writes the dwga selector byte. Refuses values other than 2.2 and 2.4 (AE's only UI options)."
+    },
+    "Project.TimeDisplayType": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projecttimedisplaytype",
+      "signature": "func (p *Project) TimeDisplayType() TimeDisplayType",
+      "rw": "read-only",
+      "summary": "TimeDisplayType returns how time is displayed in the project. Returns TimeDisplayTypeTimecode (0) when nnhd chunk is absent."
+    },
+    "Project.TimecodeDefaultBase": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projecttimecodedefaultbase",
+      "signature": "func (p *Project) TimecodeDefaultBase() int",
+      "rw": "read-only",
+      "summary": "TimecodeDefaultBase returns the default timecode base (1-999). Returns 0 when nnhd chunk is absent."
+    },
+    "Project.ToJSON": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projecttojson",
+      "signature": "func (p *Project) ToJSON() *JSONProject",
+      "rw": "read-only",
+      "summary": "ToJSON converts the Project to a JSON-serializable view."
+    },
+    "Project.TransparencyGridThumbnails": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projecttransparencygridthumbnails",
+      "signature": "func (p *Project) TransparencyGridThumbnails() bool",
+      "rw": "read-only",
+      "summary": "TransparencyGridThumbnails returns whether transparency grid is shown in thumbnails. Returns false when nnhd chunk is absent."
+    },
+    "Project.Warnings": {
+      "kind": "field",
+      "file": "project.md",
+      "anchor": "#projectwarnings",
+      "signature": "Warnings []string",
+      "rw": "read-only",
+      "summary": "Warnings collects non-fatal parsing anomalies — chunks whose header looked sane enough to attempt decoding but whose payload did not match the expected layout (length mismatch, impossible counts, etc). Each entry is a human-readable string; the parser keeps going and produces a best-effort Project. Empty (nil) on a clean parse."
+    },
+    "Project.WorkingGamma": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectworkinggamma",
+      "signature": "func (p *Project) WorkingGamma() float64",
+      "rw": "read-only",
+      "summary": "WorkingGamma returns the working gamma value (2.2 or 2.4) per the dwga byte 0 selector (0 → 2.2, non-zero → 2.4). Returns 2.2 default when dwga is absent."
+    },
+    "Project.WorkingSpace": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectworkingspace",
+      "signature": "func (p *Project) WorkingSpace() string",
+      "rw": "read-only",
+      "summary": "WorkingSpace returns the working color space name (R only). Returns \"None\" when the chunk is absent or has no baseColorProfile."
+    },
+    "Project.WriteAEP": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectwriteaep",
+      "signature": "func (p *Project) WriteAEP(w io.Writer) error",
+      "example": true,
+      "summary": "WriteAEP serializes the (possibly mutated) project back to RIFX binary form. Sizes are recomputed from the current chunk data, so mutations such as Footage.SetPath that change byte lengths are handled correctly."
+    },
+    "Project.WriteJSON": {
+      "kind": "method",
+      "file": "project.md",
+      "anchor": "#projectwritejson",
+      "signature": "func (p *Project) WriteJSON(w io.Writer) error",
+      "summary": "WriteJSON writes the project as indented JSON to w."
+    },
+    "Project.XmpPacket": {
+      "kind": "getter",
+      "file": "project.md",
+      "anchor": "#projectxmppacket",
+      "signature": "func (p *Project) XmpPacket() string",
+      "rw": "read-only",
+      "summary": "XmpPacket returns the project's XMP metadata packet (trailing UTF-8 XML after the RIFX root chunk). Returns \"\" when the file has no XMP trailer or the project was built outside the parser."
     },
     "Property": {
       "kind": "type",

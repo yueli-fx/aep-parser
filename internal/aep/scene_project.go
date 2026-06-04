@@ -181,10 +181,10 @@ const (
 
 // Project holds the fully parsed contents of an .aep file.
 type Project struct {
-	Compositions   []*Composition
-	Footage        []*Footage
-	Folders        []*Folder
-	BitsPerChannel BitsPerChannel
+	Compositions   []*Composition // all compositions in the project
+	Footage        []*Footage     // all footage items (files / solids / placeholders)
+	Folders        []*Folder      // project-panel folders
+	BitsPerChannel BitsPerChannel // project color depth (8 / 16 / 32 bpc)
 
 	// RenderQueue holds the parsed render queue (LIST:LRdr). Nil when the
 	// project has no LRdr chunk; non-nil with empty Items for an empty queue.
@@ -314,8 +314,8 @@ type Footage struct {
 
 // Folder is a project panel folder.
 type Folder struct {
-	ID   uint32
-	Name string
+	ID   uint32 // AE internal item ID
+	Name string // folder display name
 }
 
 // ItemID returns the footage's item id (mirrors the ID field). Provided

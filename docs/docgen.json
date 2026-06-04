@@ -30,6 +30,12 @@
       "roots": ["Effect"],
       "head": "_includes/effect.head.md",
       "tail": "_includes/effect.tail.md"
+    },
+    {
+      "out": "project.md",
+      "roots": ["Project", "Folder"],
+      "funcs": ["Open", "FromReader", "NewProject"],
+      "head": "_includes/project.head.md"
     }
   ]
 }
