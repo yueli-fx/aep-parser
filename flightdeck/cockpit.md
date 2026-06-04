@@ -32,7 +32,7 @@
 
 其余 deferred R-only（DisplayColorSpace / ValueText 等）+ shape 次要子属性见 [specs/deferred-backlog.md](specs/deferred-backlog.md) + [plans/coverage.md](plans/coverage.md)。
 
-（已落条目历史见 `git log` + [landed/HISTORY.md](landed/HISTORY.md)，不在 cockpit 留存。）
+（已落条目历史见 `git log`，不在 cockpit 留存。）
 
 ## Hanging tasks
 

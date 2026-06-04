@@ -17,4 +17,4 @@ disabled_folders: []
 <!-- migrated from commit_mode:confirm — 旧 toggle 取默认值 confirm，但上方 House rule「完成即 commit·无需用户每次点名」是既定的真实意图，故按 auto 编码 -->
 commit without asking
 
-- **大计划完成即自动 landing**：当一个代表已 ship 功能 arc 的 plan 翻到 `status: done`，主动跑 `/flightdeck:landing` 把它归档到 `landed/plans/` 并同步 `landed/HISTORY.md` + INDEX + cockpit，无需用户点名。判定「大计划」= 有独立 plan 文件、对应一个可交付 feature/结构性 arc（如 P3 §3G）；滚动 reference 矩阵（coverage*.md）等长期文档不适用，保持 active。
+- **大计划完成即自动 landing**：当一个代表已 ship 功能 arc 的 plan 翻到 `status: done`，主动跑 `/flightdeck:landing` 把它归档到 `landed/plans/` 并同步 INDEX + cockpit，无需用户点名。（landing log `landed/HISTORY.md` 已废弃——commit 级历史以 `git log` 为准。）判定「大计划」= 有独立 plan 文件、对应一个可交付 feature/结构性 arc（如 P3 §3G）；滚动 reference 矩阵（coverage*.md）等长期文档不适用，保持 active。
