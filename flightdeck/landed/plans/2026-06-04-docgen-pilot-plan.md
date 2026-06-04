@@ -1,7 +1,18 @@
 ---
-status: active
+status: done
 summary: docgen 生成器 pilot 实现计划 — cmd/docgen（go/doc+go/ast 抽取 → markdown），TDD against testdata/sample，终点产出 docs/property.gen.md + 验证清单
 ---
+
+## 收尾（2026-06-04，Task 9 完成 + 验收通过）
+
+用户决策门已拍板：**doc comment 英文为源**（中文后续一键翻译）+ **启动迁移**。Task 9 全部落地，pilot 验收通过：
+- formatter pass（`tidyMarkdown`）清掉 `comment.Printer` 过度转义 + 列表缩进（`a540916`）。
+- `docs/property.md` 改为生成物（DO NOT EDIT），手写 35 节 → 完整 70 节自动文档（`9bb3395`）。
+- drift gate `TestDocsUpToDate`：从 manifest 重生成并 diff committed docs（CRLF 容错），骑在 `go test ./...` 上（本仓库无 CI pipeline）。
+- 铁律调和：CLAUDE.md + rules.md House rule —— 导出 doc comment = 文档源（`1ad8673`）。
+- `docs/marker.md` 第二个文件落地（`f693e07`），**directive 机制验证**：`Marker.Remove() error` 被无参单返回启发式误判为 Attribute → `//docgen:method` 强制归 Methods，且确认 directive 不泄漏进 `go doc`。
+
+**recipe + 剩余 9 文件推广** 见 spec `2026-06-04-docgen-from-comments-design.md` § Pilot outcome。本 plan（生成器 + pilot 闭环）到此 done。
 
 ## 执行进度（2026-06-04）
 

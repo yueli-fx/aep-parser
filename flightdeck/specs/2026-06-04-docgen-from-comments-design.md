@@ -139,3 +139,25 @@ CLAUDE.md「不写注释，除非 WHY 不明显」改述为：**「内部实现�
 - 不做 README.md 生成（纯手写导航）。
 - 不一次性迁全 13 文件（pilot 先行）。
 - 不引入 Swagger `@tag` 注解语法。
+
+## Pilot outcome（2026-06-04，验收通过）
+
+Pilot plan `plans/...docgen-pilot-plan`（已 landed）跑通 + 验收。决策：**doc comment 英文为源**。生成器 `cmd/docgen` ship；`docs/property.md` + `docs/marker.md` 已是生成物；drift gate `TestDocsUpToDate` 上 `go test`。**所有验证项绿，含 directive**（`Marker.Remove` 误判 → `//docgen:method` 修正，不泄漏 `go doc`）。
+
+### 每文件 recipe（已证）
+
+1. 确认该域导出符号的 doc comment 是**英文 prose**（property/marker 已是；其余域成熟度不一，缺的要补写英文 doc comment —— 这是真实工作量，非纯机械）。
+2. 歧义方法（无参单返回的**动作**方法，如 `Remove`/`Clone`）加 `//docgen:method`；只读 getter 误判加 `//docgen:attribute`。
+3. 写 `Example<Type>_<Method>[_<suffix>]` 测试函数（compile-only，无 `// Output:`；nil 占位用方法调用或 accessor+guard，**别裸 field-deref** 否则 nilness 报警）。
+4. 概念表 / 跨类型叙事 / caveat 走 `docs/_includes/<file>.{head,tail}.md`。
+5. manifest 加一节，`go run ./cmd/docgen -manifest docs/docgen.json` 生成 + `go test ./cmd/docgen` 过 drift gate。
+
+### 剩余 11 文件推广（增量，逐文件 .md 直接生成 + 验证）
+
+- **clean（结构直映 Attributes/Methods）**：marker ✅。footage / mask / shape / text / constants 大概率 clean。
+- **有设计 wrinkle**：
+  - **composition** —— `Project.NewComposition` 在 `*Project` 上，不会渲进 Composition root；bespoke H2 分组（`## Creation` / `## Boolean flag setters` / `## Item-level`）会被拍平成 Attributes/Methods（spec 已接受「略松」）；Renderer 对照表走 tail include；`Guide` / `EssentialGraphicsController` 子类型考虑加 roots 或留 prose。
+  - **layer**（1192 行）/ **text**（928 行）—— 体量大，doc comment 成熟度需逐一核。
+  - **project** —— `NewComposition` / `NewProject` 等 creation 方法的归属（project root 渲得到）。
+- **不生成**：`README.md`（纯手写导航）；`json.md`（JSON 导出说明，非符号文档，待定）。
+- 之后：CLAUDE.md/rules House rule 已先行落（导出 doc comment = 源）。CI 门禁本仓库以 `go test` drift gate 替代（无 pipeline）。
