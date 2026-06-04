@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-04 by claude（docgen pilot 验收通过 + ship：property.md/marker.md 生成物化、drift gate 上 `go test`、directive 验证、铁律调和；pilot plan landed；剩余 ~11 文件推广待续）
-**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship + 加固（inline field comment / example 注释 / JSON 索引）。**已生成物化 4 个文件**：property（70 节）/ marker / footage / mask；+ `docs/docs_index.json`（符号 KV 索引）；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。下一步继续推剩余 docs（clean: shape/constants/text；wrinkle: composition/layer/project/effect；recipe 见 docgen spec § Pilot outcome）。
+**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship + 加固（inline field comment / example 注释 / JSON 索引）。**已生成物化 5 个 clean 文件**：property（70 节）/ marker / footage / mask / effect；+ `docs/docs_index.json`（符号 KV 索引）；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。clean 域已清完，剩余全是 **wrinkle 文件**（见 § Pilot outcome），需逐个定方案。
 > 并行收尾：**py-aep parity P3 R/W 域实质收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；唯一小尾 DimensionsSeparated animated 升 stable doc-sync。
 
 ## 进行中
@@ -17,7 +17,13 @@
 
 ## 下一步
 
-**docgen 推广下一个文件**（已落 property/marker/footage/mask）：按 recipe 推下一个 **clean 域**（shape / constants / text），再啃 wrinkle 文件（composition 的 `NewComposition` 跨类型 + bespoke 分组拍平、layer 1192 行、project）。每文件：核 doc comment 英文成熟度 → 补缺 + Example 函数 + `_includes` 表格 → manifest 加节 → 生成 + `go test ./cmd/docgen` 过 drift gate。注：constants.md 是跨类型 enum 聚合，可能不直映单 root（待评估按多 enum root 渲 or 走 include）。
+**docgen 推广 wrinkle 文件**（clean 5 个已落：property/marker/footage/mask/effect）。剩余每个有跨模型/叙事需先定方案：
+- **跨类型 setter**：text 的 `Layer.SetText`/`SetRun*`、composition 的 `Project.NewComposition` 在 `*Layer`/`*Project` 上，不渲进本类型 root → 默认让它们落到 layer.md/project.md，本文件加 cross-ref 注（接受按 owning type 分组）。
+- **package-level 函数**：`aep.TextEncodedByteLen` 等不是方法，当前生成器不渲 → 走 `_includes` 注 or 给生成器加 package-func 支持（text + constants 都受益）。
+- **constants.md**：跨类型 enum 聚合，按多 enum root 渲 or include。
+- **shape.md**：含 V2.2 Builder API 手写教程（~100 行）→ 整段进 tail include 保留。
+- 大文件 layer(1192)/text(928)：体量大但多为 verbose-mechanical，逐 root 推。
+每文件流程同 recipe：核 doc comment 英文成熟度 → 补缺 + Example + `_includes` → manifest 加节 → 生成过 drift gate。
 
 > 旁路小尾（py-aep P3，非阻塞）：DimensionsSeparated animated 已 ship-gate 8/8（landed），升 stable 的 doc-sync 暂跳过，feature 标 **Alpha**；或转 Backlog 最大候选 Layr Transform 3D 通道（需先做 3D layer 支持，V2.3）。
 
