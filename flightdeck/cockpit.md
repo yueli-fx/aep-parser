@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-04 by claude（docgen pilot 验收通过 + ship：property.md/marker.md 生成物化、drift gate 上 `go test`、directive 验证、铁律调和；pilot plan landed；剩余 ~11 文件推广待续）
-**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship + 加固（inline field comment / example 注释 / JSON 索引）。**已生成物化 5 个 clean 文件**：property（70 节）/ marker / footage / mask / effect；+ `docs/docs_index.json`（符号 KV 索引）；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。clean 域已清完，剩余全是 **wrinkle 文件**（见 § Pilot outcome），需逐个定方案。
+**Active focus**: **docgen 推广** —— 生成器 `cmd/docgen` 已 ship + 加固（inline field comment / example 注释 / JSON 索引 / **package-level func 渲染**）。**已生成物化 6 个文件**：property（70 节）/ marker / footage / mask / effect / **project**（含 Open/FromReader/NewProject via funcs）；+ `docs/docs_index.json`；drift gate `TestDocsUpToDate` 守 `go test ./...`。决策已定：**doc comment 英文为源**。clean 域清完 + project（首个 wrinkle）已落，剩 composition/text/layer/shape/constants（见 § Pilot outcome）。
 > 并行收尾：**py-aep parity P3 R/W 域实质收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；唯一小尾 DimensionsSeparated animated 升 stable doc-sync。
 
 ## 进行中
@@ -17,11 +17,12 @@
 
 ## 下一步
 
-**docgen 推广 wrinkle 文件**（clean 5 个已落：property/marker/footage/mask/effect）。剩余每个有跨模型/叙事需先定方案：
-- **跨类型 setter**：text 的 `Layer.SetText`/`SetRun*`、composition 的 `Project.NewComposition` 在 `*Layer`/`*Project` 上，不渲进本类型 root → 默认让它们落到 layer.md/project.md，本文件加 cross-ref 注（接受按 owning type 分组）。
-- **package-level 函数**：`aep.TextEncodedByteLen` 等不是方法，当前生成器不渲 → 走 `_includes` 注 or 给生成器加 package-func 支持（text + constants 都受益）。
+**docgen 推广剩余 wrinkle 文件**（已落 6 个：property/marker/footage/mask/effect/project）。剩余每个仍需定方案：
+- **跨类型 setter**：text 的 `Layer.SetText`/`SetRun*` 在 `*Layer` 上 → 让它们落 layer.md，text.md 加 cross-ref 注（按 owning type 分组）。（composition 的 `NewComposition` 已解决：是 `*Project` 方法，渲在 project.md。）
+- **package-level 函数**：✅ 已加生成器 `funcs` 支持（`## Functions`），project.md 的 Open/FromReader/NewProject 已用。`TextEncodedByteLen` 同法。
 - **constants.md**：跨类型 enum 聚合，按多 enum root 渲 or include。
 - **shape.md**：含 V2.2 Builder API 手写教程（~100 行）→ 整段进 tail include 保留。
+- **composition.md**（716）：bespoke 分组拍平、Renderer 对照表 → tail include、Guide/EssentialGraphicsController 子类型加 roots；NewComposition 不在此（已在 project.md）。
 - 大文件 layer(1192)/text(928)：体量大但多为 verbose-mechanical，逐 root 推。
 每文件流程同 recipe：核 doc comment 英文成熟度 → 补缺 + Example + `_includes` → manifest 加节 → 生成过 drift gate。
 
