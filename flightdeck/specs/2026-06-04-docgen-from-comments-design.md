@@ -154,9 +154,15 @@ Pilot plan `plans/...docgen-pilot-plan`（已 landed）跑通 + 验收。决策�
 4. 概念表 / 跨类型叙事 / caveat 走 `docs/_includes/<file>.{head,tail}.md`。
 5. manifest 加一节，`go run ./cmd/docgen -manifest docs/docgen.json` 生成 + `go test ./cmd/docgen` 过 drift gate。
 
-### 剩余 11 文件推广（增量，逐文件 .md 直接生成 + 验证）
+### 生成器后续加固（推广中补的）
 
-- **clean（结构直映 Attributes/Methods）**：marker ✅。footage / mask / shape / text / constants 大概率 clean。
+- **inline field comment**：extractFields 在无 leading doc 时 fallback 到 trailing `// ...`（短字段文档常用写法），否则裸字段无 prose。
+- **example 注释保留**：formatExampleBody 用 `printer.CommentedNode` 打印（裸打 AST 子树丢注释 + 留空行），并在 `// Output:` marker 处截断。
+- **JSON 符号索引**：见上。
+
+### 剩余文件推广（增量，逐文件 .md 直接生成 + 验证）
+
+- **已落（clean，结构直映 Attributes/Methods）**：marker ✅ / footage ✅ / mask ✅（多 root + enum constants）。shape / constants / text 待推。
 - **有设计 wrinkle**：
   - **composition** —— `Project.NewComposition` 在 `*Project` 上，不会渲进 Composition root；bespoke H2 分组（`## Creation` / `## Boolean flag setters` / `## Item-level`）会被拍平成 Attributes/Methods（spec 已接受「略松」）；Renderer 对照表走 tail include；`Guide` / `EssentialGraphicsController` 子类型考虑加 roots 或留 prose。
   - **layer**（1192 行）/ **text**（928 行）—— 体量大，doc comment 成熟度需逐一核。
