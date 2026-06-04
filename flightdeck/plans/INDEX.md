@@ -1,6 +1,7 @@
 # plans/ — INDEX
 
 <!-- AUTO:plans -->
+- [2026-06-04-docgen-pilot-plan.md](2026-06-04-docgen-pilot-plan.md) — active — docgen 生成器 pilot 实现计划（cmd/docgen，TDD against testdata/sample → docs/property.gen.md）
 - [coverage-detail.md](coverage-detail.md) — active — 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 - [coverage.md](coverage.md) — active — 字段覆盖概览（精简入口）
 <!-- /AUTO -->
