@@ -4586,6 +4586,69 @@
       "signature": "Speed float64",
       "rw": "read-only"
     },
+    "TextAutoKernType": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textautokerntype-object",
+      "summary": "TextAutoKernType mirrors AE's AutoKernType enum (AE 24+ exposed, underlying btdk field present in AE 2020+). Stored at btdk /1/1[0]/0/6/0[i]/0/0/6/11. When set to NoAutoKern, the manual kerning value lives in a separate per-character sub-tree at /1/1[0]/0/8 which this library does not yet decode."
+    },
+    "TextAutoKernType.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textautokerntypestring",
+      "signature": "func (k TextAutoKernType) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextBaselineOption": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textbaselineoption-object",
+      "summary": "TextBaselineOption mirrors AE's FontBaselineOption enum (AE 24+). In AE 2020 scripting this was readonly via subscript / superscript; AE 24 exposed write access through fontBaselineOption. Stored at btdk /1/1[0]/0/6/0[i]/0/0/6/13."
+    },
+    "TextBaselineOption.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textbaselineoptionstring",
+      "signature": "func (b TextBaselineOption) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextCapsOption": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textcapsoption-object",
+      "summary": "TextCapsOption mirrors AE's FontCapsOption enum (AE 24+). In AE 2020 scripting this was readonly via allCaps / smallCaps; AE 24 exposed write access through fontCapsOption. Stored at btdk /1/1[0]/0/6/0[i]/0/0/6/12."
+    },
+    "TextCapsOption.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textcapsoptionstring",
+      "signature": "func (c TextCapsOption) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextDigitSet": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textdigitset-object",
+      "summary": "TextDigitSet mirrors AE's DigitSet enum (AE 24+ writeable). btdk style-run /70. Only values 0..2 confirmed via fixture; Farsi/ArabicRTL follow AE's enum order per documentation."
+    },
+    "TextDigitSet.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textdigitsetstring",
+      "signature": "func (d TextDigitSet) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextEncodedByteLen": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#textencodedbytelen",
+      "signature": "func TextEncodedByteLen(s string) int",
+      "summary": "TextEncodedByteLen returns the encoded byte length that SetText would produce for s, so callers can check if a candidate value fits the length-preserving budget without trial-and-error. Use it like:"
+    },
     "TextJustification": {
       "kind": "type",
       "file": "constants.md",
@@ -4599,6 +4662,443 @@
       "signature": "func (j TextJustification) String() string",
       "rw": "read-only",
       "summary": "String returns the human-readable name."
+    },
+    "TextLeadingType": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textleadingtype-object",
+      "summary": "TextLeadingType mirrors AE's LeadingType enum (AE 24+ writeable). Paragraph-level field at btdk /1/1[0]/0/5/0[i]/0/0/5/8."
+    },
+    "TextLeadingType.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textleadingtypestring",
+      "signature": "func (t TextLeadingType) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextLineJoinType": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textlinejointype-object",
+      "summary": "TextLineJoinType mirrors AE's LineJoinType enum (AE 24+ writeable). Controls stroke corner joining for text outlines. btdk style-run /62."
+    },
+    "TextLineJoinType.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textlinejointypestring",
+      "signature": "func (j TextLineJoinType) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextParagraph": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textparagraph-object",
+      "summary": "TextParagraph is one paragraph's style (split by '\\r' inside the btdk text string). Indent / space / autoHyphenate fields are AE 24+ writeable (the BTDK chunk has always stored them; AE 2020 ScriptingAPI just couldn't toggle them on point text)."
+    },
+    "TextParagraph.AutoHyphenate": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphautohyphenate",
+      "signature": "AutoHyphenate bool",
+      "rw": "read-only",
+      "summary": "/9 — default true"
+    },
+    "TextParagraph.Direction": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphdirection",
+      "signature": "Direction TextParagraphDirection",
+      "rw": "read-only",
+      "summary": "/33 — AE 24+ (0=LTR, 1=RTL)"
+    },
+    "TextParagraph.EndIndent": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphendindent",
+      "signature": "EndIndent float64",
+      "rw": "read-only",
+      "summary": "/3 — em points"
+    },
+    "TextParagraph.FirstLineIndent": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphfirstlineindent",
+      "signature": "FirstLineIndent float64",
+      "rw": "read-only",
+      "summary": "/1 — em points"
+    },
+    "TextParagraph.HangingRoman": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphhangingroman",
+      "signature": "HangingRoman bool",
+      "rw": "read-only",
+      "summary": "/21 — AE 24+ (box-text-only meaningful)"
+    },
+    "TextParagraph.Justification": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphjustification",
+      "signature": "Justification TextJustification",
+      "rw": "read-only",
+      "summary": "/0"
+    },
+    "TextParagraph.LeadingType": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphleadingtype",
+      "signature": "LeadingType TextLeadingType",
+      "rw": "read-only",
+      "summary": "/8 — AE 24+ (0=Roman, 1=Japanese)"
+    },
+    "TextParagraph.SpaceAfter": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphspaceafter",
+      "signature": "SpaceAfter float64",
+      "rw": "read-only",
+      "summary": "/5 — em points"
+    },
+    "TextParagraph.SpaceBefore": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphspacebefore",
+      "signature": "SpaceBefore float64",
+      "rw": "read-only",
+      "summary": "/4 — em points"
+    },
+    "TextParagraph.StartIndent": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textparagraphstartindent",
+      "signature": "StartIndent float64",
+      "rw": "read-only",
+      "summary": "/2 — em points"
+    },
+    "TextParagraphDirection": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textparagraphdirection-object",
+      "summary": "TextParagraphDirection mirrors AE's ParagraphDirection enum (AE 24+ writeable). Paragraph-level field at btdk /1/1[0]/0/5/0[i]/0/0/5/33."
+    },
+    "TextParagraphDirection.String": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textparagraphdirectionstring",
+      "signature": "func (d TextParagraphDirection) String() string",
+      "rw": "read-only",
+      "summary": "String returns the human-readable name."
+    },
+    "TextSource": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textsource-object",
+      "summary": "TextSource is the decoded text-layer document. Populated when the btds payload parses cleanly; nil otherwise (raw bytes remain on Layer.TextSourceRaw)."
+    },
+    "TextSource.BoxBounds": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourceboxbounds",
+      "signature": "BoxBounds [4]float64",
+      "rw": "read-only",
+      "summary": "[xmin, ymin, xmax, ymax] in layer-local coords; zero when !IsBoxText"
+    },
+    "TextSource.FontAxes": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourcefontaxes",
+      "signature": "FontAxes [][]float64",
+      "rw": "read-only",
+      "summary": "FontAxes is parallel to Fonts: FontAxes[i] holds the OpenType design-axis values for Fonts[i] when it's a variable font. The slice is in the same order AE wrote it (matches the font's named axes — Bahnschrift = [wght, wdth], Inter Variable = [wght, slnt], etc.). Nil for non-variable fonts (most fonts; the /4 sub-array is absent in the btdk font dict). Values are decoded from 16.16 fixed-point into floats — e.g. wght=700 reads as 700.0. Read-only; axis values are tied to font-instance identity (AE rewrites them when you swap to a different instance via SetRunFontIndex / AddFont), so changing axes independently is not exposed."
+    },
+    "TextSource.Fonts": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourcefonts",
+      "signature": "Fonts []string",
+      "rw": "read-only",
+      "summary": "PostScript font names from the resource table"
+    },
+    "TextSource.IsBoxText": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourceisboxtext",
+      "signature": "IsBoxText bool",
+      "rw": "read-only",
+      "summary": "true → box (paragraph) text with explicit bounds; false → point text"
+    },
+    "TextSource.Justification": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourcejustification",
+      "signature": "Justification TextJustification",
+      "rw": "read-only",
+      "summary": "first paragraph's justification (== Paragraphs[0].Justification when present); kept for convenience"
+    },
+    "TextSource.Kerning": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourcekerning",
+      "signature": "Kerning int",
+      "rw": "read-only",
+      "summary": "Kerning mirrors AE script's TextDocument.kerning (\"only reflects the first character\"). Sourced from /1/1[0]/0/7 (a scalar sibling of /8 — AE keeps it in sync with /8/0[0] for convenience). Zero when the kerning sub-tree is absent (autoKernType is Metric or Optical across the document)."
+    },
+    "TextSource.ManualKerning": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourcemanualkerning",
+      "signature": "ManualKerning []int",
+      "rw": "read-only",
+      "summary": "ManualKerning is the per-character manual kerning values in 1/1000 em units (AE's \"Kerning\" panel field; only meaningful when the matching run's AutoKernType == TextAutoKernNoAuto). Length matches the character count of Text — one entry per character. Nil / empty when no manual kerning was ever applied (autoKernType is Metric/Optical for all chars). Decoded from the btdk per-char run-length array at /1/1[0]/0/8/0 (each entry has /0/0 = value, /1 = run length, AE always writes 1; the trailing entry is an end-of-text sentinel with an empty /0 dict and is excluded here)."
+    },
+    "TextSource.Paragraphs": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourceparagraphs",
+      "signature": "Paragraphs []TextParagraph",
+      "rw": "read-only",
+      "summary": "per-paragraph styling in document order"
+    },
+    "TextSource.Runs": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourceruns",
+      "signature": "Runs []TextStyleRun",
+      "rw": "read-only",
+      "example": true,
+      "summary": "character style runs in document order"
+    },
+    "TextSource.Text": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textsourcetext",
+      "signature": "Text string",
+      "rw": "read-only",
+      "summary": "concatenated paragraph text, \\r → \\n, trailing newline trimmed"
+    },
+    "TextStyleRun": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textstylerun-object",
+      "summary": "TextStyleRun is one character-level style span inside a TextSource. Multi-style text (different size/color per word) has multiple runs; uniform text has exactly one. Character index spans are not yet RE'd — runs appear in document order matching AE's paragraph palette."
+    },
+    "TextStyleRun.AllCaps": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textstylerunallcaps",
+      "signature": "func (r TextStyleRun) AllCaps() bool",
+      "rw": "read-only",
+      "summary": "AllCaps mirrors AE's readonly TextDocument.allCaps attribute. True when CapsOption is TextCapsAll or TextCapsAllSmall."
+    },
+    "TextStyleRun.ApplyStroke": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunapplystroke",
+      "signature": "ApplyStroke bool",
+      "rw": "read-only",
+      "summary": "whether StrokeColor/StrokeWidth are active"
+    },
+    "TextStyleRun.AutoKernType": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunautokerntype",
+      "signature": "AutoKernType TextAutoKernType",
+      "rw": "read-only",
+      "summary": "AE 24+ writeable; auto-kerning mode (NoAuto / Metric / Optical)"
+    },
+    "TextStyleRun.AutoLeading": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunautoleading",
+      "signature": "AutoLeading bool",
+      "rw": "read-only",
+      "summary": "true → Leading is AE's auto value (FontSize × 1.2 typical)"
+    },
+    "TextStyleRun.BaselineOption": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunbaselineoption",
+      "signature": "BaselineOption TextBaselineOption",
+      "rw": "read-only",
+      "summary": "AE 24+ writeable; mirrors AE's subscript / superscript readonly attrs"
+    },
+    "TextStyleRun.BaselineShift": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunbaselineshift",
+      "signature": "BaselineShift float64",
+      "rw": "read-only",
+      "summary": "em points; positive = up, negative = down"
+    },
+    "TextStyleRun.CapsOption": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstyleruncapsoption",
+      "signature": "CapsOption TextCapsOption",
+      "rw": "read-only",
+      "summary": "AE 24+ writeable; mirrors AE's allCaps / smallCaps readonly attrs"
+    },
+    "TextStyleRun.DigitSet": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerundigitset",
+      "signature": "DigitSet TextDigitSet",
+      "rw": "read-only",
+      "summary": "AE 24+ writeable; digit set (Default / Arabic / Hindi / ...)"
+    },
+    "TextStyleRun.FauxBold": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunfauxbold",
+      "signature": "FauxBold bool",
+      "rw": "read-only",
+      "summary": "run-level synthetic bold (true when font lacks a bold cut)"
+    },
+    "TextStyleRun.FauxItalic": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunfauxitalic",
+      "signature": "FauxItalic bool",
+      "rw": "read-only",
+      "summary": "run-level synthetic italic"
+    },
+    "TextStyleRun.FillColor": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunfillcolor",
+      "signature": "FillColor [4]float64",
+      "rw": "read-only",
+      "summary": "[R, G, B, A], each 0..1"
+    },
+    "TextStyleRun.FontIndex": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunfontindex",
+      "signature": "FontIndex int",
+      "rw": "read-only",
+      "summary": "index into TextSource.Fonts"
+    },
+    "TextStyleRun.FontName": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunfontname",
+      "signature": "FontName string",
+      "rw": "read-only",
+      "summary": "resolved Fonts[FontIndex] for convenience; \"\" if out of range"
+    },
+    "TextStyleRun.FontSize": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunfontsize",
+      "signature": "FontSize float64",
+      "rw": "read-only",
+      "summary": "em points (AE's \"Font Size\" field)"
+    },
+    "TextStyleRun.HorizontalScale": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunhorizontalscale",
+      "signature": "HorizontalScale float64",
+      "rw": "read-only",
+      "summary": "raw value (AE default 1, scripted range 0..100; unit not fully RE'd — pass through)"
+    },
+    "TextStyleRun.Leading": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunleading",
+      "signature": "Leading float64",
+      "rw": "read-only",
+      "summary": "em points; only meaningful when AutoLeading is false"
+    },
+    "TextStyleRun.LineJoinType": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunlinejointype",
+      "signature": "LineJoinType TextLineJoinType",
+      "rw": "read-only",
+      "summary": "AE 24+ writeable; stroke corner join style"
+    },
+    "TextStyleRun.NoBreak": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunnobreak",
+      "signature": "NoBreak bool",
+      "rw": "read-only",
+      "summary": "AE 24+ writeable; \"do not break\" character flag"
+    },
+    "TextStyleRun.SmallCaps": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textstylerunsmallcaps",
+      "signature": "func (r TextStyleRun) SmallCaps() bool",
+      "rw": "read-only",
+      "summary": "SmallCaps mirrors AE's readonly TextDocument.smallCaps attribute. True when CapsOption is TextCapsSmall or TextCapsAllSmall."
+    },
+    "TextStyleRun.StrokeColor": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunstrokecolor",
+      "signature": "StrokeColor [4]float64",
+      "rw": "read-only",
+      "summary": "[R, G, B, A]"
+    },
+    "TextStyleRun.StrokeOverFill": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunstrokeoverfill",
+      "signature": "StrokeOverFill bool",
+      "rw": "read-only",
+      "summary": "stroke renders over fill (default true). AE 2020 readonly via JSX"
+    },
+    "TextStyleRun.StrokeWidth": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunstrokewidth",
+      "signature": "StrokeWidth float64",
+      "rw": "read-only",
+      "summary": "em points"
+    },
+    "TextStyleRun.Subscript": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textstylerunsubscript",
+      "signature": "func (r TextStyleRun) Subscript() bool",
+      "rw": "read-only",
+      "summary": "Subscript mirrors AE's readonly TextDocument.subscript attribute."
+    },
+    "TextStyleRun.Superscript": {
+      "kind": "getter",
+      "file": "text.md",
+      "anchor": "#textstylerunsuperscript",
+      "signature": "func (r TextStyleRun) Superscript() bool",
+      "rw": "read-only",
+      "summary": "Superscript mirrors AE's readonly TextDocument.superscript attribute."
+    },
+    "TextStyleRun.Tracking": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstyleruntracking",
+      "signature": "Tracking float64",
+      "rw": "read-only",
+      "summary": "1/1000 em (AE's tracking field; 0 = normal)"
+    },
+    "TextStyleRun.Tsume": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstyleruntsume",
+      "signature": "Tsume float64",
+      "rw": "read-only",
+      "summary": "CJK character-spacing adjustment (0..100, AE default 0)"
+    },
+    "TextStyleRun.VerticalScale": {
+      "kind": "field",
+      "file": "text.md",
+      "anchor": "#textstylerunverticalscale",
+      "signature": "VerticalScale float64",
+      "rw": "read-only",
+      "summary": "raw value (AE default 1, scripted range 0..100)"
     },
     "TrackMatteType": {
       "kind": "type",

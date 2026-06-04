@@ -53,6 +53,12 @@
       "out": "layer.md",
       "roots": ["Layer", "LightKind"],
       "head": "_includes/layer.head.md"
+    },
+    {
+      "out": "text.md",
+      "roots": ["TextSource", "TextStyleRun", "TextParagraph", "TextCapsOption", "TextBaselineOption", "TextAutoKernType", "TextLineJoinType", "TextDigitSet", "TextLeadingType", "TextParagraphDirection"],
+      "funcs": ["TextEncodedByteLen"],
+      "head": "_includes/text.head.md"
     }
   ]
 }
