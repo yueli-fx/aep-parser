@@ -5,7 +5,7 @@ summary: docs/*.md 改为从 Go doc comment 自动生成（Swagger 式，AST 推
 
 # docgen — 从 Go doc comment 自动生成 API 文档
 
-**Status**: design（已 brainstorm 定稿，待写 plan）。**Created**: 2026-06-04。
+**Status**: design（已 brainstorm 定稿 + 纳入 3-AI 设计审核 ds/gpt/claude，待写 plan）。**Created**: 2026-06-04。
 
 ## 动机
 
@@ -24,11 +24,27 @@ cmd/docgen/
   main.go     : 读 manifest → go/doc 解析 internal/aep → 渲染 → 写 docs/*.md
   extract.go  : go/doc.NewFromFiles + go/ast 抽取（符号树 / 签名 / struct tag / setter 探测 / Example 关联）
   render.go   : 符号树 → markdown（复刻现有 Attributes / Methods / 示例 结构）
-docs/docgen.toml : manifest — 输出文件 → 根类型映射（pilot 只填 property）
-docs/_includes/  : 逃生舱 — 非符号 prose（类型间叙事 / 概念表 / README 类层级）手写 head/tail，生成时拼接
+docs/docgen.toml : manifest — 每个输出文件一节：roots（根类型，顺序即渲染序）+ head/tail（可选 _includes 路径）
+docs/_includes/  : 逃生舱（一等公民）— 非符号 prose（类型间叙事 / 概念表 / README 类层级）手写 head/tail，生成时拼接
 ```
 
-引擎选 **标准库 `go/doc`+`go/ast` 自研**（非 `go doc` 文本 scrape，非 gomarkdoc 三方——后者输出通用，匹配不了 R/RW + JSON 字段 + 按类型分文件的定制）。`go/doc.NewFromFiles` 一次拿全符号 + 注释 + Example 关联。
+manifest 节示例（_includes 不是后补，是一等公民）：
+
+```toml
+[file.property]
+roots = ["Property", "Keyframe", "TemporalEase", "InterpType"]  # 顺序即渲染序
+head  = "property.head.md"   # 可选，缺失静默跳过
+tail  = "property.tail.md"   # 可选
+```
+
+引擎选 **标准库 `go/doc`+`go/ast`+`go/doc/comment`+`go/printer` 自研**（非 `go doc` 文本 scrape，非 gomarkdoc 三方——后者输出通用，匹配不了 R/RW + JSON 字段 + 按类型分文件的定制）。
+
+**关键技术点（审核纠正）**：
+- Go doc comment **不是 markdown**——Go 1.19+ 用 `go/doc/comment` 把注释解析成结构（段落 / 标题 / 列表 / 代码块 / 链接），**原生无表格**。`render.go` 必须解析这个 comment-AST 再转 markdown，不能当纯文本透传。
+- **签名规范化**：用 `go/printer` 把签名拍平成单行，不直接 dump 源 AST（避免耦合源码换行 / gofmt 细节，保 diff 稳定）。
+- **Example 自建索引**：go/doc 只负责解析 Example 函数；关联逻辑自己掌控，建 `map[Symbol][]Example`，靠命名 `Example<Type>_<Method>[_<suffix>]` 映射，支持一方法多 Example。
+- **稳定排序**：types 按 manifest `roots` 序；section 内（Attributes/Methods/Constants）按**声明序**。绝不依赖 AST 遍历序，否则每次生成 diff 抖动。
+- **Go 版本敏感**：go/doc/comment 行为随 Go 版本变，CI / 生成记录所用 Go 版本。
 
 ## 数据来源映射（注释零重复）
 
@@ -36,10 +52,18 @@ docs/_includes/  : 逃生舱 — 非符号 prose（类型间叙事 / 概念表 /
 |---|---|
 | 签名 / 参数 / 返回类型 | AST |
 | JSON 字段名 | struct tag `json:"..."` |
-| **R vs RW** | 字段有无对应 `Set<Field>` 方法；方法是否 `Set*` |
+| **R vs RW** | **推断优先 + 显式覆盖**（见下） |
 | 描述 prose | doc comment（**唯一手写源**） |
-| 示例 | `Example<Type>_<Method>` 测试函数（godoc 惯例关联，编译校验） |
+| 示例 | `Example<Type>_<Method>[_<suffix>]` 测试函数（自建索引关联，编译校验） |
 | 按类型分文件 | manifest |
+
+### R/RW + Attribute 分类：推断优先 + 显式逃生舱（审核重点）
+
+裸 `Set<Field>` 命名约定长期脆弱——项目里有复合 setter（`SetDimensionsSeparated` 改多字段）、反语义对（`SetExpressionEnabled` ↔ `ExpressionEnabled` 字段）、非 Set 的 RW（设想 `Enable()/Disable()`）。故**不**把分类永久绑定命名：
+
+- **默认推断**（覆盖常态、零注解）：struct 字段有对应 `Set<Field>` → RW，否则 R；无参返回值、非 `Set*` 的方法 → 当 getter 归 Attributes。
+- **显式覆盖**（仅推断错时用）：字段/方法上加 `//docgen:rw` / `//docgen:ro` / `//docgen:attribute` / `//docgen:method` 指令，或 manifest 里配 override 表。生成器**优先读显式标记，fallback 推断**。
+- 避免「无参返回值 → Attribute」误收 `Clone() *Property` / `EvaluateAt(t)` 这类——getter 判定 = struct 字段 OR 显式标记 OR（无参 + 单返回值 + 非 Set*）启发式，命中歧义时要显式标记。
 
 ## 渲染规则
 
@@ -82,20 +106,28 @@ CLAUDE.md「不写注释，除非 WHY 不明显」改述为：**「内部实现�
 
 ## Pilot 范围 + 验证闭环
 
-1. 写 `cmd/docgen` + `docs/docgen.toml`（manifest 只填 property → [Property, Keyframe, TemporalEase, InterpType]）。
-2. 把现有 `property.md` 的 prose 迁进对应符号的 doc comment（分布在 scene_property*.go / mutate_property*.go / codec keyframe 等），建若干 `Example*` 函数。
-3. `go generate ./...`（或直接 `go run ./cmd/docgen`）→ 生成 `docs/property.md`。
-4. **验证**：`git diff` 旧 vs 生成版，人工核对覆盖无丢失 + 风格可接受；`go test ./...`（Example 编译/跑通）。
-5. 可接受 → manifest 推广其余 12 文件（增量，逐文件迁移 + 验证）；不可接受 → 调 render 规则重生成。
+1. 写 `cmd/docgen` + `docs/docgen.toml`（manifest 节 `[file.property]` roots=[Property, Keyframe, TemporalEase, InterpType]）。**先验 Property 类型符号**跑顺，再纳入 Keyframe/TemporalEase（其 byte-layout 概念表正好压测 _includes/表格规则）。
+2. 把现有 `property.md` 的 prose 迁进对应符号的 doc comment（分布在 scene_property*.go / mutate_property*.go / codec keyframe 等），建若干 `Example*` 函数（含一方法多 Example 的场景验证）。
+3. 根目录加 `//go:generate go run ./cmd/docgen`；跑 `go generate ./...` → 生成 `docs/property.md`。
+4. **验证清单**（不只肉眼 diff）：
+   - **覆盖率**：统计旧 property.md 的 H3 标题数 vs 生成版，抓静默丢节；逐符号核对 prose 无丢失。
+   - **表格场景**：至少一个带表格（如 Components 值表 / keyframe byte-layout 表），判定走 `_includes/` 还是渲染器支持的简单管道表，形成规则。
+   - **多 Example**：验证 `_suffix` 多 Example 正确关联渲染。
+   - **中英混排**：中文 prose + 代码块 + 列表混排渲染可接受。
+   - `go test ./...`（Example 编译/跑通）。
+5. **CI 门禁**：流水线跑 `go run ./cmd/docgen` + `git diff --exit-code docs/`——注释改了忘重生成即 CI 红（「唯一源」方案的关键一环，内化了 drift 检查）。
+6. 可接受 → manifest 推广其余 12 文件（增量，逐文件迁移 + 验证）；不可接受 → 调 render 规则重生成。
 
 > 复用素材：当前工作树未提交的 property.md DimSep 增补（reader + SetDimensionsSeparated）正好是 pilot 要迁进注释的 prose 源；不浪费。
 
 ## 风险 / 开放问题
 
-- **生成保真**：AST 推导的结构比手工策展更统一、可能丢失某些 bespoke 排版（如 Components 值表、keyframe byte-layout 概念表）。缓解：这类概念表走 `_includes/` 或类型 doc comment 内联 markdown 表（go/doc 注释支持有限 markdown）。pilot 阶段核对。
-- **go/doc 注释 markdown 能力**：Go 1.19+ doc comment 支持有限 markdown（列表、代码块、链接），但不支持复杂表格。复杂表格 → `_includes/` 或渲染器特殊处理。pilot 验证够不够用。
-- **迁移工作量**：5600 行一次性搬进注释是真成本，但 pilot 先验证再分批摊。
-- **Example 关联粒度**：godoc `Example<Type>_<Method>` 命名约定必须严格，否则关联不上。生成器对缺失 Example 的符号容忍（无示例段）。
+- **生成保真**：AST 推导的结构比手工策展更统一、可能丢失某些 bespoke 排版（如 Components 值表、keyframe byte-layout 概念表）。这类高度结构化表格走 `_includes/`；3-4 行小表评估渲染器是否支持简单管道表（避免强拆增维护负担）。pilot 阶段核对并形成规则文档。
+- **doc comment 非 markdown**：Go doc comment 用 `go/doc/comment` 的格式（段落/标题/列表/代码块/链接），**无原生表格、无任意 markdown**。render.go 解析 comment-AST → markdown；表格不能指望注释承载。
+- **迁移工作量**：5600 行一次性搬进注释是真成本，但 pilot 先验证再分批摊；每文件迁移列检查清单。
+- **Example 关联粒度**：靠自建 `map[Symbol][]Example` 索引 + 命名约定，比 go/doc 默认关联可控；缺 Example 的符号容忍（无示例段）。
+- **Returns 结构化**：暂折进 prose（不硬分小节）；若 pilot 显示可读性下降，再评估可选的 `Returns:` 段落约定（YAGNI，pilot 后定）。
+- **House rule 调和需共识**：「导出符号 doc comment = 文档源、允许注释」与「内部实现无注释」并行，写进 rules 前确认无歧义。
 
 ## 不做（YAGNI）
 
