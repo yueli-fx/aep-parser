@@ -49,7 +49,7 @@ internal/aep/*       ── AEP 语义层 (Chunk 树 → Project / Composition /
 - **一律用中文跟用户交流**（含解释、提案、报告、commit body 可英文按既有惯例）
 - 代码优先，设计讨论精简
 - 重构 / 迁移**先读源码再动**，不瞎猜
-- 不写注释，除非 WHY 不明显
+- **内部实现无注释**，除非 WHY 不明显；但**导出 API 的 doc comment = 文档源**（英文为源，`cmd/docgen` 从中生成 `docs/*.md`，见 `flightdeck/specs/2026-06-04-docgen-from-comments-design.md`）。行内实现注释仍禁；导出符号上方的 doc comment 是文档载体，不算违反。
 
 ## 文档地图
 
