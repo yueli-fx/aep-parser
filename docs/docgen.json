@@ -6,6 +6,12 @@
       "roots": ["Property", "Keyframe", "TemporalEase", "InterpType"],
       "head": "_includes/property.head.md",
       "tail": "_includes/property.tail.md"
+    },
+    {
+      "out": "marker.md",
+      "roots": ["Marker"],
+      "head": "_includes/marker.head.md",
+      "tail": "_includes/marker.tail.md"
     }
   ]
 }

@@ -31,6 +31,8 @@ import (
 //
 // Errors (project untouched): the marker was built outside the parser, is
 // already detached, or its chunk references are inconsistent.
+//
+//docgen:method
 func (m *Marker) Remove() error {
 	ml := m.list
 	if ml == nil || ml.owner == nil {

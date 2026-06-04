@@ -22,7 +22,7 @@ type Effect struct {
 // editable annotation data (most are empty unless the user filled them
 // in inside AE's "Marker Dialog").
 type Marker struct {
-	Time         float64
+	Time         float64 // marker position in seconds, decoded via the owning composition's TickRate
 	Duration     float64 // seconds; 0 = point marker. Decoded from NmHd @0x08 / 600.
 	Label        uint8   // timeline label color index (0..16); 0 = default. NmHd @0x10.
 	Comment      string  // first Utf8 in the Nmrd block
