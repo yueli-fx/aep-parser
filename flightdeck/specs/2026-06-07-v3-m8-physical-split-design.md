@@ -1,41 +1,50 @@
 ---
-status: idea
-summary: V3 M8 方案② 真·物理分包设计（A 先行）：internal/scene + internal/serializer + internal/codec 三包拆分，free-function/Document API，eager patch 迁 serializer 侧表，opaque shard 作 C 的 on-ramp；保 byte-exact 回归门，C（懒重生·改契约）作日后独立 arc
-note: brainstorm 产出，未写 plan。方向已与用户确认（A 先行 + facade 保留 + Document 写中枢）；§1 骨架已逐段过，§2–§6 直接落文档。前置：M8 scene→rifx 白名单清零（2026-06-07 已落）
+status: active
+summary: V3 M8 方案② 真·物理分包设计（A 先行 + B′ back-ref 接口）：scene/serializer/codec 物理拆包，back-ref 作 scene 内 writer 接口（serializer 实现）→ 保留全部方法 API（不破 API）、scene 编译期零 rifx；eager length-preserving patch 经接口；opaque 延后到 C；全程保 byte-exact 回归门
+note: brainstorm + 三家外审两轮整合。方向 = A 先行（保 byte-exact，C 日后独立）+ B′（back-ref 接口、不破 API、无侧表/无 Document god-object）。前置：M8 scene→rifx 白名单清零（2026-06-07 已落）
 ---
 
-# V3 M8 方案② — 真·物理分包设计（A 先行）
+# V3 M8 方案② — 真·物理分包设计（A 先行 + B′ back-ref 接口）
 
-**Status**: idea（brainstorm 产出，未写 plan）。Drafted 2026-06-07。
+**Status**: active（brainstorm + 三家外审两轮已整合，未写 plan）。Drafted 2026-06-07。
 **关联**: `2026-05-22-v3-direction.md`（M8 / scene→rifx 残留表）、`landed/specs/2026-05-30-aep-package-reorg-design.md`（方案① §0 Go 语义墙 + §6 back_ 缝固化）、`2026-05-27-v3-deep-think.md`（Q1/Q5/Q7 + opaque shard）、CLAUDE.md 硬约束 #1/#2/#3/#5/#6。
 
 ---
 
-## §0 决策记录（先读，定范围）
+## §0 决策记录 + 核心设计约束（先读，定范围）
 
-立项问题：V3 M8 的「真·物理分包」（独立 `internal/scene` + `internal/serializer` Go 包），被方案① §0 的 **Go 语义墙**挡住——方法必须与类型同包，`(p *Project) WriteAEP` 方法体调 serializer + serializer 读 Project 字段 = 导入环。方案① 当时收敛为「单包命名轴重组」，把破环留给方案②。本 spec 设计方案②。
+立项问题：V3 M8 的「真·物理分包」（独立 `internal/scene` + `internal/serializer`），被方案① §0 的 **Go 语义墙**挡住——方法必须与类型同包，`(p *Project) WriteAEP` 方法体调 serializer + serializer 读 Project = 导入环。方案① 当时收敛为「单包命名轴重组」，把破环留给方案②。本 spec 设计方案②。
 
-**brainstorm 期四个抉择（与用户逐一确认）：**
+### §0.1 brainstorm + 外审收敛的四个抉择
 
-1. **分包动机** = **硬编译边界**。把当前 `arch_boundary_test.go`（AST 测试守卫，可禁用、非气密）升级为 Go 编译器强制的隔离：scene 逻辑*永远*碰不到 serializer/rifx 内部。
+1. **分包动机 = 硬编译边界**。把 `arch_boundary_test.go`（AST 测试守卫，可禁用、非气密）升级为 Go 编译器强制：scene 逻辑*永远*碰不到 serializer/rifx 内部。
 
-2. **破环路线** = **自由函数 · 破 Stable 方法 API**（非接口依赖倒置）。scene 类型住 `internal/scene`，serializer 单向 import scene，写入走 free function / Document 方法。破 `WriteAEP` 等方法签名（约束#2），接受 compat shim / 版本跳。理由：接口倒置要镜像 serializer 读到的*每个* accessor，接口面爆炸；自由函数路线接口面最小、设计最简。
+2. **破环路线 = back-ref 接口依赖倒置（B′），保留方法 API**。**这推翻了 brainstorm 初期「自由函数·破 API」的决策**——理由是当初对接口倒置的定价错误：我误以为「保 API 必须镜像 serializer 读到的*每个* read accessor → 接口爆炸」。真相是 serializer 在物理分包后**直接 import scene、具体读字段**，无需 read-accessor 接口；**只有写回（eager patch）那一小撮操作需要接口**（每个 back-ref 类型一个 writer 接口，有界）。故 `WriteAEP`/`Set*` 可保留为 scene 方法，方法体调 `p.back.X(...)`（scene 本地接口），serializer impl 具体读 scene、写 chunk —— 无环、边界硬、**API 不破**。
 
-3. **back-ref / eager 写路径** = **侧表 + 保 eager**（选项 A）。back-ref（持 `*rifx.Chunk`）从 scene 类型迁入 serializer 侧 Document 的 per-object 侧表（以 scene 指针为 key）；`Set*` 变 Document 方法，经侧表做 length-preserving 字节 patch。scene 零 rifx import。
+3. **back-ref / eager 写路径 = B′（scene 内 writer 接口 + serializer 实现）**。**这推翻了初期「侧表（A）」的决策**——外审两轮火力几乎全打在 A 的「Document 侧表 / 指针 identity map / Document god-object」上（见 §10）。B′ 让 back-ref 成为 scene 对象上的接口字段（今天是 `back *xBackrefs` 具体类型，B′ 改成 `back XWriter` 接口），impl 在 serializer。**无侧表、无指针 identity map、无 doc handle、无 Document god-object**，从根上消解那一整类外审。
 
-   否决「懒重生·纯值 scene」（选项 C）的当下理由见下「A→C 排序」。
+4. **范围/契约 = A 先行，C 日后独立决**。保 byte-exact round-trip 契约（82-fixture 回归门全程当安全网），不改契约、不切懒重生（C = lazy regen + 契约放宽为「AE 接受 + 语义等价」，是日后独立 arc）。
 
-4. **范围/契约** = **A 先行，C 日后独立决**。保 byte-exact round-trip 契约（82-fixture 回归门全程当安全网），不在本 arc 改契约。
+### §0.2 A→C 排序论证（为何不直接 big-bang C）
 
-**A→C 排序论证（本设计的核心判断）：**
+证据（brainstorm 期三组并行调查，数据见 §9 证据表）确立：
 
-证据（brainstorm 期三组并行调查，见 §8 证据表）确立：
+- **本 arc（A 先行 + B′）是 C 的必经之路**。C（懒重生）也消不掉 serializer 侧的 per-object 字节存储（opaque chunk 不能住 scene = rifx import，破边界）。本 arc 立起的「scene 零 rifx 边界 + back-ref 接口 + serializer 持 chunk 树」正是 C 的地基。差别只在写语义（本 arc 原地 patch / C 重生+opaque 拼接）。
+- **big-bang C 把三风险耦进一次不可验证的跳跃**（分包 + 改契约 + 懒重生），且在填 ~5–10 处 partial-decode 坑时丢掉 byte-identical 这个每 commit 跑的廉价回归门。
+- **本 arc 先行**：在做最危险的结构动作（back-ref 接口化 + 物理分包）时全程保留 byte-identical 门当安全网；等边界立住、AE ship-gate + semantic-diff 覆盖到位，再独立 arc 切 C。
 
-- **A 是 C 的必经之路，不是对立选项**。opaque chunk 不能住 scene（=rifx import，破边界），所以 C 也必须有 serializer 侧的 per-object 字节存储。A 的「back-ref 侧表」与 C 的「opaque shard 侧表」是同一个容器；差别只在写语义（A 原地 patch / C 重生+opaque 拼接）。A 的全部管道（Document、free function、侧表）C 全要。**做 A 不浪费一行**。
-- **big-bang C 把三个风险耦进一次不可验证的跳跃**（分包 + 改契约 + 懒重生），且在填 ~5–10 处 partial-decode 坑时丢掉 byte-identical 这个每 commit 跑的廉价回归门。
-- **A 先行**：在做最危险的结构动作（分包 + back-ref 迁侧表）时全程保留 byte-identical 门当安全网；顺手填 opaque shard（= C 的 on-ramp）；等边界立住、AE ship-gate + semantic-diff 覆盖到位，再在独立 follow-on 有意识地放宽契约切 C。
+> 注（外审 ds#36/gpt#57）：「做 A 不浪费一行」措辞过强，已弱化为「本 arc 的基础设施（scene 边界 / back-ref 接口 / serializer 持 chunk 树）C 全要；C 可能重定义 mutation 语义，但不会推翻这些地基」。
 
-> 一句话：追 V3 终态（高收益）的正确姿势是 **A 先立边界 + 填 opaque on-ramp，再独立 arc 切 C**，而非一次性赌掉回归门。
+### §0.3 核心设计约束（编译边界 + 双源一致性 + 对象生命周期）
+
+物理分包要成立，下列约束是**前置不变量**，非事后审计（外审 claude#2 / gpt#1 / ds 多条）：
+
+- **C-1 双源一致性（single logical truth, dual physical representation）**：chunk 树（serializer 侧，根在 projectWriter.root）是**序列化权威源**；scene 值是**逻辑权威源**。**唯一支持的 mutation 入口是 `Set*` 方法**——它原子地双写（改 scene 字段 + 经 back 接口 patch chunk）。`WriteAEP` 从 chunk 树发射；`WriteJSON` 从 scene 值导出；二者一致**仅因每个 Set* 双写**。**直接写 scene 导出字段（如 `layer.Visible = true`）不被序列化**（绕过 chunk patch）——这是契约，文档显式声明；scene 导出字段语义为「读 + 经 Set* 写」。
+- **C-2 对象归属（B′ 下大幅简化）**：每个 scene 对象的 `back` 接口指向**本次 Parse 为该对象建的 serializer impl**。无跨对象侧表 → 无「拿 A 文档的 Layer 调 B 文档」隐患（每对象经自己的 back 写）。从零建对象（New*）的 back 由 serializer 构造器注入（§2.4）；未注入 back 的纯 scene 对象，Set* 走「仅改 scene 值」分支（C-3）。
+- **C-3 Set\* 的 nil-back 语义（外审 claude#3）**：`back == nil`（从未 attach，如孤立构造的 scene 对象）时，Set* 仅更新 scene 值并**返回 nil**（逻辑可用、不 panic）；不是编程错误。仅当 back 非 nil 但 patch 失败（如字节越界）才返回 error。文档明写两分支。
+- **C-4 Parse 原子性（外审 gpt#79）**：Parse 全程成功才返回 `*Project`（其下所有 back 已 attach）；任一步失败返回 `(nil, err)`，**绝不暴露半成品**。
+- **C-5 并发（外审 ds/gpt + CLAUDE.md 既有约束）**：沿用 `incidents/concurrency-unsafe-shared-chunk-bytes.md` —— back 接口 impl 与 scene 值非线程安全，调用方自己锁；不承诺更多。
+- **C-6 新增 scene 字段必须 eager materialize（外审 gpt#49）**：scene 零 rifx 靠「解析期把所有需要的值解进 scene 字段」。新增字段若按需读 chunk 会重引 rifx 依赖 → 禁止；新增字段一律解析期 eager 解出。§6 CI 边界断言兜底（scene import 集回归即红）。
 
 ---
 
@@ -44,198 +53,187 @@ note: brainstorm 产出，未写 plan。方向已与用户确认（A 先行 + fa
 五个包，箭头 = 允许 import，整体无环（DAG）：
 
 ```
-internal/aep（薄 facade，顶层，下游唯一入口）
-  ├─imports→ internal/serializer
-  └─imports→ internal/scene
+internal/aep（薄 facade，顶层，下游入口）
+  ├─imports→ internal/serializer   # Open/FromReader 委托 Parse
+  └─imports→ internal/scene        # 类型别名再导出
 
-internal/serializer（唯一同时见 scene + rifx 的包；序列化知识全集中）
-  ├─imports→ internal/scene
+internal/serializer（唯一同时见 scene + rifx 的包；实现 scene 的 writer 接口）
+  ├─imports→ internal/scene        # 具体读 scene 字段 + 实现 XWriter 接口
   ├─imports→ internal/codec
   └─imports→ internal/rifx
 
-internal/scene（纯运行时模型）
+internal/scene（纯运行时模型 + writer 接口定义）
   └─imports→ internal/codec        # 仅取值类型/枚举；零 rifx、零 serializer
 
-internal/codec（纯值/字节 codec，§7 已标纯叶）
-  └─imports→ internal/rifx          # 仅 []byte / Chunk 值；零 scene 类型
+internal/codec（纯值/字节 codec）
+  └─（无 import：实测 codec_*.go 不 import rifx，纯 []byte/值）
 
 internal/rifx（RIFX framing，不变）
   └─ 依赖：无
 ```
 
-**编译期强制的不变量（取代 AST 守卫）：**
+**编译期强制的不变量（取代 AST 守卫；§6 CI 断言全列校验）：**
 
-- `scene` 的 import 集 = {codec}。**编译器**保证 scene 永远碰不到 rifx/serializer —— 这就是「硬编译边界」目标的兑现。
-- `codec` 的 import 集 = {rifx}，零 scene 类型（§7 已铺）。
+- `scene` 直接 import 集 = {codec}。**编译器**保证 scene 永远碰不到 rifx/serializer —— 硬编译边界兑现。
+- `codec` 直接 import 集 = ∅（rifx 无关；实测纠正了 brainstorm 初稿误标的 codec→rifx）。
 - `serializer` 是唯一同时见 scene + rifx 的包。
-- `aep` facade 顶层，无人依赖 → 无环。
+- 反向边禁止：serializer 不依赖 aep、codec 不依赖 scene（§6 CI 全查，非只查 scene，回应外审 gpt#41-44）。
 
 **文件搬迁（基于证据三的清单）：**
 
 | 现 `internal/aep/` | 去向 |
 |---|---|
-| scene 类型定义 + 逻辑 accessor + 图级结构 mutation（`scene_*`） | `internal/scene` |
-| 纯 codec（`codec_*`，§7 已标） | `internal/codec` |
-| `parse_*` / `lower_*` / `write_*` / `back_*`（10 backref struct）/ `mutate_*` 字节侧 | `internal/serializer` |
-| `Open`/`Write` 入口 + 类型别名 | `internal/aep` facade |
+| scene 类型定义 + 逻辑 accessor + 纯图级 mutation + **writer 接口定义** + `WriteJSON`（纯 scene 导出，回应 gpt#8-11） | `internal/scene` |
+| 纯 codec（`codec_*`，实测零 rifx import） | `internal/codec` |
+| `parse_*` / `lower_*` / `write_*` / `back_*`（10 backref struct 改实现 XWriter 接口）/ `mutate_*` 字节侧 + chunk 树 owner | `internal/serializer` |
+| `Open`/`FromReader` 入口 + 类型别名 | `internal/aep` facade |
 
-**API 形态变化（破点，但保留方法手感）：**
+**API 形态（B′：不破）：**
 
-- `proj.WriteAEP(w)` → `doc.Write(w)`（`Document` 方法，合法——Document 是 serializer 类型，持 chunk 树）。
-- `layer.SetVisible(v)` → `doc.SetLayerVisible(layer, v)`（Document 方法，经侧表查 back-ref 做 length-preserving patch）。
-- 读不变：`doc.Scene.Compositions[0].Layers[1].Position()`（scene 纯值，getter 全 eager，无需 doc）。
+- `aep.Open(path) (*Project, error)` / `aep.FromReader(io.ReadSeeker) (*Project, error)` —— 签名不变（现 API 即此，回应 ds io.Reader 质疑：现本就 ReadSeeker）。
+- `proj.WriteAEP(w)` / `proj.WriteJSON(w)` —— 保留为 Project 方法。WriteAEP 体 = `p.back.WriteAEP(w)`（接口），serializer impl 读 scene + 写 root；WriteJSON 纯 scene 导出，留 scene 包。
+- `layer.SetVisible(v)` / `prop.SetStaticValue(v)` 等 —— 全保留方法签名，体 = 改 scene 值 + `recv.back.X(...)`（C-1/C-3）。**~550 调用点零 churn**。
 
-**§1 决策（默认拍，可在 review 推翻）：**
+**§1 决策（默认拍，review 可推翻）：**
 
-- **D1.1 保留 `internal/aep` facade**（vs 下游直接 import scene+serializer）：下游 `cmd/aepdemo` 单 import 不变，churn 最小。facade = 类型别名（`type Project = scene.Project`、`type Document = serializer.Document`）+ `aep.Open`/`aep.Write` 薄包装。
-- **D1.2 写操作集中到 `Document` 方法**（`doc.SetLayerVisible(...)`）：保留方法调用手感，写入中枢单一，便于 §2 侧表查找。
+- **D1.1 保留 `internal/aep` facade**：下游单 import + `Open` 入口集中；facade = 类型别名（`type Project = scene.Project` 等）+ `Open`/`FromReader` 委托。**已知局限（外审三家）**：类型别名会让 godoc/import path 穿透到 `internal/scene`，**facade 不提供封装隔离**，仅提供 ergonomics + 单入口。鉴于无外部消费者（证据一），此局限可接受；硬边界目标是 scene⊥rifx 编译隔离，**非**对下游隐藏 scene。
+- **D1.2 不引入 Document god-object**：B′ 下 chunk 树由 projectWriter（scene.Project 的 back impl）持有，无需独立 Document 容器统管侧表/registry（A 才需要）。
 
 ---
 
-## §2 Document 容器 + back-ref 侧表 + Parse/Write 签名
+## §2 back-ref 接口（B′）+ Parse/Write 机制
 
-**核心结构（serializer 包）：**
+### §2.1 writer 接口（scene 定义，serializer 实现）
+
+scene 为每个持 back-ref 的类型定义一个 writer 接口；scene 对象持该接口（取代今天的 `back *xBackrefs` 具体字段）：
 
 ```go
-// Document 配对「纯逻辑 scene 视图」与「序列化 source-of-truth（chunk 树）」，
-// 并持有 scene→chunk 的 back-ref 侧表 + opaque shard。下游持 *Document。
-type Document struct {
-    Scene *scene.Project   // 纯逻辑视图（零 rifx）
-    root  *rifx.Chunk      // 序列化 source-of-truth（verbatim + patch，约束#1/#5）
-
-    // back-ref 侧表：以 scene 指针 identity 为 key（scene 对象在 []*T 里指针稳定）
-    layerBack    map[*scene.Layer]*layerBackrefs
-    propBack     map[*scene.Property]*propertyBackrefs
-    compBack     map[*scene.Composition]*compositionBackrefs
-    kfBack       map[*scene.Keyframe]*keyframeBackrefs
-    markerBack   map[*scene.Marker]*markerBackrefs
-    maskBack     map[*scene.Mask]*maskBackrefs
-    footageBack  map[*scene.Footage]*footageBackrefs
-    grpBack      map[*scene.AEPropertyGroup]*propertyGroupBackrefs
-    projBack     *projectBackrefs
-    rqBack       *renderQueueBackrefs
-    opaque       opaqueRegistry  // §4：per-object 未解码 sibling 字节
+// —— internal/scene ——
+type Project struct {
+    Compositions []*Composition
+    Footages     []*Footage
+    // … 纯逻辑导出字段（读 + 经 Set* 写，见 C-1）
+    back ProjectWriter   // nil = 孤立构造（C-3）
 }
-```
 
-10 个 `*Backrefs` struct（compositionBackrefs / layerBackrefs / propertyBackrefs / keyframeBackrefs / markerBackrefs / maskBackrefs / footageBackrefs / projectBackrefs / renderQueueBackrefs / propertyGroupBackrefs）原样从 `back_*.go` 迁入 serializer，**内容不变**（仍持 `*rifx.Chunk`），只是从「scene 类型的 `back` 字段」改成「Document 侧表的 map value」。
-
-**入口签名：**
-
-```go
-func Parse(r io.ReadSeeker) (*Document, error)   // chunk→scene + 填侧表 + 填 opaque
-func (d *Document) Write(w io.Writer) error       // 写 d.root（重算 LIST size）
-func (d *Document) WriteJSON(w io.Writer) error   // 走 d.Scene 单向导出
-```
-
-**Parse 流程：** 解析 chunk 树 → 构造 `scene.*` 纯值对象 → 每解出一个对象，把其 backref struct 存进对应 map（`d.layerBack[layer] = &layerBackrefs{ldta: …}`）→ 填 opaque（§4）。scene 对象只持逻辑值，永不持 chunk。
-
-**Set\*（Document 方法）双写：**
-
-```go
-func (d *Document) SetLayerVisible(l *scene.Layer, v bool) error {
-    br := d.layerBack[l]
-    if br == nil {
-        return fmt.Errorf("SetLayerVisible: layer not tracked by this Document")
-    }
-    // 1) length-preserving 字节 patch（逻辑原样从旧 write_layer.go 搬来）
-    patchLdtaVisible(br.ldta, v)
-    // 2) 同步 scene 字段，保证后续读一致
-    l.Visible = v
-    return nil
+// ProjectWriter 是 scene↔chunk 的唯一耦合点的逻辑契约；serializer 实现。
+// 方法面 = Project 级 back-ref 操作（WriteAEP/项目级 Set*）。
+type ProjectWriter interface {
+    WriteAEP(w io.Writer) error
+    setLinearBlending(bool) error
+    // … 项目级 length-preserving patch 操作（有界）
 }
+
+type Layer struct {
+    Visible bool
+    Name    string
+    // …
+    back LayerWriter
+}
+type LayerWriter interface {
+    SetVisible(bool) error
+    SetName(string) error
+    // … layer 级 ldta patch 操作
+}
+// Property / Composition / Footage / Marker / Mask / Keyframe / AEPropertyGroup 同构。
 ```
 
-**Write 流程：** length-preserving setter 在 set 时已就地改 `br.*.Data`（slice 引用即树内字节）；length-variable（name/comment/expression/text/keyframe insert）在 set 时已 splice `root` 子树 + 标记。`d.Write` = `d.root.Write(w)`，由既有 `rifx.Chunk.PayloadSize()` + 递归 `Write` 重算所有父 LIST size（机制不变，证据三确认 size 重算已集中在 rifx 层）。
+10 个 `*Backrefs` struct（compositionBackrefs / layerBackrefs / propertyBackrefs / keyframeBackrefs / markerBackrefs / maskBackrefs / footageBackrefs / projectBackrefs / renderQueueBackrefs / propertyGroupBackrefs）迁入 serializer，**内容不变**（仍持 `*rifx.Chunk`，projectBackrefs 仍持 `root` —— 实测今天即如此），**改为实现对应 XWriter 接口**。
 
-**从零建（NewProject / NewComposition / NewShapeLayer 等结构性 new）：** 走 `mutate_*` lower 路径建 chunk 子树 + 同步往 Document 侧表注册 backref，使新对象也可被后续 Set* 命中。结构性 op 仍遵 V2.1 atomic（warnings-as-failure + rollback），约束#6 ship-gate 不变。
+> **接口粒度**：每类一个 writer 接口，方法 = 该类 eager-patch 操作集。总方法数 ≈ back-ref setter 子集（~60–100，**非** 283——283 含大量纯图 setter，见 §3）。字节逻辑全在 serializer impl，**不泄进 scene**（scene 方法体只「改值 + 调接口」）。精确接口拆分（含 group property / effect param setter 归属）入 plan 首步分类表（回应 claude#1）。
 
----
+### §2.2 attach 协议（plumbing 代价）
 
-## §3 Set\* → Document 方法（API 破点 + facade + compat）
-
-证据三量化：~283 个 `Set*`、~550 调用点（~75 非测试 + ~475 测试）、getter 几乎全 eager（额外 churn 低）。
-
-**转换规则：**
-
-- 每个经 back-ref 做字节 patch 的 `(recv) SetX(args)` → `(d *Document) SetRecvX(recv, args)`，方法体 = 旧逻辑 + 侧表查找 + scene 字段同步。
-- 纯 scene 图级 setter（不碰 chunk，如 shape IR 构建 `RectNode.SetSize`）**留在 scene 包**——它们不需要 back-ref，零 rifx，本就属 scene。证据三的 283 里含大量这类（RectNode/StrokeNode/FillNode/…）；这部分*不动*。
-- getter 全留 scene（eager 值，已解进 scene 字段）。少数 lazy flag 读（IsSpatial/IsAnimated 等读 tdb4）：解析期预解进 scene bool 字段，消除 lazy 依赖。
-
-> **澄清**：283 是「名字以 Set 开头」的总数，**真正需迁的是「经 back-ref 字节 patch」的子集**（Layer/Composition/Property/Footage/Marker/Mask/Project/RQ/OM 的 length-preserving setter）。shape/stroke/fill 等 IR builder setter 留 scene。plan 阶段第一步即精确分类这两类（grep `\.back\.` / `d\.\w+Back\[`）。
-
-**facade（`internal/aep`）：**
+serializer 需把 impl 注入 scene 对象的 `back`。因跨包，需 scene 暴露注入点：
 
 ```go
-type Project    = scene.Project
-type Composition = scene.Composition
-type Layer       = scene.Layer
-// … 全部公共 scene 类型 + 枚举别名
-type Document   = serializer.Document
-
-func Open(path string) (*Document, error)        // = serializer.Parse(file)
-func OpenReader(r io.ReadSeeker) (*Document, error)
+// —— internal/scene —— exported plumbing（仅 internal/ 可见，非真公共 API）
+func (p *Project) AttachWriter(w ProjectWriter) { p.back = w }
+func (l *Layer)   AttachWriter(w LayerWriter)   { l.back = w }
+// …
 ```
 
-**compat / 破 API 处置（约束#2）：**
+**代价（外审采纳，诚实记录）**：writer 接口 + `AttachWriter` 必须 exported（serializer 跨包实现/调用）→ scene 包 exported 面带 ~9 接口 + ~9 AttachWriter + ~60–100 接口方法的 plumbing 噪音。鉴于 `internal/`、无外部消费者，可接受；远小于 A 的 550 调用点 churn + Document god-object。
 
-- 这是显式的 Alpha-breaking 重构；commit message 标 `BREAKING`。
-- `cmd/aepdemo`（唯一非测试消费者）改 `proj.WriteAEP(f)` → `doc.Write(f)`、`layer.SetX` → `doc.SetX`。
-- 无外部消费者（证据一确认）→ 不做长期 shim；如需平滑，可在 facade 临时保留 `func (d *Document) WriteAEP(w) error { return d.Write(w) }` 一轮后删。
+### §2.3 Parse 流程（原子，C-4）
+
+`serializer.Parse(r io.ReadSeeker) (*scene.Project, error)`：解析 chunk 树 → 构造 `scene.*` 纯值对象（eager 解出所有字段，C-6）→ 为每对象建 `xBackrefs`（持 chunk）→ `obj.AttachWriter(xBackrefs)`。全程成功才返回 Project；任一步失败 `(nil, err)`，不暴露半成品。`aep.Open` 薄包装之。
+
+### §2.4 Set\* + 从零建
+
+- **Set\***（scene 方法，C-1/C-3）：
+  ```go
+  func (l *Layer) SetVisible(v bool) error {
+      l.Visible = v                 // 逻辑权威源
+      if l.back == nil { return nil } // 孤立对象：仅改值（C-3）
+      return l.back.SetVisible(v)    // serializer impl 做 length-preserving ldta patch
+  }
+  ```
+- **length-variable**（name/comment/expression/text/keyframe insert）：serializer impl 在接口方法内 splice chunk 子树；`WriteAEP` 由既有 `rifx.Chunk.PayloadSize()` + 递归 `Write` 重算父 LIST size（机制不变，回应 ds/gpt「标记未定义」——**无独立标记机制**，size 重算是 Write 时全树重算，非脏标记扫描）。
+- **从零建（New* / 结构性 mutate）**：走 serializer 的 lower 路径建 chunk 子树 + 建 xBackrefs + `obj.AttachWriter(...)`，使新对象与 Parse 对象共享同一 back attach 协议（回应 gpt#33-36「Parse 世界 / New 世界统一注册」）。New* 自身因要建 chunk 必须在 serializer 包（scene 不能 import rifx）→ 形如 `serializer.NewShapeLayer(...)` 或 facade 包装；纯 scene 图构造（无 chunk）留 scene。结构性 op 仍遵 V2.1 atomic（warnings-as-failure + rollback），约束#6 ship-gate 不变。
+- **结构性删除**（DeleteLayer 等）：移除 scene 对象即断 back 引用，serializer 侧 chunk 子树由 lower/splice 移除；无侧表/registry 需手动清（B′ 下随对象 GC，回应 gpt#78）。
 
 ---
 
-## §4 opaque shard 填充（C 的 on-ramp）
+## §3 Set\* 分类（哪些需 writer 接口方法）
 
-证据二：opaque 基建已存在（`propertyBackrefs.opaque` / `layerBackrefs.opaque`）但**当前为 nil**；partial-decode 散点 ~5–10 处（dimsep `@0x08/@0x10` 缓存字段、tdum/tduM 未解码、ldta padding、keyframe `@0x07` header、cdta 尾 padding、btds/btdk opaque list、effect sub-chunk）。
+证据三：~283 个 `Set*`、~550 调用点、getter 几乎全 eager（额外 churn 低）。**B′ 下方法签名全不变，churn 主要是「把 back-ref setter 的字节逻辑从方法体抽到 serializer impl」，调用点零改。**
 
-**本 arc 做（轻量，不改写语义）：**
+**两类划分（plan 首步出精确表，回应 claude#1 / ds#21）：**
 
-- Parse 时把每个 scene 对象**未解码的 sibling/tail chunk** 收进 Document 的 `opaqueRegistry`（per-object，以 scene 指针为 key），与 backref 侧表并列。
-- 当前写路径（verbatim + patch）**不用** opaque shard（chunk 树已含原字节）；填它纯为 C 铺路——C 改成「从 scene 重生 + 原位拼回 opaque」时直接取用。
-- **本 arc 不碰** ~5–10 处 partial-decode 的字节级重生逻辑（那是 C 的活）。只确保 opaque 收集**完整**（round-trip 仍 byte-identical 即证明收集无遗漏）。
+- **back-ref setter（需 writer 接口方法）**：经 `*rifx.Chunk` 做 length-preserving patch 者——Layer/Composition/Property/Footage/Marker/Mask/Project/RQ/OM 的 length-preserving setter。方法体迁为「改 scene 值 + 调接口」，字节逻辑入 serializer impl。
+- **纯图 setter（留 scene，无接口）**：仅改 scene 值、序列化经 lower 重建（非原地 patch）者。**关键澄清（回应 ds#36 + SetStaticValue funnel）**：shape/stroke/fill 的 `RectNode.SetSize` 等**委托到 `Property.SetStaticValue`**——而 `Property.SetStaticValue` *是* back-ref setter（经 cdat patch）。故 shape setter **不**独立碰 chunk，但其底层 `Property.SetStaticValue` 经 Property 的 back 接口完成 patch。B′ 下这天然成立：`rect.SetSize(v)` → `prop.SetStaticValue(v)` → `prop.back.WriteStaticValue(v)`，全程方法、无 doc handle。**这正是 B′ 相对 A 的决定性优势**（A 会让 doc handle 病毒式穿透 fluent 形状 API）。
+- **lazy flag 读**（IsSpatial/IsAnimated 等读 tdb4）：解析期预解进 scene bool 字段（C-6）。**外审 gpt#49/ds 提示语义变更风险**：求值时机从按需→eager。这些 flag 是 tdb4 纯 bit 读、无副作用、不依赖未解字段（已核 `scene_property_flags.go`），eager 化行为等价；plan 阶段逐个确认无条件依赖。
 
-> §4 是「填 on-ramp」而非「切 C」。若 review 认为 YAGNI，可降级为本 arc 不填、留 C 时再填（§1 范围选项三）；当前默认填，因边界刚立时填 opaque 的 blast radius 最小。
+---
+
+## §4 opaque shard —— 延后到 C（本 arc 不填）
+
+证据二：opaque 基建已存在（`propertyBackrefs.opaque` / `layerBackrefs.opaque`）但当前 nil；partial-decode 散点 ~5–10 处。
+
+**外审 ds#49/#51 + gpt 指出（采纳）**：本 arc 写路径是 verbatim+patch，**不消费** opaque shard → 本 arc 的 byte-identical round-trip **无法验证** opaque 收集是否正确（「round-trip 相同」对未消费的 opaque 是必要非充分）。在无法验证的情况下填 opaque = 投机性未验证工作。
+
+**故本 arc 不填 opaque**；只确保架构留有位置（`xBackrefs` 仍带 opaque 字段，随 §2 迁入 serializer）。opaque 的正确收集 + 消费挪入 **C**（那时它被重生路径消费，且 round-trip 可验证其正确性）。
+
+> A→C「必经之路」论证（§0.2）改由「scene 零 rifx 边界 + back-ref 接口 + serializer 持 chunk 树」三项地基支撑，**不依赖 opaque 填充**（回应 ds#36：去掉 opaque 填充后 on-ramp 论证仍成立）。
 
 ---
 
 ## §5 迁移分期（strangler，步步绿，全程保 byte-exact 门）
 
-每阶段独立可 commit、suite 全绿、byte-identical round-trip 不破。
+**核心排序约束（外审 claude#6 提请上移至此 / §0 已并入 C-1 周边）**：scene 结构体只要还持具体 `back *xBackrefs`（内含 `*rifx.Chunk`），就不可能成为零 rifx 的独立包。所以**先在单包内把 `back` 从具体类型改成接口（逻辑解耦），再把物理分包做成机械 `git mv`**。危险的是 P2（接口化解耦），P3（分包）是机械收割。
 
-**核心排序洞察（自审修正）**：scene 结构体只要还持 `back *layerBackrefs`（内含 `*rifx.Chunk`），就**不可能**成为零 rifx 的独立包——所以「先抽 scene、再迁 backref」是不可能的；**backref 迁侧表这个动作本身，才是让 scene 可抽出的前提**。故正解是**先在单包内做逻辑解耦（backref → Document 侧表），把 scene 结构体的 rifx 耦合清零，再把物理分包做成近乎机械的 `git mv`**（make the change easy, then make the easy change——同方案① 哲学）。危险的是 P2（解耦），P3（分包）只是机械收割。
+- **P0 基线**：`tmp_debug/` 建分包 round-trip 基线脚本（全 82 fixture 跑 `Open→Write→bytes` 存指纹 + 记 fixture git hash）。沿用方案① §8 套路。**exit**：基线就位。
+- **P1 抽 `internal/codec`**：`codec_*` 纯叶平移成真包（实测零 rifx import）。**facade re-alias 任何 exported codec 符号**（如 `Gradient`/`GradientColorStop`，它们在公共 API）以保零-diff（回应 ds#73）。**exit**：`go build ./...` + 82-fixture byte-identical 绿 + `go doc -all` facade 零-diff。
+- **P2 单包内 back-ref 接口化（最危险，byte-exact 门 + setter 单测当安全网）**：**仍在单包 `internal/aep`**。定义 9 个 XWriter 接口 + AttachWriter；把 10 个 `xBackrefs` 改为实现接口；scene 类型 `back` 字段由 `*xBackrefs` 改 `XWriter` 接口；back-ref setter 方法体改「改值 + 调接口」（每改一组，连同其内部调用点同 commit，`go test` 绿——回应 ds#60/gpt「调用点同步」）。**末态**：scene 结构体只引用 XWriter 接口、零 `*rifx.Chunk`/零具体 backref（grep `\.back\.` 仅见接口调用）。**安全网**：byte-identical（verbatim 路径）+ **既有 setter 单测**（每个 Set* 有断言，覆盖「改值 + patch」正确性——byte-identical 抓不到 setter 逻辑，回应 gpt#54）。**abort 条件**（回应 gpt#62）：若某类 back-ref 接口化后 setter 单测无法保绿且非调用点同步问题 → 暂停该类、记录、评估是否 B′ 对该类不适用。
+- **P3 物理分包（机械收割）**：scene 已只引用接口 → `git mv` `scene_*`（含 XWriter 接口定义 + WriteJSON）进 `internal/scene`、serializer 侧（parse_/lower_/write_/back_/mutate_ + xBackrefs impl）进 `internal/serializer`；建 `internal/aep` facade。**编译边界此刻由编译器强制**。**P3 非纯零风险（回应 gpt#62-68 / claude#5）**：跨包后 export 可见性变化、init/global-var 初始化顺序、测试辅助代码失效需逐一处理；故 P3 exit 含显式核实。**exit**：各包独立编译 + **全 DAG CI 断言**（scene 不直接 import rifx/serializer、serializer 不 import aep、codec 不 import scene——回应 gpt#41-44）+ byte-identical 全绿 + `go doc -all` facade 公共面 diff（B′ 下应**仅** codec 别名 + plumbing 接口增量，核心 R/W 方法零变）。
+- **P4 下游切换 + 收口**：`cmd/aepdemo` 验证编译（B′ 下 API 不变，预期零改或极小）；删/改 `arch_boundary_test.go`（scene⊥rifx 已编译期保证，AST 守卫降级为 serializer 包内命名轴 lint）；CLAUDE.md 硬约束#3 更新（单包 → 多包 + 新 DAG + B′ 接口破环）；终验 **AE 2020 + 2025 双版本 ship-gate 全套**（约束#6，自验留痕）；cockpit/INDEX 落地。
 
-- **P0 基线**：`tmp_debug/` 建分包 round-trip 基线脚本（全 82 fixture 跑 `Open→Write→bytes` 存指纹 + 记 fixture git hash）。沿用方案① §8 套路。**exit**：基线就位，否则后续比对无依据。
-- **P1 抽 `internal/codec`**：`codec_*` 纯叶平移成真包（§7 已验纯度，零 scene 耦合）。真包但独立、低风险、零 API 影响。**exit**：`go build ./...` + 82-fixture byte-identical 绿。
-- **P2 单包内逻辑解耦（最危险，byte-exact 门当安全网）**：**仍在单包 `internal/aep`**，不动包边界。引入 `Document`；把 10 个 backref struct 从「scene 类型的 `back` 字段」逐类迁入「Document 侧表 map」；把 back-ref 子集 `Set*` 逐个改成 Document 方法（每迁一个 `go test` 绿）；填 opaque（§4）。**末态**：scene 结构体零 `*rifx.Chunk`/零 backref 字段（grep `\.back\.` 清零），但仍单包。**exit**：byte-identical 全绿 + scene 结构体 rifx 引用 grep 清零。
-- **P3 物理分包（机械收割）**：此时 scene 结构体已 rifx-free → `git mv` `scene_*` 进 `internal/scene`、serializer 侧（parse_/lower_/write_/back_/mutate_ + Document）进 `internal/serializer`；建 `internal/aep` facade（类型别名 + Open/Write）。**编译边界此刻由编译器强制**。因耦合已在 P2 斩断，本阶段以机械移动为主。**exit**：各包独立编译 + `go list -deps ./internal/scene` 不含 rifx/serializer（编译期边界 CI 断言）+ byte-identical 全绿 + `go doc -all` facade 公共面 diff 逐条核对（破点是预期 diff）。
-- **P4 下游切换 + 收口**：`cmd/aepdemo` 切新 API（`doc.Write`/`doc.Set*`）；删旧 `WriteAEP` 方法（或留一轮 shim）；删/改 `arch_boundary_test.go`（scene⊥rifx 已由包边界编译期保证，AST 守卫降级为 serializer 包内命名轴 lint）；CLAUDE.md 硬约束#3 更新（单包 → 多包 + 新 DAG）；终验 **AE 2020 + 2025 双版本 ship-gate 全套**（约束#6，自验留痕）；cockpit/INDEX 落地。
-
-> 阶段序由风险驱动：codec（独立纯叶）→ **P2 单包内 backref 解耦（真正的活）** → P3 机械分包 → P4 收口。回归门（P0）必须在 P2（解耦）之前就位——这是硬要求。
+> 阶段序由风险驱动：codec（独立纯叶）→ **P2 单包内接口化（真正的活）** → P3 机械分包 → P4 收口。回归门（P0）必须在 P2 之前就位。**回滚（回应 gpt#62/ds#84）**：每阶段独立 commit，失败 `git revert` 回上一绿态；P2 内每组 setter 独立 commit，单组失败不污染其余。
 
 ---
 
 ## §6 验证 / 测试 / ship-gate / 边界强制
 
-每阶段（每搬一个文件 / 每批改名）必须：
+每阶段（每搬/改一组）必须：
 
 1. `go build ./...` 绿。
-2. `go vet ./... && go test -count=1 ./...` 全绿（含 ship-gate 非门控部分）。
-3. **byte-identical round-trip**（约束#1/#5）：对 82 fixture 重跑 `Open→Write→bytes`，断言与 P0 基线指纹相同。这是分包全程的安全网。
-4. **公共 API diff**（约束#2）：`go doc -all` 前后对比。**P1 须零 diff**（codec 纯搬迁）；**P2 起引入预期破点**——diff 必须逐条等于设计的破点集（`Set*`→Document 方法，`WriteAEP` 方法→`Document.Write`），无意外增删。
-5. **边界编译期强制**：scene 包 import 集断言（可加一个 `go list -deps` 检查或 CI 步骤：`internal/scene` 的依赖闭包不含 `internal/rifx`、`internal/serializer`）。这是把「硬编译边界」做成 CI 可执行断言。
-6. **终验 AE 双版本 ship-gate**（约束#6）：P5 跑全套 `AE_SHIP_GATE=1`（AE 2020 + 2025），确认纯结构搬迁零回归。无结构性写路径语义变更，故中途不必逐阶段跑，收尾跑一次。
+2. `go vet ./... && go test -count=1 ./...` 全绿（含 ship-gate 非门控部分 + **既有 setter 单测**——P2 的主安全网）。
+3. **byte-identical round-trip**（约束#1/#5）：对 82 fixture 跑 **无 mutation 的 `Open→Write→bytes`**，断言与 P0 基线指纹相同。**澄清（回应 ds#71/#48）**：此门是「解析-再发射」不变性证明，**非**「SetName 后字节不变」（length-variable 操作字节本就变；那条由 setter 单测覆盖）。
+4. **公共 API diff**（约束#2）：`go doc -all` facade 前后对比。**P1 零-diff**（codec 抽包 + facade 别名）；**P2/P3 diff 应仅 = plumbing 接口/AttachWriter 增量**（B′ 不破核心 R/W 方法签名），逐条核对无意外。
+5. **全 DAG 边界 CI 断言**（把硬边界做成可执行）：`go list -deps`/AST 检查——`internal/scene` 直接 import 集 ⊆ {codec}（不含 rifx/serializer）、`internal/serializer` 不 import `internal/aep`、`internal/codec` 不 import `internal/scene`。回应 gpt#41-44「DAG 不变量验证不完整」。注：这是 CI 断言（可被改脚本绕过），但**真正的硬保证是 Go 编译器**——scene 一旦误 import rifx 直接编译失败。
+6. **终验 AE 双版本 ship-gate**（约束#6）：P4 跑全套 `AE_SHIP_GATE=1`（AE 2020 + 2025），确认纯结构搬迁零回归。无结构性写路径语义变更，故中途不必逐阶段跑（回应 ds#52：中途 byte-identical + setter 单测已是廉价回归网，AE 门贵，收尾跑）。
 
 ---
 
 ## §7 非目标 / 范围
 
-- **不改契约**：byte-exact round-trip 仍是硬不变量；不切懒重生（C 是日后独立 arc）。
-- **不改写语义**：eager length-preserving patch 逻辑原样搬迁，不重写；length-variable 路径不动。
-- **不做接口依赖倒置**：走 free-function/Document 路线（§0 抉择 2）。
-- **零行为变更（P1–P2、P4–P5）**：纯搬迁 + 改名 + facade；唯一预期变更是 P3/P4 的 API 破点（方法→Document 方法/free function）。
-- **不顺手重构无关逻辑**、不改算法、不扩 capability matrix / shape graph / effect schema（V3 其他 M）。
-- **不填 partial-decode 重生逻辑**（C 的活）；§4 只收集 opaque，不消费。
+- **不破核心 R/W API**：B′ 保留 `Open→*Project`/`WriteAEP`/`Set*` 全签名（plumbing 接口除外，且仅 internal/）。
+- **不改契约**：byte-exact round-trip 仍硬不变量；不切懒重生（C 日后独立 arc）。
+- **不改写语义**：eager length-preserving patch 逻辑原样迁入 serializer impl，不重写；length-variable 路径不动。
+- **不填 opaque shard**（§4，C 的活）；只保留架构位置。
+- **零行为变更**：纯接口化 + 搬迁 + facade；唯一预期 API 增量是 plumbing 接口（internal/）。
+- **不扩** capability matrix / shape graph / effect schema（V3 其他 M）；不顺手重构无关逻辑。
 
 ---
 
@@ -243,35 +241,77 @@ func OpenReader(r io.ReadSeeker) (*Document, error)
 
 | 风险 | 缓解 |
 |---|---|
-| back-ref 迁侧表引入隐性行为变更 | P0 byte-identical 基线在 P2（迁侧表）之前就位，每步比对 |
-| 指针 identity 侧表失效（scene 对象被值拷贝/重分配） | scene 对象在 `[]*T` 里以指针存放，identity 稳定；plan 阶段审计有无按值传递 scene struct 的路径 |
-| Set\* 分类误判（把纯图 setter 当 back-ref setter 迁，或反之） | P2 第一步精确 grep 分类（`\.back\.` / 侧表访问），分类表入 plan 评审 |
-| API 破点波及测试 ~475 处 churn | 机械改写；facade 别名降低 import churn；分阶段每步 `go test` 绿 |
-| opaque 收集遗漏（§4） | byte-identical round-trip 即遗漏探测器——漏收一个 chunk 则指纹必变 |
-| 下游 `cmd/aepdemo` 编译破 | P4 同步切换 + `go build ./cmd/...` 门 |
-| 范围蔓延到 C（懒重生/改契约） | §0/§7 硬边界；§4 只填 on-ramp 不消费 |
-| AE 双版本 ship-gate 回归 | §6 P5 终验全套（约束#6，自验留痕） |
-
-**brainstorm 期证据表（A 先行依据）：**
-
-| 调查 | 结论 | 关键出处 |
-|---|---|---|
-| byte-exact 是否产品契约 | **内部回归工具**，非产品承诺；README/CLAUDE 只诺 length-preserving + opaque + AE 可重开；无外部消费者 | README:4/37,CLAUDE:24/32,cmd/* |
-| C 重生脆弱面 | **可控 ~5–10 散点**；opaque 基建已存在但当前 nil，要 C 须先填 | 各 incident,back_*.go |
-| A churn | **变更面高/数据访问面低**：~283 Set*、~550 调用点（~75 非测试+~475 测试）、10 backref struct、getter 全 eager；~1–2 周 | back_*.go,全仓 grep |
+| 双源一致性漂移（scene 值 vs chunk）：直接写 scene 字段绕过 patch | C-1 契约：唯一 mutation 入口是 Set*；scene 字段语义=读+经 Set* 写；plan 评估能否加 lint 防直写 |
+| back-ref 接口化引入隐性行为变更 | P0 byte-identical 基线在 P2 之前就位 + 既有 setter 单测（抓 setter 逻辑）；每组独立 commit |
+| Set* 分类误判（纯图 vs back-ref） | P2 首步精确 grep 分类（`\.back\.`/接口调用）入 plan 评审表；shape→Property.SetStaticValue 链已澄清（§3） |
+| writer 接口面/plumbing 污染 scene exported 面 | 接受（internal/、无外部消费者）；远小于 A 的 churn；接口粒度 plan 细化 |
+| P3 跨包 export/init 顺序/测试辅助失效 | P3 exit 显式核实 init/global-var + 测试辅助迁移（不假设零风险，回应 gpt/claude） |
+| lazy flag eager 化语义变更 | 已核 tdb4 flag 无副作用/无条件依赖；plan 逐个确认 |
+| 内存：Parse 后 scene + chunk 树 + backref 并存 | B′ 无侧表/registry（比 A 省）；今天 scene 已持 back，增量仅接口间接层，marginal |
+| AE 双版本 ship-gate 回归 | §6 P4 终验全套（约束#6，自验留痕） |
+| 范围蔓延到 C | §0.1 抉择4 + §4 opaque 延后硬边界 |
 
 ---
 
-## §9 决策记录
+## §9 brainstorm 期证据表（A 先行 + B′ 依据）
 
-- 2026-06-07 brainstorm：用户选 V3 M8 方案②（真·物理分包）为下一焦点。四抉择确认：①动机=硬编译边界 ②路线=自由函数·破 API ③back-ref=侧表+保 eager（A）④范围=A 先行、C 日后独立。
-- 2026-06-07 三组并行证据调查 → 确立「A 是 C 的必经之路」，否决 big-bang C（三风险耦合 + 丢回归门）。
-- §1 骨架与用户逐段过；§1 两开放点按推荐默认拍（D1.1 保 facade、D1.2 Document 写中枢），待 spec review 确认。
+| 调查 | 结论 | 关键出处 |
+|---|---|---|
+| byte-exact 是否产品契约 | **内部回归工具**，非产品承诺；README/CLAUDE 只诺 length-preserving + opaque + AE 可重开；无外部消费者（仅 cmd/aepdemo 写新文件、cmd/docgen 读 Go 源） | README:4/37,CLAUDE:24/32,cmd/* |
+| C 重生脆弱面 | **可控 ~5–10 散点**（dimsep `@0x08/@0x10`、tdum/tduM、ldta padding、keyframe `@0x07`、cdta 尾、btds/btdk、effect sub-chunk）；opaque 基建已存在但 nil | 各 incident,back_*.go |
+| back-ref/Set* churn | ~283 Set*、~550 调用点（~75 非测试+~475 测试）、10 backref struct、getter 全 eager；**B′ 下调用点零 churn（方法签名不变）** | back_*.go,全仓 grep |
+| 项目事实校验（外审分诊） | codec_*.go **不 import rifx**；`Open(path)`+`FromReader(io.ReadSeeker)` 现状；shape setter 经 `Property.SetStaticValue`（back-ref） | grep 实证 |
+
+---
+
+## §10 外审 disposition（tmp/{ds,gpt,claude}.txt，两轮）
+
+> 沿用项目惯例（reorg-spec §13 外审 disposition）。**外审不了解项目全貌，已用项目事实校验**。
+
+**采纳（已改入本版）：**
+- **B′ 取代 A**（侧表 → back-ref 接口）：从根消解 ds#10/#12（侧表失效/指针 map key）、gpt#12-20（Document 角色过载）、gpt#53-56（opaque+backref 指针 identity 耦合）、gpt#67-78（`Open→doc.Scene` 读路径剧变）、ownership/跨 Document 误用、claude#2（指针 identity 阻断）→ §0.1/§2。
+- **双源一致性不变量** → C-1（gpt#1/#21-25、ds 双真相）。
+- **nil-back 错误语义** → C-3（claude#3）。
+- **Parse 原子性** → C-4（gpt#79-82）。
+- **新增字段 eager materialize** → C-6（gpt#49）。
+- **WriteJSON 留 scene**（纯 scene 导出，不污染 serializer）→ §1 搬迁表（gpt#8-11）。
+- **opaque 延后到 C**（本 arc 不消费→无法验证→不填）→ §4（ds#49/#51、gpt）。
+- **P2 安全网 = setter 单测**（byte-identical 抓不到 setter 逻辑）→ §5 P2/§6（gpt#54）。
+- **全 DAG CI 断言**（非只查 scene）→ §6（gpt#41-44）。
+- **P3 非零风险**（export/init/测试辅助）→ §5 P3（gpt#62-68、claude#5）。
+- **byte-identical 澄清**（无 mutation 的解析-发射不变性）→ §6（ds#71/#48）。
+- **P1 零-diff 需 facade re-alias codec 公共符号** → §5 P1（ds#73）。
+- **abort/回滚条件** → §5（gpt#62、ds#84）。
+- **codec 不 import rifx**（实测纠正初稿）+ **自审修正上移 §0/§5** → §1/§5（gpt#3-7、ds#45/#66、claude#6）。
+- **lazy flag eager 化语义风险** → §3/§8（gpt#49、ds#26）。
+- **「做 A 不浪费一行」措辞过强** → §0.2 弱化（ds#36、gpt#57-61）。
+- **status idea→active**（已是 Active focus）+ **P5→P4 编号统一** → frontmatter/§5（ds#64/#70/#97）。
+- **facade 别名穿透 = 不提供封装**（仅 ergonomics）→ D1.1 显式承认（三家）。
+
+**驳回（项目事实不成立）：**
+- ds「Open 应支持 io.Reader、ReadSeeker 是 breaking」→ 现 API 本就 `FromReader(io.ReadSeeker)`，无回退问题。
+- ds#66「`go list -deps scene` 含 rifx 必失败」→ codec 实测不 import rifx，scene 传递依赖不含 rifx，断言成立。
+- 早轮 ds#94「§1 无 D1.1/D1.2 标签」→ 标签已在 §1（误读）。
+
+**留给 plan（非 spec 缺陷）：**
+- Set* 精确分类规则（group property / effect param setter 归属）→ plan 首步出分类表（claude#1/ds#21）。
+- writer 接口精确粒度/方法清单 → plan（§2.1）。
+- fixture rebaseline 责任/触发 → plan（ds#56）。
+- 内存峰值实测 → plan（gpt#90，B′ 下增量更小）。
+- 直写 scene 字段的 lint 防护可行性 → plan（C-1）。
+
+---
+
+## §11 决策记录
+
+- 2026-06-07 brainstorm：用户选 V3 M8 方案② 为下一焦点。四抉择初定：①动机=硬编译边界 ②路线=自由函数·破 API ③back-ref=侧表（A）④范围=A 先行、C 日后。
+- 2026-06-07 三组并行证据 → 确立「本 arc 是 C 必经之路」，否决 big-bang C。
+- 2026-06-07 三家外审两轮 → **推翻 ②③**：②破 API→**不破 API**（接口倒置定价纠错）；③侧表→**B′ back-ref 接口**（消解侧表/指针 identity/god-object 一整类外审）。①④不变。§10 disposition 逐条。
 
 ## 关联文档
 
 - `2026-05-22-v3-direction.md` — M1–M8 框架 + scene→rifx 残留表（M8 前置解耦已清零）
-- `landed/specs/2026-05-30-aep-package-reorg-design.md` — 方案① §0 Go 语义墙 + §6 back_ 缝固化（本 spec 的直接前置）
+- `landed/specs/2026-05-30-aep-package-reorg-design.md` — 方案① §0 Go 语义墙 + §6 back_ 缝固化（本 spec 直接前置）
 - `2026-05-27-v3-deep-think.md` — Q1 软迁移 / Q5 opaque shard / Q7 eager+lazy 共存
-- `CLAUDE.md` § 硬约束 #1/#2/#3/#5/#6
+- `CLAUDE.md` § 硬约束 #1/#2/#3/#5/#6 · `incidents/concurrency-unsafe-shared-chunk-bytes.md`（C-5）
 - `incidents/separate-dimensions-write-mechanics.md` — `@0x08/@0x10` 缓存字段（partial-decode 样例）

@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-07 by claude（V3 M8 方案② brainstorm 落 spec：`specs/2026-06-07-v3-m8-physical-split-design.md`（status idea）。方向 **A 先行**——scene/serializer/codec 三包拆 + free-function/Document API + eager patch 迁侧表 + opaque on-ramp，保 byte-exact 回归门，C（懒重生·改契约）作日后独立 arc。待用户 review spec → writing-plans）
-**Active focus**: **V3 M8 方案②（真·物理分包）** —— brainstorm 完成、设计已落 `specs/2026-06-07-v3-m8-physical-split-design.md`（A 先行）。**待用户 review spec**，通过即转 writing-plans 出实现计划。四抉择已定：动机=硬编译边界 / 路线=自由函数·破 API / back-ref=侧表+保 eager / 范围=A 先行（C 日后独立）。
+**Last updated**: 2026-06-07 by claude（V3 M8 方案② spec 经三家外审两轮整合，重写为 **B′**：`specs/2026-06-07-v3-m8-physical-split-design.md`（status active）。back-ref 改为 scene 内 writer 接口（serializer 实现）→ **不破方法 API**、无侧表/无指针 identity map/无 Document god-object，从根消解大半外审；推翻初期「破 API」+「侧表(A)」两决策。opaque 延后到 C。含 §10 disposition。待 writing-plans）
+**Active focus**: **V3 M8 方案②（真·物理分包）** —— 设计定稿 `specs/2026-06-07-v3-m8-physical-split-design.md`（**A 先行 + B′**）。**下一步：writing-plans 出多阶段实现计划**。抉择终态：动机=硬编译边界 / 路线=**B′ back-ref 接口·不破 API**（推翻初期自由函数·破 API）/ back-ref=**scene 内接口 serializer 实现**（推翻初期侧表 A）/ 范围=A 先行（保 byte-exact，opaque+C 日后独立 arc）。
 > 收尾记录：**py-aep parity P3 R/W 域已收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；DimensionsSeparated animated W **已升 stable**（2026-06-07，feature ship-gate 8/8 早已落，本次仅 doc/classification sync）。
 
 ## 进行中
@@ -16,8 +16,8 @@
 
 ## 下一步
 
-**V3 M8 方案② brainstorm 已出 spec（A 先行），等用户 review。** 待办：
-1. **用户 review `specs/2026-06-07-v3-m8-physical-split-design.md`**（含 §1 两默认决策 D1.1 保 facade / D1.2 Document 写中枢，可推翻）→ 通过即 **writing-plans** 出多阶段实现计划（P0 基线 → P1 codec 抽包 → P2 单包内 backref 迁侧表[最危险] → P3 机械分包 → P4 下游+收口+ship-gate）。
+**V3 M8 方案② 设计定稿（A 先行 + B′），三家外审两轮已整合，下一步出 plan。** 待办：
+1. **writing-plans** 出多阶段实现计划：P0 基线 → P1 codec 抽包（facade re-alias 公共符号保零-diff）→ **P2 单包内 back-ref 接口化[最危险]**（9 XWriter 接口 + AttachWriter，scene `back` 由具体改接口，setter 体改「改值+调接口」，每组同 commit / setter 单测兜底）→ P3 机械分包（git mv + 全 DAG CI 断言）→ P4 下游+收口+双版本 ship-gate。plan 首步先出 Set* 精确分类表 + writer 接口粒度（§2.1/§3 留项）。
 2. **docgen 次要 follow-on**（非阻塞）：README.md 英文化 + 链接核对；类型级 Example / package-func Example 渲染（pilot defer 项）。
 3. Backlog 单条候选：Layr Transform 3D 通道（需先 3D layer 支持，V2.3）。
 
