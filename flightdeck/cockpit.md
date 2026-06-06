@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-07 by claude（py-aep P3 尾收尾：DimensionsSeparated animated W 升 **stable** —— `SetDimensionsSeparated` doc comment 去 Alpha、coverage.md/coverage-detail.md W 行 Alpha→stable、docgen 重生成 property.md+docs_index.json；feature 早已 ship-gate 8/8。go vet+test 绿）
-**Active focus**: **开放** —— V3 M8 **前置解耦**（scene→rifx 白名单清零）已落，是物理分包的铺路；真·物理分包（独立 Go 包）仍待**方案②（`lower_`/`write_` 接口依赖倒置破环）**，是独立大 arc。下一焦点未定：候选 = V3 M8 方案② / docgen 次要 follow-on（README 英文化）。
+**Last updated**: 2026-06-07 by claude（V3 M8 方案② brainstorm 落 spec：`specs/2026-06-07-v3-m8-physical-split-design.md`（status idea）。方向 **A 先行**——scene/serializer/codec 三包拆 + free-function/Document API + eager patch 迁侧表 + opaque on-ramp，保 byte-exact 回归门，C（懒重生·改契约）作日后独立 arc。待用户 review spec → writing-plans）
+**Active focus**: **V3 M8 方案②（真·物理分包）** —— brainstorm 完成、设计已落 `specs/2026-06-07-v3-m8-physical-split-design.md`（A 先行）。**待用户 review spec**，通过即转 writing-plans 出实现计划。四抉择已定：动机=硬编译边界 / 路线=自由函数·破 API / back-ref=侧表+保 eager / 范围=A 先行（C 日后独立）。
 > 收尾记录：**py-aep parity P3 R/W 域已收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；DimensionsSeparated animated W **已升 stable**（2026-06-07，feature ship-gate 8/8 早已落，本次仅 doc/classification sync）。
 
 ## 进行中
@@ -16,8 +16,8 @@
 
 ## 下一步
 
-**M8 前置解耦（scene→rifx 白名单清零）+ py-aep P3 尾（DimSep animated 升 stable）均已落，焦点开放 —— 由用户定下一步。** 候选：
-1. **V3 M8 方案②（真·物理分包）**——独立 `internal/scene`+`internal/serializer` Go 包；需先做 `lower_`/`write_` 接口依赖倒置破环设计（§0 的 Go 语义墙）。前置解耦（白名单清零）已铺好路，但这仍是独立大 arc，宜先 brainstorm/spec。最大未启 arc。
+**V3 M8 方案② brainstorm 已出 spec（A 先行），等用户 review。** 待办：
+1. **用户 review `specs/2026-06-07-v3-m8-physical-split-design.md`**（含 §1 两默认决策 D1.1 保 facade / D1.2 Document 写中枢，可推翻）→ 通过即 **writing-plans** 出多阶段实现计划（P0 基线 → P1 codec 抽包 → P2 单包内 backref 迁侧表[最危险] → P3 机械分包 → P4 下游+收口+ship-gate）。
 2. **docgen 次要 follow-on**（非阻塞）：README.md 英文化 + 链接核对；类型级 Example / package-func Example 渲染（pilot defer 项）。
 3. Backlog 单条候选：Layr Transform 3D 通道（需先 3D layer 支持，V2.3）。
 

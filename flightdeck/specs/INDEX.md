@@ -2,6 +2,7 @@
 
 <!-- AUTO:specs -->
 ### 待启动（idea）
+- [2026-06-07-v3-m8-physical-split-design.md](2026-06-07-v3-m8-physical-split-design.md) — idea — V3 M8 方案② 真·物理分包设计（A 先行）：scene/serializer/codec 三包拆 + free-function/Document API + eager patch 迁侧表 + opaque on-ramp；保 byte-exact，C 日后独立 arc（brainstorm 产出，待 review → plan）
 - [2026-05-29-path-embed-re-findings.md](2026-05-29-path-embed-re-findings.md) — idea — Path embed bytes — RE findings（V2.2.1 子项②预备，已 ship，留作 Stroke 参考）
 - [2026-06-01-renderer-write-re-findings.md](2026-06-01-renderer-write-re-findings.md) — idea — Composition.Renderer W — RE findings（prin 104B / prda 变长，结构性，待实现）
 - [deferred-backlog.md](deferred-backlog.md) — idea — Deferred backlog 细项（从退役 logbook §Deferred 迁入）
