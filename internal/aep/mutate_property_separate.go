@@ -9,10 +9,13 @@ import (
 )
 
 // SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position
-// leader. Alpha / structural. Both directions (separate↔merge) are
-// implemented for static AND animated Position; an animated leader routes to
-// the keyframe-stream migration paths (separatePositionAnimated /
-// mergePositionAnimated), both ship-gated AE 2020+2025.
+// leader. Structural; both directions (separate↔merge) are double-version
+// ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated
+// Position (3D layers, near-linear leader path-ease). An animated leader
+// routes to the keyframe-stream migration paths (separatePositionAnimated /
+// mergePositionAnimated); animated cases outside that shipped subset — a 2D
+// layer, or a leader carrying custom spatial-path temporal ease — are refused
+// with an error rather than written.
 //
 // Byte mechanics REd from AE 2020 controlled before/after pairs (see
 // test_data/re_separate_dims*.jsx + incidents/separate-dimensions-write-mechanics.md):
