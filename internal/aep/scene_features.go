@@ -2,8 +2,6 @@ package aep
 
 import (
 	"fmt"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // Effect represents one effect instance applied to a layer (e.g. a Gaussian
@@ -31,34 +29,22 @@ type Marker struct {
 	FrameTarget  string  // fourth Utf8 — frame target id
 	CuePointName string  // fifth Utf8 — cue-point name (if used)
 
-	// Write-back references. Populated by parseMarkers; nil/zero for
-	// markers built outside the parser. SetTime / SetDuration / SetLabel
-	// / SetComment refuse with an error when these are missing.
-	ldat       *rifx.Chunk // owning ldat chunk (one shared by all markers in the set)
-	ldatOffset int         // start of this marker's keyframe block in ldat.Data
-	nmHd       *rifx.Chunk // per-marker NmHd chunk (Duration/Label)
-	nmrd       *rifx.Chunk // parent Nmrd LIST (for Utf8 text children)
-	tickRate   float64     // owning composition's TickRate (for SetTime)
-	compFps    float64     // owning composition's FrameRate (for FrameTime / SetFrameTime)
+	// Write-back state. Populated by parseMarkers; zero/nil for markers
+	// built outside the parser. ldatOffset / tickRate / compFps are plain
+	// values; the chunk references live in back (see back_marker.go) so the
+	// scene type stays chunk-free. SetTime / SetDuration / SetLabel /
+	// SetComment refuse with an error when the reference they need is missing.
+	ldatOffset int     // start of this marker's keyframe block in back.ldat.Data
+	tickRate   float64 // owning composition's TickRate (for SetTime)
+	compFps    float64 // owning composition's FrameRate (for FrameTime / SetFrameTime)
+
+	back *markerBackrefs // per-marker chunk references (nil outside parser)
 
 	// list back-references the owning marker-set container, shared by every
 	// marker in the same "ADBE Marker" set. Populated by parseMarkers; nil for
 	// markers built outside the parser. Required by the structural ops
 	// (Marker.Remove / Composition.AddMarker).
 	list *markerList
-}
-
-// markerList is the internal container behind one "ADBE Marker" set (a comp's
-// or a layer's markers). It holds the chunk references the structural ops
-// splice — the keyframe count (lhd3), the keyframe blocks (ldat), and the
-// Nmrd-bearing mrky LIST — plus owner, a pointer to the public Markers field
-// these markers live in, so Remove/Add can keep that slice in sync. All
-// markers in one set share a single *markerList.
-type markerList struct {
-	lhd3  *rifx.Chunk // kfl count chunk: count @0x08, bpk @0x10 = 16
-	ldat  *rifx.Chunk // keyframe blocks: count × 16 bytes
-	mrky  *rifx.Chunk // Nmrd container (nil when the set has no mrky branch)
-	owner *[]*Marker  // the public Composition.Markers / Layer.Markers field
 }
 
 // MaskMode is the compositing mode for a mask (matches AE C++ SDK values).
@@ -141,10 +127,10 @@ type Mask struct {
 	MkifRaw []byte // 48 bytes raw mask info (preserved for write-back)
 	ShphRaw []byte // 24 bytes, path header
 
-	// Write-back references — non-nil when SetMode/SetInverted/SetColor
-	// / SetClosed can modify the underlying RIFX bytes in-place.
-	mkif *rifx.Chunk // mkif chunk (Mode/Inverted/Color writes)
-	shph *rifx.Chunk // first shph chunk (Closed write — only meaningful for static masks)
+	// back holds the chunk references behind SetMode / SetInverted / SetColor
+	// / SetClosed etc. (see back_mask.go). nil for masks built outside the
+	// parser; the setters refuse in that case.
+	back *maskBackrefs
 }
 
 // MaskPathKeyframe is one keyframe of an animated mask path. Time is in

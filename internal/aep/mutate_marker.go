@@ -85,8 +85,8 @@ func (m *Marker) Remove() error {
 	binary.BigEndian.PutUint32(ml.lhd3.Data[0x08:0x0C], count-1)
 
 	// 4. mrky: remove this marker's Nmrd LIST.
-	if ml.mrky != nil && m.nmrd != nil {
-		if ni := indexOfChunk(ml.mrky.Children, m.nmrd); ni >= 0 {
+	if ml.mrky != nil && m.back != nil && m.back.nmrd != nil {
+		if ni := indexOfChunk(ml.mrky.Children, m.back.nmrd); ni >= 0 {
 			ch := ml.mrky.Children
 			ml.mrky.Children = append(ch[:ni:ni], ch[ni+1:]...)
 		}
@@ -130,7 +130,7 @@ func (c *Composition) AddMarker(seconds float64) (*Marker, error) {
 	if ml.mrky == nil {
 		return nil, fmt.Errorf("marker: AddMarker requires an mrky branch (none in this set)")
 	}
-	if tmpl.nmHd == nil {
+	if tmpl.back == nil || tmpl.back.nmHd == nil {
 		return nil, fmt.Errorf("marker: AddMarker template marker has no NmHd to clone")
 	}
 	if len(ml.lhd3.Data) < 0x0C {
@@ -159,7 +159,7 @@ func (c *Composition) AddMarker(seconds float64) (*Marker, error) {
 	binary.BigEndian.PutUint32(ml.lhd3.Data[0x08:0x0C], count+1)
 
 	// 3. mrky: new Nmrd { NmHd(clone, reset to point marker) + 5 empty Utf8 }.
-	nmHdClone := deepCloneChunk(tmpl.nmHd)
+	nmHdClone := deepCloneChunk(tmpl.back.nmHd)
 	if len(nmHdClone.Data) >= 0x0C {
 		binary.BigEndian.PutUint32(nmHdClone.Data[0x08:0x0C], 0) // duration → 0
 	}
@@ -175,12 +175,10 @@ func (c *Composition) AddMarker(seconds float64) (*Marker, error) {
 	// 4. scene: the new Marker, fully back-referenced.
 	nm := &Marker{
 		Time:       float64(ticks) / rate,
-		ldat:       ml.ldat,
 		ldatOffset: newOff,
-		nmHd:       nmHdClone,
-		nmrd:       nmrd,
 		tickRate:   tmpl.tickRate,
 		compFps:    tmpl.compFps,
+		back:       &markerBackrefs{ldat: ml.ldat, nmHd: nmHdClone, nmrd: nmrd},
 		list:       ml,
 	}
 	*ml.owner = append(*ml.owner, nm)

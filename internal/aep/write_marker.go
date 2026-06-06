@@ -20,21 +20,21 @@ import (
 // SetTime writes a new marker time (seconds) to the ldat keyframe slot
 // using the owning composition's TickRate. length-preserving.
 func (m *Marker) SetTime(seconds float64) error {
-	if m.ldat == nil {
+	if m.back == nil || m.back.ldat == nil {
 		return fmt.Errorf("marker: no ldat reference (built outside parser?)")
 	}
 	if seconds < 0 {
 		return fmt.Errorf("marker: negative time %g not supported", seconds)
 	}
-	if m.ldatOffset+4 > len(m.ldat.Data) {
-		return fmt.Errorf("marker: ldat offset %d out of range (len=%d)", m.ldatOffset, len(m.ldat.Data))
+	if m.ldatOffset+4 > len(m.back.ldat.Data) {
+		return fmt.Errorf("marker: ldat offset %d out of range (len=%d)", m.ldatOffset, len(m.back.ldat.Data))
 	}
 	rate := m.tickRate
 	if rate == 0 {
 		rate = aeLegacyTimeBase
 	}
 	ticks := uint32(math.Round(seconds * rate))
-	binary.BigEndian.PutUint32(m.ldat.Data[m.ldatOffset:m.ldatOffset+4], ticks)
+	binary.BigEndian.PutUint32(m.back.ldat.Data[m.ldatOffset:m.ldatOffset+4], ticks)
 	m.Time = float64(ticks) / rate
 	return nil
 }
@@ -46,18 +46,18 @@ func (m *Marker) SetTime(seconds float64) error {
 //
 // `seconds == 0` produces a point marker. Negative durations clamp to 0.
 func (m *Marker) SetDuration(seconds float64) error {
-	if m.nmHd == nil {
+	if m.back == nil || m.back.nmHd == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
 	}
-	if len(m.nmHd.Data) < 0x0C {
-		return fmt.Errorf("marker: NmHd too short for Duration write (len=%d)", len(m.nmHd.Data))
+	if len(m.back.nmHd.Data) < 0x0C {
+		return fmt.Errorf("marker: NmHd too short for Duration write (len=%d)", len(m.back.nmHd.Data))
 	}
 	if seconds < 0 {
 		seconds = 0
 	}
 	const nmHdDurationBase = 600.0
 	ticks := uint32(math.Round(seconds * nmHdDurationBase))
-	binary.BigEndian.PutUint32(m.nmHd.Data[0x08:0x0C], ticks)
+	binary.BigEndian.PutUint32(m.back.nmHd.Data[0x08:0x0C], ticks)
 	m.Duration = float64(ticks) / nmHdDurationBase
 	return nil
 }
@@ -67,13 +67,13 @@ func (m *Marker) SetDuration(seconds float64) error {
 // for unknown values but the byte round-trips).
 // length-preserving (1 byte).
 func (m *Marker) SetLabel(index uint8) error {
-	if m.nmHd == nil {
+	if m.back == nil || m.back.nmHd == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
 	}
-	if len(m.nmHd.Data) < 0x11 {
-		return fmt.Errorf("marker: NmHd too short for Label write (len=%d)", len(m.nmHd.Data))
+	if len(m.back.nmHd.Data) < 0x11 {
+		return fmt.Errorf("marker: NmHd too short for Label write (len=%d)", len(m.back.nmHd.Data))
 	}
-	m.nmHd.Data[0x10] = index
+	m.back.nmHd.Data[0x10] = index
 	m.Label = index
 	return nil
 }
@@ -116,13 +116,14 @@ func (m *Marker) SetCuePointName(s string) error {
 // empty Utf8 chunks so the requested slot reaches the right index in
 // declaration order (AE writes all 5 slots even when empty).
 func (m *Marker) setNmrdUtf8(slot int, s string, onSuccess func()) error {
-	if m.nmrd == nil {
+	if m.back == nil || m.back.nmrd == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
 	}
 	// Locate existing Utf8 children in order — collect both their indices
-	// in m.nmrd.Children and the count so we know whether to append.
+	// in the Nmrd LIST and the count so we know whether to append.
+	nmrd := m.back.nmrd
 	var utf8Idx []int
-	for i, ch := range m.nmrd.Children {
+	for i, ch := range nmrd.Children {
 		if ch.ID == rifx.IDUtf8 {
 			utf8Idx = append(utf8Idx, i)
 		}
@@ -131,10 +132,10 @@ func (m *Marker) setNmrdUtf8(slot int, s string, onSuccess func()) error {
 		// Append an empty Utf8 chunk. WriteAEP will allocate the chunk
 		// header and recompute sizes; we just need the Children entry.
 		empty := &rifx.Chunk{ID: rifx.IDUtf8, Data: nil}
-		m.nmrd.Children = append(m.nmrd.Children, empty)
-		utf8Idx = append(utf8Idx, len(m.nmrd.Children)-1)
+		nmrd.Children = append(nmrd.Children, empty)
+		utf8Idx = append(utf8Idx, len(nmrd.Children)-1)
 	}
-	target := m.nmrd.Children[utf8Idx[slot]]
+	target := nmrd.Children[utf8Idx[slot]]
 	target.Data = []byte(s)
 	onSuccess()
 	return nil
