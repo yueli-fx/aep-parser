@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-07 by claude（V3 M8 方案② spec 经三家外审**三轮**整合，定稿 **B′**：`specs/2026-06-07-v3-m8-physical-split-design.md`（status active）。轮1-2 驱动 A→B′ pivot（back-ref 作 scene 内 writer 接口、不破方法 API、无侧表/god-object）；轮3 精度/诚实加固（patch-first 原子序 C-1、attach 仅构造期、C-7 取舍、AttachWriter 暴露、attach 完整性断言、New* 位置、codec 不暴露 rifx）无新架构异议→判定收敛。含 §10 三轮 disposition。待 writing-plans）
-**Active focus**: **V3 M8 方案②（真·物理分包）** —— 设计定稿 `specs/2026-06-07-v3-m8-physical-split-design.md`（**A 先行 + B′**）。**下一步：writing-plans 出多阶段实现计划**。抉择终态：动机=硬编译边界 / 路线=**B′ back-ref 接口·不破 API**（推翻初期自由函数·破 API）/ back-ref=**scene 内接口 serializer 实现**（推翻初期侧表 A）/ 范围=A 先行（保 byte-exact，opaque+C 日后独立 arc）。
+**Active focus**: **V3 M8 方案②（真·物理分包）** —— 设计 `specs/2026-06-07-v3-m8-physical-split-design.md`（**A 先行 + B′**，用户通过）+ 实现计划 `plans/2026-06-07-v3-m8-physical-split-plan.md` 已落。**下一步：执行 plan**（P0 基线+inventory → P1 codec 抽包 → P2 back-ref 接口化[最危险] → P3 git mv 分包 → P4 收口+双版本 ship-gate）。执行方式待用户选：subagent-driven（推荐）/ inline。抉择终态：硬编译边界 / B′ back-ref 接口·不破 API / scene 内接口 serializer 实现 / A 先行（opaque+C 日后独立）。
 > 收尾记录：**py-aep parity P3 R/W 域已收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；DimensionsSeparated animated W **已升 stable**（2026-06-07，feature ship-gate 8/8 早已落，本次仅 doc/classification sync）。
 
 ## 进行中
@@ -16,8 +16,8 @@
 
 ## 下一步
 
-**V3 M8 方案② 设计定稿（A 先行 + B′），三家外审两轮已整合，下一步出 plan。** 待办：
-1. **writing-plans** 出多阶段实现计划：P0 基线 → P1 codec 抽包（facade re-alias 公共符号保零-diff）→ **P2 单包内 back-ref 接口化[最危险]**（9 XWriter 接口 + AttachWriter，scene `back` 由具体改接口，setter 体改「改值+调接口」，每组同 commit / setter 单测兜底）→ P3 机械分包（git mv + 全 DAG CI 断言）→ P4 下游+收口+双版本 ship-gate。plan 首步先出 Set* 精确分类表 + writer 接口粒度（§2.1/§3 留项）。
+**V3 M8 方案② 设计 + 实现计划均已落，下一步执行 plan。** 待办：
+1. **执行 `plans/2026-06-07-v3-m8-physical-split-plan.md`**：P0 基线+inventory（Task 0.3 出 Set* 分类表 + XWriter 接口清单，P2 依赖它）→ P1 抽 internal/codec（facade re-alias 保零-diff）→ **P2 单包内 back-ref 接口化[最危险]**（10 类 concrete→XWriter，逐类独立 commit，byte-identical + setter 单测 + attach 完整性断言兜底）→ P3 git mv 物理分包（DAG 编译期硬边界）→ P4 下游+退役 AST 守卫+CLAUDE.md+双版本 ship-gate。执行方式待用户选：subagent-driven（推荐）/ inline。
 2. **docgen 次要 follow-on**（非阻塞）：README.md 英文化 + 链接核对；类型级 Example / package-func Example 渲染（pilot defer 项）。
 3. Backlog 单条候选：Layr Transform 3D 通道（需先 3D layer 支持，V2.3）。
 
