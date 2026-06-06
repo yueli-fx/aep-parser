@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-07 by claude（V3 M8 方案② spec 经三家外审两轮整合，重写为 **B′**：`specs/2026-06-07-v3-m8-physical-split-design.md`（status active）。back-ref 改为 scene 内 writer 接口（serializer 实现）→ **不破方法 API**、无侧表/无指针 identity map/无 Document god-object，从根消解大半外审；推翻初期「破 API」+「侧表(A)」两决策。opaque 延后到 C。含 §10 disposition。待 writing-plans）
+**Last updated**: 2026-06-07 by claude（V3 M8 方案② spec 经三家外审**三轮**整合，定稿 **B′**：`specs/2026-06-07-v3-m8-physical-split-design.md`（status active）。轮1-2 驱动 A→B′ pivot（back-ref 作 scene 内 writer 接口、不破方法 API、无侧表/god-object）；轮3 精度/诚实加固（patch-first 原子序 C-1、attach 仅构造期、C-7 取舍、AttachWriter 暴露、attach 完整性断言、New* 位置、codec 不暴露 rifx）无新架构异议→判定收敛。含 §10 三轮 disposition。待 writing-plans）
 **Active focus**: **V3 M8 方案②（真·物理分包）** —— 设计定稿 `specs/2026-06-07-v3-m8-physical-split-design.md`（**A 先行 + B′**）。**下一步：writing-plans 出多阶段实现计划**。抉择终态：动机=硬编译边界 / 路线=**B′ back-ref 接口·不破 API**（推翻初期自由函数·破 API）/ back-ref=**scene 内接口 serializer 实现**（推翻初期侧表 A）/ 范围=A 先行（保 byte-exact，opaque+C 日后独立 arc）。
 > 收尾记录：**py-aep parity P3 R/W 域已收尾**——§3H ValueText 2026-06-04 **defer/won't-implement**（通用不可达，需 Adobe 不公开 schema DB；详 `incidents/valuetext-needs-schema-db.md`）；DimensionsSeparated animated W **已升 stable**（2026-06-07，feature ship-gate 8/8 早已落，本次仅 doc/classification sync）。
 
