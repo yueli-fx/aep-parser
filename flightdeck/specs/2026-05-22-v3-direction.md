@@ -1,12 +1,12 @@
 ---
 status: active
-summary: V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① 已落；M8 物理分包待启）
-note: 大 arc 暂停 — M8 物理分包待启（scene/serializer 拆包，scene→rifx 残留 5 项白名单待清零）；结构性 Phase 1-5 + 包重组方案① 已落
+summary: V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① + M8 scene→rifx 白名单清零 已落；真·物理分包(方案②接口倒置)待启）
+note: 大 arc 暂停 — M8 前置解耦已落（scene→rifx 残留 5 项白名单 2026-06-07 清零，守卫严格禁 import）；真·物理分包需方案② 接口倒置破环，待启；结构性 Phase 1-5 + 包重组方案① 已落
 ---
 
 # V3 direction — scene-graph IR + capability matrix + serializer split
 
-**Status**: **部分实现（partial / paused）— 更新 2026-05-31**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）。**剩余未做**：M8 物理分包（scene/serializer 拆包，被单 package Go 语义挡，scene→rifx 残留 5 项白名单待清零）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
+**Status**: **部分实现（partial / paused）— 更新 2026-06-07**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）+ **M8 scene→rifx 白名单清零**（5 项残留全迁出，守卫现严格禁 scene→rifx import，详下文残留表）。**剩余未做**：M8 真·物理分包（独立 `internal/scene`+`internal/serializer` Go 包，被单 package Go 语义挡，需方案② 接口依赖倒置破环）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
 
 GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`incidents/ae25-acceptance-gate.md`)。
 
@@ -229,24 +229,27 @@ API surface: `aep.Open(...) (*scene.Project, error)` / `scene.Project.WriteAEP(.
 
 预计跨越多周。期间 V2 path 继续 (V2.2 Layer 创建 可走当前 chunk-patch 套路，作为 RE 补充，但**不再深化**：V2.x 接下来每个 sub-project 都要权衡：是补 V3 brainstorm 输入，还是真的 V2 path 必要 ship）。
 
-## scene→rifx 残留解耦项（方案① 重组遗留，方案② M8 清零）
+## scene→rifx 残留解耦项（方案① 重组遗留 → M8 已清零 2026-06-07）
 
-2026-05-30 的 aep package 命名轴重组（方案①，`specs/2026-05-30-aep-package-reorg-design.md`）把 `internal/aep` 沿 `<stage>_<domain>` 收口，并加 `arch_boundary_test.go` 守卫「`scene_*` 禁 import rifx」。守卫枚举出 **5 个 `scene_*` 文件仍 import rifx**，均因持有 chunk 耦合逻辑，其干净归位正是 M8 serializer/scene 物理分包要做的。重组期暂入白名单（不阻塞、且守卫禁止新增 scene→rifx 耦合）。M8 落地时按下表迁出，迁完即清空白名单：
+2026-05-30 的 aep package 命名轴重组（方案①，`specs/2026-05-30-aep-package-reorg-design.md`）把 `internal/aep` 沿 `<stage>_<domain>` 收口，并加 `arch_boundary_test.go` 守卫「`scene_*` 禁 import rifx」。守卫枚举出 **5 个 `scene_*` 文件仍 import rifx**，均因持有 chunk 耦合逻辑。重组期暂入白名单（不阻塞、且守卫禁止新增 scene→rifx 耦合）。
 
-| scene_ 文件 | rifx 用法 | M8 迁往 |
-|---|---|---|
-| `scene_features.go` | Marker/Mask backref 结构持 `*rifx.Chunk`（ldat/nmHd/nmrd/mkif/shph） | `back_marker.go` / `back_mask.go` |
-| `scene_project_settings.go` | root flag-chunk 读写（lnrb/lnrp/dwga，length-preserving patch） | `write_project_settings.go`（write 阶段） |
-| `scene_project_views.go` | root LIST 导航 `findRootListByType`（Pefl/Pjef） | `parse_*`（读阶段导航） |
-| `scene_property_flags.go` | `decodeTdumValue(*rifx.Chunk)` 解码 helper | `parse_properties.go` |
-| `scene_property_group.go` | `AEPropertyGroup` 持 `*rifx.Chunk` + tdgp 树构建 | `parse_*`（chunk→tree 构建） |
+**2026-06-07 M8 whitelist-clearing 落地：5 项全部迁出，`sceneRifxWhitelist` 清空，守卫现严格禁止任何 scene→rifx import。** 落地手法（每项独立 commit + byte-identical round-trip（82 fixtures）+ `go doc -all` API 零 diff 验证）：
 
-> 这 5 项是 M8「scene 纯逻辑、零 chunk 引用」的具体待办；守卫白名单与本表是 M8 的 ready-made checklist。
+| scene_ 文件 | rifx 用法 | 已迁往 | 手法 |
+|---|---|---|---|
+| `scene_property_flags.go` | `decodeTdumValue(*rifx.Chunk)` | `parse_properties.go` | 移 helper，scene 经 back 字段调用 |
+| `scene_project_views.go` | `findRootListByType`（Pefl/Pjef） | `parse_project.go` | 抽 `effectNamesFromRoot` helper |
+| `scene_project_settings.go` | lnrb/lnrp flag-chunk 增删 | `write_project_settings.go` | 移 toggle 机器，留 .Data 原地 patch |
+| `scene_features.go` | Marker/Mask 持 `*rifx.Chunk` | `back_marker.go`/`back_mask.go` | `markerBackrefs`/`maskBackrefs` shard |
+| `scene_property_group.go` | `AEPropertyGroup.chunk` + tdgp 树构建 | `back_property_group.go`+`parse_property_group.go` | `propertyGroupBackrefs` shard + 树构建迁 parse_ |
+
+> **M8 剩余（未做）**：以上仅清除 scene→rifx **耦合白名单**（方案①遗留），是物理分包的**前置解耦**。真正的独立 Go 包（`internal/scene` + `internal/serializer`）仍被 §0 的 Go 语义墙挡住（方法必须与类型同包 → 循环依赖），需走**方案②（`lower_`/`write_` 接口依赖倒置破环）**才可行，那是独立大 arc，尚未启动。本次让日后方案② 从「大解耦」缩成「已分离区域内的局部手术」。
 
 ## 决策记录
 
 - 2026-05-22 V2.1 完工 + GPT 反馈 + escape-hatch 实证 → V3 brainstorm 当作"主线下个 phase 候选"。等用户确认起步。
 - 2026-05-30 aep package 命名轴重组（方案①）ship；scene→rifx 残留 5 项入守卫白名单 + 上表，作为 M8 前置解耦清单。
+- 2026-06-07 M8 whitelist-clearing ship：5 项残留全迁出（5 commit，每项 byte-identical（82 fixtures）+ API 零 diff 验证），`sceneRifxWhitelist` 清空，守卫严格禁 scene→rifx。物理分包前置解耦完成；真·分包（方案② 接口倒置）仍待启。
 
 ## 关联文档
 
