@@ -3,8 +3,6 @@ package aep
 import (
 	"fmt"
 	"math"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // Property tdb4 flag readers — mirror of py-aep's `property.is_spatial`,
@@ -212,41 +210,6 @@ func (p *Property) ControlType() PropertyControlType {
 func (p *Property) ValuePropertyType() PropertyValueType {
 	_, pvt := p.determinePropertyTypes()
 	return pvt
-}
-
-// decodeTdumValue reads a tdum/tduM chunk's payload. Layout depends on
-// tdb4 type flags: color → 4×float32 BE, integer → 1×uint32 BE,
-// otherwise N×float64 BE (N = size/8).
-func (p *Property) decodeTdumValue(c *rifx.Chunk) any {
-	if c == nil || len(c.Data) == 0 {
-		return nil
-	}
-	d := c.Data
-	if p.IsColor() && len(d) >= 16 {
-		// 4 × float32 BE
-		vals := make([]float64, 4)
-		for i := 0; i < 4; i++ {
-			bits := uint32(d[i*4])<<24 | uint32(d[i*4+1])<<16 | uint32(d[i*4+2])<<8 | uint32(d[i*4+3])
-			vals[i] = float64(math.Float32frombits(bits))
-		}
-		return vals
-	}
-	if p.IsInteger() && len(d) >= 4 {
-		v := uint32(d[0])<<24 | uint32(d[1])<<16 | uint32(d[2])<<8 | uint32(d[3])
-		return float64(v)
-	}
-	// Default: N × float64 BE
-	count := len(d) / 8
-	if count == 1 {
-		v, _ := readFloat64BE(d, 0)
-		return v
-	}
-	vals := make([]float64, count)
-	for i := 0; i < count; i++ {
-		v, _ := readFloat64BE(d, i*8)
-		vals[i] = v
-	}
-	return vals
 }
 
 // MinValue returns the minimum permitted value for the property, or nil
