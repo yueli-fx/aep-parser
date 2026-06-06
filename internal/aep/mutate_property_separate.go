@@ -44,7 +44,7 @@ func (p *Property) SetDimensionsSeparated(separated bool) error {
 		return fmt.Errorf("SetDimensionsSeparated: Position tdsb too short (tdsb=%d)", len(p.back.tdsb.Data))
 	}
 	grp := p.parentTreeGroup
-	if grp == nil || grp.chunk == nil {
+	if grp == nil || grp.back.chunk == nil {
 		return fmt.Errorf("SetDimensionsSeparated: Position has no owning tdgp group chunk")
 	}
 	layer := p.ownerLayer()
@@ -106,7 +106,7 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 	var pos2 *Property
 	var insertAt int
 	if layer.Is3D {
-		groupChildren := grp.chunk.Children
+		groupChildren := grp.back.chunk.Children
 		pos1TdbsIdx := indexOfChunk(groupChildren, pos1.back.tdbs)
 		if pos1TdbsIdx < 1 {
 			return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
@@ -156,12 +156,12 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 	pos1.StaticValue = xyz[1]
 
 	if pos2 != nil {
-		groupChildren := grp.chunk.Children
+		groupChildren := grp.back.chunk.Children
 		spliced := make([]*rifx.Chunk, 0, len(groupChildren)+2)
 		spliced = append(spliced, groupChildren[:insertAt]...)
 		spliced = append(spliced, newTdmn, newTdbs)
 		spliced = append(spliced, groupChildren[insertAt:]...)
-		grp.chunk.Children = spliced
+		grp.back.chunk.Children = spliced
 		insertChildAfter(grp, pos1, pos2)
 		layer.Properties = append(layer.Properties, pos2)
 	}
@@ -263,7 +263,7 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 	if leaderKflIdx < 0 {
 		return fmt.Errorf("SetDimensionsSeparated: animated leader has no kf stream to collapse")
 	}
-	groupChildren := grp.chunk.Children
+	groupChildren := grp.back.chunk.Children
 	pos1TdbsIdx := indexOfChunk(groupChildren, pos1.back.tdbs)
 	if pos1TdbsIdx < 1 {
 		return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
@@ -329,7 +329,7 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 	spliced = append(spliced, groupChildren[:insertAt]...)
 	spliced = append(spliced, newTdmn, newTdbs)
 	spliced = append(spliced, groupChildren[insertAt:]...)
-	grp.chunk.Children = spliced
+	grp.back.chunk.Children = spliced
 	insertChildAfter(grp, pos1, pos2)
 	layer.Properties = append(layer.Properties, pos2)
 
@@ -680,22 +680,22 @@ func buildMergedLeaderKfl(followers []*Property, n int, tickRate float64) *rifx.
 func removeFollowerChunks(grp *AEPropertyGroup, followers []*Property) {
 	remove := make(map[*rifx.Chunk]bool, len(followers)*2)
 	for _, f := range followers {
-		idx := indexOfChunk(grp.chunk.Children, f.back.tdbs)
+		idx := indexOfChunk(grp.back.chunk.Children, f.back.tdbs)
 		if idx < 0 {
 			continue
 		}
 		remove[f.back.tdbs] = true
-		if idx >= 1 && grp.chunk.Children[idx-1].ID == rifx.IDTdmn {
-			remove[grp.chunk.Children[idx-1]] = true
+		if idx >= 1 && grp.back.chunk.Children[idx-1].ID == rifx.IDTdmn {
+			remove[grp.back.chunk.Children[idx-1]] = true
 		}
 	}
-	keep := grp.chunk.Children[:0:0]
-	for _, ch := range grp.chunk.Children {
+	keep := grp.back.chunk.Children[:0:0]
+	for _, ch := range grp.back.chunk.Children {
 		if !remove[ch] {
 			keep = append(keep, ch)
 		}
 	}
-	grp.chunk.Children = keep
+	grp.back.chunk.Children = keep
 
 	removeFollowers := make(map[PropertyBase]bool, len(followers))
 	for _, f := range followers {

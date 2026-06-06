@@ -21,17 +21,12 @@ func archStageOf(name string) string {
 }
 
 // sceneRifxWhitelist names scene_ files still permitted to import rifx.
-// Each holds chunk-coupled logic whose proper home is a back_/parse_/write_
-// file; relocating it is deferred until the model/serializer boundary is
-// physically split. The guard blocks any NEW scene->rifx coupling beyond
-// this list, so the debt cannot grow.
-var sceneRifxWhitelist = map[string]bool{
-	"scene_features.go":         true, // Marker/Mask backref structs (*rifx.Chunk) -> back_
-	"scene_project_settings.go": true, // root flag-chunk read/write -> write_
-	"scene_project_views.go":    true, // root-LIST navigation helper -> parse_
-	"scene_property_flags.go":   true, // decodeTdumValue chunk decoder -> parse_
-	"scene_property_group.go":   true, // chunk-backed property-tree builder -> parse_
-}
+// Empty as of the V3 M8 whitelist-clearing pass (2026-06-07): every scene_
+// file is now chunk-free, chunk-coupled logic having moved to back_/parse_/
+// write_ files. The guard strictly forbids any scene->rifx import; add an
+// entry here only to TEMPORARILY stage a new decoupling, never as a
+// permanent escape hatch.
+var sceneRifxWhitelist = map[string]bool{}
 
 // sceneTypeNames are the runtime types a codec_ file must never reference —
 // codec_ handles only value objects, byte streams, and rifx structures.
