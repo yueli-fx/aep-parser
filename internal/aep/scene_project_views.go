@@ -1,7 +1,5 @@
 package aep
 
-import "github.com/example/aep-parser/internal/rifx"
-
 // Project filter views and lookups — mirror of py-aep's
 // `project.footages`, `project.root_folder`, `project.layer_by_id`,
 // `project.effect_names`. Most are wrappers over existing direct-field
@@ -52,26 +50,5 @@ func (p *Project) EffectNames() []string {
 	if p.back == nil || p.back.root == nil {
 		return nil
 	}
-	pefl := findRootListByType(p.back.root, rifx.IDPefl)
-	if pefl == nil {
-		return nil
-	}
-	var out []string
-	for _, ch := range pefl.Children {
-		if ch.ID == rifx.IDPjef {
-			out = append(out, ch.Text())
-		}
-	}
-	return out
-}
-
-// findRootListByType walks root's direct children looking for the
-// first LIST chunk with the given formType.
-func findRootListByType(root *rifx.Chunk, formType rifx.ChunkID) *rifx.Chunk {
-	for _, ch := range root.Children {
-		if ch.IsList() && ch.FormType == formType {
-			return ch
-		}
-	}
-	return nil
+	return effectNamesFromRoot(p.back.root)
 }
