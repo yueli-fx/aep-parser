@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 8/10**（已倒置 Composition / Marker / Mask / Footage / Keyframe / Project / Layer + **RenderQueue 子系统 ✅**；**实质待倒置仅剩 Property**，PropertyGroup 仅核查无接口）。每 commit 绿 + byte-identical round-trip。
+**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**下一步 = P3 git mv 物理分包**。每 commit 绿 + byte-identical round-trip。
 
 ## 进行中
 
@@ -18,14 +18,17 @@
 
 ## 下一步
 
-**RenderQueue 倒置 ✅ 完成**（commits ba2865b→5c2eeec，2026-06-09；§F D-U1/U2/U5 已实现）：RQ/OM/Guide settings 从 chunk-alias 改 scene 独占 copy（单一真相源）+ WriteAEP 单点 sync（`syncRenderQueue` / `syncGuides`，同构 `syncShapeLayerChunks`）；`SetComment` → `RenderQueueItemWriter{SetComment}`（唯一 A1，splice 逻辑迁 `(*renderQueueItemBackrefs)`，scene delegate patch-first）；`RenderQueueItem.back` → 接口 + `renderQueueItemBack()` helper；OM/Guide/RenderQueue 容器 back 仍 concrete（无 writer 接口，sync/结构性专用，P3 拆）；类型化 offset `codec.RenderSettingOffset`（Rs*/Oms*/Rouo* 常量改此类型，setter 体不改）；结构性 AddItem/RemoveItem 改 re-point `back.settingsSlice` + 从 scene copy 克隆模板（D-U3 stopgap，P3 迁 serializer）；attach 断言扩到 RQ/OM/Guide。每 commit 绿 + byte-identical + 我独立复核；`scene_render_queue.go`/`scene_guide.go` 已 rifx-clean。
+**P2 全部完成**（2026-06-09）。两批 landed：
+- **RenderQueue 子系统**（commits ba2865b→5c2eeec）：RQ/OM/Guide settings chunk-alias → scene 独占 copy（单一真相源）+ WriteAEP 单点 sync（`syncRenderQueue`/`syncGuides`）；`SetComment` → `RenderQueueItemWriter`；类型化 offset `codec.RenderSettingOffset`；attach 断言扩 RQ/OM/Guide。
+- **Property**（commits 73649c9 A + 8ca1e9c B，最后一类）：A=4 纯 setter（SetStaticValue/SetExpressionEnabled/SetExpression/SetLockedRatio）逻辑迁 `(*propertyBackrefs)` + scene delegate；B=`back *propertyBackrefs` → `PropertyWriter` 接口 + `propertyBack()` helper，全 reader/parse/keyframe-stream/separate-dims 经 helper 取 concrete。**判定**：InsertKeyframe/DeleteKeyframe（重建 scene Keyframes 切片）+ SetDimensionsSeparated（增删 follower Property 节点）= 结构性 → 留 scene-method stopgap（同 RQ AddItem/RemoveItem，D-U3），**不进** PropertyWriter。验证：`rect.SetSize` 委托链 + 全 separate-dims（2D/3D/merge/animated）round-trip 绿。
 
-**净结果：实质待倒置仅剩 Property。**
+**P2 收口 ✅**：全 `scene_*.go` 零 rifx import/code-token；OM/RenderQueue-容器/PropertyGroup back 故意保 concrete（§F——无 writer 接口，P3 统一解耦）。
 
-1. **Property 倒置**（最后一类，最重委托终点）：`scene_property.go` `back *propertyBackrefs` → `PropertyWriter` 接口（已在 scene_writers.go 定义）+ `propertyBack()` helper。4 setter（SetStaticValue/SetExpressionEnabled/SetExpression/SetDimensionsSeparated）+ InsertKeyframe/DeleteKeyframe 的 chunk patch 逻辑迁 `(*propertyBackrefs)`，scene delegate patch-first。**关键链路**：`SetStaticValue` 是 shape/material/transform 大批 B 类 setter 的委托终点——接口化后它们自动经 `prop.back.SetStaticValue` 工作，须验 `rect.SetSize` round-trip 绿。`SetDimensionsSeparated` 跨界改 `grp.back.chunk.Children` → 让 `propertyBackrefs` 增持父 group chunk 引用自行 splice（D-U4，不设 PropertyGroupWriter）。独立 commit + byte-identical + setter 单测 + attach 断言 + 独立复核。
-2. **PropertyGroup**：仅核查 scene 侧无 scene→rifx 残留（无接口，D-U4）。
-3. P2 收口（Task 2.3：全 `scene_*.go` rifx 引用清零核查）→ **P3** git mv 物理分包（编译期硬边界）→ **P4** 下游切换 + 退役 AST 守卫 + CLAUDE.md + 双版本 ship-gate。
-4. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
+## 下一步（P3 物理分包）
+
+1. **P3** git mv 物理拆包（编译期硬边界）：`scene_*.go`→`internal/scene`、`{parse_,lower_,write_,back_,mutate_}*.go`→`internal/serializer`、`internal/aep` 收为薄 facade。逐 task：3.1 建 scene 包（迁类型+accessor+writers 接口+WriteJSON，处理 export 可见性、DAG 断言 scene⊥rifx）→ 3.2 建 serializer 包（迁 parse/lower/write/back/mutate，核 init/global-var 顺序）→ 3.3 收 aep 为 facade（Open/New* re-export + 类型别名）。**关键 P3 待解**：OM/RQ/PropertyGroup 的 concrete back 跨包后需统一解耦（接口 or 导出 accessor，Task 3.1 Step 2）；结构性 op（AddItem/RemoveItem/InsertKeyframe/DeleteKeyframe/SetDimensionsSeparated/New*/Delete* 等）的 method-vs-free-function + public API 保全（spec 开放题）。每 task 独立 commit + byte-identical + DAG 断言。
+2. **P4** 下游切换 + 退役 AST 守卫（scene⊥rifx 改编译期保证）+ CLAUDE.md 多包描述 + 双版本 ship-gate 终验。
+3. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
 
 ## Backlog（单条候选）
 
