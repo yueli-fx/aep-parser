@@ -72,19 +72,20 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 	markers := make([]*Marker, 0, count)
 	for i := 0; i < count; i++ {
 		off := i * bpk
+		mb := &markerBackrefs{ldat: ldat, ldatOffset: off, tickRate: ctx.tickRate}
 		m := &Marker{
 			Time:       float64(binary.BigEndian.Uint32(ldat.Data[off:off+4])) / ctx.tickRate,
 			ldatOffset: off,
 			tickRate:   ctx.tickRate,
 			compFps:    ctx.compFps,
-			back:       &markerBackrefs{ldat: ldat},
+			back:       mb,
 			list:       ml,
 		}
 		if i < len(nmrds) {
-			m.back.nmrd = nmrds[i]
+			mb.nmrd = nmrds[i]
 			fillMarkerText(m, nmrds[i])
 			if nmHd := nmrds[i].FindFirst(rifx.IDNmhd); nmHd != nil {
-				m.back.nmHd = nmHd
+				mb.nmHd = nmHd
 				decodeNmHd(m, nmHd.Data)
 			}
 		}

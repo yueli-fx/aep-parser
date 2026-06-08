@@ -1,11 +1,8 @@
 package aep
 
 import (
-	"encoding/binary"
 	"fmt"
 	"math"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // Marker write API. Layer markers and composition markers share the
@@ -20,22 +17,20 @@ import (
 // SetTime writes a new marker time (seconds) to the ldat keyframe slot
 // using the owning composition's TickRate. length-preserving.
 func (m *Marker) SetTime(seconds float64) error {
-	if m.back == nil || m.back.ldat == nil {
+	if m.back == nil {
 		return fmt.Errorf("marker: no ldat reference (built outside parser?)")
 	}
-	if seconds < 0 {
-		return fmt.Errorf("marker: negative time %g not supported", seconds)
+	if err := m.back.SetTime(seconds); err != nil {
+		return err
 	}
-	if m.ldatOffset+4 > len(m.back.ldat.Data) {
-		return fmt.Errorf("marker: ldat offset %d out of range (len=%d)", m.ldatOffset, len(m.back.ldat.Data))
+	if mb, ok := m.back.(*markerBackrefs); ok {
+		rate := mb.tickRate
+		if rate == 0 {
+			rate = aeLegacyTimeBase
+		}
+		ticks := uint32(math.Round(seconds * rate))
+		m.Time = float64(ticks) / rate
 	}
-	rate := m.tickRate
-	if rate == 0 {
-		rate = aeLegacyTimeBase
-	}
-	ticks := uint32(math.Round(seconds * rate))
-	binary.BigEndian.PutUint32(m.back.ldat.Data[m.ldatOffset:m.ldatOffset+4], ticks)
-	m.Time = float64(ticks) / rate
 	return nil
 }
 
@@ -46,18 +41,17 @@ func (m *Marker) SetTime(seconds float64) error {
 //
 // `seconds == 0` produces a point marker. Negative durations clamp to 0.
 func (m *Marker) SetDuration(seconds float64) error {
-	if m.back == nil || m.back.nmHd == nil {
+	if m.back == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
-	}
-	if len(m.back.nmHd.Data) < 0x0C {
-		return fmt.Errorf("marker: NmHd too short for Duration write (len=%d)", len(m.back.nmHd.Data))
 	}
 	if seconds < 0 {
 		seconds = 0
 	}
+	if err := m.back.SetDuration(seconds); err != nil {
+		return err
+	}
 	const nmHdDurationBase = 600.0
 	ticks := uint32(math.Round(seconds * nmHdDurationBase))
-	binary.BigEndian.PutUint32(m.back.nmHd.Data[0x08:0x0C], ticks)
 	m.Duration = float64(ticks) / nmHdDurationBase
 	return nil
 }
@@ -67,13 +61,12 @@ func (m *Marker) SetDuration(seconds float64) error {
 // for unknown values but the byte round-trips).
 // length-preserving (1 byte).
 func (m *Marker) SetLabel(index uint8) error {
-	if m.back == nil || m.back.nmHd == nil {
+	if m.back == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
 	}
-	if len(m.back.nmHd.Data) < 0x11 {
-		return fmt.Errorf("marker: NmHd too short for Label write (len=%d)", len(m.back.nmHd.Data))
+	if err := m.back.SetLabel(index); err != nil {
+		return err
 	}
-	m.back.nmHd.Data[0x10] = index
 	m.Label = index
 	return nil
 }
@@ -86,57 +79,62 @@ func (m *Marker) SetLabel(index uint8) error {
 // other four Utf8 slots (they fill in declaration order, so missing
 // earlier slots are created as empty when a later slot is written).
 func (m *Marker) SetComment(s string) error {
-	return m.setNmrdUtf8(0, s, func() { m.Comment = s })
+	if m.back == nil {
+		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
+	}
+	if err := m.back.SetComment(s); err != nil {
+		return err
+	}
+	m.Comment = s
+	return nil
 }
 
 // SetChapter rewrites the marker's chapter-link text (second Utf8 in
 // the Nmrd block).
 func (m *Marker) SetChapter(s string) error {
-	return m.setNmrdUtf8(1, s, func() { m.Chapter = s })
+	if m.back == nil {
+		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
+	}
+	if err := m.back.SetChapter(s); err != nil {
+		return err
+	}
+	m.Chapter = s
+	return nil
 }
 
 // SetURL rewrites the marker's web-target URL (third Utf8).
 func (m *Marker) SetURL(s string) error {
-	return m.setNmrdUtf8(2, s, func() { m.URL = s })
+	if m.back == nil {
+		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
+	}
+	if err := m.back.SetURL(s); err != nil {
+		return err
+	}
+	m.URL = s
+	return nil
 }
 
 // SetFrameTarget rewrites the marker's frame-target id (fourth Utf8).
 func (m *Marker) SetFrameTarget(s string) error {
-	return m.setNmrdUtf8(3, s, func() { m.FrameTarget = s })
+	if m.back == nil {
+		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
+	}
+	if err := m.back.SetFrameTarget(s); err != nil {
+		return err
+	}
+	m.FrameTarget = s
+	return nil
 }
 
 // SetCuePointName rewrites the marker's cue-point name (fifth Utf8 —
 // legacy Flash-era; rarely populated in modern AE projects).
 func (m *Marker) SetCuePointName(s string) error {
-	return m.setNmrdUtf8(4, s, func() { m.CuePointName = s })
-}
-
-// setNmrdUtf8 mutates the n-th Utf8 child of the Marker's Nmrd block.
-// If fewer Utf8 children exist than n+1, missing slots are filled with
-// empty Utf8 chunks so the requested slot reaches the right index in
-// declaration order (AE writes all 5 slots even when empty).
-func (m *Marker) setNmrdUtf8(slot int, s string, onSuccess func()) error {
-	if m.back == nil || m.back.nmrd == nil {
+	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
 	}
-	// Locate existing Utf8 children in order — collect both their indices
-	// in the Nmrd LIST and the count so we know whether to append.
-	nmrd := m.back.nmrd
-	var utf8Idx []int
-	for i, ch := range nmrd.Children {
-		if ch.ID == rifx.IDUtf8 {
-			utf8Idx = append(utf8Idx, i)
-		}
+	if err := m.back.SetCuePointName(s); err != nil {
+		return err
 	}
-	for len(utf8Idx) <= slot {
-		// Append an empty Utf8 chunk. WriteAEP will allocate the chunk
-		// header and recompute sizes; we just need the Children entry.
-		empty := &rifx.Chunk{ID: rifx.IDUtf8, Data: nil}
-		nmrd.Children = append(nmrd.Children, empty)
-		utf8Idx = append(utf8Idx, len(nmrd.Children)-1)
-	}
-	target := nmrd.Children[utf8Idx[slot]]
-	target.Data = []byte(s)
-	onSuccess()
+	m.CuePointName = s
 	return nil
 }

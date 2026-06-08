@@ -38,7 +38,7 @@ type Marker struct {
 	tickRate   float64 // owning composition's TickRate (for SetTime)
 	compFps    float64 // owning composition's FrameRate (for FrameTime / SetFrameTime)
 
-	back *markerBackrefs // per-marker chunk references (nil outside parser)
+	back MarkerWriter // per-marker chunk references (nil outside parser)
 
 	// list back-references the owning marker-set container, shared by every
 	// marker in the same "ADBE Marker" set. Populated by parseMarkers; nil for
