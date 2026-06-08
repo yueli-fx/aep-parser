@@ -69,10 +69,11 @@ type RenderQueueItem struct {
 
 	OutputModules []*OutputModule
 
-	// settingsBlock aliases the 2246-byte slice of the render-settings ldat
-	// for this item (Go subslices share the backing array, so patching it
-	// mutates the chunk in place). nil for items built outside the parser.
-	// Powers the length-preserving Set* methods in write_render_queue.go.
+	// settingsBlock is this item's scene-owned copy of the 2246-byte
+	// render-settings block — the single source of truth. The length-preserving
+	// Set* methods mutate this copy; syncRenderQueue copies it back into the
+	// owning ldat chunk (via back.settingsSlice) at WriteAEP time. nil for items
+	// built outside the parser.
 	settingsBlock []byte
 
 	// back holds the RIFX chunk references that power the length-variable
@@ -134,12 +135,18 @@ type OutputModule struct {
 	// Ropt variant. slice-4, read-only.
 	FormatOptions *FormatOptions
 
-	// settingsBlock aliases this module's 128B OutputModuleSettingsItem; roouData
-	// aliases the Roou chunk bytes. Both share the backing chunk array, powering
-	// the length-preserving Set* methods in write_render_queue.go. nil outside
-	// the parser.
+	// settingsBlock / roouData are this module's scene-owned copies of the 128B
+	// OutputModuleSettingsItem and the Roou chunk bytes — the single source of
+	// truth. The length-preserving Set* methods mutate these copies;
+	// syncRenderQueue copies them back into the owning chunks (via back) at
+	// WriteAEP time. nil outside the parser.
 	settingsBlock []byte
 	roouData      []byte
+
+	// back locates the owning chunks for the write-time settings sync. No writer
+	// interface — every setter is a pure scene-buffer mutation. nil outside the
+	// parser. See back_render_queue.go.
+	back *outputModuleBackrefs
 }
 
 // FormatOptions is a typed view of the Ropt chunk (format-specific render

@@ -8,18 +8,47 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-// write_render_queue.go — length-preserving in-place setters for render queue
-// item settings. Each patches a fixed-width field inside the 2246-byte
-// render-settings ldat block (settingsBlock aliases the chunk bytes), so no
-// chunk size changes and WriteAEP re-emits the mutation. Non-structural, so no
-// AE ship-gate (same model as the other Set* value patches).
+// write_render_queue.go — length-preserving setters for render queue item +
+// output module settings. Each patches a fixed-width field inside the item's
+// scene-owned settings copy (settingsBlock / roouData — the single source of
+// truth), so no chunk size changes. syncRenderQueue copies the mutated buffers
+// back into the owning RIFX chunks at WriteAEP time. Non-structural, so no AE
+// ship-gate (same model as the other Set* value patches).
 //
 // Alpha: this write surface has not been double-version ship-gated. Values
 // round-trip byte-stably; AE acceptance is presumed (fields AE itself writes)
 // but not yet validated in-app.
 //
-// Concurrency: like all Set* patches these mutate shared chunk bytes; callers
+// Concurrency: like all Set* patches these mutate shared scene buffers; callers
 // serialize their own access (see incidents/concurrency-unsafe-shared-chunk-bytes).
+
+// syncRenderQueue copies every render-queue item's scene-owned settings buffers
+// back into the owning RIFX chunks before serialization (single source of truth
+// → chunk). Length-preserving: an unmutated buffer is byte-identical to the
+// parsed bytes, so a parse→write round-trip is unchanged. Called by
+// Project.WriteAEP; no-op for queues built outside the parser.
+func (p *Project) syncRenderQueue() {
+	rq := p.RenderQueue
+	if rq == nil {
+		return
+	}
+	for _, it := range rq.Items {
+		if it.back != nil && len(it.back.settingsSlice) == len(it.settingsBlock) {
+			copy(it.back.settingsSlice, it.settingsBlock)
+		}
+		for _, om := range it.OutputModules {
+			if om.back == nil {
+				continue
+			}
+			if len(om.back.settingsSlice) == len(om.settingsBlock) {
+				copy(om.back.settingsSlice, om.settingsBlock)
+			}
+			if len(om.back.roouSlice) == len(om.roouData) {
+				copy(om.back.roouSlice, om.roouData)
+			}
+		}
+	}
+}
 
 // patchU16 writes a big-endian u16 at the given field offset in the item's
 // settings block, no-op when the item has no backing block.

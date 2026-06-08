@@ -46,12 +46,7 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 			if pendingList == nil {
 				continue
 			}
-			item := buildRenderQueueItem(settingsBlocks, idx, pendingComment, pendingList, ch, proj)
-			item.back = &renderQueueItemBackrefs{
-				litm:          litm,
-				itemListChunk: pendingList,
-				rcomChunk:     pendingRcom,
-			}
+			item := buildRenderQueueItem(settingsBlocks, idx, pendingComment, litm, pendingList, ch, pendingRcom, proj)
 			rq.Items = append(rq.Items, item)
 			idx++
 			pendingComment = ""
@@ -95,10 +90,12 @@ func renderSettingsBlocks(lrdr *rifx.Chunk) [][]byte {
 	return blocks
 }
 
-func buildRenderQueueItem(blocks [][]byte, idx int, comment string, itemList, lom *rifx.Chunk, proj *Project) *RenderQueueItem {
+func buildRenderQueueItem(blocks [][]byte, idx int, comment string, litm, itemList, lom, rcom *rifx.Chunk, proj *Project) *RenderQueueItem {
 	item := &RenderQueueItem{Comment: comment}
+	var settingsAlias []byte
 	if idx < len(blocks) {
-		item.settingsBlock = blocks[idx]
+		settingsAlias = blocks[idx]
+		item.settingsBlock = append([]byte(nil), blocks[idx]...)
 		if rs, ok := codec.DecodeRenderSettings(blocks[idx]); ok {
 			item.Status = rs.Status
 			item.Name = rs.TemplateName
@@ -124,6 +121,12 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, itemList, lo
 				SkipExistingFiles: rs.SkipExistingFiles,
 			}
 		}
+	}
+	item.back = &renderQueueItemBackrefs{
+		litm:          litm,
+		itemListChunk: itemList,
+		rcomChunk:     rcom,
+		settingsSlice: settingsAlias,
 	}
 	item.OutputModules = parseOutputModules(lom, outputModuleSettingsBlocks(itemList))
 	return item
@@ -182,12 +185,16 @@ func parseOutputModules(lom *rifx.Chunk, omBlocks [][]byte) []*OutputModule {
 }
 
 func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
-	om := &OutputModule{settingsBlock: omBlock}
+	om := &OutputModule{
+		settingsBlock: append([]byte(nil), omBlock...),
+		back:          &outputModuleBackrefs{settingsSlice: omBlock},
+	}
 	als2Seen := false
 	var postAls2 []string
 	for _, ch := range group {
 		if ch.ID == rifx.IDRoou {
-			om.roouData = ch.Data
+			om.roouData = append([]byte(nil), ch.Data...)
+			om.back.roouSlice = ch.Data
 			applyRoou(om, ch.Data)
 			continue
 		}

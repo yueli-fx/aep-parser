@@ -20,8 +20,9 @@ import (
 //   - the item's per-item block from the Rout flags chunk (4-byte header +
 //     uniform per-item stride), decrementing the header proportionally.
 //
-// Because every item's settingsBlock aliases a sub-slice of the shared settings
-// ldat, the surviving items are re-aliased to their new offsets after the splice.
+// The scene-side settingsBlock buffers are independent copies (single source of
+// truth); surviving items' back.settingsSlice aliases are re-pointed to their
+// new offsets after the splice, and WriteAEP syncs the copies back.
 //
 // Alpha: structural delete is not yet AE-ship-gated. Only items with one output
 // module are covered by the Rout RE (uniform per-item stride); see
@@ -118,12 +119,14 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 		}
 	}
 
-	// === scene: drop item, re-index survivors' settings aliases ===
+	// === scene: drop item, re-point survivors' settings ALIAS to its new offset
+	// in the spliced ldat. The scene-owned settingsBlock copies are
+	// position-independent and stay as-is (synced back at WriteAEP). ===
 	rq.Items = append(rq.Items[:index], rq.Items[index+1:]...)
 	item.back = nil
 	for i, it := range rq.Items {
-		if it.settingsBlock != nil {
-			it.settingsBlock = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
+		if it.back != nil && it.back.settingsSlice != nil {
+			it.back.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
 	return nil
@@ -155,8 +158,10 @@ func incU32(b []byte) {
 // fresh add would name it after comp — deferred).
 //
 // Requires at least one existing item to clone from (an empty queue has no
-// template). The grown settings ldat reallocates, so every item's settingsBlock
-// alias is re-pointed afterward. See incidents/render-queue-delete-mechanics.md.
+// template). The clone is taken from the template's scene-owned settingsBlock
+// copy (single source of truth). The grown settings ldat reallocates, so every
+// item's back.settingsSlice alias is re-pointed afterward, and WriteAEP syncs
+// the copies back. See incidents/render-queue-delete-mechanics.md.
 func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 	if rq == nil {
 		return nil, fmt.Errorf("AddItem: nil render queue")
@@ -206,8 +211,14 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 		return nil, fmt.Errorf("AddItem: settings ldat too short for template block")
 	}
 
-	// === Clone template settings block + remap comp_id ===
-	newBlock := append([]byte(nil), ldat.Data[tOff:tOff+codec.RenderSettingsItemSize]...)
+	// === Clone template settings block (from the scene-owned copy, the single
+	// source of truth) + remap comp_id ===
+	var newBlock []byte
+	if len(template.settingsBlock) == codec.RenderSettingsItemSize {
+		newBlock = append([]byte(nil), template.settingsBlock...)
+	} else {
+		newBlock = append([]byte(nil), ldat.Data[tOff:tOff+codec.RenderSettingsItemSize]...)
+	}
 	binary.BigEndian.PutUint32(newBlock[codec.RsCompID:], comp.ID)
 	ldat.Data = append(ldat.Data, newBlock...)
 	incU32(lhd3.Data[0x08:])
@@ -232,14 +243,13 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 		}
 	}
 
-	// === scene: build the new item, re-alias ALL settings blocks (ldat grew) ===
+	// === scene: build the new item, re-point ALL settings aliases (ldat grew) ===
 	blocks := renderSettingsBlocks(rq.back.lrdr)
-	newItem := buildRenderQueueItem(blocks, n, "", clonedList, clonedLOm, comp.proj)
-	newItem.back = &renderQueueItemBackrefs{litm: litm, itemListChunk: clonedList}
+	newItem := buildRenderQueueItem(blocks, n, "", litm, clonedList, clonedLOm, nil, comp.proj)
 	rq.Items = append(rq.Items, newItem)
 	for i, it := range rq.Items {
-		if it.settingsBlock != nil || i == n {
-			it.settingsBlock = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
+		if it.back != nil && it.back.settingsSlice != nil {
+			it.back.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
 	return newItem, nil

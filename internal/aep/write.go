@@ -30,6 +30,7 @@ func (p *Project) WriteAEP(w io.Writer) error {
 	if err := p.syncShapeLayerChunks(); err != nil {
 		return fmt.Errorf("sync shape layers: %w", err)
 	}
+	p.syncRenderQueue()
 	p.syncHeadCounters()
 	return p.back.WriteAEP(w)
 }
