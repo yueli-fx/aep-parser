@@ -77,7 +77,7 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 
 	// === Commit: remove the item's [RCom?] + list + LOm from LItm ===
 	remove := map[*rifx.Chunk]bool{
-		ib.itemListChunk:     true,
+		ib.itemListChunk:      true,
 		litm.Children[lomIdx]: true,
 	}
 	if ib.rcomChunk != nil {
