@@ -366,6 +366,41 @@ write_text.go（33，全部经 `l.splicePSValue(...)` → patch `back.btdsChunk`
 
 ---
 
+## §F — U1-U5 决策草案（2026-06-09，**待用户审**）
+
+总原则：①scene 彻底不持 chunk-alias（持**独立 copy** 或纯值字段，不与 serializer chunk 共享 backing array）；②**结构性 op 不进 writer 接口**（spec §2.4：住 serializer + facade re-export）；③writer 接口只收 length-preserving setter 的字节 patch；④不改任何**公共 setter 签名**（含无-error 的）。
+
+### D-U1 — RenderQueue / OutputModule 别名字段（**已按用户 2 条 ⚠️ 修正：单一真相源 + 类型化 offset**）
+**决策**：scene 侧 `RenderQueueItem.settings`、`OutputModule.settings`/`roou`（重命名去掉 `Block` 暗示）从「alias chunk backing array」改为「**scene 独占的独立 `[]byte`**」（parse 时 `append([]byte(nil), chunk...)` 拷出）—— **这个 copy 是唯一可变真相源**。
+- **单一真相源（⚠️2）**：setter **只改 scene buffer，不再 eager patch chunk**（杜绝 scene+rifx 双活）。rifx chunk 是 write-derived：`WriteAEP` 时由 serializer 从 scene.settings **单点同步**回 owning chunk（`copy(chunk.Data[region:], item.settings)`），这是 scene↔chunk settings 字节的**唯一交汇点**。byte-identical：unmutated 时 scene.settings == parse 时拷出的原字节 → 同步回去逐字一致。结构性 AddItem/RemoveItem（D-U3，serializer）重建 ldat 时也从 scene items 的 settings 拷入（不再 re-slice 别名）。
+- **类型化 offset（⚠️1）**：通用 patch helper 走**定义类型**的 offset，magic number 不外溢：
+  ```go
+  type RenderSettingOffset int   // codec 侧；codec.RsQuality 等已是命名常量，改为此类型
+  func patchSettings(buf []byte, off RenderSettingOffset, data []byte) bool
+  ```
+  36 个 A2 setter 调 `patchSettings(item.settings, codec.RsQuality, enc)` —— 编码（sentinel/flag/u16）+ 命名 offset 常量留 scene/codec 级，**不再有裸 int 偏移**。
+- **接口后果（D-U3/D-U5 联动收窄）**：38 个 A2 settings setter 既不 eager patch chunk、又无 error 返回 → 退化为**纯 scene mutation**（改 scene buffer），序列化经上述 write 时同步。故：
+  - **`OutputModule` 与 `Guide` 不需要任何 writer 接口**（其 setter 全是 A2 → 纯 scene）。`outputModuleBackrefs` 仅持 chunk 供 write-时同步定位，不暴露接口。
+  - **`RenderQueueItemWriter` 仅需 `SetComment`**（唯一 A1 length-variable，经 `it.back.rcomChunk` splice，真需 serializer）。
+  - `RenderQueue` 级只有结构性 op（AddItem/RemoveItem）→ D-U3 归 serializer，**不在接口**。
+  - 净结果：RQ 子系统的 writer 接口面 = 1 个方法（`RenderQueueItemWriter.SetComment`）；其余全是 scene-owned buffer + write 时同步。比原草案的「3 接口 + PatchSettings 方法」更小、更符合 scene⊥rifx 单一真相源。
+
+### D-U2 — Guide（**已与 D-U1 单一真相源模型对齐：无接口**）
+**决策**（修正：原拟 GuideWriter，但 Guide 的 2 个 setter 是 A2 无-error，与 OM/RQ-settings 同类 → 适用同一单一真相源模型，故**不需接口**）：scene `Guide` 把 `block []byte` 别名改为**独占 16B copy**（单一真相源）；`SetPosition`/`SetOrientation` 纯 scene mutation（改 copy + `Position`/`Orientation` 字段），经 `patchSettings`/直接 PutUint 写 copy；`WriteAEP` 时 serializer 从各 guide 的 copy 单点同步回 Gide ldat slot。**无 `GuideWriter` 接口、无 `guideBackrefs`**——与 OutputModule 一致。guide 属 comp，其 ldat slot 的写在 serializer 的 comp 序列化路径里同步。
+
+### D-U3 — 结构性 op 归属
+**决策**：照 spec §2.4——`New*/Delete*/Insert*/Move*/Duplicate*/Add*` + `AEPropertyGroup.{Remove,Duplicate,MoveTo}` + `RenderQueue.{AddItem,RemoveItem}` + `Composition.AddMarker` / `Marker.Remove` **全部住 serializer 自由函数 + facade re-export，不进任何 writer 接口**。P2 阶段它们仍是 scene 上的方法、经 `back.(*xBackrefs)` stopgap 访问 chunk（与已倒置 7 类一致）；P3 git mv 时随 mutate_*.go 迁 serializer。→ 这直接收窄 D-U4。
+
+### D-U4 — PropertyGroupWriter
+**决策**：**不设 `PropertyGroupWriter` 接口**（PropertyGroup 无直属 length-preserving Set*；结构性 group op 按 D-U3 归 serializer）。唯一跨界点 `Property.SetDimensionsSeparated` 改 `grp.back.chunk.Children`：让 **`propertyBackrefs` 增持父 group 的 chunk 引用**，`PropertyWriter.SetDimensionsSeparated` 的 impl 自行 splice（splice 逻辑本就 serializer 侧）。故 `propertyGroupBackrefs` 不需接口化，P3 随 serializer 迁走即可——**P2 待倒置类实质从 3 降到 2（RenderQueue 子系统 + Property）**，PropertyGroup 只需确认无 scene→rifx 残留。
+
+### D-U5 — 无-error setter 签名
+**决策**：**公共 setter 签名一律不动**（36 RQ/OM + 2 Guide 保持 `func(...)` 无 error、silent-no-op 语义不变——避免破 Alpha API）。下沉的接口原语返回 **`bool`**（成功/越界），scene setter 按原语义吞掉 bool（保持 silent no-op）。patch-first 原子序对这些无-error 路径退化为「patch 失败则 scene 值也不变」——因为它们本就先 patch、bool=false 时不改 scene 值。
+
+**实现顺序（草案）**：先 RenderQueue 子系统（RenderQueueItemWriter + OutputModuleWriter + RenderQueueWriter，含 copy 化 + PatchSettings 原语）→ 再 Property（PropertyWriter，含 SetDimensionsSeparated 经 propertyBackrefs 持 group chunk）→ PropertyGroup 仅核查无残留。每步独立 commit + 三道门。
+
+---
+
 ## 自审
 
 - ✅ 逐方法读 body（非按名猜）：A1 全部经 grep `.back.` 命中点交叉核对；委托型 setter（scene_frame_time / scene_layer_accessors / scene_layer_property_access / scene_shape_graph / scene_layer_matte）逐文件读 body 确认委托终点；A2 三组（RQItem / OM / Guide）读 body 确认 patch 别名字段而非 `.back.`。
