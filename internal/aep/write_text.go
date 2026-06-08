@@ -192,7 +192,7 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 
 // SetRunFontIndex repoints style run #runIdx at a different entry in
 // the Fonts table (TextSource.Fonts). Caller is responsible for ensuring
-// the index is in range; the underlying codec.PsValue is just an integer.
+// the index is in range; the underlying psValue is just an integer.
 func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err

@@ -37,11 +37,11 @@ type Property struct {
 	// parameters (pard chunk). 0 for non-enum properties.
 	NbOptions int
 
-	// codec.Gradient holds the parsed gradient data for "ADBE Vector Grad
+	// Gradient holds the parsed gradient data for "ADBE Vector Grad
 	// Colors" properties. The XML is stored in the cdat chunk and
 	// parsed during property initialization. nil for non-gradient
 	// properties.
-	Gradient *codec.Gradient
+	Gradient *Gradient
 
 	// back holds the underlying RIFX chunk refs that power length-preserving
 	// writes. nil for properties built outside the parser. See back_property.go.
@@ -176,9 +176,18 @@ func (it InterpType) String() string {
 	}
 }
 
-// TemporalEase is one side's temporal ease for one component. Defined in
-// internal/codec; aliased here so callers importing aep continue to see
-// aep.TemporalEase without qualification.
+// TemporalEase is one side's temporal ease for one component:
+//
+//   - Speed: the value's rate of change at the keyframe, in property-value
+//     units per second. Default 0 = "stops" at the keyframe ("ease in/out").
+//   - Influence: how far (0..1) the bezier handle extends along the time axis.
+//     Default 0.333 (~1/3) matches AE's "Easy Ease" preset.
+//
+// For spatial properties (Position/Anchor) and mask paths, AE stores ONE
+// TemporalEase per side (speed is along the motion path, not per axis),
+// so Keyframe.InTemporalEase / OutTemporalEase have length 1. For non-spatial
+// properties, AE stores one TemporalEase per component, so the slices have
+// length 1 (1D) or length 3 (3D, e.g. Scale).
 type TemporalEase = codec.TemporalEase
 
 // Keyframe represents a single keyframe on a property.

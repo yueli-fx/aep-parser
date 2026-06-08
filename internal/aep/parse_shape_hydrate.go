@@ -13,9 +13,9 @@
 //
 // Both static and animated streams are handled. The static path uses
 // V1 parseLeafProperty's StaticValue (any); the animated path translates
-// V1 prop.Keyframes ([]*Keyframe) into typed codec.StreamKeyframe[T] via the
-// codec.PropertyStream.AddKeyframeLinear API, which also flips the stream into
-// Animated mode. A roundtrip preserves runtime semantics.
+// V1 prop.Keyframes ([]*Keyframe) into typed StreamKeyframe[T] via the
+// PropertyStream.AddKeyframeLinear API, which also flips the stream into Animated
+// mode. A roundtrip preserves runtime semantics.
 package aep
 
 import (

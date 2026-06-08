@@ -4714,20 +4714,6 @@
       "anchor": "#temporalease-object",
       "summary": "TemporalEase is one side's temporal ease for one component:"
     },
-    "TemporalEase.Influence": {
-      "kind": "field",
-      "file": "property.md",
-      "anchor": "#temporaleaseinfluence",
-      "signature": "Influence float64",
-      "rw": "read-only"
-    },
-    "TemporalEase.Speed": {
-      "kind": "field",
-      "file": "property.md",
-      "anchor": "#temporaleasespeed",
-      "signature": "Speed float64",
-      "rw": "read-only"
-    },
     "TextAutoKernType": {
       "kind": "type",
       "file": "text.md",

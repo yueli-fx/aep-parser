@@ -56,7 +56,7 @@ type RenderQueueItem struct {
 	// not yet rendered.
 	ElapsedSeconds uint32
 
-	// codec.RenderSettingsBlock holds the per-item render settings (the ExtendScript
+	// RenderSettings holds the per-item render settings (the ExtendScript
 	// get_settings() dict). Values follow py-aep NUMBER semantics: -1 means
 	// "current settings" (binary 0xFFFF).
 	RenderSettings RenderSettings
@@ -81,7 +81,7 @@ type RenderQueueItem struct {
 	back *renderQueueItemBackrefs
 }
 
-// codec.RenderSettingsBlock is the per-item render settings (ExtendScript
+// RenderSettings is the per-item render settings (ExtendScript
 // RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics:
 // -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
 // no current-settings sentinel.
@@ -143,8 +143,9 @@ type OutputModule struct {
 }
 
 // FormatOptions is a typed view of the Ropt chunk (format-specific render
-// options). Defined in internal/codec; aliased here so callers importing aep
-// continue to see aep.FormatOptions without qualification.
+// options). Kind names the active format; only that format's fields are
+// populated. Read-only (P3 §3A slice-4). HDR10 metadata + XML format options
+// (AVI/H264) are deferred.
 type FormatOptions = codec.FormatOptions
 
 // OutputModuleSettings is the per-output-module settings (ExtendScript

@@ -1,6 +1,6 @@
 // internal/aep/lower_property_stream.go
 //
-// 5 typed lowering primitives that turn codec.PropertyStream[T] into a LIST(tdgp)
+// 5 typed lowering primitives that turn PropertyStream[T] into a LIST(tdgp)
 // chunk subtree (tdmn + LIST(tdbs)(tdsb + tdsn + tdb4 + cdat OR
 // LIST(list)(lhd3 + ldat))).
 //
@@ -47,35 +47,35 @@ func NewLowerCtxForTest() *lowerCtx {
 
 // --- Public typed lowering API -------------------------------------------
 
-// LowerFloat64Stream emits LIST(tdgp) for a 1D codec.PropertyStream[float64].
-func LowerFloat64Stream(ps *codec.PropertyStream[float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+// LowerFloat64Stream emits LIST(tdgp) for a 1D PropertyStream[float64].
+func LowerFloat64Stream(ps *PropertyStream[float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	sv, _ := ps.StaticValue()
 	return lowerStream[float64](ps.Mode(), encode1D, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerVec2Stream emits LIST(tdgp) for a 2D codec.PropertyStream[[2]float64].
+// LowerVec2Stream emits LIST(tdgp) for a 2D PropertyStream[[2]float64].
 // Hot-path use is Layer Position (spatial 2D, header07=0x07).
-func LowerVec2Stream(ps *codec.PropertyStream[[2]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+func LowerVec2Stream(ps *PropertyStream[[2]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	sv, _ := ps.StaticValue()
 	return lowerStream[[2]float64](ps.Mode(), encode2D, valueLayout{dim: 2, headerByte: 0x07, spatial: true}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerVec3Stream emits LIST(tdgp) for a 3D codec.PropertyStream[[3]float64].
-func LowerVec3Stream(ps *codec.PropertyStream[[3]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+// LowerVec3Stream emits LIST(tdgp) for a 3D PropertyStream[[3]float64].
+func LowerVec3Stream(ps *PropertyStream[[3]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	sv, _ := ps.StaticValue()
 	return lowerStream[[3]float64](ps.Mode(), encode3D, valueLayout{dim: 3, headerByte: 0x07, spatial: true}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerColorStream emits LIST(tdgp) for a 4D RGBA codec.PropertyStream[[4]float64].
-func LowerColorStream(ps *codec.PropertyStream[[4]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+// LowerColorStream emits LIST(tdgp) for a 4D RGBA PropertyStream[[4]float64].
+func LowerColorStream(ps *PropertyStream[[4]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	sv, _ := ps.StaticValue()
 	return lowerStream[[4]float64](ps.Mode(), encode4D, valueLayout{dim: 4, headerByte: 0x01, spatial: false}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerPathStream emits LIST(tdgp) for a BezierPath codec.PropertyStream. Unlike
+// LowerPathStream emits LIST(tdgp) for a BezierPath PropertyStream. Unlike
 // the scalar/vector streams, AE encodes BezierPath via LIST(om-s) holding a
 // shap/shph/lhd3/ldat (f32 BE) substructure — NOT cdat float64.
-func LowerPathStream(ps *codec.PropertyStream[BezierPath], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	tdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	tdgp.Children = append(tdgp.Children, makeTdmn(matchName))
 

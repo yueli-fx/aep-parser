@@ -167,10 +167,10 @@ func NewRectNode() *RectNode {
 	return r
 }
 
-func (r *RectNode) Kind() ShapeNodeKind                   { return ShapeKindRect }
-func (r *RectNode) Size() *codec.PropertyStream[[2]float64]     { return r.size }
-func (r *RectNode) Position() *codec.PropertyStream[[2]float64] { return r.position }
-func (r *RectNode) Roundness() *codec.PropertyStream[float64]   { return r.roundness }
+func (r *RectNode) Kind() ShapeNodeKind               { return ShapeKindRect }
+func (r *RectNode) Size() *PropertyStream[[2]float64]     { return r.size }
+func (r *RectNode) Position() *PropertyStream[[2]float64] { return r.position }
+func (r *RectNode) Roundness() *PropertyStream[float64]   { return r.roundness }
 func (r *RectNode) Direction() ShapeDirection             { return r.direction }
 func (r *RectNode) SetSize(v [2]float64) error            { return r.size.SetStaticValue(v) }
 func (r *RectNode) SetPosition(v [2]float64) error        { return r.position.SetStaticValue(v) }
@@ -212,9 +212,9 @@ func NewEllipseNode() *EllipseNode {
 	return e
 }
 
-func (e *EllipseNode) Kind() ShapeNodeKind                   { return ShapeKindEllipse }
-func (e *EllipseNode) Size() *codec.PropertyStream[[2]float64]     { return e.size }
-func (e *EllipseNode) Position() *codec.PropertyStream[[2]float64] { return e.position }
+func (e *EllipseNode) Kind() ShapeNodeKind               { return ShapeKindEllipse }
+func (e *EllipseNode) Size() *PropertyStream[[2]float64]     { return e.size }
+func (e *EllipseNode) Position() *PropertyStream[[2]float64] { return e.position }
 func (e *EllipseNode) Direction() ShapeDirection             { return e.direction }
 func (e *EllipseNode) SetSize(v [2]float64) error            { return e.size.SetStaticValue(v) }
 func (e *EllipseNode) SetPosition(v [2]float64) error        { return e.position.SetStaticValue(v) }
@@ -256,8 +256,8 @@ func NewPathNode() *PathNode {
 	return p
 }
 
-func (p *PathNode) Kind() ShapeNodeKind                { return ShapeKindPath }
-func (p *PathNode) Path() *codec.PropertyStream[BezierPath]  { return p.path }
+func (p *PathNode) Kind() ShapeNodeKind            { return ShapeKindPath }
+func (p *PathNode) Path() *PropertyStream[BezierPath]  { return p.path }
 
 // Properties returns the escape-hatch β view.
 func (p *PathNode) Properties() *PropertyGroup {
@@ -318,9 +318,9 @@ func NewFillNode() *FillNode {
 	return f
 }
 
-func (f *FillNode) Kind() ShapeNodeKind                  { return ShapeKindFill }
-func (f *FillNode) Color() *codec.PropertyStream[[4]float64]   { return f.color }
-func (f *FillNode) Opacity() *codec.PropertyStream[float64]    { return f.opacity }
+func (f *FillNode) Kind() ShapeNodeKind              { return ShapeKindFill }
+func (f *FillNode) Color() *PropertyStream[[4]float64]   { return f.color }
+func (f *FillNode) Opacity() *PropertyStream[float64]    { return f.opacity }
 func (f *FillNode) BlendMode() ShapeBlendMode            { return f.blendMode }
 func (f *FillNode) CompositeOrder() ShapeCompositeOrder  { return f.compositeOrder }
 func (f *FillNode) FillRule() FillRule                   { return f.fillRule }
@@ -410,11 +410,11 @@ func (n *GradientFillNode) Kind() ShapeNodeKind { return ShapeKindGradientFill }
 // Gradient returns the live gradient (color + alpha stops). Mutating the
 // returned struct's slices directly also works, but prefer SetColorStops /
 // SetAlphaStops for range validation.
-func (n *GradientFillNode) Gradient() *codec.Gradient { return n.gradient }
+func (n *GradientFillNode) Gradient() *Gradient { return n.gradient }
 
 // SetColorStops replaces the gradient's color stops. Requires ≥ 2 stops; each
 // Offset/Midpoint in [0,1] and each Color component in [0,1].
-func (n *GradientFillNode) SetColorStops(stops []codec.GradientColorStop) error {
+func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
 	if len(stops) < 2 {
 		return fmt.Errorf("SetColorStops: need ≥ 2 stops, got %d", len(stops))
 	}
@@ -431,13 +431,13 @@ func (n *GradientFillNode) SetColorStops(stops []codec.GradientColorStop) error 
 			}
 		}
 	}
-	n.gradient.ColorStops = append([]codec.GradientColorStop(nil), stops...)
+	n.gradient.ColorStops = append([]GradientColorStop(nil), stops...)
 	return nil
 }
 
 // SetAlphaStops replaces the gradient's alpha (opacity) stops. Requires ≥ 2
 // stops; each Offset/Midpoint/Alpha in [0,1].
-func (n *GradientFillNode) SetAlphaStops(stops []codec.GradientAlphaStop) error {
+func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
 	if len(stops) < 2 {
 		return fmt.Errorf("SetAlphaStops: need ≥ 2 stops, got %d", len(stops))
 	}
@@ -452,7 +452,7 @@ func (n *GradientFillNode) SetAlphaStops(stops []codec.GradientAlphaStop) error 
 			return fmt.Errorf("SetAlphaStops: stop %d alpha = %g out of range [0,1]", i, s.Alpha)
 		}
 	}
-	n.gradient.AlphaStops = append([]codec.GradientAlphaStop(nil), stops...)
+	n.gradient.AlphaStops = append([]GradientAlphaStop(nil), stops...)
 	return nil
 }
 
@@ -530,10 +530,10 @@ func NewStrokeNode() *StrokeNode {
 	return s
 }
 
-func (s *StrokeNode) Kind() ShapeNodeKind                { return ShapeKindStroke }
-func (s *StrokeNode) Color() *codec.PropertyStream[[4]float64] { return s.color }
-func (s *StrokeNode) Opacity() *codec.PropertyStream[float64]  { return s.opacity }
-func (s *StrokeNode) Width() *codec.PropertyStream[float64]    { return s.width }
+func (s *StrokeNode) Kind() ShapeNodeKind             { return ShapeKindStroke }
+func (s *StrokeNode) Color() *PropertyStream[[4]float64] { return s.color }
+func (s *StrokeNode) Opacity() *PropertyStream[float64]  { return s.opacity }
+func (s *StrokeNode) Width() *PropertyStream[float64]    { return s.width }
 func (s *StrokeNode) SetColor(v [4]float64) error        { return s.color.SetStaticValue(v) }
 func (s *StrokeNode) SetOpacity(v float64) error         { return s.opacity.SetStaticValue(v) }
 func (s *StrokeNode) SetWidth(v float64) error           { return s.width.SetStaticValue(v) }
@@ -732,67 +732,69 @@ func (pg *PropertyGroup) Child(name string) *PropertyGroup {
 	return pg.Children[name]
 }
 
-// Float64Stream returns the codec.PropertyStream[float64] under the given name, or
-// an error if no stream by that name exists or it isn't the expected type.
+// Float64Stream returns the PropertyStream[float64] under the given name,
+// or an error if no stream by that name exists or it isn't the expected type.
 // Mutations on the returned stream are visible through the typed accessor.
-func (pg *PropertyGroup) Float64Stream(name string) (*codec.PropertyStream[float64], error) {
+func (pg *PropertyGroup) Float64Stream(name string) (*PropertyStream[float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*codec.PropertyStream[float64])
+	ps, ok := v.(*PropertyStream[float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// Vec2Stream returns the codec.PropertyStream[[2]float64] under the given name.
-func (pg *PropertyGroup) Vec2Stream(name string) (*codec.PropertyStream[[2]float64], error) {
+// Vec2Stream returns the PropertyStream[[2]float64] under the given name.
+func (pg *PropertyGroup) Vec2Stream(name string) (*PropertyStream[[2]float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*codec.PropertyStream[[2]float64])
+	ps, ok := v.(*PropertyStream[[2]float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [2]float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// Vec3Stream returns the codec.PropertyStream[[3]float64] under the given name.
-func (pg *PropertyGroup) Vec3Stream(name string) (*codec.PropertyStream[[3]float64], error) {
+// Vec3Stream returns the PropertyStream[[3]float64] under the given name.
+func (pg *PropertyGroup) Vec3Stream(name string) (*PropertyStream[[3]float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*codec.PropertyStream[[3]float64])
+	ps, ok := v.(*PropertyStream[[3]float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [3]float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// ColorStream returns the codec.PropertyStream[[4]float64] (RGBA) under the given name.
-func (pg *PropertyGroup) ColorStream(name string) (*codec.PropertyStream[[4]float64], error) {
+// ColorStream returns the PropertyStream[[4]float64] (RGBA) under the
+// given name.
+func (pg *PropertyGroup) ColorStream(name string) (*PropertyStream[[4]float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*codec.PropertyStream[[4]float64])
+	ps, ok := v.(*PropertyStream[[4]float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [4]float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// PathStream returns the codec.PropertyStream[BezierPath] under the given name.
-func (pg *PropertyGroup) PathStream(name string) (*codec.PropertyStream[BezierPath], error) {
+// PathStream returns the PropertyStream[BezierPath] under the given
+// name.
+func (pg *PropertyGroup) PathStream(name string) (*PropertyStream[BezierPath], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*codec.PropertyStream[BezierPath])
+	ps, ok := v.(*PropertyStream[BezierPath])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not BezierPath", pg.Name, name)
 	}

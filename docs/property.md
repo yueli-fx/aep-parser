@@ -767,24 +767,6 @@ TemporalEase is one side's temporal ease for one component:
 
 For spatial properties (Position/Anchor) and mask paths, AE stores ONE TemporalEase per side (speed is along the motion path, not per axis), so Keyframe.InTemporalEase / OutTemporalEase have length 1. For non-spatial properties, AE stores one TemporalEase per component, so the slices have length 1 (1D) or length 3 (3D, e.g. Scale).
 
-## Attributes
-
-### TemporalEase.Speed
-
-```go
-Speed float64
-```
-
-read-only
-
-### TemporalEase.Influence
-
-```go
-Influence float64
-```
-
-read-only
-
 # InterpType object
 
 InterpType identifies a keyframe's interpolation mode on one side (in-side or out-side). AE stores these as single-byte enums in the keyframe block at offsets 0x04 (in-interp) and 0x05 (out-interp).
