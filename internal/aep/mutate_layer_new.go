@@ -11,6 +11,7 @@ package aep
 import (
 	"fmt"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -136,18 +137,18 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 		c.proj.nextItemID = layerID + 1
 	}
 
-	// Bump cdta @0x18 (cdtaSecondaryDivisor18) from 600 (fresh-comp marker)
+	// Bump cdta @0x18 (codec.CdtaSecondaryDivisor18) from 600 (fresh-comp marker)
 	// to TickRate. cdta_layout.go: "AE rewrites to TickRate on user mod".
 	// tolerance.aep (which AE 2025 accepts as a real comp with real user
 	// layers) has this field = TickRate, our fresh comp has 600.
 	// Hypothesis: AE uses this as a "comp has user content" gate.
-	if c.back.cdta != nil && len(c.back.cdta.Data) >= cdtaSecondaryDivisor18+4 {
+	if c.back.cdta != nil && len(c.back.cdta.Data) >= codec.CdtaSecondaryDivisor18+4 {
 		tr := uint32(c.TickRate)
 		if tr > 0 {
-			c.back.cdta.Data[cdtaSecondaryDivisor18+0] = byte(tr >> 24)
-			c.back.cdta.Data[cdtaSecondaryDivisor18+1] = byte(tr >> 16)
-			c.back.cdta.Data[cdtaSecondaryDivisor18+2] = byte(tr >> 8)
-			c.back.cdta.Data[cdtaSecondaryDivisor18+3] = byte(tr)
+			c.back.cdta.Data[codec.CdtaSecondaryDivisor18+0] = byte(tr >> 24)
+			c.back.cdta.Data[codec.CdtaSecondaryDivisor18+1] = byte(tr >> 16)
+			c.back.cdta.Data[codec.CdtaSecondaryDivisor18+2] = byte(tr >> 8)
+			c.back.cdta.Data[codec.CdtaSecondaryDivisor18+3] = byte(tr)
 		}
 	}
 	s := WrapShapeLayer(base)

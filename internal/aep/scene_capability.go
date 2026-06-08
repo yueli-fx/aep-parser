@@ -1,6 +1,8 @@
 // internal/aep/capability_matrix.go
 package aep
 
+import "github.com/example/aep-parser/internal/codec"
+
 // AECapabilities describes the serializer-affecting traits of a target AE
 // version. V2.2 ships with this struct deliberately EMPTY — the escape hatch
 // (AE 2020 canonical minimum) covers all currently
@@ -47,9 +49,9 @@ type AECapabilities struct {
 // function lookup — intentionally NOT a method on *Project so a future V3
 // auto-derive path can plug in without disturbing call sites.
 func Capabilities(target AETarget) AECapabilities {
-	c := AECapabilities{LdtaSize: ldtaSize2020}
+	c := AECapabilities{LdtaSize: codec.LdtaSize2020}
 	if target >= TargetAE2025 {
-		c.LdtaSize = ldtaSize2025
+		c.LdtaSize = codec.LdtaSize2025
 	}
 	return c
 }

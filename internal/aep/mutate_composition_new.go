@@ -12,6 +12,7 @@ import (
 	"math"
 	"sync"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -69,7 +70,7 @@ func buildCompIdpc() *rifx.Chunk {
 //
 // 注意 ID offset 是 @0x10 (parse.classifyItem reads idta.U32(16))，不是 @0x14。
 // 早期文档把 @0x14 当作 ID — 实测 fixture (ID 1, 13) 与 parse 行为一致 @0x10。
-var idtaCompDefaultBytes = [idtaSize]byte{
+var idtaCompDefaultBytes = [codec.IdtaSize]byte{
 	// @0x00..0x07: type=0x04 (Composition) + padding
 	0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	// @0x08..0x0F: padding
@@ -98,10 +99,10 @@ var idtaCompDefaultBytes = [idtaSize]byte{
 // buildCompIdta 构造 84-byte idta，template-copy default + overwrite @0x10 Item ID。
 // 同时 reset @0x3A (Label) 为 0，确保 NewComposition 的 comp 默认无 label color。
 func buildCompIdta(itemID uint32) *rifx.Chunk {
-	data := make([]byte, idtaSize)
+	data := make([]byte, codec.IdtaSize)
 	copy(data, idtaCompDefaultBytes[:])
-	binary.BigEndian.PutUint32(data[idtaItemID:idtaItemID+4], itemID)
-	data[idtaLabel] = 0 // 显式归零（fixture 残留 0x0F）
+	binary.BigEndian.PutUint32(data[codec.IdtaItemID:codec.IdtaItemID+4], itemID)
+	data[codec.IdtaLabel] = 0 // 显式归零（fixture 残留 0x0F）
 	return &rifx.Chunk{
 		ID:   rifx.ChunkID{'i', 'd', 't', 'a'},
 		Data: data,
@@ -109,79 +110,79 @@ func buildCompIdta(itemID uint32) *rifx.Chunk {
 }
 
 // buildCompCdta 构造 204-byte cdta。
-// Frame rate 经 encodeFrameRate 走 NTSC canonical 表。
-// fps-derived timing 字段 (TickRate / mirrors / masterTicks) 经 lookupFpsTiming
+// Frame rate 经 codec.EncodeFrameRate 走 NTSC canonical 表。
+// fps-derived timing 字段 (TickRate / mirrors / masterTicks) 经 codec.LookupFpsTiming
 // 查表 —— 这些字段 parser 不读，但 AE 25 打开做时间轴 sanity check 时必读，
 // 全零会让 AE 25 crash（实测）。
 // WorkAreaEnd 写 sentinel 0xFFFFFFFF（实测 AE default）。
 func buildCompCdta(w, h uint16, fps, duration float64) []byte {
-	d := make([]byte, cdtaSize)
+	d := make([]byte, codec.CdtaSize)
 
-	timing := lookupFpsTiming(fps)
+	timing := codec.LookupFpsTiming(fps)
 
 	// ResolutionFactor @0x00/0x02 default [1,1]
-	binary.BigEndian.PutUint16(d[cdtaResolutionFactorX:cdtaResolutionFactorX+2], 1)
-	binary.BigEndian.PutUint16(d[cdtaResolutionFactorY:cdtaResolutionFactorY+2], 1)
+	binary.BigEndian.PutUint16(d[codec.CdtaResolutionFactorX:codec.CdtaResolutionFactorX+2], 1)
+	binary.BigEndian.PutUint16(d[codec.CdtaResolutionFactorY:codec.CdtaResolutionFactorY+2], 1)
 
 	// fps timing prologue @0x06 / @0x08 / @0x30
-	binary.BigEndian.PutUint16(d[cdtaTicksPerFrame:cdtaTicksPerFrame+2], timing.ticksPerFrame)
-	binary.BigEndian.PutUint32(d[cdtaTickRate:cdtaTickRate+4], timing.tickRate)
-	binary.BigEndian.PutUint32(d[cdtaTickRateMirror30:cdtaTickRateMirror30+4], timing.tickRate)
+	binary.BigEndian.PutUint16(d[codec.CdtaTicksPerFrame:codec.CdtaTicksPerFrame+2], timing.TicksPerFrame)
+	binary.BigEndian.PutUint32(d[codec.CdtaTickRate:codec.CdtaTickRate+4], timing.TickRate)
+	binary.BigEndian.PutUint32(d[codec.CdtaTickRateMirror30:codec.CdtaTickRateMirror30+4], timing.TickRate)
 
 	// TimeBaseDivisor @0x10 — always 600 (matches WorkArea divisor)
 	// Secondary divisor @0x18 — 600 for fresh comps (实测 A_baseline + dummy_comp).
 	// AE rewrites to TickRate after user mods —
 	// builder 出 fresh comp，必须用 600，否则 AE 25 把 ShutterAngle 按 NTSC 因子重算
 	// (实测: stored 180 → AE display 216 when @0x18=TickRate)。
-	binary.BigEndian.PutUint32(d[cdtaTimeBaseDivisor:cdtaTimeBaseDivisor+4], 600)
-	binary.BigEndian.PutUint32(d[cdtaSecondaryDivisor18:cdtaSecondaryDivisor18+4], 600)
+	binary.BigEndian.PutUint32(d[codec.CdtaTimeBaseDivisor:codec.CdtaTimeBaseDivisor+4], 600)
+	binary.BigEndian.PutUint32(d[codec.CdtaSecondaryDivisor18:codec.CdtaSecondaryDivisor18+4], 600)
 
 	// WorkArea @0x1C..@0x2B：start=0/600, end=sentinel/600
-	binary.BigEndian.PutUint32(d[cdtaWorkAreaStart:cdtaWorkAreaStart+4], 0)
-	binary.BigEndian.PutUint32(d[cdtaWorkAreaStartDiv:cdtaWorkAreaStartDiv+4], 600)
-	binary.BigEndian.PutUint32(d[cdtaWorkAreaEnd:cdtaWorkAreaEnd+4], 0xFFFFFFFF) // sentinel "use Duration"
-	binary.BigEndian.PutUint32(d[cdtaWorkAreaEndDiv:cdtaWorkAreaEndDiv+4], 600)
+	binary.BigEndian.PutUint32(d[codec.CdtaWorkAreaStart:codec.CdtaWorkAreaStart+4], 0)
+	binary.BigEndian.PutUint32(d[codec.CdtaWorkAreaStartDiv:codec.CdtaWorkAreaStartDiv+4], 600)
+	binary.BigEndian.PutUint32(d[codec.CdtaWorkAreaEnd:codec.CdtaWorkAreaEnd+4], 0xFFFFFFFF) // sentinel "use Duration"
+	binary.BigEndian.PutUint32(d[codec.CdtaWorkAreaEndDiv:codec.CdtaWorkAreaEndDiv+4], 600)
 
 	// MasterTicks @0x2C = round(duration_seconds × nominalTickRate)。
 	// AE 25 display duration ≈ @0x2C / tickRate（实测：错值导致 AE 显示错
 	// duration + 触发其它字段误算如 ShutterAngle)。
-	masterTicks := uint32(math.Round(duration * float64(timing.nominalTickRate)))
-	binary.BigEndian.PutUint32(d[cdtaMasterTicks:cdtaMasterTicks+4], masterTicks)
+	masterTicks := uint32(math.Round(duration * float64(timing.NominalTickRate)))
+	binary.BigEndian.PutUint32(d[codec.CdtaMasterTicks:codec.CdtaMasterTicks+4], masterTicks)
 
 	// BGColor @0x34..@0x36 default {0,0,0}（bytes 已 0）
 
 	// Width @0x8C / Height @0x8E
-	binary.BigEndian.PutUint16(d[cdtaWidth:cdtaWidth+2], w)
-	binary.BigEndian.PutUint16(d[cdtaHeight:cdtaHeight+2], h)
+	binary.BigEndian.PutUint16(d[codec.CdtaWidth:codec.CdtaWidth+2], w)
+	binary.BigEndian.PutUint16(d[codec.CdtaHeight:codec.CdtaHeight+2], h)
 
 	// PixelAspect @0x90/0x94 default 1/1
-	binary.BigEndian.PutUint32(d[cdtaPixelAspectNum:cdtaPixelAspectNum+4], 1)
-	binary.BigEndian.PutUint32(d[cdtaPixelAspectDen:cdtaPixelAspectDen+4], 1)
+	binary.BigEndian.PutUint32(d[codec.CdtaPixelAspectNum:codec.CdtaPixelAspectNum+4], 1)
+	binary.BigEndian.PutUint32(d[codec.CdtaPixelAspectDen:codec.CdtaPixelAspectDen+4], 1)
 
 	// FrameRate @0x9C/0x9E — canonical encoding
-	enc := encodeFrameRate(fps)
-	binary.BigEndian.PutUint16(d[cdtaFrameRateWhole:cdtaFrameRateWhole+2], enc.whole)
-	binary.BigEndian.PutUint16(d[cdtaFrameRateFrac:cdtaFrameRateFrac+2], enc.frac)
+	enc := codec.EncodeFrameRate(fps)
+	binary.BigEndian.PutUint16(d[codec.CdtaFrameRateWhole:codec.CdtaFrameRateWhole+2], enc.Whole)
+	binary.BigEndian.PutUint16(d[codec.CdtaFrameRateFrac:codec.CdtaFrameRateFrac+2], enc.Frac)
 
 	// DisplayStartTime @0xA4/0xA8 default 0/1
-	binary.BigEndian.PutUint32(d[cdtaDisplayStartTime:cdtaDisplayStartTime+4], 0)
-	binary.BigEndian.PutUint32(d[cdtaDisplayStartDiv:cdtaDisplayStartDiv+4], 1)
+	binary.BigEndian.PutUint32(d[codec.CdtaDisplayStartTime:codec.CdtaDisplayStartTime+4], 0)
+	binary.BigEndian.PutUint32(d[codec.CdtaDisplayStartDiv:codec.CdtaDisplayStartDiv+4], 1)
 
 	// ShutterAngle @0xAE default 180
-	binary.BigEndian.PutUint16(d[cdtaShutterAngle:cdtaShutterAngle+2], 180)
+	binary.BigEndian.PutUint16(d[codec.CdtaShutterAngle:codec.CdtaShutterAngle+2], 180)
 
 	// Duration @0xB0 + mirror @0xB8 (= round(duration_seconds × fps) frames)
 	durationFrames := uint32(math.Round(duration * fps))
-	binary.BigEndian.PutUint32(d[cdtaDuration:cdtaDuration+4], durationFrames)
-	binary.BigEndian.PutUint32(d[cdtaDurationMirror:cdtaDurationMirror+4], durationFrames)
+	binary.BigEndian.PutUint32(d[codec.CdtaDuration:codec.CdtaDuration+4], durationFrames)
+	binary.BigEndian.PutUint32(d[codec.CdtaDurationMirror:codec.CdtaDurationMirror+4], durationFrames)
 
 	// ShutterPhase @0xB4 default 0（已是 0）
 
 	// MotionBlurAdaptive @0xC4 default 128
-	binary.BigEndian.PutUint32(d[cdtaMotionBlurAdaptive:cdtaMotionBlurAdaptive+4], 128)
+	binary.BigEndian.PutUint32(d[codec.CdtaMotionBlurAdaptive:codec.CdtaMotionBlurAdaptive+4], 128)
 
 	// MotionBlurSamples @0xC8 default 16
-	binary.BigEndian.PutUint32(d[cdtaMotionBlurSamples:cdtaMotionBlurSamples+4], 16)
+	binary.BigEndian.PutUint32(d[codec.CdtaMotionBlurSamples:codec.CdtaMotionBlurSamples+4], 16)
 
 	return d
 }
@@ -357,10 +358,11 @@ func isDatsList(c *rifx.Chunk) bool {
 // NewComposition adds an empty composition to the project's root folder.
 //
 // Required:
-//   name        — non-empty string
-//   width/height — > 0 (uint16; AE max 30000)
-//   frameRate   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
-//   duration    — > 0 (seconds; converted to whole frames via fps internally)
+//
+//	name        — non-empty string
+//	width/height — > 0 (uint16; AE max 30000)
+//	frameRate   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
+//	duration    — > 0 (seconds; converted to whole frames via fps internally)
 //
 // Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16).
 // Override via existing Set* methods after the call.

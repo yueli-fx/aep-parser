@@ -16,6 +16,7 @@ import (
 	"math"
 	"sync"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -232,10 +233,10 @@ func encodeF64sBE(vs ...float64) []byte {
 // table is serializer-only; runtime API uses the Go enum. Strings match
 // AE-saved fixture observations.
 var shapeMatchNames = map[ShapeNodeKind]string{
-	ShapeKindRect:    "ADBE Vector Shape - Rect",
-	ShapeKindEllipse: "ADBE Vector Shape - Ellipse",
-	ShapeKindPath:    "ADBE Vector Shape - Group",
-	ShapeKindFill:    "ADBE Vector Graphic - Fill",
+	ShapeKindRect:         "ADBE Vector Shape - Rect",
+	ShapeKindEllipse:      "ADBE Vector Shape - Ellipse",
+	ShapeKindPath:         "ADBE Vector Shape - Group",
+	ShapeKindFill:         "ADBE Vector Graphic - Fill",
 	ShapeKindStroke:       "ADBE Vector Graphic - Stroke",
 	ShapeKindGroup:        "ADBE Vector Group",
 	ShapeKindGradientFill: "ADBE Vector Graphic - G-Fill",
@@ -307,25 +308,27 @@ func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // lowerShapeVec2 persists a shape Vec2 stream into an embedded body: animated →
 // inject the keyframe container (using the supplied layout); static → overwrite
 // the cdat with the 2 × f64 value.
-func lowerShapeVec2(body *rifx.Chunk, name string, ps *PropertyStream[[2]float64], ctx *lowerCtx, layout valueLayout) error {
-	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
-		return injectAnimatedVec2L(body, name, ps.keyframes, ctx, layout)
+func lowerShapeVec2(body *rifx.Chunk, name string, ps *codec.PropertyStream[[2]float64], ctx *lowerCtx, layout valueLayout) error {
+	if ps.Mode() == codec.StreamModeAnimated && ps.HasKeyframes() {
+		return injectAnimatedVec2L(body, name, ps.Keyframes(), ctx, layout)
 	}
-	overwriteShapeStreamCdat(body, name, encodeF64sBE(ps.static[0], ps.static[1]))
+	sv, _ := ps.StaticValue()
+	overwriteShapeStreamCdat(body, name, encodeF64sBE(sv[0], sv[1]))
 	return nil
 }
 
 // lowerShapeScalar persists a shape 1D stream (e.g. Rect Roundness): animated →
 // inject a 1D non-spatial keyframe container (bpk-48); static → overwrite cdat.
-func lowerShapeScalar(body *rifx.Chunk, name string, ps *PropertyStream[float64], ctx *lowerCtx) error {
-	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
-		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, encode1D, ctx)
+func lowerShapeScalar(body *rifx.Chunk, name string, ps *codec.PropertyStream[float64], ctx *lowerCtx) error {
+	if ps.Mode() == codec.StreamModeAnimated && ps.HasKeyframes() {
+		kfList, err := encodeKeyframes(ps.Keyframes(), valueLayout{dim: 1, headerByte: 0x00, spatial: false}, encode1D, ctx)
 		if err != nil {
 			return err
 		}
 		return injectAnimatedStream(body, name, kfList)
 	}
-	overwriteShapeStreamCdat(body, name, encode1D(ps.static))
+	sv, _ := ps.StaticValue()
+	overwriteShapeStreamCdat(body, name, encode1D(sv))
 	return nil
 }
 
@@ -335,14 +338,14 @@ func lowerShapeScalar(body *rifx.Chunk, name string, ps *PropertyStream[float64]
 // animated LIST(list)(lhd3+ldat) keyframe container (AE keeps tdsb/tdsn/tdb4/
 // tdum/tduM unchanged — only cdat ↔ LIST(list) flips). Non-spatial dim-2
 // layout (header07=0x00) per the kf RE fixture (Rect/Ellipse Size).
-func injectAnimatedVec2(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx) error {
+func injectAnimatedVec2(body *rifx.Chunk, streamName string, kfs []codec.StreamKeyframe[[2]float64], ctx *lowerCtx) error {
 	return injectAnimatedVec2L(body, streamName, kfs, ctx, valueLayout{dim: 2, headerByte: 0x00, spatial: false})
 }
 
 // injectAnimatedVec2L injects an animated Vec2 stream with an explicit layout
 // (Size = non-spatial header07=0x00 bpk 88; shape Position = spatial header07=
 // 0x07 bpk 104 value@0x38).
-func injectAnimatedVec2L(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[2]float64], ctx *lowerCtx, layout valueLayout) error {
+func injectAnimatedVec2L(body *rifx.Chunk, streamName string, kfs []codec.StreamKeyframe[[2]float64], ctx *lowerCtx, layout valueLayout) error {
 	kfList, err := encodeKeyframes(kfs, layout, encode2D, ctx)
 	if err != nil {
 		return err
@@ -354,7 +357,7 @@ func injectAnimatedVec2L(body *rifx.Chunk, streamName string, kfs []StreamKeyfra
 // one. Color keyframes use the spatial-style block (value at 0x38, bpk
 // 0x38+3*dim*8 = 152 for dim=4) with the [A,R,G,B]×255 value encoding — RE'd
 // from the kf fixture (Fill/Stroke Color).
-func injectAnimatedColor(body *rifx.Chunk, streamName string, kfs []StreamKeyframe[[4]float64], ctx *lowerCtx) error {
+func injectAnimatedColor(body *rifx.Chunk, streamName string, kfs []codec.StreamKeyframe[[4]float64], ctx *lowerCtx) error {
 	encColor := func(c [4]float64) []byte { return encodeShapeColorBE(c) }
 	kfList, err := encodeKeyframes(kfs, valueLayout{dim: 4, headerByte: 0x01, spatial: true}, encColor, ctx)
 	if err != nil {
@@ -417,20 +420,22 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if e.size.mode == StreamModeAnimated && len(e.size.keyframes) > 0 {
-		if err := injectAnimatedVec2(body, "ADBE Vector Ellipse Size", e.size.keyframes, ctx); err != nil {
+	if e.size.Mode() == codec.StreamModeAnimated && e.size.HasKeyframes() {
+		if err := injectAnimatedVec2(body, "ADBE Vector Ellipse Size", e.size.Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(e.size.static[0], e.size.static[1]))
+		sv, _ := e.size.StaticValue()
+		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(sv[0], sv[1]))
 	}
-	if e.position.mode == StreamModeAnimated && len(e.position.keyframes) > 0 {
-		if err := injectAnimatedVec2L(body, "ADBE Vector Ellipse Position", e.position.keyframes, ctx,
+	if e.position.Mode() == codec.StreamModeAnimated && e.position.HasKeyframes() {
+		if err := injectAnimatedVec2L(body, "ADBE Vector Ellipse Position", e.position.Keyframes(), ctx,
 			valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
 			return nil, err
 		}
 	} else {
-		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(e.position.static[0], e.position.static[1]))
+		pv, _ := e.position.StaticValue()
+		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(pv[0], pv[1]))
 	}
 	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(e.direction)))
 	return body, nil
@@ -452,15 +457,15 @@ func lowerPathNode(p *PathNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if p.path.mode == StreamModeAnimated && len(p.path.keyframes) >= 2 {
-		if err := spliceAnimatedPath(body, p.path.keyframes, ctx); err != nil {
+	if p.path.Mode() == codec.StreamModeAnimated && len(p.path.Keyframes()) >= 2 {
+		if err := spliceAnimatedPath(body, p.path.Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 		return body, nil
 	}
-	bp := p.path.static
-	if p.path.mode == StreamModeAnimated && len(p.path.keyframes) > 0 {
-		bp = p.path.keyframes[0].Value
+	bp, _ := p.path.StaticValue()
+	if p.path.Mode() == codec.StreamModeAnimated && len(p.path.Keyframes()) > 0 {
+		bp = p.path.Keyframes()[0].Value
 	}
 	if err := splicePathGeometry(body, bp); err != nil {
 		return nil, err
@@ -522,7 +527,7 @@ func spliceShapGeometry(shap *rifx.Chunk, bp BezierPath) error {
 //     spliced with that frame's geometry (encodeBezier, bbox-normalized).
 //
 // See incident-reports/path-keyframe-write-re.md.
-func spliceAnimatedPath(body *rifx.Chunk, kfs []StreamKeyframe[BezierPath], ctx *lowerCtx) error {
+func spliceAnimatedPath(body *rifx.Chunk, kfs []codec.StreamKeyframe[BezierPath], ctx *lowerCtx) error {
 	oms := findListByForm(body, rifx.IDOmS)
 	if oms == nil {
 		return fmt.Errorf("spliceAnimatedPath: LIST(om-s) not found in embed body")
@@ -598,7 +603,7 @@ func spliceAnimatedPath(body *rifx.Chunk, kfs []StreamKeyframe[BezierPath], ctx 
 // (we leave it zero for deterministic output). lhd3 mirrors encodeKeyframes'
 // header constants with count@0x08 = #kf and bpk@0x10 = 64. (An earlier RE note
 // placing the 1.0 at @0x30 and 0x02 at @0x07-of-first-block was a misread.)
-func encodePathTimeTable(kfs []StreamKeyframe[BezierPath], ctx *lowerCtx) *rifx.Chunk {
+func encodePathTimeTable(kfs []codec.StreamKeyframe[BezierPath], ctx *lowerCtx) *rifx.Chunk {
 	const bpk = 64
 	n := len(kfs)
 
@@ -681,12 +686,13 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if f.color.mode == StreamModeAnimated && len(f.color.keyframes) > 0 {
-		if err := injectAnimatedColor(body, "ADBE Vector Fill Color", f.color.keyframes, ctx); err != nil {
+	if f.color.Mode() == codec.StreamModeAnimated && f.color.HasKeyframes() {
+		if err := injectAnimatedColor(body, "ADBE Vector Fill Color", f.color.Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(f.color.static))
+		cv, _ := f.color.StaticValue()
+		overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(cv))
 	}
 	// Opacity (raw %) — 1D non-spatial (bpk-48, value@0x08). The richer fill
 	// body template carries an Opacity cdat slot (default 100 was elided), so
@@ -714,7 +720,7 @@ func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error
 		return nil, err
 	}
 	if n.gradient != nil {
-		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", EncodeGradientXML(n.gradient))
+		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", codec.EncodeGradientXML(n.gradient))
 	}
 	return body, nil
 }
@@ -772,12 +778,13 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if s.color.mode == StreamModeAnimated && len(s.color.keyframes) > 0 {
-		if err := injectAnimatedColor(body, "ADBE Vector Stroke Color", s.color.keyframes, ctx); err != nil {
+	if s.color.Mode() == codec.StreamModeAnimated && s.color.HasKeyframes() {
+		if err := injectAnimatedColor(body, "ADBE Vector Stroke Color", s.color.Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(s.color.static))
+		cv, _ := s.color.StaticValue()
+		overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(cv))
 	}
 
 	// Opacity (raw %) + Width (raw px) — 1D non-spatial scalars (bpk-48,

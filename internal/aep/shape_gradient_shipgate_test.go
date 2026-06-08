@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 )
 
 func runV2_2GradientFillShipGate(t *testing.T, target aep.AETarget, aeExe string) {
@@ -47,7 +48,7 @@ func runV2_2GradientFillShipGate(t *testing.T, target aep.AETarget, aeExe string
 	rect, _ := l.RootGroup().AddRect()
 	_ = rect.SetSize([2]float64{200, 100})
 	gf, _ := l.RootGroup().AddGradientFill()
-	if err := gf.SetColorStops([]aep.GradientColorStop{
+	if err := gf.SetColorStops([]codec.GradientColorStop{
 		{Offset: 0, Midpoint: 0.5, Color: [3]float64{1, 0, 0}},
 		{Offset: 0.5, Midpoint: 0.5, Color: [3]float64{0, 1, 0}},
 		{Offset: 1, Midpoint: 0.5, Color: [3]float64{0, 0, 1}},
@@ -90,7 +91,7 @@ func runV2_2GradientFillShipGate(t *testing.T, target aep.AETarget, aeExe string
 	if err != nil {
 		t.Fatalf("open resaved: %v", err)
 	}
-	var grad *aep.Gradient
+	var grad *codec.Gradient
 	for _, c := range proj.Compositions {
 		for _, ly := range c.Layers {
 			for _, pr := range ly.Properties {

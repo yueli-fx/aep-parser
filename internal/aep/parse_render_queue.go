@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -67,10 +68,10 @@ func outputModuleSettingsBlocks(itemList *rifx.Chunk) [][]byte {
 	if ldat == nil {
 		return nil
 	}
-	n := len(ldat.Data) / outputModuleSettingsItemSize
+	n := len(ldat.Data) / codec.OutputModuleSettingsItemSize
 	blocks := make([][]byte, 0, n)
 	for i := 0; i < n; i++ {
-		blocks = append(blocks, ldat.Data[i*outputModuleSettingsItemSize:(i+1)*outputModuleSettingsItemSize])
+		blocks = append(blocks, ldat.Data[i*codec.OutputModuleSettingsItemSize:(i+1)*codec.OutputModuleSettingsItemSize])
 	}
 	return blocks
 }
@@ -86,10 +87,10 @@ func renderSettingsBlocks(lrdr *rifx.Chunk) [][]byte {
 	if ldat == nil {
 		return nil
 	}
-	n := len(ldat.Data) / renderSettingsItemSize
+	n := len(ldat.Data) / codec.RenderSettingsItemSize
 	blocks := make([][]byte, 0, n)
 	for i := 0; i < n; i++ {
-		blocks = append(blocks, ldat.Data[i*renderSettingsItemSize:(i+1)*renderSettingsItemSize])
+		blocks = append(blocks, ldat.Data[i*codec.RenderSettingsItemSize:(i+1)*codec.RenderSettingsItemSize])
 	}
 	return blocks
 }
@@ -98,29 +99,29 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, itemList, lo
 	item := &RenderQueueItem{Comment: comment}
 	if idx < len(blocks) {
 		item.settingsBlock = blocks[idx]
-		if rs, ok := decodeRenderSettings(blocks[idx]); ok {
-			item.Status = rs.status
-			item.Name = rs.templateName
-			item.Comp = proj.CompositionByID(rs.compID)
+		if rs, ok := codec.DecodeRenderSettings(blocks[idx]); ok {
+			item.Status = rs.Status
+			item.Name = rs.TemplateName
+			item.Comp = proj.CompositionByID(rs.CompID)
 			item.TimeSpanStart, item.TimeSpanDuration = resolveTimeSpan(rs, item.Comp)
-			item.LogType = rs.logType
-			item.QueueItemNotify = rs.queueItemNotify
-			item.ElapsedSeconds = rs.elapsedSeconds
+			item.LogType = rs.LogType
+			item.QueueItemNotify = rs.QueueItemNotify
+			item.ElapsedSeconds = rs.ElapsedSeconds
 			item.RenderSettings = RenderSettings{
-				Quality:           currentSettingsInt(rs.quality),
-				ColorDepth:        currentSettingsInt(rs.colorDepth),
-				Effects:           currentSettingsInt(rs.effects),
-				FieldRender:       int(rs.fieldRender),
-				Pulldown:          int(rs.pulldown),
-				FrameBlending:     currentSettingsInt(rs.frameBlending),
-				MotionBlur:        currentSettingsInt(rs.motionBlur),
-				ProxyUse:          currentSettingsInt(rs.proxyUse),
-				SoloSwitches:      currentSettingsInt(rs.soloSwitches),
-				GuideLayers:       currentSettingsInt(rs.guideLayers),
-				DiskCache:         currentSettingsInt(rs.diskCache),
-				FrameRate:         int(rs.useThisFrameRate),
-				Resolution:        [2]int{int(rs.resolutionX), int(rs.resolutionY)},
-				SkipExistingFiles: rs.skipExistingFiles,
+				Quality:           codec.CurrentSettingsInt(rs.Quality),
+				ColorDepth:        codec.CurrentSettingsInt(rs.ColorDepth),
+				Effects:           codec.CurrentSettingsInt(rs.Effects),
+				FieldRender:       int(rs.FieldRender),
+				Pulldown:          int(rs.Pulldown),
+				FrameBlending:     codec.CurrentSettingsInt(rs.FrameBlending),
+				MotionBlur:        codec.CurrentSettingsInt(rs.MotionBlur),
+				ProxyUse:          codec.CurrentSettingsInt(rs.ProxyUse),
+				SoloSwitches:      codec.CurrentSettingsInt(rs.SoloSwitches),
+				GuideLayers:       codec.CurrentSettingsInt(rs.GuideLayers),
+				DiskCache:         codec.CurrentSettingsInt(rs.DiskCache),
+				FrameRate:         int(rs.UseThisFrameRate),
+				Resolution:        [2]int{int(rs.ResolutionX), int(rs.ResolutionY)},
+				SkipExistingFiles: rs.SkipExistingFiles,
 			}
 		}
 	}
@@ -130,20 +131,20 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, itemList, lo
 
 // resolveTimeSpan turns the time_span_source + dividends into (start, duration)
 // seconds, mirroring py-aep RenderQueueItem._resolved_time_span.
-func resolveTimeSpan(rs renderSettings, comp *Composition) (start, dur float64) {
-	switch rs.timeSpanSource {
-	case timeSpanLengthOfComp:
+func resolveTimeSpan(rs codec.RenderSettingsBlock, comp *Composition) (start, dur float64) {
+	switch rs.TimeSpanSource {
+	case codec.TimeSpanLengthOfComp:
 		if comp != nil {
 			return 0, comp.Duration
 		}
 		return 0, 0
-	case timeSpanWorkAreaOnly:
+	case codec.TimeSpanWorkAreaOnly:
 		if comp != nil {
 			return comp.WorkAreaStart, comp.WorkAreaEnd - comp.WorkAreaStart
 		}
 		return 0, 0
 	default: // CUSTOM (2 or 0xFFFF)
-		return ratio(rs.tsStartDividend, rs.tsStartDivisor), ratio(rs.tsDurationDivdend, rs.tsDurationDivisor)
+		return ratio(rs.TsStartDividend, rs.TsStartDivisor), ratio(rs.TsDurationDivdend, rs.TsDurationDivisor)
 	}
 }
 
@@ -191,7 +192,7 @@ func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
 			continue
 		}
 		if ch.ID == rifx.IDRopt {
-			om.FormatOptions = decodeRoptFormatOptions(ch.Data)
+			om.FormatOptions = codec.DecodeRoptFormatOptions(ch.Data)
 			continue
 		}
 		if ch.IsList() && ch.FormType == rifx.IDAls2 {
@@ -211,44 +212,44 @@ func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
 	if len(postAls2) > 1 {
 		om.FileTemplate = postAls2[1]
 	}
-	if s, ok := decodeOMSettings(omBlock); ok {
-		om.Settings.Channels = s.channels
-		om.Settings.ResizeQuality = s.resizeQuality
-		om.Settings.Resize = s.resize
-		om.Settings.LockAspectRatio = s.lockAspectRatio
-		om.Settings.Crop = s.crop
-		om.Settings.CropTop = s.cropTop
-		om.Settings.CropLeft = s.cropLeft
-		om.Settings.CropBottom = s.cropBottom
-		om.Settings.CropRight = s.cropRight
-		om.Settings.OutputAudio = s.outputAudio
-		om.Settings.IncludeProjectLink = s.includeProjectLink
-		om.Settings.PostRenderAction = s.postRenderAction
-		om.Settings.ConvertToLinear = s.convertToLinear
-		om.Settings.UseCompFrameNumber = s.useCompFrameNumber
-		om.Settings.UseRegionOfInterest = s.useRegionOfInterest
-		om.Settings.IncludeSourceXMP = s.includeSourceXMP
-		om.Settings.PreserveRGB = s.preserveRGB
+	if s, ok := codec.DecodeOMSettings(omBlock); ok {
+		om.Settings.Channels = s.Channels
+		om.Settings.ResizeQuality = s.ResizeQuality
+		om.Settings.Resize = s.Resize
+		om.Settings.LockAspectRatio = s.LockAspectRatio
+		om.Settings.Crop = s.Crop
+		om.Settings.CropTop = s.CropTop
+		om.Settings.CropLeft = s.CropLeft
+		om.Settings.CropBottom = s.CropBottom
+		om.Settings.CropRight = s.CropRight
+		om.Settings.OutputAudio = s.OutputAudio
+		om.Settings.IncludeProjectLink = s.IncludeProjectLink
+		om.Settings.PostRenderAction = s.PostRenderAction
+		om.Settings.ConvertToLinear = s.ConvertToLinear
+		om.Settings.UseCompFrameNumber = s.UseCompFrameNumber
+		om.Settings.UseRegionOfInterest = s.UseRegionOfInterest
+		om.Settings.IncludeSourceXMP = s.IncludeSourceXMP
+		om.Settings.PreserveRGB = s.PreserveRGB
 	}
 	return om
 }
 
 func applyRoou(om *OutputModule, data []byte) {
-	r, ok := decodeRoou(data)
+	r, ok := codec.DecodeRoou(data)
 	if !ok {
 		return
 	}
-	om.Settings.VideoCodec = r.videoCodec
-	om.Settings.FormatID = r.formatID
-	om.Settings.StartingNumber = r.startingNumber
-	om.Settings.Width = r.width
-	om.Settings.Height = r.height
-	om.Settings.Depth = r.depth
-	om.Settings.VideoOutput = r.width > 0 || r.height > 0
-	om.Settings.AudioSampleRate = r.audioSampleRate
-	om.Settings.AudioBitDepth = r.audioBitDepth
-	om.Settings.AudioChannels = r.audioChannels
-	om.Settings.AudioEnabled = r.audioEnabled
+	om.Settings.VideoCodec = r.VideoCodec
+	om.Settings.FormatID = r.FormatID
+	om.Settings.StartingNumber = r.StartingNumber
+	om.Settings.Width = r.Width
+	om.Settings.Height = r.Height
+	om.Settings.Depth = r.Depth
+	om.Settings.VideoOutput = r.Width > 0 || r.Height > 0
+	om.Settings.AudioSampleRate = r.AudioSampleRate
+	om.Settings.AudioBitDepth = r.AudioBitDepth
+	om.Settings.AudioChannels = r.AudioChannels
+	om.Settings.AudioEnabled = r.AudioEnabled
 }
 
 // decodeRComComment extracts the comment string from an RCom leaf. RCom is a

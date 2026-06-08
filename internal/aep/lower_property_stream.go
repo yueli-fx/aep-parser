@@ -1,6 +1,6 @@
 // internal/aep/lower_property_stream.go
 //
-// 5 typed lowering primitives that turn PropertyStream[T] into a LIST(tdgp)
+// 5 typed lowering primitives that turn codec.PropertyStream[T] into a LIST(tdgp)
 // chunk subtree (tdmn + LIST(tdbs)(tdsb + tdsn + tdb4 + cdat OR
 // LIST(list)(lhd3 + ldat))).
 //
@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -46,31 +47,35 @@ func NewLowerCtxForTest() *lowerCtx {
 
 // --- Public typed lowering API -------------------------------------------
 
-// LowerFloat64Stream emits LIST(tdgp) for a 1D PropertyStream[float64].
-func LowerFloat64Stream(ps *PropertyStream[float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
-	return lowerStream[float64](ps.mode, encode1D, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, matchName, displayName, ps.static, ps.keyframes, ctx)
+// LowerFloat64Stream emits LIST(tdgp) for a 1D codec.PropertyStream[float64].
+func LowerFloat64Stream(ps *codec.PropertyStream[float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+	sv, _ := ps.StaticValue()
+	return lowerStream[float64](ps.Mode(), encode1D, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerVec2Stream emits LIST(tdgp) for a 2D PropertyStream[[2]float64].
+// LowerVec2Stream emits LIST(tdgp) for a 2D codec.PropertyStream[[2]float64].
 // Hot-path use is Layer Position (spatial 2D, header07=0x07).
-func LowerVec2Stream(ps *PropertyStream[[2]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
-	return lowerStream[[2]float64](ps.mode, encode2D, valueLayout{dim: 2, headerByte: 0x07, spatial: true}, matchName, displayName, ps.static, ps.keyframes, ctx)
+func LowerVec2Stream(ps *codec.PropertyStream[[2]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+	sv, _ := ps.StaticValue()
+	return lowerStream[[2]float64](ps.Mode(), encode2D, valueLayout{dim: 2, headerByte: 0x07, spatial: true}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerVec3Stream emits LIST(tdgp) for a 3D PropertyStream[[3]float64].
-func LowerVec3Stream(ps *PropertyStream[[3]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
-	return lowerStream[[3]float64](ps.mode, encode3D, valueLayout{dim: 3, headerByte: 0x07, spatial: true}, matchName, displayName, ps.static, ps.keyframes, ctx)
+// LowerVec3Stream emits LIST(tdgp) for a 3D codec.PropertyStream[[3]float64].
+func LowerVec3Stream(ps *codec.PropertyStream[[3]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+	sv, _ := ps.StaticValue()
+	return lowerStream[[3]float64](ps.Mode(), encode3D, valueLayout{dim: 3, headerByte: 0x07, spatial: true}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerColorStream emits LIST(tdgp) for a 4D RGBA PropertyStream[[4]float64].
-func LowerColorStream(ps *PropertyStream[[4]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
-	return lowerStream[[4]float64](ps.mode, encode4D, valueLayout{dim: 4, headerByte: 0x01, spatial: false}, matchName, displayName, ps.static, ps.keyframes, ctx)
+// LowerColorStream emits LIST(tdgp) for a 4D RGBA codec.PropertyStream[[4]float64].
+func LowerColorStream(ps *codec.PropertyStream[[4]float64], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+	sv, _ := ps.StaticValue()
+	return lowerStream[[4]float64](ps.Mode(), encode4D, valueLayout{dim: 4, headerByte: 0x01, spatial: false}, matchName, displayName, sv, ps.Keyframes(), ctx)
 }
 
-// LowerPathStream emits LIST(tdgp) for a BezierPath PropertyStream. Unlike
+// LowerPathStream emits LIST(tdgp) for a BezierPath codec.PropertyStream. Unlike
 // the scalar/vector streams, AE encodes BezierPath via LIST(om-s) holding a
 // shap/shph/lhd3/ldat (f32 BE) substructure — NOT cdat float64.
-func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
+func LowerPathStream(ps *codec.PropertyStream[BezierPath], matchName, displayName string, ctx *lowerCtx) (*rifx.Chunk, error) {
 	tdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	tdgp.Children = append(tdgp.Children, makeTdmn(matchName))
 
@@ -91,21 +96,23 @@ func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName stri
 	omks := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOmks}
 	shap := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDShap}
 
-	switch ps.mode {
-	case StreamModeStatic:
-		shph, lhd3, ldat := encodeBezier(ps.static)
+	switch ps.Mode() {
+	case codec.StreamModeStatic:
+		sv, _ := ps.StaticValue()
+		shph, lhd3, ldat := encodeBezier(sv)
 		shap.Children = append(shap.Children, shph)
 		kfList := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
 		kfList.Children = append(kfList.Children, lhd3, ldat)
 		shap.Children = append(shap.Children, kfList)
 		shap.Children = append(shap.Children, &rifx.Chunk{ID: rifx.IDOmtn})
-	case StreamModeAnimated:
+	case codec.StreamModeAnimated:
 		// V2.2 emits the first keyframe's path as the static encoding; full
 		// path-keyframe animation is a V2.3+ topic. The chunk shape stays
 		// valid because AE accepts a single-shape encoding.
 		var p BezierPath
-		if len(ps.keyframes) > 0 {
-			p = ps.keyframes[0].Value
+		kfs := ps.Keyframes()
+		if len(kfs) > 0 {
+			p = kfs[0].Value
 		}
 		shph, lhd3, ldat := encodeBezier(p)
 		shap.Children = append(shap.Children, shph)
@@ -170,12 +177,12 @@ func encode4D(v [4]float64) []byte {
 // lowerStream is the generic core for scalar/vector/color streams. It does
 // NOT handle BezierPath — see LowerPathStream for the om-s/shap path.
 func lowerStream[T any](
-	mode StreamMode,
+	mode codec.StreamMode,
 	enc encodeFunc[T],
 	layout valueLayout,
 	matchName, displayName string,
 	staticVal T,
-	keyframes []StreamKeyframe[T],
+	keyframes []codec.StreamKeyframe[T],
 	ctx *lowerCtx,
 ) (*rifx.Chunk, error) {
 	tdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
@@ -189,16 +196,16 @@ func lowerStream[T any](
 	)
 
 	switch mode {
-	case StreamModeStatic:
+	case codec.StreamModeStatic:
 		tdbs.Children = append(tdbs.Children, makeCdat(enc(staticVal), layout))
-	case StreamModeAnimated:
+	case codec.StreamModeAnimated:
 		kfList, err := encodeKeyframes[T](keyframes, layout, enc, ctx)
 		if err != nil {
 			return nil, err
 		}
 		tdbs.Children = append(tdbs.Children, kfList)
 	default:
-		return nil, fmt.Errorf("lowerStream: unknown StreamMode %v", mode)
+		return nil, fmt.Errorf("lowerStream: unknown codec.StreamMode %v", mode)
 	}
 
 	tdgp.Children = append(tdgp.Children, tdbs)
@@ -332,9 +339,9 @@ func canonicalCdatSize(dim int) int {
 //	non-spatial:   bpk = 0x08 + 5*dim*8 (48 for dim=1, 88 for dim=2)
 //
 // Time field within each block = seconds * ctx.tickRate.
-func encodeKeyframes[T any](kfs []StreamKeyframe[T], layout valueLayout, enc encodeFunc[T], ctx *lowerCtx) (*rifx.Chunk, error) {
+func encodeKeyframes[T any](kfs []codec.StreamKeyframe[T], layout valueLayout, enc encodeFunc[T], ctx *lowerCtx) (*rifx.Chunk, error) {
 	if len(kfs) == 0 {
-		return nil, fmt.Errorf("encodeKeyframes: empty keyframe slice (caller should pick StreamModeStatic)")
+		return nil, fmt.Errorf("encodeKeyframes: empty keyframe slice (caller should pick codec.StreamModeStatic)")
 	}
 	if ctx == nil || ctx.tickRate <= 0 {
 		return nil, fmt.Errorf("encodeKeyframes: lowerCtx.tickRate not set")
@@ -384,8 +391,8 @@ func bytesPerKeyframe(layout valueLayout) int {
 // writeKeyframeBlock fills a single bpk-byte block per parse_keyframe.go
 // layout (kfLayout / decodeEasing). For V2.2 hot path we emit linear-interp
 // keyframes with the InEase/OutEase fields carried verbatim from the
-// StreamKeyframe — zero ease is the default and matches AE-linear.
-func writeKeyframeBlock[T any](blk []byte, kf StreamKeyframe[T], layout valueLayout, enc encodeFunc[T], ctx *lowerCtx) {
+// codec.StreamKeyframe — zero ease is the default and matches AE-linear.
+func writeKeyframeBlock[T any](blk []byte, kf codec.StreamKeyframe[T], layout valueLayout, enc encodeFunc[T], ctx *lowerCtx) {
 	// Time @0x00..0x03 = round(seconds * tickRate).
 	binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(kf.Time*ctx.tickRate)))
 	// In/Out interp bytes (1 = linear by default; AddKeyframeLinear path).

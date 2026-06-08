@@ -1,5 +1,7 @@
 package aep
 
+import "github.com/example/aep-parser/internal/codec"
+
 // Render queue runtime model (P3 §3A slice-1, read-only). Mirrors py-aep
 // RenderQueue / RenderQueueItem / OutputModule, exposing only the fields that
 // cross-validate byte-for-byte against py-aep golden JSON. Write paths, the
@@ -54,7 +56,7 @@ type RenderQueueItem struct {
 	// not yet rendered.
 	ElapsedSeconds uint32
 
-	// RenderSettings holds the per-item render settings (the ExtendScript
+	// codec.RenderSettingsBlock holds the per-item render settings (the ExtendScript
 	// get_settings() dict). Values follow py-aep NUMBER semantics: -1 means
 	// "current settings" (binary 0xFFFF).
 	RenderSettings RenderSettings
@@ -79,7 +81,7 @@ type RenderQueueItem struct {
 	back *renderQueueItemBackrefs
 }
 
-// RenderSettings is the per-item render settings (ExtendScript
+// codec.RenderSettingsBlock is the per-item render settings (ExtendScript
 // RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics:
 // -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
 // no current-settings sentinel.
@@ -141,45 +143,9 @@ type OutputModule struct {
 }
 
 // FormatOptions is a typed view of the Ropt chunk (format-specific render
-// options). Kind names the active format; only that format's fields are
-// populated. Read-only (P3 §3A slice-4). HDR10 metadata + XML format options
-// (AVI/H264) are deferred.
-type FormatOptions struct {
-	Kind string // cineon / jpeg / openexr / png / targa / tiff
-
-	// cineon (sDPX)
-	TenBitBlackPoint      int
-	TenBitWhitePoint      int
-	ConvertedBlackPoint   float64
-	ConvertedWhitePoint   float64
-	CurrentGamma          float64
-	HighlightExpansion    int
-	LogarithmicConversion bool
-	CineonFileFormat      int
-
-	// jpeg
-	Quality int
-
-	// openexr (oEXR)
-	ThirtyTwoBitFloat bool
-	LuminanceChroma   bool
-
-	// targa (TPIC)
-	BitsPerPixel   int
-	RLECompression bool
-
-	// tiff (TIF )
-	LZWCompression bool
-	IBMPCByteOrder bool
-
-	// png (png!)
-	Width  int
-	Height int
-
-	// shared: BitDepth (cineon/png), Compression (openexr/png)
-	BitDepth    int
-	Compression int
-}
+// options). Defined in internal/codec; aliased here so callers importing aep
+// continue to see aep.FormatOptions without qualification.
+type FormatOptions = codec.FormatOptions
 
 // OutputModuleSettings is the per-output-module settings (ExtendScript
 // OutputModule.getSettings). Read-only (P3 §3A slice-3). Derived/mapped fields

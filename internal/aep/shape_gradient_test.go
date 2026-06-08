@@ -13,25 +13,26 @@ import (
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 )
 
 func TestGradientXML_EncodeDecodeRoundtrip(t *testing.T) {
-	g := &aep.Gradient{
+	g := &codec.Gradient{
 		Version: "4",
-		ColorStops: []aep.GradientColorStop{
+		ColorStops: []codec.GradientColorStop{
 			{Offset: 0, Midpoint: 0.5, Color: [3]float64{1, 0, 0}},
 			{Offset: 0.5, Midpoint: 0.5, Color: [3]float64{0, 1, 0}},
 			{Offset: 1, Midpoint: 0.5, Color: [3]float64{0, 0, 1}},
 		},
-		AlphaStops: []aep.GradientAlphaStop{
+		AlphaStops: []codec.GradientAlphaStop{
 			{Offset: 0, Midpoint: 0.5, Alpha: 1},
 			{Offset: 1, Midpoint: 0.5, Alpha: 0.5},
 		},
 	}
-	xml := aep.EncodeGradientXML(g)
-	back := aep.ParseGradientXML(xml)
+	xml := codec.EncodeGradientXML(g)
+	back := codec.ParseGradientXML(xml)
 	if back == nil {
-		t.Fatalf("ParseGradientXML returned nil for:\n%s", xml)
+		t.Fatalf("codec.ParseGradientXML returned nil for:\n%s", xml)
 	}
 	if len(back.ColorStops) != 3 {
 		t.Fatalf("color stops = %d, want 3", len(back.ColorStops))
@@ -63,15 +64,15 @@ func TestGradientFill_Defaults(t *testing.T) {
 		t.Error("default gradient must be black→white")
 	}
 	// Validation.
-	if err := n.SetColorStops([]aep.GradientColorStop{{Offset: 0}}); err == nil {
+	if err := n.SetColorStops([]codec.GradientColorStop{{Offset: 0}}); err == nil {
 		t.Error("SetColorStops with 1 stop must reject (need ≥2)")
 	}
-	if err := n.SetColorStops([]aep.GradientColorStop{
+	if err := n.SetColorStops([]codec.GradientColorStop{
 		{Offset: 0, Color: [3]float64{2, 0, 0}}, {Offset: 1},
 	}); err == nil {
 		t.Error("SetColorStops with out-of-range color must reject")
 	}
-	if err := n.SetAlphaStops([]aep.GradientAlphaStop{
+	if err := n.SetAlphaStops([]codec.GradientAlphaStop{
 		{Offset: 0, Alpha: 1}, {Offset: 1, Alpha: 1},
 	}); err != nil {
 		t.Errorf("valid SetAlphaStops rejected: %v", err)
@@ -93,7 +94,7 @@ func TestV2_2_GradientFill_Roundtrip(t *testing.T) {
 	gf, _ := l.RootGroup().AddGradientFill()
 	// Distinct 3-color stops so the roundtrip proves the XML overwrite, not
 	// template passthrough (the template carries py-aep's 2 stops).
-	if err := gf.SetColorStops([]aep.GradientColorStop{
+	if err := gf.SetColorStops([]codec.GradientColorStop{
 		{Offset: 0, Midpoint: 0.5, Color: [3]float64{1, 0, 0}},
 		{Offset: 0.5, Midpoint: 0.5, Color: [3]float64{0, 1, 0}},
 		{Offset: 1, Midpoint: 0.5, Color: [3]float64{0, 0, 1}},

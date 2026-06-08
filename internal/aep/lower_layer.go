@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -282,7 +283,7 @@ func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 // well-known offsets via ldta_layout.go constants; everything else is zero
 // (AE-friendly default).
 //
-// Layer subtype byte (@0x80) = 4 (Shape) per ldta_layout.go ldtaLayerSubtype
+// Layer subtype byte (@0x80) = 4 (Shape) per ldta_layout.go codec.LdtaLayerSubtype
 // comment. Quality (@0x04) = 2 (Best) — AE's typical default. Visible bit
 // is at byte 0x27 bit0 (per parse_layer.go decoder); default Visible = true
 // → 0x01.
@@ -293,7 +294,7 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	// All written fields fit in the first 0x88 bytes, so the size choice only
 	// varies the trailing zero-pad. Fall back to 164 if a caller left LdtaSize
 	// unset.
-	size := ldtaSize2025
+	size := codec.LdtaSize2025
 	if ctx != nil && ctx.capabilities.LdtaSize > 0 {
 		size = ctx.capabilities.LdtaSize
 	}
@@ -313,32 +314,32 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	outTicks := uint32(duration * float64(tickRate))
 
 	// @0x00 — layer-local ID.
-	binary.BigEndian.PutUint32(d[ldtaLayerID:ldtaLayerID+4], s.ID)
+	binary.BigEndian.PutUint32(d[codec.LdtaLayerID:codec.LdtaLayerID+4], s.ID)
 
 	// @0x04 — Quality. 2 = Best (AE default for new layers).
-	binary.BigEndian.PutUint16(d[ldtaQuality:ldtaQuality+2], 2)
+	binary.BigEndian.PutUint16(d[codec.LdtaQuality:codec.LdtaQuality+2], 2)
 
 	// @0x08 — StretchDividend = 1 (per tolerance.aep).
 	// @0x6C — StretchDivisor = 1 (1/1 = 1× speed).
-	binary.BigEndian.PutUint32(d[ldtaStretchDivd:ldtaStretchDivd+4], 1)
-	binary.BigEndian.PutUint32(d[ldtaStretchDivs:ldtaStretchDivs+4], 1)
+	binary.BigEndian.PutUint32(d[codec.LdtaStretchDivd:codec.LdtaStretchDivd+4], 1)
+	binary.BigEndian.PutUint32(d[codec.LdtaStretchDivs:codec.LdtaStretchDivs+4], 1)
 
 	// Time fields are encoded as (ticks_dividend, ticks/sec_divisor). Per
 	// tolerance.aep: divisor = TickRate (30720 for 30fps), NOT 1. A 0/1
 	// encoding makes AE compute zero-duration layers and silently drop them
 	// from comp.layers.
-	binary.BigEndian.PutUint32(d[ldtaStartTimeDivd:ldtaStartTimeDivd+4], 0)
-	binary.BigEndian.PutUint32(d[ldtaStartTimeDivs:ldtaStartTimeDivs+4], tickRate)
-	binary.BigEndian.PutUint32(d[ldtaInPointDivd:ldtaInPointDivd+4], 0)
-	binary.BigEndian.PutUint32(d[ldtaInPointDivs:ldtaInPointDivs+4], tickRate)
-	binary.BigEndian.PutUint32(d[ldtaOutPointDivd:ldtaOutPointDivd+4], outTicks)
-	binary.BigEndian.PutUint32(d[ldtaOutPointDivs:ldtaOutPointDivs+4], tickRate)
+	binary.BigEndian.PutUint32(d[codec.LdtaStartTimeDivd:codec.LdtaStartTimeDivd+4], 0)
+	binary.BigEndian.PutUint32(d[codec.LdtaStartTimeDivs:codec.LdtaStartTimeDivs+4], tickRate)
+	binary.BigEndian.PutUint32(d[codec.LdtaInPointDivd:codec.LdtaInPointDivd+4], 0)
+	binary.BigEndian.PutUint32(d[codec.LdtaInPointDivs:codec.LdtaInPointDivs+4], tickRate)
+	binary.BigEndian.PutUint32(d[codec.LdtaOutPointDivd:codec.LdtaOutPointDivd+4], outTicks)
+	binary.BigEndian.PutUint32(d[codec.LdtaOutPointDivs:codec.LdtaOutPointDivs+4], tickRate)
 
 	// Attr bytes — tolerance.aep ShapeLayer @0x27 = 0x87 (visible + audio +
 	// effects + collapse-transform). Per write_layer.go flag map:
 	//   bit0 0x01 visible / bit1 0x02 audio-enabled / bit2 0x04 effects-enabled
 	//   bit3 0x08 motion-blur / bit7 0x80 collapse-transform
-	d[ldtaAttrByte2] = 0x87
+	d[codec.LdtaAttrByte2] = 0x87
 
 	// AttrByte0 @0x25: tolerance has bit0 set (0x01). Not in the documented
 	// bit map (parse_layer.go doc covers bit1/2/4/6). Empirically required —
@@ -361,13 +362,13 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	if len(nameBytes) < maxName {
 		maxName = len(nameBytes)
 	}
-	copy(d[ldtaLegacyName:ldtaLegacyName+maxName], nameBytes[:maxName])
+	copy(d[codec.LdtaLegacyName:codec.LdtaLegacyName+maxName], nameBytes[:maxName])
 
 	// @0x80 — LayerSubtype = Shape (4).
-	binary.BigEndian.PutUint32(d[ldtaLayerSubtype:ldtaLayerSubtype+4], 4)
+	binary.BigEndian.PutUint32(d[codec.LdtaLayerSubtype:codec.LdtaLayerSubtype+4], 4)
 
 	// @0x84 — ParentID. 0 = no parent.
-	binary.BigEndian.PutUint32(d[ldtaParentID:ldtaParentID+4], s.ParentID)
+	binary.BigEndian.PutUint32(d[codec.LdtaParentID:codec.LdtaParentID+4], s.ParentID)
 
 	return d
 }
@@ -426,48 +427,51 @@ func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) 
 // lowerTransformVec2Spatial persists a 2D spatial transform channel (Anchor /
 // Position) into the embedded template: 3D spatial motion-path on disk (bpk-128,
 // value@0x38 X/Y/Z with Z=0). The runtime API is 2D ([2]float64); Z is pinned 0.
-func lowerTransformVec2Spatial(body *rifx.Chunk, name string, ps *PropertyStream[[2]float64], ctx *lowerCtx) error {
+func lowerTransformVec2Spatial(body *rifx.Chunk, name string, ps *codec.PropertyStream[[2]float64], ctx *lowerCtx) error {
 	encXYZ := func(v [2]float64) []byte { return encode3D([3]float64{v[0], v[1], 0}) }
-	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
-		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 3, headerByte: 0x07, spatial: true, motionPath: true}, encXYZ, ctx)
+	if ps.Mode() == codec.StreamModeAnimated && ps.HasKeyframes() {
+		kfList, err := encodeKeyframes(ps.Keyframes(), valueLayout{dim: 3, headerByte: 0x07, spatial: true, motionPath: true}, encXYZ, ctx)
 		if err != nil {
 			return err
 		}
 		return injectAnimatedStream(body, name, kfList)
 	}
-	overwriteShapeStreamCdat(body, name, encXYZ(ps.static))
+	sv, _ := ps.StaticValue()
+	overwriteShapeStreamCdat(body, name, encXYZ(sv))
 	return nil
 }
 
 // lowerTransformScale persists Scale: 3D non-spatial on disk (bpk-128,
 // value@0x08), values are percent÷100 with the Z (depth) component pinned to
 // 1.0 (= 100%). Runtime API is 2D percent ([2]float64).
-func lowerTransformScale(body *rifx.Chunk, ps *PropertyStream[[2]float64], ctx *lowerCtx) error {
+func lowerTransformScale(body *rifx.Chunk, ps *codec.PropertyStream[[2]float64], ctx *lowerCtx) error {
 	encScale := func(v [2]float64) []byte { return encode3D([3]float64{v[0] / 100, v[1] / 100, 1}) }
-	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
-		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 3, headerByte: 0x00, spatial: false}, encScale, ctx)
+	if ps.Mode() == codec.StreamModeAnimated && ps.HasKeyframes() {
+		kfList, err := encodeKeyframes(ps.Keyframes(), valueLayout{dim: 3, headerByte: 0x00, spatial: false}, encScale, ctx)
 		if err != nil {
 			return err
 		}
 		return injectAnimatedStream(body, MatchNameScale, kfList)
 	}
-	overwriteShapeStreamCdat(body, MatchNameScale, encScale(ps.static))
+	sv, _ := ps.StaticValue()
+	overwriteShapeStreamCdat(body, MatchNameScale, encScale(sv))
 	return nil
 }
 
 // lowerTransformScalar persists a 1D non-spatial transform channel (Rotation /
 // Opacity): bpk-48, value@0x08. `scale` converts the runtime value to its
 // on-disk form (Rotation 1.0 = degrees as-is; Opacity 0.01 = percent÷100).
-func lowerTransformScalar(body *rifx.Chunk, name string, ps *PropertyStream[float64], ctx *lowerCtx, scale float64) error {
+func lowerTransformScalar(body *rifx.Chunk, name string, ps *codec.PropertyStream[float64], ctx *lowerCtx, scale float64) error {
 	enc := func(v float64) []byte { return encode1D(v * scale) }
-	if ps.mode == StreamModeAnimated && len(ps.keyframes) > 0 {
-		kfList, err := encodeKeyframes(ps.keyframes, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, enc, ctx)
+	if ps.Mode() == codec.StreamModeAnimated && ps.HasKeyframes() {
+		kfList, err := encodeKeyframes(ps.Keyframes(), valueLayout{dim: 1, headerByte: 0x00, spatial: false}, enc, ctx)
 		if err != nil {
 			return err
 		}
 		return injectAnimatedStream(body, name, kfList)
 	}
-	overwriteShapeStreamCdat(body, name, enc(ps.static))
+	sv, _ := ps.StaticValue()
+	overwriteShapeStreamCdat(body, name, enc(sv))
 	return nil
 }
 

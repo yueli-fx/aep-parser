@@ -3,12 +3,12 @@ package aep_test
 import (
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 )
 
 func TestPropertyStream_InitialStaticMode(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
-	if ps.Mode() != aep.StreamModeStatic {
+	ps := codec.NewPropertyStream[float64]()
+	if ps.Mode() != codec.StreamModeStatic {
 		t.Fatalf("initial mode = %v, want Static", ps.Mode())
 	}
 	v, isStatic := ps.StaticValue()
@@ -21,7 +21,7 @@ func TestPropertyStream_InitialStaticMode(t *testing.T) {
 }
 
 func TestPropertyStream_SetStaticValue(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	if err := ps.SetStaticValue(3.14); err != nil {
 		t.Fatal(err)
 	}
@@ -32,13 +32,13 @@ func TestPropertyStream_SetStaticValue(t *testing.T) {
 }
 
 func TestPropertyStream_AddKeyframe_TransitionsToAnimated(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	_ = ps.SetStaticValue(100.0)
 
 	if err := ps.AddKeyframeLinear(0, 0); err != nil {
 		t.Fatal(err)
 	}
-	if ps.Mode() != aep.StreamModeAnimated {
+	if ps.Mode() != codec.StreamModeAnimated {
 		t.Fatalf("after AddKeyframe: mode = %v, want Animated", ps.Mode())
 	}
 	if _, isStatic := ps.StaticValue(); isStatic {
@@ -47,7 +47,7 @@ func TestPropertyStream_AddKeyframe_TransitionsToAnimated(t *testing.T) {
 }
 
 func TestPropertyStream_SetStaticValue_InAnimatedMode_Error(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	_ = ps.AddKeyframeLinear(0, 0)
 	if err := ps.SetStaticValue(99); err == nil {
 		t.Fatal("SetStaticValue in Animated mode should error")
@@ -55,13 +55,13 @@ func TestPropertyStream_SetStaticValue_InAnimatedMode_Error(t *testing.T) {
 }
 
 func TestPropertyStream_Clear_RestoresStaticMode(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	_ = ps.SetStaticValue(42.0)
 	_ = ps.AddKeyframeLinear(0, 0)
 	if err := ps.Clear(); err != nil {
 		t.Fatal(err)
 	}
-	if ps.Mode() != aep.StreamModeStatic {
+	if ps.Mode() != codec.StreamModeStatic {
 		t.Fatalf("after Clear: mode = %v, want Static", ps.Mode())
 	}
 	v, isStatic := ps.StaticValue()
@@ -71,14 +71,14 @@ func TestPropertyStream_Clear_RestoresStaticMode(t *testing.T) {
 }
 
 func TestPropertyStream_NegativeTime_Rejected(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	if err := ps.AddKeyframeLinear(-0.001, 0); err == nil {
 		t.Fatal("negative time should error")
 	}
 }
 
 func TestPropertyStream_DuplicateTime_Rejected(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	_ = ps.AddKeyframeLinear(1.0, 0)
 	if err := ps.AddKeyframeLinear(1.0, 99); err == nil {
 		t.Fatal("duplicate time should error")

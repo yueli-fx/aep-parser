@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 )
 
 func TestShapeLayer_NewWithEmptyName_DoesNotPolluteComp(t *testing.T) {
@@ -30,7 +31,7 @@ func TestShapeLayer_NewWithEmptyName_DoesNotPolluteComp(t *testing.T) {
 }
 
 func TestPropertyStream_AddKeyframe_NegativeTime_NoSideEffect(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	if err := ps.AddKeyframeLinear(1.0, 100); err != nil {
 		t.Fatalf("seed kf: %v", err)
 	}
@@ -49,7 +50,7 @@ func TestPropertyStream_AddKeyframe_NegativeTime_NoSideEffect(t *testing.T) {
 }
 
 func TestPropertyStream_AddKeyframe_DuplicateTime_NoSideEffect(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	if err := ps.AddKeyframeLinear(1.0, 100); err != nil {
 		t.Fatalf("seed kf: %v", err)
 	}

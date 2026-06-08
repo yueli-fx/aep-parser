@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -82,11 +83,11 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	// === New comp item ID (idta @0x10) ===
 	newCompID := p.allocItemID()
 	dupIdta := dupItemList.FindFirst(rifx.IDIdta)
-	if dupIdta == nil || len(dupIdta.Data) < idtaItemID+4 {
+	if dupIdta == nil || len(dupIdta.Data) < codec.IdtaItemID+4 {
 		p.nextItemID = oldNextItemID
 		return nil, fmt.Errorf("DuplicateComposition: cloned comp idta missing or too short for item ID write")
 	}
-	binary.BigEndian.PutUint32(dupIdta.Data[idtaItemID:idtaItemID+4], newCompID)
+	binary.BigEndian.PutUint32(dupIdta.Data[codec.IdtaItemID:codec.IdtaItemID+4], newCompID)
 
 	// === Remap pass — the per-comp-clone machinery vs InsertLayer ===
 	// Pass A: each Layr LIST child is one layer; alloc a fresh ID and record

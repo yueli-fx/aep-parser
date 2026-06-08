@@ -13,8 +13,8 @@
 //
 // Both static and animated streams are handled. The static path uses
 // V1 parseLeafProperty's StaticValue (any); the animated path translates
-// V1 prop.Keyframes ([]*Keyframe) into typed StreamKeyframe[T] via the
-// PropertyStream.AddKeyframeLinear API, which also flips the stream into
+// V1 prop.Keyframes ([]*Keyframe) into typed codec.StreamKeyframe[T] via the
+// codec.PropertyStream.AddKeyframeLinear API, which also flips the stream into
 // Animated mode. A roundtrip preserves runtime semantics.
 package aep
 
@@ -22,6 +22,7 @@ import (
 	"encoding/binary"
 	"math"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -157,10 +158,10 @@ func hydrateLayerTransform(layer *Layer) {
 }
 
 // combinePositionXY re-combines split Position_0 + Position_1 V1 properties
-// into a single PropertyStream[[2]float64]. Static streams merge values
+// into a single codec.PropertyStream[[2]float64]. Static streams merge values
 // directly; animated streams pair keyframes by index (AE-canonical split
 // emits X and Y keyframes at the same times in the same order).
-func combinePositionXY(ps *PropertyStream[[2]float64], px, py *Property) {
+func combinePositionXY(ps *codec.PropertyStream[[2]float64], px, py *Property) {
 	getXY := func(p *Property) (float64, []*Keyframe) {
 		if p == nil {
 			return 0, nil
@@ -249,13 +250,13 @@ func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
 
 // hydrateGradientFillNode reads the gradient-fill body back into a runtime
 // GradientFillNode: descends the Grad Colors GCst→GCky→Utf8 and decodes the
-// prop.map XML via ParseGradientXML. Grad Type / Start Pt / End Pt are not
+// prop.map XML via codec.ParseGradientXML. Grad Type / Start Pt / End Pt are not
 // modeled (elided in the serialized form). Returns a default-gradient node if
 // the stops XML is absent (keeps the node visible rather than dropping it).
 func hydrateGradientFillNode(body *rifx.Chunk, _ *parseCtx) *GradientFillNode {
 	n := NewGradientFillNode()
 	if xml := findGradientStopsXML(body, "ADBE Vector Grad Colors"); xml != "" {
-		if g := ParseGradientXML(xml); g != nil {
+		if g := codec.ParseGradientXML(xml); g != nil {
 			n.gradient = g
 		}
 	}
@@ -516,7 +517,7 @@ func nodeStreamValues(body *rifx.Chunk, ctx *parseCtx) map[string]*Property {
 
 // hydrateFloat64Stream populates dst from a V1 *Property. Animated when
 // p.Keyframes is non-empty; otherwise static (or no-op if p is nil).
-func hydrateFloat64Stream(dst *PropertyStream[float64], p *Property) {
+func hydrateFloat64Stream(dst *codec.PropertyStream[float64], p *Property) {
 	if dst == nil || p == nil {
 		return
 	}
@@ -534,7 +535,7 @@ func hydrateFloat64Stream(dst *PropertyStream[float64], p *Property) {
 }
 
 // hydrateVec2Stream populates dst from a V1 *Property.
-func hydrateVec2Stream(dst *PropertyStream[[2]float64], p *Property) {
+func hydrateVec2Stream(dst *codec.PropertyStream[[2]float64], p *Property) {
 	if dst == nil || p == nil {
 		return
 	}
@@ -552,7 +553,7 @@ func hydrateVec2Stream(dst *PropertyStream[[2]float64], p *Property) {
 }
 
 // hydrateColor4Stream populates dst from a V1 *Property (RGBA).
-func hydrateColor4Stream(dst *PropertyStream[[4]float64], p *Property) {
+func hydrateColor4Stream(dst *codec.PropertyStream[[4]float64], p *Property) {
 	if dst == nil || p == nil {
 		return
 	}

@@ -3,6 +3,7 @@ package aep
 import (
 	"math"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -86,7 +87,7 @@ func collectFromGroup(group *rifx.Chunk, out *[]*Property, effects *[]*Effect, m
 //	  [LIST GCky]  — gradient keyframe container
 //	    Utf8     — prop.map XML (one per keyframe; first = static value)
 //
-// We expose the first decoded Gradient as Property.Gradient (the static or
+// We expose the first decoded codec.Gradient as Property.codec.Gradient (the static or
 // first-keyframe value). Per-keyframe gradients are deferred until a
 // fixture demonstrates animated gradients.
 func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCtx) *Property {
@@ -109,7 +110,7 @@ func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCt
 		if ch.IsList() || ch.ID != rifx.IDUtf8 {
 			continue
 		}
-		if g := ParseGradientXML(string(ch.Data)); g != nil {
+		if g := codec.ParseGradientXML(string(ch.Data)); g != nil {
 			prop.Gradient = g
 			break // first one wins (static / first-keyframe value)
 		}

@@ -3,6 +3,8 @@ package aep
 import (
 	"math"
 	"testing"
+
+	"github.com/example/aep-parser/internal/codec"
 )
 
 func TestNTSCCanonicalRoundtrip(t *testing.T) {
@@ -22,8 +24,8 @@ func TestNTSCCanonicalRoundtrip(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			enc := encodeFrameRate(tc.in)
-			got := decodeFrameRate(enc)
+			enc := codec.EncodeFrameRate(tc.in)
+			got := codec.DecodeFrameRate(enc)
 			if math.Abs(got-tc.want) > 1e-4 {
 				t.Errorf("encode→decode %g: got %g, want %g (enc=%+v)", tc.in, got, tc.want, enc)
 			}
@@ -32,8 +34,8 @@ func TestNTSCCanonicalRoundtrip(t *testing.T) {
 }
 
 func TestNTSCCanonicalIdempotent(t *testing.T) {
-	v1 := encodeFrameRate(29.97)
-	v2 := encodeFrameRate(30000.0 / 1001.0)
+	v1 := codec.EncodeFrameRate(29.97)
+	v2 := codec.EncodeFrameRate(30000.0 / 1001.0)
 	if v1 != v2 {
 		t.Errorf("29.97 (%+v) != 30000/1001 (%+v): canonicalization failed", v1, v2)
 	}

@@ -1,7 +1,24 @@
 // internal/aep/property_stream.go
-package aep
+package codec
 
 import "fmt"
+
+// TemporalEase is one side's temporal ease for one component:
+//
+//   - Speed: the value's rate of change at the keyframe, in property-value
+//     units per second. Default 0 = "stops" at the keyframe ("ease in/out").
+//   - Influence: how far (0..1) the bezier handle extends along the time
+//     axis. Default 0.333 (~1/3) matches AE's "Easy Ease" preset.
+//
+// For spatial properties (Position/Anchor) and mask paths, AE stores ONE
+// TemporalEase per side (speed is along the motion path, not per axis), so
+// Keyframe.InTemporalEase / OutTemporalEase have length 1.
+// For non-spatial properties, AE stores one TemporalEase per component, so
+// the slices have length 1 (1D) or length 3 (3D, e.g. Scale).
+type TemporalEase struct {
+	Speed     float64
+	Influence float64
+}
 
 // StreamMode is the PropertyStream state machine mode (Static ↔ Animated
 // are mutually exclusive).

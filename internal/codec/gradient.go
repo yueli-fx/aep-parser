@@ -1,4 +1,4 @@
-package aep
+package codec
 
 import (
 	"encoding/xml"

@@ -5,6 +5,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -51,7 +52,7 @@ func f64At(b []byte, off int) float64 {
 func TestLowerTransformVec2Spatial_Bpk128(t *testing.T) {
 	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	minimalTransformLeaf(body, MatchNamePosition, valueLayout{dim: 3, headerByte: 0x07, spatial: true})
-	ps := NewPropertyStream[[2]float64]()
+	ps := codec.NewPropertyStream[[2]float64]()
 	_ = ps.AddKeyframeLinear(0, [2]float64{0, 0})
 	_ = ps.AddKeyframeLinear(2, [2]float64{500, 300})
 
@@ -82,7 +83,7 @@ func TestLowerTransformVec2Spatial_Bpk128(t *testing.T) {
 func TestLowerTransformScale_Bpk128NonSpatial(t *testing.T) {
 	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	minimalTransformLeaf(body, MatchNameScale, valueLayout{dim: 3, headerByte: 0x00})
-	ps := NewPropertyStream[[2]float64]()
+	ps := codec.NewPropertyStream[[2]float64]()
 	_ = ps.AddKeyframeLinear(0, [2]float64{100, 100})
 	_ = ps.AddKeyframeLinear(2, [2]float64{150, 200})
 
@@ -110,10 +111,10 @@ func TestLowerShapeRectSubProps(t *testing.T) {
 	minimalTransformLeaf(body, "ADBE Vector Rect Position", valueLayout{dim: 2, headerByte: 0x07, spatial: true})
 	minimalTransformLeaf(body, "ADBE Vector Rect Roundness", valueLayout{dim: 1, headerByte: 0x00})
 
-	pos := NewPropertyStream[[2]float64]()
+	pos := codec.NewPropertyStream[[2]float64]()
 	_ = pos.AddKeyframeLinear(0, [2]float64{0, 0})
 	_ = pos.AddKeyframeLinear(2, [2]float64{40, 50})
-	rnd := NewPropertyStream[float64]()
+	rnd := codec.NewPropertyStream[float64]()
 	_ = rnd.AddKeyframeLinear(0, 0)
 	_ = rnd.AddKeyframeLinear(2, 20)
 	ctx := &lowerCtx{tickRate: 30720}
@@ -163,7 +164,7 @@ func TestLowerTransformScalar(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 			minimalTransformLeaf(body, tc.match, valueLayout{dim: 1, headerByte: 0x00})
-			ps := NewPropertyStream[float64]()
+			ps := codec.NewPropertyStream[float64]()
 			_ = ps.AddKeyframeLinear(0, 0)
 			_ = ps.AddKeyframeLinear(2, tc.in)
 

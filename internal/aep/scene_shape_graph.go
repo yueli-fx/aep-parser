@@ -1,7 +1,11 @@
 // internal/aep/shape_graph.go
 package aep
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/example/aep-parser/internal/codec"
+)
 
 // ShapeNodeKind identifies a shape-graph node's runtime kind. AE match-name
 // strings (`ADBE Vector Shape - Rect` etc.) are intentionally NOT exposed
@@ -143,18 +147,18 @@ const (
 )
 
 type RectNode struct {
-	size      *PropertyStream[[2]float64]
-	position  *PropertyStream[[2]float64]
-	roundness *PropertyStream[float64]
+	size      *codec.PropertyStream[[2]float64]
+	position  *codec.PropertyStream[[2]float64]
+	roundness *codec.PropertyStream[float64]
 	direction ShapeDirection
 }
 
 // NewRectNode constructs a default-valued RectNode.
 func NewRectNode() *RectNode {
 	r := &RectNode{
-		size:      NewPropertyStream[[2]float64](),
-		position:  NewPropertyStream[[2]float64](),
-		roundness: NewPropertyStream[float64](),
+		size:      codec.NewPropertyStream[[2]float64](),
+		position:  codec.NewPropertyStream[[2]float64](),
+		roundness: codec.NewPropertyStream[float64](),
 		direction: ShapeDirectionNormal,
 	}
 	_ = r.size.SetStaticValue([2]float64{100, 100})
@@ -164,9 +168,9 @@ func NewRectNode() *RectNode {
 }
 
 func (r *RectNode) Kind() ShapeNodeKind                   { return ShapeKindRect }
-func (r *RectNode) Size() *PropertyStream[[2]float64]     { return r.size }
-func (r *RectNode) Position() *PropertyStream[[2]float64] { return r.position }
-func (r *RectNode) Roundness() *PropertyStream[float64]   { return r.roundness }
+func (r *RectNode) Size() *codec.PropertyStream[[2]float64]     { return r.size }
+func (r *RectNode) Position() *codec.PropertyStream[[2]float64] { return r.position }
+func (r *RectNode) Roundness() *codec.PropertyStream[float64]   { return r.roundness }
 func (r *RectNode) Direction() ShapeDirection             { return r.direction }
 func (r *RectNode) SetSize(v [2]float64) error            { return r.size.SetStaticValue(v) }
 func (r *RectNode) SetPosition(v [2]float64) error        { return r.position.SetStaticValue(v) }
@@ -192,15 +196,15 @@ func (r *RectNode) Properties() *PropertyGroup {
 // Position=[0,0]. AE child[1] = `ADBE Vector Shape Direction` —
 // runtime-default CCW; not exposed as a typed setter in V2.2.
 type EllipseNode struct {
-	size, position *PropertyStream[[2]float64]
+	size, position *codec.PropertyStream[[2]float64]
 	direction      ShapeDirection
 }
 
 // NewEllipseNode constructs a default-valued EllipseNode.
 func NewEllipseNode() *EllipseNode {
 	e := &EllipseNode{
-		size:      NewPropertyStream[[2]float64](),
-		position:  NewPropertyStream[[2]float64](),
+		size:      codec.NewPropertyStream[[2]float64](),
+		position:  codec.NewPropertyStream[[2]float64](),
 		direction: ShapeDirectionNormal,
 	}
 	_ = e.size.SetStaticValue([2]float64{100, 100})
@@ -209,8 +213,8 @@ func NewEllipseNode() *EllipseNode {
 }
 
 func (e *EllipseNode) Kind() ShapeNodeKind                   { return ShapeKindEllipse }
-func (e *EllipseNode) Size() *PropertyStream[[2]float64]     { return e.size }
-func (e *EllipseNode) Position() *PropertyStream[[2]float64] { return e.position }
+func (e *EllipseNode) Size() *codec.PropertyStream[[2]float64]     { return e.size }
+func (e *EllipseNode) Position() *codec.PropertyStream[[2]float64] { return e.position }
 func (e *EllipseNode) Direction() ShapeDirection             { return e.direction }
 func (e *EllipseNode) SetSize(v [2]float64) error            { return e.size.SetStaticValue(v) }
 func (e *EllipseNode) SetPosition(v [2]float64) error        { return e.position.SetStaticValue(v) }
@@ -242,18 +246,18 @@ func (e *EllipseNode) Properties() *PropertyGroup {
 // 2 vertices is enforced runtime-side (conservative invariant — AE itself
 // was not directly probed for 0/1-vertex rejection).
 type PathNode struct {
-	path *PropertyStream[BezierPath]
+	path *codec.PropertyStream[BezierPath]
 }
 
 // NewPathNode constructs an empty PathNode (Closed=true).
 func NewPathNode() *PathNode {
-	p := &PathNode{path: NewPropertyStream[BezierPath]()}
+	p := &PathNode{path: codec.NewPropertyStream[BezierPath]()}
 	_ = p.path.SetStaticValue(BezierPath{Closed: true})
 	return p
 }
 
 func (p *PathNode) Kind() ShapeNodeKind                { return ShapeKindPath }
-func (p *PathNode) Path() *PropertyStream[BezierPath]  { return p.path }
+func (p *PathNode) Path() *codec.PropertyStream[BezierPath]  { return p.path }
 
 // Properties returns the escape-hatch β view.
 func (p *PathNode) Properties() *PropertyGroup {
@@ -293,8 +297,8 @@ func (p *PathNode) SetClosed(closed bool) error {
 // Opacity=100, Blend Mode=Normal, Composite Order=Above Previous, Fill
 // Rule=Nonzero Winding (runtime defaults; AE elides at default).
 type FillNode struct {
-	color          *PropertyStream[[4]float64]
-	opacity        *PropertyStream[float64]
+	color          *codec.PropertyStream[[4]float64]
+	opacity        *codec.PropertyStream[float64]
 	blendMode      ShapeBlendMode
 	compositeOrder ShapeCompositeOrder
 	fillRule       FillRule
@@ -303,8 +307,8 @@ type FillNode struct {
 // NewFillNode constructs a default-valued FillNode.
 func NewFillNode() *FillNode {
 	f := &FillNode{
-		color:          NewPropertyStream[[4]float64](),
-		opacity:        NewPropertyStream[float64](),
+		color:          codec.NewPropertyStream[[4]float64](),
+		opacity:        codec.NewPropertyStream[float64](),
 		blendMode:      ShapeBlendModeNormal,
 		compositeOrder: ShapeCompositeOrderAbovePrevious,
 		fillRule:       FillRuleNonzeroWinding,
@@ -315,8 +319,8 @@ func NewFillNode() *FillNode {
 }
 
 func (f *FillNode) Kind() ShapeNodeKind                  { return ShapeKindFill }
-func (f *FillNode) Color() *PropertyStream[[4]float64]   { return f.color }
-func (f *FillNode) Opacity() *PropertyStream[float64]    { return f.opacity }
+func (f *FillNode) Color() *codec.PropertyStream[[4]float64]   { return f.color }
+func (f *FillNode) Opacity() *codec.PropertyStream[float64]    { return f.opacity }
 func (f *FillNode) BlendMode() ShapeBlendMode            { return f.blendMode }
 func (f *FillNode) CompositeOrder() ShapeCompositeOrder  { return f.compositeOrder }
 func (f *FillNode) FillRule() FillRule                   { return f.fillRule }
@@ -376,7 +380,7 @@ func (f *FillNode) Properties() *PropertyGroup {
 // re-encodes the stops to prop.map XML and overwrites the GCky/Utf8 chunk
 // (length-variable; rifx recomputes the enclosing LIST sizes).
 type GradientFillNode struct {
-	gradient *Gradient
+	gradient *codec.Gradient
 }
 
 // NewGradientFillNode constructs a default 2-stop black→white linear gradient
@@ -387,14 +391,14 @@ func NewGradientFillNode() *GradientFillNode {
 
 // defaultGradient returns a 2-stop black→white gradient with two opaque alpha
 // stops — the values AE shows for a freshly-added gradient fill.
-func defaultGradient() *Gradient {
-	return &Gradient{
+func defaultGradient() *codec.Gradient {
+	return &codec.Gradient{
 		Version: "4",
-		ColorStops: []GradientColorStop{
+		ColorStops: []codec.GradientColorStop{
 			{Offset: 0, Midpoint: 0.5, Color: [3]float64{0, 0, 0}},
 			{Offset: 1, Midpoint: 0.5, Color: [3]float64{1, 1, 1}},
 		},
-		AlphaStops: []GradientAlphaStop{
+		AlphaStops: []codec.GradientAlphaStop{
 			{Offset: 0, Midpoint: 0.5, Alpha: 1},
 			{Offset: 1, Midpoint: 0.5, Alpha: 1},
 		},
@@ -406,11 +410,11 @@ func (n *GradientFillNode) Kind() ShapeNodeKind { return ShapeKindGradientFill }
 // Gradient returns the live gradient (color + alpha stops). Mutating the
 // returned struct's slices directly also works, but prefer SetColorStops /
 // SetAlphaStops for range validation.
-func (n *GradientFillNode) Gradient() *Gradient { return n.gradient }
+func (n *GradientFillNode) Gradient() *codec.Gradient { return n.gradient }
 
 // SetColorStops replaces the gradient's color stops. Requires ≥ 2 stops; each
 // Offset/Midpoint in [0,1] and each Color component in [0,1].
-func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
+func (n *GradientFillNode) SetColorStops(stops []codec.GradientColorStop) error {
 	if len(stops) < 2 {
 		return fmt.Errorf("SetColorStops: need ≥ 2 stops, got %d", len(stops))
 	}
@@ -427,13 +431,13 @@ func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
 			}
 		}
 	}
-	n.gradient.ColorStops = append([]GradientColorStop(nil), stops...)
+	n.gradient.ColorStops = append([]codec.GradientColorStop(nil), stops...)
 	return nil
 }
 
 // SetAlphaStops replaces the gradient's alpha (opacity) stops. Requires ≥ 2
 // stops; each Offset/Midpoint/Alpha in [0,1].
-func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
+func (n *GradientFillNode) SetAlphaStops(stops []codec.GradientAlphaStop) error {
 	if len(stops) < 2 {
 		return fmt.Errorf("SetAlphaStops: need ≥ 2 stops, got %d", len(stops))
 	}
@@ -448,7 +452,7 @@ func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
 			return fmt.Errorf("SetAlphaStops: stop %d alpha = %g out of range [0,1]", i, s.Alpha)
 		}
 	}
-	n.gradient.AlphaStops = append([]GradientAlphaStop(nil), stops...)
+	n.gradient.AlphaStops = append([]codec.GradientAlphaStop(nil), stops...)
 	return nil
 }
 
@@ -487,9 +491,9 @@ const (
 // StrokeNode — `ADBE Vector Graphic - Stroke`. Default Color=[0,0,0,1]
 // black, Width=2, Opacity=100, Line Cap=Butt, Line Join=Miter, Miter Limit=4.
 type StrokeNode struct {
-	color   *PropertyStream[[4]float64]
-	opacity *PropertyStream[float64]
-	width   *PropertyStream[float64]
+	color   *codec.PropertyStream[[4]float64]
+	opacity *codec.PropertyStream[float64]
+	width   *codec.PropertyStream[float64]
 
 	// Line Cap / Line Join are enums; Miter Limit is a scalar. AE does not
 	// animate them, so they are plain values rather than PropertyStreams.
@@ -508,9 +512,9 @@ type StrokeNode struct {
 // NewStrokeNode constructs a default-valued StrokeNode.
 func NewStrokeNode() *StrokeNode {
 	s := &StrokeNode{
-		color:      NewPropertyStream[[4]float64](),
-		opacity:    NewPropertyStream[float64](),
-		width:      NewPropertyStream[float64](),
+		color:      codec.NewPropertyStream[[4]float64](),
+		opacity:    codec.NewPropertyStream[float64](),
+		width:      codec.NewPropertyStream[float64](),
 		lineCap:        StrokeLineCapButt,
 		lineJoin:       StrokeLineJoinMiter,
 		miterLimit:     4,
@@ -527,9 +531,9 @@ func NewStrokeNode() *StrokeNode {
 }
 
 func (s *StrokeNode) Kind() ShapeNodeKind                { return ShapeKindStroke }
-func (s *StrokeNode) Color() *PropertyStream[[4]float64] { return s.color }
-func (s *StrokeNode) Opacity() *PropertyStream[float64]  { return s.opacity }
-func (s *StrokeNode) Width() *PropertyStream[float64]    { return s.width }
+func (s *StrokeNode) Color() *codec.PropertyStream[[4]float64] { return s.color }
+func (s *StrokeNode) Opacity() *codec.PropertyStream[float64]  { return s.opacity }
+func (s *StrokeNode) Width() *codec.PropertyStream[float64]    { return s.width }
 func (s *StrokeNode) SetColor(v [4]float64) error        { return s.color.SetStaticValue(v) }
 func (s *StrokeNode) SetOpacity(v float64) error         { return s.opacity.SetStaticValue(v) }
 func (s *StrokeNode) SetWidth(v float64) error           { return s.width.SetStaticValue(v) }
@@ -728,67 +732,67 @@ func (pg *PropertyGroup) Child(name string) *PropertyGroup {
 	return pg.Children[name]
 }
 
-// Float64Stream returns the PropertyStream[float64] under the given name, or
+// Float64Stream returns the codec.PropertyStream[float64] under the given name, or
 // an error if no stream by that name exists or it isn't the expected type.
 // Mutations on the returned stream are visible through the typed accessor.
-func (pg *PropertyGroup) Float64Stream(name string) (*PropertyStream[float64], error) {
+func (pg *PropertyGroup) Float64Stream(name string) (*codec.PropertyStream[float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*PropertyStream[float64])
+	ps, ok := v.(*codec.PropertyStream[float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// Vec2Stream returns the PropertyStream[[2]float64] under the given name.
-func (pg *PropertyGroup) Vec2Stream(name string) (*PropertyStream[[2]float64], error) {
+// Vec2Stream returns the codec.PropertyStream[[2]float64] under the given name.
+func (pg *PropertyGroup) Vec2Stream(name string) (*codec.PropertyStream[[2]float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*PropertyStream[[2]float64])
+	ps, ok := v.(*codec.PropertyStream[[2]float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [2]float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// Vec3Stream returns the PropertyStream[[3]float64] under the given name.
-func (pg *PropertyGroup) Vec3Stream(name string) (*PropertyStream[[3]float64], error) {
+// Vec3Stream returns the codec.PropertyStream[[3]float64] under the given name.
+func (pg *PropertyGroup) Vec3Stream(name string) (*codec.PropertyStream[[3]float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*PropertyStream[[3]float64])
+	ps, ok := v.(*codec.PropertyStream[[3]float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [3]float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// ColorStream returns the PropertyStream[[4]float64] (RGBA) under the given name.
-func (pg *PropertyGroup) ColorStream(name string) (*PropertyStream[[4]float64], error) {
+// ColorStream returns the codec.PropertyStream[[4]float64] (RGBA) under the given name.
+func (pg *PropertyGroup) ColorStream(name string) (*codec.PropertyStream[[4]float64], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*PropertyStream[[4]float64])
+	ps, ok := v.(*codec.PropertyStream[[4]float64])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not [4]float64", pg.Name, name)
 	}
 	return ps, nil
 }
 
-// PathStream returns the PropertyStream[BezierPath] under the given name.
-func (pg *PropertyGroup) PathStream(name string) (*PropertyStream[BezierPath], error) {
+// PathStream returns the codec.PropertyStream[BezierPath] under the given name.
+func (pg *PropertyGroup) PathStream(name string) (*codec.PropertyStream[BezierPath], error) {
 	v, ok := pg.streams[name]
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q not found", pg.Name, name)
 	}
-	ps, ok := v.(*PropertyStream[BezierPath])
+	ps, ok := v.(*codec.PropertyStream[BezierPath])
 	if !ok {
 		return nil, fmt.Errorf("PropertyGroup %q: stream %q is not BezierPath", pg.Name, name)
 	}

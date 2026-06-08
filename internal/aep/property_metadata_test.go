@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -11,15 +12,15 @@ import (
 // from tdb4 flags for representative property shapes.
 func TestPropertyControlType_Derivation(t *testing.T) {
 	tests := []struct {
-		name     string
-		dims     int
-		spatial  bool
-		color    bool
-		integer  bool
-		vector   bool
-		noValue  bool
-		wantPCT  aep.PropertyControlType
-		wantPVT  aep.PropertyValueType
+		name    string
+		dims    int
+		spatial bool
+		color   bool
+		integer bool
+		vector  bool
+		noValue bool
+		wantPCT aep.PropertyControlType
+		wantPVT aep.PropertyValueType
 	}{
 		{
 			name: "Position_3D_spatial",
@@ -224,7 +225,7 @@ func TestMinValue_MaxValue_Synthetic(t *testing.T) {
 		// tduM = 4 × float32 BE = [1, 1, 1, 1]
 		tduMData := make([]byte, 16)
 		for i := 0; i < 4; i++ {
-			tduMData[i*4] = 0x3F   // float32 1.0 = 0x3F800000
+			tduMData[i*4] = 0x3F // float32 1.0 = 0x3F800000
 			tduMData[i*4+1] = 0x80
 		}
 		tduM := &rifx.Chunk{ID: rifx.IDtduM, Size: 16, Data: tduMData}
@@ -443,9 +444,9 @@ func TestGradient_ParseXML(t *testing.T) {
   </prop.list>
 </prop.map>`
 
-	g := aep.ParseGradientXML(xmlText)
+	g := codec.ParseGradientXML(xmlText)
 	if g == nil {
-		t.Fatal("ParseGradientXML returned nil")
+		t.Fatal("codec.ParseGradientXML returned nil")
 	}
 	if g.Version != "4" {
 		t.Errorf("Version = %q, want %q", g.Version, "4")
@@ -475,10 +476,10 @@ func TestGradient_ParseXML(t *testing.T) {
 
 // TestGradient_ParseEmpty verifies graceful handling of empty/invalid XML.
 func TestGradient_ParseEmpty(t *testing.T) {
-	if g := aep.ParseGradientXML(""); g != nil {
+	if g := codec.ParseGradientXML(""); g != nil {
 		t.Errorf("empty string: got %v, want nil", g)
 	}
-	if g := aep.ParseGradientXML("not xml"); g != nil {
+	if g := codec.ParseGradientXML("not xml"); g != nil {
 		t.Errorf("non-xml: got %v, want nil", g)
 	}
 }

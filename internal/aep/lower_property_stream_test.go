@@ -10,11 +10,12 @@ import (
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
 func TestLowerFloat64Stream_Static(t *testing.T) {
-	ps := aep.NewPropertyStream[float64]()
+	ps := codec.NewPropertyStream[float64]()
 	if err := ps.SetStaticValue(0.5); err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +50,7 @@ func TestLowerFloat64Stream_Static(t *testing.T) {
 }
 
 func TestLowerVec2Stream_Animated(t *testing.T) {
-	ps := aep.NewPropertyStream[[2]float64]()
+	ps := codec.NewPropertyStream[[2]float64]()
 	if err := ps.AddKeyframeLinear(0, [2]float64{0, 0}); err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +82,7 @@ func TestLowerVec2Stream_Animated(t *testing.T) {
 }
 
 func TestLowerColorStream_Static_CdatSize(t *testing.T) {
-	ps := aep.NewPropertyStream[[4]float64]()
+	ps := codec.NewPropertyStream[[4]float64]()
 	if err := ps.SetStaticValue([4]float64{1, 0, 0, 1}); err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +101,7 @@ func TestLowerColorStream_Static_CdatSize(t *testing.T) {
 }
 
 func TestLowerPathStream_Static_EmitsOmS(t *testing.T) {
-	ps := aep.NewPropertyStream[aep.BezierPath]()
+	ps := codec.NewPropertyStream[aep.BezierPath]()
 	if err := ps.SetStaticValue(aep.BezierPath{
 		Vertices:    [][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}},
 		InTangents:  [][2]float64{{0, 0}, {0, 0}, {0, 0}, {0, 0}},
@@ -125,13 +126,15 @@ func TestLowerPathStream_Static_EmitsOmS(t *testing.T) {
 // TestEncodeBezier_LdatMatchesAELayout pins the ldat per-vertex layout RE'd
 // from AE-native fixtures (test_data/v2_2_shape_path_re.aep, decoded via
 // tmp_debug/decode_path_ldat): each vertex stores 6 f32 (bbox-normalized) =
-//   [ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]
+//
+//	[ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]
+//
 // i.e. anchor, THIS vertex's out-control, and the NEXT vertex's in-control
 // (wraps mod n). The pre-V2.2.1 encoder wrote [anchor, in_i, out_i] (this
 // vertex's own in/out) — AE renders that as the wrong shape.
 func TestEncodeBezier_LdatMatchesAELayout(t *testing.T) {
 	// Distinct coords (not the ambiguous 0/1 square) so each slot is identifiable.
-	ps := aep.NewPropertyStream[aep.BezierPath]()
+	ps := codec.NewPropertyStream[aep.BezierPath]()
 	if err := ps.SetStaticValue(aep.BezierPath{
 		Vertices:    [][2]float64{{10, 20}, {70, 30}, {40, 90}},
 		InTangents:  [][2]float64{{0, 0}, {0, 0}, {0, 0}},
@@ -156,9 +159,9 @@ func TestEncodeBezier_LdatMatchesAELayout(t *testing.T) {
 	}
 	// bbox min(10,20) max(70,90) → rx=60 ry=70. Expected normalized 6-tuples.
 	want := [][6]float64{
-		{0, 0, /*out*/ 0, 0, /*next-in*/ 1, 10.0 / 70.0},
-		{1, 10.0 / 70.0, /*out*/ 1, 10.0 / 70.0, /*next-in*/ 0.5, 1},
-		{0.5, 1, /*out*/ 0.5, 1, /*next-in*/ 0, 0},
+		{0, 0 /*out*/, 0, 0 /*next-in*/, 1, 10.0 / 70.0},
+		{1, 10.0 / 70.0 /*out*/, 1, 10.0 / 70.0 /*next-in*/, 0.5, 1},
+		{0.5, 1 /*out*/, 0.5, 1 /*next-in*/, 0, 0},
 	}
 	for v := 0; v < 3; v++ {
 		for k := 0; k < 6; k++ {

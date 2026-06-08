@@ -1,5 +1,7 @@
 package aep
 
+import "github.com/example/aep-parser/internal/codec"
+
 // LayerType classifies the kind of layer.
 type LayerType string
 
@@ -280,22 +282,22 @@ func (s *ShapeLayer) RootGroup() *VectorGroup { return s.shapeRootGroup }
 func (s *ShapeLayer) Transform() *LayerTransform { return s.shapeTransform }
 
 // AnchorPoint is shorthand for s.Transform().AnchorPoint().
-func (s *ShapeLayer) AnchorPoint() *PropertyStream[[2]float64] {
+func (s *ShapeLayer) AnchorPoint() *codec.PropertyStream[[2]float64] {
 	return s.shapeTransform.anchorPoint
 }
 
 // Position is shorthand for s.Transform().Position(). V2.2 ShapeLayer is
 // 2D-only (3D ShapeLayer = V2.3+); returns the 2D stream.
-func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.shapeTransform.position }
+func (s *ShapeLayer) Position() *codec.PropertyStream[[2]float64] { return s.shapeTransform.position }
 
 // Scale is shorthand for s.Transform().Scale().
-func (s *ShapeLayer) Scale() *PropertyStream[[2]float64] { return s.shapeTransform.scale }
+func (s *ShapeLayer) Scale() *codec.PropertyStream[[2]float64] { return s.shapeTransform.scale }
 
 // Rotation is shorthand for s.Transform().Rotation().
-func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.shapeTransform.rotation }
+func (s *ShapeLayer) Rotation() *codec.PropertyStream[float64] { return s.shapeTransform.rotation }
 
 // Opacity is shorthand for s.Transform().Opacity().
-func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeTransform.opacity }
+func (s *ShapeLayer) Opacity() *codec.PropertyStream[float64] { return s.shapeTransform.opacity }
 
 // LayerTransform is the typed wrapper for a layer's Transform property
 // group. V2.2 ShapeLayer is 2D, so Position / Scale /
@@ -309,21 +311,21 @@ func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeTransfor
 //	Rotation    = 0
 //	Opacity     = 100
 type LayerTransform struct {
-	anchorPoint *PropertyStream[[2]float64]
-	position    *PropertyStream[[2]float64]
-	scale       *PropertyStream[[2]float64]
-	rotation    *PropertyStream[float64]
-	opacity     *PropertyStream[float64]
+	anchorPoint *codec.PropertyStream[[2]float64]
+	position    *codec.PropertyStream[[2]float64]
+	scale       *codec.PropertyStream[[2]float64]
+	rotation    *codec.PropertyStream[float64]
+	opacity     *codec.PropertyStream[float64]
 }
 
 // newLayerTransform constructs a default-valued LayerTransform.
 func newLayerTransform() *LayerTransform {
 	lt := &LayerTransform{
-		anchorPoint: NewPropertyStream[[2]float64](),
-		position:    NewPropertyStream[[2]float64](),
-		scale:       NewPropertyStream[[2]float64](),
-		rotation:    NewPropertyStream[float64](),
-		opacity:     NewPropertyStream[float64](),
+		anchorPoint: codec.NewPropertyStream[[2]float64](),
+		position:    codec.NewPropertyStream[[2]float64](),
+		scale:       codec.NewPropertyStream[[2]float64](),
+		rotation:    codec.NewPropertyStream[float64](),
+		opacity:     codec.NewPropertyStream[float64](),
 	}
 	// Defaults per runtime-facing convention.
 	_ = lt.scale.SetStaticValue([2]float64{100, 100})
@@ -331,8 +333,8 @@ func newLayerTransform() *LayerTransform {
 	return lt
 }
 
-func (t *LayerTransform) AnchorPoint() *PropertyStream[[2]float64] { return t.anchorPoint }
-func (t *LayerTransform) Position() *PropertyStream[[2]float64]    { return t.position }
-func (t *LayerTransform) Scale() *PropertyStream[[2]float64]       { return t.scale }
-func (t *LayerTransform) Rotation() *PropertyStream[float64]       { return t.rotation }
-func (t *LayerTransform) Opacity() *PropertyStream[float64]        { return t.opacity }
+func (t *LayerTransform) AnchorPoint() *codec.PropertyStream[[2]float64] { return t.anchorPoint }
+func (t *LayerTransform) Position() *codec.PropertyStream[[2]float64]    { return t.position }
+func (t *LayerTransform) Scale() *codec.PropertyStream[[2]float64]       { return t.scale }
+func (t *LayerTransform) Rotation() *codec.PropertyStream[float64]       { return t.rotation }
+func (t *LayerTransform) Opacity() *codec.PropertyStream[float64]        { return t.opacity }

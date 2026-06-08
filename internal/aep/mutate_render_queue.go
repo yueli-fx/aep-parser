@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -67,8 +68,8 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 	if ldat == nil || lhd3 == nil {
 		return fmt.Errorf("RemoveItem: settings ldat/lhd3 missing")
 	}
-	off := index * renderSettingsItemSize
-	if off+renderSettingsItemSize > len(ldat.Data) {
+	off := index * codec.RenderSettingsItemSize
+	if off+codec.RenderSettingsItemSize > len(ldat.Data) {
 		return fmt.Errorf("RemoveItem: settings ldat too short for item %d (len=%d)", index, len(ldat.Data))
 	}
 
@@ -89,9 +90,9 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 	litm.Children = kept
 
 	// === settings ldat: splice out the 2246B block (fresh slice) ===
-	newLdat := make([]byte, 0, len(ldat.Data)-renderSettingsItemSize)
+	newLdat := make([]byte, 0, len(ldat.Data)-codec.RenderSettingsItemSize)
 	newLdat = append(newLdat, ldat.Data[:off]...)
-	newLdat = append(newLdat, ldat.Data[off+renderSettingsItemSize:]...)
+	newLdat = append(newLdat, ldat.Data[off+codec.RenderSettingsItemSize:]...)
 	ldat.Data = newLdat
 
 	// lhd3 count fields @0x08 and @0x0C both track the item count.
@@ -122,7 +123,7 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 	item.back = nil
 	for i, it := range rq.Items {
 		if it.settingsBlock != nil {
-			it.settingsBlock = ldat.Data[i*renderSettingsItemSize : (i+1)*renderSettingsItemSize]
+			it.settingsBlock = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
 	return nil
@@ -200,14 +201,14 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 		return nil, fmt.Errorf("AddItem: settings ldat/lhd3 missing")
 	}
 	n := len(rq.Items)
-	tOff := (n - 1) * renderSettingsItemSize
-	if tOff+renderSettingsItemSize > len(ldat.Data) {
+	tOff := (n - 1) * codec.RenderSettingsItemSize
+	if tOff+codec.RenderSettingsItemSize > len(ldat.Data) {
 		return nil, fmt.Errorf("AddItem: settings ldat too short for template block")
 	}
 
 	// === Clone template settings block + remap comp_id ===
-	newBlock := append([]byte(nil), ldat.Data[tOff:tOff+renderSettingsItemSize]...)
-	binary.BigEndian.PutUint32(newBlock[rsCompID:], comp.ID)
+	newBlock := append([]byte(nil), ldat.Data[tOff:tOff+codec.RenderSettingsItemSize]...)
+	binary.BigEndian.PutUint32(newBlock[codec.RsCompID:], comp.ID)
 	ldat.Data = append(ldat.Data, newBlock...)
 	incU32(lhd3.Data[0x08:])
 	incU32(lhd3.Data[0x0C:])
@@ -238,7 +239,7 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 	rq.Items = append(rq.Items, newItem)
 	for i, it := range rq.Items {
 		if it.settingsBlock != nil || i == n {
-			it.settingsBlock = ldat.Data[i*renderSettingsItemSize : (i+1)*renderSettingsItemSize]
+			it.settingsBlock = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
 	return newItem, nil

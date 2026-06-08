@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -43,7 +44,7 @@ func decodeTextSource(raw []byte) (*TextSource, string) {
 	if err != nil {
 		return nil, fmt.Sprintf("text source: %v", err)
 	}
-	root := parsePSDict(body)
+	root := codec.ParsePSDict(body)
 	if root == nil {
 		return nil, "text source: btdk dict empty"
 	}
@@ -54,18 +55,18 @@ func decodeTextSource(raw []byte) (*TextSource, string) {
 	// at /0/0/0; variable-font axis values (when present) are a sub-array
 	// at /0/0/4, encoded as 16.16 fixed-point integers (AE writes them as
 	// large decimal numbers — e.g. 26214400 == 400 << 16 == wght=400).
-	if fontArr := psPath(root, "/0/1/0"); fontArr != nil && fontArr.kind == psArr {
-		ts.FontAxes = make([][]float64, len(fontArr.arr))
-		for i, entry := range fontArr.arr {
-			name := psPathStr(entry, "/0/0/0")
+	if fontArr := codec.PsPath(root, "/0/1/0"); fontArr != nil && fontArr.Kind == codec.PsArr {
+		ts.FontAxes = make([][]float64, len(fontArr.Arr))
+		for i, entry := range fontArr.Arr {
+			name := codec.PsPathStr(entry, "/0/0/0")
 			ts.Fonts = append(ts.Fonts, name)
-			if axisArr := psPath(entry, "/0/0/4"); axisArr != nil && axisArr.kind == psArr {
-				axes := make([]float64, 0, len(axisArr.arr))
-				for _, v := range axisArr.arr {
-					if v.kind != psNum {
+			if axisArr := codec.PsPath(entry, "/0/0/4"); axisArr != nil && axisArr.Kind == codec.PsArr {
+				axes := make([]float64, 0, len(axisArr.Arr))
+				for _, v := range axisArr.Arr {
+					if v.Kind != codec.PsNum {
 						continue
 					}
-					axes = append(axes, v.num/65536.0)
+					axes = append(axes, v.Num/65536.0)
 				}
 				if len(axes) > 0 {
 					ts.FontAxes[i] = axes
@@ -75,15 +76,15 @@ func decodeTextSource(raw []byte) (*TextSource, string) {
 	}
 
 	// Text content — at /1/1[0]/0/0.
-	if t := psPath(root, "/1/1/0/0/0"); t != nil && t.kind == psStr {
-		ts.Text = normalizeTextLines(t.str)
-		ts.textStringStart = bodyOff + t.srcStart
-		ts.textStringEnd = bodyOff + t.srcEnd
+	if t := codec.PsPath(root, "/1/1/0/0/0"); t != nil && t.Kind == codec.PsStr {
+		ts.Text = normalizeTextLines(t.Str)
+		ts.textStringStart = bodyOff + t.SrcStart
+		ts.textStringEnd = bodyOff + t.SrcEnd
 	}
 
 	// Paragraphs — array at /1/1[0]/0/5/0. Each entry's style is at /0/0/5.
-	if paraArr := psPath(root, "/1/1/0/0/5/0"); paraArr != nil && paraArr.kind == psArr {
-		for _, entry := range paraArr.arr {
+	if paraArr := codec.PsPath(root, "/1/1/0/0/5/0"); paraArr != nil && paraArr.Kind == codec.PsArr {
+		for _, entry := range paraArr.Arr {
 			ts.Paragraphs = append(ts.Paragraphs, decodeParagraphStyle(entry))
 		}
 		if len(ts.Paragraphs) > 0 {
@@ -92,8 +93,8 @@ func decodeTextSource(raw []byte) (*TextSource, string) {
 	}
 
 	// Style runs — array at /1/1[0]/0/6/0
-	if runArr := psPath(root, "/1/1/0/0/6/0"); runArr != nil && runArr.kind == psArr {
-		for _, entry := range runArr.arr {
+	if runArr := codec.PsPath(root, "/1/1/0/0/6/0"); runArr != nil && runArr.Kind == codec.PsArr {
+		for _, entry := range runArr.Arr {
 			run := decodeStyleRun(entry, ts.Fonts)
 			ts.Runs = append(ts.Runs, run)
 		}
@@ -102,7 +103,7 @@ func decodeTextSource(raw []byte) (*TextSource, string) {
 	// Box-text bounds — point-text omits /0/8/0[0]/0/1. The /1/0 sub-array
 	// holds the bounds polygon as 16 (x,y) vertex pairs (= 32 numbers);
 	// the rectangle's xmin/ymin/xmax/ymax come from min/max over those.
-	if bounds := psPath(root, "/0/8/0/0/0/1/0"); bounds != nil && bounds.kind == psArr && len(bounds.arr) >= 8 {
+	if bounds := codec.PsPath(root, "/0/8/0/0/0/1/0"); bounds != nil && bounds.Kind == codec.PsArr && len(bounds.Arr) >= 8 {
 		ts.IsBoxText = true
 		ts.BoxBounds = computeBounds(bounds)
 	}
@@ -112,78 +113,78 @@ func decodeTextSource(raw []byte) (*TextSource, string) {
 	// kerning value was actually set. Last array entry is an
 	// end-of-text sentinel (empty /0 dict); skip it. Sibling /1/1[0]/0/7
 	// is the AE-script first-char mirror.
-	if kernArr := psPath(root, "/1/1/0/0/8/0"); kernArr != nil && kernArr.kind == psArr {
-		for i, entry := range kernArr.arr {
-			v := psPath(entry, "/0/0")
-			if v == nil || v.kind != psNum {
+	if kernArr := codec.PsPath(root, "/1/1/0/0/8/0"); kernArr != nil && kernArr.Kind == codec.PsArr {
+		for i, entry := range kernArr.Arr {
+			v := codec.PsPath(entry, "/0/0")
+			if v == nil || v.Kind != codec.PsNum {
 				// Sentinel allowed only as the very last entry.
-				if i == len(kernArr.arr)-1 {
+				if i == len(kernArr.Arr)-1 {
 					break
 				}
 				continue
 			}
-			ts.ManualKerning = append(ts.ManualKerning, int(v.num))
+			ts.ManualKerning = append(ts.ManualKerning, int(v.Num))
 		}
 	}
-	if v := psPath(root, "/1/1/0/0/7"); v != nil && v.kind == psNum {
-		ts.Kerning = int(v.num)
+	if v := codec.PsPath(root, "/1/1/0/0/7"); v != nil && v.Kind == codec.PsNum {
+		ts.Kerning = int(v.Num)
 	}
 
 	return ts, ""
 }
 
 // decodeStyleRun extracts one entry of /1/1[0]/0/6/0[i] into a TextStyleRun.
-func decodeStyleRun(entry *psValue, fonts []string) TextStyleRun {
+func decodeStyleRun(entry *codec.PsValue, fonts []string) TextStyleRun {
 	r := TextStyleRun{FontIndex: -1}
 	// Style block lives at entry/0/0/6 — pull it once and read all
 	// per-run keys off it.
-	style := psPath(entry, "/0/0/6")
-	if style == nil || style.kind != psDict {
+	style := codec.PsPath(entry, "/0/0/6")
+	if style == nil || style.Kind != codec.PsDict {
 		return r
 	}
-	if v := psStep(style, "0"); v != nil && v.kind == psNum {
-		r.FontIndex = int(v.num)
+	if v := codec.PsStep(style, "0"); v != nil && v.Kind == codec.PsNum {
+		r.FontIndex = int(v.Num)
 	}
-	if v := psStep(style, "1"); v != nil && v.kind == psNum {
-		r.FontSize = v.num
+	if v := codec.PsStep(style, "1"); v != nil && v.Kind == codec.PsNum {
+		r.FontSize = v.Num
 	}
 	if r.FontIndex >= 0 && r.FontIndex < len(fonts) {
 		r.FontName = fonts[r.FontIndex]
 	}
-	if v := psStep(style, "2"); v != nil && v.kind == psBool {
-		r.FauxBold = v.bv
+	if v := codec.PsStep(style, "2"); v != nil && v.Kind == codec.PsBool {
+		r.FauxBold = v.Bv
 	}
-	if v := psStep(style, "3"); v != nil && v.kind == psBool {
-		r.FauxItalic = v.bv
+	if v := codec.PsStep(style, "3"); v != nil && v.Kind == codec.PsBool {
+		r.FauxItalic = v.Bv
 	}
-	if v := psStep(style, "4"); v != nil && v.kind == psBool {
-		r.AutoLeading = v.bv
+	if v := codec.PsStep(style, "4"); v != nil && v.Kind == codec.PsBool {
+		r.AutoLeading = v.Bv
 	}
-	if v := psStep(style, "5"); v != nil && v.kind == psNum {
-		r.Leading = v.num
+	if v := codec.PsStep(style, "5"); v != nil && v.Kind == codec.PsNum {
+		r.Leading = v.Num
 	}
-	if v := psStep(style, "6"); v != nil && v.kind == psNum {
-		r.HorizontalScale = v.num
+	if v := codec.PsStep(style, "6"); v != nil && v.Kind == codec.PsNum {
+		r.HorizontalScale = v.Num
 	}
-	if v := psStep(style, "7"); v != nil && v.kind == psNum {
-		r.VerticalScale = v.num
+	if v := codec.PsStep(style, "7"); v != nil && v.Kind == codec.PsNum {
+		r.VerticalScale = v.Num
 	}
-	if v := psStep(style, "8"); v != nil && v.kind == psNum {
-		r.Tracking = v.num
+	if v := codec.PsStep(style, "8"); v != nil && v.Kind == codec.PsNum {
+		r.Tracking = v.Num
 	}
-	if v := psStep(style, "9"); v != nil && v.kind == psNum {
-		r.BaselineShift = v.num
+	if v := codec.PsStep(style, "9"); v != nil && v.Kind == codec.PsNum {
+		r.BaselineShift = v.Num
 	}
-	if v := psStep(style, "36"); v != nil && v.kind == psNum {
-		r.Tsume = v.num
+	if v := codec.PsStep(style, "36"); v != nil && v.Kind == codec.PsNum {
+		r.Tsume = v.Num
 	}
-	r.FillColor = decodePaintColor(psPath(style, "/53"))
-	r.StrokeColor = decodePaintColor(psPath(style, "/54"))
-	if v := psStep(style, "57"); v != nil && v.kind == psBool {
-		r.ApplyStroke = v.bv
+	r.FillColor = decodePaintColor(codec.PsPath(style, "/53"))
+	r.StrokeColor = decodePaintColor(codec.PsPath(style, "/54"))
+	if v := codec.PsStep(style, "57"); v != nil && v.Kind == codec.PsBool {
+		r.ApplyStroke = v.Bv
 	}
-	if v := psStep(style, "63"); v != nil && v.kind == psNum {
-		r.StrokeWidth = v.num
+	if v := codec.PsStep(style, "63"); v != nil && v.Kind == codec.PsNum {
+		r.StrokeWidth = v.Num
 	}
 	// AE 24+ fields. Default values mirror what AE writes for a fresh
 	// run: caps/baseline both Normal (0), strokeOverFill true,
@@ -191,67 +192,67 @@ func decodeStyleRun(entry *psValue, fonts []string) TextStyleRun {
 	// digitSet Default (0).
 	r.StrokeOverFill = true
 	r.AutoKernType = TextAutoKernMetric
-	if v := psStep(style, "11"); v != nil && v.kind == psNum {
-		r.AutoKernType = TextAutoKernType(int(v.num))
+	if v := codec.PsStep(style, "11"); v != nil && v.Kind == codec.PsNum {
+		r.AutoKernType = TextAutoKernType(int(v.Num))
 	}
-	if v := psStep(style, "12"); v != nil && v.kind == psNum {
-		r.CapsOption = TextCapsOption(int(v.num))
+	if v := codec.PsStep(style, "12"); v != nil && v.Kind == codec.PsNum {
+		r.CapsOption = TextCapsOption(int(v.Num))
 	}
-	if v := psStep(style, "13"); v != nil && v.kind == psNum {
-		r.BaselineOption = TextBaselineOption(int(v.num))
+	if v := codec.PsStep(style, "13"); v != nil && v.Kind == codec.PsNum {
+		r.BaselineOption = TextBaselineOption(int(v.Num))
 	}
-	if v := psStep(style, "52"); v != nil && v.kind == psBool {
-		r.NoBreak = v.bv
+	if v := codec.PsStep(style, "52"); v != nil && v.Kind == codec.PsBool {
+		r.NoBreak = v.Bv
 	}
-	if v := psStep(style, "58"); v != nil && v.kind == psBool {
-		r.StrokeOverFill = v.bv
+	if v := codec.PsStep(style, "58"); v != nil && v.Kind == codec.PsBool {
+		r.StrokeOverFill = v.Bv
 	}
-	if v := psStep(style, "62"); v != nil && v.kind == psNum {
-		r.LineJoinType = TextLineJoinType(int(v.num))
+	if v := codec.PsStep(style, "62"); v != nil && v.Kind == codec.PsNum {
+		r.LineJoinType = TextLineJoinType(int(v.Num))
 	}
-	if v := psStep(style, "70"); v != nil && v.kind == psNum {
-		r.DigitSet = TextDigitSet(int(v.num))
+	if v := codec.PsStep(style, "70"); v != nil && v.Kind == codec.PsNum {
+		r.DigitSet = TextDigitSet(int(v.Num))
 	}
 	return r
 }
 
 // decodeParagraphStyle extracts one entry of /1/1[0]/0/5/0[i] into a
 // TextParagraph. Paragraph style block lives at entry/0/0/5.
-func decodeParagraphStyle(entry *psValue) TextParagraph {
+func decodeParagraphStyle(entry *codec.PsValue) TextParagraph {
 	p := TextParagraph{AutoHyphenate: true}
-	style := psPath(entry, "/0/0/5")
-	if style == nil || style.kind != psDict {
+	style := codec.PsPath(entry, "/0/0/5")
+	if style == nil || style.Kind != codec.PsDict {
 		return p
 	}
-	if v := psStep(style, "0"); v != nil && v.kind == psNum {
-		p.Justification = TextJustification(int(v.num))
+	if v := codec.PsStep(style, "0"); v != nil && v.Kind == codec.PsNum {
+		p.Justification = TextJustification(int(v.Num))
 	}
-	if v := psStep(style, "1"); v != nil && v.kind == psNum {
-		p.FirstLineIndent = v.num
+	if v := codec.PsStep(style, "1"); v != nil && v.Kind == codec.PsNum {
+		p.FirstLineIndent = v.Num
 	}
-	if v := psStep(style, "2"); v != nil && v.kind == psNum {
-		p.StartIndent = v.num
+	if v := codec.PsStep(style, "2"); v != nil && v.Kind == codec.PsNum {
+		p.StartIndent = v.Num
 	}
-	if v := psStep(style, "3"); v != nil && v.kind == psNum {
-		p.EndIndent = v.num
+	if v := codec.PsStep(style, "3"); v != nil && v.Kind == codec.PsNum {
+		p.EndIndent = v.Num
 	}
-	if v := psStep(style, "4"); v != nil && v.kind == psNum {
-		p.SpaceBefore = v.num
+	if v := codec.PsStep(style, "4"); v != nil && v.Kind == codec.PsNum {
+		p.SpaceBefore = v.Num
 	}
-	if v := psStep(style, "5"); v != nil && v.kind == psNum {
-		p.SpaceAfter = v.num
+	if v := codec.PsStep(style, "5"); v != nil && v.Kind == codec.PsNum {
+		p.SpaceAfter = v.Num
 	}
-	if v := psStep(style, "8"); v != nil && v.kind == psNum {
-		p.LeadingType = TextLeadingType(int(v.num))
+	if v := codec.PsStep(style, "8"); v != nil && v.Kind == codec.PsNum {
+		p.LeadingType = TextLeadingType(int(v.Num))
 	}
-	if v := psStep(style, "9"); v != nil && v.kind == psBool {
-		p.AutoHyphenate = v.bv
+	if v := codec.PsStep(style, "9"); v != nil && v.Kind == codec.PsBool {
+		p.AutoHyphenate = v.Bv
 	}
-	if v := psStep(style, "21"); v != nil && v.kind == psBool {
-		p.HangingRoman = v.bv
+	if v := codec.PsStep(style, "21"); v != nil && v.Kind == codec.PsBool {
+		p.HangingRoman = v.Bv
 	}
-	if v := psStep(style, "33"); v != nil && v.kind == psNum {
-		p.Direction = TextParagraphDirection(int(v.num))
+	if v := codec.PsStep(style, "33"); v != nil && v.Kind == codec.PsNum {
+		p.Direction = TextParagraphDirection(int(v.Num))
 	}
 	return p
 }
@@ -261,12 +262,12 @@ func decodeParagraphStyle(entry *psValue) TextParagraph {
 // array stores the rectangle as a 16-vertex polygon (4 corners ×
 // 4 anchor/tangent slots each), so we don't try to reconstruct the
 // individual corners — just snap to the AABB.
-func computeBounds(arr *psValue) [4]float64 {
+func computeBounds(arr *codec.PsValue) [4]float64 {
 	xmin, ymin := math.Inf(1), math.Inf(1)
 	xmax, ymax := math.Inf(-1), math.Inf(-1)
-	for i := 0; i+1 < len(arr.arr); i += 2 {
-		x := arr.arr[i].asNum()
-		y := arr.arr[i+1].asNum()
+	for i := 0; i+1 < len(arr.Arr); i += 2 {
+		x := arr.Arr[i].AsNum()
+		y := arr.Arr[i+1].AsNum()
 		if x < xmin {
 			xmin = x
 		}
@@ -290,16 +291,16 @@ func computeBounds(arr *psValue) [4]float64 {
 // shaped `<< /99 /SimplePaint /0 << /0 1 /1 [A R G B] >> >>`. Returns
 // the zero array if the dict is missing or shaped differently (e.g.
 // when AE uses a non-SimplePaint entry for gradients — not yet seen).
-func decodePaintColor(paint *psValue) [4]float64 {
-	arr := psPath(paint, "/0/1")
-	if arr == nil || arr.kind != psArr || len(arr.arr) != 4 {
+func decodePaintColor(paint *codec.PsValue) [4]float64 {
+	arr := codec.PsPath(paint, "/0/1")
+	if arr == nil || arr.Kind != codec.PsArr || len(arr.Arr) != 4 {
 		return [4]float64{}
 	}
 	// Source order is [A, R, G, B]; expose as [R, G, B, A].
-	a := arr.arr[0].asNum()
-	rr := arr.arr[1].asNum()
-	g := arr.arr[2].asNum()
-	b := arr.arr[3].asNum()
+	a := arr.Arr[0].AsNum()
+	rr := arr.Arr[1].AsNum()
+	g := arr.Arr[2].AsNum()
+	b := arr.Arr[3].AsNum()
 	return [4]float64{rr, g, b, a}
 }
 

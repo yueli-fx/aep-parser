@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -28,7 +29,7 @@ func destFootageByPath(p *Project, path string) *Footage {
 }
 
 // locateItemBlockByID searches container.Children (recursing into folder Sfdr
-// sub-containers) for the Item LIST whose idta item-ID (@idtaItemID) equals id.
+// sub-containers) for the Item LIST whose idta item-ID (@codec.IdtaItemID) equals id.
 // On match it returns the CONTAINER holding the Item plus [start, end) covering
 // the Item LIST and its trailing non-Item sibling run within that container.
 // Returns (nil, -1, -1) if not found. Recursion handles items nested in project
@@ -41,8 +42,8 @@ func locateItemBlockByID(container *rifx.Chunk, id uint32) (*rifx.Chunk, int, in
 			continue
 		}
 		idta := ch.FindFirst(rifx.IDIdta)
-		if idta != nil && len(idta.Data) >= idtaItemID+4 &&
-			binary.BigEndian.Uint32(idta.Data[idtaItemID:idtaItemID+4]) == id {
+		if idta != nil && len(idta.Data) >= codec.IdtaItemID+4 &&
+			binary.BigEndian.Uint32(idta.Data[codec.IdtaItemID:codec.IdtaItemID+4]) == id {
 			end := i + 1
 			for end < len(children) && !isItemList(children[end]) {
 				end++
@@ -60,7 +61,7 @@ func locateItemBlockByID(container *rifx.Chunk, id uint32) (*rifx.Chunk, int, in
 }
 
 // importFootageBlock deep-clones srcID's footage Item block from src's root
-// Fold into dest's root Fold with a fresh dest item ID (idta @idtaItemID),
+// Fold into dest's root Fold with a fresh dest item ID (idta @codec.IdtaItemID),
 // parses it into dest.Footage, and returns the new dest item ID. On error the
 // CALLER (insertLayerCrossProject) restores dest via its outer snapshot — this
 // helper does not self-rollback.
@@ -72,10 +73,10 @@ func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, 
 	dup := deepCloneChunk(container.Children[start])
 	destID := dest.allocItemID()
 	idta := dup.FindFirst(rifx.IDIdta)
-	if idta == nil || len(idta.Data) < idtaItemID+4 {
+	if idta == nil || len(idta.Data) < codec.IdtaItemID+4 {
 		return 0, fmt.Errorf("cloned footage id=%d idta missing/short", srcID)
 	}
-	binary.BigEndian.PutUint32(idta.Data[idtaItemID:idtaItemID+4], destID)
+	binary.BigEndian.PutUint32(idta.Data[codec.IdtaItemID:codec.IdtaItemID+4], destID)
 	destRoot := dest.back.rootFold
 	destRoot.Children = append(destRoot.Children, dup)
 	for k := start + 1; k < end; k++ {
@@ -186,11 +187,11 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 			dup := deepCloneChunk(container.Children[start])
 			destID := destProj.allocItemID()
 			idta := dup.FindFirst(rifx.IDIdta)
-			if idta == nil || len(idta.Data) < idtaItemID+4 {
+			if idta == nil || len(idta.Data) < codec.IdtaItemID+4 {
 				rollback()
 				return nil, fmt.Errorf("InsertLayer: cloned comp id=%d idta missing/short", srcID)
 			}
-			binary.BigEndian.PutUint32(idta.Data[idtaItemID:idtaItemID+4], destID)
+			binary.BigEndian.PutUint32(idta.Data[codec.IdtaItemID:codec.IdtaItemID+4], destID)
 			layrs, err := remapClonedCompLayerLayrs(destProj, dup)
 			if err != nil {
 				rollback()

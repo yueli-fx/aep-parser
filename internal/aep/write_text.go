@@ -5,9 +5,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"strconv"
+
+	"github.com/example/aep-parser/internal/codec"
 )
 
-// Text per-run write API. Each setter targets one psValue node inside
+// Text per-run write API. Each setter targets one codec.PsValue node inside
 // the btdk PostScript dict and splices new bytes in. The btdk chunk
 // (and ancestor LIST sizes) are length-variable — WriteAEP recomputes
 // the parent sizes from chunk Data lengths.
@@ -22,7 +24,7 @@ import (
 // Setters are placed on Layer (not TextSource or TextStyleRun) to keep
 // the call site discoverable alongside SetText.
 
-// splicePSValue locates the psValue at `path` (relative to the btdk
+// splicePSValue locates the codec.PsValue at `path` (relative to the btdk
 // root dict, e.g. "/1/1/0/0/6/0/0/0/0/6/1") and replaces its on-disk
 // bytes with newSrc. Returns an error if the path doesn't resolve or
 // the layer has no decoded text source.
@@ -34,19 +36,19 @@ func (l *Layer) splicePSValue(path string, newSrc []byte) error {
 	if err != nil {
 		return fmt.Errorf("layer %q: %w", l.Name, err)
 	}
-	root := parsePSDict(body)
+	root := codec.ParsePSDict(body)
 	if root == nil {
 		return fmt.Errorf("layer %q: btdk dict empty", l.Name)
 	}
-	target := psPath(root, path)
+	target := codec.PsPath(root, path)
 	if target == nil {
-		return fmt.Errorf("layer %q: no psValue at %q", l.Name, path)
+		return fmt.Errorf("layer %q: no codec.PsValue at %q", l.Name, path)
 	}
-	if target.srcEnd <= target.srcStart {
+	if target.SrcEnd <= target.SrcStart {
 		return fmt.Errorf("layer %q: target at %q has zero-width src range", l.Name, path)
 	}
-	absStart := bodyOff + target.srcStart
-	absEnd := bodyOff + target.srcEnd
+	absStart := bodyOff + target.SrcStart
+	absEnd := bodyOff + target.SrcEnd
 	delta := len(newSrc) - (absEnd - absStart)
 
 	old := l.back.btdsChunk.Data
@@ -190,7 +192,7 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 
 // SetRunFontIndex repoints style run #runIdx at a different entry in
 // the Fonts table (TextSource.Fonts). Caller is responsible for ensuring
-// the index is in range; the underlying psValue is just an integer.
+// the index is in range; the underlying codec.PsValue is just an integer.
 func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -412,24 +414,24 @@ func (l *Layer) AddFont(fontName string) (int, error) {
 	if err != nil {
 		return -1, fmt.Errorf("layer %q: %w", l.Name, err)
 	}
-	root := parsePSDict(body)
+	root := codec.ParsePSDict(body)
 	if root == nil {
 		return -1, fmt.Errorf("layer %q: btdk dict empty", l.Name)
 	}
-	arr := psPath(root, "/0/1/0")
-	if arr == nil || arr.kind != psArr {
+	arr := codec.PsPath(root, "/0/1/0")
+	if arr == nil || arr.Kind != codec.PsArr {
 		return -1, fmt.Errorf("layer %q: Fonts array at /0/1/0 not found", l.Name)
 	}
 	// We splice just inside the closing `]`. Find the array's last
 	// child srcEnd and insert " <new>" between it and `]`. When the
 	// array is empty (rare), insert directly after `[`.
 	var insertAt int
-	if len(arr.arr) == 0 {
-		// arr.srcStart points at the `[`; insert one byte after.
-		insertAt = arr.srcStart + 1
+	if len(arr.Arr) == 0 {
+		// arr.SrcStart points at the `[`; insert one byte after.
+		insertAt = arr.SrcStart + 1
 	} else {
-		last := arr.arr[len(arr.arr)-1]
-		insertAt = last.srcEnd
+		last := arr.Arr[len(arr.Arr)-1]
+		insertAt = last.SrcEnd
 	}
 	newEntry := serializeFontEntry(fontName)
 
@@ -458,7 +460,7 @@ func (l *Layer) AddFont(fontName string) (int, error) {
 	if ts != nil {
 		l.TextSource = ts
 	}
-	return len(arr.arr), nil // index of newly-added font (was len-1 + 1 → len of old)
+	return len(arr.Arr), nil // index of newly-added font (was len-1 + 1 → len of old)
 }
 
 // serializeFontEntry renders a CoolTypeFont entry in the shape AE
