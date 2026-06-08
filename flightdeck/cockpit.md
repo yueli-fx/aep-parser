@@ -26,9 +26,12 @@
 
 ## 下一步（P3 物理分包）
 
-1. **P3** git mv 物理拆包（编译期硬边界）：`scene_*.go`→`internal/scene`、`{parse_,lower_,write_,back_,mutate_}*.go`→`internal/serializer`、`internal/aep` 收为薄 facade。逐 task：3.1 建 scene 包（迁类型+accessor+writers 接口+WriteJSON，处理 export 可见性、DAG 断言 scene⊥rifx）→ 3.2 建 serializer 包（迁 parse/lower/write/back/mutate，核 init/global-var 顺序）→ 3.3 收 aep 为 facade（Open/New* re-export + 类型别名）。**关键 P3 待解**：OM/RQ/PropertyGroup 的 concrete back 跨包后需统一解耦（接口 or 导出 accessor，Task 3.1 Step 2）；结构性 op（AddItem/RemoveItem/InsertKeyframe/DeleteKeyframe/SetDimensionsSeparated/New*/Delete* 等）的 method-vs-free-function + public API 保全（spec 开放题）。每 task 独立 commit + byte-identical + DAG 断言。
-2. **P4** 下游切换 + 退役 AST 守卫（scene⊥rifx 改编译期保证）+ CLAUDE.md 多包描述 + 双版本 ship-gate 终验。
-3. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
+**P3 关键决议**（2026-06-09 用户拍板）：「mechanical git mv」假设证伪——结构性 op 是 scene 方法但需 serializer 访问 backref（跨包=import 环），且多为 Stable ship-gated，spec §2.4/§F D-U3 的「改 free function」会破 Stable 签名。用户**批准破原 #2 约束 + 写新约束**（commit 2ef731e：CLAUDE.md #2 新增「结构性 op 语义稳定、调用形态可随分包改 facade 自由函数，标 BREAKING 不算违约」）。→ 采 **Path B**（结构性 op → serializer 自由函数 + facade re-export）。
+
+1. **P3.0（新前置）：结构性 op method→free function**（单包内先转，保绿 + byte-identical，每类型独立 commit，BREAKING 标注 + 更 commits.md API 表）。范围：`Composition.{NewComposition?/NewShapeLayer/DeleteLayer/MoveLayer/InsertLayer/DuplicateLayer/AddMarker}`、`Marker.Remove`、`RenderQueue.{AddItem,RemoveItem}`、`Property.{InsertKeyframe,DeleteKeyframe,SetDimensionsSeparated}`、`AEPropertyGroup.{Remove,MoveTo}`、`Layer.{MoveToBeginning/End/After/Before,ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`、`DuplicateComposition`。转后 scene_*.go 再无结构性方法引用 concrete backref → P3.1-3.3 git-mv 变机械。**注**：纯图构造（VectorGroup.AddRect 等，detached 无 chunk）留 scene。
+2. **P3.1-3.3** git mv 物理拆包：`scene_*.go`→`internal/scene`、`{parse_,lower_,write_,back_,mutate_}*.go`→`internal/serializer`、`internal/aep` 薄 facade（类型别名 + Open/FromReader + 全部结构性自由函数 re-export）。处理 export 可见性（AttachWriter plumbing 导出）、init/global-var 顺序、DAG 断言。OM/RQ/PropertyGroup concrete back 跨包后随 mutate_/back_ 迁 serializer（同包，无需接口）。
+3. **P4** 下游切换 + 退役 AST 守卫（scene⊥rifx 改编译期保证）+ CLAUDE.md #3 多包描述 + 双版本 ship-gate 终验。
+4. docgen 次要 follow-on（非阻塞）。
 
 ## Backlog（单条候选）
 
