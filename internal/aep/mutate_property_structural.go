@@ -68,8 +68,8 @@ func childPayloadChunk(c PropertyBase) *rifx.Chunk {
 	case *AEPropertyGroup:
 		return v.back.chunk
 	case *Property:
-		if v.back != nil {
-			return v.back.tdbs
+		if pb := v.propertyBack(); pb != nil {
+			return pb.tdbs
 		}
 	}
 	return nil

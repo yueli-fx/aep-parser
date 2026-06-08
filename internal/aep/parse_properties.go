@@ -159,7 +159,9 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 		}
 	} else if cdat := tdbs.FindFirst(rifx.IDCdat); cdat != nil && len(cdat.Data) >= 24 {
 		// Static: the cdat value is little-endian inside an otst.
-		prop.back.cdat = cdat
+		if pb := prop.propertyBack(); pb != nil {
+			pb.cdat = cdat
+		}
 		prop.StaticValue = decodeCdatValueLE(cdat.Data, 3)
 	}
 	return prop
@@ -257,29 +259,30 @@ func descend(c *rifx.Chunk, parentName string, out *[]*Property, ctx *parseCtx) 
 // Property.Expression.
 func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Property {
 	prop := &Property{MatchName: matchName, Name: matchName, Components: 1, back: &propertyBackrefs{}}
+	pb := prop.propertyBack()
 
 	if tdb4 := tdbs.FindFirst(rifx.IDtdb4); tdb4 != nil {
 		prop.Components = decodeTdb4Components(tdb4.Data)
-		prop.back.tdb4 = tdb4
+		pb.tdb4 = tdb4
 	}
 	// Some shape primitive paths use uppercase IDTdb4 — record either.
-	if prop.back.tdb4 == nil {
+	if pb.tdb4 == nil {
 		if tdb4 := tdbs.FindFirst(rifx.IDTdb4); tdb4 != nil {
-			prop.back.tdb4 = tdb4
+			pb.tdb4 = tdb4
 		}
 	}
 
 	// Parse tdsb subprop flags chunk (4 bytes) if present.
 	if tdsb := tdbs.FindFirst(rifx.IDTdsb); tdsb != nil {
-		prop.back.tdsb = tdsb
+		pb.tdsb = tdsb
 	}
 
 	// Parse tdum/tduM min/max value chunks if present.
 	if tdum := tdbs.FindFirst(rifx.IDtdum); tdum != nil {
-		prop.back.tdum = tdum
+		pb.tdum = tdum
 	}
 	if tduM := tdbs.FindFirst(rifx.IDtduM); tduM != nil {
-		prop.back.tduM = tduM
+		pb.tduM = tduM
 	}
 
 	cdat := tdbs.FindFirst(rifx.IDCdat)
@@ -292,10 +295,10 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 	}
 
 	// Expression: a Utf8 chunk inside the tdbs (sibling to tdb4/cdat).
-	prop.back.tdbs = tdbs
+	pb.tdbs = tdbs
 	if utf8 := tdbs.FindFirst(rifx.IDUtf8); utf8 != nil {
 		prop.Expression = utf8.Text()
-		prop.back.exprChunk = utf8
+		pb.exprChunk = utf8
 	}
 
 	// ExpressionEnabled: tdb4 @0x78 is an INVERTED "disabled" byte —
@@ -318,7 +321,7 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 			parseKeyframes(prop, lhd3, ldat, ctx)
 		}
 	} else if cdat != nil && len(cdat.Data) >= 8 {
-		prop.back.cdat = cdat
+		pb.cdat = cdat
 		prop.StaticValue = decodeCdatValue(cdat.Data, prop.Components)
 	} else if prop.Expression == "" {
 		// Nothing useful in this tdbs.

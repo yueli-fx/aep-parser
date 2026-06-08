@@ -43,9 +43,11 @@ type Property struct {
 	// properties.
 	Gradient *Gradient
 
-	// back holds the underlying RIFX chunk refs that power length-preserving
-	// writes. nil for properties built outside the parser. See back_property.go.
-	back *propertyBackrefs
+	// back holds the writer interface for length-preserving / expression
+	// setters. Concrete chunk access (keyframe-stream ops, separate-dimensions,
+	// flag readers, parse) goes through propertyBack. nil for properties built
+	// outside the parser. See back_property.go.
+	back PropertyWriter
 
 	// parentTreeGroup is the AEPropertyGroup that contains this leaf in
 	// the layer's hierarchical property tree (P2c). Populated by
@@ -54,6 +56,17 @@ type Property struct {
 	// mask sub-properties — those live in Effect.Parameters / Mask, not
 	// in the layer's top-level tdgp tree).
 	parentTreeGroup *AEPropertyGroup
+}
+
+// propertyBack returns the concrete back-refs for raw chunk access (keyframe
+// stream ops, separate-dimensions structural splice, tdb4/tdsb flag readers,
+// parse wiring) during M8 P2 — the back field holds the PropertyWriter
+// interface; these reads type-assert until P3 splits scene/serializer.
+func (p *Property) propertyBack() *propertyBackrefs {
+	if pb, ok := p.back.(*propertyBackrefs); ok {
+		return pb
+	}
+	return nil
 }
 
 // PropertyControlType identifies the UI control type for a property

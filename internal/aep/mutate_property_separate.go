@@ -37,14 +37,15 @@ func (p *Property) SetDimensionsSeparated(separated bool) error {
 	if p.MatchName != MatchNamePosition {
 		return fmt.Errorf("SetDimensionsSeparated: only %q can be separated (got %q)", MatchNamePosition, p.MatchName)
 	}
-	if p.back == nil || p.back.tdsb == nil {
+	pb := p.propertyBack()
+	if pb == nil || pb.tdsb == nil {
 		return fmt.Errorf("SetDimensionsSeparated: Position built outside parser (no tdsb back-ref)")
 	}
 	if p.Components != 3 {
 		return fmt.Errorf("SetDimensionsSeparated: only 3-component Position supported (Components=%d)", p.Components)
 	}
-	if len(p.back.tdsb.Data) < 4 {
-		return fmt.Errorf("SetDimensionsSeparated: Position tdsb too short (tdsb=%d)", len(p.back.tdsb.Data))
+	if len(pb.tdsb.Data) < 4 {
+		return fmt.Errorf("SetDimensionsSeparated: Position tdsb too short (tdsb=%d)", len(pb.tdsb.Data))
 	}
 	grp := p.parentTreeGroup
 	if grp == nil || grp.back.chunk == nil {
@@ -60,11 +61,11 @@ func (p *Property) SetDimensionsSeparated(separated bool) error {
 	// of an animated-separated Position (leader is static-default with a cdat,
 	// followers animated) falls through to mergePosition, which detects the
 	// animated followers and routes to mergePositionAnimated.
-	if separated && p.back.cdat == nil && len(p.Keyframes) > 0 {
+	if separated && pb.cdat == nil && len(p.Keyframes) > 0 {
 		return p.separatePositionAnimated(grp, layer)
 	}
-	if p.back.cdat == nil || len(p.back.cdat.Data) < 24 {
-		return fmt.Errorf("SetDimensionsSeparated: Position cdat too short or absent (cdat=%v)", p.back.cdat != nil)
+	if pb.cdat == nil || len(pb.cdat.Data) < 24 {
+		return fmt.Errorf("SetDimensionsSeparated: Position cdat too short or absent (cdat=%v)", pb.cdat != nil)
 	}
 
 	if separated {
@@ -96,13 +97,15 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 		return fmt.Errorf("SetDimensionsSeparated: Position_2 already present")
 	}
 	for _, f := range []*Property{pos0, pos1} {
-		if f.back == nil || f.back.tdsb == nil || f.back.cdat == nil || f.back.tdbs == nil {
+		fb := f.propertyBack()
+		if fb == nil || fb.tdsb == nil || fb.cdat == nil || fb.tdbs == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing back-refs", f.MatchName)
 		}
-		if len(f.back.tdsb.Data) < 4 || len(f.back.cdat.Data) < 8 {
+		if len(fb.tdsb.Data) < 4 || len(fb.cdat.Data) < 8 {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q tdsb/cdat too short", f.MatchName)
 		}
 	}
+	pb, pos0b, pos1b := p.propertyBack(), pos0.propertyBack(), pos1.propertyBack()
 
 	// Synthesize the Z follower up front (3D only) — the lone fallible step.
 	var newTdmn, newTdbs *rifx.Chunk
@@ -110,7 +113,7 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 	var insertAt int
 	if layer.Is3D {
 		groupChildren := grp.back.chunk.Children
-		pos1TdbsIdx := indexOfChunk(groupChildren, pos1.back.tdbs)
+		pos1TdbsIdx := indexOfChunk(groupChildren, pos1b.tdbs)
 		if pos1TdbsIdx < 1 {
 			return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
 		}
@@ -120,7 +123,7 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 		}
 		newTdmn = deepCloneChunk(pos1Tdmn)
 		writeTdmnName(newTdmn, MatchNamePosition2)
-		newTdbs = deepCloneChunk(pos1.back.tdbs)
+		newTdbs = deepCloneChunk(pos1b.tdbs)
 		newCdat := newTdbs.FindFirst(rifx.IDCdat)
 		newTdsb := newTdbs.FindFirst(rifx.IDTdsb)
 		if newCdat == nil || newTdsb == nil || len(newCdat.Data) < 8 || len(newTdsb.Data) < 4 {
@@ -144,18 +147,18 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 	}
 
 	// === Commit: in-place byte mutations (all bounds pre-validated) ===
-	p.back.tdsb.Data[2] = 0x08
-	p.back.tdsb.Data[3] |= 0x02
-	binary.BigEndian.PutUint64(p.back.cdat.Data[0:8], math.Float64bits(def[0]))
-	binary.BigEndian.PutUint64(p.back.cdat.Data[8:16], math.Float64bits(def[1]))
-	binary.BigEndian.PutUint64(p.back.cdat.Data[16:24], math.Float64bits(def[2]))
+	pb.tdsb.Data[2] = 0x08
+	pb.tdsb.Data[3] |= 0x02
+	binary.BigEndian.PutUint64(pb.cdat.Data[0:8], math.Float64bits(def[0]))
+	binary.BigEndian.PutUint64(pb.cdat.Data[8:16], math.Float64bits(def[1]))
+	binary.BigEndian.PutUint64(pb.cdat.Data[16:24], math.Float64bits(def[2]))
 	p.StaticValue = []float64{def[0], def[1], def[2]}
 
-	pos0.back.tdsb.Data[3] &^= 0x02
-	binary.BigEndian.PutUint64(pos0.back.cdat.Data[0:8], math.Float64bits(xyz[0]))
+	pos0b.tdsb.Data[3] &^= 0x02
+	binary.BigEndian.PutUint64(pos0b.cdat.Data[0:8], math.Float64bits(xyz[0]))
 	pos0.StaticValue = xyz[0]
-	pos1.back.tdsb.Data[3] &^= 0x02
-	binary.BigEndian.PutUint64(pos1.back.cdat.Data[0:8], math.Float64bits(xyz[1]))
+	pos1b.tdsb.Data[3] &^= 0x02
+	binary.BigEndian.PutUint64(pos1b.cdat.Data[0:8], math.Float64bits(xyz[1]))
 	pos1.StaticValue = xyz[1]
 
 	if pos2 != nil {
@@ -207,7 +210,8 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 	if !layer.Is3D {
 		return fmt.Errorf("SetDimensionsSeparated: animated Position separate currently supports 3D layers only")
 	}
-	if p.back.tdbs == nil || p.back.tdb4 == nil || len(p.back.tdb4.Data) <= 0x4f {
+	pb := p.propertyBack()
+	if pb == nil || pb.tdbs == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
 		return fmt.Errorf("SetDimensionsSeparated: animated leader missing tdbs/tdb4 back-refs")
 	}
 	def, ok := p.DefaultValue.([]float64)
@@ -248,18 +252,20 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 		return fmt.Errorf("SetDimensionsSeparated: Position_2 already present")
 	}
 	for _, f := range []*Property{pos0, pos1} {
-		if f.back == nil || f.back.tdsb == nil || f.back.cdat == nil || f.back.tdbs == nil || f.back.tdb4 == nil {
+		fb := f.propertyBack()
+		if fb == nil || fb.tdsb == nil || fb.cdat == nil || fb.tdbs == nil || fb.tdb4 == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing back-refs", f.MatchName)
 		}
-		if len(f.back.tdb4.Data) <= 0x44 || len(f.back.tdsb.Data) < 4 {
+		if len(fb.tdb4.Data) <= 0x44 || len(fb.tdsb.Data) < 4 {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q tdb4/tdsb too short", f.MatchName)
 		}
 	}
+	pos1b := pos1.propertyBack()
 
 	// Locate the leader's kf stream LIST + the Position_1 tdmn/tdbs splice
 	// point up front (pre-commit; refuse rather than half-mutate).
 	leaderKflIdx := -1
-	for j, ch := range p.back.tdbs.Children {
+	for j, ch := range pb.tdbs.Children {
 		if ch.IsList() && ch.FormType == rifx.IDkfl {
 			leaderKflIdx = j
 			break
@@ -269,7 +275,7 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 		return fmt.Errorf("SetDimensionsSeparated: animated leader has no kf stream to collapse")
 	}
 	groupChildren := grp.back.chunk.Children
-	pos1TdbsIdx := indexOfChunk(groupChildren, pos1.back.tdbs)
+	pos1TdbsIdx := indexOfChunk(groupChildren, pos1b.tdbs)
 	if pos1TdbsIdx < 1 {
 		return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
 	}
@@ -287,7 +293,7 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 	// Position_1's still-static tdbs, rename, convert to animated, re-parse.
 	newTdmn := deepCloneChunk(pos1Tdmn)
 	writeTdmnName(newTdmn, MatchNamePosition2)
-	newTdbs := deepCloneChunk(pos1.back.tdbs)
+	newTdbs := deepCloneChunk(pos1b.tdbs)
 	if err := convertFollowerTdbsToAnimated(newTdbs, kfl2); err != nil {
 		return fmt.Errorf("SetDimensionsSeparated: synthesize Position_2: %w", err)
 	}
@@ -312,16 +318,16 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 
 	// === Commit: in-place byte mutations (all bounds pre-validated) ===
 	// Leader: animated → static-default + separated flags.
-	p.back.tdsb.Data[2] = 0x08
-	p.back.tdsb.Data[3] |= 0x02
-	p.back.tdb4.Data[0x05] |= 0x01
-	p.back.tdb4.Data[0x44] = 0x00
-	p.back.tdb4.Data[0x4f] |= 0x01
-	p.back.tdbs.Children[leaderKflIdx] = leaderCdat
-	p.back.cdat = leaderCdat
-	p.back.lhd3 = nil
-	p.back.ldat = nil
-	p.back.bytesPerKF = 0
+	pb.tdsb.Data[2] = 0x08
+	pb.tdsb.Data[3] |= 0x02
+	pb.tdb4.Data[0x05] |= 0x01
+	pb.tdb4.Data[0x44] = 0x00
+	pb.tdb4.Data[0x4f] |= 0x01
+	pb.tdbs.Children[leaderKflIdx] = leaderCdat
+	pb.cdat = leaderCdat
+	pb.lhd3 = nil
+	pb.ldat = nil
+	pb.bytesPerKF = 0
 	p.Keyframes = nil
 	p.StaticValue = []float64{def[0], def[1], def[2]}
 
@@ -487,16 +493,17 @@ func convertFollowerTdbsToAnimated(tdbs, kfl *rifx.Chunk) error {
 // Property to animated in place (chunks + scene state), using its parsed
 // back-refs. All bounds are pre-validated by the caller, so it is infallible.
 func convertFollowerToAnimated(f *Property, kfl *rifx.Chunk, ctx *parseCtx) {
-	f.back.tdb4.Data[0x05] &^= 0x01
-	f.back.tdb4.Data[0x44] = 0x01
-	f.back.tdsb.Data[3] &^= 0x02
-	for j, ch := range f.back.tdbs.Children {
+	fb := f.propertyBack()
+	fb.tdb4.Data[0x05] &^= 0x01
+	fb.tdb4.Data[0x44] = 0x01
+	fb.tdsb.Data[3] &^= 0x02
+	for j, ch := range fb.tdbs.Children {
 		if ch.ID == rifx.IDCdat {
-			f.back.tdbs.Children[j] = kfl
+			fb.tdbs.Children[j] = kfl
 			break
 		}
 	}
-	f.back.cdat = nil
+	fb.cdat = nil
 	f.StaticValue = nil
 	parseKeyframes(f, kfl.FindFirst(rifx.IDLhd3), kfl.FindFirst(rifx.IDLdat), ctx)
 }
@@ -523,7 +530,7 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 		if f == nil {
 			continue
 		}
-		if f.back == nil || f.back.tdbs == nil {
+		if fb := f.propertyBack(); fb == nil || fb.tdbs == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing tdbs back-ref", mn)
 		}
 		v, ok := f.StaticValue.(float64)
@@ -538,11 +545,12 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 	}
 
 	// === Commit: leader takes the value + clears separated flags ===
-	p.back.tdsb.Data[2] = 0x00
-	p.back.tdsb.Data[3] &^= 0x02
-	binary.BigEndian.PutUint64(p.back.cdat.Data[0:8], math.Float64bits(axisVal[0]))
-	binary.BigEndian.PutUint64(p.back.cdat.Data[8:16], math.Float64bits(axisVal[1]))
-	binary.BigEndian.PutUint64(p.back.cdat.Data[16:24], math.Float64bits(axisVal[2]))
+	pb := p.propertyBack()
+	pb.tdsb.Data[2] = 0x00
+	pb.tdsb.Data[3] &^= 0x02
+	binary.BigEndian.PutUint64(pb.cdat.Data[0:8], math.Float64bits(axisVal[0]))
+	binary.BigEndian.PutUint64(pb.cdat.Data[8:16], math.Float64bits(axisVal[1]))
+	binary.BigEndian.PutUint64(pb.cdat.Data[16:24], math.Float64bits(axisVal[2]))
 	p.StaticValue = []float64{axisVal[0], axisVal[1], axisVal[2]}
 
 	removeFollowerChunks(grp, followers)
@@ -570,7 +578,8 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 // Atomicity: all fallible work (validation + stream construction + locating the
 // leader cdat) runs before any in-place mutation.
 func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
-	if p.back.tdbs == nil || p.back.tdb4 == nil || len(p.back.tdb4.Data) <= 0x4f {
+	pb := p.propertyBack()
+	if pb == nil || pb.tdbs == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
 		return fmt.Errorf("SetDimensionsSeparated: separated leader missing tdbs/tdb4 back-refs")
 	}
 	pos0 := grp.Property(MatchNamePosition0)
@@ -594,7 +603,7 @@ func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
 		return fmt.Errorf("SetDimensionsSeparated: animated follower tickRate unavailable")
 	}
 	for ai, f := range followers {
-		if f.back == nil || f.back.tdbs == nil {
+		if fb := f.propertyBack(); fb == nil || fb.tdbs == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing tdbs back-ref", f.MatchName)
 		}
 		if len(f.Keyframes) != n {
@@ -616,7 +625,7 @@ func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
 	leaderKfl := buildMergedLeaderKfl(followers, n, tickRate)
 
 	leaderCdatIdx := -1
-	for j, ch := range p.back.tdbs.Children {
+	for j, ch := range pb.tdbs.Children {
 		if ch.ID == rifx.IDCdat {
 			leaderCdatIdx = j
 			break
@@ -627,13 +636,13 @@ func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
 	}
 
 	// === Commit: static-default leader → animated; clear separated flags. ===
-	p.back.tdsb.Data[2] = 0x00
-	p.back.tdsb.Data[3] &^= 0x02
-	p.back.tdb4.Data[0x05] &^= 0x01
-	p.back.tdb4.Data[0x44] = 0x01
-	p.back.tdb4.Data[0x4f] &^= 0x01
-	p.back.tdbs.Children[leaderCdatIdx] = leaderKfl
-	p.back.cdat = nil
+	pb.tdsb.Data[2] = 0x00
+	pb.tdsb.Data[3] &^= 0x02
+	pb.tdb4.Data[0x05] &^= 0x01
+	pb.tdb4.Data[0x44] = 0x01
+	pb.tdb4.Data[0x4f] &^= 0x01
+	pb.tdbs.Children[leaderCdatIdx] = leaderKfl
+	pb.cdat = nil
 	p.StaticValue = nil
 	var warns []string
 	ctx := newParseCtx(tickRate, "", &warns)
@@ -687,11 +696,15 @@ func buildMergedLeaderKfl(followers []*Property, n int, tickRate float64) *rifx.
 func removeFollowerChunks(grp *AEPropertyGroup, followers []*Property) {
 	remove := make(map[*rifx.Chunk]bool, len(followers)*2)
 	for _, f := range followers {
-		idx := indexOfChunk(grp.back.chunk.Children, f.back.tdbs)
+		fb := f.propertyBack()
+		if fb == nil {
+			continue
+		}
+		idx := indexOfChunk(grp.back.chunk.Children, fb.tdbs)
 		if idx < 0 {
 			continue
 		}
-		remove[f.back.tdbs] = true
+		remove[fb.tdbs] = true
 		if idx >= 1 && grp.back.chunk.Children[idx-1].ID == rifx.IDTdmn {
 			remove[grp.back.chunk.Children[idx-1]] = true
 		}

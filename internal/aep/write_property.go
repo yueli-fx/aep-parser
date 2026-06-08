@@ -83,10 +83,11 @@ func (p *Property) SetExpressionEnabled(enabled bool) error {
 // are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent
 // on the returned Keyframe to refine.
 func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, error) {
-	if p.back == nil || p.back.ldat == nil || p.back.lhd3 == nil {
+	pb := p.propertyBack()
+	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return nil, -1, fmt.Errorf("property %q: no existing keyframes (insert from scratch not supported)", p.MatchName)
 	}
-	if p.back.bytesPerKF <= 0 {
+	if pb.bytesPerKF <= 0 {
 		return nil, -1, fmt.Errorf("property %q: bytesPerKF is zero", p.MatchName)
 	}
 	if time < 0 {
@@ -114,11 +115,11 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 
 	// Build the new block: clone header byte @0x07 from an existing
 	// keyframe (sample[0]) so layout matches; zero everything else.
-	bpk := p.back.bytesPerKF
-	if len(p.back.ldat.Data) < bpk {
-		return nil, -1, fmt.Errorf("property %q: ldat shorter than one block (%d bytes, bpk=%d)", p.MatchName, len(p.back.ldat.Data), bpk)
+	bpk := pb.bytesPerKF
+	if len(pb.ldat.Data) < bpk {
+		return nil, -1, fmt.Errorf("property %q: ldat shorter than one block (%d bytes, bpk=%d)", p.MatchName, len(pb.ldat.Data), bpk)
 	}
-	headerByte := p.back.ldat.Data[0x07]
+	headerByte := pb.ldat.Data[0x07]
 	block := make([]byte, bpk)
 	binary.BigEndian.PutUint32(block[0:4], uint32(math.Round(time*tickRate)))
 	block[0x04] = byte(InterpLinear)
@@ -150,17 +151,17 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 
 	// Splice the block into ldat at insertIdx * bpk.
 	splice := insertIdx * bpk
-	old := p.back.ldat.Data
+	old := pb.ldat.Data
 	newData := make([]byte, 0, len(old)+bpk)
 	newData = append(newData, old[:splice]...)
 	newData = append(newData, block...)
 	newData = append(newData, old[splice:]...)
-	p.back.ldat.Data = newData
+	pb.ldat.Data = newData
 
 	// Bump count in lhd3 @0x08.
-	if len(p.back.lhd3.Data) >= 0x0C {
-		newCount := binary.BigEndian.Uint32(p.back.lhd3.Data[0x08:0x0C]) + 1
-		binary.BigEndian.PutUint32(p.back.lhd3.Data[0x08:0x0C], newCount)
+	if len(pb.lhd3.Data) >= 0x0C {
+		newCount := binary.BigEndian.Uint32(pb.lhd3.Data[0x08:0x0C]) + 1
+		binary.BigEndian.PutUint32(pb.lhd3.Data[0x08:0x0C], newCount)
 	}
 
 	// Rebuild Property.Keyframes — the simplest correct path. Re-points
@@ -178,29 +179,30 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 // ldat stream and decrements the lhd3 count header. Returns an error
 // when i is out of range or the property has no keyframe stream.
 func (p *Property) DeleteKeyframe(i int) error {
-	if p.back == nil || p.back.ldat == nil || p.back.lhd3 == nil {
+	pb := p.propertyBack()
+	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return fmt.Errorf("property %q: no keyframe stream", p.MatchName)
 	}
 	if i < 0 || i >= len(p.Keyframes) {
 		return fmt.Errorf("property %q: keyframe index %d out of range [0,%d)", p.MatchName, i, len(p.Keyframes))
 	}
-	bpk := p.back.bytesPerKF
+	bpk := pb.bytesPerKF
 	splice := i * bpk
-	old := p.back.ldat.Data
+	old := pb.ldat.Data
 	if splice+bpk > len(old) {
 		return fmt.Errorf("property %q: ldat shorter than expected (off=%d, bpk=%d, len=%d)", p.MatchName, splice, bpk, len(old))
 	}
 	newData := make([]byte, 0, len(old)-bpk)
 	newData = append(newData, old[:splice]...)
 	newData = append(newData, old[splice+bpk:]...)
-	p.back.ldat.Data = newData
+	pb.ldat.Data = newData
 
-	if len(p.back.lhd3.Data) >= 0x0C {
-		newCount := binary.BigEndian.Uint32(p.back.lhd3.Data[0x08:0x0C])
+	if len(pb.lhd3.Data) >= 0x0C {
+		newCount := binary.BigEndian.Uint32(pb.lhd3.Data[0x08:0x0C])
 		if newCount > 0 {
 			newCount--
 		}
-		binary.BigEndian.PutUint32(p.back.lhd3.Data[0x08:0x0C], newCount)
+		binary.BigEndian.PutUint32(pb.lhd3.Data[0x08:0x0C], newCount)
 	}
 
 	tickRate := aeLegacyTimeBase
@@ -219,32 +221,33 @@ func (p *Property) DeleteKeyframe(i int) error {
 // ldat/lhd3 bytes. Used after InsertKeyframe / DeleteKeyframe so
 // Keyframe.offset / Value / etc. reflect the new stream layout.
 func (p *Property) reparseKeyframes(tickRate float64) error {
-	if p.back == nil || p.back.ldat == nil || p.back.lhd3 == nil {
+	pb := p.propertyBack()
+	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return fmt.Errorf("property %q: missing ldat/lhd3", p.MatchName)
 	}
-	if len(p.back.lhd3.Data) < 0x14 {
-		return fmt.Errorf("property %q: lhd3 too short (%d bytes)", p.MatchName, len(p.back.lhd3.Data))
+	if len(pb.lhd3.Data) < 0x14 {
+		return fmt.Errorf("property %q: lhd3 too short (%d bytes)", p.MatchName, len(pb.lhd3.Data))
 	}
-	count := int(binary.BigEndian.Uint32(p.back.lhd3.Data[0x08:0x0C]))
-	bpk := int(binary.BigEndian.Uint32(p.back.lhd3.Data[0x10:0x14]))
-	if count < 0 || bpk <= 0 || count*bpk > len(p.back.ldat.Data) {
-		return fmt.Errorf("property %q: lhd3 says count=%d bpk=%d but ldat has %d bytes", p.MatchName, count, bpk, len(p.back.ldat.Data))
+	count := int(binary.BigEndian.Uint32(pb.lhd3.Data[0x08:0x0C]))
+	bpk := int(binary.BigEndian.Uint32(pb.lhd3.Data[0x10:0x14]))
+	if count < 0 || bpk <= 0 || count*bpk > len(pb.ldat.Data) {
+		return fmt.Errorf("property %q: lhd3 says count=%d bpk=%d but ldat has %d bytes", p.MatchName, count, bpk, len(pb.ldat.Data))
 	}
-	p.back.bytesPerKF = bpk
+	pb.bytesPerKF = bpk
 	p.Keyframes = make([]*Keyframe, 0, count)
 	for i := 0; i < count; i++ {
 		off := i * bpk
 		kf := &Keyframe{
 			back: &keyframeBackrefs{
-				ldat:     p.back.ldat,
+				ldat:     pb.ldat,
 				offset:   off,
 				dims:     p.Components,
 				tickRate: tickRate,
 			},
 		}
-		kf.Time = float64(binary.BigEndian.Uint32(p.back.ldat.Data[off:off+4])) / tickRate
-		kf.Value = readKFValue(p.back.ldat.Data, off, p.Components)
-		decodeEasing(kf, p.back.ldat.Data[off:off+bpk])
+		kf.Time = float64(binary.BigEndian.Uint32(pb.ldat.Data[off:off+4])) / tickRate
+		kf.Value = readKFValue(pb.ldat.Data, off, p.Components)
+		decodeEasing(kf, pb.ldat.Data[off:off+bpk])
 		p.Keyframes = append(p.Keyframes, kf)
 	}
 	return nil
