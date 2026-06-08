@@ -12,7 +12,7 @@ import (
 // fixture. py-aep's gradient.json gives the expected schema (color
 // stops + alpha stops; version "4").
 func TestGradient_FixturePyAep(t *testing.T) {
-	path := "../../flightdeck/charts/py-aep/samples/models/property/gradient.aep"
+	path := "../../flightdeck/references/py-aep/samples/models/property/gradient.aep"
 	proj, err := aep.Open(path)
 	if err != nil {
 		t.Skipf("py-aep gradient.aep not present: %v", err)

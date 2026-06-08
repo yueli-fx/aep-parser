@@ -10,7 +10,7 @@ import (
 )
 
 // Golden values cross-checked against py-aep
-// flightdeck/charts/py-aep/samples/models/composition/guides.json.
+// flightdeck/references/py-aep/samples/models/composition/guides.json.
 // py-aep's orientationType is the logical enum (HORIZONTAL=0, VERTICAL=1);
 // our Orientation carries the binary code (2=horizontal, 1=vertical) and
 // .String() bridges the two. Comp "guides_both" 1920x1080: two horizontal

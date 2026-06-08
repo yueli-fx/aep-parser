@@ -11,7 +11,7 @@ import (
 )
 
 // Golden values cross-checked against py-aep
-// flightdeck/charts/py-aep/samples/models/renderqueue/*.json
+// flightdeck/references/py-aep/samples/models/renderqueue/*.json
 //
 // Note on time span: numItems_1 uses time_span_source=WORK_AREA_ONLY, so its
 // resolved duration depends on the composition's work area. py-aep's synthetic
