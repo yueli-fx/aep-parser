@@ -41,7 +41,7 @@ func parseGuides(item *rifx.Chunk) []*Guide {
 	}
 	guides := make([]*Guide, 0, n)
 	for i := 0; i < n; i++ {
-		block := ldat.Data[i*guideItemSize : (i+1)*guideItemSize]
+		block := append([]byte(nil), ldat.Data[i*guideItemSize:(i+1)*guideItemSize]...)
 		guides = append(guides, &Guide{
 			Orientation: GuideOrientation(binary.BigEndian.Uint32(block[0:4])),
 			Position:    math.Float64frombits(binary.BigEndian.Uint64(block[8:16])),

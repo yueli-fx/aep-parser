@@ -36,7 +36,9 @@ type Guide struct {
 	// horizontal guide, from the left edge for a vertical guide.
 	Position float64
 
-	// block aliases the guide's 16-byte slot inside the ldat chunk Data, for
-	// length-preserving setters. Nil for guides built outside the parser.
+	// block is this guide's scene-owned copy of its 16-byte GuideItem — the
+	// single source of truth. The length-preserving setters mutate this copy;
+	// syncGuides copies it back into the owning comp's Gide ldat slot (paired by
+	// index) at WriteAEP time. Nil for guides built outside the parser.
 	block []byte
 }

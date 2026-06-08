@@ -31,6 +31,7 @@ func (p *Project) WriteAEP(w io.Writer) error {
 		return fmt.Errorf("sync shape layers: %w", err)
 	}
 	p.syncRenderQueue()
+	p.syncGuides()
 	p.syncHeadCounters()
 	return p.back.WriteAEP(w)
 }
