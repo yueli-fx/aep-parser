@@ -62,7 +62,10 @@ func parseMasks(layr *rifx.Chunk, ctx *parseCtx) []*Mask {
 		}
 		if mkif != nil {
 			mask.MkifRaw = append([]byte(nil), mkif.Data...)
-			mask.back.mkif = mkif
+			if mb, ok := mask.back.(*maskBackrefs); ok {
+				mb.mkif = mkif
+				mb.maskName = mask.Name
+			}
 			decodeMkif(mask, mkif.Data)
 		}
 		mask.Opacity = 1.0 // default if no cdat
@@ -251,8 +254,8 @@ func fillFromShap(m *Mask, shap *rifx.Chunk) {
 		switch {
 		case ch.ID == rifx.IDShph:
 			m.ShphRaw = append([]byte(nil), ch.Data...)
-			if m.back.shph == nil {
-				m.back.shph = ch
+			if mb, ok := m.back.(*maskBackrefs); ok && mb.shph == nil {
+				mb.shph = ch
 			}
 			if len(ch.Data) >= 0x15 {
 				m.Closed = ch.Data[0x14] == 0x01

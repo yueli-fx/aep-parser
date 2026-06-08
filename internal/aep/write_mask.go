@@ -1,14 +1,10 @@
 package aep
 
-import (
-	"encoding/binary"
-	"fmt"
-)
+import "fmt"
 
 // Mask setters — length-preserving mkif / shph byte writes. Each
-// setter validates the underlying chunk is long enough for the target
-// offset, mutates the bytes in place, then syncs the matching Go
-// field. WriteAEP serializes the change.
+// setter delegates byte-patch work to maskBackrefs (MaskWriter), then
+// syncs the matching Go field. WriteAEP serializes the change.
 //
 // Note: vertex / path mutations are NOT supported here (requires
 // rewriting variable-length shap kfl streams).
@@ -16,13 +12,12 @@ import (
 // SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04.
 // length-preserving (4 bytes).
 func (m *Mask) SetMode(mode MaskMode) error {
-	if m.back == nil || m.back.mkif == nil {
+	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk (built outside parser?)", m.Name)
 	}
-	if len(m.back.mkif.Data) < 0x08 {
-		return fmt.Errorf("mask %q: mkif too short for Mode write (len=%d)", m.Name, len(m.back.mkif.Data))
+	if err := m.back.SetMode(mode); err != nil {
+		return err
 	}
-	binary.BigEndian.PutUint32(m.back.mkif.Data[0x04:0x08], uint32(mode))
 	m.Mode = mode
 	return nil
 }
@@ -30,16 +25,11 @@ func (m *Mask) SetMode(mode MaskMode) error {
 // SetInverted toggles the mask Inverted flag (mkif @0x00).
 // length-preserving (1 byte).
 func (m *Mask) SetInverted(v bool) error {
-	if m.back == nil || m.back.mkif == nil {
+	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
 	}
-	if len(m.back.mkif.Data) < 1 {
-		return fmt.Errorf("mask %q: mkif empty", m.Name)
-	}
-	if v {
-		m.back.mkif.Data[0x00] = 1
-	} else {
-		m.back.mkif.Data[0x00] = 0
+	if err := m.back.SetInverted(v); err != nil {
+		return err
 	}
 	m.Inverted = v
 	return nil
@@ -50,15 +40,12 @@ func (m *Mask) SetInverted(v bool) error {
 // this setter does not touch it.
 // length-preserving (3 bytes).
 func (m *Mask) SetColor(rgb [3]uint8) error {
-	if m.back == nil || m.back.mkif == nil {
+	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
 	}
-	if len(m.back.mkif.Data) < 0x30 {
-		return fmt.Errorf("mask %q: mkif too short for Color write (len=%d)", m.Name, len(m.back.mkif.Data))
+	if err := m.back.SetColor(rgb); err != nil {
+		return err
 	}
-	m.back.mkif.Data[0x2D] = rgb[0]
-	m.back.mkif.Data[0x2E] = rgb[1]
-	m.back.mkif.Data[0x2F] = rgb[2]
 	m.Color = rgb
 	return nil
 }
@@ -84,16 +71,11 @@ const (
 // mutable through this library.
 // length-preserving (1 byte).
 func (m *Mask) SetLocked(v bool) error {
-	if m.back == nil || m.back.mkif == nil {
+	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
 	}
-	if len(m.back.mkif.Data) < 2 {
-		return fmt.Errorf("mask %q: mkif too short for Locked write (len=%d)", m.Name, len(m.back.mkif.Data))
-	}
-	if v {
-		m.back.mkif.Data[0x01] = 1
-	} else {
-		m.back.mkif.Data[0x01] = 0
+	if err := m.back.SetLocked(v); err != nil {
+		return err
 	}
 	m.Locked = v
 	return nil
@@ -104,13 +86,12 @@ func (m *Mask) SetLocked(v bool) error {
 // MaskMotionBlurOn (2), MaskMotionBlurOff (3).
 // length-preserving (1 byte).
 func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error {
-	if m.back == nil || m.back.mkif == nil {
+	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
 	}
-	if len(m.back.mkif.Data) < 3 {
-		return fmt.Errorf("mask %q: mkif too short for MaskMotionBlur write (len=%d)", m.Name, len(m.back.mkif.Data))
+	if err := m.back.SetMaskMotionBlur(mode); err != nil {
+		return err
 	}
-	m.back.mkif.Data[0x02] = byte(mode)
 	m.MotionBlur = mode
 	return nil
 }
@@ -119,20 +100,17 @@ func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error {
 // length-preserving (1 byte). For animated masks this only affects
 // the first snapshot; per-keyframe closed flags aren't exposed yet.
 func (m *Mask) SetClosed(v bool) error {
-	if m.back == nil || m.back.shph == nil {
+	if m.back == nil {
 		return fmt.Errorf("mask %q: no shph chunk", m.Name)
 	}
-	if len(m.back.shph.Data) <= 0x14 {
-		return fmt.Errorf("mask %q: shph too short for Closed write (len=%d)", m.Name, len(m.back.shph.Data))
-	}
-	if v {
-		m.back.shph.Data[0x14] = 1
-	} else {
-		m.back.shph.Data[0x14] = 0
+	if err := m.back.SetClosed(v); err != nil {
+		return err
 	}
 	m.Closed = v
 	// Also refresh ShphRaw to mirror the new state for callers reading
 	// the cached snapshot.
-	m.ShphRaw = append([]byte(nil), m.back.shph.Data...)
+	if mb, ok := m.back.(*maskBackrefs); ok {
+		m.ShphRaw = append([]byte(nil), mb.shph.Data...)
+	}
 	return nil
 }

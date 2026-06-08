@@ -130,7 +130,7 @@ type Mask struct {
 	// back holds the chunk references behind SetMode / SetInverted / SetColor
 	// / SetClosed etc. (see back_mask.go). nil for masks built outside the
 	// parser; the setters refuse in that case.
-	back *maskBackrefs
+	back MaskWriter
 }
 
 // MaskPathKeyframe is one keyframe of an animated mask path. Time is in
