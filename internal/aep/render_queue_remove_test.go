@@ -24,7 +24,7 @@ func TestRenderQueueRemoveItem(t *testing.T) {
 		survivorComp = c.Name
 	}
 
-	if err := rq.RemoveItem(1); err != nil {
+	if err := aep.RemoveItem(rq, 1); err != nil {
 		t.Fatalf("RemoveItem(1): %v", err)
 	}
 	if rq.NumItems() != 1 {
@@ -85,7 +85,7 @@ func TestRenderQueueAddItem(t *testing.T) {
 		t.Fatal("fixture: comp RQB not found")
 	}
 
-	added, err := rq.AddItem(rqb)
+	added, err := aep.AddItem(rq, rqb)
 	if err != nil {
 		t.Fatalf("AddItem(RQB): %v", err)
 	}
@@ -131,7 +131,7 @@ func TestRenderQueueAddItem_Refuse(t *testing.T) {
 	if err != nil {
 		t.Skipf("re_rq_add_before.aep not present")
 	}
-	if _, err := proj.RenderQueue.AddItem(nil); err == nil {
+	if _, err := aep.AddItem(proj.RenderQueue, nil); err == nil {
 		t.Error("AddItem(nil) should refuse")
 	}
 }
@@ -143,10 +143,10 @@ func TestRenderQueueRemoveItem_Refuse(t *testing.T) {
 		t.Skipf("re_rq_delete_before.aep not present")
 	}
 	rq := proj.RenderQueue
-	if err := rq.RemoveItem(-1); err == nil {
+	if err := aep.RemoveItem(rq, -1); err == nil {
 		t.Error("RemoveItem(-1) should refuse")
 	}
-	if err := rq.RemoveItem(99); err == nil {
+	if err := aep.RemoveItem(rq, 99); err == nil {
 		t.Error("RemoveItem(99) should refuse")
 	}
 }

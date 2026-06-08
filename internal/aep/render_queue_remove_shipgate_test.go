@@ -42,7 +42,7 @@ func runRQRemoveShipGate(t *testing.T, aeExe, baseFixture string) {
 	if c := rq.Items[0].Comp; c != nil {
 		survivor = c.Name
 	}
-	if err := rq.RemoveItem(1); err != nil {
+	if err := aep.RemoveItem(rq, 1); err != nil {
 		t.Fatalf("RemoveItem(1): %v", err)
 	}
 
@@ -126,7 +126,7 @@ func runRQAddShipGate(t *testing.T, aeExe, baseFixture string) {
 	if rqb == nil {
 		t.Fatalf("%s: comp RQB not found", baseFixture)
 	}
-	if _, err := rq.AddItem(rqb); err != nil {
+	if _, err := aep.AddItem(rq, rqb); err != nil {
 		t.Fatalf("AddItem(RQB): %v", err)
 	}
 

@@ -11,6 +11,10 @@ import (
 // RemoveItem deletes the render queue item at index (0-based), mirroring
 // ExtendScript RenderQueueItem.remove(). Alpha / structural.
 //
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former rq.RemoveItem(i) method form.
+//
 // Byte mechanics REd from AE 2020 (test_data/re_rq_delete.jsx, 2-item→1-item
 // diff): removing item i drops, in lock-step,
 //
@@ -27,7 +31,7 @@ import (
 // Alpha: structural delete is not yet AE-ship-gated. Only items with one output
 // module are covered by the Rout RE (uniform per-item stride); see
 // incidents/render-queue-delete-mechanics.md.
-func (rq *RenderQueue) RemoveItem(index int) error {
+func RemoveItem(rq *RenderQueue, index int) error {
 	if rq == nil {
 		return fmt.Errorf("RemoveItem: nil render queue")
 	}
@@ -163,7 +167,9 @@ func incU32(b []byte) {
 // copy (single source of truth). The grown settings ldat reallocates, so every
 // item's back.settingsSlice alias is re-pointed afterward, and WriteAEP syncs
 // the copies back. See incidents/render-queue-delete-mechanics.md.
-func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
+//
+// Free function (not a method) — see RemoveItem. BREAKING vs rq.AddItem(comp).
+func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	if rq == nil {
 		return nil, fmt.Errorf("AddItem: nil render queue")
 	}
