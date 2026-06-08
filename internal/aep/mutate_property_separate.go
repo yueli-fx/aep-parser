@@ -218,7 +218,9 @@ func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) 
 	kfs := p.Keyframes
 	tickRate := 0.0
 	if kfs[0].back != nil {
-		tickRate = kfs[0].back.tickRate
+		if kb, ok := kfs[0].back.(*keyframeBackrefs); ok {
+			tickRate = kb.tickRate
+		}
 	}
 	if tickRate <= 0 {
 		return fmt.Errorf("SetDimensionsSeparated: animated leader tickRate unavailable")
@@ -584,7 +586,9 @@ func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
 	}
 	tickRate := 0.0
 	if pos0.Keyframes[0].back != nil {
-		tickRate = pos0.Keyframes[0].back.tickRate
+		if kb, ok := pos0.Keyframes[0].back.(*keyframeBackrefs); ok {
+			tickRate = kb.tickRate
+		}
 	}
 	if tickRate <= 0 {
 		return fmt.Errorf("SetDimensionsSeparated: animated follower tickRate unavailable")

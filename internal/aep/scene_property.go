@@ -217,5 +217,5 @@ type Keyframe struct {
 	// back holds the underlying RIFX chunk ref + cached layout metadata that
 	// power length-preserving keyframe writes. Nil for keyframes built outside
 	// the parser. See back_keyframe.go.
-	back *keyframeBackrefs
+	back KeyframeWriter
 }

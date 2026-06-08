@@ -120,7 +120,9 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 
 	tickRate := aeLegacyTimeBase
 	if len(p.Keyframes) > 0 && p.Keyframes[0].back != nil {
-		tickRate = p.Keyframes[0].back.tickRate
+		if kb, ok := p.Keyframes[0].back.(*keyframeBackrefs); ok {
+			tickRate = kb.tickRate
+		}
 	}
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase
@@ -219,7 +221,9 @@ func (p *Property) DeleteKeyframe(i int) error {
 
 	tickRate := aeLegacyTimeBase
 	if len(p.Keyframes) > 0 && p.Keyframes[0].back != nil {
-		tickRate = p.Keyframes[0].back.tickRate
+		if kb, ok := p.Keyframes[0].back.(*keyframeBackrefs); ok {
+			tickRate = kb.tickRate
+		}
 	}
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase

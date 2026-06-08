@@ -128,7 +128,9 @@ func decodeEasing(kf *Keyframe, blk []byte) {
 	kf.OutInterp = InterpType(blk[0x05])
 	dims := 0
 	if kf.back != nil {
-		dims = kf.back.dims
+		if kb, ok := kf.back.(*keyframeBackrefs); ok {
+			dims = kb.dims
+		}
 	}
 	if dims <= 0 {
 		dims = 1
