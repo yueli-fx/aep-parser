@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 7/10**（已倒置 Composition / Marker / Mask / Footage / Keyframe / Project / Layer；余 PropertyGroup / RenderQueue / Property，Property 最后）。剩 3 类都带设计待决（见 inventory §E U1/U4）。每 commit 绿 + byte-identical round-trip。
+**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 8/10**（已倒置 Composition / Marker / Mask / Footage / Keyframe / Project / Layer + **RenderQueue 子系统 ✅**；**实质待倒置仅剩 Property**，PropertyGroup 仅核查无接口）。每 commit 绿 + byte-identical round-trip。
 
 ## 进行中
 
@@ -18,19 +18,14 @@
 
 ## 下一步
 
-**§E 设计待决已审定**（inventory §F，用户批准；commit 0383642）：U1 RQ/OM/Guide settings → scene 独占 copy 单一真相源 + WriteAEP 单点 sync（同构现有 syncShapeLayerChunks）+ 类型化 offset；U2 Guide 无接口；U3 结构性 op 住 serializer；U4 砍 PropertyGroupWriter；U5 公共签名不变、内部 primitive 返 bool。**净结果：实质待倒置 = RenderQueue 子系统 + Property；OM/Guide/PropertyGroup 无需接口。**
+**RenderQueue 倒置 ✅ 完成**（commits ba2865b→5c2eeec，2026-06-09；§F D-U1/U2/U5 已实现）：RQ/OM/Guide settings 从 chunk-alias 改 scene 独占 copy（单一真相源）+ WriteAEP 单点 sync（`syncRenderQueue` / `syncGuides`，同构 `syncShapeLayerChunks`）；`SetComment` → `RenderQueueItemWriter{SetComment}`（唯一 A1，splice 逻辑迁 `(*renderQueueItemBackrefs)`，scene delegate patch-first）；`RenderQueueItem.back` → 接口 + `renderQueueItemBack()` helper；OM/Guide/RenderQueue 容器 back 仍 concrete（无 writer 接口，sync/结构性专用，P3 拆）；类型化 offset `codec.RenderSettingOffset`（Rs*/Oms*/Rouo* 常量改此类型，setter 体不改）；结构性 AddItem/RemoveItem 改 re-point `back.settingsSlice` + 从 scene copy 克隆模板（D-U3 stopgap，P3 迁 serializer）；attach 断言扩到 RQ/OM/Guide。每 commit 绿 + byte-identical + 我独立复核；`scene_render_queue.go`/`scene_guide.go` 已 rifx-clean。
 
-1. **RenderQueue 倒置**（下一步，最重，唯一引入 write-时同步新机制）。已读全 RQ 写面，路径明确：
-   - **setter 体不改**（`patchU16`/`omPatch*` 已写 `settingsBlock`/`roouData`，字段从别名变 copy 后自动成「改 scene copy」；已同步解码字段 `it.RenderSettings.X=v`，getter 不受影响）。
-   - **parse**：`item.settingsBlock`/`om.settingsBlock`/`om.roouData`/`guide.block` 从 alias 改 `append([]byte(nil),...)` copy（单一真相源）。
-   - **WriteAEP 加 `syncRenderQueue` 步骤**：serializer 持原别名 slice（`renderQueueItemBackrefs` 增 `settingsSlice`；新建 `outputModuleBackrefs` 持 settings+roou slice，OM 加 back；guide 经 comp 序列化路径按 index 配对），scene copy 单点拷回 chunk。byte-identical：unmutated 时 copy==原字节。
-   - **类型化 offset**：`type RenderSettingOffset int` + 现成 `codec.Rs*`/`Oms*`/`Rouo*` 常量改此类型。
-   - `SetComment`（唯一 A1 length-variable）→ `RenderQueueItemWriter{SetComment}`；结构性 AddItem/RemoveItem 暂 stopgap（P3 迁 serializer）。
-2. **Property**（RQ 之后）：4 setter + InsertKeyframe/DeleteKeyframe → PropertyWriter；`SetDimensionsSeparated` 经 propertyBackrefs 增持父 group chunk 自行 splice。
-3. **PropertyGroup**：仅核查无 scene→rifx 残留（无接口）。
-   每步独立 commit + byte-identical + setter 单测 + attach 断言 + 我独立复核。
-2. P2 收口（Task 2.3：scene_* rifx 引用清零核查）→ **P3** git mv 物理分包（编译期硬边界）→ **P4** 下游切换 + 退役 AST 守卫 + CLAUDE.md + 双版本 ship-gate。
-3. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
+**净结果：实质待倒置仅剩 Property。**
+
+1. **Property 倒置**（最后一类，最重委托终点）：`scene_property.go` `back *propertyBackrefs` → `PropertyWriter` 接口（已在 scene_writers.go 定义）+ `propertyBack()` helper。4 setter（SetStaticValue/SetExpressionEnabled/SetExpression/SetDimensionsSeparated）+ InsertKeyframe/DeleteKeyframe 的 chunk patch 逻辑迁 `(*propertyBackrefs)`，scene delegate patch-first。**关键链路**：`SetStaticValue` 是 shape/material/transform 大批 B 类 setter 的委托终点——接口化后它们自动经 `prop.back.SetStaticValue` 工作，须验 `rect.SetSize` round-trip 绿。`SetDimensionsSeparated` 跨界改 `grp.back.chunk.Children` → 让 `propertyBackrefs` 增持父 group chunk 引用自行 splice（D-U4，不设 PropertyGroupWriter）。独立 commit + byte-identical + setter 单测 + attach 断言 + 独立复核。
+2. **PropertyGroup**：仅核查 scene 侧无 scene→rifx 残留（无接口，D-U4）。
+3. P2 收口（Task 2.3：全 `scene_*.go` rifx 引用清零核查）→ **P3** git mv 物理分包（编译期硬边界）→ **P4** 下游切换 + 退役 AST 守卫 + CLAUDE.md + 双版本 ship-gate。
+4. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
 
 ## Backlog（单条候选）
 
