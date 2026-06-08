@@ -18,11 +18,17 @@
 
 ## 下一步
 
-1. **续 P2 接口化**（plan Task 2.2 Step 7）：剩 3 类，**都需先定 inventory §E 的设计待决**：
-   - **RenderQueue**（U1）：1 个 A1（`SetComment` 经 `it.back.rcomChunk`）+ 36 个 A2 setter（RQItem/OM 经别名字节字段 `settingsBlock`/`roouData`，**不**经 `.back.`）。先决：别名字段迁进 backref 结构 + `RenderQueueWriter` 补 patch 方法（或通用 `PatchSettings(off,bytes)` 原语）；`OutputModule` 无独立 backref，是否独立接口。
-   - **PropertyGroup**（U4）：无直属 Set*，写需求来自 `Property.SetDimensionsSeparated`（跨界改 `grp.back.chunk.Children`）+ 结构性 group op（Remove/Duplicate/MoveTo）。先决：接口面 = group chunk splice 原语 还是 整 op 迁 serializer。
-   - **Property 最后**：4 setter + InsertKeyframe/DeleteKeyframe；`SetDimensionsSeparated` 跨入 PropertyGroupWriter，故须 PropertyGroup 先定。shape/stroke/fill setter 全委托 `Property.SetStaticValue`，接口化后自动经 `prop.back.WriteStaticValue`。
-   每类独立 commit + byte-identical + setter 单测 + attach 完整性断言。
+**§E 设计待决已审定**（inventory §F，用户批准；commit 0383642）：U1 RQ/OM/Guide settings → scene 独占 copy 单一真相源 + WriteAEP 单点 sync（同构现有 syncShapeLayerChunks）+ 类型化 offset；U2 Guide 无接口；U3 结构性 op 住 serializer；U4 砍 PropertyGroupWriter；U5 公共签名不变、内部 primitive 返 bool。**净结果：实质待倒置 = RenderQueue 子系统 + Property；OM/Guide/PropertyGroup 无需接口。**
+
+1. **RenderQueue 倒置**（下一步，最重，唯一引入 write-时同步新机制）。已读全 RQ 写面，路径明确：
+   - **setter 体不改**（`patchU16`/`omPatch*` 已写 `settingsBlock`/`roouData`，字段从别名变 copy 后自动成「改 scene copy」；已同步解码字段 `it.RenderSettings.X=v`，getter 不受影响）。
+   - **parse**：`item.settingsBlock`/`om.settingsBlock`/`om.roouData`/`guide.block` 从 alias 改 `append([]byte(nil),...)` copy（单一真相源）。
+   - **WriteAEP 加 `syncRenderQueue` 步骤**：serializer 持原别名 slice（`renderQueueItemBackrefs` 增 `settingsSlice`；新建 `outputModuleBackrefs` 持 settings+roou slice，OM 加 back；guide 经 comp 序列化路径按 index 配对），scene copy 单点拷回 chunk。byte-identical：unmutated 时 copy==原字节。
+   - **类型化 offset**：`type RenderSettingOffset int` + 现成 `codec.Rs*`/`Oms*`/`Rouo*` 常量改此类型。
+   - `SetComment`（唯一 A1 length-variable）→ `RenderQueueItemWriter{SetComment}`；结构性 AddItem/RemoveItem 暂 stopgap（P3 迁 serializer）。
+2. **Property**（RQ 之后）：4 setter + InsertKeyframe/DeleteKeyframe → PropertyWriter；`SetDimensionsSeparated` 经 propertyBackrefs 增持父 group chunk 自行 splice。
+3. **PropertyGroup**：仅核查无 scene→rifx 残留（无接口）。
+   每步独立 commit + byte-identical + setter 单测 + attach 断言 + 我独立复核。
 2. P2 收口（Task 2.3：scene_* rifx 引用清零核查）→ **P3** git mv 物理分包（编译期硬边界）→ **P4** 下游切换 + 退役 AST 守卫 + CLAUDE.md + 双版本 ship-gate。
 3. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
 
