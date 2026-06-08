@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // Property-level writers: static value, expression source &
@@ -15,7 +13,7 @@ import (
 // SetStaticValue rewrites a property's constant value in-place (only valid
 // for properties without keyframes — those with a cdat chunk).
 func (p *Property) SetStaticValue(v any) error {
-	if p.back == nil || p.back.cdat == nil {
+	if p.back == nil {
 		return fmt.Errorf("property %q: no static-value chunk (has keyframes?)", p.MatchName)
 	}
 	switch x := v.(type) {
@@ -23,25 +21,23 @@ func (p *Property) SetStaticValue(v any) error {
 		if p.Components != 1 {
 			return fmt.Errorf("property %q is %dD, expected []float64", p.MatchName, p.Components)
 		}
-		if err := writeFloat64(p.back.cdat.Data, 0, x); err != nil {
-			return err
-		}
-		p.StaticValue = x
-		return nil
 	case []float64:
 		if len(x) != p.Components {
 			return fmt.Errorf("property %q: got %d components, property is %dD", p.MatchName, len(x), p.Components)
 		}
-		for i, f := range x {
-			if err := writeFloat64(p.back.cdat.Data, i*8, f); err != nil {
-				return err
-			}
-		}
-		p.StaticValue = append([]float64(nil), x...)
-		return nil
 	default:
 		return fmt.Errorf("property: unsupported value type %T", v)
 	}
+	if err := p.back.SetStaticValue(v); err != nil {
+		return err
+	}
+	switch x := v.(type) {
+	case float64:
+		p.StaticValue = x
+	case []float64:
+		p.StaticValue = append([]float64(nil), x...)
+	}
+	return nil
 }
 
 // SetExpressionEnabled toggles whether AE evaluates the property's
@@ -57,23 +53,11 @@ func (p *Property) SetStaticValue(v any) error {
 // present for properties parsed from real .aep files). Returns an
 // error otherwise.
 func (p *Property) SetExpressionEnabled(enabled bool) error {
-	if p.back == nil || p.back.tdbs == nil {
+	if p.back == nil {
 		return fmt.Errorf("property %q: no tdbs reference", p.MatchName)
 	}
-	tdb4 := p.back.tdbs.FindFirst(rifx.IDtdb4)
-	if tdb4 == nil {
-		tdb4 = p.back.tdbs.FindFirst(rifx.IDTdb4)
-	}
-	if tdb4 == nil {
-		return fmt.Errorf("property %q: tdb4 chunk missing", p.MatchName)
-	}
-	if len(tdb4.Data) <= 0x78 {
-		return fmt.Errorf("property %q: tdb4 too short (%d bytes) for expressionEnabled write", p.MatchName, len(tdb4.Data))
-	}
-	if enabled {
-		tdb4.Data[0x78] = 0
-	} else {
-		tdb4.Data[0x78] = 1
+	if err := p.back.SetExpressionEnabled(enabled); err != nil {
+		return err
 	}
 	p.ExpressionEnabled = enabled
 	return nil
@@ -281,31 +265,11 @@ func (p *Property) reparseKeyframes(tickRate float64) error {
 // Returns an error if the property is one built outside the parser
 // (no owning tdbs LIST reference).
 func (p *Property) SetExpression(source string) error {
-	if p.back == nil || p.back.tdbs == nil {
+	if p.back == nil {
 		return fmt.Errorf("property %q: no tdbs reference (built outside parser?)", p.MatchName)
 	}
-	if source == "" {
-		// Remove existing expression chunk if present.
-		if p.back.exprChunk != nil {
-			out := p.back.tdbs.Children[:0]
-			for _, ch := range p.back.tdbs.Children {
-				if ch == p.back.exprChunk {
-					continue
-				}
-				out = append(out, ch)
-			}
-			p.back.tdbs.Children = out
-			p.back.exprChunk = nil
-		}
-		p.Expression = ""
-		return nil
-	}
-	if p.back.exprChunk != nil {
-		p.back.exprChunk.Data = []byte(source)
-	} else {
-		newUtf8 := &rifx.Chunk{ID: rifx.IDUtf8, Data: []byte(source)}
-		p.back.tdbs.Children = append(p.back.tdbs.Children, newUtf8)
-		p.back.exprChunk = newUtf8
+	if err := p.back.SetExpression(source); err != nil {
+		return err
 	}
 	p.Expression = source
 	return nil

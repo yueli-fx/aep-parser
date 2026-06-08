@@ -98,18 +98,10 @@ func (p *Property) LockedRatio() bool {
 // SetLockedRatio sets the locked ratio flag on the property.
 // Writes to tdsb @0x02 bit 4 (length-preserving).
 func (p *Property) SetLockedRatio(v bool) error {
-	if p.back == nil || p.back.tdsb == nil {
+	if p.back == nil {
 		return fmt.Errorf("property has no tdsb chunk (cannot set LockedRatio)")
 	}
-	if len(p.back.tdsb.Data) < 3 {
-		return fmt.Errorf("tdsb chunk too short (len=%d)", len(p.back.tdsb.Data))
-	}
-	if v {
-		p.back.tdsb.Data[0x02] |= 1 << 4
-	} else {
-		p.back.tdsb.Data[0x02] &^= 1 << 4
-	}
-	return nil
+	return p.back.SetLockedRatio(v)
 }
 
 // DimensionsSeparated reports whether a multidimensional property has its

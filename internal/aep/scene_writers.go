@@ -143,13 +143,17 @@ type LayerWriter interface {
 	AddFont(string) (int, error)
 }
 
-// PropertyWriter is the writer interface for Property's back-ref operations.
+// PropertyWriter is the writer interface for Property's length-preserving /
+// expression back-ref setters. The keyframe-stream ops (InsertKeyframe /
+// DeleteKeyframe) and SetDimensionsSeparated are structural — they rebuild the
+// scene Keyframes slice or add/remove follower Property nodes — so per §F D-U3
+// they stay scene-method stopgaps reaching the concrete back-ref, not interface
+// methods (the same treatment as RenderQueue AddItem/RemoveItem).
 type PropertyWriter interface {
 	SetStaticValue(any) error
 	SetExpressionEnabled(bool) error
 	SetExpression(string) error
-	InsertKeyframe(float64, any) (*Keyframe, int, error)
-	DeleteKeyframe(int) error
+	SetLockedRatio(bool) error
 }
 
 // KeyframeWriter is the writer interface for Keyframe's back-ref operations.
