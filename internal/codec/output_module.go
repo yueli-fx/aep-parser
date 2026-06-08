@@ -57,38 +57,38 @@ const OutputModuleSettingsItemSize = 128
 
 // OutputModuleSettingsItem (128B) field offsets.
 const (
-	OmsFlagByte07         = 7  // bit7 preserve_rgb / bit6 include_source_xmp / bit4 use_region_of_interest / bit3 use_comp_frame_number
-	OmsPostRenderCompID   = 8  // u32
-	OmsChannels           = 19 // u8
-	OmsResizeQuality      = 23 // u8
-	OmsResize             = 27 // u8 bool
-	OmsLockAspectRatio    = 29 // u8 bool
-	OmsFlagByte22         = 31 // bit0 Crop
-	OmsCropTop            = 32 // u16
-	OmsCropLeft           = 34 // u16
-	OmsCropBottom         = 36 // u16
-	OmsCropRight          = 38 // u16
-	OmsOutputAudio        = 42 // u8
-	OmsIncludeProjectLink = 47 // u8 bool
-	OmsPostRenderAction   = 48 // u32
-	OmsConvertLinear      = 91 // u8
-	OmsColorSpaceWorking  = 93 // u8
+	OmsFlagByte07         RenderSettingOffset = 7  // bit7 preserve_rgb / bit6 include_source_xmp / bit4 use_region_of_interest / bit3 use_comp_frame_number
+	OmsPostRenderCompID   RenderSettingOffset = 8  // u32
+	OmsChannels           RenderSettingOffset = 19 // u8
+	OmsResizeQuality      RenderSettingOffset = 23 // u8
+	OmsResize             RenderSettingOffset = 27 // u8 bool
+	OmsLockAspectRatio    RenderSettingOffset = 29 // u8 bool
+	OmsFlagByte22         RenderSettingOffset = 31 // bit0 Crop
+	OmsCropTop            RenderSettingOffset = 32 // u16
+	OmsCropLeft           RenderSettingOffset = 34 // u16
+	OmsCropBottom         RenderSettingOffset = 36 // u16
+	OmsCropRight          RenderSettingOffset = 38 // u16
+	OmsOutputAudio        RenderSettingOffset = 42 // u8
+	OmsIncludeProjectLink RenderSettingOffset = 47 // u8 bool
+	OmsPostRenderAction   RenderSettingOffset = 48 // u32
+	OmsConvertLinear      RenderSettingOffset = 91 // u8
+	OmsColorSpaceWorking  RenderSettingOffset = 93 // u8
 )
 
 // Roou (154B) field offsets.
 const (
-	RouoVideoCodec      = 4   // 4 ascii
-	RouoStartingNumber  = 16  // u32
-	RouoFormatID        = 26  // 4 ascii
-	RouoWidth           = 36  // u16
-	RouoHeight          = 40  // u16
-	RouoDepth           = 71  // u8
-	RouoColorPremult    = 77  // u8
-	RouoAudioSampleRate = 100 // f64
-	RouoAudioDisabledHi = 108 // u8
-	RouoAudioFormat     = 109 // u8
-	RouoAudioBitDepth   = 111 // u8
-	RouoAudioChannels   = 113 // u8
+	RouoVideoCodec      RenderSettingOffset = 4   // 4 ascii
+	RouoStartingNumber  RenderSettingOffset = 16  // u32
+	RouoFormatID        RenderSettingOffset = 26  // 4 ascii
+	RouoWidth           RenderSettingOffset = 36  // u16
+	RouoHeight          RenderSettingOffset = 40  // u16
+	RouoDepth           RenderSettingOffset = 71  // u8
+	RouoColorPremult    RenderSettingOffset = 77  // u8
+	RouoAudioSampleRate RenderSettingOffset = 100 // f64
+	RouoAudioDisabledHi RenderSettingOffset = 108 // u8
+	RouoAudioFormat     RenderSettingOffset = 109 // u8
+	RouoAudioBitDepth   RenderSettingOffset = 111 // u8
+	RouoAudioChannels   RenderSettingOffset = 113 // u8
 )
 
 // OmSettings holds the decoded 128B output-module settings block.
@@ -119,7 +119,7 @@ func DecodeOMSettings(b []byte) (OmSettings, bool) {
 	}
 	f7 := b[OmsFlagByte07]
 	f22 := b[OmsFlagByte22]
-	u16 := func(off int) int { return int(binary.BigEndian.Uint16(b[off:])) }
+	u16 := func(off RenderSettingOffset) int { return int(binary.BigEndian.Uint16(b[off:])) }
 	return OmSettings{
 		UseCompFrameNumber:  f7&(1<<3) != 0,
 		UseRegionOfInterest: f7&(1<<4) != 0,

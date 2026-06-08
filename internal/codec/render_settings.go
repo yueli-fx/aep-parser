@@ -9,37 +9,44 @@ import "encoding/binary"
 
 const RenderSettingsItemSize = 2246
 
+// RenderSettingOffset is a typed byte offset into one of the render-queue
+// fixed-width settings structures (the RenderSettingsItem block, the
+// OutputModuleSettingsItem block, or the Roou chunk). Typing the offsets keeps
+// the length-preserving patch helpers from taking a bare int and documents
+// intent at the call boundary (§F D-U1).
+type RenderSettingOffset int
+
 // Field offsets within one RenderSettingsItem block. slice-1 (top-level) +
 // slice-2 (render settings). All big-endian; verified by py-aep field-size
 // accounting (sum == 2246) + golden cross-check.
 const (
-	RsFlagByte              = 0x07 // u8; bit 2 = queue_item_notify
-	RsCompID                = 0x08 // u32
-	RsStatus                = 0x0C // u32
-	RsTimeSpanStartDividend = 0x14 // u32
-	RsTimeSpanStartDivisor  = 0x18 // u32
-	RsTimeSpanDurDividend   = 0x1C // u32
-	RsTimeSpanDurDivisor    = 0x20 // u32
-	RsFieldRender           = 0x32 // u16
-	RsPulldown              = 0x36 // u16
-	RsQuality               = 0x38 // u16 (0xFFFF = current)
-	RsResolutionX           = 0x3A // u16
-	RsResolutionY           = 0x3C // u16
-	RsEffects               = 0x40 // u16 (0xFFFF = current)
-	RsProxyUse              = 0x44 // u16 (0xFFFF = current)
-	RsMotionBlur            = 0x48 // u16 (0xFFFF = current)
-	RsFrameBlending         = 0x4C // u16 (0xFFFF = current)
-	RsLogType               = 0x50 // u16 (raw; py-aep maps to 3xxx enum)
-	RsSkipExistingFiles     = 0x54 // u16 (bool)
-	RsTemplateName          = 0x5A // 64 bytes, windows-1252, NUL-padded
-	RsTemplateNameLen       = 64
-	RsUseThisFrameRate      = 2144 // u16 (FrameRateSetting: 0=comp, 1=this)
-	RsTimeSpanSource        = 2148 // u16
-	RsSoloSwitches          = 2164 // u16 (0xFFFF = current)
-	RsDiskCache             = 2168 // u16 (0xFFFF = current)
-	RsGuideLayers           = 2172 // u16 (0xFFFF = current)
-	RsColorDepth            = 2180 // u16 (0xFFFF = current)
-	RsElapsedSeconds        = 2202 // u32
+	RsFlagByte              RenderSettingOffset = 0x07 // u8; bit 2 = queue_item_notify
+	RsCompID                RenderSettingOffset = 0x08 // u32
+	RsStatus                RenderSettingOffset = 0x0C // u32
+	RsTimeSpanStartDividend RenderSettingOffset = 0x14 // u32
+	RsTimeSpanStartDivisor  RenderSettingOffset = 0x18 // u32
+	RsTimeSpanDurDividend   RenderSettingOffset = 0x1C // u32
+	RsTimeSpanDurDivisor    RenderSettingOffset = 0x20 // u32
+	RsFieldRender           RenderSettingOffset = 0x32 // u16
+	RsPulldown              RenderSettingOffset = 0x36 // u16
+	RsQuality               RenderSettingOffset = 0x38 // u16 (0xFFFF = current)
+	RsResolutionX           RenderSettingOffset = 0x3A // u16
+	RsResolutionY           RenderSettingOffset = 0x3C // u16
+	RsEffects               RenderSettingOffset = 0x40 // u16 (0xFFFF = current)
+	RsProxyUse              RenderSettingOffset = 0x44 // u16 (0xFFFF = current)
+	RsMotionBlur            RenderSettingOffset = 0x48 // u16 (0xFFFF = current)
+	RsFrameBlending         RenderSettingOffset = 0x4C // u16 (0xFFFF = current)
+	RsLogType               RenderSettingOffset = 0x50 // u16 (raw; py-aep maps to 3xxx enum)
+	RsSkipExistingFiles     RenderSettingOffset = 0x54 // u16 (bool)
+	RsTemplateName          RenderSettingOffset = 0x5A // 64 bytes, windows-1252, NUL-padded
+	RsTemplateNameLen                           = 64   // length (not an offset)
+	RsUseThisFrameRate      RenderSettingOffset = 2144 // u16 (FrameRateSetting: 0=comp, 1=this)
+	RsTimeSpanSource        RenderSettingOffset = 2148 // u16
+	RsSoloSwitches          RenderSettingOffset = 2164 // u16 (0xFFFF = current)
+	RsDiskCache             RenderSettingOffset = 2168 // u16 (0xFFFF = current)
+	RsGuideLayers           RenderSettingOffset = 2172 // u16 (0xFFFF = current)
+	RsColorDepth            RenderSettingOffset = 2180 // u16 (0xFFFF = current)
+	RsElapsedSeconds        RenderSettingOffset = 2202 // u32
 )
 
 // time_span_source enum values (py-aep TimeSpanSource).
@@ -87,7 +94,7 @@ func DecodeRenderSettings(b []byte) (RenderSettingsBlock, bool) {
 	if len(b) < RenderSettingsItemSize {
 		return RenderSettingsBlock{}, false
 	}
-	u16 := func(off int) uint16 { return binary.BigEndian.Uint16(b[off:]) }
+	u16 := func(off RenderSettingOffset) uint16 { return binary.BigEndian.Uint16(b[off:]) }
 	rs := RenderSettingsBlock{
 		CompID:            binary.BigEndian.Uint32(b[RsCompID:]),
 		Status:            binary.BigEndian.Uint32(b[RsStatus:]),

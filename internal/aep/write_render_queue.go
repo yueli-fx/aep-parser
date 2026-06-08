@@ -51,8 +51,8 @@ func (p *Project) syncRenderQueue() {
 
 // patchU16 writes a big-endian u16 at the given field offset in the item's
 // settings block, no-op when the item has no backing block.
-func (it *RenderQueueItem) patchU16(fieldOffset int, v uint16) bool {
-	if it == nil || len(it.settingsBlock) < fieldOffset+2 {
+func (it *RenderQueueItem) patchU16(fieldOffset codec.RenderSettingOffset, v uint16) bool {
+	if it == nil || len(it.settingsBlock) < int(fieldOffset)+2 {
 		return false
 	}
 	binary.BigEndian.PutUint16(it.settingsBlock[fieldOffset:], v)
@@ -180,7 +180,7 @@ func (it *RenderQueueItem) SetSkipExistingFiles(v bool) {
 // 64-byte windows-1252 NUL-padded field). Names longer than 64 bytes are
 // truncated; non-latin-1 runes are dropped. Length-preserving.
 func (it *RenderQueueItem) SetName(name string) {
-	if it == nil || len(it.settingsBlock) < codec.RsTemplateName+codec.RsTemplateNameLen {
+	if it == nil || len(it.settingsBlock) < int(codec.RsTemplateName)+codec.RsTemplateNameLen {
 		return
 	}
 	field := it.settingsBlock[codec.RsTemplateName : codec.RsTemplateName+codec.RsTemplateNameLen]
@@ -203,7 +203,7 @@ func (it *RenderQueueItem) SetName(name string) {
 // SetQueueItemNotify toggles the notify-on-completion flag (flag byte @0x07
 // bit 2).
 func (it *RenderQueueItem) SetQueueItemNotify(v bool) {
-	if it == nil || len(it.settingsBlock) <= codec.RsFlagByte {
+	if it == nil || len(it.settingsBlock) <= int(codec.RsFlagByte) {
 		return
 	}
 	mask := byte(1 << 2)
@@ -223,8 +223,8 @@ func (it *RenderQueueItem) SetLogType(v uint16) {
 }
 
 // patchU32 writes a big-endian u32 at fieldOffset in the settings block.
-func (it *RenderQueueItem) patchU32(fieldOffset int, v uint32) bool {
-	if it == nil || len(it.settingsBlock) < fieldOffset+4 {
+func (it *RenderQueueItem) patchU32(fieldOffset codec.RenderSettingOffset, v uint32) bool {
+	if it == nil || len(it.settingsBlock) < int(fieldOffset)+4 {
 		return false
 	}
 	binary.BigEndian.PutUint32(it.settingsBlock[fieldOffset:], v)
@@ -321,32 +321,32 @@ func boolByte(v bool) byte {
 
 // omPatchU8 / omPatchU16BE / omPatchU32BE / omSetBit patch the 128B settings
 // block in place; ok reports whether the block is present and long enough.
-func (om *OutputModule) omPatchU8(off int, v byte) bool {
-	if om == nil || len(om.settingsBlock) <= off {
+func (om *OutputModule) omPatchU8(off codec.RenderSettingOffset, v byte) bool {
+	if om == nil || len(om.settingsBlock) <= int(off) {
 		return false
 	}
 	om.settingsBlock[off] = v
 	return true
 }
 
-func (om *OutputModule) omPatchU16BE(off int, v uint16) bool {
-	if om == nil || len(om.settingsBlock) < off+2 {
+func (om *OutputModule) omPatchU16BE(off codec.RenderSettingOffset, v uint16) bool {
+	if om == nil || len(om.settingsBlock) < int(off)+2 {
 		return false
 	}
 	binary.BigEndian.PutUint16(om.settingsBlock[off:], v)
 	return true
 }
 
-func (om *OutputModule) omPatchU32BE(off int, v uint32) bool {
-	if om == nil || len(om.settingsBlock) < off+4 {
+func (om *OutputModule) omPatchU32BE(off codec.RenderSettingOffset, v uint32) bool {
+	if om == nil || len(om.settingsBlock) < int(off)+4 {
 		return false
 	}
 	binary.BigEndian.PutUint32(om.settingsBlock[off:], v)
 	return true
 }
 
-func (om *OutputModule) omSetBit(byteOff, bit int, v bool) bool {
-	if om == nil || len(om.settingsBlock) <= byteOff {
+func (om *OutputModule) omSetBit(byteOff codec.RenderSettingOffset, bit int, v bool) bool {
+	if om == nil || len(om.settingsBlock) <= int(byteOff) {
 		return false
 	}
 	mask := byte(1 << bit)
@@ -462,7 +462,7 @@ func (om *OutputModule) SetPreserveRGB(v bool) {
 
 // SetDepth sets the output color depth (Roou @0x47), e.g. 24/32/48/64/96/128.
 func (om *OutputModule) SetDepth(v int) {
-	if om == nil || len(om.roouData) <= codec.RouoDepth {
+	if om == nil || len(om.roouData) <= int(codec.RouoDepth) {
 		return
 	}
 	om.roouData[codec.RouoDepth] = byte(v)
@@ -471,7 +471,7 @@ func (om *OutputModule) SetDepth(v int) {
 
 // SetStartingNumber sets the image-sequence starting frame number (Roou @0x10).
 func (om *OutputModule) SetStartingNumber(v uint32) {
-	if om == nil || len(om.roouData) < codec.RouoStartingNumber+4 {
+	if om == nil || len(om.roouData) < int(codec.RouoStartingNumber)+4 {
 		return
 	}
 	binary.BigEndian.PutUint32(om.roouData[codec.RouoStartingNumber:], v)
