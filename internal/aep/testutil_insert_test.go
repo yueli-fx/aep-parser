@@ -31,10 +31,11 @@ func DestFootageByPathForTest(p *Project, path string) *Footage { return destFoo
 // LocateItemBlockByIDForTest exposes locateItemBlockByID over a Project's root
 // Fold, returning (start, end) within the matched container; (-1,-1) if absent.
 func LocateItemBlockByIDForTest(p *Project, id uint32) (int, int) {
-	if p.back == nil || p.back.rootFold == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.rootFold == nil {
 		return -1, -1
 	}
-	_, s, e := locateItemBlockByID(p.back.rootFold, id)
+	_, s, e := locateItemBlockByID(pb.rootFold, id)
 	return s, e
 }
 

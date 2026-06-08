@@ -201,11 +201,21 @@ type Project struct {
 	// back holds the underlying RIFX root + project-level single-field chunk
 	// refs that power length-preserving writes. Nil for projects built outside
 	// the parser. See back_project.go.
-	back *projectBackrefs
+	back ProjectWriter
 
 	// V2: derived state for structural mutation (NewComposition / 未来 NewFootage etc.)
 	nextItemID uint32   // monotonic Item ID counter; never reused (see Invariants #9)
 	target     AETarget // which AE-version template NewProject loaded; drives per-target builder chunk selection
+}
+
+// projectBack returns the concrete backrefs for read-side raw chunk
+// access during M8 P2 (the back field now holds the ProjectWriter
+// interface; reads type-assert until P3 splits scene/serializer).
+func (p *Project) projectBack() *projectBackrefs {
+	if pb, ok := p.back.(*projectBackrefs); ok {
+		return pb
+	}
+	return nil
 }
 
 // CompositionByID returns the first composition whose ID matches id, or

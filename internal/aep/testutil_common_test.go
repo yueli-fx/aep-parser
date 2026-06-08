@@ -6,10 +6,11 @@ import "github.com/example/aep-parser/internal/rifx"
 // `_test.go` 后缀使这些方法仅在 test build 时编译，不污染 production binary。
 func (p *Project) NextItemIDForTest() uint32 { return p.nextItemID }
 func (p *Project) RootFoldForTest() *rifx.Chunk {
-	if p.back == nil {
+	pb := p.projectBack()
+	if pb == nil {
 		return nil
 	}
-	return p.back.rootFold
+	return pb.rootFold
 }
 
 // ItemListForTest 暴露 Composition.itemList 给 golden tests 用。
@@ -23,10 +24,11 @@ func (c *Composition) ItemListForTest() *rifx.Chunk {
 
 // RootForTest 暴露 Project.root 给 debug tests 用。
 func (p *Project) RootForTest() *rifx.Chunk {
-	if p.back == nil {
+	pb := p.projectBack()
+	if pb == nil {
 		return nil
 	}
-	return p.back.root
+	return pb.root
 }
 
 // LdtaForTest 暴露 Layer.ldta 给 DeleteLayer / structural mutation tests 用

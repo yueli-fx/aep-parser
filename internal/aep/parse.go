@@ -31,24 +31,27 @@ func FromReader(r io.ReadSeeker) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	proj.back.root = root
+	if pb := proj.projectBack(); pb != nil {
+		pb.root = root
+	}
 	return proj, nil
 }
 
 func parseProject(root *rifx.Chunk) (*Project, error) {
-	proj := &Project{back: &projectBackrefs{}}
+	pb := &projectBackrefs{}
+	proj := &Project{back: pb}
 
 	// Project-level header chunks: nhed (32-byte) + nnhd (40-byte) sit
 	// as direct children of the root LIST/RIFX. Both carry a copy of
 	// BitsPerChannel at the same byte position relative to chunk start.
 	if nhed := root.FindFirst(rifx.IDNhed); nhed != nil {
-		proj.back.nhedChunk = nhed
+		pb.nhedChunk = nhed
 		if len(nhed.Data) > 0x0F {
 			proj.BitsPerChannel = BitsPerChannel(nhed.Data[0x0F])
 		}
 	}
 	if nnhd := root.FindFirst(rifx.IDNnhd); nnhd != nil {
-		proj.back.nnhdChunk = nnhd
+		pb.nnhdChunk = nnhd
 	}
 
 	// Project-level setting chunks. All sit as direct root children — capture
@@ -56,21 +59,21 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 	for _, c := range root.Children {
 		switch c.ID {
 		case rifx.IDAcer:
-			proj.back.acerChunk = c
+			pb.acerChunk = c
 		case rifx.IDAdfr:
-			proj.back.adfrChunk = c
+			pb.adfrChunk = c
 		case rifx.IDDwga:
-			proj.back.dwgaChunk = c
+			pb.dwgaChunk = c
 		}
 		if c.IsList() {
 			switch c.FormType {
 			case rifx.IDGpuG:
 				if k := c.FindFirst(rifx.IDUtf8); k != nil {
-					proj.back.gpugUtf8 = k
+					pb.gpugUtf8 = k
 				}
 			case rifx.IDExEn:
 				if k := c.FindFirst(rifx.IDUtf8); k != nil {
-					proj.back.exenUtf8 = k
+					pb.exenUtf8 = k
 				}
 			}
 		}
@@ -84,7 +87,7 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 			if len(content) > 0 && (content[0] == '{' || content[0] == '[') {
 				// Looks like JSON, check for CMS markers
 				if strings.Contains(content, "lutInterpolationMethod") || strings.Contains(content, "colorManagementSystem") {
-					proj.back.cmsUtf8 = c
+					pb.cmsUtf8 = c
 					break
 				}
 			}
@@ -151,12 +154,14 @@ func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
 	}
 	p.nextItemID = maxID + 1
 
-	if p.back == nil {
-		p.back = &projectBackrefs{}
+	pb := p.projectBack()
+	if pb == nil {
+		pb = &projectBackrefs{}
+		p.back = pb
 	}
 	for _, c := range rifxRoot.Children {
 		if c.IsList() && c.FormType == rifx.IDFold {
-			p.back.rootFold = c
+			pb.rootFold = c
 			break
 		}
 	}

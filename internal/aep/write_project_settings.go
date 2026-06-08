@@ -15,52 +15,16 @@ import (
 // rootChunkPresent reports whether root has a direct child chunk
 // (not LIST) with the given id.
 func (p *Project) rootChunkPresent(id rifx.ChunkID) bool {
-	if p.back == nil || p.back.root == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.root == nil {
 		return false
 	}
-	for _, c := range p.back.root.Children {
+	for _, c := range pb.root.Children {
 		if !c.IsList() && c.ID == id {
 			return true
 		}
 	}
 	return false
-}
-
-// setRootFlagChunk adds (when on=true) or removes (when on=false) a
-// presence-encoded flag chunk on root.
-//
-// **Layout** (against AE 2025-saved fixture
-// `re_linear_blending_on.aep`): the chunk carries **1 byte 0x01**, NOT
-// zero-length. Empty payload makes AE reject the file with "文件数据
-// 丢失"/"file data missing".
-//
-// **Position** matters: AE inserts lnrb / lnrp immediately AFTER the
-// root `cpid` chunk (color-management profile id) and before `dwga`.
-// Append-to-end likewise causes "file data missing". We insert right
-// after the existing cpid (or fall back to before dwga, or append if
-// neither anchor exists).
-func (p *Project) setRootFlagChunk(id rifx.ChunkID, on bool) error {
-	if p.back == nil || p.back.root == nil {
-		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", id)
-	}
-	idx := -1
-	for i, c := range p.back.root.Children {
-		if !c.IsList() && c.ID == id {
-			idx = i
-			break
-		}
-	}
-	if on && idx < 0 {
-		insertAt := flagChunkInsertPosition(p.back.root)
-		newChunk := &rifx.Chunk{ID: id, Data: []byte{0x01}}
-		p.back.root.Children = append(p.back.root.Children, nil)
-		copy(p.back.root.Children[insertAt+1:], p.back.root.Children[insertAt:])
-		p.back.root.Children[insertAt] = newChunk
-	}
-	if !on && idx >= 0 {
-		p.back.root.Children = append(p.back.root.Children[:idx], p.back.root.Children[idx+1:]...)
-	}
-	return nil
 }
 
 // flagChunkInsertPosition returns the index where a new lnrb / lnrp
@@ -93,7 +57,10 @@ func (p *Project) LinearBlending() bool {
 
 // SetLinearBlending toggles the lnrb chunk under root.
 func (p *Project) SetLinearBlending(v bool) error {
-	return p.setRootFlagChunk(rifx.IDLnrb, v)
+	if p.back == nil {
+		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", rifx.IDLnrb)
+	}
+	return p.back.SetLinearBlending(v)
 }
 
 // LinearizeWorkingSpace reports whether the working color space is
@@ -104,5 +71,8 @@ func (p *Project) LinearizeWorkingSpace() bool {
 
 // SetLinearizeWorkingSpace toggles the lnrp chunk under root.
 func (p *Project) SetLinearizeWorkingSpace(v bool) error {
-	return p.setRootFlagChunk(rifx.IDLnrp, v)
+	if p.back == nil {
+		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", rifx.IDLnrp)
+	}
+	return p.back.SetLinearizeWorkingSpace(v)
 }

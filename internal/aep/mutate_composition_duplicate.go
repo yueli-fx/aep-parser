@@ -40,7 +40,8 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	if src == nil {
 		return nil, fmt.Errorf("DuplicateComposition: src cannot be nil")
 	}
-	if p.back == nil || p.back.rootFold == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.rootFold == nil {
 		return nil, fmt.Errorf("DuplicateComposition: project has no root Fold back-ref (built outside parser?)")
 	}
 	srcCb, ok := src.back.(*compositionBackrefs)
@@ -54,7 +55,7 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 		return nil, fmt.Errorf("DuplicateComposition: name cannot be empty")
 	}
 
-	rootChildren := p.back.rootFold.Children
+	rootChildren := pb.rootFold.Children
 	srcItemIdx := indexOfChunk(rootChildren, srcCb.itemList)
 	if srcItemIdx < 0 {
 		return nil, fmt.Errorf("DuplicateComposition: src comp %q Item LIST not found in root Fold", src.Name)
@@ -147,12 +148,12 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	newRootChildren = append(newRootChildren, dupItemList)
 	newRootChildren = append(newRootChildren, dupSiblings...)
 	newRootChildren = append(newRootChildren, rootChildren[insertAt:]...)
-	p.back.rootFold.Children = newRootChildren
+	pb.rootFold.Children = newRootChildren
 
 	// === Reparse closed loop ===
 	dupComp, parseErr := parseComposition(dupItemList, newCompID, name, &p.Warnings)
 	if parseErr != nil {
-		p.back.rootFold.Children = oldRootChildren
+		pb.rootFold.Children = oldRootChildren
 		p.nextItemID = oldNextItemID
 		return nil, fmt.Errorf("DuplicateComposition: re-parse cloned comp: %w", parseErr)
 	}
@@ -161,7 +162,7 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	// === Register + warnings-as-failure rollback ===
 	p.Compositions = append(p.Compositions, dupComp)
 	if len(p.Warnings) > oldWarningsLen {
-		p.back.rootFold.Children = oldRootChildren
+		pb.rootFold.Children = oldRootChildren
 		p.Compositions = oldComps
 		p.nextItemID = oldNextItemID
 		newWarnings := append([]string(nil), p.Warnings[oldWarningsLen:]...)

@@ -37,10 +37,11 @@ import (
 // validate XML structure). Round-tripping through WriteAEP preserves
 // the original bytes verbatim via Chunk.Trailing.
 func (p *Project) XmpPacket() string {
-	if p.back == nil || p.back.root == nil || len(p.back.root.Trailing) == 0 {
+	pb := p.projectBack()
+	if pb == nil || pb.root == nil || len(pb.root.Trailing) == 0 {
 		return ""
 	}
-	return string(p.back.root.Trailing)
+	return string(pb.root.Trailing)
 }
 
 // Revision returns the project's file revision counter — incremented
@@ -48,10 +49,11 @@ func (p *Project) XmpPacket() string {
 // the next-item-id counter that our writer manages independently.
 // Returns 0 when the file has no head chunk or its data is too short.
 func (p *Project) Revision() uint16 {
-	if p.back == nil || p.back.root == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.root == nil {
 		return 0
 	}
-	head := p.back.root.FindFirst(chunkIDHead)
+	head := pb.root.FindFirst(chunkIDHead)
 	if head == nil || len(head.Data) < 20 {
 		return 0
 	}
@@ -70,25 +72,21 @@ func (p *Project) Revision() uint16 {
 // for scene-referred profiles when rendering (acer byte 0 != 0).
 // Returns false when the chunk is absent.
 func (p *Project) CompensateForSceneReferredProfiles() bool {
-	if p.back == nil || p.back.acerChunk == nil || len(p.back.acerChunk.Data) < 1 {
+	pb := p.projectBack()
+	if pb == nil || pb.acerChunk == nil || len(pb.acerChunk.Data) < 1 {
 		return false
 	}
-	return p.back.acerChunk.Data[0] != 0
+	return pb.acerChunk.Data[0] != 0
 }
 
 // SetCompensateForSceneReferredProfiles writes the acer byte. Refuses
 // when the acer chunk is absent (no slot to mutate; AE 23+ writes it
 // by default — files without it are rare).
 func (p *Project) SetCompensateForSceneReferredProfiles(v bool) error {
-	if p.back == nil || p.back.acerChunk == nil || len(p.back.acerChunk.Data) < 1 {
+	if p.back == nil {
 		return fmt.Errorf("project: no acer chunk — cannot SetCompensateForSceneReferredProfiles")
 	}
-	if v {
-		p.back.acerChunk.Data[0] = 1
-	} else {
-		p.back.acerChunk.Data[0] = 0
-	}
-	return nil
+	return p.back.SetCompensateForSceneReferredProfiles(v)
 }
 
 // ──────────────────────────────────────────────
@@ -102,31 +100,21 @@ var validAudioSampleRates = []float64{22050, 32000, 44100, 48000, 96000}
 // AudioSampleRate returns the project's audio sample rate in Hz.
 // Returns 0 when the adfr chunk is absent or too short.
 func (p *Project) AudioSampleRate() float64 {
-	if p.back == nil || p.back.adfrChunk == nil || len(p.back.adfrChunk.Data) < 8 {
+	pb := p.projectBack()
+	if pb == nil || pb.adfrChunk == nil || len(pb.adfrChunk.Data) < 8 {
 		return 0
 	}
-	bits := binary.BigEndian.Uint64(p.back.adfrChunk.Data[0:8])
+	bits := binary.BigEndian.Uint64(pb.adfrChunk.Data[0:8])
 	return math.Float64frombits(bits)
 }
 
 // SetAudioSampleRate writes the adfr f64 BE. Refuses unknown rates
 // outside AE's UI-supported set.
 func (p *Project) SetAudioSampleRate(rate float64) error {
-	if p.back == nil || p.back.adfrChunk == nil || len(p.back.adfrChunk.Data) < 8 {
+	if p.back == nil {
 		return fmt.Errorf("project: no adfr chunk — cannot SetAudioSampleRate")
 	}
-	valid := false
-	for _, v := range validAudioSampleRates {
-		if rate == v {
-			valid = true
-			break
-		}
-	}
-	if !valid {
-		return fmt.Errorf("project: audio_sample_rate %v invalid; must be one of %v", rate, validAudioSampleRates)
-	}
-	binary.BigEndian.PutUint64(p.back.adfrChunk.Data[0:8], math.Float64bits(rate))
-	return nil
+	return p.back.SetAudioSampleRate(rate)
 }
 
 // ──────────────────────────────────────────────
@@ -137,10 +125,11 @@ func (p *Project) SetAudioSampleRate(rate float64) error {
 // dwga byte 0 selector (0 → 2.2, non-zero → 2.4). Returns 2.2 default
 // when dwga is absent.
 func (p *Project) WorkingGamma() float64 {
-	if p.back == nil || p.back.dwgaChunk == nil || len(p.back.dwgaChunk.Data) < 1 {
+	pb := p.projectBack()
+	if pb == nil || pb.dwgaChunk == nil || len(pb.dwgaChunk.Data) < 1 {
 		return 2.2
 	}
-	if p.back.dwgaChunk.Data[0] == 0 {
+	if pb.dwgaChunk.Data[0] == 0 {
 		return 2.2
 	}
 	return 2.4
@@ -149,18 +138,10 @@ func (p *Project) WorkingGamma() float64 {
 // SetWorkingGamma writes the dwga selector byte. Refuses values other
 // than 2.2 and 2.4 (AE's only UI options).
 func (p *Project) SetWorkingGamma(gamma float64) error {
-	if p.back == nil || p.back.dwgaChunk == nil || len(p.back.dwgaChunk.Data) < 1 {
+	if p.back == nil {
 		return fmt.Errorf("project: no dwga chunk — cannot SetWorkingGamma")
 	}
-	switch gamma {
-	case 2.2:
-		p.back.dwgaChunk.Data[0] = 0
-	case 2.4:
-		p.back.dwgaChunk.Data[0] = 1
-	default:
-		return fmt.Errorf("project: working_gamma %v invalid; must be 2.2 or 2.4", gamma)
-	}
-	return nil
+	return p.back.SetWorkingGamma(gamma)
 }
 
 // ──────────────────────────────────────────────
@@ -172,20 +153,20 @@ func (p *Project) SetWorkingGamma(gamma float64) error {
 // this as a labeled enum; we surface the raw string since AE writes a
 // runtime-resolved device UUID. Empty string when the chunk is absent.
 func (p *Project) GpuAccelType() string {
-	if p.back == nil || p.back.gpugUtf8 == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.gpugUtf8 == nil {
 		return ""
 	}
-	return p.back.gpugUtf8.Text()
+	return pb.gpugUtf8.Text()
 }
 
 // SetGpuAccelType replaces the gpuG Utf8 string in-place
 // (length-variable splice; WriteAEP recomputes parent LIST size).
 func (p *Project) SetGpuAccelType(s string) error {
-	if p.back == nil || p.back.gpugUtf8 == nil {
+	if p.back == nil {
 		return fmt.Errorf("project: no gpuG/Utf8 chunk — cannot SetGpuAccelType")
 	}
-	p.back.gpugUtf8.Data = []byte(s)
-	return nil
+	return p.back.SetGpuAccelType(s)
 }
 
 // ──────────────────────────────────────────────
@@ -196,10 +177,11 @@ func (p *Project) SetGpuAccelType(s string) error {
 // ("extendscript" or "javascript-1.0"). Defaults to "extendscript"
 // when the ExEn chunk is absent — matches py-aep's behavior.
 func (p *Project) ExpressionEngine() string {
-	if p.back == nil || p.back.exenUtf8 == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.exenUtf8 == nil {
 		return "extendscript"
 	}
-	return p.back.exenUtf8.Text()
+	return pb.exenUtf8.Text()
 }
 
 // SetExpressionEngine writes the ExEn Utf8. Refuses values other than
@@ -215,11 +197,10 @@ func (p *Project) SetExpressionEngine(engine string) error {
 	default:
 		return fmt.Errorf("project: expression_engine %q invalid; must be \"extendscript\" or \"javascript-1.0\"", engine)
 	}
-	if p.back == nil || p.back.exenUtf8 == nil {
+	if p.back == nil {
 		return fmt.Errorf("project: no ExEn chunk — cannot SetExpressionEngine on file without one")
 	}
-	p.back.exenUtf8.Data = []byte(engine)
-	return nil
+	return p.back.SetExpressionEngine(engine)
 }
 
 // ──────────────────────────────────────────────
@@ -247,11 +228,12 @@ func (p *Project) SetExpressionEngine(engine string) error {
 // FeetFramesFilmType returns the film type for feet+frames timecode display.
 // Returns FeetFramesFilmTypeMM35 (0) when nnhd chunk is absent.
 func (p *Project) FeetFramesFilmType() FeetFramesFilmType {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 9 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 9 {
 		return FeetFramesFilmTypeMM35
 	}
 	// Byte 8, bit 7
-	if p.back.nnhdChunk.Data[8]&0x80 != 0 {
+	if pb.nnhdChunk.Data[8]&0x80 != 0 {
 		return FeetFramesFilmTypeMM16
 	}
 	return FeetFramesFilmTypeMM35
@@ -259,72 +241,64 @@ func (p *Project) FeetFramesFilmType() FeetFramesFilmType {
 
 // SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.
 func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 9 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFeetFramesFilmType")
 	}
-	if v == FeetFramesFilmTypeMM16 {
-		p.back.nnhdChunk.Data[8] |= 0x80
-	} else {
-		p.back.nnhdChunk.Data[8] &^= 0x80
-	}
-	return nil
+	return p.back.SetFeetFramesFilmType(v)
 }
 
 // FootageTimecodeDisplayStartType returns how timecode is displayed for footage.
 // Returns FootageTimecodeDisplayStartTypeStart0 (0) when nnhd chunk is absent.
 func (p *Project) FootageTimecodeDisplayStartType() FootageTimecodeDisplayStartType {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 10 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 10 {
 		return FootageTimecodeDisplayStartTypeStart0
 	}
-	return FootageTimecodeDisplayStartType(p.back.nnhdChunk.Data[9])
+	return FootageTimecodeDisplayStartType(pb.nnhdChunk.Data[9])
 }
 
 // SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9.
 func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 10 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFootageTimecodeDisplayStartType")
 	}
-	p.back.nnhdChunk.Data[9] = byte(v)
-	return nil
+	return p.back.SetFootageTimecodeDisplayStartType(v)
 }
 
 // TimecodeDefaultBase returns the default timecode base (1-999).
 // Returns 0 when nnhd chunk is absent.
 func (p *Project) TimecodeDefaultBase() int {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 16 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 16 {
 		return 0
 	}
-	return int(binary.BigEndian.Uint16(p.back.nnhdChunk.Data[14:16]))
+	return int(binary.BigEndian.Uint16(pb.nnhdChunk.Data[14:16]))
 }
 
 // SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15.
 func (p *Project) SetTimecodeDefaultBase(v int) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 16 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTimecodeDefaultBase")
 	}
-	if v < 1 || v > 999 {
-		return fmt.Errorf("project: timecode_default_base %d invalid; must be 1-999", v)
-	}
-	binary.BigEndian.PutUint16(p.back.nnhdChunk.Data[14:16], uint16(v))
-	return nil
+	return p.back.SetTimecodeDefaultBase(v)
 }
 
 // FramesCountType returns how frames are counted in the project.
 // Returns FramesCountTypeStart0 (0) when nnhd chunk is absent.
 func (p *Project) FramesCountType() FramesCountType {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 21 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 21 {
 		return FramesCountTypeStart0
 	}
-	return FramesCountType(p.back.nnhdChunk.Data[20])
+	return FramesCountType(pb.nnhdChunk.Data[20])
 }
 
 // SetFramesCountType writes the frames count type to nnhd byte 20.
 func (p *Project) SetFramesCountType(v FramesCountType) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 21 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesCountType")
 	}
-	p.back.nnhdChunk.Data[20] = byte(v)
-	return nil
+	return p.back.SetFramesCountType(v)
 }
 
 // DisplayStartFrame returns the display start frame (0 or 1).
@@ -340,74 +314,66 @@ func (p *Project) SetDisplayStartFrame(v int) error {
 	if v != 0 && v != 1 {
 		return fmt.Errorf("project: display_start_frame %d invalid; must be 0 or 1", v)
 	}
-	current := p.FramesCountType()
-	newValue := FramesCountType((int(current) &^ 1) | v)
-	return p.SetFramesCountType(newValue)
+	if p.back == nil {
+		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesCountType")
+	}
+	return p.back.SetDisplayStartFrame(v)
 }
 
 // FramesUseFeetFrames returns whether frames use feet+frames display.
 // Returns false when nnhd chunk is absent.
 func (p *Project) FramesUseFeetFrames() bool {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 12 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 12 {
 		return false
 	}
 	// Byte 11, bit 0
-	return p.back.nnhdChunk.Data[11]&0x01 != 0
+	return pb.nnhdChunk.Data[11]&0x01 != 0
 }
 
 // SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0.
 func (p *Project) SetFramesUseFeetFrames(v bool) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 12 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesUseFeetFrames")
 	}
-	if v {
-		p.back.nnhdChunk.Data[11] |= 0x01
-	} else {
-		p.back.nnhdChunk.Data[11] &^= 0x01
-	}
-	return nil
+	return p.back.SetFramesUseFeetFrames(v)
 }
 
 // TimeDisplayType returns how time is displayed in the project.
 // Returns TimeDisplayTypeTimecode (0) when nnhd chunk is absent.
 func (p *Project) TimeDisplayType() TimeDisplayType {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 9 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 9 {
 		return TimeDisplayTypeTimecode
 	}
 	// Byte 8, bits 6-0
-	return TimeDisplayType(p.back.nnhdChunk.Data[8] & 0x7F)
+	return TimeDisplayType(pb.nnhdChunk.Data[8] & 0x7F)
 }
 
 // SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0.
 func (p *Project) SetTimeDisplayType(v TimeDisplayType) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 9 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTimeDisplayType")
 	}
-	// Preserve bit 7 (feet_frames_film_type)
-	p.back.nnhdChunk.Data[8] = (p.back.nnhdChunk.Data[8] & 0x80) | (byte(v) & 0x7F)
-	return nil
+	return p.back.SetTimeDisplayType(v)
 }
 
 // TransparencyGridThumbnails returns whether transparency grid is shown in thumbnails.
 // Returns false when nnhd chunk is absent.
 func (p *Project) TransparencyGridThumbnails() bool {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 26 {
+	pb := p.projectBack()
+	if pb == nil || pb.nnhdChunk == nil || len(pb.nnhdChunk.Data) < 26 {
 		return false
 	}
-	return p.back.nnhdChunk.Data[25] != 0
+	return pb.nnhdChunk.Data[25] != 0
 }
 
 // SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25.
 func (p *Project) SetTransparencyGridThumbnails(v bool) error {
-	if p.back == nil || p.back.nnhdChunk == nil || len(p.back.nnhdChunk.Data) < 26 {
+	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTransparencyGridThumbnails")
 	}
-	if v {
-		p.back.nnhdChunk.Data[25] = 1
-	} else {
-		p.back.nnhdChunk.Data[25] = 0
-	}
-	return nil
+	return p.back.SetTransparencyGridThumbnails(v)
 }
 
 // ──────────────────────────────────────────────
@@ -426,37 +392,16 @@ func (p *Project) SetTransparencyGridThumbnails(v bool) error {
 // Records a parser Warning on malformed JSON so callers can surface the
 // issue instead of seeing the chunk as silently absent.
 func (p *Project) cmsSettings() map[string]interface{} {
-	if p.back == nil || p.back.cmsUtf8 == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.cmsUtf8 == nil {
 		return nil
 	}
 	var settings map[string]interface{}
-	if err := json.Unmarshal(p.back.cmsUtf8.Data, &settings); err != nil {
+	if err := json.Unmarshal(pb.cmsUtf8.Data, &settings); err != nil {
 		p.Warnings = append(p.Warnings, fmt.Sprintf("project: CMS JSON parse failed: %v", err))
 		return nil
 	}
 	return settings
-}
-
-// updateCmsSetting updates a single key in the CMS settings JSON.
-// Refuses when no CMS chunk is present — the chunk's on-disk container
-// position is AE-version-dependent and not yet RE'd, so synthesizing a
-// new one risks producing files AE rejects. To enable CMS settings,
-// open the project in AE 24+, toggle one CMS field, save, and reopen.
-func (p *Project) updateCmsSetting(key string, value interface{}) error {
-	if p.back == nil || p.back.cmsUtf8 == nil {
-		return fmt.Errorf("project: no CMS chunk — cannot set %s (only AE 24+ projects with CMS already saved are supported)", key)
-	}
-	var settings map[string]interface{}
-	if err := json.Unmarshal(p.back.cmsUtf8.Data, &settings); err != nil {
-		return fmt.Errorf("project: failed to parse CMS settings: %w", err)
-	}
-	settings[key] = value
-	data, err := json.Marshal(settings)
-	if err != nil {
-		return fmt.Errorf("project: failed to marshal CMS settings: %w", err)
-	}
-	p.back.cmsUtf8.Data = data
-	return nil
 }
 
 // ColorManagementSystem returns the color management system used by the project.
@@ -480,7 +425,10 @@ func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error {
 	default:
 		return fmt.Errorf("project: color_management_system %d invalid; must be Adobe(0) or OCIO(1)", v)
 	}
-	return p.updateCmsSetting("colorManagementSystem", int(v))
+	if p.back == nil {
+		return fmt.Errorf("project: no CMS chunk — cannot set %s (only AE 24+ projects with CMS already saved are supported)", "colorManagementSystem")
+	}
+	return p.back.SetColorManagementSystem(v)
 }
 
 // LutInterpolationMethod returns the LUT interpolation method.
@@ -504,7 +452,10 @@ func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error {
 	default:
 		return fmt.Errorf("project: lut_interpolation_method %d invalid; must be Trilinear(0) or Tetrahedral(1)", v)
 	}
-	return p.updateCmsSetting("lutInterpolationMethod", int(v))
+	if p.back == nil {
+		return fmt.Errorf("project: no CMS chunk — cannot set %s (only AE 24+ projects with CMS already saved are supported)", "lutInterpolationMethod")
+	}
+	return p.back.SetLutInterpolationMethod(v)
 }
 
 // OcioConfigurationFile returns the OCIO configuration file path.
@@ -522,20 +473,24 @@ func (p *Project) OcioConfigurationFile() string {
 
 // SetOcioConfigurationFile sets the OCIO configuration file path.
 func (p *Project) SetOcioConfigurationFile(v string) error {
-	return p.updateCmsSetting("ocioConfigurationFile", v)
+	if p.back == nil {
+		return fmt.Errorf("project: no CMS chunk — cannot set %s (only AE 24+ projects with CMS already saved are supported)", "ocioConfigurationFile")
+	}
+	return p.back.SetOcioConfigurationFile(v)
 }
 
 // WorkingSpace returns the working color space name (R only).
 // Returns "None" when the chunk is absent or has no baseColorProfile.
 func (p *Project) WorkingSpace() string {
-	if p.back == nil || p.back.cmsUtf8 == nil {
+	pb := p.projectBack()
+	if pb == nil || pb.cmsUtf8 == nil {
 		return "None"
 	}
-	if !strings.Contains(string(p.back.cmsUtf8.Data), "baseColorProfile") {
+	if !strings.Contains(string(pb.cmsUtf8.Data), "baseColorProfile") {
 		return "None"
 	}
 	var settings map[string]interface{}
-	if err := json.Unmarshal(p.back.cmsUtf8.Data, &settings); err != nil {
+	if err := json.Unmarshal(pb.cmsUtf8.Data, &settings); err != nil {
 		return "None"
 	}
 	profile, ok := settings["baseColorProfile"].(map[string]interface{})

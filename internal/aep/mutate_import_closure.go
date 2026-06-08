@@ -66,7 +66,7 @@ func locateItemBlockByID(container *rifx.Chunk, id uint32) (*rifx.Chunk, int, in
 // CALLER (insertLayerCrossProject) restores dest via its outer snapshot — this
 // helper does not self-rollback.
 func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, error) {
-	container, start, end := locateItemBlockByID(src.back.rootFold, srcID)
+	container, start, end := locateItemBlockByID(src.projectBack().rootFold, srcID)
 	if container == nil {
 		return 0, fmt.Errorf("footage Item block id=%d not found in src project", srcID)
 	}
@@ -77,7 +77,7 @@ func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, 
 		return 0, fmt.Errorf("cloned footage id=%d idta missing/short", srcID)
 	}
 	binary.BigEndian.PutUint32(idta.Data[codec.IdtaItemID:codec.IdtaItemID+4], destID)
-	destRoot := dest.back.rootFold
+	destRoot := dest.projectBack().rootFold
 	destRoot.Children = append(destRoot.Children, dup)
 	for k := start + 1; k < end; k++ {
 		destRoot.Children = append(destRoot.Children, deepCloneChunk(container.Children[k]))
@@ -101,16 +101,18 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 	destProj := c.proj
 	srcProj := src.comp.proj
 
-	if destProj.back == nil || destProj.back.rootFold == nil {
+	destPb := destProj.projectBack()
+	if destPb == nil || destPb.rootFold == nil {
 		return nil, fmt.Errorf("InsertLayer: dest Project has no root Fold back-ref (built outside parser?)")
 	}
 	if srcProj == nil {
 		return nil, fmt.Errorf("InsertLayer: src layer's Project is unknown (src.comp.proj == nil)")
 	}
-	if srcProj.back == nil || srcProj.back.rootFold == nil {
+	srcPb := srcProj.projectBack()
+	if srcPb == nil || srcPb.rootFold == nil {
 		return nil, fmt.Errorf("InsertLayer: src Project has no root Fold back-ref")
 	}
-	rootFold := destProj.back.rootFold
+	rootFold := destPb.rootFold
 
 	// === Outer snapshot (covers closure import + the layer splice) ===
 	oldRootChildren := append([]*rifx.Chunk(nil), rootFold.Children...)
@@ -183,7 +185,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 			}
 			itemIDMap[srcID] = destID
 		case *Composition:
-			container, start, end := locateItemBlockByID(srcProj.back.rootFold, srcID)
+			container, start, end := locateItemBlockByID(srcPb.rootFold, srcID)
 			if container == nil {
 				rollback()
 				return nil, fmt.Errorf("InsertLayer: cross-Project comp id=%d Item block not found in src Project", srcID)
