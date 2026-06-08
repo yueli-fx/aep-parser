@@ -1,12 +1,12 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 6/10**（已倒置 Composition / Marker / Mask / Footage / Keyframe / Project；余 Layer / PropertyGroup / RenderQueue / Property，Property 最后）。每 commit 绿 + byte-identical round-trip。
+**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 7/10**（已倒置 Composition / Marker / Mask / Footage / Keyframe / Project / Layer；余 PropertyGroup / RenderQueue / Property，Property 最后）。剩 3 类都带设计待决（见 inventory §E U1/U4）。每 commit 绿 + byte-identical round-trip。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
-- [2026-05-22-v3-direction.md](specs/2026-05-22-v3-direction.md) — V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① + M8 scene→rifx 白名单清零 已落；真·物理分包(方案②接口倒置)执行中 P2 6/10） — [note: 大 arc 暂停 — 真·物理分包(方案②接口倒置)执行中，见 M8 plan P2 6/10；结构性 Phase 1-5 + 包重组方案① + scene→rifx 白名单清零 已落]
+- [2026-05-22-v3-direction.md](specs/2026-05-22-v3-direction.md) — V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① + M8 scene→rifx 白名单清零 已落；真·物理分包(方案②接口倒置)执行中 P2 7/10） — [note: 大 arc 暂停 — 真·物理分包(方案②接口倒置)执行中，见 M8 plan P2 7/10；结构性 Phase 1-5 + 包重组方案① + scene→rifx 白名单清零 已落]
 - [2026-05-26-py-aep-parity-design.md](specs/2026-05-26-py-aep-parity-design.md) — py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向(static+animated) + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText）
 - [2026-05-27-v3-deep-think.md](specs/2026-05-27-v3-deep-think.md) — V3 deep think：open questions / risk register / migration strategy
 - [2026-06-07-v3-m8-physical-split-design.md](specs/2026-06-07-v3-m8-physical-split-design.md) — V3 M8 方案② 真·物理分包设计（A 先行 + B′ back-ref 接口）：scene/serializer/codec 物理拆包，back-ref 作 scene 内 writer 接口（serializer 实现）→ 保留全部方法 API（不破 API）、scene 编译期零 rifx；eager length-preserving patch 经接口；opaque 延后到 C；全程保 byte-exact 回归门 — [note: brainstorm + 三家外审两轮整合。方向 = A 先行（保 byte-exact，C 日后独立）+ B′（back-ref 接口、不破 API、无侧表/无 Document god-object）。前置：M8 scene→rifx 白名单清零（2026-06-07 已落）]
@@ -18,7 +18,11 @@
 
 ## 下一步
 
-1. **续 P2 接口化**（plan Task 2.2 Step 7）：剩 4 类 concrete→XWriter — **Layer**（68 setter，量大但纯 A1：ldta flag/byte + name/comment/btds length-variable）/ **PropertyGroup**（U4：无直属 Set*，写需求来自 SetDimensionsSeparated 跨界 + 结构性 group op）/ **RenderQueue**（U1：1 个 A1 + 36 个 A2 别名字段 settingsBlock/roouData，需先决别名字段归属）/ **Property 最后**（shape/stroke/fill setter 全委托 `Property.SetStaticValue`，接口化后自动经 `prop.back.WriteStaticValue`）。每类独立 commit + byte-identical + setter 单测 + attach 完整性断言。
+1. **续 P2 接口化**（plan Task 2.2 Step 7）：剩 3 类，**都需先定 inventory §E 的设计待决**：
+   - **RenderQueue**（U1）：1 个 A1（`SetComment` 经 `it.back.rcomChunk`）+ 36 个 A2 setter（RQItem/OM 经别名字节字段 `settingsBlock`/`roouData`，**不**经 `.back.`）。先决：别名字段迁进 backref 结构 + `RenderQueueWriter` 补 patch 方法（或通用 `PatchSettings(off,bytes)` 原语）；`OutputModule` 无独立 backref，是否独立接口。
+   - **PropertyGroup**（U4）：无直属 Set*，写需求来自 `Property.SetDimensionsSeparated`（跨界改 `grp.back.chunk.Children`）+ 结构性 group op（Remove/Duplicate/MoveTo）。先决：接口面 = group chunk splice 原语 还是 整 op 迁 serializer。
+   - **Property 最后**：4 setter + InsertKeyframe/DeleteKeyframe；`SetDimensionsSeparated` 跨入 PropertyGroupWriter，故须 PropertyGroup 先定。shape/stroke/fill setter 全委托 `Property.SetStaticValue`，接口化后自动经 `prop.back.WriteStaticValue`。
+   每类独立 commit + byte-identical + setter 单测 + attach 完整性断言。
 2. P2 收口（Task 2.3：scene_* rifx 引用清零核查）→ **P3** git mv 物理分包（编译期硬边界）→ **P4** 下游切换 + 退役 AST 守卫 + CLAUDE.md + 双版本 ship-gate。
 3. docgen 次要 follow-on（非阻塞）：README 英文化 + 类型级 / package-func Example 渲染。
 
