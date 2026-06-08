@@ -1,12 +1,12 @@
 ---
 status: active
-summary: V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① + M8 scene→rifx 白名单清零 已落；真·物理分包(方案②接口倒置)待启）
-note: 大 arc 暂停 — M8 前置解耦已落（scene→rifx 残留 5 项白名单 2026-06-07 清零，守卫严格禁 import）；真·物理分包需方案② 接口倒置破环，待启；结构性 Phase 1-5 + 包重组方案① 已落
+summary: V3 direction：scene-graph IR + capability matrix + serializer split（Phase 1-5 + 包重组方案① + M8 scene→rifx 白名单清零 已落；真·物理分包(方案②接口倒置)执行中 P2 5/10）
+note: 大 arc 暂停 — 真·物理分包(方案②接口倒置)执行中，见 M8 plan P2 5/10；结构性 Phase 1-5 + 包重组方案① + scene→rifx 白名单清零 已落
 ---
 
 # V3 direction — scene-graph IR + capability matrix + serializer split
 
-**Status**: **部分实现（partial / paused）— 更新 2026-06-07**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）+ **M8 scene→rifx 白名单清零**（5 项残留全迁出，守卫现严格禁 scene→rifx import，详下文残留表）。**剩余未做**：M8 真·物理分包（独立 `internal/scene`+`internal/serializer` Go 包，被单 package Go 语义挡，需方案② 接口依赖倒置破环）+ 通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
+**Status**: **部分实现（partial / paused）— 更新 2026-06-08**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）+ **M8 scene→rifx 白名单清零**（5 项残留全迁出，守卫现严格禁 scene→rifx import，详下文残留表）。**执行中**：M8 真·物理分包（独立 `internal/scene`+`internal/serializer` Go 包，方案② 接口依赖倒置破环——`plans/2026-06-07-v3-m8-physical-split-plan.md`，P2 back-ref 接口化 5/10）。**剩余未做**：通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
 
 GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`incidents/ae25-acceptance-gate.md`)。
 
