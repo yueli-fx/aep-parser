@@ -23,7 +23,8 @@ internal/aep/*       ── AEP 语义层 (Chunk 树 → Project / Composition /
 
 1. **写回 default 是 length-preserving**。改字段不准动 chunk 大小；少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。结构性 ops（NewComposition / NewShapeLayer / V3 的 Layer.Remove 等）走 V2.1 atomic invariants：warnings-as-failure + rollback to pre-call state + AE 双版本 ship-gate 验证。详 `incidents/ae25-acceptance-gate.md`。
 2. **public API 分级**：
-   - **Stable**: 已通过双版本 ship-gate 的核心 R/W API。重构不能动签名 / 类型 / JSON 字段。
+   - **Stable（核心 R/W）**: 已通过双版本 ship-gate 的 `Open` / `FromReader` / `WriteAEP` / `WriteJSON` / `Set*` / getter。**签名 / 类型 / JSON 字段不可动**。
+   - **Stable（结构性 op）= 语义稳定，调用形态可随包边界重组变化**（M8 方案② 决议，2026-06-09 用户批准，覆盖原「Stable 重构不能动签名」对结构性 op 的部分）：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等结构性写路径，**语义契约不变**（chunk 输出 byte-structural 等同、双版本 ship-gate 持续通过）；但**调用形态可在物理分包时从 scene 方法改为 facade 自由函数**（如 `comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`）——因其实现 building chunk 必须住 `internal/serializer`，而方法须与 scene 类型同包又不能访问 serializer（Go 语义墙，详 #3）。此类形态变更：**commit 标 BREAKING + 同步 `flightdeck/checklists/commits.md` API 表**，不算违反 Stable 契约。核心 R/W（Set*/Open/Write）不受此豁免，仍签名稳定。
    - **Alpha**: 显式标 alpha / deferred / 未 ship-gate 的新 API。可改可删，commit message 标 BREAKING。
    - review 时撤销新加但已知 broken 的 API 不算违反此约束。
    - 具体哪些字段属 Stable / Alpha 详 `flightdeck/plans/coverage.md`。
