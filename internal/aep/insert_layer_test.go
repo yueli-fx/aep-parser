@@ -39,7 +39,7 @@ func openInsertPair(t *testing.T) (*aep.Composition, *aep.Layer) {
 
 func TestInsertLayer_RefuseNilSrc(t *testing.T) {
 	c := &aep.Composition{Layers: []*aep.Layer{}}
-	_, err := c.InsertLayer(nil, 0)
+	_, err := aep.InsertLayer(c, nil, 0)
 	if err == nil {
 		t.Fatal("expected refuse on nil src, got nil error")
 	}
@@ -54,7 +54,7 @@ func TestInsertLayer_RefuseDestMissingItemList(t *testing.T) {
 	srcComp := &aep.Composition{}
 	src := &aep.Layer{ID: 10, Type: aep.LayerTypeAV}
 	aep.SetLayerCompForTest(src, srcComp)
-	_, err := dest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "itemList back-ref") {
 		t.Fatalf("want 'itemList back-ref' error, got %v", err)
 	}
@@ -69,7 +69,7 @@ func TestInsertLayer_RefuseDestMissingProject(t *testing.T) {
 		return
 	}
 	aep.SetCompProjForTest(dest, nil)
-	_, err := dest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "project back-ref") {
 		t.Fatalf("want 'project back-ref' error, got %v", err)
 	}
@@ -83,7 +83,7 @@ func TestInsertLayer_RefuseAtIdxOutOfRange(t *testing.T) {
 	}
 	preLen := len(dest.Layers)
 	for _, idx := range []int{-1, preLen + 1, preLen + 50} {
-		_, err := dest.InsertLayer(src, idx)
+		_, err := aep.InsertLayer(dest, src, idx)
 		if err == nil || !strings.Contains(err.Error(), "out of range") {
 			t.Errorf("atIdx=%d: want 'out of range' error, got %v", idx, err)
 		}
@@ -101,7 +101,7 @@ func TestInsertLayer_RefuseSrcDetached(t *testing.T) {
 	}
 	orphan := &aep.Layer{ID: 99, Type: aep.LayerTypeAV}
 	// orphan.comp stays nil.
-	_, err := dest.InsertLayer(orphan, 0)
+	_, err := aep.InsertLayer(dest, orphan, 0)
 	if err == nil || !strings.Contains(err.Error(), "src.comp") {
 		t.Fatalf("want 'src.comp' error, got %v", err)
 	}
@@ -116,7 +116,7 @@ func TestInsertLayer_RefuseSameComp(t *testing.T) {
 	if len(dest.Layers) == 0 {
 		t.Fatalf("fixture precondition: dest.Layers empty")
 	}
-	_, err := dest.InsertLayer(dest.Layers[0], 0)
+	_, err := aep.InsertLayer(dest, dest.Layers[0], 0)
 	if err == nil || !strings.Contains(err.Error(), "DuplicateLayer") {
 		t.Fatalf("want 'DuplicateLayer' redirect error, got %v", err)
 	}
@@ -134,7 +134,7 @@ func TestInsertLayer_CrossProjectNoLongerRefused(t *testing.T) {
 		return
 	}
 	_ = otherDest
-	_, err := dest.InsertLayer(otherSrc, 0)
+	_, err := aep.InsertLayer(dest, otherSrc, 0)
 	if err != nil && strings.Contains(err.Error(), "different Projects") {
 		t.Fatalf("R7 still active — cross-Project insert should be accepted now, got %v", err)
 	}
@@ -151,7 +151,7 @@ func TestInsertLayer_RefuseNonAV(t *testing.T) {
 	origType := src.Type
 	src.Type = aep.LayerTypeCamera
 	defer func() { src.Type = origType }()
-	_, err := dest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "non-AV") {
 		t.Fatalf("want 'non-AV' error, got %v", err)
 	}
@@ -169,7 +169,7 @@ func TestInsertLayer_RefuseDirectPrecompLoop(t *testing.T) {
 	if dest.ID == 0 {
 		t.Skip("fixture dest comp has ID 0; can't trigger R9 (SourceID==0 means 'no source')")
 	}
-	_, err := dest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "pre-comp loop") {
 		t.Fatalf("want 'pre-comp loop' error, got %v", err)
 	}
@@ -182,7 +182,7 @@ func TestInsertLayer_RefuseSrcMissingLayrList(t *testing.T) {
 		return
 	}
 	aep.ClearLayerLayrListForTest(src)
-	_, err := dest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "Layr chunk back-ref") {
 		t.Fatalf("want 'Layr chunk back-ref' error, got %v", err)
 	}
@@ -195,7 +195,7 @@ func TestInsertLayer_RefuseStructuralCorruption(t *testing.T) {
 		return
 	}
 	aep.CorruptSrcLayrFormTypeForTest(src)
-	_, err := dest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "non-Layr") {
 		t.Fatalf("want 'non-Layr' corruption error, got %v", err)
 	}
@@ -213,7 +213,7 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 	preChildCount := len(dest.ItemListForTest().Children)
 	preNextItemID := dest.ProjForTest().NextItemIDForTest()
 
-	clone, err := dest.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer(src, 0): %v", err)
 	}
@@ -277,7 +277,7 @@ func TestInsertLayer_HappyPath_Basic_MidAndAppend(t *testing.T) {
 				return
 			}
 			atIdx := tc.atIdxFn(dest)
-			clone, err := dest.InsertLayer(src, atIdx)
+			clone, err := aep.InsertLayer(dest, src, atIdx)
 			if err != nil {
 				t.Fatalf("InsertLayer(src, %d): %v", atIdx, err)
 			}
@@ -298,7 +298,7 @@ func TestInsertLayer_HappyPath_EmptyDest(t *testing.T) {
 	// only the Go-side []*Layer slice is empty. This exercises the
 	// "case len(c.Layers) == 0" branch in InsertLayer.
 	dest.Layers = nil
-	clone, err := dest.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer into emptied dest: %v", err)
 	}
@@ -321,7 +321,7 @@ func TestInsertLayer_FreshDataSlices(t *testing.T) {
 		return
 	}
 	srcLdtaBefore := append([]byte(nil), src.LdtaForTest().Data...)
-	clone, err := dest.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)
 	}
@@ -346,7 +346,7 @@ func TestInsertLayer_RoundTrip(t *testing.T) {
 		return
 	}
 	proj := dest.ProjForTest()
-	clone, err := dest.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)
 	}

@@ -36,7 +36,7 @@ func runV2_2RectSubKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, _ := comp.NewShapeLayer("RectSub")
+	l, _ := aep.NewShapeLayer(comp, "RectSub")
 	r, _ := l.RootGroup().AddRect()
 	_ = r.SetSize([2]float64{200, 100})
 	_ = r.Position().AddKeyframeLinear(0, [2]float64{0, 0})
@@ -127,7 +127,7 @@ func runV2_2StrokeKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, _ := comp.NewShapeLayer("StrokeAnim")
+	l, _ := aep.NewShapeLayer(comp, "StrokeAnim")
 	r, _ := l.RootGroup().AddRect()
 	_ = r.SetSize([2]float64{200, 100})
 	stroke, _ := l.RootGroup().AddStroke()
@@ -215,7 +215,7 @@ func runV2_2FillOpKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, _ := comp.NewShapeLayer("FillAnim")
+	l, _ := aep.NewShapeLayer(comp, "FillAnim")
 	r, _ := l.RootGroup().AddRect()
 	_ = r.SetSize([2]float64{200, 100})
 	fill, _ := l.RootGroup().AddFill()

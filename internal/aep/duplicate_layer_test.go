@@ -53,7 +53,7 @@ func TestDuplicateLayer_RefuseEmptyName(t *testing.T) {
 		return
 	}
 	c := proj.Compositions[0]
-	_, err := c.DuplicateLayer(1, "")
+	_, err := aep.DuplicateLayer(c, 1, "")
 	if err == nil {
 		t.Fatal("expected refuse on empty name, got nil")
 	}
@@ -70,7 +70,7 @@ func TestDuplicateLayer_RefuseOutOfRange(t *testing.T) {
 	c := proj.Compositions[0]
 	preLen := len(c.Layers)
 	for _, idx := range []int{-1, preLen, preLen + 50} {
-		_, err := c.DuplicateLayer(idx, "X")
+		_, err := aep.DuplicateLayer(c, idx, "X")
 		if err == nil {
 			t.Errorf("DuplicateLayer(%d): expected error, got nil", idx)
 			continue
@@ -91,7 +91,7 @@ func TestDuplicateLayer_RefuseMissingBackref(t *testing.T) {
 			{ID: 2, Type: aep.LayerTypeAV},
 		},
 	}
-	_, err := c.DuplicateLayer(0, "X")
+	_, err := aep.DuplicateLayer(c, 0, "X")
 	if err == nil {
 		t.Fatal("expected refuse on missing itemList back-ref, got nil")
 	}
@@ -107,7 +107,7 @@ func TestDuplicateLayer_RefuseNonAV(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	c.Layers[0].Type = aep.LayerTypeCamera
-	_, err := c.DuplicateLayer(0, "X")
+	_, err := aep.DuplicateLayer(c, 0, "X")
 	if err == nil {
 		t.Fatal("expected refuse on non-AV layer, got nil")
 	}
@@ -132,7 +132,7 @@ func TestDuplicateLayer_RefuseImplicitTrackMatte(t *testing.T) {
 	if c.Layers[1].TrackMatteLayerID != 0 {
 		t.Fatalf("test precondition: TrackMatteLayerID should be 0 for implicit case, got %d", c.Layers[1].TrackMatteLayerID)
 	}
-	_, err := c.DuplicateLayer(1, "X")
+	_, err := aep.DuplicateLayer(c, 1, "X")
 	if err == nil {
 		t.Fatal("expected refuse on layer with implicit TrackMatte, got nil")
 	}
@@ -163,7 +163,7 @@ func TestDuplicateLayer_HappyPath_Middle(t *testing.T) {
 	preChildCount := len(c.ItemListForTest().Children)
 	preNextItemID := proj.NextItemIDForTest()
 
-	clone, err := c.DuplicateLayer(1, "L2_clone")
+	clone, err := aep.DuplicateLayer(c, 1, "L2_clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer(1, \"L2_clone\"): %v", err)
 	}
@@ -226,7 +226,7 @@ func TestDuplicateLayer_FreshDataSlices(t *testing.T) {
 	src := c.Layers[1]
 	srcLdtaBefore := append([]byte(nil), src.LdtaForTest().Data...)
 
-	clone, err := c.DuplicateLayer(1, "Clone")
+	clone, err := aep.DuplicateLayer(c, 1, "Clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
@@ -256,7 +256,7 @@ func TestDuplicateLayer_RoundTrip(t *testing.T) {
 		return
 	}
 	c := proj.Compositions[0]
-	if _, err := c.DuplicateLayer(1, "L2_clone"); err != nil {
+	if _, err := aep.DuplicateLayer(c, 1, "L2_clone"); err != nil {
 		t.Fatalf("DuplicateLayer(1): %v", err)
 	}
 	// After dup: [L1, clone, source_L2, L3]
@@ -302,7 +302,7 @@ func TestDuplicateLayer_LdtaBodyVerbatim(t *testing.T) {
 	src := c.Layers[1]
 	srcLdtaBytes := append([]byte(nil), src.LdtaForTest().Data...)
 
-	clone, err := c.DuplicateLayer(1, "Clone")
+	clone, err := aep.DuplicateLayer(c, 1, "Clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
@@ -343,7 +343,7 @@ func TestDuplicateLayer_StructuralEquivalence_Solo(t *testing.T) {
 	}
 
 	cb := projBaseline.Compositions[0]
-	if _, err := cb.DuplicateLayer(1, "L2_mid"); err != nil {
+	if _, err := aep.DuplicateLayer(cb, 1, "L2_mid"); err != nil {
 		t.Fatalf("DuplicateLayer(1, \"L2_mid\"): %v", err)
 	}
 	cs := projSolo.Compositions[0]
@@ -413,7 +413,7 @@ func TestDuplicateLayer_ExplicitMatte_HappyPath(t *testing.T) {
 	preChildCount := len(c.ItemListForTest().Children)
 	preNextItemID := proj.NextItemIDForTest()
 
-	clone, err := c.DuplicateLayer(idx, "mt_alpha_clone")
+	clone, err := aep.DuplicateLayer(c, idx, "mt_alpha_clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer on explicit-matte layer: %v", err)
 	}
@@ -472,7 +472,7 @@ func TestDuplicateLayer_ExplicitMatte_VerbatimBytes(t *testing.T) {
 		t.Fatalf("source ldta too short for AE 23+ matte slot: %d bytes", len(srcLdtaBytes))
 	}
 
-	clone, err := c.DuplicateLayer(idx, "mt_luma_clone")
+	clone, err := aep.DuplicateLayer(c, idx, "mt_luma_clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
@@ -520,7 +520,7 @@ func TestDuplicateLayer_ExplicitMatte_RoundTrip(t *testing.T) {
 	srcMode := src.TrackMatte
 	srcMatteID := src.TrackMatteLayerID
 
-	clone, err := c.DuplicateLayer(idx, "mt_alphainv_clone")
+	clone, err := aep.DuplicateLayer(c, idx, "mt_alphainv_clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
@@ -581,7 +581,7 @@ func TestDuplicateLayer_ExplicitMatte_BothPointToSameSource(t *testing.T) {
 		t.Fatalf("test precondition: source must have explicit matte")
 	}
 
-	clone, err := c.DuplicateLayer(idx, "mt_alpha_clone")
+	clone, err := aep.DuplicateLayer(c, idx, "mt_alpha_clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}

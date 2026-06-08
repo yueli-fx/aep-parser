@@ -38,7 +38,7 @@ func runV2_2FillKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, _ := comp.NewShapeLayer("FillKf")
+	l, _ := aep.NewShapeLayer(comp, "FillKf")
 	r, _ := l.RootGroup().AddRect()
 	_ = r.SetSize([2]float64{200, 100})
 	fill, _ := l.RootGroup().AddFill()

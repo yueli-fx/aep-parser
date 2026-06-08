@@ -42,7 +42,7 @@ func TestDeleteLayer_RefuseOutOfRange(t *testing.T) {
 	preLen := len(c.Layers)
 
 	for _, idx := range []int{-1, preLen, preLen + 50} {
-		err := c.DeleteLayer(idx)
+		err := aep.DeleteLayer(c, idx)
 		if err == nil {
 			t.Errorf("DeleteLayer(%d): expected error, got nil", idx)
 			continue
@@ -63,7 +63,7 @@ func TestDeleteLayer_RefuseMissingBackref(t *testing.T) {
 			{ID: 2, Type: aep.LayerTypeAV},
 		},
 	}
-	err := c.DeleteLayer(0)
+	err := aep.DeleteLayer(c, 0)
 	if err == nil {
 		t.Fatal("expected refuse on missing itemList back-ref, got nil")
 	}
@@ -82,7 +82,7 @@ func TestDeleteLayer_RefuseLastLayer(t *testing.T) {
 	// any structural inspection of itemList, so the inconsistency
 	// between c.Layers and itemList doesn't matter.
 	c.Layers = c.Layers[:1]
-	err := c.DeleteLayer(0)
+	err := aep.DeleteLayer(c, 0)
 	if err == nil {
 		t.Fatal("expected refuse on single-layer comp, got nil")
 	}
@@ -98,7 +98,7 @@ func TestDeleteLayer_RefuseNonAV(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	c.Layers[0].Type = aep.LayerTypeCamera
-	err := c.DeleteLayer(0)
+	err := aep.DeleteLayer(c, 0)
 	if err == nil {
 		t.Fatal("expected refuse on non-AV layer, got nil")
 	}
@@ -127,7 +127,7 @@ func TestDeleteLayer_MiddleSplice(t *testing.T) {
 	}
 	preChildCount := len(itemList.Children)
 
-	if err := c.DeleteLayer(1); err != nil {
+	if err := aep.DeleteLayer(c, 1); err != nil {
 		t.Fatalf("DeleteLayer(1): %v", err)
 	}
 
@@ -165,7 +165,7 @@ func TestDeleteLayer_ResetsParentIDOnNeighbor(t *testing.T) {
 		t.Fatalf("setup: l1.ParentID = %d, want %d", l1.ParentID, l2.ID)
 	}
 
-	if err := c.DeleteLayer(1); err != nil {
+	if err := aep.DeleteLayer(c, 1); err != nil {
 		t.Fatalf("DeleteLayer(1): %v", err)
 	}
 
@@ -204,7 +204,7 @@ func TestDeleteLayer_ResetsTrackMatteIDButPreservesTypeByte(t *testing.T) {
 		t.Fatalf("setup: l1 ldta @0x6B = 0x%02x, want 0x%02x", typeByteBefore, byte(aep.TrackMatteAlpha))
 	}
 
-	if err := c.DeleteLayer(2); err != nil {
+	if err := aep.DeleteLayer(c, 2); err != nil {
 		t.Fatalf("DeleteLayer(2): %v", err)
 	}
 
@@ -248,7 +248,7 @@ func TestDeleteLayer_ResetsTrackMatteID_AE25(t *testing.T) {
 
 	// L3 is at index 1; deleting it would leave 1 layer in c.Layers —
 	// but the refuse fires only at len==1, so a 2→1 delete is OK.
-	if err := c.DeleteLayer(1); err != nil {
+	if err := aep.DeleteLayer(c, 1); err != nil {
 		t.Fatalf("DeleteLayer(1): %v", err)
 	}
 
@@ -279,7 +279,7 @@ func TestDeleteLayer_StructuralEquivalence_Middle(t *testing.T) {
 	}
 
 	cb := projBaseline.Compositions[0]
-	if err := cb.DeleteLayer(1); err != nil {
+	if err := aep.DeleteLayer(cb, 1); err != nil {
 		t.Fatalf("DeleteLayer(1): %v", err)
 	}
 
@@ -324,7 +324,7 @@ func TestDeleteLayer_RoundTrip(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 
-	if err := c.DeleteLayer(1); err != nil {
+	if err := aep.DeleteLayer(c, 1); err != nil {
 		t.Fatalf("DeleteLayer(1): %v", err)
 	}
 	wantIDs := []uint32{c.Layers[0].ID, c.Layers[1].ID}

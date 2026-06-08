@@ -35,7 +35,7 @@ func runV2_2ShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 		t.Fatalf("NewComposition: %v", err)
 	}
 
-	a, _ := comp.NewShapeLayer("A_RectFill_Animated")
+	a, _ := aep.NewShapeLayer(comp, "A_RectFill_Animated")
 	rectA, _ := a.RootGroup().AddRect()
 	_ = rectA.Size().AddKeyframeLinear(0, [2]float64{50, 50})
 	_ = rectA.Size().AddKeyframeLinear(2, [2]float64{300, 200})
@@ -45,14 +45,14 @@ func runV2_2ShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	_ = a.Position().AddKeyframeLinear(0, [2]float64{0, 0})
 	_ = a.Position().AddKeyframeLinear(2, [2]float64{500, 300})
 
-	b, _ := comp.NewShapeLayer("B_EllipseStroke_Static")
+	b, _ := aep.NewShapeLayer(comp, "B_EllipseStroke_Static")
 	ellB, _ := b.RootGroup().AddEllipse()
 	_ = ellB.SetSize([2]float64{150, 150})
 	strokeB, _ := b.RootGroup().AddStroke()
 	_ = strokeB.SetColor([4]float64{0, 0, 1, 1})
 	_ = strokeB.SetWidth(5)
 
-	c, _ := comp.NewShapeLayer("C_PathFillStroke_Static")
+	c, _ := aep.NewShapeLayer(comp, "C_PathFillStroke_Static")
 	pathC, _ := c.RootGroup().AddPath()
 	_ = pathC.SetVertices([][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}})
 	_ = pathC.SetClosed(true)

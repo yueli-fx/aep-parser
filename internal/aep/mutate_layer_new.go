@@ -107,7 +107,11 @@ func insertLayrPosition(children []*rifx.Chunk) int {
 // Atomic mutation: if lowering fails, or downstream parse emits any warning,
 // all state mutated by this call is rolled back to the pre-call snapshot
 // before the error is returned.
-func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
+func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	if name == "" {
 		return nil, fmt.Errorf("ShapeLayer name cannot be empty")
 	}

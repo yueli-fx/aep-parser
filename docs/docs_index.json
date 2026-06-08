@@ -110,13 +110,6 @@
       "rw": "read-only",
       "summary": "CompositionLayers returns layers whose source is another composition (pre-comp layers)."
     },
-    "Composition.DeleteLayer": {
-      "kind": "method",
-      "file": "composition.md",
-      "anchor": "#compositiondeletelayer",
-      "signature": "func (c *Composition) DeleteLayer(index int) error",
-      "summary": "DeleteLayer removes the layer at the given 0-based index in c.Layers. Returns nil on success, or an error if a refuse-case triggers (index out of range / comp lacks itemList back-ref / target is the last layer / target is not an AV layer / backref corruption)."
-    },
     "Composition.DisplayStartFrame": {
       "kind": "getter",
       "file": "composition.md",
@@ -132,13 +125,6 @@
       "signature": "DisplayStartTime float64",
       "rw": "read-write",
       "summary": "DisplayStartTime is the comp's display-time origin in seconds (AE scripting's CompItem.displayStartTime / displayStartFrame). Decoded from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE writes both 0 when displayStart is 0; non-zero pair encodes start-time in seconds. RE fixture: re_wave2_ae24.aep (RE_CDTA_DSF_120)."
-    },
-    "Composition.DuplicateLayer": {
-      "kind": "method",
-      "file": "composition.md",
-      "anchor": "#compositionduplicatelayer",
-      "signature": "func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error)",
-      "summary": "DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). Returns the cloned *Layer on success, or an error if a refuse-case triggers."
     },
     "Composition.Duration": {
       "kind": "field",
@@ -227,13 +213,6 @@
       "signature": "ID uint32",
       "rw": "read-only",
       "summary": "AE internal item ID"
-    },
-    "Composition.InsertLayer": {
-      "kind": "method",
-      "file": "composition.md",
-      "anchor": "#compositioninsertlayer",
-      "signature": "func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error)",
-      "summary": "InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). Returns the inserted clone *Layer on success. src may live in a sibling comp of the same Project, or in a different Project (cross-Project)."
     },
     "Composition.ItemID": {
       "kind": "getter",
@@ -336,13 +315,6 @@
       "rw": "read-only",
       "summary": "MotionGraphicsTemplateName is the Essential Graphics / .mogrt template name (AE default \"Untitled\" when the comp has no EG panel). Decoded from the comp's Item-level LIST:CIF3. See scene_essential_graphics.go."
     },
-    "Composition.MoveLayer": {
-      "kind": "method",
-      "file": "composition.md",
-      "anchor": "#compositionmovelayer",
-      "signature": "func (c *Composition) MoveLayer(from, to int) error",
-      "summary": "MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). The source layer's entire chunk block — Layr + Ewst + leaf followers (adaptive scan to next LIST/EOF, same machinery as DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the target slot. After the call, c.Layers[to] == the moved layer, and every layer's Layer.Index field is refreshed to match its new slice position."
-    },
     "Composition.Name": {
       "kind": "field",
       "file": "composition.md",
@@ -350,13 +322,6 @@
       "signature": "Name string",
       "rw": "read-write",
       "summary": "composition display name (writable via SetName)"
-    },
-    "Composition.NewShapeLayer": {
-      "kind": "method",
-      "file": "composition.md",
-      "anchor": "#compositionnewshapelayer",
-      "signature": "func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error)",
-      "summary": "NewShapeLayer adds a new empty ShapeLayer to the composition."
     },
     "Composition.NullLayers": {
       "kind": "getter",

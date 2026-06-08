@@ -43,7 +43,7 @@ func TestV2_2_StrokeDashes_Roundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Dashed")
+	l, err := aep.NewShapeLayer(comp, "Dashed")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestV2_2_StrokeDashes_Roundtrip(t *testing.T) {
 func TestV2_2_StrokeDashes_DisabledStaysSolid(t *testing.T) {
 	p := aep.NewProject()
 	comp, _ := p.NewComposition("Main", 1920, 1080, 30, 5)
-	l, _ := comp.NewShapeLayer("Solid")
+	l, _ := aep.NewShapeLayer(comp, "Solid")
 	rect, _ := l.RootGroup().AddRect()
 	_ = rect.SetSize([2]float64{200, 100})
 	stroke, _ := l.RootGroup().AddStroke()

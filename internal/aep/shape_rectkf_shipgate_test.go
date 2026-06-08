@@ -39,7 +39,7 @@ func runV2_2RectKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("RectKf")
+	l, err := aep.NewShapeLayer(comp, "RectKf")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

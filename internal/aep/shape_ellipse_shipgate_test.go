@@ -38,7 +38,7 @@ func runV2_2EllipseShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Ellipse_Static")
+	l, err := aep.NewShapeLayer(comp, "Ellipse_Static")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

@@ -43,7 +43,7 @@ func main() {
 
 	// 能力③：从零创建形状图层 + 取名（同一合成内可放多层）
 	layer := func(name string, at [2]float64) *aep.ShapeLayer {
-		l, err := comp.NewShapeLayer(name)
+		l, err := aep.NewShapeLayer(comp, name)
 		must(err)
 		must(l.Position().SetStaticValue(at))
 		return l

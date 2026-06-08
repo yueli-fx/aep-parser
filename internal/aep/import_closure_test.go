@@ -149,7 +149,7 @@ func TestInsertLayerXProj_RefuseDanglingSource(t *testing.T) {
 	orig := src.SourceID
 	src.SourceID = 0x00FFFFFF
 	defer func() { src.SourceID = orig }()
-	_, err := destComp.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(destComp, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "dangling") {
 		t.Fatalf("want 'dangling' refuse, got %v", err)
 	}
@@ -173,7 +173,7 @@ func TestInsertLayerXProj_RefuseDestNoRootFold(t *testing.T) {
 	}
 	_, _, _, realDest := openXProjPair(t)
 	aep.SetCompProjForTest(realDest, &aep.Project{}) // bare Project: back == nil
-	_, err := realDest.InsertLayer(src, 0)
+	_, err := aep.InsertLayer(realDest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "root Fold") {
 		t.Fatalf("want 'root Fold' refuse, got %v", err)
 	}
@@ -197,7 +197,7 @@ func TestInsertLayerXProj_HappyPath_Closure(t *testing.T) {
 	preDestItems := len(destProj.Compositions) + len(destProj.Footage)
 	preLayers := len(destComp.Layers)
 
-	clone, err := destComp.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(destComp, src, 0)
 	if err != nil {
 		t.Fatalf("cross-Project InsertLayer: %v", err)
 	}
@@ -234,7 +234,7 @@ func TestInsertLayerXProj_RoundTrip(t *testing.T) {
 	if src == nil {
 		t.Skip("no resolvable AV source layer")
 	}
-	clone, err := destComp.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(destComp, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)
 	}
@@ -299,7 +299,7 @@ func TestInsertLayerXProj_FootageDedup(t *testing.T) {
 	}
 	// dest opened from same file → already has the footage by Path → dedup hit
 	preFootage := len(destProj.Footage)
-	clone, err := destComp.InsertLayer(src, 0)
+	clone, err := aep.InsertLayer(destComp, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer (dedup): %v", err)
 	}

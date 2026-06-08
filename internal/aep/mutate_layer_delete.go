@@ -39,7 +39,11 @@ import (
 // middle / parent / matte modes). Future RE can lift the non-AV refuse
 // and the single-layer-comp refuse — both are conservative defaults
 // because AE's behavior for those scenarios hasn't been verified.
-func (c *Composition) DeleteLayer(index int) error {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
+func DeleteLayer(c *Composition, index int) error {
 	// 1. Validate refuse-cases.
 	if index < 0 || index >= len(c.Layers) {
 		return fmt.Errorf("DeleteLayer: index %d out of range (have %d layers)", index, len(c.Layers))

@@ -41,7 +41,7 @@ func runV2_2StrokeDashesShipGate(t *testing.T, target aep.AETarget, aeExe string
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Stroke_Static") // name expected by verify_v2_2_stroke.jsx
+	l, err := aep.NewShapeLayer(comp, "Stroke_Static") // name expected by verify_v2_2_stroke.jsx
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

@@ -17,12 +17,12 @@ func TestShapeLayer_NewWithEmptyName_DoesNotPolluteComp(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	if _, err := c.NewShapeLayer("ok"); err != nil {
+	if _, err := aep.NewShapeLayer(c, "ok"); err != nil {
 		t.Fatalf("NewShapeLayer(ok): %v", err)
 	}
 	beforeLen := len(c.Layers)
 
-	if _, err := c.NewShapeLayer(""); err == nil {
+	if _, err := aep.NewShapeLayer(c, ""); err == nil {
 		t.Fatal("empty name should error")
 	}
 	if len(c.Layers) != beforeLen {

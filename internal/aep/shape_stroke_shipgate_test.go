@@ -41,7 +41,7 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Stroke_Static")
+	l, err := aep.NewShapeLayer(comp, "Stroke_Static")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

@@ -41,7 +41,7 @@ func runV2_2GradientFillShipGate(t *testing.T, target aep.AETarget, aeExe string
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Grad_Static") // name expected by verify_v2_2_gradient.jsx
+	l, err := aep.NewShapeLayer(comp, "Grad_Static") // name expected by verify_v2_2_gradient.jsx
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

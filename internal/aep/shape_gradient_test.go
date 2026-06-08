@@ -85,7 +85,7 @@ func TestV2_2_GradientFill_Roundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Grad")
+	l, err := aep.NewShapeLayer(comp, "Grad")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

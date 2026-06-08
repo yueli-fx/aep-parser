@@ -46,7 +46,7 @@ func TestV2_2_ShapeEnums_Roundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Enums")
+	l, err := aep.NewShapeLayer(comp, "Enums")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

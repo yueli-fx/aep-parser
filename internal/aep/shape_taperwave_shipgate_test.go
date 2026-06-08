@@ -40,7 +40,7 @@ func runV2_2StrokeTaperWaveShipGate(t *testing.T, target aep.AETarget, aeExe str
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Stroke_Static") // name expected by verify_v2_2_stroke.jsx
+	l, err := aep.NewShapeLayer(comp, "Stroke_Static") // name expected by verify_v2_2_stroke.jsx
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

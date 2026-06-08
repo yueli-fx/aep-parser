@@ -48,7 +48,11 @@ import (
 // AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup] × 2 = 6/6 PASS): AE
 // accepts the Go-emitted file, the inserted clone's source resolves (imported /
 // dedup'd), and footage is not duplicated on path match.
-func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
+func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 	// === Refuse-case matrix R1-R11 ===
 	if src == nil {
 		return nil, fmt.Errorf("InsertLayer: src cannot be nil")

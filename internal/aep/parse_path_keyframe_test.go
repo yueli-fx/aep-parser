@@ -100,7 +100,7 @@ func TestPathKeyframe_WriteRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	sl, err := comp.NewShapeLayer("PathAnim")
+	sl, err := aep.NewShapeLayer(comp, "PathAnim")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

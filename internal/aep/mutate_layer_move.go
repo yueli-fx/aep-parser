@@ -37,7 +37,11 @@ import (
 // Layr LISTs in itemList.Children, same model that DeleteLayer and
 // DuplicateLayer already exercise and ship-gate across AE 2020 + AE
 // 2025). The reorder path is ship-gate validated for AE acceptance.
-func (c *Composition) MoveLayer(from, to int) error {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
+func MoveLayer(c *Composition, from, to int) error {
 	// 1. Validate refuse-cases.
 	cb, ok := c.back.(*compositionBackrefs)
 	if !ok || cb == nil || cb.itemList == nil {
@@ -209,7 +213,7 @@ func (l *Layer) MoveToBeginning() error {
 	if err != nil {
 		return err
 	}
-	return c.MoveLayer(idx, 0)
+	return MoveLayer(c, idx, 0)
 }
 
 // MoveToEnd moves the receiver to the last position in c.Layers
@@ -219,7 +223,7 @@ func (l *Layer) MoveToEnd() error {
 	if err != nil {
 		return err
 	}
-	return c.MoveLayer(idx, len(c.Layers)-1)
+	return MoveLayer(c, idx, len(c.Layers)-1)
 }
 
 // MoveAfter moves the receiver to the slot immediately after `other`
@@ -245,7 +249,7 @@ func (l *Layer) MoveAfter(other *Layer) error {
 	} else {
 		to = otherIdx + 1
 	}
-	return c.MoveLayer(fromIdx, to)
+	return MoveLayer(c, fromIdx, to)
 }
 
 // MoveBefore moves the receiver to the slot immediately before `other`
@@ -264,7 +268,7 @@ func (l *Layer) MoveBefore(other *Layer) error {
 	} else {
 		to = otherIdx
 	}
-	return c.MoveLayer(fromIdx, to)
+	return MoveLayer(c, fromIdx, to)
 }
 
 func (l *Layer) locateInComp(op string) (*Composition, int, error) {

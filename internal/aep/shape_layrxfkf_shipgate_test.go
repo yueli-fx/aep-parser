@@ -39,7 +39,7 @@ func runV2_2LayrPosKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, _ := comp.NewShapeLayer("PosAnim")
+	l, _ := aep.NewShapeLayer(comp, "PosAnim")
 	r, _ := l.RootGroup().AddRect()
 	_ = r.SetSize([2]float64{200, 100})
 	_ = l.Position().AddKeyframeLinear(0, [2]float64{100, 200})
@@ -130,7 +130,7 @@ func runV2_2XfKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, _ := comp.NewShapeLayer("XfAnim")
+	l, _ := aep.NewShapeLayer(comp, "XfAnim")
 	r, _ := l.RootGroup().AddRect()
 	_ = r.SetSize([2]float64{200, 100})
 	_ = l.AnchorPoint().AddKeyframeLinear(0, [2]float64{10, 20})

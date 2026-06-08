@@ -13,7 +13,7 @@ func TestNewShapeLayer_BasicCreation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s, err := c.NewShapeLayer("S1")
+	s, err := aep.NewShapeLayer(c, "S1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestNewShapeLayer_EmitsEwstSibling(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := c.NewShapeLayer("S1"); err != nil {
+	if _, err := aep.NewShapeLayer(c, "S1"); err != nil {
 		t.Fatal(err)
 	}
 	// Find the user Layr in itemList and assert the next sibling is Ewst(0).
@@ -76,7 +76,7 @@ func TestNewShapeLayer_EmptyName_Error(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := c.NewShapeLayer(""); err == nil {
+	if _, err := aep.NewShapeLayer(c, ""); err == nil {
 		t.Fatal("empty name should error")
 	}
 	if len(c.Layers) != 0 {
@@ -95,10 +95,10 @@ func TestNewShapeLayer_MultiLayer_EmitsLayerSiblings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := c.NewShapeLayer("L1"); err != nil {
+	if _, err := aep.NewShapeLayer(c, "L1"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := c.NewShapeLayer("L2"); err != nil {
+	if _, err := aep.NewShapeLayer(c, "L2"); err != nil {
 		t.Fatal(err)
 	}
 

@@ -37,7 +37,7 @@ func TestMoveLayer_RefuseFromOutOfRange(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	for _, from := range []int{-1, len(c.Layers), len(c.Layers) + 5} {
-		if err := c.MoveLayer(from, 0); err == nil {
+		if err := aep.MoveLayer(c, from, 0); err == nil {
 			t.Errorf("MoveLayer(%d, 0): want error, got nil", from)
 		}
 	}
@@ -50,7 +50,7 @@ func TestMoveLayer_RefuseToOutOfRange(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	for _, to := range []int{-1, len(c.Layers), len(c.Layers) + 5} {
-		if err := c.MoveLayer(0, to); err == nil {
+		if err := aep.MoveLayer(c, 0, to); err == nil {
 			t.Errorf("MoveLayer(0, %d): want error, got nil", to)
 		}
 	}
@@ -59,7 +59,7 @@ func TestMoveLayer_RefuseToOutOfRange(t *testing.T) {
 func TestMoveLayer_RefuseMissingBackref(t *testing.T) {
 	// Composition built outside the parser has c.back == nil.
 	c := &aep.Composition{Name: "synthetic"}
-	if err := c.MoveLayer(0, 1); err == nil {
+	if err := aep.MoveLayer(c, 0, 1); err == nil {
 		t.Error("MoveLayer on backref-less comp: want error, got nil")
 	} else if !strings.Contains(err.Error(), "itemList") {
 		t.Errorf("unexpected error message: %v", err)
@@ -74,7 +74,7 @@ func TestMoveLayer_NoOpSameIndex(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 	preChildCount := len(c.ItemListForTest().Children)
-	if err := c.MoveLayer(1, 1); err != nil {
+	if err := aep.MoveLayer(c, 1, 1); err != nil {
 		t.Fatalf("MoveLayer(1, 1): %v", err)
 	}
 	post := layerNames(c)
@@ -98,7 +98,7 @@ func TestMoveLayer_HappyPath_FirstToLast(t *testing.T) {
 		t.Fatalf("baseline must have 3 layers, got %d", len(pre))
 	}
 
-	if err := c.MoveLayer(0, 2); err != nil {
+	if err := aep.MoveLayer(c, 0, 2); err != nil {
 		t.Fatalf("MoveLayer(0, 2): %v", err)
 	}
 
@@ -126,7 +126,7 @@ func TestMoveLayer_HappyPath_LastToFirst(t *testing.T) {
 	preChildCount := len(c.ItemListForTest().Children)
 	pre := layerNames(c)
 
-	if err := c.MoveLayer(2, 0); err != nil {
+	if err := aep.MoveLayer(c, 2, 0); err != nil {
 		t.Fatalf("MoveLayer(2, 0): %v", err)
 	}
 
@@ -153,7 +153,7 @@ func TestMoveLayer_HappyPath_MidSwap(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 
-	if err := c.MoveLayer(1, 0); err != nil {
+	if err := aep.MoveLayer(c, 1, 0); err != nil {
 		t.Fatalf("MoveLayer(1, 0): %v", err)
 	}
 
@@ -172,7 +172,7 @@ func TestMoveLayer_RoundTrip(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 
-	if err := c.MoveLayer(0, 2); err != nil {
+	if err := aep.MoveLayer(c, 0, 2); err != nil {
 		t.Fatalf("MoveLayer(0, 2): %v", err)
 	}
 	want := []string{pre[1], pre[2], pre[0]}
@@ -209,7 +209,7 @@ func TestMoveLayer_ItemListChildrenIdentical(t *testing.T) {
 		pre[any(ch)] = struct{}{}
 	}
 
-	if err := c.MoveLayer(2, 0); err != nil {
+	if err := aep.MoveLayer(c, 2, 0); err != nil {
 		t.Fatalf("MoveLayer(2, 0): %v", err)
 	}
 

@@ -59,7 +59,7 @@ func TestV2_2_StrokeLineCapJoinMiter_Roundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("StrokeCapLayer")
+	l, err := aep.NewShapeLayer(comp, "StrokeCapLayer")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

@@ -48,7 +48,11 @@ import (
 // c.Layers, proj.nextItemID, and proj.Warnings; on any parser warning
 // surfaced during the re-parse, roll all of them back (including the
 // nextItemID bump) and return the warnings as an error.
-func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
+func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 	// 1. Validate refuse-cases.
 	if name == "" {
 		return nil, fmt.Errorf("DuplicateLayer: name cannot be empty")

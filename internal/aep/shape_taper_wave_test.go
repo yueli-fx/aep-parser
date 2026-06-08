@@ -48,7 +48,7 @@ func TestV2_2_StrokeTaperWave_Roundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("TaperWave")
+	l, err := aep.NewShapeLayer(comp, "TaperWave")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

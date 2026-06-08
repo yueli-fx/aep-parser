@@ -40,7 +40,7 @@ func runV2_2PathShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	l, err := comp.NewShapeLayer("Path_Static")
+	l, err := aep.NewShapeLayer(comp, "Path_Static")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

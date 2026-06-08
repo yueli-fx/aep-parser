@@ -18,7 +18,7 @@ func TestHydrate_RectNode_FromChunks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	s, err := c.NewShapeLayer("S1")
+	s, err := aep.NewShapeLayer(c, "S1")
 	if err != nil {
 		t.Fatalf("NewShapeLayer: %v", err)
 	}

@@ -21,7 +21,7 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 	}
 
 	// ShapeLayer A: animated streams
-	a, err := comp.NewShapeLayer("A_RectFill_Animated")
+	a, err := aep.NewShapeLayer(comp, "A_RectFill_Animated")
 	if err != nil {
 		t.Fatalf("NewShapeLayer A: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 	}
 
 	// ShapeLayer B: static
-	b, _ := comp.NewShapeLayer("B_EllipseStroke_Static")
+	b, _ := aep.NewShapeLayer(comp, "B_EllipseStroke_Static")
 	ellB, _ := b.RootGroup().AddEllipse()
 	_ = ellB.SetSize([2]float64{150, 150})
 	strokeB, _ := b.RootGroup().AddStroke()
@@ -55,7 +55,7 @@ func TestV2_2_CanonicalShapeGraph_Roundtrip(t *testing.T) {
 	_ = strokeB.SetWidth(5)
 
 	// ShapeLayer C: static path + fill + stroke
-	cl, _ := comp.NewShapeLayer("C_PathFillStroke_Static")
+	cl, _ := aep.NewShapeLayer(comp, "C_PathFillStroke_Static")
 	pathC, _ := cl.RootGroup().AddPath()
 	_ = pathC.SetVertices([][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}})
 	_ = pathC.SetClosed(true)
