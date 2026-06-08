@@ -34,10 +34,11 @@ func (p *Project) RootForTest() *rifx.Chunk {
 // LdtaForTest 暴露 Layer.ldta 给 DeleteLayer / structural mutation tests 用
 // (验 ldta @0x84 / @0xA0 / @0x6B byte-level writes).
 func (l *Layer) LdtaForTest() *rifx.Chunk {
-	if l.back == nil {
+	lb := l.layerBack()
+	if lb == nil {
 		return nil
 	}
-	return l.back.ldta
+	return lb.ldta
 }
 
 // NewTestProperty creates a Property with synthetic tdb4/tdsb/tdum/tduM

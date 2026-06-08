@@ -76,7 +76,8 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	if !crossProject && src.SourceID != 0 && src.SourceID == c.ID {
 		return nil, fmt.Errorf("InsertLayer: refuse direct pre-comp loop (src.SourceID=%d == dest.ID=%d)", src.SourceID, c.ID)
 	}
-	if src.back == nil || src.back.layrList == nil {
+	srcBack := src.layerBack()
+	if srcBack == nil || srcBack.layrList == nil {
 		return nil, fmt.Errorf("InsertLayer: src layer %q has no Layr chunk back-ref", src.Name)
 	}
 	srcCb, ok2 := src.comp.back.(*compositionBackrefs)
@@ -84,7 +85,7 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 		return nil, fmt.Errorf("InsertLayer: src comp %q has no itemList back-ref", src.comp.Name)
 	}
 	srcChildren := srcCb.itemList.Children
-	srcLayrIdx := findLayrIndexInItemList(srcCb.itemList, src.back.layrList)
+	srcLayrIdx := findLayrIndexInItemList(srcCb.itemList, srcBack.layrList)
 	if srcLayrIdx < 0 {
 		return nil, fmt.Errorf("InsertLayer: src layer %q Layr chunk not found in its comp's itemList", src.Name)
 	}
@@ -169,22 +170,24 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 		insertChunkIdx = insertLayrPosition(destChildren)
 	case atIdx < len(c.Layers):
 		target := c.Layers[atIdx]
-		if target.back == nil || target.back.layrList == nil {
+		targetBack := target.layerBack()
+		if targetBack == nil || targetBack.layrList == nil {
 			c.proj.nextItemID = oldNextItemID
 			return nil, fmt.Errorf("InsertLayer: dest Layers[%d] %q has no Layr backref", atIdx, target.Name)
 		}
-		insertChunkIdx = indexOfChunk(destChildren, target.back.layrList)
+		insertChunkIdx = indexOfChunk(destChildren, targetBack.layrList)
 		if insertChunkIdx < 0 {
 			c.proj.nextItemID = oldNextItemID
 			return nil, fmt.Errorf("InsertLayer: dest Layers[%d] %q Layr chunk not found in dest itemList", atIdx, target.Name)
 		}
 	default:
 		last := c.Layers[len(c.Layers)-1]
-		if last.back == nil || last.back.layrList == nil {
+		lastBack := last.layerBack()
+		if lastBack == nil || lastBack.layrList == nil {
 			c.proj.nextItemID = oldNextItemID
 			return nil, fmt.Errorf("InsertLayer: last dest layer %q has no Layr backref", last.Name)
 		}
-		lastLayrIdx := indexOfChunk(destChildren, last.back.layrList)
+		lastLayrIdx := indexOfChunk(destChildren, lastBack.layrList)
 		if lastLayrIdx < 0 {
 			c.proj.nextItemID = oldNextItemID
 			return nil, fmt.Errorf("InsertLayer: last dest layer %q Layr chunk not found", last.Name)

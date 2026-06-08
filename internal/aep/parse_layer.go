@@ -58,27 +58,28 @@ import (
 // The 3 auto-orient bits are mutually exclusive in AE's UI; we collapse
 // them into a single Layer.AutoOrient enum.
 func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
+	lb := &layerBackrefs{layrList: layr}
 	layer := &Layer{
 		Index:   index,
 		Visible: true,
 		Stretch: 1.0,
-		back:    &layerBackrefs{layrList: layr},
+		back:    lb,
 	}
 
 	if utf8 := layr.FindFirst(rifx.IDUtf8); utf8 != nil {
 		layer.Name = utf8.Text()
-		layer.back.nameChunk = utf8
+		lb.nameChunk = utf8
 	}
 	if cmta := layr.FindFirst(rifx.IDCmta); cmta != nil {
 		layer.Comment = decodeCmta(cmta.Data)
-		layer.back.commentChunk = cmta
+		lb.commentChunk = cmta
 	}
 
 	ldta := layr.FindFirst(rifx.IDLdta)
 	if ldta == nil {
 		return layer, nil
 	}
-	layer.back.ldta = ldta
+	lb.ldta = ldta
 
 	d := ldta.Data
 
@@ -180,7 +181,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	}
 
 	if blsi := findAlternateSourceBlsi(layr); blsi != nil && len(blsi.Data) >= 4 {
-		layer.back.alternateSourceBlsi = blsi
+		lb.alternateSourceBlsi = blsi
 		layer.AlternateSourceID = binary.BigEndian.Uint32(blsi.Data[0:4])
 	}
 
@@ -191,9 +192,9 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	layer.propertyTree = buildAEPropertyGroupTree(layr)
 	layer.propertyTree.layer = layer
 	wirePropertyTreeLeaves(layer.propertyTree, layer.Properties)
-	layer.back.btdsChunk = findTextSourceChunk(layr)
-	if layer.back.btdsChunk != nil {
-		layer.TextSourceRaw = layer.back.btdsChunk.Data
+	lb.btdsChunk = findTextSourceChunk(layr)
+	if lb.btdsChunk != nil {
+		layer.TextSourceRaw = lb.btdsChunk.Data
 		layer.Type = LayerTypeText
 		ts, warn := decodeTextSource(layer.TextSourceRaw)
 		layer.TextSource = ts
@@ -374,8 +375,9 @@ func hasShapeLayerRoot(layr *rifx.Chunk) bool {
 // layer has no ldta. Read-only access for debugging / RE tools — the
 // underlying byte slice is the live chunk data; do not mutate.
 func (l *Layer) LdtaRawBytes() []byte {
-	if l.back == nil || l.back.ldta == nil {
+	lb := l.layerBack()
+	if lb == nil || lb.ldta == nil {
 		return nil
 	}
-	return l.back.ldta.Data
+	return lb.ldta.Data
 }

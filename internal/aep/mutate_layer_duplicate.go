@@ -75,13 +75,14 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	if source.TrackMatte != TrackMatteNone && source.TrackMatteLayerID == 0 {
 		return nil, fmt.Errorf("DuplicateLayer: refuse layer %q (idx=%d) with implicit TrackMatte=%d (TrackMatteLayerID=0); AE relocates clone to preserve original's matte (F2 quirk), not yet supported", source.Name, index, source.TrackMatte)
 	}
-	if source.back == nil || source.back.layrList == nil {
+	sourceBack := source.layerBack()
+	if sourceBack == nil || sourceBack.layrList == nil {
 		return nil, fmt.Errorf("DuplicateLayer: layer %q at idx %d has no Layr chunk back-ref", source.Name, index)
 	}
 
 	// 2. Locate source Layr in itemList.Children.
 	children := cb.itemList.Children
-	srcLayrIdx := findLayrIndexInItemList(cb.itemList, source.back.layrList)
+	srcLayrIdx := findLayrIndexInItemList(cb.itemList, sourceBack.layrList)
 	if srcLayrIdx < 0 {
 		return nil, fmt.Errorf("DuplicateLayer: layer %q Layr chunk not found in itemList", source.Name)
 	}

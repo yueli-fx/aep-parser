@@ -11,14 +11,14 @@ func SetLayerCompForTest(l *Layer, c *Composition) { l.comp = c }
 func SetCompProjForTest(c *Composition, p *Project) { c.proj = p }
 
 func ClearLayerLayrListForTest(l *Layer) {
-	if l.back != nil {
-		l.back.layrList = nil
+	if lb := l.layerBack(); lb != nil {
+		lb.layrList = nil
 	}
 }
 
 func CorruptSrcLayrFormTypeForTest(l *Layer) {
-	if l.back != nil && l.back.layrList != nil {
-		l.back.layrList.FormType = rifx.ChunkID{'X', 'X', 'X', 'X'}
+	if lb := l.layerBack(); lb != nil && lb.layrList != nil {
+		lb.layrList.FormType = rifx.ChunkID{'X', 'X', 'X', 'X'}
 	}
 }
 

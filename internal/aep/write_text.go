@@ -2,11 +2,8 @@ package aep
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"strconv"
-
-	"github.com/example/aep-parser/internal/codec"
 )
 
 // Text per-run write API. Each setter targets one codec.PsValue node inside
@@ -15,70 +12,28 @@ import (
 // the parent sizes from chunk Data lengths.
 //
 // Implementation pattern:
-//   1. Locate the target value's byte range via fresh extract+parse of
-//      the btdk body (offsets recorded by parsePSValue).
-//   2. Splice new bytes into Layer.btdsChunk.Data.
-//   3. Re-decode the entire btds payload so Layer.TextSource reflects
-//      the new state.
+//   1. Validate the run / paragraph index against the decoded TextSource.
+//   2. Delegate the byte splice to layerBackrefs (LayerWriter).
+//   3. Re-sync Layer.TextSourceRaw / TextSource from the spliced btds
+//      bytes so subsequent reads reflect the new state.
 //
 // Setters are placed on Layer (not TextSource or TextStyleRun) to keep
 // the call site discoverable alongside SetText.
 
-// splicePSValue locates the codec.PsValue at `path` (relative to the btdk
-// root dict, e.g. "/1/1/0/0/6/0/0/0/0/6/1") and replaces its on-disk
-// bytes with newSrc. Returns an error if the path doesn't resolve or
-// the layer has no decoded text source.
-func (l *Layer) splicePSValue(path string, newSrc []byte) error {
-	if l.back == nil || l.back.btdsChunk == nil {
-		return fmt.Errorf("layer %q: not a text layer", l.Name)
+// resyncTextSource refreshes Layer.TextSourceRaw and re-decodes
+// Layer.TextSource from the (possibly re-spliced) btds chunk bytes.
+// Called after a back-side splice so scene reads stay accurate.
+func (l *Layer) resyncTextSource() {
+	lb := l.layerBack()
+	if lb == nil || lb.btdsChunk == nil {
+		return
 	}
-	body, bodyOff, err := extractBtdkBody(l.back.btdsChunk.Data)
-	if err != nil {
-		return fmt.Errorf("layer %q: %w", l.Name, err)
-	}
-	root := codec.ParsePSDict(body)
-	if root == nil {
-		return fmt.Errorf("layer %q: btdk dict empty", l.Name)
-	}
-	target := codec.PsPath(root, path)
-	if target == nil {
-		return fmt.Errorf("layer %q: no codec.PsValue at %q", l.Name, path)
-	}
-	if target.SrcEnd <= target.SrcStart {
-		return fmt.Errorf("layer %q: target at %q has zero-width src range", l.Name, path)
-	}
-	absStart := bodyOff + target.SrcStart
-	absEnd := bodyOff + target.SrcEnd
-	delta := len(newSrc) - (absEnd - absStart)
-
-	old := l.back.btdsChunk.Data
-	newRaw := make([]byte, 0, len(old)+delta)
-	newRaw = append(newRaw, old[:absStart]...)
-	newRaw = append(newRaw, newSrc...)
-	newRaw = append(newRaw, old[absEnd:]...)
-
-	// The inner LIST btdk header (immediately before bodyOff) carries
-	// its own uint32 BE size — bump it by delta so next time we extract
-	// the body we read the correct length. Without this, a length-
-	// changing splice misaligns extractBtdkBody on the next call.
-	// btdk LIST layout (8 bytes header + 4 bytes formType, body starts at bodyOff):
-	//   bodyOff-12: "LIST" (4 bytes)
-	//   bodyOff-8:  size uint32 BE (4 bytes) — includes the formType
-	//   bodyOff-4:  "btdk" (4 bytes formType)
-	//   bodyOff:    body
-	if delta != 0 && bodyOff >= 8 {
-		sizeOff := bodyOff - 8
-		oldSize := binary.BigEndian.Uint32(newRaw[sizeOff : sizeOff+4])
-		binary.BigEndian.PutUint32(newRaw[sizeOff:sizeOff+4], uint32(int(oldSize)+delta))
-	}
-
-	l.back.btdsChunk.Data = newRaw
+	newRaw := lb.btdsChunk.Data
 	l.TextSourceRaw = newRaw
 	ts, _ := decodeTextSource(newRaw)
 	if ts != nil {
 		l.TextSource = ts
 	}
-	return nil
 }
 
 // runStylePath builds the PostScript path to the style-run dict at
@@ -145,7 +100,11 @@ func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/1", []byte(formatPSNumber(sizePts)))
+	if err := l.back.SetRunFontSize(runIdx, sizePts); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunTracking writes character tracking (1/1000 em) on style run #runIdx.
@@ -153,7 +112,11 @@ func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/8", []byte(formatPSNumber(tracking)))
+	if err := l.back.SetRunTracking(runIdx, tracking); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunBaselineShift writes baseline shift (em points; positive = up)
@@ -162,7 +125,11 @@ func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/9", []byte(formatPSNumber(shift)))
+	if err := l.back.SetRunBaselineShift(runIdx, shift); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunLeading writes leading (em points) on style run #runIdx. Note:
@@ -173,7 +140,11 @@ func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/5", []byte(formatPSNumber(leading)))
+	if err := l.back.SetRunLeading(runIdx, leading); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunAutoLeading toggles AE's "auto leading" flag on style run #runIdx.
@@ -183,11 +154,11 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if auto {
-		v = "true"
+	if err := l.back.SetRunAutoLeading(runIdx, auto); err != nil {
+		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/4", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunFontIndex repoints style run #runIdx at a different entry in
@@ -200,7 +171,11 @@ func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if l.TextSource != nil && (fontIdx < 0 || fontIdx >= len(l.TextSource.Fonts)) {
 		return fmt.Errorf("layer %q: font index %d out of range [0,%d)", l.Name, fontIdx, len(l.TextSource.Fonts))
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/0", []byte(strconv.Itoa(fontIdx)))
+	if err := l.back.SetRunFontIndex(runIdx, fontIdx); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunFauxBold toggles synthetic bold on style run #runIdx.
@@ -208,11 +183,11 @@ func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if on {
-		v = "true"
+	if err := l.back.SetRunFauxBold(runIdx, on); err != nil {
+		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/2", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunFauxItalic toggles synthetic italic on style run #runIdx.
@@ -220,11 +195,11 @@ func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if on {
-		v = "true"
+	if err := l.back.SetRunFauxItalic(runIdx, on); err != nil {
+		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/3", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunHorizontalScale / SetRunVerticalScale write the raw scale
@@ -234,14 +209,22 @@ func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/6", []byte(formatPSNumber(scale)))
+	if err := l.back.SetRunHorizontalScale(runIdx, scale); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/7", []byte(formatPSNumber(scale)))
+	if err := l.back.SetRunVerticalScale(runIdx, scale); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunTsume writes the CJK character-spacing adjustment (0..100)
@@ -250,7 +233,11 @@ func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/36", []byte(formatPSNumber(tsume)))
+	if err := l.back.SetRunTsume(runIdx, tsume); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1)
@@ -259,7 +246,11 @@ func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/53/0/1", formatPSColorArray(rgba))
+	if err := l.back.SetRunFillColor(runIdx, rgba); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunStrokeColor writes the stroke paint color [R, G, B, A] on
@@ -268,7 +259,11 @@ func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/54/0/1", formatPSColorArray(rgba))
+	if err := l.back.SetRunStrokeColor(runIdx, rgba); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunApplyStroke toggles whether the stroke is rendered on
@@ -277,11 +272,11 @@ func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if apply {
-		v = "true"
+	if err := l.back.SetRunApplyStroke(runIdx, apply); err != nil {
+		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/57", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx.
@@ -289,7 +284,11 @@ func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/63", []byte(formatPSNumber(width)))
+	if err := l.back.SetRunStrokeWidth(runIdx, width); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunCapsOption writes the font caps option on style run #runIdx
@@ -303,7 +302,11 @@ func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 	if caps < TextCapsNormal || caps > TextCapsAllSmall {
 		return fmt.Errorf("layer %q: invalid TextCapsOption %d", l.Name, int(caps))
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/12", []byte(strconv.Itoa(int(caps))))
+	if err := l.back.SetRunCapsOption(runIdx, caps); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunBaselineOption writes the font baseline option on style run #runIdx.
@@ -315,7 +318,11 @@ func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error 
 	if base < TextBaselineNormal || base > TextBaselineSubscript {
 		return fmt.Errorf("layer %q: invalid TextBaselineOption %d", l.Name, int(base))
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/13", []byte(strconv.Itoa(int(base))))
+	if err := l.back.SetRunBaselineOption(runIdx, base); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunStrokeOverFill toggles whether the stroke renders over the fill
@@ -324,11 +331,11 @@ func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if over {
-		v = "true"
+	if err := l.back.SetRunStrokeOverFill(runIdx, over); err != nil {
+		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/58", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunAutoKernType writes the auto-kerning mode on style run #runIdx.
@@ -343,7 +350,11 @@ func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 	if kt < TextAutoKernNoAuto || kt > TextAutoKernOptical {
 		return fmt.Errorf("layer %q: invalid TextAutoKernType %d", l.Name, int(kt))
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/11", []byte(strconv.Itoa(int(kt))))
+	if err := l.back.SetRunAutoKernType(runIdx, kt); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunNoBreak toggles the "do not break" character flag on style run
@@ -353,11 +364,11 @@ func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if on {
-		v = "true"
+	if err := l.back.SetRunNoBreak(runIdx, on); err != nil {
+		return err
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/52", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunLineJoinType writes the stroke corner join style on style run
@@ -369,7 +380,11 @@ func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 	if j < TextLineJoinMiter || j > TextLineJoinBevel {
 		return fmt.Errorf("layer %q: invalid TextLineJoinType %d", l.Name, int(j))
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/62", []byte(strconv.Itoa(int(j))))
+	if err := l.back.SetRunLineJoinType(runIdx, j); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetRunDigitSet writes the digit set on style run #runIdx (AE 24+
@@ -381,7 +396,11 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 	if d < TextDigitSetDefault || d > TextDigitSetArabicRTL {
 		return fmt.Errorf("layer %q: invalid TextDigitSet %d", l.Name, int(d))
 	}
-	return l.splicePSValue(runStylePath(runIdx)+"/70", []byte(strconv.Itoa(int(d))))
+	if err := l.back.SetRunDigitSet(runIdx, d); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -404,63 +423,15 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 // Returns an error if the layer isn't a text layer or the btdk Fonts
 // array can't be located.
 func (l *Layer) AddFont(fontName string) (int, error) {
-	if l.back == nil || l.back.btdsChunk == nil || l.TextSource == nil {
+	if l.back == nil || l.TextSource == nil {
 		return -1, fmt.Errorf("layer %q: not a text layer", l.Name)
 	}
-	if fontName == "" {
-		return -1, fmt.Errorf("layer %q: fontName must be non-empty", l.Name)
-	}
-	body, bodyOff, err := extractBtdkBody(l.back.btdsChunk.Data)
+	idx, err := l.back.AddFont(fontName)
 	if err != nil {
-		return -1, fmt.Errorf("layer %q: %w", l.Name, err)
+		return -1, err
 	}
-	root := codec.ParsePSDict(body)
-	if root == nil {
-		return -1, fmt.Errorf("layer %q: btdk dict empty", l.Name)
-	}
-	arr := codec.PsPath(root, "/0/1/0")
-	if arr == nil || arr.Kind != codec.PsArr {
-		return -1, fmt.Errorf("layer %q: Fonts array at /0/1/0 not found", l.Name)
-	}
-	// We splice just inside the closing `]`. Find the array's last
-	// child srcEnd and insert " <new>" between it and `]`. When the
-	// array is empty (rare), insert directly after `[`.
-	var insertAt int
-	if len(arr.Arr) == 0 {
-		// arr.SrcStart points at the `[`; insert one byte after.
-		insertAt = arr.SrcStart + 1
-	} else {
-		last := arr.Arr[len(arr.Arr)-1]
-		insertAt = last.SrcEnd
-	}
-	newEntry := serializeFontEntry(fontName)
-
-	// Build the byte sequence to inject: leading space + serialized entry.
-	var injected []byte
-	injected = append(injected, ' ')
-	injected = append(injected, newEntry...)
-
-	old := l.back.btdsChunk.Data
-	abs := bodyOff + insertAt
-	newRaw := make([]byte, 0, len(old)+len(injected))
-	newRaw = append(newRaw, old[:abs]...)
-	newRaw = append(newRaw, injected...)
-	newRaw = append(newRaw, old[abs:]...)
-
-	// Update inner LIST btdk size header (same invariant as splicePSValue).
-	if bodyOff >= 8 {
-		sizeOff := bodyOff - 8
-		oldSize := binary.BigEndian.Uint32(newRaw[sizeOff : sizeOff+4])
-		binary.BigEndian.PutUint32(newRaw[sizeOff:sizeOff+4], uint32(int(oldSize)+len(injected)))
-	}
-
-	l.back.btdsChunk.Data = newRaw
-	l.TextSourceRaw = newRaw
-	ts, _ := decodeTextSource(newRaw)
-	if ts != nil {
-		l.TextSource = ts
-	}
-	return len(arr.Arr), nil // index of newly-added font (was len-1 + 1 → len of old)
+	l.resyncTextSource()
+	return idx, nil
 }
 
 // serializeFontEntry renders a CoolTypeFont entry in the shape AE
@@ -520,7 +491,11 @@ func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) erro
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/0", []byte(strconv.Itoa(int(j))))
+	if err := l.back.SetParagraphJustification(paraIdx, j); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphFirstLineIndent writes firstLineIndent (em points) on
@@ -529,7 +504,11 @@ func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/1", []byte(formatPSNumber(v)))
+	if err := l.back.SetParagraphFirstLineIndent(paraIdx, v); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx.
@@ -537,7 +516,11 @@ func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/2", []byte(formatPSNumber(v)))
+	if err := l.back.SetParagraphStartIndent(paraIdx, v); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx.
@@ -545,7 +528,11 @@ func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/3", []byte(formatPSNumber(v)))
+	if err := l.back.SetParagraphEndIndent(paraIdx, v); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx.
@@ -553,7 +540,11 @@ func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/4", []byte(formatPSNumber(v)))
+	if err := l.back.SetParagraphSpaceBefore(paraIdx, v); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx.
@@ -561,7 +552,11 @@ func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/5", []byte(formatPSNumber(v)))
+	if err := l.back.SetParagraphSpaceAfter(paraIdx, v); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx.
@@ -570,11 +565,11 @@ func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if on {
-		v = "true"
+	if err := l.back.SetParagraphAutoHyphenate(paraIdx, on); err != nil {
+		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/9", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx
@@ -586,7 +581,11 @@ func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 	if lt < TextLeadingRoman || lt > TextLeadingJapanese {
 		return fmt.Errorf("layer %q: invalid TextLeadingType %d", l.Name, int(lt))
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/8", []byte(strconv.Itoa(int(lt))))
+	if err := l.back.SetParagraphLeadingType(paraIdx, lt); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphHangingRoman toggles Roman Hanging Punctuation on
@@ -596,11 +595,11 @@ func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	v := "false"
-	if on {
-		v = "true"
+	if err := l.back.SetParagraphHangingRoman(paraIdx, on); err != nil {
+		return err
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/21", []byte(v))
+	l.resyncTextSource()
+	return nil
 }
 
 // SetParagraphDirection writes the paragraph reading direction on
@@ -613,7 +612,11 @@ func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) err
 	if d < TextDirectionLeftToRight || d > TextDirectionRightToLeft {
 		return fmt.Errorf("layer %q: invalid TextParagraphDirection %d", l.Name, int(d))
 	}
-	return l.splicePSValue(paragraphStylePath(paraIdx)+"/33", []byte(strconv.Itoa(int(d))))
+	if err := l.back.SetParagraphDirection(paraIdx, d); err != nil {
+		return err
+	}
+	l.resyncTextSource()
+	return nil
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -652,15 +655,9 @@ func (l *Layer) SetManualKerning(values []int) error {
 		return fmt.Errorf("layer %q: SetManualKerning: got %d values, want %d (one per existing char)",
 			l.Name, len(values), n)
 	}
-	// Write per-char values first. splicePSValue re-parses the body
-	// each call, so length-changing splices stay consistent across the
-	// loop. Path: /1/1/0/0/8/0/{i}/0/0.
-	for i, v := range values {
-		path := fmt.Sprintf("/1/1/0/0/8/0/%d/0/0", i)
-		if err := l.splicePSValue(path, []byte(strconv.Itoa(v))); err != nil {
-			return err
-		}
+	if err := l.back.SetManualKerning(values); err != nil {
+		return err
 	}
-	// Mirror values[0] to the sibling first-char scalar /1/1[0]/0/7.
-	return l.splicePSValue("/1/1/0/0/7", []byte(strconv.Itoa(values[0])))
+	l.resyncTextSource()
+	return nil
 }

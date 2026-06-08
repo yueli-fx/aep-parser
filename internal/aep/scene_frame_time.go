@@ -61,10 +61,11 @@ func (l *Layer) OutPoint() float64 {
 // at the given offset (8 bytes total) and returns dividend/divisor.
 // Returns 0 when ldta is nil, too short, or the divisor is zero.
 func (l *Layer) readLdtaFrac(off int) float64 {
-	if l.back == nil || l.back.ldta == nil || len(l.back.ldta.Data) < off+8 {
+	lb := l.layerBack()
+	if lb == nil || lb.ldta == nil || len(lb.ldta.Data) < off+8 {
 		return 0
 	}
-	d := l.back.ldta.Data
+	d := lb.ldta.Data
 	dividend := int32(binary.BigEndian.Uint32(d[off : off+4]))
 	divisor := binary.BigEndian.Uint32(d[off+4 : off+8])
 	if divisor == 0 {

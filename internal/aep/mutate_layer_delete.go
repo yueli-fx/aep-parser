@@ -56,13 +56,14 @@ func (c *Composition) DeleteLayer(index int) error {
 	if deleted.Type != LayerTypeAV {
 		return fmt.Errorf("DeleteLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported", index, deleted.Type)
 	}
-	if deleted.back == nil || deleted.back.layrList == nil {
+	deletedBack := deleted.layerBack()
+	if deletedBack == nil || deletedBack.layrList == nil {
 		return fmt.Errorf("DeleteLayer: layer %q at idx %d has no Layr chunk back-ref", deleted.Name, index)
 	}
 
 	// 2. Locate Layr in itemList.Children.
 	children := cb.itemList.Children
-	layrIdx := findLayrIndexInItemList(cb.itemList, deleted.back.layrList)
+	layrIdx := findLayrIndexInItemList(cb.itemList, deletedBack.layrList)
 	if layrIdx < 0 {
 		return fmt.Errorf("DeleteLayer: layer %q Layr chunk not found in itemList", deleted.Name)
 	}
@@ -143,19 +144,20 @@ func (c *Composition) DeleteLayer(index int) error {
 			parentID:          neighbor.ParentID,
 			trackMatteLayerID: neighbor.TrackMatteLayerID,
 		})
+		neighborBack := neighbor.layerBack()
 		if needsParent {
-			if neighbor.back != nil && neighbor.back.ldta != nil &&
-				len(neighbor.back.ldta.Data) >= 0x88 {
-				snapLdta(neighbor.back.ldta)
-				binary.BigEndian.PutUint32(neighbor.back.ldta.Data[0x84:0x88], 0)
+			if neighborBack != nil && neighborBack.ldta != nil &&
+				len(neighborBack.ldta.Data) >= 0x88 {
+				snapLdta(neighborBack.ldta)
+				binary.BigEndian.PutUint32(neighborBack.ldta.Data[0x84:0x88], 0)
 			}
 			neighbor.ParentID = 0
 		}
 		if needsMatte {
-			if neighbor.back != nil && neighbor.back.ldta != nil &&
-				len(neighbor.back.ldta.Data) >= 0xA4 {
-				snapLdta(neighbor.back.ldta)
-				binary.BigEndian.PutUint32(neighbor.back.ldta.Data[0xA0:0xA4], 0)
+			if neighborBack != nil && neighborBack.ldta != nil &&
+				len(neighborBack.ldta.Data) >= 0xA4 {
+				snapLdta(neighborBack.ldta)
+				binary.BigEndian.PutUint32(neighborBack.ldta.Data[0xA0:0xA4], 0)
 			}
 			neighbor.TrackMatteLayerID = 0
 		}

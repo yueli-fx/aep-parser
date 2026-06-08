@@ -46,7 +46,7 @@ func TestLightSource_RoundtripAndClear(t *testing.T) {
 	if light.SourceID != 20 {
 		t.Errorf("after Set, SourceID = %d, want 20", light.SourceID)
 	}
-	if got := binary.BigEndian.Uint32(light.back.ldta.Data[0x28:0x2C]); got != 20 {
+	if got := binary.BigEndian.Uint32(light.layerBack().ldta.Data[0x28:0x2C]); got != 20 {
 		t.Errorf("after Set, ldta@0x28 = %d, want 20", got)
 	}
 
@@ -137,7 +137,7 @@ func TestReplaceSource_RoundtripAndWarning(t *testing.T) {
 	if layer.SourceID != 200 {
 		t.Errorf("after ReplaceSource, SourceID = %d, want 200", layer.SourceID)
 	}
-	if got := binary.BigEndian.Uint32(layer.back.ldta.Data[0x28:0x2C]); got != 200 {
+	if got := binary.BigEndian.Uint32(layer.layerBack().ldta.Data[0x28:0x2C]); got != 200 {
 		t.Errorf("after ReplaceSource, ldta@0x28 = %d, want 200", got)
 	}
 

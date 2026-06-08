@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"math"
 	"strings"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // Layer setters covered in this file are all length-preserving single-byte
@@ -15,7 +12,7 @@ import (
 //
 //   - validates the layer has an underlying ldta chunk (else returns an
 //     error — happens for layers built outside the parser);
-//   - mutates the ldta bytes in place;
+//   - delegates the byte-patch work to layerBackrefs (LayerWriter);
 //   - keeps the matching Go field in sync so later reads see the new value.
 //
 // The next call to Project.WriteAEP serializes the change.
@@ -47,28 +44,13 @@ var (
 	flagVisible               = ldtaFlagBit{0x27, 0x01}
 )
 
-// setFlagBit flips a single ldta flag bit to match v. Returns an error
-// when the ldta chunk is missing or too short for the targeted byte
-// (length-preserving so chunk size never changes).
-func (l *Layer) setFlagBit(b ldtaFlagBit, v bool) error {
-	if l.back == nil || l.back.ldta == nil {
-		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
-	}
-	if len(l.back.ldta.Data) <= b.off {
-		return fmt.Errorf("layer %q: ldta @%#x out of range (len=%d)", l.Name, b.off, len(l.back.ldta.Data))
-	}
-	if v {
-		l.back.ldta.Data[b.off] |= b.mask
-	} else {
-		l.back.ldta.Data[b.off] &^= b.mask
-	}
-	return nil
-}
-
 // SetVisible toggles the layer's video switch (the 👁️ icon).
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetVisible(v bool) error {
-	if err := l.setFlagBit(flagVisible, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetVisible(v); err != nil {
 		return err
 	}
 	l.Visible = v
@@ -78,7 +60,10 @@ func (l *Layer) SetVisible(v bool) error {
 // SetSolo toggles the layer's Solo flag.
 // length-preserving (single bit @ldta 0x26).
 func (l *Layer) SetSolo(v bool) error {
-	if err := l.setFlagBit(flagSolo, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetSolo(v); err != nil {
 		return err
 	}
 	l.Solo = v
@@ -88,7 +73,10 @@ func (l *Layer) SetSolo(v bool) error {
 // SetShy toggles the layer's Shy flag (hides from the shy-filter view).
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetShy(v bool) error {
-	if err := l.setFlagBit(flagShy, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetShy(v); err != nil {
 		return err
 	}
 	l.Shy = v
@@ -99,7 +87,10 @@ func (l *Layer) SetShy(v bool) error {
 // edits in the timeline UI; the AEP file itself is still mutable.
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetLocked(v bool) error {
-	if err := l.setFlagBit(flagLocked, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetLocked(v); err != nil {
 		return err
 	}
 	l.Locked = v
@@ -109,7 +100,10 @@ func (l *Layer) SetLocked(v bool) error {
 // SetEffectsEnabled toggles the layer's fx switch (whether effects render).
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetEffectsEnabled(v bool) error {
-	if err := l.setFlagBit(flagEffectsEnabled, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetEffectsEnabled(v); err != nil {
 		return err
 	}
 	l.EffectsEnabled = v
@@ -119,7 +113,10 @@ func (l *Layer) SetEffectsEnabled(v bool) error {
 // SetMotionBlur toggles the layer's motion-blur switch.
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetMotionBlur(v bool) error {
-	if err := l.setFlagBit(flagMotionBlur, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetMotionBlur(v); err != nil {
 		return err
 	}
 	l.MotionBlur = v
@@ -129,7 +126,10 @@ func (l *Layer) SetMotionBlur(v bool) error {
 // SetAudioEnabled toggles the layer's audio switch.
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetAudioEnabled(v bool) error {
-	if err := l.setFlagBit(flagAudioEnabled, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetAudioEnabled(v); err != nil {
 		return err
 	}
 	l.AudioEnabled = v
@@ -139,7 +139,10 @@ func (l *Layer) SetAudioEnabled(v bool) error {
 // SetFrameBlendEnabled toggles the layer's frame-blend switch.
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetFrameBlendEnabled(v bool) error {
-	if err := l.setFlagBit(flagFrameBlendEnabled, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetFrameBlendEnabled(v); err != nil {
 		return err
 	}
 	l.FrameBlendEnabled = v
@@ -150,7 +153,10 @@ func (l *Layer) SetFrameBlendEnabled(v bool) error {
 // comps) or "Continuously Rasterize" (for Illustrator / shape layers).
 // length-preserving (single bit @ldta 0x27).
 func (l *Layer) SetCollapseTransform(v bool) error {
-	if err := l.setFlagBit(flagCollapseTransform, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetCollapseTransform(v); err != nil {
 		return err
 	}
 	l.CollapseTransform = v
@@ -160,7 +166,10 @@ func (l *Layer) SetCollapseTransform(v bool) error {
 // SetIs3D toggles the layer's 3D-layer switch.
 // length-preserving (single bit @ldta 0x26).
 func (l *Layer) SetIs3D(v bool) error {
-	if err := l.setFlagBit(flagIs3D, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetIs3D(v); err != nil {
 		return err
 	}
 	l.Is3D = v
@@ -170,7 +179,10 @@ func (l *Layer) SetIs3D(v bool) error {
 // SetIsAdjust toggles the layer's "Adjustment Layer" switch.
 // length-preserving (single bit @ldta 0x26).
 func (l *Layer) SetIsAdjust(v bool) error {
-	if err := l.setFlagBit(flagIsAdjust, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetIsAdjust(v); err != nil {
 		return err
 	}
 	l.IsAdjust = v
@@ -181,7 +193,10 @@ func (l *Layer) SetIsAdjust(v bool) error {
 // in the comp viewer but excludes it from output).
 // length-preserving (single bit @ldta 0x25).
 func (l *Layer) SetIsGuide(v bool) error {
-	if err := l.setFlagBit(flagIsGuide, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetIsGuide(v); err != nil {
 		return err
 	}
 	l.IsGuide = v
@@ -194,7 +209,10 @@ func (l *Layer) SetIsGuide(v bool) error {
 // when you understand the consequences.
 // length-preserving (single bit @ldta 0x26).
 func (l *Layer) SetIsNull(v bool) error {
-	if err := l.setFlagBit(flagIsNull, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetIsNull(v); err != nil {
 		return err
 	}
 	l.IsNull = v
@@ -204,7 +222,10 @@ func (l *Layer) SetIsNull(v bool) error {
 // SetMarkersLocked toggles "Lock markers" on the layer.
 // length-preserving (single bit @ldta 0x26).
 func (l *Layer) SetMarkersLocked(v bool) error {
-	if err := l.setFlagBit(flagMarkersLocked, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetMarkersLocked(v); err != nil {
 		return err
 	}
 	l.MarkersLocked = v
@@ -215,7 +236,10 @@ func (l *Layer) SetMarkersLocked(v bool) error {
 // sampling for the layer.
 // length-preserving (single bit @ldta 0x25).
 func (l *Layer) SetSamplingBicubic(v bool) error {
-	if err := l.setFlagBit(flagSamplingBicubic, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetSamplingBicubic(v); err != nil {
 		return err
 	}
 	l.SamplingBicubic = v
@@ -227,7 +251,10 @@ func (l *Layer) SetSamplingBicubic(v bool) error {
 // FrameBlendEnabled is also true.
 // length-preserving (single bit @ldta 0x25).
 func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
-	if err := l.setFlagBit(flagFrameBlendPixelMotion, v); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
+	}
+	if err := l.back.SetFrameBlendPixelMotion(v); err != nil {
 		return err
 	}
 	l.FrameBlendPixelMotion = v
@@ -240,13 +267,12 @@ func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
 // SetBlendingMode writes a new blending-mode enum byte to ldta @0x63.
 // length-preserving (single byte).
 func (l *Layer) SetBlendingMode(m BlendingMode) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) <= 0x63 {
-		return fmt.Errorf("layer %q: ldta too short for BlendingMode write (len=%d)", l.Name, len(l.back.ldta.Data))
+	if err := l.back.SetBlendingMode(m); err != nil {
+		return err
 	}
-	l.back.ldta.Data[0x63] = byte(m)
 	l.BlendingMode = m
 	return nil
 }
@@ -258,13 +284,12 @@ func (l *Layer) SetBlendingMode(m BlendingMode) error {
 // above this layer in the comp; this setter only flips the mode byte
 // and does NOT reorder layers.
 func (l *Layer) SetTrackMatte(t TrackMatteType) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) <= 0x6B {
-		return fmt.Errorf("layer %q: ldta too short for TrackMatte write (len=%d)", l.Name, len(l.back.ldta.Data))
+	if err := l.back.SetTrackMatte(t); err != nil {
+		return err
 	}
-	l.back.ldta.Data[0x6B] = byte(t)
 	l.TrackMatte = t
 	return nil
 }
@@ -274,13 +299,12 @@ func (l *Layer) SetTrackMatte(t TrackMatteType) error {
 // unknown value but the byte is preserved on round-trip).
 // length-preserving (single byte).
 func (l *Layer) SetLabel(index uint8) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) <= 0x3D {
-		return fmt.Errorf("layer %q: ldta too short for Label write (len=%d)", l.Name, len(l.back.ldta.Data))
+	if err := l.back.SetLabel(index); err != nil {
+		return err
 	}
-	l.back.ldta.Data[0x3D] = index
 	l.Label = index
 	return nil
 }
@@ -289,13 +313,12 @@ func (l *Layer) SetLabel(index uint8) error {
 // to ldta @0x04 (uint16 BE).
 // length-preserving (2 bytes).
 func (l *Layer) SetQuality(q LayerQuality) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) < 0x06 {
-		return fmt.Errorf("layer %q: ldta too short for Quality write (len=%d)", l.Name, len(l.back.ldta.Data))
+	if err := l.back.SetQuality(q); err != nil {
+		return err
 	}
-	binary.BigEndian.PutUint16(l.back.ldta.Data[0x04:0x06], uint16(q))
 	l.Quality = q
 	return nil
 }
@@ -311,11 +334,8 @@ func (l *Layer) SetQuality(q LayerQuality) error {
 //
 // `parentID == l.ID` is rejected (would create a self-parent cycle).
 func (l *Layer) SetParent(parentID uint32) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
-	}
-	if len(l.back.ldta.Data) < 0x88 {
-		return fmt.Errorf("layer %q: ldta too short for ParentID write (len=%d)", l.Name, len(l.back.ldta.Data))
 	}
 	if parentID != 0 && parentID == l.ID {
 		return fmt.Errorf("layer %q: self-parenting (parentID == own ID = %d) not allowed", l.Name, l.ID)
@@ -325,7 +345,9 @@ func (l *Layer) SetParent(parentID uint32) error {
 			return fmt.Errorf("layer %q: parentID %d not found in comp %q", l.Name, parentID, l.comp.Name)
 		}
 	}
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0x84:0x88], parentID)
+	if err := l.back.SetParent(parentID); err != nil {
+		return err
+	}
 	l.ParentID = parentID
 	return nil
 }
@@ -344,11 +366,8 @@ func (l *Layer) SetParent(parentID uint32) error {
 // layer at render time, not in ldta. Changing source preserves the
 // rest of ldta verbatim, which is what we want.
 func (l *Layer) SetSource(sourceID uint32) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
-	}
-	if len(l.back.ldta.Data) < 0x2C {
-		return fmt.Errorf("layer %q: ldta too short for SourceID write (len=%d)", l.Name, len(l.back.ldta.Data))
 	}
 	if sourceID != 0 && l.comp != nil && l.comp.proj != nil {
 		p := l.comp.proj
@@ -356,7 +375,9 @@ func (l *Layer) SetSource(sourceID uint32) error {
 			return fmt.Errorf("layer %q: sourceID %d not found in project items", l.Name, sourceID)
 		}
 	}
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0x28:0x2C], sourceID)
+	if err := l.back.SetSource(sourceID); err != nil {
+		return err
+	}
 	l.SourceID = sourceID
 	return nil
 }
@@ -385,26 +406,11 @@ func footageWithID(p *Project, id uint32) bool {
 //
 // Unknown enum values are treated as None (= no-op clearing).
 func (l *Layer) SetAutoOrient(t AutoOrientType) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) <= 0x26 {
-		return fmt.Errorf("layer %q: ldta too short for AutoOrient write (len=%d)", l.Name, len(l.back.ldta.Data))
-	}
-	// Clear all three bits first.
-	l.back.ldta.Data[0x25] &^= 0x10
-	l.back.ldta.Data[0x26] &^= 0x20 | 0x01
-	switch t {
-	case AutoOrientCharactersTowardCamera:
-		l.back.ldta.Data[0x25] |= 0x10
-	case AutoOrientCameraOrPointOfInterest:
-		l.back.ldta.Data[0x26] |= 0x20
-	case AutoOrientAlongPath:
-		l.back.ldta.Data[0x26] |= 0x01
-	case AutoOrientNone:
-		// already cleared
-	default:
-		return fmt.Errorf("layer %q: unknown AutoOrientType %d", l.Name, int(t))
+	if err := l.back.SetAutoOrient(t); err != nil {
+		return err
 	}
 	l.AutoOrient = t
 	return nil
@@ -414,16 +420,11 @@ func (l *Layer) SetAutoOrient(t AutoOrientType) error {
 // (ldta @0x67, single byte 0/1).
 // length-preserving (single byte).
 func (l *Layer) SetPreserveTransparency(v bool) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) <= 0x67 {
-		return fmt.Errorf("layer %q: ldta too short for PreserveTransparency write (len=%d)", l.Name, len(l.back.ldta.Data))
-	}
-	if v {
-		l.back.ldta.Data[0x67] = 1
-	} else {
-		l.back.ldta.Data[0x67] = 0
+	if err := l.back.SetPreserveTransparency(v); err != nil {
+		return err
 	}
 	l.PreserveTransparency = v
 	return nil
@@ -436,39 +437,19 @@ func (l *Layer) SetPreserveTransparency(v bool) error {
 // 600 when missing, matching how AE writes these fields.
 // ──────────────────────────────────────────────────────────────────
 
-// setLdtaFrac writes (dividend, divisor) at ldta @off / @off+4 such
-// that dividend/divisor ≈ seconds. Reuses the existing divisor when
-// non-zero; otherwise picks 600 (AE's standard for layer time fields).
-// Mutates 8 bytes. Returns the resulting (dividend, divisor) so the
-// caller can mirror to its Go field.
-func (l *Layer) setLdtaFrac(off int, seconds float64, label string) (int32, uint32, error) {
-	if l.back == nil || l.back.ldta == nil {
-		return 0, 0, fmt.Errorf("layer %q: no ldta chunk", l.Name)
-	}
-	if len(l.back.ldta.Data) < off+8 {
-		return 0, 0, fmt.Errorf("layer %q: ldta too short for %s write (len=%d, off=%#x)", l.Name, label, len(l.back.ldta.Data), off)
-	}
-	divisor := binary.BigEndian.Uint32(l.back.ldta.Data[off+4 : off+8])
-	if divisor == 0 {
-		divisor = 600
-	}
-	dividend := int32(math.Round(seconds * float64(divisor)))
-	binary.BigEndian.PutUint32(l.back.ldta.Data[off:off+4], uint32(dividend))
-	binary.BigEndian.PutUint32(l.back.ldta.Data[off+4:off+8], divisor)
-	return dividend, divisor, nil
-}
-
 // SetStartTime writes the layer's start time (seconds) to
 // ldta @0x0C/@0x10. length-preserving (8 bytes).
 //
 // AE allows negative start times (pre-roll). Mirrors the change to
 // `Layer.StartTime`.
 func (l *Layer) SetStartTime(seconds float64) error {
-	dividend, divisor, err := l.setLdtaFrac(0x0C, seconds, "StartTime")
-	if err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
+	}
+	if err := l.back.SetStartTime(seconds); err != nil {
 		return err
 	}
-	l.StartTime = float64(dividend) / float64(divisor)
+	l.StartTime = l.readLdtaFrac(0x0C)
 	return nil
 }
 
@@ -476,7 +457,10 @@ func (l *Layer) SetStartTime(seconds float64) error {
 // ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in).
 // length-preserving (8 bytes).
 func (l *Layer) SetInPoint(seconds float64) error {
-	if _, _, err := l.setLdtaFrac(0x14, seconds, "InPoint"); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
+	}
+	if err := l.back.SetInPoint(seconds); err != nil {
 		return err
 	}
 	l.recomputeDurationFromLdta()
@@ -487,7 +471,10 @@ func (l *Layer) SetInPoint(seconds float64) error {
 // ldta @0x1C/@0x20, then refreshes `Layer.Duration`.
 // length-preserving (8 bytes).
 func (l *Layer) SetOutPoint(seconds float64) error {
-	if _, _, err := l.setLdtaFrac(0x1C, seconds, "OutPoint"); err != nil {
+	if l.back == nil {
+		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
+	}
+	if err := l.back.SetOutPoint(seconds); err != nil {
 		return err
 	}
 	l.recomputeDurationFromLdta()
@@ -498,10 +485,11 @@ func (l *Layer) SetOutPoint(seconds float64) error {
 // updates `Layer.Duration`. Called by SetInPoint / SetOutPoint so the
 // in-memory Duration stays consistent with the underlying bytes.
 func (l *Layer) recomputeDurationFromLdta() {
-	if l.back == nil || l.back.ldta == nil || len(l.back.ldta.Data) < 0x24 {
+	lb := l.layerBack()
+	if lb == nil || lb.ldta == nil || len(lb.ldta.Data) < 0x24 {
 		return
 	}
-	d := l.back.ldta.Data
+	d := lb.ldta.Data
 	inDivisor := binary.BigEndian.Uint32(d[0x18:0x1C])
 	outDivisor := binary.BigEndian.Uint32(d[0x20:0x24])
 	if inDivisor == 0 || outDivisor == 0 {
@@ -519,20 +507,20 @@ func (l *Layer) recomputeDurationFromLdta() {
 // section.
 // length-preserving (8 bytes total in two 4-byte writes).
 func (l *Layer) SetStretch(ratio float64) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) < 0x70 {
-		return fmt.Errorf("layer %q: ldta too short for Stretch write (len=%d)", l.Name, len(l.back.ldta.Data))
+	if err := l.back.SetStretch(ratio); err != nil {
+		return err
 	}
-	divisor := binary.BigEndian.Uint32(l.back.ldta.Data[0x6C:0x70])
-	if divisor == 0 {
-		divisor = 100 // AE writes 100 for stretch (1.0 → dividend=100)
+	lb := l.layerBack()
+	if lb != nil && lb.ldta != nil && len(lb.ldta.Data) >= 0x70 {
+		dividend := int32(binary.BigEndian.Uint32(lb.ldta.Data[0x08:0x0C]))
+		divisor := binary.BigEndian.Uint32(lb.ldta.Data[0x6C:0x70])
+		if divisor != 0 {
+			l.Stretch = float64(dividend) / float64(divisor)
+		}
 	}
-	dividend := int32(math.Round(ratio * float64(divisor)))
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0x08:0x0C], uint32(dividend))
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0x6C:0x70], divisor)
-	l.Stretch = float64(dividend) / float64(divisor)
 	return nil
 }
 
@@ -543,10 +531,12 @@ func (l *Layer) SetStretch(ratio float64) error {
 // Returns an error when the parsed layer has no Utf8 name chunk
 // (unusual — most AE-written layers have one even for default names).
 func (l *Layer) SetName(newName string) error {
-	if l.back == nil || l.back.nameChunk == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no Utf8 name chunk to mutate", l.Name)
 	}
-	l.back.nameChunk.Data = []byte(newName)
+	if err := l.back.SetName(newName); err != nil {
+		return err
+	}
 	l.Name = newName
 	return nil
 }
@@ -561,16 +551,8 @@ func (l *Layer) SetComment(comment string) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no chunk backrefs (built outside parser?)", l.Name)
 	}
-	encoded := encodeCmta(comment)
-	if l.back.commentChunk != nil {
-		l.back.commentChunk.Data = encoded
-	} else {
-		if l.back.layrList == nil {
-			return fmt.Errorf("layer %q: no Layr LIST reference to insert cmta into", l.Name)
-		}
-		newCmta := &rifx.Chunk{ID: rifx.IDCmta, Data: encoded}
-		l.back.layrList.Children = append(l.back.layrList.Children, newCmta)
-		l.back.commentChunk = newCmta
+	if err := l.back.SetComment(comment); err != nil {
+		return err
 	}
 	l.Comment = comment
 	return nil
@@ -635,14 +617,8 @@ func containsLoneLF(s string) bool {
 // @0xA0 slot doesn't exist. Re-save the file through AE 23+ first to
 // extend ldta, then this setter works.
 func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
-	}
-	if len(l.back.ldta.Data) < 0xA4 {
-		return fmt.Errorf("layer %q: ldta too short for TrackMatteLayerID write (len=%d, need >=0xA4 — file written by AE <= 22?)", l.Name, len(l.back.ldta.Data))
-	}
-	if len(l.back.ldta.Data) < 0x6C {
-		return fmt.Errorf("layer %q: ldta too short for TrackMatte mode write (len=%d)", l.Name, len(l.back.ldta.Data))
 	}
 	if sourceID != 0 && sourceID == l.ID {
 		return fmt.Errorf("layer %q: self-matte (sourceID == own ID = %d) not allowed", l.Name, l.ID)
@@ -652,8 +628,9 @@ func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 			return fmt.Errorf("layer %q: sourceID %d not found in comp %q", l.Name, sourceID, l.comp.Name)
 		}
 	}
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0xA0:0xA4], sourceID)
-	l.back.ldta.Data[0x6B] = byte(mode)
+	if err := l.back.SetTrackMatteLayer(sourceID, mode); err != nil {
+		return err
+	}
 	l.TrackMatteLayerID = sourceID
 	l.TrackMatte = mode
 	return nil
@@ -674,16 +651,12 @@ func (l *Layer) ClearTrackMatteLayer() error {
 // at @0x84 + 4 bytes after = @0x88), so this setter works on older
 // fixtures too.
 func (l *Layer) SetLightKind(k LightKind) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if len(l.back.ldta.Data) < 0x8C {
-		return fmt.Errorf("layer %q: ldta too short for LightKind write (len=%d)", l.Name, len(l.back.ldta.Data))
+	if err := l.back.SetLightKind(k); err != nil {
+		return err
 	}
-	if k > LightKindAmbient {
-		return fmt.Errorf("layer %q: invalid LightKind %d (want 0..3)", l.Name, int(k))
-	}
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0x88:0x8C], uint32(k))
 	l.LightKind = k
 	return nil
 }
@@ -702,17 +675,16 @@ func (l *Layer) SetLightKind(k LightKind) error {
 //
 // On error the bytes are not modified.
 func (l *Layer) SetLightSource(target *Layer) error {
-	if l.back == nil || l.back.ldta == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
 	if l.Type != LayerTypeLight {
 		return fmt.Errorf("layer %q: SetLightSource only valid for Light layers (Type=%q)", l.Name, l.Type)
 	}
-	if len(l.back.ldta.Data) < 0x2C {
-		return fmt.Errorf("layer %q: ldta too short for LightSource write (len=%d)", l.Name, len(l.back.ldta.Data))
-	}
 	if target == nil {
-		binary.BigEndian.PutUint32(l.back.ldta.Data[0x28:0x2C], lightSourceUndefined)
+		if err := l.back.SetLightSource(nil); err != nil {
+			return err
+		}
 		l.SourceID = lightSourceUndefined
 		return nil
 	}
@@ -731,7 +703,9 @@ func (l *Layer) SetLightSource(target *Layer) error {
 	if target.Is3D {
 		return fmt.Errorf("layer %q: SetLightSource target cannot be a 3D layer", l.Name)
 	}
-	binary.BigEndian.PutUint32(l.back.ldta.Data[0x28:0x2C], target.ID)
+	if err := l.back.SetLightSource(target); err != nil {
+		return err
+	}
 	l.SourceID = target.ID
 	return nil
 }
@@ -756,7 +730,7 @@ func (l *Layer) SetLightSource(target *Layer) error {
 // video) at script time — we don't replicate that check; the rendered
 // .aep is still parsed cleanly by AE regardless.
 func (l *Layer) SetAlternateSource(item AVItem) error {
-	if l.back == nil || l.back.alternateSourceBlsi == nil {
+	if l.back == nil {
 		return fmt.Errorf("layer %q: no Essential Properties media-replacement slot (call addToMotionGraphicsTemplateAs in AE first)", l.Name)
 	}
 	var newID uint32
@@ -768,10 +742,9 @@ func (l *Layer) SetAlternateSource(item AVItem) error {
 			return fmt.Errorf("layer %q: alternate source item id %d not in project", l.Name, newID)
 		}
 	}
-	if len(l.back.alternateSourceBlsi.Data) < 4 {
-		return fmt.Errorf("layer %q: blsi chunk too short (len=%d)", l.Name, len(l.back.alternateSourceBlsi.Data))
+	if err := l.back.SetAlternateSource(item); err != nil {
+		return err
 	}
-	binary.BigEndian.PutUint32(l.back.alternateSourceBlsi.Data[0:4], newID)
 	l.AlternateSourceID = newID
 	return nil
 }

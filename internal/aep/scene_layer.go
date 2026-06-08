@@ -95,7 +95,7 @@ type Layer struct {
 
 	// back holds the underlying RIFX chunk refs that power length-preserving
 	// writes. Nil for layers built outside the parser. See back_layer.go.
-	back *layerBackrefs
+	back LayerWriter
 
 	// shapeRootGroup is the runtime VectorGroup tree for LayerTypeShape
 	// layers. Populated by parseLayer (via hydrateShapeNodes) when a Layr
@@ -131,6 +131,16 @@ type Layer struct {
 	// alongside the flat Layer.Properties slice; nil for layers built
 	// outside the parser. See AEPropertyGroup in property_group.go.
 	propertyTree *AEPropertyGroup
+}
+
+// layerBack returns the concrete backrefs for read-side raw chunk access
+// during M8 P2 (the back field now holds the LayerWriter interface; reads
+// type-assert until P3 splits scene/serializer).
+func (l *Layer) layerBack() *layerBackrefs {
+	if lb, ok := l.back.(*layerBackrefs); ok {
+		return lb
+	}
+	return nil
 }
 
 // Parent returns the layer's parent layer, or nil if this layer has no

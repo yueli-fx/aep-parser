@@ -55,13 +55,14 @@ func (c *Composition) MoveLayer(from, to int) error {
 	}
 
 	source := c.Layers[from]
-	if source.back == nil || source.back.layrList == nil {
+	sourceBack := source.layerBack()
+	if sourceBack == nil || sourceBack.layrList == nil {
 		return fmt.Errorf("MoveLayer: layer %q at idx %d has no Layr chunk back-ref", source.Name, from)
 	}
 
 	// 2. Locate source Layr in itemList.Children.
 	children := cb.itemList.Children
-	srcLayrIdx := findLayrIndexInItemList(cb.itemList, source.back.layrList)
+	srcLayrIdx := findLayrIndexInItemList(cb.itemList, sourceBack.layrList)
 	if srcLayrIdx < 0 {
 		return fmt.Errorf("MoveLayer: layer %q Layr chunk not found in itemList", source.Name)
 	}
@@ -118,10 +119,11 @@ func (c *Composition) MoveLayer(from, to int) error {
 	if to < len(cutLayers) {
 		// Insert BEFORE the Layr block of cutLayers[to].
 		target := cutLayers[to]
-		if target.back == nil || target.back.layrList == nil {
+		targetBack := target.layerBack()
+		if targetBack == nil || targetBack.layrList == nil {
 			return fmt.Errorf("MoveLayer: target layer %q has no Layr backref", target.Name)
 		}
-		insertIdx = indexOfChunk(cutChildren, target.back.layrList)
+		insertIdx = indexOfChunk(cutChildren, targetBack.layrList)
 		if insertIdx < 0 {
 			return fmt.Errorf("MoveLayer: target layer %q Layr not found in cut itemList", target.Name)
 		}
@@ -130,10 +132,11 @@ func (c *Composition) MoveLayer(from, to int) error {
 		// Insert AFTER the last remaining layer's block — scan to end of
 		// that block.
 		lastLayer := cutLayers[len(cutLayers)-1]
-		if lastLayer.back == nil || lastLayer.back.layrList == nil {
+		lastLayerBack := lastLayer.layerBack()
+		if lastLayerBack == nil || lastLayerBack.layrList == nil {
 			return fmt.Errorf("MoveLayer: last cut layer %q has no Layr backref", lastLayer.Name)
 		}
-		lastLayrIdx := indexOfChunk(cutChildren, lastLayer.back.layrList)
+		lastLayrIdx := indexOfChunk(cutChildren, lastLayerBack.layrList)
 		if lastLayrIdx < 0 {
 			return fmt.Errorf("MoveLayer: last cut layer %q Layr not found in cut itemList", lastLayer.Name)
 		}

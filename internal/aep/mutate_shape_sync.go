@@ -34,7 +34,8 @@ func (p *Project) syncCompositionShapeLayers(c *Composition) error {
 		if l.Type != LayerTypeShape {
 			continue
 		}
-		if l.shapeRootGroup == nil || l.back == nil || l.back.layrList == nil {
+		lb := l.layerBack()
+		if l.shapeRootGroup == nil || lb == nil || lb.layrList == nil {
 			continue
 		}
 		if !l.shapeDirty {
@@ -55,7 +56,7 @@ func (p *Project) syncCompositionShapeLayers(c *Composition) error {
 		// chunk pointer stays the same, so c.back.itemList.Children
 		// (and any other holder of the layrList pointer) remains
 		// consistent.
-		l.back.layrList.Children = fresh.Children
+		lb.layrList.Children = fresh.Children
 	}
 	return nil
 }

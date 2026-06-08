@@ -125,12 +125,13 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	//    user Layr ID must not collide, otherwise AE treats the user Layr as
 	//    deleted via the DLay ID match.
 	layerID := maxLayerIDInItemList(cb.itemList) + 1
+	baseBack := &layerBackrefs{}
 	base := &Layer{
 		Type: LayerTypeShape,
 		Name: name,
 		ID:   layerID,
 		comp: c,
-		back: &layerBackrefs{},
+		back: baseBack,
 	}
 	// Bump project nextItemID so head-chunk counter sync (write.go::
 	// syncHeadCounters) covers our layer ID. AE 2025 validates head counter
@@ -185,7 +186,7 @@ func (c *Composition) NewShapeLayer(name string) (*ShapeLayer, error) {
 	//    one too — without it, AE 2025 silently drops the layer at
 	//    instantiation stage (an empty ShapeLayer reproduces this even with
 	//    zero shape kids).
-	base.back.layrList = layrChunk
+	baseBack.layrList = layrChunk
 	base.shapeDirty = true // gate for syncShapeLayerChunks
 	// AE's per-Layr serialized unit is: Layr LIST, empty Ewst LIST, then two
 	// fvdv/fiop/ftts/foac/fiac/fipc/fifl groups (lowerLayerSiblings). The Ewst
