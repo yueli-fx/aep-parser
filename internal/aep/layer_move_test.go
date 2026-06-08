@@ -3,6 +3,8 @@ package aep_test
 import (
 	"strings"
 	"testing"
+
+	aep "github.com/example/aep-parser/internal/aep"
 )
 
 // Layer-level move wrappers delegate to Composition.MoveLayer; tests
@@ -16,7 +18,7 @@ func TestLayerMoveToBeginning(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	pre := layerNames(c)
-	if err := c.Layers[2].MoveToBeginning(); err != nil {
+	if err := aep.MoveToBeginning(c.Layers[2]); err != nil {
 		t.Fatalf("MoveToBeginning: %v", err)
 	}
 	want := []string{pre[2], pre[0], pre[1]}
@@ -32,7 +34,7 @@ func TestLayerMoveToEnd(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	pre := layerNames(c)
-	if err := c.Layers[0].MoveToEnd(); err != nil {
+	if err := aep.MoveToEnd(c.Layers[0]); err != nil {
 		t.Fatalf("MoveToEnd: %v", err)
 	}
 	want := []string{pre[1], pre[2], pre[0]}
@@ -52,7 +54,7 @@ func TestLayerMoveAfter_FromBefore(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 	l, other := c.Layers[0], c.Layers[2]
-	if err := l.MoveAfter(other); err != nil {
+	if err := aep.MoveAfter(l, other); err != nil {
 		t.Fatalf("MoveAfter: %v", err)
 	}
 	want := []string{pre[1], pre[2], pre[0]}
@@ -71,7 +73,7 @@ func TestLayerMoveAfter_FromAfter(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 	l, other := c.Layers[2], c.Layers[0]
-	if err := l.MoveAfter(other); err != nil {
+	if err := aep.MoveAfter(l, other); err != nil {
 		t.Fatalf("MoveAfter: %v", err)
 	}
 	want := []string{pre[0], pre[2], pre[1]}
@@ -90,7 +92,7 @@ func TestLayerMoveBefore_FromAfter(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 	l, other := c.Layers[2], c.Layers[0]
-	if err := l.MoveBefore(other); err != nil {
+	if err := aep.MoveBefore(l, other); err != nil {
 		t.Fatalf("MoveBefore: %v", err)
 	}
 	want := []string{pre[2], pre[0], pre[1]}
@@ -109,7 +111,7 @@ func TestLayerMoveBefore_FromBefore(t *testing.T) {
 	c := proj.Compositions[0]
 	pre := layerNames(c)
 	l, other := c.Layers[0], c.Layers[2]
-	if err := l.MoveBefore(other); err != nil {
+	if err := aep.MoveBefore(l, other); err != nil {
 		t.Fatalf("MoveBefore: %v", err)
 	}
 	want := []string{pre[1], pre[0], pre[2]}
@@ -125,10 +127,10 @@ func TestLayerMove_RefuseSelf(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	l := c.Layers[1]
-	if err := l.MoveAfter(l); err == nil {
+	if err := aep.MoveAfter(l, l); err == nil {
 		t.Error("MoveAfter(self): want error, got nil")
 	}
-	if err := l.MoveBefore(l); err == nil {
+	if err := aep.MoveBefore(l, l); err == nil {
 		t.Error("MoveBefore(self): want error, got nil")
 	}
 }
@@ -140,10 +142,10 @@ func TestLayerMove_RefuseNilOther(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	l := c.Layers[1]
-	if err := l.MoveAfter(nil); err == nil {
+	if err := aep.MoveAfter(l, nil); err == nil {
 		t.Error("MoveAfter(nil): want error, got nil")
 	}
-	if err := l.MoveBefore(nil); err == nil {
+	if err := aep.MoveBefore(l, nil); err == nil {
 		t.Error("MoveBefore(nil): want error, got nil")
 	}
 }
@@ -159,7 +161,7 @@ func TestLayerMove_RefuseCrossComp(t *testing.T) {
 	}
 	la := projA.Compositions[0].Layers[0]
 	lb := projB.Compositions[0].Layers[0]
-	if err := la.MoveAfter(lb); err == nil {
+	if err := aep.MoveAfter(la, lb); err == nil {
 		t.Error("MoveAfter cross-comp: want error, got nil")
 	} else if !strings.Contains(err.Error(), "different comp") {
 		t.Errorf("unexpected error: %v", err)

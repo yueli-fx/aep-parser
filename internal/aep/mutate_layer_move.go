@@ -208,7 +208,10 @@ func indexOfChunk(children []*rifx.Chunk, target *rifx.Chunk) int {
 
 // MoveToBeginning moves the receiver to position 0 (top of layer stack
 // in AE's display, AE-index 1).
-func (l *Layer) MoveToBeginning() error {
+//
+// Free function (not a method) — see MoveLayer. BREAKING vs the former
+// Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
+func MoveToBeginning(l *Layer) error {
 	c, idx, err := l.locateInComp("MoveToBeginning")
 	if err != nil {
 		return err
@@ -218,7 +221,10 @@ func (l *Layer) MoveToBeginning() error {
 
 // MoveToEnd moves the receiver to the last position in c.Layers
 // (bottom of layer stack in AE's display, AE-index c.numLayers).
-func (l *Layer) MoveToEnd() error {
+//
+// Free function (not a method) — see MoveLayer. BREAKING vs the former
+// Layer.MoveToEnd method form; the aep facade re-exports it post-split.
+func MoveToEnd(l *Layer) error {
 	c, idx, err := l.locateInComp("MoveToEnd")
 	if err != nil {
 		return err
@@ -231,7 +237,10 @@ func (l *Layer) MoveToEnd() error {
 // c.Layers slice order — receiver lands just below other in the stack).
 // Returns an error if other belongs to a different comp, other == l,
 // or either layer is missing a comp back-ref.
-func (l *Layer) MoveAfter(other *Layer) error {
+//
+// Free function (not a method) — see MoveLayer. BREAKING vs the former
+// Layer.MoveAfter method form; the aep facade re-exports it post-split.
+func MoveAfter(l, other *Layer) error {
 	c, fromIdx, otherIdx, err := l.locatePair("MoveAfter", other)
 	if err != nil {
 		return err
@@ -254,7 +263,10 @@ func (l *Layer) MoveAfter(other *Layer) error {
 
 // MoveBefore moves the receiver to the slot immediately before `other`
 // (receiver lands just above other in the stack).
-func (l *Layer) MoveBefore(other *Layer) error {
+//
+// Free function (not a method) — see MoveLayer. BREAKING vs the former
+// Layer.MoveBefore method form; the aep facade re-exports it post-split.
+func MoveBefore(l, other *Layer) error {
 	c, fromIdx, otherIdx, err := l.locatePair("MoveBefore", other)
 	if err != nil {
 		return err

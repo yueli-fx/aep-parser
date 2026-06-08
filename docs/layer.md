@@ -1188,26 +1188,6 @@ func (l *Layer) MaterialTransparency() *Property
 
 read-only
 
-### Layer.MoveToBeginning
-
-```go
-func (l *Layer) MoveToBeginning() error
-```
-
-MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1).
-
-read-only
-
-### Layer.MoveToEnd
-
-```go
-func (l *Layer) MoveToEnd() error
-```
-
-MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers).
-
-read-only
-
 ### Layer.Opacity
 
 ```go
@@ -1466,22 +1446,6 @@ func (l *Layer) AudioActiveAtTime(t float64) bool
 ```
 
 AudioActiveAtTime reports whether the layer would produce audio at the given time t (seconds, in the owning composition's timeline). Combines AudioActive with ActiveAtTime.
-
-### Layer.MoveAfter
-
-```go
-func (l *Layer) MoveAfter(other *Layer) error
-```
-
-MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \< receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer is missing a comp back-ref.
-
-### Layer.MoveBefore
-
-```go
-func (l *Layer) MoveBefore(other *Layer) error
-```
-
-MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack).
 
 ### Layer.PropertyByMatchName
 

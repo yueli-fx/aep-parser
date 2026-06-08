@@ -2000,36 +2000,6 @@
       "signature": "MotionBlur bool",
       "rw": "read-write"
     },
-    "Layer.MoveAfter": {
-      "kind": "method",
-      "file": "layer.md",
-      "anchor": "#layermoveafter",
-      "signature": "func (l *Layer) MoveAfter(other *Layer) error",
-      "summary": "MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \u003c receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer is missing a comp back-ref."
-    },
-    "Layer.MoveBefore": {
-      "kind": "method",
-      "file": "layer.md",
-      "anchor": "#layermovebefore",
-      "signature": "func (l *Layer) MoveBefore(other *Layer) error",
-      "summary": "MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack)."
-    },
-    "Layer.MoveToBeginning": {
-      "kind": "getter",
-      "file": "layer.md",
-      "anchor": "#layermovetobeginning",
-      "signature": "func (l *Layer) MoveToBeginning() error",
-      "rw": "read-only",
-      "summary": "MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1)."
-    },
-    "Layer.MoveToEnd": {
-      "kind": "getter",
-      "file": "layer.md",
-      "anchor": "#layermovetoend",
-      "signature": "func (l *Layer) MoveToEnd() error",
-      "rw": "read-only",
-      "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers)."
-    },
     "Layer.Name": {
       "kind": "field",
       "file": "layer.md",
