@@ -123,17 +123,18 @@ type Composition struct {
 
 	// back holds the underlying RIFX chunk refs that power length-preserving
 	// writes. Nil for comps built outside the parser. See back_composition.go.
-	back *compositionBackrefs
+	back CompositionWriter
 }
 
 // CdtaRawBytes returns the comp's cdta chunk Data slice, or nil if the
 // comp has no cdta. Read-only access for debugging / RE tools — the
 // underlying byte slice is the live chunk data; do not mutate.
 func (c *Composition) CdtaRawBytes() []byte {
-	if c.back == nil || c.back.cdta == nil {
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil || cb.cdta == nil {
 		return nil
 	}
-	return c.back.cdta.Data
+	return cb.cdta.Data
 }
 
 // PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific
@@ -141,10 +142,11 @@ func (c *Composition) CdtaRawBytes() []byte {
 // debugging / RE tools — the underlying byte slice is the live chunk data;
 // do not mutate.
 func (c *Composition) PrdaRawBytes() []byte {
-	if c.back == nil || c.back.prdaChunk == nil {
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil || cb.prdaChunk == nil {
 		return nil
 	}
-	return c.back.prdaChunk.Data
+	return cb.prdaChunk.Data
 }
 
 // LayerByID returns the first layer in this composition whose ID matches

@@ -44,7 +44,8 @@ func (c *Composition) DeleteLayer(index int) error {
 	if index < 0 || index >= len(c.Layers) {
 		return fmt.Errorf("DeleteLayer: index %d out of range (have %d layers)", index, len(c.Layers))
 	}
-	if c.back == nil || c.back.itemList == nil {
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil || cb.itemList == nil {
 		return fmt.Errorf("DeleteLayer: comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
 	if len(c.Layers) == 1 {
@@ -60,8 +61,8 @@ func (c *Composition) DeleteLayer(index int) error {
 	}
 
 	// 2. Locate Layr in itemList.Children.
-	children := c.back.itemList.Children
-	layrIdx := findLayrIndexInItemList(c.back.itemList, deleted.back.layrList)
+	children := cb.itemList.Children
+	layrIdx := findLayrIndexInItemList(cb.itemList, deleted.back.layrList)
 	if layrIdx < 0 {
 		return fmt.Errorf("DeleteLayer: layer %q Layr chunk not found in itemList", deleted.Name)
 	}
@@ -161,7 +162,7 @@ func (c *Composition) DeleteLayer(index int) error {
 	}
 
 	// 7. Splice itemList.Children — drop [layrIdx, endIdx).
-	c.back.itemList.Children = append(append([]*rifx.Chunk(nil), children[:layrIdx]...), children[endIdx:]...)
+	cb.itemList.Children = append(append([]*rifx.Chunk(nil), children[:layrIdx]...), children[endIdx:]...)
 
 	// 8. Splice c.Layers.
 	c.Layers = append(append([]*Layer(nil), c.Layers[:index]...), c.Layers[index+1:]...)
@@ -171,7 +172,7 @@ func (c *Composition) DeleteLayer(index int) error {
 	//    matching the V2.1 pattern, so future re-parse extensions get it
 	//    for free.
 	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
-		c.back.itemList.Children = oldChildren
+		cb.itemList.Children = oldChildren
 		c.Layers = oldLayers
 		for _, s := range neighborSnaps {
 			s.layer.ParentID = s.parentID

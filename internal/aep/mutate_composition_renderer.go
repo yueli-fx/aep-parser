@@ -132,42 +132,44 @@ func knownRenderers() string {
 //
 // Ship-gated: AE 2025 (4/4) + AE 2020 (Ernst + Escher) green.
 func (c *Composition) SetRenderer(name string) error {
-	matchName := normalizeRendererName(name)
-	tmpl, ok := rendererTemplates[matchName]
-	if !ok {
-		return fmt.Errorf("SetRenderer: unknown renderer %q (known: %s)", name, knownRenderers())
-	}
-	if c.back == nil || c.back.prinChunk == nil || c.back.prdaChunk == nil {
+	if c.back == nil {
 		return fmt.Errorf("SetRenderer: comp %q has no prin/prda back-ref (built outside parser, or has no PRin LIST)", c.Name)
 	}
-	prin := c.back.prinChunk
-	prda := c.back.prdaChunk
-	if len(prin.Data) != prinSize {
-		return fmt.Errorf("SetRenderer: comp %q prin is %d bytes, expected %d", c.Name, len(prin.Data), prinSize)
-	}
-
-	// Snapshot for rollback.
-	oldPrin := append([]byte(nil), prin.Data...)
-	oldPrda := append([]byte(nil), prda.Data...)
+	matchName := normalizeRendererName(name)
 	oldRenderer := c.Renderer
 	oldWarningsLen := 0
 	if c.proj != nil {
 		oldWarningsLen = len(c.proj.Warnings)
 	}
 
-	// Apply: rewrite prin's two name fields in place (preserve constants),
-	// replace prda wholesale.
-	writePrinField(prin.Data[prinMatchNameOff:prinDisplayOff], matchName)
-	writePrinField(prin.Data[prinDisplayOff:prinDisplayEnd], tmpl.display)
-	prda.Data = append([]byte(nil), tmpl.prda...)
+	// Snapshot prin/prda for rollback via type-assert stopgap (transient; removed in P3).
+	var oldPrin, oldPrda []byte
+	if cb, ok := c.back.(*compositionBackrefs); ok {
+		if cb.prinChunk != nil {
+			oldPrin = append([]byte(nil), cb.prinChunk.Data...)
+		}
+		if cb.prdaChunk != nil {
+			oldPrda = append([]byte(nil), cb.prdaChunk.Data...)
+		}
+	}
+
+	if err := c.back.SetRenderer(name); err != nil {
+		return err
+	}
 	c.Renderer = matchName
 
 	// Warnings-as-failure. No re-parse here, so warnings won't grow in
 	// practice — defensive rollback path matching the V2.1 mutate pattern.
 	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
-		prin.Data = oldPrin
-		prda.Data = oldPrda
 		c.Renderer = oldRenderer
+		if cb, ok := c.back.(*compositionBackrefs); ok {
+			if cb.prinChunk != nil && oldPrin != nil {
+				cb.prinChunk.Data = oldPrin
+			}
+			if cb.prdaChunk != nil && oldPrda != nil {
+				cb.prdaChunk.Data = oldPrda
+			}
+		}
 		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
 		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
 		return fmt.Errorf("SetRenderer: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)

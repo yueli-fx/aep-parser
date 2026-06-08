@@ -14,10 +14,11 @@ func (p *Project) RootFoldForTest() *rifx.Chunk {
 
 // ItemListForTest 暴露 Composition.itemList 给 golden tests 用。
 func (c *Composition) ItemListForTest() *rifx.Chunk {
-	if c.back == nil {
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil {
 		return nil
 	}
-	return c.back.itemList
+	return cb.itemList
 }
 
 // RootForTest 暴露 Project.root 给 debug tests 用。

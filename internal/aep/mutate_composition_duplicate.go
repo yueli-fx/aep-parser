@@ -43,7 +43,8 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	if p.back == nil || p.back.rootFold == nil {
 		return nil, fmt.Errorf("DuplicateComposition: project has no root Fold back-ref (built outside parser?)")
 	}
-	if src.back == nil || src.back.itemList == nil {
+	srcCb, ok := src.back.(*compositionBackrefs)
+	if !ok || srcCb == nil || srcCb.itemList == nil {
 		return nil, fmt.Errorf("DuplicateComposition: src comp %q has no itemList back-ref", src.Name)
 	}
 	if src.proj != p {
@@ -54,7 +55,7 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	}
 
 	rootChildren := p.back.rootFold.Children
-	srcItemIdx := indexOfChunk(rootChildren, src.back.itemList)
+	srcItemIdx := indexOfChunk(rootChildren, srcCb.itemList)
 	if srcItemIdx < 0 {
 		return nil, fmt.Errorf("DuplicateComposition: src comp %q Item LIST not found in root Fold", src.Name)
 	}
@@ -74,7 +75,7 @@ func (p *Project) DuplicateComposition(src *Composition, name string) (*Composit
 	oldWarningsLen := len(p.Warnings)
 
 	// === Deep-clone comp Item block (fresh Data slices) ===
-	dupItemList := deepCloneChunk(src.back.itemList)
+	dupItemList := deepCloneChunk(srcCb.itemList)
 	dupSiblings := make([]*rifx.Chunk, 0, sibEnd-(srcItemIdx+1))
 	for k := srcItemIdx + 1; k < sibEnd; k++ {
 		dupSiblings = append(dupSiblings, deepCloneChunk(rootChildren[k]))

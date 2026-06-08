@@ -39,7 +39,8 @@ import (
 // 2025). The reorder path is ship-gate validated for AE acceptance.
 func (c *Composition) MoveLayer(from, to int) error {
 	// 1. Validate refuse-cases.
-	if c.back == nil || c.back.itemList == nil {
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil || cb.itemList == nil {
 		return fmt.Errorf("MoveLayer: comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
 	n := len(c.Layers)
@@ -59,8 +60,8 @@ func (c *Composition) MoveLayer(from, to int) error {
 	}
 
 	// 2. Locate source Layr in itemList.Children.
-	children := c.back.itemList.Children
-	srcLayrIdx := findLayrIndexInItemList(c.back.itemList, source.back.layrList)
+	children := cb.itemList.Children
+	srcLayrIdx := findLayrIndexInItemList(cb.itemList, source.back.layrList)
 	if srcLayrIdx < 0 {
 		return fmt.Errorf("MoveLayer: layer %q Layr chunk not found in itemList", source.Name)
 	}
@@ -155,7 +156,7 @@ func (c *Composition) MoveLayer(from, to int) error {
 	newLayers = append(newLayers, cutLayers[to:]...)
 
 	// 12. Apply.
-	c.back.itemList.Children = newChildren
+	cb.itemList.Children = newChildren
 	c.Layers = newLayers
 	for i, l := range c.Layers {
 		l.Index = i
@@ -164,7 +165,7 @@ func (c *Composition) MoveLayer(from, to int) error {
 	// 13. Warnings-as-failure. Defensive — no re-parse here, but pattern
 	//     stays consistent with DeleteLayer/DuplicateLayer.
 	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
-		c.back.itemList.Children = oldChildren
+		cb.itemList.Children = oldChildren
 		c.Layers = oldLayers
 		for i, l := range c.Layers {
 			l.Index = oldIndexes[i]

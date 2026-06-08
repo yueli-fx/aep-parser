@@ -56,7 +56,8 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	if index < 0 || index >= len(c.Layers) {
 		return nil, fmt.Errorf("DuplicateLayer: index %d out of range (have %d layers)", index, len(c.Layers))
 	}
-	if c.back == nil || c.back.itemList == nil {
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil || cb.itemList == nil {
 		return nil, fmt.Errorf("DuplicateLayer: comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
 	if c.proj == nil {
@@ -79,8 +80,8 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	}
 
 	// 2. Locate source Layr in itemList.Children.
-	children := c.back.itemList.Children
-	srcLayrIdx := findLayrIndexInItemList(c.back.itemList, source.back.layrList)
+	children := cb.itemList.Children
+	srcLayrIdx := findLayrIndexInItemList(cb.itemList, source.back.layrList)
 	if srcLayrIdx < 0 {
 		return nil, fmt.Errorf("DuplicateLayer: layer %q Layr chunk not found in itemList", source.Name)
 	}
@@ -148,7 +149,7 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	newChildren = append(newChildren, children[:srcLayrIdx]...)
 	newChildren = append(newChildren, cloneBlock...)
 	newChildren = append(newChildren, children[srcLayrIdx:]...)
-	c.back.itemList.Children = newChildren
+	cb.itemList.Children = newChildren
 
 	// 10. Re-parse cloneLayr to build a fresh *Layer with backrefs into
 	//     cloned chunks. parseLayer reads ID from cloned ldta @0x00 (now
@@ -158,7 +159,7 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 	ctx := newParseCtxFPS(c.TickRate, c.FrameRate, c.Name, &localWarnings)
 	cloneLayer, parseErr := parseLayer(clonedLayr, index, ctx)
 	if parseErr != nil {
-		c.back.itemList.Children = oldItemChildren
+		cb.itemList.Children = oldItemChildren
 		c.proj.nextItemID = oldNextItemID
 		return nil, fmt.Errorf("DuplicateLayer: re-parse cloned layer: %w", parseErr)
 	}
@@ -178,7 +179,7 @@ func (c *Composition) DuplicateLayer(index int, name string) (*Layer, error) {
 		c.proj.Warnings = append(c.proj.Warnings, localWarnings...)
 	}
 	if len(c.proj.Warnings) > oldWarningsLen {
-		c.back.itemList.Children = oldItemChildren
+		cb.itemList.Children = oldItemChildren
 		c.Layers = oldLayers
 		c.proj.nextItemID = oldNextItemID
 		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)

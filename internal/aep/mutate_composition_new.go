@@ -216,11 +216,12 @@ func loadCompTemplate(raw []byte) *compTemplate {
 		panic("aep: dummy-comp template missing comp (build bug)")
 	}
 	comp := p.Compositions[0]
-	if comp.back == nil || comp.back.itemList == nil {
+	compCb, ok := comp.back.(*compositionBackrefs)
+	if !ok || compCb == nil || compCb.itemList == nil {
 		panic("aep: parseComposition didn't wire itemList (build bug)")
 	}
 	t := &compTemplate{}
-	for _, ch := range comp.back.itemList.Children {
+	for _, ch := range compCb.itemList.Children {
 		if isBuilderManagedChunk(ch) {
 			continue
 		}

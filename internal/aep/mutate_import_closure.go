@@ -116,7 +116,11 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 	oldRootChildren := append([]*rifx.Chunk(nil), rootFold.Children...)
 	oldComps := append([]*Composition(nil), destProj.Compositions...)
 	oldFootage := append([]*Footage(nil), destProj.Footage...)
-	oldDestItemList := append([]*rifx.Chunk(nil), c.back.itemList.Children...)
+	destCompCb, ok := c.back.(*compositionBackrefs)
+	if !ok || destCompCb == nil || destCompCb.itemList == nil {
+		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref", c.Name)
+	}
+	oldDestItemList := append([]*rifx.Chunk(nil), destCompCb.itemList.Children...)
 	oldDestLayers := append([]*Layer(nil), c.Layers...)
 	oldNextItemID := destProj.nextItemID
 	oldWarningsLen := len(destProj.Warnings)
@@ -124,7 +128,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		rootFold.Children = oldRootChildren
 		destProj.Compositions = oldComps
 		destProj.Footage = oldFootage
-		c.back.itemList.Children = oldDestItemList
+		destCompCb.itemList.Children = oldDestItemList
 		c.Layers = oldDestLayers
 		destProj.nextItemID = oldNextItemID
 		if len(destProj.Warnings) > oldWarningsLen {

@@ -54,8 +54,8 @@ func (c *Composition) SetComment(comment string) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)
 	}
-	if err := setItemComment(c.back.itemLayrParent, &c.back.itemCmtaChunk, comment); err != nil {
-		return fmt.Errorf("comp %q: %w", c.Name, err)
+	if err := c.back.SetComment(comment); err != nil {
+		return err
 	}
 	c.Comment = comment
 	return nil
@@ -68,8 +68,8 @@ func (c *Composition) SetLabel(index uint8) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no idta chunk reference", c.Name)
 	}
-	if err := setItemLabel(c.back.itemIdtaChunk, index); err != nil {
-		return fmt.Errorf("comp %q: %w", c.Name, err)
+	if err := c.back.SetLabel(index); err != nil {
+		return err
 	}
 	c.Label = index
 	return nil

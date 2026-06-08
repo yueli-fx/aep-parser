@@ -104,16 +104,17 @@ func (c *parseCtx) warn(format string, args ...any) {
 //	0xC4–0xC7 : motion_blur_adaptive_sample_limit (int32; AE default 128)                              [py-aep + fixture]
 //	0xC8–0xCB : motion_blur_samples_per_frame (int32; AE default 16)                                   [py-aep + fixture]
 func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]string) (*Composition, error) {
-	comp := &Composition{ID: id, Name: name, back: &compositionBackrefs{itemList: item}}
+	cb := &compositionBackrefs{compName: name, itemList: item}
+	comp := &Composition{ID: id, Name: name, back: cb}
 	if utf8 := item.FindFirst(rifx.IDUtf8); utf8 != nil {
-		comp.back.nameChunk = utf8
+		cb.nameChunk = utf8
 	}
 
 	cdta := item.FindFirst(rifx.IDCdta)
 	if cdta == nil {
 		return comp, nil
 	}
-	comp.back.cdta = cdta
+	cb.cdta = cdta
 	d := cdta.Data
 
 	if len(d) >= 0x04 {
@@ -194,6 +195,8 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 	}
 
 	comp.TickRate = deriveTickRate(d)
+	cb.tickRate = comp.TickRate
+	cb.frameRate = comp.FrameRate
 
 	// Renderer: PRin LIST → prin chunk, two NUL-separated ASCII strings
 	// after a 4-byte prefix. First string = internal match-name (e.g.
@@ -201,7 +204,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 	// (e.g. "Advanced 3D" / "Cinema 4D"). We surface the match-name.
 	if prinList := item.FindFirstList(rifx.IDPRin); prinList != nil {
 		if prinChunk := prinList.FindFirst(rifx.IDPrin); prinChunk != nil && len(prinChunk.Data) > 4 {
-			comp.back.prinChunk = prinChunk
+			cb.prinChunk = prinChunk
 			payload := prinChunk.Data[4:]
 			if i := bytes.IndexByte(payload, 0); i >= 0 {
 				comp.Renderer = string(payload[:i])
@@ -209,7 +212,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 				comp.Renderer = string(payload)
 			}
 		}
-		comp.back.prdaChunk = prinList.FindFirst(rifx.IDPrda)
+		cb.prdaChunk = prinList.FindFirst(rifx.IDPrda)
 	}
 
 	ctx := newParseCtxFPS(comp.TickRate, comp.FrameRate, comp.Name, warnings)

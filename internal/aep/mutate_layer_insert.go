@@ -53,7 +53,8 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	if src == nil {
 		return nil, fmt.Errorf("InsertLayer: src cannot be nil")
 	}
-	if c.back == nil || c.back.itemList == nil {
+	destCb, ok := c.back.(*compositionBackrefs)
+	if !ok || destCb == nil || destCb.itemList == nil {
 		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
 	if c.proj == nil {
@@ -78,8 +79,12 @@ func (c *Composition) InsertLayer(src *Layer, atIdx int) (*Layer, error) {
 	if src.back == nil || src.back.layrList == nil {
 		return nil, fmt.Errorf("InsertLayer: src layer %q has no Layr chunk back-ref", src.Name)
 	}
-	srcChildren := src.comp.back.itemList.Children
-	srcLayrIdx := findLayrIndexInItemList(src.comp.back.itemList, src.back.layrList)
+	srcCb, ok2 := src.comp.back.(*compositionBackrefs)
+	if !ok2 || srcCb == nil || srcCb.itemList == nil {
+		return nil, fmt.Errorf("InsertLayer: src comp %q has no itemList back-ref", src.comp.Name)
+	}
+	srcChildren := srcCb.itemList.Children
+	srcLayrIdx := findLayrIndexInItemList(srcCb.itemList, src.back.layrList)
 	if srcLayrIdx < 0 {
 		return nil, fmt.Errorf("InsertLayer: src layer %q Layr chunk not found in its comp's itemList", src.Name)
 	}
@@ -114,7 +119,11 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 	}
 
 	// === Snapshot for rollback ===
-	oldDestChildren := append([]*rifx.Chunk(nil), c.back.itemList.Children...)
+	cb, ok := c.back.(*compositionBackrefs)
+	if !ok || cb == nil || cb.itemList == nil {
+		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref", c.Name)
+	}
+	oldDestChildren := append([]*rifx.Chunk(nil), cb.itemList.Children...)
 	oldDestLayers := append([]*Layer(nil), c.Layers...)
 	oldNextItemID := c.proj.nextItemID
 	oldWarningsLen := len(c.proj.Warnings)
@@ -153,7 +162,7 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 	}
 
 	// === Compute dest splice index ===
-	destChildren := c.back.itemList.Children
+	destChildren := cb.itemList.Children
 	var insertChunkIdx int
 	switch {
 	case len(c.Layers) == 0:
@@ -191,14 +200,14 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 	newDestChildren = append(newDestChildren, destChildren[:insertChunkIdx]...)
 	newDestChildren = append(newDestChildren, cloneBlock...)
 	newDestChildren = append(newDestChildren, destChildren[insertChunkIdx:]...)
-	c.back.itemList.Children = newDestChildren
+	cb.itemList.Children = newDestChildren
 
 	// === Re-parse cloned Layr → fresh *Layer ===
 	var localWarnings []string
 	ctx := newParseCtxFPS(c.TickRate, c.FrameRate, c.Name, &localWarnings)
 	cloneLayer, parseErr := parseLayer(clonedLayr, atIdx, ctx)
 	if parseErr != nil {
-		c.back.itemList.Children = oldDestChildren
+		cb.itemList.Children = oldDestChildren
 		c.proj.nextItemID = oldNextItemID
 		return nil, fmt.Errorf("InsertLayer: re-parse cloned layer: %w", parseErr)
 	}
@@ -217,7 +226,7 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 		c.proj.Warnings = append(c.proj.Warnings, localWarnings...)
 	}
 	if len(c.proj.Warnings) > oldWarningsLen {
-		c.back.itemList.Children = oldDestChildren
+		cb.itemList.Children = oldDestChildren
 		c.Layers = oldDestLayers
 		c.proj.nextItemID = oldNextItemID
 		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
