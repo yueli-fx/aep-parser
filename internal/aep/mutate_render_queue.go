@@ -38,12 +38,13 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 		return fmt.Errorf("RemoveItem: render queue built outside parser (no LRdr back-ref)")
 	}
 	item := rq.Items[index]
-	if item.back == nil || item.back.litm == nil || item.back.itemListChunk == nil {
+	ib := item.renderQueueItemBack()
+	if ib == nil || ib.litm == nil || ib.itemListChunk == nil {
 		return fmt.Errorf("RemoveItem: item %d has no LItm back-refs", index)
 	}
 
-	litm := item.back.litm
-	listIdx := indexOfChunk(litm.Children, item.back.itemListChunk)
+	litm := ib.litm
+	listIdx := indexOfChunk(litm.Children, ib.itemListChunk)
 	if listIdx < 0 {
 		return fmt.Errorf("RemoveItem: item %d list chunk not found in LItm", index)
 	}
@@ -76,11 +77,11 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 
 	// === Commit: remove the item's [RCom?] + list + LOm from LItm ===
 	remove := map[*rifx.Chunk]bool{
-		item.back.itemListChunk: true,
-		litm.Children[lomIdx]:   true,
+		ib.itemListChunk:     true,
+		litm.Children[lomIdx]: true,
 	}
-	if item.back.rcomChunk != nil {
-		remove[item.back.rcomChunk] = true
+	if ib.rcomChunk != nil {
+		remove[ib.rcomChunk] = true
 	}
 	kept := make([]*rifx.Chunk, 0, len(litm.Children)-len(remove))
 	for _, ch := range litm.Children {
@@ -125,8 +126,8 @@ func (rq *RenderQueue) RemoveItem(index int) error {
 	rq.Items = append(rq.Items[:index], rq.Items[index+1:]...)
 	item.back = nil
 	for i, it := range rq.Items {
-		if it.back != nil && it.back.settingsSlice != nil {
-			it.back.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
+		if rb := it.renderQueueItemBack(); rb != nil && rb.settingsSlice != nil {
+			rb.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
 	return nil
@@ -176,12 +177,13 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 		return nil, fmt.Errorf("AddItem: empty queue has no template item to clone")
 	}
 	template := rq.Items[len(rq.Items)-1]
-	if template.back == nil || template.back.litm == nil || template.back.itemListChunk == nil {
+	tb := template.renderQueueItemBack()
+	if tb == nil || tb.litm == nil || tb.itemListChunk == nil {
 		return nil, fmt.Errorf("AddItem: template item has no LItm back-refs")
 	}
 
-	litm := template.back.litm
-	listIdx := indexOfChunk(litm.Children, template.back.itemListChunk)
+	litm := tb.litm
+	listIdx := indexOfChunk(litm.Children, tb.itemListChunk)
 	if listIdx < 0 {
 		return nil, fmt.Errorf("AddItem: template list chunk not found in LItm")
 	}
@@ -225,7 +227,7 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 	incU32(lhd3.Data[0x0C:])
 
 	// === Clone the [list, LOm] group + append to LItm ===
-	clonedList := deepCloneChunk(template.back.itemListChunk)
+	clonedList := deepCloneChunk(tb.itemListChunk)
 	clonedLOm := deepCloneChunk(litm.Children[lomIdx])
 	litm.Children = append(litm.Children, clonedList, clonedLOm)
 
@@ -248,8 +250,8 @@ func (rq *RenderQueue) AddItem(comp *Composition) (*RenderQueueItem, error) {
 	newItem := buildRenderQueueItem(blocks, n, "", litm, clonedList, clonedLOm, nil, comp.proj)
 	rq.Items = append(rq.Items, newItem)
 	for i, it := range rq.Items {
-		if it.back != nil && it.back.settingsSlice != nil {
-			it.back.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
+		if rb := it.renderQueueItemBack(); rb != nil && rb.settingsSlice != nil {
+			rb.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
 	return newItem, nil

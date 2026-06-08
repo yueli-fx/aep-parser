@@ -76,10 +76,22 @@ type RenderQueueItem struct {
 	// built outside the parser.
 	settingsBlock []byte
 
-	// back holds the RIFX chunk references that power the length-variable
-	// SetComment write (RCom insert/replace). Nil outside the parser. See
+	// back holds the writer interface for the length-variable SetComment write
+	// (RCom insert/replace). Concrete chunk access (settings sync, structural
+	// ops) goes through renderQueueItemBack. Nil outside the parser. See
 	// back_render_queue.go.
-	back *renderQueueItemBackrefs
+	back RenderQueueItemWriter
+}
+
+// renderQueueItemBack returns the concrete backrefs for raw chunk access
+// (settings sync + structural AddItem/RemoveItem) during M8 P2 — the back field
+// holds the RenderQueueItemWriter interface; these reads type-assert until P3
+// splits scene/serializer.
+func (it *RenderQueueItem) renderQueueItemBack() *renderQueueItemBackrefs {
+	if rb, ok := it.back.(*renderQueueItemBackrefs); ok {
+		return rb
+	}
+	return nil
 }
 
 // RenderSettings is the per-item render settings (ExtendScript

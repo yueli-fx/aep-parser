@@ -193,54 +193,13 @@ type FootageWriter interface {
 	SetLabel(uint8) error
 }
 
-// RenderQueueWriter is the writer interface for RenderQueueItem and
-// OutputModule back-ref operations (A1 + A2 alias-field setters).
-type RenderQueueWriter interface {
-	// RenderQueueItem — A1 (via back chunks)
+// RenderQueueItemWriter is the writer interface for RenderQueueItem's one
+// back-ref operation: the length-variable SetComment (RCom insert/replace),
+// which genuinely needs serializer chunk-tree access. Every other render-queue
+// and output-module setter is a pure scene-buffer mutation (single source of
+// truth) synced back by syncRenderQueue at WriteAEP time, so it carries no
+// writer-interface method (§F D-U1). OutputModule and Guide need no interface
+// at all for the same reason.
+type RenderQueueItemWriter interface {
 	SetComment(string) error
-	// RenderQueueItem — A2 (alias settingsBlock / roouData; no error return)
-	SetQuality(int)
-	SetColorDepth(int)
-	SetEffects(int)
-	SetFieldRender(int)
-	SetPulldown(int)
-	SetFrameBlending(int)
-	SetMotionBlur(int)
-	SetProxyUse(int)
-	SetSoloSwitches(int)
-	SetGuideLayers(int)
-	SetDiskCache(int)
-	SetFrameRate(int)
-	SetResolution(x, y int)
-	SetSkipExistingFiles(bool)
-	SetName(string)
-	SetQueueItemNotify(bool)
-	SetLogType(uint16)
-	SetTimeSpanStart(float64)
-	SetTimeSpanDuration(float64)
-	// OutputModule — A2 (alias settingsBlock / roouData; no error return)
-	SetChannels(int)
-	SetResizeQuality(int)
-	SetResize(bool)
-	SetLockAspectRatio(bool)
-	SetCrop(bool)
-	SetCropTop(int)
-	SetCropLeft(int)
-	SetCropBottom(int)
-	SetCropRight(int)
-	SetIncludeProjectLink(bool)
-	SetPostRenderAction(uint32)
-	SetUseCompFrameNumber(bool)
-	SetUseRegionOfInterest(bool)
-	SetIncludeSourceXMP(bool)
-	SetPreserveRGB(bool)
-	SetDepth(int)
-	SetStartingNumber(uint32)
-}
-
-// GuideWriter is the writer interface for Guide's alias-block operations.
-// (Guide has no *Backrefs struct; its write path aliases the ldat slot directly.)
-type GuideWriter interface {
-	SetPosition(px float64)
-	SetOrientation(o GuideOrientation)
 }

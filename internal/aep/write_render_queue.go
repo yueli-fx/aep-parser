@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // write_render_queue.go — length-preserving setters for render queue item +
@@ -33,8 +32,8 @@ func (p *Project) syncRenderQueue() {
 		return
 	}
 	for _, it := range rq.Items {
-		if it.back != nil && len(it.back.settingsSlice) == len(it.settingsBlock) {
-			copy(it.back.settingsSlice, it.settingsBlock)
+		if rb := it.renderQueueItemBack(); rb != nil && len(rb.settingsSlice) == len(it.settingsBlock) {
+			copy(rb.settingsSlice, it.settingsBlock)
 		}
 		for _, om := range it.OutputModules {
 			if om.back == nil {
@@ -304,53 +303,11 @@ func (it *RenderQueueItem) SetComment(comment string) error {
 	if it == nil || it.back == nil {
 		return fmt.Errorf("render queue item: no chunk backrefs (built outside parser?)")
 	}
-	if it.back.rcomChunk != nil {
-		it.back.rcomChunk.Data = encodeRComData(comment)
-		it.Comment = comment
-		return nil
+	if err := it.back.SetComment(comment); err != nil {
+		return err
 	}
-	if comment == "" {
-		return nil
-	}
-	if it.back.litm == nil || it.back.itemListChunk == nil {
-		return fmt.Errorf("render queue item: no LItm reference to insert RCom into")
-	}
-	newRcom := &rifx.Chunk{ID: rifx.IDRCom, Data: encodeRComData(comment)}
-	children := it.back.litm.Children
-	pos := len(children)
-	for i, ch := range children {
-		if ch == it.back.itemListChunk {
-			pos = i
-			break
-		}
-	}
-	children = append(children, nil)
-	copy(children[pos+1:], children[pos:])
-	children[pos] = newRcom
-	it.back.litm.Children = children
-	it.back.rcomChunk = newRcom
 	it.Comment = comment
 	return nil
-}
-
-// encodeRComData builds the RCom wrapper body: one embedded Utf8 chunk
-// ("Utf8" + big-endian u32 length + raw UTF-8 payload), padded to an even
-// length with a trailing NUL when the payload length is odd. This mirrors how
-// AE / py-aep serialize the chunk (Utf8 carries no NUL terminator; the pad is
-// the RIFX even-boundary pad). The inner chunk's even length keeps the RCom
-// body even, so the RCom leaf itself never needs an outer pad.
-func encodeRComData(comment string) []byte {
-	payload := []byte(comment)
-	out := make([]byte, 0, 8+len(payload)+1)
-	out = append(out, 'U', 't', 'f', '8')
-	var lenBuf [4]byte
-	binary.BigEndian.PutUint32(lenBuf[:], uint32(len(payload)))
-	out = append(out, lenBuf[:]...)
-	out = append(out, payload...)
-	if len(payload)%2 != 0 {
-		out = append(out, 0)
-	}
-	return out
 }
 
 // --- output module settings setters -----------------------------------------
