@@ -309,7 +309,7 @@ type Footage struct {
 
 	// back holds the underlying RIFX chunk refs that power length-preserving
 	// writes. Nil for footage items built outside the parser. See back_footage.go.
-	back *footageBackrefs
+	back FootageWriter
 }
 
 // Folder is a project panel folder.

@@ -1,6 +1,10 @@
 package aep
 
-import "github.com/example/aep-parser/internal/rifx"
+import (
+	"fmt"
+
+	"github.com/example/aep-parser/internal/rifx"
+)
 
 // footageBackrefs holds the rifx.Chunk references that power Footage's
 // length-preserving write paths (SetPath, SSPC flag setters) plus the
@@ -14,6 +18,11 @@ import "github.com/example/aep-parser/internal/rifx"
 //     unrecognized sibling chunks under the footage's owning Item LIST
 //     (per CLAUDE.md hard constraint #5); currently nil.
 type footageBackrefs struct {
+	// itemID / itemName are stored for error-message context (mirrors
+	// Footage.ID / Footage.Name at parse time; not used for byte writes).
+	itemID   uint32
+	itemName string
+
 	// Underlying chunks holding the source path. Set by the parser when
 	// found; SetPath mutates these for write-back.
 	aliasChunk *rifx.Chunk // Pin/Als2/alas — JSON with "fullpath"
@@ -33,3 +42,39 @@ type footageBackrefs struct {
 
 	opaque map[rifx.ChunkID]*rifx.Chunk
 }
+
+var _ FootageWriter = (*footageBackrefs)(nil)
+
+func (b *footageBackrefs) SetPath(newPath string) error {
+	if b.aliasChunk == nil && b.cpthChunk == nil {
+		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", b.itemID, b.itemName)
+	}
+	if b.aliasChunk != nil {
+		newData, err := replaceJSONStringField(b.aliasChunk.Data, "fullpath", newPath)
+		if err != nil {
+			return fmt.Errorf("footage %d (%q): rewrite alas fullpath: %w", b.itemID, b.itemName, err)
+		}
+		b.aliasChunk.Data = newData
+	}
+	if b.cpthChunk != nil {
+		buf := make([]byte, len(newPath)+1)
+		copy(buf, newPath)
+		b.cpthChunk.Data = buf
+	}
+	return nil
+}
+
+func (b *footageBackrefs) SetComment(comment string) error {
+	if err := setItemComment(b.itemLayrParent, &b.itemCmtaChunk, comment); err != nil {
+		return fmt.Errorf("footage %q: %w", b.itemName, err)
+	}
+	return nil
+}
+
+func (b *footageBackrefs) SetLabel(index uint8) error {
+	if err := setItemLabel(b.itemIdtaChunk, index); err != nil {
+		return fmt.Errorf("footage %q: %w", b.itemName, err)
+	}
+	return nil
+}
+

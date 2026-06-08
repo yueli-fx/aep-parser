@@ -52,10 +52,11 @@ func (f *Footage) FootageMissing() bool {
 	if f.IsSolid || f.IsPlaceholder {
 		return false
 	}
-	if f.back == nil || f.back.sspcChunk == nil || len(f.back.sspcChunk.Data) <= sspcOffFootageMissing {
+	fb, ok := f.back.(*footageBackrefs)
+	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) <= sspcOffFootageMissing {
 		return false
 	}
-	return f.back.sspcChunk.Data[sspcOffFootageMissing] != 0
+	return fb.sspcChunk.Data[sspcOffFootageMissing] != 0
 }
 
 // HasAudio reports whether the footage has an audio stream — true
@@ -65,10 +66,11 @@ func (f *Footage) HasAudio() bool {
 	if f.IsSolid || f.IsPlaceholder {
 		return false
 	}
-	if f.back == nil || f.back.sspcChunk == nil || len(f.back.sspcChunk.Data) < sspcOffAudioSampleRate+8 {
+	fb, ok := f.back.(*footageBackrefs)
+	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) < sspcOffAudioSampleRate+8 {
 		return false
 	}
-	bits := binary.BigEndian.Uint64(f.back.sspcChunk.Data[sspcOffAudioSampleRate : sspcOffAudioSampleRate+8])
+	bits := binary.BigEndian.Uint64(fb.sspcChunk.Data[sspcOffAudioSampleRate : sspcOffAudioSampleRate+8])
 	rate := math.Float64frombits(bits)
 	return rate > 0
 }
@@ -76,17 +78,19 @@ func (f *Footage) HasAudio() bool {
 // StartFrame returns the footage start frame (sspc @0xAC, uint32 BE).
 // 0 for non-sequence footage and for fixtures without a full-size sspc.
 func (f *Footage) StartFrame() int {
-	if f.back == nil || f.back.sspcChunk == nil || len(f.back.sspcChunk.Data) < sspcOffStartFrame+4 {
+	fb, ok := f.back.(*footageBackrefs)
+	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) < sspcOffStartFrame+4 {
 		return 0
 	}
-	return int(binary.BigEndian.Uint32(f.back.sspcChunk.Data[sspcOffStartFrame : sspcOffStartFrame+4]))
+	return int(binary.BigEndian.Uint32(fb.sspcChunk.Data[sspcOffStartFrame : sspcOffStartFrame+4]))
 }
 
 // EndFrame returns the footage end frame (sspc @0xB0, uint32 BE).
 // 0 for non-sequence footage and for fixtures without a full-size sspc.
 func (f *Footage) EndFrame() int {
-	if f.back == nil || f.back.sspcChunk == nil || len(f.back.sspcChunk.Data) < sspcOffEndFrame+4 {
+	fb, ok := f.back.(*footageBackrefs)
+	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) < sspcOffEndFrame+4 {
 		return 0
 	}
-	return int(binary.BigEndian.Uint32(f.back.sspcChunk.Data[sspcOffEndFrame : sspcOffEndFrame+4]))
+	return int(binary.BigEndian.Uint32(fb.sspcChunk.Data[sspcOffEndFrame : sspcOffEndFrame+4]))
 }

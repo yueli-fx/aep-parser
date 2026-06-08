@@ -76,21 +76,11 @@ func (p *Project) syncHeadCounters() {
 // Returns an error if no writable path chunk exists for this footage
 // (e.g. solids and placeholders never had one).
 func (f *Footage) SetPath(newPath string) error {
-	if f.back == nil || (f.back.aliasChunk == nil && f.back.cpthChunk == nil) {
+	if f.back == nil {
 		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", f.ID, f.Name)
 	}
-	if f.back.aliasChunk != nil {
-		newData, err := replaceJSONStringField(f.back.aliasChunk.Data, "fullpath", newPath)
-		if err != nil {
-			return fmt.Errorf("footage %d (%q): rewrite alas fullpath: %w", f.ID, f.Name, err)
-		}
-		f.back.aliasChunk.Data = newData
-	}
-	if f.back.cpthChunk != nil {
-		// Cpth is NUL-terminated UTF-8 text.
-		buf := make([]byte, len(newPath)+1)
-		copy(buf, newPath)
-		f.back.cpthChunk.Data = buf
+	if err := f.back.SetPath(newPath); err != nil {
+		return err
 	}
 	f.Path = newPath
 	if base := filepath.Base(strings.ReplaceAll(newPath, `\`, `/`)); base != "" && base != "." {

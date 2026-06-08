@@ -81,8 +81,8 @@ func (f *Footage) SetComment(comment string) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %q: no Item LIST reference (built outside parser?)", f.Name)
 	}
-	if err := setItemComment(f.back.itemLayrParent, &f.back.itemCmtaChunk, comment); err != nil {
-		return fmt.Errorf("footage %q: %w", f.Name, err)
+	if err := f.back.SetComment(comment); err != nil {
+		return err
 	}
 	f.Comment = comment
 	return nil
@@ -93,8 +93,8 @@ func (f *Footage) SetLabel(index uint8) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %q: no idta chunk reference", f.Name)
 	}
-	if err := setItemLabel(f.back.itemIdtaChunk, index); err != nil {
-		return fmt.Errorf("footage %q: %w", f.Name, err)
+	if err := f.back.SetLabel(index); err != nil {
+		return err
 	}
 	f.Label = index
 	return nil
