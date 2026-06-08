@@ -28,7 +28,10 @@
 
 **P3 关键决议**（2026-06-09 用户拍板）：「mechanical git mv」假设证伪——结构性 op 是 scene 方法但需 serializer 访问 backref（跨包=import 环），且多为 Stable ship-gated，spec §2.4/§F D-U3 的「改 free function」会破 Stable 签名。用户**批准破原 #2 约束 + 写新约束**（commit 2ef731e：CLAUDE.md #2 新增「结构性 op 语义稳定、调用形态可随分包改 facade 自由函数，标 BREAKING 不算违约」）。→ 采 **Path B**（结构性 op → serializer 自由函数 + facade re-export）。
 
-1. **P3.0（新前置）：结构性 op method→free function**（单包内先转，保绿 + byte-identical，每类型独立 commit，BREAKING 标注 + 更 commits.md API 表）。范围：`Composition.{NewComposition?/NewShapeLayer/DeleteLayer/MoveLayer/InsertLayer/DuplicateLayer/AddMarker}`、`Marker.Remove`、`RenderQueue.{AddItem,RemoveItem}`、`Property.{InsertKeyframe,DeleteKeyframe,SetDimensionsSeparated}`、`AEPropertyGroup.{Remove,MoveTo}`、`Layer.{MoveToBeginning/End/After/Before,ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`、`DuplicateComposition`。转后 scene_*.go 再无结构性方法引用 concrete backref → P3.1-3.3 git-mv 变机械。**注**：纯图构造（VectorGroup.AddRect 等，detached 无 chunk）留 scene。
+1. **P3.0（新前置）：结构性 op method→free function**（单包内先转，保绿 + byte-identical，每类型独立 commit，BREAKING 标注 + 更 commits.md API 表）。**进行中**：
+   - ✅ `RenderQueue.{AddItem,RemoveItem}`（commit c6eb51b，**模式已验证**：receiver→首参，body 不变，7 call-site 改 `aep.X(rq,…)`，绿+byte-identical）。
+   - **待转**：`Composition.{NewComposition/NewShapeLayer/DeleteLayer/MoveLayer/InsertLayer/DuplicateLayer/AddMarker}`、`Marker.Remove`、`Property.{InsertKeyframe,DeleteKeyframe,SetDimensionsSeparated}`、`AEPropertyGroup.{Remove,MoveTo}`、`Layer.{MoveToBeginning/End/After/Before,ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`、`DuplicateComposition`。
+   - 转后 scene_*.go 再无结构性方法引用 concrete backref → P3.1-3.3 git-mv 变机械。**注**：纯图构造（VectorGroup.AddRect 等，detached 无 chunk）留 scene。**命名**：bare 名作 package func（`aep.DeleteLayer(comp,i)`）；过于泛化的（Marker.Remove / PropertyGroup.MoveTo）转时酌情加限定（如 `RemoveMarker`/`MovePropertyGroup`），保「效果好」。
 2. **P3.1-3.3** git mv 物理拆包：`scene_*.go`→`internal/scene`、`{parse_,lower_,write_,back_,mutate_}*.go`→`internal/serializer`、`internal/aep` 薄 facade（类型别名 + Open/FromReader + 全部结构性自由函数 re-export）。处理 export 可见性（AttachWriter plumbing 导出）、init/global-var 顺序、DAG 断言。OM/RQ/PropertyGroup concrete back 跨包后随 mutate_/back_ 迁 serializer（同包，无需接口）。
 3. **P4** 下游切换 + 退役 AST 守卫（scene⊥rifx 改编译期保证）+ CLAUDE.md #3 多包描述 + 双版本 ship-gate 终验。
 4. docgen 次要 follow-on（非阻塞）。
