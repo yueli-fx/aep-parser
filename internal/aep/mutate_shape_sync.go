@@ -20,16 +20,16 @@ import (
 // layrList populated by parseLayer; if the user never wrapped/mutated,
 // the re-lowering reconstructs structurally-equivalent chunks (roundtrip
 // is the byte-fidelity gate).
-func (p *Project) syncShapeLayerChunks() error {
+func syncShapeLayerChunks(p *Project) error {
 	for _, c := range p.Compositions {
-		if err := p.syncCompositionShapeLayers(c); err != nil {
+		if err := syncCompositionShapeLayers(p, c); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *Project) syncCompositionShapeLayers(c *Composition) error {
+func syncCompositionShapeLayers(p *Project, c *Composition) error {
 	for _, l := range c.Layers {
 		if l.Type != LayerTypeShape {
 			continue

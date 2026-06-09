@@ -27,7 +27,7 @@ func (p *Project) WriteAEP(w io.Writer) error {
 	if p.back == nil {
 		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
 	}
-	if err := p.syncShapeLayerChunks(); err != nil {
+	if err := syncShapeLayerChunks(p); err != nil {
 		return fmt.Errorf("sync shape layers: %w", err)
 	}
 	p.syncRenderQueue()

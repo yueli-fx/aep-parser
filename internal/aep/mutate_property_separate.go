@@ -67,21 +67,21 @@ func SetDimensionsSeparated(p *Property, separated bool) error {
 	// followers animated) falls through to mergePosition, which detects the
 	// animated followers and routes to mergePositionAnimated.
 	if separated && pb.cdat == nil && len(p.Keyframes) > 0 {
-		return p.separatePositionAnimated(grp, layer)
+		return separatePositionAnimated(p, grp, layer)
 	}
 	if pb.cdat == nil || len(pb.cdat.Data) < 24 {
 		return fmt.Errorf("SetDimensionsSeparated: Position cdat too short or absent (cdat=%v)", pb.cdat != nil)
 	}
 
 	if separated {
-		return p.separatePosition(grp, layer)
+		return separatePosition(p, grp, layer)
 	}
-	return p.mergePosition(grp)
+	return mergePosition(p, grp)
 }
 
 // separatePosition splits the merged Position leader into per-axis followers.
 // 3D layers get Position_0/1/2; 2D layers get Position_0/1 (no Z follower).
-func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
+func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 	if p.DimensionsSeparated() {
 		return fmt.Errorf("SetDimensionsSeparated: Position already separated")
 	}
@@ -208,7 +208,7 @@ func (p *Property) separatePosition(grp *AEPropertyGroup, layer *Layer) error {
 // Atomicity: all fallible work (validation + Position_2 synthesis/re-parse)
 // runs before any in-place byte mutation, so failure leaves the project
 // untouched and there is nothing to roll back.
-func (p *Property) separatePositionAnimated(grp *AEPropertyGroup, layer *Layer) error {
+func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 	if p.DimensionsSeparated() {
 		return fmt.Errorf("SetDimensionsSeparated: Position already separated")
 	}
@@ -516,7 +516,7 @@ func convertFollowerToAnimated(f *Property, kfl *rifx.Chunk, ctx *parseCtx) {
 // mergePosition collapses separated per-axis followers back into the Position
 // leader: the leader takes the [X,Y,Z] value and every Position_0/1/2 follower
 // chunk is removed (AE's merged-after-separate form is leader-only).
-func (p *Property) mergePosition(grp *AEPropertyGroup) error {
+func mergePosition(p *Property, grp *AEPropertyGroup) error {
 	if !p.DimensionsSeparated() {
 		return fmt.Errorf("SetDimensionsSeparated: Position already merged")
 	}
@@ -524,7 +524,7 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 	// Animated followers route to the stream-merge path.
 	for _, mn := range []string{MatchNamePosition0, MatchNamePosition1, MatchNamePosition2} {
 		if f := grp.Property(mn); f != nil && f.IsAnimated() {
-			return p.mergePositionAnimated(grp)
+			return mergePositionAnimated(p, grp)
 		}
 	}
 
@@ -582,7 +582,7 @@ func (p *Property) mergePosition(grp *AEPropertyGroup) error {
 //
 // Atomicity: all fallible work (validation + stream construction + locating the
 // leader cdat) runs before any in-place mutation.
-func (p *Property) mergePositionAnimated(grp *AEPropertyGroup) error {
+func mergePositionAnimated(p *Property, grp *AEPropertyGroup) error {
 	pb := p.propertyBack()
 	if pb == nil || pb.tdbs == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
 		return fmt.Errorf("SetDimensionsSeparated: separated leader missing tdbs/tdb4 back-refs")

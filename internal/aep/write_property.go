@@ -170,7 +170,7 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 
 	// Rebuild Property.Keyframes — the simplest correct path. Re-points
 	// every Keyframe.offset to its new position in the resized ldat.
-	if err := p.reparseKeyframes(tickRate); err != nil {
+	if err := reparseKeyframes(p, tickRate); err != nil {
 		return nil, -1, fmt.Errorf("property %q: reparse after InsertKeyframe: %w", p.MatchName, err)
 	}
 	if insertIdx >= len(p.Keyframes) {
@@ -222,13 +222,13 @@ func DeleteKeyframe(p *Property, i int) error {
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase
 	}
-	return p.reparseKeyframes(tickRate)
+	return reparseKeyframes(p, tickRate)
 }
 
 // reparseKeyframes rebuilds Property.Keyframes from the current
 // ldat/lhd3 bytes. Used after InsertKeyframe / DeleteKeyframe so
 // Keyframe.offset / Value / etc. reflect the new stream layout.
-func (p *Property) reparseKeyframes(tickRate float64) error {
+func reparseKeyframes(p *Property, tickRate float64) error {
 	pb := p.propertyBack()
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return fmt.Errorf("property %q: missing ldat/lhd3", p.MatchName)
