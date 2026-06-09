@@ -166,7 +166,7 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 - **AE 2020 地基 bug 修复**：`buildLdtaBytes` 此前硬编码 164B ldta，AE 2020 判**所有** shape 图层（含 Rect+Fill）损坏并跳过；从未发现因 AE-2020 shape gate 长期 skip。改为按 target 分支（capability matrix `LdtaSize`：160 AE2020/22 / 164 AE25）。`TestLowerShapeLayer_LdtaSizeByTarget`。**Rect+Fill 在 AE 2020 现亦有效**（同 ldta 路径，Ellipse gate 已证该路径）。详 `../incidents/ae2020-shape-ldta-164-corrupt.md`。
 #### V2.2.1 子项② (2026-05-29) — Path embed+splice + ldat 编码 RE 修复
 - `(g *VectorGroup) AddPath() (*PathNode, error)` + `SetVertices / SetClosed` — ✅ **AE 2020+2025 双版本 ship-gate PASS**。embed `v2_2_shape_path_body.bin`（AE-native scaffolding）+ splice `encodeBezier` 几何。`TestV2_2_Path_AEShipGate_AE20{20,25}`（distinct 三角形，re-save + 解析器反归一化解 anchor 验证）。
-- **ldat 顶点编码 bug 修复**：`encodeBezier` 曾存 `[anchor, in_i, out_i]`（本顶点 in/out），AE 实为 `[anchor, anchor+out_i, anchor_{i+1}+in_{i+1}]`（本顶点 out 控制点 + 下一顶点 in 控制点，wrap mod n，bbox 归一化）。`TestEncodeBezier_LdatMatchesAELayout`，验证与 AE-native 字节一致。详 RE：`../specs/2026-05-29-path-embed-re-findings.md`。
+- **ldat 顶点编码 bug 修复**：`encodeBezier` 曾存 `[anchor, in_i, out_i]`（本顶点 in/out），AE 实为 `[anchor, anchor+out_i, anchor_{i+1}+in_{i+1}]`（本顶点 out 控制点 + 下一顶点 in 控制点，wrap mod n，bbox 归一化）。`TestEncodeBezier_LdatMatchesAELayout`，验证与 AE-native 字节一致。详 RE：`../archive/specs/2026-05-29-path-embed-re-findings.md`。
 - **from-scratch path 崩溃 AE 2020**（0::42）→ 必须 embed（同 Ellipse 教训，但 path 是变长几何 splice，非 overwrite-in-place）。
 
 #### V2.2.1 子项③ (2026-05-29) — Stroke embed + Fill/Stroke Color 编码 RE 修复
