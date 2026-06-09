@@ -1,14 +1,14 @@
 ---
 status: active
-summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向(static+animated) + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText）
+summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向(static+animated，animated 限 3D+linear) + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落。剩余均 deferred / fixture·RE-gated：ValueText(won't-do) · RQ output-module 路径名+全 settings enum 完整化 · Renderer W · EG W · Guides · Gradient stroke W · TimeRemap）
 ---
 
 # py-aep parity — API 全覆盖路线图
 
-**Status**: **部分完成（partial / paused）— 更新 2026-05-31**。
+**Status**: **部分完成（partial / paused）— 更新 2026-06-09**。
 - **P1 ✅ 全落**（landed `2026-05-26-py-aep-parity-p1-plan`）
 - **P2 ✅ 大部分**（landed P2a/P2b plans）；剩 deferred 少数：2C Gradient **W**（2026-05-31 已 ship gradient fill write，stroke/Type-Start-End 仍 deferred）、2E ImportPlaceholder（AE 拒收，删除）、2K TimeRemap enable（结构性）、Composition.Time（low-pri）、ReplaceWithPlaceholder/Solid
-- **P3 🚧 已启动**——**§3A slice-1 Render Queue R-only reader 已落**（2026-06-01，`Project.RenderQueue` + Items/OutputModules 只读，无写无 ship-gate；详 `../plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`）。剩余大块：Render Queue 写区（全 settings enum / format options×7 / OM 写）、Essential Graphics、Guides、Composition.Renderer W、Property.ValueText、DimensionsSeparated。**例外**：P3 §2.3 表里 Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表已改 ✅）
+- **P3 🚧 进行中**——已落：**§3A Render Queue R/W**（`Project.RenderQueue` 读 + `AddItem/RemoveItem` 结构性 + RenderQueueItem/OutputModule 各 15+/12+ 值 setter + `SetComment`（length-variable, ship-gated）；详 `../plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`）、**§3C PropertyBase Remove/Duplicate/MoveTo + DimensionsSeparated R/W**（static + animated，animated 限 3D layer + ~linear path-ease）、**§3G comp marker 增删**（双版本 ship-gate）。剩余 deferred（多 fixture·RE-gated）：RQ output-module 路径名 + 全 settings enum / format options×7 完整化、Composition.Renderer W、Essential Graphics W、Guides、Gradient stroke W、§3H ValueText（won't-do）。**例外**：Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表 ✅）
 **Created**: 2026-05-26
 **Goal**: aep-parser **API 覆盖 ≥ py-aep**（[forticheprod/py-aep](../charts/py-aep)，~20k LOC）+ 保留我们既有优势（length-preserving 写、AE 2020/2025 双 ship gate、V2.2 ShapeLayer 创建、文本完整 setter）。
 
@@ -168,7 +168,7 @@ summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+�
 | `MinValue / MaxValue / UnitsText` | ✅ R | ✅ R | ✅ R | done | P2c followup; tdum/tduM chunk + unitsTextMap |
 | `Value` (current) | ✅ R/W | ✅ R/W StaticValue | ✅ | done |
 | `CanVaryOverTime` | ✅ R | ✅ R | ✅ R | done | P1 1G |
-| `DimensionsSeparated` | ✅ R/W | ✅ R/W | ✅ R/W | done (P3 §3C) | R + W both directions (Alpha); static Position 2D+3D, AE 2020+2025 ship-gate 6/6; only animated deferred. See `incidents/separate-dimensions-write-mechanics.md` |
+| `DimensionsSeparated` | ✅ R/W | ✅ R/W | ✅ R/W | done (P3 §3C) | R + W both directions (Alpha); static Position 2D+3D, AE 2020+2025 ship-gate 6/6; animated done (3D layer + ~linear path-ease only). See `incidents/separate-dimensions-write-mechanics.md` |
 | `Expression / ExpressionEnabled / CanSetExpression` | ✅ R/W | ✅ R/W | ✅ | done |
 | `PropertyControlType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
 | `PropertyValueType` | ✅ R | ✅ R | ✅ R | done | P2c followup; derived from tdb4 flags |
@@ -290,9 +290,9 @@ summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+�
 
 子任务：
 
-- **3A** Render Queue 全栈 (`RenderQueue / RenderQueueItem / OutputModule`)，含全 enum + Settings + format options × 7 — 整个新域 (~3-5k LOC)
+- **3A** Render Queue 全栈 (`RenderQueue / RenderQueueItem / OutputModule`) ✅ **R/W 大部分 done**——read + `AddItem/RemoveItem` 结构性 + RQItem/OM 值 setter（15+/12+）+ `SetComment`（ship-gated）；残留 deferred：output-module 路径名、全 settings enum、format options × 7
 - **3B** Layer 结构性 ops: `Remove / Duplicate / CopyToComp / MoveAfter / MoveBefore / MoveToBeginning / MoveToEnd / SetParentWithJump`（全 V3 capability framework 内做）
-- **3C** PropertyBase 结构性: `Remove / Duplicate / MoveTo / DimensionsSeparated R/W`（`DimensionsSeparated R/W` done 2026-06-02 — separate↔merge 双向 static Position 2D+3D，双版本 ship-gate 6/6；仅 animated 暂搁。Remove/Duplicate/MoveTo 仍 deferred）
+- **3C** PropertyBase 结构性: `Remove / Duplicate / MoveTo / DimensionsSeparated R/W` ✅ **done**——`RemovePropertyGroup / DuplicatePropertyGroup / MovePropertyGroup`（facade 自由函数，INDEXED_GROUP：effect/mask parade · root vectors · text animators，详 `../incidents/property-indexed-group-structural-re.md`）；`DimensionsSeparated R/W` separate↔merge 双向 static Position 2D+3D（双版本 ship-gate 6/6）+ animated（限 3D layer + ~linear path-ease，详 `../incidents/separate-dimensions-write-mechanics.md`）
 - **3D** Composition.Renderer 写（跨 renderer 切换 → prda 长度变结构性）
 - **3E** Essential Graphics R only (controllers + override UUIDs，不做自动解析)
 - **3F** Guides R/W (ruler 标尺辅助线，UI-only chunk)
