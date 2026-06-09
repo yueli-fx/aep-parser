@@ -5,7 +5,7 @@
 
 **兼容下限：After Effects 2020（CC 17.0）**。新版本 AE 写的 .aep 也能读，但 AE 24+ 才引入的字段（如 `fontCapsOption` / `alternateSource`）本库不主动解码，对调用方返回 nil 而非错误。详见 [flightdeck/plans/coverage-detail.md](flightdeck/plans/coverage-detail.md) 的兼容性章节。
 
-> **每个分类支持哪些字段、哪些 API 是只读还是可写、示例片段**：见 [docs/](docs/README.md) —— 每个核心类型一个 markdown，结构参考 [docsforadobe/after-effects-scripting-guide](https://github.com/docsforadobe/after-effects-scripting-guide)。
+> **每个分类支持哪些字段、哪些 API 是只读还是可写、示例片段**：见 [docs/](docs/) —— 每个核心类型一个 markdown，由 `cmd/docgen` 从导出符号 doc comment **自动生成**（运行 `go generate ./cmd/docgen` 重生；结构参考 [docsforadobe/after-effects-scripting-guide](https://github.com/docsforadobe/after-effects-scripting-guide)）。
 
 ## 原理
 
