@@ -526,7 +526,9 @@ Expected: 全绿；round-trip 空 diff；API diff **仅 = 新增 XWriter 接口 
 
 ## Phase 3 — 物理分包（机械 git mv + DAG 编译边界）
 
-> scene_* 现只引用 XWriter 接口（Task 2.3 Step1 已证）→ 物理拆包是机械移动。**非纯零风险**：跨包 export 可见性、init 顺序、测试辅助需逐一处理（spec §5 P3）。
+> ⚠️ **部分作废（2026-06-09 勘察修正，见 cockpit §下一步 item 2）**：本 Phase 原设「机械 git mv」不成立。两点反转：(1)「`write_*.go`→serializer」反了——post-P2 的 write_*.go 实为 **scene-delegate**（rifx-clean），应属 scene；(2) scene 文件仍有 **concrete-backref 耦合**（如 `scene_property_flags.go` 经 `propertyBack()` 读 `pb.tdum`），即 P2「故意保 concrete——P3 统一解耦」的欠账，须先接口化才能拆包。已采「单包内先拆混装文件」排法（用户拍板）：先把每文件按 receiver/依赖（碰 rifx/concrete-backref/建 chunk→serializer；纯 scene→scene）拆成单一去向 + 完成 concrete→interface 解耦 + WriteAEP 委托化，**全绿后** Task 3.1/3.2 的 git mv 才退化为机械。下方原步骤的「文件→包」清单仍可参考，但须按修正后的二分重新归类。
+>
+> scene_* 现只引用 XWriter 接口（Task 2.3 Step1 已证 rifx 维度）→ 物理拆包**非纯机械**：跨包 export 可见性、init 顺序、测试辅助、concrete-backref 解耦需逐一处理（spec §5 P3）。
 
 ### Task 3.1: 建 internal/scene + 迁类型/accessor/接口/WriteJSON
 
