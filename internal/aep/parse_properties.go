@@ -383,11 +383,10 @@ func decodeCdatValue(d []byte, components int) any {
 // decodeTdumValue reads a tdum/tduM chunk's payload. Layout depends on
 // tdb4 type flags: color → 4×float32 BE, integer → 1×uint32 BE,
 // otherwise N×float64 BE (N = size/8).
-func (p *Property) decodeTdumValue(c *rifx.Chunk) any {
-	if c == nil || len(c.Data) == 0 {
+func (p *Property) decodeTdumValue(d []byte) any {
+	if len(d) == 0 {
 		return nil
 	}
-	d := c.Data
 	if p.IsColor() && len(d) >= 16 {
 		// 4 × float32 BE
 		vals := make([]float64, 4)

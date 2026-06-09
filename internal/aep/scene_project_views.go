@@ -47,9 +47,8 @@ func (p *Project) LayerByID(id uint32) *Layer {
 //
 // Mirrors py-aep's `project.effect_names`.
 func (p *Project) EffectNames() []string {
-	pb := p.projectBack()
-	if pb == nil || pb.root == nil {
+	if p.back == nil {
 		return nil
 	}
-	return effectNamesFromRoot(pb.root)
+	return p.back.effectNames()
 }

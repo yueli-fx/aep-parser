@@ -56,6 +56,33 @@ type layerBackrefs struct {
 
 var _ LayerWriter = (*layerBackrefs)(nil)
 
+// layerBack returns the concrete backrefs behind a Layer's writer interface
+// for serializer-stage (parse_/mutate_/write_) raw chunk access. Returns nil
+// when the layer was built outside the parser.
+func (l *Layer) layerBack() *layerBackrefs {
+	if lb, ok := l.back.(*layerBackrefs); ok {
+		return lb
+	}
+	return nil
+}
+
+func (b *layerBackrefs) ldtaFrac(off int) (float64, bool) {
+	if b == nil || b.ldta == nil || len(b.ldta.Data) < off+8 {
+		return 0, false
+	}
+	d := b.ldta.Data
+	dividend := int32(binary.BigEndian.Uint32(d[off : off+4]))
+	divisor := binary.BigEndian.Uint32(d[off+4 : off+8])
+	if divisor == 0 {
+		return 0, false
+	}
+	return float64(dividend) / float64(divisor), true
+}
+
+func (b *layerBackrefs) hasAlternateSourceSlot() bool {
+	return b != nil && b.alternateSourceBlsi != nil
+}
+
 // setFlagBit flips a single ldta flag bit to match v. Returns an error
 // when the ldta chunk is missing or too short for the targeted byte
 // (length-preserving so chunk size never changes).

@@ -36,14 +36,15 @@ func (p *Project) syncRenderQueue() {
 			copy(rb.settingsSlice, it.settingsBlock)
 		}
 		for _, om := range it.OutputModules {
-			if om.back == nil {
+			ob := om.outputModuleBack()
+			if ob == nil {
 				continue
 			}
-			if len(om.back.settingsSlice) == len(om.settingsBlock) {
-				copy(om.back.settingsSlice, om.settingsBlock)
+			if len(ob.settingsSlice) == len(om.settingsBlock) {
+				copy(ob.settingsSlice, om.settingsBlock)
 			}
-			if len(om.back.roouSlice) == len(om.roouData) {
-				copy(om.back.roouSlice, om.roouData)
+			if len(ob.roouSlice) == len(om.roouData) {
+				copy(ob.roouSlice, om.roouData)
 			}
 		}
 	}

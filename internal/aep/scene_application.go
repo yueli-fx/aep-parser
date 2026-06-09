@@ -1,10 +1,6 @@
 package aep
 
-import (
-	"encoding/binary"
-	"fmt"
-	"io"
-)
+import "io"
 
 // Application wraps a parsed Project, mirroring py-aep's top-level
 // `app = py_aep.parse("x.aep")` entry. Existing Go-style entry points
@@ -55,22 +51,8 @@ func ParseReader(r io.ReadSeeker) (*Application, error) {
 //
 // Source: py-aep `binary/item_chunks.py::HeadChunk`.
 func (a *Application) Version() string {
-	if a.Project == nil {
+	if a.Project == nil || a.Project.back == nil {
 		return ""
 	}
-	pb := a.Project.projectBack()
-	if pb == nil || pb.root == nil {
-		return ""
-	}
-	head := pb.root.FindFirst(chunkIDHead)
-	if head == nil || len(head.Data) < 8 {
-		return ""
-	}
-	w := binary.BigEndian.Uint32(head.Data[4:8])
-	majorA := (w >> 26) & 0x1F
-	majorB := (w >> 19) & 0x07
-	minor := (w >> 15) & 0x0F
-	build := w & 0xFF
-	major := majorA*8 + majorB
-	return fmt.Sprintf("%d.%dx%d", major, minor, build)
+	return a.Project.back.versionString()
 }

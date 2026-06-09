@@ -124,17 +124,18 @@ func TestParseAttachCompletenessRenderQueue(t *testing.T) {
 				i, len(rb.settingsSlice), len(it.settingsBlock))
 		}
 		for j, om := range it.OutputModules {
-			if om.back == nil {
+			ob := om.outputModuleBack()
+			if ob == nil {
 				t.Errorf("RenderQueueItem[%d] OutputModule[%d]: back is nil", i, j)
 				continue
 			}
-			if len(om.settingsBlock) != len(om.back.settingsSlice) {
+			if len(om.settingsBlock) != len(ob.settingsSlice) {
 				t.Errorf("RenderQueueItem[%d] OutputModule[%d]: settings copy/alias len %d != %d",
-					i, j, len(om.settingsBlock), len(om.back.settingsSlice))
+					i, j, len(om.settingsBlock), len(ob.settingsSlice))
 			}
-			if len(om.roouData) != len(om.back.roouSlice) {
+			if len(om.roouData) != len(ob.roouSlice) {
 				t.Errorf("RenderQueueItem[%d] OutputModule[%d]: roou copy/alias len %d != %d",
-					i, j, len(om.roouData), len(om.back.roouSlice))
+					i, j, len(om.roouData), len(ob.roouSlice))
 			}
 		}
 	}

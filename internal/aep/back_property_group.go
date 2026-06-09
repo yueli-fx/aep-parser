@@ -15,3 +15,17 @@ type propertyGroupBackrefs struct {
 	// chunk is the group's underlying tdgp LIST; nil for the synthetic root.
 	chunk *rifx.Chunk
 }
+
+var _ PropertyGroupWriter = (*propertyGroupBackrefs)(nil)
+
+func (b *propertyGroupBackrefs) isPropertyGroupWriter() {}
+
+// propertyGroupBack returns the concrete backrefs behind an AEPropertyGroup's
+// writer interface for serializer-stage (parse_/mutate_) tdgp LIST access.
+// Returns nil when the group was built outside the parser's tree builders.
+func (g *AEPropertyGroup) propertyGroupBack() *propertyGroupBackrefs {
+	if b, ok := g.back.(*propertyGroupBackrefs); ok {
+		return b
+	}
+	return nil
+}

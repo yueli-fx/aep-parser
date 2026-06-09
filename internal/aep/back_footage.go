@@ -45,6 +45,13 @@ type footageBackrefs struct {
 
 var _ FootageWriter = (*footageBackrefs)(nil)
 
+func (b *footageBackrefs) sspcData() []byte {
+	if b == nil || b.sspcChunk == nil {
+		return nil
+	}
+	return b.sspcChunk.Data
+}
+
 func (b *footageBackrefs) SetPath(newPath string) error {
 	if b.aliasChunk == nil && b.cpthChunk == nil {
 		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", b.itemID, b.itemName)

@@ -44,6 +44,13 @@ func (f *Footage) File() string {
 	return f.Path
 }
 
+func (f *Footage) sspcData() []byte {
+	if f.back == nil {
+		return nil
+	}
+	return f.back.sspcData()
+}
+
 // FootageMissing reports whether the footage source file was missing
 // at the time AE saved the project (per the `footage_missing_at_save`
 // flag in sspc @0x78). Solids and placeholders never have a file, so
@@ -52,11 +59,11 @@ func (f *Footage) FootageMissing() bool {
 	if f.IsSolid || f.IsPlaceholder {
 		return false
 	}
-	fb, ok := f.back.(*footageBackrefs)
-	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) <= sspcOffFootageMissing {
+	d := f.sspcData()
+	if len(d) <= sspcOffFootageMissing {
 		return false
 	}
-	return fb.sspcChunk.Data[sspcOffFootageMissing] != 0
+	return d[sspcOffFootageMissing] != 0
 }
 
 // HasAudio reports whether the footage has an audio stream — true
@@ -66,11 +73,11 @@ func (f *Footage) HasAudio() bool {
 	if f.IsSolid || f.IsPlaceholder {
 		return false
 	}
-	fb, ok := f.back.(*footageBackrefs)
-	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) < sspcOffAudioSampleRate+8 {
+	d := f.sspcData()
+	if len(d) < sspcOffAudioSampleRate+8 {
 		return false
 	}
-	bits := binary.BigEndian.Uint64(fb.sspcChunk.Data[sspcOffAudioSampleRate : sspcOffAudioSampleRate+8])
+	bits := binary.BigEndian.Uint64(d[sspcOffAudioSampleRate : sspcOffAudioSampleRate+8])
 	rate := math.Float64frombits(bits)
 	return rate > 0
 }
@@ -78,19 +85,19 @@ func (f *Footage) HasAudio() bool {
 // StartFrame returns the footage start frame (sspc @0xAC, uint32 BE).
 // 0 for non-sequence footage and for fixtures without a full-size sspc.
 func (f *Footage) StartFrame() int {
-	fb, ok := f.back.(*footageBackrefs)
-	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) < sspcOffStartFrame+4 {
+	d := f.sspcData()
+	if len(d) < sspcOffStartFrame+4 {
 		return 0
 	}
-	return int(binary.BigEndian.Uint32(fb.sspcChunk.Data[sspcOffStartFrame : sspcOffStartFrame+4]))
+	return int(binary.BigEndian.Uint32(d[sspcOffStartFrame : sspcOffStartFrame+4]))
 }
 
 // EndFrame returns the footage end frame (sspc @0xB0, uint32 BE).
 // 0 for non-sequence footage and for fixtures without a full-size sspc.
 func (f *Footage) EndFrame() int {
-	fb, ok := f.back.(*footageBackrefs)
-	if !ok || fb == nil || fb.sspcChunk == nil || len(fb.sspcChunk.Data) < sspcOffEndFrame+4 {
+	d := f.sspcData()
+	if len(d) < sspcOffEndFrame+4 {
 		return 0
 	}
-	return int(binary.BigEndian.Uint32(fb.sspcChunk.Data[sspcOffEndFrame : sspcOffEndFrame+4]))
+	return int(binary.BigEndian.Uint32(d[sspcOffEndFrame : sspcOffEndFrame+4]))
 }

@@ -37,6 +37,13 @@ type keyframeBackrefs struct {
 
 var _ KeyframeWriter = (*keyframeBackrefs)(nil)
 
+func (b *keyframeBackrefs) frameRate() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.compFps
+}
+
 func (b *keyframeBackrefs) SetTime(seconds float64) error {
 	if b.ldat == nil {
 		return fmt.Errorf("keyframe at offset %d: no underlying ldat chunk", b.offset)

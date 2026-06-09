@@ -53,6 +53,118 @@ type projectBackrefs struct {
 
 var _ ProjectWriter = (*projectBackrefs)(nil)
 
+// projectBack returns the concrete backrefs behind a Project's writer
+// interface for serializer-stage (parse_/mutate_/write_) raw chunk access.
+// Returns nil when the project was built outside the parser.
+func (p *Project) projectBack() *projectBackrefs {
+	if pb, ok := p.back.(*projectBackrefs); ok {
+		return pb
+	}
+	return nil
+}
+
+func (b *projectBackrefs) xmpPacket() string {
+	if b == nil || b.root == nil || len(b.root.Trailing) == 0 {
+		return ""
+	}
+	return string(b.root.Trailing)
+}
+
+func (b *projectBackrefs) revision() uint16 {
+	if b == nil || b.root == nil {
+		return 0
+	}
+	head := b.root.FindFirst(chunkIDHead)
+	if head == nil || len(head.Data) < 20 {
+		return 0
+	}
+	return binary.BigEndian.Uint16(head.Data[18:20])
+}
+
+func (b *projectBackrefs) versionString() string {
+	if b == nil || b.root == nil {
+		return ""
+	}
+	head := b.root.FindFirst(chunkIDHead)
+	if head == nil || len(head.Data) < 8 {
+		return ""
+	}
+	w := binary.BigEndian.Uint32(head.Data[4:8])
+	majorA := (w >> 26) & 0x1F
+	majorB := (w >> 19) & 0x07
+	minor := (w >> 15) & 0x0F
+	build := w & 0xFF
+	major := majorA*8 + majorB
+	return fmt.Sprintf("%d.%dx%d", major, minor, build)
+}
+
+func (b *projectBackrefs) effectNames() []string {
+	if b == nil || b.root == nil {
+		return nil
+	}
+	return effectNamesFromRoot(b.root)
+}
+
+func (b *projectBackrefs) compensateForSceneReferredProfiles() bool {
+	if b == nil || b.acerChunk == nil || len(b.acerChunk.Data) < 1 {
+		return false
+	}
+	return b.acerChunk.Data[0] != 0
+}
+
+func (b *projectBackrefs) audioSampleRate() float64 {
+	if b == nil || b.adfrChunk == nil || len(b.adfrChunk.Data) < 8 {
+		return 0
+	}
+	bits := binary.BigEndian.Uint64(b.adfrChunk.Data[0:8])
+	return math.Float64frombits(bits)
+}
+
+func (b *projectBackrefs) workingGamma() float64 {
+	if b == nil || b.dwgaChunk == nil || len(b.dwgaChunk.Data) < 1 {
+		return 2.2
+	}
+	if b.dwgaChunk.Data[0] == 0 {
+		return 2.2
+	}
+	return 2.4
+}
+
+func (b *projectBackrefs) gpuAccelType() (string, bool) {
+	if b == nil || b.gpugUtf8 == nil {
+		return "", false
+	}
+	return b.gpugUtf8.Text(), true
+}
+
+func (b *projectBackrefs) expressionEngine() (string, bool) {
+	if b == nil || b.exenUtf8 == nil {
+		return "", false
+	}
+	return b.exenUtf8.Text(), true
+}
+
+func (b *projectBackrefs) nnhdByte(off int) (byte, bool) {
+	if b == nil || b.nnhdChunk == nil || len(b.nnhdChunk.Data) <= off {
+		return 0, false
+	}
+	return b.nnhdChunk.Data[off], true
+}
+
+func (b *projectBackrefs) nnhdUint16(off int) (uint16, bool) {
+	if b == nil || b.nnhdChunk == nil || len(b.nnhdChunk.Data) < off+2 {
+		return 0, false
+	}
+	return binary.BigEndian.Uint16(b.nnhdChunk.Data[off : off+2]), true
+}
+
+func (b *projectBackrefs) cmsJSON() ([]byte, bool) {
+	if b == nil || b.cmsUtf8 == nil {
+		return nil, false
+	}
+	return b.cmsUtf8.Data, true
+}
+
 func (b *projectBackrefs) SetCompensateForSceneReferredProfiles(v bool) error {
 	if b.acerChunk == nil || len(b.acerChunk.Data) < 1 {
 		return fmt.Errorf("project: no acer chunk — cannot SetCompensateForSceneReferredProfiles")

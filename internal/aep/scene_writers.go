@@ -2,21 +2,26 @@ package aep
 
 import "io"
 
-// scene_writers.go — XWriter interfaces for M8 back-ref inversion (P2).
+// scene_writers.go — XWriter interfaces for M8 back-ref inversion.
 //
-// Each interface declares the writer-facing methods that the serializer
-// (P3) will implement by holding the corresponding *Backrefs struct.
-// The scene types (Project, Composition, Layer, …) will swap their
-// concrete `back *xBackrefs` fields for these interfaces in P2.2.
+// Each interface declares the writer-facing methods (plus decoded read
+// accessors) that the serializer implements by holding the corresponding
+// concrete back-ref struct. Scene types (Project, Composition, Layer, …) hold
+// the interface in their `back` field and never name the concrete back-ref or
+// touch rifx.Chunk — the prerequisite for the scene/serializer package split.
 //
 // Constraints:
-//   - Method signatures mirror the existing setter signatures EXACTLY
+//   - Set* method signatures mirror the existing setter signatures EXACTLY
 //     (no extra `error` returns, no parameter changes).
-//   - Structural ops (New*/Delete*/Insert*/Move*/Duplicate*/Add*) are
-//     excluded — they become serializer free-functions per spec §2.4.
-//   - PropertyGroupWriter is deferred to its P2.2 step and omitted here.
+//   - Structural ops (New*/Delete*/Insert*/Move*/Duplicate*/Add*) stay
+//     serializer free-functions, reaching the concrete back-ref via the
+//     unexported xBack accessor helpers.
 
 // ProjectWriter is the writer interface for Project's back-ref operations.
+// Beyond the Set* writers it exposes decoded read accessors so the scene
+// layer can surface project-settings values without naming the concrete
+// back-ref or touching rifx.Chunk. The read accessors return decoded values;
+// nil/length handling lives in the back-ref implementation.
 type ProjectWriter interface {
 	SetCompensateForSceneReferredProfiles(bool) error
 	SetAudioSampleRate(float64) error
@@ -38,6 +43,19 @@ type ProjectWriter interface {
 	SetLinearBlending(bool) error
 	SetLinearizeWorkingSpace(bool) error
 	WriteAEP(w io.Writer) error
+
+	xmpPacket() string
+	revision() uint16
+	versionString() string
+	effectNames() []string
+	compensateForSceneReferredProfiles() bool
+	audioSampleRate() float64
+	workingGamma() float64
+	gpuAccelType() (string, bool)
+	expressionEngine() (string, bool)
+	nnhdByte(off int) (byte, bool)
+	nnhdUint16(off int) (uint16, bool)
+	cmsJSON() ([]byte, bool)
 }
 
 // CompositionWriter is the writer interface for Composition's back-ref operations.
@@ -65,6 +83,12 @@ type CompositionWriter interface {
 	SetDisplayStartFrame(int) error
 	SetComment(string) error
 	SetLabel(uint8) error
+
+	// Decoded read accessors: the scene CdtaRawBytes / PrdaRawBytes accessors
+	// read the live cdta / prda Data slices through these so they never name
+	// the concrete back-ref or touch rifx.Chunk.
+	cdtaData() []byte
+	prdaData() []byte
 }
 
 // LayerWriter is the writer interface for Layer's back-ref operations.
@@ -141,6 +165,12 @@ type LayerWriter interface {
 	SetManualKerning(values []int) error
 	// non-Set* A-class method
 	AddFont(string) (int, error)
+
+	// Decoded read accessors: the scene layer reads the ldta dividend/divisor
+	// frac and the alt-source slot presence through these so it never names
+	// the concrete back-ref or touches rifx.Chunk.
+	ldtaFrac(off int) (float64, bool)
+	hasAlternateSourceSlot() bool
 }
 
 // PropertyWriter is the writer interface for Property's length-preserving /
@@ -154,6 +184,14 @@ type PropertyWriter interface {
 	SetExpressionEnabled(bool) error
 	SetExpression(string) error
 	SetLockedRatio(bool) error
+
+	// Decoded read accessors for the tdb4 / tdsb flag readers and the
+	// min/max value chunks. The scene layer reads bits / bytes through these
+	// so it never names the concrete back-ref or touches rifx.Chunk.
+	tdb4Byte(off int) (byte, bool)
+	tdsbByte(off int) (byte, bool)
+	minValueBytes() []byte
+	maxValueBytes() []byte
 }
 
 // KeyframeWriter is the writer interface for Keyframe's back-ref operations.
@@ -166,6 +204,11 @@ type KeyframeWriter interface {
 	SetOutTemporalEase([]TemporalEase) error
 	SetInSpatialTangent([]float64) error
 	SetOutSpatialTangent([]float64) error
+
+	// frameRate exposes the owning composition's FrameRate cached at parse
+	// time so the scene FrameTime / SetFrameTime accessors avoid naming the
+	// concrete back-ref.
+	frameRate() float64
 }
 
 // MarkerWriter is the writer interface for Marker's back-ref operations.
@@ -195,6 +238,12 @@ type FootageWriter interface {
 	SetPath(string) error
 	SetComment(string) error
 	SetLabel(uint8) error
+
+	// sspcData exposes the live sspc Data slice so the scene footage
+	// convenience accessors (FootageMissing / HasAudio / StartFrame /
+	// EndFrame) read their byte offsets without naming the concrete back-ref
+	// or touching rifx.Chunk.
+	sspcData() []byte
 }
 
 // RenderQueueItemWriter is the writer interface for RenderQueueItem's one
@@ -206,4 +255,30 @@ type FootageWriter interface {
 // at all for the same reason.
 type RenderQueueItemWriter interface {
 	SetComment(string) error
+}
+
+// RenderQueueWriter is the back-ref handle for a RenderQueue. The queue carries
+// no scene-facing back-ref setter (the structural AddItem / RemoveItem ops are
+// serializer free-functions reaching the concrete back-ref via renderQueueBack),
+// so this is a nominal marker letting the scene field stay interface-typed and
+// concrete-free (M8 P3.1-prep).
+type RenderQueueWriter interface {
+	isRenderQueueWriter()
+}
+
+// OutputModuleWriter is the back-ref handle for an OutputModule. Every
+// output-module setter is a pure scene-buffer mutation synced at WriteAEP time,
+// so the back exists only to locate the write-time sync targets; this nominal
+// marker keeps the scene field interface-typed and concrete-free (M8 P3.1-prep).
+type OutputModuleWriter interface {
+	isOutputModuleWriter()
+}
+
+// PropertyGroupWriter is the back-ref handle for an AEPropertyGroup. The
+// structural group ops (Remove / Duplicate / MoveTo / SetDimensionsSeparated)
+// are serializer free-functions reaching the concrete back-ref's tdgp LIST via
+// propertyGroupBack; the scene group carries no back-ref setter, so this nominal
+// marker keeps the scene field interface-typed and concrete-free (M8 P3.1-prep).
+type PropertyGroupWriter interface {
+	isPropertyGroupWriter()
 }

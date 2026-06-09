@@ -133,15 +133,6 @@ type Layer struct {
 	propertyTree *AEPropertyGroup
 }
 
-// layerBack returns the concrete backrefs for read-side raw chunk access
-// during M8 P2 (the back field now holds the LayerWriter interface; reads
-// type-assert until P3 splits scene/serializer).
-func (l *Layer) layerBack() *layerBackrefs {
-	if lb, ok := l.back.(*layerBackrefs); ok {
-		return lb
-	}
-	return nil
-}
 
 // Parent returns the layer's parent layer, or nil if this layer has no
 // parent (ParentID == 0), the parent ID does not match any layer in the

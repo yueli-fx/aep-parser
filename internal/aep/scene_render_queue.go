@@ -15,8 +15,9 @@ type RenderQueue struct {
 
 	// back holds the LIST:LRdr chunk reference powering the structural
 	// RemoveItem write (settings ldat + lhd3 count + Rout per-item block).
-	// nil for queues built outside the parser. See back_render_queue.go.
-	back *renderQueueBackrefs
+	// Interface-typed (concrete via renderQueueBack); nil for queues built
+	// outside the parser. See back_render_queue.go.
+	back RenderQueueWriter
 }
 
 // NumItems returns the number of render queue items.
@@ -83,17 +84,6 @@ type RenderQueueItem struct {
 	back RenderQueueItemWriter
 }
 
-// renderQueueItemBack returns the concrete backrefs for raw chunk access
-// (settings sync + structural AddItem/RemoveItem) during M8 P2 — the back field
-// holds the RenderQueueItemWriter interface; these reads type-assert until P3
-// splits scene/serializer.
-func (it *RenderQueueItem) renderQueueItemBack() *renderQueueItemBackrefs {
-	if rb, ok := it.back.(*renderQueueItemBackrefs); ok {
-		return rb
-	}
-	return nil
-}
-
 // RenderSettings is the per-item render settings (ExtendScript
 // RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics:
 // -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
@@ -155,10 +145,11 @@ type OutputModule struct {
 	settingsBlock []byte
 	roouData      []byte
 
-	// back locates the owning chunks for the write-time settings sync. No writer
-	// interface — every setter is a pure scene-buffer mutation. nil outside the
-	// parser. See back_render_queue.go.
-	back *outputModuleBackrefs
+	// back locates the owning chunks for the write-time settings sync. Every
+	// setter is a pure scene-buffer mutation; the back is interface-typed
+	// (concrete via outputModuleBack) so the scene struct stays concrete-free.
+	// nil outside the parser. See back_render_queue.go.
+	back OutputModuleWriter
 }
 
 // FormatOptions is a typed view of the Ropt chunk (format-specific render

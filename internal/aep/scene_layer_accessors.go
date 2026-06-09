@@ -307,8 +307,7 @@ func (l *Layer) SetOpacity(v float64) error {
 // the parent comp using the precomp as a layer). Without the slot,
 // SetAlternateSource cannot length-preservingly write a new id.
 func (l *Layer) HasAlternateSourceSlot() bool {
-	lb := l.layerBack()
-	return lb != nil && lb.alternateSourceBlsi != nil
+	return l.back != nil && l.back.hasAlternateSourceSlot()
 }
 
 // AlternateSource returns the AVItem (*Composition or *Footage) used as

@@ -1,7 +1,6 @@
 package aep
 
 import (
-	"encoding/binary"
 	"fmt"
 	"math"
 )
@@ -61,17 +60,11 @@ func (l *Layer) OutPoint() float64 {
 // at the given offset (8 bytes total) and returns dividend/divisor.
 // Returns 0 when ldta is nil, too short, or the divisor is zero.
 func (l *Layer) readLdtaFrac(off int) float64 {
-	lb := l.layerBack()
-	if lb == nil || lb.ldta == nil || len(lb.ldta.Data) < off+8 {
+	if l.back == nil {
 		return 0
 	}
-	d := lb.ldta.Data
-	dividend := int32(binary.BigEndian.Uint32(d[off : off+4]))
-	divisor := binary.BigEndian.Uint32(d[off+4 : off+8])
-	if divisor == 0 {
-		return 0
-	}
-	return float64(dividend) / float64(divisor)
+	v, _ := l.back.ldtaFrac(off)
+	return v
 }
 
 // layerFps returns the layer's owning composition FrameRate, or 0 when
@@ -204,22 +197,17 @@ func (k *Keyframe) FrameTime() int {
 	if k.back == nil {
 		return 0
 	}
-	kb, ok := k.back.(*keyframeBackrefs)
-	if !ok || kb == nil {
-		return 0
-	}
-	return secondsToFrames(k.Time, kb.compFps)
+	return secondsToFrames(k.Time, k.back.frameRate())
 }
 
 // SetFrameTime writes the keyframe's time from an integer frame,
 // delegating to SetTime. Returns an error when the owning comp's
 // FrameRate is unknown.
 func (k *Keyframe) SetFrameTime(frame int) error {
-	kb, ok := k.back.(*keyframeBackrefs)
-	if !ok || kb == nil || kb.compFps <= 0 {
+	if k.back == nil || k.back.frameRate() <= 0 {
 		return fmt.Errorf("keyframe: SetFrameTime requires owning composition FrameRate > 0")
 	}
-	return k.SetTime(framesToSeconds(frame, kb.compFps))
+	return k.SetTime(framesToSeconds(frame, k.back.frameRate()))
 }
 
 // ──────────────────────────────────────────────

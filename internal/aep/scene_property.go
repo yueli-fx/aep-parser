@@ -58,17 +58,6 @@ type Property struct {
 	parentTreeGroup *AEPropertyGroup
 }
 
-// propertyBack returns the concrete back-refs for raw chunk access (keyframe
-// stream ops, separate-dimensions structural splice, tdb4/tdsb flag readers,
-// parse wiring) during M8 P2 — the back field holds the PropertyWriter
-// interface; these reads type-assert until P3 splits scene/serializer.
-func (p *Property) propertyBack() *propertyBackrefs {
-	if pb, ok := p.back.(*propertyBackrefs); ok {
-		return pb
-	}
-	return nil
-}
-
 // PropertyControlType identifies the UI control type for a property
 // (scalar slider, color picker, angle dial, checkbox, dropdown, etc.).
 // Derived from tdb4 flags; mirrors py-aep PropertyControlType enum.

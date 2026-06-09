@@ -38,7 +38,8 @@ func RemoveItem(rq *RenderQueue, index int) error {
 	if index < 0 || index >= len(rq.Items) {
 		return fmt.Errorf("RemoveItem: index %d out of range (have %d items)", index, len(rq.Items))
 	}
-	if rq.back == nil || rq.back.lrdr == nil {
+	rqb := rq.renderQueueBack()
+	if rqb == nil || rqb.lrdr == nil {
 		return fmt.Errorf("RemoveItem: render queue built outside parser (no LRdr back-ref)")
 	}
 	item := rq.Items[index]
@@ -65,7 +66,7 @@ func RemoveItem(rq *RenderQueue, index int) error {
 	}
 
 	// === Locate the LRdr-level settings list (sibling of LItm) ===
-	settingsList := rq.back.lrdr.FindFirstList(rifx.IDkfl)
+	settingsList := rqb.lrdr.FindFirstList(rifx.IDkfl)
 	if settingsList == nil {
 		return fmt.Errorf("RemoveItem: LRdr settings list missing")
 	}
@@ -108,7 +109,7 @@ func RemoveItem(rq *RenderQueue, index int) error {
 	}
 
 	// === Rout: drop the item's per-item block + decrement header ===
-	if rout := rq.back.lrdr.FindFirst(rifx.IDRout); rout != nil && len(rout.Data) >= 4 {
+	if rout := rqb.lrdr.FindFirst(rifx.IDRout); rout != nil && len(rout.Data) >= 4 {
 		const routHeader = 4
 		n := len(rq.Items) // pre-removal count
 		if stride := (len(rout.Data) - routHeader) / n; stride > 0 {
@@ -176,7 +177,8 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	if comp == nil || comp.proj == nil {
 		return nil, fmt.Errorf("AddItem: comp is nil or detached from a project")
 	}
-	if rq.back == nil || rq.back.lrdr == nil {
+	rqb := rq.renderQueueBack()
+	if rqb == nil || rqb.lrdr == nil {
 		return nil, fmt.Errorf("AddItem: render queue built outside parser (no LRdr back-ref)")
 	}
 	if len(rq.Items) == 0 {
@@ -204,7 +206,7 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 		return nil, fmt.Errorf("AddItem: template 'LOm ' group not found")
 	}
 
-	settingsList := rq.back.lrdr.FindFirstList(rifx.IDkfl)
+	settingsList := rqb.lrdr.FindFirstList(rifx.IDkfl)
 	if settingsList == nil {
 		return nil, fmt.Errorf("AddItem: LRdr settings list missing")
 	}
@@ -238,7 +240,7 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	litm.Children = append(litm.Children, clonedList, clonedLOm)
 
 	// === Rout: clone template's per-item block + grow header ===
-	if rout := rq.back.lrdr.FindFirst(rifx.IDRout); rout != nil && len(rout.Data) >= 4 {
+	if rout := rqb.lrdr.FindFirst(rifx.IDRout); rout != nil && len(rout.Data) >= 4 {
 		const routHeader = 4
 		if stride := (len(rout.Data) - routHeader) / n; stride > 0 {
 			tRoutOff := routHeader + (n-1)*stride
@@ -252,7 +254,7 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	}
 
 	// === scene: build the new item, re-point ALL settings aliases (ldat grew) ===
-	blocks := renderSettingsBlocks(rq.back.lrdr)
+	blocks := renderSettingsBlocks(rqb.lrdr)
 	newItem := buildRenderQueueItem(blocks, n, "", litm, clonedList, clonedLOm, nil, comp.proj)
 	rq.Items = append(rq.Items, newItem)
 	for i, it := range rq.Items {

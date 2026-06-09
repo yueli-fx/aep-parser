@@ -130,11 +130,10 @@ type Composition struct {
 // comp has no cdta. Read-only access for debugging / RE tools — the
 // underlying byte slice is the live chunk data; do not mutate.
 func (c *Composition) CdtaRawBytes() []byte {
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil || cb.cdta == nil {
+	if c.back == nil {
 		return nil
 	}
-	return cb.cdta.Data
+	return c.back.cdtaData()
 }
 
 // PrdaRawBytes returns the comp's prda chunk Data slice (renderer-specific
@@ -142,11 +141,10 @@ func (c *Composition) CdtaRawBytes() []byte {
 // debugging / RE tools — the underlying byte slice is the live chunk data;
 // do not mutate.
 func (c *Composition) PrdaRawBytes() []byte {
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil || cb.prdaChunk == nil {
+	if c.back == nil {
 		return nil
 	}
-	return cb.prdaChunk.Data
+	return c.back.prdaData()
 }
 
 // LayerByID returns the first layer in this composition whose ID matches

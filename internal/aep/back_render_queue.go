@@ -54,7 +54,47 @@ type outputModuleBackrefs struct {
 	roouSlice []byte
 }
 
-var _ RenderQueueItemWriter = (*renderQueueItemBackrefs)(nil)
+var (
+	_ RenderQueueItemWriter = (*renderQueueItemBackrefs)(nil)
+	_ RenderQueueWriter     = (*renderQueueBackrefs)(nil)
+	_ OutputModuleWriter    = (*outputModuleBackrefs)(nil)
+)
+
+func (b *renderQueueBackrefs) isRenderQueueWriter() {}
+
+func (b *outputModuleBackrefs) isOutputModuleWriter() {}
+
+// renderQueueBack returns the concrete backrefs behind a RenderQueue's writer
+// interface for serializer-stage raw chunk access (AddItem / RemoveItem reach
+// the LRdr container through it). Returns nil when the queue was built outside
+// the parser.
+func (rq *RenderQueue) renderQueueBack() *renderQueueBackrefs {
+	if b, ok := rq.back.(*renderQueueBackrefs); ok {
+		return b
+	}
+	return nil
+}
+
+// outputModuleBack returns the concrete backrefs behind an OutputModule's
+// writer interface for the write-time settings sync. Returns nil when the
+// module was built outside the parser.
+func (om *OutputModule) outputModuleBack() *outputModuleBackrefs {
+	if b, ok := om.back.(*outputModuleBackrefs); ok {
+		return b
+	}
+	return nil
+}
+
+// renderQueueItemBack returns the concrete backrefs behind a RenderQueueItem's
+// writer interface for serializer-stage raw chunk access (settings sync +
+// structural AddItem / RemoveItem). Returns nil when the item was built outside
+// the parser.
+func (it *RenderQueueItem) renderQueueItemBack() *renderQueueItemBackrefs {
+	if rb, ok := it.back.(*renderQueueItemBackrefs); ok {
+		return rb
+	}
+	return nil
+}
 
 // SetComment writes the comment into the item's RCom wrapper chunk: it replaces
 // an existing RCom's payload, or inserts a fresh RCom into the LItm LIST

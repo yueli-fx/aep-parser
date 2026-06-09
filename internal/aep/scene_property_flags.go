@@ -25,11 +25,14 @@ import (
 // tdb4Bit returns bit `b` of tdb4 byte at offset `off`. Returns false
 // when the tdb4 chunk is absent or too short.
 func (p *Property) tdb4Bit(off, b int) bool {
-	pb := p.propertyBack()
-	if pb == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= off {
+	if p.back == nil {
 		return false
 	}
-	return (pb.tdb4.Data[off]>>uint(b))&1 == 1
+	v, ok := p.back.tdb4Byte(off)
+	if !ok {
+		return false
+	}
+	return (v>>uint(b))&1 == 1
 }
 
 // IsSpatial reports whether the property is spatial (motion-path) —
@@ -43,11 +46,14 @@ func (p *Property) IsSpatial() bool {
 // tdb4 chunk is available it reads the explicit animated flag (byte
 // 0x44 bool); otherwise it falls back to len(Keyframes) > 0.
 func (p *Property) IsAnimated() bool {
-	pb := p.propertyBack()
-	if pb == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x44 {
+	if p.back == nil {
 		return len(p.Keyframes) > 0
 	}
-	return pb.tdb4.Data[0x44] != 0
+	v, ok := p.back.tdb4Byte(0x44)
+	if !ok {
+		return len(p.Keyframes) > 0
+	}
+	return v != 0
 }
 
 // IsColor reports whether the property is a color (RGBA). 4-channel
@@ -85,11 +91,14 @@ func (p *Property) CanVaryOverTime() bool {
 // tdsbBit returns bit `b` of tdsb byte at offset `off`. Returns false
 // when the tdsb chunk is absent or too short.
 func (p *Property) tdsbBit(off, b int) bool {
-	pb := p.propertyBack()
-	if pb == nil || pb.tdsb == nil || len(pb.tdsb.Data) <= off {
+	if p.back == nil {
 		return false
 	}
-	return (pb.tdsb.Data[off]>>uint(b))&1 == 1
+	v, ok := p.back.tdsbByte(off)
+	if !ok {
+		return false
+	}
+	return (v>>uint(b))&1 == 1
 }
 
 // LockedRatio reports whether the property's locked ratio flag is set.
@@ -212,21 +221,19 @@ func (p *Property) ValuePropertyType() PropertyValueType {
 // for scalars, []float64 for multi-component, float64 (from uint32) for
 // integer properties.
 func (p *Property) MinValue() any {
-	pb := p.propertyBack()
-	if pb == nil {
+	if p.back == nil {
 		return nil
 	}
-	return p.decodeTdumValue(pb.tdum)
+	return p.decodeTdumValue(p.back.minValueBytes())
 }
 
 // MaxValue returns the maximum permitted value for the property, or nil
 // if no tduM chunk is present.
 func (p *Property) MaxValue() any {
-	pb := p.propertyBack()
-	if pb == nil {
+	if p.back == nil {
 		return nil
 	}
-	return p.decodeTdumValue(pb.tduM)
+	return p.decodeTdumValue(p.back.maxValueBytes())
 }
 
 // UnitsText returns the text description of the units for the property
@@ -269,11 +276,14 @@ func (p *Property) PropertyDepth() int {
 // defaults to true when the tdsb chunk is absent — matches py-aep's
 // `TdsbChunk._enable_flags` default of 1.
 func (p *Property) Enabled() bool {
-	pb := p.propertyBack()
-	if pb == nil || pb.tdsb == nil || len(pb.tdsb.Data) < 4 {
+	if p.back == nil {
 		return true
 	}
-	return pb.tdsb.Data[3]&0x01 != 0
+	v, ok := p.back.tdsbByte(3)
+	if !ok {
+		return true
+	}
+	return v&0x01 != 0
 }
 
 // Active is an alias for Enabled — mirrors py-aep's `property.active`

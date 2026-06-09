@@ -34,7 +34,7 @@ type AEPropertyGroup struct {
 	Children  []PropertyBase
 
 	parent *AEPropertyGroup
-	back   *propertyGroupBackrefs // underlying tdgp LIST shard (see back_property_group.go)
+	back   PropertyGroupWriter // underlying tdgp LIST shard, interface-typed (concrete via propertyGroupBack); see back_property_group.go
 
 	// layer back-ref, set only on the synthetic root by parseLayer. Lets a
 	// leaf reach its owning Layer (walk parent → root → layer) for structural

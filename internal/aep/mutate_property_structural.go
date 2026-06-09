@@ -66,7 +66,7 @@ func ownerLayer(g *AEPropertyGroup) *Layer {
 func childPayloadChunk(c PropertyBase) *rifx.Chunk {
 	switch v := c.(type) {
 	case *AEPropertyGroup:
-		return v.back.chunk
+		return v.propertyGroupBack().chunk
 	case *Property:
 		if pb := v.propertyBack(); pb != nil {
 			return pb.tdbs
@@ -76,29 +76,29 @@ func childPayloadChunk(c PropertyBase) *rifx.Chunk {
 }
 
 // childTdmnPayload locates a direct child's (tdmn, payload) chunk pair inside
-// parent.back.chunk.Children by payload pointer identity. ok is false when the
+// parent.propertyGroupBack().chunk.Children by payload pointer identity. ok is false when the
 // parent has no chunk, the payload isn't found, or it isn't preceded by a
 // tdmn.
 func childTdmnPayload(parent *AEPropertyGroup, child PropertyBase) (tdmn, payload *rifx.Chunk, ok bool) {
-	if parent == nil || parent.back.chunk == nil {
+	if parent == nil || parent.propertyGroupBack().chunk == nil {
 		return nil, nil, false
 	}
 	pc := childPayloadChunk(child)
 	if pc == nil {
 		return nil, nil, false
 	}
-	pi := indexOfChunk(parent.back.chunk.Children, pc)
+	pi := indexOfChunk(parent.propertyGroupBack().chunk.Children, pc)
 	if pi < 1 {
 		return nil, nil, false
 	}
-	t := parent.back.chunk.Children[pi-1]
+	t := parent.propertyGroupBack().chunk.Children[pi-1]
 	if t.ID != rifx.IDTdmn {
 		return nil, nil, false
 	}
 	return t, pc, true
 }
 
-// rebuildIndexedGroupChunk re-emits parent.back.chunk.Children from the current
+// rebuildIndexedGroupChunk re-emits parent.propertyGroupBack().chunk.Children from the current
 // parent.Children scene order. The leading header chunks (tdsb / tdsn) and the
 // trailing "ADBE Group End" sentinel are preserved verbatim; each scene child
 // contributes its original (tdmn, payload) chunk pair — the SAME pointers, so
@@ -106,7 +106,7 @@ func childTdmnPayload(parent *AEPropertyGroup, child PropertyBase) (tdmn, payloa
 // supplies the tdmn+payload for each child (captured before any scene-order
 // mutation). Returns an error without mutating when a child's pair is missing.
 func rebuildIndexedGroupChunk(parent *AEPropertyGroup, pairs map[PropertyBase][2]*rifx.Chunk) error {
-	children := parent.back.chunk.Children
+	children := parent.propertyGroupBack().chunk.Children
 
 	// Boundaries: prefix = chunks before the first child's tdmn; suffix =
 	// chunks after the last child's payload (the Group End sentinel + any
@@ -144,12 +144,12 @@ func rebuildIndexedGroupChunk(parent *AEPropertyGroup, pairs map[PropertyBase][2
 		rebuilt = append(rebuilt, pair[0], pair[1])
 	}
 	rebuilt = append(rebuilt, suffix...)
-	parent.back.chunk.Children = rebuilt
+	parent.propertyGroupBack().chunk.Children = rebuilt
 	return nil
 }
 
 // capturePairs snapshots each current scene child's (tdmn, payload) chunk pair
-// from parent.back.chunk.Children, keyed by the scene node. Children whose pair
+// from parent.propertyGroupBack().chunk.Children, keyed by the scene node. Children whose pair
 // can't be located are omitted; callers validate completeness as needed.
 func capturePairs(parent *AEPropertyGroup) map[PropertyBase][2]*rifx.Chunk {
 	pairs := make(map[PropertyBase][2]*rifx.Chunk, len(parent.Children))
@@ -254,7 +254,7 @@ func RemovePropertyGroup(g *AEPropertyGroup) error {
 	pairs := capturePairs(parent)
 
 	// Snapshot for rollback.
-	oldChunkChildren := append([]*rifx.Chunk(nil), parent.back.chunk.Children...)
+	oldChunkChildren := append([]*rifx.Chunk(nil), parent.propertyGroupBack().chunk.Children...)
 	oldSceneChildren := append([]PropertyBase(nil), parent.Children...)
 	var oldEffects []*Effect
 	var oldMasks []*Mask
@@ -268,7 +268,7 @@ func RemovePropertyGroup(g *AEPropertyGroup) error {
 	parent.Children = filterPropertyBase(parent.Children, map[PropertyBase]bool{g: true})
 	// Chunk: rebuild from the reduced scene order.
 	if err := rebuildIndexedGroupChunk(parent, pairs); err != nil {
-		parent.back.chunk.Children = oldChunkChildren
+		parent.propertyGroupBack().chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
 		return fmt.Errorf("RemovePropertyGroup: %w", err)
 	}
@@ -278,7 +278,7 @@ func RemovePropertyGroup(g *AEPropertyGroup) error {
 	}
 
 	if newWarn := newWarningsSince(layer, oldWarningsLen); len(newWarn) > 0 {
-		parent.back.chunk.Children = oldChunkChildren
+		parent.propertyGroupBack().chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
 		if layer != nil {
 			layer.Effects = oldEffects
@@ -325,7 +325,7 @@ func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	layer := ownerLayer(parent)
 	pairs := capturePairs(parent)
 
-	oldChunkChildren := append([]*rifx.Chunk(nil), parent.back.chunk.Children...)
+	oldChunkChildren := append([]*rifx.Chunk(nil), parent.propertyGroupBack().chunk.Children...)
 	oldSceneChildren := append([]PropertyBase(nil), parent.Children...)
 	var oldEffects []*Effect
 	var oldMasks []*Mask
@@ -345,7 +345,7 @@ func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	parent.Children = newChildren
 
 	if err := rebuildIndexedGroupChunk(parent, pairs); err != nil {
-		parent.back.chunk.Children = oldChunkChildren
+		parent.propertyGroupBack().chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
 		return fmt.Errorf("MovePropertyGroup: %w", err)
 	}
@@ -354,7 +354,7 @@ func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	}
 
 	if newWarn := newWarningsSince(layer, oldWarningsLen); len(newWarn) > 0 {
-		parent.back.chunk.Children = oldChunkChildren
+		parent.propertyGroupBack().chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
 		if layer != nil {
 			layer.Effects = oldEffects
@@ -413,7 +413,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	if !ok {
 		return nil, fmt.Errorf("DuplicatePropertyGroup: group %q chunk pair not located in parent LIST", g.MatchName)
 	}
-	pi := indexOfChunk(parent.back.chunk.Children, srcPayload)
+	pi := indexOfChunk(parent.propertyGroupBack().chunk.Children, srcPayload)
 	if pi < 1 {
 		return nil, fmt.Errorf("DuplicatePropertyGroup: group %q payload chunk not in parent LIST", g.MatchName)
 	}
@@ -421,7 +421,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	layer := ownerLayer(parent)
 
 	// Snapshot for rollback.
-	oldChunkChildren := append([]*rifx.Chunk(nil), parent.back.chunk.Children...)
+	oldChunkChildren := append([]*rifx.Chunk(nil), parent.propertyGroupBack().chunk.Children...)
 	oldSceneChildren := append([]PropertyBase(nil), parent.Children...)
 	var oldEffects []*Effect
 	var oldMasks []*Mask
@@ -432,7 +432,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	oldWarningsLen := warningsLen(layer)
 
 	rollback := func() {
-		parent.back.chunk.Children = oldChunkChildren
+		parent.propertyGroupBack().chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
 		if layer != nil {
 			layer.Effects = oldEffects
@@ -447,12 +447,12 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	payloadClone := deepCloneChunk(srcPayload)
 
 	// Chunk: splice the clone pair immediately after the source payload.
-	ch := parent.back.chunk.Children
+	ch := parent.propertyGroupBack().chunk.Children
 	spliced := make([]*rifx.Chunk, 0, len(ch)+2)
 	spliced = append(spliced, ch[:pi+1]...)
 	spliced = append(spliced, tdmnClone, payloadClone)
 	spliced = append(spliced, ch[pi+1:]...)
-	parent.back.chunk.Children = spliced
+	parent.propertyGroupBack().chunk.Children = spliced
 
 	// Scene: insert a stand-in group node right after the source.
 	cloneNode := &AEPropertyGroup{MatchName: g.MatchName, Name: g.Name, parent: parent, back: &propertyGroupBackrefs{chunk: payloadClone}}

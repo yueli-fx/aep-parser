@@ -208,16 +208,6 @@ type Project struct {
 	target     AETarget // which AE-version template NewProject loaded; drives per-target builder chunk selection
 }
 
-// projectBack returns the concrete backrefs for read-side raw chunk
-// access during M8 P2 (the back field now holds the ProjectWriter
-// interface; reads type-assert until P3 splits scene/serializer).
-func (p *Project) projectBack() *projectBackrefs {
-	if pb, ok := p.back.(*projectBackrefs); ok {
-		return pb
-	}
-	return nil
-}
-
 // CompositionByID returns the first composition whose ID matches id, or
 // nil if no such composition exists. ID 0 is treated as no-match (mirrors
 // Composition.LayerByID; real AE projects start item IDs at 1).

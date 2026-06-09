@@ -185,16 +185,17 @@ func parseOutputModules(lom *rifx.Chunk, omBlocks [][]byte) []*OutputModule {
 }
 
 func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
+	omb := &outputModuleBackrefs{settingsSlice: omBlock}
 	om := &OutputModule{
 		settingsBlock: append([]byte(nil), omBlock...),
-		back:          &outputModuleBackrefs{settingsSlice: omBlock},
+		back:          omb,
 	}
 	als2Seen := false
 	var postAls2 []string
 	for _, ch := range group {
 		if ch.ID == rifx.IDRoou {
 			om.roouData = append([]byte(nil), ch.Data...)
-			om.back.roouSlice = ch.Data
+			omb.roouSlice = ch.Data
 			applyRoou(om, ch.Data)
 			continue
 		}

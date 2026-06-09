@@ -59,6 +59,45 @@ type propertyBackrefs struct {
 
 var _ PropertyWriter = (*propertyBackrefs)(nil)
 
+// propertyBack returns the concrete back-refs behind a Property's writer
+// interface for serializer-stage (parse_/mutate_/write_) raw chunk access
+// (keyframe stream ops, separate-dimensions splice, tdb4/tdsb flag readers,
+// parse wiring). Returns nil when the property was built outside the parser.
+func (p *Property) propertyBack() *propertyBackrefs {
+	if pb, ok := p.back.(*propertyBackrefs); ok {
+		return pb
+	}
+	return nil
+}
+
+func (b *propertyBackrefs) tdb4Byte(off int) (byte, bool) {
+	if b == nil || b.tdb4 == nil || len(b.tdb4.Data) <= off {
+		return 0, false
+	}
+	return b.tdb4.Data[off], true
+}
+
+func (b *propertyBackrefs) tdsbByte(off int) (byte, bool) {
+	if b == nil || b.tdsb == nil || len(b.tdsb.Data) <= off {
+		return 0, false
+	}
+	return b.tdsb.Data[off], true
+}
+
+func (b *propertyBackrefs) minValueBytes() []byte {
+	if b == nil || b.tdum == nil {
+		return nil
+	}
+	return b.tdum.Data
+}
+
+func (b *propertyBackrefs) maxValueBytes() []byte {
+	if b == nil || b.tduM == nil {
+		return nil
+	}
+	return b.tduM.Data
+}
+
 // SetStaticValue rewrites the property's constant value in the cdat chunk. The
 // caller (Property delegate) validates the value's component count against
 // Property.Components and syncs the scene field; this only writes the bytes.

@@ -71,6 +71,20 @@ type compositionBackrefs struct {
 
 var _ CompositionWriter = (*compositionBackrefs)(nil)
 
+func (b *compositionBackrefs) cdtaData() []byte {
+	if b == nil || b.cdta == nil {
+		return nil
+	}
+	return b.cdta.Data
+}
+
+func (b *compositionBackrefs) prdaData() []byte {
+	if b == nil || b.prdaChunk == nil {
+		return nil
+	}
+	return b.prdaChunk.Data
+}
+
 func (b *compositionBackrefs) SetBGColor(rgb [3]uint8) error {
 	if b.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", b.compName)
