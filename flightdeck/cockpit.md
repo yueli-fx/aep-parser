@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**P3.0 结构性 op method→free function ✅ 完成**（7 组 7 commit，全绿 + byte-identical + docgen 重生成）。**P3.1 单包内先拆 进行中**（prep step1 ✅ 005ca63；**scene_*.go concrete-backref 解耦 ✅ 65ac497**——委托隔离 agent 整块倒置 ProjectWriter+13 等接口，scene_*.go 零 concrete *Backrefs，全测试绿+byte-identical+no API change）——勘察发现 plan Phase 3 原「write_*.go→serializer」反了（实为 scene-delegate）+ scene 文件仍有 concrete-backref 耦合需先解，详 §下一步 修正。每 commit 绿 + byte-identical round-trip。
+**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**P3.0 结构性 op method→free function ✅ 完成**（7 组 7 commit，全绿 + byte-identical + docgen 重生成）。**P3.1 物理分包 ✅ 完成**：stage 1 抽 `internal/scene`（ac62b25 + 0303113 清 string-leak）+ stage 2 抽 `internal/serializer`（a347e46）——`internal/aep` 现为薄 facade（aliases + facade_codec + Application + Open/FromReader + 全结构性 op re-export），覆于 `internal/{scene,serializer,codec}`。**物理分包结构性完成**。机制=新包内镜像 facade alias 桥（零 body qualify-rewrite，规避机械泄漏）+ `serializer/testsupport.go` 跨包 test-accessor + aep facade 委托。全绿 + byte-identical(183 fixture) + DAG OK（scene⊥rifx/serializer⊥aep/codec⊥scene 编译期边界）+ docs 内容零变（富注释移植 facade）。**下一步 = P4 收口**。
 
 ## 进行中
 
@@ -39,15 +39,14 @@
    - **偏离 1**：`Layer.{ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`（原 待转 列含之）**未转**——三者纯委托到 Set*（scene 方法，经 writer 接口，不碰 concrete backref）→ 留方法。`ClearTrackMatteLayer` 虽在 write_layer.go，但与同文件 Set* 方法一样 P3.1 随迁 scene。转之纯属多余 BREAKING。
    - **偏离 2**：`AEPropertyGroup.Duplicate` 原 待转 列**漏列**，与 Remove/MoveTo 同族（INDEXED_GROUP chunk-pair splice）→ 本次补转，否则 P3.1 git-mv `mutate_property_structural.go` 会断。
    - **完成验证**：scene_*.go 零调用任何结构性自由函数（grep 证）+ arch boundary guard（scene⊥rifx、codec⊥scene）绿 + `go vet ./...` + `go test ./...` 全绿。纯图构造（VectorGroup.AddRect 等 detached）留 scene。
-2. **P3.1（← 下一步）：单包内先拆混装文件**（用户 2026-06-09 拍板「单包内先拆」排法；勘察后 plan Phase 3 原步骤**部分作废**，见下修正）。**勘察结论（本次 reconnaissance）**：
-   - **plan「write_*.go→serializer」反了**：post-P2 的 `write_*.go` 实为 **scene-delegate**（校验 + `recv.back.SetX()` 接口调 + scene 字段更新，**rifx-clean**：composition/keyframe/layer/marker/mask/property/render_queue/text 零 rifx）→ 应属 **scene**。仅 `write_guide/write_item/write_project_settings` 碰 rifx。`back_*.go`（177 backref 方法，含字节 patch 实现）+ `parse_/lower_` free-func → serializer。
-   - **混装文件需逐个按 receiver/依赖拆**（非按文件名 git-mv）：依据 = **碰 rifx/concrete-backref/建 chunk → serializer；纯 scene 遍历/接口委托 → scene**。
-   - **更深的坑（必须先解，否则 split 破 DAG）**：scene 文件仍有 **concrete-backref 耦合**——如 `scene_property_flags.go` 经 `propertyBack()` 取 concrete `*propertyBackrefs` 读 `pb.tdum`（不 naming rifx 故过了 rifx guard，但跨包后 scene→serializer import 环）。即 cockpit P2 所述「OM/RenderQueue 容器/PropertyGroup **故意保 concrete——P3 统一解耦**」的欠账，范围比预想大（含 property reader 路径）。**P3.1 真正前置 = 完成这些 concrete→interface 解耦**。
-   - **核心写路径**：`WriteAEP` 自身 = scene 方法做 serializer 活（建整份字节）→ 须改 **scene 薄委托 → serializer 自由函数**（同 Path B），是 split 的中心改动。
-   - ✅ **P3.1-prep step1 完成**（commit 005ca63）：unexported scene-type serializer-helper（separatePosition/merge*/childTdmnPayload/rebuildIndexedGroupChunk/capturePairs/ownerLayer(AEPG)/sync*/reparseKeyframes）→ 自由函数（无 API 影响）。
-   - **剩余 P3.1 prep**：① 解 scene 文件 concrete-backref 耦合（propertyBack 等，接口化或移访问点）；② exported scene-delegate Set* 析出到 scene_ 文件（write_*.go 多数）+ 完成 P2 欠账的接口倒置（write_item/write_project_settings 等碰 rifx 的 setter）；③ WriteAEP 委托化。全绿后才进物理 git-mv。
-3. **P4** 下游切换 + 退役 AST 守卫（scene⊥rifx 改编译期保证）+ CLAUDE.md #3 多包描述 + 双版本 ship-gate 终验。
-4. docgen 次要 follow-on（非阻塞）。
+2. **P3.1 物理分包 ✅ 完成**（2026-06-09）：
+   - **stage 1**：抽 `internal/scene`（ac62b25 + 0303113 清 string-literal 泄漏——agent 机械 `src.comp→scene.LayerComp(src)` rewrite 漏进 error string，用户独立复验 `TestInsertLayer_RefuseSrcDetached` 抓到，已修）。
+   - **stage 2**：抽 `internal/serializer`（a347e46）——移 parse/lower/write/back/mutate(51) + templates(15) → serializer；`internal/aep` 收为薄 facade（aliases + facade_codec + Application + `facade.go`=Open/FromReader + 全结构性 op re-export）。
+   - **关键机制（避机械泄漏）**：新包内镜像 facade alias 桥（`serializer/{scene_aliases,codec_aliases}.go`）→ 移入文件保留 bare scene/codec 类型名，**零 body qualify-rewrite**（不做 `Type→scene.Type` 全量替换，规避上次 string-leak 同类风险）。跨包 test 可见性：`serializer/testsupport.go` 导出 back-ref accessor，aep facade 的 `*ForTest` helper 委托之 → 118 黑盒 test 调用点零改写；11 个 `Lower*Stream`/`NewLowerCtxForTest`/`*ForTest`（带 unexported `lowerCtx`、非 Stable API）+ 其消费 test 随迁 serializer。
+   - **docs 零回归**：富结构性 op doc comment 移植到 facade（docgen 内容 byte 一致）。
+   - **验证**：build/vet/test ./... 全绿（serializer 非缓存复跑 PASS）+ round-trip byte-identical(183 fixture) + dag_boundary OK（scene⊥rifx/serializer⊥aep/codec⊥scene 编译期）+ API 仅 11 test-helper 迁出（零真公开 API 丢失）。
+3. **P4（← 下一步）收口**：① 退役/降级 AST 守卫 `arch_boundary_test.go`（scene⊥rifx 等已是编译期包边界，AST guard 多余）；② 改写 CLAUDE.md #3「单 package + 命名轴」→ `internal/{rifx,codec,scene,serializer}` + aep facade 多包 DAG 描述；③ 双版本 ship-gate 终验（注：本 split 输出 byte-identical，ship-gate 对此 relocation 偏冗余，round-trip 已证写出不变；按 plan 仍跑一遍）。
+4. **follow-up（非阻塞）**：serializer 结构性 op 函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ 后续单独 commit trim；docgen 次要 follow-on。
 
 ## Backlog（单条候选）
 
