@@ -46,6 +46,9 @@ var v22ShapeStrokeDashedBodyBytes []byte
 //go:embed templates/v2_2_shape_gradfill_body.bin
 var v22ShapeGradFillBodyBytes []byte
 
+//go:embed templates/v2_2_shape_gradstroke_body.bin
+var v22ShapeGradStrokeBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -74,6 +77,10 @@ var (
 	v22ShapeGradFillOnce  sync.Once
 	v22ShapeGradFillCache *rifx.Chunk
 	v22ShapeGradFillErr   error
+
+	v22ShapeGradStrokeOnce  sync.Once
+	v22ShapeGradStrokeCache *rifx.Chunk
+	v22ShapeGradStrokeErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -238,8 +245,9 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindPath:         "ADBE Vector Shape - Group",
 	ShapeKindFill:         "ADBE Vector Graphic - Fill",
 	ShapeKindStroke:       "ADBE Vector Graphic - Stroke",
-	ShapeKindGroup:        "ADBE Vector Group",
-	ShapeKindGradientFill: "ADBE Vector Graphic - G-Fill",
+	ShapeKindGroup:          "ADBE Vector Group",
+	ShapeKindGradientFill:   "ADBE Vector Graphic - G-Fill",
+	ShapeKindGradientStroke: "ADBE Vector Graphic - G-Stroke",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -268,6 +276,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerStrokeNode(node, ctx)
 	case *GradientFillNode:
 		return lowerGradientFillNode(node, ctx)
+	case *GradientStrokeNode:
+		return lowerGradientStrokeNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -706,6 +716,16 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	return body, nil
 }
 
+// lowerGradientStops overwrites the Grad Colors stops XML in a gradient body
+// (G-Fill or G-Stroke) with the runtime gradient. No-op if gradient is nil.
+// Shared by lowerGradientFillNode / lowerGradientStrokeNode.
+func lowerGradientStops(body *rifx.Chunk, gradient *codec.Gradient) *rifx.Chunk {
+	if gradient != nil {
+		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", codec.EncodeGradientXML(gradient))
+	}
+	return body
+}
+
 // lowerGradientFillNode emits a gradient-fill graphic body from the embedded
 // template (templates/v2_2_shape_gradfill_body.bin), overwriting the Grad
 // Colors stops XML with the runtime gradient. The XML length changes per stop
@@ -719,10 +739,36 @@ func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error
 	if err != nil {
 		return nil, err
 	}
-	if n.Gradient() != nil {
-		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", codec.EncodeGradientXML(n.Gradient()))
+	return lowerGradientStops(body, n.Gradient()), nil
+}
+
+// cloneShapeGradStrokeBody returns a clone of the gradient-stroke template
+// (templates/v2_2_shape_gradstroke_body.bin). Like gradfill it carries only
+// `ADBE Vector Grad Colors`; stroke geometry stays at the extracted values.
+func cloneShapeGradStrokeBody() (*rifx.Chunk, error) {
+	v22ShapeGradStrokeOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeGradStrokeBodyBytes))
+		if err != nil {
+			v22ShapeGradStrokeErr = fmt.Errorf("parse v22ShapeGradStrokeBodyBytes: %w", err)
+			return
+		}
+		v22ShapeGradStrokeCache = ch
+	})
+	if v22ShapeGradStrokeErr != nil {
+		return nil, v22ShapeGradStrokeErr
 	}
-	return body, nil
+	return cloneChunk(v22ShapeGradStrokeCache), nil
+}
+
+// lowerGradientStrokeNode emits a gradient-stroke body from the embedded
+// template, overwriting the Grad Colors stops XML. Body logic is identical to
+// lowerGradientFillNode; only the cloned template differs.
+func lowerGradientStrokeNode(n *GradientStrokeNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeGradStrokeBody()
+	if err != nil {
+		return nil, err
+	}
+	return lowerGradientStops(body, n.Gradient()), nil
 }
 
 // overwriteGradientStopsXML finds the tdmn matching streamName inside body,
