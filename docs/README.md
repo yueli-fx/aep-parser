@@ -40,8 +40,8 @@ Project
 | [text.md](text.md) | `TextSource`, `TextStyleRun`, `TextParagraph`, `TextJustification`, `SetText`, `TextEncodedByteLen` |
 | [json.md](json.md) | JSON 视图（`JSON*` 类型 + `ToJSON` / `MarshalJSON` / `WriteJSON`） |
 | [constants.md](constants.md) | 枚举常量速查（`LayerType`, `BlendingMode`, `TrackMatteType`, `AutoOrientType`, `LayerQuality`, `MaskMode`, `InterpType`, `TextJustification`, `BitsPerChannel`） |
-| [../flightdeck/flight-plans/coverage.md](../flightdeck/flight-plans/coverage.md) | **覆盖度概览（精简）** —— 已 ship / 暂搁 / 不可达 / 下一步候选 |
-| [../flightdeck/flight-plans/coverage-detail.md](../flightdeck/flight-plans/coverage-detail.md) | **AE attr 详细交叉表** —— 对照 AE 脚本指南逐项标注 ✅R/W / 🟢R / ❌ 状态 |
+| [../flightdeck/plans/coverage.md](../flightdeck/plans/coverage.md) | **覆盖度概览（精简）** —— 已 ship / 暂搁 / 不可达 / 下一步候选 |
+| [../flightdeck/plans/coverage-detail.md](../flightdeck/plans/coverage-detail.md) | **AE attr 详细交叉表** —— 对照 AE 脚本指南逐项标注 ✅R/W / 🟢R / ❌ 状态 |
 
 ---
 
@@ -118,7 +118,7 @@ proj.WriteJSON(os.Stdout)
 
 ## 全局约束
 
-- **Length-preserving 是硬约束**：除 `Footage.SetPath` 外，所有 `Set*` 改写的字节数必须等于原 chunk 字节数。增删结构（图层 / 关键帧 / 顶点）目前不支持。
+- **Length-preserving 是默认**：`Set*` 原地改写默认不动 chunk 字节数（少数 length-variable 例外：name / comment / expression / 字体名 / 文本内容，由 `WriteAEP` 重算父 LIST size）。**结构性增删另走 V3 原子路径**：图层 / 合成 / marker / keyframe 的增删 · 复制 · 移动经 serializer 重建受影响子树 + warnings-as-failure 回滚 + 双版本 ship-gate（见下表）。属性 / 特效 / mask 顶点的增删仍不支持。
 - **TickRate 是 per-composition 的**：不要假设统一 8000。每个 `Composition.TickRate` 由 cdta 解出，关键帧/marker 时间换算用它。
 - **不安全的并发**：所有类型共享底层 RIFX chunk 字节。多 reader 可以；任何 `Set*` 写入需要调用方自己同步。
 - **`Project.Warnings`**：non-nil 表示遇到非致命解析异常。空切片 = clean parse。
@@ -127,17 +127,20 @@ proj.WriteJSON(os.Stdout)
 
 ## 操作能力 / 边界一览
 
-> 本表是高频能力的速查，**不是穷举清单**。AE 全字段覆盖矩阵以 [../flightdeck/flight-plans/coverage-detail.md](../flightdeck/flight-plans/coverage-detail.md) 为权威 —— 每个 AE 脚本字段都有 ✅R/W / 🟢R / ⚠ / ❌ 标注 + 引用代码位置。
+> 本表是高频能力的速查，**不是穷举清单**。AE 全字段覆盖矩阵以 [../flightdeck/plans/coverage-detail.md](../flightdeck/plans/coverage-detail.md) 为权威 —— 每个 AE 脚本字段都有 ✅R/W / 🟢R / ⚠ / ❌ 标注 + 引用代码位置。
 
 | 类别 | 操作 | 状态 |
 | --- | --- | --- |
 | **结构性** | 增删 keyframe | ✅ `Property.InsertKeyframe(time, value)` / `DeleteKeyframe(i)` — 自动 ldat 重排 + lhd3 count 同步 |
-| **结构性** | 增删图层 / 属性 / 特效 / mask vertex / shape primitive | ❌ 需重排多个父 chunk 字节，破坏 length-preserving 不变量 |
+| **结构性（V3）** | 增删 · 复制 · 移动图层 | ✅ `aep.DeleteLayer(comp,i)` / `NewShapeLayer` / `InsertLayer`（同 / 跨 Project）/ `DuplicateLayer` / `MoveLayer` + `MoveToBeginning/End/After/Before` —— 原子 + 双版本 ship-gate（M8 后为 facade 自由函数） |
+| **结构性（V3）** | 新建 · 复制合成 | ✅ `aep.NewProject` / `NewComposition` / `DuplicateComposition` |
+| **结构性（V3）** | 合成 marker 增删 · RQ item 增删 · property-group 删/移/复制 · 维度分离 | ✅ `aep.AddMarker` / `RemoveMarker` · `AddItem` / `RemoveItem` · `RemovePropertyGroup` / `MovePropertyGroup` / `DuplicatePropertyGroup` · `SetDimensionsSeparated` |
+| **结构性** | 增删 属性 / 特效 / mask 顶点 / shape primitive | ❌ 未实现（破坏多个父 chunk 字节） |
 | **结构性** | `ReadJSON` 反序列化 | ❌ 设计如此 —— JSON 仅作只读快照，所有修改走 `Open` → `Set*` → `WriteAEP` |
 | **结构性** | 修改 Mask 顶点 / Shape 路径顶点 | ❌ 未实现 |
 | **静态值 / 表达式** | 改静态属性值 / 关键帧值 / 时间 / ease / 切线 | ✅ `Property.SetStaticValue` / `Keyframe.SetValue` / `SetTime` / `SetIn/OutInterp` / `SetIn/OutTemporalEase` / `SetIn/OutSpatialTangent` |
 | **静态值 / 表达式** | 表达式写回（创建 / 替换 / 清空 / 启用切换） | ✅ `Property.SetExpression`（length-variable）+ `SetExpressionEnabled` —— [property.md](property.md#propertysetexpression) |
-| **Layer 标志位** | Visible / Solo / Shy / Locked / 3D / Null / Adjust / Guide / MotionBlur / EffectsEnabled / AudioEnabled / FrameBlend / CollapseTransform / MarkersLocked / Sampling / FrameBlendMode | ✅ 共 16 个 `Layer.Set*` flag-bit setter —— [layer.md](layer.md#flag-bit-setters) |
+| **Layer 标志位** | Visible / Solo / Shy / Locked / 3D / Null / Adjust / Guide / MotionBlur / EffectsEnabled / AudioEnabled / FrameBlend / CollapseTransform / MarkersLocked / Sampling / FrameBlendMode | ✅ 共 19 个 `Layer.Set*` flag-bit setter —— [layer.md](layer.md#flag-bit-setters) |
 | **Layer 字节字段** | BlendingMode / TrackMatte / Label / Quality / PreserveTransparency / AutoOrient | ✅ `Layer.SetBlendingMode` / `SetTrackMatte` / `SetLabel` / `SetQuality` / `SetPreserveTransparency` / `SetAutoOrient` |
 | **Layer 字节字段** | TrackMatteLayer (AE 23+，ldta `@0xA0` 显式 source) | ✅ `Layer.TrackMatteLayerID` / `TrackMatteLayer()` / `SetTrackMatteLayer` (id 入参) / `SetTrackMatteSource` (`*Layer` 入参，AE ScriptingAPI parity) / `ClearTrackMatteLayer` |
 | **Layer 字节字段** | LightKind (AE 23+，ldta `@0x88`) | ✅ `Layer.LightKind` / `SetLightKind` —— 取代旧 `LightTypeID`（已 deprecated） |
