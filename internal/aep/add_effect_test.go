@@ -94,6 +94,57 @@ func TestAddEffect_RoundTrip(t *testing.T) {
 	}
 }
 
+// TestAddEffect_AllTemplates_RoundTrip adds every supported effect to a fresh
+// copy of the baseline layer and confirms it splices + survives WriteAEP →
+// re-parse as the last effect in the parade. Cheap structural coverage for the
+// whole template library (AE acceptance for a representative sample is the
+// ship-gate's job).
+func TestAddEffect_AllTemplates_RoundTrip(t *testing.T) {
+	for _, name := range aep.SupportedEffects() {
+		t.Run(name, func(t *testing.T) {
+			proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+			if err != nil {
+				t.Skipf("baseline not present: %v", err)
+			}
+			l := layerWithEffects(proj)
+			if l == nil {
+				t.Fatal("no layer with effects")
+			}
+			before := len(l.Effects)
+			fx, err := aep.AddEffect(l, name)
+			if err != nil {
+				t.Fatalf("AddEffect(%q): %v", name, err)
+			}
+			if fx.MatchName != name {
+				t.Errorf("MatchName = %q, want %q", fx.MatchName, name)
+			}
+			if len(l.Effects) != before+1 {
+				t.Fatalf("Effects = %d, want %d", len(l.Effects), before+1)
+			}
+
+			var buf bytes.Buffer
+			if err := proj.WriteAEP(&buf); err != nil {
+				t.Fatalf("WriteAEP: %v", err)
+			}
+			re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+			if err != nil {
+				t.Fatalf("re-parse: %v", err)
+			}
+			rl := layerWithEffects(re)
+			if rl == nil {
+				t.Fatal("re-parsed: no layer with effects")
+			}
+			names := paradeChildNames(rl)
+			if len(names) != before+1 {
+				t.Fatalf("re-parsed parade len = %d, want %d (%v)", len(names), before+1, names)
+			}
+			if names[len(names)-1] != name {
+				t.Errorf("re-parsed last effect = %q, want %q", names[len(names)-1], name)
+			}
+		})
+	}
+}
+
 func TestAddEffect_Unsupported(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
 	if err != nil {
