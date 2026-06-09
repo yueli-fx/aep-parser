@@ -35,6 +35,7 @@ type (
 	FormatOptions                   = scene.FormatOptions
 	FramesCountType                 = scene.FramesCountType
 	GradientFillNode                = scene.GradientFillNode
+	GradientStrokeNode              = scene.GradientStrokeNode
 	Guide                           = scene.Guide
 	GuideOrientation                = scene.GuideOrientation
 	InterpType                      = scene.InterpType
@@ -348,6 +349,7 @@ const (
 	ShapeKindEllipse                              = scene.ShapeKindEllipse
 	ShapeKindFill                                 = scene.ShapeKindFill
 	ShapeKindGradientFill                         = scene.ShapeKindGradientFill
+	ShapeKindGradientStroke                       = scene.ShapeKindGradientStroke
 	ShapeKindGroup                                = scene.ShapeKindGroup
 	ShapeKindPath                                 = scene.ShapeKindPath
 	ShapeKindRect                                 = scene.ShapeKindRect
@@ -411,6 +413,9 @@ func NewFillNode() *FillNode { return scene.NewFillNode() }
 
 // NewGradientFillNode returns a detached gradient-fill shape node.
 func NewGradientFillNode() *GradientFillNode { return scene.NewGradientFillNode() }
+
+// NewGradientStrokeNode returns a detached gradient-stroke shape node.
+func NewGradientStrokeNode() *GradientStrokeNode { return scene.NewGradientStrokeNode() }
 
 // NewPathNode returns a detached path shape node.
 func NewPathNode() *PathNode { return scene.NewPathNode() }
