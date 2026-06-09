@@ -99,7 +99,8 @@ func SetEllipseNodeDirection(e *EllipseNode, d ShapeDirection)         { e.direc
 func SetFillNodeBlendMode(f *FillNode, m ShapeBlendMode)               { f.blendMode = m }
 func SetFillNodeCompositeOrder(f *FillNode, o ShapeCompositeOrder)     { f.compositeOrder = o }
 func SetFillNodeFillRule(f *FillNode, r FillRule)                      { f.fillRule = r }
-func SetGradientFillNodeGradient(n *GradientFillNode, g *Gradient)     { n.gradient = g }
+func SetGradientFillNodeGradient(n *GradientFillNode, g *Gradient)      { n.gradient = g }
+func SetGradientStrokeNodeGradient(n *GradientStrokeNode, g *Gradient)  { n.gradient = g }
 func SetStrokeNodeLineCap(s *StrokeNode, c StrokeLineCap)              { s.lineCap = c }
 func SetStrokeNodeLineJoin(s *StrokeNode, j StrokeLineJoin)            { s.lineJoin = j }
 func SetStrokeNodeMiterLimit(s *StrokeNode, v float64)                 { s.miterLimit = v }

@@ -21,8 +21,8 @@ const (
 	ShapeKindStroke                            // `ADBE Vector Graphic - Stroke`
 	ShapeKindGroup                             // `ADBE Vector Group` (V2.3+ user-created nested group)
 	ShapeKindGradientFill                      // `ADBE Vector Graphic - G-Fill`
-	// V2.3+ candidates: PolyStar / GradientStroke / Trim / Merge / Repeater /
-	// Transform.
+	ShapeKindGradientStroke                    // `ADBE Vector Graphic - G-Stroke`
+	// V2.3+ candidates: PolyStar / Trim / Merge / Repeater / Transform.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
@@ -415,6 +415,18 @@ func (n *GradientFillNode) Gradient() *Gradient { return n.gradient }
 // SetColorStops replaces the gradient's color stops. Requires ≥ 2 stops; each
 // Offset/Midpoint in [0,1] and each Color component in [0,1].
 func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
+	return setGradientColorStops(n.gradient, stops)
+}
+
+// SetAlphaStops replaces the gradient's alpha (opacity) stops. Requires ≥ 2
+// stops; each Offset/Midpoint/Alpha in [0,1].
+func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
+	return setGradientAlphaStops(n.gradient, stops)
+}
+
+// setGradientColorStops validates (≥2 stops; offset/midpoint/color ∈ [0,1])
+// and replaces g.ColorStops. Shared by GradientFill / GradientStroke.
+func setGradientColorStops(g *codec.Gradient, stops []GradientColorStop) error {
 	if len(stops) < 2 {
 		return fmt.Errorf("SetColorStops: need ≥ 2 stops, got %d", len(stops))
 	}
@@ -431,13 +443,13 @@ func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
 			}
 		}
 	}
-	n.gradient.ColorStops = append([]GradientColorStop(nil), stops...)
+	g.ColorStops = append([]GradientColorStop(nil), stops...)
 	return nil
 }
 
-// SetAlphaStops replaces the gradient's alpha (opacity) stops. Requires ≥ 2
-// stops; each Offset/Midpoint/Alpha in [0,1].
-func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
+// setGradientAlphaStops validates (≥2 stops; offset/midpoint/alpha ∈ [0,1])
+// and replaces g.AlphaStops. Shared by GradientFill / GradientStroke.
+func setGradientAlphaStops(g *codec.Gradient, stops []GradientAlphaStop) error {
 	if len(stops) < 2 {
 		return fmt.Errorf("SetAlphaStops: need ≥ 2 stops, got %d", len(stops))
 	}
@@ -452,7 +464,7 @@ func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
 			return fmt.Errorf("SetAlphaStops: stop %d alpha = %g out of range [0,1]", i, s.Alpha)
 		}
 	}
-	n.gradient.AlphaStops = append([]GradientAlphaStop(nil), stops...)
+	g.AlphaStops = append([]GradientAlphaStop(nil), stops...)
 	return nil
 }
 
@@ -466,6 +478,48 @@ func checkUnit(what string, i int, v float64) error {
 // Properties returns the escape-hatch β view.
 func (n *GradientFillNode) Properties() *PropertyGroup {
 	return &PropertyGroup{Name: "Gradient Fill"}
+}
+
+// GradientStrokeNode — `ADBE Vector Graphic - G-Stroke`. Models the gradient's
+// color + alpha stops only, symmetric to GradientFillNode. Stroke geometry
+// (width / cap / join / dashes / taper / wave) + ramp geometry are NOT modeled
+// (kept at the extracted template's values; deferred).
+type GradientStrokeNode struct {
+	gradient *codec.Gradient
+}
+
+// NewGradientStrokeNode constructs a default 2-stop black→white gradient stroke.
+func NewGradientStrokeNode() *GradientStrokeNode {
+	return &GradientStrokeNode{gradient: defaultGradient()}
+}
+
+func (n *GradientStrokeNode) Kind() ShapeNodeKind { return ShapeKindGradientStroke }
+
+// Gradient returns the live gradient (color + alpha stops).
+func (n *GradientStrokeNode) Gradient() *Gradient { return n.gradient }
+
+// SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).
+func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error {
+	return setGradientColorStops(n.gradient, stops)
+}
+
+// SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).
+func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error {
+	return setGradientAlphaStops(n.gradient, stops)
+}
+
+// Properties returns the escape-hatch β view.
+func (n *GradientStrokeNode) Properties() *PropertyGroup {
+	return &PropertyGroup{Name: "Gradient Stroke"}
+}
+
+// AddGradientStroke appends a default-valued GradientStrokeNode (2-stop
+// black→white gradient) and returns it. Set stops via SetColorStops /
+// SetAlphaStops.
+func (g *VectorGroup) AddGradientStroke() (*GradientStrokeNode, error) {
+	n := NewGradientStrokeNode()
+	g.Children = append(g.Children, n)
+	return n, nil
 }
 
 // StrokeLineCap is the stroke end-cap style (`ADBE Vector Stroke Line Cap`).
