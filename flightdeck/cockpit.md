@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-09 by claude（M8 物理分包 P0-P4 完成并归档；下一步=follow-up trim / 大方向待定向）
-**Active focus**: **V3 M8 物理分包 ✅ 完成（2026-06-09）** — `internal/{rifx,codec,scene,serializer}` + `aep` 薄 facade 落地，DAG 经包级 arch_boundary 守卫 + dag_boundary 强制，全程 byte-identical(183 fixture)。plan 已归档 `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`（含 P4.3 ship-gate 经 byte-identity 等效验收）。**当前无 active 大 plan**；V3 大 arc 其余暂停，下一步见下。
+**Last updated**: 2026-06-09 by claude（M8 分包完成归档 + 收口会话：incidents 审计 + docgen 多包修复；下一步=测试分散）
+**Active focus**: **V3 arc 实质收尾** — M8 物理分包完成（`internal/{rifx,codec,scene,serializer}` + `aep` 薄 facade，已归档 `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`）。**可达字段覆盖 ~99% 已 ship**（M1-M8 框架基本实现，见 `plans/coverage.md` 末）；剩余前沿均 fixture/RE-gated 或架构不可达。**本会话收口**：incidents 审计（0 过期 + 5 路径 refresh，`ba3b40b`）、**docgen 多包修复**（修 stage-1 起静默空类型文档的回归，`1bc4ad4`，恢复 +11.8k 行；教训见 `incidents/docgen-alias-blindspot-false-green.md`）。**当前无 active 大 plan**，下一步见下。
 
 ## 进行中
 
@@ -17,10 +17,9 @@
 
 ## 下一步
 
-**M8 物理分包 arc 全完**（P0-P4，2026-06-09）。plan 已归档 `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`；逐 commit 历程见 git log（`a347e46` serializer 抽出 + `ed4669c` arch 守卫/CLAUDE.md #3）+ 设计 `specs/2026-06-07-v3-m8-physical-split-design.md`。
-
-1. **immediate follow-up（非阻塞，单独 commit）**：serializer 结构性 op 自由函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim 为简短内部注释。
-2. **大方向待用户定向**（当前无 active 大 plan）：① 续 V3 大 arc（`specs/2026-05-22-v3-direction.md`，opaque 子表/M9+）；② backlog 顶：Layr Transform 3D 通道（Orientation/Rotate X·Y/Position_Z，需 3D layer 支持 V2.3）；③ py-aep parity 剩 ValueText（schema-db 依赖，见 `incidents/valuetext-needs-schema-db.md`）。
+1. **测试分散到子包（用户 2026-06-09 批准，待做）**：~114 个黑盒 `aep_test` 集中在 `internal/aep`（源仅 4 facade 文件）。按 Go 惯例分散——纯子系统行为测试 → `internal/serializer`/`internal/scene` 包目录，跨层端到端 → 留 aep facade。**注意/未决**：黑盒测试多为跨层（open→读模型→mutate→写回），归单包分类模糊（架构上跨层端到端本就该留 facade）；含 `aep.`→子包名 机械替换（=上次 string-leak 同类风险，按谨慎流程 + 全验做）。动手前宜先定分类规则。
+2. **immediate follow-up（非阻塞）**：serializer 结构性 op 自由函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim 为简短内部注释。
+3. **V3 剩余前沿（均 fixture/RE-gated，需用户提供 fixture 或新发现才动）**：Layr Transform 3D 通道（需 3D layer 支持，backlog 顶）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建 …）· ValueText（schema-db 依赖）。详 `plans/coverage.md` § 暂搁/不可达。
 
 ## Backlog（单条候选）
 
