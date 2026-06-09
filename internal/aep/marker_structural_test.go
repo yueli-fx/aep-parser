@@ -36,7 +36,7 @@ func TestMarkerRemoveRoundtrip(t *testing.T) {
 
 	// Remove the first marker ("comp marker A", t=1.0). The survivor is the
 	// point marker "second marker" (t=2.5, chapter "chap-X").
-	if err := comp.Markers[0].Remove(); err != nil {
+	if err := aep.RemoveMarker(comp.Markers[0]); err != nil {
 		t.Fatalf("Remove: %v", err)
 	}
 	if len(comp.Markers) != 1 {
@@ -90,7 +90,7 @@ func TestMarkerRemoveAllRoundtrip(t *testing.T) {
 	}
 	// Remove both (always remove index 0 — the slice shrinks under us).
 	for len(comp.Markers) > 0 {
-		if err := comp.Markers[0].Remove(); err != nil {
+		if err := aep.RemoveMarker(comp.Markers[0]); err != nil {
 			t.Fatalf("Remove: %v", err)
 		}
 	}
@@ -125,7 +125,7 @@ func TestMarkerAddRoundtrip(t *testing.T) {
 		t.Fatalf("expected 2 comp markers; got %d", len(comp.Markers))
 	}
 
-	nm, err := comp.AddMarker(4.0)
+	nm, err := aep.AddMarker(comp, 4.0)
 	if err != nil {
 		t.Fatalf("AddMarker: %v", err)
 	}
@@ -183,11 +183,11 @@ func TestMarkerAddIntoEmptyRejects(t *testing.T) {
 	}
 	comp := findRECM(t, proj)
 	for len(comp.Markers) > 0 {
-		if err := comp.Markers[0].Remove(); err != nil {
+		if err := aep.RemoveMarker(comp.Markers[0]); err != nil {
 			t.Fatalf("Remove: %v", err)
 		}
 	}
-	if _, err := comp.AddMarker(1.0); err == nil {
+	if _, err := aep.AddMarker(comp, 1.0); err == nil {
 		t.Error("AddMarker into emptied comp: expected error")
 	}
 }
@@ -196,7 +196,7 @@ func TestMarkerAddIntoEmptyRejects(t *testing.T) {
 // (no list back-ref) refuses Remove rather than panicking.
 func TestMarkerRemoveRejectsStandalone(t *testing.T) {
 	m := &aep.Marker{}
-	if err := m.Remove(); err == nil {
+	if err := aep.RemoveMarker(m); err == nil {
 		t.Error("Remove on standalone marker: expected error")
 	}
 }
@@ -210,10 +210,10 @@ func TestMarkerRemoveTwiceRejects(t *testing.T) {
 	}
 	comp := findRECM(t, proj)
 	m := comp.Markers[0]
-	if err := m.Remove(); err != nil {
+	if err := aep.RemoveMarker(m); err != nil {
 		t.Fatalf("first Remove: %v", err)
 	}
-	if err := m.Remove(); err == nil {
+	if err := aep.RemoveMarker(m); err == nil {
 		t.Error("second Remove on detached marker: expected error")
 	}
 }

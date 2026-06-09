@@ -584,20 +584,6 @@ read-only
 
 ## Methods
 
-### Composition.AddMarker
-
-```go
-func (c *Composition) AddMarker(seconds float64) (*Marker, error)
-```
-
-AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields.
-
-Mechanics (clone-template): to avoid reverse-engineering the canonical defaults of the ldat block's opaque metadata (0x04-0x0F) and the NmHd's reserved/flag bytes, the new marker clones an existing marker's ldat block and NmHd verbatim (opaque preservation, CLAUDE.md #5), then resets the time plus the known semantic NmHd fields (duration @0x08, label @0x10) to zero. The Nmrd gets five empty Utf8 slots, matching AE's always-five layout.
-
-length-variable — the ldat and mrky LISTs grow; WriteAEP recomputes the mrst-chain LIST sizes. Alpha until the AE 2020 + 2025 ship-gate passes.
-
-Restriction: requires the comp to already have ≥1 marker (the clone template). Seeding the entire "Markers" pseudo-layer for an empty comp is a separate slice (needs a canonical seed); AddMarker returns an error there.
-
 ### Composition.LayerByID
 
 ```go

@@ -55,13 +55,6 @@
       "rw": "read-only",
       "summary": "ActiveCamera returns the topmost enabled (Visible == true) camera layer in the comp, or nil when no enabled camera is present. AE uses this layer's transform + camera-options for the comp's render. Multiple cameras may coexist; AE picks the topmost enabled one."
     },
-    "Composition.AddMarker": {
-      "kind": "method",
-      "file": "composition.md",
-      "anchor": "#compositionaddmarker",
-      "signature": "func (c *Composition) AddMarker(seconds float64) (*Marker, error)",
-      "summary": "AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields."
-    },
     "Composition.AdjustmentLayers": {
       "kind": "getter",
       "file": "composition.md",
@@ -3298,13 +3291,6 @@
       "signature": "Label uint8",
       "rw": "read-write",
       "summary": "timeline label color index (0..16); 0 = default. NmHd @0x10."
-    },
-    "Marker.Remove": {
-      "kind": "method",
-      "file": "marker.md",
-      "anchor": "#markerremove",
-      "signature": "func (m *Marker) Remove() error",
-      "summary": "Remove deletes this marker from its owning composition / layer marker set."
     },
     "Marker.SetChapter": {
       "kind": "method",

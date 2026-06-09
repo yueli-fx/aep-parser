@@ -54,10 +54,10 @@ func runMarkerShipGate(t *testing.T, aeExe string) {
 	// "second marker" @ 2.5), then add a new marker at t=4.0 (after the
 	// survivor, so AE's time ordering needs no resort — isolates "does AE
 	// accept the splice" from the sort question).
-	if err := comp.Markers[0].Remove(); err != nil {
+	if err := aep.RemoveMarker(comp.Markers[0]); err != nil {
 		t.Fatalf("Remove: %v", err)
 	}
-	nm, err := comp.AddMarker(4.0)
+	nm, err := aep.AddMarker(comp, 4.0)
 	if err != nil {
 		t.Fatalf("AddMarker: %v", err)
 	}

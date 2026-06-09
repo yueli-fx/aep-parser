@@ -118,18 +118,6 @@ read-only
 
 ## Methods
 
-### Marker.Remove
-
-```go
-func (m *Marker) Remove() error
-```
-
-Remove deletes this marker from its owning composition / layer marker set.
-
-It splices the marker's 16-byte ldat keyframe block, decrements the kfl count, removes the marker's Nmrd from mrky, shifts the trailing markers' ldat offsets down, and drops the marker from the public Markers slice. The receiver is detached afterward — a second Remove (or any Set*) errors.
-
-Errors (project untouched): the marker was built outside the parser, is already detached, or its chunk references are inconsistent.
-
 ### Marker.SetChapter
 
 ```go
