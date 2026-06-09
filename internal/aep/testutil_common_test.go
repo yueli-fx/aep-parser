@@ -1,12 +1,17 @@
 package aep
 
-import "github.com/example/aep-parser/internal/rifx"
+import (
+	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
+)
 
-// White-box accessors for unexported fields.
-// `_test.go` 后缀使这些方法仅在 test build 时编译，不污染 production binary。
-func (p *Project) NextItemIDForTest() uint32 { return p.nextItemID }
-func (p *Project) RootFoldForTest() *rifx.Chunk {
-	pb := p.projectBack()
+// White-box accessors for unexported fields. Free functions (the receivers are
+// scene types post package-split); the call form is `NextItemIDForTest(p)`.
+// `_test.go` 后缀使这些函数仅在 test build 时编译，不污染 production binary。
+func NextItemIDForTest(p *Project) uint32 { return scene.ProjectNextItemID(p) }
+
+func RootFoldForTest(p *Project) *rifx.Chunk {
+	pb := projectBack(p)
 	if pb == nil {
 		return nil
 	}
@@ -14,17 +19,17 @@ func (p *Project) RootFoldForTest() *rifx.Chunk {
 }
 
 // ItemListForTest 暴露 Composition.itemList 给 golden tests 用。
-func (c *Composition) ItemListForTest() *rifx.Chunk {
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil {
+func ItemListForTest(c *Composition) *rifx.Chunk {
+	cb := compositionBack(c)
+	if cb == nil {
 		return nil
 	}
 	return cb.itemList
 }
 
 // RootForTest 暴露 Project.root 给 debug tests 用。
-func (p *Project) RootForTest() *rifx.Chunk {
-	pb := p.projectBack()
+func RootForTest(p *Project) *rifx.Chunk {
+	pb := projectBack(p)
 	if pb == nil {
 		return nil
 	}
@@ -33,8 +38,8 @@ func (p *Project) RootForTest() *rifx.Chunk {
 
 // LdtaForTest 暴露 Layer.ldta 给 DeleteLayer / structural mutation tests 用
 // (验 ldta @0x84 / @0xA0 / @0x6B byte-level writes).
-func (l *Layer) LdtaForTest() *rifx.Chunk {
-	lb := l.layerBack()
+func LdtaForTest(l *Layer) *rifx.Chunk {
+	lb := layerBack(l)
 	if lb == nil {
 		return nil
 	}
@@ -45,12 +50,12 @@ func (l *Layer) LdtaForTest() *rifx.Chunk {
 // chunks for white-box testing. All chunk refs are optional (pass nil to omit).
 func NewTestProperty(matchName string, components int, tdb4, tdsb, tdum, tduM *rifx.Chunk) *Property {
 	p := &Property{MatchName: matchName, Name: matchName, Components: components}
-	p.back = &propertyBackrefs{
+	scene.SetPropertyBack(p, &propertyBackrefs{
 		tdb4: tdb4,
 		tdsb: tdsb,
 		tdum: tdum,
 		tduM: tduM,
-	}
+	})
 	return p
 }
 

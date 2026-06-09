@@ -218,11 +218,11 @@ func TestNewComposition_EmptyLayrListPreserved(t *testing.T) {
 }
 
 // runAEShipGate 是 AE ship gate 共享 helper：
-//   1. NewProject(target) + 2 个 NewComposition + WriteAEP → tempDir/v2_1.aep
-//   2. 写 args.json 到固定路径
-//   3. AfterFX -r verify_v2_1.jsx
-//   4. 等 .done with timeout
-//   5. 读结果 assert PASS
+//  1. NewProject(target) + 2 个 NewComposition + WriteAEP → tempDir/v2_1.aep
+//  2. 写 args.json 到固定路径
+//  3. AfterFX -r verify_v2_1.jsx
+//  4. 等 .done with timeout
+//  5. 读结果 assert PASS
 //
 // 由 AE_SHIP_GATE env var gate（CI 无 AE 自动跳过）。
 func runAEShipGate(t *testing.T, target aep.AETarget, aeExe string) {

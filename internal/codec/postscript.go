@@ -21,12 +21,12 @@ const (
 // PsValue is a node in the parsed btdk tree. Compact untagged-union;
 // only the field matching Kind is meaningful.
 type PsValue struct {
-	Kind     int
-	Num      float64
-	Bv       bool
-	Str      string // tName: bare name; tString: decoded text (UTF-8 if FE FF prefix, else raw bytes as Go string)
-	Arr      []*PsValue
-	Dict     []PsDictEntry
+	Kind int
+	Num  float64
+	Bv   bool
+	Str  string // tName: bare name; tString: decoded text (UTF-8 if FE FF prefix, else raw bytes as Go string)
+	Arr  []*PsValue
+	Dict []PsDictEntry
 	// SrcStart/SrcEnd locate the value's bytes inside the btdk body.
 	// Tracked for every kind (scalars span their literal; dicts and
 	// arrays span from `<<` / `[` through the matching close). Used by
@@ -105,6 +105,35 @@ func PsPathStr(v *PsValue, path string) string {
 		return ""
 	}
 	return w.Str
+}
+
+// ExtractBtdkBody walks the raw btds payload bytes and returns the inner
+// btdk LIST's body (PostScript text) plus that body's starting offset inside
+// raw (so callers can translate body-local offsets back to TextSourceRaw
+// offsets). The payload begins with a "LIST tdbs" sub-chunk holding the
+// property descriptor; the btdk LIST follows. Both follow the regular RIFX
+// LIST header layout (LIST + uint32 BE size + 4-byte formType + payload).
+func ExtractBtdkBody(raw []byte) ([]byte, int, error) {
+	for off := 0; off+12 <= len(raw); {
+		if string(raw[off:off+4]) != "LIST" {
+			return nil, 0, fmt.Errorf("expected LIST at %#x, got %q", off, raw[off:off+4])
+		}
+		size := binary.BigEndian.Uint32(raw[off+4 : off+8])
+		if int(size) < 4 || off+8+int(size)-4 > len(raw) {
+			return nil, 0, fmt.Errorf("LIST at %#x has bad size %d", off, size)
+		}
+		bodyStart := off + 12
+		bodyEnd := off + 8 + int(size)
+		if string(raw[off+8:off+12]) == "btdk" {
+			return raw[bodyStart:bodyEnd], bodyStart, nil
+		}
+		off = bodyEnd
+		// LIST chunks have implicit pad to even length.
+		if size%2 != 0 {
+			off++
+		}
+	}
+	return nil, 0, fmt.Errorf("no btdk LIST in btds payload")
 }
 
 // ParsePSDict parses a top-level btdk body as an implicit dict

@@ -4,7 +4,9 @@ import (
 	"encoding/binary"
 	"math"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parse_guide.go — decode composition ruler guides from the comp's Item-level
@@ -17,8 +19,6 @@ import (
 // The layer-side LIST:Gide (a Layr child carrying an empty gdta) uses the same
 // formType but is nested under DLay/SLay, so FindFirstList on the Item LIST only
 // sees the comp-level guides container.
-
-const guideItemSize = 16
 
 // parseGuides reads the Item-level guides for a comp. item is the comp's owning
 // Item LIST chunk. Returns nil when the comp has no guides.
@@ -35,18 +35,19 @@ func parseGuides(item *rifx.Chunk) []*Guide {
 	if ldat == nil {
 		return nil
 	}
-	n := len(ldat.Data) / guideItemSize
+	n := len(ldat.Data) / codec.GuideItemSize
 	if n == 0 {
 		return nil
 	}
 	guides := make([]*Guide, 0, n)
 	for i := 0; i < n; i++ {
-		block := append([]byte(nil), ldat.Data[i*guideItemSize:(i+1)*guideItemSize]...)
-		guides = append(guides, &Guide{
+		block := append([]byte(nil), ldat.Data[i*codec.GuideItemSize:(i+1)*codec.GuideItemSize]...)
+		g := &Guide{
 			Orientation: GuideOrientation(binary.BigEndian.Uint32(block[0:4])),
 			Position:    math.Float64frombits(binary.BigEndian.Uint64(block[8:16])),
-			block:       block,
-		})
+		}
+		scene.SetGuideBlock(g, block)
+		guides = append(guides, g)
 	}
 	return guides
 }

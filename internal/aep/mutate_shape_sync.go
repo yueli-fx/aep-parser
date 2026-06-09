@@ -11,6 +11,8 @@ package aep
 
 import (
 	"fmt"
+
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // syncShapeLayerChunks re-lowers every shape layer that has a runtime
@@ -34,19 +36,19 @@ func syncCompositionShapeLayers(p *Project, c *Composition) error {
 		if l.Type != LayerTypeShape {
 			continue
 		}
-		lb := l.layerBack()
-		if l.shapeRootGroup == nil || lb == nil || lb.layrList == nil {
+		lb := layerBack(l)
+		if scene.LayerShapeRootGroup(l) == nil || lb == nil || lb.layrList == nil {
 			continue
 		}
-		if !l.shapeDirty {
+		if !scene.LayerShapeDirty(l) {
 			continue // parser-loaded, not user-mutated; on-disk chunks are authoritative
 		}
 		s := WrapShapeLayer(l)
 		ctx := &lowerCtx{
 			tickRate:     c.TickRate,
 			compDuration: c.Duration,
-			capabilities: Capabilities(p.target),
-			nextLayerID:  p.allocItemID,
+			capabilities: Capabilities(scene.ProjectTarget(p)),
+			nextLayerID:  func() uint32 { return allocItemID(p) },
 		}
 		fresh, err := lowerShapeLayer(s, ctx)
 		if err != nil {

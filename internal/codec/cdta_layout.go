@@ -7,6 +7,10 @@ package codec
 //
 // cdta total size is 204 bytes (0xCC); layout is stable AE 2020 → AE 2025
 // (bit-for-bit verified).
+// GuideItemSize is the on-disk byte width of one composition GuideItem inside
+// the Gide ldat (orientation u32 BE @0x00 + position f64 BE @0x08).
+const GuideItemSize = 16
+
 const (
 	CdtaResolutionFactorX  = 0x00 // uint16 BE
 	CdtaResolutionFactorY  = 0x02 // uint16 BE

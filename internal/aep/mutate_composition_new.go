@@ -14,6 +14,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // Builder uses ONE comp template — AE 2020's. Higher AE versions open AE 2020
@@ -216,8 +217,8 @@ func loadCompTemplate(raw []byte) *compTemplate {
 		panic("aep: dummy-comp template missing comp (build bug)")
 	}
 	comp := p.Compositions[0]
-	compCb, ok := comp.back.(*compositionBackrefs)
-	if !ok || compCb == nil || compCb.itemList == nil {
+	compCb := compositionBack(comp)
+	if compCb == nil || compCb.itemList == nil {
 		panic("aep: parseComposition didn't wire itemList (build bug)")
 	}
 	t := &compTemplate{}
@@ -233,7 +234,7 @@ func loadCompTemplate(raw []byte) *compTemplate {
 	// fvdv / fiop / ftts / foac / fiac / fipc / fifl]. AE expects these to
 	// follow every Item; missing them → AE 25 reports "文件数据丢失".
 	var foldList *rifx.Chunk
-	for _, ch := range p.projectBack().root.Children {
+	for _, ch := range projectBack(p).root.Children {
 		if ch.IsList() && ch.FormType == rifx.IDFold {
 			foldList = ch
 			break
@@ -362,7 +363,7 @@ func isDatsList(c *rifx.Chunk) bool {
 //
 //	name        — non-empty string
 //	width/height — > 0 (uint16; AE max 30000)
-//	frameRate   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
+//	FrameRateHz   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
 //	duration    — > 0 (seconds; converted to whole frames via fps internally)
 //
 // Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16).
@@ -384,22 +385,22 @@ func NewComposition(
 	p *Project,
 	name string,
 	width, height uint16,
-	frameRate, duration float64,
+	FrameRateHz, duration float64,
 ) (*Composition, error) {
 	// 1. Validate
-	if err := validateNewCompositionInputs(name, width, height, frameRate, duration); err != nil {
+	if err := validateNewCompositionInputs(name, width, height, FrameRateHz, duration); err != nil {
 		return nil, err
 	}
 
 	// 2. Allocate ID (monotonic; never reuses)
-	id := p.allocItemID()
+	id := allocItemID(p)
 
 	// 3. Build chunks
-	cdtaBytes := buildCompCdta(width, height, frameRate, duration)
-	itemList := buildCompItem(p.target, id, name, cdtaBytes)
+	cdtaBytes := buildCompCdta(width, height, FrameRateHz, duration)
+	itemList := buildCompItem(scene.ProjectTarget(p), id, name, cdtaBytes)
 
 	// 4. Atomic mutation prep
-	pb := p.projectBack()
+	pb := projectBack(p)
 	if pb == nil || pb.rootFold == nil {
 		return nil, fmt.Errorf("internal: project missing root Fold (template malformed?)")
 	}
@@ -430,7 +431,7 @@ func NewComposition(
 	}
 
 	// 7. Wire back-pointer + register in typed index
-	comp.proj = p
+	scene.SetCompositionProj(comp, p)
 	// comp.itemList 已由 parseComposition 设置
 	p.Compositions = append(p.Compositions, comp)
 

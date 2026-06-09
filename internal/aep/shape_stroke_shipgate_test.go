@@ -61,7 +61,7 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	// Miter Limit read empirically: AE may normalize it to 4 on save when
 	// Line Join != Miter (RE'd hidden-property behavior).
 	lineCap := aep.StrokeLineCapProjecting // 3
-	lineJoin := aep.StrokeLineJoinRound     // 2
+	lineJoin := aep.StrokeLineJoinRound    // 2
 	miterLimit := 12.0
 	_ = stroke.SetLineCap(lineCap)
 	_ = stroke.SetLineJoin(lineJoin)

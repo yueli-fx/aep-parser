@@ -292,14 +292,14 @@ func lowerRectNode(r *RectNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// (bpk-104, value@0x38; identical layout to Ellipse Position). Roundness —
 	// 1D non-spatial (bpk-48). Position/Roundness persisted via the richer rect
 	// body template (Size/Position/Roundness all cdat slots).
-	if err := lowerShapeVec2(body, "ADBE Vector Rect Size", r.size, ctx, valueLayout{dim: 2, headerByte: 0x00, spatial: false}); err != nil {
+	if err := lowerShapeVec2(body, "ADBE Vector Rect Size", r.Size(), ctx, valueLayout{dim: 2, headerByte: 0x00, spatial: false}); err != nil {
 		return nil, err
 	}
-	if err := lowerShapeVec2(body, "ADBE Vector Rect Position", r.position, ctx, valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
+	if err := lowerShapeVec2(body, "ADBE Vector Rect Position", r.Position(), ctx, valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
 		return nil, err
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(r.direction)))
-	if err := lowerShapeScalar(body, "ADBE Vector Rect Roundness", r.roundness, ctx); err != nil {
+	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(r.Direction())))
+	if err := lowerShapeScalar(body, "ADBE Vector Rect Roundness", r.Roundness(), ctx); err != nil {
 		return nil, err
 	}
 	return body, nil
@@ -420,24 +420,24 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if e.size.Mode() == codec.StreamModeAnimated && e.size.HasKeyframes() {
-		if err := injectAnimatedVec2(body, "ADBE Vector Ellipse Size", e.size.Keyframes(), ctx); err != nil {
+	if e.Size().Mode() == codec.StreamModeAnimated && e.Size().HasKeyframes() {
+		if err := injectAnimatedVec2(body, "ADBE Vector Ellipse Size", e.Size().Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		sv, _ := e.size.StaticValue()
+		sv, _ := e.Size().StaticValue()
 		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Size", encodeF64sBE(sv[0], sv[1]))
 	}
-	if e.position.Mode() == codec.StreamModeAnimated && e.position.HasKeyframes() {
-		if err := injectAnimatedVec2L(body, "ADBE Vector Ellipse Position", e.position.Keyframes(), ctx,
+	if e.Position().Mode() == codec.StreamModeAnimated && e.Position().HasKeyframes() {
+		if err := injectAnimatedVec2L(body, "ADBE Vector Ellipse Position", e.Position().Keyframes(), ctx,
 			valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
 			return nil, err
 		}
 	} else {
-		pv, _ := e.position.StaticValue()
+		pv, _ := e.Position().StaticValue()
 		overwriteShapeStreamCdat(body, "ADBE Vector Ellipse Position", encodeF64sBE(pv[0], pv[1]))
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(e.direction)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Shape Direction", encodeF64sBE(float64(e.Direction())))
 	return body, nil
 }
 
@@ -457,15 +457,15 @@ func lowerPathNode(p *PathNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if p.path.Mode() == codec.StreamModeAnimated && len(p.path.Keyframes()) >= 2 {
-		if err := spliceAnimatedPath(body, p.path.Keyframes(), ctx); err != nil {
+	if p.Path().Mode() == codec.StreamModeAnimated && len(p.Path().Keyframes()) >= 2 {
+		if err := spliceAnimatedPath(body, p.Path().Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 		return body, nil
 	}
-	bp, _ := p.path.StaticValue()
-	if p.path.Mode() == codec.StreamModeAnimated && len(p.path.Keyframes()) > 0 {
-		bp = p.path.Keyframes()[0].Value
+	bp, _ := p.Path().StaticValue()
+	if p.Path().Mode() == codec.StreamModeAnimated && len(p.Path().Keyframes()) > 0 {
+		bp = p.Path().Keyframes()[0].Value
 	}
 	if err := splicePathGeometry(body, bp); err != nil {
 		return nil, err
@@ -686,23 +686,23 @@ func lowerFillNode(f *FillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err != nil {
 		return nil, err
 	}
-	if f.color.Mode() == codec.StreamModeAnimated && f.color.HasKeyframes() {
-		if err := injectAnimatedColor(body, "ADBE Vector Fill Color", f.color.Keyframes(), ctx); err != nil {
+	if f.Color().Mode() == codec.StreamModeAnimated && f.Color().HasKeyframes() {
+		if err := injectAnimatedColor(body, "ADBE Vector Fill Color", f.Color().Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		cv, _ := f.color.StaticValue()
+		cv, _ := f.Color().StaticValue()
 		overwriteShapeStreamCdat(body, "ADBE Vector Fill Color", encodeShapeColorBE(cv))
 	}
 	// Opacity (raw %) — 1D non-spatial (bpk-48, value@0x08). The richer fill
 	// body template carries an Opacity cdat slot (default 100 was elided), so
 	// static/animated Opacity persists.
-	if err := lowerShapeScalar(body, "ADBE Vector Fill Opacity", f.opacity, ctx); err != nil {
+	if err := lowerShapeScalar(body, "ADBE Vector Fill Opacity", f.Opacity(), ctx); err != nil {
 		return nil, err
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(f.blendMode)))
-	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(f.compositeOrder)))
-	overwriteShapeStreamCdat(body, "ADBE Vector Fill Rule", encodeF64sBE(float64(f.fillRule)))
+	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(f.BlendMode())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(f.CompositeOrder())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Fill Rule", encodeF64sBE(float64(f.FillRule())))
 	return body, nil
 }
 
@@ -719,8 +719,8 @@ func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error
 	if err != nil {
 		return nil, err
 	}
-	if n.gradient != nil {
-		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", codec.EncodeGradientXML(n.gradient))
+	if n.Gradient() != nil {
+		overwriteGradientStopsXML(body, "ADBE Vector Grad Colors", codec.EncodeGradientXML(n.Gradient()))
 	}
 	return body, nil
 }
@@ -771,19 +771,19 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// Dashes enabled → swap to the dashed template (carries Dash 1 / Gap 1
 	// slots); else the solid template (Dashes group is an empty placeholder).
 	clone := cloneShapeStrokeBody
-	if s.dashes != nil && s.dashes.enabled {
+	if s.Dashes() != nil && s.Dashes().Enabled() {
 		clone = cloneShapeStrokeDashedBody
 	}
 	body, err := clone()
 	if err != nil {
 		return nil, err
 	}
-	if s.color.Mode() == codec.StreamModeAnimated && s.color.HasKeyframes() {
-		if err := injectAnimatedColor(body, "ADBE Vector Stroke Color", s.color.Keyframes(), ctx); err != nil {
+	if s.Color().Mode() == codec.StreamModeAnimated && s.Color().HasKeyframes() {
+		if err := injectAnimatedColor(body, "ADBE Vector Stroke Color", s.Color().Keyframes(), ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		cv, _ := s.color.StaticValue()
+		cv, _ := s.Color().StaticValue()
 		overwriteShapeStreamCdat(body, "ADBE Vector Stroke Color", encodeShapeColorBE(cv))
 	}
 
@@ -791,20 +791,20 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// value@0x08, no normalization; RE'd from v2_2_stroke_kf_re.aep). The stroke
 	// body template already carries both cdat slots, so animated streams flip in
 	// place (previously collapsed to the first keyframe value).
-	if err := lowerShapeScalar(body, "ADBE Vector Stroke Opacity", s.opacity, ctx); err != nil {
+	if err := lowerShapeScalar(body, "ADBE Vector Stroke Opacity", s.Opacity(), ctx); err != nil {
 		return nil, err
 	}
-	if err := lowerShapeScalar(body, "ADBE Vector Stroke Width", s.width, ctx); err != nil {
+	if err := lowerShapeScalar(body, "ADBE Vector Stroke Width", s.Width(), ctx); err != nil {
 		return nil, err
 	}
-	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Cap", encodeF64sBE(float64(s.lineCap)))
-	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Join", encodeF64sBE(float64(s.lineJoin)))
-	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(s.miterLimit))
-	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(s.blendMode)))
-	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(s.compositeOrder)))
-	lowerStrokeTaper(body, s.taper)
-	lowerStrokeWave(body, s.wave)
-	lowerStrokeDashes(body, s.dashes)
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Cap", encodeF64sBE(float64(s.LineCap())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Join", encodeF64sBE(float64(s.LineJoin())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(s.MiterLimit()))
+	overwriteShapeStreamCdat(body, "ADBE Vector Blend Mode", encodeF64sBE(float64(s.BlendMode())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Composite Order", encodeF64sBE(float64(s.CompositeOrder())))
+	lowerStrokeTaper(body, s.Taper())
+	lowerStrokeWave(body, s.Wave())
+	lowerStrokeDashes(body, s.Dashes())
 	return body, nil
 }
 
@@ -813,15 +813,15 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // template was cloned and has no Dash/Gap slots to overwrite). Offset is not
 // modeled (AE keeps it hidden / script-ungettable — no template slot exists).
 func lowerStrokeDashes(strokeBody *rifx.Chunk, d *StrokeDashes) {
-	if d == nil || !d.enabled {
+	if d == nil || !d.Enabled() {
 		return
 	}
 	g := findGroupBody(strokeBody, "ADBE Vector Stroke Dashes")
 	if g == nil {
 		return
 	}
-	overwriteShapeStreamCdat(g, "ADBE Vector Stroke Dash 1", encodeF64sBE(d.dash))
-	overwriteShapeStreamCdat(g, "ADBE Vector Stroke Gap 1", encodeF64sBE(d.gap))
+	overwriteShapeStreamCdat(g, "ADBE Vector Stroke Dash 1", encodeF64sBE(d.Dash()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Stroke Gap 1", encodeF64sBE(d.Gap()))
 }
 
 // lowerStrokeTaper overwrites the Taper group's %-mode scalar cdats inside the
@@ -835,12 +835,12 @@ func lowerStrokeTaper(strokeBody *rifx.Chunk, t *StrokeTaper) {
 	if g == nil || t == nil {
 		return
 	}
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Length", encodeF64sBE(t.startLength))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Length", encodeF64sBE(t.endLength))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Width", encodeF64sBE(t.startWidth))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Width", encodeF64sBE(t.endWidth))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Ease", encodeF64sBE(t.startEase))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Ease", encodeF64sBE(t.endEase))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Length", encodeF64sBE(t.StartLength()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Length", encodeF64sBE(t.EndLength()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Width", encodeF64sBE(t.StartWidth()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Width", encodeF64sBE(t.EndWidth()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Start Ease", encodeF64sBE(t.StartEase()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper End Ease", encodeF64sBE(t.EndEase()))
 }
 
 // lowerStrokeWave overwrites the Wave group's Wavelength-mode scalar cdats
@@ -851,9 +851,9 @@ func lowerStrokeWave(strokeBody *rifx.Chunk, w *StrokeWave) {
 	if g == nil || w == nil {
 		return
 	}
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wave Amount", encodeF64sBE(w.amount))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wavelength", encodeF64sBE(w.wavelength))
-	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wave Phase", encodeF64sBE(w.phase))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wave Amount", encodeF64sBE(w.Amount()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wavelength", encodeF64sBE(w.Wavelength()))
+	overwriteShapeStreamCdat(g, "ADBE Vector Taper Wave Phase", encodeF64sBE(w.Phase()))
 }
 
 // findGroupBody returns the LIST(tdgp) group body following the tdmn matching

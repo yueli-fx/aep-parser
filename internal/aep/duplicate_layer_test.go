@@ -160,8 +160,8 @@ func TestDuplicateLayer_HappyPath_Middle(t *testing.T) {
 	srcID := srcL2.ID
 	srcSourceID := srcL2.SourceID
 	srcParentID := srcL2.ParentID
-	preChildCount := len(c.ItemListForTest().Children)
-	preNextItemID := proj.NextItemIDForTest()
+	preChildCount := len(aep.ItemListForTest(c).Children)
+	preNextItemID := aep.NextItemIDForTest(proj)
 
 	clone, err := aep.DuplicateLayer(c, 1, "L2_clone")
 	if err != nil {
@@ -201,14 +201,14 @@ func TestDuplicateLayer_HappyPath_Middle(t *testing.T) {
 	}
 
 	// itemList growth = block size (16 for AE-saved baseline per F5).
-	postChildCount := len(c.ItemListForTest().Children)
+	postChildCount := len(aep.ItemListForTest(c).Children)
 	delta := postChildCount - preChildCount
 	if delta != 16 {
 		t.Errorf("itemList children delta: got %d, want 16 (AE-saved block per F5)", delta)
 	}
 
 	// proj.nextItemID bumped.
-	postNextItemID := proj.NextItemIDForTest()
+	postNextItemID := aep.NextItemIDForTest(proj)
 	if postNextItemID != preNextItemID+1 {
 		t.Errorf("proj.nextItemID: got %d, want %d (pre+1)", postNextItemID, preNextItemID+1)
 	}
@@ -224,17 +224,17 @@ func TestDuplicateLayer_FreshDataSlices(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	src := c.Layers[1]
-	srcLdtaBefore := append([]byte(nil), src.LdtaForTest().Data...)
+	srcLdtaBefore := append([]byte(nil), aep.LdtaForTest(src).Data...)
 
 	clone, err := aep.DuplicateLayer(c, 1, "Clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
-	cloneLdta := clone.LdtaForTest()
+	cloneLdta := aep.LdtaForTest(clone)
 	if cloneLdta == nil {
 		t.Fatal("clone has no ldta backref")
 	}
-	if &cloneLdta.Data[0] == &src.LdtaForTest().Data[0] {
+	if &cloneLdta.Data[0] == &aep.LdtaForTest(src).Data[0] {
 		t.Fatal("clone ldta shares Data slice header with source — must be fresh allocation")
 	}
 
@@ -242,7 +242,7 @@ func TestDuplicateLayer_FreshDataSlices(t *testing.T) {
 	for i := 4; i < len(cloneLdta.Data); i++ {
 		cloneLdta.Data[i] ^= 0xFF
 	}
-	srcLdtaAfter := src.LdtaForTest().Data
+	srcLdtaAfter := aep.LdtaForTest(src).Data
 	if !bytes.Equal(srcLdtaBefore, srcLdtaAfter) {
 		t.Fatal("source ldta bytes changed after mutating clone — Data slice sharing detected")
 	}
@@ -300,13 +300,13 @@ func TestDuplicateLayer_LdtaBodyVerbatim(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	src := c.Layers[1]
-	srcLdtaBytes := append([]byte(nil), src.LdtaForTest().Data...)
+	srcLdtaBytes := append([]byte(nil), aep.LdtaForTest(src).Data...)
 
 	clone, err := aep.DuplicateLayer(c, 1, "Clone")
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
-	cloneLdtaBytes := clone.LdtaForTest().Data
+	cloneLdtaBytes := aep.LdtaForTest(clone).Data
 	if len(cloneLdtaBytes) != len(srcLdtaBytes) {
 		t.Fatalf("ldta length differs: clone=%d, src=%d", len(cloneLdtaBytes), len(srcLdtaBytes))
 	}
@@ -352,8 +352,8 @@ func TestDuplicateLayer_StructuralEquivalence_Solo(t *testing.T) {
 		t.Errorf("layer count: Go=%d, AE-solo=%d", len(cb.Layers), len(cs.Layers))
 	}
 
-	goChildren := cb.ItemListForTest().Children
-	aeChildren := cs.ItemListForTest().Children
+	goChildren := aep.ItemListForTest(cb).Children
+	aeChildren := aep.ItemListForTest(cs).Children
 
 	if len(goChildren) != len(aeChildren) {
 		t.Fatalf("itemList children count: Go=%d, AE-solo=%d (F5 says AE post-dup = baseline+16)", len(goChildren), len(aeChildren))
@@ -410,8 +410,8 @@ func TestDuplicateLayer_ExplicitMatte_HappyPath(t *testing.T) {
 	srcMode := src.TrackMatte
 	srcMatteID := src.TrackMatteLayerID
 	preLayerCount := len(c.Layers)
-	preChildCount := len(c.ItemListForTest().Children)
-	preNextItemID := proj.NextItemIDForTest()
+	preChildCount := len(aep.ItemListForTest(c).Children)
+	preNextItemID := aep.NextItemIDForTest(proj)
 
 	clone, err := aep.DuplicateLayer(c, idx, "mt_alpha_clone")
 	if err != nil {
@@ -445,7 +445,7 @@ func TestDuplicateLayer_ExplicitMatte_HappyPath(t *testing.T) {
 		t.Errorf("clone.TrackMatteLayerID: got %d, want %d (verbatim from source)", clone.TrackMatteLayerID, srcMatteID)
 	}
 	// itemList grew by per-layer block size (16 for AE-saved layer).
-	delta := len(c.ItemListForTest().Children) - preChildCount
+	delta := len(aep.ItemListForTest(c).Children) - preChildCount
 	if delta != 16 {
 		t.Errorf("itemList children delta: got %d, want 16", delta)
 	}
@@ -467,7 +467,7 @@ func TestDuplicateLayer_ExplicitMatte_VerbatimBytes(t *testing.T) {
 	if idx < 0 {
 		t.Fatal("can't locate mt_luma_to_solidB in c.Layers")
 	}
-	srcLdtaBytes := append([]byte(nil), src.LdtaForTest().Data...)
+	srcLdtaBytes := append([]byte(nil), aep.LdtaForTest(src).Data...)
 	if len(srcLdtaBytes) < 0xA4 {
 		t.Fatalf("source ldta too short for AE 23+ matte slot: %d bytes", len(srcLdtaBytes))
 	}
@@ -476,7 +476,7 @@ func TestDuplicateLayer_ExplicitMatte_VerbatimBytes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DuplicateLayer: %v", err)
 	}
-	cloneLdtaBytes := clone.LdtaForTest().Data
+	cloneLdtaBytes := aep.LdtaForTest(clone).Data
 	if len(cloneLdtaBytes) != len(srcLdtaBytes) {
 		t.Fatalf("ldta length mismatch: clone=%d src=%d", len(cloneLdtaBytes), len(srcLdtaBytes))
 	}

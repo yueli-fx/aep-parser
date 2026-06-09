@@ -13,8 +13,9 @@ type FrameRateEncoding struct {
 
 // ntscCanonical: 容差 < ntscTolerance 内的用户 fps 都映射到这些 canonical 值。
 // Frac 值实证来源:
-//   29.97 / 59.94 来自 test_data/re_tickrate.aep RE_fps_29_97 / RE_fps_59_94 cdta @0x9E
-//   23.976 数学计算 (24000/1001 - 23) * 65536 ≈ 63962 = 0xF9DA (无 fixture 实证但容差内安全)
+//
+//	29.97 / 59.94 来自 test_data/re_tickrate.aep RE_fps_29_97 / RE_fps_59_94 cdta @0x9E
+//	23.976 数学计算 (24000/1001 - 23) * 65536 ≈ 63962 = 0xF9DA (无 fixture 实证但容差内安全)
 const ntscTolerance = 1e-3
 
 var ntscCanonical = map[float64]FrameRateEncoding{

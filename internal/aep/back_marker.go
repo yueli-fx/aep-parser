@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // markerBackrefs holds the per-marker rifx.Chunk references that power a
@@ -33,6 +34,32 @@ type markerBackrefs struct {
 }
 
 var _ MarkerWriter = (*markerBackrefs)(nil)
+
+func (b *markerBackrefs) CompTickRate() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.tickRate
+}
+
+// markerBack returns the concrete back-refs behind a Marker's writer interface
+// for serializer-stage raw chunk access. Returns nil when built outside the
+// parser. Free function (the receiver is a scene type post package-split).
+func markerBack(m *Marker) *markerBackrefs {
+	if mb, ok := scene.MarkerBack(m).(*markerBackrefs); ok {
+		return mb
+	}
+	return nil
+}
+
+// markerSet returns the concrete owning marker-set container behind a Marker's
+// MarkerSetRef. Returns nil when built outside the parser.
+func markerSet(m *Marker) *markerList {
+	if ml, ok := scene.MarkerSetList(m).(*markerList); ok {
+		return ml
+	}
+	return nil
+}
 
 func (b *markerBackrefs) SetTime(seconds float64) error {
 	if b.ldat == nil {
@@ -137,3 +164,7 @@ type markerList struct {
 	mrky  *rifx.Chunk // Nmrd container (nil when the set has no mrky branch)
 	owner *[]*Marker  // the public Composition.Markers / Layer.Markers field
 }
+
+var _ scene.MarkerSetRef = (*markerList)(nil)
+
+func (b *markerList) IsMarkerSetRef() {}

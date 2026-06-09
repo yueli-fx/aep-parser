@@ -73,7 +73,7 @@ func TestMoveLayer_NoOpSameIndex(t *testing.T) {
 	}
 	c := proj.Compositions[0]
 	pre := layerNames(c)
-	preChildCount := len(c.ItemListForTest().Children)
+	preChildCount := len(aep.ItemListForTest(c).Children)
 	if err := aep.MoveLayer(c, 1, 1); err != nil {
 		t.Fatalf("MoveLayer(1, 1): %v", err)
 	}
@@ -81,7 +81,7 @@ func TestMoveLayer_NoOpSameIndex(t *testing.T) {
 	if !equalStrings(pre, post) {
 		t.Errorf("no-op changed layer order: pre=%v post=%v", pre, post)
 	}
-	if got := len(c.ItemListForTest().Children); got != preChildCount {
+	if got := len(aep.ItemListForTest(c).Children); got != preChildCount {
 		t.Errorf("no-op changed itemList children count: pre=%d post=%d", preChildCount, got)
 	}
 }
@@ -92,7 +92,7 @@ func TestMoveLayer_HappyPath_FirstToLast(t *testing.T) {
 		return
 	}
 	c := proj.Compositions[0]
-	preChildCount := len(c.ItemListForTest().Children)
+	preChildCount := len(aep.ItemListForTest(c).Children)
 	pre := layerNames(c)
 	if len(pre) != 3 {
 		t.Fatalf("baseline must have 3 layers, got %d", len(pre))
@@ -107,7 +107,7 @@ func TestMoveLayer_HappyPath_FirstToLast(t *testing.T) {
 	if !equalStrings(got, want) {
 		t.Errorf("layer order: got %v, want %v", got, want)
 	}
-	if postCount := len(c.ItemListForTest().Children); postCount != preChildCount {
+	if postCount := len(aep.ItemListForTest(c).Children); postCount != preChildCount {
 		t.Errorf("itemList children count changed: pre=%d post=%d (move should preserve)", preChildCount, postCount)
 	}
 	for i, l := range c.Layers {
@@ -123,7 +123,7 @@ func TestMoveLayer_HappyPath_LastToFirst(t *testing.T) {
 		return
 	}
 	c := proj.Compositions[0]
-	preChildCount := len(c.ItemListForTest().Children)
+	preChildCount := len(aep.ItemListForTest(c).Children)
 	pre := layerNames(c)
 
 	if err := aep.MoveLayer(c, 2, 0); err != nil {
@@ -135,7 +135,7 @@ func TestMoveLayer_HappyPath_LastToFirst(t *testing.T) {
 	if !equalStrings(got, want) {
 		t.Errorf("layer order: got %v, want %v", got, want)
 	}
-	if postCount := len(c.ItemListForTest().Children); postCount != preChildCount {
+	if postCount := len(aep.ItemListForTest(c).Children); postCount != preChildCount {
 		t.Errorf("itemList children count changed: pre=%d post=%d", preChildCount, postCount)
 	}
 	for i, l := range c.Layers {
@@ -203,7 +203,7 @@ func TestMoveLayer_ItemListChildrenIdentical(t *testing.T) {
 		return
 	}
 	c := proj.Compositions[0]
-	preChildren := c.ItemListForTest().Children
+	preChildren := aep.ItemListForTest(c).Children
 	pre := make(map[any]struct{}, len(preChildren))
 	for _, ch := range preChildren {
 		pre[any(ch)] = struct{}{}
@@ -213,7 +213,7 @@ func TestMoveLayer_ItemListChildrenIdentical(t *testing.T) {
 		t.Fatalf("MoveLayer(2, 0): %v", err)
 	}
 
-	postChildren := c.ItemListForTest().Children
+	postChildren := aep.ItemListForTest(c).Children
 	post := make(map[any]struct{}, len(postChildren))
 	for _, ch := range postChildren {
 		post[any(ch)] = struct{}{}
@@ -252,4 +252,3 @@ func equalStrings(a, b []string) bool {
 	}
 	return true
 }
-

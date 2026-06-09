@@ -6,6 +6,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // DuplicateComposition deep-clones src (a comp in this Project) as a new
@@ -17,8 +18,8 @@ import (
 //
 // Clone semantics (same-Project comp only):
 //
-//   - new comp item ID = p.allocItemID()             (idta @0x10)
-//   - per layer: new layer ID = p.allocItemID()      (ldta @0x00)
+//   - new comp item ID = allocItemID(p)             (idta @0x10)
+//   - per layer: new layer ID = allocItemID(p)      (ldta @0x00)
 //   - intra-comp ParentID @0x84 / TrackMatteLayerID @0xA0 remapped via
 //     srcLayerID→dupLayerID map (matte guarded by len(ldta) >= 0xA4)
 //   - SourceID @0x28 verbatim (shared Footage/Comp items)
@@ -29,7 +30,7 @@ import (
 // found in rootFold, layer ldta too short for ParentID write.
 //
 // Atomic mutation: snapshot rootFold.Children + p.Compositions +
-// p.nextItemID + len(p.Warnings); on any new parser warning during the
+// scene.ProjectNextItemID(p) + len(p.Warnings); on any new parser warning during the
 // re-parse, roll all back including the nextItemID bump.
 //
 // Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the
@@ -44,15 +45,15 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 	if src == nil {
 		return nil, fmt.Errorf("DuplicateComposition: src cannot be nil")
 	}
-	pb := p.projectBack()
+	pb := projectBack(p)
 	if pb == nil || pb.rootFold == nil {
 		return nil, fmt.Errorf("DuplicateComposition: project has no root Fold back-ref (built outside parser?)")
 	}
-	srcCb, ok := src.back.(*compositionBackrefs)
-	if !ok || srcCb == nil || srcCb.itemList == nil {
+	srcCb := compositionBack(src)
+	if srcCb == nil || srcCb.itemList == nil {
 		return nil, fmt.Errorf("DuplicateComposition: src comp %q has no itemList back-ref", src.Name)
 	}
-	if src.proj != p {
+	if scene.CompositionProj(src) != p {
 		return nil, fmt.Errorf("DuplicateComposition: src comp %q does not belong to this Project", src.Name)
 	}
 	if name == "" {
@@ -76,7 +77,7 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 	// === Snapshot for rollback ===
 	oldRootChildren := append([]*rifx.Chunk(nil), rootChildren...)
 	oldComps := append([]*Composition(nil), p.Compositions...)
-	oldNextItemID := p.nextItemID
+	oldNextItemID := scene.ProjectNextItemID(p)
 	oldWarningsLen := len(p.Warnings)
 
 	// === Deep-clone comp Item block (fresh Data slices) ===
@@ -87,10 +88,10 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 	}
 
 	// === New comp item ID (idta @0x10) ===
-	newCompID := p.allocItemID()
+	newCompID := allocItemID(p)
 	dupIdta := dupItemList.FindFirst(rifx.IDIdta)
 	if dupIdta == nil || len(dupIdta.Data) < codec.IdtaItemID+4 {
-		p.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(p, oldNextItemID)
 		return nil, fmt.Errorf("DuplicateComposition: cloned comp idta missing or too short for item ID write")
 	}
 	binary.BigEndian.PutUint32(dupIdta.Data[codec.IdtaItemID:codec.IdtaItemID+4], newCompID)
@@ -109,11 +110,11 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 			continue // Ewst-paired empty / non-layer Layr — skip defensively
 		}
 		if len(ldta.Data) < 0x88 {
-			p.nextItemID = oldNextItemID
+			scene.SetProjectNextItemID(p, oldNextItemID)
 			return nil, fmt.Errorf("DuplicateComposition: a cloned Layr ldta too short for ParentID write (got %d bytes, need >=0x88)", len(ldta.Data))
 		}
 		oldID := binary.BigEndian.Uint32(ldta.Data[0x00:0x04])
-		newID := p.allocItemID()
+		newID := allocItemID(p)
 		idMap[oldID] = newID
 		binary.BigEndian.PutUint32(ldta.Data[0x00:0x04], newID)
 		layerLdtas = append(layerLdtas, ldta)
@@ -140,7 +141,7 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 	// === Name rewrite (length-variable Utf8) ===
 	dupUtf8 := dupItemList.FindFirst(rifx.IDUtf8)
 	if dupUtf8 == nil {
-		p.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(p, oldNextItemID)
 		return nil, fmt.Errorf("DuplicateComposition: cloned comp has no Utf8 name chunk")
 	}
 	dupUtf8.Data = []byte(name)
@@ -158,17 +159,17 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 	dupComp, parseErr := parseComposition(dupItemList, newCompID, name, &p.Warnings)
 	if parseErr != nil {
 		pb.rootFold.Children = oldRootChildren
-		p.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(p, oldNextItemID)
 		return nil, fmt.Errorf("DuplicateComposition: re-parse cloned comp: %w", parseErr)
 	}
-	dupComp.proj = p
+	scene.SetCompositionProj(dupComp, p)
 
 	// === Register + warnings-as-failure rollback ===
 	p.Compositions = append(p.Compositions, dupComp)
 	if len(p.Warnings) > oldWarningsLen {
 		pb.rootFold.Children = oldRootChildren
 		p.Compositions = oldComps
-		p.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(p, oldNextItemID)
 		newWarnings := append([]string(nil), p.Warnings[oldWarningsLen:]...)
 		p.Warnings = p.Warnings[:oldWarningsLen]
 		return nil, fmt.Errorf("DuplicateComposition: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)

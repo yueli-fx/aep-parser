@@ -24,6 +24,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // hydrateShapeNodes walks a parsed Layr LIST (descending into nested
@@ -127,33 +128,34 @@ func collectShapeKids(tdgp *rifx.Chunk, g *VectorGroup, ctx *parseCtx) {
 // the Layr's Transform Group). Called from parseLayer's LayerTypeShape
 // branch.
 func hydrateLayerTransform(layer *Layer) {
-	if layer.shapeTransform == nil {
-		layer.shapeTransform = newLayerTransform()
+	if scene.LayerShapeTransform(layer) == nil {
+		scene.SetLayerShapeTransform(layer, scene.NewLayerTransform())
 	}
+	tr := scene.LayerShapeTransform(layer)
 	// ShapeLayer canonical Transform splits Position into Position_0 (X) +
-	// Position_1 (Y). We re-combine on hydrate so shapeTransform.position
+	// Position_1 (Y). We re-combine on hydrate so the transform's position
 	// remains the [2]float64 API surface.
 	var posX, posY *Property
 	for _, p := range layer.Properties {
 		switch p.MatchName {
 		case MatchNameAnchorPoint:
-			hydrateVec2Stream(layer.shapeTransform.anchorPoint, p)
+			hydrateVec2Stream(scene.LayerTransformAnchorPoint(tr), p)
 		case MatchNamePosition:
-			hydrateVec2Stream(layer.shapeTransform.position, p)
+			hydrateVec2Stream(scene.LayerTransformPosition(tr), p)
 		case MatchNamePosition0:
 			posX = p
 		case MatchNamePosition1:
 			posY = p
 		case MatchNameScale:
-			hydrateVec2Stream(layer.shapeTransform.scale, p)
+			hydrateVec2Stream(scene.LayerTransformScale(tr), p)
 		case MatchNameRotateZ:
-			hydrateFloat64Stream(layer.shapeTransform.rotation, p)
+			hydrateFloat64Stream(scene.LayerTransformRotation(tr), p)
 		case MatchNameOpacity:
-			hydrateFloat64Stream(layer.shapeTransform.opacity, p)
+			hydrateFloat64Stream(scene.LayerTransformOpacity(tr), p)
 		}
 	}
 	if posX != nil || posY != nil {
-		combinePositionXY(layer.shapeTransform.position, posX, posY)
+		combinePositionXY(scene.LayerTransformPosition(tr), posX, posY)
 	}
 }
 
@@ -221,30 +223,30 @@ func combinePositionXY(ps *codec.PropertyStream[[2]float64], px, py *Property) {
 func hydrateRectNode(body *rifx.Chunk, ctx *parseCtx) *RectNode {
 	r := NewRectNode()
 	props := nodeStreamValues(body, ctx)
-	hydrateVec2Stream(r.size, props["ADBE Vector Rect Size"])
-	hydrateVec2Stream(r.position, props["ADBE Vector Rect Position"])
-	hydrateFloat64Stream(r.roundness, props["ADBE Vector Rect Roundness"])
-	hydrateScalarStatic(props["ADBE Vector Shape Direction"], func(v float64) { r.direction = ShapeDirection(v) })
+	hydrateVec2Stream(r.Size(), props["ADBE Vector Rect Size"])
+	hydrateVec2Stream(r.Position(), props["ADBE Vector Rect Position"])
+	hydrateFloat64Stream(r.Roundness(), props["ADBE Vector Rect Roundness"])
+	hydrateScalarStatic(props["ADBE Vector Shape Direction"], func(v float64) { scene.SetRectNodeDirection(r, ShapeDirection(v)) })
 	return r
 }
 
 func hydrateEllipseNode(body *rifx.Chunk, ctx *parseCtx) *EllipseNode {
 	e := NewEllipseNode()
 	props := nodeStreamValues(body, ctx)
-	hydrateVec2Stream(e.size, props["ADBE Vector Ellipse Size"])
-	hydrateVec2Stream(e.position, props["ADBE Vector Ellipse Position"])
-	hydrateScalarStatic(props["ADBE Vector Shape Direction"], func(v float64) { e.direction = ShapeDirection(v) })
+	hydrateVec2Stream(e.Size(), props["ADBE Vector Ellipse Size"])
+	hydrateVec2Stream(e.Position(), props["ADBE Vector Ellipse Position"])
+	hydrateScalarStatic(props["ADBE Vector Shape Direction"], func(v float64) { scene.SetEllipseNodeDirection(e, ShapeDirection(v)) })
 	return e
 }
 
 func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
 	f := NewFillNode()
 	props := nodeStreamValues(body, ctx)
-	hydrateColor4Stream(f.color, props["ADBE Vector Fill Color"])
-	hydrateFloat64Stream(f.opacity, props["ADBE Vector Fill Opacity"])
-	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { f.blendMode = ShapeBlendMode(v) })
-	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { f.compositeOrder = ShapeCompositeOrder(v) })
-	hydrateScalarStatic(props["ADBE Vector Fill Rule"], func(v float64) { f.fillRule = FillRule(v) })
+	hydrateColor4Stream(f.Color(), props["ADBE Vector Fill Color"])
+	hydrateFloat64Stream(f.Opacity(), props["ADBE Vector Fill Opacity"])
+	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { scene.SetFillNodeBlendMode(f, ShapeBlendMode(v)) })
+	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { scene.SetFillNodeCompositeOrder(f, ShapeCompositeOrder(v)) })
+	hydrateScalarStatic(props["ADBE Vector Fill Rule"], func(v float64) { scene.SetFillNodeFillRule(f, FillRule(v)) })
 	return f
 }
 
@@ -257,7 +259,7 @@ func hydrateGradientFillNode(body *rifx.Chunk, _ *parseCtx) *GradientFillNode {
 	n := NewGradientFillNode()
 	if xml := findGradientStopsXML(body, "ADBE Vector Grad Colors"); xml != "" {
 		if g := codec.ParseGradientXML(xml); g != nil {
-			n.gradient = g
+			scene.SetGradientFillNodeGradient(n, g)
 		}
 	}
 	return n
@@ -292,17 +294,17 @@ func findGradientStopsXML(body *rifx.Chunk, streamName string) string {
 func hydrateStrokeNode(body *rifx.Chunk, ctx *parseCtx) *StrokeNode {
 	s := NewStrokeNode()
 	props := nodeStreamValues(body, ctx)
-	hydrateColor4Stream(s.color, props["ADBE Vector Stroke Color"])
-	hydrateFloat64Stream(s.opacity, props["ADBE Vector Stroke Opacity"])
-	hydrateFloat64Stream(s.width, props["ADBE Vector Stroke Width"])
-	hydrateScalarStatic(props["ADBE Vector Stroke Line Cap"], func(v float64) { s.lineCap = StrokeLineCap(v) })
-	hydrateScalarStatic(props["ADBE Vector Stroke Line Join"], func(v float64) { s.lineJoin = StrokeLineJoin(v) })
-	hydrateScalarStatic(props["ADBE Vector Stroke Miter Limit"], func(v float64) { s.miterLimit = v })
-	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { s.blendMode = ShapeBlendMode(v) })
-	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { s.compositeOrder = ShapeCompositeOrder(v) })
-	hydrateStrokeTaper(body, s.taper, ctx)
-	hydrateStrokeWave(body, s.wave, ctx)
-	hydrateStrokeDashes(body, s.dashes, ctx)
+	hydrateColor4Stream(s.Color(), props["ADBE Vector Stroke Color"])
+	hydrateFloat64Stream(s.Opacity(), props["ADBE Vector Stroke Opacity"])
+	hydrateFloat64Stream(s.Width(), props["ADBE Vector Stroke Width"])
+	hydrateScalarStatic(props["ADBE Vector Stroke Line Cap"], func(v float64) { scene.SetStrokeNodeLineCap(s, StrokeLineCap(v)) })
+	hydrateScalarStatic(props["ADBE Vector Stroke Line Join"], func(v float64) { scene.SetStrokeNodeLineJoin(s, StrokeLineJoin(v)) })
+	hydrateScalarStatic(props["ADBE Vector Stroke Miter Limit"], func(v float64) { scene.SetStrokeNodeMiterLimit(s, v) })
+	hydrateScalarStatic(props["ADBE Vector Blend Mode"], func(v float64) { scene.SetStrokeNodeBlendMode(s, ShapeBlendMode(v)) })
+	hydrateScalarStatic(props["ADBE Vector Composite Order"], func(v float64) { scene.SetStrokeNodeCompositeOrder(s, ShapeCompositeOrder(v)) })
+	hydrateStrokeTaper(body, s.Taper(), ctx)
+	hydrateStrokeWave(body, s.Wave(), ctx)
+	hydrateStrokeDashes(body, s.Dashes(), ctx)
 	return s
 }
 
@@ -321,9 +323,9 @@ func hydrateStrokeDashes(strokeBody *rifx.Chunk, d *StrokeDashes, ctx *parseCtx)
 	if dash == nil && gap == nil {
 		return
 	}
-	d.enabled = true
-	hydrateScalarStatic(dash, func(v float64) { d.dash = v })
-	hydrateScalarStatic(gap, func(v float64) { d.gap = v })
+	d.Enable()
+	hydrateScalarStatic(dash, func(v float64) { _ = d.SetDash(v) })
+	hydrateScalarStatic(gap, func(v float64) { _ = d.SetGap(v) })
 }
 
 // hydrateStrokeTaper reads the Taper group's %-mode scalar sub-streams back
@@ -336,12 +338,12 @@ func hydrateStrokeTaper(strokeBody *rifx.Chunk, t *StrokeTaper, ctx *parseCtx) {
 		return
 	}
 	p := nodeStreamValues(g, ctx)
-	hydrateScalarStatic(p["ADBE Vector Taper Start Length"], func(v float64) { t.startLength = v })
-	hydrateScalarStatic(p["ADBE Vector Taper End Length"], func(v float64) { t.endLength = v })
-	hydrateScalarStatic(p["ADBE Vector Taper Start Width"], func(v float64) { t.startWidth = v })
-	hydrateScalarStatic(p["ADBE Vector Taper End Width"], func(v float64) { t.endWidth = v })
-	hydrateScalarStatic(p["ADBE Vector Taper Start Ease"], func(v float64) { t.startEase = v })
-	hydrateScalarStatic(p["ADBE Vector Taper End Ease"], func(v float64) { t.endEase = v })
+	hydrateScalarStatic(p["ADBE Vector Taper Start Length"], func(v float64) { _ = t.SetStartLength(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper End Length"], func(v float64) { _ = t.SetEndLength(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper Start Width"], func(v float64) { _ = t.SetStartWidth(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper End Width"], func(v float64) { _ = t.SetEndWidth(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper Start Ease"], func(v float64) { _ = t.SetStartEase(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper End Ease"], func(v float64) { _ = t.SetEndEase(v) })
 }
 
 // hydrateStrokeWave reads the Wave group's Wavelength-mode scalars (Amount /
@@ -352,9 +354,9 @@ func hydrateStrokeWave(strokeBody *rifx.Chunk, w *StrokeWave, ctx *parseCtx) {
 		return
 	}
 	p := nodeStreamValues(g, ctx)
-	hydrateScalarStatic(p["ADBE Vector Taper Wave Amount"], func(v float64) { w.amount = v })
-	hydrateScalarStatic(p["ADBE Vector Taper Wavelength"], func(v float64) { w.wavelength = v })
-	hydrateScalarStatic(p["ADBE Vector Taper Wave Phase"], func(v float64) { w.phase = v })
+	hydrateScalarStatic(p["ADBE Vector Taper Wave Amount"], func(v float64) { _ = w.SetAmount(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper Wavelength"], func(v float64) { _ = w.SetWavelength(v) })
+	hydrateScalarStatic(p["ADBE Vector Taper Wave Phase"], func(v float64) { _ = w.SetPhase(v) })
 }
 
 // hydrateScalarStatic applies the static 1D value of p (if present) via set.
@@ -417,7 +419,7 @@ func hydratePathNode(body *rifx.Chunk, ctx *parseCtx) *PathNode {
 	}
 	if len(shaps) == 1 {
 		// Static path — single snapshot, stream stays Static.
-		_ = p.path.SetStaticValue(bezierFromShap(shaps[0]))
+		_ = p.Path().SetStaticValue(bezierFromShap(shaps[0]))
 		return p
 	}
 	// Animated: pair each shap's geometry with its tdbs time entry.
@@ -427,7 +429,7 @@ func hydratePathNode(body *rifx.Chunk, ctx *parseCtx) *PathNode {
 		if i < len(times) {
 			t = times[i].time
 		}
-		_ = p.path.AddKeyframeLinear(t, bezierFromShap(s))
+		_ = p.Path().AddKeyframeLinear(t, bezierFromShap(s))
 	}
 	return p
 }

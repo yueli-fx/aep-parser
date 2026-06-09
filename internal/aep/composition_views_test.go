@@ -31,8 +31,8 @@ func TestCompositionViews_ReCameraLight(t *testing.T) {
 		if c == nil {
 			t.Fatal("Comp 1 not found")
 		}
-		checkLen(t, "ShapeLayers", c.ShapeLayers(), 2)         // 自定义曲线 + 形状测试
-		checkLen(t, "TextLayers", c.TextLayers(), 1)           // 文字测试
+		checkLen(t, "ShapeLayers", c.ShapeLayers(), 2) // 自定义曲线 + 形状测试
+		checkLen(t, "TextLayers", c.TextLayers(), 1)   // 文字测试
 		checkLen(t, "CameraLayers", c.CameraLayers(), 0)
 		checkLen(t, "LightLayers", c.LightLayers(), 0)
 		checkLen(t, "NullLayers", c.NullLayers(), 0)

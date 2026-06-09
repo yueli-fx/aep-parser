@@ -23,6 +23,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // v2_2 ShapeLayer Transform Group body — byte-exact extracted from
@@ -137,17 +138,17 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// tolerance.aep dumps confirm AE always emits it. lowerVectorGroup handles
 	// an empty VectorGroup (3-child LIST(tdgp): tdsb + tdsn("Contents") +
 	// Group End).
-	if s.shapeRootGroup == nil {
-		s.shapeRootGroup = NewVectorGroup()
+	if s.RootGroup() == nil {
+		scene.SetLayerShapeRootGroup(s.Layer, NewVectorGroup())
 	}
 	outer.Children = append(outer.Children, makeTdmn("ADBE Root Vectors Group"))
-	rootGroupTdgp, err := lowerVectorGroup(s.shapeRootGroup, ctx)
+	rootGroupTdgp, err := lowerVectorGroup(s.RootGroup(), ctx)
 	if err != nil {
 		return nil, err
 	}
 	outer.Children = append(outer.Children, rootGroupTdgp)
 
-	transformWrapper, err := lowerLayerTransform(s.shapeTransform, ctx)
+	transformWrapper, err := lowerLayerTransform(s.Transform(), ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -376,7 +377,7 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 // lowerLayerTransform emits the Layer Transform Group LIST(tdgp) for a
 // ShapeLayer. Uses the byte-exact Transform Group body extracted from
 // tolerance.aep as boilerplate, then overwrites the Position_0/_1 inner cdat
-// with runtime t.position values.
+// with runtime t.Position() values.
 //
 // Background: constructing the Transform Group from scratch (Anchor /
 // Position_0/_1 / Scale / RotateZ / Opacity + 6-axis 3D defaults) made AE 2025
@@ -402,19 +403,19 @@ func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) 
 	// motion-path ([x,y,0]); Scale is 3D non-spatial (÷100, Z=1.0); Rotation is
 	// 1D non-spatial (degrees); Opacity is 1D non-spatial (÷100). Animated →
 	// inject keyframes; otherwise overwrite the embedded template's static cdat.
-	if err := lowerTransformVec2Spatial(body, MatchNameAnchorPoint, t.anchorPoint, ctx); err != nil {
+	if err := lowerTransformVec2Spatial(body, MatchNameAnchorPoint, t.AnchorPoint(), ctx); err != nil {
 		return nil, err
 	}
-	if err := lowerTransformVec2Spatial(body, MatchNamePosition, t.position, ctx); err != nil {
+	if err := lowerTransformVec2Spatial(body, MatchNamePosition, t.Position(), ctx); err != nil {
 		return nil, err
 	}
-	if err := lowerTransformScale(body, t.scale, ctx); err != nil {
+	if err := lowerTransformScale(body, t.Scale(), ctx); err != nil {
 		return nil, err
 	}
-	if err := lowerTransformScalar(body, MatchNameRotateZ, t.rotation, ctx, 1); err != nil {
+	if err := lowerTransformScalar(body, MatchNameRotateZ, t.Rotation(), ctx, 1); err != nil {
 		return nil, err
 	}
-	if err := lowerTransformScalar(body, MatchNameOpacity, t.opacity, ctx, 0.01); err != nil {
+	if err := lowerTransformScalar(body, MatchNameOpacity, t.Opacity(), ctx, 0.01); err != nil {
 		return nil, err
 	}
 

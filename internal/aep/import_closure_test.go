@@ -358,7 +358,7 @@ func TestImportFootageBlock(t *testing.T) {
 	}
 
 	preCount := len(destProj.Footage)
-	preNext := destProj.NextItemIDForTest()
+	preNext := aep.NextItemIDForTest(destProj)
 	destID, err := aep.ImportFootageBlockForTest(destProj, srcProj, srcF.ID, srcF.Name)
 	if err != nil {
 		t.Fatalf("importFootageBlock: %v", err)
@@ -366,8 +366,8 @@ func TestImportFootageBlock(t *testing.T) {
 	if destID != preNext {
 		t.Errorf("imported footage destID = %d, want %d (head counter)", destID, preNext)
 	}
-	if destProj.NextItemIDForTest() != preNext+1 {
-		t.Errorf("nextItemID = %d, want %d (+1)", destProj.NextItemIDForTest(), preNext+1)
+	if aep.NextItemIDForTest(destProj) != preNext+1 {
+		t.Errorf("nextItemID = %d, want %d (+1)", aep.NextItemIDForTest(destProj), preNext+1)
 	}
 	if len(destProj.Footage) != preCount+1 {
 		t.Errorf("destProj.Footage count = %d, want %d", len(destProj.Footage), preCount+1)

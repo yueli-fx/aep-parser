@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // propertyBackrefs holds the rifx.Chunk references that power Property's
@@ -63,35 +64,35 @@ var _ PropertyWriter = (*propertyBackrefs)(nil)
 // interface for serializer-stage (parse_/mutate_/write_) raw chunk access
 // (keyframe stream ops, separate-dimensions splice, tdb4/tdsb flag readers,
 // parse wiring). Returns nil when the property was built outside the parser.
-func (p *Property) propertyBack() *propertyBackrefs {
-	if pb, ok := p.back.(*propertyBackrefs); ok {
+func propertyBack(p *Property) *propertyBackrefs {
+	if pb, ok := scene.PropertyBack(p).(*propertyBackrefs); ok {
 		return pb
 	}
 	return nil
 }
 
-func (b *propertyBackrefs) tdb4Byte(off int) (byte, bool) {
+func (b *propertyBackrefs) Tdb4Byte(off int) (byte, bool) {
 	if b == nil || b.tdb4 == nil || len(b.tdb4.Data) <= off {
 		return 0, false
 	}
 	return b.tdb4.Data[off], true
 }
 
-func (b *propertyBackrefs) tdsbByte(off int) (byte, bool) {
+func (b *propertyBackrefs) TdsbByte(off int) (byte, bool) {
 	if b == nil || b.tdsb == nil || len(b.tdsb.Data) <= off {
 		return 0, false
 	}
 	return b.tdsb.Data[off], true
 }
 
-func (b *propertyBackrefs) minValueBytes() []byte {
+func (b *propertyBackrefs) MinValueBytes() []byte {
 	if b == nil || b.tdum == nil {
 		return nil
 	}
 	return b.tdum.Data
 }
 
-func (b *propertyBackrefs) maxValueBytes() []byte {
+func (b *propertyBackrefs) MaxValueBytes() []byte {
 	if b == nil || b.tduM == nil {
 		return nil
 	}

@@ -133,7 +133,7 @@ func TestProperty_LockedRatio(t *testing.T) {
 
 	// Test with tdsb present (locked_ratio = true)
 	p := &aep.Property{
-		MatchName: "test",
+		MatchName:  "test",
 		Components: 1,
 	}
 	// Since tdsb is not exported, we can't set it directly.

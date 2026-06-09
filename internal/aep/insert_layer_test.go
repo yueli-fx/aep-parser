@@ -210,8 +210,8 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 	srcName := src.Name
 	srcSourceID := src.SourceID
 	preLen := len(dest.Layers)
-	preChildCount := len(dest.ItemListForTest().Children)
-	preNextItemID := dest.ProjForTest().NextItemIDForTest()
+	preChildCount := len(aep.ItemListForTest(dest).Children)
+	preNextItemID := aep.NextItemIDForTest(aep.ProjForTest(dest))
 
 	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
@@ -247,11 +247,11 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 	if clone.TrackMatte != aep.TrackMatteNone {
 		t.Errorf("clone.TrackMatte: got %d, want TrackMatteNone (reset for cross-comp)", clone.TrackMatte)
 	}
-	postChildCount := len(dest.ItemListForTest().Children)
+	postChildCount := len(aep.ItemListForTest(dest).Children)
 	if postChildCount <= preChildCount {
 		t.Errorf("dest itemList children should grow; pre=%d post=%d", preChildCount, postChildCount)
 	}
-	postNextItemID := dest.ProjForTest().NextItemIDForTest()
+	postNextItemID := aep.NextItemIDForTest(aep.ProjForTest(dest))
 	if postNextItemID != preNextItemID+1 {
 		t.Errorf("proj.nextItemID: got %d, want %d (pre+1)", postNextItemID, preNextItemID+1)
 	}
@@ -320,22 +320,22 @@ func TestInsertLayer_FreshDataSlices(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	srcLdtaBefore := append([]byte(nil), src.LdtaForTest().Data...)
+	srcLdtaBefore := append([]byte(nil), aep.LdtaForTest(src).Data...)
 	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)
 	}
-	cloneLdta := clone.LdtaForTest()
+	cloneLdta := aep.LdtaForTest(clone)
 	if cloneLdta == nil {
 		t.Fatal("clone has no ldta backref")
 	}
-	if &cloneLdta.Data[0] == &src.LdtaForTest().Data[0] {
+	if &cloneLdta.Data[0] == &aep.LdtaForTest(src).Data[0] {
 		t.Fatal("clone ldta shares Data slice header with src — must be fresh allocation")
 	}
 	for i := 4; i < len(cloneLdta.Data); i++ {
 		cloneLdta.Data[i] ^= 0xFF
 	}
-	if !bytes.Equal(srcLdtaBefore, src.LdtaForTest().Data) {
+	if !bytes.Equal(srcLdtaBefore, aep.LdtaForTest(src).Data) {
 		t.Fatal("src ldta bytes changed after mutating clone — Data slice sharing detected")
 	}
 }
@@ -345,7 +345,7 @@ func TestInsertLayer_RoundTrip(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	proj := dest.ProjForTest()
+	proj := aep.ProjForTest(dest)
 	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)

@@ -1,10 +1,9 @@
 package aep
 
 import (
-	"math"
-
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parseProperties extracts the property tree from a Layr. The property tree
@@ -100,7 +99,8 @@ func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCt
 		// Even when the inner tdbs has no decodable cdat (the placeholder
 		// in real fixtures is only 4 bytes), we still want to surface the
 		// gradient. Fabricate a minimal Property carrying the XML.
-		prop = &Property{MatchName: matchName, Name: matchName, Components: 1, back: &propertyBackrefs{tdbs: innerTdbs}}
+		prop = &Property{MatchName: matchName, Name: matchName, Components: 1}
+		scene.SetPropertyBack(prop, &propertyBackrefs{tdbs: innerTdbs})
 	}
 	gcky := gcst.FindFirstList(rifx.IDGCky)
 	if gcky == nil {
@@ -137,7 +137,8 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 	}
 	prop := parseLeafProperty(matchName, tdbs, ctx)
 	if prop == nil {
-		prop = &Property{MatchName: matchName, Name: matchName, back: &propertyBackrefs{tdbs: tdbs}}
+		prop = &Property{MatchName: matchName, Name: matchName}
+		scene.SetPropertyBack(prop, &propertyBackrefs{tdbs: tdbs})
 	}
 	prop.Components = 3
 
@@ -159,7 +160,7 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 		}
 	} else if cdat := tdbs.FindFirst(rifx.IDCdat); cdat != nil && len(cdat.Data) >= 24 {
 		// Static: the cdat value is little-endian inside an otst.
-		if pb := prop.propertyBack(); pb != nil {
+		if pb := propertyBack(prop); pb != nil {
 			pb.cdat = cdat
 		}
 		prop.StaticValue = decodeCdatValueLE(cdat.Data, 3)
@@ -258,8 +259,9 @@ func descend(c *rifx.Chunk, parentName string, out *[]*Property, ctx *parseCtx) 
 // expression source (JavaScript). If present, it's surfaced as
 // Property.Expression.
 func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Property {
-	prop := &Property{MatchName: matchName, Name: matchName, Components: 1, back: &propertyBackrefs{}}
-	pb := prop.propertyBack()
+	prop := &Property{MatchName: matchName, Name: matchName, Components: 1}
+	scene.SetPropertyBack(prop, &propertyBackrefs{})
+	pb := propertyBack(prop)
 
 	if tdb4 := tdbs.FindFirst(rifx.IDtdb4); tdb4 != nil {
 		prop.Components = decodeTdb4Components(tdb4.Data)
@@ -383,33 +385,3 @@ func decodeCdatValue(d []byte, components int) any {
 // decodeTdumValue reads a tdum/tduM chunk's payload. Layout depends on
 // tdb4 type flags: color → 4×float32 BE, integer → 1×uint32 BE,
 // otherwise N×float64 BE (N = size/8).
-func (p *Property) decodeTdumValue(d []byte) any {
-	if len(d) == 0 {
-		return nil
-	}
-	if p.IsColor() && len(d) >= 16 {
-		// 4 × float32 BE
-		vals := make([]float64, 4)
-		for i := 0; i < 4; i++ {
-			bits := uint32(d[i*4])<<24 | uint32(d[i*4+1])<<16 | uint32(d[i*4+2])<<8 | uint32(d[i*4+3])
-			vals[i] = float64(math.Float32frombits(bits))
-		}
-		return vals
-	}
-	if p.IsInteger() && len(d) >= 4 {
-		v := uint32(d[0])<<24 | uint32(d[1])<<16 | uint32(d[2])<<8 | uint32(d[3])
-		return float64(v)
-	}
-	// Default: N × float64 BE
-	count := len(d) / 8
-	if count == 1 {
-		v, _ := readFloat64BE(d, 0)
-		return v
-	}
-	vals := make([]float64, count)
-	for i := 0; i < count; i++ {
-		v, _ := readFloat64BE(d, i*8)
-		vals[i] = v
-	}
-	return vals
-}

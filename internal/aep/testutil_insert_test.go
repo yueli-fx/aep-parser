@@ -1,29 +1,32 @@
 package aep
 
-import "github.com/example/aep-parser/internal/rifx"
+import (
+	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
+)
 
 // SetLayerCompForTest assigns the back-ref used by InsertLayer's R5 check.
 // Test-only; production code never calls this.
-func SetLayerCompForTest(l *Layer, c *Composition) { l.comp = c }
+func SetLayerCompForTest(l *Layer, c *Composition) { scene.SetLayerComp(l, c) }
 
 // SetCompProjForTest assigns the project back-ref used by InsertLayer's R3.
 // Test-only.
-func SetCompProjForTest(c *Composition, p *Project) { c.proj = p }
+func SetCompProjForTest(c *Composition, p *Project) { scene.SetCompositionProj(c, p) }
 
 func ClearLayerLayrListForTest(l *Layer) {
-	if lb := l.layerBack(); lb != nil {
+	if lb := layerBack(l); lb != nil {
 		lb.layrList = nil
 	}
 }
 
 func CorruptSrcLayrFormTypeForTest(l *Layer) {
-	if lb := l.layerBack(); lb != nil && lb.layrList != nil {
+	if lb := layerBack(l); lb != nil && lb.layrList != nil {
 		lb.layrList.FormType = rifx.ChunkID{'X', 'X', 'X', 'X'}
 	}
 }
 
 // ProjForTest exposes Composition.proj for InsertLayer tests.
-func (c *Composition) ProjForTest() *Project { return c.proj }
+func ProjForTest(c *Composition) *Project { return scene.CompositionProj(c) }
 
 // DestFootageByPathForTest exposes destFootageByPath for cross-Project tests.
 func DestFootageByPathForTest(p *Project, path string) *Footage { return destFootageByPath(p, path) }
@@ -31,7 +34,7 @@ func DestFootageByPathForTest(p *Project, path string) *Footage { return destFoo
 // LocateItemBlockByIDForTest exposes locateItemBlockByID over a Project's root
 // Fold, returning (start, end) within the matched container; (-1,-1) if absent.
 func LocateItemBlockByIDForTest(p *Project, id uint32) (int, int) {
-	pb := p.projectBack()
+	pb := projectBack(p)
 	if pb == nil || pb.rootFold == nil {
 		return -1, -1
 	}

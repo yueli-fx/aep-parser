@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // TestProjectSettings_CmsEnumValidation verifies CMS setters reject
@@ -12,14 +13,13 @@ import (
 // SetWorkingGamma / SetExpressionEngine. Internal test so we can wire
 // up a synthetic cmsUtf8 chunk without exporting a test hook.
 func TestProjectSettings_CmsEnumValidation(t *testing.T) {
-	p := &Project{
-		back: &projectBackrefs{
-			cmsUtf8: &rifx.Chunk{
-				ID:   rifx.IDUtf8,
-				Data: []byte(`{"colorManagementSystem":0,"lutInterpolationMethod":0,"ocioConfigurationFile":""}`),
-			},
+	p := &Project{}
+	scene.SetProjectBack(p, &projectBackrefs{
+		cmsUtf8: &rifx.Chunk{
+			ID:   rifx.IDUtf8,
+			Data: []byte(`{"colorManagementSystem":0,"lutInterpolationMethod":0,"ocioConfigurationFile":""}`),
 		},
-	}
+	})
 
 	if err := p.SetColorManagementSystem(ColorManagementSystem(99)); err == nil {
 		t.Error("SetColorManagementSystem(99): expected enum-validation error")
@@ -39,14 +39,13 @@ func TestProjectSettings_CmsEnumValidation(t *testing.T) {
 // parser Warning when the chunk's JSON is malformed (so callers can
 // surface the issue) instead of silently returning defaults.
 func TestProjectSettings_CmsMalformedJsonWarns(t *testing.T) {
-	p := &Project{
-		back: &projectBackrefs{
-			cmsUtf8: &rifx.Chunk{
-				ID:   rifx.IDUtf8,
-				Data: []byte(`{not valid json`),
-			},
+	p := &Project{}
+	scene.SetProjectBack(p, &projectBackrefs{
+		cmsUtf8: &rifx.Chunk{
+			ID:   rifx.IDUtf8,
+			Data: []byte(`{not valid json`),
 		},
-	}
+	})
 	_ = p.ColorManagementSystem() // triggers cmsSettings()
 	if len(p.Warnings) == 0 {
 		t.Fatal("expected a Warning on malformed CMS JSON, got none")
@@ -98,7 +97,8 @@ func TestProperty_LockedRatio_Positive(t *testing.T) {
 		ID:   rifx.IDTdsb,
 		Data: []byte{0x00, 0x00, 0x10, 0x00}, // byte 2 = bit 4 set
 	}
-	p := &Property{MatchName: "test", Components: 1, back: &propertyBackrefs{tdsb: tdsb}}
+	p := &Property{MatchName: "test", Components: 1}
+	scene.SetPropertyBack(p, &propertyBackrefs{tdsb: tdsb})
 
 	if !p.LockedRatio() {
 		t.Error("LockedRatio with bit-4-set tdsb = false, want true")

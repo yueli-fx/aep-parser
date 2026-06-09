@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // renderQueueBackrefs holds the RIFX chunk reference that powers the structural
@@ -60,16 +61,16 @@ var (
 	_ OutputModuleWriter    = (*outputModuleBackrefs)(nil)
 )
 
-func (b *renderQueueBackrefs) isRenderQueueWriter() {}
+func (b *renderQueueBackrefs) IsRenderQueueWriter() {}
 
-func (b *outputModuleBackrefs) isOutputModuleWriter() {}
+func (b *outputModuleBackrefs) IsOutputModuleWriter() {}
 
 // renderQueueBack returns the concrete backrefs behind a RenderQueue's writer
 // interface for serializer-stage raw chunk access (AddItem / RemoveItem reach
 // the LRdr container through it). Returns nil when the queue was built outside
 // the parser.
-func (rq *RenderQueue) renderQueueBack() *renderQueueBackrefs {
-	if b, ok := rq.back.(*renderQueueBackrefs); ok {
+func renderQueueBack(rq *RenderQueue) *renderQueueBackrefs {
+	if b, ok := scene.RenderQueueBack(rq).(*renderQueueBackrefs); ok {
 		return b
 	}
 	return nil
@@ -78,8 +79,8 @@ func (rq *RenderQueue) renderQueueBack() *renderQueueBackrefs {
 // outputModuleBack returns the concrete backrefs behind an OutputModule's
 // writer interface for the write-time settings sync. Returns nil when the
 // module was built outside the parser.
-func (om *OutputModule) outputModuleBack() *outputModuleBackrefs {
-	if b, ok := om.back.(*outputModuleBackrefs); ok {
+func outputModuleBack(om *OutputModule) *outputModuleBackrefs {
+	if b, ok := scene.OutputModuleBack(om).(*outputModuleBackrefs); ok {
 		return b
 	}
 	return nil
@@ -89,8 +90,8 @@ func (om *OutputModule) outputModuleBack() *outputModuleBackrefs {
 // writer interface for serializer-stage raw chunk access (settings sync +
 // structural AddItem / RemoveItem). Returns nil when the item was built outside
 // the parser.
-func (it *RenderQueueItem) renderQueueItemBack() *renderQueueItemBackrefs {
-	if rb, ok := it.back.(*renderQueueItemBackrefs); ok {
+func renderQueueItemBack(it *RenderQueueItem) *renderQueueItemBackrefs {
+	if rb, ok := scene.RenderQueueItemBack(it).(*renderQueueItemBackrefs); ok {
 		return rb
 	}
 	return nil

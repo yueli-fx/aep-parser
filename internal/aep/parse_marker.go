@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parseMarkers decodes the "ADBE Marker" mrst wrapper into one Marker per
@@ -74,13 +75,12 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 		off := i * bpk
 		mb := &markerBackrefs{ldat: ldat, ldatOffset: off, tickRate: ctx.tickRate}
 		m := &Marker{
-			Time:       float64(binary.BigEndian.Uint32(ldat.Data[off:off+4])) / ctx.tickRate,
-			ldatOffset: off,
-			tickRate:   ctx.tickRate,
-			compFps:    ctx.compFps,
-			back:       mb,
-			list:       ml,
+			Time: float64(binary.BigEndian.Uint32(ldat.Data[off:off+4])) / ctx.tickRate,
 		}
+		scene.SetMarkerLdatOffset(m, off)
+		scene.SetMarkerRates(m, ctx.tickRate, ctx.compFps)
+		scene.SetMarkerBack(m, mb)
+		scene.SetMarkerSetList(m, ml)
 		if i < len(nmrds) {
 			mb.nmrd = nmrds[i]
 			fillMarkerText(m, nmrds[i])
@@ -101,8 +101,8 @@ func parseMarkers(mrst *rifx.Chunk, ctx *parseCtx) []*Marker {
 // slice has been assigned to its owning field.
 func bindMarkerListOwner(field *[]*Marker) {
 	for _, m := range *field {
-		if m.list != nil {
-			m.list.owner = field
+		if ml := markerSet(m); ml != nil {
+			ml.owner = field
 			return
 		}
 	}

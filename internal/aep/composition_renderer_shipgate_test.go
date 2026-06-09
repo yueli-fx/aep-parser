@@ -46,7 +46,7 @@ func runRendererShipGate(t *testing.T, aeExe, baseFixture string, targets []stri
 				t.Skipf("%s not present: %v", srcFixture, err)
 			}
 			comp := proj.Compositions[0]
-			if err := comp.SetRenderer(target); err != nil {
+			if err := aep.SetRenderer(comp, target); err != nil {
 				t.Fatalf("SetRenderer(%q): %v", target, err)
 			}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // footageBackrefs holds the rifx.Chunk references that power Footage's
@@ -45,7 +46,18 @@ type footageBackrefs struct {
 
 var _ FootageWriter = (*footageBackrefs)(nil)
 
-func (b *footageBackrefs) sspcData() []byte {
+// footageBack returns the concrete back-refs behind a Footage's writer
+// interface for serializer-stage raw chunk access. Returns nil when the
+// footage was built outside the parser. Free function (the receiver is a scene
+// type post package-split).
+func footageBack(f *Footage) *footageBackrefs {
+	if fb, ok := scene.FootageBack(f).(*footageBackrefs); ok {
+		return fb
+	}
+	return nil
+}
+
+func (b *footageBackrefs) SspcData() []byte {
 	if b == nil || b.sspcChunk == nil {
 		return nil
 	}
@@ -84,4 +96,3 @@ func (b *footageBackrefs) SetLabel(index uint8) error {
 	}
 	return nil
 }
-

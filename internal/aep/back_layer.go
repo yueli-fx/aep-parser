@@ -8,6 +8,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // layerBackrefs holds the rifx.Chunk references that power Layer's
@@ -58,15 +59,16 @@ var _ LayerWriter = (*layerBackrefs)(nil)
 
 // layerBack returns the concrete backrefs behind a Layer's writer interface
 // for serializer-stage (parse_/mutate_/write_) raw chunk access. Returns nil
-// when the layer was built outside the parser.
-func (l *Layer) layerBack() *layerBackrefs {
-	if lb, ok := l.back.(*layerBackrefs); ok {
+// when the layer was built outside the parser. Free function (the receiver is
+// a scene type, so the accessor can't be a method on it post package-split).
+func layerBack(l *Layer) *layerBackrefs {
+	if lb, ok := scene.LayerBack(l).(*layerBackrefs); ok {
 		return lb
 	}
 	return nil
 }
 
-func (b *layerBackrefs) ldtaFrac(off int) (float64, bool) {
+func (b *layerBackrefs) LdtaFrac(off int) (float64, bool) {
 	if b == nil || b.ldta == nil || len(b.ldta.Data) < off+8 {
 		return 0, false
 	}
@@ -79,9 +81,71 @@ func (b *layerBackrefs) ldtaFrac(off int) (float64, bool) {
 	return float64(dividend) / float64(divisor), true
 }
 
-func (b *layerBackrefs) hasAlternateSourceSlot() bool {
+func (b *layerBackrefs) HasAlternateSourceSlot() bool {
 	return b != nil && b.alternateSourceBlsi != nil
 }
+
+// StretchFrac decodes the split time-stretch dividend (@0x08) / divisor
+// (@0x6C) pair. Unlike LdtaFrac the two halves are not contiguous, so it has
+// its own accessor.
+func (b *layerBackrefs) StretchFrac() (float64, bool) {
+	if b == nil || b.ldta == nil || len(b.ldta.Data) < 0x70 {
+		return 0, false
+	}
+	dividend := int32(binary.BigEndian.Uint32(b.ldta.Data[0x08:0x0C]))
+	divisor := binary.BigEndian.Uint32(b.ldta.Data[0x6C:0x70])
+	if divisor == 0 {
+		return 0, false
+	}
+	return float64(dividend) / float64(divisor), true
+}
+
+// BtdsData exposes the live btds chunk bytes (text-source raw) so the scene
+// text resync re-decodes after a back-side splice. Returns nil for non-text
+// layers / layers built outside the parser.
+func (b *layerBackrefs) BtdsData() []byte {
+	if b == nil || b.btdsChunk == nil {
+		return nil
+	}
+	return b.btdsChunk.Data
+}
+
+// LdtaRaw exposes the live ldta chunk bytes. Returns nil for layers built
+// outside the parser / without an ldta.
+func (b *layerBackrefs) LdtaRaw() []byte {
+	if b == nil || b.ldta == nil {
+		return nil
+	}
+	return b.ldta.Data
+}
+
+// flag-bit positions inside ldta @0x25-0x27 — must mirror parse_layer.go's
+// decode. Keeping them centralized so future ldta-version surprises only
+// need updating in one place. Serializer-side (the byte-patch impl); the
+// scene Set* methods delegate here via LayerWriter.
+type ldtaFlagBit struct {
+	off  int  // byte offset (0x25, 0x26, or 0x27)
+	mask byte // single-bit mask within that byte
+}
+
+var (
+	flagSamplingBicubic       = ldtaFlagBit{0x25, 0x40}
+	flagFrameBlendPixelMotion = ldtaFlagBit{0x25, 0x04}
+	flagIsGuide               = ldtaFlagBit{0x25, 0x02}
+	flagIsNull                = ldtaFlagBit{0x26, 0x80}
+	flagMarkersLocked         = ldtaFlagBit{0x26, 0x10}
+	flagSolo                  = ldtaFlagBit{0x26, 0x08}
+	flagIs3D                  = ldtaFlagBit{0x26, 0x04}
+	flagIsAdjust              = ldtaFlagBit{0x26, 0x02}
+	flagCollapseTransform     = ldtaFlagBit{0x27, 0x80}
+	flagShy                   = ldtaFlagBit{0x27, 0x40}
+	flagLocked                = ldtaFlagBit{0x27, 0x20}
+	flagFrameBlendEnabled     = ldtaFlagBit{0x27, 0x10}
+	flagMotionBlur            = ldtaFlagBit{0x27, 0x08}
+	flagEffectsEnabled        = ldtaFlagBit{0x27, 0x04}
+	flagAudioEnabled          = ldtaFlagBit{0x27, 0x02}
+	flagVisible               = ldtaFlagBit{0x27, 0x01}
+)
 
 // setFlagBit flips a single ldta flag bit to match v. Returns an error
 // when the ldta chunk is missing or too short for the targeted byte
@@ -308,7 +372,7 @@ func (b *layerBackrefs) SetName(newName string) error {
 }
 
 func (b *layerBackrefs) SetComment(comment string) error {
-	encoded := encodeCmta(comment)
+	encoded := codec.EncodeCmta(comment)
 	if b.commentChunk != nil {
 		b.commentChunk.Data = encoded
 	} else {
@@ -359,7 +423,7 @@ func (b *layerBackrefs) SetLightSource(target *Layer) error {
 		return fmt.Errorf("layer: ldta too short for LightSource write (len=%d)", len(b.ldta.Data))
 	}
 	if target == nil {
-		binary.BigEndian.PutUint32(b.ldta.Data[0x28:0x2C], lightSourceUndefined)
+		binary.BigEndian.PutUint32(b.ldta.Data[0x28:0x2C], codec.LightSourceUndefined)
 		return nil
 	}
 	binary.BigEndian.PutUint32(b.ldta.Data[0x28:0x2C], target.ID)
@@ -390,7 +454,7 @@ func (b *layerBackrefs) SetText(newText string) error {
 	if b.btdsChunk == nil {
 		return fmt.Errorf("layer: not a text layer")
 	}
-	body, bodyOff, err := extractBtdkBody(b.btdsChunk.Data)
+	body, bodyOff, err := codec.ExtractBtdkBody(b.btdsChunk.Data)
 	if err != nil {
 		return fmt.Errorf("layer: %w", err)
 	}
@@ -404,7 +468,7 @@ func (b *layerBackrefs) SetText(newText string) error {
 	}
 	start := bodyOff + t.SrcStart
 	end := bodyOff + t.SrcEnd
-	encoded := encodeAEPSText(newText)
+	encoded := codec.EncodeAEPSText(newText)
 	oldLen := end - start
 	if len(encoded) != oldLen {
 		return fmt.Errorf("layer: SetText length mismatch (new=%d bytes, old=%d bytes — length-preserving only; pad input to match)",
@@ -422,7 +486,7 @@ func (b *layerBackrefs) splicePSValue(path string, newSrc []byte) ([]byte, error
 	if b.btdsChunk == nil {
 		return nil, fmt.Errorf("layer: not a text layer")
 	}
-	body, bodyOff, err := extractBtdkBody(b.btdsChunk.Data)
+	body, bodyOff, err := codec.ExtractBtdkBody(b.btdsChunk.Data)
 	if err != nil {
 		return nil, fmt.Errorf("layer: %w", err)
 	}
@@ -467,22 +531,22 @@ func (b *layerBackrefs) splicePSValue(path string, newSrc []byte) ([]byte, error
 }
 
 func (b *layerBackrefs) SetRunFontSize(runIdx int, sizePts float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/1", []byte(formatPSNumber(sizePts)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/1", []byte(codec.FormatPSNumber(sizePts)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunTracking(runIdx int, tracking float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/8", []byte(formatPSNumber(tracking)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/8", []byte(codec.FormatPSNumber(tracking)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunBaselineShift(runIdx int, shift float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/9", []byte(formatPSNumber(shift)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/9", []byte(codec.FormatPSNumber(shift)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunLeading(runIdx int, leading float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/5", []byte(formatPSNumber(leading)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/5", []byte(codec.FormatPSNumber(leading)))
 	return err
 }
 
@@ -491,12 +555,12 @@ func (b *layerBackrefs) SetRunAutoLeading(runIdx int, auto bool) error {
 	if auto {
 		v = "true"
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/4", []byte(v))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/4", []byte(v))
 	return err
 }
 
 func (b *layerBackrefs) SetRunFontIndex(runIdx, fontIdx int) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/0", []byte(strconv.Itoa(fontIdx)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/0", []byte(strconv.Itoa(fontIdx)))
 	return err
 }
 
@@ -505,7 +569,7 @@ func (b *layerBackrefs) SetRunFauxBold(runIdx int, on bool) error {
 	if on {
 		v = "true"
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/2", []byte(v))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/2", []byte(v))
 	return err
 }
 
@@ -514,32 +578,32 @@ func (b *layerBackrefs) SetRunFauxItalic(runIdx int, on bool) error {
 	if on {
 		v = "true"
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/3", []byte(v))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/3", []byte(v))
 	return err
 }
 
 func (b *layerBackrefs) SetRunHorizontalScale(runIdx int, scale float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/6", []byte(formatPSNumber(scale)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/6", []byte(codec.FormatPSNumber(scale)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunVerticalScale(runIdx int, scale float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/7", []byte(formatPSNumber(scale)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/7", []byte(codec.FormatPSNumber(scale)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunTsume(runIdx int, tsume float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/36", []byte(formatPSNumber(tsume)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/36", []byte(codec.FormatPSNumber(tsume)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunFillColor(runIdx int, rgba [4]float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/53/0/1", formatPSColorArray(rgba))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/53/0/1", codec.FormatPSColorArray(rgba))
 	return err
 }
 
 func (b *layerBackrefs) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/54/0/1", formatPSColorArray(rgba))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/54/0/1", codec.FormatPSColorArray(rgba))
 	return err
 }
 
@@ -548,12 +612,12 @@ func (b *layerBackrefs) SetRunApplyStroke(runIdx int, apply bool) error {
 	if apply {
 		v = "true"
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/57", []byte(v))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/57", []byte(v))
 	return err
 }
 
 func (b *layerBackrefs) SetRunStrokeWidth(runIdx int, width float64) error {
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/63", []byte(formatPSNumber(width)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/63", []byte(codec.FormatPSNumber(width)))
 	return err
 }
 
@@ -561,7 +625,7 @@ func (b *layerBackrefs) SetRunCapsOption(runIdx int, caps TextCapsOption) error 
 	if caps < TextCapsNormal || caps > TextCapsAllSmall {
 		return fmt.Errorf("layer: invalid TextCapsOption %d", int(caps))
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/12", []byte(strconv.Itoa(int(caps))))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/12", []byte(strconv.Itoa(int(caps))))
 	return err
 }
 
@@ -569,7 +633,7 @@ func (b *layerBackrefs) SetRunBaselineOption(runIdx int, base TextBaselineOption
 	if base < TextBaselineNormal || base > TextBaselineSubscript {
 		return fmt.Errorf("layer: invalid TextBaselineOption %d", int(base))
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/13", []byte(strconv.Itoa(int(base))))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/13", []byte(strconv.Itoa(int(base))))
 	return err
 }
 
@@ -578,7 +642,7 @@ func (b *layerBackrefs) SetRunStrokeOverFill(runIdx int, over bool) error {
 	if over {
 		v = "true"
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/58", []byte(v))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/58", []byte(v))
 	return err
 }
 
@@ -586,7 +650,7 @@ func (b *layerBackrefs) SetRunAutoKernType(runIdx int, kt TextAutoKernType) erro
 	if kt < TextAutoKernNoAuto || kt > TextAutoKernOptical {
 		return fmt.Errorf("layer: invalid TextAutoKernType %d", int(kt))
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/11", []byte(strconv.Itoa(int(kt))))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/11", []byte(strconv.Itoa(int(kt))))
 	return err
 }
 
@@ -595,7 +659,7 @@ func (b *layerBackrefs) SetRunNoBreak(runIdx int, on bool) error {
 	if on {
 		v = "true"
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/52", []byte(v))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/52", []byte(v))
 	return err
 }
 
@@ -603,7 +667,7 @@ func (b *layerBackrefs) SetRunLineJoinType(runIdx int, j TextLineJoinType) error
 	if j < TextLineJoinMiter || j > TextLineJoinBevel {
 		return fmt.Errorf("layer: invalid TextLineJoinType %d", int(j))
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/62", []byte(strconv.Itoa(int(j))))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/62", []byte(strconv.Itoa(int(j))))
 	return err
 }
 
@@ -611,37 +675,37 @@ func (b *layerBackrefs) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 	if d < TextDigitSetDefault || d > TextDigitSetArabicRTL {
 		return fmt.Errorf("layer: invalid TextDigitSet %d", int(d))
 	}
-	_, err := b.splicePSValue(runStylePath(runIdx)+"/70", []byte(strconv.Itoa(int(d))))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/70", []byte(strconv.Itoa(int(d))))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphJustification(paraIdx int, j TextJustification) error {
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/0", []byte(strconv.Itoa(int(j))))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/0", []byte(strconv.Itoa(int(j))))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/1", []byte(formatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/1", []byte(codec.FormatPSNumber(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphStartIndent(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/2", []byte(formatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/2", []byte(codec.FormatPSNumber(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphEndIndent(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/3", []byte(formatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/3", []byte(codec.FormatPSNumber(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphSpaceBefore(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/4", []byte(formatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/4", []byte(codec.FormatPSNumber(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphSpaceAfter(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/5", []byte(formatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/5", []byte(codec.FormatPSNumber(v)))
 	return err
 }
 
@@ -650,7 +714,7 @@ func (b *layerBackrefs) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	if on {
 		v = "true"
 	}
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/9", []byte(v))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/9", []byte(v))
 	return err
 }
 
@@ -658,7 +722,7 @@ func (b *layerBackrefs) SetParagraphLeadingType(paraIdx int, lt TextLeadingType)
 	if lt < TextLeadingRoman || lt > TextLeadingJapanese {
 		return fmt.Errorf("layer: invalid TextLeadingType %d", int(lt))
 	}
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/8", []byte(strconv.Itoa(int(lt))))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/8", []byte(strconv.Itoa(int(lt))))
 	return err
 }
 
@@ -667,7 +731,7 @@ func (b *layerBackrefs) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	if on {
 		v = "true"
 	}
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/21", []byte(v))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/21", []byte(v))
 	return err
 }
 
@@ -675,7 +739,7 @@ func (b *layerBackrefs) SetParagraphDirection(paraIdx int, d TextParagraphDirect
 	if d < TextDirectionLeftToRight || d > TextDirectionRightToLeft {
 		return fmt.Errorf("layer: invalid TextParagraphDirection %d", int(d))
 	}
-	_, err := b.splicePSValue(paragraphStylePath(paraIdx)+"/33", []byte(strconv.Itoa(int(d))))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/33", []byte(strconv.Itoa(int(d))))
 	return err
 }
 
@@ -701,7 +765,7 @@ func (b *layerBackrefs) AddFont(fontName string) (int, error) {
 	if fontName == "" {
 		return -1, fmt.Errorf("layer: fontName must be non-empty")
 	}
-	body, bodyOff, err := extractBtdkBody(b.btdsChunk.Data)
+	body, bodyOff, err := codec.ExtractBtdkBody(b.btdsChunk.Data)
 	if err != nil {
 		return -1, fmt.Errorf("layer: %w", err)
 	}
@@ -724,7 +788,7 @@ func (b *layerBackrefs) AddFont(fontName string) (int, error) {
 		last := arr.Arr[len(arr.Arr)-1]
 		insertAt = last.SrcEnd
 	}
-	newEntry := serializeFontEntry(fontName)
+	newEntry := codec.SerializeFontEntry(fontName)
 
 	// Build the byte sequence to inject: leading space + serialized entry.
 	var injected []byte

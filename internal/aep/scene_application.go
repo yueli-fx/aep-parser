@@ -51,8 +51,12 @@ func ParseReader(r io.ReadSeeker) (*Application, error) {
 //
 // Source: py-aep `binary/item_chunks.py::HeadChunk`.
 func (a *Application) Version() string {
-	if a.Project == nil || a.Project.back == nil {
+	if a.Project == nil {
 		return ""
 	}
-	return a.Project.back.versionString()
+	pb := projectBack(a.Project)
+	if pb == nil {
+		return ""
+	}
+	return pb.VersionString()
 }

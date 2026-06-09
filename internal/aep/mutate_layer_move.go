@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // MoveLayer reorders the layer at `from` to position `to` in c.Layers
@@ -43,8 +44,8 @@ import (
 // facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
 func MoveLayer(c *Composition, from, to int) error {
 	// 1. Validate refuse-cases.
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil || cb.itemList == nil {
+	cb := compositionBack(c)
+	if cb == nil || cb.itemList == nil {
 		return fmt.Errorf("MoveLayer: comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
 	n := len(c.Layers)
@@ -59,7 +60,7 @@ func MoveLayer(c *Composition, from, to int) error {
 	}
 
 	source := c.Layers[from]
-	sourceBack := source.layerBack()
+	sourceBack := layerBack(source)
 	if sourceBack == nil || sourceBack.layrList == nil {
 		return fmt.Errorf("MoveLayer: layer %q at idx %d has no Layr chunk back-ref", source.Name, from)
 	}
@@ -101,8 +102,8 @@ func MoveLayer(c *Composition, from, to int) error {
 		oldIndexes[i] = l.Index
 	}
 	oldWarningsLen := 0
-	if c.proj != nil {
-		oldWarningsLen = len(c.proj.Warnings)
+	if scene.CompositionProj(c) != nil {
+		oldWarningsLen = len(scene.CompositionProj(c).Warnings)
 	}
 
 	// 6. Extract the source block (will be re-inserted at the new slot).
@@ -123,7 +124,7 @@ func MoveLayer(c *Composition, from, to int) error {
 	if to < len(cutLayers) {
 		// Insert BEFORE the Layr block of cutLayers[to].
 		target := cutLayers[to]
-		targetBack := target.layerBack()
+		targetBack := layerBack(target)
 		if targetBack == nil || targetBack.layrList == nil {
 			return fmt.Errorf("MoveLayer: target layer %q has no Layr backref", target.Name)
 		}
@@ -136,7 +137,7 @@ func MoveLayer(c *Composition, from, to int) error {
 		// Insert AFTER the last remaining layer's block — scan to end of
 		// that block.
 		lastLayer := cutLayers[len(cutLayers)-1]
-		lastLayerBack := lastLayer.layerBack()
+		lastLayerBack := layerBack(lastLayer)
 		if lastLayerBack == nil || lastLayerBack.layrList == nil {
 			return fmt.Errorf("MoveLayer: last cut layer %q has no Layr backref", lastLayer.Name)
 		}
@@ -171,14 +172,14 @@ func MoveLayer(c *Composition, from, to int) error {
 
 	// 13. Warnings-as-failure. Defensive — no re-parse here, but pattern
 	//     stays consistent with DeleteLayer/DuplicateLayer.
-	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
+	if scene.CompositionProj(c) != nil && len(scene.CompositionProj(c).Warnings) > oldWarningsLen {
 		cb.itemList.Children = oldChildren
 		c.Layers = oldLayers
 		for i, l := range c.Layers {
 			l.Index = oldIndexes[i]
 		}
-		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
-		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
+		newWarnings := append([]string(nil), scene.CompositionProj(c).Warnings[oldWarningsLen:]...)
+		scene.CompositionProj(c).Warnings = scene.CompositionProj(c).Warnings[:oldWarningsLen]
 		return fmt.Errorf("MoveLayer: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
 	}
 
@@ -202,7 +203,7 @@ func indexOfChunk(children []*rifx.Chunk, target *rifx.Chunk) int {
 // against AE 2020 + AE 2025).
 //
 // Each wrapper finds the current slice index of the receiver via pointer
-// identity in `l.comp.Layers`; this avoids relying on `Layer.Index`,
+// identity in `scene.LayerComp(l).Layers`; this avoids relying on `Layer.Index`,
 // which is parse-time and may be stale if the comp was previously
 // mutated by DeleteLayer / DuplicateLayer (those don't re-index).
 
@@ -212,7 +213,7 @@ func indexOfChunk(children []*rifx.Chunk, target *rifx.Chunk) int {
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
 func MoveToBeginning(l *Layer) error {
-	c, idx, err := l.locateInComp("MoveToBeginning")
+	c, idx, err := locateInComp(l, "MoveToBeginning")
 	if err != nil {
 		return err
 	}
@@ -225,7 +226,7 @@ func MoveToBeginning(l *Layer) error {
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveToEnd method form; the aep facade re-exports it post-split.
 func MoveToEnd(l *Layer) error {
-	c, idx, err := l.locateInComp("MoveToEnd")
+	c, idx, err := locateInComp(l, "MoveToEnd")
 	if err != nil {
 		return err
 	}
@@ -241,7 +242,7 @@ func MoveToEnd(l *Layer) error {
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveAfter method form; the aep facade re-exports it post-split.
 func MoveAfter(l, other *Layer) error {
-	c, fromIdx, otherIdx, err := l.locatePair("MoveAfter", other)
+	c, fromIdx, otherIdx, err := locatePair(l, "MoveAfter", other)
 	if err != nil {
 		return err
 	}
@@ -267,7 +268,7 @@ func MoveAfter(l, other *Layer) error {
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveBefore method form; the aep facade re-exports it post-split.
 func MoveBefore(l, other *Layer) error {
-	c, fromIdx, otherIdx, err := l.locatePair("MoveBefore", other)
+	c, fromIdx, otherIdx, err := locatePair(l, "MoveBefore", other)
 	if err != nil {
 		return err
 	}
@@ -283,30 +284,32 @@ func MoveBefore(l, other *Layer) error {
 	return MoveLayer(c, fromIdx, to)
 }
 
-func (l *Layer) locateInComp(op string) (*Composition, int, error) {
-	if l.comp == nil {
+// locateInComp / locatePair are serializer-stage free functions (the receiver
+// is a scene type post package-split).
+func locateInComp(l *Layer, op string) (*Composition, int, error) {
+	if scene.LayerComp(l) == nil {
 		return nil, 0, fmt.Errorf("%s: layer %q has no comp back-ref (built outside parser?)", op, l.Name)
 	}
-	for i, other := range l.comp.Layers {
+	for i, other := range scene.LayerComp(l).Layers {
 		if other == l {
-			return l.comp, i, nil
+			return scene.LayerComp(l), i, nil
 		}
 	}
-	return nil, 0, fmt.Errorf("%s: layer %q not present in its own comp %q (parse-tree inconsistency)", op, l.Name, l.comp.Name)
+	return nil, 0, fmt.Errorf("%s: layer %q not present in its own comp %q (parse-tree inconsistency)", op, l.Name, scene.LayerComp(l).Name)
 }
 
-func (l *Layer) locatePair(op string, other *Layer) (*Composition, int, int, error) {
+func locatePair(l *Layer, op string, other *Layer) (*Composition, int, int, error) {
 	if other == nil {
 		return nil, 0, 0, fmt.Errorf("%s: other layer is nil", op)
 	}
 	if other == l {
 		return nil, 0, 0, fmt.Errorf("%s: cannot %s self", op, op)
 	}
-	c, fromIdx, err := l.locateInComp(op)
+	c, fromIdx, err := locateInComp(l, op)
 	if err != nil {
 		return nil, 0, 0, err
 	}
-	if other.comp != c {
+	if scene.LayerComp(other) != c {
 		return nil, 0, 0, fmt.Errorf("%s: other layer %q belongs to a different comp", op, other.Name)
 	}
 	for i, x := range c.Layers {

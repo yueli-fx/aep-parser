@@ -7,6 +7,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // compositionBackrefs holds the rifx.Chunk references that power
@@ -33,9 +34,9 @@ type compositionBackrefs struct {
 	// a snapshot is safe.
 	tickRate float64
 
-	// frameRate is kept in sync by SetFrameRate and used by SetDuration and
+	// FrameRateHz is kept in sync by SetFrameRate and used by SetDuration and
 	// SetDisplayStartFrame to convert frame/second quantities.
-	frameRate float64
+	FrameRateHz float64
 
 	// cdta is the underlying cdta chunk reference, captured by
 	// parseComposition. Used by SetBGColor / SetShutterAngle /
@@ -71,26 +72,37 @@ type compositionBackrefs struct {
 
 var _ CompositionWriter = (*compositionBackrefs)(nil)
 
-func (b *compositionBackrefs) cdtaData() []byte {
+// compositionBack returns the concrete back-refs behind a Composition's writer
+// interface for serializer-stage raw chunk access. Returns nil when the comp
+// was built outside the parser. Free function (the receiver is a scene type
+// post package-split).
+func compositionBack(c *Composition) *compositionBackrefs {
+	if cb, ok := scene.CompositionBack(c).(*compositionBackrefs); ok {
+		return cb
+	}
+	return nil
+}
+
+func (b *compositionBackrefs) CdtaData() []byte {
 	if b == nil || b.cdta == nil {
 		return nil
 	}
 	return b.cdta.Data
 }
 
-func (b *compositionBackrefs) prdaData() []byte {
+func (b *compositionBackrefs) PrdaData() []byte {
 	if b == nil || b.prdaChunk == nil {
 		return nil
 	}
 	return b.prdaChunk.Data
 }
 
-// guideLdatData returns the live ldat byte slice under the comp's Item-level
+// GuideLdatData returns the live ldat byte slice under the comp's Item-level
 // Gide → list container — the single source of truth for ruler guides.
 // syncGuides copies each guide's scene-owned 16-byte block back into this slice
 // (paired by index) at WriteAEP time. Returns nil when the comp has no guides
 // container (built outside the parser, or no guides).
-func (b *compositionBackrefs) guideLdatData() []byte {
+func (b *compositionBackrefs) GuideLdatData() []byte {
 	if b == nil || b.itemList == nil {
 		return nil
 	}
@@ -204,7 +216,7 @@ func (b *compositionBackrefs) SetName(newName string) error {
 	return nil
 }
 
-// SetFrameRate writes fps to cdta and keeps b.frameRate in sync so
+// SetFrameRate writes fps to cdta and keeps b.FrameRateHz in sync so
 // SetDuration / SetDisplayStartFrame can use the current rate.
 func (b *compositionBackrefs) SetFrameRate(fps float64) error {
 	if b.cdta == nil {
@@ -220,7 +232,7 @@ func (b *compositionBackrefs) SetFrameRate(fps float64) error {
 	frac := uint16(math.Round((fps - float64(whole)) * 65536.0))
 	binary.BigEndian.PutUint16(b.cdta.Data[codec.CdtaFrameRateWhole:codec.CdtaFrameRateWhole+2], whole)
 	binary.BigEndian.PutUint16(b.cdta.Data[codec.CdtaFrameRateFrac:codec.CdtaFrameRateFrac+2], frac)
-	b.frameRate = float64(whole) + float64(frac)/65536.0
+	b.FrameRateHz = float64(whole) + float64(frac)/65536.0
 	return nil
 }
 
@@ -231,13 +243,13 @@ func (b *compositionBackrefs) SetDuration(seconds float64) error {
 	if len(b.cdta.Data) < codec.CdtaDuration+4 {
 		return fmt.Errorf("comp %q: cdta too short for Duration write (len=%d)", b.compName, len(b.cdta.Data))
 	}
-	if b.frameRate <= 0 {
+	if b.FrameRateHz <= 0 {
 		return fmt.Errorf("comp %q: cannot SetDuration without a positive FrameRate (call SetFrameRate first)", b.compName)
 	}
 	if seconds < 0 {
 		return fmt.Errorf("comp %q: Duration %g must be non-negative", b.compName, seconds)
 	}
-	frames := uint32(math.Round(seconds * b.frameRate))
+	frames := uint32(math.Round(seconds * b.FrameRateHz))
 	binary.BigEndian.PutUint32(b.cdta.Data[codec.CdtaDuration:codec.CdtaDuration+4], frames)
 	return nil
 }
@@ -370,13 +382,13 @@ func (b *compositionBackrefs) SetDisplayStartTime(seconds float64) error {
 	return nil
 }
 
-// SetDisplayStartFrame delegates to SetDisplayStartTime; frameRate is read
-// from b.frameRate which SetFrameRate keeps in sync.
+// SetDisplayStartFrame delegates to SetDisplayStartTime; FrameRateHz is read
+// from b.FrameRateHz which SetFrameRate keeps in sync.
 func (b *compositionBackrefs) SetDisplayStartFrame(frame int) error {
-	if b.frameRate <= 0 {
+	if b.FrameRateHz <= 0 {
 		return fmt.Errorf("comp %q: FrameRate not set; cannot convert frame to seconds", b.compName)
 	}
-	return b.SetDisplayStartTime(float64(frame) / b.frameRate)
+	return b.SetDisplayStartTime(float64(frame) / b.FrameRateHz)
 }
 
 func (b *compositionBackrefs) SetRenderer(name string) error {

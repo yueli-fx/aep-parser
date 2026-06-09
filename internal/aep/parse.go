@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // Open parses an .aep file by path and returns the Project.
@@ -31,7 +32,7 @@ func FromReader(r io.ReadSeeker) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
-	if pb := proj.projectBack(); pb != nil {
+	if pb := projectBack(proj); pb != nil {
 		pb.root = root
 	}
 	return proj, nil
@@ -39,7 +40,8 @@ func FromReader(r io.ReadSeeker) (*Project, error) {
 
 func parseProject(root *rifx.Chunk) (*Project, error) {
 	pb := &projectBackrefs{}
-	proj := &Project{back: pb}
+	proj := &Project{}
+	scene.SetProjectBack(proj, pb)
 
 	// Project-level header chunks: nhed (32-byte) + nnhd (40-byte) sit
 	// as direct children of the root LIST/RIFX. Both carry a copy of
@@ -116,7 +118,7 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 	if err := walk(root); err != nil {
 		return nil, err
 	}
-	proj.initDerived(root)
+	initDerived(proj, root)
 	parseRenderQueue(root, proj)
 	return proj, nil
 }
@@ -130,7 +132,8 @@ func parseProject(root *rifx.Chunk) (*Project, error) {
 //   - rootFold = root Egg! 下第一个 formType=Fold 的 LIST（cached for V2 mutations）
 //
 // 参数 rifxRoot 是 parseProject 顶层 *rifx.Chunk（formType=Egg!）。
-func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
+// Free function (receiver is a scene type post package-split).
+func initDerived(p *Project, rifxRoot *rifx.Chunk) {
 	var maxID uint32
 	for _, c := range p.Compositions {
 		if c.ID > maxID {
@@ -152,12 +155,12 @@ func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
 			maxID = fo.ID
 		}
 	}
-	p.nextItemID = maxID + 1
+	scene.SetProjectNextItemID(p, maxID+1)
 
-	pb := p.projectBack()
+	pb := projectBack(p)
 	if pb == nil {
 		pb = &projectBackrefs{}
-		p.back = pb
+		scene.SetProjectBack(p, pb)
 	}
 	for _, c := range rifxRoot.Children {
 		if c.IsList() && c.FormType == rifx.IDFold {
@@ -168,9 +171,10 @@ func (p *Project) initDerived(rifxRoot *rifx.Chunk) {
 }
 
 // allocItemID 返回下一个可用 Item ID 并递增计数器。Monotonic，不 reuse。
-func (p *Project) allocItemID() uint32 {
-	id := p.nextItemID
-	p.nextItemID++
+// Free function (receiver is a scene type post package-split).
+func allocItemID(p *Project) uint32 {
+	id := scene.ProjectNextItemID(p)
+	scene.SetProjectNextItemID(p, id+1)
 	return id
 }
 
@@ -204,13 +208,13 @@ func parseItem(item *rifx.Chunk, proj *Project) error {
 		if err != nil {
 			return fmt.Errorf("aep: parse comp %q: %w", name, err)
 		}
-		comp.proj = proj // wire back-pointer so Layer.SourceComposition() works
+		scene.SetCompositionProj(comp, proj) // wire back-pointer so Layer.SourceComposition() works
 		comp.Comment = comment
 		comp.Label = label
-		cb, ok := comp.back.(*compositionBackrefs)
-		if !ok || cb == nil {
+		cb := compositionBack(comp)
+		if cb == nil {
 			cb = &compositionBackrefs{compName: comp.Name}
-			comp.back = cb
+			scene.SetCompositionBack(comp, cb)
 		}
 		cb.itemCmtaChunk = cmta
 		cb.itemIdtaChunk = idta
@@ -224,10 +228,10 @@ func parseItem(item *rifx.Chunk, proj *Project) error {
 		}
 		footage.Comment = comment
 		footage.Label = label
-		fb, ok := footage.back.(*footageBackrefs)
-		if !ok || fb == nil {
+		fb := footageBack(footage)
+		if fb == nil {
 			fb = &footageBackrefs{itemID: footage.ID, itemName: footage.Name}
-			footage.back = fb
+			scene.SetFootageBack(footage, fb)
 		}
 		fb.itemID = footage.ID
 		fb.itemName = footage.Name

@@ -11,9 +11,9 @@ import (
 func TestTextManualKerningReal(t *testing.T) {
 	proj := openTextAE24More(t)
 	cases := []struct {
-		layer        string
-		wantKerning  int
-		wantManual   []int
+		layer       string
+		wantKerning int
+		wantManual  []int
 	}{
 		// fixture text is "AaBb" (4 chars) for the pt_kerning_* variants.
 		{"pt_kerning_neg50", -50, []int{-50, -50, -50, -50}},

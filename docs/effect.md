@@ -14,61 +14,6 @@ internal index in the effect template.
 
 # Effect object
 
-Effect represents one effect instance applied to a layer (e.g. a Gaussian Blur applied to a footage layer). The MatchName identifies the effect type ("ADBE Gaussian Blur 2", "ADBE Gradient Wipe", etc.) and Parameters holds each tweakable knob as a Property. Parameter match-names are internal numeric suffixes like "ADBE Gaussian Blur 2-0001".
-
-## Attributes
-
-### Effect.MatchName
-
-```go
-MatchName string
-```
-
-effect type, e.g. "ADBE Gaussian Blur 2"
-
-read-only
-
-### Effect.Name
-
-```go
-Name string
-```
-
-user-set display name (currently mirrors MatchName)
-
-read-only
-
-### Effect.Parameters
-
-```go
-Parameters []*Property
-```
-
-effect knobs (Blurriness, Completion, …)
-
-read-only
-
-**Example:**
-
-```go
-var comp *aep.Composition
-layer := comp.LayerByID(1)
-if layer == nil {
-	return
-}
-// set Gaussian Blur's Blurriness to 20
-for _, fx := range layer.Effects {
-	if fx.MatchName != "ADBE Gaussian Blur 2" {
-		continue
-	}
-	for _, p := range fx.Parameters {
-		if p.MatchName == "ADBE Gaussian Blur 2-0001" && len(p.Keyframes) == 0 {
-			_ = p.SetStaticValue(20.0)
-		}
-	}
-}
-```
-
 <!-- Hand-authored note. -->
 
 ## Tested coverage

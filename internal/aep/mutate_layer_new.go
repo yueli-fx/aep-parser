@@ -13,14 +13,15 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // CompItemListForTest exposes a Composition's underlying Item LIST chunk
 // for tests that need to inspect Item-level structure (Layr placement +
 // Ewst siblings). Not part of public API.
 func CompItemListForTest(c *Composition) *rifx.Chunk {
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil {
+	cb := compositionBack(c)
+	if cb == nil {
 		return nil
 	}
 	return cb.itemList
@@ -115,11 +116,11 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	if name == "" {
 		return nil, fmt.Errorf("ShapeLayer name cannot be empty")
 	}
-	if c.proj == nil {
+	if scene.CompositionProj(c) == nil {
 		return nil, fmt.Errorf("internal: comp has no project back-ref")
 	}
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil || cb.itemList == nil {
+	cb := compositionBack(c)
+	if cb == nil || cb.itemList == nil {
 		return nil, fmt.Errorf("internal: comp has no itemList chunk")
 	}
 
@@ -134,14 +135,14 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 		Type: LayerTypeShape,
 		Name: name,
 		ID:   layerID,
-		comp: c,
-		back: baseBack,
 	}
+	scene.SetLayerComp(base, c)
+	scene.SetLayerBack(base, baseBack)
 	// Bump project nextItemID so head-chunk counter sync (write.go::
 	// syncHeadCounters) covers our layer ID. AE 2025 validates head counter
 	// >= max(item/layer IDs) and silently drops layers above it.
-	if layerID >= c.proj.nextItemID {
-		c.proj.nextItemID = layerID + 1
+	if layerID >= scene.ProjectNextItemID(scene.CompositionProj(c)) {
+		scene.SetProjectNextItemID(scene.CompositionProj(c), layerID+1)
 	}
 
 	// Bump cdta @0x18 (codec.CdtaSecondaryDivisor18) from 600 (fresh-comp marker)
@@ -161,11 +162,12 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	s := WrapShapeLayer(base)
 
 	// 2. Lower runtime → LIST(Layr) chunk.
+	cProj := scene.CompositionProj(c)
 	ctx := &lowerCtx{
 		tickRate:     c.TickRate,
 		compDuration: c.Duration,
-		capabilities: Capabilities(c.proj.target),
-		nextLayerID:  c.proj.allocItemID,
+		capabilities: Capabilities(scene.ProjectTarget(cProj)),
+		nextLayerID:  func() uint32 { return allocItemID(cProj) },
 	}
 	layrChunk, err := lowerShapeLayer(s, ctx)
 	if err != nil {
@@ -176,7 +178,7 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	//    save a slice copy (since the insert is mid-slice now, not append-end).
 	oldItemChildren := append([]*rifx.Chunk(nil), cb.itemList.Children...)
 	oldLayersLen := len(c.Layers)
-	oldWarningsLen := len(c.proj.Warnings)
+	oldWarningsLen := len(scene.CompositionProj(c).Warnings)
 
 	// 4. Commit: insert Layr (+ its Ewst sibling) into itemList BEFORE
 	//    first template service layer (DLay/SLay/CLay/SecL) — AE 2025
@@ -191,7 +193,7 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	//    instantiation stage (an empty ShapeLayer reproduces this even with
 	//    zero shape kids).
 	baseBack.layrList = layrChunk
-	base.shapeDirty = true // gate for syncShapeLayerChunks
+	scene.SetLayerShapeDirty(base, true) // gate for syncShapeLayerChunks
 	// AE's per-Layr serialized unit is: Layr LIST, empty Ewst LIST, then two
 	// fvdv/fiop/ftts/foac/fiac/fipc/fifl groups (lowerLayerSiblings). The Ewst
 	// alone passes a single user layer, but AE silent-drops every layer past
@@ -212,11 +214,11 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	// 5. Warnings-as-failure: if any warnings appeared, rollback.
 	// This path doesn't re-parse, so this is a defensive guard for a future
 	// re-parse closed loop to rely on.
-	if len(c.proj.Warnings) != oldWarningsLen {
+	if len(scene.CompositionProj(c).Warnings) != oldWarningsLen {
 		cb.itemList.Children = oldItemChildren
 		c.Layers = c.Layers[:oldLayersLen]
-		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
-		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
+		newWarnings := append([]string(nil), scene.CompositionProj(c).Warnings[oldWarningsLen:]...)
+		scene.CompositionProj(c).Warnings = scene.CompositionProj(c).Warnings[:oldWarningsLen]
 		return nil, fmt.Errorf("internal: NewShapeLayer produced %d parser warning(s): %v", len(newWarnings), newWarnings)
 	}
 

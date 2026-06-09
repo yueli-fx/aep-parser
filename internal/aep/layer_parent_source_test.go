@@ -12,10 +12,10 @@ func TestLayerParent(t *testing.T) {
 	// Three sibling layers in one comp: L10 (no parent), L20 (parent=L10),
 	// L30 (parent=999 — orphan, no such layer).
 	cases := []struct {
-		name        string
-		layerIndex  int
-		wantNil     bool
-		wantParent  uint32 // expected parent's ID when wantNil == false
+		name       string
+		layerIndex int
+		wantNil    bool
+		wantParent uint32 // expected parent's ID when wantNil == false
 	}{
 		{"root layer has no parent", 0, true, 0},
 		{"child resolves to parent", 1, false, 10},

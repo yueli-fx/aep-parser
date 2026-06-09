@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parseKeyframes decodes a keyframe stream into prop.Keyframes.
@@ -37,10 +38,10 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 			prop.MatchName, count, bpk, len(ldat.Data))
 		return
 	}
-	if prop.back == nil {
-		prop.back = &propertyBackrefs{}
+	if propertyBack(prop) == nil {
+		scene.SetPropertyBack(prop, &propertyBackrefs{})
 	}
-	pb := prop.propertyBack()
+	pb := propertyBack(prop)
 	pb.ldat = ldat
 	pb.lhd3 = lhd3
 	pb.bytesPerKF = bpk
@@ -68,15 +69,14 @@ func parseKeyframes(prop *Property, lhd3, ldat *rifx.Chunk, ctx *parseCtx) {
 
 	for i := 0; i < count; i++ {
 		offset := i * bpk
-		kf := &Keyframe{
-			back: &keyframeBackrefs{
-				ldat:     ldat,
-				offset:   offset,
-				dims:     prop.Components,
-				tickRate: ctx.tickRate,
-				compFps:  ctx.compFps,
-			},
-		}
+		kf := &Keyframe{}
+		setKeyframeBack(kf, &keyframeBackrefs{
+			ldat:     ldat,
+			offset:   offset,
+			dims:     prop.Components,
+			tickRate: ctx.tickRate,
+			compFps:  ctx.compFps,
+		})
 		kf.Time = float64(binary.BigEndian.Uint32(ldat.Data[offset:offset+4])) / ctx.tickRate
 		kf.Value = readKFValue(ldat.Data, offset, prop.Components)
 		decodeEasing(kf, ldat.Data[offset:offset+bpk])
@@ -128,10 +128,8 @@ func decodeEasing(kf *Keyframe, blk []byte) {
 	kf.InInterp = InterpType(blk[0x04])
 	kf.OutInterp = InterpType(blk[0x05])
 	dims := 0
-	if kf.back != nil {
-		if kb, ok := kf.back.(*keyframeBackrefs); ok {
-			dims = kb.dims
-		}
+	if kb := keyframeBack(kf); kb != nil {
+		dims = kb.dims
 	}
 	if dims <= 0 {
 		dims = 1

@@ -5,7 +5,18 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
+
+// maskBack returns the concrete back-refs behind a Mask's writer interface for
+// serializer-stage raw chunk access. Returns nil when the mask was built
+// outside the parser. Free function (the receiver is a scene type post split).
+func maskBack(m *Mask) *maskBackrefs {
+	if mb, ok := scene.MaskBack(m).(*maskBackrefs); ok {
+		return mb
+	}
+	return nil
+}
 
 // maskBackrefs holds the rifx.Chunk references that power a parsed Mask's
 // length-preserving setters (SetMode / SetInverted / SetColor / SetLocked /
@@ -30,6 +41,16 @@ type maskBackrefs struct {
 }
 
 var _ MaskWriter = (*maskBackrefs)(nil)
+
+// ShphData exposes the live shph chunk bytes so the scene SetClosed accessor
+// refreshes Mask.ShphRaw after a back-side write. Returns nil for masks built
+// outside the parser / static masks without a shph reference.
+func (b *maskBackrefs) ShphData() []byte {
+	if b == nil || b.shph == nil {
+		return nil
+	}
+	return b.shph.Data
+}
 
 func (b *maskBackrefs) SetMode(mode MaskMode) error {
 	if b.mkif == nil {

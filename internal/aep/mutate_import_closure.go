@@ -6,6 +6,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // isFileBacked reports whether f is file footage eligible for path-based dedup
@@ -66,18 +67,18 @@ func locateItemBlockByID(container *rifx.Chunk, id uint32) (*rifx.Chunk, int, in
 // CALLER (insertLayerCrossProject) restores dest via its outer snapshot — this
 // helper does not self-rollback.
 func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, error) {
-	container, start, end := locateItemBlockByID(src.projectBack().rootFold, srcID)
+	container, start, end := locateItemBlockByID(projectBack(src).rootFold, srcID)
 	if container == nil {
 		return 0, fmt.Errorf("footage Item block id=%d not found in src project", srcID)
 	}
 	dup := deepCloneChunk(container.Children[start])
-	destID := dest.allocItemID()
+	destID := allocItemID(dest)
 	idta := dup.FindFirst(rifx.IDIdta)
 	if idta == nil || len(idta.Data) < codec.IdtaItemID+4 {
 		return 0, fmt.Errorf("cloned footage id=%d idta missing/short", srcID)
 	}
 	binary.BigEndian.PutUint32(idta.Data[codec.IdtaItemID:codec.IdtaItemID+4], destID)
-	destRoot := dest.projectBack().rootFold
+	destRoot := projectBack(dest).rootFold
 	destRoot.Children = append(destRoot.Children, dup)
 	for k := start + 1; k < end; k++ {
 		destRoot.Children = append(destRoot.Children, deepCloneChunk(container.Children[k]))
@@ -98,17 +99,17 @@ func importFootageBlock(dest, src *Project, srcID uint32, name string) (uint32, 
 // seven-way dest snapshot + warnings-as-failure rollback covers both phases.
 // srcChildren/srcLayrIdx are the located src Layr position from InsertLayer.
 func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, srcChildren []*rifx.Chunk) (*Layer, error) {
-	destProj := c.proj
-	srcProj := src.comp.proj
+	destProj := scene.CompositionProj(c)
+	srcProj := scene.CompositionProj(scene.LayerComp(src))
 
-	destPb := destProj.projectBack()
+	destPb := projectBack(destProj)
 	if destPb == nil || destPb.rootFold == nil {
 		return nil, fmt.Errorf("InsertLayer: dest Project has no root Fold back-ref (built outside parser?)")
 	}
 	if srcProj == nil {
-		return nil, fmt.Errorf("InsertLayer: src layer's Project is unknown (src.comp.proj == nil)")
+		return nil, fmt.Errorf("InsertLayer: src layer's Project is unknown (scene.CompositionProj(scene.LayerComp(src)) == nil)")
 	}
-	srcPb := srcProj.projectBack()
+	srcPb := projectBack(srcProj)
 	if srcPb == nil || srcPb.rootFold == nil {
 		return nil, fmt.Errorf("InsertLayer: src Project has no root Fold back-ref")
 	}
@@ -118,13 +119,13 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 	oldRootChildren := append([]*rifx.Chunk(nil), rootFold.Children...)
 	oldComps := append([]*Composition(nil), destProj.Compositions...)
 	oldFootage := append([]*Footage(nil), destProj.Footage...)
-	destCompCb, ok := c.back.(*compositionBackrefs)
-	if !ok || destCompCb == nil || destCompCb.itemList == nil {
+	destCompCb := compositionBack(c)
+	if destCompCb == nil || destCompCb.itemList == nil {
 		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref", c.Name)
 	}
 	oldDestItemList := append([]*rifx.Chunk(nil), destCompCb.itemList.Children...)
 	oldDestLayers := append([]*Layer(nil), c.Layers...)
-	oldNextItemID := destProj.nextItemID
+	oldNextItemID := scene.ProjectNextItemID(destProj)
 	oldWarningsLen := len(destProj.Warnings)
 	rollback := func() {
 		rootFold.Children = oldRootChildren
@@ -132,7 +133,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		destProj.Footage = oldFootage
 		destCompCb.itemList.Children = oldDestItemList
 		c.Layers = oldDestLayers
-		destProj.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(destProj, oldNextItemID)
 		if len(destProj.Warnings) > oldWarningsLen {
 			destProj.Warnings = destProj.Warnings[:oldWarningsLen]
 		}
@@ -191,7 +192,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 				return nil, fmt.Errorf("InsertLayer: cross-Project comp id=%d Item block not found in src Project", srcID)
 			}
 			dup := deepCloneChunk(container.Children[start])
-			destID := destProj.allocItemID()
+			destID := allocItemID(destProj)
 			idta := dup.FindFirst(rifx.IDIdta)
 			if idta == nil || len(idta.Data) < codec.IdtaItemID+4 {
 				rollback()
@@ -257,7 +258,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 			rollback()
 			return nil, fmt.Errorf("InsertLayer: re-parse imported comp %q: %w", pc.name, err)
 		}
-		dupComp.proj = destProj
+		scene.SetCompositionProj(dupComp, destProj)
 		destProj.Compositions = append(destProj.Compositions, dupComp)
 	}
 
@@ -300,7 +301,7 @@ func remapClonedCompLayerLayrs(p *Project, dupItemList *rifx.Chunk) ([]*rifx.Chu
 			return nil, fmt.Errorf("cloned Layr ldta too short for ParentID write (got %d bytes, need >=0x88)", len(ldta.Data))
 		}
 		oldID := binary.BigEndian.Uint32(ldta.Data[0x00:0x04])
-		newID := p.allocItemID()
+		newID := allocItemID(p)
 		idMap[oldID] = newID
 		binary.BigEndian.PutUint32(ldta.Data[0x00:0x04], newID)
 		layrs = append(layrs, ch)

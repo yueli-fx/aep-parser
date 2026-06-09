@@ -8,9 +8,9 @@ import (
 
 // GradientColorStop represents a single color stop in a gradient.
 type GradientColorStop struct {
-	Offset   float64      // position along gradient (0.0 to 1.0)
-	Midpoint float64      // interpolation midpoint to next stop (0.0 to 1.0)
-	Color    [3]float64   // RGB color in 0..1 range
+	Offset   float64    // position along gradient (0.0 to 1.0)
+	Midpoint float64    // interpolation midpoint to next stop (0.0 to 1.0)
+	Color    [3]float64 // RGB color in 0..1 range
 }
 
 // GradientAlphaStop represents a single alpha (opacity) stop in a gradient.
@@ -251,10 +251,10 @@ func (l *propList) findFloatArray(key string) []float64 {
 }
 
 type propPair struct {
-	Key   string     `xml:"key"`
-	List  *propList  `xml:"prop.list"`
+	Key   string      `xml:"key"`
+	List  *propList   `xml:"prop.list"`
 	Array *floatArray `xml:"array"`
-	Str   string     `xml:"string"`
+	Str   string      `xml:"string"`
 }
 
 type floatArray struct {

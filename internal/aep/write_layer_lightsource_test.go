@@ -5,7 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // newSyntheticLayer builds a minimal Layer with a 0xA4-byte ldta chunk
@@ -13,22 +15,23 @@ import (
 // pre-written into @0x28. Used by light-source / replace-source tests.
 func newSyntheticLayer(typ LayerType, name string, id uint32) *Layer {
 	chunk := &rifx.Chunk{ID: rifx.IDLdta, Data: make([]byte, 0xA4)}
-	binary.BigEndian.PutUint32(chunk.Data[0x28:0x2C], lightSourceUndefined)
-	return &Layer{
+	binary.BigEndian.PutUint32(chunk.Data[0x28:0x2C], codec.LightSourceUndefined)
+	l := &Layer{
 		Name:     name,
 		Type:     typ,
 		ID:       id,
-		back:     &layerBackrefs{ldta: chunk},
-		SourceID: lightSourceUndefined,
+		SourceID: codec.LightSourceUndefined,
 	}
+	scene.SetLayerBack(l, &layerBackrefs{ldta: chunk})
+	return l
 }
 
 func TestLightSource_RoundtripAndClear(t *testing.T) {
 	comp := &Composition{}
 	light := newSyntheticLayer(LayerTypeLight, "L1", 10)
 	av := newSyntheticLayer(LayerTypeAV, "AV1", 20)
-	light.comp = comp
-	av.comp = comp
+	scene.SetLayerComp(light, comp)
+	scene.SetLayerComp(av, comp)
 	comp.Layers = []*Layer{light, av}
 
 	// Initially: sentinel 0xFFFFFFFF → no source.
@@ -46,7 +49,7 @@ func TestLightSource_RoundtripAndClear(t *testing.T) {
 	if light.SourceID != 20 {
 		t.Errorf("after Set, SourceID = %d, want 20", light.SourceID)
 	}
-	if got := binary.BigEndian.Uint32(light.layerBack().ldta.Data[0x28:0x2C]); got != 20 {
+	if got := binary.BigEndian.Uint32(layerBack(light).ldta.Data[0x28:0x2C]); got != 20 {
 		t.Errorf("after Set, ldta@0x28 = %d, want 20", got)
 	}
 
@@ -57,8 +60,8 @@ func TestLightSource_RoundtripAndClear(t *testing.T) {
 	if got := light.LightSource(); got != nil {
 		t.Errorf("after Clear, LightSource = %v, want nil", got)
 	}
-	if light.SourceID != lightSourceUndefined {
-		t.Errorf("after Clear, SourceID = %#x, want %#x", light.SourceID, lightSourceUndefined)
+	if light.SourceID != codec.LightSourceUndefined {
+		t.Errorf("after Clear, SourceID = %#x, want %#x", light.SourceID, codec.LightSourceUndefined)
 	}
 }
 
@@ -72,8 +75,10 @@ func TestLightSource_Validation(t *testing.T) {
 	av3d := newSyntheticLayer(LayerTypeAV, "AV3D", 50)
 	av3d.Is3D = true
 	avOther := newSyntheticLayer(LayerTypeAV, "AVOther", 60)
-	light.comp, av.comp, cam.comp, light2.comp, av3d.comp = comp, comp, comp, comp, comp
-	avOther.comp = otherComp
+	for _, l := range []*Layer{light, av, cam, light2, av3d} {
+		scene.SetLayerComp(l, comp)
+	}
+	scene.SetLayerComp(avOther, otherComp)
 	comp.Layers = []*Layer{light, av, cam, light2, av3d}
 	otherComp.Layers = []*Layer{avOther}
 
@@ -106,7 +111,7 @@ func TestLightSource_Validation(t *testing.T) {
 func TestLightSource_NonLightReadReturnsNil(t *testing.T) {
 	comp := &Composition{}
 	av := newSyntheticLayer(LayerTypeAV, "AV1", 20)
-	av.comp = comp
+	scene.SetLayerComp(av, comp)
 	av.SourceID = 99 // would normally be a footage ID
 	comp.Layers = []*Layer{av}
 	if got := av.LightSource(); got != nil {
@@ -116,7 +121,8 @@ func TestLightSource_NonLightReadReturnsNil(t *testing.T) {
 
 func TestReplaceSource_RoundtripAndWarning(t *testing.T) {
 	proj := &Project{}
-	comp := &Composition{proj: proj}
+	comp := &Composition{}
+	scene.SetCompositionProj(comp, proj)
 	proj.Compositions = []*Composition{comp}
 
 	// Create synthetic footage items with IDs
@@ -126,7 +132,7 @@ func TestReplaceSource_RoundtripAndWarning(t *testing.T) {
 
 	// Create a layer with initial source
 	layer := newSyntheticLayer(LayerTypeAV, "AV1", 1)
-	layer.comp = comp
+	scene.SetLayerComp(layer, comp)
 	layer.SourceID = 100 // initially points to footage1
 	comp.Layers = []*Layer{layer}
 
@@ -137,7 +143,7 @@ func TestReplaceSource_RoundtripAndWarning(t *testing.T) {
 	if layer.SourceID != 200 {
 		t.Errorf("after ReplaceSource, SourceID = %d, want 200", layer.SourceID)
 	}
-	if got := binary.BigEndian.Uint32(layer.layerBack().ldta.Data[0x28:0x2C]); got != 200 {
+	if got := binary.BigEndian.Uint32(layerBack(layer).ldta.Data[0x28:0x2C]); got != 200 {
 		t.Errorf("after ReplaceSource, ldta@0x28 = %d, want 200", got)
 	}
 

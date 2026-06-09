@@ -3,6 +3,7 @@ package aep
 import (
 	"fmt"
 
+	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -18,7 +19,7 @@ func setItemComment(itemList *rifx.Chunk, existing **rifx.Chunk, comment string)
 	if itemList == nil {
 		return fmt.Errorf("no Item LIST reference (built outside parser?)")
 	}
-	encoded := encodeCmta(comment)
+	encoded := codec.EncodeCmta(comment)
 	if *existing != nil {
 		(*existing).Data = encoded
 		return nil

@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // projectBackrefs holds the rifx.Chunk references that power Project's
@@ -56,19 +57,23 @@ var _ ProjectWriter = (*projectBackrefs)(nil)
 // projectBack returns the concrete backrefs behind a Project's writer
 // interface for serializer-stage (parse_/mutate_/write_) raw chunk access.
 // Returns nil when the project was built outside the parser.
-func (p *Project) projectBack() *projectBackrefs {
-	if pb, ok := p.back.(*projectBackrefs); ok {
+func projectBack(p *Project) *projectBackrefs {
+	if pb, ok := scene.ProjectBack(p).(*projectBackrefs); ok {
 		return pb
 	}
 	return nil
 }
 
-func (b *projectBackrefs) xmpPacket() string {
+func (b *projectBackrefs) XmpPacket() string {
 	if b == nil || b.root == nil || len(b.root.Trailing) == 0 {
 		return ""
 	}
 	return string(b.root.Trailing)
 }
+
+// validAudioSampleRates is the set of values AE's Project Settings → Audio
+// dialog exposes. SetAudioSampleRate rejects other values.
+var validAudioSampleRates = []float64{22050, 32000, 44100, 48000, 96000}
 
 // chunkIDHead is the root-level "head" chunk ChunkID. It holds project-level
 // counters (max item ID + a save-sequence counter) that AE 25 validates on
@@ -76,7 +81,7 @@ func (b *projectBackrefs) xmpPacket() string {
 // (file data missing), observed in practice.
 var chunkIDHead = rifx.ChunkID{'h', 'e', 'a', 'd'}
 
-func (b *projectBackrefs) revision() uint16 {
+func (b *projectBackrefs) Revision() uint16 {
 	if b == nil || b.root == nil {
 		return 0
 	}
@@ -87,7 +92,7 @@ func (b *projectBackrefs) revision() uint16 {
 	return binary.BigEndian.Uint16(head.Data[18:20])
 }
 
-func (b *projectBackrefs) versionString() string {
+func (b *projectBackrefs) VersionString() string {
 	if b == nil || b.root == nil {
 		return ""
 	}
@@ -104,21 +109,21 @@ func (b *projectBackrefs) versionString() string {
 	return fmt.Sprintf("%d.%dx%d", major, minor, build)
 }
 
-func (b *projectBackrefs) effectNames() []string {
+func (b *projectBackrefs) EffectNames() []string {
 	if b == nil || b.root == nil {
 		return nil
 	}
 	return effectNamesFromRoot(b.root)
 }
 
-func (b *projectBackrefs) compensateForSceneReferredProfiles() bool {
+func (b *projectBackrefs) CompensateForSceneReferredProfiles() bool {
 	if b == nil || b.acerChunk == nil || len(b.acerChunk.Data) < 1 {
 		return false
 	}
 	return b.acerChunk.Data[0] != 0
 }
 
-func (b *projectBackrefs) audioSampleRate() float64 {
+func (b *projectBackrefs) AudioSampleRate() float64 {
 	if b == nil || b.adfrChunk == nil || len(b.adfrChunk.Data) < 8 {
 		return 0
 	}
@@ -126,7 +131,7 @@ func (b *projectBackrefs) audioSampleRate() float64 {
 	return math.Float64frombits(bits)
 }
 
-func (b *projectBackrefs) workingGamma() float64 {
+func (b *projectBackrefs) WorkingGamma() float64 {
 	if b == nil || b.dwgaChunk == nil || len(b.dwgaChunk.Data) < 1 {
 		return 2.2
 	}
@@ -136,46 +141,46 @@ func (b *projectBackrefs) workingGamma() float64 {
 	return 2.4
 }
 
-func (b *projectBackrefs) gpuAccelType() (string, bool) {
+func (b *projectBackrefs) GpuAccelType() (string, bool) {
 	if b == nil || b.gpugUtf8 == nil {
 		return "", false
 	}
 	return b.gpugUtf8.Text(), true
 }
 
-func (b *projectBackrefs) expressionEngine() (string, bool) {
+func (b *projectBackrefs) ExpressionEngine() (string, bool) {
 	if b == nil || b.exenUtf8 == nil {
 		return "", false
 	}
 	return b.exenUtf8.Text(), true
 }
 
-func (b *projectBackrefs) nnhdByte(off int) (byte, bool) {
+func (b *projectBackrefs) NnhdByte(off int) (byte, bool) {
 	if b == nil || b.nnhdChunk == nil || len(b.nnhdChunk.Data) <= off {
 		return 0, false
 	}
 	return b.nnhdChunk.Data[off], true
 }
 
-func (b *projectBackrefs) nnhdUint16(off int) (uint16, bool) {
+func (b *projectBackrefs) NnhdUint16(off int) (uint16, bool) {
 	if b == nil || b.nnhdChunk == nil || len(b.nnhdChunk.Data) < off+2 {
 		return 0, false
 	}
 	return binary.BigEndian.Uint16(b.nnhdChunk.Data[off : off+2]), true
 }
 
-func (b *projectBackrefs) cmsJSON() ([]byte, bool) {
+func (b *projectBackrefs) CmsJSON() ([]byte, bool) {
 	if b == nil || b.cmsUtf8 == nil {
 		return nil, false
 	}
 	return b.cmsUtf8.Data, true
 }
 
-func (b *projectBackrefs) linearBlending() bool {
+func (b *projectBackrefs) LinearBlendingFlag() bool {
 	return b.rootChunkPresent(rifx.IDLnrb)
 }
 
-func (b *projectBackrefs) linearizeWorkingSpace() bool {
+func (b *projectBackrefs) LinearizeWorkingSpaceFlag() bool {
 	return b.rootChunkPresent(rifx.IDLnrp)
 }
 
@@ -476,12 +481,19 @@ func (b *projectBackrefs) setRootFlagChunk(id rifx.ChunkID, on bool) error {
 	return nil
 }
 
-// WriteAEP serializes the underlying RIFX tree. Scene-graph level sync
-// (shape layers / head counters) is handled by Project.WriteAEP before
-// it delegates here.
-func (b *projectBackrefs) WriteAEP(w io.Writer) error {
+// WriteAEP runs the serializer-stage scene→chunk sync (shape layers, render
+// queue, guides, head counters) for the owning project, then serializes the
+// underlying RIFX tree. The scene Project.WriteAEP delegates here so these sync
+// free functions (which reach the concrete back-refs) stay serializer-side.
+func (b *projectBackrefs) WriteAEP(p *Project, w io.Writer) error {
 	if b.root == nil {
 		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
 	}
+	if err := syncShapeLayerChunks(p); err != nil {
+		return fmt.Errorf("sync shape layers: %w", err)
+	}
+	syncRenderQueue(p)
+	syncGuides(p)
+	syncHeadCounters(p)
 	return b.root.Write(w)
 }

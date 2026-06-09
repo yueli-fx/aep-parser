@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx ==
@@ -12,19 +13,19 @@ import (
 // live in a sibling comp of the same Project, or in a different Project
 // (cross-Project).
 //
-// Same-Project clone semantics (src.comp.proj == c.proj):
+// Same-Project clone semantics (scene.CompositionProj(scene.LayerComp(src)) == scene.CompositionProj(c)):
 //
-//   - new layer ID = c.proj.allocItemID() (head counter +1, monotonic)
+//   - new layer ID = allocItemID(scene.CompositionProj(c)) (head counter +1, monotonic)
 //   - clone block = deep byte-clone of src's [Layr, Ewst, leaf-followers)
 //     range, with per-byte ldta mutations:
 //     @0x00..0x03 ← newID
 //     @0x6B       ← TrackMatteNone (cross-comp matte source is invalid)
-//     @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in src.comp)
+//     @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in scene.LayerComp(src))
 //     @0xA0..0xA3 ← 0 (explicit matte ID, guarded by len(ldta) >= 0xA4)
 //   - clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
 //   - clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
 //
-// Cross-Project semantics (src.comp.proj != c.proj):
+// Cross-Project semantics (scene.CompositionProj(scene.LayerComp(src)) != scene.CompositionProj(c)):
 // additionally imports src's reachable ITEM CLOSURE (footage + precomp,
 // transitively) into c's Project at root level with fresh dest item IDs, then
 // remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the
@@ -39,7 +40,7 @@ import (
 // dest/src Project has no root Fold; dangling closure source.
 //
 // Atomic mutation: snapshot dest itemList.Children + c.Layers +
-// c.proj.nextItemID + len(c.proj.Warnings) (cross-Project also snapshots
+// scene.ProjectNextItemID(scene.CompositionProj(c)) + len(scene.CompositionProj(c).Warnings) (cross-Project also snapshots
 // rootFold.Children + Compositions + Footage); on any new parser warning
 // during re-parse, roll all back including the nextItemID bump.
 //
@@ -57,36 +58,36 @@ func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 	if src == nil {
 		return nil, fmt.Errorf("InsertLayer: src cannot be nil")
 	}
-	destCb, ok := c.back.(*compositionBackrefs)
-	if !ok || destCb == nil || destCb.itemList == nil {
+	destCb := compositionBack(c)
+	if destCb == nil || destCb.itemList == nil {
 		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
-	if c.proj == nil {
+	if scene.CompositionProj(c) == nil {
 		return nil, fmt.Errorf("InsertLayer: dest comp %q has no project back-ref", c.Name)
 	}
 	if atIdx < 0 || atIdx > len(c.Layers) {
 		return nil, fmt.Errorf("InsertLayer: atIdx %d out of range (have %d layers; %d is append)", atIdx, len(c.Layers), len(c.Layers))
 	}
-	if src.comp == nil {
-		return nil, fmt.Errorf("InsertLayer: src.comp is nil (layer detached from any comp)")
+	if scene.LayerComp(src) == nil {
+		return nil, fmt.Errorf("InsertLayer: scene.LayerComp(src) is nil (layer detached from any comp)")
 	}
-	if src.comp == c {
+	if scene.LayerComp(src) == c {
 		return nil, fmt.Errorf("InsertLayer: src and dest are the same comp %q — use DuplicateLayer instead", c.Name)
 	}
-	crossProject := src.comp.proj != c.proj
+	crossProject := scene.CompositionProj(scene.LayerComp(src)) != scene.CompositionProj(c)
 	if src.Type != LayerTypeAV {
 		return nil, fmt.Errorf("InsertLayer: refuse non-AV src (Type=%s); only AV layers supported", src.Type)
 	}
 	if !crossProject && src.SourceID != 0 && src.SourceID == c.ID {
 		return nil, fmt.Errorf("InsertLayer: refuse direct pre-comp loop (src.SourceID=%d == dest.ID=%d)", src.SourceID, c.ID)
 	}
-	srcBack := src.layerBack()
+	srcBack := layerBack(src)
 	if srcBack == nil || srcBack.layrList == nil {
 		return nil, fmt.Errorf("InsertLayer: src layer %q has no Layr chunk back-ref", src.Name)
 	}
-	srcCb, ok2 := src.comp.back.(*compositionBackrefs)
+	srcCb, ok2 := scene.CompositionBack(scene.LayerComp(src)).(*compositionBackrefs)
 	if !ok2 || srcCb == nil || srcCb.itemList == nil {
-		return nil, fmt.Errorf("InsertLayer: src comp %q has no itemList back-ref", src.comp.Name)
+		return nil, fmt.Errorf("InsertLayer: src comp %q has no itemList back-ref", scene.LayerComp(src).Name)
 	}
 	srcChildren := srcCb.itemList.Children
 	srcLayrIdx := findLayrIndexInItemList(srcCb.itemList, srcBack.layrList)
@@ -110,11 +111,11 @@ func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 }
 
 // spliceLayerClone deep-clones the source Layr block at srcLayrIdx (within
-// srcChildren — src.comp's itemList) into c at atIdx, applying the standard
+// srcChildren — scene.LayerComp(src)'s itemList) into c at atIdx, applying the standard
 // cross-comp ldta mutations (new layer ID, ParentID/matte reset) plus
 // sourceRemap to SourceID @0x28 and AlternateSourceID (blsi). sourceRemap is
 // identity for same-Project inserts (bytes unchanged) and an itemIDMap lookup
-// for cross-Project inserts. Atomic over c.itemList / c.Layers / proj.nextItemID
+// for cross-Project inserts. Atomic over c.itemList / c.Layers / scene.ProjectNextItemID(proj)
 // / proj.Warnings.
 func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx.Chunk, sourceRemap func(uint32) uint32) (*Layer, error) {
 	// === Adaptive block end — scan leaf followers until next LIST/EOF ===
@@ -124,14 +125,14 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 	}
 
 	// === Snapshot for rollback ===
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil || cb.itemList == nil {
+	cb := compositionBack(c)
+	if cb == nil || cb.itemList == nil {
 		return nil, fmt.Errorf("InsertLayer: dest comp %q has no itemList back-ref", c.Name)
 	}
 	oldDestChildren := append([]*rifx.Chunk(nil), cb.itemList.Children...)
 	oldDestLayers := append([]*Layer(nil), c.Layers...)
-	oldNextItemID := c.proj.nextItemID
-	oldWarningsLen := len(c.proj.Warnings)
+	oldNextItemID := scene.ProjectNextItemID(scene.CompositionProj(c))
+	oldWarningsLen := len(scene.CompositionProj(c).Warnings)
 
 	// === Deep-clone source block (fresh Data slices) ===
 	cloneBlock := make([]*rifx.Chunk, endIdx-srcLayrIdx)
@@ -140,15 +141,15 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 	}
 
 	// === Allocate new ID + per-byte ldta mutations ===
-	newID := c.proj.allocItemID()
+	newID := allocItemID(scene.CompositionProj(c))
 	clonedLayr := cloneBlock[0]
 	clonedLdta := clonedLayr.FindFirst(rifx.IDLdta)
 	if clonedLdta == nil {
-		c.proj.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 		return nil, fmt.Errorf("InsertLayer: cloned Layr has no ldta chunk")
 	}
 	if len(clonedLdta.Data) < 0x88 {
-		c.proj.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 		return nil, fmt.Errorf("InsertLayer: cloned Layr ldta too short for ParentID write (got %d bytes, need >=0x88)", len(clonedLdta.Data))
 	}
 	binary.BigEndian.PutUint32(clonedLdta.Data[0x00:0x04], newID)
@@ -174,26 +175,26 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 		insertChunkIdx = insertLayrPosition(destChildren)
 	case atIdx < len(c.Layers):
 		target := c.Layers[atIdx]
-		targetBack := target.layerBack()
+		targetBack := layerBack(target)
 		if targetBack == nil || targetBack.layrList == nil {
-			c.proj.nextItemID = oldNextItemID
+			scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 			return nil, fmt.Errorf("InsertLayer: dest Layers[%d] %q has no Layr backref", atIdx, target.Name)
 		}
 		insertChunkIdx = indexOfChunk(destChildren, targetBack.layrList)
 		if insertChunkIdx < 0 {
-			c.proj.nextItemID = oldNextItemID
+			scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 			return nil, fmt.Errorf("InsertLayer: dest Layers[%d] %q Layr chunk not found in dest itemList", atIdx, target.Name)
 		}
 	default:
 		last := c.Layers[len(c.Layers)-1]
-		lastBack := last.layerBack()
+		lastBack := layerBack(last)
 		if lastBack == nil || lastBack.layrList == nil {
-			c.proj.nextItemID = oldNextItemID
+			scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 			return nil, fmt.Errorf("InsertLayer: last dest layer %q has no Layr backref", last.Name)
 		}
 		lastLayrIdx := indexOfChunk(destChildren, lastBack.layrList)
 		if lastLayrIdx < 0 {
-			c.proj.nextItemID = oldNextItemID
+			scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 			return nil, fmt.Errorf("InsertLayer: last dest layer %q Layr chunk not found", last.Name)
 		}
 		insertChunkIdx = lastLayrIdx + 2
@@ -215,11 +216,11 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 	cloneLayer, parseErr := parseLayer(clonedLayr, atIdx, ctx)
 	if parseErr != nil {
 		cb.itemList.Children = oldDestChildren
-		c.proj.nextItemID = oldNextItemID
+		scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
 		return nil, fmt.Errorf("InsertLayer: re-parse cloned layer: %w", parseErr)
 	}
-	cloneLayer.comp = c
-	assignTransformDefaults(cloneLayer.Properties, c, cloneLayer.Type)
+	scene.SetLayerComp(cloneLayer, c)
+	scene.AssignTransformDefaults(cloneLayer.Properties, c, cloneLayer.Type)
 
 	// === Insert cloneLayer into c.Layers ===
 	newLayers := make([]*Layer, 0, len(c.Layers)+1)
@@ -230,14 +231,14 @@ func spliceLayerClone(c *Composition, atIdx, srcLayrIdx int, srcChildren []*rifx
 
 	// === Warnings-as-failure rollback ===
 	if len(localWarnings) > 0 {
-		c.proj.Warnings = append(c.proj.Warnings, localWarnings...)
+		scene.CompositionProj(c).Warnings = append(scene.CompositionProj(c).Warnings, localWarnings...)
 	}
-	if len(c.proj.Warnings) > oldWarningsLen {
+	if len(scene.CompositionProj(c).Warnings) > oldWarningsLen {
 		cb.itemList.Children = oldDestChildren
 		c.Layers = oldDestLayers
-		c.proj.nextItemID = oldNextItemID
-		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
-		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
+		scene.SetProjectNextItemID(scene.CompositionProj(c), oldNextItemID)
+		newWarnings := append([]string(nil), scene.CompositionProj(c).Warnings[oldWarningsLen:]...)
+		scene.CompositionProj(c).Warnings = scene.CompositionProj(c).Warnings[:oldWarningsLen]
 		return nil, fmt.Errorf("InsertLayer: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
 	}
 

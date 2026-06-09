@@ -53,7 +53,7 @@ func TestSetRendererRoundTrip(t *testing.T) {
 			t.Skipf("%s not present: %v", src, err)
 		}
 		comp := proj.Compositions[0]
-		if err := comp.SetRenderer(target); err != nil {
+		if err := aep.SetRenderer(comp, target); err != nil {
 			t.Fatalf("SetRenderer(%q): %v", target, err)
 		}
 		if comp.Renderer != target {
@@ -87,7 +87,7 @@ func TestSetRendererExtendscriptAlias(t *testing.T) {
 		t.Skipf("%s not present: %v", src, err)
 	}
 	comp := proj.Compositions[0]
-	if err := comp.SetRenderer("ADBE Advanced 3d"); err != nil {
+	if err := aep.SetRenderer(comp, "ADBE Advanced 3d"); err != nil {
 		t.Fatalf("SetRenderer(\"ADBE Advanced 3d\"): %v", err)
 	}
 	if comp.Renderer != "ADBE Escher" {
@@ -107,7 +107,7 @@ func TestSetRendererUnknown(t *testing.T) {
 	}
 	comp := proj.Compositions[0]
 	before := comp.Renderer
-	if err := comp.SetRenderer("ADBE Nonexistent"); err == nil {
+	if err := aep.SetRenderer(comp, "ADBE Nonexistent"); err == nil {
 		t.Fatal("SetRenderer(unknown) = nil, want error")
 	}
 	if comp.Renderer != before {
@@ -118,7 +118,7 @@ func TestSetRendererUnknown(t *testing.T) {
 // TestSetRendererNoBackref errors on a comp built outside the parser.
 func TestSetRendererNoBackref(t *testing.T) {
 	comp := &aep.Composition{Name: "synthetic"}
-	if err := comp.SetRenderer("ADBE Escher"); err == nil {
+	if err := aep.SetRenderer(comp, "ADBE Escher"); err == nil {
 		t.Fatal("SetRenderer on synthetic comp = nil, want error")
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // DeleteLayer removes the layer at the given 0-based index in c.Layers.
@@ -48,8 +49,8 @@ func DeleteLayer(c *Composition, index int) error {
 	if index < 0 || index >= len(c.Layers) {
 		return fmt.Errorf("DeleteLayer: index %d out of range (have %d layers)", index, len(c.Layers))
 	}
-	cb, ok := c.back.(*compositionBackrefs)
-	if !ok || cb == nil || cb.itemList == nil {
+	cb := compositionBack(c)
+	if cb == nil || cb.itemList == nil {
 		return fmt.Errorf("DeleteLayer: comp %q has no itemList back-ref (built outside parser?)", c.Name)
 	}
 	if len(c.Layers) == 1 {
@@ -60,7 +61,7 @@ func DeleteLayer(c *Composition, index int) error {
 	if deleted.Type != LayerTypeAV {
 		return fmt.Errorf("DeleteLayer: refuse non-AV layer (idx=%d Type=%s); only AV layers supported", index, deleted.Type)
 	}
-	deletedBack := deleted.layerBack()
+	deletedBack := layerBack(deleted)
 	if deletedBack == nil || deletedBack.layrList == nil {
 		return fmt.Errorf("DeleteLayer: layer %q at idx %d has no Layr chunk back-ref", deleted.Name, index)
 	}
@@ -97,8 +98,8 @@ func DeleteLayer(c *Composition, index int) error {
 	oldChildren := append([]*rifx.Chunk(nil), children...)
 	oldLayers := append([]*Layer(nil), c.Layers...)
 	oldWarningsLen := 0
-	if c.proj != nil {
-		oldWarningsLen = len(c.proj.Warnings)
+	if scene.CompositionProj(c) != nil {
+		oldWarningsLen = len(scene.CompositionProj(c).Warnings)
 	}
 
 	// Snapshot every neighbor whose ref we'll clear: struct fields +
@@ -148,7 +149,7 @@ func DeleteLayer(c *Composition, index int) error {
 			parentID:          neighbor.ParentID,
 			trackMatteLayerID: neighbor.TrackMatteLayerID,
 		})
-		neighborBack := neighbor.layerBack()
+		neighborBack := layerBack(neighbor)
 		if needsParent {
 			if neighborBack != nil && neighborBack.ldta != nil &&
 				len(neighborBack.ldta.Data) >= 0x88 {
@@ -177,7 +178,7 @@ func DeleteLayer(c *Composition, index int) error {
 	//    won't increase in practice — this is a defensive rollback path
 	//    matching the V2.1 pattern, so future re-parse extensions get it
 	//    for free.
-	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
+	if scene.CompositionProj(c) != nil && len(scene.CompositionProj(c).Warnings) > oldWarningsLen {
 		cb.itemList.Children = oldChildren
 		c.Layers = oldLayers
 		for _, s := range neighborSnaps {
@@ -187,8 +188,8 @@ func DeleteLayer(c *Composition, index int) error {
 		for _, s := range ldtaSnaps {
 			s.chunk.Data = s.data
 		}
-		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
-		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
+		newWarnings := append([]string(nil), scene.CompositionProj(c).Warnings[oldWarningsLen:]...)
+		scene.CompositionProj(c).Warnings = scene.CompositionProj(c).Warnings[:oldWarningsLen]
 		return fmt.Errorf("DeleteLayer: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
 	}
 

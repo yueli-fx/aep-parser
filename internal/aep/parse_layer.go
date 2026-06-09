@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parseLayer reads layer data from a Layr list.
@@ -63,8 +64,8 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 		Index:   index,
 		Visible: true,
 		Stretch: 1.0,
-		back:    lb,
 	}
+	scene.SetLayerBack(layer, lb)
 
 	if utf8 := layr.FindFirst(rifx.IDUtf8); utf8 != nil {
 		layer.Name = utf8.Text()
@@ -189,14 +190,15 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 	layer.Properties, layer.Effects, layer.Markers = parseProperties(layr, ctx)
 	bindMarkerListOwner(&layer.Markers)
 	layer.Masks = parseMasks(layr, ctx)
-	layer.propertyTree = buildAEPropertyGroupTree(layr)
-	layer.propertyTree.layer = layer
-	wirePropertyTreeLeaves(layer.propertyTree, layer.Properties)
+	tree := buildAEPropertyGroupTree(layr)
+	scene.SetLayerPropertyTree(layer, tree)
+	scene.SetPropertyGroupLayer(tree, layer)
+	wirePropertyTreeLeaves(tree, layer.Properties)
 	lb.btdsChunk = findTextSourceChunk(layr)
 	if lb.btdsChunk != nil {
 		layer.TextSourceRaw = lb.btdsChunk.Data
 		layer.Type = LayerTypeText
-		ts, warn := decodeTextSource(layer.TextSourceRaw)
+		ts, warn := scene.DecodeTextSource(layer.TextSourceRaw)
 		layer.TextSource = ts
 		if warn != "" && ctx != nil {
 			ctx.warn("%s", warn)
@@ -207,7 +209,7 @@ func parseLayer(layr *rifx.Chunk, index int, ctx *parseCtx) (*Layer, error) {
 		layer.Type = LayerTypeShape
 		layer.ShapePaths = collectShapePaths(layr)
 		layer.ShapePrimitives = collectShapePrimitives(layr, ctx)
-		layer.shapeRootGroup = hydrateShapeNodes(layr, ctx)
+		scene.SetLayerShapeRootGroup(layer, hydrateShapeNodes(layr, ctx))
 		hydrateLayerTransform(layer)
 	}
 	return layer, nil
@@ -369,15 +371,4 @@ func hasShapeLayerRoot(layr *rifx.Chunk) bool {
 	}
 	visit(layr)
 	return found
-}
-
-// LdtaRawBytes returns the layer's ldta chunk Data slice, or nil if the
-// layer has no ldta. Read-only access for debugging / RE tools — the
-// underlying byte slice is the live chunk data; do not mutate.
-func (l *Layer) LdtaRawBytes() []byte {
-	lb := l.layerBack()
-	if lb == nil || lb.ldta == nil {
-		return nil
-	}
-	return lb.ldta.Data
 }

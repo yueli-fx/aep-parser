@@ -3,31 +3,10 @@ package aep
 import (
 	"encoding/binary"
 	"fmt"
-	"io"
 	"math"
-	"path/filepath"
-	"strings"
-)
 
-// WriteAEP serializes the (possibly mutated) project back to RIFX binary
-// form. Sizes are recomputed from the current chunk data, so mutations
-// such as Footage.SetPath that change byte lengths are handled correctly.
-//
-// This is best-effort write-back. The library only understands a small
-// subset of the .aep format; chunks we don't know about pass through
-// byte-for-byte. If After Effects rejects the output, file a sample.
-func (p *Project) WriteAEP(w io.Writer) error {
-	if p.back == nil {
-		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
-	}
-	if err := syncShapeLayerChunks(p); err != nil {
-		return fmt.Errorf("sync shape layers: %w", err)
-	}
-	p.syncRenderQueue()
-	p.syncGuides()
-	p.syncHeadCounters()
-	return p.back.WriteAEP(w)
-}
+	"github.com/example/aep-parser/internal/scene"
+)
 
 // syncHeadCounters 把 root head chunk 里的两个 32-bit counter 同步到至少
 // nextItemID。AE 25 用这两个 counter 校验文件完整性 (item ID upper bound);
@@ -45,8 +24,10 @@ func (p *Project) WriteAEP(w io.Writer) error {
 //	[12..15] counter A (uint32 BE; ~next item ID)
 //	[16..19] counter B (uint32 BE; ~save-sequence; pattern not fully RE'd
 //	         but ≥ nextItemID empirically opens in AE 25)
-func (p *Project) syncHeadCounters() {
-	pb := p.projectBack()
+//
+// Free function (serializer stage): it reaches the concrete project back-ref.
+func syncHeadCounters(p *Project) {
+	pb := projectBack(p)
 	if pb == nil || pb.root == nil {
 		return
 	}
@@ -54,35 +35,15 @@ func (p *Project) syncHeadCounters() {
 	if head == nil || len(head.Data) < 20 {
 		return
 	}
+	nextItemID := scene.ProjectNextItemID(p)
 	curA := binary.BigEndian.Uint32(head.Data[12:16])
 	curB := binary.BigEndian.Uint32(head.Data[16:20])
-	if p.nextItemID > curA {
-		binary.BigEndian.PutUint32(head.Data[12:16], p.nextItemID)
+	if nextItemID > curA {
+		binary.BigEndian.PutUint32(head.Data[12:16], nextItemID)
 	}
-	if p.nextItemID > curB {
-		binary.BigEndian.PutUint32(head.Data[16:20], p.nextItemID)
+	if nextItemID > curB {
+		binary.BigEndian.PutUint32(head.Data[16:20], nextItemID)
 	}
-}
-
-// SetPath updates the footage's source path. The change is propagated to
-// the underlying RIFX chunks (the alas JSON's "fullpath" field is rewritten
-// in-place; a legacy Cpth chunk, if any, is fully replaced). The next call
-// to Project.WriteAEP will serialize the new path.
-//
-// Returns an error if no writable path chunk exists for this footage
-// (e.g. solids and placeholders never had one).
-func (f *Footage) SetPath(newPath string) error {
-	if f.back == nil {
-		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", f.ID, f.Name)
-	}
-	if err := f.back.SetPath(newPath); err != nil {
-		return err
-	}
-	f.Path = newPath
-	if base := filepath.Base(strings.ReplaceAll(newPath, `\`, `/`)); base != "" && base != "." {
-		f.Name = base
-	}
-	return nil
 }
 
 // replaceJSONStringField does a byte-level surgical replacement of a single
@@ -172,24 +133,4 @@ func jsonEscapeString(s string) []byte {
 		}
 	}
 	return b
-}
-
-// SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc)
-// to BOTH the nhed @0x0F and nnhd @0x18 header bytes. AE stores the
-// enum redundantly; we keep both in sync.
-//
-// Accepts the existing `BPC8` / `BPC16` / `BPC32` constants. Other
-// values are written verbatim (in case AE introduces e.g. half-float
-// later) but produce a less obvious AE UI state.
-//
-// length-preserving (2 bytes total).
-func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
-	if p.back == nil {
-		return fmt.Errorf("project: header chunks missing (built outside parser?)")
-	}
-	if err := p.back.SetBitsPerChannel(bpc); err != nil {
-		return err
-	}
-	p.BitsPerChannel = bpc
-	return nil
 }

@@ -500,23 +500,23 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	//   [0..1] magic 0xb3de; [2..3] flags (0x0201 closed-with-trailer);
 	//   [4..7] bboxMinX f32; [8..11] bboxMinY f32;
 	//   [12..15] bboxMaxX f32; [16..19] bboxMaxY f32; [20..23] trailer 0x01000000.
-	shphData := make([]byte, 24)
-	shphData[0] = 0xb3
-	shphData[1] = 0xde
+	ShphData := make([]byte, 24)
+	ShphData[0] = 0xb3
+	ShphData[1] = 0xde
 	// flags: observed 0x0201 (closed); open shapes likely 0x0200.
 	// V2.2 emits 0x0201 when Closed, else 0x0200.
 	if p.Closed {
-		shphData[2] = 0x02
-		shphData[3] = 0x01
+		ShphData[2] = 0x02
+		ShphData[3] = 0x01
 	} else {
-		shphData[2] = 0x02
-		shphData[3] = 0x00
+		ShphData[2] = 0x02
+		ShphData[3] = 0x00
 	}
-	binary.BigEndian.PutUint32(shphData[4:8], math.Float32bits(float32(minX)))
-	binary.BigEndian.PutUint32(shphData[8:12], math.Float32bits(float32(minY)))
-	binary.BigEndian.PutUint32(shphData[12:16], math.Float32bits(float32(maxX)))
-	binary.BigEndian.PutUint32(shphData[16:20], math.Float32bits(float32(maxY)))
-	shphData[20] = 0x01
+	binary.BigEndian.PutUint32(ShphData[4:8], math.Float32bits(float32(minX)))
+	binary.BigEndian.PutUint32(ShphData[8:12], math.Float32bits(float32(minY)))
+	binary.BigEndian.PutUint32(ShphData[12:16], math.Float32bits(float32(maxX)))
+	binary.BigEndian.PutUint32(ShphData[16:20], math.Float32bits(float32(maxY)))
+	ShphData[20] = 0x01
 
 	// lhd3 (52 B) — observed hex for 4-vertex linear:
 	//   00d00bee 00000000 0000000c 00000004 00000008 00000004 00000001 00000010 00...
@@ -561,7 +561,7 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 		binary.BigEndian.PutUint32(ldatData[base+20:base+24], math.Float32bits(norm(nv[1]+nin[1], minY, rangeY)))
 	}
 
-	shph = &rifx.Chunk{ID: rifx.IDShph, Data: shphData}
+	shph = &rifx.Chunk{ID: rifx.IDShph, Data: ShphData}
 	lhd3 = &rifx.Chunk{ID: rifx.IDLhd3, Data: lhd3Data}
 	ldat = &rifx.Chunk{ID: rifx.IDLdat, Data: ldatData}
 	return shph, lhd3, ldat

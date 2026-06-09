@@ -6,6 +6,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // RemoveItem deletes the render queue item at index (0-based), mirroring
@@ -38,12 +39,12 @@ func RemoveItem(rq *RenderQueue, index int) error {
 	if index < 0 || index >= len(rq.Items) {
 		return fmt.Errorf("RemoveItem: index %d out of range (have %d items)", index, len(rq.Items))
 	}
-	rqb := rq.renderQueueBack()
+	rqb := renderQueueBack(rq)
 	if rqb == nil || rqb.lrdr == nil {
 		return fmt.Errorf("RemoveItem: render queue built outside parser (no LRdr back-ref)")
 	}
 	item := rq.Items[index]
-	ib := item.renderQueueItemBack()
+	ib := renderQueueItemBack(item)
 	if ib == nil || ib.litm == nil || ib.itemListChunk == nil {
 		return fmt.Errorf("RemoveItem: item %d has no LItm back-refs", index)
 	}
@@ -129,9 +130,9 @@ func RemoveItem(rq *RenderQueue, index int) error {
 	// in the spliced ldat. The scene-owned settingsBlock copies are
 	// position-independent and stay as-is (synced back at WriteAEP). ===
 	rq.Items = append(rq.Items[:index], rq.Items[index+1:]...)
-	item.back = nil
+	scene.SetRenderQueueItemBack(item, nil)
 	for i, it := range rq.Items {
-		if rb := it.renderQueueItemBack(); rb != nil && rb.settingsSlice != nil {
+		if rb := renderQueueItemBack(it); rb != nil && rb.settingsSlice != nil {
 			rb.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}
@@ -174,10 +175,10 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	if rq == nil {
 		return nil, fmt.Errorf("AddItem: nil render queue")
 	}
-	if comp == nil || comp.proj == nil {
+	if comp == nil || scene.CompositionProj(comp) == nil {
 		return nil, fmt.Errorf("AddItem: comp is nil or detached from a project")
 	}
-	rqb := rq.renderQueueBack()
+	rqb := renderQueueBack(rq)
 	if rqb == nil || rqb.lrdr == nil {
 		return nil, fmt.Errorf("AddItem: render queue built outside parser (no LRdr back-ref)")
 	}
@@ -185,7 +186,7 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 		return nil, fmt.Errorf("AddItem: empty queue has no template item to clone")
 	}
 	template := rq.Items[len(rq.Items)-1]
-	tb := template.renderQueueItemBack()
+	tb := renderQueueItemBack(template)
 	if tb == nil || tb.litm == nil || tb.itemListChunk == nil {
 		return nil, fmt.Errorf("AddItem: template item has no LItm back-refs")
 	}
@@ -224,8 +225,8 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	// === Clone template settings block (from the scene-owned copy, the single
 	// source of truth) + remap comp_id ===
 	var newBlock []byte
-	if len(template.settingsBlock) == codec.RenderSettingsItemSize {
-		newBlock = append([]byte(nil), template.settingsBlock...)
+	if tmplBlock := scene.RenderQueueItemSettings(template); len(tmplBlock) == codec.RenderSettingsItemSize {
+		newBlock = append([]byte(nil), tmplBlock...)
 	} else {
 		newBlock = append([]byte(nil), ldat.Data[tOff:tOff+codec.RenderSettingsItemSize]...)
 	}
@@ -255,10 +256,10 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 
 	// === scene: build the new item, re-point ALL settings aliases (ldat grew) ===
 	blocks := renderSettingsBlocks(rqb.lrdr)
-	newItem := buildRenderQueueItem(blocks, n, "", litm, clonedList, clonedLOm, nil, comp.proj)
+	newItem := buildRenderQueueItem(blocks, n, "", litm, clonedList, clonedLOm, nil, scene.CompositionProj(comp))
 	rq.Items = append(rq.Items, newItem)
 	for i, it := range rq.Items {
-		if rb := it.renderQueueItemBack(); rb != nil && rb.settingsSlice != nil {
+		if rb := renderQueueItemBack(it); rb != nil && rb.settingsSlice != nil {
 			rb.settingsSlice = ldat.Data[i*codec.RenderSettingsItemSize : (i+1)*codec.RenderSettingsItemSize]
 		}
 	}

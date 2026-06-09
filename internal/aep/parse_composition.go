@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // aeLegacyTimeBase is the per-second keyframe tick rate used by older AE
@@ -105,7 +106,8 @@ func (c *parseCtx) warn(format string, args ...any) {
 //	0xC8–0xCB : motion_blur_samples_per_frame (int32; AE default 16)                                   [py-aep + fixture]
 func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]string) (*Composition, error) {
 	cb := &compositionBackrefs{compName: name, itemList: item}
-	comp := &Composition{ID: id, Name: name, back: cb}
+	comp := &Composition{ID: id, Name: name}
+	scene.SetCompositionBack(comp, cb)
 	if utf8 := item.FindFirst(rifx.IDUtf8); utf8 != nil {
 		cb.nameChunk = utf8
 	}
@@ -196,7 +198,7 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 
 	comp.TickRate = deriveTickRate(d)
 	cb.tickRate = comp.TickRate
-	cb.frameRate = comp.FrameRate
+	cb.FrameRateHz = comp.FrameRate
 
 	// Renderer: PRin LIST → prin chunk, two NUL-separated ASCII strings
 	// after a 4-byte prefix. First string = internal match-name (e.g.
@@ -222,8 +224,8 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 		if err != nil {
 			continue // best-effort
 		}
-		layer.comp = comp // wire back-pointer so Layer.Parent() works
-		assignTransformDefaults(layer.Properties, comp, layer.Type)
+		scene.SetLayerComp(layer, comp) // wire back-pointer so Layer.Parent() works
+		scene.AssignTransformDefaults(layer.Properties, comp, layer.Type)
 		comp.Layers = append(comp.Layers, layer)
 	}
 

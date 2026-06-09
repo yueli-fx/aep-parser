@@ -4,64 +4,15 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+
+	"github.com/example/aep-parser/internal/scene"
 )
 
-// Property-level writers: static value, expression source &
-// enabled bit, and keyframe insert/delete (length-variable ldat
-// rebuild that re-parses the property's keyframe stream).
-
-// SetStaticValue rewrites a property's constant value in-place (only valid
-// for properties without keyframes — those with a cdat chunk).
-func (p *Property) SetStaticValue(v any) error {
-	if p.back == nil {
-		return fmt.Errorf("property %q: no static-value chunk (has keyframes?)", p.MatchName)
-	}
-	switch x := v.(type) {
-	case float64:
-		if p.Components != 1 {
-			return fmt.Errorf("property %q is %dD, expected []float64", p.MatchName, p.Components)
-		}
-	case []float64:
-		if len(x) != p.Components {
-			return fmt.Errorf("property %q: got %d components, property is %dD", p.MatchName, len(x), p.Components)
-		}
-	default:
-		return fmt.Errorf("property: unsupported value type %T", v)
-	}
-	if err := p.back.SetStaticValue(v); err != nil {
-		return err
-	}
-	switch x := v.(type) {
-	case float64:
-		p.StaticValue = x
-	case []float64:
-		p.StaticValue = append([]float64(nil), x...)
-	}
-	return nil
-}
-
-// SetExpressionEnabled toggles whether AE evaluates the property's
-// expression at render time (separate knob from `SetExpression` which
-// writes the JS source itself).
-//
-// RE'd against AE 2020 fixture: byte at tdb4 payload offset 0x78 acts
-// as a "disabled" flag — value 0 = enabled (AE applies expression),
-// value 1 = disabled (expression source preserved but ignored).
-// length-preserving (1 byte).
-//
-// Requires the property's tdbs to contain a `tdb4` chunk (always
-// present for properties parsed from real .aep files). Returns an
-// error otherwise.
-func (p *Property) SetExpressionEnabled(enabled bool) error {
-	if p.back == nil {
-		return fmt.Errorf("property %q: no tdbs reference", p.MatchName)
-	}
-	if err := p.back.SetExpressionEnabled(enabled); err != nil {
-		return err
-	}
-	p.ExpressionEnabled = enabled
-	return nil
-}
+// Property-level keyframe insert/delete (length-variable ldat rebuild that
+// re-parses the property's keyframe stream). These are structural serializer
+// free-functions reaching the concrete property/keyframe back-refs; the pure
+// scene setters (SetStaticValue / SetExpressionEnabled / SetExpression) live
+// in internal/scene.
 
 // InsertKeyframe builds a new bpk-byte keyframe block and inserts it
 // into the property's ldat stream, then updates the lhd3 count header.
@@ -87,7 +38,7 @@ func (p *Property) SetExpressionEnabled(enabled bool) error {
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
 func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error) {
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return nil, -1, fmt.Errorf("property %q: no existing keyframes (insert from scratch not supported)", p.MatchName)
 	}
@@ -108,8 +59,8 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 	}
 
 	tickRate := aeLegacyTimeBase
-	if len(p.Keyframes) > 0 && p.Keyframes[0].back != nil {
-		if kb, ok := p.Keyframes[0].back.(*keyframeBackrefs); ok {
+	if len(p.Keyframes) > 0 {
+		if kb := keyframeBack(p.Keyframes[0]); kb != nil {
 			tickRate = kb.tickRate
 		}
 	}
@@ -126,8 +77,8 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 	headerByte := pb.ldat.Data[0x07]
 	block := make([]byte, bpk)
 	binary.BigEndian.PutUint32(block[0:4], uint32(math.Round(time*tickRate)))
-	block[0x04] = byte(InterpLinear)
-	block[0x05] = byte(InterpLinear)
+	block[0x04] = byte(scene.InterpLinear)
+	block[0x05] = byte(scene.InterpLinear)
 	block[0x07] = headerByte
 
 	// Write value at the layout-appropriate offset.
@@ -187,7 +138,7 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
 func DeleteKeyframe(p *Property, i int) error {
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return fmt.Errorf("property %q: no keyframe stream", p.MatchName)
 	}
@@ -214,8 +165,8 @@ func DeleteKeyframe(p *Property, i int) error {
 	}
 
 	tickRate := aeLegacyTimeBase
-	if len(p.Keyframes) > 0 && p.Keyframes[0].back != nil {
-		if kb, ok := p.Keyframes[0].back.(*keyframeBackrefs); ok {
+	if len(p.Keyframes) > 0 {
+		if kb := keyframeBack(p.Keyframes[0]); kb != nil {
 			tickRate = kb.tickRate
 		}
 	}
@@ -229,7 +180,7 @@ func DeleteKeyframe(p *Property, i int) error {
 // ldat/lhd3 bytes. Used after InsertKeyframe / DeleteKeyframe so
 // Keyframe.offset / Value / etc. reflect the new stream layout.
 func reparseKeyframes(p *Property, tickRate float64) error {
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return fmt.Errorf("property %q: missing ldat/lhd3", p.MatchName)
 	}
@@ -245,43 +196,17 @@ func reparseKeyframes(p *Property, tickRate float64) error {
 	p.Keyframes = make([]*Keyframe, 0, count)
 	for i := 0; i < count; i++ {
 		off := i * bpk
-		kf := &Keyframe{
-			back: &keyframeBackrefs{
-				ldat:     pb.ldat,
-				offset:   off,
-				dims:     p.Components,
-				tickRate: tickRate,
-			},
-		}
+		kf := &Keyframe{}
+		setKeyframeBack(kf, &keyframeBackrefs{
+			ldat:     pb.ldat,
+			offset:   off,
+			dims:     p.Components,
+			tickRate: tickRate,
+		})
 		kf.Time = float64(binary.BigEndian.Uint32(pb.ldat.Data[off:off+4])) / tickRate
 		kf.Value = readKFValue(pb.ldat.Data, off, p.Components)
 		decodeEasing(kf, pb.ldat.Data[off:off+bpk])
 		p.Keyframes = append(p.Keyframes, kf)
 	}
-	return nil
-}
-
-// SetExpression rewrites the JavaScript expression source attached to
-// this property.
-//
-// length-variable — the underlying Utf8 chunk's data is replaced
-// (or a new Utf8 chunk is inserted into the property's tdbs LIST when
-// none existed previously; conversely, passing "" removes the chunk
-// entirely, leaving the property with no expression).
-//
-// Note: AE has a separate Enable/Disable Expression toggle (in addition
-// to the source). Removing the Utf8 chunk via SetExpression("") gets
-// you the "no expression at all" state.
-//
-// Returns an error if the property is one built outside the parser
-// (no owning tdbs LIST reference).
-func (p *Property) SetExpression(source string) error {
-	if p.back == nil {
-		return fmt.Errorf("property %q: no tdbs reference (built outside parser?)", p.MatchName)
-	}
-	if err := p.back.SetExpression(source); err != nil {
-		return err
-	}
-	p.Expression = source
 	return nil
 }

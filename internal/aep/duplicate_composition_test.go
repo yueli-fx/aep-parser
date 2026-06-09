@@ -88,7 +88,7 @@ func TestDuplicateComposition_HappyPath(t *testing.T) {
 		return
 	}
 	preComps := len(proj.Compositions)
-	preNextID := proj.NextItemIDForTest()
+	preNextID := aep.NextItemIDForTest(proj)
 	srcIDs := compLayerIDs(src)
 	srcLayerCount := len(src.Layers)
 	if srcLayerCount != 3 {
@@ -162,9 +162,9 @@ func TestDuplicateComposition_HappyPath(t *testing.T) {
 		t.Errorf("fixture precondition: expected a src layer with ParentID != 0")
 	}
 
-	if proj.NextItemIDForTest() != preNextID+uint32(srcLayerCount)+1 {
+	if aep.NextItemIDForTest(proj) != preNextID+uint32(srcLayerCount)+1 {
 		t.Errorf("nextItemID = %d, want %d (+1 comp +%d layers)",
-			proj.NextItemIDForTest(), preNextID+uint32(srcLayerCount)+1, srcLayerCount)
+			aep.NextItemIDForTest(proj), preNextID+uint32(srcLayerCount)+1, srcLayerCount)
 	}
 }
 
@@ -234,7 +234,7 @@ func TestDuplicateComposition_FreshDataSlices(t *testing.T) {
 		return
 	}
 	// Capture src's first layer ldta bytes.
-	srcLdta := src.Layers[0].LdtaForTest()
+	srcLdta := aep.LdtaForTest(src.Layers[0])
 	if srcLdta == nil {
 		t.Skip("src layer has no ldta backref")
 	}
@@ -244,7 +244,7 @@ func TestDuplicateComposition_FreshDataSlices(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DuplicateComposition: %v", err)
 	}
-	dupLdta := dup.Layers[0].LdtaForTest()
+	dupLdta := aep.LdtaForTest(dup.Layers[0])
 	if dupLdta == nil {
 		t.Fatal("dup layer has no ldta backref")
 	}

@@ -77,15 +77,15 @@ const (
 // collectShapePrimitives — slots that don't apply to the current kind
 // are skipped (e.g. a stray "Rect Size" inside a Star group).
 var shapeFieldSlot = map[string]func(p *ShapePrimitive, prop *Property){
-	"ADBE Vector Rect Size":        func(p *ShapePrimitive, v *Property) { p.Size = v },
-	"ADBE Vector Rect Position":    func(p *ShapePrimitive, v *Property) { p.Position = v },
-	"ADBE Vector Rect Roundness":   func(p *ShapePrimitive, v *Property) { p.Roundness = v },
-	"ADBE Vector Ellipse Size":     func(p *ShapePrimitive, v *Property) { p.Size = v },
-	"ADBE Vector Ellipse Position": func(p *ShapePrimitive, v *Property) { p.Position = v },
-	"ADBE Vector Star Type":        func(p *ShapePrimitive, v *Property) { p.StarType = v },
-	"ADBE Vector Star Points":      func(p *ShapePrimitive, v *Property) { p.Points = v },
-	"ADBE Vector Star Position":    func(p *ShapePrimitive, v *Property) { p.Position = v },
-	"ADBE Vector Star Rotation":    func(p *ShapePrimitive, v *Property) { p.Rotation = v },
+	"ADBE Vector Rect Size":         func(p *ShapePrimitive, v *Property) { p.Size = v },
+	"ADBE Vector Rect Position":     func(p *ShapePrimitive, v *Property) { p.Position = v },
+	"ADBE Vector Rect Roundness":    func(p *ShapePrimitive, v *Property) { p.Roundness = v },
+	"ADBE Vector Ellipse Size":      func(p *ShapePrimitive, v *Property) { p.Size = v },
+	"ADBE Vector Ellipse Position":  func(p *ShapePrimitive, v *Property) { p.Position = v },
+	"ADBE Vector Star Type":         func(p *ShapePrimitive, v *Property) { p.StarType = v },
+	"ADBE Vector Star Points":       func(p *ShapePrimitive, v *Property) { p.Points = v },
+	"ADBE Vector Star Position":     func(p *ShapePrimitive, v *Property) { p.Position = v },
+	"ADBE Vector Star Rotation":     func(p *ShapePrimitive, v *Property) { p.Rotation = v },
 	"ADBE Vector Star Inner Radius": func(p *ShapePrimitive, v *Property) { p.InnerRadius = v },
 	"ADBE Vector Star Outer Radius": func(p *ShapePrimitive, v *Property) { p.OuterRadius = v },
 	// AE's internal name uses the typo "Roundess" — kept verbatim for matching.

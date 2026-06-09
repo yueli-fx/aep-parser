@@ -1,6 +1,9 @@
 package aep
 
-import "github.com/example/aep-parser/internal/rifx"
+import (
+	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
+)
 
 // propertyGroupBackrefs holds the rifx.Chunk reference behind an
 // AEPropertyGroup — the underlying tdgp LIST that the structural property
@@ -18,13 +21,13 @@ type propertyGroupBackrefs struct {
 
 var _ PropertyGroupWriter = (*propertyGroupBackrefs)(nil)
 
-func (b *propertyGroupBackrefs) isPropertyGroupWriter() {}
+func (b *propertyGroupBackrefs) IsPropertyGroupWriter() {}
 
 // propertyGroupBack returns the concrete backrefs behind an AEPropertyGroup's
 // writer interface for serializer-stage (parse_/mutate_) tdgp LIST access.
 // Returns nil when the group was built outside the parser's tree builders.
-func (g *AEPropertyGroup) propertyGroupBack() *propertyGroupBackrefs {
-	if b, ok := g.back.(*propertyGroupBackrefs); ok {
+func propertyGroupBack(g *AEPropertyGroup) *propertyGroupBackrefs {
+	if b, ok := scene.PropertyGroupBack(g).(*propertyGroupBackrefs); ok {
 		return b
 	}
 	return nil

@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parseMasks walks the layer's property tree for the "ADBE Mask Parade"
@@ -62,7 +63,7 @@ func parseMasks(layr *rifx.Chunk, ctx *parseCtx) []*Mask {
 		}
 		if mkif != nil {
 			mask.MkifRaw = append([]byte(nil), mkif.Data...)
-			if mb, ok := mask.back.(*maskBackrefs); ok {
+			if mb := maskBack(mask); mb != nil {
 				mb.mkif = mkif
 				mb.maskName = mask.Name
 			}
@@ -154,7 +155,8 @@ func decodeMask(maskTdgp *rifx.Chunk, ctx *parseCtx) *Mask {
 		return nil
 	}
 
-	mask := &Mask{back: &maskBackrefs{}}
+	mask := &Mask{}
+	scene.SetMaskBack(mask, &maskBackrefs{})
 	// First snapshot drives Mask.Closed / Mask.Name / Mask.ShphRaw.
 	fillFromShap(mask, shaps[0])
 
@@ -254,7 +256,7 @@ func fillFromShap(m *Mask, shap *rifx.Chunk) {
 		switch {
 		case ch.ID == rifx.IDShph:
 			m.ShphRaw = append([]byte(nil), ch.Data...)
-			if mb, ok := m.back.(*maskBackrefs); ok && mb.shph == nil {
+			if mb := maskBack(m); mb != nil && mb.shph == nil {
 				mb.shph = ch
 			}
 			if len(ch.Data) >= 0x15 {

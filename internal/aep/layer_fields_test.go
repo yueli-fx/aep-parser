@@ -12,20 +12,20 @@ func TestLayerFieldDecoding(t *testing.T) {
 	rb := &rifxBuilder{}
 	ldta := buildLdta160(ldtaOpts{
 		LayerID: 42, ParentID: 100, SourceID: 7,
-		Quality:        uint16(aep.LayerQualityBest),
-		StartTime:      0.0,
-		InPoint:        0.0,
-		OutPoint:       5.0,
-		StretchDividend: 1,
-		StretchDivisor:  1,
-		Flag25:         0x40,                                // bit6 = sampling bicubic
-		Flag26:         0x80 | 0x08 | 0x02 | 0x10,           // null, solo, adjust, markers-locked
-		Flag27:         0x80 | 0x40 | 0x20 | 0x08 | 0x04 | 0x02 | 0x01, // collapse, shy, lock, motion-blur, fx, audio, visible
-		Label:          8,
-		BlendingMode:   byte(aep.BlendingModeOverlay),
+		Quality:              uint16(aep.LayerQualityBest),
+		StartTime:            0.0,
+		InPoint:              0.0,
+		OutPoint:             5.0,
+		StretchDividend:      1,
+		StretchDivisor:       1,
+		Flag25:               0x40,                                           // bit6 = sampling bicubic
+		Flag26:               0x80 | 0x08 | 0x02 | 0x10,                      // null, solo, adjust, markers-locked
+		Flag27:               0x80 | 0x40 | 0x20 | 0x08 | 0x04 | 0x02 | 0x01, // collapse, shy, lock, motion-blur, fx, audio, visible
+		Label:                8,
+		BlendingMode:         byte(aep.BlendingModeOverlay),
 		PreserveTransparency: true,
-		TrackMatte:     byte(aep.TrackMatteAlphaInverse),
-		TypeByte:       0,
+		TrackMatte:           byte(aep.TrackMatteAlphaInverse),
+		TypeByte:             0,
 	})
 	// Empty property tree just so parseProperties doesn't fail.
 	tdgp := rb.listChunk("LIST", "tdgp", rb.chunk("tdmn", []byte("ADBE Group End")))

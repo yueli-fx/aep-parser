@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/example/aep-parser/internal/codec"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // TestParseAttachCompleteness asserts that after Open() every scene object that
@@ -28,56 +29,56 @@ func walkAndAssertAttached(t *testing.T, proj *Project) {
 
 	nComps, nLayers, nProps, nKeyframes, nMarkers, nMasks, nFootage := 0, 0, 0, 0, 0, 0, 0
 
-	if proj.back == nil {
+	if scene.ProjectBack(proj) == nil {
 		t.Errorf("Project.back is nil")
 	}
 
 	for _, f := range proj.Footage {
 		nFootage++
-		if f.back == nil {
+		if scene.FootageBack(f) == nil {
 			t.Errorf("Footage %q (ID=%d): back is nil", f.Name, f.ID)
 		}
 	}
 
 	for _, comp := range proj.Compositions {
 		nComps++
-		if comp.back == nil {
+		if scene.CompositionBack(comp) == nil {
 			t.Errorf("Composition %q (ID=%d): back is nil", comp.Name, comp.ID)
 		}
 
 		for _, m := range comp.Markers {
 			nMarkers++
-			if m.back == nil {
+			if scene.MarkerBack(m) == nil {
 				t.Errorf("Composition %q marker @t=%.3fs: back is nil", comp.Name, m.Time)
 			}
 		}
 
 		for _, layer := range comp.Layers {
 			nLayers++
-			if layer.back == nil {
+			if scene.LayerBack(layer) == nil {
 				t.Errorf("Layer %q (ID=%d) in comp %q: back is nil", layer.Name, layer.ID, comp.Name)
 			}
 
 			for _, lm := range layer.Markers {
 				nMarkers++
-				if lm.back == nil {
+				if scene.MarkerBack(lm) == nil {
 					t.Errorf("Layer %q marker @t=%.3fs: back is nil", layer.Name, lm.Time)
 				}
 			}
 
 			for _, mask := range layer.Masks {
 				nMasks++
-				if mask.back == nil {
+				if scene.MaskBack(mask) == nil {
 					t.Errorf("Layer %q mask %q (index=%d): back is nil", layer.Name, mask.Name, mask.Index)
 				}
 				for _, mp := range mask.Properties {
 					nProps++
-					if mp.back == nil {
+					if scene.PropertyBack(mp) == nil {
 						t.Errorf("Layer %q mask %q property %q: back is nil", layer.Name, mask.Name, mp.MatchName)
 					}
 					for _, kf := range mp.Keyframes {
 						nKeyframes++
-						if kf.back == nil {
+						if scene.KeyframeBack(kf) == nil {
 							t.Errorf("Layer %q mask %q property %q keyframe @t=%.3fs: back is nil",
 								layer.Name, mask.Name, mp.MatchName, kf.Time)
 						}
@@ -110,32 +111,32 @@ func TestParseAttachCompletenessRenderQueue(t *testing.T) {
 		t.Fatal("fixture has no render queue items")
 	}
 	for i, it := range rq.Items {
-		rb := it.renderQueueItemBack()
+		rb := renderQueueItemBack(it)
 		if rb == nil {
 			t.Errorf("RenderQueueItem[%d]: back is nil", i)
 			continue
 		}
-		if len(it.settingsBlock) != codec.RenderSettingsItemSize {
+		if len(scene.RenderQueueItemSettings(it)) != codec.RenderSettingsItemSize {
 			t.Errorf("RenderQueueItem[%d]: settingsBlock copy len=%d, want %d",
-				i, len(it.settingsBlock), codec.RenderSettingsItemSize)
+				i, len(scene.RenderQueueItemSettings(it)), codec.RenderSettingsItemSize)
 		}
-		if len(rb.settingsSlice) != len(it.settingsBlock) {
+		if len(rb.settingsSlice) != len(scene.RenderQueueItemSettings(it)) {
 			t.Errorf("RenderQueueItem[%d]: back.settingsSlice len=%d != copy len=%d",
-				i, len(rb.settingsSlice), len(it.settingsBlock))
+				i, len(rb.settingsSlice), len(scene.RenderQueueItemSettings(it)))
 		}
 		for j, om := range it.OutputModules {
-			ob := om.outputModuleBack()
+			ob := outputModuleBack(om)
 			if ob == nil {
 				t.Errorf("RenderQueueItem[%d] OutputModule[%d]: back is nil", i, j)
 				continue
 			}
-			if len(om.settingsBlock) != len(ob.settingsSlice) {
+			if len(scene.OutputModuleSettingsBlock(om)) != len(ob.settingsSlice) {
 				t.Errorf("RenderQueueItem[%d] OutputModule[%d]: settings copy/alias len %d != %d",
-					i, j, len(om.settingsBlock), len(ob.settingsSlice))
+					i, j, len(scene.OutputModuleSettingsBlock(om)), len(ob.settingsSlice))
 			}
-			if len(om.roouData) != len(ob.roouSlice) {
+			if len(scene.OutputModuleRoouData(om)) != len(ob.roouSlice) {
 				t.Errorf("RenderQueueItem[%d] OutputModule[%d]: roou copy/alias len %d != %d",
-					i, j, len(om.roouData), len(ob.roouSlice))
+					i, j, len(scene.OutputModuleRoouData(om)), len(ob.roouSlice))
 			}
 		}
 	}
@@ -153,9 +154,9 @@ func TestParseAttachCompletenessGuides(t *testing.T) {
 	for _, c := range proj.Compositions {
 		for i, g := range c.Guides {
 			total++
-			if len(g.block) != guideItemSize {
+			if len(scene.GuideBlock(g)) != codec.GuideItemSize {
 				t.Errorf("comp %q guide[%d]: block copy len=%d, want %d",
-					c.Name, i, len(g.block), guideItemSize)
+					c.Name, i, len(scene.GuideBlock(g)), codec.GuideItemSize)
 			}
 		}
 	}
@@ -168,12 +169,12 @@ func TestParseAttachCompletenessGuides(t *testing.T) {
 func assertPropertyAttached(t *testing.T, layerName string, prop *Property, nProps, nKeyframes *int) {
 	t.Helper()
 	*nProps++
-	if prop.back == nil {
+	if scene.PropertyBack(prop) == nil {
 		t.Errorf("Layer %q property %q: back is nil", layerName, prop.MatchName)
 	}
 	for _, kf := range prop.Keyframes {
 		*nKeyframes++
-		if kf.back == nil {
+		if scene.KeyframeBack(kf) == nil {
 			t.Errorf("Layer %q property %q keyframe @t=%.3fs: back is nil",
 				layerName, prop.MatchName, kf.Time)
 		}

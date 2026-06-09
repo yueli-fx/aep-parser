@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // Marker structural ops (P3 §3G). Comp/layer markers are a keyframe-backed
@@ -36,7 +37,7 @@ import (
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. Renamed + BREAKING vs the former Marker.Remove method form.
 func RemoveMarker(m *Marker) error {
-	ml := m.list
+	ml := markerSet(m)
 	if ml == nil || ml.owner == nil {
 		return fmt.Errorf("marker: Remove unsupported (built outside parser or owner unbound)")
 	}
@@ -59,7 +60,7 @@ func RemoveMarker(m *Marker) error {
 		return fmt.Errorf("marker: not found in owning set (already removed?)")
 	}
 
-	off := m.ldatOffset
+	off := scene.MarkerLdatOffset(m)
 	if off < 0 || off+16 > len(ml.ldat.Data) {
 		return fmt.Errorf("marker: ldat offset %d out of range (len=%d)", off, len(ml.ldat.Data))
 	}
@@ -78,8 +79,8 @@ func RemoveMarker(m *Marker) error {
 
 	// 2. Shift every later marker's block offset down by one block.
 	for _, x := range markers {
-		if x.ldatOffset > off {
-			x.ldatOffset -= 16
+		if scene.MarkerLdatOffset(x) > off {
+			scene.SetMarkerLdatOffset(x, scene.MarkerLdatOffset(x)-16)
 		}
 	}
 
@@ -88,8 +89,8 @@ func RemoveMarker(m *Marker) error {
 
 	// 4. mrky: remove this marker's Nmrd LIST.
 	// P3-tracked stopgap: type-assert to access chunk field not in MarkerWriter.
-	if ml.mrky != nil && m.back != nil {
-		if mb, ok := m.back.(*markerBackrefs); ok && mb.nmrd != nil {
+	if ml.mrky != nil {
+		if mb := markerBack(m); mb != nil && mb.nmrd != nil {
 			if ni := indexOfChunk(ml.mrky.Children, mb.nmrd); ni >= 0 {
 				ch := ml.mrky.Children
 				ml.mrky.Children = append(ch[:ni:ni], ch[ni+1:]...)
@@ -99,7 +100,7 @@ func RemoveMarker(m *Marker) error {
 
 	// 5. scene: drop from the public Markers slice and detach.
 	*ml.owner = append(markers[:idx:idx], markers[idx+1:]...)
-	m.list = nil
+	scene.SetMarkerSetList(m, nil)
 	return nil
 }
 
@@ -132,25 +133,26 @@ func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 		return nil, fmt.Errorf("marker: AddMarker into an empty comp marker set is unsupported (no template to clone; needs a canonical seed)")
 	}
 	tmpl := c.Markers[len(c.Markers)-1]
-	ml := tmpl.list
+	ml := markerSet(tmpl)
 	if ml == nil || ml.owner == nil || ml.ldat == nil || ml.lhd3 == nil {
 		return nil, fmt.Errorf("marker: AddMarker missing marker-set references")
 	}
 	if ml.mrky == nil {
 		return nil, fmt.Errorf("marker: AddMarker requires an mrky branch (none in this set)")
 	}
-	// P3-tracked stopgap: type-assert to access chunk field not in MarkerWriter.
-	tmplMb, tmplMbOk := tmpl.back.(*markerBackrefs)
-	if tmpl.back == nil || !tmplMbOk || tmplMb.nmHd == nil {
+	tmplMb := markerBack(tmpl)
+	if tmplMb == nil || tmplMb.nmHd == nil {
 		return nil, fmt.Errorf("marker: AddMarker template marker has no NmHd to clone")
 	}
 	if len(ml.lhd3.Data) < 0x0C {
 		return nil, fmt.Errorf("marker: lhd3 too short for count (len=%d)", len(ml.lhd3.Data))
 	}
-	if tmpl.ldatOffset < 0 || tmpl.ldatOffset+16 > len(ml.ldat.Data) {
+	tmplOff := scene.MarkerLdatOffset(tmpl)
+	if tmplOff < 0 || tmplOff+16 > len(ml.ldat.Data) {
 		return nil, fmt.Errorf("marker: template ldat block out of range")
 	}
-	rate := tmpl.tickRate
+	tmplTick := tmplMb.tickRate
+	rate := tmplTick
 	if rate == 0 {
 		rate = aeLegacyTimeBase
 	}
@@ -160,7 +162,7 @@ func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 	// 1. ldat: append a clone of the template's 16-byte block; set the time.
 	newOff := len(ml.ldat.Data)
 	block := make([]byte, 16)
-	copy(block, ml.ldat.Data[tmpl.ldatOffset:tmpl.ldatOffset+16])
+	copy(block, ml.ldat.Data[tmplOff:tmplOff+16])
 	ticks := uint32(math.Round(seconds * rate))
 	binary.BigEndian.PutUint32(block[0:4], ticks)
 	ml.ldat.Data = append(ml.ldat.Data, block...)
@@ -184,15 +186,14 @@ func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 	ml.mrky.Children = append(ml.mrky.Children, nmrd)
 
 	// 4. scene: the new Marker, fully back-referenced.
-	newMb := &markerBackrefs{ldat: ml.ldat, ldatOffset: newOff, tickRate: tmpl.tickRate, nmHd: nmHdClone, nmrd: nmrd}
+	newMb := &markerBackrefs{ldat: ml.ldat, ldatOffset: newOff, tickRate: tmplTick, nmHd: nmHdClone, nmrd: nmrd}
 	nm := &Marker{
-		Time:       float64(ticks) / rate,
-		ldatOffset: newOff,
-		tickRate:   tmpl.tickRate,
-		compFps:    tmpl.compFps,
-		back:       newMb,
-		list:       ml,
+		Time: float64(ticks) / rate,
 	}
+	scene.SetMarkerLdatOffset(nm, newOff)
+	scene.SetMarkerRates(nm, tmplTick, scene.MarkerCompFps(tmpl))
+	scene.SetMarkerBack(nm, newMb)
+	scene.SetMarkerSetList(nm, ml)
 	*ml.owner = append(*ml.owner, nm)
 	return nm, nil
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // mutate_composition_renderer.go — SetRenderer switches a comp's 3D rendering
@@ -40,11 +42,12 @@ import (
 // serialize their own access (see incidents/concurrency-unsafe-shared-chunk-bytes).
 
 // prin layout (104B), per py-aep binary/misc_chunks.py PrinChunk:
-//   [0,4)    reserved (constant 00000000)
-//   [4,52)   match_name   — ASCII NUL-padded, 48B
-//   [52,100) display_name — ASCII NUL-padded, 48B (cosmetic; AE re-derives)
-//   [100,103) reserved
-//   [103]    end marker 0x01
+//
+//	[0,4)    reserved (constant 00000000)
+//	[4,52)   match_name   — ASCII NUL-padded, 48B
+//	[52,100) display_name — ASCII NUL-padded, 48B (cosmetic; AE re-derives)
+//	[100,103) reserved
+//	[103]    end marker 0x01
 const (
 	prinMatchNameOff = 4    // match_name field start
 	prinDisplayOff   = 0x34 // display_name field start (= 52)
@@ -131,47 +134,49 @@ func knownRenderers() string {
 // sketches/2026-06-01-renderer-write-re-findings.md.
 //
 // Ship-gated: AE 2025 (4/4) + AE 2020 (Ernst + Escher) green.
-func (c *Composition) SetRenderer(name string) error {
-	if c.back == nil {
+//
+// Free function (not a method) so the rollback path can reach the concrete
+// comp back-ref (prin/prda chunks) after the M8 split; the aep facade
+// re-exports it. BREAKING vs the former Composition.SetRenderer method form.
+func SetRenderer(c *Composition, name string) error {
+	cb := compositionBack(c)
+	if cb == nil {
 		return fmt.Errorf("SetRenderer: comp %q has no prin/prda back-ref (built outside parser, or has no PRin LIST)", c.Name)
 	}
 	matchName := normalizeRendererName(name)
 	oldRenderer := c.Renderer
+	proj := scene.CompositionProj(c)
 	oldWarningsLen := 0
-	if c.proj != nil {
-		oldWarningsLen = len(c.proj.Warnings)
+	if proj != nil {
+		oldWarningsLen = len(proj.Warnings)
 	}
 
-	// Snapshot prin/prda for rollback via type-assert stopgap (transient; removed in P3).
+	// Snapshot prin/prda for rollback.
 	var oldPrin, oldPrda []byte
-	if cb, ok := c.back.(*compositionBackrefs); ok {
-		if cb.prinChunk != nil {
-			oldPrin = append([]byte(nil), cb.prinChunk.Data...)
-		}
-		if cb.prdaChunk != nil {
-			oldPrda = append([]byte(nil), cb.prdaChunk.Data...)
-		}
+	if cb.prinChunk != nil {
+		oldPrin = append([]byte(nil), cb.prinChunk.Data...)
+	}
+	if cb.prdaChunk != nil {
+		oldPrda = append([]byte(nil), cb.prdaChunk.Data...)
 	}
 
-	if err := c.back.SetRenderer(name); err != nil {
+	if err := cb.SetRenderer(name); err != nil {
 		return err
 	}
 	c.Renderer = matchName
 
 	// Warnings-as-failure. No re-parse here, so warnings won't grow in
 	// practice — defensive rollback path matching the V2.1 mutate pattern.
-	if c.proj != nil && len(c.proj.Warnings) > oldWarningsLen {
+	if proj != nil && len(proj.Warnings) > oldWarningsLen {
 		c.Renderer = oldRenderer
-		if cb, ok := c.back.(*compositionBackrefs); ok {
-			if cb.prinChunk != nil && oldPrin != nil {
-				cb.prinChunk.Data = oldPrin
-			}
-			if cb.prdaChunk != nil && oldPrda != nil {
-				cb.prdaChunk.Data = oldPrda
-			}
+		if cb.prinChunk != nil && oldPrin != nil {
+			cb.prinChunk.Data = oldPrin
 		}
-		newWarnings := append([]string(nil), c.proj.Warnings[oldWarningsLen:]...)
-		c.proj.Warnings = c.proj.Warnings[:oldWarningsLen]
+		if cb.prdaChunk != nil && oldPrda != nil {
+			cb.prdaChunk.Data = oldPrda
+		}
+		newWarnings := append([]string(nil), proj.Warnings[oldWarningsLen:]...)
+		proj.Warnings = proj.Warnings[:oldWarningsLen]
 		return fmt.Errorf("SetRenderer: produced %d parser warning(s), rolled back: %v", len(newWarnings), newWarnings)
 	}
 

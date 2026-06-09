@@ -6,7 +6,25 @@ import (
 	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
+
+// keyframeBack returns the concrete back-refs behind a Keyframe's writer
+// interface for serializer-stage raw chunk access (tick rate, block layout).
+// Returns nil when the keyframe was built outside the parser. Free function
+// (the receiver is a scene type, so it can't be a method post package-split).
+func keyframeBack(k *Keyframe) *keyframeBackrefs {
+	if kb, ok := scene.KeyframeBack(k).(*keyframeBackrefs); ok {
+		return kb
+	}
+	return nil
+}
+
+// setKeyframeBack wires a concrete back-ref onto a scene Keyframe via the
+// scene wiring API (serializer stage cannot set the unexported field directly).
+func setKeyframeBack(k *Keyframe, b *keyframeBackrefs) {
+	scene.SetKeyframeBack(k, b)
+}
 
 // keyframeBackrefs holds the rifx.Chunk reference plus the cached layout
 // metadata (offset within ldat.Data, dimensionality, owning comp's TickRate
@@ -37,11 +55,18 @@ type keyframeBackrefs struct {
 
 var _ KeyframeWriter = (*keyframeBackrefs)(nil)
 
-func (b *keyframeBackrefs) frameRate() float64 {
+func (b *keyframeBackrefs) FrameRateHz() float64 {
 	if b == nil {
 		return 0
 	}
 	return b.compFps
+}
+
+func (b *keyframeBackrefs) CompTickRate() float64 {
+	if b == nil {
+		return 0
+	}
+	return b.tickRate
 }
 
 func (b *keyframeBackrefs) SetTime(seconds float64) error {

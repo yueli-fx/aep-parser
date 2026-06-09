@@ -6,6 +6,7 @@ import (
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parse_render_queue.go — parse the render queue (LIST:LRdr) into the scene
@@ -23,7 +24,8 @@ func parseRenderQueue(root *rifx.Chunk, proj *Project) {
 	if lrdr == nil {
 		return
 	}
-	rq := &RenderQueue{back: &renderQueueBackrefs{lrdr: lrdr}}
+	rq := &RenderQueue{}
+	scene.SetRenderQueueBack(rq, &renderQueueBackrefs{lrdr: lrdr})
 	proj.RenderQueue = rq
 
 	settingsBlocks := renderSettingsBlocks(lrdr)
@@ -95,7 +97,7 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, litm, itemLi
 	var settingsAlias []byte
 	if idx < len(blocks) {
 		settingsAlias = blocks[idx]
-		item.settingsBlock = append([]byte(nil), blocks[idx]...)
+		scene.SetRenderQueueItemSettings(item, append([]byte(nil), blocks[idx]...))
 		if rs, ok := codec.DecodeRenderSettings(blocks[idx]); ok {
 			item.Status = rs.Status
 			item.Name = rs.TemplateName
@@ -122,12 +124,12 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, litm, itemLi
 			}
 		}
 	}
-	item.back = &renderQueueItemBackrefs{
+	scene.SetRenderQueueItemBack(item, &renderQueueItemBackrefs{
 		litm:          litm,
 		itemListChunk: itemList,
 		rcomChunk:     rcom,
 		settingsSlice: settingsAlias,
-	}
+	})
 	item.OutputModules = parseOutputModules(lom, outputModuleSettingsBlocks(itemList))
 	return item
 }
@@ -186,15 +188,14 @@ func parseOutputModules(lom *rifx.Chunk, omBlocks [][]byte) []*OutputModule {
 
 func buildOutputModule(group []*rifx.Chunk, omBlock []byte) *OutputModule {
 	omb := &outputModuleBackrefs{settingsSlice: omBlock}
-	om := &OutputModule{
-		settingsBlock: append([]byte(nil), omBlock...),
-		back:          omb,
-	}
+	om := &OutputModule{}
+	scene.SetOutputModuleSettingsBlock(om, append([]byte(nil), omBlock...))
+	scene.SetOutputModuleBack(om, omb)
 	als2Seen := false
 	var postAls2 []string
 	for _, ch := range group {
 		if ch.ID == rifx.IDRoou {
-			om.roouData = append([]byte(nil), ch.Data...)
+			scene.SetOutputModuleRoouData(om, append([]byte(nil), ch.Data...))
 			omb.roouSlice = ch.Data
 			applyRoou(om, ch.Data)
 			continue

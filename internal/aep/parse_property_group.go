@@ -1,6 +1,9 @@
 package aep
 
-import "github.com/example/aep-parser/internal/rifx"
+import (
+	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
+)
 
 // Property-tree parse stage: builds the hierarchical AEPropertyGroup mirror
 // of a Layr's tdgp tree and wires its leaves to the flat Layer.Properties.
@@ -20,7 +23,8 @@ import "github.com/example/aep-parser/internal/rifx"
 // individual effect parameters are not re-parsed (the subgroup's
 // Children are empty for those — use Layer.Effects for typed access).
 func buildAEPropertyGroupTree(layr *rifx.Chunk) *AEPropertyGroup {
-	root := &AEPropertyGroup{back: &propertyGroupBackrefs{}}
+	root := &AEPropertyGroup{}
+	scene.SetPropertyGroupBack(root, &propertyGroupBackrefs{})
 	for _, ch := range layr.Children {
 		if !ch.IsList() || ch.FormType != rifx.IDTdgp {
 			continue
@@ -49,13 +53,17 @@ func addNamedChildren(group *rifx.Chunk, parent *AEPropertyGroup) {
 			placeholder := &propertyTreeLeafRef{matchName: name, tdbs: payload}
 			parent.Children = append(parent.Children, placeholder)
 		case rifx.IDTdgp:
-			sub := &AEPropertyGroup{MatchName: name, Name: name, parent: parent, back: &propertyGroupBackrefs{chunk: payload}}
+			sub := &AEPropertyGroup{MatchName: name, Name: name}
+			scene.SetPropertyGroupParent(sub, parent)
+			scene.SetPropertyGroupBack(sub, &propertyGroupBackrefs{chunk: payload})
 			addNamedChildren(payload, sub)
 			parent.Children = append(parent.Children, sub)
 		default:
 			// otst, parT, mrst, etc. — wrap as an opaque group so chained
 			// lookup still finds the name, but don't descend further.
-			sub := &AEPropertyGroup{MatchName: name, Name: name, parent: parent, back: &propertyGroupBackrefs{chunk: payload}}
+			sub := &AEPropertyGroup{MatchName: name, Name: name}
+			scene.SetPropertyGroupParent(sub, parent)
+			scene.SetPropertyGroupBack(sub, &propertyGroupBackrefs{chunk: payload})
 			parent.Children = append(parent.Children, sub)
 		}
 		return true
@@ -83,7 +91,7 @@ func (r *propertyTreeLeafRef) PropertyName() string      { return r.matchName }
 func wirePropertyTreeLeaves(root *AEPropertyGroup, props []*Property) {
 	byTdbs := make(map[*rifx.Chunk]*Property, len(props))
 	for _, p := range props {
-		if pb := p.propertyBack(); pb != nil && pb.tdbs != nil {
+		if pb := propertyBack(p); pb != nil && pb.tdbs != nil {
 			byTdbs[pb.tdbs] = p
 		}
 	}
@@ -94,7 +102,7 @@ func wirePropertyTreeLeaves(root *AEPropertyGroup, props []*Property) {
 			switch v := c.(type) {
 			case *propertyTreeLeafRef:
 				if p, ok := byTdbs[v.tdbs]; ok {
-					p.parentTreeGroup = g
+					scene.SetPropertyParentTreeGroup(p, g)
 					filtered = append(filtered, p)
 				}
 				// else: parseLeafProperty rejected this tdbs — drop placeholder.

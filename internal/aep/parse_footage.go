@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // parseFootage reads footage metadata from an Item list.
@@ -17,7 +18,8 @@ import (
 //   - Als2/alas : JSON alias data with "fullpath" — most reliable source of name
 func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, error) {
 	fb := &footageBackrefs{itemID: id, itemName: fallbackName}
-	footage := &Footage{ID: id, Name: fallbackName, back: fb}
+	footage := &Footage{ID: id, Name: fallbackName}
+	scene.SetFootageBack(footage, fb)
 
 	pin := item.FindFirstList(rifx.IDPin)
 	src := item

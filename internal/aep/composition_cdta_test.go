@@ -20,11 +20,11 @@ import (
 // of-a-second; label color at NmHd @0x10 as a raw uint8 index (0..16).
 func TestCompositionBGColorRegression(t *testing.T) {
 	cdta := buildCdtaWithOpts(1920, 1080, 30, 0, 300, cdtaOpts{
-		BGColor:               [3]uint8{200, 100, 50},
-		WorkAreaStartDivisor:  600,
-		WorkAreaEndDividend:   0xFFFFFFFF,
-		WorkAreaEndDivisor:    600,
-		ShutterAngle:          180,
+		BGColor:                   [3]uint8{200, 100, 50},
+		WorkAreaStartDivisor:      600,
+		WorkAreaEndDividend:       0xFFFFFFFF,
+		WorkAreaEndDivisor:        600,
+		ShutterAngle:              180,
 		MotionBlurAdaptiveLimit:   128,
 		MotionBlurSamplesPerFrame: 16,
 	})
@@ -64,9 +64,9 @@ func TestCompositionCDTAFields(t *testing.T) {
 		{
 			name: "ae defaults (zeroes everywhere)",
 			opts: cdtaOpts{
-				WorkAreaStartDivisor:  600,
-				WorkAreaEndDivisor:    600,
-				ShutterAngle:          180,
+				WorkAreaStartDivisor:      600,
+				WorkAreaEndDivisor:        600,
+				ShutterAngle:              180,
 				MotionBlurAdaptiveLimit:   128,
 				MotionBlurSamplesPerFrame: 16,
 			},
@@ -81,13 +81,13 @@ func TestCompositionCDTAFields(t *testing.T) {
 		{
 			name: "non-default values",
 			opts: cdtaOpts{
-				BGColor:               [3]uint8{12, 34, 56},
-				WorkAreaStartDividend: 1200, // 1200/600 = 2.0s
-				WorkAreaStartDivisor:  600,
-				WorkAreaEndDividend:   3600, // 3600/600 = 6.0s
-				WorkAreaEndDivisor:    600,
-				ShutterAngle:          270,
-				ShutterPhase:          -90, // signed; matches fixture comp #0
+				BGColor:                   [3]uint8{12, 34, 56},
+				WorkAreaStartDividend:     1200, // 1200/600 = 2.0s
+				WorkAreaStartDivisor:      600,
+				WorkAreaEndDividend:       3600, // 3600/600 = 6.0s
+				WorkAreaEndDivisor:        600,
+				ShutterAngle:              270,
+				ShutterPhase:              -90, // signed; matches fixture comp #0
 				MotionBlurAdaptiveLimit:   200,
 				MotionBlurSamplesPerFrame: 32,
 			},
@@ -102,10 +102,10 @@ func TestCompositionCDTAFields(t *testing.T) {
 		{
 			name: "work area end sentinel 0xFFFFFFFF substitutes Duration",
 			opts: cdtaOpts{
-				WorkAreaStartDivisor: 600,
-				WorkAreaEndDividend:  0xFFFFFFFF, // sentinel
-				WorkAreaEndDivisor:   600,
-				ShutterAngle:         180,
+				WorkAreaStartDivisor:      600,
+				WorkAreaEndDividend:       0xFFFFFFFF, // sentinel
+				WorkAreaEndDivisor:        600,
+				ShutterAngle:              180,
 				MotionBlurAdaptiveLimit:   128,
 				MotionBlurSamplesPerFrame: 16,
 			},

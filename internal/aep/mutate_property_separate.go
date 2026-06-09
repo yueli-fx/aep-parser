@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position
@@ -42,7 +43,7 @@ func SetDimensionsSeparated(p *Property, separated bool) error {
 	if p.MatchName != MatchNamePosition {
 		return fmt.Errorf("SetDimensionsSeparated: only %q can be separated (got %q)", MatchNamePosition, p.MatchName)
 	}
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	if pb == nil || pb.tdsb == nil {
 		return fmt.Errorf("SetDimensionsSeparated: Position built outside parser (no tdsb back-ref)")
 	}
@@ -52,11 +53,11 @@ func SetDimensionsSeparated(p *Property, separated bool) error {
 	if len(pb.tdsb.Data) < 4 {
 		return fmt.Errorf("SetDimensionsSeparated: Position tdsb too short (tdsb=%d)", len(pb.tdsb.Data))
 	}
-	grp := p.parentTreeGroup
-	if grp == nil || grp.propertyGroupBack().chunk == nil {
+	grp := scene.PropertyParentTreeGroup(p)
+	if grp == nil || propertyGroupBack(grp).chunk == nil {
 		return fmt.Errorf("SetDimensionsSeparated: Position has no owning tdgp group chunk")
 	}
-	layer := p.ownerLayer()
+	layer := p.OwnerLayer()
 	if layer == nil {
 		return fmt.Errorf("SetDimensionsSeparated: cannot reach owning layer")
 	}
@@ -102,7 +103,7 @@ func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 		return fmt.Errorf("SetDimensionsSeparated: Position_2 already present")
 	}
 	for _, f := range []*Property{pos0, pos1} {
-		fb := f.propertyBack()
+		fb := propertyBack(f)
 		if fb == nil || fb.tdsb == nil || fb.cdat == nil || fb.tdbs == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing back-refs", f.MatchName)
 		}
@@ -110,14 +111,14 @@ func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q tdsb/cdat too short", f.MatchName)
 		}
 	}
-	pb, pos0b, pos1b := p.propertyBack(), pos0.propertyBack(), pos1.propertyBack()
+	pb, pos0b, pos1b := propertyBack(p), propertyBack(pos0), propertyBack(pos1)
 
 	// Synthesize the Z follower up front (3D only) — the lone fallible step.
 	var newTdmn, newTdbs *rifx.Chunk
 	var pos2 *Property
 	var insertAt int
 	if layer.Is3D {
-		groupChildren := grp.propertyGroupBack().chunk.Children
+		groupChildren := propertyGroupBack(grp).chunk.Children
 		pos1TdbsIdx := indexOfChunk(groupChildren, pos1b.tdbs)
 		if pos1TdbsIdx < 1 {
 			return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
@@ -147,7 +148,7 @@ func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 			return fmt.Errorf("SetDimensionsSeparated: synthesized Position_2 produced parser warnings: %v", localWarnings)
 		}
 		pos2.DefaultValue = 0.0 // ADBE Position_2 fixed default
-		pos2.parentTreeGroup = grp
+		scene.SetPropertyParentTreeGroup(pos2, grp)
 		insertAt = pos1TdbsIdx + 1
 	}
 
@@ -167,12 +168,12 @@ func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 	pos1.StaticValue = xyz[1]
 
 	if pos2 != nil {
-		groupChildren := grp.propertyGroupBack().chunk.Children
+		groupChildren := propertyGroupBack(grp).chunk.Children
 		spliced := make([]*rifx.Chunk, 0, len(groupChildren)+2)
 		spliced = append(spliced, groupChildren[:insertAt]...)
 		spliced = append(spliced, newTdmn, newTdbs)
 		spliced = append(spliced, groupChildren[insertAt:]...)
-		grp.propertyGroupBack().chunk.Children = spliced
+		propertyGroupBack(grp).chunk.Children = spliced
 		insertChildAfter(grp, pos1, pos2)
 		layer.Properties = append(layer.Properties, pos2)
 	}
@@ -189,12 +190,12 @@ func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 // (incidents/separate-dimensions-write-mechanics.md §animated):
 //
 //   - per follower keyframe i, axis a:
-//       value     = leader.kf[i].Value[a]
-//       out_speed = leader.kf[i].OutSpatialTangent[a] × 100
-//       in_speed  = −leader.kf[i].InSpatialTangent[a] × 100
-//       influence = 0.01 on a side that has an adjacent segment, 0 at the
-//                   first-kf in-side / last-kf out-side boundary
-//       in/out interp = bezier  (block header07 = 0x08, bpk = 48)
+//     value     = leader.kf[i].Value[a]
+//     out_speed = leader.kf[i].OutSpatialTangent[a] × 100
+//     in_speed  = −leader.kf[i].InSpatialTangent[a] × 100
+//     influence = 0.01 on a side that has an adjacent segment, 0 at the
+//     first-kf in-side / last-kf out-side boundary
+//     in/out interp = bezier  (block header07 = 0x08, bpk = 48)
 //   - followers convert static→animated: tdb4 @0x05 clears bit0 + @0x44=0x01,
 //     tdsb clears bit1, cdat → LIST(kfl)(lhd3+ldat).
 //   - leader collapses animated→static: tdb4 @0x05 sets bit0, @0x44=0x00,
@@ -215,7 +216,7 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 	if !layer.Is3D {
 		return fmt.Errorf("SetDimensionsSeparated: animated Position separate currently supports 3D layers only")
 	}
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	if pb == nil || pb.tdbs == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
 		return fmt.Errorf("SetDimensionsSeparated: animated leader missing tdbs/tdb4 back-refs")
 	}
@@ -226,10 +227,8 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 
 	kfs := p.Keyframes
 	tickRate := 0.0
-	if kfs[0].back != nil {
-		if kb, ok := kfs[0].back.(*keyframeBackrefs); ok {
-			tickRate = kb.tickRate
-		}
+	if kb := keyframeBack(kfs[0]); kb != nil {
+		tickRate = kb.tickRate
 	}
 	if tickRate <= 0 {
 		return fmt.Errorf("SetDimensionsSeparated: animated leader tickRate unavailable")
@@ -257,7 +256,7 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 		return fmt.Errorf("SetDimensionsSeparated: Position_2 already present")
 	}
 	for _, f := range []*Property{pos0, pos1} {
-		fb := f.propertyBack()
+		fb := propertyBack(f)
 		if fb == nil || fb.tdsb == nil || fb.cdat == nil || fb.tdbs == nil || fb.tdb4 == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing back-refs", f.MatchName)
 		}
@@ -265,7 +264,7 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 			return fmt.Errorf("SetDimensionsSeparated: follower %q tdb4/tdsb too short", f.MatchName)
 		}
 	}
-	pos1b := pos1.propertyBack()
+	pos1b := propertyBack(pos1)
 
 	// Locate the leader's kf stream LIST + the Position_1 tdmn/tdbs splice
 	// point up front (pre-commit; refuse rather than half-mutate).
@@ -279,7 +278,7 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 	if leaderKflIdx < 0 {
 		return fmt.Errorf("SetDimensionsSeparated: animated leader has no kf stream to collapse")
 	}
-	groupChildren := grp.propertyGroupBack().chunk.Children
+	groupChildren := propertyGroupBack(grp).chunk.Children
 	pos1TdbsIdx := indexOfChunk(groupChildren, pos1b.tdbs)
 	if pos1TdbsIdx < 1 {
 		return fmt.Errorf("SetDimensionsSeparated: Position_1 tdbs not located in group LIST")
@@ -315,7 +314,7 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 		return fmt.Errorf("SetDimensionsSeparated: synthesized Position_2 has %d kf, want %d", len(pos2.Keyframes), len(kfs))
 	}
 	pos2.DefaultValue = 0.0 // ADBE Position_2 fixed default
-	pos2.parentTreeGroup = grp
+	scene.SetPropertyParentTreeGroup(pos2, grp)
 	insertAt := pos1TdbsIdx + 1
 
 	// Leader's replacement static cdat (72B): default + kf0 spatial tangents.
@@ -345,7 +344,7 @@ func separatePositionAnimated(p *Property, grp *AEPropertyGroup, layer *Layer) e
 	spliced = append(spliced, groupChildren[:insertAt]...)
 	spliced = append(spliced, newTdmn, newTdbs)
 	spliced = append(spliced, groupChildren[insertAt:]...)
-	grp.propertyGroupBack().chunk.Children = spliced
+	propertyGroupBack(grp).chunk.Children = spliced
 	insertChildAfter(grp, pos1, pos2)
 	layer.Properties = append(layer.Properties, pos2)
 
@@ -498,7 +497,7 @@ func convertFollowerTdbsToAnimated(tdbs, kfl *rifx.Chunk) error {
 // Property to animated in place (chunks + scene state), using its parsed
 // back-refs. All bounds are pre-validated by the caller, so it is infallible.
 func convertFollowerToAnimated(f *Property, kfl *rifx.Chunk, ctx *parseCtx) {
-	fb := f.propertyBack()
+	fb := propertyBack(f)
 	fb.tdb4.Data[0x05] &^= 0x01
 	fb.tdb4.Data[0x44] = 0x01
 	fb.tdsb.Data[3] &^= 0x02
@@ -535,7 +534,7 @@ func mergePosition(p *Property, grp *AEPropertyGroup) error {
 		if f == nil {
 			continue
 		}
-		if fb := f.propertyBack(); fb == nil || fb.tdbs == nil {
+		if fb := propertyBack(f); fb == nil || fb.tdbs == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing tdbs back-ref", mn)
 		}
 		v, ok := f.StaticValue.(float64)
@@ -550,7 +549,7 @@ func mergePosition(p *Property, grp *AEPropertyGroup) error {
 	}
 
 	// === Commit: leader takes the value + clears separated flags ===
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	pb.tdsb.Data[2] = 0x00
 	pb.tdsb.Data[3] &^= 0x02
 	binary.BigEndian.PutUint64(pb.cdat.Data[0:8], math.Float64bits(axisVal[0]))
@@ -583,7 +582,7 @@ func mergePosition(p *Property, grp *AEPropertyGroup) error {
 // Atomicity: all fallible work (validation + stream construction + locating the
 // leader cdat) runs before any in-place mutation.
 func mergePositionAnimated(p *Property, grp *AEPropertyGroup) error {
-	pb := p.propertyBack()
+	pb := propertyBack(p)
 	if pb == nil || pb.tdbs == nil || pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
 		return fmt.Errorf("SetDimensionsSeparated: separated leader missing tdbs/tdb4 back-refs")
 	}
@@ -599,16 +598,14 @@ func mergePositionAnimated(p *Property, grp *AEPropertyGroup) error {
 		return fmt.Errorf("SetDimensionsSeparated: animated follower Position_0 has no keyframes")
 	}
 	tickRate := 0.0
-	if pos0.Keyframes[0].back != nil {
-		if kb, ok := pos0.Keyframes[0].back.(*keyframeBackrefs); ok {
-			tickRate = kb.tickRate
-		}
+	if kb := keyframeBack(pos0.Keyframes[0]); kb != nil {
+		tickRate = kb.tickRate
 	}
 	if tickRate <= 0 {
 		return fmt.Errorf("SetDimensionsSeparated: animated follower tickRate unavailable")
 	}
 	for ai, f := range followers {
-		if fb := f.propertyBack(); fb == nil || fb.tdbs == nil {
+		if fb := propertyBack(f); fb == nil || fb.tdbs == nil {
 			return fmt.Errorf("SetDimensionsSeparated: follower %q missing tdbs back-ref", f.MatchName)
 		}
 		if len(f.Keyframes) != n {
@@ -701,26 +698,26 @@ func buildMergedLeaderKfl(followers []*Property, n int, tickRate float64) *rifx.
 func removeFollowerChunks(grp *AEPropertyGroup, followers []*Property) {
 	remove := make(map[*rifx.Chunk]bool, len(followers)*2)
 	for _, f := range followers {
-		fb := f.propertyBack()
+		fb := propertyBack(f)
 		if fb == nil {
 			continue
 		}
-		idx := indexOfChunk(grp.propertyGroupBack().chunk.Children, fb.tdbs)
+		idx := indexOfChunk(propertyGroupBack(grp).chunk.Children, fb.tdbs)
 		if idx < 0 {
 			continue
 		}
 		remove[fb.tdbs] = true
-		if idx >= 1 && grp.propertyGroupBack().chunk.Children[idx-1].ID == rifx.IDTdmn {
-			remove[grp.propertyGroupBack().chunk.Children[idx-1]] = true
+		if idx >= 1 && propertyGroupBack(grp).chunk.Children[idx-1].ID == rifx.IDTdmn {
+			remove[propertyGroupBack(grp).chunk.Children[idx-1]] = true
 		}
 	}
-	keep := grp.propertyGroupBack().chunk.Children[:0:0]
-	for _, ch := range grp.propertyGroupBack().chunk.Children {
+	keep := propertyGroupBack(grp).chunk.Children[:0:0]
+	for _, ch := range propertyGroupBack(grp).chunk.Children {
 		if !remove[ch] {
 			keep = append(keep, ch)
 		}
 	}
-	grp.propertyGroupBack().chunk.Children = keep
+	propertyGroupBack(grp).chunk.Children = keep
 
 	removeFollowers := make(map[PropertyBase]bool, len(followers))
 	for _, f := range followers {
@@ -734,9 +731,9 @@ func removeFollowerChunks(grp *AEPropertyGroup, followers []*Property) {
 // Property slice (by pointer identity).
 func filterLayerProperties(g *AEPropertyGroup, drop []*Property) {
 	var layer *Layer
-	for cur := g; cur != nil; cur = cur.parent {
-		if cur.layer != nil {
-			layer = cur.layer
+	for cur := g; cur != nil; cur = scene.PropertyGroupParent(cur) {
+		if scene.PropertyGroupLayer(cur) != nil {
+			layer = scene.PropertyGroupLayer(cur)
 			break
 		}
 	}
