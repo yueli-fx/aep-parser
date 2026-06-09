@@ -97,9 +97,52 @@ standalone splice can't satisfy — excluded until a Phase-2 remap handles refs.
   AE's own resave preserves the addition. The other 7 ride the identical
   mechanism (Go round-trip only) — promote to gated if a doubt arises.
 
-## Deferred (Phase 2+)
+## Phase 2 — effects on from-scratch shape layers (RE'd, NOT a quick win)
 
-- **Parade auto-create** → AddEffect on from-scratch `NewShapeLayer` layers.
-- **Reference-param effects** (need sspc layer-id remap, like cross-Project InsertLayer).
+Investigated 2026-06-10; deferred after finding it's a real feature, not a splice
+tweak. Concrete findings so the next attempt doesn't re-walk this:
+
+1. **Parade position in a shape layer** (RE `re_shape_effect.aep`, an AE-native
+   shape layer + Gaussian Blur): the outer `LIST(tdgp)` group order is
+   `tdsb, tdsn, [Root Vectors Group], [Effect Parade], [Transform Group],
+   [Layer Styles], [Extrsn Options], [Material Options], [Audio Group],
+   [Layer Sets], Group End`. **Effect Parade sits immediately after Root Vectors
+   Group, before Transform Group.**
+2. **AE emits the Effect Parade ONLY when ≥1 effect exists.** The from-scratch
+   shape templates (`v2_2_*`) were extracted from effect-less AE shape layers and
+   carry **no** parade — so emitting an *empty* parade is non-canonical (AE never
+   does it for an effect-less layer). A populated parade is the faithful form.
+3. **Write-time re-lowering wall.** `syncShapeLayerChunks` (back_project.go
+   WriteAEP) re-lowers **every dirty shape layer from scratch**
+   (`lb.layrList.Children = fresh.Children`). So **chunk-level edits to a fresh
+   shape layer's parade are discarded at write** — effects must be emitted by
+   `lowerShapeLayer` from **scene** state, not patched into the chunk (unlike
+   Phase 1, which patches a *parsed* layer's chunk that is never re-lowered).
+4. **Scene can't hold rifx chunks** (CLAUDE.md #3: scene 禁 import rifx). So the
+   effect's sspc payload (and any tuned param values) can't live on the scene
+   `*Effect`. Emitting effect *parameter values* set on a fresh layer therefore
+   needs either (a) generic effect-param lowering (re-encode `Effect.Parameters`
+   → sspc — large), or (b) a serializer-side "pending effect chunks" map keyed by
+   `*Layer` that `lowerShapeLayer` consumes. Default-param effects (no tuning)
+   are tractable via (b) but the "tuned-value silently lost" footgun must be
+   handled (refuse/warn on SetStaticValue for fresh-layer effects).
+
+**Workaround available today (no Phase 2 needed):** build the shape layer →
+`WriteAEP` → `Open` the bytes → the reopened layer is a parsed layer with a
+parade once it has effects; or apply effects in AE. Phase-1 AddEffect then works
+with full param fidelity. So fresh-layer AddEffect is a fluency nicety, not a
+capability gap.
+
+## Other deferred
+
+- **Reference-param effects** (Set Matte / Displacement Map / Compound Blur …) —
+  sspc carries a dangling layer-id; needs remap like cross-Project InsertLayer.
+- **AddMask** — Mask Parade is the same INDEXED_GROUP splice (RemovePropertyGroup
+  already handles masks); blocked by the same parade-creation gap for layers with
+  no existing Mask Parade.
 - **Library expansion** beyond the 12 (more fixture RE; watch for ref params).
 - **Per-effect typed param helpers** (today: raw `Property.SetStaticValue` by match-name).
+
+Typed effect match-name constants (`aep.EffectGaussianBlur` … `aep.EffectExposure`,
+single-sourced in the registry, divergence-guarded by `TestEffectConstants_MatchRegistry`)
+shipped 2026-06-10 — call sites no longer hardcode AE's internal strings.
