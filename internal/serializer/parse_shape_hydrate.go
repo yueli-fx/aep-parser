@@ -118,6 +118,10 @@ func collectShapeKids(tdgp *rifx.Chunk, g *VectorGroup, ctx *parseCtx) {
 			if n := hydrateGradientFillNode(payload, ctx); n != nil {
 				g.Children = append(g.Children, n)
 			}
+		case "ADBE Vector Graphic - G-Stroke":
+			if n := hydrateGradientStrokeNode(payload, ctx); n != nil {
+				g.Children = append(g.Children, n)
+			}
 		}
 		return true
 	})
@@ -250,6 +254,15 @@ func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
 	return f
 }
 
+// hydrateGradientStops decodes the Grad Colors stops XML from a gradient body
+// (G-Fill or G-Stroke). Returns nil if absent (caller keeps the default node).
+func hydrateGradientStops(body *rifx.Chunk) *codec.Gradient {
+	if xml := findGradientStopsXML(body, "ADBE Vector Grad Colors"); xml != "" {
+		return codec.ParseGradientXML(xml)
+	}
+	return nil
+}
+
 // hydrateGradientFillNode reads the gradient-fill body back into a runtime
 // GradientFillNode: descends the Grad Colors GCst→GCky→Utf8 and decodes the
 // prop.map XML via codec.ParseGradientXML. Grad Type / Start Pt / End Pt are not
@@ -257,10 +270,19 @@ func hydrateFillNode(body *rifx.Chunk, ctx *parseCtx) *FillNode {
 // the stops XML is absent (keeps the node visible rather than dropping it).
 func hydrateGradientFillNode(body *rifx.Chunk, _ *parseCtx) *GradientFillNode {
 	n := NewGradientFillNode()
-	if xml := findGradientStopsXML(body, "ADBE Vector Grad Colors"); xml != "" {
-		if g := codec.ParseGradientXML(xml); g != nil {
-			scene.SetGradientFillNodeGradient(n, g)
-		}
+	if g := hydrateGradientStops(body); g != nil {
+		scene.SetGradientFillNodeGradient(n, g)
+	}
+	return n
+}
+
+// hydrateGradientStrokeNode reads a G-Stroke body back into a runtime
+// GradientStrokeNode. Local-degrade like G-Fill: missing Grad Colors → default
+// node (node stays visible, parse never fails).
+func hydrateGradientStrokeNode(body *rifx.Chunk, _ *parseCtx) *GradientStrokeNode {
+	n := NewGradientStrokeNode()
+	if g := hydrateGradientStops(body); g != nil {
+		scene.SetGradientStrokeNodeGradient(n, g)
 	}
 	return n
 }
