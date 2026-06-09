@@ -17,28 +17,7 @@ import (
 // mergePositionAnimated); animated cases outside that shipped subset — a 2D
 // layer, or a leader carrying custom spatial-path temporal ease — are refused
 // with an error rather than written.
-//
-// Byte mechanics REd from AE 2020 controlled before/after pairs (see
-// test_data/re_separate_dims*.jsx + incidents/separate-dimensions-write-mechanics.md):
-//
-//   - separate (merge→separate): leader flips tdsb byte2→0x08 + byte3 bit1 and
-//     resets to its default ([w/2,h/2,0]); the real value migrates into the
-//     per-axis Position_0/1 (+ Position_2 for 3D layers) followers, each
-//     clearing its own bit1. AE pre-allocates Position_0/1 even while merged;
-//     the Z follower Position_2 is synthesized (clone of Position_1's
-//     tdmn+tdbs) only for 3D layers — 2D layers separate into X/Y only.
-//   - merge (separate→merged): leader clears tdsb byte2→0x00 + byte3 bit1 and
-//     takes back the migrated [X,Y,Z] value; ALL Position_0/1/2 followers are
-//     removed (AE's merged-after-separate form is leader-only).
-//
-// Atomicity: the only fallible step (re-parsing a synthesized Position_2)
-// runs before any in-place mutation, so a failure leaves the project
-// untouched and there is nothing to roll back.
-//
-// Free function (not a method) so the impl can live in internal/serializer after
-// the M8 split (CLAUDE.md #2 lists SetDimensionsSeparated as a structural write path
-// despite the Set prefix — it adds/removes follower Property nodes); the aep facade
-// re-exports it. BREAKING vs the former Property.SetDimensionsSeparated method form.
+// (Full contract + RE notes live on the aep.SetDimensionsSeparated facade — docgen source.)
 func SetDimensionsSeparated(p *Property, separated bool) error {
 	if p.MatchName != MatchNamePosition {
 		return fmt.Errorf("SetDimensionsSeparated: only %q can be separated (got %q)", MatchNamePosition, p.MatchName)

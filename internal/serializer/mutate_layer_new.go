@@ -94,24 +94,7 @@ func insertLayrPosition(children []*rifx.Chunk) int {
 }
 
 // NewShapeLayer adds a new empty ShapeLayer to the composition.
-//
-// Required:
-//
-//	name — non-empty string (matches NewComposition validation contract)
-//
-// Returns the typed *ShapeLayer wrapper; the embedded *Layer is also
-// appended to comp.Layers so V1 lookup paths (Composition.LayerByID /
-// LayerByName) work immediately. ID is auto-assigned via the project's
-// monotonic item-ID counter (never reused; layer IDs share the item-ID
-// namespace per V1 parser convention).
-//
-// Atomic mutation: if lowering fails, or downstream parse emits any warning,
-// all state mutated by this call is rolled back to the pre-call snapshot
-// before the error is returned.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
+// (Full contract + RE notes live on the aep.NewShapeLayer facade — docgen source.)
 func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	if name == "" {
 		return nil, fmt.Errorf("ShapeLayer name cannot be empty")

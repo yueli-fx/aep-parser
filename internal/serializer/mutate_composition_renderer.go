@@ -126,18 +126,7 @@ func knownRenderers() string {
 // options (structural). Returns an error for an unknown renderer, a comp built
 // outside the parser (no prin/prda back-ref), a comp whose prin is not the
 // expected 104 bytes, or if the mutation surfaces a parser warning (rolled back).
-//
-// Which engines a given AE version actually exposes differs (AE 2020:
-// Escher/Ernst + a Standard variant; AE 2025: Calder/Ernst + Picasso; AE 2025
-// auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary
-// match_name is the stable engine identity — see
-// sketches/2026-06-01-renderer-write-re-findings.md.
-//
-// Ship-gated: AE 2025 (4/4) + AE 2020 (Ernst + Escher) green.
-//
-// Free function (not a method) so the rollback path can reach the concrete
-// comp back-ref (prin/prda chunks) after the M8 split; the aep facade
-// re-exports it. BREAKING vs the former Composition.SetRenderer method form.
+// (Full contract + RE notes live on the aep.SetRenderer facade — docgen source.)
 func SetRenderer(c *Composition, name string) error {
 	cb := compositionBack(c)
 	if cb == nil {

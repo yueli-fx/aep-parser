@@ -20,13 +20,7 @@ var embeddedTemplate2025 []byte
 
 // NewProject returns a fresh empty Project parsed from the embedded
 // AE skeleton matching the requested target.
-//
-// Optional target arg: zero args = TargetAE2020 (max compatibility). Pass
-// at most one target. Subsequent NewComposition calls populate it.
-//
-// Never returns an error: the embedded templates are build-time trusted;
-// parser bugs panic with a "build bug" message (not user-facing).
-// Panics on: multiple target args, or unknown AETarget value (forward-incompat).
+// (Full contract + RE notes live on the aep.NewProject facade — docgen source.)
 func NewProject(target ...AETarget) *Project {
 	t := TargetAE2020 // default
 	switch len(target) {

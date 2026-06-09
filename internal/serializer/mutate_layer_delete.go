@@ -12,38 +12,7 @@ import (
 // Returns nil on success, or an error if a refuse-case triggers (index
 // out of range / comp lacks itemList back-ref / target is the last
 // layer / target is not an AV layer / backref corruption).
-//
-// Reference cleanup — per AE's own delete behavior (RE'd via the
-// re_delete_layer_*.aep fixtures):
-//
-//   - any other layer's Layer.ParentID == deleted.ID → reset to 0
-//     (ldta @0x84..0x87)
-//   - any other layer's Layer.TrackMatteLayerID == deleted.ID → reset
-//     to 0 (ldta @0xA0..0xA3, when ldta is long enough — AE ≤22 didn't
-//     write this field)
-//   - Layer.TrackMatte byte (ldta @0x6B) on those neighbors is LEFT
-//     UNTOUCHED to match AE: the matte intent flag persists even after
-//     the matte source is gone (AE re-resolves via implicit "layer
-//     above" at render time, which now returns nothing — matches AE)
-//   - Project.nextItemID counter: untouched (IDs never reused)
-//
-// String-level references to the deleted layer's ID (expressions,
-// render queue, essential graphics) are out of scope — callers must
-// scrub these manually if needed.
-//
-// Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers,
-// neighbor refs / ldta bytes, and Project.Warnings; on any new parser
-// warning surfaced during the call, roll all of them back and return the
-// warnings as an error.
-//
-// Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS across baseline /
-// middle / parent / matte modes). Future RE can lift the non-AV refuse
-// and the single-layer-comp refuse — both are conservative defaults
-// because AE's behavior for those scenarios hasn't been verified.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
+// (Full contract + RE notes live on the aep.DeleteLayer facade — docgen source.)
 func DeleteLayer(c *Composition, index int) error {
 	// 1. Validate refuse-cases.
 	if index < 0 || index >= len(c.Layers) {

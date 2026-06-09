@@ -15,31 +15,7 @@ import (
 // track-matte refs remapped to the dup's own layers; layer SOURCES
 // (footage / precomp items) are shared verbatim, not duplicated — matching
 // AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition.
-//
-// Clone semantics (same-Project comp only):
-//
-//   - new comp item ID = allocItemID(p)             (idta @0x10)
-//   - per layer: new layer ID = allocItemID(p)      (ldta @0x00)
-//   - intra-comp ParentID @0x84 / TrackMatteLayerID @0xA0 remapped via
-//     srcLayerID→dupLayerID map (matte guarded by len(ldta) >= 0xA4)
-//   - SourceID @0x28 verbatim (shared Footage/Comp items)
-//   - comp name = caller-supplied (length-variable Utf8 rewrite)
-//
-// Refuse-cases (R1..R7): nil src, project backref missing, src itemList
-// backref missing, src not in this Project, empty name, src Item not
-// found in rootFold, layer ldta too short for ParentID write.
-//
-// Atomic mutation: snapshot rootFold.Children + p.Compositions +
-// scene.ProjectNextItemID(p) + len(p.Warnings); on any new parser warning during the
-// re-parse, roll all back including the nextItemID bump.
-//
-// Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the
-// Go-emitted file and the dup's intra-comp parent ref resolves to the dup's
-// own layer (remap confirmed by AE), with sources shared with the original.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
+// (Full contract + RE notes live on the aep.DuplicateComposition facade — docgen source.)
 func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error) {
 	// === Refuse-case matrix R1-R7 ===
 	if src == nil {

@@ -19,24 +19,7 @@ import (
 // Returns the new Keyframe and its index in Property.Keyframes
 // (insertion is time-sorted; ties land after existing keys at the
 // same time).
-//
-// Requires the property to already have ≥1 keyframe so the new block
-// can clone the existing layout (header byte @0x07, bpk, etc.). For
-// properties without keyframes, use SetStaticValue or build keyframes
-// in AE first — synthesizing the lhd3/ldat chunks from scratch isn't
-// supported yet.
-//
-// `value` follows the same rules as Keyframe.SetValue:
-//   - 1D property: pass float64
-//   - multi-component: pass []float64 (length == Property.Components)
-//
-// The new keyframe's interpolation is Linear/Linear; ease + tangents
-// are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent
-// on the returned Keyframe to refine.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
+// (Full contract + RE notes live on the aep.InsertKeyframe facade — docgen source.)
 func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error) {
 	pb := propertyBack(p)
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
@@ -133,10 +116,7 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 // DeleteKeyframe removes the keyframe at index i from the property's
 // ldat stream and decrements the lhd3 count header. Returns an error
 // when i is out of range or the property has no keyframe stream.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
+// (Full contract + RE notes live on the aep.DeleteKeyframe facade — docgen source.)
 func DeleteKeyframe(p *Property, i int) error {
 	pb := propertyBack(p)
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {

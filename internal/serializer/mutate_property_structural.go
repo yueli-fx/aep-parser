@@ -210,15 +210,7 @@ func dropMask(s []*Mask, i int) []*Mask {
 // be a direct child of an indexed group (Effect Parade / Mask Parade / Root
 // Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring
 // AE's ScriptingAPI refuse.
-//
-// Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat
-// slice, and Project.Warnings; on any new parser warning everything rolls back
-// and the warnings are returned as an error.
-//
-// Alpha — see file header for ship-gate status. Free function (not a method) so
-// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
-// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
-// BREAKING vs the former AEPropertyGroup.Remove method form.
+// (Full contract + RE notes live on the aep.RemovePropertyGroup facade — docgen source.)
 func RemovePropertyGroup(g *AEPropertyGroup) error {
 	parent := scene.PropertyGroupParent(g)
 	if parent == nil {
@@ -279,11 +271,7 @@ func RemovePropertyGroup(g *AEPropertyGroup) error {
 // INDEXED_GROUP's children. index is clamped-checked against the current child
 // count. Mirrors AE's PropertyBase.moveTo (which is 1-based; the Go API is
 // 0-based per project convention).
-//
-// Alpha — see file header for ship-gate status. Free function (not a method) so
-// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
-// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
-// BREAKING vs the former AEPropertyGroup.MoveTo method form.
+// (Full contract + RE notes live on the aep.MovePropertyGroup facade — docgen source.)
 func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	parent := scene.PropertyGroupParent(g)
 	if parent == nil {
@@ -356,32 +344,7 @@ func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 // effect — and returns the clone. The receiver must be a direct child of an
 // indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text
 // Animators); DuplicatePropertyGroup returns an error otherwise, mirroring AE's refuse.
-//
-// The clone reuses the source's match-name and on-disk payload verbatim. AE's
-// own .duplicate() additionally persists a deduplicated display name (the
-// localized "<name> 2") into a length-variable tdsn on the clone's inner tdgp
-// (RE'd 2026-06-03, see incidents/property-indexed-group-structural-re.md
-// slice 2: the source carries NO tdsn, the clone gains one reading "高斯模糊 2").
-// We deliberately do NOT synthesize that suffix: the base is AE's *localized*
-// effect name, which needs the AE schema/localization DB we don't carry (the
-// same blocker as Property.ValueText), and a clone with no tdsn is byte-for-byte
-// an "add the same effect twice" project — which AE accepts and re-derives the
-// runtime dedup name from on open. The persisted suffix is cosmetic; AE
-// recomputes it. The structural duplicate is faithful.
-//
-// Chunk mechanics: pure (tdmn, payload) pair insert immediately after the
-// source pair, no count/index chunk (RE: parade 9→11 children, nothing else
-// touched).
-//
-// Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat
-// slice, and Project.Warnings; on any new parser warning — or a flat-mirror
-// re-parse that fails to reproduce exactly one clone — everything rolls back
-// and an error is returned.
-//
-// Alpha — see file header for ship-gate status. Free function (not a method) so
-// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
-// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
-// BREAKING vs the former AEPropertyGroup.Duplicate method form.
+// (Full contract + RE notes live on the aep.DuplicatePropertyGroup facade — docgen source.)
 func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	parent := scene.PropertyGroupParent(g)
 	if parent == nil {

@@ -24,18 +24,7 @@ import (
 // so a rejected Remove leaves the project untouched without a rollback path.
 
 // RemoveMarker deletes this marker from its owning composition / layer marker set.
-//
-// It splices the marker's 16-byte ldat keyframe block, decrements the kfl
-// count, removes the marker's Nmrd from mrky, shifts the trailing markers'
-// ldat offsets down, and drops the marker from the public Markers slice. The
-// receiver is detached afterward — a second RemoveMarker (or any Set*) errors.
-//
-// Errors (project untouched): the marker was built outside the parser, is
-// already detached, or its chunk references are inconsistent.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. Renamed + BREAKING vs the former Marker.Remove method form.
+// (Full contract + RE notes live on the aep.RemoveMarker facade — docgen source.)
 func RemoveMarker(m *Marker) error {
 	ml := markerSet(m)
 	if ml == nil || ml.owner == nil {
@@ -107,24 +96,7 @@ func RemoveMarker(m *Marker) error {
 // AddMarker appends a new composition marker at the given time (seconds) and
 // returns it for further Set* calls. The new marker is a clean point marker:
 // no duration, no label color, empty text fields.
-//
-// Mechanics (clone-template): to avoid reverse-engineering the canonical
-// defaults of the ldat block's opaque metadata (0x04-0x0F) and the NmHd's
-// reserved/flag bytes, the new marker clones an existing marker's ldat block
-// and NmHd verbatim (opaque preservation, CLAUDE.md #5), then resets the time
-// plus the known semantic NmHd fields (duration @0x08, label @0x10) to zero.
-// The Nmrd gets five empty Utf8 slots, matching AE's always-five layout.
-//
-// length-variable — the ldat and mrky LISTs grow; WriteAEP recomputes the
-// mrst-chain LIST sizes. Alpha until the AE 2020 + 2025 ship-gate passes.
-//
-// Restriction: requires the comp to already have ≥1 marker (the clone
-// template). Seeding the entire "Markers" pseudo-layer for an empty comp is a
-// separate slice (needs a canonical seed); AddMarker returns an error there.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.AddMarker method form.
+// (Full contract + RE notes live on the aep.AddMarker facade — docgen source.)
 func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 	if seconds < 0 {
 		return nil, fmt.Errorf("marker: negative time %g not supported", seconds)

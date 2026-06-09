@@ -13,46 +13,7 @@ import (
 // everything below down by one (mirrors AE ScriptingAPI's
 // layer.duplicate()). Returns the cloned *Layer on success, or an error
 // if a refuse-case triggers.
-//
-// Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff):
-//
-//   - new layer ID = allocItemID(proj) (head counter +1, monotonic)
-//   - clone's 16-chunk block (Layr + Ewst + 14 follower leaves in
-//     AE-saved files; 2 chunks in Go-built layers) is a deep byte-clone
-//     of source's block, with ldta @0x00..0x03 overwritten with the new
-//     ID. All other body bytes (SourceID @0x28, ParentID @0x84,
-//     TrackMatte @0x6B) are verbatim from source.
-//   - Layer.SourceID/ParentID/TrackMatteLayerID/TrackMatte struct fields
-//     on the clone = source values (no footage duplication; no
-//     reference rewrites).
-//   - Name = caller-supplied (AE keeps source's name verbatim; we
-//     require an explicit name to avoid silent duplicate-name confusion).
-//   - Children's outgoing ParentID is NOT updated — clone is a fresh
-//     sibling shadow; source remains the canonical parent for any
-//     incoming refs (F6).
-//
-// Refuse-cases (conservative):
-//
-//   - name empty
-//   - index out of range
-//   - comp lacks parsed itemList back-ref
-//   - source is not an AV layer (camera/light/audio behavior not RE'd)
-//   - source has implicit TrackMatte (TrackMatte != None &&
-//     TrackMatteLayerID == 0). F2 quirk: AE relocates clone above the
-//     positional matte source to preserve original's matte; not yet
-//     supported. AE 23+ explicit matte (TrackMatteLayerID != 0) is
-//     ALLOWED (Stable — clone byte-copies @0xA0 + @0x6B verbatim;
-//     passed AE 2025 ship-gate).
-//   - backref corruption (Layr formType / Ewst sibling mismatch)
-//
-// Atomic mutation: snapshot pre-call state of itemList.Children,
-// c.Layers, scene.ProjectNextItemID(proj), and proj.Warnings; on any parser warning
-// surfaced during the re-parse, roll all of them back (including the
-// nextItemID bump) and return the warnings as an error.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
+// (Full contract + RE notes live on the aep.DuplicateLayer facade — docgen source.)
 func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 	// 1. Validate refuse-cases.
 	if name == "" {

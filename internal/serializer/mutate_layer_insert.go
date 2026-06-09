@@ -12,47 +12,7 @@ import (
 // len(c.Layers) appends). Returns the inserted clone *Layer on success. src may
 // live in a sibling comp of the same Project, or in a different Project
 // (cross-Project).
-//
-// Same-Project clone semantics (scene.CompositionProj(scene.LayerComp(src)) == scene.CompositionProj(c)):
-//
-//   - new layer ID = allocItemID(scene.CompositionProj(c)) (head counter +1, monotonic)
-//   - clone block = deep byte-clone of src's [Layr, Ewst, leaf-followers)
-//     range, with per-byte ldta mutations:
-//     @0x00..0x03 ← newID
-//     @0x6B       ← TrackMatteNone (cross-comp matte source is invalid)
-//     @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in scene.LayerComp(src))
-//     @0xA0..0xA3 ← 0 (explicit matte ID, guarded by len(ldta) >= 0xA4)
-//   - clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
-//   - clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
-//
-// Cross-Project semantics (scene.CompositionProj(scene.LayerComp(src)) != scene.CompositionProj(c)):
-// additionally imports src's reachable ITEM CLOSURE (footage + precomp,
-// transitively) into c's Project at root level with fresh dest item IDs, then
-// remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the
-// srcItemID→destItemID map. File-backed footage already present in dest (matched
-// by Path) is reused, not re-cloned; comps and solids/placeholders are always
-// cloned. ParentID / track matte are still reset (cross-comp). Folders are not
-// recreated.
-//
-// Refuse-cases: nil src, dest backref missing, atIdx out of range, src
-// detached, same-comp redirect, non-AV, direct pre-comp loop (same-Project
-// only), src backref missing, structural corruption. Cross-Project adds:
-// dest/src Project has no root Fold; dangling closure source.
-//
-// Atomic mutation: snapshot dest itemList.Children + c.Layers +
-// scene.ProjectNextItemID(scene.CompositionProj(c)) + len(scene.CompositionProj(c).Warnings) (cross-Project also snapshots
-// rootFold.Children + Compositions + Footage); on any new parser warning
-// during re-parse, roll all back including the nextItemID bump.
-//
-// Stable (both paths) — same-Project passed AE 2020 + AE 2025 ship-gate (3 modes
-// [basic/footage/precomp] × 2 = 6/6 PASS); cross-Project passed the assert-based
-// AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup] × 2 = 6/6 PASS): AE
-// accepts the Go-emitted file, the inserted clone's source resolves (imported /
-// dedup'd), and footage is not duplicated on path match.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
+// (Full contract + RE notes live on the aep.InsertLayer facade — docgen source.)
 func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 	// === Refuse-case matrix R1-R11 ===
 	if src == nil {

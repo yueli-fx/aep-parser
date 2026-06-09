@@ -358,29 +358,7 @@ func isDatsList(c *rifx.Chunk) bool {
 }
 
 // NewComposition adds an empty composition to the project's root folder.
-//
-// Required:
-//
-//	name        — non-empty string
-//	width/height — > 0 (uint16; AE max 30000)
-//	FrameRateHz   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
-//	duration    — > 0 (seconds; converted to whole frames via fps internally)
-//
-// Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16).
-// Override via existing Set* methods after the call.
-//
-// Composition.ID is auto-assigned (Project.nextItemID++, monotonic).
-// New comp appends to the project's root folder.
-//
-// Atomic mutation: if chunk parse fails or warnings appear, rollback
-// chunk-tree + typed index + warnings to pre-call state.
-//
-// Warnings-as-failure: builder must produce zero parser warnings —
-// if any appear, that's a builder bug; rollback + return internal error.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Project.NewComposition method form.
+// (Full contract + RE notes live on the aep.NewComposition facade — docgen source.)
 func NewComposition(
 	p *Project,
 	name string,

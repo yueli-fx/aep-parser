@@ -14,34 +14,7 @@ import (
 // target slot. After the call, c.Layers[to] == the moved layer, and
 // every layer's Layer.Index field is refreshed to match its new slice
 // position.
-//
-// Refuse-cases (conservative):
-//
-//   - `from` or `to` out of range (note: `to == len(c.Layers)-1` IS in
-//     range and means "move to last slot")
-//   - comp lacks parsed itemList back-ref
-//   - source layer lacks Layr back-ref / corrupted block (Layr formType
-//     / Ewst sibling mismatch)
-//
-// `from == to` is a no-op (returns nil, no state change).
-//
-// Unlike DeleteLayer / DuplicateLayer, MoveLayer does NOT care about
-// layer Type or TrackMatte — pure reorder works for AV / Camera / Light
-// / Audio / Shape / Text / matted layers alike.
-//
-// Atomic mutation: snapshot pre-call itemList.Children + c.Layers +
-// each layer's Index + Warnings count; on any new parser warning during
-// the call, roll all of them back. No re-parse and no new chunks
-// created, so the warnings path is defensive.
-//
-// Stable: no Alpha gate — AE behavior is known (layer order = order of
-// Layr LISTs in itemList.Children, same model that DeleteLayer and
-// DuplicateLayer already exercise and ship-gate across AE 2020 + AE
-// 2025). The reorder path is ship-gate validated for AE acceptance.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
+// (Full contract + RE notes live on the aep.MoveLayer facade — docgen source.)
 func MoveLayer(c *Composition, from, to int) error {
 	// 1. Validate refuse-cases.
 	cb := compositionBack(c)
@@ -209,9 +182,7 @@ func indexOfChunk(children []*rifx.Chunk, target *rifx.Chunk) int {
 
 // MoveToBeginning moves the receiver to position 0 (top of layer stack
 // in AE's display, AE-index 1).
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
+// (Full contract + RE notes live on the aep.MoveToBeginning facade — docgen source.)
 func MoveToBeginning(l *Layer) error {
 	c, idx, err := locateInComp(l, "MoveToBeginning")
 	if err != nil {
@@ -222,9 +193,7 @@ func MoveToBeginning(l *Layer) error {
 
 // MoveToEnd moves the receiver to the last position in c.Layers
 // (bottom of layer stack in AE's display, AE-index c.numLayers).
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveToEnd method form; the aep facade re-exports it post-split.
+// (Full contract + RE notes live on the aep.MoveToEnd facade — docgen source.)
 func MoveToEnd(l *Layer) error {
 	c, idx, err := locateInComp(l, "MoveToEnd")
 	if err != nil {
@@ -238,9 +207,7 @@ func MoveToEnd(l *Layer) error {
 // c.Layers slice order — receiver lands just below other in the stack).
 // Returns an error if other belongs to a different comp, other == l,
 // or either layer is missing a comp back-ref.
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveAfter method form; the aep facade re-exports it post-split.
+// (Full contract + RE notes live on the aep.MoveAfter facade — docgen source.)
 func MoveAfter(l, other *Layer) error {
 	c, fromIdx, otherIdx, err := locatePair(l, "MoveAfter", other)
 	if err != nil {
@@ -264,9 +231,7 @@ func MoveAfter(l, other *Layer) error {
 
 // MoveBefore moves the receiver to the slot immediately before `other`
 // (receiver lands just above other in the stack).
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveBefore method form; the aep facade re-exports it post-split.
+// (Full contract + RE notes live on the aep.MoveBefore facade — docgen source.)
 func MoveBefore(l, other *Layer) error {
 	c, fromIdx, otherIdx, err := locatePair(l, "MoveBefore", other)
 	if err != nil {
