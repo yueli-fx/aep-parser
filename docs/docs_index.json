@@ -4156,14 +4156,6 @@
       "rw": "read-only",
       "summary": "DefaultValue is the property's default value (what AE considers the \"unmodified\" state). For transform properties, set from hardcoded tables during parse; for effect parameters, from pard chunks. nil when unknown (non-transform, non-effect properties)."
     },
-    "Property.DeleteKeyframe": {
-      "kind": "method",
-      "file": "property.md",
-      "anchor": "#propertydeletekeyframe",
-      "signature": "func (p *Property) DeleteKeyframe(i int) error",
-      "example": true,
-      "summary": "DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. Returns an error when i is out of range or the property has no keyframe stream."
-    },
     "Property.DimensionsSeparated": {
       "kind": "getter",
       "file": "property.md",
@@ -4211,14 +4203,6 @@
       "signature": "Gradient *Gradient",
       "rw": "read-only",
       "summary": "Gradient holds the parsed gradient data for \"ADBE Vector Grad Colors\" properties. The XML is stored in the cdat chunk and parsed during property initialization. nil for non-gradient properties."
-    },
-    "Property.InsertKeyframe": {
-      "kind": "method",
-      "file": "property.md",
-      "anchor": "#propertyinsertkeyframe",
-      "signature": "func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, error)",
-      "example": true,
-      "summary": "InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. Returns the new Keyframe and its index in Property.Keyframes (insertion is time-sorted; ties land after existing keys at the same time)."
     },
     "Property.IsAnimated": {
       "kind": "getter",
@@ -4410,14 +4394,6 @@
       "signature": "func (p *Property) SeparationDimension() int",
       "rw": "read-only",
       "summary": "SeparationDimension returns the axis a separation follower represents (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower. (-1 stands in for py-aep's None.)"
-    },
-    "Property.SetDimensionsSeparated": {
-      "kind": "method",
-      "file": "property.md",
-      "anchor": "#propertysetdimensionsseparated",
-      "signature": "func (p *Property) SetDimensionsSeparated(separated bool) error",
-      "example": true,
-      "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader. Structural; both directions (separate↔merge) are double-version ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated Position (3D layers, near-linear leader path-ease). An animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated); animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused with an error rather than written."
     },
     "Property.SetExpression": {
       "kind": "method",

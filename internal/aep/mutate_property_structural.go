@@ -221,30 +221,33 @@ func dropMask(s []*Mask, i int) []*Mask {
 	return append(append([]*Mask(nil), s[:i]...), s[i+1:]...)
 }
 
-// Remove deletes this group from its parent INDEXED_GROUP. The receiver must
+// RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. The receiver must
 // be a direct child of an indexed group (Effect Parade / Mask Parade / Root
-// Vectors Group / Text Animators); Remove returns an error otherwise, mirroring
+// Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring
 // AE's ScriptingAPI refuse.
 //
 // Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat
 // slice, and Project.Warnings; on any new parser warning everything rolls back
 // and the warnings are returned as an error.
 //
-// Alpha — see file header for ship-gate status.
-func (g *AEPropertyGroup) Remove() error {
+// Alpha — see file header for ship-gate status. Free function (not a method) so
+// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
+// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
+// BREAKING vs the former AEPropertyGroup.Remove method form.
+func RemovePropertyGroup(g *AEPropertyGroup) error {
 	parent := g.parent
 	if parent == nil {
-		return fmt.Errorf("Remove: property group %q has no parent (root or built outside parser)", g.MatchName)
+		return fmt.Errorf("RemovePropertyGroup: property group %q has no parent (root or built outside parser)", g.MatchName)
 	}
 	if !parent.IsIndexedGroup() {
-		return fmt.Errorf("Remove: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be removed", parent.MatchName)
+		return fmt.Errorf("RemovePropertyGroup: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be removed", parent.MatchName)
 	}
 	idx := parent.PropertyIndex(g)
 	if idx < 0 {
-		return fmt.Errorf("Remove: group %q not found among parent %q children", g.MatchName, parent.MatchName)
+		return fmt.Errorf("RemovePropertyGroup: group %q not found among parent %q children", g.MatchName, parent.MatchName)
 	}
 	if _, _, ok := parent.childTdmnPayload(g); !ok {
-		return fmt.Errorf("Remove: group %q chunk pair not located in parent LIST", g.MatchName)
+		return fmt.Errorf("RemovePropertyGroup: group %q chunk pair not located in parent LIST", g.MatchName)
 	}
 
 	layer := parent.ownerLayer()
@@ -267,7 +270,7 @@ func (g *AEPropertyGroup) Remove() error {
 	if err := parent.rebuildIndexedGroupChunk(pairs); err != nil {
 		parent.back.chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
-		return fmt.Errorf("Remove: %w", err)
+		return fmt.Errorf("RemovePropertyGroup: %w", err)
 	}
 	// Flat mirror.
 	if _, _, drop, ok := flatSliceFor(parent, layer); ok {
@@ -282,38 +285,41 @@ func (g *AEPropertyGroup) Remove() error {
 			layer.Masks = oldMasks
 		}
 		rollbackWarnings(layer, oldWarningsLen)
-		return fmt.Errorf("Remove: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
+		return fmt.Errorf("RemovePropertyGroup: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
 	}
 	return nil
 }
 
-// MoveTo reorders this group to position index (0-based) among its parent
+// MovePropertyGroup reorders this group to position index (0-based) among its parent
 // INDEXED_GROUP's children. index is clamped-checked against the current child
 // count. Mirrors AE's PropertyBase.moveTo (which is 1-based; the Go API is
 // 0-based per project convention).
 //
-// Alpha — see file header for ship-gate status.
-func (g *AEPropertyGroup) MoveTo(index int) error {
+// Alpha — see file header for ship-gate status. Free function (not a method) so
+// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
+// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
+// BREAKING vs the former AEPropertyGroup.MoveTo method form.
+func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	parent := g.parent
 	if parent == nil {
-		return fmt.Errorf("MoveTo: property group %q has no parent (root or built outside parser)", g.MatchName)
+		return fmt.Errorf("MovePropertyGroup: property group %q has no parent (root or built outside parser)", g.MatchName)
 	}
 	if !parent.IsIndexedGroup() {
-		return fmt.Errorf("MoveTo: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be reordered", parent.MatchName)
+		return fmt.Errorf("MovePropertyGroup: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be reordered", parent.MatchName)
 	}
 	cur := parent.PropertyIndex(g)
 	if cur < 0 {
-		return fmt.Errorf("MoveTo: group %q not found among parent %q children", g.MatchName, parent.MatchName)
+		return fmt.Errorf("MovePropertyGroup: group %q not found among parent %q children", g.MatchName, parent.MatchName)
 	}
 	n := len(parent.Children)
 	if index < 0 || index >= n {
-		return fmt.Errorf("MoveTo: index %d out of range (have %d children)", index, n)
+		return fmt.Errorf("MovePropertyGroup: index %d out of range (have %d children)", index, n)
 	}
 	if index == cur {
 		return nil
 	}
 	if _, _, ok := parent.childTdmnPayload(g); !ok {
-		return fmt.Errorf("MoveTo: group %q chunk pair not located in parent LIST", g.MatchName)
+		return fmt.Errorf("MovePropertyGroup: group %q chunk pair not located in parent LIST", g.MatchName)
 	}
 
 	layer := parent.ownerLayer()
@@ -341,7 +347,7 @@ func (g *AEPropertyGroup) MoveTo(index int) error {
 	if err := parent.rebuildIndexedGroupChunk(pairs); err != nil {
 		parent.back.chunk.Children = oldChunkChildren
 		parent.Children = oldSceneChildren
-		return fmt.Errorf("MoveTo: %w", err)
+		return fmt.Errorf("MovePropertyGroup: %w", err)
 	}
 	if _, reorder, _, ok := flatSliceFor(parent, layer); ok {
 		reorder(order)
@@ -355,16 +361,16 @@ func (g *AEPropertyGroup) MoveTo(index int) error {
 			layer.Masks = oldMasks
 		}
 		rollbackWarnings(layer, oldWarningsLen)
-		return fmt.Errorf("MoveTo: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
+		return fmt.Errorf("MovePropertyGroup: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
 	}
 	return nil
 }
 
-// Duplicate inserts a copy of this group immediately after it among its parent
+// DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent
 // INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural
 // effect — and returns the clone. The receiver must be a direct child of an
 // indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text
-// Animators); Duplicate returns an error otherwise, mirroring AE's refuse.
+// Animators); DuplicatePropertyGroup returns an error otherwise, mirroring AE's refuse.
 //
 // The clone reuses the source's match-name and on-disk payload verbatim. AE's
 // own .duplicate() additionally persists a deduplicated display name (the
@@ -387,26 +393,29 @@ func (g *AEPropertyGroup) MoveTo(index int) error {
 // re-parse that fails to reproduce exactly one clone — everything rolls back
 // and an error is returned.
 //
-// Alpha — see file header for ship-gate status.
-func (g *AEPropertyGroup) Duplicate() (*AEPropertyGroup, error) {
+// Alpha — see file header for ship-gate status. Free function (not a method) so
+// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
+// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
+// BREAKING vs the former AEPropertyGroup.Duplicate method form.
+func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	parent := g.parent
 	if parent == nil {
-		return nil, fmt.Errorf("Duplicate: property group %q has no parent (root or built outside parser)", g.MatchName)
+		return nil, fmt.Errorf("DuplicatePropertyGroup: property group %q has no parent (root or built outside parser)", g.MatchName)
 	}
 	if !parent.IsIndexedGroup() {
-		return nil, fmt.Errorf("Duplicate: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be duplicated", parent.MatchName)
+		return nil, fmt.Errorf("DuplicatePropertyGroup: parent group %q is not an INDEXED_GROUP; only children of indexed groups can be duplicated", parent.MatchName)
 	}
 	idx := parent.PropertyIndex(g)
 	if idx < 0 {
-		return nil, fmt.Errorf("Duplicate: group %q not found among parent %q children", g.MatchName, parent.MatchName)
+		return nil, fmt.Errorf("DuplicatePropertyGroup: group %q not found among parent %q children", g.MatchName, parent.MatchName)
 	}
 	srcTdmn, srcPayload, ok := parent.childTdmnPayload(g)
 	if !ok {
-		return nil, fmt.Errorf("Duplicate: group %q chunk pair not located in parent LIST", g.MatchName)
+		return nil, fmt.Errorf("DuplicatePropertyGroup: group %q chunk pair not located in parent LIST", g.MatchName)
 	}
 	pi := indexOfChunk(parent.back.chunk.Children, srcPayload)
 	if pi < 1 {
-		return nil, fmt.Errorf("Duplicate: group %q payload chunk not in parent LIST", g.MatchName)
+		return nil, fmt.Errorf("DuplicatePropertyGroup: group %q payload chunk not in parent LIST", g.MatchName)
 	}
 
 	layer := parent.ownerLayer()
@@ -461,14 +470,14 @@ func (g *AEPropertyGroup) Duplicate() (*AEPropertyGroup, error) {
 			collectEffects(tmpParade, &tmp, ctx)
 			if len(tmp) != 1 {
 				rollback()
-				return nil, fmt.Errorf("Duplicate: clone re-parse produced %d effects (want 1)", len(tmp))
+				return nil, fmt.Errorf("DuplicatePropertyGroup: clone re-parse produced %d effects (want 1)", len(tmp))
 			}
 			layer.Effects = insertEffectAt(layer.Effects, idx+1, tmp[0])
 		case "ADBE Mask Parade":
 			m := decodeMask(payloadClone, ctx)
 			if m == nil {
 				rollback()
-				return nil, fmt.Errorf("Duplicate: clone mask re-parse failed")
+				return nil, fmt.Errorf("DuplicatePropertyGroup: clone mask re-parse failed")
 			}
 			layer.Masks = insertMaskAt(layer.Masks, idx+1, m)
 		}
@@ -476,7 +485,7 @@ func (g *AEPropertyGroup) Duplicate() (*AEPropertyGroup, error) {
 
 	if newWarn := newWarningsSince(layer, oldWarningsLen); len(newWarn) > 0 {
 		rollback()
-		return nil, fmt.Errorf("Duplicate: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
+		return nil, fmt.Errorf("DuplicatePropertyGroup: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
 	}
 	return cloneNode, nil
 }

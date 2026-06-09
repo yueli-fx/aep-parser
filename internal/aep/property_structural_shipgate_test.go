@@ -99,11 +99,11 @@ func runPropStructShipGate(t *testing.T, aeExe, label string, mutate func(*aep.L
 }
 
 func removeMiddleEffect(l *aep.Layer) error {
-	return l.EffectsParade().ChildByIndex(1).(*aep.AEPropertyGroup).Remove()
+	return aep.RemovePropertyGroup(l.EffectsParade().ChildByIndex(1).(*aep.AEPropertyGroup))
 }
 
 func moveLastEffectToFront(l *aep.Layer) error {
-	return l.EffectsParade().ChildByIndex(2).(*aep.AEPropertyGroup).MoveTo(0)
+	return aep.MovePropertyGroup(l.EffectsParade().ChildByIndex(2).(*aep.AEPropertyGroup), 0)
 }
 
 func TestPropStructRemove_AEShipGate_AE2020(t *testing.T) {
@@ -125,7 +125,7 @@ func TestPropStructMove_AEShipGate_AE2025(t *testing.T) {
 }
 
 func duplicateFirstEffect(l *aep.Layer) error {
-	_, err := l.EffectsParade().ChildByIndex(0).(*aep.AEPropertyGroup).Duplicate()
+	_, err := aep.DuplicatePropertyGroup(l.EffectsParade().ChildByIndex(0).(*aep.AEPropertyGroup))
 	return err
 }
 

@@ -26,9 +26,9 @@ func ExampleProperty_SetStaticValue_multiComponent() {
 	}
 }
 
-func ExampleProperty_InsertKeyframe() {
+func ExampleInsertKeyframe() {
 	var pos *aep.Property
-	kf, idx, err := pos.InsertKeyframe(2.5, []float64{960, 540, 0})
+	kf, idx, err := aep.InsertKeyframe(pos, 2.5, []float64{960, 540, 0})
 	if err == nil {
 		_ = kf.SetInInterp(aep.InterpBezier)
 		_ = kf.SetOutInterp(aep.InterpBezier)
@@ -36,9 +36,9 @@ func ExampleProperty_InsertKeyframe() {
 	}
 }
 
-func ExampleProperty_DeleteKeyframe() {
+func ExampleDeleteKeyframe() {
 	var op *aep.Property
-	_ = op.DeleteKeyframe(2) // remove the 3rd keyframe
+	_ = aep.DeleteKeyframe(op, 2) // remove the 3rd keyframe
 }
 
 func ExampleProperty_SetExpression() {
@@ -54,14 +54,14 @@ func ExampleProperty_SetExpressionEnabled() {
 	_ = op.SetExpressionEnabled(true)  // resume
 }
 
-func ExampleProperty_SetDimensionsSeparated() {
+func ExampleSetDimensionsSeparated() {
 	var layer *aep.Layer
 	pos := layer.Position()
-	if err := pos.SetDimensionsSeparated(true); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err != nil {
 		return
 	}
 	// access per-axis via layer.PropertyByMatchName("ADBE Position_0"), etc.
-	_ = pos.SetDimensionsSeparated(false) // merge back
+	_ = aep.SetDimensionsSeparated(pos, false) // merge back
 }
 
 func ExampleKeyframe_SetTime() {

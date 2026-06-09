@@ -33,7 +33,12 @@ import (
 // Atomicity: the only fallible step (re-parsing a synthesized Position_2)
 // runs before any in-place mutation, so a failure leaves the project
 // untouched and there is nothing to roll back.
-func (p *Property) SetDimensionsSeparated(separated bool) error {
+//
+// Free function (not a method) so the impl can live in internal/serializer after
+// the M8 split (CLAUDE.md #2 lists SetDimensionsSeparated as a structural write path
+// despite the Set prefix — it adds/removes follower Property nodes); the aep facade
+// re-exports it. BREAKING vs the former Property.SetDimensionsSeparated method form.
+func SetDimensionsSeparated(p *Property, separated bool) error {
 	if p.MatchName != MatchNamePosition {
 		return fmt.Errorf("SetDimensionsSeparated: only %q can be separated (got %q)", MatchNamePosition, p.MatchName)
 	}

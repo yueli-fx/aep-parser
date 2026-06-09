@@ -25,7 +25,7 @@ func TestPropertyInsertAndDeleteKeyframe(t *testing.T) {
 	}
 	originalCount := len(opa.Keyframes)
 
-	kf, idx, err := opa.InsertKeyframe(1.5, 0.75)
+	kf, idx, err := aep.InsertKeyframe(opa, 1.5, 0.75)
 	if err != nil {
 		t.Fatalf("InsertKeyframe Opacity: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestPropertyInsertAndDeleteKeyframe(t *testing.T) {
 		t.Fatal("Position missing")
 	}
 	posOrig := len(pos.Keyframes)
-	_, posIdx, err := pos.InsertKeyframe(0.5, []float64{500, 250, 0})
+	_, posIdx, err := aep.InsertKeyframe(pos, 0.5, []float64{500, 250, 0})
 	if err != nil {
 		t.Fatalf("InsertKeyframe Position: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestPropertyInsertAndDeleteKeyframe(t *testing.T) {
 		t.Errorf("roundtrip position Keyframes = %d", len(rt.Position().Keyframes))
 	}
 
-	if err := rt.Opacity().DeleteKeyframe(idx); err != nil {
+	if err := aep.DeleteKeyframe(rt.Opacity(), idx); err != nil {
 		t.Fatalf("DeleteKeyframe: %v", err)
 	}
 	if len(rt.Opacity().Keyframes) != originalCount {
@@ -97,7 +97,7 @@ func TestPropertyInsertAndDeleteKeyframe(t *testing.T) {
 
 func TestPropertyInsertKeyframeRejectsEmpty(t *testing.T) {
 	p := &aep.Property{MatchName: "stub", Components: 1}
-	_, _, err := p.InsertKeyframe(0, 1.0)
+	_, _, err := aep.InsertKeyframe(p, 0, 1.0)
 	if err == nil {
 		t.Error("InsertKeyframe on property with no keyframes: expected error")
 	}

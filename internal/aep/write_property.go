@@ -82,7 +82,11 @@ func (p *Property) SetExpressionEnabled(enabled bool) error {
 // The new keyframe's interpolation is Linear/Linear; ease + tangents
 // are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent
 // on the returned Keyframe to refine.
-func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, error) {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
+func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error) {
 	pb := p.propertyBack()
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return nil, -1, fmt.Errorf("property %q: no existing keyframes (insert from scratch not supported)", p.MatchName)
@@ -178,7 +182,11 @@ func (p *Property) InsertKeyframe(time float64, value any) (*Keyframe, int, erro
 // DeleteKeyframe removes the keyframe at index i from the property's
 // ldat stream and decrements the lhd3 count header. Returns an error
 // when i is out of range or the property has no keyframe stream.
-func (p *Property) DeleteKeyframe(i int) error {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
+func DeleteKeyframe(p *Property, i int) error {
 	pb := p.propertyBack()
 	if pb == nil || pb.ldat == nil || pb.lhd3 == nil {
 		return fmt.Errorf("property %q: no keyframe stream", p.MatchName)

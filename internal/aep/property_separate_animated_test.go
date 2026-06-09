@@ -43,7 +43,7 @@ func TestSetDimensionsSeparated_Animated(t *testing.T) {
 		t.Fatalf("precondition: leader not animated (kf=%d)", len(pos.Keyframes))
 	}
 
-	if err := pos.SetDimensionsSeparated(true); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err != nil {
 		t.Fatalf("SetDimensionsSeparated(true) on animated Position: %v", err)
 	}
 
@@ -147,7 +147,7 @@ func TestSetDimensionsSeparated_Animated_NonUniform(t *testing.T) {
 	if pos == nil || pos.DimensionsSeparated() || !pos.IsAnimated() {
 		t.Fatal("precondition: animated merged non-uniform fixture missing/wrong state")
 	}
-	if err := pos.SetDimensionsSeparated(true); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err != nil {
 		t.Fatalf("SetDimensionsSeparated(true): %v", err)
 	}
 
@@ -210,7 +210,7 @@ func TestSetDimensionsSeparated_Merge_Animated(t *testing.T) {
 		t.Fatal("precondition: animated fixture not separated")
 	}
 
-	if err := pos.SetDimensionsSeparated(false); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, false); err != nil {
 		t.Fatalf("SetDimensionsSeparated(false) on animated: %v", err)
 	}
 

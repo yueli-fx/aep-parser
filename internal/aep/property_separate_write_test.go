@@ -51,7 +51,7 @@ func TestSetDimensionsSeparated_3D(t *testing.T) {
 	}
 	wantX, wantY, wantZ := xyz[0], xyz[1], xyz[2]
 
-	if err := pos.SetDimensionsSeparated(true); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err != nil {
 		t.Fatalf("SetDimensionsSeparated(true): %v", err)
 	}
 
@@ -122,7 +122,7 @@ func TestSetDimensionsSeparated_Merge(t *testing.T) {
 	wantY, _ := scalarVal(findProp(proj, aep.MatchNamePosition1).StaticValue)
 	wantZ, _ := scalarVal(findProp(proj, aep.MatchNamePosition2).StaticValue)
 
-	if err := pos.SetDimensionsSeparated(false); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, false); err != nil {
 		t.Fatalf("SetDimensionsSeparated(false): %v", err)
 	}
 
@@ -166,7 +166,7 @@ func TestSetDimensionsSeparated_2D(t *testing.T) {
 	xy := pos.StaticValue.([]float64)
 	wantX, wantY := xy[0], xy[1]
 
-	if err := pos.SetDimensionsSeparated(true); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err != nil {
 		t.Fatalf("SetDimensionsSeparated(true) on 2D: %v", err)
 	}
 
@@ -200,16 +200,16 @@ func TestSetDimensionsSeparated_Refuse(t *testing.T) {
 	// Non-leader property refuses.
 	op := findProp(proj, aep.MatchNameOpacity)
 	if op != nil {
-		if err := op.SetDimensionsSeparated(true); err == nil {
+		if err := aep.SetDimensionsSeparated(op, true); err == nil {
 			t.Error("SetDimensionsSeparated on Opacity should refuse")
 		}
 	}
 	// Double-separate refuses.
 	pos := findProp(proj, aep.MatchNamePosition)
-	if err := pos.SetDimensionsSeparated(true); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err != nil {
 		t.Fatalf("first separate: %v", err)
 	}
-	if err := pos.SetDimensionsSeparated(true); err == nil {
+	if err := aep.SetDimensionsSeparated(pos, true); err == nil {
 		t.Error("second SetDimensionsSeparated(true) should refuse (already separated)")
 	}
 }

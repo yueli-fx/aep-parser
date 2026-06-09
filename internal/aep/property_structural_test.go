@@ -96,7 +96,7 @@ func TestPropertyGroup_Remove_Effect(t *testing.T) {
 
 	// Remove the middle effect (Tint).
 	tint := l.EffectsParade().ChildByIndex(1).(*aep.AEPropertyGroup)
-	if err := tint.Remove(); err != nil {
+	if err := aep.RemovePropertyGroup(tint); err != nil {
 		t.Fatalf("Remove(Tint): %v", err)
 	}
 
@@ -135,7 +135,7 @@ func TestPropertyGroup_MoveTo_Effect(t *testing.T) {
 
 	// Move the last effect (Fill, idx 2) to the front (idx 0).
 	fill := l.EffectsParade().ChildByIndex(2).(*aep.AEPropertyGroup)
-	if err := fill.MoveTo(0); err != nil {
+	if err := aep.MovePropertyGroup(fill, 0); err != nil {
 		t.Fatalf("MoveTo(0): %v", err)
 	}
 
@@ -171,7 +171,7 @@ func TestPropertyGroup_Duplicate_Effect(t *testing.T) {
 	// Duplicate the first effect (Gaussian Blur). AE inserts the clone
 	// immediately after the source.
 	src := l.EffectsParade().ChildByIndex(0).(*aep.AEPropertyGroup)
-	clone, err := src.Duplicate()
+	clone, err := aep.DuplicatePropertyGroup(src)
 	if err != nil {
 		t.Fatalf("Duplicate(GaussianBlur): %v", err)
 	}
@@ -223,8 +223,8 @@ func TestPropertyGroup_Duplicate_RefuseNonIndexed(t *testing.T) {
 
 	// The Effect Parade's own parent is the layer root (NAMED), so duplicating
 	// the parade itself must error — same predicate as Remove/MoveTo.
-	if _, err := l.EffectsParade().Duplicate(); err == nil {
-		t.Error("Duplicate() on the Effect Parade (parent not indexed) should error, got nil")
+	if _, err := aep.DuplicatePropertyGroup(l.EffectsParade()); err == nil {
+		t.Error("DuplicatePropertyGroup on the Effect Parade (parent not indexed) should error, got nil")
 	}
 }
 
@@ -239,7 +239,7 @@ func TestPropertyGroup_Remove_RefuseNonIndexed(t *testing.T) {
 	if !parade.IsIndexedGroup() {
 		t.Fatal("Effect Parade should report IsIndexedGroup()=true")
 	}
-	if err := parade.Remove(); err == nil {
+	if err := aep.RemovePropertyGroup(parade); err == nil {
 		t.Error("Remove() on the Effect Parade (parent not indexed) should error, got nil")
 	}
 

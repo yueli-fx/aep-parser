@@ -65,7 +65,7 @@ func runSepDimShipGate(t *testing.T, aeExe, baseFixture string, separate, is3D b
 		}
 	}
 
-	if err := pos.SetDimensionsSeparated(separate); err != nil {
+	if err := aep.SetDimensionsSeparated(pos, separate); err != nil {
 		t.Fatalf("SetDimensionsSeparated(%v): %v", separate, err)
 	}
 
