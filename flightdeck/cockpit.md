@@ -7,7 +7,7 @@
 
 <!-- AUTO:inprogress -->
 - [2026-05-22-v3-direction.md](specs/2026-05-22-v3-direction.md) — V3 direction：scene-graph IR + capability matrix + serializer split。M1-M8 框架已实现（结构性 mutation Phase 1-5 + 包重组① + M8 真·物理分包② 全落）；可达字段 ~99% ship，剩余前沿 fixture/RE-gated（详 plans/coverage.md）。 — [note: 大 arc 实质收尾（2026-06-09）—— M8 物理分包完成（design+plan 已归档）；剩 ValueText / Layr 3D 通道等 fixture-gated 边缘项，无 active 大 plan。]
-- [2026-06-10-gradient-stroke-write.md](specs/2026-06-10-gradient-stroke-write.md) — GradientStroke R/W（最小·对称已 ship 的 GradientFill）：reader 补 G-Stroke 节点解 gradient（collectShapeKids case + hydrateGradientStrokeNode），writer 加 GradientStrokeNode 只 model gradient color/alpha stops（克隆 G-Stroke 模板 + 覆写 prop.map XML，复用 codec + overwriteGradientStopsXML），双版本 ship-gate（color+alpha）。stroke 几何 + ramp geometry deferred
+- [2026-06-10-gradient-stroke-write.md](specs/2026-06-10-gradient-stroke-write.md) — GradientStroke R/W（最小·对称已 ship 的 GradientFill）：reader 补 G-Stroke 节点解 gradient（局部降级，对齐 G-Fill），writer 加 GradientStrokeNode 只 model gradient color/alpha stops；fill 的 lower/hydrate 本体抽共享 helper、stroke 复用；双版本 ship-gate（color+alpha，解 stops 比值，对齐 GradientFill）。stroke 几何 + ramp geometry deferred
 - [coverage-detail.md](plans/coverage-detail.md) — 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 - [coverage.md](plans/coverage.md) — 字段覆盖概览（精简入口）
 <!-- /AUTO -->
