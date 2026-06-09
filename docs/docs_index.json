@@ -4583,6 +4583,13 @@
       "rw": "read-only",
       "summary": "PropertyValueType returns the type of value stored in the property (OneD, TwoD, ThreeD, Color, NoValue, etc.). Derived from tdb4 flags."
     },
+    "RemoveEffect": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#removeeffect",
+      "signature": "func RemoveEffect(layer *Layer, index int) error",
+      "summary": "RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect. It is a thin, index-validated wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for Effect-Parade child removal). Returns an error if the layer has no Effect Parade or index is out of range."
+    },
     "RemoveItem": {
       "kind": "func",
       "file": "project.md",

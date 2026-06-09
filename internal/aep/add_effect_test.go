@@ -145,6 +145,56 @@ func TestAddEffect_AllTemplates_RoundTrip(t *testing.T) {
 	}
 }
 
+func TestRemoveEffect_RoundTrip(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	if err != nil {
+		t.Skipf("baseline not present: %v", err)
+	}
+	l := layerWithEffects(proj)
+	if l == nil {
+		t.Fatal("no layer with effects")
+	}
+	// baseline: [Gaussian Blur, Tint, Fill]; remove middle (index 1, Tint).
+	if err := aep.RemoveEffect(l, 1); err != nil {
+		t.Fatalf("RemoveEffect: %v", err)
+	}
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rl := layerWithEffects(re)
+	if rl == nil {
+		t.Fatal("re-parsed: no layer with effects")
+	}
+	if got, want := paradeChildNames(rl), []string{"ADBE Gaussian Blur 2", "ADBE Fill"}; !eq(got, want) {
+		t.Errorf("after RemoveEffect(1): parade = %v, want %v", got, want)
+	}
+}
+
+func TestRemoveEffect_Refuse(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	if err != nil {
+		t.Skipf("baseline not present: %v", err)
+	}
+	l := layerWithEffects(proj)
+	if l == nil {
+		t.Fatal("no layer with effects")
+	}
+	if err := aep.RemoveEffect(l, 99); err == nil {
+		t.Error("RemoveEffect out-of-range: want error, got nil")
+	}
+	// Parade-less from-scratch shape layer.
+	comp, _ := aep.NewComposition(aep.NewProject(aep.TargetAE2025), "M", 1920, 1080, 30, 5)
+	sl, _ := aep.NewShapeLayer(comp, "S")
+	if err := aep.RemoveEffect(sl.Layer, 0); err == nil {
+		t.Error("RemoveEffect on parade-less layer: want error, got nil")
+	}
+}
+
 func TestAddEffect_Unsupported(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
 	if err != nil {

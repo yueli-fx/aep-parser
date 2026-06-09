@@ -139,6 +139,30 @@ func cloneEffectTemplate(matchName string) (tdmn, sspc *rifx.Chunk, err error) {
 	return deepCloneChunk(ct.chunk.Children[0]), deepCloneChunk(ct.chunk.Children[1]), nil
 }
 
+// RemoveEffect removes the effect at the given 0-based index from the layer's
+// Effect Parade. Thin index-validated wrapper over RemovePropertyGroup (which is
+// AE 2020 + AE 2025 ship-gate green for Effect-Parade child removal), giving
+// AddEffect a symmetric inverse.
+// (Full contract lives on the aep.RemoveEffect facade — docgen source.)
+func RemoveEffect(layer *Layer, index int) error {
+	if layer == nil {
+		return fmt.Errorf("RemoveEffect: layer is nil")
+	}
+	parade := layer.EffectsParade()
+	if parade == nil {
+		return fmt.Errorf("RemoveEffect: layer %q has no Effect Parade group", layer.Name)
+	}
+	n := parade.NumProperties()
+	if index < 0 || index >= n {
+		return fmt.Errorf("RemoveEffect: index %d out of range (have %d effects)", index, n)
+	}
+	g, ok := parade.ChildByIndex(index).(*AEPropertyGroup)
+	if !ok {
+		return fmt.Errorf("RemoveEffect: effect at index %d is not a property group", index)
+	}
+	return RemovePropertyGroup(g)
+}
+
 // AddEffect appends an effect to the layer's Effect Parade and returns the
 // parsed *Effect (so the caller can tune Effect.Parameters immediately).
 // (Full contract + RE notes live on the aep.AddEffect facade — docgen source.)

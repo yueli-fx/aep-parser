@@ -31,7 +31,7 @@
     {
       "out": "effect.md",
       "roots": ["Effect"],
-      "funcs": ["AddEffect", "SupportedEffects"],
+      "funcs": ["AddEffect", "RemoveEffect", "SupportedEffects"],
       "head": "_includes/effect.head.md",
       "tail": "_includes/effect.tail.md"
     },

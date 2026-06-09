@@ -535,6 +535,15 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 // an embedded template.
 func SupportedEffects() []string { return serializer.SupportedEffects() }
 
+// RemoveEffect removes the effect at the given 0-based index from the layer's
+// Effect Parade — the inverse of AddEffect. It is a thin, index-validated
+// wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for
+// Effect-Parade child removal). Returns an error if the layer has no Effect
+// Parade or index is out of range.
+//
+// Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+func RemoveEffect(layer *Layer, index int) error { return serializer.RemoveEffect(layer, index) }
+
 // Effect match-name constants for AddEffect's built-in library. Use these
 // instead of hardcoding AE's internal match-name strings. The trailing comment
 // on each is the display name shown in AE's Effects panel.
