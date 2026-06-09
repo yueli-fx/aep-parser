@@ -64,7 +64,7 @@
 | `Layer.SetRunFontSize / SetRunFillColor / SetRunStrokeColor / SetRunApplyStroke / SetRunStrokeWidth / SetRunTracking / SetRunLeading / SetRunAutoLeading / SetRunBaselineShift / SetRunHorizontalScale / SetRunVerticalScale / SetRunTsume / SetRunFauxBold / SetRunFauxItalic / SetRunFontIndex` | 文本 per-run 字段写回（length-variable PostScript splice，自动更新内嵌 LIST btdk size header） |
 | `Layer.SetParagraphJustification(i, j)` | 文本 per-paragraph 对齐方式写回 |
 | `Layer.SetName(s)` / `SetComment(s)` | length-variable Utf8 / cmta chunk 替换（cmta 缺失时自动插入） |
-| `Layer.SetVisible/SetSolo/SetShy/SetLocked/SetEffectsEnabled/...` | 16 个 flag bit setter（ldta 单 bit 翻转） |
+| `Layer.SetVisible/SetSolo/SetShy/SetLocked/SetEffectsEnabled/...` | 19 个 flag bit setter（ldta 单 bit 翻转） |
 | `Layer.SetBlendingMode/SetTrackMatte/SetLabel/SetQuality/SetPreserveTransparency` | 5 个 enum / 字节 setter |
 | `Composition.SetBGColor/SetShutterAngle/SetShutterPhase/SetMotionBlur*/SetWorkArea` | 6 个合成元数据 setter（cdta 字节写） |
 | `Marker.SetTime/SetDuration/SetLabel` | length-preserving 时间 / 时长 / 色卡 |
@@ -74,17 +74,16 @@
 
 ```text
 aep-parser/
-├── internal/
-│   ├── aep/
-│   │   ├── parse.go        # 项目/合成/图层/属性/关键帧解析
-│   │   ├── write.go        # WriteAEP + Set* 写回 API
-│   │   ├── types.go        # 公开数据模型
-│   │   ├── json.go         # JSON 序列化
-│   │   └── aep_test.go     # 单元测试（含合成 RIFX 构造器）
-│   └── rifx/
-│       └── rifx.go         # 底层 RIFX/Chunk 读写器
-└── main/
-    └── main.go             # 示例 runner（读取 + round-trip 写回 demo）
+├── internal/          # M8 物理分包后的多包分层（DAG：上层依赖下层）
+│   ├── rifx/          # 底层 RIFX/Chunk 二进制读写器（通用，无 AEP 语义）
+│   ├── codec/         # 纯值/字节编解码（framerate / gradient / property-stream / cdta·ldta layout …）
+│   ├── scene/         # 运行时模型（Project/Composition/Layer/Property/…）+ writer 接口 + WriteJSON（编译期不碰字节）
+│   ├── serializer/    # chunk ⇄ scene：parse / lower / write / back / mutate + 内嵌模板
+│   └── aep/           # 薄 facade：公开 API（Open / FromReader / New* / 结构性 op / 类型·枚举别名）
+├── cmd/
+│   ├── aepdemo/       # 示例 runner（读取 + round-trip 写回 demo）
+│   └── docgen/        # docs/*.md 文档生成器（从导出符号 doc comment 生成）
+└── docs/              # API 文档：docgen 生成的类型参考 + 手写概念页
 ```
 
 ## 快速开始
@@ -169,7 +168,7 @@ project.WriteAEP(f)
 ## 已知限制
 
 - **JSON 是单向导出**：`Project.WriteJSON` / `Project.MarshalJSON` 只把解析后的 Project 序列化为 JSON 视图，**没有 `ReadJSON` 反序列化**。来回 round-trip 必须走二进制路径 (`aep.Open` → 修改 → `Project.WriteAEP`)，JSON 路径不保留底层 chunk 字节。
-- **不支持结构性编辑**：增删图层 / 关键帧 / 属性 / 特效 / 标记 / 蒙版顶点 都需要重排 chunk 长度，当前只做 length-preserving 改写。
+- **结构性编辑（V3，已支持）**：图层（增删 / 复制 / 移动 / 跨 Project 插入）、合成（新建 / 复制）、合成 marker（增删）、keyframe（增删）、render-queue item（增删）、property group（删 / 移 / 复制）、维度分离 —— 均经 serializer 重建受影响 chunk 子树 + 原子回滚（warnings-as-failure）+ AE 2020/2025 双版本 ship-gate（`aep.NewShapeLayer` / `DeleteLayer` / `InsertLayer` / `NewComposition` / `AddMarker` / `InsertKeyframe` …，M8 后为 facade 自由函数）。**仍不支持**：属性 / 特效 增删、mask / shape 顶点重写（破坏多个父 chunk）。
 - **文本图层**：`Layer.TextSource` 解出 Text / Fonts / per-paragraph Justification / per-run Font*/FillColor/FauxBold/FauxItalic/AutoLeading/Leading/Tracking/Stroke / IsBoxText+BoxBounds。`Layer.TextSourceRaw` 同时保留 btds 原字节。**尚未结构化暴露**：baseline shift、Horizontal/Vertical Scale、subscript/superscript、character/paragraph indent、字符级 selection runs —— 这些值仍在 btdk PostScript dict 里，需要时按相同模式从 `TextSourceRaw` 解。
 - **Mkif 已结构化**：`Mask.Mode` / `Mask.Inverted` / `Mask.Index` / `Mask.Color` 已解出；`Mask.MkifRaw` 原始 48 字节仍保留供 round-trip。剩余 mkif 字节（0x10/0x18/0x20-0x27 几个常量字段）未解但也不像是用户可配置的。
 - **形状层 vector primitives**：`IsShapeLayer` 已标记，Pen 工具自由 Bezier 路径以 `Layer.ShapePaths` 暴露。**参数化的** Rect/Star/Ellipse（Size、Rotation、Inner Radius 等）仍以普通 `Properties` 形式出现，没有结构化的 `Layer.Shapes []*Shape` 分组 API。
