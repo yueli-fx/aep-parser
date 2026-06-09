@@ -21,7 +21,7 @@
 2. **docs/ = 已全自动（2026-06-09，`4bff35a`）**：删两个纯人写页（README.md + json.md）；docs/ 仅余 docgen 生成的 11 类型 .md + docs_index.json + docgen.json + `_includes/`（管线源）。docgen 多包扫描已修（`1bc4ad4`）。根 README + docs link 已去过时（`5e14c13`/`3c99306`）。
 3. **immediate follow-up（非阻塞）**：serializer 结构性 op 自由函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim 为简短内部注释。
 4. **V3 剩余前沿（均 fixture/RE-gated，需用户提供 fixture 或新发现才动）**：Layr Transform 3D 通道（需 3D layer 支持，backlog 顶）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建 …）· ValueText（schema-db 依赖）。详 `plans/coverage.md` § 暂搁/不可达。
-5. **（offer，未决）根 README 全量功能刷新**：V1 时代 support 表缺大批 V2/V3 功能（不是错，是缺）；要做另开一轮。
+5. **根 README = WIP 存根（已决，`0336733`）**：V1 时代功能表过早 + 易漂移 → 砍成最小存根（描述 + 兼容下限 + docs/ 指针 + 分层 DAG + 参考，~34 行）。功能稳定后再补全量；无待办。
 
 ## Backlog（单条候选）
 
