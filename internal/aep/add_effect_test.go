@@ -175,6 +175,30 @@ func TestAddEffect_NoParade(t *testing.T) {
 	}
 }
 
+// TestEffectConstants_MatchRegistry guards against the constants and the
+// template registry diverging — every exported Effect* constant must be a
+// supported (addable) match-name.
+func TestEffectConstants_MatchRegistry(t *testing.T) {
+	consts := []string{
+		aep.EffectGaussianBlur, aep.EffectFill, aep.EffectTint,
+		aep.EffectBrightnessContrast, aep.EffectTritone, aep.EffectLevels,
+		aep.EffectLevelsIndividual, aep.EffectHueSaturation, aep.EffectBoxBlur,
+		aep.EffectGlow, aep.EffectInvert, aep.EffectExposure,
+	}
+	supported := map[string]bool{}
+	for _, n := range aep.SupportedEffects() {
+		supported[n] = true
+	}
+	if len(consts) != len(aep.SupportedEffects()) {
+		t.Errorf("constant count %d != SupportedEffects count %d", len(consts), len(aep.SupportedEffects()))
+	}
+	for _, c := range consts {
+		if !supported[c] {
+			t.Errorf("constant %q not in SupportedEffects()", c)
+		}
+	}
+}
+
 func TestSupportedEffects(t *testing.T) {
 	got := aep.SupportedEffects()
 	if len(got) == 0 {

@@ -43,23 +43,41 @@ import (
 //go:embed templates/effect_adbe_gaussian_blur_2.bin templates/effect_adbe_fill.bin templates/effect_adbe_tint.bin templates/effect_adbe_brightness_contrast_2.bin templates/effect_adbe_tritone.bin templates/effect_adbe_easy_levels2.bin templates/effect_adbe_pro_levels2.bin templates/effect_adbe_hue_saturation.bin templates/effect_adbe_box_blur.bin templates/effect_adbe_glo2.bin templates/effect_adbe_invert.bin templates/effect_adbe_exposure2.bin
 var effectTemplateFS embed.FS
 
+// Effect match-name constants for the addable built-in set. These are AE's
+// stable internal match-names; use them with AddEffect instead of hardcoding
+// strings. The display name (what the AE Effects panel shows) is in the comment.
+const (
+	EffectGaussianBlur       = "ADBE Gaussian Blur 2"         // Gaussian Blur
+	EffectFill               = "ADBE Fill"                    // Fill
+	EffectTint               = "ADBE Tint"                    // Tint
+	EffectBrightnessContrast = "ADBE Brightness & Contrast 2" // Brightness & Contrast
+	EffectTritone            = "ADBE Tritone"                 // Tritone
+	EffectLevels             = "ADBE Easy Levels2"            // Levels
+	EffectLevelsIndividual   = "ADBE Pro Levels2"             // Levels (Individual Controls)
+	EffectHueSaturation      = "ADBE HUE SATURATION"          // Hue/Saturation
+	EffectBoxBlur            = "ADBE Box Blur"                // Fast Box Blur
+	EffectGlow               = "ADBE Glo2"                    // Glow
+	EffectInvert             = "ADBE Invert"                  // Invert
+	EffectExposure           = "ADBE Exposure2"               // Exposure
+)
+
 // effectTemplateFiles maps an effect match-name to its embedded template path.
 // Each entry is an AE-native effect instance with AE's default parameter values;
 // callers tune parameters afterward via the returned Effect.Parameters
 // (Property.SetStaticValue works on effect params).
 var effectTemplateFiles = map[string]string{
-	"ADBE Gaussian Blur 2":         "templates/effect_adbe_gaussian_blur_2.bin",
-	"ADBE Fill":                    "templates/effect_adbe_fill.bin",
-	"ADBE Tint":                    "templates/effect_adbe_tint.bin",
-	"ADBE Brightness & Contrast 2": "templates/effect_adbe_brightness_contrast_2.bin",
-	"ADBE Tritone":                 "templates/effect_adbe_tritone.bin",
-	"ADBE Easy Levels2":            "templates/effect_adbe_easy_levels2.bin",
-	"ADBE Pro Levels2":             "templates/effect_adbe_pro_levels2.bin",
-	"ADBE HUE SATURATION":          "templates/effect_adbe_hue_saturation.bin",
-	"ADBE Box Blur":                "templates/effect_adbe_box_blur.bin",
-	"ADBE Glo2":                    "templates/effect_adbe_glo2.bin",
-	"ADBE Invert":                  "templates/effect_adbe_invert.bin",
-	"ADBE Exposure2":               "templates/effect_adbe_exposure2.bin",
+	EffectGaussianBlur:       "templates/effect_adbe_gaussian_blur_2.bin",
+	EffectFill:               "templates/effect_adbe_fill.bin",
+	EffectTint:               "templates/effect_adbe_tint.bin",
+	EffectBrightnessContrast: "templates/effect_adbe_brightness_contrast_2.bin",
+	EffectTritone:            "templates/effect_adbe_tritone.bin",
+	EffectLevels:             "templates/effect_adbe_easy_levels2.bin",
+	EffectLevelsIndividual:   "templates/effect_adbe_pro_levels2.bin",
+	EffectHueSaturation:      "templates/effect_adbe_hue_saturation.bin",
+	EffectBoxBlur:            "templates/effect_adbe_box_blur.bin",
+	EffectGlow:               "templates/effect_adbe_glo2.bin",
+	EffectInvert:             "templates/effect_adbe_invert.bin",
+	EffectExposure:           "templates/effect_adbe_exposure2.bin",
 }
 
 type cachedEffectTemplate struct {

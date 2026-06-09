@@ -535,6 +535,24 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 // an embedded template.
 func SupportedEffects() []string { return serializer.SupportedEffects() }
 
+// Effect match-name constants for AddEffect's built-in library. Use these
+// instead of hardcoding AE's internal match-name strings. The trailing comment
+// on each is the display name shown in AE's Effects panel.
+const (
+	EffectGaussianBlur       = serializer.EffectGaussianBlur       // Gaussian Blur
+	EffectFill               = serializer.EffectFill               // Fill
+	EffectTint               = serializer.EffectTint               // Tint
+	EffectBrightnessContrast = serializer.EffectBrightnessContrast // Brightness & Contrast
+	EffectTritone            = serializer.EffectTritone            // Tritone
+	EffectLevels             = serializer.EffectLevels             // Levels
+	EffectLevelsIndividual   = serializer.EffectLevelsIndividual   // Levels (Individual Controls)
+	EffectHueSaturation      = serializer.EffectHueSaturation      // Hue/Saturation
+	EffectBoxBlur            = serializer.EffectBoxBlur            // Fast Box Blur
+	EffectGlow               = serializer.EffectGlow               // Glow
+	EffectInvert             = serializer.EffectInvert             // Invert
+	EffectExposure           = serializer.EffectExposure           // Exposure
+)
+
 // AddItem appends a render queue item for comp, mirroring ExtendScript
 // RenderQueue.items.add(comp). Alpha / structural.
 //
