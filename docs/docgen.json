@@ -5,12 +5,14 @@
     {
       "out": "property.md",
       "roots": ["Property", "Keyframe", "TemporalEase", "InterpType"],
+      "funcs": ["InsertKeyframe", "DeleteKeyframe", "SetDimensionsSeparated", "RemovePropertyGroup", "MovePropertyGroup", "DuplicatePropertyGroup"],
       "head": "_includes/property.head.md",
       "tail": "_includes/property.tail.md"
     },
     {
       "out": "marker.md",
       "roots": ["Marker"],
+      "funcs": ["AddMarker", "RemoveMarker"],
       "head": "_includes/marker.head.md",
       "tail": "_includes/marker.tail.md"
     },
@@ -34,12 +36,13 @@
     {
       "out": "project.md",
       "roots": ["Project", "Folder"],
-      "funcs": ["Open", "FromReader", "NewProject"],
+      "funcs": ["Open", "FromReader", "NewProject", "AddItem", "RemoveItem"],
       "head": "_includes/project.head.md"
     },
     {
       "out": "composition.md",
       "roots": ["Composition", "Guide", "GuideOrientation", "EssentialGraphicsController", "EGControllerType"],
+      "funcs": ["NewComposition", "DuplicateComposition", "DeleteLayer", "MoveLayer", "InsertLayer", "DuplicateLayer", "NewShapeLayer"],
       "head": "_includes/composition.head.md",
       "tail": "_includes/composition.tail.md"
     },
@@ -52,6 +55,7 @@
     {
       "out": "layer.md",
       "roots": ["Layer", "LightKind"],
+      "funcs": ["MoveToBeginning", "MoveToEnd", "MoveAfter", "MoveBefore"],
       "head": "_includes/layer.head.md"
     },
     {

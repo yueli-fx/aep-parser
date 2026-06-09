@@ -720,6 +720,92 @@ const (
 )
 ```
 
+## Functions
+
+### InsertKeyframe
+
+```go
+func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error)
+```
+
+InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. Returns the new Keyframe and its index in Property.Keyframes (insertion is time-sorted; ties land after existing keys at the same time).
+
+Requires the property to already have ≥1 keyframe so the new block can clone the existing layout (header byte @0x07, bpk, etc.). For properties without keyframes, use SetStaticValue or build keyframes in AE first — synthesizing the lhd3/ldat chunks from scratch isn't supported yet.
+
+`value` follows the same rules as Keyframe.SetValue:
+
+- 1D property: pass float64
+- multi-component: pass []float64 (length == Property.Components)
+
+The new keyframe's interpolation is Linear/Linear; ease + tangents are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent on the returned Keyframe to refine.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
+
+### DeleteKeyframe
+
+```go
+func DeleteKeyframe(p *Property, i int) error
+```
+
+DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. Returns an error when i is out of range or the property has no keyframe stream.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
+
+### SetDimensionsSeparated
+
+```go
+func SetDimensionsSeparated(p *Property, separated bool) error
+```
+
+SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position leader. Structural; both directions (separate↔merge) are double-version ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated Position (3D layers, near-linear leader path-ease). An animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated); animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused with an error rather than written.
+
+Byte mechanics REd from AE 2020 controlled before/after pairs (see test_data/re_separate_dims*.jsx + incidents/separate-dimensions-write-mechanics.md):
+
+- separate (merge→separate): leader flips tdsb byte2→0x08 + byte3 bit1 and resets to its default ([w/2,h/2,0]); the real value migrates into the per-axis Position_0/1 (+ Position_2 for 3D layers) followers, each clearing its own bit1. AE pre-allocates Position_0/1 even while merged; the Z follower Position_2 is synthesized (clone of Position_1's tdmn+tdbs) only for 3D layers — 2D layers separate into X/Y only.
+- merge (separate→merged): leader clears tdsb byte2→0x00 + byte3 bit1 and takes back the migrated [X,Y,Z] value; ALL Position_0/1/2 followers are removed (AE's merged-after-separate form is leader-only).
+
+Atomicity: the only fallible step (re-parsing a synthesized Position_2) runs before any in-place mutation, so a failure leaves the project untouched and there is nothing to roll back.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 lists SetDimensionsSeparated as a structural write path despite the Set prefix — it adds/removes follower Property nodes); the aep facade re-exports it. BREAKING vs the former Property.SetDimensionsSeparated method form.
+
+### RemovePropertyGroup
+
+```go
+func RemovePropertyGroup(g *AEPropertyGroup) error
+```
+
+RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring AE's ScriptingAPI refuse.
+
+Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat slice, and Project.Warnings; on any new parser warning everything rolls back and the warnings are returned as an error.
+
+Alpha — see file header for ship-gate status. Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former AEPropertyGroup.Remove method form.
+
+### MovePropertyGroup
+
+```go
+func MovePropertyGroup(g *AEPropertyGroup, index int) error
+```
+
+MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children. index is clamped-checked against the current child count. Mirrors AE's PropertyBase.moveTo (which is 1-based; the Go API is 0-based per project convention).
+
+Alpha — see file header for ship-gate status. Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former AEPropertyGroup.MoveTo method form.
+
+### DuplicatePropertyGroup
+
+```go
+func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error)
+```
+
+DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); DuplicatePropertyGroup returns an error otherwise, mirroring AE's refuse.
+
+The clone reuses the source's match-name and on-disk payload verbatim. AE's own .duplicate() additionally persists a deduplicated display name (the localized "\<name> 2") into a length-variable tdsn on the clone's inner tdgp (RE'd 2026-06-03, see incidents/property-indexed-group-structural-re.md slice 2: the source carries NO tdsn, the clone gains one reading "高斯模糊 2"). We deliberately do NOT synthesize that suffix: the base is AE's *localized* effect name, which needs the AE schema/localization DB we don't carry (the same blocker as Property.ValueText), and a clone with no tdsn is byte-for-byte an "add the same effect twice" project — which AE accepts and re-derives the runtime dedup name from on open. The persisted suffix is cosmetic; AE recomputes it. The structural duplicate is faithful.
+
+Chunk mechanics: pure (tdmn, payload) pair insert immediately after the source pair, no count/index chunk (RE: parade 9→11 children, nothing else touched).
+
+Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat slice, and Project.Warnings; on any new parser warning — or a flat-mirror re-parse that fails to reproduce exactly one clone — everything rolls back and an error is returned.
+
+Alpha — see file header for ship-gate status. Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former AEPropertyGroup.Duplicate method form.
+
 <!-- Hand-authored reference tables. go/doc comments have no table syntax, so
      these concept tables are maintained here and appended by docgen. -->
 

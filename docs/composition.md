@@ -996,6 +996,176 @@ const (
 )
 ```
 
+## Functions
+
+### NewComposition
+
+```go
+func NewComposition( p *Project, name string, width, height uint16, frameRate, duration float64, ) (*Composition, error)
+```
+
+NewComposition adds an empty composition to the project's root folder.
+
+Required:
+
+	name        — non-empty string
+	width/height — > 0 (uint16; AE max 30000)
+	frameRate   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
+	duration    — > 0 (seconds; converted to whole frames via fps internally)
+
+Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16). Override via existing Set* methods after the call.
+
+Composition.ID is auto-assigned (Project.nextItemID++, monotonic). New comp appends to the project's root folder.
+
+Atomic mutation: if chunk parse fails or warnings appear, rollback chunk-tree + typed index + warnings to pre-call state.
+
+Warnings-as-failure: builder must produce zero parser warnings — if any appear, that's a builder bug; rollback + return internal error.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Project.NewComposition method form.
+
+### DuplicateComposition
+
+```go
+func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error)
+```
+
+DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. The dup contains a fresh copy of every layer (new layer IDs), with intra-comp parent + track-matte refs remapped to the dup's own layers; layer SOURCES (footage / precomp items) are shared verbatim, not duplicated — matching AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition.
+
+Clone semantics (same-Project comp only):
+
+- new comp item ID = p.allocItemID()             (idta @0x10)
+- per layer: new layer ID = p.allocItemID()      (ldta @0x00)
+- intra-comp ParentID @0x84 / TrackMatteLayerID @0xA0 remapped via srcLayerID→dupLayerID map (matte guarded by len(ldta) >= 0xA4)
+- SourceID @0x28 verbatim (shared Footage/Comp items)
+- comp name = caller-supplied (length-variable Utf8 rewrite)
+
+Refuse-cases (R1..R7): nil src, project backref missing, src itemList backref missing, src not in this Project, empty name, src Item not found in rootFold, layer ldta too short for ParentID write.
+
+Atomic mutation: snapshot rootFold.Children + p.Compositions + p.nextItemID + len(p.Warnings); on any new parser warning during the re-parse, roll all back including the nextItemID bump.
+
+Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the Go-emitted file and the dup's intra-comp parent ref resolves to the dup's own layer (remap confirmed by AE), with sources shared with the original.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
+
+### DeleteLayer
+
+```go
+func DeleteLayer(c *Composition, index int) error
+```
+
+DeleteLayer removes the layer at the given 0-based index in c.Layers. Returns nil on success, or an error if a refuse-case triggers (index out of range / comp lacks itemList back-ref / target is the last layer / target is not an AV layer / backref corruption).
+
+Reference cleanup — per AE's own delete behavior (RE'd via the re_delete_layer_*.aep fixtures):
+
+- any other layer's Layer.ParentID == deleted.ID → reset to 0 (ldta @0x84..0x87)
+- any other layer's Layer.TrackMatteLayerID == deleted.ID → reset to 0 (ldta @0xA0..0xA3, when ldta is long enough — AE ≤22 didn't write this field)
+- Layer.TrackMatte byte (ldta @0x6B) on those neighbors is LEFT UNTOUCHED to match AE: the matte intent flag persists even after the matte source is gone (AE re-resolves via implicit "layer above" at render time, which now returns nothing — matches AE)
+- Project.nextItemID counter: untouched (IDs never reused)
+
+String-level references to the deleted layer's ID (expressions, render queue, essential graphics) are out of scope — callers must scrub these manually if needed.
+
+Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers, neighbor refs / ldta bytes, and Project.Warnings; on any new parser warning surfaced during the call, roll all of them back and return the warnings as an error.
+
+Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS across baseline / middle / parent / matte modes). Future RE can lift the non-AV refuse and the single-layer-comp refuse — both are conservative defaults because AE's behavior for those scenarios hasn't been verified.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
+
+### MoveLayer
+
+```go
+func MoveLayer(c *Composition, from, to int) error
+```
+
+MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). The source layer's entire chunk block — Layr + Ewst + leaf followers (adaptive scan to next LIST/EOF, same machinery as DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the target slot. After the call, c.Layers[to] == the moved layer, and every layer's Layer.Index field is refreshed to match its new slice position.
+
+Refuse-cases (conservative):
+
+- `from` or `to` out of range (note: `to == len(c.Layers)-1` IS in range and means "move to last slot")
+- comp lacks parsed itemList back-ref
+- source layer lacks Layr back-ref / corrupted block (Layr formType / Ewst sibling mismatch)
+
+`from == to` is a no-op (returns nil, no state change).
+
+Unlike DeleteLayer / DuplicateLayer, MoveLayer does NOT care about layer Type or TrackMatte — pure reorder works for AV / Camera / Light / Audio / Shape / Text / matted layers alike.
+
+Atomic mutation: snapshot pre-call itemList.Children + c.Layers + each layer's Index + Warnings count; on any new parser warning during the call, roll all of them back. No re-parse and no new chunks created, so the warnings path is defensive.
+
+Stable: no Alpha gate — AE behavior is known (layer order = order of Layr LISTs in itemList.Children, same model that DeleteLayer and DuplicateLayer already exercise and ship-gate across AE 2020 + AE 2025). The reorder path is ship-gate validated for AE acceptance.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
+
+### InsertLayer
+
+```go
+func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error)
+```
+
+InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). Returns the inserted clone *Layer on success. src may live in a sibling comp of the same Project, or in a different Project (cross-Project).
+
+Same-Project clone semantics (src.comp.proj == c.proj):
+
+- new layer ID = c.proj.allocItemID() (head counter +1, monotonic)
+- clone block = deep byte-clone of src's [Layr, Ewst, leaf-followers) range, with per-byte ldta mutations: @0x00..0x03 ← newID @0x6B       ← TrackMatteNone (cross-comp matte source is invalid) @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in src.comp) @0xA0..0xA3 ← 0 (explicit matte ID, guarded by len(ldta) >= 0xA4)
+- clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
+- clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
+
+Cross-Project semantics (src.comp.proj != c.proj): additionally imports src's reachable ITEM CLOSURE (footage + precomp, transitively) into c's Project at root level with fresh dest item IDs, then remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the srcItemID→destItemID map. File-backed footage already present in dest (matched by Path) is reused, not re-cloned; comps and solids/placeholders are always cloned. ParentID / track matte are still reset (cross-comp). Folders are not recreated.
+
+Refuse-cases: nil src, dest backref missing, atIdx out of range, src detached, same-comp redirect, non-AV, direct pre-comp loop (same-Project only), src backref missing, structural corruption. Cross-Project adds: dest/src Project has no root Fold; dangling closure source.
+
+Atomic mutation: snapshot dest itemList.Children + c.Layers + c.proj.nextItemID + len(c.proj.Warnings) (cross-Project also snapshots rootFold.Children + Compositions + Footage); on any new parser warning during re-parse, roll all back including the nextItemID bump.
+
+Stable (both paths) — same-Project passed AE 2020 + AE 2025 ship-gate (3 modes [basic/footage/precomp](/basic/footage/precomp) × 2 = 6/6 PASS); cross-Project passed the assert-based AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup](/footage/precomp/dedup) × 2 = 6/6 PASS): AE accepts the Go-emitted file, the inserted clone's source resolves (imported / dedup'd), and footage is not duplicated on path match.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
+
+### DuplicateLayer
+
+```go
+func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)
+```
+
+DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). Returns the cloned *Layer on success, or an error if a refuse-case triggers.
+
+Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff):
+
+- new layer ID = proj.allocItemID() (head counter +1, monotonic)
+- clone's 16-chunk block (Layr + Ewst + 14 follower leaves in AE-saved files; 2 chunks in Go-built layers) is a deep byte-clone of source's block, with ldta @0x00..0x03 overwritten with the new ID. All other body bytes (SourceID @0x28, ParentID @0x84, TrackMatte @0x6B) are verbatim from source.
+- Layer.SourceID/ParentID/TrackMatteLayerID/TrackMatte struct fields on the clone = source values (no footage duplication; no reference rewrites).
+- Name = caller-supplied (AE keeps source's name verbatim; we require an explicit name to avoid silent duplicate-name confusion).
+- Children's outgoing ParentID is NOT updated — clone is a fresh sibling shadow; source remains the canonical parent for any incoming refs (F6).
+
+Refuse-cases (conservative):
+
+- name empty
+- index out of range
+- comp lacks parsed itemList back-ref
+- source is not an AV layer (camera/light/audio behavior not RE'd)
+- source has implicit TrackMatte (TrackMatte != None && TrackMatteLayerID == 0). F2 quirk: AE relocates clone above the positional matte source to preserve original's matte; not yet supported. AE 23+ explicit matte (TrackMatteLayerID != 0) is ALLOWED (Stable — clone byte-copies @0xA0 + @0x6B verbatim; passed AE 2025 ship-gate).
+- backref corruption (Layr formType / Ewst sibling mismatch)
+
+Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers, proj.nextItemID, and proj.Warnings; on any parser warning surfaced during the re-parse, roll all of them back (including the nextItemID bump) and return the warnings as an error.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
+
+### NewShapeLayer
+
+```go
+func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)
+```
+
+NewShapeLayer adds a new empty ShapeLayer to the composition.
+
+Required:
+
+	name — non-empty string (matches NewComposition validation contract)
+
+Returns the typed *ShapeLayer wrapper; the embedded *Layer is also appended to comp.Layers so V1 lookup paths (Composition.LayerByID / LayerByName) work immediately. ID is auto-assigned via the project's monotonic item-ID counter (never reused; layer IDs share the item-ID namespace per V1 parser convention).
+
+Atomic mutation: if lowering fails, or downstream parse emits any warning, all state mutated by this call is rolled back to the pre-call snapshot before the error is returned.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
+
 <!-- Hand-authored reference table. -->
 
 ## Renderer engines

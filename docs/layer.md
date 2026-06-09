@@ -2582,3 +2582,45 @@ const (
 	LightKindAmbient	LightKind	= 3
 )
 ```
+
+## Functions
+
+### MoveToBeginning
+
+```go
+func MoveToBeginning(l *Layer) error
+```
+
+MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1).
+
+Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
+
+### MoveToEnd
+
+```go
+func MoveToEnd(l *Layer) error
+```
+
+MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers).
+
+Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveToEnd method form; the aep facade re-exports it post-split.
+
+### MoveAfter
+
+```go
+func MoveAfter(l, other *Layer) error
+```
+
+MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \< receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer is missing a comp back-ref.
+
+Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveAfter method form; the aep facade re-exports it post-split.
+
+### MoveBefore
+
+```go
+func MoveBefore(l, other *Layer) error
+```
+
+MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack).
+
+Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveBefore method form; the aep facade re-exports it post-split.

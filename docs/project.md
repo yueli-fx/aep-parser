@@ -633,3 +633,37 @@ NewProject returns a fresh empty Project parsed from the embedded AE skeleton ma
 Optional target arg: zero args = TargetAE2020 (max compatibility). Pass at most one target. Subsequent NewComposition calls populate it.
 
 Never returns an error: the embedded templates are build-time trusted; parser bugs panic with a "build bug" message (not user-facing). Panics on: multiple target args, or unknown AETarget value (forward-incompat).
+
+### AddItem
+
+```go
+func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error)
+```
+
+AddItem appends a render queue item for comp, mirroring ExtendScript RenderQueue.items.add(comp). Alpha / structural.
+
+Strategy (clone + remap, like InsertLayer): the queue's last item is the template — its 2246B settings block, [LIST:list + 'LOm '] group, and Rout per-item block are deep-cloned, then the clone's comp_id (settings @0x08) is repointed at comp. The settings ldat / Rout / lhd3 count grow in lock-step, mirroring AE's own items.add() delta (REd from a 1-item→2-item diff). The cloned output module keeps the template's path/template (AE accepts it; a fresh add would name it after comp — deferred).
+
+Requires at least one existing item to clone from (an empty queue has no template). The clone is taken from the template's scene-owned settingsBlock copy (single source of truth). The grown settings ldat reallocates, so every item's back.settingsSlice alias is re-pointed afterward, and WriteAEP syncs the copies back. See incidents/render-queue-delete-mechanics.md.
+
+Free function (not a method) — see RemoveItem. BREAKING vs rq.AddItem(comp).
+
+### RemoveItem
+
+```go
+func RemoveItem(rq *RenderQueue, index int) error
+```
+
+RemoveItem deletes the render queue item at index (0-based), mirroring ExtendScript RenderQueueItem.remove(). Alpha / structural.
+
+Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former rq.RemoveItem(i) method form.
+
+Byte mechanics REd from AE 2020 (test_data/re_rq_delete.jsx, 2-item→1-item diff): removing item i drops, in lock-step,
+
+- the item's [RCom?] + LIST:list + LIST:'LOm ' from the LItm container,
+- the item's 2246-byte block from the LRdr-level settings ldat, and decrements the settings lhd3 count (@0x08 and @0x0C),
+- the item's per-item block from the Rout flags chunk (4-byte header + uniform per-item stride), decrementing the header proportionally.
+
+The scene-side settingsBlock buffers are independent copies (single source of truth); surviving items' back.settingsSlice aliases are re-pointed to their new offsets after the splice, and WriteAEP syncs the copies back.
+
+Alpha: structural delete is not yet AE-ship-gated. Only items with one output module are covered by the Rout RE (uniform per-item stride); see incidents/render-queue-delete-mechanics.md.
