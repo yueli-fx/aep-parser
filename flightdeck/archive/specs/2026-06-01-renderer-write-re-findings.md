@@ -1,9 +1,11 @@
 ---
-status: idea
-summary: Composition.Renderer W — RE findings（prin 104B / prda 变长，结构性，待实现）
+status: done
+summary: Composition.Renderer W — RE findings ✅ 已实现并 ship（SetRenderer 双版本 ship-gate 绿，归档 2026-06-09）；本文存 prin 104B / prda 变长布局 RE 供参考
 ---
 
 # Composition.Renderer W — RE findings (P3, pre-implementation)
+
+> **✅ 已实现并落地（2026-06-09）** —— `SetRenderer` 已 ship（facade，prin 改名 length-preserving + prda 换模板 structural），AE 2025 4/4 + AE 2020 双版本 ship-gate 绿（`internal/aep/composition_renderer_shipgate_test.go`）。本文 RE 笔记保留供参考。
 
 **Created**: 2026-06-01（RQ reader/writer arc 收尾时顺手探的）
 

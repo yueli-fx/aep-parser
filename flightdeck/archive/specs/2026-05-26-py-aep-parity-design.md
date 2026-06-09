@@ -1,11 +1,11 @@
 ---
-status: active
-summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向(static+animated，animated 限 3D+linear) + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落。剩余均 deferred / fixture·RE-gated：ValueText(won't-do) · RQ output-module 路径名+全 settings enum 完整化 · Renderer W · EG W · Guides · Gradient stroke W · TimeRemap）
+status: done
+summary: py-aep parity API 全覆盖路线图 ✅ DONE（路线图收尾归档 2026-06-09）。P1/P2/P3 主体全落：RQ R/W+结构性、DimensionsSeparated R/W(static+animated)、PropertyBase Remove/Dup/MoveTo、comp marker 增删、Composition.Renderer W(双版本 ship-gate)、Guides/TimeRemap-enable(Alpha)。真未实现线头仅 EG W + Gradient stroke W（迁 deferred-backlog）；RQ 全 settings enum 完整化 + ValueText(won't-do) 见 coverage.md/incident
 ---
 
 # py-aep parity — API 全覆盖路线图
 
-**Status**: **部分完成（partial / paused）— 更新 2026-06-09**。
+**Status**: ✅ **DONE — 路线图收尾归档 2026-06-09**。P1/P2/P3 主体全落（详下）；真未实现线头仅 **Essential Graphics W** + **Gradient stroke W**（已迁 [`deferred-backlog.md`](deferred-backlog.md)）。Composition.Renderer W 已 ship（双版本 ship-gate，原 idea spec `2026-06-01-renderer-write-re-findings` 同归档）；Guides / TimeRemap-enable 已 Alpha 实现（欠 ship-gate）；RQ 全 settings enum / format options 完整化 + ValueText（won't-do）见 coverage.md / incident。
 - **P1 ✅ 全落**（landed `2026-05-26-py-aep-parity-p1-plan`）
 - **P2 ✅ 大部分**（landed P2a/P2b plans）；剩 deferred 少数：2C Gradient **W**（2026-05-31 已 ship gradient fill write，stroke/Type-Start-End 仍 deferred）、2E ImportPlaceholder（AE 拒收，删除）、2K TimeRemap enable（结构性）、Composition.Time（low-pri）、ReplaceWithPlaceholder/Solid
 - **P3 🚧 进行中**——已落：**§3A Render Queue R/W**（`Project.RenderQueue` 读 + `AddItem/RemoveItem` 结构性 + RenderQueueItem/OutputModule 各 15+/12+ 值 setter + `SetComment`（length-variable, ship-gated）；详 `../plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md`）、**§3C PropertyBase Remove/Duplicate/MoveTo + DimensionsSeparated R/W**（static + animated，animated 限 3D layer + ~linear path-ease）、**§3G comp marker 增删**（双版本 ship-gate）。剩余 deferred（多 fixture·RE-gated）：RQ output-module 路径名 + 全 settings enum / format options×7 完整化、Composition.Renderer W、Essential Graphics W、Guides、Gradient stroke W、§3H ValueText（won't-do）。**例外**：Layer 结构性 ops（Remove/Duplicate/CopyToComp/Move）已由 **V3 Phase 2-5 做掉**（见下表 ✅）
@@ -293,9 +293,9 @@ summary: py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+�
 - **3A** Render Queue 全栈 (`RenderQueue / RenderQueueItem / OutputModule`) ✅ **R/W 大部分 done**——read + `AddItem/RemoveItem` 结构性 + RQItem/OM 值 setter（15+/12+）+ `SetComment`（ship-gated）；残留 deferred：output-module 路径名、全 settings enum、format options × 7
 - **3B** Layer 结构性 ops: `Remove / Duplicate / CopyToComp / MoveAfter / MoveBefore / MoveToBeginning / MoveToEnd / SetParentWithJump`（全 V3 capability framework 内做）
 - **3C** PropertyBase 结构性: `Remove / Duplicate / MoveTo / DimensionsSeparated R/W` ✅ **done**——`RemovePropertyGroup / DuplicatePropertyGroup / MovePropertyGroup`（facade 自由函数，INDEXED_GROUP：effect/mask parade · root vectors · text animators，详 `../incidents/property-indexed-group-structural-re.md`）；`DimensionsSeparated R/W` separate↔merge 双向 static Position 2D+3D（双版本 ship-gate 6/6）+ animated（限 3D layer + ~linear path-ease，详 `../incidents/separate-dimensions-write-mechanics.md`）
-- **3D** Composition.Renderer 写（跨 renderer 切换 → prda 长度变结构性）
-- **3E** Essential Graphics R only (controllers + override UUIDs，不做自动解析)
-- **3F** Guides R/W (ruler 标尺辅助线，UI-only chunk)
+- **3D** Composition.Renderer 写 ✅ **done（ship）**——`SetRenderer`（prin 改名 length-preserving + prda 换模板 structural），AE 2025 4/4 + AE 2020 双版本 ship-gate 绿。RE 详原 idea spec `2026-06-01-renderer-write-re-findings`（同归档 archive/specs/）
+- **3E** Essential Graphics R only（controllers + override UUIDs，不做自动解析）。**W 未实现**（创建 controller / 绑定 override UUID → deferred backlog）
+- **3F** Guides R/W 🟡 **Alpha done**——`Guide.SetPosition / SetOrientation`（length-preserving），R+W round-trip 测试过；无 ship-gate（UI-only chunk，AE 接受未在 app 内验）
 - **3G** Composition Markers ：comp-level marker 增删 ✅ **done（stable）**——`Marker.Remove()` + `Composition.AddMarker`（clone-template 规避 opaque RE），AE 2020+2025 ship-gate 2/2 PASS（2026-06-04）。限制：AddMarker 需 ≥1 现存 marker（空 comp seed 暂搁）+ tail-insert 未做 time 排序。详 `../plans/2026-06-04-py-aep-p3-3g-comp-marker-structural-plan.md`
 - **3H** Property.ValueText 🗑️ **deferred / won't-implement（2026-06-04）**——通用不可达：内置枚举 label 不在 .aep（pard 只存 nbOptions 计数），需 Adobe 不公开的 per-effect×版本 schema DB；AE 26.0-only ScriptingAPI；py-aep 自己也没实现。仅自定义 Dropdown Menu Control 的 label 在 `pdnm` chunk 可 RE（有界子集，payoff 窄，不做）。详 `../incidents/valuetext-needs-schema-db.md`
 

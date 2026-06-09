@@ -1,6 +1,6 @@
 ---
 status: active
-implements: specs/2026-05-26-py-aep-parity-design.md
+implements: archive/specs/2026-05-26-py-aep-parity-design.md
 summary: 字段覆盖概览（精简入口）
 ---
 
