@@ -1,8 +1,10 @@
 ---
-status: active
+status: done
 summary: V3 M8 方案② 真·物理分包设计（A 先行 + B′ back-ref 接口）：scene/serializer/codec 物理拆包，back-ref 作 scene 内 writer 接口（serializer 实现）→ 保留全部方法 API（不破 API）、scene 编译期零 rifx；eager length-preserving patch 经接口；opaque 延后到 C；全程保 byte-exact 回归门
-note: brainstorm + 三家外审两轮整合。方向 = A 先行（保 byte-exact，C 日后独立）+ B′（back-ref 接口、不破 API、无侧表/无 Document god-object）。前置：M8 scene→rifx 白名单清零（2026-06-07 已落）
+note: brainstorm + 三家外审两轮整合。方向 = A 先行（保 byte-exact，C 日后独立）+ B′（back-ref 接口、不破 API、无侧表/无 Document god-object）。
 ---
+
+> **✅ 已实现并落地（2026-06-09）** —— M8 物理分包按本设计完成（plan `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`，逐 commit 见 git log）。opaque「C 阶段」未单独做：当前 round-trip 已 byte-identical（opaque 经现有 back-ref 保留），无独立 C 需求。
 
 # V3 M8 方案② — 真·物理分包设计（A 先行 + B′ back-ref 接口）
 
