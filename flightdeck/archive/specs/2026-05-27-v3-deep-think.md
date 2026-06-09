@@ -1,11 +1,11 @@
 ---
-status: active
-summary: V3 deep think：open questions / risk register / migration strategy
+status: done
+summary: V3 deep think ✅ 收尾归档（2026-06-10）——brainstorm 关键决策已全采纳（in-place refactor / eager+lazy / opaque preservation 已成 CLAUDE.md 铁律 / capability matrix）；引导的 V3 Phase 1-5 plan 已落地归档。剩 ShapeGraph / EffectSchema open（在 v3-direction 留底）
 ---
 
 # V3 deep think — open questions, risk register, migration strategy
 
-**Status**: **brainstorm（部分结论已采纳）— 更新 2026-05-31**。仍是开放问题/风险册，非 plan。TL;DR 的关键决策已落地：①in-place refactor（已做，方案①包重组 landed）②eager 已知字段 + lazy V3-only 结构性写（已遵循）③opaque preservation（已为铁律，CLAUDE.md §5）④capability matrix 按需提升。剩余 M8 物理分包 / ShapeGraph / EffectSchema 仍 open。Builds on `2026-05-22-v3-direction.md`（M1-M8 framework）。
+**Status**: ✅ **DONE — 收尾归档 2026-06-10**（原 brainstorm / risk register，非 plan）。关键决策已全采纳并落地：①in-place refactor（方案①包重组 + M8 物理分包 landed）②eager 已知字段 + lazy V3-only 结构性写③opaque preservation（已成铁律 CLAUDE.md §5）④capability matrix 按需提升。引导的 V3 Phase 1-5 plan 已落地归档（archive/plans/）。剩 ShapeGraph / EffectSchema 大子项 open —— 在 `2026-05-22-v3-direction.md`（仍 active）留底。Builds on `2026-05-22-v3-direction.md`（M1-M8 framework）。
 
 **Created**: 2026-05-27 after P2 parity 收尾 (PASS 259).
 
