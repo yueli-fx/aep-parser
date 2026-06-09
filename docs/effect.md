@@ -69,6 +69,34 @@ for _, fx := range layer.Effects {
 }
 ```
 
+## Functions
+
+### AddEffect
+
+```go
+func AddEffect(layer *Layer, effectMatchName string) (*Effect, error)
+```
+
+AddEffect appends an effect to the layer's "ADBE Effect Parade" and returns the parsed *Effect, so the caller can immediately tune its parameters via Effect.Parameters (Property.SetStaticValue works on effect params — e.g. set "ADBE Gaussian Blur 2-0001" to change Blurriness).
+
+effectMatchName must be one of SupportedEffects(); the effect's full parameter sub-tree (sspc payload) is supplied from an embedded AE-native template, which is why only RE'd effects are addable. AE looks the effect up by match-name at load, so the named plugin must be installed in the opening AE — the seeded effects are built-ins present since before the AE 2020 read floor and are version-portable (the AE-2020-extracted bytes are accepted by AE 2025).
+
+Mechanics: the parade stores effects as (tdmn, LIST:sspc) pairs terminated by an "ADBE Group End" tdmn sentinel; AddEffect splices a fresh pair in just before that sentinel — the same (tdmn, payload) splice DuplicatePropertyGroup is ship-gate-green with, sourced from a template instead of a sibling. LIST sizes grow automatically (rifx recomputes bottom-up on write).
+
+Phase-1 requirement: the layer must already carry an Effect Parade group (every AE-parsed AV layer does). Layers freshly built by NewShapeLayer have no parade yet — AddEffect returns an error for them (auto-create deferred).
+
+Atomic mutation: snapshot parade chunk + scene children + flat Effects slice; re-parse the spliced pair to obtain a back-ref-correct *Effect; roll back on any parser warning.
+
+Alpha / structural. Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
+
+### SupportedEffects
+
+```go
+func SupportedEffects() []string
+```
+
+SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template.
+
 <!-- Hand-authored note. -->
 
 ## Tested coverage

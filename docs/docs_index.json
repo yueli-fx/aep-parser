@@ -1,6 +1,13 @@
 {
   "go_version": "go1.25.1",
   "symbols": {
+    "AddEffect": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#addeffect",
+      "signature": "func AddEffect(layer *Layer, effectMatchName string) (*Effect, error)",
+      "summary": "AddEffect appends an effect to the layer's \"ADBE Effect Parade\" and returns the parsed *Effect, so the caller can immediately tune its parameters via Effect.Parameters (Property.SetStaticValue works on effect params — e.g. set \"ADBE Gaussian Blur 2-0001\" to change Blurriness)."
+    },
     "AddItem": {
       "kind": "func",
       "file": "project.md",
@@ -4752,6 +4759,13 @@
       "file": "shape.md",
       "anchor": "#shapeprimitivekind-object",
       "summary": "ShapePrimitiveKind identifies which AE parametric primitive a ShapePrimitive represents. The values are stable strings rather than integers so they round-trip cleanly through JSON."
+    },
+    "SupportedEffects": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#supportedeffects",
+      "signature": "func SupportedEffects() []string",
+      "summary": "SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template."
     },
     "TemporalEase": {
       "kind": "type",
