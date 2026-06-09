@@ -33,18 +33,20 @@ type indexEntry struct {
 // generateFile) so the index always reflects the exact symbols rendered.
 func buildIndex(m *manifest) (string, error) {
 	idx := docIndex{GoVersion: runtime.Version(), Symbols: map[string]indexEntry{}}
+	dirs := m.pkgDirs()
+	lps, err := loadPackages(dirs)
+	if err != nil {
+		return "", err
+	}
+	types := withMethodsMulti(extractTypesMulti(lps), lps)
+	for _, d := range dirs {
+		attachExamples(types, d)
+	}
 	for _, fm := range m.Files {
-		pkgDir := m.resolve(m.Pkg)
-		lp, err := loadPackage(pkgDir)
-		if err != nil {
-			return "", err
-		}
-		types := withMethods(extractTypes(lp), lp)
-		attachExamples(types, pkgDir)
 		for _, root := range fm.Roots {
 			dt := findType(types, root)
 			if dt == nil {
-				return "", fmt.Errorf("root type %q not found in %s", root, pkgDir)
+				return "", fmt.Errorf("root type %q not found in %v", root, dirs)
 			}
 			idx.Symbols[dt.name] = indexEntry{
 				Kind:    "type",
@@ -60,7 +62,7 @@ func buildIndex(m *manifest) (string, error) {
 			}
 		}
 		if len(fm.Funcs) > 0 {
-			funcs, err := extractPackageFuncs(lp, fm.Funcs)
+			funcs, err := extractPackageFuncsMulti(lps, fm.Funcs)
 			if err != nil {
 				return "", err
 			}

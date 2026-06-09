@@ -36,4 +36,5 @@ type docType struct {
 	attributes []symbol // 字段（结构声明序）后接 getter（源序）
 	methods    []symbol // 动作方法（源序）
 	consts     []constBlock
+	isAlias    bool // `type X = pkg.Y` 别名（facade 包里的壳）；合并时输给真定义
 }

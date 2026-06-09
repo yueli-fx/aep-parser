@@ -56,33 +56,113 @@ func loadPackage(dir string) (*loadedPackage, error) {
 	return nil, fmt.Errorf("no buildable package in %s", dir)
 }
 
-// extractPackageFuncs 抽取 names 指定的包级函数（非方法）为 symbol（按 names 顺序）。
-// 用 RawFuncDocs 取注释（doc.NewFromFiles 会清空 Decl.Doc）。未找到的名字报错（防 manifest 拼写）。
-func extractPackageFuncs(lp *loadedPackage, names []string) ([]symbol, error) {
-	byName := map[string]*doc.Func{}
+// lookupPackageFunc 在单个包里按名找包级函数（含 go/doc 归到某 type.Funcs 的
+// 构造器形函数），找到则用该包 fset + RawFuncDocs 构 symbol；否则 nil。
+func lookupPackageFunc(lp *loadedPackage, name string) *symbol {
 	for _, fn := range lp.Doc.Funcs {
-		byName[fn.Name] = fn
+		if fn.Name == name {
+			return funcSymbol(lp, fn)
+		}
 	}
 	// go/doc files a constructor-shaped func (NewT returning *T) under that
 	// type's Funcs rather than the package's, so scan both.
 	for _, ty := range lp.Doc.Types {
 		for _, fn := range ty.Funcs {
-			byName[fn.Name] = fn
+			if fn.Name == name {
+				return funcSymbol(lp, fn)
+			}
 		}
 	}
+	return nil
+}
+
+func funcSymbol(lp *loadedPackage, fn *doc.Func) *symbol {
+	rawDoc := lp.RawFuncDocs[fn.Decl.Pos()] // doc.NewFromFiles 会清空 Decl.Doc，用副本
+	return &symbol{
+		name:      fn.Name,
+		kind:      kindMethod,
+		doc:       directiveStrippedText(rawDoc),
+		signature: normalizeSignature(lp.Fset, fn.Decl),
+	}
+}
+
+// extractPackageFuncs 抽取 names 指定的包级函数（非方法）为 symbol（按 names 顺序）。
+// 未找到的名字报错（防 manifest 拼写）。
+func extractPackageFuncs(lp *loadedPackage, names []string) ([]symbol, error) {
 	out := make([]symbol, 0, len(names))
 	for _, n := range names {
-		fn := byName[n]
-		if fn == nil {
+		s := lookupPackageFunc(lp, n)
+		if s == nil {
 			return nil, fmt.Errorf("package func %q not found", n)
 		}
-		rawDoc := lp.RawFuncDocs[fn.Decl.Pos()]
-		out = append(out, symbol{
-			name:      n,
-			kind:      kindMethod,
-			doc:       directiveStrippedText(rawDoc),
-			signature: normalizeSignature(lp.Fset, fn.Decl),
-		})
+		out = append(out, *s)
+	}
+	return out, nil
+}
+
+// loadPackages 加载多个包目录的 go/doc 视图（顺序保留）。
+func loadPackages(dirs []string) ([]*loadedPackage, error) {
+	lps := make([]*loadedPackage, 0, len(dirs))
+	for _, d := range dirs {
+		lp, err := loadPackage(d)
+		if err != nil {
+			return nil, err
+		}
+		lps = append(lps, lp)
+	}
+	return lps, nil
+}
+
+// extractTypesMulti 跨多个包抽类型并合并：同名类型偏好真定义（非别名），
+// 解决 facade 包里 `type X = scene.X` 别名壳遮蔽真类型字段/方法的问题
+// （M8 物理分包后类型住 scene/codec、facade 只剩别名）。首见序稳定。
+func extractTypesMulti(lps []*loadedPackage) []*docType {
+	byName := map[string]*docType{}
+	var order []string
+	for _, lp := range lps {
+		for _, dt := range extractTypes(lp) {
+			existing, ok := byName[dt.name]
+			if !ok {
+				byName[dt.name] = dt
+				order = append(order, dt.name)
+				continue
+			}
+			if existing.isAlias && !dt.isAlias { // 真定义胜别名壳
+				byName[dt.name] = dt
+			}
+		}
+	}
+	out := make([]*docType, 0, len(order))
+	for _, n := range order {
+		out = append(out, byName[n])
+	}
+	return out
+}
+
+// withMethodsMulti 把每个包的方法/getter 累加到已合并的 types（按包序应用，
+// 真定义所在包通常在 facade 之后 → 其 setter 决定的字段 R/RW 最终生效）。
+func withMethodsMulti(types []*docType, lps []*loadedPackage) []*docType {
+	for _, lp := range lps {
+		types = withMethods(types, lp)
+	}
+	return types
+}
+
+// extractPackageFuncsMulti 跨多个包按名找包级函数，按包序首个命中胜出
+// （Pkg=facade 在前 → re-export 形函数优先）。任一名字全包未命中即报错。
+func extractPackageFuncsMulti(lps []*loadedPackage, names []string) ([]symbol, error) {
+	out := make([]symbol, 0, len(names))
+	for _, n := range names {
+		var s *symbol
+		for _, lp := range lps {
+			if s = lookupPackageFunc(lp, n); s != nil {
+				break
+			}
+		}
+		if s == nil {
+			return nil, fmt.Errorf("package func %q not found in any scanned package", n)
+		}
+		out = append(out, *s)
 	}
 	return out, nil
 }
@@ -97,11 +177,11 @@ func findType(ts []*docType, name string) *docType {
 	return nil
 }
 
-// extractTypes 把 loadedPackage 转成 []*docType（仅字段 + 常量；方法在 Task 4 补）。
+// extractTypes 把 loadedPackage 转成 []*docType（仅字段 + 常量；方法在 withMethods 补）。
 func extractTypes(lp *loadedPackage) []*docType {
 	var out []*docType
 	for _, ty := range lp.Doc.Types {
-		dt := &docType{name: ty.Name, doc: ty.Doc}
+		dt := &docType{name: ty.Name, doc: ty.Doc, isAlias: isAliasType(ty)}
 		dt.attributes = append(dt.attributes, extractFields(lp, ty)...)
 		for _, c := range ty.Consts {
 			dt.consts = append(dt.consts, constBlock{
@@ -112,6 +192,20 @@ func extractTypes(lp *loadedPackage) []*docType {
 		out = append(out, dt)
 	}
 	return out
+}
+
+// isAliasType reports whether ty is declared as a type alias (`type X = Y`)
+// rather than a defining declaration (`type X Y` / `type X struct{…}`). In the
+// aep facade package the public types are aliases to the real scene/codec
+// types, so their go/doc view carries no fields/methods — extractTypesMulti
+// prefers the real (non-alias) definition when merging across packages.
+func isAliasType(ty *doc.Type) bool {
+	for _, spec := range ty.Decl.Specs {
+		if ts, ok := spec.(*ast.TypeSpec); ok && ts.Name.Name == ty.Name {
+			return ts.Assign.IsValid()
+		}
+	}
+	return false
 }
 
 // extractFields 走 type 的 GenDecl → StructType，取导出字段。

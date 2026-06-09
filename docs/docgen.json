@@ -1,5 +1,6 @@
 {
   "pkg": "../internal/aep",
+  "pkgs": ["../internal/scene", "../internal/codec"],
   "index": "docs_index.json",
   "files": [
     {
@@ -42,7 +43,7 @@
     {
       "out": "composition.md",
       "roots": ["Composition", "Guide", "GuideOrientation", "EssentialGraphicsController", "EGControllerType"],
-      "funcs": ["NewComposition", "DuplicateComposition", "DeleteLayer", "MoveLayer", "InsertLayer", "DuplicateLayer", "NewShapeLayer"],
+      "funcs": ["NewComposition", "DuplicateComposition", "SetRenderer", "DeleteLayer", "MoveLayer", "InsertLayer", "DuplicateLayer", "NewShapeLayer"],
       "head": "_includes/composition.head.md",
       "tail": "_includes/composition.tail.md"
     },

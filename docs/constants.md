@@ -9,21 +9,229 @@ reference.
 
 # LayerType object
 
+LayerType classifies the kind of layer.
+
+## Constants
+
+```go
+const (
+	LayerTypeAV		LayerType	= "av"		// audio/video source layer
+	LayerTypeText		LayerType	= "text"	// text layer
+	LayerTypeShape		LayerType	= "shape"	// shape layer
+	LayerTypeNull		LayerType	= "null"	// null object
+	LayerTypeLight		LayerType	= "light"	// 3D light
+	LayerTypeCamera		LayerType	= "camera"	// 3D camera
+	LayerTypeAdjust		LayerType	= "adjustment"	// adjustment layer
+	LayerType3DModel	LayerType	= "3d-model"	// 3D Model layer (AE 24+, py-aep ThreeDModelLayer)
+	LayerTypeUnknown	LayerType	= "unknown"
+)
+```
+
 # BlendingMode object
+
+BlendingMode is the layer's compositing blend mode (ldta @0x63). Values match py-aep's BlendingMode enum / AE's internal numbering.
+
+## Constants
+
+```go
+const (
+	BlendingModeNormalCamera	BlendingMode	= 0	// null/camera/light default
+	BlendingModeNormal		BlendingMode	= 2
+	BlendingModeDissolve		BlendingMode	= 3
+	BlendingModeAdd			BlendingMode	= 4
+	BlendingModeMultiply		BlendingMode	= 5
+	BlendingModeScreen		BlendingMode	= 6
+	BlendingModeOverlay		BlendingMode	= 7
+	BlendingModeSoftLight		BlendingMode	= 8
+	BlendingModeHardLight		BlendingMode	= 9
+	BlendingModeDarken		BlendingMode	= 10
+	BlendingModeLighten		BlendingMode	= 11
+	BlendingModeClassicDifference	BlendingMode	= 12
+	BlendingModeHue			BlendingMode	= 13
+	BlendingModeSaturation		BlendingMode	= 14
+	BlendingModeColor		BlendingMode	= 15
+	BlendingModeLuminosity		BlendingMode	= 16
+	BlendingModeStencilAlpha	BlendingMode	= 17
+	BlendingModeStencilLuma		BlendingMode	= 18
+	BlendingModeSilhouetteAlpha	BlendingMode	= 19
+	BlendingModeSilhouetteLuma	BlendingMode	= 20
+	BlendingModeLuminescentPremul	BlendingMode	= 21
+	BlendingModeAlphaAdd		BlendingMode	= 22
+	BlendingModeClassicColorDodge	BlendingMode	= 23
+	BlendingModeClassicColorBurn	BlendingMode	= 24
+	BlendingModeExclusion		BlendingMode	= 25
+	BlendingModeDifference		BlendingMode	= 26
+	BlendingModeColorDodge		BlendingMode	= 27
+	BlendingModeColorBurn		BlendingMode	= 28
+	BlendingModeLinearDodge		BlendingMode	= 29
+	BlendingModeLinearBurn		BlendingMode	= 30
+	BlendingModeLinearLight		BlendingMode	= 31
+	BlendingModeVividLight		BlendingMode	= 32
+	BlendingModePinLight		BlendingMode	= 33
+	BlendingModeHardMix		BlendingMode	= 34
+	BlendingModeLighterColor	BlendingMode	= 35
+	BlendingModeDarkerColor		BlendingMode	= 36
+	BlendingModeSubtract		BlendingMode	= 37
+	BlendingModeDivide		BlendingMode	= 38
+)
+```
 
 # TrackMatteType object
 
+TrackMatteType is the layer's track-matte mode (ldta @0x6B).
+
+## Constants
+
+```go
+const (
+	TrackMatteNone		TrackMatteType	= 0
+	TrackMatteAlpha		TrackMatteType	= 1
+	TrackMatteAlphaInverse	TrackMatteType	= 2
+	TrackMatteLuma		TrackMatteType	= 3
+	TrackMatteLumaInverse	TrackMatteType	= 4
+)
+```
+
 # AutoOrientType object
+
+AutoOrientType is the layer's auto-orientation mode (Layer > Transform > Auto-Orient in AE). Encoded as 3 mutually-exclusive bits across ldta bytes 0x25 and 0x26 — see parse_layer.go's flag-bit doc. AE collapses the bits into one of four UI choices, which we mirror here.
+
+## Attributes
+
+### AutoOrientType.String
+
+```go
+func (a AutoOrientType) String() string
+```
+
+read-only
+
+## Constants
+
+```go
+const (
+	AutoOrientNone				AutoOrientType	= 0
+	AutoOrientAlongPath			AutoOrientType	= 1	// motion along its Position path
+	AutoOrientCameraOrPointOfInterest	AutoOrientType	= 2	// face camera / its POI
+	AutoOrientCharactersTowardCamera	AutoOrientType	= 3	// 3D text per-character billboard
+)
+```
 
 # LayerQuality object
 
+LayerQuality is the layer's render quality (ldta @0x04, uint16).
+
+## Constants
+
+```go
+const (
+	LayerQualityWireframe	LayerQuality	= 0
+	LayerQualityDraft	LayerQuality	= 1
+	LayerQualityBest	LayerQuality	= 2
+)
+```
+
 # MaskMode object
+
+MaskMode is the compositing mode for a mask (matches AE C++ SDK values).
+
+## Attributes
+
+### MaskMode.String
+
+```go
+func (m MaskMode) String() string
+```
+
+read-only
+
+## Constants
+
+```go
+const (
+	MaskModeNone		MaskMode	= 0
+	MaskModeAdd		MaskMode	= 1
+	MaskModeSubtract	MaskMode	= 2
+	MaskModeIntersect	MaskMode	= 3
+	MaskModeLighten		MaskMode	= 4
+	MaskModeDarken		MaskMode	= 5
+	MaskModeDifference	MaskMode	= 6
+)
+```
 
 # InterpType object
 
+InterpType identifies a keyframe's interpolation mode on one side (in-side or out-side). AE stores these as single-byte enums in the keyframe block at offsets 0x04 (in-interp) and 0x05 (out-interp).
+
+## Attributes
+
+### InterpType.String
+
+```go
+func (it InterpType) String() string
+```
+
+read-only
+
+## Constants
+
+```go
+const (
+	InterpLinear	InterpType	= 1
+	InterpBezier	InterpType	= 2
+	InterpHold	InterpType	= 3
+)
+```
+
 # TextJustification object
 
+TextJustification matches AE's paragraph alignment enum.
+
+## Attributes
+
+### TextJustification.String
+
+```go
+func (j TextJustification) String() string
+```
+
+String returns the human-readable name.
+
+read-only
+
+## Constants
+
+```go
+const (
+	TextJustifyLeft		TextJustification	= 0
+	TextJustifyRight	TextJustification	= 1
+	TextJustifyCenter	TextJustification	= 2
+)
+```
+
 # BitsPerChannel object
+
+BitsPerChannel represents color depth.
+
+## Attributes
+
+### BitsPerChannel.String
+
+```go
+func (b BitsPerChannel) String() string
+```
+
+read-only
+
+## Constants
+
+```go
+const (
+	BPC8	BitsPerChannel	= 0x00
+	BPC16	BitsPerChannel	= 0x01
+	BPC32	BitsPerChannel	= 0x02
+)
+```
 
 <!-- Hand-authored. Package-level const block + label table (no single owning type). -->
 

@@ -14,13 +14,390 @@ don't care about animation can ignore the distinction.
 
 # Mask object
 
+Mask represents a single vector mask on a layer. Each mask has a closed or open path made of Bezier vertices.
+
+Vertices holds the (first) path snapshot. For STATIC masks this is the only path. For ANIMATED masks (mask path keyframed in AE), every snapshot is in PathKeyframes; Vertices mirrors PathKeyframes[0].Vertices for convenience.
+
+mkif (48 bytes) decoded fields:
+
+- Mode (uint32 BE @0x04)
+- Inverted (uint8 @0x00)
+- Index (uint32 BE @0x08) — 1-based mask index on the layer
+- Color [3]uint8 (R/G/B @0x2D-0x2F; alpha at 0x2C is always 0xFF) — the colored label shown next to the mask in AE's timeline.
+
+MkifRaw is kept around for round-trip preservation of any bytes we haven't decoded.
+
+## Attributes
+
+### Mask.Name
+
+```go
+Name string
+```
+
+from omtn ("" when unnamed)
+
+read-only
+
+### Mask.Closed
+
+```go
+Closed bool
+```
+
+from shph[0x14] == 0x01
+
+read-write
+
+### Mask.Mode
+
+```go
+Mode MaskMode
+```
+
+from mkif @0x04
+
+read-write
+
+### Mask.Inverted
+
+```go
+Inverted bool
+```
+
+from mkif @0x00
+
+read-write
+
+### Mask.Locked
+
+```go
+Locked bool
+```
+
+from mkif @0x01 (== 1 when AE timeline UI lock is on)
+
+read-write
+
+### Mask.MotionBlur
+
+```go
+MotionBlur MaskMotionBlurMode
+```
+
+from mkif @0x02 (0=SameAsLayer, 2=On, 3=Off)
+
+read-only
+
+### Mask.Index
+
+```go
+Index uint32
+```
+
+from mkif @0x08 (AE internal mask ID, not always sequential)
+
+read-only
+
+### Mask.Color
+
+```go
+Color [3]uint8
+```
+
+R, G, B from mkif @0x2D-0x2F (timeline label color)
+
+read-write
+
+### Mask.Vertices
+
+```go
+Vertices []MaskVertex
+```
+
+first snapshot (or only one when static)
+
+read-only
+
+### Mask.PathKeyframes
+
+```go
+PathKeyframes []MaskPathKeyframe
+```
+
+nil when path is not animated
+
+read-only
+
+### Mask.Feather
+
+```go
+Feather [2]float64
+```
+
+Other mask-level properties, populated when their cdat values exist in the mask atom's property tree. Feather is 2D (X, Y) in pixels; Opacity is 0..1; Expansion (AE's "Mask Expansion", internally "ADBE Mask Offset") is in pixels.
+
+read-only
+
+### Mask.Opacity
+
+```go
+Opacity float64
+```
+
+default 1.0 when no cdat present
+
+read-only
+
+### Mask.Expansion
+
+```go
+Expansion float64
+```
+
+read-only
+
+### Mask.Properties
+
+```go
+Properties []*Property
+```
+
+Properties is every other tdmn+tdbs leaf inside the mask atom's property group (anything beyond Shape/Feather/Opacity/Offset, or those when keyframed). Useful for keyframed mask properties (e.g. animated feather).
+
+read-only
+
+### Mask.MkifRaw
+
+```go
+MkifRaw []byte
+```
+
+48 bytes raw mask info (preserved for write-back)
+
+read-only
+
+### Mask.ShphRaw
+
+```go
+ShphRaw []byte
+```
+
+24 bytes, path header
+
+read-only
+
+## Methods
+
+### Mask.SetClosed
+
+```go
+func (m *Mask) SetClosed(v bool) error
+```
+
+SetClosed toggles whether the (first) path is closed (shph @0x14). length-preserving (1 byte). For animated masks this only affects the first snapshot; per-keyframe closed flags aren't exposed yet.
+
+### Mask.SetColor
+
+```go
+func (m *Mask) SetColor(rgb [3]uint8) error
+```
+
+SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. AE always keeps alpha (0x2C) at 0xFF; this setter does not touch it. length-preserving (3 bytes).
+
+**Example:**
+
+```go
+var comp *aep.Composition
+if layer := comp.LayerByID(1); layer != nil {
+	for _, m := range layer.Masks {
+		_ = m.SetColor([3]uint8{0xFF, 0x88, 0x00})	// timeline label color
+	}
+}
+```
+
+### Mask.SetInverted
+
+```go
+func (m *Mask) SetInverted(v bool) error
+```
+
+SetInverted toggles the mask Inverted flag (mkif @0x00). length-preserving (1 byte).
+
+### Mask.SetLocked
+
+```go
+func (m *Mask) SetLocked(v bool) error
+```
+
+SetLocked toggles the mask's lock flag (mkif @0x01). When locked, AE refuses edits to the mask in the timeline UI; the bytes are still mutable through this library. length-preserving (1 byte).
+
+### Mask.SetMaskMotionBlur
+
+```go
+func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error
+```
+
+SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. Valid values: MaskMotionBlurSameAsLayer (0), MaskMotionBlurOn (2), MaskMotionBlurOff (3). length-preserving (1 byte).
+
+### Mask.SetMode
+
+```go
+func (m *Mask) SetMode(mode MaskMode) error
+```
+
+SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04. length-preserving (4 bytes).
+
+**Example:**
+
+```go
+var comp *aep.Composition
+layer := comp.LayerByID(1)
+if layer == nil {
+	return
+}
+for _, m := range layer.Masks {
+	_ = m.SetMode(aep.MaskModeSubtract)
+}
+```
+
 # MaskVertex object
+
+MaskVertex is one Bezier control point along a mask path. Coordinates are stored as ABSOLUTE positions (not offsets from the anchor):
+
+- Anchor: the vertex position
+- InTangent: incoming Bezier control point. For a straight incoming segment InTangent equals Anchor (control coincides with vertex → degenerate Bezier = straight line).
+- OutTangent: outgoing Bezier control point. For a straight outgoing segment OutTangent equals the NEXT vertex's Anchor (the control points sit on the line between the two anchors → straight line).
+
+So an all-straight closed polygon has InTangent==Anchor for every vertex and OutTangent==anchorOf(next vertex). Curved segments have tangents offset away from the anchors.
+
+## Attributes
+
+### MaskVertex.Anchor
+
+```go
+Anchor [2]float64
+```
+
+read-only
+
+### MaskVertex.InTangent
+
+```go
+InTangent [2]float64
+```
+
+read-only
+
+### MaskVertex.OutTangent
+
+```go
+OutTangent [2]float64
+```
+
+read-only
 
 # MaskPathKeyframe object
 
+MaskPathKeyframe is one keyframe of an animated mask path. Time is in seconds. Vertices is the full path snapshot at that time. Easing follows the same scalar (one TemporalEase per side) layout as spatial keyframes.
+
+## Attributes
+
+### MaskPathKeyframe.Time
+
+```go
+Time float64
+```
+
+read-only
+
+### MaskPathKeyframe.Vertices
+
+```go
+Vertices []MaskVertex
+```
+
+read-only
+
+### MaskPathKeyframe.InInterp
+
+```go
+InInterp InterpType
+```
+
+read-only
+
+### MaskPathKeyframe.OutInterp
+
+```go
+OutInterp InterpType
+```
+
+read-only
+
+### MaskPathKeyframe.InTemporalEase
+
+```go
+InTemporalEase TemporalEase
+```
+
+read-only
+
+### MaskPathKeyframe.OutTemporalEase
+
+```go
+OutTemporalEase TemporalEase
+```
+
+read-only
+
 # MaskMode object
 
+MaskMode is the compositing mode for a mask (matches AE C++ SDK values).
+
+## Attributes
+
+### MaskMode.String
+
+```go
+func (m MaskMode) String() string
+```
+
+read-only
+
+## Constants
+
+```go
+const (
+	MaskModeNone		MaskMode	= 0
+	MaskModeAdd		MaskMode	= 1
+	MaskModeSubtract	MaskMode	= 2
+	MaskModeIntersect	MaskMode	= 3
+	MaskModeLighten		MaskMode	= 4
+	MaskModeDarken		MaskMode	= 5
+	MaskModeDifference	MaskMode	= 6
+)
+```
+
 # MaskMotionBlurMode object
+
+MaskMotionBlurMode describes the per-mask motion-blur override. AE's MaskMotionBlur enum uses these stored values:
+
+	0 = SameAsLayer (default — mask renders blur iff layer has it)
+	2 = On (force ON regardless of layer)
+	3 = Off (force OFF regardless of layer)
+
+Stored as a single byte at mkif @0x02.
+
+## Constants
+
+```go
+const (
+	MaskMotionBlurSameAsLayer	MaskMotionBlurMode	= 0
+	MaskMotionBlurOn		MaskMotionBlurMode	= 2
+	MaskMotionBlurOff		MaskMotionBlurMode	= 3
+)
+```
 
 <!-- Hand-authored notes. -->
 

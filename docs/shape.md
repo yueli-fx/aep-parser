@@ -14,9 +14,185 @@ models, both reachable from the layer:
 
 # ShapePath object
 
+ShapePath is one custom Bezier path on a Shape Layer (the result of drawing with the Pen tool inside an "ADBE Vector Shape - Group"). It reuses MaskVertex for the per-vertex Anchor + InTangent + OutTangent triplet; the storage format is identical to mask paths.
+
+Parametric shapes (Rect, Ellipse, Star) get their own ShapePrimitive entries — see Layer.ShapePrimitives(). ShapePath is a freeform Bezier path inside a shape layer. Vertices reuse the mask-vertex model (absolute coordinates; see MaskVertex). Editing the geometry of a parsed path is not yet supported.
+
+## Attributes
+
+### ShapePath.Name
+
+```go
+Name string
+```
+
+from omtn ("" when unnamed)
+
+read-only
+
+### ShapePath.Closed
+
+```go
+Closed bool
+```
+
+true = closed path; false = open
+
+read-only
+
+### ShapePath.Vertices
+
+```go
+Vertices []MaskVertex
+```
+
+path control points (absolute coords; see MaskVertex)
+
+read-only
+
+### ShapePath.ShphRaw
+
+```go
+ShphRaw []byte
+```
+
+raw shph path-header bytes (preserved for write-back)
+
+read-only
+
 # ShapePrimitive object
 
+ShapePrimitive is one parametric primitive (Rectangle / Ellipse / Star Polygon) inside a Shape Layer's vector tree. Sub-property fields are nil when AE didn't write a cdat for them (typically happens for defaulted values like Rect Position [0, 0]).
+
+Each primitive sits inside a Vector Group; multiple primitives can coexist in one shape layer. Each `*Property` is a regular Property (same chunk references as the flat Layer.Properties entry, so SetStaticValue / Keyframe.SetX work the same way).
+
+## Attributes
+
+### ShapePrimitive.Kind
+
+```go
+Kind ShapePrimitiveKind
+```
+
+read-only
+
+### ShapePrimitive.GroupName
+
+```go
+GroupName string
+```
+
+owning Vector Group's display name ("RectGroup" etc.); empty when unnamed
+
+read-only
+
+### ShapePrimitive.Size
+
+```go
+Size *Property
+```
+
+Common fields (per-kind). Nil for primitives that don't carry the concept (e.g. Star.Size doesn't exist; Star has Inner/OuterRadius).
+
+read-only
+
+### ShapePrimitive.Position
+
+```go
+Position *Property
+```
+
+2D [x, y] — local offset within the owning group
+
+read-only
+
+### ShapePrimitive.Roundness
+
+```go
+Roundness *Property
+```
+
+Rect: 1D corner radius
+
+read-only
+
+### ShapePrimitive.StarType
+
+```go
+StarType *Property
+```
+
+Star-only fields.
+
+read-only
+
+### ShapePrimitive.Points
+
+```go
+Points *Property
+```
+
+1D integer-valued
+
+read-only
+
+### ShapePrimitive.Rotation
+
+```go
+Rotation *Property
+```
+
+1D degrees
+
+read-only
+
+### ShapePrimitive.InnerRadius
+
+```go
+InnerRadius *Property
+```
+
+read-only
+
+### ShapePrimitive.OuterRadius
+
+```go
+OuterRadius *Property
+```
+
+read-only
+
+### ShapePrimitive.InnerRoundness
+
+```go
+InnerRoundness *Property
+```
+
+AE's own internal name uses "Roundess" (typo); we expose the corrected spelling
+
+read-only
+
+### ShapePrimitive.OuterRoundness
+
+```go
+OuterRoundness *Property
+```
+
+read-only
+
 # ShapePrimitiveKind object
+
+ShapePrimitiveKind identifies which AE parametric primitive a ShapePrimitive represents. The values are stable strings rather than integers so they round-trip cleanly through JSON.
+
+## Constants
+
+```go
+const (
+	ShapePrimitiveRect	ShapePrimitiveKind	= "rect"
+	ShapePrimitiveEllipse	ShapePrimitiveKind	= "ellipse"
+	ShapePrimitiveStar	ShapePrimitiveKind	= "star"
+)
+```
 
 <!-- Hand-authored note. -->
 

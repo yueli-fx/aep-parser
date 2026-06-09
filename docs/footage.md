@@ -12,3 +12,265 @@ returns the typed source metadata (`*FileSource` / `*SolidSource` /
 `*PlaceholderSource`).
 
 # Footage object
+
+Footage represents a source media file, an AE solid, or a placeholder.
+
+Path is the one field with a length-variable writer (SetPath); it rewrites the path chunk wholesale rather than patching bytes in place. Solids and placeholders have no path.
+
+## Attributes
+
+### Footage.ID
+
+```go
+ID uint32
+```
+
+AE internal item ID
+
+read-only
+
+### Footage.Name
+
+```go
+Name string
+```
+
+display name; SetPath syncs this to the new path's basename
+
+read-only
+
+### Footage.Path
+
+```go
+Path string
+```
+
+source file path on disk; empty for solids/placeholders. Writable via SetPath
+
+read-write
+
+### Footage.Width
+
+```go
+Width uint16
+```
+
+pixel width
+
+read-only
+
+### Footage.Height
+
+```go
+Height uint16
+```
+
+pixel height
+
+read-only
+
+### Footage.FrameRate
+
+```go
+FrameRate float64
+```
+
+frames per second (video footage)
+
+read-only
+
+### Footage.Duration
+
+```go
+Duration float64
+```
+
+duration in seconds; 0 for stills
+
+read-only
+
+### Footage.IsStill
+
+```go
+IsStill bool
+```
+
+AE flagged this as a still image
+
+read-only
+
+### Footage.IsSolid
+
+```go
+IsSolid bool
+```
+
+AE solid (generated solid-color source); solids have no disk path
+
+read-only
+
+### Footage.IsPlaceholder
+
+```go
+IsPlaceholder bool
+```
+
+IsPlaceholder is true when opti tag = "Plac" (AE's placeholder footage — name + dimensions only, no source file). Mutually exclusive with IsSolid and with having a non-empty Path.
+
+read-only
+
+### Footage.Comment
+
+```go
+Comment string
+```
+
+Comment / Label — Item-level metadata (project-panel comment + timeline color chip). Populated by parseItem from the cmta + idta chunks under the Item LIST.
+
+read-write
+
+### Footage.Label
+
+```go
+Label uint8
+```
+
+read-write
+
+### Footage.AssetType
+
+```go
+func (f *Footage) AssetType() string
+```
+
+AssetType returns the footage kind as a string: "placeholder" / "solid" / "file". Mirrors py-aep's `footage.asset_type` discriminator. Footage items with neither flag default to "file".
+
+read-only
+
+### Footage.EndFrame
+
+```go
+func (f *Footage) EndFrame() int
+```
+
+EndFrame returns the footage end frame (sspc @0xB0, uint32 BE). 0 for non-sequence footage and for fixtures without a full-size sspc.
+
+read-only
+
+### Footage.File
+
+```go
+func (f *Footage) File() string
+```
+
+File returns the footage source file path. Empty string for solids and placeholders. Alias of [Footage.Path] for py-aep API parity.
+
+read-only
+
+### Footage.FootageMissing
+
+```go
+func (f *Footage) FootageMissing() bool
+```
+
+FootageMissing reports whether the footage source file was missing at the time AE saved the project (per the `footage_missing_at_save` flag in sspc @0x78). Solids and placeholders never have a file, so this is always false for them (regardless of the on-disk flag bit).
+
+read-only
+
+### Footage.HasAudio
+
+```go
+func (f *Footage) HasAudio() bool
+```
+
+HasAudio reports whether the footage has an audio stream — true when sspc's audio_sample_rate (8 byte f64 BE at @0xA0) is non-zero. Solids and placeholders never have audio.
+
+read-only
+
+### Footage.ItemID
+
+```go
+func (f *Footage) ItemID() uint32
+```
+
+ItemID returns the footage's item id (mirrors the ID field). Provided so *Footage satisfies AVItem.
+
+read-only
+
+### Footage.ItemName
+
+```go
+func (f *Footage) ItemName() string
+```
+
+ItemName returns the footage's name. Provided so *Footage satisfies AVItem.
+
+read-only
+
+### Footage.MainSource
+
+```go
+func (f *Footage) MainSource() FootageSource
+```
+
+MainSource returns the typed source metadata for this footage item. Returns *FileSource for file footage, *SolidSource for solids, *PlaceholderSource for placeholders. Returns nil if the footage was built outside the parser (no source chunks available).
+
+read-only
+
+### Footage.SspcData
+
+```go
+func (f *Footage) SspcData() []byte
+```
+
+read-only
+
+### Footage.StartFrame
+
+```go
+func (f *Footage) StartFrame() int
+```
+
+StartFrame returns the footage start frame (sspc @0xAC, uint32 BE). 0 for non-sequence footage and for fixtures without a full-size sspc.
+
+read-only
+
+## Methods
+
+### Footage.SetComment
+
+```go
+func (f *Footage) SetComment(comment string) error
+```
+
+SetComment writes a project-panel comment on the footage item. Length-variable; same semantics as Composition.SetComment.
+
+### Footage.SetLabel
+
+```go
+func (f *Footage) SetLabel(index uint8) error
+```
+
+SetLabel writes the project-panel color label index for the footage.
+
+### Footage.SetPath
+
+```go
+func (f *Footage) SetPath(newPath string) error
+```
+
+SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's "fullpath" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path.
+
+Returns an error if no writable path chunk exists for this footage (e.g. solids and placeholders never had one).
+
+**Example:**
+
+```go
+proj := aep.NewProject()
+for _, f := range proj.Footage {
+	// batch-redirect moved assets
+	if strings.HasPrefix(f.Path, `D:\old\`) {
+		_ = f.SetPath(strings.Replace(f.Path, `D:\old\`, `E:\new\`, 1))
+	}
+}
+```
