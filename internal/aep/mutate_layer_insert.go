@@ -69,7 +69,7 @@ func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 		return nil, fmt.Errorf("InsertLayer: atIdx %d out of range (have %d layers; %d is append)", atIdx, len(c.Layers), len(c.Layers))
 	}
 	if scene.LayerComp(src) == nil {
-		return nil, fmt.Errorf("InsertLayer: scene.LayerComp(src) is nil (layer detached from any comp)")
+		return nil, fmt.Errorf("InsertLayer: src.comp is nil (layer detached from any comp)")
 	}
 	if scene.LayerComp(src) == c {
 		return nil, fmt.Errorf("InsertLayer: src and dest are the same comp %q — use DuplicateLayer instead", c.Name)

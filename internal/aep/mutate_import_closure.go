@@ -107,7 +107,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		return nil, fmt.Errorf("InsertLayer: dest Project has no root Fold back-ref (built outside parser?)")
 	}
 	if srcProj == nil {
-		return nil, fmt.Errorf("InsertLayer: src layer's Project is unknown (scene.CompositionProj(scene.LayerComp(src)) == nil)")
+		return nil, fmt.Errorf("InsertLayer: src layer's Project is unknown (src.comp.proj == nil)")
 	}
 	srcPb := projectBack(srcProj)
 	if srcPb == nil || srcPb.rootFold == nil {
