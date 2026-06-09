@@ -1,7 +1,6 @@
 package aep_test
 
 import (
-	"go/ast"
 	"go/parser"
 	"go/token"
 	"path/filepath"
@@ -9,87 +8,61 @@ import (
 	"testing"
 )
 
-const rifxImportPath = "github.com/example/aep-parser/internal/rifx"
+// Package-level import-DAG guard for the M8 physical split. Pre-split this file
+// enforced per-file naming-axis rules inside the single internal/aep package;
+// post-split (internal/{rifx,codec,scene,serializer} + aep facade) the real
+// boundaries are between packages, so the guard now AST-scans each package's
+// production imports and asserts the layering:
+//
+//	rifx        (leaf)            imports none of ours
+//	codec       (pure value/byte) -X-> scene, serializer, rifx, aep
+//	scene       (runtime model)   -X-> rifx, serializer, aep   (may import codec)
+//	serializer  (chunk codec)     -X-> aep                     (imports scene+codec+rifx)
+//	aep         (facade)          imports scene+serializer+codec (top — no ban)
+//
+// scene's chunk-freeness (no rifx) is the load-bearing invariant from the V3
+// arc; it is now a package boundary rather than a per-file whitelist.
+const modBase = "github.com/example/aep-parser/internal/"
 
-func archStageOf(name string) string {
-	for _, s := range []string{"scene", "codec", "parse", "lower", "write", "back", "mutate"} {
-		if strings.HasPrefix(name, s+"_") {
-			return s
-		}
-	}
-	return ""
+// bannedImports maps each package (by dir, relative to this test's internal/aep
+// working dir) to the internal packages it must not import.
+var bannedImports = map[string][]string{
+	"../codec":      {"scene", "serializer", "rifx", "aep"},
+	"../scene":      {"rifx", "serializer", "aep"},
+	"../serializer": {"aep"},
 }
 
-// sceneRifxWhitelist names scene_ files still permitted to import rifx.
-// Empty as of the V3 M8 whitelist-clearing pass (2026-06-07): every scene_
-// file is now chunk-free, chunk-coupled logic having moved to back_/parse_/
-// write_ files. The guard strictly forbids any scene->rifx import; add an
-// entry here only to TEMPORARILY stage a new decoupling, never as a
-// permanent escape hatch.
-var sceneRifxWhitelist = map[string]bool{}
-
-// sceneTypeNames are the runtime types a codec_ file must never reference —
-// codec_ handles only value objects, byte streams, and rifx structures.
-var sceneTypeNames = map[string]bool{
-	"Project": true, "Composition": true, "Layer": true, "ShapeLayer": true,
-	"Property": true, "ShapeNode": true, "VectorGroup": true, "Footage": true,
-	"LayerTransform": true, "RectNode": true, "EllipseNode": true, "PathNode": true,
-	"FillNode": true, "StrokeNode": true, "GradientFillNode": true,
-}
-
-func archSrcFiles(t *testing.T) []string {
-	t.Helper()
-	all, err := filepath.Glob("*.go")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var out []string
-	for _, f := range all {
-		if !strings.HasSuffix(f, "_test.go") {
-			out = append(out, f)
-		}
-	}
-	return out
-}
-
-func TestArchBoundary_SceneNoRifxImport(t *testing.T) {
+func TestArchBoundary_PackageDAG(t *testing.T) {
 	fset := token.NewFileSet()
-	for _, f := range archSrcFiles(t) {
-		if archStageOf(f) != "scene" {
-			continue
-		}
-		af, err := parser.ParseFile(fset, f, nil, parser.ImportsOnly)
+	for dir, banned := range bannedImports {
+		files, err := filepath.Glob(filepath.Join(dir, "*.go"))
 		if err != nil {
-			t.Fatalf("parse %s: %v", f, err)
+			t.Fatalf("glob %s: %v", dir, err)
 		}
-		for _, imp := range af.Imports {
-			if strings.Trim(imp.Path.Value, `"`) == rifxImportPath {
-				if sceneRifxWhitelist[f] {
-					t.Logf("WHITELIST: %s imports rifx — pending removal", f)
-					continue
+		bannedSet := make(map[string]bool, len(banned))
+		for _, b := range banned {
+			bannedSet[modBase+b] = true
+		}
+		scanned := 0
+		for _, f := range files {
+			if strings.HasSuffix(f, "_test.go") {
+				continue
+			}
+			scanned++
+			af, err := parser.ParseFile(fset, f, nil, parser.ImportsOnly)
+			if err != nil {
+				t.Fatalf("parse %s: %v", f, err)
+			}
+			for _, imp := range af.Imports {
+				p := strings.Trim(imp.Path.Value, `"`)
+				if bannedSet[p] {
+					t.Errorf("%s imports %s — forbidden by package DAG (%s must not depend on it)",
+						f, p, filepath.Base(dir))
 				}
-				t.Errorf("scene_ file %s imports rifx: scene model must stay chunk-free", f)
 			}
 		}
-	}
-}
-
-func TestArchBoundary_CodecNoSceneRef(t *testing.T) {
-	fset := token.NewFileSet()
-	for _, f := range archSrcFiles(t) {
-		if archStageOf(f) != "codec" {
-			continue
+		if scanned == 0 {
+			t.Errorf("package dir %s: no source files scanned — guard would be vacuous", dir)
 		}
-		af, err := parser.ParseFile(fset, f, nil, 0)
-		if err != nil {
-			t.Fatalf("parse %s: %v", f, err)
-		}
-		ast.Inspect(af, func(n ast.Node) bool {
-			id, ok := n.(*ast.Ident)
-			if ok && sceneTypeNames[id.Name] {
-				t.Errorf("codec_ file %s references scene type %q: codec must stay scene-free", f, id.Name)
-			}
-			return true
-		})
 	}
 }

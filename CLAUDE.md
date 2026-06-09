@@ -10,14 +10,16 @@ Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/af
 io.ReadSeeker
    ↓
 internal/rifx        ── 通用 RIFX chunk 树 (磁盘字节 ↔ Chunk 树)
+internal/codec       ── 纯值/字节编解码 (无 AEP 语义、无 rifx)
+internal/scene       ── 运行时模型 (Project / Composition / Layer / ...) + writer 接口 (编译期不碰字节)
+internal/serializer  ── chunk ⇄ scene (parse / lower / write / back / mutate)，实现 scene 的 writer 接口
+internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 结构性 op / 类型别名)
    ↓
-internal/aep/*       ── AEP 语义层 (Chunk 树 → Project / Composition / Layer / ...)
-   ↓
-*aep.Project ──┬── *aep.WriteAEP(io.Writer)    二进制写回 (length-preserving)
-               └── *aep.WriteJSON(io.Writer)   JSON 单向导出（无 ReadJSON）
+*aep.Project ──┬── (p).WriteAEP(io.Writer)    二进制写回 (length-preserving)
+               └── (p).WriteJSON(io.Writer)   JSON 单向导出（无 ReadJSON）
 ```
 
-**关键边界**：`internal/rifx` 不知道 AEP 语义，只懂 RIFX 容器。`internal/aep` 不直接读字节流，只通过 `rifx.Chunk` 操作。两层职责分清，不交叉。
+**关键边界**：`internal/rifx` 不知 AEP 语义，只懂 RIFX 容器；`internal/codec` 纯值/字节、不碰 rifx；`internal/scene` 编译期不碰字节（chunk 耦合经 writer 接口倒置到 serializer 实现）；只有 `internal/serializer` 同时见 scene+codec+rifx。DAG 单向、不成环（详 #3）。
 
 ## 硬约束（不可破）
 
@@ -28,8 +30,16 @@ internal/aep/*       ── AEP 语义层 (Chunk 树 → Project / Composition /
    - **Alpha**: 显式标 alpha / deferred / 未 ship-gate 的新 API。可改可删，commit message 标 BREAKING。
    - review 时撤销新加但已知 broken 的 API 不算违反此约束。
    - 具体哪些字段属 Stable / Alpha 详 `flightdeck/plans/coverage.md`。
-3. **`internal/aep` 单 package + 文件名命名轴 + AST 边界守卫**。公共 API 是方法式签名（`(p *Project) WriteAEP` …），方法必须与类型同包，故不物理分包。内部边界靠文件名 `<stage>_<domain>` 命名轴维护，stage 前缀 = `scene_`（运行时模型/accessor）/ `codec_`（纯字节·值编解码）/ `parse_`（chunk→scene）/ `lower_`+`write_`（scene→chunk · 发射字节/length-preserving patch）/ `back_`（`*Backrefs` chunk 引用结构）/ `mutate_`（结构性 new/delete/insert/move/duplicate；`Set*` 原地 patch 归 `write_`）。守卫 `internal/aep/arch_boundary_test.go`（AST）强制 `scene_` 禁 import rifx + `codec_` 禁引用 scene 类型（chunk 耦合走 `back_*` shard）。**M8 方案② 物理分包进行中**——P2 back-ref 接口化已完、P3 拆 `internal/{scene,serializer,codec}` 进行中；本约束待 P4 落地后改写为多包描述。进度/设计详 `flightdeck/cockpit.md`。
-4. **嵌入资源目录命名复数**：`internal/aep/templates/`（非 `template/`）。Go `//go:embed` 限制资源必须在 package 同目录或子目录。
+3. **多包物理分层 `internal/{rifx,codec,scene,serializer}` + `aep` facade**（M8 方案② 物理分包已落，2026-06-09：scene 抽 `ac62b25`、serializer 抽 `a347e46`）。DAG 上依赖下、禁逆向/成环：
+   - `rifx`（叶）：通用 RIFX chunk 树，不知 AEP 语义。
+   - `codec`：纯值/字节编解码（framerate / gradient / property-stream / cdta·ldta layout / render-settings …）。禁 import scene / serializer / rifx / aep。
+   - `scene`：运行时模型 + accessor + writer 接口 + `WriteJSON`。**禁 import rifx / serializer / aep**（仅可 import codec）。chunk 耦合经 scene 内定义、serializer 实现的 `XWriter` 接口倒置（B′）——scene 编译期不碰字节。
+   - `serializer`：`parse_`（chunk→scene）/ `lower_`+`write_`（scene→chunk · 发射字节/length-preserving patch）/ `back_`（`*Backrefs` chunk 引用 + writer 实现）/ `mutate_`（结构性 new/delete/insert/move/duplicate）。import scene+codec+rifx；**禁 import aep**（防环）。包内仍以 `<stage>_<domain>` 命名轴组织。
+   - `aep`：薄 facade（`aliases`/`facade_codec` = 类型·枚举别名；`facade.go` = `Open`/`FromReader` + 结构性 op 自由函数委托 serializer；`scene_application.go` = `Application`）。**公共 API 全经此包**。
+   - 公共 R/W 方法（`(p *Project) WriteAEP` / `Set*`）= scene 类型方法，经 writer 接口委托 serializer 实现（保方法式 API）；结构性 op = facade 自由函数（`aep.DeleteLayer(comp, i)`，详 #2）。
+   - 边界守卫：`internal/aep/arch_boundary_test.go`（AST 包级 import-DAG 断言，`go test` CI 强制）+ `tmp_debug/dag_boundary`（`go list` 手动核）。
+   设计/历程详 `flightdeck/specs/2026-06-07-v3-m8-physical-split-design.md` + `cockpit.md`。
+4. **嵌入资源目录命名复数**：`internal/serializer/templates/`（非 `template/`）。Go `//go:embed` 限制资源必须在 package 同目录或子目录——M8 物理分包后随 `lower_`/`mutate_` 居 serializer。
 5. **Opaque preservation**（V2.2 教训）：parser 未解的 chunk 必须 byte-identical round-trip。scene types 携带 opaque shard，serializer 原位重发。任何 "regenerate from scene" 路径必须保留它，否则 AE 会 silent-drop。
 6. **AE 接受 gate**：任何新结构性写路径（NewX / DeleteX / DuplicateX / V3 mutation API）必须跑 AE 2020 + AE 2025 双版本 ship-gate 才算 ship。详 `incidents/ae25-acceptance-gate.md` + `checklists/re-fixture.md` § GDI 自动化。
 
