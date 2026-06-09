@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: GradientStroke R/W（最小·对称已 ship 的 GradientFill）：reader 补 G-Stroke 节点解 gradient（局部降级，对齐 G-Fill），writer 加 GradientStrokeNode 只 model gradient color/alpha stops；fill 的 lower/hydrate 本体抽共享 helper、stroke 复用；双版本 ship-gate（color+alpha，解 stops 比值，对齐 GradientFill）。stroke 几何 + ramp geometry deferred
 last_updated: 2026-06-10
 ---

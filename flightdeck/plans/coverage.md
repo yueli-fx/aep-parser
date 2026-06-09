@@ -217,7 +217,7 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 - `(g *VectorGroup) AddGradientStroke()` → `GradientStrokeNode`（`SetColorStops`/`SetAlphaStops`，复用 fill 共享 `setGradientColorStops`/`setGradientAlphaStops` free function）+ reader `hydrateGradientStrokeNode`（G-Stroke 节点局部降级，对齐 G-Fill）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_GradientStroke_AEShipGate_AE20{20,25}`：rect+gradient-stroke，3 色标 + 非默认 alpha ramp，re-save 经 read 路径解码校验 color + alpha）。
 - **复用**：磁盘编码同 G-Fill（`ADBE Vector Grad Colors` GCst→GCky→Utf8）；lower 经共享 `lowerGradientStops`、reader 经共享 `hydrateGradientStops`（第二个 gradient 节点 = DRY 阈值，fill 三处本体重构复用）。模板从 `v2_2_gradient_src.aep` 的 G-Stroke 节点提取（`v2_2_shape_gradstroke_body.bin`）。
 - **deferred**：stroke 几何（width/cap/join/miter/dashes/taper/wave，保持模板原值）+ ramp geometry（同 fill）+ 动画色标。
-- 详 `../specs/2026-06-10-gradient-stroke-write.md`（两轮外部 review 定稿）+ `incidents/gradient-fill-write-re.md`（共用 GCst 路径与 elision 教训）。
+- 详 `../archive/specs/2026-06-10-gradient-stroke-write.md`（两轮外部 review 定稿）+ `incidents/gradient-fill-write-re.md`（共用 GCst 路径与 elision 教训）。
 #### V2.2.1 子项⑭ (2026-05-31) — Gradient fill (SetGradient: color + alpha stops)
 - `(g *VectorGroup) AddGradientFill()` → `GradientFillNode`（`SetColorStops`/`SetAlphaStops` ≥2 stop + 范围校验、`Gradient()` getter）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_GradientFill_AEShipGate_AE20{20,25}`：一层 rect+gradient-fill，3 色标 red/green/blue，re-save 经 read 路径解码校验）。
 - **磁盘编码**：色标存 `ADBE Vector Grad Colors` 的 `LIST(GCst) → LIST(GCky) → Utf8` prop.map XML（version='4'）。色标数组 6 float `[off,mid,r,g,b,1]`，alpha 3 float `[off,mid,a]`，Alpha Stops 在 Color Stops 前 + 各带 Stops Size，尾 `Gradient Colors=1.0`。`EncodeGradientXML` = `ParseGradientXML` 的逆，round-trip 自洽。

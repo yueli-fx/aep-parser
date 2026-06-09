@@ -1,8 +1,8 @@
 ---
-status: active
+status: done
 summary: GradientStroke R/W 实现：提取 G-Stroke 模板 → scene(enum+node+wiring) → 抽共享 lower/hydrate helper(fill 重构) → GradientStroke lower+reader → facade → 单测 → 双版本 ship-gate(color+alpha) → aepdemo+coverage。对齐 GradientFill，8 task TDD
 last_updated: 2026-06-10
-implements: specs/2026-06-10-gradient-stroke-write.md
+implements: archive/specs/2026-06-10-gradient-stroke-write.md
 ---
 
 # GradientStroke R/W 实现计划
