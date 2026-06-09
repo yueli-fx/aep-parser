@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**P3.0 结构性 op method→free function ✅ 完成**（7 组 7 commit，全绿 + byte-identical + docgen 重生成）。**P3.1 单包内先拆 进行中**（prep step1 ✅ 005ca63）——勘察发现 plan Phase 3 原「write_*.go→serializer」反了（实为 scene-delegate）+ scene 文件仍有 concrete-backref 耦合需先解，详 §下一步 修正。每 commit 绿 + byte-identical round-trip。
+**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**P3.0 结构性 op method→free function ✅ 完成**（7 组 7 commit，全绿 + byte-identical + docgen 重生成）。**P3.1 单包内先拆 进行中**（prep step1 ✅ 005ca63；**scene_*.go concrete-backref 解耦 ✅ 65ac497**——委托隔离 agent 整块倒置 ProjectWriter+13 等接口，scene_*.go 零 concrete *Backrefs，全测试绿+byte-identical+no API change）——勘察发现 plan Phase 3 原「write_*.go→serializer」反了（实为 scene-delegate）+ scene 文件仍有 concrete-backref 耦合需先解，详 §下一步 修正。每 commit 绿 + byte-identical round-trip。
 
 ## 进行中
 
