@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-10 by claude（AddEffect W ship — 12-effect 库，AE 双版本 ship-gate 10/10，incident `add-effect-splice-re.md`）
+**Last updated**: 2026-06-10 by claude（Effect 写 API 成套 ship — AddEffect〔12-effect 库，双版本 10/10〕+ RemoveEffect + 12 typed 常量；Phase 2 已 RE 留 notes，incident `add-effect-splice-re.md`）
 **Active focus**: **结构性创建 vein（新发现的纯代码前沿）** — 之前「可达字段 ~99% 已 ship」只指**字段** R/W；**结构性创建路径**（新建图层类型、给图层加效果）此前未被识别为前沿，实则**纯代码可推 + ship-gate 自助**（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落 **AddEffect**（`aep.AddEffect`/`SupportedEffects`，12 内置效果库，splice `(tdmn,sspc)` pair 进 Effect Parade，双版本 10/10）。M8 物理分包已落。下一步见下。
 
 ## 进行中
