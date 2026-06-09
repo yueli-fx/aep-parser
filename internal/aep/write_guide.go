@@ -3,8 +3,6 @@ package aep
 import (
 	"encoding/binary"
 	"math"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
 
 // write_guide.go — length-preserving setters for existing composition guides.
@@ -26,31 +24,19 @@ import (
 // Project.WriteAEP; no-op for comps/guides built outside the parser.
 func (p *Project) syncGuides() {
 	for _, c := range p.Compositions {
-		if len(c.Guides) == 0 {
+		if len(c.Guides) == 0 || c.back == nil {
 			continue
 		}
-		cb, ok := c.back.(*compositionBackrefs)
-		if !ok || cb.itemList == nil {
-			continue
-		}
-		gide := cb.itemList.FindFirstList(rifx.IDGide)
-		if gide == nil {
-			continue
-		}
-		list := gide.FindFirstList(rifx.IDkfl)
-		if list == nil {
-			continue
-		}
-		ldat := list.FindFirst(rifx.IDLdat)
+		ldat := c.back.guideLdatData()
 		if ldat == nil {
 			continue
 		}
 		for i, g := range c.Guides {
 			off := i * guideItemSize
-			if len(g.block) != guideItemSize || off+guideItemSize > len(ldat.Data) {
+			if len(g.block) != guideItemSize || off+guideItemSize > len(ldat) {
 				continue
 			}
-			copy(ldat.Data[off:off+guideItemSize], g.block)
+			copy(ldat[off:off+guideItemSize], g.block)
 		}
 	}
 }

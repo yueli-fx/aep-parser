@@ -85,6 +85,30 @@ func (b *compositionBackrefs) prdaData() []byte {
 	return b.prdaChunk.Data
 }
 
+// guideLdatData returns the live ldat byte slice under the comp's Item-level
+// Gide → list container — the single source of truth for ruler guides.
+// syncGuides copies each guide's scene-owned 16-byte block back into this slice
+// (paired by index) at WriteAEP time. Returns nil when the comp has no guides
+// container (built outside the parser, or no guides).
+func (b *compositionBackrefs) guideLdatData() []byte {
+	if b == nil || b.itemList == nil {
+		return nil
+	}
+	gide := b.itemList.FindFirstList(rifx.IDGide)
+	if gide == nil {
+		return nil
+	}
+	list := gide.FindFirstList(rifx.IDkfl)
+	if list == nil {
+		return nil
+	}
+	ldat := list.FindFirst(rifx.IDLdat)
+	if ldat == nil {
+		return nil
+	}
+	return ldat.Data
+}
+
 func (b *compositionBackrefs) SetBGColor(rgb [3]uint8) error {
 	if b.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", b.compName)

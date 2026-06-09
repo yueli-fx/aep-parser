@@ -70,6 +70,12 @@ func (b *projectBackrefs) xmpPacket() string {
 	return string(b.root.Trailing)
 }
 
+// chunkIDHead is the root-level "head" chunk ChunkID. It holds project-level
+// counters (max item ID + a save-sequence counter) that AE 25 validates on
+// open — when a counter is below the actual item IDs, AE reports "文件数据丢失"
+// (file data missing), observed in practice.
+var chunkIDHead = rifx.ChunkID{'h', 'e', 'a', 'd'}
+
 func (b *projectBackrefs) revision() uint16 {
 	if b == nil || b.root == nil {
 		return 0
@@ -163,6 +169,28 @@ func (b *projectBackrefs) cmsJSON() ([]byte, bool) {
 		return nil, false
 	}
 	return b.cmsUtf8.Data, true
+}
+
+func (b *projectBackrefs) linearBlending() bool {
+	return b.rootChunkPresent(rifx.IDLnrb)
+}
+
+func (b *projectBackrefs) linearizeWorkingSpace() bool {
+	return b.rootChunkPresent(rifx.IDLnrp)
+}
+
+// rootChunkPresent reports whether root has a direct child chunk
+// (not LIST) with the given id.
+func (b *projectBackrefs) rootChunkPresent(id rifx.ChunkID) bool {
+	if b == nil || b.root == nil {
+		return false
+	}
+	for _, c := range b.root.Children {
+		if !c.IsList() && c.ID == id {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *projectBackrefs) SetCompensateForSceneReferredProfiles(v bool) error {
@@ -402,6 +430,28 @@ func (b *projectBackrefs) SetLinearizeWorkingSpace(v bool) error {
 // Append-to-end likewise causes "file data missing". We insert right
 // after the existing cpid (or fall back to before dwga, or append if
 // neither anchor exists).
+// flagChunkInsertPosition returns the index where a new lnrb / lnrp
+// flag chunk should be inserted on root. Per RE: after `cpid`,
+// otherwise before `dwga`, otherwise at end.
+func flagChunkInsertPosition(root *rifx.Chunk) int {
+	for i, c := range root.Children {
+		if !c.IsList() && c.ID == chunkIDCpid {
+			return i + 1
+		}
+	}
+	for i, c := range root.Children {
+		if !c.IsList() && c.ID == rifx.IDDwga {
+			return i
+		}
+	}
+	return len(root.Children)
+}
+
+// chunkIDCpid is the root-level color-profile id chunk, used as the
+// insertion anchor for lnrb / lnrp flag chunks. Not exposed in rifx
+// since no other code path needs it.
+var chunkIDCpid = rifx.ChunkID{'c', 'p', 'i', 'd'}
+
 func (b *projectBackrefs) setRootFlagChunk(id rifx.ChunkID, on bool) error {
 	if b.root == nil {
 		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", id)

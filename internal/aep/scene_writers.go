@@ -56,6 +56,8 @@ type ProjectWriter interface {
 	nnhdByte(off int) (byte, bool)
 	nnhdUint16(off int) (uint16, bool)
 	cmsJSON() ([]byte, bool)
+	linearBlending() bool
+	linearizeWorkingSpace() bool
 }
 
 // CompositionWriter is the writer interface for Composition's back-ref operations.
@@ -89,6 +91,11 @@ type CompositionWriter interface {
 	// the concrete back-ref or touch rifx.Chunk.
 	cdtaData() []byte
 	prdaData() []byte
+
+	// guideLdatData exposes the live guide ldat byte slice so syncGuides copies
+	// each guide's scene-owned block back into it without naming the concrete
+	// back-ref or touching rifx.Chunk.
+	guideLdatData() []byte
 }
 
 // LayerWriter is the writer interface for Layer's back-ref operations.

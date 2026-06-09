@@ -7,14 +7,7 @@ import (
 	"math"
 	"path/filepath"
 	"strings"
-
-	"github.com/example/aep-parser/internal/rifx"
 )
-
-// chunkIDHead 是 root-level "head" chunk 的 ChunkID。包含 project 级 counter
-// (max item ID + a save-sequence counter)，AE 25 打开时校验 —— 若 counter
-// 低于实际 item IDs，AE 报 "文件数据丢失"（实测）。
-var chunkIDHead = rifx.ChunkID{'h', 'e', 'a', 'd'}
 
 // WriteAEP serializes the (possibly mutated) project back to RIFX binary
 // form. Sizes are recomputed from the current chunk data, so mutations
