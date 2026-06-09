@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-09 by claude（M8 分包完成归档 + 收口会话：incidents 审计 + docgen 多包修复；下一步=测试分散）
+**Last updated**: 2026-06-09 by claude（收口会话：incidents 审计 + docgen 多包修复 + docs/ 全自动化（删纯人写页）+ 根/docs README 去过时；测试分散决议 B=不分散）
 **Active focus**: **V3 arc 实质收尾** — M8 物理分包完成（`internal/{rifx,codec,scene,serializer}` + `aep` 薄 facade，已归档 `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`）。**可达字段覆盖 ~99% 已 ship**（M1-M8 框架基本实现，见 `plans/coverage.md` 末）；剩余前沿均 fixture/RE-gated 或架构不可达。**本会话收口**：incidents 审计（0 过期 + 5 路径 refresh，`ba3b40b`）、**docgen 多包修复**（修 stage-1 起静默空类型文档的回归，`1bc4ad4`，恢复 +11.8k 行；教训见 `incidents/docgen-alias-blindspot-false-green.md`）。**当前无 active 大 plan**，下一步见下。
 
 ## 进行中
@@ -17,9 +17,11 @@
 
 ## 下一步
 
-1. **测试分散到子包（用户 2026-06-09 批准，待做）**：~114 个黑盒 `aep_test` 集中在 `internal/aep`（源仅 4 facade 文件）。按 Go 惯例分散——纯子系统行为测试 → `internal/serializer`/`internal/scene` 包目录，跨层端到端 → 留 aep facade。**注意/未决**：黑盒测试多为跨层（open→读模型→mutate→写回），归单包分类模糊（架构上跨层端到端本就该留 facade）；含 `aep.`→子包名 机械替换（=上次 string-leak 同类风险，按谨慎流程 + 全验做）。动手前宜先定分类规则。
-2. **immediate follow-up（非阻塞）**：serializer 结构性 op 自由函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim 为简短内部注释。
-3. **V3 剩余前沿（均 fixture/RE-gated，需用户提供 fixture 或新发现才动）**：Layr Transform 3D 通道（需 3D layer 支持，backlog 顶）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建 …）· ValueText（schema-db 依赖）。详 `plans/coverage.md` § 暂搁/不可达。
+1. **测试分散 = 已决 B（不分散，2026-06-09）**：黑盒端到端测试（114 个 `aep_test`）按 Go 惯例留 `internal/aep` facade（测公开 API、天然跨层）；纯子系统白盒单测在 M8 时已随迁 serializer/scene。**无后续动作**。
+2. **docs/ = 已全自动（2026-06-09，`4bff35a`）**：删两个纯人写页（README.md + json.md）；docs/ 仅余 docgen 生成的 11 类型 .md + docs_index.json + docgen.json + `_includes/`（管线源）。docgen 多包扫描已修（`1bc4ad4`）。根 README + docs link 已去过时（`5e14c13`/`3c99306`）。
+3. **immediate follow-up（非阻塞）**：serializer 结构性 op 自由函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim 为简短内部注释。
+4. **V3 剩余前沿（均 fixture/RE-gated，需用户提供 fixture 或新发现才动）**：Layr Transform 3D 通道（需 3D layer 支持，backlog 顶）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建 …）· ValueText（schema-db 依赖）。详 `plans/coverage.md` § 暂搁/不可达。
+5. **（offer，未决）根 README 全量功能刷新**：V1 时代 support 表缺大批 V2/V3 功能（不是错，是缺）；要做另开一轮。
 
 ## Backlog（单条候选）
 
