@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
 **Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**下一步 = P3 git mv 物理分包**。每 commit 绿 + byte-identical round-trip。
+**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**P3.0 结构性 op method→free function ✅ 完成**（7 组 7 commit，全绿 + byte-identical + docgen 重生成）。**下一步 = P3.1 git mv 物理分包**。每 commit 绿 + byte-identical round-trip。
 
 ## 进行中
 
@@ -28,11 +28,18 @@
 
 **P3 关键决议**（2026-06-09 用户拍板）：「mechanical git mv」假设证伪——结构性 op 是 scene 方法但需 serializer 访问 backref（跨包=import 环），且多为 Stable ship-gated，spec §2.4/§F D-U3 的「改 free function」会破 Stable 签名。用户**批准破原 #2 约束 + 写新约束**（commit 2ef731e：CLAUDE.md #2 新增「结构性 op 语义稳定、调用形态可随分包改 facade 自由函数，标 BREAKING 不算违约」）。→ 采 **Path B**（结构性 op → serializer 自由函数 + facade re-export）。
 
-1. **P3.0（新前置）：结构性 op method→free function**（单包内先转，保绿 + byte-identical，每类型独立 commit，BREAKING 标注 + 更 commits.md API 表）。**进行中**：
-   - ✅ `RenderQueue.{AddItem,RemoveItem}`（commit c6eb51b，**模式已验证**：receiver→首参，body 不变，7 call-site 改 `aep.X(rq,…)`，绿+byte-identical）。
-   - **待转**：`Composition.{NewComposition/NewShapeLayer/DeleteLayer/MoveLayer/InsertLayer/DuplicateLayer/AddMarker}`、`Marker.Remove`、`Property.{InsertKeyframe,DeleteKeyframe,SetDimensionsSeparated}`、`AEPropertyGroup.{Remove,MoveTo}`、`Layer.{MoveToBeginning/End/After/Before,ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`、`DuplicateComposition`。
-   - 转后 scene_*.go 再无结构性方法引用 concrete backref → P3.1-3.3 git-mv 变机械。**注**：纯图构造（VectorGroup.AddRect 等，detached 无 chunk）留 scene。**命名**：bare 名作 package func（`aep.DeleteLayer(comp,i)`）；过于泛化的（Marker.Remove / PropertyGroup.MoveTo）转时酌情加限定（如 `RemoveMarker`/`MovePropertyGroup`），保「效果好」。
-2. **P3.1-3.3** git mv 物理拆包：`scene_*.go`→`internal/scene`、`{parse_,lower_,write_,back_,mutate_}*.go`→`internal/serializer`、`internal/aep` 薄 facade（类型别名 + Open/FromReader + 全部结构性自由函数 re-export）。处理 export 可见性（AttachWriter plumbing 导出）、init/global-var 顺序、DAG 断言。OM/RQ/PropertyGroup concrete back 跨包后随 mutate_/back_ 迁 serializer（同包，无需接口）。
+1. **P3.0：结构性 op method→free function ✅ 完成**（2026-06-09，单包内转，每组独立 commit，BREAKING + docgen 重生成，全程绿 + byte-identical round-trip）。7 组 landed：
+   - ✅ `RenderQueue.{AddItem,RemoveItem}`（c6eb51b，模式验证）。
+   - ✅ Composition layer-list `{DeleteLayer,MoveLayer,InsertLayer,DuplicateLayer,NewShapeLayer}`（5915d51）。
+   - ✅ Layer 自定位 `{MoveToBeginning,MoveToEnd,MoveAfter,MoveBefore}`（bd8beee；委托 MoveLayer=serializer，故必转）。
+   - ✅ Composition 生命周期 `{NewComposition,DuplicateComposition}`（14f29ac）。
+   - ✅ Marker `{AddMarker, Remove→RemoveMarker}`（75e1939）。
+   - ✅ Property 结构性 `{InsertKeyframe,DeleteKeyframe,SetDimensionsSeparated}` + `AEPropertyGroup.{Remove→RemovePropertyGroup, MoveTo→MovePropertyGroup, Duplicate→DuplicatePropertyGroup}`（c666f30）。
+   - **判据（本次确立，比原「结构性就转」更精准）**：方法→serializer 自由函数 **当且仅当它调 serializer-only 代码**（结构性自由函数 / 建 chunk / 碰 concrete backref）。scene→scene 纯委托者**留方法**（scene 内合法）。
+   - **偏离 1**：`Layer.{ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`（原 待转 列含之）**未转**——三者纯委托到 Set*（scene 方法，经 writer 接口，不碰 concrete backref）→ 留方法。`ClearTrackMatteLayer` 虽在 write_layer.go，但与同文件 Set* 方法一样 P3.1 随迁 scene。转之纯属多余 BREAKING。
+   - **偏离 2**：`AEPropertyGroup.Duplicate` 原 待转 列**漏列**，与 Remove/MoveTo 同族（INDEXED_GROUP chunk-pair splice）→ 本次补转，否则 P3.1 git-mv `mutate_property_structural.go` 会断。
+   - **完成验证**：scene_*.go 零调用任何结构性自由函数（grep 证）+ arch boundary guard（scene⊥rifx、codec⊥scene）绿 + `go vet ./...` + `go test ./...` 全绿。纯图构造（VectorGroup.AddRect 等 detached）留 scene。
+2. **P3.1-3.3（← 下一步）** git mv 物理拆包：`scene_*.go`→`internal/scene`、`{parse_,lower_,write_,back_,mutate_}*.go`→`internal/serializer`、`internal/aep` 薄 facade（类型别名 + Open/FromReader + 全部结构性自由函数 re-export）。处理 export 可见性（AttachWriter plumbing 导出）、init/global-var 顺序、DAG 断言。OM/RQ/PropertyGroup concrete back 跨包后随 mutate_/back_ 迁 serializer（同包，无需接口）。**关键修正（P3.0 副产物）**：`write_*.go` 等 serializer-bound 文件里**留存的 scene 类型方法**（全部 `Set*` core R/W + 偏离 1 的 `ReplaceSource/RemoveTrackMatte/ClearTrackMatteLayer` 委托者 + Layer 的 `locateInComp/locatePair` 等 unexported helper）**不能随文件 git-mv 进 serializer**（方法不能跨包定义在 scene 类型上——即驱动 Path B 的同一 Go 墙）→ 这些方法须**先析出到 scene_ 文件**，仅 chunk-building/concrete-backref 函数体（P3.0 已转成的自由函数）进 serializer。故 write_*.go 的 git-mv 非整体搬，需按「方法 vs 自由函数/接口实现」二分。
 3. **P4** 下游切换 + 退役 AST 守卫（scene⊥rifx 改编译期保证）+ CLAUDE.md #3 多包描述 + 双版本 ship-gate 终验。
 4. docgen 次要 follow-on（非阻塞）。
 
