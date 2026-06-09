@@ -64,5 +64,5 @@ for _, c := range p.Compositions {
 
 - 修复 commit: 2026-05-28 V3 Phase 5B（同 commit 一起 ship）
 - Phase 5B plan: [`../plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../landed/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md)
-- 受影响代码: `internal/aep/parse.go::initDerived`
+- 受影响代码: `internal/serializer/parse.go::initDerived`
 - 受影响 invariant: Inv-9 (monotonic ID alloc, no reuse) in `incidents/ae25-acceptance-gate.md`

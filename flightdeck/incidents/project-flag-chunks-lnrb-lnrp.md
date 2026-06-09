@@ -40,7 +40,7 @@ RE 验证：`tmp_debug/dump_root_compare/` 对 `re_linear_blending_on.aep`（AE 
 
 ## How to fix (locked in)
 
-`internal/aep/project_settings.go::setRootFlagChunk`:
+`internal/serializer/back_project.go::setRootFlagChunk`:
 
 ```go
 if on && idx < 0 {
@@ -68,7 +68,7 @@ Ship gate validated: bisect 8/8 PASS, full modified.aep ship_gate_1d.done shows 
 
 | 文件 | 角色 |
 |---|---|
-| `internal/aep/project_settings.go` | `setRootFlagChunk` + `flagChunkInsertPosition` + `chunkIDCpid` 锚 |
+| `internal/serializer/back_project.go` | `setRootFlagChunk` + `flagChunkInsertPosition` + `chunkIDCpid` 锚 |
 | `tmp_debug/ship_gate_1d_bisect/` | per-setter 隔离 ship-gate runner (8 个 variant) |
 | `tmp_debug/dump_root_compare/` | root chunk children 序列 byte-diff 工具 |
 | `test_data/re_linear_blending.jsx` | AE 自己写 lnrb=true 的 RE fixture driver |

@@ -33,6 +33,6 @@ V2.2 的 AE-2020 shape ship-gate（`TestV2_2_AEShipGate_AE2020`）**一直是 `t
 
 ## 修复
 
-- `capability_matrix.go`: `AECapabilities.LdtaSize`；`Capabilities(target)` 按版本填 160/164。
-- `lower_layer.go buildLdtaBytes`: `size := ctx.capabilities.LdtaSize`（0 回退 164）。
+- `internal/scene/scene_capability.go`: `AECapabilities.LdtaSize`；`Capabilities(target)` 按版本填 160/164（`LdtaSize` 常量值现居 `internal/codec/ldta_layout.go`）。
+- `internal/serializer/lower_layer.go buildLdtaBytes`: `size := ctx.capabilities.LdtaSize`（0 回退 164）。
 - 测试：`TestLowerShapeLayer_LdtaSizeByTarget`（单测，三 target）+ `TestV2_2_Ellipse_AEShipGate_AE2020/2025`（集成，双版本 PASS）。

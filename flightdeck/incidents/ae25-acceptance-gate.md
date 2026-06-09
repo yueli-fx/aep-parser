@@ -63,7 +63,7 @@ cdta 总 204 字节，但 parser 历史只读 ~16 个关键字段（W/H/fps/dura
 **Fixture sources**:
 - `test_data/re_tickrate.aep` RE_fps_* — 每个 canonical fps 的 cdta 字节
 - `test_data/re_cdta_probe.aep` A_baseline (29.97, 10s) — masterTicks 公式实证
-- `internal/aep/templates/2020_dummy_comp.aep` — 默认 30fps 12s seed
+- `internal/serializer/templates/2020_dummy_comp.aep` — 默认 30fps 12s seed
 
 ## Stage 2 详: head counters
 
@@ -138,11 +138,11 @@ JSX 末尾写 `.done` marker；Go 端轮询等。
 
 | 文件 | 角色 |
 |---|---|
-| `internal/aep/cdta_layout.go` | 7 个 offset 常量（Stage 1 + 4） |
-| `internal/aep/framerate_canonical.go` | `fpsTiming` + `canonicalFpsTiming` + `lookupFpsTiming` |
-| `internal/aep/new_composition.go` | `compTmpl` (single seed) + builder logic |
-| `internal/aep/write.go` | `syncHeadCounters` (Stage 2) |
-| `internal/aep/templates/2020_dummy_comp.aep` | 唯一 canonical seed |
+| `internal/codec/cdta_layout.go` | 7 个 offset 常量（Stage 1 + 4） |
+| `internal/codec/framerate.go` | `fpsTiming` + `canonicalFpsTiming` + `lookupFpsTiming` |
+| `internal/serializer/mutate_composition_new.go` | `compTmpl` (single seed) + builder logic |
+| `internal/serializer/write.go` | `syncHeadCounters` (Stage 2) |
+| `internal/serializer/templates/2020_dummy_comp.aep` | 唯一 canonical seed |
 | `tmp_debug/gen_dummy_comp.jsx` | JSX 工具：让任意 AE 版本写一个 dummy_comp |
 | `test_data/verify_v2_1.jsx` | AE-side ship gate driver |
 | `internal/aep/new_composition_test.go` | `runAEShipGate` + `TestV2_1_AEShipGate_AE2020/2025` |
