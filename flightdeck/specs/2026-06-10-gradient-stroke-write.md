@@ -88,7 +88,7 @@ write: VectorGroup.AddGradientStroke() → GradientStrokeNode{gradient}
 - `TestV2_2_GradientStroke_AEShipGate_AE2020` / `_AE2025`。同一测试函数内完整流程：构造 NewProject → NewComposition → NewShapeLayer → AddRect → AddGradientStroke → WriteAEP → `runAeRunShipGate` 自驱 `scripts/ae_run.ps1`（AE 打开 + JSX resave）→ `aep.Open(resaved)` 二次解析。resaved 路径经 JSX args JSON 约定（同 GradientFill）。
 - **必须同时设非默认 color stops（红/绿/蓝 3 stop）+ 非默认 alpha stops**（如 [0→1.0, 1→0.3] ramp）—— 否则 alpha 写路径未验证。
 - **验证方式 = 解 stops 比值（对齐 GradientFill，非整文件 byte-compare）**：`aep.Open(resaved)` 解出 `GradientStrokeNode` 的 color + alpha stops，与写入值比（RGB/alpha 误差 < 0.02）。**不做整文件 byte-identical 断言** —— AE resave 会规范化 chunk，整文件比较不可靠；opaque preservation 由 lower 层「克隆模板只覆写 gradient slot」在实现层保证（铁律 #5），非 ship-gate 断言对象。
-- JSX `test_data/verify_v2_2_gradstroke.jsx`（对称 `test_data/verify_v2_2_gradient.jsx`，复用其 args JSON 参数化）：打开 .aep 找 `ADBE Vector Graphic - G-Stroke` 确认 AE 未丢弃 + **顺手验 color stop 数 = 3**（更早暴露 AE 打开时的静默回退），resave。
+- JSX `test_data/verify_v2_2_gradstroke.jsx`（对称 `test_data/verify_v2_2_gradient.jsx`，复用其 args JSON 参数化）：打开 .aep 找 `ADBE Vector Graphic - G-Stroke` 确认 AE 未丢弃，resave。**stop 数据正确性由 Go 端 readback 验**——ExtendScript 读 gradient stops 不可靠，故 JSX 只验节点存在、不在 JSX 断言 stop 数；AE 静默回退（丢自定义 stops、退回默认）会让 Go readback 的 len/值校验失败而被捕获（实现时的技术决定，偏离初稿的「JSX 验 stop 数」）。
 - agent 自助跑 `ae_run.ps1`（AE 2020 + 2025 双开）。
 
 **复用已验证机制（不重验）**：length-variable XML overwrite（stop 数变化时 LIST 自动 reflow）+ 非默认 stops 规避 AE elision trap —— 已在 GradientFill ship-gate 验证，G-Stroke 经共享 `lowerGradientStops` 复用，本 spec 只验 G-Stroke 特定的 match-name / 模板 / reader。
@@ -123,7 +123,7 @@ write: VectorGroup.AddGradientStroke() → GradientStrokeNode{gradient}
 4. serializer/lower：先把 fill 的 lower/hydrate 本体抽成共享 `lowerGradientStops` / `hydrateGradientStops`、fill 改调它；再加 match-name + 模板 embed/clone（独立 once）+ lower switch + `lowerGradientStrokeNode`。
 5. facade：暴露 `AddGradientStroke`。
 6. 单测（lower byte 结构 + parse round-trip）+ `go vet ./... && go test ./...`；fill 既有测试须仍绿（守护重构）。
-7. ship-gate test（color + alpha + 解 stops 比值 + JSX stop-count）+ JSX；自助跑 AE 2020 + 2025。
+7. ship-gate test（color + alpha + Go readback 解 stops 比值）+ JSX（验节点存在）；自助跑 AE 2020 + 2025。
 8. 验收清单逐项过（含 aepdemo + coverage 子项⑮）；commit。
 
 ## Deferred（后续 follow-on）

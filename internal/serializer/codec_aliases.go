@@ -26,7 +26,7 @@ func ParseGradientXML(xmlText string) *Gradient { return codec.ParseGradientXML(
 // — mirrors an AE 25.6-saved gradient fill verbatim so AE re-parses it without
 // complaint.
 //
-// Exposed so the serializer (lowerGradientFillNode) and tests can produce the
+// Exposed so the serializer (lowerGradientFillNode / lowerGradientStrokeNode) and tests can produce the
 // Utf8 chunk payload. The output round-trips through ParseGradientXML.
 func EncodeGradientXML(g *Gradient) string { return codec.EncodeGradientXML(g) }
 

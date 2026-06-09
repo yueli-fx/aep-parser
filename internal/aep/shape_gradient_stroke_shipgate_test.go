@@ -122,10 +122,10 @@ func runV2_2GradientStrokeShipGate(t *testing.T, target aep.AETarget, aeExe stri
 			}
 		}
 	}
-	if n := len(grad.AlphaStops); n >= 2 {
-		if a := grad.AlphaStops[n-1].Alpha; abs(a-0.3) > 0.02 {
-			t.Errorf("resaved last alpha = %g, want ~0.3", a)
-		}
+	if n := len(grad.AlphaStops); n != 2 {
+		t.Fatalf("resaved alpha stops = %d, want 2", n)
+	} else if a := grad.AlphaStops[n-1].Alpha; abs(a-0.3) > 0.02 {
+		t.Errorf("resaved last alpha = %g, want ~0.3", a)
 	}
 }
 
