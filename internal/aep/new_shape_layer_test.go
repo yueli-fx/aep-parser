@@ -9,7 +9,7 @@ import (
 
 func TestNewShapeLayer_BasicCreation(t *testing.T) {
 	p := aep.NewProject()
-	c, err := p.NewComposition("Main", 1920, 1080, 30, 10)
+	c, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func TestNewShapeLayer_BasicCreation(t *testing.T) {
 // user Layr from comp.layers when this is absent (variant #2 bisect proof).
 func TestNewShapeLayer_EmitsEwstSibling(t *testing.T) {
 	p := aep.NewProject()
-	c, err := p.NewComposition("Main", 1920, 1080, 30, 10)
+	c, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestNewShapeLayer_EmitsEwstSibling(t *testing.T) {
 
 func TestNewShapeLayer_EmptyName_Error(t *testing.T) {
 	p := aep.NewProject()
-	c, err := p.NewComposition("Main", 1920, 1080, 30, 10)
+	c, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestNewShapeLayer_EmptyName_Error(t *testing.T) {
 // (RE: multi-layer-silent-drop). Two NewShapeLayer calls must each emit them.
 func TestNewShapeLayer_MultiLayer_EmitsLayerSiblings(t *testing.T) {
 	p := aep.NewProject(aep.TargetAE2025)
-	c, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	c, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatal(err)
 	}

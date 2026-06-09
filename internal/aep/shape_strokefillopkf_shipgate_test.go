@@ -32,7 +32,7 @@ func runV2_2RectSubKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_rectsubkf_args.json`
 
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
@@ -123,7 +123,7 @@ func runV2_2StrokeKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_strokekf_args.json`
 
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
@@ -211,7 +211,7 @@ func runV2_2FillOpKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_fillopkf_args.json`
 
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

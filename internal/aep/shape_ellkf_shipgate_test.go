@@ -33,7 +33,7 @@ func runV2_2EllKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_ellkf_args.json`
 
 	p := aep.NewProject(target)
-	comp, _ := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, _ := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	l, _ := aep.NewShapeLayer(comp, "EllAnim")
 	ell, _ := l.RootGroup().AddEllipse()
 	_ = ell.Size().AddKeyframeLinear(0, [2]float64{50, 50})

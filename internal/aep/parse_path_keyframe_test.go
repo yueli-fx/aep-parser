@@ -96,7 +96,7 @@ func approxXY(a, b [2]float64) bool {
 // lossless. (findLayerByName lives in shape_graph_roundtrip_test.go.)
 func TestPathKeyframe_WriteRoundTrip(t *testing.T) {
 	p := aep.NewProject()
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

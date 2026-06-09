@@ -39,7 +39,7 @@ func TestStrokeDashes_Defaults(t *testing.T) {
 
 func TestV2_2_StrokeDashes_Roundtrip(t *testing.T) {
 	p := aep.NewProject()
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestV2_2_StrokeDashes_Roundtrip(t *testing.T) {
 // Dash/Gap slots and hydrate does not spuriously flag enabled.
 func TestV2_2_StrokeDashes_DisabledStaysSolid(t *testing.T) {
 	p := aep.NewProject()
-	comp, _ := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, _ := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	l, _ := aep.NewShapeLayer(comp, "Solid")
 	rect, _ := l.RootGroup().AddRect()
 	_ = rect.SetSize([2]float64{200, 100})

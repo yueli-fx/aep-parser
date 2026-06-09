@@ -35,7 +35,7 @@ func runV2_2RectKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_rectkf_args.json`
 
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

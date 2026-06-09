@@ -55,7 +55,7 @@ func TestStrokeNode_LineCapJoinMiter_DefaultsAndSetters(t *testing.T) {
 
 func TestV2_2_StrokeLineCapJoinMiter_Roundtrip(t *testing.T) {
 	p := aep.NewProject()
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

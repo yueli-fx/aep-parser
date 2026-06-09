@@ -3755,13 +3755,6 @@
       "rw": "read-only",
       "summary": "DisplayStartFrame returns the display start frame (0 or 1). This is derived from frames_count_type % 2. Returns 0 when nnhd chunk is absent."
     },
-    "Project.DuplicateComposition": {
-      "kind": "method",
-      "file": "project.md",
-      "anchor": "#projectduplicatecomposition",
-      "signature": "func (p *Project) DuplicateComposition(src *Composition, name string) (*Composition, error)",
-      "summary": "DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. The dup contains a fresh copy of every layer (new layer IDs), with intra-comp parent + track-matte refs remapped to the dup's own layers; layer SOURCES (footage / precomp items) are shared verbatim, not duplicated — matching AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition."
-    },
     "Project.EffectNames": {
       "kind": "getter",
       "file": "project.md",
@@ -3886,13 +3879,6 @@
       "anchor": "#projectmarshaljson",
       "signature": "func (p *Project) MarshalJSON() ([]byte, error)",
       "summary": "MarshalJSON serializes the Project as JSON."
-    },
-    "Project.NewComposition": {
-      "kind": "method",
-      "file": "project.md",
-      "anchor": "#projectnewcomposition",
-      "signature": "func (p *Project) NewComposition( name string, width, height uint16, frameRate, duration float64, ) (*Composition, error)",
-      "summary": "NewComposition adds an empty composition to the project's root folder."
     },
     "Project.OcioConfigurationFile": {
       "kind": "getter",

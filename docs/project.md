@@ -359,28 +359,6 @@ func (p *Project) CompositionByName(name string) *Composition
 
 CompositionByName returns the first composition whose Name matches the given string, or nil if none does. Matching is exact (case-sensitive). Comp names aren't guaranteed unique in AE; use CompositionByID when you need precise identity.
 
-### Project.DuplicateComposition
-
-```go
-func (p *Project) DuplicateComposition(src *Composition, name string) (*Composition, error)
-```
-
-DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. The dup contains a fresh copy of every layer (new layer IDs), with intra-comp parent + track-matte refs remapped to the dup's own layers; layer SOURCES (footage / precomp items) are shared verbatim, not duplicated — matching AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition.
-
-Clone semantics (same-Project comp only):
-
-- new comp item ID = p.allocItemID()             (idta @0x10)
-- per layer: new layer ID = p.allocItemID()      (ldta @0x00)
-- intra-comp ParentID @0x84 / TrackMatteLayerID @0xA0 remapped via srcLayerID→dupLayerID map (matte guarded by len(ldta) >= 0xA4)
-- SourceID @0x28 verbatim (shared Footage/Comp items)
-- comp name = caller-supplied (length-variable Utf8 rewrite)
-
-Refuse-cases (R1..R7): nil src, project backref missing, src itemList backref missing, src not in this Project, empty name, src Item not found in rootFold, layer ldta too short for ParentID write.
-
-Atomic mutation: snapshot rootFold.Children + p.Compositions + p.nextItemID + len(p.Warnings); on any new parser warning during the re-parse, roll all back including the nextItemID bump.
-
-Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the Go-emitted file and the dup's intra-comp parent ref resolves to the dup's own layer (remap confirmed by AE), with sources shared with the original.
-
 ### Project.FootageByName
 
 ```go
@@ -404,29 +382,6 @@ func (p *Project) MarshalJSON() ([]byte, error)
 ```
 
 MarshalJSON serializes the Project as JSON.
-
-### Project.NewComposition
-
-```go
-func (p *Project) NewComposition( name string, width, height uint16, frameRate, duration float64, ) (*Composition, error)
-```
-
-NewComposition adds an empty composition to the project's root folder.
-
-Required:
-
-	name        — non-empty string
-	width/height — > 0 (uint16; AE max 30000)
-	frameRate   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
-	duration    — > 0 (seconds; converted to whole frames via fps internally)
-
-Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16). Override via existing Set* methods after the call.
-
-Composition.ID is auto-assigned (Project.nextItemID++, monotonic). New comp appends to the project's root folder.
-
-Atomic mutation: if chunk parse fails or warnings appear, rollback chunk-tree + typed index + warnings to pre-call state.
-
-Warnings-as-failure: builder must produce zero parser warnings — if any appear, that's a builder bug; rollback + return internal error.
 
 ### Project.SetAudioSampleRate
 

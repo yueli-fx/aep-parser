@@ -28,7 +28,7 @@ func TestBuildCompItemMatchesGoldenStructure(t *testing.T) {
 
 func TestNewComposition_Fields(t *testing.T) {
 	p := aep.NewProject()
-	c, err := p.NewComposition("Main", 1920, 1080, 29.97, 10)
+	c, err := aep.NewComposition(p, "Main", 1920, 1080, 29.97, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,14 +66,14 @@ func TestNewComposition_Fields(t *testing.T) {
 
 func TestNewComposition_Roundtrip(t *testing.T) {
 	p := aep.NewProject()
-	c1, err := p.NewComposition("Main", 1920, 1080, 29.97, 10)
+	c1, err := aep.NewComposition(p, "Main", 1920, 1080, 29.97, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
 	c1.SetBGColor([3]uint8{20, 30, 40})
 	c1.SetResolutionFactor(2, 2)
 
-	c2, _ := p.NewComposition("BG", 1280, 720, 30, 5)
+	c2, _ := aep.NewComposition(p, "BG", 1280, 720, 30, 5)
 	if c2.ID == c1.ID {
 		t.Errorf("ID collision: c1=%d c2=%d", c1.ID, c2.ID)
 	}
@@ -123,31 +123,31 @@ func TestNewComposition_RejectsInvalid(t *testing.T) {
 		wantInError string
 	}{
 		{"empty name", func(p *aep.Project) error {
-			_, e := p.NewComposition("", 1920, 1080, 30, 5)
+			_, e := aep.NewComposition(p, "", 1920, 1080, 30, 5)
 			return e
 		}, "name cannot be empty"},
 		{"zero width", func(p *aep.Project) error {
-			_, e := p.NewComposition("x", 0, 1080, 30, 5)
+			_, e := aep.NewComposition(p, "x", 0, 1080, 30, 5)
 			return e
 		}, "size must be > 0"},
 		{"zero height", func(p *aep.Project) error {
-			_, e := p.NewComposition("x", 1920, 0, 30, 5)
+			_, e := aep.NewComposition(p, "x", 1920, 0, 30, 5)
 			return e
 		}, "size must be > 0"},
 		{"zero fps", func(p *aep.Project) error {
-			_, e := p.NewComposition("x", 1920, 1080, 0, 5)
+			_, e := aep.NewComposition(p, "x", 1920, 1080, 0, 5)
 			return e
 		}, "frame rate must be > 0"},
 		{"negative fps", func(p *aep.Project) error {
-			_, e := p.NewComposition("x", 1920, 1080, -29.97, 5)
+			_, e := aep.NewComposition(p, "x", 1920, 1080, -29.97, 5)
 			return e
 		}, "frame rate must be > 0"},
 		{"zero duration", func(p *aep.Project) error {
-			_, e := p.NewComposition("x", 1920, 1080, 30, 0)
+			_, e := aep.NewComposition(p, "x", 1920, 1080, 30, 0)
 			return e
 		}, "duration must be > 0"},
 		{"negative duration", func(p *aep.Project) error {
-			_, e := p.NewComposition("x", 1920, 1080, 30, -1)
+			_, e := aep.NewComposition(p, "x", 1920, 1080, 30, -1)
 			return e
 		}, "duration must be > 0"},
 	}
@@ -185,7 +185,7 @@ func TestNewComposition_OnOpenedProject_NoIDCollision(t *testing.T) {
 		}
 	}
 
-	c, err := p.NewComposition("Added", 1920, 1080, 30, 5)
+	c, err := aep.NewComposition(p, "Added", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestNewComposition_OnOpenedProject_NoIDCollision(t *testing.T) {
 
 func TestNewComposition_EmptyLayrListPreserved(t *testing.T) {
 	p := aep.NewProject()
-	c, _ := p.NewComposition("EmptyL", 1920, 1080, 30, 5)
+	c, _ := aep.NewComposition(p, "EmptyL", 1920, 1080, 30, 5)
 	if len(c.Layers) != 0 {
 		t.Errorf("fresh NewComposition has %d layers, want 0", len(c.Layers))
 	}
@@ -240,14 +240,14 @@ func runAEShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 
 	// 1. 构造 + write
 	p := aep.NewProject(target)
-	main, err := p.NewComposition("Main", 1920, 1080, 29.97, 10)
+	main, err := aep.NewComposition(p, "Main", 1920, 1080, 29.97, 10)
 	if err != nil {
 		t.Fatalf("NewComposition Main: %v", err)
 	}
 	if err := main.SetBGColor([3]uint8{20, 30, 40}); err != nil {
 		t.Fatalf("SetBGColor: %v", err)
 	}
-	if _, err := p.NewComposition("BG_loop", 1920, 1080, 30, 5); err != nil {
+	if _, err := aep.NewComposition(p, "BG_loop", 1920, 1080, 30, 5); err != nil {
 		t.Fatalf("NewComposition BG_loop: %v", err)
 	}
 	out, err := os.Create(inputAEP)

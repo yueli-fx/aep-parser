@@ -30,7 +30,7 @@ func runV2_2ShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	// 1. Build canonical shape graph — must match the layer
 	//    names and values verify_v2_2.jsx is checking against.
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

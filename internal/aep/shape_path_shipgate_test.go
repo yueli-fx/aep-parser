@@ -36,7 +36,7 @@ func runV2_2PathShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	verts := [][2]float64{{10, 20}, {70, 30}, {40, 90}}
 
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

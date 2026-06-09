@@ -376,7 +376,12 @@ func isDatsList(c *rifx.Chunk) bool {
 //
 // Warnings-as-failure: builder must produce zero parser warnings —
 // if any appear, that's a builder bug; rollback + return internal error.
-func (p *Project) NewComposition(
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Project.NewComposition method form.
+func NewComposition(
+	p *Project,
 	name string,
 	width, height uint16,
 	frameRate, duration float64,

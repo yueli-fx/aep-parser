@@ -14,7 +14,7 @@ import (
 
 func TestHydrate_RectNode_FromChunks(t *testing.T) {
 	p := aep.NewProject()
-	c, err := p.NewComposition("M", 1920, 1080, 30, 5)
+	c, err := aep.NewComposition(p, "M", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}

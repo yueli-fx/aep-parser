@@ -49,7 +49,7 @@ func compLayerIDs(c *aep.Composition) []uint32 {
 
 func TestDuplicateComposition_RefuseNilSrc(t *testing.T) {
 	p := &aep.Project{}
-	_, err := p.DuplicateComposition(nil, "x")
+	_, err := aep.DuplicateComposition(p, nil, "x")
 	if err == nil || !strings.Contains(err.Error(), "src cannot be nil") {
 		t.Fatalf("want 'src cannot be nil', got %v", err)
 	}
@@ -60,7 +60,7 @@ func TestDuplicateComposition_RefuseEmptyName(t *testing.T) {
 	if proj == nil {
 		return
 	}
-	_, err := proj.DuplicateComposition(src, "")
+	_, err := aep.DuplicateComposition(proj, src, "")
 	if err == nil || !strings.Contains(err.Error(), "name cannot be empty") {
 		t.Fatalf("want 'name cannot be empty', got %v", err)
 	}
@@ -76,7 +76,7 @@ func TestDuplicateComposition_RefuseCrossProject(t *testing.T) {
 		return
 	}
 	// src belongs to proj; calling on other must refuse.
-	_, err := other.DuplicateComposition(src, "x")
+	_, err := aep.DuplicateComposition(other, src, "x")
 	if err == nil || !strings.Contains(err.Error(), "does not belong to this Project") {
 		t.Fatalf("want cross-Project refuse, got %v", err)
 	}
@@ -95,7 +95,7 @@ func TestDuplicateComposition_HappyPath(t *testing.T) {
 		t.Fatalf("fixture precondition: compA_main want 3 layers, got %d", srcLayerCount)
 	}
 
-	dup, err := proj.DuplicateComposition(src, "compA_dup")
+	dup, err := aep.DuplicateComposition(proj, src, "compA_dup")
 	if err != nil {
 		t.Fatalf("DuplicateComposition: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestDuplicateComposition_RoundTrip(t *testing.T) {
 	if proj == nil {
 		return
 	}
-	dup, err := proj.DuplicateComposition(src, "compA_dup")
+	dup, err := aep.DuplicateComposition(proj, src, "compA_dup")
 	if err != nil {
 		t.Fatalf("DuplicateComposition: %v", err)
 	}
@@ -240,7 +240,7 @@ func TestDuplicateComposition_FreshDataSlices(t *testing.T) {
 	}
 	srcBefore := append([]byte(nil), srcLdta.Data...)
 
-	dup, err := proj.DuplicateComposition(src, "compA_dup")
+	dup, err := aep.DuplicateComposition(proj, src, "compA_dup")
 	if err != nil {
 		t.Fatalf("DuplicateComposition: %v", err)
 	}

@@ -35,7 +35,11 @@ import (
 // Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the
 // Go-emitted file and the dup's intra-comp parent ref resolves to the dup's
 // own layer (remap confirmed by AE), with sources shared with the original.
-func (p *Project) DuplicateComposition(src *Composition, name string) (*Composition, error) {
+//
+// Free function (not a method) so the impl can live in internal/serializer
+// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
+// facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
+func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error) {
 	// === Refuse-case matrix R1-R7 ===
 	if src == nil {
 		return nil, fmt.Errorf("DuplicateComposition: src cannot be nil")

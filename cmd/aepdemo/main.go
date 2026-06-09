@@ -38,7 +38,7 @@ func main() {
 	// 能力①：从零创建项目（目标 AE 2025）
 	p := aep.NewProject(aep.TargetAE2025)
 	// 能力②：从零创建合成
-	comp, err := p.NewComposition("功能演示 aep-parser", 1920, 1080, 30, 6)
+	comp, err := aep.NewComposition(p, "功能演示 aep-parser", 1920, 1080, 30, 6)
 	must(err)
 
 	// 能力③：从零创建形状图层 + 取名（同一合成内可放多层）

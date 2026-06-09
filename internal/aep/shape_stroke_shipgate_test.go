@@ -37,7 +37,7 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	width, opacity := 4.0, 60.0
 
 	p := aep.NewProject(target)
-	comp, err := p.NewComposition("Main", 1920, 1080, 30, 5)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
