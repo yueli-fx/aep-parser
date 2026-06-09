@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-09 by claude
-**Active focus**: **V3 M8 方案②（真·物理分包）执行中** — plan `plans/2026-06-07-v3-m8-physical-split-plan.md`（active）。P0 基线+inventory ✅ · P1 抽 `internal/codec` ✅ · **P2 back-ref 接口化 ✅ 完成**（9 类倒置为接口：Composition/Marker/Mask/Footage/Keyframe/Project/Layer/RenderQueueItem/**Property**；OM/RenderQueue 容器/PropertyGroup 按 §F 故意保 concrete——无 writer 接口，P3 统一解耦）。**Task 2.3 收口 ✅：全 `scene_*.go` 零 rifx import/code-token**。**P3.0 结构性 op method→free function ✅ 完成**（7 组 7 commit，全绿 + byte-identical + docgen 重生成）。**P3.1 物理分包 ✅ 完成**：stage 1 抽 `internal/scene`（ac62b25 + 0303113 清 string-leak）+ stage 2 抽 `internal/serializer`（a347e46）——`internal/aep` 现为薄 facade（aliases + facade_codec + Application + Open/FromReader + 全结构性 op re-export），覆于 `internal/{scene,serializer,codec}`。**物理分包结构性完成**。机制=新包内镜像 facade alias 桥（零 body qualify-rewrite，规避机械泄漏）+ `serializer/testsupport.go` 跨包 test-accessor + aep facade 委托。全绿 + byte-identical(183 fixture) + DAG OK（scene⊥rifx/serializer⊥aep/codec⊥scene 编译期边界）+ docs 内容零变（富注释移植 facade）。**下一步 = P4 收口**。
+**Last updated**: 2026-06-09 by claude（M8 物理分包 P0-P4 完成并归档；下一步=follow-up trim / 大方向待定向）
+**Active focus**: **V3 M8 物理分包 ✅ 完成（2026-06-09）** — `internal/{rifx,codec,scene,serializer}` + `aep` 薄 facade 落地，DAG 经包级 arch_boundary 守卫 + dag_boundary 强制，全程 byte-identical(183 fixture)。plan 已归档 `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`（含 P4.3 ship-gate 经 byte-identity 等效验收）。**当前无 active 大 plan**；V3 大 arc 其余暂停，下一步见下。
 
 ## 进行中
 
@@ -10,7 +10,6 @@
 - [2026-05-26-py-aep-parity-design.md](specs/2026-05-26-py-aep-parity-design.md) — py-aep parity API 全覆盖路线图（P1/P2 已落；P3 §3A RQ R/W+结构性 + DimensionsSeparated R/W 双向(static+animated) + 3C PropertyBase Remove/MoveTo/Duplicate + 3G comp marker 增删 已落，剩 ValueText）
 - [2026-05-27-v3-deep-think.md](specs/2026-05-27-v3-deep-think.md) — V3 deep think：open questions / risk register / migration strategy
 - [2026-06-07-v3-m8-physical-split-design.md](specs/2026-06-07-v3-m8-physical-split-design.md) — V3 M8 方案② 真·物理分包设计（A 先行 + B′ back-ref 接口）：scene/serializer/codec 物理拆包，back-ref 作 scene 内 writer 接口（serializer 实现）→ 保留全部方法 API（不破 API）、scene 编译期零 rifx；eager length-preserving patch 经接口；opaque 延后到 C；全程保 byte-exact 回归门 — [note: brainstorm + 三家外审两轮整合。方向 = A 先行（保 byte-exact，C 日后独立）+ B′（back-ref 接口、不破 API、无侧表/无 Document god-object）。前置：M8 scene→rifx 白名单清零（2026-06-07 已落）]
-- [2026-06-07-v3-m8-physical-split-plan.md](plans/2026-06-07-v3-m8-physical-split-plan.md) — V3 M8 方案② 物理分包实现计划（A 先行 + B′）：P0 基线+inventory → P1 抽 internal/codec → P2 单包内 back-ref 接口化（concrete→XWriter） → P3 git mv 物理分包 → P4 下游+收口+双版本 ship-gate
 - [coverage-detail.md](plans/coverage-detail.md) — 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 - [coverage.md](plans/coverage.md) — 字段覆盖概览（精简入口）
 - [m8-setter-inventory.md](plans/m8-setter-inventory.md) — V3 M8 Task 0.3 产出 — 全量 Set* 分类表（A 类 back-ref setter / B 类 pure-graph setter）+ 每 backref 结构的 XWriter 接口方法清单。P2（back-ref 接口倒置）的逐类输入。 — [note: 从 internal/aep 实测枚举（277 个 Set* + 10 个 *Backrefs 结构 + 全部 `.back.` 字节访问点），逐方法读 body 分类，非按名猜。spec §3 分类规则 + edge-case adjudication。]
@@ -18,35 +17,10 @@
 
 ## 下一步
 
-**P2 全部完成**（2026-06-09）。两批 landed：
-- **RenderQueue 子系统**（commits ba2865b→5c2eeec）：RQ/OM/Guide settings chunk-alias → scene 独占 copy（单一真相源）+ WriteAEP 单点 sync（`syncRenderQueue`/`syncGuides`）；`SetComment` → `RenderQueueItemWriter`；类型化 offset `codec.RenderSettingOffset`；attach 断言扩 RQ/OM/Guide。
-- **Property**（commits 73649c9 A + 8ca1e9c B，最后一类）：A=4 纯 setter（SetStaticValue/SetExpressionEnabled/SetExpression/SetLockedRatio）逻辑迁 `(*propertyBackrefs)` + scene delegate；B=`back *propertyBackrefs` → `PropertyWriter` 接口 + `propertyBack()` helper，全 reader/parse/keyframe-stream/separate-dims 经 helper 取 concrete。**判定**：InsertKeyframe/DeleteKeyframe（重建 scene Keyframes 切片）+ SetDimensionsSeparated（增删 follower Property 节点）= 结构性 → 留 scene-method stopgap（同 RQ AddItem/RemoveItem，D-U3），**不进** PropertyWriter。验证：`rect.SetSize` 委托链 + 全 separate-dims（2D/3D/merge/animated）round-trip 绿。
+**M8 物理分包 arc 全完**（P0-P4，2026-06-09）。plan 已归档 `archive/plans/2026-06-07-v3-m8-physical-split-plan.md`；逐 commit 历程见 git log（`a347e46` serializer 抽出 + `ed4669c` arch 守卫/CLAUDE.md #3）+ 设计 `specs/2026-06-07-v3-m8-physical-split-design.md`。
 
-**P2 收口 ✅**：全 `scene_*.go` 零 rifx import/code-token；OM/RenderQueue-容器/PropertyGroup back 故意保 concrete（§F——无 writer 接口，P3 统一解耦）。
-
-## 下一步（P3 物理分包）
-
-**P3 关键决议**（2026-06-09 用户拍板）：「mechanical git mv」假设证伪——结构性 op 是 scene 方法但需 serializer 访问 backref（跨包=import 环），且多为 Stable ship-gated，spec §2.4/§F D-U3 的「改 free function」会破 Stable 签名。用户**批准破原 #2 约束 + 写新约束**（commit 2ef731e：CLAUDE.md #2 新增「结构性 op 语义稳定、调用形态可随分包改 facade 自由函数，标 BREAKING 不算违约」）。→ 采 **Path B**（结构性 op → serializer 自由函数 + facade re-export）。
-
-1. **P3.0：结构性 op method→free function ✅ 完成**（2026-06-09，单包内转，每组独立 commit，BREAKING + docgen 重生成，全程绿 + byte-identical round-trip）。7 组 landed：
-   - ✅ `RenderQueue.{AddItem,RemoveItem}`（c6eb51b，模式验证）。
-   - ✅ Composition layer-list `{DeleteLayer,MoveLayer,InsertLayer,DuplicateLayer,NewShapeLayer}`（5915d51）。
-   - ✅ Layer 自定位 `{MoveToBeginning,MoveToEnd,MoveAfter,MoveBefore}`（bd8beee；委托 MoveLayer=serializer，故必转）。
-   - ✅ Composition 生命周期 `{NewComposition,DuplicateComposition}`（14f29ac）。
-   - ✅ Marker `{AddMarker, Remove→RemoveMarker}`（75e1939）。
-   - ✅ Property 结构性 `{InsertKeyframe,DeleteKeyframe,SetDimensionsSeparated}` + `AEPropertyGroup.{Remove→RemovePropertyGroup, MoveTo→MovePropertyGroup, Duplicate→DuplicatePropertyGroup}`（c666f30）。
-   - **判据（本次确立，比原「结构性就转」更精准）**：方法→serializer 自由函数 **当且仅当它调 serializer-only 代码**（结构性自由函数 / 建 chunk / 碰 concrete backref）。scene→scene 纯委托者**留方法**（scene 内合法）。
-   - **偏离 1**：`Layer.{ReplaceSource,RemoveTrackMatte,ClearTrackMatteLayer}`（原 待转 列含之）**未转**——三者纯委托到 Set*（scene 方法，经 writer 接口，不碰 concrete backref）→ 留方法。`ClearTrackMatteLayer` 虽在 write_layer.go，但与同文件 Set* 方法一样 P3.1 随迁 scene。转之纯属多余 BREAKING。
-   - **偏离 2**：`AEPropertyGroup.Duplicate` 原 待转 列**漏列**，与 Remove/MoveTo 同族（INDEXED_GROUP chunk-pair splice）→ 本次补转，否则 P3.1 git-mv `mutate_property_structural.go` 会断。
-   - **完成验证**：scene_*.go 零调用任何结构性自由函数（grep 证）+ arch boundary guard（scene⊥rifx、codec⊥scene）绿 + `go vet ./...` + `go test ./...` 全绿。纯图构造（VectorGroup.AddRect 等 detached）留 scene。
-2. **P3.1 物理分包 ✅ 完成**（2026-06-09）：
-   - **stage 1**：抽 `internal/scene`（ac62b25 + 0303113 清 string-literal 泄漏——agent 机械 `src.comp→scene.LayerComp(src)` rewrite 漏进 error string，用户独立复验 `TestInsertLayer_RefuseSrcDetached` 抓到，已修）。
-   - **stage 2**：抽 `internal/serializer`（a347e46）——移 parse/lower/write/back/mutate(51) + templates(15) → serializer；`internal/aep` 收为薄 facade（aliases + facade_codec + Application + `facade.go`=Open/FromReader + 全结构性 op re-export）。
-   - **关键机制（避机械泄漏）**：新包内镜像 facade alias 桥（`serializer/{scene_aliases,codec_aliases}.go`）→ 移入文件保留 bare scene/codec 类型名，**零 body qualify-rewrite**（不做 `Type→scene.Type` 全量替换，规避上次 string-leak 同类风险）。跨包 test 可见性：`serializer/testsupport.go` 导出 back-ref accessor，aep facade 的 `*ForTest` helper 委托之 → 118 黑盒 test 调用点零改写；11 个 `Lower*Stream`/`NewLowerCtxForTest`/`*ForTest`（带 unexported `lowerCtx`、非 Stable API）+ 其消费 test 随迁 serializer。
-   - **docs 零回归**：富结构性 op doc comment 移植到 facade（docgen 内容 byte 一致）。
-   - **验证**：build/vet/test ./... 全绿（serializer 非缓存复跑 PASS）+ round-trip byte-identical(183 fixture) + dag_boundary OK（scene⊥rifx/serializer⊥aep/codec⊥scene 编译期）+ API 仅 11 test-helper 迁出（零真公开 API 丢失）。
-3. **P4（← 下一步）收口**：① 退役/降级 AST 守卫 `arch_boundary_test.go`（scene⊥rifx 等已是编译期包边界，AST guard 多余）；② 改写 CLAUDE.md #3「单 package + 命名轴」→ `internal/{rifx,codec,scene,serializer}` + aep facade 多包 DAG 描述；③ 双版本 ship-gate 终验（注：本 split 输出 byte-identical，ship-gate 对此 relocation 偏冗余，round-trip 已证写出不变；按 plan 仍跑一遍）。
-4. **follow-up（非阻塞）**：serializer 结构性 op 函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ 后续单独 commit trim；docgen 次要 follow-on。
+1. **immediate follow-up（非阻塞，单独 commit）**：serializer 结构性 op 自由函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim 为简短内部注释。
+2. **大方向待用户定向**（当前无 active 大 plan）：① 续 V3 大 arc（`specs/2026-05-22-v3-direction.md`，opaque 子表/M9+）；② backlog 顶：Layr Transform 3D 通道（Orientation/Rotate X·Y/Position_Z，需 3D layer 支持 V2.3）；③ py-aep parity 剩 ValueText（schema-db 依赖，见 `incidents/valuetext-needs-schema-db.md`）。
 
 ## Backlog（单条候选）
 

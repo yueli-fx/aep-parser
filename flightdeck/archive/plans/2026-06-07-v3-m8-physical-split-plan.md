@@ -1,7 +1,14 @@
 ---
-status: active
+status: done
 summary: V3 M8 方案② 物理分包实现计划（A 先行 + B′）：P0 基线+inventory → P1 抽 internal/codec → P2 单包内 back-ref 接口化（concrete→XWriter） → P3 git mv 物理分包 → P4 下游+收口+双版本 ship-gate
 ---
+
+> **✅ 完成（2026-06-09）。** 物理分包落地：`internal/{rifx,codec,scene,serializer}` + `aep` 薄 facade。
+> P0-P2 + P3.0 见 git log；P3.1 stage 1 抽 scene（`ac62b25`+`0303113`）、stage 2 抽 serializer（`a347e46`）；
+> P4 守卫+CLAUDE.md #3 多包（`ed4669c`）。**P4.3 ship-gate 经 byte-identity 等效验收**（用户 2026-06-09 拍板）：
+> round-trip 证全 183 fixture 输出与 split 前（已 ship-gated）逐字节相同，relocation 零写出语义变更 ⟹ AE 接受性不变，
+> 不再跑冗余 AE 自动化。全程绿 + byte-identical + DAG OK + docs 内容零变。
+> **遗留 follow-up（非阻塞，另起 commit）**：serializer 结构性 op 函数仍带与 facade 重复的富 doc comment（doc home 已是 facade）→ trim。
 
 # V3 M8 物理分包（A 先行 + B′）Implementation Plan
 
