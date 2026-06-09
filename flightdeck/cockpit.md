@@ -16,7 +16,7 @@
 **结构性创建 vein 继续推**（均纯代码可推 + ship-gate 自助，无需用户输入）。按价值/风险排序：
 
 1. **AddEffect Phase 2 — Effect Parade auto-create**：让 `NewShapeLayer` 的 from-scratch 层也能加效果（当前 refuse parade-less 层）。需 RE 空 Effect Parade group 在 Layr property tree 的位置 + 空组字节，splice 进去。详 `incidents/add-effect-splice-re.md` § Phase 2。
-2. **新建图层类型**：当前仅 `NewShapeLayer`。缺 Solid / Null / Text / Camera / Light / Adjustment。Camera/Light 像 shape 层（无 source，靠 ldta+属性树，embed-template 可推）；Solid/Null 需先建 footage source item。
+2. **新建图层类型**（已 RE 起点，详 `incidents/new-layer-types-scoping.md`）：当前仅 `NewShapeLayer`。**Camera/Light** = 源-less，像 shape 层（embed-template，无 item 创建）→ **最低风险入口**。**Solid/Null/Adjustment** = footage-backed（共用 solid footage Item：`opti "Soli"` + Pin/sspc + Solids folder），走 InsertLayer closure-import + ID-remap，**AE-acceptance gate 高风险**（同 NewComposition 5 阶段）。SetColor/SetSize 需 RE opti/sspc 偏移。
 3. **AddEffect 扩库 / 参数化**：更多内置效果（注意带 layer/path 引用参数的效果需 sspc id remap，类似 cross-Project InsertLayer）；per-effect typed param helper（今为 raw `SetStaticValue` by match-name）。
 
 **仍 fixture/RE-gated（需外部输入）**：Layr Transform 3D 通道（需 3D layer 支持）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建）· ValueText（schema-db）。详 `plans/coverage.md` § 暂搁 / 不可达。
