@@ -1,6 +1,10 @@
 package aep
 
-import "io"
+import (
+	"io"
+
+	"github.com/example/aep-parser/internal/serializer"
+)
 
 // Application wraps a parsed Project, mirroring py-aep's top-level
 // `app = py_aep.parse("x.aep")` entry. Existing Go-style entry points
@@ -54,9 +58,5 @@ func (a *Application) Version() string {
 	if a.Project == nil {
 		return ""
 	}
-	pb := projectBack(a.Project)
-	if pb == nil {
-		return ""
-	}
-	return pb.VersionString()
+	return serializer.ProjectVersionString(a.Project)
 }
