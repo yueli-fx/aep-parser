@@ -82,6 +82,13 @@ func main() {
 		must(r.SetSize([2]float64{300, 190}))
 		_, _ = l.RootGroup().AddGradientFill()
 	}
+	// 渐变描边
+	{
+		l := layer("④b 渐变描边 AddGradientStroke(黑→白)", [2]float64{1680, 560})
+		r, _ := l.RootGroup().AddRect()
+		must(r.SetSize([2]float64{300, 190}))
+		_, _ = l.RootGroup().AddGradientStroke()
+	}
 	// 描边样式枚举
 	{
 		l := layer("⑤ 描边样式 SetLineCap/LineJoin + 圆角矩形", [2]float64{420, 560})
