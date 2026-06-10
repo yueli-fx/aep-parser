@@ -1178,7 +1178,7 @@ NewCameraLayer adds a new Camera layer to the composition and returns it.
 
 A camera is source-less: it is defined entirely by its ldta + Camera Options property group. The new layer is cloned from an embedded AE-native Camera Layr (so every AE-internal flag byte is faithful), with the layer ID, name, and time span (0 → comp duration) patched for this comp. Camera position / point of interest / options inherit the template's AE defaults; adjust afterward via the Camera* setters once the project is re-parsed.
 
-Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built camera, types it correctly, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
 
 ### NewLightLayer
 
@@ -1190,7 +1190,7 @@ NewLightLayer adds a new Light layer to the composition and returns it.
 
 Like NewCameraLayer, a light is source-less (ldta + Light Options group), cloned from an embedded AE-native Light Layr with ID / name / time span patched. Light kind / color / intensity inherit the template's AE defaults; adjust afterward via the Light* setters once the project is re-parsed.
 
-Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built light, types it correctly, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
 
 ### NewTextLayer
 
@@ -1202,9 +1202,9 @@ NewTextLayer adds a new point-text layer to the composition and returns it.
 
 Like NewCameraLayer, a text layer is source-less: its content lives in the btds/btdk text-engine document inside the layer's Text Properties group. The new layer is cloned from an embedded AE-native text Layr — point text "A" with the extraction fixture's styling (font YouYuan, 88 px, single run) — with the layer ID, name, and time span (0 → comp duration) patched for this comp.
 
-The returned layer reads TextSource immediately and supports SetText without a Reopen (the text-source back-ref is wired at create time). SetText is length-preserving, so on a fresh layer the text can become any string whose encoded length matches "A" — a single character. Arbitrary-length text is not yet writable: the btdk document embeds a layout cache (per-run character counts + per-glyph pixel metrics keyed to the rendered string) that has to be re-encoded for a different length.
+The returned layer reads TextSource immediately and supports SetText without a Reopen (the text-source back-ref is wired at create time). SetText accepts arbitrary-length replacement text for the template's single-paragraph, single-run document (see Layer.SetText for the refuse set).
 
-Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 ship-gate green (AE types the Go-built layer as a text layer, reads back the text, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
 
 ### NewSolidLayer
 
@@ -1216,7 +1216,7 @@ NewSolidLayer adds a new solid-color layer to the composition and returns it.
 
 A solid is footage-backed: the call also creates a backing solid footage item (cloned from an embedded AE-native template via the cross-Project import machinery, so every AE-internal byte stays faithful) and points the layer's SourceID at it. width/height must be 1..30000 (AE's solid ceiling); rgb components are 0..1 (stored as float32, so exact round-trips need float32-representable values such as 0.25/0.5). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed — all parsed-layer setters (transform, AddEffect, …) work immediately without a Reopen.
 
-Atomic mutation (the underlying cross-Project import snapshot + warnings-as-failure rollback covers both the footage import and the layer splice). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic mutation (the underlying cross-Project import snapshot + warnings-as-failure rollback covers both the footage import and the layer splice). Stable / structural — AE 2020 + AE 2025 ship-gate green on an all-Go-built project (AE reads back color / dims / flags, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
 
 ### NewNullLayer
 
@@ -1228,7 +1228,7 @@ NewNullLayer adds a new null-object layer to the composition and returns it.
 
 A null is a 100×100 solid-backed layer with the isNull ldta flag — AE's standard parenting helper. The backing solid footage item is created alongside (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
 
-Atomic mutation. Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (rides the gated solid-family creation path). Free function (CLAUDE.md #2 structural-op call-form).
 
 ### NewAdjustmentLayer
 
@@ -1240,7 +1240,7 @@ NewAdjustmentLayer adds a new adjustment layer to the composition and returns it
 
 An adjustment layer is a comp-sized white solid with the isAdjust ldta flag: effects applied to it affect every layer below it. The backing solid footage item is created alongside, sized to the comp's current dimensions (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
 
-Atomic mutation. Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (rides the gated solid-family creation path). Free function (CLAUDE.md #2 structural-op call-form).
 
 <!-- Hand-authored reference table. -->
 

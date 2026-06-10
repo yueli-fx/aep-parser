@@ -89,7 +89,7 @@ Refused layers: camera / light layers (AE does not allow effects on them), and l
 
 Atomic mutation: snapshot parade chunk + scene children + flat Effects slice (+ the pre-auto-create tree state); re-parse the spliced pair to obtain a back-ref-correct *Effect; roll back on any parser warning.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green across the full 12-template library (24/24), plus the parade auto-create path on a 100% Go-built file (2/2). Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
+Stable / structural — AE 2020 + AE 2025 ship-gate green across the full 29-template library, plus the parade auto-create path on a 100% Go-built file (2/2). Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 
 ### RemoveEffect
 

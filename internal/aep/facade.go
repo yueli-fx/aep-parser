@@ -147,8 +147,10 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 // of interest / options inherit the template's AE defaults; adjust afterward via
 // the Camera* setters once the project is re-parsed.
 //
-// Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural.
-// Free function (CLAUDE.md #2 structural-op call-form).
+// Atomic mutation (snapshot + warnings-as-failure rollback). Stable /
+// structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built
+// camera, types it correctly, resave preserves). Free function (CLAUDE.md #2
+// structural-op call-form).
 func NewCameraLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewCameraLayer(c, name)
 }
@@ -160,8 +162,10 @@ func NewCameraLayer(c *Composition, name string) (*Layer, error) {
 // patched. Light kind / color / intensity inherit the template's AE defaults;
 // adjust afterward via the Light* setters once the project is re-parsed.
 //
-// Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural.
-// Free function (CLAUDE.md #2 structural-op call-form).
+// Atomic mutation (snapshot + warnings-as-failure rollback). Stable /
+// structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built
+// light, types it correctly, resave preserves). Free function (CLAUDE.md #2
+// structural-op call-form).
 func NewLightLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewLightLayer(c, name)
 }
@@ -176,15 +180,14 @@ func NewLightLayer(c *Composition, name string) (*Layer, error) {
 // comp.
 //
 // The returned layer reads TextSource immediately and supports SetText without
-// a Reopen (the text-source back-ref is wired at create time). SetText is
-// length-preserving, so on a fresh layer the text can become any string whose
-// encoded length matches "A" — a single character. Arbitrary-length text is
-// not yet writable: the btdk document embeds a layout cache (per-run character
-// counts + per-glyph pixel metrics keyed to the rendered string) that has to
-// be re-encoded for a different length.
+// a Reopen (the text-source back-ref is wired at create time). SetText accepts
+// arbitrary-length replacement text for the template's single-paragraph,
+// single-run document (see Layer.SetText for the refuse set).
 //
-// Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural.
-// Free function (CLAUDE.md #2 structural-op call-form).
+// Atomic mutation (snapshot + warnings-as-failure rollback). Stable /
+// structural — AE 2020 + AE 2025 ship-gate green (AE types the Go-built layer
+// as a text layer, reads back the text, resave preserves). Free function
+// (CLAUDE.md #2 structural-op call-form).
 func NewTextLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewTextLayer(c, name)
 }
@@ -203,8 +206,9 @@ func NewTextLayer(c *Composition, name string) (*Layer, error) {
 //
 // Atomic mutation (the underlying cross-Project import snapshot +
 // warnings-as-failure rollback covers both the footage import and the layer
-// splice). Alpha / structural. Free function (CLAUDE.md #2 structural-op
-// call-form).
+// splice). Stable / structural — AE 2020 + AE 2025 ship-gate green on an
+// all-Go-built project (AE reads back color / dims / flags, resave
+// preserves). Free function (CLAUDE.md #2 structural-op call-form).
 func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error) {
 	return serializer.NewSolidLayer(c, name, width, height, rgb)
 }
@@ -216,7 +220,8 @@ func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float6
 // alongside (see NewSolidLayer). The layer's time span is re-homed to
 // 0 → comp duration. The returned layer is fully parsed.
 //
-// Atomic mutation. Alpha / structural. Free function (CLAUDE.md #2
+// Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green
+// (rides the gated solid-family creation path). Free function (CLAUDE.md #2
 // structural-op call-form).
 func NewNullLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewNullLayer(c, name)
@@ -231,7 +236,8 @@ func NewNullLayer(c *Composition, name string) (*Layer, error) {
 // (see NewSolidLayer). The layer's time span is re-homed to 0 → comp
 // duration. The returned layer is fully parsed.
 //
-// Atomic mutation. Alpha / structural. Free function (CLAUDE.md #2
+// Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green
+// (rides the gated solid-family creation path). Free function (CLAUDE.md #2
 // structural-op call-form).
 func NewAdjustmentLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewAdjustmentLayer(c, name)
@@ -649,7 +655,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // back-ref-correct *Effect; roll back on any parser warning.
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green across the full
-// 12-template library (24/24), plus the parade auto-create path on a 100%
+// 29-template library, plus the parade auto-create path on a 100%
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {

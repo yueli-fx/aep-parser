@@ -12,6 +12,9 @@ Adjustment shipped same day — AE 2020 + 2025 ship-gate PASS
 (`TestNewSolidNull_AEShipGate_AE20{20,25}`). § "As shipped" below records the
 actual mechanism (it differs from the original recommendation in one key way:
 whole-template-project + InsertLayer reuse, NOT per-chunk .bin extraction).
+The whole New\* family (Camera/Light/Solid/Null/Adjustment/Text) was promoted
+Alpha → Stable (structural op, CLAUDE.md #2) in the 2026-06-11 audit on the
+dual-version gate evidence.
 
 ## As shipped — solid family (mutate_layer_solid.go)
 

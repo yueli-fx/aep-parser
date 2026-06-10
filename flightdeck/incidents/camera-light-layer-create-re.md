@@ -10,7 +10,9 @@ last_updated: 2026-06-11
 Shipped 2026-06-10. AE 2020 + AE 2025 ship-gate PASS (`TestNewCameraLight_AEShipGate_AE20{20,25}`):
 AE accepts a Go-created Camera + Light in a fresh comp, types them correctly
 (`Cam1(cam)`, `Light1(light)`), resave preserves, Go re-parse confirms
-`LayerTypeCamera`/`LayerTypeLight` from AE's output.
+`LayerTypeCamera`/`LayerTypeLight` from AE's output. Promoted Alpha → Stable
+(structural op, CLAUDE.md #2) in the 2026-06-11 New\* family audit on this
+gate evidence.
 
 ## Why these were easy (vs shape layers / solids)
 
