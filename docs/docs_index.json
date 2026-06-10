@@ -4675,6 +4675,13 @@
       "signature": "func SetDimensionsSeparated(p *Property, separated bool) error",
       "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader. Structural; both directions (separate↔merge) are double-version ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated Position (3D layers, near-linear leader path-ease). An animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated); animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused with an error rather than written."
     },
+    "SetEffectParam": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#seteffectparam",
+      "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
+      "summary": "SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. \"ADBE Gaussian Blur 2-0001\"), returning the parameter's *Property. It is the typed-parameter entry for AddEffect-style workflows:"
+    },
     "SetRenderer": {
       "kind": "func",
       "file": "composition.md",
@@ -4823,6 +4830,13 @@
       "file": "shape.md",
       "anchor": "#shapeprimitivekind-object",
       "summary": "ShapePrimitiveKind identifies which AE parametric primitive a ShapePrimitive represents. The values are stable strings rather than integers so they round-trip cleanly through JSON."
+    },
+    "SupportedEffectParams": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#supportedeffectparams",
+      "signature": "func SupportedEffectParams() []string",
+      "summary": "SupportedEffectParams returns the sorted parameter match-names SetEffectParam can materialize from an embedded template when the target parameter is default-elided on its effect instance."
     },
     "SupportedEffects": {
       "kind": "func",

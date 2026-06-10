@@ -109,6 +109,31 @@ func SupportedEffects() []string
 
 SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template.
 
+### SetEffectParam
+
+```go
+func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)
+```
+
+SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. "ADBE Gaussian Blur 2-0001"), returning the parameter's *Property. It is the typed-parameter entry for AddEffect-style workflows:
+
+	fx, _ := aep.AddEffect(layer, aep.EffectGaussianBlur)
+	_, err := aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0001", 25.0)
+
+Why this exists: AE persists an effect parameter only while its value differs from the default — on a default instance the tunable params have no value stream at all (only "\<effect>-0000" survives), so plain Property.SetStaticValue has nothing to target. When the parameter is already present, SetEffectParam is exactly SetStaticValue. When it is default-elided, the parameter's (tdmn, tdbs) value stream is first materialized from an embedded AE-native template (synthesis-lite) at its definition-order position, then the caller's value is written — matching what AE itself persists for a touched parameter. Materializable params are listed by SupportedEffectParams; params already present on the effect are settable regardless.
+
+The materialized stream carries no tdpi host binding (only the always-present -0000 stream does), so no retarget is needed. Atomic mutation: snapshot value-group chunk children + flat Parameters + warnings; roll back on any parser warning or value-encode failure.
+
+Alpha / structural (pending AE dual-version ship-gate). Free function (CLAUDE.md #2 structural-op call-form).
+
+### SupportedEffectParams
+
+```go
+func SupportedEffectParams() []string
+```
+
+SupportedEffectParams returns the sorted parameter match-names SetEffectParam can materialize from an embedded template when the target parameter is default-elided on its effect instance.
+
 <!-- Hand-authored note. -->
 
 ## Tested coverage
