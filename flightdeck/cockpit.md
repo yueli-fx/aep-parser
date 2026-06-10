@@ -29,6 +29,13 @@
 
 其余 deferred R-only（DisplayColorSpace / ValueText 等）+ shape 次要子属性见 `specs/deferred-backlog.md` + `plans/coverage.md`。
 
+### Agent 建议（2026-06-10 会话留，按价值/成本排序）
+
+1. **★ 统一「fresh-layer setter 墙」**（跨切面，最高杠杆）：本会话两处撞同一墙——AddEffect Phase 2 与 Camera/Light setter 都因「from-scratch 层无 scene tree + scene 禁持 rifx chunk」而无法在内存态调值/加子结构。值得一个**统一方案**而非逐个 workaround：候选 (a) `Project.Reopen()`/`Layer.Reparse()` helper（write→parse 往返，把 built 层升级为 parsed 层，一行解锁所有 setter）；(b) serializer-side pending-mutation 表，lower 时重放。(a) 最省、最快见效。详 `incidents/add-effect-splice-re.md` + `camera-light-layer-create-re.md`。
+2. **完成 effect 库 ship-gate**（便宜稳健）：当前 12 效果只有 5 个 AE 双版本 gated，余 7 个走同机制仅 Go round-trip。补跑 7×2 AE runs 即全 12 个「verified」，去掉「rides the mechanism」免责声明。
+3. **AddMask**（机制已证）：Mask Parade 同 AddEffect 的 INDEXED_GROUP splice；但 mask path 写是 structural（暂搁），故 v1 只能 fixed-shape mask，价值有限——等 mask-path-write 解封再做。
+4. **NewNullLayer 优先于其它 footage-backed**：Null（parenting 用）是 footage-backed 家族里最常用的；做 solid footage Item 时先瞄准 Null/Solid。
+
 ## Hanging tasks
 
 无。
