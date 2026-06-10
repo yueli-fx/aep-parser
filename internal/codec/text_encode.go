@@ -58,10 +58,7 @@ func FormatPSColorArray(rgba [4]float64) []byte {
 // Byte values 0x28/0x29/0x5C anywhere in the resulting stream (high or low byte
 // of any code unit) are backslash-escaped per PostScript string rules.
 func EncodeAEPSText(s string) []byte {
-	s = strings.ReplaceAll(s, "\n", "\r")
-	if !strings.HasSuffix(s, "\r") {
-		s += "\r"
-	}
+	s = NormalizeAEParagraphText(s)
 	var buf bytes.Buffer
 	buf.WriteByte('(')
 	buf.WriteByte(0xfe)
@@ -71,6 +68,33 @@ func EncodeAEPSText(s string) []byte {
 	}
 	buf.WriteByte(')')
 	return buf.Bytes()
+}
+
+// UTF16CodeUnitLen returns the number of UTF-16 code units s occupies
+// (astral runes expand to surrogate pairs and count as 2) — the unit AE's
+// btdk paragraph/run character counters are expressed in.
+func UTF16CodeUnitLen(s string) int {
+	n := 0
+	for _, r := range s {
+		if r > 0xffff {
+			n += 2
+		} else {
+			n++
+		}
+	}
+	return n
+}
+
+// NormalizeAEParagraphText applies EncodeAEPSText's paragraph normalization
+// without encoding: '\n' becomes AE's '\r' line break and a trailing '\r' is
+// appended if absent. Callers use it to count the stored characters of a
+// candidate SetText input.
+func NormalizeAEParagraphText(s string) string {
+	s = strings.ReplaceAll(s, "\n", "\r")
+	if !strings.HasSuffix(s, "\r") {
+		s += "\r"
+	}
+	return s
 }
 
 // EncodeAEPSStringNoCR is EncodeAEPSText without the auto-appended trailing

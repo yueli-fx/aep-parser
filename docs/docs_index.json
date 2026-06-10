@@ -3062,7 +3062,7 @@
       "file": "layer.md",
       "anchor": "#layersettext",
       "signature": "func (l *Layer) SetText(newText string) error",
-      "summary": "SetText replaces a text layer's user-visible text in-place. The new text must encode to exactly the same number of bytes as the original PostScript string (length-preserving constraint — the surrounding btds/btdk chunk headers reference fixed byte counts that we won't rewrite). Returns an error when the byte budget doesn't match, when the layer isn't a text layer, or when the original text-string location wasn't recorded during parsing."
+      "summary": "SetText replaces a text layer's user-visible text. The new text may be any length on a single-paragraph, single-run, kerning-free document (the common case, and what NewTextLayer creates): the PostScript string is spliced together with the two character counters coupled to it, and the btdk layout cache is left for AE to recompute on load. Replacements that keep both the encoded byte length and the UTF-16 character count are written in place and work on any document structure, including multi-paragraph text."
     },
     "Layer.SetTimeRemapEnabled": {
       "kind": "method",

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/example/aep-parser/internal/codec"
 	"github.com/example/aep-parser/internal/rifx"
@@ -445,11 +446,23 @@ func (b *layerBackrefs) SetAlternateSource(item AVItem) error {
 	return nil
 }
 
-// SetText replaces the text-string value at btdk path /1/1/0/0/0 in
-// place. length-preserving: the encoded bytes must match the original
-// byte width (the scene-side wrapper enforces the same constraint with
-// its recorded textStringStart/End offsets). Locates the string range
-// directly from the btds bytes so it stays self-contained.
+// SetText replaces the text-string value at btdk path /1/1/0/0/0.
+//
+// Fast path: when the replacement keeps the encoded byte length AND the
+// per-paragraph UTF-16 character counts (same line-break positions), it is an
+// in-place copy — safe for any run/paragraph structure (no counter changes).
+// Equal totals are not enough: "A\rB" → "XYZ" moves a paragraph boundary,
+// which the paragraph entries would have to mirror.
+//
+// Length-variable path: splices the string plus the two character counters
+// that are coupled to it — the paragraph count at /1/1/0/0/5/0/{i}/1 and the
+// style-run count at /1/1/0/0/6/0/{i}/1 (both in UTF-16 code units, trailing
+// \r included; RE 2026-06-11, see
+// incidents/text-btdk-length-variable-write-scoping.md). The btdk layout
+// cache (/1/1/0/1) is left stale on purpose: AE recomputes it on load
+// (ship-gate-proven). Restricted to single-paragraph / single-run /
+// kerning-free documents — how AE distributes a changed count across multiple
+// entries is un-RE'd.
 func (b *layerBackrefs) SetText(newText string) error {
 	if b.btdsChunk == nil {
 		return fmt.Errorf("layer: not a text layer")
@@ -469,13 +482,70 @@ func (b *layerBackrefs) SetText(newText string) error {
 	start := bodyOff + t.SrcStart
 	end := bodyOff + t.SrcEnd
 	encoded := codec.EncodeAEPSText(newText)
-	oldLen := end - start
-	if len(encoded) != oldLen {
-		return fmt.Errorf("layer: SetText length mismatch (new=%d bytes, old=%d bytes — length-preserving only; pad input to match)",
-			len(encoded), oldLen)
+	normalized := codec.NormalizeAEParagraphText(newText)
+	newCount := codec.UTF16CodeUnitLen(normalized)
+	if len(encoded) == end-start && sameParagraphProfile(t.Str, normalized) {
+		copy(b.btdsChunk.Data[start:end], encoded)
+		return nil
 	}
-	copy(b.btdsChunk.Data[start:end], encoded)
+
+	if normalized == "\r" {
+		return fmt.Errorf("layer: SetText with empty text is not supported (un-RE'd; AE empty text layers are a distinct form)")
+	}
+	if pa := codec.PsPath(root, "/1/1/0/0/5/0"); pa == nil || pa.Kind != codec.PsArr || len(pa.Arr) != 1 {
+		return fmt.Errorf("layer: length-variable SetText supports single-paragraph documents only (multi-paragraph needs paragraph-entry splicing, un-RE'd)")
+	}
+	if strings.ContainsAny(newText, "\r\n") {
+		return fmt.Errorf("layer: length-variable SetText supports single-paragraph text only (got a line break)")
+	}
+	if ra := codec.PsPath(root, "/1/1/0/0/6/0"); ra == nil || ra.Kind != codec.PsArr || len(ra.Arr) != 1 {
+		return fmt.Errorf("layer: length-variable SetText supports single-style-run documents only")
+	}
+	if kern := codec.PsPath(root, "/1/1/0/0/8/0"); kern != nil {
+		return fmt.Errorf("layer: length-variable SetText refused — document carries a per-character manual-kerning table (/1/1/0/0/8/0) that would desync")
+	}
+	for _, p := range [2]string{"/1/1/0/0/5/0/0/1", "/1/1/0/0/6/0/0/1"} {
+		if v := codec.PsPath(root, p); v == nil || v.Kind != codec.PsNum {
+			return fmt.Errorf("layer: character counter at %q missing/not a number", p)
+		}
+	}
+
+	// Three splices, each of which re-parses (offsets refresh) and patches the
+	// inner btdk size header. Snapshot for atomicity: splicePSValue builds a
+	// fresh array, so restoring the old slice header undoes everything.
+	snapshot := b.btdsChunk.Data
+	count := []byte(strconv.Itoa(newCount))
+	for _, sp := range []struct {
+		path string
+		src  []byte
+	}{
+		{"/1/1/0/0/0", encoded},
+		{"/1/1/0/0/5/0/0/1", count},
+		{"/1/1/0/0/6/0/0/1", count},
+	} {
+		if _, err := b.splicePSValue(sp.path, sp.src); err != nil {
+			b.btdsChunk.Data = snapshot
+			return fmt.Errorf("layer: SetText splice %s: %w", sp.path, err)
+		}
+	}
 	return nil
+}
+
+// sameParagraphProfile reports whether two normalized paragraph strings
+// (\r-terminated lines) have identical per-paragraph UTF-16 unit counts —
+// the condition under which an in-place string swap leaves every btdk
+// character counter valid.
+func sameParagraphProfile(a, b string) bool {
+	as, bs := strings.Split(a, "\r"), strings.Split(b, "\r")
+	if len(as) != len(bs) {
+		return false
+	}
+	for i := range as {
+		if codec.UTF16CodeUnitLen(as[i]) != codec.UTF16CodeUnitLen(bs[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 // splicePSValue locates the codec.PsValue at `path` (relative to the btdk

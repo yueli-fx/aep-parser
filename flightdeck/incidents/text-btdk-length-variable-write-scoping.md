@@ -35,25 +35,34 @@ resolved_by:
    `/15 19.9375`、bbox 数组 `[0,-75.625,44,19.9375]`、宽度表 `[36,3]`…）——
    全部跟「渲染出来的具体字符串」耦合。这棵树才是 length-variable 写的大头。
 
-## 修法（解封路径，按今日证据）
+## 修法 — v1 已 SHIP（2026-06-11，同日解封）
 
-- **布局缓存大概率不用精确重算——AE 载入时自己重算**。证据：NewTextLayer
-  ship-gate 的 T2 probe（fresh 层等长 SetText "A"→"B"，btdk 布局缓存仍是 "A"
-  的字形度量），AE 2020 + AE 2025 双版本照常打开、`sourceText.value.text`
-  读回 "B"、resave 保留（`TestNewTextLayer_AEShipGate_AE20{20,25}` 2/2 PASS，
-  2026-06-11）。等长 ≠ 字形等宽（A/B 度量不同），所以「stale 像素度量可被接受」
-  已证；**未证**的是 stale 的缓存内字符计数（/5 键）在长度变化时是否也被容忍。
-- **长度可变 splice 机制已有现成范本**：`layerBackrefs.AddFont`（back_layer.go）
-  ——在 btds Data 内插字节 + 手动修内嵌 LIST btdk 的 size header
-  （`bodyOff-8` 处 u32 += delta）；外层 LIST size 由 WriteAEP bottom-up 重算。
-  文本串替换 = 同机制：替换 `/1/1[0]/0/0` 串字节 + 改写 2/3 处的整数计数
-  （PsNum 重序列化也是 length-variable，同样走 splice）+ size header 修正。
-- **建议实施顺序**：v1 限单段落（多段落要 splice 新段落 dict entry，结构性
-  更大）：改串 + 段落计数 + run 计数 + size header，布局缓存原样不动 →
-  AE 双版本 ship-gate。若 AE 拒（缓存内 /5 计数不容忍 stale），fallback 把
-  `/1/1[0]/1` 整棵换成已知可接受的最小形态（如模板 "A" 的）再 gate。
-- 多 run/多段落文本的计数分配策略（新字符归哪个 run）等同 AE 行为 RE，
-  v1 可统一归 run[0]/段落[0]（单 run 单段模板下天然成立）。
+`Layer.SetText` 升级 length-variable（签名不变，语义扩展）：三次 `splicePSValue`
+（串 `/1/1/0/0/0` + 段落计数 `/1/1/0/0/5/0/0/1` + run 计数 `/1/1/0/0/6/0/0/1`，
+每次 re-parse 刷新偏移 + 修内嵌 btdk size header `bodyOff-8`，AddFont 同机制），
+布局缓存原样不动；快照回滚保原子。**AE 2020 + AE 2025 双版本 ship-gate 2/2
+PASS**（`TestSetTextVariable_AEShipGate_AE20{20,25}`：Go-built 工程
+"A"→"Hello AEP parser"〔17 units〕+ "A"→"你好世界"〔5 units〕，AE 读回精确、
+resave 保留）——**stale 布局缓存在长度变化尺度下也被 AE 容忍**（缓存内 /5
+计数同样 stale，AE 载入全部重算；此前 NewTextLayer T2 probe 只证了等长尺度）。
+
+**v1 守卫（refuse 集，解封需 entry-splicing RE）**：变长改字仅限单段落 + 单
+style-run + 无手动 kerning 表（`/1/1/0/0/8/0`）+ 非空。多段落变长需 splice 新
+段落 dict entry；多 run 需计数分配策略（新字符归哪个 run = AE 行为，未 RE）。
+
+**实现陷阱（写时踩到）**：
+
+1. **等长快路径必须比「段落剖面」而非总量**：`"A\rB"→"XYZ"` 字节数、总字符数
+   全相等，但段落边界移动——原地写会让段落计数 [2,2] 失真（应为 [4]）且不报错。
+   快路径条件 = 字节等长 **且逐段 UTF-16 计数相等**（`sameParagraphProfile`）。
+   旧 SetText（只比字节）有此潜伏 bug，本次一并堵死。
+2. **`DecodePSString` 逐 unit `rune(cu)` 打碎代理对**：astral 字符（𝄞/emoji）
+   decode 成 U+FFFD——改 `utf16.Decode` 合成。计数侧 `UTF16CodeUnitLen` 按
+   code units（代理对=2），与 AE 的计数单位一致（你好=3 排除字节假设，fixture
+   text_unicode/text_hello 验证）。
+3. **`re_text.aep` 有历史累积的重复 RE_TEXT comp**（老 JSX 无 fresh_project
+   守卫，[[jsx-state-leak]] 活例）：按名字找层会命中多个，测试须按 parse 序
+   固定取首个，否则「改了最后一个、验了第一个」假阴。
 
 ## 相关
 

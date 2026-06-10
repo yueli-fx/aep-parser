@@ -2475,9 +2475,11 @@ SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) 
 func (l *Layer) SetText(newText string) error
 ```
 
-SetText replaces a text layer's user-visible text in-place. The new text must encode to exactly the same number of bytes as the original PostScript string (length-preserving constraint — the surrounding btds/btdk chunk headers reference fixed byte counts that we won't rewrite). Returns an error when the byte budget doesn't match, when the layer isn't a text layer, or when the original text-string location wasn't recorded during parsing.
+SetText replaces a text layer's user-visible text. The new text may be any length on a single-paragraph, single-run, kerning-free document (the common case, and what NewTextLayer creates): the PostScript string is spliced together with the two character counters coupled to it, and the btdk layout cache is left for AE to recompute on load. Replacements that keep both the encoded byte length and the UTF-16 character count are written in place and work on any document structure, including multi-paragraph text.
 
-Encoding parity with AE: input is split on '\\n' (each segment becomes a paragraph terminated by AE's '\\r' convention), then encoded as UTF-16BE with a leading FE FF BOM, with PostScript specials ( ) \\ escaped at the byte level. Use [TextEncodedByteLen] to predict whether a candidate string fits before calling.
+Returns an error when the layer isn't a text layer, or when a length-changing replacement targets a multi-paragraph / multi-run document, contains a line break, is empty, or the document carries a manual-kerning table — those need paragraph/run-entry splicing that is not RE'd yet.
+
+Encoding parity with AE: input is split on '\\n' (each segment becomes a paragraph terminated by AE's '\\r' convention), then encoded as UTF-16BE with a leading FE FF BOM, with PostScript specials ( ) \\ escaped at the byte level.
 
 After a successful call Layer.TextSource is re-decoded so subsequent reads reflect the new value; Layer.WriteAEP serializes the change.
 

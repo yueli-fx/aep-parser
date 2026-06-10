@@ -3,6 +3,7 @@ package codec
 import (
 	"encoding/binary"
 	"fmt"
+	"unicode/utf16"
 )
 
 // ──────────────────────────────────────────────────────────────────
@@ -365,12 +366,13 @@ func (l *PsLexer) ReadString() PsToken {
 func DecodePSString(b []byte) string {
 	if len(b) >= 2 && b[0] == 0xfe && b[1] == 0xff {
 		r := b[2:]
-		var out []rune
+		units := make([]uint16, 0, len(r)/2)
 		for i := 0; i+1 < len(r); i += 2 {
-			cu := binary.BigEndian.Uint16(r[i : i+2])
-			out = append(out, rune(cu))
+			units = append(units, binary.BigEndian.Uint16(r[i:i+2]))
 		}
-		return string(out)
+		// utf16.Decode combines surrogate pairs (astral chars round-trip;
+		// rune-per-unit would mangle them to U+FFFD).
+		return string(utf16.Decode(units))
 	}
 	return string(b)
 }
