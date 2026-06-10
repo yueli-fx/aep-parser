@@ -19,6 +19,8 @@
    3 — OCR engine init failed
    4 — AE process failed to start
    5 — rules file load failed
+   6 — another AfterFX process already running (screen-rect OCR would read its
+       dialogs; kill stragglers first, or pass -IgnoreRunningAe to proceed)
 #>
 
 [CmdletBinding()]
@@ -28,7 +30,8 @@ param(
     [Parameter(Mandatory)][string]$Done,
     [int]$TimeoutSec  = 180,
     [string]$RulesPath = (Join-Path $PSScriptRoot 'ae_dialog_rules.json'),
-    [int]$TickMs      = 500
+    [int]$TickMs      = 500,
+    [switch]$IgnoreRunningAe
 )
 
 . $PSScriptRoot/AeRun.Lib.ps1
@@ -40,6 +43,20 @@ Remove-Item -LiteralPath $Done -ErrorAction SilentlyContinue
 
 try { $rules = Parse-Rules -Path $RulesPath }
 catch { [Console]::Error.WriteLine("rules load failed: $_"); exit 5 }
+
+# Concurrent-AE guard. Modal capture is by SCREEN RECT — a straggler AfterFX
+# (or the user's own interactive session) puts ITS dialogs where we OCR, and
+# Get-AeModals can enumerate the wrong process's windows. Fail fast instead of
+# producing a confusing exit-2 cascade (incidents/ae-automation-occlusion-crashstate.md).
+if (-not $IgnoreRunningAe) {
+    $straggler = @(Get-Process -Name 'AfterFX*' -ErrorAction SilentlyContinue)
+    if ($straggler.Count -gt 0) {
+        $pids = ($straggler | ForEach-Object { $_.Id }) -join ', '
+        [Console]::Error.WriteLine("AfterFX already running (pid $pids) — kill stragglers (Get-Process AfterFX* | Stop-Process -Force) or pass -IgnoreRunningAe")
+        Write-ActionLog -DumpDir $dumpDir -Event 'ae-already-running' -Data @{ pids = $pids }
+        exit 6
+    }
+}
 
 try {
     Initialize-Win32
@@ -195,6 +212,19 @@ try {
                             -Modals $finalModals `
                             -OcrTexts $ocrTexts `
                             -Meta @{ aeExe = $AeExe; jsx = $Jsx; tickMs = $TickMs }
+
+        # Unknown-modal triage straight to stderr: show what OCR saw + a rule
+        # skeleton, so adding a rule doesn't require digging through the dump.
+        if ($exitCode -eq 2) {
+            [Console]::Error.WriteLine("=== unknown modal — OCR capture(s) ===")
+            foreach ($k in $ocrTexts.Keys) {
+                $txt = ($ocrTexts[$k] -replace "`r?`n", ' / ')
+                [Console]::Error.WriteLine("  $k : $txt")
+            }
+            [Console]::Error.WriteLine("Add a rule to scripts/ae_dialog_rules.json (CJK patterns CONTIGUOUS — matcher strips OCR spaces):")
+            [Console]::Error.WriteLine('  { "name": "<describe>", "windowTitle": [], "windowClass": [], "ocrMatch": ["<distinctive substring>"], "action": "SendKeys", "keys": "{ENTER}", "cooldownMs": 2000, "comment": "<why + which button this presses>" }')
+            [Console]::Error.WriteLine("Full dump: $dumpDir")
+        }
     }
 
     if ($aeProc -and -not $aeProc.HasExited) {
