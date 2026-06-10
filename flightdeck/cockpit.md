@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-10 by claude（Solid/Null/Adjustment ship 后，**测试自动化基建加固**：gate helper 读 JSX 入 test-cache key〔改 JSX 自动失效缓存〕+ exit 1/2 自动 warm-retry；ae_run 并发 AE 守卫 exit 6 + exit-2 stderr 直出 OCR/规则骨架；新增 `scripts/run_ship_gates.ps1` 全量 sweep 台账 + `scripts/regen_fixtures.ps1`/`fixtures_manifest.json` fixture 无人值守重建〔已实战补回 4 套丢失的 before/after 对〕。详 `checklists/re-fixture.md` § 全量 gate sweep）
+**Last updated**: 2026-06-10 by claude（Solid/Null/Adjustment ship + 测试自动化加固：gate 全量 sweep 台账 / fixture manifest 重建 / cache 追踪 / warm-retry / 并发守卫——详 `checklists/re-fixture.md` § 全量 gate sweep）
 **Active focus**: **结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 已落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → **Solid/Null/Adjustment**（embed 模板工程 + 复用 InsertLayer 闭包导入；opti "Soli" 颜色 ARGB@0x0A RE 完；返回层已 parsed 无需 Reopen，详 `incidents/new-layer-types-scoping.md`）。⚠ 新 scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 `unexpected match name` 拒收，已修双 chokepoint（详 `incidents/nextitemid-must-include-layer-ids.md` 第二回）。M8 物理分包已落。
 
 ## 进行中

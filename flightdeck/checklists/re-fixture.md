@@ -1,8 +1,8 @@
 ---
 status: active
 when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file; looking up "which AE version introduced field X"; invoking ae_run.ps1 wrapper for unattended ship-gate; deciding which AE version to use for a new fixture
-applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch, agent-runs-ae, version-choice]
-last_updated: 2026-05-28
+applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch, agent-runs-ae, version-choice, gate-sweep, regen-fixtures, fixtures-manifest, warm-retry, exit-6]
+last_updated: 2026-06-10
 ---
 
 # JSX RE 工作流 + ship-gate
