@@ -89,7 +89,7 @@ Refused layers: camera / light layers (AE does not allow effects on them), and l
 
 Atomic mutation: snapshot parade chunk + scene children + flat Effects slice (+ the pre-auto-create tree state); re-parse the spliced pair to obtain a back-ref-correct *Effect; roll back on any parser warning.
 
-Alpha / structural. Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
+Stable / structural — AE 2020 + AE 2025 ship-gate green across the full 12-template library (24/24), plus the parade auto-create path on a 100% Go-built file (2/2). Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 
 ### RemoveEffect
 
@@ -99,7 +99,7 @@ func RemoveEffect(layer *Layer, index int) error
 
 RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect. It is a thin, index-validated wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for Effect-Parade child removal). Returns an error if the layer has no Effect Parade or index is out of range.
 
-Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+Stable / structural — rides the AE 2020 + AE 2025 ship-gated Effect-Parade child removal. Free function (CLAUDE.md #2 structural-op call-form).
 
 ### SupportedEffects
 

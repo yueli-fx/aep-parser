@@ -11,6 +11,8 @@ last_updated: 2026-06-11
 `ADBE Effect Parade`. Shipped 2026-06-10 (two commits: core mechanic + 12-effect
 library). AE 2020 + AE 2025 ship-gate 24/24 across the full 12-effect library
 (2026-06-11; initially shipped 2026-06-10 on a 5-effect payload-size sample).
+Promoted Alpha → Stable (structural op, CLAUDE.md #2) on the full-library gate,
+together with RemoveEffect (rides the gated Effect-Parade child removal).
 
 ## Effect chunk structure (RE'd from re_property_struct_baseline.aep)
 
