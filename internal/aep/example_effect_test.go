@@ -47,6 +47,27 @@ func ExampleAddEffect() {
 	}
 }
 
+// ExampleSetEffectParam sets effect parameters by full match-name. Unlike raw
+// Property.SetStaticValue it also works on default-elided parameters (a
+// default effect instance only persists params whose value differs from the
+// default) — the missing value stream is materialized first, then written.
+func ExampleSetEffectParam() {
+	var comp *aep.Composition
+	layer := comp.LayerByID(1)
+	if layer == nil {
+		return
+	}
+	fx, err := aep.AddEffect(layer, aep.EffectGaussianBlur)
+	if err != nil {
+		return
+	}
+	// Works although a fresh Gaussian Blur exposes none of these params yet.
+	if _, err := aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0001", 25.0); err != nil {
+		return // e.g. unsupported control type while default-elided
+	}
+	_, _ = aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0003", 1.0) // bools are 0/1 float64
+}
+
 // ExampleRemoveEffect removes the first effect from a layer's Effect Parade —
 // the inverse of AddEffect.
 func ExampleRemoveEffect() {

@@ -695,8 +695,9 @@ func SupportedEffects() []string { return serializer.SupportedEffects() }
 // mutation: snapshot value-group chunk children + flat Parameters + warnings;
 // roll back on any parser warning or value-encode failure.
 //
-// Alpha / structural (pending AE dual-version ship-gate). Free function
-// (CLAUDE.md #2 structural-op call-form).
+// Alpha / structural — AE 2020 + AE 2025 ship-gate green (per-param and
+// generic materialization, values read back on open and after AE's own
+// resave). Free function (CLAUDE.md #2 structural-op call-form).
 func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error) {
 	return serializer.SetEffectParam(layer, fx, paramMatchName, value)
 }
