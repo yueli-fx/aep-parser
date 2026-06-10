@@ -135,13 +135,24 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 
 - `0` — `.done` 出现且 stable，按 PASS contract 走
 - `1` — timeout
-- `2` — 未知 modal（OCR 命中但没规则）
+- `2` — 未知 modal（OCR 命中但没规则）——**OCR 文本 + 规则骨架会直接打到 stderr**，不用翻 dump
 - `3` — OCR engine init 失败
 - `4` — AE 进程启动失败
+- `6` — **已有 AfterFX 进程在跑**（屏幕矩形 OCR 会读到它的对话框）。先 `Get-Process AfterFX* | Stop-Process -Force`，确实要并行才传 `-IgnoreRunningAe`
 
 失败时 dump 落 `<doneFile>.fail/`：`screenshot.png` / `ocr.txt` / `windows.txt` / `actions.log` / `meta.json`。
 
-**Go 端 ship-gate**用 `runAeRunShipGate(t, aeExe, jsxPath, doneFile, timeoutSec)` helper (`internal/aep/ship_gate_helpers_test.go`)，不要再直接 `exec.Command(aeExe, "-r", ...)`。
+**Go 端 ship-gate**用 `runAeRunShipGate(t, aeExe, jsxPath, doneFile, timeoutSec)` helper (`internal/aep/testutil_shipgate_test.go`)，不要再直接 `exec.Command(aeExe, "-r", ...)`。helper 自带两个机制：
+
+- **test-cache 文件追踪**：helper 显式读 verify JSX / ae_run.ps1 / 规则表，把它们纳入 go test cache key——改 JSX 自动失效缓存，**不再需要靠 `-count=1` 纪律防「JSX 改了缓存还绿」**（gate 实跑时仍建议 `-count=1` 强制真跑）。
+- **exit 1/2 自动 warm-retry 一次**：冷启动 flake 自愈；确定性 reject 重试照样红，不会被掩盖。首跑取证保留在 `<doneFile>.fail.1/`。
+
+**⚠️ 非目标：不要并行化 AE gates**（双 AE 同屏会让矩形抓图/前台按键互踩；exit 6 守卫就是为此存在）。
+
+## 全量 gate sweep + fixture 再生（批处理入口）
+
+- **`scripts/run_ship_gates.ps1`** — 全量 ship-gate 回归 sweep：预清理残留 AfterFX → `AE_SHIP_GATE=1 go test -run ShipGate -count=1 -v` → 写 PASS/FAIL/SKIP 台账（`test_data/gate_ledger.json` + `gate_sweep.log`）。跨切面改动（ID 分配 / write 路径 / wrapper）后跑一次；`-Run <pattern>` 可只跑子集；`-ClearCrashState` 在 force-kill 弄脏 crash flag 后用。
+- **`scripts/regen_fixtures.ps1`** — 按 `scripts/fixtures_manifest.json`（44 个生成 JSX 的 AE 版本 / env-mode 矩阵 / 期望产物）无人值守重建 fixture。**默认 only-missing 不碰已有文件**（AE 保存非确定性，乱重生会 churn byte-diff 基线）；`-CheckOnly` 盘点缺失 + 无主 fixture；`-Force` 全重建；`-Only <substring>` 过滤。新增生成 JSX 时**必须**同步 manifest 加条目。
 
 **⚠️ verify JSX `.done` 文件名必须 per-version 唯一**：ship-gate 同一 mode 跨 AE 2020/2025 跑两遍时，verify JSX 若把 `.done` 文件名只按 mode 命名，会(a)第二版覆盖第一版结果、(b)`ae_run.ps1 -Done` 等的是带 version-tag 的名 → 永远等不到 → 每次空等满 `TimeoutSec` 报 exit 1（实际验证早已跑通，假阴性）。修法：JSX 读一个 `$.getenv("..._TAG")`（如 `ae2020_basic`）拼进 `.done` 名，调用方 `-Done` 传同名。见 `verify_ge_insert_layer.jsx` + 2026-05-29 logbook。
 

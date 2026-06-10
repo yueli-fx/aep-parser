@@ -30,6 +30,17 @@ go vet ./...                                                       # 应 clean
 
 如果 PASS 数对不上 cockpit.md，先查最近改动是否漏了同步。
 
+## 全量 AE gate 回归 / fixture 完整性
+
+```powershell
+pwsh -File scripts/run_ship_gates.ps1                  # 全量 ship-gate sweep + 台账 (test_data/gate_ledger.json)
+pwsh -File scripts/run_ship_gates.ps1 -Run 'SolidNull' # 只跑子集
+pwsh -File scripts/regen_fixtures.ps1 -CheckOnly       # fixture 盘点（缺失 + 无主清单）
+pwsh -File scripts/regen_fixtures.ps1                  # 只补缺失 fixture（不碰已有，防 byte-diff 基线漂移）
+```
+
+跨切面改动（ID 分配 / write 路径 / ae_run wrapper / 规则表）→ 跑全量 sweep；新增生成 JSX → 同步 `scripts/fixtures_manifest.json`。详 `re-fixture.md` § 全量 gate sweep。
+
 ## 跑单个测试
 
 ```bash
