@@ -3764,12 +3764,26 @@
       "signature": "func MoveToEnd(l *Layer) error",
       "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers)."
     },
+    "NewCameraLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newcameralayer",
+      "signature": "func NewCameraLayer(c *Composition, name string) (*Layer, error)",
+      "summary": "NewCameraLayer adds a new Camera layer to the composition and returns it."
+    },
     "NewComposition": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#newcomposition",
       "signature": "func NewComposition( p *Project, name string, width, height uint16, FrameRateHz, duration float64, ) (*Composition, error)",
       "summary": "NewComposition adds an empty composition to the project's root folder."
+    },
+    "NewLightLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newlightlayer",
+      "signature": "func NewLightLayer(c *Composition, name string) (*Layer, error)",
+      "summary": "NewLightLayer adds a new Light layer to the composition and returns it."
     },
     "NewProject": {
       "kind": "func",

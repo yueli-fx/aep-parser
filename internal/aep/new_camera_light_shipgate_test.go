@@ -1,0 +1,105 @@
+// internal/aep/new_camera_light_shipgate_test.go
+//
+// AE ship gate for NewCameraLayer / NewLightLayer. Builds a fresh project with
+// one comp containing a Go-created Camera + Light layer, WriteAEP, and has AE
+// open it — proving AE ACCEPTS the cloned-template layers (no silent-drop /
+// corrupt) and reports them as CameraLayer / LightLayer with the right names.
+// Resaves so the Go side confirms AE kept them.
+//
+// Gated by AE_SHIP_GATE. Templates extracted from test_data/re_cameralight.aep.
+package aep_test
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	aep "github.com/example/aep-parser/internal/aep"
+)
+
+func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+	const argsPath = `e:/projects/tools/aep-parser/test_data/camera_light_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_camera_light.jsx`
+	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
+
+	p := aep.NewProject(target)
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewCameraLayer(comp, "Cam1"); err != nil {
+		t.Fatalf("NewCameraLayer: %v", err)
+	}
+	if _, err := aep.NewLightLayer(comp, "Light1"); err != nil {
+		t.Fatalf("NewLightLayer: %v", err)
+	}
+
+	tempDir := t.TempDir()
+	inputAEP := filepath.Join(tempDir, "camlight_in.aep")
+	resavedAEP := filepath.Join(tempDir, "camlight_resaved.aep")
+	doneFile := filepath.Join(tempDir, "camlight.done")
+
+	out, err := os.Create(inputAEP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.WriteAEP(out); err != nil {
+		out.Close()
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	out.Close()
+
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
+		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
+	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(argsPath)
+	os.Remove(doneFile)
+
+	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
+
+	content, err := os.ReadFile(doneFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(content)
+	t.Logf("%s AE readback:\n%s", ver, body)
+	if lines := strings.SplitN(body, "\n", 2); len(lines) == 0 || strings.TrimSpace(lines[0]) != "PASS" {
+		t.Errorf("%s camera/light ship gate FAIL:\n%s", ver, body)
+	}
+
+	// Preservation proof: AE's resave kept both layers with their types.
+	re, err := aep.Open(resavedAEP)
+	if err != nil {
+		t.Fatalf("re-open AE resave: %v", err)
+	}
+	var cam, light bool
+	for _, l := range re.Compositions[0].Layers {
+		if l.Name == "Cam1" && l.Type == aep.LayerTypeCamera {
+			cam = true
+		}
+		if l.Name == "Light1" && l.Type == aep.LayerTypeLight {
+			light = true
+		}
+	}
+	if !cam {
+		t.Errorf("%s resaved: Camera 'Cam1' missing", ver)
+	}
+	if !light {
+		t.Errorf("%s resaved: Light 'Light1' missing", ver)
+	}
+}
+
+func TestNewCameraLight_AEShipGate_AE2020(t *testing.T) {
+	runCameraLightGate(t, aep.TargetAE2020, ae2020(), "AE2020")
+}
+
+func TestNewCameraLight_AEShipGate_AE2025(t *testing.T) {
+	runCameraLightGate(t, aep.TargetAE2025, ae2025(), "AE2025")
+}

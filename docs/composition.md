@@ -1168,6 +1168,30 @@ Atomic mutation: if lowering fails, or downstream parse emits any warning, all s
 
 Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
 
+### NewCameraLayer
+
+```go
+func NewCameraLayer(c *Composition, name string) (*Layer, error)
+```
+
+NewCameraLayer adds a new Camera layer to the composition and returns it.
+
+A camera is source-less: it is defined entirely by its ldta + Camera Options property group. The new layer is cloned from an embedded AE-native Camera Layr (so every AE-internal flag byte is faithful), with the layer ID, name, and time span (0 → comp duration) patched for this comp. Camera position / point of interest / options inherit the template's AE defaults; adjust afterward via the Camera* setters once the project is re-parsed.
+
+Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+
+### NewLightLayer
+
+```go
+func NewLightLayer(c *Composition, name string) (*Layer, error)
+```
+
+NewLightLayer adds a new Light layer to the composition and returns it.
+
+Like NewCameraLayer, a light is source-less (ldta + Light Options group), cloned from an embedded AE-native Light Layr with ID / name / time span patched. Light kind / color / intensity inherit the template's AE defaults; adjust afterward via the Light* setters once the project is re-parsed.
+
+Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+
 <!-- Hand-authored reference table. -->
 
 ## Renderer engines

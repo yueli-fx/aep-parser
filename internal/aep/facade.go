@@ -121,6 +121,34 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	return serializer.NewShapeLayer(c, name)
 }
 
+// NewCameraLayer adds a new Camera layer to the composition and returns it.
+//
+// A camera is source-less: it is defined entirely by its ldta + Camera Options
+// property group. The new layer is cloned from an embedded AE-native Camera Layr
+// (so every AE-internal flag byte is faithful), with the layer ID, name, and
+// time span (0 → comp duration) patched for this comp. Camera position / point
+// of interest / options inherit the template's AE defaults; adjust afterward via
+// the Camera* setters once the project is re-parsed.
+//
+// Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural.
+// Free function (CLAUDE.md #2 structural-op call-form).
+func NewCameraLayer(c *Composition, name string) (*Layer, error) {
+	return serializer.NewCameraLayer(c, name)
+}
+
+// NewLightLayer adds a new Light layer to the composition and returns it.
+//
+// Like NewCameraLayer, a light is source-less (ldta + Light Options group),
+// cloned from an embedded AE-native Light Layr with ID / name / time span
+// patched. Light kind / color / intensity inherit the template's AE defaults;
+// adjust afterward via the Light* setters once the project is re-parsed.
+//
+// Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural.
+// Free function (CLAUDE.md #2 structural-op call-form).
+func NewLightLayer(c *Composition, name string) (*Layer, error) {
+	return serializer.NewLightLayer(c, name)
+}
+
 // DeleteLayer removes the layer at the given 0-based index in c.Layers.
 // Returns nil on success, or an error if a refuse-case triggers (index
 // out of range / comp lacks itemList back-ref / target is the last
