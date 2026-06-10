@@ -79,13 +79,22 @@ Output equals what AE itself writes for a touched param (value ≠ default by
 construction), so no default-reset pass and no re-gate of the 29
 add-templates. **AE 2020 + AE 2025 ship-gate PASS**
 (`TestSetEffectParam_AEShipGate_AE20{20,25}`, verify_effect_param.jsx:
-all-Go-built file, GB -0001/-0002/-0003 materialized out of order, AE reads
-back 25/2/1, and re-reads them after its own resave). Pilot registry = the 3
-Gaussian Blur params; extending = run the touch-all fixture per effect +
-extractor (watch per-version defaults, see below). Still open: generic
-per-control-type template (~7 total, would obviate per-param extraction —
-needs a gate to prove tdb4 flags are not param-specific); pard lastValue
-refresh (cosmetic — AE accepted without it).
+all-Go-built file, GB -0001/-0002/-0003 + Drop Shadow -0004/-0005/-0006
+materialized out of order, AE reads back every value on open AND after
+reopening its own resave).
+
+**Generic per-control-type templates PROVEN (same gate)**: the value stream's
+tdbs shape is control-type-keyed, not param-keyed. The Drop Shadow params
+have no per-param template — they materialize from the GB-extracted
+scalar/boolean streams with tdmn (match-name), tdsn (display name), and
+tdum/tduM (scalar min/max) patched from the host effect's own pard
+definition (parT is never elided, so the metadata is always in-file). So
+**any scalar / enum / boolean param of any effect is settable today** —
+no per-effect extraction sweep needed. Caveats: enum's generic template is
+byte-identical to the gated GB per-param one (tdmn-patched cross-effect enum
+not separately AE-gated yet); angle / color / point / 2D / 3D / slider
+control types still refuse (template TBD — extract from a touched fixture
+when needed). pard lastValue not refreshed (cosmetic — AE accepted without).
 
 ## Finding 2 — cross-version DEFAULT drift re-elides on resave (not a bug)
 

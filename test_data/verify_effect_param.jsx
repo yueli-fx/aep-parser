@@ -1,12 +1,14 @@
 // Ship-gate verify for SetEffectParam (effect-parameter materialization,
 // synthesis-lite). Reads effect_param_args.json {input, done, resaved, expect}:
-//   expect = array of {param: "<full match-name>", value: <number>} the named
-//            Gaussian Blur instance should read back after Go materialized +
-//            set the params.
+//   expect = array of {effect: "<effect match-name>", param: "<full param
+//            match-name>", value: <number>} the layer's effects should read
+//            back after Go materialized + set the params.
 // Opens the Go-written input, finds the first layer with an Effect Parade,
-// reads each expected param's value off the Gaussian Blur effect, compares
-// (small float tolerance), writes PASS/FAIL + diagnostics to .done, and
-// resaves so the Go side can confirm AE kept the values.
+// reads each expected param's value off its effect, compares (small float
+// tolerance), resaves, then REOPENS the resave and reads again — a param set
+// to a value equal to this AE version's default is legitimately re-elided
+// from the file, but its effective value must survive via the default.
+// Writes PASS/FAIL + diagnostics to .done.
 (function () {
     var argsFile = new File("e:/projects/tools/aep-parser/test_data/effect_param_args.json");
     argsFile.open("r");
@@ -24,24 +26,26 @@
             var it = app.project.item(i);
             if (it instanceof CompItem) { comp = it; break; }
         }
-        var fx = null;
+        var parade = null;
         if (!comp) {
             fail(label + ": no CompItem in project");
             return;
         }
         for (var li = 1; li <= comp.numLayers; li++) {
             var p = comp.layer(li).property("ADBE Effect Parade");
-            if (p && p.numProperties > 0) {
-                fx = p.property("ADBE Gaussian Blur 2");
-                if (fx) break;
-            }
+            if (p && p.numProperties > 0) { parade = p; break; }
         }
-        if (!fx) {
-            fail(label + ": no Gaussian Blur instance found");
+        if (!parade) {
+            fail(label + ": no layer with effects found");
             return;
         }
         for (var j = 0; j < args.expect.length; j++) {
             var e = args.expect[j];
+            var fx = parade.property(e.effect);
+            if (!fx) {
+                fail(label + ": effect " + e.effect + " not found");
+                continue;
+            }
             var prop = fx.property(e.param);
             if (!prop) {
                 fail(label + ": " + e.param + " not found on effect");

@@ -59,15 +59,24 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 	if len(fx.Parameters) != 1 {
 		t.Fatalf("precondition: default GB should expose 1 param, got %d", len(fx.Parameters))
 	}
-	set := func(mn string, v float64) {
+	// Drop Shadow params have no per-param template — they exercise the
+	// generic per-control-type fallback (pard-patched tdmn/tdsn/tdum/tduM).
+	ds, err := aep.AddEffect(l, aep.EffectDropShadow)
+	if err != nil {
+		t.Fatalf("AddEffect(DropShadow): %v", err)
+	}
+	set := func(e *aep.Effect, mn string, v float64) {
 		t.Helper()
-		if _, err := aep.SetEffectParam(l, fx, mn, v); err != nil {
+		if _, err := aep.SetEffectParam(l, e, mn, v); err != nil {
 			t.Fatalf("SetEffectParam(%s): %v", mn, err)
 		}
 	}
-	set("ADBE Gaussian Blur 2-0001", 25)
-	set("ADBE Gaussian Blur 2-0002", 2)
-	set("ADBE Gaussian Blur 2-0003", 1)
+	set(fx, "ADBE Gaussian Blur 2-0001", 25)
+	set(fx, "ADBE Gaussian Blur 2-0002", 2)
+	set(fx, "ADBE Gaussian Blur 2-0003", 1)
+	set(ds, "ADBE Drop Shadow-0004", 20) // Distance (scalar, generic)
+	set(ds, "ADBE Drop Shadow-0005", 10) // Softness (scalar, generic)
+	set(ds, "ADBE Drop Shadow-0006", 1)  // Shadow Only (boolean, generic)
 
 	tempDir := t.TempDir()
 	inputAEP := filepath.Join(tempDir, "setparam_in.aep")
@@ -85,9 +94,12 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 	out.Close()
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expect":[`+
-		`{"param":"ADBE Gaussian Blur 2-0001","value":25},`+
-		`{"param":"ADBE Gaussian Blur 2-0002","value":2},`+
-		`{"param":"ADBE Gaussian Blur 2-0003","value":1}]}`,
+		`{"effect":"ADBE Gaussian Blur 2","param":"ADBE Gaussian Blur 2-0001","value":25},`+
+		`{"effect":"ADBE Gaussian Blur 2","param":"ADBE Gaussian Blur 2-0002","value":2},`+
+		`{"effect":"ADBE Gaussian Blur 2","param":"ADBE Gaussian Blur 2-0003","value":1},`+
+		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0004","value":20},`+
+		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0005","value":10},`+
+		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0006","value":1}]}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
@@ -124,11 +136,16 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 	want := map[string]float64{
 		"ADBE Gaussian Blur 2-0001": 25,
 		"ADBE Gaussian Blur 2-0002": 2,
+		"ADBE Drop Shadow-0004":     20,
+		"ADBE Drop Shadow-0005":     10,
+		"ADBE Drop Shadow-0006":     1,
 	}
 	got := map[string]float64{}
-	for _, p := range rl.Effects[0].Parameters {
-		if f, ok := p.StaticValue.(float64); ok {
-			got[p.MatchName] = f
+	for _, e := range rl.Effects {
+		for _, p := range e.Parameters {
+			if f, ok := p.StaticValue.(float64); ok {
+				got[p.MatchName] = f
+			}
 		}
 	}
 	for mn, v := range want {

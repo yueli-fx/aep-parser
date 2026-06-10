@@ -681,9 +681,14 @@ func SupportedEffects() []string { return serializer.SupportedEffects() }
 // default-elided, the parameter's (tdmn, tdbs) value stream is first
 // materialized from an embedded AE-native template (synthesis-lite) at its
 // definition-order position, then the caller's value is written — matching
-// what AE itself persists for a touched parameter. Materializable params are
-// listed by SupportedEffectParams; params already present on the effect are
-// settable regardless.
+// what AE itself persists for a touched parameter. Any scalar / enum /
+// boolean parameter of any effect materializes via the generic
+// per-control-type template, patched (match-name, display name, scalar
+// min/max) from the host effect's own pard definition — parameter
+// definitions are never elided, so the metadata is always in-file. Other
+// control types (angle / color / point / slider …) currently return an
+// error when elided; params already present on the effect are settable
+// regardless of control type.
 //
 // The materialized stream carries no tdpi host binding (only the
 // always-present -0000 stream does), so no retarget is needed. Atomic
@@ -696,9 +701,11 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 	return serializer.SetEffectParam(layer, fx, paramMatchName, value)
 }
 
-// SupportedEffectParams returns the sorted parameter match-names
-// SetEffectParam can materialize from an embedded template when the target
-// parameter is default-elided on its effect instance.
+// SupportedEffectParams returns the sorted parameter match-names with a
+// dedicated per-param template. SetEffectParam is NOT limited to this list —
+// scalar / enum / boolean params of any effect materialize via the generic
+// per-control-type fallback, and already-present params are settable
+// regardless.
 func SupportedEffectParams() []string { return serializer.SupportedEffectParams() }
 
 // RemoveEffect removes the effect at the given 0-based index from the layer's

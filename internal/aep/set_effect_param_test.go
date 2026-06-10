@@ -183,6 +183,72 @@ func TestSetEffectParam_ParsedFixtureLayer(t *testing.T) {
 	}
 }
 
+// TestSetEffectParam_GenericControlTypeFallback materializes params that have
+// NO per-param template, on effects other than Gaussian Blur, via the generic
+// per-control-type templates patched from the host effect's pard definitions.
+func TestSetEffectParam_GenericControlTypeFallback(t *testing.T) {
+	rp, l, _ := gbDefaultInstanceLayer(t)
+	ds, err := aep.AddEffect(l, aep.EffectDropShadow)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		mn string
+		v  float64
+	}{
+		{"ADBE Drop Shadow-0004", 20}, // Distance (scalar)
+		{"ADBE Drop Shadow-0005", 10}, // Softness (scalar)
+		{"ADBE Drop Shadow-0006", 1},  // Shadow Only (boolean)
+	}
+	for _, c := range cases {
+		p, err := aep.SetEffectParam(l, ds, c.mn, c.v)
+		if err != nil {
+			t.Fatalf("SetEffectParam(%s): %v", c.mn, err)
+		}
+		if f, ok := p.StaticValue.(float64); !ok || f != c.v {
+			t.Errorf("%s = %v, want %v", c.mn, p.StaticValue, c.v)
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := rp.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rl := layerWithEffects(re)
+	if rl == nil {
+		t.Fatal("re-parsed: no layer with effects")
+	}
+	var rds *aep.Effect
+	for _, e := range rl.Effects {
+		if e.MatchName == aep.EffectDropShadow {
+			rds = e
+		}
+	}
+	if rds == nil {
+		t.Fatal("re-parsed: Drop Shadow missing")
+	}
+	vals := map[string]any{}
+	var order []string
+	for _, p := range rds.Parameters {
+		vals[p.MatchName] = p.StaticValue
+		order = append(order, p.MatchName)
+	}
+	for _, c := range cases {
+		if f, ok := vals[c.mn].(float64); !ok || f != c.v {
+			t.Errorf("re-parsed %s = %v, want %v", c.mn, vals[c.mn], c.v)
+		}
+	}
+	want := []string{"ADBE Drop Shadow-0000", "ADBE Drop Shadow-0004", "ADBE Drop Shadow-0005", "ADBE Drop Shadow-0006"}
+	if !eq(order, want) {
+		t.Errorf("re-parsed order = %v, want %v", order, want)
+	}
+}
+
 func TestSupportedEffectParams(t *testing.T) {
 	got := aep.SupportedEffectParams()
 	if len(got) != 3 {

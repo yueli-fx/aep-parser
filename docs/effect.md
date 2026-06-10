@@ -120,7 +120,7 @@ SetEffectParam sets an effect parameter's static value by full parameter match-n
 	fx, _ := aep.AddEffect(layer, aep.EffectGaussianBlur)
 	_, err := aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0001", 25.0)
 
-Why this exists: AE persists an effect parameter only while its value differs from the default — on a default instance the tunable params have no value stream at all (only "\<effect>-0000" survives), so plain Property.SetStaticValue has nothing to target. When the parameter is already present, SetEffectParam is exactly SetStaticValue. When it is default-elided, the parameter's (tdmn, tdbs) value stream is first materialized from an embedded AE-native template (synthesis-lite) at its definition-order position, then the caller's value is written — matching what AE itself persists for a touched parameter. Materializable params are listed by SupportedEffectParams; params already present on the effect are settable regardless.
+Why this exists: AE persists an effect parameter only while its value differs from the default — on a default instance the tunable params have no value stream at all (only "\<effect>-0000" survives), so plain Property.SetStaticValue has nothing to target. When the parameter is already present, SetEffectParam is exactly SetStaticValue. When it is default-elided, the parameter's (tdmn, tdbs) value stream is first materialized from an embedded AE-native template (synthesis-lite) at its definition-order position, then the caller's value is written — matching what AE itself persists for a touched parameter. Any scalar / enum / boolean parameter of any effect materializes via the generic per-control-type template, patched (match-name, display name, scalar min/max) from the host effect's own pard definition — parameter definitions are never elided, so the metadata is always in-file. Other control types (angle / color / point / slider …) currently return an error when elided; params already present on the effect are settable regardless of control type.
 
 The materialized stream carries no tdpi host binding (only the always-present -0000 stream does), so no retarget is needed. Atomic mutation: snapshot value-group chunk children + flat Parameters + warnings; roll back on any parser warning or value-encode failure.
 
@@ -132,7 +132,7 @@ Alpha / structural (pending AE dual-version ship-gate). Free function (CLAUDE.md
 func SupportedEffectParams() []string
 ```
 
-SupportedEffectParams returns the sorted parameter match-names SetEffectParam can materialize from an embedded template when the target parameter is default-elided on its effect instance.
+SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless.
 
 <!-- Hand-authored note. -->
 

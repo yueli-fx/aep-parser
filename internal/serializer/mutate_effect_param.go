@@ -16,7 +16,9 @@ package serializer
 import (
 	"bytes"
 	"embed"
+	"encoding/binary"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"sync"
@@ -43,13 +45,27 @@ var effectParamTemplateFiles = map[string]string{
 	"ADBE Gaussian Blur 2-0003": "templates/effectparam_adbe_gaussian_blur_2_0003.bin", // Repeat Edge Pixels (bool)
 }
 
+// genericEffectParamTemplates maps a pard control type to a template usable
+// for ANY effect's param of that type: the value stream's shape is
+// control-type-keyed, not param-keyed (ship-gate-proven by materializing Drop
+// Shadow / Box Blur params from these Gaussian-Blur-extracted streams). The
+// per-instance fields (tdmn match-name, tdsn display name, tdum/tduM min/max)
+// are patched from the host effect's own pard definition before splicing.
+var genericEffectParamTemplates = map[PropertyControlType]string{
+	PCTLScalar:  "templates/effectparam_adbe_gaussian_blur_2_0001.bin",
+	PCTLEnum:    "templates/effectparam_adbe_gaussian_blur_2_0002.bin",
+	PCTLBoolean: "templates/effectparam_adbe_gaussian_blur_2_0003.bin",
+}
+
 var effectParamTemplateCache = map[string]*cachedEffectTemplate{}
 var effectParamTemplateCacheMu sync.Mutex
 
-// SupportedEffectParams returns the sorted parameter match-names
-// SetEffectParam can materialize from an embedded template when the target
-// parameter is default-elided. Parameters already present on an effect are
-// settable regardless of this list.
+// SupportedEffectParams returns the sorted parameter match-names with a
+// dedicated per-param template. SetEffectParam is NOT limited to this list:
+// any scalar / enum / boolean parameter of any effect materializes via the
+// generic per-control-type fallback (patched from the host effect's pard
+// definition), and parameters already present on an effect are settable
+// regardless.
 func SupportedEffectParams() []string {
 	names := make([]string, 0, len(effectParamTemplateFiles))
 	for k := range effectParamTemplateFiles {
@@ -62,13 +78,48 @@ func SupportedEffectParams() []string {
 func cloneEffectParamTemplate(paramMatchName string) (tdmn, tdbs *rifx.Chunk, err error) {
 	path, ok := effectParamTemplateFiles[paramMatchName]
 	if !ok {
-		return nil, nil, fmt.Errorf("SetEffectParam: parameter %q is default-elided on this effect instance and no embedded template exists to materialize it (have: %v)", paramMatchName, SupportedEffectParams())
+		return nil, nil, fmt.Errorf("SetEffectParam: no per-param template for %q", paramMatchName)
 	}
+	return cloneParamTemplateByPath(paramMatchName, path)
+}
+
+// cloneGenericParamTemplate materializes paramMatchName from the generic
+// per-control-type template, patched with the param's own pard metadata:
+// tdmn match-name, tdsn display name, and (scalar) tdum/tduM min/max.
+func cloneGenericParamTemplate(paramMatchName string, def *pardParamDef) (tdmnCh, tdbsCh *rifx.Chunk, err error) {
+	path, ok := genericEffectParamTemplates[def.controlType]
+	if !ok {
+		return nil, nil, fmt.Errorf("SetEffectParam: parameter %q is default-elided and its control type %d has no generic template yet (supported: scalar/enum/boolean)", paramMatchName, def.controlType)
+	}
+	_, tdbsCh, err = cloneParamTemplateByPath(paramMatchName, path)
+	if err != nil {
+		return nil, nil, err
+	}
+	for i, ch := range tdbsCh.Children {
+		switch ch.ID {
+		case rifx.IDTdsn:
+			if def.name != "" {
+				tdbsCh.Children[i] = makeTdsn(def.name)
+			}
+		case rifx.IDtdum:
+			if f, ok := def.minValue.(float64); ok && len(ch.Data) >= 8 {
+				binary.BigEndian.PutUint64(ch.Data[0:8], math.Float64bits(f))
+			}
+		case rifx.IDtduM:
+			if f, ok := def.maxValue.(float64); ok && len(ch.Data) >= 8 {
+				binary.BigEndian.PutUint64(ch.Data[0:8], math.Float64bits(f))
+			}
+		}
+	}
+	return makeTdmn(paramMatchName), tdbsCh, nil
+}
+
+func cloneParamTemplateByPath(paramMatchName, path string) (tdmn, tdbs *rifx.Chunk, err error) {
 	effectParamTemplateCacheMu.Lock()
-	ct := effectParamTemplateCache[paramMatchName]
+	ct := effectParamTemplateCache[path]
 	if ct == nil {
 		ct = &cachedEffectTemplate{}
-		effectParamTemplateCache[paramMatchName] = ct
+		effectParamTemplateCache[path] = ct
 	}
 	effectParamTemplateCacheMu.Unlock()
 
@@ -149,7 +200,18 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 
 	tdmnCh, tdbsCh, err := cloneEffectParamTemplate(paramMatchName)
 	if err != nil {
-		return nil, err
+		// Generic fallback: the host effect's own parT carries the param's
+		// full definition (parT is never elided) — materialize from the
+		// control-type-keyed template patched with that pard metadata.
+		defs := parsePardParams(pgb.chunk)
+		def := defs[paramMatchName]
+		if def == nil {
+			return nil, fmt.Errorf("SetEffectParam: effect %q has no parameter %q in its pard definitions", fx.MatchName, paramMatchName)
+		}
+		tdmnCh, tdbsCh, err = cloneGenericParamTemplate(paramMatchName, def)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Insertion point: definition order = ascending param match-name among the
