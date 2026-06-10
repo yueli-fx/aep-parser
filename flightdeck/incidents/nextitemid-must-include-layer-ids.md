@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: implementing any allocItemID / monotonic-ID logic; computing max(used IDs) across a parsed project; debugging head-counter collisions after structural mutation; reviewing initDerived or any function summing IDs across project state
-applies_to: [nextItemID, allocItemID, head-counter, id-allocation, initDerived, layer-id, parse, monotonic-id, inv-9, duplicate-layer, new-shape-layer]
-last_updated: 2026-05-28
+when_to_read: implementing any allocItemID / monotonic-ID logic; computing max(used IDs) across a parsed project; debugging head-counter collisions after structural mutation; reviewing initDerived or any function summing IDs across project state; AE 2025 rejects a Go-built file with "unexpected match name searched for in group"
+applies_to: [nextItemID, allocItemID, head-counter, id-allocation, initDerived, layer-id, parse, monotonic-id, inv-9, duplicate-layer, new-shape-layer, service-layers, dlay, ae2025-reject]
+last_updated: 2026-06-10
 ---
 
 # initDerived must walk LAYER IDs when computing nextItemID
@@ -59,6 +59,31 @@ for _, c := range p.Compositions {
 `TestDuplicateLayer_ExplicitMatte_RoundTrip` 走 `re_trackmatte_ae24.aep` 这条路径 —— 修复后 clone 的 ID 是 68（不撞），round-trip 后 LayerByID 找到 clone 自身（不是 ID==67 的解 layer）。
 
 不必加 dedicated regression test：`re_trackmatte_ae24.aep` 解析时就走 fix 后的 initDerived，dup test 之间 cover。
+
+## 第二回（2026-06-10）：service 层也在同一 namespace —— AE 2025 直接拒收
+
+NewSolidLayer 暴露同一 scar 的更深层：comp 的 **service 层**（DLay / SLay×6 /
+CLay×3 / SecL，dummy-comp 模板里恒占 ID 2..12；真实 AE 文件也有）**不进
+`c.Layers`**（opaque 保留），所以修过的 initDerived 仍看不见它们。Go-built
+工程（NewProject + NewComposition）的 nextItemID = 2 → `allocItemID` 发出
+2/3 给 footage item + 层 → 与 service 层撞号。
+
+**表象差异**：AE 2020 宽容（gate PASS）；**AE 2025 open 即抛
+`内部验证错误 {unexpected match name searched for in group}`**（mode 3，JSX
+catch 到）。同字节文件插进 parsed AE-native 工程（nextItemID 高）则双版本全
+过 —— bisect 关键一刀。
+
+**为何以前没炸**：真实 AE 文件 service ID 很小（comp 创建后立刻分配），永远
+< 已有 max(ID)；唯一能让 nextItemID 落进 2..12 的是「除了 dummy comp 几乎空
+白」的 Go-built 工程，而旧的结构性创建（shape/camera/light）层 ID 走
+`maxLayerIDInItemList+1`（≥13）恰好绕开 —— `spliceLayerClone`/`allocItemID`
+路径第一次踩上去。
+
+**修复（两个 chokepoint）**：`initDerived` per-comp 加扫
+`maxLayerIDInItemList(cb.itemList)`（盖住 parse / Reopen 路径）+
+`NewComposition` 落 comp 后同样 bump（盖住 Go-built 路径）。副作用：多 comp
+Go-built 工程的第二个 comp item ID 从 2 变 13（单调性不变，AE 无所谓）；
+受影响 AE gate（V2_1 head counter 字节变化）复跑双版本 PASS。
 
 ## Related
 

@@ -413,6 +413,14 @@ func NewComposition(
 	// comp.itemList 已由 parseComposition 设置
 	p.Compositions = append(p.Compositions, comp)
 
+	// 8. Bump nextItemID past the template's service-layer IDs (DLay/SLay/
+	// CLay/SecL hold 2..12 in the same head-counter namespace; they never
+	// enter comp.Layers, so allocItemID would otherwise hand out colliding
+	// IDs — AE 2025 rejects the file). Mirrors the initDerived scan.
+	if m := maxLayerIDInItemList(itemList); m >= scene.ProjectNextItemID(p) {
+		scene.SetProjectNextItemID(p, m+1)
+	}
+
 	return comp, nil
 }
 

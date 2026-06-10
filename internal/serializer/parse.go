@@ -162,6 +162,17 @@ func initDerived(p *Project, rifxRoot *rifx.Chunk) {
 				maxID = l.ID
 			}
 		}
+		// Comps also carry non-parsed service layers (DLay/SLay/CLay/SecL —
+		// present in AE files and in our dummy-comp template with IDs 2..12)
+		// whose ldta IDs live in the same head-counter namespace but never
+		// enter c.Layers. Scan the raw itemList so allocItemID can't collide
+		// with them (AE 2025 rejects such collisions with "unexpected match
+		// name searched for in group"; see nextitemid-must-include-layer-ids).
+		if cb := compositionBack(c); cb != nil && cb.itemList != nil {
+			if m := maxLayerIDInItemList(cb.itemList); m > maxID {
+				maxID = m
+			}
+		}
 	}
 	for _, f := range p.Footage {
 		if f.ID > maxID {
