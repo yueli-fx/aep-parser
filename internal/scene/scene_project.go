@@ -296,6 +296,9 @@ type Footage struct {
 	Duration  float64 // duration in seconds; 0 for stills
 	IsStill   bool    // AE flagged this as a still image
 	IsSolid   bool    // AE solid (generated solid-color source); solids have no disk path
+	// SolidColor is the solid's RGB color in 0..1 (only meaningful when
+	// IsSolid; parsed from the opti "Soli" chunk, alpha is always 1.0).
+	SolidColor [3]float64
 	// IsPlaceholder is true when opti tag = "Plac" (AE's placeholder
 	// footage — name + dimensions only, no source file). Mutually
 	// exclusive with IsSolid and with having a non-empty Path.

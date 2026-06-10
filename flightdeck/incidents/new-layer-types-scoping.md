@@ -1,15 +1,47 @@
 ---
 status: active
-when_to_read: implementing NewSolidLayer / NewNullLayer / NewAdjustmentLayer / NewCameraLayer / NewLightLayer; scoping a new from-scratch layer-creation path; deciding embed-template vs from-scratch for a footage-backed layer; RE'ing the solid footage Item (opti "Soli" / Pin / sspc)
-applies_to: [new-layer, solid-layer, null-layer, adjustment-layer, camera-layer, light-layer, footage-item, opti, soli, pin, sspc, structural-write, item-creation, embed-template, scoping]
+when_to_read: implementing NewSolidLayer / NewNullLayer / NewAdjustmentLayer / NewCameraLayer / NewLightLayer; scoping a new from-scratch layer-creation path; deciding embed-template vs from-scratch for a footage-backed layer; RE'ing the solid footage Item (opti "Soli" / Pin / sspc); patching solid color / dimensions / footage name
+applies_to: [new-layer, solid-layer, null-layer, adjustment-layer, camera-layer, light-layer, footage-item, opti, soli, pin, sspc, structural-write, item-creation, embed-template, scoping, solid-color, template-project]
 last_updated: 2026-06-10
 ---
 
-# New layer types — scoping + RE head start
+# New layer types — scoping → ALL SHIPPED (2026-06-10)
 
-Currently only `NewShapeLayer` creates a layer from scratch. The user-requested
-"各个图层的生成" (Solid / Null / Adjustment / Camera / Light) splits by what
-backing each needs. Scoped 2026-06-10 (no code yet — sizing + RE breadcrumbs).
+Camera/Light shipped first ([[camera-light-layer-create-re]]); Solid/Null/
+Adjustment shipped same day — AE 2020 + 2025 ship-gate PASS
+(`TestNewSolidNull_AEShipGate_AE20{20,25}`). § "As shipped" below records the
+actual mechanism (it differs from the original recommendation in one key way:
+whole-template-project + InsertLayer reuse, NOT per-chunk .bin extraction).
+
+## As shipped — solid family (mutate_layer_solid.go)
+
+- **Embed a whole AE-2020 template PROJECT** (`templates/solidnull_2020.aep`,
+  one comp "TplComp" with layers TplSolid/TplNull/TplAdj) and **reuse
+  `insertLayerCrossProject`** — the existing gated machinery already does
+  footage-closure import with fresh item IDs + SourceID remap, which is exactly
+  solid creation. No per-chunk extraction, no new splice code. (Called directly,
+  not via the public `InsertLayer` wrapper — its refuse-matrix only admits AV
+  src, and a template null parses as `LayerTypeNull`.)
+- **Per-instance patches, all length-preserving**: layer Utf8 name (managed
+  splice) · time-span re-home 0→comp duration (`Set{StartTime,InPoint,OutPoint}`)
+  · opti name @0x1A · opti color · sspc W/H · ldta pad/trim to capability
+  LdtaSize · cdta @0x18 "user content" bump.
+- **opti "Soli" layout (282B, RE: re_solidnull.aep)**: tag @0x00, **ARGB
+  4×float32 BE @0x0A** (A=1.0 always), **name @0x1A** NUL-terminated in a fixed
+  256B tail → rename is length-preserving. Solid footage's Item-level Utf8 is
+  EMPTY — the display name lives only in opti.
+- **JSX gotcha**: a layer never explicitly renamed stores an empty Utf8 (AE
+  shows the source name) — fixture JSX must set `layer.name = ...` or the Go
+  side can't find template layers by name.
+- The returned layer is already **parsed** (InsertLayer re-parses) — setters
+  work immediately, no [[add-effect-splice-re]] Reopen needed.
+- **ID-namespace trap (the one real reject)**: Go-built dest comps carry dummy
+  service layers DLay/SLay/CLay/SecL with IDs 2..12 invisible to `c.Layers`;
+  `allocItemID` handed out 2/3 → **AE 2025 rejects** with `unexpected match
+  name searched for in group` (AE 2020 tolerates). Fixed in initDerived +
+  NewComposition — details in [[nextitemid-must-include-layer-ids]].
+
+## Original scoping (kept for the record)
 
 ## Two families
 

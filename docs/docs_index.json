@@ -1000,6 +1000,14 @@
       "example": true,
       "summary": "SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's \"fullpath\" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path."
     },
+    "Footage.SolidColor": {
+      "kind": "field",
+      "file": "footage.md",
+      "anchor": "#footagesolidcolor",
+      "signature": "SolidColor [3]float64",
+      "rw": "read-only",
+      "summary": "SolidColor is the solid's RGB color in 0..1 (only meaningful when IsSolid; parsed from the opti \"Soli\" chunk, alpha is always 1.0)."
+    },
     "Footage.SspcData": {
       "kind": "getter",
       "file": "footage.md",
@@ -3764,6 +3772,13 @@
       "signature": "func MoveToEnd(l *Layer) error",
       "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers)."
     },
+    "NewAdjustmentLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newadjustmentlayer",
+      "signature": "func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)",
+      "summary": "NewAdjustmentLayer adds a new adjustment layer to the composition and returns it."
+    },
     "NewCameraLayer": {
       "kind": "func",
       "file": "composition.md",
@@ -3785,6 +3800,13 @@
       "signature": "func NewLightLayer(c *Composition, name string) (*Layer, error)",
       "summary": "NewLightLayer adds a new Light layer to the composition and returns it."
     },
+    "NewNullLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newnulllayer",
+      "signature": "func NewNullLayer(c *Composition, name string) (*Layer, error)",
+      "summary": "NewNullLayer adds a new null-object layer to the composition and returns it."
+    },
     "NewProject": {
       "kind": "func",
       "file": "project.md",
@@ -3798,6 +3820,13 @@
       "anchor": "#newshapelayer",
       "signature": "func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)",
       "summary": "NewShapeLayer adds a new empty ShapeLayer to the composition."
+    },
+    "NewSolidLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newsolidlayer",
+      "signature": "func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)",
+      "summary": "NewSolidLayer adds a new solid-color layer to the composition and returns it."
     },
     "Open": {
       "kind": "func",

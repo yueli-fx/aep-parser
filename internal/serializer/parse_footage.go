@@ -3,6 +3,7 @@ package serializer
 import (
 	"encoding/binary"
 	"encoding/json"
+	"math"
 	"path/filepath"
 	"strings"
 
@@ -48,12 +49,22 @@ func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, e
 	}
 
 	if opti := src.FindFirst(rifx.IDOpti); opti != nil {
+		fb.optiChunk = opti
 		kind, name := parseOpti(opti.Data)
 		if name != "" && footage.Name == "" {
 			footage.Name = name
 		}
 		if kind == "Soli" {
 			footage.IsSolid = true
+			// ARGB 4×float32 BE at @0x0A (RE: re_solidnull.aep); alpha is
+			// always 1.0 in AE-written solids and is not surfaced.
+			if len(opti.Data) >= optiSoliColorB+4 {
+				footage.SolidColor = [3]float64{
+					float64(math.Float32frombits(binary.BigEndian.Uint32(opti.Data[optiSoliColorR : optiSoliColorR+4]))),
+					float64(math.Float32frombits(binary.BigEndian.Uint32(opti.Data[optiSoliColorG : optiSoliColorG+4]))),
+					float64(math.Float32frombits(binary.BigEndian.Uint32(opti.Data[optiSoliColorB : optiSoliColorB+4]))),
+				}
+			}
 		}
 		if kind == "Plac" {
 			footage.IsPlaceholder = true

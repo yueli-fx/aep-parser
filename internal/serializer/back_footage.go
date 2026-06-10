@@ -36,6 +36,12 @@ type footageBackrefs struct {
 	// Offsets per py-aep binary/footage_chunks.py::SspcChunk.
 	sspcChunk *rifx.Chunk
 
+	// optiChunk is the footage-options chunk. For "Soli" footage it holds
+	// the solid's ARGB color (@0x0A, 4×float32 BE) and display name (@0x1A,
+	// NUL-terminated inside a fixed 256-byte tail) — patched in place by the
+	// NewSolidLayer / NewNullLayer / NewAdjustmentLayer create paths.
+	optiChunk *rifx.Chunk
+
 	// Item-level write-back references (used by SetComment / SetLabel).
 	itemCmtaChunk  *rifx.Chunk
 	itemIdtaChunk  *rifx.Chunk

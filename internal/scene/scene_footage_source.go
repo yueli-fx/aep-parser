@@ -38,11 +38,7 @@ func (f *Footage) MainSource() FootageSource {
 	case f.IsPlaceholder:
 		return &PlaceholderSource{}
 	case f.IsSolid:
-		// Solid color is stored in the opti chunk. We don't currently
-		// parse the solid color from the binary, so return a zero-value
-		// SolidSource. The color can be read from the raw sspc chunk
-		// if needed.
-		return &SolidSource{}
+		return &SolidSource{Color: f.SolidColor}
 	default:
 		return &FileSource{
 			Path: f.Path,

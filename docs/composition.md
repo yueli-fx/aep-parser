@@ -1192,6 +1192,42 @@ Like NewCameraLayer, a light is source-less (ldta + Light Options group), cloned
 
 Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
 
+### NewSolidLayer
+
+```go
+func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)
+```
+
+NewSolidLayer adds a new solid-color layer to the composition and returns it.
+
+A solid is footage-backed: the call also creates a backing solid footage item (cloned from an embedded AE-native template via the cross-Project import machinery, so every AE-internal byte stays faithful) and points the layer's SourceID at it. width/height must be 1..30000 (AE's solid ceiling); rgb components are 0..1 (stored as float32, so exact round-trips need float32-representable values such as 0.25/0.5). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed — all parsed-layer setters (transform, AddEffect, …) work immediately without a Reopen.
+
+Atomic mutation (the underlying cross-Project import snapshot + warnings-as-failure rollback covers both the footage import and the layer splice). Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+
+### NewNullLayer
+
+```go
+func NewNullLayer(c *Composition, name string) (*Layer, error)
+```
+
+NewNullLayer adds a new null-object layer to the composition and returns it.
+
+A null is a 100×100 solid-backed layer with the isNull ldta flag — AE's standard parenting helper. The backing solid footage item is created alongside (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
+
+Atomic mutation. Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+
+### NewAdjustmentLayer
+
+```go
+func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)
+```
+
+NewAdjustmentLayer adds a new adjustment layer to the composition and returns it.
+
+An adjustment layer is a comp-sized white solid with the isAdjust ldta flag: effects applied to it affect every layer below it. The backing solid footage item is created alongside, sized to the comp's current dimensions (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
+
+Atomic mutation. Alpha / structural. Free function (CLAUDE.md #2 structural-op call-form).
+
 <!-- Hand-authored reference table. -->
 
 ## Renderer engines

@@ -109,6 +109,16 @@ AE solid (generated solid-color source); solids have no disk path
 
 read-only
 
+### Footage.SolidColor
+
+```go
+SolidColor [3]float64
+```
+
+SolidColor is the solid's RGB color in 0..1 (only meaningful when IsSolid; parsed from the opti "Soli" chunk, alpha is always 1.0).
+
+read-only
+
 ### Footage.IsPlaceholder
 
 ```go
