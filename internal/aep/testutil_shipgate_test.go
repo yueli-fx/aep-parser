@@ -1,6 +1,7 @@
 package aep_test
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +15,12 @@ import (
 // runAeRunShipGate dispatches AE via scripts/ae_run.ps1 (drop-in for AfterFX -r).
 // ps1 owns timeout + .done polling + dialog dismissal. On non-zero exit ps1
 // leaves a <doneFile>.fail/ dump dir with screenshot.png / ocr.txt / actions.log.
+//
+// Exit 1 (timeout) / 2 (unknown modal) get ONE automatic warm retry: AE
+// cold-start (splash outliving the unknown-modal grace) manifests as exactly
+// these codes and self-heals on relaunch, while a deterministic data reject
+// fails the retry identically — so flakes vanish without masking real rejects.
+// The first attempt's forensics dump is preserved as <doneFile>.fail.1/.
 func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec int) {
 	t.Helper()
 
@@ -24,16 +31,46 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 	repoRoot := filepath.Join(filepath.Dir(thisFile), "..", "..")
 	script := filepath.Join(repoRoot, "scripts", "ae_run.ps1")
 
-	cmd := exec.Command("pwsh", "-NoProfile", "-File", script,
-		"-AeExe", aeExe,
-		"-Jsx", jsxPath,
-		"-Done", doneFile,
-		"-TimeoutSec", strconv.Itoa(timeoutSec))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		t.Fatalf("ae_run.ps1 failed: %v (check %s.fail/ for dump)", err, doneFile)
+	// Pull the gate's moving parts into the go test cache key. The cache
+	// tracks files a test reads — without these reads, editing the verify JSX
+	// (or a dialog rule) leaves a stale cached PASS on display (see
+	// incidents/camera-light-layer-create-re.md gotcha). Reading them here
+	// makes such edits invalidate the cache structurally instead of relying
+	// on -count=1 discipline.
+	for _, p := range []string{jsxPath, script, filepath.Join(repoRoot, "scripts", "ae_dialog_rules.json")} {
+		if _, err := os.ReadFile(p); err != nil {
+			t.Fatalf("gate input missing: %v", err)
+		}
 	}
+
+	run := func() error {
+		cmd := exec.Command("pwsh", "-NoProfile", "-File", script,
+			"-AeExe", aeExe,
+			"-Jsx", jsxPath,
+			"-Done", doneFile,
+			"-TimeoutSec", strconv.Itoa(timeoutSec))
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		return cmd.Run()
+	}
+
+	err := run()
+	if err == nil {
+		return
+	}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		if code := exitErr.ExitCode(); code == 1 || code == 2 {
+			t.Logf("ae_run.ps1 exit %d — warm retry once (cold-start flake heals; a real reject fails again)", code)
+			failDir := doneFile + ".fail"
+			os.RemoveAll(failDir + ".1")
+			os.Rename(failDir, failDir+".1")
+			if err = run(); err == nil {
+				return
+			}
+		}
+	}
+	t.Fatalf("ae_run.ps1 failed: %v (check %s.fail/ for dump; first attempt in %s.fail.1/ if retried)", err, doneFile, doneFile)
 }
 
 func trimShipNUL(s string) string {
