@@ -19,6 +19,23 @@ func Open(path string) (*Project, error) { return serializer.Open(path) }
 // FromReader parses an .aep file from an io.ReadSeeker.
 func FromReader(r io.ReadSeeker) (*Project, error) { return serializer.FromReader(r) }
 
+// Reopen serializes the project to memory (WriteAEP) and re-parses the bytes
+// (FromReader), returning the fresh *Project. The receiver is left untouched;
+// callers switch to the returned project and re-resolve item / layer handles
+// (e.g. by name or ID — IDs are preserved by the round-trip).
+//
+// Why: layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer
+// / NewLightLayer) exist only as pre-lowered chunks — they have no parsed
+// property tree, so write paths that splice into a parsed Layr (AddEffect's
+// parade auto-create, the Camera* / Light* option setters) refuse them. One
+// Reopen upgrades every built layer into a fully parsed layer, after which all
+// parsed-layer APIs work with full fidelity.
+//
+// The round-trip costs one serialize + parse of the whole project and returns a
+// new object graph; any *Layer / *Composition pointers into the old project
+// remain valid for the old project only.
+func Reopen(p *Project) (*Project, error) { return serializer.Reopen(p) }
+
 // NewProject returns a fresh empty Project parsed from the embedded
 // AE skeleton matching the requested target.
 //
@@ -545,13 +562,20 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // is ship-gate-green with, sourced from a template instead of a sibling. LIST
 // sizes grow automatically (rifx recomputes bottom-up on write).
 //
-// Phase-1 requirement: the layer must already carry an Effect Parade group
-// (every AE-parsed AV layer does). Layers freshly built by NewShapeLayer have
-// no parade yet — AddEffect returns an error for them (auto-create deferred).
+// Parade auto-create: a parsed layer with no effects has no Effect Parade group
+// at all (AE only persists the parade once ≥1 effect exists). AddEffect splices
+// an empty parade — tdsb + default-name tdsn + Group End, the AE-native form —
+// into the layer's property tree immediately before "ADBE Transform Group"
+// (AE's emitted group order), then adds the effect into it.
 //
-// Atomic mutation: snapshot parade chunk + scene children + flat Effects slice;
-// re-parse the spliced pair to obtain a back-ref-correct *Effect; roll back on
-// any parser warning.
+// Refused layers: camera / light layers (AE does not allow effects on them),
+// and layers built by the structural New* APIs that were never parsed — those
+// have no property tree to splice into; call aep.Reopen first and add effects
+// to the re-parsed layer.
+//
+// Atomic mutation: snapshot parade chunk + scene children + flat Effects slice
+// (+ the pre-auto-create tree state); re-parse the spliced pair to obtain a
+// back-ref-correct *Effect; roll back on any parser warning.
 //
 // Alpha / structural. Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).

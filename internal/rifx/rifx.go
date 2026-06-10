@@ -78,6 +78,7 @@ var (
 	IDGide = ChunkID{'G', 'i', 'd', 'e'} // LIST formType: layer-side guide chunk (4th Layr child; AE-required boilerplate per iter-5 RE)
 	IDGdta = ChunkID{'g', 'd', 't', 'a'} // chunk inside Gide (8 B all zero observed)
 	IDEwst = ChunkID{'E', 'w', 's', 't'} // LIST formType: empty 0-child sibling of every Layr at Item level (AE-required boilerplate per iter-5 RE)
+	IDTdpi = ChunkID{'t', 'd', 'p', 'i'} // property host-layer binding (4-byte BE layer id inside an effect param's tdbs; AE validates it resolves on open)
 	IDPefl = ChunkID{'P', 'e', 'f', 'l'} // LIST formType: project-level effect-list container (children = pjef Utf8 entries naming used effects)
 	IDPjef = ChunkID{'p', 'j', 'e', 'f'} // Utf8 chunk: one effect match-name inside Pefl
 	IDparT = ChunkID{'p', 'a', 'r', 'T'} // LIST formType: effect parameter definitions container (pard entries)

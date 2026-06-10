@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -36,6 +37,23 @@ func FromReader(r io.ReadSeeker) (*Project, error) {
 		pb.root = root
 	}
 	return proj, nil
+}
+
+// Reopen serializes the project to memory and re-parses the bytes, returning
+// the fresh *Project. Round-tripping upgrades layers built by the structural
+// New* APIs into fully parsed layers (property tree + chunk back-refs), which
+// unlocks the parsed-layer-only write paths (AddEffect parade auto-create,
+// Camera*/Light* setters, ...) on them.
+// (Full contract lives on the aep.Reopen facade — docgen source.)
+func Reopen(p *Project) (*Project, error) {
+	if p == nil {
+		return nil, fmt.Errorf("aep: Reopen: project is nil")
+	}
+	var buf bytes.Buffer
+	if err := p.WriteAEP(&buf); err != nil {
+		return nil, fmt.Errorf("aep: Reopen: %w", err)
+	}
+	return FromReader(bytes.NewReader(buf.Bytes()))
 }
 
 func parseProject(root *rifx.Chunk) (*Project, error) {

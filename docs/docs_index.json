@@ -4625,6 +4625,13 @@
       "signature": "func RemovePropertyGroup(g *AEPropertyGroup) error",
       "summary": "RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring AE's ScriptingAPI refuse."
     },
+    "Reopen": {
+      "kind": "func",
+      "file": "project.md",
+      "anchor": "#reopen",
+      "signature": "func Reopen(p *Project) (*Project, error)",
+      "summary": "Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (e.g. by name or ID — IDs are preserved by the round-trip)."
+    },
     "SetDimensionsSeparated": {
       "kind": "func",
       "file": "property.md",

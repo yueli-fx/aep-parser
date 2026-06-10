@@ -15,14 +15,20 @@
 // so the byte-length growth needs no manual fixup (same as Footage.SetPath /
 // gradient writes).
 //
-// Phase 1 requires the layer to already carry an Effect Parade group (every
-// AE-parsed AV layer does). From-scratch shape layers built by NewShapeLayer
-// have no parade yet (auto-create deferred to Phase 2).
+// Layers without an Effect Parade (AE only emits the parade once ≥1 effect
+// exists, so every effect-less layer lacks it) get an empty parade spliced into
+// their Layr property tree first — immediately before "ADBE Transform Group",
+// matching AE's emitted group order (RE: re_shape_effect.aep +
+// re_effect_library.aep). From-scratch layers built by NewShapeLayer have no
+// parsed property tree to splice into (and dirty shape layers are re-lowered
+// from scene state at write, discarding chunk edits) — AddEffect refuses those;
+// aep.Reopen upgrades them to parsed layers.
 package serializer
 
 import (
 	"bytes"
 	"embed"
+	"encoding/binary"
 	"fmt"
 	"sort"
 	"sync"
@@ -139,6 +145,22 @@ func cloneEffectTemplate(matchName string) (tdmn, sspc *rifx.Chunk, err error) {
 	return deepCloneChunk(ct.chunk.Children[0]), deepCloneChunk(ct.chunk.Children[1]), nil
 }
 
+// retargetEffectHostLayer rewrites every tdpi chunk (the 4-byte host-layer
+// binding each effect param's tdbs carries) in the cloned template payload to
+// the destination layer's ID. The embedded templates hold the extraction
+// fixture's host layer id verbatim; AE validates the binding resolves on open
+// and rejects the project with "cannot find layer ID=N in composition" when it
+// dangles (RE'd 2026-06-10: re_effect_library host id 15, re_shape_effect host
+// id 13 — tdpi tracks the host in both).
+func retargetEffectHostLayer(c *rifx.Chunk, layerID uint32) {
+	if c.ID == rifx.IDTdpi && len(c.Data) >= 4 {
+		binary.BigEndian.PutUint32(c.Data[0:4], layerID)
+	}
+	for _, ch := range c.Children {
+		retargetEffectHostLayer(ch, layerID)
+	}
+}
+
 // RemoveEffect removes the effect at the given 0-based index from the layer's
 // Effect Parade. Thin index-validated wrapper over RemovePropertyGroup (which is
 // AE 2020 + AE 2025 ship-gate green for Effect-Parade child removal), giving
@@ -163,26 +185,113 @@ func RemoveEffect(layer *Layer, index int) error {
 	return RemovePropertyGroup(g)
 }
 
-// AddEffect appends an effect to the layer's Effect Parade and returns the
-// parsed *Effect (so the caller can tune Effect.Parameters immediately).
+// aeDefaultGroupName is the placeholder AE persists in a group's tdsn when the
+// user never renamed it — "-_0_/-" observed on every AE-native Effect Parade
+// (re_shape_effect.aep, re_effect_library.aep).
+const aeDefaultGroupName = "-_0_/-"
+
+// ensureEffectParade returns the layer's Effect Parade, splicing a fresh empty
+// parade group (tdsb 0x01 + tdsn "-_0_/-" + Group End sentinel) into the Layr
+// property tree when absent — immediately before "ADBE Transform Group",
+// matching AE's emitted group order. The returned undo restores the pre-create
+// chunk + scene-tree state (no-op when the parade already existed).
+func ensureEffectParade(layer *Layer) (*AEPropertyGroup, func(), error) {
+	if parade := layer.EffectsParade(); parade != nil {
+		return parade, func() {}, nil
+	}
+	tree := layer.PropertyTree()
+	if tree == nil {
+		return nil, nil, fmt.Errorf("AddEffect: layer %q was built outside the parser (no property tree to hold an Effect Parade); round-trip the project through aep.Reopen first, then add effects to the re-parsed layer", layer.Name)
+	}
+	lb := layerBack(layer)
+	if lb == nil || lb.layrList == nil {
+		return nil, nil, fmt.Errorf("AddEffect: layer %q has no Layr chunk back-ref", layer.Name)
+	}
+	var outer *rifx.Chunk
+	for _, ch := range lb.layrList.Children {
+		if ch.IsList() && ch.FormType == rifx.IDTdgp {
+			outer = ch
+			break
+		}
+	}
+	if outer == nil {
+		return nil, nil, fmt.Errorf("AddEffect: layer %q has no property-group LIST in its Layr", layer.Name)
+	}
+	anchor := -1
+	for i, ch := range outer.Children {
+		if ch.ID == rifx.IDTdmn && string(bytes.TrimRight(ch.Data, "\x00")) == MatchNameGroupTransform {
+			anchor = i
+			break
+		}
+	}
+	if anchor < 0 {
+		return nil, nil, fmt.Errorf("AddEffect: layer %q has no %q group to anchor the Effect Parade position", layer.Name, MatchNameGroupTransform)
+	}
+
+	paradeTdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
+		makeTdsb(),
+		makeTdsn(aeDefaultGroupName),
+		makeTdmn("ADBE Group End"),
+	}}
+
+	oldOuterChildren := append([]*rifx.Chunk(nil), outer.Children...)
+	oldTreeChildren := append([]PropertyBase(nil), tree.Children...)
+
+	spliced := make([]*rifx.Chunk, 0, len(outer.Children)+2)
+	spliced = append(spliced, outer.Children[:anchor]...)
+	spliced = append(spliced, makeTdmn(MatchNameGroupEffectParade), paradeTdgp)
+	spliced = append(spliced, outer.Children[anchor:]...)
+	outer.Children = spliced
+
+	parade := &AEPropertyGroup{MatchName: MatchNameGroupEffectParade, Name: MatchNameGroupEffectParade}
+	scene.SetPropertyGroupParent(parade, tree)
+	scene.SetPropertyGroupBack(parade, &propertyGroupBackrefs{chunk: paradeTdgp})
+	treeAnchor := len(tree.Children)
+	for i, c := range tree.Children {
+		if g, ok := c.(*AEPropertyGroup); ok && g.MatchName == MatchNameGroupTransform {
+			treeAnchor = i
+			break
+		}
+	}
+	newTreeChildren := make([]PropertyBase, 0, len(tree.Children)+1)
+	newTreeChildren = append(newTreeChildren, tree.Children[:treeAnchor]...)
+	newTreeChildren = append(newTreeChildren, parade)
+	newTreeChildren = append(newTreeChildren, tree.Children[treeAnchor:]...)
+	tree.Children = newTreeChildren
+
+	return parade, func() {
+		outer.Children = oldOuterChildren
+		tree.Children = oldTreeChildren
+	}, nil
+}
+
+// AddEffect appends an effect to the layer's Effect Parade (auto-creating the
+// parade for effect-less parsed layers) and returns the parsed *Effect (so the
+// caller can tune Effect.Parameters immediately).
 // (Full contract + RE notes live on the aep.AddEffect facade — docgen source.)
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	if layer == nil {
 		return nil, fmt.Errorf("AddEffect: layer is nil")
 	}
-	parade := layer.EffectsParade()
-	if parade == nil {
-		return nil, fmt.Errorf("AddEffect: layer %q has no Effect Parade group (from-scratch layers have none yet; parade auto-create not implemented)", layer.Name)
+	if layer.Type == LayerTypeCamera || layer.Type == LayerTypeLight {
+		return nil, fmt.Errorf("AddEffect: layer %q is a %s layer (AE does not allow effects on camera/light layers)", layer.Name, layer.Type)
+	}
+	parade, undoParadeCreate, err := ensureEffectParade(layer)
+	if err != nil {
+		return nil, err
 	}
 	pgb := propertyGroupBack(parade)
 	if pgb == nil || pgb.chunk == nil {
+		undoParadeCreate()
 		return nil, fmt.Errorf("AddEffect: Effect Parade for layer %q has no chunk back-ref", layer.Name)
 	}
 
 	tdmnCh, sspcCh, err := cloneEffectTemplate(effectMatchName)
 	if err != nil {
+		undoParadeCreate()
 		return nil, err
 	}
+	retargetEffectHostLayer(sspcCh, layer.ID)
 
 	children := pgb.chunk.Children
 	insertIdx := len(children)
@@ -204,6 +313,7 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 		parade.Children = oldSceneChildren
 		layer.Effects = oldEffects
 		rollbackWarnings(layer, oldWarningsLen)
+		undoParadeCreate()
 	}
 
 	// Chunk: splice (tdmn, sspc) in just before the Group End sentinel.

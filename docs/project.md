@@ -624,6 +624,18 @@ func FromReader(r io.ReadSeeker) (*Project, error)
 
 FromReader parses an .aep file from an io.ReadSeeker.
 
+### Reopen
+
+```go
+func Reopen(p *Project) (*Project, error)
+```
+
+Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (e.g. by name or ID — IDs are preserved by the round-trip).
+
+Why: layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer / NewLightLayer) exist only as pre-lowered chunks — they have no parsed property tree, so write paths that splice into a parsed Layr (AddEffect's parade auto-create, the Camera* / Light* option setters) refuse them. One Reopen upgrades every built layer into a fully parsed layer, after which all parsed-layer APIs work with full fidelity.
+
+The round-trip costs one serialize + parse of the whole project and returns a new object graph; any *Layer / *Composition pointers into the old project remain valid for the old project only.
+
 ### NewProject
 
 ```go

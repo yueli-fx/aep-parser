@@ -8,6 +8,7 @@ package aep_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
@@ -210,7 +211,8 @@ func TestAddEffect_Unsupported(t *testing.T) {
 }
 
 func TestAddEffect_NoParade(t *testing.T) {
-	// A from-scratch shape layer has no Effect Parade yet → AddEffect refuses.
+	// A from-scratch shape layer has no parsed property tree → AddEffect
+	// refuses and points at the Reopen upgrade path.
 	p := aep.NewProject(aep.TargetAE2025)
 	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
 	if err != nil {
@@ -220,8 +222,215 @@ func TestAddEffect_NoParade(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := aep.AddEffect(sl.Layer, "ADBE Gaussian Blur 2"); err == nil {
-		t.Error("AddEffect on parade-less layer: want error, got nil")
+	_, err = aep.AddEffect(sl.Layer, "ADBE Gaussian Blur 2")
+	if err == nil {
+		t.Fatal("AddEffect on from-scratch layer: want error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Reopen") {
+		t.Errorf("refuse error should mention the Reopen upgrade path, got: %v", err)
+	}
+}
+
+// findLayer returns the layer with the given ID across all comps, or nil.
+func findLayer(proj *aep.Project, id uint32) *aep.Layer {
+	for _, c := range proj.Compositions {
+		for _, l := range c.Layers {
+			if l.ID == id {
+				return l
+			}
+		}
+	}
+	return nil
+}
+
+// TestAddEffect_AutoCreateParade_ReopenedFreshLayer is the full from-scratch
+// closure: build project + comp + shape layer in Go, Reopen to upgrade the
+// built layer into a parsed one, then AddEffect — which must auto-create the
+// Effect Parade (the lowered shape layer carries none) — and survive a write →
+// re-parse round trip with the parade positioned before the Transform Group.
+func TestAddEffect_AutoCreateParade_ReopenedFreshLayer(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewShapeLayer(comp, "S"); err != nil {
+		t.Fatal(err)
+	}
+
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	var l *aep.Layer
+	for _, c := range rp.Compositions {
+		for _, cl := range c.Layers {
+			if cl.Name == "S" {
+				l = cl
+			}
+		}
+	}
+	if l == nil {
+		t.Fatal("reopened project: layer S not found")
+	}
+	if l.PropertyTree() == nil {
+		t.Fatal("reopened layer has no property tree (Reopen did not upgrade it)")
+	}
+	if l.EffectsParade() != nil {
+		t.Fatal("fresh shape layer should have no Effect Parade before AddEffect")
+	}
+
+	fx, err := aep.AddEffect(l, aep.EffectGaussianBlur)
+	if err != nil {
+		t.Fatalf("AddEffect (auto-create parade): %v", err)
+	}
+	if fx.MatchName != aep.EffectGaussianBlur {
+		t.Errorf("MatchName = %q", fx.MatchName)
+	}
+	if l.EffectsParade() == nil {
+		t.Fatal("parade not visible on scene tree after auto-create")
+	}
+
+	// Tree order mirrors chunk order: parade must precede the Transform Group.
+	paradeIdx, transformIdx := -1, -1
+	for i, c := range l.PropertyTree().Children {
+		if g, ok := c.(*aep.AEPropertyGroup); ok {
+			switch g.MatchName {
+			case "ADBE Effect Parade":
+				paradeIdx = i
+			case "ADBE Transform Group":
+				transformIdx = i
+			}
+		}
+	}
+	if paradeIdx < 0 || transformIdx < 0 || paradeIdx >= transformIdx {
+		t.Errorf("parade idx %d / transform idx %d: parade must sit before Transform Group", paradeIdx, transformIdx)
+	}
+
+	var buf bytes.Buffer
+	if err := rp.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rl := findLayer(re, l.ID)
+	if rl == nil {
+		t.Fatal("re-parsed: layer not found")
+	}
+	if got, want := paradeChildNames(rl), []string{aep.EffectGaussianBlur}; !eq(got, want) {
+		t.Errorf("re-parsed parade = %v, want %v", got, want)
+	}
+	if got, want := effectMatchNames(rl), []string{aep.EffectGaussianBlur}; !eq(got, want) {
+		t.Errorf("re-parsed Effects = %v, want %v", got, want)
+	}
+}
+
+// TestAddEffect_AutoCreateParade_ParsedFixtureLayer exercises auto-create on an
+// AE-native effect-less layer (real AE sibling-group layout around the splice
+// anchor), then proves write → re-parse survival.
+func TestAddEffect_AutoCreateParade_ParsedFixtureLayer(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_text.aep")
+	if err != nil {
+		t.Skipf("re_text.aep not present: %v", err)
+	}
+	var l *aep.Layer
+	for _, c := range proj.Compositions {
+		for _, cl := range c.Layers {
+			if cl.EffectsParade() == nil && cl.TransformGroup() != nil &&
+				cl.Type != aep.LayerTypeCamera && cl.Type != aep.LayerTypeLight &&
+				cl.Type != aep.LayerTypeShape && cl.PropertyTree() != nil {
+				l = cl
+				break
+			}
+		}
+		if l != nil {
+			break
+		}
+	}
+	if l == nil {
+		t.Skip("no parade-less AV layer in fixture")
+	}
+
+	if _, err := aep.AddEffect(l, aep.EffectInvert); err != nil {
+		t.Fatalf("AddEffect (auto-create on AE-native layer): %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rl := findLayer(re, l.ID)
+	if rl == nil {
+		t.Fatal("re-parsed: layer not found")
+	}
+	if got, want := paradeChildNames(rl), []string{aep.EffectInvert}; !eq(got, want) {
+		t.Errorf("re-parsed parade = %v, want %v", got, want)
+	}
+}
+
+func TestAddEffect_RefuseCameraLight(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewShapeLayer(comp, "S"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewCameraLayer(comp, "Cam"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewLightLayer(comp, "Light"); err != nil {
+		t.Fatal(err)
+	}
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	for _, c := range rp.Compositions {
+		for _, l := range c.Layers {
+			if l.Type != aep.LayerTypeCamera && l.Type != aep.LayerTypeLight {
+				continue
+			}
+			if _, err := aep.AddEffect(l, aep.EffectGaussianBlur); err == nil {
+				t.Errorf("AddEffect on %s layer %q: want refuse, got nil", l.Type, l.Name)
+			}
+		}
+	}
+}
+
+// TestReopen_WriteStable: writing the reopened project must reproduce the same
+// bytes the original project wrote (parse → write byte fidelity over the
+// freshly built content).
+func TestReopen_WriteStable(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewShapeLayer(comp, "S"); err != nil {
+		t.Fatal(err)
+	}
+	var orig bytes.Buffer
+	if err := p.WriteAEP(&orig); err != nil {
+		t.Fatal(err)
+	}
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	var rewrite bytes.Buffer
+	if err := rp.WriteAEP(&rewrite); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(orig.Bytes(), rewrite.Bytes()) {
+		t.Errorf("reopened write differs from original: %d vs %d bytes", rewrite.Len(), orig.Len())
 	}
 }
 

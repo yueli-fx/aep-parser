@@ -38,7 +38,7 @@
     {
       "out": "project.md",
       "roots": ["Project", "Folder"],
-      "funcs": ["Open", "FromReader", "NewProject", "AddItem", "RemoveItem"],
+      "funcs": ["Open", "FromReader", "Reopen", "NewProject", "AddItem", "RemoveItem"],
       "head": "_includes/project.head.md"
     },
     {
