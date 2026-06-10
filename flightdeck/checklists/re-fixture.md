@@ -75,6 +75,7 @@ Test 代码 `t.Skipf("fixture missing", ...)` 缺文件跳过，不阻塞 CI。
 ## 何时启用 ship-gate
 
 任何**结构性 / chunk-level 改动**入 main 前必须跑：
+
 - 加新 chunk / 删 chunk / 改 chunk size（length-variable splice 含 Utf8 / expression / 字体名）
 - Project-level setting chunk（lnrb/lnrp 等 toggle / acer/adfr/dwga 类单字段）
 - NewProject / NewComposition / NewShapeLayer 等结构性创建
@@ -85,12 +86,14 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 ## Adobe 软件路径
 
 - AE 2025 — `E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe`
+- AE 2023 — `E:\adobe\Adobe After Effects 2023\Support Files\AfterFX.exe`
 - AE 2022 — `E:\adobe\Adobe After Effects 2022\Support Files\AfterFX.exe`
 - AE 2020 — `E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe`
 
 跨版本对比时切对应 AE。Wave 1-3 字段默认用 AE 2025（24+ ScriptingAPI 解封）。
 
 **版本匹配规则（建议，非强制）**：
+
 - 用 **fixture 源版本** 的 AE 打开 (检查方式: `Application.Version()` 读 head 解出 e.g. `17.7x45` = AE 17.7 = AE 2020)
 - 例：`re_cameralight.aep` 是 AE 2020 写的 → 优先用 AE 2020 跑（避无意义 convert 流程）
 - 反向（高版本 fixture → 低版本 AE）经常崩，仍**避免**
@@ -107,6 +110,7 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 | **3. 打开但报数据损坏** | JSX 跑通；`app.open(...)` 在 try/catch 里 throw "After Effects 错误: 文件数据丢失" 类错误字符串 | builder chunk 写法 / 位置 / 大小破坏 AE 检查。这是最常见且最有 RE 价值的 — bisect 隔离哪个 setter 触发 |
 
 诊断流程（按这个 order）：
+
 1. AE process 是否仍 alive (`tasklist /v | grep -i afterfx`)
 2. `.done` 是否生成（生成 = mode 3 / OK；不生成 = mode 1 / 2）
 3. 看 `.done` 里 step error 信息：开头 fresh/open OK 但 open_modified ERR = mode 3；纯 fresh ERR = mode 1/2
@@ -128,6 +132,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 ```
 
 退出码：
+
 - `0` — `.done` 出现且 stable，按 PASS contract 走
 - `1` — timeout
 - `2` — 未知 modal（OCR 命中但没规则）
@@ -141,6 +146,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 **⚠️ verify JSX `.done` 文件名必须 per-version 唯一**：ship-gate 同一 mode 跨 AE 2020/2025 跑两遍时，verify JSX 若把 `.done` 文件名只按 mode 命名，会(a)第二版覆盖第一版结果、(b)`ae_run.ps1 -Done` 等的是带 version-tag 的名 → 永远等不到 → 每次空等满 `TimeoutSec` 报 exit 1（实际验证早已跑通，假阴性）。修法：JSX 读一个 `$.getenv("..._TAG")`（如 `ae2020_basic`）拼进 `.done` 名，调用方 `-Done` 传同名。见 `verify_ge_insert_layer.jsx` + 2026-05-29 logbook。
 
 **新对话框出现的流程**：
+
 1. ship-gate FAIL, exit code 2
 2. 看 `<doneFile>.fail/screenshot.png` + `ocr.txt`
 3. 加规则到 `scripts/ae_dialog_rules.json`（substring 进 `ocrMatch`，或抄稳定 `windowTitle` / `windowClass`）

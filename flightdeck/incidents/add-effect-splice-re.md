@@ -1,7 +1,7 @@
 ---
 status: active
-when_to_read: implementing or extending AddEffect / the effect-template library; adding a new effect to the embedded set; debugging "AE drops/rejects a Go-added effect"; deciding whether an effect is splice-portable; planning Effect Parade auto-create for from-scratch layers (Phase 2); reasoning about the (tdmn, sspc) effect chunk unit
-applies_to: [add-effect, effect-parade, sspc, tdmn, effect-template, structural-write, splice, group-end-sentinel, version-portable, ae2020, ae2025, ship-gate, embed-fs, gaussian-blur, levels, phase-2]
+when_to_read: implementing or extending AddEffect / the effect-template library; adding a new effect to the embedded set; debugging "AE drops/rejects a Go-added effect" or "cannot find layer ID=N in composition" on open; deciding whether an effect is splice-portable; extending parade auto-create to another group kind (Mask Parade); reasoning about the (tdmn, sspc) effect chunk unit or the tdpi host-layer binding
+applies_to: [add-effect, effect-parade, sspc, tdmn, tdpi, host-layer-binding, effect-template, structural-write, splice, group-end-sentinel, parade-auto-create, reopen, version-portable, ae2020, ae2025, ship-gate, embed-fs, gaussian-blur, levels]
 last_updated: 2026-06-10
 ---
 
@@ -62,12 +62,24 @@ chunks, never the cache), so callers can tune params immediately
    instance exposes a single `ADBE Gaussian Blur 2-0000` param (the others are
    default-elided), NOT `-0001` as the docgen example suggests. Don't assume a
    param match-name is present — iterate `Effect.Parameters`.
-4. **From-scratch shape layers have NO Effect Parade.** The embedded
-   `v2_2_transform_group_body.bin` template (used by `NewShapeLayer`) carries
-   Transform / Layer Styles / Material Options / Camera Options / Audio groups
-   but **no `ADBE Effect Parade`**. Hence Phase-1 AddEffect refuses parade-less
-   layers. **Phase 2** = splice an empty parade group into the Layr property
-   tree first (RE its position + empty-group bytes).
+4. **From-scratch shape layers have NO Effect Parade** — and neither does ANY
+   effect-less layer: AE only persists the parade once ≥1 effect exists. Solved
+   2026-06-10 by parade auto-create (see § Parade auto-create below).
+5. **tdpi = host-layer binding, AE validates it on open (the Phase-1 latent
+   bug).** Every effect param's tdbs carries a 4-byte BE `tdpi` chunk holding
+   the OWNING layer's ID (re_effect_library host id 15, re_shape_effect host id
+   13 — tracks the host in both). The embedded templates carried the extraction
+   fixture's id 15 verbatim; splicing into a layer whose ID ≠ 15 makes AE
+   reject the project on open with 无法在合成"X"中找到图层 ID=15 (an EXC from
+   app.open, NOT a corrupt-file dialog). **The Phase-1 ship-gate passed only by
+   coincidence** — the baseline fixture's host layer ID is also 15 (both
+   fixtures: one comp + one layer built by similar JSX → same ID allocation).
+   Fix: `retargetEffectHostLayer` rewrites every tdpi in the cloned pair to the
+   destination layer's ID before splicing (white-box regression
+   `TestAddEffect_RetargetsTdpiHostLayer`; re-gated AE 2020 Phase-1 sample +
+   auto-parade both versions). Corollary: effects with layer/path REFERENCE
+   params carry tdpi pointing at OTHER layers — a blind retarget-all would
+   corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
 ## Effect-template library (12, embed.FS)
 
@@ -96,11 +108,43 @@ standalone splice can't satisfy — excluded until a Phase-2 remap handles refs.
   opens the Go-added file without corruption, reads back 4 effects in order, and
   AE's own resave preserves the addition. The other 7 ride the identical
   mechanism (Go round-trip only) — promote to gated if a doubt arises.
+- `TestAddEffectAutoParade_AEShipGate_AE20{20,25}` — parade auto-create end to
+  end on a 100% Go-built file (fresh project → shape layer → Reopen →
+  AddEffect), 2/2 PASS incl. resave preservation.
+- Go-only: `TestAddEffect_AutoCreateParade_ReopenedFreshLayer` (self-contained,
+  parade-before-Transform order assert) / `_ParsedFixtureLayer` (AE-native
+  parade-less layer, re_text.aep) / `TestAddEffect_RefuseCameraLight` /
+  `TestReopen_WriteStable` / `TestAddEffect_RetargetsTdpiHostLayer` (white-box
+  tdpi remap).
 
-## Phase 2 — effects on from-scratch shape layers (RE'd, NOT a quick win)
+## Parade auto-create (Phase 2 — SHIPPED 2026-06-10)
 
-Investigated 2026-06-10; deferred after finding it's a real feature, not a splice
-tweak. Concrete findings so the next attempt doesn't re-walk this:
+Landed as `ensureEffectParade` + `aep.Reopen`, double-version ship-gated
+(`TestAddEffectAutoParade_AEShipGate_AE20{20,25}` — 100% Go-built file:
+NewProject → NewComposition → NewShapeLayer → Reopen → AddEffect, AE opens
+clean, reads back the effect, keeps it across resave):
+
+- **Auto-create (parsed layers):** when `EffectsParade() == nil`, AddEffect
+  splices `tdmn("ADBE Effect Parade") + LIST(tdgp){tdsb 0x00000001,
+  tdsn "-_0_/-", tdmn("ADBE Group End")}` into the layer's outer tdgp
+  **immediately before the `ADBE Transform Group` tdmn** — AE's emitted order on
+  every observed layer kind (shape: after Root Vectors Group; AV/solid: after
+  Time Remapping). The tdsn is AE's never-renamed placeholder name `-_0_/-`,
+  NOT an empty string. Scene tree gets the mirroring AEPropertyGroup node at the
+  same anchor; rollback restores both splices.
+- **Fresh (built) layers still refuse** — no property tree to splice into, and
+  `syncShapeLayerChunks` re-lowers dirty shape layers at write (chunk edits
+  discarded). The refuse error points at `aep.Reopen(p)`: one write→parse round
+  trip upgrades every built layer to a parsed one, after which auto-create +
+  full param fidelity work. Reopen is byte-stable (rewrite == original write).
+- **Camera / light layers refuse** (AE does not allow effects on them; we never
+  create a parade there).
+- AddMask can reuse the same auto-create pattern for Mask Parade (anchor scan +
+  empty-group bytes TBD for masks).
+
+## Phase 2 original findings (2026-06-10 investigation, pre-ship)
+
+Concrete findings kept for reference:
 
 1. **Parade position in a shape layer** (RE `re_shape_effect.aep`, an AE-native
    shape layer + Gaussian Blur): the outer `LIST(tdgp)` group order is
@@ -127,19 +171,20 @@ tweak. Concrete findings so the next attempt doesn't re-walk this:
    are tractable via (b) but the "tuned-value silently lost" footgun must be
    handled (refuse/warn on SetStaticValue for fresh-layer effects).
 
-**Workaround available today (no Phase 2 needed):** build the shape layer →
-`WriteAEP` → `Open` the bytes → the reopened layer is a parsed layer with a
-parade once it has effects; or apply effects in AE. Phase-1 AddEffect then works
-with full param fidelity. So fresh-layer AddEffect is a fluency nicety, not a
-capability gap.
+The "write → reopen" workaround in these findings became the shipped path:
+`aep.Reopen` is that round trip as a one-liner, and auto-create removes the
+"once it has effects" precondition.
 
 ## Other deferred
 
 - **Reference-param effects** (Set Matte / Displacement Map / Compound Blur …) —
-  sspc carries a dangling layer-id; needs remap like cross-Project InsertLayer.
+  their sspc carries tdpi bindings pointing at OTHER layers (not just the host);
+  needs selective remap like cross-Project InsertLayer, and retarget-all would
+  corrupt them (see finding 5).
 - **AddMask** — Mask Parade is the same INDEXED_GROUP splice (RemovePropertyGroup
-  already handles masks); blocked by the same parade-creation gap for layers with
-  no existing Mask Parade.
+  already handles masks); the parade-creation gap is now solved for effects and
+  the same auto-create pattern should transfer (mask-parade empty-group bytes +
+  anchor TBD). Still gated on mask-path write for useful v1.
 - **Library expansion** beyond the 12 (more fixture RE; watch for ref params).
 - **Per-effect typed param helpers** (today: raw `Property.SetStaticValue` by match-name).
 
