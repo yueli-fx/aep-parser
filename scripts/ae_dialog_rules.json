@@ -30,6 +30,16 @@
     "comment": "Mode 3 — fixture broken; press OK to let JSX catch + write .done(ERR)"
   },
   {
+    "name": "preferences-damaged",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["首选项文件", "首选项损坏", "preferences file", "damaged preferences"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 3000,
+    "comment": "AE prefs file corrupted (usually a prior force-kill mid-shutdown — see incidents/ae-automation-occlusion-crashstate.md §2b). Enter accepts 'create new preferences file' and AE continues with defaults. MUST stay BEFORE project-corrupt-skip: this dialog's wording also contains 已损坏, and first match wins — both press Enter, but forensics should log the right rule."
+  },
+  {
     "name": "project-corrupt-skip",
     "windowTitle": [],
     "windowClass": [],

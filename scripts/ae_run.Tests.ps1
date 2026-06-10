@@ -350,3 +350,29 @@ Describe 'Write-ForensicsDump' {
         $meta.reason   | Should -Be 'timeout'
     }
 }
+
+Describe 'Shipped dialog rules (scripts/ae_dialog_rules.json)' {
+    BeforeAll {
+        $script:shipped = Parse-Rules -Path (Join-Path $PSScriptRoot 'ae_dialog_rules.json')
+    }
+
+    It 'prefs-damaged dialog hits preferences-damaged, NOT project-corrupt-skip (ordering guard)' {
+        # The prefs dialog wording also contains 已损坏, which project-corrupt-skip
+        # matches — preferences-damaged must sit earlier in the array to win.
+        $info = @{ Title = ''; Class = ''; Ocr = '首 选 项 文 件 无 效 或 已 损 坏 。 将 创 建 新 的 首 选 项 文 件 。' }
+        $m = Match-Rule -HwndInfo $info -Rules $script:shipped
+        $m.rule.name | Should -Be 'preferences-damaged'
+    }
+
+    It 'project-corrupt dialog still hits project-corrupt-skip' {
+        $info = @{ Title = ''; Class = ''; Ocr = '项 目 文 件 似 乎 已 损 坏 （ 跳 过 部 分 ： 3 ） (26::0)' }
+        $m = Match-Rule -HwndInfo $info -Rules $script:shipped
+        $m.rule.name | Should -Be 'project-corrupt-skip'
+    }
+
+    It 'crash-repair dialog still hits ae-safe-mode-recovery' {
+        $info = @{ Title = ''; Class = ''; Ocr = '崩 溃 修 复 选 项 我 们 检 测 到 您 的 上 次 会 话 发 生 崩 溃' }
+        $m = Match-Rule -HwndInfo $info -Rules $script:shipped
+        $m.rule.name | Should -Be 'ae-safe-mode-recovery'
+    }
+}

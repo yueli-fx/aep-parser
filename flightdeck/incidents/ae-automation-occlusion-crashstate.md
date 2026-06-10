@@ -41,7 +41,10 @@ ENTER ("继续"), lets AE exit cleanly → clears the crash flag.
 工具/继续）。自动化 run 里该对话框被 `ae-safe-mode-recovery` 规则 ESC 消化，
 但用户手动开 AE 时会直接看到——首发现场即用户手动启动（2026-06-10）。
 
-**修复**：`ae_run.ps1` post-done 宽限 5s → 30s（teardown 注释里有 WHY）。
+**修复**：`ae_run.ps1` post-done 宽限 5s → 30s（teardown 注释里有 WHY）+
+`ae_dialog_rules.json` 新增 `preferences-damaged` 规则（「首选项文件无效或
+已损坏」对话框 Enter 接受重建；**必须排在 `project-corrupt-skip` 之前**——
+首选项文案也含「已损坏」，first-match-wins，Pester 有 ordering guard 用例）。
 配套既有教训：JSX 末尾必须 `app.project.close(DO_NOT_SAVE) + app.quit()`
 （见 re-fixture checklist），wrapper 的宽限只兜 quit 之后的收尾时间。
 若再看到「崩溃修复选项」：选「继续」即可（不要重置首选项）；自动化侧跑
