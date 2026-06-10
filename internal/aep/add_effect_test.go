@@ -443,6 +443,12 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectBrightnessContrast, aep.EffectTritone, aep.EffectLevels,
 		aep.EffectLevelsIndividual, aep.EffectHueSaturation, aep.EffectBoxBlur,
 		aep.EffectGlow, aep.EffectInvert, aep.EffectExposure,
+		aep.EffectDropShadow, aep.EffectSharpen, aep.EffectMosaic,
+		aep.EffectNoise, aep.EffectTransform, aep.EffectGradientRamp,
+		aep.EffectFractalNoise, aep.EffectMotionTile, aep.EffectDirectionalBlur,
+		aep.EffectLinearWipe, aep.EffectWaveWarp, aep.EffectCurves,
+		aep.EffectSliderControl, aep.EffectPointControl, aep.EffectColorControl,
+		aep.EffectAngleControl, aep.EffectCheckboxControl,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

@@ -41,6 +41,23 @@ var addEffectSample = []string{
 	aep.EffectGlow,
 	aep.EffectInvert,
 	aep.EffectExposure,
+	aep.EffectDropShadow,
+	aep.EffectSharpen,
+	aep.EffectMosaic,
+	aep.EffectNoise,
+	aep.EffectTransform,
+	aep.EffectGradientRamp,
+	aep.EffectFractalNoise,
+	aep.EffectMotionTile,
+	aep.EffectDirectionalBlur,
+	aep.EffectLinearWipe,
+	aep.EffectWaveWarp,
+	aep.EffectCurves,
+	aep.EffectSliderControl,
+	aep.EffectPointControl,
+	aep.EffectColorControl,
+	aep.EffectAngleControl,
+	aep.EffectCheckboxControl,
 }
 
 func runAddEffectGate(t *testing.T, aeExe, ver string) {

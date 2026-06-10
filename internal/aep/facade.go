@@ -686,6 +686,23 @@ const (
 	EffectGlow               = serializer.EffectGlow               // Glow
 	EffectInvert             = serializer.EffectInvert             // Invert
 	EffectExposure           = serializer.EffectExposure           // Exposure
+	EffectDropShadow         = serializer.EffectDropShadow         // Drop Shadow
+	EffectSharpen            = serializer.EffectSharpen            // Sharpen
+	EffectMosaic             = serializer.EffectMosaic             // Mosaic
+	EffectNoise              = serializer.EffectNoise              // Noise
+	EffectTransform          = serializer.EffectTransform          // Transform
+	EffectGradientRamp       = serializer.EffectGradientRamp       // Gradient Ramp
+	EffectFractalNoise       = serializer.EffectFractalNoise       // Fractal Noise
+	EffectMotionTile         = serializer.EffectMotionTile         // Motion Tile
+	EffectDirectionalBlur    = serializer.EffectDirectionalBlur    // Directional Blur
+	EffectLinearWipe         = serializer.EffectLinearWipe         // Linear Wipe
+	EffectWaveWarp           = serializer.EffectWaveWarp           // Wave Warp
+	EffectCurves             = serializer.EffectCurves             // Curves
+	EffectSliderControl      = serializer.EffectSliderControl      // Slider Control
+	EffectPointControl       = serializer.EffectPointControl       // Point Control
+	EffectColorControl       = serializer.EffectColorControl       // Color Control
+	EffectAngleControl       = serializer.EffectAngleControl       // Angle Control
+	EffectCheckboxControl    = serializer.EffectCheckboxControl    // Checkbox Control
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript
