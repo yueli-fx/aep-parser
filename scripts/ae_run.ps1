@@ -198,7 +198,12 @@ try {
     }
 
     if ($aeProc -and -not $aeProc.HasExited) {
-        $waitDeadline = (Get-Date).AddSeconds(5)
+        # Post-run exit grace. AE's clean shutdown (prefs write + session
+        # bookkeeping) routinely exceeds 5s on this machine; killing it
+        # mid-shutdown sets the crash flag, so the NEXT launch shows the
+        # 崩溃修复选项 (crash-repair) dialog — back-to-back gate runs then
+        # cascade. Give app.quit() a generous window before force-kill.
+        $waitDeadline = (Get-Date).AddSeconds(30)
         while (-not $aeProc.HasExited -and (Get-Date) -lt $waitDeadline) {
             Start-Sleep -Milliseconds 250
         }
