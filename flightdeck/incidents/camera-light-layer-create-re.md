@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing/extending source-less layer creation (NewCameraLayer / NewLightLayer); adding a new embed-whole-Layr layer type; debugging "AE drops/mis-types a Go-created camera/light"; deciding embed-whole-Layr vs from-scratch for a new layer kind
 applies_to: [new-camera-layer, new-light-layer, source-less-layer, embed-whole-layr, ldta-subtype, camera-options, light-options, structural-write, layer-create, ship-gate, ae2020, ae2025]
-last_updated: 2026-06-10
+last_updated: 2026-06-11
 ---
 
 # NewCameraLayer / NewLightLayer — embed-whole-Layr create
@@ -62,6 +62,8 @@ version-portability finding.
   existing Camera*/Light* setters operate on a parsed layer; on a freshly-built
   layer there's no scene tree, so values inherit the template's AE defaults until
   write+reopen. Same scene-vs-chunk split as [[add-effect-splice-re]] Phase 2.
-- **NewTextLayer** (embed-whole-Layr viable — text Layr is also self-contained,
-  but the btdk text-document blob is complex). **Solid/Null/Adjustment** still
-  need footage-Item creation ([[new-layer-types-scoping]]).
+- ~~NewTextLayer~~ — SHIPPED 2026-06-11 via the same embed-whole-Layr path
+  (mutate_layer_text.go; the btdk blob travels verbatim, so its complexity never
+  materialized for creation — length-variable text WRITE is the remaining wall,
+  see [[text-btdk-length-variable-write-scoping]]). ~~Solid/Null/Adjustment~~ —
+  shipped 2026-06-10 ([[new-layer-types-scoping]]). All layer kinds now creatable.

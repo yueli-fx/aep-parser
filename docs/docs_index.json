@@ -3828,6 +3828,13 @@
       "signature": "func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)",
       "summary": "NewSolidLayer adds a new solid-color layer to the composition and returns it."
     },
+    "NewTextLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newtextlayer",
+      "signature": "func NewTextLayer(c *Composition, name string) (*Layer, error)",
+      "summary": "NewTextLayer adds a new point-text layer to the composition and returns it."
+    },
     "Open": {
       "kind": "func",
       "file": "project.md",

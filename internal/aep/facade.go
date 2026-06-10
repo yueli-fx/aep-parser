@@ -166,6 +166,29 @@ func NewLightLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewLightLayer(c, name)
 }
 
+// NewTextLayer adds a new point-text layer to the composition and returns it.
+//
+// Like NewCameraLayer, a text layer is source-less: its content lives in the
+// btds/btdk text-engine document inside the layer's Text Properties group. The
+// new layer is cloned from an embedded AE-native text Layr — point text "A"
+// with the extraction fixture's styling (font YouYuan, 88 px, single run) —
+// with the layer ID, name, and time span (0 → comp duration) patched for this
+// comp.
+//
+// The returned layer reads TextSource immediately and supports SetText without
+// a Reopen (the text-source back-ref is wired at create time). SetText is
+// length-preserving, so on a fresh layer the text can become any string whose
+// encoded length matches "A" — a single character. Arbitrary-length text is
+// not yet writable: the btdk document embeds a layout cache (per-run character
+// counts + per-glyph pixel metrics keyed to the rendered string) that has to
+// be re-encoded for a different length.
+//
+// Atomic mutation (snapshot + warnings-as-failure rollback). Alpha / structural.
+// Free function (CLAUDE.md #2 structural-op call-form).
+func NewTextLayer(c *Composition, name string) (*Layer, error) {
+	return serializer.NewTextLayer(c, name)
+}
+
 // NewSolidLayer adds a new solid-color layer to the composition and returns it.
 //
 // A solid is footage-backed: the call also creates a backing solid footage
