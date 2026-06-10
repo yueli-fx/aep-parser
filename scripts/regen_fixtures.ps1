@@ -6,6 +6,12 @@
   unless -Force (AE saves are nondeterministic: GUIDs/timestamps shift, which
   would churn byte-diff RE baselines for no reason).
 
+  Granularity note: a job reruns its WHOLE generator JSX — sibling outputs of
+  the same JSX (e.g. a before/after pair) are rewritten together even if only
+  one was missing. Deliberate: pairs are only byte-consistent when produced in
+  one AE session; mixing an old "before" with a fresh "after" would corrupt
+  byte-diff RE comparisons.
+
 .PARAMETER CheckOnly   inventory only: report missing outputs + ungoverned .aep
                        (present on disk but no manifest entry and not git-tracked)
 .PARAMETER Force       regenerate ALL driveable entries, even if outputs exist
