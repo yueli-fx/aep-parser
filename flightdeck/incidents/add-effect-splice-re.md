@@ -2,14 +2,15 @@
 status: active
 when_to_read: implementing or extending AddEffect / the effect-template library; adding a new effect to the embedded set; debugging "AE drops/rejects a Go-added effect" or "cannot find layer ID=N in composition" on open; deciding whether an effect is splice-portable; extending parade auto-create to another group kind (Mask Parade); reasoning about the (tdmn, sspc) effect chunk unit or the tdpi host-layer binding
 applies_to: [add-effect, effect-parade, sspc, tdmn, tdpi, host-layer-binding, effect-template, structural-write, splice, group-end-sentinel, parade-auto-create, reopen, version-portable, ae2020, ae2025, ship-gate, embed-fs, gaussian-blur, levels]
-last_updated: 2026-06-10
+last_updated: 2026-06-11
 ---
 
 # AddEffect — Effect Parade splice RE + ship findings
 
 `aep.AddEffect(layer, matchName)` appends a built-in effect to a layer's
 `ADBE Effect Parade`. Shipped 2026-06-10 (two commits: core mechanic + 12-effect
-library). AE 2020 + AE 2025 ship-gate 10/10 across a 5-effect / 2-version sample.
+library). AE 2020 + AE 2025 ship-gate 24/24 across the full 12-effect library
+(2026-06-11; initially shipped 2026-06-10 on a 5-effect payload-size sample).
 
 ## Effect chunk structure (RE'd from re_property_struct_baseline.aep)
 
@@ -103,11 +104,11 @@ standalone splice can't satisfy — excluded until a Phase-2 remap handles refs.
 ## Coverage / gate
 
 - `TestAddEffect_AllTemplates_RoundTrip` — all 12 splice + WriteAEP + re-parse (Go, no AE).
-- `TestAddEffect_AEShipGate_AE20{20,25}` — table-driven over a 5-effect sample
-  (Gaussian Blur / Fill / Tint / Easy Levels2 / Pro Levels2), 10/10 PASS: AE
-  opens the Go-added file without corruption, reads back 4 effects in order, and
-  AE's own resave preserves the addition. The other 7 ride the identical
-  mechanism (Go round-trip only) — promote to gated if a doubt arises.
+- `TestAddEffect_AEShipGate_AE20{20,25}` — table-driven over the FULL
+  12-template library, 24/24 PASS (2026-06-11; originally a 5-effect
+  payload-size sample, the remaining 7 promoted to gated): AE opens the
+  Go-added file without corruption, reads back 4 effects in order, and AE's
+  own resave preserves the addition.
 - `TestAddEffectAutoParade_AEShipGate_AE20{20,25}` — parade auto-create end to
   end on a 100% Go-built file (fresh project → shape layer → Reopen →
   AddEffect), 2/2 PASS incl. resave preservation.

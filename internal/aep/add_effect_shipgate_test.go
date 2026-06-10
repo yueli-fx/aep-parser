@@ -7,12 +7,11 @@
 // Go-spliced effect (no data-loss / corrupt) and reads back the expected 4
 // effects in order. Resaves so the Go side confirms AE kept the addition.
 //
-// Sampled across the template library by sspc-payload size — a small effect
-// (Gaussian Blur 1.7KB), mid (Fill 2.5KB, Tint 2.2KB / 2 params) and the two
-// largest (Easy Levels2 11.7KB, Pro Levels2 20.6KB) — to prove the splice +
-// bottom-up size recompute holds regardless of payload size. The remaining
-// templates ride the identical mechanism (Go round-trip covered by
-// TestAddEffect_AllTemplates_RoundTrip).
+// Covers the full 12-template library — every embedded effect template is AE
+// dual-version ship-gated (payload sizes 1.7KB Gaussian Blur … 20.6KB Pro
+// Levels2), so the splice + bottom-up size recompute is proven per template,
+// not per mechanism. Go-only round-trip remains in
+// TestAddEffect_AllTemplates_RoundTrip.
 //
 // Gated by AE_SHIP_GATE. Baseline built by test_data/re_property_struct.jsx.
 package aep_test
@@ -27,14 +26,21 @@ import (
 	aep "github.com/example/aep-parser/internal/aep"
 )
 
-// addEffectSample is the ship-gated subset (match-name → resulting parade order).
+// addEffectSample is the ship-gated set: the full embedded template library.
 // Baseline parade is [Gaussian Blur, Tint, Fill]; the added effect appends last.
 var addEffectSample = []string{
-	"ADBE Gaussian Blur 2",
-	"ADBE Fill",
-	"ADBE Tint",
-	"ADBE Easy Levels2",
-	"ADBE Pro Levels2",
+	aep.EffectGaussianBlur,
+	aep.EffectFill,
+	aep.EffectTint,
+	aep.EffectLevels,
+	aep.EffectLevelsIndividual,
+	aep.EffectBrightnessContrast,
+	aep.EffectTritone,
+	aep.EffectHueSaturation,
+	aep.EffectBoxBlur,
+	aep.EffectGlow,
+	aep.EffectInvert,
+	aep.EffectExposure,
 }
 
 func runAddEffectGate(t *testing.T, aeExe, ver string) {

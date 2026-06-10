@@ -44,7 +44,7 @@ import (
 // All are built-in effects present well before the 2020 read floor; their
 // serialized form is version-portable (AE 2025 accepts the AE-2020 bytes —
 // mirroring the gradient version-portability finding, confirmed by ship-gate
-// across a small/large-payload sample).
+// across the full template library on both versions).
 //
 //go:embed templates/effect_adbe_gaussian_blur_2.bin templates/effect_adbe_fill.bin templates/effect_adbe_tint.bin templates/effect_adbe_brightness_contrast_2.bin templates/effect_adbe_tritone.bin templates/effect_adbe_easy_levels2.bin templates/effect_adbe_pro_levels2.bin templates/effect_adbe_hue_saturation.bin templates/effect_adbe_box_blur.bin templates/effect_adbe_glo2.bin templates/effect_adbe_invert.bin templates/effect_adbe_exposure2.bin
 var effectTemplateFS embed.FS
