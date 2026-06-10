@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-11 by claude（① effect 库全 12 双版本 gated + AddEffect/RemoveEffect 升 Stable ② NewTextLayer ship——图层类型全部建齐 ③ **SetText 升级 length-variable**（任意长度改字双版本 gate 2/2；快路径段落剖面守卫堵死旧潜伏 bug；DecodePSString 代理对修复）——详 `incidents/text-btdk-length-variable-write-scoping.md`）
+**Last updated**: 2026-06-11 by claude（**AddEffect 库 wave-2 扩到 29**：新增 17 个 parameter-only 内置效果（Drop Shadow/Sharpen/Mosaic/Noise/Transform/Gradient Ramp/Fractal Noise/Motion Tile/Directional Blur/Linear Wipe/Wave Warp/Curves + 5 表达式控制），双版本 ship-gate 34/34 PASS，全库 29/29 无未 gate 模板；新可复用提取器 `tmp_debug/extract_effect_lib`；commit `322ea00`。同日早些：effect 全 12 gated + AddEffect/RemoveEffect 升 Stable、NewTextLayer ship、SetText 升级 length-variable）
 **Active focus**: **结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → Solid/Null/Adjustment（详 `incidents/new-layer-types-scoping.md`）。2026-06-11 落：effect 全 12 模板双版本 gated + AddEffect/RemoveEffect 升 Stable + **NewTextLayer**（embed-whole-Layr，**新建图层类型全部建齐**；fresh 层免 Reopen 可读 TextSource/等长 SetText；btdk 改字长解封路径详 `incidents/text-btdk-length-variable-write-scoping.md`）。⚠ scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 拒收，已修（详 `incidents/nextitemid-must-include-layer-ids.md`）。M8 物理分包已落。
 
 ## 进行中
@@ -15,7 +15,7 @@
 
 **结构性创建 vein 继续推**（均纯代码可推 + ship-gate 自助，无需用户输入）。按价值/风险排序：
 
-1. **AddEffect 扩库 / 参数化**：更多内置效果（⚠ 带 layer/path 引用参数的效果其 tdpi 指向非宿主层，需选择性 remap——盲 retarget-all 会写坏，详 incident finding 5）；per-effect typed param helper（今为 raw `SetStaticValue` by match-name）。（✅ 既有 12 模板已全部双版本 ship-gate，2026-06-11）
+1. **AddEffect 参数化**：per-effect typed param helper（今为 raw `SetStaticValue` by match-name）。（✅ 扩库 wave-2 已落，库 = 29 全部双版本 gated，2026-06-11；再扩库 = 需求驱动，⚠ 带 layer/path 引用参数的效果其 tdpi 指向非宿主层，需选择性 remap——盲 retarget-all 会写坏，详 incident finding 5）
 2. **AddMask**（机制已证）：Mask Parade 同 INDEXED_GROUP splice + parade auto-create 模式可复用；但 mask path 写是 structural（暂搁），v1 只能 fixed-shape mask——等 mask-path-write 解封再做。
 3. **New\* 图层家族 Alpha→Stable 审计**（文档级，已获授权）：Camera/Light/Solid/Null/Adjustment/Text 均双版本 gated，按 CLAUDE.md #2 可升 Stable——逐一核对 gate 证据后一次 sweep（参照 AddEffect 升级先例）。
 4. **SetText 变长 refuse 集解封**（需求驱动再做）：多段落（splice 段落 dict entry）/ 多 run（计数分配 = AE 行为 RE）/ 空串。详 `incidents/text-btdk-length-variable-write-scoping.md` § v1 守卫。
