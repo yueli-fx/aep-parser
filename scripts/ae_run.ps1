@@ -21,6 +21,8 @@
    5 — rules file load failed
    6 — another AfterFX process already running (screen-rect OCR would read its
        dialogs; kill stragglers first, or pass -IgnoreRunningAe to proceed)
+   7 — Abort rule fired: environment failure needing USER INTERVENTION (e.g.
+       AE scripting write-access preference disabled); message on stderr
 #>
 
 [CmdletBinding()]
@@ -173,6 +175,17 @@ try {
                 continue
             }
 
+            # Abort action: hard environment failure that no keystroke can fix
+            # (e.g. AE scripting write-access preference disabled) — the user
+            # must intervene. Fail fast with exit 7 instead of dismissing and
+            # burning TimeoutSec on a .done that can never appear.
+            if ($match.rule.action -eq 'Abort') {
+                Write-ActionLog -DumpDir $dumpDir -Event 'abort-rule' -Data @{ name = $match.rule.name }
+                [Console]::Error.WriteLine("USER INTERVENTION REQUIRED [$($match.rule.name)]: $($match.rule.message)")
+                $exitCode = 7; $exitReason = "abort:$($match.rule.name)"
+                break
+            }
+
             $r = Invoke-SendKeysSafe -Hwnd $m.Hwnd -Keys $match.rule.keys -DelayMs 200
             if (-not $r.Sent) {
                 Write-ActionLog -DumpDir $dumpDir -Event 'focus-mismatch' -Data @{
@@ -186,6 +199,8 @@ try {
             Add-Cooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule $match.rule.name -DurationMs $match.rule.cooldownMs
             break
         }
+
+        if ($exitCode -ne 0) { break }   # Abort rule fired inside the foreach
 
         if ($persistentUnknownHwnd) {
             Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal-persistent' -Data @{

@@ -39,7 +39,9 @@ function Parse-Rules {
             throw "rule '$($rule.name)': at least one of windowTitle/windowClass/ocrMatch must be non-empty"
         }
         if (-not $rule.action) { throw "rule '$($rule.name)': missing 'action'" }
-        if ($rule.action -ne 'Ignore' -and -not $rule.keys) { throw "rule '$($rule.name)': missing 'keys'" }
+        if ($rule.action -notin @('SendKeys', 'Ignore', 'Abort')) { throw "rule '$($rule.name)': unknown action '$($rule.action)'" }
+        if ($rule.action -eq 'SendKeys' -and -not $rule.keys) { throw "rule '$($rule.name)': missing 'keys'" }
+        if ($rule.action -eq 'Abort' -and -not $rule.message) { throw "rule '$($rule.name)': Abort rule missing 'message' (shown to the operator on stderr)" }
         if ($null -eq $rule.cooldownMs) { throw "rule '$($rule.name)': missing 'cooldownMs'" }
     }
     return ,$parsed

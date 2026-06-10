@@ -70,6 +70,17 @@
     "comment": "AE 'Safe Mode' / Recovery dialog after wrapper force-kill on prior run — ESC declines safe-mode, continues normal launch"
   },
   {
+    "name": "scripting-write-access-disabled",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["允许脚本写入文件和访问网络", "权限被拒绝", "Allow Scripts to Write Files", "Permission denied"],
+    "action": "Abort",
+    "keys": "",
+    "message": "AE 的脚本写文件权限未开启 — 打开该 AE 版本的 首选项 > 脚本和表达式 > 勾选「允许脚本写入文件和访问网络」，然后重跑。(Preferences > Scripting & Expressions > Allow Scripts to Write Files and Access Network)",
+    "cooldownMs": 2000,
+    "comment": "JSX threw 'Unable to execute script at line N. Permission denied' — the per-version preference is off (fresh AE install / prefs reset). No keystroke fixes this; Abort with exit 7 so the operator enables the pref instead of burning TimeoutSec. First seen 2026-06-11 on AE 2025 after its prefs were recreated."
+  },
+  {
     "name": "script-alert",
     "windowTitle": ["Script Alert", "ExtendScript", "脚本警告"],
     "windowClass": [],

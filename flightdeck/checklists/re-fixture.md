@@ -139,6 +139,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 - `3` — OCR engine init 失败
 - `4` — AE 进程启动失败
 - `6` — **已有 AfterFX 进程在跑**（屏幕矩形 OCR 会读到它的对话框）。先 `Get-Process AfterFX* | Stop-Process -Force`，确实要并行才传 `-IgnoreRunningAe`
+- `7` — **Abort 规则命中 = 需用户介入的环境故障**（stderr 有 `USER INTERVENTION REQUIRED` + 修法）。已知案例：AE「允许脚本写入文件和访问网络」首选项未开（新装 / prefs 重建后默认关，**per-AE-version**），开 首选项>脚本和表达式 勾上再重跑——agent 自己修不了，必须提示用户
 
 失败时 dump 落 `<doneFile>.fail/`：`screenshot.png` / `ocr.txt` / `windows.txt` / `actions.log` / `meta.json`。
 
