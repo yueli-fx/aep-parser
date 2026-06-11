@@ -134,3 +134,4 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
 
 ## Cases
 - 2026-06-11 首次（AddMask v1 实现 + 双版本 gate；崩溃三连环：canonical tdb4 → 像素坐标 → shape 约定 open 标志）
+- 2026-06-12 finding-4 二次纠错（dump AE-native shape fixture `v2_2_shape_path_re.aep` 揭示 encodeBezier 的 shph[3]/lhd3 偏差是与 mask 同源的**通用偏差非 mask 独有**，shape 侧 AE 容忍）+ 修 `decodeShapePath` closed 误判公共 API bug（shph[0x14]→shph[3]，commit e442a43）+ 开放 shape path 双版本 ship-gate PASS（功能正确，commit a303ca3）
