@@ -115,6 +115,7 @@ cap=nextPow2(n)/4·cap），而 encodeBezier 写 `shph[3] open=0x00 / @0x14=n / 
 "ADBE Vector Shape" om-s **容忍**偏差值（不像 mask 急切解码 outline → 硬崩 0::42）。
 
 **已修的确证 bug**：`decodeShapePath`（parse_shape.go）用恒 0x01 的 shph[0x14] 读 closed → 公共 API 对
-开放 shape path 误报 Closed=true，已改 shph[3]（与本文件 `bezierFromShap` 一致）。**writer follow-up**：
-encodeBezier 写 AE-native 值 + 开放 shape path 双版本 ship-gate（现有 shape gate 全 closed，缺口）。
+开放 shape path 误报 Closed=true，已改 shph[3]（与本文件 `bezierFromShap` 一致）。**开放 shape path 写
+功能性 = 双版本 ship-gated**（`TestV2_2_PathOpen_AEShipGate_AE2020/_AE2025` PASS——AE 接受偏差字节、顶点
++ 开放标志保真）。**writer byte-faithfulness 降为纯优化 follow-up**（AE 容忍现状，需求驱动）。
 详 [[add-mask-create-re]] §三 finding 4。

@@ -88,10 +88,17 @@ readback, resave preservation). Ground-truth fixture: `test_data/re_mask_open.ae
    `shape_paths.closed`，即读真实用户文件）。已改读 `shph[3]`（与 hydrate `bezierFromShap`
    一致），fixture 三 path closed=false/true/false 全对，加回归 `TestShapePathOpenIsNotClosed`。
 
-   📌 **writer byte-faithfulness follow-up（需 AE ship-gate）**：让 encodeBezier 直接写
-   AE-native 值（shph[3] open=0x09 / @0x14=4 / @0x18=1 确定；@0x0C/@0x1C 待 n=4..8 开放+闭合
-   RE 确证 nextPow2），shape/mask 写路径即 byte-faithful、mask patch 可化简。缺口：**开放
-   shape path 的 AE 接受性从无 ship-gate**（现有 shape gate 全 closed）。详 [[path-keyframe-write-re]]。
+   ✅ **开放 shape path 写功能性 = 双版本 ship-gated（2026-06-12）**：`TestV2_2_PathOpen_AEShipGate_AE2020/_AE2025`
+   （NewShapeLayer + AddPath 开放折线 n=3 + SetClosed(false) + AddFill）**AE 2020 + AE 2025 均
+   PASS（21.8s / 20.1s）**——AE 接受当前 encodeBezier 的开放 path 偏差字节（shph[3]=0x00 等），
+   层未丢、`assertResavedPathAnchors` 顶点精确读回、`assertResavedPathClosed` 确认 AE resave 后
+   shph[3]≠0x01（开放标志存活）。**即偏差值是 AE 容忍的纯 byte-faithfulness 差异，非功能 bug**
+   ——这关闭了「开放 shape path 写 → AE 接受性未知」的功能缺口。
+
+   📌 **降级为纯优化 follow-up（非功能必需，需求驱动）**：让 encodeBezier 直接写 AE-native 值
+   （shph[3] open=0x09 / @0x14=4 / @0x18=1 确定；@0x0C/@0x1C 待 n=5..8 RE 确证 nextPow2 容量假设），
+   shape/mask 写路径即 byte-identical、mask patch 可化简。但 AE 已容忍现状且 round-trip 功能正确，
+   故无紧迫性。详 [[path-keyframe-write-re]]。
 
 ldat 三元组布局与 shape path 完全同构（`[anchor, 本点出控制点, 下点入控制点]`，绝对值、
 bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTangent/OutTangent`
