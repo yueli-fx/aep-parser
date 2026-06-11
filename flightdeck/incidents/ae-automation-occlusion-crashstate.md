@@ -22,6 +22,16 @@ the pixel capture is wrong.
 (occlusion-immune). Win32 `GetWindowText` on AE dialogs returns garbage ("O") because
 AE uses owner-drawn controls — PrintWindow + read-the-image is the reliable path.
 
+**FIXED in the wrapper 2026-06-11**: `Capture-WindowBitmap` (AeRun.Lib.ps1) now
+PrintWindow-captures by Hwnd first and only falls back to the legacy screen-rect
+copy — gate OCR works with an editor sitting on top (AddMask gate triage proved
+it: the dump's "unknown modal" OCR used to be the IDE's file tree). Same session
+also added: `Crash` action (exit 8, AE crash dialog `ae-crashed` rule — dismiss
+the corpse + fail fast; harness warm-retries 1/2/8), teardown `WaitForExit` after
+force-kill (immediate warm retry used to trip the exit-6 concurrent-AE guard),
+and failure forensics moved from t.TempDir (wiped on teardown!) to
+`tmp_debug/gate_fails/`.
+
 ## 2. Crash-recovery cascade (self-inflicted)
 A failed/timed-out ship-gate makes `ae_run.ps1` **force-kill** AE. The next AE launch
 then shows **"崩溃修复选项 / Safe Mode"** (`ae-safe-mode-recovery` rule → ESC, but

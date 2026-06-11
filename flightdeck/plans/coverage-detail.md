@@ -261,6 +261,9 @@ AE 文档：[Property](../charts/after-effects-scripting-guide/docs/property/pro
 | `MaskPropertyGroup.maskMode`           | `Mask.Mode` + `SetMode`                    | ✅ R/W        |                                                                                                          |
 | `MaskPropertyGroup.maskMotionBlur`     | `Mask.MotionBlur` + `SetMaskMotionBlur`      | ✅ R/W        | mkif `@0x02`：0=SameAsLayer, 2=On, 3=Off                                                               |
 | `MaskPropertyGroup.rotoBezier`         | —                                             | ❌ structural | AE 切换 rotoBezier 重写整个 shape 顶点 / 切线表示（+16 字节，4517 byte-diff）；超 length-preserving 范围 |
+| `Layer.Masks.addProperty("ADBE Mask Atom")` | `aep.AddMask(layer, name, path)`         | ✅ W (Alpha)  | from-scratch atom 三件套 splice + parade auto-create；创建时路径参数化（open/closed）；双版本 gate 4/4；详 `incidents/add-mask-create-re.md` |
+| `MaskPropertyGroup.name`               | `Mask.Name`（atom tdsn fallback）             | ✅ R          | AE 面板名存 atom tdgp tdsn，omtn 恒空；2026-06-11 修（之前 AE-native mask 读空） |
+| `Shape.closed`（mask 路径）            | `Mask.Closed` + `SetClosed`                   | ✅ R/W        | **shph[3] bit3**（02 01 closed / 02 09 open）；旧 @0x14 读法误（恒 0x01），2026-06-11 修 |
 
 ---
 

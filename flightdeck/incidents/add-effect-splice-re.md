@@ -198,10 +198,12 @@ The "write → reopen" workaround in these findings became the shipped path:
   their sspc carries tdpi bindings pointing at OTHER layers (not just the host);
   needs selective remap like cross-Project InsertLayer, and retarget-all would
   corrupt them (see finding 5).
-- **AddMask** — Mask Parade is the same INDEXED_GROUP splice (RemovePropertyGroup
-  already handles masks); the parade-creation gap is now solved for effects and
-  the same auto-create pattern should transfer (mask-parade empty-group bytes +
-  anchor TBD). Still gated on mask-path write for useful v1.
+- ~~**AddMask**~~ — SHIPPED 2026-06-11 (dual-version gated, from-scratch atom,
+  path parameterizable at creation; the auto-create pattern transferred via
+  `spliceEmptyParade`). See [[add-mask-create-re]]. NOTE the earlier "same
+  INDEXED_GROUP splice" framing was half-right: a mask atom is a (tdmn, mkif,
+  tdgp) TRIPLE, so RemovePropertyGroup refuses mask children (pair assumption)
+  — RemoveMask stays deferred.
 - **Library expansion** beyond the 29 (more fixture RE; watch for ref params).
 - **Per-effect typed param helpers** (today: raw `Property.SetStaticValue` by match-name).
 

@@ -130,7 +130,8 @@ summary: 字段覆盖概览（精简入口）
 ### Mask
 
 - 顶层: `Mode / Inverted / Color / Closed / Locked / MotionBlur` R/W；`Feather / Opacity / Expansion` R + 顶层 setter
-- 路径动画: `PathKeyframes` R only（顶点重写 = 结构性 ❌）
+- 路径动画: `PathKeyframes` R only（既有 mask 的顶点重写 = 结构性 ❌；但**创建时路径可参数化**——见 AddMask）
+- **AddMask W (2026-06-11, Alpha)**: `aep.AddMask(layer, name, path BezierPath) (*Mask, error)` — 给 layer 的 `ADBE Mask Parade` splice 一个 from-scratch mask atom（`(tdmn, mkif[48B], tdgp)` **三件套**，无嵌入模板，全 Go 构造；parade auto-create 复用 `spliceEmptyParade`，锚点 = Effect Parade 之前否则 Transform Group 之前）。创建时静态路径任意参数化（顶点/切线/open-closed，公共 API 收层像素，内部按源 item 分数 vs source-less 裸像素换算）；返回的 `*Mask` back-refs 即时可用（SetMode/SetInverted/SetColor…）。**AE 2020 + AE 2025 双版本 ship-gate 4/4 PASS**（AE-native fixture + 100% Go-built × closed/open，顶点像素级读回 + resave 保留）。配套修复：mask `Closed` 解析改 shph[3] bit3（旧 @0x14 读法对 AE-native open mask 误读）+ `Mask.Name` 加 atom tdsn fallback（AE 面板名存 tdsn，omtn 恒空）。refuse：camera/light / 未 Reopen 的 fresh 层 / 空 path。deferred：RemoveMask（atom 三件套不满足 RemovePropertyGroup 的 pair 假设）/ 既有 mask 路径改写 / animated path / mode·color 创建参数。详 `incidents/add-mask-create-re.md`。
 
 ### Shape
 
