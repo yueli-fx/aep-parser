@@ -30,6 +30,16 @@
     "comment": "Mode 3 — fixture broken; press OK to let JSX catch + write .done(ERR)"
   },
   {
+    "name": "ae-crashed",
+    "windowTitle": [],
+    "windowClass": [],
+    "ocrMatch": ["已崩溃", "has crashed", "无法继续", "learn_ae", "技术支持", "联系Adobe"],
+    "action": "Crash",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "AE hard-crash dialog 'After Effects 无法继续: 抱歉，After Effects 已崩溃。… (0 :: 42)' — the process is dead, .done can never appear. Crash action: press OK to release the corpse, exit 8 immediately. Gate harness warm-retries exit 8 once (cold-start crashes are transient); an identical second crash is a real reject — capture the .fail/ dump. ocrMatch carries ASCII anchors too (learn_ae from the support URL) because OCR mangles the CJK on this dialog ('Afer Effects 无 法...' observed 2026-06-11, AddMask gate). MUST stay BEFORE generic dismiss rules so the crash is classified, not blindly Enter'd."
+  },
+  {
     "name": "preferences-damaged",
     "windowTitle": [],
     "windowClass": [],

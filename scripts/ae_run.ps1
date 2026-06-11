@@ -23,6 +23,9 @@
        dialogs; kill stragglers first, or pass -IgnoreRunningAe to proceed)
    7 — Abort rule fired: environment failure needing USER INTERVENTION (e.g.
        AE scripting write-access preference disabled); message on stderr
+   8 — Crash rule fired: AE itself crashed ("After Effects 已崩溃 (0 :: 42)");
+       dialog dismissed, .done can never appear. Cold-start crashes are
+       transient — caller should warm-retry once; identical failure = real
 #>
 
 [CmdletBinding()]
@@ -129,7 +132,7 @@ try {
 
             # Layer C — OCR if title/class miss
             if (-not $match) {
-                $bmp = Capture-WindowBitmap -Rect $m.Rect
+                $bmp = Capture-WindowBitmap -Hwnd $m.Hwnd -Rect $m.Rect
                 try { $ocrText = Invoke-Ocr -Bitmap $bmp } finally { $bmp.Dispose() }
                 $info.Ocr = $ocrText
                 $match = Match-Rule -HwndInfo $info -Rules $rules
@@ -186,6 +189,24 @@ try {
                 break
             }
 
+            # Crash action: AE itself died — the JSX can never write .done.
+            # Dismiss the dialog (unblocks the dead process's shutdown so the
+            # next launch isn't haunted by a zombie modal), then fail fast with
+            # exit 8 instead of burning TimeoutSec. Cold-start crashes are
+            # transient and heal on the caller's warm retry; a deterministic
+            # crash fails the retry identically — same flake-vs-real split as
+            # exit 2.
+            if ($match.rule.action -eq 'Crash') {
+                Write-ActionLog -DumpDir $dumpDir -Event 'crash-rule' -Data @{ name = $match.rule.name }
+                if ($match.rule.keys) {
+                    $r = Invoke-SendKeysSafe -Hwnd $m.Hwnd -Keys $match.rule.keys -DelayMs 200
+                    Write-ActionLog -DumpDir $dumpDir -Event 'crash-dismiss' -Data @{ keys = $match.rule.keys; sent = $r.Sent }
+                }
+                [Console]::Error.WriteLine("AE CRASHED [$($match.rule.name)] — dialog dismissed; warm-retry once, identical failure = real crash")
+                $exitCode = 8; $exitReason = "crash:$($match.rule.name)"
+                break
+            }
+
             $r = Invoke-SendKeysSafe -Hwnd $m.Hwnd -Keys $match.rule.keys -DelayMs 200
             if (-not $r.Sent) {
                 Write-ActionLog -DumpDir $dumpDir -Event 'focus-mismatch' -Data @{
@@ -218,7 +239,7 @@ try {
         $finalModals = Get-AeModals -AeRootPid $aeRootPid -MainTitleHints @('Adobe After Effects')
         foreach ($m in $finalModals) {
             try {
-                $bmp = Capture-WindowBitmap -Rect $m.Rect
+                $bmp = Capture-WindowBitmap -Hwnd $m.Hwnd -Rect $m.Rect
                 $ocrTexts[('0x{0:X}' -f [int64]$m.Hwnd)] = Invoke-Ocr -Bitmap $bmp
                 $bmp.Dispose()
             } catch {}
@@ -254,6 +275,10 @@ try {
         }
         if (-not $aeProc.HasExited) {
             Stop-Process -Id $aeRootPid -Force -ErrorAction SilentlyContinue
+            # Block until the kill lands (bounded): exiting while the corpse is
+            # still unwinding makes the caller's immediate warm retry trip the
+            # concurrent-AE guard (exit 6) — observed on the exit-8 crash path.
+            try { [void]$aeProc.WaitForExit(15000) } catch {}
             Write-ActionLog -DumpDir $dumpDir -Event 'ae-force-killed'
         } else {
             Write-ActionLog -DumpDir $dumpDir -Event 'ae-exited'

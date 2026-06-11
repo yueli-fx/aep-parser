@@ -39,7 +39,7 @@ function Parse-Rules {
             throw "rule '$($rule.name)': at least one of windowTitle/windowClass/ocrMatch must be non-empty"
         }
         if (-not $rule.action) { throw "rule '$($rule.name)': missing 'action'" }
-        if ($rule.action -notin @('SendKeys', 'Ignore', 'Abort')) { throw "rule '$($rule.name)': unknown action '$($rule.action)'" }
+        if ($rule.action -notin @('SendKeys', 'Ignore', 'Abort', 'Crash')) { throw "rule '$($rule.name)': unknown action '$($rule.action)'" }
         if ($rule.action -eq 'SendKeys' -and -not $rule.keys) { throw "rule '$($rule.name)': missing 'keys'" }
         if ($rule.action -eq 'Abort' -and -not $rule.message) { throw "rule '$($rule.name)': Abort rule missing 'message' (shown to the operator on stderr)" }
         if ($null -eq $rule.cooldownMs) { throw "rule '$($rule.name)': missing 'cooldownMs'" }
@@ -167,6 +167,10 @@ function Initialize-Win32 {
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern System.IntPtr GetForegroundWindow();
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool PrintWindow(System.IntPtr hWnd, System.IntPtr hdcBlt, uint nFlags);
+
+        public const uint PW_RENDERFULLCONTENT = 2;
         public const uint GW_OWNER = 4;
         public const int GWL_EXSTYLE = -20;
         public const int WS_EX_DLGMODALFRAME = 0x00000001;
@@ -297,10 +301,45 @@ function Invoke-Ocr {
 }
 
 function Capture-WindowBitmap {
+    # Occlusion-immune capture: with -Hwnd, PrintWindow(PW_RENDERFULLCONTENT)
+    # renders the window's OWN content regardless of z-order — an interactive
+    # session's editor/terminal sitting on top of the AE dialog no longer
+    # poisons OCR with its own pixels (incidents/ae-automation-occlusion-
+    # crashstate.md §1; previously only tmp_debug/capture_dialog.ps1 had this).
+    # Falls back to the legacy screen-rect copy when no Hwnd is given or
+    # PrintWindow fails (some GPU-composited windows refuse it).
     [CmdletBinding()]
-    param([Parameter(Mandatory)][AeRunWin32+RECT]$Rect)
+    param(
+        [AeRunWin32+RECT]$Rect,
+        [IntPtr]$Hwnd = [IntPtr]::Zero
+    )
 
     Add-Type -AssemblyName System.Drawing
+    Initialize-Win32
+
+    if ($Hwnd -ne [IntPtr]::Zero) {
+        $r = New-Object AeRunWin32+RECT
+        if ([AeRunWin32]::GetWindowRect($Hwnd, [ref]$r)) {
+            $w = $r.Right - $r.Left
+            $h = $r.Bottom - $r.Top
+            if ($w -gt 0 -and $h -gt 0) {
+                $bmp = New-Object System.Drawing.Bitmap $w, $h
+                $g = [System.Drawing.Graphics]::FromImage($bmp)
+                $ok = $false
+                try {
+                    $hdc = $g.GetHdc()
+                    try { $ok = [AeRunWin32]::PrintWindow($Hwnd, $hdc, [AeRunWin32]::PW_RENDERFULLCONTENT) }
+                    finally { $g.ReleaseHdc($hdc) }
+                } finally {
+                    $g.Dispose()
+                }
+                if ($ok) { return $bmp }
+                $bmp.Dispose()
+            }
+        }
+    }
+
+    if ($null -eq $Rect) { throw 'Capture-WindowBitmap: need -Hwnd or -Rect' }
     $w = [Math]::Max(1, $Rect.Right - $Rect.Left)
     $h = [Math]::Max(1, $Rect.Bottom - $Rect.Top)
     $bmp = New-Object System.Drawing.Bitmap $w, $h

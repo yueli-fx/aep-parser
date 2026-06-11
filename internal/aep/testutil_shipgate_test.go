@@ -16,10 +16,11 @@ import (
 // ps1 owns timeout + .done polling + dialog dismissal. On non-zero exit ps1
 // leaves a <doneFile>.fail/ dump dir with screenshot.png / ocr.txt / actions.log.
 //
-// Exit 1 (timeout) / 2 (unknown modal) get ONE automatic warm retry: AE
-// cold-start (splash outliving the unknown-modal grace) manifests as exactly
-// these codes and self-heals on relaunch, while a deterministic data reject
-// fails the retry identically — so flakes vanish without masking real rejects.
+// Exit 1 (timeout) / 2 (unknown modal) / 8 (AE crash dialog, Crash rule) get
+// ONE automatic warm retry: AE cold-start (splash outliving the unknown-modal
+// grace, or a cold-start hard crash) manifests as exactly these codes and
+// self-heals on relaunch, while a deterministic data reject / crash fails the
+// retry identically — so flakes vanish without masking real rejects.
 // The first attempt's forensics dump is preserved as <doneFile>.fail.1/.
 func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec int) {
 	t.Helper()
@@ -60,7 +61,7 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 	}
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
-		if code := exitErr.ExitCode(); code == 1 || code == 2 {
+		if code := exitErr.ExitCode(); code == 1 || code == 2 || code == 8 {
 			t.Logf("ae_run.ps1 exit %d — warm retry once (cold-start flake heals; a real reject fails again)", code)
 			failDir := doneFile + ".fail"
 			os.RemoveAll(failDir + ".1")
@@ -70,7 +71,17 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 			}
 		}
 	}
-	t.Fatalf("ae_run.ps1 failed: %v (check %s.fail/ for dump; first attempt in %s.fail.1/ if retried)", err, doneFile, doneFile)
+	// doneFile usually lives under t.TempDir(), which the test framework wipes
+	// on teardown — move the forensics out to a stable location first, or the
+	// dump referenced by the failure message no longer exists when a human (or
+	// agent) goes looking (bit us 2026-06-11 on the AddMask crash triage).
+	kept := filepath.Join(repoRoot, "tmp_debug", "gate_fails", filepath.Base(doneFile))
+	os.RemoveAll(kept + ".fail")
+	os.RemoveAll(kept + ".fail.1")
+	os.MkdirAll(filepath.Dir(kept), 0755)
+	os.Rename(doneFile+".fail", kept+".fail")
+	os.Rename(doneFile+".fail.1", kept+".fail.1")
+	t.Fatalf("ae_run.ps1 failed: %v (forensics preserved at %s.fail/ — screenshot.png / ocr.txt / actions.log; first attempt in %s.fail.1/ if retried)", err, kept, kept)
 }
 
 func trimShipNUL(s string) string {
