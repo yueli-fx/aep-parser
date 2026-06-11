@@ -101,11 +101,20 @@ deferred：temporal ease（首版 linear only）、mask path write（只做 shap
 
 dump/build 工具（tmp_debug，gitignored）：`dump_path_anim`（按块解码）、`build_pathkf`（复刻 gate build 落盘）、`dump_tdbs`（tdbs leaf）、`dump_tdmn`（match-name 树）。
 
-## encodeBezier lhd3 @0x14/@0x18/@0x1C — n≠4 对 shape path 安全（2026-06-12 核）
+## encodeBezier lhd3/shph 偏离 AE-native — AE 容忍但非 byte-faithful（2026-06-12，二次纠错）
 
 [[add-mask-create-re]] 掀出 encodeBezier 的 geometry lhd3 写 `@0x14=n / @0x18=closedFlag / @0x1C=16`，
-而 mask 实测应为 `@0x14=4 恒 / @0x18=1 恒 / @0x1C=4·n`（AddMask 后补丁），并留 follow-up 问 shape 侧是否同样
-n≠4 broken。**纯代码核结论：shape path 不受影响**——前提（shape gated fixtures 全 n=4）不成立。`shape_path_shipgate_test.go`
-静态 gate 用 n=3 三角形 + `assertResavedPathAnchors` 精确读回，本 gate（`shape_pathkf_shipgate_test.go`）frame 2 亦 n=3，
-两者双版本 PASS。AE 对 "ADBE Vector Shape" om-s 容忍 n-依赖 lhd3（mask 的急切-decode 严格性是 mask 独有）。
-未 gate 的次要轴：开放 shape path（`@0x18=0`）无覆盖，但 closed/open 独立在 shph[3]，需求驱动再核。详 [[add-mask-create-re]] §三 finding 4。
+留 follow-up 问 shape 侧是否 n≠4 broken。**首轮结论（「shape 不受影响 = mask 独有严格性」）经 dump
+AE-native fixture `v2_2_shape_path_re.aep`（含开放 path）后部分推翻**：AE-native shape path 的这些字段值
+与 **mask 完全一致**（shph[3] open=**0x09**、@0x14=**4 恒**、@0x18=**1 恒**、@0x08=3n、@0x0C/@0x1C 疑
+cap=nextPow2(n)/4·cap），而 encodeBezier 写 `shph[3] open=0x00 / @0x14=n / @0x18=closedFlag / @0x1C=16`，
+**全部偏离、只 n=4 闭合巧合**——这是与 mask 同源的通用偏差，**不是 mask 独有**。
+
+**对的部分留下**：shape path 的 **AE 接受性** 确实不受影响——n=3 closed gate
+（`shape_path_shipgate_test.go` + 精确读回）+ 本 gate frame 2（n=3）双版本 PASS，AE 对
+"ADBE Vector Shape" om-s **容忍**偏差值（不像 mask 急切解码 outline → 硬崩 0::42）。
+
+**已修的确证 bug**：`decodeShapePath`（parse_shape.go）用恒 0x01 的 shph[0x14] 读 closed → 公共 API 对
+开放 shape path 误报 Closed=true，已改 shph[3]（与本文件 `bezierFromShap` 一致）。**writer follow-up**：
+encodeBezier 写 AE-native 值 + 开放 shape path 双版本 ship-gate（现有 shape gate 全 closed，缺口）。
+详 [[add-mask-create-re]] §三 finding 4。

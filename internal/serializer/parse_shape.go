@@ -46,8 +46,13 @@ func decodeShapePath(shap *rifx.Chunk) *ShapePath {
 		switch {
 		case ch.ID == rifx.IDShph:
 			sp.ShphRaw = append([]byte(nil), ch.Data...)
-			if len(ch.Data) >= 0x15 {
-				sp.Closed = ch.Data[0x14] == 0x01
+			if len(ch.Data) >= 4 {
+				// shph[3]: 0x01 closed, 0x09 open (bit3 = open). shph[0x14] is a
+				// constant 0x01 on every AE-native path — NOT the closed flag.
+				// The old [0x14] read reported every open shape path as closed
+				// (it only coincided on closed paths). Now matches hydrate's
+				// bezierFromShap; ground truth = v2_2_shape_path_re.aep open shaps.
+				sp.Closed = ch.Data[3] == 0x01
 			}
 		case ch.IsList() && ch.FormType == rifx.IDkfl:
 			sp.Vertices = decodeMaskVertices(ch)

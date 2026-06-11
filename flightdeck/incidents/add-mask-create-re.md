@@ -57,20 +57,41 @@ readback, resave preservation). Ground-truth fixture: `test_data/re_mask_open.ae
    mask → AE 读 mask shape 抛 `参数值无效`。
 4. **lhd3 字段对 n≠4 顶点是错的（encodeBezier 遗留）**：mask 实测 `@0x14`=**4 恒定**
    （encodeBezier 写顶点数 n，仅 n=4 巧合成立——n=3 的 mask 让 AE 2020 硬崩）、
-   `@0x18`=**1 恒定**（不是 closed 位）、`@0x1C`=**4·n**（不是常量 16）。AddMask 在
-   encodeBezier 后补丁这三个字段。✅ **follow-up 已核（2026-06-12，纯代码）——shape path
-   侧不受影响，是 mask 特有严格性，非 encodeBezier 通用 bug**：前提（「shape gated fixtures
-   恰全是 n=4」）不成立。静态 path ship-gate（`shape_path_shipgate_test.go`）用的就是
-   **n=3 三角形** `{{10,20},{70,30},{40,90}}`（closed），走 `splicePathGeometry →
-   spliceShapGeometry → encodeBezier`（lower_shape_node.go:506 整块替换 lhd3），产出
-   `@0x14=3 / @0x18=1 / @0x1C=16`，**AE 2020 + AE 2025 双版本接受 + `assertResavedPathAnchors`
-   精确读回 3 顶点（容差 0.5px）**；动画 path gate（`shape_pathkf_shipgate_test.go`）frame 2
-   同为 n=3 三角形，也双版本 PASS。即 AE 对 shape layer 的 "ADBE Vector Shape" om-s 容忍
-   encodeBezier 的 n-依赖 lhd3 字段（不像 mask 打开工程即急切解码 outline → n≠4 硬崩 0::42）。
-   **唯一未 gate 的次要轴**：所有 gated shape path 皆 `Closed=true`（→ `@0x18=closedFlag=1`，
-   恰合 mask 的恒定 1），**开放 shape path** 下 encodeBezier 写 `@0x18=0` 无 ship-gate 覆盖——
-   但这是 closed/open 轴而非 n≠4 轴，且 shape 开闭独立编码在 shph[3]，需求驱动再核。
-   （见 [[path-keyframe-write-re]]）
+   `@0x18`=**1 恒定**（不是 closed 位）、`@0x1C`=**4·容量**（不是常量 16）。AddMask 在
+   encodeBezier 后补丁这三个字段。
+
+   ⚠ **2026-06-12 二次纠错（dump AE-native shape fixture `v2_2_shape_path_re.aep`，含
+   开放 path——层名 tan_path/tri_closed/tri_open 即 ground truth）**：上一版「shape 侧不受
+   影响 = mask 特有严格性，非 encodeBezier 通用偏差」**部分错**。AE-native shape path 的这些
+   字段值与 **mask 完全一致**（不是 mask 独有）：
+
+   | shap | n=ldat/24 | shph[3] | @0x0C | @0x14 | @0x18 | @0x1C |
+   |---|---|---|---|---|---|---|
+   | tan_path 开放 | 2 | **09** | 2 | 4 | 1 | 8 |
+   | tri_closed 闭合 | 3 | 01 | 4 | 4 | 1 | 16 |
+   | tri_open 开放 | 3 | **09** | 4 | 4 | 1 | 16 |
+
+   即 AE-native shape path：`shph[3]` open=**0x09**（bit3，= mask）、`@0x14`=**4 恒**、
+   `@0x18`=**1 恒**、`@0x08`=**3n**、`@0x0C`/`@0x1C` 疑为容量语义 `cap=nextPow2(n)` /
+   `4·cap`（n=2→cap2/8、n=3→cap4/16、n=4→cap4/16；仅 3 数据点，nextPow2 是假设）。
+   而 encodeBezier 写 `shph[3] open=0x00`、`@0x14=n`、`@0x18=closedFlag`、`@0x0C=n`、
+   `@0x1C=16`——**全部偏离 AE-native，只在 n=4 闭合时巧合**（与 mask 偏差同源，非 mask 独有）。
+
+   **对的部分留下**：shape path 的 **AE 接受性** 确实不受影响——n=3 closed gate
+   （`shape_path_shipgate_test.go` 三角形 + `assertResavedPathAnchors` 精确读回）+ 动画 gate
+   frame 2（n=3）双版本 PASS。即 AE 对 shape "ADBE Vector Shape" om-s **容忍**这些偏差值
+   （不像 mask 打开工程即急切解码 outline → n≠4/非标 closed 硬崩 0::42）。
+
+   ✅ **顺带逮到并修了一个确证的公共 API parser bug**：`decodeShapePath`
+   （parse_shape.go）用 **shph[0x14]**（AE-native 恒 0x01）读 closed → 对**所有** AE-native
+   开放 shape path 误报 `Closed=true`（影响公共 `Layer.ShapePaths[].Closed` + JSON
+   `shape_paths.closed`，即读真实用户文件）。已改读 `shph[3]`（与 hydrate `bezierFromShap`
+   一致），fixture 三 path closed=false/true/false 全对，加回归 `TestShapePathOpenIsNotClosed`。
+
+   📌 **writer byte-faithfulness follow-up（需 AE ship-gate）**：让 encodeBezier 直接写
+   AE-native 值（shph[3] open=0x09 / @0x14=4 / @0x18=1 确定；@0x0C/@0x1C 待 n=4..8 开放+闭合
+   RE 确证 nextPow2），shape/mask 写路径即 byte-faithful、mask patch 可化简。缺口：**开放
+   shape path 的 AE 接受性从无 ship-gate**（现有 shape gate 全 closed）。详 [[path-keyframe-write-re]]。
 
 ldat 三元组布局与 shape path 完全同构（`[anchor, 本点出控制点, 下点入控制点]`，绝对值、
 bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTangent/OutTangent`

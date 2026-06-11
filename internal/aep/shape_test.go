@@ -38,39 +38,7 @@ func TestShapePathExtraction(t *testing.T) {
 		{Anchor: [2]float64{1, 0}, InTangent: [2]float64{0.5, 0.1}, OutTangent: [2]float64{1, 1}},
 		{Anchor: [2]float64{1, 1}, InTangent: [2]float64{1, 1}, OutTangent: [2]float64{0, 0}},
 	}
-	// Reuse mask-style scaffolding (om-s + omks + shap) since shape layers
-	// use identical wrapping.
-	omksBody := buildMaskShapBytes(rb, verts, true, "my path")
-	omksList := rb.listChunk("LIST", "omks", omksBody)
-	tdb4 := rb.chunk("tdb4", buildTdb4(0x01))
-	tdbsInner := append([]byte(nil), tdb4...)
-	tdbsList := rb.listChunk("LIST", "tdbs", tdbsInner)
-	var omSInner []byte
-	omSInner = append(omSInner, tdbsList...)
-	omSInner = append(omSInner, omksList...)
-	omSList := rb.listChunk("LIST", "om-s", omSInner)
-
-	// Vector Shape entry (tdmn + om-s).
-	var vsBody []byte
-	vsBody = append(vsBody, rb.chunk("tdmn", []byte("ADBE Vector Shape"))...)
-	vsBody = append(vsBody, omSList...)
-	vsBody = append(vsBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
-	vsTdgp := rb.listChunk("LIST", "tdgp", vsBody)
-
-	// Build the layer's root: ADBE Root Vectors Group → tdgp containing
-	// the Vector Shape — tagging this as a shape layer.
-	var rootBody []byte
-	rootBody = append(rootBody, rb.chunk("tdmn", []byte("ADBE Vector Shape - Group"))...)
-	rootBody = append(rootBody, vsTdgp...)
-	rootBody = append(rootBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
-	rvgTdgp := rb.listChunk("LIST", "tdgp", rootBody)
-
-	var tdgpBody []byte
-	tdgpBody = append(tdgpBody, rb.chunk("tdmn", []byte("ADBE Root Vectors Group"))...)
-	tdgpBody = append(tdgpBody, rvgTdgp...)
-	tdgpBody = append(tdgpBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
-
-	data := wrapAsLayer(tdgpBody)
+	data := buildShapeLayerData(rb, verts, true, "my path")
 	proj, err := aep.FromReader(bytes.NewReader(data))
 	if err != nil {
 		t.Fatalf("FromReader: %v", err)
@@ -91,6 +59,63 @@ func TestShapePathExtraction(t *testing.T) {
 	}
 	if len(sp.Vertices) != 3 {
 		t.Errorf("Vertices = %d, want 3", len(sp.Vertices))
+	}
+}
+
+// buildShapeLayerData wraps a single Vector Shape path (verts/closed/name) in
+// the Root Vectors Group scaffolding shape layers use, returning layer bytes
+// for FromReader. om-s/omks/shap wrapping is identical to masks.
+func buildShapeLayerData(rb *rifxBuilder, verts []aep.MaskVertex, closed bool, name string) []byte {
+	omksList := rb.listChunk("LIST", "omks", buildMaskShapBytes(rb, verts, closed, name))
+	tdb4 := rb.chunk("tdb4", buildTdb4(0x01))
+	tdbsList := rb.listChunk("LIST", "tdbs", append([]byte(nil), tdb4...))
+	var omSInner []byte
+	omSInner = append(omSInner, tdbsList...)
+	omSInner = append(omSInner, omksList...)
+	omSList := rb.listChunk("LIST", "om-s", omSInner)
+
+	var vsBody []byte
+	vsBody = append(vsBody, rb.chunk("tdmn", []byte("ADBE Vector Shape"))...)
+	vsBody = append(vsBody, omSList...)
+	vsBody = append(vsBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
+	vsTdgp := rb.listChunk("LIST", "tdgp", vsBody)
+
+	var rootBody []byte
+	rootBody = append(rootBody, rb.chunk("tdmn", []byte("ADBE Vector Shape - Group"))...)
+	rootBody = append(rootBody, vsTdgp...)
+	rootBody = append(rootBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
+	rvgTdgp := rb.listChunk("LIST", "tdgp", rootBody)
+
+	var tdgpBody []byte
+	tdgpBody = append(tdgpBody, rb.chunk("tdmn", []byte("ADBE Root Vectors Group"))...)
+	tdgpBody = append(tdgpBody, rvgTdgp...)
+	tdgpBody = append(tdgpBody, rb.chunk("tdmn", []byte("ADBE Group End"))...)
+	return wrapAsLayer(tdgpBody)
+}
+
+// TestShapePathOpenIsNotClosed is a regression guard: an OPEN shape path
+// (shph[3]=0x09, bit3 set) must decode to Closed=false. The old parser read
+// shph[0x14] — a constant 0x01 on every AE-native path — and reported every
+// shape path as closed (it only coincided on closed paths). Ground truth:
+// v2_2_shape_path_re.aep carries open shaps with shph[3]=0x09, shph[0x14]=0x01.
+func TestShapePathOpenIsNotClosed(t *testing.T) {
+	rb := &rifxBuilder{}
+	verts := []aep.MaskVertex{
+		{Anchor: [2]float64{0, 0}},
+		{Anchor: [2]float64{1, 0}},
+		{Anchor: [2]float64{1, 1}},
+	}
+	data := buildShapeLayerData(rb, verts, false, "open path") // closed=false → shph[3]=0x09
+	proj, err := aep.FromReader(bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	layer := proj.Compositions[0].Layers[0]
+	if len(layer.ShapePaths) != 1 {
+		t.Fatalf("ShapePaths = %d, want 1", len(layer.ShapePaths))
+	}
+	if layer.ShapePaths[0].Closed {
+		t.Error("Closed = true, want false (open shape path; shph[3]=0x09, [0x14]=0x01)")
 	}
 }
 
