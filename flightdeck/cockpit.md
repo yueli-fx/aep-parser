@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-11 by claude（**AddMask v1 落地**：from-scratch mask atom（三件套 splice + parade auto-create 泛化复用），创建时路径任意参数化（open/closed），双版本 gate 4/4——RE 三连环：mask 专用 tdb4 / 坐标 = 源 item 分数 vs source-less 裸像素 / open 标志 = shph[3] bit3（顺带修 parse Closed 误读 + Mask.Name tdsn fallback）。自动化体系同场加固：Crash action exit 8 + PrintWindow 遮挡免疫采集 + 取证保留 tmp_debug/gate_fails/。详 `incidents/add-mask-create-re.md`）
+**Last updated**: 2026-06-12 by claude（**SetEffectParam 控件类型补齐**：泛型 per-control-type 模板从 3 类扩到全 8 类（+angle/color/2D/3D/slider，touch-all fixture 一次提取）+ Point3D Control 扩库 #30，双版本 gate 13 项全 PASS（含 cross-effect color/angle pard-patch）。RE：point 参数 cdat = 层坐标空间分数（有源=源尺寸、source-less=comp 尺寸、z 除 height）；color cdat = ARGB×255。⚠ 坑：ExtendScript `""+colorValue` 拼接抛「除以零」——首轮 gate 假 reject，bisect 整文件才发现是 verify JSX 日志行炸了（陷阱已记 re-fixture.md）。详 `incidents/effect-param-elision-synthesis-lite.md`）
 **Active focus**: **结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → Solid/Null/Adjustment（详 `incidents/new-layer-types-scoping.md`）。2026-06-11 落：effect 全 12 模板双版本 gated + AddEffect/RemoveEffect 升 Stable + **NewTextLayer**（embed-whole-Layr，**新建图层类型全部建齐**；fresh 层免 Reopen 可读 TextSource/等长 SetText；btdk 改字长解封路径详 `incidents/text-btdk-length-variable-write-scoping.md`）。⚠ scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 拒收，已修（详 `incidents/nextitemid-must-include-layer-ids.md`）。M8 物理分包已落。
 
 ## 进行中
@@ -13,9 +13,9 @@
 
 ## 下一步
 
-**结构性创建 vein 继续推**（均纯代码可推 + ship-gate 自助，无需用户输入）。按价值/风险排序：
+**结构性创建 vein 实质收口（2026-06-12）**——纯代码可推的前沿全部落地，剩余条目均需求驱动或 fixture-gated。候选下一步：AddMask/SetEffectParam Alpha→Stable（待用例积累）· encodeBezier lhd3 n≠4 核查（↓2 follow-up，纯代码可核）· 需求驱动条目（↓4/5）。
 
-1. **AddEffect 参数化**（✅ 基本完成 2026-06-11：`aep.SetEffectParam` synthesis-lite 双版本 gated + **泛型 per-control-type 模板已证**——任意效果 scalar/enum/bool 参数即设即用，免逐效果提取；详 `incidents/effect-param-elision-synthesis-lite.md`）。剩余需求驱动：angle/color/point/slider 等 control type 的泛型模板（touch-all fixture 提一次即可）；Alpha→Stable 待用例积累。（✅ 效果库 = 29 全部双版本 gated；再扩库 = 需求驱动，⚠ 引用参数效果 tdpi 指向非宿主层详 add-effect incident finding 5）
+1. ~~**AddEffect 参数化**~~（✅ 完成：2026-06-11 `aep.SetEffectParam` synthesis-lite 双版本 gated；2026-06-12 泛型 per-control-type 模板**全 8 类**（scalar/enum/bool/angle/color/2D/3D/slider）——任意效果参数即设即用，免逐效果提取；效果库 30 全双版本 gated（#30 Point3D Control）。详 `incidents/effect-param-elision-synthesis-lite.md`）。剩余需求驱动：Alpha→Stable 待用例积累；再扩库（⚠ 引用参数效果 tdpi 指向非宿主层详 add-effect incident finding 5）；point 参数像素→分数便捷换算 helper（今为 raw on-disk 单位，编码已 doc）。
 2. ~~**AddMask**~~（✅ 2026-06-11 落，超原计划：原以为只能 fixed-shape，实际 from-scratch atom 让**创建时路径任意参数化**（复用 shap 发射 + mask 专用字节修正），双版本 gate 4/4，Alpha 待用例积累升 Stable。剩余需求驱动：RemoveMask（atom 三件套不满足 pair 假设需专用实现）/ 既有 mask 路径改写 / animated mask path / mode·color 创建参数。⚠ follow-up：encodeBezier lhd3 @0x14/@0x1C 对 n≠4 顶点的 shape path 可能同样错（mask 实测掀出，shape 侧 gated fixture 或全是 n=4——需核）。详 `incidents/add-mask-create-re.md`）
 3. ~~New\* 图层家族 Alpha→Stable 审计~~（✅ 2026-06-11 落：六个 New\* 全升 Stable，gate 证据 = 三个 feature commit 的双版本 PASS 断言 + gate 测试在册；顺带修 NewTextLayer doc comment 过期的「等长 SetText」段）。
 4. **SetText 变长 refuse 集解封**（需求驱动再做）：多段落（splice 段落 dict entry）/ 多 run（计数分配 = AE 行为 RE）/ 空串。详 `incidents/text-btdk-length-variable-write-scoping.md` § v1 守卫。
