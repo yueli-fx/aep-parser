@@ -236,13 +236,22 @@ func ensureEffectParade(layer *Layer) (*AEPropertyGroup, func(), error) {
 	if parade := layer.EffectsParade(); parade != nil {
 		return parade, func() {}, nil
 	}
+	return spliceEmptyParade(layer, "AddEffect", MatchNameGroupEffectParade, []string{MatchNameGroupTransform})
+}
+
+// spliceEmptyParade splices a fresh empty parade group (tdsb 0x01 + tdsn
+// "-_0_/-" + Group End sentinel) named paradeMatchName into the layer's Layr
+// property tree, immediately before the first anchor group found (tried in
+// anchorMatchNames order), mirroring the splice in the scene tree. The
+// returned undo restores the pre-create chunk + scene-tree state.
+func spliceEmptyParade(layer *Layer, opName, paradeMatchName string, anchorMatchNames []string) (*AEPropertyGroup, func(), error) {
 	tree := layer.PropertyTree()
 	if tree == nil {
-		return nil, nil, fmt.Errorf("AddEffect: layer %q was built outside the parser (no property tree to hold an Effect Parade); round-trip the project through aep.Reopen first, then add effects to the re-parsed layer", layer.Name)
+		return nil, nil, fmt.Errorf("%s: layer %q was built outside the parser (no property tree to hold a %s); round-trip the project through aep.Reopen first, then mutate the re-parsed layer", opName, layer.Name, paradeMatchName)
 	}
 	lb := layerBack(layer)
 	if lb == nil || lb.layrList == nil {
-		return nil, nil, fmt.Errorf("AddEffect: layer %q has no Layr chunk back-ref", layer.Name)
+		return nil, nil, fmt.Errorf("%s: layer %q has no Layr chunk back-ref", opName, layer.Name)
 	}
 	var outer *rifx.Chunk
 	for _, ch := range lb.layrList.Children {
@@ -252,17 +261,22 @@ func ensureEffectParade(layer *Layer) (*AEPropertyGroup, func(), error) {
 		}
 	}
 	if outer == nil {
-		return nil, nil, fmt.Errorf("AddEffect: layer %q has no property-group LIST in its Layr", layer.Name)
+		return nil, nil, fmt.Errorf("%s: layer %q has no property-group LIST in its Layr", opName, layer.Name)
 	}
 	anchor := -1
-	for i, ch := range outer.Children {
-		if ch.ID == rifx.IDTdmn && string(bytes.TrimRight(ch.Data, "\x00")) == MatchNameGroupTransform {
-			anchor = i
+	for _, anchorName := range anchorMatchNames {
+		for i, ch := range outer.Children {
+			if ch.ID == rifx.IDTdmn && string(bytes.TrimRight(ch.Data, "\x00")) == anchorName {
+				anchor = i
+				break
+			}
+		}
+		if anchor >= 0 {
 			break
 		}
 	}
 	if anchor < 0 {
-		return nil, nil, fmt.Errorf("AddEffect: layer %q has no %q group to anchor the Effect Parade position", layer.Name, MatchNameGroupTransform)
+		return nil, nil, fmt.Errorf("%s: layer %q has none of %v to anchor the %s position", opName, layer.Name, anchorMatchNames, paradeMatchName)
 	}
 
 	paradeTdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
@@ -276,17 +290,24 @@ func ensureEffectParade(layer *Layer) (*AEPropertyGroup, func(), error) {
 
 	spliced := make([]*rifx.Chunk, 0, len(outer.Children)+2)
 	spliced = append(spliced, outer.Children[:anchor]...)
-	spliced = append(spliced, makeTdmn(MatchNameGroupEffectParade), paradeTdgp)
+	spliced = append(spliced, makeTdmn(paradeMatchName), paradeTdgp)
 	spliced = append(spliced, outer.Children[anchor:]...)
 	outer.Children = spliced
 
-	parade := &AEPropertyGroup{MatchName: MatchNameGroupEffectParade, Name: MatchNameGroupEffectParade}
+	parade := &AEPropertyGroup{MatchName: paradeMatchName, Name: paradeMatchName}
 	scene.SetPropertyGroupParent(parade, tree)
 	scene.SetPropertyGroupBack(parade, &propertyGroupBackrefs{chunk: paradeTdgp})
 	treeAnchor := len(tree.Children)
-	for i, c := range tree.Children {
-		if g, ok := c.(*AEPropertyGroup); ok && g.MatchName == MatchNameGroupTransform {
-			treeAnchor = i
+	for _, anchorName := range anchorMatchNames {
+		found := false
+		for i, c := range tree.Children {
+			if g, ok := c.(*AEPropertyGroup); ok && g.MatchName == anchorName {
+				treeAnchor = i
+				found = true
+				break
+			}
+		}
+		if found {
 			break
 		}
 	}

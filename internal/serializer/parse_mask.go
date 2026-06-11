@@ -61,6 +61,11 @@ func parseMasks(layr *rifx.Chunk, ctx *parseCtx) []*Mask {
 		if mask == nil {
 			continue
 		}
+		if mask.Name == "" {
+			// AE persists the user-visible mask name in the atom tdgp's tdsn
+			// and leaves omtn empty; synthetic fixtures put it in omtn.
+			mask.Name = vectorGroupName(atomTdgp)
+		}
 		if mkif != nil {
 			mask.MkifRaw = append([]byte(nil), mkif.Data...)
 			if mb := maskBack(mask); mb != nil {
@@ -259,8 +264,12 @@ func fillFromShap(m *Mask, shap *rifx.Chunk) {
 			if mb := maskBack(m); mb != nil && mb.shph == nil {
 				mb.shph = ch
 			}
-			if len(ch.Data) >= 0x15 {
-				m.Closed = ch.Data[0x14] == 0x01
+			// Open flag = shph[3] bit3 (AE-2020-saved ground truth,
+			// re_mask_open.aep: closed = 02 01, open = 02 09; [0x14] is 0x01
+			// on every mask regardless — the earlier @0x14 reading only ever
+			// matched closed masks by coincidence).
+			if len(ch.Data) >= 4 {
+				m.Closed = ch.Data[3]&0x08 == 0
 			}
 		case ch.IsList() && ch.FormType == rifx.IDkfl:
 			m.Vertices = decodeMaskVertices(ch)

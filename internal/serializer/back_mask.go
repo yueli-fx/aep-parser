@@ -121,13 +121,16 @@ func (b *maskBackrefs) SetClosed(v bool) error {
 	if b.shph == nil {
 		return fmt.Errorf("mask %q: no shph chunk", b.maskName)
 	}
-	if len(b.shph.Data) <= 0x14 {
+	if len(b.shph.Data) < 4 {
 		return fmt.Errorf("mask %q: shph too short for Closed write (len=%d)", b.maskName, len(b.shph.Data))
 	}
+	// Open flag = shph[3] bit3 (0x01 closed / 0x09 open on every AE-saved
+	// mask; the former @0x14 target is a constant 0x01, writing it was a
+	// semantic no-op AE ignored).
 	if v {
-		b.shph.Data[0x14] = 1
+		b.shph.Data[3] &^= 0x08
 	} else {
-		b.shph.Data[0x14] = 0
+		b.shph.Data[3] |= 0x08
 	}
 	return nil
 }

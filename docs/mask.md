@@ -35,7 +35,7 @@ MkifRaw is kept around for round-trip preservation of any bytes we haven't decod
 Name string
 ```
 
-from omtn ("" when unnamed)
+from omtn, falling back to the atom tdgp's tdsn (where AE persists the panel name)
 
 read-only
 
@@ -45,7 +45,7 @@ read-only
 Closed bool
 ```
 
-from shph[0x14] == 0x01
+from shph[3] bit3 clear (0x01 closed / 0x09 open)
 
 read-write
 

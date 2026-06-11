@@ -21,10 +21,18 @@ import (
 // omtn) given a list of (anchor, in, out) triplets. Returns the inner bytes
 // of the shap LIST (without the LIST header).
 func buildMaskShap(rb *rifxBuilder, verts []aep.MaskVertex, closed bool, name string) []byte {
+	// AE-native shph flag bytes: [2..3] = 02 01 closed / 02 09 open (bit3 =
+	// OPEN); [0x14] is constant 0x01 on every mask.
 	shph := make([]byte, 24)
+	shph[0] = 0xB3
+	shph[1] = 0xDE
+	shph[2] = 0x02
 	if closed {
-		shph[0x14] = 0x01
+		shph[3] = 0x01
+	} else {
+		shph[3] = 0x09
 	}
+	shph[0x14] = 0x01
 	shphChunk := rb.chunk("shph", shph)
 
 	// ldat: 3 float32 X/Y pairs per vertex.

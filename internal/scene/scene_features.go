@@ -101,8 +101,8 @@ func (m MaskMode) String() string {
 // MkifRaw is kept around for round-trip preservation of any bytes we
 // haven't decoded.
 type Mask struct {
-	Name          string             // from omtn ("" when unnamed)
-	Closed        bool               // from shph[0x14] == 0x01
+	Name          string             // from omtn, falling back to the atom tdgp's tdsn (where AE persists the panel name)
+	Closed        bool               // from shph[3] bit3 clear (0x01 closed / 0x09 open)
 	Mode          MaskMode           // from mkif @0x04
 	Inverted      bool               // from mkif @0x00
 	Locked        bool               // from mkif @0x01 (== 1 when AE timeline UI lock is on)

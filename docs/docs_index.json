@@ -3471,7 +3471,7 @@
       "anchor": "#maskclosed",
       "signature": "Closed bool",
       "rw": "read-write",
-      "summary": "from shph[0x14] == 0x01"
+      "summary": "from shph[3] bit3 clear (0x01 closed / 0x09 open)"
     },
     "Mask.Color": {
       "kind": "field",
@@ -3550,7 +3550,7 @@
       "anchor": "#maskname",
       "signature": "Name string",
       "rw": "read-only",
-      "summary": "from omtn (\"\" when unnamed)"
+      "summary": "from omtn, falling back to the atom tdgp's tdsn (where AE persists the panel name)"
     },
     "Mask.Opacity": {
       "kind": "field",
