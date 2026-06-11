@@ -275,6 +275,8 @@ step("probe_app_fonts", function () {
 
 输出在 `.done` 里。常见教训：ExtendScript 允许对任意 key 赋值不报错（即使 key 不存在），所以"不抛错 ≠ 真生效"，必须 dump btdk 字节确认。详见 `incidents/variable-fonts-write-noop.md`。
 
+**⚠ 数组值日志拼接陷阱**：`"" + prop.value` 对 AE **color** 数组值会抛 `数字结果无效（除以零？）`（valueOf 走数值转换）——看起来像数据 reject，实为 JSX 日志行炸了。数组一律显式 `value.toString()` / `value.join(",")` 再拼。详 `incidents/effect-param-elision-synthesis-lite.md` finding 4。
+
 ## 字节 diff
 
 ```bash

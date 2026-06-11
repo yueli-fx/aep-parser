@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: implementing per-effect typed param helpers / EnsureEffectParameter; wondering why a default effect instance exposes only the -0000 param; needing AE's param-persistence rule (value!=default, not touched-flag); splicing a materialized param tdbs into an effect sspc
-applies_to: [effect-params, elision, pard, part, tdbs, param-synthesis, settext, typed-param-helper, add-effect, negative-finding]
-last_updated: 2026-06-11
+when_to_read: implementing per-effect typed param helpers / EnsureEffectParameter; wondering why a default effect instance exposes only the -0000 param; needing AE's param-persistence rule (value!=default, not touched-flag); splicing a materialized param tdbs into an effect sspc; needing effect point-param coordinate units (fraction-of-what) or color cdat ARGB encoding; verify JSX throws "数字结果无效（除以零？）" on a log line
+applies_to: [effect-params, elision, pard, part, tdbs, param-synthesis, settext, typed-param-helper, add-effect, negative-finding, control-type, point-units, color-argb, extendscript-concat-throw]
+last_updated: 2026-06-12
 resolved_by:
 ---
 
@@ -92,9 +92,47 @@ definition (parT is never elided, so the metadata is always in-file). So
 **any scalar / enum / boolean param of any effect is settable today** —
 no per-effect extraction sweep needed. Caveats: enum's generic template is
 byte-identical to the gated GB per-param one (tdmn-patched cross-effect enum
-not separately AE-gated yet); angle / color / point / 2D / 3D / slider
-control types still refuse (template TBD — extract from a touched fixture
-when needed). pard lastValue not refreshed (cosmetic — AE accepted without).
+not separately AE-gated yet). pard lastValue not refreshed (cosmetic — AE
+accepted without).
+
+## 控件类型补齐 (2026-06-12) — all 8 types gated
+
+Touch-all fixture `test_data/re_effect_param_types.aep` (AE 2020, one
+expression-control effect per missing type, each -0001 touched) yielded the
+remaining generic templates via `tmp_debug/extract_effect_params`: **angle /
+color / 2D point / 3D point / slider** (`effectparam_adbe_*_control_0001.bin`,
+also registered per-param for the 5 expression controls). Same fixture's
+untouched instance fed `tmp_debug/extract_effect_lib` → `ADBE Point3D
+Control` became AddEffect template #30. **AE 2020 + AE 2025 ship-gate PASS**,
+13 expects each: GB×3 per-param + Drop Shadow×5 generic (cross-effect color
+-0001 + angle -0003 pard-patched from the DS sspc) + 5 expression controls,
+read back on open AND after AE's own resave. Materialized color stream is
+byte-identical to AE-native (verified vs fixture). Only slider's tdbs
+carries tdum/tduM; angle/color/point are unbounded (no patch needed).
+
+### Finding 3 — point-param cdat units = fraction of the layer's coord space
+
+(RE `test_data/re_effect_param_types_units.aep`: 200×100 solid + shape layer,
+Point [123,45] / Point3D [123,45,67].) 2D/3D point params store cdat as
+**fractions**: layers with a source item divide by the SOURCE's w/h
+(solid 200×100 → [0.615, 0.45]); source-less layers (shape/text) divide by
+the COMP's w/h (1920×1080 → [0.0640625, 0.041666]). **z divides by the same
+space's HEIGHT** (67/100 resp. 67/1080). Mirrors the mask-coordinate
+dichotomy ([[add-mask-create-re]]) except source-less uses comp fractions,
+not raw pixels. SetEffectParam passes values through raw (on-disk
+StaticValue units) — callers convert; the facade doc comment records this.
+Color cdat = [A,R,G,B] each 0–255 (JSX [r,g,b,a] 0–1 ↔ ×255 reorder).
+
+### Finding 4 — ExtendScript throws on `"" + colorValue` (JSX-side trap)
+
+The first gate run FAILed with `EXC Error: 数字结果无效（除以零？）` (invalid
+numeric result / divide by zero) thrown at the *log line* of the verify JSX —
+string-concatenating an AE **color** property value routes the array through
+valueOf → numeric conversion → throw. `value.toString()` / `value.join(",")`
+/ element access / `instanceof Array` all work; only bare `"" + v` dies.
+Cost: looked exactly like a data reject (bisected the whole file before
+suspecting the JSX). Any verify/RE JSX logging array values must stringify
+explicitly (see `str()` in verify_effect_param.jsx).
 
 ## Finding 2 — cross-version DEFAULT drift re-elides on resave (not a bug)
 
@@ -113,3 +151,8 @@ our hardcoded default across versions.
 - 2026-06-11 首次（board「AddEffect 参数化」可行性 RE → 同日 synthesis-lite
   ship；fixture + probe 落 `test_data/re_effect_param_elision.*`（manifest
   已登记）+ `re_effect_param_elision_2025.*`（AE 2025 默认值漂移对照））
+- 2026-06-12 控件类型补齐（angle/color/2D/3D/slider 泛型模板 + Point3D
+  Control 扩库；fixtures `re_effect_param_types.*` +
+  `re_effect_param_types_units.*` 已登记 manifest；bisect 工具
+  `tmp_debug/ge_setparam_bisect` + probe JSX `test_data/re_setparam_bisect.jsx`
+  留存可复用）

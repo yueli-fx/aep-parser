@@ -195,18 +195,20 @@ func TestSetEffectParam_GenericControlTypeFallback(t *testing.T) {
 
 	cases := []struct {
 		mn string
-		v  float64
+		v  any
 	}{
-		{"ADBE Drop Shadow-0004", 20}, // Distance (scalar)
-		{"ADBE Drop Shadow-0005", 10}, // Softness (scalar)
-		{"ADBE Drop Shadow-0006", 1},  // Shadow Only (boolean)
+		{"ADBE Drop Shadow-0001", []float64{255, 51, 102, 153}}, // Shadow Color (color, ARGB 0-255)
+		{"ADBE Drop Shadow-0003", 90.0},                         // Direction (angle, degrees)
+		{"ADBE Drop Shadow-0004", 20.0},                         // Distance (scalar)
+		{"ADBE Drop Shadow-0005", 10.0},                         // Softness (scalar)
+		{"ADBE Drop Shadow-0006", 1.0},                          // Shadow Only (boolean)
 	}
 	for _, c := range cases {
 		p, err := aep.SetEffectParam(l, ds, c.mn, c.v)
 		if err != nil {
 			t.Fatalf("SetEffectParam(%s): %v", c.mn, err)
 		}
-		if f, ok := p.StaticValue.(float64); !ok || f != c.v {
+		if !staticValueEq(p.StaticValue, c.v) {
 			t.Errorf("%s = %v, want %v", c.mn, p.StaticValue, c.v)
 		}
 	}
@@ -239,19 +241,106 @@ func TestSetEffectParam_GenericControlTypeFallback(t *testing.T) {
 		order = append(order, p.MatchName)
 	}
 	for _, c := range cases {
-		if f, ok := vals[c.mn].(float64); !ok || f != c.v {
+		if !staticValueEq(vals[c.mn], c.v) {
 			t.Errorf("re-parsed %s = %v, want %v", c.mn, vals[c.mn], c.v)
 		}
 	}
-	want := []string{"ADBE Drop Shadow-0000", "ADBE Drop Shadow-0004", "ADBE Drop Shadow-0005", "ADBE Drop Shadow-0006"}
+	want := []string{"ADBE Drop Shadow-0000", "ADBE Drop Shadow-0001", "ADBE Drop Shadow-0003", "ADBE Drop Shadow-0004", "ADBE Drop Shadow-0005", "ADBE Drop Shadow-0006"}
 	if !eq(order, want) {
 		t.Errorf("re-parsed order = %v, want %v", order, want)
 	}
 }
 
+func staticValueEq(got any, want any) bool {
+	switch w := want.(type) {
+	case float64:
+		f, ok := got.(float64)
+		return ok && f == w
+	case []float64:
+		g, ok := got.([]float64)
+		if !ok || len(g) != len(w) {
+			return false
+		}
+		for i := range w {
+			if g[i] != w[i] {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// TestSetEffectParam_ExpressionControlTypes materializes the single tunable
+// param of each expression-control effect via its per-param template —
+// covering the angle / color / 2D-point / 3D-point / slider value streams.
+func TestSetEffectParam_ExpressionControlTypes(t *testing.T) {
+	rp, l, _ := gbDefaultInstanceLayer(t)
+
+	cases := []struct {
+		effectMN string
+		v        any
+	}{
+		{aep.EffectAngleControl, 33.0},
+		{aep.EffectColorControl, []float64{255, 51, 102, 153}},
+		{aep.EffectPointControl, []float64{0.25, 0.75}},
+		{aep.EffectPoint3DControl, []float64{0.25, 0.75, 0.5}},
+		{aep.EffectSliderControl, 12.25},
+	}
+	for _, c := range cases {
+		fx, err := aep.AddEffect(l, c.effectMN)
+		if err != nil {
+			t.Fatalf("AddEffect(%s): %v", c.effectMN, err)
+		}
+		p, err := aep.SetEffectParam(l, fx, c.effectMN+"-0001", c.v)
+		if err != nil {
+			t.Fatalf("SetEffectParam(%s-0001): %v", c.effectMN, err)
+		}
+		if !staticValueEq(p.StaticValue, c.v) {
+			t.Errorf("%s-0001 = %v, want %v", c.effectMN, p.StaticValue, c.v)
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := rp.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rl := layerWithEffects(re)
+	if rl == nil {
+		t.Fatal("re-parsed: no layer with effects")
+	}
+	byMN := map[string]*aep.Effect{}
+	for _, e := range rl.Effects {
+		byMN[e.MatchName] = e
+	}
+	for _, c := range cases {
+		fx := byMN[c.effectMN]
+		if fx == nil {
+			t.Errorf("re-parsed: effect %s missing", c.effectMN)
+			continue
+		}
+		found := false
+		for _, p := range fx.Parameters {
+			if p.MatchName == c.effectMN+"-0001" {
+				found = true
+				if !staticValueEq(p.StaticValue, c.v) {
+					t.Errorf("re-parsed %s-0001 = %v, want %v", c.effectMN, p.StaticValue, c.v)
+				}
+			}
+		}
+		if !found {
+			t.Errorf("re-parsed: %s-0001 not materialized", c.effectMN)
+		}
+	}
+}
+
 func TestSupportedEffectParams(t *testing.T) {
 	got := aep.SupportedEffectParams()
-	if len(got) != 3 {
-		t.Fatalf("SupportedEffectParams = %v, want 3 GB params", got)
+	if len(got) != 8 {
+		t.Fatalf("SupportedEffectParams = %v, want 3 GB + 5 expression-control params", got)
 	}
 }

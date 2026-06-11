@@ -1,8 +1,9 @@
 // Ship-gate verify for SetEffectParam (effect-parameter materialization,
 // synthesis-lite). Reads effect_param_args.json {input, done, resaved, expect}:
 //   expect = array of {effect: "<effect match-name>", param: "<full param
-//            match-name>", value: <number>} the layer's effects should read
-//            back after Go materialized + set the params.
+//            match-name>", value: <number or array>} the layer's effects
+//            should read back (in JSX UI units — degrees / rgba 0-1 / layer
+//            pixels) after Go materialized + set the params.
 // Opens the Go-written input, finds the first layer with an Effect Parade,
 // reads each expected param's value off its effect, compares (small float
 // tolerance), resaves, then REOPENS the resave and reads again — a param set
@@ -19,6 +20,13 @@
     var log = [];
     var ok = true;
     function fail(m) { ok = false; log.push("  " + m); }
+    // String-concatenating an AE color value ("" + v) throws "Invalid numeric
+    // result (divide by zero?)" — ExtendScript routes the array through
+    // valueOf. Stringify arrays explicitly via join.
+    function str(x) {
+        try { return (x instanceof Array) ? x.join(",") : ("" + x); }
+        catch (e) { return "<unprintable>"; }
+    }
 
     function checkValues(label) {
         var comp = null;
@@ -52,10 +60,20 @@
                 continue;
             }
             var v = prop.value;
-            var num = (v === true) ? 1 : (v === false) ? 0 : Number(v);
-            log.push("  " + label + ": " + e.param + " = " + v + " (want " + e.value + ")");
-            if (!(Math.abs(num - e.value) < 0.0001)) {
-                fail(label + ": " + e.param + ": " + v + " != " + e.value);
+            log.push("  " + label + ": " + e.param + " = " + str(v) + " (want " + str(e.value) + ")");
+            if (e.value instanceof Array) {
+                var bad = !(v instanceof Array);
+                if (!bad) {
+                    for (var k = 0; k < e.value.length; k++) {
+                        if (!(Math.abs(Number(v[k]) - e.value[k]) < 0.0001)) bad = true;
+                    }
+                }
+                if (bad) fail(label + ": " + e.param + ": " + str(v) + " != " + str(e.value));
+            } else {
+                var num = (v === true) ? 1 : (v === false) ? 0 : Number(v);
+                if (!(Math.abs(num - e.value) < 0.0001)) {
+                    fail(label + ": " + e.param + ": " + str(v) + " != " + str(e.value));
+                }
             }
         }
     }

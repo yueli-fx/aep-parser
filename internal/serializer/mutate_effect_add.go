@@ -41,15 +41,15 @@ import (
 // wrapper around an effect's (tdmn match-name, LIST:sspc payload) pair,
 // extracted verbatim from an AE-2020-saved layer that had the full curated set
 // applied (test_data/re_effect_library.aep + re_effect_library2.aep, generated
-// by re_effect_library.jsx / re_effect_library2.jsx, extracted by
-// tmp_debug/extract_effect_lib).
+// by re_effect_library.jsx / re_effect_library2.jsx; Point3D Control from
+// re_effect_param_types.aep — all extracted by tmp_debug/extract_effect_lib).
 // All are built-in effects present well before the 2020 read floor; their
 // serialized form is version-portable (AE 2025 accepts the AE-2020 bytes —
 // mirroring the gradient version-portability finding, confirmed by ship-gate
 // across the full template library on both versions).
 //
 //go:embed templates/effect_adbe_gaussian_blur_2.bin templates/effect_adbe_fill.bin templates/effect_adbe_tint.bin templates/effect_adbe_brightness_contrast_2.bin templates/effect_adbe_tritone.bin templates/effect_adbe_easy_levels2.bin templates/effect_adbe_pro_levels2.bin templates/effect_adbe_hue_saturation.bin templates/effect_adbe_box_blur.bin templates/effect_adbe_glo2.bin templates/effect_adbe_invert.bin templates/effect_adbe_exposure2.bin
-//go:embed templates/effect_adbe_drop_shadow.bin templates/effect_adbe_sharpen.bin templates/effect_adbe_mosaic.bin templates/effect_adbe_noise.bin templates/effect_adbe_geometry2.bin templates/effect_adbe_ramp.bin templates/effect_adbe_fractal_noise.bin templates/effect_adbe_tile.bin templates/effect_adbe_motion_blur.bin templates/effect_adbe_linear_wipe.bin templates/effect_adbe_wave_warp.bin templates/effect_adbe_curvescustom.bin templates/effect_adbe_slider_control.bin templates/effect_adbe_point_control.bin templates/effect_adbe_color_control.bin templates/effect_adbe_angle_control.bin templates/effect_adbe_checkbox_control.bin
+//go:embed templates/effect_adbe_drop_shadow.bin templates/effect_adbe_sharpen.bin templates/effect_adbe_mosaic.bin templates/effect_adbe_noise.bin templates/effect_adbe_geometry2.bin templates/effect_adbe_ramp.bin templates/effect_adbe_fractal_noise.bin templates/effect_adbe_tile.bin templates/effect_adbe_motion_blur.bin templates/effect_adbe_linear_wipe.bin templates/effect_adbe_wave_warp.bin templates/effect_adbe_curvescustom.bin templates/effect_adbe_slider_control.bin templates/effect_adbe_point_control.bin templates/effect_adbe_color_control.bin templates/effect_adbe_angle_control.bin templates/effect_adbe_checkbox_control.bin templates/effect_adbe_point3d_control.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -85,6 +85,7 @@ const (
 	EffectColorControl       = "ADBE Color Control"           // Color Control
 	EffectAngleControl       = "ADBE Angle Control"           // Angle Control
 	EffectCheckboxControl    = "ADBE Checkbox Control"        // Checkbox Control
+	EffectPoint3DControl     = "ADBE Point3D Control"         // 3D Point Control
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -121,6 +122,7 @@ var effectTemplateFiles = map[string]string{
 	EffectColorControl:       "templates/effect_adbe_color_control.bin",
 	EffectAngleControl:       "templates/effect_adbe_angle_control.bin",
 	EffectCheckboxControl:    "templates/effect_adbe_checkbox_control.bin",
+	EffectPoint3DControl:     "templates/effect_adbe_point3d_control.bin",
 }
 
 type cachedEffectTemplate struct {

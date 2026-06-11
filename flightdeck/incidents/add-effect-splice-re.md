@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing or extending AddEffect / the effect-template library; adding a new effect to the embedded set; debugging "AE drops/rejects a Go-added effect" or "cannot find layer ID=N in composition" on open; deciding whether an effect is splice-portable; extending parade auto-create to another group kind (Mask Parade); reasoning about the (tdmn, sspc) effect chunk unit or the tdpi host-layer binding
 applies_to: [add-effect, effect-parade, sspc, tdmn, tdpi, host-layer-binding, effect-template, structural-write, splice, group-end-sentinel, parade-auto-create, reopen, version-portable, ae2020, ae2025, ship-gate, embed-fs, gaussian-blur, levels]
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 ---
 
 # AddEffect — Effect Parade splice RE + ship findings
@@ -84,7 +84,7 @@ chunks, never the cache), so callers can tune params immediately
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
-## Effect-template library (29, embed.FS)
+## Effect-template library (30, embed.FS)
 
 `internal/serializer/templates/effect_adbe_*.bin`, each a `LIST(tdgp)` wrapper
 around one `(tdmn, sspc)` pair, extracted from AE-2020 fixtures
@@ -107,6 +107,11 @@ Ramp (Gradient Ramp) · Fractal Noise · Tile (Motion Tile) · Motion Blur
 Slider/Point/Color/Angle/Checkbox Control (expression controls; "ADBE Layer
 Control" stays excluded — layer reference).
 
+Wave 3 (2026-06-12): Point3D Control — extracted from the untouched instance
+in `re_effect_param_types.aep` (the control-type param-template fixture,
+[[effect-param-elision-synthesis-lite]]); dual-version gated via the
+SetEffectParam ship-gate (AddEffect + materialize + readback both versions).
+
 **Curation rule:** only **parameter-only** effects. Effects with layer/path
 **reference** params (e.g. Set Matte, Displacement Map, Calculations, Compound
 Blur's "layer" pickwhip) would carry a dangling layer-id in their sspc that a
@@ -114,7 +119,7 @@ standalone splice can't satisfy — excluded until a Phase-2 remap handles refs.
 
 ## Coverage / gate
 
-- `TestAddEffect_AllTemplates_RoundTrip` — all 29 splice + WriteAEP + re-parse
+- `TestAddEffect_AllTemplates_RoundTrip` — all 30 splice + WriteAEP + re-parse
   (Go, no AE; iterates `SupportedEffects()`, so new templates are auto-covered).
 - `TestAddEffect_AEShipGate_AE20{20,25}` — table-driven over the FULL
   29-template library: wave 1 24/24 PASS (2026-06-11; originally a 5-effect
@@ -204,7 +209,7 @@ The "write → reopen" workaround in these findings became the shipped path:
   INDEXED_GROUP splice" framing was half-right: a mask atom is a (tdmn, mkif,
   tdgp) TRIPLE, so RemovePropertyGroup refuses mask children (pair assumption)
   — RemoveMask stays deferred.
-- **Library expansion** beyond the 29 (more fixture RE; watch for ref params).
+- **Library expansion** beyond the 30 (more fixture RE; watch for ref params).
 - **Per-effect typed param helpers** (today: raw `Property.SetStaticValue` by match-name).
 
 Typed effect match-name constants (`aep.EffectGaussianBlur` … `aep.EffectExposure`,

@@ -65,18 +65,38 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 	if err != nil {
 		t.Fatalf("AddEffect(DropShadow): %v", err)
 	}
-	set := func(e *aep.Effect, mn string, v float64) {
+	set := func(e *aep.Effect, mn string, v any) {
 		t.Helper()
 		if _, err := aep.SetEffectParam(l, e, mn, v); err != nil {
 			t.Fatalf("SetEffectParam(%s): %v", mn, err)
 		}
 	}
-	set(fx, "ADBE Gaussian Blur 2-0001", 25)
-	set(fx, "ADBE Gaussian Blur 2-0002", 2)
-	set(fx, "ADBE Gaussian Blur 2-0003", 1)
-	set(ds, "ADBE Drop Shadow-0004", 20) // Distance (scalar, generic)
-	set(ds, "ADBE Drop Shadow-0005", 10) // Softness (scalar, generic)
-	set(ds, "ADBE Drop Shadow-0006", 1)  // Shadow Only (boolean, generic)
+	set(fx, "ADBE Gaussian Blur 2-0001", 25.0)
+	set(fx, "ADBE Gaussian Blur 2-0002", 2.0)
+	set(fx, "ADBE Gaussian Blur 2-0003", 1.0)
+	set(ds, "ADBE Drop Shadow-0001", []float64{255, 51, 102, 153}) // Shadow Color (color, generic)
+	set(ds, "ADBE Drop Shadow-0003", 90.0)                         // Direction (angle, generic)
+	set(ds, "ADBE Drop Shadow-0004", 20.0)                         // Distance (scalar, generic)
+	set(ds, "ADBE Drop Shadow-0005", 10.0)                         // Softness (scalar, generic)
+	set(ds, "ADBE Drop Shadow-0006", 1.0)                          // Shadow Only (boolean, generic)
+
+	// Expression-control effects: per-param templates for the remaining control
+	// types (angle / color / 2D / 3D / slider). Point values are fractions of
+	// the layer's coordinate space — the COMP's 1920x1080 for a source-less
+	// shape layer — so JSX reads them back in pixels.
+	addAndSet := func(effectMN string, v any) {
+		t.Helper()
+		e, err := aep.AddEffect(l, effectMN)
+		if err != nil {
+			t.Fatalf("AddEffect(%s): %v", effectMN, err)
+		}
+		set(e, effectMN+"-0001", v)
+	}
+	addAndSet(aep.EffectAngleControl, 33.0)
+	addAndSet(aep.EffectColorControl, []float64{255, 51, 102, 153})
+	addAndSet(aep.EffectPointControl, []float64{0.25, 0.75})
+	addAndSet(aep.EffectPoint3DControl, []float64{0.25, 0.75, 0.5})
+	addAndSet(aep.EffectSliderControl, 12.25)
 
 	tempDir := t.TempDir()
 	inputAEP := filepath.Join(tempDir, "setparam_in.aep")
@@ -97,9 +117,16 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 		`{"effect":"ADBE Gaussian Blur 2","param":"ADBE Gaussian Blur 2-0001","value":25},`+
 		`{"effect":"ADBE Gaussian Blur 2","param":"ADBE Gaussian Blur 2-0002","value":2},`+
 		`{"effect":"ADBE Gaussian Blur 2","param":"ADBE Gaussian Blur 2-0003","value":1},`+
+		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0001","value":[0.2,0.4,0.6,1]},`+
+		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0003","value":90},`+
 		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0004","value":20},`+
 		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0005","value":10},`+
-		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0006","value":1}]}`,
+		`{"effect":"ADBE Drop Shadow","param":"ADBE Drop Shadow-0006","value":1},`+
+		`{"effect":"ADBE Angle Control","param":"ADBE Angle Control-0001","value":33},`+
+		`{"effect":"ADBE Color Control","param":"ADBE Color Control-0001","value":[0.2,0.4,0.6,1]},`+
+		`{"effect":"ADBE Point Control","param":"ADBE Point Control-0001","value":[480,810]},`+
+		`{"effect":"ADBE Point3D Control","param":"ADBE Point3D Control-0001","value":[480,810,540]},`+
+		`{"effect":"ADBE Slider Control","param":"ADBE Slider Control-0001","value":12.25}]}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
@@ -133,27 +160,38 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 	if rl == nil {
 		t.Fatal("resaved: no layer with effects")
 	}
-	want := map[string]float64{
-		"ADBE Gaussian Blur 2-0001": 25,
-		"ADBE Gaussian Blur 2-0002": 2,
-		"ADBE Drop Shadow-0004":     20,
-		"ADBE Drop Shadow-0005":     10,
-		"ADBE Drop Shadow-0006":     1,
+	want := map[string]any{
+		"ADBE Gaussian Blur 2-0001": 25.0,
+		"ADBE Gaussian Blur 2-0002": 2.0,
+		"ADBE Drop Shadow-0001":     []float64{255, 51, 102, 153},
+		"ADBE Drop Shadow-0003":     90.0,
+		"ADBE Drop Shadow-0004":     20.0,
+		"ADBE Drop Shadow-0005":     10.0,
+		"ADBE Drop Shadow-0006":     1.0,
 	}
-	got := map[string]float64{}
+	got := map[string]any{}
 	for _, e := range rl.Effects {
 		for _, p := range e.Parameters {
-			if f, ok := p.StaticValue.(float64); ok {
-				got[p.MatchName] = f
-			}
+			got[p.MatchName] = p.StaticValue
 		}
 	}
 	for mn, v := range want {
-		if got[mn] != v {
+		if !staticValueEq(got[mn], v) {
 			t.Errorf("resaved %s = %v, want %v (AE dropped/reverted the materialized param)", mn, got[mn], v)
 		}
 	}
-	if f, present := got["ADBE Gaussian Blur 2-0003"]; present && f != 1 {
+	for mn, v := range map[string]any{
+		"ADBE Angle Control-0001":   33.0,
+		"ADBE Color Control-0001":   []float64{255, 51, 102, 153},
+		"ADBE Point Control-0001":   []float64{0.25, 0.75},
+		"ADBE Point3D Control-0001": []float64{0.25, 0.75, 0.5},
+		"ADBE Slider Control-0001":  12.25,
+	} {
+		if !staticValueEq(got[mn], v) {
+			t.Errorf("resaved %s = %v, want %v (AE dropped/reverted the materialized param)", mn, got[mn], v)
+		}
+	}
+	if f, ok := got["ADBE Gaussian Blur 2-0003"].(float64); ok && f != 1 {
 		t.Errorf("resaved -0003 present with value %v, want 1", f)
 	}
 }

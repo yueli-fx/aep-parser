@@ -22,6 +22,8 @@
     { "jsx": "test_data/re_effect_library.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_library.done", "outputs": ["test_data/re_effect_library.aep"] },
     { "jsx": "test_data/re_effect_library2.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_library2.done", "outputs": ["test_data/re_effect_library2.aep"] },
     { "jsx": "test_data/re_effect_param_elision.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_elision.done", "outputs": ["test_data/re_effect_param_elision.aep"] },
+    { "jsx": "test_data/re_effect_param_types.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_types.done", "outputs": ["test_data/re_effect_param_types.aep"] },
+    { "jsx": "test_data/re_effect_param_types_units.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_types_units.done", "outputs": ["test_data/re_effect_param_types_units.aep"] },
     { "jsx": "test_data/re_geometry_options.jsx", "ae": "2025", "env": {}, "done": "test_data/re_geometry_options.done", "outputs": ["test_data/re_geometry_options.aep"], "notes": "needs Advanced 3D renderer (ADBE Picasso, AE 24+)" },
     { "jsx": "test_data/re_gradient.jsx", "ae": "2020", "env": {}, "done": "test_data/re_gradient.done", "outputs": ["test_data/re_gradient.aep"] },
     { "jsx": "test_data/re_insert_layer.jsx", "ae": "2020", "env": { "RE_INSERT_MODE": ["basic", "footage", "precomp"], "RE_INSERT_STATE": ["before", "after"] }, "done": "test_data/re_insert_layer_{RE_INSERT_MODE}_{RE_INSERT_STATE}.done", "outputs": ["test_data/re_insert_layer_{RE_INSERT_MODE}_{RE_INSERT_STATE}.aep"] },

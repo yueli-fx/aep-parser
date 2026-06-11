@@ -4836,7 +4836,7 @@
       "file": "effect.md",
       "anchor": "#supportedeffectparams",
       "signature": "func SupportedEffectParams() []string",
-      "summary": "SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless."
+      "summary": "SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless."
     },
     "SupportedEffects": {
       "kind": "func",

@@ -89,7 +89,7 @@ Refused layers: camera / light layers (AE does not allow effects on them), and l
 
 Atomic mutation: snapshot parade chunk + scene children + flat Effects slice (+ the pre-auto-create tree state); re-parse the spliced pair to obtain a back-ref-correct *Effect; roll back on any parser warning.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green across the full 29-template library, plus the parade auto-create path on a 100% Go-built file (2/2). Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
+Stable / structural — AE 2020 + AE 2025 ship-gate green across the full 30-template library, plus the parade auto-create path on a 100% Go-built file (2/2). Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 
 ### RemoveEffect
 
@@ -120,7 +120,13 @@ SetEffectParam sets an effect parameter's static value by full parameter match-n
 	fx, _ := aep.AddEffect(layer, aep.EffectGaussianBlur)
 	_, err := aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0001", 25.0)
 
-Why this exists: AE persists an effect parameter only while its value differs from the default — on a default instance the tunable params have no value stream at all (only "\<effect>-0000" survives), so plain Property.SetStaticValue has nothing to target. When the parameter is already present, SetEffectParam is exactly SetStaticValue. When it is default-elided, the parameter's (tdmn, tdbs) value stream is first materialized from an embedded AE-native template (synthesis-lite) at its definition-order position, then the caller's value is written — matching what AE itself persists for a touched parameter. Any scalar / enum / boolean parameter of any effect materializes via the generic per-control-type template, patched (match-name, display name, scalar min/max) from the host effect's own pard definition — parameter definitions are never elided, so the metadata is always in-file. Other control types (angle / color / point / slider …) currently return an error when elided; params already present on the effect are settable regardless of control type.
+Why this exists: AE persists an effect parameter only while its value differs from the default — on a default instance the tunable params have no value stream at all (only "\<effect>-0000" survives), so plain Property.SetStaticValue has nothing to target. When the parameter is already present, SetEffectParam is exactly SetStaticValue. When it is default-elided, the parameter's (tdmn, tdbs) value stream is first materialized from an embedded AE-native template (synthesis-lite) at its definition-order position, then the caller's value is written — matching what AE itself persists for a touched parameter. Any scalar / enum / boolean / angle / color / 2D-point / 3D-point / slider parameter of any effect materializes via the generic per-control-type template, patched (match-name, display name, scalar/slider min/max) from the host effect's own pard definition — parameter definitions are never elided, so the metadata is always in-file. Rarer control types (curve, layer, …) return an error when elided; params already present on the effect are settable regardless of control type.
+
+Values use the property's on-disk (StaticValue) encoding — the same units a parsed file exposes:
+
+- scalar / slider / angle (degrees) / enum / boolean (0 or 1): float64, 1:1 with the AE UI value;
+- color: []float64{A, R, G, B}, each channel 0–255;
+- 2D / 3D point: []float64 fractions of the layer's coordinate space — the SOURCE item's pixel size for footage/solid/precomp layers, the COMPOSITION's for source-less layers (shape/text); the z component is divided by the same space's HEIGHT (RE: test_data/re_effect_param_types_units.aep).
 
 The materialized stream carries no tdpi host binding (only the always-present -0000 stream does), so no retarget is needed. Atomic mutation: snapshot value-group chunk children + flat Parameters + warnings; roll back on any parser warning or value-encode failure.
 
@@ -132,7 +138,7 @@ Alpha / structural — AE 2020 + AE 2025 ship-gate green (per-param and generic 
 func SupportedEffectParams() []string
 ```
 
-SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless.
+SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless.
 
 <!-- Hand-authored note. -->
 

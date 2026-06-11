@@ -33,6 +33,7 @@ import (
 // (test_data/re_effect_param_elision.aep via tmp_debug/extract_effect_params).
 //
 //go:embed templates/effectparam_adbe_gaussian_blur_2_0001.bin templates/effectparam_adbe_gaussian_blur_2_0002.bin templates/effectparam_adbe_gaussian_blur_2_0003.bin
+//go:embed templates/effectparam_adbe_angle_control_0001.bin templates/effectparam_adbe_color_control_0001.bin templates/effectparam_adbe_point_control_0001.bin templates/effectparam_adbe_point3d_control_0001.bin templates/effectparam_adbe_slider_control_0001.bin
 var effectParamTemplateFS embed.FS
 
 // effectParamTemplateFiles maps a full parameter match-name to its embedded
@@ -40,9 +41,14 @@ var effectParamTemplateFS embed.FS
 // SetEffectParam always overwrites it with the caller's value before
 // returning, so the stale bytes never surface.
 var effectParamTemplateFiles = map[string]string{
-	"ADBE Gaussian Blur 2-0001": "templates/effectparam_adbe_gaussian_blur_2_0001.bin", // Blurriness (scalar)
-	"ADBE Gaussian Blur 2-0002": "templates/effectparam_adbe_gaussian_blur_2_0002.bin", // Blur Dimensions (enum)
-	"ADBE Gaussian Blur 2-0003": "templates/effectparam_adbe_gaussian_blur_2_0003.bin", // Repeat Edge Pixels (bool)
+	"ADBE Gaussian Blur 2-0001":     "templates/effectparam_adbe_gaussian_blur_2_0001.bin",     // Blurriness (scalar)
+	"ADBE Gaussian Blur 2-0002":     "templates/effectparam_adbe_gaussian_blur_2_0002.bin",     // Blur Dimensions (enum)
+	"ADBE Gaussian Blur 2-0003":     "templates/effectparam_adbe_gaussian_blur_2_0003.bin",     // Repeat Edge Pixels (bool)
+	"ADBE Angle Control-0001":       "templates/effectparam_adbe_angle_control_0001.bin",       // Angle (angle)
+	"ADBE Color Control-0001":       "templates/effectparam_adbe_color_control_0001.bin",       // Color (color)
+	"ADBE Point Control-0001":       "templates/effectparam_adbe_point_control_0001.bin",       // Point (2D point)
+	"ADBE Point3D Control-0001":     "templates/effectparam_adbe_point3d_control_0001.bin",     // 3D Point (3D point)
+	"ADBE Slider Control-0001":      "templates/effectparam_adbe_slider_control_0001.bin",      // Slider (slider)
 }
 
 // genericEffectParamTemplates maps a pard control type to a template usable
@@ -55,6 +61,11 @@ var genericEffectParamTemplates = map[PropertyControlType]string{
 	PCTLScalar:  "templates/effectparam_adbe_gaussian_blur_2_0001.bin",
 	PCTLEnum:    "templates/effectparam_adbe_gaussian_blur_2_0002.bin",
 	PCTLBoolean: "templates/effectparam_adbe_gaussian_blur_2_0003.bin",
+	PCTLAngle:   "templates/effectparam_adbe_angle_control_0001.bin",
+	PCTLColor:   "templates/effectparam_adbe_color_control_0001.bin",
+	PCTLTwoD:    "templates/effectparam_adbe_point_control_0001.bin",
+	PCTLThreeD:  "templates/effectparam_adbe_point3d_control_0001.bin",
+	PCTLSlider:  "templates/effectparam_adbe_slider_control_0001.bin",
 }
 
 var effectParamTemplateCache = map[string]*cachedEffectTemplate{}
@@ -62,10 +73,10 @@ var effectParamTemplateCacheMu sync.Mutex
 
 // SupportedEffectParams returns the sorted parameter match-names with a
 // dedicated per-param template. SetEffectParam is NOT limited to this list:
-// any scalar / enum / boolean parameter of any effect materializes via the
-// generic per-control-type fallback (patched from the host effect's pard
-// definition), and parameters already present on an effect are settable
-// regardless.
+// any scalar / enum / boolean / angle / color / 2D / 3D / slider parameter of
+// any effect materializes via the generic per-control-type fallback (patched
+// from the host effect's pard definition), and parameters already present on
+// an effect are settable regardless.
 func SupportedEffectParams() []string {
 	names := make([]string, 0, len(effectParamTemplateFiles))
 	for k := range effectParamTemplateFiles {
@@ -89,7 +100,7 @@ func cloneEffectParamTemplate(paramMatchName string) (tdmn, tdbs *rifx.Chunk, er
 func cloneGenericParamTemplate(paramMatchName string, def *pardParamDef) (tdmnCh, tdbsCh *rifx.Chunk, err error) {
 	path, ok := genericEffectParamTemplates[def.controlType]
 	if !ok {
-		return nil, nil, fmt.Errorf("SetEffectParam: parameter %q is default-elided and its control type %d has no generic template yet (supported: scalar/enum/boolean)", paramMatchName, def.controlType)
+		return nil, nil, fmt.Errorf("SetEffectParam: parameter %q is default-elided and its control type %d has no generic template yet (supported: scalar/enum/boolean/angle/color/2D/3D/slider)", paramMatchName, def.controlType)
 	}
 	_, tdbsCh, err = cloneParamTemplateByPath(paramMatchName, path)
 	if err != nil {
