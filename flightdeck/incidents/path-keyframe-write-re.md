@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-05-31
+last_updated: 2026-06-12
 when_to_read: implementing shape-path keyframe write (animated ADBE Vector Shape); wiring LowerPathStream into lowerPathNode; emitting multi-frame om-s (tdbs time table + N shap); debugging "AE drops animated path" / wrong vertices on a keyframed shape path; deciding from-scratch vs embed-template for animated path lower
 applies_to: [path-keyframe, shape-path, om-s, omks, shap, shph, tdbs, lhd3, ldat, bbox-normalization, LowerPathStream, lowerPathNode, encodeBezier, ae2020, ae2025, version-portable, linear-interp, phase-0-re]
 ---
@@ -100,3 +100,12 @@ deferred：temporal ease（首版 linear only）、mask path write（只做 shap
 3. **测试 helper 用错匹配**：`findShipChunk(root, IDOmS)` 按 `ch.ID` 找，但 om-s 是 `LIST`（FormType="om-s"）→ 永远 nil。加 `findShipListByForm` 按 FormType 找。
 
 dump/build 工具（tmp_debug，gitignored）：`dump_path_anim`（按块解码）、`build_pathkf`（复刻 gate build 落盘）、`dump_tdbs`（tdbs leaf）、`dump_tdmn`（match-name 树）。
+
+## encodeBezier lhd3 @0x14/@0x18/@0x1C — n≠4 对 shape path 安全（2026-06-12 核）
+
+[[add-mask-create-re]] 掀出 encodeBezier 的 geometry lhd3 写 `@0x14=n / @0x18=closedFlag / @0x1C=16`，
+而 mask 实测应为 `@0x14=4 恒 / @0x18=1 恒 / @0x1C=4·n`（AddMask 后补丁），并留 follow-up 问 shape 侧是否同样
+n≠4 broken。**纯代码核结论：shape path 不受影响**——前提（shape gated fixtures 全 n=4）不成立。`shape_path_shipgate_test.go`
+静态 gate 用 n=3 三角形 + `assertResavedPathAnchors` 精确读回，本 gate（`shape_pathkf_shipgate_test.go`）frame 2 亦 n=3，
+两者双版本 PASS。AE 对 "ADBE Vector Shape" om-s 容忍 n-依赖 lhd3（mask 的急切-decode 严格性是 mask 独有）。
+未 gate 的次要轴：开放 shape path（`@0x18=0`）无覆盖，但 closed/open 独立在 shph[3]，需求驱动再核。详 [[add-mask-create-re]] §三 finding 4。

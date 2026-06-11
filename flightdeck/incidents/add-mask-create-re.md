@@ -58,9 +58,19 @@ readback, resave preservation). Ground-truth fixture: `test_data/re_mask_open.ae
 4. **lhd3 字段对 n≠4 顶点是错的（encodeBezier 遗留）**：mask 实测 `@0x14`=**4 恒定**
    （encodeBezier 写顶点数 n，仅 n=4 巧合成立——n=3 的 mask 让 AE 2020 硬崩）、
    `@0x18`=**1 恒定**（不是 closed 位）、`@0x1C`=**4·n**（不是常量 16）。AddMask 在
-   encodeBezier 后补丁这三个字段。⚠ **follow-up**：shape path 写路径（LowerPathStream）
-   的 gated fixtures 顶点数恰为 4？若 shape 侧同语义，n≠4 的 shape path 可能同样
-   broken——需要时用 re_mask_open 同法提 shape 样本核（见 [[path-keyframe-write-re]]）。
+   encodeBezier 后补丁这三个字段。✅ **follow-up 已核（2026-06-12，纯代码）——shape path
+   侧不受影响，是 mask 特有严格性，非 encodeBezier 通用 bug**：前提（「shape gated fixtures
+   恰全是 n=4」）不成立。静态 path ship-gate（`shape_path_shipgate_test.go`）用的就是
+   **n=3 三角形** `{{10,20},{70,30},{40,90}}`（closed），走 `splicePathGeometry →
+   spliceShapGeometry → encodeBezier`（lower_shape_node.go:506 整块替换 lhd3），产出
+   `@0x14=3 / @0x18=1 / @0x1C=16`，**AE 2020 + AE 2025 双版本接受 + `assertResavedPathAnchors`
+   精确读回 3 顶点（容差 0.5px）**；动画 path gate（`shape_pathkf_shipgate_test.go`）frame 2
+   同为 n=3 三角形，也双版本 PASS。即 AE 对 shape layer 的 "ADBE Vector Shape" om-s 容忍
+   encodeBezier 的 n-依赖 lhd3 字段（不像 mask 打开工程即急切解码 outline → n≠4 硬崩 0::42）。
+   **唯一未 gate 的次要轴**：所有 gated shape path 皆 `Closed=true`（→ `@0x18=closedFlag=1`，
+   恰合 mask 的恒定 1），**开放 shape path** 下 encodeBezier 写 `@0x18=0` 无 ship-gate 覆盖——
+   但这是 closed/open 轴而非 n≠4 轴，且 shape 开闭独立编码在 shph[3]，需求驱动再核。
+   （见 [[path-keyframe-write-re]]）
 
 ldat 三元组布局与 shape path 完全同构（`[anchor, 本点出控制点, 下点入控制点]`，绝对值、
 bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTangent/OutTangent`
