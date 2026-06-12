@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（**Mask 结构性 op 全收口**：RemoveMask/DuplicateMask/MoveMask 三连 ship，+ 既有 AddMask = Add/Remove/Duplicate/Move 全 Stable 双版本 gated；统一 triple-aware（mkif 指针定位 `(tdmn,mkif,tdgp)` 三件套，绕过通用 PropertyGroup op 的 pair 假设）。同日前序：AddMarker/RemoveMarker Alpha→Stable（commit 4a445cc）+ docgen funcs 漏文档缺口修复（commits.md 清单固化）。详 `incidents/add-mask-create-re.md` + `git log`。）
+**Last updated**: 2026-06-12 by claude（**立交付准则 + 首个端到端 gate**：orbit 动画 demo 暴露「单点 gated 能力组合起来没验证 + 混入未 AE 验证的表达式 → AE 卡死」。立 `checklists/delivery-contract.md` + CLAUDE.md #7：只有 AE 双版本 gate PASS 且在覆盖边界内才算可交付；三红线（Go round-trip≠AE 接受 / Stable 有覆盖边界 / 组合需独立 gate）。据此给 orbit 建端到端 gate `TestOrbitDemo_AEShipGate_*`，AE 2020+2025 PASS（5 层不卡、旋转动画在、resave 存活）→ demo 升为合法交付。前序：**Mask 结构性 op 全收口**：RemoveMask/DuplicateMask/MoveMask 三连 ship，+ 既有 AddMask = Add/Remove/Duplicate/Move 全 Stable 双版本 gated；统一 triple-aware（mkif 指针定位 `(tdmn,mkif,tdgp)` 三件套，绕过通用 PropertyGroup op 的 pair 假设）。同日前序：AddMarker/RemoveMarker Alpha→Stable（commit 4a445cc）+ docgen funcs 漏文档缺口修复（commits.md 清单固化）。详 `incidents/add-mask-create-re.md` + `git log`。）
 **Active focus**: **需求驱动期，无 active 主线**——大 arc 全收口：V3 框架（M1-M8，spec 已归档）· 结构性创建 vein（New\* 全家族 + AddEffect/SetEffectParam，全 Stable）· mask 结构性 op（Add/Remove/Duplicate/Move 全 Stable 双版本 gated）· Essential Graphics W（2026-06-12 ship）。ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。剩余候选见 ## 下一步；历史脉络靠 `git log` + `archive/` + coverage.md。
 
 ## 进行中
