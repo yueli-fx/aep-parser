@@ -23,7 +23,7 @@ type Property struct {
 	Keyframes         []*Keyframe
 	StaticValue       any
 	Expression        string // JS expression source, "" when no expression set
-	ExpressionEnabled bool   // tdb4 @0x78 inverted: false = AE ignores expression at render time. Always true for properties without an expression (AE's default state)
+	ExpressionEnabled bool   // tdb4 @0x77 disabled byte (0 = AE evaluates; @0x78 is the has-expression marker). Always true for properties without an expression (AE's default state)
 
 	// DefaultValue is the property's default value (what AE considers
 	// the "unmodified" state). For transform properties, set from

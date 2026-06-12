@@ -303,17 +303,21 @@ func parseLeafProperty(matchName string, tdbs *rifx.Chunk, ctx *parseCtx) *Prope
 		pb.exprChunk = utf8
 	}
 
-	// ExpressionEnabled: tdb4 @0x78 is an INVERTED "disabled" byte —
-	// 0 = enabled (AE evaluates), 1 = disabled. We expose the
-	// non-inverted form. Default true when the byte is absent so properties
-	// without an expression don't read as "disabled".
-	prop.ExpressionEnabled = true
+	// ExpressionEnabled: tdb4 @0x77 is the disabled byte (0 = AE evaluates,
+	// 1 = expression kept but off); @0x78 is the has-expression marker, NOT
+	// the enabled flag (RE'd against an AE-2025-native enabled/disabled
+	// fixture pair, expr_re 2026-06-12: enabled = 00 01, disabled = 01 01
+	// at @0x77/@0x78 — the historic reading of @0x78 as an inverted enabled
+	// byte conflated the two and made every SetExpression render-dead).
+	// Without an expression we report AE's scripting default true.
 	tdb4 := tdbs.FindFirst(rifx.IDtdb4)
 	if tdb4 == nil {
 		tdb4 = tdbs.FindFirst(rifx.IDTdb4)
 	}
-	if tdb4 != nil && len(tdb4.Data) > 0x78 {
-		prop.ExpressionEnabled = tdb4.Data[0x78] == 0
+	if prop.Expression != "" && tdb4 != nil && len(tdb4.Data) > 0x77 {
+		prop.ExpressionEnabled = tdb4.Data[0x77] == 0
+	} else {
+		prop.ExpressionEnabled = true
 	}
 
 	if kfList != nil {

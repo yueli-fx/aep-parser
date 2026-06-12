@@ -121,8 +121,12 @@ func (b *propertyBackrefs) SetStaticValue(v any) error {
 	}
 }
 
-// SetExpressionEnabled flips the tdb4 @0x78 "disabled" byte (0 = enabled,
-// 1 = disabled). length-preserving.
+// SetExpressionEnabled writes the tdb4 @0x77 disabled byte (0 = AE
+// evaluates the expression, 1 = expression kept but off). The neighbouring
+// @0x78 is NOT the enabled flag — it is the has-expression marker owned by
+// SetExpression (RE'd against AE-2025-native enabled/disabled fixture pair,
+// expr_re 2026-06-12: enabled = 00 01, disabled = 01 01 at @0x77/@0x78).
+// length-preserving.
 func (b *propertyBackrefs) SetExpressionEnabled(enabled bool) error {
 	if b.tdbs == nil {
 		return fmt.Errorf("property: no tdbs reference")
@@ -135,19 +139,28 @@ func (b *propertyBackrefs) SetExpressionEnabled(enabled bool) error {
 		return fmt.Errorf("property: tdb4 too short (%d bytes) for expressionEnabled write", len(tdb4.Data))
 	}
 	if enabled {
-		tdb4.Data[0x78] = 0
+		tdb4.Data[0x77] = 0
 	} else {
-		tdb4.Data[0x78] = 1
+		tdb4.Data[0x77] = 1
 	}
 	return nil
 }
 
 // SetExpression rewrites the JS expression source: replaces the existing Utf8
 // chunk's data, inserts a new Utf8 into the tdbs LIST when none existed, or
-// removes it entirely when source == "". length-variable.
+// removes it entirely when source == "". Keeps the tdb4 @0x78 has-expression
+// marker in sync — without it AE treats the Utf8 as absent and silently
+// drops the expression text on open (see SetExpressionEnabled for the
+// @0x77/@0x78 pair semantics). length-variable.
 func (b *propertyBackrefs) SetExpression(source string) error {
 	if b.tdbs == nil {
 		return fmt.Errorf("property: no tdbs reference (built outside parser?)")
+	}
+	tdb4 := findTdb4Chunk(b.tdbs)
+	setMarker := func(v byte) {
+		if tdb4 != nil && len(tdb4.Data) > 0x78 {
+			tdb4.Data[0x78] = v
+		}
 	}
 	if source == "" {
 		if b.exprChunk != nil {
@@ -161,6 +174,7 @@ func (b *propertyBackrefs) SetExpression(source string) error {
 			b.tdbs.Children = out
 			b.exprChunk = nil
 		}
+		setMarker(0)
 		return nil
 	}
 	if b.exprChunk != nil {
@@ -170,6 +184,7 @@ func (b *propertyBackrefs) SetExpression(source string) error {
 		b.tdbs.Children = append(b.tdbs.Children, newUtf8)
 		b.exprChunk = newUtf8
 	}
+	setMarker(1)
 	return nil
 }
 
