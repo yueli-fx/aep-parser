@@ -31,10 +31,10 @@ last_updated: 2026-06-12
 - ✅ `TestMGTrim_AEShipGate_*` AE 2020+2025 双版本**渲染像素** gate PASS：FULL(End100) 整圈 L+R、HALF(End50) 右半弧 top/right/bottom 在·left 不在；trim End resave 读回 50/100。两个 RE ground truth（render 验证非空想）：add-order [Ellipse,Stroke,Trim] trim 剪 stroke；AE 椭圆 path 起点顶部 12 点顺时针。详 `incidents/trim-paths-vector-filter-re.md`。
 - 遗留：animated trim（line-draw 真动画 End 0→100 keyframe）路径已通但未单独 gate；Repeater/Merge/Offset/Round/ZigZag 同类矢量滤镜复用此 vein（蓝本见 incident）。
 
-### S4 — precomp 嵌套（工程结构刚需）
-- MG 工程 = comp 套 comp。现状无「comp 作为 layer source」的创建路径（backlog 里 ImportComposition 需求驱动）。
-- RE：precomp 层的 ldta source-ID 指向 comp item + 必要 sibling，对照 JSX `comp.layers.add(otherComp)` fixture。
-- gate：父 comp 渲染像素能看到子 comp 内容。
+### S4 — precomp 嵌套（工程结构刚需）✅ DONE 2026-06-12
+- `aep.NewPrecompLayer(parent, child, name)`：precomp 层 = 普通 AV 层，唯一标识 = ldta @0x28 SourceID 指向 CompItem（源 comp 已存在，无 footage item 要造）。复用 camera/light 的 `newTemplatedLayer`（embed `layer_precomp_body.bin` 单 Layr）+ clone 后 `SetSource(child.ID)` + cycle guard。修 `newTemplatedLayer` backref 缺 ldta（SetSource 静默失败靠 ID 巧合，字节输出无变）。
+- ✅ `TestMGPrecomp_AEShipGate_*` AE 2020+2025 双版本**渲染像素** gate PASS：parent 唯一层=child precomp，AE 读回 source=CompItem、child 绿方块+蓝 BG 透出、resave SourceComposition 解到 child。**防 ID 巧合**：parent 先建 child 后建（child.ID≠模板 stale 1）。详 `incidents/precomp-layer-source-id-re.md`。
+- 遗留：anchor/scale 未参数化（child≠1920×1080 需手设 transform）· collapse transformation / time-remap 未做 · 多层嵌套（祖孙）未单独 gate（cycle guard 已覆逻辑）。
 
 ### S5 — 零散质感件（按需）
 - Repeater（`ADBE Vector Filter - Repeater`）：径向/网格复制，MG 高频。
