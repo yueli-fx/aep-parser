@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（**AddMarker/RemoveMarker Alpha→Stable**：实跑 marker_shipgate_test.go 双版本——AE 2020+2025 各 PASS（remove m0 + add@4.0，读回 2 marker 内容正确）。该 gate 早写好但一直 AE_SHIP_GATE 门控未执；现确认 AE 接受 spliced ldat/lhd3/mrky。同步 facade+serializer doc、docs/marker.md、coverage.md（顺修旧 `Marker.Remove()` 命名→free-function 形态）。commit 4a445cc。**核查发现**「残余 Alpha gate」#3 其余两项系看板滞后：RQ AddItem/RemoveItem 早双版本 PASS、InsertLayer 早 Stable——真缺口只 AddMarker，今已闭环）
+**Last updated**: 2026-06-12 by claude（**RemoveMask ship（Stable）**：AddMask 的逆——triple-aware splice（以 mask mkif 指针定位 `(tdmn,mkif,tdgp)` 三件套，绕过通用 RemovePropertyGroup 的 pair 假设），新 `mutate_mask_remove.go` + `aep.RemoveMask(layer,m)`。AE 2020+2025 双版本 ship-gate 2/2 PASS（建 3 删中段，survivor 几何完好+effects 未动+resave 保留）+ Go round-trip 3 用例。顺带补 docgen 缺口：mask.md 无 funcs → AddMask 自 2026-06-11 一直未文档化，今补 AddMask+RemoveMask。commit 见 git log。前序：AddMarker/RemoveMarker Alpha→Stable（commit 4a445cc）。）
 **Active focus**: **需求驱动期，无 active 主线**——大 arc 全收口：V3 框架（M1-M8，spec 已归档）· 结构性创建 vein（New\* 全家族 + AddEffect/SetEffectParam/AddMask，全 Stable）· Essential Graphics W（2026-06-12 ship）。ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。剩余候选见 ## 下一步；历史脉络靠 `git log` + `archive/` + coverage.md。
 
 ## 进行中
@@ -18,7 +18,7 @@
 2. **encodeBezier AE-native 字节**（纯优化）：写 AE-native 值（shph[3] open=0x09 等；@0x0C/@0x1C 待 n=5..8 RE 确证容量）→ shape/mask 写路径 byte-identical、mask patch 可化简。AE 已容忍现值（开放 path 双版本 gated），无紧迫性。详 `incidents/add-mask-create-re.md` §finding-4。
 3. ~~**残余 Alpha 的 gate 补齐**~~ **已闭环（2026-06-12）**：核查发现此项多为看板滞后——RQ AddItem/RemoveItem 早双版本 ship-gate PASS（incident render-queue-delete-mechanics §验证/§ADD）、InsertLayer 早 Stable（facade doc 6/6 PASS）；唯一真缺口 AddMarker/RemoveMarker 今实跑双版本 PASS 提 Stable（commit 4a445cc）。**注**：RQ Set* slice-5/6/7/8（render settings / OutputModule / item 级 setter）仍 Alpha，但属非结构性 in-place patch，按设计「非结构性故不走 ship-gate」，非 gate 缺口。
 4. **EG W deferred 控件**：point/dropdown/text/Transform 源 controller + RemoveEssentialProperty。详 `incidents/essential-graphics-write-re.md`。
-5. **各 vein 需求驱动剩件**：RemoveMask / 既有 mask 路径改写 / animated mask path · SetEffectParam 扩库 + point 单位换算 helper · 导入 solid footage 归 Solids folder。
+5. **各 vein 需求驱动剩件**：~~RemoveMask~~（**已 ship 2026-06-12 Stable**）/ 既有 mask 路径改写（SetMaskPath）/ animated mask path / mask 的 Move·Duplicate（triple-aware 化，同 RemoveMask 思路）· SetEffectParam 扩库 + point 单位换算 helper · 导入 solid footage 归 Solids folder。
 
 **仍 fixture/RE-gated（需外部输入）**：Layr Transform 3D 通道（需 3D layer 支持）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建）· ValueText（schema-db）。详 `plans/coverage.md` § 暂搁 / 不可达。
 
