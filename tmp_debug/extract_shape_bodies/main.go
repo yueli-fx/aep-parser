@@ -50,6 +50,18 @@ var extractions = []extraction{
 	// G-Stroke body: same fixture, same GCst→GCky→Utf8 slot structure as G-Fill
 	// but under the ADBE Vector Graphic - G-Stroke tdmn. Used by lowerGradientStrokeNode.
 	{"test_data/v2_2_gradient_src.aep", "ADBE Vector Graphic - G-Stroke", "internal/serializer/templates/v2_2_shape_gradstroke_body.bin"},
+	// MG roadmap S3 — Trim Paths (`ADBE Vector Filter - Trim`): a vector filter
+	// sibling of the shapes inside the Vectors Group, carrying Start / End /
+	// Offset / Trim Type cdat slots (all set non-default in the fixture so AE
+	// emits every slot). Regen via tmp_debug/gen_shape_trim.jsx. lowerTrimNode
+	// overwrites the Start/End/Offset cdats.
+	{"test_data/v2_2_trim.aep", "ADBE Vector Filter - Trim", "internal/serializer/templates/v2_2_shape_trim_body.bin"},
+	// MG roadmap S5 — Repeater (`ADBE Vector Filter - Repeater`): radial/grid
+	// duplication. Top-level Copies/Offset/Order + a nested `ADBE Vector Repeater
+	// Transform` group (Anchor/Position/Scale/Rotation/Opacity 1·2). All set
+	// non-default in the fixture so AE emits every slot. Regen via
+	// tmp_debug/gen_shape_repeater.jsx.
+	{"test_data/v2_2_repeater.aep", "ADBE Vector Filter - Repeater", "internal/serializer/templates/v2_2_shape_repeater_body.bin"},
 }
 
 func main() {
