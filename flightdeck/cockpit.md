@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（MG roadmap S5 Repeater 收口：矢量滤镜 vein 第二次复用成立——顶层 Copies/Offset + 嵌套 Transform 子组 findGroupBody descend，双版本渲染像素 gate PASS（5 点成行、间隙暗）。详 `incidents/trim-paths-vector-filter-re.md` § 复用确认。同日前序：S1 ease + S2 表达式 + S3 Trim + S4 precomp。）
-**Active focus**: **From-scratch MG 工程能力**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标 = 不开 AE 纯 Go 生成完整 MG 动画）。S1 ease ✅ · S2 表达式 ✅ · S3 Trim ✅ · S4 precomp ✅ · S5 Repeater ✅ · 下一刀 S6 端到端组合 gate（叠全要素收口）/ 余下 S5 件（gradient 方向 / 圆角 / Merge·Offset·ZigZag 同 vein）。每 slice 渲染像素级双版本 gate（红线4）。ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
+**Last updated**: 2026-06-12 by claude（MG roadmap **主线 S1–S6 闭环**：S6 端到端组合 gate PASS——一个纯 Go 工程组合 precomp+trim+ease+repeater，双版本渲染像素验证四要素协同（MOVER ease 滞后 x=411 · BADGE trim 半弧 · DOTS 4 copies · precomp 解析），用户终极目标达成。`mg_combo_shipgate_test.go`。同日全程：S1 ease · S2 表达式 · S3 Trim · S4 precomp · S5 Repeater · S6 组合。）
+**Active focus**: **From-scratch MG 工程能力 — 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标「不开 AE 纯 Go 生成完整 MG 动画」端到端达成）。ease ✅ 表达式 ✅ Trim ✅ precomp ✅ Repeater ✅ 端到端组合 gate ✅。**余下 = 按需 polish**（非阻塞）：gradient 方向 / Rounded Corners / Merge·Offset·ZigZag（同矢量滤镜 vein 蓝本）· 表达式语汇 gate（loopOut/wiggle/跨层引用）· animated trim/repeater · precomp anchor/scale 参数化。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
 
 ## 进行中
 
@@ -13,11 +13,13 @@
 
 ## 下一步
 
-**主线 = MG roadmap**（`specs/2026-06-12-from-scratch-mg-roadmap.md`；S1 ease ✅ S2 表达式 ✅ S3 Trim ✅ S4 precomp ✅ S5 Repeater ✅）：
+**MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。下一步皆**按需点名即开**（无强制主线）：
 
-1. **S6 端到端组合 gate**（orbit demo 升级版，叠 ease+trim+precomp+repeater 全要素的收口 slice；前置：S2 followup 表达式语汇 gate loopOut/wiggle/跨层引用）。
-2. 余下 S5 质感件（按需，**同矢量滤镜 vein，蓝本已两次验证**——详 `incidents/trim-paths-vector-filter-re.md`）：gradient Start·End Pt（方向）· Rounded Corners · Merge / Offset Paths / ZigZag。
-3. 技债（roadmap 路上顺修）：`encodePathTimeTable` 容量分页同病（path >4 kf 前必修，详 `incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater（line-draw / count-up 真动画）+ precomp 多层嵌套路径已通未单独 gate · precomp anchor/scale 未参数化 · 种子模板 32bpc→8bpc 评估。
+1. **质感件**（同 S3 trim 矢量滤镜 vein，蓝本已三次验证——详 `incidents/trim-paths-vector-filter-re.md`）：gradient Start·End Pt（方向）· Rounded Corners · Merge / Offset Paths / ZigZag。
+2. **表达式语汇 gate**：loopOut / wiggle / thisComp.layer 跨层引用（S2 仅验单 `time*90`）。
+3. 技债（顺修）：`encodePathTimeTable` 容量分页同病（path >4 kf 前必修，详 `incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater（line-draw / count-up 真动画）+ precomp 多层嵌套已通未单独 gate · precomp anchor/scale 未参数化 · 种子模板 32bpc→8bpc 评估。
+
+**需求驱动候选**（点名即开工）：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写功能 · SetEffectParam 扩库 · RQ Set\* slice（Alpha by design）。
 
 **需求驱动候选**（点名即开工）：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写功能（SetMaskPath / animated path / mode·color·feather 参数化）· SetEffectParam 扩库 · RQ Set\* slice-5/6/7/8（Alpha by design）。
 

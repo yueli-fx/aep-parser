@@ -46,6 +46,11 @@ last_updated: 2026-06-12
 - 文本动画器（Text Animators）、3D、粒子类不入本 roadmap（btdk/3D 各有暂搁前置）。
 - 每 slice 独立 plan + 独立 ship-gate；roadmap 不预支「组合 = 各 slice 之和」——最终「AI 生成完整 MG 工程」需要一个端到端组合 gate（orbit demo 的升级版，含 ease+trim+precomp 全要素）作为收口 slice S6。
 
+### S6 — 端到端组合 gate（收口）✅ DONE 2026-06-12 — roadmap 主线闭环
+- 一个纯 Go 工程 `MGX_Scene` 组合全部已 ship slice：precomp(S4 的 `MGX_Badge`=ellipse+stroke+Trim End=50 半弧·S3) + ease 关键帧动画 MOVER(S1) + Repeater 4-copy DOTS(S5) + BG。
+- ✅ `TestMGCombo_AEShipGate_AE2020/2025` 双版本**渲染像素** PASS（mid-frame t=2s）：MOVER ease 滞后 x=411（线性中点 950）· BADGE precomp 透出 trim 右半弧（左切）· DOTS 4 点+间隙暗 · AE 读回 4 层/BADGE source=CompItem/MOVER 2 eased kf influence 90/DOTS Copies=4 · resave 全工程存活。
+- **意义**：坐实交付准则的「组合/端到端是独立交付项」——单点 gate 不为「从零拼完整工程」背书，本 gate 证明四要素在一个 AE 接受的工程里协同渲染正确。**用户终极目标（不开 AE 纯 Go 生成完整 MG 动画）端到端达成**。`mg_combo_shipgate_test.go`（无新写路径，纯组合）。
+
 ## 评审纪要
 
 （空）
