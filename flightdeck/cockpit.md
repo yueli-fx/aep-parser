@@ -14,7 +14,7 @@
 
 **主线已全收口（2026-06-12）**：结构性创建 vein + EG W + Alpha→Stable 审计批次全部落地，结构性写主力 API 全 Stable。**无 active 主线**——以下候选均需求驱动，点名即开工：
 
-1. ~~**SetText 变长 refuse 集解封**~~ **全 ship（2026-06-12）**：空串 + 多段落 + 多 run 全解封。多 run = AE 行为 RE 出来就是 **collapse-to-first-run**（`multirun_setvalue` = AE 亲手产出的 ground truth，非需我方分配策略）。refuse 集仅剩**手动 kerning 表**。gate：段落/空串双版本 PASS；多 run AE 2025 PASS（fixture 需 characterRange AE 24+，AE 2020 前向拒开故 N/A，机制已由段落 case 跨版本证）。详 `incidents/text-btdk-length-variable-write-scoping.md` § 修法 v2/v3。
+1. ~~**SetText 变长 refuse 集解封**~~ **全 ship（2026-06-12）**：空串 + 多段落 + 多 run 全解封。多 run = AE 行为 RE 出来就是 **collapse-to-first-run**（`multirun_setvalue` = AE 亲手产出的 ground truth，非需我方分配策略）。refuse 集仅剩**手动 kerning 表**。gate：段落/空串双版本（2020+2025）PASS；多 run **AE 2024+2025 双版本 PASS**（AE 2024 2026-06-12 解锁，fixture 改 AE-24 stamped；AE 2020 前向拒开 24+ fixture 故 N/A）。详 `incidents/text-btdk-length-variable-write-scoping.md` § 修法 v2/v3。
 2. **encodeBezier AE-native 字节**（纯优化）：写 AE-native 值（shph[3] open=0x09 等；@0x0C/@0x1C 待 n=5..8 RE 确证容量）→ shape/mask 写路径 byte-identical、mask patch 可化简。AE 已容忍现值（开放 path 双版本 gated），无紧迫性。详 `incidents/add-mask-create-re.md` §finding-4。
 3. **残余 Alpha 的 gate 补齐**：RQ AddItem/RemoveItem · AddMarker · InsertLayer 家族（各有既注明的 gate 缺口/限制）。
 4. **EG W deferred 控件**：point/dropdown/text/Transform 源 controller + RemoveEssentialProperty。详 `incidents/essential-graphics-write-re.md`。

@@ -100,10 +100,13 @@ preservation 比 `\n` 形。`jsStringEscape` 须转义控制字符（`\r`/`\n` �
 `/1` = 计数）。删多 run refuse 守卫。最终 splice 三处：串 + 段落数组（整组）+ run 数组（整组）。
 
 **ship-gate**：`runSetTextMultiRunGate` 加载 `re_text_multirun.aep`（2-run）→ SetText collapse
-→ AE 读回 + resave 单 run。**AE 2025 PASS**。**AE 2020 N/A**——fixture 需 characterRange(AE 24+)
-故 AE-25 stamped，AE 2020 直接拒开（「使用版本 25.1 保存，无法用此版本打开」前向不兼容，
-非我方字节问题）；AE 2020 无 multi-run scripting API → 无法自动造 2020-openable fixture。
-`buildEntryArray` 机制本身已由段落 case（T3 双版本 PASS）跨版本证过。
+→ AE 读回 + resave 单 run。**AE 2024 + AE 2025 双版本 PASS**（fixture 用 AE 2024 生成 =
+AE-24 stamped：AE 2024 native 开、AE 2025 向后兼容开）。**AE 2020 仍 N/A**——fixture 需
+characterRange(AE 24+) 故最低 AE-24 stamped，AE 2020 前向拒开（「使用版本 X 保存，无法用此
+版本打开」，非我方字节问题）；AE 2020 也无 multi-run scripting API 造不出 2020-openable
+fixture。`buildEntryArray` 机制另由段落 case（T3 双版本含 2020 PASS）跨版本证过。
+（**AE 2024 2026-06-12 解锁** = 给 24+ 引入字段补「24+ 但非 25」第二门禁版本，详
+`checklists/re-fixture.md` § Adobe 软件路径。）
 
 **v3 守卫（剩余 refuse 集）**：仅 **手动 kerning 表**（`/1/1/0/0/8/0`，per-char 数组会 desync）。
 单/多段落 × 单/多 run × 空串 = 全支持。多 run 输入按 AE 行为 collapse 到单 run（保 run[0] 样式）。
@@ -137,4 +140,4 @@ preservation 比 `\n` 形。`jsStringEscape` 须转义控制字符（`\r`/`\n` �
 ## Cases
 - 2026-06-11 首次（NewTextLayer ship 时的 scoping pass）
 - 2026-06-12 v2 ship：空串 + 多段落解封（双版本 ship-gate PASS）；refuse 集缩到多 run + kerning
-- 2026-06-12 v3 ship：多 run 解封（AE = collapse-to-first-run，AE 2025 gate PASS，2020 N/A 前向不兼容）；refuse 集仅剩手动 kerning
+- 2026-06-12 v3 ship：多 run 解封（AE = collapse-to-first-run，AE 2024+2025 双版本 gate PASS，2020 N/A 前向不兼容）；refuse 集仅剩手动 kerning

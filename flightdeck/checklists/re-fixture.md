@@ -86,6 +86,7 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 ## Adobe 软件路径
 
 - AE 2025 — `E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe`
+- AE 2024 — `E:\adobe\Adobe After Effects 2024\Support Files\AfterFX.exe`（2026-06-12 解锁；AE 24-引入的字段/特性如 characterRange 多 run、fontCapsOption 可用它当「24+ 但非 25」的第二门禁版本——给那些 AE 2020 前向拒开的 24+ fixture 补双版本 gate，配 AE 2025 凑齐 24+×双版本）
 - AE 2023 — `E:\adobe\Adobe After Effects 2023\Support Files\AfterFX.exe`
 - AE 2022 — `E:\adobe\Adobe After Effects 2022\Support Files\AfterFX.exe`
 - AE 2020 — `E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe`
