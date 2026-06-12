@@ -125,7 +125,8 @@ summary: 字段覆盖概览（精简入口）
 
 ### Property / Keyframe
 
-- `StaticValue` R/W（对 effect 参数也直接生效）/ `Expression` 完整 R/W（length-variable）/ `ExpressionEnabled` R/W（反语义解析）
+- `StaticValue` R/W（对 effect 参数也直接生效）/ `Expression` 完整 R/W（length-variable，同步 tdb4 @0x78 has-expression 标记）/ `ExpressionEnabled` R/W（tdb4 @0x77 disabled 位）
+- **表达式激活 W (2026-06-12, MG S2, Stable)**：SetExpression+SetExpressionEnabled 写出的表达式 **AE 实际求值**——历史 @0x78 反语义解读翻案（真相 = @0x77 disabled + @0x78 has-expression 字节对；旧实现全线 render-dead 且 disabled 态丢文本）。**AE 2020+2025 双版本渲染像素 ship-gate PASS**（`TestExpression_AEShipGate_*`：`time*90` 求值 180° 渲染位移 + disabled 对照不动 + resave 双态存活）。覆盖边界：1D rotation 单表达式；loopOut/wiggle/跨层引用语汇未单独 gate。详 `incidents/expression-enable-byte-pair.md`。
 - Keyframe: `Time / Value / InInterp / OutInterp / Temporal{In,Out}Ease / Spatial{In,Out}Tangent` 全 R/W（对 effect 参数 keyframe 也直接生效）
 - 增删 keyframe: `InsertKeyframe(time, value)` + `DeleteKeyframe(i)`（要求 ≥ 1 既有 keyframe 作 layout 模板）
 - **ease keyframe + 规模 W (2026-06-12, MG S1, Stable)**: `PropertyStream.AddKeyframeWithEase(t, v, in, out TemporalEase)` — from-scratch ease 关键帧（influence ∈ (0,1] 分数；非零侧 interp 字节发 Bezier，旧实现硬编码 Linear 致 AE 忽略 ease）。同场修 lhd3 容量分页（@0x0C=ceil(n/4)、@0x1C=4×pages——恒写 1/4 时 >4 kf 被 AE 2025 判损坏，**2-keyframe 边界曾是真硬边界**）。**AE 2020+2025 双版本渲染像素 ship-gate PASS**（`TestMGEase_AEShipGate_*`：linear 基准中点 x=950、慢出 ease 滞后 x=411 像素级命中 DOM 预期、6-keyframe zigzag 插值命中、resave 保 ease+6kf）。覆盖边界：Position spatial 2D ≤6 kf 实测；ldat @0x10 segment 缓存未复刻（AE 重算）；`encodePathTimeTable`（path kf 时间表）容量同病**未修**——path >4 kf 前必修。详 `incidents/lhd3-keyframe-capacity-pages.md`。

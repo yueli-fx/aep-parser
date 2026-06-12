@@ -21,10 +21,10 @@ last_updated: 2026-06-12
 - ✅ `TestMGEase_AEShipGate_*` AE 2020+2025 双版本渲染像素 PASS：LIN 中点 x=950 / EAS 慢出滞后 x=411 / SCL 6kf 插值 x=950，DOM 读回 influence 90/10 + BEZIER。
 - 遗留：ldat 块 @0x10 segment 长度缓存未复刻（AE 重算，双版本接受）；`encodePathTimeTable` 容量字段同病未修（path >4kf 前必修）。
 
-### S2 — 表达式激活 RE（最大杠杆，已知有坑）
-- 现状：`SetExpression` 写回字节 round-trip 绿但 **AE 不激活**（`expressionEnabled` 读回 false）——delivery-contract 教训源。loopOut/wiggle/time 驱动是 AI 生成 MG 的最大杠杆（免逐帧关键帧）。
-- 路线：JSX 建带表达式 fixture（AE 原生 enabled）vs Go 写同表达式 → byte-diff 定位 enabled 位（疑 tdb4 flag / 独立 chunk）→ 修 → gate 必须验「表达式驱动的渲染像素」（如 `time*100` 旋转后采样）而非只读 expressionEnabled。
-- 风险：上次混入未验证表达式曾致 AE 卡死——fixture 阶段全程双版本小步验。
+### S2 — 表达式激活 RE ✅ DONE 2026-06-12
+- 翻案：历史「@0x78 反语义 disabled 位」解读是错的——真相 = **@0x77 disabled 位 + @0x78 has-expression 标记**两字节对（@0x78 不同步时 AE 直接丢表达式文本）。修 SetExpression（同步 @0x78）+ SetExpressionEnabled（写 @0x77）+ parse。详 `incidents/expression-enable-byte-pair.md`。
+- ✅ `TestExpression_AEShipGate_*` AE 2020+2025 双版本渲染像素 PASS：ON 层 `time*90` 实际求值（rotation@2s=180、dot 渲染转到锚点下方）、OFF 层同表达式保文本不求值、resave 双态存活。
+- followup（开 S6 端到端前做）：常用 MG 表达式语汇 gate（loopOut / wiggle / thisComp.layer 引用链）——单表达式 `time*90` 已确权，语汇覆盖未验。
 
 ### S3 — Trim Paths（线描动画，MG 标配）
 - ShapeKind 现仅 8 种（Rect/Ellipse/Path/Fill/Stroke/Group/G-Fill/G-Stroke）。Trim Paths（`ADBE Vector Filter - Trim`）= stroke 线描 reveal 的唯一路径。
