@@ -84,7 +84,7 @@ read-write
 ExpressionEnabled bool
 ```
 
-tdb4 @0x78 inverted: false = AE ignores expression at render time. Always true for properties without an expression (AE's default state)
+tdb4 @0x77 disabled byte (0 = AE evaluates; @0x78 is the has-expression marker). Always true for properties without an expression (AE's default state)
 
 read-write
 
@@ -440,7 +440,7 @@ func (p *Property) SetExpressionEnabled(enabled bool) error
 
 SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself).
 
-RE'd against AE 2020 fixture: byte at tdb4 payload offset 0x78 acts as a "disabled" flag — value 0 = enabled (AE applies expression), value 1 = disabled (expression source preserved but ignored). length-preserving (1 byte).
+RE'd against an AE-2025-native enabled/disabled fixture pair (expr_re, 2026-06-12): tdb4 byte @0x77 is the disabled flag (0 = AE evaluates, 1 = expression kept but off); the neighbouring @0x78 is a has-expression marker kept in sync by SetExpression. (The historic reading of @0x78 as an inverted enabled byte conflated the two — it made every SetExpression output render-dead, and writing @0x78=0 for "disabled" made AE drop the expression text entirely.) length-preserving (1 byte).
 
 Requires the property's tdbs to contain a `tdb4` chunk (always present for properties parsed from real .aep files). Returns an error otherwise.
 

@@ -121,6 +121,7 @@ type (
 	StrokeLineJoin                  = scene.StrokeLineJoin
 	StrokeNode                      = scene.StrokeNode
 	StrokeTaper                     = scene.StrokeTaper
+	TrimNode                        = scene.TrimNode
 	StrokeWave                      = scene.StrokeWave
 	TemporalEase                    = scene.TemporalEase
 	TextAutoKernType                = scene.TextAutoKernType
@@ -354,6 +355,7 @@ const (
 	ShapeKindPath                                 = scene.ShapeKindPath
 	ShapeKindRect                                 = scene.ShapeKindRect
 	ShapeKindStroke                               = scene.ShapeKindStroke
+	ShapeKindTrim                                 = scene.ShapeKindTrim
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar
@@ -425,6 +427,10 @@ func NewRectNode() *RectNode { return scene.NewRectNode() }
 
 // NewStrokeNode returns a detached stroke shape node.
 func NewStrokeNode() *StrokeNode { return scene.NewStrokeNode() }
+
+// NewTrimNode returns a detached Trim Paths filter node (identity: Start=0,
+// End=100, Offset=0).
+func NewTrimNode() *TrimNode { return scene.NewTrimNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }

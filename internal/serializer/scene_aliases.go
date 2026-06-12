@@ -120,6 +120,7 @@ type (
 	StrokeLineCap                   = scene.StrokeLineCap
 	StrokeLineJoin                  = scene.StrokeLineJoin
 	StrokeNode                      = scene.StrokeNode
+	TrimNode                        = scene.TrimNode
 	StrokeTaper                     = scene.StrokeTaper
 	StrokeWave                      = scene.StrokeWave
 	TemporalEase                    = scene.TemporalEase
@@ -354,6 +355,7 @@ const (
 	ShapeKindPath                                 = scene.ShapeKindPath
 	ShapeKindRect                                 = scene.ShapeKindRect
 	ShapeKindStroke                               = scene.ShapeKindStroke
+	ShapeKindTrim                                 = scene.ShapeKindTrim
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

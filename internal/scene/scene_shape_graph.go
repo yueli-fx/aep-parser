@@ -14,15 +14,16 @@ import (
 type ShapeNodeKind int
 
 const (
-	ShapeKindRect         ShapeNodeKind = iota // `ADBE Vector Shape - Rect`
-	ShapeKindEllipse                           // `ADBE Vector Shape - Ellipse`
-	ShapeKindPath                              // `ADBE Vector Shape - Group`
-	ShapeKindFill                              // `ADBE Vector Graphic - Fill`
-	ShapeKindStroke                            // `ADBE Vector Graphic - Stroke`
-	ShapeKindGroup                             // `ADBE Vector Group` (V2.3+ user-created nested group)
-	ShapeKindGradientFill                      // `ADBE Vector Graphic - G-Fill`
-	ShapeKindGradientStroke                    // `ADBE Vector Graphic - G-Stroke`
-	// V2.3+ candidates: PolyStar / Trim / Merge / Repeater / Transform.
+	ShapeKindRect           ShapeNodeKind = iota // `ADBE Vector Shape - Rect`
+	ShapeKindEllipse                             // `ADBE Vector Shape - Ellipse`
+	ShapeKindPath                                // `ADBE Vector Shape - Group`
+	ShapeKindFill                                // `ADBE Vector Graphic - Fill`
+	ShapeKindStroke                              // `ADBE Vector Graphic - Stroke`
+	ShapeKindGroup                               // `ADBE Vector Group` (V2.3+ user-created nested group)
+	ShapeKindGradientFill                        // `ADBE Vector Graphic - G-Fill`
+	ShapeKindGradientStroke                      // `ADBE Vector Graphic - G-Stroke`
+	ShapeKindTrim                                // `ADBE Vector Filter - Trim`
+	// V2.3+ candidates: PolyStar / Merge / Repeater / Transform.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
@@ -520,6 +521,72 @@ func (g *VectorGroup) AddGradientStroke() (*GradientStrokeNode, error) {
 	n := NewGradientStrokeNode()
 	g.Children = append(g.Children, n)
 	return n, nil
+}
+
+// AddTrim appends a default-valued TrimNode (Start=0, End=100, Offset=0 — the
+// no-op identity trim) and returns it. A Trim Paths filter reveals only the
+// arc of the preceding paths between Start% and End% (offset by Offset
+// degrees) — the canonical stroke line-draw / dash-reveal MG primitive. Place
+// it AFTER the path-producing shapes it should trim (render order).
+func (g *VectorGroup) AddTrim() (*TrimNode, error) {
+	n := NewTrimNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
+// TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
+// reveals only the portion of the preceding paths between Start% and End%,
+// rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
+// trimming). Start/End are percentages (0..100); Offset is in degrees.
+//
+// `Trim Type` (Simultaneously/Individually) is AE default (Simultaneously) and
+// elided by AE; not modeled in V2.2. Start/End/Offset are static — animated
+// trim (the actual line-draw reveal) flips the cdat to a keyframe container
+// via the same injectAnimatedStream path as the other shape scalars.
+type TrimNode struct {
+	start  *codec.PropertyStream[float64]
+	end    *codec.PropertyStream[float64]
+	offset *codec.PropertyStream[float64]
+}
+
+// NewTrimNode constructs a default (identity) TrimNode: Start=0, End=100,
+// Offset=0.
+func NewTrimNode() *TrimNode {
+	n := &TrimNode{
+		start:  codec.NewPropertyStream[float64](),
+		end:    codec.NewPropertyStream[float64](),
+		offset: codec.NewPropertyStream[float64](),
+	}
+	_ = n.start.SetStaticValue(0)
+	_ = n.end.SetStaticValue(100)
+	_ = n.offset.SetStaticValue(0)
+	return n
+}
+
+func (n *TrimNode) Kind() ShapeNodeKind              { return ShapeKindTrim }
+func (n *TrimNode) Start() *PropertyStream[float64]  { return n.start }
+func (n *TrimNode) End() *PropertyStream[float64]    { return n.end }
+func (n *TrimNode) Offset() *PropertyStream[float64] { return n.offset }
+
+// SetStart sets the trim start percentage (0..100).
+func (n *TrimNode) SetStart(v float64) error { return n.start.SetStaticValue(v) }
+
+// SetEnd sets the trim end percentage (0..100).
+func (n *TrimNode) SetEnd(v float64) error { return n.end.SetStaticValue(v) }
+
+// SetOffset sets the trim offset in degrees.
+func (n *TrimNode) SetOffset(v float64) error { return n.offset.SetStaticValue(v) }
+
+// Properties returns the escape-hatch β view.
+func (n *TrimNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Trim Paths",
+		streams: map[string]any{
+			"Start":  n.start,
+			"End":    n.end,
+			"Offset": n.offset,
+		},
+	}
 }
 
 // StrokeLineCap is the stroke end-cap style (`ADBE Vector Stroke Line Cap`).

@@ -49,6 +49,9 @@ var v22ShapeGradFillBodyBytes []byte
 //go:embed templates/v2_2_shape_gradstroke_body.bin
 var v22ShapeGradStrokeBodyBytes []byte
 
+//go:embed templates/v2_2_shape_trim_body.bin
+var v22ShapeTrimBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -81,6 +84,10 @@ var (
 	v22ShapeGradStrokeOnce  sync.Once
 	v22ShapeGradStrokeCache *rifx.Chunk
 	v22ShapeGradStrokeErr   error
+
+	v22ShapeTrimOnce  sync.Once
+	v22ShapeTrimCache *rifx.Chunk
+	v22ShapeTrimErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -248,6 +255,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindGroup:          "ADBE Vector Group",
 	ShapeKindGradientFill:   "ADBE Vector Graphic - G-Fill",
 	ShapeKindGradientStroke: "ADBE Vector Graphic - G-Stroke",
+	ShapeKindTrim:           "ADBE Vector Filter - Trim",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -278,6 +286,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerGradientFillNode(node, ctx)
 	case *GradientStrokeNode:
 		return lowerGradientStrokeNode(node, ctx)
+	case *TrimNode:
+		return lowerTrimNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -769,6 +779,52 @@ func lowerGradientStrokeNode(n *GradientStrokeNode, _ *lowerCtx) (*rifx.Chunk, e
 		return nil, err
 	}
 	return lowerGradientStops(body, n.Gradient()), nil
+}
+
+// cloneShapeTrimBody returns a clone of the Trim Paths template
+// (templates/v2_2_shape_trim_body.bin). The body carries the Start / End /
+// Offset cdat slots (Trim Type was AE-default and elided — no slot).
+func cloneShapeTrimBody() (*rifx.Chunk, error) {
+	v22ShapeTrimOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeTrimBodyBytes))
+		if err != nil {
+			v22ShapeTrimErr = fmt.Errorf("parse v22ShapeTrimBodyBytes: %w", err)
+			return
+		}
+		v22ShapeTrimCache = ch
+	})
+	if v22ShapeTrimErr != nil {
+		return nil, v22ShapeTrimErr
+	}
+	return cloneChunk(v22ShapeTrimCache), nil
+}
+
+// lowerTrimNode emits a Trim Paths filter body from the embedded template,
+// overwriting the Start / End / Offset cdat slots with runtime values. Start /
+// End are raw percentages (0..100), Offset is raw degrees — all float64 BE at
+// cdat[0:8], identical to the other shape scalars (RE'd from v2_2_trim.aep).
+//
+// Static → cdat overwrite; animated → the cdat flips to a 1D non-spatial
+// keyframe container (same injectAnimatedStream path as Rect Roundness / Fill
+// Opacity), so the line-draw reveal (keyframed End 0→100) persists.
+//
+// Trim Type (Simultaneously/Individually) stays at the embed default — AE
+// elided it in the source fixture so there is no slot to overwrite.
+func lowerTrimNode(n *TrimNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeTrimBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Trim Start", n.Start(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Trim End", n.End(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Trim Offset", n.Offset(), ctx); err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 // overwriteGradientStopsXML finds the tdmn matching streamName inside body,
