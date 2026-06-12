@@ -277,6 +277,8 @@ type FootageWriter interface {
 	SetPath(string) error
 	SetComment(string) error
 	SetLabel(uint8) error
+	SetSolidColor([3]float64) error
+	SetSolidSize(width, height uint16) error
 
 	// SspcData exposes the live sspc Data slice so the scene footage
 	// convenience accessors (FootageMissing / HasAudio / StartFrame /

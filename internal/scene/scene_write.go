@@ -3,6 +3,7 @@ package scene
 import (
 	"fmt"
 	"io"
+	"math"
 	"path/filepath"
 	"strings"
 )
@@ -52,6 +53,55 @@ func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
 //
 // Returns an error if no writable path chunk exists for this footage
 // (e.g. solids and placeholders never had one).
+// SetSolidColor sets a solid footage item's color (RGB, each channel 0..1 —
+// alpha is pinned to 1.0, matching AE). length-preserving: the value lives
+// inside the fixed-size opti "Soli" chunk. Every layer using this solid
+// changes color, exactly like editing the solid's settings in AE. The byte
+// patch is the one the AE-2020/2025 ship-gated NewSolidLayer path applies;
+// here it is exposed as a standalone setter for parsed solids.
+//
+// Returns an error when the footage is not a solid or the channel values are
+// out of range.
+func (f *Footage) SetSolidColor(rgb [3]float64) error {
+	if !f.IsSolid {
+		return fmt.Errorf("footage %d (%q): not a solid", f.ID, f.Name)
+	}
+	for i, v := range rgb {
+		if math.IsNaN(v) || v < 0 || v > 1 {
+			return fmt.Errorf("footage %d (%q): color[%d]=%v out of range 0..1", f.ID, f.Name, i, v)
+		}
+	}
+	if f.back == nil {
+		return fmt.Errorf("footage %d (%q): built outside the parser (no chunk back-refs)", f.ID, f.Name)
+	}
+	if err := f.back.SetSolidColor(rgb); err != nil {
+		return err
+	}
+	f.SolidColor = rgb
+	return nil
+}
+
+// SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each,
+// AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc
+// chunk. Layers using the solid are not repositioned (same as resizing a
+// solid in AE's settings dialog). Same gate lineage as SetSolidColor.
+func (f *Footage) SetSolidSize(width, height int) error {
+	if !f.IsSolid {
+		return fmt.Errorf("footage %d (%q): not a solid", f.ID, f.Name)
+	}
+	if width < 1 || width > 30000 || height < 1 || height > 30000 {
+		return fmt.Errorf("footage %d (%q): dimensions %dx%d out of range 1..30000", f.ID, f.Name, width, height)
+	}
+	if f.back == nil {
+		return fmt.Errorf("footage %d (%q): built outside the parser (no chunk back-refs)", f.ID, f.Name)
+	}
+	if err := f.back.SetSolidSize(uint16(width), uint16(height)); err != nil {
+		return err
+	}
+	f.Width, f.Height = uint16(width), uint16(height)
+	return nil
+}
+
 func (f *Footage) SetPath(newPath string) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", f.ID, f.Name)

@@ -1,7 +1,9 @@
 package serializer
 
 import (
+	"encoding/binary"
 	"fmt"
+	"math"
 
 	"github.com/example/aep-parser/internal/rifx"
 	"github.com/example/aep-parser/internal/scene"
@@ -68,6 +70,36 @@ func (b *footageBackrefs) SspcData() []byte {
 		return nil
 	}
 	return b.sspcChunk.Data
+}
+
+// SetSolidColor patches the solid's RGB into the opti "Soli" chunk
+// (@0x0A ARGB 4×float32 BE, alpha pinned to 1.0) — the same length-preserving
+// byte patch the ship-gated NewSolidLayer create path applies.
+func (b *footageBackrefs) SetSolidColor(rgb [3]float64) error {
+	if b == nil || b.optiChunk == nil || len(b.optiChunk.Data) < optiSoliName {
+		return fmt.Errorf("footage %d (%q): no opti Soli chunk to hold a solid color", b.itemID, b.itemName)
+	}
+	d := b.optiChunk.Data
+	putF32 := func(off int, v float64) {
+		binary.BigEndian.PutUint32(d[off:off+4], math.Float32bits(float32(v)))
+	}
+	putF32(optiSoliColorA, 1)
+	putF32(optiSoliColorR, rgb[0])
+	putF32(optiSoliColorG, rgb[1])
+	putF32(optiSoliColorB, rgb[2])
+	return nil
+}
+
+// SetSolidSize patches the solid's pixel dimensions into sspc @0x20/@0x24
+// (u16 BE) — same length-preserving patch as the NewSolidLayer create path.
+func (b *footageBackrefs) SetSolidSize(width, height uint16) error {
+	if b == nil || b.sspcChunk == nil || len(b.sspcChunk.Data) < sspcHeightOff+2 {
+		return fmt.Errorf("footage %d (%q): no sspc chunk to hold solid dimensions", b.itemID, b.itemName)
+	}
+	sd := b.sspcChunk.Data
+	binary.BigEndian.PutUint16(sd[sspcWidthOff:sspcWidthOff+2], width)
+	binary.BigEndian.PutUint16(sd[sspcHeightOff:sspcHeightOff+2], height)
+	return nil
 }
 
 func (b *footageBackrefs) SetPath(newPath string) error {

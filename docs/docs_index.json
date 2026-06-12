@@ -1004,15 +1004,28 @@
       "file": "footage.md",
       "anchor": "#footagesetpath",
       "signature": "func (f *Footage) SetPath(newPath string) error",
-      "example": true,
+      "example": true
+    },
+    "Footage.SetSolidColor": {
+      "kind": "method",
+      "file": "footage.md",
+      "anchor": "#footagesetsolidcolor",
+      "signature": "func (f *Footage) SetSolidColor(rgb [3]float64) error",
       "summary": "SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's \"fullpath\" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path."
+    },
+    "Footage.SetSolidSize": {
+      "kind": "method",
+      "file": "footage.md",
+      "anchor": "#footagesetsolidsize",
+      "signature": "func (f *Footage) SetSolidSize(width, height int) error",
+      "summary": "SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog). Same gate lineage as SetSolidColor."
     },
     "Footage.SolidColor": {
       "kind": "field",
       "file": "footage.md",
       "anchor": "#footagesolidcolor",
       "signature": "SolidColor [3]float64",
-      "rw": "read-only",
+      "rw": "read-write",
       "summary": "SolidColor is the solid's RGB color in 0..1 (only meaningful when IsSolid; parsed from the opti \"Soli\" chunk, alpha is always 1.0)."
     },
     "Footage.SspcData": {
