@@ -37,9 +37,9 @@ last_updated: 2026-06-12
 - 遗留：anchor/scale 未参数化（child≠1920×1080 需手设 transform）· collapse transformation / time-remap 未做 · 多层嵌套（祖孙）未单独 gate（cycle guard 已覆逻辑）。
 
 ### S5 — 零散质感件（按需）
-- Repeater（`ADBE Vector Filter - Repeater`）：径向/网格复制，MG 高频。
-- Gradient Start/End Pt：现模板 elided → 只有默认水平 ramp，方向不可控（orbit BG 已暴露）。
-- Rounded Corners / Merge Paths / 文本动画器（大坑，单列）。
+- **Repeater（`ADBE Vector Filter - Repeater`）✅ DONE 2026-06-12**：径向/网格复制，MG 高频。套 S3 trim 矢量滤镜 vein（顶层 Copies/Offset + 嵌套 Transform 子组 findGroupBody descend）。`AddRepeater`/`RepeaterNode`。✅ `TestMGRepeater_AEShipGate_*` 双版本渲染像素 PASS（Copies=5 + Position[300,0] → 5 点成行、间隙暗、resave 读回）。坑：match-name `ADBE Vector Repeater Anchor`（非 Anchor Point）。详 `incidents/trim-paths-vector-filter-re.md` § 复用确认。
+- Gradient Start/End Pt：现模板 elided → 只有默认水平 ramp，方向不可控（orbit BG 已暴露）。**未做**。
+- Rounded Corners / Merge Paths / Offset Paths / ZigZag（同矢量滤镜 vein，蓝本已三次验证）/ 文本动画器（大坑，单列）。**未做**。
 
 ## 不做 / 边界
 

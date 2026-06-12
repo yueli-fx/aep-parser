@@ -1,7 +1,7 @@
 ---
 status: active
-when_to_read: implementing or extending Trim Paths (AddTrim/TrimNode) or any other shape vector-filter (Repeater / Merge / Offset / Round Corners / ZigZag); needing the shape-stack render order (why trim cuts the stroke) or AE's ellipse path start vertex / winding; deciding from-scratch vs embed-template for a new shape filter; reasoning about which trim sub-streams AE elides
-applies_to: [trim-paths, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, trim-start, trim-end, trim-offset, trim-type, shape-stack-order, ellipse-path-winding, embed-template, lower-shape-node, mg-roadmap, s3, ship-gate, ae2020, ae2025, render-pixel]
+when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Merge / Offset / Round Corners / ZigZag) via AddTrim/AddRepeater/TrimNode/RepeaterNode; needing the shape-stack render order (why a filter cuts/duplicates the shapes) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim match-name that returns null
+applies_to: [trim-paths, repeater, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, shape-stack-order, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
 last_updated: 2026-06-12
 resolved_by:
 ---
@@ -46,3 +46,18 @@ trim End resave 读回 50/100 存活。verify_mg_trim.jsx + mg_trim_shipgate_tes
 
 Repeater / Merge Paths / Offset Paths / Round Corners / ZigZag 都是同类矢量滤镜节点——预期同 vein：
 probe match-name → 抽 body 模板 → clone+cdat 覆写。唯一变量是各自的子流集合与 elision 边界（先用 all-non-default fixture 逼 AE 不 elide）。
+
+## 复用确认 — Repeater（S5, 2026-06-12）✅ 蓝本成立
+
+`ADBE Vector Filter - Repeater` 一刀套上述 vein 落地（`AddRepeater`/`RepeaterNode`，`templates/v2_2_shape_repeater_body.bin`）。body 结构（gen_shape_repeater.jsx RE）：
+- **顶层 1D**：`ADBE Vector Repeater Copies`（f64 raw count）+ `ADBE Vector Repeater Offset`（起始 copy index）→ `lowerShapeScalar`（含 animated）。
+- **`ADBE Vector Repeater Order`（Composite enum）默认 elide 无 slot**——未建模（同 Trim Type）。
+- **嵌套 `ADBE Vector Repeater Transform`（tdgp 子组）**：descend 经 `findGroupBody`（同 Stroke Taper/Wave），内含 Anchor/Position/Scale（Vec2 @cdat[0:16]）+ Rotation/Opacity 1/Opacity 2（1D @cdat[0:8]）→ `overwriteShapeStreamCdat` 静态覆写。
+
+两个 Repeater 专属坑：
+1. **match-name 是 `ADBE Vector Repeater Anchor`，不是 `...Anchor Point`**（JSX setValue 用错名 → `property()` 返 null → 「null 不是对象」）。Position/Scale/Rotation/Opacity 1/Opacity 2 名如其字。
+2. **probe JSX 递归进 Transform 子组时 `"" + pr.value` 对 Vec2 数组抛「数字结果无效（除以零？）」**（valueOf 数值转换陷阱，[[effect-param-elision-synthesis-lite]] finding 4 同源）——dump 数组值必须 `value.join(",")`，否则抛在 save 之前 → 整个 fixture 没存成。
+
+Gate：`TestMGRepeater_AEShipGate_AE2020/2025` PASS——一个白点 Copies=5 + Transform Position=[300,0] → 渲染帧 5 个点在 x=360..1560、4 个间隙全暗；Copies/Position resave 读回。verify_mg_repeater.jsx + mg_repeater_shipgate_test.go。
+
+→ 蓝本三步（probe→抽 body→cdat 覆写）+ 「nested 组用 findGroupBody descend」对带子组的滤镜成立；Merge/Offset/Round/ZigZag 照此推进。
