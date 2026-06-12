@@ -147,12 +147,13 @@ func runSetTextGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 // (collapsing the run array 2→1), and proves AE accepts the result, reads the
 // new text, and resaves a single-run document.
 //
-// AE 2025 only: the fixture needs characterRange (AE 24+) to hold two runs, so
-// it is AE-25-stamped and AE 2020 refuses to open it at all (forward-incompat,
-// independent of our bytes). There is no AE 2020 scripting path to a multi-run
-// doc, so a 2020-openable variant can't be automated. The run-array rebuild
-// mechanism itself (buildEntryArray) is already double-version-proven via the
-// paragraph case in runSetTextGate (T3 passes on both AE 2020 and AE 2025).
+// AE 2024 + AE 2025: the fixture needs characterRange (AE 24+) to hold two
+// runs, so it is AE-24-stamped — openable by AE 2024 (native) and AE 2025
+// (backward-compat). AE 2020 refuses it outright (forward-incompat, independent
+// of our bytes), and AE 2020 has no scripting path to a multi-run doc anyway,
+// so a 2020-openable variant can't be automated; buildEntryArray is separately
+// double-version-proven via the paragraph case in runSetTextGate (T3 passes on
+// both AE 2020 and AE 2025).
 func runSetTextMultiRunGate(t *testing.T, aeExe, ver string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
@@ -193,6 +194,10 @@ func TestSetTextVariable_AEShipGate_AE2020(t *testing.T) {
 
 func TestSetTextVariable_AEShipGate_AE2025(t *testing.T) {
 	runSetTextGate(t, aep.TargetAE2025, ae2025(), "AE2025")
+}
+
+func TestSetTextMultiRun_AEShipGate_AE2024(t *testing.T) {
+	runSetTextMultiRunGate(t, ae2024(), "AE2024")
 }
 
 func TestSetTextMultiRun_AEShipGate_AE2025(t *testing.T) {

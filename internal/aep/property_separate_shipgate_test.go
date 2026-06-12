@@ -170,6 +170,13 @@ func ae2025() string {
 	return `E:/adobe/Adobe After Effects 2025/Support Files/AfterFX.exe`
 }
 
+func ae2024() string {
+	if e := os.Getenv("AE2024_EXE"); e != "" {
+		return e
+	}
+	return `E:/adobe/Adobe After Effects 2024/Support Files/AfterFX.exe`
+}
+
 func TestSeparateDims_AEShipGate_AE2020(t *testing.T) {
 	runSepDimShipGate(t, ae2020(), "../../test_data/re_separate_dims_before.aep", true, true)
 }
