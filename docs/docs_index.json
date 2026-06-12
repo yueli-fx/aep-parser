@@ -1018,7 +1018,7 @@
       "file": "footage.md",
       "anchor": "#footagesetsolidsize",
       "signature": "func (f *Footage) SetSolidSize(width, height int) error",
-      "summary": "SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog). Same gate lineage as SetSolidColor."
+      "summary": "SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog)."
     },
     "Footage.SolidColor": {
       "kind": "field",

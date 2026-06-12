@@ -289,9 +289,11 @@ func (f *Footage) SetSolidColor(rgb [3]float64) error
 
 SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's "fullpath" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path.
 
-Returns an error if no writable path chunk exists for this footage (e.g. solids and placeholders never had one). SetSolidColor sets a solid footage item's color (RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE). length-preserving: the value lives inside the fixed-size opti "Soli" chunk. Every layer using this solid changes color, exactly like editing the solid's settings in AE. The byte patch is the one the AE-2020/2025 ship-gated NewSolidLayer path applies; here it is exposed as a standalone setter for parsed solids.
+Returns an error if no writable path chunk exists for this footage (e.g. solids and placeholders never had one). SetSolidColor sets a solid footage item's color (RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE). length-preserving: the value lives inside the fixed-size opti "Soli" chunk. Every layer using this solid changes color, exactly like editing the solid's settings in AE.
 
 Returns an error when the footage is not a solid or the channel values are out of range.
+
+Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a parsed solid (AE reads the new color via SolidSource.color and keeps it across its own resave); the byte patch is also the one the ship-gated NewSolidLayer create path applies.
 
 ### Footage.SetSolidSize
 
@@ -299,4 +301,6 @@ Returns an error when the footage is not a solid or the channel values are out o
 func (f *Footage) SetSolidSize(width, height int) error
 ```
 
-SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog). Same gate lineage as SetSolidColor.
+SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog).
+
+Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a parsed solid (AE reads the new dimensions via FootageItem.width/height and keeps them across its own resave), same gate as SetSolidColor.

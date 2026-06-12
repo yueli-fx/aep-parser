@@ -729,7 +729,7 @@ func (c *Composition) SetMotionGraphicsTemplateName(name string) error
 
 SetMotionGraphicsTemplateName renames the comp's Motion Graphics template — mirrors AE's CompItem.motionGraphicsTemplateName setter. The name is rewritten in every persisted panel generation (AE stores three: CIFO, CIF2, CIF3, each holding the name twice). length-variable: WriteAEP recomputes parent LIST sizes. Returns an error for an empty name, or when the comp has no Essential Graphics panel shell (comps saved by AE — and comps created by NewComposition — always have one).
 
-Alpha — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty gate: the renamed template reads back via the scripting API and survives AE's own resave).
+Stable — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty gate: the renamed template reads back via the scripting API and survives AE's own resave); promoted from Alpha in the 2026-06-12 audit batch.
 
 ### Composition.SetName
 

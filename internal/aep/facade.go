@@ -706,9 +706,10 @@ func SupportedEffects() []string { return serializer.SupportedEffects() }
 // mutation: snapshot value-group chunk children + flat Parameters + warnings;
 // roll back on any parser warning or value-encode failure.
 //
-// Alpha / structural — AE 2020 + AE 2025 ship-gate green (per-param and
+// Stable / structural — AE 2020 + AE 2025 ship-gate green (per-param and
 // generic materialization, values read back on open and after AE's own
-// resave). Free function (CLAUDE.md #2 structural-op call-form).
+// resave); promoted from Alpha in the 2026-06-12 audit batch. Free function
+// (CLAUDE.md #2 structural-op call-form).
 func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error) {
 	return serializer.SetEffectParam(layer, fx, paramMatchName, value)
 }
@@ -755,11 +756,11 @@ func SupportedEffectParams() []string { return serializer.SupportedEffectParams(
 // controller list) is snapshotted; the panel is re-decoded after commit and
 // any mismatch or parser warning rolls everything back.
 //
-// Alpha / structural — AE 2020 + AE 2025 ship-gate green on an all-Go-built
+// Stable / structural — AE 2020 + AE 2025 ship-gate green on an all-Go-built
 // project (file accepted, panel read back via the scripting API, controller
 // identity preserved across AE's own resave; the gate also covers
-// SetMotionGraphicsTemplateName). Alpha pending use-case accumulation. Free
-// function (CLAUDE.md #2 structural-op call-form).
+// SetMotionGraphicsTemplateName); promoted from Alpha in the 2026-06-12 audit
+// batch. Free function (CLAUDE.md #2 structural-op call-form).
 func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error) {
 	return serializer.AddEssentialProperty(layer, fx, paramMatchName, displayName)
 }
@@ -814,12 +815,12 @@ func RemoveEffect(layer *Layer, index int) error { return serializer.RemoveEffec
 // back-ref-correct *Mask (its Set* setters work immediately); roll back on any
 // parser warning.
 //
-// Alpha / structural — AE 2020 + AE 2025 ship-gate green (4/4: AE-native
+// Stable / structural — AE 2020 + AE 2025 ship-gate green (4/4: AE-native
 // fixture splice next to an existing Effect Parade, plus a 100% Go-built
 // project; open + closed paths; AE reads names / modes / vertices back
-// exactly and keeps the masks across its own resave). Alpha until usage
-// accumulates (SetEffectParam precedent). Free function (CLAUDE.md #2
-// structural-op call-form).
+// exactly and keeps the masks across its own resave); promoted from Alpha in
+// the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op
+// call-form).
 func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 	return serializer.AddMask(layer, name, path)
 }

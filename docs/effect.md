@@ -130,7 +130,7 @@ Values use the property's on-disk (StaticValue) encoding — the same units a pa
 
 The materialized stream carries no tdpi host binding (only the always-present -0000 stream does), so no retarget is needed. Atomic mutation: snapshot value-group chunk children + flat Parameters + warnings; roll back on any parser warning or value-encode failure.
 
-Alpha / structural — AE 2020 + AE 2025 ship-gate green (per-param and generic materialization, values read back on open and after AE's own resave). Free function (CLAUDE.md #2 structural-op call-form).
+Stable / structural — AE 2020 + AE 2025 ship-gate green (per-param and generic materialization, values read back on open and after AE's own resave); promoted from Alpha in the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op call-form).
 
 ### SupportedEffectParams
 

@@ -71,9 +71,9 @@ type EssentialGraphicsController struct {
 // no Essential Graphics panel shell (comps saved by AE — and comps created by
 // NewComposition — always have one).
 //
-// Alpha — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty
+// Stable — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty
 // gate: the renamed template reads back via the scripting API and survives
-// AE's own resave).
+// AE's own resave); promoted from Alpha in the 2026-06-12 audit batch.
 func (c *Composition) SetMotionGraphicsTemplateName(name string) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)
