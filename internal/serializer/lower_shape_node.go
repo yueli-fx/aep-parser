@@ -52,6 +52,9 @@ var v22ShapeGradStrokeBodyBytes []byte
 //go:embed templates/v2_2_shape_trim_body.bin
 var v22ShapeTrimBodyBytes []byte
 
+//go:embed templates/v2_2_shape_repeater_body.bin
+var v22ShapeRepeaterBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -88,6 +91,10 @@ var (
 	v22ShapeTrimOnce  sync.Once
 	v22ShapeTrimCache *rifx.Chunk
 	v22ShapeTrimErr   error
+
+	v22ShapeRepeaterOnce  sync.Once
+	v22ShapeRepeaterCache *rifx.Chunk
+	v22ShapeRepeaterErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -256,6 +263,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindGradientFill:   "ADBE Vector Graphic - G-Fill",
 	ShapeKindGradientStroke: "ADBE Vector Graphic - G-Stroke",
 	ShapeKindTrim:           "ADBE Vector Filter - Trim",
+	ShapeKindRepeater:       "ADBE Vector Filter - Repeater",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -288,6 +296,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerGradientStrokeNode(node, ctx)
 	case *TrimNode:
 		return lowerTrimNode(node, ctx)
+	case *RepeaterNode:
+		return lowerRepeaterNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -823,6 +833,56 @@ func lowerTrimNode(n *TrimNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Trim Offset", n.Offset(), ctx); err != nil {
 		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapeRepeaterBody returns a clone of the Repeater template
+// (templates/v2_2_shape_repeater_body.bin): top-level Copies/Offset cdat slots
+// + a nested `ADBE Vector Repeater Transform` group (Anchor/Position/Scale/
+// Rotation/Opacity 1·2). Order (Composite) was AE-default and elided.
+func cloneShapeRepeaterBody() (*rifx.Chunk, error) {
+	v22ShapeRepeaterOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeRepeaterBodyBytes))
+		if err != nil {
+			v22ShapeRepeaterErr = fmt.Errorf("parse v22ShapeRepeaterBodyBytes: %w", err)
+			return
+		}
+		v22ShapeRepeaterCache = ch
+	})
+	if v22ShapeRepeaterErr != nil {
+		return nil, v22ShapeRepeaterErr
+	}
+	return cloneChunk(v22ShapeRepeaterCache), nil
+}
+
+// lowerRepeaterNode emits a Repeater filter body from the embedded template.
+// Top-level Copies/Offset are 1D scalars (static cdat overwrite / animated flip
+// via lowerShapeScalar). The per-copy Transform sub-streams live in the nested
+// `ADBE Vector Repeater Transform` group (descend via findGroupBody) and are
+// static cdat overwrites (Anchor/Position/Scale are Vec2 at cdat[0:16],
+// Rotation/Opacity 1·2 are 1D at cdat[0:8]) — same mechanism as Stroke
+// Taper/Wave. RE'd from v2_2_repeater.aep.
+func lowerRepeaterNode(n *RepeaterNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeRepeaterBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Repeater Copies", n.Copies(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Repeater Offset", n.Offset(), ctx); err != nil {
+		return nil, err
+	}
+	if xf := findGroupBody(body, "ADBE Vector Repeater Transform"); xf != nil {
+		t := n.Transform()
+		a, p, s := t.Anchor(), t.Position(), t.Scale()
+		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Anchor", encodeF64sBE(a[0], a[1]))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Position", encodeF64sBE(p[0], p[1]))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Scale", encodeF64sBE(s[0], s[1]))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Rotation", encodeF64sBE(t.Rotation()))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Opacity 1", encodeF64sBE(t.StartOpacity()))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Opacity 2", encodeF64sBE(t.EndOpacity()))
 	}
 	return body, nil
 }

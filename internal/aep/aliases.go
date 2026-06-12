@@ -119,6 +119,8 @@ type (
 	StrokeDashes                    = scene.StrokeDashes
 	StrokeLineCap                   = scene.StrokeLineCap
 	StrokeLineJoin                  = scene.StrokeLineJoin
+	RepeaterNode                    = scene.RepeaterNode
+	RepeaterTransform               = scene.RepeaterTransform
 	StrokeNode                      = scene.StrokeNode
 	StrokeTaper                     = scene.StrokeTaper
 	TrimNode                        = scene.TrimNode
@@ -431,6 +433,10 @@ func NewStrokeNode() *StrokeNode { return scene.NewStrokeNode() }
 // NewTrimNode returns a detached Trim Paths filter node (identity: Start=0,
 // End=100, Offset=0).
 func NewTrimNode() *TrimNode { return scene.NewTrimNode() }
+
+// NewRepeaterNode returns a detached Repeater filter node (3 copies, identity
+// transform).
+func NewRepeaterNode() *RepeaterNode { return scene.NewRepeaterNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }

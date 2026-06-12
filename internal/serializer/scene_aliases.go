@@ -119,6 +119,7 @@ type (
 	StrokeDashes                    = scene.StrokeDashes
 	StrokeLineCap                   = scene.StrokeLineCap
 	StrokeLineJoin                  = scene.StrokeLineJoin
+	RepeaterNode                    = scene.RepeaterNode
 	StrokeNode                      = scene.StrokeNode
 	TrimNode                        = scene.TrimNode
 	StrokeTaper                     = scene.StrokeTaper
@@ -356,6 +357,7 @@ const (
 	ShapeKindRect                                 = scene.ShapeKindRect
 	ShapeKindStroke                               = scene.ShapeKindStroke
 	ShapeKindTrim                                 = scene.ShapeKindTrim
+	ShapeKindRepeater                             = scene.ShapeKindRepeater
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

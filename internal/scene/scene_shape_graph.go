@@ -23,7 +23,8 @@ const (
 	ShapeKindGradientFill                        // `ADBE Vector Graphic - G-Fill`
 	ShapeKindGradientStroke                      // `ADBE Vector Graphic - G-Stroke`
 	ShapeKindTrim                                // `ADBE Vector Filter - Trim`
-	// V2.3+ candidates: PolyStar / Merge / Repeater / Transform.
+	ShapeKindRepeater                            // `ADBE Vector Filter - Repeater`
+	// V2.3+ candidates: PolyStar / Merge / Transform.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
@@ -534,6 +535,17 @@ func (g *VectorGroup) AddTrim() (*TrimNode, error) {
 	return n, nil
 }
 
+// AddRepeater appends a default-valued RepeaterNode (3 copies, identity
+// transform) and returns it. A Repeater duplicates the preceding paths N times,
+// applying its Transform (position offset / rotation / scale / opacity falloff)
+// cumulatively per copy — the canonical radial-burst / grid MG primitive. Place
+// it AFTER the shapes it should duplicate (render order).
+func (g *VectorGroup) AddRepeater() (*RepeaterNode, error) {
+	n := NewRepeaterNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -584,6 +596,117 @@ func (n *TrimNode) Properties() *PropertyGroup {
 		streams: map[string]any{
 			"Start":  n.start,
 			"End":    n.end,
+			"Offset": n.offset,
+		},
+	}
+}
+
+// RepeaterNode — `ADBE Vector Filter - Repeater` (Repeater). Duplicates the
+// preceding paths `Copies` times, applying `Transform` cumulatively per copy.
+// `Copies` and `Offset` (which copy index the first instance starts at) are
+// animatable scalars; the Transform (Anchor/Position/Scale/Rotation + Start/End
+// Opacity) is static, modeled like StrokeTaper. `Order` (Composite — copies
+// above/below) is AE-default (elided) and not modeled.
+type RepeaterNode struct {
+	copies    *codec.PropertyStream[float64]
+	offset    *codec.PropertyStream[float64]
+	transform *RepeaterTransform
+}
+
+// RepeaterTransform models the Repeater's nested `ADBE Vector Repeater
+// Transform` group: the per-copy transform applied cumulatively. Anchor /
+// Position / Scale are Vec2 (Scale in %); Rotation is degrees; Start/End
+// Opacity are % applied to the first/last copy with a linear falloff between.
+// All static (V2.2), stored as plain values like StrokeTaper.
+type RepeaterTransform struct {
+	anchor       [2]float64
+	position     [2]float64
+	scale        [2]float64
+	rotation     float64
+	startOpacity float64
+	endOpacity   float64
+}
+
+// NewRepeaterNode constructs a default RepeaterNode: 3 copies, offset 0,
+// identity transform (anchor [0,0], position [0,0], scale [100,100], rotation
+// 0, start/end opacity 100).
+func NewRepeaterNode() *RepeaterNode {
+	n := &RepeaterNode{
+		copies: codec.NewPropertyStream[float64](),
+		offset: codec.NewPropertyStream[float64](),
+		transform: &RepeaterTransform{
+			scale:        [2]float64{100, 100},
+			startOpacity: 100,
+			endOpacity:   100,
+		},
+	}
+	_ = n.copies.SetStaticValue(3)
+	_ = n.offset.SetStaticValue(0)
+	return n
+}
+
+func (n *RepeaterNode) Kind() ShapeNodeKind              { return ShapeKindRepeater }
+func (n *RepeaterNode) Copies() *PropertyStream[float64] { return n.copies }
+func (n *RepeaterNode) Offset() *PropertyStream[float64] { return n.offset }
+
+// Transform returns the Repeater's per-copy Transform group.
+func (n *RepeaterNode) Transform() *RepeaterTransform { return n.transform }
+
+// SetCopies sets the number of copies (≥ 1).
+func (n *RepeaterNode) SetCopies(v float64) error {
+	if v < 1 {
+		return fmt.Errorf("RepeaterNode.SetCopies: %g out of range (want ≥ 1)", v)
+	}
+	return n.copies.SetStaticValue(v)
+}
+
+// SetOffset sets the copy-index offset of the first instance.
+func (n *RepeaterNode) SetOffset(v float64) error { return n.offset.SetStaticValue(v) }
+
+func (t *RepeaterTransform) Anchor() [2]float64    { return t.anchor }
+func (t *RepeaterTransform) Position() [2]float64  { return t.position }
+func (t *RepeaterTransform) Scale() [2]float64     { return t.scale }
+func (t *RepeaterTransform) Rotation() float64     { return t.rotation }
+func (t *RepeaterTransform) StartOpacity() float64 { return t.startOpacity }
+func (t *RepeaterTransform) EndOpacity() float64   { return t.endOpacity }
+
+// SetAnchor sets the per-copy anchor point (px).
+func (t *RepeaterTransform) SetAnchor(v [2]float64) error { t.anchor = v; return nil }
+
+// SetPosition sets the per-copy position offset (px) — the spacing between
+// copies. The MG grid/line knob.
+func (t *RepeaterTransform) SetPosition(v [2]float64) error { t.position = v; return nil }
+
+// SetScale sets the per-copy scale (%). Cumulative: copy k is scaled k times.
+func (t *RepeaterTransform) SetScale(v [2]float64) error { t.scale = v; return nil }
+
+// SetRotation sets the per-copy rotation (degrees) — the radial-burst knob.
+func (t *RepeaterTransform) SetRotation(v float64) error { t.rotation = v; return nil }
+
+// SetStartOpacity sets the first copy's opacity (%, 0..100).
+func (t *RepeaterTransform) SetStartOpacity(v float64) error {
+	if v < 0 || v > 100 {
+		return fmt.Errorf("SetStartOpacity: %g out of range 0..100", v)
+	}
+	t.startOpacity = v
+	return nil
+}
+
+// SetEndOpacity sets the last copy's opacity (%, 0..100) — falloff to End.
+func (t *RepeaterTransform) SetEndOpacity(v float64) error {
+	if v < 0 || v > 100 {
+		return fmt.Errorf("SetEndOpacity: %g out of range 0..100", v)
+	}
+	t.endOpacity = v
+	return nil
+}
+
+// Properties returns the escape-hatch β view.
+func (n *RepeaterNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Repeater",
+		streams: map[string]any{
+			"Copies": n.copies,
 			"Offset": n.offset,
 		},
 	}
