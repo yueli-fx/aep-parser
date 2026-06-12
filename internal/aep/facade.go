@@ -720,6 +720,50 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 // already-present params are settable regardless.
 func SupportedEffectParams() []string { return serializer.SupportedEffectParams() }
 
+// AddEssentialProperty exposes one parameter of an effect on layer in the
+// owning composition's Essential Graphics panel — mirrors AE's
+// "addProperty to Essential Graphics" / Property.addToMotionGraphicsTemplate.
+// Returns the new controller (Name / Type / UUID), also appended to
+// Composition.EssentialGraphicsControllers.
+//
+// displayName is the controller's panel label; empty → the parameter's own
+// display name. Supported parameter control types in this first slice:
+// scalar / slider (EG slider controller, min/max from the pard definition),
+// boolean (checkbox), and color (color controller — requires the parameter
+// to have a materialized non-default value, since AE stores no color default
+// in pard; set one first via SetEffectParam). Other types (point, dropdown,
+// text) return an error for now.
+//
+// Mechanics (RE 2026-06-12, three coordinated chunk sites):
+//   - The comp Item's three EG panel generations (CIFO/CIF2/CIF3 — AE keeps
+//     them byte-identical) each gain a LIST:CCtl entry (localized name,
+//     fresh v4 UUID, CTyp, type-keyed CVal/CDef[/Smin/Smax], and a CPrp
+//     property ref: comp item ID + host layer ID + a JSON matchName path
+//     whose element indexes are 0-based positions within the parent group,
+//     -1 for fixed groups) and a CcCt count bump.
+//   - The host layer's "ADBE Layer Overrides" parade triple (tdmn + OvG2 +
+//     tdgp; auto-created in AE-native empty form when the layer lacks it)
+//     gains an OvG2 CPrp uuid slot and an override value stream — a clone of
+//     the parameter's materialized tdbs, or a template materialization
+//     carrying the current value when the parameter is default-elided.
+//
+// Refused: layers built by the structural New* APIs that were never parsed
+// (no property tree — call aep.Reopen first), comps without the EG panel
+// shell, and parameters absent from the effect's pard definitions.
+//
+// Atomic mutation: every mutated site (3×CIF*, OvG2, override tdgp, scene
+// controller list) is snapshotted; the panel is re-decoded after commit and
+// any mismatch or parser warning rolls everything back.
+//
+// Alpha / structural — AE 2020 + AE 2025 ship-gate green on an all-Go-built
+// project (file accepted, panel read back via the scripting API, controller
+// identity preserved across AE's own resave; the gate also covers
+// SetMotionGraphicsTemplateName). Alpha pending use-case accumulation. Free
+// function (CLAUDE.md #2 structural-op call-form).
+func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error) {
+	return serializer.AddEssentialProperty(layer, fx, paramMatchName, displayName)
+}
+
 // RemoveEffect removes the effect at the given 0-based index from the layer's
 // Effect Parade — the inverse of AddEffect. It is a thin, index-validated
 // wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for

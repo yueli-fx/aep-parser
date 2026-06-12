@@ -70,6 +70,10 @@ type EssentialGraphicsController struct {
 // parent LIST sizes. Returns an error for an empty name, or when the comp has
 // no Essential Graphics panel shell (comps saved by AE — and comps created by
 // NewComposition — always have one).
+//
+// Alpha — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty
+// gate: the renamed template reads back via the scripting API and survives
+// AE's own resave).
 func (c *Composition) SetMotionGraphicsTemplateName(name string) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)

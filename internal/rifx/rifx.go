@@ -91,6 +91,17 @@ var (
 	IDCifO = ChunkID{'C', 'I', 'F', 'O'} // LIST formType: oldest EG panel generation; AE writes CIFO+CIF2+CIF3 with byte-identical content
 	IDCif2 = ChunkID{'C', 'I', 'F', '2'} // LIST formType: middle EG panel generation (see IDCifO)
 	IDCapS = ChunkID{'C', 'a', 'p', 'S'} // LIST formType: EG caption string (CsCt + CapL + Utf8 value, no locale — sibling of CpS2)
+	IDCsCt = ChunkID{'C', 's', 'C', 't'} // U4 little-endian: EG string count inside CpS2/CapS (observed 1)
+	IDCapL = ChunkID{'C', 'a', 'p', 'L'} // U4: EG caption locale selector (observed 0)
+	IDCcCt = ChunkID{'C', 'c', 'C', 't'} // U4 big-endian: EG controller count per CIF* generation
+	IDCprC = ChunkID{'C', 'p', 'r', 'C'} // U4: CPrp count — big-endian inside CCtl, little-endian inside OvG2 (observed)
+	IDCPrp = ChunkID{'C', 'P', 'r', 'p'} // LIST formType: EG property ref — in CCtl: CCId+CLId+Utf8 JSON path; in OvG2: bare Utf8 uuid
+	IDCCId = ChunkID{'C', 'C', 'I', 'd'} // U4 big-endian: EG ref comp item ID
+	IDCLId = ChunkID{'C', 'L', 'I', 'd'} // U4 big-endian: EG ref host layer ID
+	IDCVal = ChunkID{'C', 'V', 'a', 'l'} // EG controller current value (layout per CTyp: slider f64, checkbox u1, color 4xf32 RGBA, point 2xf64)
+	IDCDef = ChunkID{'C', 'D', 'e', 'f'} // EG controller default value (same layout as CVal)
+	IDSmin = ChunkID{'S', 'm', 'i', 'n'} // F8 big-endian: EG slider minimum
+	IDSmax = ChunkID{'S', 'm', 'a', 'x'} // F8 big-endian: EG slider maximum
 	IDCctl = ChunkID{'C', 'C', 't', 'l'} // LIST formType: one EG controller (CpS2 name + Utf8 uuid + CTyp type)
 	IDCpS2 = ChunkID{'C', 'p', 'S', '2'} // LIST formType: localized string (Utf8 value + locale)
 	IDCTyp = ChunkID{'C', 'T', 'y', 'p'} // U4: EG controller type (1=Checkbox 2=Slider 4=Color 5=Point 6=Text 8=Comment 9=MultiDim 10=Group 13=Dropdown)

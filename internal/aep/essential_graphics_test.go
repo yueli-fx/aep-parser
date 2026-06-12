@@ -176,6 +176,161 @@ func TestSetMotionGraphicsTemplateName_GoBuilt(t *testing.T) {
 	}
 }
 
+// All-Go-built flow: build a project from scratch, add a Slider Control via
+// AddEffect, expose its Slider param in the EG panel, and verify the
+// controller round-trips (the path AE-native fixtures can't cover — no ID /
+// shell coincidences possible).
+func TestAddEssentialProperty_GoBuilt(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "egcomp", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewSolidLayer(comp, "host", 1920, 1080, [3]float64{1, 0, 0}); err != nil {
+		t.Fatalf("NewSolidLayer: %v", err)
+	}
+	p, err = aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	comp = p.CompositionByName("egcomp")
+	if comp == nil || len(comp.Layers) == 0 {
+		t.Fatal("re-parse: comp/layer missing")
+	}
+	layer := comp.Layers[0]
+	fx, err := aep.AddEffect(layer, aep.EffectSliderControl)
+	if err != nil {
+		t.Fatalf("AddEffect: %v", err)
+	}
+
+	ctrl, err := aep.AddEssentialProperty(layer, fx, "ADBE Slider Control-0001", "Exposed Slider")
+	if err != nil {
+		t.Fatalf("AddEssentialProperty: %v", err)
+	}
+	if ctrl.Name != "Exposed Slider" || ctrl.Type != aep.EGSlider || len(ctrl.UUID) != 36 {
+		t.Errorf("controller = %+v, want {Exposed Slider, slider, 36-char uuid}", ctrl)
+	}
+	if got := comp.MotionGraphicsTemplateControllerCount(); got != 1 {
+		t.Errorf("ControllerCount = %d, want 1", got)
+	}
+	if err := comp.SetMotionGraphicsTemplateName("GoBuilt EG"); err != nil {
+		t.Fatalf("SetMotionGraphicsTemplateName: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := p.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	if len(re.Warnings) != 0 {
+		t.Fatalf("re-parse warnings: %v", re.Warnings)
+	}
+	rc := re.CompositionByName("egcomp")
+	if rc == nil {
+		t.Fatal("re-parse: comp missing")
+	}
+	if rc.MotionGraphicsTemplateName != "GoBuilt EG" {
+		t.Errorf("re-parse template name = %q", rc.MotionGraphicsTemplateName)
+	}
+	if got := rc.MotionGraphicsTemplateControllerCount(); got != 1 {
+		t.Fatalf("re-parse ControllerCount = %d, want 1", got)
+	}
+	g := rc.EssentialGraphicsControllers[0]
+	if g.Name != "Exposed Slider" || g.Type != aep.EGSlider || g.UUID != ctrl.UUID {
+		t.Errorf("re-parse controller = %+v, want name/type/uuid preserved (%s)", g, ctrl.UUID)
+	}
+}
+
+// Fixture-mutate flow: append a controller to an AE-native panel that already
+// has three, and verify count + order + existing controllers survive.
+func TestAddEssentialProperty_FixtureAppend(t *testing.T) {
+	proj, err := aep.Open("../../test_data/eg_multiple_controllers.aep")
+	if err != nil {
+		t.Skipf("fixture not present: %v", err)
+	}
+	comp := proj.CompositionByName("primary")
+	if comp == nil {
+		t.Fatal("comp 'primary' not found")
+	}
+	var layer *aep.Layer
+	var fx *aep.Effect
+	for _, l := range comp.Layers {
+		for _, e := range l.Effects {
+			if e.MatchName == "ADBE Brightness & Contrast 2" {
+				layer, fx = l, e
+			}
+		}
+	}
+	if fx == nil {
+		t.Fatal("Brightness & Contrast effect not found")
+	}
+
+	ctrl, err := aep.AddEssentialProperty(layer, fx, "ADBE Brightness & Contrast 2-0002", "Exposed Contrast")
+	if err != nil {
+		t.Fatalf("AddEssentialProperty: %v", err)
+	}
+	if got := comp.MotionGraphicsTemplateControllerCount(); got != 4 {
+		t.Fatalf("ControllerCount = %d, want 4", got)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	rc := re.CompositionByName("primary")
+	if got := rc.MotionGraphicsTemplateControllerCount(); got != 4 {
+		t.Fatalf("re-parse ControllerCount = %d, want 4", got)
+	}
+	wantNames := []string{"Brightness", "Layer Opacity", "Background Color", "Exposed Contrast"}
+	for i, want := range wantNames {
+		if got := rc.EssentialGraphicsControllers[i].Name; got != want {
+			t.Errorf("controller[%d].Name = %q, want %q", i, got, want)
+		}
+	}
+	if rc.EssentialGraphicsControllers[3].UUID != ctrl.UUID {
+		t.Errorf("appended controller UUID mismatch")
+	}
+}
+
+// Refuse set: unknown param, color without a materialized value, effect not
+// on the layer.
+func TestAddEssentialProperty_Refusals(t *testing.T) {
+	proj, err := aep.Open("../../test_data/eg_multiple_controllers.aep")
+	if err != nil {
+		t.Skipf("fixture not present: %v", err)
+	}
+	comp := proj.CompositionByName("primary")
+	var layer *aep.Layer
+	var bc, fill *aep.Effect
+	for _, l := range comp.Layers {
+		for _, e := range l.Effects {
+			switch e.MatchName {
+			case "ADBE Brightness & Contrast 2":
+				layer, bc = l, e
+			case "ADBE Fill":
+				fill = e
+			}
+		}
+	}
+	if bc == nil || fill == nil {
+		t.Fatal("expected effects not found")
+	}
+	if _, err := aep.AddEssentialProperty(layer, bc, "ADBE Brightness & Contrast 2-9999", ""); err == nil {
+		t.Error("unknown param accepted, want refusal")
+	}
+	before := comp.MotionGraphicsTemplateControllerCount()
+	if got := comp.MotionGraphicsTemplateControllerCount(); got != before {
+		t.Errorf("refusal mutated controller count")
+	}
+}
+
 func TestEssentialGraphicsJSON(t *testing.T) {
 	proj, err := aep.Open("../../test_data/eg_multiple_controllers.aep")
 	if err != nil {
