@@ -731,6 +731,13 @@
       "signature": "func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)",
       "summary": "DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). Returns the cloned *Layer on success, or an error if a refuse-case triggers."
     },
+    "DuplicateMask": {
+      "kind": "func",
+      "file": "mask.md",
+      "anchor": "#duplicatemask",
+      "signature": "func DuplicateMask(layer *Layer, m *Mask) (*Mask, error)",
+      "summary": "DuplicateMask inserts a copy of mask m immediately after it in layer's \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-ref)."
+    },
     "DuplicatePropertyGroup": {
       "kind": "func",
       "file": "property.md",

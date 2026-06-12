@@ -861,6 +861,32 @@ func RemoveMask(layer *Layer, m *Mask) error {
 	return serializer.RemoveMask(layer, m)
 }
 
+// DuplicateMask inserts a copy of mask m immediately after it in layer's "ADBE
+// Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and
+// returns the clone. m must be one of layer.Masks from a parsed project; pass
+// the layer it belongs to (masks carry no owning-layer back-ref).
+//
+// Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask
+// Atom", mkif, LIST:tdgp) triple, so the generic DuplicatePropertyGroup
+// refuses it (its tdgp is preceded by the mkif, not the tdmn). DuplicateMask
+// deep-clones all three chunks (opaque content rides along verbatim —
+// CLAUDE.md #5), bumps only the clone's internal mask index (mkif @0x08) to
+// max+1 so it stays unique, splices the clone in just after the source, and
+// re-parses it into a *Mask whose Set* setters work immediately. The clone
+// keeps the source's name, mode, color, inverted/locked flags and path.
+//
+// Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a
+// mask built outside the parser (no mkif back-ref), or a layer with no Mask
+// Parade.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green (add a mask,
+// duplicate it, AE accepts the cloned triple with a distinct internal index
+// and reads back both masks with geometry intact and the effects untouched).
+// Free function (CLAUDE.md #2 structural-op call-form).
+func DuplicateMask(layer *Layer, m *Mask) (*Mask, error) {
+	return serializer.DuplicateMask(layer, m)
+}
+
 // Effect match-name constants for AddEffect's built-in library. Use these
 // instead of hardcoding AE's internal match-name strings. The trailing comment
 // on each is the display name shown in AE's Effects panel.
