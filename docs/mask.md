@@ -399,6 +399,42 @@ const (
 )
 ```
 
+## Functions
+
+### AddMask
+
+```go
+func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)
+```
+
+AddMask appends a vector mask to the layer's "ADBE Mask Parade" and returns the parsed *Mask. The mask is created with the given display name (empty → "Mask N"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask).
+
+The path is parameterizable at creation time even though mutating an EXISTING mask's path is refused (structural write): the atom is built from scratch, reusing the ship-gated shape-path encoding for the "ADBE Mask Shape" value (mask paths share the byte layout of "ADBE Vector Shape"). path.Vertices are in layer pixel coordinates; per-vertex tangents are relative to the anchor (AE Shape semantics). path.Closed selects a closed region vs an open polyline. (On disk AE stores mask coordinates as fractions of the SOURCE item's pixel space for footage/solid/precomp layers and as raw pixels for source-less layers (shape/text) — AddMask performs that conversion, so callers always pass pixels.)
+
+Mechanics: AE stores each mask as a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk triple inside the parade — one chunk more than an effect's pair; the 48-byte mkif carries mode / inverted / locked / motion-blur / an internal per-layer index (monotonic, AE keeps gaps) / the label color. AddMask splices a fresh triple in just before the "ADBE Group End" sentinel. LIST sizes grow automatically (rifx recomputes bottom-up on write).
+
+Parade auto-create: a parsed layer with no masks has no Mask Parade group at all. AddMask splices an empty parade into the layer's property tree immediately before "ADBE Effect Parade" when present, else before "ADBE Transform Group" (AE's emitted group order — the Mask Parade precedes both).
+
+Refused layers: camera / light layers (AE does not allow masks on them), and layers built by the structural New* APIs that were never parsed — those have no property tree to splice into; call aep.Reopen first and add masks to the re-parsed layer.
+
+Atomic mutation: snapshot parade chunk + scene children + flat Masks slice (+ the pre-auto-create tree state); re-parse the spliced triple to obtain a back-ref-correct *Mask (its Set* setters work immediately); roll back on any parser warning.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green (4/4: AE-native fixture splice next to an existing Effect Parade, plus a 100% Go-built project; open + closed paths; AE reads names / modes / vertices back exactly and keeps the masks across its own resave); promoted from Alpha in the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op call-form).
+
+### RemoveMask
+
+```go
+func RemoveMask(layer *Layer, m *Mask) error
+```
+
+RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of AddMask. m must be one of layer.Masks obtained from a parsed project; pass the same layer the mask belongs to (masks carry no owning-layer back-ref).
+
+Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk triple — one chunk more than an effect's pair, which is why the generic indexed-group RemovePropertyGroup refuses a mask atom (its tdgp is preceded by the mkif, not the tdmn). RemoveMask is triple-aware: it anchors on the mask's own mkif, validates the framing "ADBE Mask Atom" tdmn and trailing atom tdgp, and splices all three out, then drops the mask from the scene property tree and the flat layer.Masks slice. LIST sizes shrink automatically (rifx recomputes bottom-up on write). The removed chunks ride out verbatim, so no opaque content is regenerated (CLAUDE.md #5).
+
+Refused (project untouched): a nil layer/mask, a mask not in layer.Masks (e.g. already removed), a mask built outside the parser (no mkif back-ref), or a layer with no Mask Parade. Removing the last mask leaves an empty parade group in place (AE tolerates it on reopen); collapsing the parade is a separate slice.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks, remove the middle one, AE accepts the spliced-out triple next to a real Effect Parade and reads back both survivors with geometry intact and the effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+
 <!-- Hand-authored notes. -->
 
 ## Current limitations

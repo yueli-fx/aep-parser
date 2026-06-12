@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing or extending AddMask / mask-atom creation; debugging AE crash (0 :: 42) or 参数值无效 on a Go-written mask; reasoning about mask shape coordinate units (fraction vs pixel) or the shph open/closed flag; touching encodeBezier lhd3 fields for non-4-vertex paths; needing the (tdmn, mkif, tdgp) atom triple layout
 applies_to: [add-mask, mask-parade, mask-atom, mkif, om-s, shph, lhd3, tdb4, coordinate-space, open-path, closed-flag, structural-write, splice, parade-auto-create, ae2020, ae2025, ship-gate, crash-0-42]
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 resolved_by:
 ---
 
@@ -27,8 +27,12 @@ readback, resave preservation). Ground-truth fixture: `test_data/re_mask_open.ae
 ——比 effect 的 `(tdmn, sspc)` pair 多一个 mkif。后果：
 
 - `childTdmnPayload`（mutate_property_structural）的 pair 假设对 mask atom 不成立
-  （tdgp 前是 mkif 不是 tdmn）→ **Remove/Move/Duplicate 对 mask 子项会拒绝**（安全失败，
-  不损坏）。RemoveMask 需要 triple-aware 实现 → deferred。
+  （tdgp 前是 mkif 不是 tdmn）→ 通用 **Remove/Move/Duplicate 对 mask 子项会拒绝**（安全失败，
+  不损坏）。**RemoveMask 已落地（2026-06-12, Stable）**：专门的 triple-aware splice
+  `mutate_mask_remove.go`——以 mask 的 mkif 指针定位三件套（`[mi-1] tdmn / [mi] mkif /
+  [mi+1] tdgp`），校验后整块 splice，同步摘 parade.Children + flat layer.Masks。AE 2020+2025
+  双版本 ship-gate 2/2 PASS（建 3 删中段，survivor 几何完好 + effects 未动 + resave 保留）。
+  Move/Duplicate 对 mask 仍走通用路径拒绝（需求驱动时同法 triple-aware 化）。
 - atom tdgp 内容：`tdsb 0x01 + tdsn(掩码显示名) + tdmn "ADBE Mask Shape" + LIST(om-s)
   + tdmn "ADBE Group End"`。Feather/Opacity/Expansion 默认省略（同 effect param elision）。
 - **mask 显示名存在 atom tdgp 的 tdsn**（AE 面板名），omtn 恒空——parse 侧已加 tdsn
@@ -126,8 +130,9 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
 
 ## Deferred
 
-- **RemoveMask**（triple-aware 删除）/ mask path 改写（既有 mask 的 SetMaskPath）/
-  animated mask path（om-s 多 shap + tdbs 时间表，机制同 [[path-keyframe-write-re]]）。
+- ~~**RemoveMask**（triple-aware 删除）~~ **已 ship（2026-06-12, Stable）**——见上 §Atom 结构。
+  mask path 改写（既有 mask 的 SetMaskPath）/ animated mask path（om-s 多 shap + tdbs 时间表，
+  机制同 [[path-keyframe-write-re]]）/ mask 的 Move·Duplicate（triple-aware 化，同 RemoveMask 思路）。
 - mask mode/color/feather 创建参数化（今天 AE 默认 + 返回 *Mask 后 Set* 可改 mode/
   inverted/color）。
 - precomp 层 mask 未单独 gate（按 footage 分数处理，理论一致）。
@@ -135,3 +140,4 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
 ## Cases
 - 2026-06-11 首次（AddMask v1 实现 + 双版本 gate；崩溃三连环：canonical tdb4 → 像素坐标 → shape 约定 open 标志）
 - 2026-06-12 finding-4 二次纠错（dump AE-native shape fixture `v2_2_shape_path_re.aep` 揭示 encodeBezier 的 shph[3]/lhd3 偏差是与 mask 同源的**通用偏差非 mask 独有**，shape 侧 AE 容忍）+ 修 `decodeShapePath` closed 误判公共 API bug（shph[0x14]→shph[3]，commit e442a43）+ 开放 shape path 双版本 ship-gate PASS（功能正确，commit a303ca3）
+- 2026-06-12 **RemoveMask 落地 + 双版本 ship-gate**（triple-aware splice `mutate_mask_remove.go`，以 mkif 指针定位三件套；AE 2020+2025 各 PASS：建 3 删中段，survivor 几何完好 + effects 未动 + resave 保留；Go round-trip 3 用例）。解除「RemoveMask deferred」

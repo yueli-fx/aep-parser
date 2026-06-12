@@ -22,6 +22,13 @@
       "signature": "func AddMarker(c *Composition, seconds float64) (*Marker, error)",
       "summary": "AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields."
     },
+    "AddMask": {
+      "kind": "func",
+      "file": "mask.md",
+      "anchor": "#addmask",
+      "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
+      "summary": "AddMask appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed *Mask. The mask is created with the given display name (empty → \"Mask N\"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask)."
+    },
     "AutoOrientType": {
       "kind": "type",
       "file": "constants.md",
@@ -4673,6 +4680,13 @@
       "anchor": "#removemarker",
       "signature": "func RemoveMarker(m *Marker) error",
       "summary": "RemoveMarker deletes this marker from its owning composition / layer marker set."
+    },
+    "RemoveMask": {
+      "kind": "func",
+      "file": "mask.md",
+      "anchor": "#removemask",
+      "signature": "func RemoveMask(layer *Layer, m *Mask) error",
+      "summary": "RemoveMask deletes mask m from layer's \"ADBE Mask Parade\" — the inverse of AddMask. m must be one of layer.Masks obtained from a parsed project; pass the same layer the mask belongs to (masks carry no owning-layer back-ref)."
     },
     "RemovePropertyGroup": {
       "kind": "func",

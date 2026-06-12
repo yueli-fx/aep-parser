@@ -25,6 +25,7 @@
     {
       "out": "mask.md",
       "roots": ["Mask", "MaskVertex", "MaskPathKeyframe", "MaskMode", "MaskMotionBlurMode"],
+      "funcs": ["AddMask", "RemoveMask"],
       "head": "_includes/mask.head.md",
       "tail": "_includes/mask.tail.md"
     },

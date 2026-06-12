@@ -833,6 +833,34 @@ func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 	return serializer.AddMask(layer, name, path)
 }
 
+// RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of
+// AddMask. m must be one of layer.Masks obtained from a parsed project; pass
+// the same layer the mask belongs to (masks carry no owning-layer back-ref).
+//
+// Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
+// triple — one chunk more than an effect's pair, which is why the generic
+// indexed-group RemovePropertyGroup refuses a mask atom (its tdgp is preceded
+// by the mkif, not the tdmn). RemoveMask is triple-aware: it anchors on the
+// mask's own mkif, validates the framing "ADBE Mask Atom" tdmn and trailing
+// atom tdgp, and splices all three out, then drops the mask from the scene
+// property tree and the flat layer.Masks slice. LIST sizes shrink
+// automatically (rifx recomputes bottom-up on write). The removed chunks ride
+// out verbatim, so no opaque content is regenerated (CLAUDE.md #5).
+//
+// Refused (project untouched): a nil layer/mask, a mask not in layer.Masks
+// (e.g. already removed), a mask built outside the parser (no mkif back-ref),
+// or a layer with no Mask Parade. Removing the last mask leaves an empty
+// parade group in place (AE tolerates it on reopen); collapsing the parade is
+// a separate slice.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks,
+// remove the middle one, AE accepts the spliced-out triple next to a real
+// Effect Parade and reads back both survivors with geometry intact and the
+// effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+func RemoveMask(layer *Layer, m *Mask) error {
+	return serializer.RemoveMask(layer, m)
+}
+
 // Effect match-name constants for AddEffect's built-in library. Use these
 // instead of hardcoding AE's internal match-name strings. The trailing comment
 // on each is the display name shown in AE's Effects panel.
