@@ -1,12 +1,12 @@
 ---
-status: active
-summary: V3 direction：scene-graph IR + capability matrix + serializer split。M1-M8 框架已实现（结构性 mutation Phase 1-5 + 包重组① + M8 真·物理分包② 全落）；可达字段 ~99% ship，剩余前沿 fixture/RE-gated（详 plans/coverage.md）。
-note: 大 arc 实质收尾（2026-06-09）—— M8 物理分包完成（design+plan 已归档）；剩 ValueText / Layr 3D 通道等 fixture-gated 边缘项，无 active 大 plan。
+status: done
+summary: V3 direction：scene-graph IR + capability matrix + serializer split ✅ DONE（2026-06-12 收档）。M1-M8 框架全落（结构性 mutation Phase 1-5 + 包重组① + M8 真·物理分包②）；可达字段 ~99% ship。剩余边缘项（ValueText / Layr 3D / capability matrix 完整化 / ShapeGraph·EffectSchema）已迁 coverage.md + deferred-backlog 跟踪，不再挂本 spec
+last_updated: 2026-06-12
 ---
 
 # V3 direction — scene-graph IR + capability matrix + serializer split
 
-**Status**: **部分实现（partial / paused）— 更新 2026-06-09**。原为 2026-05-22 草拟的方向笔记；自那以来已 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）+ **M8 scene→rifx 白名单清零**（5 项残留全迁出，守卫现严格禁 scene→rifx import，详下文残留表）。**执行中**：M8 真·物理分包（独立 `internal/scene`+`internal/serializer` Go 包，方案② 接口依赖倒置破环——`plans/2026-06-07-v3-m8-physical-split-plan.md`，P2 back-ref 接口化 7/10）。**剩余未做**：通用 capability matrix 完整化 + ShapeGraph/EffectSchema 大子项。
+**Status**: **✅ DONE — 收档 2026-06-12**。原为 2026-05-22 草拟的方向笔记。已全部 landed：**结构性 mutation Phase 1-5**（Backrefs / DeleteLayer / DuplicateLayer / MoveLayer / InsertLayer / DuplicateComposition，全双版本 ship-gate PASS）+ **包重组方案①**（命名轴 + AST 边界守卫）+ **M8 真·物理分包②**（独立 `internal/scene`+`internal/serializer` Go 包 + 接口依赖倒置，2026-06-09 落，design+plan 已归档）。**未做的大子项**（通用 capability matrix 完整化 / ShapeGraph / EffectSchema）无实际需求驱动，连同 fixture-gated 边缘项（ValueText / Layr 3D 通道）一并由 `plans/coverage.md` + `specs/deferred-backlog.md` 跟踪——本 spec 不再是它们的挂靠点。
 
 GPT 反馈整合 (`flightdeck/kneeboard/gpt`) + V2.1 Phase 6 实践经验 (`incidents/ae25-acceptance-gate.md`)。
 
