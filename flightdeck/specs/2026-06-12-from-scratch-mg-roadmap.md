@@ -26,9 +26,10 @@ last_updated: 2026-06-12
 - ✅ `TestExpression_AEShipGate_*` AE 2020+2025 双版本渲染像素 PASS：ON 层 `time*90` 实际求值（rotation@2s=180、dot 渲染转到锚点下方）、OFF 层同表达式保文本不求值、resave 双态存活。
 - followup（开 S6 端到端前做）：常用 MG 表达式语汇 gate（loopOut / wiggle / thisComp.layer 引用链）——单表达式 `time*90` 已确权，语汇覆盖未验。
 
-### S3 — Trim Paths（线描动画，MG 标配）
-- ShapeKind 现仅 8 种（Rect/Ellipse/Path/Fill/Stroke/Group/G-Fill/G-Stroke）。Trim Paths（`ADBE Vector Filter - Trim`）= stroke 线描 reveal 的唯一路径。
-- 套既有 vein 打法：JSX fixture RE → embed body 模板 + Start/End/Offset 参数 cdat 覆写 → 渲染像素 gate（trim 50% 时 stroke 只画半圈，采样验有/无）。
+### S3 — Trim Paths（线描动画，MG 标配）✅ DONE 2026-06-12
+- Trim Paths（`ADBE Vector Filter - Trim`）= Vectors Group 内与 shape/fill/stroke 平级的矢量滤镜节点。套既有 embed-body vein：`extract_shape_bodies` 抽 `v2_2_shape_trim_body.bin` → `lowerTrimNode` clone + `lowerShapeScalar` 覆写 Start/End/Offset（f64 BE @cdat[0:8]；Start/End 原始%、Offset 度数）。Trim Type 默认 elide 未建模。`AddTrim`/`TrimNode`（static→cdat 覆写、animated→`injectAnimatedStream` flip 关键帧容器，line-draw reveal 天然支持）。
+- ✅ `TestMGTrim_AEShipGate_*` AE 2020+2025 双版本**渲染像素** gate PASS：FULL(End100) 整圈 L+R、HALF(End50) 右半弧 top/right/bottom 在·left 不在；trim End resave 读回 50/100。两个 RE ground truth（render 验证非空想）：add-order [Ellipse,Stroke,Trim] trim 剪 stroke；AE 椭圆 path 起点顶部 12 点顺时针。详 `incidents/trim-paths-vector-filter-re.md`。
+- 遗留：animated trim（line-draw 真动画 End 0→100 keyframe）路径已通但未单独 gate；Repeater/Merge/Offset/Round/ZigZag 同类矢量滤镜复用此 vein（蓝本见 incident）。
 
 ### S4 — precomp 嵌套（工程结构刚需）
 - MG 工程 = comp 套 comp。现状无「comp 作为 layer source」的创建路径（backlog 里 ImportComposition 需求驱动）。

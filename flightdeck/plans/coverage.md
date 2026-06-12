@@ -240,6 +240,12 @@ py-aep parity P3 首刀。纯 reader，无写、无 ship-gate（byte-identical r
 - **time-block 64B 布局（byte-match `re_path_anim.aep`）**：time u32@0x00 / inInterp@0x04=1 / outInterp@0x05=1 / const 0x01@0x07 / const u32 2@0x08 / f64 1.0@0x10（除末帧）/ runtime 指针@0x38 置零。详 `incidents/path-keyframe-write-re.md`（含上个会话三处误读的纠错）。
 - **三关踩坑（gate 走通前）**：首跑 exit 2 被 cockpit "默认当 flake" 误导（实为字节错触发 "项目文件似乎已损坏（跳过部分）"）→ 改 time-block + tdb4 字节；JSX 导航太浅（path 嵌 3 层）→ 递归 `findByMatch`；测试 `findShipChunk(IDOmS)` 按 ID 找不到 LIST → 新 `findShipListByForm`。
 - **deferred**：temporal ease（首版 linear only）、mask path write（只做 shape path）、open path 的 shph closed 语义。
+#### MG roadmap S3 (2026-06-12) — Trim Paths (AddTrim: Start/End/Offset, W)
+- `(g *VectorGroup) AddTrim()` → `TrimNode`（`SetStart`/`SetEnd`/`SetOffset` + getter；Start/End 原始百分比 0..100、Offset 度数）— ✅ **AE 2020+2025 双版本渲染像素 ship-gate PASS**（`TestMGTrim_AEShipGate_AE20{20,25}`：椭圆+白 stroke+Trim，FULL(End100) 整圈 L+R 都在、HALF(End50) 右半弧 top/right/bottom 在·left 不在；trim End resave 读回 50/100 存活）。
+- **磁盘形态**：Trim 是 **Vectors Group 内、与 shape/fill/stroke 平级的矢量滤镜节点**（match-name `ADBE Vector Filter - Trim`），body 标准 `LIST(tdgp)`。子流 `ADBE Vector Trim Start/End/Offset` 均 f64 BE @cdat[0:8]（同其它 shape scalar）；套既有 embed-body vein——`extract_shape_bodies` 抽 `v2_2_shape_trim_body.bin`，`lowerTrimNode` clone + `lowerShapeScalar` 覆写（静态 cdat 覆写 / animated 自动经 `injectAnimatedStream` flip 关键帧容器）。
+- **RE 两个 ground truth**（render 验证非空想）：① shape-stack 渲染顺序 add=[Ellipse,Stroke,Trim] 时 trim 剪 stroke（bottom-up = path→stroke→trim）；② AE 椭圆 path 起点顶部 12 点、顺时针。
+- **deferred**：`ADBE Vector Trim Type`（Simultaneously/Individually，AE 默认 elide 无 slot，未建模）。
+- 复用蓝本（Repeater/Merge/Offset/Round/ZigZag 同类矢量滤镜预期同 vein）+ 详 `incidents/trim-paths-vector-filter-re.md`。
 #### V2.2.1 子项⑯ (2026-06-10) — Gradient stroke (AddGradientStroke: color + alpha stops, R/W)
 - `(g *VectorGroup) AddGradientStroke()` → `GradientStrokeNode`（`SetColorStops`/`SetAlphaStops`，复用 fill 共享 `setGradientColorStops`/`setGradientAlphaStops` free function）+ reader `hydrateGradientStrokeNode`（G-Stroke 节点局部降级，对齐 G-Fill）— ✅ **AE 2020+2025 双版本 ship-gate PASS**（`TestV2_2_GradientStroke_AEShipGate_AE20{20,25}`：rect+gradient-stroke，3 色标 + 非默认 alpha ramp，re-save 经 read 路径解码校验 color + alpha）。
 - **复用**：磁盘编码同 G-Fill（`ADBE Vector Grad Colors` GCst→GCky→Utf8）；lower 经共享 `lowerGradientStops`、reader 经共享 `hydrateGradientStops`（第二个 gradient 节点 = DRY 阈值，fill 三处本体重构复用）。模板从 `v2_2_gradient_src.aep` 的 G-Stroke 节点提取（`v2_2_shape_gradstroke_body.bin`）。
