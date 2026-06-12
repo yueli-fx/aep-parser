@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（红线4 首案破案：orbit 渲染塌暗红 = Layer Styles placeholder tdsb bit0 误置 enabled，修 serializer flag words + orbit gate 升级渲染像素 gate，AE 2020+2025 PASS。详 `incidents/layer-styles-tdsb-enabled-bit.md`；同日前序（交付准则、mask op 全收口、marker Stable）见 `git log` + `archive/`。）
-**Active focus**: **需求驱动期，无 active 主线**——大 arc 全收口：V3 框架（M1-M8，spec 已归档）· 结构性创建 vein（New\* 全家族 + AddEffect/SetEffectParam，全 Stable）· mask 结构性 op（Add/Remove/Duplicate/Move 全 Stable 双版本 gated）· Essential Graphics W（2026-06-12 ship）。ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。剩余候选见 ## 下一步；历史脉络靠 `git log` + `archive/` + coverage.md。
+**Last updated**: 2026-06-12 by claude（MG roadmap S1+S2 同日收口：ease 关键帧+规模（lhd3 4-kf 分页容量翻案）、表达式激活（tdb4 @0x77/@0x78 字节对翻案），均双版本渲染像素 gate PASS。详 `incidents/lhd3-keyframe-capacity-pages.md` + `incidents/expression-enable-byte-pair.md`。同日前序：红线4 首案（layer-styles tdsb）+ 交付准则。）
+**Active focus**: **From-scratch MG 工程能力**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标 = 不开 AE 纯 Go 生成完整 MG 动画）。S1 ease ✅ · S2 表达式激活 ✅ · 下一刀 S3 Trim Paths → S4 precomp 嵌套 → S5 Repeater 等 → S6 端到端组合 gate。每 slice 渲染像素级双版本 gate（红线4）。ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
 
 ## 进行中
 
@@ -13,12 +13,13 @@
 
 ## 下一步
 
-**无 active 主线**——大 arc 全收口（V3 框架 M1-M8 · 结构性创建 vein · EG W · mask 结构性 op · length-variable SetText 零 refuse · Alpha→Stable 审计批次；脉络见 `git log` + `archive/` + coverage.md）。以下候选均需求驱动，点名即开工：
+**主线 = MG roadmap**（`specs/2026-06-12-from-scratch-mg-roadmap.md`；S1 ease ✅ S2 表达式 ✅）：
 
-1. **encodeBezier AE-native 字节**（纯优化）：写 AE-native 值（shph[3] open=0x09 等；@0x0C/@0x1C 待 n=5..8 RE 确证容量）→ shape/mask 写路径 byte-identical、mask patch 可化简。AE 已容忍现值（开放 path 双版本 gated），无紧迫性。详 `incidents/add-mask-create-re.md` §finding-4。
-2. **EG W deferred 控件**：point/dropdown/text/Transform 源 controller + RemoveEssentialProperty。详 `incidents/essential-graphics-write-re.md`。
-3. **mask 剩余写功能**（结构性 op 已全收口 Add/Remove/Duplicate/Move）：既有 mask 路径改写 `SetMaskPath`（值级，非结构性）/ animated mask path（om-s 多 shap + tdbs 时间表）/ mask mode·color·feather 创建参数化。详 `incidents/add-mask-create-re.md` §Deferred。
-4. **各 vein 零散剩件**：SetEffectParam 扩库 + point 单位换算 helper · 导入 solid footage 归 Solids folder · RQ Set\* slice-5/6/7/8 仍 Alpha（render settings / OutputModule / item 级 setter，非结构性 in-place patch，按设计不走 ship-gate）。
+1. **S3 Trim Paths**（线描动画，MG 标配）：JSX fixture RE → embed body 模板 + Start/End/Offset cdat 覆写 → 渲染像素 gate（trim 50% 半圈采样）。
+2. **S4 precomp 嵌套**（comp-as-layer-source）→ **S5 Repeater / gradient Start·End Pt / Rounded Corners** → **S6 端到端组合 gate**（前置：S2 followup 表达式语汇 gate loopOut/wiggle/跨层引用）。
+3. 技债（roadmap 路上顺修）：`encodePathTimeTable` 容量分页同病（path >4 kf 前必修，详 `incidents/lhd3-keyframe-capacity-pages.md`）· 种子模板 32bpc→8bpc 评估。
+
+**需求驱动候选**（点名即开工）：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写功能（SetMaskPath / animated path / mode·color·feather 参数化）· SetEffectParam 扩库 · RQ Set\* slice-5/6/7/8（Alpha by design）。
 
 **仍 fixture/RE-gated（需外部输入）**：Layr Transform 3D 通道（需 3D layer 支持）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建）· ValueText（schema-db）。详 `plans/coverage.md` § 暂搁 / 不可达。
 
@@ -31,4 +32,4 @@
 
 ## Hanging tasks
 
-无。（shape 颜色渲染 RE 已破案收口 2026-06-12：根因 = Layer Styles placeholder tdsb bit0 全写 0x01 → AE 渲染 10 种 style 全开（红 solidFill+bevel 罩面），颜色编码本身无辜；修 `makeTdsbFlags`/`emptyPropGroupFlags` 按 AE 原生值（body 0x03 / fx 0x02），orbit gate 升级为渲染像素 gate（JSX 渲帧+Go 采样 5 点 ±8），AE 2020+2025 双版本 PASS。详 `incidents/layer-styles-tdsb-enabled-bit.md`。）
+无。
