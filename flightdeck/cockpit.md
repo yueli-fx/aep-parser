@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（**Essential Graphics W 单日收口**：Phase-0 纯代码 RE → `SetMotionGraphicsTemplateName` + `AddEssentialProperty` 落地 → `TestEGAdd` 双版本 ship-gate PASS（all-Go-built，19.7s/13.4s）。Alpha 待用例积累；plan 已归档，RE 知识沉淀 `incidents/essential-graphics-write-re.md`）
+**Last updated**: 2026-06-12 by claude（EG W 收口后顺手收掉「Solid 系小件」主件：`Footage.SetSolidColor`/`SetSolidSize` 独立 setter（Alpha，与 NewSolidLayer gate 同字节路径）。候选下一步剩：Alpha→Stable 批次（待用例）· SetText 变长解封 · encodeBezier 纯优化）
 **Active focus**: **需求驱动期**——deferred-backlog「仅存真未实现写线头」Essential Graphics W 已 ship（2026-06-12），纯代码可推前沿全部落地；剩余条目均需求驱动或 fixture/RE-gated。前序 vein：**结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → Solid/Null/Adjustment（详 `incidents/new-layer-types-scoping.md`）。2026-06-11 落：effect 全 12 模板双版本 gated + AddEffect/RemoveEffect 升 Stable + **NewTextLayer**（embed-whole-Layr，**新建图层类型全部建齐**；fresh 层免 Reopen 可读 TextSource/等长 SetText；btdk 改字长解封路径详 `incidents/text-btdk-length-variable-write-scoping.md`）。⚠ scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 拒收，已修（详 `incidents/nextitemid-must-include-layer-ids.md`）。M8 物理分包已落。
 
 ## 进行中
@@ -15,7 +15,7 @@
 
 ✅ **Essential Graphics W 已 ship（2026-06-12 单日全程）**：`SetMotionGraphicsTemplateName`（6 槽 length-variable）+ `aep.AddEssentialProperty`（三处协同结构性写，V1 = scalar/slider/checkbox/color）双版本 ship-gate PASS。Alpha 待用例积累。布局/gotcha 详 `incidents/essential-graphics-write-re.md`；deferred（point/dropdown/text/Transform 源/RemoveEssentialProperty）需求驱动。
 
-**候选下一步（均需求驱动，无单一主线）**：Alpha→Stable 批次（AddMask / SetEffectParam / AddEssentialProperty，待用例积累）· SetText 变长解封（↓4）· Solid 系小件（↓5）· encodeBezier AE-native 字节（纯优化）。
+**候选下一步（均需求驱动，无单一主线）**：Alpha→Stable 批次（AddMask / SetEffectParam / AddEssentialProperty / SetSolidColor·Size，待用例积累）· SetText 变长解封（↓4）· encodeBezier AE-native 字节（纯优化）。
 
 ——以下为前序 vein 状态（结构性创建 vein 已实质收口）。
 
@@ -29,7 +29,7 @@
 2. ~~**AddMask**~~（✅ 2026-06-11 落，超原计划：原以为只能 fixed-shape，实际 from-scratch atom 让**创建时路径任意参数化**（复用 shap 发射 + mask 专用字节修正），双版本 gate 4/4，Alpha 待用例积累升 Stable。剩余需求驱动：RemoveMask（atom 三件套不满足 pair 假设需专用实现）/ 既有 mask 路径改写 / animated mask path / mode·color 创建参数。⚠ follow-up：encodeBezier lhd3 @0x14/@0x1C 对 n≠4 顶点的 shape path 可能同样错（mask 实测掀出，shape 侧 gated fixture 或全是 n=4——需核）。详 `incidents/add-mask-create-re.md`）
 3. ~~New\* 图层家族 Alpha→Stable 审计~~（✅ 2026-06-11 落：六个 New\* 全升 Stable，gate 证据 = 三个 feature commit 的双版本 PASS 断言 + gate 测试在册；顺带修 NewTextLayer doc comment 过期的「等长 SetText」段）。
 4. **SetText 变长 refuse 集解封**（需求驱动再做）：多段落（splice 段落 dict entry）/ 多 run（计数分配 = AE 行为 RE）/ 空串。详 `incidents/text-btdk-length-variable-write-scoping.md` § v1 守卫。
-5. **Solid 系后续小件**（需求驱动再做）：`SetSolidColor`/`SetSolidSize` 独立 setter（机制已 RE：opti @0x0A ARGB + sspc @0x20/0x24，今只在创建参数暴露）；导入的 solid footage 落 dest 根而非 Solids folder（AE 接受，仅整理性差异）。
+5. ~~**Solid 系后续小件**~~（✅ 主件 2026-06-12 落：`Footage.SetSolidColor`/`SetSolidSize` 独立 setter（Alpha，length-preserving，字节与 NewSolidLayer 双 gate 同路径，round-trip ×3 + 非 solid/越界 refuse）。剩余整理性差异需求驱动：导入的 solid footage 落 dest 根而非 Solids folder（AE 接受））。
 
 **仍 fixture/RE-gated（需外部输入）**：Layr Transform 3D 通道（需 3D layer 支持）· 暂搁项（environmentLayer / ligature / maskFeatherFalloff / CMS chunk 创建）· ValueText（schema-db）。详 `plans/coverage.md` § 暂搁 / 不可达。
 
