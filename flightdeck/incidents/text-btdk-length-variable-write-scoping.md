@@ -14,9 +14,10 @@ resolved_by:
 - where: Layer.SetText (scene_layer_writers.go) / layerBackrefs.SetText (back_layer.go)
 - trigger: writing a text string whose UTF-16BE encoding differs in byte length from the stored one
 
-> **STATUS (2026-06-12, v3)**: empty + multi-paragraph + **multi-run** SetText 全
-> **SHIPPED**（ship-gate PASS）。变长 refuse 集现仅剩 **手动 kerning 表**一项。单/多
-> 段落 × 单/多 run × 空串 = 全支持。findings 见 § 修法 v2 / v3。v1 守卫描述存历程。
+> **STATUS (2026-06-12, v4)**: empty + multi-paragraph + multi-run + **手动 kerning**
+> 全 **SHIPPED**（ship-gate PASS）。**length-variable SetText 现零 refuse**——任意长度
+> × 单/多段落 × 单/多 run × 空串 × 带/不带 kerning 全支持。findings 见 § 修法 v2/v3/v4。
+> v1 守卫描述存历程。
 
 ## 症状/复现
 
@@ -108,8 +109,31 @@ fixture。`buildEntryArray` 机制另由段落 case（T3 双版本含 2020 PASS�
 （**AE 2024 2026-06-12 解锁** = 给 24+ 引入字段补「24+ 但非 25」第二门禁版本，详
 `checklists/re-fixture.md` § Adobe 软件路径。）
 
-**v3 守卫（剩余 refuse 集）**：仅 **手动 kerning 表**（`/1/1/0/0/8/0`，per-char 数组会 desync）。
-单/多段落 × 单/多 run × 空串 = 全支持。多 run 输入按 AE 行为 collapse 到单 run（保 run[0] 样式）。
+## 修法 — v4 已 SHIP（2026-06-12，手动 kerning 解封 = 零 refuse）
+
+最后一项 refuse。**RE（`re_text_kern_resize.jsx` @ AE 2024，`td.kerning=-50` 在 "AaBb" 上
+materialize `/1/1/0/0/8` per-char 表）= 整文本替换时 AE 直接丢弃整个 kerning slot**：
+- `kern_src`（文本不变）：`/1/1[0]/0/8` 在，ManualKerning `[-50,-50,-50,-50]`。
+- `kern_grow`（text→"Hello"）/ `kern_shrink`（text→"Xy"）：**`/1/1[0]/0/8` 整个消失**。
+
+同 collapse-to-first-run 一个道理——per-char kerning 对新字符无意义，AE 直接 drop。
+`kern_grow`/`kern_shrink` 就是 AE 亲手产出的 ground truth。
+
+**注**：`td.kerning`（AE 24+ 统一 kerning 属性）能脚本 materialize `/8` slot——
+[[kerning-first-enable]]（2026-05-19）说「无 scripting API」是该 API 出现前的旧认知。
+
+**修法**：变长路径开头若检到 `/1/1/0/0/8`，先 `deleteBtdkKey("/1/1/0/0/8")` 删整个子树
+（scan-back 找 `/8` key token + 删 [keyStart, valEnd]，复用 `spliceBtdkRange` 核 + 补 btdk
+size header），再 re-parse 走正常 string/para/run rebuild。snapshot 提到 kerning drop 之前
+保原子。删多 run/kerning 的 refuse 守卫。
+
+**ship-gate**：`runSetTextKerningGate` 加载 `re_text_kern_resize.aep`（kern_src 带 kerning）
+→ SetText → AE 读回 + resave，Go 端验 ManualKerning 空。**AE 2024 + AE 2025 双版本 PASS**
+（fixture AE-24 stamped，同多 run；AE 2020 N/A 前向不兼容 + 无 kerning scripting API）。
+
+**v4 = 零 refuse**：length-variable SetText 不再拒任何输入。任意长度 × 单/多段落 ×
+单/多 run（collapse 到 run[0]）× 空串 × 带 kerning（drop）全支持。手动 kerning 表会被丢弃，
+跟 AE 行为一致。`Layer.SetManualKerning`（等长改 kerning 值）仍独立存在、不受影响。
 
 > **AE 2025 ship-gate 注意**：首跑 + warm-retry 都 exit 2（unknown modal），OCR 抓到
 > 的是 **About/credits 启动闪屏**（"1992...2024 / 保留所有权利 / 署名"），非数据 reject
@@ -141,3 +165,4 @@ fixture。`buildEntryArray` 机制另由段落 case（T3 双版本含 2020 PASS�
 - 2026-06-11 首次（NewTextLayer ship 时的 scoping pass）
 - 2026-06-12 v2 ship：空串 + 多段落解封（双版本 ship-gate PASS）；refuse 集缩到多 run + kerning
 - 2026-06-12 v3 ship：多 run 解封（AE = collapse-to-first-run，AE 2024+2025 双版本 gate PASS，2020 N/A 前向不兼容）；refuse 集仅剩手动 kerning
+- 2026-06-12 v4 ship：手动 kerning 解封（AE = drop-on-text-change，AE 2024+2025 双版本 gate PASS）；**length-variable SetText 零 refuse**
