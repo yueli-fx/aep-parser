@@ -114,7 +114,7 @@ chore(flightdeck): archive shipped designs/plans to landed/
 
 1. `flightdeck/plans/coverage.md` —— 对应行从 🟢 R / 🗑️ 暂搁 升 ✅ R/W (或反向降级)
 2. `flightdeck/plans/coverage-detail.md` —— AE attr 详细交叉表对应行
-3. `docs/{layer,property,text,…}.md` —— public API 文档 (API 文档优先级最高)
+3. `docs/{layer,property,text,…}.md` —— public API 文档 (API 文档优先级最高)。**新增 facade free function（New*/Add*/Remove* 等自由函数）必须同步登记 `docs/docgen.json` 对应文件的 `funcs` 数组，否则 docgen 跑绿但函数被静默漏文档化**（AddMask 自由函数因 mask.md 无 funcs 数组漏文档整整一天，2026-06-12 补；roots 里的类型方法不受此限，funcs 仅管自由函数）。改 doc comment 后重生成（`go run ./cmd/docgen -manifest docs/docgen.json`）。
 4. `flightdeck/cockpit.md` —— "最近归档" 一条 + ship-gate PASS count
 
 只改行为不改 API 表面: 仅更 `cockpit.md`.
