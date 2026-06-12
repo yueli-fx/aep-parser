@@ -459,7 +459,11 @@ func MoveBefore(l, other *Layer) error { return serializer.MoveBefore(l, other) 
 // The Nmrd gets five empty Utf8 slots, matching AE's always-five layout.
 //
 // length-variable — the ldat and mrky LISTs grow; WriteAEP recomputes the
-// mrst-chain LIST sizes. Alpha until the AE 2020 + 2025 ship-gate passes.
+// mrst-chain LIST sizes.
+//
+// Stable — passed the AE 2020 + AE 2025 ship-gate (remove-then-add on an
+// AE-native two-marker comp; AE accepts the spliced ldat / lhd3 count / mrky
+// Nmrd and reads back both markers with the expected times and comments).
 //
 // Restriction: requires the comp to already have ≥1 marker (the clone
 // template). Seeding the entire "Markers" pseudo-layer for an empty comp is a
@@ -481,6 +485,10 @@ func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 //
 // Errors (project untouched): the marker was built outside the parser, is
 // already detached, or its chunk references are inconsistent.
+//
+// Stable — exercised alongside AddMarker in the AE 2020 + AE 2025 ship-gate
+// (the survivor marker resolves with the correct time and comment after AE
+// resaves the spliced project).
 //
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep

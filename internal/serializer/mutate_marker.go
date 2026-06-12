@@ -18,7 +18,7 @@ import (
 //
 // length-variable: the ldat and mrky LISTs shrink; WriteAEP recomputes all
 // ancestor LIST sizes (the same path SetComment already exercises on the mrst
-// chain). Alpha until the AE 2020 + 2025 ship-gate passes (CLAUDE.md #6).
+// chain). Stable — AE 2020 + 2025 ship-gate passes (CLAUDE.md #6).
 //
 // Atomicity: every precondition is checked before the first byte is written,
 // so a rejected Remove leaves the project untouched without a rollback path.
