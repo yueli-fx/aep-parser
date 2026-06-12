@@ -678,17 +678,19 @@ func (l *Layer) SetAlternateSource(item AVItem) error {
 func (l *Layer) ClearAlternateSource() error { return l.SetAlternateSource(nil) }
 
 // SetText replaces a text layer's user-visible text. The new text may be any
-// length on a single-paragraph, single-run, kerning-free document (the common
-// case, and what NewTextLayer creates): the PostScript string is spliced
-// together with the two character counters coupled to it, and the btdk layout
-// cache is left for AE to recompute on load. Replacements that keep both the
-// encoded byte length and the UTF-16 character count are written in place and
-// work on any document structure, including multi-paragraph text.
+// length and span any number of paragraphs ('\n' / '\r' line breaks) on a
+// single-run, kerning-free document (the common case, and what NewTextLayer
+// creates): the PostScript string is spliced, the paragraph array is rebuilt
+// with one count-patched entry per paragraph, the lone style run's total count
+// is set, and the btdk layout cache is left for AE to recompute on load. Empty
+// text ("") is supported (it becomes a single empty paragraph). Replacements
+// that keep both the encoded byte length and the per-paragraph UTF-16 counts
+// are written in place and work on any document structure.
 //
 // Returns an error when the layer isn't a text layer, or when a
-// length-changing replacement targets a multi-paragraph / multi-run document,
-// contains a line break, is empty, or the document carries a manual-kerning
-// table — those need paragraph/run-entry splicing that is not RE'd yet.
+// length-changing replacement targets a multi-run document or one carrying a
+// manual-kerning table — those need run-entry splicing / count-allocation that
+// is not RE'd yet.
 //
 // Encoding parity with AE: input is split on '\n' (each segment becomes a
 // paragraph terminated by AE's '\r' convention), then encoded as UTF-16BE

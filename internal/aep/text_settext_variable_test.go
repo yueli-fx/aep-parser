@@ -9,6 +9,7 @@ package aep_test
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
@@ -118,16 +119,74 @@ func TestSetTextVariable_ShrinkAndSurrogate(t *testing.T) {
 	}
 }
 
-func TestSetTextVariable_Refusals(t *testing.T) {
-	_, l := freshTextLayer(t, "T")
-	if err := l.SetText(""); err == nil {
-		t.Error("empty text: expected refuse, got nil")
+// btdkParaCounts returns the per-paragraph UTF-16 counts from the paragraph
+// array at /1/1/0/0/5/0 (each entry's /1).
+func btdkParaCounts(t *testing.T, raw []byte) []float64 {
+	t.Helper()
+	body, _, err := codec.ExtractBtdkBody(raw)
+	if err != nil {
+		t.Fatalf("ExtractBtdkBody: %v", err)
 	}
-	if err := l.SetText("a\nb"); err == nil {
-		t.Error("line break: expected refuse, got nil")
+	root := codec.ParsePSDict(body)
+	if root == nil {
+		t.Fatal("btdk dict empty")
 	}
-	if l.TextSource.Text != "A" {
-		t.Errorf("after refusals: Text = %q, want untouched %q", l.TextSource.Text, "A")
+	arr := codec.PsPath(root, "/1/1/0/0/5/0")
+	if arr == nil || arr.Kind != codec.PsArr {
+		t.Fatal("no paragraph array at /1/1/0/0/5/0")
+	}
+	out := make([]float64, len(arr.Arr))
+	for i, entry := range arr.Arr {
+		out[i] = codec.PsPath(entry, "/1").AsNum()
+	}
+	return out
+}
+
+func TestSetTextVariable_MultiParagraphAndEmpty(t *testing.T) {
+	p, l := freshTextLayer(t, "T")
+
+	// Grow "A" into three paragraphs: paragraph array gains one entry per line,
+	// each counting its text + trailing \r; the single run carries the total.
+	if err := l.SetText("L1\nL2\nL3"); err != nil {
+		t.Fatalf("multi-paragraph SetText: %v", err)
+	}
+	if l.TextSource.Text != "L1\nL2\nL3" {
+		t.Errorf("Text = %q, want %q", l.TextSource.Text, "L1\nL2\nL3")
+	}
+	if got := btdkParaCounts(t, l.TextSourceRaw); !reflect.DeepEqual(got, []float64{3, 3, 3}) {
+		t.Errorf("paragraph counts = %v, want [3 3 3]", got)
+	}
+	if got := btdkCounter(t, l.TextSourceRaw, "/1/1/0/0/6/0/0/1"); got != 9 {
+		t.Errorf("run count = %v, want 9", got)
+	}
+
+	var buf bytes.Buffer
+	if err := p.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	rp, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	if len(rp.Warnings) != 0 {
+		t.Errorf("re-parse produced warnings: %v", rp.Warnings)
+	}
+	if rl := textLayerByName(rp, "T"); rl == nil || rl.TextSource == nil || rl.TextSource.Text != "L1\nL2\nL3" {
+		t.Errorf("re-parsed text = %+v, want %q", rl, "L1\nL2\nL3")
+	}
+
+	// Shrink to empty: a single empty paragraph "\r" (count 1).
+	if err := l.SetText(""); err != nil {
+		t.Fatalf("empty SetText: %v", err)
+	}
+	if l.TextSource.Text != "" {
+		t.Errorf("Text = %q, want empty", l.TextSource.Text)
+	}
+	if got := btdkParaCounts(t, l.TextSourceRaw); !reflect.DeepEqual(got, []float64{1}) {
+		t.Errorf("empty paragraph counts = %v, want [1]", got)
+	}
+	if got := btdkCounter(t, l.TextSourceRaw, "/1/1/0/0/6/0/0/1"); got != 1 {
+		t.Errorf("empty run count = %v, want 1", got)
 	}
 }
 
@@ -163,14 +222,15 @@ func TestSetTextVariable_ParsedFixture(t *testing.T) {
 		t.Errorf("re-parsed text_hello = %+v, want %q", rl.TextSource, text)
 	}
 
-	// Multi-paragraph document: length-variable refused, equal-length in-place
-	// still works ("A\rB" → "X\rY").
-	if err := twoLines.SetText("XYZ"); err == nil {
-		t.Error("multi-paragraph variable SetText: expected refuse, got nil")
+	// Multi-paragraph parsed document collapsing to a single paragraph: the
+	// paragraph array is rebuilt down to one entry, run count set to the total.
+	if err := twoLines.SetText("XYZ"); err != nil {
+		t.Fatalf("multi-paragraph → single SetText: %v", err)
 	}
-	if err := twoLines.SetText("X\nY"); err != nil {
-		t.Errorf("multi-paragraph equal-length SetText: %v", err)
-	} else if twoLines.TextSource.Text != "X\nY" {
-		t.Errorf("two_lines text = %q, want %q", twoLines.TextSource.Text, "X\nY")
+	if got := btdkParaCounts(t, twoLines.TextSourceRaw); !reflect.DeepEqual(got, []float64{4}) {
+		t.Errorf("paragraph counts after collapse = %v, want [4]", got)
+	}
+	if twoLines.TextSource.Text != "XYZ" {
+		t.Errorf("two_lines text = %q, want %q", twoLines.TextSource.Text, "XYZ")
 	}
 }

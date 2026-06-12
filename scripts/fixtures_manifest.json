@@ -51,6 +51,7 @@
     { "jsx": "test_data/re_text.jsx", "ae": "2020", "env": {}, "done": "test_data/re_text.done", "outputs": ["test_data/re_text.aep"] },
     { "jsx": "test_data/re_text_ae24_more.jsx", "ae": "2025", "env": {}, "done": "test_data/re_text_ae24_more.done", "outputs": ["test_data/re_text_ae24_more.aep"] },
     { "jsx": "test_data/re_text_caps_ae24.jsx", "ae": "2025", "env": {}, "done": "test_data/re_text_caps_ae24.done", "outputs": ["test_data/re_text_caps_ae24.aep"] },
+    { "jsx": "test_data/re_text_multipara.jsx", "ae": "2020", "env": {}, "done": "test_data/re_text_multipara.done", "outputs": ["test_data/re_text_multipara.aep"], "notes": "RE for empty + multi-paragraph SetText btdk shape (empty=single \\r paragraph; N paras = N count-patched entry clones)" },
     { "jsx": "test_data/re_tickrate.jsx", "ae": "2020", "env": {}, "done": null, "outputs": ["test_data/re_tickrate.aep"], "manual": true, "notes": "alert-based, no .done marker — run manually if regen needed" },
     { "jsx": "test_data/re_trackmatte_ae24.jsx", "ae": "2025", "env": {}, "done": "test_data/re_trackmatte_ae24.done", "outputs": ["test_data/re_trackmatte_ae24.aep"], "notes": "trackMatteLayer API is AE 23+ minimum; standardized on the 2025 exe" },
     { "jsx": "test_data/re_varfont_ae24.jsx", "ae": "2025", "env": {}, "done": "test_data/re_varfont_ae24.done", "outputs": ["test_data/re_varfont_ae24.aep"] },

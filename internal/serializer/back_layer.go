@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"math"
@@ -454,15 +455,19 @@ func (b *layerBackrefs) SetAlternateSource(item AVItem) error {
 // Equal totals are not enough: "A\rB" → "XYZ" moves a paragraph boundary,
 // which the paragraph entries would have to mirror.
 //
-// Length-variable path: splices the string plus the two character counters
-// that are coupled to it — the paragraph count at /1/1/0/0/5/0/{i}/1 and the
-// style-run count at /1/1/0/0/6/0/{i}/1 (both in UTF-16 code units, trailing
-// \r included; RE 2026-06-11, see
-// incidents/text-btdk-length-variable-write-scoping.md). The btdk layout
-// cache (/1/1/0/1) is left stale on purpose: AE recomputes it on load
-// (ship-gate-proven). Restricted to single-paragraph / single-run /
-// kerning-free documents — how AE distributes a changed count across multiple
-// entries is un-RE'd.
+// Length-variable path: splices the text string at /1/1/0/0/0, rebuilds the
+// paragraph array at /1/1/0/0/5/0, and sets the single style-run's count at
+// /1/1/0/0/6/0/0/1. AE stores one byte-identical entry per paragraph in the
+// paragraph array, differing only in its /1 unit count (the paragraph's text
+// plus its trailing \r), while the lone style run carries the total unit count
+// — so an arbitrary-paragraph SetText clones the existing entry [0] once per
+// target paragraph with the count patched in. Counts are UTF-16 code units
+// (trailing \r included). Empty text ("") stores as the single paragraph "\r"
+// (count 1). The btdk layout cache (/1/1/0/1) is left stale on purpose: AE
+// recomputes it on load (ship-gate-proven, incl. paragraph-count changes; see
+// incidents/text-btdk-length-variable-write-scoping.md). Restricted to
+// single-style-run / kerning-free documents — how AE distributes a changed
+// count across multiple runs is un-RE'd.
 func (b *layerBackrefs) SetText(newText string) error {
 	if b.btdsChunk == nil {
 		return fmt.Errorf("layer: not a text layer")
@@ -483,45 +488,53 @@ func (b *layerBackrefs) SetText(newText string) error {
 	end := bodyOff + t.SrcEnd
 	encoded := codec.EncodeAEPSText(newText)
 	normalized := codec.NormalizeAEParagraphText(newText)
-	newCount := codec.UTF16CodeUnitLen(normalized)
+	totalCount := codec.UTF16CodeUnitLen(normalized)
 	if len(encoded) == end-start && sameParagraphProfile(t.Str, normalized) {
 		copy(b.btdsChunk.Data[start:end], encoded)
 		return nil
 	}
 
-	if normalized == "\r" {
-		return fmt.Errorf("layer: SetText with empty text is not supported (un-RE'd; AE empty text layers are a distinct form)")
-	}
-	if pa := codec.PsPath(root, "/1/1/0/0/5/0"); pa == nil || pa.Kind != codec.PsArr || len(pa.Arr) != 1 {
-		return fmt.Errorf("layer: length-variable SetText supports single-paragraph documents only (multi-paragraph needs paragraph-entry splicing, un-RE'd)")
-	}
-	if strings.ContainsAny(newText, "\r\n") {
-		return fmt.Errorf("layer: length-variable SetText supports single-paragraph text only (got a line break)")
-	}
 	if ra := codec.PsPath(root, "/1/1/0/0/6/0"); ra == nil || ra.Kind != codec.PsArr || len(ra.Arr) != 1 {
-		return fmt.Errorf("layer: length-variable SetText supports single-style-run documents only")
+		return fmt.Errorf("layer: length-variable SetText supports single-style-run documents only (multi-run count allocation un-RE'd)")
 	}
 	if kern := codec.PsPath(root, "/1/1/0/0/8/0"); kern != nil {
 		return fmt.Errorf("layer: length-variable SetText refused — document carries a per-character manual-kerning table (/1/1/0/0/8/0) that would desync")
 	}
-	for _, p := range [2]string{"/1/1/0/0/5/0/0/1", "/1/1/0/0/6/0/0/1"} {
-		if v := codec.PsPath(root, p); v == nil || v.Kind != codec.PsNum {
-			return fmt.Errorf("layer: character counter at %q missing/not a number", p)
-		}
+	if v := codec.PsPath(root, "/1/1/0/0/6/0/0/1"); v == nil || v.Kind != codec.PsNum {
+		return fmt.Errorf("layer: style-run counter at /1/1/0/0/6/0/0/1 missing/not a number")
+	}
+
+	// Rebuild the paragraph array: one entry per paragraph, each a clone of the
+	// existing entry [0] with its /1 unit count patched in (the paragraph's
+	// text plus its trailing \r). normalized ends with \r, so the split drops a
+	// trailing empty element.
+	pa := codec.PsPath(root, "/1/1/0/0/5/0")
+	if pa == nil || pa.Kind != codec.PsArr || len(pa.Arr) == 0 {
+		return fmt.Errorf("layer: paragraph array /1/1/0/0/5/0 missing")
+	}
+	paras := strings.Split(normalized, "\r")
+	paras = paras[:len(paras)-1]
+	counts := make([]int, len(paras))
+	for i, p := range paras {
+		counts[i] = codec.UTF16CodeUnitLen(p) + 1
+	}
+	template := append([]byte(nil), body[pa.Arr[0].SrcStart:pa.Arr[0].SrcEnd]...)
+	newParaArray, err := buildParagraphArray(template, counts)
+	if err != nil {
+		return fmt.Errorf("layer: SetText paragraph array: %w", err)
 	}
 
 	// Three splices, each of which re-parses (offsets refresh) and patches the
 	// inner btdk size header. Snapshot for atomicity: splicePSValue builds a
 	// fresh array, so restoring the old slice header undoes everything.
 	snapshot := b.btdsChunk.Data
-	count := []byte(strconv.Itoa(newCount))
 	for _, sp := range []struct {
 		path string
 		src  []byte
 	}{
 		{"/1/1/0/0/0", encoded},
-		{"/1/1/0/0/5/0/0/1", count},
-		{"/1/1/0/0/6/0/0/1", count},
+		{"/1/1/0/0/5/0", newParaArray},
+		{"/1/1/0/0/6/0/0/1", []byte(strconv.Itoa(totalCount))},
 	} {
 		if _, err := b.splicePSValue(sp.path, sp.src); err != nil {
 			b.btdsChunk.Data = snapshot
@@ -529,6 +542,42 @@ func (b *layerBackrefs) SetText(newText string) error {
 		}
 	}
 	return nil
+}
+
+// buildParagraphArray emits a btdk paragraph array holding one clone of the
+// template entry per element of counts, with each clone's top-level /1 unit
+// count replaced. Entries are newline-separated (PostScript is whitespace-
+// insensitive); AE rebuilds its layout cache from these on load.
+func buildParagraphArray(template []byte, counts []int) ([]byte, error) {
+	cs, ce, err := paragraphEntryCountRange(template)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	buf.WriteByte('[')
+	for _, c := range counts {
+		buf.WriteByte('\n')
+		buf.Write(template[:cs])
+		buf.WriteString(strconv.Itoa(c))
+		buf.Write(template[ce:])
+	}
+	buf.WriteString("\n]")
+	return buf.Bytes(), nil
+}
+
+// paragraphEntryCountRange parses a single btdk paragraph entry (a dict) and
+// returns the byte range of its top-level /1 unit-count value within entry.
+func paragraphEntryCountRange(entry []byte) (int, int, error) {
+	lx := &codec.PsLexer{D: entry}
+	v := codec.ParsePSValue(lx, lx.Next())
+	if v == nil || v.Kind != codec.PsDict {
+		return 0, 0, fmt.Errorf("paragraph entry is not a dict")
+	}
+	cnt := codec.PsPath(v, "/1")
+	if cnt == nil || cnt.Kind != codec.PsNum {
+		return 0, 0, fmt.Errorf("paragraph entry has no /1 count")
+	}
+	return cnt.SrcStart, cnt.SrcEnd, nil
 }
 
 // sameParagraphProfile reports whether two normalized paragraph strings
