@@ -1252,6 +1252,20 @@ An adjustment layer is a comp-sized white solid with the isAdjust ldta flag: eff
 
 Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (rides the gated solid-family creation path). Free function (CLAUDE.md #2 structural-op call-form).
 
+### NewPrecompLayer
+
+```go
+func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)
+```
+
+NewPrecompLayer adds a layer to `parent` whose source is the composition `child` (a nested / pre-composed comp) and returns it.
+
+A precomp layer is an ordinary AV layer whose ldta SourceID points at an existing CompItem — the source comp already lives in the project, so (unlike the solid family) no backing footage item is created. An AE-native precomp Layr is cloned and spliced in, its SourceID repointed at `child`, and its time span re-homed to 0 → `parent` duration. The returned layer is fully parsed; its Layer.SourceComposition() resolves to `child`.
+
+Refuses when either comp is nil, the name is empty, parent == child, the two comps are in different projects, or the nesting would create a circular composition reference.
+
+Atomic mutation (rides the Camera/Light templated-layer splice: snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 render-pixel ship-gate green on an all-Go-built project. Free function (CLAUDE.md #2 structural-op call-form).
+
 <!-- Hand-authored reference table. -->
 
 ## Renderer engines

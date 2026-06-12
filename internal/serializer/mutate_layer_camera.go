@@ -106,17 +106,20 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 	}
 
 	// Replace the Utf8 name child (length-variable).
+	var nameChunk *rifx.Chunk
 	for _, ch := range layrChunk.Children {
 		if ch.ID == rifx.IDUtf8 {
 			ch.Data = []byte(name)
+			nameChunk = ch
 			break
 		}
 	}
 
-	// Runtime Layer wrapper.
+	// Runtime Layer wrapper. Capture ldta + nameChunk so ldta-based setters
+	// (SetSource for precomp, SetParent, flag bits) work on the fresh layer.
 	base := &Layer{Type: typ, Name: name, ID: layerID}
 	scene.SetLayerComp(base, c)
-	scene.SetLayerBack(base, &layerBackrefs{layrList: layrChunk})
+	scene.SetLayerBack(base, &layerBackrefs{layrList: layrChunk, ldta: ldta, nameChunk: nameChunk})
 	if layerID >= scene.ProjectNextItemID(cProj) {
 		scene.SetProjectNextItemID(cProj, layerID+1)
 	}

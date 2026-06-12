@@ -45,7 +45,7 @@
     {
       "out": "composition.md",
       "roots": ["Composition", "Guide", "GuideOrientation", "EssentialGraphicsController", "EGControllerType"],
-      "funcs": ["NewComposition", "DuplicateComposition", "SetRenderer", "DeleteLayer", "MoveLayer", "InsertLayer", "DuplicateLayer", "NewShapeLayer", "NewCameraLayer", "NewLightLayer", "NewTextLayer", "NewSolidLayer", "NewNullLayer", "NewAdjustmentLayer"],
+      "funcs": ["NewComposition", "DuplicateComposition", "SetRenderer", "DeleteLayer", "MoveLayer", "InsertLayer", "DuplicateLayer", "NewShapeLayer", "NewCameraLayer", "NewLightLayer", "NewTextLayer", "NewSolidLayer", "NewNullLayer", "NewAdjustmentLayer", "NewPrecompLayer"],
       "head": "_includes/composition.head.md",
       "tail": "_includes/composition.tail.md"
     },

@@ -3848,6 +3848,13 @@
       "signature": "func NewNullLayer(c *Composition, name string) (*Layer, error)",
       "summary": "NewNullLayer adds a new null-object layer to the composition and returns it."
     },
+    "NewPrecompLayer": {
+      "kind": "func",
+      "file": "composition.md",
+      "anchor": "#newprecomplayer",
+      "signature": "func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)",
+      "summary": "NewPrecompLayer adds a layer to `parent` whose source is the composition `child` (a nested / pre-composed comp) and returns it."
+    },
     "NewProject": {
       "kind": "func",
       "file": "project.md",
