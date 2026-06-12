@@ -234,6 +234,47 @@ func TestSetTextVariable_MultiRunCollapse(t *testing.T) {
 	}
 }
 
+func TestSetTextVariable_DropsManualKerning(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_text_kern_resize.aep")
+	if err != nil {
+		t.Skipf("re_text_kern_resize.aep not present; run test_data/re_text_kern_resize.jsx in AE 2024")
+	}
+	src := textLayerByName(proj, "kern_src")
+	if src == nil || src.TextSource == nil {
+		t.Fatal("kern_src layer not found")
+	}
+	if len(src.TextSource.ManualKerning) == 0 {
+		t.Fatalf("fixture kern_src should carry a manual-kerning table, got none")
+	}
+
+	// A length-changing replacement drops the manual-kerning table (AE behavior).
+	if err := src.SetText("Hello world"); err != nil {
+		t.Fatalf("SetText on kerned doc: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	rp, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	if len(rp.Warnings) != 0 {
+		t.Errorf("re-parse produced warnings: %v", rp.Warnings)
+	}
+	rl := textLayerByName(rp, "kern_src")
+	if rl == nil || rl.TextSource == nil {
+		t.Fatal("re-parsed kern_src missing")
+	}
+	if rl.TextSource.Text != "Hello world" {
+		t.Errorf("text = %q, want %q", rl.TextSource.Text, "Hello world")
+	}
+	if len(rl.TextSource.ManualKerning) != 0 {
+		t.Errorf("ManualKerning after text change = %v, want empty (dropped)", rl.TextSource.ManualKerning)
+	}
+}
+
 func TestSetTextVariable_ParsedFixture(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_text.aep")
 	if err != nil {

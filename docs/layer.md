@@ -2477,7 +2477,7 @@ func (l *Layer) SetText(newText string) error
 
 SetText replaces a text layer's user-visible text. The new text may be any length and span any number of paragraphs ('\\n' / '\\r' line breaks): the PostScript string is spliced, the paragraph array is rebuilt with one count-patched entry per paragraph, the style-run array is collapsed to a single run carrying the total count (keeping the first run's style, as AE does on a whole-text replace), and the btdk layout cache is left for AE to recompute on load. Empty text ("") is supported (it becomes a single empty paragraph). Replacements that keep both the encoded byte length and the per-paragraph UTF-16 counts are written in place and preserve all runs.
 
-Returns an error when the layer isn't a text layer, or when a length-changing replacement targets a document carrying a per-character manual-kerning table — that would desync against the new character count.
+A per-character manual-kerning table is dropped on a length-changing replacement (as AE does on a whole-text replace); the only error from a well-formed text layer is when the layer isn't actually a text layer.
 
 Encoding parity with AE: input is split on '\\n' (each segment becomes a paragraph terminated by AE's '\\r' convention), then encoded as UTF-16BE with a leading FE FF BOM, with PostScript specials ( ) \\ escaped at the byte level.
 

@@ -466,9 +466,11 @@ func (b *layerBackrefs) SetAlternateSource(item AVItem) error {
 // (trailing \r included). Empty text ("") stores as the single paragraph "\r"
 // (count 1). The btdk layout cache (/1/1/0/1) is left stale on purpose: AE
 // recomputes it on load (ship-gate-proven, incl. paragraph-count and run-count
-// changes; see incidents/text-btdk-length-variable-write-scoping.md).
-// Refused only when the document carries a per-character manual-kerning table,
-// which would desync against the new character count.
+// changes; see incidents/text-btdk-length-variable-write-scoping.md). A
+// per-character manual-kerning table (/1/1/0/0/8) is dropped before the
+// rewrite — AE does the same on a whole-text replace, since per-char kerning is
+// meaningless for the new characters. The length-variable path has no remaining
+// refuse cases.
 func (b *layerBackrefs) SetText(newText string) error {
 	if b.btdsChunk == nil {
 		return fmt.Errorf("layer: not a text layer")
@@ -495,8 +497,30 @@ func (b *layerBackrefs) SetText(newText string) error {
 		return nil
 	}
 
-	if kern := codec.PsPath(root, "/1/1/0/0/8/0"); kern != nil {
-		return fmt.Errorf("layer: length-variable SetText refused — document carries a per-character manual-kerning table (/1/1/0/0/8/0) that would desync")
+	// Snapshot the whole payload before any mutation: every step below builds a
+	// fresh slice, so restoring this header undoes the kerning drop and all
+	// splices atomically.
+	snapshot := b.btdsChunk.Data
+
+	// Drop a per-character manual-kerning table if present: AE discards it on a
+	// whole-text replace (RE 2026-06-12, re_text_kern_resize.aep), and a stale
+	// per-char table would desync against the new character count. Delete the
+	// whole /1/1/0/0/8 subtree, then re-parse since byte offsets shift.
+	if codec.PsPath(root, "/1/1/0/0/8") != nil {
+		if err := b.deleteBtdkKey("/1/1/0/0/8"); err != nil {
+			b.btdsChunk.Data = snapshot
+			return fmt.Errorf("layer: SetText drop kerning: %w", err)
+		}
+		body, _, err = codec.ExtractBtdkBody(b.btdsChunk.Data)
+		if err != nil {
+			b.btdsChunk.Data = snapshot
+			return fmt.Errorf("layer: %w", err)
+		}
+		root = codec.ParsePSDict(body)
+		if root == nil {
+			b.btdsChunk.Data = snapshot
+			return fmt.Errorf("layer: btdk dict empty after kerning drop")
+		}
 	}
 
 	// Paragraph array: one clone of entry [0] per paragraph, each /1 count
@@ -504,6 +528,7 @@ func (b *layerBackrefs) SetText(newText string) error {
 	// \r, so the split drops a trailing empty element.
 	pa := codec.PsPath(root, "/1/1/0/0/5/0")
 	if pa == nil || pa.Kind != codec.PsArr || len(pa.Arr) == 0 {
+		b.btdsChunk.Data = snapshot
 		return fmt.Errorf("layer: paragraph array /1/1/0/0/5/0 missing")
 	}
 	paras := strings.Split(normalized, "\r")
@@ -514,6 +539,7 @@ func (b *layerBackrefs) SetText(newText string) error {
 	}
 	newParaArray, err := buildEntryArray(append([]byte(nil), body[pa.Arr[0].SrcStart:pa.Arr[0].SrcEnd]...), counts)
 	if err != nil {
+		b.btdsChunk.Data = snapshot
 		return fmt.Errorf("layer: SetText paragraph array: %w", err)
 	}
 
@@ -522,17 +548,17 @@ func (b *layerBackrefs) SetText(newText string) error {
 	// rest).
 	ra := codec.PsPath(root, "/1/1/0/0/6/0")
 	if ra == nil || ra.Kind != codec.PsArr || len(ra.Arr) == 0 {
+		b.btdsChunk.Data = snapshot
 		return fmt.Errorf("layer: style-run array /1/1/0/0/6/0 missing")
 	}
 	newRunArray, err := buildEntryArray(append([]byte(nil), body[ra.Arr[0].SrcStart:ra.Arr[0].SrcEnd]...), []int{totalCount})
 	if err != nil {
+		b.btdsChunk.Data = snapshot
 		return fmt.Errorf("layer: SetText run array: %w", err)
 	}
 
 	// Three splices, each of which re-parses (offsets refresh) and patches the
-	// inner btdk size header. Snapshot for atomicity: splicePSValue builds a
-	// fresh array, so restoring the old slice header undoes everything.
-	snapshot := b.btdsChunk.Data
+	// inner btdk size header.
 	for _, sp := range []struct {
 		path string
 		src  []byte
@@ -628,23 +654,26 @@ func (b *layerBackrefs) splicePSValue(path string, newSrc []byte) ([]byte, error
 	}
 	absStart := bodyOff + target.SrcStart
 	absEnd := bodyOff + target.SrcEnd
-	delta := len(newSrc) - (absEnd - absStart)
+	return b.spliceBtdkRange(absStart, absEnd, newSrc, bodyOff)
+}
 
+// spliceBtdkRange replaces b.btdsChunk.Data[absStart:absEnd] with newSrc (nil
+// deletes the range) and patches the inner btdk LIST size header so the next
+// ExtractBtdkBody reads the correct length. bodyOff is the btdk body start, so
+// bodyOff-8 holds that uint32 BE size.
+//
+//	bodyOff-12: "LIST"   bodyOff-8: size (incl. formType)   bodyOff-4: "btdk"
+func (b *layerBackrefs) spliceBtdkRange(absStart, absEnd int, newSrc []byte, bodyOff int) ([]byte, error) {
 	old := b.btdsChunk.Data
+	if absStart < 0 || absEnd > len(old) || absStart > absEnd {
+		return nil, fmt.Errorf("layer: bad btdk splice range [%d:%d] (len %d)", absStart, absEnd, len(old))
+	}
+	delta := len(newSrc) - (absEnd - absStart)
 	newRaw := make([]byte, 0, len(old)+delta)
 	newRaw = append(newRaw, old[:absStart]...)
 	newRaw = append(newRaw, newSrc...)
 	newRaw = append(newRaw, old[absEnd:]...)
 
-	// The inner LIST btdk header (immediately before bodyOff) carries
-	// its own uint32 BE size — bump it by delta so next time we extract
-	// the body we read the correct length. Without this, a length-
-	// changing splice misaligns extractBtdkBody on the next call.
-	// btdk LIST layout (8 bytes header + 4 bytes formType, body starts at bodyOff):
-	//   bodyOff-12: "LIST" (4 bytes)
-	//   bodyOff-8:  size uint32 BE (4 bytes) — includes the formType
-	//   bodyOff-4:  "btdk" (4 bytes formType)
-	//   bodyOff:    body
 	if delta != 0 && bodyOff >= 8 {
 		sizeOff := bodyOff - 8
 		oldSize := binary.BigEndian.Uint32(newRaw[sizeOff : sizeOff+4])
@@ -653,6 +682,45 @@ func (b *layerBackrefs) splicePSValue(path string, newSrc []byte) ([]byte, error
 
 	b.btdsChunk.Data = newRaw
 	return newRaw, nil
+}
+
+// deleteBtdkKey removes the entire dict entry (the "/key" name token plus its
+// value) at path from its parent dict. Used to drop the manual-kerning table on
+// a length-changing SetText, which AE itself discards on a whole-text replace.
+func (b *layerBackrefs) deleteBtdkKey(path string) error {
+	if b.btdsChunk == nil {
+		return fmt.Errorf("layer: not a text layer")
+	}
+	body, bodyOff, err := codec.ExtractBtdkBody(b.btdsChunk.Data)
+	if err != nil {
+		return fmt.Errorf("layer: %w", err)
+	}
+	root := codec.ParsePSDict(body)
+	if root == nil {
+		return fmt.Errorf("layer: btdk dict empty")
+	}
+	v := codec.PsPath(root, path)
+	if v == nil {
+		return fmt.Errorf("layer: no value at %q", path)
+	}
+	// Walk back from the value start over whitespace, then over the key-name
+	// token, to its leading '/'.
+	i := v.SrcStart - 1
+	for i >= 0 && isBtdkWS(body[i]) {
+		i--
+	}
+	for i >= 0 && body[i] != '/' {
+		i--
+	}
+	if i < 0 {
+		return fmt.Errorf("layer: key token before %q not found", path)
+	}
+	_, err = b.spliceBtdkRange(bodyOff+i, bodyOff+v.SrcEnd, nil, bodyOff)
+	return err
+}
+
+func isBtdkWS(c byte) bool {
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == 0
 }
 
 func (b *layerBackrefs) SetRunFontSize(runIdx int, sizePts float64) error {

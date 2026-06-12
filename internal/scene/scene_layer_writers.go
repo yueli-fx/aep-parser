@@ -687,9 +687,9 @@ func (l *Layer) ClearAlternateSource() error { return l.SetAlternateSource(nil) 
 // paragraph). Replacements that keep both the encoded byte length and the
 // per-paragraph UTF-16 counts are written in place and preserve all runs.
 //
-// Returns an error when the layer isn't a text layer, or when a length-changing
-// replacement targets a document carrying a per-character manual-kerning table
-// — that would desync against the new character count.
+// A per-character manual-kerning table is dropped on a length-changing
+// replacement (as AE does on a whole-text replace); the only error from a
+// well-formed text layer is when the layer isn't actually a text layer.
 //
 // Encoding parity with AE: input is split on '\n' (each segment becomes a
 // paragraph terminated by AE's '\r' convention), then encoded as UTF-16BE

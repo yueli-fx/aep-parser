@@ -188,8 +188,54 @@ func runSetTextMultiRunGate(t *testing.T, aeExe, ver string) {
 	}
 }
 
+// runSetTextKerningGate loads the AE-built manual-kerning fixture and replaces
+// its text, exercising the kerning-table drop. Like the multi-run gate it is
+// AE 2024 + AE 2025: td.kerning needs AE 24+, so the fixture is AE-24-stamped
+// (AE 2020 forward-incompat, and 2020 has no manual-kerning scripting path).
+func runSetTextKerningGate(t *testing.T, aeExe, ver string) {
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+	const fixture = `e:/projects/tools/aep-parser/test_data/re_text_kern_resize.aep`
+	proj, err := aep.Open(fixture)
+	if err != nil {
+		t.Skipf("re_text_kern_resize.aep not present; run test_data/re_text_kern_resize.jsx in AE 2024")
+	}
+	src := textLayerByName(proj, "kern_src")
+	if src == nil || src.TextSource == nil {
+		t.Fatal("kern_src layer not found")
+	}
+	if len(src.TextSource.ManualKerning) == 0 {
+		t.Fatalf("fixture kern_src should carry a manual-kerning table, got none")
+	}
+	const newText = "kerning dropped here"
+	if err := src.SetText(newText); err != nil {
+		t.Fatalf("SetText on kerned doc: %v", err)
+	}
+
+	re := textVerifyInAE(t, aeExe, ver, proj, map[string]string{"kern_src": newText})
+	rl := textLayerByName(re, "kern_src")
+	if rl == nil || rl.TextSource == nil {
+		t.Fatalf("%s resaved: kern_src missing", ver)
+	}
+	if rl.TextSource.Text != newText {
+		t.Errorf("%s resaved: text = %q, want %q", ver, rl.TextSource.Text, newText)
+	}
+	if len(rl.TextSource.ManualKerning) != 0 {
+		t.Errorf("%s resaved: ManualKerning = %v, want empty (dropped)", ver, rl.TextSource.ManualKerning)
+	}
+}
+
 func TestSetTextVariable_AEShipGate_AE2020(t *testing.T) {
 	runSetTextGate(t, aep.TargetAE2020, ae2020(), "AE2020")
+}
+
+func TestSetTextKerning_AEShipGate_AE2024(t *testing.T) {
+	runSetTextKerningGate(t, ae2024(), "AE2024")
+}
+
+func TestSetTextKerning_AEShipGate_AE2025(t *testing.T) {
+	runSetTextKerningGate(t, ae2025(), "AE2025")
 }
 
 func TestSetTextVariable_AEShipGate_AE2025(t *testing.T) {
