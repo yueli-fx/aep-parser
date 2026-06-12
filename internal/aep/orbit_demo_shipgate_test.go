@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/codec"
 )
 
 // buildOrbitDemo constructs the demo project (mirrors tmp_debug/anim_demo): all
@@ -49,12 +50,15 @@ func buildOrbitDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err := rect.SetSize([2]float64{2200, 1300}); err != nil {
 		t.Fatalf("rect SetSize: %v", err)
 	}
-	bgFill, err := bg.RootGroup().AddFill()
+	bgFill, err := bg.RootGroup().AddGradientFill()
 	if err != nil {
-		t.Fatalf("AddFill BG: %v", err)
+		t.Fatalf("AddGradientFill BG: %v", err)
 	}
-	if err := bgFill.SetColor([4]float64{0.05, 0.06, 0.12, 1}); err != nil {
-		t.Fatalf("BG SetColor: %v", err)
+	if err := bgFill.SetColorStops([]codec.GradientColorStop{
+		{Offset: 0, Midpoint: 0.5, Color: [3]float64{0.07, 0.08, 0.18}}, // deep indigo
+		{Offset: 1, Midpoint: 0.5, Color: [3]float64{0.01, 0.01, 0.03}}, // near black
+	}); err != nil {
+		t.Fatalf("BG SetColorStops: %v", err)
 	}
 	if err := bg.Position().SetStaticValue([2]float64{cx, cy}); err != nil {
 		t.Fatalf("BG Position: %v", err)
