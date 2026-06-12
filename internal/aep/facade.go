@@ -887,6 +887,32 @@ func DuplicateMask(layer *Layer, m *Mask) (*Mask, error) {
 	return serializer.DuplicateMask(layer, m)
 }
 
+// MoveMask reorders mask m to position toIndex (0-based) among layer's masks,
+// the other masks keeping their relative order — mirroring AE's
+// PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed
+// project; pass the layer it belongs to (masks carry no owning-layer back-ref).
+// toIndex == m's current index is a no-op.
+//
+// Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a
+// (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every
+// mask's triple by its mkif, re-emits the contiguous triple run in the target
+// order (the same chunk pointers — opaque content rides along unchanged,
+// CLAUDE.md #5), and applies the same permutation to the scene property tree
+// and the flat layer.Masks slice. No chunk is created or destroyed, so no LIST
+// size changes.
+//
+// Refused (project untouched): a nil layer/mask, a mask not in layer.Masks,
+// toIndex out of range, a mask built outside the parser (no mkif back-ref), a
+// layer with no Mask Parade, or a parade whose mask triples are not contiguous.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks,
+// move the last to the front, AE accepts the re-emitted triple run and reads
+// the masks back in the new order with the effects untouched). Free function
+// (CLAUDE.md #2 structural-op call-form).
+func MoveMask(layer *Layer, m *Mask, toIndex int) error {
+	return serializer.MoveMask(layer, m, toIndex)
+}
+
 // Effect match-name constants for AddEffect's built-in library. Use these
 // instead of hardcoding AE's internal match-name strings. The trailing comment
 // on each is the display name shown in AE's Effects panel.

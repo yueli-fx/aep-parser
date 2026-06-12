@@ -3785,6 +3785,13 @@
       "signature": "func MoveLayer(c *Composition, from, to int) error",
       "summary": "MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). The source layer's entire chunk block — Layr + Ewst + leaf followers (adaptive scan to next LIST/EOF, same machinery as DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the target slot. After the call, c.Layers[to] == the moved layer, and every layer's Layer.Index field is refreshed to match its new slice position."
     },
+    "MoveMask": {
+      "kind": "func",
+      "file": "mask.md",
+      "anchor": "#movemask",
+      "signature": "func MoveMask(layer *Layer, m *Mask, toIndex int) error",
+      "summary": "MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-ref). toIndex == m's current index is a no-op."
+    },
     "MovePropertyGroup": {
       "kind": "func",
       "file": "property.md",
