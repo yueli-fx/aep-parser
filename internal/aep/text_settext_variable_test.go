@@ -190,6 +190,50 @@ func TestSetTextVariable_MultiParagraphAndEmpty(t *testing.T) {
 	}
 }
 
+func TestSetTextVariable_MultiRunCollapse(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_text_multirun.aep")
+	if err != nil {
+		t.Skipf("re_text_multirun.aep not present; run test_data/re_text_multirun.jsx in AE 2025")
+	}
+	src := textLayerByName(proj, "multirun_src")
+	if src == nil || src.TextSource == nil {
+		t.Fatal("multirun_src layer not found")
+	}
+	if len(src.TextSource.Runs) != 2 {
+		t.Fatalf("fixture multirun_src should carry 2 style runs, got %d", len(src.TextSource.Runs))
+	}
+
+	// Length-changing replacement on a multi-run doc: collapse to one run.
+	if err := src.SetText("collapsed run"); err != nil {
+		t.Fatalf("SetText on multi-run doc: %v", err)
+	}
+	if got := btdkCounter(t, src.TextSourceRaw, "/1/1/0/0/6/0/0/1"); got != 14 {
+		t.Errorf("collapsed run count = %v, want 14", got) // "collapsed run" = 13 + \r
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	rp, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	if len(rp.Warnings) != 0 {
+		t.Errorf("re-parse produced warnings: %v", rp.Warnings)
+	}
+	rl := textLayerByName(rp, "multirun_src")
+	if rl == nil || rl.TextSource == nil {
+		t.Fatal("re-parsed multirun_src missing")
+	}
+	if rl.TextSource.Text != "collapsed run" {
+		t.Errorf("text = %q, want %q", rl.TextSource.Text, "collapsed run")
+	}
+	if len(rl.TextSource.Runs) != 1 {
+		t.Errorf("run count after collapse = %d, want 1", len(rl.TextSource.Runs))
+	}
+}
+
 func TestSetTextVariable_ParsedFixture(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_text.aep")
 	if err != nil {
