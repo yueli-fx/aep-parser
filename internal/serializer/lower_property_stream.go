@@ -363,21 +363,28 @@ func encodeKeyframes[T any](kfs []codec.StreamKeyframe[T], layout valueLayout, e
 	bpk := bytesPerKeyframe(layout)
 
 	// lhd3 — 52 bytes. Magic + numKeyframes @0x08 + bpk @0x10.
-	// Bytes @0x0C/0x14/0x18/0x1C have observed constants; we replicate
-	// the most-common values (from the Layer Position 2D dump).
+	//
+	// @0x0C / @0x1C are NOT constants: they encode list capacity in pages of
+	// 4 keyframes — @0x0C = ceil(n/4) pages, @0x1C = 4 × pages (slot
+	// capacity). AE 2025 validates count ≤ capacity and rejects the project
+	// as corrupt ("读取……无效") when a >4-keyframe list still says capacity 4;
+	// AE 2020 tolerated it, which is how the historic 2-keyframe gates stayed
+	// green (RE'd against an AE-2025-native 6-keyframe Position fixture,
+	// mg-bisect 2026-06-12).
+	pages := uint32((len(kfs) + 3) / 4)
 	lhd3Data := make([]byte, 52)
 	lhd3Data[0] = 0x00
 	lhd3Data[1] = 0xd0
 	lhd3Data[2] = 0x0b
 	lhd3Data[3] = 0xee
 	binary.BigEndian.PutUint32(lhd3Data[0x08:0x0C], uint32(len(kfs)))
-	binary.BigEndian.PutUint32(lhd3Data[0x0C:0x10], 1) // observed constant
+	binary.BigEndian.PutUint32(lhd3Data[0x0C:0x10], pages)
 	binary.BigEndian.PutUint32(lhd3Data[0x10:0x14], uint32(bpk))
-	// @0x14..0x1F: observed `00000004 00000001 00000004`. Semantics
-	// not pinned; replicating verbatim.
+	// @0x14..0x1B: observed `00000004 00000001`. Semantics not pinned;
+	// replicating verbatim.
 	binary.BigEndian.PutUint32(lhd3Data[0x14:0x18], 4)
 	binary.BigEndian.PutUint32(lhd3Data[0x18:0x1C], 1)
-	binary.BigEndian.PutUint32(lhd3Data[0x1C:0x20], 4)
+	binary.BigEndian.PutUint32(lhd3Data[0x1C:0x20], 4*pages)
 
 	// ldat — N × bpk bytes.
 	ldatData := make([]byte, len(kfs)*bpk)
@@ -402,15 +409,25 @@ func bytesPerKeyframe(layout valueLayout) int {
 }
 
 // writeKeyframeBlock fills a single bpk-byte block per parse_keyframe.go
-// layout (kfLayout / decodeEasing). For V2.2 hot path we emit linear-interp
-// keyframes with the InEase/OutEase fields carried verbatim from the
-// codec.StreamKeyframe — zero ease is the default and matches AE-linear.
+// layout (kfLayout / decodeEasing) with the InEase/OutEase fields carried
+// verbatim from the codec.StreamKeyframe.
+//
+// The interp byte must agree with the ease table per side: a side with a
+// non-zero TemporalEase is emitted as Bezier (2), a zero-ease side as Linear
+// (1) — AE ignores the speed/influence table on a side whose interp byte
+// says Linear, so stamping Linear unconditionally silently drops the ease
+// AddKeyframeWithEase recorded.
 func writeKeyframeBlock[T any](blk []byte, kf codec.StreamKeyframe[T], layout valueLayout, enc encodeFunc[T], ctx *lowerCtx) {
 	// Time @0x00..0x03 = round(seconds * tickRate).
 	binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(kf.Time*ctx.tickRate)))
-	// In/Out interp bytes (1 = linear by default; AddKeyframeLinear path).
-	blk[0x04] = byte(InterpLinear)
-	blk[0x05] = byte(InterpLinear)
+	interpFor := func(e codec.TemporalEase) byte {
+		if e.Speed != 0 || e.Influence != 0 {
+			return byte(InterpBezier)
+		}
+		return byte(InterpLinear)
+	}
+	blk[0x04] = interpFor(kf.InEase)
+	blk[0x05] = interpFor(kf.OutEase)
 	blk[0x06] = 0x00
 	blk[0x07] = layout.headerByte
 

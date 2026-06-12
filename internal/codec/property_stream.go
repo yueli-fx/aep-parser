@@ -105,7 +105,20 @@ func (ps *PropertyStream[T]) AddKeyframeLinear(time float64, value T) error {
 
 // AddKeyframeWithEase adds a keyframe with explicit in/out temporal ease.
 // Triggers Static → Animated transition on first call.
+//
+// A side whose TemporalEase is the zero value stays linear on that side;
+// an eased side requires Influence in (0, 1] (fraction of the keyframe
+// interval, matching the binary encoding — AE's UI percent / 100). The
+// serialized keyframe carries Bezier interpolation on each eased side.
 func (ps *PropertyStream[T]) AddKeyframeWithEase(time float64, value T, in, out TemporalEase) error {
+	for side, e := range map[string]TemporalEase{"in": in, "out": out} {
+		if e == (TemporalEase{}) {
+			continue
+		}
+		if e.Influence <= 0 || e.Influence > 1 {
+			return fmt.Errorf("AddKeyframeWithEase: %s ease influence %g out of range (0, 1] (fraction, not percent)", side, e.Influence)
+		}
+	}
 	return ps.addKeyframe(StreamKeyframe[T]{Time: time, Value: value, InEase: in, OutEase: out})
 }
 
