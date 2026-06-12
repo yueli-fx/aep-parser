@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing arbitrary-length SetText / NewTextLayer text param; editing btds bytes and wondering which counters must stay in sync; debugging text layout after a btds edit; assuming the btdk layout cache must be kept accurate
 applies_to: [text, btdk, btds, settext, length-variable, layout-cache, char-count, new-text-layer, postscript, cooltype, re-finding]
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 resolved_by:
 ---
 
@@ -13,6 +13,10 @@ resolved_by:
 - error_type: —
 - where: Layer.SetText (scene_layer_writers.go) / layerBackrefs.SetText (back_layer.go)
 - trigger: writing a text string whose UTF-16BE encoding differs in byte length from the stored one
+
+> **STATUS (2026-06-12, v2)**: empty + multi-paragraph SetText **SHIPPED** (双版本
+> ship-gate PASS）。变长 refuse 集现仅剩 **多 style-run** + **手动 kerning 表**。
+> v2 findings 见 § 修法 v2。下方 v1 守卫描述保留作历程。
 
 ## 症状/复现
 
@@ -50,6 +54,45 @@ resave 保留）——**stale 布局缓存在长度变化尺度下也被 AE 容�
 style-run + 无手动 kerning 表（`/1/1/0/0/8/0`）+ 非空。多段落变长需 splice 新
 段落 dict entry；多 run 需计数分配策略（新字符归哪个 run = AE 行为，未 RE）。
 
+## 修法 — v2 已 SHIP（2026-06-12，空串 + 多段落解封）
+
+用户点名解封空串 + 多段落（跳过多 run）。两件事 RE 自 `re_text_multipara.jsx`
+（AE 2020：`empty_addText` / `empty_setValue` / `three_para` / `one_para`）+ 已有
+`re_text.aep` 的 `text_two_lines`：
+
+**RE finding 1 — 空串不是「distinct form」**（v1 注释的担忧证伪）。AE 空文本层
+btdk = 单段落路径：串 `/1/1/0/0/0` = `"\r"`、段落计数 `/0/5/0/0/1` = 1、run 计数
+`/0/6/0/0/1` = 1，其余全是 layout 缓存（AE 载入重算）。`addText("")` 与
+`setValue("")` 仅 leading 度量一处差（runtime，AE 自给）。**=> 删 `normalized=="\r"`
+守卫即解封，现有 splice 路径原样产出。**
+
+**RE finding 2 — 多段落 = N 个逐字节相同的段落 entry 克隆**。`/1/1/0/0/5/0` 段落
+数组每段一个 entry，**仅 `/1` 单位计数不同**（该段文本 + 尾 `\r`，UTF-16 units）；
+样式 dict（`/0/0/0/5` 的 40-key 块）逐字节相同。**单 style-run 不变**——run 数组
+仍 1 个 entry，`/1` = 总 units。例：`L1\rL2\rL3\r` → 段落计数 `[3,3,3]`、run 计数 `9`。
+
+**修法**：变长路径改为 rebuild 段落数组——取现存 entry `[0]` 原始字节当模板，按
+目标段落数克隆，每份 patch `/1`（`buildParagraphArray` / `paragraphEntryCountRange`
+in `back_layer.go`）。三次 splice：串 `/1/1/0/0/0` + 段落数组 `/1/1/0/0/5/0`（整组替换）
++ run 计数 `/1/1/0/0/6/0/0/1`。layout 缓存（含段落数不符的 stale 结构）原样留给 AE
+重算。**AE 2020 + AE 2025 双版本 ship-gate PASS**（`runSetTextGate` T1-T4：ASCII 1→17
+units、CJK 1→5、3 段落块、空串）——**stale 缓存在段落数变化下也被 AE 完全重算容忍**
+（v1 只证了单段落长度变化尺度）。
+
+**实现细节**：`jsExpect`（AE `value.text` 用 `\r` 段落分隔，无尾 terminator）≠ Go
+`TextSource.Text`（`\r`→`\n`、剥尾 `\r`）——ship-gate verify JSX 比 `\r` 形、Go resave
+preservation 比 `\n` 形。`jsStringEscape` 须转义控制字符（`\r`/`\n` → `\uXXXX`）否则
+`eval()` 见裸 line terminator 炸。
+
+**v2 守卫（剩余 refuse 集）**：仅 **多 style-run**（计数分配 = AE 行为，未 RE）+
+**手动 kerning 表**（`/1/1/0/0/8/0`，per-char 数组会 desync）。单段落/多段落/空串 ×
+单 run × 无 kerning = 全支持。
+
+> **AE 2025 ship-gate 注意**：首跑 + warm-retry 都 exit 2（unknown modal），OCR 抓到
+> 的是 **About/credits 启动闪屏**（"1992...2024 / 保留所有权利 / 署名"），非数据 reject
+> 对话框。clear crash state + kill AfterFX 后干净重跑即 PASS（12s）。冷启动闪屏 flake，
+> 非 reject——但仍照 [[feedback_ship_gate_exit2_capture_dialog]] 先验 OCR 再判。
+
 **实现陷阱（写时踩到）**：
 
 1. **等长快路径必须比「段落剖面」而非总量**：`"A\rB"→"XYZ"` 字节数、总字符数
@@ -73,3 +116,4 @@ style-run + 无手动 kerning 表（`/1/1/0/0/8/0`）+ 非空。多段落变长�
 
 ## Cases
 - 2026-06-11 首次（NewTextLayer ship 时的 scoping pass）
+- 2026-06-12 v2 ship：空串 + 多段落解封（双版本 ship-gate PASS）；refuse 集缩到多 run + kerning
