@@ -17,6 +17,8 @@ package aep_test
 
 import (
 	"fmt"
+	"image"
+	_ "image/png"
 	"os"
 	"path/filepath"
 	"strings"
@@ -130,7 +132,59 @@ func buildOrbitDemo(t *testing.T, target aep.AETarget) *aep.Project {
 			t.Fatalf("%s Rotation kf1: %v", d.name, err)
 		}
 	}
-	return p
+
+	// BG was created first → top layer, covering everything. Sink it with the
+	// gated MoveToEnd op (needs a parsed layer, hence Reopen).
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	if err := aep.MoveToEnd(rp.Compositions[0].LayerByName("BG")); err != nil {
+		t.Fatalf("MoveToEnd BG: %v", err)
+	}
+	return rp
+}
+
+// orbitPixelChecks are the render-pixel assertions (delivery-contract red
+// line 4: colour/render-affecting capabilities must be verified on RENDERED
+// pixels). Sample points dodge the ring stroke where it crosses dot centres.
+var orbitPixelChecks = []struct {
+	name string
+	x, y int
+	want [3]uint8
+}{
+	{"BG-indigo", 200, 540, [3]uint8{18, 20, 46}},     // gradient stop 0 (0.07,0.08,0.18)
+	{"Ring-cyan", 630, 540, [3]uint8{64, 217, 255}},   // stroke (0.25,0.85,1)
+	{"Dot1-amber", 960, 230, [3]uint8{255, 140, 26}},  // fill (1,0.55,0.1)
+	{"Dot2-magenta", 1228, 695, [3]uint8{255, 51, 140}}, // fill (1,0.2,0.55)
+	{"Dot3-teal", 692, 695, [3]uint8{51, 255, 179}},   // fill (0.2,1,0.7)
+}
+
+func checkOrbitRenderedPixels(t *testing.T, ver, pngPath string) {
+	t.Helper()
+	f, err := os.Open(pngPath)
+	if err != nil {
+		t.Errorf("%s rendered frame missing: %v", ver, err)
+		return
+	}
+	defer f.Close()
+	img, _, err := image.Decode(f)
+	if err != nil {
+		t.Errorf("%s decode rendered frame: %v", ver, err)
+		return
+	}
+	const tol = 8
+	for _, c := range orbitPixelChecks {
+		r, g, b, _ := img.At(c.x, c.y).RGBA()
+		got := [3]int{int(r >> 8), int(g >> 8), int(b >> 8)}
+		for i := range 3 {
+			d := got[i] - int(c.want[i])
+			if d < -tol || d > tol {
+				t.Errorf("%s render %s @(%d,%d): got RGB%v want ~%v", ver, c.name, c.x, c.y, got, c.want)
+				break
+			}
+		}
+	}
 }
 
 func runOrbitDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
@@ -147,6 +201,7 @@ func runOrbitDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	inputAEP := filepath.Join(tempDir, "orbit_in.aep")
 	resavedAEP := filepath.Join(tempDir, "orbit_resaved.aep")
 	doneFile := filepath.Join(tempDir, "orbit.done")
+	framePNG := filepath.Join(tempDir, "orbit_frame.png")
 
 	out, err := os.Create(inputAEP)
 	if err != nil {
@@ -158,8 +213,8 @@ func runOrbitDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	out.Close()
 
-	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
-		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
+		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -177,6 +232,9 @@ func runOrbitDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if lines := strings.SplitN(body, "\n", 2); len(lines) == 0 || strings.TrimSpace(lines[0]) != "PASS" {
 		t.Errorf("orbit demo %s ship gate FAIL:\n%s", ver, body)
 	}
+
+	// Red line 4: verify the RENDERED frame, not just stored values.
+	checkOrbitRenderedPixels(t, ver, framePNG)
 
 	// Acceptance proof: AE's own resave still carries 5 layers + the dots'
 	// rotation keyframes.

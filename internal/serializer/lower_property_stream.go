@@ -241,6 +241,19 @@ func makeTdsb() *rifx.Chunk {
 	return &rifx.Chunk{ID: rifx.ChunkID{'t', 'd', 's', 'b'}, Data: []byte{0x00, 0x00, 0x00, 0x01}}
 }
 
+// makeTdsbFlags returns a tdsb chunk with an explicit flag word. Bit0 is an
+// enabled bit AE honours at RENDER time: a layer-style fx group with bit0 set
+// renders that style. The Layer Styles placeholder family must carry the
+// AE-native words (body / Blend Options 0x03, fx/enabled groups 0x02, layer
+// placeholder groups 0x03; identical AE 2020 + 2025) — the generic leaf 0x01
+// turned every style ON and collapsed rendered colours under a red
+// solid-fill + bevel overlay even though all stored values were correct.
+func makeTdsbFlags(flags uint32) *rifx.Chunk {
+	d := make([]byte, 4)
+	binary.BigEndian.PutUint32(d, flags)
+	return &rifx.Chunk{ID: rifx.ChunkID{'t', 'd', 's', 'b'}, Data: d}
+}
+
 // makeTdsbContainer returns the `0x00000401` variant observed at user-extensible
 // shape-container levels in tolerance.aep: the Root Vectors Group body, the
 // Vectors Group body. AE appears to set the 0x0400 bit to mark "this group

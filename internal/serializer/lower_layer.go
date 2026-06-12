@@ -167,10 +167,10 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// 3-child LIST(tdgp).
 	appendLayerStylesPlaceholder(outer)
 	outer.Children = append(outer.Children,
-		makeTdmn("ADBE Extrsn Options Group"), emptyPropGroup(),
-		makeTdmn("ADBE Material Options Group"), emptyPropGroup(),
-		makeTdmn("ADBE Audio Group"), emptyPropGroup(),
-		makeTdmn("ADBE Layer Sets"), emptyPropGroup(),
+		makeTdmn("ADBE Extrsn Options Group"), emptyPropGroupFlags(0x03),
+		makeTdmn("ADBE Material Options Group"), emptyPropGroupFlags(0x03),
+		makeTdmn("ADBE Audio Group"), emptyPropGroupFlags(0x03),
+		makeTdmn("ADBE Layer Sets"), emptyPropGroupFlags(0x03),
 	)
 
 	outer.Children = append(outer.Children, makeTdmn("ADBE Group End"))
@@ -227,9 +227,15 @@ func makeGideBoilerplate() *rifx.Chunk {
 // sub-property placeholders (e.g. Vector Transform Group inside Vector Group;
 // Adv Blend Group inside Layer Styles).
 func emptyPropGroup() *rifx.Chunk {
+	return emptyPropGroupFlags(0x01)
+}
+
+// emptyPropGroupFlags is emptyPropGroup with an explicit tdsb flag word —
+// see makeTdsbFlags for why the Layer Styles family must not use 0x01.
+func emptyPropGroupFlags(flags uint32) *rifx.Chunk {
 	g := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	g.Children = append(g.Children,
-		makeTdsb(),
+		makeTdsbFlags(flags),
 		makeTdsn(""),
 		makeTdmn("ADBE Group End"),
 	)
@@ -239,18 +245,22 @@ func emptyPropGroup() *rifx.Chunk {
 // appendLayerStylesPlaceholder appends `tdmn(ADBE Layer Styles) +
 // LIST(tdgp, canonical nested structure)` to outer. The canonical body
 // per tolerance.aep dump line 145-209 holds:
-//   - tdsb + tdsn
-//   - tdmn(ADBE Blend Options Group) + LIST(tdgp){ tdsb + tdsn +
+//   - tdsb(0x03) + tdsn
+//   - tdmn(ADBE Blend Options Group) + LIST(tdgp){ tdsb(0x03) + tdsn +
 //     tdmn(ADBE Adv Blend Group) + emptyPropGroup() + Group End }
-//   - 10 × (tdmn(fxName/enabled) + emptyPropGroup())
+//   - 10 × (tdmn(fxName/enabled) + emptyPropGroupFlags(0x02))
 //   - tdmn(ADBE Group End)
+//
+// The tdsb words are load-bearing: bit0 = enabled. fx/enabled groups must be
+// 0x02 (present, OFF) — 0x01 makes AE render all 10 styles (red solid-fill +
+// bevel collapse) while every readable DOM value still looks correct.
 func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
-	body.Children = append(body.Children, makeTdsb(), makeTdsn(""))
+	body.Children = append(body.Children, makeTdsbFlags(0x03), makeTdsn(""))
 
 	blendOpts := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	blendOpts.Children = append(blendOpts.Children,
-		makeTdsb(),
+		makeTdsbFlags(0x03),
 		makeTdsn(""),
 		makeTdmn("ADBE Adv Blend Group"), emptyPropGroup(),
 		makeTdmn("ADBE Group End"),
@@ -272,7 +282,7 @@ func appendLayerStylesPlaceholder(outer *rifx.Chunk) {
 		"frameFX/enabled",
 	}
 	for _, n := range fxNames {
-		body.Children = append(body.Children, makeTdmn(n), emptyPropGroup())
+		body.Children = append(body.Children, makeTdmn(n), emptyPropGroupFlags(0x02))
 	}
 	body.Children = append(body.Children, makeTdmn("ADBE Group End"))
 
