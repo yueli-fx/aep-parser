@@ -1,22 +1,23 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（**Essential Graphics W 启动**：Phase-0 绑定拓扑纯代码 RE 完成（CIF* 三代 + CCtl per-CTyp 值 chunk + OvG2/CPrp + override 值流，详 plan）+ Phase 1 `SetMotionGraphicsTemplateName` 落地（Alpha，6 槽 length-variable，round-trip 测试 ×2）。下一步 Phase 2 `AddEssentialProperty`）
-**Active focus**: **Essential Graphics W**（`plans/2026-06-12-essential-graphics-write.md`）——deferred-backlog 仅存的真未实现写线头。前序 vein：**结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → Solid/Null/Adjustment（详 `incidents/new-layer-types-scoping.md`）。2026-06-11 落：effect 全 12 模板双版本 gated + AddEffect/RemoveEffect 升 Stable + **NewTextLayer**（embed-whole-Layr，**新建图层类型全部建齐**；fresh 层免 Reopen 可读 TextSource/等长 SetText；btdk 改字长解封路径详 `incidents/text-btdk-length-variable-write-scoping.md`）。⚠ scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 拒收，已修（详 `incidents/nextitemid-must-include-layer-ids.md`）。M8 物理分包已落。
+**Last updated**: 2026-06-12 by claude（**Essential Graphics W 单日收口**：Phase-0 纯代码 RE → `SetMotionGraphicsTemplateName` + `AddEssentialProperty` 落地 → `TestEGAdd` 双版本 ship-gate PASS（all-Go-built，19.7s/13.4s）。Alpha 待用例积累；plan 已归档，RE 知识沉淀 `incidents/essential-graphics-write-re.md`）
+**Active focus**: **需求驱动期**——deferred-backlog「仅存真未实现写线头」Essential Graphics W 已 ship（2026-06-12），纯代码可推前沿全部落地；剩余条目均需求驱动或 fixture/RE-gated。前序 vein：**结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → Solid/Null/Adjustment（详 `incidents/new-layer-types-scoping.md`）。2026-06-11 落：effect 全 12 模板双版本 gated + AddEffect/RemoveEffect 升 Stable + **NewTextLayer**（embed-whole-Layr，**新建图层类型全部建齐**；fresh 层免 Reopen 可读 TextSource/等长 SetText；btdk 改字长解封路径详 `incidents/text-btdk-length-variable-write-scoping.md`）。⚠ scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 拒收，已修（详 `incidents/nextitemid-must-include-layer-ids.md`）。M8 物理分包已落。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
 - [2026-05-22-v3-direction.md](specs/2026-05-22-v3-direction.md) — V3 direction：scene-graph IR + capability matrix + serializer split。M1-M8 框架已实现（结构性 mutation Phase 1-5 + 包重组① + M8 真·物理分包② 全落）；可达字段 ~99% ship，剩余前沿 fixture/RE-gated（详 plans/coverage.md）。 — [note: 大 arc 实质收尾（2026-06-09）—— M8 物理分包完成（design+plan 已归档）；剩 ValueText / Layr 3D 通道等 fixture-gated 边缘项，无 active 大 plan。]
-- [2026-06-12-essential-graphics-write.md](plans/2026-06-12-essential-graphics-write.md) — Essential Graphics 写路径：SetMotionGraphicsTemplateName + AddEssentialProperty（CCtl×3 代 CIF + OvG2/CPrp 绑定 + override 值流），Phase-0 RE 纯代码已完成
 - [coverage-detail.md](plans/coverage-detail.md) — 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
 - [coverage.md](plans/coverage.md) — 字段覆盖概览（精简入口）
 <!-- /AUTO -->
 
 ## 下一步
 
-**Essential Graphics W Phase 2（当前主线，2026-06-12 启动）**：`AddEssentialProperty(comp, layer, prop, displayName)` 结构性写——三处协同（三代 CIF* append CCtl + CcCt++ · 宿主层 OvG2 CprC++/CPrp · Layer Overrides tdgp 插 override 值流）+ UUID 生成 + parade auto-create 兜底（Go-built 层 OvG2 不齐）。V1 范围 slider/color/checkbox。然后 Phase 3 双版本 ship-gate（all-Go-built 变体防 ID coincidence），gate 绿后 SetMotionGraphicsTemplateName + AddEssentialProperty 一并 Alpha→Stable。开放问题（路径 JSON index 语义 / override cdat 值语义）实现期对照 fixture 解。详 `plans/2026-06-12-essential-graphics-write.md`。
+✅ **Essential Graphics W 已 ship（2026-06-12 单日全程）**：`SetMotionGraphicsTemplateName`（6 槽 length-variable）+ `aep.AddEssentialProperty`（三处协同结构性写，V1 = scalar/slider/checkbox/color）双版本 ship-gate PASS。Alpha 待用例积累。布局/gotcha 详 `incidents/essential-graphics-write-re.md`；deferred（point/dropdown/text/Transform 源/RemoveEssentialProperty）需求驱动。
 
-——以下为前序 vein 状态（结构性创建 vein 已实质收口，剩余条目需求驱动或 fixture-gated；候选：AddMask/SetEffectParam Alpha→Stable（待用例积累）· 需求驱动条目（↓4/5））。
+**候选下一步（均需求驱动，无单一主线）**：Alpha→Stable 批次（AddMask / SetEffectParam / AddEssentialProperty，待用例积累）· SetText 变长解封（↓4）· Solid 系小件（↓5）· encodeBezier AE-native 字节（纯优化）。
+
+——以下为前序 vein 状态（结构性创建 vein 已实质收口）。
 
 ✅ **shape path open/closed parser bug 已修（2026-06-12，确证公共 API bug）**：dump AE-native `v2_2_shape_path_re.aep`（含开放 path）发现 `decodeShapePath` 用恒 0x01 的 shph[0x14] 读 closed → 公共 API `Layer.ShapePaths[].Closed` + JSON 对**所有**开放 shape path 误报 true，已改读 shph[3]（同 hydrate）+ 回归测试 + fixture 验证。同时**纠正上一轮**：AE-native shape path 的 closed/lhd3 字段与 mask 完全一致（shph[3] open=0x09 / @0x14=4 恒 / @0x18=1 恒），encodeBezier 是通用偏差非 mask 独有，只是 shape 侧 AE 容忍。详 `incidents/add-mask-create-re.md` §三 finding 4（含 ground-truth 表）。
 
@@ -34,7 +35,7 @@
 
 ## Backlog（单条候选）
 
-1. **结构性创建 vein**（见 ↑下一步 1-4）— **当前主线**，纯代码可推。
+1. **结构性创建 vein 收尾件**（见 ↑下一步 4/5 + Alpha→Stable 批次）— 需求驱动。
 2. **Layr Transform 3D 通道**（Orientation / Rotate X·Y / Position_Z）— 需先有 3D layer 支持（V2.3，与新建 Camera/Light 层相关）。
 3. 泛型 `DuplicateItem`（无 scripting API）· `ImportComposition`（需求驱动）· **Property synthesis**（暂搁大 feature，详 `incidents/transform-group-default-omission.md`）。
 

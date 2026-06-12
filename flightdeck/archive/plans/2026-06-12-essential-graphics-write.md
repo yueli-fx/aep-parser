@@ -1,12 +1,18 @@
 ---
-status: active
-summary: Essential Graphics 写路径：SetMotionGraphicsTemplateName + AddEssentialProperty（CCtl×3 代 CIF + OvG2/CPrp 绑定 + override 值流），Phase-0 RE 纯代码已完成
+status: done
+summary: Essential Graphics 写路径 ✅ DONE（2026-06-12 单日全程）：Phase-0 绑定拓扑纯代码 RE → SetMotionGraphicsTemplateName（6 槽 length-variable）→ AddEssentialProperty（三处协同结构性写，V1 scalar/slider/checkbox/color）→ TestEGAdd 双版本 ship-gate PASS（all-Go-built，19.7s/13.4s）。Alpha 待用例积累；point/dropdown/text/Transform 源 deferred（需求驱动）
 last_updated: 2026-06-12
 ---
 
 # Essential Graphics W
 
 deferred-backlog「仅存的真未实现写线头」。读侧已 ship（CIF3→CCtl: Name/Type/UUID + 模板名）。
+
+> **✅ 全程完成（2026-06-12）**：Phase 1 = commit `6808826`；Phase 2+3 = commit `6007bbb`（`TestEGAdd_AEShipGate_AE2020` PASS 19.7s / `_AE2025` PASS 13.4s，controller UUID 在 AE resave 后保持）。实现 `internal/serializer/mutate_essential_graphics.go` + `write_essential_graphics.go`。
+>
+> **实现期解掉的开放问题**：路径 JSON index = **父组内 0-based 位置**（leaf 含 "-0000" 头对计 0；slider fixture 的 parade 实为 [Fill, Slider] 故 index=1——前轮误判）；固定组（Effect Parade / Transform Group / Opacity）= -1（序列化为 4294967295）。override tdgp 值流**所有**源类型都有（含 Transform 源——前轮 grep 漏掉 ADBE Opacity 流）；tdsn 仅在改名时携带 display name，否则 "-_0_/-" 占位。override cdat = 当前值。
+>
+> **Deferred（需求驱动）**：point（CVal 像素 vs cdat 分数需换算）/ dropdown（StVc 选项表）/ text（双 Utf8 + CFEd/CSEd + 能力 JSON + CTov）/ Transform 属性源 / RemoveEssentialProperty / Alpha→Stable（待用例积累）。
 
 ## Phase 0 — RE（✅ 2026-06-12 纯代码完成，零 AE 调用）
 
