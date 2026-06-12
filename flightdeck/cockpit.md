@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-12 by claude（EG W 收口后顺手收掉「Solid 系小件」主件：`Footage.SetSolidColor`/`SetSolidSize` 独立 setter（Alpha，与 NewSolidLayer gate 同字节路径）。候选下一步剩：Alpha→Stable 批次（待用例）· SetText 变长解封 · encodeBezier 纯优化）
+**Last updated**: 2026-06-12 by claude（**Alpha→Stable 审计批次落**（用户点名确认用例 gate）：AddMask / SetEffectParam / AddEssentialProperty / SetMotionGraphicsTemplateName 凭在册 gate 升级；SetSolidColor·Size 补 standalone 双版本 gate（`TestSolidSetters` PASS 16.4s/11.0s）后升级。候选剩：SetText 变长解封 · encodeBezier 纯优化）
 **Active focus**: **需求驱动期**——deferred-backlog「仅存真未实现写线头」Essential Graphics W 已 ship（2026-06-12），纯代码可推前沿全部落地；剩余条目均需求驱动或 fixture/RE-gated。前序 vein：**结构性创建 vein（纯代码前沿）** — 结构性创建路径纯代码可推 + ship-gate 自助（agent 跑 `scripts/ae_run.ps1` 双版本无人值守）。2026-06-10 落：AddEffect（12 效果库）→ Camera/Light → parade auto-create + `aep.Reopen` → Solid/Null/Adjustment（详 `incidents/new-layer-types-scoping.md`）。2026-06-11 落：effect 全 12 模板双版本 gated + AddEffect/RemoveEffect 升 Stable + **NewTextLayer**（embed-whole-Layr，**新建图层类型全部建齐**；fresh 层免 Reopen 可读 TextSource/等长 SetText；btdk 改字长解封路径详 `incidents/text-btdk-length-variable-write-scoping.md`）。⚠ scar：Go-built 工程 allocItemID 撞 service 层 ID 2..12 → AE 2025 拒收，已修（详 `incidents/nextitemid-must-include-layer-ids.md`）。M8 物理分包已落。
 
 ## 进行中
@@ -15,7 +15,9 @@
 
 ✅ **Essential Graphics W 已 ship（2026-06-12 单日全程）**：`SetMotionGraphicsTemplateName`（6 槽 length-variable）+ `aep.AddEssentialProperty`（三处协同结构性写，V1 = scalar/slider/checkbox/color）双版本 ship-gate PASS。Alpha 待用例积累。布局/gotcha 详 `incidents/essential-graphics-write-re.md`；deferred（point/dropdown/text/Transform 源/RemoveEssentialProperty）需求驱动。
 
-**候选下一步（均需求驱动，无单一主线）**：Alpha→Stable 批次（AddMask / SetEffectParam / AddEssentialProperty / SetSolidColor·Size，待用例积累）· SetText 变长解封（↓4）· encodeBezier AE-native 字节（纯优化）。
+✅ **Alpha→Stable 审计批次（2026-06-12 落）**：五个写 API 升 Stable——AddMask（gate 4/4 在册）· SetEffectParam（gate ×2 在册）· AddEssentialProperty + SetMotionGraphicsTemplateName（TestEGAdd 当日 PASS）· SetSolidColor/SetSolidSize（审计发现 standalone 无 gate → 补 `TestSolidSetters_AEShipGate_AE2020/_AE2025` 实跑 PASS 16.4s/11.0s）。结构性写 API 现无 Alpha 遗留（RQ AddItem/RemoveItem、AddMarker、InsertLayer 家族除外——各有既注明的 gate 缺口或限制）。
+
+**候选下一步（均需求驱动，无单一主线）**：SetText 变长解封（↓4）· encodeBezier AE-native 字节（纯优化）· RQ/Marker/InsertLayer 残余 Alpha 的 gate 补齐（需求驱动）。
 
 ——以下为前序 vein 状态（结构性创建 vein 已实质收口）。
 
