@@ -14,9 +14,9 @@ resolved_by:
 - where: Layer.SetText (scene_layer_writers.go) / layerBackrefs.SetText (back_layer.go)
 - trigger: writing a text string whose UTF-16BE encoding differs in byte length from the stored one
 
-> **STATUS (2026-06-12, v2)**: empty + multi-paragraph SetText **SHIPPED** (双版本
-> ship-gate PASS）。变长 refuse 集现仅剩 **多 style-run** + **手动 kerning 表**。
-> v2 findings 见 § 修法 v2。下方 v1 守卫描述保留作历程。
+> **STATUS (2026-06-12, v3)**: empty + multi-paragraph + **multi-run** SetText 全
+> **SHIPPED**（ship-gate PASS）。变长 refuse 集现仅剩 **手动 kerning 表**一项。单/多
+> 段落 × 单/多 run × 空串 = 全支持。findings 见 § 修法 v2 / v3。v1 守卫描述存历程。
 
 ## 症状/复现
 
@@ -84,9 +84,29 @@ units、CJK 1→5、3 段落块、空串）——**stale 缓存在段落数变�
 preservation 比 `\n` 形。`jsStringEscape` 须转义控制字符（`\r`/`\n` → `\uXXXX`）否则
 `eval()` 见裸 line terminator 炸。
 
-**v2 守卫（剩余 refuse 集）**：仅 **多 style-run**（计数分配 = AE 行为，未 RE）+
-**手动 kerning 表**（`/1/1/0/0/8/0`，per-char 数组会 desync）。单段落/多段落/空串 ×
-单 run × 无 kerning = 全支持。
+## 修法 — v3 已 SHIP（2026-06-12，多 run 解封）
+
+用户点名继续解封多 run。**RE finding（`re_text_multirun.jsx` @ AE 2025，characterRange
+造 2-run "Hello" 红/蓝）= 整文本替换时 AE 把 run 数组 collapse 成单个，保留 run[0] 样式**：
+- `multirun_src`：run 数组 `/1/1/0/0/6/0` n=2，run[0] fill `[1,1,0,0]`(红)、run[1] `[1,0,0,1]`(蓝)。
+- `multirun_setvalue`（`td.text=...` + `setValue`）→ **run 数组 n=1，fill `[1,1,0,0]`=run[0] 红**。
+- `multirun_charrange`（`characterRange(0,5).text=...`）→ 同样 collapse 到 n=1。
+
+=> 「多 run 计数分配」根本不需要 RE——AE 自己就是 **collapse-to-first-run**。`multirun_setvalue`
+就是 AE 亲手产出的 ground truth。
+
+**修法**：变长路径加一步——run 数组 `/1/1/0/0/6/0` rebuild 成单个 entry（clone run[0]、
+`/1`=总计数），跟段落数组同一个 `buildEntryArray` helper（段落/run entry 同构，top-level
+`/1` = 计数）。删多 run refuse 守卫。最终 splice 三处：串 + 段落数组（整组）+ run 数组（整组）。
+
+**ship-gate**：`runSetTextMultiRunGate` 加载 `re_text_multirun.aep`（2-run）→ SetText collapse
+→ AE 读回 + resave 单 run。**AE 2025 PASS**。**AE 2020 N/A**——fixture 需 characterRange(AE 24+)
+故 AE-25 stamped，AE 2020 直接拒开（「使用版本 25.1 保存，无法用此版本打开」前向不兼容，
+非我方字节问题）；AE 2020 无 multi-run scripting API → 无法自动造 2020-openable fixture。
+`buildEntryArray` 机制本身已由段落 case（T3 双版本 PASS）跨版本证过。
+
+**v3 守卫（剩余 refuse 集）**：仅 **手动 kerning 表**（`/1/1/0/0/8/0`，per-char 数组会 desync）。
+单/多段落 × 单/多 run × 空串 = 全支持。多 run 输入按 AE 行为 collapse 到单 run（保 run[0] 样式）。
 
 > **AE 2025 ship-gate 注意**：首跑 + warm-retry 都 exit 2（unknown modal），OCR 抓到
 > 的是 **About/credits 启动闪屏**（"1992...2024 / 保留所有权利 / 署名"），非数据 reject
@@ -117,3 +137,4 @@ preservation 比 `\n` 形。`jsStringEscape` 须转义控制字符（`\r`/`\n` �
 ## Cases
 - 2026-06-11 首次（NewTextLayer ship 时的 scoping pass）
 - 2026-06-12 v2 ship：空串 + 多段落解封（双版本 ship-gate PASS）；refuse 集缩到多 run + kerning
+- 2026-06-12 v3 ship：多 run 解封（AE = collapse-to-first-run，AE 2025 gate PASS，2020 N/A 前向不兼容）；refuse 集仅剩手动 kerning
