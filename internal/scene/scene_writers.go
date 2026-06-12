@@ -90,6 +90,7 @@ type CompositionWriter interface {
 	SetDisplayStartFrame(int) error
 	SetComment(string) error
 	SetLabel(uint8) error
+	SetMotionGraphicsTemplateName(string) error
 
 	// Decoded read accessors: the scene CdtaRawBytes / PrdaRawBytes accessors
 	// read the live cdta / prda Data slices through these so they never name

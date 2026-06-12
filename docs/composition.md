@@ -248,7 +248,7 @@ MotionGraphicsTemplateName string
 
 MotionGraphicsTemplateName is the Essential Graphics / .mogrt template name (AE default "Untitled" when the comp has no EG panel). Decoded from the comp's Item-level LIST:CIF3. See scene_essential_graphics.go.
 
-read-only
+read-write
 
 ### Composition.EssentialGraphicsControllers
 
@@ -720,6 +720,14 @@ func (c *Composition) SetMotionBlurSamplesPerFrame(n int32) error
 ```
 
 SetMotionBlurSamplesPerFrame writes the per-frame motion-blur sample count (int32 BE, AE default 16) to cdta @0xC8. length-preserving (4 bytes).
+
+### Composition.SetMotionGraphicsTemplateName
+
+```go
+func (c *Composition) SetMotionGraphicsTemplateName(name string) error
+```
+
+SetMotionGraphicsTemplateName renames the comp's Motion Graphics template — mirrors AE's CompItem.motionGraphicsTemplateName setter. The name is rewritten in every persisted panel generation (AE stores three: CIFO, CIF2, CIF3, each holding the name twice). length-variable: WriteAEP recomputes parent LIST sizes. Returns an error for an empty name, or when the comp has no Essential Graphics panel shell (comps saved by AE — and comps created by NewComposition — always have one).
 
 ### Composition.SetName
 

@@ -1,5 +1,7 @@
 package scene
 
+import "fmt"
+
 // scene_essential_graphics.go — Essential Graphics panel (EGP) model. AE
 // exposes composition properties as .mogrt controllers; the panel definition
 // lives in the comp's Item-level LIST:CIF3. Read-only (mirrors py-aep's
@@ -59,6 +61,24 @@ type EssentialGraphicsController struct {
 	// UUID is the controller's unique identifier (the CCtl's Utf8 child),
 	// used by AE to link the controller to its source property.
 	UUID string
+}
+
+// SetMotionGraphicsTemplateName renames the comp's Motion Graphics template —
+// mirrors AE's CompItem.motionGraphicsTemplateName setter. The name is
+// rewritten in every persisted panel generation (AE stores three: CIFO, CIF2,
+// CIF3, each holding the name twice). length-variable: WriteAEP recomputes
+// parent LIST sizes. Returns an error for an empty name, or when the comp has
+// no Essential Graphics panel shell (comps saved by AE — and comps created by
+// NewComposition — always have one).
+func (c *Composition) SetMotionGraphicsTemplateName(name string) error {
+	if c.back == nil {
+		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)
+	}
+	if err := c.back.SetMotionGraphicsTemplateName(name); err != nil {
+		return err
+	}
+	c.MotionGraphicsTemplateName = name
+	return nil
 }
 
 // MotionGraphicsTemplateControllerCount returns the number of Essential

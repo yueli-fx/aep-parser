@@ -88,6 +88,9 @@ var (
 
 	// Essential Graphics panel (P3 §2.8, py-aep parity). Item-level CIF3.
 	IDCif3 = ChunkID{'C', 'I', 'F', '3'} // LIST formType: EG panel definition (template-name CpS2 + CCtl controllers)
+	IDCifO = ChunkID{'C', 'I', 'F', 'O'} // LIST formType: oldest EG panel generation; AE writes CIFO+CIF2+CIF3 with byte-identical content
+	IDCif2 = ChunkID{'C', 'I', 'F', '2'} // LIST formType: middle EG panel generation (see IDCifO)
+	IDCapS = ChunkID{'C', 'a', 'p', 'S'} // LIST formType: EG caption string (CsCt + CapL + Utf8 value, no locale — sibling of CpS2)
 	IDCctl = ChunkID{'C', 'C', 't', 'l'} // LIST formType: one EG controller (CpS2 name + Utf8 uuid + CTyp type)
 	IDCpS2 = ChunkID{'C', 'p', 'S', '2'} // LIST formType: localized string (Utf8 value + locale)
 	IDCTyp = ChunkID{'C', 'T', 'y', 'p'} // U4: EG controller type (1=Checkbox 2=Slider 4=Color 5=Point 6=Text 8=Comment 9=MultiDim 10=Group 13=Dropdown)

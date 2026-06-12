@@ -1,6 +1,7 @@
 package aep_test
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -85,6 +86,93 @@ func TestEssentialGraphics_Default(t *testing.T) {
 	}
 	if names := main.MotionGraphicsTemplateControllerNames(); names != nil {
 		t.Errorf("ControllerNames = %v, want nil", names)
+	}
+}
+
+// Rename round-trip on an AE-native fixture: the new name must land in all
+// three persisted panel generations (CIFO/CIF2/CIF3 × CpS2+CapS = 6 slots) and
+// the controller must survive untouched.
+func TestSetMotionGraphicsTemplateName(t *testing.T) {
+	proj, err := aep.Open("../../test_data/eg_custom_template_name.aep")
+	if err != nil {
+		t.Skipf("fixture not present: %v", err)
+	}
+	comp := proj.CompositionByName("primary")
+	if comp == nil {
+		t.Fatal("comp 'primary' not found")
+	}
+	if comp.MotionGraphicsTemplateName != "My Custom Template" {
+		t.Fatalf("precondition: template name = %q", comp.MotionGraphicsTemplateName)
+	}
+
+	const newName = "GoRenamedTemplate"
+	if err := comp.SetMotionGraphicsTemplateName(newName); err != nil {
+		t.Fatalf("SetMotionGraphicsTemplateName: %v", err)
+	}
+	if comp.MotionGraphicsTemplateName != newName {
+		t.Errorf("scene field = %q, want %q", comp.MotionGraphicsTemplateName, newName)
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	raw := buf.Bytes()
+	if got := bytes.Count(raw, []byte(newName)); got != 6 {
+		t.Errorf("new name appears %d times in output, want 6 (3 generations x CpS2+CapS)", got)
+	}
+	if bytes.Contains(raw, []byte("My Custom Template")) {
+		t.Error("old template name still present in output")
+	}
+
+	re, err := aep.FromReader(bytes.NewReader(raw))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	rc := re.CompositionByName("primary")
+	if rc == nil {
+		t.Fatal("re-parse: comp 'primary' not found")
+	}
+	if rc.MotionGraphicsTemplateName != newName {
+		t.Errorf("re-parse template name = %q, want %q", rc.MotionGraphicsTemplateName, newName)
+	}
+	if got := rc.MotionGraphicsTemplateControllerCount(); got != 1 {
+		t.Errorf("re-parse ControllerCount = %d, want 1", got)
+	}
+	if got := rc.EssentialGraphicsControllers[0].Name; got != "Fill Color" {
+		t.Errorf("re-parse controller name = %q, want Fill Color", got)
+	}
+}
+
+// A Go-built comp carries the EG panel shell from the embed template, so the
+// rename works on it too; an empty name is refused.
+func TestSetMotionGraphicsTemplateName_GoBuilt(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "built", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if err := comp.SetMotionGraphicsTemplateName(""); err == nil {
+		t.Error("empty name accepted, want refusal")
+	}
+	if err := comp.SetMotionGraphicsTemplateName("BuiltTemplate"); err != nil {
+		t.Fatalf("SetMotionGraphicsTemplateName: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if err := p.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	rc := re.CompositionByName("built")
+	if rc == nil {
+		t.Fatal("re-parse: comp 'built' not found")
+	}
+	if rc.MotionGraphicsTemplateName != "BuiltTemplate" {
+		t.Errorf("re-parse template name = %q, want BuiltTemplate", rc.MotionGraphicsTemplateName)
 	}
 }
 
