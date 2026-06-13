@@ -14,6 +14,13 @@ disabled_folders: []
 - commit 拆分按逻辑单元：代码 + 其配套测试/fixture/文档同步算一个 commit；无关的 meta/文档改动单独 commit。commit body 可英文按既有惯例。
 - **导出 API doc comment = 文档源（docgen）**：`docs/*.md` 由 `cmd/docgen` 从 `internal/aep` 导出符号的 doc comment 自动生成（Swagger 式，唯一源=注释）。**doc comment 用英文为源**（中文可后续一键翻译）；prose 写描述、`Example*` 测试函数写示例、概念表走 `docs/_includes/*.head.md`/`*.tail.md`。改导出符号的 doc comment 后须重生成（`go generate ./cmd/docgen` 或 `go run ./cmd/docgen -manifest docs/docgen.json`）。`docs/*.gen.md` 头有 `DO NOT EDIT` —— 不手改生成物。区分点：**内部实现行内注释仍禁**（CLAUDE.md 铁律），导出符号上方的 doc comment 是文档载体不算违反。
 
+### Showcase（大阶段产出审核）
+
+- **大阶段必出 showcase 供用户审核**（2026-06-13 用户立规）。**大阶段** = 有独立 plan/spec arc 的可交付 feature（如「矢量滤镜家族」整体、新 layer 类型组、expression 激活）；落地后须在 `flightdeck/showcase/<方向>/` 产出一个**纯 Go 从零生成 + AE 实渲**的示例工程并通知用户审核。**小阶段**（单个滤镜 / 单个 `Set*` 字段 / 单 slice）**不单独出**，攒批到所属方向的 showcase 一起更新。
+- **目录形态**：`flightdeck/showcase/<方向>/`（按**能力方向**分区：shape-filters / shape-primitives / keyframes-ease / expressions / precomp-nesting / gradient / text / layers …）。每个方向文件夹含：`INDEX.md`（frontmatter 格式段写明测哪个方向 + 正文列测试文件/产出 aep/类型/布局）、`gen.go`（package main 纯 Go 生成器）、`render.jsx`（AE 打开+saveFrameToPng 出 png）。格式细则 + 新增方向流程见 `checklists/showcase.md`。
+- **gitignore 策略**：只 ignore 重产物 `*.aep` / `*.png`（已在根 `.gitignore`）；`INDEX.md` + `gen.go` + `render.jsx` **tracked** —— 干净 clone 后 `go run ./flightdeck/showcase/<方向>` + 跑 render.jsx 即可一键重生成全部产物。**生成器必须保持 `go build ./...` 绿**（它是 tracked 代码）。
+- **交付准则对齐**（CLAUDE.md #7 / `checklists/delivery-contract.md`）：showcase 里每个能力须是已过双版本 ship-gate 的；showcase 的「组合工程」本身是独立交付项，**产出后必须 AE 实渲眼验**（红线4：先看图），不靠值 round-trip 假绿。
+
 ### Autonomy overrides
 <!-- migrated from commit_mode:confirm — 旧 toggle 取默认值 confirm，但上方 House rule「完成即 commit·无需用户每次点名」是既定的真实意图，故按 auto 编码 -->
 commit without asking
