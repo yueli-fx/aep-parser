@@ -44,7 +44,9 @@ last_updated: 2026-06-12
 - **Merge Paths（`ADBE Vector Filter - Merge`）✅ DONE 2026-06-13**：套 vein 第 6 次。`AddMergePaths`/`MergePathsNode` + `MergeType` 枚举（Merge/Add/Subtract/Intersect/Exclude，非动画，建模成普通字段）。`templates/v2_2_shape_merge_body.bin`。✅ `TestMGMerge_AEShipGate_*` 双版本渲染像素 PASS（400×400 Rect − 200×200 同心 Ellipse Subtract → 白方块挖圆洞，ring 白 4/4·洞暗 3/3·Type resave 读回；眼验）。**两个新 ground truth**：① combine 型滤镜 **Fill 必须在 stack 顶**（Merge 之上）才画出合成结果，与 Trim/RC/Offset 相反（详 incident）；② ExtendScript addProperty live-ref 加兄弟后失效。stack [Rect, Ellipse, Merge, Fill]。deferred：Add/Intersect/Exclude 模式未单独 gate。详 `incidents/trim-paths-vector-filter-re.md` § 复用确认 — Merge Paths。
 - **ZigZag（`ADBE Vector Filter - Zigzag`）✅ DONE 2026-06-13**：套 vein 第 7 次——**常用矢量滤镜家族收齐**。`AddZigZag`/`ZigZagNode`，模 Size（振幅）+ Detail（ridges/段）双 1D scalar；Points enum 默认 elide 暂搁。`templates/v2_2_shape_zigzag_body.bin`。✅ `TestMGZigZag_AEShipGate_*` 双版本渲染像素 PASS（400×400 Rect + Size=40/Detail=8 → 四边尖齿 starburst；逐列扫顶白 y spread=78=±40 振幅、center 白、Size/Detail resave 读回；眼验）。stack [Rect, Fill, ZigZag]（distort 型，fill 在下）。详 `incidents/trim-paths-vector-filter-re.md` § 复用确认 — ZigZag。
 - 文本动画器（Text Animators，大坑，单列前置 btdk）。**未做**。
-- **矢量滤镜家族完成**（Trim/Repeater/RoundCorners/Offset/Merge/ZigZag 共 6 个 + Repeater 嵌套组，蓝本 7 次全绿）。剩 PolyStar/Twist/Pucker&Bloat/Wiggle 等同 vein 需求驱动可推。
+- **矢量滤镜家族完成**（Trim/Repeater/RoundCorners/Offset/Merge/ZigZag 共 6 个 + Repeater 嵌套组，蓝本 7 次全绿）。
+- **PolyStar（`ADBE Vector Shape - Star`）✅ DONE 2026-06-13**：新 from-scratch **形状**（非滤镜），套 Rect/Ellipse shape-body vein。`AddStar`/`StarNode`，模 Points/Position/Rotation/Inner·Outer Radius/Inner·Outer Roundess（match-name 对齐既有 read 侧 parse_shape.go）；Star Type 默认 Star elide（Polygon 暂搁，需 Type slot + 独立模板）。`templates/v2_2_shape_star_body.bin`。✅ `TestMGStar_AEShipGate_*` 双版本渲染像素 PASS（5 角星 OuterR=250/InnerR=100：5 tip 方向白·5 gap 方向暗·center 白·resave 读回；眼验金色五角星）。
+- 剩 Twist / Pucker&Bloat / Wiggle 等同 vein 需求驱动可推。
 
 ## 不做 / 边界
 
