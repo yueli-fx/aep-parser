@@ -21,6 +21,10 @@
         chk("expressionEngine", pr.expressionEngine, "javascript-1.0");
         chk("footageTimecodeDisplayStartType==USE_SOURCE_MEDIA",
             pr.footageTimecodeDisplayStartType === FootageTimecodeDisplayStartType.FTCS_USE_SOURCE_MEDIA, true);
+        chk("timeDisplayType==TIMECODE", pr.timeDisplayType === TimeDisplayType.TIMECODE, true);
+        chk("framesCountType==FC_START_0", pr.framesCountType === FramesCountType.FC_START_0, true);
+        chk("framesUseFeetFrames", pr.framesUseFeetFrames, true);
+        chk("feetFramesFilmType==MM35", pr.feetFramesFilmType === FeetFramesFilmType.MM35, true);
     } catch (e) { log.push("ERROR: " + e.toString() + " line=" + e.line); allOK = false; }
     done.open("w");
     done.write((allOK ? "PASS\n" : "FAIL\n") + log.join("\n"));

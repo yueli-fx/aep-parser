@@ -190,18 +190,19 @@ func (p *Project) SetExpressionEngine(engine string) error {
 // nnhd (40 bytes — project display settings)
 // ──────────────────────────────────────────────
 //
-// Byte layout (from py-aep item_chunks.py NnhdChunk):
+// Byte layout — corrected against AE 2020 self-saves (RE 2026-06-14, see
+// incidents/nnhd-display-settings-layout-re.md). The py-aep layout was wrong
+// for two of these fields (byte-8 bit-7 feet flag and a byte-8 mask for time
+// display were both fictional); AE actually stores:
 // - Bytes 0-7: reserved
-// - Byte 8: _display_byte
-//   - bit 7 = feet_frames_film_type (0=MM35, 1=MM16)
-//   - bits 6-0 = time_display_type (0=TIMECODE, 1=FRAMES)
+// - Byte 8: time_display_type (0=TIMECODE, 1=FRAMES) — full byte, not bit-packed
 // - Byte 9: footage_timecode_display_start_type (0=Start0, 1=UseSourceMedia)
 // - Byte 10: reserved
-// - Byte 11: _feet_byte
-//   - bit 0 = frames_use_feet_frames
+// - Byte 11: _feet_byte, bit 0 = frames_use_feet_frames
 // - Bytes 12-13: reserved
-// - Bytes 14-15: timecode_default_base (u2 BE, 1-999)
-// - Bytes 16-19: unknown (default 0x00000010)
+// - Bytes 14-15: timecode_default_base (u16 BE, 1-999)
+// - Bytes 16-19: feet_frames_film_type as FRAMES-PER-FOOT (u32 BE):
+//   35mm = 16 (0x10), 16mm = 40 (0x28). py-aep mislabeled this "unknown".
 // - Byte 20: frames_count_type (0=Start0, 1=Start1, 2=TimecodeConversion)
 // - Bytes 21-23: reserved
 // - Byte 24: bits_per_channel (already implemented)
@@ -214,14 +215,14 @@ func (p *Project) FeetFramesFilmType() FeetFramesFilmType {
 	if p.back == nil {
 		return FeetFramesFilmTypeMM35
 	}
-	b, ok := p.back.NnhdByte(8)
+	v, ok := p.back.NnhdUint32(16)
 	if !ok {
 		return FeetFramesFilmTypeMM35
 	}
-	if b&0x80 != 0 {
+	if v == 40 { // 16mm = 40 frames per foot
 		return FeetFramesFilmTypeMM16
 	}
-	return FeetFramesFilmTypeMM35
+	return FeetFramesFilmTypeMM35 // 35mm = 16 frames per foot
 }
 
 // SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.

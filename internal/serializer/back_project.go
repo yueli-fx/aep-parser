@@ -162,6 +162,26 @@ func (b *projectBackrefs) NnhdByte(off int) (byte, bool) {
 	return b.nnhdChunk.Data[off], true
 }
 
+func (b *projectBackrefs) NnhdUint32(off int) (uint32, bool) {
+	if b == nil || b.nnhdChunk == nil || len(b.nnhdChunk.Data) < off+4 {
+		return 0, false
+	}
+	return binary.BigEndian.Uint32(b.nnhdChunk.Data[off : off+4]), true
+}
+
+// mirrorNhed writes v to nhed[off] when the legacy nhed chunk is present and
+// long enough. AE reads the project display settings from the 32-byte legacy
+// nhed header; the 40-byte nnhd duplicates them. A setter that touches only
+// nnhd is silently ignored by AE (it reopens with the stale nhed value), so
+// every display setter must keep both in sync. The nhed↔nnhd offset map (RE
+// 2026-06-14, AE 2020 self-saves): nhed[8]=time, [9]=footage, [11]bit0=useFeet,
+// [12]=timecodeBase, [13]=feet-frames-per-foot, [14]=framesCount, [15]=bpc.
+func (b *projectBackrefs) mirrorNhed(off int, v byte) {
+	if b.nhedChunk != nil && len(b.nhedChunk.Data) > off {
+		b.nhedChunk.Data[off] = v
+	}
+}
+
 func (b *projectBackrefs) NnhdUint16(off int) (uint16, bool) {
 	if b == nil || b.nnhdChunk == nil || len(b.nnhdChunk.Data) < off+2 {
 		return 0, false
@@ -266,14 +286,16 @@ func (b *projectBackrefs) SetExpressionEngine(engine string) error {
 }
 
 func (b *projectBackrefs) SetFeetFramesFilmType(v FeetFramesFilmType) error {
-	if b.nnhdChunk == nil || len(b.nnhdChunk.Data) < 9 {
+	if b.nnhdChunk == nil || len(b.nnhdChunk.Data) < 20 {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFeetFramesFilmType")
 	}
+	// AE stores film type as frames-per-foot (u32 BE @0x10): 35mm = 16, 16mm = 40.
+	fpf := uint32(16)
 	if v == FeetFramesFilmTypeMM16 {
-		b.nnhdChunk.Data[8] |= 0x80
-	} else {
-		b.nnhdChunk.Data[8] &^= 0x80
+		fpf = 40
 	}
+	binary.BigEndian.PutUint32(b.nnhdChunk.Data[16:20], fpf)
+	b.mirrorNhed(13, byte(fpf))
 	return nil
 }
 
@@ -282,6 +304,7 @@ func (b *projectBackrefs) SetFootageTimecodeDisplayStartType(v FootageTimecodeDi
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFootageTimecodeDisplayStartType")
 	}
 	b.nnhdChunk.Data[9] = byte(v)
+	b.mirrorNhed(9, byte(v))
 	return nil
 }
 
@@ -293,6 +316,7 @@ func (b *projectBackrefs) SetTimecodeDefaultBase(v int) error {
 		return fmt.Errorf("project: timecode_default_base %d invalid; must be 1-999", v)
 	}
 	binary.BigEndian.PutUint16(b.nnhdChunk.Data[14:16], uint16(v))
+	b.mirrorNhed(12, byte(v)) // nhed stores the base in a single byte
 	return nil
 }
 
@@ -301,6 +325,7 @@ func (b *projectBackrefs) SetFramesCountType(v FramesCountType) error {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesCountType")
 	}
 	b.nnhdChunk.Data[20] = byte(v)
+	b.mirrorNhed(14, byte(v))
 	return nil
 }
 
@@ -322,8 +347,10 @@ func (b *projectBackrefs) SetFramesUseFeetFrames(v bool) error {
 	}
 	if v {
 		b.nnhdChunk.Data[11] |= 0x01
+		b.mirrorNhed(11, b.nnhdChunk.Data[11])
 	} else {
 		b.nnhdChunk.Data[11] &^= 0x01
+		b.mirrorNhed(11, b.nnhdChunk.Data[11])
 	}
 	return nil
 }
@@ -332,8 +359,10 @@ func (b *projectBackrefs) SetTimeDisplayType(v TimeDisplayType) error {
 	if b.nnhdChunk == nil || len(b.nnhdChunk.Data) < 9 {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTimeDisplayType")
 	}
-	// Preserve bit 7 (feet_frames_film_type)
-	b.nnhdChunk.Data[8] = (b.nnhdChunk.Data[8] & 0x80) | (byte(v) & 0x7F)
+	// byte 8 holds the full time_display_type value (0=Timecode, 1=Frames);
+	// it is NOT bit-packed with feet film type (that lives at nnhd[16-19]).
+	b.nnhdChunk.Data[8] = byte(v)
+	b.mirrorNhed(8, byte(v))
 	return nil
 }
 
@@ -346,6 +375,7 @@ func (b *projectBackrefs) SetTransparencyGridThumbnails(v bool) error {
 	} else {
 		b.nnhdChunk.Data[25] = 0
 	}
+	b.mirrorNhed(16, b.nnhdChunk.Data[25])
 	return nil
 }
 

@@ -88,6 +88,63 @@ func min(a, b int) int {
 	return b
 }
 
+// TestProjectSettings_NhedNnhdMirror guards the RE finding (2026-06-14) that AE
+// reads the project display settings from the legacy 32-byte nhed header, not
+// the modern 40-byte nnhd. A setter that updates only nnhd is silently ignored
+// by AE on reopen. This test asserts each display setter writes BOTH chunks at
+// the correct offsets — the regression that produced the original false green
+// (Go round-trip OK, AE DOM unchanged). See nnhd-display-settings-layout-re.md.
+func TestProjectSettings_NhedNnhdMirror(t *testing.T) {
+	nhed := &rifx.Chunk{ID: rifx.ChunkID{'n', 'h', 'e', 'd'}, Data: make([]byte, 32)}
+	nnhd := &rifx.Chunk{ID: rifx.ChunkID{'n', 'n', 'h', 'd'}, Data: make([]byte, 40)}
+	p := &Project{}
+	scene.SetProjectBack(p, &projectBackrefs{nhedChunk: nhed, nnhdChunk: nnhd})
+
+	if err := p.SetTimeDisplayType(TimeDisplayTypeFrames); err != nil {
+		t.Fatalf("SetTimeDisplayType: %v", err)
+	}
+	if nnhd.Data[8] != 1 || nhed.Data[8] != 1 {
+		t.Errorf("time display: nnhd[8]=%d nhed[8]=%d, want both 1", nnhd.Data[8], nhed.Data[8])
+	}
+
+	if err := p.SetFramesCountType(FramesCountTypeStart1); err != nil {
+		t.Fatalf("SetFramesCountType: %v", err)
+	}
+	if nnhd.Data[20] != 1 || nhed.Data[14] != 1 {
+		t.Errorf("frames count: nnhd[20]=%d nhed[14]=%d, want both 1", nnhd.Data[20], nhed.Data[14])
+	}
+
+	if err := p.SetFeetFramesFilmType(FeetFramesFilmTypeMM16); err != nil {
+		t.Fatalf("SetFeetFramesFilmType: %v", err)
+	}
+	// MM16 = 40 frames/foot: nnhd u32 BE @0x10, nhed single byte @0x0D.
+	if nnhd.Data[19] != 40 || nhed.Data[13] != 40 {
+		t.Errorf("feet film type: nnhd[19]=%d nhed[13]=%d, want both 40", nnhd.Data[19], nhed.Data[13])
+	}
+
+	if err := p.SetFramesUseFeetFrames(true); err != nil {
+		t.Fatalf("SetFramesUseFeetFrames: %v", err)
+	}
+	if nnhd.Data[11]&0x01 == 0 || nhed.Data[11]&0x01 == 0 {
+		t.Errorf("use feet: nnhd[11]=%#x nhed[11]=%#x, want bit0 set in both", nnhd.Data[11], nhed.Data[11])
+	}
+
+	if err := p.SetFootageTimecodeDisplayStartType(FootageTimecodeDisplayStartTypeUseSourceMedia); err != nil {
+		t.Fatalf("SetFootageTimecodeDisplayStartType: %v", err)
+	}
+	if nnhd.Data[9] != 1 || nhed.Data[9] != 1 {
+		t.Errorf("footage tc: nnhd[9]=%d nhed[9]=%d, want both 1", nnhd.Data[9], nhed.Data[9])
+	}
+
+	// Round-trip read back through the (nnhd-based) readers.
+	if got := p.TimeDisplayType(); got != TimeDisplayTypeFrames {
+		t.Errorf("TimeDisplayType readback = %v, want Frames", got)
+	}
+	if got := p.FeetFramesFilmType(); got != FeetFramesFilmTypeMM16 {
+		t.Errorf("FeetFramesFilmType readback = %v, want MM16", got)
+	}
+}
+
 // TestProperty_LockedRatio_Positive verifies the LockedRatio reader and
 // SetLockedRatio writer against a synthetic tdsb chunk — the existing
 // external test in property_flags_test.go can only exercise the fallback

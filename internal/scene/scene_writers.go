@@ -60,6 +60,7 @@ type ProjectWriter interface {
 	ExpressionEngine() (string, bool)
 	NnhdByte(off int) (byte, bool)
 	NnhdUint16(off int) (uint16, bool)
+	NnhdUint32(off int) (uint32, bool)
 	CmsJSON() ([]byte, bool)
 	LinearBlendingFlag() bool
 	LinearizeWorkingSpaceFlag() bool

@@ -79,15 +79,15 @@ summary: 字段覆盖概览（精简入口）
   - `GpuAccelType` R/W — gpuG → Utf8 (length-variable splice)
   - `ExpressionEngine` R/W — ExEn → Utf8, validate {"extendscript", "javascript-1.0"}
   - rifx 加 IDAcer/IDAdfr/IDDwga/IDLnrb/IDLnrp/IDGpuG/IDExEn 常量
-- **Project nnhd display settings (P2b 2A)**: 8 个 R/W，nnhd chunk (40 bytes) — py-aep `NnhdChunk` parity
-  - `FeetFramesFilmType` R/W — byte 8 bit 7 (0=MM35, 1=MM16)
-  - `FootageTimecodeDisplayStartType` R/W — byte 9 (0=Start0, 1=UseSourceMedia)
-  - `TimecodeDefaultBase` R/W — bytes 14-15 u2 BE (1-999)
-  - `FramesCountType` R/W — byte 20 (0=Start0, 1=Start1, 2=TimecodeConversion)
+- **Project nnhd display settings (P2b 2A)**: 8 个 R/W，dual-header **nhed(32B)+nnhd(40B)** — AE 读 nhed，setter 双写两头（RE 修 2026-06-14，`incidents/nnhd-display-settings-layout-re.md`；py-aep 的 nnhd-only / byte8-bit7-feet 布局两处是错的）。AE 2020+2025 DOM readback 实证
+  - `FeetFramesFilmType` R/W — frames-per-foot：nnhd[16-19] u32 / nhed[13]（35mm=16, 16mm=40）
+  - `FootageTimecodeDisplayStartType` R/W — nnhd[9]/nhed[9] (0=Start0, 1=UseSourceMedia)
+  - `TimecodeDefaultBase` R/W — nnhd[14-15] u16 BE / nhed[12] (1-999)
+  - `FramesCountType` R/W — nnhd[20]/nhed[14] (0=Start0, 1=Start1, 2=TimecodeConversion)
   - `DisplayStartFrame` R/W — derived from frames_count_type % 2
-  - `FramesUseFeetFrames` R/W — byte 11 bit 0
-  - `TimeDisplayType` R/W — byte 8 bits 6-0 (0=Timecode, 1=Frames)
-  - `TransparencyGridThumbnails` R/W — byte 25 bool
+  - `FramesUseFeetFrames` R/W — nnhd[11]/nhed[11] bit 0
+  - `TimeDisplayType` R/W — nnhd[8]/nhed[8] 整字节 (0=Timecode, 1=Frames)
+  - `TransparencyGridThumbnails` R/W — nnhd[25]/nhed[16] bool
 - **Project CMS settings (P2b 2B, AE 24+)**: JSON Utf8 chunk — py-aep `NnhdChunk` parity
   - `ColorManagementSystem` R/W — 0=Adobe, 1=OCIO（enum 校验）
   - `LutInterpolationMethod` R/W — 0=Trilinear, 1=Tetrahedral（enum 校验）

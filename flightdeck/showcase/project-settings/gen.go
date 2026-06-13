@@ -51,16 +51,20 @@ func main() {
 	must(f.SetColor([4]float64{0.25, 0.6, 0.95, 1}))
 	must(bg.Position().SetStaticValue([2]float64{960, 540}))
 
-	// Only setters whose AE-DOM readback is EXACT are applied here. Excluded as
-	// found boundaries (Go byte round-trip green but AE DOM did NOT reflect them,
-	// red line 4a): SetTimeDisplayType / SetFeetFramesFilmType (both nnhd byte 8 —
-	// suspected bit-packing / setter-interaction) and SetFramesCountType. See
-	// INDEX.md. Note: SetFootageTimecodeDisplayStartType (nnhd byte 9) DID take.
+	// All settings below have AE-DOM readback confirmed (AE 2020 + 2025). The
+	// nnhd display group (time/frames-count/feet/use-feet) was a false-green
+	// boundary until 2026-06-14: AE reads them from the legacy nhed header, not
+	// nnhd, so the setters now mirror BOTH (incidents/nnhd-display-settings-layout-re.md).
+	// Values chosen NON-default so a wrong readback shows as a real mismatch.
 	fmt.Println("applying project settings:")
 	try("SetBitsPerChannel(16)", p.SetBitsPerChannel(aep.BPC16))
 	try("SetLinearBlending(true)", p.SetLinearBlending(true))
 	try("SetExpressionEngine(javascript-1.0)", p.SetExpressionEngine("javascript-1.0"))
 	try("SetFootageTimecodeDisplayStartType(UseSourceMedia)", p.SetFootageTimecodeDisplayStartType(aep.FootageTimecodeDisplayStartTypeUseSourceMedia))
+	try("SetTimeDisplayType(Timecode)", p.SetTimeDisplayType(aep.TimeDisplayTypeTimecode))
+	try("SetFramesCountType(Start0)", p.SetFramesCountType(aep.FramesCountTypeStart0))
+	try("SetFramesUseFeetFrames(true)", p.SetFramesUseFeetFrames(true))
+	try("SetFeetFramesFilmType(MM35)", p.SetFeetFramesFilmType(aep.FeetFramesFilmTypeMM35))
 
 	out, err := os.Create(outPath)
 	must(err)

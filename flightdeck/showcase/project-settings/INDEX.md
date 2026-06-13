@@ -1,9 +1,9 @@
 ---
 showcase: project-settings
 direction: 工程设置 setter — Project.Set*（位深/线性混合/表达式引擎/素材时间码），纯 Go 从零设值后 AE app.project DOM readback 核对（📋 读值档，不看图）
-capabilities: [bits-per-channel, linear-blending, expression-engine, footage-timecode-display]
-gates: [project-flag-chunks-lnrb-lnrp]
-status: complete
+capabilities: [bits-per-channel, linear-blending, expression-engine, footage-timecode-display, time-display-type, frames-count-type, feet-frames-film-type, frames-use-feet]
+gates: [project-flag-chunks-lnrb-lnrp, nnhd-display-settings-layout-re]
+status: 待review
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/project-settings  +  scripts/ae_run.ps1 verify.jsx"
 ---
@@ -27,26 +27,24 @@ regenerate: "go run ./flightdeck/showcase/project-settings  +  scripts/ae_run.ps
 | `project_settings.aep` | 产出工程 (gitignored) | 1920×1080，AE2020 |
 | `project_settings.done` | readback 日志 (gitignored) | 用户读这个核值 |
 
-## 设值 → 期望 readback（AE2020 实测一致）
+## 设值 → 期望 readback（AE2020 + AE2025 实测一致）
 
-| Set* 调用 | DOM 字段 | 期望值 |
+| Set* 调用 | DOM 字段 | 期望值（NON-default）|
 |---|---|---|
 | SetBitsPerChannel(BPC16) | bitsPerChannel | 16 |
 | SetLinearBlending(true) | linearBlending | true |
 | SetExpressionEngine("javascript-1.0") | expressionEngine | "javascript-1.0" |
 | SetFootageTimecodeDisplayStartType(UseSourceMedia) | footageTimecodeDisplayStartType | FTCS_USE_SOURCE_MEDIA |
+| SetTimeDisplayType(Timecode) | timeDisplayType | TIMECODE |
+| SetFramesCountType(Start0) | framesCountType | FC_START_0 |
+| SetFramesUseFeetFrames(true) | framesUseFeetFrames | true |
+| SetFeetFramesFilmType(MM35) | feetFramesFilmType | MM35 |
 
-> 审核要点：`.done` 四行全 `-> OK` 即通过。
+> 审核要点：`.done` 第一行 `PASS` + 八行全 `-> OK` 即通过。
 
-## ⚠ 已发现边界（诚实标注 · 本档刻意排除）
+## ✅ 已修复（曾经的 false-green 边界）
 
-本 showcase 的 AE-DOM readback 核到三个**之前仅字节 round-trip、从未 AE-DOM 验证**的 setter 不反映到 AE DOM(红线4a 活样本,与 comp-settings 的 shutter 同类):
-
-- **SetTimeDisplayType** 设 Frames → AE DOM 仍 Timecode。
-- **SetFeetFramesFilmType** 设 MM16 → AE DOM 仍 MM35（默认）。
-- **SetFramesCountType** 设 Start1 → AE DOM 不符。
-
-线索:**timeDisplayType + feetFramesFilmType 共用 nnhd byte 8**(bit7=feet / bits6-0=timeDisplay),二者都失败;而**相邻的 footageTimecodeDisplayStartType(byte 9)成功** → 疑 byte 8 位打包 / 两 setter 互相清位。需独立 RE/修。其余工程 setter（SetWorkingGamma/SetAudioSampleRate/SetGpuAccelType/CMS 系列等）未纳入本批,按需再扩。
+本档曾排除 SetTimeDisplayType / SetFramesCountType / SetFeetFramesFilmType（字节 round-trip 绿但 AE DOM 不反映，红线4a）。**2026-06-14 RE 定位并修复**：AE 从 legacy `nhed` 头读显示设置（非 `nnhd`），且 feetFramesFilmType 真存「每英尺帧数」（35mm=16/16mm=40）而非 byte8 bit7。setter 现双写 nhed+nnhd。AE 2020 + 2025 双版本 DOM readback 全绿。详 `incidents/nnhd-display-settings-layout-re.md`。其余工程 setter（SetWorkingGamma/SetAudioSampleRate/SetGpuAccelType/CMS 系列等）未纳入本批,按需再扩。
 
 ## 溯源
 

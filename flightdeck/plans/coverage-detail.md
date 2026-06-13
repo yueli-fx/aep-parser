@@ -366,7 +366,7 @@ AE 文档：[Project](../charts/after-effects-scripting-guide/docs/general/proje
 | `Project.workingSpace`                                                          | `Project.WorkingSpace()`                                | 🟢 R only | P2b 2B；从 CMS JSON `baseColorProfile.colorProfileName` 取 |
 | `Project.displayColorSpace`                                                     | —                                                       | 🗑️ deferred | P2b 2B；separate chunk 未 RE，旧 stub 永远返回 "None"，2026-05-27 删除 |
 | `Project.timecodeDefaultBase`                                                   | `Project.TimecodeDefaultBase()` + `SetTimecodeDefaultBase()` | ✅ R/W | P2b 2A；nnhd bytes 14-15 u2 BE                       |
-| `Project.feetFramesFilmType` / `framesCountType` / `displayStartFrame`      | `Project.FeetFramesFilmType` + `SetFeetFramesFilmType` 等 8 个 | ✅ R/W | P2b 2A；nnhd chunk byte layout |
+| `Project.feetFramesFilmType` / `framesCountType` / `displayStartFrame`      | `Project.FeetFramesFilmType` + `SetFeetFramesFilmType` 等 8 个 | ✅ R/W | P2b 2A；dual-header nhed+nnhd 双写（AE 读 nhed），feet=frames/foot。RE 修 2026-06-14 `incidents/nnhd-display-settings-layout-re.md`；AE2020+2025 DOM 实证 |
 | `Project.file`                                                                  | —                                                      | N/A 运行时路径                               |                                                              |
 | `Project.footageTimecodeDisplayStartType`                                       | `Project.FootageTimecodeDisplayStartType` + `Set...` | ✅ R/W | P2b 2A |
 | `Project.gpuAccelType`                                                          | `Project.GpuAccelType` + `SetGpuAccelType`          | ✅ R/W | P1 1D |
