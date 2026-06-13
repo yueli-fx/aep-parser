@@ -24,7 +24,9 @@ last_updated: 2026-06-13
 > - ✅ **structural-ops**（commit）— Duplicate/Move/Delete/Separate；**solid 不可摆位硬限制**（Position 未物化、merged 无 leader → AE 堆 solid 到 comp 中心）→ 同心环方案：Move/Delete 像素可见、Dup/Separate 靠 .done readback。
 > - ✅ **stroke-detail**（commit，闭合形状方案）— 第一版 open-path 全塌缩（假绿边界，见下），改**全闭合形状**后 8 zone AE 实渲眼验对：Dashes（闭合 rect 虚线）+ Line Join Miter/Round/Bevel（闭合五角星尖角三态）+ Miter Limit 高/低（极尖星，长刺 vs 削平）+ Wave Fine/Bold（星轮廓密/疏波纹）。**诚实暂缺 2 项**：**Line Cap**（只在 open path 端点出现，open path 塌缩 → 无可视）·**Taper**（闭合环无起止 → AE 渲等宽轮廓，值 round-trip 但无视觉，已实渲确认）。**关键发现**：open-path（`AddPath`+`SetClosed(false)`）+stroke 渲染塌缩——几何 round-trip 绿、AE 渲微小图形；三个 stroke ship-gate 全建闭合 rect、只验值不验渲染像素、从不用 open path → 唯一渲染被证实的 stroke 几何 = 闭合形状。
 >
-> **剩余待补**：animated-path / keyframe-channels（🖼看图档）+ render-queue / essential-graphics / markers / comp-settings / project-settings（📋读值档，dump 值 readback 不看图）。
+> - ✅ **keyframe-channels**（commit）— 四 transform 通道各两线性关键帧 Position/Scale/Rotation/Opacity，渲 t=2s 中间帧每通道落插值（x≈960 / scale87.5 / rot90 横条 / opac55 暗粉），像素 + `.done` `valueAtTime(2.0)` readback 双证。与 keyframes-ease 区别：那个变位置缓动曲线，这个横扫四通道。每通道仅 2 kf 规避 lhd3 >4-kf 容量坑。
+>
+> **剩余待补**：animated-path（🖼看图档，**注意 >4 kf lhd3 容量坑** `lhd3-keyframe-capacity-pages.md` / `encodePathTimeTable` 同病）+ render-queue / essential-graphics / markers / comp-settings / project-settings（📋读值档，dump 值 readback 不看图）。
 
 ## 缺口：还没 showcase 的已 ship 能力
 
