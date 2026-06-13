@@ -97,6 +97,11 @@ var extractions = []extraction{
 	// slots; Star Type (default Star) + Shape Direction stay default (elided) —
 	// Star-type only modeled (Polygon deferred). Regen via tmp_debug/gen_shape_star.jsx.
 	{"test_data/v2_2_star.aep", "ADBE Vector Shape - Star", "internal/serializer/templates/v2_2_shape_star_body.bin"},
+	// MG roadmap S5 — Pucker & Bloat (`ADBE Vector Filter - PB`): bows the paths'
+	// edges outward (bloat, +) or inward (pucker, −). Single sub-stream `ADBE
+	// Vector PuckerBloat Amount` (1D f64 BE percent, default 10) set non-default in
+	// the fixture so AE emits the slot. Regen via tmp_debug/gen_shape_puckerbloat.jsx.
+	{"test_data/v2_2_puckerbloat.aep", "ADBE Vector Filter - PB", "internal/serializer/templates/v2_2_shape_puckerbloat_body.bin"},
 }
 
 func main() {

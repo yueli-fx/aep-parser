@@ -127,6 +127,7 @@ type (
 	RoundCornersNode                = scene.RoundCornersNode
 	ZigZagNode                      = scene.ZigZagNode
 	StarNode                        = scene.StarNode
+	PuckerBloatNode                 = scene.PuckerBloatNode
 	StrokeNode                      = scene.StrokeNode
 	StrokeTaper                     = scene.StrokeTaper
 	TrimNode                        = scene.TrimNode
@@ -369,6 +370,7 @@ const (
 	ShapeKindMergePaths                           = scene.ShapeKindMergePaths
 	ShapeKindZigZag                               = scene.ShapeKindZigZag
 	ShapeKindStar                                 = scene.ShapeKindStar
+	ShapeKindPuckerBloat                          = scene.ShapeKindPuckerBloat
 	MergeTypeMerge                                = scene.MergeTypeMerge
 	MergeTypeAdd                                  = scene.MergeTypeAdd
 	MergeTypeSubtract                             = scene.MergeTypeSubtract
@@ -468,6 +470,10 @@ func NewZigZagNode() *ZigZagNode { return scene.NewZigZagNode() }
 
 // NewStarNode returns a detached Star shape node (default 5-point star).
 func NewStarNode() *StarNode { return scene.NewStarNode() }
+
+// NewPuckerBloatNode returns a detached Pucker & Bloat filter node (Amount=0,
+// the no-op identity).
+func NewPuckerBloatNode() *PuckerBloatNode { return scene.NewPuckerBloatNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }

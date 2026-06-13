@@ -29,6 +29,7 @@ const (
 	ShapeKindMergePaths                          // `ADBE Vector Filter - Merge`
 	ShapeKindZigZag                              // `ADBE Vector Filter - Zigzag`
 	ShapeKindStar                                // `ADBE Vector Shape - Star`
+	ShapeKindPuckerBloat                         // `ADBE Vector Filter - PB`
 	// V2.3+ candidates: Transform / nested user groups.
 )
 
@@ -726,6 +727,17 @@ func (g *VectorGroup) AddZigZag() (*ZigZagNode, error) {
 	return n, nil
 }
 
+// AddPuckerBloat appends a default-valued PuckerBloatNode (Amount=0, the no-op
+// identity) and returns it. Pucker & Bloat bows the preceding paths' edges
+// inward (negative Amount = pucker, concave) or outward (positive = bloat,
+// convex) — the organic-blob / squish MG primitive. Place it AFTER the shapes it
+// should distort (render order).
+func (g *VectorGroup) AddPuckerBloat() (*PuckerBloatNode, error) {
+	n := NewPuckerBloatNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -1054,6 +1066,39 @@ func (n *ZigZagNode) Properties() *PropertyGroup {
 		streams: map[string]any{
 			"Size":   n.size,
 			"Detail": n.detail,
+		},
+	}
+}
+
+// PuckerBloatNode — `ADBE Vector Filter - PB` (Pucker & Bloat). A path-filter
+// that bows the paths below it inward (negative Amount = pucker) or outward
+// (positive = bloat). Its single sub-stream `ADBE Vector PuckerBloat Amount` is
+// an animatable 1D scalar (percent; default 0 = no distortion). Place it AFTER
+// the path-producing shapes it should distort (render order).
+type PuckerBloatNode struct {
+	amount *codec.PropertyStream[float64]
+}
+
+// NewPuckerBloatNode constructs a default PuckerBloatNode (Amount=0, identity).
+func NewPuckerBloatNode() *PuckerBloatNode {
+	n := &PuckerBloatNode{amount: codec.NewPropertyStream[float64]()}
+	_ = n.amount.SetStaticValue(0)
+	return n
+}
+
+func (n *PuckerBloatNode) Kind() ShapeNodeKind             { return ShapeKindPuckerBloat }
+func (n *PuckerBloatNode) Amount() *PropertyStream[float64] { return n.amount }
+
+// SetAmount sets the pucker/bloat amount (percent; negative puckers/concave,
+// positive bloats/convex).
+func (n *PuckerBloatNode) SetAmount(v float64) error { return n.amount.SetStaticValue(v) }
+
+// Properties returns the escape-hatch β view.
+func (n *PuckerBloatNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Pucker & Bloat",
+		streams: map[string]any{
+			"Amount": n.amount,
 		},
 	}
 }

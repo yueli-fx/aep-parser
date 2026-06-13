@@ -70,6 +70,9 @@ var v22ShapeZigZagBodyBytes []byte
 //go:embed templates/v2_2_shape_star_body.bin
 var v22ShapeStarBodyBytes []byte
 
+//go:embed templates/v2_2_shape_puckerbloat_body.bin
+var v22ShapePuckerBloatBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -130,6 +133,10 @@ var (
 	v22ShapeStarOnce  sync.Once
 	v22ShapeStarCache *rifx.Chunk
 	v22ShapeStarErr   error
+
+	v22ShapePuckerBloatOnce  sync.Once
+	v22ShapePuckerBloatCache *rifx.Chunk
+	v22ShapePuckerBloatErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -304,6 +311,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindMergePaths:     "ADBE Vector Filter - Merge",
 	ShapeKindZigZag:         "ADBE Vector Filter - Zigzag",
 	ShapeKindStar:           "ADBE Vector Shape - Star",
+	ShapeKindPuckerBloat:    "ADBE Vector Filter - PB",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -348,6 +356,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerZigZagNode(node, ctx)
 	case *StarNode:
 		return lowerStarNode(node, ctx)
+	case *PuckerBloatNode:
+		return lowerPuckerBloatNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -1133,6 +1143,41 @@ func lowerStarNode(n *StarNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return nil, err
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Star Outer Roundess", n.OuterRoundness(), ctx); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapePuckerBloatBody returns a clone of the Pucker & Bloat template
+// (templates/v2_2_shape_puckerbloat_body.bin): a single `ADBE Vector
+// PuckerBloat Amount` cdat slot (Amount was set non-default in the fixture so
+// AE emitted it).
+func cloneShapePuckerBloatBody() (*rifx.Chunk, error) {
+	v22ShapePuckerBloatOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapePuckerBloatBodyBytes))
+		if err != nil {
+			v22ShapePuckerBloatErr = fmt.Errorf("parse v22ShapePuckerBloatBodyBytes: %w", err)
+			return
+		}
+		v22ShapePuckerBloatCache = ch
+	})
+	if v22ShapePuckerBloatErr != nil {
+		return nil, v22ShapePuckerBloatErr
+	}
+	return cloneChunk(v22ShapePuckerBloatCache), nil
+}
+
+// lowerPuckerBloatNode emits a Pucker & Bloat filter body from the embedded
+// template, overwriting the single `ADBE Vector PuckerBloat Amount` cdat (1D
+// f64 BE at cdat[0:8], raw percent — same scalar layout as Round Corners
+// Radius). Static → cdat overwrite; animated → the cdat flips to a 1D
+// non-spatial keyframe container via the shared injectAnimatedStream path.
+func lowerPuckerBloatNode(n *PuckerBloatNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapePuckerBloatBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector PuckerBloat Amount", n.Amount(), ctx); err != nil {
 		return nil, err
 	}
 	return body, nil
