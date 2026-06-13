@@ -20,7 +20,7 @@
 
 **RE 候选（showcase surfaced 的真缺陷,按需修）**：
 - ✅ **comp SetShutterAngle/Phase ×1.2 已修**（2026-06-14，commit 2fa03cf）——根因 cdta @0xB0 误标 duration（实为 shutter 360° 参考常量），连带修复 **parser 误读所有真实 AE 工程时长**。incident `cdta-0xB0-shutter-ref-not-duration.md`。
-- ✅ **project nnhd display setters 已修**（2026-06-14，commit 854922f）——根因 AE 从 legacy **nhed** 头读显示设置（非 nnhd），setter 漏了双写；且 feetFramesFilmType 真存「每英尺帧数」(35mm=16/16mm=40) 非 byte8 bit7。7 个 setter 改双写 nhed+nnhd，AE2020+2025 DOM readback 全绿。incident `nnhd-display-settings-layout-re.md`。showcase project-settings 重启用三个 setter（→待review）。
+- ✅ **project nnhd display setters 全修完**（2026-06-14，commit 854922f + ec599c9）——根因 AE 从 legacy **nhed** 头读显示设置（非 nnhd），setter 漏了双写；且 feetFramesFilmType 真存「每英尺帧数」(35mm=16/16mm=40) 非 byte8 bit7。7 个 setter 改双写 nhed+nnhd。**5 个 DOM-gate 全绿**（time/framesCount/feet/useFeet/footage AE2020+2025；transparencyGrid AE2020）+ 回归测 `TestProjectSettings_NhedNnhdMirror`。**timecodeDefaultBase = binary-only**（无 DOM property，best-effort nhed[12]）。incident `nnhd-display-settings-layout-re.md`。showcase project-settings → **complete**（用户真机过）。
 - ⏳ **SetResolutionFactor** AE 除零——注意 **AE 自身 scripting `resolutionFactor=[2,2]` 也抛同错**,是 AE 侧深坑,需先搞清 AE 期望的编码。
 - ⏳ **EG 面板崩溃**（gate 需补「真机开面板」验证堵假绿盲区 + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节）——用户低优。
 - ⏳ camera/light 选项 setter from-scratch elide（需 property synthesis 或扩模板）· 从零 **SetLightType** 缺失（默认只能环境光）。
