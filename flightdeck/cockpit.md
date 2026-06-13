@@ -18,7 +18,12 @@
 
 **showcase 覆盖收官**：15 🖼 可视 + 3 📋 读值档 complete · EG blocked · 3 个（markers/render-queue/media-replace）from-scratch 不可表达。
 
-**RE 候选（showcase surfaced 的真缺陷,按需修）**：① **EG 面板崩溃**（gate 需补「真机开面板」验证堵假绿盲区 + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节）· ② comp **SetShutterAngle/Phase** 单位（×1.2）· **SetResolutionFactor** AE 除零 · ③ project **nnhd byte8** 位打包（SetTimeDisplayType/FeetFramesFilmType 互斥清位）+ **SetFramesCountType** · ④ camera/light 选项 setter from-scratch elide（需 property synthesis 或扩模板）· 从零 **SetLightType** 缺失（默认只能环境光）。
+**RE 候选（showcase surfaced 的真缺陷,按需修）**：
+- ✅ **comp SetShutterAngle/Phase ×1.2 已修**（2026-06-14，commit 2fa03cf）——根因 cdta @0xB0 误标 duration（实为 shutter 360° 参考常量），连带修复 **parser 误读所有真实 AE 工程时长**。incident `cdta-0xB0-shutter-ref-not-duration.md`。
+- ⏳ **project nnhd byte8**（SetTimeDisplayType/FeetFramesFilmType 互斥清位）+ **SetFramesCountType** AE DOM 不反映——下一个 setter 修复目标。
+- ⏳ **SetResolutionFactor** AE 除零——注意 **AE 自身 scripting `resolutionFactor=[2,2]` 也抛同错**,是 AE 侧深坑,需先搞清 AE 期望的编码。
+- ⏳ **EG 面板崩溃**（gate 需补「真机开面板」验证堵假绿盲区 + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节）——用户低优。
+- ⏳ camera/light 选项 setter from-scratch elide（需 property synthesis 或扩模板）· 从零 **SetLightType** 缺失（默认只能环境光）。
 
 **MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。其余下一步皆**按需点名即开**（无强制主线）：
 
