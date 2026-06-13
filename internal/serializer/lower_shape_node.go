@@ -64,6 +64,9 @@ var v22ShapeOffsetBodyBytes []byte
 //go:embed templates/v2_2_shape_merge_body.bin
 var v22ShapeMergeBodyBytes []byte
 
+//go:embed templates/v2_2_shape_zigzag_body.bin
+var v22ShapeZigZagBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -116,6 +119,10 @@ var (
 	v22ShapeMergeOnce  sync.Once
 	v22ShapeMergeCache *rifx.Chunk
 	v22ShapeMergeErr   error
+
+	v22ShapeZigZagOnce  sync.Once
+	v22ShapeZigZagCache *rifx.Chunk
+	v22ShapeZigZagErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -288,6 +295,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindRoundCorners:   "ADBE Vector Filter - RC",
 	ShapeKindOffsetPaths:    "ADBE Vector Filter - Offset",
 	ShapeKindMergePaths:     "ADBE Vector Filter - Merge",
+	ShapeKindZigZag:         "ADBE Vector Filter - Zigzag",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -328,6 +336,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerOffsetPathsNode(node, ctx)
 	case *MergePathsNode:
 		return lowerMergePathsNode(node, ctx)
+	case *ZigZagNode:
+		return lowerZigZagNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -1015,6 +1025,44 @@ func lowerMergePathsNode(n *MergePathsNode, _ *lowerCtx) (*rifx.Chunk, error) {
 		return nil, err
 	}
 	overwriteShapeStreamCdat(body, "ADBE Vector Merge Type", encodeF64sBE(float64(n.Type())))
+	return body, nil
+}
+
+// cloneShapeZigZagBody returns a clone of the ZigZag template
+// (templates/v2_2_shape_zigzag_body.bin): `ADBE Vector Zigzag Size` +
+// `ADBE Vector Zigzag Detail` cdat slots (both set non-default in the fixture so
+// AE emitted them; the Points enum stayed default and is elided).
+func cloneShapeZigZagBody() (*rifx.Chunk, error) {
+	v22ShapeZigZagOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeZigZagBodyBytes))
+		if err != nil {
+			v22ShapeZigZagErr = fmt.Errorf("parse v22ShapeZigZagBodyBytes: %w", err)
+			return
+		}
+		v22ShapeZigZagCache = ch
+	})
+	if v22ShapeZigZagErr != nil {
+		return nil, v22ShapeZigZagErr
+	}
+	return cloneChunk(v22ShapeZigZagCache), nil
+}
+
+// lowerZigZagNode emits a ZigZag filter body from the embedded template,
+// overwriting the `ADBE Vector Zigzag Size` (amplitude) and `ADBE Vector Zigzag
+// Detail` (ridges per segment) cdats — both 1D f64 BE at cdat[0:8], same scalar
+// layout as the other shape scalars. Static → cdat overwrite; animated → the
+// cdat flips to a 1D non-spatial keyframe container via injectAnimatedStream.
+func lowerZigZagNode(n *ZigZagNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeZigZagBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Zigzag Size", n.Size(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Zigzag Detail", n.Detail(), ctx); err != nil {
+		return nil, err
+	}
 	return body, nil
 }
 

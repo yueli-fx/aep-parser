@@ -27,6 +27,7 @@ const (
 	ShapeKindRoundCorners                        // `ADBE Vector Filter - RC`
 	ShapeKindOffsetPaths                         // `ADBE Vector Filter - Offset`
 	ShapeKindMergePaths                          // `ADBE Vector Filter - Merge`
+	ShapeKindZigZag                              // `ADBE Vector Filter - Zigzag`
 	// V2.3+ candidates: PolyStar / Transform.
 )
 
@@ -582,6 +583,17 @@ func (g *VectorGroup) AddMergePaths() (*MergePathsNode, error) {
 	return n, nil
 }
 
+// AddZigZag appends a default-valued ZigZagNode (Size=5, Detail=10 — AE's
+// defaults) and returns it. A ZigZag filter distorts the preceding paths into a
+// zigzag/wave: Size is the amplitude (px), Detail is the number of ridges per
+// path segment. Place it AFTER the shapes whose edges it should distort (render
+// order).
+func (g *VectorGroup) AddZigZag() (*ZigZagNode, error) {
+	n := NewZigZagNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -860,6 +872,58 @@ func (n *MergePathsNode) SetType(v MergeType) error {
 // Properties returns the escape-hatch β view.
 func (n *MergePathsNode) Properties() *PropertyGroup {
 	return &PropertyGroup{Name: "Merge Paths"}
+}
+
+// ZigZagNode — `ADBE Vector Filter - Zigzag` (ZigZag). A path-filter that
+// distorts the paths below it in the stack into a zigzag/wave. `Size` (amplitude,
+// px) and `Detail` (ridges per path segment) are animatable 1D scalars (defaults
+// 5 / 10, AE's defaults). The `Points` enum (Smooth/Corner) is AE-default and
+// elided in the extracted template (no slot); not modeled.
+type ZigZagNode struct {
+	size   *codec.PropertyStream[float64]
+	detail *codec.PropertyStream[float64]
+}
+
+// NewZigZagNode constructs a default ZigZagNode (Size=5, Detail=10).
+func NewZigZagNode() *ZigZagNode {
+	n := &ZigZagNode{
+		size:   codec.NewPropertyStream[float64](),
+		detail: codec.NewPropertyStream[float64](),
+	}
+	_ = n.size.SetStaticValue(5)
+	_ = n.detail.SetStaticValue(10)
+	return n
+}
+
+func (n *ZigZagNode) Kind() ShapeNodeKind            { return ShapeKindZigZag }
+func (n *ZigZagNode) Size() *PropertyStream[float64]   { return n.size }
+func (n *ZigZagNode) Detail() *PropertyStream[float64] { return n.detail }
+
+// SetSize sets the zigzag amplitude in pixels. Rejects negative values.
+func (n *ZigZagNode) SetSize(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("ZigZagNode.SetSize: %g out of range (want >= 0)", v)
+	}
+	return n.size.SetStaticValue(v)
+}
+
+// SetDetail sets the number of ridges per path segment. Rejects negative values.
+func (n *ZigZagNode) SetDetail(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("ZigZagNode.SetDetail: %g out of range (want >= 0)", v)
+	}
+	return n.detail.SetStaticValue(v)
+}
+
+// Properties returns the escape-hatch β view.
+func (n *ZigZagNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "ZigZag",
+		streams: map[string]any{
+			"Size":   n.size,
+			"Detail": n.detail,
+		},
+	}
 }
 
 // StrokeLineCap is the stroke end-cap style (`ADBE Vector Stroke Line Cap`).

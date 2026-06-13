@@ -80,6 +80,12 @@ var extractions = []extraction{
 	// non-default (Subtract) in the fixture so AE emits the slot. Regen via
 	// tmp_debug/gen_shape_merge.jsx.
 	{"test_data/v2_2_merge.aep", "ADBE Vector Filter - Merge", "internal/serializer/templates/v2_2_shape_merge_body.bin"},
+	// MG roadmap S5 — ZigZag (`ADBE Vector Filter - Zigzag`): distorts the paths
+	// below it into a zigzag/wave. Sub-streams `ADBE Vector Zigzag Size` (amplitude,
+	// default 5) + `ADBE Vector Zigzag Detail` (ridges per segment, default 10),
+	// both set non-default in the fixture so AE emits the slots; `Zigzag Points`
+	// (enum, default elided) not modeled. Regen via tmp_debug/gen_shape_zigzag.jsx.
+	{"test_data/v2_2_zigzag.aep", "ADBE Vector Filter - Zigzag", "internal/serializer/templates/v2_2_shape_zigzag_body.bin"},
 }
 
 func main() {

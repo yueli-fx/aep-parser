@@ -123,6 +123,7 @@ type (
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
 	RoundCornersNode                = scene.RoundCornersNode
+	ZigZagNode                      = scene.ZigZagNode
 	StrokeNode                      = scene.StrokeNode
 	TrimNode                        = scene.TrimNode
 	StrokeTaper                     = scene.StrokeTaper
@@ -364,6 +365,7 @@ const (
 	ShapeKindRoundCorners                         = scene.ShapeKindRoundCorners
 	ShapeKindOffsetPaths                          = scene.ShapeKindOffsetPaths
 	ShapeKindMergePaths                           = scene.ShapeKindMergePaths
+	ShapeKindZigZag                               = scene.ShapeKindZigZag
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

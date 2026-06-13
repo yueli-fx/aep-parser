@@ -125,6 +125,7 @@ type (
 	RepeaterNode                    = scene.RepeaterNode
 	RepeaterTransform               = scene.RepeaterTransform
 	RoundCornersNode                = scene.RoundCornersNode
+	ZigZagNode                      = scene.ZigZagNode
 	StrokeNode                      = scene.StrokeNode
 	StrokeTaper                     = scene.StrokeTaper
 	TrimNode                        = scene.TrimNode
@@ -365,6 +366,7 @@ const (
 	ShapeKindRoundCorners                         = scene.ShapeKindRoundCorners
 	ShapeKindOffsetPaths                          = scene.ShapeKindOffsetPaths
 	ShapeKindMergePaths                           = scene.ShapeKindMergePaths
+	ShapeKindZigZag                               = scene.ShapeKindZigZag
 	MergeTypeMerge                                = scene.MergeTypeMerge
 	MergeTypeAdd                                  = scene.MergeTypeAdd
 	MergeTypeSubtract                             = scene.MergeTypeSubtract
@@ -458,6 +460,9 @@ func NewOffsetPathsNode() *OffsetPathsNode { return scene.NewOffsetPathsNode() }
 
 // NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge).
 func NewMergePathsNode() *MergePathsNode { return scene.NewMergePathsNode() }
+
+// NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10).
+func NewZigZagNode() *ZigZagNode { return scene.NewZigZagNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }
