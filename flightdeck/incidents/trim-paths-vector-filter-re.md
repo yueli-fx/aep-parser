@@ -1,7 +1,7 @@
 ---
 status: active
-when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Offset / Merge / ZigZag) via AddTrim/AddRepeater/AddRoundCorners/AddOffsetPaths/TrimNode/RepeaterNode/RoundCornersNode/OffsetPathsNode; needing the shape-stack render order (why a filter cuts/duplicates/rounds/grows the shapes) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC/Offset match-name that returns null
-applies_to: [trim-paths, repeater, round-corners, offset-paths, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, ADBE-Vector-Filter-Offset, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, offset-amount, shape-stack-order, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
+when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Offset / Merge / ZigZag) via AddTrim/AddRepeater/AddRoundCorners/AddOffsetPaths/AddMergePaths/TrimNode/RepeaterNode/RoundCornersNode/OffsetPathsNode/MergePathsNode; needing the shape-stack render order (why a filter cuts/duplicates/rounds/grows/combines the shapes, incl. why a COMBINE filter needs the fill ABOVE it) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC/Offset/Merge match-name that returns null; an ExtendScript addProperty live-ref going stale / ReferenceError when building a multi-shape fixture
+applies_to: [trim-paths, repeater, round-corners, offset-paths, merge-paths, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, ADBE-Vector-Filter-Offset, ADBE-Vector-Filter-Merge, merge-type, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, offset-amount, shape-stack-order, fill-above-combine-filter, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, addproperty-stale-ref, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
 last_updated: 2026-06-13
 resolved_by:
 ---
@@ -79,3 +79,13 @@ Gate：`TestMGRoundCorners_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（
 渲染 ground truth：[Rect, Fill, Offset] → Offset 把 Rect path 向外长（+Amount px/边，负值缩）。400×400 白 Rect + Amount=60 → 渲染成 ~520×520 方（每边 +60）。gate 用「四原始边外侧一圈带变白(grown 5/5) + offset 外更远点仍暗(bounded 4/4)」当增长证据——区分「没长(原边外暗)」「长太多/失控(远点白)」。眼验：方块明显变大、直边在、有界。默认 Line Join=Miter 角基本尖（轻微圆是 AE offset 外角行为）。
 
 Gate：`TestMGOffset_AEShipGate_AE2020/2025` 双版本渲染像素 PASS。verify_mg_offset.jsx + mg_offset_shipgate_test.go。AE 2025 同样先 warmup_quit.jsx 预热避冷启 exit-2。
+
+## 复用确认 — Merge Paths（S5, 2026-06-13）✅ 蓝本第 6 次 + **两个新 ground truth**
+
+`ADBE Vector Filter - Merge`：`AddMergePaths`/`MergePathsNode`，`templates/v2_2_shape_merge_body.bin`（376B/5 children）。单子流 `ADBE Vector Merge Type`（**非动画枚举** 1D f64 @cdat[0:8]：1=Merge 2=Add 3=Subtract 4=Intersect 5=Exclude，默认 1）→ 建模成普通字段（同 Fill blend mode，`overwriteShapeStreamCdat` 写枚举，**非** `lowerShapeScalar`）。
+
+**新 ground truth ①（combine 型滤镜的 fill 位置反了）**：Merge 把下方多条 path 合成一条，**Fill 必须在 stack 顶（Merge 之上）** 才能画出合成结果——stack 顺序 `[Rect, Ellipse, Merge, Fill]`（Fill = Children 最高 index = 顶）。**Fill 放 Merge 下方渲染全黑**（fill 在合成前画了未合并的两条 path → ring 0/4 全暗）。这与 Trim/RC/Offset「paint 在 filter 下方」相反——因 Trim/RC/Offset 是改 path 几何、同一条 path 被下方 paint 引用；Merge 是「多 path→一 path」合成，需 paint 在合成之后。**别套前 5 个滤镜的 [shape,paint,filter] 直觉，render 出来看**：400×400 Rect − 200×200 同心 Ellipse(Subtract) → 白方块挖圆洞（眼验确认）。gate：ring 白 4/4 + 中心洞暗 3/3。
+
+**新 ground truth ②（ExtendScript addProperty 返回的 live ref 会失效）**：`var r = sc.addProperty(...)` 返回的 PropertyBase live 引用，在**之后再 addProperty 兄弟属性时失效**（用它 `.property(...).setValue` 抛 ReferenceError）。修：先 add 完所有属性，再用 `sc.property(matchName)` 取（既有 trim/RC/offset fixture 就是这个模式，一直没踩坑因它们每次只在 add 后立即用一次）。两条同 match-name（两个 Rect）还会 `sc.property` 歧义——gate 用 Rect+Ellipse 异类避开。
+
+Gate：`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Type=3 resave 读回 + 方块挖洞）。verify_mg_merge.jsx + mg_merge_shipgate_test.go。**deferred**：Add/Intersect/Exclude 模式未单独 gate（仅 Subtract 渲染验证；枚举写路径一致，其余模式 round-trip 应同）。
