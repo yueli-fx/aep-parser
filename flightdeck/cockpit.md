@@ -18,7 +18,7 @@
 
 **未修 RE 候选**：
 - **EG 面板崩溃**（用户低优）——从零 EG 工程展开「基本图形」面板崩 AE（退回单 slider 也崩），DOM readback 假绿，根源 ship-gate 从不开面板。修法：补「真机开面板」gate + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节。详 `incidents/essential-graphics-write-re.md`。
-- **camera/light 选项 setter from-scratch elide** + 从零 **SetLightType** 缺失（默认只能环境光）——需 property synthesis 或扩模板。
+- **camera/light OPTION setter from-scratch elide**（Camera Zoom/Focus/Aperture · Light Intensity/Color/Cone…）——属性住 Options group，fresh layer 是 opaque 模板克隆无 scene tree，需 **property synthesis**（见 Backlog；`incidents/camera-light-layer-create-re.md`）。✅ **SetLightKind 从零已通**（2026-06-14，ldta @0x88，4 类 AE2020+2025 gate；模板默认其实是 parallel 非环境光）。
 
 **polish / 技债**：
 1. PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。

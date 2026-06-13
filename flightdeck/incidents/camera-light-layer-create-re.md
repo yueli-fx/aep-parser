@@ -58,12 +58,28 @@ version-portability finding.
   JSX. (Did not affect correctness — the Go re-parse preservation check is the
   authoritative type signal.)
 
-## Deferred
+## Fresh-layer setters: ldta-based work, property-based deferred (2026-06-14)
 
-- **Setters on fresh camera/light** (Zoom / Intensity / LightKind / color …): the
-  existing Camera*/Light* setters operate on a parsed layer; on a freshly-built
-  layer there's no scene tree, so values inherit the template's AE defaults until
-  write+reopen. Same scene-vs-chunk split as [[add-effect-splice-re]] Phase 2.
+The "setters don't work on fresh camera/light" deferral was **too broad**. Split by
+where the field lives:
+
+- **`SetLightKind` (ldta @0x88) — WORKS from-scratch, AE-gated dual-version.**
+  `newTemplatedLayer` wires the fresh `*Layer`'s `layerBackrefs.ldta` to the cloned
+  template ldta, so any ldta-byte setter reaches it. The light template default is
+  **Parallel** (not Ambient — the old "默认只能环境光" note was wrong). Patching
+  ldta @0x88 to any of the 4 kinds is accepted by AE 2020 **and** 2025: a fresh
+  light set to Spot/Point/Ambient/Parallel reports the matching `lightType` and
+  resave preserves it — AE tolerates the kind/Light-Options mismatch (it synthesizes
+  the missing per-kind props like Cone Angle at runtime). Gated by
+  `TestNewCameraLight_AEShipGate_AE20{20,25}` (Light1 built Spot, JSX asserts
+  `lightType===SPOT`, Go resave asserts `LightKind==spot`).
+- **Property-based option setters still deferred** (Camera: Zoom/Focus/Aperture…;
+  Light: Intensity/Color/Cone Angle/Cone Feather/Falloff…): these live in the
+  Camera/Light **Options property group**, which on a fresh layer is an opaque
+  template-clone blob with no parsed scene tree. Setting them needs **property
+  synthesis** (parse-the-clone or build-the-group) — same scene-vs-chunk split as
+  [[add-effect-splice-re]] Phase 2 / [[transform-group-default-omission]]. Until
+  then a fresh camera/light carries the template's AE-default option values.
 - ~~NewTextLayer~~ — SHIPPED 2026-06-11 via the same embed-whole-Layr path
   (mutate_layer_text.go; the btdk blob travels verbatim, so its complexity never
   materialized for creation — length-variable text WRITE is the remaining wall,

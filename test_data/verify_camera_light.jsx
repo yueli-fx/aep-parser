@@ -37,6 +37,7 @@
             else if (cam.name !== "Cam1") fail("camera name " + cam.name + " != Cam1");
             if (!light) fail("no LightLayer found");
             else if (light.name !== "Light1") fail("light name " + light.name + " != Light1");
+            else if (light.lightType !== LightType.SPOT) fail("light lightType " + light.lightType + " != SPOT(" + LightType.SPOT + ")");
         }
 
         app.project.save(new File(args.resaved));

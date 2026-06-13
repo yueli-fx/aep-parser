@@ -35,8 +35,15 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	if _, err := aep.NewCameraLayer(comp, "Cam1"); err != nil {
 		t.Fatalf("NewCameraLayer: %v", err)
 	}
-	if _, err := aep.NewLightLayer(comp, "Light1"); err != nil {
+	lightLayer, err := aep.NewLightLayer(comp, "Light1")
+	if err != nil {
 		t.Fatalf("NewLightLayer: %v", err)
+	}
+	// Exercise from-scratch SetLightKind: template default is Parallel; set Spot
+	// so the gate proves AE accepts a kind-patched clone and reports SPOT
+	// (verify_camera_light.jsx checks light.lightType).
+	if err := lightLayer.SetLightKind(aep.LightKindSpot); err != nil {
+		t.Fatalf("SetLightKind: %v", err)
 	}
 
 	tempDir := t.TempDir()
@@ -86,6 +93,9 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 		}
 		if l.Name == "Light1" && l.Type == aep.LayerTypeLight {
 			light = true
+			if l.LightKind != aep.LightKindSpot {
+				t.Errorf("%s resaved: Light 'Light1' LightKind = %v, want spot", ver, l.LightKind)
+			}
 		}
 	}
 	if !cam {
