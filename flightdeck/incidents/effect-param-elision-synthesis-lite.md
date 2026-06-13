@@ -134,6 +134,16 @@ Cost: looked exactly like a data reject (bisected the whole file before
 suspecting the JSX). Any verify/RE JSX logging array values must stringify
 explicitly (see `str()` in verify_effect_param.jsx).
 
+**Repeat victim — `comp.resolutionFactor` (2026-06-14).** comp-settings showcase
+logged `"" + comp.resolutionFactor` ([2,2] array) → same `数字结果无效（除以零？）`,
+and the symptom got mis-recorded as "AE 侧除零深坑，SetResolutionFactor 待 RE"
+(propagated into cockpit RE-candidate + showcase exclusion). It was never a real
+issue: numeric-index readback (`rf[0]+"x"+rf[1]`) works; AE `resolutionFactor=[2,2]`
+writes/reads fine; AE-native cdta X@0x00/Y@0x02 uint16 BE == our writer; Go-built
+SetResolutionFactor(2,2) → AE2020+2025 DOM 2x2. **Lesson: an "AE throws" symptom
+observed only through a `"" + arrayValue` log line is presumed-trap until re-tested
+with numeric indexing — don't escalate it to an RE candidate.**
+
 ## Finding 2 — cross-version DEFAULT drift re-elides on resave (not a bug)
 
 AE 2025 flipped Gaussian Blur "Repeat Edge Pixels" (`-0003`) default false →

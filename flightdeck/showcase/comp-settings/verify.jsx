@@ -15,6 +15,10 @@
             if (it instanceof CompItem && it.name === "CompSettings") { comp = it; break; }
         }
         if (!comp) throw new Error("comp not found");
+        // resolutionFactor: index numerically — never "" + rf (array valueOf
+        // throws 数字结果无效(除以零?), the trap that mis-flagged this as broken).
+        var rf = comp.resolutionFactor;
+        log.push("resolutionFactor=" + rf[0] + "x" + rf[1]);
         log.push("shutterAngle=" + comp.shutterAngle + " shutterPhase=" + comp.shutterPhase);
         log.push("frameRate=" + comp.frameRate + " duration=" + comp.duration);
         log.push("motionBlur=" + comp.motionBlur);

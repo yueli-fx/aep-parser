@@ -1,9 +1,9 @@
 ---
 showcase: comp-settings
 direction: 合成设置 setter — Composition.Set*（运动模糊/工作区/背景色/嵌套帧率等），纯 Go 从零设值后 AE DOM readback 核对（📋 读值档，不看图）
-capabilities: [comp-motion-blur, motion-blur-samples, work-area, bg-color, hide-shy-layers, preserve-nested-framerate]
+capabilities: [comp-motion-blur, motion-blur-samples, work-area, bg-color, hide-shy-layers, preserve-nested-framerate, resolution-factor]
 gates: [shutter-side-effect-divisors, cdta-duration-two-representations]
-status: complete
+status: 待review
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 verify.jsx"
 ---
@@ -31,6 +31,7 @@ regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 v
 
 | Set* 调用 | DOM 字段 | 期望值 |
 |---|---|---|
+| SetResolutionFactor(2,2) | resolutionFactor | 2x2（Half；**误诊已澄清**，见下） |
 | SetShutterAngle(172) | shutterAngle | 172（**已修**，见下） |
 | SetShutterPhase(-86) | shutterPhase | -86（**已修**） |
 | SetCompMotionBlur(true) | motionBlur | true |
@@ -48,9 +49,9 @@ regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 v
 
 **SetShutterAngle/Phase ×1.2 假绿已根治**（incident `cdta-0xB0-shutter-ref-not-duration.md`）：根因不在 shutter setter,而是 **cdta @0xB0 历史误标为 duration**——实为「shutter 角度 360° 参考常量」。NewComposition 往 @0xB0 写真帧数(300=10s×30fps),AE 算 shutterAngle = stored×360/@0xB0 = 172×360/300 = 206.4 → 假绿。**连带发现**:parser 也从 @0xB0 读 duration → **误读所有真实 AE 工程的时长**(10s/30fps 读成 12s)。修复:parser 改读 @0x2C(MasterTicks=真时长 ticks),NewComposition 往 @0xB0 写常量 360。双版本未跑但 AE2020 实测 shutter 172/-86 + 5 个 AE-native 时长全对。
 
-## ⚠ 仍存边界（本档刻意排除）
+## ✅ SetResolutionFactor 误诊已澄清（2026-06-14）
 
-- **SetResolutionFactor(2,2)**：AE 读 `comp.resolutionFactor` 抛「数字结果无效（除以零）」——**AE 自身 scripting `comp.resolutionFactor=[2,2]` 也抛同错**,是 AE 侧深坑,非单纯 writer bug,待独立 RE。
+本档曾把 SetResolutionFactor 当「AE 侧除零深坑」排除——**实为假警报**。「除零」是 JSX 日志陷阱：`"" + comp.resolutionFactor`（数组 valueOf）抛 `数字结果无效（除以零？）`，**不是** AE 拒绝（同 effect-param incident finding 4）。改用数字索引 `rf[0]+"x"+rf[1]` 读回正常。RE 实证：AE 自身 `comp.resolutionFactor=[2,2]` 写读全正常（2x2/3x3/1x1），AE-native cdta = X@0x00/Y@0x02 uint16 BE **与我方 writer 字节完全一致**；Go 从零建工程 SetResolutionFactor(2,2) 经 **AE2020+2025 DOM readback 双版本均 2x2**。故 SetResolutionFactor 一直是好的。
 
 其余合成 setter（SetSize/SetName/SetFrameRate/SetDuration/SetPixelAspect/SetDisplayStartTime/SetDraft3D/SetFrameBlending 等）未纳入本批,按需再扩。
 

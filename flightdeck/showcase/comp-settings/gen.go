@@ -39,8 +39,8 @@ func main() {
 	must(f.SetColor([4]float64{0.25, 0.6, 0.95, 1}))
 	must(bg.Position().SetStaticValue([2]float64{960, 540}))
 
-	// Distinctive, non-default settings. (SetResolutionFactor still excluded — AE's
-	// own scripting throws divide-by-zero on resolutionFactor=[2,2]; see INDEX.md.)
+	// Distinctive, non-default settings.
+	must(comp.SetResolutionFactor(2, 2))             // DOM resolutionFactor = [2,2] (Half)
 	must(comp.SetShutterAngle(172))                  // DOM shutterAngle (fixed: was ×1.2 via @0xB0 duration/shutter-ref bug)
 	must(comp.SetShutterPhase(-86))                  // DOM shutterPhase
 	must(comp.SetCompMotionBlur(true))               // DOM motionBlur = true
