@@ -76,6 +76,9 @@ var v22ShapePuckerBloatBodyBytes []byte
 //go:embed templates/v2_2_shape_twist_body.bin
 var v22ShapeTwistBodyBytes []byte
 
+//go:embed templates/v2_2_shape_wiggle_body.bin
+var v22ShapeWiggleBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -144,6 +147,10 @@ var (
 	v22ShapeTwistOnce  sync.Once
 	v22ShapeTwistCache *rifx.Chunk
 	v22ShapeTwistErr   error
+
+	v22ShapeWiggleOnce  sync.Once
+	v22ShapeWiggleCache *rifx.Chunk
+	v22ShapeWiggleErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -320,6 +327,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindStar:           "ADBE Vector Shape - Star",
 	ShapeKindPuckerBloat:    "ADBE Vector Filter - PB",
 	ShapeKindTwist:          "ADBE Vector Filter - Twist",
+	ShapeKindWigglePaths:    "ADBE Vector Filter - Roughen",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -368,6 +376,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerPuckerBloatNode(node, ctx)
 	case *TwistNode:
 		return lowerTwistNode(node, ctx)
+	case *WigglePathsNode:
+		return lowerWigglePathsNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -1223,6 +1233,51 @@ func lowerTwistNode(n *TwistNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return nil, err
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Twist Angle", n.Angle(), ctx); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapeWiggleBody returns a clone of the Wiggle Paths template
+// (templates/v2_2_shape_wiggle_body.bin): four cdat slots — `ADBE Vector Roughen
+// Size` / `Roughen Detail` / `Temporal Freq` / `Random Seed` — all set
+// non-default in the fixture so AE emitted them. Points / Correlation /
+// Temporal·Spatial Phase stayed default and are elided.
+func cloneShapeWiggleBody() (*rifx.Chunk, error) {
+	v22ShapeWiggleOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeWiggleBodyBytes))
+		if err != nil {
+			v22ShapeWiggleErr = fmt.Errorf("parse v22ShapeWiggleBodyBytes: %w", err)
+			return
+		}
+		v22ShapeWiggleCache = ch
+	})
+	if v22ShapeWiggleErr != nil {
+		return nil, v22ShapeWiggleErr
+	}
+	return cloneChunk(v22ShapeWiggleCache), nil
+}
+
+// lowerWigglePathsNode emits a Wiggle Paths filter body from the embedded
+// template, overwriting the four modeled scalar cdats (Size / Detail /
+// WigglesPerSecond=Temporal Freq / RandomSeed; each 1D f64 BE at cdat[0:8]).
+// Static → cdat overwrite; animated → each cdat flips to a 1D non-spatial
+// keyframe container via the shared injectAnimatedStream path.
+func lowerWigglePathsNode(n *WigglePathsNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeWiggleBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Roughen Size", n.Size(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Roughen Detail", n.Detail(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Temporal Freq", n.WigglesPerSecond(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Random Seed", n.RandomSeed(), ctx); err != nil {
 		return nil, err
 	}
 	return body, nil

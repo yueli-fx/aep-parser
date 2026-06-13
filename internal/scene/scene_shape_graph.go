@@ -31,6 +31,7 @@ const (
 	ShapeKindStar                                // `ADBE Vector Shape - Star`
 	ShapeKindPuckerBloat                         // `ADBE Vector Filter - PB`
 	ShapeKindTwist                               // `ADBE Vector Filter - Twist`
+	ShapeKindWigglePaths                         // `ADBE Vector Filter - Roughen`
 	// V2.3+ candidates: Transform / nested user groups.
 )
 
@@ -749,6 +750,16 @@ func (g *VectorGroup) AddTwist() (*TwistNode, error) {
 	return n, nil
 }
 
+// AddWigglePaths appends a default-valued WigglePathsNode (Size=0, the no-op
+// identity) and returns it. Wiggle Paths roughens the preceding paths with
+// time-varying random displacement — the classic hand-drawn "boil" jitter.
+// Place it AFTER the shapes it should distort (render order).
+func (g *VectorGroup) AddWigglePaths() (*WigglePathsNode, error) {
+	n := NewWigglePathsNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -1144,6 +1155,73 @@ func (n *TwistNode) Properties() *PropertyGroup {
 		Name: "Twist",
 		streams: map[string]any{
 			"Angle": n.angle,
+		},
+	}
+}
+
+// WigglePathsNode — `ADBE Vector Filter - Roughen` (Wiggle Paths). A path-filter
+// that roughens the paths below it with time-varying random displacement — the
+// hand-drawn "boil" jitter. Four animatable 1D scalar sub-streams are modeled:
+// Size (displacement amplitude), Detail (segments per unit length),
+// WigglesPerSecond (the temporal frequency, `ADBE Vector Temporal Freq`), and
+// RandomSeed. The Points (enum), Correlation, and Temporal/Spatial Phase
+// sub-streams are left at their defaults and elided. Place it AFTER the
+// path-producing shapes it should distort (render order).
+type WigglePathsNode struct {
+	size             *codec.PropertyStream[float64]
+	detail           *codec.PropertyStream[float64]
+	wigglesPerSecond *codec.PropertyStream[float64]
+	randomSeed       *codec.PropertyStream[float64]
+}
+
+// NewWigglePathsNode constructs a default WigglePathsNode (Size=0 → no
+// displacement, the identity; Detail=10, WigglesPerSecond=2, RandomSeed=0 match
+// AE's filter defaults).
+func NewWigglePathsNode() *WigglePathsNode {
+	n := &WigglePathsNode{
+		size:             codec.NewPropertyStream[float64](),
+		detail:           codec.NewPropertyStream[float64](),
+		wigglesPerSecond: codec.NewPropertyStream[float64](),
+		randomSeed:       codec.NewPropertyStream[float64](),
+	}
+	_ = n.size.SetStaticValue(0)
+	_ = n.detail.SetStaticValue(10)
+	_ = n.wigglesPerSecond.SetStaticValue(2)
+	_ = n.randomSeed.SetStaticValue(0)
+	return n
+}
+
+func (n *WigglePathsNode) Kind() ShapeNodeKind                        { return ShapeKindWigglePaths }
+func (n *WigglePathsNode) Size() *PropertyStream[float64]             { return n.size }
+func (n *WigglePathsNode) Detail() *PropertyStream[float64]           { return n.detail }
+func (n *WigglePathsNode) WigglesPerSecond() *PropertyStream[float64] { return n.wigglesPerSecond }
+func (n *WigglePathsNode) RandomSeed() *PropertyStream[float64]       { return n.randomSeed }
+
+// SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening).
+func (n *WigglePathsNode) SetSize(v float64) error { return n.size.SetStaticValue(v) }
+
+// SetDetail sets the wiggle detail (number of segments per path length — higher
+// = finer, more frequent ridges).
+func (n *WigglePathsNode) SetDetail(v float64) error { return n.detail.SetStaticValue(v) }
+
+// SetWigglesPerSecond sets the temporal frequency (`ADBE Vector Temporal Freq`,
+// the Wiggles/Second control — how fast the random edge churns over time).
+func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error {
+	return n.wigglesPerSecond.SetStaticValue(v)
+}
+
+// SetRandomSeed sets the random seed selecting the displacement pattern.
+func (n *WigglePathsNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
+
+// Properties returns the escape-hatch β view.
+func (n *WigglePathsNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Wiggle Paths",
+		streams: map[string]any{
+			"Size":             n.size,
+			"Detail":           n.detail,
+			"WigglesPerSecond": n.wigglesPerSecond,
+			"RandomSeed":       n.randomSeed,
 		},
 	}
 }

@@ -129,6 +129,7 @@ type (
 	StarNode                        = scene.StarNode
 	PuckerBloatNode                 = scene.PuckerBloatNode
 	TwistNode                       = scene.TwistNode
+	WigglePathsNode                 = scene.WigglePathsNode
 	StrokeNode                      = scene.StrokeNode
 	StrokeTaper                     = scene.StrokeTaper
 	TrimNode                        = scene.TrimNode
@@ -373,6 +374,7 @@ const (
 	ShapeKindStar                                 = scene.ShapeKindStar
 	ShapeKindPuckerBloat                          = scene.ShapeKindPuckerBloat
 	ShapeKindTwist                                = scene.ShapeKindTwist
+	ShapeKindWigglePaths                          = scene.ShapeKindWigglePaths
 	MergeTypeMerge                                = scene.MergeTypeMerge
 	MergeTypeAdd                                  = scene.MergeTypeAdd
 	MergeTypeSubtract                             = scene.MergeTypeSubtract
@@ -480,6 +482,10 @@ func NewPuckerBloatNode() *PuckerBloatNode { return scene.NewPuckerBloatNode() }
 // NewTwistNode returns a detached Twist filter node (Angle=0, the no-op
 // identity).
 func NewTwistNode() *TwistNode { return scene.NewTwistNode() }
+
+// NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the
+// no-op identity).
+func NewWigglePathsNode() *WigglePathsNode { return scene.NewWigglePathsNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }

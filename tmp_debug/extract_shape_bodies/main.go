@@ -109,6 +109,14 @@ var extractions = []extraction{
 	// the slot; `Twist Center` (Vec2, default [0,0]) stays default and is elided
 	// (modeled only Angle). Regen via tmp_debug/gen_shape_twist.jsx.
 	{"test_data/v2_2_twist.aep", "ADBE Vector Filter - Twist", "internal/serializer/templates/v2_2_shape_twist_body.bin"},
+	// MG roadmap S5 — Wiggle Paths (`ADBE Vector Filter - Roughen` internally):
+	// roughens the paths below it with time-varying random displacement. Headline
+	// sub-streams `ADBE Vector Roughen Size` (amplitude) / `Roughen Detail` /
+	// `Temporal Freq` (Wiggles/Second) / `Random Seed` set non-default in the
+	// fixture so AE emits those four slots; Points (enum) / Correlation /
+	// Temporal·Spatial Phase stay default and are elided (modeled only the four
+	// headline controls). Regen via tmp_debug/gen_shape_wiggle.jsx.
+	{"test_data/v2_2_wiggle.aep", "ADBE Vector Filter - Roughen", "internal/serializer/templates/v2_2_shape_wiggle_body.bin"},
 }
 
 func main() {
