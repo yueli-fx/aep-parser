@@ -13,7 +13,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-下面 9 个方向**全部 🔍 待review**——产物 `.aep`/`.png` 已在本地（gitignored），请逐个真机验：`go run ./flightdeck/showcase/<方向>` 生成 .aep（或直接打开已生成的），AE 打开核对该方向 INDEX 的布局表，确认无误后告诉我，我再翻 ✅ complete。
+下面 12 个方向**全部 🔍 待review**——产物 `.aep`/`.png` 已在本地（gitignored），请逐个真机验：`go run ./flightdeck/showcase/<方向>` 生成 .aep（或直接打开已生成的），AE 打开核对该方向 INDEX 的布局表，确认无误后告诉我，我再翻 ✅ complete。
 
 ## 方向一览
 
@@ -28,5 +28,8 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [text](text/INDEX.md) | 文字层 from-scratch（NewTextLayer + SetText 多行） | 🔍 待review |
 | [layers](layers/INDEX.md) | Solid 同心色框 + Null/Adjustment 建层 | 🔍 待review |
 | [effects](effects/INDEX.md) | 加效果 AddEffect + 改参数 SetEffectParam（12 效果网格） | 🔍 待review |
+| [masks](masks/INDEX.md) | AddMask 遮罩裁切（圆/三角/星/inverted） | 🔍 待review |
+| [structural-ops](structural-ops/INDEX.md) | Duplicate/Move/Delete/维度分离（同心环+readback） | 🔍 待review |
+| [transform-values](transform-values/INDEX.md) | 改 Position/Scale/Rotation/Opacity（before/after） | 🔍 待review |
 
-> 已回填 **9 个方向**：8 个 from-scratch 可视 + **effects**（加效果/改参数）。剩 masks / structural-ops / transform-values / stroke-detail / animated-path（看图档）+ render-queue / essential-graphics / markers / comp·project 设置（读值档）逐个补，全量清单详 `specs/2026-06-13-full-showcase-coverage.md`。
+> 已回填 **12 个方向**（全 🔍 待review）：8 from-scratch 可视 + effects + masks + structural-ops + transform-values。**🚧 进行中**：stroke-detail（open-path 描边渲染塌缩，需改闭合形状方案）。**待补**：animated-path / keyframe-channels（看图档）+ render-queue / essential-graphics / markers / comp·project 设置（读值档）。全量清单 + 验证档位（🖼看图 vs 📋读值）详 `specs/2026-06-13-full-showcase-coverage.md`。
