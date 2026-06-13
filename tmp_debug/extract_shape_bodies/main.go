@@ -91,6 +91,12 @@ var extractions = []extraction{
 	// both set non-default in the fixture so AE emits the slots; `Zigzag Points`
 	// (enum, default elided) not modeled. Regen via tmp_debug/gen_shape_zigzag.jsx.
 	{"test_data/v2_2_zigzag.aep", "ADBE Vector Filter - Zigzag", "internal/serializer/templates/v2_2_shape_zigzag_body.bin"},
+	// MG roadmap S5 — PolyStar (`ADBE Vector Shape - Star`): a parametric star
+	// shape (like Rect/Ellipse). Sub-streams Points / Position / Rotation / Inner
+	// Radius / Outer Radius / Inner·Outer Roundess set non-default so AE emits the
+	// slots; Star Type (default Star) + Shape Direction stay default (elided) —
+	// Star-type only modeled (Polygon deferred). Regen via tmp_debug/gen_shape_star.jsx.
+	{"test_data/v2_2_star.aep", "ADBE Vector Shape - Star", "internal/serializer/templates/v2_2_shape_star_body.bin"},
 }
 
 func main() {

@@ -28,7 +28,8 @@ const (
 	ShapeKindOffsetPaths                         // `ADBE Vector Filter - Offset`
 	ShapeKindMergePaths                          // `ADBE Vector Filter - Merge`
 	ShapeKindZigZag                              // `ADBE Vector Filter - Zigzag`
-	// V2.3+ candidates: PolyStar / Transform.
+	ShapeKindStar                                // `ADBE Vector Shape - Star`
+	// V2.3+ candidates: Transform / nested user groups.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
@@ -79,6 +80,15 @@ func (g *VectorGroup) AddPath() (*PathNode, error) {
 	p := NewPathNode()
 	g.Children = append(g.Children, p)
 	return p, nil
+}
+
+// AddStar appends a default-valued StarNode (5-point star, OuterRadius=100,
+// InnerRadius=50) and returns it — the canonical star / sparkle / badge MG
+// primitive. V2.2 models the Star type only (not Polygon).
+func (g *VectorGroup) AddStar() (*StarNode, error) {
+	n := NewStarNode()
+	g.Children = append(g.Children, n)
+	return n, nil
 }
 
 // AddFill appends a default-valued FillNode (white, 100% opacity) and
@@ -243,6 +253,106 @@ func (e *EllipseNode) Properties() *PropertyGroup {
 		streams: map[string]any{
 			"Size":     e.size,
 			"Position": e.position,
+		},
+	}
+}
+
+// StarNode — `ADBE Vector Shape - Star`. A parametric star (V2.2 models the
+// Star type only — Polygon, which drops Inner Radius/Roundness, is deferred).
+// Defaults match AE: Points=5, Position=[0,0], Rotation=0, InnerRadius=50,
+// OuterRadius=100, Inner/OuterRoundness=0. Star Type / Shape Direction stay at
+// AE's default (Star / Normal; elided in the template, not overwritable).
+//
+// All sub-streams are animatable: Position is a Vec2 (spatial motion-path, same
+// layout as Rect Position); the rest are 1D scalars.
+type StarNode struct {
+	points         *codec.PropertyStream[float64]
+	position       *codec.PropertyStream[[2]float64]
+	rotation       *codec.PropertyStream[float64]
+	innerRadius    *codec.PropertyStream[float64]
+	outerRadius    *codec.PropertyStream[float64]
+	innerRoundness *codec.PropertyStream[float64]
+	outerRoundness *codec.PropertyStream[float64]
+}
+
+// NewStarNode constructs a default-valued StarNode (AE's default 5-point star).
+func NewStarNode() *StarNode {
+	n := &StarNode{
+		points:         codec.NewPropertyStream[float64](),
+		position:       codec.NewPropertyStream[[2]float64](),
+		rotation:       codec.NewPropertyStream[float64](),
+		innerRadius:    codec.NewPropertyStream[float64](),
+		outerRadius:    codec.NewPropertyStream[float64](),
+		innerRoundness: codec.NewPropertyStream[float64](),
+		outerRoundness: codec.NewPropertyStream[float64](),
+	}
+	_ = n.points.SetStaticValue(5)
+	_ = n.position.SetStaticValue([2]float64{0, 0})
+	_ = n.rotation.SetStaticValue(0)
+	_ = n.innerRadius.SetStaticValue(50)
+	_ = n.outerRadius.SetStaticValue(100)
+	_ = n.innerRoundness.SetStaticValue(0)
+	_ = n.outerRoundness.SetStaticValue(0)
+	return n
+}
+
+func (n *StarNode) Kind() ShapeNodeKind                      { return ShapeKindStar }
+func (n *StarNode) Points() *PropertyStream[float64]         { return n.points }
+func (n *StarNode) Position() *PropertyStream[[2]float64]    { return n.position }
+func (n *StarNode) Rotation() *PropertyStream[float64]       { return n.rotation }
+func (n *StarNode) InnerRadius() *PropertyStream[float64]    { return n.innerRadius }
+func (n *StarNode) OuterRadius() *PropertyStream[float64]    { return n.outerRadius }
+func (n *StarNode) InnerRoundness() *PropertyStream[float64] { return n.innerRoundness }
+func (n *StarNode) OuterRoundness() *PropertyStream[float64] { return n.outerRoundness }
+
+// SetPoints sets the number of star points. Rejects values < 3.
+func (n *StarNode) SetPoints(v float64) error {
+	if v < 3 {
+		return fmt.Errorf("StarNode.SetPoints: %g out of range (want >= 3)", v)
+	}
+	return n.points.SetStaticValue(v)
+}
+
+// SetPosition sets the star's local position offset (px).
+func (n *StarNode) SetPosition(v [2]float64) error { return n.position.SetStaticValue(v) }
+
+// SetRotation sets the star's rotation in degrees.
+func (n *StarNode) SetRotation(v float64) error { return n.rotation.SetStaticValue(v) }
+
+// SetInnerRadius sets the inner radius (px, the valley between points). Rejects negatives.
+func (n *StarNode) SetInnerRadius(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("StarNode.SetInnerRadius: %g out of range (want >= 0)", v)
+	}
+	return n.innerRadius.SetStaticValue(v)
+}
+
+// SetOuterRadius sets the outer radius (px, the star tips). Rejects negatives.
+func (n *StarNode) SetOuterRadius(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("StarNode.SetOuterRadius: %g out of range (want >= 0)", v)
+	}
+	return n.outerRadius.SetStaticValue(v)
+}
+
+// SetInnerRoundness sets the inner-point roundness (percent).
+func (n *StarNode) SetInnerRoundness(v float64) error { return n.innerRoundness.SetStaticValue(v) }
+
+// SetOuterRoundness sets the outer-point (tip) roundness (percent).
+func (n *StarNode) SetOuterRoundness(v float64) error { return n.outerRoundness.SetStaticValue(v) }
+
+// Properties returns the escape-hatch β view.
+func (n *StarNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Star",
+		streams: map[string]any{
+			"Points":         n.points,
+			"Position":       n.position,
+			"Rotation":       n.rotation,
+			"InnerRadius":    n.innerRadius,
+			"OuterRadius":    n.outerRadius,
+			"InnerRoundness": n.innerRoundness,
+			"OuterRoundness": n.outerRoundness,
 		},
 	}
 }

@@ -67,6 +67,9 @@ var v22ShapeMergeBodyBytes []byte
 //go:embed templates/v2_2_shape_zigzag_body.bin
 var v22ShapeZigZagBodyBytes []byte
 
+//go:embed templates/v2_2_shape_star_body.bin
+var v22ShapeStarBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -123,6 +126,10 @@ var (
 	v22ShapeZigZagOnce  sync.Once
 	v22ShapeZigZagCache *rifx.Chunk
 	v22ShapeZigZagErr   error
+
+	v22ShapeStarOnce  sync.Once
+	v22ShapeStarCache *rifx.Chunk
+	v22ShapeStarErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -296,6 +303,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindOffsetPaths:    "ADBE Vector Filter - Offset",
 	ShapeKindMergePaths:     "ADBE Vector Filter - Merge",
 	ShapeKindZigZag:         "ADBE Vector Filter - Zigzag",
+	ShapeKindStar:           "ADBE Vector Shape - Star",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -338,6 +346,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerMergePathsNode(node, ctx)
 	case *ZigZagNode:
 		return lowerZigZagNode(node, ctx)
+	case *StarNode:
+		return lowerStarNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -1068,6 +1078,61 @@ func lowerZigZagNode(n *ZigZagNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return nil, err
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Zigzag Detail", n.Detail(), ctx); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapeStarBody returns a clone of the Star template
+// (templates/v2_2_shape_star_body.bin): Points / Position / Rotation / Inner
+// Radius / Outer Radius / Inner·Outer Roundess cdat slots (all set non-default in
+// the fixture so AE emitted them). Star Type / Shape Direction stayed default
+// and are elided (Star type only).
+func cloneShapeStarBody() (*rifx.Chunk, error) {
+	v22ShapeStarOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStarBodyBytes))
+		if err != nil {
+			v22ShapeStarErr = fmt.Errorf("parse v22ShapeStarBodyBytes: %w", err)
+			return
+		}
+		v22ShapeStarCache = ch
+	})
+	if v22ShapeStarErr != nil {
+		return nil, v22ShapeStarErr
+	}
+	return cloneChunk(v22ShapeStarCache), nil
+}
+
+// lowerStarNode emits a Star shape body from the embedded template, overwriting
+// the Points / Rotation / Inner·Outer Radius / Inner·Outer Roundess 1D scalars
+// (lowerShapeScalar, static cdat / animated flip) and Position (Vec2, spatial
+// motion-path layout, same as Rect Position). Star Type stays at the embed
+// default (Star). RE'd from v2_2_star.aep.
+func lowerStarNode(n *StarNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeStarBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Star Points", n.Points(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeVec2(body, "ADBE Vector Star Position", n.Position(), ctx,
+		valueLayout{dim: 2, headerByte: 0x07, spatial: true, motionPath: true}); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Star Rotation", n.Rotation(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Star Inner Radius", n.InnerRadius(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Star Outer Radius", n.OuterRadius(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Star Inner Roundess", n.InnerRoundness(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Star Outer Roundess", n.OuterRoundness(), ctx); err != nil {
 		return nil, err
 	}
 	return body, nil
