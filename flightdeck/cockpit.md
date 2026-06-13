@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-13 by claude（质感件 S5 续：**ZigZag** (`ADBE Vector Filter - Zigzag`) 从零 ship——`AddZigZag`/`ZigZagNode`（Size 振幅 + Detail ridges 双 scalar），套矢量滤镜 vein 第 7 次，**常用矢量滤镜家族收齐**（Trim/Repeater/RoundCorners/Offset/Merge/ZigZag）。`TestMGZigZag_AEShipGate_AE2020/2025` 双版本渲染像素 PASS：400×400 Rect + Size=40/Detail=8 → 四边尖齿 starburst，逐列扫顶白 y spread=78=±40 振幅·center 白·resave 读回，眼验。commit 55e9fff。当日质感件 4 连：RoundCorners b9a4dc3·Offset 3e2ba12·Merge 959e904·ZigZag 55e9fff。）
-**Active focus**: **From-scratch MG 工程能力 — 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标「不开 AE 纯 Go 生成完整 MG 动画」端到端达成）。ease ✅ 表达式 ✅ Trim ✅ precomp ✅ Repeater ✅ Round Corners ✅ Offset Paths ✅ Merge Paths ✅ ZigZag ✅（**常用矢量滤镜家族收齐**）端到端组合 gate ✅。**余下 = 按需 polish**（非阻塞）：gradient 方向（fixture 难，详 `incidents/gradient-fill-write-re.md`）· 表达式语汇 gate（loopOut/wiggle/跨层引用）· animated trim/repeater · precomp anchor/scale 参数化 · 其余矢量滤镜（PolyStar/Twist/Pucker&Bloat/Wiggle，同 vein 需求驱动）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
+**Last updated**: 2026-06-13 by claude（质感件 S5 续：**gradient 方向**（`GradientFillNode.SetStartPoint/SetEndPoint`）从零 ship——翻案「需 UI 授权」错，JSX 能设 typed point。`TestMGGradientDir_AEShipGate_AE2020/2025` 双版本渲染像素 PASS：red→blue 对角 ramp，TL红/BR蓝/TR·BL紫·resave 读回·既有 gradient gate 不回归·眼验。commit aac0f12。**质感件全清**：当日 5 连 RoundCorners b9a4dc3·Offset 3e2ba12·Merge 959e904·ZigZag 55e9fff·gradient方向 aac0f12。）
+**Active focus**: **From-scratch MG 工程能力 — 主线 S1–S6 已闭环 + 质感件全清**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标「不开 AE 纯 Go 生成完整 MG 动画」端到端达成）。ease ✅ 表达式 ✅ Trim ✅ precomp ✅ Repeater ✅ Round Corners ✅ Offset Paths ✅ Merge Paths ✅ ZigZag ✅ gradient 方向 ✅（**常用矢量滤镜家族 + gradient 方向全收齐**）端到端组合 gate ✅。**余下 = 按需 polish**（非阻塞）：表达式语汇 gate（loopOut/wiggle/跨层引用）· animated trim/repeater · precomp anchor/scale 参数化 · 其余矢量滤镜（PolyStar/Twist/Pucker&Bloat/Wiggle，同 vein 需求驱动）· gradient 余项（radial/HiLite/G-Stroke 方向）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
 
 ## 进行中
 
@@ -15,9 +15,9 @@
 
 **MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。下一步皆**按需点名即开**（无强制主线）：
 
-1. **gradient Start·End Pt（方向）**：现模板 elided 只默认水平 ramp。**fixture 双重难题**：默认 gradient 全 elide + JSX 不能 author stops（详 `incidents/gradient-fill-write-re.md`），比矢量滤镜难——需 UI 授权或组合现有 AE25 stops fixture + JSX 设 Start/End Pt 重存。质感件里唯一未做的常见项。
-2. **其余矢量滤镜**（需求驱动，蓝本已**七次验证** Trim/Repeater/RoundCorners/Offset/Merge/ZigZag——详 `incidents/trim-paths-vector-filter-re.md`）：PolyStar（星形）/ Twist / Pucker & Bloat / Wiggle Paths（Wiggle Transform）等，同 cdat-based vein 照蓝本推。
-3. **表达式语汇 gate**：loopOut / wiggle / thisComp.layer 跨层引用（S2 仅验单 `time*90`）。
+1. **其余矢量滤镜**（需求驱动，蓝本已**七次验证** Trim/Repeater/RoundCorners/Offset/Merge/ZigZag——详 `incidents/trim-paths-vector-filter-re.md`）：PolyStar（星形）/ Twist / Pucker & Bloat / Wiggle Paths（Wiggle Transform）等，同 cdat-based vein 照蓝本推。
+2. **表达式语汇 gate**：loopOut / wiggle / thisComp.layer 跨层引用（S2 仅验单 `time*90`）。
+3. **gradient 余项**：Grad Type（radial）· HiLite · G-Stroke 方向（同 G-Fill vein，G-Stroke 模板需重抽）· direction read-back（hydrate）。
 4. 技债（顺修）：`encodePathTimeTable` 容量分页同病（path >4 kf 前必修，详 `incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater（line-draw / count-up 真动画）+ precomp 多层嵌套已通未单独 gate · precomp anchor/scale 未参数化 · 种子模板 32bpc→8bpc 评估。
 
 **需求驱动候选**（点名即开工）：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写功能（SetMaskPath / animated path / mode·color·feather 参数化）· SetEffectParam 扩库 · RQ Set\* slice-5/6/7/8（Alpha by design）。

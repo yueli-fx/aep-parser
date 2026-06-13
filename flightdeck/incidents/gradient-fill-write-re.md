@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: implementing or extending gradient write (SetGradient / GradientFillNode / GradientStroke); encoding AE gradient prop.map XML; debugging "AE drops the gradient" or stops not surviving resave; deciding whether a gradient fixture is AE-version-portable
-applies_to: [gradient, g-fill, grad-colors, prop-map, xml-encode, gcst, gcky, utf8, shape-layer, length-variable, ship-gate, ae2020, ae2025, elision]
-last_updated: 2026-05-31
+when_to_read: implementing or extending gradient write (SetGradient / GradientFillNode / GradientStroke / gradient ramp direction Start·End Pt); encoding AE gradient prop.map XML; debugging "AE drops the gradient" or stops/direction not surviving resave; deciding whether a gradient fixture is AE-version-portable; wanting to control the linear ramp angle/direction
+applies_to: [gradient, g-fill, grad-colors, grad-start-pt, grad-end-pt, ramp-direction, prop-map, xml-encode, gcst, gcky, utf8, shape-layer, length-variable, ship-gate, ae2020, ae2025, elision, mg-roadmap, s5, render-pixel]
+last_updated: 2026-06-13
 ---
 
 # Gradient fill write (SetGradient) — RE + ship findings
@@ -51,12 +51,34 @@ serializer just swaps `Utf8.Data = EncodeGradientXML(g)` and lets Write reflow.
    stops-bearing fixture is `v2_2_gradient_src.aep` (← py-aep's gradient.aep),
    which is **AE 25.6-saved**.
 
-Consequence: the extracted G-Fill template (`v2_2_shape_gradfill_body.bin`)
-contains ONLY `ADBE Vector Grad Colors` — Grad Type / Start Pt / End Pt were
-default in the source and AE elided them, so there is no slot to overwrite.
-**V2.2 models the color/alpha stops only; the ramp geometry stays at AE's
-default linear** (deferred — would need a fixture with Type/Start/End set
-non-default, which requires UI authoring since JSX can't set the stops either).
+Consequence (original): the extracted G-Fill template contained ONLY `ADBE
+Vector Grad Colors` — Grad Type / Start Pt / End Pt were default → elided → no
+slot. **V2.2 originally modeled the color/alpha stops only; the ramp geometry
+stayed at AE's default linear.**
+
+### UPDATE 2026-06-13 — ramp DIRECTION (Start/End Pt) now resolved ✅
+
+The "needs UI authoring" worry was wrong. **JSX CAN author the typed point props
+`ADBE Vector Grad Start Pt` / `End Pt`** (only the `Grad Colors` stops XML lacks
+a typed setValue). So: open the existing stops-bearing `v2_2_gradient_src.aep` in
+AE 2025, `gfill.property("ADBE Vector Grad Start Pt").setValue(...)` +
+`End Pt` non-default (a diagonal), resave → AE emits the slots alongside the
+already-present stops. Re-extracted `v2_2_shape_gradfill_body.bin` (now **9
+children** vs 5; `tmp_debug/gen_gradient_dir.jsx` → `v2_2_gradient_dir.aep`).
+- G-Fill defaults (probed): Grad Type=1 (Linear) · **Start Pt=[0,0]** · **End
+  Pt=[100,0]** (horizontal ramp) · HiLite Length/Angle=0. 10 DOM children, only
+  non-default ones emit.
+- `lowerGradientFillNode` overwrites Start/End Pt (Vec2 2×f64 BE @cdat[0:16], same
+  layout as Repeater Transform points) with the node's StartPoint/EndPoint;
+  default [0,0]→[100,0] reproduces the old behavior (no regression — existing
+  `TestV2_2_GradientFill_AEShipGate` still PASS with the 9-child template).
+- Gate `TestMGGradientDir_AEShipGate_AE2020/2025` PASS: red→blue diagonal ramp,
+  corners TL=red BR=blue TR=BL=mid-purple (horizontal ramp would make TR blue /
+  BL red). `GradientFillNode.SetStartPoint/SetEndPoint`.
+- **Still deferred**: Grad Type (radial) · HiLite · gradient STROKE direction
+  (G-Stroke template unchanged) · read-back of direction (hydrate unchanged —
+  write-only from-scratch, consistent with the filter nodes; untouched parsed
+  gradients stay opaque-preserved, mutate-sync has known partial fidelity).
 
 ## Cross-version: AE25-shaped gradient is accepted by AE 2020
 
