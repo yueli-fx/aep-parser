@@ -1,7 +1,7 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-13 by claude（质感件 S5 续：**Merge Paths** (`ADBE Vector Filter - Merge`) 从零 ship——`AddMergePaths`/`MergePathsNode`+`MergeType` 枚举，套矢量滤镜 vein 第 6 次。`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS：400×400 Rect − 200×200 同心 Ellipse Subtract → 白方块挖圆洞，ring 白 4/4·洞暗 3/3·Type resave 读回，眼验。**两个新 ground truth**：① combine 型滤镜 Fill 必须在 stack 顶（与 Trim/RC/Offset 相反）；② ExtendScript addProperty live-ref 加兄弟后失效。commit 959e904。当日质感件 3 连：RoundCorners b9a4dc3·Offset 3e2ba12·Merge 959e904。）
-**Active focus**: **From-scratch MG 工程能力 — 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标「不开 AE 纯 Go 生成完整 MG 动画」端到端达成）。ease ✅ 表达式 ✅ Trim ✅ precomp ✅ Repeater ✅ Round Corners ✅ Offset Paths ✅ Merge Paths ✅ 端到端组合 gate ✅。**余下 = 按需 polish**（非阻塞）：gradient 方向 / ZigZag（矢量滤镜 vein 蓝本，已六次验证）· 表达式语汇 gate（loopOut/wiggle/跨层引用）· animated trim/repeater · precomp anchor/scale 参数化。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
+**Last updated**: 2026-06-13 by claude（质感件 S5 续：**ZigZag** (`ADBE Vector Filter - Zigzag`) 从零 ship——`AddZigZag`/`ZigZagNode`（Size 振幅 + Detail ridges 双 scalar），套矢量滤镜 vein 第 7 次，**常用矢量滤镜家族收齐**（Trim/Repeater/RoundCorners/Offset/Merge/ZigZag）。`TestMGZigZag_AEShipGate_AE2020/2025` 双版本渲染像素 PASS：400×400 Rect + Size=40/Detail=8 → 四边尖齿 starburst，逐列扫顶白 y spread=78=±40 振幅·center 白·resave 读回，眼验。commit 55e9fff。当日质感件 4 连：RoundCorners b9a4dc3·Offset 3e2ba12·Merge 959e904·ZigZag 55e9fff。）
+**Active focus**: **From-scratch MG 工程能力 — 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`，用户终极目标「不开 AE 纯 Go 生成完整 MG 动画」端到端达成）。ease ✅ 表达式 ✅ Trim ✅ precomp ✅ Repeater ✅ Round Corners ✅ Offset Paths ✅ Merge Paths ✅ ZigZag ✅（**常用矢量滤镜家族收齐**）端到端组合 gate ✅。**余下 = 按需 polish**（非阻塞）：gradient 方向（fixture 难，详 `incidents/gradient-fill-write-re.md`）· 表达式语汇 gate（loopOut/wiggle/跨层引用）· animated trim/repeater · precomp anchor/scale 参数化 · 其余矢量滤镜（PolyStar/Twist/Pucker&Bloat/Wiggle，同 vein 需求驱动）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
 
 ## 进行中
 
@@ -15,9 +15,10 @@
 
 **MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。下一步皆**按需点名即开**（无强制主线）：
 
-1. **质感件**（同 S3 trim 矢量滤镜 vein，蓝本已**六次验证** Trim/Repeater/RoundCorners/Offset/Merge——详 `incidents/trim-paths-vector-filter-re.md`）：ZigZag（`ADBE Vector Filter - Zigzag`，子流 Size/Ridges per segment/Points enum，边变锯齿；cdat-based 照 RC/Offset 蓝本，model headline Size）— 矢量滤镜里最后一个常用件 · gradient Start·End Pt（方向，**fixture 双重难题**：默认 gradient 全 elide + JSX 不能 author stops，详 `incidents/gradient-fill-write-re.md`，比矢量滤镜难）。
-2. **表达式语汇 gate**：loopOut / wiggle / thisComp.layer 跨层引用（S2 仅验单 `time*90`）。
-3. 技债（顺修）：`encodePathTimeTable` 容量分页同病（path >4 kf 前必修，详 `incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater（line-draw / count-up 真动画）+ precomp 多层嵌套已通未单独 gate · precomp anchor/scale 未参数化 · 种子模板 32bpc→8bpc 评估。
+1. **gradient Start·End Pt（方向）**：现模板 elided 只默认水平 ramp。**fixture 双重难题**：默认 gradient 全 elide + JSX 不能 author stops（详 `incidents/gradient-fill-write-re.md`），比矢量滤镜难——需 UI 授权或组合现有 AE25 stops fixture + JSX 设 Start/End Pt 重存。质感件里唯一未做的常见项。
+2. **其余矢量滤镜**（需求驱动，蓝本已**七次验证** Trim/Repeater/RoundCorners/Offset/Merge/ZigZag——详 `incidents/trim-paths-vector-filter-re.md`）：PolyStar（星形）/ Twist / Pucker & Bloat / Wiggle Paths（Wiggle Transform）等，同 cdat-based vein 照蓝本推。
+3. **表达式语汇 gate**：loopOut / wiggle / thisComp.layer 跨层引用（S2 仅验单 `time*90`）。
+4. 技债（顺修）：`encodePathTimeTable` 容量分页同病（path >4 kf 前必修，详 `incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater（line-draw / count-up 真动画）+ precomp 多层嵌套已通未单独 gate · precomp anchor/scale 未参数化 · 种子模板 32bpc→8bpc 评估。
 
 **需求驱动候选**（点名即开工）：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写功能（SetMaskPath / animated path / mode·color·feather 参数化）· SetEffectParam 扩库 · RQ Set\* slice-5/6/7/8（Alpha by design）。
 

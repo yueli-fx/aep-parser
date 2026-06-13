@@ -1,7 +1,7 @@
 ---
 status: active
 when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Offset / Merge / ZigZag) via AddTrim/AddRepeater/AddRoundCorners/AddOffsetPaths/AddMergePaths/TrimNode/RepeaterNode/RoundCornersNode/OffsetPathsNode/MergePathsNode; needing the shape-stack render order (why a filter cuts/duplicates/rounds/grows/combines the shapes, incl. why a COMBINE filter needs the fill ABOVE it) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC/Offset/Merge match-name that returns null; an ExtendScript addProperty live-ref going stale / ReferenceError when building a multi-shape fixture
-applies_to: [trim-paths, repeater, round-corners, offset-paths, merge-paths, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, ADBE-Vector-Filter-Offset, ADBE-Vector-Filter-Merge, merge-type, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, offset-amount, shape-stack-order, fill-above-combine-filter, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, addproperty-stale-ref, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
+applies_to: [trim-paths, repeater, round-corners, offset-paths, merge-paths, zigzag, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, ADBE-Vector-Filter-Offset, ADBE-Vector-Filter-Merge, ADBE-Vector-Filter-Zigzag, merge-type, zigzag-size, zigzag-detail, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, offset-amount, shape-stack-order, fill-above-combine-filter, distort-filter, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, addproperty-stale-ref, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
 last_updated: 2026-06-13
 resolved_by:
 ---
@@ -89,3 +89,13 @@ Gate：`TestMGOffset_AEShipGate_AE2020/2025` 双版本渲染像素 PASS。verify
 **新 ground truth ②（ExtendScript addProperty 返回的 live ref 会失效）**：`var r = sc.addProperty(...)` 返回的 PropertyBase live 引用，在**之后再 addProperty 兄弟属性时失效**（用它 `.property(...).setValue` 抛 ReferenceError）。修：先 add 完所有属性，再用 `sc.property(matchName)` 取（既有 trim/RC/offset fixture 就是这个模式，一直没踩坑因它们每次只在 add 后立即用一次）。两条同 match-name（两个 Rect）还会 `sc.property` 歧义——gate 用 Rect+Ellipse 异类避开。
 
 Gate：`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Type=3 resave 读回 + 方块挖洞）。verify_mg_merge.jsx + mg_merge_shipgate_test.go。**deferred**：Add/Intersect/Exclude 模式未单独 gate（仅 Subtract 渲染验证；枚举写路径一致，其余模式 round-trip 应同）。
+
+## 复用确认 — ZigZag（S5, 2026-06-13）✅ 蓝本第 7 次 — 常用矢量滤镜家族收齐
+
+`ADBE Vector Filter - Zigzag`：`AddZigZag`/`ZigZagNode`，`templates/v2_2_shape_zigzag_body.bin`（708B/7 children）。探针 3 子流：`ADBE Vector Zigzag Size`（振幅 px，默认 5）+ `ADBE Vector Zigzag Detail`（每段隆起数/ridges，默认 10）+ `ADBE Vector Zigzag Points`（enum 默认 1，elide 未建模）。Size+Detail 双 1D scalar → `lowerShapeScalar`（同 Offset 单 headline，这里两个）。属 **distort 型**（改 path 几何），fill 在 filter 下方 stack `[Rect, Fill, ZigZag]`（与 Merge 的 combine 型相反，同 Trim/RC/Offset）。
+
+渲染 ground truth：400×400 Rect + Size=40/Detail=8 → 每条边扭成尖齿（comic-book starburst，眼验确认实心内部+四边锯齿）。gate 用**逐列扫顶白 y 的 spread** 当锯齿证据（直边 spread≈0；zigzag spread=78 = ±40 振幅围绕原边 y=340，峰 y=301 谷 y=379）——比固定采样点稳（不依赖峰谷精确 x）。
+
+Gate：`TestMGZigZag_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Size=40/Detail=8 resave 读回 + 锯齿边）。verify_mg_zigzag.jsx + mg_zigzag_shipgate_test.go。**deferred**：Points enum（Smooth/Corner）未建模（默认 elide）。
+
+**家族小结（蓝本 7 次全绿）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag。三步蓝本（probe→抽 body→cdat 覆写）对所有常用矢量滤镜成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。剩 PolyStar/Twist/Wiggle/Pucker&Bloat 等同 vein 预期可推。
