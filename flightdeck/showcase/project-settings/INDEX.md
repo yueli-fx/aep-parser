@@ -3,7 +3,7 @@ showcase: project-settings
 direction: 工程设置 setter — Project.Set*（位深/线性混合/表达式引擎/素材时间码），纯 Go 从零设值后 AE app.project DOM readback 核对（📋 读值档，不看图）
 capabilities: [bits-per-channel, linear-blending, expression-engine, footage-timecode-display, time-display-type, frames-count-type, feet-frames-film-type, frames-use-feet]
 gates: [project-flag-chunks-lnrb-lnrp, nnhd-display-settings-layout-re]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/project-settings  +  scripts/ae_run.ps1 verify.jsx"
 ---

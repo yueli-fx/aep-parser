@@ -136,6 +136,13 @@ func TestProjectSettings_NhedNnhdMirror(t *testing.T) {
 		t.Errorf("footage tc: nnhd[9]=%d nhed[9]=%d, want both 1", nnhd.Data[9], nhed.Data[9])
 	}
 
+	if err := p.SetTransparencyGridThumbnails(true); err != nil {
+		t.Fatalf("SetTransparencyGridThumbnails: %v", err)
+	}
+	if nnhd.Data[25] != 1 || nhed.Data[16] != 1 {
+		t.Errorf("transparency grid: nnhd[25]=%d nhed[16]=%d, want both 1", nnhd.Data[25], nhed.Data[16])
+	}
+
 	// Round-trip read back through the (nnhd-based) readers.
 	if got := p.TimeDisplayType(); got != TimeDisplayTypeFrames {
 		t.Errorf("TimeDisplayType readback = %v, want Frames", got)

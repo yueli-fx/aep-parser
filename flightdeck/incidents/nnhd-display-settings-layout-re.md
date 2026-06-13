@@ -45,6 +45,8 @@ showcase project-settings 的 AE-DOM readback 查出：`SetTimeDisplayType(Frame
 
 AE 2020 新建工程 DOM 默认：timeDisplayType=Frames、framesCountType=Start1、feetFramesFilmType=MM16、framesUseFeetFrames=true（与我方 from-scratch seed 默认不同，做 RE 时别拿默认当无操作）。
 
+**DOM 可读性（决定能否 readback-gate）**：`app.project` 暴露 timeDisplayType / framesCountType / feetFramesFilmType / framesUseFeetFrames / footageTimecodeDisplayStartType / **transparencyGridThumbnails** / displayStartFrame —— 这些可 DOM-gate。**`timecodeDefaultBase` 无对应 DOM property**（probe_proj_props.jsx 实证 `"timecodeDefaultBase" in app.project === false`）→ binary-only，只能字节 round-trip 验，无法 AE-DOM readback 证实（同 rq-comment 类）；nhed[12] 单字节映射是 best-effort（>255 截断）。transparencyGridThumbnails 的 nnhd[25]/nhed[16] 映射经 AE 自存 true/false byte-diff 实证（非 best-effort）。
+
 ## 修法
 
 `internal/serializer/back_project.go`：加 `mirrorNhed(off, v)` helper，每个 display setter 在写 nnhd 后**同步写 nhed 对应 offset**（按上表）。`SetFeetFramesFilmType` 改写 frames-per-foot（nnhd u32 @0x10 + nhed[13]）而非 byte8 bit7；`SetTimeDisplayType` 改成整字节 `byte(v)`（不再 `&0x80` 保留虚构的 feet bit）。reader（`scene_project_settings.go`）`FeetFramesFilmType()` 改读 `nnhd[16-19]` u32（40→MM16 否则 MM35）；其余 reader 读 nnhd 即可（写时已与 nhed 同步，AE 也保持两者一致）。新增接口方法 `NnhdUint32`（scene_writers.go + back_project.go 实现）。
