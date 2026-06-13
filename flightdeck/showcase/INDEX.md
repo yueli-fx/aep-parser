@@ -13,7 +13,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-下面 14 个方向**全部 🔍 待review**——产物 `.aep`/`.png` 已在本地（gitignored），请逐个真机验：`go run ./flightdeck/showcase/<方向>` 生成 .aep（或直接打开已生成的），AE 打开核对该方向 INDEX 的布局表，确认无误后告诉我，我再翻 ✅ complete。
+下面 15 个方向**全部 🔍 待review**——产物 `.aep`/`.png` 已在本地（gitignored），请逐个真机验：`go run ./flightdeck/showcase/<方向>` 生成 .aep（或直接打开已生成的），AE 打开核对该方向 INDEX 的布局表，确认无误后告诉我，我再翻 ✅ complete。
 
 ## 方向一览
 
@@ -33,5 +33,6 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [transform-values](transform-values/INDEX.md) | 改 Position/Scale/Rotation/Opacity（before/after） | 🔍 待review |
 | [stroke-detail](stroke-detail/INDEX.md) | 描边细节 Dashes/Line Join/Miter/Wave（闭合星，Cap·Taper 诚实暂缺） | 🔍 待review |
 | [keyframe-channels](keyframe-channels/INDEX.md) | 四通道关键帧 Position/Scale/Rotation/Opacity（渲 t=2s 插值 + readback） | 🔍 待review |
+| [animated-path](animated-path/INDEX.md) | 动画路径几何 morph 横条→正方→竖条（渲 t=2s + extent readback） | 🔍 待review |
 
-> 已回填 **14 个方向**（全 🔍 待review）：8 from-scratch 可视 + effects + masks + structural-ops + transform-values + stroke-detail + keyframe-channels。**待补**：animated-path（🖼看图档，注意 >4 kf lhd3 容量坑）+ render-queue / essential-graphics / markers / comp·project 设置（📋读值档）。全量清单 + 验证档位（🖼看图 vs 📋读值）详 `specs/2026-06-13-full-showcase-coverage.md`。
+> 已回填 **15 个方向**（全 🔍 待review）：8 from-scratch 可视 + effects + masks + structural-ops + transform-values + stroke-detail + keyframe-channels + animated-path。**🖼 看图档（可视方向）已全部补齐。** **待补皆 📋 读值档（B 类，按需）**：render-queue / essential-graphics / markers / comp-settings / project-settings / camera-light / media-replace（dump 值 readback 不看图，用户点名即补）。全量清单 + 验证档位（🖼看图 vs 📋读值）详 `specs/2026-06-13-full-showcase-coverage.md`。

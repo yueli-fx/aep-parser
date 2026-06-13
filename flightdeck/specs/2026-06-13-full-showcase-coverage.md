@@ -26,7 +26,9 @@ last_updated: 2026-06-13
 >
 > - ✅ **keyframe-channels**（commit）— 四 transform 通道各两线性关键帧 Position/Scale/Rotation/Opacity，渲 t=2s 中间帧每通道落插值（x≈960 / scale87.5 / rot90 横条 / opac55 暗粉），像素 + `.done` `valueAtTime(2.0)` readback 双证。与 keyframes-ease 区别：那个变位置缓动曲线，这个横扫四通道。每通道仅 2 kf 规避 lhd3 >4-kf 容量坑。
 >
-> **剩余待补**：animated-path（🖼看图档，**注意 >4 kf lhd3 容量坑** `lhd3-keyframe-capacity-pages.md` / `encodePathTimeTable` 同病）+ render-queue / essential-graphics / markers / comp-settings / project-settings（📋读值档，dump 值 readback 不看图）。
+> - ✅ **animated-path**（commit）— 闭合 Path 两线性关键帧，几何 morph 横条(440×120)→正方(280×280)→竖条(120×440)，渲 t=2s 正方形 + `.done` 三时刻 extent readback 数证顶点逐个插值。闭合+实心 fill 规避 open-path 塌缩；仅 2 kf 规避 lhd3 >4-kf 容量坑（多帧路径前必修 `encodePathTimeTable` 同病）。
+>
+> **🖼 看图档（A 类可视方向）已全部补齐**（共 10 个可视方向 + effects/masks 等）。**剩余待补皆 📋 读值档（B 类，按需点名即补）**：render-queue / essential-graphics / markers / comp-settings / project-settings / camera-light / media-replace（dump 值 readback 不看图）。
 
 ## 缺口：还没 showcase 的已 ship 能力
 
