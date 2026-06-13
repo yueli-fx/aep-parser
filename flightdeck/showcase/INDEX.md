@@ -13,7 +13,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-下面 8 个方向**全部 🔍 待review**——产物 `.aep`/`.png` 已在本地（gitignored），请逐个真机验：`go run ./flightdeck/showcase/<方向>` 生成 .aep（或直接打开已生成的），AE 打开核对该方向 INDEX 的布局表，确认无误后告诉我，我再翻 ✅ complete。
+下面 9 个方向**全部 🔍 待review**——产物 `.aep`/`.png` 已在本地（gitignored），请逐个真机验：`go run ./flightdeck/showcase/<方向>` 生成 .aep（或直接打开已生成的），AE 打开核对该方向 INDEX 的布局表，确认无误后告诉我，我再翻 ✅ complete。
 
 ## 方向一览
 
@@ -27,5 +27,6 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [gradient](gradient/INDEX.md) | 渐变填充 + ramp 方向（横/纵/对角/三停） | 🔍 待review |
 | [text](text/INDEX.md) | 文字层 from-scratch（NewTextLayer + SetText 多行） | 🔍 待review |
 | [layers](layers/INDEX.md) | Solid 同心色框 + Null/Adjustment 建层 | 🔍 待review |
+| [effects](effects/INDEX.md) | 加效果 AddEffect + 改参数 SetEffectParam（12 效果网格） | 🔍 待review |
 
-> 后续大阶段落地时按 `checklists/showcase.md` 逐方向补。已回填 8 个方向（覆盖已 ship 的 from-scratch 可视能力）。effects / masks / essential-graphics / structural-ops 偏「读真实 .aep + 改」，需求驱动再补。
+> 已回填 **9 个方向**：8 个 from-scratch 可视 + **effects**（加效果/改参数）。剩 masks / structural-ops / transform-values / stroke-detail / animated-path（看图档）+ render-queue / essential-graphics / markers / comp·project 设置（读值档）逐个补，全量清单详 `specs/2026-06-13-full-showcase-coverage.md`。
