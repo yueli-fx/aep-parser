@@ -3,7 +3,7 @@ showcase: shape-primitives
 direction: 形状图元 + 描绘算子 — 纯 Go 从零生成四种参数图元（Rect/Ellipse/Star/Rounded Rect）与 Fill/Stroke/Gradient 描绘变体并 AE 实渲
 capabilities: [rect, ellipse, star, rounded-rect, fill, stroke, stroke-width, stroke-line-join, gradient-fill, gradient-ramp-direction]
 gates: [TestNewShapeLayer_AEShipGate, "shape rect/ellipse/star gates", TestMGGradientDir_AEShipGate, "stroke line-cap/join gate"]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/shape-primitives  +  scripts/ae_run.ps1 render.jsx"
 ---

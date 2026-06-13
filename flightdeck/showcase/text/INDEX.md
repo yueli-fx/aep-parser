@@ -3,7 +3,7 @@ showcase: text
 direction: 文字层 from-scratch — 纯 Go 从零创建文字层并写入多行字符串（NewTextLayer + SetText），AE 实渲
 capabilities: [new-text-layer, set-text, multiline-text, length-variable-string]
 gates: [TestNewTextLayer_AEShipGate_AE2020, TestNewTextLayer_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/text  +  scripts/ae_run.ps1 render.jsx"
 ---

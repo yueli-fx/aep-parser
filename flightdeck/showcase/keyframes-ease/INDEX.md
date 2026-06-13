@@ -3,7 +3,7 @@ showcase: keyframes-ease
 direction: 时间缓动关键帧 — 纯 Go 从零生成同跨度位移动画的 linear / ease-out / ease-in-out 三种缓动，渲染中间帧让缓动表现为单帧内的水平位置差
 capabilities: [position-keyframes, linear-interpolation, temporal-ease, ease-out, ease-in-out, multi-keyframe-stream]
 gates: [TestMGEase_AEShipGate_AE2020, TestMGEase_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/keyframes-ease  +  scripts/ae_run.ps1 render.jsx (renders t=2s)"
 ---

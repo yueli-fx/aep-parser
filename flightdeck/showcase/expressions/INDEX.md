@@ -3,7 +3,7 @@ showcase: expressions
 direction: 表达式激活 — 纯 Go 从零生成 time*N 旋转表达式驱动的轨道动画，渲染 t=1s 时三个点各被表达式转到不同角度
 capabilities: [set-expression, set-expression-enabled, rotation-expression, time-driven]
 gates: [TestExpression_AEShipGate_AE2020, TestExpression_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/expressions  +  scripts/ae_run.ps1 render.jsx (renders t=1s)"
 ---

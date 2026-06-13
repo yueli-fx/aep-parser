@@ -3,7 +3,7 @@ showcase: effects
 direction: 加效果 + 改参数 — 纯 Go 从零建图形层 → AddEffect(内置效果库) + SetEffectParam 调参，AE 实渲逐格看可见效果差
 capabilities: [add-effect, set-effect-param, gaussian-blur, drop-shadow, invert, tint, tritone, wave-warp, brightness-contrast, fractal-noise, gradient-ramp, mosaic, directional-blur]
 gates: [TestAddEffect_AEShipGate_AE2020, TestAddEffect_AEShipGate_AE2025, "set_effect_param_shipgate_test.go (SetEffectParam 双版本)"]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/effects  +  scripts/ae_run.ps1 render.jsx"
 ---

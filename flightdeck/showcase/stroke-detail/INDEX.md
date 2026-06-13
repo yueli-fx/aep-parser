@@ -3,7 +3,7 @@ showcase: stroke-detail
 direction: 描边细节 setter — Dashes / Line Join / Miter Limit / Wave，纯 Go 从零生成后 AE 实渲眼验（全用闭合形状，规避 open-path 渲染塌缩假绿）
 capabilities: [stroke-dashes, stroke-line-join, stroke-miter-limit, stroke-wave]
 gates: [TestV2_2_Stroke_AEShipGate, TestV2_2_StrokeTaperWave_AEShipGate, shape_dashes_shipgate_test]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/stroke-detail  +  scripts/ae_run.ps1 render.jsx"
 ---

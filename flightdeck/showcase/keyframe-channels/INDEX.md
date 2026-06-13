@@ -3,7 +3,7 @@ showcase: keyframe-channels
 direction: 四个 transform 通道关键帧 — Position/Scale/Rotation/Opacity 各两线性关键帧，渲中间帧 t=2s 让每通道落在插值（非端点）值，像素 + .done readback 双证
 capabilities: [position-keyframes, scale-keyframes, rotation-keyframes, opacity-keyframes, linear-interpolation]
 gates: [TestMGEase_AEShipGate_AE2020, TestMGEase_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/keyframe-channels  +  scripts/ae_run.ps1 render.jsx (renders t=2s)"
 ---

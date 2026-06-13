@@ -3,7 +3,7 @@ showcase: transform-values
 direction: 改 transform 字段值 — 纯 Go 从零建形状层 → SetPosition/Scale/Rotation/Opacity 改值，AE 实渲逐格看变换
 capabilities: [set-position, set-scale, set-rotation, set-opacity, transform-setter]
 gates: [TestV2_2_XfKf_AEShipGate_AE2020, TestV2_2_XfKf_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/transform-values  +  scripts/ae_run.ps1 render.jsx"
 ---

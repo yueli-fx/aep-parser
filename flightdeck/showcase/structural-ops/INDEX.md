@@ -3,7 +3,7 @@ showcase: structural-ops
 direction: 图层结构性 op — DuplicateLayer/MoveLayer/DeleteLayer/SetDimensionsSeparated，纯 Go 应用后 AE 实渲 + .done readback 双重验证
 capabilities: [duplicate-layer, move-layer, delete-layer, set-dimensions-separated]
 gates: [TestDeleteLayer_AEShipGate, TestDuplicateLayer_AEShipGate, TestMoveLayer_AEShipGate]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/structural-ops  +  scripts/ae_run.ps1 render.jsx"
 ---

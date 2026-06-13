@@ -3,7 +3,7 @@ showcase: shape-filters
 direction: 形状矢量滤镜家族 — 纯 Go 从零生成 11 件 cdat-based vector filters（+ PolyStar 形状）并 AE 实渲
 capabilities: [round-corners, offset-paths, trim-paths, zigzag, pucker-bloat, twist, wiggle-paths, repeater, merge-paths, polystar, wiggle-transform]
 gates: [TestMGTrim_AEShipGate, TestMGRepeater_AEShipGate, TestMGRoundCorners_AEShipGate, TestMGOffset_AEShipGate, TestMGMerge_AEShipGate, TestMGZigZag_AEShipGate, TestMGPuckerBloat_AEShipGate, TestMGTwist_AEShipGate, TestMGWiggle_AEShipGate, TestMGWiggleTransform_AEShipGate, "+PolyStar star gate"]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/shape-filters  +  scripts/ae_run.ps1 render.jsx"
 ---

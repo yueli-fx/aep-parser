@@ -3,7 +3,7 @@ showcase: animated-path
 direction: 动画形状路径 — 一条闭合 Path 两线性关键帧，几何本身 morph（横条→竖条），渲中间帧 t=2s 为正方形（顶点逐个插值的单帧证据）+ .done 三时刻 extent readback
 capabilities: [path-keyframes, animated-shape-path, bezier-path-interpolation, multi-frame-oms]
 gates: [TestV2_2_PathKf_AEShipGate_AE2020, TestV2_2_PathKf_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/animated-path  +  scripts/ae_run.ps1 render.jsx (renders t=2s)"
 ---

@@ -3,7 +3,7 @@ showcase: masks
 direction: 遮罩裁切 — 纯 Go 从零建彩色形状层 → AddMask（圆/三角/星/inverted）裁切，AE 实渲只露 mask 形状
 capabilities: [add-mask, bezier-path, mask-inverted, mask-clipping]
 gates: [TestAddMask_AEShipGate_AE2020, TestAddMask_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/masks  +  scripts/ae_run.ps1 render.jsx"
 ---
