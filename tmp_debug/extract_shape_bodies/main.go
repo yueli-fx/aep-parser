@@ -74,6 +74,12 @@ var extractions = []extraction{
 	// default and are elided (modeled only Amount). Regen via
 	// tmp_debug/gen_shape_offset.jsx.
 	{"test_data/v2_2_offset.aep", "ADBE Vector Filter - Offset", "internal/serializer/templates/v2_2_shape_offset_body.bin"},
+	// MG roadmap S5 — Merge Paths (`ADBE Vector Filter - Merge`): boolean-combines
+	// the paths below it. Single sub-stream `ADBE Vector Merge Type` (1D f64 BE
+	// enum @cdat[0:8]: 1=Merge 2=Add 3=Subtract 4=Intersect 5=Exclude) set
+	// non-default (Subtract) in the fixture so AE emits the slot. Regen via
+	// tmp_debug/gen_shape_merge.jsx.
+	{"test_data/v2_2_merge.aep", "ADBE Vector Filter - Merge", "internal/serializer/templates/v2_2_shape_merge_body.bin"},
 }
 
 func main() {

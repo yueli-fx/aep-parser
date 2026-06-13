@@ -119,6 +119,7 @@ type (
 	StrokeDashes                    = scene.StrokeDashes
 	StrokeLineCap                   = scene.StrokeLineCap
 	StrokeLineJoin                  = scene.StrokeLineJoin
+	MergePathsNode                  = scene.MergePathsNode
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
 	RoundCornersNode                = scene.RoundCornersNode
@@ -362,6 +363,7 @@ const (
 	ShapeKindRepeater                             = scene.ShapeKindRepeater
 	ShapeKindRoundCorners                         = scene.ShapeKindRoundCorners
 	ShapeKindOffsetPaths                          = scene.ShapeKindOffsetPaths
+	ShapeKindMergePaths                           = scene.ShapeKindMergePaths
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

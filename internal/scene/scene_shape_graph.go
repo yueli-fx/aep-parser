@@ -26,7 +26,8 @@ const (
 	ShapeKindRepeater                            // `ADBE Vector Filter - Repeater`
 	ShapeKindRoundCorners                        // `ADBE Vector Filter - RC`
 	ShapeKindOffsetPaths                         // `ADBE Vector Filter - Offset`
-	// V2.3+ candidates: PolyStar / Merge / Transform.
+	ShapeKindMergePaths                          // `ADBE Vector Filter - Merge`
+	// V2.3+ candidates: PolyStar / Transform.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
@@ -570,6 +571,17 @@ func (g *VectorGroup) AddOffsetPaths() (*OffsetPathsNode, error) {
 	return n, nil
 }
 
+// AddMergePaths appends a default-valued MergePathsNode (Type=Merge) and returns
+// it. A Merge Paths filter boolean-combines all the preceding paths in the group
+// (Merge / Add / Subtract / Intersect / Exclude) into one path — the canonical
+// compound-shape / cut-out MG primitive. Place it AFTER the ≥2 shapes it should
+// combine (render order); the result is painted by the fills/strokes.
+func (g *VectorGroup) AddMergePaths() (*MergePathsNode, error) {
+	n := NewMergePathsNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -806,6 +818,48 @@ func (n *OffsetPathsNode) Properties() *PropertyGroup {
 			"Amount": n.amount,
 		},
 	}
+}
+
+// MergeType is the Merge Paths boolean mode (`ADBE Vector Merge Type`). Stored
+// on disk as a 1-based float64 enum index.
+type MergeType int
+
+const (
+	MergeTypeMerge     MergeType = 1 // default — union all paths, keep overlaps
+	MergeTypeAdd       MergeType = 2
+	MergeTypeSubtract  MergeType = 3 // upper paths cut holes in the lowest
+	MergeTypeIntersect MergeType = 4
+	MergeTypeExclude   MergeType = 5 // exclude overlapping regions
+)
+
+// MergePathsNode — `ADBE Vector Filter - Merge` (Merge Paths). A path-filter
+// that boolean-combines all the paths below it in the group into a single path
+// per its `Type`. Its only sub-stream `ADBE Vector Merge Type` is a non-animated
+// enum (default Merge); modeled as a plain value like the Fill blend mode.
+type MergePathsNode struct {
+	mergeType MergeType
+}
+
+// NewMergePathsNode constructs a default MergePathsNode (Type=Merge).
+func NewMergePathsNode() *MergePathsNode {
+	return &MergePathsNode{mergeType: MergeTypeMerge}
+}
+
+func (n *MergePathsNode) Kind() ShapeNodeKind { return ShapeKindMergePaths }
+func (n *MergePathsNode) Type() MergeType     { return n.mergeType }
+
+// SetType sets the boolean merge mode. Rejects values outside 1..5.
+func (n *MergePathsNode) SetType(v MergeType) error {
+	if v < MergeTypeMerge || v > MergeTypeExclude {
+		return fmt.Errorf("MergePathsNode.SetType: invalid value %d (want 1..5)", v)
+	}
+	n.mergeType = v
+	return nil
+}
+
+// Properties returns the escape-hatch β view.
+func (n *MergePathsNode) Properties() *PropertyGroup {
+	return &PropertyGroup{Name: "Merge Paths"}
 }
 
 // StrokeLineCap is the stroke end-cap style (`ADBE Vector Stroke Line Cap`).

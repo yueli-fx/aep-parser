@@ -119,6 +119,8 @@ type (
 	StrokeDashes                    = scene.StrokeDashes
 	StrokeLineCap                   = scene.StrokeLineCap
 	StrokeLineJoin                  = scene.StrokeLineJoin
+	MergePathsNode                  = scene.MergePathsNode
+	MergeType                       = scene.MergeType
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
 	RepeaterTransform               = scene.RepeaterTransform
@@ -362,6 +364,12 @@ const (
 	ShapeKindTrim                                 = scene.ShapeKindTrim
 	ShapeKindRoundCorners                         = scene.ShapeKindRoundCorners
 	ShapeKindOffsetPaths                          = scene.ShapeKindOffsetPaths
+	ShapeKindMergePaths                           = scene.ShapeKindMergePaths
+	MergeTypeMerge                                = scene.MergeTypeMerge
+	MergeTypeAdd                                  = scene.MergeTypeAdd
+	MergeTypeSubtract                             = scene.MergeTypeSubtract
+	MergeTypeIntersect                            = scene.MergeTypeIntersect
+	MergeTypeExclude                              = scene.MergeTypeExclude
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar
@@ -447,6 +455,9 @@ func NewRoundCornersNode() *RoundCornersNode { return scene.NewRoundCornersNode(
 
 // NewOffsetPathsNode returns a detached Offset Paths filter node (Amount=10).
 func NewOffsetPathsNode() *OffsetPathsNode { return scene.NewOffsetPathsNode() }
+
+// NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge).
+func NewMergePathsNode() *MergePathsNode { return scene.NewMergePathsNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }

@@ -61,6 +61,9 @@ var v22ShapeRoundCornersBodyBytes []byte
 //go:embed templates/v2_2_shape_offset_body.bin
 var v22ShapeOffsetBodyBytes []byte
 
+//go:embed templates/v2_2_shape_merge_body.bin
+var v22ShapeMergeBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -109,6 +112,10 @@ var (
 	v22ShapeOffsetOnce  sync.Once
 	v22ShapeOffsetCache *rifx.Chunk
 	v22ShapeOffsetErr   error
+
+	v22ShapeMergeOnce  sync.Once
+	v22ShapeMergeCache *rifx.Chunk
+	v22ShapeMergeErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -280,6 +287,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindRepeater:       "ADBE Vector Filter - Repeater",
 	ShapeKindRoundCorners:   "ADBE Vector Filter - RC",
 	ShapeKindOffsetPaths:    "ADBE Vector Filter - Offset",
+	ShapeKindMergePaths:     "ADBE Vector Filter - Merge",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -318,6 +326,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerRoundCornersNode(node, ctx)
 	case *OffsetPathsNode:
 		return lowerOffsetPathsNode(node, ctx)
+	case *MergePathsNode:
+		return lowerMergePathsNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -974,6 +984,37 @@ func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 	if err := lowerShapeScalar(body, "ADBE Vector Offset Amount", n.Amount(), ctx); err != nil {
 		return nil, err
 	}
+	return body, nil
+}
+
+// cloneShapeMergeBody returns a clone of the Merge Paths template
+// (templates/v2_2_shape_merge_body.bin): a single `ADBE Vector Merge Type` enum
+// cdat slot (Type set non-default in the fixture so AE emitted it).
+func cloneShapeMergeBody() (*rifx.Chunk, error) {
+	v22ShapeMergeOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeMergeBodyBytes))
+		if err != nil {
+			v22ShapeMergeErr = fmt.Errorf("parse v22ShapeMergeBodyBytes: %w", err)
+			return
+		}
+		v22ShapeMergeCache = ch
+	})
+	if v22ShapeMergeErr != nil {
+		return nil, v22ShapeMergeErr
+	}
+	return cloneChunk(v22ShapeMergeCache), nil
+}
+
+// lowerMergePathsNode emits a Merge Paths filter body from the embedded
+// template, overwriting the single `ADBE Vector Merge Type` cdat (1D f64 BE enum
+// at cdat[0:8], 1-based index — same layout as the Fill/Stroke enums). Static
+// only (the merge mode is not animated).
+func lowerMergePathsNode(n *MergePathsNode, _ *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeMergeBody()
+	if err != nil {
+		return nil, err
+	}
+	overwriteShapeStreamCdat(body, "ADBE Vector Merge Type", encodeF64sBE(float64(n.Type())))
 	return body, nil
 }
 
