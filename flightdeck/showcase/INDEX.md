@@ -16,8 +16,8 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [shape-filters](shape-filters/INDEX.md) | 形状矢量滤镜家族 11 件 + PolyStar + 双滤镜叠加 | ✅ complete |
 | [shape-primitives](shape-primitives/INDEX.md) | 四种参数图元 + Fill/Stroke/Gradient 描绘变体 | ✅ complete |
 | [keyframes-ease](keyframes-ease/INDEX.md) | 时间缓动 linear/ease-out/ease-in-out（渲中间帧看位置差） | ✅ complete |
-| expressions | 表达式激活（time\*N 旋转） | ⏳ 待建 |
-| precomp-nesting | 预合成嵌套 | ⏳ 待建 |
+| [expressions](expressions/INDEX.md) | 表达式激活（time\*N 旋转，渲 t=1s 看角度） | ✅ complete |
+| [precomp-nesting](precomp-nesting/INDEX.md) | 预合成嵌套（parent 嵌套 child 组合场景） | ✅ complete |
 | gradient | 渐变填充/描边 + ramp 方向 | ⏳ 待建 |
 | text | 文字层 from-scratch | ⏳ 待建 |
 | layers | Solid/Null/Adjustment/Camera/Light/Precomp 建层 | ⏳ 待建 |
