@@ -788,17 +788,24 @@ func lowerGradientStops(body *rifx.Chunk, gradient *codec.Gradient) *rifx.Chunk 
 
 // lowerGradientFillNode emits a gradient-fill graphic body from the embedded
 // template (templates/v2_2_shape_gradfill_body.bin), overwriting the Grad
-// Colors stops XML with the runtime gradient. The XML length changes per stop
-// count → length-variable; the Utf8 chunk's Data is swapped and rifx.Chunk.Write
+// Start/End Pt cdats (the linear ramp direction) + the Grad Colors stops XML
+// with the runtime gradient. The XML length changes per stop count →
+// length-variable; the Utf8 chunk's Data is swapped and rifx.Chunk.Write
 // recomputes the enclosing GCky / GCst / tdgp LIST sizes on serialization.
 //
-// Only the color/alpha stops are modeled. Grad Type / Start Pt / End Pt were
-// elided in the source fixture (no slot); AE applies the default linear ramp.
+// Start/End Pt are Vec2 (2 × f64 BE at cdat[0:16], same layout as the Repeater
+// Transform points), overwritten with the node's StartPoint/EndPoint (default
+// [0,0]→[100,0] = AE's horizontal ramp, so a gradient that doesn't set direction
+// reproduces the pre-direction behavior). Grad Type / HiLite stay at the embed
+// default (linear).
 func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeGradFillBody()
 	if err != nil {
 		return nil, err
 	}
+	sp, ep := n.StartPoint(), n.EndPoint()
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad Start Pt", encodeF64sBE(sp[0], sp[1]))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad End Pt", encodeF64sBE(ep[0], ep[1]))
 	return lowerGradientStops(body, n.Gradient()), nil
 }
 

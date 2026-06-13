@@ -46,7 +46,12 @@ var extractions = []extraction{
 	// stops-bearing gradient available (AE elides defaults; ExtendScript can't
 	// author custom stops). lowerGradientFillNode overwrites the scalars + the
 	// Utf8 XML (length-variable; rifx recomputes LIST sizes).
-	{"test_data/v2_2_gradient_src.aep", "ADBE Vector Graphic - G-Fill", "internal/serializer/templates/v2_2_shape_gradfill_body.bin"},
+	// G-Fill body now sourced from v2_2_gradient_dir.aep (Grad Start/End Pt set
+	// non-default → AE emits the ramp-geometry slots alongside Grad Colors).
+	// lowerGradientFillNode overwrites Start/End Pt with the node's values
+	// (default [0,0]/[100,0] = AE's horizontal ramp) + the stops XML. Regen the
+	// source via tmp_debug/gen_gradient_dir.jsx.
+	{"test_data/v2_2_gradient_dir.aep", "ADBE Vector Graphic - G-Fill", "internal/serializer/templates/v2_2_shape_gradfill_body.bin"},
 	// G-Stroke body: same fixture, same GCst→GCky→Utf8 slot structure as G-Fill
 	// but under the ADBE Vector Graphic - G-Stroke tdmn. Used by lowerGradientStrokeNode.
 	{"test_data/v2_2_gradient_src.aep", "ADBE Vector Graphic - G-Stroke", "internal/serializer/templates/v2_2_shape_gradstroke_body.bin"},

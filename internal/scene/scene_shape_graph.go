@@ -376,24 +376,46 @@ func (f *FillNode) Properties() *PropertyGroup {
 }
 
 // GradientFillNode — `ADBE Vector Graphic - G-Fill`. Models the gradient's
-// color + alpha stops (`ADBE Vector Grad Colors`), the headline of a gradient
-// fill. The ramp geometry (`Grad Type` / `Start Pt` / `End Pt`) is NOT modeled:
-// the embedded template was extracted from an AE-saved fixture where those were
-// default and therefore elided (no cdat slot to overwrite — same elision trap
-// as Stroke Taper Units). AE reconstructs the default linear ramp on open.
+// color + alpha stops (`ADBE Vector Grad Colors`) plus the linear ramp direction
+// (`ADBE Vector Grad Start Pt` / `End Pt`). The ramp runs from StartPoint to
+// EndPoint in the shape's local coordinate space (AE default [0,0]→[100,0], a
+// horizontal ramp); set them to a diagonal/vertical pair to rotate the gradient.
 //
-// Stops are static (V2.2 does not model animated gradients). The serializer
-// re-encodes the stops to prop.map XML and overwrites the GCky/Utf8 chunk
-// (length-variable; rifx recomputes the enclosing LIST sizes).
+// `Grad Type` (linear/radial) and the HiLite controls are NOT modeled (default
+// linear; elided in the template). Stops + direction are static (V2.2 does not
+// model animated gradients). The serializer re-encodes the stops to prop.map XML
+// and overwrites the Start/End Pt cdats + GCky/Utf8 chunk (length-variable; rifx
+// recomputes the enclosing LIST sizes).
 type GradientFillNode struct {
-	gradient *codec.Gradient
+	gradient   *codec.Gradient
+	startPoint [2]float64
+	endPoint   [2]float64
 }
 
 // NewGradientFillNode constructs a default 2-stop black→white linear gradient
-// (fully opaque). Callers override via SetColorStops / SetAlphaStops.
+// (fully opaque) with AE's default horizontal ramp ([0,0]→[100,0]). Callers
+// override stops via SetColorStops / SetAlphaStops and direction via
+// SetStartPoint / SetEndPoint.
 func NewGradientFillNode() *GradientFillNode {
-	return &GradientFillNode{gradient: defaultGradient()}
+	return &GradientFillNode{
+		gradient:   defaultGradient(),
+		startPoint: [2]float64{0, 0},
+		endPoint:   [2]float64{100, 0},
+	}
 }
+
+// StartPoint returns the gradient ramp's start point (shape-local coords).
+func (n *GradientFillNode) StartPoint() [2]float64 { return n.startPoint }
+
+// EndPoint returns the gradient ramp's end point (shape-local coords).
+func (n *GradientFillNode) EndPoint() [2]float64 { return n.endPoint }
+
+// SetStartPoint sets the gradient ramp's start point (shape-local coords). The
+// ramp direction is EndPoint − StartPoint; defaults to a horizontal [0,0]→[100,0].
+func (n *GradientFillNode) SetStartPoint(v [2]float64) error { n.startPoint = v; return nil }
+
+// SetEndPoint sets the gradient ramp's end point (shape-local coords).
+func (n *GradientFillNode) SetEndPoint(v [2]float64) error { n.endPoint = v; return nil }
 
 // defaultGradient returns a 2-stop black→white gradient with two opaque alpha
 // stops — the values AE shows for a freshly-added gradient fill.
