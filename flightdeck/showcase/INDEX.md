@@ -18,8 +18,8 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [keyframes-ease](keyframes-ease/INDEX.md) | 时间缓动 linear/ease-out/ease-in-out（渲中间帧看位置差） | ✅ complete |
 | [expressions](expressions/INDEX.md) | 表达式激活（time\*N 旋转，渲 t=1s 看角度） | ✅ complete |
 | [precomp-nesting](precomp-nesting/INDEX.md) | 预合成嵌套（parent 嵌套 child 组合场景） | ✅ complete |
-| gradient | 渐变填充/描边 + ramp 方向 | ⏳ 待建 |
-| text | 文字层 from-scratch | ⏳ 待建 |
-| layers | Solid/Null/Adjustment/Camera/Light/Precomp 建层 | ⏳ 待建 |
+| [gradient](gradient/INDEX.md) | 渐变填充 + ramp 方向（横/纵/对角/三停） | ✅ complete |
+| [text](text/INDEX.md) | 文字层 from-scratch（NewTextLayer + SetText 多行） | ✅ complete |
+| [layers](layers/INDEX.md) | Solid 同心色框 + Null/Adjustment 建层 | ✅ complete |
 
-> 后续大阶段落地时按 `checklists/showcase.md` 逐方向补。⏳ = 本轮回填中。
+> 后续大阶段落地时按 `checklists/showcase.md` 逐方向补。已回填 8 个方向（覆盖已 ship 的 from-scratch 可视能力）。effects / masks / essential-graphics / structural-ops 偏「读真实 .aep + 改」，需求驱动再补。
