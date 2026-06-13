@@ -13,9 +13,9 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-下面 15 个可视方向**全部 ✅ complete**（2026-06-14 用户真机逐个验收通过）。📋 B 类读值档（render-queue / essential-graphics / markers / comp-settings / project-settings / camera-light / media-replace）补全中。
+下面 15 个 🖼 可视方向**全部 ✅ complete**（2026-06-14 用户真机逐个验收通过）。📋 B 类读值档：4 个 from-scratch 可行已补（🔍 待review），3 个 from-scratch 不可表达（见末节）。
 
-## 方向一览
+## 🖼 A 类 — 可视方向（看图档）
 
 | 方向 | 测什么 | 状态 |
 |---|---|---|
@@ -35,4 +35,31 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [keyframe-channels](keyframe-channels/INDEX.md) | 四通道关键帧 Position/Scale/Rotation/Opacity（渲 t=2s 插值 + readback） | ✅ complete |
 | [animated-path](animated-path/INDEX.md) | 动画路径几何 morph 横条→正方→竖条（渲 t=2s + extent readback） | ✅ complete |
 
-> **15 个 🖼 可视方向全部 ✅ complete**（用户真机验收）：8 from-scratch 可视 + effects + masks + structural-ops + transform-values + stroke-detail + keyframe-channels + animated-path。**📋 B 类读值档补全中**（render-queue / essential-graphics / markers / comp-settings / project-settings / camera-light / media-replace，dump 值 readback 不看图）。全量清单 + 验证档位（🖼看图 vs 📋读值）详 `specs/2026-06-13-full-showcase-coverage.md`。
+## 📋 B 类 — 读值档（dump 值核对，不看图）
+
+无渲染视觉的能力 = `gen.go` 建工程 + `verify.jsx` dump DOM 值到 `.done`,**用户读日志核值**（非看图）。
+
+| 方向 | 测什么 | 状态 |
+|---|---|---|
+| [comp-settings](comp-settings/INDEX.md) | 合成设置 motionBlur/workArea/bgColor/hideShy/nestedFrameRate（7 项 DOM 一致） | 🔍 待review |
+| [project-settings](project-settings/INDEX.md) | 工程设置 bitsPerChannel/linearBlending/expressionEngine/footageTimecode（4 项一致） | 🔍 待review |
+| [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层 + 类型确认（选项 setter from-scratch elide） | 🔍 待review |
+| [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty 3 控件 + SetMotionGraphicsTemplateName | 🔍 待review |
+
+### ⚠ from-scratch 不可表达（3 个 — 非缺陷，能力本质是 fixture-mutation）
+
+这三个能力**无法纯 Go 从零生成**,只能在已有 .aep（fixture）上改,故不符 showcase 的「纯 Go 从零」前提。它们各有 **fixture-based ship-gate** 验证(非 from-scratch showcase)：
+
+- **markers** — `AddMarker` 报「empty comp marker set unsupported（需 canonical seed 克隆）」：空 marker 集无模板可克隆,只能往已有 ≥1 marker 的 comp 加。
+- **render-queue** — `AddItem` 报「empty queue has no template item to clone」：同理需已有 RQ item 作种。
+- **media-replace** — `SetAlternateSource` 需真实 footage 导入,from-scratch 无素材源。
+
+> 这三项的写能力本身经各自 ship-gate（对 fixture）验证过；只是不适合做「从零 showcase」。需要时可改成「fixture-mutation 演示」（破坏「干净 clone 重生成」原则,故未做）。
+
+### 发现的边界（readback 首次 AE-DOM 核出，红线4a 活样本）
+
+B 类 readback 首次对若干「仅字节 round-trip、从未 AE-DOM 验证」的 setter 做 AE-DOM 核对,查出**字节写对但 AE DOM 不反映**：comp 的 **SetShutterAngle/Phase**(读回 ×≈1.2)、**SetResolutionFactor**(AE 除零)；project 的 **SetTimeDisplayType/FeetFramesFilmType/FramesCountType**(nnhd byte8 疑位打包)。详各方向 INDEX「已发现边界」。**建议独立 RE/修**。
+
+---
+
+> **15 个 🖼 可视方向全部 ✅ complete** + **4 个 📋 读值档 🔍 待review** + **3 个 from-scratch 不可表达（已注明）**。全量清单 + 验证档位（🖼看图 vs 📋读值）详 `specs/2026-06-13-full-showcase-coverage.md`。

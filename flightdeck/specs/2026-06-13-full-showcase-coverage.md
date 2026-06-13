@@ -28,7 +28,16 @@ last_updated: 2026-06-13
 >
 > - ✅ **animated-path**（commit）— 闭合 Path 两线性关键帧，几何 morph 横条(440×120)→正方(280×280)→竖条(120×440)，渲 t=2s 正方形 + `.done` 三时刻 extent readback 数证顶点逐个插值。闭合+实心 fill 规避 open-path 塌缩；仅 2 kf 规避 lhd3 >4-kf 容量坑（多帧路径前必修 `encodePathTimeTable` 同病）。
 >
-> **🖼 看图档（A 类可视方向）已全部补齐**（共 10 个可视方向 + effects/masks 等）。**剩余待补皆 📋 读值档（B 类，按需点名即补）**：render-queue / essential-graphics / markers / comp-settings / project-settings / camera-light / media-replace（dump 值 readback 不看图）。
+> **🖼 看图档（A 类可视方向）已全部补齐**（共 15 个可视方向，用户 2026-06-14 真机验收全 complete）。
+>
+> **📋 B 类读值档（2026-06-14 用户「全补 7 个」）**：4 个 from-scratch 可行**已补 🔍 待review** + 3 个 from-scratch **不可表达**（已注明）：
+> - ✅ **comp-settings** — motionBlur/samples/adaptiveLimit/bgColor/workArea/hideShy/nestedFrameRate 7 项 DOM 一致。**边界**：SetShutterAngle/Phase 读回 ×≈1.2、SetResolutionFactor AE 除零（排除）。
+> - ✅ **project-settings** — bitsPerChannel/linearBlending/expressionEngine/footageTimecodeDisplayStartType 4 项一致。**边界**：SetTimeDisplayType/FeetFramesFilmType（nnhd byte8 疑位打包）/FramesCountType 不反映（排除）。
+> - ✅ **camera-light** — NewCameraLayer/NewLightLayer 建层 + 类型确认（CameraLayer/LightLayer，POINT）。**边界**：选项 setter from-scratch 全 elide（"property not present"），只在 parsed 层生效。
+> - ✅ **essential-graphics** — AddEssentialProperty 3 控件（slider 直接 / color 须先 SetEffectParam materialize / checkbox 直接）+ SetMotionGraphicsTemplateName，DOM 读回模板名 + 3 控件名。
+> - ❌ **markers / render-queue / media-replace** — from-scratch 不可表达：AddMarker/AddItem 需 canonical seed（空集无模板克隆）、SetAlternateSource 需真实 footage。各有 fixture-based ship-gate，非 from-scratch showcase。
+>
+> **B 类 readback 系统性发现（红线4a）**：多个「仅字节 round-trip、从未 AE-DOM 验证」的 settings setter，AE-DOM 核出字节写对但 AE 不反映（shutter/resolution/nnhd-byte8）→ 建议独立 RE/修。
 
 ## 缺口：还没 showcase 的已 ship 能力
 
