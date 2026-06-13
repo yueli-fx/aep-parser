@@ -67,6 +67,13 @@ var extractions = []extraction{
 	// RoundCorner Radius` (1D f64 BE @cdat[0:8]), set non-default in the fixture
 	// so AE emits the slot. Regen via tmp_debug/gen_shape_roundcorners.jsx.
 	{"test_data/v2_2_roundcorners.aep", "ADBE Vector Filter - RC", "internal/serializer/templates/v2_2_shape_roundcorners_body.bin"},
+	// MG roadmap S5 — Offset Paths (`ADBE Vector Filter - Offset`): grows/shrinks
+	// the paths below it by Amount px. Headline sub-stream `ADBE Vector Offset
+	// Amount` (1D f64 BE @cdat[0:8], default 10) set non-default in the fixture so
+	// AE emits the slot; Line Join / Miter Limit / Copies / Copy Offset stayed
+	// default and are elided (modeled only Amount). Regen via
+	// tmp_debug/gen_shape_offset.jsx.
+	{"test_data/v2_2_offset.aep", "ADBE Vector Filter - Offset", "internal/serializer/templates/v2_2_shape_offset_body.bin"},
 }
 
 func main() {

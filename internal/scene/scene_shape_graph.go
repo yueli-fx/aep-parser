@@ -25,6 +25,7 @@ const (
 	ShapeKindTrim                                // `ADBE Vector Filter - Trim`
 	ShapeKindRepeater                            // `ADBE Vector Filter - Repeater`
 	ShapeKindRoundCorners                        // `ADBE Vector Filter - RC`
+	ShapeKindOffsetPaths                         // `ADBE Vector Filter - Offset`
 	// V2.3+ candidates: PolyStar / Merge / Transform.
 )
 
@@ -558,6 +559,17 @@ func (g *VectorGroup) AddRoundCorners() (*RoundCornersNode, error) {
 	return n, nil
 }
 
+// AddOffsetPaths appends a default-valued OffsetPathsNode (Amount=10, AE's
+// default) and returns it. An Offset Paths filter grows (positive) or shrinks
+// (negative) the preceding paths by Amount pixels — the canonical outline /
+// inflate MG primitive. Place it AFTER the shapes it should offset (render
+// order).
+func (g *VectorGroup) AddOffsetPaths() (*OffsetPathsNode, error) {
+	n := NewOffsetPathsNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -757,6 +769,41 @@ func (n *RoundCornersNode) Properties() *PropertyGroup {
 		Name: "Round Corners",
 		streams: map[string]any{
 			"Radius": n.radius,
+		},
+	}
+}
+
+// OffsetPathsNode — `ADBE Vector Filter - Offset` (Offset Paths). A path-filter
+// that grows (positive Amount) or shrinks (negative Amount) the preceding paths
+// in the stack by `Amount` pixels. Its headline sub-stream `ADBE Vector Offset
+// Amount` is an animatable 1D scalar (default 10, AE's default). Place it AFTER
+// the path-producing shapes it should offset (render order).
+//
+// Line Join / Miter Limit / Copies / Copy Offset are AE-default and elided in
+// the extracted template (no slot); only Amount is modeled.
+type OffsetPathsNode struct {
+	amount *codec.PropertyStream[float64]
+}
+
+// NewOffsetPathsNode constructs a default OffsetPathsNode (Amount=10).
+func NewOffsetPathsNode() *OffsetPathsNode {
+	n := &OffsetPathsNode{amount: codec.NewPropertyStream[float64]()}
+	_ = n.amount.SetStaticValue(10)
+	return n
+}
+
+func (n *OffsetPathsNode) Kind() ShapeNodeKind             { return ShapeKindOffsetPaths }
+func (n *OffsetPathsNode) Amount() *PropertyStream[float64] { return n.amount }
+
+// SetAmount sets the offset amount in pixels (positive grows, negative shrinks).
+func (n *OffsetPathsNode) SetAmount(v float64) error { return n.amount.SetStaticValue(v) }
+
+// Properties returns the escape-hatch β view.
+func (n *OffsetPathsNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Offset Paths",
+		streams: map[string]any{
+			"Amount": n.amount,
 		},
 	}
 }

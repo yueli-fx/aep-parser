@@ -58,6 +58,9 @@ var v22ShapeRepeaterBodyBytes []byte
 //go:embed templates/v2_2_shape_roundcorners_body.bin
 var v22ShapeRoundCornersBodyBytes []byte
 
+//go:embed templates/v2_2_shape_offset_body.bin
+var v22ShapeOffsetBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -102,6 +105,10 @@ var (
 	v22ShapeRoundCornersOnce  sync.Once
 	v22ShapeRoundCornersCache *rifx.Chunk
 	v22ShapeRoundCornersErr   error
+
+	v22ShapeOffsetOnce  sync.Once
+	v22ShapeOffsetCache *rifx.Chunk
+	v22ShapeOffsetErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -272,6 +279,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindTrim:           "ADBE Vector Filter - Trim",
 	ShapeKindRepeater:       "ADBE Vector Filter - Repeater",
 	ShapeKindRoundCorners:   "ADBE Vector Filter - RC",
+	ShapeKindOffsetPaths:    "ADBE Vector Filter - Offset",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -308,6 +316,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerRepeaterNode(node, ctx)
 	case *RoundCornersNode:
 		return lowerRoundCornersNode(node, ctx)
+	case *OffsetPathsNode:
+		return lowerOffsetPathsNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -927,6 +937,41 @@ func lowerRoundCornersNode(n *RoundCornersNode, ctx *lowerCtx) (*rifx.Chunk, err
 		return nil, err
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector RoundCorner Radius", n.Radius(), ctx); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapeOffsetBody returns a clone of the Offset Paths template
+// (templates/v2_2_shape_offset_body.bin): a single `ADBE Vector Offset Amount`
+// cdat slot (Amount set non-default in the fixture so AE emitted it; Line Join /
+// Miter Limit / Copies / Copy Offset stayed default and are elided).
+func cloneShapeOffsetBody() (*rifx.Chunk, error) {
+	v22ShapeOffsetOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetBodyBytes))
+		if err != nil {
+			v22ShapeOffsetErr = fmt.Errorf("parse v22ShapeOffsetBodyBytes: %w", err)
+			return
+		}
+		v22ShapeOffsetCache = ch
+	})
+	if v22ShapeOffsetErr != nil {
+		return nil, v22ShapeOffsetErr
+	}
+	return cloneChunk(v22ShapeOffsetCache), nil
+}
+
+// lowerOffsetPathsNode emits an Offset Paths filter body from the embedded
+// template, overwriting the single `ADBE Vector Offset Amount` cdat (1D f64 BE
+// at cdat[0:8], raw pixels — same scalar layout as Round Corners Radius).
+// Static → cdat overwrite; animated → the cdat flips to a 1D non-spatial
+// keyframe container via the shared injectAnimatedStream path.
+func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeOffsetBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Offset Amount", n.Amount(), ctx); err != nil {
 		return nil, err
 	}
 	return body, nil
