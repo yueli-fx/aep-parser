@@ -102,6 +102,13 @@ var extractions = []extraction{
 	// Vector PuckerBloat Amount` (1D f64 BE percent, default 10) set non-default in
 	// the fixture so AE emits the slot. Regen via tmp_debug/gen_shape_puckerbloat.jsx.
 	{"test_data/v2_2_puckerbloat.aep", "ADBE Vector Filter - PB", "internal/serializer/templates/v2_2_shape_puckerbloat_body.bin"},
+	// MG roadmap S5 — Twist (`ADBE Vector Filter - Twist`): rotates the paths
+	// below it progressively (more rotation farther from the center), bowing
+	// straight edges into spirals. Headline sub-stream `ADBE Vector Twist Angle`
+	// (1D f64 BE degrees, default 10) set non-default in the fixture so AE emits
+	// the slot; `Twist Center` (Vec2, default [0,0]) stays default and is elided
+	// (modeled only Angle). Regen via tmp_debug/gen_shape_twist.jsx.
+	{"test_data/v2_2_twist.aep", "ADBE Vector Filter - Twist", "internal/serializer/templates/v2_2_shape_twist_body.bin"},
 }
 
 func main() {

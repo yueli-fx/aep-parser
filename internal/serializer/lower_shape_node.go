@@ -73,6 +73,9 @@ var v22ShapeStarBodyBytes []byte
 //go:embed templates/v2_2_shape_puckerbloat_body.bin
 var v22ShapePuckerBloatBodyBytes []byte
 
+//go:embed templates/v2_2_shape_twist_body.bin
+var v22ShapeTwistBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -137,6 +140,10 @@ var (
 	v22ShapePuckerBloatOnce  sync.Once
 	v22ShapePuckerBloatCache *rifx.Chunk
 	v22ShapePuckerBloatErr   error
+
+	v22ShapeTwistOnce  sync.Once
+	v22ShapeTwistCache *rifx.Chunk
+	v22ShapeTwistErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -312,6 +319,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindZigZag:         "ADBE Vector Filter - Zigzag",
 	ShapeKindStar:           "ADBE Vector Shape - Star",
 	ShapeKindPuckerBloat:    "ADBE Vector Filter - PB",
+	ShapeKindTwist:          "ADBE Vector Filter - Twist",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -358,6 +366,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerStarNode(node, ctx)
 	case *PuckerBloatNode:
 		return lowerPuckerBloatNode(node, ctx)
+	case *TwistNode:
+		return lowerTwistNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -1178,6 +1188,41 @@ func lowerPuckerBloatNode(n *PuckerBloatNode, ctx *lowerCtx) (*rifx.Chunk, error
 		return nil, err
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector PuckerBloat Amount", n.Amount(), ctx); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapeTwistBody returns a clone of the Twist template
+// (templates/v2_2_shape_twist_body.bin): a single `ADBE Vector Twist Angle`
+// cdat slot (Angle was set non-default in the fixture so AE emitted it; the
+// Vec2 Twist Center stayed default and is elided).
+func cloneShapeTwistBody() (*rifx.Chunk, error) {
+	v22ShapeTwistOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeTwistBodyBytes))
+		if err != nil {
+			v22ShapeTwistErr = fmt.Errorf("parse v22ShapeTwistBodyBytes: %w", err)
+			return
+		}
+		v22ShapeTwistCache = ch
+	})
+	if v22ShapeTwistErr != nil {
+		return nil, v22ShapeTwistErr
+	}
+	return cloneChunk(v22ShapeTwistCache), nil
+}
+
+// lowerTwistNode emits a Twist filter body from the embedded template,
+// overwriting the headline `ADBE Vector Twist Angle` cdat (1D f64 BE at
+// cdat[0:8], degrees — same scalar layout as Round Corners Radius). Static →
+// cdat overwrite; animated → the cdat flips to a 1D non-spatial keyframe
+// container via the shared injectAnimatedStream path.
+func lowerTwistNode(n *TwistNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeTwistBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Twist Angle", n.Angle(), ctx); err != nil {
 		return nil, err
 	}
 	return body, nil

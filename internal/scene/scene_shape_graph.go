@@ -30,6 +30,7 @@ const (
 	ShapeKindZigZag                              // `ADBE Vector Filter - Zigzag`
 	ShapeKindStar                                // `ADBE Vector Shape - Star`
 	ShapeKindPuckerBloat                         // `ADBE Vector Filter - PB`
+	ShapeKindTwist                               // `ADBE Vector Filter - Twist`
 	// V2.3+ candidates: Transform / nested user groups.
 )
 
@@ -738,6 +739,16 @@ func (g *VectorGroup) AddPuckerBloat() (*PuckerBloatNode, error) {
 	return n, nil
 }
 
+// AddTwist appends a default-valued TwistNode (Angle=0, the no-op identity) and
+// returns it. Twist rotates the preceding paths progressively — points farther
+// from the center rotate more — bowing straight edges into spirals. Place it
+// AFTER the shapes it should distort (render order).
+func (g *VectorGroup) AddTwist() (*TwistNode, error) {
+	n := NewTwistNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -1099,6 +1110,40 @@ func (n *PuckerBloatNode) Properties() *PropertyGroup {
 		Name: "Pucker & Bloat",
 		streams: map[string]any{
 			"Amount": n.amount,
+		},
+	}
+}
+
+// TwistNode — `ADBE Vector Filter - Twist`. A path-filter that rotates the
+// paths below it progressively (more rotation farther from the twist center),
+// bowing straight edges into spirals. Its headline sub-stream `ADBE Vector
+// Twist Angle` is an animatable 1D scalar (degrees; default 0 = no twist). The
+// `Twist Center` (Vec2) is left at its default [0,0] and elided. Place it AFTER
+// the path-producing shapes it should distort (render order).
+type TwistNode struct {
+	angle *codec.PropertyStream[float64]
+}
+
+// NewTwistNode constructs a default TwistNode (Angle=0, identity).
+func NewTwistNode() *TwistNode {
+	n := &TwistNode{angle: codec.NewPropertyStream[float64]()}
+	_ = n.angle.SetStaticValue(0)
+	return n
+}
+
+func (n *TwistNode) Kind() ShapeNodeKind              { return ShapeKindTwist }
+func (n *TwistNode) Angle() *PropertyStream[float64] { return n.angle }
+
+// SetAngle sets the twist angle (degrees; positive twists clockwise, negative
+// counter-clockwise).
+func (n *TwistNode) SetAngle(v float64) error { return n.angle.SetStaticValue(v) }
+
+// Properties returns the escape-hatch β view.
+func (n *TwistNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Twist",
+		streams: map[string]any{
+			"Angle": n.angle,
 		},
 	}
 }

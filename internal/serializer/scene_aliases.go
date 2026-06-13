@@ -126,6 +126,7 @@ type (
 	ZigZagNode                      = scene.ZigZagNode
 	StarNode                        = scene.StarNode
 	PuckerBloatNode                 = scene.PuckerBloatNode
+	TwistNode                       = scene.TwistNode
 	StrokeNode                      = scene.StrokeNode
 	TrimNode                        = scene.TrimNode
 	StrokeTaper                     = scene.StrokeTaper
@@ -370,6 +371,7 @@ const (
 	ShapeKindZigZag                               = scene.ShapeKindZigZag
 	ShapeKindStar                                 = scene.ShapeKindStar
 	ShapeKindPuckerBloat                          = scene.ShapeKindPuckerBloat
+	ShapeKindTwist                                = scene.ShapeKindTwist
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar
