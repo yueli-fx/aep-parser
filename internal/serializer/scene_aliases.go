@@ -120,6 +120,7 @@ type (
 	StrokeLineCap                   = scene.StrokeLineCap
 	StrokeLineJoin                  = scene.StrokeLineJoin
 	RepeaterNode                    = scene.RepeaterNode
+	RoundCornersNode                = scene.RoundCornersNode
 	StrokeNode                      = scene.StrokeNode
 	TrimNode                        = scene.TrimNode
 	StrokeTaper                     = scene.StrokeTaper
@@ -358,6 +359,7 @@ const (
 	ShapeKindStroke                               = scene.ShapeKindStroke
 	ShapeKindTrim                                 = scene.ShapeKindTrim
 	ShapeKindRepeater                             = scene.ShapeKindRepeater
+	ShapeKindRoundCorners                         = scene.ShapeKindRoundCorners
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

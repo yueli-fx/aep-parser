@@ -121,6 +121,7 @@ type (
 	StrokeLineJoin                  = scene.StrokeLineJoin
 	RepeaterNode                    = scene.RepeaterNode
 	RepeaterTransform               = scene.RepeaterTransform
+	RoundCornersNode                = scene.RoundCornersNode
 	StrokeNode                      = scene.StrokeNode
 	StrokeTaper                     = scene.StrokeTaper
 	TrimNode                        = scene.TrimNode
@@ -358,6 +359,7 @@ const (
 	ShapeKindRect                                 = scene.ShapeKindRect
 	ShapeKindStroke                               = scene.ShapeKindStroke
 	ShapeKindTrim                                 = scene.ShapeKindTrim
+	ShapeKindRoundCorners                         = scene.ShapeKindRoundCorners
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar
@@ -437,6 +439,9 @@ func NewTrimNode() *TrimNode { return scene.NewTrimNode() }
 // NewRepeaterNode returns a detached Repeater filter node (3 copies, identity
 // transform).
 func NewRepeaterNode() *RepeaterNode { return scene.NewRepeaterNode() }
+
+// NewRoundCornersNode returns a detached Round Corners filter node (Radius=10).
+func NewRoundCornersNode() *RoundCornersNode { return scene.NewRoundCornersNode() }
 
 // NewVectorGroup returns a detached vector group shape node.
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }

@@ -24,6 +24,7 @@ const (
 	ShapeKindGradientStroke                      // `ADBE Vector Graphic - G-Stroke`
 	ShapeKindTrim                                // `ADBE Vector Filter - Trim`
 	ShapeKindRepeater                            // `ADBE Vector Filter - Repeater`
+	ShapeKindRoundCorners                        // `ADBE Vector Filter - RC`
 	// V2.3+ candidates: PolyStar / Merge / Transform.
 )
 
@@ -546,6 +547,17 @@ func (g *VectorGroup) AddRepeater() (*RepeaterNode, error) {
 	return n, nil
 }
 
+// AddRoundCorners appends a default-valued RoundCornersNode (Radius=10, AE's
+// default) and returns it. A Round Corners filter rounds the corners of the
+// preceding paths by Radius pixels — the canonical "soften the rectangle" MG
+// primitive. Place it AFTER the shapes whose corners it should round (render
+// order).
+func (g *VectorGroup) AddRoundCorners() (*RoundCornersNode, error) {
+	n := NewRoundCornersNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -708,6 +720,43 @@ func (n *RepeaterNode) Properties() *PropertyGroup {
 		streams: map[string]any{
 			"Copies": n.copies,
 			"Offset": n.offset,
+		},
+	}
+}
+
+// RoundCornersNode — `ADBE Vector Filter - RC` (Round Corners). A path-filter
+// that rounds the corners of the preceding paths in the stack by `Radius`
+// pixels. Its single sub-stream `ADBE Vector RoundCorner Radius` is an
+// animatable 1D scalar (default 10, AE's default). Place it AFTER the
+// path-producing shapes whose corners it should round (render order).
+type RoundCornersNode struct {
+	radius *codec.PropertyStream[float64]
+}
+
+// NewRoundCornersNode constructs a default RoundCornersNode (Radius=10).
+func NewRoundCornersNode() *RoundCornersNode {
+	n := &RoundCornersNode{radius: codec.NewPropertyStream[float64]()}
+	_ = n.radius.SetStaticValue(10)
+	return n
+}
+
+func (n *RoundCornersNode) Kind() ShapeNodeKind             { return ShapeKindRoundCorners }
+func (n *RoundCornersNode) Radius() *PropertyStream[float64] { return n.radius }
+
+// SetRadius sets the corner radius in pixels. Rejects negative values.
+func (n *RoundCornersNode) SetRadius(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("RoundCornersNode.SetRadius: %g out of range (want >= 0)", v)
+	}
+	return n.radius.SetStaticValue(v)
+}
+
+// Properties returns the escape-hatch β view.
+func (n *RoundCornersNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Round Corners",
+		streams: map[string]any{
+			"Radius": n.radius,
 		},
 	}
 }

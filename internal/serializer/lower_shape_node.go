@@ -55,6 +55,9 @@ var v22ShapeTrimBodyBytes []byte
 //go:embed templates/v2_2_shape_repeater_body.bin
 var v22ShapeRepeaterBodyBytes []byte
 
+//go:embed templates/v2_2_shape_roundcorners_body.bin
+var v22ShapeRoundCornersBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -95,6 +98,10 @@ var (
 	v22ShapeRepeaterOnce  sync.Once
 	v22ShapeRepeaterCache *rifx.Chunk
 	v22ShapeRepeaterErr   error
+
+	v22ShapeRoundCornersOnce  sync.Once
+	v22ShapeRoundCornersCache *rifx.Chunk
+	v22ShapeRoundCornersErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -264,6 +271,7 @@ var shapeMatchNames = map[ShapeNodeKind]string{
 	ShapeKindGradientStroke: "ADBE Vector Graphic - G-Stroke",
 	ShapeKindTrim:           "ADBE Vector Filter - Trim",
 	ShapeKindRepeater:       "ADBE Vector Filter - Repeater",
+	ShapeKindRoundCorners:   "ADBE Vector Filter - RC",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -298,6 +306,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerTrimNode(node, ctx)
 	case *RepeaterNode:
 		return lowerRepeaterNode(node, ctx)
+	case *RoundCornersNode:
+		return lowerRoundCornersNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -883,6 +893,41 @@ func lowerRepeaterNode(n *RepeaterNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Rotation", encodeF64sBE(t.Rotation()))
 		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Opacity 1", encodeF64sBE(t.StartOpacity()))
 		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Opacity 2", encodeF64sBE(t.EndOpacity()))
+	}
+	return body, nil
+}
+
+// cloneShapeRoundCornersBody returns a clone of the Round Corners template
+// (templates/v2_2_shape_roundcorners_body.bin): a single `ADBE Vector
+// RoundCorner Radius` cdat slot (Radius was set non-default in the fixture so
+// AE emitted it).
+func cloneShapeRoundCornersBody() (*rifx.Chunk, error) {
+	v22ShapeRoundCornersOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeRoundCornersBodyBytes))
+		if err != nil {
+			v22ShapeRoundCornersErr = fmt.Errorf("parse v22ShapeRoundCornersBodyBytes: %w", err)
+			return
+		}
+		v22ShapeRoundCornersCache = ch
+	})
+	if v22ShapeRoundCornersErr != nil {
+		return nil, v22ShapeRoundCornersErr
+	}
+	return cloneChunk(v22ShapeRoundCornersCache), nil
+}
+
+// lowerRoundCornersNode emits a Round Corners filter body from the embedded
+// template, overwriting the single `ADBE Vector RoundCorner Radius` cdat (1D
+// f64 BE at cdat[0:8], raw pixels — same scalar layout as Trim Start/End).
+// Static → cdat overwrite; animated → the cdat flips to a 1D non-spatial
+// keyframe container via the shared injectAnimatedStream path.
+func lowerRoundCornersNode(n *RoundCornersNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeRoundCornersBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector RoundCorner Radius", n.Radius(), ctx); err != nil {
+		return nil, err
 	}
 	return body, nil
 }

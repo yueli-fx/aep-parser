@@ -62,6 +62,11 @@ var extractions = []extraction{
 	// non-default in the fixture so AE emits every slot. Regen via
 	// tmp_debug/gen_shape_repeater.jsx.
 	{"test_data/v2_2_repeater.aep", "ADBE Vector Filter - Repeater", "internal/serializer/templates/v2_2_shape_repeater_body.bin"},
+	// MG roadmap S5 — Round Corners (`ADBE Vector Filter - RC`): rounds the
+	// corners of the paths below it in the stack. Single sub-stream `ADBE Vector
+	// RoundCorner Radius` (1D f64 BE @cdat[0:8]), set non-default in the fixture
+	// so AE emits the slot. Regen via tmp_debug/gen_shape_roundcorners.jsx.
+	{"test_data/v2_2_roundcorners.aep", "ADBE Vector Filter - RC", "internal/serializer/templates/v2_2_shape_roundcorners_body.bin"},
 }
 
 func main() {
