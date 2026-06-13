@@ -128,6 +128,7 @@ type (
 	PuckerBloatNode                 = scene.PuckerBloatNode
 	TwistNode                       = scene.TwistNode
 	WigglePathsNode                 = scene.WigglePathsNode
+	WiggleTransformNode             = scene.WiggleTransformNode
 	StrokeNode                      = scene.StrokeNode
 	TrimNode                        = scene.TrimNode
 	StrokeTaper                     = scene.StrokeTaper
@@ -374,6 +375,7 @@ const (
 	ShapeKindPuckerBloat                          = scene.ShapeKindPuckerBloat
 	ShapeKindTwist                                = scene.ShapeKindTwist
 	ShapeKindWigglePaths                          = scene.ShapeKindWigglePaths
+	ShapeKindWiggleTransform                      = scene.ShapeKindWiggleTransform
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

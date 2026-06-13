@@ -14,24 +14,25 @@ import (
 type ShapeNodeKind int
 
 const (
-	ShapeKindRect           ShapeNodeKind = iota // `ADBE Vector Shape - Rect`
-	ShapeKindEllipse                             // `ADBE Vector Shape - Ellipse`
-	ShapeKindPath                                // `ADBE Vector Shape - Group`
-	ShapeKindFill                                // `ADBE Vector Graphic - Fill`
-	ShapeKindStroke                              // `ADBE Vector Graphic - Stroke`
-	ShapeKindGroup                               // `ADBE Vector Group` (V2.3+ user-created nested group)
-	ShapeKindGradientFill                        // `ADBE Vector Graphic - G-Fill`
-	ShapeKindGradientStroke                      // `ADBE Vector Graphic - G-Stroke`
-	ShapeKindTrim                                // `ADBE Vector Filter - Trim`
-	ShapeKindRepeater                            // `ADBE Vector Filter - Repeater`
-	ShapeKindRoundCorners                        // `ADBE Vector Filter - RC`
-	ShapeKindOffsetPaths                         // `ADBE Vector Filter - Offset`
-	ShapeKindMergePaths                          // `ADBE Vector Filter - Merge`
-	ShapeKindZigZag                              // `ADBE Vector Filter - Zigzag`
-	ShapeKindStar                                // `ADBE Vector Shape - Star`
-	ShapeKindPuckerBloat                         // `ADBE Vector Filter - PB`
-	ShapeKindTwist                               // `ADBE Vector Filter - Twist`
-	ShapeKindWigglePaths                         // `ADBE Vector Filter - Roughen`
+	ShapeKindRect            ShapeNodeKind = iota // `ADBE Vector Shape - Rect`
+	ShapeKindEllipse                              // `ADBE Vector Shape - Ellipse`
+	ShapeKindPath                                 // `ADBE Vector Shape - Group`
+	ShapeKindFill                                 // `ADBE Vector Graphic - Fill`
+	ShapeKindStroke                               // `ADBE Vector Graphic - Stroke`
+	ShapeKindGroup                                // `ADBE Vector Group` (V2.3+ user-created nested group)
+	ShapeKindGradientFill                         // `ADBE Vector Graphic - G-Fill`
+	ShapeKindGradientStroke                       // `ADBE Vector Graphic - G-Stroke`
+	ShapeKindTrim                                 // `ADBE Vector Filter - Trim`
+	ShapeKindRepeater                             // `ADBE Vector Filter - Repeater`
+	ShapeKindRoundCorners                         // `ADBE Vector Filter - RC`
+	ShapeKindOffsetPaths                          // `ADBE Vector Filter - Offset`
+	ShapeKindMergePaths                           // `ADBE Vector Filter - Merge`
+	ShapeKindZigZag                               // `ADBE Vector Filter - Zigzag`
+	ShapeKindStar                                 // `ADBE Vector Shape - Star`
+	ShapeKindPuckerBloat                          // `ADBE Vector Filter - PB`
+	ShapeKindTwist                                // `ADBE Vector Filter - Twist`
+	ShapeKindWigglePaths                          // `ADBE Vector Filter - Roughen`
+	ShapeKindWiggleTransform                      // `ADBE Vector Filter - Wiggler`
 	// V2.3+ candidates: Transform / nested user groups.
 )
 
@@ -760,6 +761,17 @@ func (g *VectorGroup) AddWigglePaths() (*WigglePathsNode, error) {
 	return n, nil
 }
 
+// AddWiggleTransform appends a default-valued WiggleTransformNode (zero
+// amplitudes, the no-op identity) and returns it. Wiggle Transform randomly
+// jitters a transform (Anchor/Position/Scale/Rotation) applied to the preceding
+// paths over time — typically placed after a Repeater to scatter its copies.
+// Place it AFTER the shapes it should affect (render order).
+func (g *VectorGroup) AddWiggleTransform() (*WiggleTransformNode, error) {
+	n := NewWiggleTransformNode()
+	g.Children = append(g.Children, n)
+	return n, nil
+}
+
 // TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
 // reveals only the portion of the preceding paths between Start% and End%,
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
@@ -942,7 +954,7 @@ func NewRoundCornersNode() *RoundCornersNode {
 	return n
 }
 
-func (n *RoundCornersNode) Kind() ShapeNodeKind             { return ShapeKindRoundCorners }
+func (n *RoundCornersNode) Kind() ShapeNodeKind              { return ShapeKindRoundCorners }
 func (n *RoundCornersNode) Radius() *PropertyStream[float64] { return n.radius }
 
 // SetRadius sets the corner radius in pixels. Rejects negative values.
@@ -982,7 +994,7 @@ func NewOffsetPathsNode() *OffsetPathsNode {
 	return n
 }
 
-func (n *OffsetPathsNode) Kind() ShapeNodeKind             { return ShapeKindOffsetPaths }
+func (n *OffsetPathsNode) Kind() ShapeNodeKind              { return ShapeKindOffsetPaths }
 func (n *OffsetPathsNode) Amount() *PropertyStream[float64] { return n.amount }
 
 // SetAmount sets the offset amount in pixels (positive grows, negative shrinks).
@@ -1061,7 +1073,7 @@ func NewZigZagNode() *ZigZagNode {
 	return n
 }
 
-func (n *ZigZagNode) Kind() ShapeNodeKind            { return ShapeKindZigZag }
+func (n *ZigZagNode) Kind() ShapeNodeKind              { return ShapeKindZigZag }
 func (n *ZigZagNode) Size() *PropertyStream[float64]   { return n.size }
 func (n *ZigZagNode) Detail() *PropertyStream[float64] { return n.detail }
 
@@ -1108,7 +1120,7 @@ func NewPuckerBloatNode() *PuckerBloatNode {
 	return n
 }
 
-func (n *PuckerBloatNode) Kind() ShapeNodeKind             { return ShapeKindPuckerBloat }
+func (n *PuckerBloatNode) Kind() ShapeNodeKind              { return ShapeKindPuckerBloat }
 func (n *PuckerBloatNode) Amount() *PropertyStream[float64] { return n.amount }
 
 // SetAmount sets the pucker/bloat amount (percent; negative puckers/concave,
@@ -1142,7 +1154,7 @@ func NewTwistNode() *TwistNode {
 	return n
 }
 
-func (n *TwistNode) Kind() ShapeNodeKind              { return ShapeKindTwist }
+func (n *TwistNode) Kind() ShapeNodeKind             { return ShapeKindTwist }
 func (n *TwistNode) Angle() *PropertyStream[float64] { return n.angle }
 
 // SetAngle sets the twist angle (degrees; positive twists clockwise, negative
@@ -1220,6 +1232,97 @@ func (n *WigglePathsNode) Properties() *PropertyGroup {
 		streams: map[string]any{
 			"Size":             n.size,
 			"Detail":           n.detail,
+			"WigglesPerSecond": n.wigglesPerSecond,
+			"RandomSeed":       n.randomSeed,
+		},
+	}
+}
+
+// WiggleTransformNode — `ADBE Vector Filter - Wiggler` (Wiggle Transform). A
+// filter that randomly jitters a transform applied to the paths below it over
+// time — usually placed after a Repeater to scatter its copies. WigglesPerSecond
+// (the temporal frequency, `ADBE Vector Xform Temporal Freq`) and RandomSeed are
+// animatable 1D scalars; the per-channel wiggle amplitudes live in the nested
+// Transform group (Anchor/Position/Scale Vec2, Rotation degrees) modeled
+// statically like the Repeater Transform. Correlation and Temporal/Spatial Phase
+// are left at their defaults and elided.
+type WiggleTransformNode struct {
+	wigglesPerSecond *codec.PropertyStream[float64]
+	randomSeed       *codec.PropertyStream[float64]
+	transform        *WigglerTransform
+}
+
+// WigglerTransform models the Wiggle Transform's nested `ADBE Vector Wiggler
+// Transform` group: the per-channel random wiggle AMPLITUDES (not absolute
+// transform values). Anchor / Position / Scale are Vec2 (Scale amplitude in %),
+// Rotation in degrees. A zero amplitude means that channel does not wiggle. All
+// static (V2.2), stored as plain values like RepeaterTransform.
+type WigglerTransform struct {
+	anchor   [2]float64
+	position [2]float64
+	scale    [2]float64
+	rotation float64
+}
+
+// NewWiggleTransformNode constructs a default WiggleTransformNode: all wiggle
+// amplitudes zero (the identity — nothing wiggles), WigglesPerSecond=2 and
+// RandomSeed=0 matching AE's filter defaults.
+func NewWiggleTransformNode() *WiggleTransformNode {
+	n := &WiggleTransformNode{
+		wigglesPerSecond: codec.NewPropertyStream[float64](),
+		randomSeed:       codec.NewPropertyStream[float64](),
+		transform:        &WigglerTransform{},
+	}
+	_ = n.wigglesPerSecond.SetStaticValue(2)
+	_ = n.randomSeed.SetStaticValue(0)
+	return n
+}
+
+func (n *WiggleTransformNode) Kind() ShapeNodeKind { return ShapeKindWiggleTransform }
+
+// WigglesPerSecond returns the temporal-frequency stream (`ADBE Vector Xform
+// Temporal Freq`).
+func (n *WiggleTransformNode) WigglesPerSecond() *PropertyStream[float64] {
+	return n.wigglesPerSecond
+}
+
+// RandomSeed returns the random-seed stream.
+func (n *WiggleTransformNode) RandomSeed() *PropertyStream[float64] { return n.randomSeed }
+
+// Transform returns the per-channel wiggle-amplitude group.
+func (n *WiggleTransformNode) Transform() *WigglerTransform { return n.transform }
+
+// SetWigglesPerSecond sets the temporal frequency (how fast the transform churns).
+func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error {
+	return n.wigglesPerSecond.SetStaticValue(v)
+}
+
+// SetRandomSeed sets the random seed selecting the wiggle pattern.
+func (n *WiggleTransformNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
+
+// Anchor / Position / Scale / Rotation return the current wiggle amplitudes.
+func (t *WigglerTransform) Anchor() [2]float64   { return t.anchor }
+func (t *WigglerTransform) Position() [2]float64 { return t.position }
+func (t *WigglerTransform) Scale() [2]float64    { return t.scale }
+func (t *WigglerTransform) Rotation() float64    { return t.rotation }
+
+// SetAnchor sets the anchor-point wiggle amplitude (pixels).
+func (t *WigglerTransform) SetAnchor(v [2]float64) error { t.anchor = v; return nil }
+
+// SetPosition sets the position wiggle amplitude (pixels).
+func (t *WigglerTransform) SetPosition(v [2]float64) error { t.position = v; return nil }
+
+// SetScale sets the scale wiggle amplitude (percent).
+func (t *WigglerTransform) SetScale(v [2]float64) error { t.scale = v; return nil }
+
+// SetRotation sets the rotation wiggle amplitude (degrees).
+func (t *WigglerTransform) SetRotation(v float64) error { t.rotation = v; return nil }
+
+// Properties returns the escape-hatch β view.
+func (n *WiggleTransformNode) Properties() *PropertyGroup {
+	return &PropertyGroup{
+		Name: "Wiggle Transform",
+		streams: map[string]any{
 			"WigglesPerSecond": n.wigglesPerSecond,
 			"RandomSeed":       n.randomSeed,
 		},

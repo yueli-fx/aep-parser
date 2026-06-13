@@ -117,6 +117,14 @@ var extractions = []extraction{
 	// Temporal·Spatial Phase stay default and are elided (modeled only the four
 	// headline controls). Regen via tmp_debug/gen_shape_wiggle.jsx.
 	{"test_data/v2_2_wiggle.aep", "ADBE Vector Filter - Roughen", "internal/serializer/templates/v2_2_shape_wiggle_body.bin"},
+	// MG roadmap S5 — Wiggle Transform (`ADBE Vector Filter - Wiggler`): randomly
+	// jitters a transform applied to the paths below (usually after a Repeater).
+	// Top-level Temporal Freq (Wiggles/Second) + Random Seed, plus a nested `ADBE
+	// Vector Wiggler Transform` group (Anchor/Position/Scale/Rotation amplitudes).
+	// All modeled slots set non-default in the fixture so AE emits them;
+	// Correlation / Temporal·Spatial Phase stay default and are elided. Regen via
+	// tmp_debug/gen_shape_wiggletransform.jsx.
+	{"test_data/v2_2_wiggletransform.aep", "ADBE Vector Filter - Wiggler", "internal/serializer/templates/v2_2_shape_wiggletransform_body.bin"},
 }
 
 func main() {

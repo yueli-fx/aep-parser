@@ -79,6 +79,9 @@ var v22ShapeTwistBodyBytes []byte
 //go:embed templates/v2_2_shape_wiggle_body.bin
 var v22ShapeWiggleBodyBytes []byte
 
+//go:embed templates/v2_2_shape_wiggletransform_body.bin
+var v22ShapeWiggleTransformBodyBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -151,6 +154,10 @@ var (
 	v22ShapeWiggleOnce  sync.Once
 	v22ShapeWiggleCache *rifx.Chunk
 	v22ShapeWiggleErr   error
+
+	v22ShapeWiggleTransformOnce  sync.Once
+	v22ShapeWiggleTransformCache *rifx.Chunk
+	v22ShapeWiggleTransformErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -310,24 +317,25 @@ func encodeF64sBE(vs ...float64) []byte {
 // table is serializer-only; runtime API uses the Go enum. Strings match
 // AE-saved fixture observations.
 var shapeMatchNames = map[ShapeNodeKind]string{
-	ShapeKindRect:         "ADBE Vector Shape - Rect",
-	ShapeKindEllipse:      "ADBE Vector Shape - Ellipse",
-	ShapeKindPath:         "ADBE Vector Shape - Group",
-	ShapeKindFill:         "ADBE Vector Graphic - Fill",
-	ShapeKindStroke:       "ADBE Vector Graphic - Stroke",
-	ShapeKindGroup:          "ADBE Vector Group",
-	ShapeKindGradientFill:   "ADBE Vector Graphic - G-Fill",
-	ShapeKindGradientStroke: "ADBE Vector Graphic - G-Stroke",
-	ShapeKindTrim:           "ADBE Vector Filter - Trim",
-	ShapeKindRepeater:       "ADBE Vector Filter - Repeater",
-	ShapeKindRoundCorners:   "ADBE Vector Filter - RC",
-	ShapeKindOffsetPaths:    "ADBE Vector Filter - Offset",
-	ShapeKindMergePaths:     "ADBE Vector Filter - Merge",
-	ShapeKindZigZag:         "ADBE Vector Filter - Zigzag",
-	ShapeKindStar:           "ADBE Vector Shape - Star",
-	ShapeKindPuckerBloat:    "ADBE Vector Filter - PB",
-	ShapeKindTwist:          "ADBE Vector Filter - Twist",
-	ShapeKindWigglePaths:    "ADBE Vector Filter - Roughen",
+	ShapeKindRect:            "ADBE Vector Shape - Rect",
+	ShapeKindEllipse:         "ADBE Vector Shape - Ellipse",
+	ShapeKindPath:            "ADBE Vector Shape - Group",
+	ShapeKindFill:            "ADBE Vector Graphic - Fill",
+	ShapeKindStroke:          "ADBE Vector Graphic - Stroke",
+	ShapeKindGroup:           "ADBE Vector Group",
+	ShapeKindGradientFill:    "ADBE Vector Graphic - G-Fill",
+	ShapeKindGradientStroke:  "ADBE Vector Graphic - G-Stroke",
+	ShapeKindTrim:            "ADBE Vector Filter - Trim",
+	ShapeKindRepeater:        "ADBE Vector Filter - Repeater",
+	ShapeKindRoundCorners:    "ADBE Vector Filter - RC",
+	ShapeKindOffsetPaths:     "ADBE Vector Filter - Offset",
+	ShapeKindMergePaths:      "ADBE Vector Filter - Merge",
+	ShapeKindZigZag:          "ADBE Vector Filter - Zigzag",
+	ShapeKindStar:            "ADBE Vector Shape - Star",
+	ShapeKindPuckerBloat:     "ADBE Vector Filter - PB",
+	ShapeKindTwist:           "ADBE Vector Filter - Twist",
+	ShapeKindWigglePaths:     "ADBE Vector Filter - Roughen",
+	ShapeKindWiggleTransform: "ADBE Vector Filter - Wiggler",
 }
 
 // LowerShapeNodeForTest exports lowerShapeNode for unit tests.
@@ -378,6 +386,8 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		return lowerTwistNode(node, ctx)
 	case *WigglePathsNode:
 		return lowerWigglePathsNode(node, ctx)
+	case *WiggleTransformNode:
+		return lowerWiggleTransformNode(node, ctx)
 	default:
 		return nil, fmt.Errorf("lowerShapeNode: unsupported kind %v", n.Kind())
 	}
@@ -1279,6 +1289,56 @@ func lowerWigglePathsNode(n *WigglePathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Random Seed", n.RandomSeed(), ctx); err != nil {
 		return nil, err
+	}
+	return body, nil
+}
+
+// cloneShapeWiggleTransformBody returns a clone of the Wiggle Transform template
+// (templates/v2_2_shape_wiggletransform_body.bin): top-level `ADBE Vector Xform
+// Temporal Freq` / `Random Seed` cdats plus the nested `ADBE Vector Wiggler
+// Transform` group's Anchor/Position/Scale/Rotation cdats — all set non-default
+// in the fixture so AE emitted them. Correlation / Temporal·Spatial Phase stayed
+// default and are elided.
+func cloneShapeWiggleTransformBody() (*rifx.Chunk, error) {
+	v22ShapeWiggleTransformOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeWiggleTransformBodyBytes))
+		if err != nil {
+			v22ShapeWiggleTransformErr = fmt.Errorf("parse v22ShapeWiggleTransformBodyBytes: %w", err)
+			return
+		}
+		v22ShapeWiggleTransformCache = ch
+	})
+	if v22ShapeWiggleTransformErr != nil {
+		return nil, v22ShapeWiggleTransformErr
+	}
+	return cloneChunk(v22ShapeWiggleTransformCache), nil
+}
+
+// lowerWiggleTransformNode emits a Wiggle Transform filter body from the embedded
+// template. Top-level WigglesPerSecond (Temporal Freq) / RandomSeed are 1D
+// scalars (static cdat overwrite / animated flip via lowerShapeScalar). The
+// per-channel wiggle amplitudes live in the nested `ADBE Vector Wiggler
+// Transform` group (descend via findGroupBody) as static cdat overwrites —
+// Anchor/Position/Scale are Vec2 at cdat[0:16], Rotation is 1D at cdat[0:8] —
+// same mechanism as the Repeater Transform. RE'd from v2_2_wiggletransform.aep.
+func lowerWiggleTransformNode(n *WiggleTransformNode, ctx *lowerCtx) (*rifx.Chunk, error) {
+	body, err := cloneShapeWiggleTransformBody()
+	if err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Xform Temporal Freq", n.WigglesPerSecond(), ctx); err != nil {
+		return nil, err
+	}
+	if err := lowerShapeScalar(body, "ADBE Vector Random Seed", n.RandomSeed(), ctx); err != nil {
+		return nil, err
+	}
+	if xf := findGroupBody(body, "ADBE Vector Wiggler Transform"); xf != nil {
+		t := n.Transform()
+		a, p, s := t.Anchor(), t.Position(), t.Scale()
+		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Anchor", encodeF64sBE(a[0], a[1]))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Position", encodeF64sBE(p[0], p[1]))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Scale", encodeF64sBE(s[0], s[1]))
+		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Rotation", encodeF64sBE(t.Rotation()))
 	}
 	return body, nil
 }
