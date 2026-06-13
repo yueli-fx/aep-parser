@@ -1,7 +1,7 @@
 ---
 status: active
-when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Merge / Offset / ZigZag) via AddTrim/AddRepeater/AddRoundCorners/TrimNode/RepeaterNode/RoundCornersNode; needing the shape-stack render order (why a filter cuts/duplicates/rounds the shapes) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC match-name that returns null
-applies_to: [trim-paths, repeater, round-corners, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, shape-stack-order, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
+when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Offset / Merge / ZigZag) via AddTrim/AddRepeater/AddRoundCorners/AddOffsetPaths/TrimNode/RepeaterNode/RoundCornersNode/OffsetPathsNode; needing the shape-stack render order (why a filter cuts/duplicates/rounds/grows the shapes) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC/Offset match-name that returns null
+applies_to: [trim-paths, repeater, round-corners, offset-paths, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, ADBE-Vector-Filter-Offset, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, offset-amount, shape-stack-order, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
 last_updated: 2026-06-13
 resolved_by:
 ---
@@ -71,3 +71,11 @@ Gate：`TestMGRepeater_AEShipGate_AE2020/2025` PASS——一个白点 Copies=5 +
 渲染 ground truth（render 出来看，红线4）：stack 顺序 **[Rect, Fill, RoundCorners]**（filter 在 stack 顶）→ Round Corners 圆掉 Rect path 的角，Fill 填出圆角卡片。400×400 白 Rect + Radius=150 → 渲染成 squircle（直边在、四角被切）。gate 即用「内部+四直边中点白(5/5) vs 四原始尖角被切暗(4/4)」当圆角证据——比纯数值 round-trip 强（尖角不切=假绿）。**别空想 filter 影响上/下方，直接 saveFrameToPng 看**（本次一次命中 [Rect,Fill,RC]，但仍渲染确认）。
 
 Gate：`TestMGRoundCorners_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Radius=150 resave 读回 + squircle 像素）。verify_mg_roundcorners.jsx + mg_roundcorners_shipgate_test.go。AE 2025 首跑 exit-2 冷启动 splash（内置 warm-retry 也栽），手动 warmup_quit.jsx 预热后同样 PASS——确认是冷启 flake 非数据 reject（reject 会 warm 后再栽）。
+
+## 复用确认 — Offset Paths（S5, 2026-06-13）✅ 蓝本第 5 次成立
+
+`ADBE Vector Filter - Offset` 同 RC 路：`AddOffsetPaths`/`OffsetPathsNode`，`templates/v2_2_shape_offset_body.bin`（408B/5 children）。探针（gen_shape_offset.jsx）见 **5 子流**：`ADBE Vector Offset Amount`（**默认 10**，非 0！1D f64 px，headline）· `Offset Line Join`(默认1=Miter) · `Offset Miter Limit`(4) · `Offset Copies`(1) · `Offset Copy Offset`(1)。只设 Amount 非默认 → 仅 Amount slot 发射，其余 4 个 elide（同 RC 模 headline 1 个、其余暂搁）→ `lowerShapeScalar`。
+
+渲染 ground truth：[Rect, Fill, Offset] → Offset 把 Rect path 向外长（+Amount px/边，负值缩）。400×400 白 Rect + Amount=60 → 渲染成 ~520×520 方（每边 +60）。gate 用「四原始边外侧一圈带变白(grown 5/5) + offset 外更远点仍暗(bounded 4/4)」当增长证据——区分「没长(原边外暗)」「长太多/失控(远点白)」。眼验：方块明显变大、直边在、有界。默认 Line Join=Miter 角基本尖（轻微圆是 AE offset 外角行为）。
+
+Gate：`TestMGOffset_AEShipGate_AE2020/2025` 双版本渲染像素 PASS。verify_mg_offset.jsx + mg_offset_shipgate_test.go。AE 2025 同样先 warmup_quit.jsx 预热避冷启 exit-2。
