@@ -3,7 +3,7 @@ showcase: layers
 direction: 图层创建 — 纯 Go 从零 NewSolidLayer（颜色+尺寸）堆成同心色框，并创建 Null/Adjustment 非渲染层
 capabilities: [new-solid-layer, solid-color, solid-dimensions, new-null-layer, new-adjustment-layer, layer-stacking]
 gates: [TestNewSolidNull_AEShipGate_AE2020, TestNewSolidNull_AEShipGate_AE2025]
-status: complete
+status: 待review
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/layers  +  scripts/ae_run.ps1 render.jsx"
 ---

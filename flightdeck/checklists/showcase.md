@@ -62,14 +62,24 @@ regenerate: "go run ./flightdeck/showcase/<方向>  +  AE render.jsx"
 <网格/层次表：每个 cell/layer = 哪个能力 + 期望效果，供用户逐项眼验>
 ```
 
+## 状态 review-gate（`status` 两档）
+
+| 值 | 含义 | 谁能标 |
+|---|---|---|
+| **`待review`** | agent 已建 + AE 实渲 + 自己眼验，**用户尚未真机复核** | agent（默认落这档） |
+| **`complete`** | **用户在真机打开 .aep 验收过** | **仅用户确认后** agent 才翻 |
+
+**agent 自己渲染眼验 ≠ 用户真机验收**（同交付准则「Go round-trip ≠ AE 接受」）。**agent 禁止自行标 `complete`**；新建/更新一律落 `待review` 并通知用户。顶层 `showcase/INDEX.md` 用 `🔍 待review` / `✅ complete` 对应。
+
 ## 操作流程（出一个大阶段 showcase）
 
 1. 新方向 → 建 `flightdeck/showcase/<方向>/`，写 `gen.go`（参考既有方向；纯 Go facade 调用，输出到本目录的 `<方向>.aep`）。
 2. `go run ./flightdeck/showcase/<方向>` 构建 .aep。
 3. 写 `render.jsx`（打开 .aep → `saveFrameToPng(0, …)`），用 `scripts/ae_run.ps1` 跑出 `<方向>.png`。
 4. **AE 实渲眼验**（红线4）：Read 渲染 png，确认每个能力的视觉对了——不靠值 round-trip 假绿。
-5. 写/更新 `<方向>/INDEX.md`（上面模板）+ 顶层 `showcase/INDEX.md` 加一行。
-6. commit tracked 三件（INDEX.md/gen.go/render.jsx）；通知用户审核 png。
+5. 写/更新 `<方向>/INDEX.md`（上面模板，`status: 待review`）+ 顶层 `showcase/INDEX.md` 加一行（`🔍 待review`）。
+6. commit tracked 三件（INDEX.md/gen.go/render.jsx）；**通知用户真机复核**。
+7. **用户真机验收通过后** → 才把该方向 `status` 翻 `complete`（顶层表同步 ✅）。
 
 ## 交付准则对齐
 

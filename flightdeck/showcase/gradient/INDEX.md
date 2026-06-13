@@ -3,7 +3,7 @@ showcase: gradient
 direction: 渐变填充 + ramp 方向 — 纯 Go 从零生成四种线性渐变（横/纵/对角/三停彩虹），验证 SetColorStops + Start/End Pt 方向几何
 capabilities: [gradient-fill, color-stops, multi-stop, ramp-direction, start-point, end-point]
 gates: [TestShapeGradient_AEShipGate, TestMGGradientDir_AEShipGate_AE2020, TestMGGradientDir_AEShipGate_AE2025]
-status: complete
+status: 待review
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/gradient  +  scripts/ae_run.ps1 render.jsx"
 ---

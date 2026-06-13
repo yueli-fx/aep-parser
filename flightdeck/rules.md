@@ -17,6 +17,7 @@ disabled_folders: []
 ### Showcase（大阶段产出审核）
 
 - **大阶段必出 showcase 供用户审核**（2026-06-13 用户立规）。**大阶段** = 有独立 plan/spec arc 的可交付 feature（如「矢量滤镜家族」整体、新 layer 类型组、expression 激活）；落地后须在 `flightdeck/showcase/<方向>/` 产出一个**纯 Go 从零生成 + AE 实渲**的示例工程并通知用户审核。**小阶段**（单个滤镜 / 单个 `Set*` 字段 / 单 slice）**不单独出**，攒批到所属方向的 showcase 一起更新。
+- **状态有 review-gate**（2026-06-13 用户立规）：showcase 的 `status` 分两档——**`待review`** = agent 已建+AE 实渲+自己眼验，但**用户尚未在真机打开 .aep 复核**；**`complete`** = **用户真机验过后**才可标。**agent 不得自行把 showcase 标 `complete`**（agent 眼验 ≠ 用户真机验收，同交付准则「Go round-trip ≠ AE 接受」的精神）。新建/更新 showcase 默认落 `待review`，并通知用户复核；用户确认后才翻 `complete`。
 - **目录形态**：`flightdeck/showcase/<方向>/`（按**能力方向**分区：shape-filters / shape-primitives / keyframes-ease / expressions / precomp-nesting / gradient / text / layers …）。每个方向文件夹含：`INDEX.md`（frontmatter 格式段写明测哪个方向 + 正文列测试文件/产出 aep/类型/布局）、`gen.go`（package main 纯 Go 生成器）、`render.jsx`（AE 打开+saveFrameToPng 出 png）。格式细则 + 新增方向流程见 `checklists/showcase.md`。
 - **gitignore 策略**：只 ignore 重产物 `*.aep` / `*.png`（已在根 `.gitignore`）；`INDEX.md` + `gen.go` + `render.jsx` **tracked** —— 干净 clone 后 `go run ./flightdeck/showcase/<方向>` + 跑 render.jsx 即可一键重生成全部产物。**生成器必须保持 `go build ./...` 绿**（它是 tracked 代码）。
 - **交付准则对齐**（CLAUDE.md #7 / `checklists/delivery-contract.md`）：showcase 里每个能力须是已过双版本 ship-gate 的；showcase 的「组合工程」本身是独立交付项，**产出后必须 AE 实渲眼验**（红线4：先看图），不靠值 round-trip 假绿。

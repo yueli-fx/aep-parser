@@ -3,7 +3,7 @@ showcase: precomp-nesting
 direction: 预合成嵌套 — 纯 Go 从零生成一个 child 合成（含三个 badge 的组合场景），由 parent 合成嵌套一次并渲染出整套 child 内容
 capabilities: [new-composition, new-precomp-layer, nested-composition, source-id-resolution, transparent-precomp]
 gates: [TestMGPrecomp_AEShipGate_AE2020, TestMGPrecomp_AEShipGate_AE2025]
-status: complete
+status: 待review
 last_updated: 2026-06-13
 regenerate: "go run ./flightdeck/showcase/precomp-nesting  +  scripts/ae_run.ps1 render.jsx"
 ---
