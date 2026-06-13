@@ -30,10 +30,11 @@ func TestNewProject_DefaultTargetAE2020(t *testing.T) {
 	if len(p.Folders) != 0 {
 		t.Errorf("Folders = %d, want 0", len(p.Folders))
 	}
-	// AE2020 template was authored at 32bpc; AE2022/2025 templates are 8bpc.
-	// Frozen template artifact — don't re-author to match a tidier default.
-	if p.BitsPerChannel != aep.BPC32 {
-		t.Errorf("BitsPerChannel = %v, want BPC32 (frozen template value)", p.BitsPerChannel)
+	// NewProject normalizes every fresh project to AE's factory default of 8bpc
+	// (the AE2020 skeleton was incidentally authored at 32bpc; the 2022/2025
+	// skeletons are already 8bpc). See NewProject in mutate_project_new.go.
+	if p.BitsPerChannel != aep.BPC8 {
+		t.Errorf("BitsPerChannel = %v, want BPC8 (AE factory default)", p.BitsPerChannel)
 	}
 	if len(p.Warnings) != 0 {
 		t.Errorf("template produced %d warnings: %v", len(p.Warnings), p.Warnings)
