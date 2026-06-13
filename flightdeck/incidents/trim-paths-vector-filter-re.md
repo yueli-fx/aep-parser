@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Merge / Offset / Round Corners / ZigZag) via AddTrim/AddRepeater/TrimNode/RepeaterNode; needing the shape-stack render order (why a filter cuts/duplicates the shapes) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim match-name that returns null
-applies_to: [trim-paths, repeater, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, shape-stack-order, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
-last_updated: 2026-06-12
+when_to_read: implementing or extending any shape vector-filter (Trim / Repeater / Round Corners / Merge / Offset / ZigZag) via AddTrim/AddRepeater/AddRoundCorners/TrimNode/RepeaterNode/RoundCornersNode; needing the shape-stack render order (why a filter cuts/duplicates/rounds the shapes) or AE's ellipse path start vertex / winding; descending into a filter's nested group (Repeater Transform); deciding from-scratch vs embed-template for a new shape filter; reasoning about which filter sub-streams AE elides; a Repeater/Trim/RC match-name that returns null
+applies_to: [trim-paths, repeater, round-corners, vector-filter, shape-filter, ADBE-Vector-Filter-Trim, ADBE-Vector-Filter-Repeater, ADBE-Vector-Filter-RC, trim-start, trim-end, trim-offset, trim-type, repeater-copies, repeater-transform, roundcorner-radius, shape-stack-order, ellipse-path-winding, embed-template, findGroupBody, lower-shape-node, mg-roadmap, s3, s5, ship-gate, ae2020, ae2025, render-pixel]
+last_updated: 2026-06-13
 resolved_by:
 ---
 
@@ -61,3 +61,13 @@ probe match-name → 抽 body 模板 → clone+cdat 覆写。唯一变量是各�
 Gate：`TestMGRepeater_AEShipGate_AE2020/2025` PASS——一个白点 Copies=5 + Transform Position=[300,0] → 渲染帧 5 个点在 x=360..1560、4 个间隙全暗；Copies/Position resave 读回。verify_mg_repeater.jsx + mg_repeater_shipgate_test.go。
 
 → 蓝本三步（probe→抽 body→cdat 覆写）+ 「nested 组用 findGroupBody descend」对带子组的滤镜成立；Merge/Offset/Round/ZigZag 照此推进。
+
+## 复用确认 — Round Corners（S5, 2026-06-13）✅ 蓝本第 4 次成立（迄今最简滤镜）
+
+`ADBE Vector Filter - RC` 一刀套蓝本三步落地（`AddRoundCorners`/`RoundCornersNode`，`templates/v2_2_shape_roundcorners_body.bin`）。body 结构（gen_shape_roundcorners.jsx 探针自证）：
+- **单子流** `ADBE Vector RoundCorner Radius`（1D f64 BE @cdat[0:8]，**原始像素**，默认 10）→ `lowerShapeScalar`（含 animated flip）。无嵌套组、无 enum、无 elision 陷阱——是迄今最干净的滤镜（body 仅 402B/5 children = tdsb+tdsn+tdmn+tdbs-list+GroupEnd）。
+- 探针设值 60（非默认）逼 AE 不 elide → 抽出 Radius cdat slot。
+
+渲染 ground truth（render 出来看，红线4）：stack 顺序 **[Rect, Fill, RoundCorners]**（filter 在 stack 顶）→ Round Corners 圆掉 Rect path 的角，Fill 填出圆角卡片。400×400 白 Rect + Radius=150 → 渲染成 squircle（直边在、四角被切）。gate 即用「内部+四直边中点白(5/5) vs 四原始尖角被切暗(4/4)」当圆角证据——比纯数值 round-trip 强（尖角不切=假绿）。**别空想 filter 影响上/下方，直接 saveFrameToPng 看**（本次一次命中 [Rect,Fill,RC]，但仍渲染确认）。
+
+Gate：`TestMGRoundCorners_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Radius=150 resave 读回 + squircle 像素）。verify_mg_roundcorners.jsx + mg_roundcorners_shipgate_test.go。AE 2025 首跑 exit-2 冷启动 splash（内置 warm-retry 也栽），手动 warmup_quit.jsx 预热后同样 PASS——确认是冷启 flake 非数据 reject（reject 会 warm 后再栽）。

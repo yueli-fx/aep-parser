@@ -38,8 +38,9 @@ last_updated: 2026-06-12
 
 ### S5 — 零散质感件（按需）
 - **Repeater（`ADBE Vector Filter - Repeater`）✅ DONE 2026-06-12**：径向/网格复制，MG 高频。套 S3 trim 矢量滤镜 vein（顶层 Copies/Offset + 嵌套 Transform 子组 findGroupBody descend）。`AddRepeater`/`RepeaterNode`。✅ `TestMGRepeater_AEShipGate_*` 双版本渲染像素 PASS（Copies=5 + Position[300,0] → 5 点成行、间隙暗、resave 读回）。坑：match-name `ADBE Vector Repeater Anchor`（非 Anchor Point）。详 `incidents/trim-paths-vector-filter-re.md` § 复用确认。
-- Gradient Start/End Pt：现模板 elided → 只有默认水平 ramp，方向不可控（orbit BG 已暴露）。**未做**。
-- Rounded Corners / Merge Paths / Offset Paths / ZigZag（同矢量滤镜 vein，蓝本已三次验证）/ 文本动画器（大坑，单列）。**未做**。
+- **Round Corners（`ADBE Vector Filter - RC`）✅ DONE 2026-06-13**：套 S3 trim 矢量滤镜 vein 第 4 次（迄今最简——单子流 `ADBE Vector RoundCorner Radius`，1D f64 px，无嵌套组/无 elision）。`AddRoundCorners`/`RoundCornersNode`，`templates/v2_2_shape_roundcorners_body.bin`。✅ `TestMGRoundCorners_AEShipGate_*` 双版本渲染像素 PASS（400×400 白 Rect + Radius=150 → squircle：内部+四直边中点白 5/5、四原始尖角切暗 4/4、Radius resave 读回；渲染帧眼验直边在角被切）。stack 顺序 [Rect, Fill, RoundCorners]。详 `incidents/trim-paths-vector-filter-re.md` § 复用确认 — Round Corners。
+- Gradient Start/End Pt：现模板 elided → 只有默认水平 ramp，方向不可控（orbit BG 已暴露）。**未做**（fixture 双重难题：默认 gradient 全 elide + JSX 不能 author stops，详 `incidents/gradient-fill-write-re.md`）。
+- Merge Paths / Offset Paths / ZigZag（同矢量滤镜 vein，蓝本已四次验证）/ 文本动画器（大坑，单列）。**未做**。
 
 ## 不做 / 边界
 
