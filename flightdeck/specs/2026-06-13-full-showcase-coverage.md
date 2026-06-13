@@ -1,7 +1,7 @@
 ---
-status: active
-summary: 把所有已 ship 能力补齐 showcase 供用户逐个真机验收（代码过≠效果对）；已回填 8 个 from-scratch 可视方向，列出剩余缺口 + 非可视能力的验证方式，交接下个对话逐方向补
-last_updated: 2026-06-13
+status: done
+summary: 把所有已 ship 能力补齐 showcase 供用户逐个真机验收（代码过≠效果对）。收官：15 个 🖼 可视方向用户真机 complete + 3 📋 读值档 complete；EG blocked（面板崩溃，保留 RE repro）；3 个 from-scratch 不可表达（markers/render-queue/media-replace）。余 B 类读值档按需点名即补（已转入 cockpit 下一步 backlog）。
+last_updated: 2026-06-14
 ---
 
 # 全能力 showcase 覆盖 — 每个已 ship 能力都要有用户可真机验证的 showcase
