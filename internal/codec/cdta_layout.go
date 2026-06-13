@@ -23,7 +23,7 @@ const (
 	CdtaWorkAreaStartDiv   = 0x20 // uint32 BE divisor
 	CdtaWorkAreaEnd        = 0x24 // uint32 BE dividend; 0xFFFFFFFF = sentinel
 	CdtaWorkAreaEndDiv     = 0x28 // uint32 BE divisor
-	CdtaMasterTicks        = 0x2C // uint32 BE — ticks_per_frame × 5 × fps_nominal_whole
+	CdtaMasterTicks        = 0x2C // uint32 BE — AUTHORITATIVE duration in ticks = round(duration_seconds × nominalTickRate). This (NOT @0xB0) is the comp duration AE reads.
 	CdtaTickRateMirror30   = 0x30 // uint32 BE — mirror of CdtaTickRate
 	CdtaBGColorR           = 0x34 // uint8
 	CdtaBGColorG           = 0x35 // uint8
@@ -39,9 +39,9 @@ const (
 	CdtaDisplayStartTime   = 0xA4 // uint32 BE dividend
 	CdtaDisplayStartDiv    = 0xA8 // uint32 BE divisor
 	CdtaShutterAngle       = 0xAE // uint16 BE
-	CdtaDuration           = 0xB0 // uint32 BE frames
+	CdtaShutterAngleMax    = 0xB0 // uint32 BE — shutter-angle reference (constant 360 in real AE). AE shows shutterAngle = stored@0xAE × 360/this. NOT duration (历史误标为 CdtaDuration).
 	CdtaShutterPhase       = 0xB4 // int32 BE
-	CdtaDurationMirror     = 0xB8 // uint32 BE — mirror of CdtaDuration
+	CdtaShutterAngleMaxMir = 0xB8 // uint32 BE — mirror of CdtaShutterAngleMax (also 360)
 	CdtaMotionBlurAdaptive = 0xC4 // int32 BE
 	CdtaMotionBlurSamples  = 0xC8 // int32 BE
 	CdtaSize               = 0xCC // 总长 = 204

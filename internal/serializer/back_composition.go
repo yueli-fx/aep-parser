@@ -240,7 +240,7 @@ func (b *compositionBackrefs) SetDuration(seconds float64) error {
 	if b.cdta == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", b.compName)
 	}
-	if len(b.cdta.Data) < codec.CdtaDuration+4 {
+	if len(b.cdta.Data) < codec.CdtaMasterTicks+4 {
 		return fmt.Errorf("comp %q: cdta too short for Duration write (len=%d)", b.compName, len(b.cdta.Data))
 	}
 	if b.FrameRateHz <= 0 {
@@ -249,8 +249,20 @@ func (b *compositionBackrefs) SetDuration(seconds float64) error {
 	if seconds < 0 {
 		return fmt.Errorf("comp %q: Duration %g must be non-negative", b.compName, seconds)
 	}
-	frames := uint32(math.Round(seconds * b.FrameRateHz))
-	binary.BigEndian.PutUint32(b.cdta.Data[codec.CdtaDuration:codec.CdtaDuration+4], frames)
+	// Authoritative duration = MasterTicks @0x2C = round(seconds × nominalTickRate)
+	// where nominalTickRate = ticksPerFrame@0x06 × round(fps). @0xB0 is the 360
+	// shutter reference, not duration. Fall back to legacy @0xB0 frame-count only for
+	// synthetic/legacy cdta that lacks ticksPerFrame@0x06 (mirrors the parser).
+	// See incident cdta-0xB0-shutter-ref-not-duration.
+	ticksPerFrame := uint32(binary.BigEndian.Uint16(b.cdta.Data[0x06:0x08]))
+	nominalTickRate := ticksPerFrame * uint32(b.FrameRateHz+0.5)
+	if nominalTickRate > 0 {
+		ticks := uint32(math.Round(seconds * float64(nominalTickRate)))
+		binary.BigEndian.PutUint32(b.cdta.Data[codec.CdtaMasterTicks:codec.CdtaMasterTicks+4], ticks)
+	} else {
+		frames := uint32(math.Round(seconds * b.FrameRateHz))
+		binary.BigEndian.PutUint32(b.cdta.Data[codec.CdtaShutterAngleMax:codec.CdtaShutterAngleMax+4], frames)
+	}
 	return nil
 }
 

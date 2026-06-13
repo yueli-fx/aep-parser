@@ -172,10 +172,12 @@ func buildCompCdta(w, h uint16, fps, duration float64) []byte {
 	// ShutterAngle @0xAE default 180
 	binary.BigEndian.PutUint16(d[codec.CdtaShutterAngle:codec.CdtaShutterAngle+2], 180)
 
-	// Duration @0xB0 + mirror @0xB8 (= round(duration_seconds × fps) frames)
-	durationFrames := uint32(math.Round(duration * fps))
-	binary.BigEndian.PutUint32(d[codec.CdtaDuration:codec.CdtaDuration+4], durationFrames)
-	binary.BigEndian.PutUint32(d[codec.CdtaDurationMirror:codec.CdtaDurationMirror+4], durationFrames)
+	// @0xB0 + mirror @0xB8 = constant 360 (shutter-angle reference, NOT duration).
+	// AE shows shutterAngle = stored@0xAE × 360 / this; writing real frame-count here
+	// scaled the displayed shutter by 360/frames. Authoritative duration is
+	// MasterTicks @0x2C (written above). See incident cdta-0xB0-shutter-ref-not-duration.
+	binary.BigEndian.PutUint32(d[codec.CdtaShutterAngleMax:codec.CdtaShutterAngleMax+4], 360)
+	binary.BigEndian.PutUint32(d[codec.CdtaShutterAngleMaxMir:codec.CdtaShutterAngleMaxMir+4], 360)
 
 	// ShutterPhase @0xB4 default 0（已是 0）
 

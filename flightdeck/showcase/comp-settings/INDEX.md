@@ -31,6 +31,8 @@ regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 v
 
 | Set* 调用 | DOM 字段 | 期望值 |
 |---|---|---|
+| SetShutterAngle(172) | shutterAngle | 172（**已修**，见下） |
+| SetShutterPhase(-86) | shutterPhase | -86（**已修**） |
 | SetCompMotionBlur(true) | motionBlur | true |
 | SetMotionBlurSamplesPerFrame(24) | motionBlurSamplesPerFrame | 24 |
 | SetMotionBlurAdaptiveSampleLimit(192) | motionBlurAdaptiveSampleLimit | 192 |
@@ -40,16 +42,17 @@ regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 v
 | SetPreserveNestedFrameRate(true) | preserveNestedFrameRate | true |
 | （NewComposition 30fps×10s） | frameRate / duration | 30 / 10 |
 
-> 审核要点：`.done` 八行值与上表逐一对上即通过。
+> 审核要点：`.done` 各行值与上表逐一对上即通过。
 
-## ⚠ 已发现边界（诚实标注 · 本档刻意排除）
+## ✅ 已修复（2026-06-14，本档 readback 暴露的真 bug）
 
-本 showcase 的 AE-DOM readback **首次**核到两个**之前仅字节 round-trip、从未 AE-DOM 验证**的 setter 有问题(红线4a「Go round-trip ≠ AE 接受」活样本)：
+**SetShutterAngle/Phase ×1.2 假绿已根治**（incident `cdta-0xB0-shutter-ref-not-duration.md`）：根因不在 shutter setter,而是 **cdta @0xB0 历史误标为 duration**——实为「shutter 角度 360° 参考常量」。NewComposition 往 @0xB0 写真帧数(300=10s×30fps),AE 算 shutterAngle = stored×360/@0xB0 = 172×360/300 = 206.4 → 假绿。**连带发现**:parser 也从 @0xB0 读 duration → **误读所有真实 AE 工程的时长**(10s/30fps 读成 12s)。修复:parser 改读 @0x2C(MasterTicks=真时长 ticks),NewComposition 往 @0xB0 写常量 360。双版本未跑但 AE2020 实测 shutter 172/-86 + 5 个 AE-native 时长全对。
 
-- **SetShutterAngle / SetShutterPhase**：设 172 / -86，AE DOM 读回 **206 / -103**（一致地 ×≈1.198）= 单位/编码未对齐。
-- **SetResolutionFactor(2,2)**：AE 读 `comp.resolutionFactor` 抛**「数字结果无效（除以零）」** = 写入值让 AE 分辨率计算除零。
+## ⚠ 仍存边界（本档刻意排除）
 
-二者已从本档排除,**需独立 RE/修**(byte 写对但 AE 语义不对)。其余合成 setter（SetSize/SetName/SetFrameRate/SetDuration/SetPixelAspect/SetDisplayStartTime/SetDraft3D/SetFrameBlending 等）未纳入本批,按需再扩。
+- **SetResolutionFactor(2,2)**：AE 读 `comp.resolutionFactor` 抛「数字结果无效（除以零）」——**AE 自身 scripting `comp.resolutionFactor=[2,2]` 也抛同错**,是 AE 侧深坑,非单纯 writer bug,待独立 RE。
+
+其余合成 setter（SetSize/SetName/SetFrameRate/SetDuration/SetPixelAspect/SetDisplayStartTime/SetDraft3D/SetFrameBlending 等）未纳入本批,按需再扩。
 
 ## 溯源
 

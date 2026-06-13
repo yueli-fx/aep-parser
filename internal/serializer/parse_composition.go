@@ -152,8 +152,20 @@ func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]stri
 	}
 
 	if len(d) >= 0xB4 && comp.FrameRate > 0 {
-		frames := binary.BigEndian.Uint32(d[0xB0:0xB4])
-		comp.Duration = float64(frames) / comp.FrameRate
+		set := false
+		if len(d) >= 0x30 {
+			durTicks := binary.BigEndian.Uint32(d[0x2C:0x30])
+			ticksPerFrame := uint32(binary.BigEndian.Uint16(d[0x06:0x08]))
+			nominalTickRate := ticksPerFrame * uint32(comp.FrameRate+0.5)
+			if durTicks > 0 && nominalTickRate > 0 {
+				comp.Duration = float64(durTicks) / float64(nominalTickRate)
+				set = true
+			}
+		}
+		if !set {
+			frames := binary.BigEndian.Uint32(d[0xB0:0xB4])
+			comp.Duration = float64(frames) / comp.FrameRate
+		}
 	}
 
 	// Work area uses its own dividend/divisor pair per side. The divisor

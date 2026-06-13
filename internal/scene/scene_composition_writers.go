@@ -150,11 +150,15 @@ func (c *Composition) SetFrameRate(fps float64) error {
 	whole := uint16(fps)
 	frac := uint16(math.Round((fps - float64(whole)) * 65536.0))
 	c.FrameRate = float64(whole) + float64(frac)/65536.0
-	// Frame count at @0xB0 is unchanged; recompute Duration from
-	// frames / new fps.
-	if d := c.back.CdtaData(); len(d) >= codec.CdtaDuration+4 && c.FrameRate > 0 {
-		frames := binary.BigEndian.Uint32(d[codec.CdtaDuration : codec.CdtaDuration+4])
-		c.Duration = float64(frames) / c.FrameRate
+	// Recompute Duration from authoritative MasterTicks @0x2C (duration ticks /
+	// nominalTickRate). @0xB0 is the 360 shutter reference, not duration.
+	if d := c.back.CdtaData(); len(d) >= codec.CdtaMasterTicks+4 && c.FrameRate > 0 {
+		durTicks := binary.BigEndian.Uint32(d[codec.CdtaMasterTicks : codec.CdtaMasterTicks+4])
+		ticksPerFrame := uint32(binary.BigEndian.Uint16(d[0x06:0x08]))
+		nominalTickRate := ticksPerFrame * uint32(c.FrameRate+0.5)
+		if durTicks > 0 && nominalTickRate > 0 {
+			c.Duration = float64(durTicks) / float64(nominalTickRate)
+		}
 	}
 	return nil
 }

@@ -15,6 +15,7 @@
             if (it instanceof CompItem && it.name === "CompSettings") { comp = it; break; }
         }
         if (!comp) throw new Error("comp not found");
+        log.push("shutterAngle=" + comp.shutterAngle + " shutterPhase=" + comp.shutterPhase);
         log.push("frameRate=" + comp.frameRate + " duration=" + comp.duration);
         log.push("motionBlur=" + comp.motionBlur);
         log.push("motionBlurSamplesPerFrame=" + comp.motionBlurSamplesPerFrame);
