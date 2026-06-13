@@ -1,9 +1,9 @@
 ---
 showcase: essential-graphics
-direction: Essential Graphics — AddEssentialProperty + SetMotionGraphicsTemplateName，纯 Go 从零把三个效果参数提升为 EG 控件并命名模板，AE EG DOM readback 核对（📋 读值档，不看图）
+direction: Essential Graphics — AddEssentialProperty + SetMotionGraphicsTemplateName。🛑 BLOCKED：from-scratch EG 工程展开「基本图形」面板崩溃 AE（连单 slider 也崩，用户 2026-06-14 真机两次确认）。EG ship-gate 从不开面板=假绿盲区。留作 RE 候选，showcase 不可交付。
 capabilities: [add-essential-property, set-motion-graphics-template-name, eg-controller]
 gates: [TestEssentialGraphics_AEShipGate_AE2020, TestEssentialGraphics_AEShipGate_AE2025, essential-graphics-write-re]
-status: 待review
+status: blocked
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/essential-graphics  +  scripts/ae_run.ps1 verify.jsx"
 ---
@@ -40,11 +40,11 @@ regenerate: "go run ./flightdeck/showcase/essential-graphics  +  scripts/ae_run.
 
 **最初版用 3 个混合控件(slider + 物化 color + checkbox),DOM readback 全过(模板名+3 控件名读得到),但用户真机一展开「基本图形」面板就崩溃 AE。** 根因方向：EG ship-gate **只验过 1 个 slider 控件,且只验 load + DOM 读 + resave,从不打开 EG 面板** → 多控件 / color / checkbox 的 EG 结构(CIF3/CCtl/OvG2/CprC)在面板渲染时不被 AE 接受,属 gate 未覆盖的组合/规模(红线4b)。
 
-**本档已退回到 gate 唯一证过的「单 slider 控件」。** ⚠ **仍待用户真机验**:展开基本图形面板,单 slider 是否也崩?
-- 若**不崩** → 单 slider 从零 EG 可交付(本档成立);多控件/color/checkbox 标为 RE 候选。
-- 若**仍崩** → 即便 gate-proven 的单 slider 从零 EG 面板也不安全(gate 从不开面板=假绿根源),整个 from-scratch EG 退回未验证,需独立 RE。
+**结论（用户 2026-06-14 真机两次确认）：连退回到单 slider 也崩溃。** → **整个 from-scratch EG 面板不安全 = BLOCKED**，本 showcase **不可交付**。根源:EG ship-gate（load + DOM 读 + resave）**从不打开 EG 面板** → 一直是假绿,从零 EG 写出的 CIF3/CCtl/OvG2/CprC 结构 AE 能加载、能 DOM 读,但面板渲染时崩。
 
-> 「Go round-trip + DOM readback 双绿 ≠ AE 真能用」的又一活样本——验证必须验到能力的真实作用面(EG 的作用面是**面板**,非 DOM 计数)。
+**处置**：保留本目录作 **RE repro**（`go run` 生成崩溃样本）+ 标 `status: blocked`。修复需独立 RE：① 给 EG ship-gate 补「真机展开面板」验证（堵假绿盲区）；② 比对 AE-native EG fixture 与从零产物的 CIF3/CCtl/OvG2/CprC 字节差。用户决定:EG 用得少,**暂不修,先标记**。
+
+> 「Go round-trip + DOM readback 双绿 ≠ AE 真能用」的最强活样本——验证必须验到能力的真实作用面(EG 的作用面是**面板**,非 DOM 计数);gate 不碰作用面 = 假绿温床。
 
 ## 注记（elision 行为，备查）
 

@@ -34,7 +34,7 @@ last_updated: 2026-06-13
 > - ✅ **comp-settings** — motionBlur/samples/adaptiveLimit/bgColor/workArea/hideShy/nestedFrameRate 7 项 DOM 一致。**边界**：SetShutterAngle/Phase 读回 ×≈1.2、SetResolutionFactor AE 除零（排除）。
 > - ✅ **project-settings** — bitsPerChannel/linearBlending/expressionEngine/footageTimecodeDisplayStartType 4 项一致。**边界**：SetTimeDisplayType/FeetFramesFilmType（nnhd byte8 疑位打包）/FramesCountType 不反映（排除）。
 > - ✅ **camera-light** — NewCameraLayer/NewLightLayer 建层 + 类型确认（CameraLayer/LightLayer，POINT）。**边界**：选项 setter from-scratch 全 elide（"property not present"），只在 parsed 层生效。
-> - ✅ **essential-graphics** — AddEssentialProperty 3 控件（slider 直接 / color 须先 SetEffectParam materialize / checkbox 直接）+ SetMotionGraphicsTemplateName，DOM 读回模板名 + 3 控件名。
+> - 🛑 **essential-graphics — BLOCKED**（用户 2026-06-14 两次真机确认）：从零 EG 工程展开「基本图形」面板**崩溃 AE**——3 混合控件崩,**退回单 slider 也崩**。DOM readback 全过(模板名+控件名)=假绿,根源 EG ship-gate（load+DOM+resave）**从不打开面板**。整个 from-scratch EG 不可交付,留 RE repro,用户决定暂不修(EG 用得少)。
 > - ❌ **markers / render-queue / media-replace** — from-scratch 不可表达：AddMarker/AddItem 需 canonical seed（空集无模板克隆）、SetAlternateSource 需真实 footage。各有 fixture-based ship-gate，非 from-scratch showcase。
 >
 > **B 类 readback 系统性发现（红线4a）**：多个「仅字节 round-trip、从未 AE-DOM 验证」的 settings setter，AE-DOM 核出字节写对但 AE 不反映（shutter/resolution/nnhd-byte8）→ 建议独立 RE/修。

@@ -3,7 +3,7 @@ showcase: camera-light
 direction: 相机/灯光层 from-scratch 创建 — NewCameraLayer / NewLightLayer，纯 Go 从零建层后 AE DOM 确认层类型（📋 读值档，不看图）
 capabilities: [new-camera-layer, new-light-layer, source-less-layer]
 gates: [TestNewCameraLayer_AEShipGate, TestNewLightLayer_AEShipGate, camera-light-layer-create-re]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/camera-light  +  scripts/ae_run.ps1 verify.jsx"
 ---

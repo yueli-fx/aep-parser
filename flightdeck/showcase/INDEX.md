@@ -43,8 +43,8 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 |---|---|---|
 | [comp-settings](comp-settings/INDEX.md) | 合成设置 motionBlur/workArea/bgColor/hideShy/nestedFrameRate（7 项 DOM 一致） | ✅ complete |
 | [project-settings](project-settings/INDEX.md) | 工程设置 bitsPerChannel/linearBlending/expressionEngine/footageTimecode（4 项一致） | ✅ complete |
-| [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层（**灯光=环境光** + 相机=双节点,值皆模板默认；选项 setter elide） | 🔍 待确认(类型已更正) |
-| [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty（**单 slider**，3 控件版崩溃面板→已退回） | 🛑 待用户重验面板 |
+| [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层（**灯光=环境光** + 相机=双节点,值皆模板默认；选项 setter elide） | ✅ complete |
+| [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty + 模板命名 | 🛑 **BLOCKED**（面板崩溃，连单 slider 也崩；RE 候选，暂不修） |
 
 ### ⚠ from-scratch 不可表达（3 个 — 非缺陷，能力本质是 fixture-mutation）
 
@@ -58,7 +58,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 ### 发现的边界（readback + 用户真机核出，红线4a/4b 活样本 → RE 候选）
 
-- **EG 面板崩溃（红线4b）**：3 混合控件(slider+color+checkbox) DOM readback 全过,但**用户展开「基本图形」面板崩溃 AE**。EG ship-gate 只验 1 slider + 从不开面板 → 多控件/color/checkbox 超 gate 覆盖。已退回单 slider,**待用户重验面板是否仍崩**。
+- **EG 面板崩溃 🛑 BLOCKED（红线4b，用户两次真机确认）**：从零 EG 工程展开「基本图形」面板崩溃 AE——3 混合控件崩,**退回单 slider 也崩**。DOM readback 全过=假绿,根源是 EG ship-gate（load+DOM+resave）**从不打开面板**。整个 from-scratch EG 不可交付,留作 RE repro,用户决定暂不修(EG 用得少)。
 - **comp setter（红线4a）**：**SetShutterAngle/Phase** 读回 ×≈1.2、**SetResolutionFactor** 让 AE `resolutionFactor` 除零 → 已排除。
 - **project setter（红线4a）**：**SetTimeDisplayType/FeetFramesFilmType**(共用 nnhd byte8 疑位打包)+**SetFramesCountType** AE DOM 不反映 → 已排除。
 - **camera/light 选项 setter**：from-scratch 全 elide（"property not present"）,只在 parsed 层生效；**NewLightLayer 默认=环境光**(无从零 SetLightType)。
@@ -67,4 +67,4 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 ---
 
-> **15 个 🖼 可视方向全部 ✅ complete** · **3 个 📋 读值档用户已验**(comp-settings / project-settings / camera-light) · **EG 🛑 待重验面板** · **3 个 from-scratch 不可表达（已注明）**。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。
+> **15 个 🖼 可视方向 ✅ complete** · **3 个 📋 读值档 ✅ complete**(comp-settings / project-settings / camera-light) · **EG 🛑 BLOCKED**(面板崩溃,RE 候选) · **3 个 from-scratch 不可表达（markers/render-queue/media-replace，已注明）**。showcase 覆盖收官。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。
