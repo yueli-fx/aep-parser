@@ -32,12 +32,13 @@ regenerate: "go run ./flightdeck/showcase/camera-light  +  scripts/ae_run.ps1 ve
 | 字段 | 期望值 | 说明 |
 |---|---|---|
 | comp layers | 3 | BG + Cam01 + Light01 |
-| Cam01 instanceof CameraLayer | true | 相机层创建被 AE 认 |
+| Cam01 instanceof CameraLayer | true | 相机层创建被 AE 认（设置面板=「双节点摄像机」） |
+| Cam01 模板默认 | zoom=1000 · DOF=on · focus=1500 · aperture=50 · blur=75 | 选项 setter 从零 elide → 全是模板默认值 |
 | Light01 instanceof LightLayer | true | 灯光层创建被 AE 认 |
-| Light01 lightType | 4415（POINT） | 模板默认 = 点光 |
-| Cam01 zoom / Light01 intensity | 1000 / 40（模板默认） | 见下「边界」 |
+| Light01 lightType | 4415 = **AMBIENT（环境光）** | 模板默认 = **环境光**（非点光！） |
+| Light01 intensity | 40 | 模板默认 |
 
-> 审核要点：两个 `instanceof` 全 true + layers=3 即通过(create 路径可用)。
+> 审核要点：两个 `instanceof` 全 true + layers=3 即通过(create 路径可用)。**注意：灯光默认是环境光,相机默认值是模板内置（非本库设的）。**
 
 ## ⚠ 真实边界（诚实标注）
 

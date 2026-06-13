@@ -44,39 +44,19 @@ func main() {
 	}
 	layer := comp.Layers[0]
 
-	// Promote one param from each of three control effects to an EG controller.
-	// A color param is elided by default → materialize it with SetEffectParam
-	// before exposing (the elision rule); slider/checkbox expose directly.
-	controllers := []struct {
-		effect      string
-		paramMN     string
-		eName       string
-		materialize any // non-nil → SetEffectParam first to create the value stream
-	}{
-		{aep.EffectSliderControl, "ADBE Slider Control-0001", "Blur Amount", nil},
-		{aep.EffectColorControl, "ADBE Color Control-0001", "Accent Color", []float64{1, 0.4, 0.2, 1}},
-		{aep.EffectCheckboxControl, "ADBE Checkbox Control-0001", "Enable Glow", nil},
-	}
-	added := 0
-	for _, c := range controllers {
-		fx, err := aep.AddEffect(layer, c.effect)
-		if err != nil {
-			fmt.Printf("  SKIP AddEffect(%s): %v\n", c.effect, err)
-			continue
-		}
-		if c.materialize != nil {
-			if _, err := aep.SetEffectParam(layer, fx, c.paramMN, c.materialize); err != nil {
-				fmt.Printf("  SKIP SetEffectParam(%q): %v\n", c.eName, err)
-				continue
-			}
-		}
-		if _, err := aep.AddEssentialProperty(layer, fx, c.paramMN, c.eName); err != nil {
-			fmt.Printf("  SKIP AddEssentialProperty(%q): %v\n", c.eName, err)
-			continue
-		}
-		fmt.Printf("  ok   controller %q\n", c.eName)
-		added++
-	}
+	// EXACTLY the ship-gate-proven case: ONE Slider Control exposed as ONE EG
+	// controller. (An earlier 3-controller version — slider + materialized color
+	// + checkbox — loaded and DOM-read fine but CRASHED AE when the user expanded
+	// the Essential Graphics panel: that combination is beyond the gate's coverage
+	// [gate only ever did 1 slider, and never opened the panel]. Reduced here to
+	// the single proven controller; the multi-/color-/checkbox-controller panel
+	// crash is a found boundary — see INDEX.md + cockpit RE candidates.)
+	fx, err := aep.AddEffect(layer, aep.EffectSliderControl)
+	must(err)
+	_, err = aep.AddEssentialProperty(layer, fx, "ADBE Slider Control-0001", "Blur Amount")
+	must(err)
+	fmt.Println("  ok   controller \"Blur Amount\" (single slider, gate-proven)")
+	added := 1
 	must(comp.SetMotionGraphicsTemplateName("Showcase EG Template"))
 
 	out, err := os.Create(outPath)

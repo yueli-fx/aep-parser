@@ -3,7 +3,7 @@ showcase: comp-settings
 direction: 合成设置 setter — Composition.Set*（运动模糊/工作区/背景色/嵌套帧率等），纯 Go 从零设值后 AE DOM readback 核对（📋 读值档，不看图）
 capabilities: [comp-motion-blur, motion-blur-samples, work-area, bg-color, hide-shy-layers, preserve-nested-framerate]
 gates: [shutter-side-effect-divisors, cdta-duration-two-representations]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/comp-settings  +  scripts/ae_run.ps1 verify.jsx"
 ---

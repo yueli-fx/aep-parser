@@ -41,10 +41,10 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 | 方向 | 测什么 | 状态 |
 |---|---|---|
-| [comp-settings](comp-settings/INDEX.md) | 合成设置 motionBlur/workArea/bgColor/hideShy/nestedFrameRate（7 项 DOM 一致） | 🔍 待review |
-| [project-settings](project-settings/INDEX.md) | 工程设置 bitsPerChannel/linearBlending/expressionEngine/footageTimecode（4 项一致） | 🔍 待review |
-| [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层 + 类型确认（选项 setter from-scratch elide） | 🔍 待review |
-| [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty 3 控件 + SetMotionGraphicsTemplateName | 🔍 待review |
+| [comp-settings](comp-settings/INDEX.md) | 合成设置 motionBlur/workArea/bgColor/hideShy/nestedFrameRate（7 项 DOM 一致） | ✅ complete |
+| [project-settings](project-settings/INDEX.md) | 工程设置 bitsPerChannel/linearBlending/expressionEngine/footageTimecode（4 项一致） | ✅ complete |
+| [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层（**灯光=环境光** + 相机=双节点,值皆模板默认；选项 setter elide） | 🔍 待确认(类型已更正) |
+| [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty（**单 slider**，3 控件版崩溃面板→已退回） | 🛑 待用户重验面板 |
 
 ### ⚠ from-scratch 不可表达（3 个 — 非缺陷，能力本质是 fixture-mutation）
 
@@ -56,10 +56,15 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 > 这三项的写能力本身经各自 ship-gate（对 fixture）验证过；只是不适合做「从零 showcase」。需要时可改成「fixture-mutation 演示」（破坏「干净 clone 重生成」原则,故未做）。
 
-### 发现的边界（readback 首次 AE-DOM 核出，红线4a 活样本）
+### 发现的边界（readback + 用户真机核出，红线4a/4b 活样本 → RE 候选）
 
-B 类 readback 首次对若干「仅字节 round-trip、从未 AE-DOM 验证」的 setter 做 AE-DOM 核对,查出**字节写对但 AE DOM 不反映**：comp 的 **SetShutterAngle/Phase**(读回 ×≈1.2)、**SetResolutionFactor**(AE 除零)；project 的 **SetTimeDisplayType/FeetFramesFilmType/FramesCountType**(nnhd byte8 疑位打包)。详各方向 INDEX「已发现边界」。**建议独立 RE/修**。
+- **EG 面板崩溃（红线4b）**：3 混合控件(slider+color+checkbox) DOM readback 全过,但**用户展开「基本图形」面板崩溃 AE**。EG ship-gate 只验 1 slider + 从不开面板 → 多控件/color/checkbox 超 gate 覆盖。已退回单 slider,**待用户重验面板是否仍崩**。
+- **comp setter（红线4a）**：**SetShutterAngle/Phase** 读回 ×≈1.2、**SetResolutionFactor** 让 AE `resolutionFactor` 除零 → 已排除。
+- **project setter（红线4a）**：**SetTimeDisplayType/FeetFramesFilmType**(共用 nnhd byte8 疑位打包)+**SetFramesCountType** AE DOM 不反映 → 已排除。
+- **camera/light 选项 setter**：from-scratch 全 elide（"property not present"）,只在 parsed 层生效；**NewLightLayer 默认=环境光**(无从零 SetLightType)。
+
+详各方向 INDEX「已发现边界/崩溃发现」。**建议独立 RE/修**。
 
 ---
 
-> **15 个 🖼 可视方向全部 ✅ complete** + **4 个 📋 读值档 🔍 待review** + **3 个 from-scratch 不可表达（已注明）**。全量清单 + 验证档位（🖼看图 vs 📋读值）详 `specs/2026-06-13-full-showcase-coverage.md`。
+> **15 个 🖼 可视方向全部 ✅ complete** · **3 个 📋 读值档用户已验**(comp-settings / project-settings / camera-light) · **EG 🛑 待重验面板** · **3 个 from-scratch 不可表达（已注明）**。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。

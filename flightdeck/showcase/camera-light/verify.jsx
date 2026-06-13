@@ -21,10 +21,14 @@
         var cam = comp.layer("Cam01");
         log.push("Cam01 instanceof CameraLayer=" + (cam instanceof CameraLayer));
         log.push("Cam01 zoom=" + readVal(cam, "ADBE Camera Options Group", "ADBE Camera Zoom"));
+        log.push("Cam01 depthOfField=" + readVal(cam, "ADBE Camera Options Group", "ADBE Camera Depth of Field"));
+        log.push("Cam01 focusDistance=" + readVal(cam, "ADBE Camera Options Group", "ADBE Camera Focus Distance"));
+        log.push("Cam01 aperture=" + readVal(cam, "ADBE Camera Options Group", "ADBE Camera Aperture"));
+        log.push("Cam01 blurLevel=" + readVal(cam, "ADBE Camera Options Group", "ADBE Camera Blur Level"));
 
         var light = comp.layer("Light01");
         log.push("Light01 instanceof LightLayer=" + (light instanceof LightLayer));
-        log.push("Light01 lightType=" + light.lightType);
+        log.push("Light01 lightType=" + light.lightType + " (" + lightTypeName(light.lightType) + ")");
         log.push("Light01 intensity=" + readVal(light, "ADBE Light Options Group", "ADBE Light Intensity"));
 
         ok = (cam instanceof CameraLayer) && (light instanceof LightLayer) && comp.numLayers === 3;
@@ -35,6 +39,13 @@
     try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); } catch (e) {}
     try { app.quit(); } catch (e) {}
 
+    function lightTypeName(v) {
+        if (v === LightType.PARALLEL) return "PARALLEL";
+        if (v === LightType.SPOT) return "SPOT";
+        if (v === LightType.POINT) return "POINT";
+        if (v === LightType.AMBIENT) return "AMBIENT";
+        return "?";
+    }
     function readVal(lyr, grpMatch, propMatch) {
         try {
             var g = lyr.property(grpMatch);

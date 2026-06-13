@@ -25,7 +25,7 @@
             catch (e1) { try { nm = comp.motionGraphicsTemplateControllerName(k); } catch (e2) { nm = "(name API n/a)"; } }
             log.push("controller#" + k + "=" + nm);
         }
-        ok = (comp.motionGraphicsTemplateName === "Showcase EG Template") && (cnt === 3);
+        ok = (comp.motionGraphicsTemplateName === "Showcase EG Template") && (cnt === 1);
     } catch (e) { log.push("ERROR: " + e.toString() + " line=" + e.line); }
     done.open("w");
     done.write((ok ? "PASS\n" : "FAIL\n") + log.join("\n"));
