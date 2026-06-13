@@ -18,6 +18,14 @@ last_updated: 2026-06-13
 
 > **effects（2026-06-13 补，commit d193f38）**：4×3 网格 = 源 token（teal 方块+amber 边）× 12 效果，AE 2020 实渲 **12/12 可见正确**（GaussianBlur/DropShadow/Invert/Tint/Tritone/WaveWarp/Brightness/FractalNoise/GradientRamp/Mosaic/DirectionalBlur）。**红线4d 活体样本**：HueSaturation master hue（`-0004` angle）`SetEffectParam` 物化值后 Go round-trip 绿、**AE frame 0 渲染色相未变** = 疑似假绿（或通道控制前置/编码未对，待 RE 确认），已剔除换 Wave Warp；Mosaic 块数 control-type 1 无 generic 模板调不了。**含义**：coverage.md「SetEffectParam 任意效果任意参数即设即用」对**未单独 gate 的参数**需打折——只有经 ship-gate 的参数确证被 AE 引擎应用。
 
+> **看图档批次（2026-06-13，并行 4 subagent 设计+编码、主控串行渲染眼验）**：
+> - ✅ **masks**（commit）— AddMask 圆/三角/星/inverted 4/4 AE 渲染对（修了圆 bezier 切线 out/in 反向 → 尖角 bug）。
+> - ✅ **transform-values**（commit）— SetPosition/Scale/Rotation/Opacity 6/6 渲染对（scale/opacity=百分比单位）。
+> - ✅ **structural-ops**（commit）— Duplicate/Move/Delete/Separate；**solid 不可摆位硬限制**（Position 未物化、merged 无 leader → AE 堆 solid 到 comp 中心）→ 同心环方案：Move/Delete 像素可见、Dup/Separate 靠 .done readback。
+> - 🚧 **stroke-detail**（未 commit，gen.go 在工作树）— **open-path 描边渲染塌缩 = 又一假绿边界**：闭合 Dashes 渲染对，但所有 open-path（`AddPath`+`SetClosed(false)`）+stroke 渲染成微小图形（几何 round-trip 绿、AE 渲染塌缩；ship-gate 只验 1 对角 path 几何、未验 open-path stroke 渲染像素）。**待改闭合形状方案**（Join/Miter/Taper/Wave 用闭合 rect/star 拐角，Line Cap open-only 渲染不出 → 诚实标注暂缺）。
+>
+> **剩余待补**：animated-path / keyframe-channels（🖼看图档）+ render-queue / essential-graphics / markers / comp-settings / project-settings（📋读值档，dump 值 readback 不看图）。
+
 ## 缺口：还没 showcase 的已 ship 能力
 
 > 权威清单以 `plans/coverage.md` 为准（看板可能漂移，建时用 grep/Explore 核实代码 + ship-gate test 真在）。下面是分组待办，**逐方向补、每个落 `待review`**。

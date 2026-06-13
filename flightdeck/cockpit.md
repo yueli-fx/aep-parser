@@ -14,7 +14,7 @@
 
 ## 下一步
 
-**[当前焦点] showcase 全量补全 + 用户逐个真机校验**（`specs/2026-06-13-full-showcase-coverage.md`，2026-06-13 用户定「要所有示例」）：9 方向待review（前 8 已 agent 实渲眼验通过，含 keyframes-ease/shape-filters/layers 三个此前缺 png 的补齐；**effects** 新补 = AddEffect+SetEffectParam 12 效果网格 AE 实渲 12/12 对，commit d193f38）。**下一个看图档方向**（逐个 from-scratch + AE 实渲 + 落待review）：masks / structural-ops / transform-values / stroke-detail / animated-path / keyframe-channels；**读值档**（render-queue / essential-graphics / markers / comp·project 设置）攒批。验证档位辨析（🖼看图 vs 📋读值，均需 AE 接受，无「纯 Go 算过」）见 spec。**关键发现**：`SetEffectParam` 对**未单独 ship-gate 的参数**可能假绿（HueSaturation master hue `-0004` 物化值绿但 AE frame0 不应用色相，红线4d 活体样本，已剔除换 WaveWarp）。
+**[当前焦点] showcase 全量补全 + 用户逐个真机校验**（`specs/2026-06-13-full-showcase-coverage.md`，2026-06-13 用户定「要所有示例」）：**12 方向待review**（前 8 存量已 agent 实渲眼验通过含补齐 3 个缺 png；新补 4 看图档：**effects** AddEffect+SetEffectParam 12 格 d193f38 · **masks** AddMask 4 形状 · **transform-values** SetPosition/Scale/Rotation/Opacity · **structural-ops** Dup/Move/Delete/Separate 同心环）。**🚧 进行中**：**stroke-detail**（open-path 描边渲染塌缩=假绿边界，gen.go 在工作树未 commit，需改闭合形状方案）。**待补**：animated-path / keyframe-channels（🖼看图档）+ render-queue / essential-graphics / markers / comp·project 设置（📋读值档，dump 值不看图）。验证档位辨析（🖼看图 vs 📋读值，均需 AE 接受，无「纯 Go 算过」）见 spec。**关键发现（2 个假绿边界，红线4d）**：① `SetEffectParam` 对未单独 gate 的参数可能假绿（HueSaturation master hue 物化绿但 AE frame0 不应用 → 换 WaveWarp）；② **open-path（AddPath+SetClosed(false)）+stroke 渲染塌缩**（几何 round-trip 绿但 AE 渲微小图形，ship-gate 只验 1 对角 path 几何未验 stroke 渲染像素）。**solid 层不可摆位**（Position 未物化）→ 结构性 op showcase 用同心环 readback 佐证。
 
 **MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。其余下一步皆**按需点名即开**（无强制主线）：
 
