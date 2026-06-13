@@ -10,20 +10,28 @@ last_updated: 2026-06-13
 
 **库里每个已 ship 的能力，都要有一个用户能在真机打开 .aep 逐个验证的 showcase**。理由：**「代码过 ≠ 效果对」**（交付准则红线4 + 用户原话）——ship-gate 像素验证是 agent 跑的，用户要亲自开 .aep 核一遍才算数。规约见 `rules.md` § Showcase + `checklists/showcase.md`（含 `待review`↔`complete` review-gate）。
 
-## 现状：已回填 8 方向（全部 🔍 待review，等用户真机验）
+## 现状：已回填 9 方向（全部 🔍 待review，等用户真机验）
 
-`flightdeck/showcase/` 下：shape-filters · shape-primitives · keyframes-ease · expressions · precomp-nesting · gradient · text · layers。每个有 `INDEX.md`（布局表）+ `gen.go` + `render.jsx`，产物 `.aep/.png` 已本地生成（gitignore）。**这 8 个等用户逐个真机验收后翻 complete。**
+`flightdeck/showcase/` 下：shape-filters · shape-primitives · keyframes-ease · expressions · precomp-nesting · gradient · text · layers · **effects**。每个有 `INDEX.md`（布局表）+ `gen.go` + `render.jsx`，产物 `.aep/.png` 已本地生成（gitignore）。**这 9 个等用户逐个真机验收后翻 complete。**
+
+> 前 8 方向：2026-06-13 本对话已全部 agent 实渲眼验通过（含 keyframes-ease / shape-filters / layers 三个**此前缺 png = 从未实渲**的方向，已补齐 AE 渲染、AE 接受、眼验对）。
+
+> **effects（2026-06-13 补，commit d193f38）**：4×3 网格 = 源 token（teal 方块+amber 边）× 12 效果，AE 2020 实渲 **12/12 可见正确**（GaussianBlur/DropShadow/Invert/Tint/Tritone/WaveWarp/Brightness/FractalNoise/GradientRamp/Mosaic/DirectionalBlur）。**红线4d 活体样本**：HueSaturation master hue（`-0004` angle）`SetEffectParam` 物化值后 Go round-trip 绿、**AE frame 0 渲染色相未变** = 疑似假绿（或通道控制前置/编码未对，待 RE 确认），已剔除换 Wave Warp；Mosaic 块数 control-type 1 无 generic 模板调不了。**含义**：coverage.md「SetEffectParam 任意效果任意参数即设即用」对**未单独 gate 的参数**需打折——只有经 ship-gate 的参数确证被 AE 引擎应用。
 
 ## 缺口：还没 showcase 的已 ship 能力
 
 > 权威清单以 `plans/coverage.md` 为准（看板可能漂移，建时用 grep/Explore 核实代码 + ship-gate test 真在）。下面是分组待办，**逐方向补、每个落 `待review`**。
 
-### A. 可像素验证（同既有 8 个的 from-scratch + AE 渲染套路）
+> **验证档位（2026-06-13 用户澄清「有些是不是代码过就算过、不需要验证」）**：**没有「纯 Go 代码过就算过」**——最低门槛永远是 AE 接受 + AE 读回（红线4a：Go round-trip ≠ AE 接受）。但验证**深度**按能力**有无可见作用面**分两档：**A 类（🖼 看图档，渲染会变）必须像素验证 + 用户真机看图**，是假绿高发区（shape 颜色 / effects 的 HueSaturation hue 都栽在这）；**B 类（📋 读值档，渲染不变的纯数据字段）= AE 接受 + readback 读回值对，用户读值核对不看图**（无「值对但渲染错」陷阱，可信度本就高，ship-gate 已验 readback 的甚至可攒批/可信任）。下面 A/B 分组即此二分。
+
+### A. 可像素验证（同既有 from-scratch + AE 渲染套路）— 🖼 看图档
 
 | 方向 | 覆盖能力 | 渲染思路 |
 |---|---|---|
 | `masks` | AddMask（mask 形状裁切/显隐图层） | 一个填充层 + mask → 渲染只露 mask 内区域 |
-| `effects` | AddEffect（Gaussian Blur / Levels / Tint 等）+ 参数 | 同一图形 before/after 并排，看效果差异 |
+| ~~`effects`~~ ✅ | AddEffect + SetEffectParam | **已补 2026-06-13（d193f38），🔍 待review**（12 效果网格；HueSaturation hue 假绿剔除） |
+| `transform-values` | 改字段值：transform（位置/缩放/旋转）+ 颜色 before/after | 读/建工程 → 改值 → before/after 并排渲染 |
+| `keyframe-channels` | 各属性关键帧（扩展现有 keyframes-ease） | 渲中间帧看各通道插值 |
 | `structural-ops` | DeleteLayer / DuplicateLayer / MoveLayer / 属性 Remove·Duplicate·MoveTo / SetDimensionsSeparated | 建基线 → 应用 op → 渲染出结果（如 duplicate→两份、separate→XY 分离动画） |
 | `stroke-detail` | 虚线 dashes / Line Cap / Line Join / Miter | 几条不同端点·连接·虚线的描边并排（可并入 shape-primitives 或单列） |
 | `animated-path` | animated shape path / mask path 关键帧 | 渲中间帧看路径插值形态 |

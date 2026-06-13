@@ -14,7 +14,9 @@
 
 ## 下一步
 
-**MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。下一步皆**按需点名即开**（无强制主线）：
+**[当前焦点] showcase 全量补全 + 用户逐个真机校验**（`specs/2026-06-13-full-showcase-coverage.md`，2026-06-13 用户定「要所有示例」）：9 方向待review（前 8 已 agent 实渲眼验通过，含 keyframes-ease/shape-filters/layers 三个此前缺 png 的补齐；**effects** 新补 = AddEffect+SetEffectParam 12 效果网格 AE 实渲 12/12 对，commit d193f38）。**下一个看图档方向**（逐个 from-scratch + AE 实渲 + 落待review）：masks / structural-ops / transform-values / stroke-detail / animated-path / keyframe-channels；**读值档**（render-queue / essential-graphics / markers / comp·project 设置）攒批。验证档位辨析（🖼看图 vs 📋读值，均需 AE 接受，无「纯 Go 算过」）见 spec。**关键发现**：`SetEffectParam` 对**未单独 ship-gate 的参数**可能假绿（HueSaturation master hue `-0004` 物化值绿但 AE frame0 不应用色相，红线4d 活体样本，已剔除换 WaveWarp）。
+
+**MG roadmap 主线 S1–S6 已闭环**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。其余下一步皆**按需点名即开**（无强制主线）：
 
 1. **形状/滤镜剩项**（矢量滤镜家族**已 11 件全收齐、vein 闭合无候选**——蓝本详 `incidents/trim-paths-vector-filter-re.md`）：只剩 PolyStar Polygon 型（需 Type slot + 独立模板）· 各滤镜 deferred 子流（Trim Type/ZigZag Points/Merge 其余模式/Wiggle Correlation·Phase 等，需求驱动）。
 2. **表达式语汇 gate**：loopOut / wiggle / thisComp.layer 跨层引用（S2 仅验单 `time*90`）。
