@@ -40,6 +40,17 @@ func TestCameraLightOptions_FromScratch_Roundtrip(t *testing.T) {
 	must("SetCameraDepthOfField", cam.SetCameraDepthOfField(true))
 	must("SetCameraFocusDistance", cam.SetCameraFocusDistance(1200))
 	must("SetCameraAperture", cam.SetCameraAperture(180))
+	// Iris*/Highlight* are synthesis-inserted from-scratch (AE elides these
+	// DoF-bokeh controls, so the template has no slots — spliced + reset).
+	if cam.IrisShape() == nil || cam.IrisHighlightSaturation() == nil {
+		t.Fatal("fresh camera: Iris leaves missing — splice failed")
+	}
+	must("SetIrisShape", cam.SetIrisShape(4))
+	must("SetIrisRotation", cam.SetIrisRotation(25))
+	must("SetIrisRoundness", cam.SetIrisRoundness(60))
+	must("SetIrisDiffractionFringe", cam.SetIrisDiffractionFringe(30))
+	must("SetIrisHighlightGain", cam.SetIrisHighlightGain(40))
+	must("SetIrisHighlightSaturation", cam.SetIrisHighlightSaturation(50))
 	// Light options.
 	must("SetLightIntensity", light.SetLightIntensity(65))
 	must("SetLightConeAngle", light.SetLightConeAngle(72))
@@ -90,6 +101,12 @@ func TestCameraLightOptions_FromScratch_Roundtrip(t *testing.T) {
 	chk("CameraDepthOfField", reCam.CameraDepthOfField(), 1)
 	chk("CameraFocusDistance", reCam.CameraFocusDistance(), 1200)
 	chk("CameraAperture", reCam.CameraAperture(), 180)
+	chk("IrisShape", reCam.IrisShape(), 4)
+	chk("IrisRotation", reCam.IrisRotation(), 25)
+	chk("IrisRoundness", reCam.IrisRoundness(), 60)
+	chk("IrisDiffractionFringe", reCam.IrisDiffractionFringe(), 30)
+	chk("IrisHighlightGain", reCam.IrisHighlightGain(), 40)
+	chk("IrisHighlightSaturation", reCam.IrisHighlightSaturation(), 50)
 	chk("LightIntensity", reLight.LightIntensity(), 65)
 	chk("LightConeAngle", reLight.LightConeAngle(), 72)
 	chk("LightConeFeather", reLight.LightConeFeather(), 35)

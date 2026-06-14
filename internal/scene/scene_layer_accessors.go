@@ -41,7 +41,10 @@ const (
 	MatchNameCameraIrisDiffractionFringe   = "ADBE Iris Diffraction Fringe"
 	MatchNameCameraIrisHighlightGain       = "ADBE Iris Highlight Gain"
 	MatchNameCameraIrisHighlightThreshold  = "ADBE Iris Highlight Threshold"
-	MatchNameCameraIrisHighlightSaturation = "ADBE Iris Highlight Saturation"
+	// NB: Adobe misspelled this match-name as "Hightlight" — it is the real
+	// on-disk name (verified via tmp_debug/gen_camera_iris.jsx); the correct
+	// spelling never matches, so the accessor was silently always-nil before.
+	MatchNameCameraIrisHighlightSaturation = "ADBE Iris Hightlight Saturation"
 )
 
 // 3D-layer-only Transform match-names. AnchorPoint / Position / Scale /

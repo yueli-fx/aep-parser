@@ -38,6 +38,17 @@ var layerLightBodyBytes []byte
 //go:embed templates/light_color_leaf.bin
 var lightColorLeafBytes []byte
 
+// camera_iris_leaves.bin is a LIST(tdgp) wrapper around the 8 Iris*/Highlight*
+// (tdmn, LIST:tdbs) pairs in AE's canonical order, extracted from an AE-2020
+// camera with DoF on + those options authored non-default (AE elides these
+// DoF-bokeh controls at default, so the from-scratch camera template carries no
+// slots — even AE's own parsed cameras lack them). newTemplatedLayer splices
+// them after Blur Level + resets each cdat to AE's default. Same synthesis-
+// insert blueprint as the Light Color leaf.
+//
+//go:embed templates/camera_iris_leaves.bin
+var cameraIrisLeavesBytes []byte
+
 // NewCameraLayer adds a new Camera layer to the composition.
 // (Full contract lives on the aep.NewCameraLayer facade — docgen source.)
 func NewCameraLayer(c *Composition, name string) (*Layer, error) {
@@ -96,6 +107,55 @@ func spliceLightColorLeaf(layrChunk *rifx.Chunk) error {
 		}
 	}
 	spliced := make([]*rifx.Chunk, 0, len(kids)+2)
+	spliced = append(spliced, kids[:insertAt]...)
+	spliced = append(spliced, wrapper.Children...)
+	spliced = append(spliced, kids[insertAt:]...)
+	opts.Children = spliced
+	return nil
+}
+
+// spliceCameraIrisLeaves inserts the 8 AE-native Iris*/Highlight* leaf pairs
+// after "ADBE Camera Blur Level" in the cloned camera's Camera Options group
+// (AE's canonical order: Zoom, DoF, Focus, Aperture, Blur Level, then the 8
+// iris controls). Same group-splice mechanics as spliceLightColorLeaf.
+func spliceCameraIrisLeaves(layrChunk *rifx.Chunk) error {
+	var outer *rifx.Chunk
+	for _, ch := range layrChunk.Children {
+		if ch.IsList() && ch.FormType == rifx.IDTdgp {
+			outer = ch
+			break
+		}
+	}
+	if outer == nil {
+		return fmt.Errorf("camera template: no outer tdgp group")
+	}
+	opts := findGroupBody(outer, "ADBE Camera Options Group")
+	if opts == nil {
+		return fmt.Errorf("camera template: no Camera Options group")
+	}
+	// Idempotent: if the iris leaves are already present (re-extracted template),
+	// do nothing.
+	for _, ch := range opts.Children {
+		if ch.ID == rifx.IDTdmn && trimChunkNUL(ch.Data) == "ADBE Iris Shape" {
+			return nil
+		}
+	}
+	wrapper, err := rifx.ReadChunk(bytes.NewReader(cameraIrisLeavesBytes))
+	if err != nil {
+		return fmt.Errorf("parse camera iris leaves template: %w", err)
+	}
+	if len(wrapper.Children) != 16 {
+		return fmt.Errorf("camera iris leaves template: want 16 children (8 tdmn,tdbs pairs), got %d", len(wrapper.Children))
+	}
+	insertAt := len(opts.Children) // fallback: before Group End handled below
+	kids := opts.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Camera Blur Level" {
+			insertAt = i + 2 // after the (tdmn, payload) pair
+			break
+		}
+	}
+	spliced := make([]*rifx.Chunk, 0, len(kids)+16)
 	spliced = append(spliced, kids[:insertAt]...)
 	spliced = append(spliced, wrapper.Children...)
 	spliced = append(spliced, kids[insertAt:]...)
@@ -188,6 +248,15 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 			return nil, err
 		}
 	}
+	// A fresh camera's template carries only the 5 non-elided options; the 8
+	// Iris*/Highlight* DoF-bokeh controls are AE-elided. Splice their AE-native
+	// leaves after Blur Level so SetIris*/SetIrisHighlight* work from scratch;
+	// each is reset to AE's default below (after the property tree is wired).
+	if typ == LayerTypeCamera {
+		if err := spliceCameraIrisLeaves(layrChunk); err != nil {
+			return nil, err
+		}
+	}
 
 	// Runtime Layer wrapper. Capture ldta + nameChunk so ldta-based setters
 	// (SetSource for precomp, SetParent, flag bits) work on the fresh layer.
@@ -220,6 +289,29 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 	if typ == LayerTypeLight {
 		if lc := base.LightColor(); lc != nil {
 			_ = base.SetLightColor([]float64{255, 255, 255, 255})
+		}
+	}
+
+	// Reset the spliced camera Iris*/Highlight* leaves to AE's defaults (the
+	// embedded template carries the extraction fixture's authored values).
+	// Best-effort: a missing slot just leaves the accessor nil, as before.
+	if typ == LayerTypeCamera {
+		for _, r := range []struct {
+			p   *Property
+			def float64
+		}{
+			{base.IrisShape(), 1},
+			{base.IrisRotation(), 0},
+			{base.IrisRoundness(), 0},
+			{base.IrisAspectRatio(), 1},
+			{base.IrisDiffractionFringe(), 0},
+			{base.IrisHighlightGain(), 0},
+			{base.IrisHighlightThreshold(), 1},
+			{base.IrisHighlightSaturation(), 0},
+		} {
+			if r.p != nil {
+				_ = r.p.SetStaticValue(r.def)
+			}
 		}
 	}
 

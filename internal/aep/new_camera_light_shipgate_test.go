@@ -56,6 +56,15 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 		{"SetCameraDepthOfField", func() error { return camLayer.SetCameraDepthOfField(true) }},
 		{"SetCameraFocusDistance", func() error { return camLayer.SetCameraFocusDistance(1200) }},
 		{"SetCameraAperture", func() error { return camLayer.SetCameraAperture(180) }},
+		// From-scratch Iris*/Highlight* (synthesis-inserted leaves; DoF on above).
+		{"SetIrisShape", func() error { return camLayer.SetIrisShape(4) }},
+		{"SetIrisRotation", func() error { return camLayer.SetIrisRotation(25) }},
+		{"SetIrisRoundness", func() error { return camLayer.SetIrisRoundness(60) }},
+		{"SetIrisAspectRatio", func() error { return camLayer.SetIrisAspectRatio(1.8) }},
+		{"SetIrisDiffractionFringe", func() error { return camLayer.SetIrisDiffractionFringe(30) }},
+		{"SetIrisHighlightGain", func() error { return camLayer.SetIrisHighlightGain(40) }},
+		{"SetIrisHighlightThreshold", func() error { return camLayer.SetIrisHighlightThreshold(0.7) }},
+		{"SetIrisHighlightSaturation", func() error { return camLayer.SetIrisHighlightSaturation(50) }},
 		{"SetLightIntensity", func() error { return lightLayer.SetLightIntensity(65) }},
 		{"SetLightConeAngle", func() error { return lightLayer.SetLightConeAngle(72) }},
 		{"SetLightConeFeather", func() error { return lightLayer.SetLightConeFeather(35) }},
@@ -115,6 +124,15 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 			chkOpt(t, ver, "Cam1.Zoom", l.CameraZoom(), 850)
 			chkOpt(t, ver, "Cam1.FocusDistance", l.CameraFocusDistance(), 1200)
 			chkOpt(t, ver, "Cam1.Aperture", l.CameraAperture(), 180)
+			// From-scratch Iris*/Highlight* (synthesis-inserted) survived resave.
+			chkOpt(t, ver, "Cam1.IrisShape", l.IrisShape(), 4)
+			chkOpt(t, ver, "Cam1.IrisRotation", l.IrisRotation(), 25)
+			chkOpt(t, ver, "Cam1.IrisRoundness", l.IrisRoundness(), 60)
+			chkOptApprox(t, ver, "Cam1.IrisAspectRatio", l.IrisAspectRatio(), 1.8)
+			chkOpt(t, ver, "Cam1.IrisDiffractionFringe", l.IrisDiffractionFringe(), 30)
+			chkOpt(t, ver, "Cam1.IrisHighlightGain", l.IrisHighlightGain(), 40)
+			chkOptApprox(t, ver, "Cam1.IrisHighlightThreshold", l.IrisHighlightThreshold(), 0.7)
+			chkOpt(t, ver, "Cam1.IrisHighlightSaturation", l.IrisHighlightSaturation(), 50)
 		}
 		if l.Name == "Light1" && l.Type == aep.LayerTypeLight {
 			light = true
@@ -151,6 +169,19 @@ func chkOpt(t *testing.T, ver, label string, p *aep.Property, want float64) {
 	got, ok := p.StaticValue.(float64)
 	if !ok || got != want {
 		t.Errorf("%s resaved: %s = %v, want %g", ver, label, p.StaticValue, want)
+	}
+}
+
+// chkOptApprox tolerates AE's float32 round-trip (e.g. 1.8 → 1.79999995).
+func chkOptApprox(t *testing.T, ver, label string, p *aep.Property, want float64) {
+	t.Helper()
+	if p == nil {
+		t.Errorf("%s resaved: %s property nil", ver, label)
+		return
+	}
+	got, ok := p.StaticValue.(float64)
+	if !ok || abs(got-want) > 1e-4 {
+		t.Errorf("%s resaved: %s = %v, want ~%g", ver, label, p.StaticValue, want)
 	}
 }
 

@@ -50,6 +50,21 @@
                 near("cam.depthOfField", co.depthOfField.value, 1);
                 near("cam.focusDistance", co.focusDistance.value, 1200);
                 near("cam.aperture", co.aperture.value, 180);
+                // From-scratch Iris*/Highlight* (synthesis-inserted leaves). Read
+                // by match-name (the last is Adobe-misspelled "Hightlight").
+                function nearP(label, mn, want) {
+                    var pr = co.property(mn);
+                    if (!pr) { fail(label + " property missing"); return; }
+                    near(label, pr.value, want);
+                }
+                nearP("cam.irisShape", "ADBE Iris Shape", 4);
+                nearP("cam.irisRotation", "ADBE Iris Rotation", 25);
+                nearP("cam.irisRoundness", "ADBE Iris Roundness", 60);
+                nearP("cam.irisAspectRatio", "ADBE Iris Aspect Ratio", 1.8);
+                nearP("cam.irisDiffractionFringe", "ADBE Iris Diffraction Fringe", 30);
+                nearP("cam.irisHighlightGain", "ADBE Iris Highlight Gain", 40);
+                nearP("cam.irisHighlightThreshold", "ADBE Iris Highlight Threshold", 0.7);
+                nearP("cam.irisHighlightSaturation", "ADBE Iris Hightlight Saturation", 50);
             }
             if (light) {
                 var lo = light.lightOption;

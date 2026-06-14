@@ -86,18 +86,46 @@ where the field lives:
   - **CORRECTION (2026-06-14, code-verified `tmp_debug/probe_fromscratch_opts`):
     parse-the-clone only reaches slots AE did NOT elide in the template.** The
     earlier "lights up the entire existing surface incl. Iris\*" was an
-    overstatement. Actual from-scratch coverage:
-    - **Light: 10/10 OK** — template carries all of Intensity / Color (now
-      spliced) / Cone Angle / Cone Feather / Falloff Type / Falloff Start /
-      Falloff Distance / Casts Shadows / Shadow Darkness / Shadow Diffusion.
-    - **Camera: 5/13 OK** — only Zoom / Depth of Field / Focus Distance /
-      Aperture / Blur Level have template slots. The **8 Iris\*/Highlight\***
-      setters (`SetIrisShape`/`IrisRotation`/`IrisRoundness`/`IrisAspectRatio`/
-      `IrisDiffractionFringe`/`IrisHighlightGain`/`IrisHighlightThreshold`/
-      `IrisHighlightSaturation`) fail from-scratch with `property not present` —
-      AE elides these DoF-bokeh controls (even the parsed `re_cameralight`
-      MyCamera lacks them). They need the **same synthesis-insert** treatment as
-      Light Color, one leaf each. **Deferred / on-demand.**
+    overstatement. Coverage by slot presence:
+    - **Light: 10/10 OK** — template carries all of Intensity / Color (spliced) /
+      Cone Angle / Cone Feather / Falloff Type / Falloff Start / Falloff Distance
+      / Casts Shadows / Shadow Darkness / Shadow Diffusion.
+    - **Camera: was 5/13, now 13/13** — the 5 (Zoom / DoF / Focus / Aperture /
+      Blur Level) have template slots; the 8 elided Iris\*/Highlight\* were
+      resolved by synthesis-insert below.
+  - **Camera Iris\*/Highlight\* — RESOLVED 2026-06-14 via synthesis-insert
+    (AE2020+2025 PASS).** AE elides these 8 DoF-bokeh controls at default (even
+    AE's own parsed cameras lack them), so the embed template had no slots and
+    `SetIrisShape`/`…`/`SetIrisHighlightSaturation` failed from-scratch with
+    `property not present`. Fixed with the **same leaf-splice as Light Color**,
+    batched: author a camera with **DoF on** + all 8 set non-default
+    (`tmp_debug/gen_camera_iris.jsx` → `test_data/re_camera_iris.aep`), extract
+    all 8 `(tdmn, LIST:tdbs)` pairs into one `templates/camera_iris_leaves.bin`
+    (a LIST(tdgp) of 8 pairs in canonical order; `extract_camera_iris_leaves`),
+    and `newTemplatedLayer` (camera only) splices them **after Blur Level** +
+    resets each cdat to AE's default (Shape 1 / Rotation 0 / Roundness 0 /
+    AspectRatio 1 / DiffractionFringe 0 / HighlightGain 0 / HighlightThreshold 1
+    / HighlightSaturation 0). Canonical Camera Options order (probed): Zoom[1],
+    DoF[2], Focus[3], Aperture[4], BlurLevel[5], then the 8 iris[6..13].
+    - **BUG also found + fixed**: the `MatchNameCameraIrisHighlightSaturation`
+      constant was the **correct** spelling `"ADBE Iris Highlight Saturation"`,
+      but Adobe's real on-disk match-name is the **misspelled** `"ADBE Iris
+      Hightlight Saturation"` ("Hightlight"). The correct spelling never matched,
+      so `IrisHighlightSaturation()` / `SetIrisHighlightSaturation` were silently
+      always-nil **even on parsed cameras** — a latent bug surfaced only because
+      this work probed AE's actual match-names. Constant corrected.
+    - **Untouched plain camera (DoF off, iris leaves at default) is AE-accepted**
+      (verified `tmp_debug/verify_plain_camera.jsx`, AE2025): file opens, camera
+      intact, irisShape reads back default 1 — no corruption from the always-on
+      splice.
+    - Gated: `TestCameraLightOptions_FromScratch_Roundtrip` (Go set/read 6 iris
+      values) + dual-version `TestNewCameraLight_AEShipGate_AE20{20,25}` extended
+      to set all 8 + read them back from **AE's DOM** (irisShape=4 / rotation=25 /
+      roundness=60 / aspectRatio=1.8 / diffractionFringe=30 / highlightGain=40 /
+      highlightThreshold=0.7 / highlightSaturation=50) + Go re-parse confirms
+      resave kept them. Both AE versions identical.
+    - **Scope honesty**: AE-model-readback + resave-preservation (pixel-proving
+      DoF bokeh needs a lit 3D scene we don't build yet).
   - **Purely read-only on the bytes**: an untouched fresh camera/light still
     serializes byte-identically (the create ship-gate stays green); a setter then
     overwrites only its own cdat in place (length-preserving).
