@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（优先级2 **3D transform 全闭环**：Z 视差 `TestLayer3DParallax`〔NEAR 300/FAR 99，3.03×〕+ RotateY 透视 `TestLayer3DRotateY`〔梯形 1.45×〕双版本渲染 PASS。**关键发现**：整个 3D transform group 从零写入零新 serializer 代码——嵌入 transform 模板本就是完整 6-axis 3D schema，`SetIs3D`+既有 setter 即可。先前同日：3D enable+相机推拉 gate · 优先级1 animated gradient 色标〔用户造 fixture 解锁〕+ animated Trim。逐 commit 见 git log。）
+**Last updated**: 2026-06-15 by claude（优先级2 **3D 主体收官**：相机景深 DoF `TestLayer3DDoF`〔焦内 1px/失焦 21-22px〕渲染 gate 双版本 PASS + showcase `3d-camera` **用户真机验收 complete**。本日累计：3D enable/相机推拉/Z 视差/RotateY 透视/DoF 五能力全渲染 gate，整个 3D transform group 从零零新 serializer 代码〔transform 模板本就是 6-axis 3D schema〕；优先级1 animated gradient 色标〔用户造 fixture 解锁〕+ animated Trim。唯一剩项=Material Options 光照/阴影像素深验。逐 commit 见 git log。）
 
 **Active focus**: **剩余能力 roadmap（模板起点，非 from-scratch）**（`specs/2026-06-14-remaining-capability-roadmap.md`）。MG from-scratch 主线 + 质感件 + camera/light option + 优先级1 animated 关键帧（trim✅）+ 优先级2 **3D-enable 双 gate 闭环**。现推进优先级2 余项：3D transform 通道**非默认值写入**（Z/旋转）。机制复用 parse-the-clone + synthesis-insert。每能力渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
 
@@ -27,10 +27,10 @@
 - ~~图层 3D flag（enable）~~ ✅ `TestLayer3DEnable`（DOM）+ ~~相机推拉~~ ✅ `TestLayer3DCamDolly`（渲染 426→124px）。
 - ~~Z 视差~~ ✅ `TestLayer3DParallax`（两层不同 Z，NEAR 300 / FAR 99，3.03×）。
 - ~~RotateY 透视 tumble~~ ✅ `TestLayer3DRotateY`（梯形 1.45×）。
+- ~~相机景深 DoF~~ ✅ `TestLayer3DDoF`（焦内锐 1px / 失焦虚 21-22px，>20×）。
+- ~~showcase `3d-camera`~~ ✅ complete（**用户 2026-06-15 真机验收**，视差+透视；2020 模板）。
 - **关键发现**：整个 3D transform group（enable+Z+旋转+朝向）**从零零新 serializer 代码**——`SetIs3D`+reopen 后既有 transform setter，因嵌入 transform 模板本就是完整 6-axis 3D schema。详 `incidents/layer-3d-enable-bit-materializes.md`。
-- **下一项（按需）**：Material Options 从零 3D 层 gate（fixture setter 已工作）· RotateX/Orientation/RotateZ 补 gate（同路径）· 3D-render DoF/光照像素深验 · 推拉镜+视差 showcase（需用户真机验收才能标 complete）。
-
-**用户真机验收待办**：本批次 6 个能力（animated trim/gradient + 3D enable/dolly/parallax/rotateY）均 agent 眼验，**未经用户真机复核**——攒 showcase 时请用户过目。
+- **唯一剩项 = Material Options（光照/阴影）像素深验**（fixture setter 已工作；从零 3D 层 + 灯 + 阴影投射 render-gate 未做，最复杂）。RotateX/Orientation/RotateZ 同路径按需补 gate。
 
 完整清单（每层细项 + 不可达附录 + 搁置项）见 roadmap spec。
 
