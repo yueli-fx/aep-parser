@@ -35,6 +35,7 @@ type (
 	FormatOptions                   = scene.FormatOptions
 	FramesCountType                 = scene.FramesCountType
 	GradientFillNode                = scene.GradientFillNode
+	GradientKeyframe                = scene.GradientKeyframe
 	GradientStrokeNode              = scene.GradientStrokeNode
 	Guide                           = scene.Guide
 	GuideOrientation                = scene.GuideOrientation

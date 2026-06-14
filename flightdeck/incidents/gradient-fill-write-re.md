@@ -254,8 +254,24 @@ LIST(GCst)
 - **Validation strategy:** the fixture is a real AE-saved byte ORACLE — make the
   encoder reproduce its exact lhd3/ldat/Utf8, then double-version render gate
   (t=0 left=R, t=1s left=G — the stop colors swap). No byte-guessing.
-- **Status:** RE'd, NOT yet implemented (scene needs gradient-keyframe storage;
-  `lowerGradientFillNode` needs the time-table + multi-Utf8 emit).
+- **Status:** ✅ **SHIPPED 2026-06-15** (AE2020 + AE2025 render-pixel gate).
+  - Scene: `GradientFillNode.AddGradientKeyframe(time, *Gradient)` + `GradientKeyframes()`
+    (write-only; re-parse surfaces kf0's stops as the static value).
+  - Lower: `animateGradientStops` flips the GCst static→animated — tdb4 flags
+    (@0x05/@0x44/@0x4f, identical to `injectAnimatedStream`), cdat→time-table
+    `LIST(list)` (FormType `IDkfl` = "list"), GCky single-Utf8 → one Utf8/kf.
+    `encodeGradientColorTimeTable` builds the bpk-64 records (time @0x00 =
+    round(sec·tickRate); 0x00000002 @0x08, f64 1.0 @0x10, scratch 0x80809FBE @0x38
+    replicated verbatim from the oracle — proven AE-irrelevant: both versions
+    accept + render the swap regardless).
+  - **bpk-64 confirmed against the oracle byte-for-byte on time** (our 30fps
+    NewComposition tickRate = 30720, so kf1@1s → 30720, matching the fixture).
+  - Gate `TestGradientAnim_AEShipGate_AE2020/2025` + `TestGradientAnimRoundtrip`
+    (pure-Go structural): a 1000px rect, horizontal ramp, kf0=R/B/G → kf1=G/R/B;
+    rendered t=0 = R/B/G, t=1s = G/R/B (left-edge R→G swap = animation proof),
+    visually eyeballed. **Deferred**: gradient STROKE stop animation (G-Stroke,
+    same path on demand); ease on stop keyframes (linear only — interp bytes
+    hardcoded 01/01).
 
 ## Scope (子项⑭)
 

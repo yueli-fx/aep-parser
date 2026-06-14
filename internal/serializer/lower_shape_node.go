@@ -884,7 +884,7 @@ func lowerGradientStops(body *rifx.Chunk, gradient *codec.Gradient) *rifx.Chunk 
 // Linear=1 reproduces the pre-type behavior). HiLite Length / Angle (both 1D f64
 // BE at cdat[0:8]) offset a radial gradient's bright centre; default 0/0
 // overwrites the baked slots with no visible change (no regression).
-func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error) {
+func lowerGradientFillNode(n *GradientFillNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeGradFillBody()
 	if err != nil {
 		return nil, err
@@ -895,6 +895,12 @@ func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad End Pt", encodeF64sBE(ep[0], ep[1]))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Length", encodeF64sBE(n.HighlightLength()))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Angle", encodeF64sBE(n.HighlightAngle()))
+	if kfs := n.GradientKeyframes(); len(kfs) > 0 {
+		if err := animateGradientStops(body, "ADBE Vector Grad Colors", kfs, ctx); err != nil {
+			return nil, err
+		}
+		return body, nil
+	}
 	return lowerGradientStops(body, n.Gradient()), nil
 }
 
@@ -1455,6 +1461,127 @@ func overwriteGradientStopsXML(body *rifx.Chunk, streamName, xml string) {
 		}
 		return
 	}
+}
+
+// animateGradientStops converts a static gradient-colors stream in an embedded
+// body to animated. It finds the tdmn matching streamName, descends into the
+// following LIST(GCst), and (a) patches the tdb4 static→animated flags (same
+// three bits as injectAnimatedStream — @0x05 clear bit0, @0x44=1, @0x4f clear
+// bit0), (b) replaces the static cdat in the inner LIST(tdbs) with a keyframe
+// time-table LIST(list)(lhd3+ldat), and (c) replaces the single GCky/Utf8 with
+// one Utf8 leaf per keyframe (that keyframe's gradient as prop.map XML). The
+// per-keyframe value lives in the parallel GCky/Utf8 list, not in the ldat —
+// structurally the same split as path keyframes (om-s time-table + shap leaves).
+// RE: incidents/gradient-fill-write-re.md § animated color stops.
+func animateGradientStops(body *rifx.Chunk, streamName string, kfs []GradientKeyframe, ctx *lowerCtx) error {
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID != rifx.IDTdmn || trimChunkNUL(kids[i].Data) != streamName {
+			continue
+		}
+		gcst := kids[i+1]
+		if !gcst.IsList() || gcst.FormType != rifx.IDGCst {
+			return fmt.Errorf("animateGradientStops: %s next chunk not LIST(GCst)", streamName)
+		}
+		times := make([]float64, len(kfs))
+		for j, kf := range kfs {
+			times[j] = kf.Time
+		}
+		timeTable, err := encodeGradientColorTimeTable(times, ctx)
+		if err != nil {
+			return err
+		}
+		var tdbs, gcky *rifx.Chunk
+		for _, c := range gcst.Children {
+			if c.IsList() && c.FormType == rifx.IDTdbs {
+				tdbs = c
+			}
+			if c.IsList() && c.FormType == rifx.IDGCky {
+				gcky = c
+			}
+		}
+		if tdbs == nil || gcky == nil {
+			return fmt.Errorf("animateGradientStops: %s missing tdbs/GCky", streamName)
+		}
+		// (a) tdb4 static→animated flags.
+		if tdb4 := findChildID(tdbs, rifx.ChunkID{'t', 'd', 'b', '4'}); tdb4 != nil && len(tdb4.Data) > 0x4f {
+			tdb4.Data[0x05] &^= 0x01
+			tdb4.Data[0x44] = 0x01
+			tdb4.Data[0x4f] &^= 0x01
+		}
+		// (b) replace the static cdat with the keyframe time-table.
+		replaced := false
+		for j, c := range tdbs.Children {
+			if c.ID == rifx.IDCdat {
+				tdbs.Children[j] = timeTable
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			return fmt.Errorf("animateGradientStops: %s no cdat to replace in tdbs", streamName)
+		}
+		// (c) replace the GCky's single Utf8 with one per keyframe.
+		gcky.Children = gcky.Children[:0]
+		for _, kf := range kfs {
+			gcky.Children = append(gcky.Children, &rifx.Chunk{
+				ID:   rifx.IDUtf8,
+				Data: []byte(codec.EncodeGradientXML(kf.Gradient)),
+			})
+		}
+		return nil
+	}
+	return fmt.Errorf("animateGradientStops: %s tdmn not found", streamName)
+}
+
+// encodeGradientColorTimeTable builds the keyframe time-table LIST(list)(lhd3+
+// ldat) for animated gradient color stops. The per-keyframe block is a
+// gradient-specific bpk-64 record (NOT the scalar/spatial layouts): time @0x00
+// (round(sec*tickRate)), linear interp bytes @0x04/0x05, headerByte 0x01 @0x07,
+// a constant 0x00000002 @0x08, and an f64 1.0 @0x10 + tangent-scratch @0x38 —
+// the latter two replicated verbatim from the AE-saved oracle fixture
+// (v2_2_gradient_anim_src.aep); the gradient VALUES live in the parallel
+// GCky/Utf8 leaves, so this table carries only timing/interp. lhd3 mirrors
+// encodeKeyframes (magic / numKf @0x08 / pages @0x0C / bpk @0x10 / 4×pages @0x1C).
+func encodeGradientColorTimeTable(times []float64, ctx *lowerCtx) (*rifx.Chunk, error) {
+	if len(times) == 0 {
+		return nil, fmt.Errorf("encodeGradientColorTimeTable: no keyframes")
+	}
+	if ctx == nil || ctx.tickRate <= 0 {
+		return nil, fmt.Errorf("encodeGradientColorTimeTable: lowerCtx.tickRate not set")
+	}
+	const bpk = 64
+	n := len(times)
+	pages := uint32((n + 3) / 4)
+
+	lhd3 := make([]byte, 52)
+	lhd3[0], lhd3[1], lhd3[2], lhd3[3] = 0x00, 0xd0, 0x0b, 0xee
+	binary.BigEndian.PutUint32(lhd3[0x08:0x0C], uint32(n))
+	binary.BigEndian.PutUint32(lhd3[0x0C:0x10], pages)
+	binary.BigEndian.PutUint32(lhd3[0x10:0x14], bpk)
+	binary.BigEndian.PutUint32(lhd3[0x14:0x18], 4)
+	binary.BigEndian.PutUint32(lhd3[0x18:0x1C], 1)
+	binary.BigEndian.PutUint32(lhd3[0x1C:0x20], 4*pages)
+
+	ldat := make([]byte, n*bpk)
+	for i, t := range times {
+		blk := ldat[i*bpk : (i+1)*bpk]
+		binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(t*ctx.tickRate)))
+		blk[0x04] = byte(InterpLinear)
+		blk[0x05] = byte(InterpLinear)
+		blk[0x07] = 0x01
+		binary.BigEndian.PutUint32(blk[0x08:0x0C], 2)
+		binary.BigEndian.PutUint64(blk[0x10:0x18], math.Float64bits(1.0))
+		// @0x38 tangent-scratch (verbatim from the oracle's first record).
+		blk[0x38], blk[0x39], blk[0x3A], blk[0x3B] = 0x80, 0x80, 0x9f, 0xbe
+	}
+
+	kfList := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl}
+	kfList.Children = append(kfList.Children,
+		&rifx.Chunk{ID: rifx.IDLhd3, Data: lhd3},
+		&rifx.Chunk{ID: rifx.IDLdat, Data: ldat},
+	)
+	return kfList, nil
 }
 
 // lowerStrokeNode emits a Stroke graphic body using embedded tolerance

@@ -538,11 +538,21 @@ func (f *FillNode) Properties() *PropertyGroup {
 // LIST sizes).
 type GradientFillNode struct {
 	gradient        *codec.Gradient
+	gradientKfs     []GradientKeyframe
 	startPoint      [2]float64
 	endPoint        [2]float64
 	gradientType    GradientType
 	highlightLength float64
 	highlightAngle  float64
+}
+
+// GradientKeyframe pairs a time (seconds) with a complete gradient value
+// (color + alpha stops). Animated gradient stops are a list of these — each
+// keyframe carries the full stop set at that time, and AE interpolates the
+// stops between keyframes. See GradientFillNode.AddGradientKeyframe.
+type GradientKeyframe struct {
+	Time     float64
+	Gradient *Gradient
 }
 
 // GradientType selects a gradient fill's ramp shape: linear (a straight band) or
@@ -656,6 +666,35 @@ func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
 func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
 	return setGradientAlphaStops(n.gradient, stops)
 }
+
+// AddGradientKeyframe appends an animated-stops keyframe: the full gradient g
+// (color + alpha stops) takes effect at `time` seconds, and AE interpolates the
+// stops between keyframes (a colour sweep / flow). The first keyframe switches
+// the node to animated mode — the static Gradient() value is then ignored on
+// lower in favour of the keyframe list. Provide keyframes in ascending time.
+// g's stops are validated (≥2 stops; offsets/colours in range).
+//
+// On-disk this writes the `ADBE Vector Grad Colors` stream as a keyframe
+// time-table plus one prop.map-XML leaf per keyframe (see
+// incidents/gradient-fill-write-re.md § animated color stops). Write-only:
+// re-parsing surfaces the first keyframe's stops as the static value.
+func (n *GradientFillNode) AddGradientKeyframe(time float64, g *Gradient) error {
+	if g == nil {
+		return fmt.Errorf("AddGradientKeyframe: nil gradient")
+	}
+	if err := setGradientColorStops(g, g.ColorStops); err != nil {
+		return err
+	}
+	if err := setGradientAlphaStops(g, g.AlphaStops); err != nil {
+		return err
+	}
+	n.gradientKfs = append(n.gradientKfs, GradientKeyframe{Time: time, Gradient: g})
+	return nil
+}
+
+// GradientKeyframes returns the animated-stops keyframes (nil when the node is
+// static). Used by the serializer.
+func (n *GradientFillNode) GradientKeyframes() []GradientKeyframe { return n.gradientKfs }
 
 // setGradientColorStops validates (≥2 stops; offset/midpoint/color ∈ [0,1])
 // and replaces g.ColorStops. Shared by GradientFill / GradientStroke.
