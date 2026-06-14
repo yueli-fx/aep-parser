@@ -48,16 +48,23 @@ one flipped bit.
    the rotation channels (camera/light-option vein), or (c) parse-the-clone off an
    AE-materialized 3D layer. TBD — next priority-2 step.
 
-## Gate (DOM-readback, not pixel — and why that's correct here)
+## Two gates: DOM enable + visible camera-dolly (both PASS, AE2020+2025)
 
-`TestLayer3DEnable_AEShipGate_AE2020/2025` PASS. **Deliberately DOM-level**: a 3D
-layer with a DEFAULT transform (z=0, no rotation) renders **pixel-identical** to
-its 2D self, so "enable" has no visible surface to assert on — the capability's
-real surface is the 3D-ness AE reports (threeDLayer + materialized channels +
-Position→3D). The **visible** 3D transform under a camera (dolly / parallax /
-RotateY perspective) is the next capability and gets its own render-pixel gate
-(red line 4). Per delivery-contract this split is honest: enable is shipped at its
-surface; visible-3D is NOT yet claimed.
+1. **`TestLayer3DEnable_AEShipGate`** (DOM-readback). **Deliberately DOM-level**: a
+   3D layer with a DEFAULT transform (z=0, no rotation) renders **pixel-identical**
+   to its 2D self, so "enable" has no visible surface — the surface is the 3D-ness
+   AE reports (threeDLayer + materialized channels + Position→3D).
+2. **`TestLayer3DCamDolly_AEShipGate`** (render-pixel, red line 4). The **visible**
+   proof, and it needed **zero new channel-write code**: build a from-scratch 3D
+   BOX (z=0) + a `NewCameraLayer`, then the JSX dollies the **camera's** Position Z
+   (cameras are inherently 3D, 3-comp Position already settable) — at z=-700 the
+   300px box renders **426px wide**, at z=-2400 it renders **124px** (3.41× ratio,
+   byte-identical both versions). A 2D layer ignores the camera → constant width,
+   so the ratio is the 3D proof. This is the roadmap's 推拉镜 in miniature.
+
+So "图层 3D flag" is closed with both an acceptance and a render proof. **Parallax**
+(differential depth = two layers at different Z) still needs per-layer Z-write
+(next item), but single-layer camera response is shipped.
 
 ## Pre-existing 3D infra (already shipped, fixture-based)
 

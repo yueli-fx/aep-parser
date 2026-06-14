@@ -32,7 +32,8 @@ last_updated: 2026-06-14
 **最大整块空白**。解锁真·拉镜（相机推轨 + 景深视差）、希区柯克变焦——AE 相机只对 3D 图层起作用，2D 图层相机动了也没用。camera/light option 已全做（2026-06-14），就缺「图层 3D 化 + Z 轴」这一环。
 
 - ~~**图层 3D flag（ldta）**~~ ✅ **2026-06-15**。3D-enable bit = ldta @0x26 **bit2**（早已读+写，`SetIs3D` length-preserving）。新发现：**翻 bit 一个动作就够**——AE 打开时自动 materialize 完整 3D 层（threeDLayer=true、Position 自动扩 2D→3D z=0、Orientation/RotateX/Y/Z + Material Options 全生成）。DOM-readback gate（`TestLayer3DEnable_AEShipGate`）双版本 PASS。详 `layer-3d-enable-bit-materializes.md`。
-- **Transform 3D 通道合成（可见 3D 的下一步）** —— Position_Z / Orientation / Rotate X / Rotate Y 的**非默认值写入**。enable 情形 AE 自动建通道（上条），但写非默认值仍需 slot：从零 Position 是 2-comp（16B cdat），3-comp（24B）非 length-preserving；RotateX/Y/Orientation 根本不在 emit 里。三条路待选：(a) Is3D 时 emit 3-comp Position；(b) synthesis-insert 旋转通道（camera/light-option vein）；(c) parse-the-clone AE-materialized 3D 层。**可见 3D（相机推拉/视差/RotateY 透视）须红线4 像素 gate**，尚未交付。详 `transform-group-default-omission.md` + `layer-3d-enable-bit-materializes.md`。
+- ~~**可见 3D：相机推拉**~~ ✅ **2026-06-15**。从零 3D BOX(z=0) + `NewCameraLayer`，dolly 相机 Position Z（相机本就 3-comp 可设）→ box 随距离缩放（near z=-700→426px、far z=-2400→124px，3.41× 双版本逐字节一致）。**零新通道写代码**。渲染像素 gate `TestLayer3DCamDolly_AEShipGate` 双版本 PASS。详 `layer-3d-enable-bit-materializes.md`。
+- **Transform 3D 通道**非默认值写入（视差/RotateY 透视的下一步）—— Position_Z / Orientation / Rotate X / Rotate Y。enable 时 AE 自动建通道，但写非默认值仍需 slot：从零 Position 2-comp（16B）→3-comp（24B）非 length-preserving；RotateX/Y/Orientation 不在 emit 里。三路：(a) Is3D 时 emit 3-comp Position；(b) synthesis-insert 旋转通道（camera/light-option vein）；(c) parse-the-clone AE-materialized 3D 层。**视差**（两层不同 Z）须此项。详 `transform-group-default-omission.md` + `layer-3d-enable-bit-materializes.md`。
 - **Material Options** —— 3D 层的 Casts Shadows/Accepts Lights/Ambient 等（`re_material_options.jsx` fixture 已存，未 ship）。
 - **3D-render 像素 gate** —— 有 3D 层后，camera/light 的 DoF/bokeh/光照才能像素级深验（现仅 DOM 值）。
 - 产物里程碑：一个纯模板编辑产出的「带景深视差的推拉镜」showcase。
