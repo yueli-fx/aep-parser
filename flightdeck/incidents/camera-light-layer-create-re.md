@@ -87,9 +87,14 @@ where the field lives:
     parse-the-clone only reaches slots AE did NOT elide in the template.** The
     earlier "lights up the entire existing surface incl. Iris\*" was an
     overstatement. Coverage by slot presence:
-    - **Light: 10/10 OK** — template carries all of Intensity / Color (spliced) /
-      Cone Angle / Cone Feather / Falloff Type / Falloff Start / Falloff Distance
-      / Casts Shadows / Shadow Darkness / Shadow Diffusion.
+    - **Light: 10/10 OK + all dual-version AE-DOM-gated** (2026-06-14 finish) —
+      Intensity / Color (spliced) / Cone Angle / Cone Feather / Falloff Type /
+      Falloff Start / Falloff Distance / Casts Shadows / Shadow Darkness / Shadow
+      Diffusion all set on the from-scratch Spot light + read back from AE's DOM
+      in `TestNewCameraLight_AEShipGate`. **Gotcha: Falloff Distance default is
+      500** — gating it at 500 made AE elide it on resave (Go re-parse → nil); the
+      gate uses 750. (Same default-elision trap as any "distinctive value happens
+      to equal the AE default" — pick a value provably off-default.)
     - **Camera: was 5/13, now 13/13** — the 5 (Zoom / DoF / Focus / Aperture /
       Blur Level) have template slots; the 8 elided Iris\*/Highlight\* were
       resolved by synthesis-insert below.

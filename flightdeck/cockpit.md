@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（camera/light from-scratch option 全清：**Camera 8 个 Iris*/Highlight* synthesis-insert**〔批量 leaf splice 在 Blur Level 后 + 复位默认，双版本 DOM 全读回〕+ 附带修 IrisHighlightSaturation 拼错 match-name latent bug〔Adobe 拼成 "Hightlight"，正确拼写连 parsed 都 nil〕；先前 **Light Color** synthesis-insert〔插 Intensity 后，组内顺序敏感，cdat=[A,R,G,B]×255 裸值〕。Camera 13/13 + Light 10/10 from-scratch 可用。逐 commit 见 git log。）
+**Last updated**: 2026-06-14 by claude（**camera/light from-scratch option 全清 + 全部双版本 AE-DOM-gate**：Camera 13/13〔含 8 Iris*/Highlight* synthesis-insert〕+ Light 10/10〔含 Color synthesis-insert + Falloff/Shadow 收尾〕。Gotcha：Falloff Distance 默认 500，gate 用 750 避 elide。附带修 IrisHighlightSaturation 拼错 match-name latent bug〔Adobe 拼成 "Hightlight"〕。唯一剩 3D-render 像素深验。逐 commit 见 git log。）
 
 **Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。常用 shape 矢量滤镜 11 件 + **gradient（方向/类型/高光，fill+stroke，写+读全闭环）** + 星形全收齐，端到端组合 gate ✅。工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**，agent 先**自验证**（render → Read png 对照意图）再给用户真机复核；gradient 与 expressions showcase 均 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
 
@@ -20,7 +20,7 @@
 - **EG 面板崩溃**（用户低优）——从零 EG 工程展开「基本图形」面板崩 AE（退回单 slider 也崩），DOM readback 假绿，根源 ship-gate 从不开面板。修法：补「真机开面板」gate + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节。详 `incidents/essential-graphics-write-re.md`。
 
 **polish / 技债**：
-- **camera/light 余项**（Light 10/10 + Light Color 已通；**Camera 13/13 已通**——8 个 Iris*/Highlight* synthesis-insert + 双版本 gate PASS，附带修 IrisHighlightSaturation 拼错 match-name 的 latent bug）：剩 ① 6 个 Light option（Falloff×3/Shadow×2/CastsShadows）能用但未逐项 AE-DOM-gate（低风险）· ② 3D-render 像素 gate（需 3D layer 支持）。`incidents/camera-light-layer-create-re.md`。
+- **camera/light from-scratch option 已全清**（**Camera 13/13 + Light 10/10 全部双版本 AE-DOM-gate 实测 PASS**；含 Iris*/Highlight* + Light Color synthesis-insert + Falloff/Shadow 收尾，附带修 IrisHighlightSaturation 拼错 match-name latent bug）。**唯一剩**：3D-render 像素 gate（值已全程 DOM 验，但渲染像素深验需 3D layer 创建支持，本库未有）。`incidents/camera-light-layer-create-re.md`。
 - **G-Stroke Dashes/Taper/Wave** 嵌套组（蓝本实心描边）· 各矢量滤镜 deferred 子流（`incidents/trim-paths-vector-filter-re.md`）。
 - `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。
 - 表达式 `linear()`/`ease()` remap（边际值低，按需）。

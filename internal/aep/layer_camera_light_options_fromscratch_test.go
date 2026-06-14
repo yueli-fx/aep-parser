@@ -63,6 +63,12 @@ func TestCameraLightOptions_FromScratch_Roundtrip(t *testing.T) {
 	}
 	// Raw cdat convention: [A,R,G,B] in 0..255 (alpha first).
 	must("SetLightColor", light.SetLightColor([]float64{255, 51, 102, 204}))
+	must("SetLightFalloffType", light.SetLightFalloffType(2))
+	must("SetLightFalloffStart", light.SetLightFalloffStart(100))
+	must("SetLightFalloffDistance", light.SetLightFalloffDistance(750))
+	must("SetLightCastsShadows", light.SetLightCastsShadows(true))
+	must("SetLightShadowDarkness", light.SetLightShadowDarkness(80))
+	must("SetLightShadowDiffusion", light.SetLightShadowDiffusion(15))
 
 	// In-memory mirror (the fresh layer's parsed property tree reflects the write).
 	if got := cam.CameraZoom().StaticValue.(float64); got != 850 {
@@ -110,6 +116,12 @@ func TestCameraLightOptions_FromScratch_Roundtrip(t *testing.T) {
 	chk("LightIntensity", reLight.LightIntensity(), 65)
 	chk("LightConeAngle", reLight.LightConeAngle(), 72)
 	chk("LightConeFeather", reLight.LightConeFeather(), 35)
+	chk("LightFalloffType", reLight.LightFalloffType(), 2)
+	chk("LightFalloffStart", reLight.LightFalloffStart(), 100)
+	chk("LightFalloffDistance", reLight.LightFalloffDistance(), 750)
+	chk("LightCastsShadows", reLight.LightCastsShadows(), 1)
+	chk("LightShadowDarkness", reLight.LightShadowDarkness(), 80)
+	chk("LightShadowDiffusion", reLight.LightShadowDiffusion(), 15)
 
 	lc := reLight.LightColor()
 	if lc == nil {

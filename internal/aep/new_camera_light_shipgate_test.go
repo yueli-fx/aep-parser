@@ -70,6 +70,13 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 		{"SetLightConeFeather", func() error { return lightLayer.SetLightConeFeather(35) }},
 		// Raw cdat [A,R,G,B] 0..255; R=51/G=102/B=204 → AE DOM [0.2,0.4,0.8].
 		{"SetLightColor", func() error { return lightLayer.SetLightColor([]float64{255, 51, 102, 204}) }},
+		// Remaining light options (template-present slots; gate them too).
+		{"SetLightFalloffType", func() error { return lightLayer.SetLightFalloffType(2) }}, // Smooth
+		{"SetLightFalloffStart", func() error { return lightLayer.SetLightFalloffStart(100) }},
+		{"SetLightFalloffDistance", func() error { return lightLayer.SetLightFalloffDistance(750) }}, // 500 is AE's default (elided on resave)
+		{"SetLightCastsShadows", func() error { return lightLayer.SetLightCastsShadows(true) }},
+		{"SetLightShadowDarkness", func() error { return lightLayer.SetLightShadowDarkness(80) }},
+		{"SetLightShadowDiffusion", func() error { return lightLayer.SetLightShadowDiffusion(15) }},
 	} {
 		if err := e.fn(); err != nil {
 			t.Fatalf("%s: %v", e.label, err)
@@ -150,6 +157,13 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 				abs(rgba[0]-255) > 0.5 || abs(rgba[1]-51) > 0.5 || abs(rgba[2]-102) > 0.5 || abs(rgba[3]-204) > 0.5 {
 				t.Errorf("%s resaved: Light1.Color = %v, want raw ~[255 51 102 204]", ver, lc.StaticValue)
 			}
+			// Remaining light options survived AE's resave.
+			chkOpt(t, ver, "Light1.FalloffType", l.LightFalloffType(), 2)
+			chkOpt(t, ver, "Light1.FalloffStart", l.LightFalloffStart(), 100)
+			chkOpt(t, ver, "Light1.FalloffDistance", l.LightFalloffDistance(), 750)
+			chkOpt(t, ver, "Light1.CastsShadows", l.LightCastsShadows(), 1)
+			chkOpt(t, ver, "Light1.ShadowDarkness", l.LightShadowDarkness(), 80)
+			chkOpt(t, ver, "Light1.ShadowDiffusion", l.LightShadowDiffusion(), 15)
 		}
 	}
 	if !cam {

@@ -79,6 +79,18 @@
                     if (Math.abs(cv[ci] - wantC[ci]) > 0.02) fail("light.color[" + ci + "]=" + cv[ci] + " want " + wantC[ci]);
                 }
                 log.push("  light.color=[" + cv.join(",") + "]");
+                // Remaining light options (template-present slots), by match-name.
+                function nearL(label, mn, want) {
+                    var pr = lo.property(mn);
+                    if (!pr) { fail(label + " property missing"); return; }
+                    near(label, pr.value, want);
+                }
+                nearL("light.falloffType", "ADBE Light Falloff Type", 2);
+                nearL("light.falloffStart", "ADBE Light Falloff Start", 100);
+                nearL("light.falloffDistance", "ADBE Light Falloff Distance", 750);
+                nearL("light.castsShadows", "ADBE Casts Shadows", 1);
+                nearL("light.shadowDarkness", "ADBE Light Shadow Darkness", 80);
+                nearL("light.shadowDiffusion", "ADBE Light Shadow Diffusion", 15);
             }
         }
 
