@@ -132,4 +132,17 @@ Gate：`TestMGWiggle_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（4 值 
 
 Gate：`TestMGWiggleTransform_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（6 值 resave 全读回 + 质心位移 189.7px 两版一致）。verify_mg_wiggletransform.jsx + mg_wiggletransform_shipgate_test.go。commit df0b874。
 
+## Animated filter scalar — Trim End reveal gated (2026-06-14)
+
+静态滤镜 11 个收齐后，**animated 滤镜 scalar 路径**（`lowerShapeScalar`→`injectAnimatedStream`，与 Rect Roundness/Stroke Opacity/Fill Opacity 共享）一直**已 wired 但从未在渲染面 gate**——incident 早先那句「animated 自动经 injectAnimatedStream … 天然支持」是**未验证假设**（交付准则：Go round-trip ≠ AE 接受；可渲染能力须红线4 像素 gate）。
+
+`TestMGTrimAnim_AEShipGate_AE2020/2025` PASS（commit 002264d）：单 shape 层 ellipse+白 stroke+Trim，Trim End 关键帧 0→100 over [t=0,t=4]，**渲染同一层三帧**断言 ring 扫开：
+- t=0 (End=0)：空（left+right+bottom 缺；top 起始顶点可能留点，不断言）
+- t=2 (End=50)：右半（top/right/bottom 在，left 缺）— AE 椭圆顶部起、顺时针
+- t=4 (End=100)：整圈（left+right 都在）
+
+**单层三帧的 left 侧单调 reveal（缺→缺→在）= 动画证据**——排除掉「层被 drop」和「静态 End=100」两种假绿。resave 重 parse 确认 Trim End 存活为 2-keyframe **bpk-48 1D 非空间**容器。双版本 PNG 逐字节一致（10581/19377/26276）。verify_mg_trimanim.jsx + mg_trimanim_shipgate_test.go。
+
+**Repeater Copies/Offset · Offset Amount · PuckerBloat/Twist/RC Amount 等所有 headline scalar 走完全相同 `lowerShapeScalar` 路径**——AE 消化 animated filter scalar 已由本 gate 证明，各自 animated gate 按需补（边际价值低，非重复 RE）。**注**：animated gradient 色标**不**属此类（GCky 是独立 keyframe 容器，未 RE + JSX 无法 authoring，见 `gradient-fill-write-re.md` § Scope）。
+
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。
