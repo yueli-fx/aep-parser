@@ -13,7 +13,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-15 个 🖼 可视方向先前全部 ✅ complete（2026-06-14 用户真机逐个验收通过）；其中 **gradient（+radial 类型）与 expressions（+四语汇 idiom）2026-06-14 各新增增量，回到 🔍 待review**，等用户复核新内容。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
+15 个 🖼 可视方向**全部 ✅ complete**（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
 
 ## 🖼 A 类 — 可视方向（看图档）
 
@@ -22,9 +22,9 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [shape-filters](shape-filters/INDEX.md) | 形状矢量滤镜家族 11 件 + PolyStar + 双滤镜叠加 | ✅ complete |
 | [shape-primitives](shape-primitives/INDEX.md) | 四种参数图元 + Fill/Stroke/Gradient 描绘变体 | ✅ complete |
 | [keyframes-ease](keyframes-ease/INDEX.md) | 时间缓动 linear/ease-out/ease-in-out（渲中间帧看位置差） | ✅ complete |
-| [expressions](expressions/INDEX.md) | 表达式激活（time\*N 旋转）+ 四语汇 idiom（跨层/loopOut/wiggle/slider） | 🔍 待review（+vocab band） |
+| [expressions](expressions/INDEX.md) | 表达式激活（time\*N 旋转）+ 四语汇 idiom（跨层/loopOut/wiggle/slider） | ✅ complete |
 | [precomp-nesting](precomp-nesting/INDEX.md) | 预合成嵌套（parent 嵌套 child 组合场景） | ✅ complete |
-| [gradient](gradient/INDEX.md) | 渐变填充 + ramp 方向 + **类型**（4 线性 + 2 径向同心） | 🔍 待review（+radial） |
+| [gradient](gradient/INDEX.md) | 渐变填充 + ramp 方向 + **类型**（4 线性 + 2 径向同心） | ✅ complete |
 | [text](text/INDEX.md) | 文字层 from-scratch（NewTextLayer + SetText 多行） | ✅ complete |
 | [layers](layers/INDEX.md) | Solid 同心色框 + Null/Adjustment 建层 | ✅ complete |
 | [effects](effects/INDEX.md) | 加效果 AddEffect + 改参数 SetEffectParam（12 效果网格） | ✅ complete |

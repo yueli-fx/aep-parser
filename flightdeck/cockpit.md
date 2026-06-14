@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-06-14 by claude（gradient radial type 从零通（双版本旋转对称像素 PASS，模板重抽 15-child）· 表达式语汇 gate 四 idiom 双版本 PASS（slider「drop」误诊经 bisection 证伪）· 先前：nnhd display 家族修复 · SetLightKind 从零通。逐 commit 见 git log。）
 
-**Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。所有常用 shape 矢量滤镜 11 件 + gradient 方向/**类型(radial)** + 星形全收齐，端到端组合 gate ✅。新工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase 供真机审核**。gradient（+radial）与 expressions（+四语汇 idiom）showcase 已扩展，**🔍 待review**（等用户复核新内容）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
+**Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。所有常用 shape 矢量滤镜 11 件 + gradient 方向/**类型(radial)** + 星形全收齐，端到端组合 gate ✅。新工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**；agent 先**自验证**（render → Read png 对照意图核一遍）再给用户真机复核。gradient（+radial）与 expressions（+四语汇 idiom）showcase 已扩展并 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
 
 ## 进行中
 

@@ -3,7 +3,7 @@ showcase: expressions
 direction: 表达式激活 + 语汇 — 纯 Go 从零生成 time*N 旋转轨道（上排）+ 四语汇 idiom（下排：跨层引用 / loopOut / wiggle / slider effect-param 引用）
 capabilities: [set-expression, set-expression-enabled, rotation-expression, time-driven, cross-layer-ref, loopout, wiggle, effect-param-ref, slider-control]
 gates: [TestExpression_AEShipGate_AE2020, TestExpression_AEShipGate_AE2025, TestExprVocab_AEShipGate_AE2020, TestExprVocab_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/expressions  +  scripts/ae_run.ps1 render.jsx (renders t=1s)"
 ---
