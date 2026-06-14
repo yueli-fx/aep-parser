@@ -47,15 +47,18 @@ tdb4 @0x77/@0x78 是**两个独立字节**，历史 RE 把它们混为一个「@
 | 跨层引用 | `thisComp.layer("LEAD").transform.position + [0,250]` | 按名解析其它层属性 + 矢量算术 | `[480,500]` ✓ |
 | loopOut | `loopOut("cycle")` | **表达式叠加在带关键帧属性上**（新组合：之前只验静态属性） | `[899.997,750]`（循环相位 0.5 中点；无循环则保持末帧 1500）✓ |
 | wiggle | `wiggle(2,250)` | 过程式/时变（偏离锚点且 t=1≠t=2.5） | `[857,916]` ✓ |
+| effect-param 引用 | `[effect(1)(1), 350]`（SLD 上挂 Slider Control = 880，表达式引用之） | **表达式读 effect 参数**（AddEffect + SetEffectParam + expression 三者组合，MG slider 绑定核心） | `[880,350]`（slider 值经表达式驱动 x）✓ |
 
-字节机制与表达式内容无关（tdb4 @0x77/@0x78 + tdbs Utf8），gate 证明的是 AE **求值**这三类 idiom + 渲染像素（LEAD/LINK/LOOP 确定性命中，WIG 非确定故仅验「渲染未丢」）。**AE 2020 + AE 2025 双版本 PASS**。
+字节机制与表达式内容无关（tdb4 @0x77/@0x78 + tdbs Utf8），gate 证明的是 AE **求值**这四类 idiom + 渲染像素（LEAD/LINK/LOOP/SLD 确定性命中，WIG 非确定故仅验「渲染未丢」）。**AE 2020 + AE 2025 双版本 PASS**。
 
-**仍未 gate：**
-- 表达式驱动 1D 标量以外维度的更复杂语汇（`linear()`/`ease()` remap、`valueAtTime` 组合）——边际证明值低（机制已证内容无关），按需补。
-- **表达式引用 effect 参数（`effect(1)("Slider")` slider-control 绑定）= 被一个 AddEffect 问题挡住，非表达式问题。负向发现（2026-06-14 尝试）：把 Slider Control 加到 SLD 后在 7 层从零 comp 里 `effect(1)` 在 AE 读回 null——AE **静默 drop 了效果**；改挂 SOLID 宿主 CTRL（essential-graphics/set-effect-param gate 已证单层 solid+slider 可接受）仍被 AE drop。Go round-trip 全程保留效果（`l.Effects`=1、params=2），AE 不保留——典型「Go round-trip ≠ AE 接受」。即 AddEffect 在「从零多层 comp」上下文回归（单层 EG gate 绿、本 7 层场景 drop），疑似 item-ID / tdpi host-binding / 层序交互（关联 `add-effect-splice-re.md`、`multi-layer-silent-drop.md`、`nextitemid-must-include-layer-ids.md`）。修法走最小失败 bisection（剥到 solid+slider 单测 → 逐层加回定位 drop 触发点），未做，deferred。表达式侧已就绪，解开 AddEffect 后即可补 SLD idiom。**注**：AddEffect 在 SHAPE 层上本就未 gate（同样 AE drop）。**
+**effect-param 引用的 RE 教训（按索引引用，不是名字）：**`effect(1)("Slider")` 与 DOM `layer.effect("Slider Control")` / `.property("Slider")` **全部解析失败**——AddEffect 生成的效果实例**名 = match-name「ADBE Slider Control」**（非显示名 "Slider Control"），且我们物化的 slider 参数**显示名不是 "Slider"**（set_effect_param 一向按 match-name "ADBE Slider Control-0001" 访问）。故：(a) 表达式引用效果用**效果索引 + 参数索引** `effect(1)(1)`（求值出 880）；(b) JSX 读回走 `layer.property("ADBE Effect Parade").property(1)`（`.effect()` DOM 访问器在此也 flaky）。表达式若按错误名字引用，AE **不报错、静默回退静态值**（实测 `effect(1)("Slider")` → x=960 静态，假绿陷阱）。
+
+**误诊更正（2026-06-14）：**最初以为「AddEffect 在 shape / 多层 comp 被 AE 静默 drop」——**错**。bisection（L1 单 shape+slider → L6 全复杂度 SLD 最后建）逐级全 PASS，效果从未被 drop。真因是上面的「按错误名字访问」：① JSX `effect("Slider Control")` 名字错 → null → throw（被误读成 drop）；② 表达式 `effect(1)("Slider")` 参数名错 → 静默回退静态。AddEffect 在 shape 层、多层、SLD 末位建——全部正常。**教训：负向发现下结论前先把验证脚本的访问路径排除掉（同「先看产物再玩数字」）。**
+
+**仍未 gate：**`linear()`/`ease()` remap、`valueAtTime` 组合等——边际证明值低（机制已证内容无关），按需补。
 
 > 写 AI 生成 MG 表达式时查语义：`flightdeck/references/after-effects-expression-reference/`（docsforadobe，docs/ 按 objects/layer/general/text 分组）。
 
 ## Cases
 - 2026-06-12 首次（MG roadmap S2；第二阶段 disabled-丢文本是修复过程中的次生发现，一并修复）
-- 2026-06-14 表达式语汇 gate（S2 followup）：loopOut / wiggle / 跨层引用三 idiom 双版本 ship-gate PASS；Go 侧零改动（机制内容无关），新增 `expr_vocab_shipgate_test.go`。JSX 数组日志须逐元素索引（`v2s()`），直接拼数组对象触发 ExtendScript「数字结果无效（除以零？）」throw（同 `effect-param-elision-synthesis-lite.md` 坑）。
+- 2026-06-14 表达式语汇 gate（S2 followup）：loopOut / wiggle / 跨层引用 / effect-param 引用**四** idiom 双版本 ship-gate PASS；Go 侧零改动（机制内容无关），新增 `expr_vocab_shipgate_test.go`。JSX 数组日志须逐元素索引（`v2s()`），直接拼数组对象触发 ExtendScript「数字结果无效（除以零？）」throw（同 `effect-param-elision-synthesis-lite.md` 坑）。effect-param idiom 先误诊为「AddEffect 被 AE drop」，bisection 证伪 → 真因是引用按名失败须改索引（见上节）。

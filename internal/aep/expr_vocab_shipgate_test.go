@@ -22,8 +22,16 @@
 //     Procedural/time-varying; JSX asserts valueAtTime moved off the anchor
 //     and differs across time. Wiggle is non-deterministic per render so the
 //     pixel check only confirms the dot rendered (not dropped).
+//   - SLD: yellow dot, a Slider Control effect (value 880) on the layer drives
+//     its own Position.x via `[effect(1)(1), 350]` → renders at (880,350).
+//     Proves an expression resolving an effect-parameter reference (core MG
+//     rig). Reference by BOTH indices — effect(1)(1) — not names: AddEffect
+//     names the instance by its match-name "ADBE Slider Control" (not the
+//     display "Slider Control"), and the materialized param's display name is
+//     not "Slider". A name-based ref (effect("Slider Control")("Slider")) makes
+//     AE silently fall back to the static value (a false-green trap).
 //
-// Render pixel proof (red line 4) is deterministic for LEAD/LINK/LOOP.
+// Render pixel proof (red line 4) is deterministic for LEAD/LINK/LOOP/SLD.
 // Gated by AE_SHIP_GATE.
 package aep_test
 
@@ -118,12 +126,32 @@ func buildExprVocabDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		t.Fatalf("WIG Position: %v", err)
 	}
 
-	// Expressions need parsed back-refs (tdbs); attach after Reopen.
+	sld := addDot("SLD", [4]float64{1.0, 0.9, 0.16, 1}) // yellow
+	if err := sld.Position().SetStaticValue([2]float64{960, 350}); err != nil {
+		t.Fatalf("SLD Position: %v", err)
+	}
+
+	// Expressions and AddEffect both need parsed back-refs; do them after Reopen.
 	rp, err := aep.Reopen(p)
 	if err != nil {
 		t.Fatalf("Reopen: %v", err)
 	}
 	cc := rp.Compositions[0]
+
+	// SLD: a Slider Control on SLD drives its own Position.x by expression —
+	// proves an expression resolving an effect-parameter reference (a core MG
+	// rig). Reference the effect by index (effect(1)); AE names the instance by
+	// its match-name ("ADBE Slider Control"), so effect("Slider Control") would
+	// miss.
+	sldLayer := cc.LayerByName("SLD")
+	fx, err := aep.AddEffect(sldLayer, aep.EffectSliderControl)
+	if err != nil {
+		t.Fatalf("AddEffect Slider Control: %v", err)
+	}
+	if _, err := aep.SetEffectParam(sldLayer, fx, "ADBE Slider Control-0001", 880.0); err != nil {
+		t.Fatalf("SetEffectParam slider: %v", err)
+	}
+
 	for _, spec := range []struct {
 		layer string
 		expr  string
@@ -131,6 +159,7 @@ func buildExprVocabDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		{"LINK", `thisComp.layer("LEAD").transform.position + [0,250]`},
 		{"LOOP", `loopOut("cycle")`},
 		{"WIG", `wiggle(2,250)`},
+		{"SLD", `[effect(1)(1), 350]`},
 	} {
 		pos := cc.LayerByName(spec.layer).Position()
 		if pos == nil {
@@ -204,6 +233,7 @@ func TestExprVocab_Roundtrip(t *testing.T) {
 		{"LINK", `thisComp.layer("LEAD").transform.position + [0,250]`},
 		{"LOOP", `loopOut("cycle")`},
 		{"WIG", `wiggle(2,250)`},
+		{"SLD", `[effect(1)(1), 350]`},
 	} {
 		l := cc.LayerByName(want.layer)
 		if l == nil || l.Position() == nil {
@@ -289,12 +319,14 @@ func runExprVocabGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	cyan := [3]uint8{64, 217, 255}
 	green := [3]uint8{64, 255, 128}
 	magenta := [3]uint8{255, 51, 199}
+	yellow := [3]uint8{255, 230, 41}
 
 	leadX := scanRowForColor(img, 250, amber, tol)
+	sldX := scanRowForColor(img, 350, yellow, tol)
 	linkX := scanRowForColor(img, 500, cyan, tol)
 	loopX := scanRowForColor(img, 750, green, tol)
 	magN := countColor(img, magenta, tol)
-	t.Logf("%s centres: LEAD x=%d LINK x=%d LOOP x=%d  WIG px=%d", ver, leadX, linkX, loopX, magN)
+	t.Logf("%s centres: LEAD x=%d SLD x=%d LINK x=%d LOOP x=%d  WIG px=%d", ver, leadX, sldX, linkX, loopX, magN)
 
 	if leadX < 420 || leadX > 540 {
 		t.Errorf("%s LEAD at x=%d, want ≈480 (static anchor)", ver, leadX)
@@ -304,6 +336,9 @@ func runExprVocabGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	if loopX < 840 || loopX > 960 {
 		t.Errorf("%s LOOP at x=%d, want ≈900 (loopOut cycle phase 0.5); x≈1500 = loop not evaluating", ver, loopX)
+	}
+	if sldX < 820 || sldX > 940 {
+		t.Errorf("%s SLD at x=%d, want ≈880 (Slider Control via expression); x≈960 = effect-param ref not evaluating", ver, sldX)
 	}
 	if magN < 500 {
 		t.Errorf("%s WIG magenta pixels = %d, want >500 (wiggle dot rendered)", ver, magN)
@@ -322,6 +357,7 @@ func runExprVocabGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		{"LINK", `thisComp.layer("LEAD").transform.position + [0,250]`},
 		{"LOOP", `loopOut("cycle")`},
 		{"WIG", `wiggle(2,250)`},
+		{"SLD", `[effect(1)(1), 350]`},
 	} {
 		l := cc.LayerByName(want.layer)
 		if l == nil || l.Position() == nil {

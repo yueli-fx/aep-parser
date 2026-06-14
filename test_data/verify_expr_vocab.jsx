@@ -77,8 +77,29 @@
                 var w1 = wp.valueAtTime(T, false);
                 var w0 = wp.valueAtTime(1.0, false);
                 note("WIG pos@" + T + "=" + v2s(w1) + "  pos@1.0=" + v2s(w0));
-                if (near(w1[0], 960, 0.5) && near(w1[1], 950, 0.5)) fail("WIG pos=" + w1 + " unchanged from anchor [960,950] — wiggle not evaluating");
+                if (near(w1[0], 960, 0.5) && near(w1[1], 950, 0.5)) fail("WIG pos=" + v2s(w1) + " unchanged from anchor [960,950] — wiggle not evaluating");
                 if (near(w1[0], w0[0], 0.5) && near(w1[1], w0[1], 0.5)) fail("WIG pos identical at t=1.0 and t=" + T + " — wiggle not time-varying");
+            }
+
+            // SLD — expression resolving an effect-parameter reference. Read the
+            // effect via the parade group (the .effect() DOM accessor is flaky
+            // here); the expression itself uses effect(1) in AE's engine.
+            var sld = byName["SLD"];
+            if (!sld) { fail("SLD missing"); }
+            else {
+                var parade = sld.property("ADBE Effect Parade");
+                if (!parade || parade.numProperties < 1) { fail("SLD Slider Control dropped (parade empty)"); }
+                else {
+                    note("SLD effect[1] matchName='" + parade.property(1).matchName + "'");
+                    var sp = sld.transform.position;
+                    note("SLD expr='" + sp.expression + "' enabled=" + sp.expressionEnabled);
+                    if (!sp.expressionEnabled) fail("SLD expressionEnabled=false");
+                    // The expression `effect(1)("Slider")` evaluating to x=880 IS
+                    // the proof the slider value (880) is reachable by reference.
+                    var sv = sp.valueAtTime(T, false);
+                    note("SLD pos@" + T + "=" + v2s(sv));
+                    if (!near(sv[0], 880, 1)) fail("SLD x=" + sv[0] + ", want 880 (effect-param ref); ≈960 = ref not evaluating");
+                }
             }
         }
 

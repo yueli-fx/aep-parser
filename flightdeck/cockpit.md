@@ -22,7 +22,7 @@
 
 **polish / 技债**：
 1. PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
-2. ✅ **表达式语汇 gate 已通**（2026-06-14）：loopOut（表达式叠加在关键帧属性上）/ wiggle / 跨层引用三 idiom 双版本渲染像素 gate PASS，Go 零改动；`expr_vocab_shipgate_test.go`、详 `incidents/expression-enable-byte-pair.md`。余项：(a) **expression→effect-param 引用（slider 绑定）= deferred 负向发现**——表达式侧就绪，但被 AddEffect 在「从零多层 comp」静默 drop 效果挡住（连 solid 宿主也 drop；Go 保留、AE 不保留；单层 EG gate 绿）；需最小失败 bisection 定位（关联 add-effect-splice/multi-layer-silent-drop/nextitemid incident）。(b) `linear()`/`ease()` 等复杂语汇按需补（边际值低）。
+2. ✅ **表达式语汇 gate 已通**（2026-06-14）：loopOut（叠加在关键帧属性上）/ wiggle / 跨层引用 / **effect-param 引用（slider 绑定）四** idiom 双版本渲染像素 gate PASS，Go 零改动；`expr_vocab_shipgate_test.go`、详 `incidents/expression-enable-byte-pair.md`。slider idiom 一度误诊为「AddEffect 被 AE drop」，**bisection 证伪**——真因是表达式/JSX 须按**索引** `effect(1)(1)` 引用（效果实例名=match-name、参数显示名非"Slider"；按名引用 AE 静默回退静态值=假绿）。余项仅 `linear()`/`ease()` remap（边际值低，按需补）。
 3. gradient 余项：Grad Type(radial) · HiLite · G-Stroke 方向 · direction read-back。
 4. `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。✅ 种子模板 8bpc 已修（2026-06-14 576e78e：AE2020 seed 误为 32bpc，NewProject 现统一规整 8bpc=AE 默认）。
 
