@@ -14,7 +14,7 @@ regenerate: "go run ./flightdeck/showcase/expressions  +  scripts/ae_run.ps1 ren
 
 三个「轨道」层，每层一个向上偏移 260px 的圆点；在层的 **Rotation 上挂 `time*N` 表达式**让点绕中心旋转。渲染 **t=1s** 时，三个不同转速（90/180/270 °/s）的点恰好转到不同角度——证明值是**表达式实时算的**、不是静态关键帧。灰色小 pip 标各轨道中心，便于读角度。表达式在 `Reopen` 后设到 `Rotation()`（`SetExpression` + `SetExpressionEnabled`），与 S2 ship-gate 同路。
 
-> ⚠ 覆盖边界（交付准则）：本 showcase 只演示 `time*N` 纯时间表达式。`loopOut`/`wiggle`/跨层引用（`thisComp.layer`）等语汇**已另行 gate**（2026-06-14，`expr_vocab_shipgate_test.go`，AE2020+2025 双版本 PASS），但本 showcase 的 `gen.go` 尚未演示它们——如需可视审核可扩展 gen.go（攒批小阶段）。
+> ⚠ 覆盖边界（交付准则）：本 showcase 只演示 `time*N` 纯时间表达式。`loopOut`/`wiggle`/跨层引用（`thisComp.layer`）/ effect-param 引用（`effect(1)(1)` slider 绑定）四类语汇**已另行 gate**（2026-06-14，`expr_vocab_shipgate_test.go`，AE2020+2025 双版本渲染像素 PASS），但本 showcase 的 `gen.go` 尚未演示它们——如需可视审核可扩展 gen.go（攒批小阶段）。
 
 ## 产物
 

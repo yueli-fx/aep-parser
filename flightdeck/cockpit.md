@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（表达式语汇 gate：loopOut/wiggle/跨层引用三 idiom 双版本渲染像素 PASS，Go 零改动 · 先前：nnhd display 家族修复 · SetLightKind 从零通 · NewProject 默认 8bpc 修复。逐 commit 见 git log，细节见各 incident。）
+**Last updated**: 2026-06-14 by claude（表达式语汇 gate：loopOut/wiggle/跨层引用/effect-param 引用四 idiom 双版本渲染像素 PASS（slider「drop」误诊经 bisection 证伪——须按索引 `effect(1)(1)` 引用），Go 零改动 · 先前：nnhd display 家族修复 · SetLightKind 从零通。逐 commit 见 git log。）
 
 **Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。所有常用 shape 矢量滤镜 11 件 + gradient 方向 + 星形全收齐，端到端组合 gate ✅；15 个 🖼 可视 showcase 方向用户真机验收 complete。无强制主线，下一步皆按需点名即开。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1` 无人值守）。
 
