@@ -80,9 +80,32 @@ change, no synthesis.
   Z. Visually eyeballed (big box left, small box right on a dark backdrop).
 - The whole scene is Go-built (no JSX mutation) — the gate proves OUR output
   renders parallax.
-- **Still needs synthesis-insert** (channels absent from the from-scratch tree,
-  unlike Position): RotateX / RotateY / Orientation for true perspective tumble.
-  Z-depth parallax + camera dolly already cover the headline 推拉镜.
+
+## RotateX/Y/Orientation also ZERO new code — the template carries every 3D slot (2026-06-15)
+
+The earlier worry that rotation/orientation "needs synthesis-insert (channels
+absent from the tree)" was **WRONG**. Dumping `templates/v2_2_transform_group_body.bin`
+(`tmp_debug/xform_dump`) shows the from-scratch transform body already carries
+**every** channel: Anchor · Position (+Position_0/_1 separated) · Scale ·
+**Orientation · Rotate X · Rotate Y · Rotate Z** · Opacity · Envir Appear. So
+after Reopen the parser surfaces `RotateY()` / `RotateX()` / `Orientation()` as
+real (non-nil) properties, and the existing `SetRotateX/Y` / `SetOrientation`
+setters overwrite an existing cdat — length-preserving, no synthesis.
+- `TestLayer3DRotateY_AEShipGate_AE2020/2025` PASS: a 400px 3D box, RotateY=50°,
+  Go camera at [960,540,-800] (close → strong perspective). Renders a
+  **trapezoid** — near vertical edge magnified (leftH=422 / rightH=612, tall/short
+  **1.45×**, byte-identical both versions); a flat rect / dropped RotateY / 2D
+  layer would be ≈1.0. AE reads back RotateY=50. Visually eyeballed (clean
+  perspective-skewed quad). NB the foreshorten direction depends on the rotation
+  sign, so the gate asserts the asymmetry direction-agnostically.
+- RotateX / Orientation / RotateZ ride the same proven path (same template slots
+  + same setter family) — gate on demand.
+
+**Net:** the entire 3D transform group (enable + Z parallax + rotation/orientation)
+is writable from scratch with NO new serializer code — `SetIs3D` + the existing
+transform setters on the reopened layer, because the embedded transform template
+was already the full 6-axis 3D schema. Camera dolly + Z parallax + RotateY tumble
+all render-gated; the headline 推拉镜/视差/透视 are shipped.
 
 ## Pre-existing 3D infra (already shipped, fixture-based)
 
