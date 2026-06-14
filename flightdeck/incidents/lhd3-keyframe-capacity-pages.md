@@ -27,7 +27,11 @@ lhd3 @0x0C 与 @0x1C **不是常量**（历史注释 "observed constant" 来自 
 
 我们恒写 1 / 4 → 6 kf 声称容量 4 → AE 2025 校验 count ≤ capacity 不过判损坏；AE 2020 无此校验（宽松重算）。对照 fixture = AE 2025 原生 6kf Position（`gen_native_sixkf.jsx`），diff 工具 `tmp_debug/mg_bisect/dumpkf`。
 
-**未修但已观察**：原生 ldat 每块 @0x10 有 f64 segment 长度缓存（等距 300.0；末块为 epsilon 残值），我们写 0——双版本接受且渲染正确（运行时重算缓存），暂不复刻。`encodePathTimeTable`（path 时间表 bpk64）@0x0C 同样恒写 1——path 多关键帧 >4 时大概率同病，**扩 path keyframe 规模前先按本 incident 修它**。
+**未修但已观察**：原生 ldat 每块 @0x10 有 f64 segment 长度缓存（等距 300.0；末块为 epsilon 残值），我们写 0——双版本接受且渲染正确（运行时重算缓存），暂不复刻。
+
+**`encodePathTimeTable` 同病已修（2026-06-14）**：path 时间表 lhd3（bpk64，`lower_shape_node.go`）此前 @0x0C 恒写 1、@0x1C 恒写 4 —— 同 `encodeKeyframes` 旧坑，path >4 关键帧 AE 2025 判损坏。改为 `pages=(n+3)/4`、`@0x0C=pages`、`@0x1C=4*pages`（同 commit）。验证：`TestV2_2_PathKf_AEShipGate_AE20{20,25}` 从 3 关键帧 bump 到 **6 关键帧**（ceil(6/4)=2 页），双版本 PASS（AE 接受、JSX 断言 numKeys≥6 未截断、Go re-decode resaved ≥6 shap + time-table kfl 存活）。
+
+**仍未修 / 另一轴**：path **几何** lhd3（per-shap，@0x0C=nVerts、@0x1C=16）是**顶点数**轴而非关键帧数轴——`encodeBezier` 写 @0x1C=16，AE-native 疑用 `cap=nextPow2(nVerts)`（`path-keyframe-write-re.md` §104）。shape gate 只验过 nVerts≤4（AE 容忍偏差，mask 才严格）；**>4 顶点的 path 是否同样需分页未测**，本次 gate 顶点数刻意保持 ≤4 隔离此轴。需求驱动时单独 RE。
 
 ## 修法
 
@@ -35,3 +39,4 @@ lhd3 @0x0C 与 @0x1C **不是常量**（历史注释 "observed constant" 来自 
 
 ## Cases
 - 2026-06-12 首次（MG roadmap S1：ease + 规模 gate 同场发现；ease 路径反而无辜——interp 字节硬编码 linear 的问题在同 commit 一并修复 `writeKeyframeBlock` per-side bezier）
+- 2026-06-14 第二处（`encodePathTimeTable` path 时间表同坑，roadmap 优先级1 首项）：`encodeKeyframes` 那次只修了标量/矢量流，path 时间表 lhd3 漏修，恒写 1/4。修法相同（pages 化）；gate 从 3kf bump 到 6kf 双版本 PASS。`encodeKeyframes`（标量/矢量）+ `encodePathTimeTable`（path）两条 keyframe 路径容量分页**全闭合**。

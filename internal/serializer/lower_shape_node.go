@@ -734,14 +734,23 @@ func encodePathTimeTable(kfs []codec.StreamKeyframe[BezierPath], ctx *lowerCtx) 
 	const bpk = 64
 	n := len(kfs)
 
+	// @0x0C / @0x1C encode list capacity in pages of 4 keyframes (same as
+	// encodeKeyframes): @0x0C = ceil(n/4) pages, @0x1C = 4 × pages. Hardcoding
+	// 1 / 4 made any path with >4 keyframes claim capacity 4 → AE 2025 rejects
+	// the file as corrupt (AE 2020 recomputes loosely). See
+	// incidents/lhd3-keyframe-capacity-pages.md.
+	pages := uint32((n + 3) / 4)
+	if pages == 0 {
+		pages = 1
+	}
 	lhd3 := make([]byte, 52)
 	lhd3[0], lhd3[1], lhd3[2], lhd3[3] = 0x00, 0xd0, 0x0b, 0xee
 	binary.BigEndian.PutUint32(lhd3[0x08:0x0C], uint32(n))
-	binary.BigEndian.PutUint32(lhd3[0x0C:0x10], 1)
+	binary.BigEndian.PutUint32(lhd3[0x0C:0x10], pages)
 	binary.BigEndian.PutUint32(lhd3[0x10:0x14], bpk)
 	binary.BigEndian.PutUint32(lhd3[0x14:0x18], 4)
 	binary.BigEndian.PutUint32(lhd3[0x18:0x1C], 1)
-	binary.BigEndian.PutUint32(lhd3[0x1C:0x20], 4)
+	binary.BigEndian.PutUint32(lhd3[0x1C:0x20], 4*pages)
 
 	tickRate := ctx.tickRate
 	if tickRate <= 0 {

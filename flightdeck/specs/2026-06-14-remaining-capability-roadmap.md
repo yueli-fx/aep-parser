@@ -21,7 +21,7 @@ last_updated: 2026-06-14
 
 上规模动画的硬地基。当前 Layr Transform 全通道（Anchor/Scale/Rotation/Opacity）+ shape Size/Color/Position/path keyframe 已 ship，但有容量与覆盖缺口。
 
-- **[必修·阻塞] path/keyframe 容量分页（lhd3）** —— 属性 >4 关键帧时 AE 2025 判损坏。`encodePathTimeTable` + `encodeKeyframes` 的 lhd3 header（@0x0C/@0x1C 非常量，是 page 容量字段）未做分页。**任何「上规模动画」前必修**。详 `lhd3-keyframe-capacity-pages.md`。
+- ~~**[必修·阻塞] path/keyframe 容量分页（lhd3）**~~ ✅ **2026-06-14 全闭合**。`encodeKeyframes`（标量/矢量，早先随 S1 修）+ `encodePathTimeTable`（path 时间表，本次）的 lhd3 @0x0C/@0x1C 均 page 化（`pages=(n+3)/4`）。path gate 从 3kf bump 到 6kf 双版本 PASS。**遗留另一轴**：path 几何 lhd3 >4 **顶点**分页未测（顶点数轴 ≠ 关键帧数轴，需求驱动）。详 `lhd3-keyframe-capacity-pages.md`。
 - **temporal ease 普及** —— 部分属性 keyframe 首版只 linear（shape path 子项⑮ deferred temporal ease）。补 ease in/out 字节（keyframe 两布局已有 `layoutFor` dispatcher）。
 - **animated 矢量滤镜** —— Trim / Repeater 的参数动画（static 已 ship，animated 没做）。
 - **animated gradient 色标** —— gradient stops 目前 static-only。

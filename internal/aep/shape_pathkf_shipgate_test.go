@@ -34,6 +34,10 @@ func runV2_2PathKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	doneFile := filepath.Join(tempDir, "v2_2_pathkf.done")
 	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_pathkf_args.json`
 
+	// 6 keyframes (>4) exercises the lhd3 capacity paging: ceil(6/4)=2 pages, so
+	// the time-table lhd3 must write @0x0C=2 / @0x1C=8. Hardcoded 1/4 made AE
+	// 2025 reject the file as corrupt (incidents/lhd3-keyframe-capacity-pages.md).
+	// Vertex counts stay ≤4 — the >4-vertex geometry axis is a separate concern.
 	frames := []struct {
 		t     float64
 		verts [][2]float64
@@ -41,6 +45,9 @@ func runV2_2PathKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 		{0, [][2]float64{{0, 0}, {40, 0}, {40, 40}, {0, 40}}},
 		{1, [][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}}},
 		{2, [][2]float64{{0, 0}, {200, 0}, {100, 200}}},
+		{3, [][2]float64{{0, 0}, {60, 0}, {60, 60}, {0, 60}}},
+		{4, [][2]float64{{10, 10}, {120, 0}, {120, 120}}},
+		{4.5, [][2]float64{{0, 0}, {150, 20}, {150, 150}, {20, 150}}},
 	}
 
 	p := aep.NewProject(target)

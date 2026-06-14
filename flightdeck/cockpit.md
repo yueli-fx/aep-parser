@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（立 `remaining-capability-roadmap` spec：把未做/半做/不可达能力按用户优先级〔动画关键帧>3D>形状剩余>mask>表达式>文字〕集中归档，模板起点非 from-scratch，基本图形搁置。先前同日：camera/light option 全清 + 双版本 gate〔Camera 13/13 + Light 10/10〕。逐 commit 见 git log。）
+**Last updated**: 2026-06-14 by claude（优先级1 首项 **lhd3 path 时间表容量分页修复**：`encodePathTimeTable` @0x0C/@0x1C page 化〔同 `encodeKeyframes`〕，path keyframe gate 从 3kf bump 到 6kf 双版本 PASS——两条 keyframe 路径容量分页全闭合。先前同日：立 remaining-capability-roadmap spec · camera/light option 全清。逐 commit 见 git log。）
 
 **Active focus**: **剩余能力 roadmap（模板起点，非 from-scratch）**（`specs/2026-06-14-remaining-capability-roadmap.md`）。MG from-scratch 主线 + 质感件 + camera/light option 全字段已闭环；现转入按优先级补齐剩余能力：**动画关键帧 > 3D 图层 > 形状剩余 > mask > 表达式 > 文字**。起点是现有模板/真实 .aep（绕开 from-scratch silent-drop），机制复用 parse-the-clone + synthesis-insert。每能力渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
 
@@ -17,9 +17,10 @@
 
 **主线 = `specs/2026-06-14-remaining-capability-roadmap.md`**（模板起点，非 from-scratch）。优先级顺序（用户 2026-06-14 定）：**动画关键帧 > 3D 图层 > 形状剩余 > mask > 表达式 > 文字图层**。
 
-**当前层 = 优先级1 动画关键帧**，第一项硬阻塞：
-- **lhd3 keyframe 容量分页**（`encodePathTimeTable`/`encodeKeyframes` 的 lhd3 @0x0C/@0x1C page 容量字段）——属性 >4kf 时 AE 2025 判损坏，**任何上规模动画前必修**。详 `incidents/lhd3-keyframe-capacity-pages.md`。
-- 同层后续：temporal ease 普及 · animated trim/repeater · animated gradient 色标。
+**当前层 = 优先级1 动画关键帧**：
+- ~~lhd3 keyframe 容量分页~~ ✅ 2026-06-14（`encodeKeyframes` + `encodePathTimeTable` 两路径全闭合，path gate bump 到 6kf 双版本 PASS）。
+- **下一项**：temporal ease 普及（部分属性 keyframe 仍 linear-only）· animated trim/repeater · animated gradient 色标。
+- 遗留：path 几何 lhd3 >4 顶点分页（另一轴，需求驱动）。
 
 完整清单（每层细项 + 不可达附录 + 搁置项）见 roadmap spec。
 
