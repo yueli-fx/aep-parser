@@ -496,16 +496,22 @@ func (f *FillNode) Properties() *PropertyGroup {
 // horizontal ramp); set them to a diagonal/vertical pair to rotate the gradient.
 //
 // `Grad Type` selects linear vs radial (StartPoint = centre, EndPoint = a point
-// on the radius for radial). The HiLite controls are NOT modeled (no highlight).
-// Stops + direction + type are static (V2.2 does not model animated gradients).
-// The serializer re-encodes the stops to prop.map XML and overwrites the Grad
-// Type / Start Pt / End Pt cdats + GCky/Utf8 chunk (length-variable; rifx
-// recomputes the enclosing LIST sizes).
+// on the radius for radial). For a radial gradient the HiLite controls offset
+// the bright centre (start color) off the geometric centre: HighlightLength is
+// the shift magnitude as a percent of the radius (0 = centred, the default) and
+// HighlightAngle is its direction in degrees. They have no visible effect on a
+// linear gradient. Stops + direction + type + highlight are static (V2.2 does
+// not model animated gradients). The serializer re-encodes the stops to prop.map
+// XML and overwrites the Grad Type / Start Pt / End Pt / HiLite Length / HiLite
+// Angle cdats + GCky/Utf8 chunk (length-variable; rifx recomputes the enclosing
+// LIST sizes).
 type GradientFillNode struct {
-	gradient     *codec.Gradient
-	startPoint   [2]float64
-	endPoint     [2]float64
-	gradientType GradientType
+	gradient        *codec.Gradient
+	startPoint      [2]float64
+	endPoint        [2]float64
+	gradientType    GradientType
+	highlightLength float64
+	highlightAngle  float64
 }
 
 // GradientType selects a gradient fill's ramp shape: linear (a straight band) or
@@ -557,6 +563,31 @@ func (n *GradientFillNode) SetGradientType(t GradientType) error {
 		return fmt.Errorf("gradient type %d out of range (1=linear, 2=radial)", t)
 	}
 	n.gradientType = t
+	return nil
+}
+
+// HighlightLength returns the radial highlight offset magnitude (percent of the
+// radius; 0 = centred).
+func (n *GradientFillNode) HighlightLength() float64 { return n.highlightLength }
+
+// HighlightAngle returns the radial highlight offset direction (degrees).
+func (n *GradientFillNode) HighlightAngle() float64 { return n.highlightAngle }
+
+// SetHighlightLength offsets a radial gradient's bright centre off the geometric
+// centre by the given percent of the radius (-100..100; 0 = centred). No visible
+// effect on a linear gradient. Returns an error if out of range.
+func (n *GradientFillNode) SetHighlightLength(v float64) error {
+	if v < -100 || v > 100 {
+		return fmt.Errorf("highlight length %g out of range [-100,100]", v)
+	}
+	n.highlightLength = v
+	return nil
+}
+
+// SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight
+// offset. Only meaningful together with a non-zero HighlightLength.
+func (n *GradientFillNode) SetHighlightAngle(v float64) error {
+	n.highlightAngle = v
 	return nil
 }
 

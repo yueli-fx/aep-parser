@@ -849,7 +849,9 @@ func lowerGradientStops(body *rifx.Chunk, gradient *codec.Gradient) *rifx.Chunk 
 // reproduces the pre-direction behavior). Grad Type (1D f64 BE enum: 1=Linear /
 // 2=Radial) is overwritten with the node's GradientType — the template bakes
 // Radial(2) so the slot exists, lowered back to the node's value (default
-// Linear=1 reproduces the pre-type behavior). HiLite stays at the embed default.
+// Linear=1 reproduces the pre-type behavior). HiLite Length / Angle (both 1D f64
+// BE at cdat[0:8]) offset a radial gradient's bright centre; default 0/0
+// overwrites the baked slots with no visible change (no regression).
 func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeGradFillBody()
 	if err != nil {
@@ -859,6 +861,8 @@ func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad Type", encodeF64sBE(float64(n.GradientType())))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad Start Pt", encodeF64sBE(sp[0], sp[1]))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad End Pt", encodeF64sBE(ep[0], ep[1]))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Length", encodeF64sBE(n.HighlightLength()))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Angle", encodeF64sBE(n.HighlightAngle()))
 	return lowerGradientStops(body, n.Gradient()), nil
 }
 

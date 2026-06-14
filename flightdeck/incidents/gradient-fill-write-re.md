@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: implementing or extending gradient write (SetGradient / GradientFillNode / GradientStroke / gradient ramp direction Start·End Pt); encoding AE gradient prop.map XML; debugging "AE drops the gradient" or stops/direction not surviving resave; deciding whether a gradient fixture is AE-version-portable; wanting to control the linear ramp angle/direction
-applies_to: [gradient, g-fill, grad-colors, grad-start-pt, grad-end-pt, ramp-direction, prop-map, xml-encode, gcst, gcky, utf8, shape-layer, length-variable, ship-gate, ae2020, ae2025, elision, mg-roadmap, s5, render-pixel]
-last_updated: 2026-06-13
+when_to_read: implementing or extending gradient write (SetGradient / GradientFillNode / GradientStroke / gradient ramp direction Start·End Pt / radial type / radial HiLite Length·Angle highlight); encoding AE gradient prop.map XML; debugging "AE drops the gradient" or stops/direction/highlight not surviving resave; deciding whether a gradient fixture is AE-version-portable; wanting to control the linear ramp angle/direction or shift a radial gradient's bright centre
+applies_to: [gradient, g-fill, grad-colors, grad-start-pt, grad-end-pt, grad-type, hilite-length, hilite-angle, radial-highlight, ramp-direction, prop-map, xml-encode, gcst, gcky, utf8, shape-layer, length-variable, ship-gate, ae2020, ae2025, elision, mg-roadmap, s5, render-pixel]
+last_updated: 2026-06-14
 ---
 
 # Gradient fill write (SetGradient) — RE + ship findings
@@ -105,6 +105,33 @@ HiLite pair too once the gradient is radial).
 - **Still deferred**: HiLite tuning (slots present but untouched, length stays
   embed default) · gradient STROKE type/direction (G-Stroke template unchanged)
   · read-back of type/direction (hydrate write-only, as before).
+
+### UPDATE 2026-06-14 — radial HIGHLIGHT (HiLite Length/Angle) now resolved ✅
+
+No template re-extraction needed — the 15-child radial body already carries the
+`ADBE Vector Grad HiLite Length` / `ADBE Vector Grad HiLite Angle` slots (AE
+emits the HiLite pair the moment the gradient is radial). Both are **1D f64 BE
+at cdat[0:8]** (len-40 cdat, same scalar family as Grad Type / the filter enums),
+baked at 0 in the template. `lowerGradientFillNode` now overwrites both with the
+node values; default 0/0 overwrites the baked 0 with no visible change →
+**no regression** (radial/dir/fill gates still PASS).
+- **HiLite Length** = highlight offset magnitude as **percent of the radius**
+  (range [-100,100]; 0 = centred). **HiLite Angle** = offset direction in
+  **degrees**. They only affect a *radial* gradient (linear ignores them).
+- **Angle convention (measured, AE2020+2025 identical):** Angle 0° shifts the
+  bright centre (start color) toward **+X (right)**. At Length 70 / Angle 0 the
+  red hotspot moves 0.7·radius right: cardinals at radius 130 render
+  R=(244,0,10) red · L=(52,0,202) blue · U==D=(79,0,175) — a clean one-axis
+  split (X) with the perpendicular (Y) pair byte-identical.
+- API: `GradientFillNode.SetHighlightLength` / `SetHighlightAngle` +
+  `HighlightLength()` / `HighlightAngle()` getters.
+- Gate `TestMGGradientHilite_AEShipGate_AE2020/2025` PASS (red line 4): asserts
+  the highlight breaks symmetry along **exactly one** axis (the radial gate's
+  inverse) — `max(dx,dy)>60 && min(dx,dy)<45` + the matched pair stays symmetric;
+  HiLite Length=70 read back; resave survives. Both AE versions byte-identical.
+- **Still deferred**: gradient STROKE type/direction/highlight (G-Stroke template
+  unchanged — needs its own re-extraction) · read-back of type/direction/highlight
+  (hydrate write-only, as before).
 
 ## Cross-version: AE25-shaped gradient is accepted by AE 2020
 
