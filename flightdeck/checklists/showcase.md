@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-06-13
+last_updated: 2026-06-15
 when_to_read: 一个大阶段（独立 plan/spec arc）落地后要产出审核示例；新增一个 showcase 方向文件夹；写或更新 showcase/<方向>/INDEX.md；纠结某次成果算大阶段（必出）还是小阶段（攒批）；想知道 showcase 产物怎么重生成
 applies_to: [showcase, example, user-review, deliverable, big-stage, gen-go, render-jsx, index-format, gitignore, regenerate, from-scratch, ae-render]
 ---
@@ -29,6 +29,7 @@ flightdeck/showcase/
 
 - **tracked**：`INDEX.md` · `gen.go` · `render.jsx`。**gitignored**：`*.aep` · `*.png`（根 `.gitignore` 已加 `flightdeck/showcase/**/*.aep|*.png`）。
 - `gen.go` 是 tracked 代码 → **必须保持 `go build ./...` / `go vet ./...` 绿**；它 `package main`，import `internal/aep` facade（与 tmp_debug 同，模块内允许）。
+- **目标版本默认 `aep.NewProject(aep.TargetAE2020)`**（读取下限，产出文件 2020+2025 都能开）。**只有能力是 AE 2025 特有时才用 `TargetAE2025`**——双版本 ship-gate 都过的能力一律 2020（用户 2026-06-15 立规；3d-camera 初版误用 2025 已纠）。渲染眼验也优先用 AE2020 跑（与 target 一致）。
 
 ## INDEX.md 格式（frontmatter 格式段 + 正文）
 
