@@ -165,8 +165,27 @@ all elided (only Grad Colors + the stroke geometry Width/Cap/Join/… present).
   highlight shifts the hotspot on the stroke too. Grad Type 1/2 + HiLite Length
   read back, resave survives, both AE versions byte-identical pixels.
 - **Still deferred**: stroke geometry (Width/Cap/Join/Dashes/Taper/Wave — kept at
-  the template's baked 18px) · type/direction/highlight read-back (hydrate
-  write-only).
+  the template's baked 18px). (Type/direction/highlight read-back resolved below.)
+
+### UPDATE 2026-06-14 — ramp-geometry READ-BACK (hydrate) now resolved ✅
+
+The hydrate path was stops-only ("write-only from-scratch"): opening a parsed
+gradient surfaced the color stops but `GradientType()` / `StartPoint()` /
+`EndPoint()` / `HighlightLength()` / `HighlightAngle()` returned the constructor
+defaults regardless of the on-disk values (raw bytes were still opaque-preserved,
+so resave stayed byte-identical — it was a *typed-accessor* gap, not data loss).
+- `hydrateGradientGeometry` (shared by G-Fill + G-Stroke) reads the five geometry
+  cdats from the body via `nodeStreamValues` + `scalarOf`/`vec2Of` and applies the
+  node setters; absent (elided-default) slots leave the constructor default.
+  Static only; setter range errors ignored (best-effort).
+- **Purely additive to the read side** — write still opaque-preserves untouched
+  nodes, so the full round-trip/golden suite stays green (no byte change).
+- Gate `TestV2_2_GradientGeometry_Roundtrip` (pure Go: build radial G-Fill +
+  G-Stroke with distinct non-default Start/End/Type/HiLite → write → re-parse →
+  assert every geometry getter). PASS.
+- Remaining gradient debt is now only **stroke geometry** (Width/Cap/Join/… on the
+  G-Stroke node — a stroke-geometry family item shared with the solid StrokeNode,
+  not gradient-specific).
 
 ## Cross-version: AE25-shaped gradient is accepted by AE 2020
 

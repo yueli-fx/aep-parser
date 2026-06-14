@@ -263,27 +263,70 @@ func hydrateGradientStops(body *rifx.Chunk) *codec.Gradient {
 	return nil
 }
 
+// hydrateGradientGeometry reads the ramp-geometry cdats (Grad Type / Start Pt /
+// End Pt / HiLite Length·Angle) from a gradient body and applies them via the
+// supplied setters. Absent slots (AE elides defaults) leave the setter untouched
+// so the node keeps its constructor default. Shared by G-Fill and G-Stroke,
+// whose geometry sub-properties are identical. Static values only (V2.2 does not
+// model animated gradient geometry); setter range errors are ignored (best-effort
+// hydrate — an out-of-range on-disk value leaves the default).
+func hydrateGradientGeometry(body *rifx.Chunk, ctx *parseCtx,
+	setType func(scene.GradientType) error,
+	setStart, setEnd func([2]float64) error,
+	setHiLen, setHiAng func(float64) error) {
+	props := nodeStreamValues(body, ctx)
+	if p := props["ADBE Vector Grad Type"]; p != nil {
+		if v, ok := scalarOf(p.StaticValue); ok {
+			_ = setType(scene.GradientType(int(v)))
+		}
+	}
+	if p := props["ADBE Vector Grad Start Pt"]; p != nil {
+		if v, ok := vec2Of(p.StaticValue); ok {
+			_ = setStart(v)
+		}
+	}
+	if p := props["ADBE Vector Grad End Pt"]; p != nil {
+		if v, ok := vec2Of(p.StaticValue); ok {
+			_ = setEnd(v)
+		}
+	}
+	if p := props["ADBE Vector Grad HiLite Length"]; p != nil {
+		if v, ok := scalarOf(p.StaticValue); ok {
+			_ = setHiLen(v)
+		}
+	}
+	if p := props["ADBE Vector Grad HiLite Angle"]; p != nil {
+		if v, ok := scalarOf(p.StaticValue); ok {
+			_ = setHiAng(v)
+		}
+	}
+}
+
 // hydrateGradientFillNode reads the gradient-fill body back into a runtime
 // GradientFillNode: descends the Grad Colors GCst→GCky→Utf8 and decodes the
-// prop.map XML via codec.ParseGradientXML. Grad Type / Start Pt / End Pt are not
-// modeled (elided in the serialized form). Returns a default-gradient node if
-// the stops XML is absent (keeps the node visible rather than dropping it).
-func hydrateGradientFillNode(body *rifx.Chunk, _ *parseCtx) *GradientFillNode {
+// prop.map XML via codec.ParseGradientXML, plus the ramp geometry (Grad Type /
+// Start Pt / End Pt / HiLite Length·Angle) via hydrateGradientGeometry. Returns
+// a default-gradient node if the stops XML is absent (keeps the node visible
+// rather than dropping it).
+func hydrateGradientFillNode(body *rifx.Chunk, ctx *parseCtx) *GradientFillNode {
 	n := NewGradientFillNode()
 	if g := hydrateGradientStops(body); g != nil {
 		scene.SetGradientFillNodeGradient(n, g)
 	}
+	hydrateGradientGeometry(body, ctx, n.SetGradientType, n.SetStartPoint, n.SetEndPoint, n.SetHighlightLength, n.SetHighlightAngle)
 	return n
 }
 
 // hydrateGradientStrokeNode reads a G-Stroke body back into a runtime
-// GradientStrokeNode. Local-degrade like G-Fill: missing Grad Colors → default
-// node (node stays visible, parse never fails).
-func hydrateGradientStrokeNode(body *rifx.Chunk, _ *parseCtx) *GradientStrokeNode {
+// GradientStrokeNode, including the ramp geometry (symmetric to G-Fill).
+// Local-degrade: missing Grad Colors → default node (node stays visible, parse
+// never fails).
+func hydrateGradientStrokeNode(body *rifx.Chunk, ctx *parseCtx) *GradientStrokeNode {
 	n := NewGradientStrokeNode()
 	if g := hydrateGradientStops(body); g != nil {
 		scene.SetGradientStrokeNodeGradient(n, g)
 	}
+	hydrateGradientGeometry(body, ctx, n.SetGradientType, n.SetStartPoint, n.SetEndPoint, n.SetHighlightLength, n.SetHighlightAngle)
 	return n
 }
 
