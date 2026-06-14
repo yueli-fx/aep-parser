@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（优先级1 **animated gradient 色标**闭环：用户手工造带关键帧色标 fixture（JSX 无法 authoring）解锁 RE，animated 布局=时间表(bpk=64)+每帧 Utf8；`AddGradientKeyframe`，kf0=R/B/G→kf1=G/R/B 双版本实渲交换 PASS+肉眼验。先前同日：优先级2 **3D flag 闭环**〔`SetIs3D`→AE 自动 materialize 3D 层，DOM gate + 相机推拉渲染 gate 双 PASS〕；优先级1 **animated Trim** reveal gate 双版本 PASS。逐 commit 见 git log。）
+**Last updated**: 2026-06-15 by claude（优先级2 **3D transform 全闭环**：Z 视差 `TestLayer3DParallax`〔NEAR 300/FAR 99，3.03×〕+ RotateY 透视 `TestLayer3DRotateY`〔梯形 1.45×〕双版本渲染 PASS。**关键发现**：整个 3D transform group 从零写入零新 serializer 代码——嵌入 transform 模板本就是完整 6-axis 3D schema，`SetIs3D`+既有 setter 即可。先前同日：3D enable+相机推拉 gate · 优先级1 animated gradient 色标〔用户造 fixture 解锁〕+ animated Trim。逐 commit 见 git log。）
 
 **Active focus**: **剩余能力 roadmap（模板起点，非 from-scratch）**（`specs/2026-06-14-remaining-capability-roadmap.md`）。MG from-scratch 主线 + 质感件 + camera/light option + 优先级1 animated 关键帧（trim✅）+ 优先级2 **3D-enable 双 gate 闭环**。现推进优先级2 余项：3D transform 通道**非默认值写入**（Z/旋转）。机制复用 parse-the-clone + synthesis-insert。每能力渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
 
@@ -23,10 +23,14 @@
 - ~~animated gradient 色标~~ ✅ 2026-06-15（用户手工造 fixture 解锁 RE；`AddGradientKeyframe` + 时间表/多 Utf8 emit；kf0=R/B/G→kf1=G/R/B 双版本实渲交换 PASS）。deferred：gradient STROKE 色标动画 + 色标 ease。
 - 遗留：path 几何 lhd3 >4 顶点分页（需求驱动）。
 
-**当前层 = 优先级2 3D 图层**：
-- ~~图层 3D flag（enable）~~ ✅ 2026-06-15。`SetIs3D` 翻 bit → AE 自动 materialize 完整 3D 层。DOM gate `TestLayer3DEnable` + 渲染 gate `TestLayer3DCamDolly`（相机推拉缩放）双版本 PASS。详 `incidents/layer-3d-enable-bit-materializes.md`。
-- **下一项 = 3D transform 通道非默认值写入**（Z position / Orientation / Rotate X·Y）。enable 时 AE 自动建通道但写非默认值需 slot：3-comp Position 非 length-preserving。三路待选：(a) Is3D 时 emit 3-comp Position；(b) synthesis-insert 旋转通道（camera/light-option vein）；(c) parse-the-clone AE-materialized 3D 层。解锁**视差**（两层不同 Z）+ RotateY 透视 + 从零 3D 层的 Material Options。
-- 后续：Material Options（fixture setter 已工作，缺从零 3D 层上的 gate）· 3D-render 像素深验 DoF/光照 · 推拉镜+视差 showcase。
+**优先级2 3D 图层（主体闭环 — 解锁真·拉镜）**：
+- ~~图层 3D flag（enable）~~ ✅ `TestLayer3DEnable`（DOM）+ ~~相机推拉~~ ✅ `TestLayer3DCamDolly`（渲染 426→124px）。
+- ~~Z 视差~~ ✅ `TestLayer3DParallax`（两层不同 Z，NEAR 300 / FAR 99，3.03×）。
+- ~~RotateY 透视 tumble~~ ✅ `TestLayer3DRotateY`（梯形 1.45×）。
+- **关键发现**：整个 3D transform group（enable+Z+旋转+朝向）**从零零新 serializer 代码**——`SetIs3D`+reopen 后既有 transform setter，因嵌入 transform 模板本就是完整 6-axis 3D schema。详 `incidents/layer-3d-enable-bit-materializes.md`。
+- **下一项（按需）**：Material Options 从零 3D 层 gate（fixture setter 已工作）· RotateX/Orientation/RotateZ 补 gate（同路径）· 3D-render DoF/光照像素深验 · 推拉镜+视差 showcase（需用户真机验收才能标 complete）。
+
+**用户真机验收待办**：本批次 6 个能力（animated trim/gradient + 3D enable/dolly/parallax/rotateY）均 agent 眼验，**未经用户真机复核**——攒 showcase 时请用户过目。
 
 完整清单（每层细项 + 不可达附录 + 搁置项）见 roadmap spec。
 
