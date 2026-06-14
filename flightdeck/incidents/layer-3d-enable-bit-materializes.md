@@ -62,9 +62,27 @@ one flipped bit.
    byte-identical both versions). A 2D layer ignores the camera → constant width,
    so the ratio is the 3D proof. This is the roadmap's 推拉镜 in miniature.
 
-So "图层 3D flag" is closed with both an acceptance and a render proof. **Parallax**
-(differential depth = two layers at different Z) still needs per-layer Z-write
-(next item), but single-layer camera response is shipped.
+So "图层 3D flag" is closed with both an acceptance and a render proof.
+
+## Per-layer Z = PARALLAX — shipped with ZERO new write code (2026-06-15)
+
+The write-side worry in consequence #2 above was half-wrong for **Position**: the
+from-scratch shape Position is **already a 3-component spatial slot on disk**
+(`lowerTransformVec2Spatial` → `encode3D([x,y,0])`, bpk-128, value@0x38 — the
+template is the "6-axis 3D-compatible" transform schema, Z just pinned 0). So
+after Reopen the Position cdat is 24 bytes, and `Layer.SetPosition([x,y,z])` on
+the reopened 3D layer is **length-preserving** — AE honours the Z. No builder
+change, no synthesis.
+- `TestLayer3DParallax_AEShipGate_AE2020/2025` PASS: two same-size (300px) 3D
+  boxes, NEAR z=-800 / FAR z=+1200, Go-created camera at [960,540,-1800] (its
+  Position also set in Go — cameras are natively 3-comp). Rendered: NEAR=300px,
+  FAR=99px (**3.03× ratio, byte-identical both versions**) — depth from per-layer
+  Z. Visually eyeballed (big box left, small box right on a dark backdrop).
+- The whole scene is Go-built (no JSX mutation) — the gate proves OUR output
+  renders parallax.
+- **Still needs synthesis-insert** (channels absent from the from-scratch tree,
+  unlike Position): RotateX / RotateY / Orientation for true perspective tumble.
+  Z-depth parallax + camera dolly already cover the headline 推拉镜.
 
 ## Pre-existing 3D infra (already shipped, fixture-based)
 
