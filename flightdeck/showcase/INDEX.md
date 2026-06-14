@@ -13,7 +13,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-15 个 🖼 可视方向**全部 ✅ complete**（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
+15 个 🖼 可视方向 ✅ complete（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）。**+1 新方向 [3d-camera] 🔍 待review**（2026-06-15，3D 图层 + 相机：视差 + 透视 tumble，agent 已实渲眼验，**待用户真机复核**）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
 
 ## 🖼 A 类 — 可视方向（看图档）
 
@@ -34,6 +34,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [stroke-detail](stroke-detail/INDEX.md) | 描边细节 Dashes/Line Join/Miter/Wave（闭合星，Cap·Taper 诚实暂缺） | ✅ complete |
 | [keyframe-channels](keyframe-channels/INDEX.md) | 四通道关键帧 Position/Scale/Rotation/Opacity（渲 t=2s 插值 + readback） | ✅ complete |
 | [animated-path](animated-path/INDEX.md) | 动画路径几何 morph 横条→正方→竖条（渲 t=2s + extent readback） | ✅ complete |
+| [3d-camera](3d-camera/INDEX.md) | 3D 图层 + 相机：Z 视差（同尺寸卡按深浅渲大小不同）+ Rotate Y 透视 tumble（梯形） | 🔍 **待review** |
 
 ## 📋 B 类 — 读值档（dump 值核对，不看图）
 
