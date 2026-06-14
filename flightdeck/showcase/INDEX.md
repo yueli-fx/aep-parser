@@ -62,7 +62,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 - **EG 面板崩溃 🛑 BLOCKED（红线4b，用户两次真机确认）**：从零 EG 工程展开「基本图形」面板崩溃 AE——3 混合控件崩,**退回单 slider 也崩**。DOM readback 全过=假绿,根源是 EG ship-gate（load+DOM+resave）**从不打开面板**。整个 from-scratch EG 不可交付,留作 RE repro,用户决定暂不修(EG 用得少)。
 - **comp setter（红线4a）**：**SetShutterAngle/Phase** 读回 ×≈1.2、**SetResolutionFactor** 让 AE `resolutionFactor` 除零 → 已排除。
 - **project setter（红线4a）**：**SetTimeDisplayType/FeetFramesFilmType**(共用 nnhd byte8 疑位打包)+**SetFramesCountType** AE DOM 不反映 → 已排除。
-- **camera/light 选项 setter**：from-scratch 全 elide（"property not present"）,只在 parsed 层生效；**NewLightLayer 默认=环境光**(无从零 SetLightType)。
+- **camera/light/material 选项 setter**：选项流在 embed 模板里 elide；解法 = synthesis-insert（camera iris / light color leaves 在 `newTemplatedLayer` 自动 splice；material leaves 经 `aep.SetMaterialOption` 按需 splice）或 reopen 后设值。**已退役的旧限制**（2026-06-15 更新）：~~NewLightLayer 无从零 SetLightType~~ → `SetLightKind` 从零生效（ldta @0x88，读回 LightType.POINT）；~~material 从零不可用~~ → `SetMaterialOption` 解锁从零 3D 阴影。剩 elide 项主要是 camera DoF/light intensity 等需 reopen-后-设值。
 
 详各方向 INDEX「已发现边界/崩溃发现」。**建议独立 RE/修**。
 

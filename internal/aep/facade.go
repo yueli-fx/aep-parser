@@ -751,6 +751,41 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 // already-present params are settable regardless.
 func SupportedEffectParams() []string { return serializer.SupportedEffectParams() }
 
+// SetMaterialOption sets a 3D layer's Material-Options property by AE match-name
+// (e.g. "ADBE Casts Shadows", "ADBE Accepts Lights", "ADBE Diffuse Coefficient"),
+// returning the property's *Property. It is the from-scratch entry for material
+// properties — the synthesis-lite sibling of SetEffectParam.
+//
+// Why this exists: a from-scratch shape/solid layer made 3D (SetIs3D) emits an
+// EMPTY Material Options group — AE materializes the full material tree (all
+// defaults) in its DOM on open, but on disk the leaves are elided, so
+// MaterialCastsShadows() / SetMaterialCastsShadows return "property not present".
+// When the property is already present (a parsed/fixture layer, or a prior
+// splice) SetMaterialOption is exactly SetStaticValue. When it is default-elided,
+// the (tdmn, tdbs) leaf is first materialized from an embedded AE-native template
+// (the 15-leaf material tree from re_material_options.aep) at its canonical
+// position, then the caller's value is written — which is non-default by intent,
+// exactly the state AE itself persists (a default-valued spliced leaf is dropped
+// by AE on open).
+//
+// The headline use is making a from-scratch 3D layer CAST shadows (Casts Shadows
+// defaults Off): SetMaterialOption(caster, "ADBE Casts Shadows", float64(aep.MaterialCastsOn)).
+// The catcher needs nothing — an empty material group accepts shadows + lights by
+// default. The layer must be round-tripped through aep.Reopen first (the material
+// group chunk must exist to splice into).
+//
+// Values use the property's on-disk (StaticValue) encoding: scalar / enum /
+// boolean (0 or 1) as float64; Shadow Color as []float64{A,R,G,B} 0–255. Atomic:
+// snapshots the group chunk children + flat Properties + tree + warnings; rolls
+// back on any parser warning or value-encode failure.
+//
+// Alpha / structural — AE 2020 + AE 2025 render ship-gate green for Casts Shadows
+// (from-scratch 3D caster drops a visible shadow). Free function (CLAUDE.md #2
+// structural-op call-form).
+func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error) {
+	return serializer.SetMaterialOption(layer, matchName, value)
+}
+
 // AddEssentialProperty exposes one parameter of an effect on layer in the
 // owning composition's Essential Graphics panel — mirrors AE's
 // "addProperty to Essential Graphics" / Property.addToMotionGraphicsTemplate.

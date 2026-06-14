@@ -58,7 +58,7 @@
     {
       "out": "layer.md",
       "roots": ["Layer", "LightKind"],
-      "funcs": ["MoveToBeginning", "MoveToEnd", "MoveAfter", "MoveBefore"],
+      "funcs": ["MoveToBeginning", "MoveToEnd", "MoveAfter", "MoveBefore", "SetMaterialOption"],
       "head": "_includes/layer.head.md"
     },
     {

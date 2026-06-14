@@ -4737,6 +4737,13 @@
       "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
       "summary": "SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. \"ADBE Gaussian Blur 2-0001\"), returning the parameter's *Property. It is the typed-parameter entry for AddEffect-style workflows:"
     },
+    "SetMaterialOption": {
+      "kind": "func",
+      "file": "layer.md",
+      "anchor": "#setmaterialoption",
+      "signature": "func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error)",
+      "summary": "SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g. \"ADBE Casts Shadows\", \"ADBE Accepts Lights\", \"ADBE Diffuse Coefficient\"), returning the property's *Property. It is the from-scratch entry for material properties — the synthesis-lite sibling of SetEffectParam."
+    },
     "SetRenderer": {
       "kind": "func",
       "file": "composition.md",

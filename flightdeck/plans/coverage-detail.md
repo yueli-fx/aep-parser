@@ -439,7 +439,7 @@ Fixtures: `re_cdta_probe.aep` / `re_cdta_ae2020.aep`（跨版本 diff 实证）/
 | **re_cdta_probe.aep** | Wave 4 — 7 comp 横扫 resolutionFactor / shutterPhase / shutterAngle + CompItem API probe | TestResolutionFactorReal / TestSetResolutionFactorRoundtrip |
 | **re_cdta_ae2020.aep** | Wave 4 — AE 2020 ↔ 2025 cdta 字节级 diff 实证 | (跨版本验证 only) |
 | **re_camera_filmsize.aep** | Wave 4 — 探针：camera ldta `@0x98` 写路径堵死实证 | (scar 实证 only) |
-| **re_material_options.aep** | Wave 4 — 3 个 solid（2D / 3D default / 3D custom），17 Material Options | TestMaterialOptionsTypedSettersRoundtrip |
+| **re_material_options.aep** | Wave 4 — 3 个 solid（2D / 3D default / 3D custom），17 Material Options；亦为 `material_options_leaves.bin` 合成模板源（`SetMaterialOption` 从零 3D 阴影，`TestLayer3DShadow_AEShipGate` 双版本） | TestMaterialOptionsTypedSettersRoundtrip / TestSetMaterialOptionSynthesisRoundtrip |
 | **re_geometry_options.aep** | Wave 4 — 3D solid Advanced 3D renderer，3 Geometry Options | TestGeometryOptionsTypedSettersRoundtrip |
 | **re_renderer.aep** | Wave 4 — comp.renderer 三种（Classic/Advanced/Cinema 4D） | TestCompositionRendererReal |
 
