@@ -1,9 +1,9 @@
 // flightdeck/showcase/gradient/gen.go — from-scratch (no AE) showcase of gradient
-// fills + ramp direction control. A 2×2 grid of rects, each a linear gradient
-// with a different ramp direction / stop set:
-//   horizontal · vertical · diagonal · 3-stop horizontal rainbow
-// proving SetColorStops + SetStartPoint/SetEndPoint (the ramp geometry).
-// Writes gradient.aep next to this file.
+// fills, ramp direction, and ramp TYPE. A 3×2 grid of rects:
+//   linear: horizontal · vertical · diagonal · 3-stop rainbow
+//   radial: 2-stop concentric · 3-stop concentric
+// proving SetColorStops + SetStartPoint/SetEndPoint (ramp geometry) +
+// SetGradientType (linear vs radial). Writes gradient.aep next to this file.
 // Run from repo root: `go run ./flightdeck/showcase/gradient`.
 package main
 
@@ -22,7 +22,11 @@ func must(err error) {
 	}
 }
 
-var cellPos = [][2]float64{{640, 360}, {1280, 360}, {640, 720}, {1280, 720}}
+// 3 columns × 2 rows.
+var cellPos = [][2]float64{
+	{480, 360}, {960, 360}, {1440, 360},
+	{480, 720}, {960, 720}, {1440, 720},
+}
 
 func main() {
 	p := aep.NewProject(aep.TargetAE2020)
@@ -89,6 +93,29 @@ func main() {
 			{Offset: 1, Midpoint: 0.5, Color: [3]float64{0.25, 0.45, 1}},
 		}))
 		must(gf.SetStartPoint([2]float64{-170, 0}))
+		must(gf.SetEndPoint([2]float64{170, 0}))
+	})
+
+	// 5 — RADIAL 2-stop: red centre → blue edge (concentric rings).
+	cell("05_Radial", 4, func(gf *aep.GradientFillNode) {
+		must(gf.SetGradientType(aep.GradientRadial))
+		must(gf.SetColorStops([]aep.GradientColorStop{
+			{Offset: 0, Midpoint: 0.5, Color: [3]float64{1, 0.3, 0.2}},
+			{Offset: 1, Midpoint: 0.5, Color: [3]float64{0.2, 0.4, 1}},
+		}))
+		must(gf.SetStartPoint([2]float64{0, 0}))    // centre
+		must(gf.SetEndPoint([2]float64{170, 0}))    // outer radius
+	})
+
+	// 6 — RADIAL 3-stop: white centre → orange → purple edge.
+	cell("06_RadialMulti", 5, func(gf *aep.GradientFillNode) {
+		must(gf.SetGradientType(aep.GradientRadial))
+		must(gf.SetColorStops([]aep.GradientColorStop{
+			{Offset: 0, Midpoint: 0.5, Color: [3]float64{1, 1, 0.95}},
+			{Offset: 0.5, Midpoint: 0.5, Color: [3]float64{1, 0.55, 0.15}},
+			{Offset: 1, Midpoint: 0.5, Color: [3]float64{0.45, 0.2, 0.7}},
+		}))
+		must(gf.SetStartPoint([2]float64{0, 0}))
 		must(gf.SetEndPoint([2]float64{170, 0}))
 	})
 
