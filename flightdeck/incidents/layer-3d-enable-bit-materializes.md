@@ -117,9 +117,63 @@ focus distance (z=-500, focus 1300) + a far BLUR box (z=+1400), DoF on, aperture
 300, blur level 200. Rendered frame: SHARP left-edge transition band = **1px**
 (crisp), BLUR band = **21-22px** (defocused) — a >20× ratio, both versions. The
 setters must run on the **reopened** camera (from-scratch camera options elide).
-This is the 景深 of the "景深视差推拉镜" milestone. **Still pending**: lights /
-shadows (Material Options) render-verify — DoF is the only camera-option render
-gate so far.
+This is the 景深 of the "景深视差推拉镜" milestone.
+
+## Lighting (from scratch) — ZERO new code, render-gated (2026-06-15)
+
+A from-scratch POINT light illuminates a from-scratch 3D layer with **no new
+serializer code**: `SetLightKind(LightKindPoint)` is ldta @0x88 length-preserving
+(works on the fresh light directly — no reopen), and AE's default material has
+**Accepts Lights = ON**, so a 3D layer is lit without touching its (empty)
+Material Options group. `TestLayer3DLight_AEShipGate_AE2020/2025` PASS: a 3D gray
+panel under a POINT light placed up-left/in-front renders a clear brightness
+falloff — near-light interior **185.6** luma vs far **88.0** (2.11×, byte-identical
+both versions, unclipped). A flat-shaded panel would be uniform; the gradient is
+the proof.
+
+**`SetLightKind` from scratch is genuine.** The earlier worry that JSX read back
+`light type=4414` (not a clean Point) was unfounded: **4414 IS ExtendScript
+`LightType.POINT`** (the enum runs 4412 PARALLEL / 4413 SPOT / 4414 POINT / 4415
+AMBIENT — showcase camera-light INDEX records 4415=AMBIENT). This retires the old
+"NewLightLayer 默认环境光, no from-scratch SetLightType" caveat.
+
+## Shadows (from scratch) — Material-Options synthesis-insert, render-gated (2026-06-15)
+
+A from-scratch 3D layer emits an **EMPTY** Material Options group
+(`lower_layer.go` `emptyPropGroupFlags`) — AE materializes the full 15-leaf
+material tree (all defaults) in its DOM on open but **elides every leaf on disk**,
+so `MaterialCastsShadows()` is nil and `SetMaterialCastsShadows` reports "property
+not present". Casting a shadow needs **Casts Shadows = On** (defaults Off), a
+non-default value AE persists — so the leaf must be synthesized back.
+
+`aep.SetMaterialOption(layer, matchName, value)` is the synthesis-lite sibling of
+`SetEffectParam` (`internal/serializer/mutate_layer_material.go`): clones the
+requested `(tdmn, LIST:tdbs)` leaf from embedded `material_options_leaves.bin`
+(the 15-leaf tree extracted from `re_material_options.aep`, group with most
+children = all props authored), splices it into the group in AE's **canonical
+order** (group order is significant — out-of-order leaves get dropped on open),
+re-parses it into a `*Property`, appends to `layer.Properties` + the tree, writes
+the caller's value. Atomic: snapshots group-chunk children + flat Properties +
+tree + warnings, rolls back on any parser warning. Already-present leaf (parsed/
+fixture layer or prior splice) → plain SetStaticValue.
+
+`TestLayer3DShadow_AEShipGate_AE2020/2025` PASS: a Go-built 3D WALL catcher + a 3D
+CASTER whose `ADBE Casts Shadows`=On is **synthesized** + a POINT light (Casts
+Shadows on) above/in-front → caster casts a hard shadow DOWNWARD onto the wall.
+Centre-below-caster luma **0.0** (pure black — single light, no fill) vs lit wall
+**114** (symmetric L/R), byte-identical both versions; AE reads back
+`materialCastsShadows=1`. A no-shadow render leaves that central region lit, so a
+dark centre flanked by a lit wall is the coincidence-proof.
+
+**Two things needed NO synthesis:** (a) the **catcher** — an empty material group
+accepts shadows + lights by default; (b) the **light's own** Casts Shadows — it is
+already present in a from-scratch light's Light Options (index 7), so
+`SetLightCastsShadows(true)` works directly.
+
+**This closes priority-2 (3D).** enable + Z parallax + rotate/orient + camera
+dolly + DoF + lighting + shadows are all render-gated double-version. Material
+Options other coefficients (Diffuse/Specular/…) ride the same `SetMaterialOption`
+path (Go-round-trip-tested; render-gate on demand).
 
 ## Pre-existing 3D infra (already shipped, fixture-based)
 

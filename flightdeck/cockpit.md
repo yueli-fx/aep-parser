@@ -1,8 +1,8 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（优先级2 **3D 主体收官**：相机景深 DoF `TestLayer3DDoF`〔焦内 1px/失焦 21-22px〕渲染 gate 双版本 PASS + showcase `3d-camera` **用户真机验收 complete**。本日累计：3D enable/相机推拉/Z 视差/RotateY 透视/DoF 五能力全渲染 gate，整个 3D transform group 从零零新 serializer 代码〔transform 模板本就是 6-axis 3D schema〕；优先级1 animated gradient 色标〔用户造 fixture 解锁〕+ animated Trim。唯一剩项=Material Options 光照/阴影像素深验。逐 commit 见 git log。）
+**Last updated**: 2026-06-15 by claude（**优先级2（3D）全部收官**：Material Options 光照 + 阴影双版本渲染 gate PASS——光照零新代码〔`SetLightKind(Point)` + 默认 Accepts Lights，`TestLayer3DLight` 衰减 2.11×〕；阴影经新 `aep.SetMaterialOption` synthesis-insert〔空 material group splice `ADBE Casts Shadows`=On，`TestLayer3DShadow` shadow 0/lit 114〕。本日累计 3D：enable/推拉/Z 视差/RotateY/DoF/光照/阴影全渲染 gate。`SetLightKind` 从零生效〔4414=POINT〕。逐 commit 见 git log。）
 
-**Active focus**: **剩余能力 roadmap（模板起点，非 from-scratch）**（`specs/2026-06-14-remaining-capability-roadmap.md`）。MG from-scratch 主线 + 质感件 + camera/light option + 优先级1 animated 关键帧（trim✅）+ 优先级2 **3D-enable 双 gate 闭环**。现推进优先级2 余项：3D transform 通道**非默认值写入**（Z/旋转）。机制复用 parse-the-clone + synthesis-insert。每能力渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
+**Active focus**: **剩余能力 roadmap**（`specs/2026-06-14-remaining-capability-roadmap.md`）。优先级顺序（用户 2026-06-14 定）：动画关键帧（基本收口）> **3D（✅ 全收官 2026-06-15）** > **形状图层剩余〔← 现在这里〕** > mask > 表达式 > 文字。模板/真实 .aep 起点（非 from-scratch，规避 silent-drop）。机制库：parse-the-clone + synthesis-insert（camera iris / light color / material leaves）。每渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
 
 ## 进行中
 
@@ -17,26 +17,18 @@
 
 **主线 = `specs/2026-06-14-remaining-capability-roadmap.md`**（模板起点，非 from-scratch）。优先级顺序（用户 2026-06-14 定）：**动画关键帧 > 3D 图层 > 形状剩余 > mask > 表达式 > 文字图层**。
 
-**优先级1 动画关键帧**（基本收口）：
-- ~~lhd3 keyframe 容量分页~~ ✅ · ~~temporal ease 普及~~ ✅（2026-06-14）。
-- ~~animated 矢量滤镜（Trim End reveal）~~ ✅ 2026-06-15（三帧渲染 gate 双版本 PASS；Repeater/Offset 同 `lowerShapeScalar` 路径，按需补）。
-- ~~animated gradient 色标~~ ✅ 2026-06-15（用户手工造 fixture 解锁 RE；`AddGradientKeyframe` + 时间表/多 Utf8 emit；kf0=R/B/G→kf1=G/R/B 双版本实渲交换 PASS）。deferred：gradient STROKE 色标动画 + 色标 ease。
-- 遗留：path 几何 lhd3 >4 顶点分页（需求驱动）。
+**优先级1 动画关键帧 ✅ 基本收口**（lhd3 容量分页 / temporal ease / animated Trim / animated gradient 色标 全双版本，2026-06-14~15）。遗留：path 几何 lhd3 >4 顶点分页 + gradient STROKE 色标动画（均需求驱动）。
 
-**优先级2 3D 图层（主体闭环 — 解锁真·拉镜）**：
-- ~~图层 3D flag（enable）~~ ✅ `TestLayer3DEnable`（DOM）+ ~~相机推拉~~ ✅ `TestLayer3DCamDolly`（渲染 426→124px）。
-- ~~Z 视差~~ ✅ `TestLayer3DParallax`（两层不同 Z，NEAR 300 / FAR 99，3.03×）。
-- ~~RotateY 透视 tumble~~ ✅ `TestLayer3DRotateY`（梯形 1.45×）。
-- ~~相机景深 DoF~~ ✅ `TestLayer3DDoF`（焦内锐 1px / 失焦虚 21-22px，>20×）。
-- ~~showcase `3d-camera`~~ ✅ complete（**用户 2026-06-15 真机验收**，视差+透视；2020 模板）。
-- **关键发现**：整个 3D transform group（enable+Z+旋转+朝向）**从零零新 serializer 代码**——`SetIs3D`+reopen 后既有 transform setter，因嵌入 transform 模板本就是完整 6-axis 3D schema。详 `incidents/layer-3d-enable-bit-materializes.md`。
-- **明天接续：Material Options 光照/阴影**（用户 2026-06-15 选「收尾 3D」，今天起头）。今天关键发现：
-  - 从零 3D shape 层的 **`ADBE Material Options Group` emit 成空 group**（`lower_layer.go:171` `emptyPropGroupFlags`）→ `MaterialCastsShadows()` 等全 nil、`SetMaterial*` 报「property not present」。
-  - **阴影**需 Casts Shadows=ON（默认 OFF）→ 必须 **synthesis-insert material 叶子**（camera Iris/Highlight 同 vein：`mutate_layer_camera.go` `spliceCameraIrisLeaves`）：从 `re_material_options.aep`（17-prop material 树）抽 `material_options_leaves.bin` → splice 进空 group（或 SetMaterial* 做 synthesis-on-demand，同 `mutate_effect_param.go`）→ 再设值。**这是本会话最大单项，明天做**。
-  - **光照**或近零代码（AE 默认 material「Accepts Lights」=ON）：实验 3D 白 panel + `NewLightLayer`+`SetLightKind(LightKindPoint)`+红色高强度——AE 接受，但 JSX 读回 `light type=4414`（非干净 Point，**待查 SetLightKind 从零是否真生效** / 4414 含义）。**未读渲染图**（被打断），明天先 Read `tmp_debug/3d_exp/lit.png`（若还在）或重渲，确认光照可见再决定光照 gate 形态。
-  - RotateX/Orientation/RotateZ 同 transform-template 路径按需补 gate（低优先）。
+**优先级2 3D 图层 ✅ 全部收官（2026-06-15）**：enable / 相机推拉 / Z 视差 / RotateY 透视 / 相机 DoF / **光照** / **阴影** 七项全渲染 gate 双版本 PASS；showcase `3d-camera` 用户真机验收 complete。整个 3D transform group 从零零新 serializer 代码（transform 模板本就是 6-axis 3D schema）；光照零新代码；阴影靠新 `aep.SetMaterialOption` synthesis-insert（material leaves）。RotateX/Orientation/RotateZ 同路径按需补 gate（低优先）。详 `incidents/layer-3d-enable-bit-materializes.md`。
 
-完整清单（每层细项 + 不可达附录 + 搁置项）见 roadmap spec。
+**➡ 下一步 = 优先级3 形状图层剩余**（shape 矢量滤镜主体已收齐；剩 elided 子流 + 未单独 gate 的模式，多为 synthesis-insert / enum 补值小活）：
+- **Stroke 嵌套组 Dashes / Taper / Wave**（+ Gradient stroke 同三组）——嵌套 group 写，模板带默认值。
+- **Trim Type**（Simultaneously/Individually，elide 无 slot → synthesis-insert，同 `SetMaterialOption` 路径）。
+- **Offset Paths 4 个 elided 子流**（Line Join / Miter / Copies / Copy Offset，现只模 headline Amount）。
+- **Merge Add/Intersect/Exclude 模式**（已能写 enum，未单独 gate）。
+- **shape 次要子属性**（Fill/Stroke Opacity·BlendMode·CompositeOrder、Shape Direction；部分 runtime-only 逐个甄别）。
+
+完整清单（每层细项 + 优先级4-6 mask/表达式/文字 + 不可达附录）见 roadmap spec。
 
 **搁置（用户决定）**：Essential Graphics 进阶 + EG 面板崩溃未修 RE。
 **独立线（按需）**：Render Queue Set* slice-5~8（Alpha）。
