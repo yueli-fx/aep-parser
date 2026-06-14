@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（gradient-stroke Width/Cap/Join/Miter 从零通（双版本：60px 像素证宽 + DOM 读回，默认=烤值无回归）。同日先前：camera/light OPTION setter parse-the-clone 全通 · gradient 方向彻底闭环 + read-back。逐 commit 见 git log。）
+**Last updated**: 2026-06-14 by claude（PolyStar Polygon 型从零通（独立模板，双版本凸多边形像素 PASS，无回归 star）。同日先前：gradient-stroke Width/Cap/Join/Miter · camera/light OPTION parse-the-clone · gradient 方向闭环+read-back。逐 commit 见 git log。）
 
 **Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。常用 shape 矢量滤镜 11 件 + **gradient（方向/类型/高光，fill+stroke，写+读全闭环）** + 星形全收齐，端到端组合 gate ✅。工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**，agent 先**自验证**（render → Read png 对照意图）再给用户真机复核；gradient 与 expressions showcase 均 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
 
@@ -22,7 +22,7 @@
 **polish / 技债**：
 - **camera/light 余项**（主体 option setter 已 parse-the-clone 通，2026-06-14）：**Light Color** from-scratch（AE 默认 elide 无 slot，需 gradient 式重抽模板）· 3D-render 像素 gate（现仅 AE DOM 读回，深验需 3D layer 支持）。`incidents/camera-light-layer-create-re.md`。
 - ✅ **gradient-stroke Width/Cap/Join/Miter 已通**（2026-06-14，模板已含 slot 免重抽；`SetStrokeWidth`/`SetLineCap`/`SetLineJoin`/`SetMiterLimit`，默认=烤值无回归；`TestMGGradStrokeStyle_*` 双版本 PASS：60px 像素证宽 + Cap/Join/Miter DOM 读回）。余 G-Stroke 的 **Dashes/Taper/Wave** 嵌套组（按需，蓝本实心描边）。
-- PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
+- ✅ **PolyStar Polygon 型已通**（2026-06-14，独立模板 `v2_2_shape_starpolygon_body.bin`：Polygon 存盘是 Star 超集——含 Type=2 slot + 仍存 Inner Radius/Roundness〔AE 隐藏不渲染〕；`StarNode.SetStarType(StarTypeStar|StarTypePolygon)`，`lowerStarNode` 按型选模板；`TestMGPolygon_*` 双版本凸多边形像素 PASS，无回归 star gate）。· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
 - `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。
 - 表达式 `linear()`/`ease()` remap（边际值低，按需）。
 

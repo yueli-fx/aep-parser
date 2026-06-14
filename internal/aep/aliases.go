@@ -128,6 +128,7 @@ type (
 	RoundCornersNode                = scene.RoundCornersNode
 	ZigZagNode                      = scene.ZigZagNode
 	StarNode                        = scene.StarNode
+	StarType                        = scene.StarType
 	PuckerBloatNode                 = scene.PuckerBloatNode
 	TwistNode                       = scene.TwistNode
 	WigglePathsNode                 = scene.WigglePathsNode
@@ -222,6 +223,8 @@ const (
 	FramesCountTypeTimecodeConversion             = scene.FramesCountTypeTimecodeConversion
 	GradientLinear                                = scene.GradientLinear
 	GradientRadial                                = scene.GradientRadial
+	StarTypeStar                                  = scene.StarTypeStar
+	StarTypePolygon                               = scene.StarTypePolygon
 	GuideHorizontal                               = scene.GuideHorizontal
 	GuideVertical                                 = scene.GuideVertical
 	InterpBezier                                  = scene.InterpBezier

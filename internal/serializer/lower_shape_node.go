@@ -70,6 +70,9 @@ var v22ShapeZigZagBodyBytes []byte
 //go:embed templates/v2_2_shape_star_body.bin
 var v22ShapeStarBodyBytes []byte
 
+//go:embed templates/v2_2_shape_starpolygon_body.bin
+var v22ShapeStarPolygonBodyBytes []byte
+
 //go:embed templates/v2_2_shape_puckerbloat_body.bin
 var v22ShapePuckerBloatBodyBytes []byte
 
@@ -142,6 +145,10 @@ var (
 	v22ShapeStarOnce  sync.Once
 	v22ShapeStarCache *rifx.Chunk
 	v22ShapeStarErr   error
+
+	v22ShapeStarPolygonOnce  sync.Once
+	v22ShapeStarPolygonCache *rifx.Chunk
+	v22ShapeStarPolygonErr   error
 
 	v22ShapePuckerBloatOnce  sync.Once
 	v22ShapePuckerBloatCache *rifx.Chunk
@@ -1170,13 +1177,41 @@ func cloneShapeStarBody() (*rifx.Chunk, error) {
 	return cloneChunk(v22ShapeStarCache), nil
 }
 
+// cloneShapeStarPolygonBody returns a clone of the Polygon-type polystar template
+// (templates/v2_2_shape_starpolygon_body.bin): same sub-streams as the Star body
+// PLUS the `ADBE Vector Star Type` slot baked to 2 (Polygon). AE saves Inner
+// Radius/Roundness too (hidden, no visual effect) so the slot set is a superset
+// of the Star body — the shared lower overwrites apply unchanged.
+func cloneShapeStarPolygonBody() (*rifx.Chunk, error) {
+	v22ShapeStarPolygonOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStarPolygonBodyBytes))
+		if err != nil {
+			v22ShapeStarPolygonErr = fmt.Errorf("parse v22ShapeStarPolygonBodyBytes: %w", err)
+			return
+		}
+		v22ShapeStarPolygonCache = ch
+	})
+	if v22ShapeStarPolygonErr != nil {
+		return nil, v22ShapeStarPolygonErr
+	}
+	return cloneChunk(v22ShapeStarPolygonCache), nil
+}
+
 // lowerStarNode emits a Star shape body from the embedded template, overwriting
 // the Points / Rotation / Inner·Outer Radius / Inner·Outer Roundess 1D scalars
 // (lowerShapeScalar, static cdat / animated flip) and Position (Vec2, spatial
 // motion-path layout, same as Rect Position). Star Type stays at the embed
 // default (Star). RE'd from v2_2_star.aep.
 func lowerStarNode(n *StarNode, ctx *lowerCtx) (*rifx.Chunk, error) {
-	body, err := cloneShapeStarBody()
+	// Polygon uses a separate template (carries the Star Type=2 slot, baked); Star
+	// uses the original (Type elided at default). The remaining sub-stream
+	// overwrites are identical (Inner Radius/Roundness are present in both but
+	// have no visual effect on a Polygon).
+	clone := cloneShapeStarBody
+	if n.IsPolygon() {
+		clone = cloneShapeStarPolygonBody
+	}
+	body, err := clone()
 	if err != nil {
 		return nil, err
 	}

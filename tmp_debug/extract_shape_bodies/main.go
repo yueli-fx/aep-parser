@@ -103,6 +103,12 @@ var extractions = []extraction{
 	// slots; Star Type (default Star) + Shape Direction stay default (elided) —
 	// Star-type only modeled (Polygon deferred). Regen via tmp_debug/gen_shape_star.jsx.
 	{"test_data/v2_2_star.aep", "ADBE Vector Shape - Star", "internal/serializer/templates/v2_2_shape_star_body.bin"},
+	// PolyStar Polygon type (`ADBE Vector Shape - Star` with Star Type=2): a
+	// separate body — a Polygon drops Inner Radius/Roundness (AE hides them), so
+	// the slots differ from the Star body. Authored with Type=2 + Points/Position/
+	// Rotation/Outer Radius/Outer Roundness non-default. lowerStarNode picks this
+	// template when the node's StarType is Polygon. Regen via tmp_debug/gen_shape_polygon.jsx.
+	{"test_data/v2_2_polygon.aep", "ADBE Vector Shape - Star", "internal/serializer/templates/v2_2_shape_starpolygon_body.bin"},
 	// MG roadmap S5 — Pucker & Bloat (`ADBE Vector Filter - PB`): bows the paths'
 	// edges outward (bloat, +) or inward (pucker, −). Single sub-stream `ADBE
 	// Vector PuckerBloat Amount` (1D f64 BE percent, default 10) set non-default in

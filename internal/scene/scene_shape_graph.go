@@ -261,15 +261,29 @@ func (e *EllipseNode) Properties() *PropertyGroup {
 	}
 }
 
-// StarNode — `ADBE Vector Shape - Star`. A parametric star (V2.2 models the
-// Star type only — Polygon, which drops Inner Radius/Roundness, is deferred).
-// Defaults match AE: Points=5, Position=[0,0], Rotation=0, InnerRadius=50,
-// OuterRadius=100, Inner/OuterRoundness=0. Star Type / Shape Direction stay at
-// AE's default (Star / Normal; elided in the template, not overwritable).
+// StarType selects a polystar's shape: a Star (alternating outer/inner radius
+// points) or a Polygon (a convex N-gon — Inner Radius/Roundness have no effect).
+// Matches AE's `ADBE Vector Star Type` enum.
+type StarType int
+
+const (
+	// StarTypeStar is the alternating-point star (AE default).
+	StarTypeStar StarType = 1
+	// StarTypePolygon is a convex N-gon (Inner Radius/Roundness ignored).
+	StarTypePolygon StarType = 2
+)
+
+// StarNode — `ADBE Vector Shape - Star`. A parametric polystar: a Star
+// (alternating outer/inner points) or a Polygon (convex N-gon) per StarType.
+// Defaults match AE: Type=Star, Points=5, Position=[0,0], Rotation=0,
+// InnerRadius=50, OuterRadius=100, Inner/OuterRoundness=0. For a Polygon the
+// Inner Radius / Inner Roundness sub-streams have no visual effect (AE hides
+// them), but Points / Position / Rotation / Outer Radius / Outer Roundness apply.
 //
 // All sub-streams are animatable: Position is a Vec2 (spatial motion-path, same
 // layout as Rect Position); the rest are 1D scalars.
 type StarNode struct {
+	starType       StarType
 	points         *codec.PropertyStream[float64]
 	position       *codec.PropertyStream[[2]float64]
 	rotation       *codec.PropertyStream[float64]
@@ -282,6 +296,7 @@ type StarNode struct {
 // NewStarNode constructs a default-valued StarNode (AE's default 5-point star).
 func NewStarNode() *StarNode {
 	n := &StarNode{
+		starType:       StarTypeStar,
 		points:         codec.NewPropertyStream[float64](),
 		position:       codec.NewPropertyStream[[2]float64](),
 		rotation:       codec.NewPropertyStream[float64](),
@@ -298,6 +313,22 @@ func NewStarNode() *StarNode {
 	_ = n.innerRoundness.SetStaticValue(0)
 	_ = n.outerRoundness.SetStaticValue(0)
 	return n
+}
+
+// StarType returns whether this polystar is a Star or a Polygon.
+func (n *StarNode) StarType() StarType { return n.starType }
+
+// IsPolygon reports whether this polystar is a Polygon (vs a Star).
+func (n *StarNode) IsPolygon() bool { return n.starType == StarTypePolygon }
+
+// SetStarType selects Star (alternating points) or Polygon (convex N-gon). For a
+// Polygon the Inner Radius/Roundness are ignored.
+func (n *StarNode) SetStarType(t StarType) error {
+	if t != StarTypeStar && t != StarTypePolygon {
+		return fmt.Errorf("StarNode.SetStarType: %d out of range (1=star, 2=polygon)", t)
+	}
+	n.starType = t
+	return nil
 }
 
 func (n *StarNode) Kind() ShapeNodeKind                      { return ShapeKindStar }
