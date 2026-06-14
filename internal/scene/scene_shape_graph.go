@@ -1235,15 +1235,19 @@ func (n *RoundCornersNode) Properties() *PropertyGroup {
 // Amount` is an animatable 1D scalar (default 10, AE's default). Place it AFTER
 // the path-producing shapes it should offset (render order).
 //
-// Line Join / Miter Limit / Copies / Copy Offset are AE-default and elided in
-// the extracted template (no slot); only Amount is modeled.
+// Line Join / Miter Limit / Copy Offset are AE-default and elided in the
+// extracted Amount-only template (no slot); Copies is materialized on demand by
+// the serializer (synthesis-insert of the `ADBE Vector Offset Copies` leaf) when
+// SetCopies is called, mirroring SetMaterialOption for default-elided leaves.
 type OffsetPathsNode struct {
-	amount *codec.PropertyStream[float64]
+	amount    *codec.PropertyStream[float64]
+	copies    float64
+	copiesSet bool
 }
 
-// NewOffsetPathsNode constructs a default OffsetPathsNode (Amount=10).
+// NewOffsetPathsNode constructs a default OffsetPathsNode (Amount=10, Copies=1).
 func NewOffsetPathsNode() *OffsetPathsNode {
-	n := &OffsetPathsNode{amount: codec.NewPropertyStream[float64]()}
+	n := &OffsetPathsNode{amount: codec.NewPropertyStream[float64](), copies: 1}
 	_ = n.amount.SetStaticValue(10)
 	return n
 }
@@ -1253,6 +1257,25 @@ func (n *OffsetPathsNode) Amount() *PropertyStream[float64] { return n.amount }
 
 // SetAmount sets the offset amount in pixels (positive grows, negative shrinks).
 func (n *OffsetPathsNode) SetAmount(v float64) error { return n.amount.SetStaticValue(v) }
+
+// Copies returns the number of progressively-offset copies (default 1).
+func (n *OffsetPathsNode) Copies() float64 { return n.copies }
+
+// SetCopies sets the number of copies the Offset Paths filter stacks, each
+// offset by a further Amount pixels — N nested outlines growing outward (or
+// inward for a negative Amount). Must be >= 1. The `ADBE Vector Offset Copies`
+// sub-stream is AE-default-elided; setting it materializes the leaf on lower.
+func (n *OffsetPathsNode) SetCopies(v float64) error {
+	if v < 1 {
+		return fmt.Errorf("OffsetPathsNode.SetCopies: %g out of range (want >= 1)", v)
+	}
+	n.copies = v
+	n.copiesSet = true
+	return nil
+}
+
+// CopiesSet reports whether SetCopies was called (serializer splice trigger).
+func (n *OffsetPathsNode) CopiesSet() bool { return n.copiesSet }
 
 // Properties returns the escape-hatch β view.
 func (n *OffsetPathsNode) Properties() *PropertyGroup {

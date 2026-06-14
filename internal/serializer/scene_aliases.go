@@ -446,6 +446,9 @@ func NewPathNode() *PathNode { return scene.NewPathNode() }
 // NewRectNode returns a detached rectangle shape node.
 func NewRectNode() *RectNode { return scene.NewRectNode() }
 
+// NewOffsetPathsNode returns a detached Offset Paths filter node.
+func NewOffsetPathsNode() *OffsetPathsNode { return scene.NewOffsetPathsNode() }
+
 // NewStrokeNode returns a detached stroke shape node.
 func NewStrokeNode() *StrokeNode { return scene.NewStrokeNode() }
 

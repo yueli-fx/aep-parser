@@ -29,6 +29,80 @@ func TestLowerRectNode_HasTdmnAndSubProps(t *testing.T) {
 	}
 }
 
+func TestLowerOffsetPaths_CopiesSplice(t *testing.T) {
+	// Default (Copies untouched): no Copies slot is spliced — the body stays the
+	// Amount-only template (matches AE's elision of the default Copies value).
+	def := NewOffsetPathsNode()
+	_ = def.SetAmount(60)
+	defBody, err := LowerShapeNodeForTest(def)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if names := topTdmnNames(defBody); containsStr(names, "ADBE Vector Offset Copies") {
+		t.Fatalf("default offset must not carry Copies slot, got tdmns %v", names)
+	}
+
+	// Copies set non-default: the `ADBE Vector Offset Copies` leaf is spliced in
+	// canonical order (after Amount, before Group End) with its cdat overwritten.
+	n := NewOffsetPathsNode()
+	_ = n.SetAmount(60)
+	_ = n.SetCopies(3)
+	body, err := LowerShapeNodeForTest(n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := topTdmnNames(body)
+	want := []string{"ADBE Vector Offset Amount", "ADBE Vector Offset Copies", "ADBE Group End"}
+	if len(got) != len(want) {
+		t.Fatalf("offset body top tdmns = %v, want %v", got, want)
+	}
+	for i, w := range want {
+		if got[i] != w {
+			t.Fatalf("offset body tdmn[%d] = %q, want %q (full %v)", i, got[i], w, got)
+		}
+	}
+	// Copies cdat[0:8] must decode to 3 (f64 BE).
+	if v := offsetCdatF64(t, body, "ADBE Vector Offset Copies"); v != 3 {
+		t.Fatalf("Copies cdat = %g, want 3", v)
+	}
+}
+
+func topTdmnNames(body *rifx.Chunk) []string {
+	var out []string
+	for _, ch := range body.Children {
+		if ch.ID == rifx.IDTdmn {
+			out = append(out, trimTestNUL(string(ch.Data)))
+		}
+	}
+	return out
+}
+
+func containsStr(ss []string, want string) bool {
+	for _, s := range ss {
+		if s == want {
+			return true
+		}
+	}
+	return false
+}
+
+func offsetCdatF64(t *testing.T, body *rifx.Chunk, streamName string) float64 {
+	t.Helper()
+	kids := body.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimTestNUL(string(kids[i].Data)) == streamName {
+			tdbs := kids[i+1]
+			for _, ch := range tdbs.Children {
+				if ch.ID == rifx.IDCdat && len(ch.Data) >= 8 {
+					return math.Float64frombits(binary.BigEndian.Uint64(ch.Data[:8]))
+				}
+			}
+		}
+	}
+	t.Fatalf("cdat for %q not found", streamName)
+	return 0
+}
+
 func TestLowerEllipseNode_OverwritesSizeAndPosition(t *testing.T) {
 	e := NewEllipseNode()
 	_ = e.SetSize([2]float64{321, 123})

@@ -61,6 +61,9 @@ var v22ShapeRoundCornersBodyBytes []byte
 //go:embed templates/v2_2_shape_offset_body.bin
 var v22ShapeOffsetBodyBytes []byte
 
+//go:embed templates/v2_2_shape_offset_copies_leaf.bin
+var v22ShapeOffsetCopiesLeafBytes []byte
+
 //go:embed templates/v2_2_shape_merge_body.bin
 var v22ShapeMergeBodyBytes []byte
 
@@ -133,6 +136,10 @@ var (
 	v22ShapeOffsetOnce  sync.Once
 	v22ShapeOffsetCache *rifx.Chunk
 	v22ShapeOffsetErr   error
+
+	v22ShapeOffsetCopiesLeafOnce  sync.Once
+	v22ShapeOffsetCopiesLeafCache *rifx.Chunk
+	v22ShapeOffsetCopiesLeafErr   error
 
 	v22ShapeMergeOnce  sync.Once
 	v22ShapeMergeCache *rifx.Chunk
@@ -1103,11 +1110,63 @@ func cloneShapeOffsetBody() (*rifx.Chunk, error) {
 	return cloneChunk(v22ShapeOffsetCache), nil
 }
 
+// cloneShapeOffsetCopiesLeaf returns a fresh (tdmn, LIST:tdbs) clone of the
+// `ADBE Vector Offset Copies` leaf from its embedded template (a LIST(tdgp)
+// wrapper holding the single pair, extracted from an AE-saved offset whose Copies
+// was authored non-default). spliced into the Amount-only offset body when Copies
+// is set — mirrors SetMaterialOption's per-leaf splice for default-elided props.
+func cloneShapeOffsetCopiesLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeOffsetCopiesLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetCopiesLeafBytes))
+		if e != nil {
+			v22ShapeOffsetCopiesLeafErr = fmt.Errorf("parse v22ShapeOffsetCopiesLeafBytes: %w", e)
+			return
+		}
+		v22ShapeOffsetCopiesLeafCache = ch
+	})
+	if v22ShapeOffsetCopiesLeafErr != nil {
+		return nil, nil, v22ShapeOffsetCopiesLeafErr
+	}
+	kids := v22ShapeOffsetCopiesLeafCache.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Offset Copies" &&
+			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
+			return cloneChunk(kids[i]), cloneChunk(kids[i+1]), nil
+		}
+	}
+	return nil, nil, fmt.Errorf("offset copies leaf missing from template")
+}
+
+// spliceShapeLeafBeforeGroupEnd inserts a (tdmn, LIST:tdbs) leaf pair into a
+// shape filter body's LIST(tdgp) immediately before the trailing
+// `ADBE Group End` sentinel — the canonical tail position for a leaf that sorts
+// after the body's existing slots (Offset Copies follows Amount). No-op if no
+// Group End is found (returns the pair appended at the end).
+func spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs *rifx.Chunk) {
+	kids := body.Children
+	insertIdx := len(kids)
+	for i := 0; i < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Group End" {
+			insertIdx = i
+			break
+		}
+	}
+	spliced := make([]*rifx.Chunk, 0, len(kids)+2)
+	spliced = append(spliced, kids[:insertIdx]...)
+	spliced = append(spliced, tdmn, tdbs)
+	spliced = append(spliced, kids[insertIdx:]...)
+	body.Children = spliced
+}
+
 // lowerOffsetPathsNode emits an Offset Paths filter body from the embedded
 // template, overwriting the single `ADBE Vector Offset Amount` cdat (1D f64 BE
 // at cdat[0:8], raw pixels — same scalar layout as Round Corners Radius).
 // Static → cdat overwrite; animated → the cdat flips to a 1D non-spatial
 // keyframe container via the shared injectAnimatedStream path.
+//
+// When Copies is set, the AE-default-elided `ADBE Vector Offset Copies` leaf is
+// spliced into the body in canonical order (after Amount, before Group End) and
+// its cdat overwritten — synthesis-insert, mirroring SetMaterialOption.
 func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeOffsetBody()
 	if err != nil {
@@ -1115,6 +1174,14 @@ func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Offset Amount", n.Amount(), ctx); err != nil {
 		return nil, err
+	}
+	if n.CopiesSet() && n.Copies() != 1 {
+		tdmn, tdbs, err := cloneShapeOffsetCopiesLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Offset Copies", encodeF64sBE(n.Copies()))
 	}
 	return body, nil
 }

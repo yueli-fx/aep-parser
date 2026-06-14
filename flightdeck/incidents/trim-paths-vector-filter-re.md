@@ -145,4 +145,17 @@ Gate：`TestMGWiggleTransform_AEShipGate_AE2020/2025` 双版本渲染像素 PASS
 
 **Repeater Copies/Offset · Offset Amount · PuckerBloat/Twist/RC Amount 等所有 headline scalar 走完全相同 `lowerShapeScalar` 路径**——AE 消化 animated filter scalar 已由本 gate 证明，各自 animated gate 按需补（边际价值低，非重复 RE）。**注**：animated gradient 色标**不**属此类（GCky 是独立 keyframe 容器，未 RE + JSX 无法 authoring，见 `gradient-fill-write-re.md` § Scope）。
 
+## Offset Copies — shape-filter synthesis-insert 首发（优先级3，2026-06-15）✅
+
+Offset Paths 的 4 个 elided 子流（Line Join / Miter / **Copies** / Copy Offset）现只模 headline Amount。**Copies** 用 **synthesis-insert** 落地——把 `SetMaterialOption`（material leaves）那套机制**首次推广到矢量滤镜 body**：
+
+- **不污染默认**：`v2_2_shape_offset_body.bin`（仅 Amount slot）保持不变；仅当 `SetCopies` 被调用且值 ≠1 时，clone `ADBE Vector Offset Copies` leaf（tdmn + LIST:tdbs，6-child scalar-with-range，与 Amount 同构）splice 进 body，覆写 cdat。与 Dashes 的「solid body 不变 + 第二模板」同精神，但更轻（splice 单 leaf，不需整 body 变体）。
+- **leaf 模板** `templates/v2_2_shape_offset_copies_leaf.bin`（318B，LIST(tdgp) 裹单个 (tdmn,tdbs) pair）由 `tmp_debug/extract_offset_copies_leaf` 从 `v2_2_offset_copies.aep`（JSX 设 Amount=40+Copies=3，逼 AE 不 elide）抽出。RE 确认落盘子序：Amount → Copies → GroupEnd（Line Join/Miter/Copy Offset 仍 elide）。
+- **splice 落点** = `spliceShapeLeafBeforeGroupEnd`（GroupEnd 前；Copies canonical 在 Amount 后）。scene `OffsetPathsNode` 加 `copies float64 + copiesSet bool`（静态，非 PropertyStream——Copies 非动画需求）。
+- **不需 hydration**：`collectShapeKids` 本就不 hydrate 任何 filter 节点（Trim/Merge/Offset 全靠 opaque chunk 穿越 Reopen）——Copies splice 在 from-scratch lower 期烘进字节，之后 Reopen→Write 作 opaque 保留。与所有现有 filter 一致。
+
+**渲染 ground truth（先看图，红线4）**：400×400 Rect + **even-odd Fill** + Offset(Amount=40, Copies=3) → 3 副本叠在 half-width 240/280/320，even-odd 填出**白心方块(<240) + 暗 gap 环(240..280) + 白外环(280..320)**。gate 签名 = 外白环白(d≈300) + gap 暗(d≈260) + 白心——**单副本（任意大小实心方块）不可能有白→暗→白径向跳变**（实心方块=假绿，靠 even-odd 同心环识破）。`TestMGOffsetCopies_AEShipGate_AE2020/2025` 双版本 PASS（outer-ring 4/4 · gap 4/4 · centre 3/3 · resave Copies=3，png 10777b 两版一致）。
+
+**蓝本推广**：此机制（clone leaf 模板 → spliceShapeLeafBeforeGroupEnd → 覆写 cdat，仅当非默认）直接复用于 **Trim Type**（elide 无 slot）· Offset 其余 3 子流 · ZigZag Points · Twist Center · Repeater Order 等所有 default-elided 矢量滤镜子流。`spliceShapeLeafBeforeGroupEnd` 是通用 helper（GroupEnd 前插 pair）；多 leaf 需 canonical 排序时再扩 ordinal map（同 `materialLeafOrder`）。
+
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。
