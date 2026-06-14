@@ -56,6 +56,14 @@
                 near("light.intensity", lo.intensity.value, 65);
                 near("light.coneAngle", lo.coneAngle.value, 72);
                 near("light.coneFeather", lo.coneFeather.value, 35);
+                // From-scratch Light Color (synthesis-inserted leaf). AE's DOM
+                // returns [r,g,b] in 0..1; compare against the written colour.
+                var cv = lo.color.value;
+                var wantC = [0.2, 0.4, 0.8];
+                for (var ci = 0; ci < 3; ci++) {
+                    if (Math.abs(cv[ci] - wantC[ci]) > 0.02) fail("light.color[" + ci + "]=" + cv[ci] + " want " + wantC[ci]);
+                }
+                log.push("  light.color=[" + cv.join(",") + "]");
             }
         }
 

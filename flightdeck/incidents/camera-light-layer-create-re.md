@@ -101,11 +101,45 @@ where the field lives:
     **3D** scene, which needs 3D-layer creation we don't have yet. For these
     numeric option scalars (AE reads them into its model, no "enabled-bit" render
     trap) the DOM-readback ceiling is the appropriate gate.
-  - **Still deferred — `ADBE Light Color`**: AE **elides** it at its default, so it
-    is absent from the template → no slot to overwrite and `LightColor()` returns
-    nil on a fresh light. This one genuinely needs the gradient-style fix (author
-    a non-default color in AE + re-extract the template, or true synthesis-insert
-    the leaf). Low priority.
+  - **`ADBE Light Color` — RESOLVED 2026-06-14 via synthesis-insert (AE2020+2025
+    PASS).** AE **elides** it at its default white, so it is absent from the
+    embed-whole-Layr template → no slot, `LightColor()` nil on a fresh light.
+    Fixed by the **leaf-splice** half (not whole-template re-extraction): author a
+    light with a non-default colour in AE 2020 (`tmp_debug/gen_light_color.jsx` →
+    `test_data/re_light_color.aep`), extract just the `(tdmn "ADBE Light Color",
+    LIST:tdbs)` pair (`tmp_debug/extract_light_color_leaf` →
+    `templates/light_color_leaf.bin`, a LIST(tdgp) wrapper), and have
+    `newTemplatedLayer` (light only) splice it into the cloned Light Options group
+    + reset the cdat to white **before** the property-tree parse — so the existing
+    `SetLightColor`/`LightColor()` light up from scratch. Same synthesis-insert
+    blueprint as `SetEffectParam` (no child-count header to bump; LIST sizes
+    reflow on Write). The whole current light template stays byte-unchanged → zero
+    regression on the create gate.
+    - **Two traps cost two failed gate runs (both classic red-line-4 false-greens):**
+      1. **Colour cdat is `[A,R,G,B] × 255` f64, NOT raw `[r,g,b,a] × 1.0`** —
+         already RE'd for shape fill/stroke (`encodeShapeColorBE`). A fresh light's
+         cdat dump: DOM `[0.9,0.1,0.2]` → disk `[255, 229.5, 25.5, 51]` (alpha
+         first, all ×255). `SetLightColor`'s established contract takes these **raw
+         0..255 alpha-first** values (`[]float64{200,100,50,255}` in the parsed-
+         fixture test); white = `[255,255,255,255]`. A Go round-trip with `[0.2,
+         0.4,0.8,1]` was self-consistently GREEN yet AE rendered white — the writer
+         and parser agreed on the wrong scale/order.
+      2. **Property order within a group is significant.** AE's canonical Light
+         Options order is **Intensity[1], Color[2]**, Cone Angle[3], … (probed:
+         `tmp_debug/gen_light_order.jsx`). Splicing Color at the group **front**
+         (ahead of Intensity) made AE **silently drop it on open** — DOM read white,
+         resave re-elided it (`LightColor()` nil on re-parse). Inserting the pair
+         **right after Intensity's payload** fixed it. Insert leaves in canonical
+         order, never blindly at the front.
+    - Gated: `TestCameraLightOptions_FromScratch_Roundtrip` (Go: fresh light →
+      `SetLightColor([255,51,102,204])` → write → re-parse → assert raw value) +
+      the dual-version `TestNewCameraLight_AEShipGate_AE20{20,25}` extended to set
+      the colour and read it back from **AE's DOM** (`lightOption.color` =
+      `[0.2,0.4,0.8]`, i.e. 51/102/204 ÷255) + Go re-parse confirms resave kept the
+      raw `[255,51,102,204]`. Both AE versions identical.
+    - **Scope honesty**: AE-model-readback + resave-preservation (same ceiling as
+      the other light options — pixel-proving a light's colour needs a lit 3D
+      scene we don't build yet).
 - ~~NewTextLayer~~ — SHIPPED 2026-06-11 via the same embed-whole-Layr path
   (mutate_layer_text.go; the btdk blob travels verbatim, so its complexity never
   materialized for creation — length-variable text WRITE is the remaining wall,

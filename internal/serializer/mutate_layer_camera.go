@@ -27,6 +27,17 @@ var layerCameraBodyBytes []byte
 //go:embed templates/layer_light_body.bin
 var layerLightBodyBytes []byte
 
+// light_color_leaf.bin is a LIST(tdgp) wrapper around the
+// (tdmn "ADBE Light Color", LIST:tdbs) pair, extracted from an AE-2020-saved
+// light whose color was authored non-default (AE elides the default white, so
+// the from-scratch light template carries no Color slot). newTemplatedLayer
+// splices this into a fresh light's Light Options group and resets the cdat to
+// white — lighting up SetLightColor / LightColor() from scratch. Same
+// synthesis-insert blueprint as SetEffectParam's materialized param streams.
+//
+//go:embed templates/light_color_leaf.bin
+var lightColorLeafBytes []byte
+
 // NewCameraLayer adds a new Camera layer to the composition.
 // (Full contract lives on the aep.NewCameraLayer facade — docgen source.)
 func NewCameraLayer(c *Composition, name string) (*Layer, error) {
@@ -37,6 +48,59 @@ func NewCameraLayer(c *Composition, name string) (*Layer, error) {
 // (Full contract lives on the aep.NewLightLayer facade — docgen source.)
 func NewLightLayer(c *Composition, name string) (*Layer, error) {
 	return newTemplatedLayer(c, name, layerLightBodyBytes, LayerTypeLight)
+}
+
+// spliceLightColorLeaf inserts the AE-native (tdmn "ADBE Light Color",
+// LIST:tdbs) pair at the front of the cloned light's Light Options group
+// (Color is canonically the group's first child, ahead of Intensity). The
+// enclosing LIST sizes reflow on Write (length-variable, like a name edit), and
+// AE property groups are Group-End-sentinel-delimited with no child-count
+// header to bump — same as SetEffectParam's value-stream splice.
+func spliceLightColorLeaf(layrChunk *rifx.Chunk) error {
+	var outer *rifx.Chunk
+	for _, ch := range layrChunk.Children {
+		if ch.IsList() && ch.FormType == rifx.IDTdgp {
+			outer = ch
+			break
+		}
+	}
+	if outer == nil {
+		return fmt.Errorf("light template: no outer tdgp group")
+	}
+	opts := findGroupBody(outer, "ADBE Light Options Group")
+	if opts == nil {
+		return fmt.Errorf("light template: no Light Options group")
+	}
+	// Already present (re-extracted template carries it) — nothing to do.
+	for _, ch := range opts.Children {
+		if ch.ID == rifx.IDTdmn && trimChunkNUL(ch.Data) == "ADBE Light Color" {
+			return nil
+		}
+	}
+	wrapper, err := rifx.ReadChunk(bytes.NewReader(lightColorLeafBytes))
+	if err != nil {
+		return fmt.Errorf("parse light color leaf template: %w", err)
+	}
+	if len(wrapper.Children) != 2 {
+		return fmt.Errorf("light color leaf template: want 2 children (tdmn, tdbs), got %d", len(wrapper.Children))
+	}
+	// AE's canonical Light Options order is Intensity[1], Color[2], … — insert
+	// the pair right after Intensity's payload. Property order within a group is
+	// significant: a Color spliced ahead of Intensity is dropped by AE on open.
+	insertAt := 0
+	kids := opts.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Light Intensity" {
+			insertAt = i + 2 // after the (tdmn, payload) pair
+			break
+		}
+	}
+	spliced := make([]*rifx.Chunk, 0, len(kids)+2)
+	spliced = append(spliced, kids[:insertAt]...)
+	spliced = append(spliced, wrapper.Children...)
+	spliced = append(spliced, kids[insertAt:]...)
+	opts.Children = spliced
+	return nil
 }
 
 // newTemplatedLayer clones an embedded AE-native Layr template, patches its
@@ -115,6 +179,16 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 		}
 	}
 
+	// A fresh light's template has no `ADBE Light Color` slot (AE elides the
+	// default white). Splice the AE-native leaf into its Light Options group so
+	// LightColor()/SetLightColor work from scratch; it is reset to white below
+	// (after the property tree is wired) so an untouched fresh light stays white.
+	if typ == LayerTypeLight {
+		if err := spliceLightColorLeaf(layrChunk); err != nil {
+			return nil, err
+		}
+	}
+
 	// Runtime Layer wrapper. Capture ldta + nameChunk so ldta-based setters
 	// (SetSource for precomp, SetParent, flag bits) work on the fresh layer.
 	base := &Layer{Type: typ, Name: name, ID: layerID}
@@ -138,6 +212,16 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 	scene.SetLayerPropertyTree(base, ptree)
 	scene.SetPropertyGroupLayer(ptree, base)
 	wirePropertyTreeLeaves(ptree, base.Properties)
+
+	// Reset the spliced Light Color leaf to AE's default white (the embedded
+	// template carries the extraction fixture's authored colour). AE stores
+	// light colour as raw [A,R,G,B] in 0..255, so white = all 255. Best-effort:
+	// a missing slot just leaves LightColor() nil, as before.
+	if typ == LayerTypeLight {
+		if lc := base.LightColor(); lc != nil {
+			_ = base.SetLightColor([]float64{255, 255, 255, 255})
+		}
+	}
 
 	// cdta @0x18: bump fresh-comp marker (600) to TickRate — AE's "comp has user
 	// content" gate (see NewShapeLayer).

@@ -59,6 +59,8 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 		{"SetLightIntensity", func() error { return lightLayer.SetLightIntensity(65) }},
 		{"SetLightConeAngle", func() error { return lightLayer.SetLightConeAngle(72) }},
 		{"SetLightConeFeather", func() error { return lightLayer.SetLightConeFeather(35) }},
+		// Raw cdat [A,R,G,B] 0..255; R=51/G=102/B=204 → AE DOM [0.2,0.4,0.8].
+		{"SetLightColor", func() error { return lightLayer.SetLightColor([]float64{255, 51, 102, 204}) }},
 	} {
 		if err := e.fn(); err != nil {
 			t.Fatalf("%s: %v", e.label, err)
@@ -122,6 +124,14 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 			chkOpt(t, ver, "Light1.Intensity", l.LightIntensity(), 65)
 			chkOpt(t, ver, "Light1.ConeAngle", l.LightConeAngle(), 72)
 			chkOpt(t, ver, "Light1.ConeFeather", l.LightConeFeather(), 35)
+			// From-scratch Light Color survived AE's resave (tolerant compare —
+			// AE round-trips colour through float32).
+			if lc := l.LightColor(); lc == nil {
+				t.Errorf("%s resaved: Light1.Color property nil", ver)
+			} else if rgba, ok := lc.StaticValue.([]float64); !ok || len(rgba) < 4 ||
+				abs(rgba[0]-255) > 0.5 || abs(rgba[1]-51) > 0.5 || abs(rgba[2]-102) > 0.5 || abs(rgba[3]-204) > 0.5 {
+				t.Errorf("%s resaved: Light1.Color = %v, want raw ~[255 51 102 204]", ver, lc.StaticValue)
+			}
 		}
 	}
 	if !cam {

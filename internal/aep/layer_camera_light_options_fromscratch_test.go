@@ -44,6 +44,14 @@ func TestCameraLightOptions_FromScratch_Roundtrip(t *testing.T) {
 	must("SetLightIntensity", light.SetLightIntensity(65))
 	must("SetLightConeAngle", light.SetLightConeAngle(72))
 	must("SetLightConeFeather", light.SetLightConeFeather(35))
+	// Light Color is synthesis-inserted from-scratch (AE elides the default
+	// white, so the template has no slot): the leaf is spliced in + reset to
+	// white, lighting up SetLightColor on a fresh light.
+	if light.LightColor() == nil {
+		t.Fatal("fresh light: LightColor() nil — leaf splice failed")
+	}
+	// Raw cdat convention: [A,R,G,B] in 0..255 (alpha first).
+	must("SetLightColor", light.SetLightColor([]float64{255, 51, 102, 204}))
 
 	// In-memory mirror (the fresh layer's parsed property tree reflects the write).
 	if got := cam.CameraZoom().StaticValue.(float64); got != 850 {
@@ -85,4 +93,18 @@ func TestCameraLightOptions_FromScratch_Roundtrip(t *testing.T) {
 	chk("LightIntensity", reLight.LightIntensity(), 65)
 	chk("LightConeAngle", reLight.LightConeAngle(), 72)
 	chk("LightConeFeather", reLight.LightConeFeather(), 35)
+
+	lc := reLight.LightColor()
+	if lc == nil {
+		t.Fatal("round-trip: LightColor() nil")
+	}
+	rgba, ok := lc.StaticValue.([]float64)
+	if !ok || len(rgba) != 4 {
+		t.Fatalf("round-trip: LightColor StaticValue = %v (%T), want 4 floats", lc.StaticValue, lc.StaticValue)
+	}
+	for i, want := range []float64{255, 51, 102, 204} {
+		if rgba[i] != want {
+			t.Errorf("round-trip: LightColor[%d] = %g, want %g", i, rgba[i], want)
+		}
+	}
 }
