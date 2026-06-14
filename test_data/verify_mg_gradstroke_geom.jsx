@@ -36,8 +36,10 @@
         else {
             var dir = layerByName(comp, "GSDIR");
             var rad = layerByName(comp, "GSRAD");
+            var hl = layerByName(comp, "GSHL");
             if (!dir) fail("GSDIR layer missing");
             if (!rad) fail("GSRAD layer missing");
+            if (!hl) fail("GSHL layer missing");
             if (dir) {
                 var gsd = gstrokeOf(dir);
                 if (!gsd) fail("GSDIR has no G-Stroke");
@@ -54,6 +56,17 @@
                     var rt = gsr.property("ADBE Vector Grad Type").value;
                     note("GSRAD Grad Type=" + rt + " (want 2 radial)");
                     if (rt !== 2) fail("GSRAD Grad Type=" + rt + ", want 2");
+                }
+            }
+            if (hl) {
+                var gsh = gstrokeOf(hl);
+                if (!gsh) fail("GSHL has no G-Stroke");
+                else {
+                    var ht = gsh.property("ADBE Vector Grad Type").value;
+                    var hll = gsh.property("ADBE Vector Grad HiLite Length").value;
+                    note("GSHL Grad Type=" + ht + " HiLite Length=" + hll + " (want 2 / 70)");
+                    if (ht !== 2) fail("GSHL Grad Type=" + ht + ", want 2");
+                    if (Math.abs(hll - 70) > 0.5) fail("GSHL HiLite Length=" + hll + ", want 70");
                 }
             }
         }

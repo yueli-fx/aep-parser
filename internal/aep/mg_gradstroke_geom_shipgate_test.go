@@ -15,9 +15,11 @@
 //     would split left=red/right=blue, which the symmetry check rejects —
 //     proving SetGradientType(radial) works on a stroke.
 //
-// The HiLite controls are wired (parity with G-Fill, same cdat-overwrite
-// mechanism already pixel-gated by TestMGGradientHilite) but not independently
-// pixel-asserted here; they are value-readback-verified.
+//   - GSHL: a 200×200 rect with an 18px gradient STROKE, red→blue RADIAL ramp
+//     plus HiLite Length 70 / Angle 0 (+X). The highlight shifts the red hotspot
+//     right, so the ring's right mid renders redder than its left mid (one-axis
+//     split) while top/bottom stay matched — proving SetHighlightLength/Angle
+//     work on a stroke.
 //
 // Gated by AE_SHIP_GATE.
 package aep_test
@@ -72,7 +74,7 @@ func buildMGGradStrokeGeomDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	}
 
 	// GSDIR — linear horizontal ramp on the left third of the comp.
-	dir := addGradStrokeRect(t, comp, "GSDIR", [2]float64{560, 540})
+	dir := addGradStrokeRect(t, comp, "GSDIR", [2]float64{360, 540})
 	if err := dir.SetStartPoint([2]float64{-100, 0}); err != nil {
 		t.Fatalf("GSDIR SetStartPoint: %v", err)
 	}
@@ -80,8 +82,8 @@ func buildMGGradStrokeGeomDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		t.Fatalf("GSDIR SetEndPoint: %v", err)
 	}
 
-	// GSRAD — radial ramp centred at the rect centre, radius 200, on the right.
-	rad := addGradStrokeRect(t, comp, "GSRAD", [2]float64{1360, 540})
+	// GSRAD — radial ramp centred at the rect centre, radius 200, in the middle.
+	rad := addGradStrokeRect(t, comp, "GSRAD", [2]float64{960, 540})
 	if err := rad.SetGradientType(aep.GradientRadial); err != nil {
 		t.Fatalf("GSRAD SetGradientType: %v", err)
 	}
@@ -90,6 +92,26 @@ func buildMGGradStrokeGeomDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	}
 	if err := rad.SetEndPoint([2]float64{200, 0}); err != nil {
 		t.Fatalf("GSRAD SetEndPoint: %v", err)
+	}
+
+	// GSHL — radial ramp + HiLite (Length 70 / Angle 0 = +X) on the right. The
+	// highlight shifts the red hotspot right, so the ring's right mid renders
+	// redder than its left mid (one-axis split), while top/bottom stay matched.
+	hl := addGradStrokeRect(t, comp, "GSHL", [2]float64{1560, 540})
+	if err := hl.SetGradientType(aep.GradientRadial); err != nil {
+		t.Fatalf("GSHL SetGradientType: %v", err)
+	}
+	if err := hl.SetStartPoint([2]float64{0, 0}); err != nil {
+		t.Fatalf("GSHL SetStartPoint: %v", err)
+	}
+	if err := hl.SetEndPoint([2]float64{200, 0}); err != nil {
+		t.Fatalf("GSHL SetEndPoint: %v", err)
+	}
+	if err := hl.SetHighlightLength(70); err != nil {
+		t.Fatalf("GSHL SetHighlightLength: %v", err)
+	}
+	if err := hl.SetHighlightAngle(0); err != nil {
+		t.Fatalf("GSHL SetHighlightAngle: %v", err)
 	}
 
 	rp, err := aep.Reopen(p)
@@ -157,9 +179,9 @@ func runMGGradStrokeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarge
 	// Tight window — the stroke band is only 18px wide.
 	const win = 4
 
-	// GSDIR (centre 560,540): left stroke band x≈460 red, right band x≈660 blue.
-	dlR, _, dlB := avgRGB(img, 460, 540, win)
-	drR, _, drB := avgRGB(img, 660, 540, win)
+	// GSDIR (centre 360,540): left stroke band x≈260 red, right band x≈460 blue.
+	dlR, _, dlB := avgRGB(img, 260, 540, win)
+	drR, _, drB := avgRGB(img, 460, 540, win)
 	t.Logf("%s GSDIR: left(r=%d,b=%d) right(r=%d,b=%d)", ver, dlR, dlB, drR, drB)
 	if dlR-dlB < 50 {
 		t.Errorf("%s GSDIR left stroke not red (r=%d b=%d) — ramp direction wrong", ver, dlR, dlB)
@@ -168,13 +190,13 @@ func runMGGradStrokeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarge
 		t.Errorf("%s GSDIR right stroke not blue (r=%d b=%d) — ramp direction wrong", ver, drR, drB)
 	}
 
-	// GSRAD (centre 1360,540): the four edge-midpoints of the 200×200 stroke ring
+	// GSRAD (centre 960,540): the four edge-midpoints of the 200×200 stroke ring
 	// sit at radius 100 = 0.5·gradient-radius → same mid color (rotational
 	// symmetry). A linear ramp would make left red / right blue.
-	rlR, rlG, rlB := avgRGB(img, 1260, 540, win) // left
-	rrR, rrG, rrB := avgRGB(img, 1460, 540, win) // right
-	ruR, ruG, ruB := avgRGB(img, 1360, 440, win) // top
-	rdR, rdG, rdB := avgRGB(img, 1360, 640, win) // bottom
+	rlR, rlG, rlB := avgRGB(img, 860, 540, win)  // left
+	rrR, rrG, rrB := avgRGB(img, 1060, 540, win) // right
+	ruR, ruG, ruB := avgRGB(img, 960, 440, win)  // top
+	rdR, rdG, rdB := avgRGB(img, 960, 640, win)  // bottom
 	t.Logf("%s GSRAD ring mids: L(r=%d,g=%d,b=%d) R(r=%d,g=%d,b=%d) U(r=%d,g=%d,b=%d) D(r=%d,g=%d,b=%d)",
 		ver, rlR, rlG, rlB, rrR, rrG, rrB, ruR, ruG, ruB, rdR, rdG, rdB)
 	if absInt(rlR-rrR) > 45 || absInt(rlB-rrB) > 45 {
@@ -192,12 +214,33 @@ func runMGGradStrokeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarge
 		t.Errorf("%s GSRAD ring not mid-ramp (r=%d b=%d) — radius mapping off", ver, rlR, rlB)
 	}
 
+	// GSHL (centre 1560,540): radial ring + HiLite Length 70 / Angle 0 (+X). The
+	// hotspot shifts right, so the ring's right mid is redder than its left mid
+	// (one-axis split), while top and bottom stay matched.
+	hlL_R, _, hlL_B := avgRGB(img, 1460, 540, win) // left mid
+	hlR_R, _, hlR_B := avgRGB(img, 1660, 540, win) // right mid
+	hlU_R, _, _ := avgRGB(img, 1560, 440, win)     // top mid
+	hlD_R, _, _ := avgRGB(img, 1560, 640, win)     // bottom mid
+	t.Logf("%s GSHL ring: L(r=%d,b=%d) R(r=%d,b=%d) U(r=%d) D(r=%d)",
+		ver, hlL_R, hlL_B, hlR_R, hlR_B, hlU_R, hlD_R)
+	if hlR_R-hlL_R < 40 {
+		t.Errorf("%s GSHL right not redder than left (L r=%d, R r=%d) — highlight not shifting the hotspot on the stroke", ver, hlL_R, hlR_R)
+	}
+	if hlL_B-hlR_B < 30 {
+		t.Errorf("%s GSHL left not bluer than right (L b=%d, R b=%d) — highlight axis wrong", ver, hlL_B, hlR_B)
+	}
+	if absInt(hlU_R-hlD_R) > 45 {
+		t.Errorf("%s GSHL top≠bottom (U r=%d, D r=%d) — highlight broke the wrong axis", ver, hlU_R, hlD_R)
+	}
+
 	re, err := aep.Open(resavedAEP)
 	if err != nil {
 		t.Fatalf("reopen resaved: %v", err)
 	}
-	if re.Compositions[0].LayerByName("GSDIR") == nil || re.Compositions[0].LayerByName("GSRAD") == nil {
-		t.Fatal("resaved: a gradient-stroke layer is missing")
+	for _, nm := range []string{"GSDIR", "GSRAD", "GSHL"} {
+		if re.Compositions[0].LayerByName(nm) == nil {
+			t.Fatalf("resaved: gradient-stroke layer %s missing", nm)
+		}
 	}
 }
 

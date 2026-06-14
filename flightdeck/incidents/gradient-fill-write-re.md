@@ -155,17 +155,15 @@ all elided (only Grad Colors + the stroke geometry Width/Cap/Join/… present).
 - API: `GradientStrokeNode.SetStartPoint/SetEndPoint` + `SetGradientType` +
   `SetHighlightLength/SetHighlightAngle` (+ getters) — full parity with
   GradientFillNode.
-- Gate `TestMGGradStrokeGeom_AEShipGate_AE2020/2025` PASS (red line 4), two
+- Gate `TestMGGradStrokeGeom_AEShipGate_AE2020/2025` PASS (red line 4), three
   18px-stroked rects in one comp: **GSDIR** linear left→right ramp renders
   left=pure red (253,0,1) / right=pure blue (1,0,253) → direction works on a
   stroke; **GSRAD** radial (radius 200) ring-mids at radius 100 render the four
   cardinals **identical (127,0,127)** = rotational symmetry → type=radial works
-  on a stroke (a linear ramp would split L=red/R=blue). Grad Type=1/2 read back,
-  resave survives, both AE versions byte-identical pixels.
-- **HiLite on stroke** is wired (same cdat-overwrite mechanism, parity with
-  G-Fill) and value-readback-verified, but NOT independently pixel-gated on the
-  stroke (the mechanism is already pixel-proven by `TestMGGradientHilite` on
-  G-Fill; a stroke-highlight pixel gate is marginal, deferred).
+  on a stroke; **GSHL** radial + HiLite Length 70 / Angle 0 (+X) renders the ring
+  L=blue (74,b=180) / R=red (224,b=30) / U==D (r=107) = one-axis split → the
+  highlight shifts the hotspot on the stroke too. Grad Type 1/2 + HiLite Length
+  read back, resave survives, both AE versions byte-identical pixels.
 - **Still deferred**: stroke geometry (Width/Cap/Join/Dashes/Taper/Wave — kept at
   the template's baked 18px) · type/direction/highlight read-back (hydrate
   write-only).

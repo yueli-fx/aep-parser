@@ -20,7 +20,7 @@ regenerate: "go run ./flightdeck/showcase/gradient  +  scripts/ae_run.ps1 render
 
 证明 `SetColorStops` 写颜色停、方向/类型/高光 setter 在 **G-Fill 与 G-Stroke** 上都生效（S5 gradient direction + 2026-06-14 radial type / HiLite / G-Stroke geom）。AE 2020 渲染 frame 0 → `gradient.png` 眼验。
 
-> 覆盖边界：linear/radial 渐变 + 方向 + 多停 + **HiLite 高光** + **G-Stroke 方向/类型** 均已双版本像素 gate。G-Stroke HiLite 独立像素 gate（边际，机制已被 G-Fill 证）/ type·direction·highlight read-back / stroke geometry(Width/Cap/…) 仍 deferred（见 cockpit），本 showcase 不含。
+> 覆盖边界：linear/radial 渐变 + 方向 + 多停 + **HiLite 高光**（fill+stroke）+ **G-Stroke 方向/类型/高光** 均已双版本像素 gate。余 type·direction·highlight read-back / stroke geometry(Width/Cap/…) 仍 deferred（见 cockpit），本 showcase 不含。
 
 ## 产物
 
