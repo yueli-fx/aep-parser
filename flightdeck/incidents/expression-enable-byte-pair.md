@@ -40,7 +40,16 @@ tdb4 @0x77/@0x78 是**两个独立字节**，历史 RE 把它们混为一个「@
 - parse：`Expression != ""` 时 `ExpressionEnabled = (@0x77 == 0)`，否则默认 true。
 - gate `TestExpression_AEShipGate_*`（红线4 渲染像素）：ON 层 `time*90` 求值后 dot 渲染在锚点下方、OFF 层同表达式不动；JSX 读回 enabled/求值双态 + resave 双态存活。**AE 2020 + AE 2025 双版本 PASS**。
 
-覆盖边界：rotation 1D scalar 表达式实测；`time*90` 单表达式；loopOut/wiggle/属性间引用（thisComp.layer 链）未单独 gate——给 AI 生成 MG 用前建议补常用表达式语汇 gate（roadmap S2 followup）。
+覆盖边界：rotation 1D scalar 表达式实测；`time*90` 单表达式。**表达式语汇扩展已 gate**（2026-06-14，S2 followup，`expr_vocab_shipgate_test.go` + `verify_expr_vocab.jsx`）：
+
+| 语汇 | 表达式 | 新覆盖点 | t=2.5s 求值 |
+|---|---|---|---|
+| 跨层引用 | `thisComp.layer("LEAD").transform.position + [0,250]` | 按名解析其它层属性 + 矢量算术 | `[480,500]` ✓ |
+| loopOut | `loopOut("cycle")` | **表达式叠加在带关键帧属性上**（新组合：之前只验静态属性） | `[899.997,750]`（循环相位 0.5 中点；无循环则保持末帧 1500）✓ |
+| wiggle | `wiggle(2,250)` | 过程式/时变（偏离锚点且 t=1≠t=2.5） | `[857,916]` ✓ |
+
+字节机制与表达式内容无关（tdb4 @0x77/@0x78 + tdbs Utf8），gate 证明的是 AE **求值**这三类 idiom + 渲染像素（LEAD/LINK/LOOP 确定性命中，WIG 非确定故仅验「渲染未丢」）。**AE 2020 + AE 2025 双版本 PASS**。仍未 gate：表达式驱动 1D 标量以外维度的更复杂语汇（如 `valueAtTime`/`linear()`/`ease()` 组合）、表达式控制（slider control 引用）。
 
 ## Cases
 - 2026-06-12 首次（MG roadmap S2；第二阶段 disabled-丢文本是修复过程中的次生发现，一并修复）
+- 2026-06-14 表达式语汇 gate（S2 followup）：loopOut / wiggle / 跨层引用三 idiom 双版本 ship-gate PASS；Go 侧零改动（机制内容无关），新增 `expr_vocab_shipgate_test.go`。JSX 数组日志须逐元素索引（`v2s()`），直接拼数组对象触发 ExtendScript「数字结果无效（除以零？）」throw（同 `effect-param-elision-synthesis-lite.md` 坑）。
