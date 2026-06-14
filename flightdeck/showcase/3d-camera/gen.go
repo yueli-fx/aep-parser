@@ -46,7 +46,10 @@ func card(comp *aep.Composition, name string, x, y float64, color [4]float64) {
 }
 
 func main() {
-	p := aep.NewProject(aep.TargetAE2025)
+	// AE 2020 target — the read floor; opens in 2020 + 2025. The 3D layer /
+	// camera capabilities here all pass the double-version gate, so nothing is
+	// 2025-specific (only use TargetAE2025 for genuinely 2025-only content).
+	p := aep.NewProject(aep.TargetAE2020)
 	comp, err := aep.NewComposition(p, "Showcase3DCamera", 1920, 1080, 30, 5)
 	must(err)
 
