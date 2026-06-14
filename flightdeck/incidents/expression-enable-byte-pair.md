@@ -48,7 +48,13 @@ tdb4 @0x77/@0x78 是**两个独立字节**，历史 RE 把它们混为一个「@
 | loopOut | `loopOut("cycle")` | **表达式叠加在带关键帧属性上**（新组合：之前只验静态属性） | `[899.997,750]`（循环相位 0.5 中点；无循环则保持末帧 1500）✓ |
 | wiggle | `wiggle(2,250)` | 过程式/时变（偏离锚点且 t=1≠t=2.5） | `[857,916]` ✓ |
 
-字节机制与表达式内容无关（tdb4 @0x77/@0x78 + tdbs Utf8），gate 证明的是 AE **求值**这三类 idiom + 渲染像素（LEAD/LINK/LOOP 确定性命中，WIG 非确定故仅验「渲染未丢」）。**AE 2020 + AE 2025 双版本 PASS**。仍未 gate：表达式驱动 1D 标量以外维度的更复杂语汇（如 `valueAtTime`/`linear()`/`ease()` 组合）、表达式控制（slider control 引用）。
+字节机制与表达式内容无关（tdb4 @0x77/@0x78 + tdbs Utf8），gate 证明的是 AE **求值**这三类 idiom + 渲染像素（LEAD/LINK/LOOP 确定性命中，WIG 非确定故仅验「渲染未丢」）。**AE 2020 + AE 2025 双版本 PASS**。
+
+**仍未 gate：**
+- 表达式驱动 1D 标量以外维度的更复杂语汇（`linear()`/`ease()` remap、`valueAtTime` 组合）——边际证明值低（机制已证内容无关），按需补。
+- **表达式引用 effect 参数（`effect(1)("Slider")` slider-control 绑定）= 被一个 AddEffect 问题挡住，非表达式问题。负向发现（2026-06-14 尝试）：把 Slider Control 加到 SLD 后在 7 层从零 comp 里 `effect(1)` 在 AE 读回 null——AE **静默 drop 了效果**；改挂 SOLID 宿主 CTRL（essential-graphics/set-effect-param gate 已证单层 solid+slider 可接受）仍被 AE drop。Go round-trip 全程保留效果（`l.Effects`=1、params=2），AE 不保留——典型「Go round-trip ≠ AE 接受」。即 AddEffect 在「从零多层 comp」上下文回归（单层 EG gate 绿、本 7 层场景 drop），疑似 item-ID / tdpi host-binding / 层序交互（关联 `add-effect-splice-re.md`、`multi-layer-silent-drop.md`、`nextitemid-must-include-layer-ids.md`）。修法走最小失败 bisection（剥到 solid+slider 单测 → 逐层加回定位 drop 触发点），未做，deferred。表达式侧已就绪，解开 AddEffect 后即可补 SLD idiom。**注**：AddEffect 在 SHAPE 层上本就未 gate（同样 AE drop）。**
+
+> 写 AI 生成 MG 表达式时查语义：`flightdeck/references/after-effects-expression-reference/`（docsforadobe，docs/ 按 objects/layer/general/text 分组）。
 
 ## Cases
 - 2026-06-12 首次（MG roadmap S2；第二阶段 disabled-丢文本是修复过程中的次生发现，一并修复）
