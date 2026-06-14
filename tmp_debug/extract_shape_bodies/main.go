@@ -53,9 +53,14 @@ var extractions = []extraction{
 	// Regen the source via tmp_debug/gen_gradient_type.jsx (which itself opens
 	// the v2_2_gradient_dir.aep produced by gen_gradient_dir.jsx).
 	{"test_data/v2_2_gradient_type.aep", "ADBE Vector Graphic - G-Fill", "internal/serializer/templates/v2_2_shape_gradfill_body.bin"},
-	// G-Stroke body: same fixture, same GCst→GCky→Utf8 slot structure as G-Fill
-	// but under the ADBE Vector Graphic - G-Stroke tdmn. Used by lowerGradientStrokeNode.
-	{"test_data/v2_2_gradient_src.aep", "ADBE Vector Graphic - G-Stroke", "internal/serializer/templates/v2_2_shape_gradstroke_body.bin"},
+	// G-Stroke body now sourced from v2_2_gradstroke_geom.aep (the G-Stroke's
+	// Grad Type=2 Radial + Start/End Pt set non-default → AE emits Grad Type +
+	// Start/End Pt + the HiLite Length/Angle pair alongside Grad Colors, same
+	// five geometry slots as the G-Fill body). lowerGradientStrokeNode overwrites
+	// Type (default 1=Linear) + Start/End Pt + HiLite Length/Angle + the stops
+	// XML. Regen the source via tmp_debug/gen_gradstroke_geom.jsx (opens the
+	// stops-bearing v2_2_gradient_src.aep).
+	{"test_data/v2_2_gradstroke_geom.aep", "ADBE Vector Graphic - G-Stroke", "internal/serializer/templates/v2_2_shape_gradstroke_body.bin"},
 	// MG roadmap S3 — Trim Paths (`ADBE Vector Filter - Trim`): a vector filter
 	// sibling of the shapes inside the Vectors Group, carrying Start / End /
 	// Offset / Trim Type cdat slots (all set non-default in the fixture so AE

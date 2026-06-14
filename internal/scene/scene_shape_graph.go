@@ -683,19 +683,84 @@ func (n *GradientFillNode) Properties() *PropertyGroup {
 }
 
 // GradientStrokeNode — `ADBE Vector Graphic - G-Stroke`. Models the gradient's
-// color + alpha stops only, symmetric to GradientFillNode. Stroke geometry
-// (width / cap / join / dashes / taper / wave) + ramp geometry are NOT modeled
-// (kept at the extracted template's values; deferred).
+// color + alpha stops plus the ramp geometry (direction, type, highlight),
+// symmetric to GradientFillNode: StartPoint/EndPoint set the ramp direction
+// (AE default [0,0]→[100,0]), GradientType selects linear vs radial, and the
+// HiLite controls offset a radial gradient's bright centre. Stroke geometry
+// (width / cap / join / dashes / taper / wave) is NOT modeled (kept at the
+// extracted template's values; deferred).
 type GradientStrokeNode struct {
-	gradient *codec.Gradient
+	gradient        *codec.Gradient
+	startPoint      [2]float64
+	endPoint        [2]float64
+	gradientType    GradientType
+	highlightLength float64
+	highlightAngle  float64
 }
 
-// NewGradientStrokeNode constructs a default 2-stop black→white gradient stroke.
+// NewGradientStrokeNode constructs a default 2-stop black→white linear gradient
+// stroke with AE's default horizontal ramp ([0,0]→[100,0]).
 func NewGradientStrokeNode() *GradientStrokeNode {
-	return &GradientStrokeNode{gradient: defaultGradient()}
+	return &GradientStrokeNode{
+		gradient:     defaultGradient(),
+		startPoint:   [2]float64{0, 0},
+		endPoint:     [2]float64{100, 0},
+		gradientType: GradientLinear,
+	}
 }
 
 func (n *GradientStrokeNode) Kind() ShapeNodeKind { return ShapeKindGradientStroke }
+
+// StartPoint returns the gradient ramp's start point (shape-local coords).
+func (n *GradientStrokeNode) StartPoint() [2]float64 { return n.startPoint }
+
+// EndPoint returns the gradient ramp's end point (shape-local coords).
+func (n *GradientStrokeNode) EndPoint() [2]float64 { return n.endPoint }
+
+// SetStartPoint sets the gradient ramp's start point (shape-local coords). The
+// ramp direction is EndPoint − StartPoint; defaults to a horizontal [0,0]→[100,0].
+func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error { n.startPoint = v; return nil }
+
+// SetEndPoint sets the gradient ramp's end point (shape-local coords).
+func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error { n.endPoint = v; return nil }
+
+// GradientType returns the ramp shape (linear or radial).
+func (n *GradientStrokeNode) GradientType() GradientType { return n.gradientType }
+
+// SetGradientType selects linear (default) or radial ramp shape. For radial,
+// StartPoint is the centre and EndPoint sets the outer radius.
+func (n *GradientStrokeNode) SetGradientType(t GradientType) error {
+	if t != GradientLinear && t != GradientRadial {
+		return fmt.Errorf("gradient type %d out of range (1=linear, 2=radial)", t)
+	}
+	n.gradientType = t
+	return nil
+}
+
+// HighlightLength returns the radial highlight offset magnitude (percent of the
+// radius; 0 = centred).
+func (n *GradientStrokeNode) HighlightLength() float64 { return n.highlightLength }
+
+// HighlightAngle returns the radial highlight offset direction (degrees).
+func (n *GradientStrokeNode) HighlightAngle() float64 { return n.highlightAngle }
+
+// SetHighlightLength offsets a radial gradient's bright centre off the geometric
+// centre by the given percent of the radius (-100..100; 0 = centred). No visible
+// effect on a linear gradient. Returns an error if out of range.
+func (n *GradientStrokeNode) SetHighlightLength(v float64) error {
+	if v < -100 || v > 100 {
+		return fmt.Errorf("highlight length %g out of range [-100,100]", v)
+	}
+	n.highlightLength = v
+	return nil
+}
+
+// SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight
+// offset. Only meaningful together with a non-zero HighlightLength.
+func (n *GradientStrokeNode) SetHighlightAngle(v float64) error {
+	n.highlightAngle = v
+	return nil
+}
 
 // Gradient returns the live gradient (color + alpha stops).
 func (n *GradientStrokeNode) Gradient() *Gradient { return n.gradient }

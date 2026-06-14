@@ -1,7 +1,7 @@
 ---
 status: active
 when_to_read: implementing or extending gradient write (SetGradient / GradientFillNode / GradientStroke / gradient ramp direction Start·End Pt / radial type / radial HiLite Length·Angle highlight); encoding AE gradient prop.map XML; debugging "AE drops the gradient" or stops/direction/highlight not surviving resave; deciding whether a gradient fixture is AE-version-portable; wanting to control the linear ramp angle/direction or shift a radial gradient's bright centre
-applies_to: [gradient, g-fill, grad-colors, grad-start-pt, grad-end-pt, grad-type, hilite-length, hilite-angle, radial-highlight, ramp-direction, prop-map, xml-encode, gcst, gcky, utf8, shape-layer, length-variable, ship-gate, ae2020, ae2025, elision, mg-roadmap, s5, render-pixel]
+applies_to: [gradient, g-fill, g-stroke, gradient-stroke, grad-colors, grad-start-pt, grad-end-pt, grad-type, hilite-length, hilite-angle, radial-highlight, ramp-direction, prop-map, xml-encode, gcst, gcky, utf8, shape-layer, length-variable, ship-gate, ae2020, ae2025, elision, mg-roadmap, s5, render-pixel]
 last_updated: 2026-06-14
 ---
 
@@ -132,6 +132,43 @@ node values; default 0/0 overwrites the baked 0 with no visible change →
 - **Still deferred**: gradient STROKE type/direction/highlight (G-Stroke template
   unchanged — needs its own re-extraction) · read-back of type/direction/highlight
   (hydrate write-only, as before).
+
+### UPDATE 2026-06-14 — gradient STROKE ramp geometry (direction + type) now resolved ✅
+
+Same template-re-extraction blueprint as G-Fill, applied to `ADBE Vector Graphic
+- G-Stroke`. The original G-Stroke template (`v2_2_shape_gradstroke_body.bin` from
+`v2_2_gradient_src.aep`) had DEFAULT ramp geometry → Grad Type/Start/End/HiLite
+all elided (only Grad Colors + the stroke geometry Width/Cap/Join/… present).
+- **Authored the slots:** `tmp_debug/gen_gradstroke_geom.jsx` opens the stops-
+  bearing `v2_2_gradient_src.aep`, sets the **G-Stroke's** `ADBE Vector Grad Type`
+  = 2 (Radial) + Start Pt=[-120,-120] / End Pt=[120,120] (non-default), resaves
+  → `v2_2_gradstroke_geom.aep`. Setting Type=2 makes AE emit the **HiLite pair
+  too** (same as G-Fill). Re-extracted via `extract_shape_bodies` (now sourced
+  from the geom fixture): **29 children** (vs ~25), carrying all 5 gradient-
+  geometry slots. Only `v2_2_shape_gradstroke_body.bin` changed.
+- **cdat layout identical to G-Fill:** Grad Type / HiLite Length / HiLite Angle =
+  1D f64 BE @cdat[0:8]; Start/End Pt = Vec2 @cdat[0:16]. `lowerGradientStrokeNode`
+  overwrites all five (default Linear=1 / [0,0]→[100,0] / HiLite 0/0 reproduces
+  AE's pre-geometry stroke → **no regression**: existing stops-only
+  `TestV2_2_GradientStroke_AEShipGate_AE2020/2025` still PASS on the 29-child
+  template, both versions).
+- API: `GradientStrokeNode.SetStartPoint/SetEndPoint` + `SetGradientType` +
+  `SetHighlightLength/SetHighlightAngle` (+ getters) — full parity with
+  GradientFillNode.
+- Gate `TestMGGradStrokeGeom_AEShipGate_AE2020/2025` PASS (red line 4), two
+  18px-stroked rects in one comp: **GSDIR** linear left→right ramp renders
+  left=pure red (253,0,1) / right=pure blue (1,0,253) → direction works on a
+  stroke; **GSRAD** radial (radius 200) ring-mids at radius 100 render the four
+  cardinals **identical (127,0,127)** = rotational symmetry → type=radial works
+  on a stroke (a linear ramp would split L=red/R=blue). Grad Type=1/2 read back,
+  resave survives, both AE versions byte-identical pixels.
+- **HiLite on stroke** is wired (same cdat-overwrite mechanism, parity with
+  G-Fill) and value-readback-verified, but NOT independently pixel-gated on the
+  stroke (the mechanism is already pixel-proven by `TestMGGradientHilite` on
+  G-Fill; a stroke-highlight pixel gate is marginal, deferred).
+- **Still deferred**: stroke geometry (Width/Cap/Join/Dashes/Taper/Wave — kept at
+  the template's baked 18px) · type/direction/highlight read-back (hydrate
+  write-only).
 
 ## Cross-version: AE25-shaped gradient is accepted by AE 2020
 

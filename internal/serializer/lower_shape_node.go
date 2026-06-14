@@ -867,8 +867,10 @@ func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error
 }
 
 // cloneShapeGradStrokeBody returns a clone of the gradient-stroke template
-// (templates/v2_2_shape_gradstroke_body.bin). Like gradfill it carries only
-// `ADBE Vector Grad Colors`; stroke geometry stays at the extracted values.
+// (templates/v2_2_shape_gradstroke_body.bin). Like gradfill it carries the five
+// gradient-geometry slots (Grad Type / Start Pt / End Pt / HiLite Length·Angle)
+// + `ADBE Vector Grad Colors`; the stroke geometry (width/cap/join/…) stays at
+// the extracted values.
 func cloneShapeGradStrokeBody() (*rifx.Chunk, error) {
 	v22ShapeGradStrokeOnce.Do(func() {
 		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeGradStrokeBodyBytes))
@@ -885,13 +887,23 @@ func cloneShapeGradStrokeBody() (*rifx.Chunk, error) {
 }
 
 // lowerGradientStrokeNode emits a gradient-stroke body from the embedded
-// template, overwriting the Grad Colors stops XML. Body logic is identical to
-// lowerGradientFillNode; only the cloned template differs.
+// template, overwriting the Grad Type / Start Pt / End Pt / HiLite Length·Angle
+// cdats + the Grad Colors stops XML. Geometry cdat layout is identical to
+// lowerGradientFillNode (Type/HiLite = 1D f64 BE @cdat[0:8], Start/End = Vec2 @
+// cdat[0:16]); only the cloned template differs. The template bakes Radial(2) /
+// [-120,-120]→[120,120] so the slots exist; defaults (Linear=1, [0,0]→[100,0],
+// HiLite 0/0) reproduce AE's pre-geometry stroke behavior (no regression).
 func lowerGradientStrokeNode(n *GradientStrokeNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeGradStrokeBody()
 	if err != nil {
 		return nil, err
 	}
+	sp, ep := n.StartPoint(), n.EndPoint()
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad Type", encodeF64sBE(float64(n.GradientType())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad Start Pt", encodeF64sBE(sp[0], sp[1]))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad End Pt", encodeF64sBE(ep[0], ep[1]))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Length", encodeF64sBE(n.HighlightLength()))
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Angle", encodeF64sBE(n.HighlightAngle()))
 	return lowerGradientStops(body, n.Gradient()), nil
 }
 
