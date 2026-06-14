@@ -20,13 +20,12 @@
 - **EG 面板崩溃**（用户低优）——从零 EG 工程展开「基本图形」面板崩 AE（退回单 slider 也崩），DOM readback 假绿，根源 ship-gate 从不开面板。修法：补「真机开面板」gate + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节。详 `incidents/essential-graphics-write-re.md`。
 
 **polish / 技债**：
-- **camera/light 余项**（主体 option setter 已 parse-the-clone 通，2026-06-14）：**Light Color** from-scratch（AE 默认 elide 无 slot，需 gradient 式重抽模板）· 3D-render 像素 gate（现仅 AE DOM 读回，深验需 3D layer 支持）。`incidents/camera-light-layer-create-re.md`。
-- ✅ **gradient-stroke Width/Cap/Join/Miter 已通**（2026-06-14，模板已含 slot 免重抽；`SetStrokeWidth`/`SetLineCap`/`SetLineJoin`/`SetMiterLimit`，默认=烤值无回归；`TestMGGradStrokeStyle_*` 双版本 PASS：60px 像素证宽 + Cap/Join/Miter DOM 读回）。余 G-Stroke 的 **Dashes/Taper/Wave** 嵌套组（按需，蓝本实心描边）。
-- ✅ **PolyStar Polygon 型已通**（2026-06-14，独立模板 `v2_2_shape_starpolygon_body.bin`：Polygon 存盘是 Star 超集——含 Type=2 slot + 仍存 Inner Radius/Roundness〔AE 隐藏不渲染〕；`StarNode.SetStarType(StarTypeStar|StarTypePolygon)`，`lowerStarNode` 按型选模板；`TestMGPolygon_*` 双版本凸多边形像素 PASS，无回归 star gate）。· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
+- **camera/light 余项**（主体 option setter 已 parse-the-clone 通）：**Light Color** from-scratch（AE 默认 elide 无 slot，需 gradient 式重抽模板 + 复位白）· 3D-render 像素 gate（现仅 AE DOM 读回，深验需 3D layer 支持）。`incidents/camera-light-layer-create-re.md`。
+- **G-Stroke Dashes/Taper/Wave** 嵌套组（蓝本实心描边）· 各矢量滤镜 deferred 子流（`incidents/trim-paths-vector-filter-re.md`）。
 - `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。
 - 表达式 `linear()`/`ease()` remap（边际值低，按需）。
 
-**需求驱动**：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写（SetMaskPath / animated path / mode·color·feather）· SetEffectParam 扩库 · RQ Set\* slice-5~8（Alpha）。
+**需求驱动**：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 余项（**Feather/Opacity** 属性 + **SetMaskPath** / animated path；mode·color·inverted 等 mkif 字节已通）· SetEffectParam 扩库 · RQ Set\* slice-5~8（Alpha）。
 
 ## Backlog
 
