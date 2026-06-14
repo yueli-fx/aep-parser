@@ -696,17 +696,76 @@ type GradientStrokeNode struct {
 	gradientType    GradientType
 	highlightLength float64
 	highlightAngle  float64
+	strokeWidth     float64
+	lineCap         StrokeLineCap
+	lineJoin        StrokeLineJoin
+	miterLimit      float64
 }
 
 // NewGradientStrokeNode constructs a default 2-stop black→white linear gradient
-// stroke with AE's default horizontal ramp ([0,0]→[100,0]).
+// stroke with AE's default horizontal ramp ([0,0]→[100,0]). The stroke geometry
+// (width / cap / join / miter) defaults to the embedded template's baked values
+// (18px, round cap, round join, miter 4); override via the Set* methods.
 func NewGradientStrokeNode() *GradientStrokeNode {
 	return &GradientStrokeNode{
 		gradient:     defaultGradient(),
 		startPoint:   [2]float64{0, 0},
 		endPoint:     [2]float64{100, 0},
 		gradientType: GradientLinear,
+		strokeWidth:  18,
+		lineCap:      StrokeLineCapRound,
+		lineJoin:     StrokeLineJoinRound,
+		miterLimit:   4,
 	}
+}
+
+// StrokeWidth returns the gradient stroke's width (pixels).
+func (n *GradientStrokeNode) StrokeWidth() float64 { return n.strokeWidth }
+
+// SetStrokeWidth sets the gradient stroke's width (pixels; must be ≥ 0).
+func (n *GradientStrokeNode) SetStrokeWidth(v float64) error {
+	if v < 0 {
+		return fmt.Errorf("stroke width %g must be ≥ 0", v)
+	}
+	n.strokeWidth = v
+	return nil
+}
+
+// LineCap returns the gradient stroke's end-cap style.
+func (n *GradientStrokeNode) LineCap() StrokeLineCap { return n.lineCap }
+
+// SetLineCap sets the gradient stroke's end-cap style (Butt / Round / Projecting).
+func (n *GradientStrokeNode) SetLineCap(c StrokeLineCap) error {
+	if c < StrokeLineCapButt || c > StrokeLineCapProjecting {
+		return fmt.Errorf("invalid line cap %d (want 1..3)", c)
+	}
+	n.lineCap = c
+	return nil
+}
+
+// LineJoin returns the gradient stroke's corner-join style.
+func (n *GradientStrokeNode) LineJoin() StrokeLineJoin { return n.lineJoin }
+
+// SetLineJoin sets the gradient stroke's corner-join style (Miter / Round / Bevel).
+func (n *GradientStrokeNode) SetLineJoin(j StrokeLineJoin) error {
+	if j < StrokeLineJoinMiter || j > StrokeLineJoinBevel {
+		return fmt.Errorf("invalid line join %d (want 1..3)", j)
+	}
+	n.lineJoin = j
+	return nil
+}
+
+// MiterLimit returns the gradient stroke's miter limit (only used with a miter join).
+func (n *GradientStrokeNode) MiterLimit() float64 { return n.miterLimit }
+
+// SetMiterLimit sets the gradient stroke's miter limit (only used when LineJoin
+// is Miter; must be ≥ 1).
+func (n *GradientStrokeNode) SetMiterLimit(v float64) error {
+	if v < 1 {
+		return fmt.Errorf("miter limit %g must be ≥ 1", v)
+	}
+	n.miterLimit = v
+	return nil
 }
 
 func (n *GradientStrokeNode) Kind() ShapeNodeKind { return ShapeKindGradientStroke }

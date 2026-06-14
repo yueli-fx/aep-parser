@@ -904,6 +904,14 @@ func lowerGradientStrokeNode(n *GradientStrokeNode, _ *lowerCtx) (*rifx.Chunk, e
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad End Pt", encodeF64sBE(ep[0], ep[1]))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Length", encodeF64sBE(n.HighlightLength()))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad HiLite Angle", encodeF64sBE(n.HighlightAngle()))
+	// Stroke geometry (1D f64 BE @cdat[0:8]; enums 1-based). Defaults mirror the
+	// template's baked values (18 / round / round / 4), so a node that doesn't
+	// override them re-emits byte-identically (no regression on the existing
+	// gradstroke gates).
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Width", encodeF64sBE(n.StrokeWidth()))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Cap", encodeF64sBE(float64(n.LineCap())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Join", encodeF64sBE(float64(n.LineJoin())))
+	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(n.MiterLimit()))
 	return lowerGradientStops(body, n.Gradient()), nil
 }
 

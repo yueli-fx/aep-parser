@@ -164,8 +164,9 @@ all elided (only Grad Colors + the stroke geometry Width/Cap/Join/… present).
   L=blue (74,b=180) / R=red (224,b=30) / U==D (r=107) = one-axis split → the
   highlight shifts the hotspot on the stroke too. Grad Type 1/2 + HiLite Length
   read back, resave survives, both AE versions byte-identical pixels.
-- **Still deferred**: stroke geometry (Width/Cap/Join/Dashes/Taper/Wave — kept at
-  the template's baked 18px). (Type/direction/highlight read-back resolved below.)
+- **Still deferred**: stroke geometry Dashes / Taper / Wave (the nested groups —
+  kept at the template's defaults). Width / Cap / Join / Miter resolved below.
+  (Type/direction/highlight read-back also resolved below.)
 
 ### UPDATE 2026-06-14 — ramp-geometry READ-BACK (hydrate) now resolved ✅
 
@@ -183,9 +184,26 @@ so resave stayed byte-identical — it was a *typed-accessor* gap, not data loss
 - Gate `TestV2_2_GradientGeometry_Roundtrip` (pure Go: build radial G-Fill +
   G-Stroke with distinct non-default Start/End/Type/HiLite → write → re-parse →
   assert every geometry getter). PASS.
-- Remaining gradient debt is now only **stroke geometry** (Width/Cap/Join/… on the
-  G-Stroke node — a stroke-geometry family item shared with the solid StrokeNode,
-  not gradient-specific).
+- Remaining gradient debt is now only **stroke geometry** (resolved below).
+
+### UPDATE 2026-06-14 — gradient-stroke geometry (Width / Cap / Join / Miter) ✅
+
+The G-Stroke template already carried these slots (baked Width=18, Cap=Round=2,
+Join=Round=2, Miter=4 — no re-extraction needed). `GradientStrokeNode` gains
+`SetStrokeWidth` / `SetLineCap` / `SetLineJoin` / `SetMiterLimit` (+ getters,
+reusing the solid stroke's `StrokeLineCap`/`StrokeLineJoin` enums);
+`lowerGradientStrokeNode` overwrites the four 1D f64 BE @cdat[0:8] slots. The
+node **defaults to the baked template values**, so a stroke that overrides none
+re-emits byte-identically → **no regression** (existing `TestMGGradStrokeGeom` /
+`TestV2_2_GradientStroke` stay green).
+- Gate `TestMGGradStrokeStyle_AEShipGate_AE2020/2025` PASS: a 60px stroke renders
+  a point 25px outside the rect edge as pure red (inside the 60px band 810±30),
+  while a point 42px out is background — an 18px default band (801..819) would
+  fail this. AE DOM reads back Width=60 / Cap=3(Projecting) / Join=3(Bevel) /
+  Miter=10; resave survives. Both versions identical. (Width is pixel-gated; Cap/
+  Join/Miter are value-gated — their render effect is subtle corner/cap geometry.)
+- **Still deferred**: the nested **Dashes / Taper / Wave** groups (kept at the
+  template defaults) — same nested-group write as the solid stroke's, on demand.
 
 ## Cross-version: AE25-shaped gradient is accepted by AE 2020
 
