@@ -30,7 +30,11 @@
 - ~~相机景深 DoF~~ ✅ `TestLayer3DDoF`（焦内锐 1px / 失焦虚 21-22px，>20×）。
 - ~~showcase `3d-camera`~~ ✅ complete（**用户 2026-06-15 真机验收**，视差+透视；2020 模板）。
 - **关键发现**：整个 3D transform group（enable+Z+旋转+朝向）**从零零新 serializer 代码**——`SetIs3D`+reopen 后既有 transform setter，因嵌入 transform 模板本就是完整 6-axis 3D schema。详 `incidents/layer-3d-enable-bit-materializes.md`。
-- **唯一剩项 = Material Options（光照/阴影）像素深验**（fixture setter 已工作；从零 3D 层 + 灯 + 阴影投射 render-gate 未做，最复杂）。RotateX/Orientation/RotateZ 同路径按需补 gate。
+- **明天接续：Material Options 光照/阴影**（用户 2026-06-15 选「收尾 3D」，今天起头）。今天关键发现：
+  - 从零 3D shape 层的 **`ADBE Material Options Group` emit 成空 group**（`lower_layer.go:171` `emptyPropGroupFlags`）→ `MaterialCastsShadows()` 等全 nil、`SetMaterial*` 报「property not present」。
+  - **阴影**需 Casts Shadows=ON（默认 OFF）→ 必须 **synthesis-insert material 叶子**（camera Iris/Highlight 同 vein：`mutate_layer_camera.go` `spliceCameraIrisLeaves`）：从 `re_material_options.aep`（17-prop material 树）抽 `material_options_leaves.bin` → splice 进空 group（或 SetMaterial* 做 synthesis-on-demand，同 `mutate_effect_param.go`）→ 再设值。**这是本会话最大单项，明天做**。
+  - **光照**或近零代码（AE 默认 material「Accepts Lights」=ON）：实验 3D 白 panel + `NewLightLayer`+`SetLightKind(LightKindPoint)`+红色高强度——AE 接受，但 JSX 读回 `light type=4414`（非干净 Point，**待查 SetLightKind 从零是否真生效** / 4414 含义）。**未读渲染图**（被打断），明天先 Read `tmp_debug/3d_exp/lit.png`（若还在）或重渲，确认光照可见再决定光照 gate 形态。
+  - RotateX/Orientation/RotateZ 同 transform-template 路径按需补 gate（低优先）。
 
 完整清单（每层细项 + 不可达附录 + 搁置项）见 roadmap spec。
 
