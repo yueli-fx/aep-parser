@@ -47,7 +47,7 @@ shape 矢量滤镜家族主体已收齐；剩 elided 子流 + 未单独 gate 的
 - **Stroke 嵌套组 Dashes / Taper / Wave**（实心描边）+ **Gradient stroke 同三组** —— 嵌套 group 写，模板带默认值。
 - ~~**Trim Type**（Simultaneously/Individually）~~ ✅ **2026-06-15**（synthesis-insert 第 2 次，enum leaf；`TestMGTrimType_AEShipGate` 双版本 PASS，Individually=左满右空 render 签名；详 `trim-paths-vector-filter-re.md` § Trim Type）。
 - **Offset Paths elided 子流**：~~**Copies**~~ ✅ **2026-06-15**（synthesis-insert 首次推广到矢量滤镜 body；`TestMGOffsetCopies_AEShipGate` 双版本 PASS，even-odd 同心环签名；详 `trim-paths-vector-filter-re.md` § Offset Copies）。剩 Line Join / Miter / Copy Offset（同 splice 路径，按需）。
-- **Merge Add/Intersect/Exclude 模式** —— 已能写 enum 但未单独 gate。
+- ~~**Merge Add/Intersect/Exclude 模式**~~ ✅ **2026-06-15**（Venn 判别床一帧 4 卡，`TestMGMergeModes_AEShipGate` 双版本 PASS；纯 gate 零新代码；详 `trim-paths-vector-filter-re.md` § Merge 全 4 模式）。
 - **shape 次要子属性** —— Fill/Stroke Opacity·BlendMode·CompositeOrder、Shape Direction（部分 runtime-only，逐个甄别）。
 - **PolyStar Polygon 型** —— 已于 2026-06-14 ship（独立模板）；此处仅留档确认无残余。
 

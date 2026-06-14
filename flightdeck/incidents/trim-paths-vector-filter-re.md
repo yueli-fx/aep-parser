@@ -88,7 +88,9 @@ Gate：`TestMGOffset_AEShipGate_AE2020/2025` 双版本渲染像素 PASS。verify
 
 **新 ground truth ②（ExtendScript addProperty 返回的 live ref 会失效）**：`var r = sc.addProperty(...)` 返回的 PropertyBase live 引用，在**之后再 addProperty 兄弟属性时失效**（用它 `.property(...).setValue` 抛 ReferenceError）。修：先 add 完所有属性，再用 `sc.property(matchName)` 取（既有 trim/RC/offset fixture 就是这个模式，一直没踩坑因它们每次只在 add 后立即用一次）。两条同 match-name（两个 Rect）还会 `sc.property` 歧义——gate 用 Rect+Ellipse 异类避开。
 
-Gate：`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Type=3 resave 读回 + 方块挖洞）。verify_mg_merge.jsx + mg_merge_shipgate_test.go。**deferred**：Add/Intersect/Exclude 模式未单独 gate（仅 Subtract 渲染验证；枚举写路径一致，其余模式 round-trip 应同）。
+Gate：`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Type=3 resave 读回 + 方块挖洞）。verify_mg_merge.jsx + mg_merge_shipgate_test.go。
+
+**全 4 模式 gated（2026-06-15）✅**：`TestMGMergeModes_AEShipGate_AE2020/2025` 双版本 PASS——**Venn 判别床**一帧 4 卡（每卡两部分重叠椭圆 + Merge(mode) + Fill-on-top）覆盖 Add/Subtract/Intersect/Exclude。三区（左独占/重叠/右独占）签名全互异，一帧分清 4 模式：Add=W,W,W（花生/union）· Subtract(L−R)=W,暗,暗（左月牙）· Intersect=暗,W,暗（透镜）· Exclude=W,暗,W（双月牙/XOR）。**纯 gate 工作零新代码**（enum 写路径早通），但红线4 实渲眼验 4 模式全对（不靠「枚举写路径一致应同」假设）。verify_mg_merge_modes.jsx + mg_merge_modes_shipgate_test.go。**新工具法**：partial-overlap Venn pair = 一帧分清全部布尔模式的最省 gate 床（比 nested 强：nested 下 Subtract≡Exclude 同形）。
 
 ## 复用确认 — ZigZag（S5, 2026-06-13）✅ 蓝本第 7 次 — 常用矢量滤镜家族收齐
 
