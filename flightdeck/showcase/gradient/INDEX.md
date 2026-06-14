@@ -3,7 +3,7 @@ showcase: gradient
 direction: 渐变填充 + 描边 + ramp 方向/类型/高光 — 纯 Go 从零生成 3×3：线性填充(横/纵/对角) · 径向填充(2停/3停/+HiLite高光) · 渐变描边(线性/径向/对角三停)，验证 SetColorStops + Start/End Pt 方向 + SetGradientType(linear/radial) + SetHighlightLength/Angle，G-Fill 与 G-Stroke 全 parity
 capabilities: [gradient-fill, gradient-stroke, color-stops, multi-stop, ramp-direction, start-point, end-point, gradient-type, radial, hilite, highlight]
 gates: [TestShapeGradient_AEShipGate, TestMGGradientDir_AEShipGate_AE2020, TestMGGradientDir_AEShipGate_AE2025, TestMGGradientRadial_AEShipGate_AE2020, TestMGGradientRadial_AEShipGate_AE2025, TestMGGradientHilite_AEShipGate_AE2020, TestMGGradientHilite_AEShipGate_AE2025, TestMGGradStrokeGeom_AEShipGate_AE2020, TestMGGradStrokeGeom_AEShipGate_AE2025, TestV2_2_GradientStroke_AEShipGate_AE2020, TestV2_2_GradientStroke_AEShipGate_AE2025]
-status: 待review
+status: complete
 last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/gradient  +  scripts/ae_run.ps1 render.jsx"
 ---
