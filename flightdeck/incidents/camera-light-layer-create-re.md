@@ -73,18 +73,31 @@ where the field lives:
   the missing per-kind props like Cone Angle at runtime). Gated by
   `TestNewCameraLight_AEShipGate_AE20{20,25}` (Light1 built Spot, JSX asserts
   `lightType===SPOT`, Go resave asserts `LightKind==spot`).
-- **Property-based option setters — RESOLVED 2026-06-14 via parse-the-clone.**
-  The deferral was framed as needing "property synthesis", but the easier half
-  sufficed: the embed-whole-Layr template **already carries** the full Camera/
-  Light Options group with every property leaf (tdmn→tdbs→cdat) — it just had no
-  parsed scene tree. `newTemplatedLayer` now runs the **same** property-tree parse
-  the read path uses (`parseProperties` + `buildAEPropertyGroupTree` +
-  `wirePropertyTreeLeaves`, warnings to a LOCAL sink so they can't trip the splice
-  rollback) on the cloned Layr. This lights up the **entire existing** option
-  setter/accessor surface (`SetCameraZoom`/`Focus`/`Aperture`/`Blur`/`DoF`/Iris*;
-  `SetLightIntensity`/`ConeAngle`/`ConeFeather`/`Falloff*`/`Shadow*`) on a fresh
-  layer — they were always implemented (`setScalarProperty` → property backref),
-  just unreachable without the tree.
+- **Property-based option setters — RESOLVED 2026-06-14 via parse-the-clone (for
+  the slots the template carries).** The deferral was framed as needing "property
+  synthesis", but the easier half sufficed for the **non-elided** options: the
+  embed-whole-Layr template carries those property leaves (tdmn→tdbs→cdat) — they
+  just had no parsed scene tree. `newTemplatedLayer` now runs the **same**
+  property-tree parse the read path uses (`parseProperties` +
+  `buildAEPropertyGroupTree` + `wirePropertyTreeLeaves`, warnings to a LOCAL sink
+  so they can't trip the splice rollback) on the cloned Layr, lighting up the
+  setters/accessors for the slots present — they were always implemented
+  (`setScalarProperty` → property backref), just unreachable without the tree.
+  - **CORRECTION (2026-06-14, code-verified `tmp_debug/probe_fromscratch_opts`):
+    parse-the-clone only reaches slots AE did NOT elide in the template.** The
+    earlier "lights up the entire existing surface incl. Iris\*" was an
+    overstatement. Actual from-scratch coverage:
+    - **Light: 10/10 OK** — template carries all of Intensity / Color (now
+      spliced) / Cone Angle / Cone Feather / Falloff Type / Falloff Start /
+      Falloff Distance / Casts Shadows / Shadow Darkness / Shadow Diffusion.
+    - **Camera: 5/13 OK** — only Zoom / Depth of Field / Focus Distance /
+      Aperture / Blur Level have template slots. The **8 Iris\*/Highlight\***
+      setters (`SetIrisShape`/`IrisRotation`/`IrisRoundness`/`IrisAspectRatio`/
+      `IrisDiffractionFringe`/`IrisHighlightGain`/`IrisHighlightThreshold`/
+      `IrisHighlightSaturation`) fail from-scratch with `property not present` —
+      AE elides these DoF-bokeh controls (even the parsed `re_cameralight`
+      MyCamera lacks them). They need the **same synthesis-insert** treatment as
+      Light Color, one leaf each. **Deferred / on-demand.**
   - **Purely read-only on the bytes**: an untouched fresh camera/light still
     serializes byte-identically (the create ship-gate stays green); a setter then
     overwrites only its own cdat in place (length-preserving).
