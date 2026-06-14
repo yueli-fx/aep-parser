@@ -3,7 +3,7 @@ showcase: 3d-camera
 direction: 从零（无 AE）生成一个 3D 图层 + 相机场景，一帧同时展示 Z 视差与 Rotate Y 透视 tumble
 capabilities: [is3d-enable, layer-position-z, parallax, rotate-y, perspective-tumble, new-camera-layer, camera-position]
 gates: [TestLayer3DEnable_AEShipGate, TestLayer3DCamDolly_AEShipGate, TestLayer3DParallax_AEShipGate, TestLayer3DRotateY_AEShipGate]
-status: 待review
+status: complete
 last_updated: 2026-06-15
 regenerate: "go run ./flightdeck/showcase/3d-camera  +  AE render.jsx"
 ---
@@ -37,5 +37,4 @@ regenerate: "go run ./flightdeck/showcase/3d-camera  +  AE render.jsx"
 | Tumble | 黄 | 960,800,0 | **50°** | 透视前缩 → 渲成**梯形** |
 | BG | 深灰 | 2D 满帧 | — | 舞台背景（2D 忽略相机） |
 
-红→绿→蓝的大小递减 = Z 视差；黄卡的梯形 = Rotate Y 透视。agent 已 AE 实渲眼验（红近大、蓝远小、黄梯形）；
-**待用户真机复核**后翻 `complete`。
+红→绿→蓝的大小递减 = Z 视差；黄卡的梯形 = Rotate Y 透视。**用户 2026-06-15 真机验收通过 → `complete`**。
