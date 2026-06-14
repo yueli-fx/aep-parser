@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（优先级2 **3D 图层 flag 闭环**：`SetIs3D` 翻 ldta 0x26 bit2 → AE 自动 materialize 完整 3D 层〔Position 扩 3D/Orientation/Rotate XYZ/Material Options〕；DOM gate `TestLayer3DEnable` + 渲染像素 gate `TestLayer3DCamDolly`〔相机推拉 box 随距离 426→124px 缩放，3.41× 双版本逐字节一致〕双 PASS。先前同日：优先级1 **animated Trim** reveal 三帧渲染 gate 双版本 PASS〔gradient 色标 fixture-blocked 暂搁〕。逐 commit 见 git log。）
+**Last updated**: 2026-06-15 by claude（优先级1 **animated gradient 色标**闭环：用户手工造带关键帧色标 fixture（JSX 无法 authoring）解锁 RE，animated 布局=时间表(bpk=64)+每帧 Utf8；`AddGradientKeyframe`，kf0=R/B/G→kf1=G/R/B 双版本实渲交换 PASS+肉眼验。先前同日：优先级2 **3D flag 闭环**〔`SetIs3D`→AE 自动 materialize 3D 层，DOM gate + 相机推拉渲染 gate 双 PASS〕；优先级1 **animated Trim** reveal gate 双版本 PASS。逐 commit 见 git log。）
 
 **Active focus**: **剩余能力 roadmap（模板起点，非 from-scratch）**（`specs/2026-06-14-remaining-capability-roadmap.md`）。MG from-scratch 主线 + 质感件 + camera/light option + 优先级1 animated 关键帧（trim✅）+ 优先级2 **3D-enable 双 gate 闭环**。现推进优先级2 余项：3D transform 通道**非默认值写入**（Z/旋转）。机制复用 parse-the-clone + synthesis-insert。每能力渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
 
@@ -20,7 +20,7 @@
 **优先级1 动画关键帧**（基本收口）：
 - ~~lhd3 keyframe 容量分页~~ ✅ · ~~temporal ease 普及~~ ✅（2026-06-14）。
 - ~~animated 矢量滤镜（Trim End reveal）~~ ✅ 2026-06-15（三帧渲染 gate 双版本 PASS；Repeater/Offset 同 `lowerShapeScalar` 路径，按需补）。
-- **暂搁**：animated gradient 色标 — fixture-blocked（animated GCky 未 RE + JSX 无法 authoring 色标，需手工 AE GUI 造 fixture）。
+- ~~animated gradient 色标~~ ✅ 2026-06-15（用户手工造 fixture 解锁 RE；`AddGradientKeyframe` + 时间表/多 Utf8 emit；kf0=R/B/G→kf1=G/R/B 双版本实渲交换 PASS）。deferred：gradient STROKE 色标动画 + 色标 ease。
 - 遗留：path 几何 lhd3 >4 顶点分页（需求驱动）。
 
 **当前层 = 优先级2 3D 图层**：
