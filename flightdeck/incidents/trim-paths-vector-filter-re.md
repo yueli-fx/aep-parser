@@ -158,4 +158,19 @@ Offset Paths 的 4 个 elided 子流（Line Join / Miter / **Copies** / Copy Off
 
 **蓝本推广**：此机制（clone leaf 模板 → spliceShapeLeafBeforeGroupEnd → 覆写 cdat，仅当非默认）直接复用于 **Trim Type**（elide 无 slot）· Offset 其余 3 子流 · ZigZag Points · Twist Center · Repeater Order 等所有 default-elided 矢量滤镜子流。`spliceShapeLeafBeforeGroupEnd` 是通用 helper（GroupEnd 前插 pair）；多 leaf 需 canonical 排序时再扩 ordinal map（同 `materialLeafOrder`）。
 
+## Trim Type — synthesis-insert 第 2 次（enum leaf，优先级3，2026-06-15）✅
+
+`ADBE Vector Trim Type`（AE「Trim Multiple Shapes」，默认 1=Simultaneously elide，2=Individually）用同 Offset Copies 的 synthesis-insert 落地——蓝本第 2 次套用，**确认对 enum leaf 同样成立**：
+
+- scene `TrimNode += trimType TrimType`（`TrimTypeSimultaneously=1`/`TrimTypeIndividually=2`，`SetType`/`Type`）。lower 当 `Type != Simultaneously` 时 clone `ADBE Vector Trim Type` leaf（`v2_2_shape_trim_type_leaf.bin`，286B，**4-child tdbs = enum**，无 tdum/tduM）经 `spliceShapeLeafBeforeGroupEnd`（Offset 那次建的通用 helper）插入 + 覆写 cdat。
+- RE：`tmp_debug/gen_shape_trim_type.jsx`（2 椭圆 + stroke + Trim End=50 + Type=2 逼 AE 不 elide）→ `v2_2_trim_type.aep` → `tmp_debug/extract_trim_type_leaf` 抽 leaf。落盘子序确认 Start/End/Offset/**Type**（Type 在 GroupEnd 前，splice 落点对）。
+
+**渲染 ground truth（先看图，红线4——这次纠正了直觉）**：2 椭圆（屏 740/1180）+ stroke + Trim End=50：
+- **Individually(2)** = 路径**按序** trim → 50% 时**左椭圆满圈、右椭圆空**（第一条 path = 前 50%，恰好满）。
+- **Simultaneously(1，默认)** = 两 path **同步**各 50% → **两椭圆各右半弧**。
+- 注意：UI 名与直觉相反，「Individually」反而是 sequential（左满右空），「Simultaneously」才是「各自半弧」。**别按字面推，render 出来看**（对比 demo `gen_trim_type_demo` 上下两行实锤）。
+- gate 双判据：左椭圆**左缘(640)白**（满圈；Simul 此处暗）+ 右椭圆**右缘(1280)暗**（空；Simul 此处白）——组合排除 Simultaneously / 无trim / 掉层全部假绿。`TestMGTrimType_AEShipGate_AE2020/2025` 双版本 PASS（left-ring 4/4 · right-empty 4/4 · resave Type=2，png 20470b 两版一致）。
+
+**synthesis-insert 蓝本现验 2 类 leaf**：scalar-with-range（Offset Copies，6-child）+ enum（Trim Type，4-child）。`spliceShapeLeafBeforeGroupEnd` + `overwriteShapeStreamCdat` 对两者通用。剩 ZigZag Points / Twist Center / Repeater Order / Offset Line Join·Miter·Copy Offset 等同路径按需。
+
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。

@@ -1031,23 +1031,38 @@ func (g *VectorGroup) AddWiggleTransform() (*WiggleTransformNode, error) {
 // rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
 // trimming). Start/End are percentages (0..100); Offset is in degrees.
 //
-// `Trim Type` (Simultaneously/Individually) is AE default (Simultaneously) and
-// elided by AE; not modeled in V2.2. Start/End/Offset are static — animated
-// trim (the actual line-draw reveal) flips the cdat to a keyframe container
-// via the same injectAnimatedStream path as the other shape scalars.
+// `Trim Type` (Simultaneously/Individually) is AE-default (Simultaneously) and
+// elided by AE; the serializer materializes the leaf via synthesis-insert when
+// SetType selects Individually. Start/End/Offset are static — animated trim (the
+// actual line-draw reveal) flips the cdat to a keyframe container via the same
+// injectAnimatedStream path as the other shape scalars.
 type TrimNode struct {
-	start  *codec.PropertyStream[float64]
-	end    *codec.PropertyStream[float64]
-	offset *codec.PropertyStream[float64]
+	start    *codec.PropertyStream[float64]
+	end      *codec.PropertyStream[float64]
+	offset   *codec.PropertyStream[float64]
+	trimType TrimType
 }
 
+// TrimType selects how a Trim Paths filter treats multiple paths in its group
+// (`ADBE Vector Trim Type`, AE's "Trim Multiple Shapes"). Stored on disk as a
+// 1-based float64 enum index.
+type TrimType int
+
+const (
+	// TrimTypeSimultaneously trims all paths as one combined length (AE default).
+	TrimTypeSimultaneously TrimType = 1
+	// TrimTypeIndividually trims each path independently to the same Start/End%.
+	TrimTypeIndividually TrimType = 2
+)
+
 // NewTrimNode constructs a default (identity) TrimNode: Start=0, End=100,
-// Offset=0.
+// Offset=0, Type=Simultaneously.
 func NewTrimNode() *TrimNode {
 	n := &TrimNode{
-		start:  codec.NewPropertyStream[float64](),
-		end:    codec.NewPropertyStream[float64](),
-		offset: codec.NewPropertyStream[float64](),
+		start:    codec.NewPropertyStream[float64](),
+		end:      codec.NewPropertyStream[float64](),
+		offset:   codec.NewPropertyStream[float64](),
+		trimType: TrimTypeSimultaneously,
 	}
 	_ = n.start.SetStaticValue(0)
 	_ = n.end.SetStaticValue(100)
@@ -1059,6 +1074,21 @@ func (n *TrimNode) Kind() ShapeNodeKind              { return ShapeKindTrim }
 func (n *TrimNode) Start() *PropertyStream[float64]  { return n.start }
 func (n *TrimNode) End() *PropertyStream[float64]    { return n.end }
 func (n *TrimNode) Offset() *PropertyStream[float64] { return n.offset }
+
+// Type returns how the trim treats multiple paths (Simultaneously / Individually).
+func (n *TrimNode) Type() TrimType { return n.trimType }
+
+// SetType selects Simultaneously (all paths as one combined length, the default)
+// or Individually (each path trimmed to the same Start/End%). The Individually
+// value is AE-default-elided; setting it materializes the `ADBE Vector Trim Type`
+// leaf on lower. Only visible with multiple paths in the trim's group.
+func (n *TrimNode) SetType(t TrimType) error {
+	if t != TrimTypeSimultaneously && t != TrimTypeIndividually {
+		return fmt.Errorf("TrimNode.SetType: %d out of range (1=Simultaneously, 2=Individually)", t)
+	}
+	n.trimType = t
+	return nil
+}
 
 // SetStart sets the trim start percentage (0..100).
 func (n *TrimNode) SetStart(v float64) error { return n.start.SetStaticValue(v) }

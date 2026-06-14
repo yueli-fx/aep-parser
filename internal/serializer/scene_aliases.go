@@ -132,6 +132,7 @@ type (
 	WiggleTransformNode             = scene.WiggleTransformNode
 	StrokeNode                      = scene.StrokeNode
 	TrimNode                        = scene.TrimNode
+	TrimType                        = scene.TrimType
 	StrokeTaper                     = scene.StrokeTaper
 	StrokeWave                      = scene.StrokeWave
 	TemporalEase                    = scene.TemporalEase
@@ -212,6 +213,8 @@ const (
 	FeetFramesFilmTypeMM35                        = scene.FeetFramesFilmTypeMM35
 	FillRuleEvenOdd                               = scene.FillRuleEvenOdd
 	FillRuleNonzeroWinding                        = scene.FillRuleNonzeroWinding
+	TrimTypeSimultaneously                        = scene.TrimTypeSimultaneously
+	TrimTypeIndividually                          = scene.TrimTypeIndividually
 	FootageTimecodeDisplayStartTypeStart0         = scene.FootageTimecodeDisplayStartTypeStart0
 	FootageTimecodeDisplayStartTypeUseSourceMedia = scene.FootageTimecodeDisplayStartTypeUseSourceMedia
 	FramesCountTypeStart0                         = scene.FramesCountTypeStart0
@@ -448,6 +451,9 @@ func NewRectNode() *RectNode { return scene.NewRectNode() }
 
 // NewOffsetPathsNode returns a detached Offset Paths filter node.
 func NewOffsetPathsNode() *OffsetPathsNode { return scene.NewOffsetPathsNode() }
+
+// NewTrimNode returns a detached Trim Paths filter node.
+func NewTrimNode() *TrimNode { return scene.NewTrimNode() }
 
 // NewStrokeNode returns a detached stroke shape node.
 func NewStrokeNode() *StrokeNode { return scene.NewStrokeNode() }

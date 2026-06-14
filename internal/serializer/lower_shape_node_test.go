@@ -67,6 +67,44 @@ func TestLowerOffsetPaths_CopiesSplice(t *testing.T) {
 	}
 }
 
+func TestLowerTrim_TypeSplice(t *testing.T) {
+	// Default (Simultaneously): no Trim Type slot is spliced.
+	def := NewTrimNode()
+	_ = def.SetEnd(50)
+	defBody, err := LowerShapeNodeForTest(def)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if names := topTdmnNames(defBody); containsStr(names, "ADBE Vector Trim Type") {
+		t.Fatalf("default trim must not carry Trim Type slot, got %v", names)
+	}
+
+	// Individually: the `ADBE Vector Trim Type` enum leaf is spliced after Offset,
+	// before Group End, with its cdat overwritten to 2.
+	n := NewTrimNode()
+	_ = n.SetEnd(50)
+	if err := n.SetType(TrimTypeIndividually); err != nil {
+		t.Fatal(err)
+	}
+	body, err := LowerShapeNodeForTest(n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := topTdmnNames(body)
+	want := []string{"ADBE Vector Trim Start", "ADBE Vector Trim End", "ADBE Vector Trim Offset", "ADBE Vector Trim Type", "ADBE Group End"}
+	if len(got) != len(want) {
+		t.Fatalf("trim body top tdmns = %v, want %v", got, want)
+	}
+	for i, w := range want {
+		if got[i] != w {
+			t.Fatalf("trim body tdmn[%d] = %q, want %q (full %v)", i, got[i], w, got)
+		}
+	}
+	if v := offsetCdatF64(t, body, "ADBE Vector Trim Type"); v != 2 {
+		t.Fatalf("Trim Type cdat = %g, want 2 (Individually)", v)
+	}
+}
+
 func topTdmnNames(body *rifx.Chunk) []string {
 	var out []string
 	for _, ch := range body.Children {

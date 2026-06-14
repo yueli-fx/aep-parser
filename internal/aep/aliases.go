@@ -122,6 +122,7 @@ type (
 	StrokeLineJoin                  = scene.StrokeLineJoin
 	MergePathsNode                  = scene.MergePathsNode
 	MergeType                       = scene.MergeType
+	TrimType                        = scene.TrimType
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
 	RepeaterTransform               = scene.RepeaterTransform
@@ -389,6 +390,8 @@ const (
 	MergeTypeSubtract                             = scene.MergeTypeSubtract
 	MergeTypeIntersect                            = scene.MergeTypeIntersect
 	MergeTypeExclude                              = scene.MergeTypeExclude
+	TrimTypeSimultaneously                        = scene.TrimTypeSimultaneously
+	TrimTypeIndividually                          = scene.TrimTypeIndividually
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

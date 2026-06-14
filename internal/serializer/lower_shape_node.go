@@ -52,6 +52,9 @@ var v22ShapeGradStrokeBodyBytes []byte
 //go:embed templates/v2_2_shape_trim_body.bin
 var v22ShapeTrimBodyBytes []byte
 
+//go:embed templates/v2_2_shape_trim_type_leaf.bin
+var v22ShapeTrimTypeLeafBytes []byte
+
 //go:embed templates/v2_2_shape_repeater_body.bin
 var v22ShapeRepeaterBodyBytes []byte
 
@@ -124,6 +127,10 @@ var (
 	v22ShapeTrimOnce  sync.Once
 	v22ShapeTrimCache *rifx.Chunk
 	v22ShapeTrimErr   error
+
+	v22ShapeTrimTypeLeafOnce  sync.Once
+	v22ShapeTrimTypeLeafCache *rifx.Chunk
+	v22ShapeTrimTypeLeafErr   error
 
 	v22ShapeRepeaterOnce  sync.Once
 	v22ShapeRepeaterCache *rifx.Chunk
@@ -987,8 +994,10 @@ func cloneShapeTrimBody() (*rifx.Chunk, error) {
 // keyframe container (same injectAnimatedStream path as Rect Roundness / Fill
 // Opacity), so the line-draw reveal (keyframed End 0→100) persists.
 //
-// Trim Type (Simultaneously/Individually) stays at the embed default — AE
-// elided it in the source fixture so there is no slot to overwrite.
+// Trim Type (Simultaneously/Individually) is AE-default-elided; when set to
+// Individually the leaf is spliced into the body in canonical order (after
+// Offset, before Group End) and its enum cdat overwritten — synthesis-insert,
+// mirroring Offset Copies / SetMaterialOption.
 func lowerTrimNode(n *TrimNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeTrimBody()
 	if err != nil {
@@ -1003,7 +1012,41 @@ func lowerTrimNode(n *TrimNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeScalar(body, "ADBE Vector Trim Offset", n.Offset(), ctx); err != nil {
 		return nil, err
 	}
+	if n.Type() != TrimTypeSimultaneously {
+		tdmn, tdbs, err := cloneShapeTrimTypeLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Trim Type", encodeF64sBE(float64(n.Type())))
+	}
 	return body, nil
+}
+
+// cloneShapeTrimTypeLeaf returns a fresh (tdmn, LIST:tdbs) clone of the
+// `ADBE Vector Trim Type` enum leaf from its embedded template, spliced into the
+// trim body when Trim Type is set non-default (Individually). Mirrors
+// cloneShapeOffsetCopiesLeaf.
+func cloneShapeTrimTypeLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeTrimTypeLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeTrimTypeLeafBytes))
+		if e != nil {
+			v22ShapeTrimTypeLeafErr = fmt.Errorf("parse v22ShapeTrimTypeLeafBytes: %w", e)
+			return
+		}
+		v22ShapeTrimTypeLeafCache = ch
+	})
+	if v22ShapeTrimTypeLeafErr != nil {
+		return nil, nil, v22ShapeTrimTypeLeafErr
+	}
+	kids := v22ShapeTrimTypeLeafCache.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Trim Type" &&
+			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
+			return cloneChunk(kids[i]), cloneChunk(kids[i+1]), nil
+		}
+	}
+	return nil, nil, fmt.Errorf("trim type leaf missing from template")
 }
 
 // cloneShapeRepeaterBody returns a clone of the Repeater template
