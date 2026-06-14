@@ -1,8 +1,8 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（gradient G-Stroke 方向+type 从零通（双版本：GSDIR 线性左红右蓝、GSRAD 径向环对称像素 PASS；模板重抽 29-child；G-Stroke setter 全 parity G-Fill）· 同日先前：gradient HiLite 高光 · radial type · 表达式语汇四 idiom · SetLightKind。逐 commit 见 git log。）
+**Last updated**: 2026-06-14 by claude（gradient 方向彻底闭环：G-Fill+G-Stroke × {方向/类型/高光} 写+读+双版本像素 gate + showcase complete；ramp-geometry read-back 补齐（hydrate）。gradient 欠债清零，仅 stroke-geometry 家族另立。逐 commit 见 git log。）
 
-**Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。所有常用 shape 矢量滤镜 11 件 + gradient 方向/**类型(radial)** + 星形全收齐，端到端组合 gate ✅。新工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**；agent 先**自验证**（render → Read png 对照意图核一遍）再给用户真机复核。gradient（+radial）与 expressions（+四语汇 idiom）showcase 已扩展并 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
+**Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。常用 shape 矢量滤镜 11 件 + **gradient（方向/类型/高光，fill+stroke，写+读全闭环）** + 星形全收齐，端到端组合 gate ✅。工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**，agent 先**自验证**（render → Read png 对照意图）再给用户真机复核；gradient 与 expressions showcase 均 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
 
 ## 进行中
 
@@ -14,17 +14,17 @@
 
 ## 下一步
 
-无强制主线（MG roadmap S1–S6 闭环 + showcase 收官）。下列皆**按需点名即开**：
+无强制主线（MG roadmap S1–S6 闭环 + gradient/expressions showcase 收官）。下列皆**按需点名即开**：
 
 **未修 RE 候选**：
 - **EG 面板崩溃**（用户低优）——从零 EG 工程展开「基本图形」面板崩 AE（退回单 slider 也崩），DOM readback 假绿，根源 ship-gate 从不开面板。修法：补「真机开面板」gate + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节。详 `incidents/essential-graphics-write-re.md`。
-- **camera/light OPTION setter from-scratch elide**（Camera Zoom/Focus/Aperture · Light Intensity/Color/Cone…）——属性住 Options group，fresh layer 是 opaque 模板克隆无 scene tree，需 **property synthesis**（见 Backlog；`incidents/camera-light-layer-create-re.md`）。✅ **SetLightKind 从零已通**（2026-06-14，ldta @0x88，4 类 AE2020+2025 gate；模板默认其实是 parallel 非环境光）。
+- **camera/light OPTION setter from-scratch elide**（Camera Zoom/Focus/Aperture · Light Intensity/Color/Cone…）——属性住 Options group，需 **property synthesis**（见 Backlog；`incidents/camera-light-layer-create-re.md`）。SetLightKind 已通。
 
 **polish / 技债**：
-1. PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
-2. ✅ **表达式语汇 gate 已通**（2026-06-14）：loopOut（叠加在关键帧属性上）/ wiggle / 跨层引用 / **effect-param 引用（slider 绑定）四** idiom 双版本渲染像素 gate PASS，Go 零改动；`expr_vocab_shipgate_test.go`、详 `incidents/expression-enable-byte-pair.md`。slider idiom 一度误诊为「AddEffect 被 AE drop」，**bisection 证伪**——真因是表达式/JSX 须按**索引** `effect(1)(1)` 引用（效果实例名=match-name、参数显示名非"Slider"；按名引用 AE 静默回退静态值=假绿）。余项仅 `linear()`/`ease()` remap（边际值低，按需补）。
-3. gradient 余项：✅ **radial type** + ✅ **HiLite 高光** + ✅ **G-Stroke 方向/type** 均已通（2026-06-14；G-Fill `SetGradientType`/`SetHighlight*`、G-Stroke `SetStartPoint`/`SetEndPoint`/`SetGradientType`/`SetHighlight*` 全 parity；HiLite Angle 0=+X；模板 G-Fill 15-child·G-Stroke 29-child；`TestMGGradientHilite_*`/`TestMGGradStrokeGeom_*` 双版本像素 PASS，详 `incidents/gradient-fill-write-re.md`）。G-Stroke HiLite 亦已像素 gate（GSHL 环单轴分裂 L 蓝/R 红 双版本 PASS）。✅ **ramp-geometry read-back 已通**（hydrate 现读回 Type/Start/End/HiLite，`TestV2_2_GradientGeometry_Roundtrip` 纯 Go PASS；纯读侧 additive，写仍 opaque-preserve 无回归）。**gradient 欠债仅剩 stroke geometry**（Width/Cap/Join/… 描边几何家族，与实心描边共用，非 gradient 专属）。**gradient showcase 已扩 3×3**（06_RadialHiLite + 第三排 G-Stroke 3 格）→ **`complete`（用户真机过，2026-06-14）**。
-4. `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。✅ 种子模板 8bpc 已修（2026-06-14 576e78e：AE2020 seed 误为 32bpc，NewProject 现统一规整 8bpc=AE 默认）。
+- **stroke geometry setter**（Width / Cap / Join / Dashes / Taper / Wave）——渐变描边现锁模板烤的 18px；属描边几何家族，与实心描边共用（实心侧已 model Cap/Join/Miter），把那套 setter 搬到 `GradientStrokeNode` 即可（`incidents/stroke-line-cap-join-miter-re.md`）。
+- PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
+- `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。
+- 表达式 `linear()`/`ease()` remap（边际值低，按需）。
 
 **需求驱动**：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写（SetMaskPath / animated path / mode·color·feather）· SetEffectParam 扩库 · RQ Set\* slice-5~8（Alpha）。
 
