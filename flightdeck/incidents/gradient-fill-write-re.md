@@ -216,6 +216,47 @@ version-portable. Both `TestV2_2_GradientFill_AEShipGate_AE2020` and `_AE2025`
 PASS, decoding the resaved stops back to the written red/green/blue. So one
 AE25-sourced template serves both gate versions.
 
+### UPDATE 2026-06-15 — animated COLOR STOPS layout RE'd (fixture obtained) 🔓
+
+The 子项⑭ "animated gradients deferred" blocker is **unblocked**: the user
+hand-authored an animated-stops fixture in the AE GUI (the one thing JSX can't do
+— `Grad Colors` has no typed setValue, so the 颜色 property's stopwatch must be
+clicked by hand). Saved as `test_data/v2_2_gradient_anim_src.aep`: a 1000×1000
+rect, linear gradient, **kf0@t=0 = R(0%)→B(50%)→G(100%)**, **kf1@t=1s =
+G(0%)→R(50%)→B(100%)** (`tmp_debug/dump_gradient` + `tmp_debug/grad_kf_probe`).
+
+**On-disk animated layout (vs the static single-Utf8 form above):**
+
+```
+tdmn("ADBE Vector Grad Colors")
+LIST(GCst)
+  LIST(tdbs)
+    tdsb / tdsn / tdb4(124)
+    LIST(list)          ← keyframe TIME TABLE (lhd3 + ldat) — REPLACES the static cdat(4B)
+  LIST(GCky)
+    Utf8                ← keyframe-0 prop.map XML (full gradient)
+    Utf8                ← keyframe-1 prop.map XML
+    …                   ← one Utf8 per keyframe, parallel-indexed to the ldat records
+```
+
+- **Structurally identical to PATH keyframes** (`path-keyframe-write-re` /
+  `encodePathTimeTable`): a standard keyframe time-table holds timing/interp while
+  the per-keyframe *values* live in a parallel sibling list (there: `shap` chunks
+  in om-s; here: `Utf8` XML leaves in GCky). Same blueprint applies.
+- **lhd3 (52 B):** numKf @0x08 = 2, pages @0x0C = 1 ((n+3)/4, same capacity-paging
+  as `lhd3-keyframe-capacity-pages`), **bpk @0x10 = 64** (0x40 — a distinct
+  per-keyframe block size; 1D-nonspatial is 48, color is 152), @0x1C = 4.
+- **ldat (128 B = 2 × 64):** per-keyframe 64-B record. time field @rec+0x00 BE
+  (kf0=0, kf1=0x7800=30720 = frame30×1024 @30fps), interp bytes `01 01 00 01` @+0x04,
+  `00 00 00 02` @+0x08; kf0 carries f64 1.0 @+0x10 (kf1 zero); ease/tangent bytes
+  @+0x38 (`80 80 9f be` kf0 / `b0 80 9f be` kf1 — differ, exact meaning TBD). The
+  gradient VALUE is NOT in ldat — it's the external Utf8.
+- **Validation strategy:** the fixture is a real AE-saved byte ORACLE — make the
+  encoder reproduce its exact lhd3/ldat/Utf8, then double-version render gate
+  (t=0 left=R, t=1s left=G — the stop colors swap). No byte-guessing.
+- **Status:** RE'd, NOT yet implemented (scene needs gradient-keyframe storage;
+  `lowerGradientFillNode` needs the time-table + multi-Utf8 emit).
+
 ## Scope (子项⑭)
 
 `(g *VectorGroup) AddGradientFill()` → `GradientFillNode`; `SetColorStops` /
