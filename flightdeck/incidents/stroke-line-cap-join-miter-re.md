@@ -179,3 +179,20 @@ cardinality → a separate template variant).
 Dual-version ship-gate (AE 2020 + 2025) PASS (`TestV2_2_StrokeDashes_AEShipGate_*`,
 Dash=18 / Gap=7 decoded from AE's resave). RE fixtures: `re_stroke_dtw.jsx` +
 `v2_2_stroke_dashed.aep`.
+
+## Addendum (2026-06-15): secondary sub-properties — render-gate 甄别
+
+shape 次要子属性（Fill/Stroke Opacity·BlendMode·CompositeOrder·FillRule·Shape
+Direction）写路径**早已全实现**（`lowerFillNode`/`lowerStrokeNode` 无条件覆写既有
+slot），Go round-trip 绿。优先级3 收尾按红线4 逐个甄别哪些值得 / 能渲染 gate：
+
+| 子属性 | 写路径 | render-gate | 结论 |
+|---|---|---|---|
+| **Fill Opacity** | ✅ lowerShapeScalar | ✅ **2026-06-15 双版本** | `TestMGOpacity_AEShipGate`：white fill 100% vs 50% over 暗底 → lum 255 vs 135（=0.5·255+0.5·BG），两版一致。 |
+| **Stroke Opacity** | ✅ lowerShapeScalar | ✅ **2026-06-15 双版本** | 同上，stroke 环 60px 100% vs 50% → 255 vs 135（同 gate）。 |
+| **Fill Rule**（Nonzero/EvenOdd） | ✅ overwriteCdat | ✅ 间接 | even-odd 已被 `TestMGOffsetCopies`（同心环）+ Merge nested 渲染验证——even-odd 真生效是那些 gate 的前提。 |
+| **Blend Mode**（Fill/Stroke） | ✅ overwriteCdat | ⏸ deferred | 组内合成语义 fiddly（fill 对组内下方已绘结果按 mode 合成，需 2-fill/2-shape 构造 + 颜色采样）；render-surprise 风险，按需补。 |
+| **Composite Order**（Above/Below Previous） | ✅ overwriteCdat | ⏸ deferred | 控制 fill 在同组 stroke 之上/之下；可见但需 fill+stroke 叠序构造，按需补。 |
+| **Shape Direction**（Normal/Reversed） | ✅ setShapeDirection | ❌ 不可独立 gate | **实心单形状翻 winding 无可见效果**（填充圆 CW/CCW 同形）；winding 只在 even-odd/trim 方向/merge 绕向起作用——其作用面已由 Fill Rule even-odd 渲染覆盖。独立渲染 gate 无意义，归 negative-finding（写路径在、值 round-trip 在、视觉等价）。 |
+
+**小结**：Fill/Stroke Opacity 双版本 render-gated（最高价值可见项收口）。Fill Rule 间接覆盖。Blend Mode / Composite Order = 写路径就绪、render-gate 按需（非阻塞）。Shape Direction = 实心形状视觉无效，不单独 gate（作用面经 even-odd 覆盖）。verify_mg_opacity.jsx + mg_opacity_shipgate_test.go。
