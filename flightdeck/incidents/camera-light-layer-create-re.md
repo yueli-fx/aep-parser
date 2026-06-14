@@ -1,8 +1,8 @@
 ---
 status: active
 when_to_read: implementing/extending source-less layer creation (NewCameraLayer / NewLightLayer); adding a new embed-whole-Layr layer type; debugging "AE drops/mis-types a Go-created camera/light"; deciding embed-whole-Layr vs from-scratch for a new layer kind
-applies_to: [new-camera-layer, new-light-layer, source-less-layer, embed-whole-layr, ldta-subtype, camera-options, light-options, structural-write, layer-create, ship-gate, ae2020, ae2025]
-last_updated: 2026-06-11
+applies_to: [new-camera-layer, new-light-layer, source-less-layer, embed-whole-layr, ldta-subtype, camera-options, light-options, parse-the-clone, property-tree, option-setter, structural-write, layer-create, ship-gate, ae2020, ae2025]
+last_updated: 2026-06-14
 ---
 
 # NewCameraLayer / NewLightLayer — embed-whole-Layr create
@@ -73,13 +73,39 @@ where the field lives:
   the missing per-kind props like Cone Angle at runtime). Gated by
   `TestNewCameraLight_AEShipGate_AE20{20,25}` (Light1 built Spot, JSX asserts
   `lightType===SPOT`, Go resave asserts `LightKind==spot`).
-- **Property-based option setters still deferred** (Camera: Zoom/Focus/Aperture…;
-  Light: Intensity/Color/Cone Angle/Cone Feather/Falloff…): these live in the
-  Camera/Light **Options property group**, which on a fresh layer is an opaque
-  template-clone blob with no parsed scene tree. Setting them needs **property
-  synthesis** (parse-the-clone or build-the-group) — same scene-vs-chunk split as
-  [[add-effect-splice-re]] Phase 2 / [[transform-group-default-omission]]. Until
-  then a fresh camera/light carries the template's AE-default option values.
+- **Property-based option setters — RESOLVED 2026-06-14 via parse-the-clone.**
+  The deferral was framed as needing "property synthesis", but the easier half
+  sufficed: the embed-whole-Layr template **already carries** the full Camera/
+  Light Options group with every property leaf (tdmn→tdbs→cdat) — it just had no
+  parsed scene tree. `newTemplatedLayer` now runs the **same** property-tree parse
+  the read path uses (`parseProperties` + `buildAEPropertyGroupTree` +
+  `wirePropertyTreeLeaves`, warnings to a LOCAL sink so they can't trip the splice
+  rollback) on the cloned Layr. This lights up the **entire existing** option
+  setter/accessor surface (`SetCameraZoom`/`Focus`/`Aperture`/`Blur`/`DoF`/Iris*;
+  `SetLightIntensity`/`ConeAngle`/`ConeFeather`/`Falloff*`/`Shadow*`) on a fresh
+  layer — they were always implemented (`setScalarProperty` → property backref),
+  just unreachable without the tree.
+  - **Purely read-only on the bytes**: an untouched fresh camera/light still
+    serializes byte-identically (the create ship-gate stays green); a setter then
+    overwrites only its own cdat in place (length-preserving).
+  - Gated: `TestCameraLightOptions_FromScratch_Roundtrip` (pure Go: create →
+    set → write → re-parse → assert getters) + the dual-version
+    `TestNewCameraLight_AEShipGate_AE20{20,25}` extended to set 7 options and read
+    them back from **AE's DOM** (`cameraOption.zoom`=850 / `focusDistance`=1200 /
+    `aperture`=180 / `depthOfField`=1; `lightOption.intensity`=65 / `coneAngle`=72
+    / `coneFeather`=35) + Go re-parse confirms resave preserved them. Both AE
+    versions identical.
+  - **Scope honesty**: this is an **AE-model-readback + resave-preservation** gate
+    (AE ingests the values into its DOM and keeps them), NOT a 3D-render pixel
+    gate — pixel-proving a light's intensity/cone or a camera's DoF needs a lit
+    **3D** scene, which needs 3D-layer creation we don't have yet. For these
+    numeric option scalars (AE reads them into its model, no "enabled-bit" render
+    trap) the DOM-readback ceiling is the appropriate gate.
+  - **Still deferred — `ADBE Light Color`**: AE **elides** it at its default, so it
+    is absent from the template → no slot to overwrite and `LightColor()` returns
+    nil on a fresh light. This one genuinely needs the gradient-style fix (author
+    a non-default color in AE + re-extract the template, or true synthesis-insert
+    the leaf). Low priority.
 - ~~NewTextLayer~~ — SHIPPED 2026-06-11 via the same embed-whole-Layr path
   (mutate_layer_text.go; the btdk blob travels verbatim, so its complexity never
   materialized for creation — length-variable text WRITE is the remaining wall,

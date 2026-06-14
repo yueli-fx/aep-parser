@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（gradient 方向彻底闭环：G-Fill+G-Stroke × {方向/类型/高光} 写+读+双版本像素 gate + showcase complete；ramp-geometry read-back 补齐（hydrate）。gradient 欠债清零，仅 stroke-geometry 家族另立。逐 commit 见 git log。）
+**Last updated**: 2026-06-14 by claude（camera/light from-scratch OPTION setter 全通：parse-the-clone 点亮全套既有 setter，7 项双版本 AE DOM 读回 + Go 保值 PASS；余 Light Color（elide）。先前同日：gradient 方向彻底闭环（fill+stroke ×{方向/类型/高光}+read-back）。逐 commit 见 git log。）
 
 **Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。常用 shape 矢量滤镜 11 件 + **gradient（方向/类型/高光，fill+stroke，写+读全闭环）** + 星形全收齐，端到端组合 gate ✅。工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**，agent 先**自验证**（render → Read png 对照意图）再给用户真机复核；gradient 与 expressions showcase 均 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
 
@@ -18,9 +18,9 @@
 
 **未修 RE 候选**：
 - **EG 面板崩溃**（用户低优）——从零 EG 工程展开「基本图形」面板崩 AE（退回单 slider 也崩），DOM readback 假绿，根源 ship-gate 从不开面板。修法：补「真机开面板」gate + 比对 AE-native CIF3/CCtl/OvG2/CprC 字节。详 `incidents/essential-graphics-write-re.md`。
-- **camera/light OPTION setter from-scratch elide**（Camera Zoom/Focus/Aperture · Light Intensity/Color/Cone…）——属性住 Options group，需 **property synthesis**（见 Backlog；`incidents/camera-light-layer-create-re.md`）。SetLightKind 已通。
 
 **polish / 技债**：
+- **camera/light 余项**（主体 option setter 已 parse-the-clone 通，2026-06-14）：**Light Color** from-scratch（AE 默认 elide 无 slot，需 gradient 式重抽模板）· 3D-render 像素 gate（现仅 AE DOM 读回，深验需 3D layer 支持）。`incidents/camera-light-layer-create-re.md`。
 - **stroke geometry setter**（Width / Cap / Join / Dashes / Taper / Wave）——渐变描边现锁模板烤的 18px；属描边几何家族，与实心描边共用（实心侧已 model Cap/Join/Miter），把那套 setter 搬到 `GradientStrokeNode` 即可（`incidents/stroke-line-cap-join-miter-re.md`）。
 - PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
 - `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。

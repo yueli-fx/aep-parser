@@ -124,6 +124,21 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 		scene.SetProjectNextItemID(cProj, layerID+1)
 	}
 
+	// Parse the cloned template's property tree + wire its leaf backrefs so the
+	// Camera/Light Options accessors + setters (SetCameraZoom / SetLightIntensity
+	// / …) work on this fresh layer exactly as on a parsed one. The template is
+	// AE-native and parses clean; parse warnings go to a LOCAL sink so they never
+	// trip the splice's warnings-as-failure rollback. Read-only on the bytes —
+	// an untouched fresh layer still serializes byte-identically (the create
+	// ship-gate stays green); a setter then overwrites only its own cdat in place.
+	localWarn := []string{}
+	pctx := newParseCtx(float64(tickRate), name, &localWarn)
+	base.Properties, base.Effects, base.Markers = parseProperties(layrChunk, pctx)
+	ptree := buildAEPropertyGroupTree(layrChunk)
+	scene.SetLayerPropertyTree(base, ptree)
+	scene.SetPropertyGroupLayer(ptree, base)
+	wirePropertyTreeLeaves(ptree, base.Properties)
+
 	// cdta @0x18: bump fresh-comp marker (600) to TickRate — AE's "comp has user
 	// content" gate (see NewShapeLayer).
 	if cb.cdta != nil && len(cb.cdta.Data) >= codec.CdtaSecondaryDivisor18+4 && tickRate > 0 {

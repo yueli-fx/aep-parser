@@ -38,6 +38,25 @@
             if (!light) fail("no LightLayer found");
             else if (light.name !== "Light1") fail("light name " + light.name + " != Light1");
             else if (light.lightType !== LightType.SPOT) fail("light lightType " + light.lightType + " != SPOT(" + LightType.SPOT + ")");
+
+            // Read back the from-scratch Camera/Light Options values AE ingested.
+            function near(label, got, want) {
+                if (Math.abs(got - want) > 0.5) fail(label + "=" + got + " want " + want);
+                else log.push("  " + label + "=" + got);
+            }
+            if (cam) {
+                var co = cam.cameraOption;
+                near("cam.zoom", co.zoom.value, 850);
+                near("cam.depthOfField", co.depthOfField.value, 1);
+                near("cam.focusDistance", co.focusDistance.value, 1200);
+                near("cam.aperture", co.aperture.value, 180);
+            }
+            if (light) {
+                var lo = light.lightOption;
+                near("light.intensity", lo.intensity.value, 65);
+                near("light.coneAngle", lo.coneAngle.value, 72);
+                near("light.coneFeather", lo.coneFeather.value, 35);
+            }
         }
 
         app.project.save(new File(args.resaved));

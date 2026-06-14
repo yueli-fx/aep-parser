@@ -32,7 +32,8 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	if _, err := aep.NewCameraLayer(comp, "Cam1"); err != nil {
+	camLayer, err := aep.NewCameraLayer(comp, "Cam1")
+	if err != nil {
 		t.Fatalf("NewCameraLayer: %v", err)
 	}
 	lightLayer, err := aep.NewLightLayer(comp, "Light1")
@@ -44,6 +45,24 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	// (verify_camera_light.jsx checks light.lightType).
 	if err := lightLayer.SetLightKind(aep.LightKindSpot); err != nil {
 		t.Fatalf("SetLightKind: %v", err)
+	}
+	// Exercise from-scratch Camera/Light Options setters (the parse-the-clone
+	// property tree). verify_camera_light.jsx reads these back from AE's DOM.
+	for _, e := range []struct {
+		label string
+		fn    func() error
+	}{
+		{"SetCameraZoom", func() error { return camLayer.SetCameraZoom(850) }},
+		{"SetCameraDepthOfField", func() error { return camLayer.SetCameraDepthOfField(true) }},
+		{"SetCameraFocusDistance", func() error { return camLayer.SetCameraFocusDistance(1200) }},
+		{"SetCameraAperture", func() error { return camLayer.SetCameraAperture(180) }},
+		{"SetLightIntensity", func() error { return lightLayer.SetLightIntensity(65) }},
+		{"SetLightConeAngle", func() error { return lightLayer.SetLightConeAngle(72) }},
+		{"SetLightConeFeather", func() error { return lightLayer.SetLightConeFeather(35) }},
+	} {
+		if err := e.fn(); err != nil {
+			t.Fatalf("%s: %v", e.label, err)
+		}
 	}
 
 	tempDir := t.TempDir()
@@ -90,12 +109,19 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	for _, l := range re.Compositions[0].Layers {
 		if l.Name == "Cam1" && l.Type == aep.LayerTypeCamera {
 			cam = true
+			// Option values survived AE's resave (read via the parsed property tree).
+			chkOpt(t, ver, "Cam1.Zoom", l.CameraZoom(), 850)
+			chkOpt(t, ver, "Cam1.FocusDistance", l.CameraFocusDistance(), 1200)
+			chkOpt(t, ver, "Cam1.Aperture", l.CameraAperture(), 180)
 		}
 		if l.Name == "Light1" && l.Type == aep.LayerTypeLight {
 			light = true
 			if l.LightKind != aep.LightKindSpot {
 				t.Errorf("%s resaved: Light 'Light1' LightKind = %v, want spot", ver, l.LightKind)
 			}
+			chkOpt(t, ver, "Light1.Intensity", l.LightIntensity(), 65)
+			chkOpt(t, ver, "Light1.ConeAngle", l.LightConeAngle(), 72)
+			chkOpt(t, ver, "Light1.ConeFeather", l.LightConeFeather(), 35)
 		}
 	}
 	if !cam {
@@ -103,6 +129,18 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	}
 	if !light {
 		t.Errorf("%s resaved: Light 'Light1' missing", ver)
+	}
+}
+
+func chkOpt(t *testing.T, ver, label string, p *aep.Property, want float64) {
+	t.Helper()
+	if p == nil {
+		t.Errorf("%s resaved: %s property nil", ver, label)
+		return
+	}
+	got, ok := p.StaticValue.(float64)
+	if !ok || got != want {
+		t.Errorf("%s resaved: %s = %v, want %g", ver, label, p.StaticValue, want)
 	}
 }
 
