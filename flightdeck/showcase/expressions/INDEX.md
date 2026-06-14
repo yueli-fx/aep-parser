@@ -1,40 +1,43 @@
 ---
 showcase: expressions
-direction: 表达式激活 — 纯 Go 从零生成 time*N 旋转表达式驱动的轨道动画，渲染 t=1s 时三个点各被表达式转到不同角度
-capabilities: [set-expression, set-expression-enabled, rotation-expression, time-driven]
-gates: [TestExpression_AEShipGate_AE2020, TestExpression_AEShipGate_AE2025]
-status: complete
-last_updated: 2026-06-13
+direction: 表达式激活 + 语汇 — 纯 Go 从零生成 time*N 旋转轨道（上排）+ 四语汇 idiom（下排：跨层引用 / loopOut / wiggle / slider effect-param 引用）
+capabilities: [set-expression, set-expression-enabled, rotation-expression, time-driven, cross-layer-ref, loopout, wiggle, effect-param-ref, slider-control]
+gates: [TestExpression_AEShipGate_AE2020, TestExpression_AEShipGate_AE2025, TestExprVocab_AEShipGate_AE2020, TestExprVocab_AEShipGate_AE2025]
+status: 待review
+last_updated: 2026-06-14
 regenerate: "go run ./flightdeck/showcase/expressions  +  scripts/ae_run.ps1 render.jsx (renders t=1s)"
 ---
 
-# expressions — 表达式激活 showcase
+# expressions — 表达式激活 + 语汇 showcase
 
 ## 这个方向测什么
 
-三个「轨道」层，每层一个向上偏移 260px 的圆点；在层的 **Rotation 上挂 `time*N` 表达式**让点绕中心旋转。渲染 **t=1s** 时，三个不同转速（90/180/270 °/s）的点恰好转到不同角度——证明值是**表达式实时算的**、不是静态关键帧。灰色小 pip 标各轨道中心，便于读角度。表达式在 `Reopen` 后设到 `Rotation()`（`SetExpression` + `SetExpressionEnabled`），与 S2 ship-gate 同路。
+**上排（time*N 轨道）**：三个「轨道」层各一个向上偏移的圆点，Rotation 挂 `time*N` 表达式让点绕中心 pip 旋转。t=1s 时三个转速（90/180/270 °/s）的点各转到 90°/180°/270°（右/下/左），证明值是表达式实时算的。
 
-> ⚠ 覆盖边界（交付准则）：本 showcase 只演示 `time*N` 纯时间表达式。`loopOut`/`wiggle`/跨层引用（`thisComp.layer`）/ effect-param 引用（`effect(1)(1)` slider 绑定）四类语汇**已另行 gate**（2026-06-14，`expr_vocab_shipgate_test.go`，AE2020+2025 双版本渲染像素 PASS），但本 showcase 的 `gen.go` 尚未演示它们——如需可视审核可扩展 gen.go（攒批小阶段）。
+**下排（四语汇 idiom）**——每个 idiom **最好在 AE 里拖时间轴看运动**（png 只是 t=1s 快照）：
+
+| 图层 | 颜色 | 表达式 | 拖时间轴看到 | t=1s 快照位置 |
+|---|---|---|---|---|
+| LINK | 青 | `thisComp.layer("LEAD").transform.position + [0,-110]` | 紧贴橙色 leader 上方 110px 同步移动 | leader 正上方 |
+| LOOP | 绿 | `loopOut("cycle")`（位置关键帧 0..1s 上下 bob） | 每秒循环上下弹 | bob 区间内 |
+| WIG | 品红 | `wiggle(3, 70)` | 围绕锚点抖动 | 偏离锚点 |
+| SLD | 黄 | `[effect(1)(1), 820]`（层上 Slider Control = 1500） | 静止在 slider 值 x=1500 处 | x≈1500 |
+
+（橙色 LEAD 是 LINK 的引用目标，自身横向扫动的关键帧动画。）
+
+> ⚠ 覆盖边界（交付准则）：time*N / loopOut / wiggle / 跨层引用 / effect-param 引用五类语汇均已双版本渲染像素 gate（`expression_shipgate_test.go` + `expr_vocab_shipgate_test.go`）。effect-param 必须**按索引** `effect(1)(1)` 引用（实例名=match-name、参数名非"Slider"）。`linear()`/`ease()` 等仍按需补。
 
 ## 产物
 
 | 文件 | 类型 | 说明 |
 |---|---|---|
-| `gen.go` | 生成器(Go, tracked) | 构建 `expressions.aep`（7 层 = 3 轨道点 + 3 中心 pip + BG） |
+| `gen.go` | 生成器(Go, tracked) | 构建 `expressions.aep`（12 层 = 3 轨道点 + 3 pip + LEAD/LINK/LOOP/WIG/SLD + BG） |
 | `render.jsx` | 渲染脚本(tracked) | AE `saveFrameToPng(1.0)` → t=1s |
 | `expressions.aep` | 产出工程 (gitignored) | 1920×1080，30fps×4s，AE2020 target |
-| `expressions.png` | 渲染帧 (gitignored) | **t=1s** |
+| `expressions.png` | 渲染帧 (gitignored) | **t=1s** 快照 |
 
-## 布局（t=1s 时点相对各自中心 pip 的角度 = 表达式证据）
-
-| 图层 | 颜色 | 中心 x | 表达式 | t=1s 角度 | 点应在中心的 |
-|---|---|---|---|---|---|
-| ORB_90 | 橙 | 480 | `time*90` | 90° | 右侧 |
-| ORB_180 | 青 | 960 | `time*180` | 180° | 下方 |
-| ORB_270 | 粉 | 1440 | `time*270` | 270° | 左侧 |
-
-> 审核要点：点不在中心 pip 的正上方（初始偏移位）= 表达式已把旋转算到对应角度。
+> 审核要点：**打开 .aep 拖时间轴**——LINK 跟随、LOOP 循环弹、WIG 抖动、SLD 定在 slider 位、上排三点转速不同。这些是表达式实时求值的证据，单帧 png 看不全。
 
 ## 溯源
 
-S2 表达式激活 RE（`expressionEnabled` 字节对）：`incidents/expression-enable-byte-pair.md`；gate：`expression_shipgate_test.go`。
+S2 表达式激活 RE（`expressionEnabled` 字节对）+ 语汇扩展（loopOut/wiggle/跨层/effect-param）：`incidents/expression-enable-byte-pair.md`；gate：`expression_shipgate_test.go`、`expr_vocab_shipgate_test.go`。
