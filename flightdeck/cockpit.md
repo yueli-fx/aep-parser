@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-14 by claude（gradient radial type 从零通（双版本旋转对称像素 PASS，模板重抽 15-child）· 表达式语汇 gate 四 idiom 双版本 PASS（slider「drop」误诊经 bisection 证伪）· 先前：nnhd display 家族修复 · SetLightKind 从零通。逐 commit 见 git log。）
+**Last updated**: 2026-06-14 by claude（gradient HiLite 高光从零通（双版本单轴像素分裂 PASS，模板 15-child 已含 slot 免重抽，Angle 0=+X）· 先前：gradient radial type · 表达式语汇四 idiom · nnhd display 家族 · SetLightKind。逐 commit 见 git log。）
 
 **Active focus**: **From-scratch MG 工程能力 — 主线闭环 + 质感件全清，现处「按需 polish」期**（`specs/2026-06-12-from-scratch-mg-roadmap.md`）。所有常用 shape 矢量滤镜 11 件 + gradient 方向/**类型(radial)** + 星形全收齐，端到端组合 gate ✅。新工作流（2026-06-14 用户立规）：**每阶段写完即出 showcase**；agent 先**自验证**（render → Read png 对照意图核一遍）再给用户真机复核。gradient（+radial）与 expressions（+四语汇 idiom）showcase 已扩展并 ✅ complete（用户真机过）。每 slice 渲染像素级双版本 gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。
 
@@ -23,7 +23,7 @@
 **polish / 技债**：
 1. PolyStar Polygon 型（需 Type slot + 独立模板）· 各矢量滤镜 deferred 子流（蓝本 `incidents/trim-paths-vector-filter-re.md`）。
 2. ✅ **表达式语汇 gate 已通**（2026-06-14）：loopOut（叠加在关键帧属性上）/ wiggle / 跨层引用 / **effect-param 引用（slider 绑定）四** idiom 双版本渲染像素 gate PASS，Go 零改动；`expr_vocab_shipgate_test.go`、详 `incidents/expression-enable-byte-pair.md`。slider idiom 一度误诊为「AddEffect 被 AE drop」，**bisection 证伪**——真因是表达式/JSX 须按**索引** `effect(1)(1)` 引用（效果实例名=match-name、参数显示名非"Slider"；按名引用 AE 静默回退静态值=假绿）。余项仅 `linear()`/`ease()` remap（边际值低，按需补）。
-3. gradient 余项：✅ **Grad Type radial 已通**（2026-06-14，`TestMGGradientRadial_*` 双版本旋转对称像素 PASS；模板重抽 15-child 含 Grad Type/HiLite slot；enum 范围 [1,2] 非 1/3；`SetGradientType(GradientLinear|GradientRadial)`，详 `incidents/gradient-fill-write-re.md`）。余：HiLite 调参 · G-Stroke 方向/type · direction/type read-back。
+3. gradient 余项：✅ **Grad Type radial 已通** + ✅ **HiLite 高光已通**（2026-06-14，`TestMGGradientHilite_*` 双版本单轴像素分裂 PASS；HiLite Length/Angle 都 1D f64 BE @cdat[0:8]，模板 15-child 已含 slot 免重抽；Angle 0=向 +X；`SetHighlightLength`(% [-100,100])/`SetHighlightAngle`(度)，详 `incidents/gradient-fill-write-re.md`）。余：**G-Stroke 方向/type/HiLite**（需重抽 G-Stroke 模板）· type/direction/highlight read-back。**gradient showcase 待批量刷**（HiLite + 将来 G-Stroke 一起加 cell，避免每小项翻 complete→待review）。
 4. `encodePathTimeTable` 容量分页（path >4kf 前必修，`incidents/lhd3-keyframe-capacity-pages.md`）· animated trim/repeater · precomp anchor/scale 参数化。✅ 种子模板 8bpc 已修（2026-06-14 576e78e：AE2020 seed 误为 32bpc，NewProject 现统一规整 8bpc=AE 默认）。
 
 **需求驱动**：encodeBezier AE-native 字节 · EG W deferred 控件 · mask 剩余写（SetMaskPath / animated path / mode·color·feather）· SetEffectParam 扩库 · RQ Set\* slice-5~8（Alpha）。
