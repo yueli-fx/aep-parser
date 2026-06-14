@@ -107,6 +107,20 @@ transform setters on the reopened layer, because the embedded transform template
 was already the full 6-axis 3D schema. Camera dolly + Z parallax + RotateY tumble
 all render-gated; the headline 推拉镜/视差/透视 are shipped.
 
+## Camera Depth of Field — render-gated (2026-06-15)
+
+The camera DoF setters (`SetCameraDepthOfField` / `SetCameraFocusDistance` /
+`SetCameraAperture` / `SetCameraBlurLevel`) existed but were only DOM-readback-
+checked (camera-light showcase) — never render-verified to actually defocus.
+`TestLayer3DDoF_AEShipGate_AE2020/2025` PASS: a SHARP 3D box at the camera's
+focus distance (z=-500, focus 1300) + a far BLUR box (z=+1400), DoF on, aperture
+300, blur level 200. Rendered frame: SHARP left-edge transition band = **1px**
+(crisp), BLUR band = **21-22px** (defocused) — a >20× ratio, both versions. The
+setters must run on the **reopened** camera (from-scratch camera options elide).
+This is the 景深 of the "景深视差推拉镜" milestone. **Still pending**: lights /
+shadows (Material Options) render-verify — DoF is the only camera-option render
+gate so far.
+
 ## Pre-existing 3D infra (already shipped, fixture-based)
 
 Material / Geometry options + transform setters (SetRotateX/Y, SetOrientation,

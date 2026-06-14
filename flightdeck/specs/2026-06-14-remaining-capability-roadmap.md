@@ -36,9 +36,9 @@ last_updated: 2026-06-14
 - ~~**Position Z 写入 = 视差**~~ ✅ **2026-06-15**。意外发现：从零 shape 层 Position **已是 3-comp 存盘**（`encode3D([x,y,0])`，Z 钉 0），故 reopen 后 `SetPosition([x,y,z])` length-preserving，**零新代码**。渲染 gate `TestLayer3DParallax_AEShipGate`：两同尺寸 3D box NEAR z=-800/FAR z=+1200 + Go 设相机 → NEAR 渲 300px、FAR 渲 99px（3.03× 双版本一致，肉眼验）。详 `layer-3d-enable-bit-materializes.md`。
 - ~~**Rotate Y 透视 tumble**~~ ✅ **2026-06-15**（连带纠错：之前以为旋转/Orientation 通道不在从零树里需 synthesis——**错了**，`v2_2_transform_group_body.bin` 模板已含 Orientation/RotateX/Y/Z 全部 slot）。reopen 后 `SetRotateY` 覆写既有 cdat，length-preserving 零新代码。渲染 gate `TestLayer3DRotateY_AEShipGate`：RotateY=50°+近相机 → 梯形（左右边高 1.45× 双版本一致，肉眼验）。RotateX/Orientation/RotateZ 同路径按需补 gate。
 - **小结**：整个 3D transform group（enable + Z 视差 + 旋转/朝向）**从零纯 Go 写入零新 serializer 代码**——`SetIs3D` + reopen 后既有 transform setter，因嵌入 transform 模板本就是完整 6-axis 3D schema。推拉镜/视差/透视全部渲染 gate 闭环。详 `layer-3d-enable-bit-materializes.md`。
-- **Material Options** —— 3D 层的 Casts Shadows/Accepts Lights/Ambient 等（`re_material_options.jsx` fixture 已存，未 ship）。
-- **3D-render 像素 gate** —— 有 3D 层后，camera/light 的 DoF/bokeh/光照才能像素级深验（现仅 DOM 值）。
-- 产物里程碑：一个纯模板编辑产出的「带景深视差的推拉镜」showcase。
+- **Material Options** —— 3D 层的 Casts Shadows/Accepts Lights/Ambient 等（`re_material_options.jsx` fixture 已存，fixture setter 工作，从零 3D 层上未 ship）。
+- ~~**3D-render DoF 像素 gate**~~ ✅ **2026-06-15**。相机景深 setter（DoF/Focus/Aperture/BlurLevel，之前仅 DOM）渲染验证：近层焦内锐（边带 1px）/ 远层失焦虚（边带 21-22px，>20× 双版本）。`TestLayer3DDoF_AEShipGate`。详 `layer-3d-enable-bit-materializes.md`。**剩**：光照/阴影（Material Options）像素深验。
+- ~~产物里程碑：「景深视差推拉镜」showcase~~ ✅ **2026-06-15** `showcase/3d-camera`（视差 + 透视 tumble，用户真机验收 complete；景深另由 DoF gate 覆盖）。
 
 ## 优先级 3 — 形状图层剩余
 
