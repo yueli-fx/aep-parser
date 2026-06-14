@@ -65,6 +65,14 @@
 		// lhd3 capacity would make AE 2025 reject the whole file before this).
 		if (!pathProp.numKeys || pathProp.numKeys < 6)
 			throw "path animation truncated (numKeys=" + (pathProp.numKeys || 0) + ", want >=6)";
+		// The t=2 keyframe (key index 3, time-sorted 0,1,2,3,4,4.5) was built with
+		// temporal ease → AE must read it as BEZIER (not LINEAR). Proves
+		// encodePathTimeTable's ease write was ingested, not silently dropped.
+		var k = 3;
+		if (pathProp.keyInInterpolationType(k) !== KeyframeInterpolationType.BEZIER ||
+			pathProp.keyOutInterpolationType(k) !== KeyframeInterpolationType.BEZIER)
+			throw "eased keyframe " + k + " not BEZIER (in=" + pathProp.keyInInterpolationType(k) +
+				" out=" + pathProp.keyOutInterpolationType(k) + ", BEZIER=" + KeyframeInterpolationType.BEZIER + ")";
 		proj.save(new File(args.resaved));
 		pass(args.done);
 	} catch (e) {

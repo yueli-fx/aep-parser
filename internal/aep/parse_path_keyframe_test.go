@@ -81,6 +81,71 @@ func TestPathKeyframe_HydrateAnimated(t *testing.T) {
 	}
 }
 
+// TestPathKeyframe_EaseRoundTrip proves a path keyframe's temporal ease
+// survives write → re-parse (encodePathTimeTable writes the 64B block's
+// ease fields; hydratePathNode reads them back). The middle keyframe carries
+// non-zero in/out influence; the endpoints stay linear.
+func TestPathKeyframe_EaseRoundTrip(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	sl, err := aep.NewShapeLayer(comp, "PathEase")
+	if err != nil {
+		t.Fatalf("NewShapeLayer: %v", err)
+	}
+	pn, err := sl.RootGroup().AddPath()
+	if err != nil {
+		t.Fatalf("AddPath: %v", err)
+	}
+	mk := func(verts [][2]float64) aep.BezierPath {
+		return aep.BezierPath{Vertices: verts, InTangents: make([][2]float64, len(verts)),
+			OutTangents: make([][2]float64, len(verts)), Closed: true}
+	}
+	_ = pn.Path().AddKeyframeLinear(0, mk([][2]float64{{0, 0}, {40, 0}, {40, 40}, {0, 40}}))
+	inEase := aep.TemporalEase{Speed: 0, Influence: 0.5}
+	outEase := aep.TemporalEase{Speed: 0, Influence: 0.75}
+	if err := pn.Path().AddKeyframeWithEase(1, mk([][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}}), inEase, outEase); err != nil {
+		t.Fatalf("AddKeyframeWithEase: %v", err)
+	}
+	_ = pn.Path().AddKeyframeLinear(2, mk([][2]float64{{0, 0}, {200, 0}, {100, 200}}))
+
+	var buf bytes.Buffer
+	if err := p.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	got, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("FromReader: %v", err)
+	}
+	gotLayer := findLayerByName(got.Compositions[0], "PathEase")
+	if gotLayer == nil {
+		t.Fatal("round-trip: PathEase layer not found")
+	}
+	var gotPath *aep.PathNode
+	for _, child := range aep.WrapShapeLayer(gotLayer).RootGroup().Children {
+		if pp, ok := child.(*aep.PathNode); ok {
+			gotPath = pp
+			break
+		}
+	}
+	if gotPath == nil {
+		t.Fatal("round-trip: no PathNode")
+	}
+	kfs := gotPath.Path().Keyframes()
+	if len(kfs) != 3 {
+		t.Fatalf("round-trip keyframes = %d, want 3", len(kfs))
+	}
+	if kfs[1].InEase.Influence != 0.5 || kfs[1].OutEase.Influence != 0.75 {
+		t.Errorf("kf[1] ease = in%+v out%+v, want in.Influence=0.5 out.Influence=0.75", kfs[1].InEase, kfs[1].OutEase)
+	}
+	// Endpoints stay linear (zero ease).
+	if kfs[0].InEase.Influence != 0 || kfs[2].OutEase.Influence != 0 {
+		t.Errorf("endpoints not linear: kf[0].In=%+v kf[2].Out=%+v", kfs[0].InEase, kfs[2].OutEase)
+	}
+}
+
 func approxXY(a, b [2]float64) bool {
 	const eps = 0.01
 	dx := a[0] - b[0]

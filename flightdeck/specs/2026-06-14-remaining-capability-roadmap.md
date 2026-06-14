@@ -22,7 +22,7 @@ last_updated: 2026-06-14
 上规模动画的硬地基。当前 Layr Transform 全通道（Anchor/Scale/Rotation/Opacity）+ shape Size/Color/Position/path keyframe 已 ship，但有容量与覆盖缺口。
 
 - ~~**[必修·阻塞] path/keyframe 容量分页（lhd3）**~~ ✅ **2026-06-14 全闭合**。`encodeKeyframes`（标量/矢量，早先随 S1 修）+ `encodePathTimeTable`（path 时间表，本次）的 lhd3 @0x0C/@0x1C 均 page 化（`pages=(n+3)/4`）。path gate 从 3kf bump 到 6kf 双版本 PASS。**遗留另一轴**：path 几何 lhd3 >4 **顶点**分页未测（顶点数轴 ≠ 关键帧数轴，需求驱动）。详 `lhd3-keyframe-capacity-pages.md`。
-- **temporal ease 普及** —— 部分属性 keyframe 首版只 linear（shape path 子项⑮ deferred temporal ease）。补 ease in/out 字节（keyframe 两布局已有 `layoutFor` dispatcher）。
+- ~~**temporal ease 普及**~~ ✅ **2026-06-14**。scalar/vector/color 早有 ease（`writeKeyframeBlock`）；唯一缺口 = shape **path**（`encodePathTimeTable` 恒写 linear）。修写 + 对称修 `hydratePathNode` 读回。Go round-trip + 双版本 AE gate（eased 关键帧 AE 读回 BEZIER）PASS。详 `path-keyframe-write-re.md`。注：influence 是分数 (0,1]。
 - **animated 矢量滤镜** —— Trim / Repeater 的参数动画（static 已 ship，animated 没做）。
 - **animated gradient 色标** —— gradient stops 目前 static-only。
 - **animated mask path** —— 见优先级 4（mask），与此层耦合。

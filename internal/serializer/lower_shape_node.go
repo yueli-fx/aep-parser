@@ -756,17 +756,33 @@ func encodePathTimeTable(kfs []codec.StreamKeyframe[BezierPath], ctx *lowerCtx) 
 	if tickRate <= 0 {
 		tickRate = 30720
 	}
+	// The path time-table block is the spatial-style 64B ease block (== scalar
+	// spatial keyframe): inInterp@0x04 / outInterp@0x05, then in/out
+	// speed·influence f64 at 0x18/0x20/0x28/0x30. Honor each keyframe's ease
+	// (was hardcoded linear, silently dropping AddKeyframeWithEase on paths). A
+	// side with non-zero ease emits Bezier(2); AE ignores the speed/influence
+	// table on a side whose interp byte says Linear.
+	interpFor := func(e codec.TemporalEase) byte {
+		if e.Speed != 0 || e.Influence != 0 {
+			return byte(InterpBezier)
+		}
+		return byte(InterpLinear)
+	}
 	ldat := make([]byte, n*bpk)
 	for i, kf := range kfs {
 		blk := ldat[i*bpk : (i+1)*bpk]
 		binary.BigEndian.PutUint32(blk[0x00:0x04], uint32(math.Round(kf.Time*tickRate)))
-		blk[0x04] = byte(InterpLinear)
-		blk[0x05] = byte(InterpLinear)
+		blk[0x04] = interpFor(kf.InEase)
+		blk[0x05] = interpFor(kf.OutEase)
 		blk[0x07] = 0x01
 		binary.BigEndian.PutUint32(blk[0x08:0x0C], 2)
 		if i != n-1 {
 			binary.BigEndian.PutUint64(blk[0x10:0x18], math.Float64bits(1.0))
 		}
+		binary.BigEndian.PutUint64(blk[0x18:0x20], math.Float64bits(kf.InEase.Speed))
+		binary.BigEndian.PutUint64(blk[0x20:0x28], math.Float64bits(kf.InEase.Influence))
+		binary.BigEndian.PutUint64(blk[0x28:0x30], math.Float64bits(kf.OutEase.Speed))
+		binary.BigEndian.PutUint64(blk[0x30:0x38], math.Float64bits(kf.OutEase.Influence))
 		// @0x38 trailer left zero (AE runtime cache pointer; rebuilt on load).
 	}
 

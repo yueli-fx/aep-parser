@@ -487,14 +487,22 @@ func hydratePathNode(body *rifx.Chunk, ctx *parseCtx) *PathNode {
 		_ = p.Path().SetStaticValue(bezierFromShap(shaps[0]))
 		return p
 	}
-	// Animated: pair each shap's geometry with its tdbs time entry.
+	// Animated: pair each shap's geometry with its tdbs time entry, carrying the
+	// temporal ease readMaskPathTimes decoded (a non-zero ease side keeps the
+	// keyframe Bezier — symmetric with encodePathTimeTable's ease write).
 	times := readMaskPathTimes(tdbs, ctx)
 	for i, s := range shaps {
-		t := 0.0
+		t, in, out := 0.0, TemporalEase{}, TemporalEase{}
 		if i < len(times) {
 			t = times[i].time
+			in, out = times[i].inEase, times[i].outEase
 		}
-		_ = p.Path().AddKeyframeLinear(t, bezierFromShap(s))
+		bp := bezierFromShap(s)
+		if in.Speed != 0 || in.Influence != 0 || out.Speed != 0 || out.Influence != 0 {
+			_ = p.Path().AddKeyframeWithEase(t, bp, in, out)
+		} else {
+			_ = p.Path().AddKeyframeLinear(t, bp)
+		}
 	}
 	return p
 }

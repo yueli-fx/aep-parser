@@ -84,7 +84,11 @@ AE 2020 vs AE 2025 输出**逐字段同构**，唯一差异：64B 时间块 `@0x
 2. 接线 `LowerPathStream` → `lowerPathNode`（`lower_shape_node.go:454-456` 现走 embed 模板单帧 fallback）；`numKeys≤1` 保留 embed 静态路径。
 3. 既往"from-scratch shape path 崩 AE 2020 (0::42)"风险已缓解：AE 双版本**自己**就产出这套字节，byte-match 即 AE 接受。
 
-deferred：temporal ease（首版 linear only）、mask path write（只做 shape path）、open path 的 shph 0x14 语义、time-block `@0x30` 1.0 的作用。
+deferred：~~temporal ease（首版 linear only）~~ ✅ **2026-06-14 解决**（见下）、mask path write（只做 shape path）、open path 的 shph 0x14 语义、time-block `@0x30` 1.0 的作用。
+
+## Temporal ease 解决（2026-06-14，roadmap 优先级1）
+
+path 时间块 64B 是 spatial-style ease 块，ease 字段 @0x18/0x20/0x28/0x30（in/out speed·influence）与标量 `writeKeyframeBlock` 同位。`encodePathTimeTable` 此前 @0x04/@0x05 恒写 LINEAR + ease 字段置零，silently drop 掉 `AddKeyframeWithEase` 设的 ease。修：per-side `interpFor`（非零 ease → Bezier(2)）+ 写 speed/influence。对称地 `hydratePathNode` 改用 `readMaskPathTimes` 已解出的 ease（非零则 `AddKeyframeWithEase`，原先恒 `AddKeyframeLinear` 丢 ease）。**influence 是分数 (0,1] 非百分比**（API 校验；AE DOM ×100 显示）。验证：`TestPathKeyframe_EaseRoundTrip`（Go：set 0.5/0.75 → write → re-parse → assert）+ `TestV2_2_PathKf_AEShipGate_AE20{20,25}` 扩为 t=2 关键帧带 ease，AE 读回 `keyInInterpolationType==BEZIER` + Go re-parse resaved 确认 ease 存活。双版本 PASS。
 
 ## Phase 2 实现结果（2026-05-31）
 

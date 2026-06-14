@@ -38,16 +38,20 @@ func runV2_2PathKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	// the time-table lhd3 must write @0x0C=2 / @0x1C=8. Hardcoded 1/4 made AE
 	// 2025 reject the file as corrupt (incidents/lhd3-keyframe-capacity-pages.md).
 	// Vertex counts stay ≤4 — the >4-vertex geometry axis is a separate concern.
+	// 6 keyframes (>4) exercise paging; the t=2 keyframe carries temporal ease
+	// (influence 0.5 both sides) so the gate also proves encodePathTimeTable's
+	// ease write — AE reads that keyframe back as BEZIER interpolation.
 	frames := []struct {
 		t     float64
 		verts [][2]float64
+		ease  bool
 	}{
-		{0, [][2]float64{{0, 0}, {40, 0}, {40, 40}, {0, 40}}},
-		{1, [][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}}},
-		{2, [][2]float64{{0, 0}, {200, 0}, {100, 200}}},
-		{3, [][2]float64{{0, 0}, {60, 0}, {60, 60}, {0, 60}}},
-		{4, [][2]float64{{10, 10}, {120, 0}, {120, 120}}},
-		{4.5, [][2]float64{{0, 0}, {150, 20}, {150, 150}, {20, 150}}},
+		{0, [][2]float64{{0, 0}, {40, 0}, {40, 40}, {0, 40}}, false},
+		{1, [][2]float64{{0, 0}, {100, 0}, {100, 100}, {0, 100}}, false},
+		{2, [][2]float64{{0, 0}, {200, 0}, {100, 200}}, true},
+		{3, [][2]float64{{0, 0}, {60, 0}, {60, 60}, {0, 60}}, false},
+		{4, [][2]float64{{10, 10}, {120, 0}, {120, 120}}, false},
+		{4.5, [][2]float64{{0, 0}, {150, 20}, {150, 150}, {20, 150}}, false},
 	}
 
 	p := aep.NewProject(target)
@@ -70,7 +74,12 @@ func runV2_2PathKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 			OutTangents: make([][2]float64, len(f.verts)),
 			Closed:      true,
 		}
-		if err := pth.Path().AddKeyframeLinear(f.t, bp); err != nil {
+		if f.ease {
+			e := aep.TemporalEase{Speed: 0, Influence: 0.5}
+			if err := pth.Path().AddKeyframeWithEase(f.t, bp, e, e); err != nil {
+				t.Fatalf("AddKeyframeWithEase(%g): %v", f.t, err)
+			}
+		} else if err := pth.Path().AddKeyframeLinear(f.t, bp); err != nil {
 			t.Fatalf("AddKeyframeLinear(%g): %v", f.t, err)
 		}
 	}
@@ -139,6 +148,34 @@ func runV2_2PathKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	}
 	if timeKfl == nil {
 		t.Errorf("resaved: tdbs has no time-table kfl (animation dropped)")
+	}
+
+	// Typed re-parse: the t=2 keyframe's temporal ease survived AE's resave.
+	re, err := aep.Open(resavedAEP)
+	if err != nil {
+		t.Fatalf("aep.Open(resaved): %v", err)
+	}
+	rl := findLayerByName(re.Compositions[0], "PathKf")
+	if rl == nil {
+		t.Fatalf("resaved: PathKf layer not found")
+	}
+	var rpn *aep.PathNode
+	for _, child := range aep.WrapShapeLayer(rl).RootGroup().Children {
+		if pp, ok := child.(*aep.PathNode); ok {
+			rpn = pp
+			break
+		}
+	}
+	if rpn == nil {
+		t.Fatalf("resaved: no PathNode")
+	}
+	kfs := rpn.Path().Keyframes()
+	if len(kfs) < 3 {
+		t.Fatalf("resaved: path keyframes = %d, want >=3", len(kfs))
+	}
+	// kf index 2 = t=2 (the eased one); ease should be non-zero both sides.
+	if kfs[2].InEase.Influence == 0 || kfs[2].OutEase.Influence == 0 {
+		t.Errorf("resaved: eased keyframe lost ease (in=%+v out=%+v)", kfs[2].InEase, kfs[2].OutEase)
 	}
 }
 
