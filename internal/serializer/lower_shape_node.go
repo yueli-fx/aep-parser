@@ -846,14 +846,17 @@ func lowerGradientStops(body *rifx.Chunk, gradient *codec.Gradient) *rifx.Chunk 
 // Start/End Pt are Vec2 (2 × f64 BE at cdat[0:16], same layout as the Repeater
 // Transform points), overwritten with the node's StartPoint/EndPoint (default
 // [0,0]→[100,0] = AE's horizontal ramp, so a gradient that doesn't set direction
-// reproduces the pre-direction behavior). Grad Type / HiLite stay at the embed
-// default (linear).
+// reproduces the pre-direction behavior). Grad Type (1D f64 BE enum: 1=Linear /
+// 2=Radial) is overwritten with the node's GradientType — the template bakes
+// Radial(2) so the slot exists, lowered back to the node's value (default
+// Linear=1 reproduces the pre-type behavior). HiLite stays at the embed default.
 func lowerGradientFillNode(n *GradientFillNode, _ *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeGradFillBody()
 	if err != nil {
 		return nil, err
 	}
 	sp, ep := n.StartPoint(), n.EndPoint()
+	overwriteShapeStreamCdat(body, "ADBE Vector Grad Type", encodeF64sBE(float64(n.GradientType())))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad Start Pt", encodeF64sBE(sp[0], sp[1]))
 	overwriteShapeStreamCdat(body, "ADBE Vector Grad End Pt", encodeF64sBE(ep[0], ep[1]))
 	return lowerGradientStops(body, n.Gradient()), nil

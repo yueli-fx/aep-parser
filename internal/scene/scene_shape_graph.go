@@ -495,26 +495,42 @@ func (f *FillNode) Properties() *PropertyGroup {
 // EndPoint in the shape's local coordinate space (AE default [0,0]→[100,0], a
 // horizontal ramp); set them to a diagonal/vertical pair to rotate the gradient.
 //
-// `Grad Type` (linear/radial) and the HiLite controls are NOT modeled (default
-// linear; elided in the template). Stops + direction are static (V2.2 does not
-// model animated gradients). The serializer re-encodes the stops to prop.map XML
-// and overwrites the Start/End Pt cdats + GCky/Utf8 chunk (length-variable; rifx
+// `Grad Type` selects linear vs radial (StartPoint = centre, EndPoint = a point
+// on the radius for radial). The HiLite controls are NOT modeled (no highlight).
+// Stops + direction + type are static (V2.2 does not model animated gradients).
+// The serializer re-encodes the stops to prop.map XML and overwrites the Grad
+// Type / Start Pt / End Pt cdats + GCky/Utf8 chunk (length-variable; rifx
 // recomputes the enclosing LIST sizes).
 type GradientFillNode struct {
-	gradient   *codec.Gradient
-	startPoint [2]float64
-	endPoint   [2]float64
+	gradient     *codec.Gradient
+	startPoint   [2]float64
+	endPoint     [2]float64
+	gradientType GradientType
 }
+
+// GradientType selects a gradient fill's ramp shape: linear (a straight band) or
+// radial (concentric rings from StartPoint out to EndPoint). Matches AE's
+// `ADBE Vector Grad Type` enum.
+type GradientType int
+
+const (
+	// GradientLinear is a straight ramp from StartPoint to EndPoint (AE default).
+	GradientLinear GradientType = 1
+	// GradientRadial is concentric rings centred at StartPoint, reaching the
+	// EndPoint color at radius |EndPoint − StartPoint|.
+	GradientRadial GradientType = 2
+)
 
 // NewGradientFillNode constructs a default 2-stop black→white linear gradient
 // (fully opaque) with AE's default horizontal ramp ([0,0]→[100,0]). Callers
-// override stops via SetColorStops / SetAlphaStops and direction via
-// SetStartPoint / SetEndPoint.
+// override stops via SetColorStops / SetAlphaStops, direction via
+// SetStartPoint / SetEndPoint, and ramp shape via SetGradientType.
 func NewGradientFillNode() *GradientFillNode {
 	return &GradientFillNode{
-		gradient:   defaultGradient(),
-		startPoint: [2]float64{0, 0},
-		endPoint:   [2]float64{100, 0},
+		gradient:     defaultGradient(),
+		startPoint:   [2]float64{0, 0},
+		endPoint:     [2]float64{100, 0},
+		gradientType: GradientLinear,
 	}
 }
 
@@ -530,6 +546,19 @@ func (n *GradientFillNode) SetStartPoint(v [2]float64) error { n.startPoint = v;
 
 // SetEndPoint sets the gradient ramp's end point (shape-local coords).
 func (n *GradientFillNode) SetEndPoint(v [2]float64) error { n.endPoint = v; return nil }
+
+// GradientType returns the ramp shape (linear or radial).
+func (n *GradientFillNode) GradientType() GradientType { return n.gradientType }
+
+// SetGradientType selects linear (default) or radial ramp shape. For radial,
+// StartPoint is the centre and EndPoint sets the outer radius.
+func (n *GradientFillNode) SetGradientType(t GradientType) error {
+	if t != GradientLinear && t != GradientRadial {
+		return fmt.Errorf("gradient type %d out of range (1=linear, 2=radial)", t)
+	}
+	n.gradientType = t
+	return nil
+}
 
 // defaultGradient returns a 2-stop black→white gradient with two opaque alpha
 // stops — the values AE shows for a freshly-added gradient fill.

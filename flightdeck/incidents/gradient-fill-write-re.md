@@ -80,6 +80,32 @@ children** vs 5; `tmp_debug/gen_gradient_dir.jsx` → `v2_2_gradient_dir.aep`).
   write-only from-scratch, consistent with the filter nodes; untouched parsed
   gradients stay opaque-preserved, mutate-sync has known partial fidelity).
 
+### UPDATE 2026-06-14 — Grad TYPE (radial) now resolved ✅
+
+Same template-re-extraction blueprint as the direction work. **`ADBE Vector
+Grad Type` is a typed enum** JSX can `setValue` — **range is [1,2]: 1=Linear,
+2=Radial** (NOT 1/3; `setValue(3)` throws "值 3 在 1 到 2 的范围外"). Authored
+on top of `v2_2_gradient_dir.aep` (Grad Type=2 + Start/End Pt kept non-default
+so all three geometry slots emit) → `v2_2_gradient_type.aep`
+(`tmp_debug/gen_gradient_type.jsx`). Re-extracted `v2_2_shape_gradfill_body.bin`
+is now **15 children** (vs 9): + Grad Type, + HiLite Length/Angle (AE emits the
+HiLite pair too once the gradient is radial).
+- Grad Type is **1D f64 BE enum @cdat[0:8]** (same family as Merge/Twist enums).
+  `lowerGradientFillNode` overwrites it with `float64(n.GradientType())`; default
+  `GradientLinear`=1 overwrites the baked Radial(2) → **no regression** (linear
+  `TestMGGradientDir` / `TestV2_2_GradientFill` still PASS on the 15-child
+  template, AE2020).
+- API: `GradientFillNode.SetGradientType(GradientLinear|GradientRadial)` +
+  `GradientType()` getter. For radial, StartPoint = centre, EndPoint sets the
+  outer radius.
+- Gate `TestMGGradientRadial_AEShipGate_AE2020/2025` PASS (red line 4): red
+  centre → blue edge, the 4 cardinal points at radius 140 render **identical
+  (76,0,178)** = rotational symmetry (a linear ramp would split L=red/R=blue);
+  Grad Type=2 read back; resave survives. Both AE versions byte-identical pixels.
+- **Still deferred**: HiLite tuning (slots present but untouched, length stays
+  embed default) · gradient STROKE type/direction (G-Stroke template unchanged)
+  · read-back of type/direction (hydrate write-only, as before).
+
 ## Cross-version: AE25-shaped gradient is accepted by AE 2020
 
 The template source is AE 25.6 and **AE 2020 refuses to open that whole project

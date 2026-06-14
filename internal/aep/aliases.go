@@ -36,6 +36,7 @@ type (
 	FramesCountType                 = scene.FramesCountType
 	GradientFillNode                = scene.GradientFillNode
 	GradientStrokeNode              = scene.GradientStrokeNode
+	GradientType                    = scene.GradientType
 	Guide                           = scene.Guide
 	GuideOrientation                = scene.GuideOrientation
 	InterpType                      = scene.InterpType
@@ -219,6 +220,8 @@ const (
 	FramesCountTypeStart0                         = scene.FramesCountTypeStart0
 	FramesCountTypeStart1                         = scene.FramesCountTypeStart1
 	FramesCountTypeTimecodeConversion             = scene.FramesCountTypeTimecodeConversion
+	GradientLinear                                = scene.GradientLinear
+	GradientRadial                                = scene.GradientRadial
 	GuideHorizontal                               = scene.GuideHorizontal
 	GuideVertical                                 = scene.GuideVertical
 	InterpBezier                                  = scene.InterpBezier
