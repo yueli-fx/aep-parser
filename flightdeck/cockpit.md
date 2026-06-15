@@ -34,7 +34,13 @@
 
 **优先级5 表达式 ✅ 机制全 ship**（核实代码：`SetExpression`/`SetExpressionEnabled` tdb4 @0x77/@0x78 已修 + `expression_shipgate` + `expr_vocab_shipgate` 4 idiom 双版本——看板旧措辞「SetExpression 栽」已滞后）。剩 `linear()`/`ease()` remap 显式按需（机制已证内容无关，边际值低）。详 `incidents/expression-enable-byte-pair.md`。
 
-**➡ 唯一真剩余 = 优先级6 文字多 run/段落〔等需求驱动〕**：多段落/多 run/带 kerning/空串改字当前 refuse，需 btdk 段落·run entry splicing（未 RE，effort 高）。NewTextLayer + 单段单 run SetText 已 ship。其余 roadmap 项皆「按需 / 不可达」。**用户 2026-06-15 决议「收尾 + 体检」**——主体收口，不主动挖按需项，等真实需求。
+**➡ 新优先级（用户 2026-06-15 改）：表达式 + 效果 > 文字**。文字基础（NewTextLayer + 单段单 run SetText）够用，**完整文字动画接入留到下一阶段**。当前挖 expr+effects 深化的真缺口（实测确认）：
+- **〔A〕expression 驱动 effect param ✅（2026-06-15）**——本以为「字节已通」是**假绿**：`SetExpression` append Utf8 到末尾，对带 tdum/tduM 的 effect param 落在 tduM 后 → AE 2020 判损坏跳层。**真 bug**：Utf8 必须插 cdat 后 / tdum-tduM 前（AE-native dump 确认）。修 `back_property.go::SetExpression`。`TestExprEffect_AEShipGate` 双版本 PASS（Gaussian Blur Blurriness=`time*40`，AE 求值 valueAtTime(2.5)=100、blur 增长 lum 0→62）。**把表达式从「只能挂无 tdum/tduM 属性」扩到任意属性含 effect param**。详 `expression-enable-byte-pair.md` § Utf8 位置二次纠错。
+- **➡〔B 大头·下一步〕animated effect param（from-scratch keyframe 合成）**——实测 `InsertKeyframe` 对 static effect param 报「insert from scratch not supported」（`propertyBack` 只有 cdat 无 ldat/lhd3）。需把 static cdat 转 animated keyframe 容器（机制类比 shape 的 `injectAnimatedStream`+`encodeKeyframes`，但走 parsed Property 路径）。**这是 effects 最大真缺口**（动画 blur/slider 驱动）。
+- 表达式 `linear()/ease()/valueAtTime`：低边际（内容无关已证），按需。
+- 效果库扩充（>30）/ per-effect typed helper / reference-param effects（Set Matte 等需 tdpi remap）：按需。
+
+**文字多 run/段落**（btdk splicing 未 RE）= 留到下一阶段完整文字动画。
 
 **蓝本（synthesis-insert 推广到矢量滤镜，2026-06-15 验透 2 类 leaf）**：clone elided leaf 模板 → `spliceShapeLeafBeforeGroupEnd`（GroupEnd 前插 (tdmn,tdbs) pair）→ 覆写 cdat，仅当值≠默认。已验 scalar-with-range（Offset Copies 6-child）+ enum（Trim Type 4-child）两类。不污染默认 body、不需 hydration（filter 靠 opaque chunk 穿越 Reopen）。剩 ZigZag Points / Twist Center / Repeater Order / Offset Line Join·Miter·Copy Offset 同路径按需。详 `trim-paths-vector-filter-re.md` § Offset Copies / Trim Type。
 

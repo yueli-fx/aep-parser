@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: SetExpression 写入后 AE 不求值/expressionEnabled 读回 false；AE 打开后表达式文本被丢；touching tdb4 @0x77/@0x78 or SetExpression/SetExpressionEnabled; 评估「Go round-trip 绿但 AE 行为不对」的表达式类症状
-applies_to: [expression, expression-enabled, tdb4, 0x77, 0x78, has-expression-marker, settext, render-dead, mg-roadmap, ship-gate, ae2020, ae2025]
-last_updated: 2026-06-12
+when_to_read: SetExpression 写入后 AE 不求值/expressionEnabled 读回 false；AE 打开后表达式文本被丢；给 effect param（或任何带 tdum/tduM 的属性）挂表达式后 AE 判损坏跳过该层；touching tdb4 @0x77/@0x78 or SetExpression/SetExpressionEnabled or 表达式 Utf8 在 tdbs 里的插入位置；评估「Go round-trip 绿但 AE 行为不对」的表达式类症状
+applies_to: [expression, expression-enabled, tdb4, 0x77, 0x78, has-expression-marker, utf8-position, tdum-tduM, effect-param-expression, settext, render-dead, mg-roadmap, ship-gate, ae2020, ae2025]
+last_updated: 2026-06-15
 resolved_by:
 ---
 
@@ -38,6 +38,18 @@ tdb4 @0x77/@0x78 是**两个独立字节**，历史 RE 把它们混为一个「@
 - `SetExpression`：写/删 Utf8 时同步 @0x78（1/0）。
 - `SetExpressionEnabled`：写 @0x77（enabled→0 / disabled→1），不再碰 @0x78。
 - parse：`Expression != ""` 时 `ExpressionEnabled = (@0x77 == 0)`，否则默认 true。
+
+### 二次纠错（2026-06-15）：Utf8 必须插在 cdat 后、tdum/tduM 前（不是 append）
+
+`SetExpression` 原本 **append** 表达式 Utf8 到 tdbs.Children 末尾。裸 Transform 标量的 tdbs =
+`tdsb/tdsn/tdb4/cdat`——append 恰好落在 cdat 后，AE 接受（旧 gate 全绿系巧合）。但**物化的
+effect param** tdbs 额外带 `tdum/tduM`（min/max 范围），append 把 Utf8 放到 tduM **之后** →
+AE 2020 开工程时急切解码表达式、读到乱序流判**损坏 → 静默跳过该层**（「项目文件似乎已损坏：跳过
+部分」）。又一个**红线1 假绿**：Go `SetExpression` 返回 nil，AE 拒。Ground truth（AE 自存
+fixture，`tmp_debug/dump_expr_effect` 逐 chunk dump）：AE canonical 序 = `…cdat, Utf8, tdum,
+tduM`。修：Utf8 **插在最后一个 cdat（无 cdat 则 tdb4）之后**，tdum/tduM 之前；无 tdum/tduM 时插入位
+== 旧 append 位，故 Transform 标量 gate 不受影响。`back_property.go::SetExpression`。
+**这把表达式从「只能挂 Transform 等无 tdum/tduM 的属性」扩到「任意属性含 effect param」**。
 - gate `TestExpression_AEShipGate_*`（红线4 渲染像素）：ON 层 `time*90` 求值后 dot 渲染在锚点下方、OFF 层同表达式不动；JSX 读回 enabled/求值双态 + resave 双态存活。**AE 2020 + AE 2025 双版本 PASS**。
 
 覆盖边界：rotation 1D scalar 表达式实测；`time*90` 单表达式。**表达式语汇扩展已 gate**（2026-06-14，S2 followup，`expr_vocab_shipgate_test.go` + `verify_expr_vocab.jsx`）：
