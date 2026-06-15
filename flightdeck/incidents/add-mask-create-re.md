@@ -1,6 +1,6 @@
 ---
 status: active
-when_to_read: implementing or extending AddMask / mask-atom creation; debugging AE crash (0 :: 42) or 参数值无效 on a Go-written mask; reasoning about mask shape coordinate units (fraction vs pixel) or the shph open/closed flag; touching encodeBezier lhd3 fields for non-4-vertex paths; needing the (tdmn, mkif, tdgp) atom triple layout
+when_to_read: implementing or extending AddMask / mask-atom creation; debugging AE crash (0 :: 42) or 参数值无效 on a Go-written mask; reasoning about mask shape coordinate units (fraction vs pixel) or the shph open/closed flag; touching encodeBezier lhd3 fields for non-4-vertex paths; needing the (tdmn, mkif, tdgp) atom triple layout; implementing SetMaskPath / SetMaskPathKeyframes (static + animated mask path write); needing the static-mask-tdb4 == animated-shape-tdb4 base finding (differs only at 3 static→animated flag offsets) for a mask path time-table tdbs
 applies_to: [add-mask, mask-parade, mask-atom, mkif, om-s, shph, lhd3, tdb4, coordinate-space, open-path, closed-flag, structural-write, splice, parade-auto-create, ae2020, ae2025, ship-gate, crash-0-42, mask-opacity, mask-feather, mask-expansion, synthesis-insert, set-mask-path, reshape, atom-tdgp]
 last_updated: 2026-06-15
 resolved_by:
@@ -136,9 +136,9 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
 ## Deferred
 
 - ~~**RemoveMask**（triple-aware 删除）~~ **已 ship（2026-06-12, Stable）**——见上 §Atom 结构。
-  mask path 改写（既有 mask 的 SetMaskPath）/ animated mask path（om-s 多 shap + tdbs 时间表，
-  机制同 [[path-keyframe-write-re]]）/ ~~mask 的 Duplicate / Move~~（**均已 ship 2026-06-12 Stable
-  —— mask 结构性 op 全收口**）。
+  ~~mask path 改写（SetMaskPath）~~ **已 ship 2026-06-15** / ~~animated mask path（om-s 多 shap +
+  tdbs 时间表，机制同 [[path-keyframe-write-re]]）~~ **已 ship 2026-06-15（SetMaskPathKeyframes）** /
+  ~~mask 的 Duplicate / Move~~（**均已 ship 2026-06-12 Stable —— mask 结构性 op 全收口**）。
 - ~~mask 的 feather/opacity/expansion 选项~~ **已 ship（2026-06-15, Stable）**——见下 §Mask 选项 synthesis-insert。mask mode/color 创建仍走 AE 默认 + 返回 *Mask 后 Set* 改。
 - precomp 层 mask 未单独 gate（按 footage 分数处理，理论一致）。
 
@@ -148,6 +148,7 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
 - 2026-06-12 **RemoveMask 落地 + 双版本 ship-gate**（triple-aware splice `mutate_mask_remove.go`，以 mkif 指针定位三件套；AE 2020+2025 各 PASS：建 3 删中段，survivor 几何完好 + effects 未动 + resave 保留；Go round-trip 3 用例）。解除「RemoveMask deferred」
 - 2026-06-12 **DuplicateMask 落地 + 双版本 ship-gate**（`mutate_mask_duplicate.go`，deep-clone 三件套 + bump mkif index；AE 2020+2025 各 PASS：建 1 duplicate，AE 接受 distinct index、读回 2 mask；Go round-trip 2 用例）。解除「mask Duplicate deferred」
 - 2026-06-12 **MoveMask 落地 + 双版本 ship-gate**（`mutate_mask_move.go`，triple-aware 重排，原指针重发 + 同步 scene/flat；AE 2020+2025 各 PASS：建 3 移末→首，读回 C/A/B；Go round-trip 3 用例）。解除「mask Move deferred」——**mask 结构性 op 全收口（Add/Remove/Duplicate/Move）**
+- 2026-06-15 **SetMaskPath（静态路径改写）+ SetMaskPathKeyframes（animated mask path）落地 + 双版本 render gate**——见 §SetMaskPath / §SetMaskPathKeyframes。后者 RE 实测静态 mask tdb4 == animated shape tdb4 同基底（仅差 3 个 static→animated flag offset），shape-path 动画机制逐字节迁移；左半→右半 reveal L↔R 翻转双帧 render 双版本 PASS。**mask 路径写（静态+动画）全收口**
 
 ## Mask 选项 synthesis-insert — Feather / Opacity / Expansion（2026-06-15, Stable）✅
 
@@ -194,3 +195,32 @@ shape rect，mask 先建全 rect（reveal 全部）再 `SetMaskPath` 成三角�
 resave 经本库 parser 读回 mask 顶点=3。Go round-trip `mask_path_test.go`（rect→triangle 顶点数
 变 + apex 归一化 + <2 顶点拒绝）。verify_mg_mask_path.jsx + mg_mask_path_shipgate_test.go。
 **facade 自由函数**（CLAUDE.md #2 结构性 op 调用形态）。
+
+## SetMaskPathKeyframes — animated mask path（2026-06-15, Stable）✅
+
+`aep.SetMaskPathKeyframes(layer, mask, []MaskPathKey)`——既有 mask 轮廓改成**动画**
+（N≥2 关键帧，每帧一个 BezierPath 快照 + 可选 temporal ease）。SetMaskPath 的
+`makeMaskShapeOmS` 是**静态基础**；动画版把它的静态结构按 `spliceAnimatedPath`（shape path
+keyframe）**同法变换**——证据见下 RE finding。
+
+**RE finding（dump_oms_tdb4 实测）**：静态 mask tdb4（`maskShapeTdb4` 124B）与 AE 自存的
+**animated shape** tdb4（`re_path_anim.aep`）**同一基底**，逐字节 diff **仅差 @0x05/@0x44/@0x4f
+三个 offset**——正是 `injectAnimatedStream`/`spliceAnimatedPath` 的 static→animated flag 补丁
+（@0x05 `&^=0x01`、@0x44`=0x01`、@0x4f `&^=0x01`）。即 shape-path 动画机制**逐字节迁移到 mask**，
+无新字节语义。om-s 结构 == animated shape/mask：value tdbs → time-table tdbs（`{tdsb, tdsn,
+tdb4(patched), kfl-timetable}`，drop cdat，复用 `encodePathTimeTable` 一帧 64B block）+ omks 单
+shap → N shap（每帧 `makeMaskShap` ——从 `makeMaskShapeOmS` 抽出的单帧 mask-strictness shap，
+带 shph[3] open / lhd3 @0x14=4·@0x18=1·@0x1C=4n 补丁，故顶点数逐帧可变）。
+
+**解析侧本就支持**（`decodeMask` 读 N shap + `readMaskPathTimes` → `mask.PathKeyframes`）；本次只补**写
+路径**。新 `scene.MaskPathKey` 输入类型 = SetMaskPath 的 BezierPath 输入风格（对内 vs 解析输出的
+MaskVertex-based `MaskPathKeyframe`）。`makeMaskShapeOmSAnimated`（`mutate_mask_path.go`）+ atomic
+re-parse 校验（probes 1 mask + N keyframes + 逐帧顶点数）+ rollback。
+
+**渲染 gate（红线4 双版本）**：`TestMGMaskPathKf_AEShipGate_AE2020/2025` PASS——白 600×600 card，
+animated mask 覆盖 t=0 **左半** → t=2s **右半**；render 两个关键帧时刻，reveal 区 **L↔R 翻转**
+（frame0 左白右暗 / t=2s 左暗右白，静态 mask 不可能两帧露不同半区）；AE 读回 `ADBE Mask Shape`
+numKeys==2 + keyTime 0/2，resave 保留 2 path keyframes。Go round-trip `mask_path_test.go`
+（rect→triangle 4→3 morph 双帧 + <2 关键帧拒绝）。verify_mg_mask_pathkf.jsx +
+mg_mask_pathkf_shipgate_test.go。**facade 自由函数**。**至此 mask 路径写（静态 + 动画）全收口**；
+剩 `maskFeatherFalloff`（位置未 RE，可能不可达）。
