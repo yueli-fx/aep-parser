@@ -72,6 +72,87 @@ func TestSetMaskPath_RectToTriangle_RoundTrip(t *testing.T) {
 	}
 }
 
+func TestSetMaskPathKeyframes_RectToTriangle_RoundTrip(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	if err != nil {
+		t.Skipf("baseline not present: %v", err)
+	}
+	l := layerWithEffects(proj)
+	if l == nil {
+		t.Fatal("no layer with effects in baseline")
+	}
+
+	m, err := aep.AddMask(l, "Morph", rectPath())
+	if err != nil {
+		t.Fatalf("AddMask: %v", err)
+	}
+
+	tri := aep.BezierPath{
+		Vertices: [][2]float64{{100, 10}, {190, 190}, {10, 190}},
+		Closed:   true,
+	}
+	keys := []aep.MaskPathKey{
+		{Time: 0, Path: rectPath()}, // 4-vertex rectangle
+		{Time: 1, Path: tri},        // 3-vertex triangle
+	}
+	if err := aep.SetMaskPathKeyframes(l, m, keys); err != nil {
+		t.Fatalf("SetMaskPathKeyframes: %v", err)
+	}
+	if len(m.PathKeyframes) != 2 {
+		t.Fatalf("scene PathKeyframes = %d, want 2", len(m.PathKeyframes))
+	}
+
+	var buf bytes.Buffer
+	if err := proj.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	re, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	rl := maskParadeLayer(re, l.ID)
+	if rl == nil || len(rl.Masks) != 1 {
+		t.Fatalf("re-parsed masks = %v, want 1", rl)
+	}
+	rm := rl.Masks[0]
+	if len(rm.PathKeyframes) != 2 {
+		t.Fatalf("re-parsed PathKeyframes = %d, want 2", len(rm.PathKeyframes))
+	}
+	if n := len(rm.PathKeyframes[0].Vertices); n != 4 {
+		t.Errorf("kf0 vertices = %d, want 4 (rect)", n)
+	}
+	if n := len(rm.PathKeyframes[1].Vertices); n != 3 {
+		t.Errorf("kf1 vertices = %d, want 3 (triangle)", n)
+	}
+	// Second keyframe at t=1s.
+	if got := rm.PathKeyframes[1].Time; got < 0.99 || got > 1.01 {
+		t.Errorf("kf1 time = %v, want ~1.0s", got)
+	}
+	// Triangle apex (input 100,10) normalizes to top-centre of its bbox.
+	apex := rm.PathKeyframes[1].Vertices[0].Anchor
+	if apex[1] > 0.01 || apex[0] < 0.4 || apex[0] > 0.6 {
+		t.Errorf("kf1 apex = %v, want ~(0.5, 0)", apex)
+	}
+}
+
+func TestSetMaskPathKeyframes_RefuseTooFew(t *testing.T) {
+	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	if err != nil {
+		t.Skipf("baseline not present: %v", err)
+	}
+	l := layerWithEffects(proj)
+	if l == nil {
+		t.Fatal("no layer with effects in baseline")
+	}
+	m, err := aep.AddMask(l, "M", rectPath())
+	if err != nil {
+		t.Fatalf("AddMask: %v", err)
+	}
+	if err := aep.SetMaskPathKeyframes(l, m, []aep.MaskPathKey{{Time: 0, Path: rectPath()}}); err == nil {
+		t.Error("SetMaskPathKeyframes with 1 keyframe: want error, got nil")
+	}
+}
+
 func TestSetMaskPath_RefuseFewVertices(t *testing.T) {
 	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
 	if err != nil {

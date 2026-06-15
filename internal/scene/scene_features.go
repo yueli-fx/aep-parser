@@ -147,6 +147,19 @@ type MaskPathKeyframe struct {
 	OutTemporalEase TemporalEase
 }
 
+// MaskPathKey is one keyframe INPUT for SetMaskPathKeyframes: the time (in
+// seconds), the mask outline at that time (a BezierPath in layer-pixel
+// coordinates, the same space AddMask / SetMaskPath accept), and optional
+// temporal ease per side (zero = linear). It mirrors SetMaskPath's BezierPath
+// input rather than the MaskVertex-based MaskPathKeyframe parse output, so
+// callers build paths the same way for static and animated masks.
+type MaskPathKey struct {
+	Time    float64
+	Path    BezierPath
+	InEase  TemporalEase
+	OutEase TemporalEase
+}
+
 // MaskVertex is one Bezier control point along a mask path. Coordinates
 // are stored as ABSOLUTE positions (not offsets from the anchor):
 //

@@ -83,6 +83,7 @@ type (
 	Mask                            = scene.Mask
 	MaskMode                        = scene.MaskMode
 	MaskMotionBlurMode              = scene.MaskMotionBlurMode
+	MaskPathKey                     = scene.MaskPathKey
 	MaskPathKeyframe                = scene.MaskPathKeyframe
 	MaskVertex                      = scene.MaskVertex
 	MaskWriter                      = scene.MaskWriter

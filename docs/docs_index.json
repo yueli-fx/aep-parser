@@ -3710,6 +3710,40 @@
       "anchor": "#maskmotionblurmode-object",
       "summary": "MaskMotionBlurMode describes the per-mask motion-blur override. AE's MaskMotionBlur enum uses these stored values:"
     },
+    "MaskPathKey": {
+      "kind": "type",
+      "file": "mask.md",
+      "anchor": "#maskpathkey-object",
+      "summary": "MaskPathKey is one keyframe INPUT for SetMaskPathKeyframes: the time (in seconds), the mask outline at that time (a BezierPath in layer-pixel coordinates, the same space AddMask / SetMaskPath accept), and optional temporal ease per side (zero = linear). It mirrors SetMaskPath's BezierPath input rather than the MaskVertex-based MaskPathKeyframe parse output, so callers build paths the same way for static and animated masks."
+    },
+    "MaskPathKey.InEase": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyinease",
+      "signature": "InEase TemporalEase",
+      "rw": "read-only"
+    },
+    "MaskPathKey.OutEase": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeyoutease",
+      "signature": "OutEase TemporalEase",
+      "rw": "read-only"
+    },
+    "MaskPathKey.Path": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeypath",
+      "signature": "Path BezierPath",
+      "rw": "read-only"
+    },
+    "MaskPathKey.Time": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskpathkeytime",
+      "signature": "Time float64",
+      "rw": "read-only"
+    },
     "MaskPathKeyframe": {
       "kind": "type",
       "file": "mask.md",
@@ -4757,6 +4791,20 @@
       "anchor": "#seteffectparam",
       "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
       "summary": "SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. \"ADBE Gaussian Blur 2-0001\"), returning the parameter's *Property. It is the typed-parameter entry for AddEffect-style workflows:"
+    },
+    "SetMaskPath": {
+      "kind": "func",
+      "file": "mask.md",
+      "anchor": "#setmaskpath",
+      "signature": "func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error",
+      "summary": "SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). Unlike the length-preserving Mask.Set* setters, the path is a variable-length subtree, so this rebuilds the \"ADBE Mask Shape\" om-s and swaps it in; WriteAEP recomputes the enclosing LIST sizes. The vertex count may differ from the original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness lhd3/shph patching AddMask uses is reused so AE accepts non-4-vertex masks."
+    },
+    "SetMaskPathKeyframes": {
+      "kind": "func",
+      "file": "mask.md",
+      "anchor": "#setmaskpathkeyframes",
+      "signature": "func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error",
+      "summary": "SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). Vertex counts may differ between keyframes (AE interpolates the outline; the mask-strictness lhd3/shph patching makes non-4-vertex frames safe)."
     },
     "SetMaterialOption": {
       "kind": "func",

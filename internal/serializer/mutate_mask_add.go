@@ -119,18 +119,26 @@ func makeMaskShapeOmS(path BezierPath) *rifx.Chunk {
 		{ID: rifx.IDtdb4, Data: append([]byte(nil), maskShapeTdb4...)},
 		{ID: rifx.IDCdat, Data: make([]byte, 4)},
 	}}
+	omks := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOmks, Children: []*rifx.Chunk{makeMaskShap(path)}}
+	return &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOmS, Children: []*rifx.Chunk{innerTdbs, omks}}
+}
 
+// makeMaskShap builds one LIST(shap) — a single frame's mask geometry —
+// applying the mask-strictness deviations from the shape-path convention
+// encodeBezier follows, in ways that crash AE 2020 on open or throw 参数值无效
+// on the mask-shape read (both gate-observed; ground truth = re_mask_open.aep,
+// AE-2020-saved open + closed masks across solid/shape layers):
+//
+//	shph[3]  — 0x01 closed, 0x09 open (bit3 = OPEN; [0x14] stays 0x01 on
+//	           every mask, open or not — it is NOT the closed flag).
+//	lhd3@0x14 — constant 4 (encodeBezier writes the vertex count, which
+//	           only coincides at n=4 — n=3 masks hard-crashed AE 2020).
+//	lhd3@0x18 — constant 1 (not a closed flag on masks).
+//	lhd3@0x1C — 4·n (encodeBezier's constant 16 again only fits n=4).
+//
+// The path arrives already scaled to layer-fraction units (see maskLayerDims).
+func makeMaskShap(path BezierPath) *rifx.Chunk {
 	shph, lhd3, ldat := encodeBezier(path)
-	// Mask encoding deviates from the shape-path convention encodeBezier
-	// follows, in ways that crash AE 2020 on open or throw 参数值无效 on the
-	// mask-shape read (both gate-observed; ground truth = re_mask_open.aep,
-	// AE-2020-saved open + closed masks across solid/shape layers):
-	//   shph[3]  — 0x01 closed, 0x09 open (bit3 = OPEN; [0x14] stays 0x01 on
-	//              every mask, open or not — it is NOT the closed flag).
-	//   lhd3@0x14 — constant 4 (encodeBezier writes the vertex count, which
-	//              only coincides at n=4 — n=3 masks hard-crashed AE 2020).
-	//   lhd3@0x18 — constant 1 (not a closed flag on masks).
-	//   lhd3@0x1C — 4·n (encodeBezier's constant 16 again only fits n=4).
 	if len(shph.Data) > 0x14 {
 		if path.Closed {
 			shph.Data[3] = 0x01
@@ -145,12 +153,9 @@ func makeMaskShapeOmS(path BezierPath) *rifx.Chunk {
 		binary.BigEndian.PutUint32(lhd3.Data[0x1C:0x20], uint32(4*n))
 	}
 	kfList := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDkfl, Children: []*rifx.Chunk{lhd3, ldat}}
-	shap := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDShap, Children: []*rifx.Chunk{
+	return &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDShap, Children: []*rifx.Chunk{
 		shph, kfList, {ID: rifx.IDOmtn},
 	}}
-	omks := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOmks, Children: []*rifx.Chunk{shap}}
-
-	return &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDOmS, Children: []*rifx.Chunk{innerTdbs, omks}}
 }
 
 // ensureMaskParade returns the layer's Mask Parade, splicing a fresh empty

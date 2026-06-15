@@ -908,6 +908,26 @@ func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 	return serializer.SetMaskPath(layer, mask, path)
 }
 
+// SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED
+// path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds
+// (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal
+// ease per side (zero = linear). Vertex counts may differ between keyframes
+// (AE interpolates the outline; the mask-strictness lhd3/shph patching makes
+// non-4-vertex frames safe).
+//
+// On disk this is byte-isomorphic to AE's own animated mask/shape path: the
+// "ADBE Mask Shape" om-s carries a TIME-table tdbs (one 64-byte block per
+// keyframe) plus one geometry shap per keyframe. WriteAEP recomputes the
+// enclosing LIST sizes. mask must come from a parsed project (it needs its
+// atom-group chunk back-ref); call aep.Reopen first for masks built by the
+// structural New*/AddMask APIs without an intervening parse.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
+// (CLAUDE.md #2 structural-op call-form).
+func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
+	return serializer.SetMaskPathKeyframes(layer, mask, keys)
+}
+
 // RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of
 // AddMask. m must be one of layer.Masks obtained from a parsed project; pass
 // the same layer the mask belongs to (masks carry no owning-layer back-ref).

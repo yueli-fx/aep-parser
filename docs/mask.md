@@ -321,6 +321,44 @@ OutTangent [2]float64
 
 read-only
 
+# MaskPathKey object
+
+MaskPathKey is one keyframe INPUT for SetMaskPathKeyframes: the time (in seconds), the mask outline at that time (a BezierPath in layer-pixel coordinates, the same space AddMask / SetMaskPath accept), and optional temporal ease per side (zero = linear). It mirrors SetMaskPath's BezierPath input rather than the MaskVertex-based MaskPathKeyframe parse output, so callers build paths the same way for static and animated masks.
+
+## Attributes
+
+### MaskPathKey.Time
+
+```go
+Time float64
+```
+
+read-only
+
+### MaskPathKey.Path
+
+```go
+Path BezierPath
+```
+
+read-only
+
+### MaskPathKey.InEase
+
+```go
+InEase TemporalEase
+```
+
+read-only
+
+### MaskPathKey.OutEase
+
+```go
+OutEase TemporalEase
+```
+
+read-only
+
 # MaskPathKeyframe object
 
 MaskPathKeyframe is one keyframe of an animated mask path. Time is in seconds. Vertices is the full path snapshot at that time. Easing follows the same scalar (one TemporalEase per side) layout as spatial keyframes.
@@ -486,6 +524,30 @@ Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a (tdmn "
 Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, toIndex out of range, a mask built outside the parser (no mkif back-ref), a layer with no Mask Parade, or a parade whose mask triples are not contiguous.
 
 Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks, move the last to the front, AE accepts the re-emitted triple run and reads the masks back in the new order with the effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+
+### SetMaskPath
+
+```go
+func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error
+```
+
+SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). Unlike the length-preserving Mask.Set* setters, the path is a variable-length subtree, so this rebuilds the "ADBE Mask Shape" om-s and swaps it in; WriteAEP recomputes the enclosing LIST sizes. The vertex count may differ from the original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness lhd3/shph patching AddMask uses is reused so AE accepts non-4-vertex masks.
+
+mask must be one of layer.Masks obtained from a parsed project (it needs its atom-group chunk back-ref); call aep.Reopen first for masks built by the structural New*/AddMask APIs without an intervening parse.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+
+### SetMaskPathKeyframes
+
+```go
+func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error
+```
+
+SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). Vertex counts may differ between keyframes (AE interpolates the outline; the mask-strictness lhd3/shph patching makes non-4-vertex frames safe).
+
+On disk this is byte-isomorphic to AE's own animated mask/shape path: the "ADBE Mask Shape" om-s carries a TIME-table tdbs (one 64-byte block per keyframe) plus one geometry shap per keyframe. WriteAEP recomputes the enclosing LIST sizes. mask must come from a parsed project (it needs its atom-group chunk back-ref); call aep.Reopen first for masks built by the structural New*/AddMask APIs without an intervening parse.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
 
 <!-- Hand-authored notes. -->
 

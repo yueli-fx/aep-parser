@@ -24,8 +24,8 @@
     },
     {
       "out": "mask.md",
-      "roots": ["Mask", "MaskVertex", "MaskPathKeyframe", "MaskMode", "MaskMotionBlurMode"],
-      "funcs": ["AddMask", "RemoveMask", "DuplicateMask", "MoveMask"],
+      "roots": ["Mask", "MaskVertex", "MaskPathKey", "MaskPathKeyframe", "MaskMode", "MaskMotionBlurMode"],
+      "funcs": ["AddMask", "RemoveMask", "DuplicateMask", "MoveMask", "SetMaskPath", "SetMaskPathKeyframes"],
       "head": "_includes/mask.head.md",
       "tail": "_includes/mask.tail.md"
     },
