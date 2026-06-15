@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（Text Animators animate-leaf 扩到 3D/4D：`AnimateTextPosition`（px glide）+ `AnimateTextColor`（RGBA 颜色循环）双版本渲染 gate PASS。RE-first 抽 AE ground truth（animatedvec）逐字核对：Position(bpk128/value@0x38/marker3)·Color(bpk152/value@0x38/marker2) 逐字匹配 effect spatial block → 复用 AnimateVectorKeyframes 零改动。gate：Color R/B 248/0→0/248、Position 质心 367→617。**Scale 3D 非 spatial 块（value@0x08）≠ 现路径，暂搁待 non-spatial vector layout RE**。animate-leaf 现覆盖 1D scalar(Opacity/Rotation)+3D/4D(Position/Color)。）
+**Last updated**: 2026-06-15 by claude（**animate-leaf 方向收口**：补 `AnimateTextScale`（非 spatial 3D，value@0x08 块）双版本渲染 gate PASS（ink 面积 2940→5879）。codec 早支持非 spatial 多维编码，只需抽 `animateVectorKeyframes(...,nonSpatial)` 私有核 + `AnimateVectorKeyframesNonSpatial` 入口，零新字节代码。**animate-leaf 全覆盖**：1D scalar(Opacity/Rotation)+spatial 多维(Position/Color)+非 spatial 3D(Scale)，每个有 Add\*Animator 的 leaf 都能 animate。全量 suite 绿（AnimateVectorKeyframes 重构不动 effect-param 路径）。）
 
 **Active focus**: **库主线全收口、进入需求驱动稳态**——剩余能力 roadmap 优先级 1-6（动画关键帧 / 3D / 形状 / mask / 表达式 / **文字**）+ 表达式·效果深化 arc + Text Animators 全 ship（详 `specs/2026-06-14-remaining-capability-roadmap.md` + git log）。**无剩余主线**；其余皆「按需 / 不可达」。机制库：parse-the-clone + synthesis-insert + animate(Scalar/Vector/Gradient/Path/TextRange)。每渲染/可见类双版本 AE ship-gate（红线4，`scripts/ae_run.ps1` 自助）。基本图形搁置。
 
@@ -18,7 +18,7 @@
 **➡ 主线全 ship，无既定下一阶段——纯需求驱动。** 用户原定 expr→effects→文字 全收口（文字 = 基础 v4 + Text Animators 引擎，2026-06-15 双版本 gate PASS）。下面是按需 backlog，等用户点名或新需求。
 
 **按需 backlog（非阻塞，需求驱动）**：
-- 文字：动画器 5 类全 ✓ + animate leaf ✓ ~~Opacity~~ ~~Rotation~~(1D) ~~Position~~ ~~Color~~(3D/4D)（双版本 gate PASS）；剩 **animate Scale 3D leaf**（须先 RE+实现 non-spatial 多维 keyframe layout，value@0x08）· Range Advanced(Mode/Shape/Smoothness)· 多 Selector · Wiggly/Expression Selector · text-animator structural op（Remove/Dup/Move）补 ship-gate（现 Alpha）。免费近邻：Fill Opacity/Stroke Color/Stroke Width/Skew/Rotation X·Y（同布局，抽模板即可）。详 `incidents/text-animator-create-re.md`
+- 文字：动画器 5 类全 ✓ + **animate leaf 全收口** ✓ ~~Opacity~~ ~~Rotation~~(1D) ~~Position~~ ~~Color~~(3D/4D spatial) ~~Scale~~(非 spatial 3D)（双版本 gate PASS）；剩 Range Advanced(Mode/Shape/Smoothness)· 多 Selector · Wiggly/Expression Selector · text-animator structural op（Remove/Dup/Move）补 ship-gate（现 Alpha）。免费近邻：Fill Opacity/Stroke Color/Stroke Width/Skew/Rotation X·Y（同布局，抽模板即可）。详 `incidents/text-animator-create-re.md`
 - shape：Gradient stroke 嵌套组 Dashes/Taper/Wave · Offset Line Join/Miter/Copy Offset · Blend Mode/Composite Order render-gate · ZigZag/Twist 等 elided 子流（synthesis-insert 蓝本现成，`trim-paths-vector-filter-re.md`）
 - mask：maskFeatherFalloff（位置未 RE，可能不可达）
 - effects：per-effect typed param helper · 库继续扩 · Displacement Map/Compound Blur 等 layer-ref（同 Set Matte 机制）
