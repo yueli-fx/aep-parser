@@ -751,6 +751,33 @@ func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeO
 	return serializer.AddTextPositionAnimator(layer, x, y, z, rangeStart, rangeEnd, rangeOffset)
 }
 
+// AddTextScaleAnimator adds a per-character Scale 3D animator with a Range
+// Selector to a text layer — the kinetic-typography primitive that pops / grows
+// characters into place one at a time. sx / sy / sz is the scale percent (100 =
+// unchanged) applied to the selected characters; rangeStart / rangeEnd /
+// rangeOffset are the Range Selector bounds in percent. The canonical reveal:
+// scale (0, 0, 100) for a pop-in (or an oversize like 220 for a shrink-in),
+// Start=0/End=100, then sweep the Range Offset 0→100 over time with
+// AnimateTextRangeOffset — the scale resolves to 100% as the selection window
+// slides off the characters.
+//
+// Same mechanics as AddTextPositionAnimator (shared splice + Range Selector
+// path); the embedded template drives a Scale 3D leaf (a 3-component cdat)
+// instead of Position. Fresh text layers carry no Animators group, so the first
+// animator splices the whole group into "ADBE Text Properties"; later animators
+// append into it.
+//
+// Refused: non-text layers, and text layers built by New* that were never parsed
+// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
+// animator chunk.
+//
+// Alpha / structural — the animator chunk structure is RE'd + double-version
+// render-gated, but the typed parameter accessors are not yet wired; tune
+// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextScaleAnimator(layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset)
+}
+
 // AnimateTextRangeOffset keyframes a text animator's Range Selector Offset,
 // turning a static reveal into an animated sweep — the kinetic-typography
 // payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the

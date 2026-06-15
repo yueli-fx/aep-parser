@@ -97,17 +97,33 @@ propertyType: 6214 INDEXED_GROUP · 6213 NAMED_GROUP · 6212 PROPERTY。
    模板缓存改按 body 指针的 `sync.Map`（`animatorTemplate(body)`）。下一个 leaf 类型 = 抽模板 +
    一个 facade，复用全部。
 
+## Scale 3D 动画器扩展（2026-06-15，第三个 leaf 类型）
+
+`AddTextScaleAnimator`，双版本渲染 gate PASS（`text_animator_scale_shipgate_test.go`）。
+泛化机制零改动，只抽模板 + 一个 facade（验证了 Position 留下的泛化设计）。findings：
+
+1. **Scale 3D cdat = 120B**（≠ Position 的 72B；vtype 6414 ThreeD 非空间）：三 BE f64 @ [0:24]
+   = sx/sy/sz，后 96B 扩展槽（per-dim min/max ease 等），tdbs 多一个 tdum 下界。`overwriteVectorCdat`
+   仍只写 [0:24]，长度无关——通用。
+2. 模板 `templates/text_animators_scale_body.bin`（`RE_TXANIM_MODE=scaletemplate`：Scale=[40,60,100]
+   + Start/End/Offset 全非默认）。
+3. **gate 签名 = ink 面积**（区别于 Position 的质心、Opacity 的 spread）：Scale=220% shrink-in，
+   扫光时字形从 220%→100% → ink 像素数单调缩（t0=1070→t1=693→t2=313，AE2020/2025 一致）。
+   证 SIZE 变化，文字全程可见。
+
 ## 现状 / 边界
 
-- **已 ship**：Opacity 动画器、**Position 3D 动画器**、Range Selector（参数化 Start/End/Offset）、
-  offset 关键帧扫光（reveal / slide-in 通用）。各双版本渲染 gate PASS。
+- **已 ship**：Opacity 动画器、**Position 3D**、**Scale 3D**、Range Selector（参数化
+  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in 通用）。各双版本渲染 gate PASS。
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
   不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
   Opacity/Position 混排已测。
-- **按需扩**（同 vein，抽模板 + 一个 facade）：Scale 3D（6414，同 vector 布局，几乎免费）、
-  Rotation（6417，同 scalar，免费）、Fill Color（6418，color cdat 布局待 RE）；
-  Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；Wiggly/Expression Selector；
-  **animate leaf 本身**（关键帧驱动 Position/Scale 值，非仅 Range Offset）。
+- **按需扩**（同 vein，抽模板 + 一个 facade）：Rotation（6417，同 scalar，照搬 Opacity，免费）、
+  Fill Color（6418，color cdat 布局待 RE）；Range Advanced（Mode/Shape/Smoothness/基于…）；
+  多 Selector；Wiggly/Expression Selector；**animate leaf 本身**（关键帧驱动 Position/Scale 值，非仅
+  Range Offset）。
+- **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
+  Scale→ink 面积（像素数）；Rotation→（待定，需检测 per-glyph 朝向变化）；Color→采样字形像素 RGB。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
   仍仅 Go round-trip = Alpha 未单独 ship-gate。
 
@@ -122,3 +138,5 @@ propertyType: 6214 INDEXED_GROUP · 6213 NAMED_GROUP · 6212 PROPERTY。
 - 2026-06-15 首次：RE + AddTextOpacityAnimator + AnimateTextRangeOffset，双版本渲染 gate PASS
 - 2026-06-15 扩 Position：AddTextPositionAnimator（spatial 3D 72B cdat + overwriteVectorCdat +
   spliceTextAnimator 泛化），slide-in 双版本渲染 gate PASS（ink 垂直质心迁移 Δ=260px）
+- 2026-06-15 扩 Scale：AddTextScaleAnimator（3D 120B cdat，泛化机制零改动只抽模板+facade），
+  shrink-in 双版本渲染 gate PASS（ink 面积 1070→313）

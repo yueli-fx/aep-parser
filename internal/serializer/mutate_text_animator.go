@@ -49,6 +49,9 @@ var textAnimatorsOpacityBody []byte
 //go:embed templates/text_animators_position_body.bin
 var textAnimatorsPositionBody []byte
 
+//go:embed templates/text_animators_scale_body.bin
+var textAnimatorsScaleBody []byte
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -57,6 +60,7 @@ const (
 	matchNameTextPercentOffset = "ADBE Text Percent Offset"
 	matchNameTextOpacity       = "ADBE Text Opacity"
 	matchNameTextPosition3D    = "ADBE Text Position 3D"
+	matchNameTextScale3D       = "ADBE Text Scale 3D"
 )
 
 var animatorTmplCache sync.Map // first-byte ptr → *animatorTmplEntry
@@ -317,6 +321,48 @@ func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeO
 		return nil, fmt.Errorf("AddTextPositionAnimator: template missing %q cdat slot", matchNameTextPosition3D)
 	}
 	if err := setRangeSelector(payload, undo, "AddTextPositionAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
+	}
+
+	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextScaleAnimator adds a per-character Scale 3D animator + Range Selector
+// to a text layer and returns a stand-in group node referencing the spliced
+// animator. sx / sy / sz is the scale percent (100 = unchanged) applied to
+// selected characters; rangeStart / rangeEnd / rangeOffset are the Range
+// Selector bounds in percent. The canonical "characters pop / grow into place"
+// reveal: scale (0,0,100) (or, for emphasis, an oversize like 220), Start=0/
+// End=100, then sweep the Range Offset 0→100 over time with
+// AnimateTextRangeOffset — the scale applies to the not-yet-revealed characters
+// and resolves to 100% as the window slides off.
+// (Full contract lives on the aep.AddTextScaleAnimator facade — docgen source.)
+func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextScaleAnimator: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextScaleAnimator: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextScaleAnimator: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", layer.Name)
+	}
+	tmpl, err := animatorTemplate(textAnimatorsScaleBody)
+	if err != nil {
+		return nil, err
+	}
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
+	}
+	if !overwriteVectorCdat(payload, matchNameTextScale3D, []float64{sx, sy, sz}) {
+		undo()
+		return nil, fmt.Errorf("AddTextScaleAnimator: template missing %q cdat slot", matchNameTextScale3D)
+	}
+	if err := setRangeSelector(payload, undo, "AddTextScaleAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
 		return nil, err
 	}
 
