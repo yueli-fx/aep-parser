@@ -175,10 +175,43 @@ effect param scalar = 通用标量关键帧流」，无 effect 特异字节。
 **渲染 gate（红线4 双版本）**：`TestAnimEffect_AEShipGate_AE2020/2025` PASS——白 400px 方块 Gaussian
 Blur Blurriness 关键帧 0@0s→100@2s，AE 求值（valueAtTime(0)=0 / (2.5)=100）、blur 增长（edge-外
 lum 0→62）、numKeys=2 读回、resave 保 2 kf。Go round-trip `animate_effect_param_test.go`。
-**scalar-only**（color/point 关键帧 = follow-up，layout 不同：spatial bpk-152 等）。facade 自由函数，
+**scalar-only**（color/point 关键帧 = 见下「Vec 扩展」）。facade 自由函数，
 `ScalarKeyframe{Time,Value,InEase,OutEase}` 输入类型。
 
+### Vec 扩展 — animated color / 2D·3D point（2026-06-15, Stable）✅
+
+`aep.AnimateEffectParamVec(layer, fx, paramMatchName, []VectorKeyframe)`——把动画 effect param
+从 1D scalar 扩到 color(4D)/point(2D·3D)。RE（`tmp_debug/dump_anim_effect` ←
+`test_data/re_anim_effect_colorpoint.jsx` AE-native fixture）确认这三类**不是** scalar 的
+non-spatial 布局，而是 **SPATIAL keyframe block**（value@0x38）：
+
+| 控件 | Components | bpk | block hdr@0x07 | @0x08 marker | value@0x38 单位 |
+|---|---|---|---|---|---|
+| color | 4 | 152 = 0x38+3·4·8 | 0x01 | **2** | `[A,R,G,B]` 0-255（同 static cdat） |
+| 2D point | 2 | 104 = 0x38+3·2·8 | 0x07 | **3** | fraction of coord space（同 static） |
+| 3D point | 3 | 128 = 0x38+3·3·8 | 0x07 | **3** | fraction（z÷height） |
+
+关键 RE 点：(a) **tdb4 static→animated 三 flag 翻转与 scalar 完全相同**（@0x05 清 bit0 /
+@0x44=1 / @0x4f 清 bit0）——实测 color 07/00/01→06/01/00、point 0f/00/01→0e/01/00、scalar
+01/00/00→00/01/00，**type-agnostic**，所以 `AnimateVectorKeyframes` 不重建 tdb4、只翻 3 bit +
+原位换 cdat→kfList（同 scalar 路径）。(b) **@0x08 marker 是 per-type 常量**（color 2 / point 3），
+区别于 layer-Position motion-path 的 1——新增 `valueLayout.spatialMarker`，与 `motionPath`(=1) 并存。
+(c) **value 单位 = SetEffectParam 的 on-disk 单位**（color [A,R,G,B]×255、point fraction），
+因 `AnimateEffectParamVec` 先 `SetEffectParam(kf[0].Value)` 物化，故 kf 值须与 SetEffectParam 一致。
+(d) readback 自动正确——`readKFValue` 经 `layoutFor(blk[0x07])` 判 spatial（color 01+dims≥2 / point 07
+→ value@0x38），无需改解析。
+
+color 切片 tangent 区为零（无 auto-bezier）；point 的 AE-native fixture 带极小 auto-bezier spatial
+tangent，我方发 linear（零 tangent）AE 接受。**渲染 gate（红线4 双版本）**
+`TestAnimEffectVec_AEShipGate_AE2020/2025` PASS：FILL comp（Fill `ADBE Fill-0002` Color 红→蓝，
+t0=(255,0,0)/t2=(51,0,204)）+ RAMP comp（Gradient Ramp `ADBE Ramp-0001` Start-of-Ramp 点左→右，
+radial 亮心 t0 L=251/R=0 → t2 L=0/R=174 L↔R swap）。Go round-trip + 结构校验
+`animate_effect_param_vec_test.go`（bpk/marker/header/value@0x38 全断言）。
+
 ## Cases
+- 2026-06-15 **AnimateEffectParamVec**（animated color/point 扩展；SPATIAL block bpk 152/104/128 +
+  per-type marker 2/3；tdb4 flip type-agnostic 实证；双版本 render gate FILL+RAMP；
+  fixture `test_data/re_anim_effect_colorpoint.jsx` + `tmp_debug/dump_anim_effect`）
 - 2026-06-15 **AnimateEffectParam**（from-scratch 标量关键帧合成；byte-identical AE-native；双版本 render gate；解 effects 最大缺口）
 - 2026-06-11 首次（board「AddEffect 参数化」可行性 RE → 同日 synthesis-lite
   ship；fixture + probe 落 `test_data/re_effect_param_elision.*`（manifest

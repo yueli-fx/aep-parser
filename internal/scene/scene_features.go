@@ -157,6 +157,20 @@ type ScalarKeyframe struct {
 	OutEase TemporalEase
 }
 
+// VectorKeyframe is one keyframe INPUT for animating a multi-component (2/3/4D)
+// effect parameter via AnimateEffectParamVec: a time in seconds, the value at
+// that time as a []float64 whose length matches the parameter's component count,
+// and optional temporal ease per side (zero = linear). Values are in the
+// parameter's on-disk units — identical to SetEffectParam: a color is
+// [A,R,G,B] in 0-255, a 2D/3D point is a fraction of the layer's coordinate
+// space (see SetEffectParam's unit notes).
+type VectorKeyframe struct {
+	Time    float64
+	Value   []float64
+	InEase  TemporalEase
+	OutEase TemporalEase
+}
+
 // MaskPathKey is one keyframe INPUT for SetMaskPathKeyframes: the time (in
 // seconds), the mask outline at that time (a BezierPath in layer-pixel
 // coordinates, the same space AddMask / SetMaskPath accept), and optional

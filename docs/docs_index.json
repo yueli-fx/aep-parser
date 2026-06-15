@@ -36,6 +36,13 @@
       "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
       "summary": "AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (\u003e= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}. It materializes the parameter if it is default-elided (like SetEffectParam, from the host effect's pard definition), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe to clone). Returns the animated *Property."
     },
+    "AnimateEffectParamVec": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#animateeffectparamvec",
+      "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
+      "summary": "AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a Time (seconds), a []float64 Value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam: a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space (for a source-backed layer divide by the source's w/h, for a source-less layer by the comp's — and z by the same space's height)."
+    },
     "AutoOrientType": {
       "kind": "type",
       "file": "constants.md",
@@ -5556,6 +5563,40 @@
       "file": "constants.md",
       "anchor": "#trackmattetype-object",
       "summary": "TrackMatteType is the layer's track-matte mode (ldta @0x6B)."
+    },
+    "VectorKeyframe": {
+      "kind": "type",
+      "file": "effect.md",
+      "anchor": "#vectorkeyframe-object",
+      "summary": "VectorKeyframe is one keyframe INPUT for animating a multi-component (2/3/4D) effect parameter via AnimateEffectParamVec: a time in seconds, the value at that time as a []float64 whose length matches the parameter's component count, and optional temporal ease per side (zero = linear). Values are in the parameter's on-disk units — identical to SetEffectParam: a color is [A,R,G,B] in 0-255, a 2D/3D point is a fraction of the layer's coordinate space (see SetEffectParam's unit notes)."
+    },
+    "VectorKeyframe.InEase": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#vectorkeyframeinease",
+      "signature": "InEase TemporalEase",
+      "rw": "read-only"
+    },
+    "VectorKeyframe.OutEase": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#vectorkeyframeoutease",
+      "signature": "OutEase TemporalEase",
+      "rw": "read-only"
+    },
+    "VectorKeyframe.Time": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#vectorkeyframetime",
+      "signature": "Time float64",
+      "rw": "read-only"
+    },
+    "VectorKeyframe.Value": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#vectorkeyframevalue",
+      "signature": "Value []float64",
+      "rw": "read-only"
     }
   }
 }

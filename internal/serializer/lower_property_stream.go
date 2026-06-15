@@ -141,6 +141,12 @@ type valueLayout struct {
 	// Position) — the keyframe block carries a 0x00000001 marker at 0x08.
 	// Color uses the spatial block shape but is NOT a motion path (0x08 = 0).
 	motionPath bool
+	// spatialMarker overrides the @0x08 marker for spatial blocks. AE-native
+	// animated EFFECT params use a per-type value here — 2 for a color param,
+	// 3 for a 2D/3D point param (RE'd from re_anim_effect_colorpoint.aep) —
+	// distinct from a layer-Position motion path's 1. 0 = fall back to
+	// motionPath (1) / none.
+	spatialMarker uint32
 }
 
 type encodeFunc[T any] func(T) []byte
@@ -437,9 +443,14 @@ func writeKeyframeBlock[T any](blk []byte, kf codec.StreamKeyframe[T], layout va
 		// Spatial-style: ease at 0x18/0x20/0x28/0x30; value at 0x38;
 		// spatial tangents follow (parse_keyframe.go kfLayout).
 		// Motion-path streams (Position) carry a 0x00000001 marker at 0x08
-		// (from layer/shape Position kf fixtures); Color does not.
-		if layout.motionPath {
-			binary.BigEndian.PutUint32(blk[0x08:0x0C], 1)
+		// (from layer/shape Position kf fixtures); animated effect color/point
+		// carry their own marker (2 / 3); plain shape Color does not.
+		marker := layout.spatialMarker
+		if marker == 0 && layout.motionPath {
+			marker = 1
+		}
+		if marker != 0 {
+			binary.BigEndian.PutUint32(blk[0x08:0x0C], marker)
 		}
 		binary.BigEndian.PutUint64(blk[0x18:0x20], math.Float64bits(kf.InEase.Speed))
 		binary.BigEndian.PutUint64(blk[0x20:0x28], math.Float64bits(kf.InEase.Influence))

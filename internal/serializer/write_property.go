@@ -238,6 +238,110 @@ func AnimateScalarKeyframes(p *Property, tickRate float64, kfs []ScalarKeyframe)
 	return reparseKeyframes(p, tickRate)
 }
 
+// vectorKeyframeLayout returns the AE-native animated layout for a
+// multi-component effect parameter, keyed by component count. Effect color (4D)
+// and 2D/3D point params all use the SPATIAL keyframe block (value at 0x38,
+// bpk = 0x38 + 3*dim*8) with a per-type @0x08 marker — RE'd byte-for-byte from
+// re_anim_effect_colorpoint.aep: color = block header 0x01 / marker 2; point =
+// block header 0x07 / marker 3.
+func vectorKeyframeLayout(dim int) valueLayout {
+	if dim == 4 {
+		return valueLayout{dim: 4, headerByte: 0x01, spatial: true, spatialMarker: 2}
+	}
+	return valueLayout{dim: dim, headerByte: 0x07, spatial: true, spatialMarker: 3}
+}
+
+// AnimateVectorKeyframes converts a STATIC 2/3/4-component property into an
+// animated one — the multi-component analogue of AnimateScalarKeyframes (the
+// case InsertKeyframe refuses). It replaces the property's static cdat with a
+// LIST(list){lhd3, ldat} keyframe stream built by encodeKeyframes (the SPATIAL
+// layout effect color/point params use on disk) and flips the same tdb4
+// static→animated bits (@0x05 clear bit0, @0x44 = 1, @0x4f clear bit0 — verified
+// type-agnostic: color 07/00/01→06/01/00, point 0f/00/01→0e/01/00, identical
+// transition to the 1D scalar 01/00/00→00/01/00). Keyframe values are taken in
+// the property's on-disk units (same as SetEffectParam: color [A,R,G,B] 0-255,
+// 2D/3D point = fraction of the layer coord space). The property must be parsed,
+// currently static, and 2/3/4-component.
+// (Full contract lives on the aep.AnimateEffectParamVec facade — docgen source.)
+func AnimateVectorKeyframes(p *Property, tickRate float64, kfs []VectorKeyframe) error {
+	if p == nil {
+		return fmt.Errorf("AnimateVectorKeyframes: nil property")
+	}
+	if len(kfs) < 2 {
+		return fmt.Errorf("AnimateVectorKeyframes: need >= 2 keyframes, got %d", len(kfs))
+	}
+	dim := p.Components
+	if dim < 2 || dim > 4 {
+		return fmt.Errorf("AnimateVectorKeyframes: property %q is %dD; only 2/3/4D supported (use AnimateScalarKeyframes for 1D)", p.MatchName, dim)
+	}
+	for i, kf := range kfs {
+		if len(kf.Value) != dim {
+			return fmt.Errorf("AnimateVectorKeyframes: keyframe %d has %d-component value, property %q is %dD", i, len(kf.Value), p.MatchName, dim)
+		}
+	}
+	pb := propertyBack(p)
+	if pb == nil || pb.tdbs == nil {
+		return fmt.Errorf("AnimateVectorKeyframes: property %q has no tdbs back-ref (built outside parser?)", p.MatchName)
+	}
+	if pb.ldat != nil {
+		return fmt.Errorf("AnimateVectorKeyframes: property %q already animated; use InsertKeyframe", p.MatchName)
+	}
+	if pb.cdat == nil {
+		return fmt.Errorf("AnimateVectorKeyframes: property %q has no cdat to convert", p.MatchName)
+	}
+	if pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
+		return fmt.Errorf("AnimateVectorKeyframes: property %q tdb4 missing/short", p.MatchName)
+	}
+	if tickRate <= 0 {
+		tickRate = aeLegacyTimeBase
+	}
+
+	streamKfs := make([]codec.StreamKeyframe[[]float64], len(kfs))
+	for i, kf := range kfs {
+		streamKfs[i] = codec.StreamKeyframe[[]float64]{
+			Time:    kf.Time,
+			Value:   kf.Value,
+			InEase:  kf.InEase,
+			OutEase: kf.OutEase,
+		}
+	}
+	enc := func(v []float64) []byte {
+		b := make([]byte, dim*8)
+		for i := 0; i < dim; i++ {
+			binary.BigEndian.PutUint64(b[i*8:(i+1)*8], math.Float64bits(v[i]))
+		}
+		return b
+	}
+	kfList, err := encodeKeyframes(streamKfs, vectorKeyframeLayout(dim), enc, &lowerCtx{tickRate: tickRate})
+	if err != nil {
+		return fmt.Errorf("AnimateVectorKeyframes: %w", err)
+	}
+
+	// Flip tdb4 static→animated (same patch as the scalar / shape paths).
+	pb.tdb4.Data[0x05] &^= 0x01
+	pb.tdb4.Data[0x44] = 0x01
+	pb.tdb4.Data[0x4f] &^= 0x01
+
+	replaced := false
+	for i, ch := range pb.tdbs.Children {
+		if ch == pb.cdat {
+			pb.tdbs.Children[i] = kfList
+			replaced = true
+			break
+		}
+	}
+	if !replaced {
+		return fmt.Errorf("AnimateVectorKeyframes: property %q cdat not found in tdbs", p.MatchName)
+	}
+	pb.cdat = nil
+	pb.lhd3 = kfList.FindFirst(rifx.IDLhd3)
+	pb.ldat = kfList.FindFirst(rifx.IDLdat)
+	if pb.lhd3 == nil || pb.ldat == nil {
+		return fmt.Errorf("AnimateVectorKeyframes: built keyframe container missing lhd3/ldat")
+	}
+	return reparseKeyframes(p, tickRate)
+}
+
 // reparseKeyframes rebuilds Property.Keyframes from the current
 // ldat/lhd3 bytes. Used after InsertKeyframe / DeleteKeyframe so
 // Keyframe.offset / Value / etc. reflect the new stream layout.

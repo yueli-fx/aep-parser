@@ -86,6 +86,7 @@ type (
 	MaskPathKey                     = scene.MaskPathKey
 	MaskPathKeyframe                = scene.MaskPathKeyframe
 	ScalarKeyframe                  = scene.ScalarKeyframe
+	VectorKeyframe                  = scene.VectorKeyframe
 	MaskVertex                      = scene.MaskVertex
 	MaskWriter                      = scene.MaskWriter
 	MaterialCastsShadowsMode        = scene.MaterialCastsShadowsMode

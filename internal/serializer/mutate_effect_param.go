@@ -180,6 +180,31 @@ func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []S
 	return prop, nil
 }
 
+// AnimateEffectParamVec materializes (if needed) and keyframes a multi-component
+// (2/3/4D) effect parameter — the color/point counterpart of AnimateEffectParam:
+// SetEffectParam with the first keyframe's value, then AnimateVectorKeyframes to
+// synthesize the SPATIAL keyframe container effect color/point params use on
+// disk, using the owning composition's tick rate. Values are in on-disk units
+// (color [A,R,G,B] 0-255, 2D/3D point = fraction of the layer coord space).
+// (Full contract lives on the aep.AnimateEffectParamVec facade — docgen source.)
+func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error) {
+	if len(kfs) < 2 {
+		return nil, fmt.Errorf("AnimateEffectParamVec: need >= 2 keyframes, got %d", len(kfs))
+	}
+	prop, err := SetEffectParam(layer, fx, paramMatchName, kfs[0].Value)
+	if err != nil {
+		return nil, err
+	}
+	tickRate := 30720.0
+	if comp := scene.LayerComp(layer); comp != nil && comp.TickRate > 0 {
+		tickRate = comp.TickRate
+	}
+	if err := AnimateVectorKeyframes(prop, tickRate, kfs); err != nil {
+		return nil, err
+	}
+	return prop, nil
+}
+
 // SetEffectParam sets an effect parameter's static value, materializing the
 // parameter's value stream first when it is default-elided.
 // (Full contract lives on the aep.SetEffectParam facade — docgen source.)

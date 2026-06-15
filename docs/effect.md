@@ -107,6 +107,44 @@ OutEase TemporalEase
 
 read-only
 
+# VectorKeyframe object
+
+VectorKeyframe is one keyframe INPUT for animating a multi-component (2/3/4D) effect parameter via AnimateEffectParamVec: a time in seconds, the value at that time as a []float64 whose length matches the parameter's component count, and optional temporal ease per side (zero = linear). Values are in the parameter's on-disk units — identical to SetEffectParam: a color is [A,R,G,B] in 0-255, a 2D/3D point is a fraction of the layer's coordinate space (see SetEffectParam's unit notes).
+
+## Attributes
+
+### VectorKeyframe.Time
+
+```go
+Time float64
+```
+
+read-only
+
+### VectorKeyframe.Value
+
+```go
+Value []float64
+```
+
+read-only
+
+### VectorKeyframe.InEase
+
+```go
+InEase TemporalEase
+```
+
+read-only
+
+### VectorKeyframe.OutEase
+
+```go
+OutEase TemporalEase
+```
+
+read-only
+
 ## Functions
 
 ### AddEffect
@@ -188,7 +226,21 @@ AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyfra
 
 On disk the parameter's static cdat is replaced by a LIST(list){lhd3, ldat} keyframe stream (non-spatial 1D layout, byte-matched to an AE-saved animated Gaussian-Blur-Blurriness fixture) and the tdb4 static→animated flags flip; WriteAEP recomputes the enclosing LIST sizes. Drives the classic MG rigs — an animated blur amount, or a Slider Control whose value an expression reads.
 
-fx must be on a parsed layer (round-trip through aep.Reopen after the structural New*/AddEffect APIs). Scalar params only (color/point are a follow-up). Linear interp unless ScalarKeyframe.InEase/OutEase are set.
+fx must be on a parsed layer (round-trip through aep.Reopen after the structural New*/AddEffect APIs). Scalar (1D) params only — use AnimateEffectParamVec for color / 2D / 3D point params. Linear interp unless ScalarKeyframe.InEase/OutEase are set.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+
+### AnimateEffectParamVec
+
+```go
+func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)
+```
+
+AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a Time (seconds), a []float64 Value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam: a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space (for a source-backed layer divide by the source's w/h, for a source-less layer by the comp's — and z by the same space's height).
+
+Like the scalar form it materializes the parameter if default-elided, then replaces its static cdat with a keyframe stream — but using the SPATIAL block layout AE writes for animated effect color/point params (value at 0x38, a per-type @0x08 marker: 2 for color, 3 for point), RE'd byte-for-byte from an AE-native fixture. The tdb4 static→animated flip is the same as the scalar / shape paths. Returns the animated *Property.
+
+fx must be on a parsed layer (round-trip through aep.Reopen). Components 2/3/4 only (use AnimateEffectParam for 1D scalars). Linear interp unless ease is set.
 
 Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
 
