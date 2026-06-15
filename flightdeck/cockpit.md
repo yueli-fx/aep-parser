@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（Text Animators〔kinetic typography〕首落地：`AddTextOpacityAnimator` + `AnimateTextRangeOffset`〔offset 扫光逐字揭示〕双版本渲染 gate PASS。文字全收口〔基础 v4 + 动画器〕。纠看板漂移：文字多 run/段落早 2026-06-12 ship。）
+**Last updated**: 2026-06-15 by claude（Text Animators 扩 Position：`AddTextPositionAnimator`〔spatial 3D 72B cdat + slide-in〕双版本渲染 gate PASS〔ink 垂直质心迁移 Δ=260px〕。机制泛化〔spliceTextAnimator/overwriteVectorCdat/per-body 模板缓存〕→ Scale/Rotation 近乎免费。前：Opacity 动画器 + offset 扫光首落地。）
 
 **Active focus**: **库主线全收口、进入需求驱动稳态**——剩余能力 roadmap 优先级 1-6（动画关键帧 / 3D / 形状 / mask / 表达式 / **文字**）+ 表达式·效果深化 arc + Text Animators 全 ship（详 `specs/2026-06-14-remaining-capability-roadmap.md` + git log）。**无剩余主线**；其余皆「按需 / 不可达」。机制库：parse-the-clone + synthesis-insert + animate(Scalar/Vector/Gradient/Path/TextRange)。每渲染/可见类双版本 AE ship-gate（红线4，`scripts/ae_run.ps1` 自助）。基本图形搁置。
 
@@ -18,7 +18,7 @@
 **➡ 主线全 ship，无既定下一阶段——纯需求驱动。** 用户原定 expr→effects→文字 全收口（文字 = 基础 v4 + Text Animators 引擎，2026-06-15 双版本 gate PASS）。下面是按需 backlog，等用户点名或新需求。
 
 **按需 backlog（非阻塞，需求驱动）**：
-- 文字：Position/Scale/Rotation/Fill Color 动画器（同 Text Animator vein 加模板）· Range Advanced(Mode/Shape/Smoothness)· 多 Selector · Wiggly/Expression Selector · text-animator structural op（Remove/Dup/Move）补 ship-gate（现 Alpha）。详 `incidents/text-animator-create-re.md`
+- 文字：~~Opacity~~ ✓ + ~~Position~~ ✓（双版本 gate PASS）；剩 Scale 3D（同 vector 布局，近免费）· Rotation（scalar，免费）· Fill Color（color cdat 待 RE）· animate leaf 本身（关键帧驱动 Position/Scale 值）· Range Advanced(Mode/Shape/Smoothness)· 多 Selector · Wiggly/Expression Selector · text-animator structural op（Remove/Dup/Move）补 ship-gate（现 Alpha）。详 `incidents/text-animator-create-re.md`
 - shape：Gradient stroke 嵌套组 Dashes/Taper/Wave · Offset Line Join/Miter/Copy Offset · Blend Mode/Composite Order render-gate · ZigZag/Twist 等 elided 子流（synthesis-insert 蓝本现成，`trim-paths-vector-filter-re.md`）
 - mask：maskFeatherFalloff（位置未 RE，可能不可达）
 - effects：per-effect typed param helper · 库继续扩 · Displacement Map/Compound Blur 等 layer-ref（同 Set Matte 机制）
