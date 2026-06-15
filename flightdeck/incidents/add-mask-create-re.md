@@ -173,3 +173,24 @@ rect + 同尺寸 rect mask（Add），Opacity 100% vs 50% over 暗底 → reveal
 （=0.5·255+0.5·BG），两版一致；resave 经本库 parser 读回 mask.Opacity 值存活。verify_mg_mask_opacity.jsx
 + mg_mask_opacity_shipgate_test.go。**Feather/Expansion** 同 splice 路径 wire + Go round-trip 测，
 render-gate 按需（feather 软边 / expansion 增缩，可见但 gate 边际值低）。
+
+## SetMaskPath — 既有 mask 路径改写（2026-06-15, Stable）✅
+
+`aep.SetMaskPath(layer, mask, path)`——AddMask 只能建 mask，改既有 mask 轮廓此前被拒
+（路径是变长 om-s/shap/kfl 子树）。落地法：**复用 `makeMaskShapeOmS` 重建整个
+"ADBE Mask Shape" om-s**（同 encodeBezier + 同 n≠4 的 lhd3/shph mask-strictness 补丁），
+swap 进 atom tdgp 替换旧 om-s；WriteAEP 重算各级 LIST size（om-s 随顶点数增缩，同 AddMask
+结构性 splice）。坐标 = layer 像素（经 `maskLayerDims` 换 source-fraction，同 AddMask）。
+需 mask 经 parser round-trip（要 atom-group backref；`mutate_mask_path.go`）。
+
+**顶点数可变**：rect(4)→triangle(3) 实测 AE 接受——n≠4 走的正是 AddMask 那套 lhd3 补丁
+（@0x14=4 恒 / @0x18=1 恒 / @0x1C=4·n），故 SetMaskPath 改顶点数不踩 n=3 硬崩坑。
+重同步 `refreshMaskShap`：从新 shap 刷 Vertices/Closed/ShphRaw + shph backref，清 PathKeyframes
+（写静态路径）。
+
+**渲染 gate（红线4 双版本）**：`TestMGMaskPath_AEShipGate_AE2020/2025` PASS——白 600×600
+shape rect，mask 先建全 rect（reveal 全部）再 `SetMaskPath` 成三角；render 三角 silhouette：
+三角内白 2/2 + **原 rect 角（旧 full-rect mask 内、三角外）暗 3/3**（若 path 没改写这些角会白）；
+resave 经本库 parser 读回 mask 顶点=3。Go round-trip `mask_path_test.go`（rect→triangle 顶点数
+变 + apex 归一化 + <2 顶点拒绝）。verify_mg_mask_path.jsx + mg_mask_path_shipgate_test.go。
+**facade 自由函数**（CLAUDE.md #2 结构性 op 调用形态）。

@@ -890,6 +890,24 @@ func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 	return serializer.AddMask(layer, name, path)
 }
 
+// SetMaskPath rewrites an existing mask's outline in place with a new static
+// path (layer-pixel coordinates, the same space AddMask accepts). Unlike the
+// length-preserving Mask.Set* setters, the path is a variable-length subtree, so
+// this rebuilds the "ADBE Mask Shape" om-s and swaps it in; WriteAEP recomputes
+// the enclosing LIST sizes. The vertex count may differ from the original (e.g.
+// reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness
+// lhd3/shph patching AddMask uses is reused so AE accepts non-4-vertex masks.
+//
+// mask must be one of layer.Masks obtained from a parsed project (it needs its
+// atom-group chunk back-ref); call aep.Reopen first for masks built by the
+// structural New*/AddMask APIs without an intervening parse.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
+// (CLAUDE.md #2 structural-op call-form).
+func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
+	return serializer.SetMaskPath(layer, mask, path)
+}
+
 // RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of
 // AddMask. m must be one of layer.Masks obtained from a parsed project; pass
 // the same layer the mask belongs to (masks carry no owning-layer back-ref).

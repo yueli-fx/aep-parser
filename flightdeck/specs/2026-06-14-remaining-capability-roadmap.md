@@ -56,7 +56,7 @@ shape 矢量滤镜家族主体已收齐；剩 elided 子流 + 未单独 gate 的
 AddMask / RemoveMask + mode·color·inverted（mkif 字节）已 ship。剩属性与路径动画。
 
 - ~~**Mask Feather / Opacity / Expansion 属性**~~ ✅ **2026-06-15**（synthesis-insert 第 3 落点=mask atom；`Mask.SetOpacity/SetFeather/SetExpansion`。Opacity `TestMGMaskOpacity_AEShipGate` 双版本 PASS 100% vs 50% lum 255/135；Feather/Expansion Go round-trip + render-gate 按需。详 `add-mask-create-re.md` § Mask 选项 synthesis-insert）。
-- **SetMaskPath / 既有 mask 路径改写** —— 当前只能建 mask 不能改其 path；需 om-s 内 shap/shph 重写（与 shape path write 共享 `encodeBezier`）。
+- ~~**SetMaskPath / 既有 mask 路径改写**~~ ✅ **2026-06-15**（`aep.SetMaskPath(layer, mask, path)`，复用 makeMaskShapeOmS 重建 om-s；rect→triangle 4→3 顶点 `TestMGMaskPath_AEShipGate` 双版本 PASS。详 `add-mask-create-re.md` § SetMaskPath）。
 - **animated mask path** —— mask path keyframe（与优先级 1 的容量分页耦合，>4kf 需先修 lhd3）。
 - **maskFeatherFalloff** —— 位置未 RE（可能落不可达，先探）。
 
