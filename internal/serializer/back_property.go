@@ -181,7 +181,24 @@ func (b *propertyBackrefs) SetExpression(source string) error {
 		b.exprChunk.Data = []byte(source)
 	} else {
 		newUtf8 := &rifx.Chunk{ID: rifx.IDUtf8, Data: []byte(source)}
-		b.tdbs.Children = append(b.tdbs.Children, newUtf8)
+		// The expression Utf8 belongs immediately AFTER the value cdat (before any
+		// tdum/tduM min/max range chunks) — AE's canonical order. A plain
+		// append() lands it after tdum/tduM, which AE 2020 reads as a corrupt
+		// stream and skips the layer on open (a materialized effect param carries
+		// tdum/tduM, where a bare Transform scalar does not, so append only
+		// happened to work before). Insert right after the last cdat (or the
+		// tdb4 when no cdat), falling back to append.
+		insertAt := len(b.tdbs.Children)
+		for i, ch := range b.tdbs.Children {
+			if id := string(ch.ID[:]); ch.ID == rifx.IDCdat || id == "tdb4" || id == "Tdb4" {
+				insertAt = i + 1
+			}
+		}
+		kids := make([]*rifx.Chunk, 0, len(b.tdbs.Children)+1)
+		kids = append(kids, b.tdbs.Children[:insertAt]...)
+		kids = append(kids, newUtf8)
+		kids = append(kids, b.tdbs.Children[insertAt:]...)
+		b.tdbs.Children = kids
 		b.exprChunk = newUtf8
 	}
 	setMarker(1)
