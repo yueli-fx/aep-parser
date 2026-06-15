@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（Text Animators 动画器矩阵 **5 类全 ship**：Opacity〔reveal〕+ Position〔slide-in〕+ Scale〔shrink-in〕+ Rotation〔spin-in〕+ **Fill Color〔colour-wipe，ink 均值绿通道 0→120→236，AE2020≡AE2025 逐像素一致〕**，均双版本渲染 gate PASS。Color = vtype 6418 cdat 96B [A,R,G,B]×255 @[0:32]，复用 overwriteVectorCdat 零机制改动只抽模板+facade。）
+**Last updated**: 2026-06-15 by claude（Text Animators：5 类 leaf 动画器全 ship + **animate leaf 本身（1D scalar）新机制维度** ship —— `AnimateTextOpacity`/`AnimateTextRotation` 让 leaf 值本身关键帧化（全字符同步值曲线，非仅 Range Offset 扫光）。gate 反转 wiring（Offset 静态、Rotation leaf 0→90），aspect 0.65→1.52 双版本渲染 PASS。零新关键帧代码 = scalarTdbs→parseLeafProperty→AnimateScalarKeyframes。3D/4D leaf animate 留下一 slice（须独立 gate 验 text leaf animated block layout）。）
 
 **Active focus**: **库主线全收口、进入需求驱动稳态**——剩余能力 roadmap 优先级 1-6（动画关键帧 / 3D / 形状 / mask / 表达式 / **文字**）+ 表达式·效果深化 arc + Text Animators 全 ship（详 `specs/2026-06-14-remaining-capability-roadmap.md` + git log）。**无剩余主线**；其余皆「按需 / 不可达」。机制库：parse-the-clone + synthesis-insert + animate(Scalar/Vector/Gradient/Path/TextRange)。每渲染/可见类双版本 AE ship-gate（红线4，`scripts/ae_run.ps1` 自助）。基本图形搁置。
 
@@ -18,7 +18,7 @@
 **➡ 主线全 ship，无既定下一阶段——纯需求驱动。** 用户原定 expr→effects→文字 全收口（文字 = 基础 v4 + Text Animators 引擎，2026-06-15 双版本 gate PASS）。下面是按需 backlog，等用户点名或新需求。
 
 **按需 backlog（非阻塞，需求驱动）**：
-- 文字：动画器 5 类全 ✓ ~~Opacity~~ ~~Position~~ ~~Scale~~ ~~Rotation~~ ~~Fill Color~~（双版本 gate PASS）；剩 animate leaf 本身（关键帧驱动 Position/Scale/Rotation/Color 值，非仅 Range Offset）· Range Advanced(Mode/Shape/Smoothness)· 多 Selector · Wiggly/Expression Selector · text-animator structural op（Remove/Dup/Move）补 ship-gate（现 Alpha）。免费近邻：Fill Opacity/Stroke Color/Stroke Width/Skew/Rotation X·Y（同布局，抽模板即可）。详 `incidents/text-animator-create-re.md`
+- 文字：动画器 5 类全 ✓ ~~Opacity~~ ~~Position~~ ~~Scale~~ ~~Rotation~~ ~~Fill Color~~ + animate leaf 1D ✓ ~~AnimateTextOpacity/Rotation~~（双版本 gate PASS）；剩 **animate 3D/4D leaf**（Position/Scale/Color 值关键帧化，走 AnimateVectorKeyframes，须独立 gate 验 text leaf animated block layout）· Range Advanced(Mode/Shape/Smoothness)· 多 Selector · Wiggly/Expression Selector · text-animator structural op（Remove/Dup/Move）补 ship-gate（现 Alpha）。免费近邻：Fill Opacity/Stroke Color/Stroke Width/Skew/Rotation X·Y（同布局，抽模板即可）。详 `incidents/text-animator-create-re.md`
 - shape：Gradient stroke 嵌套组 Dashes/Taper/Wave · Offset Line Join/Miter/Copy Offset · Blend Mode/Composite Order render-gate · ZigZag/Twist 等 elided 子流（synthesis-insert 蓝本现成，`trim-paths-vector-filter-re.md`）
 - mask：maskFeatherFalloff（位置未 RE，可能不可达）
 - effects：per-effect typed param helper · 库继续扩 · Displacement Map/Compound Blur 等 layer-ref（同 Set Matte 机制）
