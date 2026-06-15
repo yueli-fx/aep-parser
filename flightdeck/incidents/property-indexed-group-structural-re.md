@@ -100,9 +100,15 @@ AE 完全合法，打开时运行时重算去重名（" 2"）。那后缀纯 cos
 
 - **Remove + MoveTo + Duplicate**：`mutate_property_structural.go`，Go round-trip +
   AE 2020/2025 双版本 ship-gate（`property_structural_shipgate_test.go`：remove /
-  move / duplicate × 双版本 = 6/6 PASS）。Effect Parade 已 gate；
-  Mask Parade / Root Vectors / Text Animators 同机制、Go round-trip 过，但未单独
-  ship-gate → Alpha。
+  move / duplicate × 双版本 = 6/6 PASS）。**Effect Parade + Text Animators 已双版本 gate**
+  （Text Animators：2026-06-16，`text_animator_struct_shipgate_test.go`——3 动画器
+  Opacity/Skew/Fill Color，remove-middle / move-last-to-front / duplicate-first × 双版本
+  = 6/6 PASS，AE readback 动画器顺序逐项匹配 + Go round-trip）。Mask Parade / Root Vectors
+  同机制、Go round-trip 过，但未单独 ship-gate → Alpha。
+  - **gate gotcha（Text Animators readback）**：AE ScriptingAPI 的 `animator.property("ADBE
+    Text Animator Properties").property(1)` 枚举**完整 ~120 leaf schema**（永远 = "ADBE Text
+    Anchor Point 3D"），**非 materialized 子集**——按 index 取 tag 会假阴。verify jsx 必须按
+    **非默认值**辨识每个动画器的 driven leaf（Opacity=50 / Skew=20 / Fill Color=blue）。
 - Duplicate clone 的 flat mirror（`Layer.Effects` / `Layer.Masks`）走 clone chunk
   **重解**（`collectEffects` / `decodeMask`），back-ref 指向 clone chunk 不 alias 源。
 

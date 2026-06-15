@@ -204,7 +204,10 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
   Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；**Color→ink 像素均值 RGB（绿通道单调）**。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
-  仍仅 Go round-trip = Alpha 未单独 ship-gate。
+  **2026-06-16 双版本 ship-gate PASS**（`text_animator_struct_shipgate_test.go`：3 动画器
+  Opacity/Skew/Fill Color × remove-middle/move-last-to-front/duplicate-first × AE2020+2025
+  = 6/6，readback 动画器顺序逐项匹配；gotcha：ScriptingAPI 枚举完整 leaf schema，verify 按非默认
+  值辨识 driven leaf）。详 `[[property-indexed-group-structural-re]]` 落地状态。
 
 ## Free-neighbor leaves 收口（2026-06-16）
 
