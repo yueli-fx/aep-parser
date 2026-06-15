@@ -1294,19 +1294,32 @@ func (n *RoundCornersNode) Properties() *PropertyGroup {
 // Amount` is an animatable 1D scalar (default 10, AE's default). Place it AFTER
 // the path-producing shapes it should offset (render order).
 //
-// Line Join / Miter Limit / Copy Offset are AE-default and elided in the
-// extracted Amount-only template (no slot); Copies is materialized on demand by
-// the serializer (synthesis-insert of the `ADBE Vector Offset Copies` leaf) when
-// SetCopies is called, mirroring SetMaterialOption for default-elided leaves.
+// Line Join / Miter Limit / Copies / Copy Offset are AE-default and elided in the
+// extracted Amount-only template (no slot); each is materialized on demand by the
+// serializer (synthesis-insert of its leaf, spliced in canonical order) when its
+// setter is called, mirroring SetMaterialOption for default-elided leaves.
 type OffsetPathsNode struct {
-	amount    *codec.PropertyStream[float64]
-	copies    float64
-	copiesSet bool
+	amount        *codec.PropertyStream[float64]
+	lineJoin      StrokeLineJoin
+	lineJoinSet   bool
+	miterLimit    float64
+	miterLimitSet bool
+	copies        float64
+	copiesSet     bool
+	copyOffset    float64
+	copyOffsetSet bool
 }
 
-// NewOffsetPathsNode constructs a default OffsetPathsNode (Amount=10, Copies=1).
+// NewOffsetPathsNode constructs a default OffsetPathsNode (Amount=10, Line
+// Join=Miter, Miter Limit=4, Copies=1, Copy Offset=1).
 func NewOffsetPathsNode() *OffsetPathsNode {
-	n := &OffsetPathsNode{amount: codec.NewPropertyStream[float64](), copies: 1}
+	n := &OffsetPathsNode{
+		amount:     codec.NewPropertyStream[float64](),
+		lineJoin:   StrokeLineJoinMiter,
+		miterLimit: 4,
+		copies:     1,
+		copyOffset: 1,
+	}
 	_ = n.amount.SetStaticValue(10)
 	return n
 }
@@ -1316,6 +1329,45 @@ func (n *OffsetPathsNode) Amount() *PropertyStream[float64] { return n.amount }
 
 // SetAmount sets the offset amount in pixels (positive grows, negative shrinks).
 func (n *OffsetPathsNode) SetAmount(v float64) error { return n.amount.SetStaticValue(v) }
+
+// LineJoin returns the corner join used where the grown outline turns
+// (Miter/Round/Bevel; default Miter). Uses the same enum as Stroke Line Join.
+func (n *OffsetPathsNode) LineJoin() StrokeLineJoin { return n.lineJoin }
+
+// LineJoinSet reports whether SetLineJoin was called (serializer splice trigger).
+func (n *OffsetPathsNode) LineJoinSet() bool { return n.lineJoinSet }
+
+// SetLineJoin selects the corner join for the offset outline: Miter (sharp
+// point), Round, or Bevel (flat-cut). The default Miter is AE-default-elided; a
+// non-default join materializes the `ADBE Vector Offset Line Join` leaf on lower.
+func (n *OffsetPathsNode) SetLineJoin(j StrokeLineJoin) error {
+	if j < StrokeLineJoinMiter || j > StrokeLineJoinBevel {
+		return fmt.Errorf("OffsetPathsNode.SetLineJoin: %d out of range (1=Miter, 2=Round, 3=Bevel)", j)
+	}
+	n.lineJoin = j
+	n.lineJoinSet = true
+	return nil
+}
+
+// MiterLimit returns the miter clip ratio (default 4; only affects Miter joins
+// at sharp angles).
+func (n *OffsetPathsNode) MiterLimit() float64 { return n.miterLimit }
+
+// MiterLimitSet reports whether SetMiterLimit was called (serializer splice trigger).
+func (n *OffsetPathsNode) MiterLimitSet() bool { return n.miterLimitSet }
+
+// SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would
+// extend past limit×width is clipped flat to a bevel. Must be >= 1. The default 4
+// is AE-default-elided; setting it materializes the `ADBE Vector Offset Miter
+// Limit` leaf on lower.
+func (n *OffsetPathsNode) SetMiterLimit(v float64) error {
+	if v < 1 {
+		return fmt.Errorf("OffsetPathsNode.SetMiterLimit: %g out of range (want >= 1)", v)
+	}
+	n.miterLimit = v
+	n.miterLimitSet = true
+	return nil
+}
 
 // Copies returns the number of progressively-offset copies (default 1).
 func (n *OffsetPathsNode) Copies() float64 { return n.copies }
@@ -1335,6 +1387,22 @@ func (n *OffsetPathsNode) SetCopies(v float64) error {
 
 // CopiesSet reports whether SetCopies was called (serializer splice trigger).
 func (n *OffsetPathsNode) CopiesSet() bool { return n.copiesSet }
+
+// CopyOffset returns the per-copy offset multiplier applied when Copies > 1
+// (default 1 — successive copies step by one further Amount each).
+func (n *OffsetPathsNode) CopyOffset() float64 { return n.copyOffset }
+
+// CopyOffsetSet reports whether SetCopyOffset was called (serializer splice trigger).
+func (n *OffsetPathsNode) CopyOffsetSet() bool { return n.copyOffsetSet }
+
+// SetCopyOffset scales the spacing between successive offset copies (only
+// meaningful when Copies > 1). The default 1 is AE-default-elided; setting it
+// materializes the `ADBE Vector Offset Copy Offset` leaf on lower.
+func (n *OffsetPathsNode) SetCopyOffset(v float64) error {
+	n.copyOffset = v
+	n.copyOffsetSet = true
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (n *OffsetPathsNode) Properties() *PropertyGroup {

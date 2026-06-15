@@ -197,4 +197,16 @@ Offset Paths 的 4 个 elided 子流（Line Join / Miter / **Copies** / Copy Off
 
 **synthesis-insert 蓝本累计 4 次全绿 = 三类 leaf 全覆盖**：scalar-with-range（Offset Copies，6-child）· enum（Trim Type · ZigZag Points，4-child）· **Vec2（Twist Center，4-child cdat[0:16]）**。`spliceShapeLeafBeforeGroupEnd` + `overwriteShapeStreamCdat` 对三类通用。剩 Repeater Order（enum）/ Offset Line Join·Miter·Copy Offset（enum+scalar）等同三类之一，按需。
 
+## Offset Line Join / Miter Limit / Copy Offset — synthesis-insert 第 5–7 次 + **多 leaf canonical 排序**（优先级3，2026-06-15）✅
+
+Offset Paths 余下 3 个 elided 子流一次收齐——确认**单节点多 leaf 共存**的 canonical 排序：
+
+- **canonical 落盘序**（RE 自证 `gen_shape_offset_extras.jsx` 全 5 子流非默认）：Amount → **Line Join** → **Miter Limit** → Copies → **Copy Offset** → GroupEnd。`spliceShapeLeafBeforeGroupEnd` 每次插在 GroupEnd 前 = **按调用序追加**，故 lowerOffsetPathsNode 只要**按 canonical 序依次 splice**（Line Join→Miter→Copies→Copy Offset）即天然有序，无需 ordinal map。
+- scene `OffsetPathsNode +=` lineJoin(`StrokeLineJoin` 复用，Miter1/Round2/Bevel3) · miterLimit · copyOffset（各带 `*Set` flag，static）。Line Join leaf 286B/4-child enum；Miter/Copy Offset 各 318B/6-child scalar（同 Offset Copies）。leaf 用 `tmp_debug/extract_offset_leaf <aep> <leafName> <out>`（参数化，一 fixture 抽 3 leaf）。
+- 各 setter 仅当**非默认**才 splice（Line Join≠Miter · Miter≠4 · CopyOffset≠1）——不污染默认 Amount-only body。
+
+**渲染 ground truth（先看图，红线4）**：一帧 5 卡——上排 3 个 Rect200+Offset Amount=60 角形卡：**MITER(默认)** 尖角 miter 点（角尖像素 corner-fill 4/4 白）· **BEVEL(LineJoin=3)** 八边形切角（corner-fill 0/4）· **MITERLIM(Miter Limit=1)** 同切角（90°miter 比 1.41>limit1 → 裁成 bevel，corner-fill 0/4）；下排 2 个 Rect160+Amount=30+Copies=3 卡：**COPY1(默认 CopyOffset=1)** 右伸 172px · **COPY2(CopyOffset=2)** 右伸 202px（copy 步进外移一个 Amount）。`TestMGOffsetExtras_AEShipGate_AE2020/2025` 双版本 PASS（corner 4/0/0 · extent 172/202 两版一致 · png 12391b 两版同 · resave Line Join=3/Miter=1/Copy Offset=2/Copies=3 全存活）。verify_mg_offset_extras.jsx + mg_offset_extras_shipgate_test.go。眼验 5 卡（尖角 vs 八边形 ×2、小方 vs 大方）。
+
+**synthesis-insert 蓝本累计 7 次全绿**：Offset Copies · Trim Type · ZigZag Points · Twist Center · **Offset Line Join · Miter Limit · Copy Offset**。三类 leaf（scalar/enum/Vec2）+ 单节点多 leaf canonical 排序全验。Offset Paths 5 子流**全收齐**。剩 Repeater Order（enum，可达性待核）/ Wiggle 调制参数（低价值）按需。
+
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。

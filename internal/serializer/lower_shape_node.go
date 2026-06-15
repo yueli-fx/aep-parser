@@ -67,6 +67,15 @@ var v22ShapeOffsetBodyBytes []byte
 //go:embed templates/v2_2_shape_offset_copies_leaf.bin
 var v22ShapeOffsetCopiesLeafBytes []byte
 
+//go:embed templates/v2_2_shape_offset_linejoin_leaf.bin
+var v22ShapeOffsetLineJoinLeafBytes []byte
+
+//go:embed templates/v2_2_shape_offset_miter_leaf.bin
+var v22ShapeOffsetMiterLeafBytes []byte
+
+//go:embed templates/v2_2_shape_offset_copyoffset_leaf.bin
+var v22ShapeOffsetCopyOffsetLeafBytes []byte
+
 //go:embed templates/v2_2_shape_merge_body.bin
 var v22ShapeMergeBodyBytes []byte
 
@@ -153,6 +162,18 @@ var (
 	v22ShapeOffsetCopiesLeafOnce  sync.Once
 	v22ShapeOffsetCopiesLeafCache *rifx.Chunk
 	v22ShapeOffsetCopiesLeafErr   error
+
+	v22ShapeOffsetLineJoinLeafOnce  sync.Once
+	v22ShapeOffsetLineJoinLeafCache *rifx.Chunk
+	v22ShapeOffsetLineJoinLeafErr   error
+
+	v22ShapeOffsetMiterLeafOnce  sync.Once
+	v22ShapeOffsetMiterLeafCache *rifx.Chunk
+	v22ShapeOffsetMiterLeafErr   error
+
+	v22ShapeOffsetCopyOffsetLeafOnce  sync.Once
+	v22ShapeOffsetCopyOffsetLeafCache *rifx.Chunk
+	v22ShapeOffsetCopyOffsetLeafErr   error
 
 	v22ShapeMergeOnce  sync.Once
 	v22ShapeMergeCache *rifx.Chunk
@@ -1229,9 +1250,11 @@ func spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs *rifx.Chunk) {
 // Static → cdat overwrite; animated → the cdat flips to a 1D non-spatial
 // keyframe container via the shared injectAnimatedStream path.
 //
-// When Copies is set, the AE-default-elided `ADBE Vector Offset Copies` leaf is
-// spliced into the body in canonical order (after Amount, before Group End) and
-// its cdat overwritten — synthesis-insert, mirroring SetMaterialOption.
+// The four AE-default-elided sub-streams (Line Join / Miter Limit / Copies /
+// Copy Offset) are each spliced in on demand when their setter is used. They are
+// spliced in canonical order (Line Join → Miter Limit → Copies → Copy Offset),
+// each inserted just before Group End, so call order == stored order —
+// synthesis-insert, mirroring SetMaterialOption.
 func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeOffsetBody()
 	if err != nil {
@@ -1239,6 +1262,22 @@ func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 	}
 	if err := lowerShapeScalar(body, "ADBE Vector Offset Amount", n.Amount(), ctx); err != nil {
 		return nil, err
+	}
+	if n.LineJoinSet() && n.LineJoin() != StrokeLineJoinMiter {
+		tdmn, tdbs, err := cloneShapeOffsetLineJoinLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Offset Line Join", encodeF64sBE(float64(n.LineJoin())))
+	}
+	if n.MiterLimitSet() && n.MiterLimit() != 4 {
+		tdmn, tdbs, err := cloneShapeOffsetMiterLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Offset Miter Limit", encodeF64sBE(n.MiterLimit()))
 	}
 	if n.CopiesSet() && n.Copies() != 1 {
 		tdmn, tdbs, err := cloneShapeOffsetCopiesLeaf()
@@ -1248,7 +1287,78 @@ func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
 		overwriteShapeStreamCdat(body, "ADBE Vector Offset Copies", encodeF64sBE(n.Copies()))
 	}
+	if n.CopyOffsetSet() && n.CopyOffset() != 1 {
+		tdmn, tdbs, err := cloneShapeOffsetCopyOffsetLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Offset Copy Offset", encodeF64sBE(n.CopyOffset()))
+	}
 	return body, nil
+}
+
+// cloneShapeOffsetLineJoinLeaf / cloneShapeOffsetMiterLeaf /
+// cloneShapeOffsetCopyOffsetLeaf return fresh clones of the three remaining
+// AE-default-elided Offset sub-stream leaves (enum / scalar / scalar) from their
+// embedded templates, spliced into the Amount-only offset body on demand. All
+// mirror cloneShapeOffsetCopiesLeaf.
+func cloneShapeOffsetLineJoinLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeOffsetLineJoinLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetLineJoinLeafBytes))
+		if e != nil {
+			v22ShapeOffsetLineJoinLeafErr = fmt.Errorf("parse v22ShapeOffsetLineJoinLeafBytes: %w", e)
+			return
+		}
+		v22ShapeOffsetLineJoinLeafCache = ch
+	})
+	if v22ShapeOffsetLineJoinLeafErr != nil {
+		return nil, nil, v22ShapeOffsetLineJoinLeafErr
+	}
+	return offsetLeafPair(v22ShapeOffsetLineJoinLeafCache, "ADBE Vector Offset Line Join")
+}
+
+func cloneShapeOffsetMiterLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeOffsetMiterLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetMiterLeafBytes))
+		if e != nil {
+			v22ShapeOffsetMiterLeafErr = fmt.Errorf("parse v22ShapeOffsetMiterLeafBytes: %w", e)
+			return
+		}
+		v22ShapeOffsetMiterLeafCache = ch
+	})
+	if v22ShapeOffsetMiterLeafErr != nil {
+		return nil, nil, v22ShapeOffsetMiterLeafErr
+	}
+	return offsetLeafPair(v22ShapeOffsetMiterLeafCache, "ADBE Vector Offset Miter Limit")
+}
+
+func cloneShapeOffsetCopyOffsetLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeOffsetCopyOffsetLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetCopyOffsetLeafBytes))
+		if e != nil {
+			v22ShapeOffsetCopyOffsetLeafErr = fmt.Errorf("parse v22ShapeOffsetCopyOffsetLeafBytes: %w", e)
+			return
+		}
+		v22ShapeOffsetCopyOffsetLeafCache = ch
+	})
+	if v22ShapeOffsetCopyOffsetLeafErr != nil {
+		return nil, nil, v22ShapeOffsetCopyOffsetLeafErr
+	}
+	return offsetLeafPair(v22ShapeOffsetCopyOffsetLeafCache, "ADBE Vector Offset Copy Offset")
+}
+
+// offsetLeafPair finds the (tdmn, LIST:tdbs) pair named `name` in a parsed leaf
+// template wrapper and returns fresh clones.
+func offsetLeafPair(cache *rifx.Chunk, name string) (tdmn, tdbs *rifx.Chunk, err error) {
+	kids := cache.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == name &&
+			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
+			return cloneChunk(kids[i]), cloneChunk(kids[i+1]), nil
+		}
+	}
+	return nil, nil, fmt.Errorf("offset leaf %q missing from template", name)
 }
 
 // cloneShapeMergeBody returns a clone of the Merge Paths template
