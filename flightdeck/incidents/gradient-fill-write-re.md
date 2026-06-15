@@ -269,9 +269,23 @@ LIST(GCst)
   - Gate `TestGradientAnim_AEShipGate_AE2020/2025` + `TestGradientAnimRoundtrip`
     (pure-Go structural): a 1000px rect, horizontal ramp, kf0=R/B/G → kf1=G/R/B;
     rendered t=0 = R/B/G, t=1s = G/R/B (left-edge R→G swap = animation proof),
-    visually eyeballed. **Deferred**: gradient STROKE stop animation (G-Stroke,
-    same path on demand); ease on stop keyframes (linear only — interp bytes
-    hardcoded 01/01).
+    visually eyeballed. ~~**Deferred**: gradient STROKE stop animation~~ ✅ see
+    below; ease on stop keyframes (linear only — interp bytes hardcoded 01/01).
+
+### UPDATE 2026-06-15 — gradient STROKE stop animation now resolved ✅
+
+The `ADBE Vector Grad Colors` stream is byte-identical on G-Fill and G-Stroke,
+so animated stops transferred with **zero new encoder**: `GradientStrokeNode`
+gained `AddGradientKeyframe(time, *Gradient)` + `GradientKeyframes()` (copied
+from the fill node, same `GradientKeyframe` type), and `lowerGradientStrokeNode`
+now takes `ctx` and, when keyframed, calls the SHARED
+`animateGradientStops(body, "ADBE Vector Grad Colors", kfs, ctx)` the fill uses.
+Static path unchanged (byte-identical, no regression on the existing gradstroke
+gates). Gate `TestGradientStrokeAnim_AEShipGate_AE2020/2025` +
+`TestGradientStrokeAnimRoundtrip`: a 900px rect outlined by an 80px gradient
+stroke, stops kf0=R/B/G → kf1=G/R/B; sampling the top stroke band, the ramp
+swaps R/B/G (t=0) → G/R/B (t=1s) on BOTH versions; numKeys=2 read back, resave
+keeps 2 keyframes. **Closes priority-1's last leftover** (动画关键帧全收口).
 
 ## Scope (子项⑭)
 
