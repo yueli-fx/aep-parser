@@ -129,6 +129,7 @@ type (
 	ZigZagPoints                    = scene.ZigZagPoints
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
+	RepeaterOrder                   = scene.RepeaterOrder
 	RepeaterTransform               = scene.RepeaterTransform
 	RoundCornersNode                = scene.RoundCornersNode
 	ZigZagNode                      = scene.ZigZagNode
@@ -398,6 +399,8 @@ const (
 	TrimTypeIndividually                          = scene.TrimTypeIndividually
 	ZigZagPointsCorner                            = scene.ZigZagPointsCorner
 	ZigZagPointsSmooth                            = scene.ZigZagPointsSmooth
+	RepeaterOrderBelow                            = scene.RepeaterOrderBelow
+	RepeaterOrderAbove                            = scene.RepeaterOrderAbove
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

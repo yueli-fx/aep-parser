@@ -58,6 +58,9 @@ var v22ShapeTrimTypeLeafBytes []byte
 //go:embed templates/v2_2_shape_repeater_body.bin
 var v22ShapeRepeaterBodyBytes []byte
 
+//go:embed templates/v2_2_shape_repeater_order_leaf.bin
+var v22ShapeRepeaterOrderLeafBytes []byte
+
 //go:embed templates/v2_2_shape_roundcorners_body.bin
 var v22ShapeRoundCornersBodyBytes []byte
 
@@ -150,6 +153,10 @@ var (
 	v22ShapeRepeaterOnce  sync.Once
 	v22ShapeRepeaterCache *rifx.Chunk
 	v22ShapeRepeaterErr   error
+
+	v22ShapeRepeaterOrderLeafOnce  sync.Once
+	v22ShapeRepeaterOrderLeafCache *rifx.Chunk
+	v22ShapeRepeaterOrderLeafErr   error
 
 	v22ShapeRoundCornersOnce  sync.Once
 	v22ShapeRoundCornersCache *rifx.Chunk
@@ -1129,6 +1136,16 @@ func lowerRepeaterNode(n *RepeaterNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeScalar(body, "ADBE Vector Repeater Offset", n.Offset(), ctx); err != nil {
 		return nil, err
 	}
+	// Order (Composite) is canonically between Offset and the Transform group, so
+	// splice it BEFORE the Transform group (not before Group End) — synthesis-insert.
+	if n.OrderSet() && n.Order() != RepeaterOrderBelow {
+		tdmn, tdbs, err := cloneShapeRepeaterOrderLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Repeater Transform", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Repeater Order", encodeF64sBE(float64(n.Order())))
+	}
 	if xf := findGroupBody(body, "ADBE Vector Repeater Transform"); xf != nil {
 		t := n.Transform()
 		a, p, s := t.Anchor(), t.Position(), t.Scale()
@@ -1140,6 +1157,56 @@ func lowerRepeaterNode(n *RepeaterNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 		overwriteShapeStreamCdat(xf, "ADBE Vector Repeater Opacity 2", encodeF64sBE(t.EndOpacity()))
 	}
 	return body, nil
+}
+
+// spliceShapeLeafBefore inserts a (tdmn, tdbs) leaf pair into a shape filter body
+// immediately before the child tdmn matching beforeMatchName (e.g. before a
+// nested group, for a leaf whose canonical position precedes it). Falls back to
+// spliceShapeLeafBeforeGroupEnd if the target child is absent.
+func spliceShapeLeafBefore(body *rifx.Chunk, beforeMatchName string, tdmn, tdbs *rifx.Chunk) {
+	kids := body.Children
+	insertIdx := -1
+	for i := 0; i < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == beforeMatchName {
+			insertIdx = i
+			break
+		}
+	}
+	if insertIdx < 0 {
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		return
+	}
+	spliced := make([]*rifx.Chunk, 0, len(kids)+2)
+	spliced = append(spliced, kids[:insertIdx]...)
+	spliced = append(spliced, tdmn, tdbs)
+	spliced = append(spliced, kids[insertIdx:]...)
+	body.Children = spliced
+}
+
+// cloneShapeRepeaterOrderLeaf returns a fresh (tdmn, LIST:tdbs) clone of the
+// `ADBE Vector Repeater Order` enum leaf from its embedded template, spliced
+// before the Repeater Transform group when Order is set Above. Mirrors
+// cloneShapeTrimTypeLeaf.
+func cloneShapeRepeaterOrderLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeRepeaterOrderLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeRepeaterOrderLeafBytes))
+		if e != nil {
+			v22ShapeRepeaterOrderLeafErr = fmt.Errorf("parse v22ShapeRepeaterOrderLeafBytes: %w", e)
+			return
+		}
+		v22ShapeRepeaterOrderLeafCache = ch
+	})
+	if v22ShapeRepeaterOrderLeafErr != nil {
+		return nil, nil, v22ShapeRepeaterOrderLeafErr
+	}
+	kids := v22ShapeRepeaterOrderLeafCache.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Repeater Order" &&
+			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
+			return cloneChunk(kids[i]), cloneChunk(kids[i+1]), nil
+		}
+	}
+	return nil, nil, fmt.Errorf("repeater order leaf missing from template")
 }
 
 // cloneShapeRoundCornersBody returns a clone of the Round Corners template

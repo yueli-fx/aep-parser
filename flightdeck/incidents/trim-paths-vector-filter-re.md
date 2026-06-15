@@ -209,4 +209,15 @@ Offset Paths 余下 3 个 elided 子流一次收齐——确认**单节点多 le
 
 **synthesis-insert 蓝本累计 7 次全绿**：Offset Copies · Trim Type · ZigZag Points · Twist Center · **Offset Line Join · Miter Limit · Copy Offset**。三类 leaf（scalar/enum/Vec2）+ 单节点多 leaf canonical 排序全验。Offset Paths 5 子流**全收齐**。剩 Repeater Order（enum，可达性待核）/ Wiggle 调制参数（低价值）按需。
 
+## Repeater Order — synthesis-insert 第 8 次 + **splice-before-group** + 「可达但视觉无效」实证（优先级3，2026-06-15）✅
+
+`ADBE Vector Repeater Order`（Composite，Below=1 默认/Above=2）。**先纠错**：早先 Explore 审计称「JSX `property()` 返 null → 不可达」是**误判**——`gen_shape_repeater_order.jsx` 探针自证 Order 是 Repeater child[3]、真实 enum 属性、`setValue(2)` 成功读回 2。incident 原话「同 Trim Type」正确。
+
+- **canonical 落盘序**：Copies → [Offset] → **Order** → Transform(组) → GroupEnd。Order 在 Transform **组之前**，故不能用 `spliceShapeLeafBeforeGroupEnd`（会落到 Transform 组后）——新增 `spliceShapeLeafBefore(body, "ADBE Vector Repeater Transform", …)`（插在指定 tdmn 前，缺省 fallback GroupEnd）。这是蓝本首次需要「splice 在某子组前」而非 GroupEnd 前。
+- scene `RepeaterNode += order RepeaterOrder + orderSet`（`RepeaterOrderBelow=1`/`RepeaterOrderAbove=2`，`SetOrder`/`Order`/`OrderSet`）。leaf `v2_2_shape_repeater_order_leaf.bin` 286B/4-child enum（同 Trim Type）。`tmp_debug/extract_filter_leaf <aep> <filterMN> <leafMN> <out>`（通用化抽取器）。
+
+**「视觉无效」实证（红线4 的诚实边界）**：Order 是**合成顺序**设置——同色填充下数学上**不可见**（同色多层 over 合成可交换：两层色 C、alpha a/b → 结果亮度 C(a+b(1-a)) 对 a,b 对称）。故**无像素可判别**。gate 据此诚实验证：一帧两卡（BELOW 默认 + ABOVE Order=2，repeater 几何全同：5 copies 重叠+缩放+opacity 100→20），断言**白覆盖恒等**（BELOW=7341 == ABOVE=7341 两版本完全一致）+ ABOVE resave Order=2 存活 + AE 接受。`TestMGRepeaterOrder_AEShipGate_AE2020/2025` 双版本 PASS。**这不是「假绿」——是 Order 本就无可见效果的正确实证**（眼验两卡渲染逐像素同）；over-claim 一个可见效果才违反交付准则。verify_mg_repeater_order.jsx + mg_repeater_order_shipgate_test.go。
+
+**synthesis-insert 蓝本累计 8 次全绿**：+ Repeater Order。机制全谱：三类 leaf（scalar/enum/Vec2）· canonical 多 leaf 排序（Offset）· splice-before-group（Repeater Order）。**常用 shape 矢量滤镜的所有可写 elided 子流全收齐**。剩 Wiggle Paths/Transform 的 Correlation/Temporal·Spatial Phase（调制参数，低价值，待评估）。
+
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。

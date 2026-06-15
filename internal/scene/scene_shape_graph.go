@@ -1144,13 +1144,32 @@ func (n *TrimNode) Properties() *PropertyGroup {
 // preceding paths `Copies` times, applying `Transform` cumulatively per copy.
 // `Copies` and `Offset` (which copy index the first instance starts at) are
 // animatable scalars; the Transform (Anchor/Position/Scale/Rotation + Start/End
-// Opacity) is static, modeled like StrokeTaper. `Order` (Composite — copies
-// above/below) is AE-default (elided) and not modeled.
+// Opacity) is static, modeled like StrokeTaper. `Order` (Composite — whether each
+// copy stacks below or above the previous) defaults to Below and is
+// AE-default-elided, materialized by the serializer via synthesis-insert when
+// SetOrder selects Above. Note: with a single-color fill the Order makes no
+// visible difference (compositing same-colour layers is commutative); it matters
+// only when copies are visually distinguishable (e.g. blend modes / strokes
+// occluding fills).
 type RepeaterNode struct {
 	copies    *codec.PropertyStream[float64]
 	offset    *codec.PropertyStream[float64]
+	order     RepeaterOrder
+	orderSet  bool
 	transform *RepeaterTransform
 }
+
+// RepeaterOrder selects whether each Repeater copy composites below (default) or
+// above the previous one (`ADBE Vector Repeater Order`, AE's "Composite"
+// dropdown). Stored on disk as a 1-based float64 enum index.
+type RepeaterOrder int
+
+const (
+	// RepeaterOrderBelow stacks each copy below the previous (AE default).
+	RepeaterOrderBelow RepeaterOrder = 1
+	// RepeaterOrderAbove stacks each copy above the previous.
+	RepeaterOrderAbove RepeaterOrder = 2
+)
 
 // RepeaterTransform models the Repeater's nested `ADBE Vector Repeater
 // Transform` group: the per-copy transform applied cumulatively. Anchor /
@@ -1173,6 +1192,7 @@ func NewRepeaterNode() *RepeaterNode {
 	n := &RepeaterNode{
 		copies: codec.NewPropertyStream[float64](),
 		offset: codec.NewPropertyStream[float64](),
+		order:  RepeaterOrderBelow,
 		transform: &RepeaterTransform{
 			scale:        [2]float64{100, 100},
 			startOpacity: 100,
@@ -1190,6 +1210,25 @@ func (n *RepeaterNode) Offset() *PropertyStream[float64] { return n.offset }
 
 // Transform returns the Repeater's per-copy Transform group.
 func (n *RepeaterNode) Transform() *RepeaterTransform { return n.transform }
+
+// Order returns whether copies composite below (default) or above the previous.
+func (n *RepeaterNode) Order() RepeaterOrder { return n.order }
+
+// OrderSet reports whether SetOrder was called (serializer splice trigger).
+func (n *RepeaterNode) OrderSet() bool { return n.orderSet }
+
+// SetOrder selects whether each copy composites Below (default) or Above the
+// previous. The Above value is AE-default-elided; setting it materializes the
+// `ADBE Vector Repeater Order` leaf on lower. With a single-color fill this has
+// no visible effect (same-color compositing commutes).
+func (n *RepeaterNode) SetOrder(o RepeaterOrder) error {
+	if o != RepeaterOrderBelow && o != RepeaterOrderAbove {
+		return fmt.Errorf("RepeaterNode.SetOrder: %d out of range (1=Below, 2=Above)", o)
+	}
+	n.order = o
+	n.orderSet = true
+	return nil
+}
 
 // SetCopies sets the number of copies (≥ 1).
 func (n *RepeaterNode) SetCopies(v float64) error {

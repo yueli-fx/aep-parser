@@ -126,6 +126,7 @@ type (
 	MergePathsNode                  = scene.MergePathsNode
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
+	RepeaterOrder                   = scene.RepeaterOrder
 	RoundCornersNode                = scene.RoundCornersNode
 	ZigZagNode                      = scene.ZigZagNode
 	ZigZagPoints                    = scene.ZigZagPoints
@@ -221,6 +222,8 @@ const (
 	TrimTypeIndividually                          = scene.TrimTypeIndividually
 	ZigZagPointsCorner                            = scene.ZigZagPointsCorner
 	ZigZagPointsSmooth                            = scene.ZigZagPointsSmooth
+	RepeaterOrderBelow                            = scene.RepeaterOrderBelow
+	RepeaterOrderAbove                            = scene.RepeaterOrderAbove
 	FootageTimecodeDisplayStartTypeStart0         = scene.FootageTimecodeDisplayStartTypeStart0
 	FootageTimecodeDisplayStartTypeUseSourceMedia = scene.FootageTimecodeDisplayStartTypeUseSourceMedia
 	FramesCountTypeStart0                         = scene.FramesCountTypeStart0
