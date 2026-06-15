@@ -87,6 +87,17 @@ var textAnimatorsRotXBody []byte
 //go:embed templates/text_animators_roty_body.bin
 var textAnimatorsRotYBody []byte
 
+// An AE-native, fully-materialized "ADBE Text Range Advanced" group (all 10
+// params carry a cdat). The Advanced group is otherwise elided on a fresh
+// animator's selector, so SetTextRangeAdvanced replaces the elided group with a
+// clone of this, resets every slot to its AE default, then overwrites the
+// caller's params. RE'd from re_text_range_advanced.aep (AE 2020); Smoothness is
+// hidden in the AE UI unless Shape=Square but its slot still materializes when
+// Shape is non-default. Regen via test_data/gen_text_range_advanced_template.jsx.
+//
+//go:embed templates/text_range_advanced_body.bin
+var textRangeAdvancedBody []byte
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -105,7 +116,58 @@ const (
 	matchNameTextSkew          = "ADBE Text Skew"
 	matchNameTextRotationX     = "ADBE Text Rotation X"
 	matchNameTextRotationY     = "ADBE Text Rotation Y"
+
+	matchNameTextSelectors          = "ADBE Text Selectors"
+	matchNameTextSelector           = "ADBE Text Selector"
+	matchNameTextRangeAdvanced      = "ADBE Text Range Advanced"
+	matchNameTextRangeUnits         = "ADBE Text Range Units"
+	matchNameTextRangeType2         = "ADBE Text Range Type2"
+	matchNameTextSelectorMode       = "ADBE Text Selector Mode"
+	matchNameTextSelectorMaxAmount  = "ADBE Text Selector Max Amount"
+	matchNameTextRangeShape         = "ADBE Text Range Shape"
+	matchNameTextSelectorSmoothness = "ADBE Text Selector Smoothness"
+	matchNameTextLevelsMaxEase      = "ADBE Text Levels Max Ease"
+	matchNameTextLevelsMinEase      = "ADBE Text Levels Min Ease"
+	matchNameTextRandomizeOrder     = "ADBE Text Randomize Order"
+	matchNameTextRandomSeed         = "ADBE Text Random Seed"
 )
+
+// TextRangeAdvanced holds the "ADBE Text Range Advanced" sub-params of a Range
+// Selector. All are 1D scalars on disk (enums are 1-based indices). Build one
+// with DefaultTextRangeAdvanced and tweak the fields you want, then pass it to
+// SetTextRangeAdvanced. Enum codings:
+//
+//	Units:          1=Percentage, 2=Index
+//	BasedOn:        1=Characters, 2=Characters Excluding Spaces, 3=Words, 4=Lines
+//	Mode:           1=Add, 2=Subtract, 3=Intersect, 4=Min, 5=Max, 6=Difference
+//	Shape:          1=Square, 2=Ramp Up, 3=Ramp Down, 4=Triangle, 5=Round, 6=Smooth
+//	RandomizeOrder: 0=off, 1=on
+//
+// Amount / Smoothness / EaseHigh / EaseLow are percentages; RandomSeed is an
+// integer-valued scalar. (Smoothness only affects Shape=Square, per AE.)
+type TextRangeAdvanced struct {
+	Units          float64
+	BasedOn        float64
+	Mode           float64
+	Amount         float64
+	Shape          float64
+	Smoothness     float64
+	EaseHigh       float64
+	EaseLow        float64
+	RandomizeOrder float64
+	RandomSeed     float64
+}
+
+// DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults
+// (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
+// Smoothness=100, eases=0, no randomize). Tweak fields then pass to
+// SetTextRangeAdvanced.
+func DefaultTextRangeAdvanced() TextRangeAdvanced {
+	return TextRangeAdvanced{
+		Units: 1, BasedOn: 1, Mode: 1, Amount: 100, Shape: 1,
+		Smoothness: 100, EaseHigh: 0, EaseLow: 0, RandomizeOrder: 0, RandomSeed: 0,
+	}
+}
 
 var animatorTmplCache sync.Map // first-byte ptr → *animatorTmplEntry
 
@@ -625,6 +687,70 @@ func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rang
 // (Full contract lives on the aep.AddTextStrokeColorAnimator facade.)
 func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return addTextColorLeafAnimator(layer, textAnimatorsStrokeColorBody, matchNameTextStrokeColor, "AddTextStrokeColorAnimator", r, g, b, a, rangeStart, rangeEnd, rangeOffset)
+}
+
+// SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text
+// animator's Range Selector. The Advanced group is elided on a fresh selector,
+// so this replaces it with a fully-materialized clone (from the embedded
+// AE-native template), resets every slot to its AE default, then writes adv's
+// values. Idempotent — calling it again re-materializes from the template.
+// (Full contract lives on the aep.SetTextRangeAdvanced facade.)
+func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error {
+	if layer == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return fmt.Errorf("SetTextRangeAdvanced: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: layer %q has no Text Properties group (round-trip via aep.Reopen first)", layer.Name)
+	}
+	animators := childGroupChunk(tp, matchNameTextAnimators)
+	if animators == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: layer %q has no Text Animators (add an animator first)", layer.Name)
+	}
+	anim := childGroupChunk(animators, matchNameTextAnimator)
+	if anim == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: no animator present")
+	}
+	selectors := childGroupChunk(anim, matchNameTextSelectors)
+	if selectors == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: animator has no Text Selectors")
+	}
+	sel := childGroupChunk(selectors, matchNameTextSelector)
+	if sel == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: animator has no Range Selector")
+	}
+	advGroup := childGroupChunk(sel, matchNameTextRangeAdvanced)
+	if advGroup == nil {
+		return fmt.Errorf("SetTextRangeAdvanced: selector has no Range Advanced group")
+	}
+	tmpl, err := animatorTemplate(textRangeAdvancedBody)
+	if err != nil {
+		return err
+	}
+	advGroup.Children = deepCloneChunk(tmpl).Children
+	for _, sl := range []struct {
+		name string
+		val  float64
+	}{
+		{matchNameTextRangeUnits, adv.Units},
+		{matchNameTextRangeType2, adv.BasedOn},
+		{matchNameTextSelectorMode, adv.Mode},
+		{matchNameTextSelectorMaxAmount, adv.Amount},
+		{matchNameTextRangeShape, adv.Shape},
+		{matchNameTextSelectorSmoothness, adv.Smoothness},
+		{matchNameTextLevelsMaxEase, adv.EaseHigh},
+		{matchNameTextLevelsMinEase, adv.EaseLow},
+		{matchNameTextRandomizeOrder, adv.RandomizeOrder},
+		{matchNameTextRandomSeed, adv.RandomSeed},
+	} {
+		if !overwriteScalarCdat(advGroup, sl.name, sl.val) {
+			return fmt.Errorf("SetTextRangeAdvanced: template missing %q cdat slot", sl.name)
+		}
+	}
+	return nil
 }
 
 // scalarTdbs finds the first tdmn == matchName anywhere under root and returns

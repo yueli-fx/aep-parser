@@ -249,6 +249,39 @@ Order「可达但视觉惰性」家族的诚实收口。Skew Axis 同理（Skew=
 机制证：**1D scalar / color leaf 加 text animator 已是纯模板抽取 + 一行 facade**，Go 侧真·免费；
 真正的工作量与门槛全在「每 leaf 设计一个可像素门禁的作用面签名」。
 
+## Range Advanced（Selector 高级参数，2026-06-16）
+
+`SetTextRangeAdvanced(layer, TextRangeAdvanced)` —— 一次设全 10 个 Range Selector「高级」子参数
+（住 `ADBE Text Range Advanced` 子组，全 vtype 6417 1D scalar，枚举=1-based index）：
+
+| match-name | 默认 | 含义 |
+|---|---|---|
+| ADBE Text Range Units / Type2 | 1 | Units（1=%/2=Index）/ Based On（1=Chars/2=ExclSpaces/3=Words/4=Lines）|
+| ADBE Text Selector Mode | 1 | Mode（1=Add/2=Subtract/3=Intersect/4=Min/5=Max/6=Difference）|
+| ADBE Text Selector Max Amount | 100 | **Amount %**（动画器作用强度）|
+| ADBE Text Range Shape | 1 | Shape（1=Square/2=RampUp/3=RampDown/4=Triangle/5=Round/6=Smooth）|
+| ADBE Text Selector Smoothness | 100 | Smoothness %（**仅 Shape=Square 生效**）|
+| ADBE Text Levels Max/Min Ease | 0 | Ease High/Low |
+| ADBE Text Randomize Order / Random Seed | 0 | 随机化 |
+
+**机制**：Advanced 组在新建动画器上 elided（仅 tdsb/tdsn/GroupEnd）。setter 用一个 AE-native
+**全 materialize** 模板（`templates/text_range_advanced_body.bin`）整组 replace elided Advanced 组的
+children，再逐 cdat[0:8] 覆写为 caller 值（`DefaultTextRangeAdvanced()` 给默认基线）。
+
+**RE gotcha（两条）**：
+1. **enum set 使 live ExtendScript ref 失效**（同 shape addProperty stale-ref）——materialize 模板
+   的 jsx 必须每个 set 自己 step()/重导航，否则跑到第 6 个炸。
+2. **Smoothness 在 AE UI 里 Shape≠Square 时被隐藏**，`setValue` 抛「属性被隐藏」。但**Shape 非默认时
+   AE 仍持久化 Smoothness 的 cdat slot**（值=默认 100）——故单 fixture（Shape=2）即拿到全 10 slot，
+   无需双 fixture 合并（一度以为要 synthesis-merge，实测 fixture A 已含全 10）。
+
+**Amount 双版本 render-gate PASS**（`text_range_advanced_shipgate_test.go`，A/B 差分单帧：两文字层仅
+Amount 异，皆 Opacity-0 全选——TXTA Amount=100 → 隐（top spread=0）/ TXTB Amount=20 → 显（bottom
+spread=159），AE2020≡AE2025）。**其余 9 参数 round-trip 验证**（全 cdat 存活，`TestTextRangeAdvanced_RoundTrip`），
+**render gate evidence-defer**：Mode 需多 Selector 才有视觉、Smoothness 仅 Shape=Square、Units/BasedOn/
+Randomize/Seed 改的是「选中哪些字」非简单亮度、Shape/Ease 是 falloff 轮廓 polish——均无干净独立像素签名，
+机制（写+AE 接受+存活）已证。
+
 ## 相关
 - [[property-indexed-group-structural-re.md]] — `ADBE Text Animators` 是 INDEXED_GROUP，
   结构性 op 共享机制；本案是其「从零创建 child」的补全
@@ -278,6 +311,10 @@ Order「可达但视觉惰性」家族的诚实收口。Skew Axis 同理（Skew=
   多维编码器，只是 AnimateVectorKeyframes 硬编码 spatial → 抽私有核 + 非 spatial 公开入口，零新字节代码）。
   `AnimateTextScale` 走它，单测断言 value@0x08/bpk128/0x38 留空，双版本 render gate PASS（ink 面积 2940→5879）。
   **animate-leaf 方向全收口**（1D+3D/4D spatial+非 spatial 3D 全 ship）
+- 2026-06-16 Range Advanced：`SetTextRangeAdvanced`（全 10 子参数一次设，全 materialize 模板 replace
+  elided Advanced 组 + 逐 cdat 覆写）。Amount A/B 差分单帧双版本 render-gate PASS（top=0/bottom=159），
+  其余 9 round-trip 验证 + render gate evidence-defer。gotcha：enum set 失效 live ref（每 set 重导航）；
+  Smoothness Shape≠Square 隐藏但 slot 仍持久化（单 fixture 即全 10 slot）。详上节
 - 2026-06-16 free-neighbor leaves 收口：5 个新 Add*Animator（Fill/Stroke Opacity·Stroke Width·Stroke
   Color·Skew）双版本渲染 gate PASS（表驱动 + 通用 verify jsx，每 leaf 一个作用面签名，AE2020≡AE2025）；
   Rotation X/Y evidence-based defer（2D 视觉惰性，bbox 三帧全同 → 需逐字 3D；facade 保留+round-trip 自验+标

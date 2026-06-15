@@ -972,6 +972,38 @@ func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, 
 	return serializer.AddTextStrokeColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
 
+// TextRangeAdvanced holds the "Advanced" sub-params of a text animator's Range
+// Selector (Units / Based On / Mode / Amount / Shape / Smoothness / Ease High·Low
+// / Randomize Order / Random Seed). See DefaultTextRangeAdvanced + the type doc
+// for the field meanings and enum codings.
+type TextRangeAdvanced = serializer.TextRangeAdvanced
+
+// DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults
+// (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
+// Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass
+// the result to SetTextRangeAdvanced.
+func DefaultTextRangeAdvanced() TextRangeAdvanced { return serializer.DefaultTextRangeAdvanced() }
+
+// SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text
+// animator's Range Selector — the selector-shaping controls behind a kinetic-
+// typography reveal (how strongly the animator applies via Amount, the selection
+// falloff Shape, the combination Mode for multi-selector setups, etc.). The
+// Advanced group is elided on a fresh selector, so this materializes it from an
+// embedded AE-native template, resets every slot to its AE default, then writes
+// adv's values; it is idempotent (re-materializes on each call). Build adv with
+// DefaultTextRangeAdvanced and tweak fields.
+//
+// Refused: non-text layers, text layers built by New* that were never parsed
+// (call aep.Reopen first), and layers with no text animator (add one first).
+//
+// Alpha / structural — Amount is double-version render-gated; the other params
+// round-trip (write + survive AE) but their visual effect is selector-internal /
+// coupled (Mode needs multiple selectors, Smoothness only affects Shape=Square),
+// so they are not individually render-gated. Free function (CLAUDE.md #2).
+func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error {
+	return serializer.SetTextRangeAdvanced(layer, adv)
+}
+
 // AnimateTextRangeOffset keyframes a text animator's Range Selector Offset,
 // turning a static reveal into an animated sweep — the kinetic-typography
 // payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the

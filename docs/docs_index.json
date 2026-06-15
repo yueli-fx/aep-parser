@@ -843,6 +843,13 @@
       "rw": "read-only",
       "summary": "WorkAreaStartFrame returns the comp's work-area start as a frame count."
     },
+    "DefaultTextRangeAdvanced": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#defaulttextrangeadvanced",
+      "signature": "func DefaultTextRangeAdvanced() TextRangeAdvanced",
+      "summary": "DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass the result to SetTextRangeAdvanced."
+    },
     "DeleteKeyframe": {
       "kind": "func",
       "file": "property.md",
@@ -5001,6 +5008,13 @@
       "signature": "func SetRenderer(c *Composition, name string) error",
       "summary": "SetRenderer switches the composition's 3D rendering engine. The name may be either a binary prin match_name (\"ADBE Escher\" / \"ADBE Calder\" / \"ADBE Ernst\" / \"ADBE Picasso\") or an ExtendScript module name (\"ADBE Advanced 3d\" → \"ADBE Escher\"); it is normalized to the binary name. The binary match_name + display name are rewritten in the prin chunk (length-preserving) and the prda chunk is replaced with the engine's default options (structural). Returns an error for an unknown renderer, a comp built outside the parser (no prin/prda back-ref), a comp whose prin is not the expected 104 bytes, or if the mutation surfaces a parser warning (rolled back)."
     },
+    "SetTextRangeAdvanced": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#settextrangeadvanced",
+      "signature": "func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error",
+      "summary": "SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). The Advanced group is elided on a fresh selector, so this materializes it from an embedded AE-native template, resets every slot to its AE default, then writes adv's values; it is idempotent (re-materializes on each call). Build adv with DefaultTextRangeAdvanced and tweak fields."
+    },
     "ShapePath": {
       "kind": "type",
       "file": "shape.md",
@@ -5381,6 +5395,12 @@
       "signature": "func (d TextParagraphDirection) String() string",
       "rw": "read-only",
       "summary": "String returns the human-readable name."
+    },
+    "TextRangeAdvanced": {
+      "kind": "type",
+      "file": "text.md",
+      "anchor": "#textrangeadvanced-object",
+      "summary": "TextRangeAdvanced holds the \"Advanced\" sub-params of a text animator's Range Selector (Units / Based On / Mode / Amount / Shape / Smoothness / Ease High·Low / Randomize Order / Random Seed). See DefaultTextRangeAdvanced + the type doc for the field meanings and enum codings."
     },
     "TextSource": {
       "kind": "type",

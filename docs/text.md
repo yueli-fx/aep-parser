@@ -701,6 +701,10 @@ const (
 )
 ```
 
+# TextRangeAdvanced object
+
+TextRangeAdvanced holds the "Advanced" sub-params of a text animator's Range Selector (Units / Based On / Mode / Amount / Shape / Smoothness / Ease High·Low / Randomize Order / Random Seed). See DefaultTextRangeAdvanced + the type doc for the field meanings and enum codings.
+
 ## Functions
 
 ### TextEncodedByteLen
@@ -876,6 +880,26 @@ Same mechanics as AddTextColorAnimator (shared splice + Range Selector path); St
 Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
 
 Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+
+### SetTextRangeAdvanced
+
+```go
+func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error
+```
+
+SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). The Advanced group is elided on a fresh selector, so this materializes it from an embedded AE-native template, resets every slot to its AE default, then writes adv's values; it is idempotent (re-materializes on each call). Build adv with DefaultTextRangeAdvanced and tweak fields.
+
+Refused: non-text layers, text layers built by New* that were never parsed (call aep.Reopen first), and layers with no text animator (add one first).
+
+Alpha / structural — Amount is double-version render-gated; the other params round-trip (write + survive AE) but their visual effect is selector-internal / coupled (Mode needs multiple selectors, Smoothness only affects Shape=Square), so they are not individually render-gated. Free function (CLAUDE.md #2).
+
+### DefaultTextRangeAdvanced
+
+```go
+func DefaultTextRangeAdvanced() TextRangeAdvanced
+```
+
+DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass the result to SetTextRangeAdvanced.
 
 ### AnimateTextRangeOffset
 
