@@ -781,6 +781,102 @@ Refused: non-text layers, and text layers built by New* that were never parsed (
 
 Alpha / structural — the animator chunk structure is RE'd + double-version render-gated, but the typed parameter accessors are not yet wired; tune further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
 
+### AddTextFillOpacityAnimator
+
+```go
+func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any stroke intact). opacity (0–100) is applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset for a fill-only reveal.
+
+Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path); Fill Opacity is a 1D scalar with the same on-disk layout as Opacity.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+
+### AddTextStrokeOpacityAnimator
+
+```go
+func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator with a Range Selector to a text layer — it fades only the glyph stroke. opacity (0–100) is applied to the selected characters' stroke; the text must carry a stroke (apply-stroke + non-zero stroke width) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+
+Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path); Stroke Opacity is a 1D scalar with the same on-disk layout as Opacity.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+
+### AddTextStrokeWidthAnimator
+
+```go
+func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextStrokeWidthAnimator adds a per-character Stroke Width animator with a Range Selector to a text layer — it grows / shrinks the glyph stroke. width (pixels) is applied to the selected characters' stroke; the text must carry a stroke (apply-stroke enabled) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+
+Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path); Stroke Width is a 1D scalar with the same on-disk layout as Opacity.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+
+### AddTextSkewAnimator
+
+```go
+func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextSkewAnimator adds a per-character Skew animator with a Range Selector to a text layer — the kinetic-typography primitive that shears characters into place. skew is the shear angle in degrees applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset for a shear-in.
+
+Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path); Skew is a 1D scalar with the same on-disk layout as Opacity.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+
+### AddTextRotationXAnimator
+
+```go
+func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextRotationXAnimator adds a per-character Rotation X animator with a Range Selector to a text layer — a 3D rotation about each character's horizontal axis (the characters tumble forward / back). rotation is the angle in degrees applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+
+Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path); Rotation X is a 1D scalar (degrees). AE auto-adds an inert companion Z-rotation slot to the template, which stays at its default.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / write-only — the value is written and survives AE (round-trip verified), but a per-character 3D rotation is VISUALLY INERT in a plain 2D text layer (it needs Per-character 3D enabled, a separate 3D capability not yet supported). Not render-gated; see incidents/text-animator-create-re.md. Free function (CLAUDE.md #2).
+
+### AddTextRotationYAnimator
+
+```go
+func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextRotationYAnimator adds a per-character Rotation Y animator with a Range Selector to a text layer — a 3D rotation about each character's vertical axis (the characters swing left / right). rotation is the angle in degrees applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+
+Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path); Rotation Y is a 1D scalar (degrees). AE auto-adds an inert companion Z-rotation slot to the template, which stays at its default.
+
+Alpha / write-only — the value is written and survives AE (round-trip verified), but a per-character 3D rotation is VISUALLY INERT in a plain 2D text layer (it needs Per-character 3D enabled, a separate 3D capability not yet supported). Not render-gated; see incidents/text-animator-create-re.md. Free function (CLAUDE.md #2).
+
+### AddTextStrokeColorAnimator
+
+```go
+func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextStrokeColorAnimator adds a per-character Stroke Color animator with a Range Selector to a text layer — it tints only the glyph stroke. r / g / b / a is the target colour (each channel 0..1) applied to the selected characters' stroke; the text must carry a stroke (apply-stroke + non-zero stroke width) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+
+Same mechanics as AddTextColorAnimator (shared splice + Range Selector path); Stroke Color is a 4-channel colour cdat stored as [A,R,G,B] × 255 f64 BE, the same on-disk encoding as shape Fill/Stroke and the text Fill Color leaf.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+
 ### AnimateTextRangeOffset
 
 ```go

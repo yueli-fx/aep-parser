@@ -58,6 +58,35 @@ var textAnimatorsRotationBody []byte
 //go:embed templates/text_animators_color_body.bin
 var textAnimatorsColorBody []byte
 
+// Free-neighbor leaves (same on-disk layout as the five above): every one is a
+// 1D scalar (vtype 6417, 40B cdat f64 @ [0:8] — identical to Opacity/Rotation)
+// except Stroke Color (vtype 6418 colour, 96B cdat [A,R,G,B]×255 — identical to
+// Fill Color). Each body materializes only its own leaf (AE elides the rest);
+// the Rotation X/Y bodies additionally carry an inert companion Rotation (Z=0,
+// default) that AE auto-adds — overwriteScalarCdat targets the X/Y match-name so
+// the companion stays default. Regen via test_data/gen_text_anim_neighbor_templates.jsx.
+//
+//go:embed templates/text_animators_fillopacity_body.bin
+var textAnimatorsFillOpacityBody []byte
+
+//go:embed templates/text_animators_strokeopacity_body.bin
+var textAnimatorsStrokeOpacityBody []byte
+
+//go:embed templates/text_animators_strokecolor_body.bin
+var textAnimatorsStrokeColorBody []byte
+
+//go:embed templates/text_animators_strokewidth_body.bin
+var textAnimatorsStrokeWidthBody []byte
+
+//go:embed templates/text_animators_skew_body.bin
+var textAnimatorsSkewBody []byte
+
+//go:embed templates/text_animators_rotx_body.bin
+var textAnimatorsRotXBody []byte
+
+//go:embed templates/text_animators_roty_body.bin
+var textAnimatorsRotYBody []byte
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -69,6 +98,13 @@ const (
 	matchNameTextScale3D       = "ADBE Text Scale 3D"
 	matchNameTextRotation      = "ADBE Text Rotation"
 	matchNameTextFillColor     = "ADBE Text Fill Color"
+	matchNameTextFillOpacity   = "ADBE Text Fill Opacity"
+	matchNameTextStrokeOpacity = "ADBE Text Stroke Opacity"
+	matchNameTextStrokeColor   = "ADBE Text Stroke Color"
+	matchNameTextStrokeWidth   = "ADBE Text Stroke Width"
+	matchNameTextSkew          = "ADBE Text Skew"
+	matchNameTextRotationX     = "ADBE Text Rotation X"
+	matchNameTextRotationY     = "ADBE Text Rotation Y"
 )
 
 var animatorTmplCache sync.Map // first-byte ptr → *animatorTmplEntry
@@ -461,6 +497,134 @@ func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeO
 	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
 	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
 	return node, nil
+}
+
+// addTextScalarLeafAnimator is the shared body of every 1D-scalar
+// AddText*Animator facade (Fill/Stroke Opacity, Stroke Width, Skew, Rotation
+// X·Y): it splices one animator from body into the layer's text-property tree,
+// overwrites the leaf's scalar cdat (f64 @ [0:8]) with value, and sets the Range
+// Selector. matchName is the driven leaf; who is the caller name for errors.
+func addTextScalarLeafAnimator(layer *Layer, body []byte, matchName, who string, value, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("%s: layer is nil", who)
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("%s: layer %q is not a text layer", who, layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("%s: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", who, layer.Name)
+	}
+	tmpl, err := animatorTemplate(body)
+	if err != nil {
+		return nil, err
+	}
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
+	}
+	if !overwriteScalarCdat(payload, matchName, value) {
+		undo()
+		return nil, fmt.Errorf("%s: template missing %q cdat slot", who, matchName)
+	}
+	if err := setRangeSelector(payload, undo, who, rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
+	}
+	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// addTextColorLeafAnimator is addTextScalarLeafAnimator for a 4-channel colour
+// leaf (Stroke Color): r/g/b/a are 0..1 and written as the on-disk [A,R,G,B]×255
+// cdat (the same encoding shape Fill/Stroke and Fill Color use).
+func addTextColorLeafAnimator(layer *Layer, body []byte, matchName, who string, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("%s: layer is nil", who)
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("%s: layer %q is not a text layer", who, layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("%s: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", who, layer.Name)
+	}
+	tmpl, err := animatorTemplate(body)
+	if err != nil {
+		return nil, err
+	}
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
+	}
+	if !overwriteVectorCdat(payload, matchName, []float64{a * 255, r * 255, g * 255, b * 255}) {
+		undo()
+		return nil, fmt.Errorf("%s: template missing %q cdat slot", who, matchName)
+	}
+	if err := setRangeSelector(payload, undo, who, rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
+	}
+	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextFillOpacityAnimator adds a per-character Fill Opacity animator + Range
+// Selector to a text layer. opacity (0–100) is applied to selected characters;
+// rangeStart/rangeEnd/rangeOffset are the Range Selector bounds in percent.
+// (Full contract lives on the aep.AddTextFillOpacityAnimator facade.)
+func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsFillOpacityBody, matchNameTextFillOpacity, "AddTextFillOpacityAnimator", opacity, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator +
+// Range Selector to a text layer. opacity (0–100) is applied to selected
+// characters' stroke; the text must carry a stroke for this to be visible.
+// (Full contract lives on the aep.AddTextStrokeOpacityAnimator facade.)
+func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsStrokeOpacityBody, matchNameTextStrokeOpacity, "AddTextStrokeOpacityAnimator", opacity, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextStrokeWidthAnimator adds a per-character Stroke Width animator + Range
+// Selector to a text layer. width (pixels) is applied to selected characters'
+// stroke; the text must carry a stroke for this to be visible.
+// (Full contract lives on the aep.AddTextStrokeWidthAnimator facade.)
+func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsStrokeWidthBody, matchNameTextStrokeWidth, "AddTextStrokeWidthAnimator", width, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextSkewAnimator adds a per-character Skew animator + Range Selector to a
+// text layer. skew is the shear angle (degrees) applied to selected characters;
+// rangeStart/rangeEnd/rangeOffset are the Range Selector bounds in percent.
+// (Full contract lives on the aep.AddTextSkewAnimator facade.)
+func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsSkewBody, matchNameTextSkew, "AddTextSkewAnimator", skew, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextRotationXAnimator adds a per-character Rotation X (3D, about the
+// horizontal axis) animator + Range Selector to a text layer. rotation is the
+// angle in degrees applied to selected characters; rangeStart/rangeEnd/
+// rangeOffset are the Range Selector bounds in percent.
+// (Full contract lives on the aep.AddTextRotationXAnimator facade.)
+func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsRotXBody, matchNameTextRotationX, "AddTextRotationXAnimator", rotation, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextRotationYAnimator adds a per-character Rotation Y (3D, about the
+// vertical axis) animator + Range Selector to a text layer. rotation is the
+// angle in degrees applied to selected characters; rangeStart/rangeEnd/
+// rangeOffset are the Range Selector bounds in percent.
+// (Full contract lives on the aep.AddTextRotationYAnimator facade.)
+func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsRotYBody, matchNameTextRotationY, "AddTextRotationYAnimator", rotation, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextStrokeColorAnimator adds a per-character Stroke Color animator + Range
+// Selector to a text layer. r/g/b/a (0..1) is the colour applied to selected
+// characters' stroke; the text must carry a stroke for this to be visible.
+// (Full contract lives on the aep.AddTextStrokeColorAnimator facade.)
+func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextColorLeafAnimator(layer, textAnimatorsStrokeColorBody, matchNameTextStrokeColor, "AddTextStrokeColorAnimator", r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
 
 // scalarTdbs finds the first tdmn == matchName anywhere under root and returns

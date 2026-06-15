@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing/extending text animators (AddTextOpacityAnimator / AnimateTextRangeOffset); adding a new animator property type (Position/Scale/Color); wondering where Text Animators live vs btdk; building a property *Property over a spliced chunk to reuse AnimateScalarKeyframes
 applies_to: [text, text-animator, kinetic-typography, range-selector, ADBE Text Animators, ADBE Text Animator, synthesis-insert, indexed-group, AnimateScalarKeyframes, mutate-text-animator]
-last_updated: 2026-06-15
+last_updated: 2026-06-16
 resolved_by:
 ---
 
@@ -195,15 +195,56 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
   不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
   Opacity/Position 混排已测。
+- **免费近邻已收口（2026-06-16，见下节）**：Fill Opacity / Stroke Opacity / Stroke Width / Stroke
+  Color / Skew 五个双版本渲染 gate PASS；Rotation X/Y evidence-based defer（2D 视觉惰性）。
 - **按需扩**（同 vein，抽模板 + 一个 facade）：Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
-  Wiggly/Expression Selector。同布局的免费近邻：Fill Opacity / Stroke Color / Stroke Width / Skew /
-  Rotation X·Y（各 1D/color，照 overwriteScalar/VectorCdat 抽模板即可）。**animate leaf 已全覆盖**——1D 复用
+  Wiggly/Expression Selector。**animate leaf 已全覆盖**——1D 复用
   `animateTextScalarLeaf`、spatial 多维复用 `animateTextVectorLeaf(...,false,...)`、非 spatial 多维复用
   `animateTextVectorLeaf(...,true,...)`，新 leaf 类型零额外 animate 代码。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
   Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；**Color→ink 像素均值 RGB（绿通道单调）**。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
   仍仅 Go round-trip = Alpha 未单独 ship-gate。
+
+## Free-neighbor leaves 收口（2026-06-16）
+
+用户点名「文字免费近邻收口」。RE 确认 7 个候选 leaf 全有效（`probe_text_anim_neighbors.jsx`，
+AE 2020），vtype 完全落在既有机制：
+
+| leaf | match-name | vtype | 复用 |
+|---|---|---|---|
+| Fill Opacity / Stroke Opacity / Stroke Width / Skew / Skew Axis / Rotation X / Rotation Y | 6417 1D scalar | `overwriteScalarCdat`（40B cdat f64@[0:8]，同 Opacity/Rotation） |
+| Stroke Color | 6418 color | `overwriteVectorCdat`（96B cdat [A,R,G,B]×255，同 Fill Color） |
+
+落地：一次 AE 调用批量 author 7 个 materialized .aep（`gen_text_anim_neighbor_templates.jsx`，
+每 leaf 一个 fresh project，Range Start/End/Offset 全非默认 → 全 slot materialize），逐个
+`extract_text_animator <src> <out>` 抽 `templates/text_animators_<key>_body.bin`。Go 侧抽两个私有
+helper（`addTextScalarLeafAnimator` / `addTextColorLeafAnimator`），7 个 facade 各一行委托。
+
+**gotcha**：加 Rotation X（或 Y）时 AE **auto-materialize 一个伴生 `ADBE Text Rotation`（Z=0，默认）**
+——rotx/roty 模板比纯 scalar 大 242B（多一个 tdmn+tdb4 124B+cdat 40B）。`overwriteScalarCdat`
+按 match-name 精确定位 `ADBE Text Rotation X`/`Y`，伴生 Z 留默认（无副作用）。
+
+**5 个双版本渲染 gate PASS**（`text_animator_neighbor_shipgate_test.go`，表驱动 + 通用
+`verify_text_animator_neighbor.jsx`，每 leaf 一个作用面签名，AE2020≡AE2025 逐数字一致）：
+- Fill Opacity → 全帧亮度 spread（隐 0 → 显 199）
+- Stroke Opacity → stroke ink 面积（隐 0 → 显 4362）
+- Stroke Width → stroke ink 面积（粗 10797 → 细 1780）
+- Stroke Color → ink 均值绿通道（红 0 → 白 243）
+- Skew → 单字 ink bbox 长宽比（剪切宽 2.00 → 正立 0.65）
+
+stroke 三连的 gate 在 verify jsx 把 base text 设 fill-off + 白 stroke（采样 fixture 关切，
+非被测写），让 stroke ink 成唯一信号。
+
+**Rotation X / Y = evidence-based defer（reachable-but-visually-inert）**：facade 写值正确、
+AE 接受、值 round-trip 存活（`TestTextRotationXY_RoundTrip` Go 自验），但在**平面 2D 文字层
+里视觉完全无效**——实测 bbox 三帧逐像素相同（高 160/160/160，宽 104/104/104，n 全 947）。
+per-character 3D 旋转需先 enable「逐字 3D」（Per-character 3D，独立的 3D 能力，未支持）。
+故 facade 标 Alpha/write-only，**不进渲染 gate**（红线4：不可像素门禁则不假绿）。同 Repeater
+Order「可达但视觉惰性」家族的诚实收口。Skew Axis 同理（Skew=0 时独立不可门禁，未单出 facade）。
+
+机制证：**1D scalar / color leaf 加 text animator 已是纯模板抽取 + 一行 facade**，Go 侧真·免费；
+真正的工作量与门槛全在「每 leaf 设计一个可像素门禁的作用面签名」。
 
 ## 相关
 - [[property-indexed-group-structural-re.md]] — `ADBE Text Animators` 是 INDEXED_GROUP，
@@ -234,3 +275,7 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
   多维编码器，只是 AnimateVectorKeyframes 硬编码 spatial → 抽私有核 + 非 spatial 公开入口，零新字节代码）。
   `AnimateTextScale` 走它，单测断言 value@0x08/bpk128/0x38 留空，双版本 render gate PASS（ink 面积 2940→5879）。
   **animate-leaf 方向全收口**（1D+3D/4D spatial+非 spatial 3D 全 ship）
+- 2026-06-16 free-neighbor leaves 收口：5 个新 Add*Animator（Fill/Stroke Opacity·Stroke Width·Stroke
+  Color·Skew）双版本渲染 gate PASS（表驱动 + 通用 verify jsx，每 leaf 一个作用面签名，AE2020≡AE2025）；
+  Rotation X/Y evidence-based defer（2D 视觉惰性，bbox 三帧全同 → 需逐字 3D；facade 保留+round-trip 自验+标
+  Alpha/write-only）。Go 侧抽 2 私有 helper，新 leaf = 抽模板 + 一行 facade。详上节

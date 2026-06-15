@@ -36,6 +36,13 @@
       "signature": "func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g. a colour wipe sweeping across the text). r / g / b / a is the target colour applied to the selected characters (each channel 0..1); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: set a target colour, Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the colour applies to the selected characters and resolves to the base text colour as the selection window slides off them."
     },
+    "AddTextFillOpacityAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextfillopacityanimator",
+      "signature": "func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any stroke intact). opacity (0–100) is applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset for a fill-only reveal."
+    },
     "AddTextOpacityAnimator": {
       "kind": "func",
       "file": "text.md",
@@ -57,12 +64,54 @@
       "signature": "func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "AddTextRotationAnimator adds a per-character Rotation animator with a Range Selector to a text layer — the kinetic-typography primitive that spins characters into place one at a time. rotation is the angle in degrees applied to the selected characters (each rotates about its own anchor); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: rotation 90, Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the rotation resolves to 0° as the selection window slides off the characters."
     },
+    "AddTextRotationXAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextrotationxanimator",
+      "signature": "func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextRotationXAnimator adds a per-character Rotation X animator with a Range Selector to a text layer — a 3D rotation about each character's horizontal axis (the characters tumble forward / back). rotation is the angle in degrees applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent."
+    },
+    "AddTextRotationYAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextrotationyanimator",
+      "signature": "func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextRotationYAnimator adds a per-character Rotation Y animator with a Range Selector to a text layer — a 3D rotation about each character's vertical axis (the characters swing left / right). rotation is the angle in degrees applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent."
+    },
     "AddTextScaleAnimator": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#addtextscaleanimator",
       "signature": "func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "AddTextScaleAnimator adds a per-character Scale 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that pops / grows characters into place one at a time. sx / sy / sz is the scale percent (100 = unchanged) applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: scale (0, 0, 100) for a pop-in (or an oversize like 220 for a shrink-in), Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the scale resolves to 100% as the selection window slides off the characters."
+    },
+    "AddTextSkewAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextskewanimator",
+      "signature": "func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextSkewAnimator adds a per-character Skew animator with a Range Selector to a text layer — the kinetic-typography primitive that shears characters into place. skew is the shear angle in degrees applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset for a shear-in."
+    },
+    "AddTextStrokeColorAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextstrokecoloranimator",
+      "signature": "func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextStrokeColorAnimator adds a per-character Stroke Color animator with a Range Selector to a text layer — it tints only the glyph stroke. r / g / b / a is the target colour (each channel 0..1) applied to the selected characters' stroke; the text must carry a stroke (apply-stroke + non-zero stroke width) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent."
+    },
+    "AddTextStrokeOpacityAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextstrokeopacityanimator",
+      "signature": "func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator with a Range Selector to a text layer — it fades only the glyph stroke. opacity (0–100) is applied to the selected characters' stroke; the text must carry a stroke (apply-stroke + non-zero stroke width) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent."
+    },
+    "AddTextStrokeWidthAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextstrokewidthanimator",
+      "signature": "func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextStrokeWidthAnimator adds a per-character Stroke Width animator with a Range Selector to a text layer — it grows / shrinks the glyph stroke. width (pixels) is applied to the selected characters' stroke; the text must carry a stroke (apply-stroke enabled) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent."
     },
     "AnimateEffectParam": {
       "kind": "func",
