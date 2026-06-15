@@ -106,6 +106,16 @@ var textRangeAdvancedBody []byte
 //go:embed templates/text_selector_body.bin
 var textSelectorBody []byte
 
+// An AE-native "ADBE Text Wiggly Selector" (all params elided → AE applies its
+// defaults: Temporal Freq 2/s, Max 100 / Min 0, so it wiggles the selection over
+// time). Spliced into an animator's "ADBE Text Selectors" group by
+// AddTextWigglySelector. Regen: extract_text_animator <fixture> <out> "ADBE Text Wiggly Selector".
+//
+//go:embed templates/text_wiggly_selector_body.bin
+var textWigglySelectorBody []byte
+
+const matchNameTextWigglySelector = "ADBE Text Wiggly Selector"
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -742,6 +752,51 @@ func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEProperty
 		return nil, err
 	}
 	node := &AEPropertyGroup{MatchName: matchNameTextSelector, Name: matchNameTextSelector}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextWigglySelector adds a Wiggly Selector to the layer's FIRST text
+// animator's "ADBE Text Selectors" group — a selector whose selection wobbles
+// randomly over time (the "wiggle" kinetic-typography primitive: characters
+// flicker / jitter in and out under the animator). The embedded selector uses
+// AE's defaults (Temporal Freq 2/s, Max 100 / Min 0), so it animates on its own.
+// Returns a stand-in node. (Full contract lives on the aep.AddTextWigglySelector facade.)
+func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextWigglySelector: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextWigglySelector: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextWigglySelector: layer %q has no Text Properties group (round-trip via aep.Reopen first)", layer.Name)
+	}
+	animators := childGroupChunk(tp, matchNameTextAnimators)
+	if animators == nil {
+		return nil, fmt.Errorf("AddTextWigglySelector: layer %q has no Text Animators (add an animator first)", layer.Name)
+	}
+	anim := childGroupChunk(animators, matchNameTextAnimator)
+	if anim == nil {
+		return nil, fmt.Errorf("AddTextWigglySelector: no animator present")
+	}
+	selectors := childGroupChunk(anim, matchNameTextSelectors)
+	if selectors == nil {
+		return nil, fmt.Errorf("AddTextWigglySelector: animator has no Text Selectors group")
+	}
+	tmpl, err := animatorTemplate(textWigglySelectorBody)
+	if err != nil {
+		return nil, err
+	}
+	payload := deepCloneChunk(tmpl)
+	at := groupEndIndex(selectors)
+	spliced := make([]*rifx.Chunk, 0, len(selectors.Children)+2)
+	spliced = append(spliced, selectors.Children[:at]...)
+	spliced = append(spliced, makeTdmn(matchNameTextWigglySelector), payload)
+	spliced = append(spliced, selectors.Children[at:]...)
+	selectors.Children = spliced
+	node := &AEPropertyGroup{MatchName: matchNameTextWigglySelector, Name: matchNameTextWigglySelector}
 	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
 	return node, nil
 }

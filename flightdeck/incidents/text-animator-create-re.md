@@ -197,8 +197,9 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
   Opacity/Position 混排已测。
 - **免费近邻已收口（2026-06-16，见下节）**：Fill Opacity / Stroke Opacity / Stroke Width / Stroke
   Color / Skew 五个双版本渲染 gate PASS；Rotation X/Y evidence-based defer（2D 视觉惰性）。
-- **按需扩**（同 vein，抽模板 + 一个 facade）：Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
-  Wiggly/Expression Selector。**animate leaf 已全覆盖**——1D 复用
+- **selector 家族已收口（2026-06-16）**：Range Advanced（`SetTextRangeAdvanced`，Amount gated）· 多 Selector
+  （`AddTextRangeSelector`，gated）· Wiggly（`AddTextWigglySelector`，gated）全 ship；Expressible Selector
+  evidence-defer（表达式驱动，库表达式未验证）。**animate leaf 已全覆盖**——1D 复用
   `animateTextScalarLeaf`、spatial 多维复用 `animateTextVectorLeaf(...,false,...)`、非 spatial 多维复用
   `animateTextVectorLeaf(...,true,...)`，新 leaf 类型零额外 animate 代码。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
@@ -248,6 +249,28 @@ Order「可达但视觉惰性」家族的诚实收口。Skew Axis 同理（Skew=
 
 机制证：**1D scalar / color leaf 加 text animator 已是纯模板抽取 + 一行 facade**，Go 侧真·免费；
 真正的工作量与门槛全在「每 leaf 设计一个可像素门禁的作用面签名」。
+
+## Wiggly Selector（2026-06-16）+ Expressible Selector（defer）
+
+RE（`probe_text_special_selectors.jsx`）：`ADBE Text Selectors` 接受两种特殊选择器（皆 NAMED 6213）：
+- **Wiggly Selector**（`ADBE Text Wiggly Selector`，10 params：Mode/Wiggly Max·Min Amount/Range Type2/
+  Temporal Freq/Character Correlation/Temporal·Spatial Phase/Wiggly Lock Dim/Random Seed）——选区随时间
+  随机摆动（但 per-seed 确定）。
+- **Expressible Selector**（`ADBE Text Expressible Selector`，2 params：Range Type2/Expressible Amount）——
+  Amount 由表达式驱动。
+
+**Wiggly 已 ship**：`AddTextWigglySelector(layer)` splice 一个全 elided 的 wiggly selector（AE 应用默认
+Temporal Freq 2/Max 100/Min 0 → 自动摆动，无关键帧）进 Selectors 组。**双版本 render-gate PASS**
+（`text_wiggly_selector_shipgate_test.go`，**时间变化签名**：opacity-0 + 空 range（End=0 选 0 字）+ wiggly →
+wiggle 独驱选区，render 3 帧两两 frameDiff 大（0-1=1660·1-2=2247·0-2=1333，每帧 spread=199 有字）→ 证选区随
+时间 re-select；AE2020≡AE2025 逐数字一致——确定性 wiggle）+ round-trip（wiggly tdmn 存活）。
+gotcha：probe 里 `canSetExpression`/无效 match-name 抛 uncaught → AE 脚本错误 modal → ae_run exit 2（非
+flake，是真 modal）；每 addProperty 独立 step()/去掉 canSetExpression 后绿。
+
+**Expressible Selector = evidence-based defer**：唯一有意义的 param（Expressible Amount）是**表达式驱动**，
+而本库表达式支持未经渲染验证（[[expression-enable-byte-pair]]：SetExpression 有 render-dead 情形，交付准则
+红线 a）。无可用表达式求值，facade 即非功能性——故 defer 到表达式引擎单独 gate 后再 ship。结构已 RE（可达、
+2 params）。
 
 ## 多 Selector（2026-06-16）
 
@@ -324,6 +347,9 @@ Randomize/Seed 改的是「选中哪些字」非简单亮度、Shape/Ease 是 fa
   多维编码器，只是 AnimateVectorKeyframes 硬编码 spatial → 抽私有核 + 非 spatial 公开入口，零新字节代码）。
   `AnimateTextScale` 走它，单测断言 value@0x08/bpk128/0x38 留空，双版本 render gate PASS（ink 面积 2940→5879）。
   **animate-leaf 方向全收口**（1D+3D/4D spatial+非 spatial 3D 全 ship）
+- 2026-06-16 Wiggly Selector：`AddTextWigglySelector`（splice elided wiggly selector，AE 默认参数自动摆动）。
+  时间变化签名双版本 render-gate PASS（3 帧两两 frameDiff 大、确定性）+ round-trip。Expressible Selector
+  evidence-defer（表达式驱动，库表达式支持未验证）。详上节
 - 2026-06-16 多 Selector：`AddTextRangeSelector`（`ADBE Text Selectors` 是 INDEXED 6214，splice 单
   selector 模板 + 覆写 Start/End/Offset）。A/B 差分双版本 render-gate PASS（1 选择器后半可见 199 / 2 选择器
   并集全隐 0）+ round-trip（count==2）。详上节

@@ -893,6 +893,18 @@ Same indexed-group splice vein as AddTextOpacityAnimator (the "ADBE Text Selecto
 
 Alpha / structural — RE'd + double-version render-gated (two selectors union to extend the selection). Free function (CLAUDE.md #2).
 
+### AddTextWigglySelector
+
+```go
+func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error)
+```
+
+AddTextWigglySelector adds a Wiggly Selector to the layer's FIRST text animator — a selector whose selection amount wobbles randomly (but deterministically per seed) over time, so the characters flicker / jitter in and out under the animator (the "wiggle" kinetic-typography primitive). The embedded selector uses AE's defaults (Temporal Freq 2/s, Max 100 / Min 0), so it animates on its own with no keyframes; combine it with a range selector via Mode, or use an empty range (End=0) so the wiggle drives selection alone.
+
+Same indexed-group splice vein as AddTextRangeSelector. Refused: non-text layers, text layers built by New* that were never parsed (call aep.Reopen first), and layers with no text animator. Returns a stand-in group node.
+
+Alpha / structural — RE'd + double-version render-gated (the rendered frames vary over time as the wiggle re-selects characters). Free function (CLAUDE.md #2).
+
 ### SetTextRangeAdvanced
 
 ```go
