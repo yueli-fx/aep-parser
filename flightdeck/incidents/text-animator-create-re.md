@@ -111,19 +111,31 @@ propertyType: 6214 INDEXED_GROUP · 6213 NAMED_GROUP · 6212 PROPERTY。
    扫光时字形从 220%→100% → ink 像素数单调缩（t0=1070→t1=693→t2=313，AE2020/2025 一致）。
    证 SIZE 变化，文字全程可见。
 
+## Rotation 动画器扩展（2026-06-15，第四个 leaf 类型）
+
+`AddTextRotationAnimator`，双版本渲染 gate PASS（`text_animator_rotation_shipgate_test.go`）。
+Go 侧真·免费（Rotation = vtype 6417 1D scalar，cdat 40B f64 @ [0:8]，**与 Opacity 同布局**，
+degrees 直存——`overwriteScalarCdat` 照搬）。难点全在 gate 签名：
+
+- **旋转不改面积/亮度/质心** → 上述签名全失效。解法：**单个不对称字符 "L" 的 ink 包围盒长宽比
+  (w/h)**。0°→竖(w/h<1)、90°→横(w/h>1)、45°→近方，长宽比单调。verify JSX 设 fontSize=240
+  放大单字以稳定测量。t0=1.52→t1=0.81→t2=0.65（AE2020/2025 一致），方向无关、mid 居中。
+- 模板 `templates/text_animators_rotation_body.bin`（`RE_TXANIM_MODE=rottemplate`：Rotation=45
+  + Start/End/Offset 全非默认）。Rotation tdbs 无 tdum/tduM（4 children，≠ Opacity 的 6）。
+
 ## 现状 / 边界
 
-- **已 ship**：Opacity 动画器、**Position 3D**、**Scale 3D**、Range Selector（参数化
-  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in 通用）。各双版本渲染 gate PASS。
+- **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation** 动画器、Range Selector（参数化
+  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in 通用）。各双版本渲染 gate PASS。
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
   不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
   Opacity/Position 混排已测。
-- **按需扩**（同 vein，抽模板 + 一个 facade）：Rotation（6417，同 scalar，照搬 Opacity，免费）、
-  Fill Color（6418，color cdat 布局待 RE）；Range Advanced（Mode/Shape/Smoothness/基于…）；
-  多 Selector；Wiggly/Expression Selector；**animate leaf 本身**（关键帧驱动 Position/Scale 值，非仅
+- **按需扩**（同 vein，抽模板 + 一个 facade）：Fill Color（6418，color cdat 布局待 RE，gate 签名 =
+  采样字形像素 RGB）；Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
+  Wiggly/Expression Selector；**animate leaf 本身**（关键帧驱动 Position/Scale/Rotation 值，非仅
   Range Offset）。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
-  Scale→ink 面积（像素数）；Rotation→（待定，需检测 per-glyph 朝向变化）；Color→采样字形像素 RGB。
+  Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；Color→采样字形像素 RGB。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
   仍仅 Go round-trip = Alpha 未单独 ship-gate。
 
@@ -140,3 +152,5 @@ propertyType: 6214 INDEXED_GROUP · 6213 NAMED_GROUP · 6212 PROPERTY。
   spliceTextAnimator 泛化），slide-in 双版本渲染 gate PASS（ink 垂直质心迁移 Δ=260px）
 - 2026-06-15 扩 Scale：AddTextScaleAnimator（3D 120B cdat，泛化机制零改动只抽模板+facade），
   shrink-in 双版本渲染 gate PASS（ink 面积 1070→313）
+- 2026-06-15 扩 Rotation：AddTextRotationAnimator（1D scalar 同 Opacity，Go 免费；gate 签名 =
+  单字 "L" ink 包围盒长宽比 1.52→0.65），spin-in 双版本渲染 gate PASS

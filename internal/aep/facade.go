@@ -778,6 +778,32 @@ func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeO
 	return serializer.AddTextScaleAnimator(layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset)
 }
 
+// AddTextRotationAnimator adds a per-character Rotation animator with a Range
+// Selector to a text layer — the kinetic-typography primitive that spins
+// characters into place one at a time. rotation is the angle in degrees applied
+// to the selected characters (each rotates about its own anchor); rangeStart /
+// rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical
+// reveal: rotation 90, Start=0/End=100, then sweep the Range Offset 0→100 over
+// time with AnimateTextRangeOffset — the rotation resolves to 0° as the
+// selection window slides off the characters.
+//
+// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector
+// path); Rotation is a 1D scalar like Opacity, so the embedded template drives a
+// Rotation leaf and the value is the angle (degrees). Fresh text layers carry no
+// Animators group, so the first animator splices the whole group into "ADBE Text
+// Properties"; later animators append into it.
+//
+// Refused: non-text layers, and text layers built by New* that were never parsed
+// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
+// animator chunk.
+//
+// Alpha / structural — the animator chunk structure is RE'd + double-version
+// render-gated, but the typed parameter accessors are not yet wired; tune
+// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextRotationAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
+}
+
 // AnimateTextRangeOffset keyframes a text animator's Range Selector Offset,
 // turning a static reveal into an animated sweep — the kinetic-typography
 // payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the

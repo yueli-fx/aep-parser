@@ -43,6 +43,13 @@
       "signature": "func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "AddTextPositionAnimator adds a per-character Position 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that slides / drops characters into place one at a time. x / y / z is the position offset (pixels) applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: offset (0, -100, 0), Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the displacement lands the characters as the selection window slides off them."
     },
+    "AddTextRotationAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextrotationanimator",
+      "signature": "func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextRotationAnimator adds a per-character Rotation animator with a Range Selector to a text layer — the kinetic-typography primitive that spins characters into place one at a time. rotation is the angle in degrees applied to the selected characters (each rotates about its own anchor); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: rotation 90, Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the rotation resolves to 0° as the selection window slides off the characters."
+    },
     "AddTextScaleAnimator": {
       "kind": "func",
       "file": "text.md",

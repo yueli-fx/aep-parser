@@ -52,6 +52,9 @@ var textAnimatorsPositionBody []byte
 //go:embed templates/text_animators_scale_body.bin
 var textAnimatorsScaleBody []byte
 
+//go:embed templates/text_animators_rotation_body.bin
+var textAnimatorsRotationBody []byte
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -61,6 +64,7 @@ const (
 	matchNameTextOpacity       = "ADBE Text Opacity"
 	matchNameTextPosition3D    = "ADBE Text Position 3D"
 	matchNameTextScale3D       = "ADBE Text Scale 3D"
+	matchNameTextRotation      = "ADBE Text Rotation"
 )
 
 var animatorTmplCache sync.Map // first-byte ptr → *animatorTmplEntry
@@ -363,6 +367,47 @@ func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeO
 		return nil, fmt.Errorf("AddTextScaleAnimator: template missing %q cdat slot", matchNameTextScale3D)
 	}
 	if err := setRangeSelector(payload, undo, "AddTextScaleAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
+	}
+
+	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextRotationAnimator adds a per-character Rotation animator + Range
+// Selector to a text layer and returns a stand-in group node referencing the
+// spliced animator. rotation is the angle in degrees applied to selected
+// characters (each rotates about its own anchor); rangeStart / rangeEnd /
+// rangeOffset are the Range Selector bounds in percent. The canonical "letters
+// spin into place" reveal: rotation 90, Start=0/End=100, then sweep the Range
+// Offset 0→100 over time with AnimateTextRangeOffset — the rotation resolves to
+// 0° as the selection window slides off the characters.
+// (Full contract lives on the aep.AddTextRotationAnimator facade — docgen source.)
+func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextRotationAnimator: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextRotationAnimator: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextRotationAnimator: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", layer.Name)
+	}
+	tmpl, err := animatorTemplate(textAnimatorsRotationBody)
+	if err != nil {
+		return nil, err
+	}
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
+	}
+	if !overwriteScalarCdat(payload, matchNameTextRotation, rotation) {
+		undo()
+		return nil, fmt.Errorf("AddTextRotationAnimator: template missing %q cdat slot", matchNameTextRotation)
+	}
+	if err := setRangeSelector(payload, undo, "AddTextRotationAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
 		return nil, err
 	}
 
