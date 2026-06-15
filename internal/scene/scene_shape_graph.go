@@ -1391,18 +1391,34 @@ func (n *MergePathsNode) Properties() *PropertyGroup {
 // ZigZagNode — `ADBE Vector Filter - Zigzag` (ZigZag). A path-filter that
 // distorts the paths below it in the stack into a zigzag/wave. `Size` (amplitude,
 // px) and `Detail` (ridges per path segment) are animatable 1D scalars (defaults
-// 5 / 10, AE's defaults). The `Points` enum (Smooth/Corner) is AE-default and
-// elided in the extracted template (no slot); not modeled.
+// 5 / 10, AE's defaults). `Points` (Corner/Smooth) selects whether each ridge is
+// a sharp sawtooth corner (AE default) or a smooth scalloped wave; the non-default
+// Smooth value is AE-default-elided and materialized by the serializer via
+// synthesis-insert when SetPoints selects it.
 type ZigZagNode struct {
 	size   *codec.PropertyStream[float64]
 	detail *codec.PropertyStream[float64]
+	points ZigZagPoints
 }
 
-// NewZigZagNode constructs a default ZigZagNode (Size=5, Detail=10).
+// ZigZagPoints selects whether a ZigZag filter's ridges are sharp corners or
+// smooth scalloped waves (`ADBE Vector Zigzag Points`, AE's "Points" dropdown).
+// Stored on disk as a 1-based float64 enum index.
+type ZigZagPoints int
+
+const (
+	// ZigZagPointsCorner makes each ridge a sharp sawtooth corner (AE default).
+	ZigZagPointsCorner ZigZagPoints = 1
+	// ZigZagPointsSmooth makes each ridge a smooth scalloped wave.
+	ZigZagPointsSmooth ZigZagPoints = 2
+)
+
+// NewZigZagNode constructs a default ZigZagNode (Size=5, Detail=10, Points=Corner).
 func NewZigZagNode() *ZigZagNode {
 	n := &ZigZagNode{
 		size:   codec.NewPropertyStream[float64](),
 		detail: codec.NewPropertyStream[float64](),
+		points: ZigZagPointsCorner,
 	}
 	_ = n.size.SetStaticValue(5)
 	_ = n.detail.SetStaticValue(10)
@@ -1427,6 +1443,20 @@ func (n *ZigZagNode) SetDetail(v float64) error {
 		return fmt.Errorf("ZigZagNode.SetDetail: %g out of range (want >= 0)", v)
 	}
 	return n.detail.SetStaticValue(v)
+}
+
+// Points returns whether the ridges are sharp corners or smooth waves.
+func (n *ZigZagNode) Points() ZigZagPoints { return n.points }
+
+// SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth
+// (scalloped wave ridges). The Smooth value is AE-default-elided; setting it
+// materializes the `ADBE Vector Zigzag Points` leaf on lower.
+func (n *ZigZagNode) SetPoints(p ZigZagPoints) error {
+	if p != ZigZagPointsCorner && p != ZigZagPointsSmooth {
+		return fmt.Errorf("ZigZagNode.SetPoints: %d out of range (1=Corner, 2=Smooth)", p)
+	}
+	n.points = p
+	return nil
 }
 
 // Properties returns the escape-hatch β view.

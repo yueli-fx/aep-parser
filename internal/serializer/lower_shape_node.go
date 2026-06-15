@@ -73,6 +73,9 @@ var v22ShapeMergeBodyBytes []byte
 //go:embed templates/v2_2_shape_zigzag_body.bin
 var v22ShapeZigZagBodyBytes []byte
 
+//go:embed templates/v2_2_shape_zigzag_points_leaf.bin
+var v22ShapeZigZagPointsLeafBytes []byte
+
 //go:embed templates/v2_2_shape_star_body.bin
 var v22ShapeStarBodyBytes []byte
 
@@ -155,6 +158,10 @@ var (
 	v22ShapeZigZagOnce  sync.Once
 	v22ShapeZigZagCache *rifx.Chunk
 	v22ShapeZigZagErr   error
+
+	v22ShapeZigZagPointsLeafOnce  sync.Once
+	v22ShapeZigZagPointsLeafCache *rifx.Chunk
+	v22ShapeZigZagPointsLeafErr   error
 
 	v22ShapeStarOnce  sync.Once
 	v22ShapeStarCache *rifx.Chunk
@@ -1292,6 +1299,11 @@ func cloneShapeZigZagBody() (*rifx.Chunk, error) {
 // Detail` (ridges per segment) cdats — both 1D f64 BE at cdat[0:8], same scalar
 // layout as the other shape scalars. Static → cdat overwrite; animated → the
 // cdat flips to a 1D non-spatial keyframe container via injectAnimatedStream.
+//
+// When Points is set non-default (Smooth), the AE-default-elided `ADBE Vector
+// Zigzag Points` enum leaf is spliced into the body in canonical order (after
+// Detail, before Group End) and its cdat overwritten — synthesis-insert,
+// mirroring Trim Type / Offset Copies.
 func lowerZigZagNode(n *ZigZagNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeZigZagBody()
 	if err != nil {
@@ -1303,7 +1315,41 @@ func lowerZigZagNode(n *ZigZagNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeScalar(body, "ADBE Vector Zigzag Detail", n.Detail(), ctx); err != nil {
 		return nil, err
 	}
+	if n.Points() != ZigZagPointsCorner {
+		tdmn, tdbs, err := cloneShapeZigZagPointsLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Zigzag Points", encodeF64sBE(float64(n.Points())))
+	}
 	return body, nil
+}
+
+// cloneShapeZigZagPointsLeaf returns a fresh (tdmn, LIST:tdbs) clone of the
+// `ADBE Vector Zigzag Points` enum leaf from its embedded template, spliced into
+// the zigzag body when Points is set non-default (Smooth). Mirrors
+// cloneShapeTrimTypeLeaf.
+func cloneShapeZigZagPointsLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeZigZagPointsLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeZigZagPointsLeafBytes))
+		if e != nil {
+			v22ShapeZigZagPointsLeafErr = fmt.Errorf("parse v22ShapeZigZagPointsLeafBytes: %w", e)
+			return
+		}
+		v22ShapeZigZagPointsLeafCache = ch
+	})
+	if v22ShapeZigZagPointsLeafErr != nil {
+		return nil, nil, v22ShapeZigZagPointsLeafErr
+	}
+	kids := v22ShapeZigZagPointsLeafCache.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Zigzag Points" &&
+			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
+			return cloneChunk(kids[i]), cloneChunk(kids[i+1]), nil
+		}
+	}
+	return nil, nil, fmt.Errorf("zigzag points leaf missing from template")
 }
 
 // cloneShapeStarBody returns a clone of the Star template

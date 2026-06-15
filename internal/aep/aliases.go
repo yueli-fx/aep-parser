@@ -126,6 +126,7 @@ type (
 	MergePathsNode                  = scene.MergePathsNode
 	MergeType                       = scene.MergeType
 	TrimType                        = scene.TrimType
+	ZigZagPoints                    = scene.ZigZagPoints
 	OffsetPathsNode                 = scene.OffsetPathsNode
 	RepeaterNode                    = scene.RepeaterNode
 	RepeaterTransform               = scene.RepeaterTransform
@@ -395,6 +396,8 @@ const (
 	MergeTypeExclude                              = scene.MergeTypeExclude
 	TrimTypeSimultaneously                        = scene.TrimTypeSimultaneously
 	TrimTypeIndividually                          = scene.TrimTypeIndividually
+	ZigZagPointsCorner                            = scene.ZigZagPointsCorner
+	ZigZagPointsSmooth                            = scene.ZigZagPointsSmooth
 	ShapePrimitiveEllipse                         = scene.ShapePrimitiveEllipse
 	ShapePrimitiveRect                            = scene.ShapePrimitiveRect
 	ShapePrimitiveStar                            = scene.ShapePrimitiveStar

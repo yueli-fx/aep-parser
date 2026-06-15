@@ -98,7 +98,7 @@ Gate：`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Type=3 
 
 渲染 ground truth：400×400 Rect + Size=40/Detail=8 → 每条边扭成尖齿（comic-book starburst，眼验确认实心内部+四边锯齿）。gate 用**逐列扫顶白 y 的 spread** 当锯齿证据（直边 spread≈0；zigzag spread=78 = ±40 振幅围绕原边 y=340，峰 y=301 谷 y=379）——比固定采样点稳（不依赖峰谷精确 x）。
 
-Gate：`TestMGZigZag_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Size=40/Detail=8 resave 读回 + 锯齿边）。verify_mg_zigzag.jsx + mg_zigzag_shipgate_test.go。**deferred**：Points enum（Smooth/Corner）未建模（默认 elide）。
+Gate：`TestMGZigZag_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Size=40/Detail=8 resave 读回 + 锯齿边）。verify_mg_zigzag.jsx + mg_zigzag_shipgate_test.go。~~**deferred**：Points enum（Smooth/Corner）未建模（默认 elide）。~~ → **Points 已 ship**（synthesis-insert 第 3 次，见下）。
 
 ## 复用确认 — Pucker & Bloat（S5, 2026-06-13）✅ 蓝本第 8 次 — 同 Round Corners 最简
 
@@ -174,5 +174,16 @@ Offset Paths 的 4 个 elided 子流（Line Join / Miter / **Copies** / Copy Off
 - gate 双判据：左椭圆**左缘(640)白**（满圈；Simul 此处暗）+ 右椭圆**右缘(1280)暗**（空；Simul 此处白）——组合排除 Simultaneously / 无trim / 掉层全部假绿。`TestMGTrimType_AEShipGate_AE2020/2025` 双版本 PASS（left-ring 4/4 · right-empty 4/4 · resave Type=2，png 20470b 两版一致）。
 
 **synthesis-insert 蓝本现验 2 类 leaf**：scalar-with-range（Offset Copies，6-child）+ enum（Trim Type，4-child）。`spliceShapeLeafBeforeGroupEnd` + `overwriteShapeStreamCdat` 对两者通用。剩 ZigZag Points / Twist Center / Repeater Order / Offset Line Join·Miter·Copy Offset 等同路径按需。
+
+## ZigZag Points — synthesis-insert 第 3 次（enum leaf，优先级3，2026-06-15）✅
+
+`ADBE Vector Zigzag Points`（AE「Points」下拉，**默认 1=Corner elide，2=Smooth**）用同 Trim Type 的 synthesis-insert 落地——enum leaf 蓝本第 2 次套用确认稳定：
+
+- scene `ZigZagNode += points ZigZagPoints`（`ZigZagPointsCorner=1`/`ZigZagPointsSmooth=2`，`SetPoints`/`Points`）。lower 当 `Points != Corner` 时 clone `ADBE Vector Zigzag Points` leaf（`v2_2_shape_zigzag_points_leaf.bin`，286B，**4-child tdbs = enum**，与 Trim Type leaf 同字节大小/结构）经 `spliceShapeLeafBeforeGroupEnd` 插入 + 覆写 cdat。落盘子序 RE 确认 Size/Detail/**Points**/GroupEnd（Points 在 GroupEnd 前，splice 落点对）。
+- RE：`tmp_debug/gen_shape_zigzag_points.jsx`（Rect+Fill+ZigZag，Size=40/Detail=8/Points=2 逼 AE 不 elide + 渲染眼验）→ `v2_2_zigzag_points.aep` → `tmp_debug/extract_zigzag_points_leaf` 抽 leaf。probe 自证：默认 `Points=1`，3 子流 Size/Detail/Points。
+
+**渲染 ground truth（先看图，红线4）**：一帧两卡同 Size=70/Detail=5、唯 Points 不同——左 **Corner(默认)** = 尖角 starburst（sharp 三角刺），右 **Smooth(2)** = 圆滑 scallop blob（rounded 鼓包、无尖点）。控制变量到只剩 Points，任何像素差全归因于 Points。gate 判据 = **apex 带宽**（顶边中段逐列 topmost-white-y，距全局最高 y ≤8px 的列数）：sharp 窄尖顶 flat 少、rounded 宽顶 flat 多——CORNER flat=22 vs SMOOTH flat=65（~3x），require ≥2x 余量。两卡 spread 同(138/140)=同振幅（证 zigzag 都活、排除「smooth 没 splice 退回 corner」）。`TestMGZigZagPoints_AEShipGate_AE2020/2025` 双版本 PASS（flat 22/65 两版一致 · png 58629b 两版逐字节同 · resave Points=2 存活）。verify_mg_zigzag_points.jsx + mg_zigzag_points_shipgate_test.go。
+
+**synthesis-insert 蓝本累计 3 次全绿**：scalar-with-range（Offset Copies）· enum（Trim Type · **ZigZag Points**）。剩 Twist Center（Vec2，需 cdat[0:16] 而非 enum）/ Repeater Order / Offset Line Join·Miter·Copy Offset 等同路径按需。
 
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。
