@@ -17,7 +17,7 @@
 
 **主线 = `specs/2026-06-14-remaining-capability-roadmap.md`**（模板起点，非 from-scratch）。优先级顺序（用户 2026-06-14 定）：**动画关键帧 > 3D 图层 > 形状剩余 > mask > 表达式 > 文字图层**。
 
-**优先级1 动画关键帧 ✅ 基本收口**（lhd3 容量分页 / temporal ease / animated Trim / animated gradient 色标 全双版本，2026-06-14~15）。遗留：path 几何 lhd3 >4 顶点分页 + gradient STROKE 色标动画（均需求驱动）。
+**优先级1 动画关键帧 ✅ 收口**（lhd3 容量分页 / temporal ease / animated Trim / animated gradient 色标 全双版本，2026-06-14~15）。**path 几何 >4 顶点分页 ✅ 2026-06-15**（n=5 五边形 mask+shape `TestMGPentagonPath` 双版本 PASS + AE resave 逐字节相同——nextPow2 假设证伪，AE 用 cap=n，我们 emit 本就 byte-faithful，零代码改）。遗留：gradient STROKE 色标动画（需求驱动，低边际）。
 
 **优先级2 3D 图层 ✅ 全部收官（2026-06-15）**：enable / 相机推拉 / Z 视差 / RotateY 透视 / 相机 DoF / **光照** / **阴影** 七项全渲染 gate 双版本 PASS；showcase `3d-camera` 用户真机验收 complete。整个 3D transform group 从零零新 serializer 代码（transform 模板本就是 6-axis 3D schema）；光照零新代码；阴影靠新 `aep.SetMaterialOption` synthesis-insert（material leaves）。RotateX/Orientation/RotateZ 同路径按需补 gate（低优先）。详 `incidents/layer-3d-enable-bit-materializes.md`。
 

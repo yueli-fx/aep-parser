@@ -86,6 +86,16 @@ readback, resave preservation). Ground-truth fixture: `test_data/re_mask_open.ae
    而 encodeBezier 写 `shph[3] open=0x00`、`@0x14=n`、`@0x18=closedFlag`、`@0x0C=n`、
    `@0x1C=16`——**全部偏离 AE-native，只在 n=4 闭合时巧合**（与 mask 偏差同源，非 mask 独有）。
 
+   ⚠ **2026-06-15 三次纠错（nextPow2 假设证伪）**：`TestMGPentagonPath_AEShipGate`
+   建 n=5 五边形——**mask**（走 mask 补丁 `@0x14=4/@0x18=1/@0x1C=4·n=20`、`@0x0C=n=5`）+
+   **shape path**（encodeBezier raw `@0x14=n=5/@0x18=closedFlag/@0x1C=16`、`@0x0C=n=5`）——
+   AE 2020+2025 **均接受、读回 5 顶点、渲染五边形、且 AE resave 后 geometry lhd3 逐字节相同**
+   （我们的 emit == AE-native）。即 **AE 实际用 `cap=n` 不是 `nextPow2(n)`**（上方 n=3→@0x0C=4
+   的旧 fixture 是 AE 编辑历史中的惰性容量，非 from-scratch 写值）；mask 与 shape 在 `@0x14`/`@0x1C`
+   确实不同语义（mask=4/4n，shape=n/16 常量），**但我们两条编码各自已 byte-faithful**。结论：
+   **>4 顶点 path/mask 写无 bug、无需 nextPow2 修正**——「path 几何 >4 顶点分页」遗留关闭（纯 gate，
+   零代码改），优先级1 该项收口。
+
    **对的部分留下**：shape path 的 **AE 接受性** 确实不受影响——n=3 closed gate
    （`shape_path_shipgate_test.go` 三角形 + `assertResavedPathAnchors` 精确读回）+ 动画 gate
    frame 2（n=3）双版本 PASS。即 AE 对 shape "ADBE Vector Shape" om-s **容忍**这些偏差值
