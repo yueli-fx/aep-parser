@@ -199,17 +199,26 @@ The "write → reopen" workaround in these findings became the shipped path:
 
 ## Other deferred
 
-- **Reference-param effects** (Set Matte / Displacement Map / Compound Blur …) —
-  their sspc carries tdpi bindings pointing at OTHER layers (not just the host);
-  needs selective remap like cross-Project InsertLayer, and retarget-all would
-  corrupt them (see finding 5).
+- ~~**Reference-param effects** (Set Matte …)~~ — Set Matte SHIPPED 2026-06-15
+  (`aep.SetEffectLayerParam` + `EffectSetMatte` lib template; dual-version render
+  gate `TestSetMatte_AEShipGate_*`). RE (`re_set_matte.aep` + `tmp_debug/dump_set_matte`):
+  a layer-reference param stores the **target layer's ID in the param's own tdpi**
+  — the same 4B binding the always-present `-0000` host stream uses, just aimed at
+  another layer (host tdpi=17, matte-source `-0001` tdpi=15). So the setter is a
+  length-preserving 4B tdpi rewrite; no selective-remap machinery needed after all.
+  Note AddEffect's `retargetEffectHostLayer` rewrites ALL tdpi to the host on add
+  (incl. `-0001` → self-matte, a harmless no-op default for opaque layers); the
+  setter then aims `-0001` at the real source. Displacement Map / Compound Blur /
+  path-reference params: same mechanism, add on demand. Finding 5's "retarget-all
+  corrupts ref params" caveat now means "call SetEffectLayerParam after AddEffect".
 - ~~**AddMask**~~ — SHIPPED 2026-06-11 (dual-version gated, from-scratch atom,
   path parameterizable at creation; the auto-create pattern transferred via
   `spliceEmptyParade`). See [[add-mask-create-re]]. NOTE the earlier "same
   INDEXED_GROUP splice" framing was half-right: a mask atom is a (tdmn, mkif,
   tdgp) TRIPLE, so RemovePropertyGroup refuses mask children (pair assumption)
   — RemoveMask stays deferred.
-- **Library expansion** beyond the 30 (more fixture RE; watch for ref params).
+- **Library expansion** beyond the 31 (more fixture RE; ref params now tractable
+  via SetEffectLayerParam).
 - **Per-effect typed param helpers** (today: raw `Property.SetStaticValue` by match-name).
 
 Typed effect match-name constants (`aep.EffectGaussianBlur` … `aep.EffectExposure`,

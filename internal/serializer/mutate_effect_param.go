@@ -354,3 +354,70 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 	}
 	return prop, nil
 }
+
+// SetEffectLayerParam points a layer-reference effect parameter (e.g. Set
+// Matte's "Take Matte From Layer", ADBE Set Matte3-0001) at target. AE stores
+// the reference as the target layer's ID in the parameter's own tdpi chunk —
+// the same 4-byte binding the always-present "<effect>-0000" host stream uses,
+// just aimed at a different layer (RE: re_set_matte.aep — Set Matte3-0001
+// tdpi = the matte source layer's ID). The write is length-preserving (a 4-byte
+// in-place tdpi rewrite, like the Set* setters), so no structural rollback.
+// (Full contract lives on the aep.SetEffectLayerParam facade — docgen source.)
+func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error {
+	if layer == nil || fx == nil || target == nil {
+		return fmt.Errorf("SetEffectLayerParam: layer/effect/target is nil")
+	}
+	if !strings.HasPrefix(paramMatchName, fx.MatchName+"-") {
+		return fmt.Errorf("SetEffectLayerParam: parameter %q does not belong to effect %q", paramMatchName, fx.MatchName)
+	}
+	idx := -1
+	for i, e := range layer.Effects {
+		if e == fx {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return fmt.Errorf("SetEffectLayerParam: effect %q is not on layer %q", fx.MatchName, layer.Name)
+	}
+	parade := layer.EffectsParade()
+	if parade == nil || idx >= parade.NumProperties() {
+		return fmt.Errorf("SetEffectLayerParam: layer %q has no parsed Effect Parade entry for effect %d; round-trip the project through aep.Reopen first", layer.Name, idx)
+	}
+	g, ok := parade.ChildByIndex(idx).(*AEPropertyGroup)
+	if !ok {
+		return fmt.Errorf("SetEffectLayerParam: parade child %d is not a property group", idx)
+	}
+	pgb := propertyGroupBack(g)
+	if pgb == nil || pgb.chunk == nil {
+		return fmt.Errorf("SetEffectLayerParam: effect %q has no chunk back-ref", fx.MatchName)
+	}
+	var valueGroup *rifx.Chunk
+	for _, ch := range pgb.chunk.Children {
+		if ch.IsList() && ch.FormType == rifx.IDTdgp {
+			valueGroup = ch
+			break
+		}
+	}
+	if valueGroup == nil {
+		return fmt.Errorf("SetEffectLayerParam: effect %q sspc has no value tdgp", fx.MatchName)
+	}
+	kids := valueGroup.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID != rifx.IDTdmn || string(bytes.TrimRight(kids[i].Data, "\x00")) != paramMatchName {
+			continue
+		}
+		tdbs := kids[i+1]
+		if !tdbs.IsList() || tdbs.FormType != rifx.IDTdbs {
+			return fmt.Errorf("SetEffectLayerParam: parameter %q has no tdbs", paramMatchName)
+		}
+		for _, t := range tdbs.Children {
+			if t.ID == rifx.IDTdpi && len(t.Data) >= 4 {
+				binary.BigEndian.PutUint32(t.Data[0:4], target.ID)
+				return nil
+			}
+		}
+		return fmt.Errorf("SetEffectLayerParam: parameter %q has no tdpi (not a layer-reference param, or default-elided — materialization is a follow-up)", paramMatchName)
+	}
+	return fmt.Errorf("SetEffectLayerParam: parameter %q not present in effect %q value group (default-elided layer-ref materialization is a follow-up)", paramMatchName, fx.MatchName)
+}

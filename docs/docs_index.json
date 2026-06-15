@@ -4833,6 +4833,13 @@
       "signature": "func SetDimensionsSeparated(p *Property, separated bool) error",
       "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader. Structural; both directions (separate↔merge) are double-version ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated Position (3D layers, near-linear leader path-ease). An animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated); animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused with an error rather than written."
     },
+    "SetEffectLayerParam": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#seteffectlayerparam",
+      "signature": "func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error",
+      "summary": "SetEffectLayerParam points a layer-reference effect parameter at target — e.g. Set Matte's \"Take Matte From Layer\" (paramMatchName \"ADBE Set Matte3-0001\"), which mattes the host layer with another layer's channel. AE stores the reference as target's layer ID in the parameter's tdpi chunk (the same binding the effect's always-present host stream uses, aimed elsewhere), so this is a length-preserving 4-byte rewrite. target must be a layer in the same composition."
+    },
     "SetEffectParam": {
       "kind": "func",
       "file": "effect.md",

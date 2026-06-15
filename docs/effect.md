@@ -244,6 +244,18 @@ fx must be on a parsed layer (round-trip through aep.Reopen). Components 2/3/4 o
 
 Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
 
+### SetEffectLayerParam
+
+```go
+func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error
+```
+
+SetEffectLayerParam points a layer-reference effect parameter at target — e.g. Set Matte's "Take Matte From Layer" (paramMatchName "ADBE Set Matte3-0001"), which mattes the host layer with another layer's channel. AE stores the reference as target's layer ID in the parameter's tdpi chunk (the same binding the effect's always-present host stream uses, aimed elsewhere), so this is a length-preserving 4-byte rewrite. target must be a layer in the same composition.
+
+fx must be on a parsed layer (round-trip through aep.Reopen). The parameter must already be present in the effect (Set Matte's -0001 ships materialized in the AddEffect template); materializing a default-elided layer-ref param is a follow-up.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+
 <!-- Hand-authored note. -->
 
 ## Tested coverage

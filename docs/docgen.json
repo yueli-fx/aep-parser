@@ -32,7 +32,7 @@
     {
       "out": "effect.md",
       "roots": ["Effect", "ScalarKeyframe", "VectorKeyframe"],
-      "funcs": ["AddEffect", "RemoveEffect", "SupportedEffects", "SetEffectParam", "SupportedEffectParams", "AnimateEffectParam", "AnimateEffectParamVec"],
+      "funcs": ["AddEffect", "RemoveEffect", "SupportedEffects", "SetEffectParam", "SupportedEffectParams", "AnimateEffectParam", "AnimateEffectParamVec", "SetEffectLayerParam"],
       "head": "_includes/effect.head.md",
       "tail": "_includes/effect.tail.md"
     },

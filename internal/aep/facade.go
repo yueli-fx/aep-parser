@@ -801,6 +801,25 @@ func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs 
 	return serializer.AnimateEffectParamVec(layer, fx, paramMatchName, kfs)
 }
 
+// SetEffectLayerParam points a layer-reference effect parameter at target —
+// e.g. Set Matte's "Take Matte From Layer" (paramMatchName
+// "ADBE Set Matte3-0001"), which mattes the host layer with another layer's
+// channel. AE stores the reference as target's layer ID in the parameter's tdpi
+// chunk (the same binding the effect's always-present host stream uses, aimed
+// elsewhere), so this is a length-preserving 4-byte rewrite. target must be a
+// layer in the same composition.
+//
+// fx must be on a parsed layer (round-trip through aep.Reopen). The parameter
+// must already be present in the effect (Set Matte's -0001 ships materialized in
+// the AddEffect template); materializing a default-elided layer-ref param is a
+// follow-up.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
+// (CLAUDE.md #2 structural-op call-form).
+func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error {
+	return serializer.SetEffectLayerParam(layer, fx, paramMatchName, target)
+}
+
 // SetMaterialOption sets a 3D layer's Material-Options property by AE match-name
 // (e.g. "ADBE Casts Shadows", "ADBE Accepts Lights", "ADBE Diffuse Coefficient"),
 // returning the property's *Property. It is the from-scratch entry for material
@@ -1092,6 +1111,7 @@ const (
 	EffectAngleControl       = serializer.EffectAngleControl       // Angle Control
 	EffectCheckboxControl    = serializer.EffectCheckboxControl    // Checkbox Control
 	EffectPoint3DControl     = serializer.EffectPoint3DControl     // 3D Point Control
+	EffectSetMatte           = serializer.EffectSetMatte           // Set Matte (layer-reference effect)
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript

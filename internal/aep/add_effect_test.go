@@ -449,6 +449,7 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectLinearWipe, aep.EffectWaveWarp, aep.EffectCurves,
 		aep.EffectSliderControl, aep.EffectPointControl, aep.EffectColorControl,
 		aep.EffectAngleControl, aep.EffectCheckboxControl, aep.EffectPoint3DControl,
+		aep.EffectSetMatte,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

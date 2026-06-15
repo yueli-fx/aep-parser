@@ -50,6 +50,7 @@ import (
 //
 //go:embed templates/effect_adbe_gaussian_blur_2.bin templates/effect_adbe_fill.bin templates/effect_adbe_tint.bin templates/effect_adbe_brightness_contrast_2.bin templates/effect_adbe_tritone.bin templates/effect_adbe_easy_levels2.bin templates/effect_adbe_pro_levels2.bin templates/effect_adbe_hue_saturation.bin templates/effect_adbe_box_blur.bin templates/effect_adbe_glo2.bin templates/effect_adbe_invert.bin templates/effect_adbe_exposure2.bin
 //go:embed templates/effect_adbe_drop_shadow.bin templates/effect_adbe_sharpen.bin templates/effect_adbe_mosaic.bin templates/effect_adbe_noise.bin templates/effect_adbe_geometry2.bin templates/effect_adbe_ramp.bin templates/effect_adbe_fractal_noise.bin templates/effect_adbe_tile.bin templates/effect_adbe_motion_blur.bin templates/effect_adbe_linear_wipe.bin templates/effect_adbe_wave_warp.bin templates/effect_adbe_curvescustom.bin templates/effect_adbe_slider_control.bin templates/effect_adbe_point_control.bin templates/effect_adbe_color_control.bin templates/effect_adbe_angle_control.bin templates/effect_adbe_checkbox_control.bin templates/effect_adbe_point3d_control.bin
+//go:embed templates/effect_adbe_set_matte3.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -86,6 +87,7 @@ const (
 	EffectAngleControl       = "ADBE Angle Control"           // Angle Control
 	EffectCheckboxControl    = "ADBE Checkbox Control"        // Checkbox Control
 	EffectPoint3DControl     = "ADBE Point3D Control"         // 3D Point Control
+	EffectSetMatte           = "ADBE Set Matte3"              // Set Matte (layer-reference effect)
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -123,6 +125,7 @@ var effectTemplateFiles = map[string]string{
 	EffectAngleControl:       "templates/effect_adbe_angle_control.bin",
 	EffectCheckboxControl:    "templates/effect_adbe_checkbox_control.bin",
 	EffectPoint3DControl:     "templates/effect_adbe_point3d_control.bin",
+	EffectSetMatte:           "templates/effect_adbe_set_matte3.bin",
 }
 
 type cachedEffectTemplate struct {
