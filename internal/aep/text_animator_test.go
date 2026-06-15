@@ -682,6 +682,12 @@ func TestAnimateTextOpacity_RefusesWithoutAnimator(t *testing.T) {
 // keyframe container (LIST list/kfl), reading at the spatial value offset 0x38
 // within the keyframe's bpk-sized record.
 func kflKeyframeValues(t *testing.T, kfl *rifx.Chunk, kfIndex, dim int) []float64 {
+	return kflKeyframeValuesAt(t, kfl, kfIndex, 0x38, dim)
+}
+
+// kflKeyframeValuesAt reads dim BE f64 of keyframe kfIndex at valueOff within the
+// keyframe's bpk-sized record (0x38 for the spatial block, 0x08 for non-spatial).
+func kflKeyframeValuesAt(t *testing.T, kfl *rifx.Chunk, kfIndex, valueOff, dim int) []float64 {
 	t.Helper()
 	lhd3 := findShipChunk(kfl, rifx.IDLhd3)
 	ldat := findShipChunk(kfl, rifx.IDLdat)
@@ -689,7 +695,7 @@ func kflKeyframeValues(t *testing.T, kfl *rifx.Chunk, kfIndex, dim int) []float6
 		t.Fatal("kfl missing lhd3/ldat")
 	}
 	bpk := int(binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
-	base := kfIndex*bpk + 0x38
+	base := kfIndex*bpk + valueOff
 	out := make([]float64, dim)
 	for i := range out {
 		off := base + i*8
@@ -792,6 +798,55 @@ func TestAnimateTextColor_LeafBecomesKeyframed(t *testing.T) {
 	}
 	if got := kflKeyframeValues(t, kfl, 1, 4); got[0] != 255 || got[1] != 0 || got[2] != 0 || got[3] != 255 {
 		t.Errorf("Color kf1 = %v, want [255 0 0 255]", got)
+	}
+}
+
+func TestAnimateTextScale_LeafBecomesKeyframed(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextScaleAnimator(tl, 100, 100, 100, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextScaleAnimator: %v", err)
+	}
+	if err := aep.AnimateTextScale(tl, 0, []aep.VectorKeyframe{
+		{Time: 0, Value: []float64{100, 100, 100}},
+		{Time: 2, Value: []float64{200, 200, 100}},
+	}); err != nil {
+		t.Fatalf("AnimateTextScale: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txscaleleafanim.aep")
+
+	kfl := findShipList(root, "ADBE Text Scale 3D")
+	if kfl == nil {
+		t.Fatal("Scale list not found (leaf not animated)")
+	}
+	// AE ground truth (re_text_animator_animatedvec): NON-spatial 3D block, bpk
+	// 128, value @ 0x08 (NOT the spatial 0x38).
+	if bpk := kflBpk(t, kfl); bpk != 128 {
+		t.Errorf("Scale bpk = %d, want 128", bpk)
+	}
+	if got := kflKeyframeValuesAt(t, kfl, 0, 0x08, 3); got[0] != 100 || got[1] != 100 || got[2] != 100 {
+		t.Errorf("Scale kf0 value@0x08 = %v, want [100 100 100]", got)
+	}
+	if got := kflKeyframeValuesAt(t, kfl, 1, 0x08, 3); got[0] != 200 || got[1] != 200 || got[2] != 100 {
+		t.Errorf("Scale kf1 value@0x08 = %v, want [200 200 100]", got)
+	}
+	// The spatial value slot 0x38 must stay zero (proves non-spatial layout).
+	if got := kflKeyframeValuesAt(t, kfl, 0, 0x38, 3); got[0] != 0 || got[1] != 0 || got[2] != 0 {
+		t.Errorf("Scale value unexpectedly at spatial 0x38 = %v (should be non-spatial @0x08)", got)
+	}
+	if findShipList(root, "ADBE Text Percent Offset") != nil {
+		t.Error("Range Offset unexpectedly animated")
 	}
 }
 

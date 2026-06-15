@@ -264,33 +264,52 @@ func vectorKeyframeLayout(dim int) valueLayout {
 // currently static, and 2/3/4-component.
 // (Full contract lives on the aep.AnimateEffectParamVec facade — docgen source.)
 func AnimateVectorKeyframes(p *Property, tickRate float64, kfs []VectorKeyframe) error {
+	return animateVectorKeyframes(p, tickRate, kfs, false)
+}
+
+// AnimateVectorKeyframesNonSpatial is AnimateVectorKeyframes for a NON-SPATIAL
+// multi-component property (e.g. the text Scale 3D animator leaf): its animated
+// keyframe block places the value at 0x08 with per-component temporal ease
+// (bpk = 0x08 + 5*dim*8), NOT the spatial 0x38 tangent block effect color/point
+// params use. RE'd byte-matching the AE-saved text Scale 3D leaf
+// (re_text_animator_animatedvec): bpk 128, value@0x08, header byte 0x00, no
+// marker. Same parsed-property contract as AnimateVectorKeyframes.
+func AnimateVectorKeyframesNonSpatial(p *Property, tickRate float64, kfs []VectorKeyframe) error {
+	return animateVectorKeyframes(p, tickRate, kfs, true)
+}
+
+func animateVectorKeyframes(p *Property, tickRate float64, kfs []VectorKeyframe, nonSpatial bool) error {
+	who := "AnimateVectorKeyframes"
+	if nonSpatial {
+		who = "AnimateVectorKeyframesNonSpatial"
+	}
 	if p == nil {
-		return fmt.Errorf("AnimateVectorKeyframes: nil property")
+		return fmt.Errorf("%s: nil property", who)
 	}
 	if len(kfs) < 2 {
-		return fmt.Errorf("AnimateVectorKeyframes: need >= 2 keyframes, got %d", len(kfs))
+		return fmt.Errorf("%s: need >= 2 keyframes, got %d", who, len(kfs))
 	}
 	dim := p.Components
 	if dim < 2 || dim > 4 {
-		return fmt.Errorf("AnimateVectorKeyframes: property %q is %dD; only 2/3/4D supported (use AnimateScalarKeyframes for 1D)", p.MatchName, dim)
+		return fmt.Errorf("%s: property %q is %dD; only 2/3/4D supported (use AnimateScalarKeyframes for 1D)", who, p.MatchName, dim)
 	}
 	for i, kf := range kfs {
 		if len(kf.Value) != dim {
-			return fmt.Errorf("AnimateVectorKeyframes: keyframe %d has %d-component value, property %q is %dD", i, len(kf.Value), p.MatchName, dim)
+			return fmt.Errorf("%s: keyframe %d has %d-component value, property %q is %dD", who, i, len(kf.Value), p.MatchName, dim)
 		}
 	}
 	pb := propertyBack(p)
 	if pb == nil || pb.tdbs == nil {
-		return fmt.Errorf("AnimateVectorKeyframes: property %q has no tdbs back-ref (built outside parser?)", p.MatchName)
+		return fmt.Errorf("%s: property %q has no tdbs back-ref (built outside parser?)", who, p.MatchName)
 	}
 	if pb.ldat != nil {
-		return fmt.Errorf("AnimateVectorKeyframes: property %q already animated; use InsertKeyframe", p.MatchName)
+		return fmt.Errorf("%s: property %q already animated; use InsertKeyframe", who, p.MatchName)
 	}
 	if pb.cdat == nil {
-		return fmt.Errorf("AnimateVectorKeyframes: property %q has no cdat to convert", p.MatchName)
+		return fmt.Errorf("%s: property %q has no cdat to convert", who, p.MatchName)
 	}
 	if pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
-		return fmt.Errorf("AnimateVectorKeyframes: property %q tdb4 missing/short", p.MatchName)
+		return fmt.Errorf("%s: property %q tdb4 missing/short", who, p.MatchName)
 	}
 	if tickRate <= 0 {
 		tickRate = aeLegacyTimeBase
@@ -307,14 +326,20 @@ func AnimateVectorKeyframes(p *Property, tickRate float64, kfs []VectorKeyframe)
 	}
 	enc := func(v []float64) []byte {
 		b := make([]byte, dim*8)
-		for i := 0; i < dim; i++ {
+		for i := range dim {
 			binary.BigEndian.PutUint64(b[i*8:(i+1)*8], math.Float64bits(v[i]))
 		}
 		return b
 	}
-	kfList, err := encodeKeyframes(streamKfs, vectorKeyframeLayout(dim), enc, &lowerCtx{tickRate: tickRate})
+	layout := vectorKeyframeLayout(dim)
+	if nonSpatial {
+		// Non-spatial multi-dim block: value@0x08, header byte 0x00, no marker
+		// (text Scale 3D leaf — re_text_animator_animatedvec).
+		layout = valueLayout{dim: dim, headerByte: 0x00, spatial: false}
+	}
+	kfList, err := encodeKeyframes(streamKfs, layout, enc, &lowerCtx{tickRate: tickRate})
 	if err != nil {
-		return fmt.Errorf("AnimateVectorKeyframes: %w", err)
+		return fmt.Errorf("%s: %w", who, err)
 	}
 
 	// Flip tdb4 static→animated (same patch as the scalar / shape paths).
@@ -331,13 +356,13 @@ func AnimateVectorKeyframes(p *Property, tickRate float64, kfs []VectorKeyframe)
 		}
 	}
 	if !replaced {
-		return fmt.Errorf("AnimateVectorKeyframes: property %q cdat not found in tdbs", p.MatchName)
+		return fmt.Errorf("%s: property %q cdat not found in tdbs", who, p.MatchName)
 	}
 	pb.cdat = nil
 	pb.lhd3 = kfList.FindFirst(rifx.IDLhd3)
 	pb.ldat = kfList.FindFirst(rifx.IDLdat)
 	if pb.lhd3 == nil || pb.ldat == nil {
-		return fmt.Errorf("AnimateVectorKeyframes: built keyframe container missing lhd3/ldat")
+		return fmt.Errorf("%s: built keyframe container missing lhd3/ldat", who)
 	}
 	return reparseKeyframes(p, tickRate)
 }

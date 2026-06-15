@@ -294,3 +294,53 @@ func TestTextPosLeafAnimator_AEShipGate_AE2020(t *testing.T) {
 func TestTextPosLeafAnimator_AEShipGate_AE2025(t *testing.T) {
 	runTextPosLeafGate(t, ae2025(), "AE2025", aep.TargetAE2025)
 }
+
+// ---- Scale 3D leaf gate (non-spatial block) ----
+
+func buildTextScaleLeafDemo(t *testing.T, target aep.AETarget) *aep.Project {
+	t.Helper()
+	p, tl := newTextVecLeafComp(t, target, "TXSCALELEAF")
+	if _, err := aep.AddTextScaleAnimator(tl, 100, 100, 100, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextScaleAnimator: %v", err)
+	}
+	// Keyframe the scale itself, growing the glyphs over time.
+	if err := aep.AnimateTextScale(tl, 0, []aep.VectorKeyframe{
+		{Time: 0, Value: []float64{100, 100, 100}},
+		{Time: 2, Value: []float64{150, 150, 100}},
+	}); err != nil {
+		t.Fatalf("AnimateTextScale: %v", err)
+	}
+	return reopenMoveBG(t, p)
+}
+
+func checkScaleLeafFrames(t *testing.T, ver string, f0, f1, f2 image.Image) {
+	area := func(img image.Image) int {
+		_, _, n := inkBBox(img, 80, 60, 1200, 700, 2, 15, 40)
+		return n
+	}
+	n0, n1, n2 := area(f0), area(f1), area(f2)
+	t.Logf("%s ink area (px): t0=%d t1=%d t2=%d", ver, n0, n1, n2)
+	if n0 < 100 || n1 < 100 || n2 < 100 {
+		t.Errorf("%s glyphs not rendered on some frame (n0=%d n1=%d n2=%d)", ver, n0, n1, n2)
+	}
+	// Glyphs grow: ink area increases monotonically with a meaningful factor
+	// (100→150 ≈ 2.25× area; rules out a static / dropped leaf).
+	if !(n0 < n1 && n1 < n2) || n2 < (n0*3)/2 {
+		t.Errorf("%s ink area did not grow (n0=%d n1=%d n2=%d) — Scale leaf not animating", ver, n0, n1, n2)
+	}
+}
+
+func runTextScaleLeafGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+	p := buildTextScaleLeafDemo(t, target)
+	runVecLeafGate(t, aeExe, ver, "TXSCALELEAF", "ADBE Text Scale 3D", false, p, checkScaleLeafFrames)
+}
+
+func TestTextScaleLeafAnimator_AEShipGate_AE2020(t *testing.T) {
+	runTextScaleLeafGate(t, ae2020(), "AE2020", aep.TargetAE2020)
+}
+func TestTextScaleLeafAnimator_AEShipGate_AE2025(t *testing.T) {
+	runTextScaleLeafGate(t, ae2025(), "AE2025", aep.TargetAE2025)
+}

@@ -840,3 +840,15 @@ AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's f
 Refused: non-text layers, layers without a text animator carrying a Fill Color leaf, a Fill Color leaf that is already animated, and keyframe values that are not 4-channel.
 
 Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE.md #2).
+
+### AnimateTextScale
+
+```go
+func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error
+```
+
+AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe Value is the [sx, sy, sz] scale percent (100 = unchanged); every selected character shares the curve. Scale 3D is a non-spatial 3-component leaf, so it uses a different animated keyframe block (value@0x08) than the spatial Position/Color leaves — RE'd byte-matching the AE-saved text Scale leaf. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+
+Refused: non-text layers, layers without a text animator carrying a Scale leaf, and a Scale leaf that is already animated.
+
+Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE.md #2).

@@ -588,7 +588,7 @@ func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) e
 // spatial Position 3D and 4-channel Fill Color leaves; the non-spatial Scale 3D
 // leaf uses a different block and is NOT routed here). Values are in the leaf's
 // on-disk units (Position = pixels, Fill Color = [A,R,G,B]×255).
-func animateTextVectorLeaf(layer *Layer, matchName, who string, tickRate float64, kfs []VectorKeyframe) error {
+func animateTextVectorLeaf(layer *Layer, matchName, who string, nonSpatial bool, tickRate float64, kfs []VectorKeyframe) error {
 	if layer == nil {
 		return fmt.Errorf("%s: layer is nil", who)
 	}
@@ -617,6 +617,9 @@ func animateTextVectorLeaf(layer *Layer, matchName, who string, tickRate float64
 	if p == nil {
 		return fmt.Errorf("%s: failed to build property over %q tdbs", who, matchName)
 	}
+	if nonSpatial {
+		return AnimateVectorKeyframesNonSpatial(p, tickRate, kfs)
+	}
 	return AnimateVectorKeyframes(p, tickRate, kfs)
 }
 
@@ -627,7 +630,19 @@ func animateTextVectorLeaf(layer *Layer, matchName, who string, tickRate float64
 // comp's.
 // (Full contract lives on the aep.AnimateTextPosition facade — docgen source.)
 func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
-	return animateTextVectorLeaf(layer, matchNameTextPosition3D, "AnimateTextPosition", tickRate, kfs)
+	return animateTextVectorLeaf(layer, matchNameTextPosition3D, "AnimateTextPosition", false, tickRate, kfs)
+}
+
+// AnimateTextScale keyframes the per-character Scale 3D leaf of the layer's first
+// text animator (added via AddTextScaleAnimator), scaling the selected characters
+// as one synchronized group over time (e.g. a pulse). Each keyframe Value is the
+// [sx, sy, sz] scale percent (100 = unchanged). Scale 3D is a NON-SPATIAL
+// 3-component leaf, so it routes through AnimateVectorKeyframesNonSpatial (value
+// @0x08 block) rather than the spatial block Position/Color use. Needs >= 2
+// keyframes; tickRate <= 0 uses the comp's.
+// (Full contract lives on the aep.AnimateTextScale facade — docgen source.)
+func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	return animateTextVectorLeaf(layer, matchNameTextScale3D, "AnimateTextScale", true, tickRate, kfs)
 }
 
 // AnimateTextColor keyframes the per-character Fill Color leaf of the layer's
@@ -651,5 +666,5 @@ func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 			OutEase: kf.OutEase,
 		}
 	}
-	return animateTextVectorLeaf(layer, matchNameTextFillColor, "AnimateTextColor", tickRate, conv)
+	return animateTextVectorLeaf(layer, matchNameTextFillColor, "AnimateTextColor", false, tickRate, conv)
 }

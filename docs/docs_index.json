@@ -113,6 +113,13 @@
       "signature": "func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
       "summary": "AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector. Every selected character shares the rotation curve, so the text spins as one synchronized group (e.g. a continuous 0→360 spin), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Rotation slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
     },
+    "AnimateTextScale": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#animatetextscale",
+      "signature": "func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
+      "summary": "AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe Value is the [sx, sy, sz] scale percent (100 = unchanged); every selected character shares the curve. Scale 3D is a non-spatial 3-component leaf, so it uses a different animated keyframe block (value@0x08) than the spatial Position/Color leaves — RE'd byte-matching the AE-saved text Scale leaf. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+    },
     "AutoOrientType": {
       "kind": "type",
       "file": "constants.md",
