@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
+	"github.com/example/aep-parser/internal/scene"
 )
 
 // SetMaskPath replaces mask's static path with path (layer-pixel coordinates).
@@ -53,20 +54,63 @@ func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 		return fmt.Errorf("SetMaskPath: mask %q has no Mask Shape om-s", mask.Name)
 	}
 
-	// Build + swap the new om-s; snapshot for rollback on re-parse failure.
+	// Atomic structural mutation (CLAUDE.md #1): swap the rebuilt om-s in, then
+	// re-parse the atom to validate it before keeping the change — roll back to
+	// the pre-call om-s / shph back-ref / warnings on any failure.
 	oldOmS := kids[shapeIdx]
+	oldShph := mb.shph
+	oldWarn := warningsLen(layer)
 	newOmS := makeMaskShapeOmS(scaled)
 	mb.atomTdgp.Children[shapeIdx] = newOmS
+	rollback := func() {
+		mb.atomTdgp.Children[shapeIdx] = oldOmS
+		mb.shph = oldShph
+		rollbackWarnings(layer, oldWarn)
+	}
 
-	// Refresh the scene-side path fields + the shph back-ref from the new shap.
 	shap := firstShap(newOmS)
 	if shap == nil {
-		mb.atomTdgp.Children[shapeIdx] = oldOmS
+		rollback()
 		return fmt.Errorf("SetMaskPath: rebuilt om-s has no shap")
 	}
+
+	// Re-parse the modified atom (mirrors AddMask): confirm it decodes to one
+	// mask with the requested vertex count and produces no parser warnings.
+	comp := scene.LayerComp(layer)
+	if comp == nil || scene.CompositionProj(comp) == nil {
+		rollback()
+		return fmt.Errorf("SetMaskPath: layer %q has no composition/project back-ref", layer.Name)
+	}
+	ctx := newParseCtxFPS(comp.TickRate, comp.FrameRate, comp.Name, &scene.CompositionProj(comp).Warnings)
+	tmpLayr := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
+		makeTdmn(MatchNameGroupMaskParade),
+		{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
+			makeTdmn("ADBE Mask Atom"), makeMaskMkif(mask.Index), mb.atomTdgp,
+		}},
+	}}
+	probes := parseMasks(tmpLayr, ctx)
+	if len(probes) != 1 || len(probes[0].Vertices) != len(path.Vertices) {
+		rollback()
+		return fmt.Errorf("SetMaskPath: reshaped mask re-parse failed (%d masks, %d vertices, want 1/%d)",
+			len(probes), probeVerts(probes), len(path.Vertices))
+	}
+	if newWarn := newWarningsSince(layer, oldWarn); len(newWarn) > 0 {
+		rollback()
+		return fmt.Errorf("SetMaskPath: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
+	}
+
+	// Refresh the scene-side path fields + the shph back-ref from the new shap.
 	refreshMaskShap(mask, mb, shap)
 	mask.PathKeyframes = nil // SetMaskPath writes a static path
 	return nil
+}
+
+// probeVerts returns the vertex count of the first probe mask, or -1.
+func probeVerts(masks []*Mask) int {
+	if len(masks) == 0 {
+		return -1
+	}
+	return len(masks[0].Vertices)
 }
 
 // scaleMaskPath divides every coordinate by the layer-fraction divisors (mirrors
