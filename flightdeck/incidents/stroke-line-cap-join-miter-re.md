@@ -1,8 +1,8 @@
 ---
 status: active
 when_to_read: implementing Stroke Line Cap / Line Join / Miter Limit setters; enriching the embedded stroke body template; debugging why a stroke enum slot is missing from a saved .aep; setting Miter Limit via JSX and hitting a "hidden property" throw
-applies_to: [stroke, line-cap, line-join, miter-limit, shape-layer, enum, oned, elision, scripting-api-quirk, re-finding]
-last_updated: 2026-05-31
+applies_to: [stroke, line-cap, line-join, miter-limit, shape-layer, enum, oned, elision, scripting-api-quirk, re-finding, fill-opacity, stroke-opacity, blend-mode, composite-order, shape-direction, secondary-sub-properties, render-gate]
+last_updated: 2026-06-15
 ---
 
 # Stroke Line Cap / Line Join / Miter Limit — RE findings
