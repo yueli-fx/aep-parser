@@ -761,6 +761,7 @@ func (n *GradientFillNode) Properties() *PropertyGroup {
 // extracted template's values; deferred).
 type GradientStrokeNode struct {
 	gradient        *codec.Gradient
+	gradientKfs     []GradientKeyframe
 	startPoint      [2]float64
 	endPoint        [2]float64
 	gradientType    GradientType
@@ -903,6 +904,34 @@ func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error {
 func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error {
 	return setGradientAlphaStops(n.gradient, stops)
 }
+
+// AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE:
+// the full gradient g (color + alpha stops) takes effect at `time` seconds, and
+// AE interpolates the stops between keyframes (a colour sweep along the stroke).
+// The first keyframe switches the node to animated mode — the static Gradient()
+// value is then ignored on lower in favour of the keyframe list. Provide
+// keyframes in ascending time. Identical mechanism to
+// GradientFillNode.AddGradientKeyframe (the `ADBE Vector Grad Colors` stream is
+// the same on fill and stroke); see incidents/gradient-fill-write-re.md §
+// animated color stops. Write-only: re-parsing surfaces the first keyframe's
+// stops as the static value.
+func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error {
+	if g == nil {
+		return fmt.Errorf("AddGradientKeyframe: nil gradient")
+	}
+	if err := setGradientColorStops(g, g.ColorStops); err != nil {
+		return err
+	}
+	if err := setGradientAlphaStops(g, g.AlphaStops); err != nil {
+		return err
+	}
+	n.gradientKfs = append(n.gradientKfs, GradientKeyframe{Time: time, Gradient: g})
+	return nil
+}
+
+// GradientKeyframes returns the animated-stops keyframes (nil when the node is
+// static). Used by the serializer.
+func (n *GradientStrokeNode) GradientKeyframes() []GradientKeyframe { return n.gradientKfs }
 
 // Properties returns the escape-hatch β view.
 func (n *GradientStrokeNode) Properties() *PropertyGroup {

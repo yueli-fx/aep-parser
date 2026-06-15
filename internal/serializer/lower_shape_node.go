@@ -945,7 +945,7 @@ func cloneShapeGradStrokeBody() (*rifx.Chunk, error) {
 // cdat[0:16]); only the cloned template differs. The template bakes Radial(2) /
 // [-120,-120]→[120,120] so the slots exist; defaults (Linear=1, [0,0]→[100,0],
 // HiLite 0/0) reproduce AE's pre-geometry stroke behavior (no regression).
-func lowerGradientStrokeNode(n *GradientStrokeNode, _ *lowerCtx) (*rifx.Chunk, error) {
+func lowerGradientStrokeNode(n *GradientStrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeGradStrokeBody()
 	if err != nil {
 		return nil, err
@@ -964,6 +964,14 @@ func lowerGradientStrokeNode(n *GradientStrokeNode, _ *lowerCtx) (*rifx.Chunk, e
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Cap", encodeF64sBE(float64(n.LineCap())))
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Line Join", encodeF64sBE(float64(n.LineJoin())))
 	overwriteShapeStreamCdat(body, "ADBE Vector Stroke Miter Limit", encodeF64sBE(n.MiterLimit()))
+	// Animated color stops — same `ADBE Vector Grad Colors` stream + helper as the
+	// gradient fill (the stream is identical on fill and stroke).
+	if kfs := n.GradientKeyframes(); len(kfs) > 0 {
+		if err := animateGradientStops(body, "ADBE Vector Grad Colors", kfs, ctx); err != nil {
+			return nil, err
+		}
+		return body, nil
+	}
 	return lowerGradientStops(body, n.Gradient()), nil
 }
 
