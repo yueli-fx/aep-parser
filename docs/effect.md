@@ -69,6 +69,44 @@ for _, fx := range layer.Effects {
 }
 ```
 
+# ScalarKeyframe object
+
+ScalarKeyframe is one keyframe INPUT for animating a 1D-scalar property (e.g. AnimateEffectParam): a time in seconds, the scalar value at that time, and optional temporal ease per side (zero = linear).
+
+## Attributes
+
+### ScalarKeyframe.Time
+
+```go
+Time float64
+```
+
+read-only
+
+### ScalarKeyframe.Value
+
+```go
+Value float64
+```
+
+read-only
+
+### ScalarKeyframe.InEase
+
+```go
+InEase TemporalEase
+```
+
+read-only
+
+### ScalarKeyframe.OutEase
+
+```go
+OutEase TemporalEase
+```
+
+read-only
+
 ## Functions
 
 ### AddEffect
@@ -139,6 +177,20 @@ func SupportedEffectParams() []string
 ```
 
 SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless.
+
+### AnimateEffectParam
+
+```go
+func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)
+```
+
+AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (>= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}. It materializes the parameter if it is default-elided (like SetEffectParam, from the host effect's pard definition), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe to clone). Returns the animated *Property.
+
+On disk the parameter's static cdat is replaced by a LIST(list){lhd3, ldat} keyframe stream (non-spatial 1D layout, byte-matched to an AE-saved animated Gaussian-Blur-Blurriness fixture) and the tdb4 static→animated flags flip; WriteAEP recomputes the enclosing LIST sizes. Drives the classic MG rigs — an animated blur amount, or a Slider Control whose value an expression reads.
+
+fx must be on a parsed layer (round-trip through aep.Reopen after the structural New*/AddEffect APIs). Scalar params only (color/point are a follow-up). Linear interp unless ScalarKeyframe.InEase/OutEase are set.
+
+Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
 
 <!-- Hand-authored note. -->
 

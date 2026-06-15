@@ -147,6 +147,16 @@ type MaskPathKeyframe struct {
 	OutTemporalEase TemporalEase
 }
 
+// ScalarKeyframe is one keyframe INPUT for animating a 1D-scalar property
+// (e.g. AnimateEffectParam): a time in seconds, the scalar value at that time,
+// and optional temporal ease per side (zero = linear).
+type ScalarKeyframe struct {
+	Time    float64
+	Value   float64
+	InEase  TemporalEase
+	OutEase TemporalEase
+}
+
 // MaskPathKey is one keyframe INPUT for SetMaskPathKeyframes: the time (in
 // seconds), the mask outline at that time (a BezierPath in layer-pixel
 // coordinates, the same space AddMask / SetMaskPath accept), and optional

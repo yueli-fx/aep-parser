@@ -157,6 +157,29 @@ func cloneParamTemplateByPath(paramMatchName, path string) (tdmn, tdbs *rifx.Chu
 	return deepCloneChunk(ct.chunk.Children[0]), deepCloneChunk(ct.chunk.Children[1]), nil
 }
 
+// AnimateEffectParam materializes (if needed) and keyframes a 1D-scalar effect
+// parameter: SetEffectParam with the first keyframe's value, then
+// AnimateScalarKeyframes to synthesize the keyframe container from scratch using
+// the owning composition's tick rate.
+// (Full contract lives on the aep.AnimateEffectParam facade — docgen source.)
+func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error) {
+	if len(kfs) < 2 {
+		return nil, fmt.Errorf("AnimateEffectParam: need >= 2 keyframes, got %d", len(kfs))
+	}
+	prop, err := SetEffectParam(layer, fx, paramMatchName, kfs[0].Value)
+	if err != nil {
+		return nil, err
+	}
+	tickRate := 30720.0
+	if comp := scene.LayerComp(layer); comp != nil && comp.TickRate > 0 {
+		tickRate = comp.TickRate
+	}
+	if err := AnimateScalarKeyframes(prop, tickRate, kfs); err != nil {
+		return nil, err
+	}
+	return prop, nil
+}
+
 // SetEffectParam sets an effect parameter's static value, materializing the
 // parameter's value stream first when it is default-elided.
 // (Full contract lives on the aep.SetEffectParam facade — docgen source.)

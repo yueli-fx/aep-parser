@@ -751,6 +751,30 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 // already-present params are settable regardless.
 func SupportedEffectParams() []string { return serializer.SupportedEffectParams() }
 
+// AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N
+// keyframes (>= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}.
+// It materializes the parameter if it is default-elided (like SetEffectParam,
+// from the host effect's pard definition), then converts its static value stream
+// into an animated keyframe container from scratch — the case InsertKeyframe
+// refuses (it requires a pre-existing keyframe to clone). Returns the animated
+// *Property.
+//
+// On disk the parameter's static cdat is replaced by a LIST(list){lhd3, ldat}
+// keyframe stream (non-spatial 1D layout, byte-matched to an AE-saved animated
+// Gaussian-Blur-Blurriness fixture) and the tdb4 static→animated flags flip;
+// WriteAEP recomputes the enclosing LIST sizes. Drives the classic MG rigs —
+// an animated blur amount, or a Slider Control whose value an expression reads.
+//
+// fx must be on a parsed layer (round-trip through aep.Reopen after the
+// structural New*/AddEffect APIs). Scalar params only (color/point are a
+// follow-up). Linear interp unless ScalarKeyframe.InEase/OutEase are set.
+//
+// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
+// (CLAUDE.md #2 structural-op call-form).
+func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error) {
+	return serializer.AnimateEffectParam(layer, fx, paramMatchName, kfs)
+}
+
 // SetMaterialOption sets a 3D layer's Material-Options property by AE match-name
 // (e.g. "ADBE Casts Shadows", "ADBE Accepts Lights", "ADBE Diffuse Coefficient"),
 // returning the property's *Property. It is the from-scratch entry for material

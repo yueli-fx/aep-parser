@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/example/aep-parser/internal/codec"
+	"github.com/example/aep-parser/internal/rifx"
 	"github.com/example/aep-parser/internal/scene"
 )
 
@@ -152,6 +154,86 @@ func DeleteKeyframe(p *Property, i int) error {
 	}
 	if tickRate == 0 {
 		tickRate = aeLegacyTimeBase
+	}
+	return reparseKeyframes(p, tickRate)
+}
+
+// AnimateScalarKeyframes converts a STATIC 1D-scalar property into an animated
+// one by synthesizing the keyframe container from scratch (the case
+// InsertKeyframe refuses). It replaces the property's static cdat with a
+// LIST(list){lhd3, ldat} keyframe stream built by encodeKeyframes (non-spatial
+// 1D layout: bpk 48, time@0x00, value@0x08) and flips the tdb4 static→animated
+// flags (@0x05 clear bit0, @0x44 = 1, @0x4f clear bit0 — byte-verified against
+// an AE-saved animated Gaussian-Blur-Blurriness fixture, identical to the shape
+// injectAnimatedStream patch). Used for animated effect parameters (animate a
+// blur amount / a Slider Control). The property must be parsed (it needs its
+// tdbs back-ref) and currently static (no existing keyframes — use InsertKeyframe
+// to add to an already-animated stream). 1D scalar only.
+// (Full contract lives on the aep.AnimateEffectParam facade — docgen source.)
+func AnimateScalarKeyframes(p *Property, tickRate float64, kfs []ScalarKeyframe) error {
+	if p == nil {
+		return fmt.Errorf("AnimateScalarKeyframes: nil property")
+	}
+	if len(kfs) < 2 {
+		return fmt.Errorf("AnimateScalarKeyframes: need >= 2 keyframes, got %d", len(kfs))
+	}
+	if p.Components != 1 {
+		return fmt.Errorf("AnimateScalarKeyframes: property %q is %dD; only 1D scalars supported", p.MatchName, p.Components)
+	}
+	pb := propertyBack(p)
+	if pb == nil || pb.tdbs == nil {
+		return fmt.Errorf("AnimateScalarKeyframes: property %q has no tdbs back-ref (built outside parser?)", p.MatchName)
+	}
+	if pb.ldat != nil {
+		return fmt.Errorf("AnimateScalarKeyframes: property %q already animated; use InsertKeyframe", p.MatchName)
+	}
+	if pb.cdat == nil {
+		return fmt.Errorf("AnimateScalarKeyframes: property %q has no cdat to convert", p.MatchName)
+	}
+	if pb.tdb4 == nil || len(pb.tdb4.Data) <= 0x4f {
+		return fmt.Errorf("AnimateScalarKeyframes: property %q tdb4 missing/short", p.MatchName)
+	}
+	if tickRate <= 0 {
+		tickRate = aeLegacyTimeBase
+	}
+
+	streamKfs := make([]codec.StreamKeyframe[float64], len(kfs))
+	for i, kf := range kfs {
+		streamKfs[i] = codec.StreamKeyframe[float64]{
+			Time:    kf.Time,
+			Value:   kf.Value,
+			InEase:  kf.InEase,
+			OutEase: kf.OutEase,
+		}
+	}
+	kfList, err := encodeKeyframes(streamKfs, valueLayout{dim: 1, headerByte: 0x00, spatial: false}, encode1D, &lowerCtx{tickRate: tickRate})
+	if err != nil {
+		return fmt.Errorf("AnimateScalarKeyframes: %w", err)
+	}
+
+	// Flip tdb4 static→animated (same patch as injectAnimatedStream).
+	pb.tdb4.Data[0x05] &^= 0x01
+	pb.tdb4.Data[0x44] = 0x01
+	pb.tdb4.Data[0x4f] &^= 0x01
+
+	// Swap the static cdat for the keyframe container, in place (AE keeps it
+	// where the cdat was — between tdb4 and any tdum/tduM).
+	replaced := false
+	for i, ch := range pb.tdbs.Children {
+		if ch == pb.cdat {
+			pb.tdbs.Children[i] = kfList
+			replaced = true
+			break
+		}
+	}
+	if !replaced {
+		return fmt.Errorf("AnimateScalarKeyframes: property %q cdat not found in tdbs", p.MatchName)
+	}
+	pb.cdat = nil
+	pb.lhd3 = kfList.FindFirst(rifx.IDLhd3)
+	pb.ldat = kfList.FindFirst(rifx.IDLdat)
+	if pb.lhd3 == nil || pb.ldat == nil {
+		return fmt.Errorf("AnimateScalarKeyframes: built keyframe container missing lhd3/ldat")
 	}
 	return reparseKeyframes(p, tickRate)
 }

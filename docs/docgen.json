@@ -31,8 +31,8 @@
     },
     {
       "out": "effect.md",
-      "roots": ["Effect"],
-      "funcs": ["AddEffect", "RemoveEffect", "SupportedEffects", "SetEffectParam", "SupportedEffectParams"],
+      "roots": ["Effect", "ScalarKeyframe"],
+      "funcs": ["AddEffect", "RemoveEffect", "SupportedEffects", "SetEffectParam", "SupportedEffectParams", "AnimateEffectParam"],
       "head": "_includes/effect.head.md",
       "tail": "_includes/effect.tail.md"
     },

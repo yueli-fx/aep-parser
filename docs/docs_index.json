@@ -29,6 +29,13 @@
       "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
       "summary": "AddMask appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed *Mask. The mask is created with the given display name (empty → \"Mask N\"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask)."
     },
+    "AnimateEffectParam": {
+      "kind": "func",
+      "file": "effect.md",
+      "anchor": "#animateeffectparam",
+      "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
+      "summary": "AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (\u003e= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}. It materializes the parameter if it is default-elided (like SetEffectParam, from the host effect's pard definition), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe to clone). Returns the animated *Property."
+    },
     "AutoOrientType": {
       "kind": "type",
       "file": "constants.md",
@@ -4777,6 +4784,40 @@
       "anchor": "#reopen",
       "signature": "func Reopen(p *Project) (*Project, error)",
       "summary": "Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (e.g. by name or ID — IDs are preserved by the round-trip)."
+    },
+    "ScalarKeyframe": {
+      "kind": "type",
+      "file": "effect.md",
+      "anchor": "#scalarkeyframe-object",
+      "summary": "ScalarKeyframe is one keyframe INPUT for animating a 1D-scalar property (e.g. AnimateEffectParam): a time in seconds, the scalar value at that time, and optional temporal ease per side (zero = linear)."
+    },
+    "ScalarKeyframe.InEase": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#scalarkeyframeinease",
+      "signature": "InEase TemporalEase",
+      "rw": "read-only"
+    },
+    "ScalarKeyframe.OutEase": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#scalarkeyframeoutease",
+      "signature": "OutEase TemporalEase",
+      "rw": "read-only"
+    },
+    "ScalarKeyframe.Time": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#scalarkeyframetime",
+      "signature": "Time float64",
+      "rw": "read-only"
+    },
+    "ScalarKeyframe.Value": {
+      "kind": "field",
+      "file": "effect.md",
+      "anchor": "#scalarkeyframevalue",
+      "signature": "Value float64",
+      "rw": "read-only"
     },
     "SetDimensionsSeparated": {
       "kind": "func",

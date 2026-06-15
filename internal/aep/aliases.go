@@ -85,6 +85,7 @@ type (
 	MaskMotionBlurMode              = scene.MaskMotionBlurMode
 	MaskPathKey                     = scene.MaskPathKey
 	MaskPathKeyframe                = scene.MaskPathKeyframe
+	ScalarKeyframe                  = scene.ScalarKeyframe
 	MaskVertex                      = scene.MaskVertex
 	MaskWriter                      = scene.MaskWriter
 	MaterialCastsShadowsMode        = scene.MaterialCastsShadowsMode
