@@ -64,7 +64,7 @@ New L2 itself: trackMatteType=5013 (copied), but now no layer above → matte in
 
 Strategy spec § (TBD) picks (a) for Phase 3 MVP.
 
-**Phase 5B amendment (2026-05-28)**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed in Phase 5B). AE 2025 ship-gate via `ge_duplicate_layer_explicit_matte.aep` (uses `re_trackmatte_ae24.aep` as source). See [`plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../landed/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md).
+**Phase 5B amendment (2026-05-28)**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed in Phase 5B). AE 2025 ship-gate via `ge_duplicate_layer_explicit_matte.aep` (uses `re_trackmatte_ae24.aep` as source). See [`plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../archive/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md).
 
 ---
 
@@ -193,7 +193,7 @@ Per-chunk Data slice MUST be a fresh `append([]byte(nil), src.Data...)` copy (NO
 
 ## Related
 
-- Plan: [`../plans/2026-05-28-v3-phase3-duplicatelayer-plan.md`](../landed/plans/2026-05-28-v3-phase3-duplicatelayer-plan.md)
+- Plan: [`../plans/2026-05-28-v3-phase3-duplicatelayer-plan.md`](../archive/plans/2026-05-28-v3-phase3-duplicatelayer-plan.md)
 - Predecessor scar: [`ae-deletelayer-re.md`](ae-deletelayer-re.md) — F4 (16-chunk per-layer block) is what we clone
 - AE acceptance gate: [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)
 - Fixture JSX: `test_data/re_duplicate_layer.jsx`

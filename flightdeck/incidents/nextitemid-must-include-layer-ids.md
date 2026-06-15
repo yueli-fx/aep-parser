@@ -88,6 +88,6 @@ Go-built 工程的第二个 comp item ID 从 2 变 13（单调性不变，AE 无
 ## Related
 
 - 修复 commit: 2026-05-28 V3 Phase 5B（同 commit 一起 ship）
-- Phase 5B plan: [`../plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../landed/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md)
+- Phase 5B plan: [`../plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../archive/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md)
 - 受影响代码: `internal/serializer/parse.go::initDerived`
 - 受影响 invariant: Inv-9 (monotonic ID alloc, no reuse) in `incidents/ae25-acceptance-gate.md`

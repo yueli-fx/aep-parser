@@ -10,7 +10,7 @@ last_updated: 2026-06-04
 ## 结论（2026-06-04 决策：整个 3H defer / won't-implement）
 
 `Property.valueText` 是 AE **26.0 才新加**的 ScriptingAPI（连同 `Property.propertyParameters`，见
-`charts/after-effects-scripting-guide/docs/property/property.md` + changelog）。语义 = dropdown 当前选中项的 label，
+`references/after-effects-scripting-guide/docs/property/property.md` + changelog）。语义 = dropdown 当前选中项的 label，
 等价 `propertyParameters[value]`（1-based 索引，分隔符 `"(-"` 占位）。
 
 忠实的**通用** valueText 从 .aep 字节**做不到**，故整项 defer。

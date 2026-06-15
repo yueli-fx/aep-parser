@@ -46,7 +46,7 @@ summary: 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings�
 
 ## Layer (base)
 
-AE 文档：[Layer 基类](../charts/after-effects-scripting-guide/docs/layer/layer.md)
+AE 文档：[Layer 基类](../references/after-effects-scripting-guide/docs/layer/layer.md)
 
 | AE attr                                                                                                                                                | aep-parser                                                                      | 状态                      | 备注                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------- |
@@ -78,7 +78,7 @@ AE 文档：[Layer 基类](../charts/after-effects-scripting-guide/docs/layer/la
 
 ## AVLayer
 
-AE 文档：[AVLayer](../charts/after-effects-scripting-guide/docs/layer/avlayer.md)
+AE 文档：[AVLayer](../references/after-effects-scripting-guide/docs/layer/avlayer.md)
 
 | AE attr                                      | aep-parser                                                                                                                                                | 状态        | 备注                                                                                                                              |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -116,7 +116,7 @@ AE 文档：[AVLayer](../charts/after-effects-scripting-guide/docs/layer/avlayer
 
 ## CameraLayer
 
-AE 文档：[CameraLayer](../charts/after-effects-scripting-guide/docs/layer/cameralayer.md) — AE 只列了 methods，无独立 attribute；本库为方便加了一组类型化 Property accessor。
+AE 文档：[CameraLayer](../references/after-effects-scripting-guide/docs/layer/cameralayer.md) — AE 只列了 methods，无独立 attribute；本库为方便加了一组类型化 Property accessor。
 
 | 字段                                                                                               | aep-parser                                           | 状态     |
 | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------- |
@@ -133,7 +133,7 @@ AE 文档：[CameraLayer](../charts/after-effects-scripting-guide/docs/layer/cam
 
 ## LightLayer
 
-AE 文档：[LightLayer](../charts/after-effects-scripting-guide/docs/layer/lightlayer.md)
+AE 文档：[LightLayer](../references/after-effects-scripting-guide/docs/layer/lightlayer.md)
 
 | AE attr                                                                                                                                              | aep-parser                                                                                                                           | 状态     | 备注                                                                                                                             |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -157,7 +157,7 @@ AE 文档：均无独立 attribute；本库扩展：
 
 ## CompItem
 
-AE 文档：[CompItem](../charts/after-effects-scripting-guide/docs/item/compitem.md)
+AE 文档：[CompItem](../references/after-effects-scripting-guide/docs/item/compitem.md)
 
 | AE attr                                                                      | aep-parser                                                                                    | 状态            | 备注                                                                                                                                                                             |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -200,7 +200,7 @@ AE 文档：[CompItem](../charts/after-effects-scripting-guide/docs/item/compite
 
 ## FootageItem
 
-AE 文档：[FootageItem](../charts/after-effects-scripting-guide/docs/item/footageitem.md)
+AE 文档：[FootageItem](../references/after-effects-scripting-guide/docs/item/footageitem.md)
 
 | AE attr                                                                               | aep-parser                                            | 状态      |
 | ------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------- |
@@ -218,7 +218,7 @@ AE 文档：[FootageItem](../charts/after-effects-scripting-guide/docs/item/foot
 
 ## Property / PropertyGroup / MaskPropertyGroup
 
-AE 文档：[Property](../charts/after-effects-scripting-guide/docs/property/property.md)
+AE 文档：[Property](../references/after-effects-scripting-guide/docs/property/property.md)
 
 | AE attr                                                                                                                 | aep-parser                                                                                                                                                                                                                       | 状态          | 备注                                                                                                                           |
 | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -270,7 +270,7 @@ AE 文档：[Property](../charts/after-effects-scripting-guide/docs/property/pro
 
 ## TextDocument
 
-AE 文档：[TextDocument](../charts/after-effects-scripting-guide/docs/text/textdocument.md)
+AE 文档：[TextDocument](../references/after-effects-scripting-guide/docs/text/textdocument.md)
 
 > AE 的 TextDocument 是**单点快照**（取首字符 / 首段属性）；本库 `TextSource` 拆出 per-run + per-paragraph，更细。下面对应到 first-run / first-paragraph。
 
@@ -318,7 +318,7 @@ AE 文档：[TextDocument](../charts/after-effects-scripting-guide/docs/text/tex
 
 ## MarkerValue
 
-AE 文档：[MarkerValue](../charts/after-effects-scripting-guide/docs/other/markervalue.md)
+AE 文档：[MarkerValue](../references/after-effects-scripting-guide/docs/other/markervalue.md)
 
 | AE attr                                   | aep-parser                                    | 状态                                  |
 | ----------------------------------------- | --------------------------------------------- | ------------------------------------- |
@@ -339,7 +339,7 @@ AE 文档：[MarkerValue](../charts/after-effects-scripting-guide/docs/other/mar
 
 ## KeyframeEase
 
-AE 文档：[KeyframeEase](../charts/after-effects-scripting-guide/docs/other/keyframeease.md)
+AE 文档：[KeyframeEase](../references/after-effects-scripting-guide/docs/other/keyframeease.md)
 
 | AE attr                    | aep-parser                 | 状态 |
 | -------------------------- | -------------------------- | ---- |
@@ -352,7 +352,7 @@ AE 文档：[KeyframeEase](../charts/after-effects-scripting-guide/docs/other/ke
 
 ## Project
 
-AE 文档：[Project](../charts/after-effects-scripting-guide/docs/general/project.md)
+AE 文档：[Project](../references/after-effects-scripting-guide/docs/general/project.md)
 
 | AE attr                                                                           | aep-parser                                              | 状态                                         | 备注                                                         |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------ |

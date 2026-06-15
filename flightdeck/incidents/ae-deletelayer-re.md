@@ -148,7 +148,7 @@ Confirms CLAUDE.md Invariant #9 (monotonic, no reuse). **No need to down-adjust 
 
 ## Related
 
-- Plan: [`../plans/2026-05-28-v3-phase2-deletelayer-plan.md`](../landed/plans/2026-05-28-v3-phase2-deletelayer-plan.md)
+- Plan: [`../plans/2026-05-28-v3-phase2-deletelayer-plan.md`](../archive/plans/2026-05-28-v3-phase2-deletelayer-plan.md)
 - Fixture JSX: `test_data/re_delete_layer.jsx`
 - Dump tool: `tmp_debug/dump_layers/main.go`
 - Ship-gate scar (when AE rejects what we wrote): [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)
