@@ -55,6 +55,9 @@ var textAnimatorsScaleBody []byte
 //go:embed templates/text_animators_rotation_body.bin
 var textAnimatorsRotationBody []byte
 
+//go:embed templates/text_animators_color_body.bin
+var textAnimatorsColorBody []byte
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -65,6 +68,7 @@ const (
 	matchNameTextPosition3D    = "ADBE Text Position 3D"
 	matchNameTextScale3D       = "ADBE Text Scale 3D"
 	matchNameTextRotation      = "ADBE Text Rotation"
+	matchNameTextFillColor     = "ADBE Text Fill Color"
 )
 
 var animatorTmplCache sync.Map // first-byte ptr → *animatorTmplEntry
@@ -408,6 +412,49 @@ func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, range
 		return nil, fmt.Errorf("AddTextRotationAnimator: template missing %q cdat slot", matchNameTextRotation)
 	}
 	if err := setRangeSelector(payload, undo, "AddTextRotationAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
+	}
+
+	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextColorAnimator adds a per-character Fill Color animator + Range Selector
+// to a text layer and returns a stand-in group node referencing the spliced
+// animator. r / g / b / a is the colour applied to selected characters (each
+// channel 0..1); rangeStart / rangeEnd / rangeOffset are the Range Selector
+// bounds in percent. The canonical "characters tint in" reveal: set a target
+// colour, Start=0/End=100, then sweep the Range Offset 0→100 over time with
+// AnimateTextRangeOffset — the colour applies to the selected characters and
+// resolves to the base text colour as the window slides off.
+// AE stores the colour as [A,R,G,B] × 255 f64 BE (same on-disk encoding as shape
+// Fill/Stroke), so the four channels are written at cdat[0:32].
+// (Full contract lives on the aep.AddTextColorAnimator facade — docgen source.)
+func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextColorAnimator: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextColorAnimator: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextColorAnimator: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", layer.Name)
+	}
+	tmpl, err := animatorTemplate(textAnimatorsColorBody)
+	if err != nil {
+		return nil, err
+	}
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
+	}
+	if !overwriteVectorCdat(payload, matchNameTextFillColor, []float64{a * 255, r * 255, g * 255, b * 255}) {
+		undo()
+		return nil, fmt.Errorf("AddTextColorAnimator: template missing %q cdat slot", matchNameTextFillColor)
+	}
+	if err := setRangeSelector(payload, undo, "AddTextColorAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
 		return nil, err
 	}
 

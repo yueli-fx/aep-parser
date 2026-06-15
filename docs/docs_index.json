@@ -29,6 +29,13 @@
       "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
       "summary": "AddMask appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed *Mask. The mask is created with the given display name (empty → \"Mask N\"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask)."
     },
+    "AddTextColorAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextcoloranimator",
+      "signature": "func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g. a colour wipe sweeping across the text). r / g / b / a is the target colour applied to the selected characters (each channel 0..1); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: set a target colour, Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the colour applies to the selected characters and resolves to the base text colour as the selection window slides off them."
+    },
     "AddTextOpacityAnimator": {
       "kind": "func",
       "file": "text.md",

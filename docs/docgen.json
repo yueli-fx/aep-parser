@@ -64,7 +64,7 @@
     {
       "out": "text.md",
       "roots": ["TextSource", "TextStyleRun", "TextParagraph", "TextCapsOption", "TextBaselineOption", "TextAutoKernType", "TextLineJoinType", "TextDigitSet", "TextLeadingType", "TextParagraphDirection"],
-      "funcs": ["TextEncodedByteLen", "AddTextOpacityAnimator", "AddTextPositionAnimator", "AddTextScaleAnimator", "AddTextRotationAnimator", "AnimateTextRangeOffset"],
+      "funcs": ["TextEncodedByteLen", "AddTextOpacityAnimator", "AddTextPositionAnimator", "AddTextScaleAnimator", "AddTextRotationAnimator", "AddTextColorAnimator", "AnimateTextRangeOffset"],
       "head": "_includes/text.head.md"
     },
     {

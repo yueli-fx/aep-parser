@@ -123,19 +123,37 @@ degrees 直存——`overwriteScalarCdat` 照搬）。难点全在 gate 签名�
 - 模板 `templates/text_animators_rotation_body.bin`（`RE_TXANIM_MODE=rottemplate`：Rotation=45
   + Start/End/Offset 全非默认）。Rotation tdbs 无 tdum/tduM（4 children，≠ Opacity 的 6）。
 
+## Fill Color 动画器扩展（2026-06-15，第五个 leaf 类型）
+
+`AddTextColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)`，双版本渲染 gate
+PASS（`text_animator_color_shipgate_test.go`）。泛化机制零改动，只抽模板 + 一个 facade + 复用
+`overwriteVectorCdat`。findings：
+
+1. **Fill Color = vtype 6418 color，cdat = 96B**（12 BE f64）：颜色 `[A,R,G,B]×255` @ [0:32]，
+   后 64B（8 f64）全 0。**与 shape Fill/Stroke 同一 on-disk 编码**（`encodeShapeColorBE`），不是 effect-param 的
+   ARGB 变体。RE 自 `RE_TXANIM_MODE=colortemplate`：Fill=[0.2,0.4,0.8,1] → disk [255,51,102,204] 逐字节印证 order。
+   tdbs 只有 tdsb/tdsn/tdb4(124B,4 分量)/cdat —— **无 tdum/tduM**（同 Position/Rotation；scalar 才有）。
+2. facade 入参 r,g,b,a 为 0..1，`overwriteVectorCdat(payload, name, []float64{a*255, r*255, g*255, b*255})`
+   只写 [0:32]，长度无关——通用（同 Scale 120B 只写 [0:24]）。
+3. 模板 `templates/text_animators_color_body.bin`（colortemplate：Fill 非默认 + Start/End/Offset 非默认）。
+4. **gate 签名 = ink 像素均值 RGB 的绿通道**（区别于 Opacity 亮度 / Position 质心 / Scale 面积 / Rotation 长宽比）：
+   红色覆写 + 白底文字，扫光时字形从红→白。verify JSX 强制 base `fillColor=[1,1,1]` 使红覆写成唯一颜色信号。
+   t0=(248,0,0)红 → t1=(241,120,120)粉 → t2=(236,236,236)白，绿通道单调 0→120→236、红通道全程高
+   （AE2020/2025 逐像素**完全一致**）。证 COLOR（静态红会全程绿低、掉层无 ink）。
+
 ## 现状 / 边界
 
-- **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation** 动画器、Range Selector（参数化
-  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in 通用）。各双版本渲染 gate PASS。
+- **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation**、**Fill Color** 动画器、Range Selector（参数化
+  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in / colour-wipe 通用）。各双版本渲染 gate PASS。
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
   不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
   Opacity/Position 混排已测。
-- **按需扩**（同 vein，抽模板 + 一个 facade）：Fill Color（6418，color cdat 布局待 RE，gate 签名 =
-  采样字形像素 RGB）；Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
-  Wiggly/Expression Selector；**animate leaf 本身**（关键帧驱动 Position/Scale/Rotation 值，非仅
-  Range Offset）。
+- **按需扩**（同 vein，抽模板 + 一个 facade）：Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
+  Wiggly/Expression Selector；**animate leaf 本身**（关键帧驱动 Position/Scale/Rotation/Color 值，非仅
+  Range Offset）。同布局的免费近邻：Fill Opacity / Stroke Color / Stroke Width / Skew /
+  Rotation X·Y（各 1D/color，照 overwriteScalar/VectorCdat 抽模板即可）。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
-  Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；Color→采样字形像素 RGB。
+  Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；**Color→ink 像素均值 RGB（绿通道单调）**。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
   仍仅 Go round-trip = Alpha 未单独 ship-gate。
 
@@ -154,3 +172,6 @@ degrees 直存——`overwriteScalarCdat` 照搬）。难点全在 gate 签名�
   shrink-in 双版本渲染 gate PASS（ink 面积 1070→313）
 - 2026-06-15 扩 Rotation：AddTextRotationAnimator（1D scalar 同 Opacity，Go 免费；gate 签名 =
   单字 "L" ink 包围盒长宽比 1.52→0.65），spin-in 双版本渲染 gate PASS
+- 2026-06-15 扩 Fill Color：AddTextColorAnimator（color 96B cdat=[A,R,G,B]×255 @[0:32]，复用
+  overwriteVectorCdat；gate 签名 = ink 均值 RGB 绿通道 0→120→236），colour-wipe 双版本渲染 gate
+  PASS（AE2020≡AE2025 逐像素一致）

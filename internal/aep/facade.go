@@ -804,6 +804,34 @@ func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, range
 	return serializer.AddTextRotationAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
 
+// AddTextColorAnimator adds a per-character Fill Color animator with a Range
+// Selector to a text layer — the kinetic-typography primitive that tints
+// characters one at a time (e.g. a colour wipe sweeping across the text). r / g
+// / b / a is the target colour applied to the selected characters (each channel
+// 0..1); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in
+// percent. The canonical reveal: set a target colour, Start=0/End=100, then
+// sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the
+// colour applies to the selected characters and resolves to the base text colour
+// as the selection window slides off them.
+//
+// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector
+// path); the embedded template drives a Fill Color leaf (a 4-channel colour
+// cdat) which AE stores as [A,R,G,B] × 255 f64 BE, the same on-disk encoding as
+// shape Fill/Stroke. Fresh text layers carry no Animators group, so the first
+// animator splices the whole group into "ADBE Text Properties"; later animators
+// append into it.
+//
+// Refused: non-text layers, and text layers built by New* that were never parsed
+// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
+// animator chunk.
+//
+// Alpha / structural — the animator chunk structure is RE'd + double-version
+// render-gated, but the typed parameter accessors are not yet wired; tune
+// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
+}
+
 // AnimateTextRangeOffset keyframes a text animator's Range Selector Offset,
 // turning a static reveal into an animated sweep — the kinetic-typography
 // payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the

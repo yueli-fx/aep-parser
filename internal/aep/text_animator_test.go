@@ -99,6 +99,120 @@ func cdatVec3(t *testing.T, root *rifx.Chunk, matchName string) [3]float64 {
 	return v
 }
 
+// cdatVec4 returns the four BE f64 at cdat[0:32] of the tdbs following tdmn
+// matchName (a 4-channel colour value such as Fill Color, stored [A,R,G,B]×255).
+func cdatVec4(t *testing.T, root *rifx.Chunk, matchName string) [4]float64 {
+	t.Helper()
+	tdbs := followingList(root, matchName)
+	if tdbs == nil {
+		t.Fatalf("%s: tdbs not found", matchName)
+	}
+	cdat := findShipChunk(tdbs, rifx.IDCdat)
+	if cdat == nil || len(cdat.Data) < 32 {
+		t.Fatalf("%s: cdat missing/short (%d)", matchName, len(cdat.Data))
+	}
+	var v [4]float64
+	for i := range v {
+		v[i] = math.Float64frombits(binary.BigEndian.Uint64(cdat.Data[8*i : 8*i+8]))
+	}
+	return v
+}
+
+func TestTextColorAnimator_Static_RoundTrip(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	// r,g,b,a = 0.2,0.4,0.8,1 → on disk [A,R,G,B]×255 = [255,51,102,204].
+	if _, err := aep.AddTextColorAnimator(tl, 0.2, 0.4, 0.8, 1, 10, 60, 25); err != nil {
+		t.Fatalf("AddTextColorAnimator: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txcolorstatic.aep")
+
+	got := cdatVec4(t, root, "ADBE Text Fill Color")
+	want := [4]float64{255, 0.2 * 255, 0.4 * 255, 0.8 * 255}
+	for i := range want {
+		if math.Abs(got[i]-want[i]) > 1e-3 {
+			t.Errorf("Fill Color cdat[%d] = %g, want %g (full=%v)", i, got[i], want[i], got)
+		}
+	}
+	if got := cdatF64(t, root, "ADBE Text Percent Start"); got != 10 {
+		t.Errorf("Start cdat = %g, want 10", got)
+	}
+	if got := cdatF64(t, root, "ADBE Text Percent End"); got != 60 {
+		t.Errorf("End cdat = %g, want 60", got)
+	}
+	if got := cdatF64(t, root, "ADBE Text Percent Offset"); got != 25 {
+		t.Errorf("Offset cdat = %g, want 25", got)
+	}
+}
+
+func TestTextColorAnimator_RevealSweep_RoundTrip(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextColorAnimator(tl, 1, 0, 0, 1, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextColorAnimator: %v", err)
+	}
+	if err := aep.AnimateTextRangeOffset(tl, 0, []aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 2, Value: 100}}); err != nil {
+		t.Fatalf("AnimateTextRangeOffset: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txcoloranim.aep")
+
+	kfl := findShipList(root, "ADBE Text Percent Offset")
+	if kfl == nil {
+		t.Fatal("Offset list not found")
+	}
+	lhd3 := findShipChunk(kfl, rifx.IDLhd3)
+	if lhd3 == nil {
+		t.Fatal("Offset lhd3 missing (not animated)")
+	}
+	if n := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]); n != 2 {
+		t.Errorf("Offset numKf = %d, want 2", n)
+	}
+	got := cdatVec4(t, root, "ADBE Text Fill Color")
+	want := [4]float64{255, 255, 0, 0} // [A,R,G,B]×255 of opaque red
+	for i := range want {
+		if math.Abs(got[i]-want[i]) > 1e-3 {
+			t.Errorf("Fill Color cdat[%d] = %g, want %g (full=%v)", i, got[i], want[i], got)
+		}
+	}
+}
+
+func TestAddTextColorAnimator_RefusesNonText(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nl, err := aep.NewNullLayer(comp, "NULL")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextColorAnimator(nl, 1, 0, 0, 1, 0, 50, 0); err == nil {
+		t.Fatal("expected refuse on non-text layer, got nil")
+	}
+}
+
 func TestTextPositionAnimator_Static_RoundTrip(t *testing.T) {
 	p := aep.NewProject()
 	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
