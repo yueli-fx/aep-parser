@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: implementing per-effect typed param helpers / EnsureEffectParameter; wondering why a default effect instance exposes only the -0000 param; needing AE's param-persistence rule (value!=default, not touched-flag); splicing a materialized param tdbs into an effect sspc; needing effect point-param coordinate units (fraction-of-what) or color cdat ARGB encoding; verify JSX throws "数字结果无效（除以零？）" on a log line
-applies_to: [effect-params, elision, pard, part, tdbs, param-synthesis, settext, typed-param-helper, add-effect, negative-finding, control-type, point-units, color-argb, extendscript-concat-throw]
-last_updated: 2026-06-12
+when_to_read: implementing per-effect typed param helpers / EnsureEffectParameter; animating an effect param from scratch (AnimateEffectParam — InsertKeyframe refuses static→animated); wondering why a default effect instance exposes only the -0000 param; needing AE's param-persistence rule (value!=default, not touched-flag); splicing a materialized param tdbs into an effect sspc; needing effect point-param coordinate units (fraction-of-what) or color cdat ARGB encoding; verify JSX throws "数字结果无效（除以零？）" on a log line
+applies_to: [effect-params, elision, pard, part, tdbs, param-synthesis, settext, typed-param-helper, add-effect, animate-effect-param, scalar-keyframe, from-scratch-keyframe, negative-finding, control-type, point-units, color-argb, extendscript-concat-throw]
+last_updated: 2026-06-15
 resolved_by:
 ---
 
@@ -157,7 +157,29 @@ not the param stream's presence. Corollary for parsers: "param absent" can
 mean different values under different AE versions — never assume absent ==
 our hardcoded default across versions.
 
+## AnimateEffectParam — 从零合成关键帧容器（2026-06-15, Stable）✅
+
+`aep.AnimateEffectParam(layer, fx, paramMatchName, []ScalarKeyframe)`——effects 最大真缺口：
+`InsertKeyframe` 对 **static** 属性报「insert from scratch not supported」（它只能 clone 既有
+keyframe 的 layout），故动画 effect param（动画 blur / Slider 驱动表达式 rig）此前不可能。落地法：
+先 `SetEffectParam`（kf[0].Value）物化 → 新 `serializer.AnimateScalarKeyframes` 把 static cdat
+**原位换成** `LIST(list){lhd3,ldat}` 关键帧流（`encodeKeyframes` non-spatial 1D layout：bpk 48 /
+time@0x00 / value@0x08）+ flip tdb4 static→animated flag（**@0x05 清 bit0 / @0x44=1 / @0x4f 清
+bit0**——与 shape `injectAnimatedStream` **同一补丁**）。cdat 位置在 tdb4 与 tdum/tduM 之间，原位换 LIST。
+
+**RE 确认（`tmp_debug/dump_anim_blur`）**：我们的输出与 AE 自存 animated Gaussian-Blur-Blurriness
+fixture（`setValueAtTime` 两关键帧）**逐字节相同**——tdb4 三 flag、lhd3（count=2/bpk=48/pages=1/
+@0x1C=4）、两个 48B keyframe block（time 0/61440、value 0/100、interp 01/01）全等。即「animated
+effect param scalar = 通用标量关键帧流」，无 effect 特异字节。
+
+**渲染 gate（红线4 双版本）**：`TestAnimEffect_AEShipGate_AE2020/2025` PASS——白 400px 方块 Gaussian
+Blur Blurriness 关键帧 0@0s→100@2s，AE 求值（valueAtTime(0)=0 / (2.5)=100）、blur 增长（edge-外
+lum 0→62）、numKeys=2 读回、resave 保 2 kf。Go round-trip `animate_effect_param_test.go`。
+**scalar-only**（color/point 关键帧 = follow-up，layout 不同：spatial bpk-152 等）。facade 自由函数，
+`ScalarKeyframe{Time,Value,InEase,OutEase}` 输入类型。
+
 ## Cases
+- 2026-06-15 **AnimateEffectParam**（from-scratch 标量关键帧合成；byte-identical AE-native；双版本 render gate；解 effects 最大缺口）
 - 2026-06-11 首次（board「AddEffect 参数化」可行性 RE → 同日 synthesis-lite
   ship；fixture + probe 落 `test_data/re_effect_param_elision.*`（manifest
   已登记）+ `re_effect_param_elision_2025.*`（AE 2025 默认值漂移对照））
