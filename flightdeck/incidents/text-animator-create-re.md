@@ -141,17 +141,37 @@ PASS（`text_animator_color_shipgate_test.go`）。泛化机制零改动，只�
    t0=(248,0,0)红 → t1=(241,120,120)粉 → t2=(236,236,236)白，绿通道单调 0→120→236、红通道全程高
    （AE2020/2025 逐像素**完全一致**）。证 COLOR（静态红会全程绿低、掉层无 ink）。
 
+## animate leaf 本身（2026-06-15，1D scalar：Opacity/Rotation）
+
+`AnimateTextOpacity` / `AnimateTextRotation`，双版本渲染 gate PASS
+（`text_animator_leaf_anim_shipgate_test.go`）。**新机制维度**：此前所有动画靠 Range Offset 扫光、
+leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字符**同步**走一条值曲线（脉冲/连续旋转/淡入淡出，
+扫光做不到）。findings：
+
+1. **零新关键帧代码**：定位第一个 animator 的 leaf tdbs（`scalarTdbs(animators, matchName)`）→
+   `parseLeafProperty` 包成带 back-ref 的 *Property → `AnimateScalarKeyframes`。**与 `AnimateTextRangeOffset`
+   逐字一致**，只是目标从 Range Offset 换成被驱动 leaf（通法 `animateTextScalarLeaf`）。
+2. **wiring 反转 = 证据**：gate 把 Range Offset **留静态**（numKeys=0）、Rotation leaf 关键帧化（numKeys=2），
+   正好是 spin-in offset-sweep gate 的镜像 —— 证明动的是 leaf 而非 selector。单字 "L" 旋 0→90，
+   aspect (w/h) t0=0.65→t1=0.81→t2=1.52 单调（AE2020≡AE2025 逐像素一致）。
+3. **前置依赖**：leaf 必须已存在（先 AddText*Animator）且仍 static（已 animated 用 InsertKeyframe）。
+   非文字层 / 无 animator / 无该 leaf 均 refuse。
+4. **3D/4D leaf animate（Position/Scale/Color）= 下一 slice**：走 `AnimateVectorKeyframes`（spatial block，
+   color [A,R,G,B]×255），但该路径 RE 自 **effect** color/point params，text leaf 的 animated block layout
+   未验证——**须独立 gate**，不可假定同 effect。本 slice 只交付已证的 1D scalar 路径（红线：不堆未验证机制）。
+
 ## 现状 / 边界
 
 - **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation**、**Fill Color** 动画器、Range Selector（参数化
-  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in / colour-wipe 通用）。各双版本渲染 gate PASS。
+  Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in / colour-wipe 通用）、
+  **animate leaf 本身（1D scalar：`AnimateTextOpacity`/`AnimateTextRotation`，全字符同步值曲线）**。各双版本渲染 gate PASS。
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
   不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
   Opacity/Position 混排已测。
 - **按需扩**（同 vein，抽模板 + 一个 facade）：Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
-  Wiggly/Expression Selector；**animate leaf 本身**（关键帧驱动 Position/Scale/Rotation/Color 值，非仅
-  Range Offset）。同布局的免费近邻：Fill Opacity / Stroke Color / Stroke Width / Skew /
-  Rotation X·Y（各 1D/color，照 overwriteScalar/VectorCdat 抽模板即可）。
+  Wiggly/Expression Selector；**animate 3D/4D leaf**（Position/Scale/Color 值关键帧化，走 `AnimateVectorKeyframes`，
+  须独立 gate 验 text leaf animated block layout）。同布局的免费近邻：Fill Opacity / Stroke Color / Stroke Width / Skew /
+  Rotation X·Y（各 1D/color，照 overwriteScalar/VectorCdat 抽模板即可；1D 的还可 animate leaf 复用 `animateTextScalarLeaf`）。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
   Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；**Color→ink 像素均值 RGB（绿通道单调）**。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
@@ -175,3 +195,6 @@ PASS（`text_animator_color_shipgate_test.go`）。泛化机制零改动，只�
 - 2026-06-15 扩 Fill Color：AddTextColorAnimator（color 96B cdat=[A,R,G,B]×255 @[0:32]，复用
   overwriteVectorCdat；gate 签名 = ink 均值 RGB 绿通道 0→120→236），colour-wipe 双版本渲染 gate
   PASS（AE2020≡AE2025 逐像素一致）
+- 2026-06-15 animate leaf 本身（1D scalar）：AnimateTextOpacity/AnimateTextRotation（`animateTextScalarLeaf`
+  = scalarTdbs→parseLeafProperty→AnimateScalarKeyframes，零新关键帧代码）。gate 反转 wiring（Offset 静态、
+  Rotation leaf 关键帧 0→90），aspect 0.65→1.52 双版本渲染 gate PASS。3D/4D leaf animate 留下一 slice

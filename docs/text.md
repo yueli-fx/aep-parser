@@ -792,3 +792,27 @@ AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turnin
 Builds a parsed property over the spliced Offset slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use (tdb4 flag flip + keyframe-stream synthesis).
 
 Alpha / structural — RE'd + double-version render-gated as the reveal sweep. Free function (CLAUDE.md #2 structural-op call-form).
+
+### AnimateTextOpacity
+
+```go
+func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
+```
+
+AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector. Every selected character shares the opacity curve, so the text fades as one synchronized group (a pulse / blink), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Opacity slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+
+Refused: non-text layers, layers without a text animator carrying an Opacity leaf, and an Opacity leaf that is already animated.
+
+Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
+
+### AnimateTextRotation
+
+```go
+func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
+```
+
+AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector. Every selected character shares the rotation curve, so the text spins as one synchronized group (e.g. a continuous 0→360 spin), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Rotation slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+
+Refused: non-text layers, layers without a text animator carrying a Rotation leaf, and a Rotation leaf that is already animated.
+
+Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).

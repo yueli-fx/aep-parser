@@ -587,6 +587,97 @@ func TestTextOpacityAnimator_AnimatedOffset_RoundTrip(t *testing.T) {
 	}
 }
 
+func TestAnimateTextOpacity_LeafBecomesKeyframed(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	// Static full-select animator; then animate the Opacity leaf itself 100→0.
+	if _, err := aep.AddTextOpacityAnimator(tl, 100, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextOpacityAnimator: %v", err)
+	}
+	if err := aep.AnimateTextOpacity(tl, 0, []aep.ScalarKeyframe{{Time: 0, Value: 100}, {Time: 2, Value: 0}}); err != nil {
+		t.Fatalf("AnimateTextOpacity: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txopleafanim.aep")
+
+	// The Opacity leaf is now a 2-keyframe stream...
+	opKfl := findShipList(root, "ADBE Text Opacity")
+	if opKfl == nil {
+		t.Fatal("Opacity list not found (leaf not animated)")
+	}
+	lhd3 := findShipChunk(opKfl, rifx.IDLhd3)
+	if lhd3 == nil {
+		t.Fatal("Opacity lhd3 missing (not animated)")
+	}
+	if n := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]); n != 2 {
+		t.Errorf("Opacity numKf = %d, want 2", n)
+	}
+	// ...while the Range Offset stays static (no keyframe container).
+	if offKfl := findShipList(root, "ADBE Text Percent Offset"); offKfl != nil {
+		t.Error("Range Offset unexpectedly animated; this path keyframes the leaf, not the selector")
+	}
+}
+
+func TestAnimateTextRotation_LeafBecomesKeyframed(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("L"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextRotationAnimator(tl, 0, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextRotationAnimator: %v", err)
+	}
+	if err := aep.AnimateTextRotation(tl, 0, []aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 2, Value: 90}}); err != nil {
+		t.Fatalf("AnimateTextRotation: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txrotleafanim.aep")
+
+	rotKfl := findShipList(root, "ADBE Text Rotation")
+	if rotKfl == nil {
+		t.Fatal("Rotation list not found (leaf not animated)")
+	}
+	lhd3 := findShipChunk(rotKfl, rifx.IDLhd3)
+	if lhd3 == nil || binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]) != 2 {
+		t.Fatalf("Rotation numKf != 2")
+	}
+	if offKfl := findShipList(root, "ADBE Text Percent Offset"); offKfl != nil {
+		t.Error("Range Offset unexpectedly animated")
+	}
+}
+
+func TestAnimateTextOpacity_RefusesWithoutAnimator(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := aep.AnimateTextOpacity(tl, 0, []aep.ScalarKeyframe{{Time: 0, Value: 100}, {Time: 2, Value: 0}}); err == nil {
+		t.Fatal("expected refuse when no animator present, got nil")
+	}
+}
+
 func TestAddTextOpacityAnimator_RefusesNonText(t *testing.T) {
 	p := aep.NewProject()
 	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)

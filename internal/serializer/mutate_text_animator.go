@@ -518,3 +518,65 @@ func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 	}
 	return AnimateScalarKeyframes(p, tickRate, kfs)
 }
+
+// animateTextScalarLeaf keyframes a 1D-scalar animator-properties leaf (Opacity
+// / Rotation / Skew / …) on the layer's first animator, converting its static
+// value into a keyframed stream. Same parse-the-clone + AnimateScalarKeyframes
+// vein as AnimateTextRangeOffset, but it targets a DRIVEN leaf rather than the
+// Range Selector Offset — so all selected characters share one value curve over
+// time (a synchronized pulse / spin / fade, which a Range-Offset sweep cannot
+// express). The animator must already carry the leaf (call the matching
+// AddText*Animator first); the leaf must still be static. Needs >= 2 keyframes.
+func animateTextScalarLeaf(layer *Layer, matchName, who string, tickRate float64, kfs []ScalarKeyframe) error {
+	if layer == nil {
+		return fmt.Errorf("%s: layer is nil", who)
+	}
+	if layer.Type != LayerTypeText {
+		return fmt.Errorf("%s: layer %q is not a text layer", who, layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return fmt.Errorf("%s: layer %q has no Text Properties group", who, layer.Name)
+	}
+	animators := childGroupChunk(tp, matchNameTextAnimators)
+	if animators == nil {
+		return fmt.Errorf("%s: layer %q has no Text Animators (add the matching animator first)", who, layer.Name)
+	}
+	tdbs := scalarTdbs(animators, matchName)
+	if tdbs == nil {
+		return fmt.Errorf("%s: no %q leaf found (add the matching animator first)", who, matchName)
+	}
+	if tickRate <= 0 {
+		if comp := scene.LayerComp(layer); comp != nil && comp.TickRate > 0 {
+			tickRate = comp.TickRate
+		}
+	}
+	ctx := newParseCtx(tickRate, layer.Name, nil)
+	p := parseLeafProperty(matchName, tdbs, ctx)
+	if p == nil {
+		return fmt.Errorf("%s: failed to build property over %q tdbs", who, matchName)
+	}
+	return AnimateScalarKeyframes(p, tickRate, kfs)
+}
+
+// AnimateTextOpacity keyframes the per-character Opacity leaf of the layer's
+// first text animator (added via AddTextOpacityAnimator), fading the selected
+// characters as one synchronized group over time. Unlike AnimateTextRangeOffset
+// (which sweeps the selection window), this animates the driven value itself, so
+// every selected character shares the opacity curve. Needs >= 2 keyframes;
+// tickRate <= 0 uses the comp's.
+// (Full contract lives on the aep.AnimateTextOpacity facade — docgen source.)
+func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextOpacity, "AnimateTextOpacity", tickRate, kfs)
+}
+
+// AnimateTextRotation keyframes the per-character Rotation leaf of the layer's
+// first text animator (added via AddTextRotationAnimator), spinning the selected
+// characters as one synchronized group over time (e.g. a continuous 0→360 spin,
+// which a Range-Offset sweep cannot express). Unlike AnimateTextRangeOffset, this
+// animates the driven angle itself. Needs >= 2 keyframes; tickRate <= 0 uses the
+// comp's.
+// (Full contract lives on the aep.AnimateTextRotation facade — docgen source.)
+func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextRotation, "AnimateTextRotation", tickRate, kfs)
+}
