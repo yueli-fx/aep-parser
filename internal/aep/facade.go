@@ -885,6 +885,43 @@ func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) e
 	return serializer.AnimateTextRotation(layer, tickRate, kfs)
 }
 
+// AnimateTextPosition keyframes the per-character Position 3D leaf of a text
+// layer's first animator (added via AddTextPositionAnimator) — animating the
+// driven offset itself rather than sweeping the Range Selector. Each keyframe
+// Value is the [x, y, z] offset in pixels; every selected character shares the
+// motion curve, so the text glides as one synchronized group. Builds a parsed
+// property over the spliced Position slot and delegates to AnimateVectorKeyframes
+// (the spatial 3-component keyframe block — verified byte-matching the AE-saved
+// text leaf). Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
+//
+// Refused: non-text layers, layers without a text animator carrying a Position
+// leaf, and a Position leaf that is already animated.
+//
+// Alpha / structural — RE'd + double-version render-gated. Free function
+// (CLAUDE.md #2).
+func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	return serializer.AnimateTextPosition(layer, tickRate, kfs)
+}
+
+// AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's
+// first animator (added via AddTextColorAnimator) — animating the driven colour
+// itself over time (e.g. a red→blue cycle), which a Range-Offset sweep cannot
+// express. Each keyframe Value is an [r, g, b, a] colour with channels 0..1
+// (converted internally to the on-disk [A,R,G,B]×255 encoding). Builds a parsed
+// property over the spliced Fill Color slot and delegates to
+// AnimateVectorKeyframes (the 4-channel keyframe block — verified byte-matching
+// the AE-saved text leaf). Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
+//
+// Refused: non-text layers, layers without a text animator carrying a Fill Color
+// leaf, a Fill Color leaf that is already animated, and keyframe values that are
+// not 4-channel.
+//
+// Alpha / structural — RE'd + double-version render-gated. Free function
+// (CLAUDE.md #2).
+func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	return serializer.AnimateTextColor(layer, tickRate, kfs)
+}
+
 // SetEffectParam sets an effect parameter's static value by full parameter
 // match-name (e.g. "ADBE Gaussian Blur 2-0001"), returning the parameter's
 // *Property. It is the typed-parameter entry for AddEffect-style workflows:

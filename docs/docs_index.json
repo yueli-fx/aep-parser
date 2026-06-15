@@ -78,12 +78,26 @@
       "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
       "summary": "AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a Time (seconds), a []float64 Value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam: a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space (for a source-backed layer divide by the source's w/h, for a source-less layer by the comp's — and z by the same space's height)."
     },
+    "AnimateTextColor": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#animatetextcolor",
+      "signature": "func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
+      "summary": "AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven colour itself over time (e.g. a red→blue cycle), which a Range-Offset sweep cannot express. Each keyframe Value is an [r, g, b, a] colour with channels 0..1 (converted internally to the on-disk [A,R,G,B]×255 encoding). Builds a parsed property over the spliced Fill Color slot and delegates to AnimateVectorKeyframes (the 4-channel keyframe block — verified byte-matching the AE-saved text leaf). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+    },
     "AnimateTextOpacity": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextopacity",
       "signature": "func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
       "summary": "AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector. Every selected character shares the opacity curve, so the text fades as one synchronized group (a pulse / blink), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Opacity slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+    },
+    "AnimateTextPosition": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#animatetextposition",
+      "signature": "func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
+      "summary": "AnimateTextPosition keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself rather than sweeping the Range Selector. Each keyframe Value is the [x, y, z] offset in pixels; every selected character shares the motion curve, so the text glides as one synchronized group. Builds a parsed property over the spliced Position slot and delegates to AnimateVectorKeyframes (the spatial 3-component keyframe block — verified byte-matching the AE-saved text leaf). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
     },
     "AnimateTextRangeOffset": {
       "kind": "func",

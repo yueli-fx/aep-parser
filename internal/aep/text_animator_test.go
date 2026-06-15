@@ -678,6 +678,144 @@ func TestAnimateTextOpacity_RefusesWithoutAnimator(t *testing.T) {
 	}
 }
 
+// kflKeyframeValues returns the dim BE f64 values of keyframe kfIndex from a
+// keyframe container (LIST list/kfl), reading at the spatial value offset 0x38
+// within the keyframe's bpk-sized record.
+func kflKeyframeValues(t *testing.T, kfl *rifx.Chunk, kfIndex, dim int) []float64 {
+	t.Helper()
+	lhd3 := findShipChunk(kfl, rifx.IDLhd3)
+	ldat := findShipChunk(kfl, rifx.IDLdat)
+	if lhd3 == nil || ldat == nil {
+		t.Fatal("kfl missing lhd3/ldat")
+	}
+	bpk := int(binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
+	base := kfIndex*bpk + 0x38
+	out := make([]float64, dim)
+	for i := range out {
+		off := base + i*8
+		if off+8 > len(ldat.Data) {
+			t.Fatalf("ldat too short for kf %d comp %d (off %d, len %d)", kfIndex, i, off, len(ldat.Data))
+		}
+		out[i] = math.Float64frombits(binary.BigEndian.Uint64(ldat.Data[off : off+8]))
+	}
+	return out
+}
+
+func kflBpk(t *testing.T, kfl *rifx.Chunk) int {
+	t.Helper()
+	lhd3 := findShipChunk(kfl, rifx.IDLhd3)
+	if lhd3 == nil {
+		t.Fatal("kfl missing lhd3")
+	}
+	return int(binary.BigEndian.Uint32(lhd3.Data[0x10:0x14]))
+}
+
+func TestAnimateTextPosition_LeafBecomesKeyframed(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextPositionAnimator(tl, 0, 0, 0, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextPositionAnimator: %v", err)
+	}
+	if err := aep.AnimateTextPosition(tl, 0, []aep.VectorKeyframe{
+		{Time: 0, Value: []float64{0, 0, 0}},
+		{Time: 2, Value: []float64{100, 50, 0}},
+	}); err != nil {
+		t.Fatalf("AnimateTextPosition: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txposleafanim.aep")
+
+	kfl := findShipList(root, "ADBE Text Position 3D")
+	if kfl == nil {
+		t.Fatal("Position list not found (leaf not animated)")
+	}
+	// AE ground truth (re_text_animator_animatedvec): spatial 3D block, bpk 128,
+	// value @ 0x38.
+	if bpk := kflBpk(t, kfl); bpk != 128 {
+		t.Errorf("Position bpk = %d, want 128", bpk)
+	}
+	if got := kflKeyframeValues(t, kfl, 1, 3); got[0] != 100 || got[1] != 50 || got[2] != 0 {
+		t.Errorf("Position kf1 value = %v, want [100 50 0]", got)
+	}
+	if findShipList(root, "ADBE Text Percent Offset") != nil {
+		t.Error("Range Offset unexpectedly animated")
+	}
+}
+
+func TestAnimateTextColor_LeafBecomesKeyframed(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextColorAnimator(tl, 1, 0, 0, 1, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextColorAnimator: %v", err)
+	}
+	// red → blue
+	if err := aep.AnimateTextColor(tl, 0, []aep.VectorKeyframe{
+		{Time: 0, Value: []float64{1, 0, 0, 1}},
+		{Time: 2, Value: []float64{0, 0, 1, 1}},
+	}); err != nil {
+		t.Fatalf("AnimateTextColor: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txcolorleafanim.aep")
+
+	kfl := findShipList(root, "ADBE Text Fill Color")
+	if kfl == nil {
+		t.Fatal("Fill Color list not found (leaf not animated)")
+	}
+	// AE ground truth: 4-channel color block, bpk 152, value @ 0x38 as [A,R,G,B]×255.
+	if bpk := kflBpk(t, kfl); bpk != 152 {
+		t.Errorf("Color bpk = %d, want 152", bpk)
+	}
+	// kf0 = opaque red → [255,255,0,0]; kf1 = opaque blue → [255,0,0,255].
+	if got := kflKeyframeValues(t, kfl, 0, 4); got[0] != 255 || got[1] != 255 || got[2] != 0 || got[3] != 0 {
+		t.Errorf("Color kf0 = %v, want [255 255 0 0]", got)
+	}
+	if got := kflKeyframeValues(t, kfl, 1, 4); got[0] != 255 || got[1] != 0 || got[2] != 0 || got[3] != 255 {
+		t.Errorf("Color kf1 = %v, want [255 0 0 255]", got)
+	}
+}
+
+func TestAnimateTextColor_RefusesBadChannelCount(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextColorAnimator(tl, 1, 0, 0, 1, 0, 100, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := aep.AnimateTextColor(tl, 0, []aep.VectorKeyframe{
+		{Time: 0, Value: []float64{1, 0, 0}},
+		{Time: 2, Value: []float64{0, 0, 1}},
+	}); err == nil {
+		t.Fatal("expected refuse on 3-channel color keyframe, got nil")
+	}
+}
+
 func TestAddTextOpacityAnimator_RefusesNonText(t *testing.T) {
 	p := aep.NewProject()
 	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)

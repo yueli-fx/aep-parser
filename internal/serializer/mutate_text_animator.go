@@ -580,3 +580,76 @@ func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) er
 func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return animateTextScalarLeaf(layer, matchNameTextRotation, "AnimateTextRotation", tickRate, kfs)
 }
+
+// animateTextVectorLeaf is animateTextScalarLeaf for a 2/3/4-component leaf
+// (Position 3D / Fill Color): it locates the leaf, wraps it as a parsed Property,
+// and delegates to AnimateVectorKeyframes (the SPATIAL keyframe block effect
+// color/point params use — verified byte-matching the AE-saved text leaf for the
+// spatial Position 3D and 4-channel Fill Color leaves; the non-spatial Scale 3D
+// leaf uses a different block and is NOT routed here). Values are in the leaf's
+// on-disk units (Position = pixels, Fill Color = [A,R,G,B]×255).
+func animateTextVectorLeaf(layer *Layer, matchName, who string, tickRate float64, kfs []VectorKeyframe) error {
+	if layer == nil {
+		return fmt.Errorf("%s: layer is nil", who)
+	}
+	if layer.Type != LayerTypeText {
+		return fmt.Errorf("%s: layer %q is not a text layer", who, layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return fmt.Errorf("%s: layer %q has no Text Properties group", who, layer.Name)
+	}
+	animators := childGroupChunk(tp, matchNameTextAnimators)
+	if animators == nil {
+		return fmt.Errorf("%s: layer %q has no Text Animators (add the matching animator first)", who, layer.Name)
+	}
+	tdbs := scalarTdbs(animators, matchName)
+	if tdbs == nil {
+		return fmt.Errorf("%s: no %q leaf found (add the matching animator first)", who, matchName)
+	}
+	if tickRate <= 0 {
+		if comp := scene.LayerComp(layer); comp != nil && comp.TickRate > 0 {
+			tickRate = comp.TickRate
+		}
+	}
+	ctx := newParseCtx(tickRate, layer.Name, nil)
+	p := parseLeafProperty(matchName, tdbs, ctx)
+	if p == nil {
+		return fmt.Errorf("%s: failed to build property over %q tdbs", who, matchName)
+	}
+	return AnimateVectorKeyframes(p, tickRate, kfs)
+}
+
+// AnimateTextPosition keyframes the per-character Position 3D leaf of the layer's
+// first text animator (added via AddTextPositionAnimator), translating the
+// selected characters as one synchronized group over time. Each keyframe Value is
+// the [x, y, z] offset in pixels. Needs >= 2 keyframes; tickRate <= 0 uses the
+// comp's.
+// (Full contract lives on the aep.AnimateTextPosition facade — docgen source.)
+func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	return animateTextVectorLeaf(layer, matchNameTextPosition3D, "AnimateTextPosition", tickRate, kfs)
+}
+
+// AnimateTextColor keyframes the per-character Fill Color leaf of the layer's
+// first text animator (added via AddTextColorAnimator), tinting the selected
+// characters through a colour curve over time (e.g. red→blue cycling). Each
+// keyframe Value is an [r, g, b, a] colour with channels 0..1; it is converted to
+// the on-disk [A,R,G,B]×255 encoding before keyframing. Needs >= 2 keyframes;
+// tickRate <= 0 uses the comp's.
+// (Full contract lives on the aep.AnimateTextColor facade — docgen source.)
+func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
+	conv := make([]VectorKeyframe, len(kfs))
+	for i, kf := range kfs {
+		if len(kf.Value) != 4 {
+			return fmt.Errorf("AnimateTextColor: keyframe %d Value must be [r,g,b,a] (4 channels), got %d", i, len(kf.Value))
+		}
+		r, g, b, a := kf.Value[0], kf.Value[1], kf.Value[2], kf.Value[3]
+		conv[i] = VectorKeyframe{
+			Time:    kf.Time,
+			Value:   []float64{a * 255, r * 255, g * 255, b * 255},
+			InEase:  kf.InEase,
+			OutEase: kf.OutEase,
+		}
+	}
+	return animateTextVectorLeaf(layer, matchNameTextFillColor, "AnimateTextColor", tickRate, conv)
+}

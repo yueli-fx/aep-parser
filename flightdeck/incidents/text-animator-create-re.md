@@ -160,18 +160,42 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
    color [A,R,G,B]×255），但该路径 RE 自 **effect** color/point params，text leaf 的 animated block layout
    未验证——**须独立 gate**，不可假定同 effect。本 slice 只交付已证的 1D scalar 路径（红线：不堆未验证机制）。
 
+## animate 3D/4D leaf（2026-06-15，Position 3D + Fill Color；Scale 3D 暂搁）
+
+`AnimateTextPosition`（[x,y,z] px）+ `AnimateTextColor`（[r,g,b,a] 0..1）。双版本渲染 gate PASS
+（`text_animator_vec_leaf_anim_shipgate_test.go`）。**RE-first**：先抽 AE ground truth
+（`RE_TXANIM_MODE=animatedvec`：Position/Scale/Color 各 keyframe 2 帧）逐字对照 `AnimateVectorKeyframes`，
+**不假定同 effect**。findings（每 leaf 的 animated keyframe block，bpk=lhd3 @0x10）：
+
+| leaf | vtype | bpk | value 偏移 | header @0x04 / marker @0x08 | 匹配 `vectorKeyframeLayout` |
+|---|---|---|---|---|---|
+| Position 3D | 6413 spatial | 128 | **0x38** | 0007 / **3** | ✓ `(3)` spatial marker3 |
+| Fill Color | 6418 color | 152 | **0x38** | 0001 / **2** | ✓ `(4)` color marker2，值=[A,R,G,B]×255 |
+| **Scale 3D** | 6414 ThreeD | 128 | **0x08** | 00 / **无 marker** | ✗ **非 spatial 块**，现有路径不产出 |
+
+1. **Position/Color 逐字匹配 effect color/point 的 spatial block** → 复用 `AnimateVectorKeyframes` 零改动
+   （`animateTextVectorLeaf` = scalarTdbs→parseLeafProperty→AnimateVectorKeyframes）。单测断言 bpk + value@0x38
+   逐字节核对 AE ground truth（128/Position·152/Color），再双版本 render gate。
+2. **Scale 3D = 非 spatial 多维块**（value@0x08、headerByte 0x00、无 marker，≠ Position 的 spatial），
+   `AnimateVectorKeyframes` 永远发 spatial(value@0x38) → 不能用。**须新增 non-spatial vector keyframe layout**
+   （RE + valueLayout），独立 slice。暂搁。
+3. **on-disk 单位**：Position 值原样存 px（kf2 [100,50,0] 存 raw），Color facade 把 [r,g,b,a]0..1 转 [a,r,g,b]×255
+   （与 `AddTextColorAnimator` 一致）。gate 签名：Color = ink 均值 R 降 B 升（248/0→0/248）；Position = ink 垂直质心
+   下移（367→617，Δ=250px）。AE2020≡AE2025 逐像素一致。
+
 ## 现状 / 边界
 
 - **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation**、**Fill Color** 动画器、Range Selector（参数化
   Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in / colour-wipe 通用）、
-  **animate leaf 本身（1D scalar：`AnimateTextOpacity`/`AnimateTextRotation`，全字符同步值曲线）**。各双版本渲染 gate PASS。
+  **animate leaf 本身（1D scalar `AnimateTextOpacity`/`AnimateTextRotation` + 3D/4D `AnimateTextPosition`/`AnimateTextColor`，全字符同步值曲线）**。各双版本渲染 gate PASS。
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
   不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
   Opacity/Position 混排已测。
 - **按需扩**（同 vein，抽模板 + 一个 facade）：Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
-  Wiggly/Expression Selector；**animate 3D/4D leaf**（Position/Scale/Color 值关键帧化，走 `AnimateVectorKeyframes`，
-  须独立 gate 验 text leaf animated block layout）。同布局的免费近邻：Fill Opacity / Stroke Color / Stroke Width / Skew /
-  Rotation X·Y（各 1D/color，照 overwriteScalar/VectorCdat 抽模板即可；1D 的还可 animate leaf 复用 `animateTextScalarLeaf`）。
+  Wiggly/Expression Selector；**animate Scale 3D leaf**（须先 RE+实现 non-spatial 多维 keyframe layout，
+  见上表 value@0x08；Position/Color 已 ship）。同布局的免费近邻：Fill Opacity / Stroke Color / Stroke Width / Skew /
+  Rotation X·Y（各 1D/color，照 overwriteScalar/VectorCdat 抽模板即可；1D 的还可 animate leaf 复用 `animateTextScalarLeaf`，
+  4D color 可 animate 复用 `animateTextVectorLeaf`）。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
   Scale→ink 面积（像素数）；Rotation→单字 ink 包围盒长宽比；**Color→ink 像素均值 RGB（绿通道单调）**。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
@@ -198,3 +222,7 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
 - 2026-06-15 animate leaf 本身（1D scalar）：AnimateTextOpacity/AnimateTextRotation（`animateTextScalarLeaf`
   = scalarTdbs→parseLeafProperty→AnimateScalarKeyframes，零新关键帧代码）。gate 反转 wiring（Offset 静态、
   Rotation leaf 关键帧 0→90），aspect 0.65→1.52 双版本渲染 gate PASS。3D/4D leaf animate 留下一 slice
+- 2026-06-15 animate 3D/4D leaf：AnimateTextPosition + AnimateTextColor（`animateTextVectorLeaf`→AnimateVectorKeyframes）。
+  RE-first 抽 AE ground truth（animatedvec）逐字核对：Position(bpk128,value@0x38,marker3)/Color(bpk152,value@0x38,marker2)
+  逐字匹配 effect spatial block，单测断言 bytes + 双版本 render gate PASS（Color R/B 248/0→0/248、Position 质心
+  367→617）。**Scale 3D 非 spatial 块（value@0x08）≠ AnimateVectorKeyframes，暂搁待 non-spatial vector layout RE**
