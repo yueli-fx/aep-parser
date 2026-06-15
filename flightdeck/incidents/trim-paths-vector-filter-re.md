@@ -220,4 +220,23 @@ Offset Paths 余下 3 个 elided 子流一次收齐——确认**单节点多 le
 
 **synthesis-insert 蓝本累计 8 次全绿**：+ Repeater Order。机制全谱：三类 leaf（scalar/enum/Vec2）· canonical 多 leaf 排序（Offset）· splice-before-group（Repeater Order）。**常用 shape 矢量滤镜的所有可写 elided 子流全收齐**。剩 Wiggle Paths/Transform 的 Correlation/Temporal·Spatial Phase（调制参数，低价值，待评估）。
 
+## Wiggle 调制参数（Correlation / Temporal·Spatial Phase / Roughen Points）— 评估后 evidence-based defer（2026-06-15）
+
+`gen_wiggle_modulation_probe.jsx` 探针自证 Wiggle Paths（Roughen）8 子流 + match-name + 默认全确认（建模 4：Size/Detail/Temporal Freq/Random Seed；**未建模 4**）：
+| 子流 | 默认 | 类型 | 可达 |
+|---|---|---|---|
+| `ADBE Vector Roughen Points` | 1=Corner | enum | ✓（探针在 tree，可 setValue） |
+| `ADBE Vector Correlation` | 50 | scalar | ✓（探针 `setValue(0)` 成功） |
+| `ADBE Vector Temporal Phase` | 0 | scalar | ✓（real property） |
+| `ADBE Vector Spatial Phase` | 0 | scalar | ✓（real property） |
+
+Wiggle Transform（Wiggler）同族残留 `Correlation`/`Temporal Phase`/`Spatial Phase`（同义）。
+
+**defer 依据（非「不可达」，是「按价值/可门禁性 evidence-based defer」）**：
+1. **Temporal/Spatial Phase = 噪声函数相位参数**：固定帧改 phase = 读 seed 决定的噪声序列的不同采样 → 产出**统计同质的另一随机边**，无「正确像素」可断言，只是「另一随机实例」（同 Random Seed 的性质——已在 `TestMGWiggle` 单次门禁证 seed 决定性，不按值穷举）。**本质不可像素门禁**（无 categorical 判别量）。
+2. **Correlation / Roughen Points = 可门禁但低价值**：Correlation（0=独立抖/锯齿、100=相干/平滑）+ Points（Smooth/Corner）确有视觉效果，但作用在**已混沌的 roughen 边**上，门禁信号弱（噪声边度量、不如 ZigZag 干净齿）；cockpit 明标低价值。leaf 形状（scalar/enum）已被蓝本证 8 次，**defer 不丢任何机制覆盖或能力类**，只搁具体低价值旋钮。
+3. **方向实质收口**：synthesis-insert 机制全谱已证（三类 leaf + 多 leaf 排序 + splice-before-group），**所有 clean-visual elided 旋钮已 ship+gate**（ZigZag Points · Twist Center · Offset Line Join/Miter/Copy Offset · Repeater Order）。残留 = 本质不可门禁（Phase）或低价值噪声调制（Correlation/Points）。
+
+实现路径现成（按需）：Points/Correlation/Phase 各 splice 对应 leaf（enum/scalar，`spliceShapeLeafBeforeGroupEnd`，注意 Roughen 子流 canonical 序 Size/Detail/Points/TemporalFreq/Correlation/TemporalPhase/SpatialPhase/Seed——Points 在 Detail 后，Correlation/Phase 在 Seed 前）。未做。
+
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。
