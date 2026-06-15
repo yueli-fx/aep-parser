@@ -249,6 +249,19 @@ Order「可达但视觉惰性」家族的诚实收口。Skew Axis 同理（Skew=
 机制证：**1D scalar / color leaf 加 text animator 已是纯模板抽取 + 一行 facade**，Go 侧真·免费；
 真正的工作量与门槛全在「每 leaf 设计一个可像素门禁的作用面签名」。
 
+## 多 Selector（2026-06-16）
+
+`AddTextRangeSelector(layer, start, end, offset)` —— 给首个动画器加第 2+ 个 Range Selector。
+RE 确认 `ADBE Text Selectors` 是 **INDEXED_GROUP（ptype 6214）**，干净接受多个 `ADBE Text Selector`
+（`probe_text_multi_selector.jsx`：2 选择器各自 Start/End/Offset+Advanced）。机制 = splice 一个单
+selector 模板（`templates/text_selector_body.bin`，extract 自任一 animator fixture）进 Selectors 组
+Group End 前 + 覆写 Start/End/Offset——同 add-animator 的 indexed-group append vein。
+
+**多选择器按各自 Mode 组合**（默认 Add=并集；Mode 经 `SetTextRangeAdvanced` 设——但注意它只作用首个
+选择器，第 2 个的 Mode 暂走默认 Add）。**双版本 render-gate PASS**（`text_multi_selector_shipgate_test.go`，
+A/B 差分单帧：两层皆 Opacity-0 + 首选择器 [0,50]——TXTA 仅 1 选择器 → 后半可见 spread=199 / TXTB 加第 2
+选择器 [50,100] → 并集全隐 spread=0，AE2020≡AE2025）+ round-trip（selector count==2 存活）。
+
 ## Range Advanced（Selector 高级参数，2026-06-16）
 
 `SetTextRangeAdvanced(layer, TextRangeAdvanced)` —— 一次设全 10 个 Range Selector「高级」子参数
@@ -311,6 +324,9 @@ Randomize/Seed 改的是「选中哪些字」非简单亮度、Shape/Ease 是 fa
   多维编码器，只是 AnimateVectorKeyframes 硬编码 spatial → 抽私有核 + 非 spatial 公开入口，零新字节代码）。
   `AnimateTextScale` 走它，单测断言 value@0x08/bpk128/0x38 留空，双版本 render gate PASS（ink 面积 2940→5879）。
   **animate-leaf 方向全收口**（1D+3D/4D spatial+非 spatial 3D 全 ship）
+- 2026-06-16 多 Selector：`AddTextRangeSelector`（`ADBE Text Selectors` 是 INDEXED 6214，splice 单
+  selector 模板 + 覆写 Start/End/Offset）。A/B 差分双版本 render-gate PASS（1 选择器后半可见 199 / 2 选择器
+  并集全隐 0）+ round-trip（count==2）。详上节
 - 2026-06-16 Range Advanced：`SetTextRangeAdvanced`（全 10 子参数一次设，全 materialize 模板 replace
   elided Advanced 组 + 逐 cdat 覆写）。Amount A/B 差分单帧双版本 render-gate PASS（top=0/bottom=159），
   其余 9 round-trip 验证 + render gate evidence-defer。gotcha：enum set 失效 live ref（每 set 重导航）；

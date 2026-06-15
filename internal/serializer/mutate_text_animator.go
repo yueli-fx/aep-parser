@@ -98,6 +98,14 @@ var textAnimatorsRotYBody []byte
 //go:embed templates/text_range_advanced_body.bin
 var textRangeAdvancedBody []byte
 
+// An AE-native single "ADBE Text Selector" (Range Selector) tdgp with Start/End/
+// Offset materialized — spliced as a 2nd+ selector into an animator's "ADBE Text
+// Selectors" indexed group by AddTextRangeSelector. Regen: extract_text_animator
+// <any re_text_animator_*.aep> <out> "ADBE Text Selector".
+//
+//go:embed templates/text_selector_body.bin
+var textSelectorBody []byte
+
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
 	matchNameTextAnimator      = "ADBE Text Animator"
@@ -687,6 +695,55 @@ func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rang
 // (Full contract lives on the aep.AddTextStrokeColorAnimator facade.)
 func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return addTextColorLeafAnimator(layer, textAnimatorsStrokeColorBody, matchNameTextStrokeColor, "AddTextStrokeColorAnimator", r, g, b, a, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextRangeSelector adds another Range Selector to the layer's FIRST text
+// animator's "ADBE Text Selectors" indexed group (a fresh animator starts with
+// one). Multiple selectors combine per each selector's Mode (default Add =
+// union); use SetTextRangeAdvanced to set a selector's Mode. start / end /
+// offset are the new selector's bounds in percent. Returns a stand-in node.
+// (Full contract lives on the aep.AddTextRangeSelector facade.)
+func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextRangeSelector: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextRangeSelector: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextRangeSelector: layer %q has no Text Properties group (round-trip via aep.Reopen first)", layer.Name)
+	}
+	animators := childGroupChunk(tp, matchNameTextAnimators)
+	if animators == nil {
+		return nil, fmt.Errorf("AddTextRangeSelector: layer %q has no Text Animators (add an animator first)", layer.Name)
+	}
+	anim := childGroupChunk(animators, matchNameTextAnimator)
+	if anim == nil {
+		return nil, fmt.Errorf("AddTextRangeSelector: no animator present")
+	}
+	selectors := childGroupChunk(anim, matchNameTextSelectors)
+	if selectors == nil {
+		return nil, fmt.Errorf("AddTextRangeSelector: animator has no Text Selectors group")
+	}
+	tmpl, err := animatorTemplate(textSelectorBody)
+	if err != nil {
+		return nil, err
+	}
+	payload := deepCloneChunk(tmpl)
+	old := append([]*rifx.Chunk(nil), selectors.Children...)
+	at := groupEndIndex(selectors)
+	spliced := make([]*rifx.Chunk, 0, len(selectors.Children)+2)
+	spliced = append(spliced, selectors.Children[:at]...)
+	spliced = append(spliced, makeTdmn(matchNameTextSelector), payload)
+	spliced = append(spliced, selectors.Children[at:]...)
+	selectors.Children = spliced
+	if err := setRangeSelector(payload, func() { selectors.Children = old }, "AddTextRangeSelector", start, end, offset); err != nil {
+		return nil, err
+	}
+	node := &AEPropertyGroup{MatchName: matchNameTextSelector, Name: matchNameTextSelector}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
 }
 
 // SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text

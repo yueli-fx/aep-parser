@@ -972,6 +972,24 @@ func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, 
 	return serializer.AddTextStrokeColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
 
+// AddTextRangeSelector adds another Range Selector to the layer's FIRST text
+// animator (a fresh animator carries one selector). Multiple selectors combine
+// per each selector's Mode — the default is Add (union of the ranges); set a
+// selector's Mode via SetTextRangeAdvanced for Subtract / Intersect / etc. start
+// / end / offset are the new selector's bounds in percent. Sweep any selector's
+// Offset over time with AnimateTextRangeOffset (which targets the first selector).
+//
+// Same indexed-group splice vein as AddTextOpacityAnimator (the "ADBE Text
+// Selectors" group is INDEXED). Refused: non-text layers, text layers built by
+// New* that were never parsed (call aep.Reopen first), and layers with no text
+// animator. Returns a stand-in group node referencing the spliced selector.
+//
+// Alpha / structural — RE'd + double-version render-gated (two selectors union to
+// extend the selection). Free function (CLAUDE.md #2).
+func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextRangeSelector(layer, start, end, offset)
+}
+
 // TextRangeAdvanced holds the "Advanced" sub-params of a text animator's Range
 // Selector (Units / Based On / Mode / Amount / Shape / Smoothness / Ease High·Low
 // / Randomize Order / Random Seed). See DefaultTextRangeAdvanced + the type doc

@@ -881,6 +881,18 @@ Refused: non-text layers, and text layers built by New* that were never parsed (
 
 Alpha / structural — RE'd + double-version render-gated; typed parameter accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
 
+### AddTextRangeSelector
+
+```go
+func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error)
+```
+
+AddTextRangeSelector adds another Range Selector to the layer's FIRST text animator (a fresh animator carries one selector). Multiple selectors combine per each selector's Mode — the default is Add (union of the ranges); set a selector's Mode via SetTextRangeAdvanced for Subtract / Intersect / etc. start / end / offset are the new selector's bounds in percent. Sweep any selector's Offset over time with AnimateTextRangeOffset (which targets the first selector).
+
+Same indexed-group splice vein as AddTextOpacityAnimator (the "ADBE Text Selectors" group is INDEXED). Refused: non-text layers, text layers built by New* that were never parsed (call aep.Reopen first), and layers with no text animator. Returns a stand-in group node referencing the spliced selector.
+
+Alpha / structural — RE'd + double-version render-gated (two selectors union to extend the selection). Free function (CLAUDE.md #2).
+
 ### SetTextRangeAdvanced
 
 ```go
