@@ -1112,6 +1112,16 @@ const (
 	EffectCheckboxControl    = serializer.EffectCheckboxControl    // Checkbox Control
 	EffectPoint3DControl     = serializer.EffectPoint3DControl     // 3D Point Control
 	EffectSetMatte           = serializer.EffectSetMatte           // Set Matte (layer-reference effect)
+	EffectTurbulentDisplace  = serializer.EffectTurbulentDisplace  // Turbulent Displace
+	EffectRoughenEdges       = serializer.EffectRoughenEdges       // Roughen Edges
+	EffectEcho               = serializer.EffectEcho               // Echo
+	EffectRadialBlur         = serializer.EffectRadialBlur         // Radial Blur
+	EffectFourColorGradient  = serializer.EffectFourColorGradient  // 4-Color Gradient
+	EffectCheckerboard       = serializer.EffectCheckerboard       // Checkerboard
+	EffectGrid               = serializer.EffectGrid               // Grid
+	EffectStroke             = serializer.EffectStroke             // Stroke
+	EffectCornerPin          = serializer.EffectCornerPin          // Corner Pin
+	EffectVenetianBlinds     = serializer.EffectVenetianBlinds     // Venetian Blinds
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript

@@ -51,6 +51,7 @@ import (
 //go:embed templates/effect_adbe_gaussian_blur_2.bin templates/effect_adbe_fill.bin templates/effect_adbe_tint.bin templates/effect_adbe_brightness_contrast_2.bin templates/effect_adbe_tritone.bin templates/effect_adbe_easy_levels2.bin templates/effect_adbe_pro_levels2.bin templates/effect_adbe_hue_saturation.bin templates/effect_adbe_box_blur.bin templates/effect_adbe_glo2.bin templates/effect_adbe_invert.bin templates/effect_adbe_exposure2.bin
 //go:embed templates/effect_adbe_drop_shadow.bin templates/effect_adbe_sharpen.bin templates/effect_adbe_mosaic.bin templates/effect_adbe_noise.bin templates/effect_adbe_geometry2.bin templates/effect_adbe_ramp.bin templates/effect_adbe_fractal_noise.bin templates/effect_adbe_tile.bin templates/effect_adbe_motion_blur.bin templates/effect_adbe_linear_wipe.bin templates/effect_adbe_wave_warp.bin templates/effect_adbe_curvescustom.bin templates/effect_adbe_slider_control.bin templates/effect_adbe_point_control.bin templates/effect_adbe_color_control.bin templates/effect_adbe_angle_control.bin templates/effect_adbe_checkbox_control.bin templates/effect_adbe_point3d_control.bin
 //go:embed templates/effect_adbe_set_matte3.bin
+//go:embed templates/effect_adbe_turbulent_displace.bin templates/effect_adbe_roughen_edges.bin templates/effect_adbe_echo.bin templates/effect_adbe_radial_blur.bin templates/effect_adbe_4colorgradient.bin templates/effect_adbe_checkerboard.bin templates/effect_adbe_grid.bin templates/effect_adbe_stroke.bin templates/effect_adbe_corner_pin.bin templates/effect_adbe_venetian_blinds.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -88,6 +89,18 @@ const (
 	EffectCheckboxControl    = "ADBE Checkbox Control"        // Checkbox Control
 	EffectPoint3DControl     = "ADBE Point3D Control"         // 3D Point Control
 	EffectSetMatte           = "ADBE Set Matte3"              // Set Matte (layer-reference effect)
+	// Wave 4 (2026-06-15, fixture re_effect_lib3.aep) — MG distort/generate/
+	// stylize/transition.
+	EffectTurbulentDisplace = "ADBE Turbulent Displace" // Turbulent Displace
+	EffectRoughenEdges      = "ADBE Roughen Edges"      // Roughen Edges
+	EffectEcho              = "ADBE Echo"               // Echo
+	EffectRadialBlur        = "ADBE Radial Blur"        // Radial Blur
+	EffectFourColorGradient = "ADBE 4ColorGradient"     // 4-Color Gradient
+	EffectCheckerboard      = "ADBE Checkerboard"       // Checkerboard
+	EffectGrid              = "ADBE Grid"               // Grid
+	EffectStroke            = "ADBE Stroke"             // Stroke
+	EffectCornerPin         = "ADBE Corner Pin"         // Corner Pin
+	EffectVenetianBlinds    = "ADBE Venetian Blinds"    // Venetian Blinds
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -126,6 +139,16 @@ var effectTemplateFiles = map[string]string{
 	EffectCheckboxControl:    "templates/effect_adbe_checkbox_control.bin",
 	EffectPoint3DControl:     "templates/effect_adbe_point3d_control.bin",
 	EffectSetMatte:           "templates/effect_adbe_set_matte3.bin",
+	EffectTurbulentDisplace:  "templates/effect_adbe_turbulent_displace.bin",
+	EffectRoughenEdges:       "templates/effect_adbe_roughen_edges.bin",
+	EffectEcho:               "templates/effect_adbe_echo.bin",
+	EffectRadialBlur:         "templates/effect_adbe_radial_blur.bin",
+	EffectFourColorGradient:  "templates/effect_adbe_4colorgradient.bin",
+	EffectCheckerboard:       "templates/effect_adbe_checkerboard.bin",
+	EffectGrid:               "templates/effect_adbe_grid.bin",
+	EffectStroke:             "templates/effect_adbe_stroke.bin",
+	EffectCornerPin:          "templates/effect_adbe_corner_pin.bin",
+	EffectVenetianBlinds:     "templates/effect_adbe_venetian_blinds.bin",
 }
 
 type cachedEffectTemplate struct {
