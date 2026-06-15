@@ -1,7 +1,7 @@
 ---
 status: active
 summary: 模板/真实 .aep 起点的未做能力清单，按优先级排序：动画关键帧 > 3D 图层 > 形状图层剩余 > mask > 表达式 > 文字图层。非 from-scratch（已有基础模板规避 silent-drop）。基本图形搁置。
-last_updated: 2026-06-14
+last_updated: 2026-06-15
 ---
 
 # 剩余能力 roadmap（模板起点）
@@ -60,13 +60,17 @@ AddMask / RemoveMask + mode·color·inverted（mkif 字节）已 ship。剩属�
 - **animated mask path** —— mask path keyframe（与优先级 1 的容量分页耦合，>4kf 需先修 lhd3）。
 - **maskFeatherFalloff** —— 位置未 RE（可能落不可达，先探）。
 
-## 优先级 5 — 表达式
+## 优先级 5 — 表达式 ✅ 机制全收口（2026-06-15）
 
-**半残区，谨慎**。`SetExpression` 文本写 + enabled-byte（@0x77/@0x78）已 RE 修正（`expression-enable-byte-pair.md`），但仍有认知红线：Go round-trip 绿 ≠ AE 求值。
+`SetExpression`/`SetExpressionEnabled`（tdb4 @0x77/@0x78 字节对 + Utf8 插 cdat 后/tdum-tduM 前）已 RE 修正并**双版本 render-gate**（不只读回文本，验 AE 真求值 + 渲染像素）；4 idiom 语汇（跨层引用/loopOut/wiggle/effect-param 引用）+ effect-param 表达式驱动均 gate。详 `expression-enable-byte-pair.md`。**视为完成**。
 
-- **from-scratch / 模板表达式落地验证** —— 在模板层上挂表达式，双版本验 AE 真求值（不只读回文本）。
-- **`linear()` / `ease()` remap** —— 边际值低（cockpit 已注），但属表达式常用；按需。
+- ~~from-scratch / 模板表达式落地验证~~ ✅（render-gate 双版本）。
+- **`linear()` / `ease()` / `valueAtTime` remap** —— 字节机制已证**内容无关**（gate 4 idiom 通过即证 AE 求值任意 idiom），补这些只验 AE 自身函数、不验我方写入，边际值低 → **按需**。
 - **不做**：完整表达式引擎符号执行（`ReplaceSource` fixExpressions 已明确 out-of-scope）。
+
+### 附：effects 深化 arc ✅ 全收口（2026-06-15，用户加项「expr+effects 尽量全通」）
+
+非本 roadmap 原优先级，2026-06-15 用户加。四缺口全双版本 gate：①跨效果 enum render gate ②`AnimateEffectParamVec`（animated color/point effect param）③`SetEffectLayerParam`+Set Matte（layer-reference 参数）④效果库 31→41（wave5 十个 MG 效果）。详 cockpit ## 下一步 + `effect-param-elision-synthesis-lite.md` / `add-effect-splice-re.md` / git log（0cad0b8/dff6b22/d7ad64a/96b9d10）。
 
 ## 优先级 6 — 文字图层
 

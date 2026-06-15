@@ -1,8 +1,8 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-15 by claude（表达式+效果深化：修 `SetExpression` Utf8 位置真 bug〔扩表达式到 effect param 等带 tdum/tduM 属性〕+ `AnimateEffectParam` 动画 effect param〔byte-identical AE-native〕，均双版本 gate。同日：优先级1 动画关键帧**全收口**〔>4 顶点 + gradient stroke 色标动画〕、mask 主体收口〔SetMaskPath/SetMaskPathKeyframes〕、walkaround 体检修 15 断链。详 incidents + git log。）
+**Last updated**: 2026-06-15 by claude（**effects 深化 arc 全收口**：用户定「expr 尽量全通 + effects 尽量全通 → 文字」。expr 机制已全 ship〔视为完成，剩 linear()/ease() 内容无关已证按需〕；effects 四缺口全 ship 双版本 gate——①跨效果 enum render gate〔Invert Channel〕②`AnimateEffectParamVec` 动画 color/point effect param〔spatial block RE，byte-structural〕③`SetEffectLayerParam`+Set Matte〔layer-reference 参数=目标层 ID 写 tdpi〕④效果库 31→41〔wave5 十个 MG distort/generate/stylize/transition〕。commits 0cad0b8/dff6b22/d7ad64a/96b9d10。详 incidents + git log。）
 
-**Active focus**: **剩余能力 roadmap 主体已走完，库进入需求驱动稳态**（`specs/2026-06-14-remaining-capability-roadmap.md`）。优先级 1-5 全收口：**动画关键帧 ✅ 全收口（2026-06-15）** · **3D ✅ 全收官** · **形状剩余 ✅ 主体收口** · **mask ✅ 主体收口** · **表达式 ✅ 机制全 ship**（`SetExpression`/`SetExpressionEnabled` + 4 idiom 语汇 gate；剩 linear()/ease() 显式按需）。**唯一真剩余 = 优先级6 文字多 run/段落（btdk splicing 未 RE，effort 高，等需求驱动）**；其余皆「按需 / 不可达」（maskFeatherFalloff、gradient stroke 嵌套 Dashes/Taper/Wave、附录 A negative-finding）。机制库：parse-the-clone + synthesis-insert + animateGradientStops/spliceAnimatedPath。每渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
+**Active focus**: **剩余能力 roadmap 主体已走完 + 表达式/效果深化 arc 全收口，库进入需求驱动稳态**（`specs/2026-06-14-remaining-capability-roadmap.md`）。优先级 1-5 全收口：**动画关键帧 ✅** · **3D ✅** · **形状剩余 ✅** · **mask ✅** · **表达式 ✅ 机制全 ship**。**effects 深化 arc ✅（2026-06-15）**：跨效果 enum render gate · `AnimateEffectParamVec`〔animated color/point〕· `SetEffectLayerParam`+Set Matte〔layer-reference〕· 效果库 31→41〔wave5〕——四项全双版本 gate（详 ## 下一步）。**唯一真剩余主线 = 文字多 run/段落（btdk splicing 未 RE，effort 高）**；其余皆「按需 / 不可达」（maskFeatherFalloff、gradient stroke 嵌套 Dashes/Taper/Wave、附录 A negative-finding）。机制库：parse-the-clone + synthesis-insert + animateGradientStops/spliceAnimatedPath/animated-vector-effect-param。每渲染/可见类双版本 ship-gate（红线4）；ship-gate 自助（`scripts/ae_run.ps1`）。基本图形搁置。
 
 ## 进行中
 
@@ -34,13 +34,16 @@
 
 **优先级5 表达式 ✅ 机制全 ship**（核实代码：`SetExpression`/`SetExpressionEnabled` tdb4 @0x77/@0x78 已修 + `expression_shipgate` + `expr_vocab_shipgate` 4 idiom 双版本——看板旧措辞「SetExpression 栽」已滞后）。剩 `linear()`/`ease()` remap 显式按需（机制已证内容无关，边际值低）。详 `incidents/expression-enable-byte-pair.md`。
 
-**➡ 新优先级（用户 2026-06-15 改）：表达式 + 效果 > 文字**。文字基础（NewTextLayer + 单段单 run SetText）够用，**完整文字动画接入留到下一阶段**。当前挖 expr+effects 深化的真缺口（实测确认）：
-- **〔A〕expression 驱动 effect param ✅（2026-06-15）**——本以为「字节已通」是**假绿**：`SetExpression` append Utf8 到末尾，对带 tdum/tduM 的 effect param 落在 tduM 后 → AE 2020 判损坏跳层。**真 bug**：Utf8 必须插 cdat 后 / tdum-tduM 前（AE-native dump 确认）。修 `back_property.go::SetExpression`。`TestExprEffect_AEShipGate` 双版本 PASS（Gaussian Blur Blurriness=`time*40`，AE 求值 valueAtTime(2.5)=100、blur 增长 lum 0→62）。**把表达式从「只能挂无 tdum/tduM 属性」扩到任意属性含 effect param**。详 `expression-enable-byte-pair.md` § Utf8 位置二次纠错。
-- **〔B 大头〕animated effect param ✅（2026-06-15）**——`aep.AnimateEffectParam(layer, fx, param, []ScalarKeyframe)`：物化 + `serializer.AnimateScalarKeyframes` 把 static cdat 原位换 `LIST(list){lhd3,ldat}` 关键帧流（`encodeKeyframes` non-spatial 1D）+ flip tdb4 static→animated flag（@0x05/@0x44/@0x4f，同 shape `injectAnimatedStream`）。**与 AE 自存 animated blur fixture 逐字节相同**。`TestAnimEffect_AEShipGate` 双版本 PASS（Blurriness kf 0@0s→100@2s，AE 求值、blur 增长 lum 0→62、numKeys=2 resave 存活）。**scalar-only**（color/point 关键帧 layout 不同 = follow-up）。详 `effect-param-elision-synthesis-lite.md` § AnimateEffectParam。
-- 表达式 `linear()/ease()/valueAtTime`：低边际（内容无关已证），按需。
-- 效果库扩充（>30）/ per-effect typed helper / reference-param effects（Set Matte 等需 tdpi remap）：按需。
+**➡ 优先级（用户 2026-06-15 定）：表达式 + 效果「尽量全通」→ 文字。effects arc 已全收口 ✅（2026-06-15）**：
+- **表达式 ✅ 视为完成**——机制全 ship（`SetExpression`/`SetExpressionEnabled` + Utf8 位置修 + 4 idiom + effect-param 表达式驱动），剩 `linear()/ease()/valueAtTime` 内容无关已证，**按需**（边际值低）。
+- **〔1〕跨效果 enum render gate ✅**——`SetEffectParam` 泛型 enum 模板跨效果材化此前仅 GB 自身 gate；`TestMGEffectEnum_AEShipGate` 双版本（Invert Channel Red(2)/Green(3) 渲染各异、R 通道跨 128 中线、resave 存活）。零新代码。commit 0cad0b8。
+- **〔2〕animated color/point effect param ✅**——`aep.AnimateEffectParamVec`：scalar 动画扩到 color(4D)/point(2D·3D)。RE 发现这三类用 **SPATIAL** keyframe block（value@0x38，bpk 152/104/128，per-type @0x08 marker color=2/point=3），tdb4 三 flag 翻转 type-agnostic。`TestAnimEffectVec_AEShipGate` 双版本（Fill Color 红→蓝 + Gradient Ramp Start 点 L→R radial swap）。commit dff6b22。详 `effect-param-elision-synthesis-lite.md` § Vec 扩展。
+- **〔3〕Set Matte / layer-reference 参数 ✅**——`aep.SetEffectLayerParam` + `EffectSetMatte`。RE：layer-ref 存为**目标层 ID 写在参数自己的 tdpi**（同 host 绑定指向别层）；setter = length-preserving 4B tdpi 改写。`TestSetMatte_AEShipGate` 双版本（左红/右黑 matte gating）。关掉「reference-param effects」deferred。commit d7ad64a。详 `add-effect-splice-re.md` § Reference-param effects。
+- **〔4〕效果库 31→41 ✅**——wave 5 十个 MG 效果（Turbulent Displace/Roughen Edges/Echo/Radial Blur/4-Color Gradient/Checkerboard/Grid/Stroke/Corner Pin/Venetian Blinds）。一次 fixture 提取 + `TestAddEffectWave4_AEShipGate` 双版本（全 10 add+读回+resave）。commit 96b9d10。
 
-**文字多 run/段落**（btdk splicing 未 RE）= 留到下一阶段完整文字动画。
+**effects 剩纯按需**：per-effect typed param helper · default-elided layer-ref 物化（Set Matte -0001 已随模板带出，故已可用）· Displacement Map/Compound Blur 等同 layer-ref 机制按需 · 库继续扩。
+
+**➡ 下一阶段 = 文字（用户既定顺序 effects 之后）**：**文字多 run/段落 / 多 paragraph / 带 kerning / 空串改字**（btdk 段落·run entry splicing 未 RE，effort 高）= 完整文字动画接入。文字基础（NewTextLayer + 单段单 run SetText）已够用。
 
 **蓝本（synthesis-insert 推广到矢量滤镜，2026-06-15 验透 2 类 leaf）**：clone elided leaf 模板 → `spliceShapeLeafBeforeGroupEnd`（GroupEnd 前插 (tdmn,tdbs) pair）→ 覆写 cdat，仅当值≠默认。已验 scalar-with-range（Offset Copies 6-child）+ enum（Trim Type 4-child）两类。不污染默认 body、不需 hydration（filter 靠 opaque chunk 穿越 Reopen）。剩 ZigZag Points / Twist Center / Repeater Order / Offset Line Join·Miter·Copy Offset 同路径按需。详 `trim-paths-vector-filter-re.md` § Offset Copies / Trim Type。
 
