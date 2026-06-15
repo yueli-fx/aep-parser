@@ -137,7 +137,7 @@ Feather [2]float64
 
 Other mask-level properties, populated when their cdat values exist in the mask atom's property tree. Feather is 2D (X, Y) in pixels; Opacity is 0..1; Expansion (AE's "Mask Expansion", internally "ADBE Mask Offset") is in pixels.
 
-read-only
+read-write
 
 ### Mask.Opacity
 
@@ -147,7 +147,7 @@ Opacity float64
 
 default 1.0 when no cdat present
 
-read-only
+read-write
 
 ### Mask.Expansion
 
@@ -155,7 +155,7 @@ read-only
 Expansion float64
 ```
 
-read-only
+read-write
 
 ### Mask.Properties
 
@@ -216,6 +216,22 @@ if layer := comp.LayerByID(1); layer != nil {
 }
 ```
 
+### Mask.SetExpansion
+
+```go
+func (m *Mask) SetExpansion(v float64) error
+```
+
+SetExpansion sets the mask's Expansion (AE "Mask Expansion", internally `ADBE Mask Offset`) in pixels — positive grows the masked region, negative shrinks it. The leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen.
+
+### Mask.SetFeather
+
+```go
+func (m *Mask) SetFeather(xy [2]float64) error
+```
+
+SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen.
+
 ### Mask.SetInverted
 
 ```go
@@ -260,6 +276,14 @@ for _, m := range layer.Masks {
 	_ = m.SetMode(aep.MaskModeSubtract)
 }
 ```
+
+### Mask.SetOpacity
+
+```go
+func (m *Mask) SetOpacity(v float64) error
+```
+
+SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). The `ADBE Mask Opacity` leaf is AE-default-elided; setting it materializes the leaf in the mask atom group (synthesis-insert). Requires a mask round-tripped through Reopen (the atom chunk must exist). Mask Opacity scales how strongly the mask reveals/cuts — at 0.5 a reveal shows the layer at half strength.
 
 # MaskVertex object
 

@@ -3520,14 +3520,14 @@
       "file": "mask.md",
       "anchor": "#maskexpansion",
       "signature": "Expansion float64",
-      "rw": "read-only"
+      "rw": "read-write"
     },
     "Mask.Feather": {
       "kind": "field",
       "file": "mask.md",
       "anchor": "#maskfeather",
       "signature": "Feather [2]float64",
-      "rw": "read-only",
+      "rw": "read-write",
       "summary": "Other mask-level properties, populated when their cdat values exist in the mask atom's property tree. Feather is 2D (X, Y) in pixels; Opacity is 0..1; Expansion (AE's \"Mask Expansion\", internally \"ADBE Mask Offset\") is in pixels."
     },
     "Mask.Index": {
@@ -3591,7 +3591,7 @@
       "file": "mask.md",
       "anchor": "#maskopacity",
       "signature": "Opacity float64",
-      "rw": "read-only",
+      "rw": "read-write",
       "summary": "default 1.0 when no cdat present"
     },
     "Mask.PathKeyframes": {
@@ -3625,6 +3625,20 @@
       "example": true,
       "summary": "SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. AE always keeps alpha (0x2C) at 0xFF; this setter does not touch it. length-preserving (3 bytes)."
     },
+    "Mask.SetExpansion": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetexpansion",
+      "signature": "func (m *Mask) SetExpansion(v float64) error",
+      "summary": "SetExpansion sets the mask's Expansion (AE \"Mask Expansion\", internally `ADBE Mask Offset`) in pixels — positive grows the masked region, negative shrinks it. The leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen."
+    },
+    "Mask.SetFeather": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetfeather",
+      "signature": "func (m *Mask) SetFeather(xy [2]float64) error",
+      "summary": "SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen."
+    },
     "Mask.SetInverted": {
       "kind": "method",
       "file": "mask.md",
@@ -3653,6 +3667,13 @@
       "signature": "func (m *Mask) SetMode(mode MaskMode) error",
       "example": true,
       "summary": "SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04. length-preserving (4 bytes)."
+    },
+    "Mask.SetOpacity": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetopacity",
+      "signature": "func (m *Mask) SetOpacity(v float64) error",
+      "summary": "SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). The `ADBE Mask Opacity` leaf is AE-default-elided; setting it materializes the leaf in the mask atom group (synthesis-insert). Requires a mask round-tripped through Reopen (the atom chunk must exist). Mask Opacity scales how strongly the mask reveals/cuts — at 0.5 a reveal shows the layer at half strength."
     },
     "Mask.ShphRaw": {
       "kind": "field",

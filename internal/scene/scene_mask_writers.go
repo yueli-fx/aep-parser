@@ -96,6 +96,57 @@ func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error {
 	return nil
 }
 
+// SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). The
+// `ADBE Mask Opacity` leaf is AE-default-elided; setting it materializes the leaf
+// in the mask atom group (synthesis-insert). Requires a mask round-tripped
+// through Reopen (the atom chunk must exist). Mask Opacity scales how strongly
+// the mask reveals/cuts — at 0.5 a reveal shows the layer at half strength.
+func (m *Mask) SetOpacity(v float64) error {
+	if v < 0 || v > 1 {
+		return fmt.Errorf("mask %q: opacity %g out of range [0,1]", m.Name, v)
+	}
+	if m.back == nil {
+		return fmt.Errorf("mask %q: no atom chunk (built outside parser?)", m.Name)
+	}
+	if err := m.back.SetMaskOption("ADBE Mask Opacity", v); err != nil {
+		return err
+	}
+	m.Opacity = v
+	return nil
+}
+
+// SetFeather sets the mask's Feather softness (X, Y in pixels). The
+// `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf
+// (synthesis-insert). Requires a mask round-tripped through Reopen.
+func (m *Mask) SetFeather(xy [2]float64) error {
+	if xy[0] < 0 || xy[1] < 0 {
+		return fmt.Errorf("mask %q: feather %v must be >= 0", m.Name, xy)
+	}
+	if m.back == nil {
+		return fmt.Errorf("mask %q: no atom chunk (built outside parser?)", m.Name)
+	}
+	if err := m.back.SetMaskOption("ADBE Mask Feather", xy); err != nil {
+		return err
+	}
+	m.Feather = xy
+	return nil
+}
+
+// SetExpansion sets the mask's Expansion (AE "Mask Expansion", internally
+// `ADBE Mask Offset`) in pixels — positive grows the masked region, negative
+// shrinks it. The leaf is AE-default-elided; setting it materializes the leaf
+// (synthesis-insert). Requires a mask round-tripped through Reopen.
+func (m *Mask) SetExpansion(v float64) error {
+	if m.back == nil {
+		return fmt.Errorf("mask %q: no atom chunk (built outside parser?)", m.Name)
+	}
+	if err := m.back.SetMaskOption("ADBE Mask Offset", v); err != nil {
+		return err
+	}
+	m.Expansion = v
+	return nil
+}
+
 // SetClosed toggles whether the (first) path is closed (shph @0x14).
 // length-preserving (1 byte). For animated masks this only affects
 // the first snapshot; per-keyframe closed flags aren't exposed yet.

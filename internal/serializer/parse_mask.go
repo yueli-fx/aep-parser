@@ -66,6 +66,9 @@ func parseMasks(layr *rifx.Chunk, ctx *parseCtx) []*Mask {
 			// and leaves omtn empty; synthetic fixtures put it in omtn.
 			mask.Name = vectorGroupName(atomTdgp)
 		}
+		if mb := maskBack(mask); mb != nil {
+			mb.atomTdgp = atomTdgp
+		}
 		if mkif != nil {
 			mask.MkifRaw = append([]byte(nil), mkif.Data...)
 			if mb := maskBack(mask); mb != nil {

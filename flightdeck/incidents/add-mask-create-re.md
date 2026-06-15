@@ -139,8 +139,7 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
   mask path 改写（既有 mask 的 SetMaskPath）/ animated mask path（om-s 多 shap + tdbs 时间表，
   机制同 [[path-keyframe-write-re]]）/ ~~mask 的 Duplicate / Move~~（**均已 ship 2026-06-12 Stable
   —— mask 结构性 op 全收口**）。
-- mask mode/color/feather 创建参数化（今天 AE 默认 + 返回 *Mask 后 Set* 可改 mode/
-  inverted/color）。
+- ~~mask 的 feather/opacity/expansion 选项~~ **已 ship（2026-06-15, Stable）**——见下 §Mask 选项 synthesis-insert。mask mode/color 创建仍走 AE 默认 + 返回 *Mask 后 Set* 改。
 - precomp 层 mask 未单独 gate（按 footage 分数处理，理论一致）。
 
 ## Cases
@@ -149,3 +148,28 @@ bbox 内归一化）——encodeBezier 直接复用；parse 侧 `MaskVertex.InTa
 - 2026-06-12 **RemoveMask 落地 + 双版本 ship-gate**（triple-aware splice `mutate_mask_remove.go`，以 mkif 指针定位三件套；AE 2020+2025 各 PASS：建 3 删中段，survivor 几何完好 + effects 未动 + resave 保留；Go round-trip 3 用例）。解除「RemoveMask deferred」
 - 2026-06-12 **DuplicateMask 落地 + 双版本 ship-gate**（`mutate_mask_duplicate.go`，deep-clone 三件套 + bump mkif index；AE 2020+2025 各 PASS：建 1 duplicate，AE 接受 distinct index、读回 2 mask；Go round-trip 2 用例）。解除「mask Duplicate deferred」
 - 2026-06-12 **MoveMask 落地 + 双版本 ship-gate**（`mutate_mask_move.go`，triple-aware 重排，原指针重发 + 同步 scene/flat；AE 2020+2025 各 PASS：建 3 移末→首，读回 C/A/B；Go round-trip 3 用例）。解除「mask Move deferred」——**mask 结构性 op 全收口（Add/Remove/Duplicate/Move）**
+
+## Mask 选项 synthesis-insert — Feather / Opacity / Expansion（2026-06-15, Stable）✅
+
+Mask atom tdgp 内的 `ADBE Mask Feather`（Vec2 px）· `ADBE Mask Opacity`（0..1）·
+`ADBE Mask Offset`（=「Mask Expansion」px）三个 scalar leaf **AE 默认省略**——
+synthesis-insert 蓝本第 3 个落点（继 material leaves / shape filter 子流后，首次用在
+**mask atom**）：
+
+- **parser**：`maskBackrefs += atomTdgp`（`parseMasks` 填充——AddMask 内部 `parseMasks`
+  重解析也随之 wire，故 `AddMask` 返回的 mask **紧接** `SetOpacity` 即可用，无需二次 Reopen）。
+- **mutate**（`mutate_mask_options.go` `SetMaskOption`）：leaf 在 → 覆写 cdat；不在 →
+  clone AE-native leaf（`templates/mask_option_leaves.bin`，3 pair，从 `v2_2_mask_options.aep`
+  抽）按 canonical 序（Feather/Opacity/Offset，ordinal map 同 `materialLeafOrder`）splice 进
+  atom tdgp + 覆写 cdat。**mask 严格性**：mask 被 AE 急切解码，leaf 字节必须 AE-native 实抽
+  （不可合成）——故走模板而非裸构造。
+- **scene**：`Mask.SetOpacity(0..1)` / `SetFeather([2]px)` / `SetExpansion(px)`（公共 API，
+  docgen 收录）→ `MaskWriter.SetMaskOption` + 同步 scene 字段。
+- **WriteAEP 尺寸重算**：splice 让 atom tdgp 增长，Write 重算各级 LIST size（同 AddMask 结构增长）——
+  Go round-trip（`mask_options_test.go`：splice→Write→re-parse 值对 + 二次 set 覆写不重复 splice）验证。
+
+**渲染 gate（红线4 双版本）**：`TestMGMaskOpacity_AEShipGate_AE2020/2025` PASS——白 600×600 shape
+rect + 同尺寸 rect mask（Add），Opacity 100% vs 50% over 暗底 → reveal 区 lum 255 vs 135
+（=0.5·255+0.5·BG），两版一致；resave 经本库 parser 读回 mask.Opacity 值存活。verify_mg_mask_opacity.jsx
++ mg_mask_opacity_shipgate_test.go。**Feather/Expansion** 同 splice 路径 wire + Go round-trip 测，
+render-gate 按需（feather 软边 / expansion 增缩，可见但 gate 边际值低）。

@@ -267,6 +267,11 @@ type MaskWriter interface {
 	SetMaskMotionBlur(MaskMotionBlurMode) error
 	SetClosed(bool) error
 
+	// SetMaskOption overwrites or splices a default-elided mask option leaf
+	// (Feather / Opacity / Offset) in the mask atom group. value is [2]float64
+	// for Feather, float64 for Opacity/Offset.
+	SetMaskOption(matchName string, value any) error
+
 	// ShphData exposes the live shph chunk bytes so the scene SetClosed
 	// accessor refreshes Mask.ShphRaw after a back-side write without naming
 	// the concrete back-ref.

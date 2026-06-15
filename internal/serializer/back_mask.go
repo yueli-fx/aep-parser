@@ -38,6 +38,10 @@ type maskBackrefs struct {
 	// shph is the first shph path-header chunk (Closed @0x14 write — only
 	// meaningful for static masks).
 	shph *rifx.Chunk
+	// atomTdgp is the mask atom's inner property group (holds Mask Shape +
+	// the Feather/Opacity/Offset leaves). Needed by SetMaskOption to overwrite
+	// or splice those default-elided option leaves.
+	atomTdgp *rifx.Chunk
 }
 
 var _ MaskWriter = (*maskBackrefs)(nil)
