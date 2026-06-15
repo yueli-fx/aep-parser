@@ -88,6 +88,9 @@ var v22ShapePuckerBloatBodyBytes []byte
 //go:embed templates/v2_2_shape_twist_body.bin
 var v22ShapeTwistBodyBytes []byte
 
+//go:embed templates/v2_2_shape_twist_center_leaf.bin
+var v22ShapeTwistCenterLeafBytes []byte
+
 //go:embed templates/v2_2_shape_wiggle_body.bin
 var v22ShapeWiggleBodyBytes []byte
 
@@ -178,6 +181,10 @@ var (
 	v22ShapeTwistOnce  sync.Once
 	v22ShapeTwistCache *rifx.Chunk
 	v22ShapeTwistErr   error
+
+	v22ShapeTwistCenterLeafOnce  sync.Once
+	v22ShapeTwistCenterLeafCache *rifx.Chunk
+	v22ShapeTwistCenterLeafErr   error
 
 	v22ShapeWiggleOnce  sync.Once
 	v22ShapeWiggleCache *rifx.Chunk
@@ -1494,6 +1501,12 @@ func cloneShapeTwistBody() (*rifx.Chunk, error) {
 // cdat[0:8], degrees — same scalar layout as Round Corners Radius). Static →
 // cdat overwrite; animated → the cdat flips to a 1D non-spatial keyframe
 // container via the shared injectAnimatedStream path.
+//
+// When Center is set non-zero, the AE-default-elided `ADBE Vector Twist Center`
+// Vec2 leaf is spliced into the body in canonical order (after Angle, before
+// Group End) and its cdat overwritten as two f64 BE at cdat[0:16] —
+// synthesis-insert, the first Vec2 leaf (after the scalar Offset Copies and the
+// Trim Type / ZigZag Points enums).
 func lowerTwistNode(n *TwistNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeTwistBody()
 	if err != nil {
@@ -1502,7 +1515,41 @@ func lowerTwistNode(n *TwistNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	if err := lowerShapeScalar(body, "ADBE Vector Twist Angle", n.Angle(), ctx); err != nil {
 		return nil, err
 	}
+	if c := n.Center(); n.CenterSet() && (c[0] != 0 || c[1] != 0) {
+		tdmn, tdbs, err := cloneShapeTwistCenterLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBeforeGroupEnd(body, tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Twist Center", encodeF64sBE(c[0], c[1]))
+	}
 	return body, nil
+}
+
+// cloneShapeTwistCenterLeaf returns a fresh (tdmn, LIST:tdbs) clone of the
+// `ADBE Vector Twist Center` Vec2 leaf from its embedded template, spliced into
+// the twist body when Center is offset from [0,0]. Mirrors
+// cloneShapeZigZagPointsLeaf (the cdat holds two f64 BE rather than one).
+func cloneShapeTwistCenterLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeTwistCenterLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeTwistCenterLeafBytes))
+		if e != nil {
+			v22ShapeTwistCenterLeafErr = fmt.Errorf("parse v22ShapeTwistCenterLeafBytes: %w", e)
+			return
+		}
+		v22ShapeTwistCenterLeafCache = ch
+	})
+	if v22ShapeTwistCenterLeafErr != nil {
+		return nil, nil, v22ShapeTwistCenterLeafErr
+	}
+	kids := v22ShapeTwistCenterLeafCache.Children
+	for i := 0; i+1 < len(kids); i++ {
+		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Twist Center" &&
+			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
+			return cloneChunk(kids[i]), cloneChunk(kids[i+1]), nil
+		}
+	}
+	return nil, nil, fmt.Errorf("twist center leaf missing from template")
 }
 
 // cloneShapeWiggleBody returns a clone of the Wiggle Paths template

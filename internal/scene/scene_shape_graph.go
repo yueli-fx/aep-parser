@@ -1506,14 +1506,18 @@ func (n *PuckerBloatNode) Properties() *PropertyGroup {
 // TwistNode — `ADBE Vector Filter - Twist`. A path-filter that rotates the
 // paths below it progressively (more rotation farther from the twist center),
 // bowing straight edges into spirals. Its headline sub-stream `ADBE Vector
-// Twist Angle` is an animatable 1D scalar (degrees; default 0 = no twist). The
-// `Twist Center` (Vec2) is left at its default [0,0] and elided. Place it AFTER
-// the path-producing shapes it should distort (render order).
+// Twist Angle` is an animatable 1D scalar (degrees; default 0 = no twist).
+// `Center` (Vec2, shape-local pixels relative to the path centre) is the pivot
+// the twist rotates around; it defaults to [0,0] and is AE-default-elided,
+// materialized by the serializer via synthesis-insert when SetCenter offsets it.
+// Place it AFTER the path-producing shapes it should distort (render order).
 type TwistNode struct {
-	angle *codec.PropertyStream[float64]
+	angle     *codec.PropertyStream[float64]
+	center    [2]float64
+	centerSet bool
 }
 
-// NewTwistNode constructs a default TwistNode (Angle=0, identity).
+// NewTwistNode constructs a default TwistNode (Angle=0, identity; Center [0,0]).
 func NewTwistNode() *TwistNode {
 	n := &TwistNode{angle: codec.NewPropertyStream[float64]()}
 	_ = n.angle.SetStaticValue(0)
@@ -1526,6 +1530,23 @@ func (n *TwistNode) Angle() *PropertyStream[float64] { return n.angle }
 // SetAngle sets the twist angle (degrees; positive twists clockwise, negative
 // counter-clockwise).
 func (n *TwistNode) SetAngle(v float64) error { return n.angle.SetStaticValue(v) }
+
+// Center returns the twist pivot (Vec2, shape-local pixels relative to the path
+// centre). Default [0,0] (rotate about the path centre).
+func (n *TwistNode) Center() [2]float64 { return n.center }
+
+// CenterSet reports whether SetCenter has been called (so the serializer knows
+// to materialize the otherwise-elided Center leaf).
+func (n *TwistNode) CenterSet() bool { return n.centerSet }
+
+// SetCenter offsets the twist pivot from the path centre (Vec2, shape-local
+// pixels). The default [0,0] is AE-default-elided; a non-zero Center
+// materializes the `ADBE Vector Twist Center` leaf on lower.
+func (n *TwistNode) SetCenter(c [2]float64) error {
+	n.center = c
+	n.centerSet = true
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (n *TwistNode) Properties() *PropertyGroup {

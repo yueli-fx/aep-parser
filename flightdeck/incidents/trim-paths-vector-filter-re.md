@@ -114,7 +114,7 @@ Gate：`TestMGPuckerBloat_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（A
 
 渲染 ground truth：400×400 Rect + Angle=150 → **风车/螺旋**——twist 中心钉住、离中心越远旋转越少（直边被扭成弧、四角甩离原轴对齐位）。眼验 silhouette（grid dump）确认非轴对齐方块。gate 用 twist 的**独有签名 = 左右镜像不对称**（mirror-asym=44 about x=center）：plain/pucker/bloat 方块全镜像对称 → broken/no-op twist 渲成对称方块会同时栽「mirror-asym≥20」+「四原始角清空 4/4」两条——比纯数值 round-trip 强（轴对称方块=假绿）。center 白钉住。
 
-Gate：`TestMGTwist_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Angle=150 resave 读回 + 风车 + mirror-asym=44 两版一致）。verify_mg_twist.jsx + mg_twist_shipgate_test.go。commit bfa1674。**deferred**：Twist Center（Vec2，默认 elide）未建模。
+Gate：`TestMGTwist_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Angle=150 resave 读回 + 风车 + mirror-asym=44 两版一致）。verify_mg_twist.jsx + mg_twist_shipgate_test.go。commit bfa1674。~~**deferred**：Twist Center（Vec2，默认 elide）未建模。~~ → **Center 已 ship**（synthesis-insert 第 4 次 = 首个 Vec2 leaf，见下）。
 
 ## 复用确认 — Wiggle Paths（S5, 2026-06-13）✅ 蓝本第 10 次 — 常用矢量滤镜家族完整收齐
 
@@ -185,5 +185,16 @@ Offset Paths 的 4 个 elided 子流（Line Join / Miter / **Copies** / Copy Off
 **渲染 ground truth（先看图，红线4）**：一帧两卡同 Size=70/Detail=5、唯 Points 不同——左 **Corner(默认)** = 尖角 starburst（sharp 三角刺），右 **Smooth(2)** = 圆滑 scallop blob（rounded 鼓包、无尖点）。控制变量到只剩 Points，任何像素差全归因于 Points。gate 判据 = **apex 带宽**（顶边中段逐列 topmost-white-y，距全局最高 y ≤8px 的列数）：sharp 窄尖顶 flat 少、rounded 宽顶 flat 多——CORNER flat=22 vs SMOOTH flat=65（~3x），require ≥2x 余量。两卡 spread 同(138/140)=同振幅（证 zigzag 都活、排除「smooth 没 splice 退回 corner」）。`TestMGZigZagPoints_AEShipGate_AE2020/2025` 双版本 PASS（flat 22/65 两版一致 · png 58629b 两版逐字节同 · resave Points=2 存活）。verify_mg_zigzag_points.jsx + mg_zigzag_points_shipgate_test.go。
 
 **synthesis-insert 蓝本累计 3 次全绿**：scalar-with-range（Offset Copies）· enum（Trim Type · **ZigZag Points**）。剩 Twist Center（Vec2，需 cdat[0:16] 而非 enum）/ Repeater Order / Offset Line Join·Miter·Copy Offset 等同路径按需。
+
+## Twist Center — synthesis-insert 第 4 次（**首个 Vec2 leaf**，优先级3，2026-06-15）✅
+
+`ADBE Vector Twist Center`（Vec2，默认 [0,0] elide）用同蓝本落地——确认 synthesis-insert **对 Vec2 同样成立**（前 3 次是 scalar/enum 的 cdat[0:8]，本次 cdat[0:16] 两 f64 BE）：
+
+- scene `TwistNode += center [2]float64 + centerSet bool`（`SetCenter`/`Center`/`CenterSet`，static Vec2 同 Repeater Transform 字段，非动画）。lower 当 `CenterSet && Center≠[0,0]` 时 clone `ADBE Vector Twist Center` leaf（`v2_2_shape_twist_center_leaf.bin`，294B，**4-child tdbs**——Vec2 同 enum 的 4-child，无 tdum/tduM range chunk）经 `spliceShapeLeafBeforeGroupEnd` 插入 + `overwriteShapeStreamCdat(…, encodeF64sBE(c[0],c[1]))` 写 16B。落盘子序确认 Angle/**Center**/GroupEnd。**Vec2 写路径零新代码**——`overwriteShapeStreamCdat` 早被 Repeater/Wiggler Position 等 Vec2 用过，cdat 长度由 data 决定。
+- RE：`tmp_debug/gen_shape_twist_center.jsx`（Rect+Fill+Twist，Angle=180 + Center=[150,0] 逼 AE 不 elide + 渲染眼验）→ `v2_2_twist_center.aep` → `tmp_debug/extract_twist_center_leaf`。probe 自证默认 Center=[0,0]。
+
+**渲染 ground truth（先看图，红线4）**：一帧两卡同 Angle=180、唯 Center 不同——左 **CENTERED([0,0]默认)** = 点对称风车（两卷须 180° 对称、质心钉死中心）右 **OFFSET([150,0])** = 非对称（圆鼓大瓣在 pivot 侧上-右、尖卷在下-左、质心被甩离）。gate 判据 = **白像素质心位移**：CENTERED disp=0.8px（点对称证 twist 本身对称→位移全归因 Center）· OFFSET disp=119px（require CENTERED<25 + OFFSET≥50）。`TestMGTwistCenter_AEShipGate_AE2020/2025` 双版本 PASS（质心 0.8/119 两版一致 · png 44951b 两版同 · resave Center=[150,0] 16B Vec2 存活）。verify_mg_twist_center.jsx + mg_twist_center_shipgate_test.go。
+
+**synthesis-insert 蓝本累计 4 次全绿 = 三类 leaf 全覆盖**：scalar-with-range（Offset Copies，6-child）· enum（Trim Type · ZigZag Points，4-child）· **Vec2（Twist Center，4-child cdat[0:16]）**。`spliceShapeLeafBeforeGroupEnd` + `overwriteShapeStreamCdat` 对三类通用。剩 Repeater Order（enum）/ Offset Line Join·Miter·Copy Offset（enum+scalar）等同三类之一，按需。
 
 **家族小结（蓝本 11 次全绿 — vein 闭合）**：Trim · Repeater(+嵌套 Transform 组) · RoundCorners · Offset · Merge(combine·fill 在上) · ZigZag · Pucker&Bloat · Twist · Wiggle Paths · **Wiggle Transform(+嵌套 Transform 组)**——**所有常用 shape 矢量滤镜全部收齐，cdat-based vein 已无候选**。三步蓝本（probe→抽 body→cdat 覆写）+「nested 组 findGroupBody descend」对全部成立；唯二变量 = ① 子流集合/elision 边界（先 all-non-default fixture 逼 AE 不 elide）② **combine 型 fill 位置反**（Merge 需 fill 在 stack 顶）。新增工具法：**未知 filter match-name 用 `canAddProperty` 多候选发现 + 递归 walk dump 嵌套组**。
