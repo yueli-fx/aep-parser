@@ -80,6 +80,151 @@ func cdatF64(t *testing.T, root *rifx.Chunk, matchName string) float64 {
 	return math.Float64frombits(binary.BigEndian.Uint64(cdat.Data[0:8]))
 }
 
+// cdatVec3 returns the three BE f64 at cdat[0:24] of the tdbs following tdmn
+// matchName (a spatial 3-component value such as Position 3D).
+func cdatVec3(t *testing.T, root *rifx.Chunk, matchName string) [3]float64 {
+	t.Helper()
+	tdbs := followingList(root, matchName)
+	if tdbs == nil {
+		t.Fatalf("%s: tdbs not found", matchName)
+	}
+	cdat := findShipChunk(tdbs, rifx.IDCdat)
+	if cdat == nil || len(cdat.Data) < 24 {
+		t.Fatalf("%s: cdat missing/short (%d)", matchName, len(cdat.Data))
+	}
+	var v [3]float64
+	for i := range v {
+		v[i] = math.Float64frombits(binary.BigEndian.Uint64(cdat.Data[8*i : 8*i+8]))
+	}
+	return v
+}
+
+func TestTextPositionAnimator_Static_RoundTrip(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextPositionAnimator(tl, 0, -100, 0, 10, 60, 25); err != nil {
+		t.Fatalf("AddTextPositionAnimator: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txposstatic.aep")
+
+	if got := cdatVec3(t, root, "ADBE Text Position 3D"); got != [3]float64{0, -100, 0} {
+		t.Errorf("Position cdat = %v, want [0 -100 0]", got)
+	}
+	if got := cdatF64(t, root, "ADBE Text Percent Start"); got != 10 {
+		t.Errorf("Start cdat = %g, want 10", got)
+	}
+	if got := cdatF64(t, root, "ADBE Text Percent End"); got != 60 {
+		t.Errorf("End cdat = %g, want 60", got)
+	}
+	if got := cdatF64(t, root, "ADBE Text Percent Offset"); got != 25 {
+		t.Errorf("Offset cdat = %g, want 25", got)
+	}
+}
+
+func TestTextPositionAnimator_RevealSweep_RoundTrip(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tl.SetText("ABCDEF"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextPositionAnimator(tl, 0, -120, 0, 0, 100, 0); err != nil {
+		t.Fatalf("AddTextPositionAnimator: %v", err)
+	}
+	if err := aep.AnimateTextRangeOffset(tl, 0, []aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 2, Value: 100}}); err != nil {
+		t.Fatalf("AnimateTextRangeOffset: %v", err)
+	}
+
+	_, root := writeReopen(t, p, "txposanim.aep")
+
+	// Offset became a 2-keyframe bpk-48 1D non-spatial container (the sweep).
+	kfl := findShipList(root, "ADBE Text Percent Offset")
+	if kfl == nil {
+		t.Fatal("Offset list not found")
+	}
+	lhd3 := findShipChunk(kfl, rifx.IDLhd3)
+	if lhd3 == nil {
+		t.Fatal("Offset lhd3 missing (not animated)")
+	}
+	if n := binary.BigEndian.Uint32(lhd3.Data[0x08:0x0C]); n != 2 {
+		t.Errorf("Offset numKf = %d, want 2", n)
+	}
+	// Position stays the static displacement.
+	if got := cdatVec3(t, root, "ADBE Text Position 3D"); got != [3]float64{0, -120, 0} {
+		t.Errorf("Position cdat = %v, want [0 -120 0]", got)
+	}
+}
+
+func TestAddTextPositionAnimator_AppendsToExisting(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tl, err := aep.NewTextLayer(comp, "TXT")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextOpacityAnimator(tl, 0, 0, 50, 0); err != nil {
+		t.Fatalf("opacity animator: %v", err)
+	}
+	if _, err := aep.AddTextPositionAnimator(tl, 0, -80, 0, 0, 50, 0); err != nil {
+		t.Fatalf("position animator: %v", err)
+	}
+	_, root := writeReopen(t, p, "txmixed.aep")
+	animators := followingList(root, "ADBE Text Animators")
+	if animators == nil {
+		t.Fatal("Animators group not found")
+	}
+	n := 0
+	for _, ch := range animators.Children {
+		if ch.ID == rifx.IDTdmn && string(bytes.TrimRight(ch.Data, "\x00")) == "ADBE Text Animator" {
+			n++
+		}
+	}
+	if n != 2 {
+		t.Errorf("animator count = %d, want 2", n)
+	}
+	if got := cdatVec3(t, root, "ADBE Text Position 3D"); got != [3]float64{0, -80, 0} {
+		t.Errorf("Position cdat = %v, want [0 -80 0]", got)
+	}
+	if got := cdatF64(t, root, "ADBE Text Opacity"); got != 0 {
+		t.Errorf("Opacity cdat = %g, want 0", got)
+	}
+}
+
+func TestAddTextPositionAnimator_RefusesNonText(t *testing.T) {
+	p := aep.NewProject()
+	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nl, err := aep.NewNullLayer(comp, "NULL")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.AddTextPositionAnimator(nl, 0, -100, 0, 0, 50, 0); err == nil {
+		t.Fatal("expected refuse on non-text layer, got nil")
+	}
+}
+
 func TestTextOpacityAnimator_Static_RoundTrip(t *testing.T) {
 	p := aep.NewProject()
 	comp, err := aep.NewComposition(p, "T", 1280, 720, 24, 5)

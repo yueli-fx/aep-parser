@@ -76,14 +76,38 @@ propertyType: 6214 INDEXED_GROUP · 6213 NAMED_GROUP · 6212 PROPERTY。
 为 2-kf bpk-48 容器。文字层 Position 不经 Go accessor 暴露（fresh+reopened 都 nil），gate
 用 verify JSX 设位（采样 fixture 关切，非被测能力）。
 
+## Position 3D 动画器扩展（2026-06-15，第二个 leaf 类型）
+
+同 vein 扩 Position（kinetic typography 的 slide-in / drop-in），双版本渲染 gate PASS
+（`text_animator_position_shipgate_test.go`）。关键：
+
+1. **vtype 表**（自 postemplate dump，`RE_TXANIM_MODE=postemplate`）：Opacity=6417(1D)、
+   Position 3D=**6413(spatial 3D)**、Scale 3D=6414(3D)、Rotation=6417(1D)、Fill Color=6418(color)。
+2. **spatial 3D cdat = 72B**：三个 BE f64 @ [0:8]/[8:16]/[16:24]（=x/y/z），尾 48B 全 0
+   （spatial tangent 槽）。tdb4 头 `db990003000f0003`（3 分量），tdbs 无 tdum/tduM（scalar 才有）。
+   故 `overwriteVectorCdat(root, name, vals)` 按 `cdat[8*i:]` 写 N 个 double，通杀任意分量数。
+3. **每 leaf 类型一个模板**（elision）：`templates/text_animators_position_body.bin`
+   （postemplate 模式：Position=[30,-40,0] + Start/End/Offset 全非默认 → 全 slot materialize）。
+   `extract_text_animator <src> <out>` 已加参数化。
+4. **动画复用零新代码**：经典 slide-in = **静态** Position 位移 + Range Offset 关键帧扫光
+   （`AnimateTextRangeOffset` 操作 Range Selector，与被驱动 leaf 类型无关）。字形始终可见（opacity 100），
+   扫光时整块**垂直位移** → gate 签名 = ink 垂直质心单调迁移（t0=187→t1=312→t2=447，Δ=260px，
+   AE2020/2025 逐像素一致）。证 MOTION（区别于 Opacity gate 的 appearance）。
+5. **机制泛化**：splice 逻辑抽 `spliceTextAnimator(tp, tmpl)`、Range 抽 `setRangeSelector`、
+   模板缓存改按 body 指针的 `sync.Map`（`animatorTemplate(body)`）。下一个 leaf 类型 = 抽模板 +
+   一个 facade，复用全部。
+
 ## 现状 / 边界
 
-- **已 ship**：Opacity 动画器 + Range Selector（参数化 Start/End/Offset）+ offset 关键帧扫光。
+- **已 ship**：Opacity 动画器、**Position 3D 动画器**、Range Selector（参数化 Start/End/Offset）、
+  offset 关键帧扫光（reveal / slide-in 通用）。各双版本渲染 gate PASS。
 - **Alpha**：动画器叶子无 typed accessor（chunk-only，Reopen 后属性树重建但 animator 叶子
-  不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append 已测。
-- **按需扩**（同 vein，加模板即可）：Position/Scale/Rotation/Fill Color 动画器（各自 vtype/cdat
-  布局，每类抽一个模板）；Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；
-  Wiggly/Expression Selector。
+  不带 back-ref，同 `property-indexed-group-structural-re.md` 的 Root Vectors）。多动画器 append +
+  Opacity/Position 混排已测。
+- **按需扩**（同 vein，抽模板 + 一个 facade）：Scale 3D（6414，同 vector 布局，几乎免费）、
+  Rotation（6417，同 scalar，免费）、Fill Color（6418，color cdat 布局待 RE）；
+  Range Advanced（Mode/Shape/Smoothness/基于…）；多 Selector；Wiggly/Expression Selector；
+  **animate leaf 本身**（关键帧驱动 Position/Scale 值，非仅 Range Offset）。
 - structural op（Remove/Duplicate/Move 对 text animators）走 `mutate_property_structural.go`，
   仍仅 Go round-trip = Alpha 未单独 ship-gate。
 
@@ -96,3 +120,5 @@ propertyType: 6214 INDEXED_GROUP · 6213 NAMED_GROUP · 6212 PROPERTY。
 
 ## Cases
 - 2026-06-15 首次：RE + AddTextOpacityAnimator + AnimateTextRangeOffset，双版本渲染 gate PASS
+- 2026-06-15 扩 Position：AddTextPositionAnimator（spatial 3D 72B cdat + overwriteVectorCdat +
+  spliceTextAnimator 泛化），slide-in 双版本渲染 gate PASS（ink 垂直质心迁移 Δ=260px）

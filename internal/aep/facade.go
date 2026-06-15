@@ -725,6 +725,32 @@ func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOf
 	return serializer.AddTextOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
 
+// AddTextPositionAnimator adds a per-character Position 3D animator with a Range
+// Selector to a text layer — the kinetic-typography primitive that slides /
+// drops characters into place one at a time. x / y / z is the position offset
+// (pixels) applied to the selected characters; rangeStart / rangeEnd /
+// rangeOffset are the Range Selector bounds in percent. The canonical reveal:
+// offset (0, -100, 0), Start=0/End=100, then sweep the Range Offset 0→100 over
+// time with AnimateTextRangeOffset — the displacement lands the characters as
+// the selection window slides off them.
+//
+// Same mechanics as AddTextOpacityAnimator (it shares the splice + Range
+// Selector path); the difference is the embedded template drives a Position 3D
+// leaf (a spatial 3-component cdat) instead of the scalar Opacity. Fresh text
+// layers carry no Animators group, so the first animator splices the whole group
+// into "ADBE Text Properties"; later animators append into it.
+//
+// Refused: non-text layers, and text layers built by New* that were never parsed
+// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
+// animator chunk.
+//
+// Alpha / structural — the animator chunk structure is RE'd + double-version
+// render-gated, but the typed parameter accessors are not yet wired; tune
+// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextPositionAnimator(layer, x, y, z, rangeStart, rangeEnd, rangeOffset)
+}
+
 // AnimateTextRangeOffset keyframes a text animator's Range Selector Offset,
 // turning a static reveal into an animated sweep — the kinetic-typography
 // payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the

@@ -36,8 +36,18 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
+// Each embedded body is an AE-native "ADBE Text Animators" group carrying ONE
+// animator whose single driven leaf (Opacity / Position 3D / …) plus the Range
+// Selector's Start/End/Offset are all authored non-default, so every cdat slot
+// is materialized for AddText*Animator to overwrite parametrically. One body per
+// leaf value-type because AE elides default leaves and the cdat layout differs
+// (scalar 40B f64 @ [0:8] vs spatial 3D 72B with three f64 @ [0:24]).
+//
 //go:embed templates/text_animators_opacity_body.bin
 var textAnimatorsOpacityBody []byte
+
+//go:embed templates/text_animators_position_body.bin
+var textAnimatorsPositionBody []byte
 
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
@@ -46,27 +56,32 @@ const (
 	matchNameTextPercentEnd    = "ADBE Text Percent End"
 	matchNameTextPercentOffset = "ADBE Text Percent Offset"
 	matchNameTextOpacity       = "ADBE Text Opacity"
+	matchNameTextPosition3D    = "ADBE Text Position 3D"
 )
 
-var (
-	textAnimatorsTmplOnce  sync.Once
-	textAnimatorsTmplChunk *rifx.Chunk
-	textAnimatorsTmplErr   error
-)
+var animatorTmplCache sync.Map // first-byte ptr → *animatorTmplEntry
 
-// textAnimatorsTemplate parses the embedded "ADBE Text Animators" group body
-// once (cached). Callers deep-clone before splicing so spliced chunks never
-// alias the cache.
-func textAnimatorsTemplate() (*rifx.Chunk, error) {
-	textAnimatorsTmplOnce.Do(func() {
-		c, e := rifx.ReadChunk(bytes.NewReader(textAnimatorsOpacityBody))
-		if e != nil {
-			textAnimatorsTmplErr = fmt.Errorf("parse text animators template: %w", e)
-			return
-		}
-		textAnimatorsTmplChunk = c
-	})
-	return textAnimatorsTmplChunk, textAnimatorsTmplErr
+type animatorTmplEntry struct {
+	chunk *rifx.Chunk
+	err   error
+}
+
+// animatorTemplate parses an embedded "ADBE Text Animators" group body once per
+// body (cached by backing-array pointer). Callers deep-clone before splicing so
+// spliced chunks never alias the cache.
+func animatorTemplate(body []byte) (*rifx.Chunk, error) {
+	key := &body[0]
+	if v, ok := animatorTmplCache.Load(key); ok {
+		e := v.(*animatorTmplEntry)
+		return e.chunk, e.err
+	}
+	c, err := rifx.ReadChunk(bytes.NewReader(body))
+	if err != nil {
+		err = fmt.Errorf("parse text animators template: %w", err)
+	}
+	e := &animatorTmplEntry{chunk: c, err: err}
+	animatorTmplCache.Store(key, e)
+	return e.chunk, e.err
 }
 
 // tdmnName returns a tdmn chunk's match-name (NUL-trimmed), or "" for non-tdmn.
@@ -146,6 +161,90 @@ func overwriteScalarCdat(root *rifx.Chunk, matchName string, value float64) bool
 	return false
 }
 
+// overwriteVectorCdat is overwriteScalarCdat for an N-component value: it writes
+// each vals[i] as a BE f64 at cdat[8*i:8*i+8] (the spatial/vector slot, e.g.
+// Position 3D's three doubles at [0:24]; trailing tangent bytes stay zero).
+// Returns false when the slot is absent or too short for len(vals) doubles.
+func overwriteVectorCdat(root *rifx.Chunk, matchName string, vals []float64) bool {
+	for i, ch := range root.Children {
+		if tdmnName(ch) == matchName && i+1 < len(root.Children) {
+			if tdbs := root.Children[i+1]; tdbs.IsList() {
+				for _, c := range tdbs.Children {
+					if c.ID == rifx.IDCdat && len(c.Data) >= 8*len(vals) {
+						for j, v := range vals {
+							binary.BigEndian.PutUint64(c.Data[8*j:8*j+8], math.Float64bits(v))
+						}
+						return true
+					}
+				}
+			}
+		}
+		if ch.IsList() {
+			if overwriteVectorCdat(ch, matchName, vals) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// spliceTextAnimator inserts one animator from tmpl into the layer's text-
+// property tree and returns the spliced animator payload + an undo. A fresh text
+// layer (no Animators group) gets the whole "ADBE Text Animators" group spliced
+// into Text Properties before its Group End sentinel; a layer that already has
+// the group gets one inner "ADBE Text Animator" appended. The caller overwrites
+// the payload's cdat slots, then sets the Range Selector Start/End/Offset.
+func spliceTextAnimator(tp, tmpl *rifx.Chunk) (*rifx.Chunk, func(), error) {
+	if animators := childGroupChunk(tp, matchNameTextAnimators); animators == nil {
+		group := deepCloneChunk(tmpl)
+		payload := childGroupChunk(group, matchNameTextAnimator)
+		if payload == nil {
+			return nil, nil, fmt.Errorf("text animator template missing inner animator")
+		}
+		old := append([]*rifx.Chunk(nil), tp.Children...)
+		at := groupEndIndex(tp)
+		spliced := make([]*rifx.Chunk, 0, len(tp.Children)+2)
+		spliced = append(spliced, tp.Children[:at]...)
+		spliced = append(spliced, makeTdmn(matchNameTextAnimators), group)
+		spliced = append(spliced, tp.Children[at:]...)
+		tp.Children = spliced
+		return payload, func() { tp.Children = old }, nil
+	} else {
+		inner := childGroupChunk(tmpl, matchNameTextAnimator)
+		if inner == nil {
+			return nil, nil, fmt.Errorf("text animator template missing inner animator")
+		}
+		payload := deepCloneChunk(inner)
+		old := append([]*rifx.Chunk(nil), animators.Children...)
+		at := groupEndIndex(animators)
+		spliced := make([]*rifx.Chunk, 0, len(animators.Children)+2)
+		spliced = append(spliced, animators.Children[:at]...)
+		spliced = append(spliced, makeTdmn(matchNameTextAnimator), payload)
+		spliced = append(spliced, animators.Children[at:]...)
+		animators.Children = spliced
+		return payload, func() { animators.Children = old }, nil
+	}
+}
+
+// setRangeSelector overwrites the spliced animator's Range Selector Start/End/
+// Offset (percent) scalar cdats, rolling back via undo on a missing slot.
+func setRangeSelector(payload *rifx.Chunk, undo func(), who string, start, end, offset float64) error {
+	for _, sl := range []struct {
+		name string
+		val  float64
+	}{
+		{matchNameTextPercentStart, start},
+		{matchNameTextPercentEnd, end},
+		{matchNameTextPercentOffset, offset},
+	} {
+		if !overwriteScalarCdat(payload, sl.name, sl.val) {
+			undo()
+			return fmt.Errorf("%s: template missing %q cdat slot", who, sl.name)
+		}
+	}
+	return nil
+}
+
 // AddTextOpacityAnimator adds a per-character Opacity animator + Range Selector
 // to a text layer and returns a stand-in group node referencing the spliced
 // animator. opacity is the value applied to selected characters (0–100);
@@ -164,66 +263,65 @@ func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOf
 	if tp == nil {
 		return nil, fmt.Errorf("AddTextOpacityAnimator: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", layer.Name)
 	}
-
-	tmpl, err := textAnimatorsTemplate()
+	tmpl, err := animatorTemplate(textAnimatorsOpacityBody)
 	if err != nil {
 		return nil, err
 	}
-
-	var animatorPayload *rifx.Chunk
-	var undo func()
-
-	if animators := childGroupChunk(tp, matchNameTextAnimators); animators == nil {
-		// Fresh text layer: splice the whole Animators group (carrying one
-		// animator) into Text Properties before its Group End sentinel.
-		group := deepCloneChunk(tmpl)
-		animatorPayload = childGroupChunk(group, matchNameTextAnimator)
-		if animatorPayload == nil {
-			return nil, fmt.Errorf("AddTextOpacityAnimator: template missing inner animator")
-		}
-		old := append([]*rifx.Chunk(nil), tp.Children...)
-		at := groupEndIndex(tp)
-		spliced := make([]*rifx.Chunk, 0, len(tp.Children)+2)
-		spliced = append(spliced, tp.Children[:at]...)
-		spliced = append(spliced, makeTdmn(matchNameTextAnimators), group)
-		spliced = append(spliced, tp.Children[at:]...)
-		tp.Children = spliced
-		undo = func() { tp.Children = old }
-	} else {
-		// Existing Animators group: clone + append one animator before its
-		// Group End sentinel.
-		inner := childGroupChunk(tmpl, matchNameTextAnimator)
-		if inner == nil {
-			return nil, fmt.Errorf("AddTextOpacityAnimator: template missing inner animator")
-		}
-		animatorPayload = deepCloneChunk(inner)
-		old := append([]*rifx.Chunk(nil), animators.Children...)
-		at := groupEndIndex(animators)
-		spliced := make([]*rifx.Chunk, 0, len(animators.Children)+2)
-		spliced = append(spliced, animators.Children[:at]...)
-		spliced = append(spliced, makeTdmn(matchNameTextAnimator), animatorPayload)
-		spliced = append(spliced, animators.Children[at:]...)
-		animators.Children = spliced
-		undo = func() { animators.Children = old }
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
 	}
-
-	for _, sl := range []struct {
-		name string
-		val  float64
-	}{
-		{matchNameTextOpacity, opacity},
-		{matchNameTextPercentStart, rangeStart},
-		{matchNameTextPercentEnd, rangeEnd},
-		{matchNameTextPercentOffset, rangeOffset},
-	} {
-		if !overwriteScalarCdat(animatorPayload, sl.name, sl.val) {
-			undo()
-			return nil, fmt.Errorf("AddTextOpacityAnimator: template missing %q cdat slot", sl.name)
-		}
+	if !overwriteScalarCdat(payload, matchNameTextOpacity, opacity) {
+		undo()
+		return nil, fmt.Errorf("AddTextOpacityAnimator: template missing %q cdat slot", matchNameTextOpacity)
+	}
+	if err := setRangeSelector(payload, undo, "AddTextOpacityAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
 	}
 
 	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
-	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: animatorPayload})
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextPositionAnimator adds a per-character Position 3D animator + Range
+// Selector to a text layer and returns a stand-in group node referencing the
+// spliced animator. x / y / z is the position offset (pixels) applied to
+// selected characters; rangeStart / rangeEnd / rangeOffset are the Range
+// Selector bounds in percent. The canonical "characters slide/drop into place"
+// reveal: set an offset like (0, -100, 0), Start=0/End=100, then sweep the Range
+// Offset 0→100 over time with AnimateTextRangeOffset — the displacement applies
+// to the not-yet-revealed characters and lands them as the window slides off.
+// (Full contract lives on the aep.AddTextPositionAnimator facade — docgen source.)
+func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextPositionAnimator: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextPositionAnimator: layer %q is not a text layer", layer.Name)
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextPositionAnimator: layer %q has no Text Properties group (built outside parser? round-trip via aep.Reopen first)", layer.Name)
+	}
+	tmpl, err := animatorTemplate(textAnimatorsPositionBody)
+	if err != nil {
+		return nil, err
+	}
+	payload, undo, err := spliceTextAnimator(tp, tmpl)
+	if err != nil {
+		return nil, err
+	}
+	if !overwriteVectorCdat(payload, matchNameTextPosition3D, []float64{x, y, z}) {
+		undo()
+		return nil, fmt.Errorf("AddTextPositionAnimator: template missing %q cdat slot", matchNameTextPosition3D)
+	}
+	if err := setRangeSelector(payload, undo, "AddTextPositionAnimator", rangeStart, rangeEnd, rangeOffset); err != nil {
+		return nil, err
+	}
+
+	node := &AEPropertyGroup{MatchName: matchNameTextAnimator, Name: matchNameTextAnimator}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
 	return node, nil
 }
 

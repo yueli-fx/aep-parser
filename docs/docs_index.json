@@ -36,6 +36,13 @@
       "signature": "func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "AddTextOpacityAnimator adds a per-character Opacity animator with a Range Selector to a text layer — the kinetic-typography primitive (fade / wipe text in or out one character at a time). opacity (0–100) is applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. A static reveal frame, e.g. opacity 0 + start 0 + end 50, hides the first ~half of the characters; animate the reveal over time by keyframing the Range Offset with AnimateTextRangeOffset."
     },
+    "AddTextPositionAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextpositionanimator",
+      "signature": "func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "AddTextPositionAnimator adds a per-character Position 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that slides / drops characters into place one at a time. x / y / z is the position offset (pixels) applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: offset (0, -100, 0), Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the displacement lands the characters as the selection window slides off them."
+    },
     "AnimateEffectParam": {
       "kind": "func",
       "file": "effect.md",
