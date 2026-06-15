@@ -74,9 +74,10 @@ AddMask / RemoveMask + mode·color·inverted（mkif 字节）已 ship。剩属�
 
 ## 优先级 6 — 文字图层
 
-NewTextLayer + 单段单 run length-variable SetText 已 ship（`text-btdk-length-variable-write-scoping.md`）。剩复杂文档结构。
+NewTextLayer + length-variable SetText（任意长度 × 单/多段落 × 单/多 run × 空串 × 手动 kerning）**全 ship**（2026-06-12 v4 **零 refuse**，双版本 ship-gate PASS；`text-btdk-length-variable-write-scoping.md`）。文字「文档结构」侧已收口。
 
-- **多段落 / 多 run / 带 kerning / 空串改字** —— 当前 refuse，需 btdk 内段落·run entry splicing（未 RE）。
+- ~~**多段落 / 多 run / 带 kerning / 空串改字**~~ ✅ **2026-06-12 v4 全 SHIPPED**（零 refuse，双版本 gate；之前此行写「当前 refuse 未 RE」系看板抄了 v4 之前的旧状态，2026-06-15 更正）。
+- ~~**Text Animators（文本动画器）= kinetic typography 引擎**~~ ✅ **2026-06-15 首落地**。`AddTextOpacityAnimator`（从零创建 Opacity 动画器 + Range Selector，参数化 Start/End/Offset）+ `AnimateTextRangeOffset`（offset 关键帧扫光 = 逐字揭示）。住图层属性树 tdgp（非 btdk），走 synthesis-insert vein（embed `ADBE Text Animators` 组模板 + (tdmn,payload) splice + cdat 覆写）。**AE 2020+2025 双版本渲染像素 gate PASS**（亮度 spread t0=0→t1=151→t2=168 单调揭示）。详 `text-animator-create-re.md`。**按需扩**：Position/Scale/Color 动画器（同 vein 加模板）、Range Advanced、多 Selector、Wiggly/Expression Selector；structural op（Remove/Dup/Move 对 text animators）仍 Alpha 未单独 gate。
 - **更多 TextDocument 字段** —— 按需扩（font/size/justification 等已部分有）。
 - **变量字体写** —— ScriptingAPI no-op（`variable-fonts-write-noop.md`），落不可达。
 - **ligature**（OT liga）—— 未 RE，可能不可达。

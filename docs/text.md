@@ -710,3 +710,29 @@ func TextEncodedByteLen(s string) int
 ```
 
 TextEncodedByteLen returns the encoded byte length SetText would produce for s.
+
+### AddTextOpacityAnimator
+
+```go
+func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+AddTextOpacityAnimator adds a per-character Opacity animator with a Range Selector to a text layer — the kinetic-typography primitive (fade / wipe text in or out one character at a time). opacity (0–100) is applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. A static reveal frame, e.g. opacity 0 + start 0 + end 50, hides the first ~half of the characters; animate the reveal over time by keyframing the Range Offset with AnimateTextRangeOffset.
+
+Text animators live in the "ADBE Text Animators" indexed group nested inside the layer's "ADBE Text Properties" group (NOT in the btdk document). Fresh text layers (NewTextLayer) carry no Animators group, so the first animator splices the whole group into Text Properties; later animators append into it. The animator's parameter sub-tree (Selectors + Animator Properties) is supplied from an embedded AE-native template authored with every cdat slot materialized (AE elides defaults), which the call overwrites with the supplied values — the same embed-AE-bytes + (tdmn, payload) splice vein AddEffect uses.
+
+Refused: non-text layers, and text layers built by New* that were never parsed (call aep.Reopen first). Returns a stand-in group node referencing the spliced animator chunk.
+
+Alpha / structural — the animator chunk structure is RE'd + double-version render-gated, but the typed parameter accessors are not yet wired; tune further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+
+### AnimateTextRangeOffset
+
+```go
+func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
+```
+
+AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time reveals the characters one by one as the selection window (and the invisibility it carries) slides off the text. Operates on the layer's first animator; needs >= 2 keyframes. tickRate \<= 0 uses the comp's.
+
+Builds a parsed property over the spliced Offset slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use (tdb4 flag flip + keyframe-stream synthesis).
+
+Alpha / structural — RE'd + double-version render-gated as the reveal sweep. Free function (CLAUDE.md #2 structural-op call-form).
