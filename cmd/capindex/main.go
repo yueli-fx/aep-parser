@@ -24,20 +24,31 @@ import (
 func main() {
 	q := flag.String("q", "", "query term; print matching capabilities and exit")
 	check := flag.Bool("check", false, "CI mode: validate tags + verify committed files are current")
+	coverage := flag.Bool("coverage", false, "report public-surface tag coverage (P2 progress meter) and exit")
 	flag.Parse()
 
 	root, err := repoRoot()
 	if err != nil {
 		fatal(err)
 	}
-	pkgDir := filepath.Join(root, "internal", "aep")
+	pkgDirs := capindexPkgDirs(root)
 	incidentsDir := filepath.Join(root, "flightdeck", "incidents")
+	docgenPath := filepath.Join(root, "docs", "docgen.json")
 	jsonPath := filepath.Join(root, "docs", "capabilities.json")
 	mdPath := filepath.Join(root, "docs", "capabilities.md")
 
-	entries, err := extractEntries(pkgDir)
+	entries, err := extractEntries(pkgDirs...)
 	if err != nil {
 		fatal(err)
+	}
+
+	if *coverage {
+		surface, err := loadSurface(docgenPath)
+		if err != nil {
+			fatal(err)
+		}
+		reportCoverage(surface, entries)
+		return
 	}
 
 	if *q != "" {
@@ -83,6 +94,41 @@ func main() {
 		fatal(err)
 	}
 	fmt.Printf("capindex: wrote %d capabilities → %s + %s\n", len(taggedSorted(entries)), rel(root, jsonPath), rel(root, mdPath))
+}
+
+// capindexPkgDirs is the package set scanned for the capability surface, in
+// facade-priority order. internal/aep holds the public re-export funcs + type
+// aliases; internal/scene holds the real types whose Set*/getter methods are the
+// bulk of the API. (codec capability is reached via facade_codec.go re-exports,
+// so codec itself is not scanned.)
+func capindexPkgDirs(root string) []string {
+	return []string{
+		filepath.Join(root, "internal", "aep"),
+		filepath.Join(root, "internal", "scene"),
+	}
+}
+
+// reportCoverage prints the P2 progress meter: how much of the documented public
+// surface carries an aep:cap tag, and the still-untagged symbols.
+func reportCoverage(s *publicSurface, entries []Entry) {
+	tagged, untagged := s.coverage(entries)
+	total := len(tagged) + len(untagged)
+	pct := 0.0
+	if total > 0 {
+		pct = 100 * float64(len(tagged)) / float64(total)
+	}
+	fmt.Printf("capindex coverage: %d/%d public-surface symbols tagged (%.1f%%)\n", len(tagged), total, pct)
+	if len(untagged) == 0 {
+		return
+	}
+	fmt.Printf("\nuntagged (%d):\n", len(untagged))
+	for _, e := range untagged {
+		sym := e.Symbol
+		if e.Recv != "" {
+			sym = strings.TrimPrefix(e.Recv, "*") + "." + e.Symbol
+		}
+		fmt.Printf("  %s\t(%s %s)\n", sym, e.Kind, e.Pkg)
+	}
 }
 
 func repoRoot() (string, error) {

@@ -15,7 +15,7 @@ func TestGeneratedUpToDate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	entries, err := extractEntries(filepath.Join(root, "internal", "aep"))
+	entries, err := extractEntries(capindexPkgDirs(root)...)
 	if err != nil {
 		t.Fatal(err)
 	}

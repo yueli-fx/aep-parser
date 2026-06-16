@@ -1,0 +1,78 @@
+package main
+
+import (
+	"path/filepath"
+	"testing"
+)
+
+func TestLoadSurface(t *testing.T) {
+	root, err := repoRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := loadSurface(filepath.Join(root, "docs", "docgen.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// docgen roots include the big capability types whose methods are public.
+	for _, r := range []string{"Layer", "Composition", "Project", "Property", "Mask"} {
+		if !s.roots[r] {
+			t.Errorf("expected %q in docgen roots", r)
+		}
+	}
+	// docgen funcs include curated free functions.
+	for _, fn := range []string{"AddEffect", "InsertKeyframe", "NewShapeLayer"} {
+		if !s.funcs[fn] {
+			t.Errorf("expected %q in docgen funcs", fn)
+		}
+	}
+}
+
+func TestPublicSurfaceRequires(t *testing.T) {
+	s := &publicSurface{
+		roots: map[string]bool{"Layer": true},
+		funcs: map[string]bool{"AddEffect": true},
+	}
+	cases := []struct {
+		e    Entry
+		want bool
+	}{
+		{Entry{Symbol: "SetOpacity", Kind: "method", Recv: "*Layer", Pkg: "scene"}, true},  // method on a root type
+		{Entry{Symbol: "NewShapeLayer", Kind: "func", Pkg: "aep"}, true},                   // facade func
+		{Entry{Symbol: "AddEffect", Kind: "func", Pkg: "scene"}, true},                     // documented func anywhere
+		{Entry{Symbol: "setOpaque", Kind: "method", Recv: "*shard", Pkg: "scene"}, false},  // non-root receiver
+		{Entry{Symbol: "BlendingModeAdd", Kind: "const", Pkg: "aep"}, false},               // enum const = meta lane
+		{Entry{Symbol: "Layer", Kind: "type", Pkg: "aep"}, false},                          // type alias = meta lane
+	}
+	for _, tc := range cases {
+		if got := s.requires(tc.e); got != tc.want {
+			t.Errorf("requires(%s.%s kind=%s) = %v, want %v", tc.e.Recv, tc.e.Symbol, tc.e.Kind, got, tc.want)
+		}
+	}
+}
+
+// TestExtractEntries_MultiPackage proves the P2 scope expansion: scene methods
+// (the Set*/getter bulk) are now extracted, not just facade funcs.
+func TestExtractEntries_MultiPackage(t *testing.T) {
+	root, err := repoRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries, err := extractEntries(capindexPkgDirs(root)...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var setOpacity *Entry
+	for i := range entries {
+		if entries[i].Symbol == "SetOpacity" && entries[i].Recv == "*Layer" {
+			setOpacity = &entries[i]
+			break
+		}
+	}
+	if setOpacity == nil {
+		t.Fatal("SetOpacity on *Layer not extracted from scene package")
+	}
+	if setOpacity.Kind != "method" || setOpacity.Pkg != "scene" {
+		t.Errorf("SetOpacity: kind=%q pkg=%q, want method/scene", setOpacity.Kind, setOpacity.Pkg)
+	}
+}

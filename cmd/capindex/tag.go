@@ -13,6 +13,16 @@ var validVerify = map[string]bool{
 	"none": true, "roundtrip": true, "ae-accept": true, "render-pixel": true,
 }
 
+// validDomains is the closed set of capability buckets (spec § 数据模型). "meta"
+// is the lane for getters/readers/type aliases/enum consts — present in the API
+// but not verified capabilities (no gate, verify none|roundtrip).
+var validDomains = map[string]bool{
+	"layer-create": true, "layer-set": true, "shape": true, "gradient": true,
+	"keyframe": true, "effect": true, "text": true, "mask": true, "comp": true,
+	"project": true, "render-queue": true, "eg": true, "expr": true, "io": true,
+	"structural": true, "meta": true,
+}
+
 // parseCapTag scans a doc comment for an `aep:cap ...` directive (optionally
 // continued across following non-blank lines) and parses it into a Cap.
 // Returns (nil, false, nil) when no directive is present; (nil, true, err) on a
@@ -77,11 +87,28 @@ func validateCap(c *Cap) error {
 	if c.Domain == "" || c.Tier == "" || c.Verify == "" {
 		return fmt.Errorf("aep:cap requires domain, tier, verify")
 	}
+	if !validDomains[c.Domain] {
+		return fmt.Errorf("invalid domain %q", c.Domain)
+	}
 	if !validTiers[c.Tier] {
 		return fmt.Errorf("invalid tier %q", c.Tier)
 	}
 	if !validVerify[c.Verify] {
 		return fmt.Errorf("invalid verify %q", c.Verify)
+	}
+	// meta lane: getters/readers/aliases/enums — exist in the API but are not
+	// verified capabilities. No gate; verify must be none|roundtrip.
+	if c.Domain == "meta" {
+		if c.Verify != "none" && c.Verify != "roundtrip" {
+			return fmt.Errorf("domain=meta requires verify none|roundtrip, got %q", c.Verify)
+		}
+		if len(c.Gate) > 0 {
+			return fmt.Errorf("domain=meta must not declare a gate")
+		}
+		if c.MinVer == "" {
+			c.MinVer = "2020"
+		}
+		return nil
 	}
 	switch c.Tier {
 	case "stable":

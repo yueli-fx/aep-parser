@@ -6,16 +6,54 @@ import (
 	"go/printer"
 	"go/token"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
 
-// extractEntries walks the Go package in dir (skipping _test.go) and returns one
-// Entry per exported func/method/type/const, with the `aep:cap` directive parsed
-// from each symbol's raw doc comment. The directive is written as a no-space
-// `//aep:cap ...` line so go/doc strips it from rendered docs; capindex reads it
-// back from the raw AST comment list.
-func extractEntries(dir string) ([]Entry, error) {
+// extractEntries walks the given Go package dirs (skipping _test.go) and returns
+// one Entry per exported func/method/type/const, with the `aep:cap` directive
+// parsed from each symbol's raw doc comment. The directive is written as a
+// no-space `//aep:cap ...` line so go/doc strips it from rendered docs; capindex
+// reads it back from the raw AST comment list.
+//
+// Dirs are scanned in order with facade-priority dedup: the public capability
+// surface spans internal/aep (facade re-export funcs + type aliases) and
+// internal/scene (the real types whose Set*/getter methods are the bulk of the
+// API). When the same symbol appears in two packages (a facade alias type and
+// its scene definition, or a facade wrapper func over a codec original), the
+// first-scanned (facade) entry wins so the tag lives on the public surface.
+func extractEntries(dirs ...string) ([]Entry, error) {
+	var entries []Entry
+	seen := map[string]bool{}
+	for _, dir := range dirs {
+		pkg := filepath.Base(dir)
+		got, err := extractDir(dir)
+		if err != nil {
+			return nil, err
+		}
+		for _, e := range got {
+			key := e.Recv + "\x00" + e.Symbol + "\x00" + e.Kind
+			if seen[key] {
+				continue // facade-priority: keep the first (earlier dir) definition
+			}
+			seen[key] = true
+			e.Pkg = pkg
+			entries = append(entries, e)
+		}
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Symbol != entries[j].Symbol {
+			return entries[i].Symbol < entries[j].Symbol
+		}
+		return entries[i].Recv < entries[j].Recv
+	})
+	return entries, nil
+}
+
+// extractDir parses one package dir and returns its exported entries (unsorted,
+// Pkg unset — extractEntries stamps Pkg + dedups).
+func extractDir(dir string) ([]Entry, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, dir, func(fi os.FileInfo) bool {
 		return !strings.HasSuffix(fi.Name(), "_test.go")
@@ -41,12 +79,6 @@ func extractEntries(dir string) ([]Entry, error) {
 			}
 		}
 	}
-	sort.Slice(entries, func(i, j int) bool {
-		if entries[i].Symbol != entries[j].Symbol {
-			return entries[i].Symbol < entries[j].Symbol
-		}
-		return entries[i].Recv < entries[j].Recv
-	})
 	return entries, nil
 }
 
