@@ -750,7 +750,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // Go-built file. Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025,TestAddEffectAudio_AEShipGate_AE2020,TestAddEffectAudio_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025 incident=add-effect-splice-re boundary="207 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 10 个音频效果 Backwards/Bass&Treble/Delay/Flange&Chorus/High-Low Pass/Modulator/Parametric EQ/Reverb/Stereo Mixer/Tone,仅可加到有音频的层、ae-accept 非渲染 + 7 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur/3D Glasses/Warp Stabilizer/Timewarp/CC Particle World 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像,audio,音频,声音,reverb,delay,eq"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025,TestAddEffectAudio_AEShipGate_AE2020,TestAddEffectAudio_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025,TestAddEffectWave12_AEShipGate_AE2020,TestAddEffectWave12_AEShipGate_AE2025 incident=add-effect-splice-re boundary="216 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 10 个音频效果 Backwards/Bass&Treble/Delay/Flange&Chorus/High-Low Pass/Modulator/Parametric EQ/Reverb/Stereo Mixer/Tone,仅可加到有音频的层、ae-accept 非渲染 + 11 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur/3D Glasses/Warp Stabilizer/Timewarp/CC Particle World/Texturize/Color Link/Compound Arithmetic/Set Channels(4 源) 用 SetEffectLayerParam 指源;wave12 收回 wave-6 parked 经典(全大写 match-name:BEZMESH/MESH WARP/CHANNEL MIXER/RESHAPE/Vector Paint));未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ Vegas/Warp/PS Express 等 AE2020 canAdd=false + 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像,audio,音频,声音,reverb,delay,eq"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1413,7 +1413,7 @@ func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs 
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
 //
-//aep:cap domain=effect tier=stable verify=render-pixel gate=TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025,TestLayerRefDispMap_AEShipGate_AE2020,TestLayerRefDispMap_AEShipGate_AE2025,TestLayerRefCompoundBlur_AEShipGate_AE2020,TestLayerRefCompoundBlur_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025 boundary="参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);wave11 layer-ref(Warp Stabilizer -0046 · 3D Glasses -0001/-0002 · Timewarp -0029/-0031 · CC Particle World -0045)=accept+readback+resave 双版本 gated(render-pixel deferred:无单帧像素证明面);其它 default-elided layer-ref 物化未做" alias="set matte,layer reference,蒙版层,displacement map,compound blur,vector blur,take matte from layer"
+//aep:cap domain=effect tier=stable verify=render-pixel gate=TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025,TestLayerRefDispMap_AEShipGate_AE2020,TestLayerRefDispMap_AEShipGate_AE2025,TestLayerRefCompoundBlur_AEShipGate_AE2020,TestLayerRefCompoundBlur_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025,TestAddEffectWave12_AEShipGate_AE2020,TestAddEffectWave12_AEShipGate_AE2025 boundary="参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);wave11 layer-ref(Warp Stabilizer -0046 · 3D Glasses -0001/-0002 · Timewarp -0029/-0031 · CC Particle World -0045) + wave12 layer-ref(Texturize -0001 · Color Link -0001 · Compound Arithmetic -0001 · Set Channels -0001/-0003/-0005/-0007 四源)=accept+readback+resave 双版本 gated(render-pixel deferred:无单帧像素证明面);其它 default-elided layer-ref 物化未做" alias="set matte,layer reference,蒙版层,displacement map,compound blur,vector blur,take matte from layer"
 func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error {
 	return serializer.SetEffectLayerParam(layer, fx, paramMatchName, target)
 }
@@ -1909,6 +1909,17 @@ const (
 	EffectTimewarp        = serializer.EffectTimewarp        // Timewarp
 	EffectCCParticleWorld = serializer.EffectCCParticleWorld // CC Particle World
 
+	// Wave 12 parked classic effects.
+	EffectBezierWarp         = serializer.EffectBezierWarp         // Bezier Warp
+	EffectMeshWarp           = serializer.EffectMeshWarp           // Mesh Warp
+	EffectChannelMixer       = serializer.EffectChannelMixer       // Channel Mixer
+	EffectReshape            = serializer.EffectReshape            // Reshape
+	EffectVectorPaint        = serializer.EffectVectorPaint        // Vector Paint
+	EffectTexturize          = serializer.EffectTexturize          // Texturize
+	EffectColorLink          = serializer.EffectColorLink          // Color Link
+	EffectCompoundArithmetic = serializer.EffectCompoundArithmetic // Compound Arithmetic
+	EffectSetChannels        = serializer.EffectSetChannels        // Set Channels
+
 	EffectDisplacementMapLayer = serializer.EffectDisplacementMapLayer // Displacement Map Layer param
 	EffectCompoundBlurLayer    = serializer.EffectCompoundBlurLayer    // Compound Blur "Blur Layer" param
 	EffectCCVectorBlurMap      = serializer.EffectCCVectorBlurMap      // CC Vector Blur "Vector Map" param
@@ -1919,6 +1930,14 @@ const (
 	EffectTimewarpMatteLayer     = serializer.EffectTimewarpMatteLayer     // Timewarp matte layer
 	EffectTimewarpSourceLayer    = serializer.EffectTimewarpSourceLayer    // Timewarp source layer
 	EffectCCParticleWorldTexture = serializer.EffectCCParticleWorldTexture // CC Particle World texture layer
+	// Wave 12 layer-ref params.
+	EffectTexturizeLayer                 = serializer.EffectTexturizeLayer                 // Texturize texture layer
+	EffectColorLinkSourceLayer           = serializer.EffectColorLinkSourceLayer           // Color Link source layer
+	EffectCompoundArithmeticSecondSource = serializer.EffectCompoundArithmeticSecondSource // Compound Arithmetic 2nd source
+	EffectSetChannelsSource1             = serializer.EffectSetChannelsSource1             // Set Channels source 1
+	EffectSetChannelsSource2             = serializer.EffectSetChannelsSource2             // Set Channels source 2
+	EffectSetChannelsSource3             = serializer.EffectSetChannelsSource3             // Set Channels source 3
+	EffectSetChannelsSource4             = serializer.EffectSetChannelsSource4             // Set Channels source 4
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript

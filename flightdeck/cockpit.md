@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-17 by claude（本会话：effects layer-ref wave 11(库 203→207) + mask >4kf 容量分页(6kf 双版本) + maskFeatherFalloff RE(mkif @0x03,翻案"不可达",双版本 gate)→ **mask 域全收口**。另删 deferred-backlog spec、per-version-template 加交叉链接。）
+**Last updated**: 2026-06-17 by claude（本会话连推：effects wave 11 layer-ref + wave 12 收回 wave-6 parked 经典(库 203→216,全大写 match-name) · mask 域全收口(>4kf 容量分页 6kf + maskFeatherFalloff mkif @0x03 翻案"不可达")。均双版本 gate。另删 deferred-backlog spec。）
 
 **Active focus**: **需求驱动稳态**（知识库地基重建 arc 已完结）。**知识单一家 = flightdeck + CLAUDE.md**(auto-memory 已退役);**能力真相源 = capindex**(`go run ./cmd/capindex -q <词>` / `docs/capabilities.{json,md}`,CI 强制写/做面零漏标)。库能力主线早已全收口、需求驱动;机制库 parse-the-clone + synthesis-insert + animate;每渲染类双版本 AE ship-gate(红线4)。两个能力 roadmap 已归档(`archive/specs/`),残项见下 backlog,真相源=capindex。火焰=番外(见 `incidents/procedural-fx-over-vector.md`)。
 
@@ -15,7 +15,7 @@
 **➡ 需求驱动稳态——无 active arc。等新需求,或从下列残项挑。** 能力查询:`go run ./cmd/capindex -q <词>`。
 
 **剩余 backlog（非阻塞,需求驱动;两个能力 roadmap 已全收口归档→ `archive/specs/`,真相源=capindex）**：
-- effects：layer-ref 家族**全收口**（wave 11 已 ship 3D Glasses/Warp Stabilizer/Timewarp/CC Particle World）。残项=未入库的 modal-hang(Apply Color LUT/PS Arbitrary Map/Numbers,无法无人值守加)+ 待 probe match-name(Bezier Warp/Channel Mixer 等 wave-6 parked)，低优先。
+- effects：**全收口**（wave 11 layer-ref + wave 12 收回 wave-6 parked 经典 9 个:BEZMESH/MESH WARP/CHANNEL MIXER/RESHAPE/Vector Paint/Texturize/Color Link/Compound Arithmetic/Set Channels,库 216）。残项=modal-hang(Apply Color LUT/PS Arbitrary Map/Numbers,无法无人值守加)+ Vegas/Warp 等 AE2020 真不可用——**均不可达**(实证 canAdd=false/弹框)。
 - mask：**域全收口** —— 结构性 op(Add/Remove/Dup/Move) + 选项(feather/opacity/expansion) + 路径(静/动含 >4kf 容量页) + maskFeatherFalloff(2026-06-17 RE mkif @0x03,翻案"不可达",双版本 gate)。**无残项**。
 - expr：linear()/ease()/valueAtTime remap（内容无关已证,边际低）。
 

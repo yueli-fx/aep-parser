@@ -66,6 +66,7 @@ import (
 //go:embed templates/effects/effect_cc_twister.bin templates/effects/effect_cs_blockload.bin templates/effects/effect_cs_color_neutralizer.bin templates/effects/effect_cs_kernel.bin templates/effects/effect_cs_linesweep.bin templates/effects/effect_csrainfall.bin templates/effects/effect_cssnowfall.bin
 //go:embed templates/effects/effect_adbe_aud_reverse.bin templates/effects/effect_adbe_aud_bt.bin templates/effects/effect_adbe_aud_delay.bin templates/effects/effect_adbe_aud_flange.bin templates/effects/effect_adbe_aud_hilo.bin templates/effects/effect_adbe_aud_modulator.bin templates/effects/effect_adbe_param_eq.bin templates/effects/effect_adbe_aud_reverb.bin templates/effects/effect_adbe_aud_stereo_mixer.bin templates/effects/effect_adbe_aud_tone.bin
 //go:embed templates/effects/effect_adbe_subspacestabilizer.bin templates/effects/effect_adbe_3d_glasses.bin templates/effects/effect_adbe_timewarp.bin templates/effects/effect_cc_particle_world.bin
+//go:embed templates/effects/effect_adbe_bezmesh.bin templates/effects/effect_adbe_mesh_warp.bin templates/effects/effect_adbe_channel_mixer.bin templates/effects/effect_adbe_reshape.bin templates/effects/effect_adbe_vector_paint.bin templates/effects/effect_adbe_texturize.bin templates/effects/effect_adbe_color_link.bin templates/effects/effect_adbe_compound_arithmetic.bin templates/effects/effect_adbe_set_channels.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -315,6 +316,20 @@ const (
 	Effect3DGlasses       = "ADBE 3D Glasses"         // 3D Glasses
 	EffectTimewarp        = "ADBE Timewarp"           // Timewarp
 	EffectCCParticleWorld = "CC Particle World"       // CC Particle World
+	// Wave 12 (2026-06-17, fixture re_effect_lib12.aep) — the wave-6 PARKED classic
+	// effects, now with correct ALL-CAPS match-names (probe11). Old AE effect
+	// match-names are case-sensitive ALL-CAPS-with-spaces (camelCase guesses failed).
+	// 5 parameter-only + 4 layer-ref (Texturize/Color Link/Compound Arithmetic/
+	// Set Channels — the last exposes FOUR source-layer params).
+	EffectBezierWarp         = "ADBE BEZMESH"              // Bezier Warp
+	EffectMeshWarp           = "ADBE MESH WARP"            // Mesh Warp
+	EffectChannelMixer       = "ADBE CHANNEL MIXER"        // Channel Mixer
+	EffectReshape            = "ADBE RESHAPE"              // Reshape
+	EffectVectorPaint        = "ADBE Vector Paint"         // Vector Paint
+	EffectTexturize          = "ADBE Texturize"            // Texturize
+	EffectColorLink          = "ADBE Color Link"           // Color Link
+	EffectCompoundArithmetic = "ADBE Compound Arithmetic"  // Compound Arithmetic
+	EffectSetChannels        = "ADBE Set Channels"         // Set Channels
 )
 
 // Layer-reference parameter match-names for the wave-8 layer-ref effects — pass
@@ -332,6 +347,14 @@ const (
 	EffectTimewarpMatteLayer     = "ADBE Timewarp-0029"           // Timewarp matte layer (inferred)
 	EffectTimewarpSourceLayer    = "ADBE Timewarp-0031"           // Timewarp source layer (inferred)
 	EffectCCParticleWorldTexture = "CC Particle World-0045"       // CC Particle World texture layer
+	// Wave 12 layer-ref params. Set Channels has four independent source layers.
+	EffectTexturizeLayer                 = "ADBE Texturize-0001"           // Texturize texture layer
+	EffectColorLinkSourceLayer           = "ADBE Color Link-0001"          // Color Link source layer
+	EffectCompoundArithmeticSecondSource = "ADBE Compound Arithmetic-0001" // Compound Arithmetic 2nd source layer
+	EffectSetChannelsSource1             = "ADBE Set Channels-0001"        // Set Channels source layer 1
+	EffectSetChannelsSource2             = "ADBE Set Channels-0003"        // Set Channels source layer 2
+	EffectSetChannelsSource3             = "ADBE Set Channels-0005"        // Set Channels source layer 3
+	EffectSetChannelsSource4             = "ADBE Set Channels-0007"        // Set Channels source layer 4
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -547,6 +570,16 @@ var effectTemplateFiles = map[string]string{
 	Effect3DGlasses:       "templates/effects/effect_adbe_3d_glasses.bin",
 	EffectTimewarp:        "templates/effects/effect_adbe_timewarp.bin",
 	EffectCCParticleWorld: "templates/effects/effect_cc_particle_world.bin",
+	// Wave 12 — parked classic effects (5 parameter-only + 4 layer-ref).
+	EffectBezierWarp:         "templates/effects/effect_adbe_bezmesh.bin",
+	EffectMeshWarp:           "templates/effects/effect_adbe_mesh_warp.bin",
+	EffectChannelMixer:       "templates/effects/effect_adbe_channel_mixer.bin",
+	EffectReshape:            "templates/effects/effect_adbe_reshape.bin",
+	EffectVectorPaint:        "templates/effects/effect_adbe_vector_paint.bin",
+	EffectTexturize:          "templates/effects/effect_adbe_texturize.bin",
+	EffectColorLink:          "templates/effects/effect_adbe_color_link.bin",
+	EffectCompoundArithmetic: "templates/effects/effect_adbe_compound_arithmetic.bin",
+	EffectSetChannels:        "templates/effects/effect_adbe_set_channels.bin",
 }
 
 type cachedEffectTemplate struct {

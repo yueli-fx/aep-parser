@@ -381,3 +381,29 @@ param（`EffectWarpStabilizerRefLayer`/`Effect3DGlassesLeftView`/`…RightView`/
 `EffectTimewarpMatteLayer`/`…SourceLayer`/`EffectCCParticleWorldTexture`）。**Curation rule
 扩展**：layer-ref 效果只要 RE 时把 pickwhip 物化（带 tdpi 出模板）即可入库，不再受
 parameter-only 限制——`SetEffectLayerParam` 处理 ref 重指。
+
+## 2026-06-17 — Wave 12: wave-6 parked 经典效果（库 207→216，全大写 match-name 是关键）
+
+收回 wave 6 parked 的经典效果——当时 camelCase 猜名全 FAIL，根因是**老 AE effect match-name
+是 ALL-CAPS-带空格且大小写敏感**（同 chunk-id 大小写敏感 [[chunk-id-case-tdb4]]）。probe11
+（`re_effect_probe11.jsx` 试大写/格式变体）一次定位 9 个正确名：
+
+- **5 parameter-only**：`ADBE BEZMESH`(Bezier Warp) · `ADBE MESH WARP` · `ADBE CHANNEL MIXER` ·
+  `ADBE RESHAPE` · `ADBE Vector Paint`。
+- **4 layer-ref**（probe 顺带发现，物化同 wave 11）：`ADBE Texturize`(-0001) · `ADBE Color Link`
+  (-0001) · `ADBE Compound Arithmetic`(-0001) · `ADBE Set Channels`(**-0001/-0003/-0005/-0007 四个
+  source layer**)。
+
+**关键教训**：camelCase 变体（`ADBE BezierWarp`/`ADBE ChannelMixer`/`ADBE Mesh Warp`）全
+`canAdd=false`，唯有全大写（`ADBE BEZMESH`/`ADBE CHANNEL MIXER`/`ADBE MESH WARP`）+ `ADBE RESHAPE`
+（大写）能加——match-name 大小写敏感。`ADBE Reshape`(首字母大写) FAIL，`ADBE RESHAPE` OK。
+
+**确认不可达**（AE 2020 canAdd=false，非名字错）：Vegas（所有变体）· Warp · PS Express · Smear ·
+Wave World2 —— 这些 AE 2020 真没有（renamed/removed）。
+
+extract 走 `re_effect_lib12.jsx`（递归物化 layer-ref + 读 param matchName，一文件抽 9 个），
+tdpi 审计：param-only 全 1(host)、layer-ref 1+N（Set Channels host+4）。**ship-gate**
+`TestAddEffectWave12_AEShipGate_AE2020/2025`——100% Go-built（HOST/MAP solid + AddEffect ×9 +
+SetEffectLayerParam 全 layer-ref param→MAP），双版本 accept + 读回 9 名按序 + resave 存活。
+非渲染（distortion/channel 类无干净单帧 layer-ref 像素证明）→ accept+readback+resave。
+新 const：9 effect match-name + 7 layer-ref param。
