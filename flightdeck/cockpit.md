@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-16 by claude（**effects 扩库 arc DONE**:AddEffect 库 41→193(+152,5 波双版本 ship-gate)——wave5 +38·wave6 +23·wave7 +45(Lumetri+Lightning+整个 Cycore CC 家族)·wave8 layer-ref 家族(Displacement Map/Compound Blur render-pixel + CC Vector Blur accept,走 SetEffectLayerParam)·wave9 +43 大 probe sweep(keying/simulation/utility + CC 剩余)。机制零变更(splice + tdpi retarget)。全套 build/vet/test 绿,8 新 ship-gate 全 PASS。commit c89782f..f98cfe3。到不了 ~300 的差额有实证:模态弹框 3 个 + foreign-tdpi layer-ref 4 个 + 音频 ~18(未扫)+ AE2020 已移除/2021+ 新增不在 2020-floor。详 `incidents/add-effect-splice-re`。）
+**Last updated**: 2026-06-16 by claude（**文字样式 render-gate arc DONE**:SetRunFontSize/Tracking/ParagraphJustification/CapsOption 升 verify=render-pixel(双版本 `TestMGTextStyle`);Leading 仍 roundtrip(evidence-defer)。根因揪出:saveFrameToPng 磁盘缓存键(comp.id 全=1 + JSX 丢 job.time)致跨进程喂旧帧+gate 假绿——修法=JSX 唯一 time + `clearAEDiskCache` harness。顺手修 FormatPSReal(point 键须写 REAL 否则 AE÷65536,潜在 correctness fix)。ship-gate 缓存陷阱已提炼进 `checklists/re-fixture.md`;incident 归档。commit 32fb3cb。）
 
 **Active focus**: **需求驱动稳态**（知识库地基重建 arc 已完结）。**知识单一家 = flightdeck + CLAUDE.md**(auto-memory 已退役);**能力真相源 = capindex**(`go run ./cmd/capindex -q <词>` / `docs/capabilities.{json,md}`,CI 强制写/做面零漏标;getter/const 豁免)。coverage.md=残值(暂搁/不可达/negative)、coverage-detail=AE-attribute 参考矩阵。—— **库能力主线**早已全收口、需求驱动(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);机制库 parse-the-clone + synthesis-insert + animate;每渲染类双版本 AE ship-gate(红线4)。火焰=番外(程序化效果链,见 incident)。
 

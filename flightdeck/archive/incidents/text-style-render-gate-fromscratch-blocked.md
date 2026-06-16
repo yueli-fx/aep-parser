@@ -1,5 +1,5 @@
 ---
-status: resolved
+status: obsolete
 when_to_read: 想给文字样式 setter（SetRunFontSize/SetRunLeading/SetRunTracking/SetParagraphJustification/SetRunCapsOption）补 render-pixel gate；从零 NewTextLayer 的文字渲染不出来 / 渲染在画面外；SetRunFontSize 写完 AE 读回字号 ÷65536；纠结文字样式族为何只到 verify=roundtrip；**saveFrameToPng 在 headless 多 comp gate 里每张 PNG 内容都一样 / 跨进程返回旧帧**；判断要不要投入「materialize 从零文字 transform/matrix」
 applies_to: [text, text-style, SetRunFontSize, SetRunLeading, SetRunTracking, SetParagraphJustification, SetRunCapsOption, render-gate, red-line-4, from-scratch-text, NewTextLayer, text-matrix, transform-omission, position-not-materialized, fontsize-65536, btdk, run-style, roundtrip-not-render, negative-finding, saveframetopng, disk-cache, comp-id-collision, stale-frame, false-green, formatpsreal]
 last_updated: 2026-06-16

@@ -1,7 +1,7 @@
 ---
 status: active
 when_to_read: writing a new RE JSX fixture; debugging field locations via byte-diff against AE-saved baseline; setting up cross-version AE comparison; running a ship-gate against AE (modified .aep accepted/rejected); diagnosing why AE rejects a builder-written file; looking up "which AE version introduced field X"; invoking ae_run.ps1 wrapper for unattended ship-gate; deciding which AE version to use for a new fixture
-applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch, agent-runs-ae, version-choice, gate-sweep, regen-fixtures, fixtures-manifest, warm-retry, exit-6]
+applies_to: [jsx, re-workflow, fixture, ae-cli, byte-diff, baseline-strategy, ship-gate, ae-acceptance, version-mismatch, failure-modes, types-for-adobe, ae-version-introduced, ae-run-wrapper, gdi-automation, ocr-dispatch, agent-runs-ae, version-choice, gate-sweep, regen-fixtures, fixtures-manifest, warm-retry, exit-6, render-pixel, saveframetopng, disk-cache, comp-id-collision, stale-frame, false-green, clear-disk-cache]
 last_updated: 2026-06-10
 ---
 
@@ -216,6 +216,23 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
     try { app.quit(); } catch (e) {}
 })();
 ```
+
+## render-pixel gate：saveFrameToPng 磁盘缓存陷阱（关键陷阱）
+
+写**多 comp 的 render-pixel ship-gate**（每个 knob/特征一个 comp，逐个 `comp.saveFrameToPng` 抓帧比像素）时，会撞 AE 的**持久磁盘帧缓存**：缓存键 ≈ `(comp.id, render-time)`，**跨进程不失效**（缓存在 `%LOCALAPPDATA%\Temp\Adobe\After Effects\<ver>\Disk Cache-*.noindex`）。
+
+两个坑叠加 → **每张 PNG 内容都一样**（甚至跨独立冷启 AE 进程返回更早某次 run 的旧帧），且 gate 可能**假绿**（值/DOM 全对、像素被污染却恰好过断言）：
+
+1. **comp.id 撞车**：纯 Go 从零 builder 给每个单 comp 工程的 comp 恒分配同一 `comp.id`（实测全 `=1`）。
+2. **time 没传**：JSX 若硬编码 `saveFrameToPng(0)` 而忽略 per-comp time，所有帧同键。
+
+**`app.purge(PurgeTarget.ALL_CACHES)` 救不了**——它清 RAM 缓存，不碰磁盘缓存（PurgeTarget 无 disk 项）。
+
+**修法（两道防线，缺一不可）**：
+- JSX 渲染每个 comp 用**唯一 time**（`comp.saveFrameToPng(job.time, png)`，Go 端逐 comp 给开 ≥0.5s 的不同 time）→ run 内每 comp 唯一缓存键。
+- Go harness 渲染前**清磁盘缓存**：删 `Temp\Adobe\After Effects\*\Disk Cache*.noindex`（= AE「Empty Disk Cache」按钮，缓存会自动重建，无数据丢失）→ 消除跨会话/历史中毒帧。仅做唯一 time 不够：被历史 `t=0` run 污染的桶仍会喂旧帧。
+
+参考实现：`internal/aep/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/verify_mg_text_style.jsx`。根因 forensics：`archive/incidents/text-style-render-gate-fromscratch-blocked.md`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。
 
 ## AE 退出不弹框（关键陷阱）
 
