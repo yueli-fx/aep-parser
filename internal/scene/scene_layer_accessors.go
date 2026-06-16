@@ -257,6 +257,8 @@ func (l *Layer) SetAudioLevels(lr []float64) error {
 
 // SetAnchorPoint writes a new static anchor-point. Length of v must
 // match the property's Components (2 or 3 depending on Is3D).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;v 长度须匹配 Components(2D/3D);无专门 AE gate→round-trip" alias="anchor point,锚点,中心点"
 func (l *Layer) SetAnchorPoint(v []float64) error {
 	p := l.AnchorPoint()
 	if p == nil {
@@ -267,6 +269,8 @@ func (l *Layer) SetAnchorPoint(v []float64) error {
 
 // SetPosition writes a new static position. Length of v must match
 // Position's Components (2 or 3).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖" alias="position,位置,坐标,移动,平移"
 func (l *Layer) SetPosition(v []float64) error {
 	p := l.Position()
 	if p == nil {
@@ -277,6 +281,8 @@ func (l *Layer) SetPosition(v []float64) error {
 
 // SetScale writes a new static scale (normalized 1.0 = 100%). Length
 // of v must match Scale's Components (2 or 3).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;normalized 1.0=100%;2D/3D 分量" alias="scale,缩放,大小,尺寸"
 func (l *Layer) SetScale(v []float64) error {
 	p := l.Scale()
 	if p == nil {
@@ -287,21 +293,29 @@ func (l *Layer) SetScale(v []float64) error {
 
 // SetRotation writes the Z-axis rotation (degrees). Available on both
 // 2D and 3D layers (it's the only rotation axis 2D layers have).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;Z 轴(2D/3D 通用)" alias="rotation,旋转,Z 旋转,角度,转动"
 func (l *Layer) SetRotation(deg float64) error {
 	return setScalarProperty(l.Rotation(), l.Name, "Rotate Z", deg)
 }
 
 // SetRotateX / SetRotateY write per-axis 3D rotation (degrees). Error
 // on 2D layers (property not present).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;3D 层 only(2D 报 property not present)" alias="rotate x,3D X 旋转,X 轴旋转"
 func (l *Layer) SetRotateX(deg float64) error {
 	return setScalarProperty(l.RotateX(), l.Name, "Rotate X", deg)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;3D 层 only(2D 报 property not present)" alias="rotate y,3D Y 旋转,Y 轴旋转"
 func (l *Layer) SetRotateY(deg float64) error {
 	return setScalarProperty(l.RotateY(), l.Name, "Rotate Y", deg)
 }
 
 // SetOrientation writes the 3D orientation (3-component degrees per axis).
 // Errors on 2D layers.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;3D 层 only;3 分量度数" alias="orientation,方向,3D 朝向,定向"
 func (l *Layer) SetOrientation(v []float64) error {
 	p := l.Orientation()
 	if p == nil {

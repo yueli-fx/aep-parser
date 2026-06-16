@@ -609,6 +609,28 @@
     }
   },
   {
+    "symbol": "SetAnchorPoint",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetAnchorPoint(v []float64) error",
+    "summary": "SetAnchorPoint writes a new static anchor-point.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;v 长度须匹配 Components(2D/3D);无专门 AE gate→round-trip",
+      "incident": null,
+      "alias": [
+        "anchor point",
+        "锚点",
+        "中心点"
+      ]
+    }
+  },
+  {
     "symbol": "SetMaterialOption",
     "kind": "func",
     "signature": "func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error)",
@@ -678,6 +700,144 @@
         "透明度",
         "layer opacity",
         "淡入淡出"
+      ]
+    }
+  },
+  {
+    "symbol": "SetOrientation",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetOrientation(v []float64) error",
+    "summary": "SetOrientation writes the 3D orientation (3-component degrees per axis).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;3D 层 only;3 分量度数",
+      "incident": null,
+      "alias": [
+        "orientation",
+        "方向",
+        "3D 朝向",
+        "定向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPosition",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetPosition(v []float64) error",
+    "summary": "SetPosition writes a new static position.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖",
+      "incident": null,
+      "alias": [
+        "position",
+        "位置",
+        "坐标",
+        "移动",
+        "平移"
+      ]
+    }
+  },
+  {
+    "symbol": "SetRotateX",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetRotateX(deg float64) error",
+    "summary": "SetRotateX / SetRotateY write per-axis 3D rotation (degrees).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;3D 层 only(2D 报 property not present)",
+      "incident": null,
+      "alias": [
+        "rotate x",
+        "3D X 旋转",
+        "X 轴旋转"
+      ]
+    }
+  },
+  {
+    "symbol": "SetRotateY",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetRotateY(deg float64) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;3D 层 only(2D 报 property not present)",
+      "incident": null,
+      "alias": [
+        "rotate y",
+        "3D Y 旋转",
+        "Y 轴旋转"
+      ]
+    }
+  },
+  {
+    "symbol": "SetRotation",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetRotation(deg float64) error",
+    "summary": "SetRotation writes the Z-axis rotation (degrees).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;Z 轴(2D/3D 通用)",
+      "incident": null,
+      "alias": [
+        "rotation",
+        "旋转",
+        "Z 旋转",
+        "角度",
+        "转动"
+      ]
+    }
+  },
+  {
+    "symbol": "SetScale",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetScale(v []float64) error",
+    "summary": "SetScale writes a new static scale (normalized 1.0 = 100%).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving;normalized 1.0=100%;2D/3D 分量",
+      "incident": null,
+      "alias": [
+        "scale",
+        "缩放",
+        "大小",
+        "尺寸"
       ]
     }
   },

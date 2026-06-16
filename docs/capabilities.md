@@ -3,7 +3,7 @@
 
 徽章 tier:🟢stable · 🟡alpha · ⬜planned · ❌missing · 🚫negative　·　verify:none / roundtrip / ae-accept / render-pixel
 
-共 105 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+共 112 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
 
 ## comp
 
@@ -68,9 +68,16 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
+| `*Layer.SetAnchorPoint` | 🟢stable | roundtrip | 2020 |  | SetAnchorPoint writes a new static anchor-point. ⚠length-preserving;v 长度须匹配 Components(2D/3D);无专门 AE gate→round-trip |
 | `SetMaterialOption` | 🟡alpha | render-pixel | 2020 | TestLayer3DShadow_AEShipGate_AE2020<br>TestLayer3DShadow_AEShipGate_AE2025 | SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g. ⚠Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate |
 | `*Layer.SetName` | 🟢stable | roundtrip | 2020 |  | SetName rewrites the layer's display name (the AE timeline label). ⚠length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip |
 | `*Layer.SetOpacity` | 🟢stable | roundtrip | 2020 |  | SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). ⚠length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖 |
+| `*Layer.SetOrientation` | 🟢stable | roundtrip | 2020 |  | SetOrientation writes the 3D orientation (3-component degrees per axis). ⚠length-preserving;3D 层 only;3 分量度数 |
+| `*Layer.SetPosition` | 🟢stable | roundtrip | 2020 |  | SetPosition writes a new static position. ⚠length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖 |
+| `*Layer.SetRotateX` | 🟢stable | roundtrip | 2020 |  | SetRotateX / SetRotateY write per-axis 3D rotation (degrees). ⚠length-preserving;3D 层 only(2D 报 property not present) |
+| `*Layer.SetRotateY` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving;3D 层 only(2D 报 property not present) |
+| `*Layer.SetRotation` | 🟢stable | roundtrip | 2020 |  | SetRotation writes the Z-axis rotation (degrees). ⚠length-preserving;Z 轴(2D/3D 通用) |
+| `*Layer.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale writes a new static scale (normalized 1.0 = 100%). ⚠length-preserving;normalized 1.0=100%;2D/3D 分量 |
 
 ## mask
 
