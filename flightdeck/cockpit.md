@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-16 by claude（**capindex P1 ship**：源码内 `aep:cap` 结构化 tag → `cmd/capindex` 自动生成可秒查的能力/API 索引 `docs/capabilities.{json,md}`（+ `-q` 查询 + minver 版本字段）；CI drift-guard + cross-check 防漂、防假绿。layer-create 8 个 `New*` 符号已标注,**当场揪出 1 处假绿**（NewShapeLayer 原指向被 `t.Skip` 禁用的 `TestV2_2_AEShipGate` → 改指实际过 gate 的 ellipse 变体 + boundary 注）。brainstorm 落 2 spec：`capability-index`(active,本 arc)+ `knowledge-consolidation`(idea,parked)。9 commits c8bc5a9..08ce0b2。火焰演示=番外搁置(tmp_debug/flame,双版本可开但用户判定不够好,后续再做)。）
+**Last updated**: 2026-06-16 by claude（**capindex P2 wave0+1**：抽取扩到 facade+scene 两包(揭示真实公共能力面 = **536 符号**,此前只见 facade、漏 341 个 `Set*`+全 getter);加 meta 通道 + `docs/docgen.json` 公共面门禁 + `-coverage` 仪表。**facade 全量自由函数已标 + ship-gate 交叉核实 = 98/536(18.3%)**。审核揪出 **manual-gate orphans**(DeleteLayer/MoveLayer/DuplicateComposition 等 11 个 doc 称 Stable 但无自动 Go `_AEShipGate` test → 诚实标 alpha/roundtrip + boundary,待决:编码 JSX gate)。commits:wave0 + db96367(wave1)。**余 438 scene 方法** = wave2+(pace/depth 待用户定)。）
 
 **Active focus**: **知识库地基重建 arc（当前主线）**——三原则:源码为准/自动化/秒查。capindex(`specs/2026-06-16-capability-index.md`):源码内 `aep:cap` tag 自动生成可秒查能力/API 索引,**P1 done**(layer-create) → **P2 全量标注**(= 源码级能力审核,揪假绿/补缺口)→ CI 全覆盖强制 + coverage 退役。然后 `knowledge-consolidation`(parked,待 P2):记忆系统退役/incidents 合并清理/CLAUDE.md 瘦身/根目录 exe 清理。**能力查询**:`go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`(渐取代 coverage.md)。—— **库能力主线**早已全收口、需求驱动稳态(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);机制库 parse-the-clone + synthesis-insert + animate(Scalar/Vector/Gradient/Path/TextRange);每渲染类双版本 AE ship-gate(红线4)。火焰演示=番外。
 
@@ -17,8 +17,9 @@
 
 ## 下一步
 
-**➡ capindex P2:给 facade 全量导出符号打 `aep:cap` tag**（= 用户要的"源码级能力审核",逐个对 ship-gate 核实、揪假绿/标 missing 缺口）。完成后:开 CI 全符号 tag 覆盖强制 + 起 coverage 退役。tag schema/字段/流水线见 `specs/2026-06-16-capability-index.md`;查询用 `go run ./cmd/capindex -q <词>`。
-**然后** `knowledge-consolidation`(parked,待 P2 推进):记忆系统退役(迁 flightdeck/CLAUDE.md)/incidents 合并+清理/CLAUDE.md 瘦身/根目录 exe 清理(工作流 E 无依赖、可随时先做)。
+**➡ capindex P2 wave2+:438 个 scene 方法标注审核**（Layer 229 / Comp 58 / Project 52 / Property 32 / Mask·Footage…)。**pace/depth 待用户定**:solo 多会话 vs Workflow 并行(成本/opt-in);全量含 getter vs 写/做面优先。配方见 `plans/2026-06-16-capability-index-p2.md` wave2-9。**orphan 决议**(11 个 manual-gate op):编码 JSX gate 为 Go test 恢复 ae-accept,还是维持 roundtrip。
+**Wave 9 收尾**:meta 扫尾 + 开 CI 全覆盖强制 + 回写 spec。**然后** `knowledge-consolidation`(parked):记忆退役/incidents 合并/CLAUDE.md 瘦身/根 exe 清理。
+**能力查询**:`go run ./cmd/capindex -q <词>`(facade 全覆盖,438 scene 方法陆续上)。
 
 **原库能力 backlog（非阻塞,需求驱动;火焰=番外搁置）**：
 - 文字：动画器 5 类全 ✓ + **animate leaf 全收口** ✓ + **免费近邻收口** ✓（2026-06-16：~~Fill Opacity~~ ~~Stroke Opacity~~ ~~Stroke Width~~ ~~Stroke Color~~ ~~Skew~~ 5 个双版本 render-gate PASS；**Rotation X/Y evidence-based defer**——2D 层视觉惰性 bbox 三帧全同，需逐字 3D，facade 保留标 Alpha/write-only + round-trip 自验）；**structural op（Remove/Dup/Move）双版本 gate PASS** ✓ + **Range Advanced（SetTextRangeAdvanced，Amount render-gate PASS）** ✓ + **多 Selector（AddTextRangeSelector）** ✓ + **Wiggly Selector（AddTextWigglySelector，双版本 render-gate PASS via 时间变化签名）** ✓（2026-06-16）；**selector 家族收口**。**Expressible Selector = evidence-defer**（Amount 表达式驱动，库表达式未渲染验证）。详 `incidents/text-animator-create-re.md`

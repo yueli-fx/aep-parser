@@ -47,25 +47,24 @@ spec 字面写"capindex 解 `internal/aep`",基于"facade 含所有符号"的假
 
 ---
 
-## Wave 0 — 工具扩展(capindex 多包抽取 + 公共面门禁 + meta 通道)
+## Wave 0 — 工具扩展(capindex 多包抽取 + 公共面门禁 + meta 通道)✅ DONE(commit Wave0)
 
-**Files:** `cmd/capindex/extract.go`(改)· `cmd/capindex/surface.go`(新,读 docgen.json 定公共面)· `cmd/capindex/tag.go`(改 validateCap 容 meta)· `cmd/capindex/main.go`(改 pkgDir→pkgDirs)· 各 `*_test.go`
+**Files:** `cmd/capindex/extract.go`· `surface.go`(新)· `tag.go`· `main.go`· 各 `*_test.go`
 
-- [ ] **0.1 多包抽取**:`extractEntries` 由单 dir 改收多 dir(facade 优先),复用 docgen `loadPackage` 模式(`parser.ParseDir` 每包 + 原始 doc comment 副本保 `//aep:cap`)。合并:facade 自由函数优先,scene/codec 方法按 receiver 类型归集。
-  - 测试先行:`SetOpacity`(scene `*Layer` 方法)被抽出、recv=Layer、能解析其 tag。
-- [ ] **0.2 公共面门禁** `surface.go`:读 `docs/docgen.json` → 公共面 = 各 file 的 `roots` 类型的全部导出方法 ∪ `funcs` 列表 ∪ facade/aliases/facade_codec 的全部导出 func。**只有公共面符号"必须有 tag"**;非 root 的 scene 方法/内部 helper 不要求。
-  - 测试:`Layer` 方法属公共面;某非 root scene 方法(如 writer 接口实现)不属。
-- [ ] **0.3 meta 通道**:`validateCap` 容 `domain=meta`(tier=stable|alpha,verify=none|roundtrip,无 gate 不报错)。
-  - 测试:`domain=meta tier=stable verify=none` 校验通过;`domain=layer-set tier=stable verify=roundtrip` 仍按原规则报错(stable⟹ae-accept|render-pixel)。
-- [ ] **0.4 进度可见**:加 `-coverage` flag(或测试)报告"公共面 N 符号 / 已标 M / 未标 K",P2 期间作进度仪表(**暂不**作 CI 强制,Wave 9 才 flip)。
-- [ ] **0.5** 重生成 + `go test ./cmd/capindex/` 绿 + 全套绿 + commit `feat(capindex): P2 wave0 — 多包抽取 + 公共面门禁 + meta 通道`。
+- [x] **0.1 多包抽取**:`extractEntries(dirs...)` 多包 + facade-priority 去重 + `Entry.Pkg`。测试:`SetOpacity` 抽出(recv=Layer,pkg=scene)。
+- [x] **0.2 公共面门禁** `surface.go`:读 `docs/docgen.json` roots/funcs → must-tag = aep funcs ∪ root 类型方法 ∪ docgen funcs。
+- [x] **0.3 meta 通道**:`validateCap` 容 `domain=meta`(verify=none|roundtrip、无 gate)+ `validDomains` 闭集校验(揪 domain 拼写错)。
+- [x] **0.4 `-coverage` flag**:公共面 536 符号进度仪表(暂不 CI 强制,Wave 9 flip)。
+- [x] **0.5** 重生成 + 测试 + 全套绿 + commit。
 
-## Wave 1 — facade 自由函数收尾(facade.go 71 + aliases 22 + codec 3)
+## Wave 1 — facade 全量自由函数 ✅ DONE(98/536,commit db96367)
 
-P1 已标 8 个 `New*Layer`。本 wave 标完 facade 三文件剩余自由函数,domain 分布:`structural`(Delete/Duplicate/Insert/Move*Layer、Remove/Move/DuplicatePropertyGroup、AddMarker/RemoveMarker)·`keyframe`(InsertKeyframe/DeleteKeyframe/SetDimensionsSeparated)·`effect`(AddEffect/RemoveEffect/SupportedEffects/SetEffectParam/Animate*)·`text`(全部 `AddText*Animator`/`AddTextRangeSelector`/`AddTextWigglySelector`/`SetTextRangeAdvanced`/`AnimateText*`)·`shape`(aliases 的 `New*Node`/`WrapShapeLayer`/`NewVectorGroup`)·`gradient`(codec `ParseGradientXML`/`EncodeGradientXML`)·`meta`(`Capabilities`/`NewPropertyStream`/`Reopen`/`NewProject`)。
+facade.go + aliases.go + facade_codec.go + scene_application.go 全部公共自由函数已标 + ship-gate 交叉核实。domain:layer-create 8 / effect 6 / mask 6 / text 21 / shape 17 / gradient 2 / structural 14 / comp 3 / project 1 / eg 1 / render-queue 2 / layer-set 1 / keyframe 2 / meta 15。
 
-- [ ] 逐个按 recipe 标注 + 对 ship-gate 核实(text/shape/effect 多已有双版本 gate,见 `incidents/text-animator-create-re.md`、`trim-paths-vector-filter-re.md`)。
-- [ ] 重生成 + 测试 + commit。
+**审核发现(归档,供 Wave9 + orphan 决议):**
+- **manual-gate orphans(11)**:`DeleteLayer`/`DuplicateLayer`/`InsertLayer`/`MoveLayer`/`MoveToBeginning`/`MoveToEnd`/`MoveAfter`/`MoveBefore`/`DuplicateComposition`/`InsertKeyframe`/`DeleteKeyframe` —— CLAUDE.md/coverage 称 Stable,但**无自动 Go `_AEShipGate` test**(AE 接受系 manual JSX 验证,fixtures gitignored)。按交付准则诚实标 `alpha/verify=roundtrip` + boundary。**待决**:(a) 编码 JSX gate 为 Go test 恢复 ae-accept/stable;(b) 扩 capindex 支持 manual-gate 引用;(c) 维持 roundtrip。
+- **read-tier 张力**:read/infra(Open/FromReader/Reopen/Parse/getter)无 "AE 接受"语义 → 归 `meta`(stable+roundtrip);tier×verify 的 `stable⟹ae-accept|render-pixel` 规则仅适用 write/render 域。
+- **AnimateTextOpacity / AddTextRotationX·YAnimator** 诚实降 `roundtrip`(opacity leaf 共享已 render-gated 机制但自身无 gate;RotX/Y 2D 视觉惰性 write-only)。
 
 ## Wave 2 — Layer Set*/getter(229,最大块;子拆)
 
