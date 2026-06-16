@@ -25,4 +25,6 @@ type Entry struct {
 	Example   string `json:"example,omitempty"`
 	HasCap    bool   `json:"has_cap"`
 	Cap       Cap    `json:"cap"`
+
+	parseErr error // unexported: malformed aep:cap directive, surfaced by validateEntries
 }
