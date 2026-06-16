@@ -453,6 +453,19 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectTurbulentDisplace, aep.EffectRoughenEdges, aep.EffectEcho,
 		aep.EffectRadialBlur, aep.EffectFourColorGradient, aep.EffectCheckerboard,
 		aep.EffectGrid, aep.EffectStroke, aep.EffectCornerPin, aep.EffectVenetianBlinds,
+		aep.EffectTwirl, aep.EffectPolarCoordinates, aep.EffectSpherize,
+		aep.EffectMagnify, aep.EffectRipple, aep.EffectOpticsCompensation,
+		aep.EffectPosterize, aep.EffectThreshold, aep.EffectFindEdges,
+		aep.EffectColorEmboss, aep.EffectEmboss, aep.EffectStrobeLight,
+		aep.EffectBrushStrokes, aep.EffectBevelAlpha, aep.EffectBevelEdges,
+		aep.EffectPhotoFilter, aep.EffectVibrance, aep.EffectColorBalance,
+		aep.EffectColorBalanceHLS, aep.EffectBlackAndWhite, aep.EffectGammaPedestalGain,
+		aep.EffectChannelBlur, aep.EffectBilateralBlur, aep.EffectSmartBlur,
+		aep.EffectUnsharpMask, aep.EffectShiftChannels, aep.EffectSolidComposite,
+		aep.EffectMinimax, aep.EffectArithmetic, aep.EffectCircle,
+		aep.EffectLensFlare, aep.EffectCellPattern, aep.EffectAdvancedLightning,
+		aep.EffectBeam, aep.EffectPaintBucket, aep.EffectPosterizeTime,
+		aep.EffectSimpleChoker, aep.EffectMatteChoker,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

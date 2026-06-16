@@ -21,6 +21,8 @@
     { "jsx": "test_data/re_duplicate_layer.jsx", "ae": "2020", "env": { "RE_DUP_MODE": ["solo", "dup_parent", "dup_child", "dup_matted"] }, "done": "test_data/re_duplicate_layer_{RE_DUP_MODE}.done", "outputs": ["test_data/re_duplicate_layer_{RE_DUP_MODE}.aep"] },
     { "jsx": "test_data/re_effect_library.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_library.done", "outputs": ["test_data/re_effect_library.aep"] },
     { "jsx": "test_data/re_effect_library2.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_library2.done", "outputs": ["test_data/re_effect_library2.aep"] },
+    { "jsx": "test_data/re_effect_lib3.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_lib3.done", "outputs": ["test_data/re_effect_lib3.aep"] },
+    { "jsx": "test_data/re_effect_lib5.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_lib5.done", "outputs": ["test_data/re_effect_lib5.aep"] },
     { "jsx": "test_data/re_effect_param_elision.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_elision.done", "outputs": ["test_data/re_effect_param_elision.aep"] },
     { "jsx": "test_data/re_effect_param_types.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_types.done", "outputs": ["test_data/re_effect_param_types.aep"] },
     { "jsx": "test_data/re_effect_param_types_units.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_types_units.done", "outputs": ["test_data/re_effect_param_types_units.aep"] },

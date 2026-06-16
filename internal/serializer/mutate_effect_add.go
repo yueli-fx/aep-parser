@@ -52,6 +52,8 @@ import (
 //go:embed templates/effect_adbe_drop_shadow.bin templates/effect_adbe_sharpen.bin templates/effect_adbe_mosaic.bin templates/effect_adbe_noise.bin templates/effect_adbe_geometry2.bin templates/effect_adbe_ramp.bin templates/effect_adbe_fractal_noise.bin templates/effect_adbe_tile.bin templates/effect_adbe_motion_blur.bin templates/effect_adbe_linear_wipe.bin templates/effect_adbe_wave_warp.bin templates/effect_adbe_curvescustom.bin templates/effect_adbe_slider_control.bin templates/effect_adbe_point_control.bin templates/effect_adbe_color_control.bin templates/effect_adbe_angle_control.bin templates/effect_adbe_checkbox_control.bin templates/effect_adbe_point3d_control.bin
 //go:embed templates/effect_adbe_set_matte3.bin
 //go:embed templates/effect_adbe_turbulent_displace.bin templates/effect_adbe_roughen_edges.bin templates/effect_adbe_echo.bin templates/effect_adbe_radial_blur.bin templates/effect_adbe_4colorgradient.bin templates/effect_adbe_checkerboard.bin templates/effect_adbe_grid.bin templates/effect_adbe_stroke.bin templates/effect_adbe_corner_pin.bin templates/effect_adbe_venetian_blinds.bin
+//go:embed templates/effect_adbe_twirl.bin templates/effect_adbe_polar_coordinates.bin templates/effect_adbe_spherize.bin templates/effect_adbe_magnify.bin templates/effect_adbe_ripple.bin templates/effect_adbe_optics_compensation.bin templates/effect_adbe_posterize.bin templates/effect_adbe_threshold2.bin templates/effect_adbe_find_edges.bin templates/effect_adbe_color_emboss.bin templates/effect_adbe_emboss.bin templates/effect_adbe_strobe.bin templates/effect_adbe_brush_strokes.bin templates/effect_adbe_bevel_alpha.bin templates/effect_adbe_bevel_edges.bin templates/effect_adbe_photo_filter.bin templates/effect_adbe_vibrance.bin templates/effect_adbe_color_balance_2.bin templates/effect_adbe_color_balance_hls.bin
+//go:embed templates/effect_adbe_black_white.bin templates/effect_adbe_gamma_pedestal_gain2.bin templates/effect_adbe_channel_blur.bin templates/effect_adbe_bilateral.bin templates/effect_adbe_smart_blur.bin templates/effect_adbe_unsharp_mask2.bin templates/effect_adbe_shift_channels.bin templates/effect_adbe_solid_composite.bin templates/effect_adbe_minimax.bin templates/effect_adbe_arithmetic.bin templates/effect_adbe_circle.bin templates/effect_adbe_lens_flare.bin templates/effect_adbe_cell_pattern.bin templates/effect_adbe_lightning_2.bin templates/effect_adbe_laser.bin templates/effect_adbe_paint_bucket.bin templates/effect_adbe_posterize_time.bin templates/effect_adbe_simple_choker.bin templates/effect_adbe_matte_choker.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -101,6 +103,47 @@ const (
 	EffectStroke            = "ADBE Stroke"             // Stroke
 	EffectCornerPin         = "ADBE Corner Pin"         // Corner Pin
 	EffectVenetianBlinds    = "ADBE Venetian Blinds"    // Venetian Blinds
+	// Wave 5 (2026-06-16, fixture re_effect_lib5.aep) — MG distort / stylize /
+	// perspective / color-correction / blur / channel / generate / time / matte.
+	// All parameter-only (no layer pickwhip); extracted host id 15 uniform.
+	EffectTwirl              = "ADBE Twirl"                // Twirl
+	EffectPolarCoordinates   = "ADBE Polar Coordinates"    // Polar Coordinates
+	EffectSpherize           = "ADBE Spherize"             // Spherize
+	EffectMagnify            = "ADBE Magnify"              // Magnify
+	EffectRipple             = "ADBE Ripple"               // Ripple
+	EffectOpticsCompensation = "ADBE Optics Compensation"  // Optics Compensation
+	EffectPosterize          = "ADBE Posterize"            // Posterize
+	EffectThreshold          = "ADBE Threshold2"           // Threshold
+	EffectFindEdges          = "ADBE Find Edges"           // Find Edges
+	EffectColorEmboss        = "ADBE Color Emboss"         // Color Emboss
+	EffectEmboss             = "ADBE Emboss"               // Emboss
+	EffectStrobeLight        = "ADBE Strobe"               // Strobe Light
+	EffectBrushStrokes       = "ADBE Brush Strokes"        // Brush Strokes
+	EffectBevelAlpha         = "ADBE Bevel Alpha"          // Bevel Alpha
+	EffectBevelEdges         = "ADBE Bevel Edges"          // Bevel Edges
+	EffectPhotoFilter        = "ADBE Photo Filter"         // Photo Filter
+	EffectVibrance           = "ADBE Vibrance"             // Vibrance
+	EffectColorBalance       = "ADBE Color Balance 2"      // Color Balance
+	EffectColorBalanceHLS    = "ADBE Color Balance (HLS)"  // Color Balance (HLS)
+	EffectBlackAndWhite      = "ADBE Black&White"          // Black & White
+	EffectGammaPedestalGain  = "ADBE Gamma/Pedestal/Gain2" // Gamma/Pedestal/Gain
+	EffectChannelBlur        = "ADBE Channel Blur"         // Channel Blur
+	EffectBilateralBlur      = "ADBE Bilateral"            // Bilateral Blur
+	EffectSmartBlur          = "ADBE Smart Blur"           // Smart Blur
+	EffectUnsharpMask        = "ADBE Unsharp Mask2"        // Unsharp Mask
+	EffectShiftChannels      = "ADBE Shift Channels"       // Shift Channels
+	EffectSolidComposite     = "ADBE Solid Composite"      // Solid Composite
+	EffectMinimax            = "ADBE Minimax"              // Minimax
+	EffectArithmetic         = "ADBE Arithmetic"           // Arithmetic
+	EffectCircle             = "ADBE Circle"               // Circle
+	EffectLensFlare          = "ADBE Lens Flare"           // Lens Flare
+	EffectCellPattern        = "ADBE Cell Pattern"         // Cell Pattern
+	EffectAdvancedLightning  = "ADBE Lightning 2"          // Advanced Lightning
+	EffectBeam               = "ADBE Laser"                // Beam
+	EffectPaintBucket        = "ADBE Paint Bucket"         // Paint Bucket
+	EffectPosterizeTime      = "ADBE Posterize Time"       // Posterize Time
+	EffectSimpleChoker       = "ADBE Simple Choker"        // Simple Choker
+	EffectMatteChoker        = "ADBE Matte Choker"         // Matte Choker
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -149,6 +192,44 @@ var effectTemplateFiles = map[string]string{
 	EffectStroke:             "templates/effect_adbe_stroke.bin",
 	EffectCornerPin:          "templates/effect_adbe_corner_pin.bin",
 	EffectVenetianBlinds:     "templates/effect_adbe_venetian_blinds.bin",
+	EffectTwirl:              "templates/effect_adbe_twirl.bin",
+	EffectPolarCoordinates:   "templates/effect_adbe_polar_coordinates.bin",
+	EffectSpherize:           "templates/effect_adbe_spherize.bin",
+	EffectMagnify:            "templates/effect_adbe_magnify.bin",
+	EffectRipple:             "templates/effect_adbe_ripple.bin",
+	EffectOpticsCompensation: "templates/effect_adbe_optics_compensation.bin",
+	EffectPosterize:          "templates/effect_adbe_posterize.bin",
+	EffectThreshold:          "templates/effect_adbe_threshold2.bin",
+	EffectFindEdges:          "templates/effect_adbe_find_edges.bin",
+	EffectColorEmboss:        "templates/effect_adbe_color_emboss.bin",
+	EffectEmboss:             "templates/effect_adbe_emboss.bin",
+	EffectStrobeLight:        "templates/effect_adbe_strobe.bin",
+	EffectBrushStrokes:       "templates/effect_adbe_brush_strokes.bin",
+	EffectBevelAlpha:         "templates/effect_adbe_bevel_alpha.bin",
+	EffectBevelEdges:         "templates/effect_adbe_bevel_edges.bin",
+	EffectPhotoFilter:        "templates/effect_adbe_photo_filter.bin",
+	EffectVibrance:           "templates/effect_adbe_vibrance.bin",
+	EffectColorBalance:       "templates/effect_adbe_color_balance_2.bin",
+	EffectColorBalanceHLS:    "templates/effect_adbe_color_balance_hls.bin",
+	EffectBlackAndWhite:      "templates/effect_adbe_black_white.bin",
+	EffectGammaPedestalGain:  "templates/effect_adbe_gamma_pedestal_gain2.bin",
+	EffectChannelBlur:        "templates/effect_adbe_channel_blur.bin",
+	EffectBilateralBlur:      "templates/effect_adbe_bilateral.bin",
+	EffectSmartBlur:          "templates/effect_adbe_smart_blur.bin",
+	EffectUnsharpMask:        "templates/effect_adbe_unsharp_mask2.bin",
+	EffectShiftChannels:      "templates/effect_adbe_shift_channels.bin",
+	EffectSolidComposite:     "templates/effect_adbe_solid_composite.bin",
+	EffectMinimax:            "templates/effect_adbe_minimax.bin",
+	EffectArithmetic:         "templates/effect_adbe_arithmetic.bin",
+	EffectCircle:             "templates/effect_adbe_circle.bin",
+	EffectLensFlare:          "templates/effect_adbe_lens_flare.bin",
+	EffectCellPattern:        "templates/effect_adbe_cell_pattern.bin",
+	EffectAdvancedLightning:  "templates/effect_adbe_lightning_2.bin",
+	EffectBeam:               "templates/effect_adbe_laser.bin",
+	EffectPaintBucket:        "templates/effect_adbe_paint_bucket.bin",
+	EffectPosterizeTime:      "templates/effect_adbe_posterize_time.bin",
+	EffectSimpleChoker:       "templates/effect_adbe_simple_choker.bin",
+	EffectMatteChoker:        "templates/effect_adbe_matte_choker.bin",
 }
 
 type cachedEffectTemplate struct {

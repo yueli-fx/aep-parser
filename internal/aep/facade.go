@@ -749,7 +749,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="41 内置效果库;camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025 incident=add-effect-splice-re boundary="79 内置效果库(parameter-only;layer-ref 类如 Displacement Map/Compound Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1710,6 +1710,44 @@ const (
 	EffectStroke             = serializer.EffectStroke             // Stroke
 	EffectCornerPin          = serializer.EffectCornerPin          // Corner Pin
 	EffectVenetianBlinds     = serializer.EffectVenetianBlinds     // Venetian Blinds
+	EffectTwirl              = serializer.EffectTwirl              // Twirl
+	EffectPolarCoordinates   = serializer.EffectPolarCoordinates   // Polar Coordinates
+	EffectSpherize           = serializer.EffectSpherize           // Spherize
+	EffectMagnify            = serializer.EffectMagnify            // Magnify
+	EffectRipple             = serializer.EffectRipple             // Ripple
+	EffectOpticsCompensation = serializer.EffectOpticsCompensation // Optics Compensation
+	EffectPosterize          = serializer.EffectPosterize          // Posterize
+	EffectThreshold          = serializer.EffectThreshold          // Threshold
+	EffectFindEdges          = serializer.EffectFindEdges          // Find Edges
+	EffectColorEmboss        = serializer.EffectColorEmboss        // Color Emboss
+	EffectEmboss             = serializer.EffectEmboss             // Emboss
+	EffectStrobeLight        = serializer.EffectStrobeLight        // Strobe Light
+	EffectBrushStrokes       = serializer.EffectBrushStrokes       // Brush Strokes
+	EffectBevelAlpha         = serializer.EffectBevelAlpha         // Bevel Alpha
+	EffectBevelEdges         = serializer.EffectBevelEdges         // Bevel Edges
+	EffectPhotoFilter        = serializer.EffectPhotoFilter        // Photo Filter
+	EffectVibrance           = serializer.EffectVibrance           // Vibrance
+	EffectColorBalance       = serializer.EffectColorBalance       // Color Balance
+	EffectColorBalanceHLS    = serializer.EffectColorBalanceHLS    // Color Balance (HLS)
+	EffectBlackAndWhite      = serializer.EffectBlackAndWhite      // Black & White
+	EffectGammaPedestalGain  = serializer.EffectGammaPedestalGain  // Gamma/Pedestal/Gain
+	EffectChannelBlur        = serializer.EffectChannelBlur        // Channel Blur
+	EffectBilateralBlur      = serializer.EffectBilateralBlur      // Bilateral Blur
+	EffectSmartBlur          = serializer.EffectSmartBlur          // Smart Blur
+	EffectUnsharpMask        = serializer.EffectUnsharpMask        // Unsharp Mask
+	EffectShiftChannels      = serializer.EffectShiftChannels      // Shift Channels
+	EffectSolidComposite     = serializer.EffectSolidComposite     // Solid Composite
+	EffectMinimax            = serializer.EffectMinimax            // Minimax
+	EffectArithmetic         = serializer.EffectArithmetic         // Arithmetic
+	EffectCircle             = serializer.EffectCircle             // Circle
+	EffectLensFlare          = serializer.EffectLensFlare          // Lens Flare
+	EffectCellPattern        = serializer.EffectCellPattern        // Cell Pattern
+	EffectAdvancedLightning  = serializer.EffectAdvancedLightning  // Advanced Lightning
+	EffectBeam               = serializer.EffectBeam               // Beam
+	EffectPaintBucket        = serializer.EffectPaintBucket        // Paint Bucket
+	EffectPosterizeTime      = serializer.EffectPosterizeTime      // Posterize Time
+	EffectSimpleChoker       = serializer.EffectSimpleChoker       // Simple Choker
+	EffectMatteChoker        = serializer.EffectMatteChoker        // Matte Choker
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript
