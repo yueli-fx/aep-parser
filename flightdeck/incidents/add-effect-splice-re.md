@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing or extending AddEffect / the effect-template library; adding a new effect to the embedded set; debugging "AE drops/rejects a Go-added effect" or "cannot find layer ID=N in composition" on open; deciding whether an effect is splice-portable; extending parade auto-create to another group kind (Mask Parade); reasoning about the (tdmn, sspc) effect chunk unit or the tdpi host-layer binding
 applies_to: [add-effect, effect-parade, sspc, tdmn, tdpi, host-layer-binding, effect-template, structural-write, splice, group-end-sentinel, parade-auto-create, reopen, version-portable, ae2020, ae2025, ship-gate, embed-fs, gaussian-blur, levels]
-last_updated: 2026-06-12
+last_updated: 2026-06-16
 ---
 
 # AddEffect — Effect Parade splice RE + ship findings
@@ -84,7 +84,7 @@ chunks, never the cache), so callers can tune params immediately
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
-## Effect-template library (30, embed.FS)
+## Effect-template library (79, embed.FS)
 
 `internal/serializer/templates/effect_adbe_*.bin`, each a `LIST(tdgp)` wrapper
 around one `(tdmn, sspc)` pair, extracted from AE-2020 fixtures
@@ -111,6 +111,23 @@ Wave 3 (2026-06-12): Point3D Control — extracted from the untouched instance
 in `re_effect_param_types.aep` (the control-type param-template fixture,
 [[effect-param-elision-synthesis-lite]]); dual-version gated via the
 SetEffectParam ship-gate (AddEffect + materialize + readback both versions).
+
+Wave 4 (2026-06-12, `re_effect_lib3.jsx`): Turbulent Displace · Roughen Edges ·
+Echo · Radial Blur · 4-Color Gradient · Checkerboard · Grid · Stroke ·
+Corner Pin · Venetian Blinds (10). `TestAddEffectWave4_AEShipGate_AE2020/2025`.
+
+Wave 5 (2026-06-16, `re_effect_lib5.jsx` → 41 candidates / 38 OK / 3 wrong
+match-name [BULGE, Bezier Warp, Channel Mixer — corrected names TBD next wave]):
+38 MG parameter-only built-ins — distort (Twirl/Polar Coordinates/Spherize/
+Magnify/Ripple/Optics Compensation), stylize (Posterize/Threshold2/Find Edges/
+Color Emboss/Emboss/Strobe/Brush Strokes), perspective (Bevel Alpha/Edges),
+color (Photo Filter/Vibrance/Color Balance 2/Color Balance HLS/Black&White/
+Gamma·Pedestal·Gain2), blur (Channel Blur/Bilateral/Smart Blur/Unsharp Mask2),
+channel (Shift Channels/Solid Composite/Minimax/Arithmetic), generate (Circle/
+Lens Flare/Cell Pattern/Lightning 2/Laser/Paint Bucket), time (Posterize Time),
+matte (Simple/Matte Choker). All tdpi-host=15 uniform (no dangling layer-ref).
+`TestAddEffectWave5_AEShipGate_AE2020/2025` — 38-in-one-run on a 100% Go-built
+file, both versions readback-in-order + resave-preserved.
 
 **Curation rule:** only **parameter-only** effects. Effects with layer/path
 **reference** params (e.g. Set Matte, Displacement Map, Calculations, Compound
