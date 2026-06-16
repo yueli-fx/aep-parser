@@ -10,6 +10,8 @@
 //	go run ./cmd/capindex -check     # CI: validate tags + verify files up to date
 package main
 
+//go:generate go run .
+
 import (
 	"bytes"
 	"flag"

@@ -135,7 +135,7 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
 //
-//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestV2_2_AEShipGate_AE2020,TestV2_2_AEShipGate_AE2025 incident=v2-2-aelayer-structure,multi-layer-silent-drop alias="shape,形状,矢量图层"
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 incident=v2-2-aelayer-structure,multi-layer-silent-drop boundary="ellipse 变体过 gate;rect Path/Stroke embed bytes 仍 deferred" alias="shape,形状,矢量图层"
 func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	return serializer.NewShapeLayer(c, name)
 }

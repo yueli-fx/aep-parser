@@ -1,0 +1,209 @@
+[
+  {
+    "symbol": "NewAdjustmentLayer",
+    "kind": "func",
+    "signature": "func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)",
+    "summary": "NewAdjustmentLayer adds a new adjustment layer to the composition and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestNewSolidNull_AEShipGate_AE2020",
+        "TestNewSolidNull_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "new-layer-types-scoping"
+      ],
+      "alias": [
+        "adjustment",
+        "调整图层"
+      ]
+    }
+  },
+  {
+    "symbol": "NewCameraLayer",
+    "kind": "func",
+    "signature": "func NewCameraLayer(c *Composition, name string) (*Layer, error)",
+    "summary": "NewCameraLayer adds a new Camera layer to the composition and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "camera-light-layer-create-re"
+      ],
+      "alias": [
+        "camera",
+        "摄像机"
+      ]
+    }
+  },
+  {
+    "symbol": "NewLightLayer",
+    "kind": "func",
+    "signature": "func NewLightLayer(c *Composition, name string) (*Layer, error)",
+    "summary": "NewLightLayer adds a new Light layer to the composition and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "camera-light-layer-create-re"
+      ],
+      "alias": [
+        "light",
+        "灯光"
+      ]
+    }
+  },
+  {
+    "symbol": "NewNullLayer",
+    "kind": "func",
+    "signature": "func NewNullLayer(c *Composition, name string) (*Layer, error)",
+    "summary": "NewNullLayer adds a new null-object layer to the composition and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestNewSolidNull_AEShipGate_AE2020",
+        "TestNewSolidNull_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "new-layer-types-scoping"
+      ],
+      "alias": [
+        "null",
+        "空对象",
+        "空层"
+      ]
+    }
+  },
+  {
+    "symbol": "NewPrecompLayer",
+    "kind": "func",
+    "signature": "func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)",
+    "summary": "NewPrecompLayer adds a layer to `parent` whose source is the composition `child` (a nested / pre-composed comp) and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGPrecomp_AEShipGate_AE2020",
+        "TestMGPrecomp_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "precomp-layer-source-id-re"
+      ],
+      "alias": [
+        "precomp",
+        "预合成",
+        "嵌套合成"
+      ]
+    }
+  },
+  {
+    "symbol": "NewShapeLayer",
+    "kind": "func",
+    "signature": "func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)",
+    "summary": "NewShapeLayer adds a new empty ShapeLayer to the composition.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
+      ],
+      "boundary": "ellipse 变体过 gate;rect Path/Stroke embed bytes 仍 deferred",
+      "incident": [
+        "v2-2-aelayer-structure",
+        "multi-layer-silent-drop"
+      ],
+      "alias": [
+        "shape",
+        "形状",
+        "矢量图层"
+      ]
+    }
+  },
+  {
+    "symbol": "NewSolidLayer",
+    "kind": "func",
+    "signature": "func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)",
+    "summary": "NewSolidLayer adds a new solid-color layer to the composition and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestNewSolidNull_AEShipGate_AE2020",
+        "TestNewSolidNull_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "new-layer-types-scoping",
+        "nextitemid-must-include-layer-ids"
+      ],
+      "alias": [
+        "solid",
+        "纯色",
+        "固态层"
+      ]
+    }
+  },
+  {
+    "symbol": "NewTextLayer",
+    "kind": "func",
+    "signature": "func NewTextLayer(c *Composition, name string) (*Layer, error)",
+    "summary": "NewTextLayer adds a new point-text layer to the composition and returns it.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-create",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestNewTextLayer_AEShipGate_AE2020",
+        "TestNewTextLayer_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "text-btdk-length-variable-write-scoping"
+      ],
+      "alias": [
+        "text",
+        "文字",
+        "文本图层"
+      ]
+    }
+  }
+]
