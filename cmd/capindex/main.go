@@ -117,7 +117,7 @@ func reportCoverage(s *publicSurface, entries []Entry) {
 	if total > 0 {
 		pct = 100 * float64(len(tagged)) / float64(total)
 	}
-	fmt.Printf("capindex coverage: %d/%d public-surface symbols tagged (%.1f%%)\n", len(tagged), total, pct)
+	fmt.Printf("capindex coverage: %d/%d public-surface symbols tagged (%.1f%%) — %d getter/reader methods exempt (write-surface-first policy)\n", len(tagged), total, pct, s.getterExempt(entries))
 	if len(untagged) == 0 {
 		return
 	}

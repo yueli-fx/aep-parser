@@ -66,6 +66,13 @@ facade.go + aliases.go + facade_codec.go + scene_application.go 全部公共自�
 - **read-tier 张力**:read/infra(Open/FromReader/Reopen/Parse/getter)无 "AE 接受"语义 → 归 `meta`(stable+roundtrip);tier×verify 的 `stable⟹ae-accept|render-pixel` 规则仅适用 write/render 域。
 - **AnimateTextOpacity / AddTextRotationX·YAnimator** 诚实降 `roundtrip`(opacity leaf 共享已 render-gated 机制但自身无 gate;RotX/Y 2D 视觉惰性 write-only)。
 
+## 策略修正(2026-06-16,用户批准)
+
+- **tier/verify 解耦**(commit 63af412):两条正交轴,`stable+roundtrip` 合法(length-preserving 核心 setter);防假绿守卫在 `verify∈{ae-accept,render-pixel}⟹gate`。详 spec。
+- **getter 豁免(write-surface-first)**:root 类型方法**仅写/做动词前缀**(Set/Add/Remove/Delete/Insert/Move/Duplicate/Animate/Replace/Clear/Enable/Disable/Toggle/Apply/Reset/Make)强制 tag;纯 getter/reader/navigation **豁免**(不禁止,以后可 additive 补)。公共面 536→**313**(223 getter 豁免,`-coverage` 报 exempt 数,非静默)。CI 全覆盖(Wave 9)= 写面全覆盖。
+- **压测样本**(commit 63af412):SetOpacity/SetName/SetExpression/SetColorManagementSystem(minver=2024)/SetFrameRate/getter —— schema 经全形态压测确认足够。
+- **剩余写面 ≈ 210**:Layer 128 · Comp 25 · Project 18 · Marker 10 · Mask 9 · Keyframe 9 · Footage 5 · Property 4 · Guide 2。
+
 ## Wave 2 — Layer Set*/getter(229,最大块;子拆)
 
 - [ ] **2a** transform:Position/Scale/Rotation/Opacity/AnchorPoint/SetDimensionsSeparated 相关 — `domain=layer-set`。

@@ -37,12 +37,16 @@ func TestPublicSurfaceRequires(t *testing.T) {
 		e    Entry
 		want bool
 	}{
-		{Entry{Symbol: "SetOpacity", Kind: "method", Recv: "*Layer", Pkg: "scene"}, true},  // method on a root type
-		{Entry{Symbol: "NewShapeLayer", Kind: "func", Pkg: "aep"}, true},                   // facade func
-		{Entry{Symbol: "AddEffect", Kind: "func", Pkg: "scene"}, true},                     // documented func anywhere
-		{Entry{Symbol: "setOpaque", Kind: "method", Recv: "*shard", Pkg: "scene"}, false},  // non-root receiver
-		{Entry{Symbol: "BlendingModeAdd", Kind: "const", Pkg: "aep"}, false},               // enum const = meta lane
-		{Entry{Symbol: "Layer", Kind: "type", Pkg: "aep"}, false},                          // type alias = meta lane
+		{Entry{Symbol: "SetOpacity", Kind: "method", Recv: "*Layer", Pkg: "scene"}, true},   // write method on a root type
+		{Entry{Symbol: "AddMask", Kind: "method", Recv: "*Layer", Pkg: "scene"}, true},      // Add* write method
+		{Entry{Symbol: "Width", Kind: "method", Recv: "*Layer", Pkg: "scene"}, false},       // getter — exempt (write-surface-first)
+		{Entry{Symbol: "HasAudio", Kind: "method", Recv: "*Layer", Pkg: "scene"}, false},    // Has* reader — exempt
+		{Entry{Symbol: "PropertyByPath", Kind: "method", Recv: "*Layer", Pkg: "scene"}, false}, // navigation — exempt
+		{Entry{Symbol: "NewShapeLayer", Kind: "func", Pkg: "aep"}, true},                    // facade func
+		{Entry{Symbol: "AddEffect", Kind: "func", Pkg: "scene"}, true},                      // documented func anywhere
+		{Entry{Symbol: "setOpaque", Kind: "method", Recv: "*shard", Pkg: "scene"}, false},   // non-root receiver
+		{Entry{Symbol: "BlendingModeAdd", Kind: "const", Pkg: "aep"}, false},                // enum const = meta lane
+		{Entry{Symbol: "Layer", Kind: "type", Pkg: "aep"}, false},                           // type alias = meta lane
 	}
 	for _, tc := range cases {
 		if got := s.requires(tc.e); got != tc.want {

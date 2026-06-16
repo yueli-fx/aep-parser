@@ -47,15 +47,48 @@ func loadSurface(docgenPath string) (*publicSurface, error) {
 	return s, nil
 }
 
+// writeVerbs are the action-verb prefixes that mark a root-type method as a
+// write/do capability (the audit surface). Methods without one of these are
+// getters/readers/navigation — exempt from the must-tag requirement per the
+// 2026-06-16 P2 policy (write-surface-first; getters may still be tagged
+// domain=meta but are not CI-required). Adding a getter tag later is additive.
+var writeVerbs = []string{
+	"Set", "Add", "Remove", "Delete", "Insert", "Move", "Duplicate", "Animate",
+	"Replace", "Clear", "Enable", "Disable", "Toggle", "Apply", "Reset", "Make",
+}
+
+func isWriteMethod(name string) bool {
+	for _, v := range writeVerbs {
+		if strings.HasPrefix(name, v) {
+			return true
+		}
+	}
+	return false
+}
+
 // requires reports whether entry e must carry an aep:cap tag.
 func (s *publicSurface) requires(e Entry) bool {
 	switch e.Kind {
 	case "func":
 		return e.Pkg == "aep" || s.funcs[e.Symbol]
 	case "method":
-		return s.roots[strings.TrimPrefix(e.Recv, "*")]
+		// root-type write/do methods only; getters/readers are exempt.
+		return s.roots[strings.TrimPrefix(e.Recv, "*")] && isWriteMethod(e.Symbol)
 	}
 	return false // type + const = meta lane (Wave 9)
+}
+
+// getterExempt counts root-type getter/reader methods skipped by the
+// write-surface policy — surfaced in the coverage report so the exemption is
+// never a silent cap.
+func (s *publicSurface) getterExempt(entries []Entry) int {
+	n := 0
+	for _, e := range entries {
+		if e.Kind == "method" && s.roots[strings.TrimPrefix(e.Recv, "*")] && !isWriteMethod(e.Symbol) {
+			n++
+		}
+	}
+	return n
 }
 
 // coverage splits the public surface into tagged vs untagged for the P2 progress
