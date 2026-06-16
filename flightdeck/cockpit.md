@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-17 by claude（**3D priority-2 真正收口**:RotateX/Orientation/RotateZ 双版本 render-pixel gate(`layer_3d_rotaxes_shipgate_test.go`,6 个全 PASS)。建 Orientation gate 时揪出真 correctness bug——3D Orientation 静态值在 otst 里存两份(cdat 小端 + otda 大端),AE 读 otda;旧 SetStaticValue 写 cdat 用了大端(字节翻转)且没碰 otda → 值 round-trip 绿但 AE 渲染 0(红线4 活样本)。修=cdatLE+otda 双写。SetRotateX/Y/Rotation/Orientation 升 render-pixel。commit e9a471e。）
+**Last updated**: 2026-06-17 by claude（**音频效果波收口**:+10 个音频处理效果入库(库 193→203),双版本 ae-accept ship-gate(`TestAddEffectAudio`)。音频效果只能挂有音频的层,故用用户给的 mp3 import 成音频层 RE+gate(fixture gitignored)。坑:同效果加两次第二个被 AE elide(686B vs 1502B),fixture 每效果只加一次;Flange match-name 是 `ADBE Aud_Flange`(下划线)。前一轮:**3D priority-2 真正收口**:RotateX/Orientation/RotateZ 双版本 render-pixel gate(`layer_3d_rotaxes_shipgate_test.go`,6 个全 PASS)。建 Orientation gate 时揪出真 correctness bug——3D Orientation 静态值在 otst 里存两份(cdat 小端 + otda 大端),AE 读 otda;旧 SetStaticValue 写 cdat 用了大端(字节翻转)且没碰 otda → 值 round-trip 绿但 AE 渲染 0(红线4 活样本)。修=cdatLE+otda 双写。SetRotateX/Y/Rotation/Orientation 升 render-pixel。commit e9a471e。）
 
 **Active focus**: **需求驱动稳态**（知识库地基重建 arc 已完结）。**知识单一家 = flightdeck + CLAUDE.md**(auto-memory 已退役);**能力真相源 = capindex**(`go run ./cmd/capindex -q <词>` / `docs/capabilities.{json,md}`,CI 强制写/做面零漏标)。库能力主线早已全收口、需求驱动;机制库 parse-the-clone + synthesis-insert + animate;每渲染类双版本 AE ship-gate(红线4)。剩余 backlog 详 `specs/2026-06-14-remaining-capability-roadmap.md`。火焰=番外(见 `incidents/procedural-fx-over-vector.md`)。
 
@@ -16,7 +16,7 @@
 **➡ 需求驱动稳态——无 active arc。等新需求,或从下列残项挑。** 能力查询:`go run ./cmd/capindex -q <词>`。
 
 **剩余 backlog（非阻塞,需求驱动;全详 `specs/2026-06-14-remaining-capability-roadmap.md`）**：
-- effects：音频效果波(+~18,需音频层探针)· layer-ref 第二波(+4,按 Displacement Map 物化流程)。
+- effects：~~音频效果波~~ ✅(2026-06-17,+10 个 Backwards/BT/Delay/Flange/HiLo/Modulator/EQ/Reverb/StereoMixer/Tone,库 193→203,双版本 ae-accept gate,详 incident wave10)· layer-ref 第二波(+4,按 Displacement Map 物化流程)。
 - text：Expressible Selector（evidence-defer,需库表达式渲染验证）。
 - mask：maskFeatherFalloff（位置未 RE,可能不可达）· expr：linear()/ease() remap（边际低）。
 
