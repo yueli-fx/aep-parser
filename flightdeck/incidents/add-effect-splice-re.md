@@ -326,3 +326,24 @@ The "write → reopen" workaround in these findings became the shipped path:
 Typed effect match-name constants (`aep.EffectGaussianBlur` … `aep.EffectExposure`,
 single-sourced in the registry, divergence-guarded by `TestEffectConstants_MatchRegistry`)
 shipped 2026-06-10 — call sites no longer hardcode AE's internal strings.
+
+## 2026-06-17 — Wave 10: audio-processing effects (need an audio layer)
+
+加齐 10 个音频效果（库 193→203）：Backwards `ADBE Aud Reverse` · Bass&Treble `ADBE Aud BT` ·
+Delay `ADBE Aud Delay` · Flange&Chorus `ADBE Aud_Flange`（注下划线，非空格）· High-Low Pass
+`ADBE Aud HiLo` · Modulator `ADBE Aud Modulator` · Parametric EQ `ADBE Param EQ`（off-pattern，
+非 `ADBE Aud …`）· Reverb `ADBE Aud Reverb` · Stereo Mixer `ADBE Aud Stereo Mixer` · Tone
+`ADBE Aud Tone`。
+
+**关键差异：音频效果只能挂到有音频的层**——`parade.canAddProperty("ADBE Aud BT")` 在 solid 上
+返回 false。所以 RE fixture 不能用 solid，必须 import 一个 mp3 当音频层：`importFile` → `comp.layers.add(foot)`
+（`foot.hasAudio=true`）→ 在该层 parade 上 addProperty。fixture = `re_effect_audio.jsx`
+（探针 + 全加 + 存 `re_effect_audio.aep`），探针扫候选 match-name 用 canAddProperty 过滤、读回 stored 名。
+extract 走既有 `tmp_debug/extract_effect_lib`（音频效果 sspc 结构与其它一致：tdpi-host 绑定，retarget 照常）。
+⚠ **同一 effect 加两次**：第二个实例字节更小（686B vs 1502B，AE 复用/elide），extract 的 last-write-wins
+会抓到坏的——fixture 里每个效果只加一次。
+
+**ship-gate（非视觉 → ae-accept + DOM readback，无渲染像素）**：`TestAddEffectAudio_AEShipGate_AE2020/2025`
+从 clean 音频 base fixture（`re_audio_base.aep`，mp3 层零效果）`aep.Open` → AddEffect 全 10 个 →
+WriteAEP → AE 开 + 读回 parade 全 10 名按序 + resave 存活。双版本 PASS。复用 `verify_property_struct.jsx`
+（找首个非空 parade 比 match-name）。base fixture 内嵌 mp3 故 gitignored，缺则 gate skip。

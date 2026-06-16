@@ -745,11 +745,12 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // back-ref-correct *Effect; roll back on any parser warning.
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green across the full
-// 30-template library, plus the parade auto-create path on a 100%
-// Go-built file (2/2). Free function (not a method) so the impl can live in
+// embedded effect library (incl. the 10-effect audio family, which AE only
+// accepts on a layer that has audio), plus the parade auto-create path on a 100%
+// Go-built file. Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025 incident=add-effect-splice-re boundary="193 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 4 个 foreign-tdpi layer-ref(3D Glasses/Warp Stabilizer/Timewarp/CC Particle World)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025,TestAddEffectAudio_AEShipGate_AE2020,TestAddEffectAudio_AEShipGate_AE2025 incident=add-effect-splice-re boundary="203 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 10 个音频效果 Backwards/Bass&Treble/Delay/Flange&Chorus/High-Low Pass/Modulator/Parametric EQ/Reverb/Stereo Mixer/Tone,仅可加到有音频的层、ae-accept 非渲染 + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 4 个 foreign-tdpi layer-ref(3D Glasses/Warp Stabilizer/Timewarp/CC Particle World)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像,audio,音频,声音,reverb,delay,eq"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1863,6 +1864,17 @@ const (
 	EffectCCLineSweep           = serializer.EffectCCLineSweep
 	EffectCCRainfall            = serializer.EffectCCRainfall
 	EffectCCSnowfall            = serializer.EffectCCSnowfall
+
+	EffectAudioBackwards    = serializer.EffectAudioBackwards    // Backwards
+	EffectAudioBassTreble   = serializer.EffectAudioBassTreble   // Bass & Treble
+	EffectAudioDelay        = serializer.EffectAudioDelay        // Delay
+	EffectAudioFlangeChorus = serializer.EffectAudioFlangeChorus // Flange & Chorus
+	EffectAudioHighLowPass  = serializer.EffectAudioHighLowPass  // High-Low Pass
+	EffectAudioModulator    = serializer.EffectAudioModulator    // Modulator
+	EffectAudioParametricEQ = serializer.EffectAudioParametricEQ // Parametric EQ
+	EffectAudioReverb       = serializer.EffectAudioReverb       // Reverb
+	EffectAudioStereoMixer  = serializer.EffectAudioStereoMixer  // Stereo Mixer
+	EffectAudioTone         = serializer.EffectAudioTone         // Tone
 
 	EffectDisplacementMapLayer = serializer.EffectDisplacementMapLayer // Displacement Map Layer param
 	EffectCompoundBlurLayer    = serializer.EffectCompoundBlurLayer    // Compound Blur "Blur Layer" param

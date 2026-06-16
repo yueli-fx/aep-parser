@@ -505,6 +505,10 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectCCTwister, aep.EffectCCBlockLoad, aep.EffectCCColorNeutralizer,
 		aep.EffectCCKernel, aep.EffectCCLineSweep, aep.EffectCCRainfall,
 		aep.EffectCCSnowfall,
+		aep.EffectAudioBackwards, aep.EffectAudioBassTreble, aep.EffectAudioDelay,
+		aep.EffectAudioFlangeChorus, aep.EffectAudioHighLowPass, aep.EffectAudioModulator,
+		aep.EffectAudioParametricEQ, aep.EffectAudioReverb, aep.EffectAudioStereoMixer,
+		aep.EffectAudioTone,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

@@ -64,6 +64,7 @@ import (
 //go:embed templates/effect_adbe_luma_key.bin templates/effect_adbe_median.bin templates/effect_adbe_noise_hls_auto2.bin templates/effect_adbe_profiletoprofile.bin templates/effect_adbe_time_displacement.bin templates/effect_adbe_timecode.bin templates/effect_cc_ball_action.bin templates/effect_cc_bubbles.bin templates/effect_cc_composite.bin templates/effect_cc_drizzle.bin templates/effect_cc_environment.bin templates/effect_cc_glass_wipe.bin
 //go:embed templates/effect_cc_glue_gun.bin templates/effect_cc_grid_wipe.bin templates/effect_cc_hair.bin templates/effect_cc_image_wipe.bin templates/effect_cc_jaws.bin templates/effect_cc_light_wipe.bin templates/effect_cc_mr_mercury.bin templates/effect_cc_particle_systems_ii.bin templates/effect_cc_radial_scalewipe.bin templates/effect_cc_rain.bin templates/effect_cc_scale_wipe.bin templates/effect_cc_snow.bin
 //go:embed templates/effect_cc_twister.bin templates/effect_cs_blockload.bin templates/effect_cs_color_neutralizer.bin templates/effect_cs_kernel.bin templates/effect_cs_linesweep.bin templates/effect_csrainfall.bin templates/effect_cssnowfall.bin
+//go:embed templates/effect_adbe_aud_reverse.bin templates/effect_adbe_aud_bt.bin templates/effect_adbe_aud_delay.bin templates/effect_adbe_aud_flange.bin templates/effect_adbe_aud_hilo.bin templates/effect_adbe_aud_modulator.bin templates/effect_adbe_param_eq.bin templates/effect_adbe_aud_reverb.bin templates/effect_adbe_aud_stereo_mixer.bin templates/effect_adbe_aud_tone.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -285,6 +286,23 @@ const (
 	EffectCCLineSweep           = "CS LineSweep"
 	EffectCCRainfall            = "CSRainfall"
 	EffectCCSnowfall            = "CSSnowfall"
+	// Wave 10 (2026-06-17, fixture re_effect_audio.aep) — AUDIO-processing effects.
+	// Unlike every prior wave these can ONLY be applied to a layer that HAS audio
+	// (AE's canAddProperty returns false on a solid), so the fixture imports an mp3
+	// and hosts them on that audio layer (tdpi-host=14 uniform). Non-visual: the
+	// ship-gate is AE-accept + DOM readback (no render pixels). Match-names probed
+	// via canAddProperty (note the irregular "ADBE Aud_Flange" underscore and the
+	// "ADBE Param EQ" / "ADBE Aud Reverse" off-pattern names).
+	EffectAudioBackwards    = "ADBE Aud Reverse"       // Backwards
+	EffectAudioBassTreble   = "ADBE Aud BT"            // Bass & Treble
+	EffectAudioDelay        = "ADBE Aud Delay"         // Delay
+	EffectAudioFlangeChorus = "ADBE Aud_Flange"        // Flange & Chorus
+	EffectAudioHighLowPass  = "ADBE Aud HiLo"          // High-Low Pass
+	EffectAudioModulator    = "ADBE Aud Modulator"     // Modulator
+	EffectAudioParametricEQ = "ADBE Param EQ"          // Parametric EQ
+	EffectAudioReverb       = "ADBE Aud Reverb"        // Reverb
+	EffectAudioStereoMixer  = "ADBE Aud Stereo Mixer"  // Stereo Mixer
+	EffectAudioTone         = "ADBE Aud Tone"          // Tone
 )
 
 // Layer-reference parameter match-names for the wave-8 layer-ref effects — pass
@@ -493,6 +511,16 @@ var effectTemplateFiles = map[string]string{
 	EffectCCLineSweep:           "templates/effect_cs_linesweep.bin",
 	EffectCCRainfall:            "templates/effect_csrainfall.bin",
 	EffectCCSnowfall:            "templates/effect_cssnowfall.bin",
+	EffectAudioBackwards:    "templates/effect_adbe_aud_reverse.bin",
+	EffectAudioBassTreble:   "templates/effect_adbe_aud_bt.bin",
+	EffectAudioDelay:        "templates/effect_adbe_aud_delay.bin",
+	EffectAudioFlangeChorus: "templates/effect_adbe_aud_flange.bin",
+	EffectAudioHighLowPass:  "templates/effect_adbe_aud_hilo.bin",
+	EffectAudioModulator:    "templates/effect_adbe_aud_modulator.bin",
+	EffectAudioParametricEQ: "templates/effect_adbe_param_eq.bin",
+	EffectAudioReverb:       "templates/effect_adbe_aud_reverb.bin",
+	EffectAudioStereoMixer:  "templates/effect_adbe_aud_stereo_mixer.bin",
+	EffectAudioTone:         "templates/effect_adbe_aud_tone.bin",
 }
 
 type cachedEffectTemplate struct {
