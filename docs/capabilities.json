@@ -10814,10 +10814,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMGTextStyle_AEShipGate_AE2020",
+        "TestMGTextStyle_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript paragraph body splice",
       "incident": null,
       "alias": [
         "justification",
@@ -11031,7 +11034,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
         "baseline shift",
@@ -11050,10 +11053,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMGTextStyle_AEShipGate_AE2020",
+        "TestMGTextStyle_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写",
       "incident": null,
       "alias": [
         "caps option",
@@ -11192,10 +11198,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMGTextStyle_AEShipGate_AE2020",
+        "TestMGTextStyle_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;point-size key 必须写 REAL(FormatPSReal),写裸整数 AE 读成 16.16 定点→fontSize/65536",
       "incident": null,
       "alias": [
         "font size",
@@ -11218,7 +11227,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
         "horizontal scale",
@@ -11241,7 +11250,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;需搭配 SetRunAutoLeading(false) 才生效;无专门 AE gate→round-trip",
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal);需搭配 SetRunAutoLeading(false) 才生效;evidence-defer:从零层 AE 渲染默认行距,值 round-trip 对但像素不变(见 incident)",
       "incident": null,
       "alias": [
         "leading",
@@ -11359,7 +11368,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
         "stroke width",
@@ -11379,10 +11388,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMGTextStyle_AEShipGate_AE2020",
+        "TestMGTextStyle_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;tracking 是真整数键(FormatPSNumber)",
       "incident": null,
       "alias": [
         "tracking",
@@ -11428,7 +11440,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
         "vertical scale",

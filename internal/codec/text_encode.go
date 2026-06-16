@@ -23,14 +23,30 @@ func ParagraphStylePath(paraIdx int) string {
 	return fmt.Sprintf("/1/1/0/0/5/0/%d/0/0/5", paraIdx)
 }
 
-// FormatPSNumber writes a float64 in the same shape AE uses: trailing zeros
-// trimmed but the integer form kept when fractional == 0 (88 stays "88",
-// 1.5 stays "1.5").
+// FormatPSNumber writes a float64 as a bare number: the integer form when the
+// value is whole (1000 -> "1000"), else the shortest decimal (1.5 -> "1.5").
+// Use this only for run/paragraph keys AE stores as INTEGERS (tracking /8, font
+// index /0, enum keys). For REAL-valued keys use FormatPSReal — see its note.
 func FormatPSNumber(v float64) string {
 	if v == float64(int64(v)) {
 		return strconv.FormatInt(int64(v), 10)
 	}
 	return strconv.FormatFloat(v, 'g', -1, 64)
+}
+
+// FormatPSReal writes a float64 as a REAL number, always carrying a decimal
+// point (150 -> "150.0", 105.60001 -> "105.60001"). AE's text engine (CoolType)
+// stores the point-measurement style keys — font size /1, leading /5,
+// horizontal/vertical scale /6//7, baseline shift /9, stroke width /63 — as
+// reals and reads a bare integer there as 16.16 FIXED-POINT (writing "150" makes
+// AE render fontSize 150/65536). Use this for those keys so AE reads the value
+// in points. (Tracking /8 is genuinely an integer key — keep FormatPSNumber.)
+func FormatPSReal(v float64) string {
+	s := strconv.FormatFloat(v, 'f', -1, 64)
+	if !strings.ContainsRune(s, '.') {
+		s += ".0"
+	}
+	return s
 }
 
 // FormatPSColorArray formats a [R, G, B, A] color (each 0..1) as the btdk

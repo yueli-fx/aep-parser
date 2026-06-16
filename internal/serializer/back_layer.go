@@ -724,7 +724,7 @@ func isBtdkWS(c byte) bool {
 }
 
 func (b *layerBackrefs) SetRunFontSize(runIdx int, sizePts float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/1", []byte(codec.FormatPSNumber(sizePts)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/1", []byte(codec.FormatPSReal(sizePts)))
 	return err
 }
 
@@ -734,12 +734,12 @@ func (b *layerBackrefs) SetRunTracking(runIdx int, tracking float64) error {
 }
 
 func (b *layerBackrefs) SetRunBaselineShift(runIdx int, shift float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/9", []byte(codec.FormatPSNumber(shift)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/9", []byte(codec.FormatPSReal(shift)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunLeading(runIdx int, leading float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/5", []byte(codec.FormatPSNumber(leading)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/5", []byte(codec.FormatPSReal(leading)))
 	return err
 }
 
@@ -776,12 +776,12 @@ func (b *layerBackrefs) SetRunFauxItalic(runIdx int, on bool) error {
 }
 
 func (b *layerBackrefs) SetRunHorizontalScale(runIdx int, scale float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/6", []byte(codec.FormatPSNumber(scale)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/6", []byte(codec.FormatPSReal(scale)))
 	return err
 }
 
 func (b *layerBackrefs) SetRunVerticalScale(runIdx int, scale float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/7", []byte(codec.FormatPSNumber(scale)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/7", []byte(codec.FormatPSReal(scale)))
 	return err
 }
 
@@ -810,7 +810,7 @@ func (b *layerBackrefs) SetRunApplyStroke(runIdx int, apply bool) error {
 }
 
 func (b *layerBackrefs) SetRunStrokeWidth(runIdx int, width float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/63", []byte(codec.FormatPSNumber(width)))
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/63", []byte(codec.FormatPSReal(width)))
 	return err
 }
 

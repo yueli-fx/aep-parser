@@ -1,9 +1,9 @@
 ---
-status: active
-when_to_read: 想给文字样式 setter（SetRunFontSize/SetRunLeading/SetRunTracking/SetParagraphJustification/SetRunCapsOption）补 render-pixel gate；从零 NewTextLayer 的文字渲染不出来 / 渲染在画面外；SetRunFontSize 写完 AE 读回字号 ÷65536；纠结文字样式族为何只到 verify=roundtrip；判断要不要投入「materialize 从零文字 transform/matrix」
-applies_to: [text, text-style, SetRunFontSize, SetRunLeading, SetRunTracking, SetParagraphJustification, SetRunCapsOption, render-gate, red-line-4, from-scratch-text, NewTextLayer, text-matrix, transform-omission, position-not-materialized, fontsize-65536, btdk, run-style, roundtrip-not-render, negative-finding]
+status: resolved
+when_to_read: 想给文字样式 setter（SetRunFontSize/SetRunLeading/SetRunTracking/SetParagraphJustification/SetRunCapsOption）补 render-pixel gate；从零 NewTextLayer 的文字渲染不出来 / 渲染在画面外；SetRunFontSize 写完 AE 读回字号 ÷65536；纠结文字样式族为何只到 verify=roundtrip；**saveFrameToPng 在 headless 多 comp gate 里每张 PNG 内容都一样 / 跨进程返回旧帧**；判断要不要投入「materialize 从零文字 transform/matrix」
+applies_to: [text, text-style, SetRunFontSize, SetRunLeading, SetRunTracking, SetParagraphJustification, SetRunCapsOption, render-gate, red-line-4, from-scratch-text, NewTextLayer, text-matrix, transform-omission, position-not-materialized, fontsize-65536, btdk, run-style, roundtrip-not-render, negative-finding, saveframetopng, disk-cache, comp-id-collision, stale-frame, false-green, formatpsreal]
 last_updated: 2026-06-16
-resolved_by:
+resolved_by: FormatPSReal(point-key REAL 编码) + TestMGTextStyle 双版本 render-pixel gate(clearAEDiskCache harness)
 ---
 
 # 文字样式 render-gate：从零文字的 transform/matrix 缺陷挡路（红线4 揪出真问题）
@@ -61,3 +61,25 @@ resolved_by:
 headless `AfterFX -r` 下 `comp.saveFrameToPng(time, file)` **发的是 AE 的持久磁盘帧缓存、跨进程不失效**：实锤——两个**独立冷启** AE 进程、相隔 2 分钟、打开**不同的**单 comp 工程（DOM 读回各异，证明确实开了不同工程），却写出**字节完全相同**的 PNG（且是**更早某次 run** 的 TS_TRK_WIDE "MMMM" 帧）。试过且**全部无效**：`app.purge(PurgeTarget.ALL_CACHES)`、逐 job 唯一 `time`、逐 comp 独立冷启 AE（单 comp 工程）。`time` 参数似乎被忽略（唯一 time 不改变输出）。`app.purge` 不清磁盘缓存；PurgeTarget 无 disk 项。
 
 **结论**：能力已证（4 knob 渲染对、Leading 不渲染），但**自动像素门禁需要绕过 saveFrameToPng 的磁盘缓存**——候选：(a) 改 **Render Queue**（真渲染、绕 preview/disk 缓存，但只出 TIFF/PSD，无 PNG 模板 → Go stdlib 不解 TIFF，需加 `golang.org/x/image/tiff` 测试依赖、破坏本仓零依赖）；(b) 关闭/清 AE 磁盘缓存（位置/prefs key 版本相关，盲删有风险）；(c) 不做 CI 像素门禁、以本 incident 的目视+数值实证为准（红线4 风险已大幅消除）。**待需求方定夺**。工作树留存未 commit 的 gate（`mg_text_style_shipgate_test.go` 逐 comp 冷启版 + `verify_mg_text_style.jsx`）+ 文本修复（`text_encode.go`/`back_layer.go`）。
+
+## UPDATE 2026-06-16(c)：RESOLVED — 缓存根因揪出，双版本 render-pixel gate 绿
+
+(b) 的「缓存问题」上一会话只猜对一半。本次系统化 bisect 把根因彻底坐实，gate 做绿：
+
+**真根因（不是 saveFrameToPng 不稳定——它忠实返回渲染器给的帧）**：AE 持久磁盘帧缓存键 ≈ **(comp.id, render-time)**。两条共同制造碰撞：
+1. **comp.id 全撞**：确定性 builder 给每个单 comp 工程的 comp 恒分配 `comp.id=1`（8 个工程 JSX 日志全是 id=1，实锤）。
+2. **旧 verify JSX 把 `job.time` 丢了**：第 48 行硬编码 `saveFrameToPng(0)`，Go 侧算好的 per-comp 唯一 time **从没传进 AE**。→ 上一会话「逐 job 唯一 time 无效 / time 被忽略」是**伪测试**（缓解措施根本没生效），结论错了。
+
+id 全 1 + time 全 0 → 缓存键完全相同 → 一帧污染全部 8 张（旧 PNG 8 张 md5 全同、都是 `TS_TRK_WIDE` 的 "MMMM"，连画幅都不是各 comp 自己的高度）。`app.purge(ALL_CACHES)` 无效是因为它清 RAM、不碰磁盘缓存（`%LOCALAPPDATA%\Temp\Adobe\After Effects\<ver>\Disk Cache-*.noindex`，本机 2.5G）。
+
+**修复（两道防线，缺一不可，均已验证）**：
+1. **verify JSX 改用 `job.time`** → run 内每 comp 唯一缓存键。仅此一步修了 7/8；唯独 `TS_FS_SMALL`(t=0.1) 量化进被历史 t=0 run 污染的桶、仍渲旧 "MMMM" → gate **假绿**（靠 SMALL 旧帧恰好够薄 PASS，红线4 现身：值/DOM 全对但像素被污染）。
+2. **`clearAEDiskCache` harness**（`go test` 渲染前删 `Disk Cache-*.noindex`）→ 清历史中毒帧。清完重跑：**8/8 PNG 哈希各异**，`TS_FS_SMALL` 目视终于 "Ag"、`TS_FS_BIG` "Ag" 大字。
+
+**双版本 ship-gate 绿**（`TestMGTextStyle_AEShipGate_AE2020/2025`，跨版本数值一致）：FontSize 47×40 vs 153×132、Tracking 173 vs 490、Justify cx 1046 vs 958、Caps 39 vs 60。→ **SetRunFontSize / SetRunTracking / SetParagraphJustification / SetRunCapsOption 升 `verify=render-pixel`**。
+
+**另一条独立 bug 顺带修掉（FormatPSReal）**：point-measurement 键（字号 `/1`、行距 `/5`、H/V scale `/6//7`、基线 `/9`、描边宽 `/63`）AE 当 **REAL** 读；写裸整数 `"150"` 会被读成 16.16 定点 = `150/65536`（字号那次的 ÷65536 症状根因）。`codec.FormatPSReal` 强制带小数点；`back_layer.go` 这些 setter 改用它。**注意**：这些 setter 此前是**潜在错的**（会渲 ÷65536），FormatPSReal 是真 correctness fix，不只是 gate 配套。
+
+**Leading 仍 evidence-defer**（roundtrip-only）：值 + DOM 读回 70/220 对，但 AE 对从零层渲默认行距（像素不变），同 Rotation X/Y 先例，保留 `verify=roundtrip`。
+
+**TL;DR/UPDATE(a)(b) 的「缓存绕不过 / 待定夺」已作废**——见本节。
