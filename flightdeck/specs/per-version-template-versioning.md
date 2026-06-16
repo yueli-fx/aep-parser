@@ -31,8 +31,8 @@ summary: 为 effect/shape body 跨 AE 版本分裂准备的升级响应机制(YA
 ## 设计:两级响应
 
 ### Tier A — 局部字段分裂 → 分叉点写版本条件 CODE
-若只是 body 里某几个字节/某字段长度按版本不同(不是整份结构变),在 lower/back 的那个写点加 `target` 条件分支。**已有先例,不是新机制**:
-- `lower_layer.go` / `mutate_layer_camera.go`:ldta 按 target 补到 160B(AE2020/22)或 164B(AE2025)。
+若只是 body 里某几个字节/某字段长度按版本不同(不是整份结构变),在 lower/back 的那个写点加 `target` 条件分支。**已有先例,不是新机制**(完整 postmortem: [`../incidents/ae2020-shape-ldta-164-corrupt.md`](../incidents/ae2020-shape-ldta-164-corrupt.md)):
+- `lower_layer.go` / `mutate_layer_camera.go`:ldta 按 target 补到 160B(AE2020/22)或 164B(AE2025),尺寸走 `ctx.capabilities.LdtaSize`(capability matrix)勿硬编码。
 - 这是首选——成本最低,模板仍单一。
 
 ### Tier B — 整份 body 分裂 → 版本键化模板加载
