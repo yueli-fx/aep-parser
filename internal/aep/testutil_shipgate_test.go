@@ -75,13 +75,48 @@ func runAeRunShipGate(t *testing.T, aeExe, jsxPath, doneFile string, timeoutSec 
 	// on teardown — move the forensics out to a stable location first, or the
 	// dump referenced by the failure message no longer exists when a human (or
 	// agent) goes looking (bit us 2026-06-11 on the AddMask crash triage).
+	// os.Rename can't cross volumes: t.TempDir() is on C: but tmp_debug is on E:
+	// on this machine, so a bare Rename fails silently and the dump still gets
+	// wiped (bit us again 2026-06-16 on the KBar evalScript-timeout triage).
+	// moveDirCrossVol falls back to copy+remove when Rename refuses.
 	kept := filepath.Join(repoRoot, "tmp_debug", "gate_fails", filepath.Base(doneFile))
 	os.RemoveAll(kept + ".fail")
 	os.RemoveAll(kept + ".fail.1")
 	os.MkdirAll(filepath.Dir(kept), 0755)
-	os.Rename(doneFile+".fail", kept+".fail")
-	os.Rename(doneFile+".fail.1", kept+".fail.1")
+	moveDirCrossVol(doneFile+".fail", kept+".fail")
+	moveDirCrossVol(doneFile+".fail.1", kept+".fail.1")
 	t.Fatalf("ae_run.ps1 failed: %v (forensics preserved at %s.fail/ — screenshot.png / ocr.txt / actions.log; first attempt in %s.fail.1/ if retried)", err, kept, kept)
+}
+
+// moveDirCrossVol moves src→dst, falling back to a recursive copy when src and
+// dst sit on different volumes (os.Rename fails with a cross-device link error
+// on Windows). Best-effort: a missing src (no retry happened) is a no-op.
+func moveDirCrossVol(src, dst string) {
+	if _, err := os.Stat(src); err != nil {
+		return
+	}
+	if os.Rename(src, dst) == nil {
+		return
+	}
+	filepath.Walk(src, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		rel, err := filepath.Rel(src, p)
+		if err != nil {
+			return nil
+		}
+		target := filepath.Join(dst, rel)
+		if info.IsDir() {
+			os.MkdirAll(target, 0755)
+			return nil
+		}
+		if data, rerr := os.ReadFile(p); rerr == nil {
+			os.WriteFile(target, data, 0644)
+		}
+		return nil
+	})
+	os.RemoveAll(src)
 }
 
 func trimShipNUL(s string) string {

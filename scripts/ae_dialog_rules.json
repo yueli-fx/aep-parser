@@ -91,6 +91,16 @@
     "comment": "JSX threw 'Unable to execute script at line N. Permission denied' — the per-version preference is off (fresh AE install / prefs reset). No keystroke fixes this; Abort with exit 7 so the operator enables the pref instead of burning TimeoutSec. First seen 2026-06-11 on AE 2025 after its prefs were recreated."
   },
   {
+    "name": "kbar-evalscript-timeout",
+    "windowTitle": ["KBar"],
+    "windowClass": [],
+    "ocrMatch": ["CSInterface evalScript timed out", "KBarServer"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "The KBar CEP toolbar panel (installed on this machine's AE) runs a watchdog that calls CSInterface.evalScript; when our `AfterFX -r` gate JSX keeps AE's main thread busy (e.g. openInViewer + saveFrameToPng over 10 comps in the text-style render gate), KBar's round-trip exceeds its timeout and it pops an error modal titled literally 'KBar' (#32770) reading 'KBarServer could not ... CSInterface evalScript timed out'. This is NOT a data problem — our -r script keeps running independently; the modal just blocks AE's message pump (which also leaves AE's own '保存项目' save-progress dialog stuck behind it). Press ENTER on the OK button to dismiss; AE then drains the JSX to completion and writes .done. Title-match (Layer B) fires without OCR — fast + occlusion-immune; ocrMatch carries the ASCII anchor as backup. Surfaced 2026-06-16 as exit-2 unknown-modal on the mg_text_style gate (deterministic, both warm-retry attempts). Safe ordering: distinctive title/text collides with no other rule (no crash/convert/corrupt anchors), so placement is non-critical, but kept among the script-popup dismissals. If KBar interferes with more gates, the cleaner durable fix is to remove/disable the KBar CEP extension for the gate AE rather than dismiss its modal each run."
+  },
+  {
     "name": "script-alert",
     "windowTitle": ["Script Alert", "ExtendScript", "脚本警告"],
     "windowClass": [],
