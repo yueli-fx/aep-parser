@@ -1,10 +1,12 @@
 ---
-status: active
+status: done
 summary: 终极目标：不开 AE、纯 Go 从零生成完整 MG 动画工程（AI 直接产出 .aep）。按交付准则逐 slice 确权（每 slice 渲染像素级双版本 gate）：S1 ease 关键帧+规模 gate → S2 表达式激活 RE → S3 Trim Paths → S4 precomp 嵌套 → S5 Repeater/gradient 方向/圆角
-last_updated: 2026-06-12
+last_updated: 2026-06-17
 ---
 
 # From-scratch MG 工程能力 roadmap
+
+> **✅ 全部完成（S1–S6 双版本渲染 gate 全 PASS，S6 端到端组合 gate 闭环——「不开 AE 纯 Go 生成完整 MG 动画」终极目标达成）。** S5 余下 vein 件（Twist/Pucker&Bloat/Wiggle）亦于 2026-06-16 矢量滤镜家族收口时全 ship。done 后归档。
 
 ## 目标（用户 2026-06-12 点名）
 

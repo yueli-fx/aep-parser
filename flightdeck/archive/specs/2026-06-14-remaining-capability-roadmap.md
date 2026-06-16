@@ -1,10 +1,12 @@
 ---
-status: active
+status: done
 summary: 模板/真实 .aep 起点的未做能力清单，按优先级排序：动画关键帧 > 3D 图层 > 形状图层剩余 > mask > 表达式 > 文字图层。非 from-scratch（已有基础模板规避 silent-drop）。基本图形搁置。
-last_updated: 2026-06-15
+last_updated: 2026-06-17
 ---
 
 # 剩余能力 roadmap（模板起点）
+
+> **✅ 6 个优先级波次全收口（2026-06-17 归档）**：动画关键帧 ✓ · 3D 图层 ✓（含 RotateX/Orientation/RotateZ 补 gate + Orientation 端序/otda 修复，2026-06-17）· 形状剩余 ✓ · mask ✓ · 表达式 ✓ · 文字 ✓（Expressible Selector 2026-06-17 翻案 ship）。**残留按需/可能不可达项已迁 cockpit backlog**：animated mask path（reachable，lhd3>4kf 耦合）· maskFeatherFalloff（位置未 RE，可能不可达）· linear()/ease() remap（边际低）· layer-ref 第二波 · RQ Set* slice5~8。滚动 backlog 已 drain，done 后归档。
 
 > 2026-06-14 立项。把当前**没做 / 半做 / 不可达**的能力集中归档，按用户定的优先级排序，省得散落在各 incident / coverage 里忘掉。逐项做完即在此打勾 + 落对应 incident，做完一整层就 landing。
 
