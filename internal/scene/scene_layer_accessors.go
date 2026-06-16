@@ -312,6 +312,8 @@ func (l *Layer) SetOrientation(v []float64) error {
 
 // SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully
 // opaque). Callers that think in percent should divide by 100.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖" alias="opacity,不透明度,透明度,layer opacity,淡入淡出"
 func (l *Layer) SetOpacity(v float64) error {
 	return setScalarProperty(l.Opacity(), l.Name, "Opacity", v)
 }
@@ -323,6 +325,8 @@ func (l *Layer) SetOpacity(v float64) error {
 // `AVLayer.addToMotionGraphicsTemplateAs()` on the source-side layer +
 // the parent comp using the precomp as a layer). Without the slot,
 // SetAlternateSource cannot length-preservingly write a new id.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="alternate source slot,EG 媒体替换槽,essential properties"
 func (l *Layer) HasAlternateSourceSlot() bool {
 	return l.back != nil && l.back.HasAlternateSourceSlot()
 }

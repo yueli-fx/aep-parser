@@ -493,6 +493,8 @@ func (l *Layer) SetStretch(ratio float64) error {
 //
 // Returns an error when the parsed layer has no Utf8 name chunk
 // (unusual — most AE-written layers have one even for default names).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip" alias="layer name,图层名,重命名,rename layer"
 func (l *Layer) SetName(newName string) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no Utf8 name chunk to mutate", l.Name)

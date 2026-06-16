@@ -61,7 +61,17 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) { ... }
 
 `minver` 与 `gate` 正交:`minver`=功能要求的 AE 版本;`gate`=我们已验证过的 AE 版本(测试名里编码)。
 
-**tier × verify 一致性规则**(CI 校验):`stable` ⟹ `verify` 为 ae-accept 或 render-pixel(渲染类能力须 render-pixel,见红线4);`alpha` 允许 verify=roundtrip;`negative`/`missing`/`planned` ⟹ verify=none 且无 gate。
+**tier 与 verify 是两条正交轴**(2026-06-16 P2 wave2 压测修正,原 `stable⟹ae-accept` 耦合规则作废):
+- `tier` = **API 成熟度**(签名是否锁定):`stable`=锁定的公共 API(CLAUDE.md 核心 R/W + 已收口结构性 op)· `alpha`=可能改/删 · `planned/missing/negative`=占位/缺口/不可达。
+- `verify` = **证据级别**(验到几级):`none`<`roundtrip`<`ae-accept`<`render-pixel`。
+- 二者独立:length-preserving 核心 setter(如 `SetOpacity`)= **stable + roundtrip**(API 锁定但无专门 AE gate,改字节不改 size 故低风险);text animator = **alpha + render-pixel**(已 render-gated 但 accessor 未接、API 可能改)。
+
+**CI 校验规则**(防假绿在 verify⟹gate,不在 tier 耦合):
+- `stable`/`alpha` ⟹ `verify ∈ {roundtrip, ae-accept, render-pixel}`(至少 round-trip;`verify=none` 仅 planned/missing/negative 或 `domain=meta`)。
+- `verify ∈ {ae-accept, render-pixel}` ⟹ `gate` 非空(声明 AE 验证必须给出 gate 测试名)。
+- `planned/missing/negative` ⟹ `verify=none` 且无 gate。
+- `domain=meta`(getter/reader/alias/枚举/plumbing)⟹ `verify ∈ {none, roundtrip}`、无 gate(读类无"AE 接受"语义)。
+- **渲染类能力(颜色/opacity/可见效果)的 stable 声明仍须 render-pixel gate**(红线4);此约束按 domain 语义人工把关,不由 tier 机械强制。
 
 ## 生成器 `cmd/capindex`
 

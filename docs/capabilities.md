@@ -3,14 +3,15 @@
 
 徽章 tier:🟢stable · 🟡alpha · ⬜planned · ❌missing · 🚫negative　·　verify:none / roundtrip / ae-accept / render-pixel
 
-共 99 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+共 105 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
 
 ## comp
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `DuplicateComposition` | 🟡alpha | roundtrip | 2020 |  | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制 |
+| `DuplicateComposition` | 🟢stable | roundtrip | 2020 |  | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制 |
 | `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
+| `*Composition.SetFrameRate` | 🟢stable | roundtrip | 2020 |  | SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F. ⚠length-preserving(4B);29.97 等分数帧率精确 round-trip;无专门 AE gate(NewComposition 经 TestV2_1 设 fps) |
 | `SetRenderer` | 🟢stable | ae-accept | 2020 | TestSetRenderer_AEShipGate_AE2020<br>TestSetRenderer_AEShipGate_AE2025 | SetRenderer switches the composition's 3D rendering engine. ⚠binary 或 ExtendScript 名;各 AE 版本暴露引擎不同 |
 
 ## effect
@@ -30,6 +31,12 @@
 |---|---|---|---|---|---|
 | `AddEssentialProperty` | 🟢stable | ae-accept | 2020 | TestEGAdd_AEShipGate_AE2020<br>TestEGAdd_AEShipGate_AE2025 | AddEssentialProperty exposes one parameter of an effect on layer in the owning composition's Essential Graphics panel — mirrors AE's "addProperty to Essential Graphics" / Property.addToMotionGraphicsTemplate. ⚠scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused |
 
+## expr
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `*Property.SetExpression` | 🟢stable | ae-accept | 2020 | TestExpression_AEShipGate_AE2020<br>TestExpression_AEShipGate_AE2025<br>TestExprEffect_AEShipGate_AE2020<br>TestExprEffect_AEShipGate_AE2025 | SetExpression rewrites the JavaScript expression source attached to this property. ⚠length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);单值表达式 round-trip,复杂引用未逐一验 |
+
 ## gradient
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
@@ -41,8 +48,8 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `DeleteKeyframe` | 🟡alpha | roundtrip | 2020 |  | DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. ⚠无独立 Go AE gate → 库内 round-trip |
-| `InsertKeyframe` | 🟡alpha | roundtrip | 2020 |  | InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. ⚠需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear |
+| `DeleteKeyframe` | 🟢stable | roundtrip | 2020 |  | DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. ⚠无独立 Go AE gate → 库内 round-trip |
+| `InsertKeyframe` | 🟢stable | roundtrip | 2020 |  | InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. ⚠需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear |
 
 ## layer-create
 
@@ -62,6 +69,8 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `SetMaterialOption` | 🟡alpha | render-pixel | 2020 | TestLayer3DShadow_AEShipGate_AE2020<br>TestLayer3DShadow_AEShipGate_AE2025 | SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g. ⚠Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate |
+| `*Layer.SetName` | 🟢stable | roundtrip | 2020 |  | SetName rewrites the layer's display name (the AE timeline label). ⚠length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip |
+| `*Layer.SetOpacity` | 🟢stable | roundtrip | 2020 |  | SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). ⚠length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖 |
 
 ## mask
 
@@ -82,6 +91,7 @@
 | `DefaultTextRangeAdvanced` | 🟢stable | none | 2020 |  | DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize). |
 | `EncodeGradientXML` | 🟢stable | roundtrip | 2020 |  | EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the inverse of ParseGradientXML). ⚠渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated) |
 | `FromReader` | 🟢stable | roundtrip | 2020 |  | FromReader parses an .aep file from an io.ReadSeeker. |
+| `*Layer.HasAlternateSourceSlot` | 🟢stable | roundtrip | 2020 |  | HasAlternateSourceSlot reports whether this layer has an Essential Properties media-replacement slot in its chunk tree. |
 | `NewPropertyStream` | 🟢stable | roundtrip | 2020 |  | NewPropertyStream returns a Static-mode stream holding the zero value of T. |
 | `Open` | 🟢stable | roundtrip | 2020 |  | Open parses an .aep file by path and returns the Project. |
 | `Parse` | 🟢stable | roundtrip | 2020 |  | Parse opens an .aep file at path and returns an Application wrapping the parsed Project. |
@@ -99,6 +109,7 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `NewProject` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target. ⚠零参=TargetAE2020;支持 2020/2022/2025 |
+| `*Project.SetColorManagementSystem` | 🟢stable | roundtrip | 2024 |  | SetColorManagementSystem sets the color management system. ⚠仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Adobe/OCIO);无独立 AE gate → round-trip |
 
 ## render-queue
 
@@ -134,16 +145,16 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `AddMarker` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. ⚠需 comp 已有 >=1 marker(空 comp seed 暂搁);tail-insert 不排序 |
-| `DeleteLayer` | 🟡alpha | roundtrip | 2020 |  | DeleteLayer removes the layer at the given 0-based index in c.Layers. ⚠AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused |
-| `DuplicateLayer` | 🟡alpha | roundtrip | 2020 |  | DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). ⚠AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused |
+| `DeleteLayer` | 🟢stable | roundtrip | 2020 |  | DeleteLayer removes the layer at the given 0-based index in c.Layers. ⚠AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused |
+| `DuplicateLayer` | 🟢stable | roundtrip | 2020 |  | DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). ⚠AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused |
 | `DuplicatePropertyGroup` | 🟡alpha | ae-accept | 2020 | TestPropStructDuplicate_AEShipGate_AE2020<br>TestPropStructDuplicate_AEShipGate_AE2025 | DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone. ⚠display-name 后缀不合成(AE 自重算);同 indexed-group gate 覆盖面 |
-| `InsertLayer` | 🟡alpha | roundtrip | 2020 |  | InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). ⚠同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip |
-| `MoveAfter` | 🟡alpha | roundtrip | 2020 |  | MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index < receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). ⚠MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip |
-| `MoveBefore` | 🟡alpha | roundtrip | 2020 |  | MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack). ⚠MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip |
-| `MoveLayer` | 🟡alpha | roundtrip | 2020 |  | MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). ⚠纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip |
+| `InsertLayer` | 🟢stable | roundtrip | 2020 |  | InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). ⚠同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip |
+| `MoveAfter` | 🟢stable | roundtrip | 2020 |  | MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index < receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). ⚠MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip |
+| `MoveBefore` | 🟢stable | roundtrip | 2020 |  | MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack). ⚠MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip |
+| `MoveLayer` | 🟢stable | roundtrip | 2020 |  | MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). ⚠纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip |
 | `MovePropertyGroup` | 🟡alpha | ae-accept | 2020 | TestPropStructMove_AEShipGate_AE2020<br>TestPropStructMove_AEShipGate_AE2025 | MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children. ⚠同 RemovePropertyGroup 的 indexed-group gate 覆盖面 |
-| `MoveToBeginning` | 🟡alpha | roundtrip | 2020 |  | MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1). ⚠MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip |
-| `MoveToEnd` | 🟡alpha | roundtrip | 2020 |  | MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers). ⚠MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip |
+| `MoveToBeginning` | 🟢stable | roundtrip | 2020 |  | MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1). ⚠MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip |
+| `MoveToEnd` | 🟢stable | roundtrip | 2020 |  | MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers). ⚠MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip |
 | `RemoveMarker` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | RemoveMarker deletes this marker from its owning composition / layer marker set. |
 | `RemovePropertyGroup` | 🟡alpha | ae-accept | 2020 | TestPropStructRemove_AEShipGate_AE2020<br>TestPropStructRemove_AEShipGate_AE2025 | RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. ⚠Effect Parade + Text Animators 双版本 gated;Mask/Root Vectors 同机制未单独 gate |
 | `SetDimensionsSeparated` | 🟢stable | ae-accept | 2020 | TestSeparateDims_AEShipGate_AE2020<br>TestSeparateDims_AEShipGate_AE2025<br>TestMergeDims_AEShipGate_AE2020<br>TestMergeDims_AEShipGate_AE2025 | SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position leader. ⚠static 2D/3D + animated 3D 近线性 gated;animated 2D + 自定义 spatial ease refused |

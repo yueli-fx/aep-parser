@@ -110,14 +110,16 @@ func validateCap(c *Cap) error {
 		}
 		return nil
 	}
+	// tier (API maturity: locked vs evolving) and verify (evidence level) are
+	// ORTHOGONAL. A stable API can be roundtrip-only (a length-preserving core
+	// setter with no dedicated AE gate — SetOpacity); an alpha API can be
+	// render-pixel verified (a text animator whose accessors aren't wired yet).
+	// The anti-false-green guard lives in the verify⟹gate rule below, not in
+	// coupling tier to verify.
 	switch c.Tier {
-	case "stable":
-		if c.Verify != "ae-accept" && c.Verify != "render-pixel" {
-			return fmt.Errorf("tier=stable requires verify ae-accept|render-pixel, got %q", c.Verify)
-		}
-	case "alpha":
+	case "stable", "alpha":
 		if c.Verify == "none" {
-			return fmt.Errorf("tier=alpha requires verify roundtrip|ae-accept|render-pixel")
+			return fmt.Errorf("tier=%s requires verify roundtrip|ae-accept|render-pixel (verify=none is for planned/missing/negative, or use domain=meta)", c.Tier)
 		}
 	case "planned", "missing", "negative":
 		if c.Verify != "none" || len(c.Gate) > 0 {

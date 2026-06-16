@@ -424,6 +424,8 @@ func (p *Project) ColorManagementSystem() ColorManagementSystem {
 
 // SetColorManagementSystem sets the color management system.
 // Rejects values other than the defined enum members.
+//
+//aep:cap domain=project tier=stable verify=roundtrip minver=2024 boundary="仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Adobe/OCIO);无独立 AE gate → round-trip" alias="color management,色彩管理,CMS,OCIO,色彩空间"
 func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error {
 	switch v {
 	case ColorManagementSystemAdobe, ColorManagementSystemOCIO:

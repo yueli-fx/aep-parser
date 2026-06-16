@@ -7,7 +7,7 @@
     "has_cap": true,
     "cap": {
       "domain": "comp",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -45,6 +45,29 @@
         "新建合成",
         "comp",
         "create comp"
+      ]
+    }
+  },
+  {
+    "symbol": "SetFrameRate",
+    "kind": "method",
+    "recv": "*Composition",
+    "signature": "func (c *Composition) SetFrameRate(fps float64) error",
+    "summary": "SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving(4B);29.97 等分数帧率精确 round-trip;无专门 AE gate(NewComposition 经 TestV2_1 设 fps)",
+      "incident": null,
+      "alias": [
+        "frame rate",
+        "帧率",
+        "fps",
+        "合成帧率"
       ]
     }
   },
@@ -256,6 +279,37 @@
     }
   },
   {
+    "symbol": "SetExpression",
+    "kind": "method",
+    "recv": "*Property",
+    "signature": "func (p *Property) SetExpression(source string) error",
+    "summary": "SetExpression rewrites the JavaScript expression source attached to this property.",
+    "has_cap": true,
+    "cap": {
+      "domain": "expr",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestExpression_AEShipGate_AE2020",
+        "TestExpression_AEShipGate_AE2025",
+        "TestExprEffect_AEShipGate_AE2020",
+        "TestExprEffect_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);单值表达式 round-trip,复杂引用未逐一验",
+      "incident": [
+        "expression-enable-byte-pair"
+      ],
+      "alias": [
+        "expression",
+        "表达式",
+        "js 表达式",
+        "wiggle 表达式",
+        "linkexpr"
+      ]
+    }
+  },
+  {
     "symbol": "NewGradientFillNode",
     "kind": "func",
     "signature": "func NewGradientFillNode() *GradientFillNode",
@@ -313,7 +367,7 @@
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -334,7 +388,7 @@
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -581,6 +635,53 @@
     }
   },
   {
+    "symbol": "SetName",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetName(newName string) error",
+    "summary": "SetName rewrites the layer's display name (the AE timeline label).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip",
+      "incident": null,
+      "alias": [
+        "layer name",
+        "图层名",
+        "重命名",
+        "rename layer"
+      ]
+    }
+  },
+  {
+    "symbol": "SetOpacity",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) SetOpacity(v float64) error",
+    "summary": "SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖",
+      "incident": null,
+      "alias": [
+        "opacity",
+        "不透明度",
+        "透明度",
+        "layer opacity",
+        "淡入淡出"
+      ]
+    }
+  },
+  {
     "symbol": "AddMask",
     "kind": "func",
     "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
@@ -808,6 +909,28 @@
         "read",
         "流读取",
         "io.ReadSeeker"
+      ]
+    }
+  },
+  {
+    "symbol": "HasAlternateSourceSlot",
+    "kind": "method",
+    "recv": "*Layer",
+    "signature": "func (l *Layer) HasAlternateSourceSlot() bool",
+    "summary": "HasAlternateSourceSlot reports whether this layer has an Essential Properties media-replacement slot in its chunk tree.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "alternate source slot",
+        "EG 媒体替换槽",
+        "essential properties"
       ]
     }
   },
@@ -1077,6 +1200,30 @@
         "新建工程",
         "空工程",
         "create project"
+      ]
+    }
+  },
+  {
+    "symbol": "SetColorManagementSystem",
+    "kind": "method",
+    "recv": "*Project",
+    "signature": "func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error",
+    "summary": "SetColorManagementSystem sets the color management system.",
+    "has_cap": true,
+    "cap": {
+      "domain": "project",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2024",
+      "gate": null,
+      "boundary": "仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Adobe/OCIO);无独立 AE gate → round-trip",
+      "incident": null,
+      "alias": [
+        "color management",
+        "色彩管理",
+        "CMS",
+        "OCIO",
+        "色彩空间"
       ]
     }
   },
@@ -1615,7 +1762,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1637,7 +1784,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1683,7 +1830,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1705,7 +1852,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1725,7 +1872,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1745,7 +1892,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1793,7 +1940,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
@@ -1814,7 +1961,7 @@
     "has_cap": true,
     "cap": {
       "domain": "structural",
-      "tier": "alpha",
+      "tier": "stable",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,

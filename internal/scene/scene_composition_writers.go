@@ -140,6 +140,8 @@ func (c *Composition) SetName(newName string) error {
 //
 // `Duration` is recomputed from the existing frame count so the
 // in-memory value stays consistent.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving(4B);29.97 等分数帧率精确 round-trip;无专门 AE gate(NewComposition 经 TestV2_1 设 fps)" alias="frame rate,帧率,fps,合成帧率"
 func (c *Composition) SetFrameRate(fps float64) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)

@@ -10,7 +10,8 @@ func TestValidateCap(t *testing.T) {
 	}{
 		{"stable+render ok", Cap{Domain: "effect", Tier: "stable", Verify: "render-pixel", Gate: []string{"T"}}, true},
 		{"stable+ae-accept ok", Cap{Domain: "layer-create", Tier: "stable", Verify: "ae-accept", Gate: []string{"T"}}, true},
-		{"stable+roundtrip rejected", Cap{Domain: "layer-set", Tier: "stable", Verify: "roundtrip", Gate: []string{"T"}}, false},
+		{"stable+roundtrip ok (decoupled: stable API, no AE gate)", Cap{Domain: "layer-set", Tier: "stable", Verify: "roundtrip"}, true},
+		{"stable+none rejected", Cap{Domain: "layer-set", Tier: "stable", Verify: "none"}, false},
 		{"alpha+roundtrip ok", Cap{Domain: "layer-set", Tier: "alpha", Verify: "roundtrip"}, true},
 		{"alpha+none rejected", Cap{Domain: "layer-set", Tier: "alpha", Verify: "none"}, false},
 		{"planned+gate rejected", Cap{Domain: "shape", Tier: "planned", Verify: "none", Gate: []string{"T"}}, false},
