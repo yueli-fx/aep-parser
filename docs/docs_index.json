@@ -3201,7 +3201,8 @@
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunverticalscale",
-      "signature": "func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error"
+      "signature": "func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error",
+      "summary": "SetRunVerticalScale writes the vertical scale value used by AE on style run #runIdx. See TextStyleRun docs for unit notes (AE default is 1; scripted setter range 0..100)."
     },
     "Layer.SetSamplingBicubic": {
       "kind": "method",

@@ -52,6 +52,8 @@ func (l *Layer) validateRunIdx(runIdx int) error {
 
 // SetRunFontSize writes a new font size (em points) to style run #runIdx.
 // length-variable splice in the btdk PostScript body.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="font size,字号,字体大小,run font size"
 func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -64,6 +66,8 @@ func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error {
 }
 
 // SetRunTracking writes character tracking (1/1000 em) on style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="tracking,字距,字符间距,character spacing"
 func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -77,6 +81,8 @@ func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 
 // SetRunBaselineShift writes baseline shift (em points; positive = up)
 // on style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="baseline shift,基线偏移,baseline offset"
 func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -92,6 +98,8 @@ func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 // AE auto-leading is gated by the AutoLeading flag — to use this
 // value the caller should also disable auto-leading via
 // SetRunAutoLeading(runIdx, false), otherwise AE overrides it.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;需搭配 SetRunAutoLeading(false) 才生效;无专门 AE gate→round-trip" alias="leading,行距,line spacing,auto leading"
 func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -106,6 +114,8 @@ func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 // SetRunAutoLeading toggles AE's "auto leading" flag on style run #runIdx.
 // When true, the Leading value is computed by AE (typically FontSize × 1.2);
 // when false, the explicit Leading value applies.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="auto leading,自动行距,leading flag"
 func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -120,6 +130,8 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 // SetRunFontIndex repoints style run #runIdx at a different entry in
 // the Fonts table (TextSource.Fonts). Caller is responsible for ensuring
 // the index is in range; the underlying psValue is just an integer.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;无专门 AE gate→round-trip" alias="font index,字体索引,switch font,change font"
 func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -135,6 +147,8 @@ func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 }
 
 // SetRunFauxBold toggles synthetic bold on style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="faux bold,仿粗体,synthetic bold,fake bold"
 func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -147,6 +161,8 @@ func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 }
 
 // SetRunFauxItalic toggles synthetic italic on style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="faux italic,仿斜体,synthetic italic,fake italic"
 func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -161,6 +177,8 @@ func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 // SetRunHorizontalScale / SetRunVerticalScale write the raw scale
 // values used by AE on style run #runIdx. See TextStyleRun docs for
 // the unit notes (AE default is 1; scripted setter range 0..100).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="horizontal scale,水平缩放,text scale,字体缩放"
 func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -172,6 +190,11 @@ func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	return nil
 }
 
+// SetRunVerticalScale writes the vertical scale value used by AE on style
+// run #runIdx. See TextStyleRun docs for unit notes (AE default is 1;
+// scripted setter range 0..100).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="vertical scale,垂直缩放,text scale,字体缩放"
 func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -185,6 +208,8 @@ func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 
 // SetRunTsume writes the CJK character-spacing adjustment (0..100)
 // on style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;CJK 专用;无专门 AE gate→round-trip" alias="tsume,CJK spacing,字间压缩,CJK 字距"
 func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -198,6 +223,8 @@ func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 
 // SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1)
 // on style run #runIdx. Encoded as btdk's [A, R, G, B] array.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip" alias="fill color,填充颜色,text color,字体颜色,font color"
 func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -211,6 +238,8 @@ func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 
 // SetRunStrokeColor writes the stroke paint color [R, G, B, A] on
 // style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip" alias="stroke color,描边颜色,text stroke,字体描边"
 func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -224,6 +253,8 @@ func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 
 // SetRunApplyStroke toggles whether the stroke is rendered on
 // style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="apply stroke,启用描边,stroke on off,enable stroke"
 func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -236,6 +267,8 @@ func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 }
 
 // SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="stroke width,描边宽度,stroke size,text outline width"
 func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -251,6 +284,8 @@ func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 // (AE 24+ writeable; underlying btdk byte exists in AE 2020 files too,
 // but AE 2020 ScriptingAPI marks allCaps / smallCaps readonly so
 // fixture generation requires AE 24).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="caps option,大写选项,all caps,small caps,uppercase"
 func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -267,6 +302,8 @@ func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 
 // SetRunBaselineOption writes the font baseline option on style run #runIdx.
 // AE 24+ writeable; mirrors subscript / superscript readonly attrs.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="baseline option,基线选项,subscript,superscript,上标,下标"
 func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -283,6 +320,8 @@ func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error 
 
 // SetRunStrokeOverFill toggles whether the stroke renders over the fill
 // (true) or under it (false) on style run #runIdx. Default in AE is true.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="stroke over fill,描边覆盖填充,stroke order,描边顺序"
 func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -299,6 +338,8 @@ func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 // without also assigning a manual kerning value will read as "0 spacing"
 // in AE — manual kerning lives in a separate per-character sub-tree at
 // btdk /1/1[0]/0/8 which this library does not yet expose for writing.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;无专门 AE gate→round-trip" alias="auto kern,自动字距调整,kerning mode,optical kerning,metrics kerning"
 func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -316,6 +357,8 @@ func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 // SetRunNoBreak toggles the "do not break" character flag on style run
 // #runIdx (AE 24+ writeable, btdk style-run /52). When true, AE won't
 // allow line breaks to fall inside the run.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="no break,禁止换行,do not break,word wrap"
 func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -329,6 +372,8 @@ func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 
 // SetRunLineJoinType writes the stroke corner join style on style run
 // #runIdx (AE 24+ writeable, btdk style-run /62).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="line join,stroke join,线段连接,描边角点,miter join,bevel join,round join"
 func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -345,6 +390,8 @@ func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 
 // SetRunDigitSet writes the digit set on style run #runIdx (AE 24+
 // writeable, btdk style-run /70).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="digit set,数字集,Arabic digits,Hindi digits,阿拉伯数字,印地数字"
 func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -378,6 +425,8 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 //
 // Returns an error if the layer isn't a text layer or the btdk Fonts
 // array can't be located.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;无专门 AE gate→round-trip" alias="add font,添加字体,font table,字体表,register font"
 func (l *Layer) AddFont(fontName string) (int, error) {
 	if l.back == nil || l.TextSource == nil {
 		return -1, fmt.Errorf("layer %q: not a text layer", l.Name)
@@ -408,6 +457,8 @@ func (l *Layer) validateParaIdx(paraIdx int) error {
 
 // SetParagraphJustification writes a new alignment enum on
 // paragraph #paraIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="justification,对齐,alignment,text align,left align,right align,center,全对齐"
 func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -421,6 +472,8 @@ func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) erro
 
 // SetParagraphFirstLineIndent writes firstLineIndent (em points) on
 // paragraph #paraIdx. AE 24+ writeable (AE 2020 ScriptingAPI no-op on point text).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 2020 ScriptingAPI 对 point text 无效;无专门 AE gate→round-trip" alias="first line indent,首行缩进,paragraph indent,段落缩进"
 func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -433,6 +486,8 @@ func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 }
 
 // SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="start indent,左缩进,paragraph start indent,left margin"
 func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -445,6 +500,8 @@ func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 }
 
 // SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="end indent,右缩进,paragraph end indent,right margin"
 func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -457,6 +514,8 @@ func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 }
 
 // SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="space before,段前间距,paragraph space before,paragraph spacing"
 func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -469,6 +528,8 @@ func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 }
 
 // SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="space after,段后间距,paragraph space after,paragraph spacing"
 func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -482,6 +543,8 @@ func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 
 // SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx.
 // Default in AE is true. AE 24+ writeable.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="auto hyphenate,自动连字,hyphenation,断字"
 func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -495,6 +558,8 @@ func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 
 // SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx
 // (AE 24+ writeable, btdk paragraph /8).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="leading type,行距类型,roman leading,Japanese leading,段落行距"
 func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -512,6 +577,8 @@ func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 // SetParagraphHangingRoman toggles Roman Hanging Punctuation on
 // paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). Only
 // meaningful for box-text.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;无专门 AE gate→round-trip" alias="hanging roman,悬挂标点,Roman Hanging Punctuation,段落悬挂"
 func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -526,6 +593,8 @@ func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 // SetParagraphDirection writes the paragraph reading direction on
 // paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). Affects
 // how mixed LTR/RTL text composes.
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="paragraph direction,段落方向,LTR,RTL,reading direction,阅读方向,从右到左"
 func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -562,6 +631,8 @@ func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) err
 // Mirrors AE-script TextDocument.kerning: the first-character value
 // is also written to sibling /1/1[0]/0/7 (the first-char scalar that
 // the script API reflects).
+//
+//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk /1/1[0]/0/8 per-char 数组原位重写;需 btdk 已有 manual-kerning slot(首次须先在 AE 中建立);值个数必须等于现有字符数;无专门 AE gate→round-trip" alias="manual kerning,手动字距,kerning values,per-character kerning,字距调整"
 func (l *Layer) SetManualKerning(values []int) error {
 	if l.TextSource == nil {
 		return fmt.Errorf("layer %q: not a text layer", l.Name)

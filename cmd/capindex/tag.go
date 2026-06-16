@@ -23,9 +23,11 @@ var validDomains = map[string]bool{
 	"structural": true, "meta": true,
 }
 
-// parseCapTag scans a doc comment for an `aep:cap ...` directive (optionally
-// continued across following non-blank lines) and parses it into a Cap.
-// Returns (nil, false, nil) when no directive is present; (nil, true, err) on a
+// parseCapTag scans a doc comment for a single-line `aep:cap ...` directive and
+// parses it into a Cap. The directive is single-line by contract (placement
+// within the comment is irrelevant — only the aep:cap line itself is read, so
+// surrounding prose is never mistaken for key=value tokens). Returns
+// (nil, false, nil) when no directive is present; (nil, true, err) on a
 // malformed directive.
 func parseCapTag(comment string) (*Cap, bool, error) {
 	lines := strings.Split(comment, "\n")
@@ -39,18 +41,7 @@ func parseCapTag(comment string) (*Cap, bool, error) {
 	if start < 0 {
 		return nil, false, nil
 	}
-	var b strings.Builder
-	for i := start; i < len(lines); i++ {
-		t := strings.TrimSpace(lines[i])
-		if i > start && t == "" {
-			break
-		}
-		if i > start {
-			b.WriteByte(' ')
-		}
-		b.WriteString(t)
-	}
-	body := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(b.String()), "aep:cap"))
+	body := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(lines[start]), "aep:cap"))
 	kv, err := tokenizeKV(body)
 	if err != nil {
 		return nil, true, err

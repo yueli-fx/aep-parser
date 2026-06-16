@@ -767,6 +767,8 @@ func (p *Project) MarshalJSON() ([]byte, error) {
 }
 
 // WriteJSON writes the project as indented JSON to w.
+//
+//aep:cap domain=io tier=stable verify=roundtrip boundary="JSON 单向导出(无 ReadJSON);确定性 + golden 测试验证;不涉及 AE" alias="write json,json 导出,export json,序列化"
 func (p *Project) WriteJSON(w io.Writer) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")

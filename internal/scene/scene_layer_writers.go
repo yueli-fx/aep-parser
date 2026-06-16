@@ -18,6 +18,8 @@ import (
 
 // SetVisible toggles the layer's video switch (the 👁️ icon).
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="visible,visibility,显示,隐藏,视频开关,eye toggle"
 func (l *Layer) SetVisible(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -31,6 +33,8 @@ func (l *Layer) SetVisible(v bool) error {
 
 // SetSolo toggles the layer's Solo flag.
 // length-preserving (single bit @ldta 0x26).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip" alias="solo,独奏,单独显示"
 func (l *Layer) SetSolo(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -44,6 +48,8 @@ func (l *Layer) SetSolo(v bool) error {
 
 // SetShy toggles the layer's Shy flag (hides from the shy-filter view).
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="shy,羞涩,隐藏图层,shy filter"
 func (l *Layer) SetShy(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -58,6 +64,8 @@ func (l *Layer) SetShy(v bool) error {
 // SetLocked toggles the layer's Lock flag (🔒). When locked, AE refuses
 // edits in the timeline UI; the AEP file itself is still mutable.
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="locked,lock,锁定,锁,图层锁定"
 func (l *Layer) SetLocked(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -71,6 +79,8 @@ func (l *Layer) SetLocked(v bool) error {
 
 // SetEffectsEnabled toggles the layer's fx switch (whether effects render).
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="effects enabled,fx switch,特效开关,效果启用"
 func (l *Layer) SetEffectsEnabled(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -84,6 +94,8 @@ func (l *Layer) SetEffectsEnabled(v bool) error {
 
 // SetMotionBlur toggles the layer's motion-blur switch.
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="motion blur,运动模糊,模糊开关"
 func (l *Layer) SetMotionBlur(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -97,6 +109,8 @@ func (l *Layer) SetMotionBlur(v bool) error {
 
 // SetAudioEnabled toggles the layer's audio switch.
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="audio enabled,audio switch,音频开关,静音"
 func (l *Layer) SetAudioEnabled(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -110,6 +124,8 @@ func (l *Layer) SetAudioEnabled(v bool) error {
 
 // SetFrameBlendEnabled toggles the layer's frame-blend switch.
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="frame blend,帧混合,帧融合,frame blending"
 func (l *Layer) SetFrameBlendEnabled(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -124,6 +140,8 @@ func (l *Layer) SetFrameBlendEnabled(v bool) error {
 // SetCollapseTransform toggles "Collapse Transformations" (for nested
 // comps) or "Continuously Rasterize" (for Illustrator / shape layers).
 // length-preserving (single bit @ldta 0x27).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="collapse transform,continuously rasterize,折叠变换,连续栅格化"
 func (l *Layer) SetCollapseTransform(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -137,6 +155,8 @@ func (l *Layer) SetCollapseTransform(v bool) error {
 
 // SetIs3D toggles the layer's 3D-layer switch.
 // length-preserving (single bit @ldta 0x26).
+//
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayer3DEnable_AEShipGate_AE2020,TestLayer3DEnable_AEShipGate_AE2025 alias="3D layer,3D开关,三维图层,enable 3D"
 func (l *Layer) SetIs3D(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -150,6 +170,8 @@ func (l *Layer) SetIs3D(v bool) error {
 
 // SetIsAdjust toggles the layer's "Adjustment Layer" switch.
 // length-preserving (single bit @ldta 0x26).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip" alias="adjustment layer,调整图层,调节层"
 func (l *Layer) SetIsAdjust(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -164,6 +186,8 @@ func (l *Layer) SetIsAdjust(v bool) error {
 // SetIsGuide toggles the layer's "Guide Layer" switch (AE renders it
 // in the comp viewer but excludes it from output).
 // length-preserving (single bit @ldta 0x25).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip" alias="guide layer,参考线图层,辅助线"
 func (l *Layer) SetIsGuide(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -180,6 +204,8 @@ func (l *Layer) SetIsGuide(v bool) error {
 // supported by the byte but produces uncommon AE behavior — set only
 // when you understand the consequences.
 // length-preserving (single bit @ldta 0x26).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;post-hoc flip 产生非常见行为;无专门 AE gate→round-trip" alias="null layer,空对象,null object"
 func (l *Layer) SetIsNull(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -193,6 +219,8 @@ func (l *Layer) SetIsNull(v bool) error {
 
 // SetMarkersLocked toggles "Lock markers" on the layer.
 // length-preserving (single bit @ldta 0x26).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip" alias="markers locked,标记锁定,lock markers"
 func (l *Layer) SetMarkersLocked(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -207,6 +235,8 @@ func (l *Layer) SetMarkersLocked(v bool) error {
 // SetSamplingBicubic switches between Bilinear (false) and Bicubic (true)
 // sampling for the layer.
 // length-preserving (single bit @ldta 0x25).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip" alias="sampling bicubic,bicubic,bilinear,采样方式,图像质量"
 func (l *Layer) SetSamplingBicubic(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -222,6 +252,8 @@ func (l *Layer) SetSamplingBicubic(v bool) error {
 // Frame Mix (false) and Pixel Motion (true). Only relevant when
 // FrameBlendEnabled is also true.
 // length-preserving (single bit @ldta 0x25).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x25;需配合 FrameBlendEnabled=true 才生效;无专门 AE gate→round-trip" alias="pixel motion,frame mix,帧混合模式,像素运动"
 func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -238,6 +270,8 @@ func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
 
 // SetBlendingMode writes a new blending-mode enum byte to ldta @0x63.
 // length-preserving (single byte).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x63;无专门 AE gate→round-trip" alias="blending mode,混合模式,叠加模式,blend mode"
 func (l *Layer) SetBlendingMode(m BlendingMode) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -255,6 +289,8 @@ func (l *Layer) SetBlendingMode(m BlendingMode) error {
 // AE additionally requires the matte source layer to sit immediately
 // above this layer in the comp; this setter only flips the mode byte
 // and does NOT reorder layers.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,不重排图层;无专门 AE gate→round-trip" alias="track matte,matte type,遮罩,轨道遮罩,alpha matte,luma matte"
 func (l *Layer) SetTrackMatte(t TrackMatteType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -270,6 +306,8 @@ func (l *Layer) SetTrackMatte(t TrackMatteType) error {
 // Indices outside 0..16 are written verbatim (AE shows index 0 for any
 // unknown value but the byte is preserved on round-trip).
 // length-preserving (single byte).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x3D;范围 0..16;无专门 AE gate→round-trip" alias="label,label color,标签,颜色标签,时间线颜色"
 func (l *Layer) SetLabel(index uint8) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -284,6 +322,8 @@ func (l *Layer) SetLabel(index uint8) error {
 // SetQuality writes a new render-quality enum (Wireframe / Draft / Best)
 // to ldta @0x04 (uint16 BE).
 // length-preserving (2 bytes).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;无专门 AE gate→round-trip" alias="quality,render quality,渲染质量,线框,草图,最佳质量"
 func (l *Layer) SetQuality(q LayerQuality) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -305,6 +345,8 @@ func (l *Layer) SetQuality(q LayerQuality) error {
 // touch the bytes. Cross-comp parenting isn't allowed by AE.
 //
 // `parentID == l.ID` is rejected (would create a self-parent cycle).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;4 字节 @ldta 0x84;同 comp 内验证 parentID;自 parent 拒绝;无专门 AE gate→round-trip" alias="parent,parent layer,父图层,父级,layer parenting"
 func (l *Layer) SetParent(parentID uint32) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -337,6 +379,8 @@ func (l *Layer) SetParent(parentID uint32) error {
 // Note: AE caches some source-derived metadata (Width/Height) on the
 // layer at render time, not in ldta. Changing source preserves the
 // rest of ldta verbatim, which is what we want.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;无专门 AE gate→round-trip" alias="source,source id,footage source,替换素材,层来源"
 func (l *Layer) SetSource(sourceID uint32) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -377,6 +421,8 @@ func footageWithID(p *Project, id uint32) bool {
 //   - None → all three cleared
 //
 // Unknown enum values are treated as None (= no-op clearing).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;互斥 bit 组跨 @0x25/0x26;无专门 AE gate→round-trip" alias="auto orient,自动旋转,沿路径旋转,朝向摄像机"
 func (l *Layer) SetAutoOrient(t AutoOrientType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -391,6 +437,8 @@ func (l *Layer) SetAutoOrient(t AutoOrientType) error {
 // SetPreserveTransparency toggles "Preserve Underlying Transparency"
 // (ldta @0x67, single byte 0/1).
 // length-preserving (single byte).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x67;无专门 AE gate→round-trip" alias="preserve transparency,保留透明度,alpha preservation"
 func (l *Layer) SetPreserveTransparency(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -414,6 +462,8 @@ func (l *Layer) SetPreserveTransparency(v bool) error {
 //
 // AE allows negative start times (pre-roll). Mirrors the change to
 // `Layer.StartTime`.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;8 字节分数对 @ldta 0x0C/0x10;支持负值(pre-roll);无专门 AE gate→round-trip" alias="start time,开始时间,图层入点,layer offset"
 func (l *Layer) SetStartTime(seconds float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -428,6 +478,8 @@ func (l *Layer) SetStartTime(seconds float64) error {
 // SetInPoint writes the layer's source-media in-point (seconds) to
 // ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in).
 // length-preserving (8 bytes).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;8 字节分数对 @ldta 0x14/0x18;写后自动更新 Duration;无专门 AE gate→round-trip" alias="in point,入点,开始帧,trim start"
 func (l *Layer) SetInPoint(seconds float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -442,6 +494,8 @@ func (l *Layer) SetInPoint(seconds float64) error {
 // SetOutPoint writes the layer's source-media out-point (seconds) to
 // ldta @0x1C/@0x20, then refreshes `Layer.Duration`.
 // length-preserving (8 bytes).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;无专门 AE gate→round-trip" alias="out point,出点,结束帧,trim end"
 func (l *Layer) SetOutPoint(seconds float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -474,6 +528,8 @@ func (l *Layer) recomputeDurationFromLdta() {
 // the ldta** — dividend lives near the top, divisor in the trailing
 // section.
 // length-preserving (8 bytes total in two 4-byte writes).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;分子/分母分处 @ldta 0x08/@0x6C;1.0=正常速度;无专门 AE gate→round-trip" alias="stretch,time stretch,速度,时间拉伸,慢动作,快放"
 func (l *Layer) SetStretch(ratio float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -512,6 +568,8 @@ func (l *Layer) SetName(newName string) error {
 // length-variable — the underlying cmta chunk's data is replaced (or a
 // new cmta chunk is inserted into the Layr LIST when none existed).
 // Encoding mirrors what AE writes: LF → CRLF + a single NUL terminator.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-variable(cmta 整片替换或插入新 cmta);父 LIST size 重算;无专门 AE gate→round-trip" alias="comment,注释,备注,layer comment,图层注释"
 func (l *Layer) SetComment(comment string) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no chunk backrefs (built outside parser?)", l.Name)
@@ -541,6 +599,8 @@ func (l *Layer) SetComment(comment string) error {
 // On AE 2020 / 2022 files (ldta 160 bytes), this call errors — the
 // @0xA0 slot doesn't exist. Re-save the file through AE 23+ first to
 // extend ldta, then this setter works.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;无专门 AE gate→round-trip" alias="track matte layer,matte source,遮罩来源,轨道遮罩图层"
 func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -563,6 +623,8 @@ func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 
 // ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone).
 // Removes the explicit matte source AND the matte mode in one call.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;无专门 AE gate→round-trip" alias="clear matte,remove matte,清除遮罩,取消轨道遮罩"
 func (l *Layer) ClearTrackMatteLayer() error {
 	return l.SetTrackMatteLayer(0, TrackMatteNone)
 }
@@ -575,6 +637,8 @@ func (l *Layer) ClearTrackMatteLayer() error {
 // On AE 22 / 2020 ldta (160 bytes), @0x88 is still present (parent ID
 // at @0x84 + 4 bytes after = @0x88), so this setter works on older
 // fixtures too.
+//
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayer3DLight_AEShipGate_AE2020,TestLayer3DLight_AEShipGate_AE2025 alias="light kind,light type,灯光类型,平行光,点光源,聚光灯,环境光"
 func (l *Layer) SetLightKind(k LightKind) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -599,6 +663,8 @@ func (l *Layer) SetLightKind(k LightKind) error {
 //   - target must not be self
 //
 // On error the bytes are not modified.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2024 boundary="length-preserving;AE 24+ 环境灯专用;Light 层 only;3D/Light/Camera 目标拒绝;无专门 AE gate→round-trip" alias="light source,environment light,环境光源,灯光来源"
 func (l *Layer) SetLightSource(target *Layer) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -654,6 +720,8 @@ func (l *Layer) SetLightSource(target *Layer) error {
 // whose `isMediaReplacementCompatible == false` (e.g., still images vs.
 // video) at script time — we don't replicate that check; the rendered
 // .aep is still parsed cleanly by AE regardless.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;须预先有 blsi slot(无 slot → 报错);项目内验证 itemID;无专门 AE gate→round-trip" alias="alternate source,media replacement,素材替换,动态图形模板,essential properties,EG 替换"
 func (l *Layer) SetAlternateSource(item AVItem) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no Essential Properties media-replacement slot (call addToMotionGraphicsTemplateAs in AE first)", l.Name)
@@ -677,6 +745,8 @@ func (l *Layer) SetAlternateSource(item AVItem) error {
 // ClearAlternateSource removes the media-replacement override (blsi
 // = 0) so AE falls back to the wrapper precomp's default source.
 // Equivalent to SetAlternateSource(nil).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="委托 SetAlternateSource(nil);须预先有 blsi slot;无专门 AE gate→round-trip" alias="clear alternate source,clear media replacement,清除替换素材"
 func (l *Layer) ClearAlternateSource() error { return l.SetAlternateSource(nil) }
 
 // SetText replaces a text layer's user-visible text. The new text may be any
@@ -700,6 +770,8 @@ func (l *Layer) ClearAlternateSource() error { return l.SetAlternateSource(nil) 
 //
 // After a successful call Layer.TextSource is re-decoded so subsequent
 // reads reflect the new value; Layer.WriteAEP serializes the change.
+//
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestSetTextVariable_AEShipGate_AE2020,TestSetTextVariable_AEShipGate_AE2025 boundary="length-variable(PostScript 字符串拼接 + 段落/run 数组重建);多段落/多 run 支持;手动字距在长度变化时丢弃" alias="set text,text content,文本内容,替换文字,改文字,文字修改"
 func (l *Layer) SetText(newText string) error {
 	if l.TextSource == nil || l.TextSourceRaw == nil {
 		return fmt.Errorf("layer %q: not a text layer (or text source failed to decode)", l.Name)

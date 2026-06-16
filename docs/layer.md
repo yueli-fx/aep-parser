@@ -2407,6 +2407,8 @@ SetRunTsume writes the CJK character-spacing adjustment (0..100) on style run #r
 func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error
 ```
 
+SetRunVerticalScale writes the vertical scale value used by AE on style run #runIdx. See TextStyleRun docs for unit notes (AE default is 1; scripted setter range 0..100).
+
 ### Layer.SetSamplingBicubic
 
 ```go

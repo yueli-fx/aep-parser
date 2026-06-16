@@ -16,6 +16,8 @@ import (
 
 // SetTime writes a new marker time (seconds) to the ldat keyframe slot
 // using the owning composition's TickRate. length-preserving.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving(ldat tick write);无专门 AE gate→round-trip" alias="marker time,标记时间,cue time,时间标记"
 func (m *Marker) SetTime(seconds float64) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no ldat reference (built outside parser?)")
@@ -38,6 +40,8 @@ func (m *Marker) SetTime(seconds float64) error {
 // length-preserving (4 bytes).
 //
 // `seconds == 0` produces a point marker. Negative durations clamp to 0.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving(4B NmHd);0 → point marker;负值夹至 0;无专门 AE gate→round-trip" alias="marker duration,标记时长,cue duration,区间标记"
 func (m *Marker) SetDuration(seconds float64) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
@@ -58,6 +62,8 @@ func (m *Marker) SetDuration(seconds float64) error {
 // @0x10. Indices outside 0..16 are written verbatim (AE shows index 0
 // for unknown values but the byte round-trips).
 // length-preserving (1 byte).
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving(1B NmHd @0x10);越界值写入并 round-trip;无专门 AE gate→round-trip" alias="marker label,标记颜色,label color,时间线颜色"
 func (m *Marker) SetLabel(index uint8) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
@@ -76,6 +82,8 @@ func (m *Marker) SetLabel(index uint8) error {
 // Use SetChapter / SetURL / SetFrameTarget / SetCuePointName for the
 // other four Utf8 slots (they fill in declaration order, so missing
 // earlier slots are created as empty when a later slot is written).
+//
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025 boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用" alias="marker comment,标记注释,cue point comment,标记文本"
 func (m *Marker) SetComment(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -89,6 +97,8 @@ func (m *Marker) SetComment(s string) error {
 
 // SetChapter rewrites the marker's chapter-link text (second Utf8 in
 // the Nmrd block).
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip" alias="marker chapter,章节链接,chapter link"
 func (m *Marker) SetChapter(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -101,6 +111,8 @@ func (m *Marker) SetChapter(s string) error {
 }
 
 // SetURL rewrites the marker's web-target URL (third Utf8).
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip" alias="marker url,web link,网址,超链接"
 func (m *Marker) SetURL(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -113,6 +125,8 @@ func (m *Marker) SetURL(s string) error {
 }
 
 // SetFrameTarget rewrites the marker's frame-target id (fourth Utf8).
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip" alias="marker frame target,frame target,帧目标"
 func (m *Marker) SetFrameTarget(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -126,6 +140,8 @@ func (m *Marker) SetFrameTarget(s string) error {
 
 // SetCuePointName rewrites the marker's cue-point name (fifth Utf8 —
 // legacy Flash-era; rarely populated in modern AE projects).
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段,现代 AE 项目极少填;无专门 AE gate→round-trip" alias="cue point name,提示点名称,flash cue"
 func (m *Marker) SetCuePointName(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")

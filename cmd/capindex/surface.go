@@ -54,37 +54,53 @@ func loadSurface(docgenPath string) (*publicSurface, error) {
 // domain=meta but are not CI-required). Adding a getter tag later is additive.
 var writeVerbs = []string{
 	"Set", "Add", "Remove", "Delete", "Insert", "Move", "Duplicate", "Animate",
-	"Replace", "Clear", "Enable", "Disable", "Toggle", "Apply", "Reset", "Make",
+	"Replace", "Clear", "Enable", "Disable", "Toggle", "Apply", "Reset", "Make", "Write",
 }
 
+// isWriteMethod reports whether name begins with a write/do verb at a CamelCase
+// boundary — the char after the verb must be uppercase or a digit (or the name
+// is exactly the verb). This excludes getters that merely share a prefix, e.g.
+// "Enabled" is NOT "Enable", "Added" is NOT "Add".
 func isWriteMethod(name string) bool {
 	for _, v := range writeVerbs {
-		if strings.HasPrefix(name, v) {
+		if !strings.HasPrefix(name, v) {
+			continue
+		}
+		rest := name[len(v):]
+		if rest == "" {
+			return true
+		}
+		c := rest[0]
+		if (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') {
 			return true
 		}
 	}
 	return false
 }
 
-// requires reports whether entry e must carry an aep:cap tag.
+// requires reports whether entry e must carry an aep:cap tag. The write surface
+// = every facade func + every write/do method on an exported capability type
+// (extractEntries already filters method receivers to exported types, and every
+// exported scene type carrying a Set*/Add*/… method is a public capability —
+// roots like Layer/Composition plus shape nodes, render-queue items, etc.).
+// Getters/readers/navigation (no write verb) are exempt per the write-surface
+// -first policy.
 func (s *publicSurface) requires(e Entry) bool {
 	switch e.Kind {
 	case "func":
 		return e.Pkg == "aep" || s.funcs[e.Symbol]
 	case "method":
-		// root-type write/do methods only; getters/readers are exempt.
-		return s.roots[strings.TrimPrefix(e.Recv, "*")] && isWriteMethod(e.Symbol)
+		return isWriteMethod(e.Symbol)
 	}
 	return false // type + const = meta lane (Wave 9)
 }
 
-// getterExempt counts root-type getter/reader methods skipped by the
-// write-surface policy — surfaced in the coverage report so the exemption is
-// never a silent cap.
+// getterExempt counts getter/reader methods skipped by the write-surface policy
+// — surfaced in the coverage report so the exemption is never a silent cap.
 func (s *publicSurface) getterExempt(entries []Entry) int {
 	n := 0
 	for _, e := range entries {
-		if e.Kind == "method" && s.roots[strings.TrimPrefix(e.Recv, "*")] && !isWriteMethod(e.Symbol) {
+		if e.Kind == "method" && !isWriteMethod(e.Symbol) {
 			n++
 		}
 	}

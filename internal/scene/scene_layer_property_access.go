@@ -268,16 +268,22 @@ func (l *Layer) LightShadowDiffusion() *Property {
 // ── Geometry Options setters (3D AV layers) ──
 
 // SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip" alias="plane curvature,平面曲率,3D geometry"
 func (l *Layer) SetGeometryPlaneCurvature(v float64) error {
 	return setScalarProperty(l.GeometryPlaneCurvature(), l.Name, "Plane Curvature", v)
 }
 
 // SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip" alias="plane subdivision,平面细分,mesh quality,网格质量"
 func (l *Layer) SetGeometryPlaneSubdivision(v float64) error {
 	return setScalarProperty(l.GeometryPlaneSubdivision(), l.Name, "Plane Subdivision", v)
 }
 
 // SetGeometryBevelDirection writes Bevel Direction enum.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="bevel direction,斜面方向,3D bevel"
 func (l *Layer) SetGeometryBevelDirection(v float64) error {
 	return setScalarProperty(l.GeometryBevelDirection(), l.Name, "Bevel Direction", v)
 }
@@ -288,16 +294,22 @@ func (l *Layer) SetGeometryBevelDirection(v float64) error {
 // (Off/On/Only). Equivalent to SetLightCastsShadows(bool) when called
 // with Off/On; "Only" is AV-3D-specific (renders shadows but hides the
 // layer itself).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DShadow_AEShipGate_AE2020,TestLayer3DShadow_AEShipGate_AE2025 alias="casts shadows,投射阴影,material shadows,3D shadow"
 func (l *Layer) SetMaterialCastsShadows(mode MaterialCastsShadowsMode) error {
 	return setScalarProperty(l.MaterialCastsShadows(), l.Name, "Casts Shadows", float64(mode))
 }
 
 // SetMaterialLightTransmission writes light transmission (0..1).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="light transmission,光传输,透光率"
 func (l *Layer) SetMaterialLightTransmission(v float64) error {
 	return setScalarProperty(l.MaterialLightTransmission(), l.Name, "Light Transmission", v)
 }
 
 // SetMaterialAcceptsShadows toggles the Accepts Shadows switch.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="accepts shadows,接受阴影,receive shadows"
 func (l *Layer) SetMaterialAcceptsShadows(enabled bool) error {
 	v := 0.0
 	if enabled {
@@ -307,6 +319,8 @@ func (l *Layer) SetMaterialAcceptsShadows(enabled bool) error {
 }
 
 // SetMaterialAcceptsLights toggles the Accepts Lights switch.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="accepts lights,接受灯光,receive lights"
 func (l *Layer) SetMaterialAcceptsLights(enabled bool) error {
 	v := 0.0
 	if enabled {
@@ -316,6 +330,8 @@ func (l *Layer) SetMaterialAcceptsLights(enabled bool) error {
 }
 
 // SetMaterialShadowColor writes the shadow color (4-component RGBA).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="shadow color,阴影颜色,3D shadow color"
 func (l *Layer) SetMaterialShadowColor(rgba []float64) error {
 	p := l.MaterialShadowColor()
 	if p == nil {
@@ -326,6 +342,8 @@ func (l *Layer) SetMaterialShadowColor(rgba []float64) error {
 
 // SetMaterialAppearsInReflections toggles whether this layer appears in
 // reflective surfaces of other 3D layers.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="appears in reflections,出现在反射中,reflection visibility"
 func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error {
 	v := 0.0
 	if enabled {
@@ -340,36 +358,57 @@ func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error {
 // field (Ambient/Diffuse/Specular/Metal/Reflection typically 0..1 or 0..100,
 // Shininess 0..150, IndexOfRefraction 1..3+). No range clamping is done;
 // AE will accept any float.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="ambient,环境光系数,material ambient"
 func (l *Layer) SetMaterialAmbient(v float64) error {
 	return setScalarProperty(l.MaterialAmbient(), l.Name, "Ambient Coefficient", v)
 }
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="diffuse,漫反射系数,material diffuse"
 func (l *Layer) SetMaterialDiffuse(v float64) error {
 	return setScalarProperty(l.MaterialDiffuse(), l.Name, "Diffuse Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="specular,镜面反射系数,material specular"
 func (l *Layer) SetMaterialSpecular(v float64) error {
 	return setScalarProperty(l.MaterialSpecular(), l.Name, "Specular Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="shininess,光泽度,material shininess"
 func (l *Layer) SetMaterialShininess(v float64) error {
 	return setScalarProperty(l.MaterialShininess(), l.Name, "Shininess Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="metal,金属感,material metal"
 func (l *Layer) SetMaterialMetal(v float64) error {
 	return setScalarProperty(l.MaterialMetal(), l.Name, "Metal Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="reflection,反射率,material reflection"
 func (l *Layer) SetMaterialReflection(v float64) error {
 	return setScalarProperty(l.MaterialReflection(), l.Name, "Reflection Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="glossiness,光泽,material glossiness"
 func (l *Layer) SetMaterialGlossiness(v float64) error {
 	return setScalarProperty(l.MaterialGlossiness(), l.Name, "Glossiness Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="fresnel,菲涅尔,material fresnel"
 func (l *Layer) SetMaterialFresnel(v float64) error {
 	return setScalarProperty(l.MaterialFresnel(), l.Name, "Fresnel Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="transparency,透明度,material transparency"
 func (l *Layer) SetMaterialTransparency(v float64) error {
 	return setScalarProperty(l.MaterialTransparency(), l.Name, "Transparency Coefficient", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="transparency rolloff,透明衰减,transp rolloff"
 func (l *Layer) SetMaterialTranspRolloff(v float64) error {
 	return setScalarProperty(l.MaterialTranspRolloff(), l.Name, "Transp Rolloff", v)
 }
+
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="index of refraction,折射率,IOR"
 func (l *Layer) SetMaterialIndexOfRefraction(v float64) error {
 	return setScalarProperty(l.MaterialIndexOfRefraction(), l.Name, "Index of Refraction", v)
 }
@@ -378,11 +417,15 @@ func (l *Layer) SetMaterialIndexOfRefraction(v float64) error {
 
 // SetCameraZoom writes a new static value to the camera's Zoom property
 // (pixels). Errors on non-camera layers or keyframed Zoom.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="camera zoom,摄像机缩放,focal length,焦距"
 func (l *Layer) SetCameraZoom(v float64) error {
 	return setScalarProperty(l.CameraZoom(), l.Name, "Camera Zoom", v)
 }
 
 // SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DDoF_AEShipGate_AE2020,TestLayer3DDoF_AEShipGate_AE2025 alias="depth of field,景深,DOF,camera dof"
 func (l *Layer) SetCameraDepthOfField(enabled bool) error {
 	v := 0.0
 	if enabled {
@@ -392,56 +435,78 @@ func (l *Layer) SetCameraDepthOfField(enabled bool) error {
 }
 
 // SetCameraFocusDistance writes the focus-distance property (pixels).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DDoF_AEShipGate_AE2020,TestLayer3DDoF_AEShipGate_AE2025 alias="focus distance,对焦距离,camera focus"
 func (l *Layer) SetCameraFocusDistance(v float64) error {
 	return setScalarProperty(l.CameraFocusDistance(), l.Name, "Camera Focus Distance", v)
 }
 
 // SetCameraAperture writes the aperture property (pixels).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DDoF_AEShipGate_AE2020,TestLayer3DDoF_AEShipGate_AE2025 alias="aperture,光圈,camera aperture"
 func (l *Layer) SetCameraAperture(v float64) error {
 	return setScalarProperty(l.CameraAperture(), l.Name, "Camera Aperture", v)
 }
 
 // SetCameraBlurLevel writes the blur-level property (%).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DDoF_AEShipGate_AE2020,TestLayer3DDoF_AEShipGate_AE2025 alias="blur level,模糊强度,camera blur,DOF blur"
 func (l *Layer) SetCameraBlurLevel(v float64) error {
 	return setScalarProperty(l.CameraBlurLevel(), l.Name, "Camera Blur Level", v)
 }
 
 // SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris shape,光圈形状,bokeh shape"
 func (l *Layer) SetIrisShape(v float64) error {
 	return setScalarProperty(l.IrisShape(), l.Name, "Iris Shape", v)
 }
 
 // SetIrisRotation writes the Iris Rotation (degrees).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris rotation,光圈旋转,bokeh rotation"
 func (l *Layer) SetIrisRotation(v float64) error {
 	return setScalarProperty(l.IrisRotation(), l.Name, "Iris Rotation", v)
 }
 
 // SetIrisRoundness writes the Iris Roundness (%).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris roundness,光圈圆度,bokeh roundness"
 func (l *Layer) SetIrisRoundness(v float64) error {
 	return setScalarProperty(l.IrisRoundness(), l.Name, "Iris Roundness", v)
 }
 
 // SetIrisAspectRatio writes the Iris Aspect Ratio.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris aspect ratio,光圈纵横比,bokeh aspect"
 func (l *Layer) SetIrisAspectRatio(v float64) error {
 	return setScalarProperty(l.IrisAspectRatio(), l.Name, "Iris Aspect Ratio", v)
 }
 
 // SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="diffraction fringe,衍射边缘,iris fringe"
 func (l *Layer) SetIrisDiffractionFringe(v float64) error {
 	return setScalarProperty(l.IrisDiffractionFringe(), l.Name, "Iris Diffraction Fringe", v)
 }
 
 // SetIrisHighlightGain writes the Iris Highlight Gain.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="highlight gain,高光增益,iris highlight gain"
 func (l *Layer) SetIrisHighlightGain(v float64) error {
 	return setScalarProperty(l.IrisHighlightGain(), l.Name, "Iris Highlight Gain", v)
 }
 
 // SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="highlight threshold,高光阈值,iris threshold"
 func (l *Layer) SetIrisHighlightThreshold(v float64) error {
 	return setScalarProperty(l.IrisHighlightThreshold(), l.Name, "Iris Highlight Threshold", v)
 }
 
 // SetIrisHighlightSaturation writes the Iris Highlight Saturation.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="highlight saturation,高光饱和度,iris saturation"
 func (l *Layer) SetIrisHighlightSaturation(v float64) error {
 	return setScalarProperty(l.IrisHighlightSaturation(), l.Name, "Iris Highlight Saturation", v)
 }
@@ -451,6 +516,8 @@ func (l *Layer) SetIrisHighlightSaturation(v float64) error {
 // SetLightColor writes the light's Color property. The value's length
 // must match the property's component count (3 for RGB, 4 for RGBA);
 // SetStaticValue enforces this.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="light color,灯光颜色,light colour"
 func (l *Layer) SetLightColor(rgba []float64) error {
 	p := l.LightColor()
 	if p == nil {
@@ -460,36 +527,50 @@ func (l *Layer) SetLightColor(rgba []float64) error {
 }
 
 // SetLightIntensity writes the light intensity (%).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DLight_AEShipGate_AE2020,TestLayer3DLight_AEShipGate_AE2025 alias="light intensity,灯光强度,light brightness"
 func (l *Layer) SetLightIntensity(v float64) error {
 	return setScalarProperty(l.LightIntensity(), l.Name, "Light Intensity", v)
 }
 
 // SetLightConeAngle writes the spotlight cone angle (degrees).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip" alias="cone angle,锥角,spotlight cone,聚光灯角度"
 func (l *Layer) SetLightConeAngle(v float64) error {
 	return setScalarProperty(l.LightConeAngle(), l.Name, "Light Cone Angle", v)
 }
 
 // SetLightConeFeather writes the spotlight cone-feather (%).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip" alias="cone feather,锥形羽化,spotlight feather"
 func (l *Layer) SetLightConeFeather(v float64) error {
 	return setScalarProperty(l.LightConeFeather(), l.Name, "Light Cone Feather", v)
 }
 
 // SetLightFalloffType writes the falloff type enum.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="falloff type,衰减类型,light falloff"
 func (l *Layer) SetLightFalloffType(v float64) error {
 	return setScalarProperty(l.LightFalloffType(), l.Name, "Light Falloff Type", v)
 }
 
 // SetLightFalloffStart writes the falloff-start distance (pixels).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="falloff start,衰减起始距离,light falloff start"
 func (l *Layer) SetLightFalloffStart(v float64) error {
 	return setScalarProperty(l.LightFalloffStart(), l.Name, "Light Falloff Start", v)
 }
 
 // SetLightFalloffDistance writes the falloff distance (pixels).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="falloff distance,衰减距离,light falloff distance"
 func (l *Layer) SetLightFalloffDistance(v float64) error {
 	return setScalarProperty(l.LightFalloffDistance(), l.Name, "Light Falloff Distance", v)
 }
 
 // SetLightCastsShadows toggles the Casts Shadows switch (true=1, false=0).
+//
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DShadow_AEShipGate_AE2020,TestLayer3DShadow_AEShipGate_AE2025 alias="light casts shadows,灯光投射阴影,enable shadow,开启阴影"
 func (l *Layer) SetLightCastsShadows(enabled bool) error {
 	v := 0.0
 	if enabled {
@@ -499,11 +580,15 @@ func (l *Layer) SetLightCastsShadows(enabled bool) error {
 }
 
 // SetLightShadowDarkness writes the shadow darkness (%).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="shadow darkness,阴影暗度,light shadow darkness"
 func (l *Layer) SetLightShadowDarkness(v float64) error {
 	return setScalarProperty(l.LightShadowDarkness(), l.Name, "Light Shadow Darkness", v)
 }
 
 // SetLightShadowDiffusion writes the shadow diffusion (pixels).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="shadow diffusion,阴影扩散,light shadow diffusion,soft shadow"
 func (l *Layer) SetLightShadowDiffusion(v float64) error {
 	return setScalarProperty(l.LightShadowDiffusion(), l.Name, "Light Shadow Diffusion", v)
 }

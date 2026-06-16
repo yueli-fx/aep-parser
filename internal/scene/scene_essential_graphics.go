@@ -74,6 +74,8 @@ type EssentialGraphicsController struct {
 // Stable — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty
 // gate: the renamed template reads back via the scripting API and survives
 // AE's own resave); promoted from Alpha in the 2026-06-12 audit batch.
+//
+//aep:cap domain=eg tier=stable verify=ae-accept gate=TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025 boundary="length-variable(CIFO/CIF2/CIF3 各两处名字全部替换+父 LIST size 重算);空名拒绝;无 EG shell 拒绝" alias="motion graphics template name,MG 模板名,mogrt name,essential graphics name,模板重命名"
 func (c *Composition) SetMotionGraphicsTemplateName(name string) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)

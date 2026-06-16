@@ -220,6 +220,8 @@ func (l *Layer) TimeRemapEnabled() bool {
 // Returns an error when the layer has no TimeRemap property slot
 // (non-AV layers) or the property has existing keyframes (delete them
 // first before disabling).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;启用设静态值 0.0;禁用前须清关键帧;非 AV 层报错;无专门 AE gate→round-trip" alias="time remap,time remapping,时间重映射,帧速率重映射"
 func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
 	p := l.TimeRemap()
 	if p == nil {
@@ -245,6 +247,8 @@ func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
 // SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB).
 // Errors when the layer has no audio levels property (i.e. layer has no
 // audio track).
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;[left,right] dB 静态值;无音轨属性 → 报错;无专门 AE gate→round-trip" alias="audio levels,audio gain,音频电平,声道增益,音量"
 func (l *Layer) SetAudioLevels(lr []float64) error {
 	p := l.AudioLevels()
 	if p == nil {
@@ -455,6 +459,8 @@ func (l *Layer) CanSetTimeRemapEnabled() bool {
 // fixExpressions=true, a warning is added to Project.Warnings.
 //
 // Internally calls SetSource with the item's ID.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetSource(item.ID);fixExpressions 参数接受但未实现(添加 Warning);无专门 AE gate→round-trip" alias="replace source,替换来源,替换素材,换源,swap footage"
 func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error {
 	if target == nil {
 		return fmt.Errorf("layer %q: target is nil", l.Name)

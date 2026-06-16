@@ -10,6 +10,8 @@ import "fmt"
 
 // SetStaticValue rewrites a property's constant value in-place (only valid
 // for properties without keyframes — those with a cdat chunk).
+//
+//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);无专门 AE gate→round-trip" alias="static value,静态值,constant value,set value,属性值,cdat"
 func (p *Property) SetStaticValue(v any) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no static-value chunk (has keyframes?)", p.MatchName)
@@ -53,6 +55,8 @@ func (p *Property) SetStaticValue(v any) error {
 // Requires the property's tdbs to contain a `tdb4` chunk (always
 // present for properties parsed from real .aep files). Returns an
 // error otherwise.
+//
+//aep:cap domain=expr tier=stable verify=roundtrip boundary="length-preserving 低风险;tdb4 @0x77 1 byte;无专门 AE gate→round-trip;仅对有 tdbs 的属性有效" alias="expression enabled,表达式启用,enable expression,disable expression,表达式开关,toggle expression"
 func (p *Property) SetExpressionEnabled(enabled bool) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no tdbs reference", p.MatchName)

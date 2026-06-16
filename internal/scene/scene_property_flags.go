@@ -110,6 +110,8 @@ func (p *Property) LockedRatio() bool {
 
 // SetLockedRatio sets the locked ratio flag on the property.
 // Writes to tdsb @0x02 bit 4 (length-preserving).
+//
+//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="length-preserving 低风险;tdsb @0x02 bit 4;无专门 AE gate→round-trip" alias="locked ratio,锁定比例,constrain proportions,aspect ratio lock,等比缩放,tdsb"
 func (p *Property) SetLockedRatio(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("property has no tdsb chunk (cannot set LockedRatio)")

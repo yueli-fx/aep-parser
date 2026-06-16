@@ -3,9 +3,11 @@ package main
 import "testing"
 
 func TestParseCapTag(t *testing.T) {
+	// Single-line directive (the contract): placement within the comment is
+	// irrelevant and following prose is never consumed.
 	comment := "AddEffect appends a built-in effect.\n\n" +
-		"aep:cap domain=effect tier=stable verify=render-pixel\n" +
-		"  gate=TestA,TestB boundary=\"param via SetEffectParam\" alias=\"特效,blur\"\n"
+		"aep:cap domain=effect tier=stable verify=render-pixel gate=TestA,TestB boundary=\"param via SetEffectParam\" alias=\"特效,blur\"\n" +
+		"more prose after the directive that must be ignored.\n"
 	c, ok, err := parseCapTag(comment)
 	if err != nil {
 		t.Fatalf("err: %v", err)

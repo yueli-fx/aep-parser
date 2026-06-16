@@ -3,7 +3,7 @@
 
 徽章 tier:🟢stable · 🟡alpha · ⬜planned · ❌missing · 🚫negative　·　verify:none / roundtrip / ae-accept / render-pixel
 
-共 112 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+共 470 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
 
 ## comp
 
@@ -11,8 +11,44 @@
 |---|---|---|---|---|---|
 | `DuplicateComposition` | 🟢stable | roundtrip | 2020 |  | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制 |
 | `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
+| `*Composition.SetBGColor` | 🟢stable | roundtrip | 2020 |  | SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. ⚠length-preserving(3B);无专门 AE gate→round-trip |
+| `*Marker.SetChapter` | 🟢stable | roundtrip | 2020 |  | SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip |
+| `*Composition.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). ⚠length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip |
+| `*Marker.SetComment` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用 |
+| `*Composition.SetCompMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B bit 3). ⚠length-preserving(1bit);层级开关需与 Layer.MotionBlur 配合;无专门 AE gate→round-trip |
+| `*Marker.SetCuePointName` | 🟢stable | roundtrip | 2020 |  | SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段,现代 AE 项目极少填;无专门 AE gate→round-trip |
+| `*Composition.SetDisplayStartFrame` | 🟢stable | roundtrip | 2020 |  | SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStartTime. ⚠委托 SetDisplayStartTime;需 FrameRate>0;无专门 AE gate→round-trip |
+| `*Composition.SetDisplayStartTime` | 🟢stable | roundtrip | 2020 |  | SetDisplayStartTime rewrites the comp's display-start-time origin (seconds) at cdta @0xA4 (dividend) / @0xA8 (divisor). ⚠length-preserving(8B);seconds=0 写双零清除;AE25 divisor 舍入不一致但 round-trip 精确;无专门 AE gate→round-trip |
+| `*Composition.SetDraft3D` | 🟢stable | roundtrip | 2020 |  | SetDraft3D toggles the comp's "Draft 3D" preview switch (cdta @0x8A bit 0). ⚠length-preserving(1bit);无专门 AE gate→round-trip |
+| `*Composition.SetDuration` | 🟢stable | roundtrip | 2020 |  | SetDuration writes a new composition duration (seconds) to cdta @0xB0 as a uint32 frame count (= round(seconds × FrameRate)). ⚠length-preserving(4B);需先 SetFrameRate(FrameRate>0);无专门 AE gate→round-trip |
+| `*Marker.SetDuration` | 🟢stable | roundtrip | 2020 |  | SetDuration writes a new marker duration (seconds) to NmHd @0x08. ⚠length-preserving(4B NmHd);0 → point marker;负值夹至 0;无专门 AE gate→round-trip |
+| `*Composition.SetFrameBlending` | 🟢stable | roundtrip | 2020 |  | SetFrameBlending toggles the comp-level frame-blend master switch (cdta @0x8B bit 4). ⚠length-preserving(1bit);层级开关需与 Layer.FrameBlendEnabled 配合;无专门 AE gate→round-trip |
+| `*Marker.SetFrameDuration` | 🟢stable | roundtrip | 2020 |  | SetFrameDuration writes the marker's duration from an integer frame. ⚠length-preserving;委托 Marker.SetDuration;需 compFps > 0;无专门 AE gate→round-trip |
 | `*Composition.SetFrameRate` | 🟢stable | roundtrip | 2020 |  | SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F. ⚠length-preserving(4B);29.97 等分数帧率精确 round-trip;无专门 AE gate(NewComposition 经 TestV2_1 设 fps) |
+| `*Marker.SetFrameTarget` | 🟢stable | roundtrip | 2020 |  | SetFrameTarget rewrites the marker's frame-target id (fourth Utf8). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip |
+| `*Marker.SetFrameTime` | 🟢stable | roundtrip | 2020 |  | SetFrameTime writes the marker's time from an integer frame. ⚠length-preserving;委托 Marker.SetTime;需 compFps > 0;无专门 AE gate→round-trip |
+| `*Composition.SetHideShyLayers` | 🟢stable | roundtrip | 2020 |  | SetHideShyLayers toggles "Hide Shy Layers" on the comp (cdta @0x8B bit 0). ⚠length-preserving(1bit);无专门 AE gate→round-trip |
+| `*Marker.SetLabel` | 🟢stable | roundtrip | 2020 |  | SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10. ⚠length-preserving(1B NmHd @0x10);越界值写入并 round-trip;无专门 AE gate→round-trip |
+| `*Composition.SetLabel` | 🟢stable | roundtrip | 2020 |  | SetLabel writes the project-panel color label index (0..16) for the composition (Item-level). ⚠length-preserving(1B);越界值照写(AE 视为 0);无专门 AE gate→round-trip |
+| `*Composition.SetMotionBlurAdaptiveSampleLimit` | 🟢stable | roundtrip | 2020 |  | SetMotionBlurAdaptiveSampleLimit writes the motion-blur adaptive sample limit (int32 BE, AE default 128) to cdta @0xC4. ⚠length-preserving(4B);AE 默认 128;无专门 AE gate→round-trip |
+| `*Composition.SetMotionBlurSamplesPerFrame` | 🟢stable | roundtrip | 2020 |  | SetMotionBlurSamplesPerFrame writes the per-frame motion-blur sample count (int32 BE, AE default 16) to cdta @0xC8. ⚠length-preserving(4B);AE 默认 16;无专门 AE gate→round-trip |
+| `*Composition.SetName` | 🟢stable | roundtrip | 2020 |  | SetName rewrites the composition's display name (length-variable Utf8 chunk replacement; WriteAEP recomputes parent Item LIST size). ⚠length-variable(Utf8 整片替换+父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate→round-trip |
+| `*Guide.SetOrientation` | 🟡alpha | roundtrip | 2020 |  | SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical). ⚠length-preserving(16B scene-owned block;syncGuides 在 WriteAEP 时回写 ldat);非法 orientation 值静默 no-op;无专门 AE gate→round-trip |
+| `*Composition.SetPixelAspect` | 🟢stable | roundtrip | 2020 |  | SetPixelAspect writes the pixel aspect ratio (PAR) to cdta as a numerator/denominator pair at @0x90 / @0x94 (uint32 BE each). ⚠length-preserving(8B);分数用 round(par×100)/100 近似;无专门 AE gate→round-trip |
+| `*Guide.SetPosition` | 🟡alpha | roundtrip | 2020 |  | SetPosition sets the guide's pixel offset (>= 0). ⚠length-preserving(16B scene-owned block;syncGuides 在 WriteAEP 时回写 ldat);负值/无 block 时静默 no-op;无专门 AE gate→round-trip |
+| `*Composition.SetPreserveNestedFrameRate` | 🟢stable | roundtrip | 2020 |  | SetPreserveNestedFrameRate toggles "Preserve frame rate when nested or in render queue" on the comp (cdta @0x8B bit 5). ⚠length-preserving(1bit);无专门 AE gate→round-trip |
+| `*Composition.SetPreserveNestedResolution` | 🟢stable | roundtrip | 2020 |  | SetPreserveNestedResolution toggles "Preserve resolution when nested" (cdta @0x8B bit 7). ⚠length-preserving(1bit);无专门 AE gate→round-trip |
 | `SetRenderer` | 🟢stable | ae-accept | 2020 | TestSetRenderer_AEShipGate_AE2020<br>TestSetRenderer_AEShipGate_AE2025 | SetRenderer switches the composition's 3D rendering engine. ⚠binary 或 ExtendScript 名;各 AE 版本暴露引擎不同 |
+| `*Composition.SetResolutionFactor` | 🟢stable | roundtrip | 2020 |  | SetResolutionFactor writes the comp's preview-resolution downsample factors (X, Y) to cdta @0x00 / @0x02 (two uint16 BE). ⚠length-preserving(4B);拒绝 0 值;无专门 AE gate→round-trip |
+| `*Composition.SetShutterAngle` | 🟢stable | roundtrip | 2020 |  | SetShutterAngle writes the motion-blur shutter angle (uint16 BE, degrees, AE UI range 0..720, default 180) to cdta @0xAE. ⚠length-preserving(2B);AE UI 范围 0..720;无专门 AE gate→round-trip |
+| `*Composition.SetShutterPhase` | 🟢stable | roundtrip | 2020 |  | SetShutterPhase writes the motion-blur shutter phase (int32 BE) to cdta @0xB4. ⚠length-preserving(4B);单位未独立 UI 验证,传 raw int32;无专门 AE gate→round-trip |
+| `*Composition.SetSize` | 🟢stable | roundtrip | 2020 |  | SetSize writes a new canvas pixel size (width, height) to cdta @0x8C / @0x8E (uint16 BE pair). ⚠length-preserving(4B);不改 PAR;无专门 AE gate→round-trip |
+| `*Marker.SetTime` | 🟢stable | roundtrip | 2020 |  | SetTime writes a new marker time (seconds) to the ldat keyframe slot using the owning composition's TickRate. ⚠length-preserving(ldat tick write);无专门 AE gate→round-trip |
+| `*Marker.SetURL` | 🟢stable | roundtrip | 2020 |  | SetURL rewrites the marker's web-target URL (third Utf8). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip |
+| `*Composition.SetWorkArea` | 🟢stable | roundtrip | 2020 |  | SetWorkArea writes new work-area start/end times (seconds) to cdta @0x1C-0x2B. ⚠length-preserving(16B);divisor 复用已存值或取 600;无专门 AE gate→round-trip |
+| `*Composition.SetWorkAreaDurationFrame` | 🟢stable | roundtrip | 2020 |  | SetWorkAreaDurationFrame writes the work-area end so that end−start equals the given integer frame span, keeping start fixed. ⚠length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate > 0;无专门 AE gate→round-trip |
+| `*Composition.SetWorkAreaEndFrame` | 🟢stable | roundtrip | 2020 |  | SetWorkAreaEndFrame writes the work-area end from an integer frame. ⚠length-preserving;委托 SetWorkArea(保留 start);需 FrameRate > 0;无专门 AE gate→round-trip |
+| `*Composition.SetWorkAreaStartFrame` | 🟢stable | roundtrip | 2020 |  | SetWorkAreaStartFrame writes the work-area start from an integer frame, preserving the existing end. ⚠length-preserving;委托 SetWorkArea(保留 end);需 FrameRate > 0;无专门 AE gate→round-trip |
 
 ## effect
 
@@ -30,19 +66,53 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `AddEssentialProperty` | 🟢stable | ae-accept | 2020 | TestEGAdd_AEShipGate_AE2020<br>TestEGAdd_AEShipGate_AE2025 | AddEssentialProperty exposes one parameter of an effect on layer in the owning composition's Essential Graphics panel — mirrors AE's "addProperty to Essential Graphics" / Property.addToMotionGraphicsTemplate. ⚠scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused |
+| `*Composition.SetMotionGraphicsTemplateName` | 🟢stable | ae-accept | 2020 | TestEGAdd_AEShipGate_AE2020<br>TestEGAdd_AEShipGate_AE2025 | SetMotionGraphicsTemplateName renames the comp's Motion Graphics template — mirrors AE's CompItem.motionGraphicsTemplateName setter. ⚠length-variable(CIFO/CIF2/CIF3 各两处名字全部替换+父 LIST size 重算);空名拒绝;无 EG shell 拒绝 |
 
 ## expr
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `*Property.SetExpression` | 🟢stable | ae-accept | 2020 | TestExpression_AEShipGate_AE2020<br>TestExpression_AEShipGate_AE2025<br>TestExprEffect_AEShipGate_AE2020<br>TestExprEffect_AEShipGate_AE2025 | SetExpression rewrites the JavaScript expression source attached to this property. ⚠length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);单值表达式 round-trip,复杂引用未逐一验 |
+| `*Property.SetExpressionEnabled` | 🟢stable | roundtrip | 2020 |  | SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself). ⚠length-preserving 低风险;tdb4 @0x77 1 byte;无专门 AE gate→round-trip;仅对有 tdbs 的属性有效 |
+| `*Project.SetExpressionEngine` | 🟢stable | roundtrip | 2020 |  | SetExpressionEngine writes the ExEn Utf8. ⚠length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);无专门 AE gate→round-trip |
 
 ## gradient
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
+| `*VectorGroup.AddGradientFill` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | AddGradientFill appends a default-valued GradientFillNode (2-stop black→white linear gradient, fully opaque) and returns it. |
+| `*GradientFillNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientAnim_AEShipGate_AE2020<br>TestGradientAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow). |
+| `*GradientStrokeNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientStrokeAnim_AEShipGate_AE2020<br>TestGradientStrokeAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke). |
+| `*VectorGroup.AddGradientStroke` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | AddGradientStroke appends a default-valued GradientStrokeNode (2-stop black→white gradient) and returns it. |
 | `NewGradientFillNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | NewGradientFillNode returns a detached gradient-fill shape node. |
 | `NewGradientStrokeNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025<br>TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | NewGradientStrokeNode returns a detached gradient-stroke shape node. |
+| `*GradientFillNode.SetAlphaStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetAlphaStops replaces the gradient's alpha (opacity) stops. |
+| `*GradientStrokeNode.SetAlphaStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]). |
+| `*GradientStrokeNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]). |
+| `*GradientFillNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops. |
+| `*GradientStrokeNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
+| `*GradientFillNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradientDir_AEShipGate_AE2020<br>TestMGGradientDir_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
+| `*GradientFillNode.SetGradientType` | 🟢stable | render-pixel | 2020 | TestMGGradientRadial_AEShipGate_AE2020<br>TestMGGradientRadial_AEShipGate_AE2025 | SetGradientType selects linear (default) or radial ramp shape. |
+| `*GradientStrokeNode.SetGradientType` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetGradientType selects linear (default) or radial ramp shape. |
+| `*GradientStrokeNode.SetHighlightAngle` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset. |
+| `*GradientFillNode.SetHighlightAngle` | 🟢stable | render-pixel | 2020 | TestMGGradientHilite_AEShipGate_AE2020<br>TestMGGradientHilite_AEShipGate_AE2025 | SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset. |
+| `*GradientFillNode.SetHighlightLength` | 🟢stable | render-pixel | 2020 | TestMGGradientHilite_AEShipGate_AE2020<br>TestMGGradientHilite_AEShipGate_AE2025 | SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred). |
+| `*GradientStrokeNode.SetHighlightLength` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred). |
+| `*GradientStrokeNode.SetLineCap` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeStyle_AEShipGate_AE2020<br>TestMGGradStrokeStyle_AEShipGate_AE2025 | SetLineCap sets the gradient stroke's end-cap style (Butt / Round / Projecting). |
+| `*GradientStrokeNode.SetLineJoin` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeStyle_AEShipGate_AE2020<br>TestMGGradStrokeStyle_AEShipGate_AE2025 | SetLineJoin sets the gradient stroke's corner-join style (Miter / Round / Bevel). |
+| `*GradientStrokeNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeStyle_AEShipGate_AE2020<br>TestMGGradStrokeStyle_AEShipGate_AE2025 | SetMiterLimit sets the gradient stroke's miter limit (only used when LineJoin is Miter; must be ≥ 1). |
+| `*GradientStrokeNode.SetStartPoint` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetStartPoint sets the gradient ramp's start point (shape-local coords). |
+| `*GradientFillNode.SetStartPoint` | 🟢stable | render-pixel | 2020 | TestMGGradientDir_AEShipGate_AE2020<br>TestMGGradientDir_AEShipGate_AE2025 | SetStartPoint sets the gradient ramp's start point (shape-local coords). |
+| `*GradientStrokeNode.SetStrokeWidth` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetStrokeWidth sets the gradient stroke's width (pixels; must be ≥ 0). |
+
+## io
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `*Footage.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment writes a project-panel comment on the footage item. ⚠length-variable(cmta 整片替换+父 LIST size 重算);无专门 AE gate→round-trip |
+| `*Footage.SetLabel` | 🟢stable | roundtrip | 2020 |  | SetLabel writes the project-panel color label index for the footage. ⚠length-preserving(1B);越界值照写;无专门 AE gate→round-trip |
+| `*Project.WriteAEP` | 🟢stable | roundtrip | 2020 |  | WriteAEP serializes the (possibly mutated) project back to RIFX binary form. ⚠核心写回;被全部结构性 ship-gate 间接覆盖;无单一专属 AE gate 可精确引用 |
+| `*Project.WriteJSON` | 🟢stable | roundtrip | 2020 |  | WriteJSON writes the project as indented JSON to w. ⚠JSON 单向导出(无 ReadJSON);确定性 + golden 测试验证;不涉及 AE |
 
 ## keyframe
 
@@ -50,6 +120,17 @@
 |---|---|---|---|---|---|
 | `DeleteKeyframe` | 🟢stable | roundtrip | 2020 |  | DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. ⚠无独立 Go AE gate → 库内 round-trip |
 | `InsertKeyframe` | 🟢stable | roundtrip | 2020 |  | InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. ⚠需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear |
+| `*Keyframe.SetFrameTime` | 🟢stable | roundtrip | 2020 |  | SetFrameTime writes the keyframe's time from an integer frame, delegating to SetTime. ⚠length-preserving;委托 Keyframe.SetTime;需 FrameRate > 0;无专门 AE gate→round-trip |
+| `*Keyframe.SetInInterp` | 🟢stable | roundtrip | 2020 |  | SetInInterp / SetOutInterp write a new interpolation enum byte to the keyframe block @0x04 / @0x05. ⚠length-preserving(1B @0x04);无专门 AE gate→round-trip |
+| `*Keyframe.SetInSpatialTangent` | 🟢stable | roundtrip | 2020 |  | SetInSpatialTangent / SetOutSpatialTangent write 3D Bezier tangent vectors. ⚠length-preserving(dims×8B);仅空间属性有效(Position/AnchorPoint);slice 长度须等于 Property.Components;无专门 AE gate→round-trip |
+| `*Keyframe.SetInTemporalEase` | 🟢stable | roundtrip | 2020 |  | SetInTemporalEase writes a new per-side temporal ease list to the keyframe. ⚠length-preserving;slice 长度须匹配 ease shape(空间属性 1 / N-D 为 N);无专门 AE gate→round-trip |
+| `*Property.SetLockedRatio` | 🟢stable | roundtrip | 2020 |  | SetLockedRatio sets the locked ratio flag on the property. ⚠length-preserving 低风险;tdsb @0x02 bit 4;无专门 AE gate→round-trip |
+| `*Keyframe.SetOutInterp` | 🟢stable | roundtrip | 2020 |  | SetOutInterp see SetInInterp. ⚠length-preserving(1B @0x05);无专门 AE gate→round-trip |
+| `*Keyframe.SetOutSpatialTangent` | 🟢stable | roundtrip | 2020 |  | SetOutSpatialTangent see SetInSpatialTangent. ⚠length-preserving(dims×8B);仅空间属性有效;slice 长度须等于 Property.Components;无专门 AE gate→round-trip |
+| `*Keyframe.SetOutTemporalEase` | 🟢stable | roundtrip | 2020 |  | SetOutTemporalEase mirrors SetInTemporalEase for the out side. ⚠length-preserving;slice 长度须匹配 ease shape;无专门 AE gate→round-trip |
+| `*Property.SetStaticValue` | 🟢stable | roundtrip | 2020 |  | SetStaticValue rewrites a property's constant value in-place (only valid for properties without keyframes — those with a cdat chunk). ⚠length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);无专门 AE gate→round-trip |
+| `*Keyframe.SetTime` | 🟢stable | roundtrip | 2020 |  | SetTime rewrites this keyframe's time in-place using its owning composition's TickRate (decoded at parse time from cdta). ⚠length-preserving(ldat tick write);chunk size 不变;无专门 AE gate→round-trip |
+| `*Keyframe.SetValue` | 🟢stable | roundtrip | 2020 |  | SetValue rewrites this keyframe's numeric value in-place. ⚠length-preserving;1D 传 float64,N-D 传 []float64 且长度须匹配;无专门 AE gate→round-trip |
 
 ## layer-create
 
@@ -68,16 +149,102 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
+| `*Layer.ClearAlternateSource` | 🟢stable | roundtrip | 2020 |  | ClearAlternateSource removes the media-replacement override (blsi = 0) so AE falls back to the wrapper precomp's default source. ⚠委托 SetAlternateSource(nil);须预先有 blsi slot;无专门 AE gate→round-trip |
+| `*Layer.ClearTrackMatteLayer` | 🟢stable | roundtrip | 2023 |  | ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone). ⚠委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;无专门 AE gate→round-trip |
+| `*Layer.RemoveTrackMatte` | 🟢stable | roundtrip | 2023 |  | RemoveTrackMatte clears this layer's track matte assignment — both the mode (TrackMatte → None) and the explicit source pointer (TrackMatteLayerID → 0). ⚠委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;无专门 AE gate→round-trip |
+| `*Layer.ReplaceSource` | 🟢stable | roundtrip | 2020 |  | ReplaceSource replaces the layer's source with the given AV item (Composition or Footage). ⚠length-preserving;委托 SetSource(item.ID);fixExpressions 参数接受但未实现(添加 Warning);无专门 AE gate→round-trip |
+| `*Layer.SetAlternateSource` | 🟢stable | roundtrip | 2020 |  | SetAlternateSource overrides this layer's source via the Essential Properties → Media Replacement slot (4-byte blsi write, length- preserving). ⚠length-preserving;须预先有 blsi slot(无 slot → 报错);项目内验证 itemID;无专门 AE gate→round-trip |
 | `*Layer.SetAnchorPoint` | 🟢stable | roundtrip | 2020 |  | SetAnchorPoint writes a new static anchor-point. ⚠length-preserving;v 长度须匹配 Components(2D/3D);无专门 AE gate→round-trip |
+| `*Layer.SetAudioEnabled` | 🟢stable | roundtrip | 2020 |  | SetAudioEnabled toggles the layer's audio switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetAudioLevels` | 🟢stable | roundtrip | 2020 |  | SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB). ⚠length-preserving;[left,right] dB 静态值;无音轨属性 → 报错;无专门 AE gate→round-trip |
+| `*Layer.SetAutoOrient` | 🟢stable | roundtrip | 2020 |  | SetAutoOrient writes the layer's auto-orient mode by clearing the three mutually-exclusive bits across ldta @0x25/@0x26 and setting the one matching the requested AutoOrientType. ⚠length-preserving 低风险;互斥 bit 组跨 @0x25/0x26;无专门 AE gate→round-trip |
+| `*Layer.SetBlendingMode` | 🟢stable | roundtrip | 2020 |  | SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. ⚠length-preserving 低风险;单字节 @ldta 0x63;无专门 AE gate→round-trip |
+| `*Layer.SetCameraAperture` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraAperture writes the aperture property (pixels). |
+| `*Layer.SetCameraBlurLevel` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraBlurLevel writes the blur-level property (%). |
+| `*Layer.SetCameraDepthOfField` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0). |
+| `*Layer.SetCameraFocusDistance` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraFocusDistance writes the focus-distance property (pixels). |
+| `*Layer.SetCameraZoom` | 🟢stable | roundtrip | 2020 |  | SetCameraZoom writes a new static value to the camera's Zoom property (pixels). ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetCollapseTransform` | 🟢stable | roundtrip | 2020 |  | SetCollapseTransform toggles "Collapse Transformations" (for nested comps) or "Continuously Rasterize" (for Illustrator / shape layers). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment rewrites the layer's comment text (AE's "Comments" timeline column / Layer Settings dialog). ⚠length-variable(cmta 整片替换或插入新 cmta);父 LIST size 重算;无专门 AE gate→round-trip |
+| `*Layer.SetEffectsEnabled` | 🟢stable | roundtrip | 2020 |  | SetEffectsEnabled toggles the layer's fx switch (whether effects render). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetFrameBlendEnabled` | 🟢stable | roundtrip | 2020 |  | SetFrameBlendEnabled toggles the layer's frame-blend switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetFrameBlendPixelMotion` | 🟢stable | roundtrip | 2020 |  | SetFrameBlendPixelMotion switches frame blending mode between Frame Mix (false) and Pixel Motion (true). ⚠length-preserving 低风险;单 bit @ldta 0x25;需配合 FrameBlendEnabled=true 才生效;无专门 AE gate→round-trip |
+| `*Layer.SetFrameInPoint` | 🟢stable | roundtrip | 2020 |  | SetFrameInPoint writes the layer in-point converting the integer frame back to seconds via the owning comp's FrameRate, then delegates to SetInPoint. ⚠length-preserving;委托 SetInPoint;需 owning comp FrameRate > 0;无专门 AE gate→round-trip |
+| `*Layer.SetFrameOutPoint` | 🟢stable | roundtrip | 2020 |  | SetFrameOutPoint writes the layer out-point from an integer frame. ⚠length-preserving;委托 SetOutPoint;需 owning comp FrameRate > 0;无专门 AE gate→round-trip |
+| `*Layer.SetFrameStartTime` | 🟢stable | roundtrip | 2020 |  | SetFrameStartTime writes the layer start-time from an integer frame. ⚠length-preserving;委托 SetStartTime;需 owning comp FrameRate > 0;无专门 AE gate→round-trip |
+| `*Layer.SetGeometryBevelDirection` | 🟢stable | roundtrip | 2020 |  | SetGeometryBevelDirection writes Bevel Direction enum. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetGeometryPlaneCurvature` | 🟢stable | roundtrip | 2020 |  | SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1). ⚠length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip |
+| `*Layer.SetGeometryPlaneSubdivision` | 🟢stable | roundtrip | 2020 |  | SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality). ⚠length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip |
+| `*Layer.SetInPoint` | 🟢stable | roundtrip | 2020 |  | SetInPoint writes the layer's source-media in-point (seconds) to ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in). ⚠length-preserving 低风险;8 字节分数对 @ldta 0x14/0x18;写后自动更新 Duration;无专门 AE gate→round-trip |
+| `*Layer.SetIrisAspectRatio` | 🟢stable | roundtrip | 2020 |  | SetIrisAspectRatio writes the Iris Aspect Ratio. ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisDiffractionFringe` | 🟢stable | roundtrip | 2020 |  | SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%). ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisHighlightGain` | 🟢stable | roundtrip | 2020 |  | SetIrisHighlightGain writes the Iris Highlight Gain. ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisHighlightSaturation` | 🟢stable | roundtrip | 2020 |  | SetIrisHighlightSaturation writes the Iris Highlight Saturation. ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisHighlightThreshold` | 🟢stable | roundtrip | 2020 |  | SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1). ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisRotation` | 🟢stable | roundtrip | 2020 |  | SetIrisRotation writes the Iris Rotation (degrees). ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisRoundness` | 🟢stable | roundtrip | 2020 |  | SetIrisRoundness writes the Iris Roundness (%). ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIrisShape` | 🟢stable | roundtrip | 2020 |  | SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon). ⚠length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip |
+| `*Layer.SetIs3D` | 🟢stable | ae-accept | 2020 | TestLayer3DEnable_AEShipGate_AE2020<br>TestLayer3DEnable_AEShipGate_AE2025 | SetIs3D toggles the layer's 3D-layer switch. |
+| `*Layer.SetIsAdjust` | 🟢stable | roundtrip | 2020 |  | SetIsAdjust toggles the layer's "Adjustment Layer" switch. ⚠length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip |
+| `*Layer.SetIsGuide` | 🟢stable | roundtrip | 2020 |  | SetIsGuide toggles the layer's "Guide Layer" switch (AE renders it in the comp viewer but excludes it from output). ⚠length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip |
+| `*Layer.SetIsNull` | 🟢stable | roundtrip | 2020 |  | SetIsNull toggles the Null-Object marker bit. ⚠length-preserving 低风险;单 bit @ldta 0x26;post-hoc flip 产生非常见行为;无专门 AE gate→round-trip |
+| `*Layer.SetLabel` | 🟢stable | roundtrip | 2020 |  | SetLabel writes a new timeline label-color index (0..16) to ldta @0x3D. ⚠length-preserving 低风险;单字节 @ldta 0x3D;范围 0..16;无专门 AE gate→round-trip |
+| `*Layer.SetLightCastsShadows` | 🟢stable | render-pixel | 2020 | TestLayer3DShadow_AEShipGate_AE2020<br>TestLayer3DShadow_AEShipGate_AE2025 | SetLightCastsShadows toggles the Casts Shadows switch (true=1, false=0). |
+| `*Layer.SetLightColor` | 🟢stable | roundtrip | 2020 |  | SetLightColor writes the light's Color property. ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightConeAngle` | 🟢stable | roundtrip | 2020 |  | SetLightConeAngle writes the spotlight cone angle (degrees). ⚠length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightConeFeather` | 🟢stable | roundtrip | 2020 |  | SetLightConeFeather writes the spotlight cone-feather (%). ⚠length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightFalloffDistance` | 🟢stable | roundtrip | 2020 |  | SetLightFalloffDistance writes the falloff distance (pixels). ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightFalloffStart` | 🟢stable | roundtrip | 2020 |  | SetLightFalloffStart writes the falloff-start distance (pixels). ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightFalloffType` | 🟢stable | roundtrip | 2020 |  | SetLightFalloffType writes the falloff type enum. ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightIntensity` | 🟢stable | render-pixel | 2020 | TestLayer3DLight_AEShipGate_AE2020<br>TestLayer3DLight_AEShipGate_AE2025 | SetLightIntensity writes the light intensity (%). |
+| `*Layer.SetLightKind` | 🟢stable | ae-accept | 2020 | TestLayer3DLight_AEShipGate_AE2020<br>TestLayer3DLight_AEShipGate_AE2025 | SetLightKind rewrites the light layer's kind (ldta @0x88, 4 bytes BE uint32). |
+| `*Layer.SetLightShadowDarkness` | 🟢stable | roundtrip | 2020 |  | SetLightShadowDarkness writes the shadow darkness (%). ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightShadowDiffusion` | 🟢stable | roundtrip | 2020 |  | SetLightShadowDiffusion writes the shadow diffusion (pixels). ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
+| `*Layer.SetLightSource` | 🟢stable | roundtrip | 2024 |  | SetLightSource writes the environment-light source layer ID for a Light layer (AE 24+). ⚠length-preserving;AE 24+ 环境灯专用;Light 层 only;3D/Light/Camera 目标拒绝;无专门 AE gate→round-trip |
+| `*Layer.SetLocked` | 🟢stable | roundtrip | 2020 |  | SetLocked toggles the layer's Lock flag (🔒). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetMarkersLocked` | 🟢stable | roundtrip | 2020 |  | SetMarkersLocked toggles "Lock markers" on the layer. ⚠length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialAcceptsLights` | 🟢stable | roundtrip | 2020 |  | SetMaterialAcceptsLights toggles the Accepts Lights switch. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialAcceptsShadows` | 🟢stable | roundtrip | 2020 |  | SetMaterialAcceptsShadows toggles the Accepts Shadows switch. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialAmbient` | 🟢stable | roundtrip | 2020 |  | SetMaterialAmbient / Diffuse / Specular / Shininess / Metal / Reflection / Glossiness / Fresnel / Transparency / TranspRolloff / IndexOfRefraction — physically-based material coefficients. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialAppearsInReflections` | 🟢stable | roundtrip | 2020 |  | SetMaterialAppearsInReflections toggles whether this layer appears in reflective surfaces of other 3D layers. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialCastsShadows` | 🟢stable | render-pixel | 2020 | TestLayer3DShadow_AEShipGate_AE2020<br>TestLayer3DShadow_AEShipGate_AE2025 | SetMaterialCastsShadows writes the tri-state Casts Shadows enum (Off/On/Only). |
+| `*Layer.SetMaterialDiffuse` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialFresnel` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialGlossiness` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialIndexOfRefraction` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialLightTransmission` | 🟢stable | roundtrip | 2020 |  | SetMaterialLightTransmission writes light transmission (0..1). ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialMetal` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
 | `SetMaterialOption` | 🟡alpha | render-pixel | 2020 | TestLayer3DShadow_AEShipGate_AE2020<br>TestLayer3DShadow_AEShipGate_AE2025 | SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g. ⚠Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate |
+| `*Layer.SetMaterialReflection` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialShadowColor` | 🟢stable | roundtrip | 2020 |  | SetMaterialShadowColor writes the shadow color (4-component RGBA). ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialShininess` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialSpecular` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialTranspRolloff` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMaterialTransparency` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
+| `*Layer.SetMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetMotionBlur toggles the layer's motion-blur switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
 | `*Layer.SetName` | 🟢stable | roundtrip | 2020 |  | SetName rewrites the layer's display name (the AE timeline label). ⚠length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip |
 | `*Layer.SetOpacity` | 🟢stable | roundtrip | 2020 |  | SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). ⚠length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖 |
 | `*Layer.SetOrientation` | 🟢stable | roundtrip | 2020 |  | SetOrientation writes the 3D orientation (3-component degrees per axis). ⚠length-preserving;3D 层 only;3 分量度数 |
+| `*Layer.SetOutPoint` | 🟢stable | roundtrip | 2020 |  | SetOutPoint writes the layer's source-media out-point (seconds) to ldta @0x1C/@0x20, then refreshes `Layer.Duration`. ⚠length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;无专门 AE gate→round-trip |
+| `*Layer.SetParent` | 🟢stable | roundtrip | 2020 |  | SetParent rewrites the layer's parent-layer ID (ldta @0x84) to `parentID`. ⚠length-preserving 低风险;4 字节 @ldta 0x84;同 comp 内验证 parentID;自 parent 拒绝;无专门 AE gate→round-trip |
 | `*Layer.SetPosition` | 🟢stable | roundtrip | 2020 |  | SetPosition writes a new static position. ⚠length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖 |
+| `*Layer.SetPreserveTransparency` | 🟢stable | roundtrip | 2020 |  | SetPreserveTransparency toggles "Preserve Underlying Transparency" (ldta @0x67, single byte 0/1). ⚠length-preserving 低风险;单字节 @ldta 0x67;无专门 AE gate→round-trip |
+| `*Layer.SetQuality` | 🟢stable | roundtrip | 2020 |  | SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). ⚠length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;无专门 AE gate→round-trip |
 | `*Layer.SetRotateX` | 🟢stable | roundtrip | 2020 |  | SetRotateX / SetRotateY write per-axis 3D rotation (degrees). ⚠length-preserving;3D 层 only(2D 报 property not present) |
 | `*Layer.SetRotateY` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving;3D 层 only(2D 报 property not present) |
 | `*Layer.SetRotation` | 🟢stable | roundtrip | 2020 |  | SetRotation writes the Z-axis rotation (degrees). ⚠length-preserving;Z 轴(2D/3D 通用) |
+| `*Layer.SetSamplingBicubic` | 🟢stable | roundtrip | 2020 |  | SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling for the layer. ⚠length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip |
 | `*Layer.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale writes a new static scale (normalized 1.0 = 100%). ⚠length-preserving;normalized 1.0=100%;2D/3D 分量 |
+| `*Layer.SetShy` | 🟢stable | roundtrip | 2020 |  | SetShy toggles the layer's Shy flag (hides from the shy-filter view). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetSolo` | 🟢stable | roundtrip | 2020 |  | SetSolo toggles the layer's Solo flag. ⚠length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip |
+| `*Layer.SetSource` | 🟢stable | roundtrip | 2020 |  | SetSource rewrites the layer's source-item ID (ldta @0x28). ⚠length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;无专门 AE gate→round-trip |
+| `*Layer.SetStartTime` | 🟢stable | roundtrip | 2020 |  | SetStartTime writes the layer's start time (seconds) to ldta @0x0C/@0x10. ⚠length-preserving 低风险;8 字节分数对 @ldta 0x0C/0x10;支持负值(pre-roll);无专门 AE gate→round-trip |
+| `*Layer.SetStretch` | 🟢stable | roundtrip | 2020 |  | SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) to ldta @0x08 (dividend) / @0x6C (divisor). ⚠length-preserving 低风险;分子/分母分处 @ldta 0x08/@0x6C;1.0=正常速度;无专门 AE gate→round-trip |
+| `*Layer.SetTimeRemapEnabled` | 🟢stable | roundtrip | 2020 |  | SetTimeRemapEnabled enables or disables time remapping on this layer. ⚠length-preserving;启用设静态值 0.0;禁用前须清关键帧;非 AV 层报错;无专门 AE gate→round-trip |
+| `*Layer.SetTrackMatte` | 🟢stable | roundtrip | 2020 |  | SetTrackMatte writes a new track-matte type byte to ldta @0x6B. ⚠length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,不重排图层;无专门 AE gate→round-trip |
+| `*Layer.SetTrackMatteLayer` | 🟢stable | roundtrip | 2023 |  | SetTrackMatteLayer rewrites this layer's explicit track matte source (ldta @0xA0, AE 23+) to `sourceID` and updates the track matte mode (ldta @0x6B) to `mode`. ⚠length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;无专门 AE gate→round-trip |
+| `*Layer.SetTrackMatteSource` | 🟢stable | roundtrip | 2023 |  | SetTrackMatteSource designates `src` as this layer's explicit track-matte source and writes the matte mode. ⚠length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;无专门 AE gate→round-trip |
+| `*Layer.SetVisible` | 🟢stable | roundtrip | 2020 |  | SetVisible toggles the layer's video switch (the 👁️ icon). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
 
 ## mask
 
@@ -87,8 +254,17 @@
 | `DuplicateMask` | 🟢stable | ae-accept | 2020 | TestDuplicateMask_AEShipGate_AE2020<br>TestDuplicateMask_AEShipGate_AE2025 | DuplicateMask inserts a copy of mask m immediately after it in layer's "ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. ⚠mask 须来自 parsed 工程(Reopen) |
 | `MoveMask` | 🟢stable | ae-accept | 2020 | TestMoveMask_AEShipGate_AE2020<br>TestMoveMask_AEShipGate_AE2025 | MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. ⚠mask 须来自 parsed 工程(Reopen) |
 | `RemoveMask` | 🟢stable | ae-accept | 2020 | TestRemoveMask_AEShipGate_AE2020<br>TestRemoveMask_AEShipGate_AE2025 | RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of AddMask. ⚠删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程 |
+| `*Mask.SetClosed` | 🟢stable | roundtrip | 2020 |  | SetClosed toggles whether the (first) path is closed (shph @0x14). ⚠length-preserving(1B shph @0x14);动画遮罩仅影响第一帧 snapshot;无专门 AE gate→round-trip |
+| `*Mask.SetColor` | 🟢stable | roundtrip | 2020 |  | SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. ⚠length-preserving(3B mkif @0x2D-0x2F);alpha 不动;无专门 AE gate→round-trip |
+| `*Mask.SetExpansion` | 🟢stable | roundtrip | 2020 |  | SetExpansion sets the mask's Expansion (AE "Mask Expansion", internally `ADBE Mask Offset`) in pixels — positive grows the masked region, negative shrinks it. ⚠synthesis-insert;需 Reopen 后调用;正值扩张负值收缩;无专门 AE gate→round-trip |
+| `*Mask.SetFeather` | 🟢stable | roundtrip | 2020 |  | SetFeather sets the mask's Feather softness (X, Y in pixels). ⚠synthesis-insert;需 Reopen 后调用;xy 不得为负;无专门 AE gate→round-trip |
+| `*Mask.SetInverted` | 🟢stable | roundtrip | 2020 |  | SetInverted toggles the mask Inverted flag (mkif @0x00). ⚠length-preserving(1B mkif @0x00);无专门 AE gate→round-trip |
+| `*Mask.SetLocked` | 🟢stable | roundtrip | 2020 |  | SetLocked toggles the mask's lock flag (mkif @0x01). ⚠length-preserving(1B mkif @0x01);AE UI 锁定但字节仍可写;无专门 AE gate→round-trip |
+| `*Mask.SetMaskMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. ⚠length-preserving(1B mkif @0x02);无专门 AE gate→round-trip |
 | `SetMaskPath` | 🟢stable | ae-accept | 2020 | TestMGMaskPath_AEShipGate_AE2020<br>TestMGMaskPath_AEShipGate_AE2025 | SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). ⚠mask 须来自 parsed 工程(Reopen);顶点数可与原不同 |
 | `SetMaskPathKeyframes` | 🟢stable | ae-accept | 2020 | TestMGMaskPathKf_AEShipGate_AE2020<br>TestMGMaskPathKf_AEShipGate_AE2025 | SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). ⚠>=2 关键帧;逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen) |
+| `*Mask.SetMode` | 🟢stable | roundtrip | 2020 |  | SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04. ⚠length-preserving(4B mkif @0x04);无专门 AE gate→round-trip |
+| `*Mask.SetOpacity` | 🟢stable | render-pixel | 2020 | TestMGMaskOpacity_AEShipGate_AE2020<br>TestMGMaskOpacity_AEShipGate_AE2025 | SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). ⚠synthesis-insert;需 Reopen 后调用;0..1 范围拒绝越界 |
 
 ## meta
 
@@ -116,7 +292,27 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `NewProject` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target. ⚠零参=TargetAE2020;支持 2020/2022/2025 |
+| `*Project.SetAudioSampleRate` | 🟢stable | roundtrip | 2020 |  | SetAudioSampleRate writes the adfr f64 BE. ⚠length-preserving 低风险;enum 校验(AE UI 支持值);无专门 AE gate→round-trip |
+| `*Project.SetBitsPerChannel` | 🟢stable | roundtrip | 2020 |  | SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc) to BOTH the nhed @0x0F and nnhd @0x18 header bytes. ⚠length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);无专门 AE gate→round-trip |
 | `*Project.SetColorManagementSystem` | 🟢stable | roundtrip | 2024 |  | SetColorManagementSystem sets the color management system. ⚠仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Adobe/OCIO);无独立 AE gate → round-trip |
+| `*Project.SetCompensateForSceneReferredProfiles` | 🟢stable | roundtrip | 2020 |  | SetCompensateForSceneReferredProfiles writes the acer byte. ⚠length-preserving 低风险;无专门 AE gate→round-trip;acer chunk 缺失时 refuse |
+| `*Project.SetDisplayStartFrame` | 🟢stable | roundtrip | 2020 |  | SetDisplayStartFrame sets the display start frame (0 or 1). ⚠length-preserving 低风险;enum 校验(0/1);经 frames_count_type 修改 nnhd byte 20;无专门 AE gate→round-trip |
+| `*Project.SetFeetFramesFilmType` | 🟢stable | roundtrip | 2020 |  | SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7. ⚠length-preserving 低风险(nnhd 固定 40 字节);enum 校验(35mm/16mm);无专门 AE gate→round-trip |
+| `*Project.SetFootageTimecodeDisplayStartType` | 🟢stable | roundtrip | 2020 |  | SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9. ⚠length-preserving 低风险(nnhd byte 9);无专门 AE gate→round-trip |
+| `*Project.SetFramesCountType` | 🟢stable | roundtrip | 2020 |  | SetFramesCountType writes the frames count type to nnhd byte 20. ⚠length-preserving 低风险(nnhd byte 20);无专门 AE gate→round-trip |
+| `*Project.SetFramesUseFeetFrames` | 🟢stable | roundtrip | 2020 |  | SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0. ⚠length-preserving 低风险(nnhd byte 11 bit 0);无专门 AE gate→round-trip |
+| `*Project.SetGpuAccelType` | 🟢stable | roundtrip | 2020 |  | SetGpuAccelType replaces the gpuG Utf8 string in-place (length-variable splice; WriteAEP recomputes parent LIST size). ⚠length-variable splice(WriteAEP 重算父 LIST size);无专门 AE gate→round-trip |
+| `*Project.SetLinearBlending` | 🟢stable | roundtrip | 2020 |  | SetLinearBlending toggles the lnrb chunk under root. ⚠presence-encoded toggle(lnrb chunk 增删);无专门 AE gate→round-trip |
+| `*Project.SetLinearizeWorkingSpace` | 🟢stable | roundtrip | 2020 |  | SetLinearizeWorkingSpace toggles the lnrp chunk under root. ⚠presence-encoded toggle(lnrp chunk 增删);无专门 AE gate→round-trip |
+| `*Project.SetLutInterpolationMethod` | 🟢stable | roundtrip | 2024 |  | SetLutInterpolationMethod sets the LUT interpolation method. ⚠仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Trilinear/Tetrahedral);无专门 AE gate→round-trip |
+| `*Project.SetOcioConfigurationFile` | 🟢stable | roundtrip | 2024 |  | SetOcioConfigurationFile sets the OCIO configuration file path. ⚠仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);需 OCIO 工作流;无专门 AE gate→round-trip |
+| `*Footage.SetPath` | 🟢stable | roundtrip | 2020 |  |  ⚠length-variable(alas JSON fullpath rewrite + Cpth chunk 全替换);素材路径重定向;无专门 AE gate→round-trip |
+| `*Footage.SetSolidColor` | 🟢stable | ae-accept | 2020 | TestSolidSetters_AEShipGate_AE2020<br>TestSolidSetters_AEShipGate_AE2025 | SetPath updates the footage's source path. ⚠length-preserving;opti Soli chunk;AE scripting API 验值(SolidSource.color) |
+| `*Footage.SetSolidSize` | 🟢stable | ae-accept | 2020 | TestSolidSetters_AEShipGate_AE2020<br>TestSolidSetters_AEShipGate_AE2025 | SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). ⚠length-preserving;sspc chunk u16 fields;range 1..30000;AE scripting API 验值(FootageItem.width/height) |
+| `*Project.SetTimeDisplayType` | 🟢stable | roundtrip | 2020 |  | SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0. ⚠length-preserving 低风险(nnhd byte 8 bits 6-0);无专门 AE gate→round-trip |
+| `*Project.SetTimecodeDefaultBase` | 🟢stable | roundtrip | 2020 |  | SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15. ⚠length-preserving 低风险(nnhd u16 BE bytes 14-15);范围 1-999;无专门 AE gate→round-trip |
+| `*Project.SetTransparencyGridThumbnails` | 🟢stable | roundtrip | 2020 |  | SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25. ⚠length-preserving 低风险(nnhd byte 25);无专门 AE gate→round-trip |
+| `*Project.SetWorkingGamma` | 🟢stable | roundtrip | 2020 |  | SetWorkingGamma writes the dwga selector byte. ⚠length-preserving 低风险;enum 校验(2.2/2.4);无专门 AE gate→round-trip |
 
 ## render-queue
 
@@ -124,11 +320,66 @@
 |---|---|---|---|---|---|
 | `AddItem` | 🟡alpha | roundtrip | 2020 |  | AddItem appends a render queue item for comp, mirroring ExtendScript RenderQueue.items.add(comp). ⚠需队列已有 >=1 item 作模板;输出模块沿用模板路径;未 AE-gate |
 | `RemoveItem` | 🟡alpha | roundtrip | 2020 |  | RemoveItem deletes the render queue item at index (0-based), mirroring ExtendScript RenderQueueItem.remove(). ⚠仅单输出模块 item 的 Rout RE 覆盖;未 AE-gate |
+| `*OutputModule.SetChannels` | 🟡alpha | roundtrip | 2020 |  | SetChannels sets the output channels (0 RGB / 1 RGBA / 2 Alpha). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetColorDepth` | 🟡alpha | roundtrip | 2020 |  | SetColorDepth sets the color depth (-1 current / 0 8bpc / 1 16bpc / 2 32bpc). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetComment` | 🟡alpha | ae-accept | 2020 | TestRenderQueueComment_AEShipGate_AE2020<br>TestRenderQueueComment_AEShipGate_AE2025 | SetComment sets the render queue item's comment (shown in the Render Queue panel). ⚠length-variable(RCom chunk 插入/替换);AE 接受+resave-preservation 已验证;无 ScriptingAPI readback |
+| `*OutputModule.SetCrop` | 🟡alpha | roundtrip | 2020 |  | SetCrop toggles crop (flag byte @0x1F bit 0). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetCropBottom` | 🟡alpha | roundtrip | 2020 |  |  ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetCropLeft` | 🟡alpha | roundtrip | 2020 |  |  ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetCropRight` | 🟡alpha | roundtrip | 2020 |  |  ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetCropTop` | 🟡alpha | roundtrip | 2020 |  | SetCropTop/Left/Bottom/Right set the crop insets (px). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetDepth` | 🟡alpha | roundtrip | 2020 |  | SetDepth sets the output color depth (Roou @0x47), e.g. ⚠Alpha,未 AE-gate;length-preserving 低风险(roouData 字节) |
+| `*RenderQueueItem.SetDiskCache` | 🟡alpha | roundtrip | 2020 |  | SetDiskCache sets disk cache (0 read-only / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetEffects` | 🟡alpha | roundtrip | 2020 |  | SetEffects sets the effects render setting (0 all-off / 1 all-on / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetFieldRender` | 🟡alpha | roundtrip | 2020 |  | SetFieldRender sets field rendering (0 off / 1 upper-first / 2 lower-first). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetFrameBlending` | 🟡alpha | roundtrip | 2020 |  | SetFrameBlending sets frame blending (0 off-all / 1 on-checked / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetFrameRate` | 🟡alpha | roundtrip | 2020 |  | SetFrameRate sets the frame-rate source (0 use comp / 1 use this). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetGuideLayers` | 🟡alpha | roundtrip | 2020 |  | SetGuideLayers sets guide layers (0 off / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetIncludeProjectLink` | 🟡alpha | roundtrip | 2020 |  | SetIncludeProjectLink toggles the "include project link" flag. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetIncludeSourceXMP` | 🟡alpha | roundtrip | 2020 |  | SetIncludeSourceXMP toggles "include source XMP metadata" (bit 6). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetLockAspectRatio` | 🟡alpha | roundtrip | 2020 |  | SetLockAspectRatio toggles lock-aspect-ratio. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetLogType` | 🟡alpha | roundtrip | 2020 |  | SetLogType sets the raw log-type code (@0x50). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetMotionBlur` | 🟡alpha | roundtrip | 2020 |  | SetMotionBlur sets motion blur (0 off-all / 1 on-checked / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetName` | 🟡alpha | roundtrip | 2020 |  | SetName sets the render-settings template name (template_name @0x5A, a fixed 64-byte windows-1252 NUL-padded field). ⚠Alpha,未 AE-gate;length-preserving 低风险(固定 64B 字段) |
+| `*OutputModule.SetPostRenderAction` | 🟡alpha | roundtrip | 2020 |  | SetPostRenderAction sets the raw post-render action code. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetPreserveRGB` | 🟡alpha | roundtrip | 2020 |  | SetPreserveRGB toggles "preserve RGB" (bit 7). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetProxyUse` | 🟡alpha | roundtrip | 2020 |  | SetProxyUse sets proxy use (0 none / 1 all / 2 current / 3 comp-only). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetPulldown` | 🟡alpha | roundtrip | 2020 |  | SetPulldown sets the 3:2 pulldown phase (0 off / 1..5). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetQuality` | 🟡alpha | roundtrip | 2020 |  | SetQuality sets the render quality (-1 current / 0 wireframe / 1 draft / 2 best). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetQueueItemNotify` | 🟡alpha | roundtrip | 2020 |  | SetQueueItemNotify toggles the notify-on-completion flag (flag byte @0x07 bit 2). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetResize` | 🟡alpha | roundtrip | 2020 |  | SetResize toggles resize. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetResizeQuality` | 🟡alpha | roundtrip | 2020 |  | SetResizeQuality sets the resize quality. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetResolution` | 🟡alpha | roundtrip | 2020 |  | SetResolution sets the [x, y] resolution divisors (>= 1). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetSkipExistingFiles` | 🟡alpha | roundtrip | 2020 |  | SetSkipExistingFiles toggles "skip existing files". ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetSoloSwitches` | 🟡alpha | roundtrip | 2020 |  | SetSoloSwitches sets solo switches (0 off / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetStartingNumber` | 🟡alpha | roundtrip | 2020 |  | SetStartingNumber sets the image-sequence starting frame number (Roou @0x10). ⚠Alpha,未 AE-gate;length-preserving 低风险(roouData 字节) |
+| `*RenderQueueItem.SetTimeSpanDuration` | 🟡alpha | roundtrip | 2020 |  | SetTimeSpanDuration sets the render duration (seconds), switching the time span source to CUSTOM. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*RenderQueueItem.SetTimeSpanStart` | 🟡alpha | roundtrip | 2020 |  | SetTimeSpanStart sets the render start time (seconds), switching the time span source to CUSTOM. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetUseCompFrameNumber` | 🟡alpha | roundtrip | 2020 |  | SetUseCompFrameNumber toggles "use comp frame number" (flag byte @0x07 bit 3). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
+| `*OutputModule.SetUseRegionOfInterest` | 🟡alpha | roundtrip | 2020 |  | SetUseRegionOfInterest toggles "use region of interest" (bit 4). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 
 ## shape
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
+| `*VectorGroup.AddEllipse` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | AddEllipse appends a default-valued EllipseNode and returns it. |
+| `*VectorGroup.AddFill` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | AddFill appends a default-valued FillNode (white, 100% opacity) and returns it. |
+| `*VectorGroup.AddMergePaths` | 🟢stable | render-pixel | 2020 | TestMGMerge_AEShipGate_AE2020<br>TestMGMerge_AEShipGate_AE2025 | AddMergePaths appends a default-valued MergePathsNode (Type=Merge) and returns it. |
+| `*VectorGroup.AddOffsetPaths` | 🟢stable | render-pixel | 2020 | TestMGOffset_AEShipGate_AE2020<br>TestMGOffset_AEShipGate_AE2025 | AddOffsetPaths appends a default-valued OffsetPathsNode (Amount=10, AE's default) and returns it. |
+| `*VectorGroup.AddPath` | 🟢stable | render-pixel | 2020 | TestMGPentagonPath_AEShipGate_AE2020<br>TestMGPentagonPath_AEShipGate_AE2025 | AddPath appends an empty (closed) PathNode and returns it. |
+| `*VectorGroup.AddPuckerBloat` | 🟢stable | render-pixel | 2020 | TestMGPuckerBloat_AEShipGate_AE2020<br>TestMGPuckerBloat_AEShipGate_AE2025 | AddPuckerBloat appends a default-valued PuckerBloatNode (Amount=0, the no-op identity) and returns it. |
+| `*VectorGroup.AddRect` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 | AddRect appends a default-valued RectNode and returns it. |
+| `*VectorGroup.AddRepeater` | 🟢stable | render-pixel | 2020 | TestMGRepeater_AEShipGate_AE2020<br>TestMGRepeater_AEShipGate_AE2025 | AddRepeater appends a default-valued RepeaterNode (3 copies, identity transform) and returns it. |
+| `*VectorGroup.AddRoundCorners` | 🟢stable | render-pixel | 2020 | TestMGRoundCorners_AEShipGate_AE2020<br>TestMGRoundCorners_AEShipGate_AE2025 | AddRoundCorners appends a default-valued RoundCornersNode (Radius=10, AE's default) and returns it. |
+| `*VectorGroup.AddStar` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | AddStar appends a default-valued StarNode (5-point star, OuterRadius=100, InnerRadius=50) and returns it — the canonical star / sparkle / badge MG primitive. |
+| `*VectorGroup.AddStroke` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | AddStroke appends a default-valued StrokeNode (black, width=2, 100% opacity) and returns it. |
+| `*VectorGroup.AddTrim` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 | AddTrim appends a default-valued TrimNode (Start=0, End=100, Offset=0 — the no-op identity trim) and returns it. |
+| `*VectorGroup.AddTwist` | 🟢stable | render-pixel | 2020 | TestMGTwist_AEShipGate_AE2020<br>TestMGTwist_AEShipGate_AE2025 | AddTwist appends a default-valued TwistNode (Angle=0, the no-op identity) and returns it. |
+| `*VectorGroup.AddWigglePaths` | 🟢stable | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | AddWigglePaths appends a default-valued WigglePathsNode (Size=0, the no-op identity) and returns it. |
+| `*VectorGroup.AddWiggleTransform` | 🟢stable | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | AddWiggleTransform appends a default-valued WiggleTransformNode (zero amplitudes, the no-op identity) and returns it. |
+| `*VectorGroup.AddZigZag` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025 | AddZigZag appends a default-valued ZigZagNode (Size=5, Detail=10 — AE's defaults) and returns it. |
+| `*StrokeDashes.Disable` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeDashes_AEShipGate_AE2020<br>TestV2_2_StrokeDashes_AEShipGate_AE2025 |  |
+| `*StrokeDashes.Enable` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeDashes_AEShipGate_AE2020<br>TestV2_2_StrokeDashes_AEShipGate_AE2025 | Enable turns dashing on (the serializer emits the Dash + Gap slots). |
 | `NewEllipseNode` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | NewEllipseNode returns a detached ellipse shape node. |
 | `NewFillNode` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | NewFillNode returns a detached fill shape node. ⚠fill 随形状渲染验证(颜色像素门禁) |
 | `NewMergePathsNode` | 🟢stable | render-pixel | 2020 | TestMGMerge_AEShipGate_AE2020<br>TestMGMerge_AEShipGate_AE2025<br>TestMGMergeModes_AEShipGate_AE2020<br>TestMGMergeModes_AEShipGate_AE2025 | NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge). |
@@ -146,6 +397,83 @@
 | `NewWigglePathsNode` | 🟡alpha | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the no-op identity). ⚠基本 render-gated;Correlation/Temporal·Spatial Phase/Roughen Points 调制 evidence-defer |
 | `NewWiggleTransformNode` | 🟡alpha | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | NewWiggleTransformNode returns a detached Wiggle Transform filter node (zero amplitudes, the no-op identity). ⚠基本 render-gated;Correlation/Phase 调制 evidence-defer |
 | `NewZigZagNode` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025<br>TestMGZigZagPoints_AEShipGate_AE2020<br>TestMGZigZagPoints_AEShipGate_AE2025 | NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10). |
+| `*OffsetPathsNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGOffset_AEShipGate_AE2020<br>TestMGOffset_AEShipGate_AE2025 | SetAmount sets the offset amount in pixels (positive grows, negative shrinks). |
+| `*StrokeWave.SetAmount` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*PuckerBloatNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGPuckerBloat_AEShipGate_AE2020<br>TestMGPuckerBloat_AEShipGate_AE2025 | SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex). |
+| `*RepeaterTransform.SetAnchor` | 🟢stable | roundtrip | 2020 |  | SetAnchor sets the per-copy anchor point (px). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*WigglerTransform.SetAnchor` | 🟢stable | roundtrip | 2020 |  | SetAnchor sets the anchor-point wiggle amplitude (pixels). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*TwistNode.SetAngle` | 🟢stable | render-pixel | 2020 | TestMGTwist_AEShipGate_AE2020<br>TestMGTwist_AEShipGate_AE2025 | SetAngle sets the twist angle (degrees; positive twists clockwise, negative counter-clockwise). |
+| `*FillNode.SetBlendMode` | 🟢stable | render-pixel | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  |
+| `*StrokeNode.SetBlendMode` | 🟢stable | render-pixel | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  |
+| `*TwistNode.SetCenter` | 🟢stable | render-pixel | 2020 | TestMGTwistCenter_AEShipGate_AE2020<br>TestMGTwistCenter_AEShipGate_AE2025 | SetCenter offsets the twist pivot from the path centre (Vec2, shape-local pixels). |
+| `*PathNode.SetClosed` | 🟢stable | render-pixel | 2020 | TestMGPentagonPath_AEShipGate_AE2020<br>TestMGPentagonPath_AEShipGate_AE2025 | SetClosed toggles the `Closed` flag without disturbing vertices/tangents. |
+| `*StrokeNode.SetColor` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 |  |
+| `*FillNode.SetColor` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
+| `*FillNode.SetCompositeOrder` | 🟢stable | render-pixel | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  |
+| `*StrokeNode.SetCompositeOrder` | 🟢stable | render-pixel | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  |
+| `*OffsetPathsNode.SetCopies` | 🟢stable | render-pixel | 2020 | TestMGOffsetCopies_AEShipGate_AE2020<br>TestMGOffsetCopies_AEShipGate_AE2025 | SetCopies sets the number of copies the Offset Paths filter stacks, each offset by a further Amount pixels — N nested outlines growing outward (or inward for a negative Amount). |
+| `*RepeaterNode.SetCopies` | 🟢stable | render-pixel | 2020 | TestMGRepeater_AEShipGate_AE2020<br>TestMGRepeater_AEShipGate_AE2025 | SetCopies sets the number of copies (≥ 1). |
+| `*OffsetPathsNode.SetCopyOffset` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetCopyOffset scales the spacing between successive offset copies (only meaningful when Copies > 1). |
+| `*StrokeDashes.SetDash` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeDashes_AEShipGate_AE2020<br>TestV2_2_StrokeDashes_AEShipGate_AE2025 | SetDash sets the dash length and enables dashing. |
+| `*ZigZagNode.SetDetail` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025 | SetDetail sets the number of ridges per path segment. |
+| `*WigglePathsNode.SetDetail` | 🟢stable | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | SetDetail sets the wiggle detail (number of segments per path length — higher = finer, more frequent ridges). |
+| `*EllipseNode.SetDirection` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RectNode.SetDirection` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*TrimNode.SetEnd` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 | SetEnd sets the trim end percentage (0..100). |
+| `*StrokeTaper.SetEndEase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*StrokeTaper.SetEndLength` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*RepeaterTransform.SetEndOpacity` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetEndOpacity sets the last copy's opacity (%, 0..100) — falloff to End. |
+| `*StrokeTaper.SetEndWidth` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*FillNode.SetFillRule` | 🟢stable | render-pixel | 2020 | TestMGOffsetCopies_AEShipGate_AE2020<br>TestMGOffsetCopies_AEShipGate_AE2025 | SetFillRule sets the winding rule (NonzeroWinding=1 / EvenOdd=2). |
+| `*StrokeDashes.SetGap` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeDashes_AEShipGate_AE2020<br>TestV2_2_StrokeDashes_AEShipGate_AE2025 | SetGap sets the gap length and enables dashing. |
+| `*StarNode.SetInnerRadius` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetInnerRadius sets the inner radius (px, the valley between points). |
+| `*StarNode.SetInnerRoundness` | 🟢stable | roundtrip | 2020 |  | SetInnerRoundness sets the inner-point roundness (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*StrokeNode.SetLineCap` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetLineCap sets the end-cap style. |
+| `*OffsetPathsNode.SetLineJoin` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetLineJoin selects the corner join for the offset outline: Miter (sharp point), Round, or Bevel (flat-cut). |
+| `*StrokeNode.SetLineJoin` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetLineJoin sets the corner-join style. |
+| `*OffsetPathsNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would extend past limit×width is clipped flat to a bevel. |
+| `*StrokeNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetMiterLimit sets the miter limit. |
+| `*TrimNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the trim offset in degrees. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RepeaterNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the copy-index offset of the first instance. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*FillNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_FillKf_AEShipGate_AE2020<br>TestV2_2_FillKf_AEShipGate_AE2025 |  |
+| `*StrokeNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeKf_AEShipGate_AE2020<br>TestV2_2_StrokeKf_AEShipGate_AE2025 |  |
+| `*RepeaterNode.SetOrder` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetOrder selects whether each copy composites Below (default) or Above the previous. |
+| `*StarNode.SetOuterRadius` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetOuterRadius sets the outer radius (px, the star tips). |
+| `*StarNode.SetOuterRoundness` | 🟢stable | roundtrip | 2020 |  | SetOuterRoundness sets the outer-point (tip) roundness (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*StrokeWave.SetPhase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*StarNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetPoints sets the number of star points. |
+| `*ZigZagNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGZigZagPoints_AEShipGate_AE2020<br>TestMGZigZagPoints_AEShipGate_AE2025 | SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth (scalloped wave ridges). |
+| `*EllipseNode.SetPosition` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
+| `*WigglerTransform.SetPosition` | 🟢stable | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | SetPosition sets the position wiggle amplitude (pixels). |
+| `*StarNode.SetPosition` | 🟢stable | roundtrip | 2020 |  | SetPosition sets the star's local position offset (px). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RepeaterTransform.SetPosition` | 🟢stable | render-pixel | 2020 | TestMGRepeater_AEShipGate_AE2020<br>TestMGRepeater_AEShipGate_AE2025 | SetPosition sets the per-copy position offset (px) — the spacing between copies. |
+| `*RectNode.SetPosition` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RoundCornersNode.SetRadius` | 🟢stable | render-pixel | 2020 | TestMGRoundCorners_AEShipGate_AE2020<br>TestMGRoundCorners_AEShipGate_AE2025 | SetRadius sets the corner radius in pixels. |
+| `*WigglePathsNode.SetRandomSeed` | 🟡alpha | roundtrip | 2020 |  | SetRandomSeed sets the random seed selecting the displacement pattern. ⚠调制参数 evidence-defer,本质不可像素门禁 |
+| `*WiggleTransformNode.SetRandomSeed` | 🟡alpha | roundtrip | 2020 |  | SetRandomSeed sets the random seed selecting the wiggle pattern. ⚠调制参数 evidence-defer,本质不可像素门禁 |
+| `*RepeaterTransform.SetRotation` | 🟢stable | roundtrip | 2020 |  | SetRotation sets the per-copy rotation (degrees) — the radial-burst knob. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*StarNode.SetRotation` | 🟢stable | render-pixel | 2020 | TestMGPolygon_AEShipGate_AE2020<br>TestMGPolygon_AEShipGate_AE2025 | SetRotation sets the star's rotation in degrees. |
+| `*WigglerTransform.SetRotation` | 🟢stable | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | SetRotation sets the rotation wiggle amplitude (degrees). |
+| `*RectNode.SetRoundness` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*WigglerTransform.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale sets the scale wiggle amplitude (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RepeaterTransform.SetScale` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetScale sets the per-copy scale (%). |
+| `*EllipseNode.SetSize` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
+| `*RectNode.SetSize` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 |  |
+| `*ZigZagNode.SetSize` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025 | SetSize sets the zigzag amplitude in pixels. |
+| `*WigglePathsNode.SetSize` | 🟢stable | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening). |
+| `*StarNode.SetStarType` | 🟢stable | render-pixel | 2020 | TestMGPolygon_AEShipGate_AE2020<br>TestMGPolygon_AEShipGate_AE2025 | SetStarType selects Star (alternating points) or Polygon (convex N-gon). |
+| `*TrimNode.SetStart` | 🟢stable | roundtrip | 2020 |  | SetStart sets the trim start percentage (0..100). ⚠length-preserving 低风险;gate 仅测 SetEnd,SetStart 默认 0 未单独测 |
+| `*StrokeTaper.SetStartEase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*StrokeTaper.SetStartLength` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*RepeaterTransform.SetStartOpacity` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetStartOpacity sets the first copy's opacity (%, 0..100). |
+| `*StrokeTaper.SetStartWidth` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*MergePathsNode.SetType` | 🟢stable | render-pixel | 2020 | TestMGMerge_AEShipGate_AE2020<br>TestMGMerge_AEShipGate_AE2025 | SetType sets the boolean merge mode. |
+| `*TrimNode.SetType` | 🟢stable | render-pixel | 2020 | TestMGTrimType_AEShipGate_AE2020<br>TestMGTrimType_AEShipGate_AE2025 | SetType selects Simultaneously (all paths as one combined length, the default) or Individually (each path trimmed to the same Start/End%). |
+| `*PathNode.SetVertices` | 🟢stable | render-pixel | 2020 | TestMGPentagonPath_AEShipGate_AE2020<br>TestMGPentagonPath_AEShipGate_AE2025 | SetVertices replaces the path's vertex list with linear segments (tangents zeroed). |
+| `*StrokeWave.SetWavelength` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*StrokeNode.SetWidth` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 |  |
+| `*WigglePathsNode.SetWigglesPerSecond` | 🟡alpha | roundtrip | 2020 |  | SetWigglesPerSecond sets the temporal frequency (`ADBE Vector Temporal Freq`, the Wiggles/Second control — how fast the random edge churns over time). ⚠调制参数 evidence-defer,本质不可像素门禁 |
+| `*WiggleTransformNode.SetWigglesPerSecond` | 🟡alpha | roundtrip | 2020 |  | SetWigglesPerSecond sets the temporal frequency (how fast the transform churns). ⚠调制参数 evidence-defer,本质不可像素门禁 |
 
 ## structural
 
@@ -170,6 +498,7 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
+| `*Layer.AddFont` | 🟢stable | roundtrip | 2020 |  | AddFont appends a new entry to the layer's Fonts table (btdk path /0/1/0) and returns the new font index. ⚠length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;无专门 AE gate→round-trip |
 | `AddTextColorAnimator` | 🟡alpha | render-pixel | 2020 | TestTextColorAnimator_AEShipGate_AE2020<br>TestTextColorAnimator_AEShipGate_AE2025 | AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g. ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
 | `AddTextFillOpacityAnimator` | 🟡alpha | render-pixel | 2020 | TestTextNeighborAnimators_AEShipGate_AE2020<br>TestTextNeighborAnimators_AEShipGate_AE2025 | AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any stroke intact). ⚠typed param accessor 未接,经 Reopen 调 |
 | `AddTextOpacityAnimator` | 🟡alpha | render-pixel | 2020 | TestTextAnimator_AEShipGate_AE2020<br>TestTextAnimator_AEShipGate_AE2025 | AddTextOpacityAnimator adds a per-character Opacity animator with a Range Selector to a text layer — the kinetic-typography primitive (fade / wipe text in or out one character at a time). ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
@@ -190,4 +519,38 @@
 | `AnimateTextRangeOffset` | 🟡alpha | render-pixel | 2020 | TestTextAnimator_AEShipGate_AE2020<br>TestTextAnimator_AEShipGate_AE2025 | AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. ⚠作用于第一个 animator;需 >=2 关键帧;tickRate<=0 用 comp 的 |
 | `AnimateTextRotation` | 🟡alpha | render-pixel | 2020 | TestTextRotLeafAnimator_AEShipGate_AE2020<br>TestTextRotLeafAnimator_AEShipGate_AE2025 | AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector. ⚠需先 AddTextRotationAnimator;leaf 已动画则 refuse;>=2 关键帧 |
 | `AnimateTextScale` | 🟡alpha | render-pixel | 2020 | TestTextColorLeafAnimator_AEShipGate_AE2020<br>TestTextColorLeafAnimator_AEShipGate_AE2025 | AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g. ⚠需先 AddTextScaleAnimator;leaf 已动画则 refuse;>=2 关键帧 |
+| `*Layer.SetManualKerning` | 🟢stable | roundtrip | 2020 |  | SetManualKerning writes per-character manual kerning values (in 1/1000 em units) into the btdk dict. ⚠length-variable;btdk /1/1[0]/0/8 per-char 数组原位重写;需 btdk 已有 manual-kerning slot(首次须先在 AE 中建立);值个数必须等于现有字符数;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphAutoHyphenate` | 🟢stable | roundtrip | 2020 |  | SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphDirection` | 🟢stable | roundtrip | 2020 |  | SetParagraphDirection writes the paragraph reading direction on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). ⚠length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphEndIndent` | 🟢stable | roundtrip | 2020 |  | SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphFirstLineIndent` | 🟢stable | roundtrip | 2020 |  | SetParagraphFirstLineIndent writes firstLineIndent (em points) on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;AE 2020 ScriptingAPI 对 point text 无效;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphHangingRoman` | 🟢stable | roundtrip | 2020 |  | SetParagraphHangingRoman toggles Roman Hanging Punctuation on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). ⚠length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphJustification` | 🟢stable | roundtrip | 2020 |  | SetParagraphJustification writes a new alignment enum on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphLeadingType` | 🟢stable | roundtrip | 2020 |  | SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /8). ⚠length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphSpaceAfter` | 🟢stable | roundtrip | 2020 |  | SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphSpaceBefore` | 🟢stable | roundtrip | 2020 |  | SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip |
+| `*Layer.SetParagraphStartIndent` | 🟢stable | roundtrip | 2020 |  | SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx. ⚠length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunApplyStroke` | 🟢stable | roundtrip | 2020 |  | SetRunApplyStroke toggles whether the stroke is rendered on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunAutoKernType` | 🟢stable | roundtrip | 2020 |  | SetRunAutoKernType writes the auto-kerning mode on style run #runIdx. ⚠length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;无专门 AE gate→round-trip |
+| `*Layer.SetRunAutoLeading` | 🟢stable | roundtrip | 2020 |  | SetRunAutoLeading toggles AE's "auto leading" flag on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunBaselineOption` | 🟢stable | roundtrip | 2020 |  | SetRunBaselineOption writes the font baseline option on style run #runIdx. ⚠length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetRunBaselineShift` | 🟢stable | roundtrip | 2020 |  | SetRunBaselineShift writes baseline shift (em points; positive = up) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunCapsOption` | 🟢stable | roundtrip | 2020 |  | SetRunCapsOption writes the font caps option on style run #runIdx (AE 24+ writeable; underlying btdk byte exists in AE 2020 files too, but AE 2020 ScriptingAPI marks allCaps / smallCaps readonly so fixture generation requires AE 24). ⚠length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetRunDigitSet` | 🟢stable | roundtrip | 2020 |  | SetRunDigitSet writes the digit set on style run #runIdx (AE 24+ writeable, btdk style-run /70). ⚠length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetRunFauxBold` | 🟢stable | roundtrip | 2020 |  | SetRunFauxBold toggles synthetic bold on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunFauxItalic` | 🟢stable | roundtrip | 2020 |  | SetRunFauxItalic toggles synthetic italic on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunFillColor` | 🟢stable | roundtrip | 2020 |  | SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip |
+| `*Layer.SetRunFontIndex` | 🟢stable | roundtrip | 2020 |  | SetRunFontIndex repoints style run #runIdx at a different entry in the Fonts table (TextSource.Fonts). ⚠length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;无专门 AE gate→round-trip |
+| `*Layer.SetRunFontSize` | 🟢stable | roundtrip | 2020 |  | SetRunFontSize writes a new font size (em points) to style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunHorizontalScale` | 🟢stable | roundtrip | 2020 |  | SetRunHorizontalScale / SetRunVerticalScale write the raw scale values used by AE on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunLeading` | 🟢stable | roundtrip | 2020 |  | SetRunLeading writes leading (em points) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;需搭配 SetRunAutoLeading(false) 才生效;无专门 AE gate→round-trip |
+| `*Layer.SetRunLineJoinType` | 🟢stable | roundtrip | 2020 |  | SetRunLineJoinType writes the stroke corner join style on style run #runIdx (AE 24+ writeable, btdk style-run /62). ⚠length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetRunNoBreak` | 🟢stable | roundtrip | 2020 |  | SetRunNoBreak toggles the "do not break" character flag on style run #runIdx (AE 24+ writeable, btdk style-run /52). ⚠length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip |
+| `*Layer.SetRunStrokeColor` | 🟢stable | roundtrip | 2020 |  | SetRunStrokeColor writes the stroke paint color [R, G, B, A] on style run #runIdx. ⚠length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip |
+| `*Layer.SetRunStrokeOverFill` | 🟢stable | roundtrip | 2020 |  | SetRunStrokeOverFill toggles whether the stroke renders over the fill (true) or under it (false) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunStrokeWidth` | 🟢stable | roundtrip | 2020 |  | SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunTracking` | 🟢stable | roundtrip | 2020 |  | SetRunTracking writes character tracking (1/1000 em) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetRunTsume` | 🟢stable | roundtrip | 2020 |  | SetRunTsume writes the CJK character-spacing adjustment (0..100) on style run #runIdx. ⚠length-variable;btdk PostScript body splice;CJK 专用;无专门 AE gate→round-trip |
+| `*Layer.SetRunVerticalScale` | 🟢stable | roundtrip | 2020 |  | SetRunVerticalScale writes the vertical scale value used by AE on style run #runIdx. ⚠length-variable;btdk PostScript body splice;无专门 AE gate→round-trip |
+| `*Layer.SetText` | 🟢stable | ae-accept | 2020 | TestSetTextVariable_AEShipGate_AE2020<br>TestSetTextVariable_AEShipGate_AE2025 | SetText replaces a text layer's user-visible text. ⚠length-variable(PostScript 字符串拼接 + 段落/run 数组重建);多段落/多 run 支持;手动字距在长度变化时丢弃 |
 | `SetTextRangeAdvanced` | 🟡alpha | render-pixel | 2020 | TestTextRangeAdvancedAmount_AEShipGate_AE2020<br>TestTextRangeAdvancedAmount_AEShipGate_AE2025 | SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). ⚠Amount render-gated;其余 param(Mode/Shape/Smoothness…)仅 round-trip(选择器内部/耦合) |

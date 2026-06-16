@@ -19,6 +19,8 @@ import (
 // The scene-graph → chunk sync (shape layers / render queue / guides / head
 // counters) runs inside the writer back-ref (serializer stage) before the
 // RIFX tree is written, so this thin scene method stays serializer-free.
+//
+//aep:cap domain=io tier=stable verify=roundtrip boundary="核心写回;被全部结构性 ship-gate 间接覆盖;无单一专属 AE gate 可精确引用" alias="write aep,写回,serialize,binary write,RIFX write,WriteAEP"
 func (p *Project) WriteAEP(w io.Writer) error {
 	if p.back == nil {
 		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
@@ -35,6 +37,8 @@ func (p *Project) WriteAEP(w io.Writer) error {
 // later) but produce a less obvious AE UI state.
 //
 // length-preserving (2 bytes total).
+//
+//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);无专门 AE gate→round-trip" alias="bits per channel,颜色深度,color depth,bpc,8bpc,16bpc,32bpc"
 func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
 	if p.back == nil {
 		return fmt.Errorf("project: header chunks missing (built outside parser?)")
@@ -65,6 +69,8 @@ func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
 // parsed solid (AE reads the new color via SolidSource.color and keeps it
 // across its own resave); the byte patch is also the one the ship-gated
 // NewSolidLayer create path applies.
+//
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestSolidSetters_AEShipGate_AE2020,TestSolidSetters_AEShipGate_AE2025 boundary="length-preserving;opti Soli chunk;AE scripting API 验值(SolidSource.color)" alias="solid color,固态层颜色,solid colour,background color,纯色颜色"
 func (f *Footage) SetSolidColor(rgb [3]float64) error {
 	if !f.IsSolid {
 		return fmt.Errorf("footage %d (%q): not a solid", f.ID, f.Name)
@@ -92,6 +98,8 @@ func (f *Footage) SetSolidColor(rgb [3]float64) error {
 // Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a
 // parsed solid (AE reads the new dimensions via FootageItem.width/height and
 // keeps them across its own resave), same gate as SetSolidColor.
+//
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestSolidSetters_AEShipGate_AE2020,TestSolidSetters_AEShipGate_AE2025 boundary="length-preserving;sspc chunk u16 fields;range 1..30000;AE scripting API 验值(FootageItem.width/height)" alias="solid size,固态层尺寸,solid dimensions,solid width,solid height,纯色大小"
 func (f *Footage) SetSolidSize(width, height int) error {
 	if !f.IsSolid {
 		return fmt.Errorf("footage %d (%q): not a solid", f.ID, f.Name)
@@ -109,6 +117,7 @@ func (f *Footage) SetSolidSize(width, height int) error {
 	return nil
 }
 
+//aep:cap domain=project tier=stable verify=roundtrip boundary="length-variable(alas JSON fullpath rewrite + Cpth chunk 全替换);素材路径重定向;无专门 AE gate→round-trip" alias="set path,footage path,素材路径,relink footage,replace footage,文件路径"
 func (f *Footage) SetPath(newPath string) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", f.ID, f.Name)

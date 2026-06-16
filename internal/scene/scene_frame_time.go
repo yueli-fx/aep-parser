@@ -86,6 +86,8 @@ func (l *Layer) FrameInPoint() int {
 // SetFrameInPoint writes the layer in-point converting the integer
 // frame back to seconds via the owning comp's FrameRate, then
 // delegates to SetInPoint.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetInPoint;需 owning comp FrameRate > 0;无专门 AE gate→round-trip" alias="frame in point,入点帧,layer in frame,图层入点"
 func (l *Layer) SetFrameInPoint(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -100,6 +102,8 @@ func (l *Layer) FrameOutPoint() int {
 }
 
 // SetFrameOutPoint writes the layer out-point from an integer frame.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetOutPoint;需 owning comp FrameRate > 0;无专门 AE gate→round-trip" alias="frame out point,出点帧,layer out frame,图层出点"
 func (l *Layer) SetFrameOutPoint(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -114,6 +118,8 @@ func (l *Layer) FrameStartTime() int {
 }
 
 // SetFrameStartTime writes the layer start-time from an integer frame.
+//
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetStartTime;需 owning comp FrameRate > 0;无专门 AE gate→round-trip" alias="frame start time,起始帧,layer start frame,图层起始时间"
 func (l *Layer) SetFrameStartTime(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -140,6 +146,8 @@ func (c *Composition) WorkAreaStartFrame() int {
 
 // SetWorkAreaStartFrame writes the work-area start from an integer
 // frame, preserving the existing end. Delegates to SetWorkArea.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 SetWorkArea(保留 end);需 FrameRate > 0;无专门 AE gate→round-trip" alias="work area start frame,工作区起始帧,render range start,渲染范围"
 func (c *Composition) SetWorkAreaStartFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaStartFrame requires FrameRate > 0", c.Name)
@@ -154,6 +162,8 @@ func (c *Composition) WorkAreaEndFrame() int {
 }
 
 // SetWorkAreaEndFrame writes the work-area end from an integer frame.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 SetWorkArea(保留 start);需 FrameRate > 0;无专门 AE gate→round-trip" alias="work area end frame,工作区结束帧,render range end,渲染结束"
 func (c *Composition) SetWorkAreaEndFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaEndFrame requires FrameRate > 0", c.Name)
@@ -169,6 +179,8 @@ func (c *Composition) WorkAreaDurationFrame() int {
 
 // SetWorkAreaDurationFrame writes the work-area end so that end−start
 // equals the given integer frame span, keeping start fixed.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate > 0;无专门 AE gate→round-trip" alias="work area duration,工作区时长帧数,render duration frames"
 func (c *Composition) SetWorkAreaDurationFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaDurationFrame requires FrameRate > 0", c.Name)
@@ -203,6 +215,8 @@ func (k *Keyframe) FrameTime() int {
 // SetFrameTime writes the keyframe's time from an integer frame,
 // delegating to SetTime. Returns an error when the owning comp's
 // FrameRate is unknown.
+//
+//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="length-preserving;委托 Keyframe.SetTime;需 FrameRate > 0;无专门 AE gate→round-trip" alias="keyframe frame time,关键帧帧编号,kf frame,帧时间"
 func (k *Keyframe) SetFrameTime(frame int) error {
 	if k.back == nil || k.back.FrameRateHz() <= 0 {
 		return fmt.Errorf("keyframe: SetFrameTime requires owning composition FrameRate > 0")
@@ -220,6 +234,8 @@ func (m *Marker) FrameTime() int {
 }
 
 // SetFrameTime writes the marker's time from an integer frame.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 Marker.SetTime;需 compFps > 0;无专门 AE gate→round-trip" alias="marker frame time,标记帧时间,marker frame,标记帧编号"
 func (m *Marker) SetFrameTime(frame int) error {
 	if m.compFps <= 0 {
 		return fmt.Errorf("marker: SetFrameTime requires owning composition FrameRate > 0")
@@ -234,6 +250,8 @@ func (m *Marker) FrameDuration() int {
 }
 
 // SetFrameDuration writes the marker's duration from an integer frame.
+//
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 Marker.SetDuration;需 compFps > 0;无专门 AE gate→round-trip" alias="marker frame duration,标记时长帧数,cue duration frames"
 func (m *Marker) SetFrameDuration(frame int) error {
 	if m.compFps <= 0 {
 		return fmt.Errorf("marker: SetFrameDuration requires owning composition FrameRate > 0")

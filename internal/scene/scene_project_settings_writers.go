@@ -18,6 +18,8 @@ func (p *Project) LinearBlending() bool {
 }
 
 // SetLinearBlending toggles the lnrb chunk under root.
+//
+//aep:cap domain=project tier=stable verify=roundtrip boundary="presence-encoded toggle(lnrb chunk 增删);无专门 AE gate→round-trip" alias="linear blending,线性混合,lnrb,linear color blending"
 func (p *Project) SetLinearBlending(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", "lnrb")
@@ -35,6 +37,8 @@ func (p *Project) LinearizeWorkingSpace() bool {
 }
 
 // SetLinearizeWorkingSpace toggles the lnrp chunk under root.
+//
+//aep:cap domain=project tier=stable verify=roundtrip boundary="presence-encoded toggle(lnrp chunk 增删);无专门 AE gate→round-trip" alias="linearize working space,线性化工作空间,lnrp,linear working space"
 func (p *Project) SetLinearizeWorkingSpace(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("project: cannot toggle %s — no root chunk (built outside parser)", "lnrp")

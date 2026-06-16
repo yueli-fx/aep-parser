@@ -38,6 +38,7 @@ func TestPublicSurfaceRequires(t *testing.T) {
 		want bool
 	}{
 		{Entry{Symbol: "SetOpacity", Kind: "method", Recv: "*Layer", Pkg: "scene"}, true},   // write method on a root type
+		{Entry{Symbol: "SetColor", Kind: "method", Recv: "*FillNode", Pkg: "scene"}, true},  // write method on a non-root capability type
 		{Entry{Symbol: "AddMask", Kind: "method", Recv: "*Layer", Pkg: "scene"}, true},      // Add* write method
 		{Entry{Symbol: "Width", Kind: "method", Recv: "*Layer", Pkg: "scene"}, false},       // getter — exempt (write-surface-first)
 		{Entry{Symbol: "HasAudio", Kind: "method", Recv: "*Layer", Pkg: "scene"}, false},    // Has* reader — exempt
