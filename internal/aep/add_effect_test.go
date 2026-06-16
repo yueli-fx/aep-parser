@@ -489,6 +489,7 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectCCScatterize, aep.EffectCCStarBurst, aep.EffectCCForceMotionBlur,
 		aep.EffectCCWideTime, aep.EffectCCColorOffset, aep.EffectCCToner,
 		aep.EffectCCBurnFilm, aep.EffectCCVignette, aep.EffectCCSimpleWireRemoval,
+		aep.EffectDisplacementMap, aep.EffectCompoundBlur, aep.EffectCCVectorBlur,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

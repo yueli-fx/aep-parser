@@ -59,6 +59,7 @@ import (
 //go:embed templates/effect_adbe_lumetri.bin templates/effect_adbe_lightning.bin templates/effect_cc_radial_fast_blur.bin templates/effect_cc_radial_blur.bin templates/effect_cs_crossblur.bin templates/effect_cc_bend_it.bin templates/effect_cc_bender.bin templates/effect_cc_blobbylize.bin templates/effect_cc_flo_motion.bin templates/effect_cc_griddler.bin templates/effect_cc_lens.bin templates/effect_cc_page_turn.bin templates/effect_cc_power_pin.bin templates/effect_cc_ripple_pulse.bin templates/effect_cc_slant.bin
 //go:embed templates/effect_cc_smear.bin templates/effect_cc_split.bin templates/effect_cc_split_2.bin templates/effect_cc_tiler.bin templates/effect_cc_warpomatic.bin templates/effect_cc_light_burst_2_5.bin templates/effect_cc_light_rays.bin templates/effect_cc_light_sweep.bin templates/effect_cs_threads.bin templates/effect_cc_cylinder.bin templates/effect_cc_sphere.bin templates/effect_cc_spotlight.bin templates/effect_cc_glass.bin templates/effect_cs_hextile.bin templates/effect_cc_kaleida.bin
 //go:embed templates/effect_cc_mr_smoothie.bin templates/effect_cc_plastic.bin templates/effect_cc_repetile.bin templates/effect_cc_threshold.bin templates/effect_cc_threshold_rgb.bin templates/effect_cc_pixel_polly.bin templates/effect_cc_scatterize.bin templates/effect_cc_star_burst.bin templates/effect_cc_force_motion_blur.bin templates/effect_cc_wide_time.bin templates/effect_cc_color_offset.bin templates/effect_cc_toner.bin templates/effect_cc_burn_film.bin templates/effect_cs_vignette.bin templates/effect_cc_simple_wire_removal.bin
+//go:embed templates/effect_adbe_displacement_map.bin templates/effect_adbe_compound_blur.bin templates/effect_cc_vector_blur.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -225,6 +226,22 @@ const (
 	EffectCCBurnFilm          = "CC Burn Film"             // CC Burn Film
 	EffectCCVignette          = "CS Vignette"              // CC Vignette
 	EffectCCSimpleWireRemoval = "CC Simple Wire Removal"   // CC Simple Wire Removal
+	// Wave 8 (2026-06-16, fixture re_effect_layerref.aep) — LAYER-REFERENCE
+	// effects: their templates carry a materialized layer-ref param (with tdpi);
+	// AddEffect retargets all tdpi to host (self), then SetEffectLayerParam aims
+	// the layer-ref param at the real source (same flow as Set Matte). The
+	// layer-ref param match-name for each is the …LayerParam const below.
+	EffectDisplacementMap = "ADBE Displacement Map" // Displacement Map
+	EffectCompoundBlur    = "ADBE Compound Blur"    // Compound Blur
+	EffectCCVectorBlur    = "CC Vector Blur"        // CC Vector Blur
+)
+
+// Layer-reference parameter match-names for the wave-8 layer-ref effects — pass
+// these to SetEffectLayerParam(layer, fx, paramMatchName, target).
+const (
+	EffectDisplacementMapLayer = "ADBE Displacement Map-0001" // Displacement Map Layer
+	EffectCompoundBlurLayer    = "ADBE Compound Blur-0001"    // Blur Layer
+	EffectCCVectorBlurMap      = "CC Vector Blur-0005"        // Vector Map
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -379,6 +396,9 @@ var effectTemplateFiles = map[string]string{
 	EffectCCBurnFilm:          "templates/effect_cc_burn_film.bin",
 	EffectCCVignette:          "templates/effect_cs_vignette.bin",
 	EffectCCSimpleWireRemoval: "templates/effect_cc_simple_wire_removal.bin",
+	EffectDisplacementMap:     "templates/effect_adbe_displacement_map.bin",
+	EffectCompoundBlur:        "templates/effect_adbe_compound_blur.bin",
+	EffectCCVectorBlur:        "templates/effect_cc_vector_blur.bin",
 }
 
 type cachedEffectTemplate struct {

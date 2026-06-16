@@ -749,7 +749,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025 incident=add-effect-splice-re boundary="147 内置效果库(ADBE + Cycore CC 家族;parameter-only;layer-ref 类如 Displacement Map/Compound Blur/CC Vector Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025 incident=add-effect-splice-re boundary="150 内置效果库(ADBE + Cycore CC 家族 + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur,用 SetEffectLayerParam 指定源层);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1385,7 +1385,7 @@ func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs 
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
 //
-//aep:cap domain=effect tier=stable verify=render-pixel gate=TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025 boundary="参数须已物化(Set Matte -0001 随模板带出);default-elided layer-ref 物化未做" alias="set matte,layer reference,蒙版层,take matte from layer"
+//aep:cap domain=effect tier=stable verify=render-pixel gate=TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025,TestLayerRefDispMap_AEShipGate_AE2020,TestLayerRefDispMap_AEShipGate_AE2025,TestLayerRefCompoundBlur_AEShipGate_AE2020,TestLayerRefCompoundBlur_AEShipGate_AE2025 boundary="参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);其它 default-elided layer-ref 物化未做" alias="set matte,layer reference,蒙版层,displacement map,compound blur,vector blur,take matte from layer"
 func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error {
 	return serializer.SetEffectLayerParam(layer, fx, paramMatchName, target)
 }
@@ -1816,6 +1816,13 @@ const (
 	EffectCCBurnFilm          = serializer.EffectCCBurnFilm          // CC Burn Film
 	EffectCCVignette          = serializer.EffectCCVignette          // CC Vignette
 	EffectCCSimpleWireRemoval = serializer.EffectCCSimpleWireRemoval // CC Simple Wire Removal
+	EffectDisplacementMap = serializer.EffectDisplacementMap // Displacement Map (layer-reference)
+	EffectCompoundBlur    = serializer.EffectCompoundBlur    // Compound Blur (layer-reference)
+	EffectCCVectorBlur    = serializer.EffectCCVectorBlur    // CC Vector Blur (layer-reference)
+
+	EffectDisplacementMapLayer = serializer.EffectDisplacementMapLayer // Displacement Map Layer param
+	EffectCompoundBlurLayer    = serializer.EffectCompoundBlurLayer    // Compound Blur "Blur Layer" param
+	EffectCCVectorBlurMap      = serializer.EffectCCVectorBlurMap      // CC Vector Blur "Vector Map" param
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript

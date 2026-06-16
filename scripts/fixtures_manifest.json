@@ -25,6 +25,7 @@
     { "jsx": "test_data/re_effect_lib5.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_lib5.done", "outputs": ["test_data/re_effect_lib5.aep"] },
     { "jsx": "test_data/re_effect_lib6.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_lib6.done", "outputs": ["test_data/re_effect_lib6.aep"] },
     { "jsx": "test_data/re_effect_lib7.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_lib7.done", "outputs": ["test_data/re_effect_lib7.aep"] },
+    { "jsx": "test_data/re_effect_layerref.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_layerref.done", "outputs": ["test_data/re_effect_layerref.aep"] },
     { "jsx": "test_data/re_effect_param_elision.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_elision.done", "outputs": ["test_data/re_effect_param_elision.aep"] },
     { "jsx": "test_data/re_effect_param_types.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_types.done", "outputs": ["test_data/re_effect_param_types.aep"] },
     { "jsx": "test_data/re_effect_param_types_units.jsx", "ae": "2020", "env": {}, "done": "test_data/re_effect_param_types_units.done", "outputs": ["test_data/re_effect_param_types_units.aep"] },

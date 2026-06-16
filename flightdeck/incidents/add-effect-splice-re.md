@@ -84,7 +84,7 @@ chunks, never the cache), so callers can tune params immediately
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
-## Effect-template library (147, embed.FS)
+## Effect-template library (150, embed.FS)
 
 `internal/serializer/templates/effect_adbe_*.bin`, each a `LIST(tdgp)` wrapper
 around one `(tdmn, sspc)` pair, extracted from AE-2020 fixtures
@@ -267,6 +267,28 @@ The "write → reopen" workaround in these findings became the shipped path:
   setter then aims `-0001` at the real source. Displacement Map / Compound Blur /
   path-reference params: same mechanism, add on demand. Finding 5's "retarget-all
   corrupts ref params" caveat now means "call SetEffectLayerParam after AddEffect".
+- ~~**Displacement Map / Compound Blur / CC Vector Blur**~~ — Wave 8 SHIPPED
+  2026-06-16 (the layer-ref family, fixture `re_effect_layerref.aep`). RE: each
+  effect's layer param is materialized by pointing it at a layer in the fixture
+  (`pr.propertyValueType === PropertyValueType.LAYER_INDEX` → setValue(idx)), so
+  the extracted template carries the param WITH a tdpi (Displacement Map `-0001`
+  "用户图层" tdpi=15, Compound Blur `-0001` "模糊图层", CC Vector Blur `-0005`
+  "Vector Map"; host `-0000`=17). AddEffect retargets both → host; SetEffectLayerParam
+  aims the ref at the real source — same flow as Set Matte. Library consts +
+  layer-ref param consts (`EffectDisplacementMapLayer` etc.) added.
+  - **Render gate gotchas** (`mg_effect_layerref_shipgate_test.go`):
+    (1) **A video-OFF map layer reads as EMPTY** → zero displacement (first gate
+    try set MAP invisible, got delta=0). Fix: keep MAP video-ON, park it at the
+    bottom behind a full-frame black BG solid so it does not composite over HOST
+    (HOST = white-left shape, transparent right → black). (2) **Displacement Map
+    param order**: `-0002` = "Use For Horizontal Displacement" (a dropdown),
+    `-0003` = "Max Horizontal Displacement" (the AMOUNT). Setting `-0002` did
+    nothing visible; `-0003`=180 shifts. (3) Displacement direction is NEGATIVE
+    for white(255) → seam moves LEFT; the two-point ±90px flip test (x1050→white
+    OR x870→black) is direction-agnostic. Displacement Map + Compound Blur are
+    render-pixel double-version gated; **CC Vector Blur = accept+round-trip+resave
+    only** (gradient-driven blur has no clean spatial pixel proof here —
+    render-pixel deferred).
 - ~~**AddMask**~~ — SHIPPED 2026-06-11 (dual-version gated, from-scratch atom,
   path parameterizable at creation; the auto-create pattern transferred via
   `spliceEmptyParade`). See [[add-mask-create-re]]. NOTE the earlier "same
