@@ -942,9 +942,11 @@
         "TestAddEffectWave5_AEShipGate_AE2020",
         "TestAddEffectWave5_AEShipGate_AE2025",
         "TestAddEffectWave6_AEShipGate_AE2020",
-        "TestAddEffectWave6_AEShipGate_AE2025"
+        "TestAddEffectWave6_AEShipGate_AE2025",
+        "TestAddEffectWave7_AEShipGate_AE2020",
+        "TestAddEffectWave7_AEShipGate_AE2025"
       ],
-      "boundary": "102 内置效果库(parameter-only;layer-ref 类如 Displacement Map/Compound Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
+      "boundary": "147 内置效果库(ADBE + Cycore CC 家族;parameter-only;layer-ref 类如 Displacement Map/Compound Blur/CC Vector Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
       "incident": [
         "add-effect-splice-re"
       ],
@@ -954,7 +956,10 @@
         "加效果",
         "blur",
         "模糊",
-        "glow"
+        "glow",
+        "cc",
+        "cycore",
+        "lumetri"
       ]
     }
   },

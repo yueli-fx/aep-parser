@@ -749,7 +749,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025 incident=add-effect-splice-re boundary="102 内置效果库(parameter-only;layer-ref 类如 Displacement Map/Compound Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025 incident=add-effect-splice-re boundary="147 内置效果库(ADBE + Cycore CC 家族;parameter-only;layer-ref 类如 Displacement Map/Compound Blur/CC Vector Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1771,6 +1771,51 @@ const (
 	EffectNoiseHLS         = serializer.EffectNoiseHLS         // Noise HLS
 	EffectRadialWipe       = serializer.EffectRadialWipe       // Radial Wipe
 	EffectBlockDissolve    = serializer.EffectBlockDissolve    // Block Dissolve
+	EffectLumetri             = serializer.EffectLumetri             // Lumetri Color
+	EffectLightning           = serializer.EffectLightning           // Lightning
+	EffectCCRadialFastBlur    = serializer.EffectCCRadialFastBlur    // CC Radial Fast Blur
+	EffectCCRadialBlur        = serializer.EffectCCRadialBlur        // CC Radial Blur
+	EffectCCCrossBlur         = serializer.EffectCCCrossBlur         // CC Cross Blur
+	EffectCCBendIt            = serializer.EffectCCBendIt            // CC Bend It
+	EffectCCBender            = serializer.EffectCCBender            // CC Bender
+	EffectCCBlobbylize        = serializer.EffectCCBlobbylize        // CC Blobbylize
+	EffectCCFloMotion         = serializer.EffectCCFloMotion         // CC Flo Motion
+	EffectCCGriddler          = serializer.EffectCCGriddler          // CC Griddler
+	EffectCCLens              = serializer.EffectCCLens              // CC Lens
+	EffectCCPageTurn          = serializer.EffectCCPageTurn          // CC Page Turn
+	EffectCCPowerPin          = serializer.EffectCCPowerPin          // CC Power Pin
+	EffectCCRipplePulse       = serializer.EffectCCRipplePulse       // CC Ripple Pulse
+	EffectCCSlant             = serializer.EffectCCSlant             // CC Slant
+	EffectCCSmear             = serializer.EffectCCSmear             // CC Smear
+	EffectCCSplit             = serializer.EffectCCSplit             // CC Split
+	EffectCCSplit2            = serializer.EffectCCSplit2            // CC Split 2
+	EffectCCTiler             = serializer.EffectCCTiler             // CC Tiler
+	EffectCCWarpoMatic        = serializer.EffectCCWarpoMatic        // CC WarpoMatic
+	EffectCCLightBurst        = serializer.EffectCCLightBurst        // CC Light Burst 2.5
+	EffectCCLightRays         = serializer.EffectCCLightRays         // CC Light Rays
+	EffectCCLightSweep        = serializer.EffectCCLightSweep        // CC Light Sweep
+	EffectCCThreads           = serializer.EffectCCThreads           // CC Threads
+	EffectCCCylinder          = serializer.EffectCCCylinder          // CC Cylinder
+	EffectCCSphere            = serializer.EffectCCSphere            // CC Sphere
+	EffectCCSpotlight         = serializer.EffectCCSpotlight         // CC Spotlight
+	EffectCCGlass             = serializer.EffectCCGlass             // CC Glass
+	EffectCCHexTile           = serializer.EffectCCHexTile           // CC HexTile
+	EffectCCKaleida           = serializer.EffectCCKaleida           // CC Kaleida
+	EffectCCMrSmoothie        = serializer.EffectCCMrSmoothie        // CC Mr. Smoothie
+	EffectCCPlastic           = serializer.EffectCCPlastic           // CC Plastic
+	EffectCCRepeTile          = serializer.EffectCCRepeTile          // CC RepeTile
+	EffectCCThreshold         = serializer.EffectCCThreshold         // CC Threshold
+	EffectCCThresholdRGB      = serializer.EffectCCThresholdRGB      // CC Threshold RGB
+	EffectCCPixelPolly        = serializer.EffectCCPixelPolly        // CC Pixel Polly
+	EffectCCScatterize        = serializer.EffectCCScatterize        // CC Scatterize
+	EffectCCStarBurst         = serializer.EffectCCStarBurst         // CC Star Burst
+	EffectCCForceMotionBlur   = serializer.EffectCCForceMotionBlur   // CC Force Motion Blur
+	EffectCCWideTime          = serializer.EffectCCWideTime          // CC Wide Time
+	EffectCCColorOffset       = serializer.EffectCCColorOffset       // CC Color Offset
+	EffectCCToner             = serializer.EffectCCToner             // CC Toner
+	EffectCCBurnFilm          = serializer.EffectCCBurnFilm          // CC Burn Film
+	EffectCCVignette          = serializer.EffectCCVignette          // CC Vignette
+	EffectCCSimpleWireRemoval = serializer.EffectCCSimpleWireRemoval // CC Simple Wire Removal
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript

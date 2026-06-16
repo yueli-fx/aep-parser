@@ -84,7 +84,7 @@ chunks, never the cache), so callers can tune params immediately
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
-## Effect-template library (102, embed.FS)
+## Effect-template library (147, embed.FS)
 
 `internal/serializer/templates/effect_adbe_*.bin`, each a `LIST(tdgp)` wrapper
 around one `(tdmn, sspc)` pair, extracted from AE-2020 fixtures
@@ -144,6 +144,29 @@ Still-wrong match-names parked: Bezier Warp (≠ `ADBE BezMesh`), Channel Mixer
 (≠ `ADBE ChannelMixer`), + many tried-and-FAILed in lib6 (Warp/Mesh Warp/
 Liquify/Reshape/Vegas/Radio Waves/Shadow-Highlight/Pixel Motion Blur/…) — their
 real match-names need a probe pass (enumerate via canAddProperty sweep).
+
+Wave 7 (2026-06-16, `re_effect_lib7.jsx` probe sweep → 46/46 canAdd, 45 kept):
+**Lumetri Color** (`ADBE Lumetri`) + **Lightning** (`ADBE Lightning`, the old one;
+`ADBE Lightning 2` = Advanced Lightning was wave 4) + **43 Cycore (CC) effects**
+(CC Radial Fast/Radial Blur · Bend It/Bender/Blobbylize/Flo Motion/Griddler/Lens/
+Page Turn/Power Pin/Ripple Pulse/Slant/Smear/Split/Split 2/Tiler/WarpoMatic ·
+Light Burst 2.5/Light Rays/Light Sweep/Threads · Cylinder/Sphere/Spotlight ·
+Glass/HexTile/Kaleida/Mr. Smoothie/Plastic/RepeTile/Threshold/Threshold RGB ·
+Pixel Polly/Scatterize/Star Burst · Force Motion Blur/Wide Time · Color Offset/
+Toner · Burn Film/Vignette/Simple Wire Removal).
+- **KEY: 4 CC effects store a `CS …` internal match-name ≠ the `CC …` addProperty
+  alias** — CC Cross Blur→`CS CrossBlur`, CC Threads→`CS Threads`, CC HexTile→
+  `CS HexTile`, CC Vignette→`CS Vignette`. `addProperty("CC X")` accepts the alias
+  but the stored tdmn (what `collectEffects` reads back + what `cloneEffectTemplate`
+  must be keyed on) is the `CS` form. So the const VALUE = the stored `CS …` name.
+  Lesson: when the parade readback name ≠ the addProperty name, key the template
+  map + const on the **readback** name (gate's paradeChildNames compares readback).
+- **CC Vector Blur EXCLUDED**: all-tdpi audit (throwaway scanner) showed tdpi=[15,0]
+  — its "Vector Map" layer pickwhip defaults to None=0 (foreign vs host 15);
+  retarget-all would point it at self. Same curation rule as Set Matte siblings.
+  Other CC layer-pickwhip effects (Glass bump / Page Turn back-page / Blobbylize
+  blob / Mr. Smoothie) audited CLEAN (no foreign tdpi when default None) → kept.
+`TestAddEffectWave7_AEShipGate_AE2020/2025` — 45-in-one-run, both versions.
 
 **Curation rule:** only **parameter-only** effects. Effects with layer/path
 **reference** params (e.g. Set Matte, Displacement Map, Calculations, Compound

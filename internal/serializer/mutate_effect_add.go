@@ -56,6 +56,9 @@ import (
 //go:embed templates/effect_adbe_black_white.bin templates/effect_adbe_gamma_pedestal_gain2.bin templates/effect_adbe_channel_blur.bin templates/effect_adbe_bilateral.bin templates/effect_adbe_smart_blur.bin templates/effect_adbe_unsharp_mask2.bin templates/effect_adbe_shift_channels.bin templates/effect_adbe_solid_composite.bin templates/effect_adbe_minimax.bin templates/effect_adbe_arithmetic.bin templates/effect_adbe_circle.bin templates/effect_adbe_lens_flare.bin templates/effect_adbe_cell_pattern.bin templates/effect_adbe_lightning_2.bin templates/effect_adbe_laser.bin templates/effect_adbe_paint_bucket.bin templates/effect_adbe_posterize_time.bin templates/effect_adbe_simple_choker.bin templates/effect_adbe_matte_choker.bin
 //go:embed templates/effect_adbe_bulge.bin templates/effect_adbe_offset.bin templates/effect_adbe_mirror.bin templates/effect_adbe_fractal.bin templates/effect_adbe_write_on.bin templates/effect_adbe_scribble_fill.bin templates/effect_adbe_eyedropper_fill.bin templates/effect_adbe_audspect.bin templates/effect_adbe_audwave.bin templates/effect_adbe_autolevels.bin templates/effect_adbe_autocolor.bin templates/effect_adbe_autocontrast.bin
 //go:embed templates/effect_adbe_equalize.bin templates/effect_adbe_leave_color.bin templates/effect_adbe_change_to_color.bin templates/effect_adbe_change_color.bin templates/effect_adbe_radial_shadow.bin templates/effect_adbe_remove_color_matting.bin templates/effect_adbe_dust_scratches.bin templates/effect_adbe_noise_alpha2.bin templates/effect_adbe_noise_hls2.bin templates/effect_adbe_radial_wipe.bin templates/effect_adbe_block_dissolve.bin
+//go:embed templates/effect_adbe_lumetri.bin templates/effect_adbe_lightning.bin templates/effect_cc_radial_fast_blur.bin templates/effect_cc_radial_blur.bin templates/effect_cs_crossblur.bin templates/effect_cc_bend_it.bin templates/effect_cc_bender.bin templates/effect_cc_blobbylize.bin templates/effect_cc_flo_motion.bin templates/effect_cc_griddler.bin templates/effect_cc_lens.bin templates/effect_cc_page_turn.bin templates/effect_cc_power_pin.bin templates/effect_cc_ripple_pulse.bin templates/effect_cc_slant.bin
+//go:embed templates/effect_cc_smear.bin templates/effect_cc_split.bin templates/effect_cc_split_2.bin templates/effect_cc_tiler.bin templates/effect_cc_warpomatic.bin templates/effect_cc_light_burst_2_5.bin templates/effect_cc_light_rays.bin templates/effect_cc_light_sweep.bin templates/effect_cs_threads.bin templates/effect_cc_cylinder.bin templates/effect_cc_sphere.bin templates/effect_cc_spotlight.bin templates/effect_cc_glass.bin templates/effect_cs_hextile.bin templates/effect_cc_kaleida.bin
+//go:embed templates/effect_cc_mr_smoothie.bin templates/effect_cc_plastic.bin templates/effect_cc_repetile.bin templates/effect_cc_threshold.bin templates/effect_cc_threshold_rgb.bin templates/effect_cc_pixel_polly.bin templates/effect_cc_scatterize.bin templates/effect_cc_star_burst.bin templates/effect_cc_force_motion_blur.bin templates/effect_cc_wide_time.bin templates/effect_cc_color_offset.bin templates/effect_cc_toner.bin templates/effect_cc_burn_film.bin templates/effect_cs_vignette.bin templates/effect_cc_simple_wire_removal.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -172,6 +175,56 @@ const (
 	EffectNoiseHLS         = "ADBE Noise HLS2"           // Noise HLS
 	EffectRadialWipe       = "ADBE Radial Wipe"          // Radial Wipe
 	EffectBlockDissolve    = "ADBE Block Dissolve"       // Block Dissolve
+	// Wave 7 (2026-06-16, fixture re_effect_lib7.aep) — Lumetri Color + Lightning
+	// + the Cycore (CC) effect family. Probe-swept via canAddProperty. NOTE 4 CC
+	// effects store a "CS …" internal match-name (≠ the "CC …" addProperty alias):
+	// the const value is the STORED name (what AddEffect must be given + what AE
+	// reads back). CC Vector Blur excluded (Vector Map layer pickwhip → foreign tdpi).
+	EffectLumetri             = "ADBE Lumetri"             // Lumetri Color
+	EffectLightning           = "ADBE Lightning"           // Lightning
+	EffectCCRadialFastBlur    = "CC Radial Fast Blur"      // CC Radial Fast Blur
+	EffectCCRadialBlur        = "CC Radial Blur"           // CC Radial Blur
+	EffectCCCrossBlur         = "CS CrossBlur"             // CC Cross Blur
+	EffectCCBendIt            = "CC Bend It"               // CC Bend It
+	EffectCCBender            = "CC Bender"                // CC Bender
+	EffectCCBlobbylize        = "CC Blobbylize"            // CC Blobbylize
+	EffectCCFloMotion         = "CC Flo Motion"            // CC Flo Motion
+	EffectCCGriddler          = "CC Griddler"              // CC Griddler
+	EffectCCLens              = "CC Lens"                  // CC Lens
+	EffectCCPageTurn          = "CC Page Turn"             // CC Page Turn
+	EffectCCPowerPin          = "CC Power Pin"             // CC Power Pin
+	EffectCCRipplePulse       = "CC Ripple Pulse"          // CC Ripple Pulse
+	EffectCCSlant             = "CC Slant"                 // CC Slant
+	EffectCCSmear             = "CC Smear"                 // CC Smear
+	EffectCCSplit             = "CC Split"                 // CC Split
+	EffectCCSplit2            = "CC Split 2"               // CC Split 2
+	EffectCCTiler             = "CC Tiler"                 // CC Tiler
+	EffectCCWarpoMatic        = "CC WarpoMatic"            // CC WarpoMatic
+	EffectCCLightBurst        = "CC Light Burst 2.5"       // CC Light Burst 2.5
+	EffectCCLightRays         = "CC Light Rays"            // CC Light Rays
+	EffectCCLightSweep        = "CC Light Sweep"           // CC Light Sweep
+	EffectCCThreads           = "CS Threads"               // CC Threads
+	EffectCCCylinder          = "CC Cylinder"              // CC Cylinder
+	EffectCCSphere            = "CC Sphere"                // CC Sphere
+	EffectCCSpotlight         = "CC Spotlight"             // CC Spotlight
+	EffectCCGlass             = "CC Glass"                 // CC Glass
+	EffectCCHexTile           = "CS HexTile"               // CC HexTile
+	EffectCCKaleida           = "CC Kaleida"               // CC Kaleida
+	EffectCCMrSmoothie        = "CC Mr. Smoothie"          // CC Mr. Smoothie
+	EffectCCPlastic           = "CC Plastic"               // CC Plastic
+	EffectCCRepeTile          = "CC RepeTile"              // CC RepeTile
+	EffectCCThreshold         = "CC Threshold"             // CC Threshold
+	EffectCCThresholdRGB      = "CC Threshold RGB"         // CC Threshold RGB
+	EffectCCPixelPolly        = "CC Pixel Polly"           // CC Pixel Polly
+	EffectCCScatterize        = "CC Scatterize"            // CC Scatterize
+	EffectCCStarBurst         = "CC Star Burst"            // CC Star Burst
+	EffectCCForceMotionBlur   = "CC Force Motion Blur"     // CC Force Motion Blur
+	EffectCCWideTime          = "CC Wide Time"             // CC Wide Time
+	EffectCCColorOffset       = "CC Color Offset"          // CC Color Offset
+	EffectCCToner             = "CC Toner"                 // CC Toner
+	EffectCCBurnFilm          = "CC Burn Film"             // CC Burn Film
+	EffectCCVignette          = "CS Vignette"              // CC Vignette
+	EffectCCSimpleWireRemoval = "CC Simple Wire Removal"   // CC Simple Wire Removal
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -281,6 +334,51 @@ var effectTemplateFiles = map[string]string{
 	EffectNoiseHLS:           "templates/effect_adbe_noise_hls2.bin",
 	EffectRadialWipe:         "templates/effect_adbe_radial_wipe.bin",
 	EffectBlockDissolve:      "templates/effect_adbe_block_dissolve.bin",
+	EffectLumetri:             "templates/effect_adbe_lumetri.bin",
+	EffectLightning:           "templates/effect_adbe_lightning.bin",
+	EffectCCRadialFastBlur:    "templates/effect_cc_radial_fast_blur.bin",
+	EffectCCRadialBlur:        "templates/effect_cc_radial_blur.bin",
+	EffectCCCrossBlur:         "templates/effect_cs_crossblur.bin",
+	EffectCCBendIt:            "templates/effect_cc_bend_it.bin",
+	EffectCCBender:            "templates/effect_cc_bender.bin",
+	EffectCCBlobbylize:        "templates/effect_cc_blobbylize.bin",
+	EffectCCFloMotion:         "templates/effect_cc_flo_motion.bin",
+	EffectCCGriddler:          "templates/effect_cc_griddler.bin",
+	EffectCCLens:              "templates/effect_cc_lens.bin",
+	EffectCCPageTurn:          "templates/effect_cc_page_turn.bin",
+	EffectCCPowerPin:          "templates/effect_cc_power_pin.bin",
+	EffectCCRipplePulse:       "templates/effect_cc_ripple_pulse.bin",
+	EffectCCSlant:             "templates/effect_cc_slant.bin",
+	EffectCCSmear:             "templates/effect_cc_smear.bin",
+	EffectCCSplit:             "templates/effect_cc_split.bin",
+	EffectCCSplit2:            "templates/effect_cc_split_2.bin",
+	EffectCCTiler:             "templates/effect_cc_tiler.bin",
+	EffectCCWarpoMatic:        "templates/effect_cc_warpomatic.bin",
+	EffectCCLightBurst:        "templates/effect_cc_light_burst_2_5.bin",
+	EffectCCLightRays:         "templates/effect_cc_light_rays.bin",
+	EffectCCLightSweep:        "templates/effect_cc_light_sweep.bin",
+	EffectCCThreads:           "templates/effect_cs_threads.bin",
+	EffectCCCylinder:          "templates/effect_cc_cylinder.bin",
+	EffectCCSphere:            "templates/effect_cc_sphere.bin",
+	EffectCCSpotlight:         "templates/effect_cc_spotlight.bin",
+	EffectCCGlass:             "templates/effect_cc_glass.bin",
+	EffectCCHexTile:           "templates/effect_cs_hextile.bin",
+	EffectCCKaleida:           "templates/effect_cc_kaleida.bin",
+	EffectCCMrSmoothie:        "templates/effect_cc_mr_smoothie.bin",
+	EffectCCPlastic:           "templates/effect_cc_plastic.bin",
+	EffectCCRepeTile:          "templates/effect_cc_repetile.bin",
+	EffectCCThreshold:         "templates/effect_cc_threshold.bin",
+	EffectCCThresholdRGB:      "templates/effect_cc_threshold_rgb.bin",
+	EffectCCPixelPolly:        "templates/effect_cc_pixel_polly.bin",
+	EffectCCScatterize:        "templates/effect_cc_scatterize.bin",
+	EffectCCStarBurst:         "templates/effect_cc_star_burst.bin",
+	EffectCCForceMotionBlur:   "templates/effect_cc_force_motion_blur.bin",
+	EffectCCWideTime:          "templates/effect_cc_wide_time.bin",
+	EffectCCColorOffset:       "templates/effect_cc_color_offset.bin",
+	EffectCCToner:             "templates/effect_cc_toner.bin",
+	EffectCCBurnFilm:          "templates/effect_cc_burn_film.bin",
+	EffectCCVignette:          "templates/effect_cs_vignette.bin",
+	EffectCCSimpleWireRemoval: "templates/effect_cc_simple_wire_removal.bin",
 }
 
 type cachedEffectTemplate struct {

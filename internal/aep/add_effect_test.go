@@ -474,6 +474,21 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectChangeColor, aep.EffectRadialShadow, aep.EffectRemoveColorMatte,
 		aep.EffectDustAndScratches, aep.EffectNoiseAlpha, aep.EffectNoiseHLS,
 		aep.EffectRadialWipe, aep.EffectBlockDissolve,
+		aep.EffectLumetri, aep.EffectLightning, aep.EffectCCRadialFastBlur,
+		aep.EffectCCRadialBlur, aep.EffectCCCrossBlur, aep.EffectCCBendIt,
+		aep.EffectCCBender, aep.EffectCCBlobbylize, aep.EffectCCFloMotion,
+		aep.EffectCCGriddler, aep.EffectCCLens, aep.EffectCCPageTurn,
+		aep.EffectCCPowerPin, aep.EffectCCRipplePulse, aep.EffectCCSlant,
+		aep.EffectCCSmear, aep.EffectCCSplit, aep.EffectCCSplit2,
+		aep.EffectCCTiler, aep.EffectCCWarpoMatic, aep.EffectCCLightBurst,
+		aep.EffectCCLightRays, aep.EffectCCLightSweep, aep.EffectCCThreads,
+		aep.EffectCCCylinder, aep.EffectCCSphere, aep.EffectCCSpotlight,
+		aep.EffectCCGlass, aep.EffectCCHexTile, aep.EffectCCKaleida,
+		aep.EffectCCMrSmoothie, aep.EffectCCPlastic, aep.EffectCCRepeTile,
+		aep.EffectCCThreshold, aep.EffectCCThresholdRGB, aep.EffectCCPixelPolly,
+		aep.EffectCCScatterize, aep.EffectCCStarBurst, aep.EffectCCForceMotionBlur,
+		aep.EffectCCWideTime, aep.EffectCCColorOffset, aep.EffectCCToner,
+		aep.EffectCCBurnFilm, aep.EffectCCVignette, aep.EffectCCSimpleWireRemoval,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {
