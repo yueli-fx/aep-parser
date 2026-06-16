@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-16 by claude（**capindex P2 DONE(写/做面 468/468=100%,CI 强制)→ 转 knowledge-consolidation,E+D 落地**。capindex:8-agent Workflow 标 scene 写面 + write-surface-first(getter/const 豁免)+ tier/verify 解耦 + 写面定义扩面(shape 节点/render-queue/text-run)。verify 诚实分布 roundtrip280/render-pixel149/ae-accept35/meta6。**knowledge-consolidation**(active):**E** 删 12 个根目录 stray exe;**D** coverage 退役——coverage.md 415→75 行(写能力快照→capindex 指针,保留 暂搁/不可达/negative 残值,status=superseded)+ coverage-detail.md→reference + CLAUDE.md 改指 capindex。commits 4ae1358..d07bc56。）
+**Last updated**: 2026-06-16 by claude（**capindex P2 DONE(写面 468/468=100%,CI 强制)+ knowledge-consolidation E/D/C 落地**。capindex:8-agent Workflow 标 scene 写面 + write-surface-first + tier/verify 解耦 + 写面定义扩面;verify 诚实分布 roundtrip280/render-pixel149/ae-accept35/meta6。knowledge-consolidation(active):**E** 删 12 stray exe · **D** coverage 退役(coverage.md 415→75 残值化、coverage-detail→reference、CLAUDE.md 改指 capindex)· **C** incidents 审计(8-agent grep 核实:**0 过时**、4 并 3 锚 → 51→47,被并入 archive/incidents/)。**剩 A(记忆退役,需用户确认 repo 外删除)+ B(CLAUDE.md 全量瘦身)**。commits 4ae1358..528c2ab。）
 
 **Active focus**: **知识库地基重建 arc（当前主线）**——三原则:源码为准/自动化/秒查。capindex(`specs/2026-06-16-capability-index.md`,graduate)**P1+P2 DONE**:源码内 `aep:cap` tag → 自动生成可秒查能力/API 索引,**写/做面 100% 标注 + CI 强制零漏标**。getter/const 按 write-surface-first 豁免。**下一步 = `knowledge-consolidation`**(parked→可启动):coverage.md 退役(写面真相源已迁入 tag,已解锁)/ incidents 合并清理 / CLAUDE.md 瘦身 / 记忆系统退役 / 根目录 exe 清理。**能力查询**:`go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`(取代 coverage.md)。—— **库能力主线**早已全收口、需求驱动稳态(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);每渲染类双版本 AE ship-gate(红线4)。火焰演示=番外。
 
@@ -15,10 +15,9 @@
 
 ## 下一步
 
-**➡ `knowledge-consolidation`(active)续做**(spec 字母轴):**E ✅**(exe 清理)· **D ✅**(coverage 退役)。剩:
-- **A 记忆退役**:~20 条 auto-memory 按 A1 映射表迁入 flightdeck/CLAUDE.md(多条已重复→删),memory 目录清空 + CLAUDE.md 加"不用 auto-memory"规则。⚠ **memory 在 repo 外、删除不可 git 回滚 → 执行前须用户确认**(spec 风险条)。
-- **C incidents 审核**(51 个):过时清理(grep 代码核实,board-status-drift)+ 同根因合并成多-Case incident + 对齐 capindex `incident=` 反链。**量大,workflow 候选**(同 capindex 并行模式)。
-- **B CLAUDE.md 全量瘦身**:#2/#3 长 RE 解释下沉 references/incident,留短规则+指针(部分已做:能力源指针)。+ 写防复发约定(`go build -o tmp_debug/bin/`)。
+**➡ `knowledge-consolidation`(active)剩 2 块**:**E✅ D✅ C✅**。
+- **A 记忆退役**:~20 条 auto-memory 按 A1 映射表迁 flightdeck/CLAUDE.md(多条已重复→删)+ memory 目录清空 + CLAUDE.md 加"不用 auto-memory"规则。⚠ **memory 在 repo 外、删除不可 git 回滚 → 删除前须用户点头**(迁移可先做、删那步停)。
+- **B CLAUDE.md 全量瘦身**:#2/#3 长 RE 解释下沉 references/incident,留短规则+指针(能力源指针已改)。+ 写防复发约定(`go build -o tmp_debug/bin/`)。
 **capindex 遗留小项**:render-queue tag directive-first→END(cosmetic,功能等价)· orphan(11 manual-gate op 编码 JSX gate 为 Go test 恢复 ae-accept)。
 **能力查询**:`go run ./cmd/capindex -q <词>`。
 

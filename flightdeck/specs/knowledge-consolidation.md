@@ -7,7 +7,7 @@ last_updated: 2026-06-16
 
 # 知识库整合与退役 (memory/coverage/incidents/CLAUDE.md → flightdeck 单一家)
 
-> **进度(2026-06-16,capindex P2 done 后启动)**:**E ✅**(12 个根目录 stray exe 删除)· **D ✅**(coverage 退役——见下,做法**偏离"删除"为"退役到残值"**:capindex 不覆盖的 deferred/unreachable/negative + AE-attribute 矩阵已验证未被吸收,故保留而非删,合 #4 删前先验迁移)· B 部分(CLAUDE.md 能力源指针已改指 capindex)。**剩 A(记忆退役,repo 外删除需用户确认)· B 全量瘦身 · C(incidents 审核合并)。**
+> **进度(2026-06-16,capindex P2 done 后启动)**:**E ✅**(12 个根目录 stray exe 删除)· **D ✅**(coverage 退役→残值,见下)· **C ✅**(8-agent 只读审计 grep 核实:0 过时、4 并 3 锚、46 keep → 51→47,见下)· B 部分(CLAUDE.md 能力源指针已改指 capindex)。**剩 A(记忆退役,repo 外删除需用户确认)· B 全量瘦身。**
 
 ## 背景 / 动机
 
@@ -61,7 +61,13 @@ last_updated: 2026-06-16
 **移出**:#2/#3 里的长篇 RE/历程解释 → `references/` 或对应 incident;能力分级细节 → capindex tag(coverage 退役后)。
 **criteria**:一条内容若 (a) 是"为什么这么设计"的长解释、或 (b) 只在特定任务才需要 → 移出留指针;若是"每次动代码都要守"的铁律 → 留短规则。目标:CLAUDE.md 读一遍即知边界与去哪查,不在其中堆细节。
 
-## 工作流 C — incidents 审核(51 个):过时清理 + 合并减量
+## 工作流 C — incidents 审核(51 个):过时清理 + 合并减量 — ✅ DONE(2026-06-16)
+
+**做法**:8-agent 只读 workflow,每篇 grep 代码核实结论是否仍成立(铁律:代码>正文)。**结论:0 篇过时**(incidents 维护良好、多为各自独立 RE,非冗余——"太多"更多是知识量大而非重复)。**4 篇并入 3 现有锚**(复用最全锚以免断引用):cdta-duration→cdta-0xB0(@0xB0=duration 前提已证伪,保留 RQ 断言指导)· keyframe-byte-layout-dispatcher→lhd3-keyframe-capacity-pages · pwsh-7-no-winrt + windows-media-ocr-cjk-glyph-spacing→ae-automation-occlusion-crashstate(脚本已引此 slug)。**51→47**。被并 4 篇 rename 入 `archive/incidents/`(git 保留)。C3 对齐:capindex `-check` OK,incident= 反链全解析无悬链(被并 4 篇均未被任何 tag 引用)。原下文为执行前的候选/判据记录。
+
+---
+
+## 工作流 C(原始)— incidents 审核(51 个):过时清理 + 合并减量
 
 **C1 过时清理**——过时判定(任一即标候选):被后续代码改动推翻(记忆 board-status-drift:正文滞后于代码)· 已 resolved 且不再可达 · 内容已被 capindex tag / 其他 incident 吸收。处置:过时→归档(`archive/` 或删,执行时定)+ 在相关存活 incident 注明。
 
