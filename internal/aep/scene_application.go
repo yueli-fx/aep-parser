@@ -20,6 +20,8 @@ type Application struct {
 
 // Parse opens an .aep file at path and returns an Application wrapping
 // the parsed Project. Mirrors py-aep's `py_aep.parse(path)`.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="parse,application,read,py-aep parse,读取"
 func Parse(path string) (*Application, error) {
 	p, err := Open(path)
 	if err != nil {
@@ -30,6 +32,8 @@ func Parse(path string) (*Application, error) {
 
 // ParseReader parses an .aep file from an io.ReadSeeker and returns an
 // Application wrapping the Project. Mirrors py-aep's reader-based parse.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="parse reader,application,流读取,io.ReadSeeker"
 func ParseReader(r io.ReadSeeker) (*Application, error) {
 	p, err := FromReader(r)
 	if err != nil {
@@ -54,6 +58,8 @@ func ParseReader(r io.ReadSeeker) (*Application, error) {
 // (synthesized fixtures / corrupt files).
 //
 // Source: py-aep `binary/item_chunks.py::HeadChunk`.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="version,AE 版本,build,head chunk"
 func (a *Application) Version() string {
 	if a.Project == nil {
 		return ""

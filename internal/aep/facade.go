@@ -14,9 +14,13 @@ import (
 )
 
 // Open parses an .aep file by path and returns the Project.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="open,read,parse,读取,打开,加载 aep"
 func Open(path string) (*Project, error) { return serializer.Open(path) }
 
 // FromReader parses an .aep file from an io.ReadSeeker.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="from reader,read,流读取,io.ReadSeeker"
 func FromReader(r io.ReadSeeker) (*Project, error) { return serializer.FromReader(r) }
 
 // Reopen serializes the project to memory (WriteAEP) and re-parses the bytes
@@ -34,6 +38,8 @@ func FromReader(r io.ReadSeeker) (*Project, error) { return serializer.FromReade
 // The round-trip costs one serialize + parse of the whole project and returns a
 // new object graph; any *Layer / *Composition pointers into the old project
 // remain valid for the old project only.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip boundary="把 New* 建的 built 层升级为 parsed 层,解锁 parsed-only 写路径(AddEffect/AddMask/Camera·Light setter…)" alias="reopen,reparse,重新打开,升级层,parsed layer"
 func Reopen(p *Project) (*Project, error) { return serializer.Reopen(p) }
 
 // NewProject returns a fresh empty Project parsed from the embedded
@@ -45,6 +51,8 @@ func Reopen(p *Project) (*Project, error) { return serializer.Reopen(p) }
 // Never returns an error: the embedded templates are build-time trusted;
 // parser bugs panic with a "build bug" message (not user-facing).
 // Panics on: multiple target args, or unknown AETarget value (forward-incompat).
+//
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestV2_1_AEShipGate_AE2020,TestV2_1_AEShipGate_AE2025 incident=ae25-acceptance-gate boundary="零参=TargetAE2020;支持 2020/2022/2025" alias="project,工程,新建工程,空工程,create project"
 func NewProject(target ...AETarget) *Project { return serializer.NewProject(target...) }
 
 // NewComposition adds an empty composition to the project's root folder.
@@ -71,6 +79,8 @@ func NewProject(target ...AETarget) *Project { return serializer.NewProject(targ
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Project.NewComposition method form.
+//
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestV2_1_AEShipGate_AE2020,TestV2_1_AEShipGate_AE2025 incident=ae25-acceptance-gate boundary="可选字段默认 AE-typical;其余经 Set* 改" alias="composition,合成,新建合成,comp,create comp"
 func NewComposition(
 	p *Project,
 	name string,
@@ -111,6 +121,8 @@ func NewComposition(
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
+//
+//aep:cap domain=comp tier=alpha verify=roundtrip boundary="coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制" alias="duplicate composition,复制合成,克隆合成"
 func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error) {
 	return serializer.DuplicateComposition(p, src, name)
 }
@@ -317,6 +329,8 @@ func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error) {
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused" alias="delete layer,删图层,删除图层,remove layer"
 func DeleteLayer(c *Composition, index int) error { return serializer.DeleteLayer(c, index) }
 
 // DuplicateLayer clones the layer at the given 0-based index in c.Layers
@@ -364,6 +378,8 @@ func DeleteLayer(c *Composition, index int) error { return serializer.DeleteLaye
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused" alias="duplicate layer,复制图层"
 func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 	return serializer.DuplicateLayer(c, index, name)
 }
@@ -413,6 +429,8 @@ func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip" alias="insert layer,插入图层,跨工程复制,copy to comp"
 func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 	return serializer.InsertLayer(c, src, atIdx)
 }
@@ -452,6 +470,8 @@ func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip" alias="move layer,图层排序,reorder layer,改层级"
 func MoveLayer(c *Composition, from, to int) error { return serializer.MoveLayer(c, from, to) }
 
 // MoveToBeginning moves the receiver to position 0 (top of layer stack
@@ -459,6 +479,8 @@ func MoveLayer(c *Composition, from, to int) error { return serializer.MoveLayer
 //
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip" alias="move to beginning,移到顶部,置顶"
 func MoveToBeginning(l *Layer) error { return serializer.MoveToBeginning(l) }
 
 // MoveToEnd moves the receiver to the last position in c.Layers
@@ -466,6 +488,8 @@ func MoveToBeginning(l *Layer) error { return serializer.MoveToBeginning(l) }
 //
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveToEnd method form; the aep facade re-exports it post-split.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip" alias="move to end,移到底部,置底"
 func MoveToEnd(l *Layer) error { return serializer.MoveToEnd(l) }
 
 // MoveAfter moves the receiver to the slot immediately after `other`
@@ -476,6 +500,8 @@ func MoveToEnd(l *Layer) error { return serializer.MoveToEnd(l) }
 //
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveAfter method form; the aep facade re-exports it post-split.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip" alias="move after,移到之后"
 func MoveAfter(l, other *Layer) error { return serializer.MoveAfter(l, other) }
 
 // MoveBefore moves the receiver to the slot immediately before `other`
@@ -483,6 +509,8 @@ func MoveAfter(l, other *Layer) error { return serializer.MoveAfter(l, other) }
 //
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveBefore method form; the aep facade re-exports it post-split.
+//
+//aep:cap domain=structural tier=alpha verify=roundtrip boundary="MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip" alias="move before,移到之前"
 func MoveBefore(l, other *Layer) error { return serializer.MoveBefore(l, other) }
 
 // AddMarker appends a new composition marker at the given time (seconds) and
@@ -510,6 +538,8 @@ func MoveBefore(l, other *Layer) error { return serializer.MoveBefore(l, other) 
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.AddMarker method form.
+//
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025 boundary="需 comp 已有 >=1 marker(空 comp seed 暂搁);tail-insert 不排序" alias="marker,标记,合成标记,comp marker"
 func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 	return serializer.AddMarker(c, seconds)
 }
@@ -531,6 +561,8 @@ func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. Renamed + BREAKING vs the former Marker.Remove method form.
+//
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025 alias="remove marker,删标记"
 func RemoveMarker(m *Marker) error { return serializer.RemoveMarker(m) }
 
 // InsertKeyframe builds a new bpk-byte keyframe block and inserts it
@@ -556,6 +588,8 @@ func RemoveMarker(m *Marker) error { return serializer.RemoveMarker(m) }
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
+//
+//aep:cap domain=keyframe tier=alpha verify=roundtrip boundary="需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear" alias="insert keyframe,插入关键帧,加关键帧"
 func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error) {
 	return serializer.InsertKeyframe(p, time, value)
 }
@@ -567,6 +601,8 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
+//
+//aep:cap domain=keyframe tier=alpha verify=roundtrip boundary="无独立 Go AE gate → 库内 round-trip" alias="delete keyframe,删关键帧,移除关键帧"
 func DeleteKeyframe(p *Property, i int) error { return serializer.DeleteKeyframe(p, i) }
 
 // SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position
@@ -599,6 +635,8 @@ func DeleteKeyframe(p *Property, i int) error { return serializer.DeleteKeyframe
 // the M8 split (CLAUDE.md #2 lists SetDimensionsSeparated as a structural write path
 // despite the Set prefix — it adds/removes follower Property nodes); the aep facade
 // re-exports it. BREAKING vs the former Property.SetDimensionsSeparated method form.
+//
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestSeparateDims_AEShipGate_AE2020,TestSeparateDims_AEShipGate_AE2025,TestMergeDims_AEShipGate_AE2020,TestMergeDims_AEShipGate_AE2025 incident=separate-dimensions-write-mechanics boundary="static 2D/3D + animated 3D 近线性 gated;animated 2D + 自定义 spatial ease refused" alias="separate dimensions,分离维度,position 分离,X Y 分离"
 func SetDimensionsSeparated(p *Property, separated bool) error {
 	return serializer.SetDimensionsSeparated(p, separated)
 }
@@ -616,6 +654,8 @@ func SetDimensionsSeparated(p *Property, separated bool) error {
 // the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
 // structural-op call-form carve-out); the aep facade re-exports it. Renamed +
 // BREAKING vs the former AEPropertyGroup.Remove method form.
+//
+//aep:cap domain=structural tier=alpha verify=ae-accept gate=TestPropStructRemove_AEShipGate_AE2020,TestPropStructRemove_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="Effect Parade + Text Animators 双版本 gated;Mask/Root Vectors 同机制未单独 gate" alias="remove property group,删属性组,删动画器,删 indexed group 子项"
 func RemovePropertyGroup(g *AEPropertyGroup) error { return serializer.RemovePropertyGroup(g) }
 
 // MovePropertyGroup reorders this group to position index (0-based) among its parent
@@ -627,6 +667,8 @@ func RemovePropertyGroup(g *AEPropertyGroup) error { return serializer.RemovePro
 // the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
 // structural-op call-form carve-out); the aep facade re-exports it. Renamed +
 // BREAKING vs the former AEPropertyGroup.MoveTo method form.
+//
+//aep:cap domain=structural tier=alpha verify=ae-accept gate=TestPropStructMove_AEShipGate_AE2020,TestPropStructMove_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="同 RemovePropertyGroup 的 indexed-group gate 覆盖面" alias="move property group,属性组排序,reorder group"
 func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	return serializer.MovePropertyGroup(g, index)
 }
@@ -662,6 +704,8 @@ func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 // the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
 // structural-op call-form carve-out); the aep facade re-exports it. Renamed +
 // BREAKING vs the former AEPropertyGroup.Duplicate method form.
+//
+//aep:cap domain=structural tier=alpha verify=ae-accept gate=TestPropStructDuplicate_AEShipGate_AE2020,TestPropStructDuplicate_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="display-name 后缀不合成(AE 自重算);同 indexed-group gate 覆盖面" alias="duplicate property group,复制属性组,复制效果"
 func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	return serializer.DuplicatePropertyGroup(g)
 }
@@ -704,12 +748,16 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // 30-template library, plus the parade auto-create path on a 100%
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
+//
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="41 内置效果库;camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
 
 // SupportedEffects returns the sorted effect match-names AddEffect can add from
 // an embedded template.
+//
+//aep:cap domain=meta tier=stable verify=none alias="effects,效果列表,supported effects"
 func SupportedEffects() []string { return serializer.SupportedEffects() }
 
 // AddTextOpacityAnimator adds a per-character Opacity animator with a Range
@@ -737,6 +785,8 @@ func SupportedEffects() []string { return serializer.SupportedEffects() }
 // Alpha / structural — the animator chunk structure is RE'd + double-version
 // render-gated, but the typed parameter accessors are not yet wired; tune
 // further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextAnimator_AEShipGate_AE2020,TestTextAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text opacity animator,文字不透明度动画,kinetic typography,逐字,打字机"
 func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
@@ -763,6 +813,8 @@ func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOf
 // Alpha / structural — the animator chunk structure is RE'd + double-version
 // render-gated, but the typed parameter accessors are not yet wired; tune
 // further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextPosAnimator_AEShipGate_AE2020,TestTextPosAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text position animator,文字位移动画,字符滑入,drop in"
 func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextPositionAnimator(layer, x, y, z, rangeStart, rangeEnd, rangeOffset)
 }
@@ -790,6 +842,8 @@ func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeO
 // Alpha / structural — the animator chunk structure is RE'd + double-version
 // render-gated, but the typed parameter accessors are not yet wired; tune
 // further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextScaleAnimator_AEShipGate_AE2020,TestTextScaleAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text scale animator,文字缩放动画,字符弹入,pop in"
 func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextScaleAnimator(layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset)
 }
@@ -816,6 +870,8 @@ func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeO
 // Alpha / structural — the animator chunk structure is RE'd + double-version
 // render-gated, but the typed parameter accessors are not yet wired; tune
 // further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextRotAnimator_AEShipGate_AE2020,TestTextRotAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text rotation animator,文字旋转动画,字符旋转,spin in"
 func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRotationAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
@@ -844,6 +900,8 @@ func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, range
 // Alpha / structural — the animator chunk structure is RE'd + double-version
 // render-gated, but the typed parameter accessors are not yet wired; tune
 // further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorAnimator_AEShipGate_AE2020,TestTextColorAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text color animator,文字颜色动画,颜色擦除,color wipe"
 func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
@@ -864,6 +922,8 @@ func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeO
 //
 // Alpha / structural — RE'd + double-version render-gated; typed parameter
 // accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调" alias="text fill opacity,填充不透明度动画"
 func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextFillOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
@@ -883,6 +943,8 @@ func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, ran
 //
 // Alpha / structural — RE'd + double-version render-gated; typed parameter
 // accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="需文字带 stroke 才可见;typed accessor 未接" alias="text stroke opacity,描边不透明度动画"
 func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextStrokeOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
@@ -902,6 +964,8 @@ func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, r
 //
 // Alpha / structural — RE'd + double-version render-gated; typed parameter
 // accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="需文字带 stroke 才可见;typed accessor 未接" alias="text stroke width,描边宽度动画"
 func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextStrokeWidthAnimator(layer, width, rangeStart, rangeEnd, rangeOffset)
 }
@@ -921,6 +985,8 @@ func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, range
 //
 // Alpha / structural — RE'd + double-version render-gated; typed parameter
 // accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调" alias="text skew,文字倾斜动画,shear"
 func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextSkewAnimator(layer, skew, rangeStart, rangeEnd, rangeOffset)
 }
@@ -944,6 +1010,8 @@ func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset f
 // layer (it needs Per-character 3D enabled, a separate 3D capability not yet
 // supported). Not render-gated; see incidents/text-animator-create-re.md. Free
 // function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=roundtrip incident=text-animator-create-re boundary="2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate" alias="text rotation x,3D 旋转 X,字符前后翻转"
 func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRotationXAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
@@ -963,6 +1031,8 @@ func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rang
 // layer (it needs Per-character 3D enabled, a separate 3D capability not yet
 // supported). Not render-gated; see incidents/text-animator-create-re.md. Free
 // function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=roundtrip incident=text-animator-create-re boundary="2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate" alias="text rotation y,3D 旋转 Y,字符左右翻转"
 func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRotationYAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
@@ -984,6 +1054,8 @@ func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rang
 //
 // Alpha / structural — RE'd + double-version render-gated; typed parameter
 // accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="需文字带 stroke 才可见;typed accessor 未接" alias="text stroke color,描边颜色动画"
 func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextStrokeColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
@@ -1002,6 +1074,8 @@ func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, 
 //
 // Alpha / structural — RE'd + double-version render-gated (two selectors union to
 // extend the selection). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextMultiSelector_AEShipGate_AE2020,TestTextMultiSelector_AEShipGate_AE2025 incident=text-animator-create-re boundary="作用于第一个 animator;Mode 经 SetTextRangeAdvanced;未 parse 的 fresh 层 refused" alias="text range selector,多选择器,range selector,叠加选择"
 func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRangeSelector(layer, start, end, offset)
 }
@@ -1020,6 +1094,8 @@ func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEProperty
 //
 // Alpha / structural — RE'd + double-version render-gated (the rendered frames
 // vary over time as the wiggle re-selects characters). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextWigglySelector_AEShipGate_AE2020,TestTextWigglySelector_AEShipGate_AE2025 incident=text-animator-create-re boundary="作用于第一个 animator;用 AE 默认(Temporal Freq 2/s)自动摆动;未 parse 的 fresh 层 refused" alias="wiggly selector,摆动选择器,抖动,flicker,jitter"
 func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error) {
 	return serializer.AddTextWigglySelector(layer)
 }
@@ -1034,6 +1110,8 @@ type TextRangeAdvanced = serializer.TextRangeAdvanced
 // (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
 // Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass
 // the result to SetTextRangeAdvanced.
+//
+//aep:cap domain=meta tier=stable verify=none alias="range advanced defaults,默认高级范围"
 func DefaultTextRangeAdvanced() TextRangeAdvanced { return serializer.DefaultTextRangeAdvanced() }
 
 // SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text
@@ -1052,6 +1130,8 @@ func DefaultTextRangeAdvanced() TextRangeAdvanced { return serializer.DefaultTex
 // round-trip (write + survive AE) but their visual effect is selector-internal /
 // coupled (Mode needs multiple selectors, Smoothness only affects Shape=Square),
 // so they are not individually render-gated. Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextRangeAdvancedAmount_AEShipGate_AE2020,TestTextRangeAdvancedAmount_AEShipGate_AE2025 incident=text-animator-create-re boundary="Amount render-gated;其余 param(Mode/Shape/Smoothness…)仅 round-trip(选择器内部/耦合)" alias="range advanced,高级范围,amount,shape,mode,ease high"
 func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error {
 	return serializer.SetTextRangeAdvanced(layer, adv)
 }
@@ -1069,6 +1149,8 @@ func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error {
 //
 // Alpha / structural — RE'd + double-version render-gated as the reveal sweep.
 // Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextAnimator_AEShipGate_AE2020,TestTextAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="作用于第一个 animator;需 >=2 关键帧;tickRate<=0 用 comp 的" alias="animate range offset,范围偏移动画,逐字揭示,reveal sweep,打字机动画"
 func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextRangeOffset(layer, tickRate, kfs)
 }
@@ -1087,6 +1169,8 @@ func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe
 //
 // Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf
 // path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=roundtrip incident=text-animator-create-re boundary="1D scalar leaf 路径已 render-gated(经 AnimateTextRangeOffset/Rotation);本函数本身仅 round-trip" alias="animate text opacity,文字不透明度关键帧,同步闪烁,pulse"
 func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextOpacity(layer, tickRate, kfs)
 }
@@ -1105,6 +1189,8 @@ func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) er
 //
 // Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf
 // path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextRotLeafAnimator_AEShipGate_AE2020,TestTextRotLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextRotationAnimator;leaf 已动画则 refuse;>=2 关键帧" alias="animate text rotation,文字旋转关键帧,同步旋转,持续旋转"
 func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextRotation(layer, tickRate, kfs)
 }
@@ -1123,6 +1209,8 @@ func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) e
 //
 // Alpha / structural — RE'd + double-version render-gated. Free function
 // (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextPositionAnimator;leaf 已动画则 refuse;>=2 关键帧" alias="animate text position,文字位移关键帧,同步滑动"
 func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextPosition(layer, tickRate, kfs)
 }
@@ -1141,6 +1229,8 @@ func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) e
 //
 // Alpha / structural — RE'd + double-version render-gated. Free function
 // (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextScaleAnimator;leaf 已动画则 refuse;>=2 关键帧" alias="animate text scale,文字缩放关键帧,同步缩放,pulse"
 func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextScale(layer, tickRate, kfs)
 }
@@ -1160,6 +1250,8 @@ func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 //
 // Alpha / structural — RE'd + double-version render-gated. Free function
 // (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextColorAnimator;leaf 已动画则 refuse;>=2 关键帧;值须 4 通道" alias="animate text color,文字颜色关键帧,颜色循环,color cycle"
 func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextColor(layer, tickRate, kfs)
 }
@@ -1208,6 +1300,8 @@ func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 // generic materialization, values read back on open and after AE's own
 // resave); promoted from Alpha in the 2026-06-12 audit batch. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestSetEffectParam_AEShipGate_AE2020,TestSetEffectParam_AEShipGate_AE2025 incident=effect-param-elision-synthesis-lite boundary="scalar/enum/bool/angle/color/2D·3D point/slider 泛型物化;curve/layer-ref 类 elided 时 refuse" alias="effect param,效果参数,设参数,blurriness"
 func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error) {
 	return serializer.SetEffectParam(layer, fx, paramMatchName, value)
 }
@@ -1217,6 +1311,8 @@ func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) 
 // scalar / enum / boolean / angle / color / 2D / 3D / slider params of any
 // effect materialize via the generic per-control-type fallback, and
 // already-present params are settable regardless.
+//
+//aep:cap domain=meta tier=stable verify=none alias="effect params,参数列表,supported params"
 func SupportedEffectParams() []string { return serializer.SupportedEffectParams() }
 
 // AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N
@@ -1240,6 +1336,8 @@ func SupportedEffectParams() []string { return serializer.SupportedEffectParams(
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=effect tier=stable verify=render-pixel gate=TestAnimEffect_AEShipGate_AE2020,TestAnimEffect_AEShipGate_AE2025 boundary="1D scalar only;color/point 用 AnimateEffectParamVec;fx 须在 parsed 层(Reopen)" alias="animate effect,效果关键帧,动画模糊,slider rig"
 func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error) {
 	return serializer.AnimateEffectParam(layer, fx, paramMatchName, kfs)
 }
@@ -1265,6 +1363,8 @@ func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []S
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=effect tier=stable verify=render-pixel gate=TestAnimEffectVec_AEShipGate_AE2020,TestAnimEffectVec_AEShipGate_AE2025 boundary="2/3/4 分量(color/point);1D 用 AnimateEffectParam;fx 须在 parsed 层(Reopen)" alias="animate effect color,效果颜色关键帧,point 动画"
 func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error) {
 	return serializer.AnimateEffectParamVec(layer, fx, paramMatchName, kfs)
 }
@@ -1284,6 +1384,8 @@ func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs 
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=effect tier=stable verify=render-pixel gate=TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025 boundary="参数须已物化(Set Matte -0001 随模板带出);default-elided layer-ref 物化未做" alias="set matte,layer reference,蒙版层,take matte from layer"
 func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error {
 	return serializer.SetEffectLayerParam(layer, fx, paramMatchName, target)
 }
@@ -1319,6 +1421,8 @@ func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target
 // Alpha / structural — AE 2020 + AE 2025 render ship-gate green for Casts Shadows
 // (from-scratch 3D caster drops a visible shadow). Free function (CLAUDE.md #2
 // structural-op call-form).
+//
+//aep:cap domain=layer-set tier=alpha verify=render-pixel gate=TestLayer3DShadow_AEShipGate_AE2020,TestLayer3DShadow_AEShipGate_AE2025 boundary="Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate" alias="material option,材质选项,casts shadows,投影,3D 材质"
 func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error) {
 	return serializer.SetMaterialOption(layer, matchName, value)
 }
@@ -1363,6 +1467,8 @@ func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, er
 // identity preserved across AE's own resave; the gate also covers
 // SetMotionGraphicsTemplateName); promoted from Alpha in the 2026-06-12 audit
 // batch. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=eg tier=stable verify=ae-accept gate=TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025 boundary="scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused" alias="essential graphics,主图形,EG,模板控件,addToMotionGraphicsTemplate"
 func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error) {
 	return serializer.AddEssentialProperty(layer, fx, paramMatchName, displayName)
 }
@@ -1375,6 +1481,8 @@ func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName 
 //
 // Stable / structural — rides the AE 2020 + AE 2025 ship-gated Effect-Parade
 // child removal. Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestPropStructRemove_AEShipGate_AE2020,TestPropStructRemove_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="rides RemovePropertyGroup 的 Effect-Parade gate;无独立 RemoveEffect AE gate" alias="remove effect,删效果"
 func RemoveEffect(layer *Layer, index int) error { return serializer.RemoveEffect(layer, index) }
 
 // AddMask appends a vector mask to the layer's "ADBE Mask Parade" and returns
@@ -1423,6 +1531,8 @@ func RemoveEffect(layer *Layer, index int) error { return serializer.RemoveEffec
 // exactly and keeps the masks across its own resave); promoted from Alpha in
 // the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op
 // call-form).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestAddMask_AEShipGate_AE2020,TestAddMask_AEShipGate_AE2025 boundary="camera/light 层 + 未 Reopen 的 fresh 层 refused;Feather/Opacity/Expansion default-elided" alias="mask,蒙版,遮罩,vector mask,加蒙版"
 func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 	return serializer.AddMask(layer, name, path)
 }
@@ -1441,6 +1551,8 @@ func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMGMaskPath_AEShipGate_AE2020,TestMGMaskPath_AEShipGate_AE2025 boundary="mask 须来自 parsed 工程(Reopen);顶点数可与原不同" alias="mask path,蒙版路径,改蒙版形状,reshape mask"
 func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 	return serializer.SetMaskPath(layer, mask, path)
 }
@@ -1461,6 +1573,8 @@ func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 //
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMGMaskPathKf_AEShipGate_AE2020,TestMGMaskPathKf_AEShipGate_AE2025 boundary=">=2 关键帧;逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)" alias="mask path keyframes,蒙版路径动画,animated mask,变形蒙版"
 func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
 	return serializer.SetMaskPathKeyframes(layer, mask, keys)
 }
@@ -1489,6 +1603,8 @@ func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
 // remove the middle one, AE accepts the spliced-out triple next to a real
 // Effect Parade and reads back both survivors with geometry intact and the
 // effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestRemoveMask_AEShipGate_AE2020,TestRemoveMask_AEShipGate_AE2025 boundary="删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程" alias="remove mask,删蒙版"
 func RemoveMask(layer *Layer, m *Mask) error {
 	return serializer.RemoveMask(layer, m)
 }
@@ -1515,6 +1631,8 @@ func RemoveMask(layer *Layer, m *Mask) error {
 // duplicate it, AE accepts the cloned triple with a distinct internal index
 // and reads back both masks with geometry intact and the effects untouched).
 // Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestDuplicateMask_AEShipGate_AE2020,TestDuplicateMask_AEShipGate_AE2025 boundary="mask 须来自 parsed 工程(Reopen)" alias="duplicate mask,复制蒙版"
 func DuplicateMask(layer *Layer, m *Mask) (*Mask, error) {
 	return serializer.DuplicateMask(layer, m)
 }
@@ -1541,6 +1659,8 @@ func DuplicateMask(layer *Layer, m *Mask) (*Mask, error) {
 // move the last to the front, AE accepts the re-emitted triple run and reads
 // the masks back in the new order with the effects untouched). Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMoveMask_AEShipGate_AE2020,TestMoveMask_AEShipGate_AE2025 boundary="mask 须来自 parsed 工程(Reopen)" alias="move mask,蒙版排序,reorder mask"
 func MoveMask(layer *Layer, m *Mask, toIndex int) error {
 	return serializer.MoveMask(layer, m, toIndex)
 }
@@ -1610,6 +1730,8 @@ const (
 // the copies back. See incidents/render-queue-delete-mechanics.md.
 //
 // Free function (not a method) — see RemoveItem. BREAKING vs rq.AddItem(comp).
+//
+//aep:cap domain=render-queue tier=alpha verify=roundtrip incident=render-queue-delete-mechanics boundary="需队列已有 >=1 item 作模板;输出模块沿用模板路径;未 AE-gate" alias="render queue,渲染队列,add item,RQ,导出"
 func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	return serializer.AddItem(rq, comp)
 }
@@ -1637,6 +1759,8 @@ func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 // Alpha: structural delete is not yet AE-ship-gated. Only items with one output
 // module are covered by the Rout RE (uniform per-item stride); see
 // incidents/render-queue-delete-mechanics.md.
+//
+//aep:cap domain=render-queue tier=alpha verify=roundtrip incident=render-queue-delete-mechanics boundary="仅单输出模块 item 的 Rout RE 覆盖;未 AE-gate" alias="render queue,渲染队列,remove item"
 func RemoveItem(rq *RenderQueue, index int) error { return serializer.RemoveItem(rq, index) }
 
 // SetRenderer switches the composition's 3D rendering engine. The name may be
@@ -1660,4 +1784,6 @@ func RemoveItem(rq *RenderQueue, index int) error { return serializer.RemoveItem
 // Free function (not a method) so the rollback path can reach the concrete
 // comp back-ref (prin/prda chunks) after the M8 split; the aep facade
 // re-exports it. BREAKING vs the former Composition.SetRenderer method form.
+//
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestSetRenderer_AEShipGate_AE2020,TestSetRenderer_AEShipGate_AE2025 boundary="binary 或 ExtendScript 名;各 AE 版本暴露引擎不同" alias="renderer,渲染器,3D 引擎,advanced 3d,cinema 4d"
 func SetRenderer(c *Composition, name string) error { return serializer.SetRenderer(c, name) }

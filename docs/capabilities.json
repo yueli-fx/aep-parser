@@ -1,5 +1,353 @@
 [
   {
+    "symbol": "DuplicateComposition",
+    "kind": "func",
+    "signature": "func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error)",
+    "summary": "DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制",
+      "incident": null,
+      "alias": [
+        "duplicate composition",
+        "复制合成",
+        "克隆合成"
+      ]
+    }
+  },
+  {
+    "symbol": "NewComposition",
+    "kind": "func",
+    "signature": "func NewComposition(\n\tp *Project,\n\tname string,\n\twidth, height uint16,\n\tFrameRateHz, duration float64,\n) (*Composition, error)",
+    "summary": "NewComposition adds an empty composition to the project's root folder.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestV2_1_AEShipGate_AE2020",
+        "TestV2_1_AEShipGate_AE2025"
+      ],
+      "boundary": "可选字段默认 AE-typical;其余经 Set* 改",
+      "incident": [
+        "ae25-acceptance-gate"
+      ],
+      "alias": [
+        "composition",
+        "合成",
+        "新建合成",
+        "comp",
+        "create comp"
+      ]
+    }
+  },
+  {
+    "symbol": "SetRenderer",
+    "kind": "func",
+    "signature": "func SetRenderer(c *Composition, name string) error",
+    "summary": "SetRenderer switches the composition's 3D rendering engine.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestSetRenderer_AEShipGate_AE2020",
+        "TestSetRenderer_AEShipGate_AE2025"
+      ],
+      "boundary": "binary 或 ExtendScript 名;各 AE 版本暴露引擎不同",
+      "incident": null,
+      "alias": [
+        "renderer",
+        "渲染器",
+        "3D 引擎",
+        "advanced 3d",
+        "cinema 4d"
+      ]
+    }
+  },
+  {
+    "symbol": "AddEffect",
+    "kind": "func",
+    "signature": "func AddEffect(layer *Layer, effectMatchName string) (*Effect, error)",
+    "summary": "AddEffect appends an effect to the layer's \"ADBE Effect Parade\" and returns the parsed *Effect, so the caller can immediately tune its parameters via Effect.Parameters (Property.SetStaticValue works on effect params — e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestAddEffect_AEShipGate_AE2020",
+        "TestAddEffect_AEShipGate_AE2025"
+      ],
+      "boundary": "41 内置效果库;camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
+      "incident": [
+        "add-effect-splice-re"
+      ],
+      "alias": [
+        "effect",
+        "特效",
+        "加效果",
+        "blur",
+        "模糊",
+        "glow"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateEffectParam",
+    "kind": "func",
+    "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
+    "summary": "AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (\u003e= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestAnimEffect_AEShipGate_AE2020",
+        "TestAnimEffect_AEShipGate_AE2025"
+      ],
+      "boundary": "1D scalar only;color/point 用 AnimateEffectParamVec;fx 须在 parsed 层(Reopen)",
+      "incident": null,
+      "alias": [
+        "animate effect",
+        "效果关键帧",
+        "动画模糊",
+        "slider rig"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateEffectParamVec",
+    "kind": "func",
+    "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
+    "summary": "AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestAnimEffectVec_AEShipGate_AE2020",
+        "TestAnimEffectVec_AEShipGate_AE2025"
+      ],
+      "boundary": "2/3/4 分量(color/point);1D 用 AnimateEffectParam;fx 须在 parsed 层(Reopen)",
+      "incident": null,
+      "alias": [
+        "animate effect color",
+        "效果颜色关键帧",
+        "point 动画"
+      ]
+    }
+  },
+  {
+    "symbol": "RemoveEffect",
+    "kind": "func",
+    "signature": "func RemoveEffect(layer *Layer, index int) error",
+    "summary": "RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestPropStructRemove_AEShipGate_AE2020",
+        "TestPropStructRemove_AEShipGate_AE2025"
+      ],
+      "boundary": "rides RemovePropertyGroup 的 Effect-Parade gate;无独立 RemoveEffect AE gate",
+      "incident": [
+        "property-indexed-group-structural-re"
+      ],
+      "alias": [
+        "remove effect",
+        "删效果"
+      ]
+    }
+  },
+  {
+    "symbol": "SetEffectLayerParam",
+    "kind": "func",
+    "signature": "func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error",
+    "summary": "SetEffectLayerParam points a layer-reference effect parameter at target — e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestSetMatte_AEShipGate_AE2020",
+        "TestSetMatte_AEShipGate_AE2025"
+      ],
+      "boundary": "参数须已物化(Set Matte -0001 随模板带出);default-elided layer-ref 物化未做",
+      "incident": null,
+      "alias": [
+        "set matte",
+        "layer reference",
+        "蒙版层",
+        "take matte from layer"
+      ]
+    }
+  },
+  {
+    "symbol": "SetEffectParam",
+    "kind": "func",
+    "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
+    "summary": "SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestSetEffectParam_AEShipGate_AE2020",
+        "TestSetEffectParam_AEShipGate_AE2025"
+      ],
+      "boundary": "scalar/enum/bool/angle/color/2D·3D point/slider 泛型物化;curve/layer-ref 类 elided 时 refuse",
+      "incident": [
+        "effect-param-elision-synthesis-lite"
+      ],
+      "alias": [
+        "effect param",
+        "效果参数",
+        "设参数",
+        "blurriness"
+      ]
+    }
+  },
+  {
+    "symbol": "AddEssentialProperty",
+    "kind": "func",
+    "signature": "func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error)",
+    "summary": "AddEssentialProperty exposes one parameter of an effect on layer in the owning composition's Essential Graphics panel — mirrors AE's \"addProperty to Essential Graphics\" / Property.addToMotionGraphicsTemplate.",
+    "has_cap": true,
+    "cap": {
+      "domain": "eg",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestEGAdd_AEShipGate_AE2020",
+        "TestEGAdd_AEShipGate_AE2025"
+      ],
+      "boundary": "scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused",
+      "incident": null,
+      "alias": [
+        "essential graphics",
+        "主图形",
+        "EG",
+        "模板控件",
+        "addToMotionGraphicsTemplate"
+      ]
+    }
+  },
+  {
+    "symbol": "NewGradientFillNode",
+    "kind": "func",
+    "signature": "func NewGradientFillNode() *GradientFillNode",
+    "summary": "NewGradientFillNode returns a detached gradient-fill shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_GradientFill_AEShipGate_AE2020",
+        "TestV2_2_GradientFill_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient fill",
+        "渐变填充",
+        "线性渐变",
+        "径向渐变"
+      ]
+    }
+  },
+  {
+    "symbol": "NewGradientStrokeNode",
+    "kind": "func",
+    "signature": "func NewGradientStrokeNode() *GradientStrokeNode",
+    "summary": "NewGradientStrokeNode returns a detached gradient-stroke shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_GradientStroke_AEShipGate_AE2020",
+        "TestV2_2_GradientStroke_AEShipGate_AE2025",
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke",
+        "渐变描边"
+      ]
+    }
+  },
+  {
+    "symbol": "DeleteKeyframe",
+    "kind": "func",
+    "signature": "func DeleteKeyframe(p *Property, i int) error",
+    "summary": "DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header.",
+    "has_cap": true,
+    "cap": {
+      "domain": "keyframe",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "无独立 Go AE gate → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "delete keyframe",
+        "删关键帧",
+        "移除关键帧"
+      ]
+    }
+  },
+  {
+    "symbol": "InsertKeyframe",
+    "kind": "func",
+    "signature": "func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error)",
+    "summary": "InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header.",
+    "has_cap": true,
+    "cap": {
+      "domain": "keyframe",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "需 \u003e=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear",
+      "incident": null,
+      "alias": [
+        "insert keyframe",
+        "插入关键帧",
+        "加关键帧"
+      ]
+    }
+  },
+  {
     "symbol": "NewAdjustmentLayer",
     "kind": "func",
     "signature": "func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)",
@@ -203,6 +551,1909 @@
         "text",
         "文字",
         "文本图层"
+      ]
+    }
+  },
+  {
+    "symbol": "SetMaterialOption",
+    "kind": "func",
+    "signature": "func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error)",
+    "summary": "SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestLayer3DShadow_AEShipGate_AE2020",
+        "TestLayer3DShadow_AEShipGate_AE2025"
+      ],
+      "boundary": "Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate",
+      "incident": null,
+      "alias": [
+        "material option",
+        "材质选项",
+        "casts shadows",
+        "投影",
+        "3D 材质"
+      ]
+    }
+  },
+  {
+    "symbol": "AddMask",
+    "kind": "func",
+    "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
+    "summary": "AddMask appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed *Mask.",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestAddMask_AEShipGate_AE2020",
+        "TestAddMask_AEShipGate_AE2025"
+      ],
+      "boundary": "camera/light 层 + 未 Reopen 的 fresh 层 refused;Feather/Opacity/Expansion default-elided",
+      "incident": null,
+      "alias": [
+        "mask",
+        "蒙版",
+        "遮罩",
+        "vector mask",
+        "加蒙版"
+      ]
+    }
+  },
+  {
+    "symbol": "DuplicateMask",
+    "kind": "func",
+    "signature": "func DuplicateMask(layer *Layer, m *Mask) (*Mask, error)",
+    "summary": "DuplicateMask inserts a copy of mask m immediately after it in layer's \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone.",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestDuplicateMask_AEShipGate_AE2020",
+        "TestDuplicateMask_AEShipGate_AE2025"
+      ],
+      "boundary": "mask 须来自 parsed 工程(Reopen)",
+      "incident": null,
+      "alias": [
+        "duplicate mask",
+        "复制蒙版"
+      ]
+    }
+  },
+  {
+    "symbol": "MoveMask",
+    "kind": "func",
+    "signature": "func MoveMask(layer *Layer, m *Mask, toIndex int) error",
+    "summary": "MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask.",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMoveMask_AEShipGate_AE2020",
+        "TestMoveMask_AEShipGate_AE2025"
+      ],
+      "boundary": "mask 须来自 parsed 工程(Reopen)",
+      "incident": null,
+      "alias": [
+        "move mask",
+        "蒙版排序",
+        "reorder mask"
+      ]
+    }
+  },
+  {
+    "symbol": "RemoveMask",
+    "kind": "func",
+    "signature": "func RemoveMask(layer *Layer, m *Mask) error",
+    "summary": "RemoveMask deletes mask m from layer's \"ADBE Mask Parade\" — the inverse of AddMask.",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestRemoveMask_AEShipGate_AE2020",
+        "TestRemoveMask_AEShipGate_AE2025"
+      ],
+      "boundary": "删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程",
+      "incident": null,
+      "alias": [
+        "remove mask",
+        "删蒙版"
+      ]
+    }
+  },
+  {
+    "symbol": "SetMaskPath",
+    "kind": "func",
+    "signature": "func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error",
+    "summary": "SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts).",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMGMaskPath_AEShipGate_AE2020",
+        "TestMGMaskPath_AEShipGate_AE2025"
+      ],
+      "boundary": "mask 须来自 parsed 工程(Reopen);顶点数可与原不同",
+      "incident": null,
+      "alias": [
+        "mask path",
+        "蒙版路径",
+        "改蒙版形状",
+        "reshape mask"
+      ]
+    }
+  },
+  {
+    "symbol": "SetMaskPathKeyframes",
+    "kind": "func",
+    "signature": "func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error",
+    "summary": "SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear).",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMGMaskPathKf_AEShipGate_AE2020",
+        "TestMGMaskPathKf_AEShipGate_AE2025"
+      ],
+      "boundary": "\u003e=2 关键帧;逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)",
+      "incident": null,
+      "alias": [
+        "mask path keyframes",
+        "蒙版路径动画",
+        "animated mask",
+        "变形蒙版"
+      ]
+    }
+  },
+  {
+    "symbol": "Capabilities",
+    "kind": "func",
+    "signature": "func Capabilities(target AETarget) AECapabilities",
+    "summary": "Capabilities returns the AECapabilities matrix for the given AE target.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "none",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "capabilities",
+        "能力矩阵",
+        "版本能力",
+        "AE target"
+      ]
+    }
+  },
+  {
+    "symbol": "DefaultTextRangeAdvanced",
+    "kind": "func",
+    "signature": "func DefaultTextRangeAdvanced() TextRangeAdvanced",
+    "summary": "DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize).",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "none",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "range advanced defaults",
+        "默认高级范围"
+      ]
+    }
+  },
+  {
+    "symbol": "EncodeGradientXML",
+    "kind": "func",
+    "signature": "func EncodeGradientXML(g *Gradient) string",
+    "summary": "EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the inverse of ParseGradientXML).",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated)",
+      "incident": null,
+      "alias": [
+        "encode gradient xml",
+        "渐变编码",
+        "gradient stops"
+      ]
+    }
+  },
+  {
+    "symbol": "FromReader",
+    "kind": "func",
+    "signature": "func FromReader(r io.ReadSeeker) (*Project, error)",
+    "summary": "FromReader parses an .aep file from an io.ReadSeeker.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "from reader",
+        "read",
+        "流读取",
+        "io.ReadSeeker"
+      ]
+    }
+  },
+  {
+    "symbol": "NewPropertyStream",
+    "kind": "func",
+    "signature": "func NewPropertyStream[T any]() *PropertyStream[T]",
+    "summary": "NewPropertyStream returns a Static-mode stream holding the zero value of T.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "property stream",
+        "动画原语",
+        "V2.2 keyframe stream"
+      ]
+    }
+  },
+  {
+    "symbol": "Open",
+    "kind": "func",
+    "signature": "func Open(path string) (*Project, error)",
+    "summary": "Open parses an .aep file by path and returns the Project.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "open",
+        "read",
+        "parse",
+        "读取",
+        "打开",
+        "加载 aep"
+      ]
+    }
+  },
+  {
+    "symbol": "Parse",
+    "kind": "func",
+    "signature": "func Parse(path string) (*Application, error)",
+    "summary": "Parse opens an .aep file at path and returns an Application wrapping the parsed Project.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "parse",
+        "application",
+        "read",
+        "py-aep parse",
+        "读取"
+      ]
+    }
+  },
+  {
+    "symbol": "ParseGradientXML",
+    "kind": "func",
+    "signature": "func ParseGradientXML(xmlText string) *Gradient",
+    "summary": "ParseGradientXML parses AE gradient XML (prop.map format) into a *Gradient.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "parse gradient xml",
+        "渐变解析",
+        "gradient stops"
+      ]
+    }
+  },
+  {
+    "symbol": "ParseReader",
+    "kind": "func",
+    "signature": "func ParseReader(r io.ReadSeeker) (*Application, error)",
+    "summary": "ParseReader parses an .aep file from an io.ReadSeeker and returns an Application wrapping the Project.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "parse reader",
+        "application",
+        "流读取",
+        "io.ReadSeeker"
+      ]
+    }
+  },
+  {
+    "symbol": "Reopen",
+    "kind": "func",
+    "signature": "func Reopen(p *Project) (*Project, error)",
+    "summary": "Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "把 New* 建的 built 层升级为 parsed 层,解锁 parsed-only 写路径(AddEffect/AddMask/Camera·Light setter…)",
+      "incident": null,
+      "alias": [
+        "reopen",
+        "reparse",
+        "重新打开",
+        "升级层",
+        "parsed layer"
+      ]
+    }
+  },
+  {
+    "symbol": "SupportedEffectParams",
+    "kind": "func",
+    "signature": "func SupportedEffectParams() []string",
+    "summary": "SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "none",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "effect params",
+        "参数列表",
+        "supported params"
+      ]
+    }
+  },
+  {
+    "symbol": "SupportedEffects",
+    "kind": "func",
+    "signature": "func SupportedEffects() []string",
+    "summary": "SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "none",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "effects",
+        "效果列表",
+        "supported effects"
+      ]
+    }
+  },
+  {
+    "symbol": "TextEncodedByteLen",
+    "kind": "func",
+    "signature": "func TextEncodedByteLen(s string) int",
+    "summary": "TextEncodedByteLen returns the encoded byte length SetText would produce for s.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "none",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "text byte length",
+        "编码长度",
+        "utf 长度"
+      ]
+    }
+  },
+  {
+    "symbol": "Version",
+    "kind": "method",
+    "recv": "*Application",
+    "signature": "func (a *Application) Version() string",
+    "summary": "Version returns the AE version that wrote the file as a string like \"17.7x101\" (AE 2020 / 17.7 build 101) or \"25.6x57\" (AE 2025), decoded from the root `head` chunk's packed version word (offset 4-7).",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "version",
+        "AE 版本",
+        "build",
+        "head chunk"
+      ]
+    }
+  },
+  {
+    "symbol": "WrapShapeLayer",
+    "kind": "func",
+    "signature": "func WrapShapeLayer(layer *Layer) *ShapeLayer",
+    "summary": "WrapShapeLayer wraps a parsed shape Layer into a ShapeLayer view.",
+    "has_cap": true,
+    "cap": {
+      "domain": "meta",
+      "tier": "stable",
+      "verify": "none",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "wrap shape layer",
+        "形状层视图",
+        "shape layer"
+      ]
+    }
+  },
+  {
+    "symbol": "NewProject",
+    "kind": "func",
+    "signature": "func NewProject(target ...AETarget) *Project",
+    "summary": "NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target.",
+    "has_cap": true,
+    "cap": {
+      "domain": "project",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestV2_1_AEShipGate_AE2020",
+        "TestV2_1_AEShipGate_AE2025"
+      ],
+      "boundary": "零参=TargetAE2020;支持 2020/2022/2025",
+      "incident": [
+        "ae25-acceptance-gate"
+      ],
+      "alias": [
+        "project",
+        "工程",
+        "新建工程",
+        "空工程",
+        "create project"
+      ]
+    }
+  },
+  {
+    "symbol": "AddItem",
+    "kind": "func",
+    "signature": "func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error)",
+    "summary": "AddItem appends a render queue item for comp, mirroring ExtendScript RenderQueue.items.add(comp).",
+    "has_cap": true,
+    "cap": {
+      "domain": "render-queue",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "需队列已有 \u003e=1 item 作模板;输出模块沿用模板路径;未 AE-gate",
+      "incident": [
+        "render-queue-delete-mechanics"
+      ],
+      "alias": [
+        "render queue",
+        "渲染队列",
+        "add item",
+        "RQ",
+        "导出"
+      ]
+    }
+  },
+  {
+    "symbol": "RemoveItem",
+    "kind": "func",
+    "signature": "func RemoveItem(rq *RenderQueue, index int) error",
+    "summary": "RemoveItem deletes the render queue item at index (0-based), mirroring ExtendScript RenderQueueItem.remove().",
+    "has_cap": true,
+    "cap": {
+      "domain": "render-queue",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "仅单输出模块 item 的 Rout RE 覆盖;未 AE-gate",
+      "incident": [
+        "render-queue-delete-mechanics"
+      ],
+      "alias": [
+        "render queue",
+        "渲染队列",
+        "remove item"
+      ]
+    }
+  },
+  {
+    "symbol": "NewEllipseNode",
+    "kind": "func",
+    "signature": "func NewEllipseNode() *EllipseNode",
+    "summary": "NewEllipseNode returns a detached ellipse shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "ellipse",
+        "椭圆",
+        "圆",
+        "oval"
+      ]
+    }
+  },
+  {
+    "symbol": "NewFillNode",
+    "kind": "func",
+    "signature": "func NewFillNode() *FillNode",
+    "summary": "NewFillNode returns a detached fill shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
+      ],
+      "boundary": "fill 随形状渲染验证(颜色像素门禁)",
+      "incident": null,
+      "alias": [
+        "fill",
+        "填充",
+        "纯色填充",
+        "solid color"
+      ]
+    }
+  },
+  {
+    "symbol": "NewMergePathsNode",
+    "kind": "func",
+    "signature": "func NewMergePathsNode() *MergePathsNode",
+    "summary": "NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGMerge_AEShipGate_AE2020",
+        "TestMGMerge_AEShipGate_AE2025",
+        "TestMGMergeModes_AEShipGate_AE2020",
+        "TestMGMergeModes_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "merge paths",
+        "合并路径",
+        "布尔运算",
+        "boolean"
+      ]
+    }
+  },
+  {
+    "symbol": "NewOffsetPathsNode",
+    "kind": "func",
+    "signature": "func NewOffsetPathsNode() *OffsetPathsNode",
+    "summary": "NewOffsetPathsNode returns a detached Offset Paths filter node (Amount=10).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGOffset_AEShipGate_AE2020",
+        "TestMGOffset_AEShipGate_AE2025",
+        "TestMGOffsetExtras_AEShipGate_AE2020",
+        "TestMGOffsetExtras_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "offset paths",
+        "偏移路径",
+        "描边膨胀",
+        "inflate"
+      ]
+    }
+  },
+  {
+    "symbol": "NewPathNode",
+    "kind": "func",
+    "signature": "func NewPathNode() *PathNode",
+    "summary": "NewPathNode returns a detached path shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Path_AEShipGate_AE2020",
+        "TestV2_2_Path_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "path",
+        "路径",
+        "自定义形状",
+        "bezier",
+        "贝塞尔"
+      ]
+    }
+  },
+  {
+    "symbol": "NewPuckerBloatNode",
+    "kind": "func",
+    "signature": "func NewPuckerBloatNode() *PuckerBloatNode",
+    "summary": "NewPuckerBloatNode returns a detached Pucker \u0026 Bloat filter node (Amount=0, the no-op identity).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGPuckerBloat_AEShipGate_AE2020",
+        "TestMGPuckerBloat_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "pucker bloat",
+        "缩拢膨胀",
+        "尖角圆角"
+      ]
+    }
+  },
+  {
+    "symbol": "NewRectNode",
+    "kind": "func",
+    "signature": "func NewRectNode() *RectNode",
+    "summary": "NewRectNode returns a detached rectangle shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_RectKf_AEShipGate_AE2020",
+        "TestV2_2_RectKf_AEShipGate_AE2025"
+      ],
+      "boundary": "rect via keyframe render-gated;静态 rect Path/Stroke embed bytes deferred",
+      "incident": null,
+      "alias": [
+        "rect",
+        "矩形",
+        "方块",
+        "rectangle"
+      ]
+    }
+  },
+  {
+    "symbol": "NewRepeaterNode",
+    "kind": "func",
+    "signature": "func NewRepeaterNode() *RepeaterNode",
+    "summary": "NewRepeaterNode returns a detached Repeater filter node (3 copies, identity transform).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGRepeater_AEShipGate_AE2020",
+        "TestMGRepeater_AEShipGate_AE2025",
+        "TestMGRepeaterOrder_AEShipGate_AE2020",
+        "TestMGRepeaterOrder_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "repeater",
+        "重复",
+        "阵列",
+        "复制"
+      ]
+    }
+  },
+  {
+    "symbol": "NewRoundCornersNode",
+    "kind": "func",
+    "signature": "func NewRoundCornersNode() *RoundCornersNode",
+    "summary": "NewRoundCornersNode returns a detached Round Corners filter node (Radius=10).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGRoundCorners_AEShipGate_AE2020",
+        "TestMGRoundCorners_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "round corners",
+        "圆角"
+      ]
+    }
+  },
+  {
+    "symbol": "NewStarNode",
+    "kind": "func",
+    "signature": "func NewStarNode() *StarNode",
+    "summary": "NewStarNode returns a detached Star shape node (default 5-point star).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGStar_AEShipGate_AE2020",
+        "TestMGStar_AEShipGate_AE2025",
+        "TestMGPolygon_AEShipGate_AE2020",
+        "TestMGPolygon_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "star",
+        "星形",
+        "多边形",
+        "polygon",
+        "五角星"
+      ]
+    }
+  },
+  {
+    "symbol": "NewStrokeNode",
+    "kind": "func",
+    "signature": "func NewStrokeNode() *StrokeNode",
+    "summary": "NewStrokeNode returns a detached stroke shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Stroke_AEShipGate_AE2020",
+        "TestV2_2_Stroke_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "stroke",
+        "描边",
+        "线条",
+        "outline"
+      ]
+    }
+  },
+  {
+    "symbol": "NewTrimNode",
+    "kind": "func",
+    "signature": "func NewTrimNode() *TrimNode",
+    "summary": "NewTrimNode returns a detached Trim Paths filter node (identity: Start=0, End=100, Offset=0).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGTrim_AEShipGate_AE2020",
+        "TestMGTrim_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "trim paths",
+        "修剪路径",
+        "描边动画",
+        "write-on",
+        "线条生长"
+      ]
+    }
+  },
+  {
+    "symbol": "NewTwistNode",
+    "kind": "func",
+    "signature": "func NewTwistNode() *TwistNode",
+    "summary": "NewTwistNode returns a detached Twist filter node (Angle=0, the no-op identity).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGTwist_AEShipGate_AE2020",
+        "TestMGTwist_AEShipGate_AE2025",
+        "TestMGTwistCenter_AEShipGate_AE2020",
+        "TestMGTwistCenter_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "twist",
+        "扭转",
+        "旋涡",
+        "swirl"
+      ]
+    }
+  },
+  {
+    "symbol": "NewVectorGroup",
+    "kind": "func",
+    "signature": "func NewVectorGroup() *VectorGroup",
+    "summary": "NewVectorGroup returns a detached vector group shape node.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
+      ],
+      "boundary": "形状内容容器,承载子节点(随形状渲染验证)",
+      "incident": null,
+      "alias": [
+        "vector group",
+        "形状组",
+        "shape contents",
+        "分组"
+      ]
+    }
+  },
+  {
+    "symbol": "NewWigglePathsNode",
+    "kind": "func",
+    "signature": "func NewWigglePathsNode() *WigglePathsNode",
+    "summary": "NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the no-op identity).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggle_AEShipGate_AE2020",
+        "TestMGWiggle_AEShipGate_AE2025"
+      ],
+      "boundary": "基本 render-gated;Correlation/Temporal·Spatial Phase/Roughen Points 调制 evidence-defer",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "wiggle paths",
+        "抖动路径",
+        "粗糙化",
+        "roughen"
+      ]
+    }
+  },
+  {
+    "symbol": "NewWiggleTransformNode",
+    "kind": "func",
+    "signature": "func NewWiggleTransformNode() *WiggleTransformNode",
+    "summary": "NewWiggleTransformNode returns a detached Wiggle Transform filter node (zero amplitudes, the no-op identity).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleTransform_AEShipGate_AE2020",
+        "TestMGWiggleTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "基本 render-gated;Correlation/Phase 调制 evidence-defer",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "wiggle transform",
+        "抖动变换"
+      ]
+    }
+  },
+  {
+    "symbol": "NewZigZagNode",
+    "kind": "func",
+    "signature": "func NewZigZagNode() *ZigZagNode",
+    "summary": "NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGZigZag_AEShipGate_AE2020",
+        "TestMGZigZag_AEShipGate_AE2025",
+        "TestMGZigZagPoints_AEShipGate_AE2020",
+        "TestMGZigZagPoints_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": [
+        "trim-paths-vector-filter-re"
+      ],
+      "alias": [
+        "zigzag",
+        "锯齿",
+        "波浪边"
+      ]
+    }
+  },
+  {
+    "symbol": "AddMarker",
+    "kind": "func",
+    "signature": "func AddMarker(c *Composition, seconds float64) (*Marker, error)",
+    "summary": "AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMarker_AEShipGate_AE2020",
+        "TestMarker_AEShipGate_AE2025"
+      ],
+      "boundary": "需 comp 已有 \u003e=1 marker(空 comp seed 暂搁);tail-insert 不排序",
+      "incident": null,
+      "alias": [
+        "marker",
+        "标记",
+        "合成标记",
+        "comp marker"
+      ]
+    }
+  },
+  {
+    "symbol": "DeleteLayer",
+    "kind": "func",
+    "signature": "func DeleteLayer(c *Composition, index int) error",
+    "summary": "DeleteLayer removes the layer at the given 0-based index in c.Layers.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused",
+      "incident": null,
+      "alias": [
+        "delete layer",
+        "删图层",
+        "删除图层",
+        "remove layer"
+      ]
+    }
+  },
+  {
+    "symbol": "DuplicateLayer",
+    "kind": "func",
+    "signature": "func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)",
+    "summary": "DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused",
+      "incident": null,
+      "alias": [
+        "duplicate layer",
+        "复制图层"
+      ]
+    }
+  },
+  {
+    "symbol": "DuplicatePropertyGroup",
+    "kind": "func",
+    "signature": "func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error)",
+    "summary": "DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestPropStructDuplicate_AEShipGate_AE2020",
+        "TestPropStructDuplicate_AEShipGate_AE2025"
+      ],
+      "boundary": "display-name 后缀不合成(AE 自重算);同 indexed-group gate 覆盖面",
+      "incident": [
+        "property-indexed-group-structural-re"
+      ],
+      "alias": [
+        "duplicate property group",
+        "复制属性组",
+        "复制效果"
+      ]
+    }
+  },
+  {
+    "symbol": "InsertLayer",
+    "kind": "func",
+    "signature": "func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error)",
+    "summary": "InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "insert layer",
+        "插入图层",
+        "跨工程复制",
+        "copy to comp"
+      ]
+    }
+  },
+  {
+    "symbol": "MoveAfter",
+    "kind": "func",
+    "signature": "func MoveAfter(l, other *Layer) error",
+    "summary": "MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \u003c receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "move after",
+        "移到之后"
+      ]
+    }
+  },
+  {
+    "symbol": "MoveBefore",
+    "kind": "func",
+    "signature": "func MoveBefore(l, other *Layer) error",
+    "summary": "MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "move before",
+        "移到之前"
+      ]
+    }
+  },
+  {
+    "symbol": "MoveLayer",
+    "kind": "func",
+    "signature": "func MoveLayer(c *Composition, from, to int) error",
+    "summary": "MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "move layer",
+        "图层排序",
+        "reorder layer",
+        "改层级"
+      ]
+    }
+  },
+  {
+    "symbol": "MovePropertyGroup",
+    "kind": "func",
+    "signature": "func MovePropertyGroup(g *AEPropertyGroup, index int) error",
+    "summary": "MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestPropStructMove_AEShipGate_AE2020",
+        "TestPropStructMove_AEShipGate_AE2025"
+      ],
+      "boundary": "同 RemovePropertyGroup 的 indexed-group gate 覆盖面",
+      "incident": [
+        "property-indexed-group-structural-re"
+      ],
+      "alias": [
+        "move property group",
+        "属性组排序",
+        "reorder group"
+      ]
+    }
+  },
+  {
+    "symbol": "MoveToBeginning",
+    "kind": "func",
+    "signature": "func MoveToBeginning(l *Layer) error",
+    "summary": "MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "move to beginning",
+        "移到顶部",
+        "置顶"
+      ]
+    }
+  },
+  {
+    "symbol": "MoveToEnd",
+    "kind": "func",
+    "signature": "func MoveToEnd(l *Layer) error",
+    "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers).",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip",
+      "incident": null,
+      "alias": [
+        "move to end",
+        "移到底部",
+        "置底"
+      ]
+    }
+  },
+  {
+    "symbol": "RemoveMarker",
+    "kind": "func",
+    "signature": "func RemoveMarker(m *Marker) error",
+    "summary": "RemoveMarker deletes this marker from its owning composition / layer marker set.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMarker_AEShipGate_AE2020",
+        "TestMarker_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "remove marker",
+        "删标记"
+      ]
+    }
+  },
+  {
+    "symbol": "RemovePropertyGroup",
+    "kind": "func",
+    "signature": "func RemovePropertyGroup(g *AEPropertyGroup) error",
+    "summary": "RemovePropertyGroup deletes this group from its parent INDEXED_GROUP.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestPropStructRemove_AEShipGate_AE2020",
+        "TestPropStructRemove_AEShipGate_AE2025"
+      ],
+      "boundary": "Effect Parade + Text Animators 双版本 gated;Mask/Root Vectors 同机制未单独 gate",
+      "incident": [
+        "property-indexed-group-structural-re"
+      ],
+      "alias": [
+        "remove property group",
+        "删属性组",
+        "删动画器",
+        "删 indexed group 子项"
+      ]
+    }
+  },
+  {
+    "symbol": "SetDimensionsSeparated",
+    "kind": "func",
+    "signature": "func SetDimensionsSeparated(p *Property, separated bool) error",
+    "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader.",
+    "has_cap": true,
+    "cap": {
+      "domain": "structural",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestSeparateDims_AEShipGate_AE2020",
+        "TestSeparateDims_AEShipGate_AE2025",
+        "TestMergeDims_AEShipGate_AE2020",
+        "TestMergeDims_AEShipGate_AE2025"
+      ],
+      "boundary": "static 2D/3D + animated 3D 近线性 gated;animated 2D + 自定义 spatial ease refused",
+      "incident": [
+        "separate-dimensions-write-mechanics"
+      ],
+      "alias": [
+        "separate dimensions",
+        "分离维度",
+        "position 分离",
+        "X Y 分离"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextColorAnimator",
+    "kind": "func",
+    "signature": "func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextColorAnimator_AEShipGate_AE2020",
+        "TestTextColorAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text color animator",
+        "文字颜色动画",
+        "颜色擦除",
+        "color wipe"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextFillOpacityAnimator",
+    "kind": "func",
+    "signature": "func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any stroke intact).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextNeighborAnimators_AEShipGate_AE2020",
+        "TestTextNeighborAnimators_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text fill opacity",
+        "填充不透明度动画"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextOpacityAnimator",
+    "kind": "func",
+    "signature": "func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextOpacityAnimator adds a per-character Opacity animator with a Range Selector to a text layer — the kinetic-typography primitive (fade / wipe text in or out one character at a time).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextAnimator_AEShipGate_AE2020",
+        "TestTextAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text opacity animator",
+        "文字不透明度动画",
+        "kinetic typography",
+        "逐字",
+        "打字机"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextPositionAnimator",
+    "kind": "func",
+    "signature": "func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextPositionAnimator adds a per-character Position 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that slides / drops characters into place one at a time.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextPosAnimator_AEShipGate_AE2020",
+        "TestTextPosAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text position animator",
+        "文字位移动画",
+        "字符滑入",
+        "drop in"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextRangeSelector",
+    "kind": "func",
+    "signature": "func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextRangeSelector adds another Range Selector to the layer's FIRST text animator (a fresh animator carries one selector).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextMultiSelector_AEShipGate_AE2020",
+        "TestTextMultiSelector_AEShipGate_AE2025"
+      ],
+      "boundary": "作用于第一个 animator;Mode 经 SetTextRangeAdvanced;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text range selector",
+        "多选择器",
+        "range selector",
+        "叠加选择"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextRotationAnimator",
+    "kind": "func",
+    "signature": "func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextRotationAnimator adds a per-character Rotation animator with a Range Selector to a text layer — the kinetic-typography primitive that spins characters into place one at a time.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextRotAnimator_AEShipGate_AE2020",
+        "TestTextRotAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text rotation animator",
+        "文字旋转动画",
+        "字符旋转",
+        "spin in"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextRotationXAnimator",
+    "kind": "func",
+    "signature": "func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextRotationXAnimator adds a per-character Rotation X animator with a Range Selector to a text layer — a 3D rotation about each character's horizontal axis (the characters tumble forward / back).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text rotation x",
+        "3D 旋转 X",
+        "字符前后翻转"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextRotationYAnimator",
+    "kind": "func",
+    "signature": "func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextRotationYAnimator adds a per-character Rotation Y animator with a Range Selector to a text layer — a 3D rotation about each character's vertical axis (the characters swing left / right).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text rotation y",
+        "3D 旋转 Y",
+        "字符左右翻转"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextScaleAnimator",
+    "kind": "func",
+    "signature": "func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextScaleAnimator adds a per-character Scale 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that pops / grows characters into place one at a time.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextScaleAnimator_AEShipGate_AE2020",
+        "TestTextScaleAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text scale animator",
+        "文字缩放动画",
+        "字符弹入",
+        "pop in"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextSkewAnimator",
+    "kind": "func",
+    "signature": "func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextSkewAnimator adds a per-character Skew animator with a Range Selector to a text layer — the kinetic-typography primitive that shears characters into place.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextNeighborAnimators_AEShipGate_AE2020",
+        "TestTextNeighborAnimators_AEShipGate_AE2025"
+      ],
+      "boundary": "typed param accessor 未接,经 Reopen 调",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text skew",
+        "文字倾斜动画",
+        "shear"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextStrokeColorAnimator",
+    "kind": "func",
+    "signature": "func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextStrokeColorAnimator adds a per-character Stroke Color animator with a Range Selector to a text layer — it tints only the glyph stroke.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextNeighborAnimators_AEShipGate_AE2020",
+        "TestTextNeighborAnimators_AEShipGate_AE2025"
+      ],
+      "boundary": "需文字带 stroke 才可见;typed accessor 未接",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text stroke color",
+        "描边颜色动画"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextStrokeOpacityAnimator",
+    "kind": "func",
+    "signature": "func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator with a Range Selector to a text layer — it fades only the glyph stroke.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextNeighborAnimators_AEShipGate_AE2020",
+        "TestTextNeighborAnimators_AEShipGate_AE2025"
+      ],
+      "boundary": "需文字带 stroke 才可见;typed accessor 未接",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text stroke opacity",
+        "描边不透明度动画"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextStrokeWidthAnimator",
+    "kind": "func",
+    "signature": "func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+    "summary": "AddTextStrokeWidthAnimator adds a per-character Stroke Width animator with a Range Selector to a text layer — it grows / shrinks the glyph stroke.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextNeighborAnimators_AEShipGate_AE2020",
+        "TestTextNeighborAnimators_AEShipGate_AE2025"
+      ],
+      "boundary": "需文字带 stroke 才可见;typed accessor 未接",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "text stroke width",
+        "描边宽度动画"
+      ]
+    }
+  },
+  {
+    "symbol": "AddTextWigglySelector",
+    "kind": "func",
+    "signature": "func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error)",
+    "summary": "AddTextWigglySelector adds a Wiggly Selector to the layer's FIRST text animator — a selector whose selection amount wobbles randomly (but deterministically per seed) over time, so the characters flicker / jitter in and out under the animator (the \"wiggle\" kinetic-typography primitive).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextWigglySelector_AEShipGate_AE2020",
+        "TestTextWigglySelector_AEShipGate_AE2025"
+      ],
+      "boundary": "作用于第一个 animator;用 AE 默认(Temporal Freq 2/s)自动摆动;未 parse 的 fresh 层 refused",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "wiggly selector",
+        "摆动选择器",
+        "抖动",
+        "flicker",
+        "jitter"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateTextColor",
+    "kind": "func",
+    "signature": "func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
+    "summary": "AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven colour itself over time (e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextColorLeafAnimator_AEShipGate_AE2020",
+        "TestTextColorLeafAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "需先 AddTextColorAnimator;leaf 已动画则 refuse;\u003e=2 关键帧;值须 4 通道",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "animate text color",
+        "文字颜色关键帧",
+        "颜色循环",
+        "color cycle"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateTextOpacity",
+    "kind": "func",
+    "signature": "func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
+    "summary": "AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "1D scalar leaf 路径已 render-gated(经 AnimateTextRangeOffset/Rotation);本函数本身仅 round-trip",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "animate text opacity",
+        "文字不透明度关键帧",
+        "同步闪烁",
+        "pulse"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateTextPosition",
+    "kind": "func",
+    "signature": "func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
+    "summary": "AnimateTextPosition keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself rather than sweeping the Range Selector.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextColorLeafAnimator_AEShipGate_AE2020",
+        "TestTextColorLeafAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "需先 AddTextPositionAnimator;leaf 已动画则 refuse;\u003e=2 关键帧",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "animate text position",
+        "文字位移关键帧",
+        "同步滑动"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateTextRangeOffset",
+    "kind": "func",
+    "signature": "func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
+    "summary": "AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextAnimator_AEShipGate_AE2020",
+        "TestTextAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "作用于第一个 animator;需 \u003e=2 关键帧;tickRate\u003c=0 用 comp 的",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "animate range offset",
+        "范围偏移动画",
+        "逐字揭示",
+        "reveal sweep",
+        "打字机动画"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateTextRotation",
+    "kind": "func",
+    "signature": "func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
+    "summary": "AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextRotLeafAnimator_AEShipGate_AE2020",
+        "TestTextRotLeafAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "需先 AddTextRotationAnimator;leaf 已动画则 refuse;\u003e=2 关键帧",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "animate text rotation",
+        "文字旋转关键帧",
+        "同步旋转",
+        "持续旋转"
+      ]
+    }
+  },
+  {
+    "symbol": "AnimateTextScale",
+    "kind": "func",
+    "signature": "func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
+    "summary": "AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g.",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextColorLeafAnimator_AEShipGate_AE2020",
+        "TestTextColorLeafAnimator_AEShipGate_AE2025"
+      ],
+      "boundary": "需先 AddTextScaleAnimator;leaf 已动画则 refuse;\u003e=2 关键帧",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "animate text scale",
+        "文字缩放关键帧",
+        "同步缩放",
+        "pulse"
+      ]
+    }
+  },
+  {
+    "symbol": "SetTextRangeAdvanced",
+    "kind": "func",
+    "signature": "func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error",
+    "summary": "SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.).",
+    "has_cap": true,
+    "cap": {
+      "domain": "text",
+      "tier": "alpha",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestTextRangeAdvancedAmount_AEShipGate_AE2020",
+        "TestTextRangeAdvancedAmount_AEShipGate_AE2025"
+      ],
+      "boundary": "Amount render-gated;其余 param(Mode/Shape/Smoothness…)仅 round-trip(选择器内部/耦合)",
+      "incident": [
+        "text-animator-create-re"
+      ],
+      "alias": [
+        "range advanced",
+        "高级范围",
+        "amount",
+        "shape",
+        "mode",
+        "ease high"
       ]
     }
   }

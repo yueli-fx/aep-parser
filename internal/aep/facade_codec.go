@@ -16,6 +16,8 @@ type GradientAlphaStop = codec.GradientAlphaStop
 // ParseGradientXML parses AE gradient XML (prop.map format) into a *Gradient.
 // Returns nil when parsing fails or the XML is empty. Exposed so tests can
 // exercise the XML decoder without building a full RIFX tree.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="parse gradient xml,渐变解析,gradient stops"
 func ParseGradientXML(xmlText string) *Gradient { return codec.ParseGradientXML(xmlText) }
 
 // EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the
@@ -28,6 +30,8 @@ func ParseGradientXML(xmlText string) *Gradient { return codec.ParseGradientXML(
 //
 // Exposed so the serializer (lowerGradientFillNode) and tests can produce the
 // Utf8 chunk payload. The output round-trips through ParseGradientXML.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip boundary="渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated)" alias="encode gradient xml,渐变编码,gradient stops"
 func EncodeGradientXML(g *Gradient) string { return codec.EncodeGradientXML(g) }
 
 // PropertyStream[T] is the canonical V2.2 animation primitive. T parameterizes
@@ -62,4 +66,6 @@ const (
 )
 
 // NewPropertyStream returns a Static-mode stream holding the zero value of T.
+//
+//aep:cap domain=meta tier=stable verify=roundtrip alias="property stream,动画原语,V2.2 keyframe stream"
 func NewPropertyStream[T any]() *PropertyStream[T] { return codec.NewPropertyStream[T]() }

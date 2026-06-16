@@ -3,7 +3,46 @@
 
 徽章 tier:🟢stable · 🟡alpha · ⬜planned · ❌missing · 🚫negative　·　verify:none / roundtrip / ae-accept / render-pixel
 
-共 8 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+共 99 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+
+## comp
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `DuplicateComposition` | 🟡alpha | roundtrip | 2020 |  | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制 |
+| `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
+| `SetRenderer` | 🟢stable | ae-accept | 2020 | TestSetRenderer_AEShipGate_AE2020<br>TestSetRenderer_AEShipGate_AE2025 | SetRenderer switches the composition's 3D rendering engine. ⚠binary 或 ExtendScript 名;各 AE 版本暴露引擎不同 |
+
+## effect
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `AddEffect` | 🟢stable | ae-accept | 2020 | TestAddEffect_AEShipGate_AE2020<br>TestAddEffect_AEShipGate_AE2025 | AddEffect appends an effect to the layer's "ADBE Effect Parade" and returns the parsed *Effect, so the caller can immediately tune its parameters via Effect.Parameters (Property.SetStaticValue works on effect params — e.g. ⚠41 内置效果库;camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做 |
+| `AnimateEffectParam` | 🟢stable | render-pixel | 2020 | TestAnimEffect_AEShipGate_AE2020<br>TestAnimEffect_AEShipGate_AE2025 | AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (>= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}. ⚠1D scalar only;color/point 用 AnimateEffectParamVec;fx 须在 parsed 层(Reopen) |
+| `AnimateEffectParamVec` | 🟢stable | render-pixel | 2020 | TestAnimEffectVec_AEShipGate_AE2020<br>TestAnimEffectVec_AEShipGate_AE2025 | AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. ⚠2/3/4 分量(color/point);1D 用 AnimateEffectParam;fx 须在 parsed 层(Reopen) |
+| `RemoveEffect` | 🟢stable | ae-accept | 2020 | TestPropStructRemove_AEShipGate_AE2020<br>TestPropStructRemove_AEShipGate_AE2025 | RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect. ⚠rides RemovePropertyGroup 的 Effect-Parade gate;无独立 RemoveEffect AE gate |
+| `SetEffectLayerParam` | 🟢stable | render-pixel | 2020 | TestSetMatte_AEShipGate_AE2020<br>TestSetMatte_AEShipGate_AE2025 | SetEffectLayerParam points a layer-reference effect parameter at target — e.g. ⚠参数须已物化(Set Matte -0001 随模板带出);default-elided layer-ref 物化未做 |
+| `SetEffectParam` | 🟢stable | ae-accept | 2020 | TestSetEffectParam_AEShipGate_AE2020<br>TestSetEffectParam_AEShipGate_AE2025 | SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. ⚠scalar/enum/bool/angle/color/2D·3D point/slider 泛型物化;curve/layer-ref 类 elided 时 refuse |
+
+## eg
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `AddEssentialProperty` | 🟢stable | ae-accept | 2020 | TestEGAdd_AEShipGate_AE2020<br>TestEGAdd_AEShipGate_AE2025 | AddEssentialProperty exposes one parameter of an effect on layer in the owning composition's Essential Graphics panel — mirrors AE's "addProperty to Essential Graphics" / Property.addToMotionGraphicsTemplate. ⚠scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused |
+
+## gradient
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `NewGradientFillNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | NewGradientFillNode returns a detached gradient-fill shape node. |
+| `NewGradientStrokeNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025<br>TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | NewGradientStrokeNode returns a detached gradient-stroke shape node. |
+
+## keyframe
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `DeleteKeyframe` | 🟡alpha | roundtrip | 2020 |  | DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. ⚠无独立 Go AE gate → 库内 round-trip |
+| `InsertKeyframe` | 🟡alpha | roundtrip | 2020 |  | InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. ⚠需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear |
 
 ## layer-create
 
@@ -17,3 +56,120 @@
 | `NewShapeLayer` | 🟢stable | ae-accept | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | NewShapeLayer adds a new empty ShapeLayer to the composition. ⚠ellipse 变体过 gate;rect Path/Stroke embed bytes 仍 deferred |
 | `NewSolidLayer` | 🟢stable | ae-accept | 2020 | TestNewSolidNull_AEShipGate_AE2020<br>TestNewSolidNull_AEShipGate_AE2025 | NewSolidLayer adds a new solid-color layer to the composition and returns it. |
 | `NewTextLayer` | 🟢stable | ae-accept | 2020 | TestNewTextLayer_AEShipGate_AE2020<br>TestNewTextLayer_AEShipGate_AE2025 | NewTextLayer adds a new point-text layer to the composition and returns it. |
+
+## layer-set
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `SetMaterialOption` | 🟡alpha | render-pixel | 2020 | TestLayer3DShadow_AEShipGate_AE2020<br>TestLayer3DShadow_AEShipGate_AE2025 | SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g. ⚠Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate |
+
+## mask
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `AddMask` | 🟢stable | ae-accept | 2020 | TestAddMask_AEShipGate_AE2020<br>TestAddMask_AEShipGate_AE2025 | AddMask appends a vector mask to the layer's "ADBE Mask Parade" and returns the parsed *Mask. ⚠camera/light 层 + 未 Reopen 的 fresh 层 refused;Feather/Opacity/Expansion default-elided |
+| `DuplicateMask` | 🟢stable | ae-accept | 2020 | TestDuplicateMask_AEShipGate_AE2020<br>TestDuplicateMask_AEShipGate_AE2025 | DuplicateMask inserts a copy of mask m immediately after it in layer's "ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. ⚠mask 须来自 parsed 工程(Reopen) |
+| `MoveMask` | 🟢stable | ae-accept | 2020 | TestMoveMask_AEShipGate_AE2020<br>TestMoveMask_AEShipGate_AE2025 | MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. ⚠mask 须来自 parsed 工程(Reopen) |
+| `RemoveMask` | 🟢stable | ae-accept | 2020 | TestRemoveMask_AEShipGate_AE2020<br>TestRemoveMask_AEShipGate_AE2025 | RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of AddMask. ⚠删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程 |
+| `SetMaskPath` | 🟢stable | ae-accept | 2020 | TestMGMaskPath_AEShipGate_AE2020<br>TestMGMaskPath_AEShipGate_AE2025 | SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). ⚠mask 须来自 parsed 工程(Reopen);顶点数可与原不同 |
+| `SetMaskPathKeyframes` | 🟢stable | ae-accept | 2020 | TestMGMaskPathKf_AEShipGate_AE2020<br>TestMGMaskPathKf_AEShipGate_AE2025 | SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). ⚠>=2 关键帧;逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen) |
+
+## meta
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `Capabilities` | 🟢stable | none | 2020 |  | Capabilities returns the AECapabilities matrix for the given AE target. |
+| `DefaultTextRangeAdvanced` | 🟢stable | none | 2020 |  | DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize). |
+| `EncodeGradientXML` | 🟢stable | roundtrip | 2020 |  | EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the inverse of ParseGradientXML). ⚠渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated) |
+| `FromReader` | 🟢stable | roundtrip | 2020 |  | FromReader parses an .aep file from an io.ReadSeeker. |
+| `NewPropertyStream` | 🟢stable | roundtrip | 2020 |  | NewPropertyStream returns a Static-mode stream holding the zero value of T. |
+| `Open` | 🟢stable | roundtrip | 2020 |  | Open parses an .aep file by path and returns the Project. |
+| `Parse` | 🟢stable | roundtrip | 2020 |  | Parse opens an .aep file at path and returns an Application wrapping the parsed Project. |
+| `ParseGradientXML` | 🟢stable | roundtrip | 2020 |  | ParseGradientXML parses AE gradient XML (prop.map format) into a *Gradient. |
+| `ParseReader` | 🟢stable | roundtrip | 2020 |  | ParseReader parses an .aep file from an io.ReadSeeker and returns an Application wrapping the Project. |
+| `Reopen` | 🟢stable | roundtrip | 2020 |  | Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. ⚠把 New* 建的 built 层升级为 parsed 层,解锁 parsed-only 写路径(AddEffect/AddMask/Camera·Light setter…) |
+| `SupportedEffectParams` | 🟢stable | none | 2020 |  | SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. |
+| `SupportedEffects` | 🟢stable | none | 2020 |  | SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template. |
+| `TextEncodedByteLen` | 🟢stable | none | 2020 |  | TextEncodedByteLen returns the encoded byte length SetText would produce for s. |
+| `*Application.Version` | 🟢stable | roundtrip | 2020 |  | Version returns the AE version that wrote the file as a string like "17.7x101" (AE 2020 / 17.7 build 101) or "25.6x57" (AE 2025), decoded from the root `head` chunk's packed version word (offset 4-7). |
+| `WrapShapeLayer` | 🟢stable | none | 2020 |  | WrapShapeLayer wraps a parsed shape Layer into a ShapeLayer view. |
+
+## project
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `NewProject` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target. ⚠零参=TargetAE2020;支持 2020/2022/2025 |
+
+## render-queue
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `AddItem` | 🟡alpha | roundtrip | 2020 |  | AddItem appends a render queue item for comp, mirroring ExtendScript RenderQueue.items.add(comp). ⚠需队列已有 >=1 item 作模板;输出模块沿用模板路径;未 AE-gate |
+| `RemoveItem` | 🟡alpha | roundtrip | 2020 |  | RemoveItem deletes the render queue item at index (0-based), mirroring ExtendScript RenderQueueItem.remove(). ⚠仅单输出模块 item 的 Rout RE 覆盖;未 AE-gate |
+
+## shape
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `NewEllipseNode` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | NewEllipseNode returns a detached ellipse shape node. |
+| `NewFillNode` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | NewFillNode returns a detached fill shape node. ⚠fill 随形状渲染验证(颜色像素门禁) |
+| `NewMergePathsNode` | 🟢stable | render-pixel | 2020 | TestMGMerge_AEShipGate_AE2020<br>TestMGMerge_AEShipGate_AE2025<br>TestMGMergeModes_AEShipGate_AE2020<br>TestMGMergeModes_AEShipGate_AE2025 | NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge). |
+| `NewOffsetPathsNode` | 🟢stable | render-pixel | 2020 | TestMGOffset_AEShipGate_AE2020<br>TestMGOffset_AEShipGate_AE2025<br>TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | NewOffsetPathsNode returns a detached Offset Paths filter node (Amount=10). |
+| `NewPathNode` | 🟢stable | render-pixel | 2020 | TestV2_2_Path_AEShipGate_AE2020<br>TestV2_2_Path_AEShipGate_AE2025 | NewPathNode returns a detached path shape node. |
+| `NewPuckerBloatNode` | 🟢stable | render-pixel | 2020 | TestMGPuckerBloat_AEShipGate_AE2020<br>TestMGPuckerBloat_AEShipGate_AE2025 | NewPuckerBloatNode returns a detached Pucker & Bloat filter node (Amount=0, the no-op identity). |
+| `NewRectNode` | 🟡alpha | render-pixel | 2020 | TestV2_2_RectKf_AEShipGate_AE2020<br>TestV2_2_RectKf_AEShipGate_AE2025 | NewRectNode returns a detached rectangle shape node. ⚠rect via keyframe render-gated;静态 rect Path/Stroke embed bytes deferred |
+| `NewRepeaterNode` | 🟢stable | render-pixel | 2020 | TestMGRepeater_AEShipGate_AE2020<br>TestMGRepeater_AEShipGate_AE2025<br>TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | NewRepeaterNode returns a detached Repeater filter node (3 copies, identity transform). |
+| `NewRoundCornersNode` | 🟢stable | render-pixel | 2020 | TestMGRoundCorners_AEShipGate_AE2020<br>TestMGRoundCorners_AEShipGate_AE2025 | NewRoundCornersNode returns a detached Round Corners filter node (Radius=10). |
+| `NewStarNode` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025<br>TestMGPolygon_AEShipGate_AE2020<br>TestMGPolygon_AEShipGate_AE2025 | NewStarNode returns a detached Star shape node (default 5-point star). |
+| `NewStrokeNode` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | NewStrokeNode returns a detached stroke shape node. |
+| `NewTrimNode` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 | NewTrimNode returns a detached Trim Paths filter node (identity: Start=0, End=100, Offset=0). |
+| `NewTwistNode` | 🟢stable | render-pixel | 2020 | TestMGTwist_AEShipGate_AE2020<br>TestMGTwist_AEShipGate_AE2025<br>TestMGTwistCenter_AEShipGate_AE2020<br>TestMGTwistCenter_AEShipGate_AE2025 | NewTwistNode returns a detached Twist filter node (Angle=0, the no-op identity). |
+| `NewVectorGroup` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 | NewVectorGroup returns a detached vector group shape node. ⚠形状内容容器,承载子节点(随形状渲染验证) |
+| `NewWigglePathsNode` | 🟡alpha | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the no-op identity). ⚠基本 render-gated;Correlation/Temporal·Spatial Phase/Roughen Points 调制 evidence-defer |
+| `NewWiggleTransformNode` | 🟡alpha | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | NewWiggleTransformNode returns a detached Wiggle Transform filter node (zero amplitudes, the no-op identity). ⚠基本 render-gated;Correlation/Phase 调制 evidence-defer |
+| `NewZigZagNode` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025<br>TestMGZigZagPoints_AEShipGate_AE2020<br>TestMGZigZagPoints_AEShipGate_AE2025 | NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10). |
+
+## structural
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `AddMarker` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. ⚠需 comp 已有 >=1 marker(空 comp seed 暂搁);tail-insert 不排序 |
+| `DeleteLayer` | 🟡alpha | roundtrip | 2020 |  | DeleteLayer removes the layer at the given 0-based index in c.Layers. ⚠AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused |
+| `DuplicateLayer` | 🟡alpha | roundtrip | 2020 |  | DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). ⚠AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused |
+| `DuplicatePropertyGroup` | 🟡alpha | ae-accept | 2020 | TestPropStructDuplicate_AEShipGate_AE2020<br>TestPropStructDuplicate_AEShipGate_AE2025 | DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone. ⚠display-name 后缀不合成(AE 自重算);同 indexed-group gate 覆盖面 |
+| `InsertLayer` | 🟡alpha | roundtrip | 2020 |  | InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). ⚠同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip |
+| `MoveAfter` | 🟡alpha | roundtrip | 2020 |  | MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index < receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). ⚠MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip |
+| `MoveBefore` | 🟡alpha | roundtrip | 2020 |  | MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack). ⚠MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip |
+| `MoveLayer` | 🟡alpha | roundtrip | 2020 |  | MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). ⚠纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip |
+| `MovePropertyGroup` | 🟡alpha | ae-accept | 2020 | TestPropStructMove_AEShipGate_AE2020<br>TestPropStructMove_AEShipGate_AE2025 | MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children. ⚠同 RemovePropertyGroup 的 indexed-group gate 覆盖面 |
+| `MoveToBeginning` | 🟡alpha | roundtrip | 2020 |  | MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1). ⚠MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip |
+| `MoveToEnd` | 🟡alpha | roundtrip | 2020 |  | MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers). ⚠MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip |
+| `RemoveMarker` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | RemoveMarker deletes this marker from its owning composition / layer marker set. |
+| `RemovePropertyGroup` | 🟡alpha | ae-accept | 2020 | TestPropStructRemove_AEShipGate_AE2020<br>TestPropStructRemove_AEShipGate_AE2025 | RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. ⚠Effect Parade + Text Animators 双版本 gated;Mask/Root Vectors 同机制未单独 gate |
+| `SetDimensionsSeparated` | 🟢stable | ae-accept | 2020 | TestSeparateDims_AEShipGate_AE2020<br>TestSeparateDims_AEShipGate_AE2025<br>TestMergeDims_AEShipGate_AE2020<br>TestMergeDims_AEShipGate_AE2025 | SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position leader. ⚠static 2D/3D + animated 3D 近线性 gated;animated 2D + 自定义 spatial ease refused |
+
+## text
+
+| 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
+|---|---|---|---|---|---|
+| `AddTextColorAnimator` | 🟡alpha | render-pixel | 2020 | TestTextColorAnimator_AEShipGate_AE2020<br>TestTextColorAnimator_AEShipGate_AE2025 | AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g. ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
+| `AddTextFillOpacityAnimator` | 🟡alpha | render-pixel | 2020 | TestTextNeighborAnimators_AEShipGate_AE2020<br>TestTextNeighborAnimators_AEShipGate_AE2025 | AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any stroke intact). ⚠typed param accessor 未接,经 Reopen 调 |
+| `AddTextOpacityAnimator` | 🟡alpha | render-pixel | 2020 | TestTextAnimator_AEShipGate_AE2020<br>TestTextAnimator_AEShipGate_AE2025 | AddTextOpacityAnimator adds a per-character Opacity animator with a Range Selector to a text layer — the kinetic-typography primitive (fade / wipe text in or out one character at a time). ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
+| `AddTextPositionAnimator` | 🟡alpha | render-pixel | 2020 | TestTextPosAnimator_AEShipGate_AE2020<br>TestTextPosAnimator_AEShipGate_AE2025 | AddTextPositionAnimator adds a per-character Position 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that slides / drops characters into place one at a time. ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
+| `AddTextRangeSelector` | 🟡alpha | render-pixel | 2020 | TestTextMultiSelector_AEShipGate_AE2020<br>TestTextMultiSelector_AEShipGate_AE2025 | AddTextRangeSelector adds another Range Selector to the layer's FIRST text animator (a fresh animator carries one selector). ⚠作用于第一个 animator;Mode 经 SetTextRangeAdvanced;未 parse 的 fresh 层 refused |
+| `AddTextRotationAnimator` | 🟡alpha | render-pixel | 2020 | TestTextRotAnimator_AEShipGate_AE2020<br>TestTextRotAnimator_AEShipGate_AE2025 | AddTextRotationAnimator adds a per-character Rotation animator with a Range Selector to a text layer — the kinetic-typography primitive that spins characters into place one at a time. ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
+| `AddTextRotationXAnimator` | 🟡alpha | roundtrip | 2020 |  | AddTextRotationXAnimator adds a per-character Rotation X animator with a Range Selector to a text layer — a 3D rotation about each character's horizontal axis (the characters tumble forward / back). ⚠2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate |
+| `AddTextRotationYAnimator` | 🟡alpha | roundtrip | 2020 |  | AddTextRotationYAnimator adds a per-character Rotation Y animator with a Range Selector to a text layer — a 3D rotation about each character's vertical axis (the characters swing left / right). ⚠2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate |
+| `AddTextScaleAnimator` | 🟡alpha | render-pixel | 2020 | TestTextScaleAnimator_AEShipGate_AE2020<br>TestTextScaleAnimator_AEShipGate_AE2025 | AddTextScaleAnimator adds a per-character Scale 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that pops / grows characters into place one at a time. ⚠typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused |
+| `AddTextSkewAnimator` | 🟡alpha | render-pixel | 2020 | TestTextNeighborAnimators_AEShipGate_AE2020<br>TestTextNeighborAnimators_AEShipGate_AE2025 | AddTextSkewAnimator adds a per-character Skew animator with a Range Selector to a text layer — the kinetic-typography primitive that shears characters into place. ⚠typed param accessor 未接,经 Reopen 调 |
+| `AddTextStrokeColorAnimator` | 🟡alpha | render-pixel | 2020 | TestTextNeighborAnimators_AEShipGate_AE2020<br>TestTextNeighborAnimators_AEShipGate_AE2025 | AddTextStrokeColorAnimator adds a per-character Stroke Color animator with a Range Selector to a text layer — it tints only the glyph stroke. ⚠需文字带 stroke 才可见;typed accessor 未接 |
+| `AddTextStrokeOpacityAnimator` | 🟡alpha | render-pixel | 2020 | TestTextNeighborAnimators_AEShipGate_AE2020<br>TestTextNeighborAnimators_AEShipGate_AE2025 | AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator with a Range Selector to a text layer — it fades only the glyph stroke. ⚠需文字带 stroke 才可见;typed accessor 未接 |
+| `AddTextStrokeWidthAnimator` | 🟡alpha | render-pixel | 2020 | TestTextNeighborAnimators_AEShipGate_AE2020<br>TestTextNeighborAnimators_AEShipGate_AE2025 | AddTextStrokeWidthAnimator adds a per-character Stroke Width animator with a Range Selector to a text layer — it grows / shrinks the glyph stroke. ⚠需文字带 stroke 才可见;typed accessor 未接 |
+| `AddTextWigglySelector` | 🟡alpha | render-pixel | 2020 | TestTextWigglySelector_AEShipGate_AE2020<br>TestTextWigglySelector_AEShipGate_AE2025 | AddTextWigglySelector adds a Wiggly Selector to the layer's FIRST text animator — a selector whose selection amount wobbles randomly (but deterministically per seed) over time, so the characters flicker / jitter in and out under the animator (the "wiggle" kinetic-typography primitive). ⚠作用于第一个 animator;用 AE 默认(Temporal Freq 2/s)自动摆动;未 parse 的 fresh 层 refused |
+| `AnimateTextColor` | 🟡alpha | render-pixel | 2020 | TestTextColorLeafAnimator_AEShipGate_AE2020<br>TestTextColorLeafAnimator_AEShipGate_AE2025 | AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven colour itself over time (e.g. ⚠需先 AddTextColorAnimator;leaf 已动画则 refuse;>=2 关键帧;值须 4 通道 |
+| `AnimateTextOpacity` | 🟡alpha | roundtrip | 2020 |  | AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector. ⚠1D scalar leaf 路径已 render-gated(经 AnimateTextRangeOffset/Rotation);本函数本身仅 round-trip |
+| `AnimateTextPosition` | 🟡alpha | render-pixel | 2020 | TestTextColorLeafAnimator_AEShipGate_AE2020<br>TestTextColorLeafAnimator_AEShipGate_AE2025 | AnimateTextPosition keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself rather than sweeping the Range Selector. ⚠需先 AddTextPositionAnimator;leaf 已动画则 refuse;>=2 关键帧 |
+| `AnimateTextRangeOffset` | 🟡alpha | render-pixel | 2020 | TestTextAnimator_AEShipGate_AE2020<br>TestTextAnimator_AEShipGate_AE2025 | AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. ⚠作用于第一个 animator;需 >=2 关键帧;tickRate<=0 用 comp 的 |
+| `AnimateTextRotation` | 🟡alpha | render-pixel | 2020 | TestTextRotLeafAnimator_AEShipGate_AE2020<br>TestTextRotLeafAnimator_AEShipGate_AE2025 | AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector. ⚠需先 AddTextRotationAnimator;leaf 已动画则 refuse;>=2 关键帧 |
+| `AnimateTextScale` | 🟡alpha | render-pixel | 2020 | TestTextColorLeafAnimator_AEShipGate_AE2020<br>TestTextColorLeafAnimator_AEShipGate_AE2025 | AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g. ⚠需先 AddTextScaleAnimator;leaf 已动画则 refuse;>=2 关键帧 |
+| `SetTextRangeAdvanced` | 🟡alpha | render-pixel | 2020 | TestTextRangeAdvancedAmount_AEShipGate_AE2020<br>TestTextRangeAdvancedAmount_AEShipGate_AE2025 | SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). ⚠Amount render-gated;其余 param(Mode/Shape/Smoothness…)仅 round-trip(选择器内部/耦合) |
