@@ -2,6 +2,7 @@ package main
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -25,6 +26,38 @@ func TestLoadSurface(t *testing.T) {
 		if !s.funcs[fn] {
 			t.Errorf("expected %q in docgen funcs", fn)
 		}
+	}
+}
+
+// TestWriteSurfaceFullyTagged is the P2 CI drift guard: every public write/do
+// symbol (facade func + write-verb method on an exported type) MUST carry an
+// aep:cap tag. Getters/readers are exempt by policy. A new untagged write
+// method fails this — keeping the capability index complete over time.
+func TestWriteSurfaceFullyTagged(t *testing.T) {
+	root, err := repoRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries, err := extractEntries(capindexPkgDirs(root)...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	surface, err := loadSurface(filepath.Join(root, "docs", "docgen.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var missing []string
+	for _, e := range entries {
+		if surface.requires(e) && !e.HasCap {
+			sym := e.Symbol
+			if e.Recv != "" {
+				sym = strings.TrimPrefix(e.Recv, "*") + "." + e.Symbol
+			}
+			missing = append(missing, sym)
+		}
+	}
+	if len(missing) > 0 {
+		t.Errorf("%d public write-surface symbol(s) missing an aep:cap tag (add a tag, or it's a getter that should be exempt): %v", len(missing), missing)
 	}
 }
 

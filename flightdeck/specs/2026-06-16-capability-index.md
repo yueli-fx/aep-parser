@@ -104,22 +104,23 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) { ... }
 
 ## 分阶段
 
-- **P1 地基**(本 spec 核心):tag schema + `cmd/capindex` + 4 项 CI 校验 + `-q` 查询,先在 `layer-create` domain(`NewShapeLayer/NewSolidLayer/NewNullLayer/NewAdjustmentLayer/NewCameraLayer/NewLightLayer/NewPrecompLayer/NewTextLayer` 等,全 ship-gated、tier 清晰)端到端跑通。产出可查、CI 绿。
-- **P2 全量标注**:给所有 facade 导出符号打 tag,**逐个对着 ship-gate 测试核实** ← 这步本身就是"以源码为准的全量能力审核",会揪出假绿与缺口(可顺手标 `tier=missing/planned` 占位)。完成即开 CI 强制 tag 全覆盖。
-- **P3+(独立 spec)**:incidents 全量审核(靠本 spec 的 `incident=` 反向链接核 + 过时清理)· CLAUDE.md 审核 · coverage.md 退役 · showcase 占位符/积攒阈值/review 提醒升级。
+- **P1 地基**(DONE):tag schema + `cmd/capindex` + CI 校验 + `-q` 查询,`layer-create` domain 端到端跑通。
+- **P2 写面全标注**(DONE,2026-06-16):**写/做面公共符号 468/468 = 100% 标注 + ship-gate 交叉核实**(facade 自由函数 + 任意 exported 能力类型的写方法:Layer/Comp/Project/shape 节点全族/RenderQueueItem/OutputModule/Marker/Mask/Keyframe/Footage/Property/Guide/text-run)。**write-surface-first 策略**(用户批准):getter/reader/navigation + type alias + 枚举 const **豁免**(`requires()` 只强制写/做面;以后可 additive 补)。`TestWriteSurfaceFullyTagged` CI 强制写面零漏标。verify 分布诚实(roundtrip 主导=length-preserving;render-pixel=实测采样像素的 gate)。8-agent Workflow 并行落地。审核副产物:tier/verify 解耦(见上)+ manual-gate orphans 诚实标注。
+- **P3+(独立 spec = `knowledge-consolidation`)**:coverage.md 退役(**已解锁**——写面真相源已迁入 tag)· incidents 全量审核(靠 `incident=` 反向链接)· CLAUDE.md 审核 · 记忆系统退役。
 
 ## 与现有 docgen / coverage.md 的关系
 
 - docgen 不动:继续管 API 文档(签名 + doc 正文)。capindex 是其上的**状态/能力层**,共用同一批符号与 go/doc 基础设施。
-- coverage.md:P2 完成前保持 active 作为过渡真相源;P2 后独立 spec 退役(内容已被 tag 吸收)。
+- coverage.md:P2 已完成 → 写面真相源已被 tag 吸收,**可在 `knowledge-consolidation` 退役**。
 
 ## 验收标准
 
-- [ ] `aep:cap` tag schema 文档化(本 spec 即契约,graduate)。
-- [ ] `cmd/capindex` 跑通,`layer-create` domain 全标注,生成 `docs/capabilities.{json,md}`。
-- [ ] 4 项 CI 校验测试存在且绿。
-- [ ] `go run ./cmd/capindex -q "solid"` 秒出 `NewSolidLayer` 全卡。
-- [ ] `go vet ./... && go test ./...` 绿。
+- [x] `aep:cap` tag schema 文档化(本 spec 即契约,graduate)。
+- [x] `cmd/capindex` 跑通,生成 `docs/capabilities.{json,md}`(470 条)。
+- [x] CI 校验测试存在且绿(`TestGeneratedUpToDate` drift + tag 校验 + `TestWriteSurfaceFullyTagged` 写面零漏标 + cross-check gate)。
+- [x] `go run ./cmd/capindex -q "<词>"` 秒出能力(solid/蒙版/位置/表达式/色彩管理…)。
+- [x] 写/做面 468/468 = 100% 标注 + ship-gate 交叉核实(getter/const 按 write-surface-first 豁免)。
+- [x] `go vet ./... && go test ./...` 绿。
 
 ## 风险 / 未决
 

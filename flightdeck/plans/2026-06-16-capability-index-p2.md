@@ -113,14 +113,22 @@ facade.go + aliases.go + facade_codec.go + scene_application.go 全部公共自�
 
 ---
 
-## 验收标准
+## 验收标准 — ✅ DONE(2026-06-16)
 
-- [ ] capindex 抽取覆盖 facade+scene+codec 三包;`go run ./cmd/capindex -q "opacity"` 秒出 `SetOpacity`(scene 方法)全卡。
-- [ ] 公共面每符号有合法 tag,`TestPublicSurfaceFullyTagged` 绿。
-- [ ] 每 `gate=` 真实存在且非 skip;tier×verify 一致;`incident=` slug 可解析。
-- [ ] `docs/capabilities.{json,md}` == 重生成(drift guard 绿)。
-- [ ] `go vet ./... && go test ./...` 全绿。
-- [ ] 审核副产物:揪出的假绿 / 缺口逐条标 `tier=missing/planned/negative` + boundary(不假装"能用")。
+- [x] capindex 抽取覆盖 facade+scene(codec 经 facade 再导出);`-q "opacity"` 秒出 `SetOpacity`(scene 方法)全卡。
+- [x] **写/做面 468/468 = 100% 合法 tag**,`TestWriteSurfaceFullyTagged` CI 强制绿(getter/const 按 write-surface-first 豁免)。
+- [x] 每 `gate=` 真实存在且非 skip;tier×verify 一致;`incident=` slug 可解析(capindex 校验)。
+- [x] `docs/capabilities.{json,md}` == 重生成(drift guard 绿);docgen 文档随新增 doc comment 重生成。
+- [x] `go vet ./... && go test ./...` 全绿。
+- [x] 审核副产物:tier/verify 解耦 · manual-gate orphans 诚实 stable+roundtrip · render-pixel claim spot-check 实测采样像素 · verify 分布(roundtrip 280 / render-pixel 149 / ae-accept 35 / meta-none 6)。
+
+## 完成纪要
+
+- **8-agent Workflow**(581k token)并行标 scene 写面 + 收尾补漏(text-run 34 + WriteJSON)。
+- **写面定义扩面**:docgen-root → "任意 exported 能力类型的写方法"(此前漏 shape 节点全族 / render-queue / OutputModule / text-run)。
+- **工具硬化**:`isWriteMethod` CamelCase 边界(排除 Enabled/Added getter 误判);`parseCapTag` 单行契约(防 prose 误析);+Write 动词。
+- **遗留 cosmetic**:`scene_render_queue_writers.go` 部分 tag directive-first 放置(功能等价、go/doc 已 strip、测试绿),可后续清理。
+- **下一步**:`knowledge-consolidation`——coverage.md 退役(已解锁)/ incidents 审核 / CLAUDE.md 瘦身 / 记忆退役。
 
 ## 风险 / 注记
 
