@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 退役 auto-memory 系统(迁入 flightdeck/CLAUDE.md)+ incidents 过时清理与合并减量 + coverage.md/coverage-detail.md 退役(待 capindex 完成)+ CLAUDE.md 瘦身 + 根目录 stray exe 清理;目标=单一知识家 flightdeck + 精简 CLAUDE.md + 干净仓库
 graduate: true
 last_updated: 2026-06-16
@@ -7,7 +7,7 @@ last_updated: 2026-06-16
 
 # 知识库整合与退役 (memory/coverage/incidents/CLAUDE.md → flightdeck 单一家)
 
-> **进度(2026-06-16,capindex P2 done 后启动)**:**E ✅**(12 个根目录 stray exe 删除)· **D ✅**(coverage 退役→残值,见下)· **C ✅**(8-agent 只读审计 grep 核实:0 过时、4 并 3 锚、46 keep → 51→47,见下)· B 部分(CLAUDE.md 能力源指针已改指 capindex)。**剩 A(记忆退役,repo 外删除需用户确认)· B 全量瘦身。**
+> **✅ 全部完成(2026-06-16,capindex P2 done 后启动)**:**E ✅**(删 12 stray exe + build-不落根目录约定)· **D ✅**(coverage 退役→残值)· **C ✅**(8-agent 审计:0 过时、4 并 3 锚 → 51→47)· **A ✅**(~20 memory 全迁 flightdeck/CLAUDE.md 后清空 memory 目录 + CLAUDE.md 加"不用 auto-memory"最高优先级规则)· **B ✅**(CLAUDE.md #2/#3 长 RE 解释下沉 spec、留短规则+指针,工作风格精华迁入,硬约束 #1-7 全在)。**durable 产物**:no-memory 规则 + 工作风格 + 能力源指针 = CLAUDE.md;能力状态 = capindex tag。本 spec 为一次性整合(非长期契约),done 后可归档。
 
 ## 背景 / 动机
 
@@ -55,7 +55,13 @@ last_updated: 2026-06-16
 - CLAUDE.md 加规则(最高优先级,覆盖默认 Memory 行为):**"本项目不使用 auto-memory 系统。新知识写入 flightdeck(错误→incident/流程→checklist/指针→reference/设计→spec)或 CLAUDE.md(跨切面精华)。不要写 memory 文件。"**
 - 注:memory 目录在 repo 外、且双路径疑似同一库(`.claude` 与 `.claude-accounts/max.config` 指向同一文件)——删除是 repo 外破坏性操作,执行时须显式向用户确认。
 
-## 工作流 B — CLAUDE.md 瘦身
+## 工作流 B — CLAUDE.md 瘦身 — ✅ DONE(2026-06-16)
+
+#3 多包 DAG 的 7 行 per-package 详情 → 紧凑单向 DAG 链 + 边界守卫 + 指向 M8 spec(细节在 spec + `arch_boundary_test.go` CI 强制,零规则丢失);#2 删 Go-语义墙 长解释(详 #3)。A 的工作风格精华(terse-autonomous/finish-direction/bisection/look-at-artifact/工具链真相源/AE-self-serve/真相源优先级)迁入 `## 工作风格` 为短规则。硬约束 #1-7 全在、5 section 全在、`go build` 绿。能力分级细节已指 capindex。原下文为执行前 criteria 记录。
+
+---
+
+## 工作流 B(原始）— CLAUDE.md 瘦身
 
 **留**(精华 + 指针):数据流图 · 硬约束 #1-7 的**一句话规则 + 指针**(详情指向 incident/checklist)· 工作风格 · 文档地图 · 入口命令。
 **移出**:#2/#3 里的长篇 RE/历程解释 → `references/` 或对应 incident;能力分级细节 → capindex tag(coverage 退役后)。
@@ -108,14 +114,14 @@ capindex P2(全量标注) ──► D coverage 退役(硬 gate)
 ```
 E 独立、随时可做;A/B/C 可在 capindex P1 落地后开始;D 必须等 capindex P2。本 spec 现为 `idea`,capindex 推进到位后翻 `active` 并起实现计划。
 
-## 验收标准
+## 验收标准 — ✅ DONE(2026-06-16)
 
-- [ ] memory 目录清空 + CLAUDE.md 含"不用 auto-memory"规则;20 条记忆有逐条去向记录。
-- [ ] incidents 审核完成,无过时项,存活项与 capindex `incident=` 对齐(无孤儿/无悬链)。
-- [ ] coverage.md + coverage-detail.md 删除,无悬空引用。
-- [ ] CLAUDE.md 瘦身后仍覆盖全部铁律(以短规则+指针形式),`go vet ./... && go test ./...` 不受影响。
-- [ ] 根目录无 stray `.exe`;防复发约定已写入 CLAUDE.md/checklist。
-- [ ] 全库搜索:同一知识无两处权威副本。
+- [x] memory 目录清空(21 文件删,repo 外用户授权)+ CLAUDE.md 含"不用 auto-memory"最高优先级规则;20 条记忆逐条有去向(commit `docs: knowledge-consolidation A`)。
+- [x] incidents 审核完成(8-agent grep 核实),0 过时;4 并 3 锚后 51→47,capindex `-check` OK(`incident=` 反链全解析、无孤儿/悬链)。
+- [x] coverage 退役为残值(非整删——保留 capindex 不覆盖的 暂搁/不可达/negative + AE-attribute 矩阵,合原则 #4);无悬空引用,CLAUDE.md/cockpit 已改指 capindex。
+- [x] CLAUDE.md 瘦身:#2/#3 长解释下沉,硬约束 #1-7 全在(短规则+指针),`go build`/`go test` 绿。
+- [x] 根目录 0 stray `.exe`;`go build -o tmp_debug/bin/` 防复发约定入 CLAUDE.md 入口命令。
+- [x] 单一来源:写/做能力=capindex tag、暂搁/negative=coverage 残值、错误/陷阱=incidents、工作风格/铁律=CLAUDE.md、auto-memory 已退役。
 
 ## 风险
 
