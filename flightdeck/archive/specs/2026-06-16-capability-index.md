@@ -1,11 +1,13 @@
 ---
-status: active
+status: done
 summary: 源码内 aep:cap 结构化 tag → cmd/capindex 自动生成可秒查的能力+API 索引(JSON+人读表) + version(minver) 支持,CI 防漂移;取代手写易过期的 coverage.md
-last_updated: 2026-06-16
+last_updated: 2026-06-17
 graduate: true
 ---
 
 # 源码驱动的能力/API 索引地基 (capindex)
+
+> **✅ 全部完成(2026-06-17 归档)**:P1 地基 + P2 写面 468/468 标注 + CI 防漂移全 ship;验收标准 6 项全 [x];工具上线(`go run ./cmd/capindex -q <词>` + `docs/capabilities.{json,md}`)。产物=能力真相源,已落 CLAUDE.md/cockpit 指针。本 spec 为一次性地基 arc,done 后归档。
 
 ## 背景 / 动机
 
