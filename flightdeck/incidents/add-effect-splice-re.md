@@ -184,9 +184,10 @@ LineSweep/Rainfall/Snowfall). `TestAddEffectWave9_AEShipGate_AE2020/2025`.
   Kernel/LineSweep, and Rainfall=`CSRainfall`/Snowfall=`CSSnowfall` (no space).
 - **Dropdown Control excluded**: its match-name is a per-instance PSEUDO
   (`Pseudo/@@…` random) — not a stable reusable key.
-- **4 foreign-tdpi layer-ref deferred** (tdpi=[15,0…]): 3D Glasses · Warp
-  Stabilizer (`ADBE SubspaceStabilizer`) · Timewarp · CC Particle World — need
-  the materialized-template + SetEffectLayerParam path (future layer-ref wave).
+- **4 foreign-tdpi layer-ref** (tdpi=[15,0…]): 3D Glasses · Warp Stabilizer
+  (`ADBE SubspaceStabilizer`) · Timewarp · CC Particle World — **SHIPPED wave 11
+  (2026-06-17)** via the materialized-template + SetEffectLayerParam path (see
+  § Wave 11 below).
 - Genuinely unavailable in AE 2020 (canAdd=false, removed/renamed): Add/Remove
   Grain, Turbulent Noise, Cartoon, Ellipse, Radio Waves, Iris Wipe, Pixel Motion
   Blur, Shadow/Highlight, Selective Color, Liquify, HDR Compander, Foam/Wave
@@ -347,3 +348,36 @@ extract 走既有 `tmp_debug/extract_effect_lib`（音频效果 sspc 结构与�
 从 clean 音频 base fixture（`re_audio_base.aep`，mp3 层零效果）`aep.Open` → AddEffect 全 10 个 →
 WriteAEP → AE 开 + 读回 parade 全 10 名按序 + resave 存活。双版本 PASS。复用 `verify_property_struct.jsx`
 （找首个非空 parade 比 match-name）。base fixture 内嵌 mp3 故 gitignored，缺则 gate skip。
+
+## 2026-06-17 — Wave 11: the 4 foreign-tdpi layer-ref effects (library 203→207)
+
+收口 wave 9 deferred 的 4 个 layer-ref 效果：**3D Glasses (`ADBE 3D Glasses`) · Warp
+Stabilizer (`ADBE SubspaceStabilizer`) · Timewarp (`ADBE Timewarp`) · CC Particle
+World (`CC Particle World`)**。同 wave-8 物化流程（`re_effect_layerref2.jsx`）：HOST
+solid 上 addProperty 每个效果，**递归**找 LAYER_INDEX param 指向 MAP 层物化（这些复杂
+效果的 layer pickwhip 嵌在子 group 里，不像 Displacement Map 在顶层——wave-1 顶层-only
+遍历会漏），存 fixture，`extract_effect_lib` 抽出带 tdpi 的模板。
+
+**关键 RE 发现**：
+- **3D Glasses & Timewarp 各有 TWO layer-ref param**（wave 9 的 all-tdpi 审计只数到 1，
+  漏数）：3D Glasses `-0001`/`-0002`（左/右视图）· Timewarp `-0029`/`-0031`（matte/source，
+  语义按 param 顺序推测——中文 AE 的 UI 名是 CJK）· Warp Stabilizer `-0046`（单个，
+  reference）· CC Particle World `-0045`（Texture Layer）。tdpi 计数实测 = host + N：
+  3d_glasses 3 · subspacestabilizer 2 · timewarp 3 · particle_world 2。
+- **Warp Stabilizer 可加到 solid**（canAdd=true，无分析 modal）——推翻了"分析类效果加不上/
+  弹 modal hang"的预判。AddEffect + SetEffectLayerParam → MAP 后 AE 2020+2025 都接受。
+- 模板较大（CC Particle World 32KB · Warp Stabilizer 13KB · Timewarp 12KB）但 splice 照常
+  accept；retargetEffectHostLayer 递归重写全部 tdpi → host，SetEffectLayerParam 再逐 param
+  指真实 source（多 layer-ref 按 param match-name 区分，机制无需改）。
+
+**ship-gate（非渲染 → accept + DOM readback + resave）**：`TestAddEffectWave11_AEShipGate_
+AE2020/2025`——100% Go-built 文件（NewProject→Comp→HOST/MAP solid→Reopen→AddEffect ×4 +
+SetEffectLayerParam 每个 layer-ref param→MAP→WriteAEP），双版本 AE 开 + 读回 4 名按序 +
+resave 存活。**render-pixel 诚实 deferred**（同 CC Vector Blur 先例）：这 4 个的视觉作用面
+无干净单帧像素证明（Warp Stabilizer=分析驱动 · Timewarp=时间重映射 · CC Particle World=
+程序化 · 3D Glasses=立体合成）。Go round-trip `TestLayerRefWave11_GoRoundTrip` 验 6 个
+layer-ref param 的 tdpi 物化全部回读 MAP id。新 const：4 effect match-name + 6 layer-ref
+param（`EffectWarpStabilizerRefLayer`/`Effect3DGlassesLeftView`/`…RightView`/
+`EffectTimewarpMatteLayer`/`…SourceLayer`/`EffectCCParticleWorldTexture`）。**Curation rule
+扩展**：layer-ref 效果只要 RE 时把 pickwhip 物化（带 tdpi 出模板）即可入库，不再受
+parameter-only 限制——`SetEffectLayerParam` 处理 ref 重指。

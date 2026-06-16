@@ -948,9 +948,11 @@
         "TestAddEffectWave9_AEShipGate_AE2020",
         "TestAddEffectWave9_AEShipGate_AE2025",
         "TestAddEffectAudio_AEShipGate_AE2020",
-        "TestAddEffectAudio_AEShipGate_AE2025"
+        "TestAddEffectAudio_AEShipGate_AE2025",
+        "TestAddEffectWave11_AEShipGate_AE2020",
+        "TestAddEffectWave11_AEShipGate_AE2025"
       ],
-      "boundary": "203 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 10 个音频效果 Backwards/Bass\u0026Treble/Delay/Flange\u0026Chorus/High-Low Pass/Modulator/Parametric EQ/Reverb/Stereo Mixer/Tone,仅可加到有音频的层、ae-accept 非渲染 + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 4 个 foreign-tdpi layer-ref(3D Glasses/Warp Stabilizer/Timewarp/CC Particle World)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
+      "boundary": "207 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 10 个音频效果 Backwards/Bass\u0026Treble/Delay/Flange\u0026Chorus/High-Low Pass/Modulator/Parametric EQ/Reverb/Stereo Mixer/Tone,仅可加到有音频的层、ae-accept 非渲染 + 7 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur/3D Glasses/Warp Stabilizer/Timewarp/CC Particle World 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
       "incident": [
         "add-effect-splice-re"
       ],
@@ -1066,9 +1068,11 @@
         "TestLayerRefDispMap_AEShipGate_AE2020",
         "TestLayerRefDispMap_AEShipGate_AE2025",
         "TestLayerRefCompoundBlur_AEShipGate_AE2020",
-        "TestLayerRefCompoundBlur_AEShipGate_AE2025"
+        "TestLayerRefCompoundBlur_AEShipGate_AE2025",
+        "TestAddEffectWave11_AEShipGate_AE2020",
+        "TestAddEffectWave11_AEShipGate_AE2025"
       ],
-      "boundary": "参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);其它 default-elided layer-ref 物化未做",
+      "boundary": "参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);wave11 layer-ref(Warp Stabilizer -0046 · 3D Glasses -0001/-0002 · Timewarp -0029/-0031 · CC Particle World -0045)=accept+readback+resave 双版本 gated(render-pixel deferred:无单帧像素证明面);其它 default-elided layer-ref 物化未做",
       "incident": null,
       "alias": [
         "set matte",

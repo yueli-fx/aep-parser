@@ -146,6 +146,18 @@ func TestLayerRef_GoRoundTrip(t *testing.T) {
 	layerRefRoundTrip(t, "VECBLUR", aep.EffectCCVectorBlur, aep.EffectCCVectorBlurMap, "CC Vector Blur-0002", 120)
 }
 
+// Wave 11 layer-ref effects: each materialized layer-ref param's tdpi must
+// round-trip to the MAP layer ID after AddEffect (retarget→host) +
+// SetEffectLayerParam (→MAP). 3D Glasses / Timewarp expose two each — both tested.
+func TestLayerRefWave11_GoRoundTrip(t *testing.T) {
+	layerRefRoundTrip(t, "WARPSTAB", aep.EffectWarpStabilizer, aep.EffectWarpStabilizerRefLayer, "", 0)
+	layerRefRoundTrip(t, "GLASSESL", aep.Effect3DGlasses, aep.Effect3DGlassesLeftView, "", 0)
+	layerRefRoundTrip(t, "GLASSESR", aep.Effect3DGlasses, aep.Effect3DGlassesRightView, "", 0)
+	layerRefRoundTrip(t, "TWMATTE", aep.EffectTimewarp, aep.EffectTimewarpMatteLayer, "", 0)
+	layerRefRoundTrip(t, "TWSOURCE", aep.EffectTimewarp, aep.EffectTimewarpSourceLayer, "", 0)
+	layerRefRoundTrip(t, "PARTWORLD", aep.EffectCCParticleWorld, aep.EffectCCParticleWorldTexture, "", 0)
+}
+
 func lum(r, g, b int) int { return (r + g + b) / 3 }
 
 func runLayerRefGate(t *testing.T, aeExe, ver string, target aep.AETarget, compName, fxMatch, refParam, amtParam string, amtVal float64, pixelCheck func(*testing.T, image.Image, string)) {

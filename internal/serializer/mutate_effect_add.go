@@ -65,6 +65,7 @@ import (
 //go:embed templates/effects/effect_cc_glue_gun.bin templates/effects/effect_cc_grid_wipe.bin templates/effects/effect_cc_hair.bin templates/effects/effect_cc_image_wipe.bin templates/effects/effect_cc_jaws.bin templates/effects/effect_cc_light_wipe.bin templates/effects/effect_cc_mr_mercury.bin templates/effects/effect_cc_particle_systems_ii.bin templates/effects/effect_cc_radial_scalewipe.bin templates/effects/effect_cc_rain.bin templates/effects/effect_cc_scale_wipe.bin templates/effects/effect_cc_snow.bin
 //go:embed templates/effects/effect_cc_twister.bin templates/effects/effect_cs_blockload.bin templates/effects/effect_cs_color_neutralizer.bin templates/effects/effect_cs_kernel.bin templates/effects/effect_cs_linesweep.bin templates/effects/effect_csrainfall.bin templates/effects/effect_cssnowfall.bin
 //go:embed templates/effects/effect_adbe_aud_reverse.bin templates/effects/effect_adbe_aud_bt.bin templates/effects/effect_adbe_aud_delay.bin templates/effects/effect_adbe_aud_flange.bin templates/effects/effect_adbe_aud_hilo.bin templates/effects/effect_adbe_aud_modulator.bin templates/effects/effect_adbe_param_eq.bin templates/effects/effect_adbe_aud_reverb.bin templates/effects/effect_adbe_aud_stereo_mixer.bin templates/effects/effect_adbe_aud_tone.bin
+//go:embed templates/effects/effect_adbe_subspacestabilizer.bin templates/effects/effect_adbe_3d_glasses.bin templates/effects/effect_adbe_timewarp.bin templates/effects/effect_cc_particle_world.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -240,9 +241,10 @@ const (
 	EffectCompoundBlur    = "ADBE Compound Blur"    // Compound Blur
 	EffectCCVectorBlur    = "CC Vector Blur"        // CC Vector Blur
 	// Wave 9 (2026-06-16, fixture re_effect_lib9.aep) — big probe sweep:
-	// keying / simulation / utility / more Cycore CC. parameter-only (4 layer-ref
-	// effects — 3D Glasses/Warp Stabilizer/Timewarp/CC Particle World — deferred:
-	// foreign tdpi). NOTE several CC store a "CS …" internal name (≠ "CC …" alias).
+	// keying / simulation / utility / more Cycore CC. parameter-only (the 4 layer-ref
+	// effects 3D Glasses/Warp Stabilizer/Timewarp/CC Particle World it surfaced are
+	// now shipped in wave 11 below). NOTE several CC store a "CS …" internal name
+	// (≠ "CC …" alias).
 	EffectBasic3D               = "ADBE Basic 3D"
 	EffectBroadcastColors       = "ADBE Broadcast Colors"
 	EffectChannelCombiner       = "ADBE Channel Combiner"
@@ -303,6 +305,16 @@ const (
 	EffectAudioReverb       = "ADBE Aud Reverb"        // Reverb
 	EffectAudioStereoMixer  = "ADBE Aud Stereo Mixer"  // Stereo Mixer
 	EffectAudioTone         = "ADBE Aud Tone"          // Tone
+	// Wave 11 (2026-06-17, fixture re_effect_layerref2.aep) — the 4 LAYER-REFERENCE
+	// effects wave 9 surfaced but deferred (foreign tdpi). Same materialize flow as
+	// wave 8: each template carries its layer-ref param(s) with a tdpi (pointed at a
+	// MAP layer during RE), AddEffect retargets all tdpi to host, then
+	// SetEffectLayerParam aims the …Layer param const(s) below at the real source.
+	// 3D Glasses & Timewarp each expose TWO layer-ref params.
+	EffectWarpStabilizer  = "ADBE SubspaceStabilizer" // Warp Stabilizer
+	Effect3DGlasses       = "ADBE 3D Glasses"         // 3D Glasses
+	EffectTimewarp        = "ADBE Timewarp"           // Timewarp
+	EffectCCParticleWorld = "CC Particle World"       // CC Particle World
 )
 
 // Layer-reference parameter match-names for the wave-8 layer-ref effects — pass
@@ -311,6 +323,15 @@ const (
 	EffectDisplacementMapLayer = "ADBE Displacement Map-0001" // Displacement Map Layer
 	EffectCompoundBlurLayer    = "ADBE Compound Blur-0001"    // Blur Layer
 	EffectCCVectorBlurMap      = "CC Vector Blur-0005"        // Vector Map
+	// Wave 11 layer-ref params. 3D Glasses & Timewarp each expose two; the
+	// Warp Stabilizer / Timewarp UI names were CJK in the RE fixture, so those
+	// role names are inferred from param order (the match-name is the stable key).
+	EffectWarpStabilizerRefLayer = "ADBE SubspaceStabilizer-0046" // Warp Stabilizer reference layer
+	Effect3DGlassesLeftView      = "ADBE 3D Glasses-0001"         // 3D Glasses left view
+	Effect3DGlassesRightView     = "ADBE 3D Glasses-0002"         // 3D Glasses right view
+	EffectTimewarpMatteLayer     = "ADBE Timewarp-0029"           // Timewarp matte layer (inferred)
+	EffectTimewarpSourceLayer    = "ADBE Timewarp-0031"           // Timewarp source layer (inferred)
+	EffectCCParticleWorldTexture = "CC Particle World-0045"       // CC Particle World texture layer
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -521,6 +542,11 @@ var effectTemplateFiles = map[string]string{
 	EffectAudioReverb:       "templates/effects/effect_adbe_aud_reverb.bin",
 	EffectAudioStereoMixer:  "templates/effects/effect_adbe_aud_stereo_mixer.bin",
 	EffectAudioTone:         "templates/effects/effect_adbe_aud_tone.bin",
+	// Wave 11 — layer-reference effects (materialized templates carry tdpi).
+	EffectWarpStabilizer:  "templates/effects/effect_adbe_subspacestabilizer.bin",
+	Effect3DGlasses:       "templates/effects/effect_adbe_3d_glasses.bin",
+	EffectTimewarp:        "templates/effects/effect_adbe_timewarp.bin",
+	EffectCCParticleWorld: "templates/effects/effect_cc_particle_world.bin",
 }
 
 type cachedEffectTemplate struct {
