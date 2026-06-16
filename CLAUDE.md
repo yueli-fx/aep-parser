@@ -28,19 +28,14 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 1. **写回 default 是 length-preserving**。改字段不准动 chunk 大小；少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。结构性 ops（NewComposition / NewShapeLayer / DeleteLayer 等）走 atomic invariants：warnings-as-failure + rollback to pre-call state + AE 双版本 ship-gate 验证。详 `incidents/ae25-acceptance-gate.md`。
 2. **public API 分级**：
    - **Stable（核心 R/W）**: 已通过双版本 ship-gate 的 `Open` / `FromReader` / `WriteAEP` / `WriteJSON` / `Set*` / getter。**签名 / 类型 / JSON 字段不可动**。
-   - **Stable（结构性 op）= 语义稳定，调用形态可随包边界重组变化**（M8 方案② 决议，2026-06-09 用户批准，覆盖原「Stable 重构不能动签名」对结构性 op 的部分）：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等结构性写路径，**语义契约不变**（chunk 输出 byte-structural 等同、双版本 ship-gate 持续通过）；但**调用形态可在物理分包时从 scene 方法改为 facade 自由函数**（如 `comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`）——因其实现 building chunk 必须住 `internal/serializer`，而方法须与 scene 类型同包又不能访问 serializer（Go 语义墙，详 #3）。此类形态变更：**commit 标 BREAKING + 同步 `flightdeck/checklists/commits.md` API 表**，不算违反 Stable 契约。核心 R/W（Set*/Open/Write）不受此豁免，仍签名稳定。
+   - **Stable（结构性 op）= 语义稳定、调用形态可变**：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等——**语义契约不变**（chunk byte-structural 等同 + 双版本 gate 持续过），但**调用形态可随物理分包从 scene 方法改为 facade 自由函数**（`comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`；因实现须住 serializer，Go 语义墙详 #3）。此类变更：**commit 标 BREAKING + 同步 `checklists/commits.md` API 表**，不算违约。核心 R/W 不享此豁免、仍签名稳定。
    - **Alpha**: 显式标 alpha / deferred / 未 ship-gate 的新 API。可改可删，commit message 标 BREAKING。
    - review 时撤销新加但已知 broken 的 API 不算违反此约束。
    - 具体某符号属 Stable / Alpha + 验到几级 + gate + 边界 = **capindex 真相源**(源码内 `aep:cap` tag,CI 强制写面零漏标):`go run ./cmd/capindex -q "<词>"` 或 `docs/capabilities.{json,md}`。
-3. **多包物理分层 `internal/{rifx,codec,scene,serializer}` + `aep` facade**（M8 方案② 物理分包已落，2026-06-09：scene 抽 `ac62b25`、serializer 抽 `a347e46`）。DAG 上依赖下、禁逆向/成环：
-   - `rifx`（叶）：通用 RIFX chunk 树，不知 AEP 语义。
-   - `codec`：纯值/字节编解码（framerate / gradient / property-stream / cdta·ldta layout / render-settings …）。禁 import scene / serializer / rifx / aep。
-   - `scene`：运行时模型 + accessor + writer 接口 + `WriteJSON`。**禁 import rifx / serializer / aep**（仅可 import codec）。chunk 耦合经 scene 内定义、serializer 实现的 `XWriter` 接口倒置（B′）——scene 编译期不碰字节。
-   - `serializer`：`parse_`（chunk→scene）/ `lower_`+`write_`（scene→chunk · 发射字节/length-preserving patch）/ `back_`（`*Backrefs` chunk 引用 + writer 实现）/ `mutate_`（结构性 new/delete/insert/move/duplicate）。import scene+codec+rifx；**禁 import aep**（防环）。包内仍以 `<stage>_<domain>` 命名轴组织。
-   - `aep`：薄 facade（`aliases`/`facade_codec` = 类型·枚举别名；`facade.go` = `Open`/`FromReader` + 结构性 op 自由函数委托 serializer；`scene_application.go` = `Application`）。**公共 API 全经此包**。
-   - 公共 R/W 方法（`(p *Project) WriteAEP` / `Set*`）= scene 类型方法，经 writer 接口委托 serializer 实现（保方法式 API）；结构性 op = facade 自由函数（`aep.DeleteLayer(comp, i)`，详 #2）。
-   - 边界守卫：`internal/aep/arch_boundary_test.go`（AST 包级 import-DAG 断言，`go test` CI 强制）+ `tmp_debug/dag_boundary`（`go list` 手动核）。
-   设计/历程详 `flightdeck/specs/2026-06-07-v3-m8-physical-split-design.md` + `cockpit.md`。
+3. **多包物理分层 `internal/{rifx,codec,scene,serializer}` + `aep` facade**，DAG 依赖单向、禁逆向/成环：
+   - **rifx**（叶·通用 RIFX 树，不知 AEP 语义）← **codec**（纯值/字节编解码，禁 import 其它内部包）← **scene**（运行时模型 + accessor + writer 接口 + `WriteJSON`，仅可 import codec；chunk 耦合经 serializer 实现的 writer 接口倒置，**编译期不碰字节**）← **serializer**（`parse_`/`lower_`/`write_`/`back_`/`mutate_`，import scene+codec+rifx，**禁 import aep** 防环）← **aep**（薄 facade，**公共 API 全经此包**）。
+   - 公共 R/W 方法（`WriteAEP`/`Set*`）= scene 方法经 writer 接口委托 serializer；结构性 op = facade 自由函数（详 #2）。
+   - 边界守卫：`internal/aep/arch_boundary_test.go`（AST import-DAG 断言，CI 强制）。各包职责细节 + 设计历程详 `specs/2026-06-07-v3-m8-physical-split-design.md`。
 4. **嵌入资源目录命名复数**：`internal/serializer/templates/`（非 `template/`）。Go `//go:embed` 限制资源必须在 package 同目录或子目录——M8 物理分包后随 `lower_`/`mutate_` 居 serializer。
 5. **Opaque preservation**（V2.2 教训）：parser 未解的 chunk 必须 byte-identical round-trip。scene types 携带 opaque shard，serializer 原位重发。任何 "regenerate from scene" 路径必须保留它，否则 AE 会 silent-drop。
 6. **AE 接受 gate**：任何新结构性写路径（NewX / DeleteX / DuplicateX / V3 mutation API）必须跑 AE 2020 + AE 2025 双版本 ship-gate 才算 ship。详 `incidents/ae25-acceptance-gate.md` + `checklists/re-fixture.md` § GDI 自动化。
