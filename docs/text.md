@@ -905,6 +905,20 @@ Same indexed-group splice vein as AddTextRangeSelector. Refused: non-text layers
 
 Alpha / structural — RE'd + double-version render-gated (the rendered frames vary over time as the wiggle re-selects characters). Free function (CLAUDE.md #2).
 
+### AddTextExpressibleSelector
+
+```go
+func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error)
+```
+
+AddTextExpressibleSelector adds an Expressible Selector to the layer's FIRST text animator and drives its per-character selection with amountExpr, an ExtendScript expression returning the selection percentage (0..100). This is the expression-driven kinetic-typography primitive: the expression (which can read textIndex / textTotal / time / selectorValue) decides which glyphs the animator affects and by how much.
+
+Unlike the Range / Wiggly selectors the Expressible Amount is EXPRESSION-ONLY — it has no usable static value (a fresh Amount's .value throws in AE), so an empty expression yields an inert selector and amountExpr must be non-empty. Typical idioms: "textIndex \<= 3 ? 100 : 0" (first 3 glyphs), "selectorValue" (all glyphs), or a time-driven sweep.
+
+Same indexed-group splice vein as AddTextWigglySelector, plus a SetExpression on the spliced Amount param (the expression Utf8 lands in canonical order — see incidents/expression-enable-byte-pair.md). Refused: non-text layers, text layers built by New* that were never parsed (call aep.Reopen first), layers with no text animator, and an empty amountExpr. Returns a stand-in group node.
+
+Alpha / structural — RE'd + double-version render-gated (the expression-driven selection visibly affects the glyphs AE renders). Free function (CLAUDE.md #2).
+
 ### SetTextRangeAdvanced
 
 ```go

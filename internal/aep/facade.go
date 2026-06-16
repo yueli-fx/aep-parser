@@ -1101,6 +1101,33 @@ func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error) {
 	return serializer.AddTextWigglySelector(layer)
 }
 
+// AddTextExpressibleSelector adds an Expressible Selector to the layer's FIRST
+// text animator and drives its per-character selection with amountExpr, an
+// ExtendScript expression returning the selection percentage (0..100). This is
+// the expression-driven kinetic-typography primitive: the expression (which can
+// read textIndex / textTotal / time / selectorValue) decides which glyphs the
+// animator affects and by how much.
+//
+// Unlike the Range / Wiggly selectors the Expressible Amount is EXPRESSION-ONLY —
+// it has no usable static value (a fresh Amount's .value throws in AE), so an
+// empty expression yields an inert selector and amountExpr must be non-empty.
+// Typical idioms: "textIndex <= 3 ? 100 : 0" (first 3 glyphs), "selectorValue"
+// (all glyphs), or a time-driven sweep.
+//
+// Same indexed-group splice vein as AddTextWigglySelector, plus a SetExpression
+// on the spliced Amount param (the expression Utf8 lands in canonical order —
+// see incidents/expression-enable-byte-pair.md). Refused: non-text layers, text
+// layers built by New* that were never parsed (call aep.Reopen first), layers
+// with no text animator, and an empty amountExpr. Returns a stand-in group node.
+//
+// Alpha / structural — RE'd + double-version render-gated (the expression-driven
+// selection visibly affects the glyphs AE renders). Free function (CLAUDE.md #2).
+//
+//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextExpressibleSelector_AEShipGate_AE2020,TestTextExpressibleSelector_AEShipGate_AE2025 incident=text-animator-create-re,expression-enable-byte-pair boundary="作用于第一个 animator;Amount 表达式驱动(必填,无静态值);未 parse 的 fresh 层 refused" alias="expressible selector,表达式选择器,expression selector,selectorValue,textIndex"
+func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error) {
+	return serializer.AddTextExpressibleSelector(layer, amountExpr)
+}
+
 // TextRangeAdvanced holds the "Advanced" sub-params of a text animator's Range
 // Selector (Units / Based On / Mode / Amount / Shape / Smoothness / Ease High·Low
 // / Randomize Order / Random Seed). See DefaultTextRangeAdvanced + the type doc

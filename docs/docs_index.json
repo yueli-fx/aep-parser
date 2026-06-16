@@ -36,6 +36,13 @@
       "signature": "func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g. a colour wipe sweeping across the text). r / g / b / a is the target colour applied to the selected characters (each channel 0..1); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical reveal: set a target colour, Start=0/End=100, then sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the colour applies to the selected characters and resolves to the base text colour as the selection window slides off them."
     },
+    "AddTextExpressibleSelector": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextexpressibleselector",
+      "signature": "func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error)",
+      "summary": "AddTextExpressibleSelector adds an Expressible Selector to the layer's FIRST text animator and drives its per-character selection with amountExpr, an ExtendScript expression returning the selection percentage (0..100). This is the expression-driven kinetic-typography primitive: the expression (which can read textIndex / textTotal / time / selectorValue) decides which glyphs the animator affects and by how much."
+    },
     "AddTextFillOpacityAnimator": {
       "kind": "func",
       "file": "text.md",

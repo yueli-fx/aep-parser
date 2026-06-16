@@ -198,8 +198,8 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
 - **免费近邻已收口（2026-06-16，见下节）**：Fill Opacity / Stroke Opacity / Stroke Width / Stroke
   Color / Skew 五个双版本渲染 gate PASS；Rotation X/Y evidence-based defer（2D 视觉惰性）。
 - **selector 家族已收口（2026-06-16）**：Range Advanced（`SetTextRangeAdvanced`，Amount gated）· 多 Selector
-  （`AddTextRangeSelector`，gated）· Wiggly（`AddTextWigglySelector`，gated）全 ship；Expressible Selector
-  evidence-defer（表达式驱动，库表达式未验证）。**animate leaf 已全覆盖**——1D 复用
+  （`AddTextRangeSelector`，gated）· Wiggly（`AddTextWigglySelector`，gated）· **Expressible**
+  （`AddTextExpressibleSelector`，2026-06-17 render-gated，原 defer 翻案）全 ship。**animate leaf 已全覆盖**——1D 复用
   `animateTextScalarLeaf`、spatial 多维复用 `animateTextVectorLeaf(...,false,...)`、非 spatial 多维复用
   `animateTextVectorLeaf(...,true,...)`，新 leaf 类型零额外 animate 代码。
 - **gate 签名速查**（每 leaf 类型选作用面）：Opacity→全帧亮度 spread；Position→ink 垂直质心；
@@ -267,10 +267,22 @@ wiggle 独驱选区，render 3 帧两两 frameDiff 大（0-1=1660·1-2=2247·0-2
 gotcha：probe 里 `canSetExpression`/无效 match-name 抛 uncaught → AE 脚本错误 modal → ae_run exit 2（非
 flake，是真 modal）；每 addProperty 独立 step()/去掉 canSetExpression 后绿。
 
-**Expressible Selector = evidence-based defer**：唯一有意义的 param（Expressible Amount）是**表达式驱动**，
-而本库表达式支持未经渲染验证（[[expression-enable-byte-pair]]：SetExpression 有 render-dead 情形，交付准则
-红线 a）。无可用表达式求值，facade 即非功能性——故 defer 到表达式引擎单独 gate 后再 ship。结构已 RE（可达、
-2 params）。
+**Expressible Selector = SHIPPED（2026-06-17，原 defer 已翻案）**：`AddTextExpressibleSelector(layer, amountExpr)`
+双版本 render-gate PASS（`text_expressible_selector_shipgate_test.go`）。原 defer 理由「库表达式未渲染验证」**已过时**
+——SetExpression 早经 S2 + 2026-06-15 Utf8-order 修复渲染验证（含 effect param，见 [[expression-enable-byte-pair]]）。
+
+RE 关键发现（`re_text_expressible.jsx`）：
+- **Expressible Amount 是表达式专属 param**：fresh 时 expressionEnabled=false、expression 空、且**读 `.value` 直接抛**
+  （无静态值）。故空表达式 = inert selector，facade 强制 amountExpr 非空。
+- **模板必须先 materialize**：默认 Expressible Selector 两 param（Range Type2 + Amount）**全 elided**，
+  extract 出来只有 `tdsb+tdsn+GroupEnd`（108B）——没有 Amount tdbs 可写。解法：RE fixture 里先给 Amount 设个
+  表达式（`amt.expression="selectorValue"`）逼 AE 持久化 Amount tdbs，再 extract（516B，含 cdat+Utf8+tdum/tduM，
+  Utf8 已在 canonical 位）。`AddTextExpressibleSelector` splice 该模板 + `scalarTdbs`→`parseLeafProperty`→
+  `SetExpression(amountExpr)`+`SetExpressionEnabled(true)` 覆写。
+- **gate = 空间差分**（非时间）：两 comp 各 "ABCDEFGH" + opacity-0 animator + Expressible Selector，
+  L=`textIndex<=4?100:0`（隐 ABCD → 渲 EFGH）、R=`textIndex>4?100:0`（隐 EFGH → 渲 ABCD），断言两者 ink 质心
+  相距 >100px（可见字集不同 = 表达式真驱动选区）。坑：文字 center-justify，可见字集左右方向是排版假象，故用 |Δ| 不看符号。
+  AE2020≡AE2025 逐数字一致（|Δ|=188，确定性）。**selector 家族至此全收口。**
 
 ## 多 Selector（2026-06-16）
 

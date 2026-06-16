@@ -114,7 +114,19 @@ var textSelectorBody []byte
 //go:embed templates/text_wiggly_selector_body.bin
 var textWigglySelectorBody []byte
 
+// An AE-native "ADBE Text Expressible Selector" (Range Type2 + Expressible Amount,
+// both elided). Unlike every other selector the Amount has NO usable static value —
+// it is purely expression-driven (RE 2026-06-17: a fresh Amount has
+// expressionEnabled=false, empty expression, and .value throws), so AddText-
+// ExpressibleSelector also writes the caller's expression onto the Amount.
+// Regen: extract_text_animator <fixture> <out> "ADBE Text Expressible Selector".
+//
+//go:embed templates/text_expressible_selector_body.bin
+var textExpressibleSelectorBody []byte
+
 const matchNameTextWigglySelector = "ADBE Text Wiggly Selector"
+const matchNameTextExpressibleSelector = "ADBE Text Expressible Selector"
+const matchNameTextExpressibleAmount = "ADBE Text Expressible Amount"
 
 const (
 	matchNameTextAnimators     = "ADBE Text Animators"
@@ -797,6 +809,77 @@ func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error) {
 	spliced = append(spliced, selectors.Children[at:]...)
 	selectors.Children = spliced
 	node := &AEPropertyGroup{MatchName: matchNameTextWigglySelector, Name: matchNameTextWigglySelector}
+	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
+	return node, nil
+}
+
+// AddTextExpressibleSelector adds an Expressible Selector to the layer's FIRST
+// text animator's "ADBE Text Selectors" group and drives its selection with
+// amountExpr — an ExtendScript expression returning the per-character selection
+// percentage (0..100). Unlike the Range / Wiggly selectors the Expressible
+// Amount has no usable static value (it is expression-only), so an empty
+// expression yields an inert selector; amountExpr must be non-empty. Typical
+// idioms: "textIndex <= 3 ? 100 : 0" (first 3 glyphs), "selectorValue" (all),
+// or a time-driven sweep. Returns a stand-in node.
+// (Full contract lives on the aep.AddTextExpressibleSelector facade.)
+func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error) {
+	if layer == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: layer is nil")
+	}
+	if layer.Type != LayerTypeText {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: layer %q is not a text layer", layer.Name)
+	}
+	if amountExpr == "" {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: amountExpr is empty (the Expressible Amount is expression-only; an empty expression yields an inert selector)")
+	}
+	tp := textPropertiesChunk(layer)
+	if tp == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: layer %q has no Text Properties group (round-trip via aep.Reopen first)", layer.Name)
+	}
+	animators := childGroupChunk(tp, matchNameTextAnimators)
+	if animators == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: layer %q has no Text Animators (add an animator first)", layer.Name)
+	}
+	anim := childGroupChunk(animators, matchNameTextAnimator)
+	if anim == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: no animator present")
+	}
+	selectors := childGroupChunk(anim, matchNameTextSelectors)
+	if selectors == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: animator has no Text Selectors group")
+	}
+	tmpl, err := animatorTemplate(textExpressibleSelectorBody)
+	if err != nil {
+		return nil, err
+	}
+	payload := deepCloneChunk(tmpl)
+	at := groupEndIndex(selectors)
+	spliced := make([]*rifx.Chunk, 0, len(selectors.Children)+2)
+	spliced = append(spliced, selectors.Children[:at]...)
+	spliced = append(spliced, makeTdmn(matchNameTextExpressibleSelector), payload)
+	spliced = append(spliced, selectors.Children[at:]...)
+	selectors.Children = spliced
+
+	// The Amount is expression-only: write the caller's expression onto its tdbs
+	// (build a parsed *Property over the spliced chunk, same vein as
+	// AnimateTextRangeOffset) and enable evaluation.
+	tdbs := scalarTdbs(payload, matchNameTextExpressibleAmount)
+	if tdbs == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: spliced selector missing Expressible Amount tdbs")
+	}
+	ctx := newParseCtx(0, layer.Name, nil)
+	p := parseLeafProperty(matchNameTextExpressibleAmount, tdbs, ctx)
+	if p == nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: failed to build property over Expressible Amount tdbs")
+	}
+	if err := p.SetExpression(amountExpr); err != nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: set Amount expression: %w", err)
+	}
+	if err := p.SetExpressionEnabled(true); err != nil {
+		return nil, fmt.Errorf("AddTextExpressibleSelector: enable Amount expression: %w", err)
+	}
+
+	node := &AEPropertyGroup{MatchName: matchNameTextExpressibleSelector, Name: matchNameTextExpressibleSelector}
 	scene.SetPropertyGroupBack(node, &propertyGroupBackrefs{chunk: payload})
 	return node, nil
 }

@@ -64,7 +64,7 @@
     {
       "out": "text.md",
       "roots": ["TextSource", "TextStyleRun", "TextParagraph", "TextCapsOption", "TextBaselineOption", "TextAutoKernType", "TextLineJoinType", "TextDigitSet", "TextLeadingType", "TextParagraphDirection", "TextRangeAdvanced"],
-      "funcs": ["TextEncodedByteLen", "AddTextOpacityAnimator", "AddTextPositionAnimator", "AddTextScaleAnimator", "AddTextRotationAnimator", "AddTextColorAnimator", "AddTextFillOpacityAnimator", "AddTextStrokeOpacityAnimator", "AddTextStrokeWidthAnimator", "AddTextSkewAnimator", "AddTextRotationXAnimator", "AddTextRotationYAnimator", "AddTextStrokeColorAnimator", "AddTextRangeSelector", "AddTextWigglySelector", "SetTextRangeAdvanced", "DefaultTextRangeAdvanced", "AnimateTextRangeOffset", "AnimateTextOpacity", "AnimateTextRotation", "AnimateTextPosition", "AnimateTextColor", "AnimateTextScale"],
+      "funcs": ["TextEncodedByteLen", "AddTextOpacityAnimator", "AddTextPositionAnimator", "AddTextScaleAnimator", "AddTextRotationAnimator", "AddTextColorAnimator", "AddTextFillOpacityAnimator", "AddTextStrokeOpacityAnimator", "AddTextStrokeWidthAnimator", "AddTextSkewAnimator", "AddTextRotationXAnimator", "AddTextRotationYAnimator", "AddTextStrokeColorAnimator", "AddTextRangeSelector", "AddTextWigglySelector", "AddTextExpressibleSelector", "SetTextRangeAdvanced", "DefaultTextRangeAdvanced", "AnimateTextRangeOffset", "AnimateTextOpacity", "AnimateTextRotation", "AnimateTextPosition", "AnimateTextColor", "AnimateTextScale"],
       "head": "_includes/text.head.md"
     },
     {
