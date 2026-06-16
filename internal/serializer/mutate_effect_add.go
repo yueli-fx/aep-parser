@@ -60,6 +60,10 @@ import (
 //go:embed templates/effect_cc_smear.bin templates/effect_cc_split.bin templates/effect_cc_split_2.bin templates/effect_cc_tiler.bin templates/effect_cc_warpomatic.bin templates/effect_cc_light_burst_2_5.bin templates/effect_cc_light_rays.bin templates/effect_cc_light_sweep.bin templates/effect_cs_threads.bin templates/effect_cc_cylinder.bin templates/effect_cc_sphere.bin templates/effect_cc_spotlight.bin templates/effect_cc_glass.bin templates/effect_cs_hextile.bin templates/effect_cc_kaleida.bin
 //go:embed templates/effect_cc_mr_smoothie.bin templates/effect_cc_plastic.bin templates/effect_cc_repetile.bin templates/effect_cc_threshold.bin templates/effect_cc_threshold_rgb.bin templates/effect_cc_pixel_polly.bin templates/effect_cc_scatterize.bin templates/effect_cc_star_burst.bin templates/effect_cc_force_motion_blur.bin templates/effect_cc_wide_time.bin templates/effect_cc_color_offset.bin templates/effect_cc_toner.bin templates/effect_cc_burn_film.bin templates/effect_cs_vignette.bin templates/effect_cc_simple_wire_removal.bin
 //go:embed templates/effect_adbe_displacement_map.bin templates/effect_adbe_compound_blur.bin templates/effect_cc_vector_blur.bin
+//go:embed templates/effect_adbe_basic_3d.bin templates/effect_adbe_broadcast_colors.bin templates/effect_adbe_channel_combiner.bin templates/effect_adbe_cineon_converter2.bin templates/effect_adbe_color_key.bin templates/effect_adbe_color_range.bin templates/effect_adbe_extract.bin templates/effect_adbe_geometry.bin templates/effect_adbe_gradient_wipe.bin templates/effect_adbe_grow_bounds.bin templates/effect_adbe_keycleaner.bin templates/effect_adbe_layer_control.bin
+//go:embed templates/effect_adbe_luma_key.bin templates/effect_adbe_median.bin templates/effect_adbe_noise_hls_auto2.bin templates/effect_adbe_profiletoprofile.bin templates/effect_adbe_time_displacement.bin templates/effect_adbe_timecode.bin templates/effect_cc_ball_action.bin templates/effect_cc_bubbles.bin templates/effect_cc_composite.bin templates/effect_cc_drizzle.bin templates/effect_cc_environment.bin templates/effect_cc_glass_wipe.bin
+//go:embed templates/effect_cc_glue_gun.bin templates/effect_cc_grid_wipe.bin templates/effect_cc_hair.bin templates/effect_cc_image_wipe.bin templates/effect_cc_jaws.bin templates/effect_cc_light_wipe.bin templates/effect_cc_mr_mercury.bin templates/effect_cc_particle_systems_ii.bin templates/effect_cc_radial_scalewipe.bin templates/effect_cc_rain.bin templates/effect_cc_scale_wipe.bin templates/effect_cc_snow.bin
+//go:embed templates/effect_cc_twister.bin templates/effect_cs_blockload.bin templates/effect_cs_color_neutralizer.bin templates/effect_cs_kernel.bin templates/effect_cs_linesweep.bin templates/effect_csrainfall.bin templates/effect_cssnowfall.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -234,6 +238,53 @@ const (
 	EffectDisplacementMap = "ADBE Displacement Map" // Displacement Map
 	EffectCompoundBlur    = "ADBE Compound Blur"    // Compound Blur
 	EffectCCVectorBlur    = "CC Vector Blur"        // CC Vector Blur
+	// Wave 9 (2026-06-16, fixture re_effect_lib9.aep) — big probe sweep:
+	// keying / simulation / utility / more Cycore CC. parameter-only (4 layer-ref
+	// effects — 3D Glasses/Warp Stabilizer/Timewarp/CC Particle World — deferred:
+	// foreign tdpi). NOTE several CC store a "CS …" internal name (≠ "CC …" alias).
+	EffectBasic3D               = "ADBE Basic 3D"
+	EffectBroadcastColors       = "ADBE Broadcast Colors"
+	EffectChannelCombiner       = "ADBE Channel Combiner"
+	EffectCineonConverter       = "ADBE Cineon Converter2"
+	EffectColorKey              = "ADBE Color Key"
+	EffectColorRange            = "ADBE Color Range"
+	EffectExtract               = "ADBE Extract"
+	EffectGeometryLegacy        = "ADBE Geometry"
+	EffectGradientWipe          = "ADBE Gradient Wipe"
+	EffectGrowBounds            = "ADBE GROW BOUNDS"
+	EffectKeyCleaner            = "ADBE KeyCleaner"
+	EffectLayerControl          = "ADBE Layer Control"
+	EffectLumaKey               = "ADBE Luma Key"
+	EffectMedian                = "ADBE Median"
+	EffectNoiseHLSAuto          = "ADBE Noise HLS Auto2"
+	EffectColorProfileConverter = "ADBE ProfileToProfile"
+	EffectTimeDisplacement      = "ADBE Time Displacement"
+	EffectTimecode              = "ADBE Timecode"
+	EffectCCBallAction          = "CC Ball Action"
+	EffectCCBubbles             = "CC Bubbles"
+	EffectCCComposite           = "CC Composite"
+	EffectCCDrizzle             = "CC Drizzle"
+	EffectCCEnvironment         = "CC Environment"
+	EffectCCGlassWipe           = "CC Glass Wipe"
+	EffectCCGlueGun             = "CC Glue Gun"
+	EffectCCGridWipe            = "CC Grid Wipe"
+	EffectCCHair                = "CC Hair"
+	EffectCCImageWipe           = "CC Image Wipe"
+	EffectCCJaws                = "CC Jaws"
+	EffectCCLightWipe           = "CC Light Wipe"
+	EffectCCMrMercury           = "CC Mr. Mercury"
+	EffectCCParticleSystemsII   = "CC Particle Systems II"
+	EffectCCRadialScaleWipe     = "CC Radial ScaleWipe"
+	EffectCCRain                = "CC Rain"
+	EffectCCScaleWipe           = "CC Scale Wipe"
+	EffectCCSnow                = "CC Snow"
+	EffectCCTwister             = "CC Twister"
+	EffectCCBlockLoad           = "CS BlockLoad"
+	EffectCCColorNeutralizer    = "CS Color Neutralizer"
+	EffectCCKernel              = "CS Kernel"
+	EffectCCLineSweep           = "CS LineSweep"
+	EffectCCRainfall            = "CSRainfall"
+	EffectCCSnowfall            = "CSSnowfall"
 )
 
 // Layer-reference parameter match-names for the wave-8 layer-ref effects — pass
@@ -399,6 +450,49 @@ var effectTemplateFiles = map[string]string{
 	EffectDisplacementMap:     "templates/effect_adbe_displacement_map.bin",
 	EffectCompoundBlur:        "templates/effect_adbe_compound_blur.bin",
 	EffectCCVectorBlur:        "templates/effect_cc_vector_blur.bin",
+	EffectBasic3D:               "templates/effect_adbe_basic_3d.bin",
+	EffectBroadcastColors:       "templates/effect_adbe_broadcast_colors.bin",
+	EffectChannelCombiner:       "templates/effect_adbe_channel_combiner.bin",
+	EffectCineonConverter:       "templates/effect_adbe_cineon_converter2.bin",
+	EffectColorKey:              "templates/effect_adbe_color_key.bin",
+	EffectColorRange:            "templates/effect_adbe_color_range.bin",
+	EffectExtract:               "templates/effect_adbe_extract.bin",
+	EffectGeometryLegacy:        "templates/effect_adbe_geometry.bin",
+	EffectGradientWipe:          "templates/effect_adbe_gradient_wipe.bin",
+	EffectGrowBounds:            "templates/effect_adbe_grow_bounds.bin",
+	EffectKeyCleaner:            "templates/effect_adbe_keycleaner.bin",
+	EffectLayerControl:          "templates/effect_adbe_layer_control.bin",
+	EffectLumaKey:               "templates/effect_adbe_luma_key.bin",
+	EffectMedian:                "templates/effect_adbe_median.bin",
+	EffectNoiseHLSAuto:          "templates/effect_adbe_noise_hls_auto2.bin",
+	EffectColorProfileConverter: "templates/effect_adbe_profiletoprofile.bin",
+	EffectTimeDisplacement:      "templates/effect_adbe_time_displacement.bin",
+	EffectTimecode:              "templates/effect_adbe_timecode.bin",
+	EffectCCBallAction:          "templates/effect_cc_ball_action.bin",
+	EffectCCBubbles:             "templates/effect_cc_bubbles.bin",
+	EffectCCComposite:           "templates/effect_cc_composite.bin",
+	EffectCCDrizzle:             "templates/effect_cc_drizzle.bin",
+	EffectCCEnvironment:         "templates/effect_cc_environment.bin",
+	EffectCCGlassWipe:           "templates/effect_cc_glass_wipe.bin",
+	EffectCCGlueGun:             "templates/effect_cc_glue_gun.bin",
+	EffectCCGridWipe:            "templates/effect_cc_grid_wipe.bin",
+	EffectCCHair:                "templates/effect_cc_hair.bin",
+	EffectCCImageWipe:           "templates/effect_cc_image_wipe.bin",
+	EffectCCJaws:                "templates/effect_cc_jaws.bin",
+	EffectCCLightWipe:           "templates/effect_cc_light_wipe.bin",
+	EffectCCMrMercury:           "templates/effect_cc_mr_mercury.bin",
+	EffectCCParticleSystemsII:   "templates/effect_cc_particle_systems_ii.bin",
+	EffectCCRadialScaleWipe:     "templates/effect_cc_radial_scalewipe.bin",
+	EffectCCRain:                "templates/effect_cc_rain.bin",
+	EffectCCScaleWipe:           "templates/effect_cc_scale_wipe.bin",
+	EffectCCSnow:                "templates/effect_cc_snow.bin",
+	EffectCCTwister:             "templates/effect_cc_twister.bin",
+	EffectCCBlockLoad:           "templates/effect_cs_blockload.bin",
+	EffectCCColorNeutralizer:    "templates/effect_cs_color_neutralizer.bin",
+	EffectCCKernel:              "templates/effect_cs_kernel.bin",
+	EffectCCLineSweep:           "templates/effect_cs_linesweep.bin",
+	EffectCCRainfall:            "templates/effect_csrainfall.bin",
+	EffectCCSnowfall:            "templates/effect_cssnowfall.bin",
 }
 
 type cachedEffectTemplate struct {

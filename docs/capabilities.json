@@ -944,9 +944,11 @@
         "TestAddEffectWave6_AEShipGate_AE2020",
         "TestAddEffectWave6_AEShipGate_AE2025",
         "TestAddEffectWave7_AEShipGate_AE2020",
-        "TestAddEffectWave7_AEShipGate_AE2025"
+        "TestAddEffectWave7_AEShipGate_AE2025",
+        "TestAddEffectWave9_AEShipGate_AE2020",
+        "TestAddEffectWave9_AEShipGate_AE2025"
       ],
-      "boundary": "150 内置效果库(ADBE + Cycore CC 家族 + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur,用 SetEffectLayerParam 指定源层);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
+      "boundary": "193 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 4 个 foreign-tdpi layer-ref(3D Glasses/Warp Stabilizer/Timewarp/CC Particle World)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做",
       "incident": [
         "add-effect-splice-re"
       ],
@@ -959,7 +961,9 @@
         "glow",
         "cc",
         "cycore",
-        "lumetri"
+        "lumetri",
+        "keying",
+        "抠像"
       ]
     }
   },

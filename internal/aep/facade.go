@@ -749,7 +749,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025 incident=add-effect-splice-re boundary="150 内置效果库(ADBE + Cycore CC 家族 + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur,用 SetEffectLayerParam 指定源层);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025 incident=add-effect-splice-re boundary="193 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 3 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur 用 SetEffectLayerParam 指源);未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ 4 个 foreign-tdpi layer-ref(3D Glasses/Warp Stabilizer/Timewarp/CC Particle World)+ 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1819,6 +1819,50 @@ const (
 	EffectDisplacementMap = serializer.EffectDisplacementMap // Displacement Map (layer-reference)
 	EffectCompoundBlur    = serializer.EffectCompoundBlur    // Compound Blur (layer-reference)
 	EffectCCVectorBlur    = serializer.EffectCCVectorBlur    // CC Vector Blur (layer-reference)
+
+	EffectBasic3D               = serializer.EffectBasic3D
+	EffectBroadcastColors       = serializer.EffectBroadcastColors
+	EffectChannelCombiner       = serializer.EffectChannelCombiner
+	EffectCineonConverter       = serializer.EffectCineonConverter
+	EffectColorKey              = serializer.EffectColorKey
+	EffectColorRange            = serializer.EffectColorRange
+	EffectExtract               = serializer.EffectExtract
+	EffectGeometryLegacy        = serializer.EffectGeometryLegacy
+	EffectGradientWipe          = serializer.EffectGradientWipe
+	EffectGrowBounds            = serializer.EffectGrowBounds
+	EffectKeyCleaner            = serializer.EffectKeyCleaner
+	EffectLayerControl          = serializer.EffectLayerControl
+	EffectLumaKey               = serializer.EffectLumaKey
+	EffectMedian                = serializer.EffectMedian
+	EffectNoiseHLSAuto          = serializer.EffectNoiseHLSAuto
+	EffectColorProfileConverter = serializer.EffectColorProfileConverter
+	EffectTimeDisplacement      = serializer.EffectTimeDisplacement
+	EffectTimecode              = serializer.EffectTimecode
+	EffectCCBallAction          = serializer.EffectCCBallAction
+	EffectCCBubbles             = serializer.EffectCCBubbles
+	EffectCCComposite           = serializer.EffectCCComposite
+	EffectCCDrizzle             = serializer.EffectCCDrizzle
+	EffectCCEnvironment         = serializer.EffectCCEnvironment
+	EffectCCGlassWipe           = serializer.EffectCCGlassWipe
+	EffectCCGlueGun             = serializer.EffectCCGlueGun
+	EffectCCGridWipe            = serializer.EffectCCGridWipe
+	EffectCCHair                = serializer.EffectCCHair
+	EffectCCImageWipe           = serializer.EffectCCImageWipe
+	EffectCCJaws                = serializer.EffectCCJaws
+	EffectCCLightWipe           = serializer.EffectCCLightWipe
+	EffectCCMrMercury           = serializer.EffectCCMrMercury
+	EffectCCParticleSystemsII   = serializer.EffectCCParticleSystemsII
+	EffectCCRadialScaleWipe     = serializer.EffectCCRadialScaleWipe
+	EffectCCRain                = serializer.EffectCCRain
+	EffectCCScaleWipe           = serializer.EffectCCScaleWipe
+	EffectCCSnow                = serializer.EffectCCSnow
+	EffectCCTwister             = serializer.EffectCCTwister
+	EffectCCBlockLoad           = serializer.EffectCCBlockLoad
+	EffectCCColorNeutralizer    = serializer.EffectCCColorNeutralizer
+	EffectCCKernel              = serializer.EffectCCKernel
+	EffectCCLineSweep           = serializer.EffectCCLineSweep
+	EffectCCRainfall            = serializer.EffectCCRainfall
+	EffectCCSnowfall            = serializer.EffectCCSnowfall
 
 	EffectDisplacementMapLayer = serializer.EffectDisplacementMapLayer // Displacement Map Layer param
 	EffectCompoundBlurLayer    = serializer.EffectCompoundBlurLayer    // Compound Blur "Blur Layer" param

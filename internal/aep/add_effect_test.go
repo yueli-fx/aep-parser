@@ -490,6 +490,21 @@ func TestEffectConstants_MatchRegistry(t *testing.T) {
 		aep.EffectCCWideTime, aep.EffectCCColorOffset, aep.EffectCCToner,
 		aep.EffectCCBurnFilm, aep.EffectCCVignette, aep.EffectCCSimpleWireRemoval,
 		aep.EffectDisplacementMap, aep.EffectCompoundBlur, aep.EffectCCVectorBlur,
+		aep.EffectBasic3D, aep.EffectBroadcastColors, aep.EffectChannelCombiner,
+		aep.EffectCineonConverter, aep.EffectColorKey, aep.EffectColorRange,
+		aep.EffectExtract, aep.EffectGeometryLegacy, aep.EffectGradientWipe,
+		aep.EffectGrowBounds, aep.EffectKeyCleaner, aep.EffectLayerControl,
+		aep.EffectLumaKey, aep.EffectMedian, aep.EffectNoiseHLSAuto,
+		aep.EffectColorProfileConverter, aep.EffectTimeDisplacement, aep.EffectTimecode,
+		aep.EffectCCBallAction, aep.EffectCCBubbles, aep.EffectCCComposite,
+		aep.EffectCCDrizzle, aep.EffectCCEnvironment, aep.EffectCCGlassWipe,
+		aep.EffectCCGlueGun, aep.EffectCCGridWipe, aep.EffectCCHair,
+		aep.EffectCCImageWipe, aep.EffectCCJaws, aep.EffectCCLightWipe,
+		aep.EffectCCMrMercury, aep.EffectCCParticleSystemsII, aep.EffectCCRadialScaleWipe,
+		aep.EffectCCRain, aep.EffectCCScaleWipe, aep.EffectCCSnow,
+		aep.EffectCCTwister, aep.EffectCCBlockLoad, aep.EffectCCColorNeutralizer,
+		aep.EffectCCKernel, aep.EffectCCLineSweep, aep.EffectCCRainfall,
+		aep.EffectCCSnowfall,
 	}
 	supported := map[string]bool{}
 	for _, n := range aep.SupportedEffects() {

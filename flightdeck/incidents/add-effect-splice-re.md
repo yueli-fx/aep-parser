@@ -84,7 +84,7 @@ chunks, never the cache), so callers can tune params immediately
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
-## Effect-template library (150, embed.FS)
+## Effect-template library (193, embed.FS)
 
 `internal/serializer/templates/effect_adbe_*.bin`, each a `LIST(tdgp)` wrapper
 around one `(tdmn, sspc)` pair, extracted from AE-2020 fixtures
@@ -167,6 +167,30 @@ Toner · Burn Film/Vignette/Simple Wire Removal).
   Other CC layer-pickwhip effects (Glass bump / Page Turn back-page / Blobbylize
   blob / Mr. Smoothie) audited CLEAN (no foreign tdpi when default None) → kept.
 `TestAddEffectWave7_AEShipGate_AE2020/2025` — 45-in-one-run, both versions.
+
+Wave 9 (2026-06-16, `re_effect_lib9.jsx` BIG probe sweep → 43 NEW kept): keying
+(Color Key/Color Range/Extract/Luma Key/KeyCleaner) · channel (Channel Combiner)
+· color/utility (Broadcast Colors/ProfileToProfile/Cineon Converter/GROW BOUNDS/
+Median/Noise HLS Auto) · perspective (Basic 3D/Geometry-legacy) · time (Time
+Displacement/Timecode) · transition (Gradient Wipe) · controls (Layer Control) ·
++ 25 more Cycore CC (Ball Action/Bubbles/Composite/Drizzle/Environment/Glass Wipe/
+Glue Gun/Grid Wipe/Hair/Image Wipe/Jaws/Light Wipe/Mr. Mercury/Particle Systems II/
+Radial ScaleWipe/Rain/Scale Wipe/Snow/Twister/BlockLoad/Color Neutralizer/Kernel/
+LineSweep/Rainfall/Snowfall). `TestAddEffectWave9_AEShipGate_AE2020/2025`.
+- **Probe-sweep traps (unattended automation)**: 3 effects open a MODAL on add →
+  hang ae_run (exit 2): **Apply Color LUT** (LUT file picker), **PS Arbitrary Map**
+  (map file picker), **Numbers** (font dialog). Excluded — can't add headlessly.
+- **6 more CS-prefix stored names** (≠ CC alias): BlockLoad/Color Neutralizer/
+  Kernel/LineSweep, and Rainfall=`CSRainfall`/Snowfall=`CSSnowfall` (no space).
+- **Dropdown Control excluded**: its match-name is a per-instance PSEUDO
+  (`Pseudo/@@…` random) — not a stable reusable key.
+- **4 foreign-tdpi layer-ref deferred** (tdpi=[15,0…]): 3D Glasses · Warp
+  Stabilizer (`ADBE SubspaceStabilizer`) · Timewarp · CC Particle World — need
+  the materialized-template + SetEffectLayerParam path (future layer-ref wave).
+- Genuinely unavailable in AE 2020 (canAdd=false, removed/renamed): Add/Remove
+  Grain, Turbulent Noise, Cartoon, Ellipse, Radio Waves, Iris Wipe, Pixel Motion
+  Blur, Shadow/Highlight, Selective Color, Liquify, HDR Compander, Foam/Wave
+  World/Caustics/Shatter/Particle Playground, Card Wipe, Spill Suppressor.
 
 **Curation rule:** only **parameter-only** effects. Effects with layer/path
 **reference** params (e.g. Set Matte, Displacement Map, Calculations, Compound
