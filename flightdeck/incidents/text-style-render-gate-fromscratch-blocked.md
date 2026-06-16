@@ -37,3 +37,15 @@ resolved_by:
 ## 建议（交给需求方决策）
 
 要把文字样式族升到 render-pixel，先解 **从零文字 transform/text-matrix materialize**（synthesis-insert 文字层完整 transform + 文本 matrix，使 Position 可设 + 字号按 plain points 渲染）——这是独立的中-大型 RE arc，**非「中等收益」小活**。在此之前文字样式族**诚实保持 verify=roundtrip**，边界标注「从零文字渲染未验证（matrix 缺陷）；setter 在已 parse 的真实文字层上 round-trip 正常」。**不要**因 Go round-trip 绿就标 render-pixel（假绿）。
+
+## UPDATE 2026-06-16（render-gate 实跑，部分推翻 TL;DR）
+
+前述 TL;DR「从零文字完全渲染不出来 / 默认 size=88 也看不见 / `SetRunFontSize` 读回 ÷65536」**已不再成立**。本次先扫清挡路的 KBar evalScript-timeout 模态（ship-gate 卡 exit-2，已加 `ae_dialog_rules.json` 规则 + 修 cross-volume forensics 丢失，commit b33df56），gate 得以跑完，实测：
+
+- **从零文字现在能渲染**：每个 TS_* comp 的默认文字（AE 默认浅蓝 fill）在 AE2020 实渲里**清晰可见**（目视 png 确认，非空白），不再是「完全看不见」。
+- **DOM 读回字号正确**：`doc.fontSize` = 160 / 50 / 88（plain，**非 /65536**）；trk=1200、lead=70/220、just=7413/7415 全对。
+- **同源缺陷已被工作树 `internal/codec/text_encode.go` + `internal/serializer/back_layer.go` 改动修掉**（上次会话产出，**尚未 commit**，render-gate 未过故未 ship）。
+
+**但 render-pixel 仍未证成**（红线4 未闭环）：gate 用 `comp.openInViewer()` + `comp.saveFrameToPng` 取帧，实测 **saveFrameToPng 渲染的是 active-viewer comp 而非 receiver comp**，且 headless `-r` 下 viewer 切换不同步（同步脚本占住事件循环，`setActive()` 不生效）→ 9/10 单行 comp 抓到的是同一个 active comp（TS_JL 的 "ABCD"），无法逐 knob 区分。故 **SetRunFontSize 等是否「按值渲染」尚未被像素证实**——只证了「文字能渲染 + DOM 值对」。
+
+**下一步（reachable，独立子活）**：换可靠的逐 comp 取帧（Render Queue 渲 PNG 序列，comp-specific 且不依赖 viewer；或一次 AE run 只渲 startup-active 的单 comp）。证成后文字样式族方可升 render-pixel + commit 文本修复 + 改本 incident `status: resolved`。在此之前维持 verify=roundtrip 标注，文本修复保持 uncommitted（render-gate 未过不算 ship）。
