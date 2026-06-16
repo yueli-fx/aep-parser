@@ -20,7 +20,7 @@
 - expr：linear()/ease()/valueAtTime remap（内容无关已证,边际低）。
 
 **搁置（用户决定）**：Essential Graphics 进阶 + EG 面板崩溃未修 RE。
-**独立线（按需）**：Render Queue Set* slice-5~8（Alpha）· capindex 收尾小项（render-queue tag cosmetic · 11 manual-gate orphan 恢复 ae-accept,需跑 AE）。
+**独立线（按需）**：Render Queue Set* **基本收尾**（OutputModule 实质字段补齐到 OutputAudio/ConvertToLinear,Alpha;剩 ColorSpaceWorking=CMS 假绿风险 · PostRenderCompID=结构性引用 · Rs runtime 字段=不该 setter,均不做）· capindex 收尾小项（render-queue tag cosmetic · 11 manual-gate orphan 恢复 ae-accept,需跑 AE）。
 
 ## Backlog
 

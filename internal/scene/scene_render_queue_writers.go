@@ -435,6 +435,22 @@ func (om *OutputModule) SetPostRenderAction(v uint32) {
 	}
 }
 
+//aep:cap domain=render-queue tier=alpha verify=roundtrip boundary="Alpha,未 AE-gate;length-preserving 低风险;raw u8(py-aep derives ON/OFF/AUTO)" alias="output audio,输出音频,渲染音频开关"
+// SetOutputAudio sets the raw output-audio code (OutputModule @0x2A).
+func (om *OutputModule) SetOutputAudio(v int) {
+	if om.omPatchU8(codec.OmsOutputAudio, byte(v)) {
+		om.Settings.OutputAudio = v
+	}
+}
+
+//aep:cap domain=render-queue tier=alpha verify=roundtrip boundary="Alpha,未 AE-gate;length-preserving 低风险;CMS 联动 enum,round-trip 绿不保证 AE 渲染采用" alias="convert to linear,转线性光,linearize output"
+// SetConvertToLinear sets the raw convert-to-linear code (OutputModule @0x5B).
+func (om *OutputModule) SetConvertToLinear(v int) {
+	if om.omPatchU8(codec.OmsConvertLinear, byte(v)) {
+		om.Settings.ConvertToLinear = v
+	}
+}
+
 //aep:cap domain=render-queue tier=alpha verify=roundtrip boundary="Alpha,未 AE-gate;length-preserving 低风险" alias="use comp frame number,使用合成帧编号,帧编号"
 // SetUseCompFrameNumber toggles "use comp frame number" (flag byte @0x07 bit 3).
 func (om *OutputModule) SetUseCompFrameNumber(v bool) {

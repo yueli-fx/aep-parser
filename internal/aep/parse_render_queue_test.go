@@ -437,6 +437,8 @@ func TestRenderQueueOutputModuleWriteRoundTrip(t *testing.T) {
 	om.SetIncludeProjectLink(false) // true -> false
 	om.SetDepth(32)                 // Roou: 24 -> 32
 	om.SetStartingNumber(101)       // Roou u32
+	om.SetOutputAudio(2)            // raw u8
+	om.SetConvertToLinear(1)        // raw u8
 
 	var buf bytes.Buffer
 	if err := proj.WriteAEP(&buf); err != nil {
@@ -467,6 +469,12 @@ func TestRenderQueueOutputModuleWriteRoundTrip(t *testing.T) {
 	}
 	if s.StartingNumber != 101 {
 		t.Errorf("StartingNumber = %d, want 101", s.StartingNumber)
+	}
+	if s.OutputAudio != 2 {
+		t.Errorf("OutputAudio = %d, want 2", s.OutputAudio)
+	}
+	if s.ConvertToLinear != 1 {
+		t.Errorf("ConvertToLinear = %d, want 1", s.ConvertToLinear)
 	}
 }
 

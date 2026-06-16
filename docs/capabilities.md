@@ -3,7 +3,7 @@
 
 徽章 tier:🟢stable · 🟡alpha · ⬜planned · ❌missing · 🚫negative　·　verify:none / roundtrip / ae-accept / render-pixel
 
-共 479 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+共 481 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
 
 ## comp
 
@@ -13,8 +13,8 @@
 | `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
 | `*Composition.SetBGColor` | 🟢stable | roundtrip | 2020 |  | SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. ⚠length-preserving(3B);无专门 AE gate→round-trip |
 | `*Marker.SetChapter` | 🟢stable | roundtrip | 2020 |  | SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip |
-| `*Marker.SetComment` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用 |
 | `*Composition.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). ⚠length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip |
+| `*Marker.SetComment` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用 |
 | `*Composition.SetCompMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B bit 3). ⚠length-preserving(1bit);层级开关需与 Layer.MotionBlur 配合;无专门 AE gate→round-trip |
 | `*Marker.SetCuePointName` | 🟢stable | roundtrip | 2020 |  | SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段,现代 AE 项目极少填;无专门 AE gate→round-trip |
 | `*Composition.SetDisplayStartFrame` | 🟢stable | roundtrip | 2020 |  | SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStartTime. ⚠委托 SetDisplayStartTime;需 FrameRate>0;无专门 AE gate→round-trip |
@@ -81,17 +81,17 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `*VectorGroup.AddGradientFill` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | AddGradientFill appends a default-valued GradientFillNode (2-stop black→white linear gradient, fully opaque) and returns it. |
-| `*GradientStrokeNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientStrokeAnim_AEShipGate_AE2020<br>TestGradientStrokeAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke). |
 | `*GradientFillNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientAnim_AEShipGate_AE2020<br>TestGradientAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow). |
+| `*GradientStrokeNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientStrokeAnim_AEShipGate_AE2020<br>TestGradientStrokeAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke). |
 | `*VectorGroup.AddGradientStroke` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | AddGradientStroke appends a default-valued GradientStrokeNode (2-stop black→white gradient) and returns it. |
 | `NewGradientFillNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | NewGradientFillNode returns a detached gradient-fill shape node. |
 | `NewGradientStrokeNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025<br>TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | NewGradientStrokeNode returns a detached gradient-stroke shape node. |
 | `*GradientStrokeNode.SetAlphaStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]). |
 | `*GradientFillNode.SetAlphaStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetAlphaStops replaces the gradient's alpha (opacity) stops. |
-| `*GradientFillNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops. |
 | `*GradientStrokeNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]). |
-| `*GradientFillNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradientDir_AEShipGate_AE2020<br>TestMGGradientDir_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
+| `*GradientFillNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops. |
 | `*GradientStrokeNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
+| `*GradientFillNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradientDir_AEShipGate_AE2020<br>TestMGGradientDir_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
 | `*GradientFillNode.SetGradientType` | 🟢stable | render-pixel | 2020 | TestMGGradientRadial_AEShipGate_AE2020<br>TestMGGradientRadial_AEShipGate_AE2025 | SetGradientType selects linear (default) or radial ramp shape. |
 | `*GradientStrokeNode.SetGradientType` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetGradientType selects linear (default) or radial ramp shape. |
 | `*GradientFillNode.SetHighlightAngle` | 🟢stable | render-pixel | 2020 | TestMGGradientHilite_AEShipGate_AE2020<br>TestMGGradientHilite_AEShipGate_AE2025 | SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset. |
@@ -324,6 +324,7 @@
 | `*OutputModule.SetChannels` | 🟡alpha | roundtrip | 2020 |  | SetChannels sets the output channels (0 RGB / 1 RGBA / 2 Alpha). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*RenderQueueItem.SetColorDepth` | 🟡alpha | roundtrip | 2020 |  | SetColorDepth sets the color depth (-1 current / 0 8bpc / 1 16bpc / 2 32bpc). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*RenderQueueItem.SetComment` | 🟡alpha | ae-accept | 2020 | TestRenderQueueComment_AEShipGate_AE2020<br>TestRenderQueueComment_AEShipGate_AE2025 | SetComment sets the render queue item's comment (shown in the Render Queue panel). ⚠length-variable(RCom chunk 插入/替换);AE 接受+resave-preservation 已验证;无 ScriptingAPI readback |
+| `*OutputModule.SetConvertToLinear` | 🟡alpha | roundtrip | 2020 |  | SetConvertToLinear sets the raw convert-to-linear code (OutputModule @0x5B). ⚠Alpha,未 AE-gate;length-preserving 低风险;CMS 联动 enum,round-trip 绿不保证 AE 渲染采用 |
 | `*OutputModule.SetCrop` | 🟡alpha | roundtrip | 2020 |  | SetCrop toggles crop (flag byte @0x1F bit 0). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*OutputModule.SetCropBottom` | 🟡alpha | roundtrip | 2020 |  |  ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*OutputModule.SetCropLeft` | 🟡alpha | roundtrip | 2020 |  |  ⚠Alpha,未 AE-gate;length-preserving 低风险 |
@@ -342,6 +343,7 @@
 | `*RenderQueueItem.SetLogType` | 🟡alpha | roundtrip | 2020 |  | SetLogType sets the raw log-type code (@0x50). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*RenderQueueItem.SetMotionBlur` | 🟡alpha | roundtrip | 2020 |  | SetMotionBlur sets motion blur (0 off-all / 1 on-checked / 2 current). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*RenderQueueItem.SetName` | 🟡alpha | roundtrip | 2020 |  | SetName sets the render-settings template name (template_name @0x5A, a fixed 64-byte windows-1252 NUL-padded field). ⚠Alpha,未 AE-gate;length-preserving 低风险(固定 64B 字段) |
+| `*OutputModule.SetOutputAudio` | 🟡alpha | roundtrip | 2020 |  | SetOutputAudio sets the raw output-audio code (OutputModule @0x2A). ⚠Alpha,未 AE-gate;length-preserving 低风险;raw u8(py-aep derives ON/OFF/AUTO) |
 | `*OutputModule.SetPostRenderAction` | 🟡alpha | roundtrip | 2020 |  | SetPostRenderAction sets the raw post-render action code. ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*OutputModule.SetPreserveRGB` | 🟡alpha | roundtrip | 2020 |  | SetPreserveRGB toggles "preserve RGB" (bit 7). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
 | `*RenderQueueItem.SetProxyUse` | 🟡alpha | roundtrip | 2020 |  | SetProxyUse sets proxy use (0 none / 1 all / 2 current / 3 comp-only). ⚠Alpha,未 AE-gate;length-preserving 低风险 |
@@ -398,9 +400,9 @@
 | `NewWigglePathsNode` | 🟡alpha | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the no-op identity). ⚠基本 render-gated;Correlation/Temporal·Spatial Phase/Roughen Points 调制 evidence-defer |
 | `NewWiggleTransformNode` | 🟡alpha | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | NewWiggleTransformNode returns a detached Wiggle Transform filter node (zero amplitudes, the no-op identity). ⚠基本 render-gated;Correlation/Phase 调制 evidence-defer |
 | `NewZigZagNode` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025<br>TestMGZigZagPoints_AEShipGate_AE2020<br>TestMGZigZagPoints_AEShipGate_AE2025 | NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10). |
-| `*PuckerBloatNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGPuckerBloat_AEShipGate_AE2020<br>TestMGPuckerBloat_AEShipGate_AE2025 | SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex). |
-| `*OffsetPathsNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGOffset_AEShipGate_AE2020<br>TestMGOffset_AEShipGate_AE2025 | SetAmount sets the offset amount in pixels (positive grows, negative shrinks). |
 | `*StrokeWave.SetAmount` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
+| `*OffsetPathsNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGOffset_AEShipGate_AE2020<br>TestMGOffset_AEShipGate_AE2025 | SetAmount sets the offset amount in pixels (positive grows, negative shrinks). |
+| `*PuckerBloatNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGPuckerBloat_AEShipGate_AE2020<br>TestMGPuckerBloat_AEShipGate_AE2025 | SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex). |
 | `*RepeaterTransform.SetAnchor` | 🟢stable | roundtrip | 2020 |  | SetAnchor sets the per-copy anchor point (px). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*WigglerTransform.SetAnchor` | 🟢stable | roundtrip | 2020 |  | SetAnchor sets the anchor-point wiggle amplitude (pixels). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*TwistNode.SetAngle` | 🟢stable | render-pixel | 2020 | TestMGTwist_AEShipGate_AE2020<br>TestMGTwist_AEShipGate_AE2025 | SetAngle sets the twist angle (degrees; positive twists clockwise, negative counter-clockwise). |
@@ -436,22 +438,22 @@
 | `*OffsetPathsNode.SetLineJoin` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetLineJoin selects the corner join for the offset outline: Miter (sharp point), Round, or Bevel (flat-cut). |
 | `*StrokeNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetMiterLimit sets the miter limit. |
 | `*OffsetPathsNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would extend past limit×width is clipped flat to a bevel. |
-| `*TrimNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the trim offset in degrees. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*RepeaterNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the copy-index offset of the first instance. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
-| `*StrokeNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeKf_AEShipGate_AE2020<br>TestV2_2_StrokeKf_AEShipGate_AE2025 |  |
+| `*TrimNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the trim offset in degrees. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*FillNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_FillKf_AEShipGate_AE2020<br>TestV2_2_FillKf_AEShipGate_AE2025 |  |
+| `*StrokeNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeKf_AEShipGate_AE2020<br>TestV2_2_StrokeKf_AEShipGate_AE2025 |  |
 | `*RepeaterNode.SetOrder` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetOrder selects whether each copy composites Below (default) or Above the previous. |
 | `*StarNode.SetOuterRadius` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetOuterRadius sets the outer radius (px, the star tips). |
 | `*StarNode.SetOuterRoundness` | 🟢stable | roundtrip | 2020 |  | SetOuterRoundness sets the outer-point (tip) roundness (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*StrokeWave.SetPhase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
 | `*StarNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetPoints sets the number of star points. |
-| `*WigglePathsNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGWiggleMod_AEShipGate_AE2020<br>TestMGWiggleMod_AEShipGate_AE2025 | SetPoints selects Corner (sharp displaced spikes, the default) or Smooth (rounded scalloped bumps). |
 | `*ZigZagNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGZigZagPoints_AEShipGate_AE2020<br>TestMGZigZagPoints_AEShipGate_AE2025 | SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth (scalloped wave ridges). |
+| `*WigglePathsNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGWiggleMod_AEShipGate_AE2020<br>TestMGWiggleMod_AEShipGate_AE2025 | SetPoints selects Corner (sharp displaced spikes, the default) or Smooth (rounded scalloped bumps). |
 | `*WigglerTransform.SetPosition` | 🟢stable | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | SetPosition sets the position wiggle amplitude (pixels). |
-| `*EllipseNode.SetPosition` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
-| `*RectNode.SetPosition` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
-| `*RepeaterTransform.SetPosition` | 🟢stable | render-pixel | 2020 | TestMGRepeater_AEShipGate_AE2020<br>TestMGRepeater_AEShipGate_AE2025 | SetPosition sets the per-copy position offset (px) — the spacing between copies. |
 | `*StarNode.SetPosition` | 🟢stable | roundtrip | 2020 |  | SetPosition sets the star's local position offset (px). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RepeaterTransform.SetPosition` | 🟢stable | render-pixel | 2020 | TestMGRepeater_AEShipGate_AE2020<br>TestMGRepeater_AEShipGate_AE2025 | SetPosition sets the per-copy position offset (px) — the spacing between copies. |
+| `*RectNode.SetPosition` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*EllipseNode.SetPosition` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
 | `*RoundCornersNode.SetRadius` | 🟢stable | render-pixel | 2020 | TestMGRoundCorners_AEShipGate_AE2020<br>TestMGRoundCorners_AEShipGate_AE2025 | SetRadius sets the corner radius in pixels. |
 | `*WiggleTransformNode.SetRandomSeed` | 🟡alpha | roundtrip | 2020 |  | SetRandomSeed sets the random seed selecting the wiggle pattern. ⚠调制参数 evidence-defer,本质不可像素门禁 |
 | `*WigglePathsNode.SetRandomSeed` | 🟡alpha | roundtrip | 2020 |  | SetRandomSeed sets the random seed selecting the displacement pattern. ⚠调制参数 evidence-defer,本质不可像素门禁 |

@@ -96,6 +96,29 @@
   {
     "symbol": "SetComment",
     "kind": "method",
+    "recv": "*Composition",
+    "signature": "func (c *Composition) SetComment(comment string) error",
+    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip",
+      "incident": null,
+      "alias": [
+        "comp comment",
+        "合成备注",
+        "项目面板备注",
+        "item comment"
+      ]
+    }
+  },
+  {
+    "symbol": "SetComment",
+    "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetComment(s string) error",
     "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block).",
@@ -116,29 +139,6 @@
         "标记注释",
         "cue point comment",
         "标记文本"
-      ]
-    }
-  },
-  {
-    "symbol": "SetComment",
-    "kind": "method",
-    "recv": "*Composition",
-    "signature": "func (c *Composition) SetComment(comment string) error",
-    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "roundtrip",
-      "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip",
-      "incident": null,
-      "alias": [
-        "comp comment",
-        "合成备注",
-        "项目面板备注",
-        "item comment"
       ]
     }
   },
@@ -1277,32 +1277,6 @@
   {
     "symbol": "AddGradientKeyframe",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
-    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestGradientStrokeAnim_AEShipGate_AE2020",
-        "TestGradientStrokeAnim_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "animated gradient stroke",
-        "渐变描边动画",
-        "gradient stroke keyframe",
-        "色标关键帧"
-      ]
-    }
-  },
-  {
-    "symbol": "AddGradientKeyframe",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) AddGradientKeyframe(time float64, g *Gradient) error",
     "summary": "AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow).",
@@ -1324,6 +1298,32 @@
         "gradient keyframe",
         "渐变关键帧",
         "color sweep"
+      ]
+    }
+  },
+  {
+    "symbol": "AddGradientKeyframe",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
+    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestGradientStrokeAnim_AEShipGate_AE2020",
+        "TestGradientStrokeAnim_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "animated gradient stroke",
+        "渐变描边动画",
+        "gradient stroke keyframe",
+        "色标关键帧"
       ]
     }
   },
@@ -1456,6 +1456,31 @@
   {
     "symbol": "SetColorStops",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
+    "summary": "SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_GradientStroke_AEShipGate_AE2020",
+        "TestV2_2_GradientStroke_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke color stops",
+        "渐变描边色标",
+        "color stops"
+      ]
+    }
+  },
+  {
+    "symbol": "SetColorStops",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error",
     "summary": "SetColorStops replaces the gradient's color stops.",
@@ -1480,11 +1505,11 @@
     }
   },
   {
-    "symbol": "SetColorStops",
+    "symbol": "SetEndPoint",
     "kind": "method",
     "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
-    "summary": "SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).",
+    "signature": "func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error",
+    "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1492,15 +1517,15 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_GradientStroke_AEShipGate_AE2020",
-        "TestV2_2_GradientStroke_AEShipGate_AE2025"
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient stroke color stops",
-        "渐变描边色标",
-        "color stops"
+        "gradient stroke end point",
+        "渐变描边终点",
+        "gradient direction"
       ]
     }
   },
@@ -1527,31 +1552,6 @@
         "渐变终点",
         "gradient direction",
         "渐变方向"
-      ]
-    }
-  },
-  {
-    "symbol": "SetEndPoint",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error",
-    "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke end point",
-        "渐变描边终点",
-        "gradient direction"
       ]
     }
   },
@@ -6088,6 +6088,28 @@
     }
   },
   {
+    "symbol": "SetConvertToLinear",
+    "kind": "method",
+    "recv": "*OutputModule",
+    "signature": "func (om *OutputModule) SetConvertToLinear(v int)",
+    "summary": "SetConvertToLinear sets the raw convert-to-linear code (OutputModule @0x5B).",
+    "has_cap": true,
+    "cap": {
+      "domain": "render-queue",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "Alpha,未 AE-gate;length-preserving 低风险;CMS 联动 enum,round-trip 绿不保证 AE 渲染采用",
+      "incident": null,
+      "alias": [
+        "convert to linear",
+        "转线性光",
+        "linearize output"
+      ]
+    }
+  },
+  {
     "symbol": "SetCrop",
     "kind": "method",
     "recv": "*OutputModule",
@@ -6482,6 +6504,28 @@
         "template name",
         "渲染设置名称",
         "模板名"
+      ]
+    }
+  },
+  {
+    "symbol": "SetOutputAudio",
+    "kind": "method",
+    "recv": "*OutputModule",
+    "signature": "func (om *OutputModule) SetOutputAudio(v int)",
+    "summary": "SetOutputAudio sets the raw output-audio code (OutputModule @0x2A).",
+    "has_cap": true,
+    "cap": {
+      "domain": "render-queue",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "Alpha,未 AE-gate;length-preserving 低风险;raw u8(py-aep derives ON/OFF/AUTO)",
+      "incident": null,
+      "alias": [
+        "output audio",
+        "输出音频",
+        "渲染音频开关"
       ]
     }
   },
@@ -7777,9 +7821,9 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*PuckerBloatNode",
-    "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
-    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
+    "recv": "*StrokeWave",
+    "signature": "func (w *StrokeWave) SetAmount(v float64) error",
+    "summary": "",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7787,16 +7831,15 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGPuckerBloat_AEShipGate_AE2020",
-        "TestMGPuckerBloat_AEShipGate_AE2025"
+        "TestV2_2_StrokeTaperWave_AEShipGate_AE2020",
+        "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "pucker bloat amount",
-        "膨胀收缩量",
-        "pucker",
-        "bloat"
+        "wave amount",
+        "波浪幅度",
+        "stroke wave amount"
       ]
     }
   },
@@ -7829,9 +7872,9 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*StrokeWave",
-    "signature": "func (w *StrokeWave) SetAmount(v float64) error",
-    "summary": "",
+    "recv": "*PuckerBloatNode",
+    "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
+    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7839,15 +7882,16 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_StrokeTaperWave_AEShipGate_AE2020",
-        "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
+        "TestMGPuckerBloat_AEShipGate_AE2020",
+        "TestMGPuckerBloat_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "wave amount",
-        "波浪幅度",
-        "stroke wave amount"
+        "pucker bloat amount",
+        "膨胀收缩量",
+        "pucker",
+        "bloat"
       ]
     }
   },
@@ -8730,29 +8774,6 @@
   {
     "symbol": "SetOffset",
     "kind": "method",
-    "recv": "*TrimNode",
-    "signature": "func (n *TrimNode) SetOffset(v float64) error",
-    "summary": "SetOffset sets the trim offset in degrees.",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "roundtrip",
-      "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
-      "incident": null,
-      "alias": [
-        "trim offset",
-        "修剪偏移",
-        "trim rotation",
-        "degrees"
-      ]
-    }
-  },
-  {
-    "symbol": "SetOffset",
-    "kind": "method",
     "recv": "*RepeaterNode",
     "signature": "func (n *RepeaterNode) SetOffset(v float64) error",
     "summary": "SetOffset sets the copy-index offset of the first instance.",
@@ -8773,27 +8794,25 @@
     }
   },
   {
-    "symbol": "SetOpacity",
+    "symbol": "SetOffset",
     "kind": "method",
-    "recv": "*StrokeNode",
-    "signature": "func (s *StrokeNode) SetOpacity(v float64) error",
-    "summary": "",
+    "recv": "*TrimNode",
+    "signature": "func (n *TrimNode) SetOffset(v float64) error",
+    "summary": "SetOffset sets the trim offset in degrees.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "render-pixel",
+      "verify": "roundtrip",
       "minver": "2020",
-      "gate": [
-        "TestV2_2_StrokeKf_AEShipGate_AE2020",
-        "TestV2_2_StrokeKf_AEShipGate_AE2025"
-      ],
-      "boundary": "",
+      "gate": null,
+      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
-        "stroke opacity",
-        "描边不透明度",
-        "set opacity"
+        "trim offset",
+        "修剪偏移",
+        "trim rotation",
+        "degrees"
       ]
     }
   },
@@ -8818,6 +8837,31 @@
       "alias": [
         "fill opacity",
         "填充不透明度",
+        "set opacity"
+      ]
+    }
+  },
+  {
+    "symbol": "SetOpacity",
+    "kind": "method",
+    "recv": "*StrokeNode",
+    "signature": "func (s *StrokeNode) SetOpacity(v float64) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_StrokeKf_AEShipGate_AE2020",
+        "TestV2_2_StrokeKf_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "stroke opacity",
+        "描边不透明度",
         "set opacity"
       ]
     }
@@ -8950,32 +8994,6 @@
   {
     "symbol": "SetPoints",
     "kind": "method",
-    "recv": "*WigglePathsNode",
-    "signature": "func (n *WigglePathsNode) SetPoints(p RoughenPoints) error",
-    "summary": "SetPoints selects Corner (sharp displaced spikes, the default) or Smooth (rounded scalloped bumps).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGWiggleMod_AEShipGate_AE2020",
-        "TestMGWiggleMod_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "wiggle points",
-        "路径抖动形状",
-        "corner smooth",
-        "roughen points"
-      ]
-    }
-  },
-  {
-    "symbol": "SetPoints",
-    "kind": "method",
     "recv": "*ZigZagNode",
     "signature": "func (n *ZigZagNode) SetPoints(p ZigZagPoints) error",
     "summary": "SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth (scalloped wave ridges).",
@@ -8996,6 +9014,32 @@
         "锯齿形状",
         "corner smooth",
         "wave type"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPoints",
+    "kind": "method",
+    "recv": "*WigglePathsNode",
+    "signature": "func (n *WigglePathsNode) SetPoints(p RoughenPoints) error",
+    "summary": "SetPoints selects Corner (sharp displaced spikes, the default) or Smooth (rounded scalloped bumps).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleMod_AEShipGate_AE2020",
+        "TestMGWiggleMod_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "wiggle points",
+        "路径抖动形状",
+        "corner smooth",
+        "roughen points"
       ]
     }
   },
@@ -9027,34 +9071,9 @@
   {
     "symbol": "SetPosition",
     "kind": "method",
-    "recv": "*EllipseNode",
-    "signature": "func (e *EllipseNode) SetPosition(v [2]float64) error",
-    "summary": "",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_Ellipse_AEShipGate_AE2020",
-        "TestV2_2_Ellipse_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "ellipse position",
-        "椭圆位置",
-        "set position"
-      ]
-    }
-  },
-  {
-    "symbol": "SetPosition",
-    "kind": "method",
-    "recv": "*RectNode",
-    "signature": "func (r *RectNode) SetPosition(v [2]float64) error",
-    "summary": "",
+    "recv": "*StarNode",
+    "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
+    "summary": "SetPosition sets the star's local position offset (px).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9065,9 +9084,9 @@
       "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
-        "rect position",
-        "矩形位置",
-        "set position"
+        "star position",
+        "星形位置",
+        "polystar position"
       ]
     }
   },
@@ -9100,9 +9119,9 @@
   {
     "symbol": "SetPosition",
     "kind": "method",
-    "recv": "*StarNode",
-    "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
-    "summary": "SetPosition sets the star's local position offset (px).",
+    "recv": "*RectNode",
+    "signature": "func (r *RectNode) SetPosition(v [2]float64) error",
+    "summary": "",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9113,9 +9132,34 @@
       "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
-        "star position",
-        "星形位置",
-        "polystar position"
+        "rect position",
+        "矩形位置",
+        "set position"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPosition",
+    "kind": "method",
+    "recv": "*EllipseNode",
+    "signature": "func (e *EllipseNode) SetPosition(v [2]float64) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "ellipse position",
+        "椭圆位置",
+        "set position"
       ]
     }
   },
