@@ -199,3 +199,23 @@ func streamCdat(root *rifx.Chunk, name string) []byte {
 	walk(root)
 	return found
 }
+
+// countStream counts how many tdmn chunks matching name occur anywhere in the
+// tree (used when the same generic match-name appears under more than one filter
+// — e.g. ADBE Vector Temporal Phase shared by Roughen and Wiggler).
+func countStream(root *rifx.Chunk, name string) int {
+	n := 0
+	var walk func(*rifx.Chunk)
+	walk = func(c *rifx.Chunk) {
+		for _, ch := range c.Children {
+			if ch.ID == rifx.IDTdmn && trimShipNUL(string(ch.Data)) == name {
+				n++
+			}
+			if ch.IsList() {
+				walk(ch)
+			}
+		}
+	}
+	walk(root)
+	return n
+}

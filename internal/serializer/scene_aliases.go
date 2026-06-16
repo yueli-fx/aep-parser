@@ -130,6 +130,7 @@ type (
 	RoundCornersNode                = scene.RoundCornersNode
 	ZigZagNode                      = scene.ZigZagNode
 	ZigZagPoints                    = scene.ZigZagPoints
+	RoughenPoints                   = scene.RoughenPoints
 	StarNode                        = scene.StarNode
 	PuckerBloatNode                 = scene.PuckerBloatNode
 	TwistNode                       = scene.TwistNode
@@ -222,6 +223,8 @@ const (
 	TrimTypeIndividually                          = scene.TrimTypeIndividually
 	ZigZagPointsCorner                            = scene.ZigZagPointsCorner
 	ZigZagPointsSmooth                            = scene.ZigZagPointsSmooth
+	RoughenPointsCorner                           = scene.RoughenPointsCorner
+	RoughenPointsSmooth                           = scene.RoughenPointsSmooth
 	RepeaterOrderBelow                            = scene.RepeaterOrderBelow
 	RepeaterOrderAbove                            = scene.RepeaterOrderAbove
 	FootageTimecodeDisplayStartTypeStart0         = scene.FootageTimecodeDisplayStartTypeStart0

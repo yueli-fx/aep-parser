@@ -109,6 +109,18 @@ var v22ShapeWiggleBodyBytes []byte
 //go:embed templates/v2_2_shape_wiggletransform_body.bin
 var v22ShapeWiggleTransformBodyBytes []byte
 
+//go:embed templates/v2_2_shape_roughen_points_leaf.bin
+var v22ShapeRoughenPointsLeafBytes []byte
+
+//go:embed templates/v2_2_shape_correlation_leaf.bin
+var v22ShapeCorrelationLeafBytes []byte
+
+//go:embed templates/v2_2_shape_temporal_phase_leaf.bin
+var v22ShapeTemporalPhaseLeafBytes []byte
+
+//go:embed templates/v2_2_shape_spatial_phase_leaf.bin
+var v22ShapeSpatialPhaseLeafBytes []byte
+
 var (
 	v22ShapeRectOnce  sync.Once
 	v22ShapeRectCache *rifx.Chunk
@@ -221,6 +233,22 @@ var (
 	v22ShapeWiggleTransformOnce  sync.Once
 	v22ShapeWiggleTransformCache *rifx.Chunk
 	v22ShapeWiggleTransformErr   error
+
+	v22ShapeRoughenPointsLeafOnce  sync.Once
+	v22ShapeRoughenPointsLeafCache *rifx.Chunk
+	v22ShapeRoughenPointsLeafErr   error
+
+	v22ShapeCorrelationLeafOnce  sync.Once
+	v22ShapeCorrelationLeafCache *rifx.Chunk
+	v22ShapeCorrelationLeafErr   error
+
+	v22ShapeTemporalPhaseLeafOnce  sync.Once
+	v22ShapeTemporalPhaseLeafCache *rifx.Chunk
+	v22ShapeTemporalPhaseLeafErr   error
+
+	v22ShapeSpatialPhaseLeafOnce  sync.Once
+	v22ShapeSpatialPhaseLeafCache *rifx.Chunk
+	v22ShapeSpatialPhaseLeafErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
@@ -1771,7 +1799,111 @@ func lowerWigglePathsNode(n *WigglePathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 	if err := lowerShapeScalar(body, "ADBE Vector Random Seed", n.RandomSeed(), ctx); err != nil {
 		return nil, err
 	}
+	// Synthesis-insert the AE-default-elided modulation leaves, each in canonical
+	// order. Points sits before Temporal Freq; Correlation / Temporal Phase /
+	// Spatial Phase sit before Random Seed (canonical Roughen order is Size /
+	// Detail / Points / Temporal Freq / Correlation / Temporal Phase / Spatial
+	// Phase / Random Seed).
+	if n.Points() != RoughenPointsCorner {
+		tdmn, tdbs, err := cloneShapeRoughenPointsLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Temporal Freq", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Roughen Points", encodeF64sBE(float64(n.Points())))
+	}
+	if n.CorrelationSet() && n.Correlation() != 50 {
+		tdmn, tdbs, err := cloneShapeCorrelationLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Random Seed", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Correlation", encodeF64sBE(n.Correlation()))
+	}
+	if n.TemporalPhaseSet() && n.TemporalPhase() != 0 {
+		tdmn, tdbs, err := cloneShapeTemporalPhaseLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Random Seed", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Temporal Phase", encodeF64sBE(n.TemporalPhase()))
+	}
+	if n.SpatialPhaseSet() && n.SpatialPhase() != 0 {
+		tdmn, tdbs, err := cloneShapeSpatialPhaseLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Random Seed", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Spatial Phase", encodeF64sBE(n.SpatialPhase()))
+	}
 	return body, nil
+}
+
+// cloneShapeRoughenPointsLeaf / cloneShapeCorrelationLeaf /
+// cloneShapeTemporalPhaseLeaf / cloneShapeSpatialPhaseLeaf return fresh
+// (tdmn, LIST:tdbs) clones of the four AE-default-elided Wiggle modulation
+// sub-stream leaves from their embedded templates. The Correlation / Temporal
+// Phase / Spatial Phase leaves are shared by both Wiggle Paths (Roughen) and
+// Wiggle Transform (Wiggler) — the on-disk match-names and tdbs layouts are
+// identical (the embedded value is overwritten on splice).
+func cloneShapeRoughenPointsLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeRoughenPointsLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeRoughenPointsLeafBytes))
+		if e != nil {
+			v22ShapeRoughenPointsLeafErr = fmt.Errorf("parse v22ShapeRoughenPointsLeafBytes: %w", e)
+			return
+		}
+		v22ShapeRoughenPointsLeafCache = ch
+	})
+	if v22ShapeRoughenPointsLeafErr != nil {
+		return nil, nil, v22ShapeRoughenPointsLeafErr
+	}
+	return offsetLeafPair(v22ShapeRoughenPointsLeafCache, "ADBE Vector Roughen Points")
+}
+
+func cloneShapeCorrelationLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeCorrelationLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeCorrelationLeafBytes))
+		if e != nil {
+			v22ShapeCorrelationLeafErr = fmt.Errorf("parse v22ShapeCorrelationLeafBytes: %w", e)
+			return
+		}
+		v22ShapeCorrelationLeafCache = ch
+	})
+	if v22ShapeCorrelationLeafErr != nil {
+		return nil, nil, v22ShapeCorrelationLeafErr
+	}
+	return offsetLeafPair(v22ShapeCorrelationLeafCache, "ADBE Vector Correlation")
+}
+
+func cloneShapeTemporalPhaseLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeTemporalPhaseLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeTemporalPhaseLeafBytes))
+		if e != nil {
+			v22ShapeTemporalPhaseLeafErr = fmt.Errorf("parse v22ShapeTemporalPhaseLeafBytes: %w", e)
+			return
+		}
+		v22ShapeTemporalPhaseLeafCache = ch
+	})
+	if v22ShapeTemporalPhaseLeafErr != nil {
+		return nil, nil, v22ShapeTemporalPhaseLeafErr
+	}
+	return offsetLeafPair(v22ShapeTemporalPhaseLeafCache, "ADBE Vector Temporal Phase")
+}
+
+func cloneShapeSpatialPhaseLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
+	v22ShapeSpatialPhaseLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeSpatialPhaseLeafBytes))
+		if e != nil {
+			v22ShapeSpatialPhaseLeafErr = fmt.Errorf("parse v22ShapeSpatialPhaseLeafBytes: %w", e)
+			return
+		}
+		v22ShapeSpatialPhaseLeafCache = ch
+	})
+	if v22ShapeSpatialPhaseLeafErr != nil {
+		return nil, nil, v22ShapeSpatialPhaseLeafErr
+	}
+	return offsetLeafPair(v22ShapeSpatialPhaseLeafCache, "ADBE Vector Spatial Phase")
 }
 
 // cloneShapeWiggleTransformBody returns a clone of the Wiggle Transform template
@@ -1820,6 +1952,34 @@ func lowerWiggleTransformNode(n *WiggleTransformNode, ctx *lowerCtx) (*rifx.Chun
 		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Position", encodeF64sBE(p[0], p[1]))
 		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Scale", encodeF64sBE(s[0], s[1]))
 		overwriteShapeStreamCdat(xf, "ADBE Vector Wiggler Rotation", encodeF64sBE(t.Rotation()))
+	}
+	// Synthesis-insert the AE-default-elided modulation leaves, each before
+	// Random Seed (canonical Wiggler order is Xform Temporal Freq / Correlation /
+	// Temporal Phase / Spatial Phase / Random Seed / Wiggler Transform). The
+	// leaves are shared with Wiggle Paths (same match-names + layouts).
+	if n.CorrelationSet() && n.Correlation() != 50 {
+		tdmn, tdbs, err := cloneShapeCorrelationLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Random Seed", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Correlation", encodeF64sBE(n.Correlation()))
+	}
+	if n.TemporalPhaseSet() && n.TemporalPhase() != 0 {
+		tdmn, tdbs, err := cloneShapeTemporalPhaseLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Random Seed", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Temporal Phase", encodeF64sBE(n.TemporalPhase()))
+	}
+	if n.SpatialPhaseSet() && n.SpatialPhase() != 0 {
+		tdmn, tdbs, err := cloneShapeSpatialPhaseLeaf()
+		if err != nil {
+			return nil, err
+		}
+		spliceShapeLeafBefore(body, "ADBE Vector Random Seed", tdmn, tdbs)
+		overwriteShapeStreamCdat(body, "ADBE Vector Spatial Phase", encodeF64sBE(n.SpatialPhase()))
 	}
 	return body, nil
 }

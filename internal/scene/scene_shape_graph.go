@@ -1850,17 +1850,40 @@ type WigglePathsNode struct {
 	detail           *codec.PropertyStream[float64]
 	wigglesPerSecond *codec.PropertyStream[float64]
 	randomSeed       *codec.PropertyStream[float64]
+
+	points           RoughenPoints
+	correlation      float64
+	correlationSet   bool
+	temporalPhase    float64
+	temporalPhaseSet bool
+	spatialPhase     float64
+	spatialPhaseSet  bool
 }
+
+// RoughenPoints selects whether the random roughen displacement breaks the path
+// into sharp corner spikes or smooth scalloped bumps (`ADBE Vector Roughen
+// Points`, AE's "Points" dropdown on Wiggle Paths). Stored on disk as a 1-based
+// float64 enum index.
+type RoughenPoints int
+
+const (
+	// RoughenPointsCorner makes each displaced segment a sharp corner (AE default).
+	RoughenPointsCorner RoughenPoints = 1
+	// RoughenPointsSmooth makes each displaced segment a smooth scalloped bump.
+	RoughenPointsSmooth RoughenPoints = 2
+)
 
 // NewWigglePathsNode constructs a default WigglePathsNode (Size=0 → no
 // displacement, the identity; Detail=10, WigglesPerSecond=2, RandomSeed=0 match
-// AE's filter defaults).
+// AE's filter defaults; Points=Corner, Correlation=50, Temporal/Spatial Phase=0).
 func NewWigglePathsNode() *WigglePathsNode {
 	n := &WigglePathsNode{
 		size:             codec.NewPropertyStream[float64](),
 		detail:           codec.NewPropertyStream[float64](),
 		wigglesPerSecond: codec.NewPropertyStream[float64](),
 		randomSeed:       codec.NewPropertyStream[float64](),
+		points:           RoughenPointsCorner,
+		correlation:      50,
 	}
 	_ = n.size.SetStaticValue(0)
 	_ = n.detail.SetStaticValue(10)
@@ -1874,6 +1897,17 @@ func (n *WigglePathsNode) Size() *PropertyStream[float64]             { return n
 func (n *WigglePathsNode) Detail() *PropertyStream[float64]           { return n.detail }
 func (n *WigglePathsNode) WigglesPerSecond() *PropertyStream[float64] { return n.wigglesPerSecond }
 func (n *WigglePathsNode) RandomSeed() *PropertyStream[float64]       { return n.randomSeed }
+
+// Points / Correlation / TemporalPhase / SpatialPhase return the modulation
+// sub-stream values. CorrelationSet / TemporalPhaseSet / SpatialPhaseSet report
+// whether each was explicitly set (controls synthesis-insert on lower).
+func (n *WigglePathsNode) Points() RoughenPoints     { return n.points }
+func (n *WigglePathsNode) Correlation() float64      { return n.correlation }
+func (n *WigglePathsNode) CorrelationSet() bool      { return n.correlationSet }
+func (n *WigglePathsNode) TemporalPhase() float64    { return n.temporalPhase }
+func (n *WigglePathsNode) TemporalPhaseSet() bool    { return n.temporalPhaseSet }
+func (n *WigglePathsNode) SpatialPhase() float64     { return n.spatialPhase }
+func (n *WigglePathsNode) SpatialPhaseSet() bool     { return n.spatialPhaseSet }
 
 // SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening).
 //
@@ -1898,6 +1932,61 @@ func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error {
 //
 //aep:cap domain=shape tier=alpha verify=roundtrip boundary="调制参数 evidence-defer,本质不可像素门禁" alias="wiggle random seed,路径抖动随机种子,random seed"
 func (n *WigglePathsNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
+
+// SetPoints selects Corner (sharp displaced spikes, the default) or Smooth
+// (rounded scalloped bumps). Smooth is AE-default-elided; setting it
+// materializes the `ADBE Vector Roughen Points` enum leaf on lower
+// (synthesis-insert).
+//
+//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleMod_AEShipGate_AE2020,TestMGWiggleMod_AEShipGate_AE2025 alias="wiggle points,路径抖动形状,corner smooth,roughen points"
+func (n *WigglePathsNode) SetPoints(p RoughenPoints) error {
+	if p != RoughenPointsCorner && p != RoughenPointsSmooth {
+		return fmt.Errorf("WigglePathsNode.SetPoints: %d out of range (1=Corner, 2=Smooth)", p)
+	}
+	n.points = p
+	return nil
+}
+
+// SetCorrelation sets how correlated successive random displacements are
+// (`ADBE Vector Correlation`, 0..100). 0 = each point jitters independently
+// (jagged), 100 = neighbours move together (smooth coherent boil). Default 50;
+// non-default materializes the `ADBE Vector Correlation` leaf on lower.
+//
+//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleMod_AEShipGate_AE2020,TestMGWiggleMod_AEShipGate_AE2025 alias="wiggle correlation,路径抖动相关性,roughen correlation"
+func (n *WigglePathsNode) SetCorrelation(v float64) error {
+	if v < 0 || v > 100 {
+		return fmt.Errorf("WigglePathsNode.SetCorrelation: %g out of range (want 0..100)", v)
+	}
+	n.correlation = v
+	n.correlationSet = true
+	return nil
+}
+
+// SetTemporalPhase sets the temporal phase (degrees) into the noise sequence
+// — selecting a different time-slice of the same seeded random pattern. Default
+// 0; non-default materializes the `ADBE Vector Temporal Phase` leaf on lower.
+// Like RandomSeed, a phase shift produces a statistically-equivalent alternate
+// random edge with no categorically-correct pixel result, so it is
+// roundtrip-verified (evidence-based: not pixel-gatable).
+//
+//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle temporal phase,路径抖动时间相位,roughen temporal phase"
+func (n *WigglePathsNode) SetTemporalPhase(v float64) error {
+	n.temporalPhase = v
+	n.temporalPhaseSet = true
+	return nil
+}
+
+// SetSpatialPhase sets the spatial phase (degrees) into the noise field —
+// selecting a different spatial offset of the same seeded random pattern.
+// Default 0; non-default materializes the `ADBE Vector Spatial Phase` leaf on
+// lower. Roundtrip-verified for the same reason as TemporalPhase.
+//
+//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle spatial phase,路径抖动空间相位,roughen spatial phase"
+func (n *WigglePathsNode) SetSpatialPhase(v float64) error {
+	n.spatialPhase = v
+	n.spatialPhaseSet = true
+	return nil
+}
 
 // Properties returns the escape-hatch β view.
 func (n *WigglePathsNode) Properties() *PropertyGroup {
@@ -1924,6 +2013,13 @@ type WiggleTransformNode struct {
 	wigglesPerSecond *codec.PropertyStream[float64]
 	randomSeed       *codec.PropertyStream[float64]
 	transform        *WigglerTransform
+
+	correlation      float64
+	correlationSet   bool
+	temporalPhase    float64
+	temporalPhaseSet bool
+	spatialPhase     float64
+	spatialPhaseSet  bool
 }
 
 // WigglerTransform models the Wiggle Transform's nested `ADBE Vector Wiggler
@@ -1946,11 +2042,22 @@ func NewWiggleTransformNode() *WiggleTransformNode {
 		wigglesPerSecond: codec.NewPropertyStream[float64](),
 		randomSeed:       codec.NewPropertyStream[float64](),
 		transform:        &WigglerTransform{},
+		correlation:      50,
 	}
 	_ = n.wigglesPerSecond.SetStaticValue(2)
 	_ = n.randomSeed.SetStaticValue(0)
 	return n
 }
+
+// Correlation / TemporalPhase / SpatialPhase return the modulation sub-stream
+// values; the *Set getters report whether each was explicitly set (controls
+// synthesis-insert on lower).
+func (n *WiggleTransformNode) Correlation() float64   { return n.correlation }
+func (n *WiggleTransformNode) CorrelationSet() bool   { return n.correlationSet }
+func (n *WiggleTransformNode) TemporalPhase() float64 { return n.temporalPhase }
+func (n *WiggleTransformNode) TemporalPhaseSet() bool { return n.temporalPhaseSet }
+func (n *WiggleTransformNode) SpatialPhase() float64  { return n.spatialPhase }
+func (n *WiggleTransformNode) SpatialPhaseSet() bool  { return n.spatialPhaseSet }
 
 func (n *WiggleTransformNode) Kind() ShapeNodeKind { return ShapeKindWiggleTransform }
 
@@ -1977,6 +2084,47 @@ func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error {
 //
 //aep:cap domain=shape tier=alpha verify=roundtrip boundary="调制参数 evidence-defer,本质不可像素门禁" alias="wiggle transform random seed,变换抖动随机种子,random seed"
 func (n *WiggleTransformNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
+
+// SetCorrelation sets how correlated the random transform jitter is between
+// channels/time (`ADBE Vector Correlation`, 0..100; default 50). Non-default
+// materializes the `ADBE Vector Correlation` leaf on lower. The wiggle is a
+// per-frame random transform offset and Correlation modulates its temporal
+// smoothness, with no single-frame categorically-correct pixel result, so it is
+// roundtrip-verified (evidence-based: not pixel-gatable).
+//
+//aep:cap domain=shape tier=alpha verify=roundtrip boundary="时变抖动调制,本质不可单帧像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle transform correlation,变换抖动相关性"
+func (n *WiggleTransformNode) SetCorrelation(v float64) error {
+	if v < 0 || v > 100 {
+		return fmt.Errorf("WiggleTransformNode.SetCorrelation: %g out of range (want 0..100)", v)
+	}
+	n.correlation = v
+	n.correlationSet = true
+	return nil
+}
+
+// SetTemporalPhase sets the temporal phase (degrees) into the transform-wiggle
+// noise sequence; default 0, non-default materializes the `ADBE Vector Temporal
+// Phase` leaf on lower. Roundtrip-verified (noise phase selection, not
+// pixel-gatable).
+//
+//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle transform temporal phase,变换抖动时间相位"
+func (n *WiggleTransformNode) SetTemporalPhase(v float64) error {
+	n.temporalPhase = v
+	n.temporalPhaseSet = true
+	return nil
+}
+
+// SetSpatialPhase sets the spatial phase (degrees) into the transform-wiggle
+// noise field; default 0, non-default materializes the `ADBE Vector Spatial
+// Phase` leaf on lower. Roundtrip-verified (noise phase selection, not
+// pixel-gatable).
+//
+//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle transform spatial phase,变换抖动空间相位"
+func (n *WiggleTransformNode) SetSpatialPhase(v float64) error {
+	n.spatialPhase = v
+	n.spatialPhaseSet = true
+	return nil
+}
 
 // Anchor / Position / Scale / Rotation return the current wiggle amplitudes.
 func (t *WigglerTransform) Anchor() [2]float64   { return t.anchor }

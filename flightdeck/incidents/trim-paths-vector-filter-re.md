@@ -220,7 +220,25 @@ Offset Paths 余下 3 个 elided 子流一次收齐——确认**单节点多 le
 
 **synthesis-insert 蓝本累计 8 次全绿**：+ Repeater Order。机制全谱：三类 leaf（scalar/enum/Vec2）· canonical 多 leaf 排序（Offset）· splice-before-group（Repeater Order）。**常用 shape 矢量滤镜的所有可写 elided 子流全收齐**。剩 Wiggle Paths/Transform 的 Correlation/Temporal·Spatial Phase（调制参数，低价值，待评估）。
 
-## Wiggle 调制参数（Correlation / Temporal·Spatial Phase / Roughen Points）— 评估后 evidence-based defer（2026-06-15）
+## Wiggle 调制参数（Roughen Points / Correlation / Temporal·Spatial Phase）— synthesis-insert 第 9–15 次,全收齐（2026-06-16）✅
+
+Wiggle Paths（Roughen）+ Wiggle Transform（Wiggler）的全部 elided 调制子流落地——synthesis-insert 蓝本累计 15 次,**shape 矢量滤镜家族彻底收口（无任何剩余可写子流）**。先前的 evidence-based defer（下方原文存档）按用户需求翻案全做。
+
+- **leaf 抽取**（`tmp_debug/gen_wiggle_modulation.jsx` → `test_data/v2_2_wiggle_modulation.aep` → 通用 `extract_filter_leaf <aep> <filterMN> <leafMN> <out>`）：4 个模板即够——`v2_2_shape_roughen_points_leaf.bin`(enum 4-child 286B)、`v2_2_shape_correlation_leaf.bin`(scalar-with-range 6-child 318B)、`v2_2_shape_temporal_phase_leaf.bin`/`v2_2_shape_spatial_phase_leaf.bin`(各 scalar 4-child 286B,**无 tdum/tduM range**——角度无界)。**两 filter 共用通用 match-name**(`ADBE Vector Correlation`/`Temporal Phase`/`Spatial Phase`)且 Correlation leaf 跨 filter byte-identical、Phase leaf 仅差 cdat 值(覆写无关)→ Roughen 版即作共享模板。
+- **canonical 序**(gen fixture dump 自证)：Roughen = Size/Detail/**Points**/TemporalFreq/**Correlation**/**TPhase**/**SPhase**/Seed；Wiggler = XformTemporalFreq/**Correlation**/**TPhase**/**SPhase**/Seed/Transform组。故 Points 用 `spliceShapeLeafBefore("ADBE Vector Temporal Freq",…)`,Correlation/TPhase/SPhase 用 `spliceShapeLeafBefore("ADBE Vector Random Seed",…)`(按 canonical 序依次 splice 即天然有序,**首次需 splice-before-non-GroupEnd 用于普通子流而非组**)。
+- scene：`WigglePathsNode += points RoughenPoints + correlation/temporalPhase/spatialPhase(+Set flag)`;`WiggleTransformNode += correlation/temporalPhase/spatialPhase(+Set flag)`。`RoughenPoints`(Corner=1/Smooth=2,同 ZigZagPoints)。
+
+**门禁分两档（红线4 诚实边界）**：
+1. **render-pixel gate**`TestMGWiggleMod_AEShipGate_AE2020/2025`(双版本 PASS,metrics 逐字节同)——单帧 4 卡同 Size60/Detail8/Seed5：
+   - **Roughen Points**(Corner vs Smooth)：判据 = **弦偏离** curv=mean|y[i]-(y[i-d]+y[i+d])/2| (d=10)。Corner 直斜边连接位移顶点→采样点在弦上 dev 低(1.99);Smooth 弧线 bow off 弦 dev 高(3.14),1.58x。**关键教训**:Corner/Smooth **共享位移顶点**,只是顶点间插值不同(直线 vs bezier)→ 顶边 1D 的 spread/jag/2nd-diff/面积全只差~1%(被共享顶点洗掉),**唯弦偏离(大基线 d)抓住「直 vs 曲」**。先看图(尖角星形 vs 圆鼓块)才定的度量,三次试错(2nd-diff 反向→面积无效→弦偏离 d=10 命中)。
+   - **Correlation**(0 vs 100)：判据 = **spread 塌缩**。Corr=0 各点独立抖→jagged(spread 34);Corr=100 邻点相干→**位移变刚性平移→边几乎全平**(spread 0、area 92k→117k)。**spread=0 是正确渲染不是失败**(初版误判栽这)。
+2. **roundtrip gate**`TestMGWiggleModRT_AEShipGate_AE2020/2025`(双版本 PASS)——**Temporal/Spatial Phase(两 filter)+ Wiggler Correlation**:噪声相位/相干调制选的是同 seed 的另一统计等价随机实例,**无单帧 categorical 正确像素**(同 RandomSeed 性质)→ 验 AE 接受 + 值读回 + resave cdat 存活(两 filter 共用 match-name → `countStream` 验各≥2),不做像素断言。诚实实证非假绿(over-claim 可见效果才违约)。
+
+commit(见下)。verify_mg_wiggle_mod.jsx + verify_mg_wiggle_modrt.jsx。
+
+---
+
+**原 evidence-based defer 存档（2026-06-15,已于 2026-06-16 翻案全做）**：
 
 `gen_wiggle_modulation_probe.jsx` 探针自证 Wiggle Paths（Roughen）8 子流 + match-name + 默认全确认（建模 4：Size/Detail/Temporal Freq/Random Seed；**未建模 4**）：
 | 子流 | 默认 | 类型 | 可达 |

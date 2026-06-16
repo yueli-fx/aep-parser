@@ -96,29 +96,6 @@
   {
     "symbol": "SetComment",
     "kind": "method",
-    "recv": "*Composition",
-    "signature": "func (c *Composition) SetComment(comment string) error",
-    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "roundtrip",
-      "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip",
-      "incident": null,
-      "alias": [
-        "comp comment",
-        "合成备注",
-        "项目面板备注",
-        "item comment"
-      ]
-    }
-  },
-  {
-    "symbol": "SetComment",
-    "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetComment(s string) error",
     "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block).",
@@ -139,6 +116,29 @@
         "标记注释",
         "cue point comment",
         "标记文本"
+      ]
+    }
+  },
+  {
+    "symbol": "SetComment",
+    "kind": "method",
+    "recv": "*Composition",
+    "signature": "func (c *Composition) SetComment(comment string) error",
+    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip",
+      "incident": null,
+      "alias": [
+        "comp comment",
+        "合成备注",
+        "项目面板备注",
+        "item comment"
       ]
     }
   },
@@ -439,29 +439,6 @@
   {
     "symbol": "SetLabel",
     "kind": "method",
-    "recv": "*Marker",
-    "signature": "func (m *Marker) SetLabel(index uint8) error",
-    "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10.",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "roundtrip",
-      "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;无专门 AE gate→round-trip",
-      "incident": null,
-      "alias": [
-        "marker label",
-        "标记颜色",
-        "label color",
-        "时间线颜色"
-      ]
-    }
-  },
-  {
-    "symbol": "SetLabel",
-    "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetLabel(index uint8) error",
     "summary": "SetLabel writes the project-panel color label index (0..16) for the composition (Item-level).",
@@ -480,6 +457,29 @@
         "颜色标签",
         "项目面板标签",
         "comp label"
+      ]
+    }
+  },
+  {
+    "symbol": "SetLabel",
+    "kind": "method",
+    "recv": "*Marker",
+    "signature": "func (m *Marker) SetLabel(index uint8) error",
+    "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;无专门 AE gate→round-trip",
+      "incident": null,
+      "alias": [
+        "marker label",
+        "标记颜色",
+        "label color",
+        "时间线颜色"
       ]
     }
   },
@@ -1261,6 +1261,32 @@
   {
     "symbol": "AddGradientKeyframe",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
+    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestGradientStrokeAnim_AEShipGate_AE2020",
+        "TestGradientStrokeAnim_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "animated gradient stroke",
+        "渐变描边动画",
+        "gradient stroke keyframe",
+        "色标关键帧"
+      ]
+    }
+  },
+  {
+    "symbol": "AddGradientKeyframe",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) AddGradientKeyframe(time float64, g *Gradient) error",
     "summary": "AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow).",
@@ -1282,32 +1308,6 @@
         "gradient keyframe",
         "渐变关键帧",
         "color sweep"
-      ]
-    }
-  },
-  {
-    "symbol": "AddGradientKeyframe",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
-    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestGradientStrokeAnim_AEShipGate_AE2020",
-        "TestGradientStrokeAnim_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "animated gradient stroke",
-        "渐变描边动画",
-        "gradient stroke keyframe",
-        "色标关键帧"
       ]
     }
   },
@@ -1389,6 +1389,31 @@
   {
     "symbol": "SetAlphaStops",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error",
+    "summary": "SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_GradientStroke_AEShipGate_AE2020",
+        "TestV2_2_GradientStroke_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke alpha stops",
+        "渐变描边透明度色标",
+        "alpha stops"
+      ]
+    }
+  },
+  {
+    "symbol": "SetAlphaStops",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error",
     "summary": "SetAlphaStops replaces the gradient's alpha (opacity) stops.",
@@ -1409,31 +1434,6 @@
         "渐变透明度色标",
         "alpha stops",
         "渐变不透明度"
-      ]
-    }
-  },
-  {
-    "symbol": "SetAlphaStops",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error",
-    "summary": "SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_GradientStroke_AEShipGate_AE2020",
-        "TestV2_2_GradientStroke_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke alpha stops",
-        "渐变描边透明度色标",
-        "alpha stops"
       ]
     }
   },
@@ -1542,34 +1542,6 @@
   {
     "symbol": "SetGradientType",
     "kind": "method",
-    "recv": "*GradientFillNode",
-    "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
-    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradientRadial_AEShipGate_AE2020",
-        "TestMGGradientRadial_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient type",
-        "渐变类型",
-        "linear",
-        "radial",
-        "线性",
-        "径向"
-      ]
-    }
-  },
-  {
-    "symbol": "SetGradientType",
-    "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
     "summary": "SetGradientType selects linear (default) or radial ramp shape.",
@@ -1588,6 +1560,34 @@
       "alias": [
         "gradient stroke type",
         "渐变描边类型",
+        "linear",
+        "radial",
+        "线性",
+        "径向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetGradientType",
+    "kind": "method",
+    "recv": "*GradientFillNode",
+    "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
+    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradientRadial_AEShipGate_AE2020",
+        "TestMGGradientRadial_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient type",
+        "渐变类型",
         "linear",
         "radial",
         "线性",
@@ -1649,6 +1649,31 @@
   {
     "symbol": "SetHighlightLength",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
+    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke highlight length",
+        "渐变描边高亮偏移",
+        "radial highlight stroke"
+      ]
+    }
+  },
+  {
+    "symbol": "SetHighlightLength",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetHighlightLength(v float64) error",
     "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
@@ -1669,31 +1694,6 @@
         "高亮偏移",
         "radial highlight",
         "渐变高亮"
-      ]
-    }
-  },
-  {
-    "symbol": "SetHighlightLength",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
-    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke highlight length",
-        "渐变描边高亮偏移",
-        "radial highlight stroke"
       ]
     }
   },
@@ -1781,31 +1781,6 @@
   {
     "symbol": "SetStartPoint",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
-    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke start point",
-        "渐变描边起点",
-        "gradient direction"
-      ]
-    }
-  },
-  {
-    "symbol": "SetStartPoint",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetStartPoint(v [2]float64) error",
     "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
@@ -1826,6 +1801,31 @@
         "渐变起点",
         "gradient direction",
         "渐变方向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetStartPoint",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
+    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke start point",
+        "渐变描边起点",
+        "gradient direction"
       ]
     }
   },
@@ -7723,32 +7723,6 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*OffsetPathsNode",
-    "signature": "func (n *OffsetPathsNode) SetAmount(v float64) error",
-    "summary": "SetAmount sets the offset amount in pixels (positive grows, negative shrinks).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGOffset_AEShipGate_AE2020",
-        "TestMGOffset_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "offset amount",
-        "偏移量",
-        "grow shrink",
-        "offset paths amount"
-      ]
-    }
-  },
-  {
-    "symbol": "SetAmount",
-    "kind": "method",
     "recv": "*StrokeWave",
     "signature": "func (w *StrokeWave) SetAmount(v float64) error",
     "summary": "",
@@ -7794,6 +7768,32 @@
         "膨胀收缩量",
         "pucker",
         "bloat"
+      ]
+    }
+  },
+  {
+    "symbol": "SetAmount",
+    "kind": "method",
+    "recv": "*OffsetPathsNode",
+    "signature": "func (n *OffsetPathsNode) SetAmount(v float64) error",
+    "summary": "SetAmount sets the offset amount in pixels (positive grows, negative shrinks).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGOffset_AEShipGate_AE2020",
+        "TestMGOffset_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "offset amount",
+        "偏移量",
+        "grow shrink",
+        "offset paths amount"
       ]
     }
   },
@@ -7869,31 +7869,6 @@
   {
     "symbol": "SetBlendMode",
     "kind": "method",
-    "recv": "*FillNode",
-    "signature": "func (f *FillNode) SetBlendMode(v ShapeBlendMode) error",
-    "summary": "",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
-        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "fill blend mode",
-        "填充混合模式",
-        "blend mode"
-      ]
-    }
-  },
-  {
-    "symbol": "SetBlendMode",
-    "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetBlendMode(v ShapeBlendMode) error",
     "summary": "",
@@ -7912,6 +7887,31 @@
       "alias": [
         "stroke blend mode",
         "描边混合模式",
+        "blend mode"
+      ]
+    }
+  },
+  {
+    "symbol": "SetBlendMode",
+    "kind": "method",
+    "recv": "*FillNode",
+    "signature": "func (f *FillNode) SetBlendMode(v ShapeBlendMode) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
+        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "fill blend mode",
+        "填充混合模式",
         "blend mode"
       ]
     }
@@ -7971,32 +7971,6 @@
   {
     "symbol": "SetColor",
     "kind": "method",
-    "recv": "*StrokeNode",
-    "signature": "func (s *StrokeNode) SetColor(v [4]float64) error",
-    "summary": "",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_Stroke_AEShipGate_AE2020",
-        "TestV2_2_Stroke_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "stroke color",
-        "描边颜色",
-        "set color",
-        "RGBA"
-      ]
-    }
-  },
-  {
-    "symbol": "SetColor",
-    "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetColor(v [4]float64) error",
     "summary": "",
@@ -8015,6 +7989,32 @@
       "alias": [
         "fill color",
         "填充颜色",
+        "set color",
+        "RGBA"
+      ]
+    }
+  },
+  {
+    "symbol": "SetColor",
+    "kind": "method",
+    "recv": "*StrokeNode",
+    "signature": "func (s *StrokeNode) SetColor(v [4]float64) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Stroke_AEShipGate_AE2020",
+        "TestV2_2_Stroke_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "stroke color",
+        "描边颜色",
         "set color",
         "RGBA"
       ]
@@ -8073,6 +8073,31 @@
   {
     "symbol": "SetCopies",
     "kind": "method",
+    "recv": "*RepeaterNode",
+    "signature": "func (n *RepeaterNode) SetCopies(v float64) error",
+    "summary": "SetCopies sets the number of copies (≥ 1).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGRepeater_AEShipGate_AE2020",
+        "TestMGRepeater_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "repeater copies",
+        "重复器份数",
+        "copies count"
+      ]
+    }
+  },
+  {
+    "symbol": "SetCopies",
+    "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetCopies(v float64) error",
     "summary": "SetCopies sets the number of copies the Offset Paths filter stacks, each offset by a further Amount pixels — N nested outlines growing outward (or inward for a negative Amount).",
@@ -8093,31 +8118,6 @@
         "偏移副本数",
         "nested outlines",
         "copies"
-      ]
-    }
-  },
-  {
-    "symbol": "SetCopies",
-    "kind": "method",
-    "recv": "*RepeaterNode",
-    "signature": "func (n *RepeaterNode) SetCopies(v float64) error",
-    "summary": "SetCopies sets the number of copies (≥ 1).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGRepeater_AEShipGate_AE2020",
-        "TestMGRepeater_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "repeater copies",
-        "重复器份数",
-        "copies count"
       ]
     }
   },
@@ -8143,6 +8143,52 @@
         "offset copy offset",
         "偏移副本间距",
         "copy spacing multiplier"
+      ]
+    }
+  },
+  {
+    "symbol": "SetCorrelation",
+    "kind": "method",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetCorrelation(v float64) error",
+    "summary": "SetCorrelation sets how correlated the random transform jitter is between channels/time (`ADBE Vector Correlation`, 0..100; default 50).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "时变抖动调制,本质不可单帧像素门禁,roundtrip+synthesis-insert 验证",
+      "incident": null,
+      "alias": [
+        "wiggle transform correlation",
+        "变换抖动相关性"
+      ]
+    }
+  },
+  {
+    "symbol": "SetCorrelation",
+    "kind": "method",
+    "recv": "*WigglePathsNode",
+    "signature": "func (n *WigglePathsNode) SetCorrelation(v float64) error",
+    "summary": "SetCorrelation sets how correlated successive random displacements are (`ADBE Vector Correlation`, 0..100).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleMod_AEShipGate_AE2020",
+        "TestMGWiggleMod_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "wiggle correlation",
+        "路径抖动相关性",
+        "roughen correlation"
       ]
     }
   },
@@ -8175,31 +8221,6 @@
   {
     "symbol": "SetDetail",
     "kind": "method",
-    "recv": "*ZigZagNode",
-    "signature": "func (n *ZigZagNode) SetDetail(v float64) error",
-    "summary": "SetDetail sets the number of ridges per path segment.",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGZigZag_AEShipGate_AE2020",
-        "TestMGZigZag_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "zigzag detail",
-        "锯齿密度",
-        "ridges per segment"
-      ]
-    }
-  },
-  {
-    "symbol": "SetDetail",
-    "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetDetail(v float64) error",
     "summary": "SetDetail sets the wiggle detail (number of segments per path length — higher = finer, more frequent ridges).",
@@ -8219,6 +8240,31 @@
         "wiggle detail",
         "路径抖动细节",
         "segments per unit length"
+      ]
+    }
+  },
+  {
+    "symbol": "SetDetail",
+    "kind": "method",
+    "recv": "*ZigZagNode",
+    "signature": "func (n *ZigZagNode) SetDetail(v float64) error",
+    "summary": "SetDetail sets the number of ridges per path segment.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGZigZag_AEShipGate_AE2020",
+        "TestMGZigZag_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "zigzag detail",
+        "锯齿密度",
+        "ridges per segment"
       ]
     }
   },
@@ -8525,33 +8571,6 @@
   {
     "symbol": "SetLineJoin",
     "kind": "method",
-    "recv": "*OffsetPathsNode",
-    "signature": "func (n *OffsetPathsNode) SetLineJoin(j StrokeLineJoin) error",
-    "summary": "SetLineJoin selects the corner join for the offset outline: Miter (sharp point), Round, or Bevel (flat-cut).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGOffsetExtras_AEShipGate_AE2020",
-        "TestMGOffsetExtras_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "offset line join",
-        "偏移接头",
-        "offset corner join",
-        "miter",
-        "bevel"
-      ]
-    }
-  },
-  {
-    "symbol": "SetLineJoin",
-    "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetLineJoin(v StrokeLineJoin) error",
     "summary": "SetLineJoin sets the corner-join style.",
@@ -8578,11 +8597,11 @@
     }
   },
   {
-    "symbol": "SetMiterLimit",
+    "symbol": "SetLineJoin",
     "kind": "method",
     "recv": "*OffsetPathsNode",
-    "signature": "func (n *OffsetPathsNode) SetMiterLimit(v float64) error",
-    "summary": "SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would extend past limit×width is clipped flat to a bevel.",
+    "signature": "func (n *OffsetPathsNode) SetLineJoin(j StrokeLineJoin) error",
+    "summary": "SetLineJoin selects the corner join for the offset outline: Miter (sharp point), Round, or Bevel (flat-cut).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8596,9 +8615,11 @@
       "boundary": "",
       "incident": null,
       "alias": [
-        "offset miter limit",
-        "偏移斜接限制",
-        "miter limit"
+        "offset line join",
+        "偏移接头",
+        "offset corner join",
+        "miter",
+        "bevel"
       ]
     }
   },
@@ -8628,25 +8649,27 @@
     }
   },
   {
-    "symbol": "SetOffset",
+    "symbol": "SetMiterLimit",
     "kind": "method",
-    "recv": "*TrimNode",
-    "signature": "func (n *TrimNode) SetOffset(v float64) error",
-    "summary": "SetOffset sets the trim offset in degrees.",
+    "recv": "*OffsetPathsNode",
+    "signature": "func (n *OffsetPathsNode) SetMiterLimit(v float64) error",
+    "summary": "SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would extend past limit×width is clipped flat to a bevel.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMGOffsetExtras_AEShipGate_AE2020",
+        "TestMGOffsetExtras_AEShipGate_AE2025"
+      ],
+      "boundary": "",
       "incident": null,
       "alias": [
-        "trim offset",
-        "修剪偏移",
-        "trim rotation",
-        "degrees"
+        "offset miter limit",
+        "偏移斜接限制",
+        "miter limit"
       ]
     }
   },
@@ -8673,27 +8696,25 @@
     }
   },
   {
-    "symbol": "SetOpacity",
+    "symbol": "SetOffset",
     "kind": "method",
-    "recv": "*FillNode",
-    "signature": "func (f *FillNode) SetOpacity(v float64) error",
-    "summary": "",
+    "recv": "*TrimNode",
+    "signature": "func (n *TrimNode) SetOffset(v float64) error",
+    "summary": "SetOffset sets the trim offset in degrees.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "render-pixel",
+      "verify": "roundtrip",
       "minver": "2020",
-      "gate": [
-        "TestV2_2_FillKf_AEShipGate_AE2020",
-        "TestV2_2_FillKf_AEShipGate_AE2025"
-      ],
-      "boundary": "",
+      "gate": null,
+      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
-        "fill opacity",
-        "填充不透明度",
-        "set opacity"
+        "trim offset",
+        "修剪偏移",
+        "trim rotation",
+        "degrees"
       ]
     }
   },
@@ -8718,6 +8739,31 @@
       "alias": [
         "stroke opacity",
         "描边不透明度",
+        "set opacity"
+      ]
+    }
+  },
+  {
+    "symbol": "SetOpacity",
+    "kind": "method",
+    "recv": "*FillNode",
+    "signature": "func (f *FillNode) SetOpacity(v float64) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_FillKf_AEShipGate_AE2020",
+        "TestV2_2_FillKf_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "fill opacity",
+        "填充不透明度",
         "set opacity"
       ]
     }
@@ -8850,6 +8896,32 @@
   {
     "symbol": "SetPoints",
     "kind": "method",
+    "recv": "*WigglePathsNode",
+    "signature": "func (n *WigglePathsNode) SetPoints(p RoughenPoints) error",
+    "summary": "SetPoints selects Corner (sharp displaced spikes, the default) or Smooth (rounded scalloped bumps).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleMod_AEShipGate_AE2020",
+        "TestMGWiggleMod_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "wiggle points",
+        "路径抖动形状",
+        "corner smooth",
+        "roughen points"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPoints",
+    "kind": "method",
     "recv": "*ZigZagNode",
     "signature": "func (n *ZigZagNode) SetPoints(p ZigZagPoints) error",
     "summary": "SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth (scalloped wave ridges).",
@@ -8876,59 +8948,9 @@
   {
     "symbol": "SetPosition",
     "kind": "method",
-    "recv": "*EllipseNode",
-    "signature": "func (e *EllipseNode) SetPosition(v [2]float64) error",
+    "recv": "*RectNode",
+    "signature": "func (r *RectNode) SetPosition(v [2]float64) error",
     "summary": "",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_Ellipse_AEShipGate_AE2020",
-        "TestV2_2_Ellipse_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "ellipse position",
-        "椭圆位置",
-        "set position"
-      ]
-    }
-  },
-  {
-    "symbol": "SetPosition",
-    "kind": "method",
-    "recv": "*WigglerTransform",
-    "signature": "func (t *WigglerTransform) SetPosition(v [2]float64) error",
-    "summary": "SetPosition sets the position wiggle amplitude (pixels).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGWiggleTransform_AEShipGate_AE2020",
-        "TestMGWiggleTransform_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "wiggler position amplitude",
-        "抖动位置幅度",
-        "position wiggle"
-      ]
-    }
-  },
-  {
-    "symbol": "SetPosition",
-    "kind": "method",
-    "recv": "*StarNode",
-    "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
-    "summary": "SetPosition sets the star's local position offset (px).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8939,9 +8961,9 @@
       "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
-        "star position",
-        "星形位置",
-        "polystar position"
+        "rect position",
+        "矩形位置",
+        "set position"
       ]
     }
   },
@@ -8974,9 +8996,9 @@
   {
     "symbol": "SetPosition",
     "kind": "method",
-    "recv": "*RectNode",
-    "signature": "func (r *RectNode) SetPosition(v [2]float64) error",
-    "summary": "",
+    "recv": "*StarNode",
+    "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
+    "summary": "SetPosition sets the star's local position offset (px).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8987,8 +9009,58 @@
       "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
       "incident": null,
       "alias": [
-        "rect position",
-        "矩形位置",
+        "star position",
+        "星形位置",
+        "polystar position"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPosition",
+    "kind": "method",
+    "recv": "*WigglerTransform",
+    "signature": "func (t *WigglerTransform) SetPosition(v [2]float64) error",
+    "summary": "SetPosition sets the position wiggle amplitude (pixels).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGWiggleTransform_AEShipGate_AE2020",
+        "TestMGWiggleTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "wiggler position amplitude",
+        "抖动位置幅度",
+        "position wiggle"
+      ]
+    }
+  },
+  {
+    "symbol": "SetPosition",
+    "kind": "method",
+    "recv": "*EllipseNode",
+    "signature": "func (e *EllipseNode) SetPosition(v [2]float64) error",
+    "summary": "",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "ellipse position",
+        "椭圆位置",
         "set position"
       ]
     }
@@ -9208,9 +9280,9 @@
   {
     "symbol": "SetSize",
     "kind": "method",
-    "recv": "*EllipseNode",
-    "signature": "func (e *EllipseNode) SetSize(v [2]float64) error",
-    "summary": "",
+    "recv": "*WigglePathsNode",
+    "signature": "func (n *WigglePathsNode) SetSize(v float64) error",
+    "summary": "SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9218,16 +9290,40 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_Ellipse_AEShipGate_AE2020",
-        "TestV2_2_Ellipse_AEShipGate_AE2025"
+        "TestMGWiggle_AEShipGate_AE2020",
+        "TestMGWiggle_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "ellipse size",
-        "椭圆尺寸",
-        "set size",
-        "宽高"
+        "wiggle size",
+        "路径抖动幅度",
+        "displacement amplitude"
+      ]
+    }
+  },
+  {
+    "symbol": "SetSize",
+    "kind": "method",
+    "recv": "*ZigZagNode",
+    "signature": "func (n *ZigZagNode) SetSize(v float64) error",
+    "summary": "SetSize sets the zigzag amplitude in pixels.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGZigZag_AEShipGate_AE2020",
+        "TestMGZigZag_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "zigzag size",
+        "锯齿幅度",
+        "amplitude"
       ]
     }
   },
@@ -9260,9 +9356,9 @@
   {
     "symbol": "SetSize",
     "kind": "method",
-    "recv": "*ZigZagNode",
-    "signature": "func (n *ZigZagNode) SetSize(v float64) error",
-    "summary": "SetSize sets the zigzag amplitude in pixels.",
+    "recv": "*EllipseNode",
+    "signature": "func (e *EllipseNode) SetSize(v [2]float64) error",
+    "summary": "",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9270,40 +9366,59 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGZigZag_AEShipGate_AE2020",
-        "TestMGZigZag_AEShipGate_AE2025"
+        "TestV2_2_Ellipse_AEShipGate_AE2020",
+        "TestV2_2_Ellipse_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "zigzag size",
-        "锯齿幅度",
-        "amplitude"
+        "ellipse size",
+        "椭圆尺寸",
+        "set size",
+        "宽高"
       ]
     }
   },
   {
-    "symbol": "SetSize",
+    "symbol": "SetSpatialPhase",
     "kind": "method",
-    "recv": "*WigglePathsNode",
-    "signature": "func (n *WigglePathsNode) SetSize(v float64) error",
-    "summary": "SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening).",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetSpatialPhase(v float64) error",
+    "summary": "SetSpatialPhase sets the spatial phase (degrees) into the transform-wiggle noise field; default 0, non-default materializes the `ADBE Vector Spatial Phase` leaf on lower.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
+      "tier": "alpha",
+      "verify": "roundtrip",
       "minver": "2020",
-      "gate": [
-        "TestMGWiggle_AEShipGate_AE2020",
-        "TestMGWiggle_AEShipGate_AE2025"
-      ],
-      "boundary": "",
+      "gate": null,
+      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
       "incident": null,
       "alias": [
-        "wiggle size",
-        "路径抖动幅度",
-        "displacement amplitude"
+        "wiggle transform spatial phase",
+        "变换抖动空间相位"
+      ]
+    }
+  },
+  {
+    "symbol": "SetSpatialPhase",
+    "kind": "method",
+    "recv": "*WigglePathsNode",
+    "signature": "func (n *WigglePathsNode) SetSpatialPhase(v float64) error",
+    "summary": "SetSpatialPhase sets the spatial phase (degrees) into the noise field — selecting a different spatial offset of the same seeded random pattern.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "incident": null,
+      "alias": [
+        "wiggle spatial phase",
+        "路径抖动空间相位",
+        "roughen spatial phase"
       ]
     }
   },
@@ -9457,6 +9572,49 @@
     }
   },
   {
+    "symbol": "SetTemporalPhase",
+    "kind": "method",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetTemporalPhase(v float64) error",
+    "summary": "SetTemporalPhase sets the temporal phase (degrees) into the transform-wiggle noise sequence; default 0, non-default materializes the `ADBE Vector Temporal Phase` leaf on lower.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "incident": null,
+      "alias": [
+        "wiggle transform temporal phase",
+        "变换抖动时间相位"
+      ]
+    }
+  },
+  {
+    "symbol": "SetTemporalPhase",
+    "kind": "method",
+    "recv": "*WigglePathsNode",
+    "signature": "func (n *WigglePathsNode) SetTemporalPhase(v float64) error",
+    "summary": "SetTemporalPhase sets the temporal phase (degrees) into the noise sequence — selecting a different time-slice of the same seeded random pattern.",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "incident": null,
+      "alias": [
+        "wiggle temporal phase",
+        "路径抖动时间相位",
+        "roughen temporal phase"
+      ]
+    }
+  },
+  {
     "symbol": "SetType",
     "kind": "method",
     "recv": "*MergePathsNode",
@@ -9592,6 +9750,28 @@
   {
     "symbol": "SetWigglesPerSecond",
     "kind": "method",
+    "recv": "*WiggleTransformNode",
+    "signature": "func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error",
+    "summary": "SetWigglesPerSecond sets the temporal frequency (how fast the transform churns).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "调制参数 evidence-defer,本质不可像素门禁",
+      "incident": null,
+      "alias": [
+        "wiggle transform frequency",
+        "变换抖动频率",
+        "wiggles per second"
+      ]
+    }
+  },
+  {
+    "symbol": "SetWigglesPerSecond",
+    "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error",
     "summary": "SetWigglesPerSecond sets the temporal frequency (`ADBE Vector Temporal Freq`, the Wiggles/Second control — how fast the random edge churns over time).",
@@ -9609,28 +9789,6 @@
         "路径抖动频率",
         "wiggles per second",
         "temporal frequency"
-      ]
-    }
-  },
-  {
-    "symbol": "SetWigglesPerSecond",
-    "kind": "method",
-    "recv": "*WiggleTransformNode",
-    "signature": "func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error",
-    "summary": "SetWigglesPerSecond sets the temporal frequency (how fast the transform churns).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "alpha",
-      "verify": "roundtrip",
-      "minver": "2020",
-      "gate": null,
-      "boundary": "调制参数 evidence-defer,本质不可像素门禁",
-      "incident": null,
-      "alias": [
-        "wiggle transform frequency",
-        "变换抖动频率",
-        "wiggles per second"
       ]
     }
   },
