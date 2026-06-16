@@ -224,15 +224,15 @@
 | `*Layer.SetMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetMotionBlur toggles the layer's motion-blur switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
 | `*Layer.SetName` | 🟢stable | roundtrip | 2020 |  | SetName rewrites the layer's display name (the AE timeline label). ⚠length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip |
 | `*Layer.SetOpacity` | 🟢stable | roundtrip | 2020 |  | SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). ⚠length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖 |
-| `*Layer.SetOrientation` | 🟢stable | roundtrip | 2020 |  | SetOrientation writes the 3D orientation (3-component degrees per axis). ⚠length-preserving;3D 层 only;3 分量度数 |
+| `*Layer.SetOrientation` | 🟢stable | render-pixel | 2020 | TestLayer3DOrientation_AEShipGate_AE2020<br>TestLayer3DOrientation_AEShipGate_AE2025 | SetOrientation writes the 3D orientation (3-component degrees per axis). ⚠length-preserving;3D 层 only;3 分量度数;静态值须双写 cdat(LE)+otda(BE),否则 AE 渲染 0 |
 | `*Layer.SetOutPoint` | 🟢stable | roundtrip | 2020 |  | SetOutPoint writes the layer's source-media out-point (seconds) to ldta @0x1C/@0x20, then refreshes `Layer.Duration`. ⚠length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;无专门 AE gate→round-trip |
 | `*Layer.SetParent` | 🟢stable | roundtrip | 2020 |  | SetParent rewrites the layer's parent-layer ID (ldta @0x84) to `parentID`. ⚠length-preserving 低风险;4 字节 @ldta 0x84;同 comp 内验证 parentID;自 parent 拒绝;无专门 AE gate→round-trip |
 | `*Layer.SetPosition` | 🟢stable | roundtrip | 2020 |  | SetPosition writes a new static position. ⚠length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖 |
 | `*Layer.SetPreserveTransparency` | 🟢stable | roundtrip | 2020 |  | SetPreserveTransparency toggles "Preserve Underlying Transparency" (ldta @0x67, single byte 0/1). ⚠length-preserving 低风险;单字节 @ldta 0x67;无专门 AE gate→round-trip |
 | `*Layer.SetQuality` | 🟢stable | roundtrip | 2020 |  | SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). ⚠length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;无专门 AE gate→round-trip |
-| `*Layer.SetRotateX` | 🟢stable | roundtrip | 2020 |  | SetRotateX / SetRotateY write per-axis 3D rotation (degrees). ⚠length-preserving;3D 层 only(2D 报 property not present) |
-| `*Layer.SetRotateY` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving;3D 层 only(2D 报 property not present) |
-| `*Layer.SetRotation` | 🟢stable | roundtrip | 2020 |  | SetRotation writes the Z-axis rotation (degrees). ⚠length-preserving;Z 轴(2D/3D 通用) |
+| `*Layer.SetRotateX` | 🟢stable | render-pixel | 2020 | TestLayer3DRotateX_AEShipGate_AE2020<br>TestLayer3DRotateX_AEShipGate_AE2025 | SetRotateX / SetRotateY write per-axis 3D rotation (degrees). ⚠length-preserving;3D 层 only(2D 报 property not present) |
+| `*Layer.SetRotateY` | 🟢stable | render-pixel | 2020 | TestLayer3DRotateY_AEShipGate_AE2020<br>TestLayer3DRotateY_AEShipGate_AE2025 |  ⚠length-preserving;3D 层 only(2D 报 property not present) |
+| `*Layer.SetRotation` | 🟢stable | render-pixel | 2020 | TestLayer3DRotateZ_AEShipGate_AE2020<br>TestLayer3DRotateZ_AEShipGate_AE2025 | SetRotation writes the Z-axis rotation (degrees). ⚠length-preserving;Z 轴(2D/3D 通用) |
 | `*Layer.SetSamplingBicubic` | 🟢stable | roundtrip | 2020 |  | SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling for the layer. ⚠length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip |
 | `*Layer.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale writes a new static scale (normalized 1.0 = 100%). ⚠length-preserving;normalized 1.0=100%;2D/3D 分量 |
 | `*Layer.SetShy` | 🟢stable | roundtrip | 2020 |  | SetShy toggles the layer's Shy flag (hides from the shy-filter view). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |

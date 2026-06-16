@@ -298,7 +298,7 @@ func (l *Layer) SetScale(v []float64) error {
 // SetRotation writes the Z-axis rotation (degrees). Available on both
 // 2D and 3D layers (it's the only rotation axis 2D layers have).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;Z 轴(2D/3D 通用)" alias="rotation,旋转,Z 旋转,角度,转动"
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DRotateZ_AEShipGate_AE2020,TestLayer3DRotateZ_AEShipGate_AE2025 boundary="length-preserving;Z 轴(2D/3D 通用)" alias="rotation,旋转,Z 旋转,角度,转动"
 func (l *Layer) SetRotation(deg float64) error {
 	return setScalarProperty(l.Rotation(), l.Name, "Rotate Z", deg)
 }
@@ -306,12 +306,12 @@ func (l *Layer) SetRotation(deg float64) error {
 // SetRotateX / SetRotateY write per-axis 3D rotation (degrees). Error
 // on 2D layers (property not present).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;3D 层 only(2D 报 property not present)" alias="rotate x,3D X 旋转,X 轴旋转"
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DRotateX_AEShipGate_AE2020,TestLayer3DRotateX_AEShipGate_AE2025 boundary="length-preserving;3D 层 only(2D 报 property not present)" alias="rotate x,3D X 旋转,X 轴旋转"
 func (l *Layer) SetRotateX(deg float64) error {
 	return setScalarProperty(l.RotateX(), l.Name, "Rotate X", deg)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;3D 层 only(2D 报 property not present)" alias="rotate y,3D Y 旋转,Y 轴旋转"
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DRotateY_AEShipGate_AE2020,TestLayer3DRotateY_AEShipGate_AE2025 boundary="length-preserving;3D 层 only(2D 报 property not present)" alias="rotate y,3D Y 旋转,Y 轴旋转"
 func (l *Layer) SetRotateY(deg float64) error {
 	return setScalarProperty(l.RotateY(), l.Name, "Rotate Y", deg)
 }
@@ -319,7 +319,7 @@ func (l *Layer) SetRotateY(deg float64) error {
 // SetOrientation writes the 3D orientation (3-component degrees per axis).
 // Errors on 2D layers.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;3D 层 only;3 分量度数" alias="orientation,方向,3D 朝向,定向"
+//aep:cap domain=layer-set tier=stable verify=render-pixel gate=TestLayer3DOrientation_AEShipGate_AE2020,TestLayer3DOrientation_AEShipGate_AE2025 boundary="length-preserving;3D 层 only;3 分量度数;静态值须双写 cdat(LE)+otda(BE),否则 AE 渲染 0" alias="orientation,方向,3D 朝向,定向"
 func (l *Layer) SetOrientation(v []float64) error {
 	p := l.Orientation()
 	if p == nil {

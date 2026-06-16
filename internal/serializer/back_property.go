@@ -32,6 +32,18 @@ type propertyBackrefs struct {
 	tdb4 *rifx.Chunk
 	// cdat is the current/static value chunk (no keyframes).
 	cdat *rifx.Chunk
+	// cdatLE marks cdat as little-endian (AE stores a 3D layer's Orientation
+	// value LE inside its otst wrapper — see parseOrientationProperty). The
+	// default (big-endian) holds for every other property. SetStaticValue keys
+	// its write endianness off this so the value round-trips and AE accepts it.
+	cdatLE bool
+	// otda is the orientation "default value" chunk (24 B = 3 × f64, BIG-endian)
+	// living under the otst's otky sibling LIST. For a STATIC 3D orientation AE
+	// reads its current value from HERE, not from cdat — so SetStaticValue must
+	// mirror the value into otda (BE) or AE renders 0 despite a clean cdat write
+	// (RE'd 2026-06-17 by byte-diffing an AE-authored golden). Nil for non-
+	// orientation properties.
+	otda *rifx.Chunk
 	// ldat is the keyframe stream chunk (with keyframes).
 	ldat *rifx.Chunk
 	// lhd3 is the keyframe-list header chunk (count @0x08, bpk @0x10).
@@ -106,13 +118,24 @@ func (b *propertyBackrefs) SetStaticValue(v any) error {
 	if b.cdat == nil {
 		return fmt.Errorf("property: no static-value chunk (has keyframes?)")
 	}
+	wf := writeFloat64
+	if b.cdatLE {
+		wf = writeFloat64LE
+	}
 	switch x := v.(type) {
 	case float64:
-		return writeFloat64(b.cdat.Data, 0, x)
+		return wf(b.cdat.Data, 0, x)
 	case []float64:
 		for i, f := range x {
-			if err := writeFloat64(b.cdat.Data, i*8, f); err != nil {
+			if err := wf(b.cdat.Data, i*8, f); err != nil {
 				return err
+			}
+			// Orientation: AE's authoritative static value lives in otda (BE),
+			// not cdat — mirror it or AE renders 0 (see otda field doc).
+			if b.otda != nil && i*8+8 <= len(b.otda.Data) {
+				if err := writeFloat64(b.otda.Data, i*8, f); err != nil {
+					return err
+				}
 			}
 		}
 		return nil

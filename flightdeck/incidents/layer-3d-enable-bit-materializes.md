@@ -182,3 +182,30 @@ Material / Geometry options + transform setters (SetRotateX/Y, SetOrientation,
 / `re_cameralight.aep`, `layer_3d_test.go`) — they require the channel present in
 the tree. The gap this incident closes is making OUR from-scratch layer 3D in the
 first place; wiring those setters onto a from-scratch-3D layer is the next step.
+
+## 2026-06-17 — priority-2 真正收口：RotateX/Orientation/RotateZ render-gate + Orientation 静态写 bug
+
+补齐 RotateY 之外的三轴双版本 render-pixel gate（`layer_3d_rotaxes_shipgate_test.go`，
+6 个 `TestLayer3D{RotateX,Orientation,RotateZ}_AEShipGate_AE2020/2025`）：
+- **RotateX=50°** → 透视下顶/底边 width 不等（侧躺梯形，topW/botW 1.45）。
+- **RotateZ=45°**（= `SetRotation`，Z 轴）→ 正方形转成菱形（center col >> edge col，54×）。
+- **Orientation [0,50,0]** → 同 RotateY 的 Y 轴梯形（leftH/rightH 1.45）。
+
+RotateX/RotateZ 确如先前判断「同路径零新代码」（标量 BE cdat 覆写）直接过。**Orientation 不是**——
+踩出一个真 correctness bug（值 round-trip 绿但 AE 渲染 0，红线红线 #4 活样本）：
+
+**根因（byte-diff AE-authored golden 揪出）**：3D 层 Orientation 的 `otst` wrapper 把静态值存**两份**：
+1. `tdbs/cdat`（24B）= **小端**（py-aep 早 RE 的读路径已知）。
+2. `otky/otda`（24B，"orientation default value chunk"）= **大端** —— **AE 读静态当前值用的是这份，不是 cdat**。
+
+旧 `SetStaticValue` 两头都错：(a) 用通用 `writeFloat64`（大端）写 cdat，跟 AE 的小端**字节翻转**
+（50.0 → 9.26e-320 ≈ 0）；(b) **完全没碰 otda**，留默认 [0,0,0]。两个 bug 叠加 → AE 渲染 0。
+仅修 cdat 端序仍 FAIL（AE 不读 cdat 读 otda），必须**双写**。
+
+**修法**（`back_property.go` + `parse_properties.go`）：propertyBackrefs 加 `cdatLE bool` + `otda *rifx.Chunk`，
+`parseOrientationProperty` 静态分支同时绑 cdat（标 LE）+ otky 下的 otda；`SetStaticValue` 据 `cdatLE`
+选 `writeFloat64LE` 写 cdat，并把同值**大端镜像进 otda**。其它属性 otda=nil、cdatLE=false，零影响。
+
+**波及面**：这 bug 对**任何** SetOrientation（fixture 层也算，非仅 from-scratch）都存在，只是从未 AE-gated
+（capindex 标 roundtrip）才一直没暴。现 SetRotateX/Y/Rotation/Orientation 全升 verify=render-pixel。
+**遗留**：animated orientation（otda 多帧 + ease）写未验，需要时另立。

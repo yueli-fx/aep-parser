@@ -162,6 +162,14 @@ func parseOrientationProperty(matchName string, otst *rifx.Chunk, ctx *parseCtx)
 		// Static: the cdat value is little-endian inside an otst.
 		if pb := propertyBack(prop); pb != nil {
 			pb.cdat = cdat
+			pb.cdatLE = true // SetStaticValue must write LE to match (orientation quirk)
+			// AE reads the static orientation from otda (BE), not cdat — capture
+			// it so SetStaticValue can mirror the value there too.
+			if otky := otst.FindFirstList(rifx.IDOtky); otky != nil {
+				if otda := otky.FindFirst(rifx.IDOtda); otda != nil && len(otda.Data) >= 24 {
+					pb.otda = otda
+				}
+			}
 		}
 		prop.StaticValue = decodeCdatValueLE(cdat.Data, 3)
 	}

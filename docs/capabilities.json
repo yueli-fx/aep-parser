@@ -4191,10 +4191,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;3D 层 only;3 分量度数",
+      "gate": [
+        "TestLayer3DOrientation_AEShipGate_AE2020",
+        "TestLayer3DOrientation_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;3D 层 only;3 分量度数;静态值须双写 cdat(LE)+otda(BE),否则 AE 渲染 0",
       "incident": null,
       "alias": [
         "orientation",
@@ -4332,9 +4335,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
+      "gate": [
+        "TestLayer3DRotateX_AEShipGate_AE2020",
+        "TestLayer3DRotateX_AEShipGate_AE2025"
+      ],
       "boundary": "length-preserving;3D 层 only(2D 报 property not present)",
       "incident": null,
       "alias": [
@@ -4354,9 +4360,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
+      "gate": [
+        "TestLayer3DRotateY_AEShipGate_AE2020",
+        "TestLayer3DRotateY_AEShipGate_AE2025"
+      ],
       "boundary": "length-preserving;3D 层 only(2D 报 property not present)",
       "incident": null,
       "alias": [
@@ -4376,9 +4385,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "render-pixel",
       "minver": "2020",
-      "gate": null,
+      "gate": [
+        "TestLayer3DRotateZ_AEShipGate_AE2020",
+        "TestLayer3DRotateZ_AEShipGate_AE2025"
+      ],
       "boundary": "length-preserving;Z 轴(2D/3D 通用)",
       "incident": null,
       "alias": [

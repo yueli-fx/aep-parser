@@ -104,6 +104,18 @@ func writeFloat64(d []byte, offset int, f float64) error {
 	return nil
 }
 
+// writeFloat64LE writes a little-endian float64. AE stores a 3D layer's
+// Orientation cdat little-endian (the cdat is_le when its grandparent LIST is
+// otst — see parseOrientationProperty); writing it big-endian byte-swaps the
+// value so AE reads garbage (≈0). The big-endian counterpart is writeFloat64.
+func writeFloat64LE(d []byte, offset int, f float64) error {
+	if offset < 0 || offset+8 > len(d) {
+		return fmt.Errorf("float64 write at offset %d: out of bounds (len=%d)", offset, len(d))
+	}
+	binary.LittleEndian.PutUint64(d[offset:offset+8], math.Float64bits(f))
+	return nil
+}
+
 // jsonEscapeString returns the JSON-string body for s (no surrounding quotes).
 func jsonEscapeString(s string) []byte {
 	var b []byte
