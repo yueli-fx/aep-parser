@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-16 by claude（**capindex P2 wave0+1**：抽取扩到 facade+scene 两包(揭示真实公共能力面 = **536 符号**,此前只见 facade、漏 341 个 `Set*`+全 getter);加 meta 通道 + `docs/docgen.json` 公共面门禁 + `-coverage` 仪表。**facade 全量自由函数已标 + ship-gate 交叉核实 = 98/536(18.3%)**。审核揪出 **manual-gate orphans**(DeleteLayer/MoveLayer/DuplicateComposition 等 11 个 doc 称 Stable 但无自动 Go `_AEShipGate` test → 诚实标 alpha/roundtrip + boundary,待决:编码 JSX gate)。commits:wave0 + db96367(wave1)。**余 438 scene 方法** = wave2+(pace/depth 待用户定)。）
+**Last updated**: 2026-06-16 by claude（**capindex P2 wave0+1+2 起步**:facade 全量(98)+ schema 压测硬化 + getter 豁免策略 + Layer transform = **110/313(35.1%)**。**关键修正**:(1) **tier/verify 解耦**(压测样本揪出原 `stable⟹ae-accept` 错耦——SetOpacity 是 stable API 但只 roundtrip;438 多数如此),防假绿守卫移到 `verify∈{ae-accept,render-pixel}⟹gate`;(2) **getter 豁免**(write-surface-first,用户批准):公共面 536→**313**(223 getter 不强制 tag,可后补);(3) manual-gate orphans 改回诚实 stable+roundtrip。commits 4ae1358..7efd590(6 个)。**余 ~190 写方法**(Layer 121 / Comp 25 / Project 18 / Marker 10 / Mask 9 / Keyframe 9 / Footage 5 / Property 4 / Guide 2)= wave2 续(solo vs Workflow 待用户定)。）
 
 **Active focus**: **知识库地基重建 arc（当前主线）**——三原则:源码为准/自动化/秒查。capindex(`specs/2026-06-16-capability-index.md`):源码内 `aep:cap` tag 自动生成可秒查能力/API 索引,**P1 done**(layer-create) → **P2 全量标注**(= 源码级能力审核,揪假绿/补缺口)→ CI 全覆盖强制 + coverage 退役。然后 `knowledge-consolidation`(parked,待 P2):记忆系统退役/incidents 合并清理/CLAUDE.md 瘦身/根目录 exe 清理。**能力查询**:`go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`(渐取代 coverage.md)。—— **库能力主线**早已全收口、需求驱动稳态(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);机制库 parse-the-clone + synthesis-insert + animate(Scalar/Vector/Gradient/Path/TextRange);每渲染类双版本 AE ship-gate(红线4)。火焰演示=番外。
 
@@ -17,7 +17,7 @@
 
 ## 下一步
 
-**➡ capindex P2 wave2+:438 个 scene 方法标注审核**（Layer 229 / Comp 58 / Project 52 / Property 32 / Mask·Footage…)。**pace/depth 待用户定**:solo 多会话 vs Workflow 并行(成本/opt-in);全量含 getter vs 写/做面优先。配方见 `plans/2026-06-16-capability-index-p2.md` wave2-9。**orphan 决议**(11 个 manual-gate op):编码 JSX gate 为 Go test 恢复 ae-accept,还是维持 roundtrip。
+**➡ capindex P2 wave2 续:~190 个 scene 写方法标注**（Layer 121:material/camera/light/flags/time/matte · Comp 25 · Project 18 · Marker 10 · Mask 9 · Keyframe 9 · Footage 5 · Property 4 · Guide 2)。getter 已豁免(write-surface-first)。**pace 待定**:solo 多会话(~5-6 turn)vs Workflow 并行(按 file/type 分片 worktree 隔离,快但耗 token,需用户喊"用 workflow")。配方:每方法 domain by area + verify(length-preserving→roundtrip / 有 gate→ae-accept|render-pixel)+ boundary + alias;capindex 校验 gate。**orphan 决议**(11 manual-gate):编码 JSX gate 为 Go test 恢复 ae-accept,还是维持 stable+roundtrip。
 **Wave 9 收尾**:meta 扫尾 + 开 CI 全覆盖强制 + 回写 spec。**然后** `knowledge-consolidation`(parked):记忆退役/incidents 合并/CLAUDE.md 瘦身/根 exe 清理。
 **能力查询**:`go run ./cmd/capindex -q <词>`(facade 全覆盖,438 scene 方法陆续上)。
 
