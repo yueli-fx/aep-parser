@@ -83,6 +83,7 @@ type (
 	Mask                            = scene.Mask
 	MaskMode                        = scene.MaskMode
 	MaskMotionBlurMode              = scene.MaskMotionBlurMode
+	MaskFeatherFalloff              = scene.MaskFeatherFalloff
 	MaskPathKey                     = scene.MaskPathKey
 	MaskPathKeyframe                = scene.MaskPathKeyframe
 	ScalarKeyframe                  = scene.ScalarKeyframe
@@ -273,6 +274,8 @@ const (
 	MaskMotionBlurOff                             = scene.MaskMotionBlurOff
 	MaskMotionBlurOn                              = scene.MaskMotionBlurOn
 	MaskMotionBlurSameAsLayer                     = scene.MaskMotionBlurSameAsLayer
+	MaskFeatherFalloffSmooth                      = scene.MaskFeatherFalloffSmooth
+	MaskFeatherFalloffLinear                      = scene.MaskFeatherFalloffLinear
 	MatchNameAnchorPoint                          = scene.MatchNameAnchorPoint
 	MatchNameAudioLevels                          = scene.MatchNameAudioLevels
 	MatchNameCameraAperture                       = scene.MatchNameCameraAperture

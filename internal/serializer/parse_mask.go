@@ -240,6 +240,9 @@ func collectMaskProperties(atomTdgp *rifx.Chunk, mask *Mask, ctx *parseCtx) {
 // known mode/inverted/color differences):
 //
 //	0x00 : uint8  — Inverted flag (0/1)
+//	0x01 : uint8  — Locked flag (0/1)
+//	0x02 : uint8  — MaskMotionBlur mode (0=SameAsLayer, 2=On, 3=Off)
+//	0x03 : uint8  — MaskFeatherFalloff (0=Smooth, 1=Linear) — RE'd 2026-06-17
 //	0x04 : uint32 BE — Mode enum (MaskModeNone..MaskModeDifference)
 //	0x08 : uint32 BE — Mask index (1-based)
 //	0x2C : uint8  — alpha (always 0xFF)
@@ -253,6 +256,7 @@ func decodeMkif(m *Mask, data []byte) {
 	m.Inverted = data[0x00] != 0
 	m.Locked = data[0x01] != 0
 	m.MotionBlur = MaskMotionBlurMode(data[0x02])
+	m.FeatherFalloff = MaskFeatherFalloff(data[0x03])
 	m.Mode = MaskMode(binary.BigEndian.Uint32(data[0x04:0x08]))
 	m.Index = binary.BigEndian.Uint32(data[0x08:0x0C])
 	m.Color = [3]uint8{data[0x2D], data[0x2E], data[0x2F]}

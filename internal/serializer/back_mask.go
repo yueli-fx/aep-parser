@@ -121,6 +121,17 @@ func (b *maskBackrefs) SetMaskMotionBlur(mode MaskMotionBlurMode) error {
 	return nil
 }
 
+func (b *maskBackrefs) SetFeatherFalloff(falloff MaskFeatherFalloff) error {
+	if b.mkif == nil {
+		return fmt.Errorf("mask %q: no mkif chunk", b.maskName)
+	}
+	if len(b.mkif.Data) < 4 {
+		return fmt.Errorf("mask %q: mkif too short for FeatherFalloff write (len=%d)", b.maskName, len(b.mkif.Data))
+	}
+	b.mkif.Data[0x03] = byte(falloff)
+	return nil
+}
+
 func (b *maskBackrefs) SetClosed(v bool) error {
 	if b.shph == nil {
 		return fmt.Errorf("mask %q: no shph chunk", b.maskName)

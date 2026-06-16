@@ -106,8 +106,9 @@ type Mask struct {
 	Mode          MaskMode           // from mkif @0x04
 	Inverted      bool               // from mkif @0x00
 	Locked        bool               // from mkif @0x01 (== 1 when AE timeline UI lock is on)
-	MotionBlur    MaskMotionBlurMode // from mkif @0x02 (0=SameAsLayer, 2=On, 3=Off)
-	Index         uint32             // from mkif @0x08 (AE internal mask ID, not always sequential)
+	MotionBlur     MaskMotionBlurMode  // from mkif @0x02 (0=SameAsLayer, 2=On, 3=Off)
+	FeatherFalloff MaskFeatherFalloff  // from mkif @0x03 (0=Smooth, 1=Linear)
+	Index          uint32              // from mkif @0x08 (AE internal mask ID, not always sequential)
 	Color         [3]uint8           // R, G, B from mkif @0x2D-0x2F (timeline label color)
 	Vertices      []MaskVertex       // first snapshot (or only one when static)
 	PathKeyframes []MaskPathKeyframe // nil when path is not animated

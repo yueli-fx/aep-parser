@@ -96,29 +96,6 @@
   {
     "symbol": "SetComment",
     "kind": "method",
-    "recv": "*Composition",
-    "signature": "func (c *Composition) SetComment(comment string) error",
-    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "roundtrip",
-      "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip",
-      "incident": null,
-      "alias": [
-        "comp comment",
-        "合成备注",
-        "项目面板备注",
-        "item comment"
-      ]
-    }
-  },
-  {
-    "symbol": "SetComment",
-    "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetComment(s string) error",
     "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block).",
@@ -139,6 +116,29 @@
         "标记注释",
         "cue point comment",
         "标记文本"
+      ]
+    }
+  },
+  {
+    "symbol": "SetComment",
+    "kind": "method",
+    "recv": "*Composition",
+    "signature": "func (c *Composition) SetComment(comment string) error",
+    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip",
+      "incident": null,
+      "alias": [
+        "comp comment",
+        "合成备注",
+        "项目面板备注",
+        "item comment"
       ]
     }
   },
@@ -1273,6 +1273,32 @@
   {
     "symbol": "AddGradientKeyframe",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
+    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestGradientStrokeAnim_AEShipGate_AE2020",
+        "TestGradientStrokeAnim_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "animated gradient stroke",
+        "渐变描边动画",
+        "gradient stroke keyframe",
+        "色标关键帧"
+      ]
+    }
+  },
+  {
+    "symbol": "AddGradientKeyframe",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) AddGradientKeyframe(time float64, g *Gradient) error",
     "summary": "AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow).",
@@ -1294,32 +1320,6 @@
         "gradient keyframe",
         "渐变关键帧",
         "color sweep"
-      ]
-    }
-  },
-  {
-    "symbol": "AddGradientKeyframe",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
-    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestGradientStrokeAnim_AEShipGate_AE2020",
-        "TestGradientStrokeAnim_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "animated gradient stroke",
-        "渐变描边动画",
-        "gradient stroke keyframe",
-        "色标关键帧"
       ]
     }
   },
@@ -1452,31 +1452,6 @@
   {
     "symbol": "SetColorStops",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
-    "summary": "SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_GradientStroke_AEShipGate_AE2020",
-        "TestV2_2_GradientStroke_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke color stops",
-        "渐变描边色标",
-        "color stops"
-      ]
-    }
-  },
-  {
-    "symbol": "SetColorStops",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error",
     "summary": "SetColorStops replaces the gradient's color stops.",
@@ -1497,6 +1472,31 @@
         "渐变色标",
         "color stops",
         "渐变颜色"
+      ]
+    }
+  },
+  {
+    "symbol": "SetColorStops",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
+    "summary": "SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_GradientStroke_AEShipGate_AE2020",
+        "TestV2_2_GradientStroke_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke color stops",
+        "渐变描边色标",
+        "color stops"
       ]
     }
   },
@@ -4883,6 +4883,32 @@
         "遮罩羽化",
         "feather softness",
         "边缘柔化"
+      ]
+    }
+  },
+  {
+    "symbol": "SetFeatherFalloff",
+    "kind": "method",
+    "recv": "*Mask",
+    "signature": "func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error",
+    "summary": "SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03.",
+    "has_cap": true,
+    "cap": {
+      "domain": "mask",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMaskFeatherFalloff_AEShipGate_AE2020",
+        "TestMaskFeatherFalloff_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B mkif @0x03);RE'd 2026-06-17(parser 此前漏读该字节);非渲染→AE DOM readback gate(maskFeatherFalloff enum)",
+      "incident": null,
+      "alias": [
+        "mask feather falloff",
+        "遮罩羽化衰减",
+        "feather falloff curve",
+        "smooth linear feather"
       ]
     }
   },

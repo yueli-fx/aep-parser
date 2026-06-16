@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing or extending AddMask / mask-atom creation; debugging AE crash (0 :: 42) or 参数值无效 on a Go-written mask; reasoning about mask shape coordinate units (fraction vs pixel) or the shph open/closed flag; touching encodeBezier lhd3 fields for non-4-vertex paths; needing the (tdmn, mkif, tdgp) atom triple layout; implementing SetMaskPath / SetMaskPathKeyframes (static + animated mask path write); needing the static-mask-tdb4 == animated-shape-tdb4 base finding (differs only at 3 static→animated flag offsets) for a mask path time-table tdbs
 applies_to: [add-mask, mask-parade, mask-atom, mkif, om-s, shph, lhd3, tdb4, coordinate-space, open-path, closed-flag, structural-write, splice, parade-auto-create, ae2020, ae2025, ship-gate, crash-0-42, mask-opacity, mask-feather, mask-expansion, synthesis-insert, set-mask-path, reshape, atom-tdgp]
-last_updated: 2026-06-15
+last_updated: 2026-06-17
 resolved_by:
 ---
 
@@ -233,8 +233,28 @@ animated mask 覆盖 t=0 **左半** → t=2s **右半**；render 两个关键帧
 numKeys==6（gate 2026-06-17 从 2kf bump 到 **6kf=2 lhd3 容量页**，见下）+ keyTime 0/2，
 resave 保留 6 path keyframes。Go round-trip `mask_path_test.go`（rect→triangle 4→3 morph
 双帧 + <2 关键帧拒绝）。verify_mg_mask_pathkf.jsx + mg_mask_pathkf_shipgate_test.go。
-**facade 自由函数**。**至此 mask 路径写（静态 + 动画）全收口**；剩 `maskFeatherFalloff`
-（位置未 RE，可能不可达）。
+**facade 自由函数**。**至此 mask 路径写（静态 + 动画）全收口**。
+
+## 2026-06-17 — maskFeatherFalloff = mkif @0x03（翻案「可能不可达」）✅
+
+`Mask.SetFeatherFalloff(MaskFeatherFalloffSmooth/Linear)` — mask feather 衰减曲线
+（AE ScriptingAPI enum FFO_SMOOTH=7212 / FFO_LINEAR=7213）。coverage 旧结论「JSX 设值后
+mkif 字节零变化，疑在 sub-property 树，可能不可达」**是错的**——根因是只看了 mkif `@0x00`
+第一字节（=Inverted），没看 **`@0x03`**。
+
+**RE（`re_mask_feather_falloff.jsx` 一文件两 mask：LINEAR vs SMOOTH，`mask_dump` byte-diff）**：
+两 mask 的 mkif 仅差 3 处——`@0x08`(index，预期)、`@0x2C`(label 色，预期)、**`@0x03`**
+（LINEAR=`00 00 00 01` → byte[3]=1 / SMOOTH=`00 00 00 00` → byte[3]=0）。即 mkif `@0x00..0x03`
+是连续单字节 flag 区：**@0x00 Inverted · @0x01 Locked · @0x02 MotionBlur · @0x03 FeatherFalloff**
+（前 3 个早已解析，@0x03 此前漏读）。
+
+**实现**：length-preserving 1B 写（镜像 SetMaskMotionBlur），`decodeMkif` 补读 `@0x03`，
+scene `MaskFeatherFalloff` enum + `Mask.FeatherFalloff` 字段 + `SetFeatherFalloff` setter。
+**双版本 AE gate**（`TestMaskFeatherFalloff_AEShipGate_AE2020/2025`，DOM readback——非渲染，
+falloff 是 feather 曲线 enum 无干净单帧像素证明）：写 @0x03=1 → AE 读回
+`maskFeatherFalloff==FFO_LINEAR(7213)` + resave 保留 → **coincidence-proof @0x03 真是 falloff**
+（新 RE 字节必须 AE 验，非仅 round-trip，红线7a）。Go round-trip `mask_feather_falloff_test.go`
+（Linear 写回 + 默认 Smooth）。**至此 mask 域真正全收口**（结构性 op + 选项 + 路径静/动 + falloff）。
 
 ### 2026-06-17 — animated mask path 的 >4kf 容量分页收口（红线2 边界扩展）
 

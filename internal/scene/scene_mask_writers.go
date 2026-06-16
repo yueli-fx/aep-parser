@@ -106,6 +106,36 @@ func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error {
 	return nil
 }
 
+// MaskFeatherFalloff describes the mask feather decay curve (AE's
+// MaskFeatherFalloff enum FFO_SMOOTH/FFO_LINEAR). Stored as a single byte at
+// mkif @0x03 (RE'd 2026-06-17 by diffing two AE-native masks Smooth vs Linear;
+// the parser previously did not read this byte).
+//
+//	0 = Smooth (FFO_SMOOTH, AE default)
+//	1 = Linear (FFO_LINEAR)
+type MaskFeatherFalloff uint8
+
+const (
+	MaskFeatherFalloffSmooth MaskFeatherFalloff = 0
+	MaskFeatherFalloffLinear MaskFeatherFalloff = 1
+)
+
+// SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03.
+// Valid values: MaskFeatherFalloffSmooth (0, default), MaskFeatherFalloffLinear (1).
+// length-preserving (1 byte).
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskFeatherFalloff_AEShipGate_AE2020,TestMaskFeatherFalloff_AEShipGate_AE2025 boundary="length-preserving(1B mkif @0x03);RE'd 2026-06-17(parser 此前漏读该字节);非渲染→AE DOM readback gate(maskFeatherFalloff enum)" alias="mask feather falloff,遮罩羽化衰减,feather falloff curve,smooth linear feather"
+func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error {
+	if m.back == nil {
+		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
+	}
+	if err := m.back.SetFeatherFalloff(falloff); err != nil {
+		return err
+	}
+	m.FeatherFalloff = falloff
+	return nil
+}
+
 // SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). The
 // `ADBE Mask Opacity` leaf is AE-default-elided; setting it materializes the leaf
 // in the mask atom group (synthesis-insert). Requires a mask round-tripped

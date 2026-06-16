@@ -89,6 +89,16 @@ from mkif @0x02 (0=SameAsLayer, 2=On, 3=Off)
 
 read-only
 
+### Mask.FeatherFalloff
+
+```go
+FeatherFalloff MaskFeatherFalloff
+```
+
+from mkif @0x03 (0=Smooth, 1=Linear)
+
+read-write
+
 ### Mask.Index
 
 ```go
@@ -231,6 +241,14 @@ func (m *Mask) SetFeather(xy [2]float64) error
 ```
 
 SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen.
+
+### Mask.SetFeatherFalloff
+
+```go
+func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error
+```
+
+SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03. Valid values: MaskFeatherFalloffSmooth (0, default), MaskFeatherFalloffLinear (1). length-preserving (1 byte).
 
 ### Mask.SetInverted
 

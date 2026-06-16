@@ -3,7 +3,7 @@
 
 徽章 tier:🟢stable · 🟡alpha · ⬜planned · ❌missing · 🚫negative　·　verify:none / roundtrip / ae-accept / render-pixel
 
-共 478 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
+共 479 条已标注能力。查询用 `go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`。
 
 ## comp
 
@@ -13,8 +13,8 @@
 | `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
 | `*Composition.SetBGColor` | 🟢stable | roundtrip | 2020 |  | SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. ⚠length-preserving(3B);无专门 AE gate→round-trip |
 | `*Marker.SetChapter` | 🟢stable | roundtrip | 2020 |  | SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip |
-| `*Composition.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). ⚠length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip |
 | `*Marker.SetComment` | 🟢stable | ae-accept | 2020 | TestMarker_AEShipGate_AE2020<br>TestMarker_AEShipGate_AE2025 | SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用 |
+| `*Composition.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). ⚠length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入新块);无专门 AE gate→round-trip |
 | `*Composition.SetCompMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B bit 3). ⚠length-preserving(1bit);层级开关需与 Layer.MotionBlur 配合;无专门 AE gate→round-trip |
 | `*Marker.SetCuePointName` | 🟢stable | roundtrip | 2020 |  | SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段,现代 AE 项目极少填;无专门 AE gate→round-trip |
 | `*Composition.SetDisplayStartFrame` | 🟢stable | roundtrip | 2020 |  | SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStartTime. ⚠委托 SetDisplayStartTime;需 FrameRate>0;无专门 AE gate→round-trip |
@@ -81,15 +81,15 @@
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
 | `*VectorGroup.AddGradientFill` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | AddGradientFill appends a default-valued GradientFillNode (2-stop black→white linear gradient, fully opaque) and returns it. |
-| `*GradientFillNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientAnim_AEShipGate_AE2020<br>TestGradientAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow). |
 | `*GradientStrokeNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientStrokeAnim_AEShipGate_AE2020<br>TestGradientStrokeAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke). |
+| `*GradientFillNode.AddGradientKeyframe` | 🟢stable | render-pixel | 2020 | TestGradientAnim_AEShipGate_AE2020<br>TestGradientAnim_AEShipGate_AE2025 | AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow). |
 | `*VectorGroup.AddGradientStroke` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | AddGradientStroke appends a default-valued GradientStrokeNode (2-stop black→white gradient) and returns it. |
 | `NewGradientFillNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | NewGradientFillNode returns a detached gradient-fill shape node. |
 | `NewGradientStrokeNode` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025<br>TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | NewGradientStrokeNode returns a detached gradient-stroke shape node. |
 | `*GradientStrokeNode.SetAlphaStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]). |
 | `*GradientFillNode.SetAlphaStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetAlphaStops replaces the gradient's alpha (opacity) stops. |
-| `*GradientStrokeNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]). |
 | `*GradientFillNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientFill_AEShipGate_AE2020<br>TestV2_2_GradientFill_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops. |
+| `*GradientStrokeNode.SetColorStops` | 🟢stable | render-pixel | 2020 | TestV2_2_GradientStroke_AEShipGate_AE2020<br>TestV2_2_GradientStroke_AEShipGate_AE2025 | SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]). |
 | `*GradientFillNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradientDir_AEShipGate_AE2020<br>TestMGGradientDir_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
 | `*GradientStrokeNode.SetEndPoint` | 🟢stable | render-pixel | 2020 | TestMGGradStrokeGeom_AEShipGate_AE2020<br>TestMGGradStrokeGeom_AEShipGate_AE2025 | SetEndPoint sets the gradient ramp's end point (shape-local coords). |
 | `*GradientFillNode.SetGradientType` | 🟢stable | render-pixel | 2020 | TestMGGradientRadial_AEShipGate_AE2020<br>TestMGGradientRadial_AEShipGate_AE2025 | SetGradientType selects linear (default) or radial ramp shape. |
@@ -258,6 +258,7 @@
 | `*Mask.SetColor` | 🟢stable | roundtrip | 2020 |  | SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. ⚠length-preserving(3B mkif @0x2D-0x2F);alpha 不动;无专门 AE gate→round-trip |
 | `*Mask.SetExpansion` | 🟢stable | roundtrip | 2020 |  | SetExpansion sets the mask's Expansion (AE "Mask Expansion", internally `ADBE Mask Offset`) in pixels — positive grows the masked region, negative shrinks it. ⚠synthesis-insert;需 Reopen 后调用;正值扩张负值收缩;无专门 AE gate→round-trip |
 | `*Mask.SetFeather` | 🟢stable | roundtrip | 2020 |  | SetFeather sets the mask's Feather softness (X, Y in pixels). ⚠synthesis-insert;需 Reopen 后调用;xy 不得为负;无专门 AE gate→round-trip |
+| `*Mask.SetFeatherFalloff` | 🟢stable | ae-accept | 2020 | TestMaskFeatherFalloff_AEShipGate_AE2020<br>TestMaskFeatherFalloff_AEShipGate_AE2025 | SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03. ⚠length-preserving(1B mkif @0x03);RE'd 2026-06-17(parser 此前漏读该字节);非渲染→AE DOM readback gate(maskFeatherFalloff enum) |
 | `*Mask.SetInverted` | 🟢stable | roundtrip | 2020 |  | SetInverted toggles the mask Inverted flag (mkif @0x00). ⚠length-preserving(1B mkif @0x00);无专门 AE gate→round-trip |
 | `*Mask.SetLocked` | 🟢stable | roundtrip | 2020 |  | SetLocked toggles the mask's lock flag (mkif @0x01). ⚠length-preserving(1B mkif @0x01);AE UI 锁定但字节仍可写;无专门 AE gate→round-trip |
 | `*Mask.SetMaskMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. ⚠length-preserving(1B mkif @0x02);无专门 AE gate→round-trip |

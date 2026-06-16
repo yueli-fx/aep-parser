@@ -265,6 +265,7 @@ type MaskWriter interface {
 	SetColor([3]uint8) error
 	SetLocked(bool) error
 	SetMaskMotionBlur(MaskMotionBlurMode) error
+	SetFeatherFalloff(MaskFeatherFalloff) error
 	SetClosed(bool) error
 
 	// SetMaskOption overwrites or splices a default-elided mask option leaf

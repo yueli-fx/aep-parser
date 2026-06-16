@@ -3699,6 +3699,14 @@
       "rw": "read-write",
       "summary": "Other mask-level properties, populated when their cdat values exist in the mask atom's property tree. Feather is 2D (X, Y) in pixels; Opacity is 0..1; Expansion (AE's \"Mask Expansion\", internally \"ADBE Mask Offset\") is in pixels."
     },
+    "Mask.FeatherFalloff": {
+      "kind": "field",
+      "file": "mask.md",
+      "anchor": "#maskfeatherfalloff",
+      "signature": "FeatherFalloff MaskFeatherFalloff",
+      "rw": "read-write",
+      "summary": "from mkif @0x03 (0=Smooth, 1=Linear)"
+    },
     "Mask.Index": {
       "kind": "field",
       "file": "mask.md",
@@ -3807,6 +3815,13 @@
       "anchor": "#masksetfeather",
       "signature": "func (m *Mask) SetFeather(xy [2]float64) error",
       "summary": "SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen."
+    },
+    "Mask.SetFeatherFalloff": {
+      "kind": "method",
+      "file": "mask.md",
+      "anchor": "#masksetfeatherfalloff",
+      "signature": "func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error",
+      "summary": "SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03. Valid values: MaskFeatherFalloffSmooth (0, default), MaskFeatherFalloffLinear (1). length-preserving (1 byte)."
     },
     "Mask.SetInverted": {
       "kind": "method",

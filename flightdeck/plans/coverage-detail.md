@@ -260,7 +260,7 @@ AE 文档：[Property](../references/after-effects-scripting-guide/docs/property
 | `MaskPropertyGroup.color`              | `Mask.Color` + `SetColor`                  | ✅ R/W        |                                                                                                          |
 | `MaskPropertyGroup.inverted`           | `Mask.Inverted` + `SetInverted`            | ✅ R/W        |                                                                                                          |
 | `MaskPropertyGroup.locked`             | `Mask.Locked` + `SetLocked`                  | ✅ R/W        | mkif `@0x01`，1 = locked                                                                               |
-| `MaskPropertyGroup.maskFeatherFalloff` | —                                             | ⚠ deferred   | JSX 设值 OK 但 mkif 字节无变化 — 可能存在 mask sub-property 树里（不是顶层 chunk），需要进一步 RE       |
+| `MaskPropertyGroup.maskFeatherFalloff` | `Mask.FeatherFalloff` + `SetFeatherFalloff`  | ✅ R/W        | mkif `@0x03`（0=Smooth/1=Linear），RE'd 2026-06-17：旧「mkif 字节无变化」结论错（看漏 @0x03）；双版本 AE DOM gate |
 | `MaskPropertyGroup.maskMode`           | `Mask.Mode` + `SetMode`                    | ✅ R/W        |                                                                                                          |
 | `MaskPropertyGroup.maskMotionBlur`     | `Mask.MotionBlur` + `SetMaskMotionBlur`      | ✅ R/W        | mkif `@0x02`：0=SameAsLayer, 2=On, 3=Off                                                               |
 | `MaskPropertyGroup.rotoBezier`         | —                                             | ❌ structural | AE 切换 rotoBezier 重写整个 shape 顶点 / 切线表示（+16 字节，4517 byte-diff）；超 length-preserving 范围 |

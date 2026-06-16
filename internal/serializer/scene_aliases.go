@@ -83,6 +83,7 @@ type (
 	Mask                            = scene.Mask
 	MaskMode                        = scene.MaskMode
 	MaskMotionBlurMode              = scene.MaskMotionBlurMode
+	MaskFeatherFalloff              = scene.MaskFeatherFalloff
 	MaskPathKey                     = scene.MaskPathKey
 	MaskPathKeyframe                = scene.MaskPathKeyframe
 	ScalarKeyframe                  = scene.ScalarKeyframe
