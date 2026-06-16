@@ -1,8 +1,8 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-16 by claude（**capindex P2 wave0+1+2 起步**:facade 全量(98)+ schema 压测硬化 + getter 豁免策略 + Layer transform = **110/313(35.1%)**。**关键修正**:(1) **tier/verify 解耦**(压测样本揪出原 `stable⟹ae-accept` 错耦——SetOpacity 是 stable API 但只 roundtrip;438 多数如此),防假绿守卫移到 `verify∈{ae-accept,render-pixel}⟹gate`;(2) **getter 豁免**(write-surface-first,用户批准):公共面 536→**313**(223 getter 不强制 tag,可后补);(3) manual-gate orphans 改回诚实 stable+roundtrip。commits 4ae1358..7efd590(6 个)。**余 ~190 写方法**(Layer 121 / Comp 25 / Project 18 / Marker 10 / Mask 9 / Keyframe 9 / Footage 5 / Property 4 / Guide 2)= wave2 续(solo vs Workflow 待用户定)。）
+**Last updated**: 2026-06-16 by claude（**capindex P2 DONE — 写/做面全标注 468/468 = 100%**(`docs/capabilities.{json,md}` 470 条)。8-agent Workflow(581k token)并行标 scene 写面 + 收尾。**write-surface-first**(用户批准):getter/reader/const **豁免**,只强制写/做面;`TestWriteSurfaceFullyTagged` CI 锁定零漏标。verify 诚实分布:roundtrip 280(length-preserving)/ render-pixel 149(实测采样像素 gate)/ ae-accept 35 / meta 6。审核修正:**tier/verify 解耦**(SetOpacity=stable+roundtrip 合法)· manual-gate orphans 诚实标 · **写面定义扩面**(纳入 shape 节点全族/render-queue/text-run,此前漏)。`-q "蒙版/位置/表达式/色彩管理"` 秒答。commits 4ae1358..0cd4626(~13 个)。遗留 cosmetic:render-queue 部分 directive-first 放置(功能等价)。）
 
-**Active focus**: **知识库地基重建 arc（当前主线）**——三原则:源码为准/自动化/秒查。capindex(`specs/2026-06-16-capability-index.md`):源码内 `aep:cap` tag 自动生成可秒查能力/API 索引,**P1 done**(layer-create) → **P2 全量标注**(= 源码级能力审核,揪假绿/补缺口)→ CI 全覆盖强制 + coverage 退役。然后 `knowledge-consolidation`(parked,待 P2):记忆系统退役/incidents 合并清理/CLAUDE.md 瘦身/根目录 exe 清理。**能力查询**:`go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`(渐取代 coverage.md)。—— **库能力主线**早已全收口、需求驱动稳态(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);机制库 parse-the-clone + synthesis-insert + animate(Scalar/Vector/Gradient/Path/TextRange);每渲染类双版本 AE ship-gate(红线4)。火焰演示=番外。
+**Active focus**: **知识库地基重建 arc（当前主线）**——三原则:源码为准/自动化/秒查。capindex(`specs/2026-06-16-capability-index.md`,graduate)**P1+P2 DONE**:源码内 `aep:cap` tag → 自动生成可秒查能力/API 索引,**写/做面 100% 标注 + CI 强制零漏标**。getter/const 按 write-surface-first 豁免。**下一步 = `knowledge-consolidation`**(parked→可启动):coverage.md 退役(写面真相源已迁入 tag,已解锁)/ incidents 合并清理 / CLAUDE.md 瘦身 / 记忆系统退役 / 根目录 exe 清理。**能力查询**:`go run ./cmd/capindex -q <词>` 或 grep `docs/capabilities.json`(取代 coverage.md)。—— **库能力主线**早已全收口、需求驱动稳态(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);每渲染类双版本 AE ship-gate(红线4)。火焰演示=番外。
 
 ## 进行中
 
@@ -17,9 +17,12 @@
 
 ## 下一步
 
-**➡ capindex P2 wave2 续:~190 个 scene 写方法标注**（Layer 121:material/camera/light/flags/time/matte · Comp 25 · Project 18 · Marker 10 · Mask 9 · Keyframe 9 · Footage 5 · Property 4 · Guide 2)。getter 已豁免(write-surface-first)。**pace 待定**:solo 多会话(~5-6 turn)vs Workflow 并行(按 file/type 分片 worktree 隔离,快但耗 token,需用户喊"用 workflow")。配方:每方法 domain by area + verify(length-preserving→roundtrip / 有 gate→ae-accept|render-pixel)+ boundary + alias;capindex 校验 gate。**orphan 决议**(11 manual-gate):编码 JSX gate 为 Go test 恢复 ae-accept,还是维持 stable+roundtrip。
-**Wave 9 收尾**:meta 扫尾 + 开 CI 全覆盖强制 + 回写 spec。**然后** `knowledge-consolidation`(parked):记忆退役/incidents 合并/CLAUDE.md 瘦身/根 exe 清理。
-**能力查询**:`go run ./cmd/capindex -q <词>`(facade 全覆盖,438 scene 方法陆续上)。
+**➡ capindex P2 完成。下一步 = `knowledge-consolidation`**(`specs/knowledge-consolidation.md`,idea→可启动):
+- **A coverage.md 退役**(已解锁):写面真相源已迁入源码 tag + `docs/capabilities.{json,md}`;coverage.md/coverage-detail.md 残值审计后退役/精简为指针。
+- **B incidents 审计**:靠 `incident=` 反向链接核 + 过时清理 + 相似合并。
+- **C CLAUDE.md 瘦身** · **D 记忆系统退役**(迁 flightdeck) · **E 根目录 exe 清理**(无依赖可先做)。
+**遗留小项**(capindex):render-queue tag directive-first 放置统一为 END(cosmetic,功能等价)· orphan 决议(11 manual-gate op:编码 JSX gate 为 Go test 恢复 ae-accept,或维持 stable+roundtrip)。
+**能力查询**:`go run ./cmd/capindex -q <词>`(写/做面全覆盖)。
 
 **原库能力 backlog（非阻塞,需求驱动;火焰=番外搁置）**：
 - 文字：动画器 5 类全 ✓ + **animate leaf 全收口** ✓ + **免费近邻收口** ✓（2026-06-16：~~Fill Opacity~~ ~~Stroke Opacity~~ ~~Stroke Width~~ ~~Stroke Color~~ ~~Skew~~ 5 个双版本 render-gate PASS；**Rotation X/Y evidence-based defer**——2D 层视觉惰性 bbox 三帧全同，需逐字 3D，facade 保留标 Alpha/write-only + round-trip 自验）；**structural op（Remove/Dup/Move）双版本 gate PASS** ✓ + **Range Advanced（SetTextRangeAdvanced，Amount render-gate PASS）** ✓ + **多 Selector（AddTextRangeSelector）** ✓ + **Wiggly Selector（AddTextWigglySelector，双版本 render-gate PASS via 时间变化签名）** ✓（2026-06-16）；**selector 家族收口**。**Expressible Selector = evidence-defer**（Amount 表达式驱动，库表达式未渲染验证）。详 `incidents/text-animator-create-re.md`
