@@ -13,13 +13,13 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 **🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
 
-15 个 🖼 可视方向 ✅ complete（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）。**+1 新方向 [3d-camera] ✅ complete**（2026-06-15 用户真机验收通过，3D 图层 + 相机：视差 + 透视 tumble）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
+15 个 🖼 可视方向 ✅ complete（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）+ [3d-camera] ✅ complete（2026-06-15，3D 图层 + 相机：视差 + 透视 tumble）。**[shape-filters] 当前 🔍 待review**（2026-06-16 扩成 4×4，加 Wiggle 调制对比行 Points/Correlation，等真机复核翻回 complete）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
 
 ## 🖼 A 类 — 可视方向（看图档）
 
 | 方向 | 测什么 | 状态 |
 |---|---|---|
-| [shape-filters](shape-filters/INDEX.md) | 形状矢量滤镜家族 11 件 + PolyStar + 双滤镜叠加 | ✅ complete |
+| [shape-filters](shape-filters/INDEX.md) | 形状矢量滤镜家族 11 件 + PolyStar + 双滤镜叠加 + **Wiggle 调制对比行**（Points/Correlation） | 🔍 待review（2026-06-16 加第 4 行调制对比） |
 | [shape-primitives](shape-primitives/INDEX.md) | 四种参数图元 + Fill/Stroke/Gradient 描绘变体 | ✅ complete |
 | [keyframes-ease](keyframes-ease/INDEX.md) | 时间缓动 linear/ease-out/ease-in-out（渲中间帧看位置差） | ✅ complete |
 | [expressions](expressions/INDEX.md) | 表达式激活（time\*N 旋转）+ 四语汇 idiom（跨层/loopOut/wiggle/slider） | ✅ complete |

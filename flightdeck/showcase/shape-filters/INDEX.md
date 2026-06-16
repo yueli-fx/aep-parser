@@ -1,10 +1,10 @@
 ---
 showcase: shape-filters
-direction: 形状矢量滤镜家族 — 纯 Go 从零生成 11 件 cdat-based vector filters（+ PolyStar 形状）并 AE 实渲
-capabilities: [round-corners, offset-paths, trim-paths, zigzag, pucker-bloat, twist, wiggle-paths, repeater, merge-paths, polystar, wiggle-transform]
-gates: [TestMGTrim_AEShipGate, TestMGRepeater_AEShipGate, TestMGRoundCorners_AEShipGate, TestMGOffset_AEShipGate, TestMGMerge_AEShipGate, TestMGZigZag_AEShipGate, TestMGPuckerBloat_AEShipGate, TestMGTwist_AEShipGate, TestMGWiggle_AEShipGate, TestMGWiggleTransform_AEShipGate, "+PolyStar star gate"]
-status: complete
-last_updated: 2026-06-13
+direction: 形状矢量滤镜家族 — 纯 Go 从零生成 11 件 cdat-based vector filters（+ PolyStar 形状 + Wiggle 调制对比）并 AE 实渲
+capabilities: [round-corners, offset-paths, trim-paths, zigzag, pucker-bloat, twist, wiggle-paths, repeater, merge-paths, polystar, wiggle-transform, roughen-points, correlation]
+gates: [TestMGTrim_AEShipGate, TestMGRepeater_AEShipGate, TestMGRoundCorners_AEShipGate, TestMGOffset_AEShipGate, TestMGMerge_AEShipGate, TestMGZigZag_AEShipGate, TestMGPuckerBloat_AEShipGate, TestMGTwist_AEShipGate, TestMGWiggle_AEShipGate, TestMGWiggleTransform_AEShipGate, TestMGWiggleMod_AEShipGate, "+PolyStar star gate"]
+status: 待review
+last_updated: 2026-06-16
 regenerate: "go run ./flightdeck/showcase/shape-filters  +  scripts/ae_run.ps1 render.jsx"
 ---
 
@@ -12,7 +12,9 @@ regenerate: "go run ./flightdeck/showcase/shape-filters  +  scripts/ae_run.ps1 r
 
 ## 这个方向测什么
 
-不开 AE，纯 Go（`internal/aep` facade）从零拼一个 4×3 网格工程，每格一个形状层 + 一个矢量滤镜/形状，覆盖**全部 11 件常用 shape 矢量滤镜**（cdat-based vein 已闭合）+ PolyStar 形状 + 一个双滤镜叠加。AE 2020 打开零损坏弹窗、渲染 frame 0 → `shape_filters.png` 供逐格眼验（红线4：看图，不靠值 round-trip）。每件能力本身已过 AE 2020+2025 双版本渲染像素 ship-gate（见 `gates`），本工程验证它们**组合**也成立。
+不开 AE，纯 Go（`internal/aep` facade）从零拼一个 **4×4** 网格工程，每格一个形状层 + 一个矢量滤镜/形状。前三行覆盖**全部 11 件常用 shape 矢量滤镜**（cdat-based vein 已闭合）+ PolyStar 形状 + 一个双滤镜叠加；**第 4 行 = Wiggle 调制对比**（家族最后收口的 elided 子流：Roughen Points Corner↔Smooth、Correlation 低↔高）。AE 2020 打开零损坏弹窗、渲染 frame 0 → `shape_filters.png` 供逐格眼验（红线4：看图，不靠值 round-trip）。每件能力本身已过 AE 2020+2025 双版本渲染像素 ship-gate（见 `gates`），本工程验证它们**组合**也成立。
+
+> Temporal/Spatial Phase + Wiggler Correlation 是噪声相位调制、无 categorical 像素（roundtrip-gated，非视觉），故不入本看图档——见 `TestMGWiggleModRT` + `incidents/trim-paths-vector-filter-re.md`。
 
 ## 产物
 
@@ -39,6 +41,12 @@ regenerate: "go run ./flightdeck/showcase/shape-filters  +  scripts/ae_run.ps1 r
 | 行3·列2 | 10_MergeSubtract | 绿 | 方块中央挖圆洞 | Merge Subtract（fill 在上） |
 | 行3·列3 | 11_PolyStar | 琥珀 | 五角星 | PolyStar 5 points |
 | 行3·列4 | 12_TwistPlusWiggle | 紫 | 既扭又毛糙的团块 | Twist + Wiggle 叠加 |
+| 行4·列1 | 13_WiggleCorner | 青 | 毛糙方块·**尖角**刺（默认 Corner） | Wiggle Points=Corner |
+| 行4·列2 | 14_WiggleSmooth | 青 | 同种子毛糙方块·**圆鼓**波浪（Smooth） | Wiggle Points=Smooth |
+| 行4·列3 | 15_WiggleCorrLow | 粉 | 毛糙 jagged 方块（各点独立抖） | Correlation=0 |
+| 行4·列4 | 16_WiggleCorrHigh | 粉 | **近乎干净方块**（相干→刚性平移） | Correlation=100 |
+
+> 行4 读法：列1↔列2 同种子 Size34/Detail8，唯 Points 不同 → 尖角 vs 圆鼓；列3↔列4 同种子，唯 Correlation 不同 → jagged vs 几近平整（完全相干使位移退化为整体平移，边几乎不 roughen）。
 
 ## 溯源
 

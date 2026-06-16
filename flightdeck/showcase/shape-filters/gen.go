@@ -23,9 +23,10 @@ func must(err error) {
 	}
 }
 
-// cell center positions: 4 columns × 3 rows in a 1920×1080 frame.
+// cell center positions: 4 columns × 4 rows in a 1920×1080 frame. Row 4 holds
+// the Wiggle modulation comparison (Points Corner/Smooth, Correlation low/high).
 var colX = []float64{320, 740, 1180, 1600}
-var rowY = []float64{230, 540, 850}
+var rowY = []float64{160, 405, 650, 905}
 
 func at(col, row int) [2]float64 { return [2]float64{colX[col], rowY[row]} }
 
@@ -227,6 +228,45 @@ func main() {
 		must(wg.SetSize(12))
 		must(wg.SetDetail(20))
 		must(wg.SetRandomSeed(3))
+	})
+
+	// Row 4 — Wiggle modulation comparison (the family's last knobs). All four
+	// share Size/Detail/Seed; only the demonstrated knob varies, so the visual
+	// difference is attributable to it alone.
+	wiggleBase := func(g *aep.VectorGroup, color [4]float64) *aep.WigglePathsNode {
+		r, err := g.AddRect()
+		must(err)
+		must(r.SetSize([2]float64{150, 150}))
+		f, err := g.AddFill()
+		must(err)
+		must(f.SetColor(color))
+		wg, err := g.AddWigglePaths()
+		must(err)
+		must(wg.SetSize(34))
+		must(wg.SetDetail(8))
+		must(wg.SetRandomSeed(5))
+		return wg
+	}
+
+	// (0,3) Points = Corner (default) — sharp angular spikes.
+	cell("13_WiggleCorner", 0, 3, func(g *aep.VectorGroup) {
+		wiggleBase(g, teal)
+	})
+	// (1,3) Points = Smooth — same seed, rounded scalloped bumps.
+	cell("14_WiggleSmooth", 1, 3, func(g *aep.VectorGroup) {
+		wg := wiggleBase(g, teal)
+		must(wg.SetPoints(aep.RoughenPointsSmooth))
+	})
+	// (2,3) Correlation = 0 — independent jitter, jagged edge.
+	cell("15_WiggleCorrLow", 2, 3, func(g *aep.VectorGroup) {
+		wg := wiggleBase(g, pink)
+		must(wg.SetCorrelation(0))
+	})
+	// (3,3) Correlation = 100 — coherent boil, edge collapses to a near-rigid
+	// offset (almost-clean square).
+	cell("16_WiggleCorrHigh", 3, 3, func(g *aep.VectorGroup) {
+		wg := wiggleBase(g, pink)
+		must(wg.SetCorrelation(100))
 	})
 
 	// BG must render behind everything.
