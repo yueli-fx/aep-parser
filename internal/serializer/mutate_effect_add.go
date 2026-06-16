@@ -54,6 +54,8 @@ import (
 //go:embed templates/effect_adbe_turbulent_displace.bin templates/effect_adbe_roughen_edges.bin templates/effect_adbe_echo.bin templates/effect_adbe_radial_blur.bin templates/effect_adbe_4colorgradient.bin templates/effect_adbe_checkerboard.bin templates/effect_adbe_grid.bin templates/effect_adbe_stroke.bin templates/effect_adbe_corner_pin.bin templates/effect_adbe_venetian_blinds.bin
 //go:embed templates/effect_adbe_twirl.bin templates/effect_adbe_polar_coordinates.bin templates/effect_adbe_spherize.bin templates/effect_adbe_magnify.bin templates/effect_adbe_ripple.bin templates/effect_adbe_optics_compensation.bin templates/effect_adbe_posterize.bin templates/effect_adbe_threshold2.bin templates/effect_adbe_find_edges.bin templates/effect_adbe_color_emboss.bin templates/effect_adbe_emboss.bin templates/effect_adbe_strobe.bin templates/effect_adbe_brush_strokes.bin templates/effect_adbe_bevel_alpha.bin templates/effect_adbe_bevel_edges.bin templates/effect_adbe_photo_filter.bin templates/effect_adbe_vibrance.bin templates/effect_adbe_color_balance_2.bin templates/effect_adbe_color_balance_hls.bin
 //go:embed templates/effect_adbe_black_white.bin templates/effect_adbe_gamma_pedestal_gain2.bin templates/effect_adbe_channel_blur.bin templates/effect_adbe_bilateral.bin templates/effect_adbe_smart_blur.bin templates/effect_adbe_unsharp_mask2.bin templates/effect_adbe_shift_channels.bin templates/effect_adbe_solid_composite.bin templates/effect_adbe_minimax.bin templates/effect_adbe_arithmetic.bin templates/effect_adbe_circle.bin templates/effect_adbe_lens_flare.bin templates/effect_adbe_cell_pattern.bin templates/effect_adbe_lightning_2.bin templates/effect_adbe_laser.bin templates/effect_adbe_paint_bucket.bin templates/effect_adbe_posterize_time.bin templates/effect_adbe_simple_choker.bin templates/effect_adbe_matte_choker.bin
+//go:embed templates/effect_adbe_bulge.bin templates/effect_adbe_offset.bin templates/effect_adbe_mirror.bin templates/effect_adbe_fractal.bin templates/effect_adbe_write_on.bin templates/effect_adbe_scribble_fill.bin templates/effect_adbe_eyedropper_fill.bin templates/effect_adbe_audspect.bin templates/effect_adbe_audwave.bin templates/effect_adbe_autolevels.bin templates/effect_adbe_autocolor.bin templates/effect_adbe_autocontrast.bin
+//go:embed templates/effect_adbe_equalize.bin templates/effect_adbe_leave_color.bin templates/effect_adbe_change_to_color.bin templates/effect_adbe_change_color.bin templates/effect_adbe_radial_shadow.bin templates/effect_adbe_remove_color_matting.bin templates/effect_adbe_dust_scratches.bin templates/effect_adbe_noise_alpha2.bin templates/effect_adbe_noise_hls2.bin templates/effect_adbe_radial_wipe.bin templates/effect_adbe_block_dissolve.bin
 var effectTemplateFS embed.FS
 
 // Effect match-name constants for the addable built-in set. These are AE's
@@ -144,6 +146,32 @@ const (
 	EffectPosterizeTime      = "ADBE Posterize Time"       // Posterize Time
 	EffectSimpleChoker       = "ADBE Simple Choker"        // Simple Choker
 	EffectMatteChoker        = "ADBE Matte Choker"         // Matte Choker
+	// Wave 6 (2026-06-16, fixture re_effect_lib6.aep) — more MG parameter-only
+	// built-ins (+ wave-5 Bulge correction). All tdpi-host uniform (audio
+	// spectrum/waveform default Audio Layer = None → no foreign tdpi).
+	EffectBulge            = "ADBE Bulge"                // Bulge
+	EffectOffset           = "ADBE Offset"               // Offset
+	EffectMirror           = "ADBE Mirror"               // Mirror
+	EffectFractal          = "ADBE Fractal"              // Fractal
+	EffectWriteOn          = "ADBE Write-on"             // Write-on
+	EffectScribble         = "ADBE Scribble Fill"        // Scribble
+	EffectEyedropperFill   = "ADBE Eyedropper Fill"      // Eyedropper Fill
+	EffectAudioSpectrum    = "ADBE AudSpect"             // Audio Spectrum
+	EffectAudioWaveform    = "ADBE AudWave"              // Audio Waveform
+	EffectAutoLevels       = "ADBE AutoLevels"           // Auto Levels
+	EffectAutoColor        = "ADBE AutoColor"            // Auto Color
+	EffectAutoContrast     = "ADBE AutoContrast"         // Auto Contrast
+	EffectEqualize         = "ADBE Equalize"             // Equalize
+	EffectLeaveColor       = "ADBE Leave Color"          // Leave Color
+	EffectChangeToColor    = "ADBE Change To Color"      // Change to Color
+	EffectChangeColor      = "ADBE Change Color"         // Change Color
+	EffectRadialShadow     = "ADBE Radial Shadow"        // Radial Shadow
+	EffectRemoveColorMatte = "ADBE Remove Color Matting" // Remove Color Matting
+	EffectDustAndScratches = "ADBE Dust & Scratches"     // Dust & Scratches
+	EffectNoiseAlpha       = "ADBE Noise Alpha2"         // Noise Alpha
+	EffectNoiseHLS         = "ADBE Noise HLS2"           // Noise HLS
+	EffectRadialWipe       = "ADBE Radial Wipe"          // Radial Wipe
+	EffectBlockDissolve    = "ADBE Block Dissolve"       // Block Dissolve
 )
 
 // effectTemplateFiles maps an effect match-name to its embedded template path.
@@ -230,6 +258,29 @@ var effectTemplateFiles = map[string]string{
 	EffectPosterizeTime:      "templates/effect_adbe_posterize_time.bin",
 	EffectSimpleChoker:       "templates/effect_adbe_simple_choker.bin",
 	EffectMatteChoker:        "templates/effect_adbe_matte_choker.bin",
+	EffectBulge:              "templates/effect_adbe_bulge.bin",
+	EffectOffset:             "templates/effect_adbe_offset.bin",
+	EffectMirror:             "templates/effect_adbe_mirror.bin",
+	EffectFractal:            "templates/effect_adbe_fractal.bin",
+	EffectWriteOn:            "templates/effect_adbe_write_on.bin",
+	EffectScribble:           "templates/effect_adbe_scribble_fill.bin",
+	EffectEyedropperFill:     "templates/effect_adbe_eyedropper_fill.bin",
+	EffectAudioSpectrum:      "templates/effect_adbe_audspect.bin",
+	EffectAudioWaveform:      "templates/effect_adbe_audwave.bin",
+	EffectAutoLevels:         "templates/effect_adbe_autolevels.bin",
+	EffectAutoColor:          "templates/effect_adbe_autocolor.bin",
+	EffectAutoContrast:       "templates/effect_adbe_autocontrast.bin",
+	EffectEqualize:           "templates/effect_adbe_equalize.bin",
+	EffectLeaveColor:         "templates/effect_adbe_leave_color.bin",
+	EffectChangeToColor:      "templates/effect_adbe_change_to_color.bin",
+	EffectChangeColor:        "templates/effect_adbe_change_color.bin",
+	EffectRadialShadow:       "templates/effect_adbe_radial_shadow.bin",
+	EffectRemoveColorMatte:   "templates/effect_adbe_remove_color_matting.bin",
+	EffectDustAndScratches:   "templates/effect_adbe_dust_scratches.bin",
+	EffectNoiseAlpha:         "templates/effect_adbe_noise_alpha2.bin",
+	EffectNoiseHLS:           "templates/effect_adbe_noise_hls2.bin",
+	EffectRadialWipe:         "templates/effect_adbe_radial_wipe.bin",
+	EffectBlockDissolve:      "templates/effect_adbe_block_dissolve.bin",
 }
 
 type cachedEffectTemplate struct {

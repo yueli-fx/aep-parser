@@ -84,7 +84,7 @@ chunks, never the cache), so callers can tune params immediately
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
 
-## Effect-template library (79, embed.FS)
+## Effect-template library (102, embed.FS)
 
 `internal/serializer/templates/effect_adbe_*.bin`, each a `LIST(tdgp)` wrapper
 around one `(tdmn, sspc)` pair, extracted from AE-2020 fixtures
@@ -128,6 +128,22 @@ Lens Flare/Cell Pattern/Lightning 2/Laser/Paint Bucket), time (Posterize Time),
 matte (Simple/Matte Choker). All tdpi-host=15 uniform (no dangling layer-ref).
 `TestAddEffectWave5_AEShipGate_AE2020/2025` — 38-in-one-run on a 100% Go-built
 file, both versions readback-in-order + resave-preserved.
+
+Wave 6 (2026-06-16, `re_effect_lib6.jsx` → 45 candidates / 23 OK; corrected
+wave-5 Bulge = `ADBE Bulge` not `ADBE BULGE`): 23 more parameter-only built-ins
+— distort (Bulge/Offset/Mirror/Fractal), generate (Write-on/Scribble Fill/
+Eyedropper Fill/Audio Spectrum/Audio Waveform), color (Auto Levels/Auto Color/
+Auto Contrast/Equalize/Leave Color/Change To Color/Change Color), perspective
+(Radial Shadow), channel (Remove Color Matting), noise-grain (Dust & Scratches/
+Noise Alpha2/Noise HLS2), transition (Radial Wipe/Block Dissolve). **Audio
+Spectrum/Waveform kept**: their Audio Layer param defaults to None so the
+template's tdpi pair is [host,host] (verified all-tdpi audit, no foreign id) —
+splice-safe, though the audio source must be wired separately (no setter yet).
+`TestAddEffectWave6_AEShipGate_AE2020/2025` — 23-in-one-run, both versions.
+Still-wrong match-names parked: Bezier Warp (≠ `ADBE BezMesh`), Channel Mixer
+(≠ `ADBE ChannelMixer`), + many tried-and-FAILed in lib6 (Warp/Mesh Warp/
+Liquify/Reshape/Vegas/Radio Waves/Shadow-Highlight/Pixel Motion Blur/…) — their
+real match-names need a probe pass (enumerate via canAddProperty sweep).
 
 **Curation rule:** only **parameter-only** effects. Effects with layer/path
 **reference** params (e.g. Set Matte, Displacement Map, Calculations, Compound

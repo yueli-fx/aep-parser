@@ -749,7 +749,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 // Go-built file (2/2). Free function (not a method) so the impl can live in
 // internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
 //
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025 incident=add-effect-splice-re boundary="79 内置效果库(parameter-only;layer-ref 类如 Displacement Map/Compound Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow"
+//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025 incident=add-effect-splice-re boundary="102 内置效果库(parameter-only;layer-ref 类如 Displacement Map/Compound Blur 未入库,走 SetEffectLayerParam);camera/light 层 + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow"
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
@@ -1748,6 +1748,29 @@ const (
 	EffectPosterizeTime      = serializer.EffectPosterizeTime      // Posterize Time
 	EffectSimpleChoker       = serializer.EffectSimpleChoker       // Simple Choker
 	EffectMatteChoker        = serializer.EffectMatteChoker        // Matte Choker
+	EffectBulge            = serializer.EffectBulge            // Bulge
+	EffectOffset           = serializer.EffectOffset           // Offset
+	EffectMirror           = serializer.EffectMirror           // Mirror
+	EffectFractal          = serializer.EffectFractal          // Fractal
+	EffectWriteOn          = serializer.EffectWriteOn          // Write-on
+	EffectScribble         = serializer.EffectScribble         // Scribble
+	EffectEyedropperFill   = serializer.EffectEyedropperFill   // Eyedropper Fill
+	EffectAudioSpectrum    = serializer.EffectAudioSpectrum    // Audio Spectrum
+	EffectAudioWaveform    = serializer.EffectAudioWaveform    // Audio Waveform
+	EffectAutoLevels       = serializer.EffectAutoLevels       // Auto Levels
+	EffectAutoColor        = serializer.EffectAutoColor        // Auto Color
+	EffectAutoContrast     = serializer.EffectAutoContrast     // Auto Contrast
+	EffectEqualize         = serializer.EffectEqualize         // Equalize
+	EffectLeaveColor       = serializer.EffectLeaveColor       // Leave Color
+	EffectChangeToColor    = serializer.EffectChangeToColor    // Change to Color
+	EffectChangeColor      = serializer.EffectChangeColor      // Change Color
+	EffectRadialShadow     = serializer.EffectRadialShadow     // Radial Shadow
+	EffectRemoveColorMatte = serializer.EffectRemoveColorMatte // Remove Color Matting
+	EffectDustAndScratches = serializer.EffectDustAndScratches // Dust & Scratches
+	EffectNoiseAlpha       = serializer.EffectNoiseAlpha       // Noise Alpha
+	EffectNoiseHLS         = serializer.EffectNoiseHLS         // Noise HLS
+	EffectRadialWipe       = serializer.EffectRadialWipe       // Radial Wipe
+	EffectBlockDissolve    = serializer.EffectBlockDissolve    // Block Dissolve
 )
 
 // AddItem appends a render queue item for comp, mirroring ExtendScript
