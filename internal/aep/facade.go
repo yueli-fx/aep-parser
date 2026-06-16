@@ -134,6 +134,8 @@ func DuplicateComposition(p *Project, src *Composition, name string) (*Compositi
 // Free function (not a method) so the impl can live in internal/serializer
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestV2_2_AEShipGate_AE2020,TestV2_2_AEShipGate_AE2025 incident=v2-2-aelayer-structure,multi-layer-silent-drop alias="shape,形状,矢量图层"
 func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	return serializer.NewShapeLayer(c, name)
 }
@@ -151,6 +153,8 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 // structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built
 // camera, types it correctly, resave preserves). Free function (CLAUDE.md #2
 // structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 incident=camera-light-layer-create-re alias="camera,摄像机"
 func NewCameraLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewCameraLayer(c, name)
 }
@@ -166,6 +170,8 @@ func NewCameraLayer(c *Composition, name string) (*Layer, error) {
 // structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built
 // light, types it correctly, resave preserves). Free function (CLAUDE.md #2
 // structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 incident=camera-light-layer-create-re alias="light,灯光"
 func NewLightLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewLightLayer(c, name)
 }
@@ -188,6 +194,8 @@ func NewLightLayer(c *Composition, name string) (*Layer, error) {
 // structural — AE 2020 + AE 2025 ship-gate green (AE types the Go-built layer
 // as a text layer, reads back the text, resave preserves). Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestNewTextLayer_AEShipGate_AE2020,TestNewTextLayer_AEShipGate_AE2025 incident=text-btdk-length-variable-write-scoping alias="text,文字,文本图层"
 func NewTextLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewTextLayer(c, name)
 }
@@ -209,6 +217,8 @@ func NewTextLayer(c *Composition, name string) (*Layer, error) {
 // splice). Stable / structural — AE 2020 + AE 2025 ship-gate green on an
 // all-Go-built project (AE reads back color / dims / flags, resave
 // preserves). Free function (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestNewSolidNull_AEShipGate_AE2020,TestNewSolidNull_AEShipGate_AE2025 incident=new-layer-types-scoping,nextitemid-must-include-layer-ids alias="solid,纯色,固态层"
 func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error) {
 	return serializer.NewSolidLayer(c, name, width, height, rgb)
 }
@@ -223,6 +233,8 @@ func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float6
 // Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green
 // (rides the gated solid-family creation path). Free function (CLAUDE.md #2
 // structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestNewSolidNull_AEShipGate_AE2020,TestNewSolidNull_AEShipGate_AE2025 incident=new-layer-types-scoping alias="null,空对象,空层"
 func NewNullLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewNullLayer(c, name)
 }
@@ -239,6 +251,8 @@ func NewNullLayer(c *Composition, name string) (*Layer, error) {
 // Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green
 // (rides the gated solid-family creation path). Free function (CLAUDE.md #2
 // structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=ae-accept gate=TestNewSolidNull_AEShipGate_AE2020,TestNewSolidNull_AEShipGate_AE2025 incident=new-layer-types-scoping alias="adjustment,调整图层"
 func NewAdjustmentLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewAdjustmentLayer(c, name)
 }
@@ -261,6 +275,8 @@ func NewAdjustmentLayer(c *Composition, name string) (*Layer, error) {
 // warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025
 // render-pixel ship-gate green on an all-Go-built project. Free function
 // (CLAUDE.md #2 structural-op call-form).
+//
+//aep:cap domain=layer-create tier=stable verify=render-pixel gate=TestMGPrecomp_AEShipGate_AE2020,TestMGPrecomp_AEShipGate_AE2025 incident=precomp-layer-source-id-re alias="precomp,预合成,嵌套合成"
 func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error) {
 	return serializer.NewPrecompLayer(parent, child, name)
 }
