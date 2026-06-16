@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-16 by claude（**知识库地基重建 arc 全部 DONE**:capindex P1+P2(写面 468/468=100% + CI 强制)+ knowledge-consolidation E/D/C/A/B 全收口。本轮收尾:**A** ~20 auto-memory 迁 flightdeck/CLAUDE.md 后清空 memory 目录 + CLAUDE.md 加"不用 auto-memory"规则;**B** CLAUDE.md #2/#3 长解释下沉 spec、留短规则+指针(硬约束 #1-7 全在);flame 番外 lesson 入 `incidents/procedural-fx-over-vector`。全套 go build/test 绿。~28 commits 4ae1358..(本轮)。**arc 完结 → 回归需求驱动库工作**。）
+**Last updated**: 2026-06-16 by claude（**effects 扩库 arc DONE**:AddEffect 库 41→193(+152,5 波双版本 ship-gate)——wave5 +38·wave6 +23·wave7 +45(Lumetri+Lightning+整个 Cycore CC 家族)·wave8 layer-ref 家族(Displacement Map/Compound Blur render-pixel + CC Vector Blur accept,走 SetEffectLayerParam)·wave9 +43 大 probe sweep(keying/simulation/utility + CC 剩余)。机制零变更(splice + tdpi retarget)。全套 build/vet/test 绿,8 新 ship-gate 全 PASS。commit c89782f..f98cfe3。到不了 ~300 的差额有实证:模态弹框 3 个 + foreign-tdpi layer-ref 4 个 + 音频 ~18(未扫)+ AE2020 已移除/2021+ 新增不在 2020-floor。详 `incidents/add-effect-splice-re`。）
 
 **Active focus**: **需求驱动稳态**（知识库地基重建 arc 已完结）。**知识单一家 = flightdeck + CLAUDE.md**(auto-memory 已退役);**能力真相源 = capindex**(`go run ./cmd/capindex -q <词>` / `docs/capabilities.{json,md}`,CI 强制写/做面零漏标;getter/const 豁免)。coverage.md=残值(暂搁/不可达/negative)、coverage-detail=AE-attribute 参考矩阵。—— **库能力主线**早已全收口、需求驱动(roadmap 1-6 + Text Animators 全 ship,详 `specs/2026-06-14-remaining-capability-roadmap.md`);机制库 parse-the-clone + synthesis-insert + animate;每渲染类双版本 AE ship-gate(红线4)。火焰=番外(程序化效果链,见 incident)。
 
@@ -25,7 +25,7 @@
 - 文字：动画器 5 类全 ✓ + **animate leaf 全收口** ✓ + **免费近邻收口** ✓（2026-06-16：~~Fill Opacity~~ ~~Stroke Opacity~~ ~~Stroke Width~~ ~~Stroke Color~~ ~~Skew~~ 5 个双版本 render-gate PASS；**Rotation X/Y evidence-based defer**——2D 层视觉惰性 bbox 三帧全同，需逐字 3D，facade 保留标 Alpha/write-only + round-trip 自验）；**structural op（Remove/Dup/Move）双版本 gate PASS** ✓ + **Range Advanced（SetTextRangeAdvanced，Amount render-gate PASS）** ✓ + **多 Selector（AddTextRangeSelector）** ✓ + **Wiggly Selector（AddTextWigglySelector，双版本 render-gate PASS via 时间变化签名）** ✓（2026-06-16）；**selector 家族收口**。**Expressible Selector = evidence-defer**（Amount 表达式驱动，库表达式未渲染验证）。详 `incidents/text-animator-create-re.md`
 - shape：**elided 子属性收口 arc 已完成**（2026-06-15）——ZigZag Points · Twist Center · Offset Line Join/Miter/Copy Offset · Repeater Order 全双版本 render-gate PASS（synthesis-insert 8×，Offset 5 子流全收齐）；Gradient stroke Dashes/Taper/Wave + Blend Mode/Composite Order 早已 ship（曾是看板 drift）。**仅剩** Wiggle Paths/Transform 调制参数（Correlation/Temporal·Spatial Phase/Roughen Points）evidence-based defer（Phase 本质不可像素门禁、Correlation/Points 低价值，机制已证、随时可做）。详 `trim-paths-vector-filter-re.md`
 - mask：maskFeatherFalloff（位置未 RE，可能不可达）
-- effects：per-effect typed param helper · 库继续扩 · Displacement Map/Compound Blur 等 layer-ref（同 Set Matte 机制）
+- effects：**扩库 arc DONE**（库 193,wave5-9 双版本 ship-gate）。剩余可加（需求驱动）：**音频效果波**（+~18,需音频层探针）· **layer-ref 第二波**（+4：3D Glasses/Warp Stabilizer/Timewarp/CC Particle World,按 Displacement Map 物化流程）· per-effect typed helper（低价值）。模态弹框 3 个（Apply Color LUT/PS Arbitrary Map/Numbers）headless 不可达;AE2020-floor 限制部分 2021+ 效果不可达
 - expr：linear()/ease()/valueAtTime remap（内容无关已证，边际低）
 - 3D：RotateX/Orientation/RotateZ 补 gate（同路径，低优先）
 
