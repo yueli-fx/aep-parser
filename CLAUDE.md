@@ -3,6 +3,8 @@
 Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/aftereffects-aep-parser 重写 + 增量。**读取下限 AE 2020**。
 
 > 项目用 **flightdeck**（deck 在 `flightdeck/`）。会话入口由 SessionStart hook 自动注入接管指令；手动可跑 `/flightdeck:preflight`。第一件事：读 `flightdeck/cockpit.md`（状态/下一步）+ 各 `INDEX.md`。
+>
+> **本项目不使用 auto-memory 系统**（已于 2026-06-16 退役、迁入本 deck）。新知识只进 flightdeck（错误/陷阱→`incidents/`、可复用流程→`checklists/`、外部指针→`references/`、设计→`specs/`、能力状态→capindex `aep:cap` tag）或 CLAUDE.md（跨切面铁律/工作风格）。**不要写 memory 文件。**
 
 ## 数据流
 
@@ -50,6 +52,9 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 
 - 校验: `go vet ./... && go test ./...`
 - 单测: `go test ./internal/aep/ -run 'TestX' -v`
+- 能力查询（写/做面真相源）: `go run ./cmd/capindex -q "<词>"`（或 grep `docs/capabilities.json`）
+- **build 不落根目录**：跑工具优先 `go run ./cmd/<x>`；必须 build 时 `go build -o tmp_debug/bin/<x>`（`.gitignore` 已含 `*.exe`，但别在根目录裸 build 留垃圾）
+- **多行 commit message**（Bash 工具跑 bash 非 pwsh）：写临时文件 `git commit -F tmpfile`，**勿**用 `@'...'@` here-string（会被 mangle）
 - 详细操作（tmp_debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/checklists/`
 
 ## 工作风格
@@ -57,6 +62,13 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - **一律用中文跟用户交流**（含解释、提案、报告、commit body 可英文按既有惯例）
 - 代码优先，设计讨论精简
 - 重构 / 迁移**先读源码再动**，不瞎猜
+- **自主推进**：用户授权后端到端驱动（挑高 ROI → 实现 → 验证 → 汇报），不逐步请示；一个 arc 内逐项 drain、自然停顿点不停。AskUserQuestion 只留给**真破坏性操作**或无信息不可继续。
+- **做完一个方向**：选定方向把同族子类型/硬骨头全做掉再报完成；不可达要给**实证理由**（≠「下一 slice 再说」）。诚实标未验证 ≠ 可半途收手。
+- **调试纪律**：外部校验器（AE）以**相同错误信号**连拒多个结构性修复 → 停止堆叠，转**最小失败 bisection**（已知 PASS baseline 逐特征加到首个 FAIL）。错误信号每次变化才继续 stack。
+- **渲染类 bug 先看图**：拿到渲染帧先 `Read` PNG 目视（浮雕/overlay/flat 等模式信息 > 像素数值占卜），再做数值断言；showcase 先自渲染 + Read png 自验再呈用户（不替代用户实机验收）。
+- **工具链才是真相源**：判断编译/测试只信 `go build`/`go vet`/`go test`，**不信** IDE/`<new-diagnostics>` 面板（subagent 多文件编辑期会 stale 报假 ✘）或 `gofmt -l`（本仓 core.autocrlf=true，每个 .go 都误报——比 LF/index 形或直接信 go vet）。
+- **AE ship-gate = agent 自跑** `scripts/ae_run.ps1`（无人值守，exit 0/1/2/8），别默认让用户手开 AE；cold-start exit-2 先 warm-retry（≤3 次）+ 跑已知-good fixture 作对照，别当真 FAIL（详 `checklists/re-fixture.md`）。
+- **真相源优先级**：代码 + ship-gate test > capindex tag（`go run ./cmd/capindex -q`）> docs > spec 正文/backlog（最易漂）。对齐看板前 grep 代码核实，别照搬文档。
 - **内部实现无注释**，除非 WHY 不明显；但**导出 API 的 doc comment = 文档源**（英文为源，`cmd/docgen` 从中生成 `docs/*.md`）。行内实现注释仍禁；导出符号上方的 doc comment 是文档载体，不算违反。
 
 ## 文档地图
