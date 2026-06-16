@@ -49,3 +49,15 @@ resolved_by:
 **但 render-pixel 仍未证成**（红线4 未闭环）：gate 用 `comp.openInViewer()` + `comp.saveFrameToPng` 取帧，实测 **saveFrameToPng 渲染的是 active-viewer comp 而非 receiver comp**，且 headless `-r` 下 viewer 切换不同步（同步脚本占住事件循环，`setActive()` 不生效）→ 9/10 单行 comp 抓到的是同一个 active comp（TS_JL 的 "ABCD"），无法逐 knob 区分。故 **SetRunFontSize 等是否「按值渲染」尚未被像素证实**——只证了「文字能渲染 + DOM 值对」。
 
 **下一步（reachable，独立子活）**：换可靠的逐 comp 取帧（Render Queue 渲 PNG 序列，comp-specific 且不依赖 viewer；或一次 AE run 只渲 startup-active 的单 comp）。证成后文字样式族方可升 render-pixel + commit 文本修复 + 改本 incident `status: resolved`。在此之前维持 verify=roundtrip 标注，文本修复保持 uncommitted（render-gate 未过不算 ship）。
+
+## UPDATE 2026-06-16(b)：4/5 knob 渲染已目视/数值证实；自动 gate 卡在 saveFrameToPng 缓存
+
+继续推进后**能力真相已查明**（capability 层面，红线4 实质消除）：
+
+- **字号 / 字距 / 对齐 / 大小写 4 个 knob 确认按值正确渲染**：在抓帧成功的那次 run + 目视 png：FontSize SMALL 47×40 vs BIG 153×132（≥2×）、Tracking TIGHT 173 vs WIDE 490、Justify JLEFT cx≠JCENTER cx、Caps "ace"→实渲 "ACE"（大写）。FontSize/Tracking 跨多次 run 数值稳定一致。
+- **Leading 实证不渲染（roundtrip-only）**：`SetRunLeading` 写值 + DOM 读回 70/220 正确，但 AE 对从零层渲染默认行距（220 与 70 两行间距目视相同）。已从 render-gate 移除、保留 verify=roundtrip（evidence-based defer，同 Rotation X/Y 先例）。
+
+**但自动化 render-gate 仍做不绿——卡在 AE 工具链的 `saveFrameToPng` 缓存**（不是库缺陷）：
+headless `AfterFX -r` 下 `comp.saveFrameToPng(time, file)` **发的是 AE 的持久磁盘帧缓存、跨进程不失效**：实锤——两个**独立冷启** AE 进程、相隔 2 分钟、打开**不同的**单 comp 工程（DOM 读回各异，证明确实开了不同工程），却写出**字节完全相同**的 PNG（且是**更早某次 run** 的 TS_TRK_WIDE "MMMM" 帧）。试过且**全部无效**：`app.purge(PurgeTarget.ALL_CACHES)`、逐 job 唯一 `time`、逐 comp 独立冷启 AE（单 comp 工程）。`time` 参数似乎被忽略（唯一 time 不改变输出）。`app.purge` 不清磁盘缓存；PurgeTarget 无 disk 项。
+
+**结论**：能力已证（4 knob 渲染对、Leading 不渲染），但**自动像素门禁需要绕过 saveFrameToPng 的磁盘缓存**——候选：(a) 改 **Render Queue**（真渲染、绕 preview/disk 缓存，但只出 TIFF/PSD，无 PNG 模板 → Go stdlib 不解 TIFF，需加 `golang.org/x/image/tiff` 测试依赖、破坏本仓零依赖）；(b) 关闭/清 AE 磁盘缓存（位置/prefs key 版本相关，盲删有风险）；(c) 不做 CI 像素门禁、以本 incident 的目视+数值实证为准（红线4 风险已大幅消除）。**待需求方定夺**。工作树留存未 commit 的 gate（`mg_text_style_shipgate_test.go` 逐 comp 冷启版 + `verify_mg_text_style.jsx`）+ 文本修复（`text_encode.go`/`back_layer.go`）。
