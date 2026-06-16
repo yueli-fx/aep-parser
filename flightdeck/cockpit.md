@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-17 by claude（landing housekeeping:归档 2 个完成的一次性 arc spec → `archive/specs/`(knowledge-consolidation + 2026-06-16-capability-index);cockpit 瘦身。能力主线维持需求驱动稳态。）
+**Last updated**: 2026-06-17 by claude（**3D priority-2 真正收口**:RotateX/Orientation/RotateZ 双版本 render-pixel gate(`layer_3d_rotaxes_shipgate_test.go`,6 个全 PASS)。建 Orientation gate 时揪出真 correctness bug——3D Orientation 静态值在 otst 里存两份(cdat 小端 + otda 大端),AE 读 otda;旧 SetStaticValue 写 cdat 用了大端(字节翻转)且没碰 otda → 值 round-trip 绿但 AE 渲染 0(红线4 活样本)。修=cdatLE+otda 双写。SetRotateX/Y/Rotation/Orientation 升 render-pixel。commit e9a471e。）
 
 **Active focus**: **需求驱动稳态**（知识库地基重建 arc 已完结）。**知识单一家 = flightdeck + CLAUDE.md**(auto-memory 已退役);**能力真相源 = capindex**(`go run ./cmd/capindex -q <词>` / `docs/capabilities.{json,md}`,CI 强制写/做面零漏标)。库能力主线早已全收口、需求驱动;机制库 parse-the-clone + synthesis-insert + animate;每渲染类双版本 AE ship-gate(红线4)。剩余 backlog 详 `specs/2026-06-14-remaining-capability-roadmap.md`。火焰=番外(见 `incidents/procedural-fx-over-vector.md`)。
 
@@ -17,7 +17,6 @@
 
 **剩余 backlog（非阻塞,需求驱动;全详 `specs/2026-06-14-remaining-capability-roadmap.md`）**：
 - effects：音频效果波(+~18,需音频层探针)· layer-ref 第二波(+4,按 Displacement Map 物化流程)。
-- 3D：RotateX/Orientation/RotateZ 补 render-gate（同路径,低优先）。
 - text：Expressible Selector（evidence-defer,需库表达式渲染验证）。
 - mask：maskFeatherFalloff（位置未 RE,可能不可达）· expr：linear()/ease() remap（边际低）。
 
