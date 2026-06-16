@@ -36,6 +36,14 @@ cdta `@0xB0`（旧误标 `CdtaDuration`）+ 镜像 `@0xB8` 在**真实 AE 工程
 - `go test ./...` 全绿（synthetic 测试经 @0xB0 fallback 保住）。
 - **未跑双版本 ship-gate / 渲染像素**（这是 readback/解析层修复，非结构性写新增）；shutter 是 📋 读值能力。
 
+## 合并:RQ 时长断言指导（原 `cdta-duration-two-representations`,2026-06-16 折入）
+
+cdta 另有 **time-ratio** 时长表示（`duration_dividend / divisor` @0x14 区,秒,py-aep 用),与 @0x2C 权威 ticks 在真实 AE 文件一致;但 **py-aep synthetic fixture（脚本批量改过的）里可能偏离**——外部脚本 save 只更新 time-ratio,留下 stale 派生字段。
+
+**测试指导**:当 RQ `time_span_source = LENGTH_OF_COMP / WORK_AREA_ONLY` 时,**别拿 py-aep RQ golden 的 `timeSpanDuration` 秒数硬断言我方值**(它依赖 comp duration/work-area,synthetic fixture 这俩字段不自洽)。改断言**解析逻辑**(`TimeSpanDuration == WorkAreaEnd − WorkAreaStart`)或用 **CUSTOM source** fixture(值直接来自 settings ldat dividends,与 comp 解析无关)。详 `parse_render_queue_test.go`。
+
+> 注:被折入的原 incident 曾把 @0xB0=360 误读为「360 帧 duration」——实为 shutter 常量(见上),真时长在 @0x2C。该误判已由本 incident 修正;但上述 RQ 断言指导独立成立,故保留。
+
 ## 关联
 
-`cdta-duration-two-representations.md`（旧理解：@0xB0=frame-count + time-ratio 两表示——**本 incident 修正：@0xB0 根本不是 duration**，真时长在 @0x2C）· `tickrate-per-composition.md` · `shutter-side-effect-divisors.md`。RE 工具：`tmp_debug/re_dur.jsx`（AE 造多时长工程）+ `dump_cdta`。
+`tickrate-per-composition.md` · `shutter-side-effect-divisors.md`。RE 工具：`tmp_debug/re_dur.jsx`（AE 造多时长工程）+ `dump_cdta`。

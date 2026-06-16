@@ -1,7 +1,7 @@
 ---
 status: active
-when_to_read: AE 2025 rejects a Go-written project as corrupt (项目文件似乎已损坏/读取无效) when a property has >4 keyframes; touching encodeKeyframes lhd3 header fields; assuming lhd3 @0x0C/@0x1C are constants; extending any keyframe-list writer (path time table / mask om-s)
-applies_to: [lhd3, keyframe, capacity, pages, encodeKeyframes, ae2025-reject, scale-boundary, position-kf, mg-roadmap]
+when_to_read: AE 2025 rejects a Go-written project as corrupt (项目文件似乎已损坏/读取无效) when a property has >4 keyframes; touching encodeKeyframes lhd3 header fields; assuming lhd3 @0x0C/@0x1C are constants; extending any keyframe-list writer (path time table / mask om-s); editing parse_keyframe.go / write_keyframe.go; adding a new keyframe property type; debugging "ease/value at wrong offset"
+applies_to: [lhd3, keyframe, capacity, pages, encodeKeyframes, ae2025-reject, scale-boundary, position-kf, mg-roadmap, layout, spatial, non-spatial, layoutFor, parse_keyframe, write_keyframe]
 last_updated: 2026-06-12
 resolved_by:
 ---
@@ -40,3 +40,14 @@ lhd3 @0x0C 与 @0x1C **不是常量**（历史注释 "observed constant" 来自 
 ## Cases
 - 2026-06-12 首次（MG roadmap S1：ease + 规模 gate 同场发现；ease 路径反而无辜——interp 字节硬编码 linear 的问题在同 commit 一并修复 `writeKeyframeBlock` per-side bezier）
 - 2026-06-14 第二处（`encodePathTimeTable` path 时间表同坑，roadmap 优先级1 首项）：`encodeKeyframes` 那次只修了标量/矢量流，path 时间表 lhd3 漏修，恒写 1/4。修法相同（pages 化）；gate 从 3kf bump 到 6kf 双版本 PASS。`encodeKeyframes`（标量/矢量）+ `encodePathTimeTable`（path）两条 keyframe 路径容量分页**全闭合**。
+
+---
+
+## [合并] 关键帧字节布局两种 — 必须走 layoutFor 分发（原 `keyframe-byte-layout-dispatcher`,2026-06-16 折入）
+
+容量分页(上)是 lhd3 头的轴;**block 内字节布局**是另一轴,同样**不统一**。两种 layout 互斥,按 property 类型决定——**不要在 caller 端手算 offset**。
+
+- **Spatial-style**(4D color / Position / Anchor 3D):block 头 byte `0x07 = 0x07` 或 `0x01 + dims≥2`;scalar ease @0x18/0x20/0x28/0x30;values @0x38;bpk = 0x38 + 3·N·8。
+- **Non-spatial**(Opacity 1D / Scale 3D / Mask Feather 2D):头 byte `0x07 = 0x00`;values @0x08;per-component ease @ `0x08 + (N+i)·8`;bpk = 0x08 + 5·N·8。
+
+**How to apply**:加新 keyframe property 类型 → 走 `layoutFor(header07, dims)` 集中分发,**不新加 if/else 链**;改写回 → 用同一 `layoutFor` 算 offset 保 read/write 对称;调试 ease/value 错位 → 先 dump block 头 byte `0x07` 确认 layout。**Why**:早期 caller 端到处手算 offset → 改一种漏改另一种 → silent 错位;`layoutFor`(`parse_keyframe.go`)是唯一权威分发点(被 back_keyframe/write_property 多处调用)。
