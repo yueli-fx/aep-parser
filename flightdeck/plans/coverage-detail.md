@@ -1,12 +1,14 @@
 ---
-status: active
+status: reference
 implements: archive/specs/2026-05-26-py-aep-parity-design.md
-summary: 字段覆盖矩阵（详细参考 + 暂搁/不可达/negative findings）
+summary: AE-attribute → Go-field 详细交叉矩阵(按需参考);能力状态以 capindex 为准
+last_updated: 2026-06-16
 ---
 
-# Coverage matrix（详细参考）
+# Coverage matrix（AE-attribute → Go-field 详细参考）
 
-> **入口在 [coverage.md](coverage.md)** —— 精简覆盖概览。本文是按需查的详细交叉表（AE attribute → Go field）+ Wave 1-4 历史摘要 + Fixture 清单。会话起手不需要读这个。
+> **能力"能不能用/验到几级"的真相源 = capindex**(`go run ./cmd/capindex -q "<词>"` / `docs/capabilities.{json,md}`,CI 强制)。本文是**正交的另一维**:AE scripting attribute → Go field 的逐项交叉矩阵 + Wave 1-4 历史 + Fixture 清单——capindex(符号级)不覆盖这层 attribute 级映射,故保留为按需参考。会话起手不需要读。
+> 入口的覆盖残值(暂搁/不可达/negative)在 [coverage.md](coverage.md)。
 
 对照 [docsforadobe/after-effects-scripting-guide](https://github.com/docsforadobe/after-effects-scripting-guide) 的属性清单逐项盘点 aep-parser 当前覆盖度，标出仍缺的内容、优先级、估计工作量。
 

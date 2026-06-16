@@ -29,7 +29,7 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
    - **Stable（结构性 op）= 语义稳定，调用形态可随包边界重组变化**（M8 方案② 决议，2026-06-09 用户批准，覆盖原「Stable 重构不能动签名」对结构性 op 的部分）：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等结构性写路径，**语义契约不变**（chunk 输出 byte-structural 等同、双版本 ship-gate 持续通过）；但**调用形态可在物理分包时从 scene 方法改为 facade 自由函数**（如 `comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`）——因其实现 building chunk 必须住 `internal/serializer`，而方法须与 scene 类型同包又不能访问 serializer（Go 语义墙，详 #3）。此类形态变更：**commit 标 BREAKING + 同步 `flightdeck/checklists/commits.md` API 表**，不算违反 Stable 契约。核心 R/W（Set*/Open/Write）不受此豁免，仍签名稳定。
    - **Alpha**: 显式标 alpha / deferred / 未 ship-gate 的新 API。可改可删，commit message 标 BREAKING。
    - review 时撤销新加但已知 broken 的 API 不算违反此约束。
-   - 具体哪些字段属 Stable / Alpha 详 `flightdeck/plans/coverage.md`。
+   - 具体某符号属 Stable / Alpha + 验到几级 + gate + 边界 = **capindex 真相源**(源码内 `aep:cap` tag,CI 强制写面零漏标):`go run ./cmd/capindex -q "<词>"` 或 `docs/capabilities.{json,md}`。
 3. **多包物理分层 `internal/{rifx,codec,scene,serializer}` + `aep` facade**（M8 方案② 物理分包已落，2026-06-09：scene 抽 `ac62b25`、serializer 抽 `a347e46`）。DAG 上依赖下、禁逆向/成环：
    - `rifx`（叶）：通用 RIFX chunk 树，不知 AEP 语义。
    - `codec`：纯值/字节编解码（framerate / gradient / property-stream / cdta·ldta layout / render-settings …）。禁 import scene / serializer / rifx / aep。
@@ -61,7 +61,8 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 
 ## 文档地图
 
-- 字段覆盖矩阵 + 暂搁 / 不可达 / negative findings: `flightdeck/plans/coverage.md` + `coverage-detail.md`
+- **能力索引（写/做面真相源,秒查）**: `go run ./cmd/capindex -q "<词>"` / `docs/capabilities.{json,md}`（源码内 `aep:cap` tag,CI 强制零漏标。取代退役的 coverage.md 写能力清单）
+- 暂搁 / 不可达 / negative findings（capindex 不覆盖的残值）: `flightdeck/plans/coverage.md`（已退役为残值）；AE-attribute→Go-field 矩阵: `coverage-detail.md`（参考）
 - API 同步表（改任何 public API 必读）: `flightdeck/checklists/commits.md` § 命令一致性
 - 测试惯例 / 验证流程 / tmp_debug 工具表: `flightdeck/checklists/verify.md`
 - JSX RE 工作流 + ship-gate + RE fixture 双轨 + Types-for-Adobe 参考: `flightdeck/checklists/re-fixture.md`

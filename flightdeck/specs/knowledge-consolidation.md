@@ -1,10 +1,13 @@
 ---
-status: idea
+status: active
 summary: 退役 auto-memory 系统(迁入 flightdeck/CLAUDE.md)+ incidents 过时清理与合并减量 + coverage.md/coverage-detail.md 退役(待 capindex 完成)+ CLAUDE.md 瘦身 + 根目录 stray exe 清理;目标=单一知识家 flightdeck + 精简 CLAUDE.md + 干净仓库
 graduate: true
+last_updated: 2026-06-16
 ---
 
 # 知识库整合与退役 (memory/coverage/incidents/CLAUDE.md → flightdeck 单一家)
+
+> **进度(2026-06-16,capindex P2 done 后启动)**:**E ✅**(12 个根目录 stray exe 删除)· **D ✅**(coverage 退役——见下,做法**偏离"删除"为"退役到残值"**:capindex 不覆盖的 deferred/unreachable/negative + AE-attribute 矩阵已验证未被吸收,故保留而非删,合 #4 删前先验迁移)· B 部分(CLAUDE.md 能力源指针已改指 capindex)。**剩 A(记忆退役,repo 外删除需用户确认)· B 全量瘦身 · C(incidents 审核合并)。**
 
 ## 背景 / 动机
 
@@ -68,13 +71,21 @@ graduate: true
 
 **贯穿**:**真相源=代码 > incident 正文**(对齐 board-status-drift),审核/合并须 grep 代码/ship-gate 核实,不照信正文。
 
-## 工作流 D — coverage 退役(硬依赖 capindex)
+## 工作流 D — coverage 退役(硬依赖 capindex)— ✅ DONE(2026-06-16)
 
-capindex P2(全量标注)完成、能力状态全进 tag 后:核对 coverage.md/coverage-detail.md 残余信息已全部被 tag 或 incident 覆盖 → 删除两文件 → 更新 plans/INDEX + 任何指向它们的引用(CLAUDE.md 文档地图等)。
+capindex P2 完成后核对发现:coverage 含 capindex **不覆盖**的内容——故**退役到残值**而非整删(合原则 #4):
+- `coverage.md`(415→75 行):`## ✅ 已 ship` 写能力快照(347 行)退役(被 capindex 写能力 + docgen read/API + incidents 机制吸收且更准)→ 换成 capindex 指针;**保留** capindex 不覆盖的 暂搁/不可达/negative findings/可探方向(残值)。status→`superseded`。
+- `coverage-detail.md`:AE-attribute→Go-field 矩阵是**正交另一维**(capindex 是符号级,不含 attribute 级映射)→ **保留为参考**,status→`reference` + 顶部 banner 指向 capindex 为能力状态源。
+- CLAUDE.md 文档地图 + 分级条目已改指 capindex(`-q` / `docs/capabilities.{json,md}`)。
+- 原文全在 git history,可追。
 
-## 工作流 E — 根目录 stray exe 清理(无依赖)
+## 工作流 E — 根目录 stray exe 清理(无依赖)— ✅ DONE(2026-06-16)
 
-现状(实测):项目根有 **11 个 `.exe`**(aepdemo / animated-path / bisect_v2_2 / docgen / dump_fdta / ge_cross_project_insert / gradient_roundtrip / keyframe-channels / stroke-detail / structural-ops / transform-values),共 ~44MB。**均未被 git 跟踪**(`git ls-files '*.exe'` 空)且 `.gitignore` 已含 `*.exe` 规则 —— 纯构建产物垃圾,删除零风险、不影响 git。
+实测根目录有 **12 个 stray `.exe`**(spec 当初记 11,实为 12:含 `capindex.exe`),全 untracked + `.gitignore` 已含 `*.exe` → 删除零风险。已 `rm` 全部 12 个,根目录 0 stray exe。防复发约定(`go run ./path` / `go build -o tmp_debug/bin/`)待写入 CLAUDE.md 入口命令(随 B)。
+
+---
+
+原始现状记录:项目根有 **11 个 `.exe`**(aepdemo / animated-path / bisect_v2_2 / docgen / dump_fdta / ge_cross_project_insert / gradient_roundtrip / keyframe-channels / stroke-detail / structural-ops / transform-values),共 ~44MB。**均未被 git 跟踪**(`git ls-files '*.exe'` 空)且 `.gitignore` 已含 `*.exe` 规则 —— 纯构建产物垃圾,删除零风险、不影响 git。
 
 **根因**:`go build`(showcase 生成器 / tmp_debug 工具)不带 `-o` 时把二进制落在 CWD=根目录。
 **处置**:① 直接删根目录全部 `.exe`(可 git 回滚?否——本就未 tracked,但可随时 `go build` 重生成,无损失)。② 防复发约定(写入 CLAUDE.md `## 入口命令` 或 checklist):跑生成器/工具优先 `go run ./path`;必须 build 时 `go build -o tmp_debug/bin/`,不在根目录裸 build。`.gitignore` 已覆盖,无需改。
