@@ -7,11 +7,18 @@
 // per keyframe (byte-isomorphic to AE's own animated mask/shape path).
 //
 // Per delivery-contract red line 4, verified at the capability's surface: a white
-// 600×600 shape rect masked by an ANIMATED rectangle that covers the LEFT half at
-// t=0 and the RIGHT half at t=2s. The gate renders both keyframe times and asserts
-// the revealed region MOVED — at frame 0 the left half is white & the right dark,
-// at t=2s it flips. A static mask cannot reveal opposite halves at two frames, so
-// this proves AE honored the time table (not just that the values round-tripped).
+// 600×600 shape rect masked by an ANIMATED rectangle that oscillates between the
+// LEFT half (t=0) and the RIGHT half (t=2s). The gate renders both endpoint times
+// and asserts the revealed region MOVED — at frame 0 the left half is white & the
+// right dark, at t=2s it flips. A static mask cannot reveal opposite halves at two
+// frames, so this proves AE honored the time table (not just value round-trip).
+//
+// SCALE (delivery-contract red line 2): SIX keyframes, not two — this crosses the
+// lhd3 capacity-page boundary (ceil(6/4)=2 pages) under MASK strictness. The
+// encodePathTimeTable page fix was only shape-path-gated to 6kf; mask is decoded
+// eagerly by AE (capacity-field errors hard-crash 0::42 / corrupt), so the >4kf
+// boundary needed its own mask gate. The two render endpoints land on keyframes
+// (t=0 left, t=2s right); the intermediate oscillation just populates pages 1–2.
 //
 // Gated by AE_SHIP_GATE.
 package aep_test
@@ -105,9 +112,15 @@ func buildMGMaskPathKfDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("AddMask: %v", err)
 	}
-	// Animate the outline: left half at t=0 → right half at t=2s.
+	// Animate the outline: SIX keyframes oscillating left↔right (crosses the
+	// lhd3 capacity page boundary, ceil(6/4)=2). Endpoints land on keyframes so
+	// the render assertions stay exact: t=0 left, t=2s right.
 	keys := []aep.MaskPathKey{
 		{Time: 0, Path: leftHalf},
+		{Time: 0.4, Path: rightHalf},
+		{Time: 0.8, Path: leftHalf},
+		{Time: 1.2, Path: rightHalf},
+		{Time: 1.6, Path: leftHalf},
 		{Time: 2, Path: rightHalf},
 	}
 	if err := aep.SetMaskPathKeyframes(l, m, keys); err != nil {
@@ -204,7 +217,7 @@ func runMGMaskPathKfGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		t.Errorf("%s t=2s right-centre not white — mask did not move to the right half (animation ignored)", ver)
 	}
 
-	// Resave proof: AE re-encodes 2 mask-shape keyframes.
+	// Resave proof: AE re-encodes all 6 mask-shape keyframes (no page truncation).
 	re, err := aep.Open(resavedAEP)
 	if err != nil {
 		t.Fatalf("reopen resaved: %v", err)
@@ -213,8 +226,8 @@ func runMGMaskPathKfGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if l == nil || len(l.Masks) != 1 {
 		t.Fatal("resaved: CARD mask missing")
 	}
-	if got := len(l.Masks[0].PathKeyframes); got != 2 {
-		t.Errorf("resaved mask path keyframes = %d, want 2 (animated)", got)
+	if got := len(l.Masks[0].PathKeyframes); got != 6 {
+		t.Errorf("resaved mask path keyframes = %d, want 6 (animated, 2 capacity pages)", got)
 	}
 }
 

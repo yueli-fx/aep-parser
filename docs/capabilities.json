@@ -4986,13 +4986,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "ae-accept",
+      "verify": "render-pixel",
       "minver": "2020",
       "gate": [
         "TestMGMaskPathKf_AEShipGate_AE2020",
         "TestMGMaskPathKf_AEShipGate_AE2025"
       ],
-      "boundary": "\u003e=2 关键帧;逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)",
+      "boundary": "\u003e=2 关键帧,gate 实测到 6kf(=2 lhd3 容量页,验 mask 严格性下分页正确,非仅 2kf 单页);逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)",
       "incident": null,
       "alias": [
         "mask path keyframes",

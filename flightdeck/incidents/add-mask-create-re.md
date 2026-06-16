@@ -230,7 +230,21 @@ re-parse 校验（probes 1 mask + N keyframes + 逐帧顶点数）+ rollback。
 **渲染 gate（红线4 双版本）**：`TestMGMaskPathKf_AEShipGate_AE2020/2025` PASS——白 600×600 card，
 animated mask 覆盖 t=0 **左半** → t=2s **右半**；render 两个关键帧时刻，reveal 区 **L↔R 翻转**
 （frame0 左白右暗 / t=2s 左暗右白，静态 mask 不可能两帧露不同半区）；AE 读回 `ADBE Mask Shape`
-numKeys==2 + keyTime 0/2，resave 保留 2 path keyframes。Go round-trip `mask_path_test.go`
-（rect→triangle 4→3 morph 双帧 + <2 关键帧拒绝）。verify_mg_mask_pathkf.jsx +
-mg_mask_pathkf_shipgate_test.go。**facade 自由函数**。**至此 mask 路径写（静态 + 动画）全收口**；
-剩 `maskFeatherFalloff`（位置未 RE，可能不可达）。
+numKeys==6（gate 2026-06-17 从 2kf bump 到 **6kf=2 lhd3 容量页**，见下）+ keyTime 0/2，
+resave 保留 6 path keyframes。Go round-trip `mask_path_test.go`（rect→triangle 4→3 morph
+双帧 + <2 关键帧拒绝）。verify_mg_mask_pathkf.jsx + mg_mask_pathkf_shipgate_test.go。
+**facade 自由函数**。**至此 mask 路径写（静态 + 动画）全收口**；剩 `maskFeatherFalloff`
+（位置未 RE，可能不可达）。
+
+### 2026-06-17 — animated mask path 的 >4kf 容量分页收口（红线2 边界扩展）
+
+初版 gate 只验 **2 关键帧**（单页 lhd3）。`encodePathTimeTable` 的容量分页修复
+（`pages=(n+3)/4`，[[lhd3-keyframe-capacity-pages]]）此前只在 **shape path** 验到 6kf；
+mask path 动画虽**复用同一函数**（`makeMaskShapeOmSAnimated` 调 `encodePathTimeTable`），
+但 **mask 比 shape 严格**（AE 急切解码 mask outline，容量字段错会硬崩 0::42 / 判损坏），
+shape 验过不代表 mask 也过——这是交付准则红线2「Stable 有覆盖边界，超出规模即退回未验证」
+的典型缺口。**把 `TestMGMaskPathKf` 从 2kf bump 到 6kf**（左右振荡，endpoint 落关键帧保
+render 翻转断言不变）：**AE 2020 + 2025 双版本 PASS**——AE 接受、numKeys=6 读回不截断、
+render 翻转、resave 保留 6 path keyframes。**结论：mask 严格性下 lhd3 容量分页同样成立，零
+代码改（纯 gate 规模扩展），SetMaskPathKeyframes 边界 2kf→6kf**。失败信号纯来自 verify JSX
+旧硬编码 `want 2`（已同步 6）——AE 侧从未拒绝。

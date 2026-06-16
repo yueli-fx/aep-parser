@@ -2,7 +2,7 @@
 status: active
 when_to_read: AE 2025 rejects a Go-written project as corrupt (项目文件似乎已损坏/读取无效) when a property has >4 keyframes; touching encodeKeyframes lhd3 header fields; assuming lhd3 @0x0C/@0x1C are constants; extending any keyframe-list writer (path time table / mask om-s); editing parse_keyframe.go / write_keyframe.go; adding a new keyframe property type; debugging "ease/value at wrong offset"
 applies_to: [lhd3, keyframe, capacity, pages, encodeKeyframes, ae2025-reject, scale-boundary, position-kf, mg-roadmap, layout, spatial, non-spatial, layoutFor, parse_keyframe, write_keyframe]
-last_updated: 2026-06-12
+last_updated: 2026-06-17
 resolved_by:
 ---
 
@@ -40,6 +40,7 @@ lhd3 @0x0C 与 @0x1C **不是常量**（历史注释 "observed constant" 来自 
 ## Cases
 - 2026-06-12 首次（MG roadmap S1：ease + 规模 gate 同场发现；ease 路径反而无辜——interp 字节硬编码 linear 的问题在同 commit 一并修复 `writeKeyframeBlock` per-side bezier）
 - 2026-06-14 第二处（`encodePathTimeTable` path 时间表同坑，roadmap 优先级1 首项）：`encodeKeyframes` 那次只修了标量/矢量流，path 时间表 lhd3 漏修，恒写 1/4。修法相同（pages 化）；gate 从 3kf bump 到 6kf 双版本 PASS。`encodeKeyframes`（标量/矢量）+ `encodePathTimeTable`（path）两条 keyframe 路径容量分页**全闭合**。
+- 2026-06-17 第三处验证（**mask path 动画 >4kf**，无代码改）：`encodePathTimeTable` 被 `makeMaskShapeOmSAnimated` 复用，但 **mask 严格性**（AE 急切解码 mask outline，容量字段错硬崩 0::42）下 >4kf 此前未单独 gate（`TestMGMaskPathKf` 只验 2kf=单页）。把它从 2kf bump 到 6kf（=2 页），AE 2020+2025 双版本 PASS（numKeys=6 读回不截断 + render 翻转 + resave 保留 6kf）→ 确认容量分页在 mask 上同样成立。详 [[add-mask-create-re]] § 2026-06-17。
 
 ---
 

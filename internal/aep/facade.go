@@ -1602,7 +1602,7 @@ func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 // Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
 // (CLAUDE.md #2 structural-op call-form).
 //
-//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMGMaskPathKf_AEShipGate_AE2020,TestMGMaskPathKf_AEShipGate_AE2025 boundary=">=2 关键帧;逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)" alias="mask path keyframes,蒙版路径动画,animated mask,变形蒙版"
+//aep:cap domain=mask tier=stable verify=render-pixel gate=TestMGMaskPathKf_AEShipGate_AE2020,TestMGMaskPathKf_AEShipGate_AE2025 boundary=">=2 关键帧,gate 实测到 6kf(=2 lhd3 容量页,验 mask 严格性下分页正确,非仅 2kf 单页);逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)" alias="mask path keyframes,蒙版路径动画,animated mask,变形蒙版"
 func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
 	return serializer.SetMaskPathKeyframes(layer, mask, keys)
 }
