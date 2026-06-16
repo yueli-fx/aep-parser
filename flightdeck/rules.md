@@ -26,6 +26,9 @@ disabled_folders: []
 ### Autonomy overrides
 <!-- migrated from commit_mode:confirm — 旧 toggle 取默认值 confirm，但上方 House rule「完成即 commit·无需用户每次点名」是既定的真实意图，故按 auto 编码 -->
 commit without asking
+never push
+
+- **永不 push 远端**（2026-06-16 用户立规「永远不 push」）：所有工作 commit 直推本地 main 即可；landing/任何流程都**不要提议或执行 `git push`**。本地 commit 历史就是交付记录。
 
 - **文档可自由更新（含破坏性重写、含 CLAUDE.md）**（2026-06-11 用户授权「允许破坏性更新 你可以更新任何文档 包括claude.md」）：任何项目文档——CLAUDE.md / flightdeck deck / docs / doc comment——无需逐次确认即可更新、重组、删改；分级（Alpha↔Stable）等契约表述变更照常在 commit body 说明。代码 API 契约本身仍按 CLAUDE.md #2 执行。
 
