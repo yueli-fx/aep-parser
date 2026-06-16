@@ -32,31 +32,31 @@ import (
 // byte-correctly from scratch is too fragile (silent-drop trigger). V2.3 may
 // RE the full byte layout and replace this blob with constructor code.
 //
-//go:embed templates/v2_2_transform_group_body.bin
-var v22TransformGroupBodyBytes []byte
+//go:embed templates/layers/transform_group_body.bin
+var transformGroupBodyBytes []byte
 
 var (
-	v22TransformGroupOnce  sync.Once
-	v22TransformGroupCache *rifx.Chunk
-	v22TransformGroupErr   error
+	transformGroupOnce  sync.Once
+	transformGroupCache *rifx.Chunk
+	transformGroupErr   error
 )
 
 // cloneShapeTransformGroupBody returns a deep clone of the cached tolerance
 // Transform Group body. Caller may modify the returned tree freely (typically
 // to overwrite Position_0/_1 cdat with runtime values).
 func cloneShapeTransformGroupBody() (*rifx.Chunk, error) {
-	v22TransformGroupOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22TransformGroupBodyBytes))
+	transformGroupOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(transformGroupBodyBytes))
 		if err != nil {
-			v22TransformGroupErr = fmt.Errorf("parse v22TransformGroupBodyBytes: %w", err)
+			transformGroupErr = fmt.Errorf("parse transformGroupBodyBytes: %w", err)
 			return
 		}
-		v22TransformGroupCache = ch
+		transformGroupCache = ch
 	})
-	if v22TransformGroupErr != nil {
-		return nil, v22TransformGroupErr
+	if transformGroupErr != nil {
+		return nil, transformGroupErr
 	}
-	return cloneChunk(v22TransformGroupCache), nil
+	return cloneChunk(transformGroupCache), nil
 }
 
 // cloneChunk deep-copies a chunk tree. Caller modifications to clone don't
@@ -496,6 +496,6 @@ func lowerTransformScalar(body *rifx.Chunk, name string, ps *codec.PropertyStrea
 //	    otda (24 B = 3 × f64 = 0,0,0)
 //
 // lowerOrientationDefault no longer called — Transform Group body is now
-// embedded as tolerance bytes (templates/v2_2_transform_group_body.bin) and
+// embedded as tolerance bytes (templates/layers/transform_group_body.bin) and
 // includes its own Orientation otst wrapper. Retired here; keep the chunk-IDs
 // (IDOtst/IDOtky/IDOtda) in rifx.go for parser-side use.

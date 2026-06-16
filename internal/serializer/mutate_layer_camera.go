@@ -21,10 +21,10 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-//go:embed templates/layer_camera_body.bin
+//go:embed templates/layers/layer_camera_body.bin
 var layerCameraBodyBytes []byte
 
-//go:embed templates/layer_light_body.bin
+//go:embed templates/layers/layer_light_body.bin
 var layerLightBodyBytes []byte
 
 // light_color_leaf.bin is a LIST(tdgp) wrapper around the
@@ -35,7 +35,7 @@ var layerLightBodyBytes []byte
 // white — lighting up SetLightColor / LightColor() from scratch. Same
 // synthesis-insert blueprint as SetEffectParam's materialized param streams.
 //
-//go:embed templates/light_color_leaf.bin
+//go:embed templates/options/light_color_leaf.bin
 var lightColorLeafBytes []byte
 
 // camera_iris_leaves.bin is a LIST(tdgp) wrapper around the 8 Iris*/Highlight*
@@ -46,7 +46,7 @@ var lightColorLeafBytes []byte
 // them after Blur Level + resets each cdat to AE's default. Same synthesis-
 // insert blueprint as the Light Color leaf.
 //
-//go:embed templates/camera_iris_leaves.bin
+//go:embed templates/options/camera_iris_leaves.bin
 var cameraIrisLeavesBytes []byte
 
 // NewCameraLayer adds a new Camera layer to the composition.

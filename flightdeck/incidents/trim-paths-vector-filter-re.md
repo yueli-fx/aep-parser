@@ -10,7 +10,7 @@ resolved_by:
 
 ## Signature
 - symptom: 无 bug（clean slice）。本条是 RE 记录 + 后续 shape-filter（Repeater/Merge/Offset/Round/ZigZag）的复用蓝本
-- where: internal/serializer/lower_shape_node.go `lowerTrimNode` + templates/v2_2_shape_trim_body.bin · internal/scene/scene_shape_graph.go `TrimNode`
+- where: internal/serializer/lower_shape_node.go `lowerTrimNode` + templates/shapes/trim_body.bin · internal/scene/scene_shape_graph.go `TrimNode`
 - trigger: MG roadmap S3 — 线描 reveal（stroke 半圈）从零生成
 
 ## RE 发现（v2_2_trim.aep，AE 2020；tmp_debug/gen_shape_trim.jsx）
@@ -49,7 +49,7 @@ probe match-name → 抽 body 模板 → clone+cdat 覆写。唯一变量是各�
 
 ## 复用确认 — Repeater（S5, 2026-06-12）✅ 蓝本成立
 
-`ADBE Vector Filter - Repeater` 一刀套上述 vein 落地（`AddRepeater`/`RepeaterNode`，`templates/v2_2_shape_repeater_body.bin`）。body 结构（gen_shape_repeater.jsx RE）：
+`ADBE Vector Filter - Repeater` 一刀套上述 vein 落地（`AddRepeater`/`RepeaterNode`，`templates/shapes/repeater_body.bin`）。body 结构（gen_shape_repeater.jsx RE）：
 - **顶层 1D**：`ADBE Vector Repeater Copies`（f64 raw count）+ `ADBE Vector Repeater Offset`（起始 copy index）→ `lowerShapeScalar`（含 animated）。
 - **`ADBE Vector Repeater Order`（Composite enum）默认 elide 无 slot**——未建模（同 Trim Type）。
 - **嵌套 `ADBE Vector Repeater Transform`（tdgp 子组）**：descend 经 `findGroupBody`（同 Stroke Taper/Wave），内含 Anchor/Position/Scale（Vec2 @cdat[0:16]）+ Rotation/Opacity 1/Opacity 2（1D @cdat[0:8]）→ `overwriteShapeStreamCdat` 静态覆写。
@@ -64,7 +64,7 @@ Gate：`TestMGRepeater_AEShipGate_AE2020/2025` PASS——一个白点 Copies=5 +
 
 ## 复用确认 — Round Corners（S5, 2026-06-13）✅ 蓝本第 4 次成立（迄今最简滤镜）
 
-`ADBE Vector Filter - RC` 一刀套蓝本三步落地（`AddRoundCorners`/`RoundCornersNode`，`templates/v2_2_shape_roundcorners_body.bin`）。body 结构（gen_shape_roundcorners.jsx 探针自证）：
+`ADBE Vector Filter - RC` 一刀套蓝本三步落地（`AddRoundCorners`/`RoundCornersNode`，`templates/shapes/roundcorners_body.bin`）。body 结构（gen_shape_roundcorners.jsx 探针自证）：
 - **单子流** `ADBE Vector RoundCorner Radius`（1D f64 BE @cdat[0:8]，**原始像素**，默认 10）→ `lowerShapeScalar`（含 animated flip）。无嵌套组、无 enum、无 elision 陷阱——是迄今最干净的滤镜（body 仅 402B/5 children = tdsb+tdsn+tdmn+tdbs-list+GroupEnd）。
 - 探针设值 60（非默认）逼 AE 不 elide → 抽出 Radius cdat slot。
 
@@ -74,7 +74,7 @@ Gate：`TestMGRoundCorners_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（
 
 ## 复用确认 — Offset Paths（S5, 2026-06-13）✅ 蓝本第 5 次成立
 
-`ADBE Vector Filter - Offset` 同 RC 路：`AddOffsetPaths`/`OffsetPathsNode`，`templates/v2_2_shape_offset_body.bin`（408B/5 children）。探针（gen_shape_offset.jsx）见 **5 子流**：`ADBE Vector Offset Amount`（**默认 10**，非 0！1D f64 px，headline）· `Offset Line Join`(默认1=Miter) · `Offset Miter Limit`(4) · `Offset Copies`(1) · `Offset Copy Offset`(1)。只设 Amount 非默认 → 仅 Amount slot 发射，其余 4 个 elide（同 RC 模 headline 1 个、其余暂搁）→ `lowerShapeScalar`。
+`ADBE Vector Filter - Offset` 同 RC 路：`AddOffsetPaths`/`OffsetPathsNode`，`templates/shapes/offset_body.bin`（408B/5 children）。探针（gen_shape_offset.jsx）见 **5 子流**：`ADBE Vector Offset Amount`（**默认 10**，非 0！1D f64 px，headline）· `Offset Line Join`(默认1=Miter) · `Offset Miter Limit`(4) · `Offset Copies`(1) · `Offset Copy Offset`(1)。只设 Amount 非默认 → 仅 Amount slot 发射，其余 4 个 elide（同 RC 模 headline 1 个、其余暂搁）→ `lowerShapeScalar`。
 
 渲染 ground truth：[Rect, Fill, Offset] → Offset 把 Rect path 向外长（+Amount px/边，负值缩）。400×400 白 Rect + Amount=60 → 渲染成 ~520×520 方（每边 +60）。gate 用「四原始边外侧一圈带变白(grown 5/5) + offset 外更远点仍暗(bounded 4/4)」当增长证据——区分「没长(原边外暗)」「长太多/失控(远点白)」。眼验：方块明显变大、直边在、有界。默认 Line Join=Miter 角基本尖（轻微圆是 AE offset 外角行为）。
 
@@ -82,7 +82,7 @@ Gate：`TestMGOffset_AEShipGate_AE2020/2025` 双版本渲染像素 PASS。verify
 
 ## 复用确认 — Merge Paths（S5, 2026-06-13）✅ 蓝本第 6 次 + **两个新 ground truth**
 
-`ADBE Vector Filter - Merge`：`AddMergePaths`/`MergePathsNode`，`templates/v2_2_shape_merge_body.bin`（376B/5 children）。单子流 `ADBE Vector Merge Type`（**非动画枚举** 1D f64 @cdat[0:8]：1=Merge 2=Add 3=Subtract 4=Intersect 5=Exclude，默认 1）→ 建模成普通字段（同 Fill blend mode，`overwriteShapeStreamCdat` 写枚举，**非** `lowerShapeScalar`）。
+`ADBE Vector Filter - Merge`：`AddMergePaths`/`MergePathsNode`，`templates/shapes/merge_body.bin`（376B/5 children）。单子流 `ADBE Vector Merge Type`（**非动画枚举** 1D f64 @cdat[0:8]：1=Merge 2=Add 3=Subtract 4=Intersect 5=Exclude，默认 1）→ 建模成普通字段（同 Fill blend mode，`overwriteShapeStreamCdat` 写枚举，**非** `lowerShapeScalar`）。
 
 **新 ground truth ①（combine 型滤镜的 fill 位置反了）**：Merge 把下方多条 path 合成一条，**Fill 必须在 stack 顶（Merge 之上）** 才能画出合成结果——stack 顺序 `[Rect, Ellipse, Merge, Fill]`（Fill = Children 最高 index = 顶）。**Fill 放 Merge 下方渲染全黑**（fill 在合成前画了未合并的两条 path → ring 0/4 全暗）。这与 Trim/RC/Offset「paint 在 filter 下方」相反——因 Trim/RC/Offset 是改 path 几何、同一条 path 被下方 paint 引用；Merge 是「多 path→一 path」合成，需 paint 在合成之后。**别套前 5 个滤镜的 [shape,paint,filter] 直觉，render 出来看**：400×400 Rect − 200×200 同心 Ellipse(Subtract) → 白方块挖圆洞（眼验确认）。gate：ring 白 4/4 + 中心洞暗 3/3。
 
@@ -94,7 +94,7 @@ Gate：`TestMGMerge_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Type=3 
 
 ## 复用确认 — ZigZag（S5, 2026-06-13）✅ 蓝本第 7 次 — 常用矢量滤镜家族收齐
 
-`ADBE Vector Filter - Zigzag`：`AddZigZag`/`ZigZagNode`，`templates/v2_2_shape_zigzag_body.bin`（708B/7 children）。探针 3 子流：`ADBE Vector Zigzag Size`（振幅 px，默认 5）+ `ADBE Vector Zigzag Detail`（每段隆起数/ridges，默认 10）+ `ADBE Vector Zigzag Points`（enum 默认 1，elide 未建模）。Size+Detail 双 1D scalar → `lowerShapeScalar`（同 Offset 单 headline，这里两个）。属 **distort 型**（改 path 几何），fill 在 filter 下方 stack `[Rect, Fill, ZigZag]`（与 Merge 的 combine 型相反，同 Trim/RC/Offset）。
+`ADBE Vector Filter - Zigzag`：`AddZigZag`/`ZigZagNode`，`templates/shapes/zigzag_body.bin`（708B/7 children）。探针 3 子流：`ADBE Vector Zigzag Size`（振幅 px，默认 5）+ `ADBE Vector Zigzag Detail`（每段隆起数/ridges，默认 10）+ `ADBE Vector Zigzag Points`（enum 默认 1，elide 未建模）。Size+Detail 双 1D scalar → `lowerShapeScalar`（同 Offset 单 headline，这里两个）。属 **distort 型**（改 path 几何），fill 在 filter 下方 stack `[Rect, Fill, ZigZag]`（与 Merge 的 combine 型相反，同 Trim/RC/Offset）。
 
 渲染 ground truth：400×400 Rect + Size=40/Detail=8 → 每条边扭成尖齿（comic-book starburst，眼验确认实心内部+四边锯齿）。gate 用**逐列扫顶白 y 的 spread** 当锯齿证据（直边 spread≈0；zigzag spread=78 = ±40 振幅围绕原边 y=340，峰 y=301 谷 y=379）——比固定采样点稳（不依赖峰谷精确 x）。
 
@@ -102,7 +102,7 @@ Gate：`TestMGZigZag_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Size=4
 
 ## 复用确认 — Pucker & Bloat（S5, 2026-06-13）✅ 蓝本第 8 次 — 同 Round Corners 最简
 
-`ADBE Vector Filter - PB`：`AddPuckerBloat`/`PuckerBloatNode`，`templates/v2_2_shape_puckerbloat_body.bin`（412B/5 children）。探针单子流 `ADBE Vector PuckerBloat Amount`（1D f64 BE 百分比，默认 0=identity）→ `lowerShapeScalar`（含 animated flip）。无嵌套组、无 enum、无 elision（与 Round Corners 同构，唯二 headline-only 滤镜之一）。属 **distort 型**，fill 在 filter 下方 stack `[Rect, Fill, PuckerBloat]`（同 Trim/RC/Offset/ZigZag）。
+`ADBE Vector Filter - PB`：`AddPuckerBloat`/`PuckerBloatNode`，`templates/shapes/puckerbloat_body.bin`（412B/5 children）。探针单子流 `ADBE Vector PuckerBloat Amount`（1D f64 BE 百分比，默认 0=identity）→ `lowerShapeScalar`（含 animated flip）。无嵌套组、无 enum、无 elision（与 Round Corners 同构，唯二 headline-only 滤镜之一）。属 **distort 型**，fill 在 filter 下方 stack `[Rect, Fill, PuckerBloat]`（同 Trim/RC/Offset/ZigZag）。
 
 渲染 ground truth：400×400 Rect + Amount=100（bloat）→ **四叶草/花瓣形**——每条直边外凸成圆瓣、四角全部内拉到中心（四瓣在 center 交汇）。gate 采样：center 白 + 四边外侧越界点白 4/4（边外凸越过原 400×400 边界）+ 四原始尖角内拉暗 4/4（角塌向中心）——精确 bloat 签名，与 plain rect / Round Corners / pucker / no-effect 全可区分。眼验四瓣花瓣确认（非数字 numerology）。
 
@@ -110,7 +110,7 @@ Gate：`TestMGPuckerBloat_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（A
 
 ## 复用确认 — Twist（S5, 2026-06-13）✅ 蓝本第 9 次 — 同 Round Corners/PuckerBloat 最简
 
-`ADBE Vector Filter - Twist`：`AddTwist`/`TwistNode`，`templates/v2_2_shape_twist_body.bin`（402B/5 children，与 Round Corners **完全同构** = 单 headline scalar、无 enum、无嵌套组、无 elision 陷阱）。探针（gen_shape_twist.jsx）2 子流：`ADBE Vector Twist Angle`（**默认 10**，1D f64 BE 度数，headline）+ `ADBE Vector Twist Center`（Vec2 默认 [0,0]，elide 未建模）。只设 Angle 非默认 → 仅 Angle slot 发射 → `lowerShapeScalar`（含 animated flip）。NewTwistNode 默认 Angle=0（identity 无扭，语义 no-op；AE 默认是 10 但 lower 总覆写）。属 **distort 型**，fill 在 filter 下方 stack `[Rect, Fill, Twist]`（同 Trim/RC/Offset/ZigZag/PB）。
+`ADBE Vector Filter - Twist`：`AddTwist`/`TwistNode`，`templates/shapes/twist_body.bin`（402B/5 children，与 Round Corners **完全同构** = 单 headline scalar、无 enum、无嵌套组、无 elision 陷阱）。探针（gen_shape_twist.jsx）2 子流：`ADBE Vector Twist Angle`（**默认 10**，1D f64 BE 度数，headline）+ `ADBE Vector Twist Center`（Vec2 默认 [0,0]，elide 未建模）。只设 Angle 非默认 → 仅 Angle slot 发射 → `lowerShapeScalar`（含 animated flip）。NewTwistNode 默认 Angle=0（identity 无扭，语义 no-op；AE 默认是 10 但 lower 总覆写）。属 **distort 型**，fill 在 filter 下方 stack `[Rect, Fill, Twist]`（同 Trim/RC/Offset/ZigZag/PB）。
 
 渲染 ground truth：400×400 Rect + Angle=150 → **风车/螺旋**——twist 中心钉住、离中心越远旋转越少（直边被扭成弧、四角甩离原轴对齐位）。眼验 silhouette（grid dump）确认非轴对齐方块。gate 用 twist 的**独有签名 = 左右镜像不对称**（mirror-asym=44 about x=center）：plain/pucker/bloat 方块全镜像对称 → broken/no-op twist 渲成对称方块会同时栽「mirror-asym≥20」+「四原始角清空 4/4」两条——比纯数值 round-trip 强（轴对称方块=假绿）。center 白钉住。
 
@@ -118,7 +118,7 @@ Gate：`TestMGTwist_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（Angle=1
 
 ## 复用确认 — Wiggle Paths（S5, 2026-06-13）✅ 蓝本第 10 次 — 常用矢量滤镜家族完整收齐
 
-`ADBE Vector Filter - Roughen`（**UI 叫 Wiggle Paths，内部 match-name 是 Roughen**——发现型探针 `canAddProperty` 多候选自证）：`AddWigglePaths`/`WigglePathsNode`，`templates/v2_2_shape_wiggle_body.bin`（1326B/11 children）。8 子流（全 1D scalar），建模 4 个 headline：`ADBE Vector Roughen Size`（振幅 默认 10）+ `Roughen Detail`（默认 10）+ `ADBE Vector Temporal Freq`（=Wiggles/Second，默认 2）+ `ADBE Vector Random Seed`（默认 0）→ 各走 `lowerShapeScalar`（含 animated flip）。**deferred**：`Roughen Points`（enum）· `ADBE Vector Correlation`（默认 50）· `Temporal Phase` · `Spatial Phase`（默认 elide 未建模）。NewWigglePathsNode 默认 Size=0=identity（无扰）。属 **distort 型**，stack `[Rect, Fill, Wiggle]`（同 Trim/RC/Offset/ZigZag/PB/Twist）。
+`ADBE Vector Filter - Roughen`（**UI 叫 Wiggle Paths，内部 match-name 是 Roughen**——发现型探针 `canAddProperty` 多候选自证）：`AddWigglePaths`/`WigglePathsNode`，`templates/shapes/wiggle_body.bin`（1326B/11 children）。8 子流（全 1D scalar），建模 4 个 headline：`ADBE Vector Roughen Size`（振幅 默认 10）+ `Roughen Detail`（默认 10）+ `ADBE Vector Temporal Freq`（=Wiggles/Second，默认 2）+ `ADBE Vector Random Seed`（默认 0）→ 各走 `lowerShapeScalar`（含 animated flip）。**deferred**：`Roughen Points`（enum）· `ADBE Vector Correlation`（默认 50）· `Temporal Phase` · `Spatial Phase`（默认 elide 未建模）。NewWigglePathsNode 默认 Size=0=identity（无扰）。属 **distort 型**，stack `[Rect, Fill, Wiggle]`（同 Trim/RC/Offset/ZigZag/PB/Twist）。
 
 **新 ground truth（时间随机性滤镜）**：Wiggle 是**逐帧随机**（`Temporal Freq` 控制 churn 速度），但**单帧由 Random Seed + 相位决定性**——frame 0 渲出固定的毛糙边。gate 渲帧 0：400×400 Rect + Size=60/Detail=30/WPS=4/Seed=9 → 边缘毛糙噪声边界（眼验 silhouette：顶边 y=340 有缺口、y=310 外凸尖、y=760 下凸刺）。gate 用**顶边逐列 topmost-white-y 的 spread** 当毛糙证据（干净方块 spread≈0；wiggle spread=41，topY∈[312,353]）——**spread=41 两版（AE2020/2025）完全一致 = seed 决定性跨版本可复现**，比纯数值 round-trip 强（干净方块=假绿）。
 
@@ -126,7 +126,7 @@ Gate：`TestMGWiggle_AEShipGate_AE2020/2025` 双版本渲染像素 PASS（4 值 
 
 ## 复用确认 — Wiggle Transform（S5, 2026-06-13）✅ 蓝本第 11 次 — **矢量滤镜家族全部收齐（vein 闭合）**
 
-`ADBE Vector Filter - Wiggler`（UI 名 Wiggle Transform）：`AddWiggleTransform`/`WiggleTransformNode`，`templates/v2_2_shape_wiggletransform_body.bin`（2040B/9 children）。递归探针自证：5 顶层 scalar + 1 嵌套 Transform 组。建模 = 顶层 `ADBE Vector Xform Temporal Freq`(=Wiggles/Second，默认 2) + `ADBE Vector Random Seed`(默认 0)（各 1D scalar 含 animated）+ 嵌套 `ADBE Vector Wiggler Transform` 组（同 Repeater 经 `findGroupBody` descend + `overwriteShapeStreamCdat` 静态覆写）的 4 通道**抖动幅度**：`Wiggler Anchor`/`Position`/`Scale`(Vec2 @cdat[0:16]) + `Wiggler Rotation`(1D @cdat[0:8])。**deferred**：`Correlation`(默认 50)/`Temporal Phase`/`Spatial Phase`（默认 elide）。`WigglerTransform` 字段全 static（同 RepeaterTransform）。NewWiggleTransformNode 默认全零幅度=identity（不抖）。
+`ADBE Vector Filter - Wiggler`（UI 名 Wiggle Transform）：`AddWiggleTransform`/`WiggleTransformNode`，`templates/shapes/wiggletransform_body.bin`（2040B/9 children）。递归探针自证：5 顶层 scalar + 1 嵌套 Transform 组。建模 = 顶层 `ADBE Vector Xform Temporal Freq`(=Wiggles/Second，默认 2) + `ADBE Vector Random Seed`(默认 0)（各 1D scalar 含 animated）+ 嵌套 `ADBE Vector Wiggler Transform` 组（同 Repeater 经 `findGroupBody` descend + `overwriteShapeStreamCdat` 静态覆写）的 4 通道**抖动幅度**：`Wiggler Anchor`/`Position`/`Scale`(Vec2 @cdat[0:16]) + `Wiggler Rotation`(1D @cdat[0:8])。**deferred**：`Correlation`(默认 50)/`Temporal Phase`/`Spatial Phase`（默认 elide）。`WigglerTransform` 字段全 static（同 RepeaterTransform）。NewWiggleTransformNode 默认全零幅度=identity（不抖）。
 
 **坑**：`Wiggler Scale`/`Anchor`/`Position` 默认值是 **[0,0]（抖动幅度，非绝对 transform 值）**——Scale 不是 [100,100]，零幅度=该通道不抖。
 
@@ -152,7 +152,7 @@ Gate：`TestMGWiggleTransform_AEShipGate_AE2020/2025` 双版本渲染像素 PASS
 Offset Paths 的 4 个 elided 子流（Line Join / Miter / **Copies** / Copy Offset）现只模 headline Amount。**Copies** 用 **synthesis-insert** 落地——把 `SetMaterialOption`（material leaves）那套机制**首次推广到矢量滤镜 body**：
 
 - **不污染默认**：`v2_2_shape_offset_body.bin`（仅 Amount slot）保持不变；仅当 `SetCopies` 被调用且值 ≠1 时，clone `ADBE Vector Offset Copies` leaf（tdmn + LIST:tdbs，6-child scalar-with-range，与 Amount 同构）splice 进 body，覆写 cdat。与 Dashes 的「solid body 不变 + 第二模板」同精神，但更轻（splice 单 leaf，不需整 body 变体）。
-- **leaf 模板** `templates/v2_2_shape_offset_copies_leaf.bin`（318B，LIST(tdgp) 裹单个 (tdmn,tdbs) pair）由 `tmp_debug/extract_offset_copies_leaf` 从 `v2_2_offset_copies.aep`（JSX 设 Amount=40+Copies=3，逼 AE 不 elide）抽出。RE 确认落盘子序：Amount → Copies → GroupEnd（Line Join/Miter/Copy Offset 仍 elide）。
+- **leaf 模板** `templates/shapes/offset_copies_leaf.bin`（318B，LIST(tdgp) 裹单个 (tdmn,tdbs) pair）由 `tmp_debug/extract_offset_copies_leaf` 从 `v2_2_offset_copies.aep`（JSX 设 Amount=40+Copies=3，逼 AE 不 elide）抽出。RE 确认落盘子序：Amount → Copies → GroupEnd（Line Join/Miter/Copy Offset 仍 elide）。
 - **splice 落点** = `spliceShapeLeafBeforeGroupEnd`（GroupEnd 前；Copies canonical 在 Amount 后）。scene `OffsetPathsNode` 加 `copies float64 + copiesSet bool`（静态，非 PropertyStream——Copies 非动画需求）。
 - **不需 hydration**：`collectShapeKids` 本就不 hydrate 任何 filter 节点（Trim/Merge/Offset 全靠 opaque chunk 穿越 Reopen）——Copies splice 在 from-scratch lower 期烘进字节，之后 Reopen→Write 作 opaque 保留。与所有现有 filter 一致。
 

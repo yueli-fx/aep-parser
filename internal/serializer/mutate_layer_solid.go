@@ -4,7 +4,7 @@
 // Unlike Camera/Light (source-less, embed a single Layr), these layers need a
 // backing solid footage Item (`opti "Soli"` + Pin/sspc). Rather than
 // synthesizing that Item from scratch, we embed a whole AE-2020-native template
-// project (templates/solidnull_2020.aep, one comp with a solid + null +
+// project (templates/project/solidnull_2020.aep, one comp with a solid + null +
 // adjustment layer) and reuse the cross-Project InsertLayer machinery: it
 // imports the layer's footage closure with fresh item IDs and remaps the
 // clone's SourceID, exactly what AE-faithful solid creation needs. Per-instance
@@ -24,7 +24,7 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-//go:embed templates/solidnull_2020.aep
+//go:embed templates/project/solidnull_2020.aep
 var solidLibraryBytes []byte
 
 // opti "Soli" layout (RE: test_data/re_solidnull.aep, AE 2020; 282-byte chunk):
@@ -44,7 +44,7 @@ const (
 	solidMaxDim = 30000 // AE's solid dimension ceiling
 )
 
-// Template layer names inside templates/solidnull_2020.aep, comp "TplComp".
+// Template layer names inside templates/project/solidnull_2020.aep, comp "TplComp".
 const (
 	tplSolidLayer      = "TplSolid"
 	tplNullLayer       = "TplNull"

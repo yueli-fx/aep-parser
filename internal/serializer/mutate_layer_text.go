@@ -16,7 +16,7 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-//go:embed templates/layer_text_body.bin
+//go:embed templates/layers/layer_text_body.bin
 var layerTextBodyBytes []byte
 
 // NewTextLayer adds a new text layer to the composition.

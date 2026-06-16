@@ -26,7 +26,7 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-//go:embed templates/material_options_leaves.bin
+//go:embed templates/options/material_options_leaves.bin
 var materialOptionsLeavesBytes []byte
 
 // materialLeafOrder is AE's canonical child order in the Material Options group

@@ -20,7 +20,7 @@ import (
 	"github.com/example/aep-parser/internal/rifx"
 )
 
-//go:embed templates/mask_option_leaves.bin
+//go:embed templates/options/mask_option_leaves.bin
 var maskOptionLeavesBytes []byte
 
 // maskOptionOrder is AE's canonical child order for the option leaves inside a

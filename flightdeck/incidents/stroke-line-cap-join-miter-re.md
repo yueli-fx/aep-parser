@@ -57,7 +57,7 @@ the Cap/Join enums do not.
 
 ## Implication for the builder
 
-The embedded `templates/v2_2_shape_stroke_body.bin` was extracted from a stroke
+The embedded `templates/shapes/stroke_body.bin` was extracted from a stroke
 WITHOUT these slots. To emit Cap/Join/Miter, either re-extract a richer template
 (stroke with all six scalar props non-default) and overwrite each `cdat[0:8]`, or
 inject the three `tdbs` sub-trees on demand (mirrors AE elision). Whichever path,

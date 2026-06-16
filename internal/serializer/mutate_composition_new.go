@@ -27,7 +27,7 @@ import (
 // builder targets the minimum (AE 2020) so output works in every supported
 // AE version.
 //
-//go:embed templates/2020_dummy_comp.aep
+//go:embed templates/project/2020_dummy_comp.aep
 var embeddedDummyCompTemplate []byte
 
 type compTemplate struct {
@@ -201,7 +201,7 @@ func buildEmptyLayrList() *rifx.Chunk {
 
 // ensureCompTemplate lazy-init the single shared comp template (AE 2020 dummy).
 //
-// Source: templates/2020_dummy_comp.aep — generated via tmp_debug/gen_dummy_comp.jsx
+// Source: templates/project/2020_dummy_comp.aep — generated via tmp_debug/gen_dummy_comp.jsx
 // against AE 2020 (17.7). FEE 0 children, ldta 160B, tdgp 19 — minimum spec that
 // every supported AE version opens back-compat.
 func ensureCompTemplate() {

@@ -9,13 +9,13 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-//go:embed templates/2020.aep
+//go:embed templates/project/2020.aep
 var embeddedTemplate2020 []byte
 
-//go:embed templates/2022.aep
+//go:embed templates/project/2022.aep
 var embeddedTemplate2022 []byte
 
-//go:embed templates/2025.aep
+//go:embed templates/project/2025.aep
 var embeddedTemplate2025 []byte
 
 // NewProject returns a fresh empty Project parsed from the embedded

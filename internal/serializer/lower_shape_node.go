@@ -25,323 +25,323 @@ import (
 // drop independently. The embed-tolerance-bytes approach (same pattern as
 // lowerLayerTransform) bypasses byte-level RE.
 //
-//go:embed templates/v2_2_shape_rect_body.bin
-var v22ShapeRectBodyBytes []byte
+//go:embed templates/shapes/rect_body.bin
+var shapeRectBodyBytes []byte
 
-//go:embed templates/v2_2_shape_fill_body.bin
-var v22ShapeFillBodyBytes []byte
+//go:embed templates/shapes/fill_body.bin
+var shapeFillBodyBytes []byte
 
-//go:embed templates/v2_2_shape_ellipse_body.bin
-var v22ShapeEllipseBodyBytes []byte
+//go:embed templates/shapes/ellipse_body.bin
+var shapeEllipseBodyBytes []byte
 
-//go:embed templates/v2_2_shape_path_body.bin
-var v22ShapePathBodyBytes []byte
+//go:embed templates/shapes/path_body.bin
+var shapePathBodyBytes []byte
 
-//go:embed templates/v2_2_shape_stroke_body.bin
-var v22ShapeStrokeBodyBytes []byte
+//go:embed templates/shapes/stroke_body.bin
+var shapeStrokeBodyBytes []byte
 
-//go:embed templates/v2_2_shape_stroke_dashed_body.bin
-var v22ShapeStrokeDashedBodyBytes []byte
+//go:embed templates/shapes/stroke_dashed_body.bin
+var shapeStrokeDashedBodyBytes []byte
 
-//go:embed templates/v2_2_shape_gradfill_body.bin
-var v22ShapeGradFillBodyBytes []byte
+//go:embed templates/shapes/gradfill_body.bin
+var shapeGradFillBodyBytes []byte
 
-//go:embed templates/v2_2_shape_gradstroke_body.bin
-var v22ShapeGradStrokeBodyBytes []byte
+//go:embed templates/shapes/gradstroke_body.bin
+var shapeGradStrokeBodyBytes []byte
 
-//go:embed templates/v2_2_shape_trim_body.bin
-var v22ShapeTrimBodyBytes []byte
+//go:embed templates/shapes/trim_body.bin
+var shapeTrimBodyBytes []byte
 
-//go:embed templates/v2_2_shape_trim_type_leaf.bin
-var v22ShapeTrimTypeLeafBytes []byte
+//go:embed templates/shapes/trim_type_leaf.bin
+var shapeTrimTypeLeafBytes []byte
 
-//go:embed templates/v2_2_shape_repeater_body.bin
-var v22ShapeRepeaterBodyBytes []byte
+//go:embed templates/shapes/repeater_body.bin
+var shapeRepeaterBodyBytes []byte
 
-//go:embed templates/v2_2_shape_repeater_order_leaf.bin
-var v22ShapeRepeaterOrderLeafBytes []byte
+//go:embed templates/shapes/repeater_order_leaf.bin
+var shapeRepeaterOrderLeafBytes []byte
 
-//go:embed templates/v2_2_shape_roundcorners_body.bin
-var v22ShapeRoundCornersBodyBytes []byte
+//go:embed templates/shapes/roundcorners_body.bin
+var shapeRoundCornersBodyBytes []byte
 
-//go:embed templates/v2_2_shape_offset_body.bin
-var v22ShapeOffsetBodyBytes []byte
+//go:embed templates/shapes/offset_body.bin
+var shapeOffsetBodyBytes []byte
 
-//go:embed templates/v2_2_shape_offset_copies_leaf.bin
-var v22ShapeOffsetCopiesLeafBytes []byte
+//go:embed templates/shapes/offset_copies_leaf.bin
+var shapeOffsetCopiesLeafBytes []byte
 
-//go:embed templates/v2_2_shape_offset_linejoin_leaf.bin
-var v22ShapeOffsetLineJoinLeafBytes []byte
+//go:embed templates/shapes/offset_linejoin_leaf.bin
+var shapeOffsetLineJoinLeafBytes []byte
 
-//go:embed templates/v2_2_shape_offset_miter_leaf.bin
-var v22ShapeOffsetMiterLeafBytes []byte
+//go:embed templates/shapes/offset_miter_leaf.bin
+var shapeOffsetMiterLeafBytes []byte
 
-//go:embed templates/v2_2_shape_offset_copyoffset_leaf.bin
-var v22ShapeOffsetCopyOffsetLeafBytes []byte
+//go:embed templates/shapes/offset_copyoffset_leaf.bin
+var shapeOffsetCopyOffsetLeafBytes []byte
 
-//go:embed templates/v2_2_shape_merge_body.bin
-var v22ShapeMergeBodyBytes []byte
+//go:embed templates/shapes/merge_body.bin
+var shapeMergeBodyBytes []byte
 
-//go:embed templates/v2_2_shape_zigzag_body.bin
-var v22ShapeZigZagBodyBytes []byte
+//go:embed templates/shapes/zigzag_body.bin
+var shapeZigZagBodyBytes []byte
 
-//go:embed templates/v2_2_shape_zigzag_points_leaf.bin
-var v22ShapeZigZagPointsLeafBytes []byte
+//go:embed templates/shapes/zigzag_points_leaf.bin
+var shapeZigZagPointsLeafBytes []byte
 
-//go:embed templates/v2_2_shape_star_body.bin
-var v22ShapeStarBodyBytes []byte
+//go:embed templates/shapes/star_body.bin
+var shapeStarBodyBytes []byte
 
-//go:embed templates/v2_2_shape_starpolygon_body.bin
-var v22ShapeStarPolygonBodyBytes []byte
+//go:embed templates/shapes/starpolygon_body.bin
+var shapeStarPolygonBodyBytes []byte
 
-//go:embed templates/v2_2_shape_puckerbloat_body.bin
-var v22ShapePuckerBloatBodyBytes []byte
+//go:embed templates/shapes/puckerbloat_body.bin
+var shapePuckerBloatBodyBytes []byte
 
-//go:embed templates/v2_2_shape_twist_body.bin
-var v22ShapeTwistBodyBytes []byte
+//go:embed templates/shapes/twist_body.bin
+var shapeTwistBodyBytes []byte
 
-//go:embed templates/v2_2_shape_twist_center_leaf.bin
-var v22ShapeTwistCenterLeafBytes []byte
+//go:embed templates/shapes/twist_center_leaf.bin
+var shapeTwistCenterLeafBytes []byte
 
-//go:embed templates/v2_2_shape_wiggle_body.bin
-var v22ShapeWiggleBodyBytes []byte
+//go:embed templates/shapes/wiggle_body.bin
+var shapeWiggleBodyBytes []byte
 
-//go:embed templates/v2_2_shape_wiggletransform_body.bin
-var v22ShapeWiggleTransformBodyBytes []byte
+//go:embed templates/shapes/wiggletransform_body.bin
+var shapeWiggleTransformBodyBytes []byte
 
-//go:embed templates/v2_2_shape_roughen_points_leaf.bin
-var v22ShapeRoughenPointsLeafBytes []byte
+//go:embed templates/shapes/roughen_points_leaf.bin
+var shapeRoughenPointsLeafBytes []byte
 
-//go:embed templates/v2_2_shape_correlation_leaf.bin
-var v22ShapeCorrelationLeafBytes []byte
+//go:embed templates/shapes/correlation_leaf.bin
+var shapeCorrelationLeafBytes []byte
 
-//go:embed templates/v2_2_shape_temporal_phase_leaf.bin
-var v22ShapeTemporalPhaseLeafBytes []byte
+//go:embed templates/shapes/temporal_phase_leaf.bin
+var shapeTemporalPhaseLeafBytes []byte
 
-//go:embed templates/v2_2_shape_spatial_phase_leaf.bin
-var v22ShapeSpatialPhaseLeafBytes []byte
+//go:embed templates/shapes/spatial_phase_leaf.bin
+var shapeSpatialPhaseLeafBytes []byte
 
 var (
-	v22ShapeRectOnce  sync.Once
-	v22ShapeRectCache *rifx.Chunk
-	v22ShapeRectErr   error
+	shapeRectOnce  sync.Once
+	shapeRectCache *rifx.Chunk
+	shapeRectErr   error
 
-	v22ShapeFillOnce  sync.Once
-	v22ShapeFillCache *rifx.Chunk
-	v22ShapeFillErr   error
+	shapeFillOnce  sync.Once
+	shapeFillCache *rifx.Chunk
+	shapeFillErr   error
 
-	v22ShapeEllipseOnce  sync.Once
-	v22ShapeEllipseCache *rifx.Chunk
-	v22ShapeEllipseErr   error
+	shapeEllipseOnce  sync.Once
+	shapeEllipseCache *rifx.Chunk
+	shapeEllipseErr   error
 
-	v22ShapePathOnce  sync.Once
-	v22ShapePathCache *rifx.Chunk
-	v22ShapePathErr   error
+	shapePathOnce  sync.Once
+	shapePathCache *rifx.Chunk
+	shapePathErr   error
 
-	v22ShapeStrokeOnce  sync.Once
-	v22ShapeStrokeCache *rifx.Chunk
-	v22ShapeStrokeErr   error
+	shapeStrokeOnce  sync.Once
+	shapeStrokeCache *rifx.Chunk
+	shapeStrokeErr   error
 
-	v22ShapeStrokeDashedOnce  sync.Once
-	v22ShapeStrokeDashedCache *rifx.Chunk
-	v22ShapeStrokeDashedErr   error
+	shapeStrokeDashedOnce  sync.Once
+	shapeStrokeDashedCache *rifx.Chunk
+	shapeStrokeDashedErr   error
 
-	v22ShapeGradFillOnce  sync.Once
-	v22ShapeGradFillCache *rifx.Chunk
-	v22ShapeGradFillErr   error
+	shapeGradFillOnce  sync.Once
+	shapeGradFillCache *rifx.Chunk
+	shapeGradFillErr   error
 
-	v22ShapeGradStrokeOnce  sync.Once
-	v22ShapeGradStrokeCache *rifx.Chunk
-	v22ShapeGradStrokeErr   error
+	shapeGradStrokeOnce  sync.Once
+	shapeGradStrokeCache *rifx.Chunk
+	shapeGradStrokeErr   error
 
-	v22ShapeTrimOnce  sync.Once
-	v22ShapeTrimCache *rifx.Chunk
-	v22ShapeTrimErr   error
+	shapeTrimOnce  sync.Once
+	shapeTrimCache *rifx.Chunk
+	shapeTrimErr   error
 
-	v22ShapeTrimTypeLeafOnce  sync.Once
-	v22ShapeTrimTypeLeafCache *rifx.Chunk
-	v22ShapeTrimTypeLeafErr   error
+	shapeTrimTypeLeafOnce  sync.Once
+	shapeTrimTypeLeafCache *rifx.Chunk
+	shapeTrimTypeLeafErr   error
 
-	v22ShapeRepeaterOnce  sync.Once
-	v22ShapeRepeaterCache *rifx.Chunk
-	v22ShapeRepeaterErr   error
+	shapeRepeaterOnce  sync.Once
+	shapeRepeaterCache *rifx.Chunk
+	shapeRepeaterErr   error
 
-	v22ShapeRepeaterOrderLeafOnce  sync.Once
-	v22ShapeRepeaterOrderLeafCache *rifx.Chunk
-	v22ShapeRepeaterOrderLeafErr   error
+	shapeRepeaterOrderLeafOnce  sync.Once
+	shapeRepeaterOrderLeafCache *rifx.Chunk
+	shapeRepeaterOrderLeafErr   error
 
-	v22ShapeRoundCornersOnce  sync.Once
-	v22ShapeRoundCornersCache *rifx.Chunk
-	v22ShapeRoundCornersErr   error
+	shapeRoundCornersOnce  sync.Once
+	shapeRoundCornersCache *rifx.Chunk
+	shapeRoundCornersErr   error
 
-	v22ShapeOffsetOnce  sync.Once
-	v22ShapeOffsetCache *rifx.Chunk
-	v22ShapeOffsetErr   error
+	shapeOffsetOnce  sync.Once
+	shapeOffsetCache *rifx.Chunk
+	shapeOffsetErr   error
 
-	v22ShapeOffsetCopiesLeafOnce  sync.Once
-	v22ShapeOffsetCopiesLeafCache *rifx.Chunk
-	v22ShapeOffsetCopiesLeafErr   error
+	shapeOffsetCopiesLeafOnce  sync.Once
+	shapeOffsetCopiesLeafCache *rifx.Chunk
+	shapeOffsetCopiesLeafErr   error
 
-	v22ShapeOffsetLineJoinLeafOnce  sync.Once
-	v22ShapeOffsetLineJoinLeafCache *rifx.Chunk
-	v22ShapeOffsetLineJoinLeafErr   error
+	shapeOffsetLineJoinLeafOnce  sync.Once
+	shapeOffsetLineJoinLeafCache *rifx.Chunk
+	shapeOffsetLineJoinLeafErr   error
 
-	v22ShapeOffsetMiterLeafOnce  sync.Once
-	v22ShapeOffsetMiterLeafCache *rifx.Chunk
-	v22ShapeOffsetMiterLeafErr   error
+	shapeOffsetMiterLeafOnce  sync.Once
+	shapeOffsetMiterLeafCache *rifx.Chunk
+	shapeOffsetMiterLeafErr   error
 
-	v22ShapeOffsetCopyOffsetLeafOnce  sync.Once
-	v22ShapeOffsetCopyOffsetLeafCache *rifx.Chunk
-	v22ShapeOffsetCopyOffsetLeafErr   error
+	shapeOffsetCopyOffsetLeafOnce  sync.Once
+	shapeOffsetCopyOffsetLeafCache *rifx.Chunk
+	shapeOffsetCopyOffsetLeafErr   error
 
-	v22ShapeMergeOnce  sync.Once
-	v22ShapeMergeCache *rifx.Chunk
-	v22ShapeMergeErr   error
+	shapeMergeOnce  sync.Once
+	shapeMergeCache *rifx.Chunk
+	shapeMergeErr   error
 
-	v22ShapeZigZagOnce  sync.Once
-	v22ShapeZigZagCache *rifx.Chunk
-	v22ShapeZigZagErr   error
+	shapeZigZagOnce  sync.Once
+	shapeZigZagCache *rifx.Chunk
+	shapeZigZagErr   error
 
-	v22ShapeZigZagPointsLeafOnce  sync.Once
-	v22ShapeZigZagPointsLeafCache *rifx.Chunk
-	v22ShapeZigZagPointsLeafErr   error
+	shapeZigZagPointsLeafOnce  sync.Once
+	shapeZigZagPointsLeafCache *rifx.Chunk
+	shapeZigZagPointsLeafErr   error
 
-	v22ShapeStarOnce  sync.Once
-	v22ShapeStarCache *rifx.Chunk
-	v22ShapeStarErr   error
+	shapeStarOnce  sync.Once
+	shapeStarCache *rifx.Chunk
+	shapeStarErr   error
 
-	v22ShapeStarPolygonOnce  sync.Once
-	v22ShapeStarPolygonCache *rifx.Chunk
-	v22ShapeStarPolygonErr   error
+	shapeStarPolygonOnce  sync.Once
+	shapeStarPolygonCache *rifx.Chunk
+	shapeStarPolygonErr   error
 
-	v22ShapePuckerBloatOnce  sync.Once
-	v22ShapePuckerBloatCache *rifx.Chunk
-	v22ShapePuckerBloatErr   error
+	shapePuckerBloatOnce  sync.Once
+	shapePuckerBloatCache *rifx.Chunk
+	shapePuckerBloatErr   error
 
-	v22ShapeTwistOnce  sync.Once
-	v22ShapeTwistCache *rifx.Chunk
-	v22ShapeTwistErr   error
+	shapeTwistOnce  sync.Once
+	shapeTwistCache *rifx.Chunk
+	shapeTwistErr   error
 
-	v22ShapeTwistCenterLeafOnce  sync.Once
-	v22ShapeTwistCenterLeafCache *rifx.Chunk
-	v22ShapeTwistCenterLeafErr   error
+	shapeTwistCenterLeafOnce  sync.Once
+	shapeTwistCenterLeafCache *rifx.Chunk
+	shapeTwistCenterLeafErr   error
 
-	v22ShapeWiggleOnce  sync.Once
-	v22ShapeWiggleCache *rifx.Chunk
-	v22ShapeWiggleErr   error
+	shapeWiggleOnce  sync.Once
+	shapeWiggleCache *rifx.Chunk
+	shapeWiggleErr   error
 
-	v22ShapeWiggleTransformOnce  sync.Once
-	v22ShapeWiggleTransformCache *rifx.Chunk
-	v22ShapeWiggleTransformErr   error
+	shapeWiggleTransformOnce  sync.Once
+	shapeWiggleTransformCache *rifx.Chunk
+	shapeWiggleTransformErr   error
 
-	v22ShapeRoughenPointsLeafOnce  sync.Once
-	v22ShapeRoughenPointsLeafCache *rifx.Chunk
-	v22ShapeRoughenPointsLeafErr   error
+	shapeRoughenPointsLeafOnce  sync.Once
+	shapeRoughenPointsLeafCache *rifx.Chunk
+	shapeRoughenPointsLeafErr   error
 
-	v22ShapeCorrelationLeafOnce  sync.Once
-	v22ShapeCorrelationLeafCache *rifx.Chunk
-	v22ShapeCorrelationLeafErr   error
+	shapeCorrelationLeafOnce  sync.Once
+	shapeCorrelationLeafCache *rifx.Chunk
+	shapeCorrelationLeafErr   error
 
-	v22ShapeTemporalPhaseLeafOnce  sync.Once
-	v22ShapeTemporalPhaseLeafCache *rifx.Chunk
-	v22ShapeTemporalPhaseLeafErr   error
+	shapeTemporalPhaseLeafOnce  sync.Once
+	shapeTemporalPhaseLeafCache *rifx.Chunk
+	shapeTemporalPhaseLeafErr   error
 
-	v22ShapeSpatialPhaseLeafOnce  sync.Once
-	v22ShapeSpatialPhaseLeafCache *rifx.Chunk
-	v22ShapeSpatialPhaseLeafErr   error
+	shapeSpatialPhaseLeafOnce  sync.Once
+	shapeSpatialPhaseLeafCache *rifx.Chunk
+	shapeSpatialPhaseLeafErr   error
 )
 
 func cloneShapeRectBody() (*rifx.Chunk, error) {
-	v22ShapeRectOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeRectBodyBytes))
+	shapeRectOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeRectBodyBytes))
 		if err != nil {
-			v22ShapeRectErr = fmt.Errorf("parse v22ShapeRectBodyBytes: %w", err)
+			shapeRectErr = fmt.Errorf("parse shapeRectBodyBytes: %w", err)
 			return
 		}
-		v22ShapeRectCache = ch
+		shapeRectCache = ch
 	})
-	if v22ShapeRectErr != nil {
-		return nil, v22ShapeRectErr
+	if shapeRectErr != nil {
+		return nil, shapeRectErr
 	}
-	return cloneChunk(v22ShapeRectCache), nil
+	return cloneChunk(shapeRectCache), nil
 }
 
 func cloneShapeFillBody() (*rifx.Chunk, error) {
-	v22ShapeFillOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeFillBodyBytes))
+	shapeFillOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeFillBodyBytes))
 		if err != nil {
-			v22ShapeFillErr = fmt.Errorf("parse v22ShapeFillBodyBytes: %w", err)
+			shapeFillErr = fmt.Errorf("parse shapeFillBodyBytes: %w", err)
 			return
 		}
-		v22ShapeFillCache = ch
+		shapeFillCache = ch
 	})
-	if v22ShapeFillErr != nil {
-		return nil, v22ShapeFillErr
+	if shapeFillErr != nil {
+		return nil, shapeFillErr
 	}
-	return cloneChunk(v22ShapeFillCache), nil
+	return cloneChunk(shapeFillCache), nil
 }
 
 func cloneShapeEllipseBody() (*rifx.Chunk, error) {
-	v22ShapeEllipseOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeEllipseBodyBytes))
+	shapeEllipseOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeEllipseBodyBytes))
 		if err != nil {
-			v22ShapeEllipseErr = fmt.Errorf("parse v22ShapeEllipseBodyBytes: %w", err)
+			shapeEllipseErr = fmt.Errorf("parse shapeEllipseBodyBytes: %w", err)
 			return
 		}
-		v22ShapeEllipseCache = ch
+		shapeEllipseCache = ch
 	})
-	if v22ShapeEllipseErr != nil {
-		return nil, v22ShapeEllipseErr
+	if shapeEllipseErr != nil {
+		return nil, shapeEllipseErr
 	}
-	return cloneChunk(v22ShapeEllipseCache), nil
+	return cloneChunk(shapeEllipseCache), nil
 }
 
 func cloneShapePathBody() (*rifx.Chunk, error) {
-	v22ShapePathOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapePathBodyBytes))
+	shapePathOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapePathBodyBytes))
 		if err != nil {
-			v22ShapePathErr = fmt.Errorf("parse v22ShapePathBodyBytes: %w", err)
+			shapePathErr = fmt.Errorf("parse shapePathBodyBytes: %w", err)
 			return
 		}
-		v22ShapePathCache = ch
+		shapePathCache = ch
 	})
-	if v22ShapePathErr != nil {
-		return nil, v22ShapePathErr
+	if shapePathErr != nil {
+		return nil, shapePathErr
 	}
-	return cloneChunk(v22ShapePathCache), nil
+	return cloneChunk(shapePathCache), nil
 }
 
 func cloneShapeStrokeBody() (*rifx.Chunk, error) {
-	v22ShapeStrokeOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStrokeBodyBytes))
+	shapeStrokeOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeStrokeBodyBytes))
 		if err != nil {
-			v22ShapeStrokeErr = fmt.Errorf("parse v22ShapeStrokeBodyBytes: %w", err)
+			shapeStrokeErr = fmt.Errorf("parse shapeStrokeBodyBytes: %w", err)
 			return
 		}
-		v22ShapeStrokeCache = ch
+		shapeStrokeCache = ch
 	})
-	if v22ShapeStrokeErr != nil {
-		return nil, v22ShapeStrokeErr
+	if shapeStrokeErr != nil {
+		return nil, shapeStrokeErr
 	}
-	return cloneChunk(v22ShapeStrokeCache), nil
+	return cloneChunk(shapeStrokeCache), nil
 }
 
 // cloneShapeStrokeDashedBody returns a clone of the dashed-stroke template — a
 // superset of the solid stroke body that additionally carries the Dashes group's
 // Dash 1 / Gap 1 slots. lowerStrokeNode selects it when dashes are enabled.
 func cloneShapeStrokeDashedBody() (*rifx.Chunk, error) {
-	v22ShapeStrokeDashedOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStrokeDashedBodyBytes))
+	shapeStrokeDashedOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeStrokeDashedBodyBytes))
 		if err != nil {
-			v22ShapeStrokeDashedErr = fmt.Errorf("parse v22ShapeStrokeDashedBodyBytes: %w", err)
+			shapeStrokeDashedErr = fmt.Errorf("parse shapeStrokeDashedBodyBytes: %w", err)
 			return
 		}
-		v22ShapeStrokeDashedCache = ch
+		shapeStrokeDashedCache = ch
 	})
-	if v22ShapeStrokeDashedErr != nil {
-		return nil, v22ShapeStrokeDashedErr
+	if shapeStrokeDashedErr != nil {
+		return nil, shapeStrokeDashedErr
 	}
-	return cloneChunk(v22ShapeStrokeDashedCache), nil
+	return cloneChunk(shapeStrokeDashedCache), nil
 }
 
 // cloneShapeGradFillBody returns a clone of the gradient-fill template. The
@@ -349,18 +349,18 @@ func cloneShapeStrokeDashedBody() (*rifx.Chunk, error) {
 // Type / Start Pt / End Pt were default in the source fixture and AE elided
 // them, so the ramp geometry is not overwritable (default linear on open).
 func cloneShapeGradFillBody() (*rifx.Chunk, error) {
-	v22ShapeGradFillOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeGradFillBodyBytes))
+	shapeGradFillOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeGradFillBodyBytes))
 		if err != nil {
-			v22ShapeGradFillErr = fmt.Errorf("parse v22ShapeGradFillBodyBytes: %w", err)
+			shapeGradFillErr = fmt.Errorf("parse shapeGradFillBodyBytes: %w", err)
 			return
 		}
-		v22ShapeGradFillCache = ch
+		shapeGradFillCache = ch
 	})
-	if v22ShapeGradFillErr != nil {
-		return nil, v22ShapeGradFillErr
+	if shapeGradFillErr != nil {
+		return nil, shapeGradFillErr
 	}
-	return cloneChunk(v22ShapeGradFillCache), nil
+	return cloneChunk(shapeGradFillCache), nil
 }
 
 // encodeShapeColorBE returns the AE shape-color cdat bytes for an [r,g,b,a]
@@ -485,7 +485,7 @@ func lowerShapeNode(n ShapeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 }
 
 // lowerRectNode emits a Rect shape body using embedded tolerance bytes
-// (templates/v2_2_shape_rect_body.bin). From-scratch construction triggered
+// (templates/shapes/rect_body.bin). From-scratch construction triggered
 // silent drop (transplant-isolated); embedding the canonical body +
 // overwriting Size cdat with runtime user values is the validator-safe path.
 //
@@ -614,7 +614,7 @@ func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chun
 }
 
 // lowerEllipseNode emits an Ellipse shape body using embedded tolerance
-// bytes (templates/v2_2_shape_ellipse_body.bin). Same rationale as
+// bytes (templates/shapes/ellipse_body.bin). Same rationale as
 // lowerRectNode — from-scratch emit triggered AE silent-drop (the body's
 // boilerplate, not the values, fails AE's semantic validation); embedding the
 // canonical AE-saved body + overwriting Size/Position cdat with runtime values
@@ -653,7 +653,7 @@ func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 }
 
 // lowerPathNode emits a Path shape body using embedded tolerance bytes
-// (templates/v2_2_shape_path_body.bin). From-scratch emit CRASHED AE 2020
+// (templates/shapes/path_body.bin). From-scratch emit CRASHED AE 2020
 // ("After Effects 已崩溃 (0::42)") — the om-s/tdb4 scaffolding is too fragile
 // to hand-build. We clone the AE-native body and splice in the user's geometry
 // (shph/lhd3/ldat from encodeBezier, whose layout matches AE byte-for-byte),
@@ -905,7 +905,7 @@ func findListByForm(c *rifx.Chunk, form rifx.ChunkID) *rifx.Chunk {
 }
 
 // lowerFillNode emits a Fill graphic body using embedded tolerance bytes
-// (templates/v2_2_shape_fill_body.bin). Same rationale as lowerRectNode —
+// (templates/shapes/fill_body.bin). Same rationale as lowerRectNode —
 // transplant tests proved from-scratch Fill body triggers silent drop;
 // embedded canonical body + cdat overwrite for Color values is the
 // validator-safe path.
@@ -953,7 +953,7 @@ func lowerGradientStops(body *rifx.Chunk, gradient *codec.Gradient) *rifx.Chunk 
 }
 
 // lowerGradientFillNode emits a gradient-fill graphic body from the embedded
-// template (templates/v2_2_shape_gradfill_body.bin), overwriting the Grad
+// template (templates/shapes/gradfill_body.bin), overwriting the Grad
 // Start/End Pt cdats (the linear ramp direction) + the Grad Colors stops XML
 // with the runtime gradient. The XML length changes per stop count →
 // length-variable; the Utf8 chunk's Data is swapped and rifx.Chunk.Write
@@ -989,23 +989,23 @@ func lowerGradientFillNode(n *GradientFillNode, ctx *lowerCtx) (*rifx.Chunk, err
 }
 
 // cloneShapeGradStrokeBody returns a clone of the gradient-stroke template
-// (templates/v2_2_shape_gradstroke_body.bin). Like gradfill it carries the five
+// (templates/shapes/gradstroke_body.bin). Like gradfill it carries the five
 // gradient-geometry slots (Grad Type / Start Pt / End Pt / HiLite Length·Angle)
 // + `ADBE Vector Grad Colors`; the stroke geometry (width/cap/join/…) stays at
 // the extracted values.
 func cloneShapeGradStrokeBody() (*rifx.Chunk, error) {
-	v22ShapeGradStrokeOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeGradStrokeBodyBytes))
+	shapeGradStrokeOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeGradStrokeBodyBytes))
 		if err != nil {
-			v22ShapeGradStrokeErr = fmt.Errorf("parse v22ShapeGradStrokeBodyBytes: %w", err)
+			shapeGradStrokeErr = fmt.Errorf("parse shapeGradStrokeBodyBytes: %w", err)
 			return
 		}
-		v22ShapeGradStrokeCache = ch
+		shapeGradStrokeCache = ch
 	})
-	if v22ShapeGradStrokeErr != nil {
-		return nil, v22ShapeGradStrokeErr
+	if shapeGradStrokeErr != nil {
+		return nil, shapeGradStrokeErr
 	}
-	return cloneChunk(v22ShapeGradStrokeCache), nil
+	return cloneChunk(shapeGradStrokeCache), nil
 }
 
 // lowerGradientStrokeNode emits a gradient-stroke body from the embedded
@@ -1046,21 +1046,21 @@ func lowerGradientStrokeNode(n *GradientStrokeNode, ctx *lowerCtx) (*rifx.Chunk,
 }
 
 // cloneShapeTrimBody returns a clone of the Trim Paths template
-// (templates/v2_2_shape_trim_body.bin). The body carries the Start / End /
+// (templates/shapes/trim_body.bin). The body carries the Start / End /
 // Offset cdat slots (Trim Type was AE-default and elided — no slot).
 func cloneShapeTrimBody() (*rifx.Chunk, error) {
-	v22ShapeTrimOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeTrimBodyBytes))
+	shapeTrimOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeTrimBodyBytes))
 		if err != nil {
-			v22ShapeTrimErr = fmt.Errorf("parse v22ShapeTrimBodyBytes: %w", err)
+			shapeTrimErr = fmt.Errorf("parse shapeTrimBodyBytes: %w", err)
 			return
 		}
-		v22ShapeTrimCache = ch
+		shapeTrimCache = ch
 	})
-	if v22ShapeTrimErr != nil {
-		return nil, v22ShapeTrimErr
+	if shapeTrimErr != nil {
+		return nil, shapeTrimErr
 	}
-	return cloneChunk(v22ShapeTrimCache), nil
+	return cloneChunk(shapeTrimCache), nil
 }
 
 // lowerTrimNode emits a Trim Paths filter body from the embedded template,
@@ -1106,18 +1106,18 @@ func lowerTrimNode(n *TrimNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // trim body when Trim Type is set non-default (Individually). Mirrors
 // cloneShapeOffsetCopiesLeaf.
 func cloneShapeTrimTypeLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeTrimTypeLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeTrimTypeLeafBytes))
+	shapeTrimTypeLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeTrimTypeLeafBytes))
 		if e != nil {
-			v22ShapeTrimTypeLeafErr = fmt.Errorf("parse v22ShapeTrimTypeLeafBytes: %w", e)
+			shapeTrimTypeLeafErr = fmt.Errorf("parse shapeTrimTypeLeafBytes: %w", e)
 			return
 		}
-		v22ShapeTrimTypeLeafCache = ch
+		shapeTrimTypeLeafCache = ch
 	})
-	if v22ShapeTrimTypeLeafErr != nil {
-		return nil, nil, v22ShapeTrimTypeLeafErr
+	if shapeTrimTypeLeafErr != nil {
+		return nil, nil, shapeTrimTypeLeafErr
 	}
-	kids := v22ShapeTrimTypeLeafCache.Children
+	kids := shapeTrimTypeLeafCache.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Trim Type" &&
 			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
@@ -1128,22 +1128,22 @@ func cloneShapeTrimTypeLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
 }
 
 // cloneShapeRepeaterBody returns a clone of the Repeater template
-// (templates/v2_2_shape_repeater_body.bin): top-level Copies/Offset cdat slots
+// (templates/shapes/repeater_body.bin): top-level Copies/Offset cdat slots
 // + a nested `ADBE Vector Repeater Transform` group (Anchor/Position/Scale/
 // Rotation/Opacity 1·2). Order (Composite) was AE-default and elided.
 func cloneShapeRepeaterBody() (*rifx.Chunk, error) {
-	v22ShapeRepeaterOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeRepeaterBodyBytes))
+	shapeRepeaterOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeRepeaterBodyBytes))
 		if err != nil {
-			v22ShapeRepeaterErr = fmt.Errorf("parse v22ShapeRepeaterBodyBytes: %w", err)
+			shapeRepeaterErr = fmt.Errorf("parse shapeRepeaterBodyBytes: %w", err)
 			return
 		}
-		v22ShapeRepeaterCache = ch
+		shapeRepeaterCache = ch
 	})
-	if v22ShapeRepeaterErr != nil {
-		return nil, v22ShapeRepeaterErr
+	if shapeRepeaterErr != nil {
+		return nil, shapeRepeaterErr
 	}
-	return cloneChunk(v22ShapeRepeaterCache), nil
+	return cloneChunk(shapeRepeaterCache), nil
 }
 
 // lowerRepeaterNode emits a Repeater filter body from the embedded template.
@@ -1216,18 +1216,18 @@ func spliceShapeLeafBefore(body *rifx.Chunk, beforeMatchName string, tdmn, tdbs 
 // before the Repeater Transform group when Order is set Above. Mirrors
 // cloneShapeTrimTypeLeaf.
 func cloneShapeRepeaterOrderLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeRepeaterOrderLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeRepeaterOrderLeafBytes))
+	shapeRepeaterOrderLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeRepeaterOrderLeafBytes))
 		if e != nil {
-			v22ShapeRepeaterOrderLeafErr = fmt.Errorf("parse v22ShapeRepeaterOrderLeafBytes: %w", e)
+			shapeRepeaterOrderLeafErr = fmt.Errorf("parse shapeRepeaterOrderLeafBytes: %w", e)
 			return
 		}
-		v22ShapeRepeaterOrderLeafCache = ch
+		shapeRepeaterOrderLeafCache = ch
 	})
-	if v22ShapeRepeaterOrderLeafErr != nil {
-		return nil, nil, v22ShapeRepeaterOrderLeafErr
+	if shapeRepeaterOrderLeafErr != nil {
+		return nil, nil, shapeRepeaterOrderLeafErr
 	}
-	kids := v22ShapeRepeaterOrderLeafCache.Children
+	kids := shapeRepeaterOrderLeafCache.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Repeater Order" &&
 			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
@@ -1238,22 +1238,22 @@ func cloneShapeRepeaterOrderLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
 }
 
 // cloneShapeRoundCornersBody returns a clone of the Round Corners template
-// (templates/v2_2_shape_roundcorners_body.bin): a single `ADBE Vector
+// (templates/shapes/roundcorners_body.bin): a single `ADBE Vector
 // RoundCorner Radius` cdat slot (Radius was set non-default in the fixture so
 // AE emitted it).
 func cloneShapeRoundCornersBody() (*rifx.Chunk, error) {
-	v22ShapeRoundCornersOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeRoundCornersBodyBytes))
+	shapeRoundCornersOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeRoundCornersBodyBytes))
 		if err != nil {
-			v22ShapeRoundCornersErr = fmt.Errorf("parse v22ShapeRoundCornersBodyBytes: %w", err)
+			shapeRoundCornersErr = fmt.Errorf("parse shapeRoundCornersBodyBytes: %w", err)
 			return
 		}
-		v22ShapeRoundCornersCache = ch
+		shapeRoundCornersCache = ch
 	})
-	if v22ShapeRoundCornersErr != nil {
-		return nil, v22ShapeRoundCornersErr
+	if shapeRoundCornersErr != nil {
+		return nil, shapeRoundCornersErr
 	}
-	return cloneChunk(v22ShapeRoundCornersCache), nil
+	return cloneChunk(shapeRoundCornersCache), nil
 }
 
 // lowerRoundCornersNode emits a Round Corners filter body from the embedded
@@ -1273,22 +1273,22 @@ func lowerRoundCornersNode(n *RoundCornersNode, ctx *lowerCtx) (*rifx.Chunk, err
 }
 
 // cloneShapeOffsetBody returns a clone of the Offset Paths template
-// (templates/v2_2_shape_offset_body.bin): a single `ADBE Vector Offset Amount`
+// (templates/shapes/offset_body.bin): a single `ADBE Vector Offset Amount`
 // cdat slot (Amount set non-default in the fixture so AE emitted it; Line Join /
 // Miter Limit / Copies / Copy Offset stayed default and are elided).
 func cloneShapeOffsetBody() (*rifx.Chunk, error) {
-	v22ShapeOffsetOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetBodyBytes))
+	shapeOffsetOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeOffsetBodyBytes))
 		if err != nil {
-			v22ShapeOffsetErr = fmt.Errorf("parse v22ShapeOffsetBodyBytes: %w", err)
+			shapeOffsetErr = fmt.Errorf("parse shapeOffsetBodyBytes: %w", err)
 			return
 		}
-		v22ShapeOffsetCache = ch
+		shapeOffsetCache = ch
 	})
-	if v22ShapeOffsetErr != nil {
-		return nil, v22ShapeOffsetErr
+	if shapeOffsetErr != nil {
+		return nil, shapeOffsetErr
 	}
-	return cloneChunk(v22ShapeOffsetCache), nil
+	return cloneChunk(shapeOffsetCache), nil
 }
 
 // cloneShapeOffsetCopiesLeaf returns a fresh (tdmn, LIST:tdbs) clone of the
@@ -1297,18 +1297,18 @@ func cloneShapeOffsetBody() (*rifx.Chunk, error) {
 // was authored non-default). spliced into the Amount-only offset body when Copies
 // is set — mirrors SetMaterialOption's per-leaf splice for default-elided props.
 func cloneShapeOffsetCopiesLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeOffsetCopiesLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetCopiesLeafBytes))
+	shapeOffsetCopiesLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeOffsetCopiesLeafBytes))
 		if e != nil {
-			v22ShapeOffsetCopiesLeafErr = fmt.Errorf("parse v22ShapeOffsetCopiesLeafBytes: %w", e)
+			shapeOffsetCopiesLeafErr = fmt.Errorf("parse shapeOffsetCopiesLeafBytes: %w", e)
 			return
 		}
-		v22ShapeOffsetCopiesLeafCache = ch
+		shapeOffsetCopiesLeafCache = ch
 	})
-	if v22ShapeOffsetCopiesLeafErr != nil {
-		return nil, nil, v22ShapeOffsetCopiesLeafErr
+	if shapeOffsetCopiesLeafErr != nil {
+		return nil, nil, shapeOffsetCopiesLeafErr
 	}
-	kids := v22ShapeOffsetCopiesLeafCache.Children
+	kids := shapeOffsetCopiesLeafCache.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Offset Copies" &&
 			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
@@ -1399,48 +1399,48 @@ func lowerOffsetPathsNode(n *OffsetPathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 // embedded templates, spliced into the Amount-only offset body on demand. All
 // mirror cloneShapeOffsetCopiesLeaf.
 func cloneShapeOffsetLineJoinLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeOffsetLineJoinLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetLineJoinLeafBytes))
+	shapeOffsetLineJoinLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeOffsetLineJoinLeafBytes))
 		if e != nil {
-			v22ShapeOffsetLineJoinLeafErr = fmt.Errorf("parse v22ShapeOffsetLineJoinLeafBytes: %w", e)
+			shapeOffsetLineJoinLeafErr = fmt.Errorf("parse shapeOffsetLineJoinLeafBytes: %w", e)
 			return
 		}
-		v22ShapeOffsetLineJoinLeafCache = ch
+		shapeOffsetLineJoinLeafCache = ch
 	})
-	if v22ShapeOffsetLineJoinLeafErr != nil {
-		return nil, nil, v22ShapeOffsetLineJoinLeafErr
+	if shapeOffsetLineJoinLeafErr != nil {
+		return nil, nil, shapeOffsetLineJoinLeafErr
 	}
-	return offsetLeafPair(v22ShapeOffsetLineJoinLeafCache, "ADBE Vector Offset Line Join")
+	return offsetLeafPair(shapeOffsetLineJoinLeafCache, "ADBE Vector Offset Line Join")
 }
 
 func cloneShapeOffsetMiterLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeOffsetMiterLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetMiterLeafBytes))
+	shapeOffsetMiterLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeOffsetMiterLeafBytes))
 		if e != nil {
-			v22ShapeOffsetMiterLeafErr = fmt.Errorf("parse v22ShapeOffsetMiterLeafBytes: %w", e)
+			shapeOffsetMiterLeafErr = fmt.Errorf("parse shapeOffsetMiterLeafBytes: %w", e)
 			return
 		}
-		v22ShapeOffsetMiterLeafCache = ch
+		shapeOffsetMiterLeafCache = ch
 	})
-	if v22ShapeOffsetMiterLeafErr != nil {
-		return nil, nil, v22ShapeOffsetMiterLeafErr
+	if shapeOffsetMiterLeafErr != nil {
+		return nil, nil, shapeOffsetMiterLeafErr
 	}
-	return offsetLeafPair(v22ShapeOffsetMiterLeafCache, "ADBE Vector Offset Miter Limit")
+	return offsetLeafPair(shapeOffsetMiterLeafCache, "ADBE Vector Offset Miter Limit")
 }
 
 func cloneShapeOffsetCopyOffsetLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeOffsetCopyOffsetLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeOffsetCopyOffsetLeafBytes))
+	shapeOffsetCopyOffsetLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeOffsetCopyOffsetLeafBytes))
 		if e != nil {
-			v22ShapeOffsetCopyOffsetLeafErr = fmt.Errorf("parse v22ShapeOffsetCopyOffsetLeafBytes: %w", e)
+			shapeOffsetCopyOffsetLeafErr = fmt.Errorf("parse shapeOffsetCopyOffsetLeafBytes: %w", e)
 			return
 		}
-		v22ShapeOffsetCopyOffsetLeafCache = ch
+		shapeOffsetCopyOffsetLeafCache = ch
 	})
-	if v22ShapeOffsetCopyOffsetLeafErr != nil {
-		return nil, nil, v22ShapeOffsetCopyOffsetLeafErr
+	if shapeOffsetCopyOffsetLeafErr != nil {
+		return nil, nil, shapeOffsetCopyOffsetLeafErr
 	}
-	return offsetLeafPair(v22ShapeOffsetCopyOffsetLeafCache, "ADBE Vector Offset Copy Offset")
+	return offsetLeafPair(shapeOffsetCopyOffsetLeafCache, "ADBE Vector Offset Copy Offset")
 }
 
 // offsetLeafPair finds the (tdmn, LIST:tdbs) pair named `name` in a parsed leaf
@@ -1457,21 +1457,21 @@ func offsetLeafPair(cache *rifx.Chunk, name string) (tdmn, tdbs *rifx.Chunk, err
 }
 
 // cloneShapeMergeBody returns a clone of the Merge Paths template
-// (templates/v2_2_shape_merge_body.bin): a single `ADBE Vector Merge Type` enum
+// (templates/shapes/merge_body.bin): a single `ADBE Vector Merge Type` enum
 // cdat slot (Type set non-default in the fixture so AE emitted it).
 func cloneShapeMergeBody() (*rifx.Chunk, error) {
-	v22ShapeMergeOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeMergeBodyBytes))
+	shapeMergeOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeMergeBodyBytes))
 		if err != nil {
-			v22ShapeMergeErr = fmt.Errorf("parse v22ShapeMergeBodyBytes: %w", err)
+			shapeMergeErr = fmt.Errorf("parse shapeMergeBodyBytes: %w", err)
 			return
 		}
-		v22ShapeMergeCache = ch
+		shapeMergeCache = ch
 	})
-	if v22ShapeMergeErr != nil {
-		return nil, v22ShapeMergeErr
+	if shapeMergeErr != nil {
+		return nil, shapeMergeErr
 	}
-	return cloneChunk(v22ShapeMergeCache), nil
+	return cloneChunk(shapeMergeCache), nil
 }
 
 // lowerMergePathsNode emits a Merge Paths filter body from the embedded
@@ -1488,22 +1488,22 @@ func lowerMergePathsNode(n *MergePathsNode, _ *lowerCtx) (*rifx.Chunk, error) {
 }
 
 // cloneShapeZigZagBody returns a clone of the ZigZag template
-// (templates/v2_2_shape_zigzag_body.bin): `ADBE Vector Zigzag Size` +
+// (templates/shapes/zigzag_body.bin): `ADBE Vector Zigzag Size` +
 // `ADBE Vector Zigzag Detail` cdat slots (both set non-default in the fixture so
 // AE emitted them; the Points enum stayed default and is elided).
 func cloneShapeZigZagBody() (*rifx.Chunk, error) {
-	v22ShapeZigZagOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeZigZagBodyBytes))
+	shapeZigZagOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeZigZagBodyBytes))
 		if err != nil {
-			v22ShapeZigZagErr = fmt.Errorf("parse v22ShapeZigZagBodyBytes: %w", err)
+			shapeZigZagErr = fmt.Errorf("parse shapeZigZagBodyBytes: %w", err)
 			return
 		}
-		v22ShapeZigZagCache = ch
+		shapeZigZagCache = ch
 	})
-	if v22ShapeZigZagErr != nil {
-		return nil, v22ShapeZigZagErr
+	if shapeZigZagErr != nil {
+		return nil, shapeZigZagErr
 	}
-	return cloneChunk(v22ShapeZigZagCache), nil
+	return cloneChunk(shapeZigZagCache), nil
 }
 
 // lowerZigZagNode emits a ZigZag filter body from the embedded template,
@@ -1543,18 +1543,18 @@ func lowerZigZagNode(n *ZigZagNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // the zigzag body when Points is set non-default (Smooth). Mirrors
 // cloneShapeTrimTypeLeaf.
 func cloneShapeZigZagPointsLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeZigZagPointsLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeZigZagPointsLeafBytes))
+	shapeZigZagPointsLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeZigZagPointsLeafBytes))
 		if e != nil {
-			v22ShapeZigZagPointsLeafErr = fmt.Errorf("parse v22ShapeZigZagPointsLeafBytes: %w", e)
+			shapeZigZagPointsLeafErr = fmt.Errorf("parse shapeZigZagPointsLeafBytes: %w", e)
 			return
 		}
-		v22ShapeZigZagPointsLeafCache = ch
+		shapeZigZagPointsLeafCache = ch
 	})
-	if v22ShapeZigZagPointsLeafErr != nil {
-		return nil, nil, v22ShapeZigZagPointsLeafErr
+	if shapeZigZagPointsLeafErr != nil {
+		return nil, nil, shapeZigZagPointsLeafErr
 	}
-	kids := v22ShapeZigZagPointsLeafCache.Children
+	kids := shapeZigZagPointsLeafCache.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Zigzag Points" &&
 			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
@@ -1565,43 +1565,43 @@ func cloneShapeZigZagPointsLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
 }
 
 // cloneShapeStarBody returns a clone of the Star template
-// (templates/v2_2_shape_star_body.bin): Points / Position / Rotation / Inner
+// (templates/shapes/star_body.bin): Points / Position / Rotation / Inner
 // Radius / Outer Radius / Inner·Outer Roundess cdat slots (all set non-default in
 // the fixture so AE emitted them). Star Type / Shape Direction stayed default
 // and are elided (Star type only).
 func cloneShapeStarBody() (*rifx.Chunk, error) {
-	v22ShapeStarOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStarBodyBytes))
+	shapeStarOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeStarBodyBytes))
 		if err != nil {
-			v22ShapeStarErr = fmt.Errorf("parse v22ShapeStarBodyBytes: %w", err)
+			shapeStarErr = fmt.Errorf("parse shapeStarBodyBytes: %w", err)
 			return
 		}
-		v22ShapeStarCache = ch
+		shapeStarCache = ch
 	})
-	if v22ShapeStarErr != nil {
-		return nil, v22ShapeStarErr
+	if shapeStarErr != nil {
+		return nil, shapeStarErr
 	}
-	return cloneChunk(v22ShapeStarCache), nil
+	return cloneChunk(shapeStarCache), nil
 }
 
 // cloneShapeStarPolygonBody returns a clone of the Polygon-type polystar template
-// (templates/v2_2_shape_starpolygon_body.bin): same sub-streams as the Star body
+// (templates/shapes/starpolygon_body.bin): same sub-streams as the Star body
 // PLUS the `ADBE Vector Star Type` slot baked to 2 (Polygon). AE saves Inner
 // Radius/Roundness too (hidden, no visual effect) so the slot set is a superset
 // of the Star body — the shared lower overwrites apply unchanged.
 func cloneShapeStarPolygonBody() (*rifx.Chunk, error) {
-	v22ShapeStarPolygonOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeStarPolygonBodyBytes))
+	shapeStarPolygonOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeStarPolygonBodyBytes))
 		if err != nil {
-			v22ShapeStarPolygonErr = fmt.Errorf("parse v22ShapeStarPolygonBodyBytes: %w", err)
+			shapeStarPolygonErr = fmt.Errorf("parse shapeStarPolygonBodyBytes: %w", err)
 			return
 		}
-		v22ShapeStarPolygonCache = ch
+		shapeStarPolygonCache = ch
 	})
-	if v22ShapeStarPolygonErr != nil {
-		return nil, v22ShapeStarPolygonErr
+	if shapeStarPolygonErr != nil {
+		return nil, shapeStarPolygonErr
 	}
-	return cloneChunk(v22ShapeStarPolygonCache), nil
+	return cloneChunk(shapeStarPolygonCache), nil
 }
 
 // lowerStarNode emits a Star shape body from the embedded template, overwriting
@@ -1648,22 +1648,22 @@ func lowerStarNode(n *StarNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 }
 
 // cloneShapePuckerBloatBody returns a clone of the Pucker & Bloat template
-// (templates/v2_2_shape_puckerbloat_body.bin): a single `ADBE Vector
+// (templates/shapes/puckerbloat_body.bin): a single `ADBE Vector
 // PuckerBloat Amount` cdat slot (Amount was set non-default in the fixture so
 // AE emitted it).
 func cloneShapePuckerBloatBody() (*rifx.Chunk, error) {
-	v22ShapePuckerBloatOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapePuckerBloatBodyBytes))
+	shapePuckerBloatOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapePuckerBloatBodyBytes))
 		if err != nil {
-			v22ShapePuckerBloatErr = fmt.Errorf("parse v22ShapePuckerBloatBodyBytes: %w", err)
+			shapePuckerBloatErr = fmt.Errorf("parse shapePuckerBloatBodyBytes: %w", err)
 			return
 		}
-		v22ShapePuckerBloatCache = ch
+		shapePuckerBloatCache = ch
 	})
-	if v22ShapePuckerBloatErr != nil {
-		return nil, v22ShapePuckerBloatErr
+	if shapePuckerBloatErr != nil {
+		return nil, shapePuckerBloatErr
 	}
-	return cloneChunk(v22ShapePuckerBloatCache), nil
+	return cloneChunk(shapePuckerBloatCache), nil
 }
 
 // lowerPuckerBloatNode emits a Pucker & Bloat filter body from the embedded
@@ -1683,22 +1683,22 @@ func lowerPuckerBloatNode(n *PuckerBloatNode, ctx *lowerCtx) (*rifx.Chunk, error
 }
 
 // cloneShapeTwistBody returns a clone of the Twist template
-// (templates/v2_2_shape_twist_body.bin): a single `ADBE Vector Twist Angle`
+// (templates/shapes/twist_body.bin): a single `ADBE Vector Twist Angle`
 // cdat slot (Angle was set non-default in the fixture so AE emitted it; the
 // Vec2 Twist Center stayed default and is elided).
 func cloneShapeTwistBody() (*rifx.Chunk, error) {
-	v22ShapeTwistOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeTwistBodyBytes))
+	shapeTwistOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeTwistBodyBytes))
 		if err != nil {
-			v22ShapeTwistErr = fmt.Errorf("parse v22ShapeTwistBodyBytes: %w", err)
+			shapeTwistErr = fmt.Errorf("parse shapeTwistBodyBytes: %w", err)
 			return
 		}
-		v22ShapeTwistCache = ch
+		shapeTwistCache = ch
 	})
-	if v22ShapeTwistErr != nil {
-		return nil, v22ShapeTwistErr
+	if shapeTwistErr != nil {
+		return nil, shapeTwistErr
 	}
-	return cloneChunk(v22ShapeTwistCache), nil
+	return cloneChunk(shapeTwistCache), nil
 }
 
 // lowerTwistNode emits a Twist filter body from the embedded template,
@@ -1736,18 +1736,18 @@ func lowerTwistNode(n *TwistNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 // the twist body when Center is offset from [0,0]. Mirrors
 // cloneShapeZigZagPointsLeaf (the cdat holds two f64 BE rather than one).
 func cloneShapeTwistCenterLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeTwistCenterLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeTwistCenterLeafBytes))
+	shapeTwistCenterLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeTwistCenterLeafBytes))
 		if e != nil {
-			v22ShapeTwistCenterLeafErr = fmt.Errorf("parse v22ShapeTwistCenterLeafBytes: %w", e)
+			shapeTwistCenterLeafErr = fmt.Errorf("parse shapeTwistCenterLeafBytes: %w", e)
 			return
 		}
-		v22ShapeTwistCenterLeafCache = ch
+		shapeTwistCenterLeafCache = ch
 	})
-	if v22ShapeTwistCenterLeafErr != nil {
-		return nil, nil, v22ShapeTwistCenterLeafErr
+	if shapeTwistCenterLeafErr != nil {
+		return nil, nil, shapeTwistCenterLeafErr
 	}
-	kids := v22ShapeTwistCenterLeafCache.Children
+	kids := shapeTwistCenterLeafCache.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == "ADBE Vector Twist Center" &&
 			kids[i+1].IsList() && kids[i+1].FormType == rifx.IDTdbs {
@@ -1758,23 +1758,23 @@ func cloneShapeTwistCenterLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
 }
 
 // cloneShapeWiggleBody returns a clone of the Wiggle Paths template
-// (templates/v2_2_shape_wiggle_body.bin): four cdat slots — `ADBE Vector Roughen
+// (templates/shapes/wiggle_body.bin): four cdat slots — `ADBE Vector Roughen
 // Size` / `Roughen Detail` / `Temporal Freq` / `Random Seed` — all set
 // non-default in the fixture so AE emitted them. Points / Correlation /
 // Temporal·Spatial Phase stayed default and are elided.
 func cloneShapeWiggleBody() (*rifx.Chunk, error) {
-	v22ShapeWiggleOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeWiggleBodyBytes))
+	shapeWiggleOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeWiggleBodyBytes))
 		if err != nil {
-			v22ShapeWiggleErr = fmt.Errorf("parse v22ShapeWiggleBodyBytes: %w", err)
+			shapeWiggleErr = fmt.Errorf("parse shapeWiggleBodyBytes: %w", err)
 			return
 		}
-		v22ShapeWiggleCache = ch
+		shapeWiggleCache = ch
 	})
-	if v22ShapeWiggleErr != nil {
-		return nil, v22ShapeWiggleErr
+	if shapeWiggleErr != nil {
+		return nil, shapeWiggleErr
 	}
-	return cloneChunk(v22ShapeWiggleCache), nil
+	return cloneChunk(shapeWiggleCache), nil
 }
 
 // lowerWigglePathsNode emits a Wiggle Paths filter body from the embedded
@@ -1847,84 +1847,84 @@ func lowerWigglePathsNode(n *WigglePathsNode, ctx *lowerCtx) (*rifx.Chunk, error
 // Wiggle Transform (Wiggler) — the on-disk match-names and tdbs layouts are
 // identical (the embedded value is overwritten on splice).
 func cloneShapeRoughenPointsLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeRoughenPointsLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeRoughenPointsLeafBytes))
+	shapeRoughenPointsLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeRoughenPointsLeafBytes))
 		if e != nil {
-			v22ShapeRoughenPointsLeafErr = fmt.Errorf("parse v22ShapeRoughenPointsLeafBytes: %w", e)
+			shapeRoughenPointsLeafErr = fmt.Errorf("parse shapeRoughenPointsLeafBytes: %w", e)
 			return
 		}
-		v22ShapeRoughenPointsLeafCache = ch
+		shapeRoughenPointsLeafCache = ch
 	})
-	if v22ShapeRoughenPointsLeafErr != nil {
-		return nil, nil, v22ShapeRoughenPointsLeafErr
+	if shapeRoughenPointsLeafErr != nil {
+		return nil, nil, shapeRoughenPointsLeafErr
 	}
-	return offsetLeafPair(v22ShapeRoughenPointsLeafCache, "ADBE Vector Roughen Points")
+	return offsetLeafPair(shapeRoughenPointsLeafCache, "ADBE Vector Roughen Points")
 }
 
 func cloneShapeCorrelationLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeCorrelationLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeCorrelationLeafBytes))
+	shapeCorrelationLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeCorrelationLeafBytes))
 		if e != nil {
-			v22ShapeCorrelationLeafErr = fmt.Errorf("parse v22ShapeCorrelationLeafBytes: %w", e)
+			shapeCorrelationLeafErr = fmt.Errorf("parse shapeCorrelationLeafBytes: %w", e)
 			return
 		}
-		v22ShapeCorrelationLeafCache = ch
+		shapeCorrelationLeafCache = ch
 	})
-	if v22ShapeCorrelationLeafErr != nil {
-		return nil, nil, v22ShapeCorrelationLeafErr
+	if shapeCorrelationLeafErr != nil {
+		return nil, nil, shapeCorrelationLeafErr
 	}
-	return offsetLeafPair(v22ShapeCorrelationLeafCache, "ADBE Vector Correlation")
+	return offsetLeafPair(shapeCorrelationLeafCache, "ADBE Vector Correlation")
 }
 
 func cloneShapeTemporalPhaseLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeTemporalPhaseLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeTemporalPhaseLeafBytes))
+	shapeTemporalPhaseLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeTemporalPhaseLeafBytes))
 		if e != nil {
-			v22ShapeTemporalPhaseLeafErr = fmt.Errorf("parse v22ShapeTemporalPhaseLeafBytes: %w", e)
+			shapeTemporalPhaseLeafErr = fmt.Errorf("parse shapeTemporalPhaseLeafBytes: %w", e)
 			return
 		}
-		v22ShapeTemporalPhaseLeafCache = ch
+		shapeTemporalPhaseLeafCache = ch
 	})
-	if v22ShapeTemporalPhaseLeafErr != nil {
-		return nil, nil, v22ShapeTemporalPhaseLeafErr
+	if shapeTemporalPhaseLeafErr != nil {
+		return nil, nil, shapeTemporalPhaseLeafErr
 	}
-	return offsetLeafPair(v22ShapeTemporalPhaseLeafCache, "ADBE Vector Temporal Phase")
+	return offsetLeafPair(shapeTemporalPhaseLeafCache, "ADBE Vector Temporal Phase")
 }
 
 func cloneShapeSpatialPhaseLeaf() (tdmn, tdbs *rifx.Chunk, err error) {
-	v22ShapeSpatialPhaseLeafOnce.Do(func() {
-		ch, e := rifx.ReadChunk(bytes.NewReader(v22ShapeSpatialPhaseLeafBytes))
+	shapeSpatialPhaseLeafOnce.Do(func() {
+		ch, e := rifx.ReadChunk(bytes.NewReader(shapeSpatialPhaseLeafBytes))
 		if e != nil {
-			v22ShapeSpatialPhaseLeafErr = fmt.Errorf("parse v22ShapeSpatialPhaseLeafBytes: %w", e)
+			shapeSpatialPhaseLeafErr = fmt.Errorf("parse shapeSpatialPhaseLeafBytes: %w", e)
 			return
 		}
-		v22ShapeSpatialPhaseLeafCache = ch
+		shapeSpatialPhaseLeafCache = ch
 	})
-	if v22ShapeSpatialPhaseLeafErr != nil {
-		return nil, nil, v22ShapeSpatialPhaseLeafErr
+	if shapeSpatialPhaseLeafErr != nil {
+		return nil, nil, shapeSpatialPhaseLeafErr
 	}
-	return offsetLeafPair(v22ShapeSpatialPhaseLeafCache, "ADBE Vector Spatial Phase")
+	return offsetLeafPair(shapeSpatialPhaseLeafCache, "ADBE Vector Spatial Phase")
 }
 
 // cloneShapeWiggleTransformBody returns a clone of the Wiggle Transform template
-// (templates/v2_2_shape_wiggletransform_body.bin): top-level `ADBE Vector Xform
+// (templates/shapes/wiggletransform_body.bin): top-level `ADBE Vector Xform
 // Temporal Freq` / `Random Seed` cdats plus the nested `ADBE Vector Wiggler
 // Transform` group's Anchor/Position/Scale/Rotation cdats — all set non-default
 // in the fixture so AE emitted them. Correlation / Temporal·Spatial Phase stayed
 // default and are elided.
 func cloneShapeWiggleTransformBody() (*rifx.Chunk, error) {
-	v22ShapeWiggleTransformOnce.Do(func() {
-		ch, err := rifx.ReadChunk(bytes.NewReader(v22ShapeWiggleTransformBodyBytes))
+	shapeWiggleTransformOnce.Do(func() {
+		ch, err := rifx.ReadChunk(bytes.NewReader(shapeWiggleTransformBodyBytes))
 		if err != nil {
-			v22ShapeWiggleTransformErr = fmt.Errorf("parse v22ShapeWiggleTransformBodyBytes: %w", err)
+			shapeWiggleTransformErr = fmt.Errorf("parse shapeWiggleTransformBodyBytes: %w", err)
 			return
 		}
-		v22ShapeWiggleTransformCache = ch
+		shapeWiggleTransformCache = ch
 	})
-	if v22ShapeWiggleTransformErr != nil {
-		return nil, v22ShapeWiggleTransformErr
+	if shapeWiggleTransformErr != nil {
+		return nil, shapeWiggleTransformErr
 	}
-	return cloneChunk(v22ShapeWiggleTransformCache), nil
+	return cloneChunk(shapeWiggleTransformCache), nil
 }
 
 // lowerWiggleTransformNode emits a Wiggle Transform filter body from the embedded
@@ -2133,7 +2133,7 @@ func encodeGradientColorTimeTable(times []float64, ctx *lowerCtx) (*rifx.Chunk, 
 }
 
 // lowerStrokeNode emits a Stroke graphic body using embedded tolerance
-// bytes (templates/v2_2_shape_stroke_body.bin). Same rationale as the other
+// bytes (templates/shapes/stroke_body.bin). Same rationale as the other
 // shape kinds — from-scratch emit triggers AE silent-drop; the embedded
 // AE-native body carries the child set (Color / Opacity / Width / Line Cap /
 // Line Join / Miter Limit + Dashes/Taper/Wave nested groups), and we overwrite

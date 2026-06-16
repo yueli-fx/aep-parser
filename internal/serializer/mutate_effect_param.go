@@ -32,8 +32,8 @@ import (
 // AE-2020-saved instance with the param touched
 // (test_data/re_effect_param_elision.aep via tmp_debug/extract_effect_params).
 //
-//go:embed templates/effectparam_adbe_gaussian_blur_2_0001.bin templates/effectparam_adbe_gaussian_blur_2_0002.bin templates/effectparam_adbe_gaussian_blur_2_0003.bin
-//go:embed templates/effectparam_adbe_angle_control_0001.bin templates/effectparam_adbe_color_control_0001.bin templates/effectparam_adbe_point_control_0001.bin templates/effectparam_adbe_point3d_control_0001.bin templates/effectparam_adbe_slider_control_0001.bin
+//go:embed templates/effects/effectparam_adbe_gaussian_blur_2_0001.bin templates/effects/effectparam_adbe_gaussian_blur_2_0002.bin templates/effects/effectparam_adbe_gaussian_blur_2_0003.bin
+//go:embed templates/effects/effectparam_adbe_angle_control_0001.bin templates/effects/effectparam_adbe_color_control_0001.bin templates/effects/effectparam_adbe_point_control_0001.bin templates/effects/effectparam_adbe_point3d_control_0001.bin templates/effects/effectparam_adbe_slider_control_0001.bin
 var effectParamTemplateFS embed.FS
 
 // effectParamTemplateFiles maps a full parameter match-name to its embedded
@@ -41,14 +41,14 @@ var effectParamTemplateFS embed.FS
 // SetEffectParam always overwrites it with the caller's value before
 // returning, so the stale bytes never surface.
 var effectParamTemplateFiles = map[string]string{
-	"ADBE Gaussian Blur 2-0001":     "templates/effectparam_adbe_gaussian_blur_2_0001.bin",     // Blurriness (scalar)
-	"ADBE Gaussian Blur 2-0002":     "templates/effectparam_adbe_gaussian_blur_2_0002.bin",     // Blur Dimensions (enum)
-	"ADBE Gaussian Blur 2-0003":     "templates/effectparam_adbe_gaussian_blur_2_0003.bin",     // Repeat Edge Pixels (bool)
-	"ADBE Angle Control-0001":       "templates/effectparam_adbe_angle_control_0001.bin",       // Angle (angle)
-	"ADBE Color Control-0001":       "templates/effectparam_adbe_color_control_0001.bin",       // Color (color)
-	"ADBE Point Control-0001":       "templates/effectparam_adbe_point_control_0001.bin",       // Point (2D point)
-	"ADBE Point3D Control-0001":     "templates/effectparam_adbe_point3d_control_0001.bin",     // 3D Point (3D point)
-	"ADBE Slider Control-0001":      "templates/effectparam_adbe_slider_control_0001.bin",      // Slider (slider)
+	"ADBE Gaussian Blur 2-0001":     "templates/effects/effectparam_adbe_gaussian_blur_2_0001.bin",     // Blurriness (scalar)
+	"ADBE Gaussian Blur 2-0002":     "templates/effects/effectparam_adbe_gaussian_blur_2_0002.bin",     // Blur Dimensions (enum)
+	"ADBE Gaussian Blur 2-0003":     "templates/effects/effectparam_adbe_gaussian_blur_2_0003.bin",     // Repeat Edge Pixels (bool)
+	"ADBE Angle Control-0001":       "templates/effects/effectparam_adbe_angle_control_0001.bin",       // Angle (angle)
+	"ADBE Color Control-0001":       "templates/effects/effectparam_adbe_color_control_0001.bin",       // Color (color)
+	"ADBE Point Control-0001":       "templates/effects/effectparam_adbe_point_control_0001.bin",       // Point (2D point)
+	"ADBE Point3D Control-0001":     "templates/effects/effectparam_adbe_point3d_control_0001.bin",     // 3D Point (3D point)
+	"ADBE Slider Control-0001":      "templates/effects/effectparam_adbe_slider_control_0001.bin",      // Slider (slider)
 }
 
 // genericEffectParamTemplates maps a pard control type to a template usable
@@ -58,14 +58,14 @@ var effectParamTemplateFiles = map[string]string{
 // per-instance fields (tdmn match-name, tdsn display name, tdum/tduM min/max)
 // are patched from the host effect's own pard definition before splicing.
 var genericEffectParamTemplates = map[PropertyControlType]string{
-	PCTLScalar:  "templates/effectparam_adbe_gaussian_blur_2_0001.bin",
-	PCTLEnum:    "templates/effectparam_adbe_gaussian_blur_2_0002.bin",
-	PCTLBoolean: "templates/effectparam_adbe_gaussian_blur_2_0003.bin",
-	PCTLAngle:   "templates/effectparam_adbe_angle_control_0001.bin",
-	PCTLColor:   "templates/effectparam_adbe_color_control_0001.bin",
-	PCTLTwoD:    "templates/effectparam_adbe_point_control_0001.bin",
-	PCTLThreeD:  "templates/effectparam_adbe_point3d_control_0001.bin",
-	PCTLSlider:  "templates/effectparam_adbe_slider_control_0001.bin",
+	PCTLScalar:  "templates/effects/effectparam_adbe_gaussian_blur_2_0001.bin",
+	PCTLEnum:    "templates/effects/effectparam_adbe_gaussian_blur_2_0002.bin",
+	PCTLBoolean: "templates/effects/effectparam_adbe_gaussian_blur_2_0003.bin",
+	PCTLAngle:   "templates/effects/effectparam_adbe_angle_control_0001.bin",
+	PCTLColor:   "templates/effects/effectparam_adbe_color_control_0001.bin",
+	PCTLTwoD:    "templates/effects/effectparam_adbe_point_control_0001.bin",
+	PCTLThreeD:  "templates/effects/effectparam_adbe_point3d_control_0001.bin",
+	PCTLSlider:  "templates/effects/effectparam_adbe_slider_control_0001.bin",
 }
 
 var effectParamTemplateCache = map[string]*cachedEffectTemplate{}

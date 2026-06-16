@@ -43,19 +43,19 @@ import (
 // leaf value-type because AE elides default leaves and the cdat layout differs
 // (scalar 40B f64 @ [0:8] vs spatial 3D 72B with three f64 @ [0:24]).
 //
-//go:embed templates/text_animators_opacity_body.bin
+//go:embed templates/text/text_animators_opacity_body.bin
 var textAnimatorsOpacityBody []byte
 
-//go:embed templates/text_animators_position_body.bin
+//go:embed templates/text/text_animators_position_body.bin
 var textAnimatorsPositionBody []byte
 
-//go:embed templates/text_animators_scale_body.bin
+//go:embed templates/text/text_animators_scale_body.bin
 var textAnimatorsScaleBody []byte
 
-//go:embed templates/text_animators_rotation_body.bin
+//go:embed templates/text/text_animators_rotation_body.bin
 var textAnimatorsRotationBody []byte
 
-//go:embed templates/text_animators_color_body.bin
+//go:embed templates/text/text_animators_color_body.bin
 var textAnimatorsColorBody []byte
 
 // Free-neighbor leaves (same on-disk layout as the five above): every one is a
@@ -66,25 +66,25 @@ var textAnimatorsColorBody []byte
 // default) that AE auto-adds — overwriteScalarCdat targets the X/Y match-name so
 // the companion stays default. Regen via test_data/gen_text_anim_neighbor_templates.jsx.
 //
-//go:embed templates/text_animators_fillopacity_body.bin
+//go:embed templates/text/text_animators_fillopacity_body.bin
 var textAnimatorsFillOpacityBody []byte
 
-//go:embed templates/text_animators_strokeopacity_body.bin
+//go:embed templates/text/text_animators_strokeopacity_body.bin
 var textAnimatorsStrokeOpacityBody []byte
 
-//go:embed templates/text_animators_strokecolor_body.bin
+//go:embed templates/text/text_animators_strokecolor_body.bin
 var textAnimatorsStrokeColorBody []byte
 
-//go:embed templates/text_animators_strokewidth_body.bin
+//go:embed templates/text/text_animators_strokewidth_body.bin
 var textAnimatorsStrokeWidthBody []byte
 
-//go:embed templates/text_animators_skew_body.bin
+//go:embed templates/text/text_animators_skew_body.bin
 var textAnimatorsSkewBody []byte
 
-//go:embed templates/text_animators_rotx_body.bin
+//go:embed templates/text/text_animators_rotx_body.bin
 var textAnimatorsRotXBody []byte
 
-//go:embed templates/text_animators_roty_body.bin
+//go:embed templates/text/text_animators_roty_body.bin
 var textAnimatorsRotYBody []byte
 
 // An AE-native, fully-materialized "ADBE Text Range Advanced" group (all 10
@@ -95,7 +95,7 @@ var textAnimatorsRotYBody []byte
 // hidden in the AE UI unless Shape=Square but its slot still materializes when
 // Shape is non-default. Regen via test_data/gen_text_range_advanced_template.jsx.
 //
-//go:embed templates/text_range_advanced_body.bin
+//go:embed templates/text/text_range_advanced_body.bin
 var textRangeAdvancedBody []byte
 
 // An AE-native single "ADBE Text Selector" (Range Selector) tdgp with Start/End/
@@ -103,7 +103,7 @@ var textRangeAdvancedBody []byte
 // Selectors" indexed group by AddTextRangeSelector. Regen: extract_text_animator
 // <any re_text_animator_*.aep> <out> "ADBE Text Selector".
 //
-//go:embed templates/text_selector_body.bin
+//go:embed templates/text/text_selector_body.bin
 var textSelectorBody []byte
 
 // An AE-native "ADBE Text Wiggly Selector" (all params elided → AE applies its
@@ -111,7 +111,7 @@ var textSelectorBody []byte
 // time). Spliced into an animator's "ADBE Text Selectors" group by
 // AddTextWigglySelector. Regen: extract_text_animator <fixture> <out> "ADBE Text Wiggly Selector".
 //
-//go:embed templates/text_wiggly_selector_body.bin
+//go:embed templates/text/text_wiggly_selector_body.bin
 var textWigglySelectorBody []byte
 
 // An AE-native "ADBE Text Expressible Selector" (Range Type2 + Expressible Amount,
@@ -121,7 +121,7 @@ var textWigglySelectorBody []byte
 // ExpressibleSelector also writes the caller's expression onto the Amount.
 // Regen: extract_text_animator <fixture> <out> "ADBE Text Expressible Selector".
 //
-//go:embed templates/text_expressible_selector_body.bin
+//go:embed templates/text/text_expressible_selector_body.bin
 var textExpressibleSelectorBody []byte
 
 const matchNameTextWigglySelector = "ADBE Text Wiggly Selector"

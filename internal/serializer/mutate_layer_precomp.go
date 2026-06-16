@@ -5,7 +5,7 @@
 // an existing CompItem (instead of a footage item) — the source composition
 // already lives in the project, so unlike Solid/Null/Adjustment there is no
 // footage item to synthesize/import. We embed a single AE-native precomp AV
-// Layr (templates/layer_precomp_body.bin, extracted from re_precomp.aep — a
+// Layr (templates/layers/layer_precomp_body.bin, extracted from re_precomp.aep — a
 // 4-child Layr identical in shape to camera/light, only its SourceID marks it
 // as a precomp) and splice it via the same machinery as Camera/Light
 // (newTemplatedLayer), then repoint its SourceID at the user's child comp.
@@ -18,7 +18,7 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-//go:embed templates/layer_precomp_body.bin
+//go:embed templates/layers/layer_precomp_body.bin
 var layerPrecompBodyBytes []byte
 
 // NewPrecompLayer adds a layer to `parent` whose source is the composition
