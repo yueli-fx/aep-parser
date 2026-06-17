@@ -1331,10 +1331,13 @@
     "cap": {
       "domain": "expr",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);双版本 AE gated(project_settings,app.project.expressionEngine DOM readback=javascript-1.0)",
       "incident": null,
       "alias": [
         "expression engine",
@@ -5818,10 +5821,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);双版本 AE gated(project_settings,app.project.bitsPerChannel DOM readback=16)",
       "incident": null,
       "alias": [
         "bits per channel",
@@ -5890,10 +5896,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;enum 校验(0/1);经 frames_count_type 修改 nnhd byte 20;无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;enum 校验(0/1);经 frames_count_type 修改 nnhd byte 20;双版本 AE gated(project_settings,传递性:与 SetFramesCountType 写同一 nnhd byte 20,gate 验 app.project.displayStartFrame DOM readback=1)",
       "incident": null,
       "alias": [
         "display start frame",
@@ -5914,10 +5923,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险(nnhd 固定 40 字节);enum 校验(35mm/16mm);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险(nnhd 固定 40 字节);enum 校验(35mm/16mm);双版本 AE gated(project_settings,app.project.feetFramesFilmType DOM readback=MM16)",
       "incident": null,
       "alias": [
         "feet frames film type",
@@ -5939,10 +5951,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险(nnhd byte 9);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险(nnhd byte 9);双版本 AE gated(project_settings,app.project.footageTimecodeDisplayStartType DOM readback=FTCS_USE_SOURCE_MEDIA)",
       "incident": null,
       "alias": [
         "footage timecode display start",
@@ -5962,10 +5977,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险(nnhd byte 20);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险(nnhd byte 20);双版本 AE gated(project_settings,app.project.framesCountType DOM readback=FC_START_1)",
       "incident": null,
       "alias": [
         "frames count type",
@@ -5987,10 +6005,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险(nnhd byte 11 bit 0);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险(nnhd byte 11 bit 0);双版本 AE gated(project_settings,app.project.framesUseFeetFrames DOM readback=true)",
       "incident": null,
       "alias": [
         "feet frames",
@@ -6035,10 +6056,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "presence-encoded toggle(lnrb chunk 增删);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "presence-encoded toggle(lnrb chunk 增删);双版本 AE gated(project_settings,app.project.linearBlending DOM readback=true)",
       "incident": null,
       "alias": [
         "linear blending",
@@ -6209,10 +6233,13 @@
     "cap": {
       "domain": "project",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险(nnhd byte 8 bits 6-0);无专门 AE gate→round-trip",
+      "gate": [
+        "TestProjectSettings_AEShipGate_AE2020",
+        "TestProjectSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险(nnhd byte 8 bits 6-0);双版本 AE gated(project_settings,app.project.timeDisplayType DOM readback=FRAMES)",
       "incident": null,
       "alias": [
         "time display type",

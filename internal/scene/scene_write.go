@@ -38,7 +38,7 @@ func (p *Project) WriteAEP(w io.Writer) error {
 //
 // length-preserving (2 bytes total).
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);无专门 AE gate→round-trip" alias="bits per channel,颜色深度,color depth,bpc,8bpc,16bpc,32bpc"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);双版本 AE gated(project_settings,app.project.bitsPerChannel DOM readback=16)" alias="bits per channel,颜色深度,color depth,bpc,8bpc,16bpc,32bpc"
 func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
 	if p.back == nil {
 		return fmt.Errorf("project: header chunks missing (built outside parser?)")

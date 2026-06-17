@@ -182,7 +182,7 @@ func (p *Project) ExpressionEngine() string {
 // refuse rather than synthesize one — adding a new top-level LIST
 // requires AE-side ship-gate verification.
 //
-//aep:cap domain=expr tier=stable verify=roundtrip boundary="length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);无专门 AE gate→round-trip" alias="expression engine,表达式引擎,ExEn,extendscript,javascript-1.0"
+//aep:cap domain=expr tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);双版本 AE gated(project_settings,app.project.expressionEngine DOM readback=javascript-1.0)" alias="expression engine,表达式引擎,ExEn,extendscript,javascript-1.0"
 func (p *Project) SetExpressionEngine(engine string) error {
 	switch engine {
 	case "extendscript", "javascript-1.0":
@@ -237,7 +237,7 @@ func (p *Project) FeetFramesFilmType() FeetFramesFilmType {
 
 // SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd 固定 40 字节);enum 校验(35mm/16mm);无专门 AE gate→round-trip" alias="feet frames film type,胶片类型,35mm,16mm,nnhd,FPF"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd 固定 40 字节);enum 校验(35mm/16mm);双版本 AE gated(project_settings,app.project.feetFramesFilmType DOM readback=MM16)" alias="feet frames film type,胶片类型,35mm,16mm,nnhd,FPF"
 func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFeetFramesFilmType")
@@ -260,7 +260,7 @@ func (p *Project) FootageTimecodeDisplayStartType() FootageTimecodeDisplayStartT
 
 // SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9.
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd byte 9);无专门 AE gate→round-trip" alias="footage timecode display start,素材时间码显示起点,nnhd,timecode start"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 9);双版本 AE gated(project_settings,app.project.footageTimecodeDisplayStartType DOM readback=FTCS_USE_SOURCE_MEDIA)" alias="footage timecode display start,素材时间码显示起点,nnhd,timecode start"
 func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFootageTimecodeDisplayStartType")
@@ -306,7 +306,7 @@ func (p *Project) FramesCountType() FramesCountType {
 
 // SetFramesCountType writes the frames count type to nnhd byte 20.
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd byte 20);无专门 AE gate→round-trip" alias="frames count type,帧计数模式,nnhd,start frame,start 0,start 1"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 20);双版本 AE gated(project_settings,app.project.framesCountType DOM readback=FC_START_1)" alias="frames count type,帧计数模式,nnhd,start frame,start 0,start 1"
 func (p *Project) SetFramesCountType(v FramesCountType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesCountType")
@@ -324,7 +324,7 @@ func (p *Project) DisplayStartFrame() int {
 // SetDisplayStartFrame sets the display start frame (0 or 1).
 // This modifies frames_count_type to preserve the value.
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险;enum 校验(0/1);经 frames_count_type 修改 nnhd byte 20;无专门 AE gate→round-trip" alias="display start frame,起始帧显示,frame offset,start 0,start 1"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险;enum 校验(0/1);经 frames_count_type 修改 nnhd byte 20;双版本 AE gated(project_settings,传递性:与 SetFramesCountType 写同一 nnhd byte 20,gate 验 app.project.displayStartFrame DOM readback=1)" alias="display start frame,起始帧显示,frame offset,start 0,start 1"
 func (p *Project) SetDisplayStartFrame(v int) error {
 	if v != 0 && v != 1 {
 		return fmt.Errorf("project: display_start_frame %d invalid; must be 0 or 1", v)
@@ -350,7 +350,7 @@ func (p *Project) FramesUseFeetFrames() bool {
 
 // SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0.
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd byte 11 bit 0);无专门 AE gate→round-trip" alias="feet frames,英尺帧,feet+frames,film timecode,nnhd"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 11 bit 0);双版本 AE gated(project_settings,app.project.framesUseFeetFrames DOM readback=true)" alias="feet frames,英尺帧,feet+frames,film timecode,nnhd"
 func (p *Project) SetFramesUseFeetFrames(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesUseFeetFrames")
@@ -373,7 +373,7 @@ func (p *Project) TimeDisplayType() TimeDisplayType {
 
 // SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0.
 //
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd byte 8 bits 6-0);无专门 AE gate→round-trip" alias="time display type,时间显示格式,timecode,frames,nnhd"
+//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 8 bits 6-0);双版本 AE gated(project_settings,app.project.timeDisplayType DOM readback=FRAMES)" alias="time display type,时间显示格式,timecode,frames,nnhd"
 func (p *Project) SetTimeDisplayType(v TimeDisplayType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTimeDisplayType")
