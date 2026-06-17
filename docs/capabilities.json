@@ -11261,10 +11261,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "apply stroke",
@@ -11308,10 +11311,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "auto leading",
@@ -11355,10 +11361,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "baseline shift",
@@ -11429,10 +11438,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "faux bold",
@@ -11452,10 +11464,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "faux italic",
@@ -11475,10 +11490,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;RGBA 各分量 0..1;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "fill color",
@@ -11548,10 +11566,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run DOM scale=50 实读)",
       "incident": null,
       "alias": [
         "horizontal scale",
@@ -11571,10 +11592,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal);需搭配 SetRunAutoLeading(false) 才生效;evidence-defer:从零层 AE 渲染默认行距,值 round-trip 对但像素不变(见 incident)",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal);需搭配 SetRunAutoLeading(false);双版本 AE gated(DOM 值验 leading=80);⚠ render 仍默认行距(像素未验,见 incident text-style-render-gate-fromscratch-blocked)",
       "incident": null,
       "alias": [
         "leading",
@@ -11643,10 +11667,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;RGBA 各分量 0..1;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "stroke color",
@@ -11666,10 +11693,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "stroke over fill",
@@ -11689,10 +11719,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run single-run DOM fixture)",
       "incident": null,
       "alias": [
         "stroke width",
@@ -11738,10 +11771,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;CJK 专用;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;CJK 专用;DOM 0..1;⚠ 必须 FormatPSReal(本批修了 FormatPSNumber bug→AE 读成 /65536);双版本 AE gated(text-run DOM tsume=0.5)",
       "incident": null,
       "alias": [
         "tsume",
@@ -11761,10 +11797,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextRun_AEShipGate_AE2020",
+        "TestTextRun_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run DOM scale=150 实读)",
       "incident": null,
       "alias": [
         "vertical scale",

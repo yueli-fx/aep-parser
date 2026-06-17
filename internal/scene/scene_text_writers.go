@@ -82,7 +82,7 @@ func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 // SetRunBaselineShift writes baseline shift (em points; positive = up)
 // on style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip" alias="baseline shift,基线偏移,baseline offset"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run single-run DOM fixture)" alias="baseline shift,基线偏移,baseline offset"
 func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -99,7 +99,7 @@ func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 // value the caller should also disable auto-leading via
 // SetRunAutoLeading(runIdx, false), otherwise AE overrides it.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal);需搭配 SetRunAutoLeading(false) 才生效;evidence-defer:从零层 AE 渲染默认行距,值 round-trip 对但像素不变(见 incident)" alias="leading,行距,line spacing,auto leading"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal);需搭配 SetRunAutoLeading(false);双版本 AE gated(DOM 值验 leading=80);⚠ render 仍默认行距(像素未验,见 incident text-style-render-gate-fromscratch-blocked)" alias="leading,行距,line spacing,auto leading"
 func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -115,7 +115,7 @@ func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 // When true, the Leading value is computed by AE (typically FontSize × 1.2);
 // when false, the explicit Leading value applies.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="auto leading,自动行距,leading flag"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="auto leading,自动行距,leading flag"
 func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -148,7 +148,7 @@ func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 
 // SetRunFauxBold toggles synthetic bold on style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="faux bold,仿粗体,synthetic bold,fake bold"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="faux bold,仿粗体,synthetic bold,fake bold"
 func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -162,7 +162,7 @@ func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 
 // SetRunFauxItalic toggles synthetic italic on style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="faux italic,仿斜体,synthetic italic,fake italic"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="faux italic,仿斜体,synthetic italic,fake italic"
 func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -178,7 +178,7 @@ func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 // values used by AE on style run #runIdx. See TextStyleRun docs for
 // the unit notes (AE default is 1; scripted setter range 0..100).
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip" alias="horizontal scale,水平缩放,text scale,字体缩放"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run DOM scale=50 实读)" alias="horizontal scale,水平缩放,text scale,字体缩放"
 func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -194,7 +194,7 @@ func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 // run #runIdx. See TextStyleRun docs for unit notes (AE default is 1;
 // scripted setter range 0..100).
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip" alias="vertical scale,垂直缩放,text scale,字体缩放"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run DOM scale=150 实读)" alias="vertical scale,垂直缩放,text scale,字体缩放"
 func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -209,7 +209,7 @@ func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 // SetRunTsume writes the CJK character-spacing adjustment (0..100)
 // on style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;CJK 专用;无专门 AE gate→round-trip" alias="tsume,CJK spacing,字间压缩,CJK 字距"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;CJK 专用;DOM 0..1;⚠ 必须 FormatPSReal(本批修了 FormatPSNumber bug→AE 读成 /65536);双版本 AE gated(text-run DOM tsume=0.5)" alias="tsume,CJK spacing,字间压缩,CJK 字距"
 func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -224,7 +224,7 @@ func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 // SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1)
 // on style run #runIdx. Encoded as btdk's [A, R, G, B] array.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip" alias="fill color,填充颜色,text color,字体颜色,font color"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;双版本 AE gated(text-run single-run DOM fixture)" alias="fill color,填充颜色,text color,字体颜色,font color"
 func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -239,7 +239,7 @@ func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 // SetRunStrokeColor writes the stroke paint color [R, G, B, A] on
 // style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;无专门 AE gate→round-trip" alias="stroke color,描边颜色,text stroke,字体描边"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;双版本 AE gated(text-run single-run DOM fixture)" alias="stroke color,描边颜色,text stroke,字体描边"
 func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -254,7 +254,7 @@ func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 // SetRunApplyStroke toggles whether the stroke is rendered on
 // style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="apply stroke,启用描边,stroke on off,enable stroke"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="apply stroke,启用描边,stroke on off,enable stroke"
 func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -268,7 +268,7 @@ func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 
 // SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;无专门 AE gate→round-trip" alias="stroke width,描边宽度,stroke size,text outline width"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run single-run DOM fixture)" alias="stroke width,描边宽度,stroke size,text outline width"
 func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -321,7 +321,7 @@ func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error 
 // SetRunStrokeOverFill toggles whether the stroke renders over the fill
 // (true) or under it (false) on style run #runIdx. Default in AE is true.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;无专门 AE gate→round-trip" alias="stroke over fill,描边覆盖填充,stroke order,描边顺序"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="stroke over fill,描边覆盖填充,stroke order,描边顺序"
 func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err

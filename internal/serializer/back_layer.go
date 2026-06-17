@@ -797,7 +797,11 @@ func (b *layerBackrefs) SetRunVerticalScale(runIdx int, scale float64) error {
 }
 
 func (b *layerBackrefs) SetRunTsume(runIdx int, tsume float64) error {
-	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/36", []byte(codec.FormatPSNumber(tsume)))
+	// tsume key /36 is a REAL: AE/CoolType reads a decimal-point-less number as
+	// 16.16 fixed-point (value/65536), so FormatPSNumber(0.5)="0.5" is fine but an
+	// integer like "50" would read as 50/65536. Use FormatPSReal so it always
+	// carries the point (matches BaselineShift/Leading/Scale siblings).
+	_, err := b.splicePSValue(codec.RunStylePath(runIdx)+"/36", []byte(codec.FormatPSReal(tsume)))
 	return err
 }
 
