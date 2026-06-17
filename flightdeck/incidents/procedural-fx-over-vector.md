@@ -42,4 +42,6 @@ last_updated: 2026-06-18
 3. 若所需效果(Fractal Noise 参数控制 / Turbulent Displace / Glow 渲染、Colorama/Displacement Map 模板)尚未 render-gate 验证或缺嵌入模板,**先如实说这是未验证/缺失的基础设施缺口**(查 `go run ./cmd/capindex -q`),别硬糊一个交付(交付准则,CLAUDE.md #7)。
 4. **(Case 2 教训)用对效果链 ≠ 能产出「好」——别拿手搓配方直接宣称交付**。手搓凭空调参的天花板是「可辨认」(一眼是火苗轮廓),离专业质量(白热芯 / 色温渐变 / 泛光 / 舔动细节)有质的差距。**好火焰/烟/能量的效果栈+参数+分层要从真实人做的样本里学**(解析专业 .aep 抽配方),不能凭空猜。顺序:**先有样本参照造出「好」的,再谈参数化/泛化**。
 
-关联:CLAUDE.md 工作风格「渲染类 bug 先看图」「做完一个方向」· `effect-param-elision-synthesis-lite.md`(AnimateEffectParam 机制)。
+5. **(配方真相源)造火焰/烟/能量前先读 `checklists/build-good-fire.md`** —— plugin-free 原生配方 + 参数→效果对照表 + 插件分级，从真实样本解析得出，省得重新摸索。
+
+关联:CLAUDE.md 工作风格「渲染类 bug 先看图」「做完一个方向」· `effect-param-elision-synthesis-lite.md`(AnimateEffectParam 机制) · `checklists/build-good-fire.md`(火焰配方)。

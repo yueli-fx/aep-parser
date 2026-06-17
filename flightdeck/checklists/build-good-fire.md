@@ -1,0 +1,81 @@
+---
+status: active
+when_to_read: 被要求从零造火焰/烟/能量类程序化 FX；要重做火焰 v2；调火焰参数想知道某个旋钮的视觉影响；纠结哪些效果是核心、哪些靠插件
+applies_to: [fire, flame, procedural-fx, fractal-noise, displacement-map, ramp, glow, recipe, parameters, plugin-free, sample-analysis, AnimateEffectParam, blend-modes]
+last_updated: 2026-06-18
+---
+
+# 造一个好火焰 — plugin-free 原生配方 + 参数影响对照
+
+> **这份文档的用途**：跨会话固化「怎么用本库从零造一个**好**火焰」的知识。下一个会话开场 preflight 会把 `checklists/INDEX.md` 读进上下文，所以这条会被自动看到。配合 cockpit Active focus（火焰 Phase 2）即可接力，不必重新解析样本。
+
+## ⚠ 成熟度（诚实前提，别当已验证流程用）
+
+- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（探针 `tmp_debug/dump_fxchain`/`dump_tdmn`，local）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
+- **「照此 build 就好看」= 假设，未验证**：plugin-free v2 还没做出过用户认可的好火焰（v1 被否、v2 待做）。**过双版本 AE ship-gate + 用户真机验收后才升级为「验证配方」**（交付准则红线4：值对≠渲染对；showcase review-gate：agent 眼验≠用户验收）。
+- 当前状态：**配方假设 + 重做处方**，给 v2 当蓝图。
+
+## 一句话原理
+
+**好火焰 = 噪声生成形态 + 位移驱动「舔动」+ 色温渐变上色 + 辉光 + 多层叠加出深度。** 不是"画个水滴形糊上橙色"（那是 v1，被否）。真实专业火焰甚至是 7 层预合成的深度合成（见样本解析），但**核心火焰本身是纯原生效果**，可复刻。
+
+## 核心配方（plugin-free，全 ADBE 原生，本库已 gate）
+
+按本库已验证的 from-scratch render harness（镜像 `orbit_demo`/v1 flame：`NewSolidLayer` + `AddEffect` + `SetEffectParam` + `AnimateEffectParam` + `AddMask`/`SetFeather` → `WriteAEP` → AE 渲一帧 PNG）：
+
+1. **底噪 = `ADBE Fractal Noise`**：高对比（样本 Contrast≈169）、竖向拉伸（Scale Width 小 / Height 大 → 瘦高火苗）。
+2. **动画**：给 Fractal Noise 的 **Offset Turbulence 沿 −Y 随时间推**（火往上滚）+ **Evolution 随时间增**（内部翻腾），用 **`AnimateEffectParam` 打关键帧**（**不要用表达式**——样本用 `time*[0,-500]`/`time*90` 表达式，但本库写的表达式 AE 端不求值，见 [[expression-enable-byte-pair]]；v1 已证 Evolution 关键帧可行、没撞 elision 缺口）。
+3. **火舌「舔动」= `ADBE Displacement Map`**：用上面的噪声层当位移源，**Max Vertical Displacement 给大值（样本 ~150–280）**把图像向上拽成火舌。**这是 v1 缺的关键**——v1 用了 Turbulent Displace（自带噪声、控制弱），样本用的是独立高对比噪声驱动的 Displacement Map。
+4. **颜色 = `ADBE Ramp`（垂直色温渐变）**：多层不同色温的线性 Ramp（红/橙/黄端点），**层间 `Add(4)` 混合叠出明亮热芯**。这给用户要的「白→黄→橙→红→暗尖」色温（v1 用 Tint 2 色，正是被否的主因）。
+5. **泛光 = `ADBE Glo2`（Glow）**：阈值只对亮处发光 + 半径/强度（样本 Intensity≈68）。补用户要的「Glow 泛光」。
+6. **外形**：火苗轮廓用羽化 mask（`AddMask`+`SetFeather`）；若要"火球"形，用径向遮罩/径向 Ramp 近似（样本的球形靠 `CC Sphere` 插件，plugin-free 只能近似）。
+
+## 参数 → 视觉效果 对照表
+
+| 效果 | 参数 | 调大/调小的视觉影响 | 样本值 |
+|---|---|---|---|
+| **Fractal Noise** | Contrast | 大 → 火舌边缘锐利、黑间隙分明；小 → 糊成一团 | **169（高）** |
+| | Brightness | 整体明暗 | — |
+| | Scale Width / Height | W 小 + H 大 → 瘦高竖向火苗；等比 → 团状 | 竖拉 |
+| | Complexity / Sub-Influence | 大 → 细碎火丝多 | — |
+| | **Offset Turbulence**(point) | 沿 −Y 随时间推 → **火向上滚动** | expr `time*[0,-500]` |
+| | **Evolution**(angle) | 随时间增 → **内部翻腾/boiling** | expr `time*90` |
+| **Displacement Map** | **Max Vertical Displacement** | **大 → 火舌向上拉长舔动**；0 → 死板不动 | **~150–280** |
+| | Max Horizontal Displacement | 小幅 → 左右轻摆；大 → 撕裂 | -22 / 81 |
+| | Displacement Map Layer / Use For | 指向噪声层 + 用其亮度通道 | 噪声层 |
+| **Ramp** | Start/End Color | 火色温端点；多层不同色温 + Add → 白热芯+渐变 | 红→橙→品 ARGB |
+| | Ramp Shape | Linear（垂直）；Radial 可做球形光 | Linear |
+| **Glo2 (Glow)** | Glow Threshold | 高 → 只最亮处发光（芯）；低 → 整体泛白 | — |
+| | Glow Radius / Intensity | 大 → 光晕宽/强 | Intensity≈68 |
+| **Blend mode** | Add(4) | 叠亮、出热芯 | Fire 层 |
+| | Difference(26) | 出暗筋/负向细节（"Negative Fire"） | — |
+| | Screen / Lighten | 也可叠火不变暗 | — |
+
+> 注：上表 Fractal Noise/Displacement Map 的具体 param **index→名** 以 v1 `flame/gen.go` 里已用对的映射为准（v1 设值成功）；表里写"待确认名"的，build v2 时按本库 API 的 matchName/index 现取现核，别照搬 `-NNNN`。
+
+## 插件分级（决定能复刻到哪）
+
+| 层 | 用什么 | plugin-free 能否复刻 |
+|---|---|---|
+| **核心火焰** | Fractal Noise + Displacement Map + Ramp + Glo2 **全原生·已 gate** | ✅ 直接做 |
+| 火球外形 | `CC Sphere`(Cycore 自带) + `PEDX`=Displacer Pro(**第三方**·需装+GPU) | ⚠ 第三方违反「人人可开」；native 径向近似 or 砍 |
+| 火星/迸射 | `CC Particle World`(Cycore 自带) | ⚠ 无原生粒子替代；自带能渲但未 gate |
+
+**第三方插件二进制**（`.aex`/`.plugin`）留 `samples/`（gitignore），**不进 `internal/serializer/templates/`**——产出 .aep 依赖插件就违反交付准则。
+
+## v1 被否对照（别再犯）
+
+| 用户抱怨 | v1 错法 | 正确法 |
+|---|---|---|
+| 无白→黄→橙→红色温 | `Tint`（2 色） | 多层 `Ramp` 色温渐变 + Add |
+| 无 Glow 泛光 | 没加 | `Glo2` |
+| 只有形态、没深度 | 单层 | Add 叠多层位移彩渐变 |
+| 不像在"舔" | `Turbulent Displace`（自带噪声） | `Displacement Map` 驱动独立高对比 Fractal Noise，大垂直量 |
+
+## 来源 / 交叉链接
+
+- 样本解析全文（渲染图 + 效果用量 + blend 解码）：`specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
+- 教训（手搓只到「可辨认」、需真实样本）：[[procedural-fx-over-vector]] Case 2。
+- v1 实现（被否，保留作对照）：`flightdeck/showcase/procedural-fx/`（status ❌质量未过）。
+- 动画走关键帧不走表达式的原因：[[expression-enable-byte-pair]]。
+- **新增样本时**：在此表追加"样本解析 #N"的参数范围，并更新对照表（多样本对齐 = Phase 2 通过判据）。

@@ -1,6 +1,7 @@
 # checklists/ — INDEX
 
 <!-- AUTO:checklists -->
+- [build-good-fire.md](build-good-fire.md) — active — when_to_read: 被要求从零造火焰/烟/能量类程序化 FX；要重做火焰 v2；调火焰参数想知道某个旋钮的视觉影响；纠结哪些效果是核心、哪些靠插件 — applies_to: [fire, flame, procedural-fx, fractal-noise, displacement-map, ramp, glow, recipe, parameters, plugin-free, sample-analysis, AnimateEffectParam, blend-modes]
 - [comments.md](comments.md) — active — when_to_read: before writing or editing any source-code comment — applies_to: [comments, code-style, documentation]
 - [commits.md](commits.md) — active — when_to_read: before writing a commit message / staging files / preparing a PR — applies_to: [commit, git, staging, message, push, pr, conventional-commits, type-scope]
 - [delivery-contract.md](delivery-contract.md) — active — when_to_read: 把任何能力/产物对外宣称「能用」之前；做演示/示例/端到端工程之前；判断某次实现到底算「交付」还是「原型」；review 别人或自己声称 ship 的东西；纠结「Go 测试过了算不算数」 — applies_to: [delivery, ship-gate, ae-acceptance, verification-level, go-roundtrip-not-ae, coverage-boundary, composition-gate, end-to-end, deliverable-vs-prototype, honest-scope]

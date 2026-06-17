@@ -13,11 +13,12 @@
 
 ## 下一步
 
-**Phase 2 — 学真实火焰样本(待开工)**。用户已把真实火焰工程放 `samples/Colorful Fire Ball`(+ `.rar`,已 gitignore;非 source、供解析学习)。
+**Phase 2 — 火焰 v2 plugin-free 重做(配方已就绪,待开工)**。样本 #1(`samples/Colorful Fire Ball`)已解析,配方 + 参数影响固化进 **`checklists/build-good-fire.md`**(preflight 自动载入,接力不必重解析)。
 
-- **解析样本 .aep** → 抽「好火焰」真实**效果栈 + 参数范围 + 分层**;对照 v1 缺的:白热芯 / 由内到外色温渐变 / Glow 泛光 / 向上舔动细节。优先纯 AE 原生效果做的工程(查样本是否含 Particular 等插件 / 是否素材视频,若是则要用户另给纯原生的)。
-- **用学到的配方重做火焰** → 双版本 AE ship-gate + showcase 自渲 Read png 自验 → 呈用户**真机复核**。过了才翻 showcase `procedural-fx` complete、才谈参数化(原 Phase 1,已推后到「有好火焰之后」)。
-- 依据:`specs/2026-06-18-procedural-fx-generator.md` § 更新(2026-06-18) + `archive/plans/2026-06-18-phase0-flame-deterministic.md` § 用户验收结论 + `incidents/procedural-fx-over-vector.md` Case2。
+- **按 checklist 处方做 v2**(纯原生):`Fractal Noise(高对比+上滚+evolution 关键帧)→ Displacement Map 拉 Ramp 色温渐变(大垂直量)→ 多层 Add → Glo2 辉光`;火苗轮廓羽化 mask。补齐 v1 被否的四缺口(白热芯/色温渐变/Glow/舔动)。动画走 `AnimateEffectParam` 关键帧(非表达式)。
+- → 双版本 AE ship-gate + showcase 自渲 Read png 自验 → 呈用户**真机复核**。过了才翻 showcase `procedural-fx` complete、checklist 升「验证配方」、才谈参数化(原 Phase 1,已推后)。
+- **待用户定**:渲染依赖档位(纯原生 / +Cycore自带 / +第三方)——但核心火焰不被它阻塞,先做。
+- 依据:`checklists/build-good-fire.md` · `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1 · `incidents/procedural-fx-over-vector.md` Case2。
 
 **次要(需求驱动)**:残值 backlog(剩 53 roundtrip)→ `specs/2026-06-18-roundtrip-ae-accept-residual.md`;能力真相源 `go run ./cmd/capindex -q <词>`。
 
