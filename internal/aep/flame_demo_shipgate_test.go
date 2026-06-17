@@ -107,6 +107,18 @@ func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 		t.Fatalf("SetFeather: %v", err)
 	}
 
+	// 5) Animate Evolution so the fire boils/licks over time (the "alive" part).
+	if _, err := aep.AnimateEffectParam(sol, fn, "ADBE Fractal Noise-0023", []aep.ScalarKeyframe{
+		{Time: 0, Value: 0}, {Time: 4, Value: 1440}, // 4 turns over 4s
+	}); err != nil {
+		t.Fatalf("AnimateEffectParam FN Evolution: %v", err)
+	}
+	if _, err := aep.AnimateEffectParam(sol, td, "ADBE Turbulent Displace-0006", []aep.ScalarKeyframe{
+		{Time: 0, Value: 0}, {Time: 4, Value: 720},
+	}); err != nil {
+		t.Fatalf("AnimateEffectParam TD Evolution: %v", err)
+	}
+
 	return rp
 }
 
@@ -124,6 +136,7 @@ func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	inputAEP := filepath.Join(tempDir, "flame_in.aep")
 	doneFile := filepath.Join(tempDir, "flame.done")
 	framePNG := filepath.Join(tempDir, "flame_frame.png")
+	framePNG2 := filepath.Join(tempDir, "flame_frame2.png")
 
 	out, err := os.Create(inputAEP)
 	if err != nil {
@@ -135,8 +148,8 @@ func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	out.Close()
 
-	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"png":%q,"t":2.0}`,
-		toFwd(inputAEP), toFwd(doneFile), toFwd(framePNG))
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"png":%q,"t":1.0,"png2":%q,"t2":3.0}`,
+		toFwd(inputAEP), toFwd(doneFile), toFwd(framePNG), toFwd(framePNG2))
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -185,6 +198,50 @@ func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if bright == 0 {
 		t.Errorf("flame %s: frame all black — effect not rendering", ver)
 	}
+	if warm < 50 {
+		t.Errorf("flame %s: too few fire-colored pixels = %d (Tint not applied?)", ver, warm)
+	}
+
+	// Motion: frame at t=1 must differ from t=3 (Evolution animating).
+	img2, err2 := decodePNG(framePNG2)
+	if err2 != nil {
+		t.Errorf("flame %s: decode frame2: %v", ver, err2)
+		return
+	}
+	if keep2data, rerr := os.ReadFile(framePNG2); rerr == nil {
+		_ = os.WriteFile(filepath.Join("..", "..", "tmp_debug", "flame_"+ver+"_t3.png"), keep2data, 0644)
+	}
+	diff := 0
+	for y := b.Min.Y; y < b.Max.Y; y += 17 {
+		for x := b.Min.X; x < b.Max.X; x += 17 {
+			r1, g1, b1, _ := img.At(x, y).RGBA()
+			r2, g2, b2, _ := img2.At(x, y).RGBA()
+			if absDiff(int(r1>>8), int(r2>>8))+absDiff(int(g1>>8), int(g2>>8))+absDiff(int(b1>>8), int(b2>>8)) > 24 {
+				diff++
+			}
+		}
+	}
+	t.Logf("flame %s: %d sample points differ between t=1 and t=3", ver, diff)
+	if diff < 20 {
+		t.Errorf("flame %s: frames at t=1,t=3 nearly identical (diff=%d) — Evolution not animating", ver, diff)
+	}
+}
+
+func decodePNG(path string) (image.Image, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	img, _, err := image.Decode(f)
+	return img, err
+}
+
+func absDiff(a, b int) int {
+	if a < b {
+		return b - a
+	}
+	return a - b
 }
 
 func TestFlameDemo_AEShipGate_AE2025(t *testing.T) {
