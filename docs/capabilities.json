@@ -5032,10 +5032,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B shph @0x14);动画遮罩仅影响第一帧 snapshot;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B shph @0x14);动画遮罩仅影响第一帧 snapshot;双版本 AE gated(mask-opts AE Mask DOM maskShape.closed 实读)",
       "incident": null,
       "alias": [
         "mask closed",
@@ -5055,10 +5058,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(3B mkif @0x2D-0x2F);alpha 不动;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(3B mkif @0x2D-0x2F);alpha 不动;双版本 AE gated(mask-opts AE Mask DOM color 实读)",
       "incident": null,
       "alias": [
         "mask color",
@@ -5078,10 +5084,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "synthesis-insert;需 Reopen 后调用;正值扩张负值收缩;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "synthesis-insert;需 Reopen 后调用;正值扩张负值收缩;双版本 AE gated(mask-opts AE Mask DOM maskExpansion=15 实读)",
       "incident": null,
       "alias": [
         "mask expansion",
@@ -5101,10 +5110,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "synthesis-insert;需 Reopen 后调用;xy 不得为负;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "synthesis-insert;需 Reopen 后调用;xy 不得为负;双版本 AE gated(mask-opts AE Mask DOM maskFeather=[10,20] 实读)",
       "incident": null,
       "alias": [
         "mask feather",
@@ -5150,10 +5162,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B mkif @0x00);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B mkif @0x00);双版本 AE gated(mask-opts AE Mask DOM inverted 实读)",
       "incident": null,
       "alias": [
         "mask inverted",
@@ -5172,10 +5187,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B mkif @0x01);AE UI 锁定但字节仍可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B mkif @0x01);AE UI 锁定但字节仍可写;双版本 AE gated(mask-opts AE Mask DOM locked 实读)",
       "incident": null,
       "alias": [
         "mask locked",
@@ -5194,10 +5212,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B mkif @0x02);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B mkif @0x02);双版本 AE gated(mask-opts AE Mask DOM maskMotionBlur=On 实读)",
       "incident": null,
       "alias": [
         "mask motion blur",
@@ -5266,10 +5287,13 @@
     "cap": {
       "domain": "mask",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B mkif @0x04);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaskOpts_AEShipGate_AE2020",
+        "TestMaskOpts_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B mkif @0x04);双版本 AE gated(mask-opts AE Mask DOM maskMode=Subtract 实读)",
       "incident": null,
       "alias": [
         "mask mode",

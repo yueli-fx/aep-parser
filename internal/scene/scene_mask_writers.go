@@ -12,7 +12,7 @@ import "fmt"
 // SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04.
 // length-preserving (4 bytes).
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="length-preserving(4B mkif @0x04);无专门 AE gate→round-trip" alias="mask mode,遮罩模式,blend mode,add subtract intersect"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="length-preserving(4B mkif @0x04);双版本 AE gated(mask-opts AE Mask DOM maskMode=Subtract 实读)" alias="mask mode,遮罩模式,blend mode,add subtract intersect"
 func (m *Mask) SetMode(mode MaskMode) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk (built outside parser?)", m.Name)
@@ -27,7 +27,7 @@ func (m *Mask) SetMode(mode MaskMode) error {
 // SetInverted toggles the mask Inverted flag (mkif @0x00).
 // length-preserving (1 byte).
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="length-preserving(1B mkif @0x00);无专门 AE gate→round-trip" alias="mask inverted,遮罩反转,invert mask"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="length-preserving(1B mkif @0x00);双版本 AE gated(mask-opts AE Mask DOM inverted 实读)" alias="mask inverted,遮罩反转,invert mask"
 func (m *Mask) SetInverted(v bool) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
@@ -44,7 +44,7 @@ func (m *Mask) SetInverted(v bool) error {
 // this setter does not touch it.
 // length-preserving (3 bytes).
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="length-preserving(3B mkif @0x2D-0x2F);alpha 不动;无专门 AE gate→round-trip" alias="mask color,遮罩颜色,label color,时间线标签色"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="length-preserving(3B mkif @0x2D-0x2F);alpha 不动;双版本 AE gated(mask-opts AE Mask DOM color 实读)" alias="mask color,遮罩颜色,label color,时间线标签色"
 func (m *Mask) SetColor(rgb [3]uint8) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
@@ -77,7 +77,7 @@ const (
 // mutable through this library.
 // length-preserving (1 byte).
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="length-preserving(1B mkif @0x01);AE UI 锁定但字节仍可写;无专门 AE gate→round-trip" alias="mask locked,遮罩锁定,lock mask"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="length-preserving(1B mkif @0x01);AE UI 锁定但字节仍可写;双版本 AE gated(mask-opts AE Mask DOM locked 实读)" alias="mask locked,遮罩锁定,lock mask"
 func (m *Mask) SetLocked(v bool) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
@@ -94,7 +94,7 @@ func (m *Mask) SetLocked(v bool) error {
 // MaskMotionBlurOn (2), MaskMotionBlurOff (3).
 // length-preserving (1 byte).
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="length-preserving(1B mkif @0x02);无专门 AE gate→round-trip" alias="mask motion blur,遮罩运动模糊,motion blur override"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="length-preserving(1B mkif @0x02);双版本 AE gated(mask-opts AE Mask DOM maskMotionBlur=On 实读)" alias="mask motion blur,遮罩运动模糊,motion blur override"
 func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no mkif chunk", m.Name)
@@ -161,7 +161,7 @@ func (m *Mask) SetOpacity(v float64) error {
 // `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf
 // (synthesis-insert). Requires a mask round-tripped through Reopen.
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="synthesis-insert;需 Reopen 后调用;xy 不得为负;无专门 AE gate→round-trip" alias="mask feather,遮罩羽化,feather softness,边缘柔化"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="synthesis-insert;需 Reopen 后调用;xy 不得为负;双版本 AE gated(mask-opts AE Mask DOM maskFeather=[10,20] 实读)" alias="mask feather,遮罩羽化,feather softness,边缘柔化"
 func (m *Mask) SetFeather(xy [2]float64) error {
 	if xy[0] < 0 || xy[1] < 0 {
 		return fmt.Errorf("mask %q: feather %v must be >= 0", m.Name, xy)
@@ -181,7 +181,7 @@ func (m *Mask) SetFeather(xy [2]float64) error {
 // shrinks it. The leaf is AE-default-elided; setting it materializes the leaf
 // (synthesis-insert). Requires a mask round-tripped through Reopen.
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="synthesis-insert;需 Reopen 后调用;正值扩张负值收缩;无专门 AE gate→round-trip" alias="mask expansion,遮罩扩展,mask offset,扩展收缩"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="synthesis-insert;需 Reopen 后调用;正值扩张负值收缩;双版本 AE gated(mask-opts AE Mask DOM maskExpansion=15 实读)" alias="mask expansion,遮罩扩展,mask offset,扩展收缩"
 func (m *Mask) SetExpansion(v float64) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no atom chunk (built outside parser?)", m.Name)
@@ -197,7 +197,7 @@ func (m *Mask) SetExpansion(v float64) error {
 // length-preserving (1 byte). For animated masks this only affects
 // the first snapshot; per-keyframe closed flags aren't exposed yet.
 //
-//aep:cap domain=mask tier=stable verify=roundtrip boundary="length-preserving(1B shph @0x14);动画遮罩仅影响第一帧 snapshot;无专门 AE gate→round-trip" alias="mask closed,路径闭合,closed path,开放路径"
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMaskOpts_AEShipGate_AE2020,TestMaskOpts_AEShipGate_AE2025 boundary="length-preserving(1B shph @0x14);动画遮罩仅影响第一帧 snapshot;双版本 AE gated(mask-opts AE Mask DOM maskShape.closed 实读)" alias="mask closed,路径闭合,closed path,开放路径"
 func (m *Mask) SetClosed(v bool) error {
 	if m.back == nil {
 		return fmt.Errorf("mask %q: no shph chunk", m.Name)
