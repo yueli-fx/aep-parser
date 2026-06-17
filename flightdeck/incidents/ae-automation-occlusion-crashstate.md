@@ -1,11 +1,26 @@
 ---
 status: active
 when_to_read: running AE ship-gates in an interactive session and hitting ae_run.ps1 exit 2 / unknown-modal; AE shows a dialog that OCR can't read; "崩溃修复选项" safe-mode dialog on launch (including on MANUAL launch after automated runs); writing PowerShell that touches WinRT/UWP (Windows.Media.Ocr) or "Unable to find type" from pwsh; ocrMatch rules failing on CJK text
-applies_to: [ship-gate, ae-automation, ae_run, ocr, debugging-tools, exit-grace, crash-flag, powershell, pwsh, winrt, uwp, windows-media-ocr, cjk, ocr-matching, dispatch-rules]
-last_updated: 2026-06-10
+applies_to: [ship-gate, ae-automation, ae_run, ocr, debugging-tools, exit-grace, crash-flag, powershell, pwsh, winrt, uwp, windows-media-ocr, cjk, ocr-matching, dispatch-rules, operator-context, cold-start-splash, dont-ask-user, no-resave]
+last_updated: 2026-06-17
 ---
 
 # AE ship-gate flakes in interactive sessions: occlusion + crash-recovery cascade
+
+## Operator context（2026-06-17，用户立规）
+
+**用户几乎不在这台机器上操作（在另一台机器玩游戏）。** 故本机前台可能挂着一个
+游戏窗口(英雄联盟等)占满屏幕,但那不是用户在用——AE 自动化抢前台/OCR 失败时，
+**这是 agent 自己要解的问题，不是环境问题，更不要 AskUserQuestion 让用户"让出
+机器/关游戏"**。正确反应 = 跑下方 §"Standard pre-gate ritual"(清 crash flag +
+warm-up + 跑已知-good 对照确认环境，再 warm-retry)。批22 footage gate 首撞:
+cold-start splash「正在初始化本地化设置」+ 前台挂游戏 → exit 2,我误判为用户机器
+占用并发问；用户纠正后跑 clear_ae_crashstate + comp_idta 对照(13s 绿)→ footage
+gate 双版本即过。教训:CLAUDE.md「AE ship-gate = agent 自跑…别默认让用户手开 AE;
+cold-start exit-2 先 warm-retry + 跑已知-good 对照」是铁律,exit-2 别第一反应甩给
+用户。**另**:用户「经常看你卡在另存为界面」——任何 verify jsx 必须纯 DOM
+readback、`close(DO_NOT_SAVE)+quit`,**禁 resave**(弹 Save 框 = OCR 无规则 → hang;
+comp_idta/footage_idta 均已去 resave)。
 
 `ae_run.ps1` dispatches AE modals via Layer B (title/class) → Layer C (OCR). Two
 failure modes recur when running ship-gates **while an interactive coding session
