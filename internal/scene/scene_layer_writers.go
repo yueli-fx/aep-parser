@@ -141,7 +141,7 @@ func (l *Layer) SetFrameBlendEnabled(v bool) error {
 // comps) or "Continuously Rasterize" (for Illustrator / shape layers).
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="collapse transform,continuously rasterize,折叠变换,连续栅格化"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerBool_AEShipGate_AE2020,TestLayerBool_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-bool,shape 层=continuously rasterize,DOM collapseTransformation=true)" alias="collapse transform,continuously rasterize,折叠变换,连续栅格化"
 func (l *Layer) SetCollapseTransform(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -422,7 +422,7 @@ func footageWithID(p *Project, id uint32) bool {
 //
 // Unknown enum values are treated as None (= no-op clearing).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;互斥 bit 组跨 @0x25/0x26;无专门 AE gate→round-trip" alias="auto orient,自动旋转,沿路径旋转,朝向摄像机"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerBool_AEShipGate_AE2020,TestLayerBool_AEShipGate_AE2025 boundary="length-preserving 低风险;互斥 bit 组跨 @0x25/0x26;双版本 AE gated(layer-bool,AlongPath 需运动路径=position 关键帧,DOM autoOrient=ALONG_PATH)" alias="auto orient,自动旋转,沿路径旋转,朝向摄像机"
 func (l *Layer) SetAutoOrient(t AutoOrientType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -529,7 +529,7 @@ func (l *Layer) recomputeDurationFromLdta() {
 // section.
 // length-preserving (8 bytes total in two 4-byte writes).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;分子/分母分处 @ldta 0x08/@0x6C;1.0=正常速度;无专门 AE gate→round-trip" alias="stretch,time stretch,速度,时间拉伸,慢动作,快放"
+//aep:cap domain=layer-set tier=alpha verify=roundtrip boundary="⚠ 确认 false-green:写 @ldta 0x08/0x6C 分子/分母 Go round-trips,但 AE 读 layer.stretch=100 不认(precomp 源也一样)——AE 按 in/out span 重算 stretch,本 setter 不调 in/out。须协调 outPoint 或 RE 正确字段。详 incident layer-setstretch-ae-recomputes-span" alias="stretch,time stretch,速度,时间拉伸,慢动作,快放"
 func (l *Layer) SetStretch(ratio float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
