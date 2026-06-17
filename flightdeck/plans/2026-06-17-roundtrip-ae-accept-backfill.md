@@ -33,7 +33,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批3**(87cd03b + 0e700cf):SetName/SetStartTime/SetParent + **SetComment(修了假绿)**。
 - ✅ **批4**(594409a):camera/light options **17 setter** 升 ae-accept — **零新 fixture,纯补标验证洁癖洞**。早被双版本真 AE gate `TestNewCameraLight_AEShipGate_AE2020/AE2025`(verify_camera_light.jsx DOM readback 逐项 near() + resave-parse 值存活)覆盖,只是 tag 一直停 roundtrip;本批**自跑双版本确认现在真绿**(AE2025 11.6s/AE2020 16.7s,23 项 DOM 值全对)才标。覆盖:9 camera(SetCameraZoom + 8×SetIris*) + 6 light(Color/FalloffType/FalloffStart/FalloffDistance/ShadowDarkness/ShadowDiffusion) + 2 spot(ConeAngle/ConeFeather)。
 - ✅ **批5a**(500a6d4):**8 classic Material setter** 升 ae-accept(双版本)。**关键勘探**:唯一现成 material fixture `re_material_options.aep` 是 AE25 存的、**AE2020 直接拒开** → 无法双版本验;故 **author 一个 AE2020-native 载体** `re_material_classic_2020.aep`(AE2020 builder JSX 造 3D solid + 设 classic material 非默认值 materialize),两版本都能开。覆盖 LightTransmission/AcceptsShadows/AcceptsLights/Ambient/Diffuse/Specular/Shininess/Metal。新 gate `TestMaterialClassic_AEShipGate_AE2020/AE2025`。
-- `ae-accept` 35→**78**;`roundtrip` 279→**236**。
+- ✅ **批6**(comp 域):**22 Composition setter** 升 ae-accept(双版本,**from-scratch gate** `TestCompSettings_AEShipGate_AE2020/AE2025`,5 个 from-scratch comp DOM readback)。comp 设置写 cdta 固定字节无 elision,NewComposition 已双版本 → from-scratch 即载体,无需造文件。调试勘出 2 真问题:**SetFrameRate+SetDuration 同 comp → AE 读时长被 newFps/oldFps 缩放**(真 bug,新 incident `comp-setframerate-no-duration-rescale`,gate 解耦验);**SetDraft3D @0x8A bit0 AE DOM 不反映**(留 roundtrip 待 RE)。
+- `ae-accept` 35→**100**;`roundtrip` 279→**214**。
 
 ## 待办(按 ROI / 难度排)
 
@@ -53,7 +54,9 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
   - **复用资产**:`tmp_debug/scan_material_fixture`(Go dump 任 aep 每层 material prop 存在性)·`test_data/probe_material.jsx`(AE 跑,dump materialOption 树 matchName+value,版本探测用)——均本地未 tracked。
 
 ### B. 其它域(每域一/几个综合 fixture)
-- **comp 37**:⚠ **带着 item-comment idta-flag 嫌疑去**——`Composition.SetComment` 走同款 `EncodeCmta`(现已 double-NUL)但 item 无 ldta@0x3C,大概率需某 idta flag(同 SetComment 真因)。先 RE:AE 原生设 comp comment→存盘→`diff` idta 找 has-comment flag。其余 comp setter(duration/framerate/bg/resolution…)DOM 可读。
+- ~~**comp**~~ ✅ **批6 主体已清**:22 cdta-level setter 双版本 ae-accept(from-scratch gate)。**残 comp 项(→ 6b)**:
+  - `SetLabel`/`SetComment`:**item-level idta**(from-scratch comp 无 idta chunk,报 "no idta chunk reference")→ 须**解析真 comp 载体**(任一现成 .aep 的 comp)做 gate。SetComment 仍带 item-comment idta-flag 嫌疑(走 `EncodeCmta` 但 item 无 ldta@0x3C 等价物,大概率需某 idta has-comment flag,同 layer SetComment 真因)→ 先 RE:AE 原生设 comp comment→存盘→diff idta 找 flag。
+  - `SetDraft3D`:@0x8A bit0,AE2025 `comp.draft3d` DOM 不反映(其余 5 个 @0x8B flag 全反映)→ 留 roundtrip,须 RE 正确 bit/字段。
 - **text 33**:btdk 字段,DOM 可读(font/size/justification/tracking…),部分已有 text gate,核实重复。
 - **shape 23**:⚠ render-pixel 类(颜色/描边),按红线4 验渲染像素不只值。
 - **keyframe 13 / mask 8 / structural 8**:渲染或结构接受验。
