@@ -21,7 +21,7 @@ implements: specs/2026-06-18-procedural-fx-generator.md
 ## 内化流水线（5 步;每给一个参考模版跑一遍）
 
 1. **PARSE（机械,库已能做）**:参考 .aep → 全结构 dump(comp 树 / 每层 类型·混合模式·源·mask / 每效果 matchName+set/animated 参数 / 关键帧·表达式 / 原生vs插件分类)。
-   - 当前:探针 `tmp_debug/dump_fxchain`+`dump_tdmn`(local)。**TODO:升级成正经工具 `cmd/aepdissect`**,任何模版一键出结构化报告。
+   - ✅ **已做:`cmd/aepdissect`**(repo 工具,`go run ./cmd/aepdissect <file.aep>`,任意模版一键结构化报告:效果用量+原生/Cycore/第三方分级+预合成嵌套+逐层效果链+两类元素判别)。辅助 `tmp_debug/dump_tdmn`(local,全树 matchName)。
 2. **DECOMPOSE 到角色（AI/人判断,不可机械化）**:原始结构 → 功能角色映射(「什么效果干什么用」)。产物 = 角色词典(见 `checklists/build-good-fire.md` § 效果用途词典)。
 3. **EXTRACT 技法（提炼跨域原子）**:每个技法抽成命名条目。**新技法 → 进技法库;已有技法 → 标"现象 Y 也用到"**(交叉链,越用越强)。
 4. **STORE（flightdeck,自动跨会话）**:两层结构,见下。

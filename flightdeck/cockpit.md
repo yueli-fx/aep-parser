@@ -23,7 +23,7 @@
 - ⬜ **可选:程序化闪电**(T14 `ADBE Lightning 2` 已在库,未验证)= 不靠素材纯生成电弧 + T5 Glow + T6 闪烁。
 - ⬜ 喂更多模版,继续长技法库。
 
-依据:`specs/2026-06-18-fx-technique-internalization.md` · `docs/fx-techniques.md` · `checklists/build-good-fire.md` · v2 builder `tmp_debug/flame2/`(local)。
+依据:`specs/2026-06-18-fx-technique-internalization.md` · `docs/fx-techniques.md` · `checklists/build-good-fire.md` · 火焰 builder = `flightdeck/showcase/procedural-fx/gen.go`(v3,tracked)。
 
 **次要(需求驱动)**:残值 backlog(剩 53 roundtrip)→ `specs/2026-06-18-roundtrip-ae-accept-residual.md`;能力真相源 `go run ./cmd/capindex -q <词>`。
 

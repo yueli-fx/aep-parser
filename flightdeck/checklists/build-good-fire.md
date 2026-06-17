@@ -11,7 +11,7 @@ last_updated: 2026-06-18
 
 ## ⚠ 成熟度（诚实前提，别当已验证流程用）
 
-- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（探针 `tmp_debug/dump_fxchain`/`dump_tdmn`，local）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
+- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tmp_debug/dump_tdmn`）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
 - **✅ 已升级为「验证配方」（2026-06-18）**：**v3 多层合成**（黑底+3 火层+同心 mask 温度分区+Add+Glo2，运动共相）经 **`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 gate 绿（逐像素一致）+ 用户真机验收过**。这条多层配方现在是验证过的,可照搬。
 - 历程：v1 被否（单层 Tint）→ v2（单层 Tritone+Glo2,修色温/Glow 但无层次）→ **v3 多层合成出层次（通过）**。下面参数表/步骤为 v3 实际值。
 
@@ -50,11 +50,11 @@ last_updated: 2026-06-18
 
 ### v2 实证（2026-06-18，单层天花板）
 
-单层栈 `Fractal Noise → Tritone(三档色温) → Turbulent Displace → Glo2` + 羽化 mask + 黑底，AE2025 自渲：**色温/辉光/翻腾都对了**（修掉 v1 三个缺口），但**层次感不足**（用户：「调再多参数没意义了，示例是多层混合的」）。→ 坐实「单层调参到顶 = 一团有色温的火」，深度必须上多层合成。builder 见 `tmp_debug/flame2/`（local）。
+单层栈 `Fractal Noise → Tritone(三档色温) → Turbulent Displace → Glo2` + 羽化 mask + 黑底，AE2025 自渲：**色温/辉光/翻腾都对了**（修掉 v1 三个缺口），但**层次感不足**（用户：「调再多参数没意义了，示例是多层混合的」）。→ 坐实「单层调参到顶 = 一团有色温的火」，深度必须上多层合成。（v2 builder 为迭代 scratch，已清理；最终 v3 builder=`flightdeck/showcase/procedural-fx/gen.go`，tracked。）
 
 ### v3 实证（2026-06-18，多层合成 → 层次感出来了）✓ 自渲验证 T3
 
-5 层结构(`tmp_debug/flame3/`，local)：黑底 + **3 个 Fractal Noise→Tritone→Turbulent Displace 火层**(不同噪声 scale=不同细节频率，越内层 Tritone 越热) + 顶部 Glo2 调整层。AE2025 自渲：清晰的**径向色温分层**——外深红 wispy → 中橙 → **内黄白热芯柱**，有舔动有翻腾，明显比 v2 有深度。
+5 层结构(builder=`flightdeck/showcase/procedural-fx/gen.go`，tracked)：黑底 + **3 个 Fractal Noise→Tritone→Turbulent Displace 火层**(不同噪声 scale=不同细节频率，越内层 Tritone 越热) + 顶部 Glo2 调整层。双版本 AE 实渲 + 用户验收：清晰的**径向色温分层**——外深红 wispy → 中橙 → **内黄白热芯柱**，有舔动有翻腾，明显比 v2 有深度。
 
 **两个关键踩坑 → 解法**(都记进 `docs/fx-techniques.md` T3):
 1. **团块**：3 层 Add **共用同一 mask** → streak 并集填满成"发光团块"。**解法=同心 mask**(`scalePath` 缩 f=0.5/0.76/1.0,核层小/外层全)+ 各层 Tritone 越内越热 → 温度分区(外红中橙内白)而非实心。
