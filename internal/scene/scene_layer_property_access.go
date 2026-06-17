@@ -269,21 +269,21 @@ func (l *Layer) LightShadowDiffusion() *Property {
 
 // SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip" alias="plane curvature,平面曲率,3D geometry"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层+Advanced 3D renderer;不可达 AE-gate(实勘 2026-06-18):solid/extruded-shape 的 Extrsn 组里 ADBE Plane Curvature 属性<not present>(疑 footage-plane 专属),无载体可 author→留 roundtrip(incident material-advanced-props-hidden)" alias="plane curvature,平面曲率,3D geometry"
 func (l *Layer) SetGeometryPlaneCurvature(v float64) error {
 	return setScalarProperty(l.GeometryPlaneCurvature(), l.Name, "Plane Curvature", v)
 }
 
 // SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip" alias="plane subdivision,平面细分,mesh quality,网格质量"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层+Advanced 3D renderer;不可达 AE-gate(实勘 2026-06-18):solid/extruded-shape 的 Extrsn 组里 ADBE Plane Subdivision 属性<not present>(疑 footage-plane 专属),无载体可 author→留 roundtrip(incident material-advanced-props-hidden)" alias="plane subdivision,平面细分,mesh quality,网格质量"
 func (l *Layer) SetGeometryPlaneSubdivision(v float64) error {
 	return setScalarProperty(l.GeometryPlaneSubdivision(), l.Name, "Plane Subdivision", v)
 }
 
 // SetGeometryBevelDirection writes Bevel Direction enum.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip" alias="bevel direction,斜面方向,3D bevel"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;不可达 AE-gate(实勘 2026-06-18):Extrsn 组列出但 setValue(连 Extrsn Depth)被拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 全拒→无法 author 载体→留 roundtrip(incident material-advanced-props-hidden)" alias="bevel direction,斜面方向,3D bevel"
 func (l *Layer) SetGeometryBevelDirection(v float64) error {
 	return setScalarProperty(l.GeometryBevelDirection(), l.Name, "Bevel Direction", v)
 }
@@ -331,7 +331,7 @@ func (l *Layer) SetMaterialAcceptsLights(enabled bool) error {
 
 // SetMaterialShadowColor writes the shadow color (4-component RGBA).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;AE2020 classic 不暴露此 prop(builder 实勘 MISS),无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="shadow color,阴影颜色,3D shadow color"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;AE2020 material 组无此 prop(仅 AE2025 有);AE2025 Advanced-3D setValue 也被拒「父级属性被隐藏」(实勘 2026-06-18,solid+shape 全拒)→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="shadow color,阴影颜色,3D shadow color"
 func (l *Layer) SetMaterialShadowColor(rgba []float64) error {
 	p := l.MaterialShadowColor()
 	if p == nil {
@@ -343,7 +343,7 @@ func (l *Layer) SetMaterialShadowColor(rgba []float64) error {
 // SetMaterialAppearsInReflections toggles whether this layer appears in
 // reflective surfaces of other 3D layers.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;AE2024+ Advanced-3D 专属,AE2020 classic 渲染器不可设(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip" alias="appears in reflections,出现在反射中,reflection visibility"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组列出但 setValue 被拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 全拒→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="appears in reflections,出现在反射中,reflection visibility"
 func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error {
 	v := 0.0
 	if enabled {
@@ -383,32 +383,32 @@ func (l *Layer) SetMaterialMetal(v float64) error {
 	return setScalarProperty(l.MaterialMetal(), l.Name, "Metal Coefficient", v)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="reflection,反射率,material reflection"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="reflection,反射率,material reflection"
 func (l *Layer) SetMaterialReflection(v float64) error {
 	return setScalarProperty(l.MaterialReflection(), l.Name, "Reflection Coefficient", v)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="glossiness,光泽,material glossiness"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="glossiness,光泽,material glossiness"
 func (l *Layer) SetMaterialGlossiness(v float64) error {
 	return setScalarProperty(l.MaterialGlossiness(), l.Name, "Glossiness Coefficient", v)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="fresnel,菲涅尔,material fresnel"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="fresnel,菲涅尔,material fresnel"
 func (l *Layer) SetMaterialFresnel(v float64) error {
 	return setScalarProperty(l.MaterialFresnel(), l.Name, "Fresnel Coefficient", v)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="transparency,透明度,material transparency"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="transparency,透明度,material transparency"
 func (l *Layer) SetMaterialTransparency(v float64) error {
 	return setScalarProperty(l.MaterialTransparency(), l.Name, "Transparency Coefficient", v)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="transparency rolloff,透明衰减,transp rolloff"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="transparency rolloff,透明衰减,transp rolloff"
 func (l *Layer) SetMaterialTranspRolloff(v float64) error {
 	return setScalarProperty(l.MaterialTranspRolloff(), l.Name, "Transp Rolloff", v)
 }
 
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback" alias="index of refraction,折射率,IOR"
+//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)" alias="index of refraction,折射率,IOR"
 func (l *Layer) SetMaterialIndexOfRefraction(v float64) error {
 	return setScalarProperty(l.MaterialIndexOfRefraction(), l.Name, "Index of Refraction", v)
 }

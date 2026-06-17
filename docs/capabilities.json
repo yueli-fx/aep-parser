@@ -3226,7 +3226,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;不可达 AE-gate(实勘 2026-06-18):Extrsn 组列出但 setValue(连 Extrsn Depth)被拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 全拒→无法 author 载体→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "bevel direction",
@@ -3248,7 +3248,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层+Advanced 3D renderer;不可达 AE-gate(实勘 2026-06-18):solid/extruded-shape 的 Extrsn 组里 ADBE Plane Curvature 属性\u003cnot present\u003e(疑 footage-plane 专属),无载体可 author→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "plane curvature",
@@ -3270,7 +3270,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层+Advanced 3D renderer;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层+Advanced 3D renderer;不可达 AE-gate(实勘 2026-06-18):solid/extruded-shape 的 Extrsn 组里 ADBE Plane Subdivision 属性\u003cnot present\u003e(疑 footage-plane 专属),无载体可 author→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "plane subdivision",
@@ -4076,7 +4076,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;AE2024+ Advanced-3D 专属,AE2020 classic 渲染器不可设(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组列出但 setValue 被拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 全拒→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "appears in reflections",
@@ -4149,7 +4149,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "fresnel",
@@ -4171,7 +4171,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "glossiness",
@@ -4193,7 +4193,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "index of refraction",
@@ -4291,7 +4291,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "reflection",
@@ -4313,7 +4313,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;AE2020 classic 不暴露此 prop(builder 实勘 MISS),无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;AE2020 material 组无此 prop(仅 AE2025 有);AE2025 Advanced-3D setValue 也被拒「父级属性被隐藏」(实勘 2026-06-18,solid+shape 全拒)→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "shadow color",
@@ -4385,7 +4385,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "transparency rolloff",
@@ -4407,7 +4407,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced material,双版本不可达 AE-gate(实勘 2026-06-18):Advanced-3D 组里列出(.enabled=true 误导)但 setValue 被 AE 拒「父级属性被隐藏」,solid+extruded-shape × AE2020+AE2025 四组合全拒,无 ray-traced 渲染器可 un-hide→无法 author 载体/无 DOM 值验→留 roundtrip(incident material-advanced-props-hidden)",
       "incident": null,
       "alias": [
         "transparency",
