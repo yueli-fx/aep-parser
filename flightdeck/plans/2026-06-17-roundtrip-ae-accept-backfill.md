@@ -38,7 +38,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批7b**(text 段落):**5 SetParagraph indent/spacing** 升 ae-accept(双版本)。**又抓+修一个真 bug**:5 个 setter 同 tsume FormatPSReal bug(写 20 → AE 读 20/65536)。discovery gate 实证 → 改 FormatPSReal。AE2025 DOM 验 firstLineIndent/spaceBefore/spaceAfter,StartIndent/EndIndent(AE 无 leftMargin/rightMargin DOM)+ AE2020(无段落 DOM)靠双版本 resave-preservation。新 incident `btdk-point-value-needs-formatpsreal`(模式总结,复发两次)。
 - ✅ **批7c**(text enum):**9 AE24+ run/paragraph enum** 升 ae-accept(双版本)。勘探坐实:虽标"AE24+ ScriptingAPI 才可写",**AE2020 opaque 保留了它不认识的 AE24+ enum 字节**(resave 后 Go 读回全对)→ 双版本 resave-preservation(AE2025 加 DOM)。覆盖 AutoKernType/BaselineOption/NoBreak/LineJoinType/DigitSet + AutoHyphenate/LeadingType/HangingRoman/Direction。**通用洞察:AE 旧版对不识别的新版属性 opaque 保留 → AE24+ 写能力可经低版本 resave-preservation 双版本验**。
 - ✅ **批8**(shape wiggle):**9 Wiggle Paths/Transform procedural setter** 升 ae-accept(验证洁癖洞)。早被双版本 gate `mg_wiggle`/`mg_wiggle_modrt`/`mg_wiggletransform` 的 verify JSX **显式 DOM 值读回**(TemporalPhase/SpatialPhase/Correlation/RandomSeed/WigglesPerSecond),只是标 roundtrip(还是 tier=alpha)。自跑 3 gate 双版本确认绿才补标。boundary 留"本质不可像素门禁(procedural)"(随机/相位单帧无类别正确像素,ae-accept DOM 值验是正确上限)。
-- `ae-accept` 35→**136**;`roundtrip` 279→**178**。
+- ✅ **批8b/8c**(shape 几何):**11 个** 升 ae-accept。SetDirection(rect/ell,洁癖洞 shape_enums)·新 gate `TestShapeGeom` 覆盖 Rect Roundness/Position·Star Inner/Outer Roundness/Position·Repeater Offset/Rotation·Trim Start/Offset(Go-reparse streamCdat 按 match-name 验值存活,1D+2D)。残 shape 3:SetAnchor(Repeater/Wiggler)/SetScale(Wiggler)——Repeater Anchor match-name 实测错需 RE,Wiggler transform generic match-name 歧义,defer。
+- `ae-accept` 35→**147**;`roundtrip` 279→**167**。
 
 ## 待办(按 ROI / 难度排)
 
