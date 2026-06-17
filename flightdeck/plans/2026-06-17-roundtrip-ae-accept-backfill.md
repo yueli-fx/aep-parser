@@ -36,7 +36,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批6**(comp 域):**22 Composition setter** 升 ae-accept(双版本,**from-scratch gate** `TestCompSettings_AEShipGate_AE2020/AE2025`,5 个 from-scratch comp DOM readback)。comp 设置写 cdta 固定字节无 elision,NewComposition 已双版本 → from-scratch 即载体,无需造文件。调试勘出 2 真问题:**SetFrameRate+SetDuration 同 comp → AE 读时长被 newFps/oldFps 缩放**(真 bug,新 incident `comp-setframerate-no-duration-rescale`,gate 解耦验);**SetDraft3D @0x8A bit0 AE DOM 不反映**(留 roundtrip 待 RE)。
 - ✅ **批7**(text 域):**13 SetRun* style setter** 升 ae-accept(双版本)。载体 = from-scratch 单 run 文本(NewTextLayer+SetText("Ag")),每个 SetRun0 浮现为 **whole-doc textDocument** 属性,AE2020 也可读(characterRange 仅 per-run/AE2022+ 才需)。覆盖 FillColor/StrokeColor/ApplyStroke/StrokeWidth/StrokeOverFill/FauxBold/FauxItalic/BaselineShift/AutoLeading/Leading/HScale/VScale/Tsume。**修真 bug**:SetRunTsume 误用 FormatPSNumber(裸整数→AE 当 16.16 定点 /65536),改 FormatPSReal。
 - ✅ **批7b**(text 段落):**5 SetParagraph indent/spacing** 升 ae-accept(双版本)。**又抓+修一个真 bug**:5 个 setter 同 tsume FormatPSReal bug(写 20 → AE 读 20/65536)。discovery gate 实证 → 改 FormatPSReal。AE2025 DOM 验 firstLineIndent/spaceBefore/spaceAfter,StartIndent/EndIndent(AE 无 leftMargin/rightMargin DOM)+ AE2020(无段落 DOM)靠双版本 resave-preservation。新 incident `btdk-point-value-needs-formatpsreal`(模式总结,复发两次)。
-- `ae-accept` 35→**118**;`roundtrip` 279→**196**(跌破 200)。
+- ✅ **批7c**(text enum):**9 AE24+ run/paragraph enum** 升 ae-accept(双版本)。勘探坐实:虽标"AE24+ ScriptingAPI 才可写",**AE2020 opaque 保留了它不认识的 AE24+ enum 字节**(resave 后 Go 读回全对)→ 双版本 resave-preservation(AE2025 加 DOM)。覆盖 AutoKernType/BaselineOption/NoBreak/LineJoinType/DigitSet + AutoHyphenate/LeadingType/HangingRoman/Direction。**通用洞察:AE 旧版对不识别的新版属性 opaque 保留 → AE24+ 写能力可经低版本 resave-preservation 双版本验**。
+- `ae-accept` 35→**127**;`roundtrip` 279→**187**。
 
 ## 待办(按 ROI / 难度排)
 
@@ -61,7 +62,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
   - `SetDraft3D`:@0x8A bit0,AE2025 `comp.draft3d` DOM 不反映(其余 5 个 @0x8B flag 全反映)→ 留 roundtrip,须 RE 正确 bit/字段。
 - ~~**text 33**~~ ✅ **批7 主体已清**:13 SetRun* style 双版本(单 run whole-doc DOM)。**残 text(→7b/7c)**:
   - **SetRun* enum/index 残**:`SetRunFontIndex`(换字体,需多字体)·`SetRunDigitSet`·`SetRunAutoKernType`·`SetRunBaselineOption`(AE24+)·`SetRunLineJoinType`(AE24+)·`SetRunNoBreak` —— 多映射 textDocument 枚举属性,可仿批7 加进同 gate 验(部分 AE24+ 单版本)。
-  - ~~**SetParagraph 5 indent/spacing**~~ ✅ **批7b 已清(含 bug 修)**。**残 SetParagraph bool/enum 4**:`SetParagraphAutoHyphenate`(/9 bool)·`SetParagraphLeadingType`(/8 enum)·`SetParagraphHangingRoman`(/21 bool)·`SetParagraphDirection`(/33 enum)——格式 OK(非 point),但 DOM 多 AE2022+/单版本,可走 resave-preservation 双版本(仿批7b)。SetParagraphJustification 已 render-gated。
+  - ~~**SetParagraph 5 indent/spacing**~~ ✅ **批7b**(含 bug 修)。~~**SetRun enum/index + SetParagraph bool/enum**~~ ✅ **批7c(9 个 AE24+ enum,opaque preservation 双版本)**。
+  - **残 text(真硬尾,6 个,documented defer)**:`SetRunFontIndex`+`AddFont`(换字体,需先 AddFont 加第二字体再指,可仿批7c 加 gate=textDocument.font 验,**下个 text slice 首选**)· `SetManualKerning`(incident `kerning-first-enable`,需 AE-native kerning slot,难)· 3 个 text animator(`AddTextRotationX/YAnimator`/`AnimateTextOpacity`,结构性 write-only,render-gate 已 defer)。SetParagraphJustification 已 render-gated。
   - `SetManualKerning`(incident `kerning-first-enable`,难)·`AddFont`(字体表)·text animator(AddTextRotationX/YAnimator/AnimateTextOpacity,结构性,另批)。
 - **shape 23**:⚠ render-pixel 类(颜色/描边),按红线4 验渲染像素不只值。
 - **keyframe 13 / mask 8 / structural 8**:渲染或结构接受验。
