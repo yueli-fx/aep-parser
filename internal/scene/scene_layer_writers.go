@@ -171,7 +171,7 @@ func (l *Layer) SetIs3D(v bool) error {
 // SetIsAdjust toggles the layer's "Adjustment Layer" switch.
 // length-preserving (single bit @ldta 0x26).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip" alias="adjustment layer,调整图层,调节层"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x26;双版本 AE gated(layer-av-fields2 批量 fixture)" alias="adjustment layer,调整图层,调节层"
 func (l *Layer) SetIsAdjust(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -187,7 +187,7 @@ func (l *Layer) SetIsAdjust(v bool) error {
 // in the comp viewer but excludes it from output).
 // length-preserving (single bit @ldta 0x25).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip" alias="guide layer,参考线图层,辅助线"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x25;双版本 AE gated(layer-av-fields2 批量 fixture)" alias="guide layer,参考线图层,辅助线"
 func (l *Layer) SetIsGuide(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -236,7 +236,7 @@ func (l *Layer) SetMarkersLocked(v bool) error {
 // sampling for the layer.
 // length-preserving (single bit @ldta 0x25).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip" alias="sampling bicubic,bicubic,bilinear,采样方式,图像质量"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x25;双版本 AE gated(layer-av-fields2 批量 fixture,验 Bicubic)" alias="sampling bicubic,bicubic,bilinear,采样方式,图像质量"
 func (l *Layer) SetSamplingBicubic(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -307,7 +307,7 @@ func (l *Layer) SetTrackMatte(t TrackMatteType) error {
 // unknown value but the byte is preserved on round-trip).
 // length-preserving (single byte).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x3D;范围 0..16;无专门 AE gate→round-trip" alias="label,label color,标签,颜色标签,时间线颜色"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;单字节 @ldta 0x3D;范围 0..16;双版本 AE gated(layer-av-fields2 批量 fixture,验 9)" alias="label,label color,标签,颜色标签,时间线颜色"
 func (l *Layer) SetLabel(index uint8) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -438,7 +438,7 @@ func (l *Layer) SetAutoOrient(t AutoOrientType) error {
 // (ldta @0x67, single byte 0/1).
 // length-preserving (single byte).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x67;无专门 AE gate→round-trip" alias="preserve transparency,保留透明度,alpha preservation"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;单字节 @ldta 0x67;双版本 AE gated(layer-av-fields2 批量 fixture)" alias="preserve transparency,保留透明度,alpha preservation"
 func (l *Layer) SetPreserveTransparency(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -479,7 +479,7 @@ func (l *Layer) SetStartTime(seconds float64) error {
 // ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in).
 // length-preserving (8 bytes).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;8 字节分数对 @ldta 0x14/0x18;写后自动更新 Duration;无专门 AE gate→round-trip" alias="in point,入点,开始帧,trim start"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;8 字节分数对 @ldta 0x14/0x18;写后自动更新 Duration;双版本 AE gated(layer-av-fields2 批量 fixture)" alias="in point,入点,开始帧,trim start"
 func (l *Layer) SetInPoint(seconds float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -495,7 +495,7 @@ func (l *Layer) SetInPoint(seconds float64) error {
 // ldta @0x1C/@0x20, then refreshes `Layer.Duration`.
 // length-preserving (8 bytes).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;无专门 AE gate→round-trip" alias="out point,出点,结束帧,trim end"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFields2_AEShipGate_AE2020,TestLayerAVFields2_AEShipGate_AE2025 boundary="length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;双版本 AE gated(layer-av-fields2 批量 fixture)" alias="out point,出点,结束帧,trim end"
 func (l *Layer) SetOutPoint(seconds float64) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)

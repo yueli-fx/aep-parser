@@ -3095,10 +3095,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;8 字节分数对 @ldta 0x14/0x18;写后自动更新 Duration;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;8 字节分数对 @ldta 0x14/0x18;写后自动更新 Duration;双版本 AE gated(layer-av-fields2 批量 fixture)",
       "incident": null,
       "alias": [
         "in point",
@@ -3320,10 +3323,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x26;双版本 AE gated(layer-av-fields2 批量 fixture)",
       "incident": null,
       "alias": [
         "adjustment layer",
@@ -3342,10 +3348,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x25;双版本 AE gated(layer-av-fields2 批量 fixture)",
       "incident": null,
       "alias": [
         "guide layer",
@@ -3386,10 +3395,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单字节 @ldta 0x3D;范围 0..16;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单字节 @ldta 0x3D;范围 0..16;双版本 AE gated(layer-av-fields2 批量 fixture,验 9)",
       "incident": null,
       "alias": [
         "label",
@@ -4242,10 +4254,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;8 字节分数对 @ldta 0x1C/0x20;写后自动更新 Duration;双版本 AE gated(layer-av-fields2 批量 fixture)",
       "incident": null,
       "alias": [
         "out point",
@@ -4313,10 +4328,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单字节 @ldta 0x67;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单字节 @ldta 0x67;双版本 AE gated(layer-av-fields2 批量 fixture)",
       "incident": null,
       "alias": [
         "preserve transparency",
@@ -4440,10 +4458,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields2_AEShipGate_AE2020",
+        "TestLayerAVFields2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x25;双版本 AE gated(layer-av-fields2 批量 fixture,验 Bicubic)",
       "incident": null,
       "alias": [
         "sampling bicubic",
