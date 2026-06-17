@@ -16,8 +16,8 @@
 - **批1 ✅**(5e98762):7 AV-flag(Visible/Shy/Solo/Locked/MotionBlur/Quality/BlendingMode)。
 - **批2 ✅**:7 AV-field(InPoint/OutPoint/PreserveTransparency/SamplingBicubic/IsGuide/IsAdjust/Label)。
 - **批3 ✅**:SetName(length-variable)/SetStartTime/SetParent(两层 fixture)。`ae-accept` 35→**52**,roundtrip→262。
-- **⚠ 批3 抓出真假绿**:`Layer.SetComment` 在 from-scratch 层(无原生 cmta)插新 cmta=append 到 Layr LIST 末尾,AE 读回空(红线1+7)。已降级标注 + incident `layer-setcomment-cmta-append-position`(待 RE 正确槽位修;**连带嫌疑 item-level setItemComment 同款 append**,补 comp/project 域时重点验)。
-- **下一批候选**:layer-set 残项(Stretch/AutoOrient/IsNull/audio/frameblend——部分需特殊载体或映射确认)→ **修 SetComment**(RE cmta 位置)→ comp 37 → text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。
+- **批3 抓出 + 修好真假绿**:`Layer.SetComment` from-scratch 层 AE 读回空。RE **推翻"位置"假说**(cmta 本就该在 Layr 末尾),真因 = ldta **@0x3C has-comment flag**(此前未解字节)+ cmta **double-NUL**。已修 + 纳入批3 gate,`ae-accept` 52→**53**。incident RESOLVED(`layer-setcomment-cmta-append-position`)。**连带:item-level setItemComment 同走 EncodeCmta 但无 ldta@0x3C 等价物,补 comp 域须 RE idta flag**。
+- **下一批候选**:layer-set 残项(Stretch/AutoOrient/IsNull/audio/frameblend——部分需特殊载体或映射确认)→ comp 37(⚠ item comment idta flag)→ text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。
 - 域分布查询:`pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq 'roundtrip'}|group {$_.cap.domain}"`。
 
 需求驱动残项(arc 外,按需):能力查询 `go run ./cmd/capindex -q <词>`。
