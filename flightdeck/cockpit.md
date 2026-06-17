@@ -18,7 +18,8 @@
 - **批3 ✅**:SetName(length-variable)/SetStartTime/SetParent(两层 fixture)。`ae-accept` 35→**52**,roundtrip→262。
 - **批3 抓出 + 修好真假绿**:`Layer.SetComment` from-scratch 层 AE 读回空。RE **推翻"位置"假说**(cmta 本就该在 Layr 末尾),真因 = ldta **@0x3C has-comment flag**(此前未解字节)+ cmta **double-NUL**。已修 + 纳入批3 gate,`ae-accept` 52→**53**。incident RESOLVED(`layer-setcomment-cmta-append-position`)。**连带:item-level setItemComment 同走 EncodeCmta 但无 ldta@0x3C 等价物,补 comp 域须 RE idta flag**。
 - **批4 ✅**(594409a):camera/light options **17 setter** 升 ae-accept(9 camera Zoom+8 Iris / 6 light / 2 spot)。**零新 fixture**——核实出"早被双版本 `TestNewCameraLight_AEShipGate_*` DOM-readback+resave 覆盖,只是 tag 停 roundtrip",自跑双版本确认真绿才标。`ae-accept` 53→**70**,roundtrip→**244**。
-- **下一批候选(批4 后)**:**`SetMaterial*` 20 个**(最大残块,仅 layer_3d_test 纯 round-trip,typed setter 未 AE 验;新 fixture=3D solid+material DOM readback,可值验,**ROI 最高**)→ comp 37(⚠ item comment idta flag)→ text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。残:SetGeometry*(3,renderer-gated 待核实可达)·SetLightSource(AE24+环境灯,niche)·layer-set bool 残项(Stretch/AutoOrient/IsNull/audio/frameblend)。
+- **下一批 = 批5:`SetMaterial*` 16 个**(最大残块,typed setter 未 AE 验)。**⚠ 非快活,设计约束已勘记 plan**:载体须用真 fixture `re_material_options.aep`(禁 from-scratch,material 树被 elide)· **版本劈裂**(advanced material ~6 疑 AE2020 不暴露,先探测 → 双版本只验 classic ~10,advanced minver=2024 单 AE2025)· default-elision 用姊妹 solid 读 AcceptsShadows/Shininess。
+- 批5 后:comp 37(⚠ item comment idta flag)→ text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。残:SetGeometry*(3,renderer-gated 待核实可达)·SetLightSource(AE24+环境灯,niche)·layer-set bool 残项(Stretch/AutoOrient/IsNull/audio/frameblend)。
 - 域分布查询:`pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq 'roundtrip'}|group {$_.cap.domain}"`。
 
 需求驱动残项(arc 外,按需):能力查询 `go run ./cmd/capindex -q <词>`。

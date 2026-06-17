@@ -41,7 +41,11 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - **结构/引用类**:`SetSource`/`ReplaceSource`(需第二 source)、`SetTrackMatte`/`SetTrackMatteLayer`/`ClearTrackMatteLayer`/`SetTrackMatteSource`/`RemoveTrackMatte`(需两层 + matte,AE23+)、`SetAlternateSource`/`ClearAlternateSource`(需 blsi slot)。
 - ~~**light/iris/camera-zoom 间接覆盖**~~ ✅ **批4 已清**:核实结论坐实"验证洁癖洞"——17 个早被 `TestNewCameraLight_AEShipGate_*` 实测覆盖,只补标。
 - **残项(批4 后剩,需独立 fixture)**:
-  - `SetMaterial*`(**20 个,最大残块**):仅 `layer_3d_test.go` **纯 Go round-trip**(非 ship-gate);`layer_3d_shadow_shipgate` 只走泛型 `SetMaterialOption("ADBE Casts Shadows")`,**typed setter 未 AE 验**。需新 fixture:3D solid + 设 material props → AE DOM 经 `layer.threeDLayer` material match-name readback(`ADBE Ambient Coefficient` 等)。可值验,**下批首选**(ROI 最高的残块)。
+  - `SetMaterial*`(**16 个,下批首选**;SetMaterialCastsShadows 已 render-pixel gated 不在内):仅 `layer_3d_test.go` **纯 Go round-trip**(非 ship-gate);`layer_3d_shadow_shipgate` 只走泛型 `SetMaterialOption("ADBE Casts Shadows")`,**typed setter 未 AE 验**。**批5 设计约束(已勘,勿盲目照抄 new_camera_light)**:
+    1. **载体必须 `test_data/re_material_options.aep`**(本地存在,AE 原生 3D solids 带完整 17-prop material 树)——**禁 from-scratch**:from-scratch 3D solid 的 material 树被 AE elide 成空、无槽可写(红线7)。读真 aep+局部改+写回 = 库核心强项。
+    2. **⚠ 版本劈裂**:fixture 是 AE24+ Advanced 3D。`Reflection/Glossiness/Fresnel/Transparency/TranspRolloff/IndexOfRefraction/AppearsInReflections`(~6-7)疑为 **Advanced-3D 专属**,AE2020 classic 渲染器大概率不暴露 → 双版本 gate 的 **AE2020 腿只能验 classic 子集**(Ambient/Diffuse/Specular/Shininess/Metal/AcceptsShadows/AcceptsLights/LightTransmission/ShadowColor ~10);advanced 子集须 `minver=2024` 单 AE2025 验。**起手先 AE2020 探测**:它能否开这个 fixture + `layer.materialOption.property("ADBE Reflection Coefficient")` 是否非 null。
+    3. **default-elision**:custom solid 上 AcceptsShadows/Shininess 被 AE 剪枝(JSX 写了默认值),须找**姊妹 default solid** 读那两个(见 layer_3d_test.go:146-162)。
+    4. DOM 读法:`layer.materialOption.property("ADBE Ambient Coefficient")` 等(非 threeDLayer)。可值验→ae-accept(非 render-pixel,除非额外渲染)。
   - `SetGeometry*`(3,BevelDirection/PlaneCurvature/PlaneSubdivision):3D Geometry Options,需 Cinema4D/Advanced 3D renderer——**先核实 AE2020 标准渲染器是否可达/可读**,可能不可表达。
   - `SetLightSource`(AE24+ 环境灯专用,需 environment-light + 源层两载体):niche,最后做。
 
