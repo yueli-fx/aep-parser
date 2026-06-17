@@ -1,6 +1,6 @@
 ---
-status: active
-summary: 证命门:纯 Go 手写一条火焰效果栈(固态+Fractal Noise+Turbulent Displace+Tint+evolution 动画)→ AE 双版本实渲 PNG → 看图。过=库能确定性造好 FX,进 Phase 1;不过=fallback 数据条族。镜像 orbit_demo render harness。
+status: done
+summary: 证命门:纯 Go 手写一条火焰效果栈(固态+Fractal Noise+Turbulent Displace+Tint+evolution 动画)→ AE 双版本实渲 PNG → 看图。结论=狭义命门过(库能确定性造可辨认火焰 + 效果栈/param/animate/mask 全 gated),但产品质量被用户真机否决(只有形态、不像火焰)→ roadmap 改为先 Phase 2 学真实样本再重做。镜像 orbit_demo render harness。
 last_updated: 2026-06-18
 implements: specs/2026-06-18-procedural-fx-generator.md
 ---
@@ -408,3 +408,13 @@ git commit -m "feat(flame): Phase0 Task7 — double-version gate + showcase + ve
 - **carry-over to Phase 1**:① 参数表已在 `flame_demo_shipgate_test.go` 顶部注释 + showcase gen.go;② 可改进项(底更红/芯更亮/加 Glow 泛光)留 Phase 1 参数化时做;③ 配方=「effect-stack recipe」已坐实可行,Phase 2 学样本就是抽这套效果栈 + 参数范围。
 
 **等用户真机打开 `flightdeck/showcase/procedural-fx/flame.aep` 复核 → 认可则 Phase 0 正式过、showcase 翻 complete、进 Phase 1;否决则记原因再议。**
+
+### 用户真机验收结论(2026-06-18):❌ 质量不合格 — 顺序调整
+
+用户真机看后否决:「只有火焰的形态,但和火焰差很多」。**实情**:产物=橙色噪声水滴,缺真火关键——白热芯 / 由内到外色温渐变(白→黄→橙→红→暗尖)/ 泛光(Glow)/ 向上舔的细节。**一眼可辨认是火苗轮廓,但远未达「像火焰」的产品质量。**
+
+**关键教训(已上升到 spec)**:**手搓配方只到「可辨认」、到不了「好」——好视觉得借真实人做的样本**(验证 brainstorm 的核心判断:AI/程序化在有界族上能「认得出」,但「好看」需人造参照)。Phase 0 的**狭义**目标(证库能确定性造可辨认火焰 + 效果栈+param+动画+mask 全 gated 可行)技术上达成;但产品质量门槛未过。
+
+**决策(改 roadmap 顺序)**:不进原 Phase 1(参数化)。**先做 Phase 2(学真实样本)再回头重做火焰**——没造出「好」火焰前参数化无意义。下一步=用户提供真实火焰 .aep(纯 AE 原生效果、非插件、非素材视频)→ 库解析抽「好火焰」的效果栈+参数 → 重做 → 再过用户关。
+
+**carry-over 仍有效**:effect-stack recipe 机制 + AnimateEffectParam 无缺口 + 参数表,都复用;变的只是「配方内容」要照真实样本重定。

@@ -38,3 +38,6 @@ flightdeck/archive
 flightdeck/showcase/**/*.aep
 flightdeck/showcase/**/*.png
 flightdeck/showcase/**/*.done.fail/
+
+# FX 样本输入（用户提供的真实工程，供 Phase 2 解析学习，重二进制不入库）
+/samples/

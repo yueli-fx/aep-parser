@@ -3,7 +3,7 @@ showcase: procedural-fx
 direction: 程序化 FX 生成器 v1 火焰(spec procedural-fx-generator Phase 0)— 纯 Go 从零拼一条原生效果栈,AE 双版本实渲出可辨认的、翻腾的火焰
 capabilities: [fractal-noise, tint, turbulent-displace, mask-feather, animate-effect-param, effect-stack-recipe]
 gates: [TestFlameDemo_AEShipGate_AE2020, TestFlameDemo_AEShipGate_AE2025]
-status: 待review
+status: ❌质量未过(blocked,待 Phase 2 学样本重做)
 last_updated: 2026-06-18
 regenerate: "go run ./flightdeck/showcase/procedural-fx  +  scripts/ae_run.ps1 render.jsx"
 ---
@@ -33,8 +33,10 @@ AI 永不碰字节:这条配方将来是 AI 层调的参数空间,这里每个�
 
 ## gate 实测(2026-06-18)
 
-`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 PASS:bright≈1473 / warm≈1141 / 两帧 diff≈1472(运动活)。agent 已 Read png 眼验像火焰。**status=待review:等用户真机打开 flame.aep 复核火焰质量后才翻 complete**(agent 眼验 ≠ 用户验收)。
+`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 PASS:bright≈1473 / warm≈1141 / 两帧 diff≈1472(运动活)。agent 已 Read png 眼验像火焰。
 
-## 已知可改进(Phase 1 参数化时)
+## 用户真机验收(2026-06-18):❌ 质量未过
 
-底部更红、芯部更亮、加 Glow 泛光会更像真火;当前是「可辨认火焰」的最小可行版,够证命门。
+用户真机打开 `flame.aep` 复核后**否决**:「只有火焰的形态,但和火焰差很多」。产物=橙色噪声水滴,缺真火关键——白热芯 / 由内到外色温渐变(白→黄→橙→红→暗尖)/ Glow 泛光 / 向上舔的细节。**狭义命门(库能确定性造可辨认火焰 + 效果栈/param/animate/mask 全 gated)技术达成,但产品质量门槛未过。**
+
+**决策(roadmap 改顺序)**:不参数化(原 Phase 1)。**先 Phase 2 学真实样本(解析专业火焰 .aep 抽效果栈+参数)再回头重做**,过用户关后这个 showcase 才有资格翻 complete。详 `specs/2026-06-18-procedural-fx-generator.md` § 更新(2026-06-18) + `archive/plans/2026-06-18-phase0-flame-deterministic.md` § 用户验收结论 + `incidents/procedural-fx-over-vector.md` Case 2。**当前 gen.go/flame.aep 是被否的 v1,保留作对照,Phase 2 重做后替换。**

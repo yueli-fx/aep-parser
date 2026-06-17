@@ -67,6 +67,14 @@ last_updated: 2026-06-18
 - **Phase 3 通过** = NL 描述 → 参数 → 渲染,人评「描述与结果一致」。
 - 每阶段产物进 `flightdeck/showcase/`(渲染类必出 showcase 眼验,rules.md)。
 
+## 更新(2026-06-18,Phase 0 用户验收后 — roadmap 顺序调整)
+
+Phase 0 手搓火焰用户真机否决:「只有形态,和火焰差很多」(缺白热芯 / 色温渐变 / Glow 泛光 / 向上舔细节)。**狭义命门达成**(库能确定性造可辨认火焰,effect-stack+param+AnimateEffectParam+mask 全 gated 可行,双版本渲染一致);**但产品质量门槛未过**。
+
+**坐实的核心判断**:**手搓配方只到「可辨认」、到不了「好」——好视觉必须借真实人造样本。** 这正是 brainstorm 时的论点的实证。
+
+**roadmap 顺序改**:原 Phase 1(参数化)→ Phase 2(学样本)。**改成先 Phase 2(学真实样本)再回头重做火焰,过用户关后才参数化**——没有「好」火焰前参数化无意义。**下一步具体动作 = 用户提供真实火焰 .aep(纯 AE 原生效果、非 Particular 插件、非素材视频)放 `samples/flame/` → 库解析抽「好火焰」真实效果栈+参数 → 重做。** 详 `archive/plans/2026-06-18-phase0-flame-deterministic.md` § 用户验收结论。
+
 ## 风险 / 未决
 
 - **最大风险 = Phase 0**(库能否确定性造好火焰 + 补掉从零效果参数动画缺口)。故排在最前。
