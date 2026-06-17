@@ -1,8 +1,10 @@
 ---
-status: active
-summary: 把 capindex 里 261 个仅 verify=roundtrip 的写/做能力,按域做综合 fixture 批量补真 AE 验,升到 ae-accept(读不回的→acceptance)。layer-set 主体已清,SetComment 假绿已修。
-last_updated: 2026-06-17
+status: done
+summary: "DONE(2026-06-18,批1-28):按域综合 fixture 批量补真 AE 验,ae-accept 35→261,roundtrip 279→53。剩 53 残值=N/A read/helper + 实勘负结论 + false-green + 硬尾,移交 specs/2026-06-18-roundtrip-ae-accept-residual.md(someday-backlog)。"
+last_updated: 2026-06-18
 ---
+
+> ✅ **DONE 2026-06-18**。批1-28 完成,ae-accept 35→261 / roundtrip 279→53。剩 53 残值的分类 + someday-backlog 见 `specs/2026-06-18-roundtrip-ae-accept-residual.md`。本 plan 的逐批进度 + 配方/陷阱作为历史记录保留。
 
 # Plan: roundtrip → ae-accept 补验 arc
 
