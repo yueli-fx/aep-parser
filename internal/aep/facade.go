@@ -122,7 +122,7 @@ func NewComposition(
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制" alias="duplicate composition,复制合成,克隆合成"
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompDuplicate_AEShipGate_AE2020,TestCompDuplicate_AEShipGate_AE2025 boundary="双版本 AE gated(comp_duplicate):from-scratch ORIG(solids A,B;B parent→A)→DuplicateComposition→DUP;AE DOM 验 distinct CompItem + 深拷贝 layer 列表 + intra-comp parent ref remap 到 DUP 自身 A(非源 comp) + layer source 共享(id 相等,非复制) + comp 设置克隆(w/h/fps/dur);source items 共享不复制" alias="duplicate composition,复制合成,克隆合成"
 func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error) {
 	return serializer.DuplicateComposition(p, src, name)
 }

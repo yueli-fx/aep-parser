@@ -9,7 +9,7 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `DuplicateComposition` | 🟢stable | roundtrip | 2020 |  | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠coverage 称 AE 双版本 gated 但无 Go _AEShipGate test → 库内 round-trip + 单测;source items 共享不复制 |
+| `DuplicateComposition` | 🟢stable | ae-accept | 2020 | TestCompDuplicate_AEShipGate_AE2020<br>TestCompDuplicate_AEShipGate_AE2025 | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠双版本 AE gated(comp_duplicate):from-scratch ORIG(solids A,B;B parent→A)→DuplicateComposition→DUP;AE DOM 验 distinct CompItem + 深拷贝 layer 列表 + intra-comp parent ref remap 到 DUP 自身 A(非源 comp) + layer source 共享(id 相等,非复制) + comp 设置克隆(w/h/fps/dur);source items 共享不复制 |
 | `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
 | `*Composition.SetBGColor` | 🟢stable | ae-accept | 2020 | TestCompSettings_AEShipGate_AE2020<br>TestCompSettings_AEShipGate_AE2025 | SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. ⚠length-preserving(3B);双版本 AE gated(comp-settings from-scratch fixture) |
 | `*Marker.SetChapter` | 🟢stable | ae-accept | 2020 | TestMarkerFields_AEShipGate_AE2020<br>TestMarkerFields_AEShipGate_AE2025 | SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM chapter=ch1 实读) |
