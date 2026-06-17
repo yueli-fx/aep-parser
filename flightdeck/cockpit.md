@@ -12,7 +12,7 @@
 
 ## 下一步
 
-**➡ ACTIVE ARC:roundtrip→ae-accept 补验**(2026-06-17 起)。库 481 能力里 **272 个仅 verify=roundtrip**(只 Go 自读回,从没让真 AE 消化——红线1 假绿温床)。系统性按域做综合 fixture 批量补真 AE 验,把验证等级整体抬一档。**诚实约束**:能 JSX DOM readback 的→值验;读不回的(尤其 render-queue 40 个二进制专属字段,rq-comment incident)→上限只能 acceptance-preservation。
+**➡ ACTIVE ARC:roundtrip→ae-accept 补验**(2026-06-17 起)。库 481 能力里 **261 个仍仅 verify=roundtrip**(只 Go 自读回——红线1 假绿温床)。系统性按域做综合 fixture 批量补真 AE 验。**📋 逐项 drain 清单 + 验一批配方 + 复用资产 + 陷阱 → `plans/2026-06-17-roundtrip-ae-accept-backfill.md`(下个对话起手读它就能接着干)**。**诚实约束**:能 DOM readback→值验;读不回的(尤其 render-queue 40 个二进制字段)→封顶 acceptance-preservation。
 - **批1 ✅**(5e98762):7 AV-flag(Visible/Shy/Solo/Locked/MotionBlur/Quality/BlendingMode)。
 - **批2 ✅**:7 AV-field(InPoint/OutPoint/PreserveTransparency/SamplingBicubic/IsGuide/IsAdjust/Label)。
 - **批3 ✅**:SetName(length-variable)/SetStartTime/SetParent(两层 fixture)。`ae-accept` 35→**52**,roundtrip→262。
