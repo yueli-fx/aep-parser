@@ -14,14 +14,14 @@
 
 ## 下一步
 
-**把火焰专属升级成「技法内化框架」通用结构**(spec `2026-06-18-fx-technique-internalization`,待用户确认方向后开工)。四步:
+**技法内化框架**(spec `2026-06-18-fx-technique-internalization`)。地基已搭(步骤 1+2 done),剩 3+4:
 
-1. **`cmd/aepdissect`**:把 `tmp_debug/dump_fxchain`+`dump_tdmn`(local 探针)升级成正经工具——任何参考 .aep 一键出结构化报告(comp 树/层/效果+参数/原生vs插件)。= 流水线 PARSE 步工具化。
-2. **抽技法原子建 `fx-techniques/` 首批**:把 `build-good-fire.md` 里的技法(噪声造质料/位移扭曲/多层Add叠深度/亮度调色/辉光/时间驱动)抽成独立跨域条目,建立两层知识结构(技法库 + 现象配方)。落 `docs/` 或 checklists(tracked,非 references/gitignore)。
-3. **火焰 v3 多层合成**:作为 "additive-depth + 多层" 技法的验证实例——同套「噪声→Displacement Map→Ramp」复制 3–4 份 + 混合模式(Add 热芯/Difference 负火/Divide)+ 内外焰分层 + Glow(`NewSolidLayer`×N + `SetBlendingMode` + `SetEffectLayerParam`,全 gated)。自渲自验 → 呈用户真机。
-4. **喂第二现象**(风/雨/雷电其一)验证技法复用率。
+- ✅ **步骤1 `cmd/aepdissect`**(done):正经 repo 工具,任意 .aep 一键出结构化报告(效果用量+原生/Cycore/第三方分级+预合成嵌套+逐层效果链)。= PARSE 步工具化。已在 Colorful Fire Ball 验证。
+- ✅ **步骤2 两层知识结构**(done):`docs/fx-techniques.md`=跨域技法库(T1 噪声造质料…T9 收尾,从火焰抽,标跨现象复用)+ `checklists/build-<现象>.md`=现象配方;交叉链已通。
+- ⬜ **步骤3 火焰 v3 多层合成**:验证 T3(additive-depth)技法——同套「噪声→Displacement Map→Ramp」复制 3–4 份 + 混合模式(Add 热芯/Difference 负火/Divide)+ 内外焰分层 + Glow。`NewSolidLayer`×N + `SetBlendingMode` + `SetEffectLayerParam`,全 gated。自渲自验 → 呈用户真机。
+- ⬜ **步骤4 喂第二现象**(风/雨/雷电其一):跑 aepdissect → 拆角色 → 登记技法 → 写 build-X 配方,验证技法复用率(框架的真正检验)。
 
-依据:`specs/2026-06-18-fx-technique-internalization.md` · `checklists/build-good-fire.md`(角色词典)· v2 builder `tmp_debug/flame2/`(local)。
+依据:`specs/2026-06-18-fx-technique-internalization.md` · `docs/fx-techniques.md` · `checklists/build-good-fire.md` · v2 builder `tmp_debug/flame2/`(local)。
 
 **次要(需求驱动)**:残值 backlog(剩 53 roundtrip)→ `specs/2026-06-18-roundtrip-ae-accept-residual.md`;能力真相源 `go run ./cmd/capindex -q <词>`。
 
