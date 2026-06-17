@@ -10268,10 +10268,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "双版本 AE gated(structural_ops,AV solid 载体,layer-order DOM 读回);non-AV + 单层 comp refused",
       "incident": null,
       "alias": [
         "delete layer",
@@ -10290,10 +10293,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "双版本 AE gated(structural_ops,AV solid,clone 置于 source 上方,layer-order DOM 读回);AE23+ explicit matte 允许,implicit matte/非 AV refused",
       "incident": null,
       "alias": [
         "duplicate layer",
@@ -10336,10 +10342,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "同/跨工程插入;双版本 AE gated(structural_ops 自动验同工程 layer-order DOM 读回);cross-project 经 assert-gate coverage 6/6,未纳入自动 gate",
       "incident": null,
       "alias": [
         "insert layer",
@@ -10358,10 +10367,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "MoveLayer 便捷封装(移到 other 之后);双版本 AE gated(structural_ops)",
       "incident": null,
       "alias": [
         "move after",
@@ -10378,10 +10390,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "MoveLayer 便捷封装(移到 other 之前);双版本 AE gated(structural_ops)",
       "incident": null,
       "alias": [
         "move before",
@@ -10398,10 +10413,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "纯重排(类型无关,impl 不查 Type);双版本 AE gated(structural_ops,AV solid layer-order DOM 读回)",
       "incident": null,
       "alias": [
         "move layer",
@@ -10446,10 +10464,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "MoveLayer 便捷封装(移到顶部);双版本 AE gated(structural_ops)",
       "incident": null,
       "alias": [
         "move to beginning",
@@ -10467,10 +10488,13 @@
     "cap": {
       "domain": "structural",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip",
+      "gate": [
+        "TestStructuralOps_AEShipGate_AE2020",
+        "TestStructuralOps_AEShipGate_AE2025"
+      ],
+      "boundary": "MoveLayer 便捷封装(移到底部);双版本 AE gated(structural_ops)",
       "incident": null,
       "alias": [
         "move to end",

@@ -330,7 +330,7 @@ func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error) {
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="AE 2020+2025 manual JSX-gated 8/8(re_delete_layer,coverage.md);无自动 Go _AEShipGate test → 库内仅 round-trip 验证;non-AV + 单层 comp refused" alias="delete layer,删图层,删除图层,remove layer"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="双版本 AE gated(structural_ops,AV solid 载体,layer-order DOM 读回);non-AV + 单层 comp refused" alias="delete layer,删图层,删除图层,remove layer"
 func DeleteLayer(c *Composition, index int) error { return serializer.DeleteLayer(c, index) }
 
 // DuplicateLayer clones the layer at the given 0-based index in c.Layers
@@ -379,7 +379,7 @@ func DeleteLayer(c *Composition, index int) error { return serializer.DeleteLaye
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="AE manual JSX-gated(re_duplicate_layer 4 fixtures,coverage.md);无自动 Go _AEShipGate test → 库内 round-trip;AE23+ explicit matte 允许,implicit matte/非 AV refused" alias="duplicate layer,复制图层"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="双版本 AE gated(structural_ops,AV solid,clone 置于 source 上方,layer-order DOM 读回);AE23+ explicit matte 允许,implicit matte/非 AV refused" alias="duplicate layer,复制图层"
 func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 	return serializer.DuplicateLayer(c, index, name)
 }
@@ -430,7 +430,7 @@ func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="同/跨工程插入;AE manual-gated(coverage 6/6 same + 6/6 cross);无自动 Go _AEShipGate test → 库内 round-trip" alias="insert layer,插入图层,跨工程复制,copy to comp"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="同/跨工程插入;双版本 AE gated(structural_ops 自动验同工程 layer-order DOM 读回);cross-project 经 assert-gate coverage 6/6,未纳入自动 gate" alias="insert layer,插入图层,跨工程复制,copy to comp"
 func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 	return serializer.InsertLayer(c, src, atIdx)
 }
@@ -471,7 +471,7 @@ func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="纯重排(AV/camera/light/shape/text/matted 通用);AE 行为已知,rides Delete/Duplicate 机制;无独立 Go AE gate → 库内 round-trip" alias="move layer,图层排序,reorder layer,改层级"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="纯重排(类型无关,impl 不查 Type);双版本 AE gated(structural_ops,AV solid layer-order DOM 读回)" alias="move layer,图层排序,reorder layer,改层级"
 func MoveLayer(c *Composition, from, to int) error { return serializer.MoveLayer(c, from, to) }
 
 // MoveToBeginning moves the receiver to position 0 (top of layer stack
@@ -480,7 +480,7 @@ func MoveLayer(c *Composition, from, to int) error { return serializer.MoveLayer
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="MoveLayer 便捷封装(移到顶部);无独立 Go AE gate → 库内 round-trip" alias="move to beginning,移到顶部,置顶"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到顶部);双版本 AE gated(structural_ops)" alias="move to beginning,移到顶部,置顶"
 func MoveToBeginning(l *Layer) error { return serializer.MoveToBeginning(l) }
 
 // MoveToEnd moves the receiver to the last position in c.Layers
@@ -489,7 +489,7 @@ func MoveToBeginning(l *Layer) error { return serializer.MoveToBeginning(l) }
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveToEnd method form; the aep facade re-exports it post-split.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="MoveLayer 便捷封装(移到底部);无独立 Go AE gate → 库内 round-trip" alias="move to end,移到底部,置底"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到底部);双版本 AE gated(structural_ops)" alias="move to end,移到底部,置底"
 func MoveToEnd(l *Layer) error { return serializer.MoveToEnd(l) }
 
 // MoveAfter moves the receiver to the slot immediately after `other`
@@ -501,7 +501,7 @@ func MoveToEnd(l *Layer) error { return serializer.MoveToEnd(l) }
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveAfter method form; the aep facade re-exports it post-split.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="MoveLayer 便捷封装(移到 other 之后);无独立 Go AE gate → 库内 round-trip" alias="move after,移到之后"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到 other 之后);双版本 AE gated(structural_ops)" alias="move after,移到之后"
 func MoveAfter(l, other *Layer) error { return serializer.MoveAfter(l, other) }
 
 // MoveBefore moves the receiver to the slot immediately before `other`
@@ -510,7 +510,7 @@ func MoveAfter(l, other *Layer) error { return serializer.MoveAfter(l, other) }
 // Free function (not a method) — see MoveLayer. BREAKING vs the former
 // Layer.MoveBefore method form; the aep facade re-exports it post-split.
 //
-//aep:cap domain=structural tier=stable verify=roundtrip boundary="MoveLayer 便捷封装(移到 other 之前);无独立 Go AE gate → 库内 round-trip" alias="move before,移到之前"
+//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到 other 之前);双版本 AE gated(structural_ops)" alias="move before,移到之前"
 func MoveBefore(l, other *Layer) error { return serializer.MoveBefore(l, other) }
 
 // AddMarker appends a new composition marker at the given time (seconds) and
