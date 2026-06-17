@@ -392,3 +392,19 @@ git commit -m "feat(flame): Phase0 Task7 — double-version gate + showcase + ve
 - **Spec 覆盖**:Phase 0 = spec 的 Phase 0 全部(手写火焰 + 渲染 + 看图 + make-or-break + fallback 钩子)。Phase 1-4 不在本 plan(各自独立 plan)。
 - **已知缺口显式挂钩**:effect-param 动画缺口(Task 6 fallback 表达式)· curve 类 param refuse(Task 3/4 fallback)· saveFrameToPng 可用性(Task 2 fallback 读 orbit jsx 机制)。这些是真实 unknown,故 Task 1 + 各 fallback 显式写出,不是 placeholder。
 - **`<Contrast>`/`<Evolution>` 等尖括号 = Task 1 必须先实测填的真实数字 matchName**,不是可跳过的占位——Task 1 是硬前置。
+
+---
+
+## Verdict(2026-06-18,执行完成)
+
+**Phase 0 = agent 眼验 PASS,待用户真机验收(make-or-break 最终判定)。**
+
+- Task1(probe 参数表 9aee→a1f)· Task2(harness)· Task3-5(静态火焰)· Task6(运动)· Task7(双版本+showcase)全做完。commit:Task1=…Task2=…Task3-5=`3429f18`·Task6=`ce1d312`·Task7=本次。
+- **双版本 gate `TestFlameDemo_AEShipGate_AE2020/AE2025` 都 PASS**,渲染指标一致:bright≈1473 / warm≈1141 / 两帧 diff≈1472(运动活)。AE2020 与 AE2025 渲染帧逐像素一致。
+- **agent Read png 眼验**:水滴形火苗,竖向橙黄火舌 + 黑间隙,羽化柔边,t=1/t=3 内部纹理明显翻腾 → **一眼看得出是火焰**。命门过。
+- **走的路径**:effect-stack(FractalNoise tall + Tint + TurbulentDisplace + 羽化 teardrop mask + AnimateEffectParam Evolution),全程 gated 公共 API,**无从零字节裸写**。
+- **已知缺口未撞**:`AnimateEffectParam` 给 elided Fractal Noise/Turbulent Displace 的 Evolution 打关键帧**直接成功**(incident effect-param-elision-synthesis-lite 的 refuse 未发生,本场景标量 angle 参数走得通)→ Phase 1 参数化无需 fallback 表达式。
+- **未触发 fallback**(没退数据条):火焰一次成型。
+- **carry-over to Phase 1**:① 参数表已在 `flame_demo_shipgate_test.go` 顶部注释 + showcase gen.go;② 可改进项(底更红/芯更亮/加 Glow 泛光)留 Phase 1 参数化时做;③ 配方=「effect-stack recipe」已坐实可行,Phase 2 学样本就是抽这套效果栈 + 参数范围。
+
+**等用户真机打开 `flightdeck/showcase/procedural-fx/flame.aep` 复核 → 认可则 Phase 0 正式过、showcase 翻 complete、进 Phase 1;否决则记原因再议。**
