@@ -6085,7 +6085,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "presence-encoded toggle(lnrp chunk 增删);无专门 AE gate→round-trip",
+      "boundary": "presence-encoded toggle(lnrp chunk 增删);⚠ AE DOM 不可值验(已知):app.project.linearizeWorkingSpace 即便 AE 自存文件 reload 也读 false——OCIO/CMS profile derived state,ScriptingAPI 不绑 lnrp chunk(详 incident project-flag-chunks-lnrb-lnrp § lnrp readback quirk)。封顶 acceptance(byte-preservation,字节同 AE 自存),留 roundtrip",
       "incident": null,
       "alias": [
         "linearize working space",
