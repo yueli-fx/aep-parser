@@ -2820,10 +2820,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "camera zoom",
@@ -3126,10 +3129,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "iris aspect ratio",
@@ -3148,10 +3154,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "diffraction fringe",
@@ -3170,10 +3179,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "highlight gain",
@@ -3192,10 +3204,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "highlight saturation",
@@ -3214,10 +3229,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "highlight threshold",
@@ -3236,10 +3254,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "iris rotation",
@@ -3258,10 +3279,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "iris roundness",
@@ -3280,10 +3304,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "iris shape",
@@ -3453,10 +3480,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "light color",
@@ -3475,10 +3505,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 spot light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "cone angle",
@@ -3498,10 +3531,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 spot light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "cone feather",
@@ -3520,10 +3556,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "falloff distance",
@@ -3542,10 +3581,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "falloff start",
@@ -3564,10 +3606,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "falloff type",
@@ -3640,10 +3685,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "shadow darkness",
@@ -3662,10 +3710,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestNewCameraLight_AEShipGate_AE2020",
+        "TestNewCameraLight_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "shadow diffusion",

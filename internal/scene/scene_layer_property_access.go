@@ -418,7 +418,7 @@ func (l *Layer) SetMaterialIndexOfRefraction(v float64) error {
 // SetCameraZoom writes a new static value to the camera's Zoom property
 // (pixels). Errors on non-camera layers or keyframed Zoom.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="camera zoom,摄像机缩放,focal length,焦距"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="camera zoom,摄像机缩放,focal length,焦距"
 func (l *Layer) SetCameraZoom(v float64) error {
 	return setScalarProperty(l.CameraZoom(), l.Name, "Camera Zoom", v)
 }
@@ -457,56 +457,56 @@ func (l *Layer) SetCameraBlurLevel(v float64) error {
 
 // SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris shape,光圈形状,bokeh shape"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="iris shape,光圈形状,bokeh shape"
 func (l *Layer) SetIrisShape(v float64) error {
 	return setScalarProperty(l.IrisShape(), l.Name, "Iris Shape", v)
 }
 
 // SetIrisRotation writes the Iris Rotation (degrees).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris rotation,光圈旋转,bokeh rotation"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="iris rotation,光圈旋转,bokeh rotation"
 func (l *Layer) SetIrisRotation(v float64) error {
 	return setScalarProperty(l.IrisRotation(), l.Name, "Iris Rotation", v)
 }
 
 // SetIrisRoundness writes the Iris Roundness (%).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris roundness,光圈圆度,bokeh roundness"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="iris roundness,光圈圆度,bokeh roundness"
 func (l *Layer) SetIrisRoundness(v float64) error {
 	return setScalarProperty(l.IrisRoundness(), l.Name, "Iris Roundness", v)
 }
 
 // SetIrisAspectRatio writes the Iris Aspect Ratio.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="iris aspect ratio,光圈纵横比,bokeh aspect"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="iris aspect ratio,光圈纵横比,bokeh aspect"
 func (l *Layer) SetIrisAspectRatio(v float64) error {
 	return setScalarProperty(l.IrisAspectRatio(), l.Name, "Iris Aspect Ratio", v)
 }
 
 // SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="diffraction fringe,衍射边缘,iris fringe"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="diffraction fringe,衍射边缘,iris fringe"
 func (l *Layer) SetIrisDiffractionFringe(v float64) error {
 	return setScalarProperty(l.IrisDiffractionFringe(), l.Name, "Iris Diffraction Fringe", v)
 }
 
 // SetIrisHighlightGain writes the Iris Highlight Gain.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="highlight gain,高光增益,iris highlight gain"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="highlight gain,高光增益,iris highlight gain"
 func (l *Layer) SetIrisHighlightGain(v float64) error {
 	return setScalarProperty(l.IrisHighlightGain(), l.Name, "Iris Highlight Gain", v)
 }
 
 // SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="highlight threshold,高光阈值,iris threshold"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="highlight threshold,高光阈值,iris threshold"
 func (l *Layer) SetIrisHighlightThreshold(v float64) error {
 	return setScalarProperty(l.IrisHighlightThreshold(), l.Name, "Iris Highlight Threshold", v)
 }
 
 // SetIrisHighlightSaturation writes the Iris Highlight Saturation.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 camera 层;无专门 AE gate→round-trip" alias="highlight saturation,高光饱和度,iris saturation"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 camera 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="highlight saturation,高光饱和度,iris saturation"
 func (l *Layer) SetIrisHighlightSaturation(v float64) error {
 	return setScalarProperty(l.IrisHighlightSaturation(), l.Name, "Iris Highlight Saturation", v)
 }
@@ -517,7 +517,7 @@ func (l *Layer) SetIrisHighlightSaturation(v float64) error {
 // must match the property's component count (3 for RGB, 4 for RGBA);
 // SetStaticValue enforces this.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="light color,灯光颜色,light colour"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="light color,灯光颜色,light colour"
 func (l *Layer) SetLightColor(rgba []float64) error {
 	p := l.LightColor()
 	if p == nil {
@@ -535,35 +535,35 @@ func (l *Layer) SetLightIntensity(v float64) error {
 
 // SetLightConeAngle writes the spotlight cone angle (degrees).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip" alias="cone angle,锥角,spotlight cone,聚光灯角度"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 spot light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="cone angle,锥角,spotlight cone,聚光灯角度"
 func (l *Layer) SetLightConeAngle(v float64) error {
 	return setScalarProperty(l.LightConeAngle(), l.Name, "Light Cone Angle", v)
 }
 
 // SetLightConeFeather writes the spotlight cone-feather (%).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 spot light 层;无专门 AE gate→round-trip" alias="cone feather,锥形羽化,spotlight feather"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 spot light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="cone feather,锥形羽化,spotlight feather"
 func (l *Layer) SetLightConeFeather(v float64) error {
 	return setScalarProperty(l.LightConeFeather(), l.Name, "Light Cone Feather", v)
 }
 
 // SetLightFalloffType writes the falloff type enum.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="falloff type,衰减类型,light falloff"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="falloff type,衰减类型,light falloff"
 func (l *Layer) SetLightFalloffType(v float64) error {
 	return setScalarProperty(l.LightFalloffType(), l.Name, "Light Falloff Type", v)
 }
 
 // SetLightFalloffStart writes the falloff-start distance (pixels).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="falloff start,衰减起始距离,light falloff start"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="falloff start,衰减起始距离,light falloff start"
 func (l *Layer) SetLightFalloffStart(v float64) error {
 	return setScalarProperty(l.LightFalloffStart(), l.Name, "Light Falloff Start", v)
 }
 
 // SetLightFalloffDistance writes the falloff distance (pixels).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="falloff distance,衰减距离,light falloff distance"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="falloff distance,衰减距离,light falloff distance"
 func (l *Layer) SetLightFalloffDistance(v float64) error {
 	return setScalarProperty(l.LightFalloffDistance(), l.Name, "Light Falloff Distance", v)
 }
@@ -581,14 +581,14 @@ func (l *Layer) SetLightCastsShadows(enabled bool) error {
 
 // SetLightShadowDarkness writes the shadow darkness (%).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="shadow darkness,阴影暗度,light shadow darkness"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="shadow darkness,阴影暗度,light shadow darkness"
 func (l *Layer) SetLightShadowDarkness(v float64) error {
 	return setScalarProperty(l.LightShadowDarkness(), l.Name, "Light Shadow Darkness", v)
 }
 
 // SetLightShadowDiffusion writes the shadow diffusion (pixels).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip" alias="shadow diffusion,阴影扩散,light shadow diffusion,soft shadow"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestNewCameraLight_AEShipGate_AE2020,TestNewCameraLight_AEShipGate_AE2025 boundary="length-preserving 低风险;仅限 light 层;双版本 AE gated(new-camera-light 综合 fixture,DOM readback+resave 值存活)" alias="shadow diffusion,阴影扩散,light shadow diffusion,soft shadow"
 func (l *Layer) SetLightShadowDiffusion(v float64) error {
 	return setScalarProperty(l.LightShadowDiffusion(), l.Name, "Light Shadow Diffusion", v)
 }
