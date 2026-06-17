@@ -125,7 +125,7 @@ func (l *Layer) SetAudioEnabled(v bool) error {
 // SetFrameBlendEnabled toggles the layer's frame-blend switch.
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="frame blend,帧混合,帧融合,frame blending"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerFrameBlend_AEShipGate_AE2020,TestLayerFrameBlend_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;仅对有时间帧的层(视频 footage/精合成)有效;双版本 AE gated(layer-frameblend,精合成载体,DOM frameBlendingType 读回)" alias="frame blend,帧混合,帧融合,frame blending"
 func (l *Layer) SetFrameBlendEnabled(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -253,7 +253,7 @@ func (l *Layer) SetSamplingBicubic(v bool) error {
 // FrameBlendEnabled is also true.
 // length-preserving (single bit @ldta 0x25).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x25;需配合 FrameBlendEnabled=true 才生效;无专门 AE gate→round-trip" alias="pixel motion,frame mix,帧混合模式,像素运动"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerFrameBlend_AEShipGate_AE2020,TestLayerFrameBlend_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x25;需配合 FrameBlendEnabled=true 才生效;双版本 AE gated(layer-frameblend,enabled+pixelMotion→DOM frameBlendingType=PIXEL_MOTION vs FRAME_MIX)" alias="pixel motion,frame mix,帧混合模式,像素运动"
 func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
