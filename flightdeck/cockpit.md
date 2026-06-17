@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-06-17 by claude（本会话连推：effects wave 11 layer-ref + wave 12 收回 wave-6 parked 经典(库 203→216,全大写 match-name) · mask 域全收口(>4kf 容量分页 6kf + maskFeatherFalloff mkif @0x03 翻案"不可达")。均双版本 gate。另删 deferred-backlog spec。· expr backlog 撤项（按函数补 gate = closed decision，机制已闭环）。· 启动 roundtrip→ae-accept 补验 arc：layer-set 批1-3 共 17 setter 升 ae-accept(35→53)，RE 修好 SetComment from-scratch 假绿(ldta @0x3C has-comment flag)，立跨对话 drain 清单 plan。）
 
-**Active focus**: **roundtrip→ae-accept 补验 arc**(2026-06-17 起;详 `## 下一步` + `plans/2026-06-17-roundtrip-ae-accept-backfill.md`)。库能力主线早已全收口,此 arc 把"标 stable 但只 Go round-trip、从没让真 AE 消化"的写能力按域补双版本 AE 验(验证洁癖洞)。已推进至批7c(ae-accept 35→**127**,roundtrip→**187**):layer-set 主体(批1-3)+ camera/light 17(批4)+ classic material 8(批5a)+ Composition 22(批6)+ **text 27/33(批7 style 13 / 7b para-indent 5 / 7c AE24+ enum 9)**。修 3 真 bug:SetComment 假绿 · SetFrameRate+SetDuration(incident)· btdk FormatPSReal(tsume+5 段落,incident)。批7c 洞察:**AE2020 opaque 保留不识别的 AE24+ 属性 → AE24+ 写能力可经低版本 resave-preservation 双版本验**。**不变量**:知识单一家 = flightdeck + CLAUDE.md(auto-memory 已退役);能力真相源 = capindex(`go run ./cmd/capindex -q <词>`,CI 强制零漏标);每渲染类双版本 AE ship-gate(红线4)。火焰=番外(`incidents/procedural-fx-over-vector.md`)。
+**Active focus**: **roundtrip→ae-accept 补验 arc**(2026-06-17 起;详 `## 下一步` + `plans/2026-06-17-roundtrip-ae-accept-backfill.md`)。库能力主线早已全收口,此 arc 把"标 stable 但只 Go round-trip、从没让真 AE 消化"的写能力按域补双版本 AE 验(验证洁癖洞)。已推进至批8(ae-accept 35→**136**,roundtrip→**178**):layer-set 主体(批1-3)+ camera/light 17(批4)+ classic material 8(批5a)+ Composition 22(批6)+ text 27/33(批7/7b/7c)+ **shape wiggle 9(批8,洁癖洞)**。修 3 真 bug(SetComment 假绿 · SetFrameRate+Duration incident · btdk FormatPSReal incident:tsume+5 段落)。两通用洞察:**AE2020 opaque 保留不识别的 AE24+ 属性**(批7c)· **既有 render gate 常 set+DOM 读回 roundtrip-tag 的 setter = 验证洁癖洞**(批4/8,自跑确认绿后补标)。**不变量**:知识单一家 = flightdeck + CLAUDE.md(auto-memory 已退役);能力真相源 = capindex(`go run ./cmd/capindex -q <词>`,CI 强制零漏标);每渲染类双版本 AE ship-gate(红线4)。火焰=番外(`incidents/procedural-fx-over-vector.md`)。
 
 ## 进行中
 
@@ -20,8 +20,8 @@
 - **批4 ✅**(594409a):camera/light options **17 setter** 升 ae-accept(9 camera Zoom+8 Iris / 6 light / 2 spot)。**零新 fixture**——核实出"早被双版本 `TestNewCameraLight_AEShipGate_*` DOM-readback+resave 覆盖,只是 tag 停 roundtrip",自跑双版本确认真绿才标。`ae-accept` 53→**70**,roundtrip→**244**。
 - **批5a ✅**(500a6d4):8 classic Material setter 双版本 ae-accept。关键 = author AE2020-native 载体(通用解法:3D/material/renderer 双版本 gate 须用目标低版本 author fixture)。残 material 8(ShadowColor + 7 ray-traced)+ geometry 3 判定基本不可达双版本(AE2020 classic 不暴露/禁用,无单版本 ae-accept 先例),搁置;详 plan。
 - **批6 ✅**(comp 22 setter 双版本 from-scratch gate)。残 comp(→6b):SetLabel/SetComment(item-level idta,需真 comp 载体 + SetComment item-comment idta-flag RE)· SetDraft3D(@0x8A bit0 DOM 不反映,RE)。
-- **批7/7b/7c ✅**(text 27/33;修 3 bug)。**残 text 硬尾 6**:FontIndex+AddFont(换字体,下个 text slice 首选)· ManualKerning(难,需 AE slot)· 3 animator(结构性 render-defer)。
-- **下一批 = shape 23(渲染像素红线4,大块,新域)** 或 text-font slice(FontIndex+AddFont)→ keyframe/mask → marker(SetChapter/URL/CuePoint 归错 comp domain)→ project/meta → render-queue 40(多 acceptance)。layer-set bool 残 + 6b(comp idta) 按需。
+- **批8 ✅**(shape wiggle 9 procedural,洁癖洞)。**残 shape ~14**:洁癖洞候选 SetDirection(rect/ell,shape_enums)/SetRotation(star,mg_polygon)——查 verify 深度+自跑即可补;几何参数 Rect/Star roundness/position·Repeater/Trim offset·Transform anchor/scale/rotation(render-pixel 相关,可 DOM 值读回升 ae-accept,仿 mg_*)。
+- **下一批 = shape 残(洁癖洞候选 SetDirection/SetRotation 最快;或几何参数值读回 gate)** 或 text-font slice(FontIndex+AddFont)→ keyframe/mask → marker(归错 comp domain)→ project/meta → render-queue 40(多 acceptance)。layer-set bool 残 + 6b(comp idta) 按需。
 - 域分布查询:`pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq 'roundtrip'}|group {$_.cap.domain}"`。
 
 需求驱动残项(arc 外,按需):能力查询 `go run ./cmd/capindex -q <词>`。

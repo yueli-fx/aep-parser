@@ -37,7 +37,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批7**(text 域):**13 SetRun* style setter** 升 ae-accept(双版本)。载体 = from-scratch 单 run 文本(NewTextLayer+SetText("Ag")),每个 SetRun0 浮现为 **whole-doc textDocument** 属性,AE2020 也可读(characterRange 仅 per-run/AE2022+ 才需)。覆盖 FillColor/StrokeColor/ApplyStroke/StrokeWidth/StrokeOverFill/FauxBold/FauxItalic/BaselineShift/AutoLeading/Leading/HScale/VScale/Tsume。**修真 bug**:SetRunTsume 误用 FormatPSNumber(裸整数→AE 当 16.16 定点 /65536),改 FormatPSReal。
 - ✅ **批7b**(text 段落):**5 SetParagraph indent/spacing** 升 ae-accept(双版本)。**又抓+修一个真 bug**:5 个 setter 同 tsume FormatPSReal bug(写 20 → AE 读 20/65536)。discovery gate 实证 → 改 FormatPSReal。AE2025 DOM 验 firstLineIndent/spaceBefore/spaceAfter,StartIndent/EndIndent(AE 无 leftMargin/rightMargin DOM)+ AE2020(无段落 DOM)靠双版本 resave-preservation。新 incident `btdk-point-value-needs-formatpsreal`(模式总结,复发两次)。
 - ✅ **批7c**(text enum):**9 AE24+ run/paragraph enum** 升 ae-accept(双版本)。勘探坐实:虽标"AE24+ ScriptingAPI 才可写",**AE2020 opaque 保留了它不认识的 AE24+ enum 字节**(resave 后 Go 读回全对)→ 双版本 resave-preservation(AE2025 加 DOM)。覆盖 AutoKernType/BaselineOption/NoBreak/LineJoinType/DigitSet + AutoHyphenate/LeadingType/HangingRoman/Direction。**通用洞察:AE 旧版对不识别的新版属性 opaque 保留 → AE24+ 写能力可经低版本 resave-preservation 双版本验**。
-- `ae-accept` 35→**127**;`roundtrip` 279→**187**。
+- ✅ **批8**(shape wiggle):**9 Wiggle Paths/Transform procedural setter** 升 ae-accept(验证洁癖洞)。早被双版本 gate `mg_wiggle`/`mg_wiggle_modrt`/`mg_wiggletransform` 的 verify JSX **显式 DOM 值读回**(TemporalPhase/SpatialPhase/Correlation/RandomSeed/WigglesPerSecond),只是标 roundtrip(还是 tier=alpha)。自跑 3 gate 双版本确认绿才补标。boundary 留"本质不可像素门禁(procedural)"(随机/相位单帧无类别正确像素,ae-accept DOM 值验是正确上限)。
+- `ae-accept` 35→**136**;`roundtrip` 279→**178**。
 
 ## 待办(按 ROI / 难度排)
 
@@ -65,7 +66,9 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
   - ~~**SetParagraph 5 indent/spacing**~~ ✅ **批7b**(含 bug 修)。~~**SetRun enum/index + SetParagraph bool/enum**~~ ✅ **批7c(9 个 AE24+ enum,opaque preservation 双版本)**。
   - **残 text(真硬尾,6 个,documented defer)**:`SetRunFontIndex`+`AddFont`(换字体,需先 AddFont 加第二字体再指,可仿批7c 加 gate=textDocument.font 验,**下个 text slice 首选**)· `SetManualKerning`(incident `kerning-first-enable`,需 AE-native kerning slot,难)· 3 个 text animator(`AddTextRotationX/YAnimator`/`AnimateTextOpacity`,结构性 write-only,render-gate 已 defer)。SetParagraphJustification 已 render-gated。
   - `SetManualKerning`(incident `kerning-first-enable`,难)·`AddFont`(字体表)·text animator(AddTextRotationX/YAnimator/AnimateTextOpacity,结构性,另批)。
-- **shape 23**:⚠ render-pixel 类(颜色/描边),按红线4 验渲染像素不只值。
+- **shape**(批8 后残 ~14):
+  - **验证洁癖洞候选(先查 verify 深度再自跑+retag,同批8)**:`SetDirection`(RectNode/EllipseNode,`shape_enums_shipgate` 已 set)· `SetRotation`(star,`mg_polygon` 已 set Rotation)——确认其 verify JSX 真读回值就可补标。
+  - **几何参数(render-pixel 相关,需新 gate 或值读回)**:Rect SetRoundness/SetPosition · Star SetInner/OuterRoundness/SetPosition · Repeater SetOffset/Transform(SetAnchor/SetRotation)· Trim SetOffset/SetStart · WigglerTransform SetAnchor/SetScale。多数改渲染几何→红线4 理想 render-pixel,但 ae-accept(DOM 值读回)是合法升级;可仿 mg_* 的 RootGroup().AddX + 值读回。
 - **keyframe 13 / mask 8 / structural 8**:渲染或结构接受验。
 - **project 19 / meta 16 / io 4**:多 header/flag,DOM 读不回的→acceptance。
 - **render-queue 40**:⚠ **多数无 ScriptingAPI**(`rq-comment` incident),DOM 读不回,上限=acceptance-preservation,不能值验。最后做、期望值最低。
