@@ -221,7 +221,7 @@ func (l *Layer) TimeRemapEnabled() bool {
 // (non-AV layers) or the property has existing keyframes (delete them
 // first before disabling).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;启用设静态值 0.0;禁用前须清关键帧;非 AV 层报错;无专门 AE gate→round-trip" alias="time remap,time remapping,时间重映射,帧速率重映射"
+//aep:cap domain=layer-set tier=alpha verify=roundtrip boundary="⚠ 确认 false-green:enable 只设静态值 0.0,但 AE(及本库 TimeRemapEnabled getter)以「TimeRemap 属性带 2 个 identity 关键帧」表示启用 → AE 读 timeRemapEnabled=false。须合成 2 关键帧(t=in/out)+ enable flag,非裸静态值。详 incident layer-settimeremapenabled-needs-keyframes" alias="time remap,time remapping,时间重映射,帧速率重映射"
 func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
 	p := l.TimeRemap()
 	if p == nil {

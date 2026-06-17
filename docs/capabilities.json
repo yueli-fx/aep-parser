@@ -3039,10 +3039,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerFlags2_AEShipGate_AE2020",
+        "TestLayerFlags2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-flags2:加 effect 后 switch off→DOM effectsActive=false,对比 on=true)",
       "incident": null,
       "alias": [
         "effects enabled",
@@ -3555,10 +3558,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x26;post-hoc flip 产生非常见行为;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerFlags2_AEShipGate_AE2020",
+        "TestLayerFlags2_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x26;post-hoc flip 产生非常见行为(但 AE 认:DOM nullLayer=true);双版本 AE gated(layer-flags2)",
       "incident": null,
       "alias": [
         "null layer",
@@ -4881,11 +4887,11 @@
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
-      "tier": "stable",
+      "tier": "alpha",
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving;启用设静态值 0.0;禁用前须清关键帧;非 AV 层报错;无专门 AE gate→round-trip",
+      "boundary": "⚠ 确认 false-green:enable 只设静态值 0.0,但 AE(及本库 TimeRemapEnabled getter)以「TimeRemap 属性带 2 个 identity 关键帧」表示启用 → AE 读 timeRemapEnabled=false。须合成 2 关键帧(t=in/out)+ enable flag,非裸静态值。详 incident layer-settimeremapenabled-needs-keyframes",
       "incident": null,
       "alias": [
         "time remap",

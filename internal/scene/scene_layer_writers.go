@@ -80,7 +80,7 @@ func (l *Layer) SetLocked(v bool) error {
 // SetEffectsEnabled toggles the layer's fx switch (whether effects render).
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="effects enabled,fx switch,特效开关,效果启用"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerFlags2_AEShipGate_AE2020,TestLayerFlags2_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-flags2:加 effect 后 switch off→DOM effectsActive=false,对比 on=true)" alias="effects enabled,fx switch,特效开关,效果启用"
 func (l *Layer) SetEffectsEnabled(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -205,7 +205,7 @@ func (l *Layer) SetIsGuide(v bool) error {
 // when you understand the consequences.
 // length-preserving (single bit @ldta 0x26).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;post-hoc flip 产生非常见行为;无专门 AE gate→round-trip" alias="null layer,空对象,null object"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerFlags2_AEShipGate_AE2020,TestLayerFlags2_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x26;post-hoc flip 产生非常见行为(但 AE 认:DOM nullLayer=true);双版本 AE gated(layer-flags2)" alias="null layer,空对象,null object"
 func (l *Layer) SetIsNull(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
