@@ -14,6 +14,15 @@ last_updated: 2026-06-18
 >
 > **验证状态约定**：✓=该现象已实证用到 · ○=推断适用待验 · 标「validated」=经 AE gate。当前原子源自 Colorful Fire Ball 解析(实例#1),火焰栏多为 ✓,其它现象为 ○(待喂对应模版验证)。
 
+## 两类元素:程序化 vs 素材+装配（框架级判别）
+
+喂进来的模版分两类,**`aepdissect` 能自动判别**,决定"能不能程序化复刻":
+
+- **① 程序化元素**（火焰 Colorful Fire Ball）：.aep 用效果**生成**视觉(噪声/位移/调色/粒子…)。→ **我们能学会复刻**(技法 T1–T9)。
+- **② 素材 + 装配**（闪电 Lightning Pack）：.aep 是**重上色/辉光/控制器**包在**外部素材**(footage)上;真正的视觉(如电弧形状+闪击)在素材里,不在工程里。→ **装配能复刻(T10–T13),但元素得用户提供**;想纯程序化生成该现象要另找路子(如闪电=`Advanced Lightning` 效果,本样本没用)。
+
+**判别信号(aepdissect 输出)**：layer `src=footage(..)` + **0 关键帧** + 效果只有重上色/辉光/调色类 → 素材+装配型。反之(solid 源 + 生成类效果 + 关键帧)→ 程序化型。
+
 ## 技法原子
 
 ### T1 噪声造质料 (noise-substance)
@@ -45,7 +54,7 @@ last_updated: 2026-06-18
 - **做什么**：让亮处向外发光(bloom),给发光体 emissive 质感。
 - **实现**：`ADBE Glo2`(Glow,native)。
 - **关键参数**:`-0002` Threshold(阈值,只对亮处)· `-0003` Radius(半径)· `-0004` Intensity(强度)。常**在多个图层上分别用**。
-- **跨现象**：火✓ · 闪电/电弧○ · 霓虹○ · 能量○。
+- **跨现象**：火✓ · **闪电✓**(Lightning Pack 实证复用)· 霓虹○ · 能量○。
 
 ### T6 时间驱动参数 (time-evolution)
 - **做什么**：让某参数随时间变=现象"活"(翻腾/流动/下落/闪烁)。
@@ -68,14 +77,42 @@ last_updated: 2026-06-18
 - **实现**：`ADBE Brightness & Contrast 2` · `ADBE PhotoFilterPS` · `CS Vignette`(⚠第三方,可用 native 径向遮罩替代)· `ADBE Hue/Saturation`。
 - **跨现象**：通用收尾。
 
+### T10 控制器装配 (customizer-controller-rig) 〔素材+装配型〕
+- **做什么**：建一个"控制器"空层,挂用户旋钮(颜色/滑块/开关),用**表达式**把各效果参数连到旋钮 → 一处调、全联动。**几乎所有商业 AE 模版的套路**(也是 .mogrt/Essential Graphics 的本质)。
+- **实现**：`NewNullLayer` + `ADBE Color Control` / `ADBE Slider Control` / `ADBE Checkbox Control` + 各效果参数挂表达式指向控制器。
+- **⚠ 本库限制**：库写的表达式 AE **不求值**(见 `incidents/expression-enable-byte-pair.md`)→ **做不出活联动的 Customizer**;只能把值**烤死**进各效果(放弃"一处调全联动")。
+- **跨现象**：任何需暴露用户旋钮的模版(闪电✓ · 通用)。
+
+### T11 投影当辉光 (drop-shadow-as-glow) 〔技巧〕
+- **做什么**：`Drop Shadow` 设 0 距离 + 亮颜色 + 大柔和度 = 一圈廉价辉光halo(比 Glow 更可控方向/颜色)。常叠多个。
+- **实现**：`ADBE Drop Shadow`(`-0001` 颜色 · `-0002` 不透明 · `-0003` 方向 · `-0005` 柔和度)。
+- **跨现象**：闪电✓ · 任何发光元素 · 文字辉光。
+
+### T12 素材重上色 (footage-recolor) 〔素材+装配型〕
+- **做什么**：把白色/带 alpha 的素材元素重上色成任意颜色。
+- **实现**：`ADBE Fill`(`-0002` 颜色)。
+- **跨现象**：闪电✓ · 任何白底/alpha 素材(光效/烟/粒子序列)。
+
+### T13 像素化风格 (mosaic-stylize) 〔可选风格〕
+- **做什么**：把元素马赛克/像素化,做"复古/数字"变体(常配开关切换)。
+- **实现**：`ADBE Mosaic` + `ADBE Checkbox Control`(开关)。
+- **跨现象**：闪电✓(Pixelate 变体)· 任何风格化。
+
+### T14 分形分支/电弧生成 (fractal-branch) 〔程序化,可生成本体〕
+- **做什么**：**程序化生成**分叉的电弧/闪电/电流本体(不是靠素材)。这是 Lightning Pack 那条素材路线之外的"纯生成"路。
+- **实现**：`ADBE Lightning 2`（= Advanced Lightning,**已在本库 216 集**,native）· `ADBE Lightning`(老版)· 起止点 + 分叉/湍流/核心半径参数;配 T5 辉光 + T6 闪烁(关键帧)。
+- **验证状态**：⚠**可用但未验证**(未 build/render 过)。要纯程序化闪电走这条,不是 footage+rig。
+- **跨现象**：闪电○ · 电弧/电流○ · 裂纹○ · 神经/树枝状结构○。
+
 ## 现象配方索引（技法的组合）
 
 | 现象 | 配方 | 用到的技法 |
 |---|---|---|
-| 火焰 | `checklists/build-good-fire.md` | T1+T2+T3+T4+T5+T6+T7(+T8/T9 可选) |
+| 火焰 | `checklists/build-good-fire.md` | ①程序化:T1+T2+T3+T4+T5+T6+T7(+T8/T9) |
+| 闪电(素材包) | 实证#2 Lightning Pack | **②素材+装配**:T12 重上色+T11 投影辉光+T5 Glow+T13 像素化+T10 控制器装配。**电弧本体=外部素材**,工程不生成 |
+| 闪电(程序化) | (待建,可行) | ①程序化:**T14 `ADBE Lightning 2`(已在库)**+T5 Glow+T6 闪烁。这条能纯生成电弧本体,不靠素材 |
 | 风 | (待建) | T1+T2(方向)+T6+运动模糊 |
 | 雨 | (待建) | T8(条状)+T6(下落)+模糊 |
-| 雷电 | (待建) | 分形分支(Advanced Lightning)+T5+T6(闪烁)+T3 |
 | 转场 | (待建) | T2/擦除+T6(时间扫过) |
 
 > 新增现象:跑 `aepdissect` 解析模版 → 拆角色 → 在此登记新技法/标已有技法新适用现象 → 写 `checklists/build-<现象>.md` 配方 → AE gate 验证。
