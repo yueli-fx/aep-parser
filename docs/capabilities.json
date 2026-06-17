@@ -2680,10 +2680,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 SetSource(item.ID);fixExpressions 参数接受但未实现(添加 Warning);无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerSource_AEShipGate_AE2020",
+        "TestLayerSource_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 SetSource(item.ID);fixExpressions 参数接受但未实现(添加 Warning);双版本 AE gated(layer-source,DOM layer.source.name=B)",
       "incident": null,
       "alias": [
         "replace source",
@@ -4801,10 +4804,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerSource_AEShipGate_AE2020",
+        "TestLayerSource_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;双版本 AE gated(layer-source:precomp 源 A→B,DOM layer.source.name=B)",
       "incident": null,
       "alias": [
         "source",

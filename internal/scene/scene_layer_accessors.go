@@ -460,7 +460,7 @@ func (l *Layer) CanSetTimeRemapEnabled() bool {
 //
 // Internally calls SetSource with the item's ID.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetSource(item.ID);fixExpressions 参数接受但未实现(添加 Warning);无专门 AE gate→round-trip" alias="replace source,替换来源,替换素材,换源,swap footage"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerSource_AEShipGate_AE2020,TestLayerSource_AEShipGate_AE2025 boundary="length-preserving;委托 SetSource(item.ID);fixExpressions 参数接受但未实现(添加 Warning);双版本 AE gated(layer-source,DOM layer.source.name=B)" alias="replace source,替换来源,替换素材,换源,swap footage"
 func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error {
 	if target == nil {
 		return fmt.Errorf("layer %q: target is nil", l.Name)

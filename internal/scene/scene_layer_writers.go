@@ -380,7 +380,7 @@ func (l *Layer) SetParent(parentID uint32) error {
 // layer at render time, not in ldta. Changing source preserves the
 // rest of ldta verbatim, which is what we want.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;无专门 AE gate→round-trip" alias="source,source id,footage source,替换素材,层来源"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerSource_AEShipGate_AE2020,TestLayerSource_AEShipGate_AE2025 boundary="length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;双版本 AE gated(layer-source:precomp 源 A→B,DOM layer.source.name=B)" alias="source,source id,footage source,替换素材,层来源"
 func (l *Layer) SetSource(sourceID uint32) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
