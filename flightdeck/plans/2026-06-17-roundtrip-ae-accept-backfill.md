@@ -31,14 +31,19 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批1**(5e98762):layer-set 7 AV-flag — Visible/Shy/Solo/Locked/MotionBlur/Quality/BlendingMode。
 - ✅ **批2**(83fff35):layer-set 7 AV-field — InPoint/OutPoint/PreserveTransparency/SamplingBicubic/IsGuide/IsAdjust/Label。
 - ✅ **批3**(87cd03b + 0e700cf):SetName/SetStartTime/SetParent + **SetComment(修了假绿)**。
-- `ae-accept` 35→**53**;`roundtrip` 279→**261**。
+- ✅ **批4**(594409a):camera/light options **17 setter** 升 ae-accept — **零新 fixture,纯补标验证洁癖洞**。早被双版本真 AE gate `TestNewCameraLight_AEShipGate_AE2020/AE2025`(verify_camera_light.jsx DOM readback 逐项 near() + resave-parse 值存活)覆盖,只是 tag 一直停 roundtrip;本批**自跑双版本确认现在真绿**(AE2025 11.6s/AE2020 16.7s,23 项 DOM 值全对)才标。覆盖:9 camera(SetCameraZoom + 8×SetIris*) + 6 light(Color/FalloffType/FalloffStart/FalloffDistance/ShadowDarkness/ShadowDiffusion) + 2 spot(ConeAngle/ConeFeather)。
+- `ae-accept` 35→**70**;`roundtrip` 279→**244**。
 
 ## 待办(按 ROI / 难度排)
 
 ### A. layer-set 残项(同域,先清干净)
 - **可值验(solid/简单载体)**:`SetStretch`(⚠ ratio↔AE 百分比映射先确认)、`SetAutoOrient`(2D 用 AlongPath,DOM `layer.autoOrient`)、`SetIsNull`(变 null,doc 说 uncommon,验 `layer.nullLayer`)、`SetMarkersLocked`(⚠ 无直接 DOM,可能 acceptance)、`SetEffectsEnabled`(⚠ `layer.effectsActive` read-only,需先加效果)、`SetCollapseTransform`(⚠ solid 不支持,需 precomp/shape 载体)、`SetAudioEnabled`/`SetFrameBlendEnabled`/`SetFrameBlendPixelMotion`(⚠ solid 无音频/帧混合,需视频素材或忽略)。
 - **结构/引用类**:`SetSource`/`ReplaceSource`(需第二 source)、`SetTrackMatte`/`SetTrackMatteLayer`/`ClearTrackMatteLayer`/`SetTrackMatteSource`/`RemoveTrackMatte`(需两层 + matte,AE23+)、`SetAlternateSource`/`ClearAlternateSource`(需 blsi slot)。
-- **light/material/iris/geometry(~44 个,最大块)**:`SetLight*`(12)/`SetMaterial*`(20)/`SetIris*`(9)/`SetGeometry*`(3)/`SetCameraZoom`。**先核实**:`go run ./cmd/capindex -q "SetLightKind"` 等——很多可能已被 `layer_3d_*` / `new_camera_light` gate **间接覆盖**只是没标 gate=(同 expr 验证洁癖)。grep 现有 light/camera gate 看覆盖,只补真没验的,别重复造。
+- ~~**light/iris/camera-zoom 间接覆盖**~~ ✅ **批4 已清**:核实结论坐实"验证洁癖洞"——17 个早被 `TestNewCameraLight_AEShipGate_*` 实测覆盖,只补标。
+- **残项(批4 后剩,需独立 fixture)**:
+  - `SetMaterial*`(**20 个,最大残块**):仅 `layer_3d_test.go` **纯 Go round-trip**(非 ship-gate);`layer_3d_shadow_shipgate` 只走泛型 `SetMaterialOption("ADBE Casts Shadows")`,**typed setter 未 AE 验**。需新 fixture:3D solid + 设 material props → AE DOM 经 `layer.threeDLayer` material match-name readback(`ADBE Ambient Coefficient` 等)。可值验,**下批首选**(ROI 最高的残块)。
+  - `SetGeometry*`(3,BevelDirection/PlaneCurvature/PlaneSubdivision):3D Geometry Options,需 Cinema4D/Advanced 3D renderer——**先核实 AE2020 标准渲染器是否可达/可读**,可能不可表达。
+  - `SetLightSource`(AE24+ 环境灯专用,需 environment-light + 源层两载体):niche,最后做。
 
 ### B. 其它域(每域一/几个综合 fixture)
 - **comp 37**:⚠ **带着 item-comment idta-flag 嫌疑去**——`Composition.SetComment` 走同款 `EncodeCmta`(现已 double-NUL)但 item 无 ldta@0x3C,大概率需某 idta flag(同 SetComment 真因)。先 RE:AE 原生设 comp comment→存盘→`diff` idta 找 has-comment flag。其余 comp setter(duration/framerate/bg/resolution…)DOM 可读。
