@@ -147,7 +147,7 @@ func (c *Composition) WorkAreaStartFrame() int {
 // SetWorkAreaStartFrame writes the work-area start from an integer
 // frame, preserving the existing end. Delegates to SetWorkArea.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 SetWorkArea(保留 end);需 FrameRate > 0;无专门 AE gate→round-trip" alias="work area start frame,工作区起始帧,render range start,渲染范围"
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025 boundary="length-preserving;委托 SetWorkArea(保留 end);需 FrameRate > 0;双版本 AE gated(comp-settings from-scratch fixture)" alias="work area start frame,工作区起始帧,render range start,渲染范围"
 func (c *Composition) SetWorkAreaStartFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaStartFrame requires FrameRate > 0", c.Name)
@@ -163,7 +163,7 @@ func (c *Composition) WorkAreaEndFrame() int {
 
 // SetWorkAreaEndFrame writes the work-area end from an integer frame.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 SetWorkArea(保留 start);需 FrameRate > 0;无专门 AE gate→round-trip" alias="work area end frame,工作区结束帧,render range end,渲染结束"
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025 boundary="length-preserving;委托 SetWorkArea(保留 start);需 FrameRate > 0;双版本 AE gated(comp-settings from-scratch fixture)" alias="work area end frame,工作区结束帧,render range end,渲染结束"
 func (c *Composition) SetWorkAreaEndFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaEndFrame requires FrameRate > 0", c.Name)
@@ -180,7 +180,7 @@ func (c *Composition) WorkAreaDurationFrame() int {
 // SetWorkAreaDurationFrame writes the work-area end so that end−start
 // equals the given integer frame span, keeping start fixed.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate > 0;无专门 AE gate→round-trip" alias="work area duration,工作区时长帧数,render duration frames"
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025 boundary="length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate > 0;双版本 AE gated(comp-settings from-scratch fixture)" alias="work area duration,工作区时长帧数,render duration frames"
 func (c *Composition) SetWorkAreaDurationFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaDurationFrame requires FrameRate > 0", c.Name)

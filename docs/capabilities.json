@@ -58,10 +58,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(3B);无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(3B);双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "background color",
@@ -152,10 +155,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1bit);层级开关需与 Layer.MotionBlur 配合;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1bit);层级开关需与 Layer.MotionBlur 配合;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "comp motion blur",
@@ -196,10 +202,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "委托 SetDisplayStartTime;需 FrameRate\u003e0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "委托 SetDisplayStartTime;需 FrameRate\u003e0;双版本 AE gated(comp-settings fixture,frame 15→0.5s 实读)",
       "incident": null,
       "alias": [
         "display start frame",
@@ -219,10 +228,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(8B);seconds=0 写双零清除;AE25 divisor 舍入不一致但 round-trip 精确;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(8B);seconds=0 写双零清除;AE25 divisor 舍入不一致但 round-trip 精确;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "display start time",
@@ -288,10 +300,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);需先 SetFrameRate(FrameRate\u003e0);无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);写帧数=round(sec×FrameRate);⚠ 勿与 SetFrameRate 同 comp(SetFrameRate 不 rescale duration ticks→AE 按旧率读,8s→6.4s,见 incident);双版本 AE gated(comp-settings fixture,单独 30fps comp 验)",
       "incident": null,
       "alias": [
         "duration",
@@ -312,10 +327,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1bit);层级开关需与 Layer.FrameBlendEnabled 配合;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1bit);层级开关需与 Layer.FrameBlendEnabled 配合;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "frame blending",
@@ -356,10 +374,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);29.97 等分数帧率精确 round-trip;无专门 AE gate(NewComposition 经 TestV2_1 设 fps)",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);29.97 等分数帧率精确 round-trip;双版本 AE gated(comp-settings fixture,单独 comp 验);⚠ 勿与 SetDuration 同 comp(不 rescale duration ticks→AE 读错率,见 incident)",
       "incident": null,
       "alias": [
         "frame rate",
@@ -424,10 +445,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1bit);无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1bit);双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "hide shy layers",
@@ -493,10 +517,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);AE 默认 128;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);AE 默认 128;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "motion blur adaptive sample limit",
@@ -515,10 +542,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);AE 默认 16;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);AE 默认 16;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "motion blur samples per frame",
@@ -537,10 +567,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(Utf8 整片替换+父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 整片替换+父 LIST size 重算,CLAUDE.md #1 例外);双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "comp name",
@@ -585,10 +618,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(8B);分数用 round(par×100)/100 近似;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(8B);分数用 round(par×100)/100 近似;双版本 AE gated(comp-settings fixture,PAR=2.0 实读)",
       "incident": null,
       "alias": [
         "pixel aspect ratio",
@@ -631,10 +667,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1bit);无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1bit);双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "preserve nested frame rate",
@@ -653,10 +692,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1bit);无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1bit);双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "preserve nested resolution",
@@ -701,10 +743,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);拒绝 0 值;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);拒绝 0 值;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "resolution factor",
@@ -725,10 +770,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(2B);AE UI 范围 0..720;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(2B);AE UI 范围 0..720;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "shutter angle",
@@ -748,10 +796,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);单位未独立 UI 验证,传 raw int32;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);双版本 AE gated(comp-settings fixture,AE DOM shutterPhase=-90 实读)",
       "incident": null,
       "alias": [
         "shutter phase",
@@ -771,10 +822,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B);不改 PAR;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B);不改 PAR;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "canvas size",
@@ -843,10 +897,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(16B);divisor 复用已存值或取 600;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(16B);divisor 复用已存值或取 600;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "work area",
@@ -867,10 +924,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate \u003e 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate \u003e 0;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "work area duration",
@@ -889,10 +949,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 SetWorkArea(保留 start);需 FrameRate \u003e 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 SetWorkArea(保留 start);需 FrameRate \u003e 0;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "work area end frame",
@@ -912,10 +975,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 SetWorkArea(保留 end);需 FrameRate \u003e 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestCompSettings_AEShipGate_AE2020",
+        "TestCompSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 SetWorkArea(保留 end);需 FrameRate \u003e 0;双版本 AE gated(comp-settings from-scratch fixture)",
       "incident": null,
       "alias": [
         "work area start frame",
