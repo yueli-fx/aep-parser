@@ -210,7 +210,7 @@ func (r *RectNode) Direction() ShapeDirection             { return r.direction }
 //aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 alias="rect size,矩形尺寸,set size,宽高"
 func (r *RectNode) SetSize(v [2]float64) error { return r.size.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="rect position,矩形位置,set position"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])" alias="rect position,矩形位置,set position"
 func (r *RectNode) SetPosition(v [2]float64) error { return r.position.SetStaticValue(v) }
 
 //aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25)" alias="rect roundness,矩形圆角,set roundness"
@@ -382,7 +382,7 @@ func (n *StarNode) SetPoints(v float64) error {
 
 // SetPosition sets the star's local position offset (px).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="star position,星形位置,polystar position"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[200,150])" alias="star position,星形位置,polystar position"
 func (n *StarNode) SetPosition(v [2]float64) error { return n.position.SetStaticValue(v) }
 
 // SetRotation sets the star's rotation in degrees.
@@ -1400,7 +1400,7 @@ func (t *RepeaterTransform) SetScale(v [2]float64) error { t.scale = v; return n
 
 // SetRotation sets the per-copy rotation (degrees) — the radial-burst knob.
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="repeater rotation,重复器旋转,radial burst,per-copy rotation"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=30)" alias="repeater rotation,重复器旋转,radial burst,per-copy rotation"
 func (t *RepeaterTransform) SetRotation(v float64) error { t.rotation = v; return nil }
 
 // SetStartOpacity sets the first copy's opacity (%, 0..100).

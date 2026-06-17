@@ -9296,10 +9296,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[200,150])",
       "incident": null,
       "alias": [
         "star position",
@@ -9344,10 +9347,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])",
       "incident": null,
       "alias": [
         "rect position",
@@ -9466,10 +9472,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=30)",
       "incident": null,
       "alias": [
         "repeater rotation",

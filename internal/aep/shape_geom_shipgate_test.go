@@ -52,6 +52,7 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	must("rect.SetSize", rect.SetSize([2]float64{300, 200}))
 	must("rect.SetRoundness", rect.SetRoundness(25))
+	must("rect.SetPosition", rect.SetPosition([2]float64{120, 80}))
 
 	star, err := rg.AddStar()
 	if err != nil {
@@ -59,6 +60,7 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	must("star.SetInnerRoundness", star.SetInnerRoundness(40))
 	must("star.SetOuterRoundness", star.SetOuterRoundness(60))
+	must("star.SetPosition", star.SetPosition([2]float64{200, 150}))
 
 	_, _ = rg.AddFill() // give the shapes something to render (harmless)
 
@@ -67,6 +69,7 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		t.Fatalf("AddRepeater: %v", err)
 	}
 	must("rep.SetOffset", rep.SetOffset(2))
+	must("rep.Transform().SetRotation", rep.Transform().SetRotation(30))
 
 	trim, err := rg.AddTrim()
 	if err != nil {
@@ -116,7 +119,8 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 
 	root := parseAEP(t, resavedAEP)
-	rd := func(b []byte) float64 { return math.Float64frombits(binary.BigEndian.Uint64(b[0:8])) }
+	rd := func(b []byte, off int) float64 { return math.Float64frombits(binary.BigEndian.Uint64(b[off : off+8])) }
+	// 1D scalars.
 	for _, c := range []struct {
 		name string
 		want float64
@@ -125,6 +129,7 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		{"ADBE Vector Star Inner Roundess", 40},
 		{"ADBE Vector Star Outer Roundess", 60},
 		{"ADBE Vector Repeater Offset", 2},
+		{"ADBE Vector Repeater Rotation", 30},
 		{"ADBE Vector Trim Start", 20},
 		{"ADBE Vector Trim Offset", 15},
 	} {
@@ -133,8 +138,25 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 			t.Errorf("%s resaved %q cdat missing — AE dropped the slot or wrong match-name", ver, c.name)
 			continue
 		}
-		if got := rd(cdat); math.Abs(got-c.want) > 0.01 {
+		if got := rd(cdat, 0); math.Abs(got-c.want) > 0.01 {
 			t.Errorf("%s resaved %q = %.4g, want %.4g", ver, c.name, got, c.want)
+		}
+	}
+	// 2D points: cdat carries x at off 0, y at off 8.
+	for _, c := range []struct {
+		name   string
+		x, y   float64
+	}{
+		{"ADBE Vector Rect Position", 120, 80},
+		{"ADBE Vector Star Position", 200, 150},
+	} {
+		cdat := streamCdat(root, c.name)
+		if cdat == nil {
+			t.Errorf("%s resaved %q cdat missing — AE dropped the slot or wrong match-name", ver, c.name)
+			continue
+		}
+		if gx, gy := rd(cdat, 0), rd(cdat, 8); math.Abs(gx-c.x) > 0.01 || math.Abs(gy-c.y) > 0.01 {
+			t.Errorf("%s resaved %q = [%.4g %.4g], want [%.4g %.4g]", ver, c.name, gx, gy, c.x, c.y)
 		}
 	}
 }
