@@ -35,15 +35,79 @@ func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	sol, err := aep.NewSolidLayer(comp, "Flame", 1080, 1920, [3]float64{0, 0, 0})
-	if err != nil {
+	if _, err := aep.NewSolidLayer(comp, "Flame", 1080, 1920, [3]float64{0, 0, 0}); err != nil {
 		t.Fatalf("NewSolidLayer: %v", err)
 	}
-	_, err = aep.AddEffect(sol, aep.EffectFractalNoise)
+	// Elided effect params (Contrast, Tint colors) need the parade parsed, so
+	// Reopen before AddEffect/SetEffectParam (proven pattern, animate_effect_param_vec_test).
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	sol := rp.Compositions[0].LayerByName("Flame")
+	if sol == nil {
+		t.Fatal("reopened Flame layer missing")
+	}
+	set := func(label string, fx *aep.Effect, mn string, v any) {
+		t.Helper()
+		if _, err := aep.SetEffectParam(sol, fx, mn, v); err != nil {
+			t.Fatalf("%s: %v", label, err)
+		}
+	}
+
+	// 1) Fractal Noise tuned to tall, high-contrast flame-like streaks.
+	fn, err := aep.AddEffect(sol, aep.EffectFractalNoise)
 	if err != nil {
 		t.Fatalf("AddEffect FractalNoise: %v", err)
 	}
-	return p
+	set("FN Contrast", fn, "ADBE Fractal Noise-0004", 200.0)
+	set("FN Brightness", fn, "ADBE Fractal Noise-0005", 0.0)
+	set("FN UniformScale-off", fn, "ADBE Fractal Noise-0009", 0.0)
+	set("FN ScaleWidth", fn, "ADBE Fractal Noise-0011", 50.0)
+	set("FN ScaleHeight", fn, "ADBE Fractal Noise-0012", 300.0)
+	set("FN Complexity", fn, "ADBE Fractal Noise-0015", 6.0)
+
+	// 2) Tint: black -> deep red, white -> orange-yellow ([A,R,G,B] 0-255).
+	tn, err := aep.AddEffect(sol, aep.EffectTint)
+	if err != nil {
+		t.Fatalf("AddEffect Tint: %v", err)
+	}
+	set("Tint Black", tn, "ADBE Tint-0001", []float64{255, 12, 0, 0})
+	set("Tint White", tn, "ADBE Tint-0002", []float64{255, 255, 190, 40})
+	set("Tint Amount", tn, "ADBE Tint-0003", 100.0)
+
+	// 3) Turbulent Displace: organic wavering of the fire edges.
+	td, err := aep.AddEffect(sol, aep.EffectTurbulentDisplace)
+	if err != nil {
+		t.Fatalf("AddEffect TurbulentDisplace: %v", err)
+	}
+	set("TD Amount", td, "ADBE Turbulent Displace-0002", 45.0)
+	set("TD Size", td, "ADBE Turbulent Displace-0003", 30.0)
+
+	// 4) Feathered teardrop mask -> clip the fire texture to a flame silhouette
+	//    (wide bottom, narrow tip). Vertices in layer px (1080x1920), center x=540.
+	flamePath := aep.BezierPath{
+		Vertices: [][2]float64{
+			{540, 250},  // tip
+			{700, 760},
+			{812, 1260},
+			{700, 1700},
+			{540, 1785}, // bottom center
+			{380, 1700},
+			{268, 1260},
+			{380, 760},
+		},
+		Closed: true,
+	}
+	mask, err := aep.AddMask(sol, "FlameMask", flamePath)
+	if err != nil {
+		t.Fatalf("AddMask: %v", err)
+	}
+	if err := mask.SetFeather([2]float64{95, 95}); err != nil {
+		t.Fatalf("SetFeather: %v", err)
+	}
+
+	return rp
 }
 
 func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
