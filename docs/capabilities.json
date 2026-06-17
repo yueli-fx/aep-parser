@@ -6410,11 +6410,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "channels",
@@ -6435,11 +6438,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "color depth",
@@ -6484,11 +6490,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险;CMS 联动 enum,round-trip 绿不保证 AE 渲染采用",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险;CMS 联动 enum,round-trip 绿不保证 AE 渲染采用",
       "incident": null,
       "alias": [
         "convert to linear",
@@ -6506,11 +6515,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "crop",
@@ -6528,11 +6540,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "crop bottom",
@@ -6550,11 +6565,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "crop left",
@@ -6571,11 +6589,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "crop right",
@@ -6592,11 +6613,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "crop top",
@@ -6614,11 +6638,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险(roouData 字节)",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险(roouData 字节)",
       "incident": null,
       "alias": [
         "depth",
@@ -6637,11 +6664,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "disk cache",
@@ -6659,11 +6689,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "effects",
@@ -6682,11 +6715,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "field render",
@@ -6705,11 +6741,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "frame blending",
@@ -6727,11 +6766,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "frame rate",
@@ -6749,11 +6791,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "guide layers",
@@ -6771,11 +6816,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "include project link",
@@ -6793,11 +6841,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "XMP",
@@ -6816,11 +6867,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "lock aspect ratio",
@@ -6838,11 +6892,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "log type",
@@ -6860,11 +6917,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "motion blur",
@@ -6881,11 +6941,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险(固定 64B 字段)",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险(固定 64B 字段)",
       "incident": null,
       "alias": [
         "name",
@@ -6904,11 +6967,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险;raw u8(py-aep derives ON/OFF/AUTO)",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险;raw u8(py-aep derives ON/OFF/AUTO)",
       "incident": null,
       "alias": [
         "output audio",
@@ -6926,11 +6992,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "post render action",
@@ -6952,7 +7021,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "boundary": "Alpha;length-preserving 低风险;AE 接受写入但 resave 清零(AE2025 实勘,@0x07 bit7 受输出色彩管理上下文 gate,非写入 bug)→不保 preservation,留 roundtrip(gate TestRenderQueueSettings 实证)",
       "incident": null,
       "alias": [
         "preserve RGB",
@@ -6970,11 +7039,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "proxy",
@@ -6993,11 +7065,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "pulldown",
@@ -7016,11 +7091,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "quality",
@@ -7043,7 +7121,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "boundary": "Alpha;length-preserving 低风险;AE 接受写入但 resave 清零(AE2020 实勘清 @0x07 bit2,版本相关归一化,非写入 bug;AE2025 保留)→双版本不保 preservation,留 roundtrip(gate TestRenderQueueSettings 实证)",
       "incident": null,
       "alias": [
         "notify",
@@ -7061,11 +7139,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "resize",
@@ -7083,11 +7164,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "resize quality",
@@ -7104,11 +7188,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "resolution",
@@ -7126,11 +7213,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "skip existing files",
@@ -7148,11 +7238,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "solo switches",
@@ -7170,11 +7263,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险(roouData 字节)",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险(roouData 字节)",
       "incident": null,
       "alias": [
         "starting number",
@@ -7193,11 +7289,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "time span duration",
@@ -7216,11 +7315,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "time span start",
@@ -7239,11 +7341,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "use comp frame number",
@@ -7261,11 +7366,14 @@
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
-      "tier": "alpha",
-      "verify": "roundtrip",
+      "tier": "stable",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "Alpha,未 AE-gate;length-preserving 低风险",
+      "gate": [
+        "TestRenderQueueSettings_AEShipGate_AE2020",
+        "TestRenderQueueSettings_AEShipGate_AE2025"
+      ],
+      "boundary": "AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险",
       "incident": null,
       "alias": [
         "region of interest",
