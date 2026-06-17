@@ -122,7 +122,7 @@ func (b *footageBackrefs) SetPath(newPath string) error {
 }
 
 func (b *footageBackrefs) SetComment(comment string) error {
-	if err := setItemComment(b.itemLayrParent, &b.itemCmtaChunk, comment); err != nil {
+	if err := setItemComment(b.itemLayrParent, b.itemIdtaChunk, &b.itemCmtaChunk, comment); err != nil {
 		return fmt.Errorf("footage %q: %w", b.itemName, err)
 	}
 	return nil

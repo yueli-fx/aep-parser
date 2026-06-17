@@ -56,8 +56,9 @@ const (
 // was a documentation error; the constant was declared but unused until
 // now, so no behavior change.
 const (
-	IdtaTypeCode = 0x00 // uint16 BE; 0x04 = Composition / 0x01 = Folder
-	IdtaItemID   = 0x10 // uint32 BE; per-item ID
-	IdtaLabel    = 0x3A // uint8; label color index 0..16 (0 = none)
-	IdtaSize     = 84
+	IdtaTypeCode   = 0x00 // uint16 BE; 0x04 = Composition / 0x01 = Folder
+	IdtaItemID     = 0x10 // uint32 BE; per-item ID
+	IdtaHasComment = 0x39 // uint8; 1 when the item carries a comment (cmta present). AE silently ignores a cmta unless this flag is set — item-level analog of layer ldta @0x3C (RE 2026-06-17, re_comp_idta.aep CMT vs BARE diff).
+	IdtaLabel      = 0x3A // uint8; label color index 0..16 (0 = none)
+	IdtaSize       = 84
 )

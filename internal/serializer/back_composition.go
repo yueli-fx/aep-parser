@@ -424,7 +424,7 @@ func (b *compositionBackrefs) SetRenderer(name string) error {
 }
 
 func (b *compositionBackrefs) SetComment(comment string) error {
-	if err := setItemComment(b.itemLayrParent, &b.itemCmtaChunk, comment); err != nil {
+	if err := setItemComment(b.itemLayrParent, b.itemIdtaChunk, &b.itemCmtaChunk, comment); err != nil {
 		return fmt.Errorf("comp %q: %w", b.compName, err)
 	}
 	return nil
