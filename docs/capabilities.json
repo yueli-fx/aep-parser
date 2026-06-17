@@ -269,7 +269,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving(1bit);无专门 AE gate→round-trip",
+      "boundary": "length-preserving(1bit cdta @0x8A bit0);⚠ AE DOM 不可值验(已知,RE 2026-06-17 comp_idta gate):写的字节与 AE 原生 draft3d=true 逐位一致(@0x8A=01),但 AE reopen 读 comp.draft3d=false——derived/runtime 态,DOM 不从该 bit 反映(false-green 家族,同 lnrp/SetTimeRemapEnabled,详 incident comp-setdraft3d-false-green)。封顶 acceptance(byte-preservation),留 roundtrip",
       "incident": null,
       "alias": [
         "draft 3D",

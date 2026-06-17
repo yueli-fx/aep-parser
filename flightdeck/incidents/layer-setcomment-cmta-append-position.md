@@ -35,9 +35,13 @@ resolved_by: codec.EncodeCmta double-NUL + back_layer.SetComment ldta @0x3C flag
 - `back_layer.SetComment`:写/清 cmta 后设 ldta **@0x3C = 1(非空)/0(空)**。
 - 批3 ship-gate(`layer_av_fields3`)把 SetComment 加回,AE 双版本 DOM `layer.comment` readback 非空 + resave 存活 PASS。`Layer.SetComment` roundtrip→ae-accept。
 
-## item-level setItemComment(comp/footage)仍待补
+## item-level setItemComment(comp/footage)— 预言成真,已修(批21 双版本 gated)
 
-`write_item.go::setItemComment` 也走 `EncodeCmta`(现已 double-NUL),但 item 挂在 Item LIST、没有 ldta —— 若 AE 同样需要某 **idta flag** 标记 item comment 存在,setItemComment 可能仍假绿(comp/footage SetComment 当前 verify=roundtrip,未真 AE 验)。补 comp/project 域时用同法 RE:AE 原生设 comp comment → 存盘 → diff idta 找 has-comment flag。
+2026-06-17 补验 arc 批21 RE 坐实本节两条预警,**比 layer 还多一个位置坑**:
+1. **idta has-comment flag = @0x39**(comment 时 00→01;正好 label 字节 @0x3A 前一位,完全类比 layer ldta @0x3C)。RE = AE2020 原生 fixture `re_comp_idta.aep`(各设一项 comment/label/draft3d + BARE)diff,CMT vs BARE 唯一非 ID 差异就是 @0x39。
+2. **cmta 位置 = 紧跟 Utf8 名字之后**(AE 原生 Item LIST 顺序:`idta Utf8 cmta dats cdta …`),**不是末尾**。layer 的 cmta 在 Layr LIST 末尾 AE 容忍,但 **item 的 cmta append 到末尾 → AE 直接打不开文件**(弹"打开项目"框,不是 silent-drop)。Item LIST 位置敏感,比 layer 更严。
+
+修(`write_item.go::setItemComment`):新 cmta 插到 Utf8 之后(查 Utf8 index+1)+ 设 idta @0x39 = 1/0。comp + footage 共用。comp 路径双版本 gated(`comp_idta`,verify_comp_idta.jsx DOM `comp.comment`/`comp.label` 读回);footage 载体未单独 AE 验,留 roundtrip(共用同一修复)。**红线1 更狠的一例:Go round-trip 全绿,AE 连文件都打不开。**
 
 ## Cases
 - 2026-06-17 补验 arc 批3 首次发现。bisection 天然:同 fixture 4 setter,3 绿 1 红,红的就是 comment,根因 = 唯一走 append 新 chunk 路径的那个。

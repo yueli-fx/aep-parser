@@ -242,7 +242,7 @@ func (c *Composition) SetPreserveNestedFrameRate(v bool) error {
 // SetDraft3D toggles the comp's "Draft 3D" preview switch (cdta @0x8A
 // bit 0). Disables shadows / motion blur / DOF in viewport for speed.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving(1bit);无专门 AE gate→round-trip" alias="draft 3D,草稿3D,3D预览,快速3D"
+//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving(1bit cdta @0x8A bit0);⚠ AE DOM 不可值验(已知,RE 2026-06-17 comp_idta gate):写的字节与 AE 原生 draft3d=true 逐位一致(@0x8A=01),但 AE reopen 读 comp.draft3d=false——derived/runtime 态,DOM 不从该 bit 反映(false-green 家族,同 lnrp/SetTimeRemapEnabled,详 incident comp-setdraft3d-false-green)。封顶 acceptance(byte-preservation),留 roundtrip" alias="draft 3D,草稿3D,3D预览,快速3D"
 func (c *Composition) SetDraft3D(v bool) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no cdta chunk", c.Name)
