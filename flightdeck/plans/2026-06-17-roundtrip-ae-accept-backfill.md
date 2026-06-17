@@ -41,7 +41,9 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批8b/8c**(shape 几何):**11 个** 升 ae-accept。SetDirection(rect/ell,洁癖洞 shape_enums)·新 gate `TestShapeGeom` 覆盖 Rect Roundness/Position·Star Inner/Outer Roundness/Position·Repeater Offset/Rotation·Trim Start/Offset(Go-reparse streamCdat 按 match-name 验值存活,1D+2D)。残 shape 3:SetAnchor(Repeater/Wiggler)/SetScale(Wiggler)——Repeater Anchor match-name 实测错需 RE,Wiggler transform generic match-name 歧义,defer。
 - ✅ **批9**(marker):**9 Marker field setter** 升 ae-accept(双版本)。SetChapter/CuePointName/URL/FrameTarget/Duration/FrameDuration/Label/Time/FrameTime —— marker_shipgate 只验了 SetComment。新 gate `TestMarkerFields`,载体 re_compmarker.aep(AddMark 需 clone 模板),4 marker 按 comment 区分,AE MarkerValue DOM 逐字段读回。这 9 个 domain-tag 误为 comp(实 Marker 方法)。
 - ✅ **批10**(mask):**8 Mask 选项 setter** 升 ae-accept(双版本)。SetMode/Inverted/Locked/Color/MaskMotionBlur/Feather/Expansion/Closed。新 gate `TestMaskOpts`,from-scratch shape+AddMask 双 Reopen,AE Mask DOM 逐项读回。
-- `ae-accept` 35→**164**;`roundtrip` 279→**150**。
+- ✅ **批11**(keyframe,96ba292):**12 keyframe mutate setter** 升 ae-accept(双版本)。新 gate `TestKeyframeMutate_AEShipGate_AE2020/AE2025` + verify_kf_mutate.jsx,6 隔离 shape 层 DOM 逐字段读回:SetInInterp/SetOutInterp/SetInTemporalEase/SetOutTemporalEase(EASE)·SetTime/SetValue/SetFrameTime(VALT)·SetInSpatialTangent/SetOutSpatialTangent(TAN,**spatial tangent 首试即读回,无 auto-bezier 覆盖**)·Property.SetStaticValue(STAT)·InsertKeyframe(INS)·DeleteKeyframe(DEL)。create-path(AddKeyframe*)早被 mg_ease render-proven,mutate setter 字节布局同 → 渲染面传递性覆盖,本 gate 验值面。**陷阱**:layer Position 即便 2D 层也解析为 3D(z=0 存储),SetValue/Tangent/StaticValue slice 须长度 3,AE DOM 仍返 2 元素数组。残 keyframe 1:`SetLockedRatio`(tdsb @0x02 bit4,无干净 DOM 入口,defer)。
+- ✅ **批12**(structural,55a8d4d):**8 layer-list 结构性 op** 升 ae-accept(**自动双版本 gate,域全收口**)。这 8 个此前只人工 JSX-gated(coverage.md 手记)、无自动 Go gate → 封顶 roundtrip。新 gate `TestStructuralOps_AEShipGate_AE2020/AE2025` + verify_structural_ops.jsx:9 隔离 comp(每 op 一个),from-scratch 跑 op 后 AE DOM 逐 comp 读回 layer 顺序。DeleteLayer/DuplicateLayer/InsertLayer/MoveLayer/MoveToBeginning/MoveToEnd/MoveAfter/MoveBefore。**陷阱**:Delete/Duplicate/InsertLayer 拒绝非 AV 层(shape/text/camera/light)→ 结构性载体须 solid。InsertLayer 自动 gate 仅覆盖同工程;cross-project 仍靠既有 assert-gate(coverage 6/6),boundary 注明。
+- `ae-accept` 35→**184**;`roundtrip` 279→**130**。
 
 ## 待办(按 ROI / 难度排)
 
@@ -72,8 +74,9 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - **shape**(批8 后残 ~14):
   - **验证洁癖洞候选(先查 verify 深度再自跑+retag,同批8)**:`SetDirection`(RectNode/EllipseNode,`shape_enums_shipgate` 已 set)· `SetRotation`(star,`mg_polygon` 已 set Rotation)——确认其 verify JSX 真读回值就可补标。
   - **几何参数(render-pixel 相关,需新 gate 或值读回)**:Rect SetRoundness/SetPosition · Star SetInner/OuterRoundness/SetPosition · Repeater SetOffset/Transform(SetAnchor/SetRotation)· Trim SetOffset/SetStart · WigglerTransform SetAnchor/SetScale。多数改渲染几何→红线4 理想 render-pixel,但 ae-accept(DOM 值读回)是合法升级;可仿 mg_* 的 RootGroup().AddX + 值读回。
-- **keyframe 13 / mask 8 / structural 8**:渲染或结构接受验。
-- **project 19 / meta 16 / io 4**:多 header/flag,DOM 读不回的→acceptance。
+- ~~**keyframe 13**~~ ✅ **批11**(残 SetLockedRatio 1,defer)。~~**mask 8**~~ ✅ 批10。~~**structural 8**~~ ✅ **批12 全收口**。
+- **project 19 / meta 10 / io 4**:多 header/flag,DOM 读不回的→acceptance。**meta 10 多为 read/helper(Open/Parse/FromReader/Reopen/Version/NewPropertyStream/Encode·ParseGradientXML/HasAlternateSourceSlot)→ ae-accept 本不适用(不产出 AE 摄入字节),应保留 roundtrip 或另分类,非补验目标**。
+- **comp 残 6**(SetComment/SetLabel 需 item-level idta RE · SetDraft3D @0x8A bit0 需 RE · DuplicateComposition 需结构性 comp gate · SetOrientation/SetPosition 域标可疑,疑似 camera/light mis-domain,先核实是否已被批4 camera gate 覆盖=洁癖洞)。
 - **render-queue 40**:⚠ **多数无 ScriptingAPI**(`rq-comment` incident),DOM 读不回,上限=acceptance-preservation,不能值验。最后做、期望值最低。
 
 ## 复用资产 / 陷阱(下个对话必读)
