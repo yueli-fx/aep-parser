@@ -24,7 +24,7 @@ import "fmt"
 // matte applied" — AE allows that (source pointer stored, matte channel
 // disabled). To fully clear, use ClearTrackMatteLayer().
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;无专门 AE gate→round-trip" alias="set track matte source,track matte,setTrackMatte,设置遮罩来源,遮罩图层"
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;AE2025 单版本已验(track_matte_explicit,DOM trackMatteLayer+type 对);双版本不可达(fingerprint,同 SetTrackMatteLayer)→ 留 roundtrip" alias="set track matte source,track matte,setTrackMatte,设置遮罩来源,遮罩图层"
 func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error {
 	if src == nil {
 		return fmt.Errorf("SetTrackMatteSource: matte source is nil")

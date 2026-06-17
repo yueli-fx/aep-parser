@@ -290,7 +290,7 @@ func (l *Layer) SetBlendingMode(m BlendingMode) error {
 // above this layer in the comp; this setter only flips the mode byte
 // and does NOT reorder layers.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,不重排图层;无专门 AE gate→round-trip" alias="track matte,matte type,遮罩,轨道遮罩,alpha matte,luma matte"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestTrackMatteClassic_AEShipGate_AE2020,TestTrackMatteClassic_AEShipGate_AE2025 boundary="length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,matte 须为正上方层(不重排);双版本 AE gated(track_matte_classic;AE2025 自迁移 classic→显式,DOM trackMatteType=ALPHA)" alias="track matte,matte type,遮罩,轨道遮罩,alpha matte,luma matte"
 func (l *Layer) SetTrackMatte(t TrackMatteType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -600,7 +600,7 @@ func (l *Layer) SetComment(comment string) error {
 // @0xA0 slot doesn't exist. Re-save the file through AE 23+ first to
 // extend ldta, then this setter works.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;无专门 AE gate→round-trip" alias="track matte layer,matte source,遮罩来源,轨道遮罩图层"
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;AE2025 单版本已验(TestTrackMatteExplicit_AEShipGate_AE2025,DOM trackMatteLayer+type 读回对);双版本不可达:仅 TargetAE2025 产 @0xA0,其 fingerprint 被 AE2024 forward-compat 拒,无中间 target → 按惯例留 roundtrip" alias="track matte layer,matte source,遮罩来源,轨道遮罩图层"
 func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -624,7 +624,7 @@ func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 // ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone).
 // Removes the explicit matte source AND the matte mode in one call.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;无专门 AE gate→round-trip" alias="clear matte,remove matte,清除遮罩,取消轨道遮罩"
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;AE2025 单版本已验(track_matte_explicit,clear→DOM NO_TRACK_MATTE);双版本不可达(同 SetTrackMatteLayer,fingerprint)→ 留 roundtrip" alias="clear matte,remove matte,清除遮罩,取消轨道遮罩"
 func (l *Layer) ClearTrackMatteLayer() error {
 	return l.SetTrackMatteLayer(0, TrackMatteNone)
 }

@@ -176,7 +176,7 @@ func (l *Layer) IsNameFromSource() bool {
 // Alias of [Layer.ClearTrackMatteLayer] kept for py-aep API parity
 // (`layer.remove_track_matte()`).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;无专门 AE gate→round-trip" alias="remove track matte,remove matte,清除遮罩,取消遮罩,remove_track_matte"
+//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;AE2025 单版本已验(track_matte_explicit,remove→DOM NO_TRACK_MATTE);双版本不可达(fingerprint)→ 留 roundtrip" alias="remove track matte,remove matte,清除遮罩,取消遮罩,remove_track_matte"
 func (l *Layer) RemoveTrackMatte() error {
 	return l.ClearTrackMatteLayer()
 }

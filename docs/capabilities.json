@@ -2636,7 +2636,7 @@
       "verify": "roundtrip",
       "minver": "2023",
       "gate": null,
-      "boundary": "委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;无专门 AE gate→round-trip",
+      "boundary": "委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;AE2025 单版本已验(track_matte_explicit,clear→DOM NO_TRACK_MATTE);双版本不可达(同 SetTrackMatteLayer,fingerprint)→ 留 roundtrip",
       "incident": null,
       "alias": [
         "clear matte",
@@ -2659,7 +2659,7 @@
       "verify": "roundtrip",
       "minver": "2023",
       "gate": null,
-      "boundary": "委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;无专门 AE gate→round-trip",
+      "boundary": "委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;AE2025 单版本已验(track_matte_explicit,remove→DOM NO_TRACK_MATTE);双版本不可达(fingerprint)→ 留 roundtrip",
       "incident": null,
       "alias": [
         "remove track matte",
@@ -4893,10 +4893,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,不重排图层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTrackMatteClassic_AEShipGate_AE2020",
+        "TestTrackMatteClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,matte 须为正上方层(不重排);双版本 AE gated(track_matte_classic;AE2025 自迁移 classic→显式,DOM trackMatteType=ALPHA)",
       "incident": null,
       "alias": [
         "track matte",
@@ -4921,7 +4924,7 @@
       "verify": "roundtrip",
       "minver": "2023",
       "gate": null,
-      "boundary": "length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;无专门 AE gate→round-trip",
+      "boundary": "length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;AE2025 单版本已验(TestTrackMatteExplicit_AEShipGate_AE2025,DOM trackMatteLayer+type 读回对);双版本不可达:仅 TargetAE2025 产 @0xA0,其 fingerprint 被 AE2024 forward-compat 拒,无中间 target → 按惯例留 roundtrip",
       "incident": null,
       "alias": [
         "track matte layer",
@@ -4944,7 +4947,7 @@
       "verify": "roundtrip",
       "minver": "2023",
       "gate": null,
-      "boundary": "length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;无专门 AE gate→round-trip",
+      "boundary": "length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;AE2025 单版本已验(track_matte_explicit,DOM trackMatteLayer+type 对);双版本不可达(fingerprint,同 SetTrackMatteLayer)→ 留 roundtrip",
       "incident": null,
       "alias": [
         "set track matte source",
