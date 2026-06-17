@@ -1384,7 +1384,7 @@ func (t *RepeaterTransform) EndOpacity() float64   { return t.endOpacity }
 
 // SetAnchor sets the per-copy anchor point (px).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="repeater anchor,重复器锚点,per-copy anchor"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;match-name `ADBE Vector Repeater Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[15,25])" alias="repeater anchor,重复器锚点,per-copy anchor"
 func (t *RepeaterTransform) SetAnchor(v [2]float64) error { t.anchor = v; return nil }
 
 // SetPosition sets the per-copy position offset (px) — the spacing between
@@ -2134,7 +2134,7 @@ func (t *WigglerTransform) Rotation() float64    { return t.rotation }
 
 // SetAnchor sets the anchor-point wiggle amplitude (pixels).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="wiggler anchor amplitude,抖动锚点幅度,anchor wiggle"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;match-name `ADBE Vector Wiggler Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[30,40])" alias="wiggler anchor amplitude,抖动锚点幅度,anchor wiggle"
 func (t *WigglerTransform) SetAnchor(v [2]float64) error { t.anchor = v; return nil }
 
 // SetPosition sets the position wiggle amplitude (pixels).
@@ -2144,7 +2144,7 @@ func (t *WigglerTransform) SetPosition(v [2]float64) error { t.position = v; ret
 
 // SetScale sets the scale wiggle amplitude (percent).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="wiggler scale amplitude,抖动缩放幅度,scale wiggle"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;match-name `ADBE Vector Wiggler Scale`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])" alias="wiggler scale amplitude,抖动缩放幅度,scale wiggle"
 func (t *WigglerTransform) SetScale(v [2]float64) error { t.scale = v; return nil }
 
 // SetRotation sets the rotation wiggle amplitude (degrees).

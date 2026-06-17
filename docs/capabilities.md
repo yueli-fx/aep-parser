@@ -403,8 +403,8 @@
 | `*StrokeWave.SetAmount` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
 | `*OffsetPathsNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGOffset_AEShipGate_AE2020<br>TestMGOffset_AEShipGate_AE2025 | SetAmount sets the offset amount in pixels (positive grows, negative shrinks). |
 | `*PuckerBloatNode.SetAmount` | 🟢stable | render-pixel | 2020 | TestMGPuckerBloat_AEShipGate_AE2020<br>TestMGPuckerBloat_AEShipGate_AE2025 | SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex). |
-| `*RepeaterTransform.SetAnchor` | 🟢stable | roundtrip | 2020 |  | SetAnchor sets the per-copy anchor point (px). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
-| `*WigglerTransform.SetAnchor` | 🟢stable | roundtrip | 2020 |  | SetAnchor sets the anchor-point wiggle amplitude (pixels). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RepeaterTransform.SetAnchor` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetAnchor sets the per-copy anchor point (px). ⚠length-preserving 低风险;match-name `ADBE Vector Repeater Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[15,25]) |
+| `*WigglerTransform.SetAnchor` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetAnchor sets the anchor-point wiggle amplitude (pixels). ⚠length-preserving 低风险;match-name `ADBE Vector Wiggler Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[30,40]) |
 | `*TwistNode.SetAngle` | 🟢stable | render-pixel | 2020 | TestMGTwist_AEShipGate_AE2020<br>TestMGTwist_AEShipGate_AE2025 | SetAngle sets the twist angle (degrees; positive twists clockwise, negative counter-clockwise). |
 | `*StrokeNode.SetBlendMode` | 🟢stable | render-pixel | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  |
 | `*FillNode.SetBlendMode` | 🟢stable | render-pixel | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  |
@@ -461,7 +461,7 @@
 | `*StarNode.SetRotation` | 🟢stable | render-pixel | 2020 | TestMGPolygon_AEShipGate_AE2020<br>TestMGPolygon_AEShipGate_AE2025 | SetRotation sets the star's rotation in degrees. |
 | `*WigglerTransform.SetRotation` | 🟢stable | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | SetRotation sets the rotation wiggle amplitude (degrees). |
 | `*RectNode.SetRoundness` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 |  ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25) |
-| `*WigglerTransform.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale sets the scale wiggle amplitude (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*WigglerTransform.SetScale` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetScale sets the scale wiggle amplitude (percent). ⚠length-preserving 低风险;match-name `ADBE Vector Wiggler Scale`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80]) |
 | `*RepeaterTransform.SetScale` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetScale sets the per-copy scale (%). |
 | `*EllipseNode.SetSize` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
 | `*RectNode.SetSize` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 |  |

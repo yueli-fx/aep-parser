@@ -7,6 +7,14 @@
 // each value survived its engine (acceptance-preservation, value-checked by
 // match-name — same machinery as shape_enums). ae-accept tier.
 //
+// Batch-23 extension — the 3 transform-group anchor/scale residuals that lower
+// with template-confirmed match-names but had no AE gate: Repeater Transform
+// Anchor (ADBE Vector Repeater Anchor), Wiggle Transform Anchor/Scale (ADBE
+// Vector Wiggler Anchor / Scale). Same resave-preservation 2D value check. The
+// sibling Position/Rotation are render-pixel gated elsewhere; these are not
+// pixel-gatable cleanly (anchor shifts pivot; wiggler amplitudes need noise), so
+// DOM/byte value readback is the correct ceiling.
+//
 // Gated by AE_SHIP_GATE.
 package aep_test
 
@@ -70,6 +78,7 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	must("rep.SetOffset", rep.SetOffset(2))
 	must("rep.Transform().SetRotation", rep.Transform().SetRotation(30))
+	must("rep.Transform().SetAnchor", rep.Transform().SetAnchor([2]float64{15, 25}))
 
 	trim, err := rg.AddTrim()
 	if err != nil {
@@ -77,6 +86,16 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	must("trim.SetStart", trim.SetStart(20))
 	must("trim.SetOffset", trim.SetOffset(15))
+
+	// Wiggle Transform: the only carrier for the Wiggler transform-group
+	// anchor/scale residuals. Position/Rotation are render-pixel gated elsewhere
+	// (TestMGWiggleTransform); Anchor/Scale are value-readback here.
+	wt, err := rg.AddWiggleTransform()
+	if err != nil {
+		t.Fatalf("AddWiggleTransform: %v", err)
+	}
+	must("wt.Transform().SetAnchor", wt.Transform().SetAnchor([2]float64{30, 40}))
+	must("wt.Transform().SetScale", wt.Transform().SetScale([2]float64{120, 80}))
 
 	rp, err := aep.Reopen(p)
 	if err != nil {
@@ -149,6 +168,9 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}{
 		{"ADBE Vector Rect Position", 120, 80},
 		{"ADBE Vector Star Position", 200, 150},
+		{"ADBE Vector Repeater Anchor", 15, 25},
+		{"ADBE Vector Wiggler Anchor", 30, 40},
+		{"ADBE Vector Wiggler Scale", 120, 80},
 	} {
 		cdat := streamCdat(root, c.name)
 		if cdat == nil {

@@ -8273,10 +8273,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;match-name `ADBE Vector Repeater Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[15,25])",
       "incident": null,
       "alias": [
         "repeater anchor",
@@ -8295,10 +8298,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;match-name `ADBE Vector Wiggler Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[30,40])",
       "incident": null,
       "alias": [
         "wiggler anchor amplitude",
@@ -9745,10 +9751,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;match-name `ADBE Vector Wiggler Scale`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])",
       "incident": null,
       "alias": [
         "wiggler scale amplitude",
