@@ -46,7 +46,7 @@ func (c *Composition) SetLabel(index uint8) error {
 // SetComment writes a project-panel comment on the footage item.
 // Length-variable; same semantics as Composition.SetComment.
 //
-//aep:cap domain=io tier=stable verify=roundtrip boundary="length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——共用 setItemComment 修复,comp 路径已双版本 gated comp_idta);footage 载体未单独 AE 验→留 roundtrip" alias="footage comment,素材备注,项目面板备注,footage item comment"
+//aep:cap domain=io tier=stable verify=ae-accept gate=TestFootageIdta_AEShipGate_AE2020,TestFootageIdta_AEShipGate_AE2025 boundary="length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——与 comp setItemComment 同源);双版本 AE gated(footage_idta,单 solid 载体 footage.comment DOM readback,solid Item Utf8 空→cmta 插在该空 Utf8 后)" alias="footage comment,素材备注,项目面板备注,footage item comment"
 func (f *Footage) SetComment(comment string) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %q: no Item LIST reference (built outside parser?)", f.Name)
@@ -60,7 +60,7 @@ func (f *Footage) SetComment(comment string) error {
 
 // SetLabel writes the project-panel color label index for the footage.
 //
-//aep:cap domain=io tier=stable verify=roundtrip boundary="length-preserving(1B);越界值照写;无专门 AE gate→round-trip" alias="footage label,素材颜色标签,label,color label"
+//aep:cap domain=io tier=stable verify=ae-accept gate=TestFootageIdta_AEShipGate_AE2020,TestFootageIdta_AEShipGate_AE2025 boundary="length-preserving(1B,idta @0x3A);越界值照写(AE 视为 0);双版本 AE gated(footage_idta,footage.label DOM readback=9)" alias="footage label,素材颜色标签,label,color label"
 func (f *Footage) SetLabel(index uint8) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %q: no idta chunk reference", f.Name)

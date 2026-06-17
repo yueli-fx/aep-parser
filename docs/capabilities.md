@@ -109,8 +109,8 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `*Footage.SetComment` | 🟢stable | roundtrip | 2020 |  | SetComment writes a project-panel comment on the footage item. ⚠length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——共用 setItemComment 修复,comp 路径已双版本 gated comp_idta);footage 载体未单独 AE 验→留 roundtrip |
-| `*Footage.SetLabel` | 🟢stable | roundtrip | 2020 |  | SetLabel writes the project-panel color label index for the footage. ⚠length-preserving(1B);越界值照写;无专门 AE gate→round-trip |
+| `*Footage.SetComment` | 🟢stable | ae-accept | 2020 | TestFootageIdta_AEShipGate_AE2020<br>TestFootageIdta_AEShipGate_AE2025 | SetComment writes a project-panel comment on the footage item. ⚠length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——与 comp setItemComment 同源);双版本 AE gated(footage_idta,单 solid 载体 footage.comment DOM readback,solid Item Utf8 空→cmta 插在该空 Utf8 后) |
+| `*Footage.SetLabel` | 🟢stable | ae-accept | 2020 | TestFootageIdta_AEShipGate_AE2020<br>TestFootageIdta_AEShipGate_AE2025 | SetLabel writes the project-panel color label index for the footage. ⚠length-preserving(1B,idta @0x3A);越界值照写(AE 视为 0);双版本 AE gated(footage_idta,footage.label DOM readback=9) |
 | `*Project.WriteAEP` | 🟢stable | roundtrip | 2020 |  | WriteAEP serializes the (possibly mutated) project back to RIFX binary form. ⚠核心写回;被全部结构性 ship-gate 间接覆盖;无单一专属 AE gate 可精确引用 |
 | `*Project.WriteJSON` | 🟢stable | roundtrip | 2020 |  | WriteJSON writes the project as indented JSON to w. ⚠JSON 单向导出(无 ReadJSON);确定性 + golden 测试验证;不涉及 AE |
 

@@ -1985,10 +1985,13 @@
     "cap": {
       "domain": "io",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——共用 setItemComment 修复,comp 路径已双版本 gated comp_idta);footage 载体未单独 AE 验→留 roundtrip",
+      "gate": [
+        "TestFootageIdta_AEShipGate_AE2020",
+        "TestFootageIdta_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——与 comp setItemComment 同源);双版本 AE gated(footage_idta,单 solid 载体 footage.comment DOM readback,solid Item Utf8 空→cmta 插在该空 Utf8 后)",
       "incident": null,
       "alias": [
         "footage comment",
@@ -2008,10 +2011,13 @@
     "cap": {
       "domain": "io",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B);越界值照写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestFootageIdta_AEShipGate_AE2020",
+        "TestFootageIdta_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B,idta @0x3A);越界值照写(AE 视为 0);双版本 AE gated(footage_idta,footage.label DOM readback=9)",
       "incident": null,
       "alias": [
         "footage label",
