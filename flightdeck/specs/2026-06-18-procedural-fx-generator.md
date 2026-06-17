@@ -75,9 +75,33 @@ Phase 0 手搓火焰用户真机否决:「只有形态,和火焰差很多」(缺
 
 **roadmap 顺序改**:原 Phase 1(参数化)→ Phase 2(学样本)。**改成先 Phase 2(学真实样本)再回头重做火焰,过用户关后才参数化**——没有「好」火焰前参数化无意义。**下一步具体动作 = 用户提供真实火焰 .aep(纯 AE 原生效果、非 Particular 插件、非素材视频)放 `samples/flame/` → 库解析抽「好火焰」真实效果栈+参数 → 重做。** 详 `archive/plans/2026-06-18-phase0-flame-deterministic.md` § 用户验收结论。
 
+## 样本解析 #1(2026-06-18):Colorful Fire Ball 配方解剖
+
+用户提供首个真实样本 `samples/Colorful Fire Ball/Colorful fire AE 2023.aep`(by Plugin Everything,Note 说需装免费插件 Displacer Pro)。我们的 parser 解析(`tmp_debug/dump_fxchain` + `dump_tdmn` 探针,parser 对未知插件效果 opaque-preserve、matchName 照读)。**核心结论:好火焰 = 7 层预合成的深度合成 + 位移驱动 + 粒子 + 辉光,远非「一固态层+一条效果栈」。**
+
+**渲染图(底→顶,7 precomp):**
+1. **Noise 1** = 1 层 `ADBE Fractal Noise`(**对比度 169** 高;Offset Turbulence expr `time*[0,-500]` 向上滚、Evolution expr `time*90` churn——**动画走表达式不是关键帧**)。
+2. **Noise 1 looped** = Noise 1 ×2 + footage,blend **Silhouette Alpha(19)** 做无缝循环。
+3. **Fire**(核心!**纯原生**)= 多层彩色 `ADBE Ramp` 渐变,各被 `ADBE Displacement Map`(用噪声当位移源,**垂直位移量大 ~150–280**)向上拉成火舌,层间 blend **Add(4)** 加亮叠出热芯。Ramp 是**垂直色温渐变**(红→橙→品,0–255 ARGB)。
+4. **Outer fire**(**靠插件**)= `CC Sphere`(球形,自带)+ `ADBE MESH WARP` + **`PEDX`=Displacer Pro(第三方)** + Motion Blur → 火球外形。
+5. **Particles**(**靠插件**)= 2 层 `CC Particle World`(自带,火星/迸射)。
+6. **Whole fire animation** = 合成:Fire(正)+ Fire(`Negative Fire`,blend **Difference(26)** 出暗筋)+ Particles(blend Divide(38),双 `ADBE Glo2` 辉光)+ `ADBE Glo2` 全局辉光 + 背景 Ramp。
+7. **Comp 1** = Outer fire ×2(Divide)+ Whole fire ×2 + 底部调色栈(Checkerboard/Grid/Vignette×2/Brightness/PhotoFilter)。
+
+**效果用量:** CC Particle World ×349 · PEDX ×228 · Fractal Noise ×98 · CC Sphere ×88 · Ramp ×47 · Displacement Map ×46 · Glo2/MeshWarp/Hue-Sat/Vignette… 余。
+
+**插件依赖分级(决定可复刻面):**
+- **核心火焰 = 0 插件**:Fire precomp 全 `ADBE Fractal Noise + Displacement Map + Ramp`,我们已 gate → **plugin-free 可复刻**。
+- **CC Sphere / CC Particle World** = Cycore,**AE 自带、人人能渲**,但非 ADBE-native、未 gate(球形 + 真粒子)。
+- **PEDX = Displacer Pro** = 第三方、需装 + GPU(GLSL)→ 产出 .aep 依赖它就违反「人人可开」;`.aex`/`.plugin` 二进制留 `samples/`(gitignore),**不入 `internal/serializer/templates/`**。
+
+**v1 被否的精确诊断(对照样本):** v1 用 `Turbulent Displace`(自带噪声)而非 **Displacement Map 驱动独立高对比 Fractal Noise**;用 `Tint`(2 色)而非 **Ramp 色温渐变**(用户#1 抱怨「无白→黄→橙→红」正源于此);**无 Glow**(用户抱怨);**单层**而非 **Add 叠多层位移彩渐变**。→ plugin-free 重做的最小处方:**Fractal Noise(高对比+上滚+evolution 关键帧)→ Displacement Map 拉 Ramp 渐变(大垂直量)→ 多层 Add → Glo2 辉光**,正好补齐用户列的四个缺口。**动画用 AnimateEffectParam 关键帧**(样本的表达式驱动我们写不进——见 `incidents/expression-enable-byte-pair.md`,v1 已证 Evolution 关键帧可行)。
+
+**待定(已问用户,答「先不定、继续深挖」):** 产出允许的渲染依赖档位(纯原生 / +Cycore自带 / +第三方插件)——决定要不要 gate `CC Sphere`/`CC Particle World`、以及球形+粒子是 native 近似还是直接用 CC。**核心火焰无论哪档都 plugin-free 先做。**
+
 ## 风险 / 未决
 
 - **最大风险 = Phase 0**(库能否确定性造好火焰 + 补掉从零效果参数动画缺口)。故排在最前。
 - 配方提取的「学习」程度:Phase 2 是结构化抽取 + LLM 辅助草拟 schema,**不是** fine-tune;具体抽取算法待 Phase 2 细化。
-- 火焰若依赖第三方插件(Particular 等)→ 那批样本只能整层搬运;需在 Phase 2 确认样本用的是 AE 原生效果。
+- 火焰若依赖第三方插件 → **已证实**:样本 #1(Colorful Fire Ball)用了第三方 Displacer Pro(PEDX)+ 自带 Cycore(CC Sphere/Particle World)。但**核心火焰是纯原生**(见 § 样本解析 #1),插件只在球形/粒子/外形上。Phase 2 走 plugin-free 复刻核心,Cycore/第三方按用户定的「渲染依赖档位」再议。
 - 网站/API/计费 = Phase 4,本 spec 不展开(独立子项目)。
