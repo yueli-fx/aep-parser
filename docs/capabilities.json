@@ -2866,10 +2866,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;⚠ from-scratch 假绿:无原生 cmta 的层上插入新 cmta=append 到 Layr LIST 末尾,AE 读回空(DOM comment 丢)——见 incident layer-setcomment-cmta-append-position;替换现有 cmta(parsed real layer 原有 comment)路径未单独验但应 OK",
+      "gate": [
+        "TestLayerAVFields3_AEShipGate_AE2020",
+        "TestLayerAVFields3_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;须 cmta double-NUL 终止 + ldta @0x3C has-comment flag=1(二者皆须,缺 flag 时 AE 字节全对仍读回空,已修);双版本 AE gated(layer-av-fields3 from-scratch 层)",
       "incident": [
         "layer-setcomment-cmta-append-position"
       ],

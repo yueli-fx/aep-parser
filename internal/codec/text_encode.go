@@ -142,14 +142,18 @@ func SerializeFontEntry(name string) []byte {
 }
 
 // EncodeCmta encodes a Go-friendly LF-separated string into AE's cmta payload
-// format: CRLF line endings + single NUL terminator.
+// format: CRLF line endings + double NUL terminator (non-empty), single NUL
+// (empty).
 func EncodeCmta(s string) []byte {
 	if s == "" {
-		// AE typically writes a single NUL even for the empty case; matches
-		// what decodeCmta gracefully reads back as "".
+		// AE writes a single NUL for the empty case; decodeCmta reads "".
 		return []byte{0}
 	}
-	out := normalizeToCRLF(s) + "\x00"
+	// AE terminates a non-empty cmta payload with TWO NULs (observed in
+	// AE-native re_layer_comment.aep: "REPROBE_COMMENT\x00\x00", len 17 for a
+	// 15-char comment). A single NUL makes AE silently drop the layer comment
+	// on open — see incidents/layer-setcomment-cmta-append-position.md.
+	out := normalizeToCRLF(s) + "\x00\x00"
 	return []byte(out)
 }
 

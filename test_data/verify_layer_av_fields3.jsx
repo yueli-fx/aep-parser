@@ -54,9 +54,10 @@
             checks.push(check("BG present", bg !== null));
             checks.push(check("FG_Renamed present (SetName)", fg !== null));
             if (fg && bg) {
-                log.push("fg.name=" + fg.name +
+                log.push("fg.name=" + fg.name + " comment=" + fg.comment +
                          " startTime=" + fg.startTime +
                          " parent=" + (fg.parent ? fg.parent.name : "null"));
+                checks.push(check("comment batch3_note", fg.comment === "batch3_note"));
                 checks.push(check("startTime 0.5", near(fg.startTime, 0.5)));
                 checks.push(check("parent is BG", fg.parent !== null && fg.parent.name === "BG"));
             }

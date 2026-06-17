@@ -385,6 +385,17 @@ func (b *layerBackrefs) SetComment(comment string) error {
 		b.layrList.Children = append(b.layrList.Children, newCmta)
 		b.commentChunk = newCmta
 	}
+	// AE marks "this layer has a comment" with a flag byte at ldta @0x3C
+	// (1 = present, 0 = none). Without it AE ignores the cmta chunk even
+	// when the bytes are otherwise identical — see
+	// incidents/layer-setcomment-cmta-append-position.md.
+	if b.ldta != nil && len(b.ldta.Data) > 0x3C {
+		if comment == "" {
+			b.ldta.Data[0x3C] = 0
+		} else {
+			b.ldta.Data[0x3C] = 1
+		}
+	}
 	return nil
 }
 

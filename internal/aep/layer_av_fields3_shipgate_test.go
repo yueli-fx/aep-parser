@@ -1,18 +1,17 @@
 // internal/aep/layer_av_fields3_shipgate_test.go
 //
 // AE ship gate (batch 3 of the roundtrip→ae-accept backfill arc): the
-// length-variable SetName (rewrites a Utf8 chunk + forces parent-LIST size
-// recompute, a different write path from the fixed-width batches 1-2),
-// SetStartTime, and the structural SetParent.
+// length-variable SetName (rewrites a Utf8 chunk) and SetComment (cmta), plus
+// SetStartTime and the structural SetParent.
 //
-// SetComment was originally bundled here but FAILED the gate: on a from-scratch
-// layer with no native cmta, the new cmta is appended to the Layr LIST tail and
-// AE silently ignores it (DOM comment reads back empty) — see
-// incidents/layer-setcomment-cmta-append-position.md. It stays at verify=roundtrip.
+// SetComment originally FAILED this gate — AE read the comment back empty. RE
+// (re_layer_comment.aep, AE-native) showed the cmta payload needs a DOUBLE NUL
+// terminator, not one; fixed in codec.EncodeCmta. See
+// incidents/layer-setcomment-cmta-append-position.md.
 //
-// Two-layer fixture: BG + FG solids. FG is renamed, time-shifted, and parented
-// to BG. AE must accept the resized file, read each back through the DOM (incl.
-// the parent layer reference), and the values must survive resave.
+// Two-layer fixture: BG + FG solids. FG is renamed, commented, time-shifted, and
+// parented to BG. AE must accept the resized file, read each back through the DOM
+// (incl. the parent layer reference), and the values must survive resave.
 package aep_test
 
 import (
@@ -77,6 +76,7 @@ func runLayerAVFields3ShipGate(t *testing.T, target aep.AETarget, aeExe string) 
 		}
 	}
 	must("SetName", fg.SetName("FG_Renamed"))
+	must("SetComment", fg.SetComment("batch3_note"))
 	must("SetStartTime", fg.SetStartTime(0.5))
 	must("SetParent", fg.SetParent(bg.ID))
 
@@ -136,6 +136,9 @@ func runLayerAVFields3ShipGate(t *testing.T, target aep.AETarget, aeExe string) 
 	}
 	if rfg == nil {
 		t.Fatal("resaved: FG_Renamed layer missing (SetName lost)")
+	}
+	if rfg.Comment != "batch3_note" {
+		t.Errorf("resaved Comment = %q, want batch3_note", rfg.Comment)
 	}
 	if math.Abs(rfg.StartTime-0.5) > 0.01 {
 		t.Errorf("resaved StartTime = %v, want 0.5", rfg.StartTime)
