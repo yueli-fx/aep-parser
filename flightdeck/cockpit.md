@@ -1,13 +1,13 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-17 by claude（本会话连推：effects wave 11 layer-ref + wave 12 收回 wave-6 parked 经典(库 203→216,全大写 match-name) · mask 域全收口(>4kf 容量分页 6kf + maskFeatherFalloff mkif @0x03 翻案"不可达")。均双版本 gate。另删 deferred-backlog spec。· expr backlog 撤项（按函数补 gate = closed decision，机制已闭环）。· 启动 roundtrip→ae-accept 补验 arc，批1 layer-set 7 flag 双版本 gate。）
+**Last updated**: 2026-06-17 by claude（本会话连推：effects wave 11 layer-ref + wave 12 收回 wave-6 parked 经典(库 203→216,全大写 match-name) · mask 域全收口(>4kf 容量分页 6kf + maskFeatherFalloff mkif @0x03 翻案"不可达")。均双版本 gate。另删 deferred-backlog spec。· expr backlog 撤项（按函数补 gate = closed decision，机制已闭环）。· 启动 roundtrip→ae-accept 补验 arc：layer-set 批1-3 共 17 setter 升 ae-accept(35→53)，RE 修好 SetComment from-scratch 假绿(ldta @0x3C has-comment flag)，立跨对话 drain 清单 plan。）
 
-**Active focus**: **需求驱动稳态**（知识库地基重建 arc 已完结）。**知识单一家 = flightdeck + CLAUDE.md**(auto-memory 已退役);**能力真相源 = capindex**(`go run ./cmd/capindex -q <词>` / `docs/capabilities.{json,md}`,CI 强制写/做面零漏标)。库能力主线早已全收口、需求驱动;机制库 parse-the-clone + synthesis-insert + animate;每渲染类双版本 AE ship-gate(红线4)。两个能力 roadmap 已归档(`archive/specs/`),残项见下 backlog,真相源=capindex。火焰=番外(见 `incidents/procedural-fx-over-vector.md`)。
+**Active focus**: **roundtrip→ae-accept 补验 arc**(2026-06-17 起;详 `## 下一步` + `plans/2026-06-17-roundtrip-ae-accept-backfill.md`)。库能力主线早已全收口,此 arc 把 261 个"标 stable 但只 Go round-trip、从没让真 AE 消化"的写能力按域补双版本 AE 验(验证洁癖洞)。layer-set 主体已清(批1-3,ae-accept 35→53),含 RE 修好 SetComment 假绿。**不变量**:知识单一家 = flightdeck + CLAUDE.md(auto-memory 已退役);能力真相源 = capindex(`go run ./cmd/capindex -q <词>`,CI 强制零漏标);每渲染类双版本 AE ship-gate(红线4)。火焰=番外(`incidents/procedural-fx-over-vector.md`)。
 
 ## 进行中
 
 <!-- AUTO:inprogress -->
-
+- [2026-06-17-roundtrip-ae-accept-backfill.md](plans/2026-06-17-roundtrip-ae-accept-backfill.md) — 把 capindex 里 261 个仅 verify=roundtrip 的写/做能力,按域做综合 fixture 批量补真 AE 验,升到 ae-accept(读不回的→acceptance)。layer-set 主体已清,SetComment 假绿已修。
 <!-- /AUTO -->
 
 ## 下一步
