@@ -9,6 +9,7 @@
 <!-- AUTO:inprogress -->
 - [2026-06-18-procedural-fx-generator.md](specs/2026-06-18-procedural-fx-generator.md) — 用户 NL 描述 → 网站一键产出可在 AE 打开的 .aep。架构=离线配方提取 + 运行时(NL→参数→库出字节)。AI 永不碰字节,Go 库是保证合法的执行引擎。v1=火焰,Phase 0(确定性造一个好火焰)为 make-or-break 门槛。
 - [2026-06-18-roundtrip-ae-accept-residual.md](specs/2026-06-18-roundtrip-ae-accept-residual.md) — 补验 arc(批1-28,2026-06-17/18)完成记录 + 剩 53 个 verify=roundtrip 残值的 someday-backlog:逐项分类(N/A read/helper · 实勘负结论 · false-green · 硬尾 · 可做但低 ROI),有需要时按本表挑。ae-accept 35→261,roundtrip 279→53。
+- [2026-06-18-phase0-flame-deterministic.md](plans/2026-06-18-phase0-flame-deterministic.md) — 证命门:纯 Go 手写一条火焰效果栈(固态+Fractal Noise+Turbulent Displace+Tint+evolution 动画)→ AE 双版本实渲 PNG → 看图。过=库能确定性造好 FX,进 Phase 1;不过=fallback 数据条族。镜像 orbit_demo render harness。
 <!-- /AUTO -->
 
 ## 下一步
