@@ -3808,10 +3808,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic;默认值=1 时 AE resave elide,DOM readback 验)",
       "incident": null,
       "alias": [
         "accepts lights",
@@ -3830,10 +3833,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic;默认值=1 时 AE resave elide,DOM readback 验)",
       "incident": null,
       "alias": [
         "accepts shadows",
@@ -3852,10 +3858,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic AE2020-authored 载体,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "ambient",
@@ -3877,7 +3886,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;AE2024+ Advanced-3D 专属,AE2020 classic 渲染器不可设(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip",
       "incident": null,
       "alias": [
         "appears in reflections",
@@ -3922,10 +3931,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic AE2020-authored 载体,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "diffuse",
@@ -3947,7 +3959,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "fresnel",
@@ -3969,7 +3981,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "glossiness",
@@ -3991,7 +4003,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "index of refraction",
@@ -4010,10 +4022,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic AE2020-authored 载体,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "light transmission",
@@ -4032,10 +4047,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic AE2020-authored 载体,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "metal",
@@ -4083,7 +4101,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "reflection",
@@ -4105,7 +4123,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;AE2020 classic 不暴露此 prop(builder 实勘 MISS),无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "shadow color",
@@ -4124,10 +4142,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic AE2020-authored 载体,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "shininess",
@@ -4146,10 +4167,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMaterialClassic_AEShipGate_AE2020",
+        "TestMaterialClassic_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;需 3D 层(classic 渲染器);双版本 AE gated(material-classic AE2020-authored 载体,DOM readback+resave 值存活)",
       "incident": null,
       "alias": [
         "specular",
@@ -4171,7 +4195,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "transparency rolloff",
@@ -4193,7 +4217,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip",
+      "boundary": "length-preserving 低风险;需 3D 层;ray-traced/Advanced-3D 专属,AE2020 classic 渲染器禁用(惰性/父级隐藏,builder 实勘);无 AE2020-openable 载体→留 round-trip;AE2025 可 readback",
       "incident": null,
       "alias": [
         "transparency",
