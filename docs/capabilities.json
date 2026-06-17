@@ -2869,8 +2869,10 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable(cmta 整片替换或插入新 cmta);父 LIST size 重算;无专门 AE gate→round-trip",
-      "incident": null,
+      "boundary": "length-variable;⚠ from-scratch 假绿:无原生 cmta 的层上插入新 cmta=append 到 Layr LIST 末尾,AE 读回空(DOM comment 丢)——见 incident layer-setcomment-cmta-append-position;替换现有 cmta(parsed real layer 原有 comment)路径未单独验但应 OK",
+      "incident": [
+        "layer-setcomment-cmta-append-position"
+      ],
       "alias": [
         "comment",
         "注释",
@@ -4181,10 +4183,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip",
+      "gate": [
+        "TestLayerAVFields3_AEShipGate_AE2020",
+        "TestLayerAVFields3_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);双版本 AE gated(layer-av-fields3 批量 fixture,验 AE 接受 resize + DOM name)",
       "incident": null,
       "alias": [
         "layer name",
@@ -4280,10 +4285,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;4 字节 @ldta 0x84;同 comp 内验证 parentID;自 parent 拒绝;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields3_AEShipGate_AE2020",
+        "TestLayerAVFields3_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;4 字节 @ldta 0x84;同 comp 内验证 parentID;自 parent 拒绝;双版本 AE gated(layer-av-fields3 两层 fixture,验 AE DOM parent 指向正确层)",
       "incident": null,
       "alias": [
         "parent",
@@ -4583,10 +4591,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;8 字节分数对 @ldta 0x0C/0x10;支持负值(pre-roll);无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFields3_AEShipGate_AE2020",
+        "TestLayerAVFields3_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;8 字节分数对 @ldta 0x0C/0x10;支持负值(pre-roll);双版本 AE gated(layer-av-fields3 批量 fixture,验 0.5)",
       "incident": null,
       "alias": [
         "start time",
