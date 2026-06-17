@@ -18,13 +18,13 @@ last_updated: 2026-05-25
 
 留下两个 tmp_debug 工具:
 - `tmp_debug/gen_canonical_failing/` — 重建 AE 拒的 canonical aep 到 `tmp_debug/v2_2_canonical_failing.aep`
-- `tmp_debug/dump_chunks/<path>` — chunk 树 dump
+- `tools/debug/dump_chunks/<path>` — chunk 树 dump
 
 跑:
 ```bash
 go run tmp_debug/gen_canonical_failing/main.go
-go run tmp_debug/dump_chunks/main.go tmp_debug/v2_2_canonical_failing.aep > tmp_debug/dump_failing.txt
-go run tmp_debug/dump_chunks/main.go test_data/v2_2_shape_tolerance.aep > tmp_debug/dump_tolerance.txt
+go run tools/debug/dump_chunks/main.go tmp_debug/v2_2_canonical_failing.aep > tmp_debug/dump_failing.txt
+go run tools/debug/dump_chunks/main.go test_data/v2_2_shape_tolerance.aep > tmp_debug/dump_tolerance.txt
 ```
 
 tolerance.aep 是 AE 自己存的 nested-Rect+Fill ShapeLayer fixture (Task 5.3 出)，结构 AE 认。Diff 二者即看 V2.2 lowering 哪里跟 AE 不一致。
@@ -337,13 +337,13 @@ V2.2 把 runtime `shapeRootGroup.Children = [Rect, Fill, ...]` 映射到 **单�
 3. **`hydrate_shape.go` 重写 `hydrateVectorGroup`**：内部 `collectShapeKids` 递归 helper — 看见 `ADBE Vector Group` / `ADBE Vectors Group` 就 transparent 递归下去；看见 typed shape (Rect/Ellipse/Path/Fill/Stroke) 就 hydrate 进 `g.Children`；忽略 Vector Transform Group / Vector Materials Group。多 Vector Group siblings 全部 flatten 进同一个 `shapeRootGroup.Children` (V2.2 不分 group)。
 4. **`types_core.go::WrapShapeLayer` 改 always 标 `shapeDirty = true`** — iter-4 之前的"仅 NewShapeLayer 标 dirty"是 hydrate 不完整时的临时防御。iter 5 hydrate 完整后契约改为：**WrapShapeLayer 是 V2.2 opt-in；调它 = write-sync 从 runtime tree re-lower**。V1-only path (Property.SetStaticValue 等) 不经 WrapShapeLayer → 不受影响 (V1 测试 TestShapePrimitivesReal 通)。
 5. **`lower_shape_node_test.go::TestLowerVectorGroup_*` 重写** — 校验 Root Vectors Group body 5 child + 必须含 Vector Group / Vectors Group / Vector Transform Group / Vector Materials Group 四个 tdmn marker。
-6. **`tmp_debug/dump_root/main.go` 升级** — 解码 tdmn matchName 为 ASCII (NUL-terminated 取 prefix) + 解码 tdsn embedded Utf8 record (skip "Utf8" magic + 4B size → 拿 name 字节)。原来全 hex 输出，无法肉眼看 matchName。
+6. **`tools/debug/dump_root/main.go` 升级** — 解码 tdmn matchName 为 ASCII (NUL-terminated 取 prefix) + 解码 tdsn embedded Utf8 record (skip "Utf8" magic + 4B size → 拿 name 字节)。原来全 hex 输出，无法肉眼看 matchName。
 7. **新 `tmp_debug/gen_iter5_check/main.go`** — 出仿 tolerance.aep 内容的 .aep (1 ShapeLayer + Rect 200×100 + Fill gray) 用作 byte-diff baseline。
 
 ### 验证
 
 - `go vet ./... && go test ./...` — PASS=174 (+1; `TestV2_2_MutateExistingShape` 之前 silent skip 因 hydrate 找不到 shape kids；iter 5 hydrate 后实际跑通 mutate→write→re-parse→读 Size=500 闭环)
-- byte-level 验证: `go run tmp_debug/gen_iter5_check/main.go && go run tmp_debug/dump_root/main.go tmp_debug/iter5_check.aep | sed -n '45,135p'` — 跟 tolerance.aep 同段 (45-100 行 Root Vectors Group 子树) 结构 + matchName 序列 + tdsb 标志位 **完全一致**
+- byte-level 验证: `go run tmp_debug/gen_iter5_check/main.go && go run tools/debug/dump_root/main.go tmp_debug/iter5_check.aep | sed -n '45,135p'` — 跟 tolerance.aep 同段 (45-100 行 Root Vectors Group 子树) 结构 + matchName 序列 + tdsb 标志位 **完全一致**
 
 ### 残留待启动 — fix C (spatial cdat padding + tdum/tduM)
 

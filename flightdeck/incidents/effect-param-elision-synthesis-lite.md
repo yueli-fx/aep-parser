@@ -27,7 +27,7 @@ surface-level symptom).
 
 RE probe `test_data/re_effect_param_elision.jsx` (AE 2020, fixture
 `re_effect_param_elision.aep`, 3 Gaussian Blur instances; dump via
-`tmp_debug/probe_effects` + `dump_chunks`):
+`tools/debug/probe_effects` + `dump_chunks`):
 
 | instance | treatment | params persisted in value tdgp |
 |---|---|---|

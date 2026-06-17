@@ -197,4 +197,4 @@ Per-chunk Data slice MUST be a fresh `append([]byte(nil), src.Data...)` copy (NO
 - Predecessor scar: [`ae-deletelayer-re.md`](ae-deletelayer-re.md) — F4 (16-chunk per-layer block) is what we clone
 - AE acceptance gate: [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)
 - Fixture JSX: `test_data/re_duplicate_layer.jsx`
-- Dump tool: `tmp_debug/dump_layers/main.go` (reused from Phase 2)
+- Dump tool: `tools/debug/dump_layers/main.go` (reused from Phase 2)

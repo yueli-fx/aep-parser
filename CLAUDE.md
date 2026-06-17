@@ -49,6 +49,7 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - 单测: `go test ./internal/aep/ -run 'TestX' -v`
 - 能力查询（写/做面真相源）: `go run ./cmd/capindex -q "<词>"`（或 grep `docs/capabilities.json`）
 - **build 不落根目录**：跑工具优先 `go run ./cmd/<x>`；必须 build 时 `go build -o tmp_debug/bin/<x>`（`.gitignore` 已含 `*.exe`，但别在根目录裸 build 留垃圾）
+- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·**一次性 probe/渲染输出/scratch→`tmp_debug/` 或根 `tmp/`(gitignored，用完即删别留)**。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `incidents/` 后删探针。细则 `checklists/verify.md` § 工件该放哪。
 - **多行 commit message**（Bash 工具跑 bash 非 pwsh）：写临时文件 `git commit -F tmpfile`，**勿**用 `@'...'@` here-string（会被 mangle）
 - 详细操作（tmp_debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/checklists/`
 

@@ -77,7 +77,7 @@ Phase 0 手搓火焰用户真机否决:「只有形态,和火焰差很多」(缺
 
 ## 样本解析 #1(2026-06-18):Colorful Fire Ball 配方解剖
 
-用户提供首个真实样本 `samples/Colorful Fire Ball/Colorful fire AE 2023.aep`(by Plugin Everything,Note 说需装免费插件 Displacer Pro)。我们的 parser 解析(`cmd/aepdissect` + `tmp_debug/dump_tdmn`,parser 对未知插件效果 opaque-preserve、matchName 照读)。**核心结论:好火焰 = 7 层预合成的深度合成 + 位移驱动 + 粒子 + 辉光,远非「一固态层+一条效果栈」。**
+用户提供首个真实样本 `samples/Colorful Fire Ball/Colorful fire AE 2023.aep`(by Plugin Everything,Note 说需装免费插件 Displacer Pro)。我们的 parser 解析(`cmd/aepdissect` + `tools/debug/dump_tdmn`,parser 对未知插件效果 opaque-preserve、matchName 照读)。**核心结论:好火焰 = 7 层预合成的深度合成 + 位移驱动 + 粒子 + 辉光,远非「一固态层+一条效果栈」。**
 
 **渲染图(底→顶,7 precomp):**
 1. **Noise 1** = 1 层 `ADBE Fractal Noise`(**对比度 169** 高;Offset Turbulence expr `time*[0,-500]` 向上滚、Evolution expr `time*90` churn——**动画走表达式不是关键帧**)。

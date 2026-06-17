@@ -42,7 +42,7 @@ AE 内部在精确表示 shutter 的分数角度时挑了更细的 tick base。`
 要复现/验证别的 setter 是否有类似 AE-side re-encoding，做法：
 
 1. 写 JSX 在新 comp 上 set 单一属性
-2. 跑 `go run ./tmp_debug/dump_cdta probe.aep` 对比 baseline
+2. 跑 `go run ./tools/debug/dump_cdta probe.aep` 对比 baseline
 3. 看是否有目标 byte 之外的 byte 也变了
 4. 如果"额外变化字节"是 0/1/divisor 这种结构性数字 → 多半是 AE 内部 re-encoding，**别学 AE**；保持 setter 单点写
 

@@ -15,7 +15,7 @@ resolved_by: FormatPSReal(point-key REAL 编码) + TestMGTextStyle 双版本 ren
 ## Bisection（已定位，勿重走）
 
 1. **不是 SetText / from-scratch 文本本身**：同样走 `NewTextLayer`+`SetText` 但**不调** SetRunFontSize 的对照层（TS_DEFAULT），`doc.fontSize` 读回 **88（对）**——唯一变量是有没有调 SetRunFontSize。
-2. **不是 writer 写错位置/格式**：dump 两边 btdk（`tmp_debug/parse_btdk`）——
+2. **不是 writer 写错位置/格式**：dump 两边 btdk（`tools/debug/parse_btdk`）——
    - AE 原生 `re_text.aep` 的 `size_200` 层：run-style 路径 `/1/1[0]/0/6/0[0]/0/0/6/1` 存 **`/1 200` 纯整数**（非定点）。
    - 我方从零 `SetRunFontSize(150)`：**完全相同路径**存 **`/1 150` 纯整数**，字节格式一致。
    - → writer 写对了。decoder 读 `/1` 为 `v.Num`（plain，与 AE 原生值一致）。Go 编/解自洽。

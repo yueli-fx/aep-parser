@@ -15,7 +15,7 @@ V2.2.1 子项② = Path embed bytes，原以为是 Ellipse 同款 mirror（embed
 
 - AE-native 参考 fixture：`test_data/v2_2_shape_path_tolerance.aep`（`tmp_debug/gen_shape_path_tolerance.jsx`，AE 2025 存，4 顶点闭合方块 [[0,0],[100,0],[100,100],[0,100]] + Fill）。
 - 我们 from-scratch 输出：`go run ./tmp_debug/gen_ellipse_input path` → `tmp_debug/ellipse_input_path.aep`。
-- 结构对比工具：`tmp_debug/dump_chunks`（树）+ `tmp_debug/diff_path_geom`（几何字节 diff）。
+- 结构对比工具：`tools/debug/dump_chunks`（树）+ `tmp_debug/diff_path_geom`（几何字节 diff）。
 
 ### 发现 1：scaffolding 结构一致，仅 tdsn 显示名大小不同
 Path body 树（`ADBE Vector Shape - Group` → tdsb/tdsn → tdmn `ADBE Vector Shape` → LIST(om-s)(om-s header: tdsb/tdsn/tdb4 124B/cdat 4B) → LIST(omks) → LIST(shap)(shph 24B + LIST(list)(lhd3 52B + ldat 96B) + omtn 0B))与 AE-native **逐 chunk 一致**，唯 tdsn（display name）大小不同（AE 14/16B vs 我们 8/12B）——与 Ellipse 当年同类差异，embed 可解。

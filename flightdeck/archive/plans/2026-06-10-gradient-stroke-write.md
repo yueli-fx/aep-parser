@@ -29,7 +29,7 @@ implements: archive/specs/2026-06-10-gradient-stroke-write.md
 
 - [ ] **Step 1: 看 extract_shape_bodies 怎么提取 gradfill 的**
 
-Run: `go run ./tmp_debug/dump_chunks/main.go test_data/v2_2_gradient_src.aep | grep -n -B2 -A6 "G-Stroke"`
+Run: `go run ./tools/debug/dump_chunks/main.go test_data/v2_2_gradient_src.aep | grep -n -B2 -A6 "G-Stroke"`
 Expected: 看到 `tdmn = ADBE Vector Graphic - G-Stroke` 后跟 `[LIST tdgp]`（节点 body），body 内含 `ADBE Vector Grad Colors → GCst → GCky → Utf8`。记下 G-Stroke 节点 body（紧跟该 tdmn 的 LIST tdgp）。
 
 - [ ] **Step 2: 提取 G-Stroke body 到 .bin**
@@ -41,7 +41,7 @@ Expected: 生成 `internal/serializer/templates/v2_2_shape_gradstroke_body.bin`
 
 - [ ] **Step 3: 验证提取的 body 可被 rifx 解析回**
 
-Run: `go run ./tmp_debug/dump_chunks/main.go internal/serializer/templates/v2_2_shape_gradstroke_body.bin`
+Run: `go run ./tools/debug/dump_chunks/main.go internal/serializer/templates/v2_2_shape_gradstroke_body.bin`
 Expected: 输出含 `ADBE Vector Grad Colors`、`[LIST GCst]`、`[LIST GCky]`、`Utf8`。若缺 GCst → no-go，停止并按 spec §模板提取兜底处理。
 
 - [ ] **Step 4: Commit**

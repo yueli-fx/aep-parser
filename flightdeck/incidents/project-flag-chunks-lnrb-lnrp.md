@@ -25,7 +25,7 @@ bisect (`tmp_debug/ship_gate_1d_bisect/`) 隔出来真凶：8 个 setter 里只�
 1. **Chunk 有 1 byte payload**，不是空。py-aep 注释虽然说 toggle，但 `lnrb / lnrp` 注册在 `U1Chunk`（1 byte value）。AE 写出 `lnrb len=1 bytes=01`。
 2. **位置固定**：紧跟 root 的 `cpid` 之后（color-profile id），`dwga` 之前。Append-to-end 跟错位都触发 "文件数据丢失"。
 
-RE 验证：`tmp_debug/dump_root_compare/` 对 `re_linear_blending_on.aep`（AE 自己写）跟 `re_cameralight.aep`（无 lnrb）做 root children 序列 diff — AE 把 lnrb 插在 `[14]` 紧跟 `cpid`，1 byte `0x01`。lnrp 做同样实验（`re_linearize_workspace_on.aep`），相同位置/字节。
+RE 验证：`tools/debug/dump_root_compare/` 对 `re_linear_blending_on.aep`（AE 自己写）跟 `re_cameralight.aep`（无 lnrb）做 root children 序列 diff — AE 把 lnrb 插在 `[14]` 紧跟 `cpid`，1 byte `0x01`。lnrp 做同样实验（`re_linearize_workspace_on.aep`），相同位置/字节。
 
 ## Lesson
 
@@ -70,7 +70,7 @@ Ship gate validated: bisect 8/8 PASS, full modified.aep ship_gate_1d.done shows 
 |---|---|
 | `internal/serializer/back_project.go` | `setRootFlagChunk` + `flagChunkInsertPosition` + `chunkIDCpid` 锚 |
 | `tmp_debug/ship_gate_1d_bisect/` | per-setter 隔离 ship-gate runner (8 个 variant) |
-| `tmp_debug/dump_root_compare/` | root chunk children 序列 byte-diff 工具 |
+| `tools/debug/dump_root_compare/` | root chunk children 序列 byte-diff 工具 |
 | `test_data/re_linear_blending.jsx` | AE 自己写 lnrb=true 的 RE fixture driver |
 | `test_data/re_linearize_workspace.jsx` | 同 lnrp |
 | `test_data/ship_gate_1d.jsx` | 全 8 setter combined ship-gate driver |

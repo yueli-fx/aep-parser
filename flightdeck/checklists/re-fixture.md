@@ -83,7 +83,7 @@ Test 代码 `t.Skipf("fixture missing", ...)` 缺文件跳过，不阻塞 CI。
 
 length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtrip Go test 够，不必走 ship-gate。
 
-**防 ID-巧合假绿（新结构性写路径必做）**：只在单一 canonical fixture 上 mutate 的 gate 可能**靠 ID 巧合通过**——embed 模板的宿主层/item ID 与 baseline fixture 恰好同号（同套 JSX → 同 ID 分配序列），AE open 校验时不暴露。AddEffect Phase-1 双版本 10/10 全绿却带潜伏 bug（效果模板 sspc 每参数 tdpi=来源宿主层 ID=15，baseline 也恰是 15）就栽在这，直到 parade-auto-create 用 100% Go-built 全新工程（层 ID≠15）才暴露。**对策**：① 除 fixture-mutate 场景外，**必加一个 from-scratch 全 Go-built 场景**（NewProject→…→WriteAEP，ID 空间天然错开提取 fixture）；② embed-AE-bytes 模板落库前用 `tmp_debug/effect_id_scan`（全树扫 32-bit 值）查模板里有没有嵌着来源文件的 item/layer ID。
+**防 ID-巧合假绿（新结构性写路径必做）**：只在单一 canonical fixture 上 mutate 的 gate 可能**靠 ID 巧合通过**——embed 模板的宿主层/item ID 与 baseline fixture 恰好同号（同套 JSX → 同 ID 分配序列），AE open 校验时不暴露。AddEffect Phase-1 双版本 10/10 全绿却带潜伏 bug（效果模板 sspc 每参数 tdpi=来源宿主层 ID=15，baseline 也恰是 15）就栽在这，直到 parade-auto-create 用 100% Go-built 全新工程（层 ID≠15）才暴露。**对策**：① 除 fixture-mutate 场景外，**必加一个 from-scratch 全 Go-built 场景**（NewProject→…→WriteAEP，ID 空间天然错开提取 fixture）；② embed-AE-bytes 模板落库前用 `tools/debug/effect_id_scan`（全树扫 32-bit 值）查模板里有没有嵌着来源文件的 item/layer ID。
 
 ## Adobe 软件路径
 
@@ -300,8 +300,8 @@ step("probe_app_fonts", function () {
 ## 字节 diff
 
 ```bash
-go run ./tmp_debug/parse_btdk test_data/re_<name>.aep <layer_filter> > /tmp/dump_a.txt
-go run ./tmp_debug/parse_btdk test_data/re_<name>.aep <other_layer> > /tmp/dump_b.txt
+go run ./tools/debug/parse_btdk test_data/re_<name>.aep <layer_filter> > /tmp/dump_a.txt
+go run ./tools/debug/parse_btdk test_data/re_<name>.aep <other_layer> > /tmp/dump_b.txt
 diff /tmp/dump_a.txt /tmp/dump_b.txt
 ```
 

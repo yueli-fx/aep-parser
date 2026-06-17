@@ -207,7 +207,7 @@ standalone splice can't satisfy — excluded until a Phase-2 remap handles refs.
   payload-size sample, the remaining 7 promoted to gated), wave 2 34/34 PASS
   (2026-06-11, both versions): AE opens the Go-added file without corruption,
   reads back 4 effects in order, and AE's own resave preserves the addition.
-- Pre-commit template hygiene: `tmp_debug/effect_id_scan <bin> 15` on each new
+- Pre-commit template hygiene: `tools/debug/effect_id_scan <bin> 15` on each new
   template — non-tdpi hits in `pard`/`pdnm`/`fnam` are coincidental definition
   bytes (gated wave-1 templates show the same pattern); only tdpi carries the
   host binding (retargeted at splice).

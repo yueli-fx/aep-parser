@@ -58,26 +58,39 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 
 会 dump 整个 Project 结构供肉眼核对。
 
-## tmp_debug 工具
+## 调试工具 `tools/debug/`（tracked，入 git）
 
-`tmp_debug/` 下小程序按需用：
+> **2026-06-18 整顿**：可复用调试工具从 gitignored `tmp_debug/` **提进 tracked `tools/debug/`**（在 git、跨 clone、不丢）。一次性 RE scaffolding(findings 已进 incidents)+ 渲染输出全清。**约定见下「工件该放哪」。**
+
+`tools/debug/` 下小程序按需用：
 
 | 工具 | 用法 | 用途 |
 | --- | --- | --- |
-| `parse_btdk` | `go run ./tmp_debug/parse_btdk <file.aep> <layer_filter>` | dump 文本图层 btdk PostScript 树 |
-| `dump_kern` | `go run ./tmp_debug/dump_kern <file.aep> <layer>` | 打 ManualKerning / Kerning |
-| `dump_cdta` | `go run ./tmp_debug/dump_cdta <file.aep> [name_prefix]` | dump comp cdta hex（RE cdta 字节用） |
-| `dump_ldta_trackmatte` | `go run ./tmp_debug/dump_ldta_trackmatte <file.aep> [comp] [prefix]` | dump layer ldta hex |
-| `list_items` | `go run ./tmp_debug/list_items <file.aep>` | 列所有 items + id |
-| `list_props` | `go run ./tmp_debug/list_props <file.aep> [comp]` | 列每个 layer 的所有 Property |
-| `list_item_chunks` | `go run ./tmp_debug/list_item_chunks <file.aep> [prefix]` | dump comp Item LIST 完整 chunk 树（找 PRin / prda 这种 sibling chunk） |
-| `probe_effects` | `go run ./tmp_debug/probe_effects <file.aep>` | 列每个 layer 的 effects + params |
-| `dump_layers` | `go run ./tmp_debug/dump_layers <file.aep> [<file2> ...]` | 每 comp parsed layers (ID/Type/Name/ParentID/TrackMatteLayerID/SourceID) + raw Item LIST 子 chunk 顺序 + Layr/Ewst pairing 检测 — DeleteLayer / InsertLayer 结构性 mutation 的 fixture diff 主力 |
-| `parade_dump` | `go run ./tmp_debug/parade_dump <file.aep>` | 每 Layr 的 outer tdgp 子 chunk 顺序（tdmn 名）+ Effect Parade 体内 chunk hex（parade 位置/头字节 RE 用） |
-| `effect_id_scan` | `go run ./tmp_debug/effect_id_scan <file.aep\|.bin> <decimal>` | 全树扫 32-bit BE 值命中（chunk 路径 + 偏移）+ 列 Layr ldta 层 ID — 追「无法找到图层 ID=N」类悬空引用（tdpi 等） |
-| `dump_comp` / `dump_text` / `demo_*` | 类似 | RE 时核对字节 |
+| `parse_btdk` | `go run ./tools/debug/parse_btdk <file.aep> <layer_filter>` | dump 文本图层 btdk PostScript 树 |
+| `dump_kern` | `go run ./tools/debug/dump_kern <file.aep> <layer>` | 打 ManualKerning / Kerning |
+| `dump_cdta` | `go run ./tools/debug/dump_cdta <file.aep> [name_prefix]` | dump comp cdta hex（RE cdta 字节用） |
+| `dump_ldta_trackmatte` | `go run ./tools/debug/dump_ldta_trackmatte <file.aep> [comp] [prefix]` | dump layer ldta hex |
+| `list_items` | `go run ./tools/debug/list_items <file.aep>` | 列所有 items + id |
+| `list_props` | `go run ./tools/debug/list_props <file.aep> [comp]` | 列每个 layer 的所有 Property |
+| `list_item_chunks` | `go run ./tools/debug/list_item_chunks <file.aep> [prefix]` | dump comp Item LIST 完整 chunk 树（找 PRin / prda 这种 sibling chunk） |
+| `probe_effects` | `go run ./tools/debug/probe_effects <file.aep>` | 列每个 layer 的 effects + params |
+| `dump_layers` | `go run ./tools/debug/dump_layers <file.aep> [<file2> ...]` | 每 comp parsed layers (ID/Type/Name/ParentID/TrackMatteLayerID/SourceID) + raw Item LIST 子 chunk 顺序 + Layr/Ewst pairing 检测 — DeleteLayer / InsertLayer 结构性 mutation 的 fixture diff 主力 |
+| `parade_dump` / `dump_parade` | `go run ./tools/debug/parade_dump <file.aep>` | 每 Layr 的 outer tdgp 子 chunk 顺序（tdmn 名）+ Effect Parade 体内 chunk hex（parade 位置/头字节 RE 用） |
+| `effect_id_scan` | `go run ./tools/debug/effect_id_scan <file.aep\|.bin> <decimal>` | 全树扫 32-bit BE 值命中（chunk 路径 + 偏移）+ 列 Layr ldta 层 ID — 追「无法找到图层 ID=N」类悬空引用（tdpi 等） |
+| `dump_tdmn` / `dump_chunks` / `dump_root` / `dump_idta` / `dump_fdta` / `dump_comp` / `dump_text` / `count_layers` | 类似 | 全树 matchName / chunk 树 / 各类字节 RE 核对 |
 
-不放进 `internal/aep`，避免污染 public API。
+另：`go run ./cmd/aepdissect <file.aep>` = 结构化解析报告(效果用量+原生/Cycore/第三方+预合成嵌套+逐层效果链),模版分析首选。
+
+### 工件该放哪（避免再堆 junk drawer）
+
+| 类型 | 家 | 在 git? |
+| --- | --- | --- |
+| 可复用调试工具 | `tools/debug/<name>/` | ✅ tracked |
+| 用户面工具 | `cmd/<name>/` | ✅ tracked |
+| vfx / showcase 生成器 | `flightdeck/showcase/<方向>/gen.go` | ✅ tracked |
+| **一次性 probe / 渲染输出 / scratch** | `tmp_debug/`（或根 `tmp/`） | ❌ gitignored,**用完即删,别留** |
+
+原则:**有用→进 git(提到上面某个 tracked 家);没用→删;只 RE 一次的探针 findings 进 `incidents/` 后删探针。** 不放进 `internal/aep`,避免污染 public API。
 
 ## 重构脚本
 

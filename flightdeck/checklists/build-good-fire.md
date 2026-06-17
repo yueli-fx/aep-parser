@@ -11,7 +11,7 @@ last_updated: 2026-06-18
 
 ## ⚠ 成熟度（诚实前提，别当已验证流程用）
 
-- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tmp_debug/dump_tdmn`）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
+- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tools/debug/dump_tdmn`）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
 - **✅ 已升级为「验证配方」（2026-06-18）**：**v3 多层合成**（黑底+3 火层+同心 mask 温度分区+Add+Glo2，运动共相）经 **`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 gate 绿（逐像素一致）+ 用户真机验收过**。这条多层配方现在是验证过的,可照搬。
 - 历程：v1 被否（单层 Tint）→ v2（单层 Tritone+Glo2,修色温/Glow 但无层次）→ **v3 多层合成出层次（通过）**。下面参数表/步骤为 v3 实际值。
 
