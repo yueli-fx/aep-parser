@@ -2,7 +2,7 @@
 status: active
 when_to_read: SetExpression 写入后 AE 不求值/expressionEnabled 读回 false；AE 打开后表达式文本被丢；给 effect param（或任何带 tdum/tduM 的属性）挂表达式后 AE 判损坏跳过该层；touching tdb4 @0x77/@0x78 or SetExpression/SetExpressionEnabled or 表达式 Utf8 在 tdbs 里的插入位置；评估「Go round-trip 绿但 AE 行为不对」的表达式类症状
 applies_to: [expression, expression-enabled, tdb4, 0x77, 0x78, has-expression-marker, utf8-position, tdum-tduM, effect-param-expression, settext, render-dead, mg-roadmap, ship-gate, ae2020, ae2025]
-last_updated: 2026-06-15
+last_updated: 2026-06-17
 resolved_by:
 ---
 
@@ -67,7 +67,9 @@ tduM`。修：Utf8 **插在最后一个 cdat（无 cdat 则 tdb4）之后**，td
 
 **误诊更正（2026-06-14）：**最初以为「AddEffect 在 shape / 多层 comp 被 AE 静默 drop」——**错**。bisection（L1 单 shape+slider → L6 全复杂度 SLD 最后建）逐级全 PASS，效果从未被 drop。真因是上面的「按错误名字访问」：① JSX `effect("Slider Control")` 名字错 → null → throw（被误读成 drop）；② 表达式 `effect(1)("Slider")` 参数名错 → 静默回退静态。AddEffect 在 shape 层、多层、SLD 末位建——全部正常。**教训：负向发现下结论前先把验证脚本的访问路径排除掉（同「先看产物再玩数字」）。**
 
-**仍未 gate：**`linear()`/`ease()` remap、`valueAtTime` 组合等——边际证明值低（机制已证内容无关），按需补。
+**按函数补 gate = 关闭（closed decision，2026-06-17）：**`linear()`/`ease()` remap、`valueAtTime` 组合等**不再单独 gate**。理由：这些全是 AE 官方内置表达式函数（AE 必认，风险不在"AE 认不认函数"），且字节写入路径与表达式内容无关——上面已 gate 的 5 类 idiom（静态值 / 跨层引用 / 带关键帧叠加 / 时变随机 / 读 effect 参数）已**穷尽写入端的字节情况**：普通标量 tdbs（无 tdum/tduM，Utf8 落 cdat 后）与 effect param tdbs（带 tdum/tduM，Utf8 须插 cdat 后/tduM 前）两种插入位都覆盖了，新函数不会引入新字节路径。"未验"的潜台词从来不是"AE 不认函数"，而是"怕换写法时我们这边又有隐藏耦合"（如当年 tdum/tduM 那次）——该担心已被这 5 类堵死。
+
+> **若哪天某 remap 真出问题：**几乎一定在 AE 求值端（AE 的事），不在我们的写入端。下结论前先 `difftdb4` 拿 AE 自存的同表达式 fixture 逐字节对账（同红线 1 原始教训），确认 @0x77/@0x78 + Utf8 插入位无误后再去怀疑求值——别又凭 Go round-trip 绿假绿。
 
 > 写 AI 生成 MG 表达式时查语义：`flightdeck/references/after-effects-expression-reference/`（docsforadobe，docs/ 按 objects/layer/general/text 分组）。
 
