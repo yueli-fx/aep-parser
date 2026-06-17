@@ -1,42 +1,45 @@
 ---
 showcase: procedural-fx
-direction: 程序化 FX 生成器 v1 火焰(spec procedural-fx-generator Phase 0)— 纯 Go 从零拼一条原生效果栈,AE 双版本实渲出可辨认的、翻腾的火焰
-capabilities: [fractal-noise, tint, turbulent-displace, mask-feather, animate-effect-param, effect-stack-recipe]
+direction: 程序化 FX 生成器火焰(spec procedural-fx-generator)— 纯 Go 从零拼多层原生效果栈,AE 双版本实渲出有层次、翻腾的火焰；用户真机验收通过
+capabilities: [fractal-noise, tritone, turbulent-displace, glo2-glow, mask-feather, concentric-mask, add-blend, multi-layer-composite, animate-effect-param, animate-effect-param-vec, adjustment-layer, effect-stack-recipe]
 gates: [TestFlameDemo_AEShipGate_AE2020, TestFlameDemo_AEShipGate_AE2025]
-status: ❌质量未过(blocked,待 Phase 2 学样本重做)
+status: complete
 last_updated: 2026-06-18
 regenerate: "go run ./flightdeck/showcase/procedural-fx  +  scripts/ae_run.ps1 render.jsx"
 ---
 
-# procedural-fx — 程序化 FX 生成器 v1 火焰 showcase
+# procedural-fx — 程序化火焰 showcase（v3，多层合成，用户验收通过）
 
 ## 这个方向测什么
 
-证 spec `procedural-fx-generator` 的命门(Phase 0):**库能不能确定性造出一个一眼看得出是火焰的东西**。不开 AE,纯 Go 在一个固态层上叠一条 AE 原生效果栈:
+证 spec `procedural-fx-generator`:**库能不能确定性造出一个有层次、像样的火焰**。不开 AE,纯 Go 多层合成一条原生效果栈。**v3 = 多层合成出层次感**(技法 T3 additive-depth,`docs/fx-techniques.md`):
 
-`Fractal Noise(竖向拉伸+高对比)→ Tint(黑→暗红 / 白→橙黄)→ Turbulent Displace(有机扰动)+ 羽化水滴形 mask(火苗轮廓)`,再给 Fractal Noise / Turbulent Displace 的 **Evolution 打关键帧** → 火焰翻腾。
+- **黑底** + **3 个火层**(`Fractal Noise(竖拉+高对比)→ Tritone(三档色温)→ Turbulent Displace`),各层**不同噪声 scale**(粗大火舌 / 中 / 细芯)。
+- **同心 mask**(核层小 / 中层中 / 外层全)+ 各层 Tritone **越内越热** → 径向温度分区:**外深红 wispy → 中橙 → 内黄白热芯柱**。
+- **Add 混合** → 重叠处叠出白热芯;顶部 **Glo2 Glow 调整层** → 泛光。
+- 运动**共相**(所有层同速率 Evolution+Offset,关键帧)→ 翻腾上升、**不失相抖动**。
 
-AI 永不碰字节:这条配方将来是 AI 层调的参数空间,这里每个旋钮手动设死。覆盖 `AddEffect` + `SetEffectParam`(含 elided param 物化、color [A,R,G,B] 0-255)+ `AnimateEffectParam`(从零给效果参数打关键帧,实测 AnimateEffectParam 未撞 elision 缺口)+ `AddMask`/`SetFeather`。
+覆盖 `AddEffect`(FractalNoise/Tritone/TurbulentDisplace/Glo2)+ `SetEffectParam`(elided 物化、color [A,R,G,B])+ `AnimateEffectParam`/`AnimateEffectParamVec` + `AddMask`/`SetFeather` + `Layer.SetBlendingMode` + `NewAdjustmentLayer`。AI 永不碰字节;这条配方是将来 AI 层调的参数空间,这里手动设死。
 
 ## 产物
 
 | 文件 | 类型 | 说明 |
 |---|---|---|
-| `gen.go` | 生成器(Go, tracked) | 构建 `flame.aep`(1080×1920 竖构图,AE2020 target,单 Flame 层) |
-| `render.jsx` | 渲染脚本(tracked) | AE `saveFrameToPng(2.0)` → `flame.png`(强制 8bpc) |
-| `flame.aep` | 产出工程 (gitignored) | |
-| `flame.png` | 渲染帧 (gitignored) | t=2s 中段 |
+| `gen.go` | 生成器(Go, tracked) | 构建 `flame.aep`(1080×1920,AE2020 target,5 层:黑底+3 火层+Glow 调整层) |
+| `render.jsx` | 渲染脚本(tracked) | AE `saveFrameToPng` → `flame.png`(强制 8bpc) |
+| `flame.aep` / `flame.png` | 产出 (gitignored) | |
 
 ## 应看到
 
-一个**水滴形火苗**:下宽上尖,竖向橙黄火舌 + 黑色间隙,边缘羽化柔和,透明底。t=1 与 t=3 两帧内部纹理明显不同(在翻腾)。
+一个**有层次的火苗**:外圈深红 wispy 火舌 → 中橙 → 内黄白热芯柱,边缘羽化,黑底发光,在翻腾上升。t=1/t=3 内部纹理明显不同且**全程平稳无抖动**。
 
-## gate 实测(2026-06-18)
+## gate 实测 + 用户验收(2026-06-18)
 
-`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 PASS:bright≈1473 / warm≈1141 / 两帧 diff≈1472(运动活)。agent 已 Read png 眼验像火焰。
+- **双版本 ship-gate PASS**:`TestFlameDemo_AEShipGate_AE2020/AE2025` 均绿,**两版本逐像素一致**(bright=2019 / warm=1843 / 两帧 diff=1446)。
+- **用户真机验收:✅ 过了**(2026-06-18)。这是火焰从 v1 被否(单层、无色温/Glow)→ v2(单层修色温/Glow,层次不足)→ **v3 多层合成有层次** 的收尾。
 
-## 用户真机验收(2026-06-18):❌ 质量未过
+## 历史(踩坑记录,详 `checklists/build-good-fire.md`)
 
-用户真机打开 `flame.aep` 复核后**否决**:「只有火焰的形态,但和火焰差很多」。产物=橙色噪声水滴,缺真火关键——白热芯 / 由内到外色温渐变(白→黄→橙→红→暗尖)/ Glow 泛光 / 向上舔的细节。**狭义命门(库能确定性造可辨认火焰 + 效果栈/param/animate/mask 全 gated)技术达成,但产品质量门槛未过。**
-
-**决策(roadmap 改顺序)**:不参数化(原 Phase 1)。**先 Phase 2 学真实样本(解析专业火焰 .aep 抽效果栈+参数)再回头重做**,过用户关后这个 showcase 才有资格翻 complete。详 `specs/2026-06-18-procedural-fx-generator.md` § 更新(2026-06-18) + `archive/plans/2026-06-18-phase0-flame-deterministic.md` § 用户验收结论 + `incidents/procedural-fx-over-vector.md` Case 2。**当前 gen.go/flame.aep 是被否的 v1,保留作对照,Phase 2 重做后替换。**
+- v1 被否:单层 Tint 2 色,缺色温/Glow/深度。
+- v2:单层 Tritone+Glo2 修掉色温/辉光,但**单层无层次**(用户:层次来自多层混合)。
+- v3:多层 Add 合成。两个关键踩坑→解法:① **团块**→同心 mask 分温度区;② **抖动**(~3s 起失相闪烁)→层运动共相、只静态属性分层。

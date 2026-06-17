@@ -1,19 +1,19 @@
 // internal/aep/flame_demo_shipgate_test.go
 //
-// Phase 0 (make-or-break) of the procedural-FX generator (spec 2026-06-18-
-// procedural-fx-generator): can the library DETERMINISTICALLY build a .aep that
-// renders as a recognizable flame? Builds a solid + native effect stack
-// (Fractal Noise -> Tint -> Turbulent Displace, Evolution animated) 100% in Go,
-// has AE 2020+2025 render a frame to PNG, and checks the rendered pixels (red
-// line 4: verify RENDERED output, not stored values). Mirrors the proven
-// orbit_demo render harness. Gated by AE_SHIP_GATE.
+// Procedural-FX generator (spec 2026-06-18-procedural-fx-generator), flame demo.
+// v3 = MULTI-LAYER composite for depth (validates technique T3 additive-depth,
+// docs/fx-techniques.md): 3 Fractal Noise->Tritone->Turbulent Displace fire layers
+// at different noise scales (big tongues / mid / fine core), concentric masks for
+// outer->inner temperature zones, Add-blended so overlaps build a white-hot core,
+// + a top Glo2 Glow adjustment + black bg. Motion is SHARED across layers (coherent
+// — per-layer rates desync and shimmer late). Builds 100% in Go, AE 2020+2025 render
+// a frame to PNG, pixel-checked (red line 4). User-accepted on real machine 2026-06-18.
 //
-// Fractal Noise param matchNames (probe_flame_params.jsx, AE2025):
-//   0004 Contrast · 0005 Brightness · 0009 Uniform-Scaling(off to split W/H) ·
-//   0010 Scale · 0011 Scale-Width · 0012 Scale-Height · 0015 Complexity ·
-//   0023 Evolution(animate) · 0029 Opacity
-// Turbulent Displace: 0002 Amount · 0003 Size · 0006 Evolution
-// Tint: 0001 Map-Black-To · 0002 Map-White-To · 0003 Amount-to-Tint
+// Param matchNames (probe_flame_params.jsx): Fractal Noise 0004 Contrast / 0005
+// Brightness / 0009 Uniform-Scaling / 0011 Scale-Width / 0012 Scale-Height / 0015
+// Complexity / 0013 Offset-Turbulence(vec) / 0023 Evolution. Turbulent Displace 0002
+// Amount / 0003 Size / 0006 Evolution. Tritone 0001 Highlights / 0002 Midtones /
+// 0003 Shadows. Glo2 0002 Threshold / 0003 Radius / 0004 Intensity.
 package aep_test
 
 import (
@@ -28,6 +28,22 @@ import (
 	aep "github.com/example/aep-parser/internal/aep"
 )
 
+type flameLayerCfg struct {
+	name                                             string
+	contrast, brightness, scaleW, scaleH, complexity float64
+	dispAmt, dispSize, maskScale                     float64
+	tShadow, tMid, tHigh                             []float64 // [A,R,G,B] 0-255
+}
+
+// flameScalePath shrinks a path toward (cx,cy) by f (concentric flame zones).
+func flameScalePath(p aep.BezierPath, cx, cy, f float64) aep.BezierPath {
+	out := aep.BezierPath{Closed: p.Closed}
+	for _, v := range p.Vertices {
+		out.Vertices = append(out.Vertices, [2]float64{cx + (v[0]-cx)*f, cy + (v[1]-cy)*f})
+	}
+	return out
+}
+
 func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	t.Helper()
 	p := aep.NewProject(target)
@@ -35,88 +51,124 @@ func buildFlameDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	if err != nil {
 		t.Fatalf("NewComposition: %v", err)
 	}
-	if _, err := aep.NewSolidLayer(comp, "Flame", 1080, 1920, [3]float64{0, 0, 0}); err != nil {
-		t.Fatalf("NewSolidLayer: %v", err)
+	// Build top->bottom (new layers append below): Glow adj, core, mid, base, BG.
+	if _, err := aep.NewAdjustmentLayer(comp, "Glow"); err != nil {
+		t.Fatalf("NewAdjustmentLayer: %v", err)
 	}
-	// Elided effect params (Contrast, Tint colors) need the parade parsed, so
-	// Reopen before AddEffect/SetEffectParam (proven pattern, animate_effect_param_vec_test).
+	cfgs := []flameLayerCfg{
+		{name: "FireCore", contrast: 185, brightness: -18, scaleW: 30, scaleH: 420, complexity: 6,
+			dispAmt: 38, dispSize: 28, maskScale: 0.5,
+			tShadow: []float64{255, 30, 0, 0}, tMid: []float64{255, 255, 150, 25}, tHigh: []float64{255, 255, 250, 235}},
+		{name: "FireMid", contrast: 158, brightness: -24, scaleW: 50, scaleH: 330, complexity: 6,
+			dispAmt: 50, dispSize: 38, maskScale: 0.76,
+			tShadow: []float64{255, 16, 0, 0}, tMid: []float64{255, 245, 80, 0}, tHigh: []float64{255, 255, 195, 70}},
+		{name: "FireBase", contrast: 128, brightness: -30, scaleW: 82, scaleH: 260, complexity: 5,
+			dispAmt: 62, dispSize: 46, maskScale: 1.0,
+			tShadow: []float64{255, 14, 0, 0}, tMid: []float64{255, 175, 26, 0}, tHigh: []float64{255, 255, 110, 8}},
+	}
+	for _, c := range cfgs {
+		if _, err := aep.NewSolidLayer(comp, c.name, 1080, 1920, [3]float64{0, 0, 0}); err != nil {
+			t.Fatalf("NewSolidLayer %s: %v", c.name, err)
+		}
+	}
+	if _, err := aep.NewSolidLayer(comp, "BG", 1080, 1920, [3]float64{0, 0, 0}); err != nil {
+		t.Fatalf("NewSolidLayer BG: %v", err)
+	}
+
+	// Elided effect params need the parade parsed -> Reopen before AddEffect.
 	rp, err := aep.Reopen(p)
 	if err != nil {
 		t.Fatalf("Reopen: %v", err)
 	}
-	sol := rp.Compositions[0].LayerByName("Flame")
-	if sol == nil {
-		t.Fatal("reopened Flame layer missing")
-	}
-	set := func(label string, fx *aep.Effect, mn string, v any) {
+	fc := rp.Compositions[0]
+	set := func(label string, l *aep.Layer, fx *aep.Effect, mn string, v any) {
 		t.Helper()
-		if _, err := aep.SetEffectParam(sol, fx, mn, v); err != nil {
+		if _, err := aep.SetEffectParam(l, fx, mn, v); err != nil {
 			t.Fatalf("%s: %v", label, err)
 		}
 	}
 
-	// 1) Fractal Noise tuned to tall, high-contrast flame-like streaks.
-	fn, err := aep.AddEffect(sol, aep.EffectFractalNoise)
+	// Top Glow adjustment — glows the Add-composited fire below.
+	glowL := fc.LayerByName("Glow")
+	gl, err := aep.AddEffect(glowL, "ADBE Glo2")
 	if err != nil {
-		t.Fatalf("AddEffect FractalNoise: %v", err)
+		t.Fatalf("AddEffect Glo2: %v", err)
 	}
-	set("FN Contrast", fn, "ADBE Fractal Noise-0004", 200.0)
-	set("FN Brightness", fn, "ADBE Fractal Noise-0005", 0.0)
-	set("FN UniformScale-off", fn, "ADBE Fractal Noise-0009", 0.0)
-	set("FN ScaleWidth", fn, "ADBE Fractal Noise-0011", 50.0)
-	set("FN ScaleHeight", fn, "ADBE Fractal Noise-0012", 300.0)
-	set("FN Complexity", fn, "ADBE Fractal Noise-0015", 6.0)
+	set("Glow Threshold", glowL, gl, "ADBE Glo2-0002", 50.0)
+	set("Glow Radius", glowL, gl, "ADBE Glo2-0003", 55.0)
+	set("Glow Intensity", glowL, gl, "ADBE Glo2-0004", 1.5)
 
-	// 2) Tint: black -> deep red, white -> orange-yellow ([A,R,G,B] 0-255).
-	tn, err := aep.AddEffect(sol, aep.EffectTint)
-	if err != nil {
-		t.Fatalf("AddEffect Tint: %v", err)
-	}
-	set("Tint Black", tn, "ADBE Tint-0001", []float64{255, 12, 0, 0})
-	set("Tint White", tn, "ADBE Tint-0002", []float64{255, 255, 190, 40})
-	set("Tint Amount", tn, "ADBE Tint-0003", 100.0)
-
-	// 3) Turbulent Displace: organic wavering of the fire edges.
-	td, err := aep.AddEffect(sol, aep.EffectTurbulentDisplace)
-	if err != nil {
-		t.Fatalf("AddEffect TurbulentDisplace: %v", err)
-	}
-	set("TD Amount", td, "ADBE Turbulent Displace-0002", 45.0)
-	set("TD Size", td, "ADBE Turbulent Displace-0003", 30.0)
-
-	// 4) Feathered teardrop mask -> clip the fire texture to a flame silhouette
-	//    (wide bottom, narrow tip). Vertices in layer px (1080x1920), center x=540.
 	flamePath := aep.BezierPath{
 		Vertices: [][2]float64{
-			{540, 250},  // tip
-			{700, 760},
-			{812, 1260},
-			{700, 1700},
-			{540, 1785}, // bottom center
-			{380, 1700},
-			{268, 1260},
-			{380, 760},
+			{540, 250}, {700, 760}, {812, 1260}, {700, 1700},
+			{540, 1785}, {380, 1700}, {268, 1260}, {380, 760},
 		},
 		Closed: true,
 	}
-	mask, err := aep.AddMask(sol, "FlameMask", flamePath)
-	if err != nil {
-		t.Fatalf("AddMask: %v", err)
-	}
-	if err := mask.SetFeather([2]float64{95, 95}); err != nil {
-		t.Fatalf("SetFeather: %v", err)
-	}
+	// SHARED, calm motion across all layers (coherent -> no desync shimmer).
+	const evoEnd, offEndY, tdEvoEnd = 540.0, 540.0, 360.0
 
-	// 5) Animate Evolution so the fire boils/licks over time (the "alive" part).
-	if _, err := aep.AnimateEffectParam(sol, fn, "ADBE Fractal Noise-0023", []aep.ScalarKeyframe{
-		{Time: 0, Value: 0}, {Time: 4, Value: 1440}, // 4 turns over 4s
-	}); err != nil {
-		t.Fatalf("AnimateEffectParam FN Evolution: %v", err)
-	}
-	if _, err := aep.AnimateEffectParam(sol, td, "ADBE Turbulent Displace-0006", []aep.ScalarKeyframe{
-		{Time: 0, Value: 0}, {Time: 4, Value: 720},
-	}); err != nil {
-		t.Fatalf("AnimateEffectParam TD Evolution: %v", err)
+	for _, c := range cfgs {
+		l := fc.LayerByName(c.name)
+		if l == nil {
+			t.Fatalf("reopened layer %s missing", c.name)
+		}
+		fn, err := aep.AddEffect(l, aep.EffectFractalNoise)
+		if err != nil {
+			t.Fatalf("AddEffect FractalNoise %s: %v", c.name, err)
+		}
+		set("FN Contrast", l, fn, "ADBE Fractal Noise-0004", c.contrast)
+		set("FN Brightness", l, fn, "ADBE Fractal Noise-0005", c.brightness)
+		set("FN UniformScale", l, fn, "ADBE Fractal Noise-0009", 0.0)
+		set("FN ScaleW", l, fn, "ADBE Fractal Noise-0011", c.scaleW)
+		set("FN ScaleH", l, fn, "ADBE Fractal Noise-0012", c.scaleH)
+		set("FN Complexity", l, fn, "ADBE Fractal Noise-0015", c.complexity)
+
+		tr, err := aep.AddEffect(l, "ADBE Tritone")
+		if err != nil {
+			t.Fatalf("AddEffect Tritone %s: %v", c.name, err)
+		}
+		set("Tritone Hi", l, tr, "ADBE Tritone-0001", c.tHigh)
+		set("Tritone Mid", l, tr, "ADBE Tritone-0002", c.tMid)
+		set("Tritone Sh", l, tr, "ADBE Tritone-0003", c.tShadow)
+
+		td, err := aep.AddEffect(l, aep.EffectTurbulentDisplace)
+		if err != nil {
+			t.Fatalf("AddEffect TurbulentDisplace %s: %v", c.name, err)
+		}
+		set("TD Amount", l, td, "ADBE Turbulent Displace-0002", c.dispAmt)
+		set("TD Size", l, td, "ADBE Turbulent Displace-0003", c.dispSize)
+
+		// Concentric mask -> outer/mid/inner temperature zones (layered, not solid fill).
+		mp := flameScalePath(flamePath, 540, 1080, c.maskScale)
+		feather := 110 * c.maskScale
+		if feather < 60 {
+			feather = 60
+		}
+		mask, err := aep.AddMask(l, c.name+"Mask", mp)
+		if err != nil {
+			t.Fatalf("AddMask %s: %v", c.name, err)
+		}
+		if err := mask.SetFeather([2]float64{feather, feather}); err != nil {
+			t.Fatalf("SetFeather %s: %v", c.name, err)
+		}
+
+		if err := l.SetBlendingMode(aep.BlendingModeAdd); err != nil {
+			t.Fatalf("SetBlendingMode %s: %v", c.name, err)
+		}
+
+		if _, err := aep.AnimateEffectParam(l, fn, "ADBE Fractal Noise-0023",
+			[]aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 4, Value: evoEnd}}); err != nil {
+			t.Fatalf("Animate FN Evolution %s: %v", c.name, err)
+		}
+		if _, err := aep.AnimateEffectParamVec(l, fn, "ADBE Fractal Noise-0013",
+			[]aep.VectorKeyframe{{Time: 0, Value: []float64{540, 960}}, {Time: 4, Value: []float64{540, offEndY}}}); err != nil {
+			t.Fatalf("Animate FN Offset %s: %v", c.name, err)
+		}
+		if _, err := aep.AnimateEffectParam(l, td, "ADBE Turbulent Displace-0006",
+			[]aep.ScalarKeyframe{{Time: 0, Value: 0}, {Time: 4, Value: tdEvoEnd}}); err != nil {
+			t.Fatalf("Animate TD Evolution %s: %v", c.name, err)
+		}
 	}
 
 	return rp
@@ -199,7 +251,7 @@ func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		t.Errorf("flame %s: frame all black — effect not rendering", ver)
 	}
 	if warm < 50 {
-		t.Errorf("flame %s: too few fire-colored pixels = %d (Tint not applied?)", ver, warm)
+		t.Errorf("flame %s: too few fire-colored pixels = %d (Tritone not applied?)", ver, warm)
 	}
 
 	// Motion: frame at t=1 must differ from t=3 (Evolution animating).

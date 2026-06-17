@@ -35,7 +35,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [keyframe-channels](keyframe-channels/INDEX.md) | 四通道关键帧 Position/Scale/Rotation/Opacity（渲 t=2s 插值 + readback） | ✅ complete |
 | [animated-path](animated-path/INDEX.md) | 动画路径几何 morph 横条→正方→竖条（渲 t=2s + extent readback） | ✅ complete |
 | [3d-camera](3d-camera/INDEX.md) | 3D 图层 + 相机：Z 视差（同尺寸卡按深浅渲大小不同）+ Rotate Y 透视 tumble（梯形） | ✅ complete |
-| [procedural-fx](procedural-fx/INDEX.md) | 程序化 FX v1 火焰（固态+FractalNoise+Tint+TurbulentDisplace+羽化 mask+Evolution 动画，effect-stack recipe） | ❌ 质量未过（用户真机否决「只有形态、不像火焰」；待 Phase 2 学样本重做） |
+| [procedural-fx](procedural-fx/INDEX.md) | 程序化火焰 v3（多层合成：黑底+3 火层 FractalNoise→Tritone→TurbulentDisplace+同心 mask 温度分区+Add 叠热芯+Glo2 Glow；技法 T3 additive-depth） | ✅ complete（用户真机验收过 2026-06-18；双版本 gate 绿、逐像素一致） |
 
 ## 📋 B 类 — 读值档（dump 值核对，不看图）
 
@@ -71,4 +71,4 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 > **15 个 🖼 可视方向 ✅ complete** · **3 个 📋 读值档 ✅ complete**(comp-settings / project-settings / camera-light) · **EG 🛑 BLOCKED**(面板崩溃,RE 候选) · **3 个 from-scratch 不可表达（markers/render-queue/media-replace，已注明）**。能力 showcase 覆盖收官。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。
 >
-> **番外 [procedural-fx] ❌ 质量未过**（2026-06-18,非能力域,是 `specs/procedural-fx-generator` 产品 demo）:火焰 v1 用户真机否决「只有形态、不像火焰」。roadmap 改顺序——先 Phase 2 学真实样本再重做,过用户关后才翻 complete。详 procedural-fx/INDEX.md。
+> **番外 [procedural-fx] ✅ complete**（2026-06-18,非能力域,是 `specs/procedural-fx-generator` 产品 demo）:火焰 v3 多层合成,用户真机验收过 + 双版本 gate 绿。经 v1(被否)→v2(单层修色温/Glow)→v3(多层出层次)三轮。详 procedural-fx/INDEX.md + `checklists/build-good-fire.md`。

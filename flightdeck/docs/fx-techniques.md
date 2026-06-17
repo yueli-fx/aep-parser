@@ -38,7 +38,7 @@ last_updated: 2026-06-18
 - **关键参数**：Max Horizontal/Vertical Displacement(方向+幅度;火焰=大垂直量拉火舌)、Size、Evolution(随时间变=动)。
 - **跨现象**：火舌✓ · 风吹弯/热浪○ · 水波/雨幕扰动○ · 扭曲转场○。
 
-### T3 多层 Add 叠深度 (additive-depth) ⭐ ✓自渲验证
+### T3 多层 Add 叠深度 (additive-depth) ⭐ ✅validated(双版本 gate + 用户验收)
 - **做什么**：把同一套"质料+扭曲+上色"图层**复制 N 份**(不同位移/偏移/色),用混合模式叠 → **层次感/深度**。**这是结构技法,不是单效果**(单层无论调参到顶都没深度)。
 - **实现**：`NewSolidLayer`×N + `Layer.SetBlendingMode`。`Add(相加)`重叠处变亮=自动长白热芯;`Difference(差值)`做"负相"层=暗筋/内部纹理;`Divide`压外层;`Screen`叠亮不溢。
 - **关键**：层数、各层位移/偏移/色温差异、混合模式选择。

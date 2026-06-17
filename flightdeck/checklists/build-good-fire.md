@@ -12,8 +12,8 @@ last_updated: 2026-06-18
 ## ⚠ 成熟度（诚实前提，别当已验证流程用）
 
 - **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（探针 `tmp_debug/dump_fxchain`/`dump_tdmn`，local）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
-- **「照此 build 就好看」= 假设，未验证**：plugin-free v2 还没做出过用户认可的好火焰（v1 被否、v2 待做）。**过双版本 AE ship-gate + 用户真机验收后才升级为「验证配方」**（交付准则红线4：值对≠渲染对；showcase review-gate：agent 眼验≠用户验收）。
-- 当前状态：**配方假设 + 重做处方**，给 v2 当蓝图。
+- **✅ 已升级为「验证配方」（2026-06-18）**：**v3 多层合成**（黑底+3 火层+同心 mask 温度分区+Add+Glo2，运动共相）经 **`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 gate 绿（逐像素一致）+ 用户真机验收过**。这条多层配方现在是验证过的,可照搬。
+- 历程：v1 被否（单层 Tint）→ v2（单层 Tritone+Glo2,修色温/Glow 但无层次）→ **v3 多层合成出层次（通过）**。下面参数表/步骤为 v3 实际值。
 
 ## 一句话原理
 
