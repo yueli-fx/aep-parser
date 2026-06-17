@@ -52,6 +52,12 @@ last_updated: 2026-06-18
 
 单层栈 `Fractal Noise → Tritone(三档色温) → Turbulent Displace → Glo2` + 羽化 mask + 黑底，AE2025 自渲：**色温/辉光/翻腾都对了**（修掉 v1 三个缺口），但**层次感不足**（用户：「调再多参数没意义了，示例是多层混合的」）。→ 坐实「单层调参到顶 = 一团有色温的火」，深度必须上多层合成。builder 见 `tmp_debug/flame2/`（local）。
 
+### v3 实证（2026-06-18，多层合成 → 层次感出来了）✓ 自渲验证 T3
+
+5 层结构(`tmp_debug/flame3/`，local)：黑底 + **3 个 Fractal Noise→Tritone→Turbulent Displace 火层**(不同噪声 scale=不同细节频率，越内层 Tritone 越热) + 顶部 Glo2 调整层。AE2025 自渲：清晰的**径向色温分层**——外深红 wispy → 中橙 → **内黄白热芯柱**，有舔动有翻腾，明显比 v2 有深度。
+
+**关键踩坑 → 关键解法**：3 层都 Add + **共用同一个 mask** → 各层 streak 并集填满 → 退化成"发光团块"(第一版 v3)。**解法 = 同心 mask(concentric)**：核层小 mask、中层中 mask、外层全 mask → 形成温度分区(外红中橙内白)而非实心填充。`scalePath(path, cx, cy, f)` 把火苗形向中心缩 f=0.5/0.76/1.0。**这是「多层 Add 叠深度(T3)」用于径向温度现象的具体手法**(详 `docs/fx-techniques.md` T3)。⚠ 仍是 agent 自渲，待用户真机验收。
+
 ## 核心配方（plugin-free，全 ADBE 原生，本库已 gate）
 
 按本库已验证的 from-scratch render harness（镜像 `orbit_demo`/v1 flame：`NewSolidLayer` + `AddEffect` + `SetEffectParam` + `AnimateEffectParam` + `AddMask`/`SetFeather` → `WriteAEP` → AE 渲一帧 PNG）：

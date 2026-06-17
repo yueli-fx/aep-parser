@@ -19,7 +19,7 @@
 - ✅ **步骤1 `cmd/aepdissect`**(done):正经 repo 工具,任意 .aep 一键出结构化报告(效果用量+原生/Cycore/第三方分级+预合成嵌套+逐层效果链)。= PARSE 步工具化。已在 Colorful Fire Ball 验证。
 - ✅ **步骤2 两层知识结构**(done):`docs/fx-techniques.md`=跨域技法库(T1 噪声造质料…T9 收尾,从火焰抽,标跨现象复用)+ `checklists/build-<现象>.md`=现象配方;交叉链已通。
 - ✅ **步骤4 喂第二现象**(done,闪电 Lightning Pack):框架在非程序化样本上验证通过——aepdissect 判出②素材+装配型,诚实结论「教不了生成闪电」,复用 T5 + 新增 T10–T13。两类元素概念催生。
-- ⬜ **步骤3 火焰 v3 多层合成**:验证 T3(additive-depth)——同套「噪声→Displacement Map→Ramp」复制 3–4 份 + 混合(Add 热芯/Difference 负火)+ 内外焰分层 + Glow。`NewSolidLayer`×N + `SetBlendingMode` + `SetEffectLayerParam`,全 gated。自渲自验 → 呈用户真机。
+- ✅ **步骤3 火焰 v3 多层合成**(done,自渲验证 T3):5 层(黑底+3 Fractal Noise→Tritone→TurbDisp 火层不同 scale + 顶 Glo2 调整层),**同心 mask** 形成径向温度分区(外深红→中橙→内黄白热芯柱),AE2025 自渲明显有层次。验证 T3 additive-depth 可行。builder `tmp_debug/flame3/`(local)。**⚠ 待用户真机验收**(agent 眼验≠验收)。踩坑+解法(同心防团块)记入 build-good-fire + fx-techniques T3。
 - ⬜ **可选:程序化闪电**(T14 `ADBE Lightning 2` 已在库,未验证)= 不靠素材纯生成电弧 + T5 Glow + T6 闪烁。
 - ⬜ 喂更多模版,继续长技法库。
 
