@@ -83,7 +83,7 @@ func (p *Property) SetExpressionEnabled(enabled bool) error {
 // Returns an error if the property is one built outside the parser
 // (no owning tdbs LIST reference).
 //
-//aep:cap domain=expr tier=stable verify=ae-accept gate=TestExpression_AEShipGate_AE2020,TestExpression_AEShipGate_AE2025,TestExprEffect_AEShipGate_AE2020,TestExprEffect_AEShipGate_AE2025 incident=expression-enable-byte-pair boundary="length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);单值表达式 round-trip,复杂引用未逐一验" alias="expression,表达式,js 表达式,wiggle 表达式,linkexpr"
+//aep:cap domain=expr tier=stable verify=ae-accept gate=TestExpression_AEShipGate_AE2020,TestExpression_AEShipGate_AE2025,TestExprEffect_AEShipGate_AE2020,TestExprEffect_AEShipGate_AE2025 incident=expression-enable-byte-pair boundary="length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);写入端字节路径已穷尽(5 类 idiom 双版本 gated:静态/跨层/带关键帧/时变/读 effect 参数);linear/ease/valueAtTime 等未单独 gate=机制内容无关 closed decision" alias="expression,表达式,js 表达式,wiggle 表达式,linkexpr"
 func (p *Property) SetExpression(source string) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no tdbs reference (built outside parser?)", p.MatchName)

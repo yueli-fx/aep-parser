@@ -1187,7 +1187,7 @@
         "TestExprEffect_AEShipGate_AE2020",
         "TestExprEffect_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);单值表达式 round-trip,复杂引用未逐一验",
+      "boundary": "length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);写入端字节路径已穷尽(5 类 idiom 双版本 gated:静态/跨层/带关键帧/时变/读 effect 参数);linear/ease/valueAtTime 等未单独 gate=机制内容无关 closed decision",
       "incident": [
         "expression-enable-byte-pair"
       ],

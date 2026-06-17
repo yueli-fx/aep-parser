@@ -72,7 +72,7 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `*Property.SetExpression` | 🟢stable | ae-accept | 2020 | TestExpression_AEShipGate_AE2020<br>TestExpression_AEShipGate_AE2025<br>TestExprEffect_AEShipGate_AE2020<br>TestExprEffect_AEShipGate_AE2025 | SetExpression rewrites the JavaScript expression source attached to this property. ⚠length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);单值表达式 round-trip,复杂引用未逐一验 |
+| `*Property.SetExpression` | 🟢stable | ae-accept | 2020 | TestExpression_AEShipGate_AE2020<br>TestExpression_AEShipGate_AE2025<br>TestExprEffect_AEShipGate_AE2020<br>TestExprEffect_AEShipGate_AE2025 | SetExpression rewrites the JavaScript expression source attached to this property. ⚠length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);写入端字节路径已穷尽(5 类 idiom 双版本 gated:静态/跨层/带关键帧/时变/读 effect 参数);linear/ease/valueAtTime 等未单独 gate=机制内容无关 closed decision |
 | `*Property.SetExpressionEnabled` | 🟢stable | roundtrip | 2020 |  | SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself). ⚠length-preserving 低风险;tdb4 @0x77 1 byte;无专门 AE gate→round-trip;仅对有 tdbs 的属性有效 |
 | `*Project.SetExpressionEngine` | 🟢stable | roundtrip | 2020 |  | SetExpressionEngine writes the ExEn Utf8. ⚠length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);无专门 AE gate→round-trip |
 
