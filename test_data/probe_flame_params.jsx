@@ -21,6 +21,10 @@
         dump("ADBE Fractal Noise");
         dump("ADBE Turbulent Displace");
         dump("ADBE Tint");
+        dump("ADBE Tritone");
+        dump("ADBE Glo2");
+        dump("ADBE Ramp");
+        dump("ADBE 4ColorGradient");
     } catch (e) { log.push("EXC " + e.toString() + " line=" + e.line); }
     var m = new File(dir + "probe_flame_params.done"); m.open("w"); m.write(log.join("\n")); m.close();
     try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); } catch (e) {}

@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-18 by claude（**火焰 Phase 0 命门=质量未过**:7 任务 done + 双版本 gate 绿,但用户真机否决「只有形态、不像火焰」→ roadmap 改顺序=先 Phase 2 学真实样本再重做、过用户关后才参数化。Phase 0 plan 已 archive、showcase procedural-fx 标 ❌质量未过、incident procedural-fx-over-vector +Case2。用户已放样本 `samples/Colorful Fire Ball`(+.rar,已 gitignore)。）
+**Last updated**: 2026-06-18 by claude（**火焰 Phase 2 进行中**:样本 #1 解析 → 配方 + **效果用途词典(角色→效果)**固化进 `checklists/build-good-fire.md`。v2 单层栈(Tritone 色温+Glo2 辉光)AE2025 自渲修掉 v1 三缺口,但**层次感不足**——用户定调「层次感来自多层混合,不是调参」。下一步 v3 = 多层合成结构。Phase 0 plan 已 archive、showcase ❌质量未过。）
 
 **Active focus**: **火焰程序化 FX 番外**(`specs/2026-06-18-procedural-fx-generator.md`)。Phase 0(纯 Go 手搓确定性火焰)命门**质量未过**——库能确定性造可辨认火焰 + 效果栈/param/animate/mask 全 gated(狭义达成),但**手搓配方只到「可辨认」、到不了「好」**(用户真机否决:缺白热芯/色温渐变/Glow/舔动)。**核心教训**:好视觉的效果栈+参数必须从真实人做的样本学,凭空调参到玩具档。**下一步=Phase 2(学样本)**:用户已放真实火焰工程 `samples/Colorful Fire Ball`,解析抽「好火焰」效果栈+参数 → 重做 → 再过用户关,之后才参数化(原 Phase 1,已推后)。读写主线 + roundtrip→ae-accept 补验 arc 早收口(残值 backlog 见 `specs/2026-06-18-roundtrip-ae-accept-residual.md`,需求驱动)。**不变量**:知识单一家 = flightdeck + CLAUDE.md;能力真相源 = capindex(`go run ./cmd/capindex -q <词>`);每渲染类双版本 AE ship-gate(红线4);火焰=番外(`incidents/procedural-fx-over-vector.md` Case2)。
 
@@ -13,12 +13,12 @@
 
 ## 下一步
 
-**Phase 2 — 火焰 v2 plugin-free 重做(配方已就绪,待开工)**。样本 #1(`samples/Colorful Fire Ball`)已解析,配方 + 参数影响固化进 **`checklists/build-good-fire.md`**(preflight 自动载入,接力不必重解析)。
+**Phase 2 — 火焰 v3 多层合成(为「层次感」,待开工)**。v2 单层栈(Fractal Noise→Tritone→Turbulent Displace→Glo2+mask+黑底)AE2025 自渲:**色温/辉光/翻腾对了**(修掉 v1 三缺口),但**层次感不足**——用户定调:「**调再多参数没意义了,层次感来自多层混合**」。坐实单层天花板。
 
-- **按 checklist 处方做 v2**(纯原生):`Fractal Noise(高对比+上滚+evolution 关键帧)→ Displacement Map 拉 Ramp 色温渐变(大垂直量)→ 多层 Add → Glo2 辉光`;火苗轮廓羽化 mask。补齐 v1 被否的四缺口(白热芯/色温渐变/Glow/舔动)。动画走 `AnimateEffectParam` 关键帧(非表达式)。
-- → 双版本 AE ship-gate + showcase 自渲 Read png 自验 → 呈用户**真机复核**。过了才翻 showcase `procedural-fx` complete、checklist 升「验证配方」、才谈参数化(原 Phase 1,已推后)。
-- **待用户定**:渲染依赖档位(纯原生 / +Cycore自带 / +第三方)——但核心火焰不被它阻塞,先做。
-- 依据:`checklists/build-good-fire.md` · `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1 · `incidents/procedural-fx-over-vector.md` Case2。
+- **v3 = 搭多层合成结构**(非继续调参):同套「噪声→Displacement Map→Ramp」图层**复制 3–4 份**(不同位移/偏移/色温)+ **混合模式**(`Add` 叠热芯 / `Difference` 做负火出暗筋 / `Divide`)+ 内外焰分层 + 全局 Glow。本库可做(`NewSolidLayer`×N + `AddEffect` + `Layer.SetBlendingMode` + `SetEffectLayerParam` 指噪声层,全 gated)。
+- **角色词典(效果→用途)+「层次感=合成结构」已固化** `checklists/build-good-fire.md`(本次新增,比参数表重要)。
+- → v3 自渲自验 → 呈用户真机 → 过了才双版本 gate + showcase 升级 + checklist 升「验证配方」。
+- v2 builder 在 `tmp_debug/flame2/`(local);依据 `checklists/build-good-fire.md` · `specs/...procedural-fx-generator.md` § 样本解析 #1。
 
 **次要(需求驱动)**:残值 backlog(剩 53 roundtrip)→ `specs/2026-06-18-roundtrip-ae-accept-residual.md`;能力真相源 `go run ./cmd/capindex -q <词>`。
 
