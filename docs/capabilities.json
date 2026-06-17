@@ -10622,10 +10622,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextFont_AEShipGate_AE2020",
+        "TestTextFont_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;fontName 须真实已装系统字体的 PostScript 名(如 ArialMT);双版本 AE gated(text-font)",
       "incident": null,
       "alias": [
         "add font",
@@ -11754,10 +11757,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextFont_AEShipGate_AE2020",
+        "TestTextFont_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;双版本 AE gated(text-font:AddFont(ArialMT)+SetRunFontIndex→DOM textDocument.font=ArialMT)",
       "incident": null,
       "alias": [
         "font index",

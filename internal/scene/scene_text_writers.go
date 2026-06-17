@@ -131,7 +131,7 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 // the Fonts table (TextSource.Fonts). Caller is responsible for ensuring
 // the index is in range; the underlying psValue is just an integer.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;无专门 AE gate→round-trip" alias="font index,字体索引,switch font,change font"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextFont_AEShipGate_AE2020,TestTextFont_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;双版本 AE gated(text-font:AddFont(ArialMT)+SetRunFontIndex→DOM textDocument.font=ArialMT)" alias="font index,字体索引,switch font,change font"
 func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -426,7 +426,7 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 // Returns an error if the layer isn't a text layer or the btdk Fonts
 // array can't be located.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;无专门 AE gate→round-trip" alias="add font,添加字体,font table,字体表,register font"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextFont_AEShipGate_AE2020,TestTextFont_AEShipGate_AE2025 boundary="length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;fontName 须真实已装系统字体的 PostScript 名(如 ArialMT);双版本 AE gated(text-font)" alias="add font,添加字体,font table,字体表,register font"
 func (l *Layer) AddFont(fontName string) (int, error) {
 	if l.back == nil || l.TextSource == nil {
 		return -1, fmt.Errorf("layer %q: not a text layer", l.Name)
