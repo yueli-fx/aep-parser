@@ -1923,14 +1923,14 @@ func (n *WigglePathsNode) SetDetail(v float64) error { return n.detail.SetStatic
 // SetWigglesPerSecond sets the temporal frequency (`ADBE Vector Temporal Freq`,
 // the Wiggles/Second control — how fast the random edge churns over time).
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="调制参数 evidence-defer,本质不可像素门禁" alias="wiggle frequency,路径抖动频率,wiggles per second,temporal frequency"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Temporal Freq 值读回)" alias="wiggle frequency,路径抖动频率,wiggles per second,temporal frequency"
 func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error {
 	return n.wigglesPerSecond.SetStaticValue(v)
 }
 
 // SetRandomSeed sets the random seed selecting the displacement pattern.
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="调制参数 evidence-defer,本质不可像素门禁" alias="wiggle random seed,路径抖动随机种子,random seed"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Random Seed 值读回)" alias="wiggle random seed,路径抖动随机种子,random seed"
 func (n *WigglePathsNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
 
 // SetPoints selects Corner (sharp displaced spikes, the default) or Smooth
@@ -1969,7 +1969,7 @@ func (n *WigglePathsNode) SetCorrelation(v float64) error {
 // random edge with no categorically-correct pixel result, so it is
 // roundtrip-verified (evidence-based: not pixel-gatable).
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle temporal phase,路径抖动时间相位,roughen temporal phase"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)" alias="wiggle temporal phase,路径抖动时间相位,roughen temporal phase"
 func (n *WigglePathsNode) SetTemporalPhase(v float64) error {
 	n.temporalPhase = v
 	n.temporalPhaseSet = true
@@ -1981,7 +1981,7 @@ func (n *WigglePathsNode) SetTemporalPhase(v float64) error {
 // Default 0; non-default materializes the `ADBE Vector Spatial Phase` leaf on
 // lower. Roundtrip-verified for the same reason as TemporalPhase.
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle spatial phase,路径抖动空间相位,roughen spatial phase"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)" alias="wiggle spatial phase,路径抖动空间相位,roughen spatial phase"
 func (n *WigglePathsNode) SetSpatialPhase(v float64) error {
 	n.spatialPhase = v
 	n.spatialPhaseSet = true
@@ -2075,14 +2075,14 @@ func (n *WiggleTransformNode) Transform() *WigglerTransform { return n.transform
 
 // SetWigglesPerSecond sets the temporal frequency (how fast the transform churns).
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="调制参数 evidence-defer,本质不可像素门禁" alias="wiggle transform frequency,变换抖动频率,wiggles per second"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Temporal Freq 值读回)" alias="wiggle transform frequency,变换抖动频率,wiggles per second"
 func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error {
 	return n.wigglesPerSecond.SetStaticValue(v)
 }
 
 // SetRandomSeed sets the random seed selecting the wiggle pattern.
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="调制参数 evidence-defer,本质不可像素门禁" alias="wiggle transform random seed,变换抖动随机种子,random seed"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Random Seed 值读回)" alias="wiggle transform random seed,变换抖动随机种子,random seed"
 func (n *WiggleTransformNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
 
 // SetCorrelation sets how correlated the random transform jitter is between
@@ -2092,7 +2092,7 @@ func (n *WiggleTransformNode) SetRandomSeed(v float64) error { return n.randomSe
 // smoothness, with no single-frame categorically-correct pixel result, so it is
 // roundtrip-verified (evidence-based: not pixel-gatable).
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="时变抖动调制,本质不可单帧像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle transform correlation,变换抖动相关性"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="时变抖动调制,本质不可单帧像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Correlation 值读回)" alias="wiggle transform correlation,变换抖动相关性"
 func (n *WiggleTransformNode) SetCorrelation(v float64) error {
 	if v < 0 || v > 100 {
 		return fmt.Errorf("WiggleTransformNode.SetCorrelation: %g out of range (want 0..100)", v)
@@ -2107,7 +2107,7 @@ func (n *WiggleTransformNode) SetCorrelation(v float64) error {
 // Phase` leaf on lower. Roundtrip-verified (noise phase selection, not
 // pixel-gatable).
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle transform temporal phase,变换抖动时间相位"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)" alias="wiggle transform temporal phase,变换抖动时间相位"
 func (n *WiggleTransformNode) SetTemporalPhase(v float64) error {
 	n.temporalPhase = v
 	n.temporalPhaseSet = true
@@ -2119,7 +2119,7 @@ func (n *WiggleTransformNode) SetTemporalPhase(v float64) error {
 // Phase` leaf on lower. Roundtrip-verified (noise phase selection, not
 // pixel-gatable).
 //
-//aep:cap domain=shape tier=alpha verify=roundtrip boundary="噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证" alias="wiggle transform spatial phase,变换抖动空间相位"
+//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)" alias="wiggle transform spatial phase,变换抖动空间相位"
 func (n *WiggleTransformNode) SetSpatialPhase(v float64) error {
 	n.spatialPhase = v
 	n.spatialPhaseSet = true

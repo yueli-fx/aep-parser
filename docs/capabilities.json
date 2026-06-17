@@ -8476,10 +8476,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "时变抖动调制,本质不可单帧像素门禁,roundtrip+synthesis-insert 验证",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "时变抖动调制,本质不可单帧像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Correlation 值读回)",
       "incident": null,
       "alias": [
         "wiggle transform correlation",
@@ -9395,10 +9398,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "调制参数 evidence-defer,本质不可像素门禁",
+      "gate": [
+        "TestMGWiggleTransform_AEShipGate_AE2020",
+        "TestMGWiggleTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Random Seed 值读回)",
       "incident": null,
       "alias": [
         "wiggle transform random seed",
@@ -9417,10 +9423,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "调制参数 evidence-defer,本质不可像素门禁",
+      "gate": [
+        "TestMGWiggle_AEShipGate_AE2020",
+        "TestMGWiggle_AEShipGate_AE2025"
+      ],
+      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Random Seed 值读回)",
       "incident": null,
       "alias": [
         "wiggle random seed",
@@ -9684,10 +9693,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)",
       "incident": null,
       "alias": [
         "wiggle transform spatial phase",
@@ -9705,10 +9717,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)",
       "incident": null,
       "alias": [
         "wiggle spatial phase",
@@ -9876,10 +9891,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)",
       "incident": null,
       "alias": [
         "wiggle transform temporal phase",
@@ -9897,10 +9915,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "噪声相位采样,本质不可像素门禁,roundtrip+synthesis-insert 验证",
+      "gate": [
+        "TestMGWiggleModRT_AEShipGate_AE2020",
+        "TestMGWiggleModRT_AEShipGate_AE2025"
+      ],
+      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)",
       "incident": null,
       "alias": [
         "wiggle temporal phase",
@@ -10052,10 +10073,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "调制参数 evidence-defer,本质不可像素门禁",
+      "gate": [
+        "TestMGWiggle_AEShipGate_AE2020",
+        "TestMGWiggle_AEShipGate_AE2025"
+      ],
+      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Temporal Freq 值读回)",
       "incident": null,
       "alias": [
         "wiggle frequency",
@@ -10075,10 +10099,13 @@
     "cap": {
       "domain": "shape",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "调制参数 evidence-defer,本质不可像素门禁",
+      "gate": [
+        "TestMGWiggleTransform_AEShipGate_AE2020",
+        "TestMGWiggleTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Temporal Freq 值读回)",
       "incident": null,
       "alias": [
         "wiggle transform frequency",
