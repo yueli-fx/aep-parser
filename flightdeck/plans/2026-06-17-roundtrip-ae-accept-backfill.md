@@ -35,7 +35,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批5a**(500a6d4):**8 classic Material setter** 升 ae-accept(双版本)。**关键勘探**:唯一现成 material fixture `re_material_options.aep` 是 AE25 存的、**AE2020 直接拒开** → 无法双版本验;故 **author 一个 AE2020-native 载体** `re_material_classic_2020.aep`(AE2020 builder JSX 造 3D solid + 设 classic material 非默认值 materialize),两版本都能开。覆盖 LightTransmission/AcceptsShadows/AcceptsLights/Ambient/Diffuse/Specular/Shininess/Metal。新 gate `TestMaterialClassic_AEShipGate_AE2020/AE2025`。
 - ✅ **批6**(comp 域):**22 Composition setter** 升 ae-accept(双版本,**from-scratch gate** `TestCompSettings_AEShipGate_AE2020/AE2025`,5 个 from-scratch comp DOM readback)。comp 设置写 cdta 固定字节无 elision,NewComposition 已双版本 → from-scratch 即载体,无需造文件。调试勘出 2 真问题:**SetFrameRate+SetDuration 同 comp → AE 读时长被 newFps/oldFps 缩放**(真 bug,新 incident `comp-setframerate-no-duration-rescale`,gate 解耦验);**SetDraft3D @0x8A bit0 AE DOM 不反映**(留 roundtrip 待 RE)。
 - ✅ **批7**(text 域):**13 SetRun* style setter** 升 ae-accept(双版本)。载体 = from-scratch 单 run 文本(NewTextLayer+SetText("Ag")),每个 SetRun0 浮现为 **whole-doc textDocument** 属性,AE2020 也可读(characterRange 仅 per-run/AE2022+ 才需)。覆盖 FillColor/StrokeColor/ApplyStroke/StrokeWidth/StrokeOverFill/FauxBold/FauxItalic/BaselineShift/AutoLeading/Leading/HScale/VScale/Tsume。**修真 bug**:SetRunTsume 误用 FormatPSNumber(裸整数→AE 当 16.16 定点 /65536),改 FormatPSReal。
-- `ae-accept` 35→**113**;`roundtrip` 279→**201**。
+- ✅ **批7b**(text 段落):**5 SetParagraph indent/spacing** 升 ae-accept(双版本)。**又抓+修一个真 bug**:5 个 setter 同 tsume FormatPSReal bug(写 20 → AE 读 20/65536)。discovery gate 实证 → 改 FormatPSReal。AE2025 DOM 验 firstLineIndent/spaceBefore/spaceAfter,StartIndent/EndIndent(AE 无 leftMargin/rightMargin DOM)+ AE2020(无段落 DOM)靠双版本 resave-preservation。新 incident `btdk-point-value-needs-formatpsreal`(模式总结,复发两次)。
+- `ae-accept` 35→**118**;`roundtrip` 279→**196**(跌破 200)。
 
 ## 待办(按 ROI / 难度排)
 
@@ -60,7 +61,7 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
   - `SetDraft3D`:@0x8A bit0,AE2025 `comp.draft3d` DOM 不反映(其余 5 个 @0x8B flag 全反映)→ 留 roundtrip,须 RE 正确 bit/字段。
 - ~~**text 33**~~ ✅ **批7 主体已清**:13 SetRun* style 双版本(单 run whole-doc DOM)。**残 text(→7b/7c)**:
   - **SetRun* enum/index 残**:`SetRunFontIndex`(换字体,需多字体)·`SetRunDigitSet`·`SetRunAutoKernType`·`SetRunBaselineOption`(AE24+)·`SetRunLineJoinType`(AE24+)·`SetRunNoBreak` —— 多映射 textDocument 枚举属性,可仿批7 加进同 gate 验(部分 AE24+ 单版本)。
-  - **SetParagraph* 10**(StartIndent/EndIndent/FirstLineIndent/SpaceBefore/SpaceAfter/LeadingType/AutoHyphenate/HangingRoman/Direction):⚠ **5 个 indent/spacing 用 FormatPSNumber**(back_layer.go:892-912,**疑同 tsume FormatPSReal bug**,先验!)。段落级 DOM 需 `paragraphRange()`(AE2022+)→ AE2020 读不回 → 多数只能 acceptance 或 AE2025 单版本。SetParagraphJustification 已 render-gated。
+  - ~~**SetParagraph 5 indent/spacing**~~ ✅ **批7b 已清(含 bug 修)**。**残 SetParagraph bool/enum 4**:`SetParagraphAutoHyphenate`(/9 bool)·`SetParagraphLeadingType`(/8 enum)·`SetParagraphHangingRoman`(/21 bool)·`SetParagraphDirection`(/33 enum)——格式 OK(非 point),但 DOM 多 AE2022+/单版本,可走 resave-preservation 双版本(仿批7b)。SetParagraphJustification 已 render-gated。
   - `SetManualKerning`(incident `kerning-first-enable`,难)·`AddFont`(字体表)·text animator(AddTextRotationX/YAnimator/AnimateTextOpacity,结构性,另批)。
 - **shape 23**:⚠ render-pixel 类(颜色/描边),按红线4 验渲染像素不只值。
 - **keyframe 13 / mask 8 / structural 8**:渲染或结构接受验。
