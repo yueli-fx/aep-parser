@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-06-17 by claude（本会话连推：effects wave 11 layer-ref + wave 12 收回 wave-6 parked 经典(库 203→216,全大写 match-name) · mask 域全收口(>4kf 容量分页 6kf + maskFeatherFalloff mkif @0x03 翻案"不可达")。均双版本 gate。另删 deferred-backlog spec。· expr backlog 撤项（按函数补 gate = closed decision，机制已闭环）。· 启动 roundtrip→ae-accept 补验 arc：layer-set 批1-3 共 17 setter 升 ae-accept(35→53)，RE 修好 SetComment from-scratch 假绿(ldta @0x3C has-comment flag)，立跨对话 drain 清单 plan。）
 
-**Active focus**: **roundtrip→ae-accept 补验 arc**(2026-06-17 起;详 `## 下一步` + `plans/2026-06-17-roundtrip-ae-accept-backfill.md`)。库能力主线早已全收口,此 arc 把"标 stable 但只 Go round-trip、从没让真 AE 消化"的写能力按域补双版本 AE 验(验证洁癖洞)。layer-set 主体已清(批1-4,ae-accept 35→**70**,roundtrip→244),含 RE 修好 SetComment 假绿 + 批4 坐实"camera/light options 17 setter 早被 NewCameraLight 双版本 gate 覆盖只是没标"。**不变量**:知识单一家 = flightdeck + CLAUDE.md(auto-memory 已退役);能力真相源 = capindex(`go run ./cmd/capindex -q <词>`,CI 强制零漏标);每渲染类双版本 AE ship-gate(红线4)。火焰=番外(`incidents/procedural-fx-over-vector.md`)。
+**Active focus**: **roundtrip→ae-accept 补验 arc**(2026-06-17 起;详 `## 下一步` + `plans/2026-06-17-roundtrip-ae-accept-backfill.md`)。库能力主线早已全收口,此 arc 把"标 stable 但只 Go round-trip、从没让真 AE 消化"的写能力按域补双版本 AE 验(验证洁癖洞)。layer-set 主体已清(批1-5a,ae-accept 35→**78**,roundtrip→236),含 RE 修好 SetComment 假绿 · 批4 坐实"camera/light options 17 setter 早被 NewCameraLight 双版本 gate 覆盖只是没标" · 批5a author AE2020-native 载体让 8 classic material setter 双版本 gated(因唯一现成 material fixture 是 AE25 存的、AE2020 拒开)。**不变量**:知识单一家 = flightdeck + CLAUDE.md(auto-memory 已退役);能力真相源 = capindex(`go run ./cmd/capindex -q <词>`,CI 强制零漏标);每渲染类双版本 AE ship-gate(红线4)。火焰=番外(`incidents/procedural-fx-over-vector.md`)。
 
 ## 进行中
 
@@ -18,8 +18,8 @@
 - **批3 ✅**:SetName(length-variable)/SetStartTime/SetParent(两层 fixture)。`ae-accept` 35→**52**,roundtrip→262。
 - **批3 抓出 + 修好真假绿**:`Layer.SetComment` from-scratch 层 AE 读回空。RE **推翻"位置"假说**(cmta 本就该在 Layr 末尾),真因 = ldta **@0x3C has-comment flag**(此前未解字节)+ cmta **double-NUL**。已修 + 纳入批3 gate,`ae-accept` 52→**53**。incident RESOLVED(`layer-setcomment-cmta-append-position`)。**连带:item-level setItemComment 同走 EncodeCmta 但无 ldta@0x3C 等价物,补 comp 域须 RE idta flag**。
 - **批4 ✅**(594409a):camera/light options **17 setter** 升 ae-accept(9 camera Zoom+8 Iris / 6 light / 2 spot)。**零新 fixture**——核实出"早被双版本 `TestNewCameraLight_AEShipGate_*` DOM-readback+resave 覆盖,只是 tag 停 roundtrip",自跑双版本确认真绿才标。`ae-accept` 53→**70**,roundtrip→**244**。
-- **下一批 = 批5:`SetMaterial*` 16 个**(最大残块,typed setter 未 AE 验)。**⚠ 非快活,设计约束已勘记 plan**:载体须用真 fixture `re_material_options.aep`(禁 from-scratch,material 树被 elide)· **版本劈裂**(advanced material ~6 疑 AE2020 不暴露,先探测 → 双版本只验 classic ~10,advanced minver=2024 单 AE2025)· default-elision 用姊妹 solid 读 AcceptsShadows/Shininess。
-- 批5 后:comp 37(⚠ item comment idta flag)→ text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。残:SetGeometry*(3,renderer-gated 待核实可达)·SetLightSource(AE24+环境灯,niche)·layer-set bool 残项(Stretch/AutoOrient/IsNull/audio/frameblend)。
+- **批5a ✅**(500a6d4):8 classic Material setter 双版本 ae-accept。关键 = author AE2020-native 载体(通用解法:3D/material/renderer 双版本 gate 须用目标低版本 author fixture)。残 material 8(ShadowColor + 7 ray-traced)+ geometry 3 判定基本不可达双版本(AE2020 classic 不暴露/禁用,无单版本 ae-accept 先例),搁置;详 plan。
+- **下一批 = 批5b/6:comp 37**(⚠ `Composition.SetComment` 带 item-comment idta-flag 嫌疑,先 RE diff idta;其余 duration/framerate/bg/resolution DOM 可读)→ text 33(btdk DOM 可读,核实重复)→ shape 23(渲染像素,红线4)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。layer-set bool 残项(Stretch/AutoOrient/IsNull/audio/frameblend)按需。
 - 域分布查询:`pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq 'roundtrip'}|group {$_.cap.domain}"`。
 
 需求驱动残项(arc 外,按需):能力查询 `go run ./cmd/capindex -q <词>`。

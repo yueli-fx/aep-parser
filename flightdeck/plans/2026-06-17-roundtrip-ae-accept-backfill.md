@@ -32,7 +32,8 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - ✅ **批2**(83fff35):layer-set 7 AV-field — InPoint/OutPoint/PreserveTransparency/SamplingBicubic/IsGuide/IsAdjust/Label。
 - ✅ **批3**(87cd03b + 0e700cf):SetName/SetStartTime/SetParent + **SetComment(修了假绿)**。
 - ✅ **批4**(594409a):camera/light options **17 setter** 升 ae-accept — **零新 fixture,纯补标验证洁癖洞**。早被双版本真 AE gate `TestNewCameraLight_AEShipGate_AE2020/AE2025`(verify_camera_light.jsx DOM readback 逐项 near() + resave-parse 值存活)覆盖,只是 tag 一直停 roundtrip;本批**自跑双版本确认现在真绿**(AE2025 11.6s/AE2020 16.7s,23 项 DOM 值全对)才标。覆盖:9 camera(SetCameraZoom + 8×SetIris*) + 6 light(Color/FalloffType/FalloffStart/FalloffDistance/ShadowDarkness/ShadowDiffusion) + 2 spot(ConeAngle/ConeFeather)。
-- `ae-accept` 35→**70**;`roundtrip` 279→**244**。
+- ✅ **批5a**(500a6d4):**8 classic Material setter** 升 ae-accept(双版本)。**关键勘探**:唯一现成 material fixture `re_material_options.aep` 是 AE25 存的、**AE2020 直接拒开** → 无法双版本验;故 **author 一个 AE2020-native 载体** `re_material_classic_2020.aep`(AE2020 builder JSX 造 3D solid + 设 classic material 非默认值 materialize),两版本都能开。覆盖 LightTransmission/AcceptsShadows/AcceptsLights/Ambient/Diffuse/Specular/Shininess/Metal。新 gate `TestMaterialClassic_AEShipGate_AE2020/AE2025`。
+- `ae-accept` 35→**78**;`roundtrip` 279→**236**。
 
 ## 待办(按 ROI / 难度排)
 
@@ -41,13 +42,15 @@ pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq '
 - **结构/引用类**:`SetSource`/`ReplaceSource`(需第二 source)、`SetTrackMatte`/`SetTrackMatteLayer`/`ClearTrackMatteLayer`/`SetTrackMatteSource`/`RemoveTrackMatte`(需两层 + matte,AE23+)、`SetAlternateSource`/`ClearAlternateSource`(需 blsi slot)。
 - ~~**light/iris/camera-zoom 间接覆盖**~~ ✅ **批4 已清**:核实结论坐实"验证洁癖洞"——17 个早被 `TestNewCameraLight_AEShipGate_*` 实测覆盖,只补标。
 - **残项(批4 后剩,需独立 fixture)**:
-  - `SetMaterial*`(**16 个,下批首选**;SetMaterialCastsShadows 已 render-pixel gated 不在内):仅 `layer_3d_test.go` **纯 Go round-trip**(非 ship-gate);`layer_3d_shadow_shipgate` 只走泛型 `SetMaterialOption("ADBE Casts Shadows")`,**typed setter 未 AE 验**。**批5 设计约束(已勘,勿盲目照抄 new_camera_light)**:
-    1. **载体必须 `test_data/re_material_options.aep`**(本地存在,AE 原生 3D solids 带完整 17-prop material 树)——**禁 from-scratch**:from-scratch 3D solid 的 material 树被 AE elide 成空、无槽可写(红线7)。读真 aep+局部改+写回 = 库核心强项。
-    2. **⚠ 版本劈裂**:fixture 是 AE24+ Advanced 3D。`Reflection/Glossiness/Fresnel/Transparency/TranspRolloff/IndexOfRefraction/AppearsInReflections`(~6-7)疑为 **Advanced-3D 专属**,AE2020 classic 渲染器大概率不暴露 → 双版本 gate 的 **AE2020 腿只能验 classic 子集**(Ambient/Diffuse/Specular/Shininess/Metal/AcceptsShadows/AcceptsLights/LightTransmission/ShadowColor ~10);advanced 子集须 `minver=2024` 单 AE2025 验。**起手先 AE2020 探测**:它能否开这个 fixture + `layer.materialOption.property("ADBE Reflection Coefficient")` 是否非 null。
-    3. **default-elision**:custom solid 上 AcceptsShadows/Shininess 被 AE 剪枝(JSX 写了默认值),须找**姊妹 default solid** 读那两个(见 layer_3d_test.go:146-162)。
-    4. DOM 读法:`layer.materialOption.property("ADBE Ambient Coefficient")` 等(非 threeDLayer)。可值验→ae-accept(非 render-pixel,除非额外渲染)。
-  - `SetGeometry*`(3,BevelDirection/PlaneCurvature/PlaneSubdivision):3D Geometry Options,需 Cinema4D/Advanced 3D renderer——**先核实 AE2020 标准渲染器是否可达/可读**,可能不可表达。
+  - ~~`SetMaterial*` 8 classic~~ ✅ **批5a 已清**(500a6d4)。**勘探实证(覆盖原"版本劈裂"假说)**:
+    - `re_material_options.aep` 是 **AE25 存的,AE2020 直接拒开**(不是"advanced prop 读不回",是整个 fixture 开不了)→ 双版本不可能用它。
+    - 解法 = **author AE2020-native 载体** `re_material_classic_2020.aep`(builder `test_data/build_material_classic_2020.jsx`,AE2020 造 3D solid + 设 classic material 非默认值 materialize)。两版本都能开。**这是 3D/material/renderer 类需双版本 gate 的通用解法:载体必须用目标低版本 author**。
+    - **AE2020 classic 渲染器实勘**:16 prop 暴露,**9 classic 可设**(本批 8 + CastsShadows 已 gated);**ShadowColor AE2020 不暴露(MISS)**;**7 ray-traced(Reflection/Glossiness/Fresnel/Transparency/TranspRolloff/IOR/AppearsInReflections)classic 禁用**(setValue 报"惰性/父级隐藏")。
+    - **AcceptsShadows/AcceptsLights 默认=1**:Go 设 1 → AE resave elide → Go 读不回(正确行为),DOM readback 为权威证明。
+  - **残:material 8(ShadowColor + 7 ray-traced)** 留 roundtrip(boundary 已文档化)。升级须 AE2025 单版本(**无单版本 ae-accept 先例**,全是双版本)或 **author AE2020 ray-traced 载体**(ray-traced 渲染器重、deprecated;ShadowColor/AppearsInReflections 是 2024+ AE2020 真没有)→ ROI 低,**判定基本不可达双版本,搁置**。
+  - `SetGeometry*`(3,BevelDirection/PlaneCurvature/PlaneSubdivision):3D Geometry Options,需 Advanced 3D renderer(2024+),**AE2020 无 → 同 ray-traced 不可双版本,搁置**(boundary 待补文档)。
   - `SetLightSource`(AE24+ 环境灯专用,需 environment-light + 源层两载体):niche,最后做。
+  - **复用资产**:`tmp_debug/scan_material_fixture`(Go dump 任 aep 每层 material prop 存在性)·`test_data/probe_material.jsx`(AE 跑,dump materialOption 树 matchName+value,版本探测用)——均本地未 tracked。
 
 ### B. 其它域(每域一/几个综合 fixture)
 - **comp 37**:⚠ **带着 item-comment idta-flag 嫌疑去**——`Composition.SetComment` 走同款 `EncodeCmta`(现已 double-NUL)但 item 无 ldta@0x3C,大概率需某 idta flag(同 SetComment 真因)。先 RE:AE 原生设 comp comment→存盘→`diff` idta 找 has-comment flag。其余 comp setter(duration/framerate/bg/resolution…)DOM 可读。
