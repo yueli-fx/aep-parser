@@ -19,7 +19,7 @@ import (
 // SetVisible toggles the layer's video switch (the 👁️ icon).
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="visible,visibility,显示,隐藏,视频开关,eye toggle"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)" alias="visible,visibility,显示,隐藏,视频开关,eye toggle"
 func (l *Layer) SetVisible(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -34,7 +34,7 @@ func (l *Layer) SetVisible(v bool) error {
 // SetSolo toggles the layer's Solo flag.
 // length-preserving (single bit @ldta 0x26).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip" alias="solo,独奏,单独显示"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x26;双版本 AE gated(layer-av-flags 批量 fixture)" alias="solo,独奏,单独显示"
 func (l *Layer) SetSolo(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -49,7 +49,7 @@ func (l *Layer) SetSolo(v bool) error {
 // SetShy toggles the layer's Shy flag (hides from the shy-filter view).
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="shy,羞涩,隐藏图层,shy filter"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)" alias="shy,羞涩,隐藏图层,shy filter"
 func (l *Layer) SetShy(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -65,7 +65,7 @@ func (l *Layer) SetShy(v bool) error {
 // edits in the timeline UI; the AEP file itself is still mutable.
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="locked,lock,锁定,锁,图层锁定"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)" alias="locked,lock,锁定,锁,图层锁定"
 func (l *Layer) SetLocked(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -95,7 +95,7 @@ func (l *Layer) SetEffectsEnabled(v bool) error {
 // SetMotionBlur toggles the layer's motion-blur switch.
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="motion blur,运动模糊,模糊开关"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)" alias="motion blur,运动模糊,模糊开关"
 func (l *Layer) SetMotionBlur(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
@@ -271,7 +271,7 @@ func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
 // SetBlendingMode writes a new blending-mode enum byte to ldta @0x63.
 // length-preserving (single byte).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单字节 @ldta 0x63;无专门 AE gate→round-trip" alias="blending mode,混合模式,叠加模式,blend mode"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;单字节 @ldta 0x63;双版本 AE gated(layer-av-flags 批量 fixture,验 Multiply)" alias="blending mode,混合模式,叠加模式,blend mode"
 func (l *Layer) SetBlendingMode(m BlendingMode) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -323,7 +323,7 @@ func (l *Layer) SetLabel(index uint8) error {
 // to ldta @0x04 (uint16 BE).
 // length-preserving (2 bytes).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;无专门 AE gate→round-trip" alias="quality,render quality,渲染质量,线框,草图,最佳质量"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAVFlags_AEShipGate_AE2020,TestLayerAVFlags_AEShipGate_AE2025 boundary="length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;双版本 AE gated(layer-av-flags 批量 fixture,验 Draft)" alias="quality,render quality,渲染质量,线框,草图,最佳质量"
 func (l *Layer) SetQuality(q LayerQuality) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)

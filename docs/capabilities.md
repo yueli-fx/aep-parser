@@ -158,7 +158,7 @@
 | `*Layer.SetAudioEnabled` | 🟢stable | roundtrip | 2020 |  | SetAudioEnabled toggles the layer's audio switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
 | `*Layer.SetAudioLevels` | 🟢stable | roundtrip | 2020 |  | SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB). ⚠length-preserving;[left,right] dB 静态值;无音轨属性 → 报错;无专门 AE gate→round-trip |
 | `*Layer.SetAutoOrient` | 🟢stable | roundtrip | 2020 |  | SetAutoOrient writes the layer's auto-orient mode by clearing the three mutually-exclusive bits across ldta @0x25/@0x26 and setting the one matching the requested AutoOrientType. ⚠length-preserving 低风险;互斥 bit 组跨 @0x25/0x26;无专门 AE gate→round-trip |
-| `*Layer.SetBlendingMode` | 🟢stable | roundtrip | 2020 |  | SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. ⚠length-preserving 低风险;单字节 @ldta 0x63;无专门 AE gate→round-trip |
+| `*Layer.SetBlendingMode` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. ⚠length-preserving 低风险;单字节 @ldta 0x63;双版本 AE gated(layer-av-flags 批量 fixture,验 Multiply) |
 | `*Layer.SetCameraAperture` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraAperture writes the aperture property (pixels). |
 | `*Layer.SetCameraBlurLevel` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraBlurLevel writes the blur-level property (%). |
 | `*Layer.SetCameraDepthOfField` | 🟢stable | render-pixel | 2020 | TestLayer3DDoF_AEShipGate_AE2020<br>TestLayer3DDoF_AEShipGate_AE2025 | SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0). |
@@ -201,7 +201,7 @@
 | `*Layer.SetLightShadowDarkness` | 🟢stable | roundtrip | 2020 |  | SetLightShadowDarkness writes the shadow darkness (%). ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
 | `*Layer.SetLightShadowDiffusion` | 🟢stable | roundtrip | 2020 |  | SetLightShadowDiffusion writes the shadow diffusion (pixels). ⚠length-preserving 低风险;仅限 light 层;无专门 AE gate→round-trip |
 | `*Layer.SetLightSource` | 🟢stable | roundtrip | 2024 |  | SetLightSource writes the environment-light source layer ID for a Light layer (AE 24+). ⚠length-preserving;AE 24+ 环境灯专用;Light 层 only;3D/Light/Camera 目标拒绝;无专门 AE gate→round-trip |
-| `*Layer.SetLocked` | 🟢stable | roundtrip | 2020 |  | SetLocked toggles the layer's Lock flag (🔒). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetLocked` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetLocked toggles the layer's Lock flag (🔒). ⚠length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture) |
 | `*Layer.SetMarkersLocked` | 🟢stable | roundtrip | 2020 |  | SetMarkersLocked toggles "Lock markers" on the layer. ⚠length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip |
 | `*Layer.SetMaterialAcceptsLights` | 🟢stable | roundtrip | 2020 |  | SetMaterialAcceptsLights toggles the Accepts Lights switch. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
 | `*Layer.SetMaterialAcceptsShadows` | 🟢stable | roundtrip | 2020 |  | SetMaterialAcceptsShadows toggles the Accepts Shadows switch. ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
@@ -221,7 +221,7 @@
 | `*Layer.SetMaterialSpecular` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
 | `*Layer.SetMaterialTranspRolloff` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
 | `*Layer.SetMaterialTransparency` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;需 3D 层;无专门 AE gate→round-trip |
-| `*Layer.SetMotionBlur` | 🟢stable | roundtrip | 2020 |  | SetMotionBlur toggles the layer's motion-blur switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetMotionBlur` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetMotionBlur toggles the layer's motion-blur switch. ⚠length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture) |
 | `*Layer.SetName` | 🟢stable | roundtrip | 2020 |  | SetName rewrites the layer's display name (the AE timeline label). ⚠length-variable(Utf8 整片替换 + 父 LIST size 重算,CLAUDE.md #1 例外);无专门 AE gate → round-trip |
 | `*Layer.SetOpacity` | 🟢stable | roundtrip | 2020 |  | SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). ⚠length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖 |
 | `*Layer.SetOrientation` | 🟢stable | render-pixel | 2020 | TestLayer3DOrientation_AEShipGate_AE2020<br>TestLayer3DOrientation_AEShipGate_AE2025 | SetOrientation writes the 3D orientation (3-component degrees per axis). ⚠length-preserving;3D 层 only;3 分量度数;静态值须双写 cdat(LE)+otda(BE),否则 AE 渲染 0 |
@@ -229,14 +229,14 @@
 | `*Layer.SetParent` | 🟢stable | roundtrip | 2020 |  | SetParent rewrites the layer's parent-layer ID (ldta @0x84) to `parentID`. ⚠length-preserving 低风险;4 字节 @ldta 0x84;同 comp 内验证 parentID;自 parent 拒绝;无专门 AE gate→round-trip |
 | `*Layer.SetPosition` | 🟢stable | roundtrip | 2020 |  | SetPosition writes a new static position. ⚠length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖 |
 | `*Layer.SetPreserveTransparency` | 🟢stable | roundtrip | 2020 |  | SetPreserveTransparency toggles "Preserve Underlying Transparency" (ldta @0x67, single byte 0/1). ⚠length-preserving 低风险;单字节 @ldta 0x67;无专门 AE gate→round-trip |
-| `*Layer.SetQuality` | 🟢stable | roundtrip | 2020 |  | SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). ⚠length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;无专门 AE gate→round-trip |
+| `*Layer.SetQuality` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). ⚠length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;双版本 AE gated(layer-av-flags 批量 fixture,验 Draft) |
 | `*Layer.SetRotateX` | 🟢stable | render-pixel | 2020 | TestLayer3DRotateX_AEShipGate_AE2020<br>TestLayer3DRotateX_AEShipGate_AE2025 | SetRotateX / SetRotateY write per-axis 3D rotation (degrees). ⚠length-preserving;3D 层 only(2D 报 property not present) |
 | `*Layer.SetRotateY` | 🟢stable | render-pixel | 2020 | TestLayer3DRotateY_AEShipGate_AE2020<br>TestLayer3DRotateY_AEShipGate_AE2025 |  ⚠length-preserving;3D 层 only(2D 报 property not present) |
 | `*Layer.SetRotation` | 🟢stable | render-pixel | 2020 | TestLayer3DRotateZ_AEShipGate_AE2020<br>TestLayer3DRotateZ_AEShipGate_AE2025 | SetRotation writes the Z-axis rotation (degrees). ⚠length-preserving;Z 轴(2D/3D 通用) |
 | `*Layer.SetSamplingBicubic` | 🟢stable | roundtrip | 2020 |  | SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling for the layer. ⚠length-preserving 低风险;单 bit @ldta 0x25;无专门 AE gate→round-trip |
 | `*Layer.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale writes a new static scale (normalized 1.0 = 100%). ⚠length-preserving;normalized 1.0=100%;2D/3D 分量 |
-| `*Layer.SetShy` | 🟢stable | roundtrip | 2020 |  | SetShy toggles the layer's Shy flag (hides from the shy-filter view). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
-| `*Layer.SetSolo` | 🟢stable | roundtrip | 2020 |  | SetSolo toggles the layer's Solo flag. ⚠length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip |
+| `*Layer.SetShy` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetShy toggles the layer's Shy flag (hides from the shy-filter view). ⚠length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture) |
+| `*Layer.SetSolo` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetSolo toggles the layer's Solo flag. ⚠length-preserving 低风险;单 bit @ldta 0x26;双版本 AE gated(layer-av-flags 批量 fixture) |
 | `*Layer.SetSource` | 🟢stable | roundtrip | 2020 |  | SetSource rewrites the layer's source-item ID (ldta @0x28). ⚠length-preserving 低风险;4 字节 @ldta 0x28;项目内验证 sourceID;无专门 AE gate→round-trip |
 | `*Layer.SetStartTime` | 🟢stable | roundtrip | 2020 |  | SetStartTime writes the layer's start time (seconds) to ldta @0x0C/@0x10. ⚠length-preserving 低风险;8 字节分数对 @ldta 0x0C/0x10;支持负值(pre-roll);无专门 AE gate→round-trip |
 | `*Layer.SetStretch` | 🟢stable | roundtrip | 2020 |  | SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) to ldta @0x08 (dividend) / @0x6C (divisor). ⚠length-preserving 低风险;分子/分母分处 @ldta 0x08/@0x6C;1.0=正常速度;无专门 AE gate→round-trip |
@@ -244,7 +244,7 @@
 | `*Layer.SetTrackMatte` | 🟢stable | roundtrip | 2020 |  | SetTrackMatte writes a new track-matte type byte to ldta @0x6B. ⚠length-preserving 低风险;单字节 @ldta 0x6B;仅写模式字节,不重排图层;无专门 AE gate→round-trip |
 | `*Layer.SetTrackMatteLayer` | 🟢stable | roundtrip | 2023 |  | SetTrackMatteLayer rewrites this layer's explicit track matte source (ldta @0xA0, AE 23+) to `sourceID` and updates the track matte mode (ldta @0x6B) to `mode`. ⚠length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;无专门 AE gate→round-trip |
 | `*Layer.SetTrackMatteSource` | 🟢stable | roundtrip | 2023 |  | SetTrackMatteSource designates `src` as this layer's explicit track-matte source and writes the matte mode. ⚠length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;无专门 AE gate→round-trip |
-| `*Layer.SetVisible` | 🟢stable | roundtrip | 2020 |  | SetVisible toggles the layer's video switch (the 👁️ icon). ⚠length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip |
+| `*Layer.SetVisible` | 🟢stable | ae-accept | 2020 | TestLayerAVFlags_AEShipGate_AE2020<br>TestLayerAVFlags_AEShipGate_AE2025 | SetVisible toggles the layer's video switch (the 👁️ icon). ⚠length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture) |
 
 ## mask
 

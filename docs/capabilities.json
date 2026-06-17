@@ -2692,10 +2692,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单字节 @ldta 0x63;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单字节 @ldta 0x63;双版本 AE gated(layer-av-flags 批量 fixture,验 Multiply)",
       "incident": null,
       "alias": [
         "blending mode",
@@ -3688,10 +3691,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)",
       "incident": null,
       "alias": [
         "locked",
@@ -4138,10 +4144,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)",
       "incident": null,
       "alias": [
         "motion blur",
@@ -4326,10 +4335,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;2 字节 uint16 BE @ldta 0x04;双版本 AE gated(layer-av-flags 批量 fixture,验 Draft)",
       "incident": null,
       "alias": [
         "quality",
@@ -4475,10 +4487,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)",
       "incident": null,
       "alias": [
         "shy",
@@ -4498,10 +4513,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x26;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x26;双版本 AE gated(layer-av-flags 批量 fixture)",
       "incident": null,
       "alias": [
         "solo",
@@ -4687,10 +4705,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAVFlags_AEShipGate_AE2020",
+        "TestLayerAVFlags_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-av-flags 批量 fixture)",
       "incident": null,
       "alias": [
         "visible",
