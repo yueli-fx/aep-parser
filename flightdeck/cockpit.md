@@ -13,8 +13,11 @@
 ## 下一步
 
 **➡ ACTIVE ARC:roundtrip→ae-accept 补验**(2026-06-17 起)。库 481 能力里 **272 个仅 verify=roundtrip**(只 Go 自读回,从没让真 AE 消化——红线1 假绿温床)。系统性按域做综合 fixture 批量补真 AE 验,把验证等级整体抬一档。**诚实约束**:能 JSX DOM readback 的→值验;读不回的(尤其 render-queue 40 个二进制专属字段,rq-comment incident)→上限只能 acceptance-preservation。
-- **批1 ✅ DONE**(commit 5e98762):layer-set 7 个 AV-flag setter(Visible/Shy/Solo/Locked/MotionBlur/Quality/BlendingMode)双版本 gate;`ae-accept` 35→42。
-- **下一批候选**:layer-set 剩余可值验项(InPoint/OutPoint/StartTime/Stretch/Parent/Label/AutoOrient…)→ comp 37 → text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta(部分 acceptance)→ render-queue 40(多数仅 acceptance)。
+- **批1 ✅**(5e98762):7 AV-flag(Visible/Shy/Solo/Locked/MotionBlur/Quality/BlendingMode)。
+- **批2 ✅**:7 AV-field(InPoint/OutPoint/PreserveTransparency/SamplingBicubic/IsGuide/IsAdjust/Label)。
+- **批3 ✅**:SetName(length-variable)/SetStartTime/SetParent(两层 fixture)。`ae-accept` 35→**52**,roundtrip→262。
+- **⚠ 批3 抓出真假绿**:`Layer.SetComment` 在 from-scratch 层(无原生 cmta)插新 cmta=append 到 Layr LIST 末尾,AE 读回空(红线1+7)。已降级标注 + incident `layer-setcomment-cmta-append-position`(待 RE 正确槽位修;**连带嫌疑 item-level setItemComment 同款 append**,补 comp/project 域时重点验)。
+- **下一批候选**:layer-set 残项(Stretch/AutoOrient/IsNull/audio/frameblend——部分需特殊载体或映射确认)→ **修 SetComment**(RE cmta 位置)→ comp 37 → text 33 → shape 23(渲染像素)→ keyframe/mask → project/meta → render-queue 40(多数仅 acceptance)。
 - 域分布查询:`pwsh -c "(gc docs/capabilities.json -raw|ConvertFrom-Json)|?{$_.cap.verify -eq 'roundtrip'}|group {$_.cap.domain}"`。
 
 需求驱动残项(arc 外,按需):能力查询 `go run ./cmd/capindex -q <词>`。
