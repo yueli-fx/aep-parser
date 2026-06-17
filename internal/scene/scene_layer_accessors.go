@@ -262,7 +262,7 @@ func (l *Layer) SetAudioLevels(lr []float64) error {
 // SetAnchorPoint writes a new static anchor-point. Length of v must
 // match the property's Components (2 or 3 depending on Is3D).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;v 长度须匹配 Components(2D/3D);无专门 AE gate→round-trip" alias="anchor point,锚点,中心点"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;v 长度须匹配 Components(2D/3D);双版本 AE gated(layer-xform DOM 值读回);须属性已 materialize(default-omission 层先经 create-path)" alias="anchor point,锚点,中心点"
 func (l *Layer) SetAnchorPoint(v []float64) error {
 	p := l.AnchorPoint()
 	if p == nil {
@@ -274,7 +274,7 @@ func (l *Layer) SetAnchorPoint(v []float64) error {
 // SetPosition writes a new static position. Length of v must match
 // Position's Components (2 or 3).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;2D/3D 分量;静态值无专门 AE gate(动画见 keyframe),广泛被渲染 gate 间接覆盖" alias="position,位置,坐标,移动,平移"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;2D/3D 分量;双版本 AE gated(layer-xform 静态值 DOM 读回);须属性已 materialize" alias="position,位置,坐标,移动,平移"
 func (l *Layer) SetPosition(v []float64) error {
 	p := l.Position()
 	if p == nil {
@@ -286,7 +286,7 @@ func (l *Layer) SetPosition(v []float64) error {
 // SetScale writes a new static scale (normalized 1.0 = 100%). Length
 // of v must match Scale's Components (2 or 3).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;normalized 1.0=100%;2D/3D 分量" alias="scale,缩放,大小,尺寸"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;normalized 1.0=100%;2D/3D 分量;双版本 AE gated(layer-xform,1.25→AE 125%);须属性已 materialize" alias="scale,缩放,大小,尺寸"
 func (l *Layer) SetScale(v []float64) error {
 	p := l.Scale()
 	if p == nil {
@@ -331,7 +331,7 @@ func (l *Layer) SetOrientation(v []float64) error {
 // SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully
 // opaque). Callers that think in percent should divide by 100.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 标量写(CLAUDE.md #1 低风险);无专门 layer-opacity AE gate,广泛被渲染 gate 间接覆盖" alias="opacity,不透明度,透明度,layer opacity,淡入淡出"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving 标量写(CLAUDE.md #1 低风险);normalized 0..1(0.6→AE 60%);双版本 AE gated(layer-xform DOM 值读回);须属性已 materialize" alias="opacity,不透明度,透明度,layer opacity,淡入淡出"
 func (l *Layer) SetOpacity(v float64) error {
 	return setScalarProperty(l.Opacity(), l.Name, "Opacity", v)
 }

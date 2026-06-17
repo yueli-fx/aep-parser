@@ -87,7 +87,7 @@ func (l *Layer) FrameInPoint() int {
 // frame back to seconds via the owning comp's FrameRate, then
 // delegates to SetInPoint.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetInPoint;需 owning comp FrameRate > 0;无专门 AE gate→round-trip" alias="frame in point,入点帧,layer in frame,图层入点"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;委托 SetInPoint(source-relative,AE 显示 startTime+此值);需 owning comp FrameRate > 0;双版本 AE gated(layer-xform)" alias="frame in point,入点帧,layer in frame,图层入点"
 func (l *Layer) SetFrameInPoint(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -103,7 +103,7 @@ func (l *Layer) FrameOutPoint() int {
 
 // SetFrameOutPoint writes the layer out-point from an integer frame.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetOutPoint;需 owning comp FrameRate > 0;无专门 AE gate→round-trip" alias="frame out point,出点帧,layer out frame,图层出点"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;委托 SetOutPoint(source-relative,AE 显示 startTime+此值);需 owning comp FrameRate > 0;双版本 AE gated(layer-xform)" alias="frame out point,出点帧,layer out frame,图层出点"
 func (l *Layer) SetFrameOutPoint(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -119,7 +119,7 @@ func (l *Layer) FrameStartTime() int {
 
 // SetFrameStartTime writes the layer start-time from an integer frame.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;委托 SetStartTime;需 owning comp FrameRate > 0;无专门 AE gate→round-trip" alias="frame start time,起始帧,layer start frame,图层起始时间"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;委托 SetStartTime;需 owning comp FrameRate > 0;双版本 AE gated(layer-xform)" alias="frame start time,起始帧,layer start frame,图层起始时间"
 func (l *Layer) SetFrameStartTime(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
