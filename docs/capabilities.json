@@ -8576,10 +8576,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
+        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-enums;同 RectNode SetDirection cdat 路径,AE 接受+存活)",
       "incident": null,
       "alias": [
         "ellipse direction",
@@ -8599,10 +8602,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestV2_2_ShapeEnums_AEShipGate_AE2020",
+        "TestV2_2_ShapeEnums_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-enums;resave 后 Go-reparse 验 Direction=3 存活)",
       "incident": null,
       "alias": [
         "rect direction",
@@ -8826,10 +8832,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=40,match-name AE 拼错 Roundess)",
       "incident": null,
       "alias": [
         "star inner roundness",
@@ -8981,10 +8990,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=2)",
       "incident": null,
       "alias": [
         "repeater offset",
@@ -9003,10 +9015,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Offset=15)",
       "incident": null,
       "alias": [
         "trim offset",
@@ -9128,10 +9143,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=60)",
       "incident": null,
       "alias": [
         "star outer roundness",
@@ -9522,10 +9540,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;无专门 AE gate→round-trip",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25)",
       "incident": null,
       "alias": [
         "rect roundness",
@@ -9769,10 +9790,13 @@
     "cap": {
       "domain": "shape",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;gate 仅测 SetEnd,SetStart 默认 0 未单独测",
+      "gate": [
+        "TestShapeGeom_AEShipGate_AE2020",
+        "TestShapeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Start=20)",
       "incident": null,
       "alias": [
         "trim start",

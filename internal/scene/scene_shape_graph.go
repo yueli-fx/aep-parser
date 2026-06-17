@@ -213,10 +213,10 @@ func (r *RectNode) SetSize(v [2]float64) error { return r.size.SetStaticValue(v)
 //aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="rect position,矩形位置,set position"
 func (r *RectNode) SetPosition(v [2]float64) error { return r.position.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="rect roundness,矩形圆角,set roundness"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25)" alias="rect roundness,矩形圆角,set roundness"
 func (r *RectNode) SetRoundness(v float64) error { return r.roundness.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="rect direction,路径方向,shape direction,正向反向"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-enums;resave 后 Go-reparse 验 Direction=3 存活)" alias="rect direction,路径方向,shape direction,正向反向"
 func (r *RectNode) SetDirection(v ShapeDirection) error { return setShapeDirection(&r.direction, v) }
 
 // Properties returns the escape-hatch β view onto this RectNode's streams.
@@ -265,7 +265,7 @@ func (e *EllipseNode) SetSize(v [2]float64) error { return e.size.SetStaticValue
 //aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="ellipse position,椭圆位置,set position"
 func (e *EllipseNode) SetPosition(v [2]float64) error { return e.position.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="ellipse direction,椭圆方向,path direction,正向反向"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-enums;同 RectNode SetDirection cdat 路径,AE 接受+存活)" alias="ellipse direction,椭圆方向,path direction,正向反向"
 func (e *EllipseNode) SetDirection(v ShapeDirection) error { return setShapeDirection(&e.direction, v) }
 
 // setShapeDirection validates and assigns a ShapeDirection (Normal=1 or
@@ -412,12 +412,12 @@ func (n *StarNode) SetOuterRadius(v float64) error {
 
 // SetInnerRoundness sets the inner-point roundness (percent).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="star inner roundness,星形内圆角,inner roundness"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=40,match-name AE 拼错 Roundess)" alias="star inner roundness,星形内圆角,inner roundness"
 func (n *StarNode) SetInnerRoundness(v float64) error { return n.innerRoundness.SetStaticValue(v) }
 
 // SetOuterRoundness sets the outer-point (tip) roundness (percent).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="star outer roundness,星形外圆角,outer roundness"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=60)" alias="star outer roundness,星形外圆角,outer roundness"
 func (n *StarNode) SetOuterRoundness(v float64) error { return n.outerRoundness.SetStaticValue(v) }
 
 // Properties returns the escape-hatch β view.
@@ -1243,7 +1243,7 @@ func (n *TrimNode) SetType(t TrimType) error {
 
 // SetStart sets the trim start percentage (0..100).
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;gate 仅测 SetEnd,SetStart 默认 0 未单独测" alias="trim start,修剪起始,start percentage"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Start=20)" alias="trim start,修剪起始,start percentage"
 func (n *TrimNode) SetStart(v float64) error { return n.start.SetStaticValue(v) }
 
 // SetEnd sets the trim end percentage (0..100).
@@ -1253,7 +1253,7 @@ func (n *TrimNode) SetEnd(v float64) error { return n.end.SetStaticValue(v) }
 
 // SetOffset sets the trim offset in degrees.
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="trim offset,修剪偏移,trim rotation,degrees"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Offset=15)" alias="trim offset,修剪偏移,trim rotation,degrees"
 func (n *TrimNode) SetOffset(v float64) error { return n.offset.SetStaticValue(v) }
 
 // Properties returns the escape-hatch β view.
@@ -1372,7 +1372,7 @@ func (n *RepeaterNode) SetCopies(v float64) error {
 
 // SetOffset sets the copy-index offset of the first instance.
 //
-//aep:cap domain=shape tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip" alias="repeater offset,重复器偏移,copy offset"
+//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=2)" alias="repeater offset,重复器偏移,copy offset"
 func (n *RepeaterNode) SetOffset(v float64) error { return n.offset.SetStaticValue(v) }
 
 func (t *RepeaterTransform) Anchor() [2]float64    { return t.anchor }

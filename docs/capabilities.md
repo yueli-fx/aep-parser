@@ -422,8 +422,8 @@
 | `*StrokeDashes.SetDash` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeDashes_AEShipGate_AE2020<br>TestV2_2_StrokeDashes_AEShipGate_AE2025 | SetDash sets the dash length and enables dashing. |
 | `*ZigZagNode.SetDetail` | 🟢stable | render-pixel | 2020 | TestMGZigZag_AEShipGate_AE2020<br>TestMGZigZag_AEShipGate_AE2025 | SetDetail sets the number of ridges per path segment. |
 | `*WigglePathsNode.SetDetail` | 🟢stable | render-pixel | 2020 | TestMGWiggle_AEShipGate_AE2020<br>TestMGWiggle_AEShipGate_AE2025 | SetDetail sets the wiggle detail (number of segments per path length — higher = finer, more frequent ridges). |
-| `*EllipseNode.SetDirection` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
-| `*RectNode.SetDirection` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*EllipseNode.SetDirection` | 🟢stable | ae-accept | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  ⚠length-preserving 低风险;双版本 AE gated(shape-enums;同 RectNode SetDirection cdat 路径,AE 接受+存活) |
+| `*RectNode.SetDirection` | 🟢stable | ae-accept | 2020 | TestV2_2_ShapeEnums_AEShipGate_AE2020<br>TestV2_2_ShapeEnums_AEShipGate_AE2025 |  ⚠length-preserving 低风险;双版本 AE gated(shape-enums;resave 后 Go-reparse 验 Direction=3 存活) |
 | `*TrimNode.SetEnd` | 🟢stable | render-pixel | 2020 | TestMGTrim_AEShipGate_AE2020<br>TestMGTrim_AEShipGate_AE2025 | SetEnd sets the trim end percentage (0..100). |
 | `*StrokeTaper.SetEndEase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
 | `*StrokeTaper.SetEndLength` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
@@ -432,19 +432,19 @@
 | `*FillNode.SetFillRule` | 🟢stable | render-pixel | 2020 | TestMGOffsetCopies_AEShipGate_AE2020<br>TestMGOffsetCopies_AEShipGate_AE2025 | SetFillRule sets the winding rule (NonzeroWinding=1 / EvenOdd=2). |
 | `*StrokeDashes.SetGap` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeDashes_AEShipGate_AE2020<br>TestV2_2_StrokeDashes_AEShipGate_AE2025 | SetGap sets the gap length and enables dashing. |
 | `*StarNode.SetInnerRadius` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetInnerRadius sets the inner radius (px, the valley between points). |
-| `*StarNode.SetInnerRoundness` | 🟢stable | roundtrip | 2020 |  | SetInnerRoundness sets the inner-point roundness (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*StarNode.SetInnerRoundness` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetInnerRoundness sets the inner-point roundness (percent). ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=40,match-name AE 拼错 Roundess) |
 | `*StrokeNode.SetLineCap` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetLineCap sets the end-cap style. |
 | `*StrokeNode.SetLineJoin` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetLineJoin sets the corner-join style. |
 | `*OffsetPathsNode.SetLineJoin` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetLineJoin selects the corner join for the offset outline: Miter (sharp point), Round, or Bevel (flat-cut). |
 | `*StrokeNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestV2_2_Stroke_AEShipGate_AE2020<br>TestV2_2_Stroke_AEShipGate_AE2025 | SetMiterLimit sets the miter limit. |
 | `*OffsetPathsNode.SetMiterLimit` | 🟢stable | render-pixel | 2020 | TestMGOffsetExtras_AEShipGate_AE2020<br>TestMGOffsetExtras_AEShipGate_AE2025 | SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would extend past limit×width is clipped flat to a bevel. |
-| `*RepeaterNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the copy-index offset of the first instance. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
-| `*TrimNode.SetOffset` | 🟢stable | roundtrip | 2020 |  | SetOffset sets the trim offset in degrees. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RepeaterNode.SetOffset` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetOffset sets the copy-index offset of the first instance. ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=2) |
+| `*TrimNode.SetOffset` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetOffset sets the trim offset in degrees. ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Offset=15) |
 | `*FillNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_FillKf_AEShipGate_AE2020<br>TestV2_2_FillKf_AEShipGate_AE2025 |  |
 | `*StrokeNode.SetOpacity` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeKf_AEShipGate_AE2020<br>TestV2_2_StrokeKf_AEShipGate_AE2025 |  |
 | `*RepeaterNode.SetOrder` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetOrder selects whether each copy composites Below (default) or Above the previous. |
 | `*StarNode.SetOuterRadius` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetOuterRadius sets the outer radius (px, the star tips). |
-| `*StarNode.SetOuterRoundness` | 🟢stable | roundtrip | 2020 |  | SetOuterRoundness sets the outer-point (tip) roundness (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*StarNode.SetOuterRoundness` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetOuterRoundness sets the outer-point (tip) roundness (percent). ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=60) |
 | `*StrokeWave.SetPhase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
 | `*StarNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGStar_AEShipGate_AE2020<br>TestMGStar_AEShipGate_AE2025 | SetPoints sets the number of star points. |
 | `*ZigZagNode.SetPoints` | 🟢stable | render-pixel | 2020 | TestMGZigZagPoints_AEShipGate_AE2020<br>TestMGZigZagPoints_AEShipGate_AE2025 | SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth (scalloped wave ridges). |
@@ -460,7 +460,7 @@
 | `*RepeaterTransform.SetRotation` | 🟢stable | roundtrip | 2020 |  | SetRotation sets the per-copy rotation (degrees) — the radial-burst knob. ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*StarNode.SetRotation` | 🟢stable | render-pixel | 2020 | TestMGPolygon_AEShipGate_AE2020<br>TestMGPolygon_AEShipGate_AE2025 | SetRotation sets the star's rotation in degrees. |
 | `*WigglerTransform.SetRotation` | 🟢stable | render-pixel | 2020 | TestMGWiggleTransform_AEShipGate_AE2020<br>TestMGWiggleTransform_AEShipGate_AE2025 | SetRotation sets the rotation wiggle amplitude (degrees). |
-| `*RectNode.SetRoundness` | 🟢stable | roundtrip | 2020 |  |  ⚠length-preserving 低风险;无专门 AE gate→round-trip |
+| `*RectNode.SetRoundness` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 |  ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25) |
 | `*WigglerTransform.SetScale` | 🟢stable | roundtrip | 2020 |  | SetScale sets the scale wiggle amplitude (percent). ⚠length-preserving 低风险;无专门 AE gate→round-trip |
 | `*RepeaterTransform.SetScale` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetScale sets the per-copy scale (%). |
 | `*EllipseNode.SetSize` | 🟢stable | render-pixel | 2020 | TestV2_2_Ellipse_AEShipGate_AE2020<br>TestV2_2_Ellipse_AEShipGate_AE2025 |  |
@@ -470,7 +470,7 @@
 | `*WiggleTransformNode.SetSpatialPhase` | 🟡alpha | ae-accept | 2020 | TestMGWiggleModRT_AEShipGate_AE2020<br>TestMGWiggleModRT_AEShipGate_AE2025 | SetSpatialPhase sets the spatial phase (degrees) into the transform-wiggle noise field; default 0, non-default materializes the `ADBE Vector Spatial Phase` leaf on lower. ⚠噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回) |
 | `*WigglePathsNode.SetSpatialPhase` | 🟡alpha | ae-accept | 2020 | TestMGWiggleModRT_AEShipGate_AE2020<br>TestMGWiggleModRT_AEShipGate_AE2025 | SetSpatialPhase sets the spatial phase (degrees) into the noise field — selecting a different spatial offset of the same seeded random pattern. ⚠噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回) |
 | `*StarNode.SetStarType` | 🟢stable | render-pixel | 2020 | TestMGPolygon_AEShipGate_AE2020<br>TestMGPolygon_AEShipGate_AE2025 | SetStarType selects Star (alternating points) or Polygon (convex N-gon). |
-| `*TrimNode.SetStart` | 🟢stable | roundtrip | 2020 |  | SetStart sets the trim start percentage (0..100). ⚠length-preserving 低风险;gate 仅测 SetEnd,SetStart 默认 0 未单独测 |
+| `*TrimNode.SetStart` | 🟢stable | ae-accept | 2020 | TestShapeGeom_AEShipGate_AE2020<br>TestShapeGeom_AEShipGate_AE2025 | SetStart sets the trim start percentage (0..100). ⚠length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Start=20) |
 | `*StrokeTaper.SetStartEase` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
 | `*StrokeTaper.SetStartLength` | 🟢stable | render-pixel | 2020 | TestV2_2_StrokeTaperWave_AEShipGate_AE2020<br>TestV2_2_StrokeTaperWave_AEShipGate_AE2025 |  |
 | `*RepeaterTransform.SetStartOpacity` | 🟢stable | render-pixel | 2020 | TestMGRepeaterOrder_AEShipGate_AE2020<br>TestMGRepeaterOrder_AEShipGate_AE2025 | SetStartOpacity sets the first copy's opacity (%, 0..100). |
