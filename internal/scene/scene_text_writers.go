@@ -473,7 +473,7 @@ func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) erro
 // SetParagraphFirstLineIndent writes firstLineIndent (em points) on
 // paragraph #paraIdx. AE 24+ writeable (AE 2020 ScriptingAPI no-op on point text).
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 2020 ScriptingAPI 对 point text 无效;无专门 AE gate→round-trip" alias="first line indent,首行缩进,paragraph indent,段落缩进"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 FormatPSNumber→AE 读 /65536 bug);双版本 AE gated(text-para;AE2025 DOM firstLineIndent 值验 + 双版本 resave-preservation)" alias="first line indent,首行缩进,paragraph indent,段落缩进"
 func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -487,7 +487,7 @@ func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 
 // SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="start indent,左缩进,paragraph start indent,left margin"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);AE textDocument 无 leftMargin DOM→双版本 AE gated(text-para resave-preservation,值经 AE 引擎存活)" alias="start indent,左缩进,paragraph start indent,left margin"
 func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -501,7 +501,7 @@ func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 
 // SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="end indent,右缩进,paragraph end indent,right margin"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);AE textDocument 无 rightMargin DOM→双版本 AE gated(text-para resave-preservation,值经 AE 引擎存活)" alias="end indent,右缩进,paragraph end indent,right margin"
 func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -515,7 +515,7 @@ func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 
 // SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="space before,段前间距,paragraph space before,paragraph spacing"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);双版本 AE gated(text-para;AE2025 DOM spaceBefore 值验 + 双版本 resave-preservation)" alias="space before,段前间距,paragraph space before,paragraph spacing"
 func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -529,7 +529,7 @@ func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 
 // SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip" alias="space after,段后间距,paragraph space after,paragraph spacing"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);双版本 AE gated(text-para;AE2025 DOM spaceAfter 值验 + 双版本 resave-preservation)" alias="space after,段后间距,paragraph space after,paragraph spacing"
 func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err

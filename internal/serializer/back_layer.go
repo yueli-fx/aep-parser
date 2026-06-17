@@ -892,28 +892,32 @@ func (b *layerBackrefs) SetParagraphJustification(paraIdx int, j TextJustificati
 	return err
 }
 
+// The five paragraph indent/spacing keys /1../5 are point-measurement REALs:
+// AE/CoolType reads a decimal-point-less number as 16.16 fixed-point (value/65536),
+// so these MUST use FormatPSReal (not FormatPSNumber). Same bug class as
+// SetRunTsume — fixed + gated by text_para_shipgate (batch 7b).
 func (b *layerBackrefs) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/1", []byte(codec.FormatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/1", []byte(codec.FormatPSReal(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphStartIndent(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/2", []byte(codec.FormatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/2", []byte(codec.FormatPSReal(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphEndIndent(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/3", []byte(codec.FormatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/3", []byte(codec.FormatPSReal(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphSpaceBefore(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/4", []byte(codec.FormatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/4", []byte(codec.FormatPSReal(v)))
 	return err
 }
 
 func (b *layerBackrefs) SetParagraphSpaceAfter(paraIdx int, v float64) error {
-	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/5", []byte(codec.FormatPSNumber(v)))
+	_, err := b.splicePSValue(codec.ParagraphStylePath(paraIdx)+"/5", []byte(codec.FormatPSReal(v)))
 	return err
 }
 

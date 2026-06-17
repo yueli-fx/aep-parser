@@ -11069,10 +11069,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextPara_AEShipGate_AE2020",
+        "TestTextPara_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);AE textDocument 无 rightMargin DOM→双版本 AE gated(text-para resave-preservation,值经 AE 引擎存活)",
       "incident": null,
       "alias": [
         "end indent",
@@ -11092,10 +11095,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 2020 ScriptingAPI 对 point text 无效;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextPara_AEShipGate_AE2020",
+        "TestTextPara_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 FormatPSNumber→AE 读 /65536 bug);双版本 AE gated(text-para;AE2025 DOM firstLineIndent 值验 + 双版本 resave-preservation)",
       "incident": null,
       "alias": [
         "first line indent",
@@ -11192,10 +11198,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextPara_AEShipGate_AE2020",
+        "TestTextPara_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);双版本 AE gated(text-para;AE2025 DOM spaceAfter 值验 + 双版本 resave-preservation)",
       "incident": null,
       "alias": [
         "space after",
@@ -11215,10 +11224,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextPara_AEShipGate_AE2020",
+        "TestTextPara_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);双版本 AE gated(text-para;AE2025 DOM spaceBefore 值验 + 双版本 resave-preservation)",
       "incident": null,
       "alias": [
         "space before",
@@ -11238,10 +11250,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextPara_AEShipGate_AE2020",
+        "TestTextPara_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);AE textDocument 无 leftMargin DOM→双版本 AE gated(text-para resave-preservation,值经 AE 引擎存活)",
       "incident": null,
       "alias": [
         "start indent",
