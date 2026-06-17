@@ -56,7 +56,11 @@ last_updated: 2026-06-18
 
 5 层结构(`tmp_debug/flame3/`，local)：黑底 + **3 个 Fractal Noise→Tritone→Turbulent Displace 火层**(不同噪声 scale=不同细节频率，越内层 Tritone 越热) + 顶部 Glo2 调整层。AE2025 自渲：清晰的**径向色温分层**——外深红 wispy → 中橙 → **内黄白热芯柱**，有舔动有翻腾，明显比 v2 有深度。
 
-**关键踩坑 → 关键解法**：3 层都 Add + **共用同一个 mask** → 各层 streak 并集填满 → 退化成"发光团块"(第一版 v3)。**解法 = 同心 mask(concentric)**：核层小 mask、中层中 mask、外层全 mask → 形成温度分区(外红中橙内白)而非实心填充。`scalePath(path, cx, cy, f)` 把火苗形向中心缩 f=0.5/0.76/1.0。**这是「多层 Add 叠深度(T3)」用于径向温度现象的具体手法**(详 `docs/fx-techniques.md` T3)。⚠ 仍是 agent 自渲，待用户真机验收。
+**两个关键踩坑 → 解法**(都记进 `docs/fx-techniques.md` T3):
+1. **团块**：3 层 Add **共用同一 mask** → streak 并集填满成"发光团块"。**解法=同心 mask**(`scalePath` 缩 f=0.5/0.76/1.0,核层小/外层全)+ 各层 Tritone 越内越热 → 温度分区(外红中橙内白)而非实心。
+2. **抖动**(用户在 ~3s 处发现):3 层各用**不同动画速率** → 逐渐失相,Add+Glow 出拍频闪烁,越后越抖。**解法=层运动共相**(shared evolution/offset 速率),只让静态属性(scale/色/mask)分层。修复后 t=3.2/3.6 平稳。
+
+⚠ 仍是 agent 自渲，待用户真机验收。
 
 ## 核心配方（plugin-free，全 ADBE 原生，本库已 gate）
 
