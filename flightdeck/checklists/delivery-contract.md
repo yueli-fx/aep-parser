@@ -23,6 +23,8 @@ applies_to: [delivery, ship-gate, ae-acceptance, verification-level, go-roundtri
 
 库里的 `Stable` ≈ Verified，`Alpha` ≈ Go-roundtrip-only（详 CLAUDE.md #2 + `plans/coverage.md`）。**但 `Stable` 不等于无条件可用**——见红线 2。
 
+**单版本 ae-accept 例外（2026-06-18 用户授权）**：默认 ae-accept 须双版本（AE2020+AE2025）。但当一个能力**物理上双版本不可达**——典型：AE23+ 专属字节（如 explicit track-matte 的 ldta @0xA0 slot），仅 `TargetAE2025` 产出该 slot、其 fingerprint 又被更低 AE forward-compat 拒、且无中间 target 可桥接——则**允许凭单版本(AE2025)实测 PASS mint ae-accept**（这是真 AE 接受、非假绿，不算降级）。**硬性要求**：tag/boundary 必须**写清版本下限**（`minver=` + boundary 首句 `ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级)`），让消费者一眼看出它不是双版本保证。**适用判据**：双版本不可达必须是**物理/forward-compat 限制**的实证结论，不是「懒得造低版本载体」——后者仍须双版本。首例：批26 explicit track-matte 4 setter（SetTrackMatteLayer/SetTrackMatteSource/ClearTrackMatteLayer/RemoveTrackMatte）。
+
 ## 四条认知红线（每条都有血的教训）
 
 1. **Go round-trip 0 警告 ≠ AE 接受。** Go parser 宽松：它只验证「字节能读回成模型对象」，**不验证 AE 的几何 / 表达式 / 渲染引擎能否消化**。结构自洽 ≠ AE 认账。

@@ -2651,10 +2651,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2023",
-      "gate": null,
-      "boundary": "委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;AE2025 单版本已验(track_matte_explicit,clear→DOM NO_TRACK_MATTE);双版本不可达(同 SetTrackMatteLayer,fingerprint)→ 留 roundtrip",
+      "gate": [
+        "TestTrackMatteExplicit_AEShipGate_AE2025"
+      ],
+      "boundary": "ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;track_matte_explicit clear→DOM NO_TRACK_MATTE;双版本不可达(同 SetTrackMatteLayer,fingerprint)",
       "incident": null,
       "alias": [
         "clear matte",
@@ -2674,10 +2676,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2023",
-      "gate": null,
-      "boundary": "委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;AE2025 单版本已验(track_matte_explicit,remove→DOM NO_TRACK_MATTE);双版本不可达(fingerprint)→ 留 roundtrip",
+      "gate": [
+        "TestTrackMatteExplicit_AEShipGate_AE2025"
+      ],
+      "boundary": "ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;track_matte_explicit remove→DOM NO_TRACK_MATTE;双版本不可达(fingerprint)",
       "incident": null,
       "alias": [
         "remove track matte",
@@ -4969,10 +4973,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2023",
-      "gate": null,
-      "boundary": "length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;AE2025 单版本已验(TestTrackMatteExplicit_AEShipGate_AE2025,DOM trackMatteLayer+type 读回对);双版本不可达:仅 TargetAE2025 产 @0xA0,其 fingerprint 被 AE2024 forward-compat 拒,无中间 target → 按惯例留 roundtrip",
+      "gate": [
+        "TestTrackMatteExplicit_AEShipGate_AE2025"
+      ],
+      "boundary": "ae-accept=AE2025+ 单版本验证(库内首个单版本 ae-accept;双版本物理不可达非降级);length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;TestTrackMatteExplicit_AEShipGate_AE2025 DOM trackMatteLayer+type 读回对;双版本不可达:仅 TargetAE2025 产 @0xA0,其 fingerprint 被 AE2024 forward-compat 拒,无中间 target",
       "incident": null,
       "alias": [
         "track matte layer",
@@ -4992,10 +4998,12 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2023",
-      "gate": null,
-      "boundary": "length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;AE2025 单版本已验(track_matte_explicit,DOM trackMatteLayer+type 对);双版本不可达(fingerprint,同 SetTrackMatteLayer)→ 留 roundtrip",
+      "gate": [
+        "TestTrackMatteExplicit_AEShipGate_AE2025"
+      ],
+      "boundary": "ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;track_matte_explicit DOM trackMatteLayer+type 对;双版本不可达(fingerprint,同 SetTrackMatteLayer)",
       "incident": null,
       "alias": [
         "set track matte source",

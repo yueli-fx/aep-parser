@@ -600,7 +600,7 @@ func (l *Layer) SetComment(comment string) error {
 // @0xA0 slot doesn't exist. Re-save the file through AE 23+ first to
 // extend ldta, then this setter works.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;AE2025 单版本已验(TestTrackMatteExplicit_AEShipGate_AE2025,DOM trackMatteLayer+type 读回对);双版本不可达:仅 TargetAE2025 产 @0xA0,其 fingerprint 被 AE2024 forward-compat 拒,无中间 target → 按惯例留 roundtrip" alias="track matte layer,matte source,遮罩来源,轨道遮罩图层"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestTrackMatteExplicit_AEShipGate_AE2025 minver=2023 boundary="ae-accept=AE2025+ 单版本验证(库内首个单版本 ae-accept;双版本物理不可达非降级);length-preserving;AE 23+ ldta 专属(@0xA0 不存在于 AE2020/2022 → 报错);同 comp 验证;自 matte 拒绝;TestTrackMatteExplicit_AEShipGate_AE2025 DOM trackMatteLayer+type 读回对;双版本不可达:仅 TargetAE2025 产 @0xA0,其 fingerprint 被 AE2024 forward-compat 拒,无中间 target" alias="track matte layer,matte source,遮罩来源,轨道遮罩图层"
 func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
@@ -624,7 +624,7 @@ func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
 // ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone).
 // Removes the explicit matte source AND the matte mode in one call.
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip minver=2023 boundary="委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;AE2025 单版本已验(track_matte_explicit,clear→DOM NO_TRACK_MATTE);双版本不可达(同 SetTrackMatteLayer,fingerprint)→ 留 roundtrip" alias="clear matte,remove matte,清除遮罩,取消轨道遮罩"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestTrackMatteExplicit_AEShipGate_AE2025 minver=2023 boundary="ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);委托 SetTrackMatteLayer(0, None);AE 23+ ldta 专属;track_matte_explicit clear→DOM NO_TRACK_MATTE;双版本不可达(同 SetTrackMatteLayer,fingerprint)" alias="clear matte,remove matte,清除遮罩,取消轨道遮罩"
 func (l *Layer) ClearTrackMatteLayer() error {
 	return l.SetTrackMatteLayer(0, TrackMatteNone)
 }
