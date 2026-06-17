@@ -216,7 +216,7 @@ func (k *Keyframe) FrameTime() int {
 // delegating to SetTime. Returns an error when the owning comp's
 // FrameRate is unknown.
 //
-//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="length-preserving;委托 Keyframe.SetTime;需 FrameRate > 0;无专门 AE gate→round-trip" alias="keyframe frame time,关键帧帧编号,kf frame,帧时间"
+//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="length-preserving;委托 Keyframe.SetTime;需 FrameRate > 0;双版本 AE gated(keyframe_mutate)" alias="keyframe frame time,关键帧帧编号,kf frame,帧时间"
 func (k *Keyframe) SetFrameTime(frame int) error {
 	if k.back == nil || k.back.FrameRateHz() <= 0 {
 		return fmt.Errorf("keyframe: SetFrameTime requires owning composition FrameRate > 0")

@@ -2066,10 +2066,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "无独立 Go AE gate → 库内 round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "双版本 AE gated(keyframe_mutate,numKeys readback)",
       "incident": null,
       "alias": [
         "delete keyframe",
@@ -2087,10 +2090,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "需 \u003e=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "需 \u003e=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);双版本 AE gated(keyframe_mutate,numKeys readback);新 kf 默认 Linear",
       "incident": null,
       "alias": [
         "insert keyframe",
@@ -2109,10 +2115,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 Keyframe.SetTime;需 FrameRate \u003e 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 Keyframe.SetTime;需 FrameRate \u003e 0;双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "keyframe frame time",
@@ -2132,10 +2141,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B @0x04);无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B @0x04);双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "keyframe interpolation",
@@ -2155,10 +2167,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(dims×8B);仅空间属性有效(Position/AnchorPoint);slice 长度须等于 Property.Components;无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(dims×8B);仅空间属性有效(Position/AnchorPoint);slice 长度须等于 Property.Components;双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "spatial tangent",
@@ -2179,10 +2194,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;slice 长度须匹配 ease shape(空间属性 1 / N-D 为 N);无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;slice 长度须匹配 ease shape(空间属性 1 / N-D 为 N);双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "temporal ease",
@@ -2228,10 +2246,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B @0x05);无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B @0x05);双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "keyframe out interpolation",
@@ -2251,10 +2272,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(dims×8B);仅空间属性有效;slice 长度须等于 Property.Components;无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(dims×8B);仅空间属性有效;slice 长度须等于 Property.Components;双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "out tangent",
@@ -2274,10 +2298,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;slice 长度须匹配 ease shape;无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;slice 长度须匹配 ease shape;双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "temporal ease out",
@@ -2297,10 +2324,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);双版本 AE gated(keyframe_mutate,2D static Position DOM readback)",
       "incident": null,
       "alias": [
         "static value",
@@ -2322,10 +2352,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(ldat tick write);chunk size 不变;无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(ldat tick write);chunk size 不变;双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "keyframe time",
@@ -2345,10 +2378,13 @@
     "cap": {
       "domain": "keyframe",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;1D 传 float64,N-D 传 []float64 且长度须匹配;无专门 AE gate→round-trip",
+      "gate": [
+        "TestKeyframeMutate_AEShipGate_AE2020",
+        "TestKeyframeMutate_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;1D 传 float64,N-D 传 []float64 且长度须匹配;双版本 AE gated(keyframe_mutate)",
       "incident": null,
       "alias": [
         "keyframe value",

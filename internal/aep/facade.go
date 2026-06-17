@@ -589,7 +589,7 @@ func RemoveMarker(m *Marker) error { return serializer.RemoveMarker(m) }
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
 //
-//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);无独立 Go AE gate → 库内 round-trip;新 kf 默认 Linear" alias="insert keyframe,插入关键帧,加关键帧"
+//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);双版本 AE gated(keyframe_mutate,numKeys readback);新 kf 默认 Linear" alias="insert keyframe,插入关键帧,加关键帧"
 func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error) {
 	return serializer.InsertKeyframe(p, time, value)
 }
@@ -602,7 +602,7 @@ func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error
 // after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
 // facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
 //
-//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="无独立 Go AE gate → 库内 round-trip" alias="delete keyframe,删关键帧,移除关键帧"
+//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="双版本 AE gated(keyframe_mutate,numKeys readback)" alias="delete keyframe,删关键帧,移除关键帧"
 func DeleteKeyframe(p *Property, i int) error { return serializer.DeleteKeyframe(p, i) }
 
 // SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position

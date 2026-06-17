@@ -11,7 +11,7 @@ import "fmt"
 // SetStaticValue rewrites a property's constant value in-place (only valid
 // for properties without keyframes — those with a cdat chunk).
 //
-//aep:cap domain=keyframe tier=stable verify=roundtrip boundary="length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);无专门 AE gate→round-trip" alias="static value,静态值,constant value,set value,属性值,cdat"
+//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);双版本 AE gated(keyframe_mutate,2D static Position DOM readback)" alias="static value,静态值,constant value,set value,属性值,cdat"
 func (p *Property) SetStaticValue(v any) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no static-value chunk (has keyframes?)", p.MatchName)
