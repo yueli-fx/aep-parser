@@ -303,7 +303,7 @@ func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 // SetRunBaselineOption writes the font baseline option on style run #runIdx.
 // AE 24+ writeable; mirrors subscript / superscript readonly attrs.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="baseline option,基线选项,subscript,superscript,上标,下标"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 AE24+ enum + AE2025 DOM,resave-preservation)" alias="baseline option,基线选项,subscript,superscript,上标,下标"
 func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -339,7 +339,7 @@ func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 // in AE — manual kerning lives in a separate per-character sub-tree at
 // btdk /1/1[0]/0/8 which this library does not yet expose for writing.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;无专门 AE gate→round-trip" alias="auto kern,自动字距调整,kerning mode,optical kerning,metrics kerning"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="auto kern,自动字距调整,kerning mode,optical kerning,metrics kerning"
 func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -358,7 +358,7 @@ func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 // #runIdx (AE 24+ writeable, btdk style-run /52). When true, AE won't
 // allow line breaks to fall inside the run.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="no break,禁止换行,do not break,word wrap"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="no break,禁止换行,do not break,word wrap"
 func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -373,7 +373,7 @@ func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 // SetRunLineJoinType writes the stroke corner join style on style run
 // #runIdx (AE 24+ writeable, btdk style-run /62).
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="line join,stroke join,线段连接,描边角点,miter join,bevel join,round join"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="line join,stroke join,线段连接,描边角点,miter join,bevel join,round join"
 func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -391,7 +391,7 @@ func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 // SetRunDigitSet writes the digit set on style run #runIdx (AE 24+
 // writeable, btdk style-run /70).
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="digit set,数字集,Arabic digits,Hindi digits,阿拉伯数字,印地数字"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="digit set,数字集,Arabic digits,Hindi digits,阿拉伯数字,印地数字"
 func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -544,7 +544,7 @@ func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 // SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx.
 // Default in AE is true. AE 24+ writeable.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="auto hyphenate,自动连字,hyphenation,断字"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2025 DOM autoHyphenate + 双版本 resave-preservation)" alias="auto hyphenate,自动连字,hyphenation,断字"
 func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -559,7 +559,7 @@ func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 // SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx
 // (AE 24+ writeable, btdk paragraph /8).
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="leading type,行距类型,roman leading,Japanese leading,段落行距"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="leading type,行距类型,roman leading,Japanese leading,段落行距"
 func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -578,7 +578,7 @@ func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 // paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). Only
 // meaningful for box-text.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;无专门 AE gate→round-trip" alias="hanging roman,悬挂标点,Roman Hanging Punctuation,段落悬挂"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;双版本 AE gated(text-enum;AE2025 DOM hangingRoman + 双版本 resave-preservation)" alias="hanging roman,悬挂标点,Roman Hanging Punctuation,段落悬挂"
 func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -594,7 +594,7 @@ func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 // paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). Affects
 // how mixed LTR/RTL text composes.
 //
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip" alias="paragraph direction,段落方向,LTR,RTL,reading direction,阅读方向,从右到左"
+//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="paragraph direction,段落方向,LTR,RTL,reading direction,阅读方向,从右到左"
 func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err

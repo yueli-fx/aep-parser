@@ -11020,10 +11020,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2025 DOM autoHyphenate + 双版本 resave-preservation)",
       "incident": null,
       "alias": [
         "auto hyphenate",
@@ -11043,10 +11046,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "paragraph direction",
@@ -11121,10 +11127,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;双版本 AE gated(text-enum;AE2025 DOM hangingRoman + 双版本 resave-preservation)",
       "incident": null,
       "alias": [
         "hanging roman",
@@ -11174,10 +11183,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "leading type",
@@ -11302,10 +11314,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "auto kern",
@@ -11351,10 +11366,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 AE24+ enum + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "baseline option",
@@ -11428,10 +11446,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "digit set",
@@ -11633,10 +11654,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "line join",
@@ -11659,10 +11683,13 @@
     "cap": {
       "domain": "text",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;无专门 AE gate→round-trip",
+      "gate": [
+        "TestTextEnum_AEShipGate_AE2020",
+        "TestTextEnum_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)",
       "incident": null,
       "alias": [
         "no break",
