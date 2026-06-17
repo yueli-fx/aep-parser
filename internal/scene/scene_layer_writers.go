@@ -110,7 +110,7 @@ func (l *Layer) SetMotionBlur(v bool) error {
 // SetAudioEnabled toggles the layer's audio switch.
 // length-preserving (single bit @ldta 0x27).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip" alias="audio enabled,audio switch,音频开关,静音"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAudio_AEShipGate_AE2020,TestLayerAudio_AEShipGate_AE2025 boundary="length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-audio,DOM layer.audioEnabled 读回;非视觉域 ae-accept 上限)" alias="audio enabled,audio switch,音频开关,静音"
 func (l *Layer) SetAudioEnabled(v bool) error {
 	if l.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)

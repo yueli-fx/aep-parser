@@ -2775,10 +2775,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAudio_AEShipGate_AE2020",
+        "TestLayerAudio_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving 低风险;单 bit @ldta 0x27;双版本 AE gated(layer-audio,DOM layer.audioEnabled 读回;非视觉域 ae-accept 上限)",
       "incident": null,
       "alias": [
         "audio enabled",
@@ -2798,10 +2801,13 @@
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;[left,right] dB 静态值;无音轨属性 → 报错;无专门 AE gate→round-trip",
+      "gate": [
+        "TestLayerAudio_AEShipGate_AE2020",
+        "TestLayerAudio_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;[left,right] dB 静态值;无音轨属性(default-omission elided) → 报错,载体须先 materialize;双版本 AE gated(layer-audio,DOM Audio Levels 值读回)",
       "incident": null,
       "alias": [
         "audio levels",

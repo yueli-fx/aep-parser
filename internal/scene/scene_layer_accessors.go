@@ -248,7 +248,7 @@ func (l *Layer) SetTimeRemapEnabled(enabled bool) error {
 // Errors when the layer has no audio levels property (i.e. layer has no
 // audio track).
 //
-//aep:cap domain=layer-set tier=stable verify=roundtrip boundary="length-preserving;[left,right] dB 静态值;无音轨属性 → 报错;无专门 AE gate→round-trip" alias="audio levels,audio gain,音频电平,声道增益,音量"
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerAudio_AEShipGate_AE2020,TestLayerAudio_AEShipGate_AE2025 boundary="length-preserving;[left,right] dB 静态值;无音轨属性(default-omission elided) → 报错,载体须先 materialize;双版本 AE gated(layer-audio,DOM Audio Levels 值读回)" alias="audio levels,audio gain,音频电平,声道增益,音量"
 func (l *Layer) SetAudioLevels(lr []float64) error {
 	p := l.AudioLevels()
 	if p == nil {
