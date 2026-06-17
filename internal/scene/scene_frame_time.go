@@ -235,7 +235,7 @@ func (m *Marker) FrameTime() int {
 
 // SetFrameTime writes the marker's time from an integer frame.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 Marker.SetTime;需 compFps > 0;无专门 AE gate→round-trip" alias="marker frame time,标记帧时间,marker frame,标记帧编号"
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving;委托 Marker.SetTime;需 compFps > 0;双版本 AE gated(marker-fields;AE DOM keyTime=4.0 实读)" alias="marker frame time,标记帧时间,marker frame,标记帧编号"
 func (m *Marker) SetFrameTime(frame int) error {
 	if m.compFps <= 0 {
 		return fmt.Errorf("marker: SetFrameTime requires owning composition FrameRate > 0")
@@ -251,7 +251,7 @@ func (m *Marker) FrameDuration() int {
 
 // SetFrameDuration writes the marker's duration from an integer frame.
 //
-//aep:cap domain=comp tier=stable verify=roundtrip boundary="length-preserving;委托 Marker.SetDuration;需 compFps > 0;无专门 AE gate→round-trip" alias="marker frame duration,标记时长帧数,cue duration frames"
+//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving;委托 Marker.SetDuration;需 compFps > 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)" alias="marker frame duration,标记时长帧数,cue duration frames"
 func (m *Marker) SetFrameDuration(frame int) error {
 	if m.compFps <= 0 {
 		return fmt.Errorf("marker: SetFrameDuration requires owning composition FrameRate > 0")

@@ -84,10 +84,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM chapter=ch1 实读)",
       "incident": null,
       "alias": [
         "marker chapter",
@@ -180,10 +183,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段,现代 AE 项目极少填;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段;双版本 AE gated(marker-fields;AE DOM cuePointName=cue1 实读)",
       "incident": null,
       "alias": [
         "cue point name",
@@ -277,10 +283,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(4B NmHd);0 → point marker;负值夹至 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B NmHd);0 → point marker;负值夹至 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)",
       "incident": null,
       "alias": [
         "marker duration",
@@ -352,10 +361,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 Marker.SetDuration;需 compFps \u003e 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 Marker.SetDuration;需 compFps \u003e 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)",
       "incident": null,
       "alias": [
         "marker frame duration",
@@ -400,10 +412,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM frameTarget=ft1 实读)",
       "incident": null,
       "alias": [
         "marker frame target",
@@ -422,10 +437,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving;委托 Marker.SetTime;需 compFps \u003e 0;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving;委托 Marker.SetTime;需 compFps \u003e 0;双版本 AE gated(marker-fields;AE DOM keyTime=4.0 实读)",
       "incident": null,
       "alias": [
         "marker frame time",
@@ -470,10 +488,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;双版本 AE gated(marker-fields;AE DOM label=4 实读)",
       "incident": null,
       "alias": [
         "marker label",
@@ -851,10 +872,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-preserving(ldat tick write);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(ldat tick write);双版本 AE gated(marker-fields;AE DOM keyTime=3.5 实读)",
       "incident": null,
       "alias": [
         "marker time",
@@ -874,10 +898,13 @@
     "cap": {
       "domain": "comp",
       "tier": "stable",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);无专门 AE gate→round-trip",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM url 实读)",
       "incident": null,
       "alias": [
         "marker url",
