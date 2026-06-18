@@ -323,9 +323,10 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [glitch]
 hypothesized_transfers: [cyberpunk, retro-crt, transition, text-fx]
 not_this: "整体 Hue 偏移(那是调色,不是把 R/G/B 拆开各自位移)"
-evidence: [samples/motionbox/glitch/booyah-glitch, samples/motionbox/glitch/glitchtext]
+evidence: [samples/motionbox/glitch/booyah-glitch, samples/motionbox/glitch/glitchtext, showcase/glitch]
 confidence: observed
 # 三层 Fill 路最可控(纯 native);Set Channels/Channel Blur 是单效果近似。配 time-evolution 让错位闪烁。
+# ✅ showcase/glitch 实渲验证(2026-06-18,AE2025):3 形状 bar Fill R/G/B + Add → 青/橙红色差肉眼可见、纯 native。待用户真机 + TestGlitch ship-gate 升 validated。
 ```
 
 ### T17 scanlines-crt(扫描线 / CRT 行)〔质感技法〕
@@ -341,9 +342,10 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [glitch]
 hypothesized_transfers: [retro-crt, hologram, hud, surveillance]
 not_this: "整体降噪/模糊(扫描线是规律横纹叠加,不是噪点)"
-evidence: [samples/motionbox/glitch/booyah-glitch]
+evidence: [samples/motionbox/glitch/booyah-glitch, showcase/glitch]
 confidence: observed
 # Booyah 用 Venetian Blinds ×3 做 HUD 行栅。
+# ✅ showcase/glitch 实渲验证(2026-06-18,AE2025):暗 solid + Venetian Blinds(完成度34/宽5/横向)→ 细扫描线肉眼可见、纯 native。
 ```
 
 ### T18 temporal-glitch(时间 glitch / 抽帧卡顿 + datamosh)⭐glitch 催生

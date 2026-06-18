@@ -36,6 +36,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [animated-path](animated-path/INDEX.md) | 动画路径几何 morph 横条→正方→竖条（渲 t=2s + extent readback） | ✅ complete |
 | [3d-camera](3d-camera/INDEX.md) | 3D 图层 + 相机：Z 视差（同尺寸卡按深浅渲大小不同）+ Rotate Y 透视 tumble（梯形） | ✅ complete |
 | [procedural-fx](procedural-fx/INDEX.md) | 程序化火焰 v3（多层合成：黑底+3 火层 FractalNoise→Tritone→TurbulentDisplace+同心 mask 温度分区+Add 叠热芯+Glo2 Glow；技法 T3 additive-depth） | ✅ complete（用户真机验收过 2026-06-18；双版本 gate 绿、逐像素一致） |
+| [glitch](glitch/INDEX.md) | 纯 native glitch（RGB 色差 split + 噪声驱动位移撕裂 + 扫描线 + 辉光；技法 T16/T17 + T2/T5 glitch 迁移；零插件） | 🔍 待review（2026-06-18 agent AE2025 渲验，4 技法肉眼可见、无第三方依赖；待真机复核） |
 
 ## 📋 B 类 — 读值档（dump 值核对，不看图）
 
