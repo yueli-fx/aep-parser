@@ -1,6 +1,7 @@
 # checklists/ — INDEX
 
 <!-- AUTO:checklists -->
+- [techniques/](techniques/INDEX.md) — 跨分类「技法学习」配方区 — 火/烟/能量 · 文字 · 转场 + 跨分类通用技巧（照着做就能产出某现象的可执行配方） — last_updated: 2026-06-18
 - [build-good-fire.md](build-good-fire.md) — active — when_to_read: 被要求从零造火焰/烟/能量类程序化 FX；要重做火焰 v2；调火焰参数想知道某个旋钮的视觉影响；纠结哪些效果是核心、哪些靠插件 — applies_to: [fire, flame, procedural-fx, fractal-noise, displacement-map, ramp, glow, recipe, parameters, plugin-free, sample-analysis, AnimateEffectParam, blend-modes]
 - [comments.md](comments.md) — active — when_to_read: before writing or editing any source-code comment — applies_to: [comments, code-style, documentation]
 - [commits.md](commits.md) — active — when_to_read: before writing a commit message / staging files / preparing a PR — applies_to: [commit, git, staging, message, push, pr, conventional-commits, type-scope]
