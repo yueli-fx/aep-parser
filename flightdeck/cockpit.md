@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-06-18 by claude（**「理解一个工程」研究 arc：效果字典 + 三轴本体冻结 + 理解自动化**。① `effects-dict` 基础设施:5 版本英文效果字典(matchName→名+类型+**默认值**)+ 可重生成 dumper(`scripts/dump_effects_dict.*`)+ checklist。② **`technique-ontology` spec 冻结(graduate)**:角色/技法/机制三轴本体 + schema v2,投大规模工程前的数据契约,经火焰/闪电/控制器三类压测。③ `fx-techniques` 14 技法重构到三轴(glow 跨现象复用实证)。④ **aepdissect 消费字典**:自动译参数 + 标非默认 = 配方信号(`✎ Glow Threshold=139 (default 153)` + `→ tuned:` 摘要)。核心洞察:.aep 用 **elision**(只存非默认)→ 字节即配方信号、免费降噪。火焰 v3 早先已用户验收 + 双版本 gate 过。）
 
-**Active focus**: **技法内化框架**(`specs/2026-06-18-fx-technique-internalization.md`,procedural-fx-generator 的配方提取引擎通用化)。目标:用户给参考 .aep → 我系统内化成可复用、可迁移到风/雨/雷电/转场的**技法**(非现象专属)。核心洞察:**资产是「技法」不是「现象」**——每现象 = 跨域技法的组合;技法库越长新现象越便宜。机制 = 5 步流水线 + flightdeck 两层结构(技法原子 + 现象配方),preflight 自动载入 = "内化"。**火焰是首个实证**:流水线跑通(解析真实多插件工程→角色词典→存),v2 坐实「层次感=多层合成不是参数」。**下一步**:把火焰专属升级成通用(① `cmd/aepdissect` 工具化解析 ② 抽技法原子建 fx-techniques 首批 ③ 火焰 v3 多层合成验证 additive-depth 技法 ④ 喂第二现象验复用率)。**不变量**:知识单一家 = flightdeck + CLAUDE.md;能力真相源 = capindex(`go run ./cmd/capindex -q <词>`);每渲染类双版本 AE ship-gate(红线4);火焰=番外(`incidents/procedural-fx-over-vector.md` Case2)。
+**Active focus**: **Booyah Glitch 全工程复刻 = 理解金标准检验**(spec `2026-06-19-booyah-glitch-full-replication.md` + plan `2026-06-19-booyah-glitch-replication.md`)。把整个真实工程(12 comp/61 层/~100 mask/wiggle+Evolution 表达式/Curves)用咱们 Go API 从零重建——round-trip 只证读得回字节,**从零重建证真懂每个 chunk 怎么来的**。用户铁律:**不逃避未知字段**(撞墙 RE,物理不可写给实证负结论)。判据 = 结构保真(AE 接受 + DOM 读回值对账)+ 终帧渲染像素对照;范围 = 全 12 comp,DAG 叶→根逐 comp 验;方法 = 手写 per-comp 生成器、**原工程只读当取值神谕、chunk 全由 API 重建(绝不 copy 字节)**。是上游「技法内化框架」(`specs/2026-06-18-fx-technique-internalization.md`)的「复现判据 = 理解金标准」检验项,bar 拉到字节/工程级。**不变量**:知识单一家 = flightdeck + CLAUDE.md;能力真相源 = capindex(`go run ./cmd/capindex -q <词>`);每渲染类双版本 AE ship-gate(红线4)。
 
 ## 进行中
 
@@ -17,7 +17,17 @@
 
 ## 下一步
 
-**「理解一个工程」研究 arc**(契约 `specs/2026-06-18-technique-ontology.md`)。用户计划:3 天研究此课题 → 之后投大量参考工程。Day1(schema 冻结)+ Day2(技法对齐 + 理解自动化)已完成。
+**Booyah Glitch 全工程复刻 arc — Phase 0 进行中**(plan `2026-06-19-booyah-glitch-replication.md`)。
+- ✅ **Task 0.1 scaffold**(commit 04e57eb):`flightdeck/showcase/booyah-clone/` 包建好——`oracle.go` 只读打开原工程当取值神谕、`main.go` 跑通列出 12 comp、`render.jsx`/`verify.jsx` 起点、`INDEX.md` 覆盖账本(✅/🔧/⛔/⬜ 逐 comp + 逐未知特征)。
+- ⬜ **Task 0.2 oracle 读侧审计**(轻):确认 mask bezier / keyframe 值 / effect params 全可读;读不出的(预期 Curves)登记账本 `🔧待RE(read)`。读侧已证基本可读。
+- ⬜ **Task 0.3 表达式 spike(头号 de-risk)**:Go 写 Evolution=`time*N` + `wiggle(34,0.29)` → AE 双版本 ship-gate 验是否真求值(`expression-enable-byte-pair` 高危)。go/no-go 决定 ③⑩⑪ 怎么建;FAIL 则降级 keyframe 近似(用户已批准)。
+- ⬜ **Task 0.4 many-mask(21)spike** · **Task 0.5 Curves spike** → 然后 Phase 1-4 按 DAG 逐 comp 建。
+
+依据:plan + spec(`specs/2026-06-19-booyah-glitch-full-replication.md`)+ `tmp/booyah_dissect.txt`(完整画像,真相源)+ `cmd/aepdissect`。
+
+---
+
+**上游「理解一个工程」研究 arc(暂让位,本复刻即其「复现判据=理解金标准」检验项)**(契约 `specs/2026-06-18-technique-ontology.md`)。Day1(schema 冻结)+ Day2(技法对齐 + 理解自动化)已完成。
 
 已完成:
 - ✅ **effects-dict 基础设施**:5 版本英文字典 `data/effects-dict/` + dumper `scripts/dump_effects_dict.{jsx,ps1}` + 种子。流程/坑全记 `checklists/effects-dict.md`(切语言、脚本写权限只能人工开、LUT skip)。
