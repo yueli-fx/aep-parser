@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -261,9 +262,181 @@ func walkAnimated(g *aep.AEPropertyGroup, out *[]*aep.Property) {
 	}
 }
 
+// --- dependency edges ---
+
+var exprRefRe = regexp.MustCompile(`(?:effect|comp|layer|footage)\(\s*"([^"]+)"`)
+
+// exprRefs extracts the quoted names an expression references (effect("X"),
+// thisComp.layer("Y"), comp("Z")...) — the property→property dependency edges.
+func exprRefs(s string) []string {
+	if s == "" {
+		return nil
+	}
+	seen := map[string]bool{}
+	var out []string
+	for _, m := range exprRefRe.FindAllStringSubmatch(s, -1) {
+		if !seen[m[1]] {
+			seen[m[1]] = true
+			out = append(out, m[1])
+		}
+	}
+	return out
+}
+
+// --- structured profile (project_profile per technique-ontology spec §3) ---
+
+type jParam struct {
+	MatchName string `json:"matchName"`
+	Name      string `json:"name,omitempty"`
+	Value     any    `json:"value,omitempty"`
+	Default   any    `json:"default,omitempty"`
+	Changed   bool   `json:"changed"`
+	Expr      string `json:"expr,omitempty"`
+}
+type jEffect struct {
+	MatchName string   `json:"matchName"`
+	Name      string   `json:"name,omitempty"`
+	Class     string   `json:"class"`
+	Tuned     []string `json:"tuned,omitempty"`
+	Params    []jParam `json:"params,omitempty"`
+}
+type jAnim struct {
+	Property string  `json:"property"`
+	KF       int     `json:"kf"`
+	Motion   string  `json:"motion"`
+	Start    float64 `json:"start"`
+	End      float64 `json:"end"`
+}
+type jLayer struct {
+	Index    int       `json:"index"`
+	Name     string    `json:"name"`
+	Type     string    `json:"type"`
+	Blend    string    `json:"blend"`
+	Visible  bool      `json:"visible"`
+	Source   string    `json:"source,omitempty"`
+	InPoint  float64   `json:"inPoint"`
+	OutPoint float64   `json:"outPoint"`
+	Parent   int       `json:"parent,omitempty"` // parent layer Index, 0 = none
+	Matte    int       `json:"matte,omitempty"`  // matte source layer Index
+	Effects  []jEffect `json:"effects,omitempty"`
+	Animated []jAnim   `json:"animated,omitempty"`
+	ExprRefs []string  `json:"exprRefs,omitempty"`
+}
+type jComp struct {
+	Name     string   `json:"name"`
+	ID       uint32   `json:"id"`
+	Width    int      `json:"width"`
+	Height   int      `json:"height"`
+	FPS      float64  `json:"fps"`
+	Duration float64  `json:"duration"`
+	Layers   []jLayer `json:"layers"`
+}
+type jProfile struct {
+	Project     string         `json:"project"`
+	EffectUsage map[string]int `json:"effectUsage"`
+	ThirdParty  []string       `json:"thirdParty,omitempty"`
+	Comps       []jComp        `json:"comps"`
+}
+
+func buildProfile(path string, p *aep.Project, dict *effectsDict, compName map[uint32]string) jProfile {
+	prof := jProfile{Project: path, EffectUsage: map[string]int{}}
+	tpSeen := map[string]bool{}
+	for _, c := range p.Compositions {
+		jc := jComp{Name: c.Name, ID: c.ID, Width: int(c.Width), Height: int(c.Height), FPS: c.FrameRate, Duration: c.Duration}
+		idIndex := map[uint32]int{}
+		for _, l := range c.Layers {
+			idIndex[l.ID] = l.Index
+		}
+		for _, l := range c.Layers {
+			jl := jLayer{
+				Index: l.Index, Name: l.Name, Type: fmt.Sprintf("%v", l.Type),
+				Blend: blend(int(l.BlendingMode)), Visible: l.Visible,
+				InPoint: l.InPoint(), OutPoint: l.OutPoint(),
+			}
+			if l.SourceID != 0 {
+				if nm, ok := compName[l.SourceID]; ok {
+					jl.Source = "precomp:" + nm
+				} else {
+					jl.Source = fmt.Sprintf("footage:%d", l.SourceID)
+				}
+			}
+			if l.ParentID != 0 {
+				jl.Parent = idIndex[l.ParentID]
+			}
+			if l.TrackMatteLayerID != 0 {
+				jl.Matte = idIndex[l.TrackMatteLayerID]
+			}
+			var ap []*aep.Property
+			walkAnimated(l.PropertyTree(), &ap)
+			for _, pr := range ap {
+				t0, t1 := kfSpan(pr.Keyframes)
+				jl.Animated = append(jl.Animated, jAnim{
+					Property: propName(pr.MatchName), KF: len(pr.Keyframes),
+					Motion: motionLabel(pr.Keyframes), Start: t0, End: t1,
+				})
+			}
+			refSeen := map[string]bool{}
+			for _, fx := range l.Effects {
+				prof.EffectUsage[fx.MatchName]++
+				cls := classify(fx.MatchName)
+				if cls == "⚠THIRD-PARTY" && !tpSeen[fx.MatchName] {
+					tpSeen[fx.MatchName] = true
+					prof.ThirdParty = append(prof.ThirdParty, fx.MatchName)
+				}
+				je := jEffect{MatchName: fx.MatchName, Class: cls}
+				de, haveEffect := dictEffect{}, false
+				if dict != nil {
+					de, haveEffect = dict.Effects[fx.MatchName]
+				}
+				if haveEffect {
+					je.Name = de.Name
+				}
+				for _, pr := range fx.Parameters {
+					anim := len(pr.Keyframes) > 0
+					set := pr.StaticValue != nil
+					if !anim && !set {
+						continue
+					}
+					jp := jParam{MatchName: pr.MatchName, Value: pr.StaticValue, Expr: pr.Expression}
+					if haveEffect {
+						if dp, ok := de.Params[pr.MatchName]; ok {
+							jp.Name = dp.Name
+							jp.Default = dp.Default
+							if set && dp.Default != nil {
+								if eq, cmp := equalsDefault(pr.StaticValue, dp.Default); cmp && !eq {
+									jp.Changed = true
+								}
+							}
+						}
+					}
+					label := jp.Name
+					if label == "" {
+						label = pr.MatchName
+					}
+					if jp.Changed || anim {
+						je.Tuned = append(je.Tuned, label)
+					}
+					je.Params = append(je.Params, jp)
+					for _, r := range exprRefs(pr.Expression) {
+						if !refSeen[r] {
+							refSeen[r] = true
+							jl.ExprRefs = append(jl.ExprRefs, r)
+						}
+					}
+				}
+				jl.Effects = append(jl.Effects, je)
+			}
+			jc.Layers = append(jc.Layers, jl)
+		}
+		prof.Comps = append(prof.Comps, jc)
+	}
+	return prof
+}
+
 func main() {
 	dictPath := flag.String("dict", "data/effects-dict/effects_en_US_25.1x68.json",
 		"effect dictionary json (matchName -> name + default); empty to disable")
+	jsonOut := flag.Bool("json", false, "emit a structured project profile as JSON instead of the text report")
 	flag.Parse()
 	args := flag.Args()
 	if len(args) < 1 {
@@ -286,6 +459,17 @@ func main() {
 	compName := map[uint32]string{}
 	for _, c := range p.Compositions {
 		compName[c.ID] = c.Name
+	}
+
+	if *jsonOut {
+		prof := buildProfile(path, p, dict, compName)
+		b, err := json.MarshalIndent(prof, "", "  ")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "marshal:", err)
+			os.Exit(1)
+		}
+		fmt.Println(string(b))
+		return
 	}
 
 	fmt.Printf("=== PROJECT: %s ===\n", path)
@@ -483,6 +667,44 @@ func main() {
 			}
 			if lo > 0.02 && hi < 3.0 && (hi-lo) < 0.2 {
 				fmt.Printf("  ↳ stagger: %d layers, anim start offset ~%.2fs each (错位启动)\n", len(starts), (lo+hi)/2)
+			}
+		}
+	}
+
+	// --- dependency graph (parent / matte / source / expr-ref edges) ---
+	fmt.Printf("\n=== DEPENDENCY GRAPH (parent / matte / source / expr-ref edges) ===\n")
+	for _, c := range p.Compositions {
+		idIndex := map[uint32]int{}
+		for _, l := range c.Layers {
+			idIndex[l.ID] = l.Index
+		}
+		var edges []string
+		for _, l := range c.Layers {
+			if l.ParentID != 0 {
+				edges = append(edges, fmt.Sprintf("  L[%d] %-18q --parent--> L[%d]", l.Index, l.Name, idIndex[l.ParentID]))
+			}
+			if l.TrackMatteLayerID != 0 {
+				edges = append(edges, fmt.Sprintf("  L[%d] %-18q --matte--> L[%d]", l.Index, l.Name, idIndex[l.TrackMatteLayerID]))
+			}
+			if nm, ok := compName[l.SourceID]; ok {
+				edges = append(edges, fmt.Sprintf("  L[%d] %-18q --source--> precomp %q", l.Index, l.Name, nm))
+			}
+			refSeen := map[string]bool{}
+			for _, fx := range l.Effects {
+				for _, pr := range fx.Parameters {
+					for _, r := range exprRefs(pr.Expression) {
+						if !refSeen[r] {
+							refSeen[r] = true
+							edges = append(edges, fmt.Sprintf("  L[%d] %-18q --expr--> %q", l.Index, l.Name, r))
+						}
+					}
+				}
+			}
+		}
+		if len(edges) > 0 {
+			fmt.Printf("\n--- COMP %q ---\n", c.Name)
+			for _, e := range edges {
+				fmt.Println(e)
 			}
 		}
 	}
