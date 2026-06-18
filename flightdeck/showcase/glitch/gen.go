@@ -1,19 +1,21 @@
-// flightdeck/showcase/glitch/gen.go — from-scratch (no AE) PLUGIN-FREE glitch,
-// following the all-native Booyah Glitch recipe (samples/motionbox/glitch/booyah-
-// glitch). Validates the glitch technique atoms (docs/fx-techniques.md) on rendered
-// pixels (delivery contract red line 4):
-//   T16 rgb-channel-split   — 3 bar copies Fill'd pure R/G/B, offset, Add-blended
-//                             => white core + chromatic fringe (chromatic aberration)
-//   T2  displacement-glitch — Displacement Map (src = high-contrast horizontal-streak
-//                             Fractal Noise) on an adjustment layer => horizontal tear
-//   T17 scanlines-crt       — Venetian Blinds on a dark solid => thin scanline stripes
-//   T5  emissive-glow       — Glo2 bloom on the bright bars
-// (T18 temporal-glitch is time-domain — not single-frame pixel-verifiable — left out.)
+// flightdeck/showcase/glitch/gen.go — from-scratch (no AE) PLUGIN-FREE glitch on
+// readable "GLITCH" text, following the all-native Booyah Glitch recipe
+// (samples/motionbox/glitch/booyah-glitch). Validates glitch technique atoms
+// (docs/fx-techniques.md) on rendered pixels (delivery contract red line 4):
+//   T16 rgb-channel-split   — text pre-comp instanced 3×, Fill'd pure R/G/B, offset
+//                             via a Transform effect, Add-blended => chromatic split
+//   T2  displacement-glitch — Displacement Map (src = HIDDEN big-block Fractal Noise)
+//                             on an adjustment => clean horizontal slice tear; the bg
+//                             stays clean because the noise layer is map-only (eye off)
+//   T17 scanlines-crt       — Venetian Blinds on a dark solid => fine subtle scanlines
+//   T5  emissive-glow       — Glo2 neon bloom on the bright text
+// (T18 temporal-glitch is time-domain — not single-frame-verifiable — left out.)
 //
-// Everything native => no plugin needed to render (Booyah's whole point). AddEffect /
-// SetEffectParam / SetEffectLayerParam / AnimateEffectParam / SetBlendingMode / shape
-// Fill+Position are all double-version ship-gate verified; this is the COMBINATION,
-// rendered + eyeballed via render.jsx.
+// Text can't be recoloured/offset directly (NewTextLayer exposes only SetText), so the
+// word lives in a pre-comp ("TXT") instanced 3×; each instance is a normal AV layer.
+// A fresh pre-comp instance has NO materialized layer transform (l.Position() is nil),
+// so position + scale are done with a Transform EFFECT (ADBE Geometry2) whose point
+// params are comp-fraction coords ([0.5,0.5] = centre, per Booyah's saved values).
 //
 // Run from repo root: `go run ./flightdeck/showcase/glitch`.
 package main
@@ -33,8 +35,22 @@ func must(err error) {
 	}
 }
 
+type mark struct {
+	name string
+	col  []float64  // Fill color [A,R,G,B] 0-255
+	pos  []float64  // Transform Position, comp-fraction [x,y]
+}
+
 func main() {
 	p := aep.NewProject(aep.TargetAE2020)
+
+	// Source pre-comp: the readable word.
+	txt, err := aep.NewComposition(p, "TXT", 1920, 1080, 30, 4)
+	must(err)
+	if _, err := aep.NewTextLayer(txt, "word"); err != nil {
+		panic(err)
+	}
+
 	comp, err := aep.NewComposition(p, "GLITCH", 1920, 1080, 30, 4)
 	must(err)
 
@@ -46,101 +62,86 @@ func main() {
 	_, err = aep.NewAdjustmentLayer(comp, "Displace")
 	must(err)
 
-	// RGB-split bar trio (same geometry, pure R/G/B fill, offset, Add).
-	type mark struct {
-		name string
-		rgba [4]float64 // SetColor 0-1
-		pos  [2]float64
-	}
+	// Point text is left-anchored, so the word starts at Position.x and runs right;
+	// base x is shifted left of centre so "GLITCH" sits roughly centred. R/G/B get a
+	// small ± offset around the base for the chromatic split.
 	marks := []mark{
-		{"Mark_R", [4]float64{1, 0, 0, 1}, [2]float64{992, 528}},
-		{"Mark_G", [4]float64{0, 1, 0, 1}, [2]float64{960, 540}},
-		{"Mark_B", [4]float64{0, 0.35, 1, 1}, [2]float64{928, 552}},
+		{"G_R", []float64{255, 255, 0, 0}, []float64{0.308, 0.496}},
+		{"G_G", []float64{255, 0, 255, 40}, []float64{0.3, 0.5}},
+		{"G_B", []float64{255, 0, 130, 255}, []float64{0.292, 0.505}},
 	}
 	for _, m := range marks {
-		l, err := aep.NewShapeLayer(comp, m.name)
+		_, err := aep.NewPrecompLayer(comp, txt, m.name)
 		must(err)
-		g := l.RootGroup()
-		r, err := g.AddRect()
-		must(err)
-		must(r.SetSize([2]float64{1120, 230}))
-		bar2, err := g.AddRect()
-		must(err)
-		must(bar2.SetSize([2]float64{760, 70}))
-		f, err := g.AddFill()
-		must(err)
-		must(f.SetColor(m.rgba))
-		must(l.Position().SetStaticValue(m.pos))
 	}
 
-	_, err = aep.NewSolidLayer(comp, "Noise", 1920, 1080, [3]float64{0, 0, 0})
+	_, err = aep.NewSolidLayer(comp, "Map", 1920, 1080, [3]float64{0, 0, 0})
 	must(err)
-	_, err = aep.NewSolidLayer(comp, "BG", 1920, 1080, [3]float64{0.02, 0.02, 0.035})
+	_, err = aep.NewSolidLayer(comp, "BG", 1920, 1080, [3]float64{0.02, 0.02, 0.05})
 	must(err)
 
 	rp, err := aep.Reopen(p)
 	must(err)
-	fc := rp.Compositions[0]
+	must(rp.CompositionByName("TXT").LayerByName("word").SetText("GLITCH"))
+	fc := rp.CompositionByName("GLITCH")
 	set := func(l *aep.Layer, fx *aep.Effect, mn string, v any) {
 		if _, err := aep.SetEffectParam(l, fx, mn, v); err != nil {
 			panic(fmt.Sprintf("%s %s: %v", l.Name, mn, err))
 		}
 	}
 
-	// Noise: high-contrast horizontal streaks => horizontal displacement tear.
-	noiseL := fc.LayerByName("Noise")
-	fn, err := aep.AddEffect(noiseL, aep.EffectFractalNoise)
+	// Map = high-contrast big horizontal blocks => clean slice tears (not fine static).
+	// Eye off: used only as the displacement source, so the bg stays clean.
+	mapL := fc.LayerByName("Map")
+	fn, err := aep.AddEffect(mapL, aep.EffectFractalNoise)
 	must(err)
-	set(noiseL, fn, "ADBE Fractal Noise-0004", 150.0) // Contrast
-	set(noiseL, fn, "ADBE Fractal Noise-0009", 0.0)   // Uniform Scaling off
-	set(noiseL, fn, "ADBE Fractal Noise-0011", 520.0) // Scale Width (wide)
-	set(noiseL, fn, "ADBE Fractal Noise-0012", 32.0)  // Scale Height (thin) -> streaks
-	set(noiseL, fn, "ADBE Fractal Noise-0015", 2.0)   // Complexity (blocky)
-	set(noiseL, fn, "ADBE Fractal Noise-0029", 20.0)  // Opacity (faint texture)
+	set(mapL, fn, "ADBE Fractal Noise-0004", 320.0) // Contrast (hard edges)
+	set(mapL, fn, "ADBE Fractal Noise-0009", 0.0)   // Uniform Scaling off
+	set(mapL, fn, "ADBE Fractal Noise-0011", 700.0) // Scale Width (very wide)
+	set(mapL, fn, "ADBE Fractal Noise-0012", 9.0)   // Scale Height (thin bands)
+	set(mapL, fn, "ADBE Fractal Noise-0015", 1.0)   // Complexity (blocky)
+	mapL.SetVisible(false)
 
-	// Displace adjustment: tear everything below using Noise as the map.
 	dispL := fc.LayerByName("Displace")
 	dm, err := aep.AddEffect(dispL, "ADBE Displacement Map")
 	must(err)
-	must(aep.SetEffectLayerParam(dispL, dm, "ADBE Displacement Map-0001", noiseL))
-	set(dispL, dm, "ADBE Displacement Map-0003", 48.0) // Max Horizontal Displacement
-	set(dispL, dm, "ADBE Displacement Map-0005", 7.0)  // Max Vertical Displacement
+	must(aep.SetEffectLayerParam(dispL, dm, "ADBE Displacement Map-0001", mapL))
+	set(dispL, dm, "ADBE Displacement Map-0003", 26.0) // Max Horizontal Displacement
+	set(dispL, dm, "ADBE Displacement Map-0005", 0.0)  // Max Vertical (pure h-slices)
 
-	// Glow adjustment: bloom the bright bars.
 	glowL := fc.LayerByName("Glow")
 	gl, err := aep.AddEffect(glowL, "ADBE Glo2")
 	must(err)
-	set(glowL, gl, "ADBE Glo2-0002", 110.0) // Glow Threshold (low -> more bloom)
-	set(glowL, gl, "ADBE Glo2-0003", 48.0)  // Glow Radius
-	set(glowL, gl, "ADBE Glo2-0004", 1.6)   // Glow Intensity
+	set(glowL, gl, "ADBE Glo2-0002", 70.0) // Glow Threshold (low -> strong bloom)
+	set(glowL, gl, "ADBE Glo2-0003", 42.0) // Glow Radius
+	set(glowL, gl, "ADBE Glo2-0004", 2.6)  // Glow Intensity
 
-	// Scanlines: thin Venetian-Blinds stripes over everything.
 	scanL := fc.LayerByName("Scanlines")
 	vb, err := aep.AddEffect(scanL, "ADBE Venetian Blinds")
 	must(err)
-	set(scanL, vb, "ADBE Venetian Blinds-0001", 34.0) // Transition Completion (lighter)
-	set(scanL, vb, "ADBE Venetian Blinds-0002", 0.0)  // Direction (horizontal blinds)
-	set(scanL, vb, "ADBE Venetian Blinds-0003", 5.0)  // Width (fine)
+	set(scanL, vb, "ADBE Venetian Blinds-0001", 24.0) // Transition Completion (light)
+	set(scanL, vb, "ADBE Venetian Blinds-0002", 0.0)  // Direction (horizontal)
+	set(scanL, vb, "ADBE Venetian Blinds-0003", 4.0)  // Width (fine)
 	set(scanL, vb, "ADBE Venetian Blinds-0004", 1.0)  // Feather
 
-	// Fill each bar pure R/G/B + Add blend (RGB-split chromatic aberration).
-	fills := map[string][]float64{
-		"Mark_R": {255, 255, 0, 0},
-		"Mark_G": {255, 0, 255, 0},
-		"Mark_B": {255, 0, 90, 255},
-	}
-	for name, col := range fills {
-		l := fc.LayerByName(name)
+	// Each text instance: Transform (scale up + RGB offset) + Fill (channel) + Add.
+	for _, m := range marks {
+		l := fc.LayerByName(m.name)
+		tr, err := aep.AddEffect(l, "ADBE Geometry2")
+		must(err)
+		set(l, tr, "ADBE Geometry2-0011", 0.0)   // Uniform Scale off
+		set(l, tr, "ADBE Geometry2-0004", 250.0) // Scale Width %
+		set(l, tr, "ADBE Geometry2-0003", 250.0) // Scale Height %
+		set(l, tr, "ADBE Geometry2-0002", m.pos) // Position (comp fraction)
+
 		ff, err := aep.AddEffect(l, "ADBE Fill")
 		must(err)
-		set(l, ff, "ADBE Fill-0002", col)
+		set(l, ff, "ADBE Fill-0002", m.col)
 		must(l.SetBlendingMode(aep.BlendingModeAdd))
 	}
 
-	// Animate the tear (Max Horizontal Displacement jitters) — motion for the .aep,
-	// not needed for the single-frame gate.
 	_, err = aep.AnimateEffectParam(dispL, dm, "ADBE Displacement Map-0003",
-		[]aep.ScalarKeyframe{{Time: 0, Value: 8}, {Time: 1.5, Value: 42}, {Time: 3, Value: 14}})
+		[]aep.ScalarKeyframe{{Time: 0, Value: 6}, {Time: 1.5, Value: 30}, {Time: 3, Value: 12}})
 	must(err)
 
 	f, err := os.Create(outPath)
