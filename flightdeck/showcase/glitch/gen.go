@@ -7,9 +7,10 @@
 //   T2  displacement-glitch — Displacement Map (src = HIDDEN big-block Fractal Noise)
 //                             on an adjustment => clean horizontal slice tear; the bg
 //                             stays clean because the noise layer is map-only (eye off)
-//   T17 scanlines-crt       — Venetian Blinds on a dark solid => fine subtle scanlines
 //   T5  emissive-glow       — Glo2 neon bloom on the bright text
-// (T18 temporal-glitch is time-domain — not single-frame-verifiable — left out.)
+// (T17 scanlines-crt dropped — Venetian Blinds CRT lines muddied/darkened the word;
+//  it reads much cleaner without. T18 temporal-glitch is time-domain, not single-
+//  frame-verifiable. Both stay sample-observed, not shown here.)
 //
 // Text can't be recoloured/offset directly (NewTextLayer exposes only SetText), so the
 // word lives in a pre-comp ("TXT") instanced 3×; each instance is a normal AV layer.
@@ -55,8 +56,6 @@ func main() {
 	must(err)
 
 	// top -> bottom (new layers append below)
-	_, err = aep.NewSolidLayer(comp, "Scanlines", 1920, 1080, [3]float64{0.05, 0.05, 0.07})
-	must(err)
 	_, err = aep.NewAdjustmentLayer(comp, "Glow")
 	must(err)
 	_, err = aep.NewAdjustmentLayer(comp, "Displace")
@@ -116,13 +115,8 @@ func main() {
 	set(glowL, gl, "ADBE Glo2-0003", 42.0) // Glow Radius
 	set(glowL, gl, "ADBE Glo2-0004", 2.6)  // Glow Intensity
 
-	scanL := fc.LayerByName("Scanlines")
-	vb, err := aep.AddEffect(scanL, "ADBE Venetian Blinds")
-	must(err)
-	set(scanL, vb, "ADBE Venetian Blinds-0001", 24.0) // Transition Completion (light)
-	set(scanL, vb, "ADBE Venetian Blinds-0002", 0.0)  // Direction (horizontal)
-	set(scanL, vb, "ADBE Venetian Blinds-0003", 4.0)  // Width (fine)
-	set(scanL, vb, "ADBE Venetian Blinds-0004", 1.0)  // Feather
+	// (Scanlines / Venetian Blinds removed — the word reads much cleaner & brighter
+	// without the CRT line overlay. T17 stays sample-observed, not shown here.)
 
 	// Each text instance: Transform (scale up + RGB offset) + Fill (channel) + Add.
 	for _, m := range marks {

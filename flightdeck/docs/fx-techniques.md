@@ -342,10 +342,12 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [glitch]
 hypothesized_transfers: [retro-crt, hologram, hud, surveillance]
 not_this: "整体降噪/模糊(扫描线是规律横纹叠加,不是噪点)"
-evidence: [samples/motionbox/glitch/booyah-glitch, showcase/glitch]
+evidence: [samples/motionbox/glitch/booyah-glitch]
 confidence: observed
 # Booyah 用 Venetian Blinds ×3 做 HUD 行栅。
-# ✅ showcase/glitch 实渲验证(2026-06-18,AE2025):暗 solid + Venetian Blinds(完成度34/宽5/横向)→ 细扫描线肉眼可见、纯 native。
+# ⚠ showcase/glitch 曾试渲(2026-06-18,AE2025:暗 solid + Venetian Blinds 完成度34/宽5/横向,
+#   细扫描线确实纯 native 渲得出),但 CRT 行栅压暗/添糊了主体字 —— 用户实测去掉更鲜亮通透,
+#   showcase 已移除该层。技法本身有效、退回纯 sample-observed(本现象配方不取它)。
 ```
 
 ### T18 temporal-glitch(时间 glitch / 抽帧卡顿 + datamosh)⭐glitch 催生
