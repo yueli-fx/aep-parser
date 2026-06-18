@@ -26,10 +26,10 @@ regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 re
 
 | 特征 | status | 备注 |
 |---|---|---|
-| expr-evolution(`time*N`) | ⬜待建 | Task 0.3 spike:AE 是否真求值 Go 写的 Evolution 表达式 |
-| expr-wiggle(`wiggle(34,0.29)`) | ⬜待建 | Task 0.3 同 spike |
-| many-mask(单层 ~21) | ⬜待建 | Task 0.4 spike:多 mask 不被 silent-drop |
-| curves(CurvesCustom 曲线数据) | 🔧待RE | **Task 0.2 实测:读侧即 gap** —— 只 surface `-0000` master slot,曲线点未作 param 暴露 → Task 0.5 RE 读+写两侧 |
+| expr-evolution(`time*N`) | ✅ | **Task 0.3 GO**:`SetExpression` stable+双版本 AE gated(`TestExprEffect` effect-param+`time*40`);time* idiom 已 gated(`TestExpression` time*90);`ADBE Fractal Noise-0023` Evolution=`time*1200` round-trip 实证干净。无需降级。 |
+| expr-wiggle(`wiggle(34,0.29)`) | ✅ | **Task 0.3 GO**:wiggle idiom 已 gated(expr_vocab `wiggle(2,250)`);`ADBE Exposure2-0003` Exposure=`wiggle(34,0.29)` round-trip 干净。写入端字节路径与表达式内容无关(closed decision 2026-06-17)。 |
+| many-mask(单层 ~21) | 🔶在位验 | 0.4 standalone spike **并入 ⑩ 在位验**(masks 集中在 ⑩,①-⑨ 仅背景 L4 有 1 个;Go round-trip 对 silent-drop 无意义=假绿,只能 AE 验,故 ⑩ 建时 AE-accept 实地验)。mask=parade list,非 keyframe lhd3 分页,Go 侧无 count 上限。 |
+| curves(CurvesCustom 曲线数据) | ⛔曲线blocked / 实例可加 | **Task 0.2+0.5**:曲线数据读侧即 gap(只 `-0000` master)+ 无写 param = arbitrary-data 物理 blocked(无 scripting 通道)。但 effect **实例可加**(`ADBE CurvesCustom` 原生在库)→ ⑫ 降级:加默认 Curves 实例、曲线标 ⛔,实例 AE-accept 在 ⑫ 验。 |
 
 > **Task 0.2 读侧审计(2026-06-19,probe 已删)**:mask 顶点 ✅(グリッチテキスト L0 = 16 mask,`Vertices`/`Closed`/`Mode`/`PathKeyframes` 可读)· keyframe 值 ✅(`Time`/`Value`)· effect params + expression ✅。读侧唯一 gap = Curves 曲线数据(见上行)。gen 文件直接用 raw API(`l.Masks`/`l.Effects`/`pr.Keyframes`)即可,oracle 暂不需额外 typed accessor(YAGNI)。
 
