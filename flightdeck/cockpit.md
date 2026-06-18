@@ -17,11 +17,16 @@
 
 ## 下一步
 
-**Booyah Glitch 全工程复刻 arc — Phase 0 进行中**(plan `2026-06-19-booyah-glitch-replication.md`)。
-- ✅ **Task 0.1 scaffold**(commit 04e57eb):`flightdeck/showcase/booyah-clone/` 包建好——`oracle.go` 只读打开原工程当取值神谕、`main.go` 跑通列出 12 comp、`render.jsx`/`verify.jsx` 起点、`INDEX.md` 覆盖账本(✅/🔧/⛔/⬜ 逐 comp + 逐未知特征)。
-- ⬜ **Task 0.2 oracle 读侧审计**(轻):确认 mask bezier / keyframe 值 / effect params 全可读;读不出的(预期 Curves)登记账本 `🔧待RE(read)`。读侧已证基本可读。
-- ⬜ **Task 0.3 表达式 spike(头号 de-risk)**:Go 写 Evolution=`time*N` + `wiggle(34,0.29)` → AE 双版本 ship-gate 验是否真求值(`expression-enable-byte-pair` 高危)。go/no-go 决定 ③⑩⑪ 怎么建;FAIL 则降级 keyframe 近似(用户已批准)。
-- ⬜ **Task 0.4 many-mask(21)spike** · **Task 0.5 Curves spike** → 然后 Phase 1-4 按 DAG 逐 comp 建。
+**Booyah Glitch 全工程复刻 arc — Phase 0 完成 ✅,Phase 1 起**(plan `2026-06-19-booyah-glitch-replication.md`)。
+
+Phase 0(前置 de-risk)收口:
+- ✅ **0.1 scaffold**(04e57eb):`flightdeck/showcase/booyah-clone/` 包 + oracle(只读神谕)+ 覆盖账本。
+- ✅ **0.2 读侧审计**(c3bff18):mask 顶点/keyframe/params/expr 全可读;Curves 曲线数据=读侧 gap。
+- ✅ **0.3 表达式 = GO**(29b4db6,头号 de-risk 解除):`SetExpression` 早已 stable+双版本 AE gated;Evolution=`time*N`(`ADBE Fractal Noise-0023`)+ `wiggle(34,0.29)`(`ADBE Exposure2-0003`)round-trip 干净,落在已 gated 字节路径+idiom。**噪声动画+wiggle 能忠实复刻,无需降级。**
+- 🔶 **0.4 many-mask(21)** 并入 ⑩ 在位 AE 验(masks 集中在 ⑩;Go round-trip 对 silent-drop 假绿)。
+- ⛔ **0.5 Curves**:曲线数据物理 blocked(arbitrary-data 无 scripting),实例可加 → ⑫ 降级 + 在位验。
+
+**下一步 = Phase 1 Task 1.1:comp ① シェイイイイプ！！！**(1 shape 层,4 个动画矩形 Rect Size/Position,值从 oracle 提取)→ 然后 ②③④ 叶子,按 DAG 上行。
 
 依据:plan + spec(`specs/2026-06-19-booyah-glitch-full-replication.md`)+ `tmp/booyah_dissect.txt`(完整画像,真相源)+ `cmd/aepdissect`。
 
