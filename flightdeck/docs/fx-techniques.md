@@ -59,9 +59,10 @@ mechanism:
       - {param: Evolution, direction: up}                 # 随时间=动
       - {param: Bend, direction: set}                     # 仅 WRPMESH(Warp):整体弯曲
 reproducibility: {mechanism: native, requires_asset: none}
-proven_transfers: [fire]
+proven_transfers: [fire, glitch]
 hypothesized_transfers: [wind, water, transition]
 not_this: "整层平移(那是位置动画,不是逐像素扭曲)"
+# glitch 用法:高对比/块状噪声驱动 → 横向块状撕裂(Booyah Displacement Map ×12 / GlitchText ×20);火焰用法=MaxV 拉火舌。
 evidence: [showcase/procedural-fx, samples/ColorfulFireBall]
 confidence: validated
 # 备注:Displacement Map=主力(ColorfulFireBall 用 ×6,MaxV 最大 280),需用另一层当源(SetEffectLayerParam);
@@ -121,7 +122,7 @@ mechanism:
       - {param: Glow Radius, direction: up}
       - {param: Glow Intensity, direction: up}
 reproducibility: {mechanism: native, requires_asset: none}
-proven_transfers: [fire, lightning]
+proven_transfers: [fire, lightning, glitch]
 hypothesized_transfers: [neon, energy, magic]
 not_this: "整体提亮(无阈值=不是选择性辉光)"
 evidence: [showcase/procedural-fx, samples/LightningPack]
@@ -307,6 +308,62 @@ confidence: observed
 # 本库:time-remap 需关键帧(见 incidents/layer-settimeremapenabled-needs-keyframes)+ opacity 关键帧交叉淡入。未单独 build/render 验过。
 ```
 
+### T16 rgb-channel-split(RGB 通道分离/色差)⭐glitch 催生
+把图像拆成 R/G/B 三份各自偏移/闪烁 → 色差/通道错位。glitch 的招牌信号,也用于赛博朋克/复古 CRT/转场。
+```yaml
+id: rgb-channel-split
+role: [color, distort]
+mechanism:
+  - kind: composition_op
+    op: "源复制 3 份,各 ADBE Fill 成纯 R/G/B + 相加类 blend,三层各自位移/opacity 关键帧错位闪烁(Booyah 'RGBズレ':R/G/B 三层各 23-25kf opacity)"
+  - kind: effect
+    any_of: [ADBE Set Channels, ADBE Channel Blur]   # 单效果做通道操作/逐通道软化(GlitchText:Red Blurriness=80=软色差)
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [glitch]
+hypothesized_transfers: [cyberpunk, retro-crt, transition, text-fx]
+not_this: "整体 Hue 偏移(那是调色,不是把 R/G/B 拆开各自位移)"
+evidence: [samples/motionbox/glitch/booyah-glitch, samples/motionbox/glitch/glitchtext]
+confidence: observed
+# 三层 Fill 路最可控(纯 native);Set Channels/Channel Blur 是单效果近似。配 time-evolution 让错位闪烁。
+```
+
+### T17 scanlines-crt(扫描线 / CRT 行)〔质感技法〕
+横向行栅叠加 → CRT / HUD / 监视器质感。glitch、复古、全息常配。
+```yaml
+id: scanlines-crt
+role: [texture]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Venetian Blinds, ADBE Grid]   # 百叶窗/网格生成等距横线,低 opacity 叠
+    signal: [{param: Transition Completion, direction: set}, {param: Width, direction: down}]
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [glitch]
+hypothesized_transfers: [retro-crt, hologram, hud, surveillance]
+not_this: "整体降噪/模糊(扫描线是规律横纹叠加,不是噪点)"
+evidence: [samples/motionbox/glitch/booyah-glitch]
+confidence: observed
+# Booyah 用 Venetian Blinds ×3 做 HUD 行栅。
+```
+
+### T18 temporal-glitch(时间 glitch / 抽帧卡顿 + datamosh)⭐glitch 催生
+让时间轴本身 glitch:抽帧卡顿 + 帧间涂抹。区别于空间位移,作用在**时间**上。
+```yaml
+id: temporal-glitch
+role: [motion, distort]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Posterize Time, ADBE Time Displacement]
+    signal: [{param: Frame Rate, direction: down}, {param: Max Displacement Time [sec], direction: up}]
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [glitch]
+hypothesized_transfers: [datamosh, music-video, transition]
+not_this: "空间位移(那是 displacement-distortion;此条是时间轴抽帧/涂抹)"
+evidence: [samples/motionbox/glitch/glitchtext]
+confidence: observed
+# Posterize Time=降帧率出卡顿;Time Displacement=按亮度图错时间出涂抹(GlitchText Max Displacement Time=2s)。
+# ⚠ GlitchText 招牌跳变靠第三方 Videocopilot Twitch;纯 native 用 Posterize Time + Displacement Map(块状噪声驱动)近似。
+```
+
 ---
 
 ## 现象配方索引(技法的有序组合)
@@ -319,6 +376,8 @@ confidence: observed
 | 风 | (待建) | noise-as-material + displacement-distortion(方向) + time-evolution + 运动模糊 |
 | 雨 | (待建) | particle-emit(条状) + time-evolution(下落) + 模糊 |
 | 转场 | (待建) | displacement-distortion/擦除 + time-evolution(时间扫过) |
+| glitch(纯 native·可复刻) | (待建,Booyah 实证可行) | ①程序化:rgb-channel-split + displacement-distortion(块状噪声驱动) + scanlines-crt + temporal-glitch(Posterize Time) + emissive-glow。Booyah Glitch 全 native |
+| glitch(重度/datamosh) | 实证 GlitchText | ②插件依赖:招牌跳变=**Videocopilot Twitch**(第三方)+ PEDG/Colorama 等;native 部分=temporal-glitch + rgb-channel-split + displacement。纯 native 只能近似 |
 
 > 新增现象:`aepdissect` 解析 → 拆角色 → 按 schema 在此登记新技法/标已有技法新 `proven_transfers` → 写 `checklists/build-<现象>.md` 配方(负责技法间顺序)→ AE gate 验证升 confidence。
 
