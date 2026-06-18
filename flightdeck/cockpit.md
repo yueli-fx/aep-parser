@@ -26,7 +26,10 @@ Phase 0(前置 de-risk)收口:
 - 🔶 **0.4 many-mask(21)** 并入 ⑩ 在位 AE 验(masks 集中在 ⑩;Go round-trip 对 silent-drop 假绿)。
 - ⛔ **0.5 Curves**:曲线数据物理 blocked(arbitrary-data 无 scripting),实例可加 → ⑫ 降级 + 在位验。
 
-**下一步 = Phase 1 Task 1.1:comp ① シェイイイイプ！！！**(1 shape 层,4 个动画矩形 Rect Size/Position,值从 oracle 提取)→ 然后 ②③④ 叶子,按 DAG 上行。
+**Phase 1 进行中**:
+- 🔶 **Task 1.1 comp ① シェイイイイプ**(commit e4d266c,Go 建):4 rect 精确 kf + fill 色 round-trip 逐值对账原工程 ✓;结构 delta(shape 组嵌套 + transform 默认物化,render-neutral)已记账。**AE-accept/render 待验**。
+- ⬜ **下一步 = 首次 AE 验证**(基座检查):开 `booyah-clone.aep` 确认 AE 接受(Japanese comp 名 + shape 不被 drop)+ render comp ① 与原工程同 comp 对照。这步同时验 harness 在本会话能跑 + 日文名 JSX 匹配(render.jsx 的 UTF-8 caveat)。**先验基座再建 ②③④**,避免在坏地基上摞。
+- ⬜ 然后 Task 1.2-1.4:② テキスト(text+animator)③ マップ用ノイズ(fractal+expr,0.3 已 GO)④ カクッ(shape),按 DAG 上行。
 
 依据:plan + spec(`specs/2026-06-19-booyah-glitch-full-replication.md`)+ `tmp/booyah_dissect.txt`(完整画像,真相源)+ `cmd/aepdissect`。
 
