@@ -1,24 +1,35 @@
 // cmd/aepdissect — structured teardown of any After Effects .aep, for the
 // technique-internalization pipeline (spec 2026-06-18-fx-technique-internalization,
-// step PARSE). Generalizes the one-off tmp_debug probes (dump_fxchain / dump_tdmn /
-// dump_layers) into a repo tool: given a reference template, print
+// step PARSE; output shape per spec 2026-06-18-technique-ontology). Given a
+// reference template, print
 //   - effect-usage histogram with native / Cycore-bundled / third-party class
 //   - third-party plugin dependency list (what the output needs installed to render)
 //   - precomp nesting map
 //   - per-comp layer detail: blend mode (named), source, mask/effect counts,
-//     and each effect's SET or ANIMATED params (untouched defaults elided)
+//     and each effect's SET or ANIMATED params, TRANSLATED via the effect
+//     dictionary (matchName -> human name) and flagged against the AE default
+//     so the params the author actually CHANGED stand out (= recipe signal;
+//     AE elides params equal to default, so a stored param ~= an author decision).
 //
 // Usage:
-//   go run ./cmd/aepdissect <file.aep>
+//   go run ./cmd/aepdissect [-dict <effects.json>] <file.aep>
+//
+// Dictionary defaults to data/effects-dict/effects_en_US_25.1x68.json (run from
+// repo root). Missing dict -> falls back to raw matchName output. Build the dict
+// with scripts/dump_effects_dict.ps1 (see checklists/effects-dict.md).
 //
 // This is the mechanical step; turning the dump into role/technique knowledge is
-// human/AI judgment (see checklists/build-good-fire.md for the fire example).
+// human/AI judgment (see docs/fx-techniques.md + the technique-ontology schema).
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
+	"math"
 	"os"
 	"sort"
+	"strings"
 
 	aep "github.com/example/aep-parser/internal/aep"
 )
@@ -45,21 +56,134 @@ func blend(m int) string {
 // classify an effect matchName by render dependency.
 func classify(mn string) string {
 	switch {
-	case len(mn) >= 5 && mn[:5] == "ADBE ":
+	case strings.HasPrefix(mn, "ADBE "):
 		return "native"
-	case len(mn) >= 3 && mn[:3] == "CC ":
+	case strings.HasPrefix(mn, "CC "):
 		return "Cycore(bundled)"
 	default:
 		return "⚠THIRD-PARTY"
 	}
 }
 
+// --- effect dictionary (data/effects-dict/effects_<lang>_<ver>.json) ---
+
+type dictParam struct {
+	Name    string `json:"name"`
+	Type    string `json:"type"`
+	Default any    `json:"default"`
+}
+type dictEffect struct {
+	Name   string               `json:"name"`
+	Params map[string]dictParam `json:"params"`
+}
+type effectsDict struct {
+	AEVersion string                `json:"aeVersion"`
+	Effects   map[string]dictEffect `json:"effects"`
+}
+
+func loadDict(path string) *effectsDict {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warn: no effect dict (%v) — falling back to raw matchName output\n", err)
+		return nil
+	}
+	var d effectsDict
+	if err := json.Unmarshal(b, &d); err != nil {
+		fmt.Fprintf(os.Stderr, "warn: dict parse failed (%v) — raw output\n", err)
+		return nil
+	}
+	return &d
+}
+
+func toFloat(v any) (float64, bool) {
+	switch n := v.(type) {
+	case float64:
+		return n, true
+	case float32:
+		return float64(n), true
+	case int:
+		return float64(n), true
+	case int64:
+		return float64(n), true
+	}
+	return 0, false
+}
+
+func toFloatSlice(v any) ([]float64, bool) {
+	switch s := v.(type) {
+	case []float64:
+		return s, true
+	case []any:
+		out := make([]float64, 0, len(s))
+		for _, e := range s {
+			f, ok := toFloat(e)
+			if !ok {
+				return nil, false
+			}
+			out = append(out, f)
+		}
+		return out, true
+	}
+	return nil, false
+}
+
+// equalsDefault reports whether stored value v matches the dict default def.
+// ok=false means "not comparable" (no default / unhandled type) — treat as changed.
+func equalsDefault(v, def any) (equal, ok bool) {
+	if def == nil {
+		return false, false
+	}
+	switch d := def.(type) {
+	case float64:
+		if f, ok2 := toFloat(v); ok2 {
+			return math.Abs(f-d) < 1e-6, true
+		}
+	case []any, []float64:
+		ds, _ := toFloatSlice(def)
+		vs, ok2 := toFloatSlice(v)
+		_ = d
+		if !ok2 || len(vs) != len(ds) {
+			return false, len(vs) > 0
+		}
+		for i := range ds {
+			if math.Abs(vs[i]-ds[i]) > 1e-6 {
+				return false, true
+			}
+		}
+		return true, true
+	case string:
+		return fmt.Sprint(v) == d, true
+	case bool:
+		if b, ok2 := v.(bool); ok2 {
+			return b == d, true
+		}
+	}
+	return false, false
+}
+
+func fmtNum(v any) string {
+	if f, ok := toFloat(v); ok {
+		return fmt.Sprintf("%g", f)
+	}
+	return fmt.Sprintf("%v", v)
+}
+
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: aepdissect <file.aep>")
+	dictPath := flag.String("dict", "data/effects-dict/effects_en_US_25.1x68.json",
+		"effect dictionary json (matchName -> name + default); empty to disable")
+	flag.Parse()
+	args := flag.Args()
+	if len(args) < 1 {
+		fmt.Fprintln(os.Stderr, "usage: aepdissect [-dict <effects.json>] <file.aep>")
 		os.Exit(2)
 	}
-	path := os.Args[1]
+	path := args[0]
+
+	var dict *effectsDict
+	if *dictPath != "" {
+		dict = loadDict(*dictPath)
+	}
+
 	p, err := aep.Open(path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "open:", err)
@@ -73,6 +197,9 @@ func main() {
 
 	fmt.Printf("=== PROJECT: %s ===\n", path)
 	fmt.Printf("compositions: %d\n", len(p.Compositions))
+	if dict != nil {
+		fmt.Printf("dict: %s (AE %s, %d effects)\n", *dictPath, dict.AEVersion, len(dict.Effects))
+	}
 
 	// --- effect usage histogram + classification ---
 	usage := map[string]int{}
@@ -101,7 +228,13 @@ func main() {
 	var thirdParty []string
 	for _, e := range hist {
 		cls := classify(e.name)
-		fmt.Printf("  %4d  %-28s [%s]\n", e.count, e.name, cls)
+		human := ""
+		if dict != nil {
+			if de, ok := dict.Effects[e.name]; ok && de.Name != "" {
+				human = "  \"" + de.Name + "\""
+			}
+		}
+		fmt.Printf("  %4d  %-28s [%s]%s\n", e.count, e.name, cls, human)
 		if cls == "⚠THIRD-PARTY" {
 			thirdParty = append(thirdParty, fmt.Sprintf("%s (×%d)", e.name, e.count))
 		}
@@ -133,7 +266,7 @@ func main() {
 	}
 
 	// --- per-comp detail ---
-	fmt.Printf("\n=== PER-COMP DETAIL ===\n")
+	fmt.Printf("\n=== PER-COMP DETAIL (✎=author changed vs default · ?=no dict entry) ===\n")
 	for _, c := range p.Compositions {
 		fmt.Printf("\n--- COMP %q (id=%d, %dx%d, %.0ffps, %.1fs, %d layers) ---\n",
 			c.Name, c.ID, c.Width, c.Height, c.FrameRate, c.Duration, len(c.Layers))
@@ -149,17 +282,50 @@ func main() {
 			fmt.Printf("  L[%d] %-18q %-10v blend=%-15s vis=%-5v src=%-22s masks=%d fx=%d\n",
 				l.Index, l.Name, l.Type, blend(int(l.BlendingMode)), l.Visible, src, len(l.Masks), len(l.Effects))
 			for _, fx := range l.Effects {
-				fmt.Printf("        FX %-26s [%s]\n", fx.MatchName, classify(fx.MatchName))
+				de, haveEffect := dictEffect{}, false
+				if dict != nil {
+					de, haveEffect = dict.Effects[fx.MatchName]
+				}
+				ehuman := ""
+				if haveEffect && de.Name != "" {
+					ehuman = " \"" + de.Name + "\""
+				}
+				fmt.Printf("        FX %-26s%s [%s]\n", fx.MatchName, ehuman, classify(fx.MatchName))
+
+				var tuned []string
 				for _, pr := range fx.Parameters {
 					anim := len(pr.Keyframes) > 0
 					set := pr.StaticValue != nil
 					if !anim && !set {
 						continue
 					}
-					line := fmt.Sprintf("           · %-26s", pr.MatchName)
-					if set {
-						line += fmt.Sprintf(" = %v", pr.StaticValue)
+					// resolve human name + default from dict
+					pname, mark := pr.MatchName, "·"
+					var defStr string
+					if haveEffect {
+						if dp, ok := de.Params[pr.MatchName]; ok {
+							if dp.Name != "" {
+								pname = dp.Name
+							}
+							if set && dp.Default != nil {
+								if eq, cmp := equalsDefault(pr.StaticValue, dp.Default); cmp {
+									if eq {
+										mark = "=" // stored but equals default (structural/rare)
+									} else {
+										mark = "✎" // author changed it
+										defStr = fmt.Sprintf("  (default %s)", fmtNum(dp.Default))
+									}
+								}
+							}
+						} else {
+							mark = "?" // no dict entry for this slot (e.g. master slot 0000)
+						}
 					}
+					line := fmt.Sprintf("         %s %-26s", mark, pname)
+					if set {
+						line += fmt.Sprintf(" = %s", fmtNum(pr.StaticValue))
+					}
+					line += defStr
 					if anim {
 						line += fmt.Sprintf("  [ANIM %dkf]", len(pr.Keyframes))
 					}
@@ -167,6 +333,12 @@ func main() {
 						line += fmt.Sprintf("  expr=%q", pr.Expression)
 					}
 					fmt.Println(line)
+					if mark == "✎" || anim {
+						tuned = append(tuned, pname)
+					}
+				}
+				if len(tuned) > 0 {
+					fmt.Printf("           → tuned: %s\n", strings.Join(tuned, ", "))
 				}
 			}
 		}
