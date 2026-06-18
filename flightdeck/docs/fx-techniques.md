@@ -1,120 +1,311 @@
 ---
 status: active
-when_to_read: 造任何程序化视觉(火/烟/风/雨/雷电/能量/转场)选效果/技法时;想知道某技法跨哪些现象复用;建新现象配方 build-X 时查可复用技法原子
-applies_to: [fx-techniques, procedural-fx, technique-library, fire, wind, rain, lightning, transition, noise, displacement, glow, blend-modes, cross-domain]
-when_to_update: 新增/验证一个技法原子;某技法发现新实现效果或新适用现象;某技法被 AE gate 验证
+when_to_read: 造任何程序化视觉(火/烟/风/雨/雷电/能量/转场)选效果/技法时;想知道某技法跨哪些现象复用;建新现象配方 build-X 时查可复用技法原子;新增/重构技法条目需对齐三轴 schema 时
+applies_to: [fx-techniques, procedural-fx, technique-library, three-axis-ontology, role, technique, mechanism, fire, wind, rain, lightning, transition, noise, displacement, glow, blend-modes, cross-domain, reproducibility]
+when_to_update: 新增/验证一个技法原子;某技法发现新实现效果(等价集)或新适用现象;某技法被 AE gate 验证(confidence 升级);schema 字段变更需对齐
 last_updated: 2026-06-18
 ---
 
-# 程序化视觉技法库（跨域可复用原子）
+# 程序化视觉技法库(三轴本体 · 技法层)
 
-> **这是什么**：`specs/2026-06-18-fx-technique-internalization.md` 的两层知识结构之**技法层**——按「角色/功能」组织的**跨域可复用技法原子**。现象配方(`checklists/build-<现象>.md`)由这些原子组合而成。每喂一个参考模版,新技法进这里、已有技法标新适用现象(交叉链越用越强)。
+> **这是什么**:`specs/2026-06-18-technique-ontology.md` 三轴本体的**技法层**实例库——按冻结 schema v2 组织的跨域可复用技法原子。现象配方(`checklists/build-<现象>.md`)由这些原子**有序组合**而成。每喂一个参考模版,新技法按 schema 追加、已有技法标新 `proven_transfers`(交叉链越用越强)。
 >
-> **解析工具**：`go run ./cmd/aepdissect <file.aep>` 出结构化报告(效果用量+原生/Cycore/第三方分级+预合成嵌套+逐层效果链),是内化流水线的 PARSE 步。
+> **schema/字段定义见 spec**;本文件是 instance 库(schema 闭、instance 开)。**解析工具** `go run ./cmd/aepdissect <file.aep>` = 内化流水线 PARSE 步。
 >
-> **验证状态约定**：✓=该现象已实证用到 · ○=推断适用待验 · 标「validated」=经 AE gate。当前原子源自 Colorful Fire Ball 解析(实例#1),火焰栏多为 ✓,其它现象为 ○(待喂对应模版验证)。
+> **confidence 约定**:`validated`=经 AE gate(火焰双版本 gate 链内的技法)· `observed`=样本实证用到、未单独渲验 · `hypothesized`=推断/库里有但没渲过。**reproducibility.mechanism 取 any_of 里最可达的**(只要有一个 native 实现技法即可复刻;第三方/cycore 是增强选项,记在备注)。
 
-## 两类元素:程序化 vs 素材+装配（框架级判别）
+## 两类元素:程序化 vs 素材+装配(aepdissect 自动判别)
 
-喂进来的模版分两类,**`aepdissect` 能自动判别**,决定"能不能程序化复刻":
+- **① 程序化**(火焰 Colorful Fire Ball):.aep 用效果**生成**视觉 → **能学会复刻**(T1–T9,多 `requires_asset: none`)。
+- **② 素材+装配**(闪电 Lightning Pack):重上色/辉光/控制器包在**外部素材**上,真正视觉在素材里 → **装配能复刻(T10–T13),元素得用户提供**(`requires_asset: footage`)。
+- **判别信号**:layer `src=footage(..)` + 0 关键帧 + 效果只有重上色/辉光/调色 → ②型;反之(solid 源 + 生成类效果 + 关键帧)→ ①型。
 
-- **① 程序化元素**（火焰 Colorful Fire Ball）：.aep 用效果**生成**视觉(噪声/位移/调色/粒子…)。→ **我们能学会复刻**(技法 T1–T9)。
-- **② 素材 + 装配**（闪电 Lightning Pack）：.aep 是**重上色/辉光/控制器**包在**外部素材**(footage)上;真正的视觉(如电弧形状+闪击)在素材里,不在工程里。→ **装配能复刻(T10–T13),但元素得用户提供**;想纯程序化生成该现象要另找路子(如闪电=`Advanced Lightning` 效果,本样本没用)。
+---
 
-**判别信号(aepdissect 输出)**：layer `src=footage(..)` + **0 关键帧** + 效果只有重上色/辉光/调色类 → 素材+装配型。反之(solid 源 + 生成类效果 + 关键帧)→ 程序化型。
+## 技法原子(三轴 schema v2)
 
-## 技法原子
+### T1 noise-as-material(噪声造质料)
+生成湍流噪声当"基本物质"(非画形状)。高对比→锐边,竖拉→瘦高。
+```yaml
+id: noise-as-material
+role: [form, texture]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Fractal Noise, ADBE Turbulent Noise]
+    signal:
+      - {param: Contrast, direction: up, observed_range: [128, 185]}
+      - {param: ScaleWidth, direction: down}
+      - {param: ScaleHeight, direction: up}
+      - {param: Brightness, direction: down}
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [smoke, clouds, wind, water]
+not_this: "贴静态噪声纹理当背景(无形态生成意图)"
+evidence: [showcase/procedural-fx]
+confidence: validated
+```
 
-### T1 噪声造质料 (noise-substance)
-- **做什么**：生成湍流噪声纹理,当作自然现象的"基本物质"(不是画形状)。
-- **实现**：`ADBE Fractal Noise`(native)。
-- **关键参数**：Contrast(高→锐利边界/分明)、Brightness、Scale Width/Height(非等比→方向拉伸)、Complexity(细节层数)。
-- **跨现象**：火✓ · 烟○ · 云○ · 风(气流)○ · 水焦散○。
-- 详 `checklists/build-good-fire.md` 参数表。
+### T2 displacement-distortion(位移扭曲)
+用一个源(常是噪声)推像素,把平滑的推成有机弯曲/舔动。形态"活"的关键。
+```yaml
+id: displacement-distortion
+role: [distort, motion]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Turbulent Displace, ADBE Displacement Map, ADBE MESH WARP]
+    signal:
+      - {param: MaxVerticalDisplacement, direction: up}   # 火舌=大垂直量
+      - {param: Size, direction: set}
+      - {param: Evolution, direction: up}                 # 随时间=动
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [wind, water, transition]
+not_this: "整层平移(那是位置动画,不是逐像素扭曲)"
+evidence: [showcase/procedural-fx]
+confidence: validated
+# 备注:Displacement Map 需用另一层当源(SetEffectLayerParam);PEDX=Displacer Pro 更强但⚠第三方
+```
 
-### T2 位移扭曲 (displacement-distortion)
-- **做什么**：用一个源(通常是噪声)推像素,把平滑的东西推成有机的弯曲/舔动/起伏。**形态"活"的关键**。
-- **实现**：`ADBE Displacement Map`(native,**用另一层当位移源**,经 `SetEffectLayerParam` 指定)· `ADBE Turbulent Displace`(native,自带噪声、更简单)· `ADBE MESH WARP`/`WRPMESH`(大尺度网格弯)· `PEDX`=Displacer Pro(⚠第三方)。
-- **关键参数**：Max Horizontal/Vertical Displacement(方向+幅度;火焰=大垂直量拉火舌)、Size、Evolution(随时间变=动)。
-- **跨现象**：火舌✓ · 风吹弯/热浪○ · 水波/雨幕扰动○ · 扭曲转场○。
+### T3 additive-multilayer-depth(多层 Add 叠深度)⭐
+同套"质料+扭曲+上色"层复制 N 份叠加 → 层次/深度。**结构技法非单效果**(单层调参到顶也没深度)。
+```yaml
+id: additive-multilayer-depth
+role: [depth]
+mechanism:
+  - kind: composition_op
+    op: "同套效果链复制 N 份 + 各层不同 noise scale + blend=Add(亮叠出热芯)"
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [smoke, energy, magic]
+not_this: "单层调高对比假装有层次(v2 被否)"
+evidence: [showcase/procedural-fx]
+confidence: validated
+# ⚠防团块:N 层共用同一 mask→并集填满成团块。解法=同心 mask(内小外大)+各层越内越热=温度分区。
+# ⚠防抖动:各层动画速率不一→渐失相→Add+Glow 拍频闪烁。铁律=运动共相,只静态属性(scale/色/mask)分层。
+# 其它混合:Difference=负相暗筋/Divide 压外层/Screen 叠亮不溢。
+```
 
-### T3 多层 Add 叠深度 (additive-depth) ⭐ ✅validated(双版本 gate + 用户验收)
-- **做什么**：把同一套"质料+扭曲+上色"图层**复制 N 份**(不同位移/偏移/色),用混合模式叠 → **层次感/深度**。**这是结构技法,不是单效果**(单层无论调参到顶都没深度)。
-- **实现**：`NewSolidLayer`×N + `Layer.SetBlendingMode`。`Add(相加)`重叠处变亮=自动长白热芯;`Difference(差值)`做"负相"层=暗筋/内部纹理;`Divide`压外层;`Screen`叠亮不溢。
-- **关键**：层数、各层位移/偏移/色温差异、混合模式选择。
-- **⚠ 防"团块"陷阱(火焰 v3 踩过)**：N 层 Add **共用同一 mask/形状** → streak 并集填满 → 退化成发光团块。**解法=同心(concentric)**:内层小 mask、外层大 mask,各层 Tritone 越内越热 → 形成温度**分区**(外冷内热)而非实心填充。这是 additive-depth 用于**径向温度现象**(火/能量球)的具体手法。
-- **⚠ 防"抖动"陷阱(火焰 v3 踩过)**:N 层各自用**不同的动画速率**(evolution/offset 速率不一)→ 起初同相平稳,随时间**逐渐失相**,Add+Glow 合成出**拍频/闪烁**,**越往后越抖**(用户在 ~3s 处发现)。**铁律=层的「运动」要共相(shared/同速率),只让「静态」属性(scale/色/mask)分层。** 单层动画无此问题(v2 平稳);多层 Add 必须共相运动。
-- **跨现象**：火层次✓(自渲验证,火焰 v3) · 闪电辉光叠○ · 能量○。**库可做,全 gated。**
+### T4 luminance-color(亮度→调色板)
+把灰度噪声按亮度映射到颜色,得色温渐变。
+```yaml
+id: luminance-color
+role: [color, temperature]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Tritone, ADBE Ramp]
+    signal:
+      - {param: Highlights, direction: set}   # 火=黄白热芯
+      - {param: Midtones, direction: set}     # 火=橙
+      - {param: Shadows, direction: set}      # 火=深红
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [lightning, energy, lava]
+not_this: "整体 Hue 偏移(那是调色,不是按亮度分档上色)"
+evidence: [showcase/procedural-fx]
+confidence: validated
+# 备注:多层 Ramp 不同色温+位移亦可;经典 Colorama 不在本库效果集。
+```
 
-### T4 亮度→调色板 (luminance-color)
-- **做什么**：把灰度(噪声)按亮度映射到颜色,得到色温渐变。
-- **实现**：`ADBE Tritone`(native,3 档:阴影/中间调/高光,本库验证可用)· 多层 `ADBE Ramp`(native,生成渐变后被位移)· `ADBE Hue/Saturation`微调。**注**:经典的 Colorama **不在本库 216 效果集**。
-- **关键参数**：三/两档颜色端点(ARGB 0-255);火=阴影深红→中橙→高光黄白热芯。
-- **跨现象**：火色温✓ · 闪电电色○ · 能量○ · 卡通上色○。
+### T5 emissive-glow(辉光/泛光)⭐跨现象复用实证
+亮处向外 bloom,给发光体 emissive 质感。**fire + lightning 都 proven**。
+```yaml
+id: emissive-glow
+role: [glow]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Glo2]
+    signal:
+      - {param: Glow Threshold, direction: down}   # 越低越整体泛白;高=只芯
+      - {param: Glow Radius, direction: up}
+      - {param: Glow Intensity, direction: up}
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire, lightning]
+hypothesized_transfers: [neon, energy, magic]
+not_this: "整体提亮(无阈值=不是选择性辉光)"
+evidence: [showcase/procedural-fx, samples/LightningPack]
+confidence: validated
+# 常在多个图层分别用。
+```
 
-### T5 辉光/泛光 (emissive-glow)
-- **做什么**：让亮处向外发光(bloom),给发光体 emissive 质感。
-- **实现**：`ADBE Glo2`(Glow,native)。
-- **关键参数**:`-0002` Threshold(阈值,只对亮处)· `-0003` Radius(半径)· `-0004` Intensity(强度)。常**在多个图层上分别用**。
-- **跨现象**：火✓ · **闪电✓**(Lightning Pack 实证复用)· 霓虹○ · 能量○。
+### T6 time-evolution(时间驱动参数)
+让某参数随时间变=现象"活"(翻腾/流动/下落/闪烁)。
+```yaml
+id: time-evolution
+role: [motion]
+mechanism:
+  - kind: composition_op
+    op: "AnimateEffectParam(标量)/AnimateEffectParamVec(矢量)打关键帧。用关键帧不用表达式(本库表达式 AE 不求值)"
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [wind, rain, lightning]
+not_this: "静态值(无关键帧=不动)"
+evidence: [showcase/procedural-fx]
+confidence: validated
+# 动哪个:火=Evolution(翻腾)+Offset(上滚);风=方向位移;雨=下落;雷=闪烁。
+```
 
-### T6 时间驱动参数 (time-evolution)
-- **做什么**：让某参数随时间变=现象"活"(翻腾/流动/下落/闪烁)。
-- **实现**：`AnimateEffectParam`(标量)/`AnimateEffectParamVec`(矢量,点)打关键帧。**用关键帧不用表达式**——本库写的表达式 AE 端不求值(见 `incidents/expression-enable-byte-pair.md`)。
-- **关键**：动哪个参数。火=Fractal Noise 的 Evolution(翻腾)+ Offset(上滚);风=方向位移流动;雨=下落;雷=闪烁。
-- **跨现象**：火翻腾/上升✓ · 风流动○ · 雨下落○ · 雷闪烁○。
+### T7 silhouette-shape(轮廓塑形)
+把满屏质料裁成现象整体外形。
+```yaml
+id: silhouette-shape
+role: [contour]
+mechanism:
+  - kind: composition_op
+    op: "羽化 AddMask + SetFeather(任意形);径向 mask/Ramp 近似球形"
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [energy, smoke]
+not_this: "硬边裁剪(无羽化=边缘死板)"
+evidence: [showcase/procedural-fx]
+confidence: validated
+# 备注:火球用 CC Sphere(⚠Cycore);plugin-free 用径向近似。
+```
 
-### T7 轮廓塑形 (silhouette-shape)
-- **做什么**：把满屏的质料裁成现象的整体外形。
-- **实现**：羽化 `AddMask`+`SetFeather`(火苗/任意形)· `CC Sphere`(⚠Cycore,球/火球)· 径向 `Ramp`/遮罩(球形近似,plugin-free)。
-- **跨现象**：火苗形✓ · 火球(样本用 CC Sphere)✓ · 能量球○。
+### T8 particle-emit(粒子发射)
+发射大量小粒子(火星/雨滴/雪/火花)。
+```yaml
+id: particle-emit
+role: [particle]
+mechanism:
+  - kind: effect
+    any_of: [CC Particle World]
+    signal: [{param: Birth Rate, direction: up}, {param: Velocity, direction: set}]
+reproducibility: {mechanism: cycore, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [rain, snow, transition]
+not_this: "噪声+阈值近似(弱替代,非真粒子)"
+evidence: [samples/ColorfulFireBall]
+confidence: observed
+# ⚠Cycore 自带(人人能渲)但非 native、未 gate;plugin-free 无原生粒子替代。
+```
 
-### T8 粒子发射 (particle-emit)
-- **做什么**：发射大量小粒子(火星/雨滴/雪/火花/碎屑)。
-- **实现**：`CC Particle World`(⚠Cycore 自带,人人能渲但非 native、未 gate)。**plugin-free 无原生粒子替代**(可用噪声+阈值近似,效果弱)。
-- **跨现象**：火星✓ · 雨○ · 雪○ · 火花○ · 碎屑转场○。
+### T9 final-grade(收尾调色)
+统一整体氛围(对比/色调/暗角)。
+```yaml
+id: final-grade
+role: [grade]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Brightness & Contrast 2, ADBE PhotoFilterPS, ADBE HUE SATURATION, ADBE Lumetri]
+    signal: [{param: Contrast, direction: up}, {param: Saturation, direction: set}]
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: []
+hypothesized_transfers: [fire, lightning, transition]
+not_this: "单层局部调色(收尾=全局,常在调整层)"
+evidence: [samples/bondbond]
+confidence: observed
+# 备注:Vignette 用 native 径向遮罩替代(CS Vignette=第三方)。
+```
 
-### T9 收尾调色 (final-grade)
-- **做什么**:统一整体氛围(对比/色调/暗角)。
-- **实现**：`ADBE Brightness & Contrast 2` · `ADBE PhotoFilterPS` · `CS Vignette`(⚠第三方,可用 native 径向遮罩替代)· `ADBE Hue/Saturation`。
-- **跨现象**：通用收尾。
+### T10 customizer-controller-rig(控制器装配)〔结构角色 · 本库 blocked〕
+建控制器空层挂用户旋钮,表达式把各效果参数连到旋钮 → 一处调全联动。几乎所有商业模版的套路(=.mogrt 本质)。
+```yaml
+id: customizer-controller-rig
+role: [control]
+mechanism:
+  - kind: composition_op
+    op: "NewNullLayer + Color/Slider/Checkbox Control + 各效果参数挂表达式指向控制器"
+reproducibility: {mechanism: lib-blocked, requires_asset: none}
+proven_transfers: [lightning]
+hypothesized_transfers: [transition, energy]
+not_this: "把值烤死进各效果(那是放弃联动,不是控制器)"
+evidence: [samples/LightningPack, incidents/expression-enable-byte-pair.md]
+confidence: observed
+# ⚠本库表达式 AE 不求值→做不出活联动 Customizer;只能烤死值。这是 lib-blocked 的典型。
+```
 
-### T10 控制器装配 (customizer-controller-rig) 〔素材+装配型〕
-- **做什么**：建一个"控制器"空层,挂用户旋钮(颜色/滑块/开关),用**表达式**把各效果参数连到旋钮 → 一处调、全联动。**几乎所有商业 AE 模版的套路**(也是 .mogrt/Essential Graphics 的本质)。
-- **实现**：`NewNullLayer` + `ADBE Color Control` / `ADBE Slider Control` / `ADBE Checkbox Control` + 各效果参数挂表达式指向控制器。
-- **⚠ 本库限制**：库写的表达式 AE **不求值**(见 `incidents/expression-enable-byte-pair.md`)→ **做不出活联动的 Customizer**;只能把值**烤死**进各效果(放弃"一处调全联动")。
-- **跨现象**：任何需暴露用户旋钮的模版(闪电✓ · 通用)。
+### T11 drop-shadow-as-glow(投影当辉光)〔技巧〕
+Drop Shadow 设 0 距离 + 亮色 + 大柔和 = 廉价方向/颜色可控的辉光 halo。
+```yaml
+id: drop-shadow-as-glow
+role: [glow]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Drop Shadow]
+    signal:
+      - {param: Distance, direction: down}     # 0=纯 halo
+      - {param: Softness, direction: up}
+      - {param: Color, direction: set}
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [lightning]
+hypothesized_transfers: [neon, text-fx]
+not_this: "真投影(有距离=阴影不是辉光)"
+evidence: [samples/LightningPack]
+confidence: observed
+# 常叠多个;比 Glow 更可控方向/颜色。
+```
 
-### T11 投影当辉光 (drop-shadow-as-glow) 〔技巧〕
-- **做什么**：`Drop Shadow` 设 0 距离 + 亮颜色 + 大柔和度 = 一圈廉价辉光halo(比 Glow 更可控方向/颜色)。常叠多个。
-- **实现**：`ADBE Drop Shadow`(`-0001` 颜色 · `-0002` 不透明 · `-0003` 方向 · `-0005` 柔和度)。
-- **跨现象**：闪电✓ · 任何发光元素 · 文字辉光。
+### T12 footage-recolor(素材重上色)〔素材+装配型〕
+把白色/带 alpha 的素材重上色成任意颜色。
+```yaml
+id: footage-recolor
+role: [color]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Fill, ADBE Tint]
+    signal: [{param: Color, direction: set}]
+reproducibility: {mechanism: native, requires_asset: footage}
+proven_transfers: [lightning]
+hypothesized_transfers: [light-fx, smoke-footage, particle-seq]
+not_this: "给生成的 solid 上色(那走 luminance-color;此条专指素材重上色)"
+evidence: [samples/LightningPack]
+confidence: observed
+```
 
-### T12 素材重上色 (footage-recolor) 〔素材+装配型〕
-- **做什么**：把白色/带 alpha 的素材元素重上色成任意颜色。
-- **实现**：`ADBE Fill`(`-0002` 颜色)。
-- **跨现象**：闪电✓ · 任何白底/alpha 素材(光效/烟/粒子序列)。
+### T13 mosaic-stylize(像素化风格)〔可选风格〕
+把元素马赛克/像素化做"复古/数字"变体(常配开关切换)。
+```yaml
+id: mosaic-stylize
+role: [texture]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Mosaic]
+    signal: [{param: Horizontal Blocks, direction: set}, {param: Vertical Blocks, direction: set}]
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [lightning]
+hypothesized_transfers: [transition, glitch]
+not_this: "降分辨率(Mosaic 是块化风格,不是渲染质量)"
+evidence: [samples/LightningPack]
+confidence: observed
+# 常配 Checkbox Control 开关切换变体。
+```
 
-### T13 像素化风格 (mosaic-stylize) 〔可选风格〕
-- **做什么**：把元素马赛克/像素化,做"复古/数字"变体(常配开关切换)。
-- **实现**：`ADBE Mosaic` + `ADBE Checkbox Control`(开关)。
-- **跨现象**：闪电✓(Pixelate 变体)· 任何风格化。
+### T14 fractal-branch(分形分支/电弧生成)〔程序化生成本体〕
+**程序化生成**分叉电弧/闪电本体(不靠素材)。Lightning Pack 素材路线之外的纯生成路。
+```yaml
+id: fractal-branch
+role: [form]
+mechanism:
+  - kind: effect
+    any_of: [ADBE Lightning 2, ADBE Lightning]
+    signal: [{param: Conductivity, direction: set}, {param: Core Radius, direction: set}, {param: Branching, direction: up}]
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: []
+hypothesized_transfers: [lightning, electricity, cracks, neural-tree]
+not_this: "用闪电素材(那是 footage-recolor 路线;此条是纯生成)"
+evidence: [docs/capabilities (ADBE Lightning 2 在库)]
+confidence: hypothesized
+# ⚠可用但未验证(未 build/render 过)。配 T5 辉光 + T6 闪烁。
+```
 
-### T14 分形分支/电弧生成 (fractal-branch) 〔程序化,可生成本体〕
-- **做什么**：**程序化生成**分叉的电弧/闪电/电流本体(不是靠素材)。这是 Lightning Pack 那条素材路线之外的"纯生成"路。
-- **实现**：`ADBE Lightning 2`（= Advanced Lightning,**已在本库 216 集**,native）· `ADBE Lightning`(老版)· 起止点 + 分叉/湍流/核心半径参数;配 T5 辉光 + T6 闪烁(关键帧)。
-- **验证状态**：⚠**可用但未验证**(未 build/render 过)。要纯程序化闪电走这条,不是 footage+rig。
-- **跨现象**：闪电○ · 电弧/电流○ · 裂纹○ · 神经/树枝状结构○。
+---
 
-## 现象配方索引（技法的组合）
+## 现象配方索引(技法的有序组合)
 
-| 现象 | 配方 | 用到的技法 |
+| 现象 | 配方 | 技法(id) |
 |---|---|---|
-| 火焰 | `checklists/build-good-fire.md` | ①程序化:T1+T2+T3+T4+T5+T6+T7(+T8/T9) |
-| 闪电(素材包) | 实证#2 Lightning Pack | **②素材+装配**:T12 重上色+T11 投影辉光+T5 Glow+T13 像素化+T10 控制器装配。**电弧本体=外部素材**,工程不生成 |
-| 闪电(程序化) | (待建,可行) | ①程序化:**T14 `ADBE Lightning 2`(已在库)**+T5 Glow+T6 闪烁。这条能纯生成电弧本体,不靠素材 |
-| 风 | (待建) | T1+T2(方向)+T6+运动模糊 |
-| 雨 | (待建) | T8(条状)+T6(下落)+模糊 |
-| 转场 | (待建) | T2/擦除+T6(时间扫过) |
+| 火焰 | `checklists/build-good-fire.md` | ①程序化:noise-as-material → displacement-distortion → luminance-color → silhouette-shape → additive-multilayer-depth → emissive-glow → time-evolution (+particle-emit/final-grade) |
+| 闪电(素材包) | 实证#2 Lightning Pack | ②素材+装配:footage-recolor + drop-shadow-as-glow + emissive-glow + mosaic-stylize + customizer-controller-rig。**电弧本体=外部素材** |
+| 闪电(程序化) | (待建,可行) | ①程序化:fractal-branch(ADBE Lightning 2) + emissive-glow + time-evolution。纯生成不靠素材 |
+| 风 | (待建) | noise-as-material + displacement-distortion(方向) + time-evolution + 运动模糊 |
+| 雨 | (待建) | particle-emit(条状) + time-evolution(下落) + 模糊 |
+| 转场 | (待建) | displacement-distortion/擦除 + time-evolution(时间扫过) |
 
-> 新增现象:跑 `aepdissect` 解析模版 → 拆角色 → 在此登记新技法/标已有技法新适用现象 → 写 `checklists/build-<现象>.md` 配方 → AE gate 验证。
+> 新增现象:`aepdissect` 解析 → 拆角色 → 按 schema 在此登记新技法/标已有技法新 `proven_transfers` → 写 `checklists/build-<现象>.md` 配方(负责技法间顺序)→ AE gate 验证升 confidence。
+
+---
+
+## 重构发现(反馈给 spec,2026-06-18)
+
+迁 T1–T14 时撞到一个 schema v2 没覆盖的张力,已按"先用着"原则定规:
+- **any_of 内可复刻性不齐**(T2 = Turbulent Displace[native] + PEDX[third-party];T9 含 native+Lumetri):**技法级 `reproducibility.mechanism` 取 any_of 里最可达的**(有一个 native 即技法可复刻),更强但需插件的实现记备注。语义=回答"这技法能否被复刻"而非"每种实现各自如何"。若将来需要 per-effect 可复刻性再下沉到 mechanism 项(spec §8 候选)。
