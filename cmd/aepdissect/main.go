@@ -168,6 +168,99 @@ func fmtNum(v any) string {
 	return fmt.Sprintf("%v", v)
 }
 
+// --- timeline / motion (keyframe reading) ---
+
+var xformName = map[string]string{
+	"ADBE Position": "Position", "ADBE Anchor Point": "Anchor Point",
+	"ADBE Scale": "Scale", "ADBE Rotate Z": "Rotation", "ADBE Opacity": "Opacity",
+	"ADBE Rotate X": "X Rotation", "ADBE Rotate Y": "Y Rotation",
+	"ADBE Orientation": "Orientation", "ADBE Position_0": "X Position",
+	"ADBE Position_1": "Y Position", "ADBE Position_2": "Z Position",
+	"ADBE Time Remapping": "Time Remap",
+}
+
+func propName(mn string) string {
+	if n, ok := xformName[mn]; ok {
+		return n
+	}
+	return mn
+}
+
+func kfSpan(kfs []*aep.Keyframe) (lo, hi float64) {
+	if len(kfs) == 0 {
+		return 0, 0
+	}
+	lo, hi = kfs[0].Time, kfs[0].Time
+	for _, k := range kfs {
+		if k.Time < lo {
+			lo = k.Time
+		}
+		if k.Time > hi {
+			hi = k.Time
+		}
+	}
+	return lo, hi
+}
+
+// motionLabel classifies a property's keyframe interpolation into a motion
+// technique tag (the "运动语言" — readable straight from the time table, no render).
+func motionLabel(kfs []*aep.Keyframe) string {
+	var hold, lin, bez int
+	eased := false
+	for _, k := range kfs {
+		for _, it := range []aep.InterpType{k.InInterp, k.OutInterp} {
+			switch it {
+			case aep.InterpHold:
+				hold++
+			case aep.InterpLinear:
+				lin++
+			case aep.InterpBezier:
+				bez++
+			}
+		}
+		for _, te := range k.InTemporalEase {
+			if te.Influence > 0.2 {
+				eased = true
+			}
+		}
+		for _, te := range k.OutTemporalEase {
+			if te.Influence > 0.2 {
+				eased = true
+			}
+		}
+	}
+	switch {
+	case hold > 0 && bez == 0 && lin == 0:
+		return "hold"
+	case bez > 0 && eased:
+		return "ease"
+	case bez > 0:
+		return "bezier"
+	case lin > 0:
+		return "linear"
+	default:
+		return "?"
+	}
+}
+
+// walkAnimated collects leaf properties carrying keyframes from a property tree
+// (Transform group etc; effect params live elsewhere and are handled separately).
+func walkAnimated(g *aep.AEPropertyGroup, out *[]*aep.Property) {
+	if g == nil {
+		return
+	}
+	for _, c := range g.Children {
+		switch n := c.(type) {
+		case *aep.Property:
+			if len(n.Keyframes) > 0 {
+				*out = append(*out, n)
+			}
+		case *aep.AEPropertyGroup:
+			walkAnimated(n, out)
+		}
+	}
+}
+
 func main() {
 	dictPath := flag.String("dict", "data/effects-dict/effects_en_US_25.1x68.json",
 		"effect dictionary json (matchName -> name + default); empty to disable")
@@ -266,10 +359,15 @@ func main() {
 	}
 
 	// --- per-comp detail ---
-	fmt.Printf("\n=== PER-COMP DETAIL (✎=author changed vs default · ?=no dict entry) ===\n")
+	fmt.Printf("\n=== PER-COMP DETAIL (✎=changed vs default · ?=no dict · ~=animated · act=[in→out]s) ===\n")
 	for _, c := range p.Compositions {
 		fmt.Printf("\n--- COMP %q (id=%d, %dx%d, %.0ffps, %.1fs, %d layers) ---\n",
 			c.Name, c.ID, c.Width, c.Height, c.FrameRate, c.Duration, len(c.Layers))
+		type animStart struct {
+			name string
+			t    float64
+		}
+		var starts []animStart
 		for _, l := range c.Layers {
 			src := "-"
 			if l.SourceID != 0 {
@@ -279,8 +377,24 @@ func main() {
 					src = fmt.Sprintf("footage(%d)", l.SourceID)
 				}
 			}
-			fmt.Printf("  L[%d] %-18q %-10v blend=%-15s vis=%-5v src=%-22s masks=%d fx=%d\n",
-				l.Index, l.Name, l.Type, blend(int(l.BlendingMode)), l.Visible, src, len(l.Masks), len(l.Effects))
+			fmt.Printf("  L[%d] %-18q %-10v blend=%-13s vis=%-5v src=%-20s act=[%.1f→%.1f] masks=%d fx=%d\n",
+				l.Index, l.Name, l.Type, blend(int(l.BlendingMode)), l.Visible, src,
+				l.InPoint(), l.OutPoint(), len(l.Masks), len(l.Effects))
+
+			firstAnim := math.Inf(1)
+
+			// transform / layer-level animated properties (effect params handled below)
+			var animProps []*aep.Property
+			walkAnimated(l.PropertyTree(), &animProps)
+			for _, pr := range animProps {
+				t0, t1 := kfSpan(pr.Keyframes)
+				if t0 < firstAnim {
+					firstAnim = t0
+				}
+				fmt.Printf("        ~ %-24s [ANIM %dkf %s  %.1f→%.1fs]\n",
+					propName(pr.MatchName), len(pr.Keyframes), motionLabel(pr.Keyframes), t0, t1)
+			}
+
 			for _, fx := range l.Effects {
 				de, haveEffect := dictEffect{}, false
 				if dict != nil {
@@ -327,7 +441,11 @@ func main() {
 					}
 					line += defStr
 					if anim {
-						line += fmt.Sprintf("  [ANIM %dkf]", len(pr.Keyframes))
+						t0, t1 := kfSpan(pr.Keyframes)
+						if t0 < firstAnim {
+							firstAnim = t0
+						}
+						line += fmt.Sprintf("  [ANIM %dkf %s %.1f→%.1fs]", len(pr.Keyframes), motionLabel(pr.Keyframes), t0, t1)
 					}
 					if pr.Expression != "" {
 						line += fmt.Sprintf("  expr=%q", pr.Expression)
@@ -340,6 +458,31 @@ func main() {
 				if len(tuned) > 0 {
 					fmt.Printf("           → tuned: %s\n", strings.Join(tuned, ", "))
 				}
+			}
+
+			if !math.IsInf(firstAnim, 1) {
+				starts = append(starts, animStart{l.Name, firstAnim})
+			}
+		}
+
+		// stagger hint: ≥3 animated layers whose anim starts march forward at a
+		// roughly constant offset = a classic MG stagger (错位启动).
+		if len(starts) >= 3 {
+			sort.Slice(starts, func(i, j int) bool { return starts[i].t < starts[j].t })
+			var deltas []float64
+			lo, hi := math.Inf(1), 0.0
+			for i := 1; i < len(starts); i++ {
+				d := starts[i].t - starts[i-1].t
+				deltas = append(deltas, d)
+				if d < lo {
+					lo = d
+				}
+				if d > hi {
+					hi = d
+				}
+			}
+			if lo > 0.02 && hi < 3.0 && (hi-lo) < 0.2 {
+				fmt.Printf("  ↳ stagger: %d layers, anim start offset ~%.2fs each (错位启动)\n", len(starts), (lo+hi)/2)
 			}
 		}
 	}
