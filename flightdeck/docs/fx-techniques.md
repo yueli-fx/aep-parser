@@ -52,18 +52,20 @@ id: displacement-distortion
 role: [distort, motion]
 mechanism:
   - kind: effect
-    any_of: [ADBE Turbulent Displace, ADBE Displacement Map, ADBE MESH WARP]
+    any_of: [ADBE Turbulent Displace, ADBE Displacement Map, ADBE MESH WARP, ADBE WRPMESH]
     signal:
-      - {param: MaxVerticalDisplacement, direction: up}   # 火舌=大垂直量
+      - {param: MaxVerticalDisplacement, direction: up, observed_range: [102, 280]}  # 火舌=大垂直量
       - {param: Size, direction: set}
       - {param: Evolution, direction: up}                 # 随时间=动
+      - {param: Bend, direction: set}                     # 仅 WRPMESH(Warp):整体弯曲
 reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [fire]
 hypothesized_transfers: [wind, water, transition]
 not_this: "整层平移(那是位置动画,不是逐像素扭曲)"
-evidence: [showcase/procedural-fx]
+evidence: [showcase/procedural-fx, samples/ColorfulFireBall]
 confidence: validated
-# 备注:Displacement Map 需用另一层当源(SetEffectLayerParam);PEDX=Displacer Pro 更强但⚠第三方
+# 备注:Displacement Map=主力(ColorfulFireBall 用 ×6,MaxV 最大 280),需用另一层当源(SetEffectLayerParam);
+#       WRPMESH(Warp/Bend)在 "Negative Fire" 层作整体弯曲;PEDX=Displacer Pro 更强但⚠第三方(native DispMap 可替)
 ```
 
 ### T3 additive-multilayer-depth(多层 Add 叠深度)⭐
@@ -73,16 +75,16 @@ id: additive-multilayer-depth
 role: [depth]
 mechanism:
   - kind: composition_op
-    op: "同套效果链复制 N 份 + 各层不同 noise scale + blend=Add(亮叠出热芯)"
+    op: "同套效果链复制 N 份 + 各层不同 noise scale + blend 重组。两种形态:(a)单 comp 平铺多 Add 层(showcase v3);(b)多级预合成嵌套,每级一个 displaced/recolored pass(ColorfulFireBall:Noise→Loop→Fire→Whole→Comp1 五级)"
 reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [fire]
 hypothesized_transfers: [smoke, energy, magic]
 not_this: "单层调高对比假装有层次(v2 被否)"
-evidence: [showcase/procedural-fx]
+evidence: [showcase/procedural-fx, samples/ColorfulFireBall]
 confidence: validated
+# 三种 blend 各司其职(ColorfulFireBall 实证):Add=亮叠出白热芯 / Difference=负相暗筋("Negative Fire"层,proven) / Divide=压外层(particles)。Screen=叠亮不溢(备选)。
 # ⚠防团块:N 层共用同一 mask→并集填满成团块。解法=同心 mask(内小外大)+各层越内越热=温度分区。
 # ⚠防抖动:各层动画速率不一→渐失相→Add+Glow 拍频闪烁。铁律=运动共相,只静态属性(scale/色/mask)分层。
-# 其它混合:Difference=负相暗筋/Divide 压外层/Screen 叠亮不溢。
 ```
 
 ### T4 luminance-color(亮度→调色板)
@@ -288,13 +290,30 @@ confidence: hypothesized
 # ⚠可用但未验证(未 build/render 过)。配 T5 辉光 + T6 闪烁。
 ```
 
+### T15 seamless-loop(时间无缝循环)〔结构技法 · ColorfulFireBall 催生〕
+把一个**随时间演化**的源(噪声/粒子)做成可无限循环,无跳帧。火焰/烟/能量这类"持续翻腾"现象的隐形刚需。
+```yaml
+id: seamless-loop
+role: [motion, organize]
+mechanism:
+  - kind: composition_op
+    op: "演化源复制 2 份、时间错位半个周期 + 尾段 opacity 交叉淡入 + (可选)SilhouetteAlpha matte → 接缝隐形(ColorfulFireBall 'Noise 1 looped')"
+reproducibility: {mechanism: native, requires_asset: none}
+proven_transfers: [fire]
+hypothesized_transfers: [smoke, clouds, energy, water]
+not_this: "单层直接循环(演化参数在端点不连续=可见跳帧)"
+evidence: [samples/ColorfulFireBall]
+confidence: observed
+# 本库:time-remap 需关键帧(见 incidents/layer-settimeremapenabled-needs-keyframes)+ opacity 关键帧交叉淡入。未单独 build/render 验过。
+```
+
 ---
 
 ## 现象配方索引(技法的有序组合)
 
 | 现象 | 配方 | 技法(id) |
 |---|---|---|
-| 火焰 | `checklists/build-good-fire.md` | ①程序化:noise-as-material → displacement-distortion → luminance-color → silhouette-shape → additive-multilayer-depth → emissive-glow → time-evolution (+particle-emit/final-grade) |
+| 火焰 | `checklists/techniques/build-good-fire.md` | ①程序化:noise-as-material → seamless-loop → displacement-distortion → luminance-color → silhouette-shape → additive-multilayer-depth(嵌套式 pass) → emissive-glow → time-evolution (+particle-emit/final-grade) |
 | 闪电(素材包) | 实证#2 Lightning Pack | ②素材+装配:footage-recolor + drop-shadow-as-glow + emissive-glow + mosaic-stylize + customizer-controller-rig。**电弧本体=外部素材** |
 | 闪电(程序化) | (待建,可行) | ①程序化:fractal-branch(ADBE Lightning 2) + emissive-glow + time-evolution。纯生成不靠素材 |
 | 风 | (待建) | noise-as-material + displacement-distortion(方向) + time-evolution + 运动模糊 |
@@ -307,5 +326,5 @@ confidence: hypothesized
 
 ## 重构发现(反馈给 spec,2026-06-18)
 
-迁 T1–T14 时撞到一个 schema v2 没覆盖的张力,已按"先用着"原则定规:
+迁 T1–T14 时撞到一个 schema v2 没覆盖的张力,已按"先用着"原则定规(2026-06-18 fire 重解析又增 T15 seamless-loop):
 - **any_of 内可复刻性不齐**(T2 = Turbulent Displace[native] + PEDX[third-party];T9 含 native+Lumetri):**技法级 `reproducibility.mechanism` 取 any_of 里最可达的**(有一个 native 即技法可复刻),更强但需插件的实现记备注。语义=回答"这技法能否被复刻"而非"每种实现各自如何"。若将来需要 per-effect 可复刻性再下沉到 mechanism 项(spec §8 候选)。

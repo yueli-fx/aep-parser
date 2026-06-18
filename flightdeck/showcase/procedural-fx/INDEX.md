@@ -38,7 +38,7 @@ regenerate: "go run ./flightdeck/showcase/procedural-fx  +  scripts/ae_run.ps1 r
 - **双版本 ship-gate PASS**:`TestFlameDemo_AEShipGate_AE2020/AE2025` 均绿,**两版本逐像素一致**(bright=2019 / warm=1843 / 两帧 diff=1446)。
 - **用户真机验收:✅ 过了**(2026-06-18)。这是火焰从 v1 被否(单层、无色温/Glow)→ v2(单层修色温/Glow,层次不足)→ **v3 多层合成有层次** 的收尾。
 
-## 历史(踩坑记录,详 `checklists/build-good-fire.md`)
+## 历史(踩坑记录,详 `checklists/techniques/build-good-fire.md`)
 
 - v1 被否:单层 Tint 2 色,缺色温/Glow/深度。
 - v2:单层 Tritone+Glo2 修掉色温/辉光,但**单层无层次**(用户:层次来自多层混合)。

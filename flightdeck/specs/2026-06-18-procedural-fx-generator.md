@@ -99,7 +99,7 @@ Phase 0 手搓火焰用户真机否决:「只有形态,和火焰差很多」(缺
 
 **待定(已问用户,答「先不定、继续深挖」):** 产出允许的渲染依赖档位(纯原生 / +Cycore自带 / +第三方插件)——决定要不要 gate `CC Sphere`/`CC Particle World`、以及球形+粒子是 native 近似还是直接用 CC。**核心火焰无论哪档都 plugin-free 先做。**
 
-**↳ 配方 + 参数影响已固化为可复用 checklist:`checklists/build-good-fire.md`**(plugin-free 配方步骤 + 参数→效果对照表 + v1 对照 + 插件分级)。下个会话 preflight 自动载入其 INDEX → 接力 v2 不必重解析。新样本的参数范围往该 checklist 追加。
+**↳ 配方 + 参数影响已固化为可复用 checklist:`checklists/techniques/build-good-fire.md`**(plugin-free 配方步骤 + 参数→效果对照表 + v1 对照 + 插件分级)。下个会话 preflight 自动载入其 INDEX → 接力 v2 不必重解析。新样本的参数范围往该 checklist 追加。
 
 ## 风险 / 未决
 

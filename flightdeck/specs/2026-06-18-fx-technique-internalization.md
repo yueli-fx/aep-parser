@@ -22,7 +22,7 @@ implements: specs/2026-06-18-procedural-fx-generator.md
 
 1. **PARSE（机械,库已能做）**:参考 .aep → 全结构 dump(comp 树 / 每层 类型·混合模式·源·mask / 每效果 matchName+set/animated 参数 / 关键帧·表达式 / 原生vs插件分类)。
    - ✅ **已做:`cmd/aepdissect`**(repo 工具,`go run ./cmd/aepdissect <file.aep>`,任意模版一键结构化报告:效果用量+原生/Cycore/第三方分级+预合成嵌套+逐层效果链+两类元素判别)。辅助 `tools/debug/dump_tdmn`(local,全树 matchName)。
-2. **DECOMPOSE 到角色（AI/人判断,不可机械化）**:原始结构 → 功能角色映射(「什么效果干什么用」)。产物 = 角色词典(见 `checklists/build-good-fire.md` § 效果用途词典)。
+2. **DECOMPOSE 到角色（AI/人判断,不可机械化）**:原始结构 → 功能角色映射(「什么效果干什么用」)。产物 = 角色词典(见 `checklists/techniques/build-good-fire.md` § 效果用途词典)。
 3. **EXTRACT 技法（提炼跨域原子）**:每个技法抽成命名条目。**新技法 → 进技法库;已有技法 → 标"现象 Y 也用到"**(交叉链,越用越强)。
 4. **STORE（flightdeck,自动跨会话）**:两层结构,见下。
 5. **VALIDATE（库已有 gate）**:按配方 build(`NewSolidLayer`×N + `AddEffect` + `SetEffectParam`/`AnimateEffectParam` + `Layer.SetBlendingMode` + `SetEffectLayerParam` 等,全 gated)→ AE 渲 → 眼验/用户验收。同一套火焰 render harness 通用。只有验证过的技法/配方标「validated」。
@@ -68,7 +68,7 @@ checklists/build-<现象>.md       ← 现象配方(组合技法,一句话引用
 
 ## 样本实证记录
 
-- **#1 火焰**(Colorful Fire Ball,①程序化):流水线 1–4 跑通——解析多插件工程 → 角色词典 → 原生/插件分级 → 存。核心火焰纯原生可复刻。技法 T1–T9。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1 + `checklists/build-good-fire.md`。
+- **#1 火焰**(Colorful Fire Ball,①程序化):流水线 1–4 跑通——解析多插件工程 → 角色词典 → 原生/插件分级 → 存。核心火焰纯原生可复刻。技法 T1–T9。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1 + `checklists/techniques/build-good-fire.md`。
 - **#2 闪电**(Lightning Pack,②素材+装配):`aepdissect` 即判出——10 段外部 footage + 重上色/辉光/控制器装配,7 效果全原生、0 关键帧、0 第三方。**框架诚实结论:此样本教不了"程序化生成闪电"**(电弧在素材里)。但**复用确认 T5 辉光**,且**新增 T10 控制器装配 / T11 投影当辉光 / T12 素材重上色 / T13 像素化**(高复用,覆盖几乎所有商业模版)。另:纯程序化闪电的路是 `ADBE Lightning 2`(已在库,= T14,未验证)。⚠装配靠表达式,本库表达式 AE 不求值→只能烤死值。
   - **复用率读数**:火焰 9 技法 → 闪电直接复用 1(T5);但闪电带来 4 个新跨域技法(T10–T13)→ 库从 9 增到 14。框架在长。
 

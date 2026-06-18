@@ -19,6 +19,38 @@ last_updated: 2026-06-18
 
 **好火焰 = 噪声生成形态 + 位移驱动「舔动」+ 色温渐变上色 + 辉光 + 多层合成出深度。** 不是"画个水滴形糊上橙色"（那是 v1，被否）。也**不是靠单层调参**——单层无论怎么调，天花板就是"一团有色温的火"（v2 实证，见下）；**层次感来自多层合成结构，不是参数**。真实专业火焰是 7 层预合成的深度合成（见样本解析），核心火焰是纯原生、可复刻。
 
+## 源工程真实结构 — aepdissect 三轴重解析（2026-06-18）
+
+> `go run ./cmd/aepdissect "samples/fx/Fire/Colorful Fire Ball/Colorful fire AE 2023.aep"`。比早先读法**深一层**：深度不是「单 comp 平铺 3–4 个 Add 层」，而是 **5 级预合成嵌套**，每级一个 displaced/recolored pass，再用 Add/Difference/Divide 重组。
+
+```yaml
+project_profile:   # Colorful Fire Ball (by Plugin Everything)
+  meta: {type: [reel], resolution: 1200x1200, duration: 55s, fps: 30}
+  fingerprint: {comps: 7, nest_depth: 5, top: "Comp 1"(10层)}
+  graph:           # ← 深度的真相：嵌套式 pass 累积
+    Noise 1 → Noise 1 looped → Fire → Whole fire animation → Comp 1
+    旁支: Outer fire(CC Sphere 球形包裹) · Particles(CC Particle World 火星)
+  signal_comps:
+    - Noise 1:              noise-as-material   # Fractal Noise: Contrast169, 竖拉 ScaleW79/H210, Invert; expr 上滚 time*[0,-500] + 翻腾 time*90
+    - Noise 1 looped:       seamless-loop       # 2×time-offset copy + opacity crossfade + SilhouetteAlpha matte → 无缝循环
+    - Fire:                 displace+color      # Distortion adj(DispMap MaxV280) + 3×[DispMap + Ramp 各自色温] Add
+    - Whole fire animation: depth+glow          # "Negative Fire"=Difference + Fire=Add + Particles=Divide + Glo2(thr175 r125 / thr108 r68)
+    - Comp 1:               assemble+grade      # 2×Outer fire(Divide+TimeRemap) + Whole fire(+BoxBlur+Transform) + 背景(Checkerboard/Grid/Solid Composite) + B&C/Photo Filter/Vignette
+  techniques: [noise-as-material, seamless-loop, displacement-distortion, luminance-color,
+               additive-multilayer-depth, emissive-glow, time-evolution,
+               silhouette-shape, particle-emit, final-grade]
+  reproducibility:
+    native:       核心火焰全原生 — Fractal Noise / Displacement Map(×6) / Ramp(×4) / Glo2(×3) / Add·Difference·Divide 嵌套
+    cycore:       CC Sphere(球形) · CC Particle World(火星) — bundled 能渲、未 gate
+    third_party:  CS Vignette(×2) · PEDX=Displacer Pro(×1) — 可 native 替代(径向遮罩 / Displacement Map)
+  verification: v3 简化 5 层合成已双版本 gate + 用户验收；此 5 级全嵌套未逐级复刻(render-diff 未做)
+```
+
+**两条比旧读法更新的认知**：
+1. **深度 = 嵌套式 pass，不是平铺。** `additive-multilayer-depth` 在这工程的真实形态是「每个预合成贡献一个 displaced+recolored pass，外层用 Add/Difference/Divide 累积」——见 `docs/fx-techniques.md` T3（已据此 refine）。
+2. **"Negative Fire" 是实证不是假设。** `Whole fire animation` 里真有一层名为 "Negative Fire"、blend=Difference、加 Warp(Bend −100) + Hue/Sat —— Difference 叠暗筋这条从「猜测」升为 proven。
+3. **新技法 `seamless-loop`**：`Noise 1 looped` = 把演化中的噪声源复制 2 份、时间错位 + opacity 交叉淡入 + SilhouetteAlpha matte → 无缝循环。跨域（烟/云/能量/水任何演化噪声都可循环）。已登记 `docs/fx-techniques.md` T15。
+
 ## ⭐ 效果用途词典 —— 什么效果干什么用（按角色，比参数表重要）
 
 这是生成器真正需要的知识：**按「角色/功能」理解每个效果在火焰里的作用**（AI 层是按角色拼装，不是抄参数）。源自 Colorful Fire Ball 解析。

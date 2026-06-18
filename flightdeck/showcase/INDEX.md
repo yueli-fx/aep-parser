@@ -71,4 +71,4 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 > **15 个 🖼 可视方向 ✅ complete** · **3 个 📋 读值档 ✅ complete**(comp-settings / project-settings / camera-light) · **EG 🛑 BLOCKED**(面板崩溃,RE 候选) · **3 个 from-scratch 不可表达（markers/render-queue/media-replace，已注明）**。能力 showcase 覆盖收官。全量清单 + 验证档位详 `specs/2026-06-13-full-showcase-coverage.md`。
 >
-> **番外 [procedural-fx] ✅ complete**（2026-06-18,非能力域,是 `specs/procedural-fx-generator` 产品 demo）:火焰 v3 多层合成,用户真机验收过 + 双版本 gate 绿。经 v1(被否)→v2(单层修色温/Glow)→v3(多层出层次)三轮。详 procedural-fx/INDEX.md + `checklists/build-good-fire.md`。
+> **番外 [procedural-fx] ✅ complete**（2026-06-18,非能力域,是 `specs/procedural-fx-generator` 产品 demo）:火焰 v3 多层合成,用户真机验收过 + 双版本 gate 绿。经 v1(被否)→v2(单层修色温/Glow)→v3(多层出层次)三轮。详 procedural-fx/INDEX.md + `checklists/techniques/build-good-fire.md`。
