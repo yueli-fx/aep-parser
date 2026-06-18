@@ -29,7 +29,9 @@ regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 re
 | expr-evolution(`time*N`) | ⬜待建 | Task 0.3 spike:AE 是否真求值 Go 写的 Evolution 表达式 |
 | expr-wiggle(`wiggle(34,0.29)`) | ⬜待建 | Task 0.3 同 spike |
 | many-mask(单层 ~21) | ⬜待建 | Task 0.4 spike:多 mask 不被 silent-drop |
-| curves(CurvesCustom 曲线数据) | ⬜待建 | Task 0.5 spike:arbitrary-data 可读/可写性 |
+| curves(CurvesCustom 曲线数据) | 🔧待RE | **Task 0.2 实测:读侧即 gap** —— 只 surface `-0000` master slot,曲线点未作 param 暴露 → Task 0.5 RE 读+写两侧 |
+
+> **Task 0.2 读侧审计(2026-06-19,probe 已删)**:mask 顶点 ✅(グリッチテキスト L0 = 16 mask,`Vertices`/`Closed`/`Mode`/`PathKeyframes` 可读)· keyframe 值 ✅(`Time`/`Value`)· effect params + expression ✅。读侧唯一 gap = Curves 曲线数据(见上行)。gen 文件直接用 raw API(`l.Masks`/`l.Effects`/`pr.Keyframes`)即可,oracle 暂不需额外 typed accessor(YAGNI)。
 
 ### 12 comp(DAG 叶→根)
 
