@@ -24,7 +24,8 @@
 - ✅ **aepdissect 消费字典**:自动产配方信号(译参数 + `✎`标非默认 + `→ tuned:`摘要)。
 
 剩(Day2/3,投工程前的增强):
-- ⬜ **aepdissect 补工程画像其余维度**:时间轴(活跃区间 + 缓动/错位 motion 技法,读关键帧)→ 依赖图边(源/父/表达式/matte)→ 结构化画像输出(当前是人读文本,未出 yaml/json profile)。
+- ✅ **时间轴维度**(done,commit 59f8d83):aepdissect 读关键帧出活跃区间 act=[in→out] + 动画属性(transform 树遍历)+ 缓动分类(linear/ease/bezier/hold)+ 错位提示。揭示 bondbond ED:Line 层 3.9s 入场描边生长、Cam 运镜。⚠ 已知:kf span 是层/源相对时间,未归一化到合成时间。
+- ⬜ **aepdissect 余下画像维度**:依赖图边(源/父/表达式/matte 整合)→ 结构化画像输出(当前人读文本,未出 yaml/json profile)。
 - ⬜ **复现判据验证**(理解金标准):挑简单工程从画像反向生成,渲染对照测理解度。
 - ⬜ 投工程时校准受控词表(角色/技法粒度、词表生长)。
 
