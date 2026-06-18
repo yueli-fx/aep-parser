@@ -2,7 +2,7 @@
 status: active
 when_to_read: running AE ship-gates in an interactive session and hitting ae_run.ps1 exit 2 / unknown-modal; AE shows a dialog that OCR can't read; "崩溃修复选项" safe-mode dialog on launch (including on MANUAL launch after automated runs); writing PowerShell that touches WinRT/UWP (Windows.Media.Ocr) or "Unable to find type" from pwsh; ocrMatch rules failing on CJK text
 applies_to: [ship-gate, ae-automation, ae_run, ocr, debugging-tools, exit-grace, crash-flag, powershell, pwsh, winrt, uwp, windows-media-ocr, cjk, ocr-matching, dispatch-rules, operator-context, cold-start-splash, dont-ask-user, no-resave]
-last_updated: 2026-06-17
+last_updated: 2026-06-19
 ---
 
 # AE ship-gate flakes in interactive sessions: occlusion + crash-recovery cascade
@@ -74,6 +74,23 @@ ENTER ("继续"), lets AE exit cleanly → clears the crash flag.
 （见 re-fixture checklist），wrapper 的宽限只兜 quit 之后的收尾时间。
 若再看到「崩溃修复选项」：选「继续」即可（不要重置首选项）；自动化侧跑
 `tmp_debug/clear_ae_crashstate.ps1` 清 flag。
+
+### 2c. 两个新坑（2026-06-19，Booyah 复刻 comp① 首次 AE 验证）
+
+1. **JSX 提早 `f.open` 创建 -Done 标记 + 中途抛错 = 0 字节 done = ae_run 误判 PASS。**
+   verify.jsx 用 `JSON.stringify(domObject)` 写 -Done，但 `JSON.stringify` 在 catch
+   之外抛（DOM enum 值），而 `f.open("w")` 已把文件截断成 0 字节 → ae_run 见 done
+   存在即 `done-found`/`exit 0`（**假 PASS**）→ 随即 force-kill AE → 置崩溃标志。
+   **铁律**：verify/render JSX 必须**先把全部内容拼成纯字符串、最后一步只 `f.open`+
+   `write`+`close` 一次**，且只在成功路径写 -Done；绝不用提早 open 占位 + 复杂序列化。
+   (纯字符串、无 JSON.stringify；本次已据此重写 booyah-clone/verify.jsx。)
+2. **`tmp_debug/clear_ae_crashstate.ps1` 已丢（gitignored，从未 track）。** 且
+   `AeRun.Lib.ps1::Invoke-SendKeysSafe` 用 `SetForegroundWindow`+SendKeys 关 safe-mode
+   框——**被前台游戏的 foreground-lock 挡住**（`Sent=$false`，即 actions.log 里反复的
+   `focus-mismatch`）→ safe-mode 框关不掉 → 超时 exit 1。文档版 clear 用 **PostMessage**
+   （直投 hwnd 消息队列，不依赖焦点）才稳。**待办**：把 clear_ae_crashstate.ps1 重建为
+   **tracked 工具**（`tools/debug/`，免再丢），PostMessage `VK_RETURN`(=继续) 到 safe-mode
+   dialog hwnd（不要 SetForegroundWindow）。
 
 ## Standard pre-gate ritual (interactive session)
 ```

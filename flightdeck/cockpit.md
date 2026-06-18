@@ -28,7 +28,8 @@ Phase 0(前置 de-risk)收口:
 
 **Phase 1 进行中**:
 - 🔶 **Task 1.1 comp ① シェイイイイプ**(commit e4d266c,Go 建):4 rect 精确 kf + fill 色 round-trip 逐值对账原工程 ✓;结构 delta(shape 组嵌套 + transform 默认物化,render-neutral)已记账。**AE-accept/render 待验**。
-- ⬜ **下一步 = 首次 AE 验证**(基座检查):开 `booyah-clone.aep` 确认 AE 接受(Japanese comp 名 + shape 不被 drop)+ render comp ① 与原工程同 comp 对照。这步同时验 harness 在本会话能跑 + 日文名 JSX 匹配(render.jsx 的 UTF-8 caveat)。**先验基座再建 ②③④**,避免在坏地基上摞。
+- ⚠ **首次 AE 验证(基座检查)撞 crash-state cascade,受阻**(详 `incidents/ae-automation-occlusion-crashstate.md` Case 2c):run1 的 verify.jsx 用 JSON.stringify 在 catch 外抛 → 0 字节 done → ae_run 假 PASS(exit 0)→ force-kill AE → 置崩溃标志;run2 弹 safe-mode 框,但 ae_run 的 `SetForegroundWindow`+SendKeys 关框被**前台游戏 foreground-lock 挡住**(focus-mismatch)→ 超时。已修 verify.jsx(纯字符串、末尾一次写)。**注:游戏窗口≠用户在用(用户在另一台机器,operator-context 立规),不问用户让机器。**
+- ⬜ **下一步 = 重建 `clear_ae_crashstate.ps1` 为 tracked 工具**(`tools/debug/`,免再丢;**PostMessage** `VK_RETURN`=继续 到 safe-mode hwnd,不用 SetForegroundWindow)→ 清崩溃标志 → warm-retry verify.jsx(确认 AE 接受 + shape 不 drop)→ render comp ① 对照原工程。这是 arc 全程 AE 验证的前置基建。
 - ⬜ 然后 Task 1.2-1.4:② テキスト(text+animator)③ マップ用ノイズ(fractal+expr,0.3 已 GO)④ カクッ(shape),按 DAG 上行。
 
 依据:plan + spec(`specs/2026-06-19-booyah-glitch-full-replication.md`)+ `tmp/booyah_dissect.txt`(完整画像,真相源)+ `cmd/aepdissect`。
