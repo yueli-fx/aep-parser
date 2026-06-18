@@ -37,7 +37,7 @@ regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 re
 
 | # | comp | status | 备注 |
 |---|---|---|---|
-| ① | シェイイイイプ！！！ | ⬜待建 | 1 shape 层,4 动画矩形 |
+| ① | シェイイイイプ！！！ | 🔶Go建 | 4 rect 精确 kf + fill 色 round-trip 逐值对账原工程 ✓(色彩约定:raw [A,R,G,B]0-255 ↔ SetColor [R,G,B,A]0-1)。⚠结构 delta(render-neutral):from-scratch emit 把 rect 包进 `Vector Group/Vectors Group`(原 flat 直挂 Root)+ 物化 Anchor/Position/Scale 默认(原省略)。AE-accept/render 待验。 |
 | ② | テキスト変えるならココ！ | ⬜待建 | 1 text 层 "GLITCH" + tracking/char-offset 动画器 |
 | ③ | マップ用フラクタルノイズ | ⬜待建 | 2 Fractal Noise 层 + Evolution expr(依赖 0.3) |
 | ④ | カクッ | ⬜待建 | 2 shape 层 |
