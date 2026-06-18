@@ -16,6 +16,20 @@ last_updated: 2026-06-18
 - **理解 = 降噪**：一个工程 95% 是默认/样板/不可见。AE 的 elision 只存非默认参数 → 字节本身≈作者改过的（aepdissect 用 `✎` 标）。找那 5% 信号层/信号参数，不读全。
 - **诚实分级**：`proven`（真渲过）vs `hypothesized`（推断）；`native`/`cycore`/`third-party`/`lib-blocked`。混淆会让「通用技巧」虚高（红线4 精神）。
 
+## 何时把发现总结进通用知识（归属判据）— 三层
+
+每个发现落三层之一，判据 = **可迁移性**（一句话测试：「能搬到另一个现象吗？」）：
+
+| 落点 | 判据 | 例 |
+|---|---|---|
+| **通用技法库** `docs/fx-techniques.md`（T-atom） | 「能搬到另一现象」= **能** → 是可迁移的因果决策 | rgb-channel-split（glitch→赛博朋克/CRT/转场）；displacement-distortion（火→风→glitch） |
+| **现象配方层** `build-<现象>.md` | **现象专属**：技法间的**顺序/编排**、为这个观感调的特定组合 | 火焰「噪声→位移→上色→Add 叠」的次序；某 look 的具体参数搭 |
+| **不单列**（机制层 signal / 不收） | 是个**参数值**或一次性琐碎 | Contrast=169 → 记进某技法 `observed_range`，不立条 |
+
+**confidence 怎么升（强化规则）**：首次见 → `observed`/`hypothesized`（低，一个工程里看到≠通用）；**跨工程复现** → 加 `proven_transfers`（同 flightdeck「第二次出现=pattern」，技法库越用越强靠这个）；**AE render-gate 过** → `validated`。立新条前**先检索去重**，能并进已有 `any_of`/`proven_transfers` 就别新立。
+
+> **判不准时默认留配方层**（宁可窄）：把现象专属误当通用 = 污染通用知识，比漏收更坏（红线4 精神）。
+
 ## 步骤
 
 1. **PARSE（机械）** — `go run ./cmd/aepdissect "<file.aep>"`
@@ -25,6 +39,7 @@ last_updated: 2026-06-18
 2. **判两类元素**（决定能否程序化复刻）：
    - **①程序化**（solid 源 + 生成类效果 + 关键帧）→ 能学会复刻。
    - **②素材+装配**（footage 源 + 0 关键帧 + 只有重上色/辉光/调色）→ 装配能复刻、元素得用户提供。诚实说清。
+   - **插件依赖是正交维度**（见下「第三方插件」节）：① 或 ② 都可能用插件；**插件 ≠ 跳过**，照样抽技法、标 `reproducibility: third-party`。
 3. **DECOMPOSE 到角色**（判断，不可机械化）：每个信号效果/结构 → 它解决**什么问题**（form/distort/color/depth/glow/motion/control…受控词表见 ontology spec §4）。产物 = 角色词典。
 4. **EXTRACT 技法**（提炼跨域原子）：每个「可迁移因果决策」抽成命名条目，对齐 schema v2：
    - 新技法 → 在 `docs/fx-techniques.md` 按 schema 追加（`mechanism.any_of` 等价效果集是对齐命门、`reproducibility` 两正交轴、`not_this` 反例必填）。
@@ -36,6 +51,16 @@ last_updated: 2026-06-18
    - project_profile（每工程一份，可跨工程对齐）→ 暂存进该现象的 `build-<现象>.md`（火焰范例见 build-good-fire.md § 源工程真实结构）。
    - preflight 每次完整载入 INDEX = 下个会话自动浮现 = 「内化成我的」的确切机制。
 6. **VALIDATE（金标准 = 能复现）**：按配方 build（`NewSolidLayer`×N + `AddEffect` + `SetEffectParam`/`AnimateEffectParam` + `SetBlendingMode` + `SetEffectLayerParam`，全 gated）→ AE 渲 → render-diff 对照原图。只有渲过的技法/配方升 `confidence: validated`。**理解引擎 = 生成引擎**（能复现才算真懂）。
+
+## 第三方插件：支持，不是跳过（2026-06-18 用户定调）
+
+招牌插件往往**就是那个技法本身**（Videocopilot Twitch = glitch 跳变；Colorama = 调色；Trapcode = 粒子）。写死/跳过 = 丢掉技法。立场改为**支持**：
+
+- **读 / 保真**：✅ 已做——opaque preservation 字节级 round-trip 任何未知效果 chunk（红线5），aepdissect 连其参数槽都 dump（`PEQCAGL-0013=189`）。读插件工程 = 已解决。
+- **从零写（AddEffect 插件效果）**：可行路 = **embed-template**（同 native 效果，`docs/embed-template-architecture.md` + [[add-effect-splice-re]]）——从用了它的**真实样本 .aep 采该效果 chunk**（sspc/tdmn/参数）→ 嵌入 → splice 进目标，参数按 index 戳值。产物 AE 能打开；**装了插件才渲对**（没装 = AE 显示 missing-effect 占位）。**尚未实现，是可行的下一能力。**
+- **`reproducibility.mechanism` 语义重定**：`third-party` = **「可支持——读✓ / 写靠采模板 / 渲染需装插件」**，**不**等于不可做。真正做不了的是 `lib-blocked`（表达式 AE 不求值，见 [[expression-enable-byte-pair]]）。
+- **与交付准则的关系**：`plugin-free` 仍是 **procedural-fx-generator 产品**的优先（网页用户没装 Twitch）；但**学习库 + 装了插件的用户 + 我们自己的分析**里，插件技法是一等公民、可建，**诚实标注渲染依赖**即可（别声称无插件能渲）。
+- **采模板金矿** = `samples/motionbox/`（含真实 Twitch/Colorama/PEDG 用法），正好当 embed-template 采集源。
 
 ## 易错（红线）
 

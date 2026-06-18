@@ -12,7 +12,8 @@ last_updated: 2026-06-18
 >
 > **schema/字段定义见 spec**;本文件是 instance 库(schema 闭、instance 开)。**解析工具** `go run ./cmd/aepdissect <file.aep>` = 内化流水线 PARSE 步。
 >
-> **confidence 约定**:`validated`=经 AE gate(火焰双版本 gate 链内的技法)· `observed`=样本实证用到、未单独渲验 · `hypothesized`=推断/库里有但没渲过。**reproducibility.mechanism 取 any_of 里最可达的**(只要有一个 native 实现技法即可复刻;第三方/cycore 是增强选项,记在备注)。
+> **confidence 约定**:`validated`=经 AE gate(火焰双版本 gate 链内的技法)· `observed`=样本实证用到、未单独渲验 · `hypothesized`=推断/库里有但没渲过。**reproducibility.mechanism 取 any_of 里最可达的**(有 native 实现即标 native;cycore/第三方为增强或替代)。
+> **第三方插件是一等公民(2026-06-18)**:技法可以**纯靠插件**(如 Twitch glitch 跳变,无 native 等价),照立 `third-party` 条、照抽——`third-party` = 「可支持:读✓/写靠 embed-template 采样本 chunk/渲染需装插件」,**不是跳过**。`plugin-free` 仅 procedural-fx-generator 产品优先。详 `checklists/techniques/understand-a-project.md` §第三方插件。
 
 ## 两类元素:程序化 vs 素材+装配(aepdissect 自动判别)
 
@@ -377,7 +378,7 @@ confidence: observed
 | 雨 | (待建) | particle-emit(条状) + time-evolution(下落) + 模糊 |
 | 转场 | (待建) | displacement-distortion/擦除 + time-evolution(时间扫过) |
 | glitch(纯 native·可复刻) | (待建,Booyah 实证可行) | ①程序化:rgb-channel-split + displacement-distortion(块状噪声驱动) + scanlines-crt + temporal-glitch(Posterize Time) + emissive-glow。Booyah Glitch 全 native |
-| glitch(重度/datamosh) | 实证 GlitchText | ②插件依赖:招牌跳变=**Videocopilot Twitch**(第三方)+ PEDG/Colorama 等;native 部分=temporal-glitch + rgb-channel-split + displacement。纯 native 只能近似 |
+| glitch(重度/datamosh) | 实证 GlitchText | 招牌跳变=**Videocopilot Twitch**(third-party,**可经 embed-template 采样本支持**,渲染需装)+ PEDG/Colorama 等;native 部分=temporal-glitch + rgb-channel-split + displacement(纯 native 也能自成一路,见上行) |
 
 > 新增现象:`aepdissect` 解析 → 拆角色 → 按 schema 在此登记新技法/标已有技法新 `proven_transfers` → 写 `checklists/build-<现象>.md` 配方(负责技法间顺序)→ AE gate 验证升 confidence。
 

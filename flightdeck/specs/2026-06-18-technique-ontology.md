@@ -60,6 +60,7 @@ technique:
 - **`signal.direction` 含 set/toggle**:颜色是"设成某值"、开关是 toggle,不只标量↑↓。
 - **`signal` 拆 direction(技法层定性)+ observed_range(机制层证据)**:方向跨工程稳定,具体值是参数空间、每工程不同,分开存。
 - **`reproducibility` 两正交轴**:机制可复刻性(能不能做)与素材依赖(要不要外部资产)**独立**——Fill 机制全可复刻,却依赖你造不出的闪电素材。漏了这维度,②素材+装配型工程无法诚实分类。`lib-blocked` 是本库特有状态(AE native 但本库表达式不求值,做不出活联动),区别于"AE 能不能做"。
+  - **`third-party` = 可支持,不是不可做**(2026-06-18 用户定调):读已 opaque round-trip(红线5);从零写靠 embed-template(从真实样本采该效果 chunk → splice),**装了插件才渲对**——尚未实现但可行。招牌插件常**就是技法本身**(Twitch=glitch),不该跳过。`plugin-free` 仅是 procedural-fx-generator 产品的优先项,非学习库的准入门槛。真正做不了的只有 `lib-blocked`。流程细节见 `checklists/techniques/understand-a-project.md` §第三方插件 + §归属判据。
 - **迁移拆 `proven` / `hypothesized`**:火焰没做过烟,`transfers:[smoke]` 是猜测不是事实;混在一起会让"通用技巧"虚高。诚实是地基(红线4 精神)。
 - **顺序/依赖不在技法里**:技法是**无序原子**,技法间的编排顺序(displacement 必在 noise 之后)归**现象配方层**(`checklists/build-<现象>.md`)。职责分离。
 
