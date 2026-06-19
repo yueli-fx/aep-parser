@@ -4,7 +4,7 @@ summary: 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)spli
 last_updated: 2026-06-20
 ---
 
-> **进度**(2026-06-20):Phase 0 spike ✅ **GO**(AE 2020+2025 双版本 CRUX-PASS)。Phase 1 ✅ `rifx` 读 .ffx + 抽 effect-unit。Phase 2 🔶 `ApplyPseudoEffect` 已建(facade+serializer,复用 AddEffect 核心)、**离线端到端通**,但 AE 报 "file is damaged" → 实测发现 **.ffx sspc 需转换成 in-parade 形态**(fnam→Utf8 / parT 追加 built-in / tdgp 重构,详 §「Phase 2 关键修正」)。**下一步 = 实现该转换 + AE 复验**(先验 elision-非必需 hypothesis)。
+> **进度**(2026-06-20):Phase 0 ✅ GO · Phase 1 ✅ · **Phase 2 ✅ DONE** —— `ApplyPseudoEffect`(facade+serializer)**AE 2020+2025 双版本 ship-gate 绿**(committed:`TestApplyPseudoEffect_AEShipGate_AE2020/2025`)。转换 = fnam→Utf8 + parT 追加 `ADBE Effect Built In Params`(parn 重算)+ tdgp 丢 .ffx 值仅留骨架。**v1 范围 = 以 pard 默认值应用**(.ffx 作者值暂不保留——AE 拒裸值 'missing data';Set* 调参未接)。下一步(可选增强,非 v1):保留作者值(per-param 值 materialize 进合法 in-parade tdbs)+ Set* 调参 + 多控件类型/读侧。
 
 # 支持 AE Pseudo Effect(自定义伪效果)纯 Go 离线应用
 

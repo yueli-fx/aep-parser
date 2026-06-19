@@ -2,6 +2,7 @@ package serializer
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 
 	"github.com/example/aep-parser/internal/rifx"
@@ -27,7 +28,114 @@ func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := transformPseudoSspcToInParade(sspcCh); err != nil {
+		return nil, err
+	}
 	return addEffectFromChunks(layer, "ApplyPseudoEffect", matchName, tdmnCh, sspcCh)
+}
+
+// transformPseudoSspcToInParade rewrites a pseudo effect's sspc payload — read
+// verbatim from a preset .ffx — into the form AE expects for an effect living
+// inside a layer's Effect Parade. A .ffx is a not-yet-applied preset; every
+// effect *instance* in a parade additionally carries the universal "ADBE Effect
+// Built In Params" group (Compositing Options) that the preset lacks. AE adds it
+// when it applies the preset; offline we splice the same constant blocks
+// (sourced from any native effect template, which are AE-baked in-parade form)
+// into the sspc's parT (param defs) and tdgp (param values), each just before
+// their trailing Group End sentinel.
+func transformPseudoSspcToInParade(sspc *rifx.Chunk) error {
+	parT := childByForm(sspc, rifx.IDparT)
+	if parT == nil {
+		return fmt.Errorf("ApplyPseudoEffect: pseudo sspc has no parT param-defs")
+	}
+	valTdgp := childByForm(sspc, rifx.IDTdgp)
+	if valTdgp == nil {
+		return fmt.Errorf("ApplyPseudoEffect: pseudo sspc has no tdgp values group")
+	}
+
+	// A .ffx (FaFX preset) stores name strings raw (fixed-width / length-by-size);
+	// an Egg! project stores them Utf8-wrapped ("Utf8" + u32 len + bytes). Splicing
+	// raw strings makes AE misread the next chunk's length → "file is damaged".
+	// Re-encode fnam + every raw tdsn in the sspc tree to the Utf8 form.
+	if fnam := childByID(sspc, rifx.IDFnam); fnam != nil {
+		fnam.Data = utf8StringData(string(bytes.TrimRight(fnam.Data, "\x00")))
+	}
+	reencodeRawTdsn(sspc)
+
+	biParTPair, biTdgpPair, err := builtInParamsBlocks()
+	if err != nil {
+		return err
+	}
+
+	// parT: append (tdmn "ADBE Effect Built In Params", pard) at the end (the
+	// .ffx parT has no Group End sentinel — it ends on the last param's pard),
+	// then bump the parn count header to match the new pard total (AE reports
+	// "missing data in file" when parn undercounts the pard entries present).
+	parT.Children = append(parT.Children, biParTPair...)
+	if parn := childByID(parT, rifx.IDParn); parn != nil && len(parn.Data) >= 4 {
+		var pardCount uint32
+		for _, ch := range parT.Children {
+			if ch.ID == rifx.IDpard {
+				pardCount++
+			}
+		}
+		binary.BigEndian.PutUint32(parn.Data[0:4], pardCount)
+	}
+
+	// tdgp: AE elides param values left at their pard-defined default, so a
+	// freshly-applied pseudo effect's value group carries only the structural
+	// scaffold (tdsb + tdsn group name) + the built-in-params group + Group End;
+	// the controls themselves come from the parT pard defs. We drop the .ffx's
+	// per-param value entries — the effect applies at its pard defaults (AE 2020
+	// + AE 2025 reject the spliced .ffx values as "missing data in file"; the
+	// all-defaults form is ship-gate green on both). Authored .ffx values are
+	// thus NOT yet preserved (a future step would materialize each non-default
+	// value into a correctly-laid-out in-parade tdbs).
+	scaffold := make([]*rifx.Chunk, 0, 5)
+	for _, ch := range valTdgp.Children {
+		if ch.ID == rifx.IDTdsb || ch.ID == rifx.IDTdsn {
+			scaffold = append(scaffold, ch)
+		}
+	}
+	scaffold = append(scaffold, biTdgpPair...)
+	scaffold = append(scaffold, makeTdmn("ADBE Group End"))
+	valTdgp.Children = scaffold
+	return nil
+}
+
+// builtInParamsBlocks returns deep clones of the universal "ADBE Effect Built In
+// Params" entries — the parT pair (tdmn + pard) and the tdgp pair (tdmn + LIST
+// value group) — extracted from a native effect template (canonical AE-baked
+// in-parade bytes). These are identical across effects (Compositing Options).
+func builtInParamsBlocks() (parTPair, tdgpPair []*rifx.Chunk, err error) {
+	_, sspc, e := cloneEffectTemplate(EffectFill)
+	if e != nil {
+		return nil, nil, fmt.Errorf("ApplyPseudoEffect: load built-in-params reference template: %w", e)
+	}
+	parT := childByForm(sspc, rifx.IDparT)
+	valTdgp := childByForm(sspc, rifx.IDTdgp)
+	if parT == nil || valTdgp == nil {
+		return nil, nil, fmt.Errorf("ApplyPseudoEffect: reference template missing parT/tdgp")
+	}
+	const biName = "ADBE Effect Built In Params"
+	if parTPair = pairAfterTdmn(parT.Children, biName); parTPair == nil {
+		return nil, nil, fmt.Errorf("ApplyPseudoEffect: reference template parT has no %q", biName)
+	}
+	if tdgpPair = pairAfterTdmn(valTdgp.Children, biName); tdgpPair == nil {
+		return nil, nil, fmt.Errorf("ApplyPseudoEffect: reference template tdgp has no %q", biName)
+	}
+	return parTPair, tdgpPair, nil
+}
+
+// pairAfterTdmn finds the tdmn child whose match-name is name and returns deep
+// clones of [that tdmn, the following chunk] (nil if not found / no follower).
+func pairAfterTdmn(children []*rifx.Chunk, name string) []*rifx.Chunk {
+	for i, ch := range children {
+		if ch.ID == rifx.IDTdmn && string(bytes.TrimRight(ch.Data, "\x00")) == name && i+1 < len(children) {
+			return []*rifx.Chunk{deepCloneChunk(ch), deepCloneChunk(children[i+1])}
+		}
+	}
+	return nil
 }
 
 // extractPseudoEffectUnit parses a .ffx (RIFX "FaFX") and pulls out the
@@ -88,6 +196,39 @@ func extractPseudoEffectUnit(ffxBytes []byte) (matchName string, tdmn, sspc *rif
 	}
 
 	return matchName, makeTdmn(matchName), deepCloneChunk(sspc), nil
+}
+
+// utf8StringData encodes s as AE's in-project string sub-record: the 4-byte
+// "Utf8" tag + a big-endian u32 length + the raw bytes.
+func utf8StringData(s string) []byte {
+	b := []byte(s)
+	data := make([]byte, 8+len(b))
+	copy(data[0:4], "Utf8")
+	binary.BigEndian.PutUint32(data[4:8], uint32(len(b)))
+	copy(data[8:], b)
+	return data
+}
+
+// reencodeRawTdsn walks c and rewrites every tdsn whose payload is a raw string
+// (not already a "Utf8" sub-record) into the Utf8 form. Built-in-params blocks
+// spliced from native templates are already Utf8 and are left untouched.
+func reencodeRawTdsn(c *rifx.Chunk) {
+	if c.ID == rifx.IDTdsn && !bytes.HasPrefix(c.Data, []byte("Utf8")) {
+		c.Data = utf8StringData(string(bytes.TrimRight(c.Data, "\x00")))
+	}
+	for _, ch := range c.Children {
+		reencodeRawTdsn(ch)
+	}
+}
+
+// childByID returns the first child of c with the given leaf chunk ID.
+func childByID(c *rifx.Chunk, id rifx.ChunkID) *rifx.Chunk {
+	for _, ch := range c.Children {
+		if ch.ID == id {
+			return ch
+		}
+	}
+	return nil
 }
 
 // childByForm returns the first LIST child of c whose form-type equals form.

@@ -27,6 +27,7 @@ var (
 	IDIdta = ChunkID{'i', 'd', 't', 'a'} // item metadata
 	IDLdta = ChunkID{'l', 'd', 't', 'a'} // layer data
 	IDSspc = ChunkID{'s', 's', 'p', 'c'} // source/footage reference
+	IDFnam = ChunkID{'f', 'n', 'a', 'm'} // effect instance name (in a project: embeds a "Utf8" sub-record; in a .ffx preset: fixed-width raw)
 	IDFdta = ChunkID{'f', 'd', 't', 'a'} // folder marker
 	IDCmta = ChunkID{'c', 'm', 't', 'a'} // comment
 	IDKfmd = ChunkID{'k', 'f', 'm', 'd'} // keyframe data
@@ -83,6 +84,7 @@ var (
 	IDPjef = ChunkID{'p', 'j', 'e', 'f'} // Utf8 chunk: one effect match-name inside Pefl
 	IDparT = ChunkID{'p', 'a', 'r', 'T'} // LIST formType: effect parameter definitions container (pard entries)
 	IDpard = ChunkID{'p', 'a', 'r', 'd'} // effect parameter definition chunk (variable-length, keyed by control type)
+	IDParn = ChunkID{'p', 'a', 'r', 'n'} // parT param-count header (u32 = number of pard entries, incl. ADBE Effect Built In Params)
 	IDBesc = ChunkID{'b', 'e', 's', 'c'} // LIST formType: animation-preset (.ffx) descriptor wrapper (root child of a RIFX "FaFX" form)
 	IDTdsp = ChunkID{'t', 'd', 's', 'p'} // LIST formType: preset target property-path descriptor (holds tdsi path steps)
 	IDTdsi = ChunkID{'t', 'd', 's', 'i'} // LIST formType: one property-path step (tdix index + tdmn match-name)

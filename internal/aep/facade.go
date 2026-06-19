@@ -784,18 +784,25 @@ func SupportedEffects() []string { return serializer.SupportedEffects() }
 // parsed layers). tdpi host-layer bindings are retargeted to the destination
 // layer.
 //
+// Applied at defaults: the pseudo effect is spliced with its controls at their
+// pard-defined defaults — the authored values stored in the .ffx are NOT yet
+// preserved (AE rejects the raw .ffx value entries spliced into a parade as
+// "missing data in file"; the all-defaults value group is what ships green). All
+// controls are present (AE rebuilds them from the pard defs) and tunable in AE;
+// programmatic tuning via Set* after Reopen is a future step (the returned
+// Effect's value group is empty until a value is materialized).
+//
 // Refused (same as AddEffect): camera / light layers, and New*-built layers
 // never parsed (call aep.Reopen first). Returns an error for a malformed .ffx
 // (not RIFX/FaFX, missing besc/sspc, or no extractable match-name).
 //
-// Alpha — the splice reuses AddEffect's ship-gate-green machinery and the
-// self-contained-acceptance crux is verified (AE 2020 + AE 2025 both render an
-// AE-baked pseudo effect from a fresh, never-registered process); the Go-splice
-// path's own AE acceptance + render-pixel gate is in progress. Free function
-// (CLAUDE.md #2 structural-op call-form). See spec
+// Alpha / structural — AE 2020 + AE 2025 ship-gate green (a fresh, never-
+// registered AE process reads the Go-spliced pseudo effect back live), but the
+// apply-at-defaults scope (no authored-value preservation, no Set* tuning yet)
+// keeps it Alpha. Free function (CLAUDE.md #2 structural-op call-form). See spec
 // 2026-06-20-pseudo-effect-support.
 //
-//aep:cap domain=effect tier=alpha verify=roundtrip incident=add-effect-splice-re boundary="纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE。仅 Go round-trip 绿(splice→WriteAEP→重读 matchName+参数对);**AE 尚不接受 Go-spliced 字节('file is damaged')**——实测 .ffx sspc≠in-parade sspc,AE 烤进工程时重构(fnam→Utf8 / parT 追加 built-in params / tdgp 去 tdsb·tdsn 前缀+elision),转换待实现(spec 2026-06-20-pseudo-effect-support §Phase 2)。自包含接受性本身已双版本验(AE-baked)。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做" alias="pseudo effect,pseudoeffect,伪效果,自定义效果,ffx,animation preset,动画预设,applypreset,custom effect"
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestApplyPseudoEffect_AEShipGate_AE2020,TestApplyPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE(对比 rendertom 必须 applyPreset 运行时点亮)。AE 2020+2025 ship-gate 绿:全新未注册 AE 进程读回伪效果为活(matchName 对、非 Missing、控件全、enabled)。**以 pard 默认值应用**——.ffx 作者值暂不保留(AE 拒裸 .ffx 值'missing data',只有 all-defaults 值组过 gate),Set* 调参未接(返回 Effect 值组空)。转换=fnam→Utf8+parT 追加 ADBE Effect Built In Params(parn 重算)+tdgp 丢值仅留骨架。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做" alias="pseudo effect,pseudoeffect,伪效果,自定义效果,ffx,animation preset,动画预设,applypreset,custom effect"
 func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 	return serializer.ApplyPseudoEffect(layer, ffxBytes)
 }

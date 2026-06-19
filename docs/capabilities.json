@@ -1139,10 +1139,13 @@
     "cap": {
       "domain": "effect",
       "tier": "alpha",
-      "verify": "roundtrip",
+      "verify": "ae-accept",
       "minver": "2020",
-      "gate": null,
-      "boundary": "纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE。仅 Go round-trip 绿(splice→WriteAEP→重读 matchName+参数对);**AE 尚不接受 Go-spliced 字节('file is damaged')**——实测 .ffx sspc≠in-parade sspc,AE 烤进工程时重构(fnam→Utf8 / parT 追加 built-in params / tdgp 去 tdsb·tdsn 前缀+elision),转换待实现(spec 2026-06-20-pseudo-effect-support §Phase 2)。自包含接受性本身已双版本验(AE-baked)。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做",
+      "gate": [
+        "TestApplyPseudoEffect_AEShipGate_AE2020",
+        "TestApplyPseudoEffect_AEShipGate_AE2025"
+      ],
+      "boundary": "纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE(对比 rendertom 必须 applyPreset 运行时点亮)。AE 2020+2025 ship-gate 绿:全新未注册 AE 进程读回伪效果为活(matchName 对、非 Missing、控件全、enabled)。**以 pard 默认值应用**——.ffx 作者值暂不保留(AE 拒裸 .ffx 值'missing data',只有 all-defaults 值组过 gate),Set* 调参未接(返回 Effect 值组空)。转换=fnam→Utf8+parT 追加 ADBE Effect Built In Params(parn 重算)+tdgp 丢值仅留骨架。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做",
       "incident": [
         "add-effect-splice-re"
       ],
