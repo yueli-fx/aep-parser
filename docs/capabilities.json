@@ -1131,6 +1131,35 @@
     }
   },
   {
+    "symbol": "ApplyPseudoEffect",
+    "kind": "func",
+    "signature": "func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error)",
+    "summary": "ApplyPseudoEffect splices the pseudo effect carried by an After Effects Animation Preset (.ffx) into the layer's \"ADBE Effect Parade\" and returns the parsed *Effect.",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "alpha",
+      "verify": "roundtrip",
+      "minver": "2020",
+      "gate": null,
+      "boundary": "纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE。仅 Go round-trip 绿(splice→WriteAEP→重读 matchName+参数对);**AE 尚不接受 Go-spliced 字节('file is damaged')**——实测 .ffx sspc≠in-parade sspc,AE 烤进工程时重构(fnam→Utf8 / parT 追加 built-in params / tdgp 去 tdsb·tdsn 前缀+elision),转换待实现(spec 2026-06-20-pseudo-effect-support §Phase 2)。自包含接受性本身已双版本验(AE-baked)。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做",
+      "incident": [
+        "add-effect-splice-re"
+      ],
+      "alias": [
+        "pseudo effect",
+        "pseudoeffect",
+        "伪效果",
+        "自定义效果",
+        "ffx",
+        "animation preset",
+        "动画预设",
+        "applypreset",
+        "custom effect"
+      ]
+    }
+  },
+  {
     "symbol": "RemoveEffect",
     "kind": "func",
     "signature": "func RemoveEffect(layer *Layer, index int) error",
@@ -1663,34 +1692,6 @@
   {
     "symbol": "SetGradientType",
     "kind": "method",
-    "recv": "*GradientFillNode",
-    "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
-    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradientRadial_AEShipGate_AE2020",
-        "TestMGGradientRadial_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient type",
-        "渐变类型",
-        "linear",
-        "radial",
-        "线性",
-        "径向"
-      ]
-    }
-  },
-  {
-    "symbol": "SetGradientType",
-    "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
     "summary": "SetGradientType selects linear (default) or radial ramp shape.",
@@ -1717,11 +1718,11 @@
     }
   },
   {
-    "symbol": "SetHighlightAngle",
+    "symbol": "SetGradientType",
     "kind": "method",
     "recv": "*GradientFillNode",
-    "signature": "func (n *GradientFillNode) SetHighlightAngle(v float64) error",
-    "summary": "SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset.",
+    "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
+    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1729,16 +1730,18 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGGradientHilite_AEShipGate_AE2020",
-        "TestMGGradientHilite_AEShipGate_AE2025"
+        "TestMGGradientRadial_AEShipGate_AE2020",
+        "TestMGGradientRadial_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "highlight angle",
-        "高亮角度",
-        "radial highlight angle",
-        "渐变高亮角度"
+        "gradient type",
+        "渐变类型",
+        "linear",
+        "radial",
+        "线性",
+        "径向"
       ]
     }
   },
@@ -1764,6 +1767,32 @@
         "gradient stroke highlight angle",
         "渐变描边高亮角度",
         "radial highlight angle stroke"
+      ]
+    }
+  },
+  {
+    "symbol": "SetHighlightAngle",
+    "kind": "method",
+    "recv": "*GradientFillNode",
+    "signature": "func (n *GradientFillNode) SetHighlightAngle(v float64) error",
+    "summary": "SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset.",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradientHilite_AEShipGate_AE2020",
+        "TestMGGradientHilite_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "highlight angle",
+        "高亮角度",
+        "radial highlight angle",
+        "渐变高亮角度"
       ]
     }
   },
@@ -8317,9 +8346,9 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*StrokeWave",
-    "signature": "func (w *StrokeWave) SetAmount(v float64) error",
-    "summary": "",
+    "recv": "*PuckerBloatNode",
+    "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
+    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8327,15 +8356,16 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestV2_2_StrokeTaperWave_AEShipGate_AE2020",
-        "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
+        "TestMGPuckerBloat_AEShipGate_AE2020",
+        "TestMGPuckerBloat_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "wave amount",
-        "波浪幅度",
-        "stroke wave amount"
+        "pucker bloat amount",
+        "膨胀收缩量",
+        "pucker",
+        "bloat"
       ]
     }
   },
@@ -8368,9 +8398,9 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*PuckerBloatNode",
-    "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
-    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
+    "recv": "*StrokeWave",
+    "signature": "func (w *StrokeWave) SetAmount(v float64) error",
+    "summary": "",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8378,16 +8408,15 @@
       "verify": "render-pixel",
       "minver": "2020",
       "gate": [
-        "TestMGPuckerBloat_AEShipGate_AE2020",
-        "TestMGPuckerBloat_AEShipGate_AE2025"
+        "TestV2_2_StrokeTaperWave_AEShipGate_AE2020",
+        "TestV2_2_StrokeTaperWave_AEShipGate_AE2025"
       ],
       "boundary": "",
       "incident": null,
       "alias": [
-        "pucker bloat amount",
-        "膨胀收缩量",
-        "pucker",
-        "bloat"
+        "wave amount",
+        "波浪幅度",
+        "stroke wave amount"
       ]
     }
   },

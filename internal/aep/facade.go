@@ -761,6 +761,45 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 //aep:cap domain=meta tier=stable verify=none alias="effects,效果列表,supported effects"
 func SupportedEffects() []string { return serializer.SupportedEffects() }
 
+// ApplyPseudoEffect splices the pseudo effect carried by an After Effects
+// Animation Preset (.ffx) into the layer's "ADBE Effect Parade" and returns the
+// parsed *Effect. ffxBytes is the raw .ffx file content.
+//
+// A Pseudo Effect (built with the Pseudo Effect Maker) is a user-defined effect
+// — a named group of standard controls (Slider / Color / Checkbox / Point /
+// Angle …) that looks like a native effect, with match-name "Pseudo/<uID>/<name>".
+// Unlike a native effect (looked up by match-name in the opening AE), a pseudo
+// effect's full control definition (pard chunks) travels inside the .ffx, so it
+// is self-contained: AE renders it from the saved .aep bytes without the preset
+// ever being registered via applyPreset. This makes ApplyPseudoEffect the
+// offline, pure-Go equivalent of AE's applyPreset — no running AE required (the
+// rendertom/PseudoEffect ExtendScript helper, by contrast, needs AE to "make
+// the match-name live" in a temp comp first).
+//
+// Mechanics: the .ffx is a RIFX "FaFX" form; ApplyPseudoEffect reads it,
+// extracts the effect-unit (the bare match-name + its LIST:sspc payload of
+// pard param-defs + values), and splices the (tdmn, sspc) pair into the parade
+// just before its Group End sentinel — the same atomic, warnings-as-failure,
+// rollback-on-error splice AddEffect uses (parade auto-created for effect-less
+// parsed layers). tdpi host-layer bindings are retargeted to the destination
+// layer.
+//
+// Refused (same as AddEffect): camera / light layers, and New*-built layers
+// never parsed (call aep.Reopen first). Returns an error for a malformed .ffx
+// (not RIFX/FaFX, missing besc/sspc, or no extractable match-name).
+//
+// Alpha — the splice reuses AddEffect's ship-gate-green machinery and the
+// self-contained-acceptance crux is verified (AE 2020 + AE 2025 both render an
+// AE-baked pseudo effect from a fresh, never-registered process); the Go-splice
+// path's own AE acceptance + render-pixel gate is in progress. Free function
+// (CLAUDE.md #2 structural-op call-form). See spec
+// 2026-06-20-pseudo-effect-support.
+//
+//aep:cap domain=effect tier=alpha verify=roundtrip incident=add-effect-splice-re boundary="纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE。仅 Go round-trip 绿(splice→WriteAEP→重读 matchName+参数对);**AE 尚不接受 Go-spliced 字节('file is damaged')**——实测 .ffx sspc≠in-parade sspc,AE 烤进工程时重构(fnam→Utf8 / parT 追加 built-in params / tdgp 去 tdsb·tdsn 前缀+elision),转换待实现(spec 2026-06-20-pseudo-effect-support §Phase 2)。自包含接受性本身已双版本验(AE-baked)。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做" alias="pseudo effect,pseudoeffect,伪效果,自定义效果,ffx,animation preset,动画预设,applypreset,custom effect"
+func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
+	return serializer.ApplyPseudoEffect(layer, ffxBytes)
+}
+
 // AddTextOpacityAnimator adds a per-character Opacity animator with a Range
 // Selector to a text layer — the kinetic-typography primitive (fade / wipe text
 // in or out one character at a time). opacity (0–100) is applied to the

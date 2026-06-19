@@ -83,6 +83,9 @@ var (
 	IDPjef = ChunkID{'p', 'j', 'e', 'f'} // Utf8 chunk: one effect match-name inside Pefl
 	IDparT = ChunkID{'p', 'a', 'r', 'T'} // LIST formType: effect parameter definitions container (pard entries)
 	IDpard = ChunkID{'p', 'a', 'r', 'd'} // effect parameter definition chunk (variable-length, keyed by control type)
+	IDBesc = ChunkID{'b', 'e', 's', 'c'} // LIST formType: animation-preset (.ffx) descriptor wrapper (root child of a RIFX "FaFX" form)
+	IDTdsp = ChunkID{'t', 'd', 's', 'p'} // LIST formType: preset target property-path descriptor (holds tdsi path steps)
+	IDTdsi = ChunkID{'t', 'd', 's', 'i'} // LIST formType: one property-path step (tdix index + tdmn match-name)
 	IDGCst = ChunkID{'G', 'C', 's', 't'} // LIST formType: gradient color stops wrapper (contains tdbs + GCky)
 	IDGCky = ChunkID{'G', 'C', 'k', 'y'} // LIST formType: gradient keyframe container (Utf8 children holding prop.map XML, one per keyframe)
 

@@ -790,8 +790,23 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	if layer == nil {
 		return nil, fmt.Errorf("AddEffect: layer is nil")
 	}
+	tdmnCh, sspcCh, err := cloneEffectTemplate(effectMatchName)
+	if err != nil {
+		return nil, err
+	}
+	return addEffectFromChunks(layer, "AddEffect", effectMatchName, tdmnCh, sspcCh)
+}
+
+// addEffectFromChunks splices a caller-supplied effect-unit (a tdmn match-name
+// chunk + its LIST:sspc payload) into the layer's Effect Parade — the shared
+// core behind AddEffect (embedded built-in template) and ApplyPseudoEffect
+// (unit extracted from a user .ffx). opName labels errors. The sspc's tdpi
+// host-layer bindings are retargeted to the destination layer; the splice is
+// atomic (snapshot + warnings-as-failure rollback) and re-parses the spliced
+// pair into a back-ref-correct *Effect.
+func addEffectFromChunks(layer *Layer, opName, effectMatchName string, tdmnCh, sspcCh *rifx.Chunk) (*Effect, error) {
 	if layer.Type == LayerTypeCamera || layer.Type == LayerTypeLight {
-		return nil, fmt.Errorf("AddEffect: layer %q is a %s layer (AE does not allow effects on camera/light layers)", layer.Name, layer.Type)
+		return nil, fmt.Errorf("%s: layer %q is a %s layer (AE does not allow effects on camera/light layers)", opName, layer.Name, layer.Type)
 	}
 	parade, undoParadeCreate, err := ensureEffectParade(layer)
 	if err != nil {
@@ -800,14 +815,9 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	pgb := propertyGroupBack(parade)
 	if pgb == nil || pgb.chunk == nil {
 		undoParadeCreate()
-		return nil, fmt.Errorf("AddEffect: Effect Parade for layer %q has no chunk back-ref", layer.Name)
+		return nil, fmt.Errorf("%s: Effect Parade for layer %q has no chunk back-ref", opName, layer.Name)
 	}
 
-	tdmnCh, sspcCh, err := cloneEffectTemplate(effectMatchName)
-	if err != nil {
-		undoParadeCreate()
-		return nil, err
-	}
 	retargetEffectHostLayer(sspcCh, layer.ID)
 
 	children := pgb.chunk.Children
@@ -857,7 +867,7 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 		collectEffects(tmpParade, &tmp, ctx)
 		if len(tmp) != 1 {
 			rollback()
-			return nil, fmt.Errorf("AddEffect: spliced effect re-parse produced %d effects (want 1)", len(tmp))
+			return nil, fmt.Errorf("%s: spliced effect re-parse produced %d effects (want 1)", opName, len(tmp))
 		}
 		newEffect = tmp[0]
 		layer.Effects = append(layer.Effects, newEffect)
@@ -865,7 +875,7 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 
 	if newWarn := newWarningsSince(layer, oldWarningsLen); len(newWarn) > 0 {
 		rollback()
-		return nil, fmt.Errorf("AddEffect: produced %d parser warning(s), rolled back: %v", len(newWarn), newWarn)
+		return nil, fmt.Errorf("%s: produced %d parser warning(s), rolled back: %v", opName, len(newWarn), newWarn)
 	}
 
 	return newEffect, nil

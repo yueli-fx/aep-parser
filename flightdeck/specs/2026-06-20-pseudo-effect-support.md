@@ -4,7 +4,7 @@ summary: 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)spli
 last_updated: 2026-06-20
 ---
 
-> **进度**:Phase 0 spike ✅ **GO**(2026-06-20,AE 2020+2025 双版本 CRUX-PASS,详 §4 Phase 0)。Phase 1 离线已 de-risk(`rifx` 读 .ffx)。下一步 = Phase 1+2 建 `ApplyPseudoEffect`。
+> **进度**(2026-06-20):Phase 0 spike ✅ **GO**(AE 2020+2025 双版本 CRUX-PASS)。Phase 1 ✅ `rifx` 读 .ffx + 抽 effect-unit。Phase 2 🔶 `ApplyPseudoEffect` 已建(facade+serializer,复用 AddEffect 核心)、**离线端到端通**,但 AE 报 "file is damaged" → 实测发现 **.ffx sspc 需转换成 in-parade 形态**(fnam→Utf8 / parT 追加 built-in / tdgp 重构,详 §「Phase 2 关键修正」)。**下一步 = 实现该转换 + AE 复验**(先验 elision-非必需 hypothesis)。
 
 # 支持 AE Pseudo Effect(自定义伪效果)纯 Go 离线应用
 
@@ -69,6 +69,17 @@ rendertom 整套「点亮(make live)」hack 的存在,暗示 AE 运行时**可�
 - `internal/rifx`:`Parse` 硬拒非 `Egg!`,但 `ReadChunk` 不校验 form → 读 `.ffx` 走 `ReadChunk`(已验)或给 `Parse` 加 `FaFX` 白名单。
 - `internal/serializer` 增 `.ffx` 解析:抽出 effect-unit 子树(`sspc + ppar + tdgp`),丢弃 preset 专属的 `besc/beso/tdsp`(路径描述)+ `pgui`。
 - 输出一个内部「pseudo-effect 模板」表示(matchName + 控件定义 + 默认值字节)。
+
+### ⚠ Phase 2 关键修正(2026-06-20 实测发现)— **.ffx sspc ≠ in-parade sspc,需转换**
+**「verbatim splice」假设证伪**。已建 `ApplyPseudoEffect`(facade + serializer,复用 AddEffect 的 `addEffectFromChunks` 核心),**离线端到端通**(splice→WriteAEP→重读,matchName+8 参数对)。但 AE 2025 打开 Go-spliced .aep 报 **"file is damaged"**(经典红线7a:Go round-trip 绿 ≠ AE 接受)。
+
+byte-diff(go-spliced vs AE-baked oracle `scribe_baked.aep`)定位:effect 单元同为 `sspc(fnam,parT,tdgp,pgui)`,但 AE **applyPreset 烤进工程时重构 .ffx**,三处 delta:
+1. **fnam**:.ffx 48B 定长 NUL-pad → in-parade `Utf8` 包装(14B:`Utf8`+len+name)。
+2. **parT**:.ffx 17 children(parn + 8×(tdmn+pard))→ in-parade 19(**追加 `ADBE Effect Built In Params` tdmn+pard** = Compositing Options,通用常量)。
+3. **tdgp 值区**:.ffx 19(`tdsb`+`tdsn`+8×(tdmn+tdbs)+GroupEnd)→ in-parade 11(**去 tdsb/tdsn 前缀** + **按 elision 丢默认值参数**,只留非默认 -0000/-0003/-0007 + built-in 值组 + GroupEnd)。
+
+**关键 hypothesis(待验,决定 Phase 2 难度)**:**elision 非接受必需**——.ffx 自身含全量非默认值、AE applyPreset 照吃,AE 只在**存盘**时 elide。若成立,转换 = fnam→Utf8 + parT 追加 built-in pard + tdgp(去 tdsb/tdsn 前缀 + **保留全量值** + 追加 built-in 值组),**无需实现 per-param 默认值比对**(那才是难点)。两个 built-in 常量块(parT 的 pard + tdgp 的值组)可从任一原生 effect 模板 runtime 抽。
+→ 下一步 = 实现此转换 → AE 2020+2025 复验(先验 hypothesis:非 elide 是否被接受)。
 
 ### Phase 2 — `ApplyPseudoEffect`(写侧,v1 主交付)
 - facade 自由函数(对齐 CLAUDE.md #2/#3 结构性 op 住 serializer):
