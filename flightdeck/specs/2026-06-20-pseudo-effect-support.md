@@ -4,6 +4,8 @@ summary: 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)spli
 last_updated: 2026-06-20
 ---
 
+> **进度**:Phase 0 spike ✅ **GO**(2026-06-20,AE 2020+2025 双版本 CRUX-PASS,详 §4 Phase 0)。Phase 1 离线已 de-risk(`rifx` 读 .ffx)。下一步 = Phase 1+2 建 `ApplyPseudoEffect`。
+
 # 支持 AE Pseudo Effect(自定义伪效果)纯 Go 离线应用
 
 > 配套 RE 详档:`references/pseudoeffect-support-re.md`(.ffx 字节 dissect + rendertom 机制 + 5 条开放问题)。本 spec = **要做什么 + 怎么分阶段 + 判据**;那份 reference = **底层字节真相 + 参考实现**。两者勿重复,有冲突以本 spec 决策为准。
@@ -44,15 +46,27 @@ rendertom 整套「点亮(make live)」hack 的存在,暗示 AE 运行时**可�
 
 ## 4. 范围与分阶段
 
-### Phase 0 — Spike(de-risk,必须最先)
-手动从 Scribe 样本(`references/PseudoEffect/` README/test.js)抽 effect-unit,splice 进一个真实层,**干净 AE(从未跑过该 preset)** 双版本打开:
-- **判据 A(accept)**:AE 2020 + AE 2025 都不报损坏/不 silent-drop 该效果;DOM 读回 `effect.matchName == "Pseudo/9db0uID/Scribe"`、参数槽数对。
-- **判据 B(render)**:Scribe 是描边动画效果 —— 渲染一帧采样像素,效果**可见**(红线4:值对 ≠ 渲染对)。
-- spike 工件入 `tmp_debug/` 或 showcase 占位,findings 进 incident,**不留垃圾**。
-- **Gate**:Phase 0 不过 → 停,给负结论,本 spec 转「不可达」。过 → 进 Phase 1。
+### Phase 0 — Spike(de-risk,必须最先)✅ **PASS / GO**(2026-06-20)
+**结论:头号 crux 在 AE 2020 + 2025 双版本决定性通过 —— feature 物理成立。**
 
-### Phase 1 — `.ffx` reader(FaFX form)
-- `internal/rifx` 增 `FaFX` form 识别(目前只认 `Egg!`)。
+实测路径(`tmp_debug/pseudo-spike/`):
+1. **离线**:Node 从 test.js binaryString 重建 `Scribe.ffx`(4572B,RIFX `FaFX` form);我们的 `rifx.ReadChunk` **完整解出** FaFX 树,effect-unit = `LIST sspc`(fnam + parT(8 pard 控件定义) + tdgp(值区))定位清晰。→ **Phase 1 离线 de-risk 完成**。
+2. **Launch A(注册 session)**:JSX 新建 shape 层 → `applyPreset(Scribe.ffx)` → 效果活、8 参数全在 → 存 `scribe_baked.aep`。AE 2020 + 2025 各一份。
+3. **离线核对**:Go parser 读 baked.aep → **AE 把完整自包含定义烤进字节**(sspc + 8 pard 全在,非裸 matchName 引用)。
+4. **★ Launch B(决定性:全新进程 = 未注册)**:打开 baked.aep → 效果**完全活**(`name=Scribe` 非「Missing:」、`enabled=true`、8 参数带名)。**AE 2020 + 2025 均 CRUX-PASS**。
+
+→ **AE 接受未经 `applyPreset` 注册的自包含伪效果;pard 控件定义随 `.aep` 字节自带、跨进程存活。** rendertom 的运行时点亮 hack 对「离线写 .aep」**不必要**。
+
+**意外收获 = 字节 oracle**:`scribe_baked_2020.aep` / `scribe_baked.aep`(2025)是 AE 亲手写的「正确的 in-parade 伪效果」样本 → Phase 2 splice 直接 byte-diff 对照,无需猜目标布局。
+
+**仍未验(Phase 2 才验)**:① 我们 **Go-splice 出的字节**(非 AE-baked)被 AE 接受 —— API 未建;② **render-pixel**(本 spike 用空路径 shape 层,Scribe 无路径可描 → 帧空白 234B,符合预期,非渲染验证)。
+
+判据(原始,已满足 accept 面、render 面留 Phase 2):
+- **判据 A(accept)**:✅ AE 2020 + 2025 DOM 读回 `matchName == "Pseudo/9db0uID/Scribe"`、8 参数、`name` 不含 Missing、`enabled=true`。
+- **判据 B(render)**:⏸ 移到 Phase 2 ship-gate(需带路径的层让 Scribe 可见)。
+
+### Phase 1 — `.ffx` reader(FaFX form)〔Phase 0 已离线 de-risk:`rifx.ReadChunk` 已能读 FaFX 树〕
+- `internal/rifx`:`Parse` 硬拒非 `Egg!`,但 `ReadChunk` 不校验 form → 读 `.ffx` 走 `ReadChunk`(已验)或给 `Parse` 加 `FaFX` 白名单。
 - `internal/serializer` 增 `.ffx` 解析:抽出 effect-unit 子树(`sspc + ppar + tdgp`),丢弃 preset 专属的 `besc/beso/tdsp`(路径描述)+ `pgui`。
 - 输出一个内部「pseudo-effect 模板」表示(matchName + 控件定义 + 默认值字节)。
 
@@ -64,6 +78,8 @@ rendertom 整套「点亮(make live)」hack 的存在,暗示 AE 运行时**可�
   读 `.ffx` → 抽 effect-unit → splice 进 `layer` 的 `ADBE Effect Parade` → 返回解析后的 `*Effect`,调用方可继续 `Set*` 调参。
 - 复用 `AddEffect` 的 Effect-Parade 插入路径(原子不变量 + rollback)。
 - 核对 `tdpi`(add-effect incident 记其为 host-layer 绑定)是否需重指向目标层。
+- **byte oracle**:byte-diff 我们的输出 vs Phase 0 的 `tmp_debug/pseudo-spike/scribe_baked{,_2020}.aep`(AE 亲手写的正确 in-parade 伪效果)。
+- **render-pixel**:用**带路径的层**(让 Scribe 实际描边)出可见帧,采样像素验(红线4)。
 - **Gate**:AE 2020 + 2025 双版本 ship-gate(accept + render-pixel),过了才升 Stable;未过保持 Alpha。
 
 ### Phase 3 — 多控件类型覆盖
