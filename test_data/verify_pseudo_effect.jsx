@@ -32,6 +32,22 @@
         log.push("matchName=" + fx.matchName);
         log.push("numProperties=" + fx.numProperties);
         log.push("enabled=" + fx.enabled);
+        // Recursive structure dump (free diagnostics — shows how AE indexed any
+        // groups/labels so checks can target the right path).
+        var dump = function (g, prefix) {
+            for (var pi = 1; pi <= g.numProperties; pi++) {
+                var pp = g.property(pi);
+                var line = prefix + pi + " " + pp.matchName + " '" + pp.name + "'";
+                if (pp.numProperties !== undefined && pp.numProperties > 0) {
+                    log.push(line + " {");
+                    dump(pp, prefix + "  ");
+                    log.push(prefix + "}");
+                } else {
+                    log.push(line);
+                }
+            }
+        };
+        try { dump(fx, "  prop "); } catch (de) { log.push("dump err: " + de.toString()); }
         var codes = [];
         for (var c = 0; c < fx.name.length; c++) codes.push(fx.name.charCodeAt(c));
         log.push("name.charCodes=" + codes.join(","));
@@ -55,7 +71,10 @@
         if (ok && args.checks) {
             for (var ci = 0; ci < args.checks.length; ci++) {
                 var chk = args.checks[ci];
-                var p = fx.property(chk.idx);
+                // idx may be a number (top-level) or an array path into nested
+                // groups, e.g. [4,1] = property 1 of group 4.
+                var p = fx, path = (chk.idx instanceof Array) ? chk.idx : [chk.idx];
+                for (var pj = 0; p && pj < path.length; pj++) p = p.property(path[pj]);
                 if (!p) { log.push("check[" + ci + "] missing idx " + chk.idx); ok = false; break; }
                 // Touch hasMin/hasMax before minValue/maxValue: on a freshly
                 // fetched pseudo-slider property, minValue reads stale (returns
@@ -63,6 +82,7 @@
                 var got;
                 if (chk.prop === "min") { if (p.hasMin) {} got = p.minValue; }
                 else if (chk.prop === "max") { if (p.hasMax) {} got = p.maxValue; }
+                else if (chk.prop === "numProperties") { got = p.numProperties; }
                 else got = p.value;
                 log.push("check[" + ci + "] [" + chk.idx + "]." + chk.prop + "=" + got);
                 if (Math.abs(got - chk.expect) > 0.001) ok = false;

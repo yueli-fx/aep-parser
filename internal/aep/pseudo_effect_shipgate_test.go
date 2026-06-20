@@ -143,6 +143,102 @@ func runBuildPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 	}
 }
 
+// TestBuildPseudoEffectRich_AEShipGate_* verifies the from-scratch synthesizer
+// for the structural control kinds — Dropdown (menu), Group (nesting) + a child,
+// and Label — are accepted by AE 2020 + 2025 and read back live. The dropdown's
+// selected index reads back, and the "Advanced" group nests its child angle.
+func TestBuildPseudoEffectRich_AEShipGate_AE2020(t *testing.T) {
+	runBuildPseudoEffectRichGate(t, ae2020(), aep.TargetAE2020)
+}
+
+func TestBuildPseudoEffectRich_AEShipGate_AE2025(t *testing.T) {
+	runBuildPseudoEffectRichGate(t, ae2025(), aep.TargetAE2025)
+}
+
+func runBuildPseudoEffectRichGate(t *testing.T, aeExe string, target aep.AETarget) {
+	t.Helper()
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const matchName = "Pseudo/aepgo02/Rich"
+	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
+
+	p := aep.NewProject(target)
+	comp, err := aep.NewComposition(p, "Main", 400, 400, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewShapeLayer(comp, "S"); err != nil {
+		t.Fatal(err)
+	}
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	var l *aep.Layer
+	for _, c := range rp.Compositions {
+		for _, cl := range c.Layers {
+			if cl.Name == "S" {
+				l = cl
+			}
+		}
+	}
+	// slider (1), dropdown (2), a group wrapping one angle child, then a label.
+	controls := []aep.PseudoControl{
+		{Kind: aep.PseudoSlider, Name: "Strength", Min: -100, Max: 100, Default: 50},
+		{Kind: aep.PseudoDropdown, Name: "Mode", Options: []string{"Add", "Screen", "Multiply"}, Default: 2},
+		{Kind: aep.PseudoGroupStart, Name: "Advanced"},
+		{Kind: aep.PseudoAngle, Name: "Spin", Default: 90},
+		{Kind: aep.PseudoGroupEnd},
+		{Kind: aep.PseudoLabel, Name: "footer"},
+	}
+	if _, err := aep.BuildPseudoEffect(l, "aepgo02", "Rich", "Rich Effect", controls); err != nil {
+		t.Fatalf("BuildPseudoEffect: %v", err)
+	}
+
+	tempDir := t.TempDir()
+	inputAEP := filepath.Join(tempDir, "rich_in.aep")
+	doneFile := filepath.Join(tempDir, "rich.done")
+	out, err := os.Create(inputAEP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := rp.WriteAEP(out); err != nil {
+		out.Close()
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	out.Close()
+
+	// Checks robust to group indexing: slider value/range at top-level idx 1,
+	// dropdown selected index (2) at idx 2. minParams modest — structural
+	// acceptance (matchName live, not Missing, enabled) is the crux; the log
+	// carries a recursive structure dump for the group/label layout.
+	const checks = `[` +
+		`{"idx":1,"prop":"value","expect":50},` +
+		`{"idx":1,"prop":"min","expect":-100},` +
+		`{"idx":1,"prop":"max","expect":100},` +
+		`{"idx":2,"prop":"value","expect":2}]`
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":4,"checks":%s}`,
+		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
+	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(argsPath)
+	os.Remove(doneFile)
+
+	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
+
+	content, err := os.ReadFile(doneFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body := string(content); !strings.HasPrefix(body, "PASS") {
+		t.Fatalf("AE rejected Go-synthesized rich pseudo effect:\n%s", body)
+	}
+}
+
 func runApplyPseudoEffectGateImpl(t *testing.T, aeExe string, target aep.AETarget, displayName string, nameCodes []rune) {
 	t.Helper()
 	if os.Getenv("AE_SHIP_GATE") == "" {

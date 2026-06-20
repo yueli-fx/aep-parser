@@ -3,6 +3,7 @@ package serializer
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 
@@ -13,24 +14,33 @@ import (
 type PseudoControlKind int
 
 const (
-	PseudoSlider   PseudoControlKind = iota // scalar slider
-	PseudoColor                             // color swatch
-	PseudoCheckbox                          // checkbox
-	PseudoAngle                             // angle dial
-	PseudoPoint                             // 2D point
-	PseudoPoint3D                           // 3D point
+	PseudoSlider     PseudoControlKind = iota // scalar slider
+	PseudoColor                               // color swatch
+	PseudoCheckbox                            // checkbox
+	PseudoAngle                               // angle dial
+	PseudoPoint                               // 2D point
+	PseudoPoint3D                             // 3D point
+	PseudoDropdown                            // dropdown menu (Options)
+	PseudoGroupStart                          // group start (controls until PseudoGroupEnd nest under it)
+	PseudoGroupEnd                            // group end
+	PseudoLabel                               // static text label (no value)
 )
 
 // pardControlType maps a kind to the pard control_type byte (@0x0F), RE'd from a
 // real Pseudo Effect Maker output (test_data/pseudo_rich_demo.aep): angle 0x03,
-// checkbox 0x04, color 0x05, point 0x06, slider 0x0a, 3D point 0x12.
+// checkbox 0x04, color 0x05, point 0x06, dropdown 0x07, slider 0x0a, group-start
+// & label 0x0d, group-end 0x0e, 3D point 0x12.
 var pardControlType = map[PseudoControlKind]byte{
-	PseudoAngle:    0x03,
-	PseudoCheckbox: 0x04,
-	PseudoColor:    0x05,
-	PseudoPoint:    0x06,
-	PseudoSlider:   0x0a,
-	PseudoPoint3D:  0x12,
+	PseudoAngle:      0x03,
+	PseudoCheckbox:   0x04,
+	PseudoColor:      0x05,
+	PseudoPoint:      0x06,
+	PseudoDropdown:   0x07,
+	PseudoSlider:     0x0a,
+	PseudoGroupStart: 0x0d,
+	PseudoLabel:      0x0d, // same control type as group-start; distinguished by the @0x04 flag
+	PseudoGroupEnd:   0x0e,
+	PseudoPoint3D:    0x12,
 }
 
 // PseudoControl is one control in a from-scratch pseudo effect. The optional
@@ -52,6 +62,11 @@ type PseudoControl struct {
 	// Color (PseudoColor): default as RGBA in 0..1. nil → white. Length-4
 	// slices only; out-of-range components are clamped to [0,1].
 	Color []float64
+
+	// Dropdown (PseudoDropdown): the menu items, in order. The pard records the
+	// option count; the items are carried in a trailing pdnm ("a|b|c"). Default
+	// (rounded, 1-based) selects the initial item; out-of-range clamps into 1..N.
+	Options []string
 }
 
 // BuildPseudoEffect constructs a pseudo effect entirely in Go — no .ffx, no AE,
@@ -90,17 +105,18 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl) (*rifx.C
 	// -0000 effect header pard: control_type 0, struct-field (@0x30) = 2.
 	parT.Children = append(parT.Children,
 		makeTdmn(matchName+"-0000"), synthPard(0x00, "", func(d []byte) { bePutU32(d[0x30:], 2) }))
-	for i, c := range controls {
-		pard, err := synthControlPard(c)
+	// Controls are numbered -0001.. by emitted pard, not by control: a Label
+	// expands to a group-start/group-end pard pair, so it consumes two slots.
+	idx := 0
+	for _, c := range controls {
+		entries, err := synthControlEntries(c)
 		if err != nil {
 			return nil, err
 		}
-		parT.Children = append(parT.Children, makeTdmn(fmt.Sprintf("%s-%04d", matchName, i+1)), pard)
-		// A Checkbox carries its on/off label as a trailing pdnm string (AE:
-		// "PF_ParamCheckbox must have nameptr set" without it).
-		if c.Kind == PseudoCheckbox {
-			parT.Children = append(parT.Children,
-				&rifx.Chunk{ID: rifx.IDPdnm, Data: utf8StringData(c.Name)})
+		for _, e := range entries {
+			idx++
+			parT.Children = append(parT.Children, makeTdmn(fmt.Sprintf("%s-%04d", matchName, idx)), e.pard)
+			parT.Children = append(parT.Children, e.trailing...)
 		}
 	}
 	// Built-in "Compositing Options" pard (control_type 0x09, otherwise empty).
@@ -133,6 +149,63 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl) (*rifx.C
 	return &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDSspc, Children: []*rifx.Chunk{
 		fnam, parT, valTdgp, pgui,
 	}}, nil
+}
+
+// pardEntry is one pard plus any trailing leaf chunks (e.g. the pdnm carrying a
+// checkbox's on/off label or a dropdown's menu items) that follow it in parT.
+type pardEntry struct {
+	pard     *rifx.Chunk
+	trailing []*rifx.Chunk
+}
+
+// synthControlEntries expands one PseudoControl into the parT pard entries it
+// occupies. Most controls are a single pard; a Checkbox/Dropdown carries a
+// trailing pdnm string; a Label is a group-start (label flag) + group-end pair.
+func synthControlEntries(c PseudoControl) ([]pardEntry, error) {
+	switch c.Kind {
+	case PseudoCheckbox:
+		// A Checkbox carries its on/off label as a trailing pdnm string (AE:
+		// "PF_ParamCheckbox must have nameptr set" without it).
+		pard, err := synthControlPard(c)
+		if err != nil {
+			return nil, err
+		}
+		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(c.Name)}}}, nil
+	case PseudoDropdown:
+		// The menu items travel in a trailing pdnm as "opt1|opt2|..".
+		pard, err := synthControlPard(c)
+		if err != nil {
+			return nil, err
+		}
+		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(strings.Join(c.Options, "|"))}}}, nil
+	case PseudoLabel:
+		// AE's Pseudo Effect Maker emits a label as a 0x0d group-start carrying
+		// the label flag (@0x04=0x20) immediately closed by a 0x0e group-end.
+		start, err := synthControlPard(c)
+		if err != nil {
+			return nil, err
+		}
+		return []pardEntry{{pard: start}, {pard: synthGroupEndPard()}}, nil
+	default:
+		pard, err := synthControlPard(c)
+		if err != nil {
+			return nil, err
+		}
+		return []pardEntry{{pard: pard}}, nil
+	}
+}
+
+func pdnmChunk(s string) *rifx.Chunk {
+	return &rifx.Chunk{ID: rifx.IDPdnm, Data: utf8StringData(s)}
+}
+
+// synthGroupEndPard builds the 0x0e group-end pard (@0x04=0x08, @0x30=2) that
+// closes a Label's or a PseudoGroupStart's nesting.
+func synthGroupEndPard() *rifx.Chunk {
+	return synthPard(0x0e, "", func(d []byte) {
+		bePutU32(d[0x04:], 0x08)
+		bePutU32(d[0x30:], 2)
+	})
 }
 
 // synthControlPard synthesizes one control's pard from the RE'd per-type layout.
@@ -190,6 +263,32 @@ func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
 			}
 		case PseudoPoint3D:
 			// origin default — already zero.
+		case PseudoDropdown:
+			// @0x38 selected index (1-based); @0x3C hi16 = option count, lo16 =
+			// selected index. The menu item strings live in the trailing pdnm.
+			n := len(c.Options)
+			if n < 1 {
+				n = 1
+			}
+			sel := int(c.Default)
+			if sel < 1 {
+				sel = 1
+			} else if sel > n {
+				sel = n
+			}
+			bePutU32(d[0x38:], uint32(sel))
+			bePutU32(d[0x3C:], uint32(n)<<16|uint32(sel))
+		case PseudoGroupStart:
+			// 0x0d, label flag (@0x04) left 0; @0x30 = 2 like all containers.
+			bePutU32(d[0x30:], 2)
+		case PseudoLabel:
+			// 0x0d with the label flag set; closed by a generated group-end.
+			bePutU32(d[0x04:], 0x20)
+			bePutU32(d[0x30:], 2)
+		case PseudoGroupEnd:
+			// 0x0e group-end (when authored explicitly rather than via a Label).
+			bePutU32(d[0x04:], 0x08)
+			bePutU32(d[0x30:], 2)
 		}
 	}), nil
 }
