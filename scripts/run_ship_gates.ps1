@@ -39,7 +39,7 @@ if (-not $SkipPreClean) {
     }
 }
 if ($ClearCrashState) {
-    $clear = Join-Path $repoRoot 'tmp_debug/clear_ae_crashstate.ps1'
+    $clear = Join-Path $repoRoot 'tools/debug/clear_ae_crashstate/clear_ae_crashstate.ps1'
     foreach ($exe in @(
         'E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe',
         'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe')) {
