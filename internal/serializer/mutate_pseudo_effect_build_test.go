@@ -28,11 +28,38 @@ func TestPardNameBytes_GBKMatchesAENative(t *testing.T) {
 		{"Strength", "537472656e677468"}, // ASCII passthrough
 	}
 	for _, tc := range cases {
-		got := pardNameBytes(tc.name)
+		got := pardNameBytes(tc.name, PseudoLabelGBK)
 		want, _ := hex.DecodeString(tc.wantHex)
 		if !bytes.Equal(got, want) {
 			t.Errorf("pardNameBytes(%q) = %x, want %s (AE-native bytes)", tc.name, got, tc.wantHex)
 		}
+	}
+}
+
+// TestPardNameBytes_ShiftJIS proves Japanese labels are Shift-JIS encoded (the
+// codepage a Japanese Windows decodes the pard name in). Can't be ship-gated on
+// a Western-codepage machine — byte-equivalence to the standard Shift-JIS
+// encoding is the evidence (色 = 0x9046, ア = 0x8341 in Shift-JIS/cp932).
+func TestPardNameBytes_ShiftJIS(t *testing.T) {
+	cases := []struct {
+		name    string
+		wantHex string
+	}{
+		{"色", "9046"},             // kanji
+		{"ア", "8341"},             // katakana
+		{"Color", "436f6c6f72"}, // ASCII passthrough (unchanged across codepages)
+	}
+	for _, tc := range cases {
+		got := pardNameBytes(tc.name, PseudoLabelShiftJIS)
+		want, _ := hex.DecodeString(tc.wantHex)
+		if !bytes.Equal(got, want) {
+			t.Errorf("pardNameBytes(%q, ShiftJIS) = %x, want %s", tc.name, got, tc.wantHex)
+		}
+	}
+	// The same label under GBK differs — proving the setting actually switches
+	// encoders (not a no-op).
+	if bytes.Equal(pardNameBytes("色", PseudoLabelGBK), pardNameBytes("色", PseudoLabelShiftJIS)) {
+		t.Error("色 should encode to different bytes under GBK vs Shift-JIS")
 	}
 }
 
@@ -46,7 +73,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 	// Dropdown: 2 options, default selection 2 — golden 0009 had @0x38=2,
 	// @0x3C=0x00020002 (hi16 count=2, lo16 sel=2) + trailing pdnm "a|b".
 	t.Run("dropdown", func(t *testing.T) {
-		es, err := synthControlEntries(PseudoControl{Kind: PseudoDropdown, Name: "Menu", Options: []string{"a", "b"}, Default: 2})
+		es, err := synthControlEntries(PseudoControl{Kind: PseudoDropdown, Name: "Menu", Options: []string{"a", "b"}, Default: 2}, PseudoLabelGBK)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -73,7 +100,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 
 	// Group start: 0x0d, label flag (@0x04) clear, @0x30=2 — golden 0011.
 	t.Run("group-start", func(t *testing.T) {
-		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupStart, Name: "Grp"})
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupStart, Name: "Grp"}, PseudoLabelGBK)
 		d := es[0].pard.Data
 		if d[0x0F] != 0x0d || be32(d, 0x04) != 0 || be32(d, 0x30) != 2 {
 			t.Errorf("group-start pard @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0d/0x0/0x2", d[0x0F], be32(d, 0x04), be32(d, 0x30))
@@ -82,7 +109,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 
 	// Group end: 0x0e, @0x04=0x08, @0x30=2 — golden 0013/0005.
 	t.Run("group-end", func(t *testing.T) {
-		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupEnd})
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupEnd}, PseudoLabelGBK)
 		d := es[0].pard.Data
 		if d[0x0F] != 0x0e || be32(d, 0x04) != 0x08 || be32(d, 0x30) != 2 {
 			t.Errorf("group-end pard @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0e/0x08/0x2", d[0x0F], be32(d, 0x04), be32(d, 0x30))
@@ -92,7 +119,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 	// Label: a group-start with the label flag (@0x04=0x20) immediately closed
 	// by a generated group-end — golden 0004 (label "标签") + 0005 (group-end).
 	t.Run("label", func(t *testing.T) {
-		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLabel, Name: "Note"})
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLabel, Name: "Note"}, PseudoLabelGBK)
 		if len(es) != 2 {
 			t.Fatalf("label: got %d entries, want 2 (start+end)", len(es))
 		}

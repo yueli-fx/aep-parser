@@ -6,10 +6,33 @@ import (
 	"math"
 	"strings"
 
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/simplifiedchinese"
 
 	"github.com/example/aep-parser/internal/rifx"
 )
+
+// PseudoLabelCodepage selects the ANSI codepage a pseudo effect's control labels
+// (pard @0x10 names) are encoded in. AE decodes that field in the viewing
+// machine's system codepage (not UTF-8), so a CJK label only displays correctly
+// on a matching-locale Windows — this picks which locale to target. ASCII labels
+// are codepage-independent. See incidents/pseudo-control-label-ansi-codepage.md.
+type PseudoLabelCodepage int
+
+const (
+	PseudoLabelGBK      PseudoLabelCodepage = iota // Simplified Chinese (GBK / cp936) — default; ASCII passes through
+	PseudoLabelShiftJIS                            // Japanese (Shift-JIS / cp932)
+)
+
+func pseudoLabelEncoder(cp PseudoLabelCodepage) *encoding.Encoder {
+	switch cp {
+	case PseudoLabelShiftJIS:
+		return japanese.ShiftJIS.NewEncoder()
+	default:
+		return simplifiedchinese.GBK.NewEncoder()
+	}
+}
 
 // PseudoControlKind is the AE control type of one pseudo-effect control.
 type PseudoControlKind int
@@ -92,7 +115,7 @@ type PseudoControl struct {
 // Controls take their type defaults. Returns the parsed *Effect.
 //
 // (Full contract lives on the aep.BuildPseudoEffect facade.)
-func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl) (*Effect, error) {
+func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl, cp PseudoLabelCodepage) (*Effect, error) {
 	if layer == nil {
 		return nil, fmt.Errorf("BuildPseudoEffect: layer is nil")
 	}
@@ -104,7 +127,7 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 	if label == "" {
 		label = name
 	}
-	sspc, err := synthPseudoSspc(matchName, label, controls)
+	sspc, err := synthPseudoSspc(matchName, label, controls, cp)
 	if err != nil {
 		return nil, err
 	}
@@ -114,18 +137,18 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 // synthPseudoSspc assembles the in-parade sspc for a pseudo effect entirely from
 // synthesized chunks: fnam(Utf8) + parT(header pard + control pards + built-in
 // pard) + tdgp(scaffold + built-in value group, controls at defaults) + pgui.
-func synthPseudoSspc(matchName, label string, controls []PseudoControl) (*rifx.Chunk, error) {
+func synthPseudoSspc(matchName, label string, controls []PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, error) {
 	parT := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDparT}
 	parT.Children = append(parT.Children, makeParn(0)) // count patched below
 	// -0000 effect header pard: control_type 0, struct-field (@0x30) = 2.
 	parT.Children = append(parT.Children,
-		makeTdmn(matchName+"-0000"), synthPard(0x00, "", func(d []byte) { bePutU32(d[0x30:], 2) }))
+		makeTdmn(matchName+"-0000"), synthPard(0x00, "", cp, func(d []byte) { bePutU32(d[0x30:], 2) }))
 	// Controls are numbered -0001.. by emitted pard, not by control: a Label
 	// expands to a group-start/group-end pard pair, so it consumes two slots.
 	idx := 0
 	var valEntries []*rifx.Chunk
 	for _, c := range controls {
-		entries, err := synthControlEntries(c)
+		entries, err := synthControlEntries(c, cp)
 		if err != nil {
 			return nil, err
 		}
@@ -142,7 +165,7 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl) (*rifx.C
 	}
 	// Built-in "Compositing Options" pard (control_type 0x09, otherwise empty).
 	parT.Children = append(parT.Children,
-		makeTdmn("ADBE Effect Built In Params"), synthPard(0x09, "", nil))
+		makeTdmn("ADBE Effect Built In Params"), synthPard(0x09, "", cp, nil))
 	if parn := childByID(parT, rifx.IDParn); parn != nil {
 		var n uint32
 		for _, ch := range parT.Children {
@@ -184,19 +207,19 @@ type pardEntry struct {
 // synthControlEntries expands one PseudoControl into the parT pard entries it
 // occupies. Most controls are a single pard; a Checkbox/Dropdown carries a
 // trailing pdnm string; a Label is a group-start (label flag) + group-end pair.
-func synthControlEntries(c PseudoControl) ([]pardEntry, error) {
+func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage) ([]pardEntry, error) {
 	switch c.Kind {
 	case PseudoCheckbox:
 		// A Checkbox carries its on/off label as a trailing pdnm string (AE:
 		// "PF_ParamCheckbox must have nameptr set" without it).
-		pard, err := synthControlPard(c)
+		pard, err := synthControlPard(c, cp)
 		if err != nil {
 			return nil, err
 		}
 		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(c.Name)}}}, nil
 	case PseudoDropdown:
 		// The menu items travel in a trailing pdnm as "opt1|opt2|..".
-		pard, err := synthControlPard(c)
+		pard, err := synthControlPard(c, cp)
 		if err != nil {
 			return nil, err
 		}
@@ -204,13 +227,13 @@ func synthControlEntries(c PseudoControl) ([]pardEntry, error) {
 	case PseudoLabel:
 		// AE's Pseudo Effect Maker emits a label as a 0x0d group-start carrying
 		// the label flag (@0x04=0x20) immediately closed by a 0x0e group-end.
-		start, err := synthControlPard(c)
+		start, err := synthControlPard(c, cp)
 		if err != nil {
 			return nil, err
 		}
-		return []pardEntry{{pard: start}, {pard: synthGroupEndPard()}}, nil
+		return []pardEntry{{pard: start}, {pard: synthGroupEndPard(cp)}}, nil
 	default:
-		pard, err := synthControlPard(c)
+		pard, err := synthControlPard(c, cp)
 		if err != nil {
 			return nil, err
 		}
@@ -224,8 +247,8 @@ func pdnmChunk(s string) *rifx.Chunk {
 
 // synthGroupEndPard builds the 0x0e group-end pard (@0x04=0x08, @0x30=2) that
 // closes a Label's or a PseudoGroupStart's nesting.
-func synthGroupEndPard() *rifx.Chunk {
-	return synthPard(0x0e, "", func(d []byte) {
+func synthGroupEndPard(cp PseudoLabelCodepage) *rifx.Chunk {
+	return synthPard(0x0e, "", cp, func(d []byte) {
 		bePutU32(d[0x04:], 0x08)
 		bePutU32(d[0x30:], 2)
 	})
@@ -303,12 +326,12 @@ func mustHex124(s string) []byte {
 }
 
 // synthControlPard synthesizes one control's pard from the RE'd per-type layout.
-func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
+func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, error) {
 	ct, ok := pardControlType[c.Kind]
 	if !ok {
 		return nil, fmt.Errorf("BuildPseudoEffect: unsupported control kind %d", c.Kind)
 	}
-	return synthPard(ct, c.Name, func(d []byte) {
+	return synthPard(ct, c.Name, cp, func(d []byte) {
 		switch c.Kind {
 		case PseudoColor:
 			// @0x38 ARGB last + @0x3C ARGB default (RE'd offsets — an earlier
@@ -394,15 +417,15 @@ func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
 // synthPard builds a 148-byte pard: control_type at @0x0F, name at @0x10
 // (32 bytes NUL-padded), then a type-specific writer over the zeroed body.
 //
-// The name is encoded with pardNameBytes — AE reads pard @0x10 in the viewing
-// machine's system ANSI codepage (NOT UTF-8), so a CJK label is GBK-encoded to
-// match AE's own Pseudo Effect Maker output byte-for-byte and display correctly
-// on a simplified-Chinese (GBK) system. ASCII passes through unchanged. See
-// incidents/pseudo-control-label-ansi-codepage.md.
-func synthPard(controlType byte, name string, body func(d []byte)) *rifx.Chunk {
+// The name is encoded with pardNameBytes in the cp codepage — AE reads pard
+// @0x10 in the viewing machine's system ANSI codepage (NOT UTF-8), so a CJK
+// label is encoded to match AE's own Pseudo Effect Maker output byte-for-byte
+// and display correctly on a matching-locale system. ASCII passes through
+// unchanged. See incidents/pseudo-control-label-ansi-codepage.md.
+func synthPard(controlType byte, name string, cp PseudoLabelCodepage, body func(d []byte)) *rifx.Chunk {
 	d := make([]byte, 148)
 	d[0x0F] = controlType
-	nb := pardNameBytes(name)
+	nb := pardNameBytes(name, cp)
 	if len(nb) > 31 {
 		nb = nb[:31]
 	}
@@ -418,11 +441,11 @@ func synthPard(controlType byte, name string, body func(d []byte)) *rifx.Chunk {
 // ASCII superset — ASCII labels are byte-identical) to match AE's native output
 // on simplified-Chinese systems. If a rune is not GBK-representable the raw
 // UTF-8 bytes are kept (best-effort; it will mojibake, but nothing is dropped).
-func pardNameBytes(name string) []byte {
+func pardNameBytes(name string, cp PseudoLabelCodepage) []byte {
 	if name == "" {
 		return nil
 	}
-	if b, err := simplifiedchinese.GBK.NewEncoder().Bytes([]byte(name)); err == nil {
+	if b, err := pseudoLabelEncoder(cp).Bytes([]byte(name)); err == nil {
 		return b
 	}
 	return []byte(name)

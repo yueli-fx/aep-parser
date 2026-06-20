@@ -839,6 +839,32 @@ const (
 	PseudoLayer      = serializer.PseudoLayer      // Layer picker (LayerID, 0 = None)
 )
 
+// PseudoLabelCodepage selects the ANSI codepage a pseudo effect's control labels
+// are encoded in (see WithLabelCodepage / BuildPseudoEffect). The zero value is
+// PseudoLabelGBK.
+type PseudoLabelCodepage = serializer.PseudoLabelCodepage
+
+// Control-label target codepages for BuildPseudoEffect's WithLabelCodepage.
+const (
+	PseudoLabelGBK      = serializer.PseudoLabelGBK      // Simplified Chinese (GBK / cp936) — default; ASCII passes through
+	PseudoLabelShiftJIS = serializer.PseudoLabelShiftJIS // Japanese (Shift-JIS / cp932)
+)
+
+// PseudoOption customizes BuildPseudoEffect. The only option today is
+// WithLabelCodepage; the type leaves room for further effect-wide knobs.
+type PseudoOption func(*pseudoConfig)
+
+type pseudoConfig struct{ codepage PseudoLabelCodepage }
+
+// WithLabelCodepage sets the ANSI codepage the effect's control labels are
+// encoded in (default PseudoLabelGBK). Pass PseudoLabelShiftJIS for a Japanese
+// effect. ASCII labels are unaffected. See BuildPseudoEffect for the why.
+//
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=pseudo-control-label-ansi-codepage boundary="BuildPseudoEffect 选项:选控件标签 pard 名的目标 ANSI 码页(GBK 简中默认 / Shift-JIS 日文)。结构 ae-accept(同 BuildPseudoEffect 字节路径,码页只改 name 字段字节、AE 不校验编码);**显示正确性 = byte-equivalence 验**(字节等同 AE 原生该 locale 输出,本西欧码页机不可 ship-gate),仅匹配 locale 的 Windows 显示对——AE 架构限" alias="pseudo label codepage,控件标签码页,日语标签,japanese label,shift-jis,gbk,locale,with label codepage"
+func WithLabelCodepage(cp PseudoLabelCodepage) PseudoOption {
+	return func(c *pseudoConfig) { c.codepage = cp }
+}
+
 // PseudoControl is one control of a from-scratch pseudo effect: a kind + the
 // label shown in AE's Effect Controls, plus optional per-kind customization
 // (Slider Min/Max/Default, Angle Default, Checkbox Checked, Color, Dropdown
@@ -882,12 +908,13 @@ type PseudoControl = serializer.PseudoControl
 //
 // Control labels (PseudoControl.Name) are written into the pard name field,
 // which AE decodes in the viewing machine's system ANSI codepage — NOT UTF-8.
-// ASCII labels are exact everywhere. CJK labels are GBK-encoded (byte-identical
-// to AE's own Pseudo Effect Maker output) so they display correctly on a
-// simplified-Chinese (GBK) Windows; this is verified by byte-equivalence to
-// AE-authored output, not ship-gated (the gate machine is Western-codepage), and
-// will mojibake on a non-GBK system — an AE architecture limit, see
-// incidents/pseudo-control-label-ansi-codepage.md.
+// ASCII labels are exact everywhere. A CJK label is encoded in the codepage
+// chosen by WithLabelCodepage (default PseudoLabelGBK = simplified Chinese; pass
+// PseudoLabelShiftJIS for Japanese) — byte-identical to what AE's own Pseudo
+// Effect Maker writes on that locale, so it displays correctly on a matching
+// Windows. This is verified by byte-equivalence (not ship-gated — the gate
+// machine is Western-codepage) and still mojibakes on a non-matching-locale
+// system: an AE architecture limit, see incidents/pseudo-control-label-ansi-codepage.md.
 //
 // Refused (same as AddEffect): camera / light layers, and New*-built layers
 // never parsed (call aep.Reopen first).
@@ -899,9 +926,13 @@ type PseudoControl = serializer.PseudoControl
 // to the intended layer's index. CJK control labels (byte-equivalence only) keep
 // it Alpha. Free function (CLAUDE.md #2). See spec 2026-06-20-pseudo-effect-support.
 //
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025,TestBuildPseudoEffectRich_AEShipGate_AE2020,TestBuildPseudoEffectRich_AEShipGate_AE2025,TestBuildPseudoEffectValueEntry_AEShipGate_AE2020,TestBuildPseudoEffectValueEntry_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型(全):Slider/Color/Checkbox/Angle/Point/Point3D/Dropdown/Group/Label/Layer。**自定义值(AE 实测回读)**:Slider Min/Max+Default、Angle Default、Checkbox Checked、Color RGBA、Dropdown Options+选中项(以上 pard 级);**Point/Point3D 默认坐标 + Layer 绑定层(以上值条目合成:cdat=坐标空间分数 0.25→100px、tdpi=层内部 ID 读回层索引)**——零值=类型默认。**Group/Label = 扁平标记控件**:AE 伪效果「组」是 Effect Controls 视觉分组非属性树嵌套(原生输出读回同样扁平);仅内置 Compositing Options 真嵌套。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8);ASCII 精确,CJK 走 GBK 编码(字节等同 AE 原生)——byte-equivalence 验(本西欧码页机不可 ship-gate),非 GBK 系统乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox dropdown group label layer point,slider min max,自定义范围,下拉菜单,分组,标签,图层选择,点坐标,中文标签,cjk label,gbk,离线造伪效果"
-func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl) (*Effect, error) {
-	return serializer.BuildPseudoEffect(layer, uid, name, displayName, controls)
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025,TestBuildPseudoEffectRich_AEShipGate_AE2020,TestBuildPseudoEffectRich_AEShipGate_AE2025,TestBuildPseudoEffectValueEntry_AEShipGate_AE2020,TestBuildPseudoEffectValueEntry_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型(全):Slider/Color/Checkbox/Angle/Point/Point3D/Dropdown/Group/Label/Layer。**自定义值(AE 实测回读)**:Slider Min/Max+Default、Angle Default、Checkbox Checked、Color RGBA、Dropdown Options+选中项(以上 pard 级);**Point/Point3D 默认坐标 + Layer 绑定层(以上值条目合成:cdat=坐标空间分数 0.25→100px、tdpi=层内部 ID 读回层索引)**——零值=类型默认。**Group/Label = 扁平标记控件**:AE 伪效果「组」是 Effect Controls 视觉分组非属性树嵌套(原生输出读回同样扁平);仅内置 Compositing Options 真嵌套。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8);ASCII 精确,CJK 走 `WithLabelCodepage` 选的码页(默认 GBK 简中,可选 Shift-JIS 日文)编码——字节等同 AE 原生该 locale 输出,byte-equivalence 验(本西欧码页机不可 ship-gate),非匹配 locale 系统乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox dropdown group label layer point,slider min max,自定义范围,下拉菜单,分组,标签,图层选择,点坐标,中文标签,cjk label,gbk,离线造伪效果"
+func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl, opts ...PseudoOption) (*Effect, error) {
+	cfg := pseudoConfig{codepage: PseudoLabelGBK}
+	for _, o := range opts {
+		o(&cfg)
+	}
+	return serializer.BuildPseudoEffect(layer, uid, name, displayName, controls, cfg.codepage)
 }
 
 // AddTextOpacityAnimator adds a per-character Opacity animator with a Range
