@@ -1,8 +1,8 @@
 ---
 status: active
-summary: AE reads a pseudo control's label from the pard @0x10 name in the system ANSI codepage; value-entry tdsn does NOT override it (gate-disproven).
-when_to_read: building/labeling pseudo-effect controls, especially CJK labels via BuildPseudoEffect
-applies_to: [pseudo-effect, build-pseudo-effect, cjk, i18n, pard]
+summary: AE reads a pseudo control's label from the pard @0x10 name in the system ANSI codepage (value-entry tdsn does NOT override it, gate-disproven). Encoding is a selectable codepage — WithLabelCodepage: GBK (default) / Shift-JIS (Japanese).
+when_to_read: building/labeling pseudo-effect controls, especially CJK/Japanese labels via BuildPseudoEffect + WithLabelCodepage
+applies_to: [pseudo-effect, build-pseudo-effect, cjk, i18n, pard, codepage, gbk, shift-jis, japanese, with-label-codepage]
 last_updated: 2026-06-20
 resolved_by:
 ---
@@ -36,15 +36,21 @@ from the pard name (cp1252 mojibake). So the value-entry tdsn does **not** drive
 
 ## Fix
 No portable fix — this is an AE architecture limit. **Implemented (2026-06-20):**
-`synthPard`/`pardNameBytes` **GBK-encode** the pard `@0x10` name (GBK is an ASCII superset,
-so ASCII labels are byte-identical). For simplified-Chinese labels the bytes are
-**byte-identical to AE's native Pseudo Effect Maker output** (unit-proven:
-`pardNameBytes("颜色") == d1d5c9ab`, the rich-demo color pard's bytes) and display correctly
-on a GBK Windows. Costs the `golang.org/x/text` dep + a simplified-Chinese locale assumption,
-and is **not ship-gateable on a Western-codepage machine** — byte-equivalence to AE-authored
-output is the evidence (see `TestPardNameBytes_GBKMatchesAENative`). A non-GBK rune that GBK
-can't encode falls back to raw UTF-8 (mojibakes, but nothing is dropped). On a non-GBK
-viewing system CJK still mojibakes — inherent to AE.
+`synthPard`/`pardNameBytes` encode the pard `@0x10` name in a **selectable codepage**
+(`golang.org/x/text` encoders). For simplified-Chinese the bytes are **byte-identical to AE's
+native Pseudo Effect Maker output** (unit-proven: `pardNameBytes("颜色", GBK) == d1d5c9ab`).
+A rune the codepage can't encode falls back to raw UTF-8 (mojibakes, nothing dropped).
+
+**Configurable codepage (2026-06-20, follow-up):** the encoding was first hardcoded to GBK,
+which **blindly GBK-encodes every label** — there is NO language detection, so a Japanese
+label silently got wrong bytes (GBK can encode some kana/kanji, but a Japanese Windows decodes
+the name in Shift-JIS/cp932). Now exposed as a per-effect setting: facade
+`BuildPseudoEffect(..., aep.WithLabelCodepage(cp))`, `cp ∈ {PseudoLabelGBK (default),
+PseudoLabelShiftJIS}`. Byte-equivalence proven for both (`TestPardNameBytes_GBKMatchesAENative`,
+`TestPardNameBytes_ShiftJIS`: 色→0x9046, ア→0x8341; GBK≠Shift-JIS for the same rune). AE 2020
+**structurally accepts** a Shift-JIS-labeled effect (matchName live, enabled). Still
+**not display-ship-gateable on a Western-codepage machine**, and CJK still mojibakes on a
+non-matching-locale system — inherent to AE. Adding another locale = add an encoder case.
 
 The effect **display name** has no such limit (value-group tdsn / Utf8) — `ApplyPseudoEffectNamed`
 and `BuildPseudoEffect`'s `displayName` already round-trip CJK (gate-green).
