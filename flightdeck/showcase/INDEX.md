@@ -2,6 +2,8 @@
 
 每个子文件夹 = 一个**能力方向**的纯 Go 从零生成示例 + AE 实渲产物，供用户逐项审核。规则见 `rules.md` § Showcase + `checklists/showcase.md`。
 
+> **lint 例外（by-design，勿当 drift）**：flightdeck 3.0 的 `KNOWN_FOLDERS` 硬编码、无 allowlist，故 `/flightdeck:walkaround` 与 `flightdeck_lint` 会**恒报**本目录 `unknown directory showcase/ under deck root` 的 stray WARNING。这是 schema 局限、非 deck drift——本目录是项目刻意采用的眼验设施（rules.md § Showcase）。**接受为已知项即可，勿删/勿移**：移动会断开 rules.md / CLAUDE.md / 各 gen.go / render.jsx 里引用的 `flightdeck/showcase/<方向>/` 路径。（背景见 commit 58ebeb8。）
+
 **产物 gitignored**：`*.aep` / `*.png` 不进仓库；`INDEX.md` + `gen.go` + `render.jsx` tracked。干净 clone 后重生成：
 
 ```
