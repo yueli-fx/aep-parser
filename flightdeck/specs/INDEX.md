@@ -3,6 +3,7 @@
 <!-- AUTO:specs -->
 ### Backlog (idea)
 - [per-version-template-versioning.md](per-version-template-versioning.md) — idea — 为 effect/shape body 跨 AE 版本分裂准备的升级响应机制(YAGNI,gate 红了再建):局部字段分裂走版本条件 CODE(先例 ldta 160/164),整份 body 分裂把 effectTemplateFiles 升 (name,target)→path + per-target 覆盖文件 fallback 默认。检测靠现有双版本 ship-gate(红线6)。
+- [property-synthesis-and-item-ops.md](property-synthesis-and-item-ops.md) — idea — 暂搁的大 feature 池:泛型 DuplicateItem · ImportComposition · Property synthesis(从零合成属性树,详 incidents/transform-group-default-omission.md)。撞真实需求再 flip active。
 
 ### Active · Done
 - [2026-06-19-booyah-glitch-full-replication.md](2026-06-19-booyah-glitch-full-replication.md) — active — 把整个 Booyah Glitch 真实工程(12 comp/61 层/~100 mask/wiggle 表达式/Curves)用咱们的 Go API 从零完整复刻,作为理解金标准检验。判据=结构保真(AE 接受 + DOM 读回值对账)+ 终帧渲染像素对照;范围=全工程 DAG 叶子优先逐 comp 验;方法=手写 per-comp 生成器、原工程仅当取值神谕、chunk 全由 API 重建(绝不 copy 字节)。

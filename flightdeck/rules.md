@@ -1,6 +1,7 @@
 ---
 version: 3.0
-disabled_folders: []
+runtime: uv
+agents_md: off
 ---
 
 # flightdeck rules — aep-parser
@@ -25,13 +26,11 @@ disabled_folders: []
 - **gitignore 策略**：只 ignore 重产物 `*.aep` / `*.png`（已在根 `.gitignore`）；`INDEX.md` + `gen.go` + `render.jsx` **tracked** —— 干净 clone 后 `go run ./flightdeck/showcase/<方向>` + 跑 render.jsx 即可一键重生成全部产物。**生成器必须保持 `go build ./...` 绿**（它是 tracked 代码）。
 - **交付准则对齐**（CLAUDE.md #7 / `checklists/delivery-contract.md`）：showcase 里每个能力须是已过双版本 ship-gate 的；showcase 的「组合工程」本身是独立交付项，**产出后必须 AE 实渲眼验**（红线4：先看图），不靠值 round-trip 假绿。
 
-### Autonomy overrides
-<!-- migrated from commit_mode:confirm — 旧 toggle 取默认值 confirm，但上方 House rule「完成即 commit·无需用户每次点名」是既定的真实意图，故按 auto 编码 -->
-commit without asking
-never push
+### Rules
 
-- **永不 push 远端**（2026-06-16 用户立规「永远不 push」）：所有工作 commit 直推本地 main 即可；landing/任何流程都**不要提议或执行 `git push`**。本地 commit 历史就是交付记录。
+<!-- AI-authored behavior rules from natural-language requests (source + date). -->
 
-- **文档可自由更新（含破坏性重写、含 CLAUDE.md）**（2026-06-11 用户授权「允许破坏性更新 你可以更新任何文档 包括claude.md」）：任何项目文档——CLAUDE.md / flightdeck deck / docs / doc comment——无需逐次确认即可更新、重组、删改；分级（Alpha↔Stable）等契约表述变更照常在 commit body 说明。代码 API 契约本身仍按 CLAUDE.md #2 执行。
-
-- **大计划完成即自动 landing**：当一个代表已 ship 功能 arc 的 plan 翻到 `status: done`，主动跑 `/flightdeck:landing` 把它归档到 `landed/plans/` 并同步 INDEX + cockpit，无需用户点名。（landing log `landed/HISTORY.md` 已废弃——commit 级历史以 `git log` 为准。）判定「大计划」= 有独立 plan 文件、对应一个可交付 feature/结构性 arc（如 P3 §3G）；滚动 reference 矩阵（coverage*.md）等长期文档不适用，保持 active。
+- commit 直推本地 main，无需逐次点名（既定项目惯例：完成一个可交付单元即 commit；无 PR 流）。
+- 永不 push 远端：所有工作 commit 到本地 main 即可，landing/任何流程都不提议或执行 `git push`，本地 commit 历史就是交付记录（you, 2026-06-16）。
+- 文档可自由更新（含破坏性重写、含 CLAUDE.md）：CLAUDE.md / flightdeck deck / docs / doc comment 无需逐次确认即可更新、重组、删改；分级（Alpha↔Stable）等契约表述变更照常在 commit body 说明；代码 API 契约本身仍按 CLAUDE.md #2 执行（you, 2026-06-11）。
+- 大计划完成即自动 landing：代表已 ship 功能 arc 的 plan 翻到 `status: done` 时主动跑 `/flightdeck:landing` 归档 + 同步 INDEX/cockpit，无需点名。判定「大计划」= 有独立 plan 文件、对应一个可交付 feature/结构性 arc；滚动 reference 矩阵不适用，保持 active。

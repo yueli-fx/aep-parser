@@ -19,6 +19,24 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ---
 
+## Progress
+
+current: Task 1.1 收尾 — comp ① シェイイイイプ 首次 AE 验收。前置基建 = 重建 `clear_ae_crashstate.ps1` 为 tracked 工具（`tools/debug/`，**PostMessage** `VK_RETURN` 到 safe-mode hwnd，不用 SetForegroundWindow）清崩溃标志 → warm-retry verify.jsx 确认 AE 接受 + shape 不 silent-drop → render comp ① 对照原工程。
+
+**Phase 0（前置 de-risk）全收口:**
+- ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。
+- ✅ 0.2 读侧审计（c3bff18）：mask 顶点/keyframe/params/expr 全可读；Curves 曲线数据 = 读侧 gap。
+- ✅ 0.3 表达式 = GO（29b4db6，头号 de-risk 解除）：`SetExpression` stable+双版本 AE gated；Evolution=`time*N`（`ADBE Fractal Noise-0023`）+ `wiggle(34,0.29)`（`ADBE Exposure2-0003`）round-trip 干净。噪声动画+wiggle 可忠实复刻、无需降级。
+- 🔶 0.4 many-mask(21)：并入 ⑩ 在位 AE 验（masks 集中在 ⑩；Go round-trip 对 silent-drop 假绿）。
+- ⛔ 0.5 Curves：曲线数据物理 blocked（arbitrary-data 无 scripting），实例可加 → ⑫ 降级 + 在位验。
+
+**Phase 1 进行中:**
+- 🔶 Task 1.1 comp ① シェイイイイプ（e4d266c，Go 建）：4 rect 精确 kf + fill 色 round-trip 逐值对账原工程 ✓；结构 delta（shape 组嵌套 + transform 默认物化，render-neutral）已记账。AE-accept/render 待验。
+- ⚠ 首次 AE 验证撞 crash-state cascade，受阻（详 `incidents/ae-automation-occlusion-crashstate.md` Case 2c）：run1 verify.jsx 用 JSON.stringify 在 catch 外抛 → 0 字节 done → ae_run 假 PASS → force-kill → 置崩溃标志；run2 safe-mode 框被前台游戏 foreground-lock 挡住关框 → 超时。已修 verify.jsx（纯字符串、末尾一次写）。注：游戏窗口≠用户在用（operator 在另一台机器），不问用户让机器。
+- ⬜ 然后 Task 1.2-1.4：② テキスト（text+animator）③ マップ用ノイズ（fractal+expr，0.3 已 GO）④ カクッ（shape），按 DAG 上行。
+
+---
+
 ## Phase 0 — 前置 spike + 基建(先把未知打掉,再建)
 
 de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变后续 comp 的建法,必须最前置。

@@ -3,7 +3,6 @@ status: active
 when_to_read: 调查 comp.Duration 与真实 AE 不符；AE 打开 Go 生成工程后 shutterAngle/shutterPhase 显示被放大（×duration/360）；以为 cdta @0xB0 是 duration；改 NewComposition / SetDuration / SetFrameRate 的时长写法；新增任何依赖 cdta 时间基的 setter
 applies_to: [composition, cdta, duration, shutter-angle, shutter-phase, 0xB0, 0x2C, master-ticks, nominal-tickrate, parser-misread, false-green, new-composition, set-duration]
 last_updated: 2026-06-14
-supersedes: 部分修正 cdta-duration-two-representations.md（@0xB0 不是 duration）
 ---
 
 # cdta @0xB0 是 shutter 角度 360° 参考常量，**不是 duration**

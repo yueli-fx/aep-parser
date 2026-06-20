@@ -1,6 +1,5 @@
 ---
 status: active
-since: 2026-05-26
 last_updated: 2026-05-26
 when_to_read: implementing or debugging project-level flag chunks (lnrb / lnrp / similar presence-encoded settings); AE rejects writer output with "文件数据丢失"
 applies_to: [project-settings, lnrb, lnrp, flag-chunk, py-aep-parity, ship-gate, ae-acceptance, scripting-api-quirk]

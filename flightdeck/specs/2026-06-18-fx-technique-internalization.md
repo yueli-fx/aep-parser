@@ -3,7 +3,6 @@ status: active
 graduate: true
 summary: 通用机制:任何参考 .aep → 解析 → 拆角色 → 抽跨域技法原子 → 存 flightdeck 两层结构(技法库 references/fx-techniques + 现象配方 checklists/build-X)→ AE gate 验证。火焰=实例#1已验证。适配风/雨/雷电/转场=复用技法+增量。是 procedural-fx-generator 的「配方提取」引擎的通用化。
 last_updated: 2026-06-18
-implements: specs/2026-06-18-procedural-fx-generator.md
 ---
 
 # 技法内化流水线 + 跨域技法库（参考模版 → 可复用能力）
