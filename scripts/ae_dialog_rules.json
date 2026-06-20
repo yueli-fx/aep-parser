@@ -10,6 +10,16 @@
     "comment": "AE high-version opening low-version .aep — accept convert with Enter"
   },
   {
+    "name": "resolve-fonts-missing",
+    "windowTitle": ["Resolve Fonts"],
+    "windowClass": [],
+    "ocrMatch": ["not currently available", "字体", "substituted"],
+    "action": "SendKeys",
+    "keys": "{ENTER}",
+    "cooldownMs": 2000,
+    "comment": "Opening a project whose fonts aren't installed (e.g. the Booyah original) — accept substituted fonts with Enter so the open completes; irrelevant for shape-only comps"
+  },
+  {
     "name": "save-changes-on-quit",
     "windowTitle": ["Adobe After Effects"],
     "windowClass": [],

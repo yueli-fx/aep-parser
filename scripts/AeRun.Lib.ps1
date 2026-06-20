@@ -170,10 +170,15 @@ function Initialize-Win32 {
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern bool PrintWindow(System.IntPtr hWnd, System.IntPtr hdcBlt, uint nFlags);
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool PostMessage(System.IntPtr hWnd, uint Msg, System.IntPtr wParam, System.IntPtr lParam);
+
         public const uint PW_RENDERFULLCONTENT = 2;
         public const uint GW_OWNER = 4;
         public const int GWL_EXSTYLE = -20;
         public const int WS_EX_DLGMODALFRAME = 0x00000001;
+        public const uint WM_KEYDOWN = 0x0100;
+        public const uint WM_KEYUP   = 0x0101;
 
         public struct RECT {
             public int Left; public int Top; public int Right; public int Bottom;
@@ -360,18 +365,32 @@ function Invoke-SendKeysSafe {
         [int]$DelayMs = 200
     )
     Initialize-Win32
-    Add-Type -AssemblyName System.Windows.Forms
 
-    $brought = [AeRunWin32]::SetForegroundWindow($Hwnd)
-    Start-Sleep -Milliseconds $DelayMs
-    $actual = [AeRunWin32]::GetForegroundWindow()
-
-    if (-not $brought -or $actual -ne $Hwnd) {
-        return [pscustomobject]@{ Sent = $false; FocusActual = $actual }
+    # Deliver keys via PostMessage straight to the dialog's own message queue —
+    # focus-independent. The old SetForegroundWindow+SendKeys path failed whenever
+    # another window held the foreground lock (the operator runs gates headless
+    # while a game window owns the foreground), logging endless focus-mismatch and
+    # never dismissing the modal (incidents/ae-automation-occlusion-crashstate.md
+    # §2c). PostMessage needs no focus; the dialog's modal loop translates VK_RETURN
+    # → default button / VK_ESCAPE → cancel / VK_TAB → next control, same as keys.
+    $vk = @{ '{ENTER}' = 0x0D; '{ESC}' = 0x1B; '{TAB}' = 0x09 }
+    $tokens = [regex]::Matches($Keys, '\{[^}]+\}|.') | ForEach-Object { $_.Value }
+    $sentAny = $false
+    foreach ($tok in $tokens) {
+        $code = $null
+        if ($vk.ContainsKey($tok)) { $code = $vk[$tok] }
+        elseif ($tok.Length -eq 1) { $code = [int]([string]$tok).ToUpper()[0] }
+        if ($null -eq $code) { continue }
+        $wp = [IntPtr]$code
+        # Sent tracks PostMessage delivery success — false for an invalid hwnd
+        # (window gone / bogus), true once the dialog's queue accepts the key.
+        $ok = [AeRunWin32]::PostMessage($Hwnd, [AeRunWin32]::WM_KEYDOWN, $wp, [IntPtr]0x00000001)
+        Start-Sleep -Milliseconds 30
+        [void][AeRunWin32]::PostMessage($Hwnd, [AeRunWin32]::WM_KEYUP, $wp, [IntPtr][int64]0xC0000001)
+        Start-Sleep -Milliseconds $DelayMs
+        if ($ok) { $sentAny = $true }
     }
-
-    [System.Windows.Forms.SendKeys]::SendWait($Keys)
-    return [pscustomobject]@{ Sent = $true; FocusActual = $actual }
+    return [pscustomobject]@{ Sent = $sentAny; FocusActual = [AeRunWin32]::GetForegroundWindow() }
 }
 
 function Write-ActionLog {
