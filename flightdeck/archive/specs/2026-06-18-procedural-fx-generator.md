@@ -1,8 +1,8 @@
 ---
-status: active
+status: obsolete
 graduate: true
 summary: 用户 NL 描述 → 网站一键产出可在 AE 打开的 .aep。架构=离线配方提取 + 运行时(NL→参数→库出字节)。AI 永不碰字节,Go 库是保证合法的执行引擎。v1=火焰,Phase 0(确定性造一个好火焰)为 make-or-break 门槛。
-last_updated: 2026-06-18
+last_updated: 2026-06-20
 ---
 
 # AI 参数化程序化 FX 生成器（产品方案 + 路线）

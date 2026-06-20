@@ -1,7 +1,7 @@
 ---
-status: active
+status: done
 summary: 补验 arc(批1-28,2026-06-17/18)完成记录 + 剩 53 个 verify=roundtrip 残值的 someday-backlog:逐项分类(N/A read/helper · 实勘负结论 · false-green · 硬尾 · 可做但低 ROI),有需要时按本表挑。ae-accept 35→261,roundtrip 279→53。
-last_updated: 2026-06-18
+last_updated: 2026-06-20
 ---
 
 # roundtrip→ae-accept 补验 arc 完成记录 + 残值 backlog(53)

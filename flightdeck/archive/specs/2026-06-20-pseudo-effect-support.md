@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 summary: 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)splice 进层 Effect Parade,免开 AE。.ffx=RIFX FaFX form,内含 sspc+ppar(pard)+tdgp = 一个 Effect-Parade 成员单元(同 AddEffect splice)。头号 crux=AE 认不认未 applyPreset 注册的 Pseudo/<uID> matchName,spike-first 双版本验。v1=apply-only 写侧,读侧解 .ffx 进 scene 列后续。
 last_updated: 2026-06-20
 ---

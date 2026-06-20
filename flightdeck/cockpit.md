@@ -8,14 +8,9 @@
 
 <!-- AUTO:inprogress -->
 - [2026-06-18-fx-technique-internalization.md](specs/2026-06-18-fx-technique-internalization.md) — 通用机制:任何参考 .aep → 解析 → 拆角色 → 抽跨域技法原子 → 存 flightdeck 两层结构(技法库 references/fx-techni…
-- [2026-06-18-procedural-fx-generator.md](specs/2026-06-18-procedural-fx-generator.md) — 用户 NL 描述 → 网站一键产出可在 AE 打开的 .aep。架构=离线配方提取 + 运行时(NL→参数→库出字节)。AI 永不碰字节,Go 库是保证合法的执…
-- [2026-06-18-roundtrip-ae-accept-residual.md](specs/2026-06-18-roundtrip-ae-accept-residual.md) — 补验 arc(批1-28,2026-06-17/18)完成记录 + 剩 53 个 verify=roundtrip 残值的 someday-backlog:逐项…
 - [2026-06-18-technique-ontology.md](specs/2026-06-18-technique-ontology.md) — 投大规模工程前冻结的数据骨架:角色/技法/机制三轴本体 + 技法条目 schema v2(等价效果集·可复刻性两轴·迁移分proven/hypothesized…
 - [2026-06-19-booyah-glitch-full-replication.md](specs/2026-06-19-booyah-glitch-full-replication.md) — 把整个 Booyah Glitch 真实工程(12 comp/61 层/~100 mask/wiggle 表达式/Curves)用咱们的 Go API 从零完整…
-- [2026-06-20-pseudo-effect-support.md](specs/2026-06-20-pseudo-effect-support.md) — 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)splice 进层 Effect Parade,免开 AE。.ffx=RIFX…
 - [2026-06-19-booyah-glitch-replication.md](plans/2026-06-19-booyah-glitch-replication.md) — 实现 Booyah Glitch 全工程复刻:Phase0 前置 spike(表达式 Evolution=time*N + wiggle / 单层 ~21 ma…
-- [coverage-detail.md](plans/coverage-detail.md) — AE-attribute → Go-field 详细交叉矩阵(按需参考);能力状态以 capindex 为准
-- [coverage.md](plans/coverage.md) — capindex 不覆盖的残值(暂搁/不可达/negative findings/可探方向);写/做能力真相源已迁 capindex
 <!-- /AUTO -->
 
 ## Next
@@ -55,12 +50,12 @@ Phase 0(前置 de-risk)收口:
 
 依据:`specs/2026-06-18-technique-ontology.md`(冻结契约)· `specs/2026-06-18-fx-technique-internalization.md`(上游流水线)· `docs/fx-techniques.md`(技法库)· `cmd/aepdissect`(PARSE+配方信号)· `checklists/effects-dict.md`(字典 dump/用)。
 
-**次要(需求驱动)**:程序化闪电(T14 未验证)· 残值 backlog(剩 53 roundtrip,`specs/2026-06-18-roundtrip-ae-accept-residual.md`)· 能力真相源 `go run ./cmd/capindex -q <词>`。
+**次要(需求驱动)**:残值 backlog(剩 53 roundtrip,已归档 `archive/specs/2026-06-18-roundtrip-ae-accept-residual.md`,按需取)· 能力真相源 `go run ./cmd/capindex -q <词>`。程序化 FX 生成器方向(NL→.aep,含程序化闪电 T14)已停泊归档 `archive/specs/2026-06-18-procedural-fx-generator.md`;自定义伪效果已收工归档 `archive/specs/2026-06-20-pseudo-effect-support.md`(知识在 `docs/pseudo-effect-continuation-handoff.md` + incidents)。
 
 ## Backlog
 
 - 泛型 `DuplicateItem` · `ImportComposition` · **Property synthesis**（暂搁大 feature，`incidents/transform-group-default-omission.md`）。
-- fixture/RE-gated + deferred R-only（DisplayColorSpace / ValueText / environmentLayer / ligature 等）详 `plans/coverage.md` § 暂搁/不可达。
+- fixture/RE-gated + deferred R-only（DisplayColorSpace / ValueText / environmentLayer / ligature 等）详 `archive/plans/coverage.md` § 暂搁/不可达（coverage 矩阵已退役归档，能力真相源以 capindex 为准）。
 
 ## Hanging Tasks
 
