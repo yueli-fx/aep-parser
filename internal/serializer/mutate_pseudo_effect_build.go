@@ -122,7 +122,11 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 	if uid == "" || name == "" {
 		return nil, fmt.Errorf("BuildPseudoEffect: uid and name are required")
 	}
-	matchName := "Pseudo/" + uid + "/" + name
+	// PEM's canonical pseudo match-name is "Pseudo/<uid>" — the effect name lives
+	// in the display name (fnam / value-group tdsn), NOT the match-name. An extra
+	// "/<name>" segment is tolerated by value params but makes AE fail to render a
+	// layer-picker control (the one param it must recognize as a layer reference).
+	matchName := "Pseudo/" + uid
 	label := displayName
 	if label == "" {
 		label = name
@@ -150,7 +154,7 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl, cp Pseud
 	// expands to a group-start/group-end pard pair, so it consumes two slots.
 	idx := 0
 	for _, c := range controls {
-		entries, err := synthControlEntries(c, cp)
+		entries, err := synthControlEntries(c, cp, hostLayerID)
 		if err != nil {
 			return nil, err
 		}
@@ -217,7 +221,7 @@ type pardEntry struct {
 // synthControlEntries expands one PseudoControl into the parT pard entries it
 // occupies. Most controls are a single pard; a Checkbox/Dropdown carries a
 // trailing pdnm string; a Label is a group-start (label flag) + group-end pair.
-func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage) ([]pardEntry, error) {
+func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage, hostLayerID uint32) ([]pardEntry, error) {
 	pard, err := synthControlPard(c, cp)
 	if err != nil {
 		return nil, err
@@ -231,22 +235,34 @@ func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage) ([]pardEntry, 
 		// The menu items travel in a trailing pdnm as "opt1|opt2|..".
 		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(strings.Join(c.Options, "|"))}}}, nil
 	case PseudoLabel:
-		// AE's Pseudo Effect Maker emits a label as a 0x0d group-start carrying
-		// the label flag (@0x04=0x20) immediately closed by a 0x0e group-end —
-		// both need scaffold value entries (the start carries the label text).
+		// A label is a 0x0d group-start (label flag, @0x04=0x20) immediately
+		// closed by a 0x0e group-end. Both build from the pard alone — no value
+		// entry. AE's own minimal form gives the value group only to the binding
+		// controls (effect header + layer pickers); a synthesized scaffold entry
+		// for a label/group corrupted AE's handling of a later binding control.
+		return []pardEntry{{pard: pard}, {pard: synthGroupEndPard(cp)}}, nil
+	case PseudoGroupStart, PseudoGroupEnd:
+		return []pardEntry{{pard: pard}}, nil
+	case PseudoPoint, PseudoPoint3D:
+		// The default coords live in the pard (see synthControlPard); AE builds
+		// the control from the pard alone — exactly like its own all-defaults
+		// form, which displays a point/3D with an empty value group. Emitting a
+		// synthesized value entry instead made AE hide the control.
+		return []pardEntry{{pard: pard}}, nil
+	case PseudoLayer:
+		// A layer picker carries a value entry whose tdpi is the bound layer id.
+		// Two RE'd musts (else AE hides it): (1) tdbs flag = 1 (plain property),
+		// NOT 3 (the effect-header anchor flag); (2) tdpi must resolve to a layer
+		// — a fresh PEM picker defaults to its own host layer. So an unset
+		// LayerID binds the host; a caller value overrides the target.
+		bound := c.LayerID
+		if bound == 0 {
+			bound = hostLayerID
+		}
 		name := c.Name
-		return []pardEntry{
-			{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, name) }},
-			{pard: synthGroupEndPard(cp), valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, "") }},
-		}, nil
-	case PseudoGroupStart:
-		name := c.Name
-		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, name) }}}, nil
-	case PseudoGroupEnd:
-		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, "") }}}, nil
-	case PseudoPoint, PseudoPoint3D, PseudoLayer:
-		ctl := c
-		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return synthControlValueEntry(ctl, mn) }}}, nil
+		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk {
+			return valueEntry(mn, 1, name, layerTdb4Hex, make([]byte, 40), true, bound)
+		}}}, nil
 	default:
 		// Slider / Angle / Color: value elided (read from pard).
 		return []pardEntry{{pard: pard}}, nil
@@ -266,21 +282,15 @@ func synthGroupEndPard(cp PseudoLabelCodepage) *rifx.Chunk {
 	})
 }
 
-// Per-type value-entry tdb4 descriptors (124 bytes), verbatim from AE's own
-// Pseudo Effect Maker output (test_data/pseudo_rich_demo.aep). The head encodes
-// the dimension + per-type markers; @0x10.. is a per-dimension constant block
-// (point and 3D-point share it, dim-1 differs) — not value-dependent, so it is
-// copied as-is and the actual value lives in the companion cdat / tdpi.
+// value-entry tdb4 descriptors (124 bytes), verbatim from AE's own Pseudo Effect
+// Maker output. Only the effect header and the layer-picker carry a value entry
+// (everything else builds from its pard), and both are dimension-1 (scalar/
+// reference) so the descriptor is comp-independent — copied as-is; the binding
+// lives in the companion tdpi. tdb4 layout (RE'd): @0x02 dimension count, @0x0C
+// the constant 0x5da8, @0x10.. a per-dimension matrix (trivial for dim-1).
 const (
-	pointTdb4Hex   = "db990002000f0003ffffff0400005da83d9b7cdfd9d7bdbc3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000406000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	point3DTdb4Hex = "db990003000f0003ffffff0400005da83d9b7cdfd9d7bdbc3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000809000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	layerTdb4Hex   = "db99000100010000000100ff00005da83f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	// scaffoldTdb4Hex is the dim-1 descriptor AE writes for a label / group
-	// marker value entry (control_type 0x0d/0x0e), verbatim from an AE resave.
-	scaffoldTdb4Hex = "db9900010001000000010000000078003f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000809000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	// headerTdb4Hex is the dim-1 descriptor for the effect header's (-0000) value
-	// entry (control_type 0x00, @0x3C marker 0x0404), verbatim from an AE resave.
-	headerTdb4Hex = "db9900010001000000010000000078003f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	layerTdb4Hex  = "db99000100010000000100ff00005da83f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	headerTdb4Hex = "db990001000100000001000000005da83f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 )
 
 // headerValueEntry is the effect header's (-0000) value-group entry. AE writes
@@ -289,46 +299,6 @@ const (
 // short of AE's canonical form.
 func headerValueEntry(matchName string, hostLayerID uint32) []*rifx.Chunk {
 	return valueEntry(matchName, 3, "", headerTdb4Hex, make([]byte, 40), true, hostLayerID)
-}
-
-// scaffoldValueEntry builds the value-group entry for a structural control (a
-// label or group start/end marker). AE walks the value group to lay out the
-// Effect-Controls panel; without these scaffold entries the property tree is
-// malformed and later controls (slider/point/layer) fail to render. tdsb = 1
-// (markers), cdat all-zero, tdsn = the label/group text (empty for an end).
-func scaffoldValueEntry(matchName, label string) []*rifx.Chunk {
-	return valueEntry(matchName, 1, label, scaffoldTdb4Hex, make([]byte, 40), false, 0)
-}
-
-// synthControlValueEntry builds the value-group entry (tdmn + LIST tdbs) for one
-// control whose value cannot be elided into the pard: a Point/Point3D with a
-// non-origin default, or a Layer picker (carries its binding in tdpi). Returns
-// nil when the control's value is elidable (AE reads it from the pard).
-func synthControlValueEntry(c PseudoControl, matchName string) []*rifx.Chunk {
-	switch c.Kind {
-	case PseudoPoint:
-		if len(c.PointDefault) < 2 {
-			return nil // origin → elide
-		}
-		cdat := make([]byte, 48)
-		bePutF64(cdat[0x00:], c.PointDefault[0])
-		bePutF64(cdat[0x08:], c.PointDefault[1])
-		return valueEntry(matchName, 3, c.Name, pointTdb4Hex, cdat, false, 0)
-	case PseudoPoint3D:
-		if len(c.PointDefault) < 3 {
-			return nil
-		}
-		cdat := make([]byte, 72)
-		bePutF64(cdat[0x00:], c.PointDefault[0])
-		bePutF64(cdat[0x08:], c.PointDefault[1])
-		bePutF64(cdat[0x10:], c.PointDefault[2])
-		return valueEntry(matchName, 3, c.Name, point3DTdb4Hex, cdat, false, 0)
-	case PseudoLayer:
-		// A layer picker always carries a value entry (tdpi = bound layer id, 0
-		// = None); the pard alone has no slot for the binding.
-		return valueEntry(matchName, 3, c.Name, layerTdb4Hex, make([]byte, 40), true, c.LayerID)
-	}
-	return nil
 }
 
 // valueEntry assembles [tdmn, LIST tdbs{tdsb, tdsn, tdb4, cdat, [tdpi, tdps]}].
@@ -376,15 +346,26 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 			bePutU32(d[0x38:], argb)
 			bePutU32(d[0x3C:], argb)
 		case PseudoPoint:
-			// RE'd structural defaults (@0x3C, @0x48); actual position lives in
-			// the value entry. AE rejects a point pard without these ("range has
-			// no values").
-			bePutU32(d[0x3C:], 0x00050000)
-			bePutU32(d[0x48:], 0x00640000)
+			// The point's default coords live IN the pard as 16.16-fixed
+			// fractions of the layer/comp space — @0x38 x, @0x3C y — plus a
+			// ×100 (percent) copy at @0x44/@0x48. AE hides a point whose pard
+			// carries no value ("range has no values"); the value entry's cdat
+			// holds the same coords for the current value. RE'd from a
+			// confirmed-working AE sample (point=500,1080 → 0.2604,1.0).
+			var px, py float64
+			if len(c.PointDefault) >= 2 {
+				px, py = c.PointDefault[0], c.PointDefault[1]
+			}
+			putFx1616(d[0x38:], px)
+			putFx1616(d[0x3C:], py)
+			putFx1616(d[0x44:], px*100)
+			putFx1616(d[0x48:], py*100)
 		case PseudoSlider:
-			// @0x04 slider flag; @0x38 f8 default; @0x68/@0x6C f4 valid range;
-			// @0x70/@0x74 f4 visible range; @0x78 f4 default; @0x7C precision/
-			// display flags (constant 0x00050003 in AE-authored sliders).
+			// @0x38 f8 default; @0x68/@0x6C f4 valid range; @0x70/@0x74 f4
+			// visible range; @0x78 f4 default; @0x7C precision/display flags
+			// (constant 0x00050003 in AE-authored sliders). NOTE: a confirmed-
+			// working AE slider leaves @0x04 = 0 — an earlier RE wrote a 0x200
+			// "flag" there that made AE hide the slider.
 			lo, hi := c.Min, c.Max
 			if hi <= lo {
 				lo, hi = 0, 100
@@ -395,14 +376,16 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 			} else if def > hi {
 				def = hi
 			}
-			bePutU32(d[0x04:], 0x00000200)
 			bePutF64(d[0x38:], def)
 			bePutF32(d[0x68:], float32(lo))
 			bePutF32(d[0x6C:], float32(hi))
 			bePutF32(d[0x70:], float32(lo))
 			bePutF32(d[0x74:], float32(hi))
 			bePutF32(d[0x78:], float32(def))
-			bePutU32(d[0x7C:], 0x00050003)
+			// @0x7C display flags. 0x00020000 = AE's default-config slider
+			// (verbatim from pseudo2.aep). The 0x00050003 form an earlier RE
+			// copied turned on the percent display (that sample had it enabled).
+			bePutU32(d[0x7C:], 0x00020000)
 		case PseudoAngle:
 			// @0x38 last + @0x3C default, both s4 degrees in 16.16 fixed point.
 			fx := uint32(int32(c.Default * 65536))
@@ -415,7 +398,21 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 				d[0x3C] = 1
 			}
 		case PseudoPoint3D:
-			// origin default — already zero.
+			// Like a 2D point but the default coords are f64 (not 16.16):
+			// @0x38 x, @0x40 y, @0x48 z (fractions of the layer/comp space),
+			// plus a ×100 (percent) copy at @0x50/@0x58/@0x60. AE hides a 3D
+			// point whose pard has no value. RE'd from a confirmed-working AE
+			// sample (100,200,300 → 0.0521,0.1852,0.2778).
+			var qx, qy, qz float64
+			if len(c.PointDefault) >= 3 {
+				qx, qy, qz = c.PointDefault[0], c.PointDefault[1], c.PointDefault[2]
+			}
+			bePutF64(d[0x38:], qx)
+			bePutF64(d[0x40:], qy)
+			bePutF64(d[0x48:], qz)
+			bePutF64(d[0x50:], qx*100)
+			bePutF64(d[0x58:], qy*100)
+			bePutF64(d[0x60:], qz*100)
 		case PseudoDropdown:
 			// @0x38 selected index (1-based); @0x3C hi16 = option count, lo16 =
 			// selected index. The menu item strings live in the trailing pdnm.
@@ -499,6 +496,12 @@ func bePutU32(b []byte, v uint32) {
 
 func bePutF32(b []byte, f float32) {
 	bePutU32(b, math.Float32bits(f))
+}
+
+// putFx1616 writes f as an unsigned 16.16 fixed-point u32 (AE's point-pard
+// fraction encoding).
+func putFx1616(b []byte, f float64) {
+	bePutU32(b, uint32(int64(f*65536)))
 }
 
 func bePutF64(b []byte, f float64) {

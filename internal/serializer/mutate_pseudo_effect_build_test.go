@@ -73,7 +73,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 	// Dropdown: 2 options, default selection 2 — golden 0009 had @0x38=2,
 	// @0x3C=0x00020002 (hi16 count=2, lo16 sel=2) + trailing pdnm "a|b".
 	t.Run("dropdown", func(t *testing.T) {
-		es, err := synthControlEntries(PseudoControl{Kind: PseudoDropdown, Name: "Menu", Options: []string{"a", "b"}, Default: 2}, PseudoLabelGBK)
+		es, err := synthControlEntries(PseudoControl{Kind: PseudoDropdown, Name: "Menu", Options: []string{"a", "b"}, Default: 2}, PseudoLabelGBK, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -100,7 +100,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 
 	// Group start: 0x0d, label flag (@0x04) clear, @0x30=2 — golden 0011.
 	t.Run("group-start", func(t *testing.T) {
-		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupStart, Name: "Grp"}, PseudoLabelGBK)
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupStart, Name: "Grp"}, PseudoLabelGBK, 0)
 		d := es[0].pard.Data
 		if d[0x0F] != 0x0d || be32(d, 0x04) != 0 || be32(d, 0x30) != 2 {
 			t.Errorf("group-start pard @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0d/0x0/0x2", d[0x0F], be32(d, 0x04), be32(d, 0x30))
@@ -109,7 +109,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 
 	// Group end: 0x0e, @0x04=0x08, @0x30=2 — golden 0013/0005.
 	t.Run("group-end", func(t *testing.T) {
-		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupEnd}, PseudoLabelGBK)
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoGroupEnd}, PseudoLabelGBK, 0)
 		d := es[0].pard.Data
 		if d[0x0F] != 0x0e || be32(d, 0x04) != 0x08 || be32(d, 0x30) != 2 {
 			t.Errorf("group-end pard @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0e/0x08/0x2", d[0x0F], be32(d, 0x04), be32(d, 0x30))
@@ -119,7 +119,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 	// Label: a group-start with the label flag (@0x04=0x20) immediately closed
 	// by a generated group-end — golden 0004 (label "标签") + 0005 (group-end).
 	t.Run("label", func(t *testing.T) {
-		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLabel, Name: "Note"}, PseudoLabelGBK)
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLabel, Name: "Note"}, PseudoLabelGBK, 0)
 		if len(es) != 2 {
 			t.Fatalf("label: got %d entries, want 2 (start+end)", len(es))
 		}
@@ -138,11 +138,15 @@ func f64at(d []byte, off int) float64 {
 	return math.Float64frombits(binary.BigEndian.Uint64(d[off:]))
 }
 
-// TestSynthControlValueEntry verifies the value-entry synthesis for the controls
-// whose value can't be elided into the pard: Point/3DPoint custom coords (cdat =
-// fraction of coord space, AE-verified [0.25,0.125]→[100,50] in a 400 comp) and
-// the Layer picker (binding in tdpi). Bytes mirror test_data/pseudo_rich_demo.aep.
-func TestSynthControlValueEntry(t *testing.T) {
+// TestPseudoControlEntries_ValueRules verifies the RE'd elision rules: a
+// point/3D default lives IN the pard and emits NO value entry (AE builds the
+// control from the pard); only the layer picker carries a value entry, and it
+// must be flagged tdsb=1 (a plain property, NOT 3=the effect-header anchor — AE
+// hides a picker flagged 3) with tdpi = the bound layer (an unset LayerID binds
+// the host). RE'd from pseudo2.aep (Pseudo/148432) + pseudo_rich_demo.aep.
+func TestPseudoControlEntries_ValueRules(t *testing.T) {
+	const hostID = 99
+	fx1616 := func(d []byte, off int) float64 { return float64(be32(d, off)) / 65536 }
 	tdbsOf := func(chunks []*rifx.Chunk) *rifx.Chunk {
 		if len(chunks) != 2 || chunks[0].ID != rifx.IDTdmn || chunks[1].FormType != rifx.IDTdbs {
 			t.Fatalf("want [tdmn, LIST tdbs], got %d chunks", len(chunks))
@@ -158,48 +162,50 @@ func TestSynthControlValueEntry(t *testing.T) {
 		return nil
 	}
 
-	t.Run("point", func(t *testing.T) {
-		ve := synthControlValueEntry(PseudoControl{Kind: PseudoPoint, Name: "C", PointDefault: []float64{0.25, 0.125}}, "mn")
-		tdbs := tdbsOf(ve)
-		tdb4 := child(tdbs, rifx.IDtdb4)
-		if tdb4 == nil || len(tdb4.Data) != 124 || binary.BigEndian.Uint16(tdb4.Data[2:]) != 2 {
-			t.Fatalf("point tdb4: want 124B dim=2")
+	t.Run("point-coords-in-pard-no-value-entry", func(t *testing.T) {
+		es, err := synthControlEntries(PseudoControl{Kind: PseudoPoint, Name: "C", PointDefault: []float64{0.25, 0.125}}, PseudoLabelGBK, hostID)
+		if err != nil {
+			t.Fatal(err)
 		}
-		cdat := child(tdbs, rifx.IDCdat)
-		if cdat == nil || len(cdat.Data) != 48 {
-			t.Fatalf("point cdat: want 48B, got %v", cdat)
+		if len(es) != 1 || es[0].valueEntry != nil {
+			t.Fatalf("point must build from pard with NO value entry")
 		}
-		if f64at(cdat.Data, 0) != 0.25 || f64at(cdat.Data, 8) != 0.125 {
-			t.Errorf("point cdat = [%v,%v], want [0.25,0.125]", f64at(cdat.Data, 0), f64at(cdat.Data, 8))
+		d := es[0].pard.Data
+		if fx1616(d, 0x38) != 0.25 || fx1616(d, 0x3C) != 0.125 {
+			t.Errorf("point pard @0x38/@0x3C (16.16) = %v/%v, want 0.25/0.125", fx1616(d, 0x38), fx1616(d, 0x3C))
 		}
 	})
 
-	t.Run("point3d", func(t *testing.T) {
-		ve := synthControlValueEntry(PseudoControl{Kind: PseudoPoint3D, PointDefault: []float64{0.25, 0.125, 0.0625}}, "mn")
-		cdat := child(tdbsOf(ve), rifx.IDCdat)
-		if cdat == nil || len(cdat.Data) != 72 {
-			t.Fatalf("3dpoint cdat: want 72B")
+	t.Run("3d-coords-in-pard-no-value-entry", func(t *testing.T) {
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoPoint3D, PointDefault: []float64{0.25, 0.125, 0.0625}}, PseudoLabelGBK, hostID)
+		if es[0].valueEntry != nil {
+			t.Fatalf("3d must build from pard with NO value entry")
 		}
-		if f64at(cdat.Data, 0) != 0.25 || f64at(cdat.Data, 8) != 0.125 || f64at(cdat.Data, 16) != 0.0625 {
-			t.Errorf("3dpoint cdat wrong: %v %v %v", f64at(cdat.Data, 0), f64at(cdat.Data, 8), f64at(cdat.Data, 16))
-		}
-	})
-
-	t.Run("point-origin-elided", func(t *testing.T) {
-		if ve := synthControlValueEntry(PseudoControl{Kind: PseudoPoint}, "mn"); ve != nil {
-			t.Errorf("point with no PointDefault should elide its value entry, got %d chunks", len(ve))
+		d := es[0].pard.Data
+		if f64at(d, 0x38) != 0.25 || f64at(d, 0x40) != 0.125 || f64at(d, 0x48) != 0.0625 {
+			t.Errorf("3d pard coords (f64) = %v/%v/%v, want 0.25/0.125/0.0625", f64at(d, 0x38), f64at(d, 0x40), f64at(d, 0x48))
 		}
 	})
 
-	t.Run("layer", func(t *testing.T) {
-		ve := synthControlValueEntry(PseudoControl{Kind: PseudoLayer, Name: "L", LayerID: 15}, "mn")
-		tdbs := tdbsOf(ve)
-		tdpi := child(tdbs, rifx.IDTdpi)
-		if tdpi == nil || be32(tdpi.Data, 0) != 15 {
+	t.Run("layer-value-entry-tdsb1-tdpi", func(t *testing.T) {
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLayer, Name: "L", LayerID: 15}, PseudoLabelGBK, hostID)
+		if es[0].valueEntry == nil {
+			t.Fatal("layer must carry a value entry (tdpi binding)")
+		}
+		tdbs := tdbsOf(es[0].valueEntry("mn"))
+		if be32(tdbs.Children[0].Data, 0) != 1 {
+			t.Errorf("layer tdsb flag = %d, want 1 (plain property, not 3=anchor)", be32(tdbs.Children[0].Data, 0))
+		}
+		if tdpi := child(tdbs, rifx.IDTdpi); tdpi == nil || be32(tdpi.Data, 0) != 15 {
 			t.Errorf("layer tdpi = %v, want 15", tdpi)
 		}
-		if child(tdbs, rifx.IDTdps) == nil {
-			t.Errorf("layer value entry missing tdps")
+	})
+
+	t.Run("layer-unset-binds-host", func(t *testing.T) {
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLayer, Name: "L"}, PseudoLabelGBK, hostID)
+		tdbs := tdbsOf(es[0].valueEntry("mn"))
+		if tdpi := child(tdbs, rifx.IDTdpi); tdpi == nil || be32(tdpi.Data, 0) != hostID {
+			t.Errorf("unset LayerID should bind host %d, got %v", hostID, tdpi)
 		}
 	})
 }

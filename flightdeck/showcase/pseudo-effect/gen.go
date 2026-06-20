@@ -25,7 +25,7 @@ type labels struct {
 	advanced, subAmount, invert                    string
 }
 
-func controls(L labels, sourceLayerID uint32) []aep.PseudoControl {
+func controls(L labels) []aep.PseudoControl {
 	return []aep.PseudoControl{
 		{Kind: aep.PseudoLabel, Name: L.basic},
 		{Kind: aep.PseudoSlider, Name: L.strength, Min: 0, Max: 100, Default: 75},
@@ -34,9 +34,11 @@ func controls(L labels, sourceLayerID uint32) []aep.PseudoControl {
 		{Kind: aep.PseudoCheckbox, Name: L.enabled, Checked: true},
 		{Kind: aep.PseudoDropdown, Name: L.mode, Options: L.modeOpts, Default: 2},
 		{Kind: aep.PseudoLabel, Name: L.spatial},
-		{Kind: aep.PseudoPoint, Name: L.center, PointDefault: []float64{0.5, 0.5}},        // comp center
+		{Kind: aep.PseudoPoint, Name: L.center, PointDefault: []float64{0.5, 0.5}},       // comp center
 		{Kind: aep.PseudoPoint3D, Name: L.pos3d, PointDefault: []float64{0.25, 0.75, 0}}, // off-center
-		{Kind: aep.PseudoLayer, Name: L.source, LayerID: sourceLayerID},
+		// Layer picker with no explicit target → binds the host layer (AE hides
+		// a picker whose tdpi is 0/None; a fresh PEM picker defaults to host).
+		{Kind: aep.PseudoLayer, Name: L.source, LayerID: 0},
 		{Kind: aep.PseudoGroupStart, Name: L.advanced},
 		{Kind: aep.PseudoSlider, Name: L.subAmount, Min: -50, Max: 50, Default: 10},
 		{Kind: aep.PseudoCheckbox, Name: L.invert, Checked: false},
@@ -67,7 +69,7 @@ func build(L labels, uid string) error {
 	if err != nil {
 		return err
 	}
-	// Host layer carries the effect; Source is the layer-picker's bind target.
+	// Host carries the effect; Source is a second layer the None picker could pick.
 	if _, err := aep.NewShapeLayer(comp, "Host"); err != nil {
 		return err
 	}
@@ -78,20 +80,17 @@ func build(L labels, uid string) error {
 	if err != nil {
 		return err
 	}
-	var host, src *aep.Layer
+	var host *aep.Layer
 	for _, c := range rp.Compositions {
 		for _, l := range c.Layers {
-			switch l.Name {
-			case "Host":
+			if l.Name == "Host" {
 				host = l
-			case "Source":
-				src = l
 			}
 		}
 	}
 	// matchName segment stays ASCII ("Demo"); the localized effect name is the
 	// displayName (value-group tdsn / UTF-8 — CJK round-trips, codepage-free).
-	if _, err := aep.BuildPseudoEffect(host, uid, "Demo", L.effect, controls(L, src.ID)); err != nil {
+	if _, err := aep.BuildPseudoEffect(host, uid, "Demo", L.effect, controls(L)); err != nil {
 		return err
 	}
 	out := filepath.Join("flightdeck", "showcase", "pseudo-effect", "pseudo_demo_"+uid+".aep")
@@ -103,7 +102,7 @@ func build(L labels, uid string) error {
 	if err := rp.WriteAEP(f); err != nil {
 		return err
 	}
-	fmt.Println("wrote", out, "—", len(controls(L, src.ID)), "controls (all kinds)")
+	fmt.Println("wrote", out, "—", len(controls(L)), "controls (all kinds)")
 	return nil
 }
 
