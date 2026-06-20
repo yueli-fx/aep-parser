@@ -21,7 +21,7 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ## Progress
 
-current: Task 1.1 残留 — comp ① 的 >4kf rect 关键帧保真。✅ 基建(clear_ae_crashstate tracked 工具,67023b6)✅ AE 2025 接受+shape 不 drop(verify 实证)✅ render 主 bug 修复(层 position (0,0)→合成中心,4f579d1;t=0 帧与原工程字节完全一致)。🔶残留:>4kf 的 rect#3(11)/#4(8) 在 t=0.5 位置略偏、t=1 有原工程没有的残留杆——疑 lhd3 关键帧分页(`incidents/lhd3-keyframe-capacity-pages.md`),下一步 RE 该边界;另 AE 2020 侧 verify 待补(双版本)。
+current: Task 1.1 残留 — comp ① 中间帧关键帧保真 + AE 2020 render。✅ 基建(clear_ae_crashstate 工具 67023b6;**ae_run PostMessage 根治 foreground-lock** b411d09——所有 in-run modal 无人值守可消化,arc 全程关键)✅ AE 2025 接受+shape 不 drop ✅ render 两真 bug 修复:层 position (0,0)→中心(4f579d1)+ 层时长满comp→[0,0.901](6091016)→ **t=0/t=1 字节完全一致、t=0.5 差 4B**。🔶残留:中间帧 t=0.3/t=0.8 关键帧插值保真(lhd3 容量已对、全 linear→非分页/插值类型;需逐 rect valueAtTime 细diff,疑 rect center 锚或某 kf 值);AE 2020 侧 render 待补。
 
 **Phase 0（前置 de-risk）全收口:**
 - ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。

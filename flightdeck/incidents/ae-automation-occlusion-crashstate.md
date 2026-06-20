@@ -92,6 +92,14 @@ ENTER ("继续"), lets AE exit cleanly → clears the crash flag.
    **tracked 工具**（`tools/debug/`，免再丢），PostMessage `VK_RETURN`(=继续) 到 safe-mode
    dialog hwnd（不要 SetForegroundWindow）。
 
+   **✅ 已解（2026-06-20）**：(a) `tools/debug/clear_ae_crashstate/clear_ae_crashstate.ps1`
+   重建为 tracked 工具（67023b6，PostMessage VK_RETURN，实测清双版本崩溃标志）；(b) **根治**
+   `AeRun.Lib.ps1::Invoke-SendKeysSafe` 改用 **PostMessage**（WM_KEYDOWN/UP，解析
+   {ENTER}/{ESC}/{TAB}→VK），focus-independent（b411d09）——不止 safe-mode，**所有 in-run
+   modal** 在前台游戏锁下都能消化。实证：原工程「Resolve Fonts」框此前 focus-mismatch 挂死，
+   改后 exit 0 无人值守过；配套加 `resolve-fonts-missing` 规则。`Sent` 改为反映 PostMessage
+   投递成功（无效 hwnd=false，旧 focus-mismatch 单测契约仍成立）。
+
 ## Standard pre-gate ritual (interactive session)
 ```
 Get-Process AfterFX* | Stop-Process -Force          # kill stragglers
