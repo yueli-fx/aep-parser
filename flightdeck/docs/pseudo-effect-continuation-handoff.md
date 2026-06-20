@@ -1,16 +1,30 @@
 ---
-status: active
-summary: 续作交接:已做(自定义值+GBK CJK 标签 gated)、剩余控件类型清单、所需 fixture/probe/文件、ship-gate 技巧、RE 出的 pard/value-entry 字节布局。
-when_to_read: 下个对话继续 BuildPseudoEffect 支线、补做剩余控件类型(Point/3DPoint 坐标·Layer-picker·Dropdown·Group)时先读这篇
-applies_to: [pseudo-effect, build-pseudo-effect, handoff, continuation]
+status: done
+summary: BuildPseudoEffect 支线已全部完成(Dropdown/Group/Label/Point 坐标/3DPoint 坐标/Layer-picker 均双版本 AE gate 绿)。仅剩 CJK 控件标签的 AE 架构限制(byte-equiv-only,不可 ship-gate)。下方保留 RE 字节布局与 ship-gate 技巧作参考。
+when_to_read: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/value-entry 字节布局 + ship-gate 技巧时
+applies_to: [pseudo-effect, build-pseudo-effect, handoff, continuation, point, layer-picker, dropdown, group, value-entry]
 last_updated: 2026-06-20
 ---
 
-# Pseudo Effect 从零生成 — 续作交接(剩余控件类型)
+# Pseudo Effect 从零生成 — 支线完成记录 + RE 参考
 
 > 冷启动顺序:先读本篇 → `specs/2026-06-20-pseudo-effect-support.md`(§9 = 从零生成全 RE)→ `incidents/pseudo-control-label-ansi-codepage.md`(CJK 限制)→ `incidents/add-effect-splice-re.md`(splice 机制)。能力真相源:`go run ./cmd/capindex -q "pseudo"`。
 
-## 1. 现状(已 ship,别重做)
+## 0. 支线收口(2026-06-20,commit 4fa4a5c + d661bb9)
+
+**全部剩余控件类型已实现 + 双版本 AE ship-gate 绿。** Pseudo Effect Maker 能造的控件类型现在都能纯 Go 离线合成。
+
+- **Dropdown / Group / Label**(commit `4fa4a5c`):pard-only(值条目可省略——AE 从 pard 读默认)。gate `TestBuildPseudoEffectRich_AEShipGate_AE2020/2025`。**决定性发现**:伪效果「组」是**扁平标记控件**(Effect Controls 视觉分组),非属性树嵌套——AE 原生金样本读回同样扁平(组+子控件都是顶层兄弟),仅内置 Compositing Options 真嵌套。
+- **Point/3DPoint 自定义坐标 + Layer-picker**(commit `d661bb9`):值条目合成(tdmn + LIST tdbs{tdsb,tdsn,tdb4(124),cdat,[tdpi,tdps]})。gate `TestBuildPseudoEffectValueEntry_AEShipGate_AE2020/2025`。
+  - **Point cdat = 坐标空间分数**(RE 决定性:读金样本 point 回 AE = value [0.000025,2500] @ 500px host → cdat [5e-8,5.0],比值 500=维度)。`PointDefault [fx,fy(,fz)]`,实测 [0.25,0.125]→[100,50]、3D 加 z 0.0625→25。
+  - **Layer-picker**:pard type 0x00(同 header)+@0x30=2;绑定在值条目 `tdpi`=目标层内部 ID(`aep.Layer.ID`),0→AE 解析为第一层。gate 绑第二层、AE 读回该层索引。
+  - per-type tdb4(124B)逐字节抄金样本(@0x10 块=per-dim 常量,非值相关);新增 rifx `IDTdps`。
+
+**唯一未解 = CJK 控件标签**(AE 架构限,详 `incidents/pseudo-control-label-ansi-codepage.md`):标签=pard @0x10 名,按查看机系统 ANSI 码页解码,GBK-pard-name 仅 byte-equivalence 验(本西欧码页机不可 ship-gate)。非缺口、是 AE 限制。
+
+---
+
+## 1. 历史现状(Phase 1 之前,保留作背景)
 
 `BuildPseudoEffect(layer, uid, name, displayName, controls)` —— 纯 Go 从零合成伪效果(无 .ffx / 无 AE / 不 clone 模板),splice 进 Effect Parade。**AE 2020+2025 双版本 gate 绿**。
 

@@ -4,7 +4,7 @@ summary: 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)spli
 last_updated: 2026-06-20
 ---
 
-> **🏗️ 从零造(2026-06-20,方向转向)**:用户拍板——**应用 .ffx 只对伪效果无价值,转做纯 Go 生成伪效果;且不许 clone 模板偷懒、要解析理解后合成**。`BuildPseudoEffect(layer, uid, name, displayName, controls)` —— **零 .ffx、零 AE、零模板字节**,每个 `pard` 按 RE 出的 148B 布局逐字段合成。控件类型 Slider/Color/Checkbox/Angle/Point/Point3D,AE 2020+2025 ship-gate 绿(`TestBuildPseudoEffect_AEShipGate_*`)。RE 真相源 = `test_data/pseudo_rich_demo.aep`(用户 Pseudo Effect Maker 产物,13 控件全类型)。pard 格式:`@0x0F`类型·`@0x10`名(ANSI)·`@0x30`=2结构/0有值·`@0x40+`值区;checkbox 需尾随 `pdnm` 标签、dropdown 需 `pdnm` 选项;`@0x50+` 是 AE 栈垃圾(清零无妨)。**剩**:① 控件标签 CJK(pard 名 ANSI 读→乱码,需每控件 UTF-8 tdsn 值条目)② 自定义 default/min/max(值条目 tdum/tduM)③ Dropdown/Layer/Group 类型。①②③ 共用"值条目合成"底层。
+> **🏗️ 从零造(2026-06-20,方向转向)**:用户拍板——**应用 .ffx 只对伪效果无价值,转做纯 Go 生成伪效果;且不许 clone 模板偷懒、要解析理解后合成**。`BuildPseudoEffect(layer, uid, name, displayName, controls)` —— **零 .ffx、零 AE、零模板字节**,每个 `pard` 按 RE 出的 148B 布局逐字段合成。控件类型(全)Slider/Color/Checkbox/Angle/Point/Point3D/Dropdown/Group/Label/Layer,AE 2020+2025 ship-gate 绿(`TestBuildPseudoEffect*_AEShipGate_*`,3 组 gate)。RE 真相源 = `test_data/pseudo_rich_demo.aep`(用户 Pseudo Effect Maker 产物,13 控件全类型)。pard 格式:`@0x0F`类型·`@0x10`名(ANSI)·`@0x30`=2结构/0有值·`@0x40+`值区;checkbox/dropdown 需尾随 `pdnm`;`@0x50+` 是 AE 栈垃圾(清零无妨)。**支线已收口**(见 §9 收口段 + `docs/pseudo-effect-continuation-handoff.md`):Dropdown/Group/Label = pard-only(组=扁平标记非嵌套);Point 坐标/Layer-picker = 值条目合成(cdat=坐标分数·tdpi=层 ID)。**唯一未解 = CJK 控件标签**(AE 架构限,byte-equiv-only)。
 >
 > **额外能力(2026-06-20)**:`ApplyPseudoEffectNamed(layer, ffx, displayName)` —— 可设效果实例**显示名**,**支持任意 UTF-8 含中文**(如「伪效果」)。RE 发现显示名落在**值组 tdsn**(非 fnam);Utf8 子记录按**字节长**编码,故多字节中文精确 round-trip。AE 2020+2025 ship-gate 绿(`TestApplyPseudoEffectNamed_CJK_AEShipGate_*`,读回 U+4F2A/6548/679C)。matchName 仍 ASCII。**(社区工具普遍栽在中文名,本库过)**。
 >
@@ -163,5 +163,9 @@ ExtendScript 里对**刚 fetch 的伪 slider 属性**直接读 `p.minValue` 返�
 
 ### 仍未做
 - **CJK 控件标签** = AE 限制,仅 GBK-pard-name 可行(locale + 依赖 + 不可 gate,待用户拍)。
-- **值条目合成的剩余收益**:Point/3DPoint 默认坐标 + Layer-picker 选层(机制已验 AE 接受,差 cdat 编码 + tdpi/tdps + gate)。
-- **Dropdown/Group/Label** 控件类型(pard 布局已 RE,差合成 + gate)。
+
+### ✅ 支线收口(2026-06-20,commit 4fa4a5c + d661bb9)
+全部剩余控件类型已实现 + 双版本 AE ship-gate 绿。Pseudo Effect Maker 能造的控件类型现在都能纯 Go 离线合成。
+- **Dropdown / Group / Label**(`TestBuildPseudoEffectRich_AEShipGate_*`):pard-only(值条目可省略)。**决定性发现**:伪效果「组」=**扁平标记控件**(视觉分组,非属性树嵌套);AE 原生金样本读回同样扁平,仅内置 Compositing Options 真嵌套。
+- **Point/3DPoint 自定义坐标 + Layer-picker**(`TestBuildPseudoEffectValueEntry_AEShipGate_*`):值条目合成。**Point cdat = 坐标空间分数**(读金样本回 AE 反推:[0.000025,2500]@500px → cdat[5e-8,5.0],比值=维度);实测 [0.25,0.125]→[100,50]。**Layer-picker** 绑定=值条目 `tdpi`=层内部 ID(`aep.Layer.ID`),gate 绑指定层、AE 读回该层索引。per-type tdb4(124B)逐字节抄金样本(@0x10=per-dim 常量非值相关);新增 rifx `IDTdps`。
+- 收口记录详 `docs/pseudo-effect-continuation-handoff.md` §0。
