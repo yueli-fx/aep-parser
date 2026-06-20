@@ -1192,6 +1192,37 @@
     }
   },
   {
+    "symbol": "BuildPseudoEffect",
+    "kind": "func",
+    "signature": "func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl) (*Effect, error)",
+    "summary": "BuildPseudoEffect builds a Pseudo Effect entirely in Go — no .ffx file and no running AE — and splices it into the layer's \"ADBE Effect Parade\".",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestBuildPseudoEffect_AEShipGate_AE2020",
+        "TestBuildPseudoEffect_AEShipGate_AE2025"
+      ],
+      "boundary": "纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**apply-at-defaults + ASCII 标签**:控件取类型默认值/范围;自定义 default/min/max(值条目 tdum/tduM)未做;控件标签写 pard 名(AE 按 ANSI 读→ASCII 准、CJK 乱码,需每控件 UTF-8 tdsn 值条目=同值 materialize 边界);Dropdown(需 pdnm 选项)/Layer/Group 未做;camera/light+未 Reopen refused",
+      "incident": [
+        "add-effect-splice-re"
+      ],
+      "alias": [
+        "build pseudo effect",
+        "从零造伪效果",
+        "pseudo effect maker",
+        "authoring",
+        "造效果",
+        "自定义控件",
+        "slider color checkbox",
+        "离线造伪效果"
+      ]
+    }
+  },
+  {
     "symbol": "RemoveEffect",
     "kind": "func",
     "signature": "func RemoveEffect(layer *Layer, index int) error",
@@ -1724,34 +1755,6 @@
   {
     "symbol": "SetGradientType",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
-    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke type",
-        "渐变描边类型",
-        "linear",
-        "radial",
-        "线性",
-        "径向"
-      ]
-    }
-  },
-  {
-    "symbol": "SetGradientType",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
     "summary": "SetGradientType selects linear (default) or radial ramp shape.",
@@ -1778,11 +1781,11 @@
     }
   },
   {
-    "symbol": "SetHighlightAngle",
+    "symbol": "SetGradientType",
     "kind": "method",
     "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetHighlightAngle(v float64) error",
-    "summary": "SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset.",
+    "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
+    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1796,9 +1799,12 @@
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient stroke highlight angle",
-        "渐变描边高亮角度",
-        "radial highlight angle stroke"
+        "gradient stroke type",
+        "渐变描边类型",
+        "linear",
+        "radial",
+        "线性",
+        "径向"
       ]
     }
   },
@@ -1829,11 +1835,11 @@
     }
   },
   {
-    "symbol": "SetHighlightLength",
+    "symbol": "SetHighlightAngle",
     "kind": "method",
     "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
-    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
+    "signature": "func (n *GradientStrokeNode) SetHighlightAngle(v float64) error",
+    "summary": "SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1847,9 +1853,9 @@
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient stroke highlight length",
-        "渐变描边高亮偏移",
-        "radial highlight stroke"
+        "gradient stroke highlight angle",
+        "渐变描边高亮角度",
+        "radial highlight angle stroke"
       ]
     }
   },
@@ -1876,6 +1882,31 @@
         "高亮偏移",
         "radial highlight",
         "渐变高亮"
+      ]
+    }
+  },
+  {
+    "symbol": "SetHighlightLength",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
+    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke highlight length",
+        "渐变描边高亮偏移",
+        "radial highlight stroke"
       ]
     }
   },
@@ -1963,31 +1994,6 @@
   {
     "symbol": "SetStartPoint",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
-    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke start point",
-        "渐变描边起点",
-        "gradient direction"
-      ]
-    }
-  },
-  {
-    "symbol": "SetStartPoint",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetStartPoint(v [2]float64) error",
     "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
@@ -2008,6 +2014,31 @@
         "渐变起点",
         "gradient direction",
         "渐变方向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetStartPoint",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
+    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke start point",
+        "渐变描边起点",
+        "gradient direction"
       ]
     }
   },

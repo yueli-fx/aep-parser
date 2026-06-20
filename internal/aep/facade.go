@@ -820,6 +820,58 @@ func ApplyPseudoEffectNamed(layer *Layer, ffxBytes []byte, displayName string) (
 	return serializer.ApplyPseudoEffectNamed(layer, ffxBytes, displayName)
 }
 
+// PseudoControlKind is the AE control type of a from-scratch pseudo-effect
+// control (see BuildPseudoEffect).
+type PseudoControlKind = serializer.PseudoControlKind
+
+// Pseudo-effect control kinds for BuildPseudoEffect.
+const (
+	PseudoSlider   = serializer.PseudoSlider   // Slider (scalar)
+	PseudoColor    = serializer.PseudoColor    // Color swatch
+	PseudoCheckbox = serializer.PseudoCheckbox // Checkbox
+	PseudoAngle    = serializer.PseudoAngle    // Angle dial
+	PseudoPoint    = serializer.PseudoPoint    // 2D Point
+	PseudoPoint3D  = serializer.PseudoPoint3D  // 3D Point
+)
+
+// PseudoControl is one control of a from-scratch pseudo effect: a kind + the
+// label shown in AE's Effect Controls.
+type PseudoControl = serializer.PseudoControl
+
+// BuildPseudoEffect builds a Pseudo Effect entirely in Go — no .ffx file and no
+// running AE — and splices it into the layer's "ADBE Effect Parade". This is the
+// authoring direction (what aescripts' Pseudo Effect Maker does in AE's UI),
+// brought into the library and offline: name a set of controls and get a live,
+// AE-accepted custom effect on the layer.
+//
+// uid is the per-effect unique id (the "<uID>" in match-name "Pseudo/<uID>/<name>");
+// name is the match-name segment; displayName is the effect label (any UTF-8,
+// incl. CJK — empty falls back to name); controls are the controls, in order.
+// Every pard is synthesized field-by-field from the RE'd pard layout — no .ffx,
+// no AE, and no cloned template bytes — so the supported kinds are exactly what
+// PseudoControlKind enumerates.
+//
+// Applied at defaults: controls take their type's default value/range. Custom
+// default / min / max per control is a separate value-materialization step (the
+// slider track range lives in the value entry, which this all-defaults form
+// omits — same boundary as ApplyPseudoEffect). Control labels are written into
+// the pard name field, which AE reads in the system ANSI codepage, so ASCII
+// labels display exactly while CJK labels are mojibake until per-control value
+// entries carry a UTF-8 name (the same value-materialization step).
+//
+// Refused (same as AddEffect): camera / light layers, and New*-built layers
+// never parsed (call aep.Reopen first).
+//
+// Alpha / structural — AE 2020 + AE 2025 ship-gate green (a from-scratch effect
+// with Slider/Color/Checkbox/Angle/Point controls reads back live in AE). The
+// apply-at-defaults + ASCII-label scope keeps it Alpha. Free function
+// (CLAUDE.md #2 structural-op call-form). See spec 2026-06-20-pseudo-effect-support.
+//
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**apply-at-defaults + ASCII 标签**:控件取类型默认值/范围;自定义 default/min/max(值条目 tdum/tduM)未做;控件标签写 pard 名(AE 按 ANSI 读→ASCII 准、CJK 乱码,需每控件 UTF-8 tdsn 值条目=同值 materialize 边界);Dropdown(需 pdnm 选项)/Layer/Group 未做;camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox,离线造伪效果"
+func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl) (*Effect, error) {
+	return serializer.BuildPseudoEffect(layer, uid, name, displayName, controls)
+}
+
 // AddTextOpacityAnimator adds a per-character Opacity animator with a Range
 // Selector to a text layer — the kinetic-typography primitive (fade / wipe text
 // in or out one character at a time). opacity (0–100) is applied to the

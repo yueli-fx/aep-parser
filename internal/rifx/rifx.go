@@ -85,6 +85,8 @@ var (
 	IDparT = ChunkID{'p', 'a', 'r', 'T'} // LIST formType: effect parameter definitions container (pard entries)
 	IDpard = ChunkID{'p', 'a', 'r', 'd'} // effect parameter definition chunk (variable-length, keyed by control type)
 	IDParn = ChunkID{'p', 'a', 'r', 'n'} // parT param-count header (u32 = number of pard entries, incl. ADBE Effect Built In Params)
+	IDPgui = ChunkID{'p', 'g', 'u', 'i'} // effect sspc trailing UI-state chunk (16 bytes, group fold/expand flags)
+	IDPdnm = ChunkID{'p', 'd', 'n', 'm'} // param display-name / aux string (Utf8): checkbox on-off label, dropdown "opt1|opt2" options
 	IDBesc = ChunkID{'b', 'e', 's', 'c'} // LIST formType: animation-preset (.ffx) descriptor wrapper (root child of a RIFX "FaFX" form)
 	IDTdsp = ChunkID{'t', 'd', 's', 'p'} // LIST formType: preset target property-path descriptor (holds tdsi path steps)
 	IDTdsi = ChunkID{'t', 'd', 's', 'i'} // LIST formType: one property-path step (tdix index + tdmn match-name)

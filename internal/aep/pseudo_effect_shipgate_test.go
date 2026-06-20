@@ -49,6 +49,92 @@ func TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2025(t *testing.T) {
 	runApplyPseudoEffectGateImpl(t, ae2025(), aep.TargetAE2025, "伪效果", []rune{'伪', '效', '果'})
 }
 
+// TestBuildPseudoEffect_AEShipGate_* verifies a pseudo effect synthesized
+// entirely in Go (no .ffx, no AE, no cloned template bytes — every pard built
+// field-by-field) is accepted by AE 2020 + 2025 and reads back live with all its
+// controls (Slider/Color/Checkbox/Angle/Point + Compositing Options).
+func TestBuildPseudoEffect_AEShipGate_AE2020(t *testing.T) {
+	runBuildPseudoEffectGate(t, ae2020(), aep.TargetAE2020)
+}
+
+func TestBuildPseudoEffect_AEShipGate_AE2025(t *testing.T) {
+	runBuildPseudoEffectGate(t, ae2025(), aep.TargetAE2025)
+}
+
+func runBuildPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
+	t.Helper()
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const matchName = "Pseudo/aepgo01/Demo"
+	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
+
+	p := aep.NewProject(target)
+	comp, err := aep.NewComposition(p, "Main", 400, 400, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewShapeLayer(comp, "S"); err != nil {
+		t.Fatal(err)
+	}
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	var l *aep.Layer
+	for _, c := range rp.Compositions {
+		for _, cl := range c.Layers {
+			if cl.Name == "S" {
+				l = cl
+			}
+		}
+	}
+	controls := []aep.PseudoControl{
+		{Kind: aep.PseudoSlider, Name: "Strength"},
+		{Kind: aep.PseudoColor, Name: "Tint"},
+		{Kind: aep.PseudoCheckbox, Name: "Enabled"},
+		{Kind: aep.PseudoAngle, Name: "Rotation"},
+		{Kind: aep.PseudoPoint, Name: "Center"},
+	}
+	if _, err := aep.BuildPseudoEffect(l, "aepgo01", "Demo", "Demo Effect", controls); err != nil {
+		t.Fatalf("BuildPseudoEffect: %v", err)
+	}
+
+	tempDir := t.TempDir()
+	inputAEP := filepath.Join(tempDir, "build_in.aep")
+	doneFile := filepath.Join(tempDir, "build.done")
+	out, err := os.Create(inputAEP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := rp.WriteAEP(out); err != nil {
+		out.Close()
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	out.Close()
+
+	// 6 = 5 controls + Compositing Options.
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":6}`,
+		toFwd(inputAEP), toFwd(doneFile), matchName)
+	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(argsPath)
+	os.Remove(doneFile)
+
+	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
+
+	content, err := os.ReadFile(doneFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body := string(content); !strings.HasPrefix(body, "PASS") {
+		t.Fatalf("AE rejected Go-synthesized pseudo effect:\n%s", body)
+	}
+}
+
 func runApplyPseudoEffectGateImpl(t *testing.T, aeExe string, target aep.AETarget, displayName string, nameCodes []rune) {
 	t.Helper()
 	if os.Getenv("AE_SHIP_GATE") == "" {
