@@ -21,7 +21,7 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ## Progress
 
-current: Task 1.1 收尾 — comp ① シェイイイイプ 首次 AE 验收。前置基建 = 重建 `clear_ae_crashstate.ps1` 为 tracked 工具（`tools/debug/`，**PostMessage** `VK_RETURN` 到 safe-mode hwnd，不用 SetForegroundWindow）清崩溃标志 → warm-retry verify.jsx 确认 AE 接受 + shape 不 silent-drop → render comp ① 对照原工程。
+current: Task 1.1 残留 — comp ① 的 >4kf rect 关键帧保真。✅ 基建(clear_ae_crashstate tracked 工具,67023b6)✅ AE 2025 接受+shape 不 drop(verify 实证)✅ render 主 bug 修复(层 position (0,0)→合成中心,4f579d1;t=0 帧与原工程字节完全一致)。🔶残留:>4kf 的 rect#3(11)/#4(8) 在 t=0.5 位置略偏、t=1 有原工程没有的残留杆——疑 lhd3 关键帧分页(`incidents/lhd3-keyframe-capacity-pages.md`),下一步 RE 该边界;另 AE 2020 侧 verify 待补(双版本)。
 
 **Phase 0（前置 de-risk）全收口:**
 - ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。

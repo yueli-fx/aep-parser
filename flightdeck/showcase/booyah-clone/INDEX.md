@@ -37,7 +37,7 @@ regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 re
 
 | # | comp | status | 备注 |
 |---|---|---|---|
-| ① | シェイイイイプ！！！ | 🔶Go建 | 4 rect 精确 kf + fill 色 round-trip 逐值对账原工程 ✓(色彩约定:raw [A,R,G,B]0-255 ↔ SetColor [R,G,B,A]0-1)。⚠结构 delta(render-neutral):from-scratch emit 把 rect 包进 `Vector Group/Vectors Group`(原 flat 直挂 Root)+ 物化 Anchor/Position/Scale 默认(原省略)。AE-accept/render 待验。 |
+| ① | シェイイイイプ！！！ | ✅AE-accept · 🔶render残留 | 4 rect 精确 kf + fill 色逐值对账原工程 ✓(色彩:raw [A,R,G,B]0-255 ↔ SetColor [R,G,B,A]0-1)。**AE 2025 接受、shape 不 silent-drop**(verify.jsx 实证 4 rect+fill)。**render**:曾全空白(红线4:值对渲染空)——根因=**层 position 默认 (0,0) 非合成中心**,rect 负坐标全落画外([[shape-layer-position-default-offscreen]],fix 4f579d1:gen 经 `Transform().Position()` 拷原层 position)→ **t=0 帧与原工程字节完全一致、t=0.5 差 4B**。🔶残留:>4kf 的 rect#3(11)/#4(8)在 t=0.5 位置略偏、t=1 有原工程没有的残留杆(疑 lhd3 关键帧分页 [[lhd3-keyframe-capacity-pages]])。⚠结构 delta(rect 包进 Vector Group/Vectors Group,原 flat)render-neutral 已证。 |
 | ② | テキスト変えるならココ！ | ⬜待建 | 1 text 层 "GLITCH" + tracking/char-offset 动画器 |
 | ③ | マップ用フラクタルノイズ | ⬜待建 | 2 Fractal Noise 层 + Evolution expr(依赖 0.3) |
 | ④ | カクッ | ⬜待建 | 2 shape 层 |
