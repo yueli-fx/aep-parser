@@ -20,6 +20,21 @@ func buildShapeIiip(p *aep.Project, orc *oracle) *aep.Composition {
 	root := sl.RootGroup()
 
 	orig := orc.mustComp(compName).Layers[0]
+
+	// AE centers a new shape layer at comp-center; NewShapeLayer leaves it at (0,0).
+	// The rects carry negative shape-space positions, so an un-centered layer puts
+	// every rect off-screen (top-left) → blank render despite a correct DOM. Copy
+	// the original layer's Transform Position onto the shape layer's own transform
+	// (the embedded-template path lowerShapeLayer writes — NOT Layer.SetPosition,
+	// whose materialized Position property a from-scratch shape layer lacks).
+	tg := findGroup(orig.PropertyTree(), "ADBE Transform Group")
+	px, py := float64(comp.Width)/2, float64(comp.Height)/2
+	if pos := findProp(tg, "ADBE Position"); pos != nil && pos.StaticValue != nil {
+		p := toFloats(pos.StaticValue)
+		px, py = p[0], p[1]
+	}
+	must(sl.Transform().Position().SetStaticValue([2]float64{px, py}))
+
 	rvg := findGroup(orig.PropertyTree(), "ADBE Root Vectors Group")
 	if rvg == nil {
 		panic("comp①: original has no Root Vectors Group")
