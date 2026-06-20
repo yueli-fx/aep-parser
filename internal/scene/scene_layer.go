@@ -19,7 +19,7 @@ const (
 
 // Layer represents a layer within a composition.
 type Layer struct {
-	Index             int       // 1-based timeline position (top of stack = 1)
+	Index             int       // 0-based timeline position (top of stack = 0; the on-disk Layr order). AE's ExtendScript layer.index is 1-based, so AE-index = Index+1.
 	Name              string    // layer display name (writable via SetName)
 	Type              LayerType // layer kind (AV / shape / text / camera / light / null / adjustment)
 	ID                uint32    // own layer ID (ldta @0x00) — referenced by ParentID of children

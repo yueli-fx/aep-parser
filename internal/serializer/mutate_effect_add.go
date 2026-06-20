@@ -794,16 +794,25 @@ func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Embedded templates carry the extraction fixture's host-layer id in every
+	// tdpi; retarget them all to the destination layer so AE doesn't reject a
+	// dangling binding ("cannot find layer ID=N"). Built-in effect params bind
+	// only to their host, so a blanket rewrite is correct here — unlike the
+	// pseudo paths, whose layer pickers bind to a deliberately chosen layer.
+	retargetEffectHostLayer(sspcCh, layer.ID)
 	return addEffectFromChunks(layer, "AddEffect", effectMatchName, tdmnCh, sspcCh)
 }
 
 // addEffectFromChunks splices a caller-supplied effect-unit (a tdmn match-name
 // chunk + its LIST:sspc payload) into the layer's Effect Parade — the shared
-// core behind AddEffect (embedded built-in template) and ApplyPseudoEffect
-// (unit extracted from a user .ffx). opName labels errors. The sspc's tdpi
-// host-layer bindings are retargeted to the destination layer; the splice is
-// atomic (snapshot + warnings-as-failure rollback) and re-parses the spliced
-// pair into a back-ref-correct *Effect.
+// core behind AddEffect (embedded built-in template), ApplyPseudoEffect (unit
+// extracted from a user .ffx), and BuildPseudoEffect (fully synthesized). opName
+// labels errors. The caller owns tdpi host-layer correctness — AddEffect
+// retargets its template's foreign bindings to the host (see AddEffect); the
+// pseudo paths synthesize correct tdpi (header → host, layer picker → the chosen
+// layer) and must NOT be retargeted, else the picker binding is clobbered to the
+// host. The splice is atomic (snapshot + warnings-as-failure rollback) and
+// re-parses the spliced pair into a back-ref-correct *Effect.
 func addEffectFromChunks(layer *Layer, opName, effectMatchName string, tdmnCh, sspcCh *rifx.Chunk) (*Effect, error) {
 	if layer.Type == LayerTypeCamera || layer.Type == LayerTypeLight {
 		return nil, fmt.Errorf("%s: layer %q is a %s layer (AE does not allow effects on camera/light layers)", opName, layer.Name, layer.Type)
@@ -817,8 +826,6 @@ func addEffectFromChunks(layer *Layer, opName, effectMatchName string, tdmnCh, s
 		undoParadeCreate()
 		return nil, fmt.Errorf("%s: Effect Parade for layer %q has no chunk back-ref", opName, layer.Name)
 	}
-
-	retargetEffectHostLayer(sspcCh, layer.ID)
 
 	children := pgb.chunk.Children
 	insertIdx := len(children)

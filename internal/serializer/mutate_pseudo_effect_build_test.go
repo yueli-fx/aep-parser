@@ -203,3 +203,88 @@ func TestSynthControlValueEntry(t *testing.T) {
 		}
 	})
 }
+
+// TestBuildPseudoEffect_LayerPickerBindsChosenLayer is the end-to-end regression
+// for the layer-picker host-binding bug. A pseudo effect carries two kinds of
+// tdpi: the effect header binds to its HOST layer (the layer the effect sits on),
+// while a Layer-picker control binds to the user-CHOSEN layer. The shared
+// effect-splice core (addEffectFromChunks) once blanket-retargeted every tdpi to
+// the host — correct for AddEffect's foreign template bindings, but it silently
+// clobbered the picker's chosen layer to the host. The unit test above checks
+// synthControlValueEntry in isolation and so never caught it; this exercises the
+// full BuildPseudoEffect splice. AE 2020 + AE 2025 accept and preserve both
+// bindings on resave (header=Host, picker=Target).
+func TestBuildPseudoEffect_LayerPickerBindsChosenLayer(t *testing.T) {
+	p := NewProject()
+	comp, err := NewComposition(p, "Main", 400, 400, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewShapeLayer(comp, "Host"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewShapeLayer(comp, "Target"); err != nil {
+		t.Fatal(err)
+	}
+	rp, err := Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	var host, target *Layer
+	for _, c := range rp.Compositions {
+		for _, cl := range c.Layers {
+			switch cl.Name {
+			case "Host":
+				host = cl
+			case "Target":
+				target = cl
+			}
+		}
+	}
+	if host == nil || target == nil {
+		t.Fatal("Host/Target not found after Reopen")
+	}
+	if host.ID == target.ID {
+		t.Fatalf("Host and Target share ID %d — test cannot distinguish bindings", host.ID)
+	}
+
+	ctrls := []PseudoControl{
+		{Kind: PseudoSlider, Name: "Amt", Min: 0, Max: 100, Default: 50},
+		{Kind: PseudoLayer, Name: "Src", LayerID: target.ID},
+	}
+	if _, err := BuildPseudoEffect(host, "t", "Demo", "Demo", ctrls, PseudoLabelGBK); err != nil {
+		t.Fatalf("BuildPseudoEffect: %v", err)
+	}
+
+	lb := layerBack(host)
+	if lb == nil || lb.layrList == nil {
+		t.Fatal("host layer has no Layr back-ref")
+	}
+	var tdpis []uint32
+	var walk func(c *rifx.Chunk)
+	walk = func(c *rifx.Chunk) {
+		if c.ID == rifx.IDTdpi && len(c.Data) >= 4 {
+			tdpis = append(tdpis, binary.BigEndian.Uint32(c.Data[0:4]))
+		}
+		for _, ch := range c.Children {
+			walk(ch)
+		}
+	}
+	walk(lb.layrList)
+
+	var sawHost, sawTarget bool
+	for _, v := range tdpis {
+		switch v {
+		case host.ID:
+			sawHost = true
+		case target.ID:
+			sawTarget = true
+		}
+	}
+	if !sawHost {
+		t.Errorf("no tdpi == host ID %d (effect header must bind to host); tdpis=%v", host.ID, tdpis)
+	}
+	if !sawTarget {
+		t.Errorf("layer-picker tdpi not bound to chosen layer %d (clobbered to host?); tdpis=%v", target.ID, tdpis)
+	}
+}

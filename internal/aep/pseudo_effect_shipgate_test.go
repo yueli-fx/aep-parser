@@ -293,7 +293,9 @@ func runBuildPseudoEffectValueEntryGate(t *testing.T, aeExe string, target aep.A
 		t.Fatal("reopened project: layer S or T not found")
 	}
 	// Point 0.25/0.125 of a 400-comp → [100,50]; 3D adds z 0.0625 → 25. Picker
-	// bound to T by its internal ID → AE resolves to T's 1-based index.
+	// bound to T by its internal ID → AE's DOM exposes the resolved binding as
+	// T's 1-based timeline index. Layer.Index is 0-based (the on-disk Layr order,
+	// which matches AE top→bottom), so the AE-visible index is target2.Index+1.
 	controls := []aep.PseudoControl{
 		{Kind: aep.PseudoPoint, Name: "Center", PointDefault: []float64{0.25, 0.125}},
 		{Kind: aep.PseudoPoint3D, Name: "Pos3D", PointDefault: []float64{0.25, 0.125, 0.0625}},
@@ -319,7 +321,7 @@ func runBuildPseudoEffectValueEntryGate(t *testing.T, aeExe string, target aep.A
 	checks := fmt.Sprintf(`[`+
 		`{"idx":1,"prop":"value","expect":[100,50]},`+
 		`{"idx":2,"prop":"value","expect":[100,50,25]},`+
-		`{"idx":3,"prop":"value","expect":%d}]`, target2.Index)
+		`{"idx":3,"prop":"value","expect":%d}]`, target2.Index+1)
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":3,"checks":%s}`,
 		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
