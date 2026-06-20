@@ -31,6 +31,26 @@ func TestApplyPseudoEffect_AEShipGate_AE2025(t *testing.T) {
 
 func runApplyPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 	t.Helper()
+	// displayName "" → applied with the .ffx's own name; nameCodes nil → no
+	// custom-name char-code assertion.
+	runApplyPseudoEffectGateImpl(t, aeExe, target, "", nil)
+}
+
+// TestApplyPseudoEffectNamed_CJK_AEShipGate_* verifies a CJK effect-instance
+// display name ("伪效果", U+4F2A U+6548 U+679C) round-trips through Go → .aep →
+// AE exactly. CJK names are where naïve byte-pokers break (the Utf8 sub-record's
+// length is in bytes, not characters); we encode bytes, so AE reads "伪效果"
+// back as 3 chars with the right code points on both AE versions.
+func TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2020(t *testing.T) {
+	runApplyPseudoEffectGateImpl(t, ae2020(), aep.TargetAE2020, "伪效果", []rune{'伪', '效', '果'})
+}
+
+func TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2025(t *testing.T) {
+	runApplyPseudoEffectGateImpl(t, ae2025(), aep.TargetAE2025, "伪效果", []rune{'伪', '效', '果'})
+}
+
+func runApplyPseudoEffectGateImpl(t *testing.T, aeExe string, target aep.AETarget, displayName string, nameCodes []rune) {
+	t.Helper()
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
@@ -69,8 +89,8 @@ func runApplyPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 	if l == nil {
 		t.Fatal("reopened project: layer S not found")
 	}
-	if _, err := aep.ApplyPseudoEffect(l, ffx); err != nil {
-		t.Fatalf("ApplyPseudoEffect: %v", err)
+	if _, err := aep.ApplyPseudoEffectNamed(l, ffx, displayName); err != nil {
+		t.Fatalf("ApplyPseudoEffectNamed: %v", err)
 	}
 
 	tempDir := t.TempDir()
@@ -87,8 +107,16 @@ func runApplyPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 	}
 	out.Close()
 
-	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":8}`,
-		toFwd(inputAEP), toFwd(doneFile), matchName)
+	nameCodesJSON := ""
+	if len(nameCodes) > 0 {
+		parts := make([]string, len(nameCodes))
+		for i, r := range nameCodes {
+			parts[i] = fmt.Sprintf("%d", r)
+		}
+		nameCodesJSON = fmt.Sprintf(`,"nameCodes":[%s]`, strings.Join(parts, ","))
+	}
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":8%s}`,
+		toFwd(inputAEP), toFwd(doneFile), matchName, nameCodesJSON)
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}

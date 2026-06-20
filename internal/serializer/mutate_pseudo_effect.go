@@ -21,6 +21,17 @@ var ffxFormType = rifx.ChunkID{'F', 'a', 'F', 'X'}
 //
 // (Full contract + RE notes live on the aep.ApplyPseudoEffect facade.)
 func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
+	return ApplyPseudoEffectNamed(layer, ffxBytes, "")
+}
+
+// ApplyPseudoEffectNamed is ApplyPseudoEffect with a custom effect-instance
+// display name (the label shown in AE's Effect Controls / timeline). displayName
+// may be any UTF-8 string — including CJK like "伪效果" — because the name is
+// written as AE's "Utf8" + byte-length + bytes sub-record (the length is in
+// bytes, not runes, so multi-byte names round-trip cleanly). An empty
+// displayName keeps the .ffx's own name. The match-name (the AE lookup key,
+// "Pseudo/<uID>/<name>") is unaffected and stays ASCII.
+func ApplyPseudoEffectNamed(layer *Layer, ffxBytes []byte, displayName string) (*Effect, error) {
 	if layer == nil {
 		return nil, fmt.Errorf("ApplyPseudoEffect: layer is nil")
 	}
@@ -28,7 +39,7 @@ func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := transformPseudoSspcToInParade(sspcCh); err != nil {
+	if err := transformPseudoSspcToInParade(sspcCh, displayName); err != nil {
 		return nil, err
 	}
 	return addEffectFromChunks(layer, "ApplyPseudoEffect", matchName, tdmnCh, sspcCh)
@@ -43,7 +54,7 @@ func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 // (sourced from any native effect template, which are AE-baked in-parade form)
 // into the sspc's parT (param defs) and tdgp (param values), each just before
 // their trailing Group End sentinel.
-func transformPseudoSspcToInParade(sspc *rifx.Chunk) error {
+func transformPseudoSspcToInParade(sspc *rifx.Chunk, displayName string) error {
 	parT := childByForm(sspc, rifx.IDparT)
 	if parT == nil {
 		return fmt.Errorf("ApplyPseudoEffect: pseudo sspc has no parT param-defs")
@@ -56,9 +67,15 @@ func transformPseudoSspcToInParade(sspc *rifx.Chunk) error {
 	// A .ffx (FaFX preset) stores name strings raw (fixed-width / length-by-size);
 	// an Egg! project stores them Utf8-wrapped ("Utf8" + u32 len + bytes). Splicing
 	// raw strings makes AE misread the next chunk's length → "file is damaged".
-	// Re-encode fnam + every raw tdsn in the sspc tree to the Utf8 form.
+	// Re-encode fnam + every raw tdsn in the sspc tree to the Utf8 form. The fnam
+	// (effect-instance display name) takes displayName when non-empty — any UTF-8,
+	// incl. CJK (the length is in bytes, so multi-byte names are exact).
 	if fnam := childByID(sspc, rifx.IDFnam); fnam != nil {
-		fnam.Data = utf8StringData(string(bytes.TrimRight(fnam.Data, "\x00")))
+		name := displayName
+		if name == "" {
+			name = string(bytes.TrimRight(fnam.Data, "\x00"))
+		}
+		fnam.Data = utf8StringData(name)
 	}
 	reencodeRawTdsn(sspc)
 
@@ -94,6 +111,11 @@ func transformPseudoSspcToInParade(sspc *rifx.Chunk) error {
 	scaffold := make([]*rifx.Chunk, 0, 5)
 	for _, ch := range valTdgp.Children {
 		if ch.ID == rifx.IDTdsb || ch.ID == rifx.IDTdsn {
+			// AE shows the effect-instance label from this value-group tdsn
+			// (NOT fnam), so the display-name override lands here.
+			if ch.ID == rifx.IDTdsn && displayName != "" {
+				ch.Data = utf8StringData(displayName)
+			}
 			scaffold = append(scaffold, ch)
 		}
 	}

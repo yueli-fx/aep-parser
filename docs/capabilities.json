@@ -487,32 +487,6 @@
   {
     "symbol": "SetLabel",
     "kind": "method",
-    "recv": "*Marker",
-    "signature": "func (m *Marker) SetLabel(index uint8) error",
-    "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10.",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMarkerFields_AEShipGate_AE2020",
-        "TestMarkerFields_AEShipGate_AE2025"
-      ],
-      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;双版本 AE gated(marker-fields;AE DOM label=4 实读)",
-      "incident": null,
-      "alias": [
-        "marker label",
-        "标记颜色",
-        "label color",
-        "时间线颜色"
-      ]
-    }
-  },
-  {
-    "symbol": "SetLabel",
-    "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetLabel(index uint8) error",
     "summary": "SetLabel writes the project-panel color label index (0..16) for the composition (Item-level).",
@@ -534,6 +508,32 @@
         "颜色标签",
         "项目面板标签",
         "comp label"
+      ]
+    }
+  },
+  {
+    "symbol": "SetLabel",
+    "kind": "method",
+    "recv": "*Marker",
+    "signature": "func (m *Marker) SetLabel(index uint8) error",
+    "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;双版本 AE gated(marker-fields;AE DOM label=4 实读)",
+      "incident": null,
+      "alias": [
+        "marker label",
+        "标记颜色",
+        "label color",
+        "时间线颜色"
       ]
     }
   },
@@ -1163,6 +1163,35 @@
     }
   },
   {
+    "symbol": "ApplyPseudoEffectNamed",
+    "kind": "func",
+    "signature": "func ApplyPseudoEffectNamed(layer *Layer, ffxBytes []byte, displayName string) (*Effect, error)",
+    "summary": "ApplyPseudoEffectNamed is ApplyPseudoEffect with a custom effect-instance display name (the label in AE's Effect Controls / timeline).",
+    "has_cap": true,
+    "cap": {
+      "domain": "effect",
+      "tier": "alpha",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2020",
+        "TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2025"
+      ],
+      "boundary": "同 ApplyPseudoEffect,额外可设效果实例显示名,支持任意 UTF-8 含中文(显示名落在值组 tdsn,非 fnam——RE 实测;Utf8 子记录按字节长,多字节精确 round-trip);matchName 仍 ASCII 不变。中文名「伪效果」AE 2020+2025 读回 3 字符 U+4F2A/6548/679C(ship-gate 绿)",
+      "incident": [
+        "add-effect-splice-re"
+      ],
+      "alias": [
+        "pseudo effect named",
+        "伪效果命名",
+        "中文效果名",
+        "自定义显示名",
+        "cjk effect name",
+        "utf8 effect name"
+      ]
+    }
+  },
+  {
     "symbol": "RemoveEffect",
     "kind": "func",
     "signature": "func RemoveEffect(layer *Layer, index int) error",
@@ -1542,31 +1571,6 @@
   {
     "symbol": "SetAlphaStops",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error",
-    "summary": "SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestV2_2_GradientStroke_AEShipGate_AE2020",
-        "TestV2_2_GradientStroke_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke alpha stops",
-        "渐变描边透明度色标",
-        "alpha stops"
-      ]
-    }
-  },
-  {
-    "symbol": "SetAlphaStops",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error",
     "summary": "SetAlphaStops replaces the gradient's alpha (opacity) stops.",
@@ -1587,6 +1591,31 @@
         "渐变透明度色标",
         "alpha stops",
         "渐变不透明度"
+      ]
+    }
+  },
+  {
+    "symbol": "SetAlphaStops",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error",
+    "summary": "SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestV2_2_GradientStroke_AEShipGate_AE2020",
+        "TestV2_2_GradientStroke_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke alpha stops",
+        "渐变描边透明度色标",
+        "alpha stops"
       ]
     }
   },
@@ -1934,6 +1963,31 @@
   {
     "symbol": "SetStartPoint",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
+    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke start point",
+        "渐变描边起点",
+        "gradient direction"
+      ]
+    }
+  },
+  {
+    "symbol": "SetStartPoint",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetStartPoint(v [2]float64) error",
     "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
@@ -1954,31 +2008,6 @@
         "渐变起点",
         "gradient direction",
         "渐变方向"
-      ]
-    }
-  },
-  {
-    "symbol": "SetStartPoint",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
-    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke start point",
-        "渐变描边起点",
-        "gradient direction"
       ]
     }
   },
@@ -8349,32 +8378,6 @@
   {
     "symbol": "SetAmount",
     "kind": "method",
-    "recv": "*PuckerBloatNode",
-    "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
-    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
-    "has_cap": true,
-    "cap": {
-      "domain": "shape",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGPuckerBloat_AEShipGate_AE2020",
-        "TestMGPuckerBloat_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "pucker bloat amount",
-        "膨胀收缩量",
-        "pucker",
-        "bloat"
-      ]
-    }
-  },
-  {
-    "symbol": "SetAmount",
-    "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetAmount(v float64) error",
     "summary": "SetAmount sets the offset amount in pixels (positive grows, negative shrinks).",
@@ -8395,6 +8398,32 @@
         "偏移量",
         "grow shrink",
         "offset paths amount"
+      ]
+    }
+  },
+  {
+    "symbol": "SetAmount",
+    "kind": "method",
+    "recv": "*PuckerBloatNode",
+    "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
+    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
+    "has_cap": true,
+    "cap": {
+      "domain": "shape",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGPuckerBloat_AEShipGate_AE2020",
+        "TestMGPuckerBloat_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "pucker bloat amount",
+        "膨胀收缩量",
+        "pucker",
+        "bloat"
       ]
     }
   },

@@ -30,13 +30,23 @@
         if (!layer) throw new Error("no layer with a non-empty Effect Parade");
         var fx = layer.property("ADBE Effect Parade").property(1);
         log.push("matchName=" + fx.matchName);
-        log.push("name=" + fx.name);
         log.push("numProperties=" + fx.numProperties);
         log.push("enabled=" + fx.enabled);
+        var codes = [];
+        for (var c = 0; c < fx.name.length; c++) codes.push(fx.name.charCodeAt(c));
+        log.push("name.charCodes=" + codes.join(","));
         ok = (fx.matchName === args.matchName) &&
              (fx.name.indexOf("Missing") < 0) &&
              (fx.numProperties >= args.minParams) &&
              (fx.enabled === true);
+        // Optional CJK / custom display-name check by char-code (keeps non-ASCII
+        // out of this source). args.nameCodes = array of expected charCodeAt values.
+        if (ok && args.nameCodes) {
+            ok = (fx.name.length === args.nameCodes.length);
+            for (var k = 0; ok && k < args.nameCodes.length; k++) {
+                if (fx.name.charCodeAt(k) !== args.nameCodes[k]) ok = false;
+            }
+        }
     } catch (e) { log.push("ERROR: " + e.toString() + " line=" + e.line); }
 
     var done = new File(args.done);

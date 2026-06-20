@@ -4,6 +4,8 @@ summary: 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)spli
 last_updated: 2026-06-20
 ---
 
+> **额外能力(2026-06-20)**:`ApplyPseudoEffectNamed(layer, ffx, displayName)` —— 可设效果实例**显示名**,**支持任意 UTF-8 含中文**(如「伪效果」)。RE 发现显示名落在**值组 tdsn**(非 fnam);Utf8 子记录按**字节长**编码,故多字节中文精确 round-trip。AE 2020+2025 ship-gate 绿(`TestApplyPseudoEffectNamed_CJK_AEShipGate_*`,读回 U+4F2A/6548/679C)。matchName 仍 ASCII。**(社区工具普遍栽在中文名,本库过)**。
+>
 > **进度**(2026-06-20):Phase 0 ✅ GO · Phase 1 ✅ · **Phase 2 ✅ DONE** —— `ApplyPseudoEffect`(facade+serializer)**AE 2020+2025 双版本 ship-gate 绿**(committed:`TestApplyPseudoEffect_AEShipGate_AE2020/2025`)。转换 = fnam→Utf8 + parT 追加 `ADBE Effect Built In Params`(parn 重算)+ tdgp 丢 .ffx 值仅留骨架。**v1 范围 = 以 pard 默认值应用**(.ffx 作者值暂不保留——AE 拒裸值 'missing data';Set* 调参未接)。下一步(可选增强,非 v1):保留作者值(per-param 值 materialize 进合法 in-parade tdbs)+ Set* 调参 + 多控件类型/读侧。
 
 # 支持 AE Pseudo Effect(自定义伪效果)纯 Go 离线应用

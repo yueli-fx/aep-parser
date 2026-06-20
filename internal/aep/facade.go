@@ -807,6 +807,19 @@ func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 	return serializer.ApplyPseudoEffect(layer, ffxBytes)
 }
 
+// ApplyPseudoEffectNamed is ApplyPseudoEffect with a custom effect-instance
+// display name (the label in AE's Effect Controls / timeline). displayName may be
+// any UTF-8 string — including CJK such as "伪效果" — because AE stores the name
+// as a "Utf8" + byte-length + bytes sub-record and we count bytes, not runes, so
+// multi-byte names round-trip exactly (a place naïve byte-pokers trip up). An
+// empty displayName keeps the .ffx's own name. The match-name (AE's ASCII lookup
+// key) is unaffected. All other behaviour matches ApplyPseudoEffect.
+//
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2020,TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2025 incident=add-effect-splice-re boundary="同 ApplyPseudoEffect,额外可设效果实例显示名,支持任意 UTF-8 含中文(显示名落在值组 tdsn,非 fnam——RE 实测;Utf8 子记录按字节长,多字节精确 round-trip);matchName 仍 ASCII 不变。中文名「伪效果」AE 2020+2025 读回 3 字符 U+4F2A/6548/679C(ship-gate 绿)" alias="pseudo effect named,伪效果命名,中文效果名,自定义显示名,cjk effect name,utf8 effect name"
+func ApplyPseudoEffectNamed(layer *Layer, ffxBytes []byte, displayName string) (*Effect, error) {
+	return serializer.ApplyPseudoEffectNamed(layer, ffxBytes, displayName)
+}
+
 // AddTextOpacityAnimator adds a per-character Opacity animator with a Range
 // Selector to a text layer — the kinetic-typography primitive (fade / wipe text
 // in or out one character at a time). opacity (0–100) is applied to the
