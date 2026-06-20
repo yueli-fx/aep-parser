@@ -1,10 +1,10 @@
 # Cockpit — aep-parser
 
-**Last updated**: 2026-06-18 by claude（**「理解一个工程」研究 arc：效果字典 + 三轴本体冻结 + 理解自动化**。① `effects-dict` 基础设施:5 版本英文效果字典(matchName→名+类型+**默认值**)+ 可重生成 dumper(`scripts/dump_effects_dict.*`)+ checklist。② **`technique-ontology` spec 冻结(graduate)**:角色/技法/机制三轴本体 + schema v2,投大规模工程前的数据契约,经火焰/闪电/控制器三类压测。③ `fx-techniques` 14 技法重构到三轴(glow 跨现象复用实证)。④ **aepdissect 消费字典**:自动译参数 + 标非默认 = 配方信号(`✎ Glow Threshold=139 (default 153)` + `→ tuned:` 摘要)。核心洞察:.aep 用 **elision**(只存非默认)→ 字节即配方信号、免费降噪。火焰 v3 早先已用户验收 + 双版本 gate 过。）
+**Last updated**: 2026-06-20 by claude
 
 **Active focus**: **Booyah Glitch 全工程复刻 = 理解金标准检验**(spec `2026-06-19-booyah-glitch-full-replication.md` + plan `2026-06-19-booyah-glitch-replication.md`)。把整个真实工程(12 comp/61 层/~100 mask/wiggle+Evolution 表达式/Curves)用咱们 Go API 从零重建——round-trip 只证读得回字节,**从零重建证真懂每个 chunk 怎么来的**。用户铁律:**不逃避未知字段**(撞墙 RE,物理不可写给实证负结论)。判据 = 结构保真(AE 接受 + DOM 读回值对账)+ 终帧渲染像素对照;范围 = 全 12 comp,DAG 叶→根逐 comp 验;方法 = 手写 per-comp 生成器、**原工程只读当取值神谕、chunk 全由 API 重建(绝不 copy 字节)**。是上游「技法内化框架」(`specs/2026-06-18-fx-technique-internalization.md`)的「复现判据 = 理解金标准」检验项,bar 拉到字节/工程级。**不变量**:知识单一家 = flightdeck + CLAUDE.md;能力真相源 = capindex(`go run ./cmd/capindex -q <词>`);每渲染类双版本 AE ship-gate(红线4)。
 
-## 进行中
+## In Progress
 
 <!-- AUTO:inprogress -->
 - [2026-06-18-fx-technique-internalization.md](specs/2026-06-18-fx-technique-internalization.md) — 通用机制:任何参考 .aep → 解析 → 拆角色 → 抽跨域技法原子 → 存 flightdeck 两层结构(技法库 references/fx-techni…
@@ -14,9 +14,11 @@
 - [2026-06-19-booyah-glitch-full-replication.md](specs/2026-06-19-booyah-glitch-full-replication.md) — 把整个 Booyah Glitch 真实工程(12 comp/61 层/~100 mask/wiggle 表达式/Curves)用咱们的 Go API 从零完整…
 - [2026-06-20-pseudo-effect-support.md](specs/2026-06-20-pseudo-effect-support.md) — 让本库纯 Go 离线把 AE Pseudo Effect(.ffx 自定义伪效果)splice 进层 Effect Parade,免开 AE。.ffx=RIFX…
 - [2026-06-19-booyah-glitch-replication.md](plans/2026-06-19-booyah-glitch-replication.md) — 实现 Booyah Glitch 全工程复刻:Phase0 前置 spike(表达式 Evolution=time*N + wiggle / 单层 ~21 ma…
+- [coverage-detail.md](plans/coverage-detail.md) — AE-attribute → Go-field 详细交叉矩阵(按需参考);能力状态以 capindex 为准
+- [coverage.md](plans/coverage.md) — capindex 不覆盖的残值(暂搁/不可达/negative findings/可探方向);写/做能力真相源已迁 capindex
 <!-- /AUTO -->
 
-## 下一步
+## Next
 
 **Booyah Glitch 全工程复刻 arc — Phase 0 完成 ✅,Phase 1 起**(plan `2026-06-19-booyah-glitch-replication.md`)。
 
@@ -60,6 +62,6 @@ Phase 0(前置 de-risk)收口:
 - 泛型 `DuplicateItem` · `ImportComposition` · **Property synthesis**（暂搁大 feature，`incidents/transform-group-default-omission.md`）。
 - fixture/RE-gated + deferred R-only（DisplayColorSpace / ValueText / environmentLayer / ligature 等）详 `plans/coverage.md` § 暂搁/不可达。
 
-## Hanging tasks
+## Hanging Tasks
 
 无。

@@ -1,5 +1,5 @@
 ---
-status: done
+status: active
 summary: BuildPseudoEffect 支线已全部完成(Dropdown/Group/Label/Point 坐标/3DPoint 坐标/Layer-picker 均双版本 AE gate 绿)。仅剩 CJK 控件标签的 AE 架构限制(byte-equiv-only,不可 ship-gate)。下方保留 RE 字节布局与 ship-gate 技巧作参考。
 when_to_read: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/value-entry 字节布局 + ship-gate 技巧时
 applies_to: [pseudo-effect, build-pseudo-effect, handoff, continuation, point, layer-picker, dropdown, group, value-entry]

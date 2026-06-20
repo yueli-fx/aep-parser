@@ -1,5 +1,5 @@
 ---
-status: active
+status: obsolete
 when_to_read: editing parse_keyframe.go or write_keyframe.go; adding new keyframe property type; debugging "ease/value at wrong offset"
 applies_to: [keyframe, layout, spatial, non-spatial, layoutFor, parse_keyframe, write_keyframe]
 last_updated: 2026-05-27

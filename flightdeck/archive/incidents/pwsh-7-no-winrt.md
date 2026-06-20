@@ -1,5 +1,5 @@
 ---
-status: active
+status: obsolete
 since: 2026-05-27
 last_updated: 2026-05-27
 when_to_read: writing PowerShell that touches UWP / WinRT APIs (Windows.Media.Ocr, Windows.Graphics.*, Windows.Storage.*); debugging "Unable to find type" errors when loading WinRT classes from pwsh; choosing PowerShell version for Windows automation in this repo

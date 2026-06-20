@@ -1,5 +1,5 @@
 ---
-status: active
+status: obsolete
 since: 2026-05-27
 last_updated: 2026-05-27
 when_to_read: writing dispatch rules that ocrMatch Chinese / Japanese / Korean text via Windows.Media.Ocr; debugging "rule doesn't match even though OCR clearly captured the right phrase"; matching patterns against CJK OCR output

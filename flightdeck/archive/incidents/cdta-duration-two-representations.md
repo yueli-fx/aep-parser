@@ -1,5 +1,5 @@
 ---
-status: active
+status: obsolete
 when_to_read: resolving render-queue time spans; comparing comp Duration against py-aep golden; debugging "comp duration off by ~1.5×" on synthetic fixtures
 applies_to: [composition, cdta, duration, work-area, render-queue, py-aep-parity]
 last_updated: 2026-06-01

@@ -1,5 +1,5 @@
 ---
-status: idea
+status: done
 summary: Path embed bytes — RE findings（V2.2.1 子项②预备，已 ship，留作 Stroke 参考）
 ---
 

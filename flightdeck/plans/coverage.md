@@ -1,8 +1,7 @@
 ---
-status: superseded
+status: active
 implements: archive/specs/2026-05-26-py-aep-parity-design.md
 summary: capindex 不覆盖的残值(暂搁/不可达/negative findings/可探方向);写/做能力真相源已迁 capindex
-superseded_by: docs/capabilities.json
 last_updated: 2026-06-16
 ---
 

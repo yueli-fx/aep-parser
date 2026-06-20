@@ -1,5 +1,5 @@
 ---
-status: reference
+status: active
 implements: archive/specs/2026-05-26-py-aep-parity-design.md
 summary: AE-attribute → Go-field 详细交叉矩阵(按需参考);能力状态以 capindex 为准
 last_updated: 2026-06-16
