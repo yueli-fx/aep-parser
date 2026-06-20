@@ -127,3 +127,34 @@ Scribe 只示范 group / Color / Slider。补验 Point / Angle / Checkbox / Drop
 ## 8. 依据
 
 `references/pseudoeffect-support-re.md`(字节 dissect + 参考实现)· `references/PseudoEffect/`(rendertom 源 + Scribe 样本)· `incidents/add-effect-splice-re.md`(effect splice 机制,本 feature 复用)· `docs/embed-template-architecture.md`(模板/跨版本)· capindex `AddEffect`(216 内置库基线)· CLAUDE.md 红线 4/7 + #2/#3(API 分级 + 物理分层)。
+
+---
+
+## 9. 方向转向 — 从零生成(`BuildPseudoEffect`,2026-06-20)
+
+用户拍板:**apply-only 无价值,转「纯 Go 从零合成伪效果、禁用模板」**(「不能什么都用模版偷懒」)。`ApplyPseudoEffect*` 保留(双版本 gate 绿,含 CJK 实例名),但主交付转 `BuildPseudoEffect`。
+
+### 已交付(双版本 AE ship-gate 绿)
+- `BuildPseudoEffect(layer, uid, name, displayName, controls)` — 每个 pard 按 RE 出的 148B 布局**逐字段合成**,无 .ffx / 无 AE / 不 clone 模板字节。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D。
+- **自定义值(pard 级,AE 实测回读)**:`PseudoControl{Min,Max,Default,Checked,Color}`。gate 实测 AE 读回 slider value 50 / range -100..100、checkbox checked、angle 45°。
+
+### RE 真相(金样本 `test_data/pseudo_rich_demo.aep`,13 控件 AE-authored)
+pard 148B,值字段全在 pard 内(被 elide 的控件 AE 仍从 pard 读 min/max/default):
+- **Slider(0x0a)**:@0x04=0x200 flag · @0x38 f8 default · @0x68/@0x6C f4 **valid range = AE minValue/maxValue** · @0x70/@0x74 f4 visible(track)range · @0x78 f4 default · @0x7C=0x00050003 精度/显示 flag。
+- **Color(0x05)**:@0x38 ARGB last · @0x3C ARGB default(**非** @0x40——早期草稿写错偏移,白色凑巧过 gate)。
+- **Angle(0x03)**:@0x38/@0x3C s4 度数 16.16 定点(last/default)。
+- **Checkbox(0x04)**:@0x38 u32 last · @0x3C u8 default(1=勾)· parT 内尾随 `pdnm`(Utf8 标签,缺则 AE「must have nameptr set」)。
+- **Point(0x06)**:@0x3C=0x00050000 · @0x48=0x00640000 结构常量(缺则 AE「range has no values」);**坐标在值条目,不在 pard**。
+- **Dropdown(0x07)**:@0x38 last · @0x3C hi16=nb_options/lo16 · parT 内尾随 `pdnm`=「opt1|opt2」。
+- **Layer-picker**:control_type **0x00**(同 effect header)+ @0x30=2;值条目带 `tdpi`+`tdps`。
+- **Group/Label(0x0d)**:label 带 @0x04=0x20 flag,group 不带;配对 **GroupEnd(0x0e)** @0x04=0x08。
+
+### CJK 控件标签的解(待实现增量)
+pard @0x10 名是 **GBK**(系统 ANSI codepage),非 UTF-8 → 跨系统乱码。**真解**:每控件在值组 tdgp 里有 value entry(`LIST tdbs{tdsb + tdsn(Utf8!) + tdb4(124B) + cdat}`),AE 的 Effect Controls 显示名取自 **Utf8 tdsn**(金样本里「颜色」「标签」「3D 点」全是 UTF-8 tdsn)。被 elide(默认值)的控件无 value entry → 退回 pard GBK 名。⇒ **保证 CJK 显示 = 给每控件合成非 elide 的 value entry(带 Utf8 tdsn)**。此「值条目合成」同时解锁:Point/3DPoint 默认坐标 + Layer-picker 选层。
+
+### ship-gate verify-JSX gotcha(可复用)
+ExtendScript 里对**刚 fetch 的伪 slider 属性**直接读 `p.minValue` 返回 stale(=maxValue);必须**先碰 `p.hasMin`** 再读 `minValue`(`maxValue` 同理需先碰 `hasMax`)。`fx.property(matchName)` 读 minValue 也踩此坑,改 `fx.property(index)` + 先碰 hasMin 才稳。RE 决定性证据:同一文件 probe(先碰 hasMin)报 -100、gate(冷读)报 100。
+
+### 仍未做
+- **值条目合成**(CJK 标签 + Point/3DPoint 坐标 + Layer-picker)= 下一增量,一箭多雕。
+- **Dropdown/Group/Label** 控件类型(pard 布局已 RE,差合成 + gate)。

@@ -835,7 +835,9 @@ const (
 )
 
 // PseudoControl is one control of a from-scratch pseudo effect: a kind + the
-// label shown in AE's Effect Controls.
+// label shown in AE's Effect Controls, plus optional per-kind customization
+// (Slider Min/Max/Default, Angle Default, Checkbox Checked, Color). The optional
+// fields' zero values reproduce AE's plain type defaults.
 type PseudoControl = serializer.PseudoControl
 
 // BuildPseudoEffect builds a Pseudo Effect entirely in Go — no .ffx file and no
@@ -851,23 +853,26 @@ type PseudoControl = serializer.PseudoControl
 // no AE, and no cloned template bytes — so the supported kinds are exactly what
 // PseudoControlKind enumerates.
 //
-// Applied at defaults: controls take their type's default value/range. Custom
-// default / min / max per control is a separate value-materialization step (the
-// slider track range lives in the value entry, which this all-defaults form
-// omits — same boundary as ApplyPseudoEffect). Control labels are written into
-// the pard name field, which AE reads in the system ANSI codepage, so ASCII
-// labels display exactly while CJK labels are mojibake until per-control value
-// entries carry a UTF-8 name (the same value-materialization step).
+// Per-control customization (PseudoControl optional fields, written into the
+// pard and AE-read-back verified): Slider Min/Max (the slider's valid range —
+// AE's minValue/maxValue) + Default, Angle Default, Checkbox Checked, Color
+// default (RGBA). Their zero values give AE's plain type defaults. Still NOT
+// done (needs per-control value-entry synthesis): Point/3DPoint default
+// position, and CJK control labels — labels are written into the pard name
+// field, which AE reads in the system ANSI codepage, so ASCII labels display
+// exactly while CJK is mojibake until each control carries a UTF-8 tdsn value
+// entry. Dropdown/Layer/Group control kinds are also not yet synthesized.
 //
 // Refused (same as AddEffect): camera / light layers, and New*-built layers
 // never parsed (call aep.Reopen first).
 //
-// Alpha / structural — AE 2020 + AE 2025 ship-gate green (a from-scratch effect
-// with Slider/Color/Checkbox/Angle/Point controls reads back live in AE). The
-// apply-at-defaults + ASCII-label scope keeps it Alpha. Free function
-// (CLAUDE.md #2 structural-op call-form). See spec 2026-06-20-pseudo-effect-support.
+// Alpha / structural — AE 2020 + AE 2025 ship-gate green: a from-scratch effect
+// with Slider/Color/Checkbox/Angle/Point controls reads back live in AE, with
+// the custom slider value 50 / range -100..100, checkbox checked, and angle 45°
+// honored. The remaining gaps (CJK labels, more kinds) keep it Alpha. Free
+// function (CLAUDE.md #2). See spec 2026-06-20-pseudo-effect-support.
 //
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**apply-at-defaults + ASCII 标签**:控件取类型默认值/范围;自定义 default/min/max(值条目 tdum/tduM)未做;控件标签写 pard 名(AE 按 ANSI 读→ASCII 准、CJK 乱码,需每控件 UTF-8 tdsn 值条目=同值 materialize 边界);Dropdown(需 pdnm 选项)/Layer/Group 未做;camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox,离线造伪效果"
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**自定义值(pard 级,AE 实测回读)**:Slider Min/Max(valid range=AE minValue/maxValue)+Default、Angle Default、Checkbox Checked、Color 默认 RGBA——零值=类型默认。**未做(需每控件值条目合成)**:Point/3DPoint 默认坐标、CJK 控件标签(标签写 pard 名 AE 按 ANSI 读→ASCII 准、CJK 乱码,需 UTF-8 tdsn 值条目);Dropdown(需 pdnm 选项)/Layer/Group 控件类型未做;camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox,slider min max,自定义范围,离线造伪效果"
 func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl) (*Effect, error) {
 	return serializer.BuildPseudoEffect(layer, uid, name, displayName, controls)
 }

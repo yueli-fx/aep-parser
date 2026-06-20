@@ -31,10 +31,25 @@ var pardControlType = map[PseudoControlKind]byte{
 	PseudoPoint3D:  0x12,
 }
 
-// PseudoControl is one control in a from-scratch pseudo effect.
+// PseudoControl is one control in a from-scratch pseudo effect. The optional
+// fields customize the control's pard defaults (RE'd from a real Pseudo Effect
+// Maker output); their zero values reproduce AE's plain type defaults, so a
+// bare {Kind, Name} keeps the previous behavior.
 type PseudoControl struct {
 	Kind PseudoControlKind
 	Name string // the control's label in AE's Effect Controls
+
+	// Slider (PseudoSlider): visible + valid range and initial value. When
+	// Max <= Min the range falls back to 0..100. Default is clamped into range.
+	Min, Max float64
+	Default  float64 // Slider initial value; Angle initial value (degrees).
+
+	// Checkbox (PseudoCheckbox): initial state.
+	Checked bool
+
+	// Color (PseudoColor): default as RGBA in 0..1. nil → white. Length-4
+	// slices only; out-of-range components are clamped to [0,1].
+	Color []float64
 }
 
 // BuildPseudoEffect constructs a pseudo effect entirely in Go — no .ffx, no AE,
@@ -127,9 +142,11 @@ func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
 	return synthPard(ct, c.Name, func(d []byte) {
 		switch c.Kind {
 		case PseudoColor:
-			// @0x40 ARGB last + @0x44 ARGB default — white by default.
-			bePutU32(d[0x40:], 0xffffffff)
-			bePutU32(d[0x44:], 0xffffffff)
+			// @0x38 ARGB last + @0x3C ARGB default (RE'd offsets — an earlier
+			// draft wrote @0x40/@0x44, which AE silently ignored). nil → white.
+			argb := colorToARGB(c.Color)
+			bePutU32(d[0x38:], argb)
+			bePutU32(d[0x3C:], argb)
 		case PseudoPoint:
 			// RE'd structural defaults (@0x3C, @0x48); actual position lives in
 			// the value entry. AE rejects a point pard without these ("range has
@@ -137,16 +154,40 @@ func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
 			bePutU32(d[0x3C:], 0x00050000)
 			bePutU32(d[0x48:], 0x00640000)
 		case PseudoSlider:
-			// @0x04 slider flag; @0x38 f8 default(0); @0x68/@0x6C f4 valid range;
-			// @0x70/@0x74 f4 slider range; @0x78 f4 default.
+			// @0x04 slider flag; @0x38 f8 default; @0x68/@0x6C f4 valid range;
+			// @0x70/@0x74 f4 visible range; @0x78 f4 default; @0x7C precision/
+			// display flags (constant 0x00050003 in AE-authored sliders).
+			lo, hi := c.Min, c.Max
+			if hi <= lo {
+				lo, hi = 0, 100
+			}
+			def := c.Default
+			if def < lo {
+				def = lo
+			} else if def > hi {
+				def = hi
+			}
 			bePutU32(d[0x04:], 0x00000200)
-			bePutF32(d[0x68:], -1000)
-			bePutF32(d[0x6C:], 1000)
-			bePutF32(d[0x70:], 0)
-			bePutF32(d[0x74:], 100)
-			bePutF32(d[0x78:], 0)
-		case PseudoAngle, PseudoCheckbox, PseudoPoint3D:
-			// default 0 / unchecked / origin — already zero.
+			bePutF64(d[0x38:], def)
+			bePutF32(d[0x68:], float32(lo))
+			bePutF32(d[0x6C:], float32(hi))
+			bePutF32(d[0x70:], float32(lo))
+			bePutF32(d[0x74:], float32(hi))
+			bePutF32(d[0x78:], float32(def))
+			bePutU32(d[0x7C:], 0x00050003)
+		case PseudoAngle:
+			// @0x38 last + @0x3C default, both s4 degrees in 16.16 fixed point.
+			fx := uint32(int32(c.Default * 65536))
+			bePutU32(d[0x38:], fx)
+			bePutU32(d[0x3C:], fx)
+		case PseudoCheckbox:
+			// @0x38 u32 last + @0x3C u8 default — 1 = checked.
+			if c.Checked {
+				bePutU32(d[0x38:], 1)
+				d[0x3C] = 1
+			}
+		case PseudoPoint3D:
+			// origin default — already zero.
 		}
 	}), nil
 }
@@ -179,4 +220,29 @@ func bePutU32(b []byte, v uint32) {
 
 func bePutF32(b []byte, f float32) {
 	bePutU32(b, math.Float32bits(f))
+}
+
+func bePutF64(b []byte, f float64) {
+	v := math.Float64bits(f)
+	for i := 0; i < 8; i++ {
+		b[i] = byte(v >> (56 - 8*i))
+	}
+}
+
+// colorToARGB packs an RGBA-in-0..1 slice into AE's 0xAARRGGBB pard color word.
+// nil (or any malformed length) → opaque white, the AE default.
+func colorToARGB(rgba []float64) uint32 {
+	if len(rgba) != 4 {
+		return 0xffffffff
+	}
+	clamp := func(f float64) uint32 {
+		if f <= 0 {
+			return 0
+		}
+		if f >= 1 {
+			return 255
+		}
+		return uint32(f*255 + 0.5)
+	}
+	return clamp(rgba[3])<<24 | clamp(rgba[0])<<16 | clamp(rgba[1])<<8 | clamp(rgba[2])
 }

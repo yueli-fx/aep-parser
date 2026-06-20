@@ -47,6 +47,27 @@
                 if (fx.name.charCodeAt(k) !== args.nameCodes[k]) ok = false;
             }
         }
+        // Optional per-control value/range read-back. args.checks = array of
+        // {idx, prop, expect}: idx = 1-based property index within the effect,
+        // prop ∈ value|min|max, expect = number. Proves AE honored the
+        // synthesized pard defaults. (Index access is used over property(mn)
+        // because the latter mis-reports minValue for pseudo sliders.)
+        if (ok && args.checks) {
+            for (var ci = 0; ci < args.checks.length; ci++) {
+                var chk = args.checks[ci];
+                var p = fx.property(chk.idx);
+                if (!p) { log.push("check[" + ci + "] missing idx " + chk.idx); ok = false; break; }
+                // Touch hasMin/hasMax before minValue/maxValue: on a freshly
+                // fetched pseudo-slider property, minValue reads stale (returns
+                // maxValue) unless hasMin is queried first.
+                var got;
+                if (chk.prop === "min") { if (p.hasMin) {} got = p.minValue; }
+                else if (chk.prop === "max") { if (p.hasMax) {} got = p.maxValue; }
+                else got = p.value;
+                log.push("check[" + ci + "] [" + chk.idx + "]." + chk.prop + "=" + got);
+                if (Math.abs(got - chk.expect) > 0.001) ok = false;
+            }
+        }
     } catch (e) { log.push("ERROR: " + e.toString() + " line=" + e.line); }
 
     var done = new File(args.done);

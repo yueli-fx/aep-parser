@@ -92,10 +92,10 @@ func runBuildPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 		}
 	}
 	controls := []aep.PseudoControl{
-		{Kind: aep.PseudoSlider, Name: "Strength"},
-		{Kind: aep.PseudoColor, Name: "Tint"},
-		{Kind: aep.PseudoCheckbox, Name: "Enabled"},
-		{Kind: aep.PseudoAngle, Name: "Rotation"},
+		{Kind: aep.PseudoSlider, Name: "Strength", Min: -100, Max: 100, Default: 50},
+		{Kind: aep.PseudoColor, Name: "Tint", Color: []float64{1, 0, 0, 1}},
+		{Kind: aep.PseudoCheckbox, Name: "Enabled", Checked: true},
+		{Kind: aep.PseudoAngle, Name: "Rotation", Default: 45},
 		{Kind: aep.PseudoPoint, Name: "Center"},
 	}
 	if _, err := aep.BuildPseudoEffect(l, "aepgo01", "Demo", "Demo Effect", controls); err != nil {
@@ -115,9 +115,17 @@ func runBuildPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 	}
 	out.Close()
 
-	// 6 = 5 controls + Compositing Options.
-	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":6}`,
-		toFwd(inputAEP), toFwd(doneFile), matchName)
+	// 6 = 5 controls + Compositing Options. checks assert AE honored the
+	// synthesized pard defaults (1-based property index within the effect):
+	// [1] slider value 50 / range -100..100, [3] checkbox checked=1, [4] angle 45°.
+	const checks = `[` +
+		`{"idx":1,"prop":"value","expect":50},` +
+		`{"idx":1,"prop":"min","expect":-100},` +
+		`{"idx":1,"prop":"max","expect":100},` +
+		`{"idx":3,"prop":"value","expect":1},` +
+		`{"idx":4,"prop":"value","expect":45}]`
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":6,"checks":%s}`,
+		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
 	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
