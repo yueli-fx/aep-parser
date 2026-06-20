@@ -856,12 +856,20 @@ type PseudoControl = serializer.PseudoControl
 // Per-control customization (PseudoControl optional fields, written into the
 // pard and AE-read-back verified): Slider Min/Max (the slider's valid range —
 // AE's minValue/maxValue) + Default, Angle Default, Checkbox Checked, Color
-// default (RGBA). Their zero values give AE's plain type defaults. Still NOT
-// done (needs per-control value-entry synthesis): Point/3DPoint default
-// position, and CJK control labels — labels are written into the pard name
-// field, which AE reads in the system ANSI codepage, so ASCII labels display
-// exactly while CJK is mojibake until each control carries a UTF-8 tdsn value
-// entry. Dropdown/Layer/Group control kinds are also not yet synthesized.
+// default (RGBA). Their zero values give AE's plain type defaults.
+//
+// Control labels (PseudoControl.Name) are written into the pard name field,
+// which AE decodes in the viewing machine's system ANSI codepage — NOT UTF-8.
+// ASCII labels are exact everywhere. CJK labels are GBK-encoded (byte-identical
+// to AE's own Pseudo Effect Maker output) so they display correctly on a
+// simplified-Chinese (GBK) Windows; this is verified by byte-equivalence to
+// AE-authored output, not ship-gated (the gate machine is Western-codepage), and
+// will mojibake on a non-GBK system — an AE architecture limit, see
+// incidents/pseudo-control-label-ansi-codepage.md.
+//
+// Still NOT done (needs per-control value-entry synthesis, mechanism proven
+// AE-accepted): Point/3DPoint default position, Layer-picker; and the
+// Dropdown/Layer/Group control kinds are not yet synthesized.
 //
 // Refused (same as AddEffect): camera / light layers, and New*-built layers
 // never parsed (call aep.Reopen first).
@@ -872,7 +880,7 @@ type PseudoControl = serializer.PseudoControl
 // honored. The remaining gaps (CJK labels, more kinds) keep it Alpha. Free
 // function (CLAUDE.md #2). See spec 2026-06-20-pseudo-effect-support.
 //
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**自定义值(pard 级,AE 实测回读)**:Slider Min/Max(valid range=AE minValue/maxValue)+Default、Angle Default、Checkbox Checked、Color 默认 RGBA——零值=类型默认。**未做(需每控件值条目合成)**:Point/3DPoint 默认坐标、CJK 控件标签(标签写 pard 名 AE 按 ANSI 读→ASCII 准、CJK 乱码,需 UTF-8 tdsn 值条目);Dropdown(需 pdnm 选项)/Layer/Group 控件类型未做;camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox,slider min max,自定义范围,离线造伪效果"
+//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**自定义值(pard 级,AE 实测回读)**:Slider Min/Max(valid range=AE minValue/maxValue)+Default、Angle Default、Checkbox Checked、Color 默认 RGBA——零值=类型默认。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8)。ASCII 处处精确;CJK 走 **GBK 编码**(字节等同 AE 原生 Pseudo Effect Maker 输出,中文 GBK Windows 显示对)——byte-equivalence 验(本西欧码页机不可 ship-gate),非 GBK 系统会乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。**未做(需值条目合成,机制已验 AE 接受)**:Point/3DPoint 默认坐标、Layer-picker;Dropdown(需 pdnm 选项)/Group 控件类型未做;camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox,slider min max,自定义范围,中文标签,cjk label,gbk,离线造伪效果"
 func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl) (*Effect, error) {
 	return serializer.BuildPseudoEffect(layer, uid, name, displayName, controls)
 }

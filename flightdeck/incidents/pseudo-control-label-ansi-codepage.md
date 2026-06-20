@@ -35,17 +35,23 @@ entries (`tdsb + tdsn(Utf8) + tdb4 + cdat`, RE'd per-kind bytes) for checkbox/co
 from the pard name (cp1252 mojibake). So the value-entry tdsn does **not** drive the label.
 
 ## Fix
-No portable fix — this is an AE architecture limit. Two honest options:
-1. **ASCII labels** → exact everywhere (current `BuildPseudoEffect` behavior; the Go `Name`
-   string is copied raw into pard `@0x10`).
-2. **GBK-encode the pard name** for simplified-Chinese delivery → byte-identical to AE's
-   native Pseudo Effect Maker output, displays on GBK Windows. Costs an `x/text` dep + a
-   locale assumption, and is **not ship-gateable on a Western-codepage machine** (byte-
-   equivalence to AE-authored output is the only available evidence). Deferred pending a
-   user call on the dep/locale trade-off.
+No portable fix — this is an AE architecture limit. **Implemented (2026-06-20):**
+`synthPard`/`pardNameBytes` **GBK-encode** the pard `@0x10` name (GBK is an ASCII superset,
+so ASCII labels are byte-identical). For simplified-Chinese labels the bytes are
+**byte-identical to AE's native Pseudo Effect Maker output** (unit-proven:
+`pardNameBytes("颜色") == d1d5c9ab`, the rich-demo color pard's bytes) and display correctly
+on a GBK Windows. Costs the `golang.org/x/text` dep + a simplified-Chinese locale assumption,
+and is **not ship-gateable on a Western-codepage machine** — byte-equivalence to AE-authored
+output is the evidence (see `TestPardNameBytes_GBKMatchesAENative`). A non-GBK rune that GBK
+can't encode falls back to raw UTF-8 (mojibakes, but nothing is dropped). On a non-GBK
+viewing system CJK still mojibakes — inherent to AE.
 
 The effect **display name** has no such limit (value-group tdsn / Utf8) — `ApplyPseudoEffectNamed`
 and `BuildPseudoEffect`'s `displayName` already round-trip CJK (gate-green).
+
+Also disproven en route: the per-control **value-entry tdsn** does NOT drive the label (AE
+accepts synthesized value entries but still labels from the pard name) — that spike was
+reverted.
 
 ## Cases
 - 2026-06-20 first seen — BuildPseudoEffect CJK control-label gate on cp1252 ship-gate machine.

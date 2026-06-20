@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 
+	"golang.org/x/text/encoding/simplifiedchinese"
+
 	"github.com/example/aep-parser/internal/rifx"
 )
 
@@ -194,10 +196,16 @@ func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
 
 // synthPard builds a 148-byte pard: control_type at @0x0F, name at @0x10
 // (32 bytes NUL-padded), then a type-specific writer over the zeroed body.
+//
+// The name is encoded with pardNameBytes — AE reads pard @0x10 in the viewing
+// machine's system ANSI codepage (NOT UTF-8), so a CJK label is GBK-encoded to
+// match AE's own Pseudo Effect Maker output byte-for-byte and display correctly
+// on a simplified-Chinese (GBK) system. ASCII passes through unchanged. See
+// incidents/pseudo-control-label-ansi-codepage.md.
 func synthPard(controlType byte, name string, body func(d []byte)) *rifx.Chunk {
 	d := make([]byte, 148)
 	d[0x0F] = controlType
-	nb := []byte(name)
+	nb := pardNameBytes(name)
 	if len(nb) > 31 {
 		nb = nb[:31]
 	}
@@ -206,6 +214,21 @@ func synthPard(controlType byte, name string, body func(d []byte)) *rifx.Chunk {
 		body(d)
 	}
 	return &rifx.Chunk{ID: rifx.IDpard, Data: d}
+}
+
+// pardNameBytes encodes a control label for the pard @0x10 name field. AE
+// decodes this field in the system ANSI codepage, so we GBK-encode (GBK is an
+// ASCII superset — ASCII labels are byte-identical) to match AE's native output
+// on simplified-Chinese systems. If a rune is not GBK-representable the raw
+// UTF-8 bytes are kept (best-effort; it will mojibake, but nothing is dropped).
+func pardNameBytes(name string) []byte {
+	if name == "" {
+		return nil
+	}
+	if b, err := simplifiedchinese.GBK.NewEncoder().Bytes([]byte(name)); err == nil {
+		return b
+	}
+	return []byte(name)
 }
 
 func makeParn(n uint32) *rifx.Chunk {

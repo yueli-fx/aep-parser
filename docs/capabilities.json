@@ -1206,7 +1206,7 @@
         "TestBuildPseudoEffect_AEShipGate_AE2020",
         "TestBuildPseudoEffect_AEShipGate_AE2025"
       ],
-      "boundary": "纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**自定义值(pard 级,AE 实测回读)**:Slider Min/Max(valid range=AE minValue/maxValue)+Default、Angle Default、Checkbox Checked、Color 默认 RGBA——零值=类型默认。**未做(需每控件值条目合成)**:Point/3DPoint 默认坐标、CJK 控件标签(标签写 pard 名 AE 按 ANSI 读→ASCII 准、CJK 乱码,需 UTF-8 tdsn 值条目);Dropdown(需 pdnm 选项)/Layer/Group 控件类型未做;camera/light+未 Reopen refused",
+      "boundary": "纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D(checkbox 带 pdnm 标签)。**自定义值(pard 级,AE 实测回读)**:Slider Min/Max(valid range=AE minValue/maxValue)+Default、Angle Default、Checkbox Checked、Color 默认 RGBA——零值=类型默认。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8)。ASCII 处处精确;CJK 走 **GBK 编码**(字节等同 AE 原生 Pseudo Effect Maker 输出,中文 GBK Windows 显示对)——byte-equivalence 验(本西欧码页机不可 ship-gate),非 GBK 系统会乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。**未做(需值条目合成,机制已验 AE 接受)**:Point/3DPoint 默认坐标、Layer-picker;Dropdown(需 pdnm 选项)/Group 控件类型未做;camera/light+未 Reopen refused",
       "incident": [
         "add-effect-splice-re"
       ],
@@ -1220,6 +1220,9 @@
         "slider color checkbox",
         "slider min max",
         "自定义范围",
+        "中文标签",
+        "cjk label",
+        "gbk",
         "离线造伪效果"
       ]
     }
