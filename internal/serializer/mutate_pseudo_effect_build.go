@@ -101,10 +101,15 @@ type PseudoControl struct {
 	// (no value entry synthesized — the plain type default).
 	PointDefault []float64
 
-	// Layer (PseudoLayer): the bound layer's internal ID, or 0 for "None". The
-	// picker defaults to None unless a non-zero ID is given (AE validates that
-	// the ID resolves to a layer in the comp when the project opens).
+	// Layer (PseudoLayer): the bound layer's internal ID. 0 binds the effect's
+	// host layer (the PEM default) — AE hides a picker that resolves to no layer,
+	// so "None" is not a renderable option. A non-zero ID binds that layer (but
+	// binding a non-host layer does not render yet — see the render incident).
 	LayerID uint32
+
+	// Label (PseudoLabel): dim/gray the label text. Default false = normal
+	// (non-gray) — the @0x04 0x20 bit, RE'd from pseudo2.aep.
+	Dimmed bool
 }
 
 // BuildPseudoEffect constructs a pseudo effect entirely in Go — no .ffx, no AE,
@@ -432,8 +437,12 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 			// 0x0d, label flag (@0x04) left 0; @0x30 = 2 like all containers.
 			bePutU32(d[0x30:], 2)
 		case PseudoLabel:
-			// 0x0d with the label flag set; closed by a generated group-end.
-			bePutU32(d[0x04:], 0x20)
+			// 0x0d self-closing group = a label (a group-end is generated after
+			// it). @0x04 bit 0x20 = dim/gray; default 0 = normal (non-gray). RE'd
+			// from pseudo2.aep: non-gray label @0x04=0x00, gray @0x04=0x20.
+			if c.Dimmed {
+				bePutU32(d[0x04:], 0x20)
+			}
 			bePutU32(d[0x30:], 2)
 		case PseudoGroupEnd:
 			// 0x0e group-end (when authored explicitly rather than via a Label).

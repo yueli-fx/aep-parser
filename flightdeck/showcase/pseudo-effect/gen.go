@@ -52,7 +52,8 @@ func maxControls() []aep.PseudoControl {
 		{Kind: aep.PseudoColor, Name: "Color", Color: []float64{0.2, 0.8, 1.0, 1.0}}, // cyan
 		{Kind: aep.PseudoCheckbox, Name: "Checkbox", Checked: true},
 		{Kind: aep.PseudoDropdown, Name: "Dropdown", Options: []string{"One", "Two", "Three", "Four"}, Default: 3},
-		{Kind: aep.PseudoLabel, Name: "-- Spatial --"},
+		{Kind: aep.PseudoLabel, Name: "-- Spatial (dimmed) --", Dimmed: true}, // gray label
+
 		{Kind: aep.PseudoPoint, Name: "Point", PointDefault: []float64{0.75, 0.25}},      // 300,100 in a 400 comp
 		{Kind: aep.PseudoPoint3D, Name: "Point 3D", PointDefault: []float64{0.1, 0.2, 0.3}}, // 40,80,120
 		{Kind: aep.PseudoLayer, Name: "Layer"}, // → host (non-host binding not renderable yet)

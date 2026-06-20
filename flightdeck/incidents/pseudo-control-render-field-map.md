@@ -23,7 +23,7 @@ The pseudo gates checked **AE-accept + DOM readback + resave**, never **panel re
 
 | offset | field | meaning |
 |---|---|---|
-| `@0x04` u32 | flags | `0x20`=label (dim/gray static) · `0x08`=group-end · `0x200`=an *optional* slider bit (varies; removing it is safe) |
+| `@0x04` u32 | flags | `0x20`=**dim/gray** (an OPTION on a label; default 0 = non-gray — a label is a self-closing 0x0d group, the 0x20 bit only dims it) · `0x08`=group-end · `0x200`=an *optional* slider bit (varies; removing it is safe) |
 | `@0x0C` u32 | **control_type** | 03 angle·04 checkbox·05 color·06 point·07 dropdown·0a slider·0d group/label·0e group-end·12 3d·00 header/layer-picker |
 | `@0x10–0x2F` | name | **system ANSI codepage** (NOT UTF-8) — see [[pseudo-control-label-ansi-codepage]] |
 | `@0x30` u32 | kind | **2 = structural/reference** (header / layer-picker / group / label) · **0 = value-leaf** |
