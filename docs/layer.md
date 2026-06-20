@@ -28,7 +28,7 @@ Layer represents a layer within a composition.
 Index int
 ```
 
-1-based timeline position (top of stack = 1)
+0-based timeline position (top of stack = 0; the on-disk Layr order). AE's ExtendScript layer.index is 1-based, so AE-index = Index+1.
 
 read-only
 
