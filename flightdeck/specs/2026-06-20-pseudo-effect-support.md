@@ -149,12 +149,19 @@ pard 148B,值字段全在 pard 内(被 elide 的控件 AE 仍从 pard 读 min/ma
 - **Layer-picker**:control_type **0x00**(同 effect header)+ @0x30=2;值条目带 `tdpi`+`tdps`。
 - **Group/Label(0x0d)**:label 带 @0x04=0x20 flag,group 不带;配对 **GroupEnd(0x0e)** @0x04=0x08。
 
-### CJK 控件标签的解(待实现增量)
-pard @0x10 名是 **GBK**(系统 ANSI codepage),非 UTF-8 → 跨系统乱码。**真解**:每控件在值组 tdgp 里有 value entry(`LIST tdbs{tdsb + tdsn(Utf8!) + tdb4(124B) + cdat}`),AE 的 Effect Controls 显示名取自 **Utf8 tdsn**(金样本里「颜色」「标签」「3D 点」全是 UTF-8 tdsn)。被 elide(默认值)的控件无 value entry → 退回 pard GBK 名。⇒ **保证 CJK 显示 = 给每控件合成非 elide 的 value entry(带 Utf8 tdsn)**。此「值条目合成」同时解锁:Point/3DPoint 默认坐标 + Layer-picker 选层。
+### CJK 控件标签 — 决定性负结论(2026-06-20 gate 实测,详 `incidents/pseudo-control-label-ansi-codepage.md`)
+原 hypothesis「value-entry tdsn 驱动控件标签」**被 gate 证伪**:
+- 合成了 checkbox/color/point 非 elide value entry(`tdsb + tdsn(Utf8) + tdb4(RE'd 每类型) + cdat`)→ **AE 接受**(value-entry 机制可行),但
+- 控件标签仍来自 **pard @0x10 名**(本机 cp1252 误读成乱码,8364=€ 暴露系统码页为西欧非 GBK),**tdsn 不覆盖标签**。
+
+**真相 = AE 架构限制**:控件标签 = pard @0x10 名,按**查看机系统 ANSI 码页**解码(非 UTF-8、非 tdsn)。AE 自家 Pseudo Effect Maker 写 GBK(金样本 color pard `@0x10=d1d5c9ab`=「颜色」GBK),仅在 GBK Windows 显示对。**无可移植解**。中文系统唯一解 = pard 名 GBK 编码(字节等同 AE 原生输出,需 x/text 依赖 + locale 假设,本西欧码页机**无法 ship-gate**)——已搁,待用户拍依赖/locale 取舍。
+**效果显示名无此限**(值组顶层 tdsn / Utf8),`displayName`「中文效果」gate 绿。
+value-entry 合成本身已验可行(AE 接受非 elide 值条目),Point/3DPoint 默认坐标 + Layer-picker 仍可走它,**但不为 CJK 标签**。已 revert(不留无收益的 opaque tdb4 字节)。
 
 ### ship-gate verify-JSX gotcha(可复用)
 ExtendScript 里对**刚 fetch 的伪 slider 属性**直接读 `p.minValue` 返回 stale(=maxValue);必须**先碰 `p.hasMin`** 再读 `minValue`(`maxValue` 同理需先碰 `hasMax`)。`fx.property(matchName)` 读 minValue 也踩此坑,改 `fx.property(index)` + 先碰 hasMin 才稳。RE 决定性证据:同一文件 probe(先碰 hasMin)报 -100、gate(冷读)报 100。
 
 ### 仍未做
-- **值条目合成**(CJK 标签 + Point/3DPoint 坐标 + Layer-picker)= 下一增量,一箭多雕。
+- **CJK 控件标签** = AE 限制,仅 GBK-pard-name 可行(locale + 依赖 + 不可 gate,待用户拍)。
+- **值条目合成的剩余收益**:Point/3DPoint 默认坐标 + Layer-picker 选层(机制已验 AE 接受,差 cdat 编码 + tdpi/tdps + gate)。
 - **Dropdown/Group/Label** 控件类型(pard 布局已 RE,差合成 + gate)。
