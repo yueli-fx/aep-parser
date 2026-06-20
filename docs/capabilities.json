@@ -1206,9 +1206,11 @@
         "TestBuildPseudoEffect_AEShipGate_AE2020",
         "TestBuildPseudoEffect_AEShipGate_AE2025",
         "TestBuildPseudoEffectRich_AEShipGate_AE2020",
-        "TestBuildPseudoEffectRich_AEShipGate_AE2025"
+        "TestBuildPseudoEffectRich_AEShipGate_AE2025",
+        "TestBuildPseudoEffectValueEntry_AEShipGate_AE2020",
+        "TestBuildPseudoEffectValueEntry_AEShipGate_AE2025"
       ],
-      "boundary": "纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型:Slider/Color/Checkbox/Angle/Point/Point3D/Dropdown/Group/Label(checkbox+dropdown 带 pdnm)。**自定义值(pard 级,AE 实测回读)**:Slider Min/Max(valid range=AE minValue/maxValue)+Default、Angle Default、Checkbox Checked、Color 默认 RGBA、Dropdown Options+选中项——零值=类型默认。**Group/Label = 扁平标记控件**:AE 伪效果「组」是 Effect Controls 面板的视觉分组,非属性树嵌套(AE 原生 Pseudo Effect Maker 输出读回同样扁平,组内控件仍是顶层兄弟);仅内置 Compositing Options 真嵌套。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8)。ASCII 处处精确;CJK 走 **GBK 编码**(字节等同 AE 原生输出)——byte-equivalence 验(本西欧码页机不可 ship-gate),非 GBK 系统会乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。**未做(需值条目合成,机制已验 AE 接受)**:Point/3DPoint 默认坐标、Layer-picker;camera/light+未 Reopen refused",
+      "boundary": "纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型(全):Slider/Color/Checkbox/Angle/Point/Point3D/Dropdown/Group/Label/Layer。**自定义值(AE 实测回读)**:Slider Min/Max+Default、Angle Default、Checkbox Checked、Color RGBA、Dropdown Options+选中项(以上 pard 级);**Point/Point3D 默认坐标 + Layer 绑定层(以上值条目合成:cdat=坐标空间分数 0.25→100px、tdpi=层内部 ID 读回层索引)**——零值=类型默认。**Group/Label = 扁平标记控件**:AE 伪效果「组」是 Effect Controls 视觉分组非属性树嵌套(原生输出读回同样扁平);仅内置 Compositing Options 真嵌套。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8);ASCII 精确,CJK 走 GBK 编码(字节等同 AE 原生)——byte-equivalence 验(本西欧码页机不可 ship-gate),非 GBK 系统乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。camera/light+未 Reopen refused",
       "incident": [
         "add-effect-splice-re"
       ],
@@ -1219,12 +1221,14 @@
         "authoring",
         "造效果",
         "自定义控件",
-        "slider color checkbox dropdown group label",
+        "slider color checkbox dropdown group label layer point",
         "slider min max",
         "自定义范围",
         "下拉菜单",
         "分组",
         "标签",
+        "图层选择",
+        "点坐标",
         "中文标签",
         "cjk label",
         "gbk",

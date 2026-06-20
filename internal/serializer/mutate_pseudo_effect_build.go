@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"encoding/hex"
 	"fmt"
 	"math"
 	"strings"
@@ -24,6 +25,7 @@ const (
 	PseudoGroupStart                          // group start (controls until PseudoGroupEnd nest under it)
 	PseudoGroupEnd                            // group end
 	PseudoLabel                               // static text label (no value)
+	PseudoLayer                               // layer picker
 )
 
 // pardControlType maps a kind to the pard control_type byte (@0x0F), RE'd from a
@@ -40,6 +42,7 @@ var pardControlType = map[PseudoControlKind]byte{
 	PseudoGroupStart: 0x0d,
 	PseudoLabel:      0x0d, // same control type as group-start; distinguished by the @0x04 flag
 	PseudoGroupEnd:   0x0e,
+	PseudoLayer:      0x00, // same control type as the effect header; distinguished by position (not first)
 	PseudoPoint3D:    0x12,
 }
 
@@ -67,6 +70,18 @@ type PseudoControl struct {
 	// option count; the items are carried in a trailing pdnm ("a|b|c"). Default
 	// (rounded, 1-based) selects the initial item; out-of-range clamps into 1..N.
 	Options []string
+
+	// Point (PseudoPoint) / Point3D (PseudoPoint3D) default position, as a
+	// fraction of the host layer's coordinate space — AE stores effect point
+	// params as value÷(layer source dim), or ÷(comp dim) for source-less layers
+	// (shape/text), z÷height. {fx, fy} for 2D, {fx, fy, fz} for 3D. nil → origin
+	// (no value entry synthesized — the plain type default).
+	PointDefault []float64
+
+	// Layer (PseudoLayer): the bound layer's internal ID, or 0 for "None". The
+	// picker defaults to None unless a non-zero ID is given (AE validates that
+	// the ID resolves to a layer in the comp when the project opens).
+	LayerID uint32
 }
 
 // BuildPseudoEffect constructs a pseudo effect entirely in Go — no .ffx, no AE,
@@ -108,16 +123,22 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl) (*rifx.C
 	// Controls are numbered -0001.. by emitted pard, not by control: a Label
 	// expands to a group-start/group-end pard pair, so it consumes two slots.
 	idx := 0
+	var valEntries []*rifx.Chunk
 	for _, c := range controls {
 		entries, err := synthControlEntries(c)
 		if err != nil {
 			return nil, err
 		}
+		firstIdx := idx + 1
 		for _, e := range entries {
 			idx++
 			parT.Children = append(parT.Children, makeTdmn(fmt.Sprintf("%s-%04d", matchName, idx)), e.pard)
 			parT.Children = append(parT.Children, e.trailing...)
 		}
+		// Controls whose value can't be elided into the pard (Point/3DPoint with
+		// a non-origin default, Layer picker) carry a value-group entry keyed by
+		// the control's first pard match-name.
+		valEntries = append(valEntries, synthControlValueEntry(c, fmt.Sprintf("%s-%04d", matchName, firstIdx))...)
 	}
 	// Built-in "Compositing Options" pard (control_type 0x09, otherwise empty).
 	parT.Children = append(parT.Children,
@@ -139,9 +160,11 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl) (*rifx.C
 	}}
 	valTdgp := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp, Children: []*rifx.Chunk{
 		makeTdsb(), makeTdsn(label),
-		makeTdmn("ADBE Effect Built In Params"), biValTdgp,
-		makeTdmn("ADBE Group End"),
 	}}
+	valTdgp.Children = append(valTdgp.Children, valEntries...)
+	valTdgp.Children = append(valTdgp.Children,
+		makeTdmn("ADBE Effect Built In Params"), biValTdgp,
+		makeTdmn("ADBE Group End"))
 
 	fnam := &rifx.Chunk{ID: rifx.IDFnam, Data: utf8StringData(label)}
 	pgui := &rifx.Chunk{ID: rifx.IDPgui, Data: make([]byte, 16)}
@@ -206,6 +229,77 @@ func synthGroupEndPard() *rifx.Chunk {
 		bePutU32(d[0x04:], 0x08)
 		bePutU32(d[0x30:], 2)
 	})
+}
+
+// Per-type value-entry tdb4 descriptors (124 bytes), verbatim from AE's own
+// Pseudo Effect Maker output (test_data/pseudo_rich_demo.aep). The head encodes
+// the dimension + per-type markers; @0x10.. is a per-dimension constant block
+// (point and 3D-point share it, dim-1 differs) — not value-dependent, so it is
+// copied as-is and the actual value lives in the companion cdat / tdpi.
+const (
+	pointTdb4Hex   = "db990002000f0003ffffff0400005da83d9b7cdfd9d7bdbc3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000406000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	point3DTdb4Hex = "db990003000f0003ffffff0400005da83d9b7cdfd9d7bdbc3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000809000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	layerTdb4Hex   = "db99000100010000000100ff00005da83f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+)
+
+// synthControlValueEntry builds the value-group entry (tdmn + LIST tdbs) for one
+// control whose value cannot be elided into the pard: a Point/Point3D with a
+// non-origin default, or a Layer picker (carries its binding in tdpi). Returns
+// nil when the control's value is elidable (AE reads it from the pard).
+func synthControlValueEntry(c PseudoControl, matchName string) []*rifx.Chunk {
+	switch c.Kind {
+	case PseudoPoint:
+		if len(c.PointDefault) < 2 {
+			return nil // origin → elide
+		}
+		cdat := make([]byte, 48)
+		bePutF64(cdat[0x00:], c.PointDefault[0])
+		bePutF64(cdat[0x08:], c.PointDefault[1])
+		return valueEntry(matchName, c.Name, pointTdb4Hex, cdat, false, 0)
+	case PseudoPoint3D:
+		if len(c.PointDefault) < 3 {
+			return nil
+		}
+		cdat := make([]byte, 72)
+		bePutF64(cdat[0x00:], c.PointDefault[0])
+		bePutF64(cdat[0x08:], c.PointDefault[1])
+		bePutF64(cdat[0x10:], c.PointDefault[2])
+		return valueEntry(matchName, c.Name, point3DTdb4Hex, cdat, false, 0)
+	case PseudoLayer:
+		// A layer picker always carries a value entry (tdpi = bound layer id, 0
+		// = None); the pard alone has no slot for the binding.
+		return valueEntry(matchName, c.Name, layerTdb4Hex, make([]byte, 40), true, c.LayerID)
+	}
+	return nil
+}
+
+// valueEntry assembles [tdmn, LIST tdbs{tdsb, tdsn, tdb4, cdat, [tdpi, tdps]}].
+// label is the control's display name (UTF-8 — value-entry tdsn is UTF-8, unlike
+// the ANSI/GBK pard @0x10 name). withLayer appends the tdpi/tdps layer binding.
+func valueEntry(matchName, label, tdb4Hex string, cdat []byte, withLayer bool, layerID uint32) []*rifx.Chunk {
+	tdb4 := mustHex124(tdb4Hex)
+	tdbs := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdbs, Children: []*rifx.Chunk{
+		makeTdsbFlags(3), // value-entry tdsb = 0x00000003 (AE-native)
+		makeTdsn(label),
+		{ID: rifx.IDtdb4, Data: tdb4},
+		{ID: rifx.IDCdat, Data: cdat},
+	}}
+	if withLayer {
+		tdpi := make([]byte, 4)
+		bePutU32(tdpi, layerID)
+		tdbs.Children = append(tdbs.Children,
+			&rifx.Chunk{ID: rifx.IDTdpi, Data: tdpi},
+			&rifx.Chunk{ID: rifx.IDTdps, Data: make([]byte, 4)})
+	}
+	return []*rifx.Chunk{makeTdmn(matchName), tdbs}
+}
+
+func mustHex124(s string) []byte {
+	b, err := hex.DecodeString(s)
+	if err != nil || len(b) != 124 {
+		panic(fmt.Sprintf("pseudo value-entry tdb4 must be 124 bytes: len=%d err=%v", len(b), err))
+	}
+	return b
 }
 
 // synthControlPard synthesizes one control's pard from the RE'd per-type layout.
@@ -288,6 +382,10 @@ func synthControlPard(c PseudoControl) (*rifx.Chunk, error) {
 		case PseudoGroupEnd:
 			// 0x0e group-end (when authored explicitly rather than via a Label).
 			bePutU32(d[0x04:], 0x08)
+			bePutU32(d[0x30:], 2)
+		case PseudoLayer:
+			// Layer picker: control_type 0x00 (like the header) with @0x30 = 2.
+			// The bound layer (if any) lives in the value entry's tdpi.
 			bePutU32(d[0x30:], 2)
 		}
 	}), nil

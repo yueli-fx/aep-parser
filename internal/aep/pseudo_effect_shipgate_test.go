@@ -239,6 +239,106 @@ func runBuildPseudoEffectRichGate(t *testing.T, aeExe string, target aep.AETarge
 	}
 }
 
+// TestBuildPseudoEffectValueEntry_AEShipGate_* verifies the value-entry
+// synthesizer: a Point / 3D-Point with a custom default position, and a Layer
+// picker bound to a specific layer. AE 2020 + 2025 read back the exact pixel
+// coordinates (the fraction-of-coord-space cdat decoded right) and resolve the
+// picker to the bound layer's index.
+func TestBuildPseudoEffectValueEntry_AEShipGate_AE2020(t *testing.T) {
+	runBuildPseudoEffectValueEntryGate(t, ae2020(), aep.TargetAE2020)
+}
+
+func TestBuildPseudoEffectValueEntry_AEShipGate_AE2025(t *testing.T) {
+	runBuildPseudoEffectValueEntryGate(t, ae2025(), aep.TargetAE2025)
+}
+
+func runBuildPseudoEffectValueEntryGate(t *testing.T, aeExe string, target aep.AETarget) {
+	t.Helper()
+	if os.Getenv("AE_SHIP_GATE") == "" {
+		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
+	}
+	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const matchName = "Pseudo/aepgo03/P2"
+	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
+
+	p := aep.NewProject(target)
+	comp, err := aep.NewComposition(p, "Main", 400, 400, 30, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Two layers: S hosts the effect, T is the layer-picker's bind target.
+	if _, err := aep.NewShapeLayer(comp, "S"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := aep.NewShapeLayer(comp, "T"); err != nil {
+		t.Fatal(err)
+	}
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	var host, target2 *aep.Layer
+	for _, c := range rp.Compositions {
+		for _, cl := range c.Layers {
+			switch cl.Name {
+			case "S":
+				host = cl
+			case "T":
+				target2 = cl
+			}
+		}
+	}
+	if host == nil || target2 == nil {
+		t.Fatal("reopened project: layer S or T not found")
+	}
+	// Point 0.25/0.125 of a 400-comp → [100,50]; 3D adds z 0.0625 → 25. Picker
+	// bound to T by its internal ID → AE resolves to T's 1-based index.
+	controls := []aep.PseudoControl{
+		{Kind: aep.PseudoPoint, Name: "Center", PointDefault: []float64{0.25, 0.125}},
+		{Kind: aep.PseudoPoint3D, Name: "Pos3D", PointDefault: []float64{0.25, 0.125, 0.0625}},
+		{Kind: aep.PseudoLayer, Name: "Pick", LayerID: target2.ID},
+	}
+	if _, err := aep.BuildPseudoEffect(host, "aepgo03", "P2", "P2 Effect", controls); err != nil {
+		t.Fatalf("BuildPseudoEffect: %v", err)
+	}
+
+	tempDir := t.TempDir()
+	inputAEP := filepath.Join(tempDir, "p2_in.aep")
+	doneFile := filepath.Join(tempDir, "p2.done")
+	out, err := os.Create(inputAEP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := rp.WriteAEP(out); err != nil {
+		out.Close()
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	out.Close()
+
+	checks := fmt.Sprintf(`[`+
+		`{"idx":1,"prop":"value","expect":[100,50]},`+
+		`{"idx":2,"prop":"value","expect":[100,50,25]},`+
+		`{"idx":3,"prop":"value","expect":%d}]`, target2.Index)
+	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":3,"checks":%s}`,
+		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
+	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(argsPath)
+	os.Remove(doneFile)
+
+	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
+
+	content, err := os.ReadFile(doneFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body := string(content); !strings.HasPrefix(body, "PASS") {
+		t.Fatalf("AE rejected Go-synthesized pseudo value entries:\n%s", body)
+	}
+}
+
 func runApplyPseudoEffectGateImpl(t *testing.T, aeExe string, target aep.AETarget, displayName string, nameCodes []rune) {
 	t.Helper()
 	if os.Getenv("AE_SHIP_GATE") == "" {

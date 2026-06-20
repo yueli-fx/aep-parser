@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
+	"math"
 	"testing"
 
 	"github.com/example/aep-parser/internal/rifx"
@@ -102,6 +103,76 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 		end := es[1].pard.Data
 		if end[0x0F] != 0x0e || be32(end, 0x04) != 0x08 {
 			t.Errorf("label end @0x0F/@0x04 = %#x/%#x, want 0x0e/0x08", end[0x0F], be32(end, 0x04))
+		}
+	})
+}
+
+func f64at(d []byte, off int) float64 {
+	return math.Float64frombits(binary.BigEndian.Uint64(d[off:]))
+}
+
+// TestSynthControlValueEntry verifies the value-entry synthesis for the controls
+// whose value can't be elided into the pard: Point/3DPoint custom coords (cdat =
+// fraction of coord space, AE-verified [0.25,0.125]→[100,50] in a 400 comp) and
+// the Layer picker (binding in tdpi). Bytes mirror test_data/pseudo_rich_demo.aep.
+func TestSynthControlValueEntry(t *testing.T) {
+	tdbsOf := func(chunks []*rifx.Chunk) *rifx.Chunk {
+		if len(chunks) != 2 || chunks[0].ID != rifx.IDTdmn || chunks[1].FormType != rifx.IDTdbs {
+			t.Fatalf("want [tdmn, LIST tdbs], got %d chunks", len(chunks))
+		}
+		return chunks[1]
+	}
+	child := func(c *rifx.Chunk, id rifx.ChunkID) *rifx.Chunk {
+		for _, ch := range c.Children {
+			if ch.ID == id {
+				return ch
+			}
+		}
+		return nil
+	}
+
+	t.Run("point", func(t *testing.T) {
+		ve := synthControlValueEntry(PseudoControl{Kind: PseudoPoint, Name: "C", PointDefault: []float64{0.25, 0.125}}, "mn")
+		tdbs := tdbsOf(ve)
+		tdb4 := child(tdbs, rifx.IDtdb4)
+		if tdb4 == nil || len(tdb4.Data) != 124 || binary.BigEndian.Uint16(tdb4.Data[2:]) != 2 {
+			t.Fatalf("point tdb4: want 124B dim=2")
+		}
+		cdat := child(tdbs, rifx.IDCdat)
+		if cdat == nil || len(cdat.Data) != 48 {
+			t.Fatalf("point cdat: want 48B, got %v", cdat)
+		}
+		if f64at(cdat.Data, 0) != 0.25 || f64at(cdat.Data, 8) != 0.125 {
+			t.Errorf("point cdat = [%v,%v], want [0.25,0.125]", f64at(cdat.Data, 0), f64at(cdat.Data, 8))
+		}
+	})
+
+	t.Run("point3d", func(t *testing.T) {
+		ve := synthControlValueEntry(PseudoControl{Kind: PseudoPoint3D, PointDefault: []float64{0.25, 0.125, 0.0625}}, "mn")
+		cdat := child(tdbsOf(ve), rifx.IDCdat)
+		if cdat == nil || len(cdat.Data) != 72 {
+			t.Fatalf("3dpoint cdat: want 72B")
+		}
+		if f64at(cdat.Data, 0) != 0.25 || f64at(cdat.Data, 8) != 0.125 || f64at(cdat.Data, 16) != 0.0625 {
+			t.Errorf("3dpoint cdat wrong: %v %v %v", f64at(cdat.Data, 0), f64at(cdat.Data, 8), f64at(cdat.Data, 16))
+		}
+	})
+
+	t.Run("point-origin-elided", func(t *testing.T) {
+		if ve := synthControlValueEntry(PseudoControl{Kind: PseudoPoint}, "mn"); ve != nil {
+			t.Errorf("point with no PointDefault should elide its value entry, got %d chunks", len(ve))
+		}
+	})
+
+	t.Run("layer", func(t *testing.T) {
+		ve := synthControlValueEntry(PseudoControl{Kind: PseudoLayer, Name: "L", LayerID: 15}, "mn")
+		tdbs := tdbsOf(ve)
+		tdpi := child(tdbs, rifx.IDTdpi)
+		if tdpi == nil || be32(tdpi.Data, 0) != 15 {
+			t.Errorf("layer tdpi = %v, want 15", tdpi)
+		}
+		if child(tdbs, rifx.IDTdps) == nil {
+			t.Errorf("layer value entry missing tdps")
 		}
 	})
 }

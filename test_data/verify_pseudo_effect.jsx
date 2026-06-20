@@ -84,8 +84,18 @@
                 else if (chk.prop === "max") { if (p.hasMax) {} got = p.maxValue; }
                 else if (chk.prop === "numProperties") { got = p.numProperties; }
                 else got = p.value;
-                log.push("check[" + ci + "] [" + chk.idx + "]." + chk.prop + "=" + got);
-                if (Math.abs(got - chk.expect) > 0.001) ok = false;
+                // expect may be a number or an array (point/3D point value).
+                if (chk.expect instanceof Array) {
+                    var gs = [];
+                    for (var gi = 0; gi < chk.expect.length; gi++) gs.push(String(got[gi]));
+                    log.push("check[" + ci + "] [" + chk.idx + "]." + chk.prop + "=[" + gs.join(",") + "]");
+                    for (var ei = 0; ei < chk.expect.length; ei++) {
+                        if (!got || Math.abs(got[ei] - chk.expect[ei]) > 0.001) ok = false;
+                    }
+                } else {
+                    log.push("check[" + ci + "] [" + chk.idx + "]." + chk.prop + "=" + got);
+                    if (Math.abs(got - chk.expect) > 0.001) ok = false;
+                }
             }
         }
     } catch (e) { log.push("ERROR: " + e.toString() + " line=" + e.line); }
