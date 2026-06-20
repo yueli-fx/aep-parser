@@ -83,6 +83,14 @@ chunks, never the cache), so callers can tune params immediately
    auto-parade both versions). Corollary: effects with layer/path REFERENCE
    params carry tdpi pointing at OTHER layers — a blind retarget-all would
    corrupt those; the parameter-only curation rule keeps retarget-all safe.
+   **2026-06-20 relocation:** the retarget now lives in `AddEffect`, NOT the
+   shared `addEffectFromChunks` splice core. `BuildPseudoEffect` synthesizes its
+   own tdpi (header→host, layer-picker→a deliberately chosen OTHER layer) and the
+   blanket retarget-all in the core silently clobbered the picker → host. Only
+   the template path (AddEffect) has foreign tdpi to fix, so retarget moved there;
+   the pseudo paths splice through the core untouched. See
+   [[pseudo-layer-picker-tdpi-retarget-clobber]] (incl. the 0-based-Index /
+   1-based-AE false-green gate that masked it).
 
 ## Effect-template library (193, embed.FS)
 
