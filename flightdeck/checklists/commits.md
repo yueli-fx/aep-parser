@@ -3,7 +3,7 @@ status: active
 last_updated: 2026-05-29
 when_to_read: before writing a commit message / staging files / preparing a PR
 applies_to: [commit, git, staging, message, push, pr, conventional-commits, type-scope]
-portable: partial   # §通用 项目无关, 可整段拷到别的仓库; §项目覆盖 是本仓库 (aep-parser) 专属, 移植时整段替换
+synced: true
 ---
 # Commits Playbook
 
@@ -11,8 +11,8 @@ portable: partial   # §通用 项目无关, 可整段拷到别的仓库; §项�
 
 依据:
 
-- Conventional Commits 1.0.0 (<https://www.conventionalcommits.org/>)
-- Chris Beams《How to Write a Git Commit Message》(<https://cbea.ms/git-commit/>)
+- Conventional Commits 1.0.0 ([https://www.conventionalcommits.org/](https://www.conventionalcommits.org/))
+- Chris Beams《How to Write a Git Commit Message》([https://cbea.ms/git-commit/](https://cbea.ms/git-commit/))
 
 ---
 
@@ -70,7 +70,19 @@ BREAKING CHANGE: /login 响应去掉 token 字段, 改 accessToken + refreshToke
 
 不写 `Co-Authored-By: <AI>`, 不写 `🤖 Generated with ...`. 提交前 `git log` 扫一眼历史风格对齐.
 
----
+### 6. 多行 message：认清 shell 再传
+
+当环境**同时挂 Bash 和 PowerShell 工具**时, 给原生命令(`git commit` 等)传多行串前先认清当前工具是哪个 shell:
+
+- **PowerShell 工具** → here-string `@'...'@`(结束 `'@` 必须顶列零缩进).
+- **Bash 工具** → 真 heredoc(`git commit -F - <<'EOF' … EOF`)或 `-F <file>`; **别用 `@'...'@`** —— bash 没有 here-string, `@` 会当字面量混进 subject(`@ chore: …`).
+- 最稳, 跨 shell 通用: 把信息写进文件, `git commit -F <file>`.
+
+### 7. 暂存前扫 `RM`/`MM`（重命名+内容改动）
+
+`git mv` 重命名文件后再编辑内容，`git status --short` 会显示 `RM`（index 已暂存重命名、工作区内容未暂存）；`R100` = 内容改动**未暂存**（只提交了纯重命名）。**提交前扫一遍 `RM`/`MM` 行，对命中的文件再 `git add <file>` 暂存内容**，直到 `git status --short` 干净（或只剩预期的未跟踪文件）再 commit。
+
+<!-- flightdeck:project-specific -->
 
 ## 项目覆盖 (本仓库专属 — aep-parser; 移植到别的仓库时整段替换)
 
