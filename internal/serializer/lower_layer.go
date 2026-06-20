@@ -318,11 +318,20 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	if tickRate == 0 {
 		tickRate = 30720 // AE default 30 fps tick rate
 	}
+	// Layer timeline span. A fresh layer fills the whole comp; a caller can trim
+	// it by setting the scene layer's StartTime/Duration (e.g. replication copying
+	// the original's in/out). Honored opt-in — callers that leave them 0 keep the
+	// old full-comp behavior, so no existing gate regresses.
+	startTime := s.StartTime
 	duration := 1.0
 	if ctx != nil && ctx.compDuration > 0 {
 		duration = ctx.compDuration
 	}
-	outTicks := uint32(duration * float64(tickRate))
+	if s.Duration > 0 {
+		duration = s.Duration
+	}
+	startTicks := uint32(startTime * float64(tickRate))
+	outTicks := uint32((startTime + duration) * float64(tickRate))
 
 	// @0x00 — layer-local ID.
 	binary.BigEndian.PutUint32(d[codec.LdtaLayerID:codec.LdtaLayerID+4], s.ID)
@@ -339,9 +348,9 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 	// tolerance.aep: divisor = TickRate (30720 for 30fps), NOT 1. A 0/1
 	// encoding makes AE compute zero-duration layers and silently drop them
 	// from comp.layers.
-	binary.BigEndian.PutUint32(d[codec.LdtaStartTimeDivd:codec.LdtaStartTimeDivd+4], 0)
+	binary.BigEndian.PutUint32(d[codec.LdtaStartTimeDivd:codec.LdtaStartTimeDivd+4], startTicks)
 	binary.BigEndian.PutUint32(d[codec.LdtaStartTimeDivs:codec.LdtaStartTimeDivs+4], tickRate)
-	binary.BigEndian.PutUint32(d[codec.LdtaInPointDivd:codec.LdtaInPointDivd+4], 0)
+	binary.BigEndian.PutUint32(d[codec.LdtaInPointDivd:codec.LdtaInPointDivd+4], startTicks)
 	binary.BigEndian.PutUint32(d[codec.LdtaInPointDivs:codec.LdtaInPointDivs+4], tickRate)
 	binary.BigEndian.PutUint32(d[codec.LdtaOutPointDivd:codec.LdtaOutPointDivd+4], outTicks)
 	binary.BigEndian.PutUint32(d[codec.LdtaOutPointDivs:codec.LdtaOutPointDivs+4], tickRate)

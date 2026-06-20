@@ -35,6 +35,15 @@ func buildShapeIiip(p *aep.Project, orc *oracle) *aep.Composition {
 	}
 	must(sl.Transform().Position().SetStaticValue([2]float64{px, py}))
 
+	// Match the original layer's timeline span. The rects' keyframes run to ~2.7s,
+	// but the original shape layer is visible only [0, 0.901] (a glitch flash);
+	// NewShapeLayer spans the whole comp, so without trimming the out-point the
+	// clone renders bars past the moment the original layer has already ended.
+	// Set the scene fields (buildLdtaBytes honors them) — Layer.SetOutPoint is an
+	// in-place ldta edit that a not-yet-written from-scratch layer has no chunk for.
+	sl.StartTime = orig.StartTime
+	sl.Duration = orig.Duration
+
 	rvg := findGroup(orig.PropertyTree(), "ADBE Root Vectors Group")
 	if rvg == nil {
 		panic("comp①: original has no Root Vectors Group")
