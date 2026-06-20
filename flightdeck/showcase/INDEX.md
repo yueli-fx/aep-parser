@@ -48,6 +48,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 | [project-settings](project-settings/INDEX.md) | 工程设置 bitsPerChannel/linearBlending/expressionEngine/footageTimecode（4 项一致） | ✅ complete |
 | [camera-light](camera-light/INDEX.md) | NewCameraLayer/NewLightLayer 建层（**灯光=环境光** + 相机=双节点,值皆模板默认；选项 setter elide） | ✅ complete |
 | [essential-graphics](essential-graphics/INDEX.md) | AddEssentialProperty + 模板命名 | 🛑 **BLOCKED**（面板崩溃，连单 slider 也崩；RE 候选，暂不修） |
+| [pseudo-effect](pseudo-effect/INDEX.md) | BuildPseudoEffect 从零合成伪效果，单效果铺满全部 11 种控件（en 纯 ASCII + zh GBK 中文标签）；控件容器无渲染面 | 🔍 待review（2026-06-20 agent AE2020 结构 dump 验：两份接受、控件全、显示名「演示」对；zh 控件标签待中文真机复核） |
 
 ### ⚠ from-scratch 不可表达（3 个 — 非缺陷，能力本质是 fixture-mutation）
 
