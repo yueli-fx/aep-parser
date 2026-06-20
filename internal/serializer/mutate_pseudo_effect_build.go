@@ -127,7 +127,7 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 	if label == "" {
 		label = name
 	}
-	sspc, err := synthPseudoSspc(matchName, label, controls, cp)
+	sspc, err := synthPseudoSspc(matchName, label, controls, cp, layer.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,31 +137,34 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 // synthPseudoSspc assembles the in-parade sspc for a pseudo effect entirely from
 // synthesized chunks: fnam(Utf8) + parT(header pard + control pards + built-in
 // pard) + tdgp(scaffold + built-in value group, controls at defaults) + pgui.
-func synthPseudoSspc(matchName, label string, controls []PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, error) {
+func synthPseudoSspc(matchName, label string, controls []PseudoControl, cp PseudoLabelCodepage, hostLayerID uint32) (*rifx.Chunk, error) {
 	parT := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDparT}
 	parT.Children = append(parT.Children, makeParn(0)) // count patched below
 	// -0000 effect header pard: control_type 0, struct-field (@0x30) = 2.
 	parT.Children = append(parT.Children,
 		makeTdmn(matchName+"-0000"), synthPard(0x00, "", cp, func(d []byte) { bePutU32(d[0x30:], 2) }))
+	// The header's own value-group entry leads the value group (binds the effect
+	// to its host layer); the property-tree scaffold AE's ECW walks starts here.
+	valEntries := headerValueEntry(matchName+"-0000", hostLayerID)
 	// Controls are numbered -0001.. by emitted pard, not by control: a Label
 	// expands to a group-start/group-end pard pair, so it consumes two slots.
 	idx := 0
-	var valEntries []*rifx.Chunk
 	for _, c := range controls {
 		entries, err := synthControlEntries(c, cp)
 		if err != nil {
 			return nil, err
 		}
-		firstIdx := idx + 1
 		for _, e := range entries {
 			idx++
-			parT.Children = append(parT.Children, makeTdmn(fmt.Sprintf("%s-%04d", matchName, idx)), e.pard)
+			mn := fmt.Sprintf("%s-%04d", matchName, idx)
+			parT.Children = append(parT.Children, makeTdmn(mn), e.pard)
 			parT.Children = append(parT.Children, e.trailing...)
+			// Structural / value-bearing controls contribute a value-group entry
+			// (the property-tree scaffold AE's Effect-Controls panel walks).
+			if e.valueEntry != nil {
+				valEntries = append(valEntries, e.valueEntry(mn)...)
+			}
 		}
-		// Controls whose value can't be elided into the pard (Point/3DPoint with
-		// a non-origin default, Layer picker) carry a value-group entry keyed by
-		// the control's first pard match-name.
-		valEntries = append(valEntries, synthControlValueEntry(c, fmt.Sprintf("%s-%04d", matchName, firstIdx))...)
 	}
 	// Built-in "Compositing Options" pard (control_type 0x09, otherwise empty).
 	parT.Children = append(parT.Children,
@@ -198,45 +201,54 @@ func synthPseudoSspc(matchName, label string, controls []PseudoControl, cp Pseud
 }
 
 // pardEntry is one pard plus any trailing leaf chunks (e.g. the pdnm carrying a
-// checkbox's on/off label or a dropdown's menu items) that follow it in parT.
+// checkbox's on/off label or a dropdown's menu items) that follow it in parT,
+// plus an optional value-group entry builder. The value entry is REQUIRED for
+// structural controls (label/group markers) and value-bearing ones (point with
+// coords, layer): AE builds the Effect-Controls property tree from the value
+// group, and an omitted scaffold entry leaves the tree malformed so the panel
+// fails to render later controls. nil = elided (AE reads the value from the pard
+// — fine for slider/angle/color/checkbox/dropdown).
 type pardEntry struct {
-	pard     *rifx.Chunk
-	trailing []*rifx.Chunk
+	pard       *rifx.Chunk
+	trailing   []*rifx.Chunk
+	valueEntry func(matchName string) []*rifx.Chunk
 }
 
 // synthControlEntries expands one PseudoControl into the parT pard entries it
 // occupies. Most controls are a single pard; a Checkbox/Dropdown carries a
 // trailing pdnm string; a Label is a group-start (label flag) + group-end pair.
 func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage) ([]pardEntry, error) {
+	pard, err := synthControlPard(c, cp)
+	if err != nil {
+		return nil, err
+	}
 	switch c.Kind {
 	case PseudoCheckbox:
 		// A Checkbox carries its on/off label as a trailing pdnm string (AE:
 		// "PF_ParamCheckbox must have nameptr set" without it).
-		pard, err := synthControlPard(c, cp)
-		if err != nil {
-			return nil, err
-		}
 		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(c.Name)}}}, nil
 	case PseudoDropdown:
 		// The menu items travel in a trailing pdnm as "opt1|opt2|..".
-		pard, err := synthControlPard(c, cp)
-		if err != nil {
-			return nil, err
-		}
 		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(strings.Join(c.Options, "|"))}}}, nil
 	case PseudoLabel:
 		// AE's Pseudo Effect Maker emits a label as a 0x0d group-start carrying
-		// the label flag (@0x04=0x20) immediately closed by a 0x0e group-end.
-		start, err := synthControlPard(c, cp)
-		if err != nil {
-			return nil, err
-		}
-		return []pardEntry{{pard: start}, {pard: synthGroupEndPard(cp)}}, nil
+		// the label flag (@0x04=0x20) immediately closed by a 0x0e group-end —
+		// both need scaffold value entries (the start carries the label text).
+		name := c.Name
+		return []pardEntry{
+			{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, name) }},
+			{pard: synthGroupEndPard(cp), valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, "") }},
+		}, nil
+	case PseudoGroupStart:
+		name := c.Name
+		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, name) }}}, nil
+	case PseudoGroupEnd:
+		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return scaffoldValueEntry(mn, "") }}}, nil
+	case PseudoPoint, PseudoPoint3D, PseudoLayer:
+		ctl := c
+		return []pardEntry{{pard: pard, valueEntry: func(mn string) []*rifx.Chunk { return synthControlValueEntry(ctl, mn) }}}, nil
 	default:
-		pard, err := synthControlPard(c, cp)
-		if err != nil {
-			return nil, err
-		}
+		// Slider / Angle / Color: value elided (read from pard).
 		return []pardEntry{{pard: pard}}, nil
 	}
 }
@@ -263,7 +275,30 @@ const (
 	pointTdb4Hex   = "db990002000f0003ffffff0400005da83d9b7cdfd9d7bdbc3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000406000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	point3DTdb4Hex = "db990003000f0003ffffff0400005da83d9b7cdfd9d7bdbc3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000809000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	layerTdb4Hex   = "db99000100010000000100ff00005da83f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	// scaffoldTdb4Hex is the dim-1 descriptor AE writes for a label / group
+	// marker value entry (control_type 0x0d/0x0e), verbatim from an AE resave.
+	scaffoldTdb4Hex = "db9900010001000000010000000078003f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000809000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	// headerTdb4Hex is the dim-1 descriptor for the effect header's (-0000) value
+	// entry (control_type 0x00, @0x3C marker 0x0404), verbatim from an AE resave.
+	headerTdb4Hex = "db9900010001000000010000000078003f1a36e2eb1c432d3ff00000000000003ff00000000000003ff00000000000003ff00000000000000000000404000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 )
+
+// headerValueEntry is the effect header's (-0000) value-group entry. AE writes
+// one for every pseudo effect; its tdpi binds the effect to its host layer (the
+// layer the effect is applied to). Omitting it leaves the value group one entry
+// short of AE's canonical form.
+func headerValueEntry(matchName string, hostLayerID uint32) []*rifx.Chunk {
+	return valueEntry(matchName, 3, "", headerTdb4Hex, make([]byte, 40), true, hostLayerID)
+}
+
+// scaffoldValueEntry builds the value-group entry for a structural control (a
+// label or group start/end marker). AE walks the value group to lay out the
+// Effect-Controls panel; without these scaffold entries the property tree is
+// malformed and later controls (slider/point/layer) fail to render. tdsb = 1
+// (markers), cdat all-zero, tdsn = the label/group text (empty for an end).
+func scaffoldValueEntry(matchName, label string) []*rifx.Chunk {
+	return valueEntry(matchName, 1, label, scaffoldTdb4Hex, make([]byte, 40), false, 0)
+}
 
 // synthControlValueEntry builds the value-group entry (tdmn + LIST tdbs) for one
 // control whose value cannot be elided into the pard: a Point/Point3D with a
@@ -278,7 +313,7 @@ func synthControlValueEntry(c PseudoControl, matchName string) []*rifx.Chunk {
 		cdat := make([]byte, 48)
 		bePutF64(cdat[0x00:], c.PointDefault[0])
 		bePutF64(cdat[0x08:], c.PointDefault[1])
-		return valueEntry(matchName, c.Name, pointTdb4Hex, cdat, false, 0)
+		return valueEntry(matchName, 3, c.Name, pointTdb4Hex, cdat, false, 0)
 	case PseudoPoint3D:
 		if len(c.PointDefault) < 3 {
 			return nil
@@ -287,22 +322,23 @@ func synthControlValueEntry(c PseudoControl, matchName string) []*rifx.Chunk {
 		bePutF64(cdat[0x00:], c.PointDefault[0])
 		bePutF64(cdat[0x08:], c.PointDefault[1])
 		bePutF64(cdat[0x10:], c.PointDefault[2])
-		return valueEntry(matchName, c.Name, point3DTdb4Hex, cdat, false, 0)
+		return valueEntry(matchName, 3, c.Name, point3DTdb4Hex, cdat, false, 0)
 	case PseudoLayer:
 		// A layer picker always carries a value entry (tdpi = bound layer id, 0
 		// = None); the pard alone has no slot for the binding.
-		return valueEntry(matchName, c.Name, layerTdb4Hex, make([]byte, 40), true, c.LayerID)
+		return valueEntry(matchName, 3, c.Name, layerTdb4Hex, make([]byte, 40), true, c.LayerID)
 	}
 	return nil
 }
 
 // valueEntry assembles [tdmn, LIST tdbs{tdsb, tdsn, tdb4, cdat, [tdpi, tdps]}].
-// label is the control's display name (UTF-8 — value-entry tdsn is UTF-8, unlike
-// the ANSI/GBK pard @0x10 name). withLayer appends the tdpi/tdps layer binding.
-func valueEntry(matchName, label, tdb4Hex string, cdat []byte, withLayer bool, layerID uint32) []*rifx.Chunk {
+// tdsbFlag is the tdbs flag word (3 for the header/point/layer, 1 for label/group
+// markers — AE-native). label is the display name (UTF-8 — value-entry tdsn is
+// UTF-8, unlike the ANSI/GBK pard @0x10 name). withLayer appends tdpi/tdps.
+func valueEntry(matchName string, tdsbFlag uint32, label, tdb4Hex string, cdat []byte, withLayer bool, layerID uint32) []*rifx.Chunk {
 	tdb4 := mustHex124(tdb4Hex)
 	tdbs := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdbs, Children: []*rifx.Chunk{
-		makeTdsbFlags(3), // value-entry tdsb = 0x00000003 (AE-native)
+		makeTdsbFlags(tdsbFlag),
 		makeTdsn(label),
 		{ID: rifx.IDtdb4, Data: tdb4},
 		{ID: rifx.IDCdat, Data: cdat},
