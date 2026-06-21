@@ -1063,22 +1063,18 @@ Free function (not a method) so the rollback path can reach the concrete comp ba
 func DeleteLayer(c *Composition, index int) error
 ```
 
-DeleteLayer removes the layer at the given 0-based index in c.Layers. Returns nil on success, or an error if a refuse-case triggers (index out of range / comp lacks itemList back-ref / target is the last layer / target is not an AV layer / backref corruption).
+Remove a layer from a composition by index
 
-Reference cleanup — per AE's own delete behavior (RE'd via the re_delete_layer_*.aep fixtures):
+Removes the layer at the given 0-based index in the comp's layer list. Returns an error on a refuse-case (index out of range, comp lacks its item-list back-reference, target is the last layer, target is not an AV layer, or back-reference corruption).
 
-- any other layer's Layer.ParentID == deleted.ID → reset to 0 (ldta @0x84..0x87)
-- any other layer's Layer.TrackMatteLayerID == deleted.ID → reset to 0 (ldta @0xA0..0xA3, when ldta is long enough — AE ≤22 didn't write this field)
-- Layer.TrackMatte byte (ldta @0x6B) on those neighbors is LEFT UNTOUCHED to match AE: the matte intent flag persists even after the matte source is gone (AE re-resolves via implicit "layer above" at render time, which now returns nothing — matches AE)
-- Project.nextItemID counter: untouched (IDs never reused)
+Reference cleanup mirrors AE's own delete behavior: any other layer whose parent is the deleted layer has its parent reset to none, and any layer using the deleted layer as a track-matte source has that reference cleared (when the layer record is long enough — AE 2022 and earlier did not write that field). The neighbor's track-matte intent flag is left untouched to match AE. String-level references (expressions, render queue, essential graphics) are out of scope — scrub them manually if needed.
 
-String-level references to the deleted layer's ID (expressions, render queue, essential graphics) are out of scope — callers must scrub these manually if needed.
+Atomic (snapshot + rollback on any parser warning).
 
-Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers, neighbor refs / ldta bytes, and Project.Warnings; on any new parser warning surfaced during the call, roll all of them back and return the warnings as an error.
-
-Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS across baseline / middle / parent / matte modes). Future RE can lift the non-AV refuse and the single-layer-comp refuse — both are conservative defaults because AE's behavior for those scenarios hasn't been verified.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
+| Parameter | Description |
+|---|---|
+| `c` | the composition to remove the layer from |
+| `index` | 0-based index of the layer to remove |
 
 ### MoveLayer
 
@@ -1086,23 +1082,19 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func MoveLayer(c *Composition, from, to int) error
 ```
 
-MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). The source layer's entire chunk block — Layr + Ewst + leaf followers (adaptive scan to next LIST/EOF, same machinery as DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the target slot. After the call, c.Layers[to] == the moved layer, and every layer's Layer.Index field is refreshed to match its new slice position.
+Reorder a layer within a composition
 
-Refuse-cases (conservative):
+Moves the layer at from to position to in the comp's layer list (both 0-based). The source layer's entire chunk block is spliced out and re-inserted at the target slot; afterward every layer's index is refreshed to match its new position. from == to is a no-op.
 
-- `from` or `to` out of range (note: `to == len(c.Layers)-1` IS in range and means "move to last slot")
-- comp lacks parsed itemList back-ref
-- source layer lacks Layr back-ref / corrupted block (Layr formType / Ewst sibling mismatch)
+Refuses when from or to is out of range, the comp lacks its item-list back-reference, or the source block is corrupt. Unlike DeleteLayer and DuplicateLayer, MoveLayer ignores layer type and track matte — a pure reorder works for AV / camera / light / audio / shape / text / matted layers alike.
 
-`from == to` is a no-op (returns nil, no state change).
+Atomic (snapshot + rollback on any parser warning).
 
-Unlike DeleteLayer / DuplicateLayer, MoveLayer does NOT care about layer Type or TrackMatte — pure reorder works for AV / Camera / Light / Audio / Shape / Text / matted layers alike.
-
-Atomic mutation: snapshot pre-call itemList.Children + c.Layers + each layer's Index + Warnings count; on any new parser warning during the call, roll all of them back. No re-parse and no new chunks created, so the warnings path is defensive.
-
-Stable: no Alpha gate — AE behavior is known (layer order = order of Layr LISTs in itemList.Children, same model that DeleteLayer and DuplicateLayer already exercise and ship-gate across AE 2020 + AE 2025). The reorder path is ship-gate validated for AE acceptance.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
+| Parameter | Description |
+|---|---|
+| `c` | the composition whose layers to reorder |
+| `from` | 0-based current index of the layer to move |
+| `to` | 0-based target index |
 
 ### InsertLayer
 
@@ -1110,24 +1102,25 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error)
 ```
 
-InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). Returns the inserted clone *Layer on success. src may live in a sibling comp of the same Project, or in a different Project (cross-Project).
+Deep-clone a layer into a composition at an index
 
-Same-Project clone semantics (scene.CompositionProj(scene.LayerComp(src)) == scene.CompositionProj(c)):
+Deep-clones src into the comp's layer list at atIdx (0-based; atIdx == len(layers) appends) and returns the inserted clone. src may live in a sibling comp of the same project or in a different project (cross-project).
 
-- new layer ID = allocItemID(scene.CompositionProj(c)) (head counter +1, monotonic)
-- clone block = deep byte-clone of src's [Layr, Ewst, leaf-followers) range, with per-byte ldta mutations: @0x00..0x03 ← newID @0x6B       ← TrackMatteNone (cross-comp matte source is invalid) @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in scene.LayerComp(src)) @0xA0..0xA3 ← 0 (explicit matte ID, guarded by len(ldta) >= 0xA4)
-- clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
-- clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
+Same-project: the clone gets a new monotonic layer ID; its block is a deep byte-clone of src with the ID set, the track matte reset (a cross-comp matte source is invalid), and the parent reset (src's parent named a layer in src's own comp). The source reference is verbatim (the shared footage / comp item); the name matches AE's copyToComp (verbatim).
 
-Cross-Project semantics (scene.CompositionProj(scene.LayerComp(src)) != scene.CompositionProj(c)): additionally imports src's reachable ITEM CLOSURE (footage + precomp, transitively) into c's Project at root level with fresh dest item IDs, then remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the srcItemID→destItemID map. File-backed footage already present in dest (matched by Path) is reused, not re-cloned; comps and solids/placeholders are always cloned. ParentID / track matte are still reset (cross-comp). Folders are not recreated.
+Cross-project: additionally imports src's reachable item closure (footage + precomp, transitively) into the destination project at root level with fresh item IDs, then remaps the clone's source and alternate-source through that map. File-backed footage already present in the destination (matched by path) is reused, not re-cloned; comps and solids / placeholders are always cloned.
 
-Refuse-cases: nil src, dest backref missing, atIdx out of range, src detached, same-comp redirect, non-AV, direct pre-comp loop (same-Project only), src backref missing, structural corruption. Cross-Project adds: dest/src Project has no root Fold; dangling closure source.
+Refuses on: nil src, missing destination back-reference, atIdx out of range, a detached or same-comp src, a non-AV src, a direct precomp loop (same-project only), or structural corruption. Cross-project also refuses a project with no root folder or a dangling closure source.
 
-Atomic mutation: snapshot dest itemList.Children + c.Layers + scene.ProjectNextItemID(scene.CompositionProj(c)) + len(scene.CompositionProj(c).Warnings) (cross-Project also snapshots rootFold.Children + Compositions + Footage); on any new parser warning during re-parse, roll all back including the nextItemID bump.
+Atomic (snapshot + rollback on any parser warning, including the ID bump).
 
-Stable (both paths) — same-Project passed AE 2020 + AE 2025 ship-gate (3 modes [basic/footage/precomp](/basic/footage/precomp) × 2 = 6/6 PASS); cross-Project passed the assert-based AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup](/footage/precomp/dedup) × 2 = 6/6 PASS): AE accepts the Go-emitted file, the inserted clone's source resolves (imported / dedup'd), and footage is not duplicated on path match.
+| Parameter | Description |
+|---|---|
+| `c` | the composition to insert into |
+| `src` | the layer to clone (a sibling comp or another project) |
+| `atIdx` | 0-based insertion index (len(layers) appends) |
 
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
+**Returns:** the inserted clone Layer
 
 ### DuplicateLayer
 
@@ -1135,28 +1128,23 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)
 ```
 
-DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). Returns the cloned *Layer on success, or an error if a refuse-case triggers.
+Clone a layer in place by index
 
-Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff):
+Clones the layer at the given 0-based index and inserts the clone at that same position, pushing the source and everything below it down by one (mirrors AE's layer.duplicate()). Returns the cloned layer, or an error on a refuse-case.
 
-- new layer ID = allocItemID(proj) (head counter +1, monotonic)
-- clone's 16-chunk block (Layr + Ewst + 14 follower leaves in AE-saved files; 2 chunks in Go-built layers) is a deep byte-clone of source's block, with ldta @0x00..0x03 overwritten with the new ID. All other body bytes (SourceID @0x28, ParentID @0x84, TrackMatte @0x6B) are verbatim from source.
-- Layer.SourceID/ParentID/TrackMatteLayerID/TrackMatte struct fields on the clone = source values (no footage duplication; no reference rewrites).
-- Name = caller-supplied (AE keeps source's name verbatim; we require an explicit name to avoid silent duplicate-name confusion).
-- Children's outgoing ParentID is NOT updated — clone is a fresh sibling shadow; source remains the canonical parent for any incoming refs (F6).
+Clone semantics: the clone gets a new monotonic layer ID; its chunk block is a deep byte-clone of the source's, with only the ID overwritten — source, parent, and track-matte references are copied verbatim (no footage duplication, no reference rewrites). The name is caller-supplied (an explicit name avoids silent duplicate-name confusion). Incoming references still resolve to the source, not the clone.
 
-Refuse-cases (conservative):
+Refuses on: empty name, index out of range, comp lacking its item-list back-reference, a non-AV source (camera / light / audio behavior not yet reverse-engineered), a source with an implicit track matte, or back-reference corruption. An AE 23+ explicit track matte is allowed (the clone byte-copies the matte reference verbatim).
 
-- name empty
-- index out of range
-- comp lacks parsed itemList back-ref
-- source is not an AV layer (camera/light/audio behavior not RE'd)
-- source has implicit TrackMatte (TrackMatte != None && TrackMatteLayerID == 0). F2 quirk: AE relocates clone above the positional matte source to preserve original's matte; not yet supported. AE 23+ explicit matte (TrackMatteLayerID != 0) is ALLOWED (Stable — clone byte-copies @0xA0 + @0x6B verbatim; passed AE 2025 ship-gate).
-- backref corruption (Layr formType / Ewst sibling mismatch)
+Atomic (snapshot + rollback on any parser warning, including the ID bump).
 
-Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers, scene.ProjectNextItemID(proj), and proj.Warnings; on any parser warning surfaced during the re-parse, roll all of them back (including the nextItemID bump) and return the warnings as an error.
+| Parameter | Description |
+|---|---|
+| `c` | the composition that owns the layer |
+| `index` | 0-based index of the layer to clone |
+| `name` | name for the cloned layer (non-empty) |
 
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
+**Returns:** the cloned Layer
 
 ### NewShapeLayer
 

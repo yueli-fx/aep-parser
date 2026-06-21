@@ -2595,9 +2595,13 @@ const (
 func MoveToBeginning(l *Layer) error
 ```
 
-MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1).
+Move a layer to the top of the layer stack
 
-Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
+Moves the layer to position 0 (top of the stack in AE's display, AE-index 1). A convenience wrapper over MoveLayer.
+
+| Parameter | Description |
+|---|---|
+| `l` | the layer to move to the top |
 
 ### MoveToEnd
 
@@ -2605,9 +2609,13 @@ Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.Mov
 func MoveToEnd(l *Layer) error
 ```
 
-MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers).
+Move a layer to the bottom of the layer stack
 
-Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveToEnd method form; the aep facade re-exports it post-split.
+Moves the layer to the last position (bottom of the stack in AE's display). A convenience wrapper over MoveLayer.
+
+| Parameter | Description |
+|---|---|
+| `l` | the layer to move to the bottom |
 
 ### MoveAfter
 
@@ -2615,9 +2623,14 @@ Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.Mov
 func MoveAfter(l, other *Layer) error
 ```
 
-MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \< receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer is missing a comp back-ref.
+Move a layer to just after another layer
 
-Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveAfter method form; the aep facade re-exports it post-split.
+Moves the layer to the slot immediately after other (the receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer lacks a comp back-reference. A convenience wrapper over MoveLayer.
+
+| Parameter | Description |
+|---|---|
+| `l` | the layer to move |
+| `other` | the layer to position l after |
 
 ### MoveBefore
 
@@ -2625,9 +2638,14 @@ Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.Mov
 func MoveBefore(l, other *Layer) error
 ```
 
-MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack).
+Move a layer to just before another layer
 
-Free function (not a method) — see MoveLayer. BREAKING vs the former Layer.MoveBefore method form; the aep facade re-exports it post-split.
+Moves the layer to the slot immediately before other (the receiver lands just above other in the stack). A convenience wrapper over MoveLayer.
+
+| Parameter | Description |
+|---|---|
+| `l` | the layer to move |
+| `other` | the layer to position l before |
 
 ### SetMaterialOption
 

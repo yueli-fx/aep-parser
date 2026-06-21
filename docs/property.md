@@ -756,18 +756,19 @@ const (
 func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error)
 ```
 
-InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. Returns the new Keyframe and its index in Property.Keyframes (insertion is time-sorted; ties land after existing keys at the same time).
+Insert a keyframe into a property's stream
 
-Requires the property to already have ≥1 keyframe so the new block can clone the existing layout (header byte @0x07, bpk, etc.). For properties without keyframes, use SetStaticValue or build keyframes in AE first — synthesizing the lhd3/ldat chunks from scratch isn't supported yet.
+Builds a new keyframe block and inserts it into the property's keyframe stream (time-sorted; ties land after existing keys at the same time), then updates the count header. Returns the new keyframe and its index in the property's keyframe list.
 
-`value` follows the same rules as Keyframe.SetValue:
+Requires the property to already have at least one keyframe so the new block can clone the existing layout. For properties without keyframes, use a static value or the Animate* APIs — synthesizing the keyframe chunks from scratch is not supported here. value follows the SetValue rules: a float64 for a 1D property, or a []float64 (length == component count) for a multi-component property. The new keyframe's interpolation is Linear/Linear with zeroed ease and tangents; refine it via the returned keyframe's setters.
 
-- 1D property: pass float64
-- multi-component: pass []float64 (length == Property.Components)
+| Parameter | Description |
+|---|---|
+| `p` | the property to insert into (must already have >= 1 keyframe) |
+| `time` | keyframe time in seconds |
+| `value` | keyframe value (float64 for 1D, []float64 for multi-component) |
 
-The new keyframe's interpolation is Linear/Linear; ease + tangents are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent on the returned Keyframe to refine.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
+**Returns:** the new Keyframe and its index in the property's keyframe list
 
 ### DeleteKeyframe
 
@@ -775,9 +776,14 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func DeleteKeyframe(p *Property, i int) error
 ```
 
-DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. Returns an error when i is out of range or the property has no keyframe stream.
+Delete a keyframe from a property's stream by index
 
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
+Removes the keyframe at index i from the property's keyframe stream and decrements the count header. Returns an error when i is out of range or the property has no keyframe stream.
+
+| Parameter | Description |
+|---|---|
+| `p` | the property to delete from |
+| `i` | 0-based index of the keyframe to delete |
 
 ### SetDimensionsSeparated
 
@@ -785,16 +791,16 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func SetDimensionsSeparated(p *Property, separated bool) error
 ```
 
-SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position leader. Structural; both directions (separate↔merge) are double-version ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated Position (3D layers, near-linear leader path-ease). An animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated); animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused with an error rather than written.
+Toggle Separate Dimensions on a Position property
 
-Byte mechanics REd from AE 2020 controlled before/after pairs (see test_data/re_separate_dims*.jsx + incidents/separate-dimensions-write-mechanics.md):
+Toggles AE's "Separate Dimensions" on a Position leader, in both directions. Static Position (2D and 3D) and animated Position on 3D layers (near-linear leader path-ease) are double-version ship-gated. An animated leader routes to the keyframe-stream migration paths; animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused rather than written.
 
-- separate (merge→separate): leader flips tdsb byte2→0x08 + byte3 bit1 and resets to its default ([w/2,h/2,0]); the real value migrates into the per-axis Position_0/1 (+ Position_2 for 3D layers) followers, each clearing its own bit1. AE pre-allocates Position_0/1 even while merged; the Z follower Position_2 is synthesized (clone of Position_1's tdmn+tdbs) only for 3D layers — 2D layers separate into X/Y only.
-- merge (separate→merged): leader clears tdsb byte2→0x00 + byte3 bit1 and takes back the migrated [X,Y,Z] value; ALL Position_0/1/2 followers are removed (AE's merged-after-separate form is leader-only).
+Separating migrates the leader's value into per-axis Position followers (X/Y, plus Z for 3D layers, which is synthesized) and resets the leader; merging takes the value back into the leader and removes the per-axis followers. The only fallible step (re-parsing a synthesized Z follower) runs before any in-place mutation, so a failure leaves the project untouched.
 
-Atomicity: the only fallible step (re-parsing a synthesized Position_2) runs before any in-place mutation, so a failure leaves the project untouched and there is nothing to roll back.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 lists SetDimensionsSeparated as a structural write path despite the Set prefix — it adds/removes follower Property nodes); the aep facade re-exports it. BREAKING vs the former Property.SetDimensionsSeparated method form.
+| Parameter | Description |
+|---|---|
+| `p` | the Position leader property to toggle |
+| `separated` | true to separate dimensions, false to merge them |
 
 ### RemovePropertyGroup
 
@@ -802,11 +808,15 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func RemovePropertyGroup(g *AEPropertyGroup) error
 ```
 
-RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring AE's ScriptingAPI refuse.
+Remove a group from its parent indexed group
 
-Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat slice, and Project.Warnings; on any new parser warning everything rolls back and the warnings are returned as an error.
+Deletes this group from its parent indexed group. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring AE's refuse.
 
-Alpha — see file header for ship-gate status. Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former AEPropertyGroup.Remove method form.
+Atomic (snapshot + rollback on any parser warning).
+
+| Parameter | Description |
+|---|---|
+| `g` | the property group to remove (a direct child of an indexed group) |
 
 ### MovePropertyGroup
 
@@ -814,9 +824,14 @@ Alpha — see file header for ship-gate status. Free function (not a method) so 
 func MovePropertyGroup(g *AEPropertyGroup, index int) error
 ```
 
-MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children. index is clamped-checked against the current child count. Mirrors AE's PropertyBase.moveTo (which is 1-based; the Go API is 0-based per project convention).
+Reorder a group within its parent indexed group
 
-Alpha — see file header for ship-gate status. Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former AEPropertyGroup.MoveTo method form.
+Reorders this group to position index (0-based) among its parent indexed group's children; index is range-checked against the current child count. Mirrors AE's PropertyBase.moveTo (which is 1-based; this API is 0-based per project convention).
+
+| Parameter | Description |
+|---|---|
+| `g` | the property group to reorder (a direct child of an indexed group) |
+| `index` | 0-based target position among the parent's children |
 
 ### DuplicatePropertyGroup
 
@@ -824,15 +839,19 @@ Alpha — see file header for ship-gate status. Free function (not a method) so 
 func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error)
 ```
 
-DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); DuplicatePropertyGroup returns an error otherwise, mirroring AE's refuse.
+Duplicate a group within its parent indexed group
 
-The clone reuses the source's match-name and on-disk payload verbatim. AE's own .duplicate() additionally persists a deduplicated display name (the localized "\<name> 2") into a length-variable tdsn on the clone's inner tdgp (RE'd 2026-06-03, see incidents/property-indexed-group-structural-re.md slice 2: the source carries NO tdsn, the clone gains one reading "高斯模糊 2"). We deliberately do NOT synthesize that suffix: the base is AE's *localized* effect name, which needs the AE schema/localization DB we don't carry (the same blocker as Property.ValueText), and a clone with no tdsn is byte-for-byte an "add the same effect twice" project — which AE accepts and re-derives the runtime dedup name from on open. The persisted suffix is cosmetic; AE recomputes it. The structural duplicate is faithful.
+Inserts a copy of this group immediately after it among its parent indexed group's children — mirroring AE's PropertyBase.duplicate() — and returns the clone. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); DuplicatePropertyGroup returns an error otherwise.
 
-Chunk mechanics: pure (tdmn, payload) pair insert immediately after the source pair, no count/index chunk (RE: parade 9→11 children, nothing else touched).
+The clone reuses the source's match-name and on-disk payload verbatim. AE's own duplicate additionally persists a deduplicated display name (the localized "\<name> 2"); this call deliberately does NOT synthesize that suffix — it needs AE's localization database we do not carry, and a clone with no display-name override is byte-for-byte an "add the same effect twice" project, which AE accepts and re-derives the runtime dedup name from on open. The persisted suffix is cosmetic; the structural duplicate is faithful.
 
-Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat slice, and Project.Warnings; on any new parser warning — or a flat-mirror re-parse that fails to reproduce exactly one clone — everything rolls back and an error is returned.
+Atomic (snapshot + rollback on any parser warning, or if the re-parse fails to reproduce exactly one clone).
 
-Alpha — see file header for ship-gate status. Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former AEPropertyGroup.Duplicate method form.
+| Parameter | Description |
+|---|---|
+| `g` | the property group to duplicate (a direct child of an indexed group) |
+
+**Returns:** the cloned AEPropertyGroup
 
 <!-- Hand-authored reference tables. go/doc comments have no table syntax, so
      these concept tables are maintained here and appended by docgen. -->

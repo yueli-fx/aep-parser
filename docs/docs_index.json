@@ -20,7 +20,7 @@
       "file": "marker.md",
       "anchor": "#addmarker",
       "signature": "func AddMarker(c *Composition, seconds float64) (*Marker, error)",
-      "summary": "AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields."
+      "summary": "Appends a new composition marker at the given time (in seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields."
     },
     "AddMask": {
       "kind": "func",
@@ -876,14 +876,14 @@
       "file": "property.md",
       "anchor": "#deletekeyframe",
       "signature": "func DeleteKeyframe(p *Property, i int) error",
-      "summary": "DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header. Returns an error when i is out of range or the property has no keyframe stream."
+      "summary": "Removes the keyframe at index i from the property's keyframe stream and decrements the count header. Returns an error when i is out of range or the property has no keyframe stream."
     },
     "DeleteLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#deletelayer",
       "signature": "func DeleteLayer(c *Composition, index int) error",
-      "summary": "DeleteLayer removes the layer at the given 0-based index in c.Layers. Returns nil on success, or an error if a refuse-case triggers (index out of range / comp lacks itemList back-ref / target is the last layer / target is not an AV layer / backref corruption)."
+      "summary": "Removes the layer at the given 0-based index in the comp's layer list. Returns an error on a refuse-case (index out of range, comp lacks its item-list back-reference, target is the last layer, target is not an AV layer, or back-reference corruption)."
     },
     "DuplicateComposition": {
       "kind": "func",
@@ -897,7 +897,7 @@
       "file": "composition.md",
       "anchor": "#duplicatelayer",
       "signature": "func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)",
-      "summary": "DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()). Returns the cloned *Layer on success, or an error if a refuse-case triggers."
+      "summary": "Clones the layer at the given 0-based index and inserts the clone at that same position, pushing the source and everything below it down by one (mirrors AE's layer.duplicate()). Returns the cloned layer, or an error on a refuse-case."
     },
     "DuplicateMask": {
       "kind": "func",
@@ -911,7 +911,7 @@
       "file": "property.md",
       "anchor": "#duplicatepropertygroup",
       "signature": "func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error)",
-      "summary": "DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); DuplicatePropertyGroup returns an error otherwise, mirroring AE's refuse."
+      "summary": "Inserts a copy of this group immediately after it among its parent indexed group's children — mirroring AE's PropertyBase.duplicate() — and returns the clone. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); DuplicatePropertyGroup returns an error otherwise."
     },
     "EGControllerType": {
       "kind": "type",
@@ -1294,14 +1294,14 @@
       "file": "property.md",
       "anchor": "#insertkeyframe",
       "signature": "func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error)",
-      "summary": "InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header. Returns the new Keyframe and its index in Property.Keyframes (insertion is time-sorted; ties land after existing keys at the same time)."
+      "summary": "Builds a new keyframe block and inserts it into the property's keyframe stream (time-sorted; ties land after existing keys at the same time), then updates the count header. Returns the new keyframe and its index in the property's keyframe list."
     },
     "InsertLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#insertlayer",
       "signature": "func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error)",
-      "summary": "InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends). Returns the inserted clone *Layer on success. src may live in a sibling comp of the same Project, or in a different Project (cross-Project)."
+      "summary": "Deep-clones src into the comp's layer list at atIdx (0-based; atIdx == len(layers) appends) and returns the inserted clone. src may live in a sibling comp of the same project or in a different project (cross-project)."
     },
     "InterpType": {
       "kind": "type",
@@ -4007,21 +4007,21 @@
       "file": "layer.md",
       "anchor": "#moveafter",
       "signature": "func MoveAfter(l, other *Layer) error",
-      "summary": "MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \u003c receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer is missing a comp back-ref."
+      "summary": "Moves the layer to the slot immediately after other (the receiver lands just below other in the stack). Returns an error if other belongs to a different comp, other == l, or either layer lacks a comp back-reference. A convenience wrapper over MoveLayer."
     },
     "MoveBefore": {
       "kind": "func",
       "file": "layer.md",
       "anchor": "#movebefore",
       "signature": "func MoveBefore(l, other *Layer) error",
-      "summary": "MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack)."
+      "summary": "Moves the layer to the slot immediately before other (the receiver lands just above other in the stack). A convenience wrapper over MoveLayer."
     },
     "MoveLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#movelayer",
       "signature": "func MoveLayer(c *Composition, from, to int) error",
-      "summary": "MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based). The source layer's entire chunk block — Layr + Ewst + leaf followers (adaptive scan to next LIST/EOF, same machinery as DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the target slot. After the call, c.Layers[to] == the moved layer, and every layer's Layer.Index field is refreshed to match its new slice position."
+      "summary": "Moves the layer at from to position to in the comp's layer list (both 0-based). The source layer's entire chunk block is spliced out and re-inserted at the target slot; afterward every layer's index is refreshed to match its new position. from == to is a no-op."
     },
     "MoveMask": {
       "kind": "func",
@@ -4035,21 +4035,21 @@
       "file": "property.md",
       "anchor": "#movepropertygroup",
       "signature": "func MovePropertyGroup(g *AEPropertyGroup, index int) error",
-      "summary": "MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children. index is clamped-checked against the current child count. Mirrors AE's PropertyBase.moveTo (which is 1-based; the Go API is 0-based per project convention)."
+      "summary": "Reorders this group to position index (0-based) among its parent indexed group's children; index is range-checked against the current child count. Mirrors AE's PropertyBase.moveTo (which is 1-based; this API is 0-based per project convention)."
     },
     "MoveToBeginning": {
       "kind": "func",
       "file": "layer.md",
       "anchor": "#movetobeginning",
       "signature": "func MoveToBeginning(l *Layer) error",
-      "summary": "MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1)."
+      "summary": "Moves the layer to position 0 (top of the stack in AE's display, AE-index 1). A convenience wrapper over MoveLayer."
     },
     "MoveToEnd": {
       "kind": "func",
       "file": "layer.md",
       "anchor": "#movetoend",
       "signature": "func MoveToEnd(l *Layer) error",
-      "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers)."
+      "summary": "Moves the layer to the last position (bottom of the stack in AE's display). A convenience wrapper over MoveLayer."
     },
     "NewAdjustmentLayer": {
       "kind": "func",
@@ -4937,7 +4937,7 @@
       "file": "marker.md",
       "anchor": "#removemarker",
       "signature": "func RemoveMarker(m *Marker) error",
-      "summary": "RemoveMarker deletes this marker from its owning composition / layer marker set."
+      "summary": "Deletes this marker from its owning composition or layer marker set: it splices out the marker's keyframe block, decrements the count, removes the marker's record, shifts the trailing markers' offsets down, and drops the marker from the public list. The receiver is detached afterward — a second RemoveMarker (or any Set*) errors."
     },
     "RemoveMask": {
       "kind": "func",
@@ -4951,7 +4951,7 @@
       "file": "property.md",
       "anchor": "#removepropertygroup",
       "signature": "func RemovePropertyGroup(g *AEPropertyGroup) error",
-      "summary": "RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring AE's ScriptingAPI refuse."
+      "summary": "Deletes this group from its parent indexed group. The receiver must be a direct child of an indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring AE's refuse."
     },
     "Reopen": {
       "kind": "func",
@@ -4999,7 +4999,7 @@
       "file": "property.md",
       "anchor": "#setdimensionsseparated",
       "signature": "func SetDimensionsSeparated(p *Property, separated bool) error",
-      "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader. Structural; both directions (separate↔merge) are double-version ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated Position (3D layers, near-linear leader path-ease). An animated leader routes to the keyframe-stream migration paths (separatePositionAnimated / mergePositionAnimated); animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused with an error rather than written."
+      "summary": "Toggles AE's \"Separate Dimensions\" on a Position leader, in both directions. Static Position (2D and 3D) and animated Position on 3D layers (near-linear leader path-ease) are double-version ship-gated. An animated leader routes to the keyframe-stream migration paths; animated cases outside that shipped subset — a 2D layer, or a leader carrying custom spatial-path temporal ease — are refused rather than written."
     },
     "SetEffectLayerParam": {
       "kind": "func",

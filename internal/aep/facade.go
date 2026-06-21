@@ -387,419 +387,362 @@ func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error) {
 	return serializer.NewPrecompLayer(parent, child, name)
 }
 
-// DeleteLayer removes the layer at the given 0-based index in c.Layers.
-// Returns nil on success, or an error if a refuse-case triggers (index
-// out of range / comp lacks itemList back-ref / target is the last
-// layer / target is not an AV layer / backref corruption).
+// @summary    Remove a layer from a composition by index
+// @description Removes the layer at the given 0-based index in the comp's layer
+//   list. Returns an error on a refuse-case (index out of range, comp lacks its
+//   item-list back-reference, target is the last layer, target is not an AV
+//   layer, or back-reference corruption).
 //
-// Reference cleanup — per AE's own delete behavior (RE'd via the
-// re_delete_layer_*.aep fixtures):
+//   Reference cleanup mirrors AE's own delete behavior: any other layer whose
+//   parent is the deleted layer has its parent reset to none, and any layer using
+//   the deleted layer as a track-matte source has that reference cleared (when
+//   the layer record is long enough — AE 2022 and earlier did not write that
+//   field). The neighbor's track-matte intent flag is left untouched to match AE.
+//   String-level references (expressions, render queue, essential graphics) are
+//   out of scope — scrub them manually if needed.
 //
-//   - any other layer's Layer.ParentID == deleted.ID → reset to 0
-//     (ldta @0x84..0x87)
-//   - any other layer's Layer.TrackMatteLayerID == deleted.ID → reset
-//     to 0 (ldta @0xA0..0xA3, when ldta is long enough — AE ≤22 didn't
-//     write this field)
-//   - Layer.TrackMatte byte (ldta @0x6B) on those neighbors is LEFT
-//     UNTOUCHED to match AE: the matte intent flag persists even after
-//     the matte source is gone (AE re-resolves via implicit "layer
-//     above" at render time, which now returns nothing — matches AE)
-//   - Project.nextItemID counter: untouched (IDs never reused)
-//
-// String-level references to the deleted layer's ID (expressions,
-// render queue, essential graphics) are out of scope — callers must
-// scrub these manually if needed.
-//
-// Atomic mutation: snapshot pre-call state of itemList.Children, c.Layers,
-// neighbor refs / ldta bytes, and Project.Warnings; on any new parser
-// warning surfaced during the call, roll all of them back and return the
-// warnings as an error.
-//
-// Stable: AE 2020 + AE 2025 ship-gate green (8/8 PASS across baseline /
-// middle / parent / matte modes). Future RE can lift the non-AV refuse
-// and the single-layer-comp refuse — both are conservative defaults
-// because AE's behavior for those scenarios hasn't been verified.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.DeleteLayer method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="双版本 AE gated(structural_ops,AV solid 载体,layer-order DOM 读回);non-AV + 单层 comp refused" alias="delete layer,删图层,删除图层,remove layer"
+//   Atomic (snapshot + rollback on any parser warning).
+// @param      c      the composition to remove the layer from
+// @param      index  0-based index of the layer to remove
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   AE-gated on an AV solid carrier with layer-order DOM readback; non-AV layers and single-layer comps are refused
+// @alias      delete layer,删图层,删除图层,remove layer
 func DeleteLayer(c *Composition, index int) error { return serializer.DeleteLayer(c, index) }
 
-// DuplicateLayer clones the layer at the given 0-based index in c.Layers
-// and inserts the clone at that same position, pushing source and
-// everything below down by one (mirrors AE ScriptingAPI's
-// layer.duplicate()). Returns the cloned *Layer on success, or an error
-// if a refuse-case triggers.
+// @summary    Clone a layer in place by index
+// @description Clones the layer at the given 0-based index and inserts the clone
+//   at that same position, pushing the source and everything below it down by one
+//   (mirrors AE's layer.duplicate()). Returns the cloned layer, or an error on a
+//   refuse-case.
 //
-// Clone semantics (RE'd via 4 AE-saved fixtures + byte-diff):
+//   Clone semantics: the clone gets a new monotonic layer ID; its chunk block is
+//   a deep byte-clone of the source's, with only the ID overwritten — source,
+//   parent, and track-matte references are copied verbatim (no footage
+//   duplication, no reference rewrites). The name is caller-supplied (an explicit
+//   name avoids silent duplicate-name confusion). Incoming references still
+//   resolve to the source, not the clone.
 //
-//   - new layer ID = allocItemID(proj) (head counter +1, monotonic)
-//   - clone's 16-chunk block (Layr + Ewst + 14 follower leaves in
-//     AE-saved files; 2 chunks in Go-built layers) is a deep byte-clone
-//     of source's block, with ldta @0x00..0x03 overwritten with the new
-//     ID. All other body bytes (SourceID @0x28, ParentID @0x84,
-//     TrackMatte @0x6B) are verbatim from source.
-//   - Layer.SourceID/ParentID/TrackMatteLayerID/TrackMatte struct fields
-//     on the clone = source values (no footage duplication; no
-//     reference rewrites).
-//   - Name = caller-supplied (AE keeps source's name verbatim; we
-//     require an explicit name to avoid silent duplicate-name confusion).
-//   - Children's outgoing ParentID is NOT updated — clone is a fresh
-//     sibling shadow; source remains the canonical parent for any
-//     incoming refs (F6).
+//   Refuses on: empty name, index out of range, comp lacking its item-list
+//   back-reference, a non-AV source (camera / light / audio behavior not yet
+//   reverse-engineered), a source with an implicit track matte, or back-reference
+//   corruption. An AE 23+ explicit track matte is allowed (the clone byte-copies
+//   the matte reference verbatim).
 //
-// Refuse-cases (conservative):
-//
-//   - name empty
-//   - index out of range
-//   - comp lacks parsed itemList back-ref
-//   - source is not an AV layer (camera/light/audio behavior not RE'd)
-//   - source has implicit TrackMatte (TrackMatte != None &&
-//     TrackMatteLayerID == 0). F2 quirk: AE relocates clone above the
-//     positional matte source to preserve original's matte; not yet
-//     supported. AE 23+ explicit matte (TrackMatteLayerID != 0) is
-//     ALLOWED (Stable — clone byte-copies @0xA0 + @0x6B verbatim;
-//     passed AE 2025 ship-gate).
-//   - backref corruption (Layr formType / Ewst sibling mismatch)
-//
-// Atomic mutation: snapshot pre-call state of itemList.Children,
-// c.Layers, scene.ProjectNextItemID(proj), and proj.Warnings; on any parser warning
-// surfaced during the re-parse, roll all of them back (including the
-// nextItemID bump) and return the warnings as an error.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.DuplicateLayer method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="双版本 AE gated(structural_ops,AV solid,clone 置于 source 上方,layer-order DOM 读回);AE23+ explicit matte 允许,implicit matte/非 AV refused" alias="duplicate layer,复制图层"
+//   Atomic (snapshot + rollback on any parser warning, including the ID bump).
+// @param      c      the composition that owns the layer
+// @param      index  0-based index of the layer to clone
+// @param      name   name for the cloned layer (non-empty)
+// @returns    the cloned Layer
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   AE-gated on an AV solid (clone placed above the source, layer-order DOM readback); AE 23+ explicit matte allowed, implicit matte and non-AV refused
+// @alias      duplicate layer,复制图层
 func DuplicateLayer(c *Composition, index int, name string) (*Layer, error) {
 	return serializer.DuplicateLayer(c, index, name)
 }
 
-// InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx ==
-// len(c.Layers) appends). Returns the inserted clone *Layer on success. src may
-// live in a sibling comp of the same Project, or in a different Project
-// (cross-Project).
+// @summary    Deep-clone a layer into a composition at an index
+// @description Deep-clones src into the comp's layer list at atIdx (0-based;
+//   atIdx == len(layers) appends) and returns the inserted clone. src may live in
+//   a sibling comp of the same project or in a different project (cross-project).
 //
-// Same-Project clone semantics (scene.CompositionProj(scene.LayerComp(src)) == scene.CompositionProj(c)):
+//   Same-project: the clone gets a new monotonic layer ID; its block is a deep
+//   byte-clone of src with the ID set, the track matte reset (a cross-comp matte
+//   source is invalid), and the parent reset (src's parent named a layer in src's
+//   own comp). The source reference is verbatim (the shared footage / comp item);
+//   the name matches AE's copyToComp (verbatim).
 //
-//   - new layer ID = allocItemID(scene.CompositionProj(c)) (head counter +1, monotonic)
-//   - clone block = deep byte-clone of src's [Layr, Ewst, leaf-followers)
-//     range, with per-byte ldta mutations:
-//     @0x00..0x03 ← newID
-//     @0x6B       ← TrackMatteNone (cross-comp matte source is invalid)
-//     @0x84..0x87 ← 0 (ParentID; src's ParentID named a layer in scene.LayerComp(src))
-//     @0xA0..0xA3 ← 0 (explicit matte ID, guarded by len(ldta) >= 0xA4)
-//   - clone.SourceID = src.SourceID (verbatim — the shared Footage/Comp item).
-//   - clone.Name = src.Name (verbatim — matches AE's layer.copyToComp).
+//   Cross-project: additionally imports src's reachable item closure (footage +
+//   precomp, transitively) into the destination project at root level with fresh
+//   item IDs, then remaps the clone's source and alternate-source through that
+//   map. File-backed footage already present in the destination (matched by path)
+//   is reused, not re-cloned; comps and solids / placeholders are always cloned.
 //
-// Cross-Project semantics (scene.CompositionProj(scene.LayerComp(src)) != scene.CompositionProj(c)):
-// additionally imports src's reachable ITEM CLOSURE (footage + precomp,
-// transitively) into c's Project at root level with fresh dest item IDs, then
-// remaps the inserted clone's SourceID @0x28 + AlternateSourceID through the
-// srcItemID→destItemID map. File-backed footage already present in dest (matched
-// by Path) is reused, not re-cloned; comps and solids/placeholders are always
-// cloned. ParentID / track matte are still reset (cross-comp). Folders are not
-// recreated.
+//   Refuses on: nil src, missing destination back-reference, atIdx out of range,
+//   a detached or same-comp src, a non-AV src, a direct precomp loop (same-project
+//   only), or structural corruption. Cross-project also refuses a project with no
+//   root folder or a dangling closure source.
 //
-// Refuse-cases: nil src, dest backref missing, atIdx out of range, src
-// detached, same-comp redirect, non-AV, direct pre-comp loop (same-Project
-// only), src backref missing, structural corruption. Cross-Project adds:
-// dest/src Project has no root Fold; dangling closure source.
-//
-// Atomic mutation: snapshot dest itemList.Children + c.Layers +
-// scene.ProjectNextItemID(scene.CompositionProj(c)) + len(scene.CompositionProj(c).Warnings) (cross-Project also snapshots
-// rootFold.Children + Compositions + Footage); on any new parser warning
-// during re-parse, roll all back including the nextItemID bump.
-//
-// Stable (both paths) — same-Project passed AE 2020 + AE 2025 ship-gate (3 modes
-// [basic/footage/precomp] × 2 = 6/6 PASS); cross-Project passed the assert-based
-// AE 2020 + AE 2025 gate (3 modes [footage/precomp/dedup] × 2 = 6/6 PASS): AE
-// accepts the Go-emitted file, the inserted clone's source resolves (imported /
-// dedup'd), and footage is not duplicated on path match.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.InsertLayer method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="同/跨工程插入;双版本 AE gated(structural_ops 自动验同工程 layer-order DOM 读回);cross-project 经 assert-gate coverage 6/6,未纳入自动 gate" alias="insert layer,插入图层,跨工程复制,copy to comp"
+//   Atomic (snapshot + rollback on any parser warning, including the ID bump).
+// @param      c      the composition to insert into
+// @param      src    the layer to clone (a sibling comp or another project)
+// @param      atIdx  0-based insertion index (len(layers) appends)
+// @returns    the inserted clone Layer
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   same- and cross-project insert; same-project is auto-gated (layer-order DOM readback); cross-project has assert-gate coverage (6/6) but is not in the automated gate
+// @alias      insert layer,插入图层,跨工程复制,copy to comp
 func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error) {
 	return serializer.InsertLayer(c, src, atIdx)
 }
 
-// MoveLayer reorders the layer at `from` to position `to` in c.Layers
-// (both 0-based). The source layer's entire chunk block — Layr + Ewst
-// + leaf followers (adaptive scan to next LIST/EOF, same machinery as
-// DeleteLayer / DuplicateLayer) — is spliced out and re-inserted at the
-// target slot. After the call, c.Layers[to] == the moved layer, and
-// every layer's Layer.Index field is refreshed to match its new slice
-// position.
+// @summary    Reorder a layer within a composition
+// @description Moves the layer at from to position to in the comp's layer list
+//   (both 0-based). The source layer's entire chunk block is spliced out and
+//   re-inserted at the target slot; afterward every layer's index is refreshed to
+//   match its new position. from == to is a no-op.
 //
-// Refuse-cases (conservative):
+//   Refuses when from or to is out of range, the comp lacks its item-list
+//   back-reference, or the source block is corrupt. Unlike DeleteLayer and
+//   DuplicateLayer, MoveLayer ignores layer type and track matte — a pure reorder
+//   works for AV / camera / light / audio / shape / text / matted layers alike.
 //
-//   - `from` or `to` out of range (note: `to == len(c.Layers)-1` IS in
-//     range and means "move to last slot")
-//   - comp lacks parsed itemList back-ref
-//   - source layer lacks Layr back-ref / corrupted block (Layr formType
-//     / Ewst sibling mismatch)
-//
-// `from == to` is a no-op (returns nil, no state change).
-//
-// Unlike DeleteLayer / DuplicateLayer, MoveLayer does NOT care about
-// layer Type or TrackMatte — pure reorder works for AV / Camera / Light
-// / Audio / Shape / Text / matted layers alike.
-//
-// Atomic mutation: snapshot pre-call itemList.Children + c.Layers +
-// each layer's Index + Warnings count; on any new parser warning during
-// the call, roll all of them back. No re-parse and no new chunks
-// created, so the warnings path is defensive.
-//
-// Stable: no Alpha gate — AE behavior is known (layer order = order of
-// Layr LISTs in itemList.Children, same model that DeleteLayer and
-// DuplicateLayer already exercise and ship-gate across AE 2020 + AE
-// 2025). The reorder path is ship-gate validated for AE acceptance.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.MoveLayer method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="纯重排(类型无关,impl 不查 Type);双版本 AE gated(structural_ops,AV solid layer-order DOM 读回)" alias="move layer,图层排序,reorder layer,改层级"
+//   Atomic (snapshot + rollback on any parser warning).
+// @param      c     the composition whose layers to reorder
+// @param      from  0-based current index of the layer to move
+// @param      to    0-based target index
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   pure reorder (type-agnostic); AE-gated on an AV solid with layer-order DOM readback
+// @alias      move layer,图层排序,reorder layer,改层级
 func MoveLayer(c *Composition, from, to int) error { return serializer.MoveLayer(c, from, to) }
 
-// MoveToBeginning moves the receiver to position 0 (top of layer stack
-// in AE's display, AE-index 1).
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveToBeginning method form; the aep facade re-exports it post-split.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到顶部);双版本 AE gated(structural_ops)" alias="move to beginning,移到顶部,置顶"
+// @summary    Move a layer to the top of the layer stack
+// @description Moves the layer to position 0 (top of the stack in AE's display,
+//   AE-index 1). A convenience wrapper over MoveLayer.
+// @param      l  the layer to move to the top
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   MoveLayer convenience wrapper (move to top); AE-gated via structural ops
+// @alias      move to beginning,移到顶部,置顶
 func MoveToBeginning(l *Layer) error { return serializer.MoveToBeginning(l) }
 
-// MoveToEnd moves the receiver to the last position in c.Layers
-// (bottom of layer stack in AE's display, AE-index c.numLayers).
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveToEnd method form; the aep facade re-exports it post-split.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到底部);双版本 AE gated(structural_ops)" alias="move to end,移到底部,置底"
+// @summary    Move a layer to the bottom of the layer stack
+// @description Moves the layer to the last position (bottom of the stack in AE's
+//   display). A convenience wrapper over MoveLayer.
+// @param      l  the layer to move to the bottom
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   MoveLayer convenience wrapper (move to bottom); AE-gated via structural ops
+// @alias      move to end,移到底部,置底
 func MoveToEnd(l *Layer) error { return serializer.MoveToEnd(l) }
 
-// MoveAfter moves the receiver to the slot immediately after `other`
-// (i.e., other.Index < receiver.Index post-call, both viewed in
-// c.Layers slice order — receiver lands just below other in the stack).
-// Returns an error if other belongs to a different comp, other == l,
-// or either layer is missing a comp back-ref.
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveAfter method form; the aep facade re-exports it post-split.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到 other 之后);双版本 AE gated(structural_ops)" alias="move after,移到之后"
+// @summary    Move a layer to just after another layer
+// @description Moves the layer to the slot immediately after other (the receiver
+//   lands just below other in the stack). Returns an error if other belongs to a
+//   different comp, other == l, or either layer lacks a comp back-reference. A
+//   convenience wrapper over MoveLayer.
+// @param      l      the layer to move
+// @param      other  the layer to position l after
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   MoveLayer convenience wrapper (move after other); AE-gated via structural ops
+// @alias      move after,移到之后
 func MoveAfter(l, other *Layer) error { return serializer.MoveAfter(l, other) }
 
-// MoveBefore moves the receiver to the slot immediately before `other`
-// (receiver lands just above other in the stack).
-//
-// Free function (not a method) — see MoveLayer. BREAKING vs the former
-// Layer.MoveBefore method form; the aep facade re-exports it post-split.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025 boundary="MoveLayer 便捷封装(移到 other 之前);双版本 AE gated(structural_ops)" alias="move before,移到之前"
+// @summary    Move a layer to just before another layer
+// @description Moves the layer to the slot immediately before other (the receiver
+//   lands just above other in the stack). A convenience wrapper over MoveLayer.
+// @param      l      the layer to move
+// @param      other  the layer to position l before
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestStructuralOps_AEShipGate_AE2020,TestStructuralOps_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   MoveLayer convenience wrapper (move before other); AE-gated via structural ops
+// @alias      move before,移到之前
 func MoveBefore(l, other *Layer) error { return serializer.MoveBefore(l, other) }
 
-// AddMarker appends a new composition marker at the given time (seconds) and
-// returns it for further Set* calls. The new marker is a clean point marker:
-// no duration, no label color, empty text fields.
+// @summary    Append a composition marker at a given time
+// @description Appends a new composition marker at the given time (in seconds) and
+//   returns it for further Set* calls. The new marker is a clean point marker: no
+//   duration, no label color, empty text fields.
 //
-// Mechanics (clone-template): to avoid reverse-engineering the canonical
-// defaults of the ldat block's opaque metadata (0x04-0x0F) and the NmHd's
-// reserved/flag bytes, the new marker clones an existing marker's ldat block
-// and NmHd verbatim (opaque preservation, CLAUDE.md #5), then resets the time
-// plus the known semantic NmHd fields (duration @0x08, label @0x10) to zero.
-// The Nmrd gets five empty Utf8 slots, matching AE's always-five layout.
-//
-// length-variable — the ldat and mrky LISTs grow; WriteAEP recomputes the
-// mrst-chain LIST sizes.
-//
-// Stable — passed the AE 2020 + AE 2025 ship-gate (remove-then-add on an
-// AE-native two-marker comp; AE accepts the spliced ldat / lhd3 count / mrky
-// Nmrd and reads back both markers with the expected times and comments).
-//
-// Restriction: requires the comp to already have ≥1 marker (the clone
-// template). Seeding the entire "Markers" pseudo-layer for an empty comp is a
-// separate slice (needs a canonical seed); AddMarker returns an error there.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Composition.AddMarker method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025 boundary="需 comp 已有 >=1 marker(空 comp seed 暂搁);tail-insert 不排序" alias="marker,标记,合成标记,comp marker"
+//   To avoid reverse-engineering the canonical defaults of the marker's opaque
+//   metadata, the new marker clones an existing marker's block verbatim (opaque
+//   preservation), then resets the time plus the known semantic fields (duration,
+//   label) to zero. This means the comp must already have at least one marker to
+//   serve as the clone template; AddMarker returns an error otherwise. Markers
+//   are appended without re-sorting.
+// @param      c        the composition to add the marker to
+// @param      seconds  marker time in seconds
+// @returns    the created Marker
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   requires the comp to already have >= 1 marker (empty-comp seeding is deferred); tail-insert without sorting
+// @alias      marker,标记,合成标记,comp marker
 func AddMarker(c *Composition, seconds float64) (*Marker, error) {
 	return serializer.AddMarker(c, seconds)
 }
 
-// RemoveMarker deletes this marker from its owning composition / layer marker set.
+// @summary    Remove a marker from its owning comp or layer
+// @description Deletes this marker from its owning composition or layer marker set:
+//   it splices out the marker's keyframe block, decrements the count, removes the
+//   marker's record, shifts the trailing markers' offsets down, and drops the
+//   marker from the public list. The receiver is detached afterward — a second
+//   RemoveMarker (or any Set*) errors.
 //
-// It splices the marker's 16-byte ldat keyframe block, decrements the kfl
-// count, removes the marker's Nmrd from mrky, shifts the trailing markers'
-// ldat offsets down, and drops the marker from the public Markers slice. The
-// receiver is detached afterward — a second RemoveMarker (or any Set*) errors.
-//
-// Errors (project untouched): the marker was built outside the parser, is
-// already detached, or its chunk references are inconsistent.
-//
-// Stable — exercised alongside AddMarker in the AE 2020 + AE 2025 ship-gate
-// (the survivor marker resolves with the correct time and comment after AE
-// resaves the spliced project).
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. Renamed + BREAKING vs the former Marker.Remove method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025 alias="remove marker,删标记"
+//   Errors (project untouched) when the marker was built outside the parser, is
+//   already detached, or its chunk references are inconsistent.
+// @param      m  the marker to remove
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025
+// @since      AE2020
+// @alias      remove marker,删标记
 func RemoveMarker(m *Marker) error { return serializer.RemoveMarker(m) }
 
-// InsertKeyframe builds a new bpk-byte keyframe block and inserts it
-// into the property's ldat stream, then updates the lhd3 count header.
-// Returns the new Keyframe and its index in Property.Keyframes
-// (insertion is time-sorted; ties land after existing keys at the
-// same time).
+// @summary    Insert a keyframe into a property's stream
+// @description Builds a new keyframe block and inserts it into the property's
+//   keyframe stream (time-sorted; ties land after existing keys at the same
+//   time), then updates the count header. Returns the new keyframe and its index
+//   in the property's keyframe list.
 //
-// Requires the property to already have ≥1 keyframe so the new block
-// can clone the existing layout (header byte @0x07, bpk, etc.). For
-// properties without keyframes, use SetStaticValue or build keyframes
-// in AE first — synthesizing the lhd3/ldat chunks from scratch isn't
-// supported yet.
-//
-// `value` follows the same rules as Keyframe.SetValue:
-//   - 1D property: pass float64
-//   - multi-component: pass []float64 (length == Property.Components)
-//
-// The new keyframe's interpolation is Linear/Linear; ease + tangents
-// are zeroed. Call SetInInterp / SetInTemporalEase / SetInSpatialTangent
-// on the returned Keyframe to refine.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Property.InsertKeyframe method form.
-//
-//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="需 >=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);双版本 AE gated(keyframe_mutate,numKeys readback);新 kf 默认 Linear" alias="insert keyframe,插入关键帧,加关键帧"
+//   Requires the property to already have at least one keyframe so the new block
+//   can clone the existing layout. For properties without keyframes, use a static
+//   value or the Animate* APIs — synthesizing the keyframe chunks from scratch is
+//   not supported here. value follows the SetValue rules: a float64 for a 1D
+//   property, or a []float64 (length == component count) for a multi-component
+//   property. The new keyframe's interpolation is Linear/Linear with zeroed ease
+//   and tangents; refine it via the returned keyframe's setters.
+// @param      p      the property to insert into (must already have >= 1 keyframe)
+// @param      time   keyframe time in seconds
+// @param      value  keyframe value (float64 for 1D, []float64 for multi-component)
+// @returns    the new Keyframe and its index in the property's keyframe list
+// @domain     keyframe
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   requires >= 1 existing keyframe to clone layout (from-scratch unsupported — use the Animate* APIs); AE-gated on keyframe-count readback; new keyframe defaults to Linear
+// @alias      insert keyframe,插入关键帧,加关键帧
 func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error) {
 	return serializer.InsertKeyframe(p, time, value)
 }
 
-// DeleteKeyframe removes the keyframe at index i from the property's
-// ldat stream and decrements the lhd3 count header. Returns an error
-// when i is out of range or the property has no keyframe stream.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Property.DeleteKeyframe method form.
-//
-//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="双版本 AE gated(keyframe_mutate,numKeys readback)" alias="delete keyframe,删关键帧,移除关键帧"
+// @summary    Delete a keyframe from a property's stream by index
+// @description Removes the keyframe at index i from the property's keyframe stream
+//   and decrements the count header. Returns an error when i is out of range or
+//   the property has no keyframe stream.
+// @param      p  the property to delete from
+// @param      i  0-based index of the keyframe to delete
+// @domain     keyframe
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   AE-gated on keyframe-count readback
+// @alias      delete keyframe,删关键帧,移除关键帧
 func DeleteKeyframe(p *Property, i int) error { return serializer.DeleteKeyframe(p, i) }
 
-// SetDimensionsSeparated toggles AE's "Separate Dimensions" on a Position
-// leader. Structural; both directions (separate↔merge) are double-version
-// ship-gated (AE 2020 + 2025) for static Position (2D + 3D) and animated
-// Position (3D layers, near-linear leader path-ease). An animated leader
-// routes to the keyframe-stream migration paths (separatePositionAnimated /
-// mergePositionAnimated); animated cases outside that shipped subset — a 2D
-// layer, or a leader carrying custom spatial-path temporal ease — are refused
-// with an error rather than written.
+// @summary    Toggle Separate Dimensions on a Position property
+// @description Toggles AE's "Separate Dimensions" on a Position leader, in both
+//   directions. Static Position (2D and 3D) and animated Position on 3D layers
+//   (near-linear leader path-ease) are double-version ship-gated. An animated
+//   leader routes to the keyframe-stream migration paths; animated cases outside
+//   that shipped subset — a 2D layer, or a leader carrying custom spatial-path
+//   temporal ease — are refused rather than written.
 //
-// Byte mechanics REd from AE 2020 controlled before/after pairs (see
-// test_data/re_separate_dims*.jsx + incidents/separate-dimensions-write-mechanics.md):
-//
-//   - separate (merge→separate): leader flips tdsb byte2→0x08 + byte3 bit1 and
-//     resets to its default ([w/2,h/2,0]); the real value migrates into the
-//     per-axis Position_0/1 (+ Position_2 for 3D layers) followers, each
-//     clearing its own bit1. AE pre-allocates Position_0/1 even while merged;
-//     the Z follower Position_2 is synthesized (clone of Position_1's
-//     tdmn+tdbs) only for 3D layers — 2D layers separate into X/Y only.
-//   - merge (separate→merged): leader clears tdsb byte2→0x00 + byte3 bit1 and
-//     takes back the migrated [X,Y,Z] value; ALL Position_0/1/2 followers are
-//     removed (AE's merged-after-separate form is leader-only).
-//
-// Atomicity: the only fallible step (re-parsing a synthesized Position_2)
-// runs before any in-place mutation, so a failure leaves the project
-// untouched and there is nothing to roll back.
-//
-// Free function (not a method) so the impl can live in internal/serializer after
-// the M8 split (CLAUDE.md #2 lists SetDimensionsSeparated as a structural write path
-// despite the Set prefix — it adds/removes follower Property nodes); the aep facade
-// re-exports it. BREAKING vs the former Property.SetDimensionsSeparated method form.
-//
-//aep:cap domain=structural tier=stable verify=ae-accept gate=TestSeparateDims_AEShipGate_AE2020,TestSeparateDims_AEShipGate_AE2025,TestMergeDims_AEShipGate_AE2020,TestMergeDims_AEShipGate_AE2025 incident=separate-dimensions-write-mechanics boundary="static 2D/3D + animated 3D 近线性 gated;animated 2D + 自定义 spatial ease refused" alias="separate dimensions,分离维度,position 分离,X Y 分离"
+//   Separating migrates the leader's value into per-axis Position followers
+//   (X/Y, plus Z for 3D layers, which is synthesized) and resets the leader;
+//   merging takes the value back into the leader and removes the per-axis
+//   followers. The only fallible step (re-parsing a synthesized Z follower) runs
+//   before any in-place mutation, so a failure leaves the project untouched.
+// @param      p          the Position leader property to toggle
+// @param      separated  true to separate dimensions, false to merge them
+// @domain     structural
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestSeparateDims_AEShipGate_AE2020,TestSeparateDims_AEShipGate_AE2025,TestMergeDims_AEShipGate_AE2020,TestMergeDims_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   static 2D/3D and near-linear animated 3D are gated; animated 2D and custom spatial ease are refused
+// @incident   separate-dimensions-write-mechanics
+// @alias      separate dimensions,分离维度,position 分离,X Y 分离
 func SetDimensionsSeparated(p *Property, separated bool) error {
 	return serializer.SetDimensionsSeparated(p, separated)
 }
 
-// RemovePropertyGroup deletes this group from its parent INDEXED_GROUP. The receiver must
-// be a direct child of an indexed group (Effect Parade / Mask Parade / Root
-// Vectors Group / Text Animators); RemovePropertyGroup returns an error otherwise, mirroring
-// AE's ScriptingAPI refuse.
+// @summary    Remove a group from its parent indexed group
+// @description Deletes this group from its parent indexed group. The receiver must
+//   be a direct child of an indexed group (Effect Parade / Mask Parade / Root
+//   Vectors Group / Text Animators); RemovePropertyGroup returns an error
+//   otherwise, mirroring AE's refuse.
 //
-// Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat
-// slice, and Project.Warnings; on any new parser warning everything rolls back
-// and the warnings are returned as an error.
-//
-// Alpha — see file header for ship-gate status. Free function (not a method) so
-// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
-// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
-// BREAKING vs the former AEPropertyGroup.Remove method form.
-//
-//aep:cap domain=structural tier=alpha verify=ae-accept gate=TestPropStructRemove_AEShipGate_AE2020,TestPropStructRemove_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="Effect Parade + Text Animators 双版本 gated;Mask/Root Vectors 同机制未单独 gate" alias="remove property group,删属性组,删动画器,删 indexed group 子项"
+//   Atomic (snapshot + rollback on any parser warning).
+// @param      g  the property group to remove (a direct child of an indexed group)
+// @domain     structural
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestPropStructRemove_AEShipGate_AE2020,TestPropStructRemove_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   Effect Parade and Text Animators are gated in both versions; Mask and Root Vectors use the same mechanism but are not separately gated
+// @incident   property-indexed-group-structural-re
+// @alias      remove property group,删属性组,删动画器,删 indexed group 子项
 func RemovePropertyGroup(g *AEPropertyGroup) error { return serializer.RemovePropertyGroup(g) }
 
-// MovePropertyGroup reorders this group to position index (0-based) among its parent
-// INDEXED_GROUP's children. index is clamped-checked against the current child
-// count. Mirrors AE's PropertyBase.moveTo (which is 1-based; the Go API is
-// 0-based per project convention).
-//
-// Alpha — see file header for ship-gate status. Free function (not a method) so
-// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
-// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
-// BREAKING vs the former AEPropertyGroup.MoveTo method form.
-//
-//aep:cap domain=structural tier=alpha verify=ae-accept gate=TestPropStructMove_AEShipGate_AE2020,TestPropStructMove_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="同 RemovePropertyGroup 的 indexed-group gate 覆盖面" alias="move property group,属性组排序,reorder group"
+// @summary    Reorder a group within its parent indexed group
+// @description Reorders this group to position index (0-based) among its parent
+//   indexed group's children; index is range-checked against the current child
+//   count. Mirrors AE's PropertyBase.moveTo (which is 1-based; this API is 0-based
+//   per project convention).
+// @param      g      the property group to reorder (a direct child of an indexed group)
+// @param      index  0-based target position among the parent's children
+// @domain     structural
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestPropStructMove_AEShipGate_AE2020,TestPropStructMove_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   same indexed-group gate coverage as RemovePropertyGroup
+// @incident   property-indexed-group-structural-re
+// @alias      move property group,属性组排序,reorder group
 func MovePropertyGroup(g *AEPropertyGroup, index int) error {
 	return serializer.MovePropertyGroup(g, index)
 }
 
-// DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent
-// INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural
-// effect — and returns the clone. The receiver must be a direct child of an
-// indexed group (Effect Parade / Mask Parade / Root Vectors Group / Text
-// Animators); DuplicatePropertyGroup returns an error otherwise, mirroring AE's refuse.
+// @summary    Duplicate a group within its parent indexed group
+// @description Inserts a copy of this group immediately after it among its parent
+//   indexed group's children — mirroring AE's PropertyBase.duplicate() — and
+//   returns the clone. The receiver must be a direct child of an indexed group
+//   (Effect Parade / Mask Parade / Root Vectors Group / Text Animators);
+//   DuplicatePropertyGroup returns an error otherwise.
 //
-// The clone reuses the source's match-name and on-disk payload verbatim. AE's
-// own .duplicate() additionally persists a deduplicated display name (the
-// localized "<name> 2") into a length-variable tdsn on the clone's inner tdgp
-// (RE'd 2026-06-03, see incidents/property-indexed-group-structural-re.md
-// slice 2: the source carries NO tdsn, the clone gains one reading "高斯模糊 2").
-// We deliberately do NOT synthesize that suffix: the base is AE's *localized*
-// effect name, which needs the AE schema/localization DB we don't carry (the
-// same blocker as Property.ValueText), and a clone with no tdsn is byte-for-byte
-// an "add the same effect twice" project — which AE accepts and re-derives the
-// runtime dedup name from on open. The persisted suffix is cosmetic; AE
-// recomputes it. The structural duplicate is faithful.
+//   The clone reuses the source's match-name and on-disk payload verbatim. AE's
+//   own duplicate additionally persists a deduplicated display name (the
+//   localized "<name> 2"); this call deliberately does NOT synthesize that suffix
+//   — it needs AE's localization database we do not carry, and a clone with no
+//   display-name override is byte-for-byte an "add the same effect twice"
+//   project, which AE accepts and re-derives the runtime dedup name from on open.
+//   The persisted suffix is cosmetic; the structural duplicate is faithful.
 //
-// Chunk mechanics: pure (tdmn, payload) pair insert immediately after the
-// source pair, no count/index chunk (RE: parade 9→11 children, nothing else
-// touched).
-//
-// Atomic: snapshots the parent chunk LIST, scene children, the mirrored flat
-// slice, and Project.Warnings; on any new parser warning — or a flat-mirror
-// re-parse that fails to reproduce exactly one clone — everything rolls back
-// and an error is returned.
-//
-// Alpha — see file header for ship-gate status. Free function (not a method) so
-// the impl can live in internal/serializer after the M8 split (CLAUDE.md #2
-// structural-op call-form carve-out); the aep facade re-exports it. Renamed +
-// BREAKING vs the former AEPropertyGroup.Duplicate method form.
-//
-//aep:cap domain=structural tier=alpha verify=ae-accept gate=TestPropStructDuplicate_AEShipGate_AE2020,TestPropStructDuplicate_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="display-name 后缀不合成(AE 自重算);同 indexed-group gate 覆盖面" alias="duplicate property group,复制属性组,复制效果"
+//   Atomic (snapshot + rollback on any parser warning, or if the re-parse fails
+//   to reproduce exactly one clone).
+// @param      g  the property group to duplicate (a direct child of an indexed group)
+// @returns    the cloned AEPropertyGroup
+// @domain     structural
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestPropStructDuplicate_AEShipGate_AE2020,TestPropStructDuplicate_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   the display-name suffix is not synthesized (AE recomputes it); same indexed-group gate coverage as RemovePropertyGroup
+// @incident   property-indexed-group-structural-re
+// @alias      duplicate property group,复制属性组,复制效果
 func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	return serializer.DuplicatePropertyGroup(g)
 }

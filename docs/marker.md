@@ -242,17 +242,18 @@ SetURL rewrites the marker's web-target URL (third Utf8).
 func AddMarker(c *Composition, seconds float64) (*Marker, error)
 ```
 
-AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields.
+Append a composition marker at a given time
 
-Mechanics (clone-template): to avoid reverse-engineering the canonical defaults of the ldat block's opaque metadata (0x04-0x0F) and the NmHd's reserved/flag bytes, the new marker clones an existing marker's ldat block and NmHd verbatim (opaque preservation, CLAUDE.md #5), then resets the time plus the known semantic NmHd fields (duration @0x08, label @0x10) to zero. The Nmrd gets five empty Utf8 slots, matching AE's always-five layout.
+Appends a new composition marker at the given time (in seconds) and returns it for further Set* calls. The new marker is a clean point marker: no duration, no label color, empty text fields.
 
-length-variable — the ldat and mrky LISTs grow; WriteAEP recomputes the mrst-chain LIST sizes.
+To avoid reverse-engineering the canonical defaults of the marker's opaque metadata, the new marker clones an existing marker's block verbatim (opaque preservation), then resets the time plus the known semantic fields (duration, label) to zero. This means the comp must already have at least one marker to serve as the clone template; AddMarker returns an error otherwise. Markers are appended without re-sorting.
 
-Stable — passed the AE 2020 + AE 2025 ship-gate (remove-then-add on an AE-native two-marker comp; AE accepts the spliced ldat / lhd3 count / mrky Nmrd and reads back both markers with the expected times and comments).
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the marker to |
+| `seconds` | marker time in seconds |
 
-Restriction: requires the comp to already have ≥1 marker (the clone template). Seeding the entire "Markers" pseudo-layer for an empty comp is a separate slice (needs a canonical seed); AddMarker returns an error there.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.AddMarker method form.
+**Returns:** the created Marker
 
 ### RemoveMarker
 
@@ -260,15 +261,15 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func RemoveMarker(m *Marker) error
 ```
 
-RemoveMarker deletes this marker from its owning composition / layer marker set.
+Remove a marker from its owning comp or layer
 
-It splices the marker's 16-byte ldat keyframe block, decrements the kfl count, removes the marker's Nmrd from mrky, shifts the trailing markers' ldat offsets down, and drops the marker from the public Markers slice. The receiver is detached afterward — a second RemoveMarker (or any Set*) errors.
+Deletes this marker from its owning composition or layer marker set: it splices out the marker's keyframe block, decrements the count, removes the marker's record, shifts the trailing markers' offsets down, and drops the marker from the public list. The receiver is detached afterward — a second RemoveMarker (or any Set*) errors.
 
-Errors (project untouched): the marker was built outside the parser, is already detached, or its chunk references are inconsistent.
+Errors (project untouched) when the marker was built outside the parser, is already detached, or its chunk references are inconsistent.
 
-Stable — exercised alongside AddMarker in the AE 2020 + AE 2025 ship-gate (the survivor marker resolves with the correct time and comment after AE resaves the spliced project).
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. Renamed + BREAKING vs the former Marker.Remove method form.
+| Parameter | Description |
+|---|---|
+| `m` | the marker to remove |
 
 <!-- Hand-authored notes. go/doc comments can't carry these tables / caveats. -->
 

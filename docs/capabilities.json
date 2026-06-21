@@ -2216,7 +2216,7 @@
     "symbol": "DeleteKeyframe",
     "kind": "func",
     "signature": "func DeleteKeyframe(p *Property, i int) error",
-    "summary": "DeleteKeyframe removes the keyframe at index i from the property's ldat stream and decrements the lhd3 count header.",
+    "summary": "@summary    Delete a keyframe from a property's stream by index @description Removes the keyframe at index i from the property's keyframe stream   and decrements the count header.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2227,7 +2227,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "双版本 AE gated(keyframe_mutate,numKeys readback)",
+      "boundary": "AE-gated on keyframe-count readback",
       "incident": null,
       "alias": [
         "delete keyframe",
@@ -2240,7 +2240,7 @@
     "symbol": "InsertKeyframe",
     "kind": "func",
     "signature": "func InsertKeyframe(p *Property, time float64, value any) (*Keyframe, int, error)",
-    "summary": "InsertKeyframe builds a new bpk-byte keyframe block and inserts it into the property's ldat stream, then updates the lhd3 count header.",
+    "summary": "@summary    Insert a keyframe into a property's stream @description Builds a new keyframe block and inserts it into the property's   keyframe stream (time-sorted; ties land after existing keys at the same   time), then updates the count header.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2251,7 +2251,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "需 \u003e=1 既有关键帧 clone layout(从零合成不支持,用 Animate* 系);双版本 AE gated(keyframe_mutate,numKeys readback);新 kf 默认 Linear",
+      "boundary": "requires \u003e= 1 existing keyframe to clone layout (from-scratch unsupported — use the Animate* APIs); AE-gated on keyframe-count readback; new keyframe defaults to Linear",
       "incident": null,
       "alias": [
         "insert keyframe",
@@ -10624,7 +10624,7 @@
     "symbol": "AddMarker",
     "kind": "func",
     "signature": "func AddMarker(c *Composition, seconds float64) (*Marker, error)",
-    "summary": "AddMarker appends a new composition marker at the given time (seconds) and returns it for further Set* calls.",
+    "summary": "@summary    Append a composition marker at a given time @description Appends a new composition marker at the given time (in seconds) and   returns it for further Set* calls.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10635,7 +10635,7 @@
         "TestMarker_AEShipGate_AE2020",
         "TestMarker_AEShipGate_AE2025"
       ],
-      "boundary": "需 comp 已有 \u003e=1 marker(空 comp seed 暂搁);tail-insert 不排序",
+      "boundary": "requires the comp to already have \u003e= 1 marker (empty-comp seeding is deferred); tail-insert without sorting",
       "incident": null,
       "alias": [
         "marker",
@@ -10649,7 +10649,7 @@
     "symbol": "DeleteLayer",
     "kind": "func",
     "signature": "func DeleteLayer(c *Composition, index int) error",
-    "summary": "DeleteLayer removes the layer at the given 0-based index in c.Layers.",
+    "summary": "@summary    Remove a layer from a composition by index @description Removes the layer at the given 0-based index in the comp's layer   list.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10660,7 +10660,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "双版本 AE gated(structural_ops,AV solid 载体,layer-order DOM 读回);non-AV + 单层 comp refused",
+      "boundary": "AE-gated on an AV solid carrier with layer-order DOM readback; non-AV layers and single-layer comps are refused",
       "incident": null,
       "alias": [
         "delete layer",
@@ -10674,7 +10674,7 @@
     "symbol": "DuplicateLayer",
     "kind": "func",
     "signature": "func DuplicateLayer(c *Composition, index int, name string) (*Layer, error)",
-    "summary": "DuplicateLayer clones the layer at the given 0-based index in c.Layers and inserts the clone at that same position, pushing source and everything below down by one (mirrors AE ScriptingAPI's layer.duplicate()).",
+    "summary": "@summary    Clone a layer in place by index @description Clones the layer at the given 0-based index and inserts the clone   at that same position, pushing the source and everything below it down by one   (mirrors AE's layer.duplicate()).",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10685,7 +10685,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "双版本 AE gated(structural_ops,AV solid,clone 置于 source 上方,layer-order DOM 读回);AE23+ explicit matte 允许,implicit matte/非 AV refused",
+      "boundary": "AE-gated on an AV solid (clone placed above the source, layer-order DOM readback); AE 23+ explicit matte allowed, implicit matte and non-AV refused",
       "incident": null,
       "alias": [
         "duplicate layer",
@@ -10697,7 +10697,7 @@
     "symbol": "DuplicatePropertyGroup",
     "kind": "func",
     "signature": "func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error)",
-    "summary": "DuplicatePropertyGroup inserts a copy of this group immediately after it among its parent INDEXED_GROUP's children — mirroring AE's PropertyBase.duplicate() structural effect — and returns the clone.",
+    "summary": "@summary    Duplicate a group within its parent indexed group @description Inserts a copy of this group immediately after it among its parent   indexed group's children — mirroring AE's PropertyBase.duplicate() — and   returns the clone.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10708,7 +10708,7 @@
         "TestPropStructDuplicate_AEShipGate_AE2020",
         "TestPropStructDuplicate_AEShipGate_AE2025"
       ],
-      "boundary": "display-name 后缀不合成(AE 自重算);同 indexed-group gate 覆盖面",
+      "boundary": "the display-name suffix is not synthesized (AE recomputes it); same indexed-group gate coverage as RemovePropertyGroup",
       "incident": [
         "property-indexed-group-structural-re"
       ],
@@ -10723,7 +10723,7 @@
     "symbol": "InsertLayer",
     "kind": "func",
     "signature": "func InsertLayer(c *Composition, src *Layer, atIdx int) (*Layer, error)",
-    "summary": "InsertLayer deep-clones src into c.Layers at atIdx (0-based; atIdx == len(c.Layers) appends).",
+    "summary": "@summary    Deep-clone a layer into a composition at an index @description Deep-clones src into the comp's layer list at atIdx (0-based;   atIdx == len(layers) appends) and returns the inserted clone.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10734,7 +10734,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "同/跨工程插入;双版本 AE gated(structural_ops 自动验同工程 layer-order DOM 读回);cross-project 经 assert-gate coverage 6/6,未纳入自动 gate",
+      "boundary": "same- and cross-project insert; same-project is auto-gated (layer-order DOM readback); cross-project has assert-gate coverage (6/6) but is not in the automated gate",
       "incident": null,
       "alias": [
         "insert layer",
@@ -10748,7 +10748,7 @@
     "symbol": "MoveAfter",
     "kind": "func",
     "signature": "func MoveAfter(l, other *Layer) error",
-    "summary": "MoveAfter moves the receiver to the slot immediately after `other` (i.e., other.Index \u003c receiver.Index post-call, both viewed in c.Layers slice order — receiver lands just below other in the stack).",
+    "summary": "@summary    Move a layer to just after another layer @description Moves the layer to the slot immediately after other (the receiver   lands just below other in the stack).",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10759,7 +10759,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "MoveLayer 便捷封装(移到 other 之后);双版本 AE gated(structural_ops)",
+      "boundary": "MoveLayer convenience wrapper (move after other); AE-gated via structural ops",
       "incident": null,
       "alias": [
         "move after",
@@ -10771,7 +10771,7 @@
     "symbol": "MoveBefore",
     "kind": "func",
     "signature": "func MoveBefore(l, other *Layer) error",
-    "summary": "MoveBefore moves the receiver to the slot immediately before `other` (receiver lands just above other in the stack).",
+    "summary": "@summary    Move a layer to just before another layer @description Moves the layer to the slot immediately before other (the receiver   lands just above other in the stack).",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10782,7 +10782,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "MoveLayer 便捷封装(移到 other 之前);双版本 AE gated(structural_ops)",
+      "boundary": "MoveLayer convenience wrapper (move before other); AE-gated via structural ops",
       "incident": null,
       "alias": [
         "move before",
@@ -10794,7 +10794,7 @@
     "symbol": "MoveLayer",
     "kind": "func",
     "signature": "func MoveLayer(c *Composition, from, to int) error",
-    "summary": "MoveLayer reorders the layer at `from` to position `to` in c.Layers (both 0-based).",
+    "summary": "@summary    Reorder a layer within a composition @description Moves the layer at from to position to in the comp's layer list   (both 0-based).",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10805,7 +10805,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "纯重排(类型无关,impl 不查 Type);双版本 AE gated(structural_ops,AV solid layer-order DOM 读回)",
+      "boundary": "pure reorder (type-agnostic); AE-gated on an AV solid with layer-order DOM readback",
       "incident": null,
       "alias": [
         "move layer",
@@ -10819,7 +10819,7 @@
     "symbol": "MovePropertyGroup",
     "kind": "func",
     "signature": "func MovePropertyGroup(g *AEPropertyGroup, index int) error",
-    "summary": "MovePropertyGroup reorders this group to position index (0-based) among its parent INDEXED_GROUP's children.",
+    "summary": "@summary    Reorder a group within its parent indexed group @description Reorders this group to position index (0-based) among its parent   indexed group's children; index is range-checked against the current child   count.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10830,7 +10830,7 @@
         "TestPropStructMove_AEShipGate_AE2020",
         "TestPropStructMove_AEShipGate_AE2025"
       ],
-      "boundary": "同 RemovePropertyGroup 的 indexed-group gate 覆盖面",
+      "boundary": "same indexed-group gate coverage as RemovePropertyGroup",
       "incident": [
         "property-indexed-group-structural-re"
       ],
@@ -10845,7 +10845,7 @@
     "symbol": "MoveToBeginning",
     "kind": "func",
     "signature": "func MoveToBeginning(l *Layer) error",
-    "summary": "MoveToBeginning moves the receiver to position 0 (top of layer stack in AE's display, AE-index 1).",
+    "summary": "@summary    Move a layer to the top of the layer stack @description Moves the layer to position 0 (top of the stack in AE's display,   AE-index 1).",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10856,7 +10856,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "MoveLayer 便捷封装(移到顶部);双版本 AE gated(structural_ops)",
+      "boundary": "MoveLayer convenience wrapper (move to top); AE-gated via structural ops",
       "incident": null,
       "alias": [
         "move to beginning",
@@ -10869,7 +10869,7 @@
     "symbol": "MoveToEnd",
     "kind": "func",
     "signature": "func MoveToEnd(l *Layer) error",
-    "summary": "MoveToEnd moves the receiver to the last position in c.Layers (bottom of layer stack in AE's display, AE-index c.numLayers).",
+    "summary": "@summary    Move a layer to the bottom of the layer stack @description Moves the layer to the last position (bottom of the stack in AE's   display).",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10880,7 +10880,7 @@
         "TestStructuralOps_AEShipGate_AE2020",
         "TestStructuralOps_AEShipGate_AE2025"
       ],
-      "boundary": "MoveLayer 便捷封装(移到底部);双版本 AE gated(structural_ops)",
+      "boundary": "MoveLayer convenience wrapper (move to bottom); AE-gated via structural ops",
       "incident": null,
       "alias": [
         "move to end",
@@ -10893,7 +10893,7 @@
     "symbol": "RemoveMarker",
     "kind": "func",
     "signature": "func RemoveMarker(m *Marker) error",
-    "summary": "RemoveMarker deletes this marker from its owning composition / layer marker set.",
+    "summary": "@summary    Remove a marker from its owning comp or layer @description Deletes this marker from its owning composition or layer marker set:   it splices out the marker's keyframe block, decrements the count, removes the   marker's record, shifts the trailing markers' offsets down, and drops the   marker from the public list.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10916,7 +10916,7 @@
     "symbol": "RemovePropertyGroup",
     "kind": "func",
     "signature": "func RemovePropertyGroup(g *AEPropertyGroup) error",
-    "summary": "RemovePropertyGroup deletes this group from its parent INDEXED_GROUP.",
+    "summary": "@summary    Remove a group from its parent indexed group @description Deletes this group from its parent indexed group.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10927,7 +10927,7 @@
         "TestPropStructRemove_AEShipGate_AE2020",
         "TestPropStructRemove_AEShipGate_AE2025"
       ],
-      "boundary": "Effect Parade + Text Animators 双版本 gated;Mask/Root Vectors 同机制未单独 gate",
+      "boundary": "Effect Parade and Text Animators are gated in both versions; Mask and Root Vectors use the same mechanism but are not separately gated",
       "incident": [
         "property-indexed-group-structural-re"
       ],
@@ -10943,7 +10943,7 @@
     "symbol": "SetDimensionsSeparated",
     "kind": "func",
     "signature": "func SetDimensionsSeparated(p *Property, separated bool) error",
-    "summary": "SetDimensionsSeparated toggles AE's \"Separate Dimensions\" on a Position leader.",
+    "summary": "@summary    Toggle Separate Dimensions on a Position property @description Toggles AE's \"Separate Dimensions\" on a Position leader, in both   directions.",
     "has_cap": true,
     "cap": {
       "domain": "structural",
@@ -10956,7 +10956,7 @@
         "TestMergeDims_AEShipGate_AE2020",
         "TestMergeDims_AEShipGate_AE2025"
       ],
-      "boundary": "static 2D/3D + animated 3D 近线性 gated;animated 2D + 自定义 spatial ease refused",
+      "boundary": "static 2D/3D and near-linear animated 3D are gated; animated 2D and custom spatial ease are refused",
       "incident": [
         "separate-dimensions-write-mechanics"
       ],
