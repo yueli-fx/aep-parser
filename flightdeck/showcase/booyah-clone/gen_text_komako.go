@@ -38,6 +38,20 @@ func finishTextKomako(rp *aep.Project, orc *oracle) {
 		panic("comp ②: GLITCH layer not found after reopen")
 	}
 
+	// Match the original GLITCH text style (RE'd from its text doc via AE DOM:
+	// Industry-Demi 110pt, base tracking 65, faux italic, centre-justified). The
+	// font + centre justification + size are what let the original's anchor
+	// (copied below) place the text dead-centre — without them a default-font
+	// left-justified layout lands low. Industry-Demi need not be installed on this
+	// box (AE substitutes at render); it resolves on a machine that has it.
+	fontIdx, err := layer.AddFont("Industry-Demi")
+	must(err)
+	must(layer.SetRunFontIndex(0, fontIdx))
+	must(layer.SetRunFontSize(0, 110))
+	must(layer.SetRunTracking(0, 65))
+	must(layer.SetRunFauxItalic(0, true))
+	must(layer.SetParagraphJustification(0, aep.TextJustifyCenter))
+
 	orig := orc.mustComp(komakoCompName).Layers[0]
 	otg := findGroup(orig.PropertyTree(), "ADBE Transform Group")
 
@@ -61,7 +75,7 @@ func finishTextKomako(rp *aep.Project, orc *oracle) {
 	trackKfs := scalarKfsOf(orig, "ADBE Text Tracking Amount")
 	offKfs := scalarKfsOf(orig, "ADBE Text Character Offset")
 
-	_, err := aep.AddTextTrackingAnimator(layer, trackKfs[0].Value, 0, 100, 0)
+	_, err = aep.AddTextTrackingAnimator(layer, trackKfs[0].Value, 0, 100, 0)
 	must(err)
 	must(aep.AnimateTextTracking(layer, 0, trackKfs))
 
