@@ -3,7 +3,7 @@
     "symbol": "DuplicateComposition",
     "kind": "func",
     "signature": "func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error)",
-    "summary": "DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions.",
+    "summary": "@summary    Deep-clone a composition as a new sibling comp @description Deep-clones src (a composition in this project) as a new sibling   composition named name, appended to the project.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -14,7 +14,7 @@
         "TestCompDuplicate_AEShipGate_AE2020",
         "TestCompDuplicate_AEShipGate_AE2025"
       ],
-      "boundary": "双版本 AE gated(comp_duplicate):from-scratch ORIG(solids A,B;B parent→A)→DuplicateComposition→DUP;AE DOM 验 distinct CompItem + 深拷贝 layer 列表 + intra-comp parent ref remap 到 DUP 自身 A(非源 comp) + layer source 共享(id 相等,非复制) + comp 设置克隆(w/h/fps/dur);source items 共享不复制",
+      "boundary": "AE-verified: distinct comp item, deep-copied layer list, intra-comp parent refs remap to the duplicate's own layers, layer sources shared (not copied), comp settings (size / fps / duration) cloned",
       "incident": null,
       "alias": [
         "duplicate composition",
@@ -27,7 +27,7 @@
     "symbol": "NewComposition",
     "kind": "func",
     "signature": "func NewComposition(\n\tp *Project,\n\tname string,\n\twidth, height uint16,\n\tFrameRateHz, duration float64,\n) (*Composition, error)",
-    "summary": "NewComposition adds an empty composition to the project's root folder.",
+    "summary": "@summary    Add an empty composition to the project's root folder @description Appends a new empty composition to the project's root folder.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -38,7 +38,7 @@
         "TestV2_1_AEShipGate_AE2020",
         "TestV2_1_AEShipGate_AE2025"
       ],
-      "boundary": "可选字段默认 AE-typical;其余经 Set* 改",
+      "boundary": "optional settings default to AE-typical values; change the rest via Set* methods",
       "incident": [
         "ae25-acceptance-gate"
       ],
@@ -5677,7 +5677,7 @@
     "symbol": "FromReader",
     "kind": "func",
     "signature": "func FromReader(r io.ReadSeeker) (*Project, error)",
-    "summary": "FromReader parses an .aep file from an io.ReadSeeker.",
+    "summary": "@summary    Parse an .aep file from an io.ReadSeeker @param      r  reader positioned at the start of the .aep byte stream @returns    the parsed Project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      from reader,read,流读取,io.ReadSeeker",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5742,7 +5742,7 @@
     "symbol": "Open",
     "kind": "func",
     "signature": "func Open(path string) (*Project, error)",
-    "summary": "Open parses an .aep file by path and returns the Project.",
+    "summary": "@summary    Parse an .aep file by path @param      path  filesystem path to the .aep file to read @returns    the parsed Project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      open,read,parse,读取,打开,加载 aep",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5832,7 +5832,7 @@
     "symbol": "Reopen",
     "kind": "func",
     "signature": "func Reopen(p *Project) (*Project, error)",
-    "summary": "Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project.",
+    "summary": "@summary    Serialize then re-parse a project to fully materialize built layers @description Serializes the project to memory (WriteAEP) and re-parses the   bytes (FromReader), returning a fresh Project.",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5840,7 +5840,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "把 New* 建的 built 层升级为 parsed 层,解锁 parsed-only 写路径(AddEffect/AddMask/Camera·Light setter…)",
+      "boundary": "upgrades New*-built layers to parsed layers, unlocking parsed-only write paths (AddEffect / AddMask / Camera \u0026 Light setters)",
       "incident": null,
       "alias": [
         "reopen",
@@ -5962,7 +5962,7 @@
     "symbol": "NewProject",
     "kind": "func",
     "signature": "func NewProject(target ...AETarget) *Project",
-    "summary": "NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target.",
+    "summary": "@summary    Create a fresh empty Project from an embedded AE skeleton @description Returns an empty Project parsed from the embedded AE skeleton   matching the requested target.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -5973,7 +5973,7 @@
         "TestV2_1_AEShipGate_AE2020",
         "TestV2_1_AEShipGate_AE2025"
       ],
-      "boundary": "零参=TargetAE2020;支持 2020/2022/2025",
+      "boundary": "zero args defaults to TargetAE2020; targets 2020 / 2022 / 2025 supported",
       "incident": [
         "ae25-acceptance-gate"
       ],

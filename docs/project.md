@@ -614,7 +614,13 @@ read-only
 func Open(path string) (*Project, error)
 ```
 
-Open parses an .aep file by path and returns the Project.
+Parse an .aep file by path
+
+| Parameter | Description |
+|---|---|
+| `path` | filesystem path to the .aep file to read |
+
+**Returns:** the parsed Project
 
 ### FromReader
 
@@ -622,7 +628,13 @@ Open parses an .aep file by path and returns the Project.
 func FromReader(r io.ReadSeeker) (*Project, error)
 ```
 
-FromReader parses an .aep file from an io.ReadSeeker.
+Parse an .aep file from an io.ReadSeeker
+
+| Parameter | Description |
+|---|---|
+| `r` | reader positioned at the start of the .aep byte stream |
+
+**Returns:** the parsed Project
 
 ### Reopen
 
@@ -630,11 +642,19 @@ FromReader parses an .aep file from an io.ReadSeeker.
 func Reopen(p *Project) (*Project, error)
 ```
 
-Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (e.g. by name or ID — IDs are preserved by the round-trip).
+Serialize then re-parse a project to fully materialize built layers
 
-Why: layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer / NewLightLayer) exist only as pre-lowered chunks — they have no parsed property tree, so write paths that splice into a parsed Layr (AddEffect's parade auto-create, the Camera* / Light* option setters) refuse them. One Reopen upgrades every built layer into a fully parsed layer, after which all parsed-layer APIs work with full fidelity.
+Serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning a fresh Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (by name or ID — IDs are preserved by the round-trip).
 
-The round-trip costs one serialize + parse of the whole project and returns a new object graph; any *Layer / *Composition pointers into the old project remain valid for the old project only.
+Layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer / NewLightLayer) exist only as pre-lowered chunks — they have no parsed property tree, so write paths that splice into a parsed layer (AddEffect's parade auto-create, the Camera / Light option setters) refuse them. One Reopen upgrades every built layer into a fully parsed layer, after which all parsed-layer APIs work with full fidelity.
+
+The round-trip costs one serialize + parse of the whole project and returns a new object graph; any Layer / Composition pointers into the old project remain valid for the old project only.
+
+| Parameter | Description |
+|---|---|
+| `p` | the project to serialize and re-parse |
+
+**Returns:** a fresh fully-parsed Project (the receiver is left unchanged)
 
 ### NewProject
 
@@ -642,11 +662,17 @@ The round-trip costs one serialize + parse of the whole project and returns a ne
 func NewProject(target ...AETarget) *Project
 ```
 
-NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target.
+Create a fresh empty Project from an embedded AE skeleton
 
-Optional target arg: zero args = TargetAE2020 (max compatibility). Pass at most one target. Subsequent NewComposition calls populate it.
+Returns an empty Project parsed from the embedded AE skeleton matching the requested target. Zero args = TargetAE2020 (maximum compatibility); pass at most one target. Subsequent NewComposition calls populate it.
 
-Never returns an error: the embedded templates are build-time trusted; parser bugs panic with a "build bug" message (not user-facing). Panics on: multiple target args, or unknown AETarget value (forward-incompat).
+Never returns an error: the embedded templates are build-time trusted, so a parser failure panics with a "build bug" message rather than surfacing to the caller. Panics on multiple target args or an unknown AETarget value.
+
+| Parameter | Description |
+|---|---|
+| `target` | optional target AE version (default TargetAE2020) |
+
+**Returns:** the new empty Project
 
 ### AddItem
 

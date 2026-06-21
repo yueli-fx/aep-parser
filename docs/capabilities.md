@@ -9,8 +9,8 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `DuplicateComposition` | 🟢stable | ae-accept | 2020 | TestCompDuplicate_AEShipGate_AE2020<br>TestCompDuplicate_AEShipGate_AE2025 | DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. ⚠双版本 AE gated(comp_duplicate):from-scratch ORIG(solids A,B;B parent→A)→DuplicateComposition→DUP;AE DOM 验 distinct CompItem + 深拷贝 layer 列表 + intra-comp parent ref remap 到 DUP 自身 A(非源 comp) + layer source 共享(id 相等,非复制) + comp 设置克隆(w/h/fps/dur);source items 共享不复制 |
-| `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewComposition adds an empty composition to the project's root folder. ⚠可选字段默认 AE-typical;其余经 Set* 改 |
+| `DuplicateComposition` | 🟢stable | ae-accept | 2020 | TestCompDuplicate_AEShipGate_AE2020<br>TestCompDuplicate_AEShipGate_AE2025 | @summary    Deep-clone a composition as a new sibling comp @description Deep-clones src (a composition in this project) as a new sibling   composition named name, appended to the project. ⚠AE-verified: distinct comp item, deep-copied layer list, intra-comp parent refs remap to the duplicate's own layers, layer sources shared (not copied), comp settings (size / fps / duration) cloned |
+| `NewComposition` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | @summary    Add an empty composition to the project's root folder @description Appends a new empty composition to the project's root folder. ⚠optional settings default to AE-typical values; change the rest via Set* methods |
 | `*Composition.SetBGColor` | 🟢stable | ae-accept | 2020 | TestCompSettings_AEShipGate_AE2020<br>TestCompSettings_AEShipGate_AE2025 | SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. ⚠length-preserving(3B);双版本 AE gated(comp-settings from-scratch fixture) |
 | `*Marker.SetChapter` | 🟢stable | ae-accept | 2020 | TestMarkerFields_AEShipGate_AE2020<br>TestMarkerFields_AEShipGate_AE2025 | SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block). ⚠length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM chapter=ch1 实读) |
 | `*Composition.SetComment` | 🟢stable | ae-accept | 2020 | TestCompIdta_AEShipGate_AE2020<br>TestCompIdta_AEShipGate_AE2025 | SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). ⚠length-variable(cmta 整片替换+父 LIST size 重算);无 cmta 时插入到 Utf8 之后(位置敏感,RE re_comp_idta.aep:末尾 append→AE 打不开)+ 设 idta @0x39 has-comment flag(否则 AE 丢 comment);双版本 AE gated(comp_idta,comp.comment DOM readback) |
@@ -279,14 +279,14 @@
 | `Capabilities` | 🟢stable | none | 2020 |  | Capabilities returns the AECapabilities matrix for the given AE target. |
 | `DefaultTextRangeAdvanced` | 🟢stable | none | 2020 |  | DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize). |
 | `EncodeGradientXML` | 🟢stable | roundtrip | 2020 |  | EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the inverse of ParseGradientXML). ⚠渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated) |
-| `FromReader` | 🟢stable | roundtrip | 2020 |  | FromReader parses an .aep file from an io.ReadSeeker. |
+| `FromReader` | 🟢stable | roundtrip | 2020 |  | @summary    Parse an .aep file from an io.ReadSeeker @param      r  reader positioned at the start of the .aep byte stream @returns    the parsed Project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      from reader,read,流读取,io.ReadSeeker |
 | `*Layer.HasAlternateSourceSlot` | 🟢stable | roundtrip | 2020 |  | HasAlternateSourceSlot reports whether this layer has an Essential Properties media-replacement slot in its chunk tree. |
 | `NewPropertyStream` | 🟢stable | roundtrip | 2020 |  | NewPropertyStream returns a Static-mode stream holding the zero value of T. |
-| `Open` | 🟢stable | roundtrip | 2020 |  | Open parses an .aep file by path and returns the Project. |
+| `Open` | 🟢stable | roundtrip | 2020 |  | @summary    Parse an .aep file by path @param      path  filesystem path to the .aep file to read @returns    the parsed Project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      open,read,parse,读取,打开,加载 aep |
 | `Parse` | 🟢stable | roundtrip | 2020 |  | Parse opens an .aep file at path and returns an Application wrapping the parsed Project. |
 | `ParseGradientXML` | 🟢stable | roundtrip | 2020 |  | ParseGradientXML parses AE gradient XML (prop.map format) into a *Gradient. |
 | `ParseReader` | 🟢stable | roundtrip | 2020 |  | ParseReader parses an .aep file from an io.ReadSeeker and returns an Application wrapping the Project. |
-| `Reopen` | 🟢stable | roundtrip | 2020 |  | Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. ⚠把 New* 建的 built 层升级为 parsed 层,解锁 parsed-only 写路径(AddEffect/AddMask/Camera·Light setter…) |
+| `Reopen` | 🟢stable | roundtrip | 2020 |  | @summary    Serialize then re-parse a project to fully materialize built layers @description Serializes the project to memory (WriteAEP) and re-parses the   bytes (FromReader), returning a fresh Project. ⚠upgrades New*-built layers to parsed layers, unlocking parsed-only write paths (AddEffect / AddMask / Camera & Light setters) |
 | `SupportedEffectParams` | 🟢stable | none | 2020 |  | SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. |
 | `SupportedEffects` | 🟢stable | none | 2020 |  | SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template. |
 | `TextEncodedByteLen` | 🟢stable | none | 2020 |  | TextEncodedByteLen returns the encoded byte length SetText would produce for s. |
@@ -297,7 +297,7 @@
 
 | 符号 | 状态 | verify | 需 AE ≥ | gate | 说明 |
 |---|---|---|---|---|---|
-| `NewProject` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target. ⚠零参=TargetAE2020;支持 2020/2022/2025 |
+| `NewProject` | 🟢stable | ae-accept | 2020 | TestV2_1_AEShipGate_AE2020<br>TestV2_1_AEShipGate_AE2025 | @summary    Create a fresh empty Project from an embedded AE skeleton @description Returns an empty Project parsed from the embedded AE skeleton   matching the requested target. ⚠zero args defaults to TargetAE2020; targets 2020 / 2022 / 2025 supported |
 | `*Project.SetAudioSampleRate` | 🟢stable | roundtrip | 2020 |  | SetAudioSampleRate writes the adfr f64 BE. ⚠length-preserving 低风险;enum 校验(AE UI 支持值);无专门 AE gate→round-trip |
 | `*Project.SetBitsPerChannel` | 🟢stable | ae-accept | 2020 | TestProjectSettings_AEShipGate_AE2020<br>TestProjectSettings_AEShipGate_AE2025 | SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc) to BOTH the nhed @0x0F and nnhd @0x18 header bytes. ⚠length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);双版本 AE gated(project_settings,app.project.bitsPerChannel DOM readback=16) |
 | `*Project.SetColorManagementSystem` | 🟢stable | roundtrip | 2024 |  | SetColorManagementSystem sets the color management system. ⚠仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Adobe/OCIO);无独立 AE gate → round-trip |

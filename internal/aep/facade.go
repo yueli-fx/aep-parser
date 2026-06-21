@@ -1,10 +1,10 @@
 package aep
 
 // Facade re-exports of the parse + structural-mutation entry points whose
-// implementations moved to internal/serializer (M8 P3.1 stage 2). The public
-// call form (aep.Open / aep.DeleteLayer / aep.NewComposition …) is unchanged;
-// each function delegates verbatim. Types in these signatures are aep aliases
-// that resolve to the same scene types serializer uses, so the delegations are
+// implementations live in the serializer layer. The public call form
+// (aep.Open / aep.DeleteLayer / aep.NewComposition …) is unchanged; each
+// function delegates verbatim. Types in these signatures are aep aliases that
+// resolve to the same scene types the serializer uses, so the delegations are
 // type-identical across the package boundary.
 
 import (
@@ -13,74 +13,102 @@ import (
 	"github.com/example/aep-parser/internal/serializer"
 )
 
-// Open parses an .aep file by path and returns the Project.
-//
-//aep:cap domain=meta tier=stable verify=roundtrip alias="open,read,parse,读取,打开,加载 aep"
+// @summary    Parse an .aep file by path
+// @param      path  filesystem path to the .aep file to read
+// @returns    the parsed Project
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @alias      open,read,parse,读取,打开,加载 aep
 func Open(path string) (*Project, error) { return serializer.Open(path) }
 
-// FromReader parses an .aep file from an io.ReadSeeker.
-//
-//aep:cap domain=meta tier=stable verify=roundtrip alias="from reader,read,流读取,io.ReadSeeker"
+// @summary    Parse an .aep file from an io.ReadSeeker
+// @param      r  reader positioned at the start of the .aep byte stream
+// @returns    the parsed Project
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @alias      from reader,read,流读取,io.ReadSeeker
 func FromReader(r io.ReadSeeker) (*Project, error) { return serializer.FromReader(r) }
 
-// Reopen serializes the project to memory (WriteAEP) and re-parses the bytes
-// (FromReader), returning the fresh *Project. The receiver is left untouched;
-// callers switch to the returned project and re-resolve item / layer handles
-// (e.g. by name or ID — IDs are preserved by the round-trip).
+// @summary    Serialize then re-parse a project to fully materialize built layers
+// @description Serializes the project to memory (WriteAEP) and re-parses the
+//   bytes (FromReader), returning a fresh Project. The receiver is left
+//   untouched; callers switch to the returned project and re-resolve item /
+//   layer handles (by name or ID — IDs are preserved by the round-trip).
 //
-// Why: layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer
-// / NewLightLayer) exist only as pre-lowered chunks — they have no parsed
-// property tree, so write paths that splice into a parsed Layr (AddEffect's
-// parade auto-create, the Camera* / Light* option setters) refuse them. One
-// Reopen upgrades every built layer into a fully parsed layer, after which all
-// parsed-layer APIs work with full fidelity.
+//   Layers built by the structural New* APIs (NewShapeLayer / NewCameraLayer /
+//   NewLightLayer) exist only as pre-lowered chunks — they have no parsed
+//   property tree, so write paths that splice into a parsed layer (AddEffect's
+//   parade auto-create, the Camera / Light option setters) refuse them. One
+//   Reopen upgrades every built layer into a fully parsed layer, after which
+//   all parsed-layer APIs work with full fidelity.
 //
-// The round-trip costs one serialize + parse of the whole project and returns a
-// new object graph; any *Layer / *Composition pointers into the old project
-// remain valid for the old project only.
-//
-//aep:cap domain=meta tier=stable verify=roundtrip boundary="把 New* 建的 built 层升级为 parsed 层,解锁 parsed-only 写路径(AddEffect/AddMask/Camera·Light setter…)" alias="reopen,reparse,重新打开,升级层,parsed layer"
+//   The round-trip costs one serialize + parse of the whole project and returns
+//   a new object graph; any Layer / Composition pointers into the old project
+//   remain valid for the old project only.
+// @param      p  the project to serialize and re-parse
+// @returns    a fresh fully-parsed Project (the receiver is left unchanged)
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   upgrades New*-built layers to parsed layers, unlocking parsed-only write paths (AddEffect / AddMask / Camera & Light setters)
+// @alias      reopen,reparse,重新打开,升级层,parsed layer
 func Reopen(p *Project) (*Project, error) { return serializer.Reopen(p) }
 
-// NewProject returns a fresh empty Project parsed from the embedded
-// AE skeleton matching the requested target.
+// @summary    Create a fresh empty Project from an embedded AE skeleton
+// @description Returns an empty Project parsed from the embedded AE skeleton
+//   matching the requested target. Zero args = TargetAE2020 (maximum
+//   compatibility); pass at most one target. Subsequent NewComposition calls
+//   populate it.
 //
-// Optional target arg: zero args = TargetAE2020 (max compatibility). Pass
-// at most one target. Subsequent NewComposition calls populate it.
-//
-// Never returns an error: the embedded templates are build-time trusted;
-// parser bugs panic with a "build bug" message (not user-facing).
-// Panics on: multiple target args, or unknown AETarget value (forward-incompat).
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestV2_1_AEShipGate_AE2020,TestV2_1_AEShipGate_AE2025 incident=ae25-acceptance-gate boundary="零参=TargetAE2020;支持 2020/2022/2025" alias="project,工程,新建工程,空工程,create project"
+//   Never returns an error: the embedded templates are build-time trusted, so a
+//   parser failure panics with a "build bug" message rather than surfacing to
+//   the caller. Panics on multiple target args or an unknown AETarget value.
+// @param      target  optional target AE version (default TargetAE2020)
+// @returns    the new empty Project
+// @domain     project
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestV2_1_AEShipGate_AE2020,TestV2_1_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   zero args defaults to TargetAE2020; targets 2020 / 2022 / 2025 supported
+// @incident   ae25-acceptance-gate
+// @alias      project,工程,新建工程,空工程,create project
 func NewProject(target ...AETarget) *Project { return serializer.NewProject(target...) }
 
-// NewComposition adds an empty composition to the project's root folder.
+// @summary    Add an empty composition to the project's root folder
+// @description Appends a new empty composition to the project's root folder. The
+//   name must be non-empty; width and height must be 1..30000; FrameRateHz must
+//   be > 0 (in Hz, e.g. 29.97 — the whole+fraction encoding is handled
+//   internally); duration must be > 0 (in seconds, converted to whole frames via
+//   the frame rate).
 //
-// Required:
+//   Optional settings default to AE-typical values (background black, pixel
+//   aspect 1.0, full resolution, shutter 180°, motion blur defaults); override
+//   them with the Set* methods after the call. The composition ID is
+//   auto-assigned from the project's monotonic item-ID counter.
 //
-//	name        — non-empty string
-//	width/height — > 0 (uint16; AE max 30000)
-//	FrameRateHz   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
-//	duration    — > 0 (seconds; converted to whole frames via fps internally)
-//
-// Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16).
-// Override via existing Set* methods after the call.
-//
-// Composition.ID is auto-assigned (Project.nextItemID++, monotonic).
-// New comp appends to the project's root folder.
-//
-// Atomic mutation: if chunk parse fails or warnings appear, rollback
-// chunk-tree + typed index + warnings to pre-call state.
-//
-// Warnings-as-failure: builder must produce zero parser warnings —
-// if any appear, that's a builder bug; rollback + return internal error.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Project.NewComposition method form.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestV2_1_AEShipGate_AE2020,TestV2_1_AEShipGate_AE2025 incident=ae25-acceptance-gate boundary="可选字段默认 AE-typical;其余经 Set* 改" alias="composition,合成,新建合成,comp,create comp"
+//   Atomic: if chunk parsing fails or any parser warning appears, the chunk
+//   tree, typed index, and warning list roll back to the pre-call state.
+// @param      p            the project to add the composition to
+// @param      name         composition name (non-empty)
+// @param      width        composition width in pixels (1..30000)
+// @param      height       composition height in pixels (1..30000)
+// @param      FrameRateHz  frame rate in Hz (> 0; e.g. 29.97)
+// @param      duration     composition duration in seconds (> 0)
+// @returns    the created Composition
+// @domain     comp
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestV2_1_AEShipGate_AE2020,TestV2_1_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   optional settings default to AE-typical values; change the rest via Set* methods
+// @incident   ae25-acceptance-gate
+// @alias      composition,合成,新建合成,comp,create comp
 func NewComposition(
 	p *Project,
 	name string,
@@ -90,39 +118,32 @@ func NewComposition(
 	return serializer.NewComposition(p, name, width, height, FrameRateHz, duration)
 }
 
-// DuplicateComposition deep-clones src (a comp in this Project) as a new
-// sibling comp named name, appended to p.Compositions. The dup contains a
-// fresh copy of every layer (new layer IDs), with intra-comp parent +
-// track-matte refs remapped to the dup's own layers; layer SOURCES
-// (footage / precomp items) are shared verbatim, not duplicated — matching
-// AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition.
+// @summary    Deep-clone a composition as a new sibling comp
+// @description Deep-clones src (a composition in this project) as a new sibling
+//   composition named name, appended to the project. The duplicate gets a fresh
+//   copy of every layer (with new layer IDs), and intra-comp parent and
+//   track-matte references are remapped to the duplicate's own layers. Layer
+//   sources (footage / precomp items) are shared verbatim, not duplicated —
+//   matching AE's CompItem.duplicate().
 //
-// Clone semantics (same-Project comp only):
+//   Refuses when src is nil, its project or item-list back-reference is missing,
+//   src is not in this project, the name is empty, the source item is not found
+//   in the root folder, or a layer record is too short to carry a parent ID.
 //
-//   - new comp item ID = allocItemID(p)             (idta @0x10)
-//   - per layer: new layer ID = allocItemID(p)      (ldta @0x00)
-//   - intra-comp ParentID @0x84 / TrackMatteLayerID @0xA0 remapped via
-//     srcLayerID→dupLayerID map (matte guarded by len(ldta) >= 0xA4)
-//   - SourceID @0x28 verbatim (shared Footage/Comp items)
-//   - comp name = caller-supplied (length-variable Utf8 rewrite)
-//
-// Refuse-cases (R1..R7): nil src, project backref missing, src itemList
-// backref missing, src not in this Project, empty name, src Item not
-// found in rootFold, layer ldta too short for ParentID write.
-//
-// Atomic mutation: snapshot rootFold.Children + p.Compositions +
-// scene.ProjectNextItemID(p) + len(p.Warnings); on any new parser warning during the
-// re-parse, roll all back including the nextItemID bump.
-//
-// Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the
-// Go-emitted file and the dup's intra-comp parent ref resolves to the dup's
-// own layer (remap confirmed by AE), with sources shared with the original.
-//
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompDuplicate_AEShipGate_AE2020,TestCompDuplicate_AEShipGate_AE2025 boundary="双版本 AE gated(comp_duplicate):from-scratch ORIG(solids A,B;B parent→A)→DuplicateComposition→DUP;AE DOM 验 distinct CompItem + 深拷贝 layer 列表 + intra-comp parent ref remap 到 DUP 自身 A(非源 comp) + layer source 共享(id 相等,非复制) + comp 设置克隆(w/h/fps/dur);source items 共享不复制" alias="duplicate composition,复制合成,克隆合成"
+//   Atomic: snapshots the root folder, composition list, next-item-ID counter,
+//   and warning count; on any new parser warning during the re-parse, all of
+//   them roll back including the ID-counter bump.
+// @param      p     the project that owns src and will own the duplicate
+// @param      src   the composition to clone (must belong to p)
+// @param      name  name for the new duplicate composition (non-empty)
+// @returns    the cloned Composition
+// @domain     comp
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestCompDuplicate_AEShipGate_AE2020,TestCompDuplicate_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   AE-verified: distinct comp item, deep-copied layer list, intra-comp parent refs remap to the duplicate's own layers, layer sources shared (not copied), comp settings (size / fps / duration) cloned
+// @alias      duplicate composition,复制合成,克隆合成
 func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error) {
 	return serializer.DuplicateComposition(p, src, name)
 }

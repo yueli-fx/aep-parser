@@ -890,7 +890,7 @@
       "file": "composition.md",
       "anchor": "#duplicatecomposition",
       "signature": "func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error)",
-      "summary": "DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. The dup contains a fresh copy of every layer (new layer IDs), with intra-comp parent + track-matte refs remapped to the dup's own layers; layer SOURCES (footage / precomp items) are shared verbatim, not duplicated — matching AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition."
+      "summary": "Deep-clones src (a composition in this project) as a new sibling composition named name, appended to the project. The duplicate gets a fresh copy of every layer (with new layer IDs), and intra-comp parent and track-matte references are remapped to the duplicate's own layers. Layer sources (footage / precomp items) are shared verbatim, not duplicated — matching AE's CompItem.duplicate()."
     },
     "DuplicateLayer": {
       "kind": "func",
@@ -1237,8 +1237,7 @@
       "kind": "func",
       "file": "project.md",
       "anchor": "#fromreader",
-      "signature": "func FromReader(r io.ReadSeeker) (*Project, error)",
-      "summary": "FromReader parses an .aep file from an io.ReadSeeker."
+      "signature": "func FromReader(r io.ReadSeeker) (*Project, error)"
     },
     "Guide": {
       "kind": "type",
@@ -4071,7 +4070,7 @@
       "file": "composition.md",
       "anchor": "#newcomposition",
       "signature": "func NewComposition( p *Project, name string, width, height uint16, FrameRateHz, duration float64, ) (*Composition, error)",
-      "summary": "NewComposition adds an empty composition to the project's root folder."
+      "summary": "Appends a new empty composition to the project's root folder. The name must be non-empty; width and height must be 1..30000; FrameRateHz must be \u003e 0 (in Hz, e.g. 29.97 — the whole+fraction encoding is handled internally); duration must be \u003e 0 (in seconds, converted to whole frames via the frame rate)."
     },
     "NewLightLayer": {
       "kind": "func",
@@ -4099,7 +4098,7 @@
       "file": "project.md",
       "anchor": "#newproject",
       "signature": "func NewProject(target ...AETarget) *Project",
-      "summary": "NewProject returns a fresh empty Project parsed from the embedded AE skeleton matching the requested target."
+      "summary": "Returns an empty Project parsed from the embedded AE skeleton matching the requested target. Zero args = TargetAE2020 (maximum compatibility); pass at most one target. Subsequent NewComposition calls populate it."
     },
     "NewShapeLayer": {
       "kind": "func",
@@ -4126,8 +4125,7 @@
       "kind": "func",
       "file": "project.md",
       "anchor": "#open",
-      "signature": "func Open(path string) (*Project, error)",
-      "summary": "Open parses an .aep file by path and returns the Project."
+      "signature": "func Open(path string) (*Project, error)"
     },
     "Project": {
       "kind": "type",
@@ -4960,7 +4958,7 @@
       "file": "project.md",
       "anchor": "#reopen",
       "signature": "func Reopen(p *Project) (*Project, error)",
-      "summary": "Reopen serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning the fresh *Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (e.g. by name or ID — IDs are preserved by the round-trip)."
+      "summary": "Serializes the project to memory (WriteAEP) and re-parses the bytes (FromReader), returning a fresh Project. The receiver is left untouched; callers switch to the returned project and re-resolve item / layer handles (by name or ID — IDs are preserved by the round-trip)."
     },
     "ScalarKeyframe": {
       "kind": "type",

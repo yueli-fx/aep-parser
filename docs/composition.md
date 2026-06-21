@@ -1002,24 +1002,24 @@ const (
 func NewComposition( p *Project, name string, width, height uint16, FrameRateHz, duration float64, ) (*Composition, error)
 ```
 
-NewComposition adds an empty composition to the project's root folder.
+Add an empty composition to the project's root folder
 
-Required:
+Appends a new empty composition to the project's root folder. The name must be non-empty; width and height must be 1..30000; FrameRateHz must be > 0 (in Hz, e.g. 29.97 — the whole+fraction encoding is handled internally); duration must be > 0 (in seconds, converted to whole frames via the frame rate).
 
-	name        — non-empty string
-	width/height — > 0 (uint16; AE max 30000)
-	FrameRateHz   — > 0 (Hz; 29.97 etc.; whole+frac/65536 encoding handled internally)
-	duration    — > 0 (seconds; converted to whole frames via fps internally)
+Optional settings default to AE-typical values (background black, pixel aspect 1.0, full resolution, shutter 180°, motion blur defaults); override them with the Set* methods after the call. The composition ID is auto-assigned from the project's monotonic item-ID counter.
 
-Optional fields default to AE-typical (BGColor=0/PAR=1.0/ResFac=1,1/Shutter=180,0/MotionBlur=128,16). Override via existing Set* methods after the call.
+Atomic: if chunk parsing fails or any parser warning appears, the chunk tree, typed index, and warning list roll back to the pre-call state.
 
-Composition.ID is auto-assigned (Project.nextItemID++, monotonic). New comp appends to the project's root folder.
+| Parameter | Description |
+|---|---|
+| `p` | the project to add the composition to |
+| `name` | composition name (non-empty) |
+| `width` | composition width in pixels (1..30000) |
+| `height` | composition height in pixels (1..30000) |
+| `FrameRateHz` | frame rate in Hz (> 0; e.g. 29.97) |
+| `duration` | composition duration in seconds (> 0) |
 
-Atomic mutation: if chunk parse fails or warnings appear, rollback chunk-tree + typed index + warnings to pre-call state.
-
-Warnings-as-failure: builder must produce zero parser warnings — if any appear, that's a builder bug; rollback + return internal error.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Project.NewComposition method form.
+**Returns:** the created Composition
 
 ### DuplicateComposition
 
@@ -1027,23 +1027,21 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func DuplicateComposition(p *Project, src *Composition, name string) (*Composition, error)
 ```
 
-DuplicateComposition deep-clones src (a comp in this Project) as a new sibling comp named name, appended to p.Compositions. The dup contains a fresh copy of every layer (new layer IDs), with intra-comp parent + track-matte refs remapped to the dup's own layers; layer SOURCES (footage / precomp items) are shared verbatim, not duplicated — matching AE ScriptingAPI's CompItem.duplicate(). Returns the new *Composition.
+Deep-clone a composition as a new sibling comp
 
-Clone semantics (same-Project comp only):
+Deep-clones src (a composition in this project) as a new sibling composition named name, appended to the project. The duplicate gets a fresh copy of every layer (with new layer IDs), and intra-comp parent and track-matte references are remapped to the duplicate's own layers. Layer sources (footage / precomp items) are shared verbatim, not duplicated — matching AE's CompItem.duplicate().
 
-- new comp item ID = allocItemID(p)             (idta @0x10)
-- per layer: new layer ID = allocItemID(p)      (ldta @0x00)
-- intra-comp ParentID @0x84 / TrackMatteLayerID @0xA0 remapped via srcLayerID→dupLayerID map (matte guarded by len(ldta) >= 0xA4)
-- SourceID @0x28 verbatim (shared Footage/Comp items)
-- comp name = caller-supplied (length-variable Utf8 rewrite)
+Refuses when src is nil, its project or item-list back-reference is missing, src is not in this project, the name is empty, the source item is not found in the root folder, or a layer record is too short to carry a parent ID.
 
-Refuse-cases (R1..R7): nil src, project backref missing, src itemList backref missing, src not in this Project, empty name, src Item not found in rootFold, layer ldta too short for ParentID write.
+Atomic: snapshots the root folder, composition list, next-item-ID counter, and warning count; on any new parser warning during the re-parse, all of them roll back including the ID-counter bump.
 
-Atomic mutation: snapshot rootFold.Children + p.Compositions + scene.ProjectNextItemID(p) + len(p.Warnings); on any new parser warning during the re-parse, roll all back including the nextItemID bump.
+| Parameter | Description |
+|---|---|
+| `p` | the project that owns src and will own the duplicate |
+| `src` | the composition to clone (must belong to p) |
+| `name` | name for the new duplicate composition (non-empty) |
 
-Stable — passed AE 2020 + AE 2025 ship-gate: AE accepts the Go-emitted file and the dup's intra-comp parent ref resolves to the dup's own layer (remap confirmed by AE), with sources shared with the original.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Project.DuplicateComposition method form.
+**Returns:** the cloned Composition
 
 ### SetRenderer
 
