@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-21 · claude · Stage: Booyah 复刻 · Phase 1（comp ① ✅；comp ② gap#1 ✅，剩 2 动画器待 RE）
+Updated: 2026-06-21 · claude · Stage: 两线并行（Booyah 复刻 comp②；@tag 文档 schema 已设计待实现）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,7 +8,11 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-comp ② gap #1 ✅ 已解（`SetLayerTransform` 物化+动画模板层 transform，双版本 AE gate 过，解锁 ②⑤⑥⑦⑧）。**下一步 = RE comp ② 剩两缺口**：gap #2 Tracking 动画器（`ADBE Text Tracking Amount`+`Track Type`）+ gap #3 Character Offset 动画器（`ADBE Text Character Offset`+`Character Change Type`+`Character Range`），JSX 抓模板字节 → 仿 `AddText*Animator` 加 `AddTextTrackingAnimator`/`AddTextCharacterOffsetAnimator` → 双版本 gate → 拼 comp ②（text + SetLayerTransform 层动画 + 2 动画器）→ [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支：① 补 AE 2020 render；修 `NewComposition` 分数 fps cdta 时基（[[ntsc-tickrate-derive-3x-off]] 第二发现）。
+**两条 active 线,下个对话挑一条继续:**
+
+**A. @tag 文档 schema（刚设计完,断在这里）** → spec [2026-06-21-api-doc-tag-schema.md](specs/2026-06-21-api-doc-tag-schema.md)（`graduate:true`,已过 3 家 review + 用户多轮加固:强字段规则 + 一键 validator + docgen 生成期自校验 + `internal/apidoc` 单一词表源 + 2 步迁移分提交流）。**下一步 = 走 `superpowers:writing-plans` 出实现计划**,Step 1：建 `internal/apidoc`(parse+schema+validate)→ capindex 切过去 → docgen 加 @param 渲染+自校验 → 转换器 → facade.go 样板。
+
+**B. Booyah comp ②（gap#1 已解,剩 2 动画器）** → gap #2 Tracking 动画器 + gap #3 Character Offset 动画器:JSX 抓模板字节 → 仿 `AddText*Animator` → 双版本 gate → 拼 comp ②（text + `SetLayerTransform` 层动画 + 2 动画器）→ [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支：① 补 AE 2020 render；修 `NewComposition` 分数 fps cdta 时基（[[ntsc-tickrate-derive-3x-off]] 第二发现）。
 
 ## In Progress
 
@@ -26,6 +30,7 @@ comp ② gap #1 ✅ 已解（`SetLayerTransform` 物化+动画模板层 transfor
 - AE 自动化基建（arc 全程关键）：`clear_ae_crashstate.ps1` tracked 工具（`tools/debug/`，67023b6）+ **ae_run `Invoke-SendKeysSafe` 改 PostMessage 根治 foreground-lock**（b411d09）→ 所有 in-run modal 在前台游戏锁下都能无人值守消化（实证原工程 Resolve Fonts 框）。
 - 复刻=理解压测定位（用户校准 2026-06-21）：复刻不为产物，为**逼出读侧漏解属性 / 写侧缺 API / 未知结构**;终极=任给一个 .aep 能说清构成+内容+cover 边界。每 comp 先读侧全审计→列 gap→建可建的→诚实标缺口。
 - 新能力 `SetLayerTransform`（layer-set·stable·双版本 gate）：给**模板层**（text/precomp/footage/solid/null）物化+动画 transform（绕 AE default-omission：模板层 default 通道被省略，无 cdat 可转）。解锁 comp ②⑤⑥⑦⑧ 层级 Position/Opacity 动画。
+- @tag schema spec 关键拍板（实现时照搬,别重推）：统一 @tag 吞 aep:cap（**用户拒了 hybrid,长期可维护性优先**）;字段规则机器校验（summary≤80/`@param` 对账签名/domain 16 项冻结枚举/`@since AE<年>`）;词表单一源 = `internal/apidoc/schema.go`;docgen 生成期跑 `apidoc.Validate`;单格式不变量（绝不同时带 aep:cap+@tag）;收口闸 = 残留 aep:cap=0 且无 @param TODO。
 - ⚠ 预存 RED 单测（非本 arc）：`TestSynthControlEntries_PardLayout/label`（pseudo-effect label pard @0x04=0x0 want 0x20）——pseudo spec 已归档收工但此 unit test 红，待单独修。
 - operator 在另一台机器、前台游戏窗口 ≠ 用户在用 → 不问用户让机器（`incidents/ae-automation-occlusion-crashstate.md` Case 2c）。
 - 上游「理解工程」研究 arc（暂让位）进度归 `specs/2026-06-18-fx-technique-internalization.md` § 现状与下一步 + `technique-ontology` § 9。
