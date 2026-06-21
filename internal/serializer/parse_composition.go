@@ -297,22 +297,28 @@ func decodeFrac(dividend, divisor []byte) float64 {
 // deriveTickRate computes a composition's keyframe-tick-per-second base
 // from its cdta payload. See Composition.TickRate doc for the formula.
 //
-// Verified against 7 comps at different fps (24/25/29.97/30/50/59.94/60):
-// modern comps store ticks/sec at cdta_0x08 and 1 at cdta_0xA8;
-// legacy NTSC comps (older AE) store the playback base at cdta_0x08
-// (= ticks_per_frame × 30) and fps*100 at cdta_0xA8 — the kf rate is
-// then cdta_0x08 × 1000 / cdta_0xA8 = 8000 for 29.97.
+// cdta @0x08 holds the ticks-per-second base directly (= ticks_per_frame
+// × fps, e.g. 800 × 29.97 = 23976 for NTSC, 1024 × 30 = 30720 for 30 fps).
+// AE evaluates keyframe ticks against THIS value, verified end-to-end via
+// AE's own valueAtTime / keyTime DOM (see incident
+// ntsc-tickrate-derive-3x-off): RECT frame-8 kf = 8 × 800 = 6400 ticks →
+// 6400 / 23976 = 0.2669 s, matching AE exactly.
+//
+// The earlier `rate × 1000 / cdta_0xA8` "legacy NTSC" correction (which
+// turned 23976 into 8000 for 29.97) was a py-aep-derived misreading never
+// checked against AE's rendered keyframe times. It is latent under
+// read-modify-write (keyframe ticks are preserved, so the wrong rate
+// cancels) but corrupts any path that reads keyframe seconds out of one
+// comp and writes them into another (from-scratch replication): the times
+// land 3× too large. cdta @0xA8 is a display-time divisor, not a kf-rate
+// scale.
 func deriveTickRate(cdta []byte) float64 {
-	if len(cdta) < 0xAC {
+	if len(cdta) < 0x0C {
 		return aeLegacyTimeBase
 	}
 	rate := binary.BigEndian.Uint32(cdta[0x08:0x0C])
-	scale := binary.BigEndian.Uint32(cdta[0xA8:0xAC])
 	if rate == 0 {
 		return aeLegacyTimeBase
 	}
-	if scale <= 1 {
-		return float64(rate)
-	}
-	return float64(rate) * 1000.0 / float64(scale)
+	return float64(rate)
 }

@@ -64,7 +64,10 @@ func TestPerCompTickRate(t *testing.T) {
 		{"modern_30fps", 30, 0, 30720, 1, 30720},
 		{"modern_24fps", 24, 0, 24576, 1, 24576},
 		{"modern_29_97", 29, 63570, 23976, 1, 23976},
-		{"legacy_29_97", 29, 63570, 23976, 2997, 8000},
+		// cdta @0xA8 (here 2997) is a display-time divisor, NOT a kf-rate
+		// scale: AE evaluates keyframes against rate@0x08 (23976) directly.
+		// Verified vs AE valueAtTime/keyTime (incident ntsc-tickrate-derive-3x-off).
+		{"ntsc_29_97_scale_is_display_divisor", 29, 63570, 23976, 2997, 23976},
 		{"missing_scale_falls_back", 30, 0, 8000, 0, 8000},
 	}
 
