@@ -1,5 +1,7 @@
 package main
 
+import "github.com/example/aep-parser/internal/apidoc"
+
 type symKind int
 
 const (
@@ -23,6 +25,11 @@ type symbol struct {
 	readWrite     bool   // Attributes 专用：RW=true / R=false
 	fieldRWForced bool   // 字段 R/RW 被 //docgen:rw|ro 显式锁定
 	examples      []example
+
+	summary   string         // @summary line (annotated symbols)
+	params    []apidoc.Param // @param entries (annotated symbols)
+	returns   string         // @returns line (annotated symbols)
+	annotated bool           // true when the comment carried a @tag block
 }
 
 type constBlock struct {

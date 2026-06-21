@@ -9,6 +9,8 @@ import (
 	"go/token"
 	"reflect"
 	"strings"
+
+	"github.com/example/aep-parser/internal/apidoc"
 )
 
 // loadedPackage 捆绑 go/doc 视图 + 共享 fset（签名打印 / 注释定位都要 fset）。
@@ -78,12 +80,49 @@ func lookupPackageFunc(lp *loadedPackage, name string) *symbol {
 
 func funcSymbol(lp *loadedPackage, fn *doc.Func) *symbol {
 	rawDoc := lp.RawFuncDocs[fn.Decl.Pos()] // doc.NewFromFiles 会清空 Decl.Doc，用副本
-	return &symbol{
+	s := &symbol{
 		name:      fn.Name,
 		kind:      kindMethod,
-		doc:       directiveStrippedText(rawDoc),
 		signature: normalizeSignature(lp.Fset, fn.Decl),
 	}
+	applyAnnotation(s, rawDoc)
+	return s
+}
+
+// applyAnnotation parses a raw doc-comment group for @tag fields. When present,
+// it fills the symbol's summary/description/params/returns from the annotation;
+// otherwise it falls back to the legacy directive-stripped prose.
+func applyAnnotation(s *symbol, rawDoc *ast.CommentGroup) {
+	ann, err := apidoc.Parse(rawCommentOf(rawDoc))
+	if err != nil || !ann.HasTags {
+		s.doc = directiveStrippedText(rawDoc)
+		return
+	}
+	s.annotated = true
+	s.summary = ann.Summary
+	s.doc = ann.Description
+	s.params = ann.Params
+	s.returns = ann.Returns
+}
+
+// rawCommentOf reconstructs comment text WITHOUT go/doc directive stripping, so
+// `// @tag` lines survive for apidoc.Parse (mirrors capindex's rawCommentText).
+func rawCommentOf(cg *ast.CommentGroup) string {
+	if cg == nil {
+		return ""
+	}
+	var b strings.Builder
+	for _, c := range cg.List {
+		t := c.Text
+		if strings.HasPrefix(t, "//") {
+			t = t[2:]
+		} else {
+			t = strings.TrimSuffix(strings.TrimPrefix(t, "/*"), "*/")
+		}
+		b.WriteString(strings.TrimPrefix(t, " "))
+		b.WriteByte('\n')
+	}
+	return b.String()
 }
 
 // extractPackageFuncs 抽取 names 指定的包级函数（非方法）为 symbol（按 names 顺序）。
@@ -329,9 +368,9 @@ func withMethods(types []*docType, lp *loadedPackage) []*docType {
 			rawDoc := lp.RawFuncDocs[fn.Decl.Pos()]
 			sym := symbol{
 				name:      fn.Name,
-				doc:       directiveStrippedText(rawDoc),
 				signature: normalizeSignature(lp.Fset, fn.Decl),
 			}
+			applyAnnotation(&sym, rawDoc)
 			switch classifyMethod(fn, rawDoc) {
 			case kindGetter:
 				sym.kind = kindGetter
