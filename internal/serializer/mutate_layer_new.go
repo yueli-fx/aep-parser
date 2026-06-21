@@ -66,6 +66,28 @@ func maxLayerIDInItemList(itemList *rifx.Chunk) uint32 {
 	return maxID
 }
 
+// allocLayerID hands out a project-globally-unique layer ID. AE allocates EVERY
+// entity — items AND layers — from one monotonic head counter (see
+// nextitemid-must-include-layer-ids), so layer IDs are NOT a per-composition
+// namespace: using maxLayerIDInItemList(thisComp)+1 alone makes every comp's
+// first user layer land on the same ID (13, just past the template service
+// layers 2..12), and two such layers in one project collide — the file opens
+// and renders, but AE's UI/verification does ID-keyed lookups and a delete /
+// edit on the colliding layer searches the wrong layer's property group
+// ("unexpected match name searched for in group"). Use the global counter, but
+// never below this comp's service-layer IDs (else AE treats the user Layr as a
+// service layer). For a single-comp project this returns the same value as the
+// old per-comp formula (allocItemID == service-max+1 after NewComposition's
+// bump), so existing single-comp ship-gates are byte-unchanged.
+func allocLayerID(p *Project, itemList *rifx.Chunk) uint32 {
+	id := allocItemID(p)
+	if svcMax := maxLayerIDInItemList(itemList); svcMax >= id {
+		id = svcMax + 1
+		scene.SetProjectNextItemID(p, id+1)
+	}
+	return id
+}
+
 // templateServiceLayerInsertTypes is templateServiceLayerTypes minus Layr —
 // used by insertLayrPosition to find the first non-Layr template chunk.
 var templateServiceLayerInsertTypes = map[rifx.ChunkID]bool{
@@ -107,12 +129,12 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 		return nil, fmt.Errorf("internal: comp has no itemList chunk")
 	}
 
-	// 1. Construct runtime ShapeLayer. Layer IDs occupy a per-composition
-	//    namespace (NOT the project-wide Item ID namespace): template service
-	//    layers DLay/SLay/CLay/SecL hold IDs 2..12 in the comp's itemList;
-	//    user Layr ID must not collide, otherwise AE treats the user Layr as
-	//    deleted via the DLay ID match.
-	layerID := maxLayerIDInItemList(cb.itemList) + 1
+	// 1. Construct runtime ShapeLayer. Layer IDs are project-global (one AE head
+	//    counter for items AND layers) and must stay above this comp's template
+	//    service layers (DLay/SLay/CLay/SecL at 2..12) — allocLayerID guarantees
+	//    both, so two comps' first user layers don't collide (write.go::
+	//    syncHeadCounters then covers the ID via the bumped nextItemID).
+	layerID := allocLayerID(scene.CompositionProj(c), cb.itemList)
 	baseBack := &layerBackrefs{}
 	base := &Layer{
 		Type: LayerTypeShape,
@@ -121,12 +143,6 @@ func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error) {
 	}
 	scene.SetLayerComp(base, c)
 	scene.SetLayerBack(base, baseBack)
-	// Bump project nextItemID so head-chunk counter sync (write.go::
-	// syncHeadCounters) covers our layer ID. AE 2025 validates head counter
-	// >= max(item/layer IDs) and silently drops layers above it.
-	if layerID >= scene.ProjectNextItemID(scene.CompositionProj(c)) {
-		scene.SetProjectNextItemID(scene.CompositionProj(c), layerID+1)
-	}
 
 	// Bump cdta @0x18 (codec.CdtaSecondaryDivisor18) from 600 (fresh-comp marker)
 	// to TickRate. cdta_layout.go: "AE rewrites to TickRate on user mod".

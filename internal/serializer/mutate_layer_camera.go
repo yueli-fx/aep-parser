@@ -191,8 +191,9 @@ func newTemplatedLayer(c *Composition, name string, templateBytes []byte, typ La
 		return nil, fmt.Errorf("layer template ldta missing/short")
 	}
 
-	// Per-composition layer-ID namespace (must avoid template service-layer IDs).
-	layerID := maxLayerIDInItemList(cb.itemList) + 1
+	// Project-global layer ID, above this comp's template service layers — see
+	// allocLayerID (per-comp maxLayerIDInItemList+1 collides across comps).
+	layerID := allocLayerID(cProj, cb.itemList)
 	d := ldta.Data
 	binary.BigEndian.PutUint32(d[codec.LdtaLayerID:codec.LdtaLayerID+4], layerID)
 
