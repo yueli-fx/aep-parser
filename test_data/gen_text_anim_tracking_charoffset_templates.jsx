@@ -16,13 +16,20 @@
     var log = [];
     try { log.push("ae=" + app.version); } catch (e) {}
 
-    // key -> [matchName, value]  (both 1D scalar)
+    // key -> [matchName, value, companions[]]  (both 1D scalar). The companion
+    // leaves are the sibling properties AE adds with the named animator in the
+    // UI "Add" menu (Tracking → Track Type; Character Offset → Character Change
+    // Type + Character Range). They MUST be materialized alongside the driven
+    // leaf, or AE's UI/verification (edit-text / delete) searches the animator
+    // group for them and throws "internal verification failure {unexpected match
+    // name searched for in group}". The original Booyah project has all three at
+    // value 1; we author them the same so the spliced animator is complete.
     var specs = [
-        ["tracking",  "ADBE Text Tracking Amount",  50],
-        ["charoffset", "ADBE Text Character Offset", 5]
+        ["tracking",   "ADBE Text Tracking Amount",  50, [["ADBE Text Track Type", 1]]],
+        ["charoffset", "ADBE Text Character Offset", 5,  [["ADBE Text Character Change Type", 1], ["ADBE Text Character Range", 1]]]
     ];
 
-    function authorOne(key, mn, val) {
+    function authorOne(key, mn, val, companions) {
         var out = new File("e:/projects/tools/aep-parser/test_data/re_text_animator_" + key + ".aep");
         app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
         app.newProject();
@@ -37,6 +44,11 @@
         var sel       = sels.addProperty("ADBE Text Selector");
         var props     = anim.property("ADBE Text Animator Properties");
 
+        // Companion leaves first (so the animator group is structurally complete).
+        for (var ci = 0; ci < companions.length; ci++) {
+            var cp = props.addProperty(companions[ci][0]);
+            cp.setValue(companions[ci][1]);
+        }
         var leaf = props.addProperty(mn);
         leaf.setValue(val);
 
@@ -50,7 +62,7 @@
     }
 
     for (var i = 0; i < specs.length; i++) {
-        try { authorOne(specs[i][0], specs[i][1], specs[i][2]); }
+        try { authorOne(specs[i][0], specs[i][1], specs[i][2], specs[i][3]); }
         catch (e) { log.push("ERR " + specs[i][0] + " -> " + e.toString()); }
     }
 

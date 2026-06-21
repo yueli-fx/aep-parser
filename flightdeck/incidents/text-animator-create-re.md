@@ -379,10 +379,23 @@ Randomize/Seed 改的是「选中哪些字」非简单亮度、Shape/Ease 是 fa
   双版本渲染 gate PASS（AE2020≡AE2025 像素逐数字一致）。**新方法：RE 不靠 AE，直接从真实工程读** —— 原
   Booyah 工程的 GLITCH 文字层已把两 leaf materialize+keyframe 落盘，`tmp_debug` 探针读出 tdb4 db990001
   =1 分量（确认 1D scalar，套既有 `addTextScalarLeafAnimator`+`overwriteScalarCdat`，零新字节代码）+
-  **companion 自动 materialize**（Tracking Amount→`ADBE Text Track Type`；Character Offset→`ADBE Text
-  Character Change Type`+`ADBE Text Character Range`，同 Rotation X/Y 的伴生 Z，match-name 精确覆写、伴生
-  留默认）。clean 静态模板仍须 AE 实物化（`gen_text_anim_tracking_charoffset_templates.jsx`→extract，
-  伴生默认值→AE 省略，模板只剩驱动 leaf 一个 cdat，比真实工程更干净）。gate 签名：**Tracking→ink bbox
+  **companion 必须随驱动 leaf 一起物化**（Tracking→`ADBE Text Track Type`；Character Offset→`ADBE Text
+  Character Change Type`+`ADBE Text Character Range`）——见下 2026-06-22(2) 追修。clean 静态模板须 AE 实物化
+  （`gen_text_anim_tracking_charoffset_templates.jsx`→extract）。gate 签名：**Tracking→ink bbox
   宽度**（选中→撑开 612→354）；**Character Offset→frameDiff**（选中段字形被改码重映射，0-2 diff=2157，
   每帧都有 ink≠掉层，同 wiggly/multi-selector 的 A/B 差分风格而非单调）。⚠AE 装在 `E:\adobe\`（非
   `C:\Program Files`）——查 AE 可用性别只看默认路径。
+- 2026-06-22(2) **companion-leaf 必须物化，否则 AE UI 编辑/删层炸**（comp ② 真机 review 追修，commit 后续）：
+  Tracking/Character Offset 模板**只物化驱动 leaf、漏伴生属性**时，AE **render + ExtendScript
+  (setValue/remove/duplicate/precompose/save) 全过**，但**真机 UI 编辑文字 / 删图层抛 `内部验证失败
+  {unexpected match name searched for in group} (29::0)`**——UI 校验在 animator group 里搜伴生 match-name
+  搜不到即炸。**根因**：`props.addProperty("ADBE Text Tracking Amount")` 只加驱动 leaf，AE **不**自动补伴生
+  （≠ Rotation X/Y 自动补 Z 那次）；原工程经 UI「Add Tracking」加整组（Track Type+Amount，值=1 持久化）。
+  **修法**：gen jsx 显式 `addProperty` 伴生 + setValue 原值(1) → 物化进模板（2042→2316/2590B）；facade
+  零改（`overwriteScalarCdat` 按 match-name 只覆写驱动 leaf，伴生留 1）。前 commit 2add514 的模板缺伴生 =
+  已 ship 能力的隐性结构洞，本次重授权一并修。**教训**：render-pixel + round-trip + 脚本全绿 ≠ AE UI 可编辑
+  （UI 校验比脚本严，「结构不完整但能渲染」唯真机 UI 操作能暴露——红线1 的 UI 变体）。
+  ⚠**另有一个独立 confirmed 缺陷待修**：多 comp 从零工程里 `NewShapeLayer`/`newTemplatedLayer` 用**每-comp**
+  `maxLayerIDInItemList+1` 分层 ID，两个 comp 的首个用户层都拿 ID 13 → **跨 comp ID 撞号**（[[nextitemid-must-include-layer-ids]]
+  说该 head-counter 是全局单调）。本例 AE 容忍（resave 保留、脚本/render 全过），与上面 UI 报错**非**同因（该报错是
+  property-group 缺 match-name，非 layer-ID），但仍是真 bug，应改用全局 `allocItemID` 分层 ID（需双版本 ship-gate）。
