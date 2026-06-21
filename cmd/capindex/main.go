@@ -19,12 +19,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/example/aep-parser/internal/apidoc"
 )
 
 func main() {
 	q := flag.String("q", "", "query term; print matching capabilities and exit")
 	check := flag.Bool("check", false, "CI mode: validate tags + verify committed files are current")
 	coverage := flag.Bool("coverage", false, "report public-surface tag coverage (P2 progress meter) and exit")
+	validate := flag.Bool("validate", false, "validate @tag annotations against the schema and exit")
 	flag.Parse()
 
 	root, err := repoRoot()
@@ -40,6 +43,27 @@ func main() {
 	entries, err := extractEntries(pkgDirs...)
 	if err != nil {
 		fatal(err)
+	}
+
+	if *validate {
+		surface, err := loadSurface(docgenPath)
+		if err != nil {
+			fatal(err)
+		}
+		gates, err := scanTests(filepath.Join(root, "internal"))
+		if err != nil {
+			fatal(err)
+		}
+		ctx := apidoc.Context{Gates: gates, IncidentsDir: incidentsDir}
+		errs := runValidate(entries, surface, ctx, apidoc.ModeWarn)
+		for _, e := range errs {
+			fmt.Fprintln(os.Stderr, "capindex:", e)
+		}
+		if len(errs) > 0 {
+			os.Exit(1)
+		}
+		fmt.Println("capindex: @tag validation clean")
+		return
 	}
 
 	if *coverage {
