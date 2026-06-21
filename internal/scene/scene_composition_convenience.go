@@ -1,7 +1,7 @@
 package scene
 
-// Composition convenience helpers — mirror of py-aep's `comp.num_layers`, //nolint:jargon
-// `comp.has_audio`, `comp.time_scale`. `ActiveCamera` and `Markers` already
+// Composition convenience helpers — mirroring AE's CompItem accessors
+// (num layers, has audio, time scale). `ActiveCamera` and `Markers` already
 // live on Composition itself (ActiveCamera as a method in types_core.go;
 // Markers as a direct field).
 

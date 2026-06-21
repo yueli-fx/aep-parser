@@ -35,7 +35,7 @@ type footageBackrefs struct {
 	// height (already on Footage) plus audio sample rate, start/end
 	// frame, footage_missing flag, etc. — used by P1 1H convenience
 	// helpers (FootageMissing / HasAudio / StartFrame / EndFrame).
-	// Offsets per py-aep binary/footage_chunks.py::SspcChunk. //nolint:jargon
+	// Offsets per the reference parser's binary/footage_chunks.py::SspcChunk.
 	sspcChunk *rifx.Chunk
 
 	// optiChunk is the footage-options chunk. For "Soli" footage it holds

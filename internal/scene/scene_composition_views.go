@@ -1,9 +1,9 @@
 package scene
 
-// CompItem filter views — mirror of py-aep's `comp.text_layers`, //nolint:jargon
-// `comp.shape_layers`, etc. Each method walks Layers once and returns a
-// filtered slice. Results are computed on every call; if you need to
-// iterate the same view repeatedly, cache it locally.
+// CompItem filter views — convenience accessors that return layers of a
+// given kind (text layers, shape layers, etc.). Each method walks Layers
+// once and returns a filtered slice. Results are computed on every call; if
+// you need to iterate the same view repeatedly, cache it locally.
 
 // TextLayers returns all text layers in the composition.
 func (c *Composition) TextLayers() []*Layer {

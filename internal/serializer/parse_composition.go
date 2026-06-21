@@ -80,30 +80,30 @@ func (c *parseCtx) warn(format string, args ...any) {
 // parseComposition reads a composition from an Item list.
 //
 // cdta layout (204 bytes in CC2020+ .aep files). Sources:
-//   - "py-aep" = py-aep/binary/composition_chunks.py CdtaChunk //nolint:jargon
+//   - "ref" = the reference parser's binary/composition_chunks.py CdtaChunk
 //   - "fixture" = hex-dumped from test_data/re_tickrate.aep
 //   - "local" = derived from observation only, no external source
 //
 // Offsets used here are big-endian unless otherwise noted.
 //
-//	0x08–0x0B : internal_timebase  (uint32) — modern: ticks/sec; legacy: see deriveTickRate           [py-aep + fixture] //nolint:jargon
-//	0x1C–0x1F : work_area_start_dividend (uint32)                                                     [py-aep + fixture] //nolint:jargon
-//	0x20–0x23 : work_area_start_divisor  (uint32)                                                     [py-aep + fixture] //nolint:jargon
-//	0x24–0x27 : work_area_end_dividend   (uint32) — 0xFFFFFFFF = "extend to comp Duration"           [py-aep + fixture; sentinel = local] //nolint:jargon
-//	0x28–0x2B : work_area_end_divisor    (uint32)                                                     [py-aep + fixture] //nolint:jargon
-//	0x34      : bg_color_r (uint8)                                                                    [py-aep + fixture] //nolint:jargon
-//	0x35      : bg_color_g (uint8)                                                                    [py-aep + fixture] //nolint:jargon
-//	0x36      : bg_color_b (uint8)                                                                    [py-aep + fixture] //nolint:jargon
+//	0x08–0x0B : internal_timebase  (uint32) — modern: ticks/sec; legacy: see deriveTickRate           [ref + fixture]
+//	0x1C–0x1F : work_area_start_dividend (uint32)                                                     [ref + fixture]
+//	0x20–0x23 : work_area_start_divisor  (uint32)                                                     [ref + fixture]
+//	0x24–0x27 : work_area_end_dividend   (uint32) — 0xFFFFFFFF = "extend to comp Duration"           [ref + fixture; sentinel = local]
+//	0x28–0x2B : work_area_end_divisor    (uint32)                                                     [ref + fixture]
+//	0x34      : bg_color_r (uint8)                                                                    [ref + fixture]
+//	0x35      : bg_color_g (uint8)                                                                    [ref + fixture]
+//	0x36      : bg_color_b (uint8)                                                                    [ref + fixture]
 //	0x8C–0x8D : Width  (uint16)                                                                       [local + fixture]
 //	0x8E–0x8F : Height (uint16)                                                                       [local + fixture]
 //	0x9C–0x9D : FramerateWhole       (uint16)                                                          [local + fixture]
 //	0x9E–0x9F : FramerateFractional  (uint16, units = 1/65536)                                         [local + fixture]
 //	0xA8–0xAB : legacy_scale         (uint32) — see deriveTickRate                                     [local; deriveTickRate doc]
-//	0xAE–0xAF : shutter_angle (uint16, degrees; AE UI default 180)                                    [py-aep + fixture] //nolint:jargon
+//	0xAE–0xAF : shutter_angle (uint16, degrees; AE UI default 180)                                    [ref + fixture]
 //	0xB0–0xB3 : DurationFrames (uint32)                                                                [local + fixture]
-//	0xB4–0xB7 : shutter_phase (int32 — likely degrees, exact units not UI-verified)                   [py-aep + fixture] //nolint:jargon
-//	0xC4–0xC7 : motion_blur_adaptive_sample_limit (int32; AE default 128)                              [py-aep + fixture] //nolint:jargon
-//	0xC8–0xCB : motion_blur_samples_per_frame (int32; AE default 16)                                   [py-aep + fixture] //nolint:jargon
+//	0xB4–0xB7 : shutter_phase (int32 — likely degrees, exact units not UI-verified)                   [ref + fixture]
+//	0xC4–0xC7 : motion_blur_adaptive_sample_limit (int32; AE default 128)                              [ref + fixture]
+//	0xC8–0xCB : motion_blur_samples_per_frame (int32; AE default 16)                                   [ref + fixture]
 func parseComposition(item *rifx.Chunk, id uint32, name string, warnings *[]string) (*Composition, error) {
 	cb := &compositionBackrefs{compName: name, itemList: item}
 	comp := &Composition{ID: id, Name: name}
@@ -305,7 +305,7 @@ func decodeFrac(dividend, divisor []byte) float64 {
 // 6400 / 23976 = 0.2669 s, matching AE exactly.
 //
 // The earlier `rate × 1000 / cdta_0xA8` "legacy NTSC" correction (which
-// turned 23976 into 8000 for 29.97) was a py-aep-derived misreading never //nolint:jargon
+// turned 23976 into 8000 for 29.97) was a reference-parser-derived misreading never
 // checked against AE's rendered keyframe times. It is latent under
 // read-modify-write (keyframe ticks are preserved, so the wrong rate
 // cancels) but corrupts any path that reads keyframe seconds out of one

@@ -148,7 +148,7 @@ func parseSinglePard(matchName string, pard *rifx.Chunk) *pardParamDef {
 
 	case PCTLColor:
 		// pard stores colors as [A, R, G, B] in 0-255 range.
-		// Look for color data — py-aep uses last_color / default_color //nolint:jargon
+		// Look for color data — the reference parser uses last_color / default_color
 		// from a separate ColorPardChunk layout. For now, extract
 		// what we can from the body. Color pard has a different prefix
 		// layout. We'll handle it if we encounter it in fixtures.

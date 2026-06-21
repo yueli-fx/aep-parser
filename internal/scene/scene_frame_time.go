@@ -5,9 +5,9 @@ import (
 	"math"
 )
 
-// Frame-time companion accessors — mirror of py-aep's `layer.frame_in_point`, //nolint:jargon
-// `keyframe.frame_time`, `comp.work_area_start_frame`, etc. All conversions
-// use the owning composition's FrameRate (not TickRate). Setters round the
+// Frame-time companion accessors — frame-indexed views of the seconds-based
+// time fields (layer in/out point, keyframe time, comp work-area bounds, etc.).
+// All conversions use the owning composition's FrameRate (not TickRate). Setters round the
 // frame integer back to seconds via `seconds = frame / FrameRate` before
 // delegating to the existing seconds-based setter.
 //

@@ -7,7 +7,7 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-// PropertyBase structural ops (py-aep parity P3 §3C): Remove / MoveTo on an //nolint:jargon
+// PropertyBase structural ops: Remove / MoveTo on an
 // AEPropertyGroup that is a direct child of an INDEXED_GROUP parent.
 //
 // Behavior contract (RE'd from AE 2020, see //nolint:jargon
@@ -31,7 +31,7 @@ import (
 // Alpha until their own gate runs.
 
 // indexedGroupMatchNames is AE's fixed set of INDEXED_GROUP match-names
-// (mirrors py-aep _INDEXED_GROUP_MATCH_NAMES). Membership is the sole //nolint:jargon
+// (mirrors the reference parser's _INDEXED_GROUP_MATCH_NAMES set). Membership is the sole
 // predicate for whether a group's direct children may be removed / reordered /
 // duplicated.
 // ownerLayer walks up to the synthetic property-tree root and returns the

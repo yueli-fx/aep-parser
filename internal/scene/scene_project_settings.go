@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Project-level single-field setting chunks — py-aep parity P1 1D. //nolint:jargon
+// Project-level single-field setting chunks.
 //
 // All chunks sit as direct children of the root RIFX (Egg!) LIST:
 //
@@ -19,7 +19,7 @@ import (
 //	gpuG LIST → Utf8 — gpu_accel_type (UUID-style device id; length-variable string)
 //	ExEn LIST → Utf8 — expression_engine ("extendscript" / "javascript-1.0")
 //
-// Source: py-aep `models/project.py` + `binary/scalar_chunks.py` + //nolint:jargon
+// Source: the reference parser's `models/project.py` + `binary/scalar_chunks.py` +
 // `binary/misc_chunks.py`. Verified against re_cameralight.aep dumps.
 
 // ──────────────────────────────────────────────
@@ -225,7 +225,7 @@ func (p *Project) SetExpressionEngine(engine string) error {
 // ──────────────────────────────────────────────
 //
 // Byte layout — corrected against AE 2020 self-saves (RE 2026-06-14, see
-// incidents/nnhd-display-settings-layout-re.md). The py-aep layout was wrong //nolint:jargon
+// incidents/nnhd-display-settings-layout-re.md). The reference parser's layout was wrong
 // for two of these fields (byte-8 bit-7 feet flag and a byte-8 mask for time
 // display were both fictional); AE actually stores:
 // - Bytes 0-7: reserved
@@ -236,7 +236,7 @@ func (p *Project) SetExpressionEngine(engine string) error {
 // - Bytes 12-13: reserved
 // - Bytes 14-15: timecode_default_base (u16 BE, 1-999)
 // - Bytes 16-19: feet_frames_film_type as FRAMES-PER-FOOT (u32 BE):
-//   35mm = 16 (0x10), 16mm = 40 (0x28). py-aep mislabeled this "unknown". //nolint:jargon
+//   35mm = 16 (0x10), 16mm = 40 (0x28). The reference parser mislabeled this "unknown".
 // - Byte 20: frames_count_type (0=Start0, 1=Start1, 2=TimecodeConversion)
 // - Bytes 21-23: reserved
 // - Byte 24: bits_per_channel (already implemented)

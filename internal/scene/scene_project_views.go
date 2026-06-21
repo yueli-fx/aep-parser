@@ -1,10 +1,9 @@
 package scene
 
-// Project filter views and lookups — mirror of py-aep's //nolint:jargon
-// `project.footages`, `project.root_folder`, `project.layer_by_id`,
-// `project.effect_names`. Most are wrappers over existing direct-field
-// access (Project.Footage / Project.Folders); LayerByID and EffectNames
-// add new functionality.
+// Project filter views and lookups — convenience accessors mirroring AE's
+// project-level shortcuts (footages, root folder, layer-by-id, effect names).
+// Most are wrappers over existing direct-field access (Project.Footage /
+// Project.Folders); LayerByID and EffectNames add new functionality.
 
 // Footages returns the project's footage items (alias of the
 // Project.Footage slice field, provided as a convenience).

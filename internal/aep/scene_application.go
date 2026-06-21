@@ -6,10 +6,10 @@ import (
 	"github.com/example/aep-parser/internal/serializer"
 )
 
-// Application wraps a parsed Project, mirroring py-aep's top-level //nolint:jargon
-// `app = py_aep.parse("x.aep")` entry. Existing Go-style entry points
-// (`aep.Open`, `aep.FromReader` returning *Project) are unchanged; this
-// type is an additive convenience layer.
+// Application wraps a parsed Project, providing a top-level
+// application handle analogous to ExtendScript's `app`. Existing Go-style
+// entry points (`aep.Open`, `aep.FromReader` returning *Project) are
+// unchanged; this type is an additive convenience layer.
 //
 // Application exists primarily to provide a stable namespace for
 // AE-version metadata (Version), file-level handles (Project), and

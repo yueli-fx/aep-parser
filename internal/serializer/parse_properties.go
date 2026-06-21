@@ -79,7 +79,7 @@ func collectFromGroup(group *rifx.Chunk, out *[]*Property, effects *[]*Effect, m
 }
 
 // parseGradientStopsProperty reads an "ADBE Vector Grad Colors" GCst LIST.
-// Structure (per py-aep parsers/specialized_properties.py::parse_gradient): //nolint:jargon
+// Structure (per the reference parser's parsers/specialized_properties.py::parse_gradient):
 //
 //	[LIST GCst]
 //	  [LIST tdbs]  — base property metadata (tdb4 + small placeholder cdat)
@@ -120,7 +120,7 @@ func parseGradientStopsProperty(matchName string, gcst *rifx.Chunk, ctx *parseCt
 
 // parseOrientationProperty reads the otst wrapper that holds a 3D layer's
 // Orientation. The wrapper nests a tdbs whose cdat stores the X/Y/Z value
-// LITTLE-ENDIAN (py-aep: cdat is_le when its grandparent LIST is otst) plus //nolint:jargon
+// LITTLE-ENDIAN (the reference parser: cdat is_le when its grandparent LIST is otst) plus
 // an otky keyframe container. Orientation is always 3-component even though
 // its tdb4 dimension byte reads 0x01, so Components/StaticValue are fixed up
 // after the shared parseLeafProperty pass.

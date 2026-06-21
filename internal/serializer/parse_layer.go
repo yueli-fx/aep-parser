@@ -12,7 +12,7 @@ import (
 // parseLayer reads layer data from a Layr list.
 //
 // ldta layout (160 bytes; 164 for AE >= 23) — offsets verified against
-// real .aep files plus py-aep's LdtaChunk reference: //nolint:jargon
+// real .aep files plus the reference parser's LdtaChunk:
 //
 //	0x00 : uint32 BE  — own layer ID (referenced by child layers' ParentID)
 //	0x04 : uint16 BE  — quality (0=Wireframe, 1=Draft, 2=Best)
@@ -43,7 +43,7 @@ import (
 //	                    "layer immediately above" convention). RE'd via
 //	                    test_data/re_trackmatte_ae24.aep.
 //
-// LayerAttrBits (3 bytes, per py-aep): //nolint:jargon
+// LayerAttrBits (3 bytes, per the reference parser):
 //
 //	byte 0 (0x25): bit6=sampling-quality (0=Bilinear, 1=Bicubic),
 //	               bit4=auto-orient characters-toward-camera,
@@ -285,8 +285,8 @@ func findBlsiInOverrideTdgp(tdgp *rifx.Chunk) *rifx.Chunk {
 	return nil
 }
 
-// inferLayerType picks a LayerType from the ldta byte at 0x83 (py-aep's //nolint:jargon
-// LayerType enum: 0=AV, 1=Light, 2=Camera, 3=Text, 4=Shape, 5=3DModel)
+// inferLayerType picks a LayerType from the ldta byte at 0x83 (the reference
+// parser's LayerType enum: 0=AV, 1=Light, 2=Camera, 3=Text, 4=Shape, 5=3DModel)
 // plus the parsed flag bits and SourceID. The 0x83 byte distinguishes
 // AE's built-in 3D layer kinds (Light/Camera/3DModel); text/shape are
 // also detected via the property tree (findTextSource / hasShapeLayerRoot

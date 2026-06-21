@@ -1,7 +1,7 @@
 package scene
 
-// P2c PropertyGroup hierarchy — Layer-level accessors mirroring py-aep's //nolint:jargon
-// `layer.transform()` / `layer.effects()` / etc. shortcuts. Each returns
+// P2c PropertyGroup hierarchy — Layer-level accessors mirroring AE's
+// layer.transform() / layer.effects() / etc. property-group shortcuts. Each returns
 // the corresponding *AEPropertyGroup from the parsed tree, or nil when:
 //
 //   - the layer was built outside the parser (no tree was built), or

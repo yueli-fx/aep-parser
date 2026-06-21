@@ -40,8 +40,8 @@ type JSONRenderQueueItem struct {
 	OutputModules    []*JSONOutputModule `json:"output_modules,omitempty"`
 }
 
-// JSONRenderSettings mirrors RenderSettings (values follow py-aep NUMBER //nolint:jargon
-// semantics: -1 = current settings).
+// JSONRenderSettings mirrors RenderSettings (values follow the reference
+// parser's NUMBER semantics: -1 = current settings).
 type JSONRenderSettings struct {
 	Quality           int    `json:"quality"`
 	ColorDepth        int    `json:"color_depth"`

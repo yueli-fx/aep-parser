@@ -3,9 +3,9 @@ package codec
 import "encoding/binary"
 
 // codec_render_settings.go — pure byte decoding of the render-queue settings
-// ldat item. No scene coupling (codec_ boundary). Byte layout mirrors py-aep //nolint:jargon
-// binary/render_chunks.py RenderSettingsItem (2246 bytes, big-endian); offsets
-// verified by field-size accounting (sum == 2246) + golden cross-check.
+// ldat item. No scene coupling (codec_ boundary). Byte layout mirrors the
+// reference parser's binary/render_chunks.py RenderSettingsItem (2246 bytes,
+// big-endian); offsets verified by field-size accounting (sum == 2246) + golden cross-check.
 
 const RenderSettingsItemSize = 2246
 
@@ -17,7 +17,7 @@ const RenderSettingsItemSize = 2246
 type RenderSettingOffset int
 
 // Field offsets within one RenderSettingsItem block. slice-1 (top-level) +
-// slice-2 (render settings). All big-endian; verified by py-aep field-size //nolint:jargon
+// slice-2 (render settings). All big-endian; verified by field-size
 // accounting (sum == 2246) + golden cross-check.
 const (
 	RsFlagByte              RenderSettingOffset = 0x07 // u8; bit 2 = queue_item_notify
@@ -36,7 +36,7 @@ const (
 	RsProxyUse              RenderSettingOffset = 0x44 // u16 (0xFFFF = current)
 	RsMotionBlur            RenderSettingOffset = 0x48 // u16 (0xFFFF = current)
 	RsFrameBlending         RenderSettingOffset = 0x4C // u16 (0xFFFF = current)
-	RsLogType               RenderSettingOffset = 0x50 // u16 (raw; py-aep maps to 3xxx enum) //nolint:jargon
+	RsLogType               RenderSettingOffset = 0x50 // u16 (raw; the reference parser maps to 3xxx enum)
 	RsSkipExistingFiles     RenderSettingOffset = 0x54 // u16 (bool)
 	RsTemplateName          RenderSettingOffset = 0x5A // 64 bytes, windows-1252, NUL-padded
 	RsTemplateNameLen                           = 64   // length (not an offset)
@@ -49,7 +49,7 @@ const (
 	RsElapsedSeconds        RenderSettingOffset = 2202 // u32
 )
 
-// time_span_source enum values (py-aep TimeSpanSource). //nolint:jargon
+// time_span_source enum values (the reference parser's TimeSpanSource).
 const (
 	TimeSpanLengthOfComp = 0
 	TimeSpanWorkAreaOnly = 1
@@ -126,9 +126,9 @@ func DecodeRenderSettings(b []byte) (RenderSettingsBlock, bool) {
 	return rs, true
 }
 
-// CurrentSettingsInt maps a raw u16 render-setting value to py-aep's NUMBER //nolint:jargon
-// semantics: 0xFFFF ("current settings") becomes -1, everything else is the
-// value as-is.
+// CurrentSettingsInt maps a raw u16 render-setting value to the reference
+// parser's NUMBER semantics: 0xFFFF ("current settings") becomes -1,
+// everything else is the value as-is.
 func CurrentSettingsInt(v uint16) int {
 	if v == 0xFFFF {
 		return -1

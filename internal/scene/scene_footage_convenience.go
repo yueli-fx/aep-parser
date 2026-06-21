@@ -5,9 +5,9 @@ import (
 	"math"
 )
 
-// Footage convenience helpers — mirror of py-aep's `footage.asset_type`, //nolint:jargon
-// `footage.has_audio`, `footage.start_frame`, etc. Most read from sspc
-// at byte offsets sourced from py-aep `binary/footage_chunks.py`: //nolint:jargon
+// Footage convenience helpers — convenience accessors for footage items
+// (asset type, has audio, start frame, etc.). Most read from sspc
+// at byte offsets sourced from the reference parser's `binary/footage_chunks.py`:
 //
 //	@0x78  (120)  footage_missing_at_save (1 byte bool, 1 = missing)
 //	@0xA0  (160)  audio_sample_rate (8 byte f64 BE; 0 = no audio)

@@ -39,7 +39,7 @@ type projectBackrefs struct {
 	nhedChunk *rifx.Chunk
 	nnhdChunk *rifx.Chunk
 
-	// Project-level single-field setting chunks (P1 1D, py-aep parity). //nolint:jargon
+	// Project-level single-field setting chunks.
 	// Captured by parseProject when present; mutated by Set* methods.
 	// All exist as direct root children — see project_settings.go.
 	acerChunk *rifx.Chunk // 1B bool — compensate_for_scene_referred_profiles

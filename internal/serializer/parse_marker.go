@@ -112,41 +112,41 @@ func bindMarkerListOwner(field *[]*Marker) {
 // payload.
 //
 // Sources:
-//   - "py-aep" = py-aep/binary/misc_chunks.py NmhdChunk //nolint:jargon
+//   - "ref" = the reference parser's binary/misc_chunks.py NmhdChunk
 //   - "fixture" = hex-dumped from test_data/re_tickrate.aep
 //
-// Layout (py-aep verified; fixture is consistent for zero/label only — //nolint:jargon
+// Layout (ref verified; fixture is consistent for zero/label only —
 // see ⚠ note below):
 //
-//	0x00..0x02 : reserved (3 bytes)                                          [py-aep + fixture] //nolint:jargon
-//	0x03       : marker_flags (uint8) — bit0=navigation, bit1=protected     [py-aep] — decode deferred this loop //nolint:jargon
-//	0x04..0x07 : reserved (4 bytes)                                          [py-aep + fixture] //nolint:jargon
-//	0x08..0x0B : frame_duration (uint32 BE) — 600ths of a second per py-aep  [py-aep stated; fixture observes 0 here in 2/2 point markers] //nolint:jargon
-//	0x0C..0x0F : reserved per py-aep                                         [⚠ py-aep + fixture DISAGREE — see note] //nolint:jargon
-//	0x10       : label color index (uint8, 0..16; AE's user-customizable    [py-aep + fixture] //nolint:jargon
+//	0x00..0x02 : reserved (3 bytes)                                          [ref + fixture]
+//	0x03       : marker_flags (uint8) — bit0=navigation, bit1=protected     [ref] — decode deferred this loop
+//	0x04..0x07 : reserved (4 bytes)                                          [ref + fixture]
+//	0x08..0x0B : frame_duration (uint32 BE) — 600ths of a second per ref     [ref stated; fixture observes 0 here in 2/2 point markers]
+//	0x0C..0x0F : reserved per ref                                            [⚠ ref + fixture DISAGREE — see note]
+//	0x10       : label color index (uint8, 0..16; AE's user-customizable    [ref + fixture]
 //	             label palette — index is stable, RGB mapping is not)
 //	0x11+      : optional trailing padding (3 bytes in CC2020+ fixtures)     [local]
 //
 // ⚠ Offset ambiguity (do NOT speculate, do NOT change decode):
 // Both NmHd chunks in re_tickrate.aep (CC2020+ markers) have:
 //
-//	bytes 0x08..0x0B = 00 00 00 00  (duration per py-aep — zero) //nolint:jargon
-//	bytes 0x0C..0x0F = 00 00 02 58  (= 600; py-aep says "reserved") //nolint:jargon
+//	bytes 0x08..0x0B = 00 00 00 00  (duration per the reference parser — zero)
+//	bytes 0x0C..0x0F = 00 00 02 58  (= 600; the reference parser says "reserved")
 //
-// 0x258 = 600 = exactly one second at the py-aep documented 600-base. //nolint:jargon
-// This is highly suspicious but unverified — could mean (1) py-aep's //nolint:jargon
-// duration offset shifted in newer AE versions to 0x0C, (2) the field
+// 0x258 = 600 = exactly one second at the reference parser's documented 600-base.
+// This is highly suspicious but unverified — could mean (1) the reference
+// parser's duration offset shifted in newer AE versions to 0x0C, (2) the field
 // is a related-but-distinct semantic (e.g. an internal "1 unit" sentinel
 // for chapter markers), or (3) coincidence. Until we have an AE
 // project with a known user-set duration to verify against, we follow
-// py-aep's documented offset (0x08). Real-world point markers will //nolint:jargon
+// the reference parser's documented offset (0x08). Real-world point markers will
 // correctly surface as Duration = 0.0s under this decode.
 //
-// py-aep declares NmHd as 17 bytes; real-world fixtures pad to 20. We //nolint:jargon
+// The reference parser declares NmHd as 17 bytes; real-world fixtures pad to 20. We
 // bounds-check both reads.
 func decodeNmHd(m *Marker, d []byte) {
 	if len(d) >= 0x0C {
-		// 600ths-of-a-second per py-aep; fixture's 0x258 = 600 = 1.0s //nolint:jargon
+		// 600ths-of-a-second per the reference parser; fixture's 0x258 = 600 = 1.0s
 		// is plausible "1-second marker". Surface as seconds for
 		// consistency with Marker.Time.
 		const nmHdDurationBase = 600.0

@@ -135,7 +135,7 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, litm, itemLi
 }
 
 // resolveTimeSpan turns the time_span_source + dividends into (start, duration)
-// seconds, mirroring py-aep RenderQueueItem._resolved_time_span. //nolint:jargon
+// seconds, mirroring the reference parser's RenderQueueItem._resolved_time_span.
 func resolveTimeSpan(rs codec.RenderSettingsBlock, comp *Composition) (start, dur float64) {
 	switch rs.TimeSpanSource {
 	case codec.TimeSpanLengthOfComp:

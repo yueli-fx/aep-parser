@@ -1,9 +1,9 @@
 package scene
 
-// Layer convenience helpers — mirror of py-aep's `layer.containing_comp`, //nolint:jargon
-// `layer.has_audio`, `layer.active_at_time(t)`, etc. Pure helpers built
-// on existing Layer fields; no chunk RE / no writes (except RemoveTrackMatte,
-// which is an alias of the existing ClearTrackMatteLayer).
+// Layer convenience helpers — convenience accessors over existing Layer
+// fields (containing comp, has audio, active-at-time, etc.). Pure helpers; no
+// chunk RE / no writes (except RemoveTrackMatte, which is an alias of the
+// existing ClearTrackMatteLayer).
 //
 // `Layer.Index` and `Layer.Type` are already exposed as direct fields;
 // `Parent`, `SourceComposition`, `SourceFootage`, `AlternateSource`,

@@ -3,7 +3,7 @@ package scene
 // PropertyBase is the common interface satisfied by both *Property (leaf)
 // and *AEPropertyGroup (interior node). Used so AEPropertyGroup.Children can
 // hold mixed leaves and subgroups in their original on-disk order — which
-// mirrors AE's property index. py-aep parity: every node has a match-name //nolint:jargon
+// mirrors AE's property index: every node has a match-name
 // and a (usually empty) display name.
 type PropertyBase interface {
 	PropertyMatchName() string
@@ -19,7 +19,7 @@ func (p *Property) PropertyName() string { return p.Name }
 
 // AEPropertyGroup is the hierarchical wrapper for AE's tdgp groups
 // ("ADBE Transform Group", "ADBE Mask Parade", "ADBE Effect Parade", etc.).
-// It mirrors py-aep's AEPropertyGroup interface — children are ordered and //nolint:jargon
+// It mirrors AE's PropertyGroup interface — children are ordered and
 // can be looked up by match-name or walked positionally.
 //
 // The layer-level root group has empty MatchName / Name; its Children are
@@ -68,7 +68,7 @@ func (g *AEPropertyGroup) PropertyName() string { return g.Name }
 func (g *AEPropertyGroup) ParentGroup() *AEPropertyGroup { return g.parent }
 
 // NumProperties returns the number of direct children (mix of leaves and
-// subgroups). Mirrors py-aep's AEPropertyGroup.num_properties. //nolint:jargon
+// subgroups). Mirrors AE's PropertyGroup.numProperties.
 func (g *AEPropertyGroup) NumProperties() int { return len(g.Children) }
 
 // Property returns the direct-child *Property whose match-name equals
@@ -103,7 +103,7 @@ func (g *AEPropertyGroup) Group(matchName string) *AEPropertyGroup {
 }
 
 // ChildByIndex returns the child at the given index, or nil if out of
-// bounds. Mirrors py-aep's `property_by_index` / 1-based AE addressing //nolint:jargon
+// bounds. Mirrors AE's `property(index)` / 1-based AE addressing
 // translated to 0-based Go.
 func (g *AEPropertyGroup) ChildByIndex(i int) PropertyBase {
 	if i < 0 || i >= len(g.Children) {

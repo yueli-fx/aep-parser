@@ -7,7 +7,7 @@ import (
 )
 
 // parse_essential_graphics.go — decode the Essential Graphics panel from a
-// comp's Item-level LIST:CIF3. Mirrors py-aep parsers/essential_graphics.py. //nolint:jargon
+// comp's Item-level LIST:CIF3. Mirrors the reference parser's parsers/essential_graphics.py.
 //
 //	LIST:CIF3
 //	  LIST:CpS2 → Utf8           ← template name ("Untitled" default)

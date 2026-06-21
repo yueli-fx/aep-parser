@@ -3,7 +3,7 @@ package scene
 // scene_guide.go — composition ruler guides (AE's drag-from-ruler alignment
 // lines). UI-only: they don't affect rendering. Stored in the comp's Item-level
 // LIST:Gide → LIST:list → lhd3(count) + ldat(GuideItem × N, 16B each). No
-// ExtendScript equivalent; mirrors py-aep's Guide model. //nolint:jargon
+// ExtendScript equivalent.
 
 // GuideOrientation is a guide's binary orientation code (as stored in ldat @0).
 type GuideOrientation uint32

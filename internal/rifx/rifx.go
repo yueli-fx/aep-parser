@@ -94,7 +94,7 @@ var (
 	IDGCst = ChunkID{'G', 'C', 's', 't'} // LIST formType: gradient color stops wrapper (contains tdbs + GCky)
 	IDGCky = ChunkID{'G', 'C', 'k', 'y'} // LIST formType: gradient keyframe container (Utf8 children holding prop.map XML, one per keyframe)
 
-	// Essential Graphics panel (py-aep parity). Item-level CIF3. //nolint:jargon
+	// Essential Graphics panel. Item-level CIF3.
 	IDCif3 = ChunkID{'C', 'I', 'F', '3'} // LIST formType: EG panel definition (template-name CpS2 + CCtl controllers)
 	IDCifO = ChunkID{'C', 'I', 'F', 'O'} // LIST formType: oldest EG panel generation; AE writes CIFO+CIF2+CIF3 with byte-identical content
 	IDCif2 = ChunkID{'C', 'I', 'F', '2'} // LIST formType: middle EG panel generation (see IDCifO)
@@ -114,7 +114,7 @@ var (
 	IDCpS2 = ChunkID{'C', 'p', 'S', '2'} // LIST formType: localized string (Utf8 value + locale)
 	IDCTyp = ChunkID{'C', 'T', 'y', 'p'} // U4: EG controller type (1=Checkbox 2=Slider 4=Color 5=Point 6=Text 8=Comment 9=MultiDim 10=Group 13=Dropdown)
 
-	// Project-level setting chunks (py-aep parity) //nolint:jargon
+	// Project-level setting chunks
 	IDAcer = ChunkID{'a', 'c', 'e', 'r'} // U1: compensate_for_scene_referred_profiles
 	IDAdfr = ChunkID{'a', 'd', 'f', 'r'} // F8: audio sample rate (Hz)
 	IDDwga = ChunkID{'d', 'w', 'g', 'a'} // Variable (1-4B observed): byte 0 = working gamma selector (0 → 2.2, ≠0 → 2.4)
@@ -123,7 +123,7 @@ var (
 	IDGpuG = ChunkID{'g', 'p', 'u', 'G'} // LIST formType: GPU device id container (single Utf8 child = UUID)
 	IDExEn = ChunkID{'E', 'x', 'E', 'n'} // LIST formType: expression engine container (single Utf8 child = "extendscript" / "javascript-1.0")
 
-	// Render queue chunk family (py-aep parity). IDAls2/IDAlas/IDLhd3/IDLdat already above; "list" = IDkfl. //nolint:jargon
+	// Render queue chunk family. IDAls2/IDAlas/IDLhd3/IDLdat already above; "list" = IDkfl.
 	IDLRdr = ChunkID{'L', 'R', 'd', 'r'} // LIST formType: render queue container (direct root child)
 	IDLItm = ChunkID{'L', 'I', 't', 'm'} // LIST formType: render-queue item collection (per-item RCom/list/LOm groups)
 	IDLOm  = ChunkID{'L', 'O', 'm', ' '} // LIST formType: output-module group (Roou-delimited modules + Als2 + Utf8 name/template)

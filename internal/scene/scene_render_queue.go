@@ -2,9 +2,9 @@ package scene
 
 import "github.com/example/aep-parser/internal/codec"
 
-// Render queue runtime model (read-only). Mirrors py-aep //nolint:jargon
+// Render queue runtime model (read-only). Models AE's
 // RenderQueue / RenderQueueItem / OutputModule, exposing only the fields that
-// cross-validate byte-for-byte against py-aep golden JSON. //nolint:jargon
+// cross-validate byte-for-byte against the reference parser's golden JSON.
 // Write paths, the full render-settings enum surface, format options and the
 // 128-byte OutputModuleSettingsItem are deferred to later slices.
 
@@ -33,7 +33,7 @@ type RenderQueueItem struct {
 	// render-settings ldat. Nil if the referenced comp id was not found.
 	Comp *Composition
 
-	// Status is the raw render status code (RenderSettingsItem @0x0C). py-aep //nolint:jargon
+	// Status is the raw render status code (RenderSettingsItem @0x0C). AE
 	// maps this to its RQItemStatus enum; we expose the raw value for now.
 	Status uint32
 
@@ -44,7 +44,7 @@ type RenderQueueItem struct {
 	// Comment is the item comment (RCom → Utf8), empty when no RCom present.
 	Comment string
 
-	// LogType is the raw log-type code (RenderSettingsItem @0x50). py-aep //nolint:jargon
+	// LogType is the raw log-type code (RenderSettingsItem @0x50). AE
 	// maps this to its 3xxx-namespaced LogType enum; we expose raw.
 	LogType uint16
 
@@ -57,8 +57,8 @@ type RenderQueueItem struct {
 	ElapsedSeconds uint32
 
 	// RenderSettings holds the per-item render settings (the ExtendScript
-	// get_settings() dict). Values follow py-aep NUMBER semantics: -1 means //nolint:jargon
-	// "current settings" (binary 0xFFFF).
+	// get_settings() dict). Values follow the reference parser's NUMBER
+	// semantics: -1 means "current settings" (binary 0xFFFF).
 	RenderSettings RenderSettings
 
 	// TimeSpanStart / TimeSpanDuration are resolved (seconds) per the item's
@@ -84,8 +84,8 @@ type RenderQueueItem struct {
 }
 
 // RenderSettings is the per-item render settings (ExtendScript
-// RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics: //nolint:jargon
-// -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
+// RenderQueueItem.getSettings). Enum-typed fields use the reference parser's
+// NUMBER semantics: -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
 // no current-settings sentinel.
 type RenderSettings struct {
 	Quality           int    // -1 current / 0 wireframe / 1 draft / 2 best
@@ -171,7 +171,7 @@ type OutputModuleSettings struct {
 	CropLeft            int
 	CropBottom          int
 	CropRight           int
-	OutputAudio         int // raw (py-aep derives ON/OFF/AUTO) //nolint:jargon
+	OutputAudio         int // raw (the reference parser derives ON/OFF/AUTO)
 	IncludeProjectLink  bool
 	PostRenderAction    uint32 // raw
 	ConvertToLinear     int

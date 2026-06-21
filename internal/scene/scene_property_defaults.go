@@ -2,7 +2,7 @@ package scene
 
 // transformFixedDefaults holds default values for transform properties
 // whose defaults are fixed constants (not dependent on comp/layer
-// dimensions). Ported from py-aep _TRANSFORM_FIXED_DEFAULTS. //nolint:jargon
+// dimensions). Ported from the reference parser's _TRANSFORM_FIXED_DEFAULTS table.
 var transformFixedDefaults = map[string]any{
 	MatchNameScale:       []float64{100, 100, 100},
 	"ADBE Rotate X":      0.0,
@@ -34,7 +34,7 @@ func AssignTransformDefaults(props []*Property, comp *Composition, layerType Lay
 	default:
 		// For AV layers, anchor defaults to source center.
 		// We don't have source dimensions here, so use comp dims
-		// as a reasonable fallback (matches py-aep for non-AV layers). //nolint:jargon
+		// as a reasonable fallback (matches the reference parser for non-AV layers).
 		anchorW, anchorH = compW, compH
 	}
 

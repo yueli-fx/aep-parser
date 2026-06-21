@@ -6,10 +6,10 @@ import (
 	"math"
 )
 
-// Property tdb4 flag readers — mirror of py-aep's `property.is_spatial`, //nolint:jargon
-// `property.is_animated`, etc. All read from the 124-byte tdb4 metadata
-// chunk under each tdbs LIST. Byte offsets sourced from py-aep's //nolint:jargon
-// binary/property_chunks.py::Tdb4Chunk:
+// Property tdb4 flag readers — convenience accessors mirroring AE's
+// property flag queries (is-spatial, is-animated, etc.). All read from the
+// 124-byte tdb4 metadata chunk under each tdbs LIST. Byte offsets sourced
+// from the reference parser's binary/property_chunks.py::Tdb4Chunk:
 //
 //	byte 0x05      spatial/static flags — bit 3 = is_spatial, bit 0 = static
 //	byte 0x0B      can-vary-over-time flags — bit 1 = can_vary_over_time
@@ -135,7 +135,7 @@ func (p *Property) DimensionsSeparated() bool {
 
 // separationFollowers are the per-axis component match-names AE creates when
 // Position dimensions are separated (X / Y / Z). Position is the only
-// property AE allows to separate; mirrors py-aep's _SEPARATION_FOLLOWERS. //nolint:jargon
+// property AE allows to separate; mirrors the reference parser's _SEPARATION_FOLLOWERS set.
 var separationFollowers = [...]string{"ADBE Position_0", "ADBE Position_1", "ADBE Position_2"}
 
 // IsSeparationLeader reports whether the property is the multidimensional
@@ -170,7 +170,7 @@ func (p *Property) SeparationDimension() int {
 }
 
 // determinePropertyTypes derives PropertyControlType and PropertyValueType
-// from tdb4 flags. Port of py-aep's _determine_property_types(). //nolint:jargon
+// from tdb4 flags. Port of the reference parser's _determine_property_types().
 func (p *Property) determinePropertyTypes() (PropertyControlType, PropertyValueType) {
 	pct := PCTLUnknown
 	pvt := PVTUnknown
