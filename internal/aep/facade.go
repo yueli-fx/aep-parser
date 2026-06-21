@@ -971,369 +971,396 @@ func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []P
 	return serializer.BuildPseudoEffect(layer, uid, name, displayName, controls, cfg.codepage)
 }
 
-// AddTextOpacityAnimator adds a per-character Opacity animator with a Range
-// Selector to a text layer — the kinetic-typography primitive (fade / wipe text
-// in or out one character at a time). opacity (0–100) is applied to the
-// selected characters; rangeStart / rangeEnd / rangeOffset are the Range
-// Selector bounds in percent. A static reveal frame, e.g. opacity 0 + start 0 +
-// end 50, hides the first ~half of the characters; animate the reveal over time
-// by keyframing the Range Offset with AnimateTextRangeOffset.
+// @summary    Add a per-character Opacity animator to a text layer
+// @description Adds a per-character Opacity animator with a Range Selector — the
+//   kinetic-typography primitive that fades / wipes text in or out one character
+//   at a time. opacity (0–100) is applied to the selected characters; rangeStart
+//   / rangeEnd / rangeOffset are the Range Selector bounds in percent. Animate the
+//   reveal over time by keyframing the Range Offset with AnimateTextRangeOffset.
 //
-// Text animators live in the "ADBE Text Animators" indexed group nested inside
-// the layer's "ADBE Text Properties" group (NOT in the btdk document). Fresh
-// text layers (NewTextLayer) carry no Animators group, so the first animator
-// splices the whole group into Text Properties; later animators append into it.
-// The animator's parameter sub-tree (Selectors + Animator Properties) is
-// supplied from an embedded AE-native template authored with every cdat slot
-// materialized (AE elides defaults), which the call overwrites with the
-// supplied values — the same embed-AE-bytes + (tdmn, payload) splice vein
-// AddEffect uses.
-//
-// Refused: non-text layers, and text layers built by New* that were never
-// parsed (call aep.Reopen first). Returns a stand-in group node referencing the
-// spliced animator chunk.
-//
-// Alpha / structural — the animator chunk structure is RE'd + double-version
-// render-gated, but the typed parameter accessors are not yet wired; tune
-// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextAnimator_AEShipGate_AE2020,TestTextAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text opacity animator,文字不透明度动画,kinetic typography,逐字,打字机"
+//   Text animators live in the "ADBE Text Animators" indexed group nested inside
+//   the layer's Text Properties group. A fresh text layer carries no Animators
+//   group, so the first animator splices the whole group in; later animators
+//   append into it. Refused on non-text layers and on text layers built by New*
+//   that were never parsed (call Reopen first).
+// @param      layer        the parsed text layer to add the animator to
+// @param      opacity      per-character opacity applied to the selection (0–100)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextAnimator_AEShipGate_AE2020,TestTextAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text opacity animator,文字不透明度动画,kinetic typography,逐字,打字机
 func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextPositionAnimator adds a per-character Position 3D animator with a Range
-// Selector to a text layer — the kinetic-typography primitive that slides /
-// drops characters into place one at a time. x / y / z is the position offset
-// (pixels) applied to the selected characters; rangeStart / rangeEnd /
-// rangeOffset are the Range Selector bounds in percent. The canonical reveal:
-// offset (0, -100, 0), Start=0/End=100, then sweep the Range Offset 0→100 over
-// time with AnimateTextRangeOffset — the displacement lands the characters as
-// the selection window slides off them.
-//
-// Same mechanics as AddTextOpacityAnimator (it shares the splice + Range
-// Selector path); the difference is the embedded template drives a Position 3D
-// leaf (a spatial 3-component cdat) instead of the scalar Opacity. Fresh text
-// layers carry no Animators group, so the first animator splices the whole group
-// into "ADBE Text Properties"; later animators append into it.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — the animator chunk structure is RE'd + double-version
-// render-gated, but the typed parameter accessors are not yet wired; tune
-// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextPosAnimator_AEShipGate_AE2020,TestTextPosAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text position animator,文字位移动画,字符滑入,drop in"
+// @summary    Add a per-character Position animator to a text layer
+// @description Adds a per-character Position 3D animator with a Range Selector —
+//   the kinetic-typography primitive that slides / drops characters into place one
+//   at a time. x / y / z is the position offset (pixels) applied to the selected
+//   characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds
+//   in percent. Canonical reveal: offset (0, -100, 0), Start=0/End=100, then sweep
+//   the Range Offset 0→100 over time with AnimateTextRangeOffset. Refused on
+//   non-text layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      x            per-character X position offset, in pixels
+// @param      y            per-character Y position offset, in pixels
+// @param      z            per-character Z position offset, in pixels
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextPosAnimator_AEShipGate_AE2020,TestTextPosAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text position animator,文字位移动画,字符滑入,drop in
 func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextPositionAnimator(layer, x, y, z, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextScaleAnimator adds a per-character Scale 3D animator with a Range
-// Selector to a text layer — the kinetic-typography primitive that pops / grows
-// characters into place one at a time. sx / sy / sz is the scale percent (100 =
-// unchanged) applied to the selected characters; rangeStart / rangeEnd /
-// rangeOffset are the Range Selector bounds in percent. The canonical reveal:
-// scale (0, 0, 100) for a pop-in (or an oversize like 220 for a shrink-in),
-// Start=0/End=100, then sweep the Range Offset 0→100 over time with
-// AnimateTextRangeOffset — the scale resolves to 100% as the selection window
-// slides off the characters.
-//
-// Same mechanics as AddTextPositionAnimator (shared splice + Range Selector
-// path); the embedded template drives a Scale 3D leaf (a 3-component cdat)
-// instead of Position. Fresh text layers carry no Animators group, so the first
-// animator splices the whole group into "ADBE Text Properties"; later animators
-// append into it.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — the animator chunk structure is RE'd + double-version
-// render-gated, but the typed parameter accessors are not yet wired; tune
-// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextScaleAnimator_AEShipGate_AE2020,TestTextScaleAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text scale animator,文字缩放动画,字符弹入,pop in"
+// @summary    Add a per-character Scale animator to a text layer
+// @description Adds a per-character Scale 3D animator with a Range Selector — the
+//   kinetic-typography primitive that pops / grows characters into place one at a
+//   time. sx / sy / sz is the scale percent (100 = unchanged) applied to the
+//   selected characters; rangeStart / rangeEnd / rangeOffset are the Range
+//   Selector bounds in percent. Canonical reveal: scale (0, 0, 100) for a pop-in,
+//   Start=0/End=100, then sweep the Range Offset 0→100 over time with
+//   AnimateTextRangeOffset. Refused on non-text layers and on un-Reopened
+//   New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      sx           per-character X scale, in percent (100 = unchanged)
+// @param      sy           per-character Y scale, in percent (100 = unchanged)
+// @param      sz           per-character Z scale, in percent (100 = unchanged)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextScaleAnimator_AEShipGate_AE2020,TestTextScaleAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text scale animator,文字缩放动画,字符弹入,pop in
 func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextScaleAnimator(layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextRotationAnimator adds a per-character Rotation animator with a Range
-// Selector to a text layer — the kinetic-typography primitive that spins
-// characters into place one at a time. rotation is the angle in degrees applied
-// to the selected characters (each rotates about its own anchor); rangeStart /
-// rangeEnd / rangeOffset are the Range Selector bounds in percent. The canonical
-// reveal: rotation 90, Start=0/End=100, then sweep the Range Offset 0→100 over
-// time with AnimateTextRangeOffset — the rotation resolves to 0° as the
-// selection window slides off the characters.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector
-// path); Rotation is a 1D scalar like Opacity, so the embedded template drives a
-// Rotation leaf and the value is the angle (degrees). Fresh text layers carry no
-// Animators group, so the first animator splices the whole group into "ADBE Text
-// Properties"; later animators append into it.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — the animator chunk structure is RE'd + double-version
-// render-gated, but the typed parameter accessors are not yet wired; tune
-// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextRotAnimator_AEShipGate_AE2020,TestTextRotAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text rotation animator,文字旋转动画,字符旋转,spin in"
+// @summary    Add a per-character Rotation animator to a text layer
+// @description Adds a per-character Rotation animator with a Range Selector — the
+//   kinetic-typography primitive that spins characters into place one at a time.
+//   rotation is the angle in degrees applied to the selected characters (each
+//   rotates about its own anchor); rangeStart / rangeEnd / rangeOffset are the
+//   Range Selector bounds in percent. Canonical reveal: rotation 90,
+//   Start=0/End=100, then sweep the Range Offset 0→100 over time with
+//   AnimateTextRangeOffset. Refused on non-text layers and on un-Reopened
+//   New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      rotation     per-character rotation, in degrees
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextRotAnimator_AEShipGate_AE2020,TestTextRotAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text rotation animator,文字旋转动画,字符旋转,spin in
 func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRotationAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextColorAnimator adds a per-character Fill Color animator with a Range
-// Selector to a text layer — the kinetic-typography primitive that tints
-// characters one at a time (e.g. a colour wipe sweeping across the text). r / g
-// / b / a is the target colour applied to the selected characters (each channel
-// 0..1); rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in
-// percent. The canonical reveal: set a target colour, Start=0/End=100, then
-// sweep the Range Offset 0→100 over time with AnimateTextRangeOffset — the
-// colour applies to the selected characters and resolves to the base text colour
-// as the selection window slides off them.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector
-// path); the embedded template drives a Fill Color leaf (a 4-channel colour
-// cdat) which AE stores as [A,R,G,B] × 255 f64 BE, the same on-disk encoding as
-// shape Fill/Stroke. Fresh text layers carry no Animators group, so the first
-// animator splices the whole group into "ADBE Text Properties"; later animators
-// append into it.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — the animator chunk structure is RE'd + double-version
-// render-gated, but the typed parameter accessors are not yet wired; tune
-// further via Reopen. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorAnimator_AEShipGate_AE2020,TestTextColorAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused" alias="text color animator,文字颜色动画,颜色擦除,color wipe"
+// @summary    Add a per-character Fill Color animator to a text layer
+// @description Adds a per-character Fill Color animator with a Range Selector — the
+//   kinetic-typography primitive that tints characters one at a time (e.g. a color
+//   wipe sweeping across the text). r / g / b / a is the target color applied to
+//   the selected characters (each channel 0..1); rangeStart / rangeEnd /
+//   rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset
+//   0→100 over time with AnimateTextRangeOffset for the wipe. Refused on non-text
+//   layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      r            target fill red channel (0..1)
+// @param      g            target fill green channel (0..1)
+// @param      b            target fill blue channel (0..1)
+// @param      a            target fill alpha channel (0..1)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextColorAnimator_AEShipGate_AE2020,TestTextColorAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text color animator,文字颜色动画,颜色擦除,color wipe
 func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a
-// Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only
-// the glyph fill (leaving any stroke intact). opacity (0–100) is applied to the
-// selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector
-// bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset
-// for a fill-only reveal.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path);
-// Fill Opacity is a 1D scalar with the same on-disk layout as Opacity.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — RE'd + double-version render-gated; typed parameter
-// accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调" alias="text fill opacity,填充不透明度动画"
+// @summary    Add a per-character Fill Opacity animator to a text layer
+// @description Adds a per-character Fill Opacity animator with a Range Selector —
+//   like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any
+//   stroke intact). opacity (0–100) is applied to the selected characters;
+//   rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+//   Sweep the Range Offset over time with AnimateTextRangeOffset for a fill-only
+//   reveal. Refused on non-text layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      opacity      per-character fill opacity applied to the selection (0–100)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text fill opacity,填充不透明度动画
 func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextFillOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator with
-// a Range Selector to a text layer — it fades only the glyph stroke. opacity
-// (0–100) is applied to the selected characters' stroke; the text must carry a
-// stroke (apply-stroke + non-zero stroke width) for the effect to be visible.
-// rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path);
-// Stroke Opacity is a 1D scalar with the same on-disk layout as Opacity.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — RE'd + double-version render-gated; typed parameter
-// accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="需文字带 stroke 才可见;typed accessor 未接" alias="text stroke opacity,描边不透明度动画"
+// @summary    Add a per-character Stroke Opacity animator to a text layer
+// @description Adds a per-character Stroke Opacity animator with a Range Selector —
+//   it fades only the glyph stroke. opacity (0–100) is applied to the selected
+//   characters' stroke; the text must carry a stroke (apply-stroke + non-zero
+//   stroke width) for the effect to be visible. rangeStart / rangeEnd /
+//   rangeOffset are the Range Selector bounds in percent. Refused on non-text
+//   layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      opacity      per-character stroke opacity applied to the selection (0–100)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)
+// @incident   text-animator-create-re
+// @alias      text stroke opacity,描边不透明度动画
 func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextStrokeOpacityAnimator(layer, opacity, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextStrokeWidthAnimator adds a per-character Stroke Width animator with a
-// Range Selector to a text layer — it grows / shrinks the glyph stroke. width
-// (pixels) is applied to the selected characters' stroke; the text must carry a
-// stroke (apply-stroke enabled) for the effect to be visible. rangeStart /
-// rangeEnd / rangeOffset are the Range Selector bounds in percent.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path);
-// Stroke Width is a 1D scalar with the same on-disk layout as Opacity.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — RE'd + double-version render-gated; typed parameter
-// accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="需文字带 stroke 才可见;typed accessor 未接" alias="text stroke width,描边宽度动画"
+// @summary    Add a per-character Stroke Width animator to a text layer
+// @description Adds a per-character Stroke Width animator with a Range Selector —
+//   it grows / shrinks the glyph stroke. width (pixels) is applied to the selected
+//   characters' stroke; the text must carry a stroke (apply-stroke enabled) for
+//   the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range
+//   Selector bounds in percent. Refused on non-text layers and on un-Reopened
+//   New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      width        per-character stroke width, in pixels
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)
+// @incident   text-animator-create-re
+// @alias      text stroke width,描边宽度动画
 func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextStrokeWidthAnimator(layer, width, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextSkewAnimator adds a per-character Skew animator with a Range Selector to
-// a text layer — the kinetic-typography primitive that shears characters into
-// place. skew is the shear angle in degrees applied to the selected characters;
-// rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
-// Sweep the Range Offset over time with AnimateTextRangeOffset for a shear-in.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path);
-// Skew is a 1D scalar with the same on-disk layout as Opacity.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — RE'd + double-version render-gated; typed parameter
-// accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="typed param accessor 未接,经 Reopen 调" alias="text skew,文字倾斜动画,shear"
+// @summary    Add a per-character Skew animator to a text layer
+// @description Adds a per-character Skew animator with a Range Selector — the
+//   kinetic-typography primitive that shears characters into place. skew is the
+//   shear angle in degrees applied to the selected characters; rangeStart /
+//   rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the
+//   Range Offset over time with AnimateTextRangeOffset for a shear-in. Refused on
+//   non-text layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      skew         per-character shear angle, in degrees
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text skew,文字倾斜动画,shear
 func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextSkewAnimator(layer, skew, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextRotationXAnimator adds a per-character Rotation X animator with a Range
-// Selector to a text layer — a 3D rotation about each character's horizontal
-// axis (the characters tumble forward / back). rotation is the angle in degrees
-// applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the
-// Range Selector bounds in percent.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path);
-// Rotation X is a 1D scalar (degrees). AE auto-adds an inert companion Z-rotation
-// slot to the template, which stays at its default.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / write-only — the value is written and survives AE (round-trip
-// verified), but a per-character 3D rotation is VISUALLY INERT in a plain 2D text
-// layer (it needs Per-character 3D enabled, a separate 3D capability not yet
-// supported). Not render-gated; see incidents/text-animator-create-re.md. Free
-// function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=roundtrip incident=text-animator-create-re boundary="2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate" alias="text rotation x,3D 旋转 X,字符前后翻转"
+// @summary    Add a per-character Rotation X animator to a text layer
+// @description Adds a per-character Rotation X animator with a Range Selector — a
+//   3D rotation about each character's horizontal axis (the characters tumble
+//   forward / back). rotation is the angle in degrees applied to the selected
+//   characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds
+//   in percent. Refused on non-text layers and on un-Reopened New*-built text
+//   layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      rotation     per-character X-axis rotation, in degrees
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated
+// @incident   text-animator-create-re
+// @alias      text rotation x,3D 旋转 X,字符前后翻转
 func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRotationXAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextRotationYAnimator adds a per-character Rotation Y animator with a Range
-// Selector to a text layer — a 3D rotation about each character's vertical axis
-// (the characters swing left / right). rotation is the angle in degrees applied
-// to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range
-// Selector bounds in percent.
-//
-// Same mechanics as AddTextOpacityAnimator (shared splice + Range Selector path);
-// Rotation Y is a 1D scalar (degrees). AE auto-adds an inert companion Z-rotation
-// slot to the template, which stays at its default.
-//
-// Alpha / write-only — the value is written and survives AE (round-trip
-// verified), but a per-character 3D rotation is VISUALLY INERT in a plain 2D text
-// layer (it needs Per-character 3D enabled, a separate 3D capability not yet
-// supported). Not render-gated; see incidents/text-animator-create-re.md. Free
-// function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=roundtrip incident=text-animator-create-re boundary="2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate" alias="text rotation y,3D 旋转 Y,字符左右翻转"
+// @summary    Add a per-character Rotation Y animator to a text layer
+// @description Adds a per-character Rotation Y animator with a Range Selector — a
+//   3D rotation about each character's vertical axis (the characters swing left /
+//   right). rotation is the angle in degrees applied to the selected characters;
+//   rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+//   Refused on non-text layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      rotation     per-character Y-axis rotation, in degrees
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated
+// @incident   text-animator-create-re
+// @alias      text rotation y,3D 旋转 Y,字符左右翻转
 func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRotationYAnimator(layer, rotation, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextStrokeColorAnimator adds a per-character Stroke Color animator with a
-// Range Selector to a text layer — it tints only the glyph stroke. r / g / b / a
-// is the target colour (each channel 0..1) applied to the selected characters'
-// stroke; the text must carry a stroke (apply-stroke + non-zero stroke width) for
-// the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range
-// Selector bounds in percent.
-//
-// Same mechanics as AddTextColorAnimator (shared splice + Range Selector path);
-// Stroke Color is a 4-channel colour cdat stored as [A,R,G,B] × 255 f64 BE, the
-// same on-disk encoding as shape Fill/Stroke and the text Fill Color leaf.
-//
-// Refused: non-text layers, and text layers built by New* that were never parsed
-// (call aep.Reopen first). Returns a stand-in group node referencing the spliced
-// animator chunk.
-//
-// Alpha / structural — RE'd + double-version render-gated; typed parameter
-// accessors are not yet wired (tune via Reopen). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025 incident=text-animator-create-re boundary="需文字带 stroke 才可见;typed accessor 未接" alias="text stroke color,描边颜色动画"
+// @summary    Add a per-character Stroke Color animator to a text layer
+// @description Adds a per-character Stroke Color animator with a Range Selector —
+//   it tints only the glyph stroke. r / g / b / a is the target color (each
+//   channel 0..1) applied to the selected characters' stroke; the text must carry
+//   a stroke (apply-stroke + non-zero stroke width) for the effect to be visible.
+//   rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent.
+//   Refused on non-text layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      r            target stroke red channel (0..1)
+// @param      g            target stroke green channel (0..1)
+// @param      b            target stroke blue channel (0..1)
+// @param      a            target stroke alpha channel (0..1)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextNeighborAnimators_AEShipGate_AE2020,TestTextNeighborAnimators_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)
+// @incident   text-animator-create-re
+// @alias      text stroke color,描边颜色动画
 func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextStrokeColorAnimator(layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset)
 }
 
-// AddTextRangeSelector adds another Range Selector to the layer's FIRST text
-// animator (a fresh animator carries one selector). Multiple selectors combine
-// per each selector's Mode — the default is Add (union of the ranges); set a
-// selector's Mode via SetTextRangeAdvanced for Subtract / Intersect / etc. start
-// / end / offset are the new selector's bounds in percent. Sweep any selector's
-// Offset over time with AnimateTextRangeOffset (which targets the first selector).
-//
-// Same indexed-group splice vein as AddTextOpacityAnimator (the "ADBE Text
-// Selectors" group is INDEXED). Refused: non-text layers, text layers built by
-// New* that were never parsed (call aep.Reopen first), and layers with no text
-// animator. Returns a stand-in group node referencing the spliced selector.
-//
-// Alpha / structural — RE'd + double-version render-gated (two selectors union to
-// extend the selection). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextMultiSelector_AEShipGate_AE2020,TestTextMultiSelector_AEShipGate_AE2025 incident=text-animator-create-re boundary="作用于第一个 animator;Mode 经 SetTextRangeAdvanced;未 parse 的 fresh 层 refused" alias="text range selector,多选择器,range selector,叠加选择"
+// @summary    Add another Range Selector to a text animator
+// @description Adds another Range Selector to the layer's first text animator (a
+//   fresh animator carries one selector). Multiple selectors combine per each
+//   selector's Mode — the default is Add (union of the ranges); set a selector's
+//   Mode via SetTextRangeAdvanced. start / end / offset are the new selector's
+//   bounds in percent. Sweep any selector's Offset over time with
+//   AnimateTextRangeOffset (which targets the first selector). Refused on non-text
+//   layers, un-Reopened New*-built text layers, and layers with no text animator.
+// @param      layer   the parsed text layer whose animator to extend
+// @param      start   selector start bound, in percent
+// @param      end     selector end bound, in percent
+// @param      offset  selector offset, in percent
+// @returns    a stand-in group node referencing the spliced selector
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextMultiSelector_AEShipGate_AE2020,TestTextMultiSelector_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   acts on the first animator; the combination Mode is set via SetTextRangeAdvanced; un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text range selector,多选择器,range selector,叠加选择
 func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error) {
 	return serializer.AddTextRangeSelector(layer, start, end, offset)
 }
 
-// AddTextWigglySelector adds a Wiggly Selector to the layer's FIRST text animator
-// — a selector whose selection amount wobbles randomly (but deterministically per
-// seed) over time, so the characters flicker / jitter in and out under the
-// animator (the "wiggle" kinetic-typography primitive). The embedded selector
-// uses AE's defaults (Temporal Freq 2/s, Max 100 / Min 0), so it animates on its
-// own with no keyframes; combine it with a range selector via Mode, or use an
-// empty range (End=0) so the wiggle drives selection alone.
-//
-// Same indexed-group splice vein as AddTextRangeSelector. Refused: non-text
-// layers, text layers built by New* that were never parsed (call aep.Reopen
-// first), and layers with no text animator. Returns a stand-in group node.
-//
-// Alpha / structural — RE'd + double-version render-gated (the rendered frames
-// vary over time as the wiggle re-selects characters). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextWigglySelector_AEShipGate_AE2020,TestTextWigglySelector_AEShipGate_AE2025 incident=text-animator-create-re boundary="作用于第一个 animator;用 AE 默认(Temporal Freq 2/s)自动摆动;未 parse 的 fresh 层 refused" alias="wiggly selector,摆动选择器,抖动,flicker,jitter"
+// @summary    Add a Wiggly Selector to a text animator
+// @description Adds a Wiggly Selector to the layer's first text animator — a
+//   selector whose selection amount wobbles randomly (but deterministically per
+//   seed) over time, so the characters flicker / jitter in and out (the wiggle
+//   kinetic-typography primitive). The embedded selector uses AE's defaults
+//   (temporal frequency 2/s, max 100 / min 0), so it animates on its own with no
+//   keyframes; combine it with a range selector via Mode, or use an empty range so
+//   the wiggle drives selection alone. Refused on non-text layers, un-Reopened
+//   New*-built text layers, and layers with no text animator.
+// @param      layer  the parsed text layer whose animator to extend
+// @returns    a stand-in group node referencing the spliced selector
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextWigglySelector_AEShipGate_AE2020,TestTextWigglySelector_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   acts on the first animator; wobbles on its own using AE defaults (temporal frequency 2/s); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      wiggly selector,摆动选择器,抖动,flicker,jitter
 func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error) {
 	return serializer.AddTextWigglySelector(layer)
 }
 
-// AddTextExpressibleSelector adds an Expressible Selector to the layer's FIRST
-// text animator and drives its per-character selection with amountExpr, an
-// ExtendScript expression returning the selection percentage (0..100). This is
-// the expression-driven kinetic-typography primitive: the expression (which can
-// read textIndex / textTotal / time / selectorValue) decides which glyphs the
-// animator affects and by how much.
+// @summary    Add an expression-driven selector to a text animator
+// @description Adds an Expressible Selector to the layer's first text animator and
+//   drives its per-character selection with amountExpr, an expression returning
+//   the selection percentage (0..100). The expression (which can read textIndex /
+//   textTotal / time / selectorValue) decides which glyphs the animator affects
+//   and by how much.
 //
-// Unlike the Range / Wiggly selectors the Expressible Amount is EXPRESSION-ONLY —
-// it has no usable static value (a fresh Amount's .value throws in AE), so an
-// empty expression yields an inert selector and amountExpr must be non-empty.
-// Typical idioms: "textIndex <= 3 ? 100 : 0" (first 3 glyphs), "selectorValue"
-// (all glyphs), or a time-driven sweep.
-//
-// Same indexed-group splice vein as AddTextWigglySelector, plus a SetExpression
-// on the spliced Amount param (the expression Utf8 lands in canonical order —
-// see incidents/expression-enable-byte-pair.md). Refused: non-text layers, text
-// layers built by New* that were never parsed (call aep.Reopen first), layers
-// with no text animator, and an empty amountExpr. Returns a stand-in group node.
-//
-// Alpha / structural — RE'd + double-version render-gated (the expression-driven
-// selection visibly affects the glyphs AE renders). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextExpressibleSelector_AEShipGate_AE2020,TestTextExpressibleSelector_AEShipGate_AE2025 incident=text-animator-create-re,expression-enable-byte-pair boundary="作用于第一个 animator;Amount 表达式驱动(必填,无静态值);未 parse 的 fresh 层 refused" alias="expressible selector,表达式选择器,expression selector,selectorValue,textIndex"
+//   Unlike the Range / Wiggly selectors, the Expressible Amount is
+//   expression-only — it has no usable static value, so amountExpr must be
+//   non-empty (an empty expression yields an inert selector). Typical idioms:
+//   "textIndex <= 3 ? 100 : 0" (first 3 glyphs), "selectorValue" (all glyphs), or
+//   a time-driven sweep. Refused on non-text layers, un-Reopened New*-built text
+//   layers, layers with no text animator, and an empty amountExpr.
+// @param      layer       the parsed text layer whose animator to extend
+// @param      amountExpr  expression returning the selection percentage (0..100)
+// @returns    a stand-in group node referencing the spliced selector
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextExpressibleSelector_AEShipGate_AE2020,TestTextExpressibleSelector_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   acts on the first animator; the Amount is expression-driven (required, no static value); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re,expression-enable-byte-pair
+// @alias      expressible selector,表达式选择器,expression selector,selectorValue,textIndex
 func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error) {
 	return serializer.AddTextExpressibleSelector(layer, amountExpr)
 }
@@ -1344,12 +1371,17 @@ func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGro
 // for the field meanings and enum codings.
 type TextRangeAdvanced = serializer.TextRangeAdvanced
 
-// DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults
-// (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
-// Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass
-// the result to SetTextRangeAdvanced.
-//
-//aep:cap domain=meta tier=stable verify=none alias="range advanced defaults,默认高级范围"
+// @summary    Return the Range Advanced params at their AE defaults
+// @description Returns the Range Advanced params at their AE defaults
+//   (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,
+//   Smoothness=100, eases=0, no randomize). Tweak the fields you want, then pass
+//   the result to SetTextRangeAdvanced.
+// @returns    the Range Advanced params at their AE defaults
+// @domain     meta
+// @stability  stable
+// @verify     none
+// @since      AE2020
+// @alias      range advanced defaults,默认高级范围
 func DefaultTextRangeAdvanced() TextRangeAdvanced { return serializer.DefaultTextRangeAdvanced() }
 
 // SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text

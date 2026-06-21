@@ -5636,7 +5636,7 @@
     "symbol": "DefaultTextRangeAdvanced",
     "kind": "func",
     "signature": "func DefaultTextRangeAdvanced() TextRangeAdvanced",
-    "summary": "DefaultTextRangeAdvanced returns the Range Advanced params at their AE defaults (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square, Smoothness=100, eases=0, no randomize).",
+    "summary": "@summary    Return the Range Advanced params at their AE defaults @description Returns the Range Advanced params at their AE defaults   (Units=Percentage, BasedOn=Characters, Mode=Add, Amount=100, Shape=Square,   Smoothness=100, eases=0, no randomize).",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -10999,7 +10999,7 @@
     "symbol": "AddTextColorAnimator",
     "kind": "func",
     "signature": "func AddTextColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextColorAnimator adds a per-character Fill Color animator with a Range Selector to a text layer — the kinetic-typography primitive that tints characters one at a time (e.g.",
+    "summary": "@summary    Add a per-character Fill Color animator to a text layer @description Adds a per-character Fill Color animator with a Range Selector — the   kinetic-typography primitive that tints characters one at a time (e.g.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11010,7 +11010,7 @@
         "TestTextColorAnimator_AEShipGate_AE2020",
         "TestTextColorAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11026,7 +11026,7 @@
     "symbol": "AddTextExpressibleSelector",
     "kind": "func",
     "signature": "func AddTextExpressibleSelector(layer *Layer, amountExpr string) (*AEPropertyGroup, error)",
-    "summary": "AddTextExpressibleSelector adds an Expressible Selector to the layer's FIRST text animator and drives its per-character selection with amountExpr, an ExtendScript expression returning the selection percentage (0..100).",
+    "summary": "@summary    Add an expression-driven selector to a text animator @description Adds an Expressible Selector to the layer's first text animator and   drives its per-character selection with amountExpr, an expression returning   the selection percentage (0..100).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11037,7 +11037,7 @@
         "TestTextExpressibleSelector_AEShipGate_AE2020",
         "TestTextExpressibleSelector_AEShipGate_AE2025"
       ],
-      "boundary": "作用于第一个 animator;Amount 表达式驱动(必填,无静态值);未 parse 的 fresh 层 refused",
+      "boundary": "acts on the first animator; the Amount is expression-driven (required, no static value); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re",
         "expression-enable-byte-pair"
@@ -11055,7 +11055,7 @@
     "symbol": "AddTextFillOpacityAnimator",
     "kind": "func",
     "signature": "func AddTextFillOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextFillOpacityAnimator adds a per-character Fill Opacity animator with a Range Selector to a text layer — like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any stroke intact).",
+    "summary": "@summary    Add a per-character Fill Opacity animator to a text layer @description Adds a per-character Fill Opacity animator with a Range Selector —   like AddTextOpacityAnimator, but it fades only the glyph fill (leaving any   stroke intact).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11066,7 +11066,7 @@
         "TestTextNeighborAnimators_AEShipGate_AE2020",
         "TestTextNeighborAnimators_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11080,7 +11080,7 @@
     "symbol": "AddTextOpacityAnimator",
     "kind": "func",
     "signature": "func AddTextOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextOpacityAnimator adds a per-character Opacity animator with a Range Selector to a text layer — the kinetic-typography primitive (fade / wipe text in or out one character at a time).",
+    "summary": "@summary    Add a per-character Opacity animator to a text layer @description Adds a per-character Opacity animator with a Range Selector — the   kinetic-typography primitive that fades / wipes text in or out one character   at a time.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11091,7 +11091,7 @@
         "TestTextAnimator_AEShipGate_AE2020",
         "TestTextAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11108,7 +11108,7 @@
     "symbol": "AddTextPositionAnimator",
     "kind": "func",
     "signature": "func AddTextPositionAnimator(layer *Layer, x, y, z, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextPositionAnimator adds a per-character Position 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that slides / drops characters into place one at a time.",
+    "summary": "@summary    Add a per-character Position animator to a text layer @description Adds a per-character Position 3D animator with a Range Selector —   the kinetic-typography primitive that slides / drops characters into place one   at a time.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11119,7 +11119,7 @@
         "TestTextPosAnimator_AEShipGate_AE2020",
         "TestTextPosAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11135,7 +11135,7 @@
     "symbol": "AddTextRangeSelector",
     "kind": "func",
     "signature": "func AddTextRangeSelector(layer *Layer, start, end, offset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextRangeSelector adds another Range Selector to the layer's FIRST text animator (a fresh animator carries one selector).",
+    "summary": "@summary    Add another Range Selector to a text animator @description Adds another Range Selector to the layer's first text animator (a   fresh animator carries one selector).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11146,7 +11146,7 @@
         "TestTextMultiSelector_AEShipGate_AE2020",
         "TestTextMultiSelector_AEShipGate_AE2025"
       ],
-      "boundary": "作用于第一个 animator;Mode 经 SetTextRangeAdvanced;未 parse 的 fresh 层 refused",
+      "boundary": "acts on the first animator; the combination Mode is set via SetTextRangeAdvanced; un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11162,7 +11162,7 @@
     "symbol": "AddTextRotationAnimator",
     "kind": "func",
     "signature": "func AddTextRotationAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextRotationAnimator adds a per-character Rotation animator with a Range Selector to a text layer — the kinetic-typography primitive that spins characters into place one at a time.",
+    "summary": "@summary    Add a per-character Rotation animator to a text layer @description Adds a per-character Rotation animator with a Range Selector — the   kinetic-typography primitive that spins characters into place one at a time.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11173,7 +11173,7 @@
         "TestTextRotAnimator_AEShipGate_AE2020",
         "TestTextRotAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11189,7 +11189,7 @@
     "symbol": "AddTextRotationXAnimator",
     "kind": "func",
     "signature": "func AddTextRotationXAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextRotationXAnimator adds a per-character Rotation X animator with a Range Selector to a text layer — a 3D rotation about each character's horizontal axis (the characters tumble forward / back).",
+    "summary": "@summary    Add a per-character Rotation X animator to a text layer @description Adds a per-character Rotation X animator with a Range Selector — a   3D rotation about each character's horizontal axis (the characters tumble   forward / back).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11197,7 +11197,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate",
+      "boundary": "visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11212,7 +11212,7 @@
     "symbol": "AddTextRotationYAnimator",
     "kind": "func",
     "signature": "func AddTextRotationYAnimator(layer *Layer, rotation, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextRotationYAnimator adds a per-character Rotation Y animator with a Range Selector to a text layer — a 3D rotation about each character's vertical axis (the characters swing left / right).",
+    "summary": "@summary    Add a per-character Rotation Y animator to a text layer @description Adds a per-character Rotation Y animator with a Range Selector — a   3D rotation about each character's vertical axis (the characters swing left /   right).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11220,7 +11220,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "2D 文字层视觉惰性(需 per-character 3D,未支持);值 write-only round-trip,未 render-gate",
+      "boundary": "visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11235,7 +11235,7 @@
     "symbol": "AddTextScaleAnimator",
     "kind": "func",
     "signature": "func AddTextScaleAnimator(layer *Layer, sx, sy, sz, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextScaleAnimator adds a per-character Scale 3D animator with a Range Selector to a text layer — the kinetic-typography primitive that pops / grows characters into place one at a time.",
+    "summary": "@summary    Add a per-character Scale animator to a text layer @description Adds a per-character Scale 3D animator with a Range Selector — the   kinetic-typography primitive that pops / grows characters into place one at a   time.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11246,7 +11246,7 @@
         "TestTextScaleAnimator_AEShipGate_AE2020",
         "TestTextScaleAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调;未 parse 的 fresh 层 refused",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11262,7 +11262,7 @@
     "symbol": "AddTextSkewAnimator",
     "kind": "func",
     "signature": "func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextSkewAnimator adds a per-character Skew animator with a Range Selector to a text layer — the kinetic-typography primitive that shears characters into place.",
+    "summary": "@summary    Add a per-character Skew animator to a text layer @description Adds a per-character Skew animator with a Range Selector — the   kinetic-typography primitive that shears characters into place.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11273,7 +11273,7 @@
         "TestTextNeighborAnimators_AEShipGate_AE2020",
         "TestTextNeighborAnimators_AEShipGate_AE2025"
       ],
-      "boundary": "typed param accessor 未接,经 Reopen 调",
+      "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11288,7 +11288,7 @@
     "symbol": "AddTextStrokeColorAnimator",
     "kind": "func",
     "signature": "func AddTextStrokeColorAnimator(layer *Layer, r, g, b, a, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextStrokeColorAnimator adds a per-character Stroke Color animator with a Range Selector to a text layer — it tints only the glyph stroke.",
+    "summary": "@summary    Add a per-character Stroke Color animator to a text layer @description Adds a per-character Stroke Color animator with a Range Selector —   it tints only the glyph stroke.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11299,7 +11299,7 @@
         "TestTextNeighborAnimators_AEShipGate_AE2020",
         "TestTextNeighborAnimators_AEShipGate_AE2025"
       ],
-      "boundary": "需文字带 stroke 才可见;typed accessor 未接",
+      "boundary": "the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11313,7 +11313,7 @@
     "symbol": "AddTextStrokeOpacityAnimator",
     "kind": "func",
     "signature": "func AddTextStrokeOpacityAnimator(layer *Layer, opacity, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextStrokeOpacityAnimator adds a per-character Stroke Opacity animator with a Range Selector to a text layer — it fades only the glyph stroke.",
+    "summary": "@summary    Add a per-character Stroke Opacity animator to a text layer @description Adds a per-character Stroke Opacity animator with a Range Selector —   it fades only the glyph stroke.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11324,7 +11324,7 @@
         "TestTextNeighborAnimators_AEShipGate_AE2020",
         "TestTextNeighborAnimators_AEShipGate_AE2025"
       ],
-      "boundary": "需文字带 stroke 才可见;typed accessor 未接",
+      "boundary": "the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11338,7 +11338,7 @@
     "symbol": "AddTextStrokeWidthAnimator",
     "kind": "func",
     "signature": "func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
-    "summary": "AddTextStrokeWidthAnimator adds a per-character Stroke Width animator with a Range Selector to a text layer — it grows / shrinks the glyph stroke.",
+    "summary": "@summary    Add a per-character Stroke Width animator to a text layer @description Adds a per-character Stroke Width animator with a Range Selector —   it grows / shrinks the glyph stroke.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11349,7 +11349,7 @@
         "TestTextNeighborAnimators_AEShipGate_AE2020",
         "TestTextNeighborAnimators_AEShipGate_AE2025"
       ],
-      "boundary": "需文字带 stroke 才可见;typed accessor 未接",
+      "boundary": "the text must carry a stroke to be visible; typed parameter accessors are not yet wired (tune via Reopen)",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11363,7 +11363,7 @@
     "symbol": "AddTextWigglySelector",
     "kind": "func",
     "signature": "func AddTextWigglySelector(layer *Layer) (*AEPropertyGroup, error)",
-    "summary": "AddTextWigglySelector adds a Wiggly Selector to the layer's FIRST text animator — a selector whose selection amount wobbles randomly (but deterministically per seed) over time, so the characters flicker / jitter in and out under the animator (the \"wiggle\" kinetic-typography primitive).",
+    "summary": "@summary    Add a Wiggly Selector to a text animator @description Adds a Wiggly Selector to the layer's first text animator — a   selector whose selection amount wobbles randomly (but deterministically per   seed) over time, so the characters flicker / jitter in and out (the wiggle   kinetic-typography primitive).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11374,7 +11374,7 @@
         "TestTextWigglySelector_AEShipGate_AE2020",
         "TestTextWigglySelector_AEShipGate_AE2025"
       ],
-      "boundary": "作用于第一个 animator;用 AE 默认(Temporal Freq 2/s)自动摆动;未 parse 的 fresh 层 refused",
+      "boundary": "acts on the first animator; wobbles on its own using AE defaults (temporal frequency 2/s); un-Reopened fresh layers are refused",
       "incident": [
         "text-animator-create-re"
       ],
