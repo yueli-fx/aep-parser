@@ -107,16 +107,20 @@ func Validate(ann *Annotation, sym Symbol, ctx Context, mode Mode) []error {
 		add("missing @returns (signature returns a non-error value)")
 	}
 
-	// @gate presence + existence.
+	// @gate presence (always) + existence (only when the caller supplies the
+	// test set — docgen validates well-formedness with a nil Gates map and leaves
+	// the gate/incident crosscheck to capindex).
 	if (ann.Verify == "ae-accept" || ann.Verify == "render-pixel") && len(ann.Gate) == 0 {
 		add("@verify %s requires @gate", ann.Verify)
 	}
-	for _, g := range ann.Gate {
-		skipped, ok := ctx.Gates[g]
-		if !ok {
-			add("@gate %q not found in any *_test.go", g)
-		} else if skipped {
-			add("@gate %q is unconditionally skipped (disabled)", g)
+	if ctx.Gates != nil {
+		for _, g := range ann.Gate {
+			skipped, ok := ctx.Gates[g]
+			if !ok {
+				add("@gate %q not found in any *_test.go", g)
+			} else if skipped {
+				add("@gate %q is unconditionally skipped (disabled)", g)
+			}
 		}
 	}
 
