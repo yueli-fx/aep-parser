@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **comp ② テキスト 拼成**（GLITCH text + SetLayerTransform 28kf/24kf + Tracking/CharOffset 动画器；AE2020≡AE2025 接受+render；commit 2add514+377006c）；comp ② 待用户真机 review；下一步 = comp ③ マップ用ノイズ
+Updated: 2026-06-22 · claude · Stage: Booyah comp ② 拼成 + 真机 review 追修中（样式/居中已对；**UI 编辑/删层报错根因=跨-comp 层 ID 撞号**，已修用户层 ID 全局化 commit 383bcd2，待真机验）；下一步 = 验通过→comp ③
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,7 +8,7 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-**⚠ 待用户真机 review**：`booyah-clone.aep` 的 comp ②「テキスト変えるならココ！」请在真机打开复核（agent 已 AE2020+2025 接受+render 眼验：GLITCH→PURCLQ + tracking + flicker，但 review-gate 须用户验过才能从 待review 翻 complete）。
+**⚠ 待用户真机 review comp ②**（重生成 `go run ./flightdeck/showcase/booyah-clone` 后开 `booyah-clone.aep`）：本会话据真机反馈连修 4 处——①字体/字号/斜体/居中对齐原 text doc（f40cbe3）②竖直居中=anchor 按自身文字框中心（8e7f527）③动画器补 companion leaf（e870062，非 UI 报错主因）④**UI 编辑/删层报错 `{unexpected match name searched for in group}` 根因=跨-comp 用户层 ID 撞号**（comp① shape 与 comp② text 都拿 ID 13；`allocLayerID` 改全局单调，383bcd2，单-comp gate 字节不变+双版本 PASS，守卫 `TestNewLayer_CrossCompIDsDistinct`）。**复现卡点**：该报错**真机 UI 专属**，render+round-trip+ExtendScript 全过都复现不出（UI 走 ID-keyed 查找、脚本走直接引用）→ 只能用户真机验。**残留待定**：service 层（DLay/SLay…2..12）跨-comp 也撞号，但理论上 AE 视其 comp-内部而容忍（文件能在严格的 AE2025 open）；若 UI 报错仍在=service 撞号也需修（NewComposition re-ID，更大改动）。详 [[nextitemid-must-include-layer-ids]] 第三回。
 
 **A = 续建 Booyah Phase 1**（Task 1.3/1.4，[plan](plans/2026-06-19-booyah-glitch-replication.md)）：
 1. **③ マップ用フラクタルノイズ**：2 Fractal Noise 层（footage 源共享建法首遇——实测确定）+ Evolution `SetExpression("time*1200"/"time*3000")`（0.3 已 GO）+ Offset Turbulence `AnimateEffectParam` + L0 blend=Overlay。
