@@ -8,10 +8,16 @@ import "fmt"
 // DeleteKeyframe) are structural serializer free-functions and live in the
 // serializer stage (internal/aep), not here.
 
-// SetStaticValue rewrites a property's constant value in-place (only valid
-// for properties without keyframes — those with a cdat chunk).
-//
-//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);双版本 AE gated(keyframe_mutate,2D static Position DOM readback)" alias="static value,静态值,constant value,set value,属性值,cdat"
+// @summary    Rewrite a property's constant value in place
+// @param      v  the new value (float64 for 1D, []float64 matching Components for multi-D)
+// @domain     keyframe
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving, low risk. Only valid for properties
+//   without keyframes (those holding a cdat chunk).
+// @alias      static value,静态值,constant value,set value,属性值,cdat
 func (p *Property) SetStaticValue(v any) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no static-value chunk (has keyframes?)", p.MatchName)
@@ -40,23 +46,20 @@ func (p *Property) SetStaticValue(v any) error {
 	return nil
 }
 
-// SetExpressionEnabled toggles whether AE evaluates the property's
-// expression at render time (separate knob from `SetExpression` which
-// writes the JS source itself).
-//
-// RE'd against an AE-2025-native enabled/disabled fixture pair (expr_re,
-// 2026-06-12): tdb4 byte @0x77 is the disabled flag (0 = AE evaluates,
-// 1 = expression kept but off); the neighbouring @0x78 is a has-expression
-// marker kept in sync by SetExpression. (The historic reading of @0x78 as
-// an inverted enabled byte conflated the two — it made every SetExpression
-// output render-dead, and writing @0x78=0 for "disabled" made AE drop the
-// expression text entirely.) length-preserving (1 byte).
-//
-// Requires the property's tdbs to contain a `tdb4` chunk (always
-// present for properties parsed from real .aep files). Returns an
-// error otherwise.
-//
-//aep:cap domain=expr tier=stable verify=roundtrip boundary="length-preserving 低风险;tdb4 @0x77 1 byte;无专门 AE gate→round-trip;仅对有 tdbs 的属性有效" alias="expression enabled,表达式启用,enable expression,disable expression,表达式开关,toggle expression"
+// @summary    Toggle whether AE evaluates the property's expression at render time
+// @param      enabled  true to let AE evaluate the expression, false to keep it attached but off
+// @domain     expr
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   length-preserving, 1 byte at tdb4 offset 0x77 (the disabled
+//   flag; 0 = AE evaluates, 1 = expression kept but off). The neighboring
+//   offset 0x78 is a separate has-expression marker kept in sync by
+//   SetExpression — the two bytes are distinct and must not be conflated.
+//   Requires the property's tdbs to contain a tdb4 chunk, which is always
+//   present for properties parsed from real files; returns an error
+//   otherwise.
+// @alias      expression enabled,表达式启用,enable expression,disable expression,表达式开关,toggle expression
 func (p *Property) SetExpressionEnabled(enabled bool) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no tdbs reference", p.MatchName)
@@ -68,22 +71,26 @@ func (p *Property) SetExpressionEnabled(enabled bool) error {
 	return nil
 }
 
-// SetExpression rewrites the JavaScript expression source attached to
-// this property.
-//
-// length-variable — the underlying Utf8 chunk's data is replaced
-// (or a new Utf8 chunk is inserted into the property's tdbs LIST when
-// none existed previously; conversely, passing "" removes the chunk
-// entirely, leaving the property with no expression).
-//
-// Note: AE has a separate Enable/Disable Expression toggle (in addition
-// to the source). Removing the Utf8 chunk via SetExpression("") gets
-// you the "no expression at all" state.
-//
-// Returns an error if the property is one built outside the parser
-// (no owning tdbs LIST reference).
-//
-//aep:cap domain=expr tier=stable verify=ae-accept gate=TestExpression_AEShipGate_AE2020,TestExpression_AEShipGate_AE2025,TestExprEffect_AEShipGate_AE2020,TestExprEffect_AEShipGate_AE2025 incident=expression-enable-byte-pair boundary="length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);写入端字节路径已穷尽(5 类 idiom 双版本 gated:静态/跨层/带关键帧/时变/读 effect 参数);linear/ease/valueAtTime 等未单独 gate=机制内容无关 closed decision" alias="expression,表达式,js 表达式,wiggle 表达式,linkexpr"
+// @summary    Rewrite the JavaScript expression source attached to a property
+// @param      source  the expression source text; empty string removes the expression entirely
+// @domain     expr
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestExpression_AEShipGate_AE2020,TestExpression_AEShipGate_AE2025,TestExprEffect_AEShipGate_AE2020,TestExprEffect_AEShipGate_AE2025
+// @since      AE2020
+// @incident   expression-enable-byte-pair
+// @boundary   length-variable: the underlying Utf8 chunk's data is replaced,
+//   or a new Utf8 chunk is inserted into the property's tdbs LIST when none
+//   existed previously. The new chunk must be inserted after the cdat chunk
+//   and before the tdum/tduM chunks — getting this wrong produced a
+//   false-positive pass on AE 2020 that has since been fixed and gated.
+//   AE has a separate enable/disable expression toggle in addition to the
+//   source text; passing "" removes the Utf8 chunk and yields the
+//   no-expression state. The write path has been exercised across static,
+//   cross-layer, keyframed, time-varying, and effect-parameter-reading
+//   expressions; helper APIs like linear/ease/valueAtTime are not gated
+//   individually since they exercise the same underlying mechanism.
+// @alias      expression,表达式,js 表达式,wiggle 表达式,linkexpr
 func (p *Property) SetExpression(source string) error {
 	if p.back == nil {
 		return fmt.Errorf("property %q: no tdbs reference (built outside parser?)", p.MatchName)

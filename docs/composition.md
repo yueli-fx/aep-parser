@@ -629,7 +629,11 @@ Set the composition's background color
 func (c *Composition) SetComment(comment string) error
 ```
 
-SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). length-variable: the cmta chunk's Data is replaced wholesale; WriteAEP recomputes the parent Item LIST size. When no cmta chunk exists yet, a fresh one is inserted into the Item LIST.
+Set the project-panel comment on a composition
+
+| Parameter | Description |
+|---|---|
+| `comment` | the comment text to write |
 
 ### Composition.SetCompMotionBlur
 
@@ -747,7 +751,11 @@ Set the composition's "Hide Shy Layers" toggle
 func (c *Composition) SetLabel(index uint8) error
 ```
 
-SetLabel writes the project-panel color label index (0..16) for the composition (Item-level). Indices outside 0..16 are written verbatim (AE shows index 0 for unknown values). length-preserving (1 byte).
+Set the project-panel color label index on a composition
+
+| Parameter | Description |
+|---|---|
+| `index` | the color label index (0..16) |
 
 ### Composition.SetMotionBlurAdaptiveSampleLimit
 
@@ -779,9 +787,11 @@ Set the composition's per-frame motion-blur sample count
 func (c *Composition) SetMotionGraphicsTemplateName(name string) error
 ```
 
-SetMotionGraphicsTemplateName renames the comp's Motion Graphics template — mirrors AE's CompItem.motionGraphicsTemplateName setter. The name is rewritten in every persisted panel generation (AE stores three: CIFO, CIF2, CIF3, each holding the name twice). length-variable: WriteAEP recomputes parent LIST sizes. Returns an error for an empty name, or when the comp has no Essential Graphics panel shell (comps saved by AE — and comps created by NewComposition — always have one).
+Rename the composition's Motion Graphics template
 
-Stable — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty gate: the renamed template reads back via the scripting API and survives AE's own resave); promoted from Alpha in the 2026-06-12 audit batch.
+| Parameter | Description |
+|---|---|
+| `name` | the new template name (must be non-empty) |
 
 ### Composition.SetName
 
@@ -1000,7 +1010,11 @@ read-write
 func (g *Guide) SetOrientation(o GuideOrientation)
 ```
 
-SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical). No-op when the guide has no backing block or the orientation is unrecognized.
+Set the guide's orientation
+
+| Parameter | Description |
+|---|---|
+| `o` | the new orientation (GuideHorizontal or GuideVertical) |
 
 ### Guide.SetPosition
 
@@ -1008,7 +1022,11 @@ SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical). N
 func (g *Guide) SetPosition(px float64)
 ```
 
-SetPosition sets the guide's pixel offset (>= 0). No-op when the guide has no backing block (built outside the parser) or position is negative.
+Set the guide's pixel offset
+
+| Parameter | Description |
+|---|---|
+| `px` | the new offset in pixels from the top or left edge (must be >= 0) |
 
 # GuideOrientation object
 

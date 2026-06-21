@@ -82,7 +82,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetChapter(s string) error",
-    "summary": "SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block).",
+    "summary": "@summary     Set the marker's chapter-link text @description Rewrites the second Utf8 child of the Nmrd block.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -93,7 +93,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM chapter=ch1 实读)",
+      "boundary": "length-variable — the Utf8 chunk's data is replaced wholesale\nand ancestor LIST sizes are recomputed; verified by reading the\nmarker's chapter back through the AE DOM",
       "incident": null,
       "alias": [
         "marker chapter",
@@ -107,7 +107,7 @@
     "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetComment(comment string) error",
-    "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
+    "summary": "@summary    Set the project-panel comment on a composition @param      comment  the comment text to write @domain     comp @stability  stable @verify     ae-accept @gate       TestCompIdta_AEShipGate_AE2020,TestCompIdta_AEShipGate_AE2025 @since      AE2020 @boundary   length-variable: the cmta chunk's data is replaced wholesale   and WriteAEP recomputes the parent Item LIST size.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -118,7 +118,7 @@
         "TestCompIdta_AEShipGate_AE2020",
         "TestCompIdta_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算);无 cmta 时插入到 Utf8 之后(位置敏感,RE re_comp_idta.aep:末尾 append→AE 打不开)+ 设 idta @0x39 has-comment flag(否则 AE 丢 comment);双版本 AE gated(comp_idta,comp.comment DOM readback)",
+      "boundary": "length-variable: the cmta chunk's data is replaced wholesale\nand WriteAEP recomputes the parent Item LIST size. When no cmta chunk\nexists yet, a fresh one is inserted right after the Utf8 chunk\n(position-sensitive — appending at the end of the LIST produces a file\nAE refuses to open), and the idta byte at offset 0x39 has-comment flag\nis set, otherwise AE silently drops the comment.",
       "incident": null,
       "alias": [
         "comp comment",
@@ -133,7 +133,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetComment(s string) error",
-    "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block).",
+    "summary": "@summary     Set the marker's primary comment text @description Rewrites the first Utf8 child of the Nmrd block.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -144,7 +144,7 @@
         "TestMarker_AEShipGate_AE2020",
         "TestMarker_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用",
+      "boundary": "length-variable — the Utf8 chunk's data is replaced wholesale\nand ancestor LIST sizes are recomputed; gated by calling this after\nAddMarker",
       "incident": null,
       "alias": [
         "marker comment",
@@ -184,7 +184,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetCuePointName(s string) error",
-    "summary": "SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects).",
+    "summary": "@summary     Set the marker's cue-point name @description Rewrites the fifth Utf8 child of the Nmrd block — a   legacy Flash-era field, rarely populated in modern AE projects.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -195,7 +195,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段;双版本 AE gated(marker-fields;AE DOM cuePointName=cue1 实读)",
+      "boundary": "length-variable — the Utf8 chunk's data is replaced wholesale\nand ancestor LIST sizes are recomputed; verified by reading the\nmarker's cue-point name back through the AE DOM",
       "incident": null,
       "alias": [
         "cue point name",
@@ -313,7 +313,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetDuration(seconds float64) error",
-    "summary": "SetDuration writes a new marker duration (seconds) to NmHd @0x08.",
+    "summary": "@summary     Set the marker's duration @description Encoded as a uint32 BE count of 600ths-of-a-second at NmHd   offset 0x08.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -324,7 +324,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(4B NmHd);0 → point marker;负值夹至 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)",
+      "boundary": "length-preserving (4 bytes); verified by reading the marker's\nduration back through the AE DOM",
       "incident": null,
       "alias": [
         "marker duration",
@@ -415,7 +415,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetFrameTarget(s string) error",
-    "summary": "SetFrameTarget rewrites the marker's frame-target id (fourth Utf8).",
+    "summary": "@summary     Set the marker's frame-target id @description Rewrites the fourth Utf8 child of the Nmrd block.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -426,7 +426,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM frameTarget=ft1 实读)",
+      "boundary": "length-variable — the Utf8 chunk's data is replaced wholesale\nand ancestor LIST sizes are recomputed; verified by reading the\nmarker's frame target back through the AE DOM",
       "incident": null,
       "alias": [
         "marker frame target",
@@ -491,7 +491,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetLabel(index uint8) error",
-    "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10.",
+    "summary": "@summary     Set the marker's timeline label color @description Indices outside the 0..16 label range are written verbatim —   AE displays index 0 for unrecognized values but the byte still   round-trips.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -502,7 +502,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(1B NmHd @0x10);越界值写入并 round-trip;双版本 AE gated(marker-fields;AE DOM label=4 实读)",
+      "boundary": "length-preserving (1 byte at NmHd offset 0x10); verified by\nreading the marker's label back through the AE DOM",
       "incident": null,
       "alias": [
         "marker label",
@@ -517,7 +517,7 @@
     "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetLabel(index uint8) error",
-    "summary": "SetLabel writes the project-panel color label index (0..16) for the composition (Item-level).",
+    "summary": "@summary    Set the project-panel color label index on a composition @param      index  the color label index (0..16) @domain     comp @stability  stable @verify     ae-accept @gate       TestCompIdta_AEShipGate_AE2020,TestCompIdta_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving, 1 byte at idta offset 0x3A.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -528,7 +528,7 @@
         "TestCompIdta_AEShipGate_AE2020",
         "TestCompIdta_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(1B,idta @0x3A);越界值照写(AE 视为 0);双版本 AE gated(comp_idta,comp.label DOM readback=9)",
+      "boundary": "length-preserving, 1 byte at idta offset 0x3A. Values outside\n0..16 are written verbatim and AE displays them as index 0.",
       "incident": null,
       "alias": [
         "label",
@@ -620,7 +620,7 @@
     "kind": "method",
     "recv": "*Guide",
     "signature": "func (g *Guide) SetOrientation(o GuideOrientation)",
-    "summary": "SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical).",
+    "summary": "@summary     Set the guide's orientation @param       o  the new orientation (GuideHorizontal or GuideVertical) @domain      comp @stability   alpha @verify      roundtrip @since       AE2020 @boundary    length-preserving: patches the guide's 16-byte scene-owned   block, which is copied back into the composition's ldat at write time.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -628,7 +628,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving(16B scene-owned block;syncGuides 在 WriteAEP 时回写 ldat);非法 orientation 值静默 no-op;无专门 AE gate→round-trip",
+      "boundary": "length-preserving: patches the guide's 16-byte scene-owned\nblock, which is copied back into the composition's ldat at write time.\nSilently no-ops when the guide has no backing block (built outside the\nparser) or o is not a recognized orientation value.",
       "incident": null,
       "alias": [
         "guide orientation",
@@ -671,7 +671,7 @@
     "kind": "method",
     "recv": "*Guide",
     "signature": "func (g *Guide) SetPosition(px float64)",
-    "summary": "SetPosition sets the guide's pixel offset (\u003e= 0).",
+    "summary": "@summary     Set the guide's pixel offset @param       px  the new offset in pixels from the top or left edge (must be \u003e= 0) @domain      comp @stability   alpha @verify      roundtrip @since       AE2020 @boundary    length-preserving: patches the guide's 16-byte scene-owned   block, which is copied back into the composition's ldat at write time.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -679,7 +679,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving(16B scene-owned block;syncGuides 在 WriteAEP 时回写 ldat);负值/无 block 时静默 no-op;无专门 AE gate→round-trip",
+      "boundary": "length-preserving: patches the guide's 16-byte scene-owned\nblock, which is copied back into the composition's ldat at write time.\nSilently no-ops when the guide has no backing block (built outside the\nparser) or px is negative.",
       "incident": null,
       "alias": [
         "guide position",
@@ -878,7 +878,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetTime(seconds float64) error",
-    "summary": "SetTime writes a new marker time (seconds) to the ldat keyframe slot using the owning composition's TickRate.",
+    "summary": "@summary     Set the marker's time @param       seconds  the new marker time in seconds @domain      comp @stability   stable @verify      ae-accept @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 @since       AE2020 @boundary    length-preserving (ldat tick write); verified by reading the   marker's keyTime back through the AE DOM @alias       marker time,标记时间,cue time,时间标记",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -889,7 +889,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(ldat tick write);双版本 AE gated(marker-fields;AE DOM keyTime=3.5 实读)",
+      "boundary": "length-preserving (ldat tick write); verified by reading the\nmarker's keyTime back through the AE DOM",
       "incident": null,
       "alias": [
         "marker time",
@@ -904,7 +904,7 @@
     "kind": "method",
     "recv": "*Marker",
     "signature": "func (m *Marker) SetURL(s string) error",
-    "summary": "SetURL rewrites the marker's web-target URL (third Utf8).",
+    "summary": "@summary     Set the marker's web-target URL @description Rewrites the third Utf8 child of the Nmrd block.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -915,7 +915,7 @@
         "TestMarkerFields_AEShipGate_AE2020",
         "TestMarkerFields_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM url 实读)",
+      "boundary": "length-variable — the Utf8 chunk's data is replaced wholesale\nand ancestor LIST sizes are recomputed; verified by reading the\nmarker's URL back through the AE DOM",
       "incident": null,
       "alias": [
         "marker url",
@@ -1388,7 +1388,7 @@
     "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetMotionGraphicsTemplateName(name string) error",
-    "summary": "SetMotionGraphicsTemplateName renames the comp's Motion Graphics template — mirrors AE's CompItem.motionGraphicsTemplateName setter.",
+    "summary": "@summary     Rename the composition's Motion Graphics template @param       name  the new template name (must be non-empty) @domain      eg @stability   stable @verify      ae-accept @gate        TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025 @since       AE2020 @boundary    mirrors AE's CompItem.motionGraphicsTemplateName setter.",
     "has_cap": true,
     "cap": {
       "domain": "eg",
@@ -1399,7 +1399,7 @@
         "TestEGAdd_AEShipGate_AE2020",
         "TestEGAdd_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(CIFO/CIF2/CIF3 各两处名字全部替换+父 LIST size 重算);空名拒绝;无 EG shell 拒绝",
+      "boundary": "mirrors AE's CompItem.motionGraphicsTemplateName setter. The\nname is rewritten in every persisted panel generation — AE stores three\n(CIFO, CIF2, CIF3), each holding the name twice — and the write is\nlength-variable, so WriteAEP recomputes the parent LIST sizes. Rejects\nan empty name and rejects comps with no Essential Graphics panel shell\n(comps saved by AE, and comps created by NewComposition, always have\none). The renamed template reads back via the scripting API and\nsurvives AE's own resave.",
       "incident": null,
       "alias": [
         "motion graphics template name",
@@ -1415,7 +1415,7 @@
     "kind": "method",
     "recv": "*Property",
     "signature": "func (p *Property) SetExpression(source string) error",
-    "summary": "SetExpression rewrites the JavaScript expression source attached to this property.",
+    "summary": "@summary    Rewrite the JavaScript expression source attached to a property @param      source  the expression source text; empty string removes the expression entirely @domain     expr @stability  stable @verify     ae-accept @gate       TestExpression_AEShipGate_AE2020,TestExpression_AEShipGate_AE2025,TestExprEffect_AEShipGate_AE2020,TestExprEffect_AEShipGate_AE2025 @since      AE2020 @incident   expression-enable-byte-pair @boundary   length-variable: the underlying Utf8 chunk's data is replaced,   or a new Utf8 chunk is inserted into the property's tdbs LIST when none   existed previously.",
     "has_cap": true,
     "cap": {
       "domain": "expr",
@@ -1428,7 +1428,7 @@
         "TestExprEffect_AEShipGate_AE2020",
         "TestExprEffect_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable;Utf8 须插 cdat 后/tdum-tduM 前(曾是 AE2020 假绿坑,已修+gated);写入端字节路径已穷尽(5 类 idiom 双版本 gated:静态/跨层/带关键帧/时变/读 effect 参数);linear/ease/valueAtTime 等未单独 gate=机制内容无关 closed decision",
+      "boundary": "length-variable: the underlying Utf8 chunk's data is replaced,\nor a new Utf8 chunk is inserted into the property's tdbs LIST when none\nexisted previously. The new chunk must be inserted after the cdat chunk\nand before the tdum/tduM chunks — getting this wrong produced a\nfalse-positive pass on AE 2020 that has since been fixed and gated.\nAE has a separate enable/disable expression toggle in addition to the\nsource text; passing \"\" removes the Utf8 chunk and yields the\nno-expression state. The write path has been exercised across static,\ncross-layer, keyframed, time-varying, and effect-parameter-reading\nexpressions; helper APIs like linear/ease/valueAtTime are not gated\nindividually since they exercise the same underlying mechanism.",
       "incident": [
         "expression-enable-byte-pair"
       ],
@@ -1446,7 +1446,7 @@
     "kind": "method",
     "recv": "*Property",
     "signature": "func (p *Property) SetExpressionEnabled(enabled bool) error",
-    "summary": "SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself).",
+    "summary": "@summary    Toggle whether AE evaluates the property's expression at render time @param      enabled  true to let AE evaluate the expression, false to keep it attached but off @domain     expr @stability  stable @verify     roundtrip @since      AE2020 @boundary   length-preserving, 1 byte at tdb4 offset 0x77 (the disabled   flag; 0 = AE evaluates, 1 = expression kept but off).",
     "has_cap": true,
     "cap": {
       "domain": "expr",
@@ -1454,7 +1454,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;tdb4 @0x77 1 byte;无专门 AE gate→round-trip;仅对有 tdbs 的属性有效",
+      "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise.",
       "incident": null,
       "alias": [
         "expression enabled",
@@ -2123,7 +2123,7 @@
     "kind": "method",
     "recv": "*Footage",
     "signature": "func (f *Footage) SetComment(comment string) error",
-    "summary": "SetComment writes a project-panel comment on the footage item.",
+    "summary": "@summary    Set the project-panel comment on a footage item @param      comment  the comment text to write @domain     io @stability  stable @verify     ae-accept @gate       TestFootageIdta_AEShipGate_AE2020,TestFootageIdta_AEShipGate_AE2025 @since      AE2020 @boundary   length-variable: the cmta chunk's data is replaced wholesale   and the parent Item LIST size is recomputed.",
     "has_cap": true,
     "cap": {
       "domain": "io",
@@ -2134,7 +2134,7 @@
         "TestFootageIdta_AEShipGate_AE2020",
         "TestFootageIdta_AEShipGate_AE2025"
       ],
-      "boundary": "length-variable(cmta 整片替换+父 LIST size 重算;无 cmta 时插入到 Utf8 之后 + 设 idta @0x39 flag——与 comp setItemComment 同源);双版本 AE gated(footage_idta,单 solid 载体 footage.comment DOM readback,solid Item Utf8 空→cmta 插在该空 Utf8 后)",
+      "boundary": "length-variable: the cmta chunk's data is replaced wholesale\nand the parent Item LIST size is recomputed. When no cmta chunk exists\nyet, a fresh one is inserted right after the Utf8 chunk and the idta\nbyte at offset 0x39 has-comment flag is set (shared mechanics with\nComposition.SetComment). On a solid footage item the Utf8 chunk is\nempty, so the cmta chunk is inserted right after that empty Utf8 chunk.",
       "incident": null,
       "alias": [
         "footage comment",
@@ -2149,7 +2149,7 @@
     "kind": "method",
     "recv": "*Footage",
     "signature": "func (f *Footage) SetLabel(index uint8) error",
-    "summary": "SetLabel writes the project-panel color label index for the footage.",
+    "summary": "@summary    Set the project-panel color label index on a footage item @param      index  the color label index (0..16) @domain     io @stability  stable @verify     ae-accept @gate       TestFootageIdta_AEShipGate_AE2020,TestFootageIdta_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving, 1 byte at idta offset 0x3A.",
     "has_cap": true,
     "cap": {
       "domain": "io",
@@ -2160,7 +2160,7 @@
         "TestFootageIdta_AEShipGate_AE2020",
         "TestFootageIdta_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(1B,idta @0x3A);越界值照写(AE 视为 0);双版本 AE gated(footage_idta,footage.label DOM readback=9)",
+      "boundary": "length-preserving, 1 byte at idta offset 0x3A. Values outside\n0..16 are written verbatim and AE displays them as index 0.",
       "incident": null,
       "alias": [
         "footage label",
@@ -2175,7 +2175,7 @@
     "kind": "method",
     "recv": "*Project",
     "signature": "func (p *Project) WriteAEP(w io.Writer) error",
-    "summary": "WriteAEP serializes the (possibly mutated) project back to RIFX binary form.",
+    "summary": "@summary     Serialize the project back to RIFX binary form @description Sizes are recomputed from the current chunk data, so   mutations such as Footage.SetPath that change byte lengths are handled   correctly.",
     "has_cap": true,
     "cap": {
       "domain": "io",
@@ -2183,7 +2183,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "核心写回;被全部结构性 ship-gate 间接覆盖;无单一专属 AE gate 可精确引用",
+      "boundary": "this is the core write-back path, indirectly covered by every\nstructural ship gate; no single AE gate exercises it in isolation",
       "incident": null,
       "alias": [
         "write aep",
@@ -2200,7 +2200,7 @@
     "kind": "method",
     "recv": "*Project",
     "signature": "func (p *Project) WriteJSON(w io.Writer) error",
-    "summary": "WriteJSON writes the project as indented JSON to w.",
+    "summary": "@summary     Write the project as indented JSON @param       w  the destination writer @domain      io @stability   stable @verify      roundtrip @since       AE2020 @boundary    one-way export — there is no corresponding ReadJSON.",
     "has_cap": true,
     "cap": {
       "domain": "io",
@@ -2208,7 +2208,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "JSON 单向导出(无 ReadJSON);确定性 + golden 测试验证;不涉及 AE",
+      "boundary": "one-way export — there is no corresponding ReadJSON. Output is\ndeterministic and checked against golden fixtures; this path does not\ninvolve AE.",
       "incident": null,
       "alias": [
         "write json",
@@ -2297,7 +2297,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetInInterp(t InterpType) error",
-    "summary": "SetInInterp / SetOutInterp write a new interpolation enum byte to the keyframe block @0x04 / @0x05.",
+    "summary": "@summary     Set the keyframe's in-side interpolation type @description See SetOutInterp for the out side.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2308,7 +2308,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(1B @0x04);双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving (1 byte at the keyframe block offset 0x04)",
       "incident": null,
       "alias": [
         "keyframe interpolation",
@@ -2323,7 +2323,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetInSpatialTangent(v []float64) error",
-    "summary": "SetInSpatialTangent / SetOutSpatialTangent write 3D Bezier tangent vectors.",
+    "summary": "@summary     Set the keyframe's in-side spatial Bezier tangent @description Only valid for spatial properties (Position / AnchorPoint   with motion path enabled).",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2334,7 +2334,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(dims×8B);仅空间属性有效(Position/AnchorPoint);slice 长度须等于 Property.Components;双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving (dims x 8 bytes)",
       "incident": null,
       "alias": [
         "spatial tangent",
@@ -2350,7 +2350,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetInTemporalEase(eases []TemporalEase) error",
-    "summary": "SetInTemporalEase writes a new per-side temporal ease list to the keyframe.",
+    "summary": "@summary     Set the keyframe's in-side temporal ease @description The slice length must match the keyframe's current ease   shape: a spatial property (Position / Anchor) or 1D non-spatial   property takes length 1; a non-spatial N-D property (Scale 3D /   Feather 2D / 4D color) takes length N.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2361,7 +2361,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving;slice 长度须匹配 ease shape(空间属性 1 / N-D 为 N);双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving (8 or 16 bytes per ease, at fixed offsets\ndetermined by the property's layout)",
       "incident": null,
       "alias": [
         "temporal ease",
@@ -2377,7 +2377,7 @@
     "kind": "method",
     "recv": "*Property",
     "signature": "func (p *Property) SetLockedRatio(v bool) error",
-    "summary": "SetLockedRatio sets the locked ratio flag on the property.",
+    "summary": "@summary     Set the property's locked-ratio flag @param       v  true to lock the ratio, false to unlock it @domain      keyframe @stability   stable @verify      roundtrip @since       AE2020 @boundary    length-preserving, low-risk write to tdsb @0x02 bit 4 @alias       locked ratio,锁定比例,constrain proportions,aspect ratio lock,等比缩放,tdsb",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2385,7 +2385,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-preserving 低风险;tdsb @0x02 bit 4;无专门 AE gate→round-trip",
+      "boundary": "length-preserving, low-risk write to tdsb @0x02 bit 4",
       "incident": null,
       "alias": [
         "locked ratio",
@@ -2402,7 +2402,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetOutInterp(t InterpType) error",
-    "summary": "SetOutInterp see SetInInterp.",
+    "summary": "@summary     Set the keyframe's out-side interpolation type @description See SetInInterp for the in side.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2413,7 +2413,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(1B @0x05);双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving (1 byte at the keyframe block offset 0x05)",
       "incident": null,
       "alias": [
         "keyframe out interpolation",
@@ -2428,7 +2428,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetOutSpatialTangent(v []float64) error",
-    "summary": "SetOutSpatialTangent see SetInSpatialTangent.",
+    "summary": "@summary     Set the keyframe's out-side spatial Bezier tangent @description Only valid for spatial properties (Position / AnchorPoint   with motion path enabled).",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2439,7 +2439,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(dims×8B);仅空间属性有效;slice 长度须等于 Property.Components;双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving (dims x 8 bytes)",
       "incident": null,
       "alias": [
         "out tangent",
@@ -2454,7 +2454,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetOutTemporalEase(eases []TemporalEase) error",
-    "summary": "SetOutTemporalEase mirrors SetInTemporalEase for the out side.",
+    "summary": "@summary     Set the keyframe's out-side temporal ease @description Mirrors SetInTemporalEase for the out side; the slice   length must match the keyframe's current ease shape.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2465,7 +2465,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving;slice 长度须匹配 ease shape;双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving",
       "incident": null,
       "alias": [
         "temporal ease out",
@@ -2480,7 +2480,7 @@
     "kind": "method",
     "recv": "*Property",
     "signature": "func (p *Property) SetStaticValue(v any) error",
-    "summary": "SetStaticValue rewrites a property's constant value in-place (only valid for properties without keyframes — those with a cdat chunk).",
+    "summary": "@summary    Rewrite a property's constant value in place @param      v  the new value (float64 for 1D, []float64 matching Components for multi-D) @domain     keyframe @stability  stable @verify     ae-accept @gate       TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving, low risk.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2491,7 +2491,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;仅适用于无关键帧属性(cdat chunk);双版本 AE gated(keyframe_mutate,2D static Position DOM readback)",
+      "boundary": "length-preserving, low risk. Only valid for properties\nwithout keyframes (those holding a cdat chunk).",
       "incident": null,
       "alias": [
         "static value",
@@ -2508,7 +2508,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetTime(seconds float64) error",
-    "summary": "SetTime rewrites this keyframe's time in-place using its owning composition's TickRate (decoded at parse time from cdta).",
+    "summary": "@summary     Set the keyframe's time @description Uses the owning composition's TickRate, decoded at parse   time from cdta.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2519,7 +2519,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving(ldat tick write);chunk size 不变;双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving — the ldat chunk size never changes, so\nwriting the project back never relocates anything",
       "incident": null,
       "alias": [
         "keyframe time",
@@ -2534,7 +2534,7 @@
     "kind": "method",
     "recv": "*Keyframe",
     "signature": "func (k *Keyframe) SetValue(v any) error",
-    "summary": "SetValue rewrites this keyframe's numeric value in-place.",
+    "summary": "@summary     Set the keyframe's numeric value @description For a 1D property pass a float64.",
     "has_cap": true,
     "cap": {
       "domain": "keyframe",
@@ -2545,7 +2545,7 @@
         "TestKeyframeMutate_AEShipGate_AE2020",
         "TestKeyframeMutate_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving;1D 传 float64,N-D 传 []float64 且长度须匹配;双版本 AE gated(keyframe_mutate)",
+      "boundary": "length-preserving — chunk size is unchanged",
       "incident": null,
       "alias": [
         "keyframe value",
@@ -2814,17 +2814,17 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) RemoveTrackMatte() error",
-    "summary": "RemoveTrackMatte clears this layer's track matte assignment — both the mode (TrackMatte → None) and the explicit source pointer (TrackMatteLayerID → 0).",
+    "summary": "@summary     Clear the layer's track-matte assignment @description Alias of [Layer.ClearTrackMatteLayer], kept for API parity   with other scripting environments' layer.removeTrackMatte().",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
       "verify": "ae-accept",
-      "minver": "2023",
+      "minver": "2025",
       "gate": [
         "TestTrackMatteExplicit_AEShipGate_AE2025"
       ],
-      "boundary": "ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;track_matte_explicit remove→DOM NO_TRACK_MATTE;双版本不可达(fingerprint)",
+      "boundary": "present only on AE 23+ project layouts; the ship gate is\nsingle-version because no intermediate AE target both produces this\nlayout and survives the next version's forward compatibility check,\nso a two-version gate is not reachable.",
       "incident": null,
       "alias": [
         "remove track matte",
@@ -5190,17 +5190,17 @@
     "kind": "method",
     "recv": "*Layer",
     "signature": "func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error",
-    "summary": "SetTrackMatteSource designates `src` as this layer's explicit track-matte source and writes the matte mode.",
+    "summary": "@summary     Set another layer as this layer's explicit track-matte source @param       src   the layer to use as the matte source @param       mode  the matte mode to apply @domain      layer-set @stability   stable @verify      ae-accept @gate        TestTrackMatteExplicit_AEShipGate_AE2025 @since       AE2025 @boundary    mirrors AE ScriptingAPI 23+'s layer.setTrackMatte(srcLayer,   type) and requires the AE 23+ ldta layout (the @0xA0 slot) — files saved   by AE 22 / 2020 need a resave through AE 23+ first.",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
       "tier": "stable",
       "verify": "ae-accept",
-      "minver": "2023",
+      "minver": "2025",
       "gate": [
         "TestTrackMatteExplicit_AEShipGate_AE2025"
       ],
-      "boundary": "ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;track_matte_explicit DOM trackMatteLayer+type 对;双版本不可达(fingerprint,同 SetTrackMatteLayer)",
+      "boundary": "mirrors AE ScriptingAPI 23+'s layer.setTrackMatte(srcLayer,\ntype) and requires the AE 23+ ldta layout (the @0xA0 slot) — files saved\nby AE 22 / 2020 need a resave through AE 23+ first. length-preserving:\nwrites ldta @0xA0..0xA3 = src.ID (4 bytes BE) and @0x6B = mode (1 byte),\ndelegating to SetTrackMatteLayer. Refuses a nil src, either layer\nlacking a comp back-pointer, a cross-comp matte (AE 23+ requires the\nsame comp), and a self-matte (src.ID == the layer's own ID). Passing\nmode=TrackMatteNone with a non-nil src preserves the source pointer\nwhile disabling the matte channel; use ClearTrackMatteLayer to fully\nclear it. The ship gate is single-version because no intermediate AE\ntarget both produces this layout and survives the next version's\nforward compatibility check, so a two-version gate is not reachable.",
       "incident": null,
       "alias": [
         "set track matte source",
@@ -5688,7 +5688,7 @@
     "symbol": "EncodeGradientXML",
     "kind": "func",
     "signature": "func EncodeGradientXML(g *Gradient) string",
-    "summary": "EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the inverse of ParseGradientXML).",
+    "summary": "@summary    Render a Gradient back into AE's prop.map XML form @param      g  the gradient to encode @returns    the gradient XML in prop.map format, round-trippable through ParseGradientXML @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @description The inverse of ParseGradientXML.",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5696,7 +5696,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated)",
+      "boundary": "this is the low-level encoder used by the gradient-fill node\nconstructor, which carries its own render-pixel gate",
       "incident": null,
       "alias": [
         "encode gradient xml",
@@ -5753,7 +5753,7 @@
     "symbol": "NewPropertyStream",
     "kind": "func",
     "signature": "func NewPropertyStream[T any]() *PropertyStream[T]",
-    "summary": "NewPropertyStream returns a Static-mode stream holding the zero value of T.",
+    "summary": "@summary    Create a static-mode property stream holding the zero value of T @returns    a new PropertyStream in static mode @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      property stream,动画原语,keyframe stream",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5766,7 +5766,7 @@
       "alias": [
         "property stream",
         "动画原语",
-        "V2.2 keyframe stream"
+        "keyframe stream"
       ]
     }
   },
@@ -5798,7 +5798,7 @@
     "symbol": "Parse",
     "kind": "func",
     "signature": "func Parse(path string) (*Application, error)",
-    "summary": "Parse opens an .aep file at path and returns an Application wrapping the parsed Project.",
+    "summary": "@summary    Open an .aep file and return an Application wrapping the parsed project @param      path  the filesystem path to the .aep file @returns    an Application wrapping the parsed project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      parse,application,read,读取",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5812,7 +5812,6 @@
         "parse",
         "application",
         "read",
-        "py-aep parse",
         "读取"
       ]
     }
@@ -5821,7 +5820,7 @@
     "symbol": "ParseGradientXML",
     "kind": "func",
     "signature": "func ParseGradientXML(xmlText string) *Gradient",
-    "summary": "ParseGradientXML parses AE gradient XML (prop.map format) into a *Gradient.",
+    "summary": "@summary    Parse AE gradient XML into a Gradient @param      xmlText  the gradient XML in prop.map format @returns    the parsed gradient, or nil when parsing fails or the XML is empty @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @description Exposed so tests can exercise the XML decoder without   building a full RIFX tree.",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5842,7 +5841,7 @@
     "symbol": "ParseReader",
     "kind": "func",
     "signature": "func ParseReader(r io.ReadSeeker) (*Application, error)",
-    "summary": "ParseReader parses an .aep file from an io.ReadSeeker and returns an Application wrapping the Project.",
+    "summary": "@summary    Parse an .aep file from a reader into an Application @param      r  the reader positioned at the start of the .aep file @returns    an Application wrapping the parsed project @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @alias      parse reader,application,流读取,io.ReadSeeker",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5951,7 +5950,7 @@
     "kind": "method",
     "recv": "*Application",
     "signature": "func (a *Application) Version() string",
-    "summary": "Version returns the AE version that wrote the file as a string like \"17.7x101\" (AE 2020 / 17.7 build 101) or \"25.6x57\" (AE 2025), decoded from the root `head` chunk's packed version word (offset 4-7).",
+    "summary": "@summary    Report the AE version that wrote the file @returns    a version string like \"17.7x101\" (AE 2020 build 101) or \"25.6x57\" (AE 2025), or \"\" when unavailable @domain     meta @stability  stable @verify     roundtrip @since      AE2020 @description Decoded from the root head chunk's packed version word at   offset 4-7 (uint32 big-endian): bits 30-26 are major_a (5 bits), bits   21-19 are major_b (3 bits, major = major_a*8 + major_b), bits 18-15 are   minor (4 bits), bit 9 is the beta flag (1 = release), and bits 7-0 are   the build number.",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -6045,7 +6044,7 @@
     "kind": "method",
     "recv": "*Project",
     "signature": "func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error",
-    "summary": "SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc) to BOTH the nhed @0x0F and nnhd @0x18 header bytes.",
+    "summary": "@summary     Set the project's color bit depth @description Writes to BOTH the nhed offset 0x0F and nnhd offset 0x18   header bytes — AE stores the enum redundantly, so both copies are kept   in sync.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -6056,7 +6055,7 @@
         "TestProjectSettings_AEShipGate_AE2020",
         "TestProjectSettings_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);双版本 AE gated(project_settings,app.project.bitsPerChannel DOM readback=16)",
+      "boundary": "length-preserving (2 bytes total, 1 in each header); verified\nby reading app.project.bitsPerChannel back through the AE DOM",
       "incident": null,
       "alias": [
         "bits per channel",
@@ -6280,7 +6279,7 @@
     "kind": "method",
     "recv": "*Project",
     "signature": "func (p *Project) SetLinearBlending(v bool) error",
-    "summary": "SetLinearBlending toggles the lnrb chunk under root.",
+    "summary": "@summary     Toggle the project's linear blending setting @param       v  true to enable linear blending, false to disable it @domain      project @stability   stable @verify      ae-accept @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 @since       AE2020 @boundary    presence-encoded toggle: enabling adds the lnrb chunk under   root, disabling removes it.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -6291,7 +6290,7 @@
         "TestProjectSettings_AEShipGate_AE2020",
         "TestProjectSettings_AEShipGate_AE2025"
       ],
-      "boundary": "presence-encoded toggle(lnrb chunk 增删);双版本 AE gated(project_settings,app.project.linearBlending DOM readback=true)",
+      "boundary": "presence-encoded toggle: enabling adds the lnrb chunk under\nroot, disabling removes it. Verified on both AE versions, with the\nDOM's app.project.linearBlending reading back true after a round-trip.",
       "incident": null,
       "alias": [
         "linear blending",
@@ -6306,7 +6305,7 @@
     "kind": "method",
     "recv": "*Project",
     "signature": "func (p *Project) SetLinearizeWorkingSpace(v bool) error",
-    "summary": "SetLinearizeWorkingSpace toggles the lnrp chunk under root.",
+    "summary": "@summary     Toggle the project's linearize-working-space setting @param       v  true to enable the linearized working space, false to disable it @domain      project @stability   stable @verify      roundtrip @since       AE2020 @boundary    presence-encoded toggle: enabling adds the lnrp chunk under   root, disabling removes it.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -6314,8 +6313,10 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "presence-encoded toggle(lnrp chunk 增删);⚠ AE DOM 不可值验(已知):app.project.linearizeWorkingSpace 即便 AE 自存文件 reload 也读 false——OCIO/CMS profile derived state,ScriptingAPI 不绑 lnrp chunk(详 incident project-flag-chunks-lnrb-lnrp § lnrp readback quirk)。封顶 acceptance(byte-preservation,字节同 AE 自存),留 roundtrip",
-      "incident": null,
+      "boundary": "presence-encoded toggle: enabling adds the lnrp chunk under\nroot, disabling removes it. The DOM's app.project.linearizeWorkingSpace\nis not a reliable verification surface — it reads false even on a file\nAE itself saved and reloaded, because the value is derived from the\ncolor-management profile rather than bound to the lnrp chunk. Acceptance\nis therefore capped at byte-preservation against AE's own save, hence\nroundtrip rather than ae-accept.",
+      "incident": [
+        "project-flag-chunks-lnrb-lnrp"
+      ],
       "alias": [
         "linearize working space",
         "线性化工作空间",
@@ -6377,7 +6378,7 @@
     "kind": "method",
     "recv": "*Footage",
     "signature": "func (f *Footage) SetPath(newPath string) error",
-    "summary": "",
+    "summary": "@summary     Set the footage's source path @description The change propagates to the underlying RIFX chunks: the   alas JSON's \"fullpath\" field is rewritten in-place, and a legacy Cpth   chunk, if any, is fully replaced.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -6385,7 +6386,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "length-variable(alas JSON fullpath rewrite + Cpth chunk 全替换);素材路径重定向;无专门 AE gate→round-trip",
+      "boundary": "length-variable (alas JSON fullpath rewrite plus a full Cpth\nchunk replacement) — relinks the footage path; no dedicated AE gate,\nverified by round-trip",
       "incident": null,
       "alias": [
         "set path",
@@ -6402,7 +6403,7 @@
     "kind": "method",
     "recv": "*Footage",
     "signature": "func (f *Footage) SetSolidColor(rgb [3]float64) error",
-    "summary": "SetPath updates the footage's source path.",
+    "summary": "@summary     Set a solid footage item's color @description RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -6413,7 +6414,7 @@
         "TestSolidSetters_AEShipGate_AE2020",
         "TestSolidSetters_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving;opti Soli chunk;AE scripting API 验值(SolidSource.color)",
+      "boundary": "length-preserving — the value lives inside the fixed-size\nopti \"Soli\" chunk; verified by reading SolidSource.color back through\nthe AE scripting API",
       "incident": null,
       "alias": [
         "solid color",
@@ -6429,7 +6430,7 @@
     "kind": "method",
     "recv": "*Footage",
     "signature": "func (f *Footage) SetSolidSize(width, height int) error",
-    "summary": "SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling).",
+    "summary": "@summary     Set a solid footage item's pixel dimensions @description Layers using the solid are not repositioned — same behavior   as resizing a solid through AE's settings dialog.",
     "has_cap": true,
     "cap": {
       "domain": "project",
@@ -6440,7 +6441,7 @@
         "TestSolidSetters_AEShipGate_AE2020",
         "TestSolidSetters_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving;sspc chunk u16 fields;range 1..30000;AE scripting API 验值(FootageItem.width/height)",
+      "boundary": "length-preserving — u16 fields inside the fixed sspc chunk,\nAE's solid ceiling is 30000; verified by reading\nFootageItem.width/height back through the AE scripting API",
       "incident": null,
       "alias": [
         "solid size",

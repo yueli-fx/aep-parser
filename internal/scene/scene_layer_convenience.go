@@ -169,14 +169,21 @@ func (l *Layer) IsNameFromSource() bool {
 	return l.SourceComposition() != nil || l.SourceFootage() != nil
 }
 
-// RemoveTrackMatte clears this layer's track matte assignment — both
-// the mode (TrackMatte → None) and the explicit source pointer
-// (TrackMatteLayerID → 0). Length-preserving write to ldta.
-//
-// Alias of [Layer.ClearTrackMatteLayer] kept for py-aep API parity
-// (`layer.remove_track_matte()`).
-//
-//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestTrackMatteExplicit_AEShipGate_AE2025 minver=2023 boundary="ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);委托 ClearTrackMatteLayer;AE 23+ ldta 专属;同时清 mode 和 source pointer;track_matte_explicit remove→DOM NO_TRACK_MATTE;双版本不可达(fingerprint)" alias="remove track matte,remove matte,清除遮罩,取消遮罩,remove_track_matte"
+// @summary     Clear the layer's track-matte assignment
+// @description Alias of [Layer.ClearTrackMatteLayer], kept for API parity
+//   with other scripting environments' layer.removeTrackMatte(). Clears
+//   both the mode (TrackMatte to None) and the explicit source pointer
+//   (TrackMatteLayerID to 0) with one length-preserving write to ldta.
+// @domain      layer-set
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTrackMatteExplicit_AEShipGate_AE2025
+// @since       AE2025
+// @boundary    present only on AE 23+ project layouts; the ship gate is
+//   single-version because no intermediate AE target both produces this
+//   layout and survives the next version's forward compatibility check,
+//   so a two-version gate is not reachable.
+// @alias       remove track matte,remove matte,清除遮罩,取消遮罩,remove_track_matte
 func (l *Layer) RemoveTrackMatte() error {
 	return l.ClearTrackMatteLayer()
 }

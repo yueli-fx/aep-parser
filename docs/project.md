@@ -401,11 +401,13 @@ Set the project's audio sample rate
 func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error
 ```
 
-SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc) to BOTH the nhed @0x0F and nnhd @0x18 header bytes. AE stores the enum redundantly; we keep both in sync.
+Set the project's color bit depth
 
-Accepts the existing `BPC8` / `BPC16` / `BPC32` constants. Other values are written verbatim (in case AE introduces e.g. half-float later) but produce a less obvious AE UI state.
+Writes to BOTH the nhed offset 0x0F and nnhd offset 0x18 header bytes — AE stores the enum redundantly, so both copies are kept in sync. Accepts the BPC8 / BPC16 / BPC32 constants; other values are written verbatim (in case AE introduces e.g. half-float later) but produce a less obvious AE UI state.
 
-length-preserving (2 bytes total).
+| Parameter | Description |
+|---|---|
+| `bpc` | the new bit depth (8 / 16 / 32 bits per channel) |
 
 ### Project.SetColorManagementSystem
 
@@ -525,7 +527,11 @@ Set the project's GPU acceleration device id
 func (p *Project) SetLinearBlending(v bool) error
 ```
 
-SetLinearBlending toggles the lnrb chunk under root.
+Toggle the project's linear blending setting
+
+| Parameter | Description |
+|---|---|
+| `v` | true to enable linear blending, false to disable it |
 
 ### Project.SetLinearizeWorkingSpace
 
@@ -533,7 +539,11 @@ SetLinearBlending toggles the lnrb chunk under root.
 func (p *Project) SetLinearizeWorkingSpace(v bool) error
 ```
 
-SetLinearizeWorkingSpace toggles the lnrp chunk under root.
+Toggle the project's linearize-working-space setting
+
+| Parameter | Description |
+|---|---|
+| `v` | true to enable the linearized working space, false to disable it |
 
 ### Project.SetLutInterpolationMethod
 
@@ -613,11 +623,13 @@ Set the project's working gamma
 func (p *Project) WriteAEP(w io.Writer) error
 ```
 
-WriteAEP serializes the (possibly mutated) project back to RIFX binary form. Sizes are recomputed from the current chunk data, so mutations such as Footage.SetPath that change byte lengths are handled correctly.
+Serialize the project back to RIFX binary form
 
-This is best-effort write-back. The library only understands a small subset of the .aep format; chunks we don't know about pass through byte-for-byte. If After Effects rejects the output, file a sample.
+Sizes are recomputed from the current chunk data, so mutations such as Footage.SetPath that change byte lengths are handled correctly. This is best-effort write-back: only a small subset of the .aep format is understood, and chunks that aren't recognized pass through byte-for-byte. The scene-graph to chunk sync (shape layers / render queue / guides / head counters) runs in the writer back-ref before the RIFX tree is written, so this method itself never touches chunk bytes directly.
 
-The scene-graph → chunk sync (shape layers / render queue / guides / head counters) runs inside the writer back-ref (serializer stage) before the RIFX tree is written, so this thin scene method stays serializer-free.
+| Parameter | Description |
+|---|---|
+| `w` | the destination to write the binary project to |
 
 **Example:**
 
@@ -644,7 +656,11 @@ _ = proj.WriteAEP(out)
 func (p *Project) WriteJSON(w io.Writer) error
 ```
 
-WriteJSON writes the project as indented JSON to w.
+Write the project as indented JSON
+
+| Parameter | Description |
+|---|---|
+| `w` | the destination writer |
 
 # Folder object
 

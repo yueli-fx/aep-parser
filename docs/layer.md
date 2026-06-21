@@ -1277,9 +1277,9 @@ read-only
 func (l *Layer) RemoveTrackMatte() error
 ```
 
-RemoveTrackMatte clears this layer's track matte assignment — both the mode (TrackMatte → None) and the explicit source pointer (TrackMatteLayerID → 0). Length-preserving write to ldta.
+Clear the layer's track-matte assignment
 
-Alias of [Layer.ClearTrackMatteLayer] kept for py-aep API parity (`layer.remove_track_matte()`).
+Alias of [Layer.ClearTrackMatteLayer], kept for API parity with other scripting environments' layer.removeTrackMatte(). Clears both the mode (TrackMatte to None) and the explicit source pointer (TrackMatteLayerID to 0) with one length-preserving write to ldta.
 
 read-only
 
@@ -3144,19 +3144,12 @@ Pass sourceID=0 with mode=TrackMatteNone to clear the matte. When the layer live
 func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error
 ```
 
-SetTrackMatteSource designates `src` as this layer's explicit track-matte source and writes the matte mode. Mirrors AE ScriptingAPI 23+ layer.setTrackMatte(srcLayer, type). Requires AE 23+ ldta (the @0xA0 slot — re-save through AE 23+ first on AE 22 / 2020 files).
+Set another layer as this layer's explicit track-matte source
 
-On success, writes ldta @0xA0..0xA3 = src.ID (4 bytes BE) and @0x6B = mode (1 byte). length-preserving. Delegates byte writes to SetTrackMatteLayer; this wrapper provides the *Layer-arg parity with AE scripting plus early validation (nil / cross-comp / self) with clearer error messages.
-
-Refuse-cases:
-
-- src == nil
-- either layer lacks a comp back-pointer (built outside parser)
-- cross-comp matte (src.comp != l.comp); AE 23+ requires same-comp
-- self-matte (src.ID == l.ID)
-- ldta too short — caught and surfaced by SetTrackMatteLayer
-
-Pass mode=TrackMatteNone with non-nil src for "preserve target, no matte applied" — AE allows that (source pointer stored, matte channel disabled). To fully clear, use ClearTrackMatteLayer().
+| Parameter | Description |
+|---|---|
+| `src` | the layer to use as the matte source |
+| `mode` | the matte mode to apply |
 
 ### Layer.SetVisible
 

@@ -571,8 +571,7 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetcomment",
-      "signature": "func (c *Composition) SetComment(comment string) error",
-      "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment). length-variable: the cmta chunk's Data is replaced wholesale; WriteAEP recomputes the parent Item LIST size. When no cmta chunk exists yet, a fresh one is inserted into the Item LIST."
+      "signature": "func (c *Composition) SetComment(comment string) error"
     },
     "Composition.SetCompMotionBlur": {
       "kind": "method",
@@ -633,8 +632,7 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetlabel",
-      "signature": "func (c *Composition) SetLabel(index uint8) error",
-      "summary": "SetLabel writes the project-panel color label index (0..16) for the composition (Item-level). Indices outside 0..16 are written verbatim (AE shows index 0 for unknown values). length-preserving (1 byte)."
+      "signature": "func (c *Composition) SetLabel(index uint8) error"
     },
     "Composition.SetMotionBlurAdaptiveSampleLimit": {
       "kind": "method",
@@ -652,8 +650,7 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetmotiongraphicstemplatename",
-      "signature": "func (c *Composition) SetMotionGraphicsTemplateName(name string) error",
-      "summary": "SetMotionGraphicsTemplateName renames the comp's Motion Graphics template — mirrors AE's CompItem.motionGraphicsTemplateName setter. The name is rewritten in every persisted panel generation (AE stores three: CIFO, CIF2, CIF3, each holding the name twice). length-variable: WriteAEP recomputes parent LIST sizes. Returns an error for an empty name, or when the comp has no Essential Graphics panel shell (comps saved by AE — and comps created by NewComposition — always have one)."
+      "signature": "func (c *Composition) SetMotionGraphicsTemplateName(name string) error"
     },
     "Composition.SetName": {
       "kind": "method",
@@ -1162,36 +1159,35 @@
       "kind": "method",
       "file": "footage.md",
       "anchor": "#footagesetcomment",
-      "signature": "func (f *Footage) SetComment(comment string) error",
-      "summary": "SetComment writes a project-panel comment on the footage item. Length-variable; same semantics as Composition.SetComment."
+      "signature": "func (f *Footage) SetComment(comment string) error"
     },
     "Footage.SetLabel": {
       "kind": "method",
       "file": "footage.md",
       "anchor": "#footagesetlabel",
-      "signature": "func (f *Footage) SetLabel(index uint8) error",
-      "summary": "SetLabel writes the project-panel color label index for the footage."
+      "signature": "func (f *Footage) SetLabel(index uint8) error"
     },
     "Footage.SetPath": {
       "kind": "method",
       "file": "footage.md",
       "anchor": "#footagesetpath",
       "signature": "func (f *Footage) SetPath(newPath string) error",
-      "example": true
+      "example": true,
+      "summary": "The change propagates to the underlying RIFX chunks: the alas JSON's \"fullpath\" field is rewritten in-place, and a legacy Cpth chunk, if any, is fully replaced. The next call to Project.WriteAEP serializes the new path. Returns an error if no writable path chunk exists for this footage (solids and placeholders never had one)."
     },
     "Footage.SetSolidColor": {
       "kind": "method",
       "file": "footage.md",
       "anchor": "#footagesetsolidcolor",
       "signature": "func (f *Footage) SetSolidColor(rgb [3]float64) error",
-      "summary": "SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's \"fullpath\" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path."
+      "summary": "RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE. Every layer using this solid changes color, exactly like editing the solid's settings in AE. The same byte patch is applied by the NewSolidLayer create path."
     },
     "Footage.SetSolidSize": {
       "kind": "method",
       "file": "footage.md",
       "anchor": "#footagesetsolidsize",
       "signature": "func (f *Footage) SetSolidSize(width, height int) error",
-      "summary": "SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog)."
+      "summary": "Layers using the solid are not repositioned — same behavior as resizing a solid through AE's settings dialog. Shares its ship gate with SetSolidColor."
     },
     "Footage.SolidColor": {
       "kind": "field",
@@ -1256,15 +1252,13 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#guidesetorientation",
-      "signature": "func (g *Guide) SetOrientation(o GuideOrientation)",
-      "summary": "SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical). No-op when the guide has no backing block or the orientation is unrecognized."
+      "signature": "func (g *Guide) SetOrientation(o GuideOrientation)"
     },
     "Guide.SetPosition": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#guidesetposition",
-      "signature": "func (g *Guide) SetPosition(px float64)",
-      "summary": "SetPosition sets the guide's pixel offset (\u003e= 0). No-op when the guide has no backing block (built outside the parser) or position is negative."
+      "signature": "func (g *Guide) SetPosition(px float64)"
     },
     "GuideOrientation": {
       "kind": "type",
@@ -1377,7 +1371,7 @@
       "file": "property.md",
       "anchor": "#keyframesetininterp",
       "signature": "func (k *Keyframe) SetInInterp(t InterpType) error",
-      "summary": "SetInInterp / SetOutInterp write a new interpolation enum byte to the keyframe block @0x04 / @0x05. length-preserving (1 byte)."
+      "summary": "See SetOutInterp for the out side."
     },
     "Keyframe.SetInSpatialTangent": {
       "kind": "method",
@@ -1385,7 +1379,7 @@
       "anchor": "#keyframesetinspatialtangent",
       "signature": "func (k *Keyframe) SetInSpatialTangent(v []float64) error",
       "example": true,
-      "summary": "SetInSpatialTangent / SetOutSpatialTangent write 3D Bezier tangent vectors. Only valid for spatial properties (Position / AnchorPoint with motion path enabled). Slice length must equal `Property.Components`. length-preserving (dims × 8 bytes)."
+      "summary": "Only valid for spatial properties (Position / AnchorPoint with motion path enabled). See SetOutSpatialTangent for the out side."
     },
     "Keyframe.SetInTemporalEase": {
       "kind": "method",
@@ -1393,28 +1387,28 @@
       "anchor": "#keyframesetintemporalease",
       "signature": "func (k *Keyframe) SetInTemporalEase(eases []TemporalEase) error",
       "example": true,
-      "summary": "SetInTemporalEase writes a new per-side temporal ease list to the keyframe. The slice length must match the keyframe's current ease shape:"
+      "summary": "The slice length must match the keyframe's current ease shape: a spatial property (Position / Anchor) or 1D non-spatial property takes length 1; a non-spatial N-D property (Scale 3D / Feather 2D / 4D color) takes length N."
     },
     "Keyframe.SetOutInterp": {
       "kind": "method",
       "file": "property.md",
       "anchor": "#keyframesetoutinterp",
       "signature": "func (k *Keyframe) SetOutInterp(t InterpType) error",
-      "summary": "SetOutInterp see SetInInterp."
+      "summary": "See SetInInterp for the in side."
     },
     "Keyframe.SetOutSpatialTangent": {
       "kind": "method",
       "file": "property.md",
       "anchor": "#keyframesetoutspatialtangent",
       "signature": "func (k *Keyframe) SetOutSpatialTangent(v []float64) error",
-      "summary": "SetOutSpatialTangent see SetInSpatialTangent."
+      "summary": "Only valid for spatial properties (Position / AnchorPoint with motion path enabled). See SetInSpatialTangent for the in side."
     },
     "Keyframe.SetOutTemporalEase": {
       "kind": "method",
       "file": "property.md",
       "anchor": "#keyframesetouttemporalease",
       "signature": "func (k *Keyframe) SetOutTemporalEase(eases []TemporalEase) error",
-      "summary": "SetOutTemporalEase mirrors SetInTemporalEase for the out side."
+      "summary": "Mirrors SetInTemporalEase for the out side; the slice length must match the keyframe's current ease shape."
     },
     "Keyframe.SetTime": {
       "kind": "method",
@@ -1422,7 +1416,7 @@
       "anchor": "#keyframesettime",
       "signature": "func (k *Keyframe) SetTime(seconds float64) error",
       "example": true,
-      "summary": "SetTime rewrites this keyframe's time in-place using its owning composition's TickRate (decoded at parse time from cdta). Chunk size does not change, so writing the project back never relocates anything."
+      "summary": "Uses the owning composition's TickRate, decoded at parse time from cdta."
     },
     "Keyframe.SetValue": {
       "kind": "method",
@@ -1430,7 +1424,7 @@
       "anchor": "#keyframesetvalue",
       "signature": "func (k *Keyframe) SetValue(v any) error",
       "example": true,
-      "summary": "SetValue rewrites this keyframe's numeric value in-place."
+      "summary": "For a 1D property pass a float64. For a multi-component property pass []float64 with exact length equal to the property's component count."
     },
     "Keyframe.Time": {
       "kind": "field",
@@ -2379,7 +2373,7 @@
       "anchor": "#layerremovetrackmatte",
       "signature": "func (l *Layer) RemoveTrackMatte() error",
       "rw": "read-only",
-      "summary": "RemoveTrackMatte clears this layer's track matte assignment — both the mode (TrackMatte → None) and the explicit source pointer (TrackMatteLayerID → 0). Length-preserving write to ldta."
+      "summary": "Alias of [Layer.ClearTrackMatteLayer], kept for API parity with other scripting environments' layer.removeTrackMatte(). Clears both the mode (TrackMatte to None) and the explicit source pointer (TrackMatteLayerID to 0) with one length-preserving write to ldta."
     },
     "Layer.ReplaceSource": {
       "kind": "method",
@@ -3231,8 +3225,7 @@
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersettrackmattesource",
-      "signature": "func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error",
-      "summary": "SetTrackMatteSource designates `src` as this layer's explicit track-matte source and writes the matte mode. Mirrors AE ScriptingAPI 23+ layer.setTrackMatte(srcLayer, type). Requires AE 23+ ldta (the @0xA0 slot — re-save through AE 23+ first on AE 22 / 2020 files)."
+      "signature": "func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error"
     },
     "Layer.SetVisible": {
       "kind": "method",
@@ -3516,7 +3509,7 @@
       "file": "marker.md",
       "anchor": "#markersetchapter",
       "signature": "func (m *Marker) SetChapter(s string) error",
-      "summary": "SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block)."
+      "summary": "Rewrites the second Utf8 child of the Nmrd block."
     },
     "Marker.SetComment": {
       "kind": "method",
@@ -3524,21 +3517,21 @@
       "anchor": "#markersetcomment",
       "signature": "func (m *Marker) SetComment(s string) error",
       "example": true,
-      "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). length-variable — the Utf8 chunk's data slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes."
+      "summary": "Rewrites the first Utf8 child of the Nmrd block. Use SetChapter / SetURL / SetFrameTarget / SetCuePointName for the other four Utf8 slots — they fill in declaration order, so writing a later slot creates any missing earlier slots as empty."
     },
     "Marker.SetCuePointName": {
       "kind": "method",
       "file": "marker.md",
       "anchor": "#markersetcuepointname",
       "signature": "func (m *Marker) SetCuePointName(s string) error",
-      "summary": "SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects)."
+      "summary": "Rewrites the fifth Utf8 child of the Nmrd block — a legacy Flash-era field, rarely populated in modern AE projects."
     },
     "Marker.SetDuration": {
       "kind": "method",
       "file": "marker.md",
       "anchor": "#markersetduration",
       "signature": "func (m *Marker) SetDuration(seconds float64) error",
-      "summary": "SetDuration writes a new marker duration (seconds) to NmHd @0x08. Encoded as uint32 BE in 600ths-of-a-second per py-aep documentation; see decodeNmHd doc comment for the offset rationale. length-preserving (4 bytes)."
+      "summary": "Encoded as a uint32 BE count of 600ths-of-a-second at NmHd offset 0x08. A duration of 0 produces a point marker; negative values clamp to 0."
     },
     "Marker.SetFrameDuration": {
       "kind": "method",
@@ -3552,7 +3545,7 @@
       "file": "marker.md",
       "anchor": "#markersetframetarget",
       "signature": "func (m *Marker) SetFrameTarget(s string) error",
-      "summary": "SetFrameTarget rewrites the marker's frame-target id (fourth Utf8)."
+      "summary": "Rewrites the fourth Utf8 child of the Nmrd block."
     },
     "Marker.SetFrameTime": {
       "kind": "method",
@@ -3567,22 +3560,21 @@
       "anchor": "#markersetlabel",
       "signature": "func (m *Marker) SetLabel(index uint8) error",
       "example": true,
-      "summary": "SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10. Indices outside 0..16 are written verbatim (AE shows index 0 for unknown values but the byte round-trips). length-preserving (1 byte)."
+      "summary": "Indices outside the 0..16 label range are written verbatim — AE displays index 0 for unrecognized values but the byte still round-trips."
     },
     "Marker.SetTime": {
       "kind": "method",
       "file": "marker.md",
       "anchor": "#markersettime",
       "signature": "func (m *Marker) SetTime(seconds float64) error",
-      "example": true,
-      "summary": "SetTime writes a new marker time (seconds) to the ldat keyframe slot using the owning composition's TickRate. length-preserving."
+      "example": true
     },
     "Marker.SetURL": {
       "kind": "method",
       "file": "marker.md",
       "anchor": "#markerseturl",
       "signature": "func (m *Marker) SetURL(s string) error",
-      "summary": "SetURL rewrites the marker's web-target URL (third Utf8)."
+      "summary": "Rewrites the third Utf8 child of the Nmrd block."
     },
     "Marker.Time": {
       "kind": "field",
@@ -4305,7 +4297,7 @@
       "file": "project.md",
       "anchor": "#projectsetbitsperchannel",
       "signature": "func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error",
-      "summary": "SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc) to BOTH the nhed @0x0F and nnhd @0x18 header bytes. AE stores the enum redundantly; we keep both in sync."
+      "summary": "Writes to BOTH the nhed offset 0x0F and nnhd offset 0x18 header bytes — AE stores the enum redundantly, so both copies are kept in sync. Accepts the BPC8 / BPC16 / BPC32 constants; other values are written verbatim (in case AE introduces e.g. half-float later) but produce a less obvious AE UI state."
     },
     "Project.SetColorManagementSystem": {
       "kind": "method",
@@ -4367,15 +4359,13 @@
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetlinearblending",
-      "signature": "func (p *Project) SetLinearBlending(v bool) error",
-      "summary": "SetLinearBlending toggles the lnrb chunk under root."
+      "signature": "func (p *Project) SetLinearBlending(v bool) error"
     },
     "Project.SetLinearizeWorkingSpace": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetlinearizeworkingspace",
-      "signature": "func (p *Project) SetLinearizeWorkingSpace(v bool) error",
-      "summary": "SetLinearizeWorkingSpace toggles the lnrp chunk under root."
+      "signature": "func (p *Project) SetLinearizeWorkingSpace(v bool) error"
     },
     "Project.SetLutInterpolationMethod": {
       "kind": "method",
@@ -4475,14 +4465,13 @@
       "anchor": "#projectwriteaep",
       "signature": "func (p *Project) WriteAEP(w io.Writer) error",
       "example": true,
-      "summary": "WriteAEP serializes the (possibly mutated) project back to RIFX binary form. Sizes are recomputed from the current chunk data, so mutations such as Footage.SetPath that change byte lengths are handled correctly."
+      "summary": "Sizes are recomputed from the current chunk data, so mutations such as Footage.SetPath that change byte lengths are handled correctly. This is best-effort write-back: only a small subset of the .aep format is understood, and chunks that aren't recognized pass through byte-for-byte. The scene-graph to chunk sync (shape layers / render queue / guides / head counters) runs in the writer back-ref before the RIFX tree is written, so this method itself never touches chunk bytes directly."
     },
     "Project.WriteJSON": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectwritejson",
-      "signature": "func (p *Project) WriteJSON(w io.Writer) error",
-      "summary": "WriteJSON writes the project as indented JSON to w."
+      "signature": "func (p *Project) WriteJSON(w io.Writer) error"
     },
     "Project.XmpPacket": {
       "kind": "getter",
@@ -4790,31 +4779,27 @@
       "file": "property.md",
       "anchor": "#propertysetexpression",
       "signature": "func (p *Property) SetExpression(source string) error",
-      "example": true,
-      "summary": "SetExpression rewrites the JavaScript expression source attached to this property."
+      "example": true
     },
     "Property.SetExpressionEnabled": {
       "kind": "method",
       "file": "property.md",
       "anchor": "#propertysetexpressionenabled",
       "signature": "func (p *Property) SetExpressionEnabled(enabled bool) error",
-      "example": true,
-      "summary": "SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself)."
+      "example": true
     },
     "Property.SetLockedRatio": {
       "kind": "method",
       "file": "property.md",
       "anchor": "#propertysetlockedratio",
-      "signature": "func (p *Property) SetLockedRatio(v bool) error",
-      "summary": "SetLockedRatio sets the locked ratio flag on the property. Writes to tdsb @0x02 bit 4 (length-preserving)."
+      "signature": "func (p *Property) SetLockedRatio(v bool) error"
     },
     "Property.SetStaticValue": {
       "kind": "method",
       "file": "property.md",
       "anchor": "#propertysetstaticvalue",
       "signature": "func (p *Property) SetStaticValue(v any) error",
-      "example": true,
-      "summary": "SetStaticValue rewrites a property's constant value in-place (only valid for properties without keyframes — those with a cdat chunk)."
+      "example": true
     },
     "Property.StaticValue": {
       "kind": "field",

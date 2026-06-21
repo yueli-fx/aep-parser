@@ -12,10 +12,17 @@ import (
 // serializer-side syncGuides copies the mutated copies back into each comp's
 // Gide ldat at WriteAEP time.
 
-// SetPosition sets the guide's pixel offset (>= 0). No-op when the guide has no
-// backing block (built outside the parser) or position is negative.
-//
-//aep:cap domain=comp tier=alpha verify=roundtrip boundary="length-preserving(16B scene-owned block;syncGuides 在 WriteAEP 时回写 ldat);负值/无 block 时静默 no-op;无专门 AE gate→round-trip" alias="guide position,参考线位置,ruler guide,标尺参考线"
+// @summary     Set the guide's pixel offset
+// @param       px  the new offset in pixels from the top or left edge (must be >= 0)
+// @domain      comp
+// @stability   alpha
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving: patches the guide's 16-byte scene-owned
+//   block, which is copied back into the composition's ldat at write time.
+//   Silently no-ops when the guide has no backing block (built outside the
+//   parser) or px is negative.
+// @alias       guide position,参考线位置,ruler guide,标尺参考线
 func (g *Guide) SetPosition(px float64) {
 	if g == nil || len(g.block) < codec.GuideItemSize || px < 0 {
 		return
@@ -24,10 +31,17 @@ func (g *Guide) SetPosition(px float64) {
 	g.Position = px
 }
 
-// SetOrientation sets the guide's orientation (GuideHorizontal / GuideVertical).
-// No-op when the guide has no backing block or the orientation is unrecognized.
-//
-//aep:cap domain=comp tier=alpha verify=roundtrip boundary="length-preserving(16B scene-owned block;syncGuides 在 WriteAEP 时回写 ldat);非法 orientation 值静默 no-op;无专门 AE gate→round-trip" alias="guide orientation,参考线方向,horizontal guide,vertical guide,水平参考线,垂直参考线"
+// @summary     Set the guide's orientation
+// @param       o  the new orientation (GuideHorizontal or GuideVertical)
+// @domain      comp
+// @stability   alpha
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving: patches the guide's 16-byte scene-owned
+//   block, which is copied back into the composition's ldat at write time.
+//   Silently no-ops when the guide has no backing block (built outside the
+//   parser) or o is not a recognized orientation value.
+// @alias       guide orientation,参考线方向,horizontal guide,vertical guide,水平参考线,垂直参考线
 func (g *Guide) SetOrientation(o GuideOrientation) {
 	if g == nil || len(g.block) < codec.GuideItemSize {
 		return

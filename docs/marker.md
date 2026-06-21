@@ -124,7 +124,13 @@ read-only
 func (m *Marker) SetChapter(s string) error
 ```
 
-SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd block).
+Set the marker's chapter-link text
+
+Rewrites the second Utf8 child of the Nmrd block.
+
+| Parameter | Description |
+|---|---|
+| `s` | the new chapter-link text |
 
 ### Marker.SetComment
 
@@ -132,9 +138,13 @@ SetChapter rewrites the marker's chapter-link text (second Utf8 in the Nmrd bloc
 func (m *Marker) SetComment(s string) error
 ```
 
-SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block). length-variable — the Utf8 chunk's data slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes.
+Set the marker's primary comment text
 
-Use SetChapter / SetURL / SetFrameTarget / SetCuePointName for the other four Utf8 slots (they fill in declaration order, so missing earlier slots are created as empty when a later slot is written).
+Rewrites the first Utf8 child of the Nmrd block. Use SetChapter / SetURL / SetFrameTarget / SetCuePointName for the other four Utf8 slots — they fill in declaration order, so writing a later slot creates any missing earlier slots as empty.
+
+| Parameter | Description |
+|---|---|
+| `s` | the new comment text |
 
 **Example:**
 
@@ -156,7 +166,13 @@ for _, m := range comp.Markers {
 func (m *Marker) SetCuePointName(s string) error
 ```
 
-SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flash-era; rarely populated in modern AE projects).
+Set the marker's cue-point name
+
+Rewrites the fifth Utf8 child of the Nmrd block — a legacy Flash-era field, rarely populated in modern AE projects.
+
+| Parameter | Description |
+|---|---|
+| `s` | the new cue-point name |
 
 ### Marker.SetDuration
 
@@ -164,9 +180,13 @@ SetCuePointName rewrites the marker's cue-point name (fifth Utf8 — legacy Flas
 func (m *Marker) SetDuration(seconds float64) error
 ```
 
-SetDuration writes a new marker duration (seconds) to NmHd @0x08. Encoded as uint32 BE in 600ths-of-a-second per py-aep documentation; see decodeNmHd doc comment for the offset rationale. length-preserving (4 bytes).
+Set the marker's duration
 
-`seconds == 0` produces a point marker. Negative durations clamp to 0.
+Encoded as a uint32 BE count of 600ths-of-a-second at NmHd offset 0x08. A duration of 0 produces a point marker; negative values clamp to 0.
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new marker duration in seconds |
 
 ### Marker.SetFrameDuration
 
@@ -188,7 +208,13 @@ Converts frame back to seconds via the owning composition's FrameRate, then dele
 func (m *Marker) SetFrameTarget(s string) error
 ```
 
-SetFrameTarget rewrites the marker's frame-target id (fourth Utf8).
+Set the marker's frame-target id
+
+Rewrites the fourth Utf8 child of the Nmrd block.
+
+| Parameter | Description |
+|---|---|
+| `s` | the new frame-target id |
 
 ### Marker.SetFrameTime
 
@@ -210,7 +236,13 @@ Converts frame back to seconds via the owning composition's FrameRate, then dele
 func (m *Marker) SetLabel(index uint8) error
 ```
 
-SetLabel writes a new timeline label-color index (0..16) to NmHd @0x10. Indices outside 0..16 are written verbatim (AE shows index 0 for unknown values but the byte round-trips). length-preserving (1 byte).
+Set the marker's timeline label color
+
+Indices outside the 0..16 label range are written verbatim — AE displays index 0 for unrecognized values but the byte still round-trips.
+
+| Parameter | Description |
+|---|---|
+| `index` | the new label-color index (0..16) |
 
 **Example:**
 
@@ -227,7 +259,11 @@ if comp := proj.CompositionByID(1); comp != nil && len(comp.Markers) > 0 {
 func (m *Marker) SetTime(seconds float64) error
 ```
 
-SetTime writes a new marker time (seconds) to the ldat keyframe slot using the owning composition's TickRate. length-preserving.
+Set the marker's time
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new marker time in seconds |
 
 **Example:**
 
@@ -244,7 +280,13 @@ if comp := proj.CompositionByID(1); comp != nil && len(comp.Markers) > 0 {
 func (m *Marker) SetURL(s string) error
 ```
 
-SetURL rewrites the marker's web-target URL (third Utf8).
+Set the marker's web-target URL
+
+Rewrites the third Utf8 child of the Nmrd block.
+
+| Parameter | Description |
+|---|---|
+| `s` | the new URL |
 
 ## Functions
 

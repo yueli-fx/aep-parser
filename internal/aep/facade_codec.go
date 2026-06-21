@@ -13,25 +13,38 @@ type GradientColorStop = codec.GradientColorStop
 // GradientAlphaStop represents a single alpha (opacity) stop in a gradient.
 type GradientAlphaStop = codec.GradientAlphaStop
 
-// ParseGradientXML parses AE gradient XML (prop.map format) into a *Gradient.
-// Returns nil when parsing fails or the XML is empty. Exposed so tests can
-// exercise the XML decoder without building a full RIFX tree.
-//
-//aep:cap domain=meta tier=stable verify=roundtrip alias="parse gradient xml,渐变解析,gradient stops"
+// @summary    Parse AE gradient XML into a Gradient
+// @param      xmlText  the gradient XML in prop.map format
+// @returns    the parsed gradient, or nil when parsing fails or the XML is empty
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @description Exposed so tests can exercise the XML decoder without
+//   building a full RIFX tree.
+// @alias      parse gradient xml,渐变解析,gradient stops
 func ParseGradientXML(xmlText string) *Gradient { return codec.ParseGradientXML(xmlText) }
 
-// EncodeGradientXML renders a *Gradient back into AE's prop.map XML form (the
-// inverse of ParseGradientXML). The byte layout — element order (Alpha Stops
-// before Color Stops), the 6-float color array [offset, midpoint, r, g, b, 1],
-// the 3-float alpha array [offset, midpoint, alpha], the trailing "Gradient
-// Colors" = "1.0" marker, and flat newline-separated lines with no indentation
-// — mirrors an AE 25.6-saved gradient fill verbatim so AE re-parses it without
-// complaint.
-//
-// Exposed so the serializer (lowerGradientFillNode) and tests can produce the
-// Utf8 chunk payload. The output round-trips through ParseGradientXML.
-//
-//aep:cap domain=meta tier=stable verify=roundtrip boundary="渐变写的底层编码器;面向用户的渐变能力是 NewGradientFillNode(render-gated)" alias="encode gradient xml,渐变编码,gradient stops"
+// @summary    Render a Gradient back into AE's prop.map XML form
+// @param      g  the gradient to encode
+// @returns    the gradient XML in prop.map format, round-trippable through ParseGradientXML
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @description The inverse of ParseGradientXML. The byte layout — element
+//   order (Alpha Stops before Color Stops), the 6-float color array
+//   [offset, midpoint, r, g, b, 1], the 3-float alpha array [offset,
+//   midpoint, alpha], the trailing "Gradient Colors" = "1.0" marker, and
+//   flat newline-separated lines with no indentation — mirrors an AE
+//   25.6-saved gradient fill verbatim so AE re-parses it without complaint.
+//   Exposed so the serializer's gradient-fill lowering path and tests can
+//   produce the Utf8 chunk payload directly. This is the low-level encoder;
+//   the user-facing gradient capability is the gradient-fill node
+//   constructor, which is gated separately.
+// @boundary   this is the low-level encoder used by the gradient-fill node
+//   constructor, which carries its own render-pixel gate
+// @alias      encode gradient xml,渐变编码,gradient stops
 func EncodeGradientXML(g *Gradient) string { return codec.EncodeGradientXML(g) }
 
 // PropertyStream[T] is the canonical V2.2 animation primitive. T parameterizes
@@ -65,7 +78,11 @@ const (
 	StreamModeAnimated StreamMode = codec.StreamModeAnimated
 )
 
-// NewPropertyStream returns a Static-mode stream holding the zero value of T.
-//
-//aep:cap domain=meta tier=stable verify=roundtrip alias="property stream,动画原语,V2.2 keyframe stream"
+// @summary    Create a static-mode property stream holding the zero value of T
+// @returns    a new PropertyStream in static mode
+// @domain     meta
+// @stability  stable
+// @verify     roundtrip
+// @since      AE2020
+// @alias      property stream,动画原语,keyframe stream
 func NewPropertyStream[T any]() *PropertyStream[T] { return codec.NewPropertyStream[T]() }

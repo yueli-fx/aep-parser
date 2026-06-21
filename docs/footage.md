@@ -253,7 +253,11 @@ read-only
 func (f *Footage) SetComment(comment string) error
 ```
 
-SetComment writes a project-panel comment on the footage item. Length-variable; same semantics as Composition.SetComment.
+Set the project-panel comment on a footage item
+
+| Parameter | Description |
+|---|---|
+| `comment` | the comment text to write |
 
 ### Footage.SetLabel
 
@@ -261,13 +265,25 @@ SetComment writes a project-panel comment on the footage item. Length-variable; 
 func (f *Footage) SetLabel(index uint8) error
 ```
 
-SetLabel writes the project-panel color label index for the footage.
+Set the project-panel color label index on a footage item
+
+| Parameter | Description |
+|---|---|
+| `index` | the color label index (0..16) |
 
 ### Footage.SetPath
 
 ```go
 func (f *Footage) SetPath(newPath string) error
 ```
+
+Set the footage's source path
+
+The change propagates to the underlying RIFX chunks: the alas JSON's "fullpath" field is rewritten in-place, and a legacy Cpth chunk, if any, is fully replaced. The next call to Project.WriteAEP serializes the new path. Returns an error if no writable path chunk exists for this footage (solids and placeholders never had one).
+
+| Parameter | Description |
+|---|---|
+| `newPath` | the new source path |
 
 **Example:**
 
@@ -287,13 +303,13 @@ for _, f := range proj.Footage {
 func (f *Footage) SetSolidColor(rgb [3]float64) error
 ```
 
-SetPath updates the footage's source path. The change is propagated to the underlying RIFX chunks (the alas JSON's "fullpath" field is rewritten in-place; a legacy Cpth chunk, if any, is fully replaced). The next call to Project.WriteAEP will serialize the new path.
+Set a solid footage item's color
 
-Returns an error if no writable path chunk exists for this footage (e.g. solids and placeholders never had one). SetSolidColor sets a solid footage item's color (RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE). length-preserving: the value lives inside the fixed-size opti "Soli" chunk. Every layer using this solid changes color, exactly like editing the solid's settings in AE.
+RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE. Every layer using this solid changes color, exactly like editing the solid's settings in AE. The same byte patch is applied by the NewSolidLayer create path.
 
-Returns an error when the footage is not a solid or the channel values are out of range.
-
-Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a parsed solid (AE reads the new color via SolidSource.color and keeps it across its own resave); the byte patch is also the one the ship-gated NewSolidLayer create path applies.
+| Parameter | Description |
+|---|---|
+| `rgb` | the new color, each channel in range 0..1 |
 
 ### Footage.SetSolidSize
 
@@ -301,6 +317,11 @@ Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a parsed 
 func (f *Footage) SetSolidSize(width, height int) error
 ```
 
-SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each, AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc chunk. Layers using the solid are not repositioned (same as resizing a solid in AE's settings dialog).
+Set a solid footage item's pixel dimensions
 
-Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a parsed solid (AE reads the new dimensions via FootageItem.width/height and keeps them across its own resave), same gate as SetSolidColor.
+Layers using the solid are not repositioned — same behavior as resizing a solid through AE's settings dialog. Shares its ship gate with SetSolidColor.
+
+| Parameter | Description |
+|---|---|
+| `width` | the new width in pixels, in range 1..30000 |
+| `height` | the new height in pixels, in range 1..30000 |

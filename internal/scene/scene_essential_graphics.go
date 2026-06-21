@@ -63,19 +63,22 @@ type EssentialGraphicsController struct {
 	UUID string
 }
 
-// SetMotionGraphicsTemplateName renames the comp's Motion Graphics template —
-// mirrors AE's CompItem.motionGraphicsTemplateName setter. The name is
-// rewritten in every persisted panel generation (AE stores three: CIFO, CIF2,
-// CIF3, each holding the name twice). length-variable: WriteAEP recomputes
-// parent LIST sizes. Returns an error for an empty name, or when the comp has
-// no Essential Graphics panel shell (comps saved by AE — and comps created by
-// NewComposition — always have one).
-//
-// Stable — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty
-// gate: the renamed template reads back via the scripting API and survives
-// AE's own resave); promoted from Alpha in the 2026-06-12 audit batch.
-//
-//aep:cap domain=eg tier=stable verify=ae-accept gate=TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025 boundary="length-variable(CIFO/CIF2/CIF3 各两处名字全部替换+父 LIST size 重算);空名拒绝;无 EG shell 拒绝" alias="motion graphics template name,MG 模板名,mogrt name,essential graphics name,模板重命名"
+// @summary     Rename the composition's Motion Graphics template
+// @param       name  the new template name (must be non-empty)
+// @domain      eg
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    mirrors AE's CompItem.motionGraphicsTemplateName setter. The
+//   name is rewritten in every persisted panel generation — AE stores three
+//   (CIFO, CIF2, CIF3), each holding the name twice — and the write is
+//   length-variable, so WriteAEP recomputes the parent LIST sizes. Rejects
+//   an empty name and rejects comps with no Essential Graphics panel shell
+//   (comps saved by AE, and comps created by NewComposition, always have
+//   one). The renamed template reads back via the scripting API and
+//   survives AE's own resave.
+// @alias       motion graphics template name,MG 模板名,mogrt name,essential graphics name,模板重命名
 func (c *Composition) SetMotionGraphicsTemplateName(name string) error {
 	if c.back == nil {
 		return fmt.Errorf("comp %q: no Item LIST reference (built outside parser?)", c.Name)

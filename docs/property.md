@@ -416,13 +416,11 @@ read-only
 func (p *Property) SetExpression(source string) error
 ```
 
-SetExpression rewrites the JavaScript expression source attached to this property.
+Rewrite the JavaScript expression source attached to a property
 
-length-variable — the underlying Utf8 chunk's data is replaced (or a new Utf8 chunk is inserted into the property's tdbs LIST when none existed previously; conversely, passing "" removes the chunk entirely, leaving the property with no expression).
-
-Note: AE has a separate Enable/Disable Expression toggle (in addition to the source). Removing the Utf8 chunk via SetExpression("") gets you the "no expression at all" state.
-
-Returns an error if the property is one built outside the parser (no owning tdbs LIST reference).
+| Parameter | Description |
+|---|---|
+| `source` | the expression source text; empty string removes the expression entirely |
 
 **Example:**
 
@@ -438,11 +436,11 @@ _ = pos.SetExpression("")	// clear the expression
 func (p *Property) SetExpressionEnabled(enabled bool) error
 ```
 
-SetExpressionEnabled toggles whether AE evaluates the property's expression at render time (separate knob from `SetExpression` which writes the JS source itself).
+Toggle whether AE evaluates the property's expression at render time
 
-RE'd against an AE-2025-native enabled/disabled fixture pair (expr_re, 2026-06-12): tdb4 byte @0x77 is the disabled flag (0 = AE evaluates, 1 = expression kept but off); the neighbouring @0x78 is a has-expression marker kept in sync by SetExpression. (The historic reading of @0x78 as an inverted enabled byte conflated the two — it made every SetExpression output render-dead, and writing @0x78=0 for "disabled" made AE drop the expression text entirely.) length-preserving (1 byte).
-
-Requires the property's tdbs to contain a `tdb4` chunk (always present for properties parsed from real .aep files). Returns an error otherwise.
+| Parameter | Description |
+|---|---|
+| `enabled` | true to let AE evaluate the expression, false to keep it attached but off |
 
 **Example:**
 
@@ -459,7 +457,11 @@ _ = op.SetExpressionEnabled(true)	// resume
 func (p *Property) SetLockedRatio(v bool) error
 ```
 
-SetLockedRatio sets the locked ratio flag on the property. Writes to tdsb @0x02 bit 4 (length-preserving).
+Set the property's locked-ratio flag
+
+| Parameter | Description |
+|---|---|
+| `v` | true to lock the ratio, false to unlock it |
 
 ### Property.SetStaticValue
 
@@ -467,7 +469,11 @@ SetLockedRatio sets the locked ratio flag on the property. Writes to tdsb @0x02 
 func (p *Property) SetStaticValue(v any) error
 ```
 
-SetStaticValue rewrites a property's constant value in-place (only valid for properties without keyframes — those with a cdat chunk).
+Rewrite a property's constant value in place
+
+| Parameter | Description |
+|---|---|
+| `v` | the new value (float64 for 1D, []float64 matching Components for multi-D) |
 
 **Example:**
 
@@ -601,7 +607,13 @@ Converts frame back to seconds via the owning composition's FrameRate, then dele
 func (k *Keyframe) SetInInterp(t InterpType) error
 ```
 
-SetInInterp / SetOutInterp write a new interpolation enum byte to the keyframe block @0x04 / @0x05. length-preserving (1 byte).
+Set the keyframe's in-side interpolation type
+
+See SetOutInterp for the out side.
+
+| Parameter | Description |
+|---|---|
+| `t` | the new in-interpolation type |
 
 ### Keyframe.SetInSpatialTangent
 
@@ -609,7 +621,13 @@ SetInInterp / SetOutInterp write a new interpolation enum byte to the keyframe b
 func (k *Keyframe) SetInSpatialTangent(v []float64) error
 ```
 
-SetInSpatialTangent / SetOutSpatialTangent write 3D Bezier tangent vectors. Only valid for spatial properties (Position / AnchorPoint with motion path enabled). Slice length must equal `Property.Components`. length-preserving (dims × 8 bytes).
+Set the keyframe's in-side spatial Bezier tangent
+
+Only valid for spatial properties (Position / AnchorPoint with motion path enabled). See SetOutSpatialTangent for the out side.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new tangent vector; length must equal |
 
 **Example:**
 
@@ -626,12 +644,13 @@ if pos := layer.Position(); pos != nil && len(pos.Keyframes) > 0 {
 func (k *Keyframe) SetInTemporalEase(eases []TemporalEase) error
 ```
 
-SetInTemporalEase writes a new per-side temporal ease list to the keyframe. The slice length must match the keyframe's current ease shape:
+Set the keyframe's in-side temporal ease
 
-- spatial property (Position / Anchor) or 1D non-spatial: length 1
-- non-spatial N-D (Scale 3D / Feather 2D / 4D color): length N
+The slice length must match the keyframe's current ease shape: a spatial property (Position / Anchor) or 1D non-spatial property takes length 1; a non-spatial N-D property (Scale 3D / Feather 2D / 4D color) takes length N.
 
-length-preserving (8 or 16 bytes per ease, fixed offsets per layout).
+| Parameter | Description |
+|---|---|
+| `eases` | the new per-component in-ease values |
 
 **Example:**
 
@@ -649,7 +668,13 @@ if opa := layer.Opacity(); opa != nil && len(opa.Keyframes) > 0 {
 func (k *Keyframe) SetOutInterp(t InterpType) error
 ```
 
-SetOutInterp see SetInInterp.
+Set the keyframe's out-side interpolation type
+
+See SetInInterp for the in side.
+
+| Parameter | Description |
+|---|---|
+| `t` | the new out-interpolation type |
 
 ### Keyframe.SetOutSpatialTangent
 
@@ -657,7 +682,13 @@ SetOutInterp see SetInInterp.
 func (k *Keyframe) SetOutSpatialTangent(v []float64) error
 ```
 
-SetOutSpatialTangent see SetInSpatialTangent.
+Set the keyframe's out-side spatial Bezier tangent
+
+Only valid for spatial properties (Position / AnchorPoint with motion path enabled). See SetInSpatialTangent for the in side.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new tangent vector; length must equal |
 
 ### Keyframe.SetOutTemporalEase
 
@@ -665,7 +696,13 @@ SetOutSpatialTangent see SetInSpatialTangent.
 func (k *Keyframe) SetOutTemporalEase(eases []TemporalEase) error
 ```
 
-SetOutTemporalEase mirrors SetInTemporalEase for the out side.
+Set the keyframe's out-side temporal ease
+
+Mirrors SetInTemporalEase for the out side; the slice length must match the keyframe's current ease shape.
+
+| Parameter | Description |
+|---|---|
+| `eases` | the new per-component out-ease values |
 
 ### Keyframe.SetTime
 
@@ -673,7 +710,13 @@ SetOutTemporalEase mirrors SetInTemporalEase for the out side.
 func (k *Keyframe) SetTime(seconds float64) error
 ```
 
-SetTime rewrites this keyframe's time in-place using its owning composition's TickRate (decoded at parse time from cdta). Chunk size does not change, so writing the project back never relocates anything.
+Set the keyframe's time
+
+Uses the owning composition's TickRate, decoded at parse time from cdta.
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new keyframe time in seconds |
 
 **Example:**
 
@@ -690,9 +733,13 @@ if pos := layer.Position(); pos != nil && len(pos.Keyframes) > 0 {
 func (k *Keyframe) SetValue(v any) error
 ```
 
-SetValue rewrites this keyframe's numeric value in-place.
+Set the keyframe's numeric value
 
-For a 1D property pass a float64. For a multi-component property pass []float64 of exact length equal to the property's component count. Length-preserving: chunk size is unchanged.
+For a 1D property pass a float64. For a multi-component property pass []float64 with exact length equal to the property's component count.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new value: float64 for 1D, []float64 matching the |
 
 **Example:**
 

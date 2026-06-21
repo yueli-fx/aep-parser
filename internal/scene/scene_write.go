@@ -8,19 +8,23 @@ import (
 	"strings"
 )
 
-// WriteAEP serializes the (possibly mutated) project back to RIFX binary
-// form. Sizes are recomputed from the current chunk data, so mutations
-// such as Footage.SetPath that change byte lengths are handled correctly.
-//
-// This is best-effort write-back. The library only understands a small
-// subset of the .aep format; chunks we don't know about pass through
-// byte-for-byte. If After Effects rejects the output, file a sample.
-//
-// The scene-graph → chunk sync (shape layers / render queue / guides / head
-// counters) runs inside the writer back-ref (serializer stage) before the
-// RIFX tree is written, so this thin scene method stays serializer-free.
-//
-//aep:cap domain=io tier=stable verify=roundtrip boundary="核心写回;被全部结构性 ship-gate 间接覆盖;无单一专属 AE gate 可精确引用" alias="write aep,写回,serialize,binary write,RIFX write,WriteAEP"
+// @summary     Serialize the project back to RIFX binary form
+// @description Sizes are recomputed from the current chunk data, so
+//   mutations such as Footage.SetPath that change byte lengths are handled
+//   correctly. This is best-effort write-back: only a small subset of the
+//   .aep format is understood, and chunks that aren't recognized pass
+//   through byte-for-byte. The scene-graph to chunk sync (shape layers /
+//   render queue / guides / head counters) runs in the writer back-ref
+//   before the RIFX tree is written, so this method itself never touches
+//   chunk bytes directly.
+// @param       w  the destination to write the binary project to
+// @domain      io
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    this is the core write-back path, indirectly covered by every
+//   structural ship gate; no single AE gate exercises it in isolation
+// @alias       write aep,写回,serialize,binary write,RIFX write,WriteAEP
 func (p *Project) WriteAEP(w io.Writer) error {
 	if p.back == nil {
 		return fmt.Errorf("aep: project has no underlying RIFX tree (was it built from FromReader?)")
@@ -28,17 +32,21 @@ func (p *Project) WriteAEP(w io.Writer) error {
 	return p.back.WriteAEP(p, w)
 }
 
-// SetBitsPerChannel writes the project's color depth (8 / 16 / 32 bpc)
-// to BOTH the nhed @0x0F and nnhd @0x18 header bytes. AE stores the
-// enum redundantly; we keep both in sync.
-//
-// Accepts the existing `BPC8` / `BPC16` / `BPC32` constants. Other
-// values are written verbatim (in case AE introduces e.g. half-float
-// later) but produce a less obvious AE UI state.
-//
-// length-preserving (2 bytes total).
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nhed+nnhd 各 1 字节,共 2 字节);enum 校验(8/16/32 bpc);双版本 AE gated(project_settings,app.project.bitsPerChannel DOM readback=16)" alias="bits per channel,颜色深度,color depth,bpc,8bpc,16bpc,32bpc"
+// @summary     Set the project's color bit depth
+// @description Writes to BOTH the nhed offset 0x0F and nnhd offset 0x18
+//   header bytes — AE stores the enum redundantly, so both copies are kept
+//   in sync. Accepts the BPC8 / BPC16 / BPC32 constants; other values are
+//   written verbatim (in case AE introduces e.g. half-float later) but
+//   produce a less obvious AE UI state.
+// @param       bpc  the new bit depth (8 / 16 / 32 bits per channel)
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving (2 bytes total, 1 in each header); verified
+//   by reading app.project.bitsPerChannel back through the AE DOM
+// @alias       bits per channel,颜色深度,color depth,bpc,8bpc,16bpc,32bpc
 func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
 	if p.back == nil {
 		return fmt.Errorf("project: header chunks missing (built outside parser?)")
@@ -50,27 +58,21 @@ func (p *Project) SetBitsPerChannel(bpc BitsPerChannel) error {
 	return nil
 }
 
-// SetPath updates the footage's source path. The change is propagated to
-// the underlying RIFX chunks (the alas JSON's "fullpath" field is rewritten
-// in-place; a legacy Cpth chunk, if any, is fully replaced). The next call
-// to Project.WriteAEP will serialize the new path.
-//
-// Returns an error if no writable path chunk exists for this footage
-// (e.g. solids and placeholders never had one).
-// SetSolidColor sets a solid footage item's color (RGB, each channel 0..1 —
-// alpha is pinned to 1.0, matching AE). length-preserving: the value lives
-// inside the fixed-size opti "Soli" chunk. Every layer using this solid
-// changes color, exactly like editing the solid's settings in AE.
-//
-// Returns an error when the footage is not a solid or the channel values are
-// out of range.
-//
-// Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a
-// parsed solid (AE reads the new color via SolidSource.color and keeps it
-// across its own resave); the byte patch is also the one the ship-gated
-// NewSolidLayer create path applies.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestSolidSetters_AEShipGate_AE2020,TestSolidSetters_AEShipGate_AE2025 boundary="length-preserving;opti Soli chunk;AE scripting API 验值(SolidSource.color)" alias="solid color,固态层颜色,solid colour,background color,纯色颜色"
+// @summary     Set a solid footage item's color
+// @description RGB, each channel 0..1 — alpha is pinned to 1.0, matching AE.
+//   Every layer using this solid changes color, exactly like editing the
+//   solid's settings in AE. The same byte patch is applied by the
+//   NewSolidLayer create path.
+// @param       rgb  the new color, each channel in range 0..1
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestSolidSetters_AEShipGate_AE2020,TestSolidSetters_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving — the value lives inside the fixed-size
+//   opti "Soli" chunk; verified by reading SolidSource.color back through
+//   the AE scripting API
+// @alias       solid color,固态层颜色,solid colour,background color,纯色颜色
 func (f *Footage) SetSolidColor(rgb [3]float64) error {
 	if !f.IsSolid {
 		return fmt.Errorf("footage %d (%q): not a solid", f.ID, f.Name)
@@ -90,16 +92,21 @@ func (f *Footage) SetSolidColor(rgb [3]float64) error {
 	return nil
 }
 
-// SetSolidSize sets a solid footage item's pixel dimensions (1..30000 each,
-// AE's solid ceiling). length-preserving: u16 fields inside the fixed sspc
-// chunk. Layers using the solid are not repositioned (same as resizing a
-// solid in AE's settings dialog).
-//
-// Stable — AE 2020 + AE 2025 ship-gate green as a standalone setter on a
-// parsed solid (AE reads the new dimensions via FootageItem.width/height and
-// keeps them across its own resave), same gate as SetSolidColor.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestSolidSetters_AEShipGate_AE2020,TestSolidSetters_AEShipGate_AE2025 boundary="length-preserving;sspc chunk u16 fields;range 1..30000;AE scripting API 验值(FootageItem.width/height)" alias="solid size,固态层尺寸,solid dimensions,solid width,solid height,纯色大小"
+// @summary     Set a solid footage item's pixel dimensions
+// @description Layers using the solid are not repositioned — same behavior
+//   as resizing a solid through AE's settings dialog. Shares its ship gate
+//   with SetSolidColor.
+// @param       width   the new width in pixels, in range 1..30000
+// @param       height  the new height in pixels, in range 1..30000
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestSolidSetters_AEShipGate_AE2020,TestSolidSetters_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving — u16 fields inside the fixed sspc chunk,
+//   AE's solid ceiling is 30000; verified by reading
+//   FootageItem.width/height back through the AE scripting API
+// @alias       solid size,固态层尺寸,solid dimensions,solid width,solid height,纯色大小
 func (f *Footage) SetSolidSize(width, height int) error {
 	if !f.IsSolid {
 		return fmt.Errorf("footage %d (%q): not a solid", f.ID, f.Name)
@@ -117,7 +124,21 @@ func (f *Footage) SetSolidSize(width, height int) error {
 	return nil
 }
 
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-variable(alas JSON fullpath rewrite + Cpth chunk 全替换);素材路径重定向;无专门 AE gate→round-trip" alias="set path,footage path,素材路径,relink footage,replace footage,文件路径"
+// @summary     Set the footage's source path
+// @description The change propagates to the underlying RIFX chunks: the
+//   alas JSON's "fullpath" field is rewritten in-place, and a legacy Cpth
+//   chunk, if any, is fully replaced. The next call to Project.WriteAEP
+//   serializes the new path. Returns an error if no writable path chunk
+//   exists for this footage (solids and placeholders never had one).
+// @param       newPath  the new source path
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-variable (alas JSON fullpath rewrite plus a full Cpth
+//   chunk replacement) — relinks the footage path; no dedicated AE gate,
+//   verified by round-trip
+// @alias       set path,footage path,素材路径,relink footage,replace footage,文件路径
 func (f *Footage) SetPath(newPath string) error {
 	if f.back == nil {
 		return fmt.Errorf("footage %d (%q): no path chunks present (solid/placeholder?)", f.ID, f.Name)

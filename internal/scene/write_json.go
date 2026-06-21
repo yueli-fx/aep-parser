@@ -766,9 +766,16 @@ func (p *Project) MarshalJSON() ([]byte, error) {
 	return json.Marshal(p.ToJSON())
 }
 
-// WriteJSON writes the project as indented JSON to w.
-//
-//aep:cap domain=io tier=stable verify=roundtrip boundary="JSON 单向导出(无 ReadJSON);确定性 + golden 测试验证;不涉及 AE" alias="write json,json 导出,export json,序列化"
+// @summary     Write the project as indented JSON
+// @param       w  the destination writer
+// @domain      io
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    one-way export — there is no corresponding ReadJSON. Output is
+//   deterministic and checked against golden fixtures; this path does not
+//   involve AE.
+// @alias       write json,json 导出,export json,序列化
 func (p *Project) WriteJSON(w io.Writer) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")

@@ -2,29 +2,27 @@ package scene
 
 import "fmt"
 
-// SetTrackMatteSource designates `src` as this layer's explicit track-matte
-// source and writes the matte mode. Mirrors AE ScriptingAPI 23+
-// layer.setTrackMatte(srcLayer, type). Requires AE 23+ ldta (the @0xA0
-// slot — re-save through AE 23+ first on AE 22 / 2020 files).
-//
-// On success, writes ldta @0xA0..0xA3 = src.ID (4 bytes BE) and
-// @0x6B = mode (1 byte). length-preserving. Delegates byte writes to
-// SetTrackMatteLayer; this wrapper provides the *Layer-arg parity with AE
-// scripting plus early validation (nil / cross-comp / self) with clearer
-// error messages.
-//
-// Refuse-cases:
-//   - src == nil
-//   - either layer lacks a comp back-pointer (built outside parser)
-//   - cross-comp matte (src.comp != l.comp); AE 23+ requires same-comp
-//   - self-matte (src.ID == l.ID)
-//   - ldta too short — caught and surfaced by SetTrackMatteLayer
-//
-// Pass mode=TrackMatteNone with non-nil src for "preserve target, no
-// matte applied" — AE allows that (source pointer stored, matte channel
-// disabled). To fully clear, use ClearTrackMatteLayer().
-//
-//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestTrackMatteExplicit_AEShipGate_AE2025 minver=2023 boundary="ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级);length-preserving;AE 23+ ldta 专属;委托 SetTrackMatteLayer;nil/跨 comp/自 matte 拒绝;track_matte_explicit DOM trackMatteLayer+type 对;双版本不可达(fingerprint,同 SetTrackMatteLayer)" alias="set track matte source,track matte,setTrackMatte,设置遮罩来源,遮罩图层"
+// @summary     Set another layer as this layer's explicit track-matte source
+// @param       src   the layer to use as the matte source
+// @param       mode  the matte mode to apply
+// @domain      layer-set
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTrackMatteExplicit_AEShipGate_AE2025
+// @since       AE2025
+// @boundary    mirrors AE ScriptingAPI 23+'s layer.setTrackMatte(srcLayer,
+//   type) and requires the AE 23+ ldta layout (the @0xA0 slot) — files saved
+//   by AE 22 / 2020 need a resave through AE 23+ first. length-preserving:
+//   writes ldta @0xA0..0xA3 = src.ID (4 bytes BE) and @0x6B = mode (1 byte),
+//   delegating to SetTrackMatteLayer. Refuses a nil src, either layer
+//   lacking a comp back-pointer, a cross-comp matte (AE 23+ requires the
+//   same comp), and a self-matte (src.ID == the layer's own ID). Passing
+//   mode=TrackMatteNone with a non-nil src preserves the source pointer
+//   while disabling the matte channel; use ClearTrackMatteLayer to fully
+//   clear it. The ship gate is single-version because no intermediate AE
+//   target both produces this layout and survives the next version's
+//   forward compatibility check, so a two-version gate is not reachable.
+// @alias       set track matte source,track matte,setTrackMatte,设置遮罩来源,遮罩图层
 func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error {
 	if src == nil {
 		return fmt.Errorf("SetTrackMatteSource: matte source is nil")

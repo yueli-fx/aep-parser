@@ -14,10 +14,16 @@ import (
 // length-variable — the underlying Utf8 chunk's bytes can grow or
 // shrink; WriteAEP recomputes all parent LIST sizes.
 
-// SetTime writes a new marker time (seconds) to the ldat keyframe slot
-// using the owning composition's TickRate. length-preserving.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving(ldat tick write);双版本 AE gated(marker-fields;AE DOM keyTime=3.5 实读)" alias="marker time,标记时间,cue time,时间标记"
+// @summary     Set the marker's time
+// @param       seconds  the new marker time in seconds
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving (ldat tick write); verified by reading the
+//   marker's keyTime back through the AE DOM
+// @alias       marker time,标记时间,cue time,时间标记
 func (m *Marker) SetTime(seconds float64) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no ldat reference (built outside parser?)")
@@ -34,14 +40,19 @@ func (m *Marker) SetTime(seconds float64) error {
 	return nil
 }
 
-// SetDuration writes a new marker duration (seconds) to NmHd @0x08.
-// Encoded as uint32 BE in 600ths-of-a-second per py-aep documentation;
-// see decodeNmHd doc comment for the offset rationale.
-// length-preserving (4 bytes).
-//
-// `seconds == 0` produces a point marker. Negative durations clamp to 0.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving(4B NmHd);0 → point marker;负值夹至 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)" alias="marker duration,标记时长,cue duration,区间标记"
+// @summary     Set the marker's duration
+// @description Encoded as a uint32 BE count of 600ths-of-a-second at NmHd
+//   offset 0x08. A duration of 0 produces a point marker; negative values
+//   clamp to 0.
+// @param       seconds  the new marker duration in seconds
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving (4 bytes); verified by reading the marker's
+//   duration back through the AE DOM
+// @alias       marker duration,标记时长,cue duration,区间标记
 func (m *Marker) SetDuration(seconds float64) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
@@ -58,12 +69,19 @@ func (m *Marker) SetDuration(seconds float64) error {
 	return nil
 }
 
-// SetLabel writes a new timeline label-color index (0..16) to NmHd
-// @0x10. Indices outside 0..16 are written verbatim (AE shows index 0
-// for unknown values but the byte round-trips).
-// length-preserving (1 byte).
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving(1B NmHd @0x10);越界值写入并 round-trip;双版本 AE gated(marker-fields;AE DOM label=4 实读)" alias="marker label,标记颜色,label color,时间线颜色"
+// @summary     Set the marker's timeline label color
+// @description Indices outside the 0..16 label range are written verbatim —
+//   AE displays index 0 for unrecognized values but the byte still
+//   round-trips.
+// @param       index  the new label-color index (0..16)
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving (1 byte at NmHd offset 0x10); verified by
+//   reading the marker's label back through the AE DOM
+// @alias       marker label,标记颜色,label color,时间线颜色
 func (m *Marker) SetLabel(index uint8) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no NmHd reference (built outside parser?)")
@@ -75,15 +93,21 @@ func (m *Marker) SetLabel(index uint8) error {
 	return nil
 }
 
-// SetComment rewrites the marker's primary comment text (first Utf8
-// child of the Nmrd block). length-variable — the Utf8 chunk's data
-// slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes.
-//
-// Use SetChapter / SetURL / SetFrameTarget / SetCuePointName for the
-// other four Utf8 slots (they fill in declaration order, so missing
-// earlier slots are created as empty when a later slot is written).
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025 boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用" alias="marker comment,标记注释,cue point comment,标记文本"
+// @summary     Set the marker's primary comment text
+// @description Rewrites the first Utf8 child of the Nmrd block. Use
+//   SetChapter / SetURL / SetFrameTarget / SetCuePointName for the other
+//   four Utf8 slots — they fill in declaration order, so writing a later
+//   slot creates any missing earlier slots as empty.
+// @param       s  the new comment text
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarker_AEShipGate_AE2020,TestMarker_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable — the Utf8 chunk's data is replaced wholesale
+//   and ancestor LIST sizes are recomputed; gated by calling this after
+//   AddMarker
+// @alias       marker comment,标记注释,cue point comment,标记文本
 func (m *Marker) SetComment(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -95,10 +119,18 @@ func (m *Marker) SetComment(s string) error {
 	return nil
 }
 
-// SetChapter rewrites the marker's chapter-link text (second Utf8 in
-// the Nmrd block).
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM chapter=ch1 实读)" alias="marker chapter,章节链接,chapter link"
+// @summary     Set the marker's chapter-link text
+// @description Rewrites the second Utf8 child of the Nmrd block.
+// @param       s  the new chapter-link text
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable — the Utf8 chunk's data is replaced wholesale
+//   and ancestor LIST sizes are recomputed; verified by reading the
+//   marker's chapter back through the AE DOM
+// @alias       marker chapter,章节链接,chapter link
 func (m *Marker) SetChapter(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -110,9 +142,18 @@ func (m *Marker) SetChapter(s string) error {
 	return nil
 }
 
-// SetURL rewrites the marker's web-target URL (third Utf8).
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM url 实读)" alias="marker url,web link,网址,超链接"
+// @summary     Set the marker's web-target URL
+// @description Rewrites the third Utf8 child of the Nmrd block.
+// @param       s  the new URL
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable — the Utf8 chunk's data is replaced wholesale
+//   and ancestor LIST sizes are recomputed; verified by reading the
+//   marker's URL back through the AE DOM
+// @alias       marker url,web link,网址,超链接
 func (m *Marker) SetURL(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -124,9 +165,18 @@ func (m *Marker) SetURL(s string) error {
 	return nil
 }
 
-// SetFrameTarget rewrites the marker's frame-target id (fourth Utf8).
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);双版本 AE gated(marker-fields;AE DOM frameTarget=ft1 实读)" alias="marker frame target,frame target,帧目标"
+// @summary     Set the marker's frame-target id
+// @description Rewrites the fourth Utf8 child of the Nmrd block.
+// @param       s  the new frame-target id
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable — the Utf8 chunk's data is replaced wholesale
+//   and ancestor LIST sizes are recomputed; verified by reading the
+//   marker's frame target back through the AE DOM
+// @alias       marker frame target,frame target,帧目标
 func (m *Marker) SetFrameTarget(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
@@ -138,10 +188,19 @@ func (m *Marker) SetFrameTarget(s string) error {
 	return nil
 }
 
-// SetCuePointName rewrites the marker's cue-point name (fifth Utf8 —
-// legacy Flash-era; rarely populated in modern AE projects).
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-variable(Utf8 chunk 替换+父 LIST size 重算);Flash 遗留字段;双版本 AE gated(marker-fields;AE DOM cuePointName=cue1 实读)" alias="cue point name,提示点名称,flash cue"
+// @summary     Set the marker's cue-point name
+// @description Rewrites the fifth Utf8 child of the Nmrd block — a
+//   legacy Flash-era field, rarely populated in modern AE projects.
+// @param       s  the new cue-point name
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable — the Utf8 chunk's data is replaced wholesale
+//   and ancestor LIST sizes are recomputed; verified by reading the
+//   marker's cue-point name back through the AE DOM
+// @alias       cue point name,提示点名称,flash cue
 func (m *Marker) SetCuePointName(s string) error {
 	if m.back == nil {
 		return fmt.Errorf("marker: no Nmrd reference (built outside parser?)")
