@@ -21,9 +21,9 @@ import (
 //     file.
 //   - For projects built via NewProject the template-loader populates these
 //     fields from the bundled .aep template (parsed re-parse closed loop).
-//   - opaque is reserved for future V3 phases that need to round-trip
-//     unrecognized root-level chunks (per CLAUDE.md hard constraint #5);
-//     currently nil.
+//   - opaque is reserved for a future phase that needs to round-trip
+//     unrecognized root-level chunks (to satisfy the opaque-preservation
+//     invariant); currently nil.
 type projectBackrefs struct {
 	// root keeps the original RIFX chunk tree so callers can mutate leaf
 	// chunks (e.g. Footage.SetPath) and re-serialize via WriteAEP.
@@ -39,7 +39,7 @@ type projectBackrefs struct {
 	nhedChunk *rifx.Chunk
 	nnhdChunk *rifx.Chunk
 
-	// Project-level single-field setting chunks (P1 1D, py-aep parity).
+	// Project-level single-field setting chunks (P1 1D, py-aep parity). //nolint:jargon
 	// Captured by parseProject when present; mutated by Set* methods.
 	// All exist as direct root children — see project_settings.go.
 	acerChunk *rifx.Chunk // 1B bool — compensate_for_scene_referred_profiles

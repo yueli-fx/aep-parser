@@ -170,7 +170,7 @@ read-only
 DisplayStartTime float64
 ```
 
-DisplayStartTime is the comp's display-time origin in seconds (AE scripting's CompItem.displayStartTime / displayStartFrame). Decoded from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE writes both 0 when displayStart is 0; non-zero pair encodes start-time in seconds. RE fixture: re_wave2_ae24.aep (RE_CDTA_DSF_120).
+DisplayStartTime is the comp's display-time origin in seconds (AE scripting's CompItem.displayStartTime / displayStartFrame). Decoded from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE writes both 0 when displayStart is 0; non-zero pair encodes start-time in seconds.
 
 read-write
 
@@ -378,7 +378,7 @@ func (c *Composition) FrameDuration() int
 
 FrameDuration returns the comp's total Duration as a frame count.
 
-Note: this differs from py-aep's `AVItem.frame_duration` (which is also the total duration in frames). It is NOT the duration of a single frame in seconds (= 1/FrameRate).
+Note: this is the total duration in frames. It is NOT the duration of a single frame in seconds (= 1/FrameRate).
 
 read-only
 
@@ -468,7 +468,7 @@ read-only
 func (c *Composition) NumLayers() int
 ```
 
-NumLayers returns the number of layers in the composition. Equivalent to len(c.Layers); provided for py-aep API parity.
+NumLayers returns the number of layers in the composition. Equivalent to len(c.Layers); provided as a convenience alias.
 
 read-only
 
@@ -548,7 +548,7 @@ read-only
 func (c *Composition) TimeScale() float64
 ```
 
-TimeScale is the per-comp ticks-per-second base used for keyframe and marker times. Alias of TickRate, matching py-aep's `comp.time_scale` naming for API parity. See [Composition.TickRate] for the full RE notes on cdta @0x08 / @0xA8 decoding.
+TimeScale is the per-comp ticks-per-second base used for keyframe and marker times. Alias of TickRate, provided as a naming convenience. See [Composition.TickRate] for the full notes on cdta @0x08 / @0xA8 decoding.
 
 read-only
 
@@ -1093,7 +1093,7 @@ read-only
 
 # EGControllerType object
 
-EGControllerType is an Essential Graphics controller's type code, as stored in its CTyp chunk. Values mirror py-aep's controller_type.
+EGControllerType is an Essential Graphics controller's type code, as stored in its CTyp chunk. Values match AE's internal controller numbering.
 
 ## Attributes
 

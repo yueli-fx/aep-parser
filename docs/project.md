@@ -127,8 +127,6 @@ func (p *Project) EffectNames() []string
 
 EffectNames returns the match-names of every effect referenced by the project, from the root-level `Pefl` LIST → `pjef` Utf8 entries. Returns nil when the project has no Pefl LIST (e.g., projects with no effects applied anywhere or builder-synthesized projects).
 
-Mirrors py-aep's `project.effect_names`.
-
 read-only
 
 ### Project.ExpressionEngine
@@ -137,7 +135,7 @@ read-only
 func (p *Project) ExpressionEngine() string
 ```
 
-ExpressionEngine returns the project's expression engine name ("extendscript" or "javascript-1.0"). Defaults to "extendscript" when the ExEn chunk is absent — matches py-aep's behavior.
+ExpressionEngine returns the project's expression engine name ("extendscript" or "javascript-1.0"). Defaults to "extendscript" when the ExEn chunk is absent.
 
 read-only
 
@@ -167,7 +165,7 @@ read-only
 func (p *Project) Footages() []*Footage
 ```
 
-Footages returns the project's footage items (alias of the Project.Footage slice field, named to match py-aep's `project.footages` for API parity).
+Footages returns the project's footage items (alias of the Project.Footage slice field, provided as a convenience).
 
 read-only
 
@@ -197,7 +195,7 @@ read-only
 func (p *Project) GpuAccelType() string
 ```
 
-GpuAccelType returns the project's GPU acceleration device id (UUID-style string inside the gpuG LIST → Utf8 child). py-aep models this as a labeled enum; we surface the raw string since AE writes a runtime-resolved device UUID. Empty string when the chunk is absent.
+GpuAccelType returns the project's GPU acceleration device id (UUID-style string inside the gpuG LIST → Utf8 child). We surface the raw string since AE writes a runtime-resolved device UUID. Empty string when the chunk is absent.
 
 read-only
 
@@ -329,7 +327,7 @@ func (p *Project) XmpPacket() string
 
 XmpPacket returns the project's XMP metadata packet (trailing UTF-8 XML after the RIFX root chunk). Returns "" when the file has no XMP trailer or the project was built outside the parser.
 
-py-aep parity: matches `Project.xmp_packet` reader. Currently R only — SetXmpPacket would require care to keep the AEP loader happy (AE may validate XML structure). Round-tripping through WriteAEP preserves the original bytes verbatim via Chunk.Trailing.
+Currently read-only — writing the packet would require care to keep the AEP loader happy (AE may validate XML structure). Round-tripping through WriteAEP preserves the original bytes verbatim via Chunk.Trailing.
 
 read-only
 
@@ -373,7 +371,7 @@ FootageByName returns the first footage item whose Name matches the given string
 func (p *Project) LayerByID(id uint32) *Layer
 ```
 
-LayerByID searches every composition in the project for a layer with the matching ID and returns the first hit. Returns nil for id == 0 (the "no layer" sentinel) and when no comp owns this id. Mirrors py-aep's `project.layer_by_id(id)`.
+LayerByID searches every composition in the project for a layer with the matching ID and returns the first hit. Returns nil for id == 0 (the "no layer" sentinel) and when no comp owns this id.
 
 ### Project.MarshalJSON
 

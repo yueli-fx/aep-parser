@@ -66,7 +66,7 @@ type Composition struct {
 	// scripting's CompItem.displayStartTime / displayStartFrame). Decoded
 	// from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE
 	// writes both 0 when displayStart is 0; non-zero pair encodes
-	// start-time in seconds. RE fixture: re_wave2_ae24.aep (RE_CDTA_DSF_120).
+	// start-time in seconds.
 	DisplayStartTime float64
 
 	// ShutterAngle is the motion-blur shutter angle in degrees (AE UI

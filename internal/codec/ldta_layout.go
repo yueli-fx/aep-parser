@@ -2,10 +2,10 @@
 package codec
 
 // Layer ldta byte offsets — single source of truth shared by parser
-// (parse_layer.go), writer (write_layer.go), and builder (V2.2 lower_layer.go).
+// (parse_layer.go), writer (write_layer.go), and builder (lower_layer.go).
 //
 // ldta canonical total size: 160 bytes (AE 2020 / 2022). AE 2025 emits 164
-// bytes with the trailing 4 bytes always zero. V2.2 builder targets the 160-B
+// bytes with the trailing 4 bytes always zero. The builder targets the 160-B
 // canonical layout; the trailing AE 2025 padding is treated as
 // length-preserving passthrough and does NOT enter the capability matrix.
 //
@@ -40,6 +40,6 @@ const (
 
 // ldta total size per AE version.
 const (
-	LdtaSize2020 = 160 // AE 2020 / 2022 canonical (V2.2 builder output)
+	LdtaSize2020 = 160 // AE 2020 / 2022 canonical (builder output)
 	LdtaSize2025 = 164 // AE 2025 — trailing 4 B always zero (length-preserving passthrough)
 )

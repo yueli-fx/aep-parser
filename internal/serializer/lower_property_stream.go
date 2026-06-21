@@ -6,7 +6,7 @@
 //
 // The builder ALWAYS emits cdat / the full keyframe substructure even when
 // values equal AE defaults. AE elides defaults in its own writer; we don't
-// replicate that (V3 may revisit). AE accepts the non-elided form.
+// replicate that (a future pass may revisit). AE accepts the non-elided form.
 //
 // Byte layouts are sourced from RE findings of AE-saved fixtures. Where a
 // single byte was observed but its meaning is unverified, the constant carries
@@ -25,9 +25,9 @@ import (
 
 // lowerCtx is the serializer-side lowering state. It carries lowering state
 // only — it does NOT hold runtime-graph handles. tickRate converts seconds →
-// ticks for keyframe time fields; capabilities is reserved for V3 (currently
-// always empty — see capability_matrix.go); nextLayerID is plumbed for the
-// layer-creation entry points.
+// ticks for keyframe time fields; capabilities is reserved for future use
+// (currently always empty — see capability_matrix.go); nextLayerID is
+// plumbed for the layer-creation entry points.
 type lowerCtx struct {
 	tickRate     float64
 	compDuration float64 // seconds — owning comp's Duration (for ldta out-point)
@@ -106,8 +106,8 @@ func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName stri
 		shap.Children = append(shap.Children, kfList)
 		shap.Children = append(shap.Children, &rifx.Chunk{ID: rifx.IDOmtn})
 	case codec.StreamModeAnimated:
-		// V2.2 emits the first keyframe's path as the static encoding; full
-		// path-keyframe animation is a V2.3+ topic. The chunk shape stays
+		// This emits the first keyframe's path as the static encoding; full
+		// path-keyframe animation is a future topic. The chunk shape stays
 		// valid because AE accepts a single-shape encoding.
 		var p BezierPath
 		kfs := ps.Keyframes()
@@ -143,7 +143,7 @@ type valueLayout struct {
 	motionPath bool
 	// spatialMarker overrides the @0x08 marker for spatial blocks. AE-native
 	// animated EFFECT params use a per-type value here — 2 for a color param,
-	// 3 for a 2D/3D point param (RE'd from re_anim_effect_colorpoint.aep) —
+	// 3 for a 2D/3D point param (RE'd from re_anim_effect_colorpoint.aep) — //nolint:jargon
 	// distinct from a layer-Position motion path's 1. 0 = fall back to
 	// motionPath (1) / none.
 	spatialMarker uint32
@@ -274,7 +274,7 @@ func makeTdsbContainer() *rifx.Chunk {
 //
 //	[ "Utf8" (4) | size uint32 BE (4) | name bytes | optional NUL ]
 //
-// V2.2 emits the bare format with no trailing NUL — AE accepts.
+// This implementation emits the bare format with no trailing NUL — AE accepts.
 func makeTdsn(displayName string) *rifx.Chunk {
 	nameBytes := []byte(displayName)
 	data := make([]byte, 8+len(nameBytes))
@@ -292,8 +292,8 @@ func makeTdsn(displayName string) *rifx.Chunk {
 // Bytes 0x04..0x05 = 0x0001 (constant); byte 0x06 = headerByte (observed
 // 0x07 for Orientation; 0x00 for scalars; etc.); byte 0x07 = 0x00.
 // The remaining 108 bytes are AE-internal padding + a trailing constant
-// `00 00 78 00` at 0x0C..0x0F (observed everywhere). V2.2 emits the
-// canonical 124-byte tdb4 with the head + zero padding to total 124.
+// `00 00 78 00` at 0x0C..0x0F (observed everywhere). This implementation
+// emits the canonical 124-byte tdb4 with the head + zero padding to total 124.
 func makeTdb4(layout valueLayout) *rifx.Chunk {
 	d := make([]byte, 124)
 	d[0] = 0xdb
@@ -321,9 +321,9 @@ func makeTdb4(layout valueLayout) *rifx.Chunk {
 //
 // AE's cdat padding (observed): 40B for dim=1, 48B for dim=2 non-spatial
 // (Position), 80B for dim=2 with hint-range / spatial (Size), 96B for dim=4
-// (Stroke Color). V2.2 picks a single canonical size per dim — value bytes
-// only depend on `dim*8`. The exact padding chosen is the AE-observed minimum
-// that's been seen to round-trip:
+// (Stroke Color). This implementation picks a single canonical size per dim —
+// value bytes only depend on `dim*8`. The exact padding chosen is the
+// AE-observed minimum that's been seen to round-trip:
 //
 //	dim=1 → 40B   dim=2 → 48B   dim=3 → 56B   dim=4 → 96B
 func makeCdat(valueBytes []byte, layout valueLayout) *rifx.Chunk {
@@ -545,7 +545,7 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	ShphData[0] = 0xb3
 	ShphData[1] = 0xde
 	// flags: observed 0x0201 (closed); open shapes likely 0x0200.
-	// V2.2 emits 0x0201 when Closed, else 0x0200.
+	// This implementation emits 0x0201 when Closed, else 0x0200.
 	if p.Closed {
 		ShphData[2] = 0x02
 		ShphData[3] = 0x01
@@ -581,7 +581,7 @@ func encodeBezier(p BezierPath) (shph, lhd3, ldat *rifx.Chunk) {
 	binary.BigEndian.PutUint32(lhd3Data[0x1C:0x20], 16)
 
 	// ldat — 24 B/vertex (6 × f32 BE), bbox-normalized. Per-vertex layout RE'd
-	// from AE-native fixtures (v2_2_shape_path_re.aep):
+	// from AE-native fixtures (v2_2_shape_path_re.aep): //nolint:jargon
 	//   [ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]
 	// i.e. anchor, THIS vertex's out-control, then the NEXT vertex's in-control
 	// (wraps mod n). NOT this vertex's own in/out — that mis-encoding rendered

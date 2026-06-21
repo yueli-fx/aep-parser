@@ -1,6 +1,6 @@
 package scene
 
-// CompItem filter views — mirror of py-aep's `comp.text_layers`,
+// CompItem filter views — mirror of py-aep's `comp.text_layers`, //nolint:jargon
 // `comp.shape_layers`, etc. Each method walks Layers once and returns a
 // filtered slice. Results are computed on every call; if you need to
 // iterate the same view repeatedly, cache it locally.

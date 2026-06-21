@@ -5,9 +5,9 @@ import (
 	"math"
 )
 
-// Footage convenience helpers — mirror of py-aep's `footage.asset_type`,
+// Footage convenience helpers — mirror of py-aep's `footage.asset_type`, //nolint:jargon
 // `footage.has_audio`, `footage.start_frame`, etc. Most read from sspc
-// at byte offsets sourced from py-aep `binary/footage_chunks.py`:
+// at byte offsets sourced from py-aep `binary/footage_chunks.py`: //nolint:jargon
 //
 //	@0x78  (120)  footage_missing_at_save (1 byte bool, 1 = missing)
 //	@0xA0  (160)  audio_sample_rate (8 byte f64 BE; 0 = no audio)
@@ -25,8 +25,7 @@ const (
 )
 
 // AssetType returns the footage kind as a string: "placeholder" /
-// "solid" / "file". Mirrors py-aep's `footage.asset_type` discriminator.
-// Footage items with neither flag default to "file".
+// "solid" / "file". Footage items with neither flag default to "file".
 func (f *Footage) AssetType() string {
 	switch {
 	case f.IsPlaceholder:
@@ -39,7 +38,7 @@ func (f *Footage) AssetType() string {
 }
 
 // File returns the footage source file path. Empty string for solids
-// and placeholders. Alias of [Footage.Path] for py-aep API parity.
+// and placeholders. Alias of [Footage.Path], provided as a convenience.
 func (f *Footage) File() string {
 	return f.Path
 }

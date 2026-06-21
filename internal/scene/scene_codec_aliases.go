@@ -17,6 +17,6 @@ type GradientColorStop = codec.GradientColorStop
 // GradientAlphaStop represents a single alpha (opacity) stop in a gradient.
 type GradientAlphaStop = codec.GradientAlphaStop
 
-// PropertyStream[T] is the canonical V2.2 animation primitive (time domain
+// PropertyStream[T] is the canonical animation primitive (time domain
 // seconds). T parameterizes the value shape (float64, [N]float64, BezierPath).
 type PropertyStream[T any] = codec.PropertyStream[T]

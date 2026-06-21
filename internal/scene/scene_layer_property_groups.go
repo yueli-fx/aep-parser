@@ -1,6 +1,6 @@
 package scene
 
-// P2c PropertyGroup hierarchy — Layer-level accessors mirroring py-aep's
+// P2c PropertyGroup hierarchy — Layer-level accessors mirroring py-aep's //nolint:jargon
 // `layer.transform()` / `layer.effects()` / etc. shortcuts. Each returns
 // the corresponding *AEPropertyGroup from the parsed tree, or nil when:
 //
@@ -126,7 +126,7 @@ func (l *Layer) GeometryOptionsGroup() *AEPropertyGroup {
 }
 
 // ShapeContentsGroup returns a shape layer's "ADBE Root Vectors Group",
-// or nil for non-shape layers. For typed access prefer the V2.2
+// or nil for non-shape layers. For typed access prefer the
 // ShapeLayer wrapper (see WrapShapeLayer).
 func (l *Layer) ShapeContentsGroup() *AEPropertyGroup {
 	return l.PropertyGroupByMatchName(MatchNameGroupShapeContents)

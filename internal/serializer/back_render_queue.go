@@ -27,7 +27,7 @@ type renderQueueItemBackrefs struct {
 
 	// itemListChunk is this item's LIST:list (output-module settings) chunk. It
 	// is the insertion anchor: a new RCom goes immediately before it, matching
-	// AE / py-aep per-item ordering [RCom] + list + 'LOm '.
+	// AE / py-aep per-item ordering [RCom] + list + 'LOm '. //nolint:jargon
 	itemListChunk *rifx.Chunk
 
 	// rcomChunk is the existing RCom wrapper leaf, or nil when the item carries
@@ -99,7 +99,7 @@ func renderQueueItemBack(it *RenderQueueItem) *renderQueueItemBackrefs {
 
 // SetComment writes the comment into the item's RCom wrapper chunk: it replaces
 // an existing RCom's payload, or inserts a fresh RCom into the LItm LIST
-// immediately before the item's settings list (matching AE / py-aep per-item
+// immediately before the item's settings list (matching AE / py-aep per-item //nolint:jargon
 // ordering [RCom] + list + 'LOm '). Setting "" on an item with no RCom is a
 // no-op. WriteAEP recomputes the LItm/LRdr LIST sizes. The scene-side Comment
 // field is synced by the RenderQueueItem delegate.
@@ -134,7 +134,7 @@ func (b *renderQueueItemBackrefs) SetComment(comment string) error {
 // encodeRComData builds the RCom wrapper body: one embedded Utf8 chunk
 // ("Utf8" + big-endian u32 length + raw UTF-8 payload), padded to an even
 // length with a trailing NUL when the payload length is odd. This mirrors how
-// AE / py-aep serialize the chunk (Utf8 carries no NUL terminator; the pad is
+// AE / py-aep serialize the chunk (Utf8 carries no NUL terminator; the pad is //nolint:jargon
 // the RIFX even-boundary pad). The inner chunk's even length keeps the RCom
 // body even, so the RCom leaf itself never needs an outer pad.
 func encodeRComData(comment string) []byte {

@@ -36,7 +36,7 @@ func parseFootage(item *rifx.Chunk, id uint32, fallbackName string) (*Footage, e
 	if sspc := src.FindFirst(rifx.IDSspc); sspc != nil && len(sspc.Data) >= 4 {
 		fb.sspcChunk = sspc
 		// Real AE sspc is 222 bytes with width/height at @0x20/@0x24
-		// (py-aep binary/footage_chunks.py::SspcChunk). Synthesized test
+		// (py-aep binary/footage_chunks.py::SspcChunk). Synthesized test //nolint:jargon
 		// fixtures use a short 4-byte sspc with width/height at byte 0/2.
 		// Pick the layout based on chunk length.
 		if len(sspc.Data) >= 38 {

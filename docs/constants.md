@@ -22,14 +22,14 @@ const (
 	LayerTypeLight		LayerType	= "light"	// 3D light
 	LayerTypeCamera		LayerType	= "camera"	// 3D camera
 	LayerTypeAdjust		LayerType	= "adjustment"	// adjustment layer
-	LayerType3DModel	LayerType	= "3d-model"	// 3D Model layer (AE 24+, py-aep ThreeDModelLayer)
+	LayerType3DModel	LayerType	= "3d-model"	// 3D Model layer (AE 24+)
 	LayerTypeUnknown	LayerType	= "unknown"
 )
 ```
 
 # BlendingMode object
 
-BlendingMode is the layer's compositing blend mode (ldta @0x63). Values match py-aep's BlendingMode enum / AE's internal numbering.
+BlendingMode is the layer's compositing blend mode (ldta @0x63). Values match AE's internal numbering.
 
 ## Constants
 

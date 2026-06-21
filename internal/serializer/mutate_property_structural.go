@@ -7,10 +7,10 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-// PropertyBase structural ops (py-aep parity P3 §3C): Remove / MoveTo on an
+// PropertyBase structural ops (py-aep parity P3 §3C): Remove / MoveTo on an //nolint:jargon
 // AEPropertyGroup that is a direct child of an INDEXED_GROUP parent.
 //
-// Behavior contract (RE'd from AE 2020, see
+// Behavior contract (RE'd from AE 2020, see //nolint:jargon
 // incidents/property-indexed-group-structural-re.md):
 //
 //   - AE refuses .remove()/.moveTo() unless the node's parentProperty is an
@@ -31,7 +31,7 @@ import (
 // Alpha until their own gate runs.
 
 // indexedGroupMatchNames is AE's fixed set of INDEXED_GROUP match-names
-// (mirrors py-aep _INDEXED_GROUP_MATCH_NAMES). Membership is the sole
+// (mirrors py-aep _INDEXED_GROUP_MATCH_NAMES). Membership is the sole //nolint:jargon
 // predicate for whether a group's direct children may be removed / reordered /
 // duplicated.
 // ownerLayer walks up to the synthetic property-tree root and returns the
@@ -87,7 +87,7 @@ func childTdmnPayload(parent *AEPropertyGroup, child PropertyBase) (tdmn, payloa
 // parent.Children scene order. The leading header chunks (tdsb / tdsn) and the
 // trailing "ADBE Group End" sentinel are preserved verbatim; each scene child
 // contributes its original (tdmn, payload) chunk pair — the SAME pointers, so
-// any opaque/undecoded content rides along unchanged (CLAUDE.md #5). pairs
+// any opaque/undecoded content rides along unchanged (opaque-preservation invariant). pairs
 // supplies the tdmn+payload for each child (captured before any scene-order
 // mutation). Returns an error without mutating when a child's pair is missing.
 func rebuildIndexedGroupChunk(parent *AEPropertyGroup, pairs map[PropertyBase][2]*rifx.Chunk) error {
@@ -390,7 +390,7 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	}
 
 	// Clone the (tdmn, payload) pair verbatim — opaque content rides along
-	// unchanged (CLAUDE.md #5).
+	// unchanged (opaque-preservation invariant).
 	tdmnClone := deepCloneChunk(srcTdmn)
 	payloadClone := deepCloneChunk(srcPayload)
 

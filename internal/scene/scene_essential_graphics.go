@@ -4,11 +4,11 @@ import "fmt"
 
 // scene_essential_graphics.go — Essential Graphics panel (EGP) model. AE
 // exposes composition properties as .mogrt controllers; the panel definition
-// lives in the comp's Item-level LIST:CIF3. Read-only (mirrors py-aep's
+// lives in the comp's Item-level LIST:CIF3. Read-only (mirrors py-aep's //nolint:jargon
 // EssentialGraphicsController). Decoded in parse_essential_graphics.go.
 
 // EGControllerType is an Essential Graphics controller's type code, as stored
-// in its CTyp chunk. Values mirror py-aep's controller_type.
+// in its CTyp chunk. Values match AE's internal controller numbering.
 type EGControllerType uint32
 
 const (

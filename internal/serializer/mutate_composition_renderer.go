@@ -28,7 +28,7 @@ import (
 // Atomic mutation: snapshot prin.Data / prda.Data / c.Renderer / warnings;
 // on any new parser warning, roll all back and return them as an error.
 //
-// prin/prda templates were RE'd from py-aep's renderer_{classic_3d,advanced_3d,
+// prin/prda templates were RE'd from py-aep's renderer_{classic_3d,advanced_3d, //nolint:jargon
 // cinema_4d,ray_traced}.aep fixtures (single comp each). The binary match_name
 // is the stable engine identity; the prda template is keyed by it (Escher 12B /
 // Calder 52B / Ernst 20B / Picasso 16B).
@@ -41,7 +41,7 @@ import (
 // Concurrency: like all mutate paths these touch shared chunk bytes; callers
 // serialize their own access (see incidents/concurrency-unsafe-shared-chunk-bytes).
 
-// prin layout (104B), per py-aep binary/misc_chunks.py PrinChunk:
+// prin layout (104B), per py-aep binary/misc_chunks.py PrinChunk: //nolint:jargon
 //
 //	[0,4)    reserved (constant 00000000)
 //	[4,52)   match_name   — ASCII NUL-padded, 48B
@@ -57,7 +57,7 @@ const (
 
 // rendererExtendscriptToBinary maps the ExtendScript module name (what
 // CompItem.renderer exposes) to the binary prin match_name (what's stored on
-// disk). Mirrors py-aep composition.py _RENDERER_EXTENDSCRIPT_TO_BINARY. Only
+// disk). Mirrors py-aep composition.py _RENDERER_EXTENDSCRIPT_TO_BINARY. Only //nolint:jargon
 // "ADBE Advanced 3d" differs from its binary name ("ADBE Escher"); the other
 // three are identical in both namespaces. SetRenderer accepts either name.
 var rendererExtendscriptToBinary = map[string]string{
@@ -82,7 +82,7 @@ type rendererTemplate struct {
 }
 
 // rendererTemplates maps a renderer match-name to its prin display name and
-// prda default-option payload. RE'd from py-aep renderer fixtures.
+// prda default-option payload. RE'd from py-aep renderer fixtures. //nolint:jargon
 var rendererTemplates = map[string]rendererTemplate{
 	"ADBE Escher": { // Classic 3D
 		display: "Classic 3D",

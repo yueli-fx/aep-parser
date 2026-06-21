@@ -444,7 +444,7 @@ read-only
 func (l *Layer) AVSource() AVItem
 ```
 
-AVSource resolves this layer's source to an AVItem (Composition or Footage), or nil when SourceID is 0 or the layer was built outside the parser. Mirrors py-aep's `Layer.source`.
+AVSource resolves this layer's source to an AVItem (Composition or Footage), or nil when SourceID is 0 or the layer was built outside the parser.
 
 read-only
 
@@ -504,7 +504,7 @@ read-only
 func (l *Layer) AutoName() string
 ```
 
-AutoName returns the layer's display name. Mirrors py-aep's `layer.auto_name` — falls back to the source item's name when the layer has no user-set name. Empty string for layers without a source (camera/light/null/text/shape) and no user-set name.
+AutoName returns the layer's display name. Falls back to the source item's name when the layer has no user-set name. Empty string for layers without a source (camera/light/null/text/shape) and no user-set name.
 
 read-only
 
@@ -574,7 +574,7 @@ read-only
 func (l *Layer) CanSetCollapseTransformation() bool
 ```
 
-CanSetCollapseTransformation reports whether AE will let the user toggle CollapseTransform on this layer. Mirrors py-aep's `AVLayer.can_set_collapse_transformation`:
+CanSetCollapseTransformation reports whether AE will let the user toggle CollapseTransform on this layer:
 
 - precomp source → true
 - solid footage source → true
@@ -590,7 +590,7 @@ read-only
 func (l *Layer) CanSetTimeRemapEnabled() bool
 ```
 
-CanSetTimeRemapEnabled reports whether AE will let the user enable time remapping on this layer. Mirrors py-aep's `AVLayer.can_set_time_remap_enabled`: true when the source has a non-zero duration. Still images, text layers, and shape sources don't qualify.
+CanSetTimeRemapEnabled reports whether AE will let the user enable time remapping on this layer: true when the source has a non-zero duration. Still images, text layers, and shape sources don't qualify.
 
 read-only
 
@@ -870,7 +870,7 @@ read-only
 func (l *Layer) IsThreeDModelLayer() bool
 ```
 
-IsThreeDModelLayer reports whether the layer is a 3D Model layer (AE 24+, py-aep `ThreeDModelLayer`). Identified by ldta byte 0x83 == 0x05 at parse time; see [inferLayerType].
+IsThreeDModelLayer reports whether the layer is a 3D Model layer (AE 24+). Identified by ldta byte 0x83 == 0x05 at parse time; see [inferLayerType].
 
 read-only
 
@@ -1023,8 +1023,6 @@ func (l *Layer) LightSource() *Layer
 LightSource returns the layer used as the environment-light source for this Light layer (AE 24+). Returns nil for non-light layers, lights with no source (sentinels 0 / 0xFFFFFFFF), or when the source ID doesn't resolve to a layer in the owning composition.
 
 AE stores the source layer ID in ldta @0x28 (same slot as Layer.SourceID for AV layers; the field is repurposed per Layer.Type). Only meaningful when Type == LayerTypeLight and LightKind == LightKindAmbient (the "Environment" light in AE 24+).
-
-Mirrors py-aep `LightLayer.light_source`.
 
 read-only
 
@@ -1327,7 +1325,7 @@ read-only
 func (l *Layer) ShapeContentsGroup() *AEPropertyGroup
 ```
 
-ShapeContentsGroup returns a shape layer's "ADBE Root Vectors Group", or nil for non-shape layers. For typed access prefer the V2.2 ShapeLayer wrapper (see WrapShapeLayer).
+ShapeContentsGroup returns a shape layer's "ADBE Root Vectors Group", or nil for non-shape layers. For typed access prefer the ShapeLayer wrapper (see WrapShapeLayer).
 
 read-only
 
@@ -1379,7 +1377,7 @@ func (l *Layer) TimeRemapEnabled() bool
 
 TimeRemapEnabled reports whether the layer has time remapping turned on. AE always writes the TimeRemap property slot in the property tree (so PropertyByMatchName always finds it on AV layers / precomps), but only populates it with keyframes when remap is enabled — AE adds two default identity keyframes (t=0, t=duration) on enable. When disabled, Keyframes is empty.
 
-Mirrors AE script's TimeRemapEnabled getter. Verified against test_data/re_wave2_ae24.aep (RE_TIMEREMAP comp): tr_baseline has 0 keyframes; tr_remap_on has 2.
+Mirrors AE script's TimeRemapEnabled getter.
 
 read-only
 
@@ -3175,8 +3173,6 @@ if l := comp.LayerByName("BG"); l != nil {
 # LightKind object
 
 LightKind is the layer-level light type stored in ldta @0x88 (4-byte BE uint32, AE 23+ ldta layout). For light layers only; zero for non-light layers (the parser leaves Layer.LightKind as default 0 == Parallel for them, so always cross-check Layer.Type == LayerTypeLight before reading LightKind).
-
-RE fixture: test_data/re_wave2_ae24.aep (RE_LIGHTS comp).
 
 ## Attributes
 

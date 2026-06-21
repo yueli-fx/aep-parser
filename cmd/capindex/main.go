@@ -28,6 +28,7 @@ func main() {
 	check := flag.Bool("check", false, "CI mode: validate tags + verify committed files are current")
 	coverage := flag.Bool("coverage", false, "report public-surface tag coverage (P2 progress meter) and exit")
 	validate := flag.Bool("validate", false, "validate @tag annotations against the schema and exit")
+	lintComments := flag.Bool("lint-comments", false, "lint internal/ non-test comments for jargon and exit")
 	flag.Parse()
 
 	root, err := repoRoot()
@@ -63,6 +64,22 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println("capindex: @tag validation clean")
+		return
+	}
+
+	if *lintComments {
+		errs, err := lintRepoComments(root)
+		if err != nil {
+			fatal(err)
+		}
+		for _, e := range errs {
+			fmt.Fprintln(os.Stderr, "capindex:", e)
+		}
+		if len(errs) > 0 {
+			fmt.Fprintf(os.Stderr, "capindex: %d comment jargon violation(s)\n", len(errs))
+			os.Exit(1)
+		}
+		fmt.Println("capindex: comment jargon lint clean")
 		return
 	}
 

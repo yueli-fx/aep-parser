@@ -153,7 +153,7 @@ read-write
 func (f *Footage) AssetType() string
 ```
 
-AssetType returns the footage kind as a string: "placeholder" / "solid" / "file". Mirrors py-aep's `footage.asset_type` discriminator. Footage items with neither flag default to "file".
+AssetType returns the footage kind as a string: "placeholder" / "solid" / "file". Footage items with neither flag default to "file".
 
 read-only
 
@@ -173,7 +173,7 @@ read-only
 func (f *Footage) File() string
 ```
 
-File returns the footage source file path. Empty string for solids and placeholders. Alias of [Footage.Path] for py-aep API parity.
+File returns the footage source file path. Empty string for solids and placeholders. Alias of [Footage.Path], provided as a convenience.
 
 read-only
 

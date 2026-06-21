@@ -51,7 +51,7 @@ const (
 	PseudoLayer                               // layer picker
 )
 
-// pardControlType maps a kind to the pard control_type byte (@0x0F), RE'd from a
+// pardControlType maps a kind to the pard control_type byte (@0x0F), RE'd from a //nolint:jargon
 // real Pseudo Effect Maker output (test_data/pseudo_rich_demo.aep): angle 0x03,
 // checkbox 0x04, color 0x05, point 0x06, dropdown 0x07, slider 0x0a, group-start
 // & label 0x0d, group-end 0x0e, 3D point 0x12.
@@ -70,7 +70,7 @@ var pardControlType = map[PseudoControlKind]byte{
 }
 
 // PseudoControl is one control in a from-scratch pseudo effect. The optional
-// fields customize the control's pard defaults (RE'd from a real Pseudo Effect
+// fields customize the control's pard defaults (RE'd from a real Pseudo Effect //nolint:jargon
 // Maker output); their zero values reproduce AE's plain type defaults, so a
 // bare {Kind, Name} keeps the previous behavior.
 type PseudoControl struct {
@@ -108,7 +108,7 @@ type PseudoControl struct {
 	LayerID uint32
 
 	// Label (PseudoLabel): dim/gray the label text. Default false = normal
-	// (non-gray) — the @0x04 0x20 bit, RE'd from pseudo2.aep.
+	// (non-gray) — the @0x04 0x20 bit, RE'd from pseudo2.aep. //nolint:jargon
 	Dimmed bool
 }
 
@@ -355,7 +355,7 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 			// fractions of the layer/comp space — @0x38 x, @0x3C y — plus a
 			// ×100 (percent) copy at @0x44/@0x48. AE hides a point whose pard
 			// carries no value ("range has no values"); the value entry's cdat
-			// holds the same coords for the current value. RE'd from a
+			// holds the same coords for the current value. RE'd from a //nolint:jargon
 			// confirmed-working AE sample (point=500,1080 → 0.2604,1.0).
 			var px, py float64
 			if len(c.PointDefault) >= 2 {
@@ -406,7 +406,7 @@ func synthControlPard(c PseudoControl, cp PseudoLabelCodepage) (*rifx.Chunk, err
 			// Like a 2D point but the default coords are f64 (not 16.16):
 			// @0x38 x, @0x40 y, @0x48 z (fractions of the layer/comp space),
 			// plus a ×100 (percent) copy at @0x50/@0x58/@0x60. AE hides a 3D
-			// point whose pard has no value. RE'd from a confirmed-working AE
+			// point whose pard has no value. RE'd from a confirmed-working AE //nolint:jargon
 			// sample (100,200,300 → 0.0521,0.1852,0.2778).
 			var qx, qy, qz float64
 			if len(c.PointDefault) >= 3 {

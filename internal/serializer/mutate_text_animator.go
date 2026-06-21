@@ -91,7 +91,7 @@ var textAnimatorsRotYBody []byte
 // params carry a cdat). The Advanced group is otherwise elided on a fresh
 // animator's selector, so SetTextRangeAdvanced replaces the elided group with a
 // clone of this, resets every slot to its AE default, then overwrites the
-// caller's params. RE'd from re_text_range_advanced.aep (AE 2020); Smoothness is
+// caller's params. RE'd from re_text_range_advanced.aep (AE 2020); Smoothness is //nolint:jargon
 // hidden in the AE UI unless Shape=Square but its slot still materializes when
 // Shape is non-default. Regen via test_data/gen_text_range_advanced_template.jsx.
 //

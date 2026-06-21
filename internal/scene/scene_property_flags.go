@@ -6,9 +6,9 @@ import (
 	"math"
 )
 
-// Property tdb4 flag readers — mirror of py-aep's `property.is_spatial`,
+// Property tdb4 flag readers — mirror of py-aep's `property.is_spatial`, //nolint:jargon
 // `property.is_animated`, etc. All read from the 124-byte tdb4 metadata
-// chunk under each tdbs LIST. Byte offsets sourced from py-aep's
+// chunk under each tdbs LIST. Byte offsets sourced from py-aep's //nolint:jargon
 // binary/property_chunks.py::Tdb4Chunk:
 //
 //	byte 0x05      spatial/static flags — bit 3 = is_spatial, bit 0 = static
@@ -103,7 +103,7 @@ func (p *Property) tdsbBit(off, b int) bool {
 }
 
 // LockedRatio reports whether the property's locked ratio flag is set.
-// Read from tdsb @0x02 bit 4 (py-aep: byte 2 bit 4 = locked_ratio).
+// Read from tdsb @0x02 bit 4 (byte 2 bit 4).
 func (p *Property) LockedRatio() bool {
 	return p.tdsbBit(0x02, 4)
 }
@@ -135,13 +135,13 @@ func (p *Property) DimensionsSeparated() bool {
 
 // separationFollowers are the per-axis component match-names AE creates when
 // Position dimensions are separated (X / Y / Z). Position is the only
-// property AE allows to separate; mirrors py-aep's _SEPARATION_FOLLOWERS.
+// property AE allows to separate; mirrors py-aep's _SEPARATION_FOLLOWERS. //nolint:jargon
 var separationFollowers = [...]string{"ADBE Position_0", "ADBE Position_1", "ADBE Position_2"}
 
 // IsSeparationLeader reports whether the property is the multidimensional
 // leader that can be separated into per-axis followers — true for
 // "ADBE Position" regardless of whether it is currently separated (use
-// DimensionsSeparated for the actual state). Mirrors py-aep.
+// DimensionsSeparated for the actual state).
 func (p *Property) IsSeparationLeader() bool {
 	return p.MatchName == MatchNamePosition
 }
@@ -159,7 +159,7 @@ func (p *Property) IsSeparationFollower() bool {
 
 // SeparationDimension returns the axis a separation follower represents
 // (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower.
-// (-1 stands in for py-aep's None.)
+// (-1 means the property is not a follower.)
 func (p *Property) SeparationDimension() int {
 	for i, mn := range separationFollowers {
 		if p.MatchName == mn {
@@ -170,7 +170,7 @@ func (p *Property) SeparationDimension() int {
 }
 
 // determinePropertyTypes derives PropertyControlType and PropertyValueType
-// from tdb4 flags. Port of py-aep's _determine_property_types().
+// from tdb4 flags. Port of py-aep's _determine_property_types(). //nolint:jargon
 func (p *Property) determinePropertyTypes() (PropertyControlType, PropertyValueType) {
 	pct := PCTLUnknown
 	pvt := PVTUnknown
@@ -321,8 +321,7 @@ func (p *Property) PropertyDepth() int {
 
 // Enabled reports whether the property is enabled (UI toggle next to
 // the property name in AE's timeline). Read from tdsb byte 3 bit 0;
-// defaults to true when the tdsb chunk is absent — matches py-aep's
-// `TdsbChunk._enable_flags` default of 1.
+// defaults to true when the tdsb chunk is absent.
 func (p *Property) Enabled() bool {
 	if p.back == nil {
 		return true
@@ -334,17 +333,16 @@ func (p *Property) Enabled() bool {
 	return v&0x01 != 0
 }
 
-// Active is an alias for Enabled — mirrors py-aep's `property.active`
-// which returns `self.enabled`. Kept as a separate accessor for parity
-// even though it's a thin wrapper.
+// Active is an alias for Enabled, provided as a convenience. Kept as a
+// separate accessor even though it's a thin wrapper.
 func (p *Property) Active() bool { return p.Enabled() }
 
 // IsModified reports whether the property has been changed from its
 // default state. A property is considered modified when it has keyframes,
 // has an expression (regardless of enabled state), or its StaticValue
-// differs from DefaultValue. Mirrors py-aep's `Property.is_modified`
-// minus the always-modified special-cases (Source Text, mask-index,
-// effect-NoValue) which depend on parser context we don't yet track.
+// differs from DefaultValue. Does not yet cover the always-modified
+// special-cases (Source Text, mask-index, effect-NoValue) which depend
+// on parser context we don't yet track.
 func (p *Property) IsModified() bool {
 	if p.IsAnimated() {
 		return true
@@ -391,26 +389,25 @@ func valuesEqualForModified(a, b any) bool {
 	return false
 }
 
-// Elided reports whether the property is hidden from the AE UI. py-aep
-// sets this for parser-synthesized placeholder groups; we don't
-// synthesize anything yet, so this always returns false. Reserved for
-// future implementations that materialize missing slots.
+// Elided reports whether the property is hidden from the AE UI. This is
+// set for parser-synthesized placeholder groups; we don't synthesize
+// anything yet, so this always returns false. Reserved for future
+// implementations that materialize missing slots.
 func (p *Property) Elided() bool { return false }
 
 // IsNameSet reports whether the property has an explicit display name
 // set (different from its match-name). Currently a thin proxy:
-// `Name != "" && Name != MatchName`. py-aep checks the underlying tdsn
-// Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name
-// (always defaults to MatchName), so this returns false for parsed
-// properties until tdsn decode lands.
+// `Name != "" && Name != MatchName`. The display name lives in the
+// underlying tdsn Utf8 chunk; our parser doesn't yet decode tdsn into
+// Property.Name (always defaults to MatchName), so this returns false
+// for parsed properties until tdsn decode lands.
 func (p *Property) IsNameSet() bool {
 	return p.Name != "" && p.Name != p.MatchName
 }
 
 // IsModified reports whether any child of this group has been modified.
 // For indexed groups (Effects Parade, Mask Parade), the group is
-// considered modified when it has any children. Mirrors py-aep's
-// `PropertyGroup.is_modified`.
+// considered modified when it has any children.
 func (g *AEPropertyGroup) IsModified() bool {
 	if g == nil {
 		return false

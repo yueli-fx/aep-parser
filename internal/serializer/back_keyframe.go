@@ -41,7 +41,7 @@ func setKeyframeBack(k *Keyframe, b *keyframeBackrefs) {
 //   - Also populated by write_property.go::reparseKeyframes after a
 //     length-variable splice rewrites the ldat.Data.
 //   - Nil for keyframes built outside the parser.
-//   - opaque is reserved for future V3 phases (per-keyframe-block ancillary
+//   - opaque is reserved for a future phase (per-keyframe-block ancillary
 //     chunks if/when we identify any); currently nil.
 type keyframeBackrefs struct {
 	ldat     *rifx.Chunk

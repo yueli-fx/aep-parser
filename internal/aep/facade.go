@@ -2168,13 +2168,13 @@ const (
 	EffectAudioStereoMixer  = serializer.EffectAudioStereoMixer  // Stereo Mixer
 	EffectAudioTone         = serializer.EffectAudioTone         // Tone
 
-	// Wave 11 layer-reference effects.
+	// Layer-reference effects.
 	EffectWarpStabilizer  = serializer.EffectWarpStabilizer  // Warp Stabilizer
 	Effect3DGlasses       = serializer.Effect3DGlasses       // 3D Glasses
 	EffectTimewarp        = serializer.EffectTimewarp        // Timewarp
 	EffectCCParticleWorld = serializer.EffectCCParticleWorld // CC Particle World
 
-	// Wave 12 parked classic effects.
+	// Parked classic effects.
 	EffectBezierWarp         = serializer.EffectBezierWarp         // Bezier Warp
 	EffectMeshWarp           = serializer.EffectMeshWarp           // Mesh Warp
 	EffectChannelMixer       = serializer.EffectChannelMixer       // Channel Mixer
@@ -2188,14 +2188,14 @@ const (
 	EffectDisplacementMapLayer = serializer.EffectDisplacementMapLayer // Displacement Map Layer param
 	EffectCompoundBlurLayer    = serializer.EffectCompoundBlurLayer    // Compound Blur "Blur Layer" param
 	EffectCCVectorBlurMap      = serializer.EffectCCVectorBlurMap      // CC Vector Blur "Vector Map" param
-	// Wave 11 layer-ref params.
+	// Layer-reference params (warp/3D/timewarp/particle group).
 	EffectWarpStabilizerRefLayer = serializer.EffectWarpStabilizerRefLayer // Warp Stabilizer reference layer
 	Effect3DGlassesLeftView      = serializer.Effect3DGlassesLeftView      // 3D Glasses left view
 	Effect3DGlassesRightView     = serializer.Effect3DGlassesRightView     // 3D Glasses right view
 	EffectTimewarpMatteLayer     = serializer.EffectTimewarpMatteLayer     // Timewarp matte layer
 	EffectTimewarpSourceLayer    = serializer.EffectTimewarpSourceLayer    // Timewarp source layer
 	EffectCCParticleWorldTexture = serializer.EffectCCParticleWorldTexture // CC Particle World texture layer
-	// Wave 12 layer-ref params.
+	// Layer-reference params (classic parked effects group).
 	EffectTexturizeLayer                 = serializer.EffectTexturizeLayer                 // Texturize texture layer
 	EffectColorLinkSourceLayer           = serializer.EffectColorLinkSourceLayer           // Color Link source layer
 	EffectCompoundArithmeticSecondSource = serializer.EffectCompoundArithmeticSecondSource // Compound Arithmetic 2nd source

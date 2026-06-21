@@ -1,6 +1,6 @@
 // internal/aep/sync_shape_layers.go
 //
-// V2.2 — write-time bridge from runtime ShapeLayer state to the
+// Write-time bridge from runtime ShapeLayer state to the
 // owning Layr chunk. NewShapeLayer pre-lowers an empty Layr at construction
 // time; subsequent VectorGroup mutations (AddRect, SetSize, ...) only touch
 // the runtime tree. This pass walks every layer where shapeRootGroup is

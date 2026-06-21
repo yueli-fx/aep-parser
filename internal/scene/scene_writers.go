@@ -2,7 +2,8 @@ package scene
 
 import "io"
 
-// scene_writers.go — XWriter interfaces for M8 back-ref inversion.
+// scene_writers.go — XWriter interfaces for the back-ref inversion that
+// keeps scene types decoupled from concrete chunk types.
 //
 // Each interface declares the writer-facing methods (plus decoded read
 // accessors) that the serializer implements by holding the corresponding
@@ -309,7 +310,7 @@ type RenderQueueItemWriter interface {
 // no scene-facing back-ref setter (the structural AddItem / RemoveItem ops are
 // serializer free-functions reaching the concrete back-ref via renderQueueBack),
 // so this is a nominal marker letting the scene field stay interface-typed and
-// concrete-free (M8 P3.1-prep).
+// concrete-free.
 type RenderQueueWriter interface {
 	IsRenderQueueWriter()
 }
@@ -317,7 +318,7 @@ type RenderQueueWriter interface {
 // OutputModuleWriter is the back-ref handle for an OutputModule. Every
 // output-module setter is a pure scene-buffer mutation synced at WriteAEP time,
 // so the back exists only to locate the write-time sync targets; this nominal
-// marker keeps the scene field interface-typed and concrete-free (M8 P3.1-prep).
+// marker keeps the scene field interface-typed and concrete-free.
 type OutputModuleWriter interface {
 	IsOutputModuleWriter()
 }
@@ -326,7 +327,7 @@ type OutputModuleWriter interface {
 // structural group ops (Remove / Duplicate / MoveTo / SetDimensionsSeparated)
 // are serializer free-functions reaching the concrete back-ref's tdgp LIST via
 // propertyGroupBack; the scene group carries no back-ref setter, so this nominal
-// marker keeps the scene field interface-typed and concrete-free (M8 P3.1-prep).
+// marker keeps the scene field interface-typed and concrete-free.
 type PropertyGroupWriter interface {
 	IsPropertyGroupWriter()
 }

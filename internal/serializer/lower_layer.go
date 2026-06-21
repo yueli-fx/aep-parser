@@ -5,13 +5,14 @@
 //
 //	ldta (160 B AE 2020 canonical)
 //	Utf8 (layer name, length-variable)
-//	LIST(tdgp) — layer Transform Group (V2.2: user-facing 2D 5-stream)
+//	LIST(tdgp) — layer Transform Group (user-facing 2D 5-stream form)
 //	[if root has shapes:] tdmn("ADBE Root Vectors Group") + LIST(tdgp, root)
 //
 // AE's canonical fixture observed a 6-axis 3D-compatible Transform schema
 // (Position_0 / Position_1 / Orientation / RotateX / RotateY / Envir Appear).
-// V2.2 instead emits the user-facing 2D form (Anchor / Position / Scale /
-// Rotate Z / Opacity) per V1 parser convention — AE accepts both.
+// This implementation instead emits the user-facing 2D form (Anchor /
+// Position / Scale / Rotate Z / Opacity) per the original parser convention
+// — AE accepts both.
 package serializer
 
 import (
@@ -26,11 +27,12 @@ import (
 	"github.com/example/aep-parser/internal/scene"
 )
 
-// v2_2 ShapeLayer Transform Group body — byte-exact extracted from
+// ShapeLayer Transform Group body — byte-exact extracted from
 // tolerance.aep (1842 B LIST(tdgp) with 15 children: tdsb + tdsn + 6 stream
 // tdmn-LIST pairs + Group End). Transplant tests proved constructing this
-// byte-correctly from scratch is too fragile (silent-drop trigger). V2.3 may
-// RE the full byte layout and replace this blob with constructor code.
+// byte-correctly from scratch is too fragile (silent-drop trigger). A future
+// pass may reverse-engineer the full byte layout and replace this blob with
+// constructor code.
 //
 //go:embed templates/layers/transform_group_body.bin
 var transformGroupBodyBytes []byte
@@ -126,7 +128,7 @@ func lowerShapeLayer(s *ShapeLayer, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// tolerance.aep:
 	//   tdsb + tdsn("") + (tdmn + LIST(tdgp))* + tdmn("ADBE Group End")
 	//
-	// V2.2 minimum outer body emits: Root Vectors Group (when shapes
+	// Minimum outer body emitted: Root Vectors Group (when shapes
 	// present) + Transform Group. Additional layer-property groups AE
 	// emits at default (Layer Styles / Extrsn Options / Material Options
 	// / Audio Group / Layer Sets) get added if AE 2020/25 still rejects.
@@ -408,17 +410,17 @@ func buildLdtaBytes(s *ShapeLayer, ctx *lowerCtx) []byte {
 // subtle byte errors (tdsb 0x03 vs 0x01, tdb4 head bytes, missing tdum/tduM,
 // over-emit of Anchor/Scale/RotateZ/Opacity as Vec2 instead of 3D).
 //
-// V2.2 ship gate uses verbatim tolerance bytes; runtime user-set values
-// for non-Position streams (Anchor / Scale / Rotation / Opacity) are
-// runtime-only — they don't persist to disk in V2.2. V2.3 will RE the
-// proper byte layout for full Transform persistence.
+// The current ship gate uses verbatim tolerance bytes; runtime user-set
+// values for non-Position streams (Anchor / Scale / Rotation / Opacity) are
+// runtime-only — they don't persist to disk yet. A future pass will
+// reverse-engineer the proper byte layout for full Transform persistence.
 func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeTransformGroupBody()
 	if err != nil {
 		return nil, err
 	}
 	// Each transform channel is persisted to disk in its RE'd on-disk encoding
-	// (test_data/v2_2_transform_kf_re.aep): Anchor/Position are 3D spatial
+	// (test_data/v2_2_transform_kf_re.aep): Anchor/Position are 3D spatial //nolint:jargon
 	// motion-path ([x,y,0]); Scale is 3D non-spatial (÷100, Z=1.0); Rotation is
 	// 1D non-spatial (degrees); Opacity is 1D non-spatial (÷100). Animated →
 	// inject keyframes; otherwise overwrite the embedded template's static cdat.

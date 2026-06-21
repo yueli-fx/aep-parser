@@ -50,8 +50,8 @@ type FormatOptions struct {
 // codec_output_module.go — pure byte decoding of the per-output-module
 // settings: the 128B OutputModuleSettingsItem (ldat under each LItm item's
 // LIST:list) and the 154B Roou chunk. No scene coupling (codec_ boundary).
-// Byte layout mirrors py-aep binary/render_chunks.py; offsets verified by
-// field-size accounting + tmp_debug probe + golden cross-check.
+// Byte layout mirrors py-aep binary/render_chunks.py; offsets verified by //nolint:jargon
+// field-size accounting + a scratch probe script + golden cross-check.
 
 const OutputModuleSettingsItemSize = 128
 
@@ -189,7 +189,7 @@ func Ascii4(b []byte) string {
 // DecodeRoptFormatOptions decodes a Ropt chunk into typed format options,
 // dispatching on the 4-byte format_code. Returns nil for unknown/too-short
 // bodies (e.g. XML-based formats AVI/H264/QuickTime carry no Ropt variant).
-// Field offsets mirror py-aep binary/render_chunks.py Ropt variant classes;
+// Field offsets mirror py-aep binary/render_chunks.py Ropt variant classes; //nolint:jargon
 // cineon offsets verified against the format_options/cineon/* fixtures.
 func DecodeRoptFormatOptions(d []byte) *FormatOptions {
 	if len(d) < 4 {

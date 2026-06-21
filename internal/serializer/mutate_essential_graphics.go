@@ -1,8 +1,7 @@
 // Public-API entry for exposing an effect parameter in a comp's Essential
 // Graphics panel (.mogrt controller).
 //
-// AE persists an EG controller across three coordinated sites (RE 2026-06-12,
-// flightdeck/plans/2026-06-12-essential-graphics-write.md):
+// AE persists an EG controller across three coordinated sites (RE 2026-06-12):
 //
 //  1. The comp Item's CIF* panel lists — AE writes three byte-identical
 //     generations (CIFO / CIF2 / CIF3); each gains a LIST:CCtl describing the

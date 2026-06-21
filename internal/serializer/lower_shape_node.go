@@ -3,9 +3,9 @@
 // 5 per-node lowering funcs (Rect / Ellipse / Path / Fill / Stroke) +
 // lowerVectorGroup for the Root Vectors Group container.
 //
-// Match-names are from AE-saved fixture observations. V2.2 emits ALL sub-props
-// even when default-valued (AE elides; we don't — see lower_property_stream.go
-// preamble); AE accepts the non-elided form.
+// Match-names are from AE-saved fixture observations. This implementation
+// emits ALL sub-props even when default-valued (AE elides; we don't — see
+// lower_property_stream.go preamble); AE accepts the non-elided form.
 package serializer
 
 import (
@@ -364,7 +364,7 @@ func cloneShapeGradFillBody() (*rifx.Chunk, error) {
 }
 
 // encodeShapeColorBE returns the AE shape-color cdat bytes for an [r,g,b,a]
-// (0..1) color: AE stores colors as [A,R,G,B] × 255 as f64 BE (RE'd from the
+// (0..1) color: AE stores colors as [A,R,G,B] × 255 as f64 BE (RE'd from the //nolint:jargon
 // stroke tolerance fixture — JSX [0,0,1,1] → disk [255,0,0,255]). Both Stroke
 // and Fill use it.
 func encodeShapeColorBE(c [4]float64) []byte {
@@ -624,7 +624,7 @@ func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chun
 //   - Direction: AE default (the AE-saved body elides the Direction sub-prop;
 //     embedded body has no slot to overwrite).
 //   - Animated Size: keyframes persisted (non-spatial Vec2). Animated Position:
-//     keyframes persisted (spatial Vec2, bpk 104 value@0x38 — RE'd from the
+//     keyframes persisted (spatial Vec2, bpk 104 value@0x38 — RE'd from the //nolint:jargon
 //     ellipse-kf fixture; AE recomputes spatial tangents on load).
 func lowerEllipseNode(e *EllipseNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeEllipseBody()
@@ -1066,7 +1066,7 @@ func cloneShapeTrimBody() (*rifx.Chunk, error) {
 // lowerTrimNode emits a Trim Paths filter body from the embedded template,
 // overwriting the Start / End / Offset cdat slots with runtime values. Start /
 // End are raw percentages (0..100), Offset is raw degrees — all float64 BE at
-// cdat[0:8], identical to the other shape scalars (RE'd from v2_2_trim.aep).
+// cdat[0:8], identical to the other shape scalars (RE'd from v2_2_trim.aep). //nolint:jargon
 //
 // Static → cdat overwrite; animated → the cdat flips to a 1D non-spatial
 // keyframe container (same injectAnimatedStream path as Rect Roundness / Fill
@@ -1152,7 +1152,7 @@ func cloneShapeRepeaterBody() (*rifx.Chunk, error) {
 // `ADBE Vector Repeater Transform` group (descend via findGroupBody) and are
 // static cdat overwrites (Anchor/Position/Scale are Vec2 at cdat[0:16],
 // Rotation/Opacity 1·2 are 1D at cdat[0:8]) — same mechanism as Stroke
-// Taper/Wave. RE'd from v2_2_repeater.aep.
+// Taper/Wave. RE'd from v2_2_repeater.aep. //nolint:jargon
 func lowerRepeaterNode(n *RepeaterNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeRepeaterBody()
 	if err != nil {
@@ -1608,7 +1608,7 @@ func cloneShapeStarPolygonBody() (*rifx.Chunk, error) {
 // the Points / Rotation / Inner·Outer Radius / Inner·Outer Roundess 1D scalars
 // (lowerShapeScalar, static cdat / animated flip) and Position (Vec2, spatial
 // motion-path layout, same as Rect Position). Star Type stays at the embed
-// default (Star). RE'd from v2_2_star.aep.
+// default (Star). RE'd from v2_2_star.aep. //nolint:jargon
 func lowerStarNode(n *StarNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	// Polygon uses a separate template (carries the Star Type=2 slot, baked); Star
 	// uses the original (Type elided at default). The remaining sub-stream
@@ -1933,7 +1933,7 @@ func cloneShapeWiggleTransformBody() (*rifx.Chunk, error) {
 // per-channel wiggle amplitudes live in the nested `ADBE Vector Wiggler
 // Transform` group (descend via findGroupBody) as static cdat overwrites —
 // Anchor/Position/Scale are Vec2 at cdat[0:16], Rotation is 1D at cdat[0:8] —
-// same mechanism as the Repeater Transform. RE'd from v2_2_wiggletransform.aep.
+// same mechanism as the Repeater Transform. RE'd from v2_2_wiggletransform.aep. //nolint:jargon
 func lowerWiggleTransformNode(n *WiggleTransformNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	body, err := cloneShapeWiggleTransformBody()
 	if err != nil {
@@ -2088,7 +2088,7 @@ func animateGradientStops(body *rifx.Chunk, streamName string, kfs []GradientKey
 // (round(sec*tickRate)), linear interp bytes @0x04/0x05, headerByte 0x01 @0x07,
 // a constant 0x00000002 @0x08, and an f64 1.0 @0x10 + tangent-scratch @0x38 —
 // the latter two replicated verbatim from the AE-saved oracle fixture
-// (v2_2_gradient_anim_src.aep); the gradient VALUES live in the parallel
+// (v2_2_gradient_anim_src.aep); the gradient VALUES live in the parallel //nolint:jargon
 // GCky/Utf8 leaves, so this table carries only timing/interp. lhd3 mirrors
 // encodeKeyframes (magic / numKf @0x08 / pages @0x0C / bpk @0x10 / 4×pages @0x1C).
 func encodeGradientColorTimeTable(times []float64, ctx *lowerCtx) (*rifx.Chunk, error) {
@@ -2168,7 +2168,7 @@ func lowerStrokeNode(s *StrokeNode, ctx *lowerCtx) (*rifx.Chunk, error) {
 	}
 
 	// Opacity (raw %) + Width (raw px) — 1D non-spatial scalars (bpk-48,
-	// value@0x08, no normalization; RE'd from v2_2_stroke_kf_re.aep). The stroke
+	// value@0x08, no normalization; RE'd from v2_2_stroke_kf_re.aep). The stroke //nolint:jargon
 	// body template already carries both cdat slots, so animated streams flip in
 	// place (previously collapsed to the first keyframe value).
 	if err := lowerShapeScalar(body, "ADBE Vector Stroke Opacity", s.Opacity(), ctx); err != nil {
@@ -2209,7 +2209,7 @@ func lowerStrokeDashes(strokeBody *rifx.Chunk, d *StrokeDashes) {
 // Taper group's % controls set non-default) carries the 6 always-active slots:
 // Start/End Length, Start/End Width, Start/End Ease — each a float64 BE at
 // cdat[0:8]. Length Units / StartWidthPx / EndWidthPx are AE-elided in % mode
-// and absent from the template (not modeled in V2.2).
+// and absent from the template (not currently modeled).
 func lowerStrokeTaper(strokeBody *rifx.Chunk, t *StrokeTaper) {
 	g := findGroupBody(strokeBody, "ADBE Vector Stroke Taper")
 	if g == nil || t == nil {
@@ -2225,7 +2225,7 @@ func lowerStrokeTaper(strokeBody *rifx.Chunk, t *StrokeTaper) {
 
 // lowerStrokeWave overwrites the Wave group's Wavelength-mode scalar cdats
 // (Amount / Wavelength / Phase). Units / Cycles are AE-elided in Wavelength mode
-// and absent from the template (not modeled in V2.2).
+// and absent from the template (not currently modeled).
 func lowerStrokeWave(strokeBody *rifx.Chunk, w *StrokeWave) {
 	g := findGroupBody(strokeBody, "ADBE Vector Stroke Wave")
 	if g == nil || w == nil {
@@ -2278,9 +2278,10 @@ func findGroupBody(body *rifx.Chunk, groupName string) *rifx.Chunk {
 // "Group N"), and each Vector Group always carries the 3-child fixed routing
 // (Vectors Group for shape kids + Transform + Materials).
 //
-// V2.2 maps the runtime `shapeRootGroup.Children = [Rect, Fill, ...]` to a
-// SINGLE Vector Group wrapper (semantic = AE's auto-created "Group 1"). V2.3+
-// may expose multiple user-named groups.
+// This implementation maps the runtime `shapeRootGroup.Children = [Rect,
+// Fill, ...]` to a SINGLE Vector Group wrapper (semantic = AE's
+// auto-created "Group 1"). A future version may expose multiple
+// user-named groups.
 //
 // Children render in order: Children[0] = bottom, Children[len-1] = top.
 func lowerVectorGroup(g *VectorGroup, ctx *lowerCtx) (*rifx.Chunk, error) {

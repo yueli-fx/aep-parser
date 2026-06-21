@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Project-level single-field setting chunks — py-aep parity P1 1D.
+// Project-level single-field setting chunks — py-aep parity P1 1D. //nolint:jargon
 //
 // All chunks sit as direct children of the root RIFX (Egg!) LIST:
 //
@@ -19,7 +19,7 @@ import (
 //	gpuG LIST → Utf8 — gpu_accel_type (UUID-style device id; length-variable string)
 //	ExEn LIST → Utf8 — expression_engine ("extendscript" / "javascript-1.0")
 //
-// Source: py-aep `models/project.py` + `binary/scalar_chunks.py` +
+// Source: py-aep `models/project.py` + `binary/scalar_chunks.py` + //nolint:jargon
 // `binary/misc_chunks.py`. Verified against re_cameralight.aep dumps.
 
 // ──────────────────────────────────────────────
@@ -30,10 +30,10 @@ import (
 // XML after the RIFX root chunk). Returns "" when the file has no XMP
 // trailer or the project was built outside the parser.
 //
-// py-aep parity: matches `Project.xmp_packet` reader. Currently R only —
-// SetXmpPacket would require care to keep the AEP loader happy (AE may
-// validate XML structure). Round-tripping through WriteAEP preserves
-// the original bytes verbatim via Chunk.Trailing.
+// Currently read-only — writing the packet would require care to keep
+// the AEP loader happy (AE may validate XML structure). Round-tripping
+// through WriteAEP preserves the original bytes verbatim via
+// Chunk.Trailing.
 func (p *Project) XmpPacket() string {
 	if p.back == nil {
 		return ""
@@ -150,9 +150,9 @@ func (p *Project) SetWorkingGamma(gamma float64) error {
 // ──────────────────────────────────────────────
 
 // GpuAccelType returns the project's GPU acceleration device id
-// (UUID-style string inside the gpuG LIST → Utf8 child). py-aep models
-// this as a labeled enum; we surface the raw string since AE writes a
-// runtime-resolved device UUID. Empty string when the chunk is absent.
+// (UUID-style string inside the gpuG LIST → Utf8 child). We surface the
+// raw string since AE writes a runtime-resolved device UUID. Empty
+// string when the chunk is absent.
 func (p *Project) GpuAccelType() string {
 	if p.back == nil {
 		return ""
@@ -183,7 +183,7 @@ func (p *Project) SetGpuAccelType(s string) error {
 
 // ExpressionEngine returns the project's expression engine name
 // ("extendscript" or "javascript-1.0"). Defaults to "extendscript"
-// when the ExEn chunk is absent — matches py-aep's behavior.
+// when the ExEn chunk is absent.
 func (p *Project) ExpressionEngine() string {
 	if p.back == nil {
 		return "extendscript"
@@ -225,7 +225,7 @@ func (p *Project) SetExpressionEngine(engine string) error {
 // ──────────────────────────────────────────────
 //
 // Byte layout — corrected against AE 2020 self-saves (RE 2026-06-14, see
-// incidents/nnhd-display-settings-layout-re.md). The py-aep layout was wrong
+// incidents/nnhd-display-settings-layout-re.md). The py-aep layout was wrong //nolint:jargon
 // for two of these fields (byte-8 bit-7 feet flag and a byte-8 mask for time
 // display were both fictional); AE actually stores:
 // - Bytes 0-7: reserved
@@ -236,7 +236,7 @@ func (p *Project) SetExpressionEngine(engine string) error {
 // - Bytes 12-13: reserved
 // - Bytes 14-15: timecode_default_base (u16 BE, 1-999)
 // - Bytes 16-19: feet_frames_film_type as FRAMES-PER-FOOT (u32 BE):
-//   35mm = 16 (0x10), 16mm = 40 (0x28). py-aep mislabeled this "unknown".
+//   35mm = 16 (0x10), 16mm = 40 (0x28). py-aep mislabeled this "unknown". //nolint:jargon
 // - Byte 20: frames_count_type (0=Start0, 1=Start1, 2=TimecodeConversion)
 // - Bytes 21-23: reserved
 // - Byte 24: bits_per_channel (already implemented)

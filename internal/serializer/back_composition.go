@@ -21,9 +21,9 @@ import (
 //     from a parsed .aep file.
 //   - Nil for comps built outside the parser (NewComposition builds it
 //     explicitly via the re-parse closed loop).
-//   - opaque is reserved for future V3 phases that need to round-trip
+//   - opaque is reserved for a future phase that needs to round-trip
 //     unrecognized sibling chunks under the comp's owning Item LIST
-//     (per CLAUDE.md hard constraint #5); currently nil.
+//     (to satisfy the opaque-preservation invariant); currently nil.
 type compositionBackrefs struct {
 	// compName is stored for error-message context.
 	compName string

@@ -12,7 +12,7 @@ import (
 // parseLayer reads layer data from a Layr list.
 //
 // ldta layout (160 bytes; 164 for AE >= 23) — offsets verified against
-// real .aep files plus py-aep's LdtaChunk reference:
+// real .aep files plus py-aep's LdtaChunk reference: //nolint:jargon
 //
 //	0x00 : uint32 BE  — own layer ID (referenced by child layers' ParentID)
 //	0x04 : uint16 BE  — quality (0=Wireframe, 1=Draft, 2=Best)
@@ -36,14 +36,14 @@ import (
 //	0x84 : uint32 BE  — parent layer ID (0 = no parent)
 //	0x88 : uint32 BE  — light kind (only on light layers): 0=Parallel,
 //	                    1=Spot, 2=Point, 3=Ambient. RE'd via
-//	                    test_data/re_wave2_ae24.aep (RE_LIGHTS comp).
+//	                    test_data/re_wave2_ae24.aep (RE_LIGHTS comp). //nolint:jargon
 //	                    On non-light layers this slot is 0.
 //	0xA0 : uint32 BE  — track matte SOURCE layer ID (AE 23+ explicit; 0 if
 //	                    no explicit matte source — AE <= 22 used implicit
 //	                    "layer immediately above" convention). RE'd via
 //	                    test_data/re_trackmatte_ae24.aep.
 //
-// LayerAttrBits (3 bytes, per py-aep):
+// LayerAttrBits (3 bytes, per py-aep): //nolint:jargon
 //
 //	byte 0 (0x25): bit6=sampling-quality (0=Bilinear, 1=Bicubic),
 //	               bit4=auto-orient characters-toward-camera,
@@ -285,7 +285,7 @@ func findBlsiInOverrideTdgp(tdgp *rifx.Chunk) *rifx.Chunk {
 	return nil
 }
 
-// inferLayerType picks a LayerType from the ldta byte at 0x83 (py-aep's
+// inferLayerType picks a LayerType from the ldta byte at 0x83 (py-aep's //nolint:jargon
 // LayerType enum: 0=AV, 1=Light, 2=Camera, 3=Text, 4=Shape, 5=3DModel)
 // plus the parsed flag bits and SourceID. The 0x83 byte distinguishes
 // AE's built-in 3D layer kinds (Light/Camera/3DModel); text/shape are

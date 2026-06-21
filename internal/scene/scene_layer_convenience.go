@@ -1,6 +1,6 @@
 package scene
 
-// Layer convenience helpers — mirror of py-aep's `layer.containing_comp`,
+// Layer convenience helpers — mirror of py-aep's `layer.containing_comp`, //nolint:jargon
 // `layer.has_audio`, `layer.active_at_time(t)`, etc. Pure helpers built
 // on existing Layer fields; no chunk RE / no writes (except RemoveTrackMatte,
 // which is an alias of the existing ClearTrackMatteLayer).
@@ -142,10 +142,10 @@ func (l *Layer) IsTrackMatte() bool {
 	return false
 }
 
-// AutoName returns the layer's display name. Mirrors py-aep's
-// `layer.auto_name` — falls back to the source item's name when the
-// layer has no user-set name. Empty string for layers without a source
-// (camera/light/null/text/shape) and no user-set name.
+// AutoName returns the layer's display name. Falls back to the source
+// item's name when the layer has no user-set name. Empty string for
+// layers without a source (camera/light/null/text/shape) and no
+// user-set name.
 func (l *Layer) AutoName() string {
 	if l.Name != "" {
 		return l.Name
@@ -189,8 +189,8 @@ func (l *Layer) RemoveTrackMatte() error {
 }
 
 // IsThreeDModelLayer reports whether the layer is a 3D Model layer
-// (AE 24+, py-aep `ThreeDModelLayer`). Identified by ldta byte 0x83 == 0x05
-// at parse time; see [inferLayerType].
+// (AE 24+). Identified by ldta byte 0x83 == 0x05 at parse time; see
+// [inferLayerType].
 func (l *Layer) IsThreeDModelLayer() bool {
 	return l.Type == LayerType3DModel
 }

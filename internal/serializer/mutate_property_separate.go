@@ -165,7 +165,7 @@ func separatePosition(p *Property, grp *AEPropertyGroup, layer *Layer) error {
 // temporal followers, then collapses the leader to its static default — the
 // stream-migration analogue of separatePosition.
 //
-// Byte mechanics REd from AE 2020 re_sepdim_anim_{before,after}.aep
+// Byte mechanics REd from AE 2020 re_sepdim_anim_{before,after}.aep //nolint:jargon
 // (incidents/separate-dimensions-write-mechanics.md §animated):
 //
 //   - per follower keyframe i, axis a:
@@ -351,7 +351,7 @@ func temporalEaseLinear(es []TemporalEase) bool {
 // (200/−50/400/650) and within 1 ULP for the rest (e.g. Δ=300) — vs ~2e-7
 // off for a clean Δ/6×100. time / value / influence are byte-identical to AE
 // regardless; the ≤1-ULP speed residual is AE's per-keyframe tick rounding,
-// not replicated here. RE'd from re_sepdim_anim{,2,3}_after.aep (AE 2020).
+// not replicated here. RE'd from re_sepdim_anim{,2,3}_after.aep (AE 2020). //nolint:jargon
 var aeSepDimSpeedFactor = math.Float64frombits(0x4030aaaaaaac192b)
 
 // buildSeparatedAxisKfl builds a LIST(kfl)(lhd3 + ldat) for one axis of a

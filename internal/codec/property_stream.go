@@ -31,7 +31,7 @@ const (
 	StreamModeAnimated
 )
 
-// PropertyStream[T] is the canonical V2.2 animation primitive. T
+// PropertyStream[T] is the canonical animation primitive. T
 // parameterizes the value shape:
 //
 //	float64, [2]float64, [3]float64, [4]float64, BezierPath
@@ -50,7 +50,7 @@ type PropertyStream[T any] struct {
 	expression string // "" = no expression; reserved for V2.3+
 }
 
-// StreamKeyframe[T] is the V2.2 typed keyframe — distinct from the V1
+// StreamKeyframe[T] is the typed keyframe — distinct from the older
 // non-generic `Keyframe` struct (which carries serializer back-references
 // and `any` value). Named with the `Stream` prefix to avoid Go's type-name
 // collision between generic and non-generic declarations in one package.

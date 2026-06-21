@@ -51,7 +51,7 @@ func decodeShapePath(shap *rifx.Chunk) *ShapePath {
 				// constant 0x01 on every AE-native path — NOT the closed flag.
 				// The old [0x14] read reported every open shape path as closed
 				// (it only coincided on closed paths). Now matches hydrate's
-				// bezierFromShap; ground truth = v2_2_shape_path_re.aep open shaps.
+				// bezierFromShap; ground truth = v2_2_shape_path_re.aep open shaps. //nolint:jargon
 				sp.Closed = ch.Data[3] == 0x01
 			}
 		case ch.IsList() && ch.FormType == rifx.IDkfl:

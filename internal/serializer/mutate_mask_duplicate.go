@@ -5,7 +5,7 @@
 // mkif[48B], LIST:tdgp) TRIPLE, so the generic DuplicatePropertyGroup refuses
 // it (its (tdmn, payload) pair detection sees the mkif before the tdgp).
 // DuplicateMask anchors on the source mask's mkif, deep-clones all three chunks
-// (opaque content rides along verbatim — CLAUDE.md #5), bumps only the clone's
+// (opaque content rides along verbatim, per the opaque-preservation invariant), bumps only the clone's
 // internal mask index (mkif @0x08) to max+1 so it stays unique, splices the
 // clone triple in immediately after the source atom tdgp, and re-parses it into
 // a back-ref-correct *Mask inserted right after the source in layer.Masks.

@@ -30,7 +30,7 @@ func ParseGradientXML(xmlText string) *Gradient { return codec.ParseGradientXML(
 // Utf8 chunk payload. The output round-trips through ParseGradientXML.
 func EncodeGradientXML(g *Gradient) string { return codec.EncodeGradientXML(g) }
 
-// PropertyStream[T] is the canonical V2.2 animation primitive. T parameterizes
+// PropertyStream[T] is the canonical generic animation primitive. T parameterizes
 // the value shape:
 //
 //	float64, [2]float64, [3]float64, [4]float64, BezierPath
@@ -44,7 +44,7 @@ func EncodeGradientXML(g *Gradient) string { return codec.EncodeGradientXML(g) }
 // if they want to revert to a static value.
 type PropertyStream[T any] = codec.PropertyStream[T]
 
-// StreamKeyframe[T] is the V2.2 typed keyframe — distinct from the V1
+// StreamKeyframe[T] is the generic typed keyframe — distinct from the older
 // non-generic `Keyframe` struct (which carries serializer back-references
 // and `any` value). Named with the `Stream` prefix to avoid Go's type-name
 // collision between generic and non-generic declarations in one package.

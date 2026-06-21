@@ -1,14 +1,13 @@
 package scene
 
-// Project filter views and lookups — mirror of py-aep's
+// Project filter views and lookups — mirror of py-aep's //nolint:jargon
 // `project.footages`, `project.root_folder`, `project.layer_by_id`,
 // `project.effect_names`. Most are wrappers over existing direct-field
 // access (Project.Footage / Project.Folders); LayerByID and EffectNames
 // add new functionality.
 
 // Footages returns the project's footage items (alias of the
-// Project.Footage slice field, named to match py-aep's
-// `project.footages` for API parity).
+// Project.Footage slice field, provided as a convenience).
 func (p *Project) Footages() []*Footage {
 	return p.Footage
 }
@@ -27,7 +26,6 @@ func (p *Project) RootFolder() *Folder {
 // LayerByID searches every composition in the project for a layer
 // with the matching ID and returns the first hit. Returns nil for
 // id == 0 (the "no layer" sentinel) and when no comp owns this id.
-// Mirrors py-aep's `project.layer_by_id(id)`.
 func (p *Project) LayerByID(id uint32) *Layer {
 	if id == 0 {
 		return nil
@@ -44,8 +42,6 @@ func (p *Project) LayerByID(id uint32) *Layer {
 // the project, from the root-level `Pefl` LIST → `pjef` Utf8 entries.
 // Returns nil when the project has no Pefl LIST (e.g., projects with
 // no effects applied anywhere or builder-synthesized projects).
-//
-// Mirrors py-aep's `project.effect_names`.
 func (p *Project) EffectNames() []string {
 	if p.back == nil {
 		return nil

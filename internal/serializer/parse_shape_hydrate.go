@@ -69,7 +69,7 @@ func hydrateShapeNodes(layr *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 //	  tdmn(Vector Transform Group) + tdgp(empty)
 //	  tdmn(Vector Materials Group) + tdgp(empty)
 //
-// V2.2 collapses this into a flat shapeRootGroup.Children — the user
+// Hydrate collapses this into a flat shapeRootGroup.Children — the user
 // API sees [Rect, Fill, ...] directly. Vector Group / Vectors Group /
 // Vector Transform Group / Vector Materials Group are transparent on
 // hydrate; lower deterministically reconstructs them.
@@ -85,7 +85,7 @@ func hydrateVectorGroup(tdgp *rifx.Chunk, ctx *parseCtx) *VectorGroup {
 // collectShapeKids walks a tdgp body, descending transparently through
 // Vector Group / Vectors Group wrappers, and appends typed shape nodes
 // to g.Children. Vector Transform Group / Vector Materials Group are
-// ignored (V2.2 doesn't expose per-group transforms / materials).
+// ignored (this model doesn't expose per-group transforms / materials).
 func collectShapeKids(tdgp *rifx.Chunk, g *VectorGroup, ctx *parseCtx) {
 	walkTdmnPairs(tdgp, func(matchName string, payload *rifx.Chunk) bool {
 		if !payload.IsList() || payload.FormType != rifx.IDTdgp {
@@ -267,7 +267,7 @@ func hydrateGradientStops(body *rifx.Chunk) *codec.Gradient {
 // End Pt / HiLite Length·Angle) from a gradient body and applies them via the
 // supplied setters. Absent slots (AE elides defaults) leave the setter untouched
 // so the node keeps its constructor default. Shared by G-Fill and G-Stroke,
-// whose geometry sub-properties are identical. Static values only (V2.2 does not
+// whose geometry sub-properties are identical. Static values only (this hydrate does not
 // model animated gradient geometry); setter range errors are ignored (best-effort
 // hydrate — an out-of-range on-disk value leaves the default).
 func hydrateGradientGeometry(body *rifx.Chunk, ctx *parseCtx,
@@ -444,8 +444,8 @@ func hydrateScalarStatic(p *Property, set func(float64)) {
 // A static path has ONE shap inside omks → Path() stays Static. An animated
 // path has N shaps (one geometry per keyframe, == animated mask) plus a
 // sibling tdbs time table → Path() becomes Animated with N linear keyframes
-// (times read from tdbs.kfl via readMaskPathTimes). Temporal ease is V2.3+;
-// V2.2 hydrates animated paths as linear. See
+// (times read from tdbs.kfl via readMaskPathTimes). Temporal ease is deferred;
+// animated paths hydrate as linear. See
 // incident-reports/path-keyframe-write-re.md.
 func hydratePathNode(body *rifx.Chunk, ctx *parseCtx) *PathNode {
 	p := NewPathNode()
@@ -508,7 +508,7 @@ func hydratePathNode(body *rifx.Chunk, ctx *parseCtx) *PathNode {
 }
 
 // bezierFromShap decodes one shap LIST (shph + kfl{lhd3,ldat}) into a
-// BezierPath with denormalized vertices. Tangents are zeroed (V2.2 linear
+// BezierPath with denormalized vertices. Tangents are zeroed (linear
 // scope; on-disk tangent fidelity is deferred — see
 // incident-reports/path-keyframe-write-re.md).
 func bezierFromShap(shap *rifx.Chunk) BezierPath {

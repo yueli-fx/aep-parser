@@ -21,9 +21,9 @@ import (
 //   - Populated by parseLayer when a Layer is built from a parsed .aep file.
 //   - Nil for layers built outside the parser (NewProject / NewShapeLayer
 //     builders construct it explicitly per their archetype).
-//   - opaque is reserved for future V3 phases that need to round-trip
+//   - opaque is reserved for a future phase that needs to round-trip
 //     unrecognized sibling chunks under the layer's owning Layr LIST
-//     (per CLAUDE.md hard constraint #5); currently nil.
+//     (to satisfy the opaque-preservation invariant); currently nil.
 type layerBackrefs struct {
 	// ldta is the underlying ldta chunk reference, captured by parseLayer.
 	// Used by SetVisible/SetBlendingMode/etc. for length-preserving

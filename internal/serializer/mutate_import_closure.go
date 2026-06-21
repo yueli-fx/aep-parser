@@ -139,7 +139,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		}
 	}
 
-	// === PHASE 1: import the source item closure (BFS) ===
+	// === Import the source item closure (BFS) ===
 	itemIDMap := make(map[uint32]uint32)
 	type pendingComp struct {
 		dup   *rifx.Chunk
@@ -227,7 +227,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		}
 	}
 
-	// === PHASE 1 Pass 2: remap imported comps' layer source refs ===
+	// === Second pass: remap imported comps' layer source refs ===
 	remap := func(id uint32) uint32 {
 		if id == 0 {
 			return 0
@@ -262,7 +262,7 @@ func insertLayerCrossProject(c *Composition, src *Layer, atIdx, srcLayrIdx int, 
 		destProj.Compositions = append(destProj.Compositions, dupComp)
 	}
 
-	// === PHASE 2: splice the layer with SourceID/AltSourceID remapped ===
+	// === Splice the layer with SourceID/AltSourceID remapped ===
 	clone, err := spliceLayerClone(c, atIdx, srcLayrIdx, srcChildren, remap)
 	if err != nil {
 		rollback()

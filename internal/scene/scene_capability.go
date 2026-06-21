@@ -4,7 +4,7 @@ package scene
 import "github.com/example/aep-parser/internal/codec"
 
 // AECapabilities describes the serializer-affecting traits of a target AE
-// version. V2.2 ships with this struct deliberately EMPTY — the escape hatch
+// version. This struct ships deliberately EMPTY — the escape hatch
 // (AE 2020 canonical minimum) covers all currently
 // known cross-version differences without requiring lowering to branch.
 //
@@ -24,7 +24,7 @@ import "github.com/example/aep-parser/internal/codec"
 // AE-2025-native = 164 B), single canonical cannot cover both, lowering
 // branches in buildLdtaBytes.
 //
-// The remaining six candidates still don't qualify for V2.2 — listed
+// The remaining six candidates still don't qualify for admission — listed
 // here for traceability:
 //
 //   - FEEHasPpSn           (FEE LIST ppSn child absent in AE 2020)
@@ -34,7 +34,7 @@ import "github.com/example/aep-parser/internal/codec"
 //   - PathBezierEncoding   (shap/shph/lhd3/ldat cross-version identical)
 //   - KeyframeEaseEncoding (cosmetic flag-byte diff only; AE 2025 reads AE 2020 ldat fine)
 //
-// V3 brainstorm may revisit (capability auto-derive). Keeping the struct
+// A future capability auto-derive design may revisit this. Keeping the struct
 // + lookup function reserves the API surface so a future trait addition is
 // non-breaking to call sites that already do `caps := Capabilities(target)`.
 type AECapabilities struct {
@@ -46,7 +46,7 @@ type AECapabilities struct {
 }
 
 // Capabilities returns the capability set for the given AE target. Pure
-// function lookup — intentionally NOT a method on *Project so a future V3
+// function lookup — intentionally NOT a method on *Project so a future
 // auto-derive path can plug in without disturbing call sites.
 func Capabilities(target AETarget) AECapabilities {
 	c := AECapabilities{LdtaSize: codec.LdtaSize2020}

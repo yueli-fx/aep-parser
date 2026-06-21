@@ -2998,8 +2998,8 @@ func (t *StrokeTaper) SetEndEase(v float64) error { t.endEase = v; return nil }
 
 // StrokeWave models the Stroke "Wave" group's wavelength-mode scalars
 // (`ADBE Vector Stroke Wave`): Amount (%), Wavelength (px), Phase (deg) — stored
-// on disk as float64 big-endian at cdat[0:8]. Defaults: Amount 0, Wavelength
-// 100, Phase 0.
+// on disk as float64 big-endian at cdat[0:8]. Defaults: Amount is 0,
+// Wavelength is 100, Phase is 0.
 //
 // Only the wavelength-mode controls are modeled. The Units enum and the Cycles
 // stream are AE-elided at the wavelength default and not modeled — Wave is

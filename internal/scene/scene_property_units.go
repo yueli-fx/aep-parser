@@ -1,7 +1,7 @@
 package scene
 
 // unitsTextMap maps property match-names to their unit strings.
-// Ported from py-aep data/units.py. Used by Property.UnitsText().
+// Ported from py-aep data/units.py. Used by Property.UnitsText(). //nolint:jargon
 var unitsTextMap = map[string]string{
 	"ADBE Ambient Coefficient":            "percent",
 	"ADBE Anchor Point":                   "pixels",

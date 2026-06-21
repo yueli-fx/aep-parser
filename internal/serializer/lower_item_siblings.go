@@ -17,9 +17,9 @@ package serializer
 import "github.com/example/aep-parser/internal/rifx"
 
 // lowerItemSiblings returns deep-clones of the Fold-level sibling chunks AE
-// expects after each Item LIST. ctx is reserved (V3 may key off capabilities);
-// V2.2 ignores it — the AE 2020 substrate works on every supported AE
-// version via back-compat.
+// expects after each Item LIST. ctx is reserved (a future version may key off
+// capabilities); the current implementation ignores it — the AE 2020
+// substrate works on every supported AE version via back-compat.
 func lowerItemSiblings(_ *lowerCtx) []*rifx.Chunk {
 	ensureCompTemplate()
 	out := make([]*rifx.Chunk, 0, len(compTmpl.siblingChunks))

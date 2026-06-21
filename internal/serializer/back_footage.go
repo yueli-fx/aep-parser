@@ -17,9 +17,9 @@ import (
 //   - Populated by parseFootage + parseItem when a Footage is built from a
 //     parsed .aep file.
 //   - Nil for footage items built outside the parser.
-//   - opaque is reserved for future V3 phases that need to round-trip
+//   - opaque is reserved for a future phase that needs to round-trip
 //     unrecognized sibling chunks under the footage's owning Item LIST
-//     (per CLAUDE.md hard constraint #5); currently nil.
+//     (to satisfy the opaque-preservation invariant); currently nil.
 type footageBackrefs struct {
 	// itemID / itemName are stored for error-message context (mirrors
 	// Footage.ID / Footage.Name at parse time; not used for byte writes).
@@ -35,7 +35,7 @@ type footageBackrefs struct {
 	// height (already on Footage) plus audio sample rate, start/end
 	// frame, footage_missing flag, etc. — used by P1 1H convenience
 	// helpers (FootageMissing / HasAudio / StartFrame / EndFrame).
-	// Offsets per py-aep binary/footage_chunks.py::SspcChunk.
+	// Offsets per py-aep binary/footage_chunks.py::SspcChunk. //nolint:jargon
 	sspcChunk *rifx.Chunk
 
 	// optiChunk is the footage-options chunk. For "Soli" footage it holds

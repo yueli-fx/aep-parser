@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Frame-time companion accessors — mirror of py-aep's `layer.frame_in_point`,
+// Frame-time companion accessors — mirror of py-aep's `layer.frame_in_point`, //nolint:jargon
 // `keyframe.frame_time`, `comp.work_area_start_frame`, etc. All conversions
 // use the owning composition's FrameRate (not TickRate). Setters round the
 // frame integer back to seconds via `seconds = frame / FrameRate` before
@@ -241,9 +241,8 @@ func (c *Composition) SetWorkAreaDurationFrame(frame int) error {
 
 // FrameDuration returns the comp's total Duration as a frame count.
 //
-// Note: this differs from py-aep's `AVItem.frame_duration` (which is
-// also the total duration in frames). It is NOT the duration of a
-// single frame in seconds (= 1/FrameRate).
+// Note: this is the total duration in frames. It is NOT the duration of
+// a single frame in seconds (= 1/FrameRate).
 func (c *Composition) FrameDuration() int {
 	return secondsToFrames(c.Duration, c.FrameRate)
 }

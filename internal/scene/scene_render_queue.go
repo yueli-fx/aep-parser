@@ -2,12 +2,11 @@ package scene
 
 import "github.com/example/aep-parser/internal/codec"
 
-// Render queue runtime model (P3 §3A slice-1, read-only). Mirrors py-aep
+// Render queue runtime model (read-only). Mirrors py-aep //nolint:jargon
 // RenderQueue / RenderQueueItem / OutputModule, exposing only the fields that
-// cross-validate byte-for-byte against py-aep golden JSON. Write paths, the
-// full render-settings enum surface, format options and the 128-byte
-// OutputModuleSettingsItem are deferred to later slices (see
-// flightdeck/plans/2026-06-01-py-aep-p3-renderqueue-reader-plan.md).
+// cross-validate byte-for-byte against py-aep golden JSON. //nolint:jargon
+// Write paths, the full render-settings enum surface, format options and the
+// 128-byte OutputModuleSettingsItem are deferred to later slices.
 
 // RenderQueue is the project's render queue (LIST:LRdr).
 type RenderQueue struct {
@@ -34,7 +33,7 @@ type RenderQueueItem struct {
 	// render-settings ldat. Nil if the referenced comp id was not found.
 	Comp *Composition
 
-	// Status is the raw render status code (RenderSettingsItem @0x0C). py-aep
+	// Status is the raw render status code (RenderSettingsItem @0x0C). py-aep //nolint:jargon
 	// maps this to its RQItemStatus enum; we expose the raw value for now.
 	Status uint32
 
@@ -45,7 +44,7 @@ type RenderQueueItem struct {
 	// Comment is the item comment (RCom → Utf8), empty when no RCom present.
 	Comment string
 
-	// LogType is the raw log-type code (RenderSettingsItem @0x50). py-aep
+	// LogType is the raw log-type code (RenderSettingsItem @0x50). py-aep //nolint:jargon
 	// maps this to its 3xxx-namespaced LogType enum; we expose raw.
 	LogType uint16
 
@@ -58,7 +57,7 @@ type RenderQueueItem struct {
 	ElapsedSeconds uint32
 
 	// RenderSettings holds the per-item render settings (the ExtendScript
-	// get_settings() dict). Values follow py-aep NUMBER semantics: -1 means
+	// get_settings() dict). Values follow py-aep NUMBER semantics: -1 means //nolint:jargon
 	// "current settings" (binary 0xFFFF).
 	RenderSettings RenderSettings
 
@@ -85,7 +84,7 @@ type RenderQueueItem struct {
 }
 
 // RenderSettings is the per-item render settings (ExtendScript
-// RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics:
+// RenderQueueItem.getSettings). Enum-typed fields use py-aep NUMBER semantics: //nolint:jargon
 // -1 = "current settings" (binary 0xFFFF). FieldRender/Pulldown/FrameRate have
 // no current-settings sentinel.
 type RenderSettings struct {
@@ -172,7 +171,7 @@ type OutputModuleSettings struct {
 	CropLeft            int
 	CropBottom          int
 	CropRight           int
-	OutputAudio         int // raw (py-aep derives ON/OFF/AUTO)
+	OutputAudio         int // raw (py-aep derives ON/OFF/AUTO) //nolint:jargon
 	IncludeProjectLink  bool
 	PostRenderAction    uint32 // raw
 	ConvertToLinear     int

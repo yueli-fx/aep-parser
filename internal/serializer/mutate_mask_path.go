@@ -55,7 +55,7 @@ func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 		return fmt.Errorf("SetMaskPath: mask %q has no Mask Shape om-s", mask.Name)
 	}
 
-	// Atomic structural mutation (CLAUDE.md #1): swap the rebuilt om-s in, then
+	// Atomic structural mutation: swap the rebuilt om-s in, then
 	// re-parse the atom to validate it before keeping the change — roll back to
 	// the pre-call om-s / shph back-ref / warnings on any failure.
 	oldOmS := kids[shapeIdx]
@@ -163,7 +163,7 @@ func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
 		return fmt.Errorf("SetMaskPathKeyframes: mask %q has no Mask Shape om-s", mask.Name)
 	}
 
-	// Atomic structural mutation (CLAUDE.md #1): swap the animated om-s in, then
+	// Atomic structural mutation: swap the animated om-s in, then
 	// re-parse the atom to validate before keeping the change — roll back to the
 	// pre-call om-s / shph back-ref / warnings on any failure.
 	oldOmS := kids[shapeIdx]

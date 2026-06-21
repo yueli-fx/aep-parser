@@ -1,6 +1,6 @@
 // Public-API entry for replacing a templated layer's Transform Group with a
 // caller-built LayerTransform — the from-scratch path for ANIMATED layer
-// transform on layers that are NOT V2.2 ShapeLayers (text / precomp / footage /
+// transform on layers that are NOT generic ShapeLayers (text / precomp / footage /
 // solid / null …). Those layers come from embedded templates whose Transform
 // Group ELIDES default channels (AE default-omission — see incident
 // transform-group-default-omission): a fresh NewTextLayer has no "ADBE Position"
@@ -9,7 +9,7 @@
 // nor AnimateScalarKeyframes/InsertKeyframe (no cdat to convert) can reach them.
 //
 // SetLayerTransform sidesteps that by lowering a full canonical Transform Group
-// (the exact path V2.2 ShapeLayers ship, already AE 2020/2025 gated) from a
+// (the exact path generic ShapeLayers ship, already AE 2020/2025 gated) from a
 // LayerTransform the caller fills with static values and/or keyframes, then
 // swapping it in for the layer's elided Transform Group body. rifx recomputes
 // the ancestor LIST sizes on write (same as the text-animator splice).

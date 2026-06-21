@@ -2,8 +2,8 @@
 // Expansion — the default-elided scalar leaves inside a mask atom's property
 // group. AE elides them at default, so a from-scratch mask (AddMask) and most
 // parsed masks carry no slot to overwrite. SetMaskOption clones the requested
-// AE-native leaf from an embedded template (extracted from re-saved
-// v2_2_mask_options.aep — masks are eagerly decoded so the bytes must be exact),
+// AE-native leaf from an embedded template (extracted from a re-saved
+// mask-options fixture — masks are eagerly decoded so the bytes must be exact),
 // splices it into the atom group in AE's canonical order (Feather, Opacity,
 // Offset), and overwrites its cdat with the caller's value. When the leaf is
 // already present (option authored or a prior splice) it just overwrites.

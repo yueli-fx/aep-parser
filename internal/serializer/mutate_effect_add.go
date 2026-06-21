@@ -5,8 +5,8 @@
 // "ADBE Group End" tdmn sentinel. Adding an effect = splice a fresh
 // (tdmn, sspc) pair in just before that sentinel. The sspc payload (parameter
 // tree, pard metadata, built-in-params group) is supplied verbatim from an
-// embedded AE-native template — the same embed-AE-bytes strategy the V2.2 shape
-// bodies use, and the same (tdmn, payload) splice DuplicatePropertyGroup is
+// embedded AE-native template — the same embed-AE-bytes strategy the generic
+// shape bodies use, and the same (tdmn, payload) splice DuplicatePropertyGroup is
 // ship-gate-green with.
 //
 // Atomic: snapshot parade chunk + scene children + flat Effects slice, commit,
@@ -42,7 +42,7 @@ import (
 // extracted verbatim from an AE-2020-saved layer that had the full curated set
 // applied (test_data/re_effect_library.aep + re_effect_library2.aep, generated
 // by re_effect_library.jsx / re_effect_library2.jsx; Point3D Control from
-// re_effect_param_types.aep — all extracted by tmp_debug/extract_effect_lib).
+// re_effect_param_types.aep — all extracted by a one-off extraction script).
 // All are built-in effects present well before the 2020 read floor; their
 // serialized form is version-portable (AE 2025 accepts the AE-2020 bytes —
 // mirroring the gradient version-portability finding, confirmed by ship-gate
@@ -104,7 +104,7 @@ const (
 	EffectCheckboxControl    = "ADBE Checkbox Control"        // Checkbox Control
 	EffectPoint3DControl     = "ADBE Point3D Control"         // 3D Point Control
 	EffectSetMatte           = "ADBE Set Matte3"              // Set Matte (layer-reference effect)
-	// Wave 4 (2026-06-15, fixture re_effect_lib3.aep) — MG distort/generate/
+	// Added 2026-06-15, fixture re_effect_lib3.aep — MG distort/generate/
 	// stylize/transition.
 	EffectTurbulentDisplace = "ADBE Turbulent Displace" // Turbulent Displace
 	EffectRoughenEdges      = "ADBE Roughen Edges"      // Roughen Edges
@@ -116,7 +116,7 @@ const (
 	EffectStroke            = "ADBE Stroke"             // Stroke
 	EffectCornerPin         = "ADBE Corner Pin"         // Corner Pin
 	EffectVenetianBlinds    = "ADBE Venetian Blinds"    // Venetian Blinds
-	// Wave 5 (2026-06-16, fixture re_effect_lib5.aep) — MG distort / stylize /
+	// Added 2026-06-16, fixture re_effect_lib5.aep — MG distort / stylize /
 	// perspective / color-correction / blur / channel / generate / time / matte.
 	// All parameter-only (no layer pickwhip); extracted host id 15 uniform.
 	EffectTwirl              = "ADBE Twirl"                // Twirl
@@ -157,8 +157,8 @@ const (
 	EffectPosterizeTime      = "ADBE Posterize Time"       // Posterize Time
 	EffectSimpleChoker       = "ADBE Simple Choker"        // Simple Choker
 	EffectMatteChoker        = "ADBE Matte Choker"         // Matte Choker
-	// Wave 6 (2026-06-16, fixture re_effect_lib6.aep) — more MG parameter-only
-	// built-ins (+ wave-5 Bulge correction). All tdpi-host uniform (audio
+	// Added 2026-06-16, fixture re_effect_lib6.aep — more MG parameter-only
+	// built-ins (+ a Bulge correction from the prior batch). All tdpi-host uniform (audio
 	// spectrum/waveform default Audio Layer = None → no foreign tdpi).
 	EffectBulge            = "ADBE Bulge"                // Bulge
 	EffectOffset           = "ADBE Offset"               // Offset
@@ -183,7 +183,7 @@ const (
 	EffectNoiseHLS         = "ADBE Noise HLS2"           // Noise HLS
 	EffectRadialWipe       = "ADBE Radial Wipe"          // Radial Wipe
 	EffectBlockDissolve    = "ADBE Block Dissolve"       // Block Dissolve
-	// Wave 7 (2026-06-16, fixture re_effect_lib7.aep) — Lumetri Color + Lightning
+	// Added 2026-06-16, fixture re_effect_lib7.aep — Lumetri Color + Lightning
 	// + the Cycore (CC) effect family. Probe-swept via canAddProperty. NOTE 4 CC
 	// effects store a "CS …" internal match-name (≠ the "CC …" addProperty alias):
 	// the const value is the STORED name (what AddEffect must be given + what AE
@@ -233,7 +233,7 @@ const (
 	EffectCCBurnFilm          = "CC Burn Film"             // CC Burn Film
 	EffectCCVignette          = "CS Vignette"              // CC Vignette
 	EffectCCSimpleWireRemoval = "CC Simple Wire Removal"   // CC Simple Wire Removal
-	// Wave 8 (2026-06-16, fixture re_effect_layerref.aep) — LAYER-REFERENCE
+	// Added 2026-06-16, fixture re_effect_layerref.aep — LAYER-REFERENCE
 	// effects: their templates carry a materialized layer-ref param (with tdpi);
 	// AddEffect retargets all tdpi to host (self), then SetEffectLayerParam aims
 	// the layer-ref param at the real source (same flow as Set Matte). The
@@ -241,10 +241,10 @@ const (
 	EffectDisplacementMap = "ADBE Displacement Map" // Displacement Map
 	EffectCompoundBlur    = "ADBE Compound Blur"    // Compound Blur
 	EffectCCVectorBlur    = "CC Vector Blur"        // CC Vector Blur
-	// Wave 9 (2026-06-16, fixture re_effect_lib9.aep) — big probe sweep:
+	// Added 2026-06-16, fixture re_effect_lib9.aep — big probe sweep:
 	// keying / simulation / utility / more Cycore CC. parameter-only (the 4 layer-ref
 	// effects 3D Glasses/Warp Stabilizer/Timewarp/CC Particle World it surfaced are
-	// now shipped in wave 11 below). NOTE several CC store a "CS …" internal name
+	// shipped further below). NOTE several CC store a "CS …" internal name
 	// (≠ "CC …" alias).
 	EffectBasic3D               = "ADBE Basic 3D"
 	EffectBroadcastColors       = "ADBE Broadcast Colors"
@@ -289,8 +289,8 @@ const (
 	EffectCCLineSweep           = "CS LineSweep"
 	EffectCCRainfall            = "CSRainfall"
 	EffectCCSnowfall            = "CSSnowfall"
-	// Wave 10 (2026-06-17, fixture re_effect_audio.aep) — AUDIO-processing effects.
-	// Unlike every prior wave these can ONLY be applied to a layer that HAS audio
+	// Added 2026-06-17, fixture re_effect_audio.aep — AUDIO-processing effects.
+	// Unlike every prior batch these can ONLY be applied to a layer that HAS audio
 	// (AE's canAddProperty returns false on a solid), so the fixture imports an mp3
 	// and hosts them on that audio layer (tdpi-host=14 uniform). Non-visual: the
 	// ship-gate is AE-accept + DOM readback (no render pixels). Match-names probed
@@ -306,9 +306,9 @@ const (
 	EffectAudioReverb       = "ADBE Aud Reverb"        // Reverb
 	EffectAudioStereoMixer  = "ADBE Aud Stereo Mixer"  // Stereo Mixer
 	EffectAudioTone         = "ADBE Aud Tone"          // Tone
-	// Wave 11 (2026-06-17, fixture re_effect_layerref2.aep) — the 4 LAYER-REFERENCE
-	// effects wave 9 surfaced but deferred (foreign tdpi). Same materialize flow as
-	// wave 8: each template carries its layer-ref param(s) with a tdpi (pointed at a
+	// Added 2026-06-17, fixture re_effect_layerref2.aep — the 4 LAYER-REFERENCE
+	// effects surfaced earlier but deferred (foreign tdpi). Same materialize flow as
+	// the other layer-reference effects above: each template carries its layer-ref param(s) with a tdpi (pointed at a
 	// MAP layer during RE), AddEffect retargets all tdpi to host, then
 	// SetEffectLayerParam aims the …Layer param const(s) below at the real source.
 	// 3D Glasses & Timewarp each expose TWO layer-ref params.
@@ -316,7 +316,7 @@ const (
 	Effect3DGlasses       = "ADBE 3D Glasses"         // 3D Glasses
 	EffectTimewarp        = "ADBE Timewarp"           // Timewarp
 	EffectCCParticleWorld = "CC Particle World"       // CC Particle World
-	// Wave 12 (2026-06-17, fixture re_effect_lib12.aep) — the wave-6 PARKED classic
+	// Added 2026-06-17, fixture re_effect_lib12.aep — the previously PARKED classic
 	// effects, now with correct ALL-CAPS match-names (probe11). Old AE effect
 	// match-names are case-sensitive ALL-CAPS-with-spaces (camelCase guesses failed).
 	// 5 parameter-only + 4 layer-ref (Texturize/Color Link/Compound Arithmetic/
@@ -332,22 +332,22 @@ const (
 	EffectSetChannels        = "ADBE Set Channels"         // Set Channels
 )
 
-// Layer-reference parameter match-names for the wave-8 layer-ref effects — pass
+// Layer-reference parameter match-names for the LAYER-REFERENCE effects above — pass
 // these to SetEffectLayerParam(layer, fx, paramMatchName, target).
 const (
 	EffectDisplacementMapLayer = "ADBE Displacement Map-0001" // Displacement Map Layer
 	EffectCompoundBlurLayer    = "ADBE Compound Blur-0001"    // Blur Layer
 	EffectCCVectorBlurMap      = "CC Vector Blur-0005"        // Vector Map
-	// Wave 11 layer-ref params. 3D Glasses & Timewarp each expose two; the
+	// Layer-ref params for the effects added above. 3D Glasses & Timewarp each expose two; the
 	// Warp Stabilizer / Timewarp UI names were CJK in the RE fixture, so those
-	// role names are inferred from param order (the match-name is the stable key).
+	// role names come from param order instead (the match-name is the stable key).
 	EffectWarpStabilizerRefLayer = "ADBE SubspaceStabilizer-0046" // Warp Stabilizer reference layer
 	Effect3DGlassesLeftView      = "ADBE 3D Glasses-0001"         // 3D Glasses left view
 	Effect3DGlassesRightView     = "ADBE 3D Glasses-0002"         // 3D Glasses right view
 	EffectTimewarpMatteLayer     = "ADBE Timewarp-0029"           // Timewarp matte layer (inferred)
 	EffectTimewarpSourceLayer    = "ADBE Timewarp-0031"           // Timewarp source layer (inferred)
 	EffectCCParticleWorldTexture = "CC Particle World-0045"       // CC Particle World texture layer
-	// Wave 12 layer-ref params. Set Channels has four independent source layers.
+	// Layer-ref params for the classic effects added above. Set Channels has four independent source layers.
 	EffectTexturizeLayer                 = "ADBE Texturize-0001"           // Texturize texture layer
 	EffectColorLinkSourceLayer           = "ADBE Color Link-0001"          // Color Link source layer
 	EffectCompoundArithmeticSecondSource = "ADBE Compound Arithmetic-0001" // Compound Arithmetic 2nd source layer
@@ -565,12 +565,12 @@ var effectTemplateFiles = map[string]string{
 	EffectAudioReverb:       "templates/effects/effect_adbe_aud_reverb.bin",
 	EffectAudioStereoMixer:  "templates/effects/effect_adbe_aud_stereo_mixer.bin",
 	EffectAudioTone:         "templates/effects/effect_adbe_aud_tone.bin",
-	// Wave 11 — layer-reference effects (materialized templates carry tdpi).
+	// Layer-reference effects (materialized templates carry tdpi).
 	EffectWarpStabilizer:  "templates/effects/effect_adbe_subspacestabilizer.bin",
 	Effect3DGlasses:       "templates/effects/effect_adbe_3d_glasses.bin",
 	EffectTimewarp:        "templates/effects/effect_adbe_timewarp.bin",
 	EffectCCParticleWorld: "templates/effects/effect_cc_particle_world.bin",
-	// Wave 12 — parked classic effects (5 parameter-only + 4 layer-ref).
+	// Previously parked classic effects (5 parameter-only + 4 layer-ref).
 	EffectBezierWarp:         "templates/effects/effect_adbe_bezmesh.bin",
 	EffectMeshWarp:           "templates/effects/effect_adbe_mesh_warp.bin",
 	EffectChannelMixer:       "templates/effects/effect_adbe_channel_mixer.bin",

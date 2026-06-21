@@ -7,7 +7,7 @@
 // MoveMask locates every mask's triple by its mkif pointer, confirms they form
 // one contiguous run (parade header prefix + N triples + Group End suffix),
 // then re-emits the run in the target order — the SAME chunk pointers, so all
-// opaque content rides along unchanged (CLAUDE.md #5) — and applies the same
+// opaque content rides along unchanged (per the opaque-preservation invariant) — and applies the same
 // permutation to the scene property tree and the flat layer.Masks slice.
 //
 // No chunk is created or destroyed, so no LIST size changes and no re-parse is

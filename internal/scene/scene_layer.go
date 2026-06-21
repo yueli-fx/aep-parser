@@ -13,7 +13,7 @@ const (
 	LayerTypeLight   LayerType = "light"      // 3D light
 	LayerTypeCamera  LayerType = "camera"     // 3D camera
 	LayerTypeAdjust  LayerType = "adjustment" // adjustment layer
-	LayerType3DModel LayerType = "3d-model"   // 3D Model layer (AE 24+, py-aep ThreeDModelLayer)
+	LayerType3DModel LayerType = "3d-model"   // 3D Model layer (AE 24+)
 	LayerTypeUnknown LayerType = "unknown"
 )
 
@@ -239,10 +239,10 @@ func (l *Layer) Rotation() *Property { return l.PropertyByMatchName(MatchNameRot
 // Opacity returns the layer's Opacity property (1D, 0..1), or nil.
 func (l *Layer) Opacity() *Property { return l.PropertyByMatchName(MatchNameOpacity) }
 
-// ShapeLayer is the V2.2 typed wrapper around *Layer. V1 callers
-// keep using *Layer directly; V2.2 creation / hydration paths return
-// *ShapeLayer, exposing shape-specific API (RootGroup, Transform, shorthand
-// transform accessors) on top of the embedded layer.
+// ShapeLayer is the typed wrapper around *Layer. Callers that don't need
+// shape-specific API keep using *Layer directly; shape creation / hydration
+// paths return *ShapeLayer, exposing shape-specific API (RootGroup, Transform,
+// shorthand transform accessors) on top of the embedded layer.
 //
 // The wrapper holds runtime state only — it does NOT carry rifx.Chunk refs.
 // Lowering (`lower_layer.go`) consumes the runtime tree
@@ -252,10 +252,10 @@ type ShapeLayer struct {
 }
 
 // WrapShapeLayer wraps a parsed/created *Layer as a ShapeLayer. Caller is
-// responsible for ensuring layer.Type == LayerTypeShape (matches V1 contract
-// pattern: typed wrappers trust the caller). Lazily initializes the
-// runtime shape state on the Layer itself so all wrappers of the same
-// Layer share the same state — the wrapper is a thin façade.
+// responsible for ensuring layer.Type == LayerTypeShape (matches the
+// existing convention that typed wrappers trust the caller). Lazily
+// initializes the runtime shape state on the Layer itself so all wrappers of
+// the same Layer share the same state — the wrapper is a thin façade.
 func WrapShapeLayer(layer *Layer) *ShapeLayer {
 	if layer.shapeRootGroup == nil {
 		layer.shapeRootGroup = NewVectorGroup()
@@ -263,13 +263,13 @@ func WrapShapeLayer(layer *Layer) *ShapeLayer {
 	if layer.shapeTransform == nil {
 		layer.shapeTransform = NewLayerTransform()
 	}
-	// WrapShapeLayer is the V2.2 opt-in: callers signal "I'm going to use
-	// V2.2 mutation APIs (RootGroup / Transform)". Mark dirty so write-time
-	// sync re-lowers from the runtime tree. V1-only code paths (Property /
-	// ShapePrimitives) never call WrapShapeLayer and remain unaffected.
-	// Caveat: re-lowering loses on-disk content V2.2 hydration doesn't
-	// preserve (V2.2-unsupported shape kinds, per-group transforms with
-	// non-default values, opaque material settings).
+	// WrapShapeLayer is the opt-in: callers signal "I'm going to use the
+	// typed mutation APIs (RootGroup / Transform)". Mark dirty so write-time
+	// sync re-lowers from the runtime tree. Code paths that only use Property
+	// / ShapePrimitives directly never call WrapShapeLayer and remain
+	// unaffected. Caveat: re-lowering loses on-disk content the typed
+	// hydration doesn't preserve (unsupported shape kinds, per-group
+	// transforms with non-default values, opaque material settings).
 	layer.shapeDirty = true
 	return &ShapeLayer{Layer: layer}
 }
@@ -286,8 +286,9 @@ func (s *ShapeLayer) AnchorPoint() *PropertyStream[[2]float64] {
 	return s.shapeTransform.anchorPoint
 }
 
-// Position is shorthand for s.Transform().Position(). V2.2 ShapeLayer is
-// 2D-only (3D ShapeLayer = V2.3+); returns the 2D stream.
+// Position is shorthand for s.Transform().Position(). ShapeLayer is
+// currently 2D-only (a future 3D ShapeLayer would be a separate type);
+// returns the 2D stream.
 func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.shapeTransform.position }
 
 // Scale is shorthand for s.Transform().Scale().
@@ -300,8 +301,8 @@ func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.shapeTransfo
 func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeTransform.opacity }
 
 // LayerTransform is the typed wrapper for a layer's Transform property
-// group. V2.2 ShapeLayer is 2D, so Position / Scale /
-// AnchorPoint are 2D streams; 3D layers are V2.3+.
+// group. ShapeLayer is currently 2D, so Position / Scale /
+// AnchorPoint are 2D streams; 3D support would be a future addition.
 //
 // Default values (runtime-facing; lowering elides defaults):
 //

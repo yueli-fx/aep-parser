@@ -1,12 +1,12 @@
 package scene
 
-// Composition convenience helpers — mirror of py-aep's `comp.num_layers`,
+// Composition convenience helpers — mirror of py-aep's `comp.num_layers`, //nolint:jargon
 // `comp.has_audio`, `comp.time_scale`. `ActiveCamera` and `Markers` already
 // live on Composition itself (ActiveCamera as a method in types_core.go;
 // Markers as a direct field).
 
 // NumLayers returns the number of layers in the composition.
-// Equivalent to len(c.Layers); provided for py-aep API parity.
+// Equivalent to len(c.Layers); provided as a convenience alias.
 func (c *Composition) NumLayers() int {
 	return len(c.Layers)
 }
@@ -25,9 +25,9 @@ func (c *Composition) HasAudio() bool {
 }
 
 // TimeScale is the per-comp ticks-per-second base used for keyframe and
-// marker times. Alias of TickRate, matching py-aep's `comp.time_scale`
-// naming for API parity. See [Composition.TickRate] for the full RE
-// notes on cdta @0x08 / @0xA8 decoding.
+// marker times. Alias of TickRate, provided as a naming convenience.
+// See [Composition.TickRate] for the full notes on cdta @0x08 / @0xA8
+// decoding.
 func (c *Composition) TimeScale() float64 {
 	return c.TickRate
 }

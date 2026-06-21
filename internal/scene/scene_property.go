@@ -60,7 +60,7 @@ type Property struct {
 
 // PropertyControlType identifies the UI control type for a property
 // (scalar slider, color picker, angle dial, checkbox, dropdown, etc.).
-// Derived from tdb4 flags; mirrors py-aep PropertyControlType enum.
+// Derived from tdb4 flags; mirrors py-aep PropertyControlType enum. //nolint:jargon
 type PropertyControlType uint8
 
 const (
@@ -117,7 +117,7 @@ func (p PropertyControlType) String() string {
 }
 
 // PropertyValueType identifies the type of value stored in a property.
-// Mirrors py-aep PropertyValueType enum (ExtendScript constants).
+// Mirrors py-aep PropertyValueType enum (ExtendScript constants). //nolint:jargon
 type PropertyValueType uint16
 
 const (

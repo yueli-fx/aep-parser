@@ -10,7 +10,7 @@ import (
 )
 
 // parse_render_queue.go — parse the render queue (LIST:LRdr) into the scene
-// model. Read-only (P3 §3A slice-1). Structure (verified by tmp_debug probe):
+// model. Read-only (P3 §3A slice-1). Structure (verified by a chunk-tree probe):
 //
 //	LRdr
 //	 ├ LIST:list → lhd3 + ldat(RenderSettingsItem × N, 2246B)   ← per-item settings
@@ -135,7 +135,7 @@ func buildRenderQueueItem(blocks [][]byte, idx int, comment string, litm, itemLi
 }
 
 // resolveTimeSpan turns the time_span_source + dividends into (start, duration)
-// seconds, mirroring py-aep RenderQueueItem._resolved_time_span.
+// seconds, mirroring py-aep RenderQueueItem._resolved_time_span. //nolint:jargon
 func resolveTimeSpan(rs codec.RenderSettingsBlock, comp *Composition) (start, dur float64) {
 	switch rs.TimeSpanSource {
 	case codec.TimeSpanLengthOfComp:

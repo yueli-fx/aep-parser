@@ -206,7 +206,7 @@ type MaskVertex struct {
 }
 
 // BlendingMode is the layer's compositing blend mode (ldta @0x63).
-// Values match py-aep's BlendingMode enum / AE's internal numbering.
+// Values match AE's internal numbering.
 type BlendingMode uint8
 
 const (

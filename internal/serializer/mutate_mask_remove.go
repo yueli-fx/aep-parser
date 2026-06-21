@@ -12,7 +12,7 @@
 // length-variable: the parade tdgp shrinks; WriteAEP recomputes the ancestor
 // LIST sizes bottom-up (same path AddMask exercises when it grows the parade).
 // The removed triple chunks ride out verbatim, so no opaque content is
-// regenerated (CLAUDE.md #5). Every precondition is checked before the first
+// regenerated (per the opaque-preservation invariant). Every precondition is checked before the first
 // byte is spliced, so a rejected RemoveMask leaves the project untouched.
 package serializer
 

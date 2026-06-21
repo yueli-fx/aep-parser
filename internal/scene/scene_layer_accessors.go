@@ -42,8 +42,9 @@ const (
 	MatchNameCameraIrisHighlightGain       = "ADBE Iris Highlight Gain"
 	MatchNameCameraIrisHighlightThreshold  = "ADBE Iris Highlight Threshold"
 	// NB: Adobe misspelled this match-name as "Hightlight" — it is the real
-	// on-disk name (verified via tmp_debug/gen_camera_iris.jsx); the correct
-	// spelling never matches, so the accessor was silently always-nil before.
+	// on-disk name (verified via a generated camera-iris probe script); the
+	// correct spelling never matches, so the accessor was silently
+	// always-nil before.
 	MatchNameCameraIrisHighlightSaturation = "ADBE Iris Hightlight Saturation"
 )
 
@@ -126,8 +127,6 @@ const (
 // non-light layers (the parser leaves Layer.LightKind as default 0 ==
 // Parallel for them, so always cross-check Layer.Type == LayerTypeLight
 // before reading LightKind).
-//
-// RE fixture: test_data/re_wave2_ae24.aep (RE_LIGHTS comp).
 type LightKind uint8
 
 const (
@@ -159,7 +158,7 @@ func (k LightKind) String() string {
 //
 // Deprecated: use LightKind. The 4101..4104 values are wrong (no AE
 // version writes them) and the actual storage was reverse-engineered
-// to ldta @0x88 by re_wave2_ae24.jsx.
+// to ldta @0x88 by re_wave2_ae24.jsx. //nolint:jargon
 type LightTypeID int
 
 // Deprecated: use LightKindParallel.
@@ -200,9 +199,7 @@ func (t LightTypeID) String() string {
 // default identity keyframes (t=0, t=duration) on enable. When disabled,
 // Keyframes is empty.
 //
-// Mirrors AE script's TimeRemapEnabled getter. Verified against
-// test_data/re_wave2_ae24.aep (RE_TIMEREMAP comp): tr_baseline has 0
-// keyframes; tr_remap_on has 2.
+// Mirrors AE script's TimeRemapEnabled getter.
 func (l *Layer) TimeRemapEnabled() bool {
 	p := l.TimeRemap()
 	if p == nil {
@@ -445,8 +442,6 @@ func (l *Layer) AlternateSource() AVItem {
 // for AV layers; the field is repurposed per Layer.Type). Only meaningful
 // when Type == LayerTypeLight and LightKind == LightKindAmbient (the
 // "Environment" light in AE 24+).
-//
-// Mirrors py-aep `LightLayer.light_source`.
 func (l *Layer) LightSource() *Layer {
 	if l.Type != LayerTypeLight || l.comp == nil {
 		return nil
@@ -469,7 +464,7 @@ func setScalarProperty(p *Property, layerName, propName string, v float64) error
 
 // AVSource resolves this layer's source to an AVItem (Composition or
 // Footage), or nil when SourceID is 0 or the layer was built outside
-// the parser. Mirrors py-aep's `Layer.source`.
+// the parser.
 func (l *Layer) AVSource() AVItem {
 	if l.SourceID == 0 || l.comp == nil || l.comp.proj == nil {
 		return nil
@@ -478,8 +473,7 @@ func (l *Layer) AVSource() AVItem {
 }
 
 // CanSetCollapseTransformation reports whether AE will let the user
-// toggle CollapseTransform on this layer. Mirrors py-aep's
-// `AVLayer.can_set_collapse_transformation`:
+// toggle CollapseTransform on this layer:
 //
 //   - precomp source → true
 //   - solid footage source → true
@@ -502,10 +496,8 @@ func (l *Layer) CanSetCollapseTransformation() bool {
 }
 
 // CanSetTimeRemapEnabled reports whether AE will let the user enable
-// time remapping on this layer. Mirrors py-aep's
-// `AVLayer.can_set_time_remap_enabled`: true when the source has a
-// non-zero duration. Still images, text layers, and shape sources don't
-// qualify.
+// time remapping on this layer: true when the source has a non-zero
+// duration. Still images, text layers, and shape sources don't qualify.
 func (l *Layer) CanSetTimeRemapEnabled() bool {
 	src := l.AVSource()
 	if src == nil {

@@ -134,7 +134,7 @@ read-only
 func (p *Property) Active() bool
 ```
 
-Active is an alias for Enabled — mirrors py-aep's `property.active` which returns `self.enabled`. Kept as a separate accessor for parity even though it's a thin wrapper.
+Active is an alias for Enabled, provided as a convenience. Kept as a separate accessor even though it's a thin wrapper.
 
 read-only
 
@@ -174,7 +174,7 @@ read-only
 func (p *Property) Elided() bool
 ```
 
-Elided reports whether the property is hidden from the AE UI. py-aep sets this for parser-synthesized placeholder groups; we don't synthesize anything yet, so this always returns false. Reserved for future implementations that materialize missing slots.
+Elided reports whether the property is hidden from the AE UI. This is set for parser-synthesized placeholder groups; we don't synthesize anything yet, so this always returns false. Reserved for future implementations that materialize missing slots.
 
 read-only
 
@@ -184,7 +184,7 @@ read-only
 func (p *Property) Enabled() bool
 ```
 
-Enabled reports whether the property is enabled (UI toggle next to the property name in AE's timeline). Read from tdsb byte 3 bit 0; defaults to true when the tdsb chunk is absent — matches py-aep's `TdsbChunk._enable_flags` default of 1.
+Enabled reports whether the property is enabled (UI toggle next to the property name in AE's timeline). Read from tdsb byte 3 bit 0; defaults to true when the tdsb chunk is absent.
 
 read-only
 
@@ -224,7 +224,7 @@ read-only
 func (p *Property) IsModified() bool
 ```
 
-IsModified reports whether the property has been changed from its default state. A property is considered modified when it has keyframes, has an expression (regardless of enabled state), or its StaticValue differs from DefaultValue. Mirrors py-aep's `Property.is_modified` minus the always-modified special-cases (Source Text, mask-index, effect-NoValue) which depend on parser context we don't yet track.
+IsModified reports whether the property has been changed from its default state. A property is considered modified when it has keyframes, has an expression (regardless of enabled state), or its StaticValue differs from DefaultValue. Does not yet cover the always-modified special-cases (Source Text, mask-index, effect-NoValue) which depend on parser context we don't yet track.
 
 read-only
 
@@ -234,7 +234,7 @@ read-only
 func (p *Property) IsNameSet() bool
 ```
 
-IsNameSet reports whether the property has an explicit display name set (different from its match-name). Currently a thin proxy: `Name != "" && Name != MatchName`. py-aep checks the underlying tdsn Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name (always defaults to MatchName), so this returns false for parsed properties until tdsn decode lands.
+IsNameSet reports whether the property has an explicit display name set (different from its match-name). Currently a thin proxy: `Name != "" && Name != MatchName`. The display name lives in the underlying tdsn Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name (always defaults to MatchName), so this returns false for parsed properties until tdsn decode lands.
 
 read-only
 
@@ -264,7 +264,7 @@ read-only
 func (p *Property) IsSeparationLeader() bool
 ```
 
-IsSeparationLeader reports whether the property is the multidimensional leader that can be separated into per-axis followers — true for "ADBE Position" regardless of whether it is currently separated (use DimensionsSeparated for the actual state). Mirrors py-aep.
+IsSeparationLeader reports whether the property is the multidimensional leader that can be separated into per-axis followers — true for "ADBE Position" regardless of whether it is currently separated (use DimensionsSeparated for the actual state).
 
 read-only
 
@@ -294,7 +294,7 @@ read-only
 func (p *Property) LockedRatio() bool
 ```
 
-LockedRatio reports whether the property's locked ratio flag is set. Read from tdsb @0x02 bit 4 (py-aep: byte 2 bit 4 = locked_ratio).
+LockedRatio reports whether the property's locked ratio flag is set. Read from tdsb @0x02 bit 4 (byte 2 bit 4).
 
 read-only
 
@@ -384,7 +384,7 @@ read-only
 func (p *Property) SeparationDimension() int
 ```
 
-SeparationDimension returns the axis a separation follower represents (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower. (-1 stands in for py-aep's None.)
+SeparationDimension returns the axis a separation follower represents (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower. (-1 means the property is not a follower.)
 
 read-only
 

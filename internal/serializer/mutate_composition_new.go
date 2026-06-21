@@ -201,7 +201,7 @@ func buildEmptyLayrList() *rifx.Chunk {
 
 // ensureCompTemplate lazy-init the single shared comp template (AE 2020 dummy).
 //
-// Source: templates/project/2020_dummy_comp.aep — generated via tmp_debug/gen_dummy_comp.jsx
+// Source: templates/project/2020_dummy_comp.aep — generated via a one-off JSX script
 // against AE 2020 (17.7). FEE 0 children, ldta 160B, tdgp 19 — minimum spec that
 // every supported AE version opens back-compat.
 func ensureCompTemplate() {
@@ -333,7 +333,7 @@ func buildCompItem(target AETarget, itemID uint32, name string, cdta []byte) *ri
 	//
 	// 不写 empty Layr：AE 自己 saved 的 empty comp 也不带 Layr（dummy template
 	// 验证：只有 SLay/CLay/SecL，没有 Layr）。若写 empty Layr，parseLayer 会在
-	// ldta 缺失时返回 stub 层，污染 comp.Layers（V2.2 AddLayer 时再 build Layr）。
+	// ldta 缺失时返回 stub 层，污染 comp.Layers（AddLayer 时再 build Layr）。
 	if len(tmpl.itemChunks) > 0 && isDatsList(tmpl.itemChunks[0]) {
 		children = append(children, deepCloneChunk(tmpl.itemChunks[0]))
 		children = append(children, cdtaChunk)

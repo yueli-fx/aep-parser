@@ -9,7 +9,7 @@ import (
 
 // propertyBackrefs holds the rifx.Chunk references that power Property's
 // length-preserving write paths (SetStaticValue / SetExpression / per-keyframe
-// setters). Lives in a separate shard so V3 scene types can mutate logical
+// setters). Lives in a separate shard so scene types can mutate logical
 // fields without dragging serialization state through every accessor.
 //
 // Lifecycle:
@@ -19,8 +19,8 @@ import (
 //     it explicitly per their archetype).
 //   - opaque captures parsed-but-undecoded sibling chunks under the property's
 //     owning tdbs/tdgp container; serializer re-emits them in original order
-//     to satisfy CLAUDE.md hard constraint #5 (opaque preservation). Populated
-//     by future V3 phases; currently a nil map.
+//     to satisfy the opaque-preservation invariant. Populated
+//     by a future phase; currently a nil map.
 type propertyBackrefs struct {
 	// tdbs is the property's owning tdbs LIST — used by SetExpression
 	// to insert/remove the Utf8 chunk holding the JS source.

@@ -32,7 +32,7 @@ type Symbol struct {
 // Context carries external facts for the gate/incident crosschecks.
 type Context struct {
 	Gates        map[string]bool // test name -> unconditionally-skipped
-	IncidentsDir string          // flightdeck/incidents (for @incident existence)
+	IncidentsDir string          // incidents directory (for @incident existence)
 }
 
 var sinceRe = regexp.MustCompile(`^AE\d{4}$`)

@@ -220,7 +220,7 @@
       "kind": "type",
       "file": "constants.md",
       "anchor": "#blendingmode-object",
-      "summary": "BlendingMode is the layer's compositing blend mode (ldta @0x63). Values match py-aep's BlendingMode enum / AE's internal numbering."
+      "summary": "BlendingMode is the layer's compositing blend mode (ldta @0x63). Values match AE's internal numbering."
     },
     "Composition": {
       "kind": "type",
@@ -306,7 +306,7 @@
       "anchor": "#compositiondisplaystarttime",
       "signature": "DisplayStartTime float64",
       "rw": "read-write",
-      "summary": "DisplayStartTime is the comp's display-time origin in seconds (AE scripting's CompItem.displayStartTime / displayStartFrame). Decoded from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE writes both 0 when displayStart is 0; non-zero pair encodes start-time in seconds. RE fixture: re_wave2_ae24.aep (RE_CDTA_DSF_120)."
+      "summary": "DisplayStartTime is the comp's display-time origin in seconds (AE scripting's CompItem.displayStartTime / displayStartFrame). Decoded from cdta @0xA4 / @0xA8 (uint32 BE dividend / divisor pair). AE writes both 0 when displayStart is 0; non-zero pair encodes start-time in seconds."
     },
     "Composition.Duration": {
       "kind": "field",
@@ -519,7 +519,7 @@
       "anchor": "#compositionnumlayers",
       "signature": "func (c *Composition) NumLayers() int",
       "rw": "read-only",
-      "summary": "NumLayers returns the number of layers in the composition. Equivalent to len(c.Layers); provided for py-aep API parity."
+      "summary": "NumLayers returns the number of layers in the composition. Equivalent to len(c.Layers); provided as a convenience alias."
     },
     "Composition.PixelAspect": {
       "kind": "field",
@@ -803,7 +803,7 @@
       "anchor": "#compositiontimescale",
       "signature": "func (c *Composition) TimeScale() float64",
       "rw": "read-only",
-      "summary": "TimeScale is the per-comp ticks-per-second base used for keyframe and marker times. Alias of TickRate, matching py-aep's `comp.time_scale` naming for API parity. See [Composition.TickRate] for the full RE notes on cdta @0x08 / @0xA8 decoding."
+      "summary": "TimeScale is the per-comp ticks-per-second base used for keyframe and marker times. Alias of TickRate, provided as a naming convenience. See [Composition.TickRate] for the full notes on cdta @0x08 / @0xA8 decoding."
     },
     "Composition.Width": {
       "kind": "field",
@@ -905,7 +905,7 @@
       "kind": "type",
       "file": "composition.md",
       "anchor": "#egcontrollertype-object",
-      "summary": "EGControllerType is an Essential Graphics controller's type code, as stored in its CTyp chunk. Values mirror py-aep's controller_type."
+      "summary": "EGControllerType is an Essential Graphics controller's type code, as stored in its CTyp chunk. Values match AE's internal controller numbering."
     },
     "EGControllerType.String": {
       "kind": "getter",
@@ -1010,7 +1010,7 @@
       "anchor": "#footageassettype",
       "signature": "func (f *Footage) AssetType() string",
       "rw": "read-only",
-      "summary": "AssetType returns the footage kind as a string: \"placeholder\" / \"solid\" / \"file\". Mirrors py-aep's `footage.asset_type` discriminator. Footage items with neither flag default to \"file\"."
+      "summary": "AssetType returns the footage kind as a string: \"placeholder\" / \"solid\" / \"file\". Footage items with neither flag default to \"file\"."
     },
     "Footage.Comment": {
       "kind": "field",
@@ -1042,7 +1042,7 @@
       "anchor": "#footagefile",
       "signature": "func (f *Footage) File() string",
       "rw": "read-only",
-      "summary": "File returns the footage source file path. Empty string for solids and placeholders. Alias of [Footage.Path] for py-aep API parity."
+      "summary": "File returns the footage source file path. Empty string for solids and placeholders. Alias of [Footage.Path], provided as a convenience."
     },
     "Footage.FootageMissing": {
       "kind": "getter",
@@ -1452,7 +1452,7 @@
       "anchor": "#layeravsource",
       "signature": "func (l *Layer) AVSource() AVItem",
       "rw": "read-only",
-      "summary": "AVSource resolves this layer's source to an AVItem (Composition or Footage), or nil when SourceID is 0 or the layer was built outside the parser. Mirrors py-aep's `Layer.source`."
+      "summary": "AVSource resolves this layer's source to an AVItem (Composition or Footage), or nil when SourceID is 0 or the layer was built outside the parser."
     },
     "Layer.ActiveAtTime": {
       "kind": "method",
@@ -1536,7 +1536,7 @@
       "anchor": "#layerautoname",
       "signature": "func (l *Layer) AutoName() string",
       "rw": "read-only",
-      "summary": "AutoName returns the layer's display name. Mirrors py-aep's `layer.auto_name` — falls back to the source item's name when the layer has no user-set name. Empty string for layers without a source (camera/light/null/text/shape) and no user-set name."
+      "summary": "AutoName returns the layer's display name. Falls back to the source item's name when the layer has no user-set name. Empty string for layers without a source (camera/light/null/text/shape) and no user-set name."
     },
     "Layer.AutoOrient": {
       "kind": "field",
@@ -1608,7 +1608,7 @@
       "anchor": "#layercansetcollapsetransformation",
       "signature": "func (l *Layer) CanSetCollapseTransformation() bool",
       "rw": "read-only",
-      "summary": "CanSetCollapseTransformation reports whether AE will let the user toggle CollapseTransform on this layer. Mirrors py-aep's `AVLayer.can_set_collapse_transformation`:"
+      "summary": "CanSetCollapseTransformation reports whether AE will let the user toggle CollapseTransform on this layer:"
     },
     "Layer.CanSetTimeRemapEnabled": {
       "kind": "getter",
@@ -1616,7 +1616,7 @@
       "anchor": "#layercansettimeremapenabled",
       "signature": "func (l *Layer) CanSetTimeRemapEnabled() bool",
       "rw": "read-only",
-      "summary": "CanSetTimeRemapEnabled reports whether AE will let the user enable time remapping on this layer. Mirrors py-aep's `AVLayer.can_set_time_remap_enabled`: true when the source has a non-zero duration. Still images, text layers, and shape sources don't qualify."
+      "summary": "CanSetTimeRemapEnabled reports whether AE will let the user enable time remapping on this layer: true when the source has a non-zero duration. Still images, text layers, and shape sources don't qualify."
     },
     "Layer.ClearAlternateSource": {
       "kind": "getter",
@@ -1938,7 +1938,7 @@
       "anchor": "#layeristhreedmodellayer",
       "signature": "func (l *Layer) IsThreeDModelLayer() bool",
       "rw": "read-only",
-      "summary": "IsThreeDModelLayer reports whether the layer is a 3D Model layer (AE 24+, py-aep `ThreeDModelLayer`). Identified by ldta byte 0x83 == 0x05 at parse time; see [inferLayerType]."
+      "summary": "IsThreeDModelLayer reports whether the layer is a 3D Model layer (AE 24+). Identified by ldta byte 0x83 == 0x05 at parse time; see [inferLayerType]."
     },
     "Layer.IsTrackMatte": {
       "kind": "getter",
@@ -3240,7 +3240,7 @@
       "anchor": "#layershapecontentsgroup",
       "signature": "func (l *Layer) ShapeContentsGroup() *AEPropertyGroup",
       "rw": "read-only",
-      "summary": "ShapeContentsGroup returns a shape layer's \"ADBE Root Vectors Group\", or nil for non-shape layers. For typed access prefer the V2.2 ShapeLayer wrapper (see WrapShapeLayer)."
+      "summary": "ShapeContentsGroup returns a shape layer's \"ADBE Root Vectors Group\", or nil for non-shape layers. For typed access prefer the ShapeLayer wrapper (see WrapShapeLayer)."
     },
     "Layer.ShapePaths": {
       "kind": "field",
@@ -4143,7 +4143,7 @@
       "anchor": "#projectexpressionengine",
       "signature": "func (p *Project) ExpressionEngine() string",
       "rw": "read-only",
-      "summary": "ExpressionEngine returns the project's expression engine name (\"extendscript\" or \"javascript-1.0\"). Defaults to \"extendscript\" when the ExEn chunk is absent — matches py-aep's behavior."
+      "summary": "ExpressionEngine returns the project's expression engine name (\"extendscript\" or \"javascript-1.0\"). Defaults to \"extendscript\" when the ExEn chunk is absent."
     },
     "Project.FeetFramesFilmType": {
       "kind": "getter",
@@ -4190,7 +4190,7 @@
       "anchor": "#projectfootages",
       "signature": "func (p *Project) Footages() []*Footage",
       "rw": "read-only",
-      "summary": "Footages returns the project's footage items (alias of the Project.Footage slice field, named to match py-aep's `project.footages` for API parity)."
+      "summary": "Footages returns the project's footage items (alias of the Project.Footage slice field, provided as a convenience)."
     },
     "Project.FramesCountType": {
       "kind": "getter",
@@ -4214,14 +4214,14 @@
       "anchor": "#projectgpuacceltype",
       "signature": "func (p *Project) GpuAccelType() string",
       "rw": "read-only",
-      "summary": "GpuAccelType returns the project's GPU acceleration device id (UUID-style string inside the gpuG LIST → Utf8 child). py-aep models this as a labeled enum; we surface the raw string since AE writes a runtime-resolved device UUID. Empty string when the chunk is absent."
+      "summary": "GpuAccelType returns the project's GPU acceleration device id (UUID-style string inside the gpuG LIST → Utf8 child). We surface the raw string since AE writes a runtime-resolved device UUID. Empty string when the chunk is absent."
     },
     "Project.LayerByID": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectlayerbyid",
       "signature": "func (p *Project) LayerByID(id uint32) *Layer",
-      "summary": "LayerByID searches every composition in the project for a layer with the matching ID and returns the first hit. Returns nil for id == 0 (the \"no layer\" sentinel) and when no comp owns this id. Mirrors py-aep's `project.layer_by_id(id)`."
+      "summary": "LayerByID searches every composition in the project for a layer with the matching ID and returns the first hit. Returns nil for id == 0 (the \"no layer\" sentinel) and when no comp owns this id."
     },
     "Project.LinearBlending": {
       "kind": "getter",
@@ -4493,7 +4493,7 @@
       "anchor": "#propertyactive",
       "signature": "func (p *Property) Active() bool",
       "rw": "read-only",
-      "summary": "Active is an alias for Enabled — mirrors py-aep's `property.active` which returns `self.enabled`. Kept as a separate accessor for parity even though it's a thin wrapper."
+      "summary": "Active is an alias for Enabled, provided as a convenience. Kept as a separate accessor even though it's a thin wrapper."
     },
     "Property.CanVaryOverTime": {
       "kind": "getter",
@@ -4541,7 +4541,7 @@
       "anchor": "#propertyelided",
       "signature": "func (p *Property) Elided() bool",
       "rw": "read-only",
-      "summary": "Elided reports whether the property is hidden from the AE UI. py-aep sets this for parser-synthesized placeholder groups; we don't synthesize anything yet, so this always returns false. Reserved for future implementations that materialize missing slots."
+      "summary": "Elided reports whether the property is hidden from the AE UI. This is set for parser-synthesized placeholder groups; we don't synthesize anything yet, so this always returns false. Reserved for future implementations that materialize missing slots."
     },
     "Property.Enabled": {
       "kind": "getter",
@@ -4549,7 +4549,7 @@
       "anchor": "#propertyenabled",
       "signature": "func (p *Property) Enabled() bool",
       "rw": "read-only",
-      "summary": "Enabled reports whether the property is enabled (UI toggle next to the property name in AE's timeline). Read from tdsb byte 3 bit 0; defaults to true when the tdsb chunk is absent — matches py-aep's `TdsbChunk._enable_flags` default of 1."
+      "summary": "Enabled reports whether the property is enabled (UI toggle next to the property name in AE's timeline). Read from tdsb byte 3 bit 0; defaults to true when the tdsb chunk is absent."
     },
     "Property.Expression": {
       "kind": "field",
@@ -4605,7 +4605,7 @@
       "anchor": "#propertyismodified",
       "signature": "func (p *Property) IsModified() bool",
       "rw": "read-only",
-      "summary": "IsModified reports whether the property has been changed from its default state. A property is considered modified when it has keyframes, has an expression (regardless of enabled state), or its StaticValue differs from DefaultValue. Mirrors py-aep's `Property.is_modified` minus the always-modified special-cases (Source Text, mask-index, effect-NoValue) which depend on parser context we don't yet track."
+      "summary": "IsModified reports whether the property has been changed from its default state. A property is considered modified when it has keyframes, has an expression (regardless of enabled state), or its StaticValue differs from DefaultValue. Does not yet cover the always-modified special-cases (Source Text, mask-index, effect-NoValue) which depend on parser context we don't yet track."
     },
     "Property.IsNameSet": {
       "kind": "getter",
@@ -4613,7 +4613,7 @@
       "anchor": "#propertyisnameset",
       "signature": "func (p *Property) IsNameSet() bool",
       "rw": "read-only",
-      "summary": "IsNameSet reports whether the property has an explicit display name set (different from its match-name). Currently a thin proxy: `Name != \"\" \u0026\u0026 Name != MatchName`. py-aep checks the underlying tdsn Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name (always defaults to MatchName), so this returns false for parsed properties until tdsn decode lands."
+      "summary": "IsNameSet reports whether the property has an explicit display name set (different from its match-name). Currently a thin proxy: `Name != \"\" \u0026\u0026 Name != MatchName`. The display name lives in the underlying tdsn Utf8 chunk; our parser doesn't yet decode tdsn into Property.Name (always defaults to MatchName), so this returns false for parsed properties until tdsn decode lands."
     },
     "Property.IsNoValue": {
       "kind": "getter",
@@ -4637,7 +4637,7 @@
       "anchor": "#propertyisseparationleader",
       "signature": "func (p *Property) IsSeparationLeader() bool",
       "rw": "read-only",
-      "summary": "IsSeparationLeader reports whether the property is the multidimensional leader that can be separated into per-axis followers — true for \"ADBE Position\" regardless of whether it is currently separated (use DimensionsSeparated for the actual state). Mirrors py-aep."
+      "summary": "IsSeparationLeader reports whether the property is the multidimensional leader that can be separated into per-axis followers — true for \"ADBE Position\" regardless of whether it is currently separated (use DimensionsSeparated for the actual state)."
     },
     "Property.IsSpatial": {
       "kind": "getter",
@@ -4676,7 +4676,7 @@
       "anchor": "#propertylockedratio",
       "signature": "func (p *Property) LockedRatio() bool",
       "rw": "read-only",
-      "summary": "LockedRatio reports whether the property's locked ratio flag is set. Read from tdsb @0x02 bit 4 (py-aep: byte 2 bit 4 = locked_ratio)."
+      "summary": "LockedRatio reports whether the property's locked ratio flag is set. Read from tdsb @0x02 bit 4 (byte 2 bit 4)."
     },
     "Property.MatchName": {
       "kind": "field",
@@ -4772,7 +4772,7 @@
       "anchor": "#propertyseparationdimension",
       "signature": "func (p *Property) SeparationDimension() int",
       "rw": "read-only",
-      "summary": "SeparationDimension returns the axis a separation follower represents (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower. (-1 stands in for py-aep's None.)"
+      "summary": "SeparationDimension returns the axis a separation follower represents (0 = X, 1 = Y, 2 = Z), or -1 when the property is not a follower. (-1 means the property is not a follower.)"
     },
     "Property.SetExpression": {
       "kind": "method",
