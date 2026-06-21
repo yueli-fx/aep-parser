@@ -90,16 +90,20 @@ func Parse(raw string) (*Annotation, error) {
 			}
 			// non-alphabetic "@" token (chunk-offset ref) → fall through as prose.
 		}
-		if cur == "" || trimmed == "" {
+		if cur == "" {
 			continue
 		}
+		// Continuation line. A blank line inside a multi-line field is kept as a
+		// paragraph break; leading blanks (field still empty) are dropped.
 		switch cur {
 		case "description":
-			a.Description += "\n" + trimmed
+			a.Description = appendLine(a.Description, trimmed)
 		case "boundary":
-			a.Boundary += "\n" + trimmed
+			a.Boundary = appendLine(a.Boundary, trimmed)
 		}
 	}
+	a.Description = strings.TrimRight(a.Description, "\n")
+	a.Boundary = strings.TrimRight(a.Boundary, "\n")
 	// An unknown alphabetic @tag is a typo only inside a genuinely converted
 	// block (≥ 1 known tag). In un-converted legacy prose it is just text.
 	if a.HasTags && len(unknown) > 0 {
@@ -131,6 +135,18 @@ func HasLegacyCap(raw string) bool {
 		}
 	}
 	return false
+}
+
+// appendLine joins a continuation line onto a multi-line field, preserving an
+// internal blank line as a paragraph break and dropping a leading blank.
+func appendLine(field, line string) string {
+	if field == "" {
+		if line == "" {
+			return field
+		}
+		return line
+	}
+	return field + "\n" + line
 }
 
 func splitTag(line string) (name, val string) {

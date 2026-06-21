@@ -54,6 +54,18 @@ func TestParse_FullBlock(t *testing.T) {
 	}
 }
 
+func TestParse_DescriptionParagraphs(t *testing.T) {
+	raw := "@summary do a thing\n@description First paragraph line one.\n  line two of paragraph one.\n\n  Second paragraph after a blank line.\n@domain io"
+	a, err := Parse(raw)
+	if err != nil {
+		t.Fatalf("Parse: %v", err)
+	}
+	want := "First paragraph line one.\nline two of paragraph one.\n\nSecond paragraph after a blank line."
+	if a.Description != want {
+		t.Errorf("Description = %q, want %q", a.Description, want)
+	}
+}
+
 func TestParse_NoTags(t *testing.T) {
 	a, err := Parse("AddMask adds a vector mask to a layer.\nNo @ lines here.")
 	if err != nil {
