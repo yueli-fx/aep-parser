@@ -21,7 +21,7 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ## Progress
 
-current: **Task 1.1 ① ✅ + 1.2 ② ✅(用户真机验收) + 1.3 ③ ✅(complete(用户真机验收))完成**,进 Task 1.4 ④ カクッ。Task 1.3 ③ マップ用フラクタルノイズ:`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise,**双版本 AE 接受 + DOM 对账 PASS**(Evolution `time*1200/time*3000` 表达式真启用、Offset Turbulence 2kf→DOM 960,540、UniformScaling off、blend Overlay/Normal、2 层不 drop)。footage-share 实测=各自 solid(无共享 API,render-neutral)。值全 oracle 取。verify.jsx 加 effect-parade dump。Task 1.2:两文字动画器 gap #2 Tracking + #3 Character Offset 本会话 RE + 双版本 render-gate ship(commit 2add514),`gen_text_komako.go` 拼成 comp ②（text + `SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器），AE2020≡AE2025 接受+render 一致（GLITCH→PURCLQ 字符环移 + tracking 撑开 + opacity flicker）。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
+current: **Phase 1 叶子 comp 全完成**:1.1 ① ✅ + 1.2 ② ✅(用户验收) + 1.3 ③ ✅(用户验收) + 1.4 ④ ✅(🔶待 review)。进 **Phase 2 中层 comp**(Task 2.1 ⑤ プリコンポジション 1 起,首遇 `NewPrecompLayer` 嵌套)。**Task 1.4 ④ カクッ**:`gen_kakuh.go` 2 shape 层=stroked rect(1635×810)+Trim Paths(97/5.3)+层级 Scale(2kf)/Opacity(20kf)+L0 RotateZ=180,双版本 AE-accept(2×Stroke+2×Trim 入 DOM)。坑:`SetLayerTransform.Scale` 单位 percent 需 ×100;shape 几何是参数化(Rect+Stroke+Trim)非 freeform path。**Task 1.3 ③ マップ用フラクタルノイズ**:`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise,**双版本 AE 接受 + DOM 对账 PASS**(Evolution `time*1200/time*3000` 表达式真启用、Offset Turbulence 2kf→DOM 960,540、UniformScaling off、blend Overlay/Normal、2 层不 drop)。footage-share 实测=各自 solid(无共享 API,render-neutral)。值全 oracle 取。verify.jsx 加 effect-parade dump。Task 1.2:两文字动画器 gap #2 Tracking + #3 Character Offset 本会话 RE + 双版本 render-gate ship(commit 2add514),`gen_text_komako.go` 拼成 comp ②（text + `SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器），AE2020≡AE2025 接受+render 一致（GLITCH→PURCLQ 字符环移 + tracking 撑开 + opacity flicker）。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
 
 **Phase 0（前置 de-risk）全收口:**
 - ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。
@@ -34,8 +34,9 @@ current: **Task 1.1 ① ✅ + 1.2 ② ✅(用户真机验收) + 1.3 ③ ✅(comp
 - ✅ Task 1.1 comp ① シェイイイイプ（e4d266c Go 建 + d03101c tickrate 根因修）：4 rect 精确 kf + fill 色逐值对账 ✓；**AE 2025 render 与原工程像素级一致**（中间帧 0/0/32px）。结构 delta（shape 组嵌套 + transform 默认物化，render-neutral）已记账。残留旁支：AE 2020 render 待补；clone 30fps 绕开 NewComposition 分数 fps cdta bug。
 - ⚠ 首次 AE 验证撞 crash-state cascade，受阻（详 `incidents/ae-automation-occlusion-crashstate.md` Case 2c）：run1 verify.jsx 用 JSON.stringify 在 catch 外抛 → 0 字节 done → ae_run 假 PASS → force-kill → 置崩溃标志；run2 safe-mode 框被前台游戏 foreground-lock 挡住关框 → 超时。已修 verify.jsx（纯字符串、末尾一次写）。注：游戏窗口≠用户在用（operator 在另一台机器），不问用户让机器。
 - ✅ Task 1.2 ② テキスト（text+animator，用户真机验收 complete）。
-- ✅ Task 1.3 ③ マップ用フラクタルノイズ（2 solid + Fractal Noise + Evolution expr，双版本 AE-accept + DOM PASS，🔶待用户 review）。
-- ⬜ Task 1.4 ④ カクッ（2 shape 层，层级 Scale/Opacity），按 DAG 上行。
+- ✅ Task 1.3 ③ マップ用フラクタルノイズ（2 solid + Fractal Noise + Evolution expr，双版本 AE-accept + DOM PASS，complete 用户真机验收）。
+- ✅ Task 1.4 ④ カクッ（2 shape 层=stroked rect+Trim Paths+层级 Scale/Opacity+L0 RotateZ，双版本 AE-accept，🔶待 review）。
+- → **Phase 1 叶子层全完成**；进 Phase 2 中层 comp（⑤⑥⑦⑧⑨）。
 
 ---
 
@@ -138,8 +139,8 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 
 **结构:** 2 shape 层,层级 Scale(2kf ease)+ Opacity(20kf)动画;shape 几何由 oracle 提取(静态 path)。
 
-- [ ] **Step 1:** `NewShapeLayer` ×2,oracle 提取各自 shape path → 重建。
-- [ ] **Step 2:** 层 Scale/Opacity 关键帧。验收。账本 ④。Commit。
+- [x] **Step 1:** `NewShapeLayer` ×2。读侧实测:shape 几何**不是 freeform path 而是参数化** = Rect(1635×810)+ Stroke(0.8px)+ Trim Paths(Start=97/Offset=5.3);用 `AddRect/AddStroke/AddTrim`(非 path 提取)。Position 原=separated(0,0)=NewShapeLayer 默认,无需 centering。
+- [x] **Step 2:** 层 `SetLayerTransform` Scale(2kf 64%→100%)/Opacity(20kf)+L0 RotateZ=180。**坑**:Scale 单位 percent 非 fraction,需 ×100(同 Opacity)。验收 4 关全过(Go round-trip 逐值 ✓ + AE2020≡AE2025 接受:4 comp、④ 2 层不 drop、2×Stroke+2×Trim 入 DOM、OK)。账本 ④=🔶待review。Commit。
 
 ---
 

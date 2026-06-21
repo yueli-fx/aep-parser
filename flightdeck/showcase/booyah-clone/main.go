@@ -35,7 +35,7 @@ func main() {
 	buildShapeIiip(p, orc)   // ① シェイイイイプ！！！ (shape API needs no reopen)
 	buildTextKomako(p, orc)  // ② テキスト変えるならココ！ (text layer + SetText)
 	buildFractalMap(p, orc)  // ③ マップ用フラクタルノイズ (comp + 2 solids)
-	// ④ カクッ ... (later tasks)
+	buildKakuh(p, orc)       // ④ カクッ (comp + 2 stroked-rect+trim shape layers)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -44,6 +44,7 @@ func main() {
 	must(err)
 	finishTextKomako(rp, orc)  // ②
 	finishFractalMap(rp, orc)  // ③
+	finishKakuh(rp, orc)       // ④
 
 	f, err := os.Create(outPath)
 	must(err)

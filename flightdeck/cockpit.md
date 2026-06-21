@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **comp ③ マップ用フラクタルノイズ complete（用户真机验收 2026-06-22）**（2 Fractal Noise solid，双版本 AE-accept + DOM；a0ce40f）；进行中 = comp ④ カクッ（2 shape 层）
+Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1 叶子 comp 全完成**（① ② ③ 用户验收 · ④ カクッ 双版本 AE-accept，🔶待 review）；下一步 = Phase 2 中层 comp ⑤ プリコンポジション 1（首遇 NewPrecompLayer 嵌套）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -10,9 +10,11 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **comp ③ マップ用フラクタルノイズ ✅ complete（用户真机验收 2026-06-22；a0ce40f）**：`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise（L0 Overlay / L1 Normal）。**双版本 AE-accept + DOM 对账 PASS**——2 层不 drop、Fractal Noise 32 props 全在、Evolution `expr="time*1200"/"time*3000" on`（AE DOM 确认表达式真启用，红线1 清，非假绿）、Offset Turbulence 2kf→DOM 960,540（parser fraction[0.5,0.5]→AE 像素中心映射对）、UniformScaling off、blend 对。值全 oracle 取（连 L1 `time*3000\r` 尾 CR）。**footage-share 实测结论**：footage(67)=黑 solid，无 from-scratch 共享 footage-item API（SetSource 留孤儿 / DuplicateLayer 继承 effect 需脆弱二次 reopen）→ 各自 1 黑 solid（Fractal Noise 自生成像素，render-neutral delta）。终帧 render-pixel 归 ⑫。verify.jsx 加 `dumpEffects`（服务后续 ④⑦⑧⑨⑩⑪⑫）。无新 API（组合既有 gated 能力），capindex 不变。
 
-**下一 = Task 1.4 ④ カクッ**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：2 shape 层，层级 Scale(2kf ease)+Opacity(20kf) + oracle 提取静态 path（复用 comp ① shape territory + ② 的 `SetLayerTransform`，应快）。走验收四关 + 账本。
+**comp ④ カクッ ✅（本会话，🔶待用户 review）**：`gen_kakuh.go` 2 shape 层=**stroked rect(1635×810,无 fill,0.8px)+ Trim Paths(Start=97/Offset=5.3)** + 层级 `SetLayerTransform` Scale(2kf 64%→100%)/Opacity(20kf)，L0 加 RotateZ=180。双版本 AE-accept（4 comp 全在、④ 2 层不 drop、2×Stroke+2×Trim 入 DOM、OK）。**两个坑修掉**：①shape 几何是参数化(Rect+Stroke+Trim)非 freeform path（读侧实测）；②`SetLayerTransform.Scale` 单位=**percent 非 fraction**，需 ×100（初版 scale 100× 偏小）。Delta 记账：描边色取 AddStroke 默认黑（原 elide 了=AE 建时默认不可恢复，0.8px 细线）·shape wrapper 多套一层(同①)·Scale Z=1 vs 原 0.853(2D 无关)。无新 API。
 
-**Booyah Phase 1 进度**：① ✅(complete) ② ✅(complete) ③ ✅(complete) ④ 🔧(进行中) → 然后 Phase 2 中层 comp（⑤⑥⑦⑧⑨）。⚠AE 装 `E:\adobe\`。
+**下一 = Phase 2 中层 comp**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：**Task 2.1 ⑤ プリコンポジション 1**（3 层均 src=① シェイイイイプ，**首遇 `NewPrecompLayer` 嵌套** + L0 Position(2kf)/L1 Opacity(13kf)）→ ⑥(7 层 src=⑤)→ ⑦(3 层+Glow)→ ⑧(3 层 src=② Fill 色差)→ ⑨(3 层+Trim,2 层 src=④)。
+
+**Booyah 进度**：Phase 1 叶子 ① ✅ ② ✅ ③ ✅(均 complete) ④ ✅(🔶待 review) → Phase 2 中层 ⑤⑥⑦⑧⑨ 待建 → Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
