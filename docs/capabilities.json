@@ -2553,7 +2553,7 @@
     "symbol": "NewAdjustmentLayer",
     "kind": "func",
     "signature": "func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)",
-    "summary": "NewAdjustmentLayer adds a new adjustment layer to the composition and returns it.",
+    "summary": "@summary    Add an adjustment layer to a composition @description Appends a new adjustment layer and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2578,7 +2578,7 @@
     "symbol": "NewCameraLayer",
     "kind": "func",
     "signature": "func NewCameraLayer(c *Composition, name string) (*Layer, error)",
-    "summary": "NewCameraLayer adds a new Camera layer to the composition and returns it.",
+    "summary": "@summary    Add a Camera layer to a composition @description Appends a new Camera layer and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2603,7 +2603,7 @@
     "symbol": "NewLightLayer",
     "kind": "func",
     "signature": "func NewLightLayer(c *Composition, name string) (*Layer, error)",
-    "summary": "NewLightLayer adds a new Light layer to the composition and returns it.",
+    "summary": "@summary    Add a Light layer to a composition @description Appends a new Light layer and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2628,7 +2628,7 @@
     "symbol": "NewNullLayer",
     "kind": "func",
     "signature": "func NewNullLayer(c *Composition, name string) (*Layer, error)",
-    "summary": "NewNullLayer adds a new null-object layer to the composition and returns it.",
+    "summary": "@summary    Add a null-object layer to a composition @description Appends a new null-object layer and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2654,7 +2654,7 @@
     "symbol": "NewPrecompLayer",
     "kind": "func",
     "signature": "func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)",
-    "summary": "NewPrecompLayer adds a layer to `parent` whose source is the composition `child` (a nested / pre-composed comp) and returns it.",
+    "summary": "@summary    Add a precomp (nested-comp) layer to a composition @description Adds a layer to parent whose source is the composition child (a   nested / pre-composed comp) and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2680,7 +2680,7 @@
     "symbol": "NewShapeLayer",
     "kind": "func",
     "signature": "func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)",
-    "summary": "NewShapeLayer adds a new empty ShapeLayer to the composition.",
+    "summary": "@summary    Add an empty shape layer to a composition @description Appends a new empty shape layer and returns the typed ShapeLayer   wrapper; the embedded Layer is also appended to the comp's layer list so   lookups by ID or name work immediately.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2691,7 +2691,7 @@
         "TestV2_2_Ellipse_AEShipGate_AE2020",
         "TestV2_2_Ellipse_AEShipGate_AE2025"
       ],
-      "boundary": "ellipse 变体过 gate;rect Path/Stroke embed bytes 仍 deferred",
+      "boundary": "the ellipse variant is gated; rectangle path/stroke embed bytes are still deferred",
       "incident": [
         "v2-2-aelayer-structure",
         "multi-layer-silent-drop"
@@ -2707,7 +2707,7 @@
     "symbol": "NewSolidLayer",
     "kind": "func",
     "signature": "func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)",
-    "summary": "NewSolidLayer adds a new solid-color layer to the composition and returns it.",
+    "summary": "@summary    Add a solid-color layer to a composition @description Appends a new solid-color layer and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -2734,7 +2734,7 @@
     "symbol": "NewTextLayer",
     "kind": "func",
     "signature": "func NewTextLayer(c *Composition, name string) (*Layer, error)",
-    "summary": "NewTextLayer adds a new point-text layer to the composition and returns it.",
+    "summary": "@summary    Add a point-text layer to a composition @description Appends a new point-text layer and returns it.",
     "has_cap": true,
     "cap": {
       "domain": "layer-create",
@@ -3775,7 +3775,7 @@
     "symbol": "SetLayerTransform",
     "kind": "func",
     "signature": "func SetLayerTransform(layer *Layer, t *LayerTransform) error",
-    "summary": "SetLayerTransform replaces a parsed layer's Transform Group with a lowering of t — the from-scratch path for ANIMATED (or non-default-static) transform on layers that are not V2.2 ShapeLayers (text / precomp / footage / solid / null).",
+    "summary": "@summary    Replace a parsed layer's Transform Group with a lowering of t @description Replaces a parsed layer's Transform Group — the from-scratch path   for animated (or non-default static) transform on layers that are not shape   layers (text / precomp / footage / solid / null).",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -3786,7 +3786,7 @@
         "TestSetLayerTransform_AEShipGate_AE2020",
         "TestSetLayerTransform_AEShipGate_AE2025"
       ],
-      "boundary": "层须 parsed(Reopen);整组替换 Transform Group(物化 default-elided 通道);gate 验 text 层 anchor+pos3kf+op3kf,opacity 单位 percent;Scale/Rotation 走同路未单独 gate",
+      "boundary": "layer must be parsed (Reopen); replaces the whole Transform Group, materializing default-elided channels; gate covers a text layer (anchor + 3-keyframe Position + 3-keyframe Opacity, opacity in percent); Scale/Rotation share the path but are not separately gated",
       "incident": [
         "transform-group-default-omission"
       ],

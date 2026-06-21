@@ -4056,14 +4056,14 @@
       "file": "composition.md",
       "anchor": "#newadjustmentlayer",
       "signature": "func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)",
-      "summary": "NewAdjustmentLayer adds a new adjustment layer to the composition and returns it."
+      "summary": "Appends a new adjustment layer and returns it. An adjustment layer is a comp-sized white solid with the adjustment flag set: effects applied to it affect every layer below it. The backing solid footage item is created alongside, sized to the comp's current dimensions (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed."
     },
     "NewCameraLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#newcameralayer",
       "signature": "func NewCameraLayer(c *Composition, name string) (*Layer, error)",
-      "summary": "NewCameraLayer adds a new Camera layer to the composition and returns it."
+      "summary": "Appends a new Camera layer and returns it. A camera is source-less: it is defined entirely by its layer record plus a Camera Options property group. The layer is cloned from an embedded AE-native Camera layer (so every AE-internal flag byte is faithful), with the layer ID, name, and time span (0 → comp duration) patched for this comp. Position / point of interest / options inherit the template's AE defaults; adjust them via the Camera* setters after the project is re-parsed (see Reopen)."
     },
     "NewComposition": {
       "kind": "func",
@@ -4077,21 +4077,21 @@
       "file": "composition.md",
       "anchor": "#newlightlayer",
       "signature": "func NewLightLayer(c *Composition, name string) (*Layer, error)",
-      "summary": "NewLightLayer adds a new Light layer to the composition and returns it."
+      "summary": "Appends a new Light layer and returns it. Like a camera, a light is source-less (a layer record plus a Light Options group), cloned from an embedded AE-native Light layer with ID, name, and time span patched. Light kind / color / intensity inherit the template's AE defaults; adjust them via the Light* setters after the project is re-parsed (see Reopen)."
     },
     "NewNullLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#newnulllayer",
       "signature": "func NewNullLayer(c *Composition, name string) (*Layer, error)",
-      "summary": "NewNullLayer adds a new null-object layer to the composition and returns it."
+      "summary": "Appends a new null-object layer and returns it. A null is a 100×100 solid-backed layer with the null flag set — AE's standard parenting helper. The backing solid footage item is created alongside (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed."
     },
     "NewPrecompLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#newprecomplayer",
       "signature": "func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)",
-      "summary": "NewPrecompLayer adds a layer to `parent` whose source is the composition `child` (a nested / pre-composed comp) and returns it."
+      "summary": "Adds a layer to parent whose source is the composition child (a nested / pre-composed comp) and returns it. A precomp layer is an ordinary AV layer whose source points at an existing comp item — the source comp already lives in the project, so (unlike the solid family) no backing footage item is created. An AE-native precomp layer is cloned and spliced in, its source repointed at child, and its time span re-homed to 0 → parent duration. The returned layer is fully parsed; its SourceComposition resolves to child."
     },
     "NewProject": {
       "kind": "func",
@@ -4105,21 +4105,21 @@
       "file": "composition.md",
       "anchor": "#newshapelayer",
       "signature": "func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)",
-      "summary": "NewShapeLayer adds a new empty ShapeLayer to the composition."
+      "summary": "Appends a new empty shape layer and returns the typed ShapeLayer wrapper; the embedded Layer is also appended to the comp's layer list so lookups by ID or name work immediately. The ID is auto-assigned from the project's monotonic item-ID counter (never reused; layer IDs share the item-ID namespace)."
     },
     "NewSolidLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#newsolidlayer",
       "signature": "func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)",
-      "summary": "NewSolidLayer adds a new solid-color layer to the composition and returns it."
+      "summary": "Appends a new solid-color layer and returns it. A solid is footage-backed: the call also creates a backing solid footage item (cloned from an embedded AE-native template so every AE-internal byte stays faithful) and points the layer's source at it. width and height must be 1..30000 (AE's solid ceiling); rgb components are 0..1 (stored as float32, so exact round-trips need float32-representable values such as 0.25 / 0.5). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed — all parsed-layer setters (transform, AddEffect, …) work immediately without a Reopen."
     },
     "NewTextLayer": {
       "kind": "func",
       "file": "composition.md",
       "anchor": "#newtextlayer",
       "signature": "func NewTextLayer(c *Composition, name string) (*Layer, error)",
-      "summary": "NewTextLayer adds a new point-text layer to the composition and returns it."
+      "summary": "Appends a new point-text layer and returns it. A text layer is source-less: its content lives in the text-engine document inside the layer's Text Properties group. The layer is cloned from an embedded AE-native text layer (point text \"A\", a single styled run) with the layer ID, name, and time span (0 → comp duration) patched for this comp."
     },
     "Open": {
       "kind": "func",

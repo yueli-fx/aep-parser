@@ -1164,17 +1164,18 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func NewShapeLayer(c *Composition, name string) (*ShapeLayer, error)
 ```
 
-NewShapeLayer adds a new empty ShapeLayer to the composition.
+Add an empty shape layer to a composition
 
-Required:
+Appends a new empty shape layer and returns the typed ShapeLayer wrapper; the embedded Layer is also appended to the comp's layer list so lookups by ID or name work immediately. The ID is auto-assigned from the project's monotonic item-ID counter (never reused; layer IDs share the item-ID namespace).
 
-	name — non-empty string (matches NewComposition validation contract)
+Atomic: if lowering fails or a downstream parse emits any warning, all state mutated by the call rolls back to the pre-call snapshot before the error is returned.
 
-Returns the typed *ShapeLayer wrapper; the embedded *Layer is also appended to comp.Layers so V1 lookup paths (Composition.LayerByID / LayerByName) work immediately. ID is auto-assigned via the project's monotonic item-ID counter (never reused; layer IDs share the item-ID namespace per V1 parser convention).
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the shape layer to |
+| `name` | shape layer name (non-empty) |
 
-Atomic mutation: if lowering fails, or downstream parse emits any warning, all state mutated by this call is rolled back to the pre-call snapshot before the error is returned.
-
-Free function (not a method) so the impl can live in internal/serializer after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep facade re-exports it. BREAKING vs the former Composition.NewShapeLayer method form.
+**Returns:** the created ShapeLayer
 
 ### NewCameraLayer
 
@@ -1182,11 +1183,18 @@ Free function (not a method) so the impl can live in internal/serializer after t
 func NewCameraLayer(c *Composition, name string) (*Layer, error)
 ```
 
-NewCameraLayer adds a new Camera layer to the composition and returns it.
+Add a Camera layer to a composition
 
-A camera is source-less: it is defined entirely by its ldta + Camera Options property group. The new layer is cloned from an embedded AE-native Camera Layr (so every AE-internal flag byte is faithful), with the layer ID, name, and time span (0 → comp duration) patched for this comp. Camera position / point of interest / options inherit the template's AE defaults; adjust afterward via the Camera* setters once the project is re-parsed.
+Appends a new Camera layer and returns it. A camera is source-less: it is defined entirely by its layer record plus a Camera Options property group. The layer is cloned from an embedded AE-native Camera layer (so every AE-internal flag byte is faithful), with the layer ID, name, and time span (0 → comp duration) patched for this comp. Position / point of interest / options inherit the template's AE defaults; adjust them via the Camera* setters after the project is re-parsed (see Reopen).
 
-Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built camera, types it correctly, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (snapshot + rollback on any parser warning). AE accepts the Go-built camera, types it correctly, and preserves it on resave.
+
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the camera to |
+| `name` | camera layer name (non-empty) |
+
+**Returns:** the created camera Layer
 
 ### NewLightLayer
 
@@ -1194,11 +1202,18 @@ Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural �
 func NewLightLayer(c *Composition, name string) (*Layer, error)
 ```
 
-NewLightLayer adds a new Light layer to the composition and returns it.
+Add a Light layer to a composition
 
-Like NewCameraLayer, a light is source-less (ldta + Light Options group), cloned from an embedded AE-native Light Layr with ID / name / time span patched. Light kind / color / intensity inherit the template's AE defaults; adjust afterward via the Light* setters once the project is re-parsed.
+Appends a new Light layer and returns it. Like a camera, a light is source-less (a layer record plus a Light Options group), cloned from an embedded AE-native Light layer with ID, name, and time span patched. Light kind / color / intensity inherit the template's AE defaults; adjust them via the Light* setters after the project is re-parsed (see Reopen).
 
-Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 ship-gate green (AE accepts the Go-built light, types it correctly, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (snapshot + rollback on any parser warning). AE accepts the Go-built light, types it correctly, and preserves it on resave.
+
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the light to |
+| `name` | light layer name (non-empty) |
+
+**Returns:** the created light Layer
 
 ### NewTextLayer
 
@@ -1206,13 +1221,20 @@ Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural �
 func NewTextLayer(c *Composition, name string) (*Layer, error)
 ```
 
-NewTextLayer adds a new point-text layer to the composition and returns it.
+Add a point-text layer to a composition
 
-Like NewCameraLayer, a text layer is source-less: its content lives in the btds/btdk text-engine document inside the layer's Text Properties group. The new layer is cloned from an embedded AE-native text Layr — point text "A" with the extraction fixture's styling (font YouYuan, 88 px, single run) — with the layer ID, name, and time span (0 → comp duration) patched for this comp.
+Appends a new point-text layer and returns it. A text layer is source-less: its content lives in the text-engine document inside the layer's Text Properties group. The layer is cloned from an embedded AE-native text layer (point text "A", a single styled run) with the layer ID, name, and time span (0 → comp duration) patched for this comp.
 
-The returned layer reads TextSource immediately and supports SetText without a Reopen (the text-source back-ref is wired at create time). SetText accepts arbitrary-length replacement text for the template's single-paragraph, single-run document (see Layer.SetText for the refuse set).
+The returned layer reads its text source immediately and supports SetText without a Reopen (the text-source back-reference is wired at create time). SetText accepts arbitrary-length replacement text for the template's single-paragraph, single-run document (see Layer.SetText for the refuse set).
 
-Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 ship-gate green (AE types the Go-built layer as a text layer, reads back the text, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (snapshot + rollback on any parser warning). AE types the Go-built layer as a text layer, reads back the text, and preserves it on resave.
+
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the text layer to |
+| `name` | text layer name (non-empty) |
+
+**Returns:** the created text Layer
 
 ### NewSolidLayer
 
@@ -1220,11 +1242,21 @@ Atomic mutation (snapshot + warnings-as-failure rollback). Stable / structural �
 func NewSolidLayer(c *Composition, name string, width, height int, rgb [3]float64) (*Layer, error)
 ```
 
-NewSolidLayer adds a new solid-color layer to the composition and returns it.
+Add a solid-color layer to a composition
 
-A solid is footage-backed: the call also creates a backing solid footage item (cloned from an embedded AE-native template via the cross-Project import machinery, so every AE-internal byte stays faithful) and points the layer's SourceID at it. width/height must be 1..30000 (AE's solid ceiling); rgb components are 0..1 (stored as float32, so exact round-trips need float32-representable values such as 0.25/0.5). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed — all parsed-layer setters (transform, AddEffect, …) work immediately without a Reopen.
+Appends a new solid-color layer and returns it. A solid is footage-backed: the call also creates a backing solid footage item (cloned from an embedded AE-native template so every AE-internal byte stays faithful) and points the layer's source at it. width and height must be 1..30000 (AE's solid ceiling); rgb components are 0..1 (stored as float32, so exact round-trips need float32-representable values such as 0.25 / 0.5). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed — all parsed-layer setters (transform, AddEffect, …) work immediately without a Reopen.
 
-Atomic mutation (the underlying cross-Project import snapshot + warnings-as-failure rollback covers both the footage import and the layer splice). Stable / structural — AE 2020 + AE 2025 ship-gate green on an all-Go-built project (AE reads back color / dims / flags, resave preserves). Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (the cross-project import snapshot + rollback covers both the footage import and the layer splice). AE reads back color / dimensions / flags and preserves them on resave.
+
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the solid to |
+| `name` | solid layer name (non-empty) |
+| `width` | solid width in pixels (1..30000) |
+| `height` | solid height in pixels (1..30000) |
+| `rgb` | solid color as RGB components, each in 0..1 |
+
+**Returns:** the created solid Layer
 
 ### NewNullLayer
 
@@ -1232,11 +1264,18 @@ Atomic mutation (the underlying cross-Project import snapshot + warnings-as-fail
 func NewNullLayer(c *Composition, name string) (*Layer, error)
 ```
 
-NewNullLayer adds a new null-object layer to the composition and returns it.
+Add a null-object layer to a composition
 
-A null is a 100×100 solid-backed layer with the isNull ldta flag — AE's standard parenting helper. The backing solid footage item is created alongside (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
+Appends a new null-object layer and returns it. A null is a 100×100 solid-backed layer with the null flag set — AE's standard parenting helper. The backing solid footage item is created alongside (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
 
-Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (rides the gated solid-family creation path). Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (rides the gated solid-family creation path).
+
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the null to |
+| `name` | null layer name (non-empty) |
+
+**Returns:** the created null Layer
 
 ### NewAdjustmentLayer
 
@@ -1244,11 +1283,18 @@ Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (ride
 func NewAdjustmentLayer(c *Composition, name string) (*Layer, error)
 ```
 
-NewAdjustmentLayer adds a new adjustment layer to the composition and returns it.
+Add an adjustment layer to a composition
 
-An adjustment layer is a comp-sized white solid with the isAdjust ldta flag: effects applied to it affect every layer below it. The backing solid footage item is created alongside, sized to the comp's current dimensions (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
+Appends a new adjustment layer and returns it. An adjustment layer is a comp-sized white solid with the adjustment flag set: effects applied to it affect every layer below it. The backing solid footage item is created alongside, sized to the comp's current dimensions (see NewSolidLayer). The layer's time span is re-homed to 0 → comp duration. The returned layer is fully parsed.
 
-Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (rides the gated solid-family creation path). Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (rides the gated solid-family creation path).
+
+| Parameter | Description |
+|---|---|
+| `c` | the composition to add the adjustment layer to |
+| `name` | adjustment layer name (non-empty) |
+
+**Returns:** the created adjustment Layer
 
 ### NewPrecompLayer
 
@@ -1256,13 +1302,21 @@ Atomic mutation. Stable / structural — AE 2020 + AE 2025 ship-gate green (ride
 func NewPrecompLayer(parent, child *Composition, name string) (*Layer, error)
 ```
 
-NewPrecompLayer adds a layer to `parent` whose source is the composition `child` (a nested / pre-composed comp) and returns it.
+Add a precomp (nested-comp) layer to a composition
 
-A precomp layer is an ordinary AV layer whose ldta SourceID points at an existing CompItem — the source comp already lives in the project, so (unlike the solid family) no backing footage item is created. An AE-native precomp Layr is cloned and spliced in, its SourceID repointed at `child`, and its time span re-homed to 0 → `parent` duration. The returned layer is fully parsed; its Layer.SourceComposition() resolves to `child`.
+Adds a layer to parent whose source is the composition child (a nested / pre-composed comp) and returns it. A precomp layer is an ordinary AV layer whose source points at an existing comp item — the source comp already lives in the project, so (unlike the solid family) no backing footage item is created. An AE-native precomp layer is cloned and spliced in, its source repointed at child, and its time span re-homed to 0 → parent duration. The returned layer is fully parsed; its SourceComposition resolves to child.
 
 Refuses when either comp is nil, the name is empty, parent == child, the two comps are in different projects, or the nesting would create a circular composition reference.
 
-Atomic mutation (rides the Camera/Light templated-layer splice: snapshot + warnings-as-failure rollback). Stable / structural — AE 2020 + AE 2025 render-pixel ship-gate green on an all-Go-built project. Free function (CLAUDE.md #2 structural-op call-form).
+Atomic (snapshot + rollback on any parser warning).
+
+| Parameter | Description |
+|---|---|
+| `parent` | the composition that will contain the new layer |
+| `child` | the composition to use as the layer's source |
+| `name` | precomp layer name (non-empty) |
+
+**Returns:** the created precomp Layer
 
 <!-- Hand-authored reference table. -->
 
