@@ -1,7 +1,7 @@
 ---
 status: active
 summary: Step 1 of api-doc-tag-schema: build internal/apidoc (parse+schema+validate+jargon), wire capindex + docgen for dual-read (@tag with aep:cap fallback), add capindex --validate (warn mode) + docgen self-validation, ship the tagconvert tool, and fully convert facade.go (77 funcs) as the end-to-end proof. CI green throughout. Step 2 (bulk 25 files + jargon cleanup + flip) is a follow-on.
-last_updated: 2026-06-21
+last_updated: 2026-06-21 (session 3: comment jargon scrub COMPLETE — ed9dbbc + c0964d6, py-aep fully removed everywhere; flip(c) remains optional, main line is next)
 implements: specs/2026-06-21-api-doc-tag-schema.md
 ---
 
@@ -49,9 +49,9 @@ implements: specs/2026-06-21-api-doc-tag-schema.md
 
 ## Handoff — next session (start here)
 
-**State:** Step 1 COMPLETE — toolchain DONE+committed; facade.go **77/77** converted (batch 7
-committed c3753d4), `grep -c aep:cap internal/aep/facade.go` == 0, all green, `--validate` clean.
-**Next session starts Step 2.**
+**State (2026-06-21 session 3):** serializer jargon cleanup finished + **cleanup stream committed `ed9dbbc`** (85 files: repo-wide comment jargon scrub + `cmd/capindex --lint-comments` linter + flag + regenerated docs). lint clean, build/vet green, `go test ./...` green except the pre-existing out-of-arc RED `TestSynthControlEntries_PardLayout/label`. **GOTCHA discovered (fold into an incident at landing):** appending `//nolint:jargon` to an EXPORTED-symbol doc comment leaks the directive AND the suppressed jargon into docgen-generated public docs (`docs/*.md`, `docs_index.json`) — `TestDocsUpToDate` catches it. Rule: jargon in exported doc comments must be REWRITTEN, never nolint'd; nolint is only for non-doc internal-impl comments. Fixed: all py-aep removed from scene/ exported doc comments + docs regenerated. Then per user direction ("completely remove py-aep, finish the comment block"), a second pass (`c0964d6`, 34 files, 96 rewrites) removed EVERY py-aep token from ALL non-test comments — banners, internal-impl, unexported, and serializer byte-layout provenance tables (which now use a `[ref]` source-attribution key instead of `[py-aep]`, all offsets/struct-names/paths/fixture-tags preserved). End state: `grep py-aep` in non-test comments = 0, docs py-aep = 0, lint clean, build/vet green, `go test ./...` green except the known out-of-arc RED. RE'd-from / RE-fixture internal provenance notes keep their `//nolint:jargon` (not in scope). **Comment-jargon work is fully done.** Remaining A-line = the OPTIONAL flip (step c, non-blocking; dual-read still works, aep:cap=0). **Next session resumes the main line (Booyah comp ②).**
+
+**State (2026-06-21 session 2):** Step 1 COMPLETE. **Step 2 IN PROGRESS — see `flightdeck/cockpit.md` § Next for the precise resume checklist** (it has the authoritative, ordered next steps + uncommitted working-tree inventory). Summary: all **263 `//aep:cap` directives converted to @tag and COMMITTED** (`d917798` wave 2a + `540d90f` wave 2b); `aep:cap`==0, `@param TODO`==0, `--validate` clean, 486 caps preserved (format-only). negative-tier open question = resolved (moot; only stable/alpha ever existed). Remaining (uncommitted in working tree, build-green): new `cmd/capindex/comment_lint.go` + `--lint-comments` flag; repo-wide jargon cleanup (non-test) DONE for scene/codec/rifx/aep, **35 hits left in internal/serializer/**. Then: finish serializer cleanup → commit cleanup stream → the flip (remove legacy `parseCapTag`/enum maps, add guard + `TestRepoCommentsNoJargon` + strict `--validate` CI, update CLAUDE.md/rules.md doc-source note) → commit flip stream → plan done → `/flightdeck:landing`.
 
 **Step 2 = the only remaining work** (the other ~25 `aep:cap` files / ~400 symbols + repo-wide
 jargon cleanup + the flip). Same gate-loop + cheap subagent strategy as above; see the Follow-on

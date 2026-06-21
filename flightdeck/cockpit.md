@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-21 · claude · Stage: 两线并行（Booyah 复刻 comp②；@tag 文档 schema Step 1 完成,待 Step 2 批量转换）
+Updated: 2026-06-21 · claude · Stage: @tag 注释 jargon 清理**全部完成**（py-aep 在非test注释+公开文档双零;commit ed9dbbc+c0964d6;working tree 净）；下一对话回主线 Booyah comp ②
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,11 +8,15 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-**两条 active 线,下个对话挑一条继续:**
+**A 线 = @tag schema Step 2** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。注释 jargon 清理**已全部完成**(下方);剩 flip(c) 为**可选**遗留读路径清理(非阻塞,可随时做)。
 
-**A. @tag 文档 schema（Step 1 完成,下一步 Step 2）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。**Step 1 全部 DONE**：`internal/apidoc` 工具链(Task 1–8)+ facade.go **77/77** 转完(batch 7 = 末 11 funcs,c3753d4;`grep -c aep:cap facade.go`==0,gate loop 全绿)。**下一步 = Step 2**：其余 ~25 个 `aep:cap` 文件/~400 符号(scene+serializer+codec)批量转换 + 全仓 jargon 清理 + flip(invariant #9:残留 aep:cap==0 且 @param TODO==0)。**先解 negative-tier 问题**(scene 文件用 `tier=planned/missing/negative`,但 @stability 只有 stable/alpha — 见 plan Follow-on)。复用 cheap subagent+validator gate loop。Step 2 落地后整个 plan done → 跑 `/flightdeck:landing`。
+**已 commit**:① 263 条 `//aep:cap`→@tag(`d917798`+`540d90f`);② **`ed9dbbc`**(85 文件)= 注释 jargon linter `cmd/capindex --lint-comments` + flag + 全仓 codename/RE 注释清理 + py-aep 移出公开文档;③ **`c0964d6`**(34 文件)= **py-aep codename 从全仓非test注释彻底清除**(96 处改写,banner/impl/字节表 provenance 全保义,serializer 字节表用 `[ref]` 替 `[py-aep]`)。**收口态**:`grep py-aep` 非test注释=0、docs 内 py-aep=0、lint clean、build/vet 绿、`go test ./...` 仅剩已知 out-of-arc RED `TestSynthControlEntries_PardLayout/label`、capindex 486 caps 不变。
 
-**B. Booyah comp ②（gap#1 已解,剩 2 动画器）** → gap #2 Tracking 动画器 + gap #3 Character Offset 动画器:JSX 抓模板字节 → 仿 `AddText*Animator` → 双版本 gate → 拼 comp ②（text + `SetLayerTransform` 层动画 + 2 动画器）→ [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支：① 补 AE 2020 render；修 `NewComposition` 分数 fps cdta 时基（[[ntsc-tickrate-derive-3x-off]] 第二发现）。
+**本会话陷阱(待 landing 归 incident)**:给**导出符号 doc comment** 行尾加 `//nolint:jargon` 会让指令+被压 jargon **一起泄漏进 docgen 公开文档**(`TestDocsUpToDate` 抓得到)。→ 导出 doc comment 的 jargon **必须改写、不能 nolint**;nolint 仅用于不进文档的内部注释。已据此处理;py-aep 现全仓清零(无残留);RE'd-from / RE-fixture 内部 provenance 仍按政策保留 `//nolint:jargon`。
+
+**下一步 = 回主线(Booyah,见下 B)。** A 线剩余 = **可选 flip(c)**,非阻塞(dual-read 现仍工作、aep:cap=0):删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map(validTiers/validVerify/validDomains;`capFromAnnotation`+`validateCap` 留,Tier 只余 stable/alpha)+ 守卫测试(apidoc 外无 @domain/@stability/@verify/@since 枚举字面量)+ `cmd/capindex/comment_lint_test.go` `TestRepoCommentsNoJargon`(调 `lintRepoComments`)+ `--validate` strict 设为 required CI + 改 **CLAUDE.md/rules.md 文档真相源注脚**(@tag 取代 aep:cap)→ regen docs+capindex → `go test ./...` → commit flip 流 → plan 翻 done → `/flightdeck:landing`。
+
+**B. Booyah comp ②(暂让位)** → gap #2 Tracking 动画器 + gap #3 Character Offset 动画器:JSX 抓模板字节 → 仿 `AddText*Animator` → 双版本 gate → 拼 comp ②(text + `SetLayerTransform` 层动画 + 2 动画器)→ [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支:① 补 AE 2020 render;修 `NewComposition` 分数 fps cdta 时基([[ntsc-tickrate-derive-3x-off]] 第二发现)。
 
 ## In Progress
 
