@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1 叶子 comp 全完成**（① ② ③ 用户验收 · ④ カクッ 双版本 AE-accept，🔶待 review）；下一步 = Phase 2 中层 comp ⑤ プリコンポジション 1（首遇 NewPrecompLayer 嵌套）
+Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1 全 complete（①②③④ 用户验收）+ Phase 2 ⑤ プリコンポジション 1 成**（首遇 NewPrecompLayer 嵌套，3 层→comp ①，双版本 AE-accept + DOM source 绑定确认，🔶待 review）；下一步 = ⑥ シェイプの塊（7 层 src=⑤）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,13 +8,11 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-**comp ③ マップ用フラクタルノイズ ✅ complete（用户真机验收 2026-06-22；a0ce40f）**：`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise（L0 Overlay / L1 Normal）。**双版本 AE-accept + DOM 对账 PASS**——2 层不 drop、Fractal Noise 32 props 全在、Evolution `expr="time*1200"/"time*3000" on`（AE DOM 确认表达式真启用，红线1 清，非假绿）、Offset Turbulence 2kf→DOM 960,540（parser fraction[0.5,0.5]→AE 像素中心映射对）、UniformScaling off、blend 对。值全 oracle 取（连 L1 `time*3000\r` 尾 CR）。**footage-share 实测结论**：footage(67)=黑 solid，无 from-scratch 共享 footage-item API（SetSource 留孤儿 / DuplicateLayer 继承 effect 需脆弱二次 reopen）→ 各自 1 黑 solid（Fractal Noise 自生成像素，render-neutral delta）。终帧 render-pixel 归 ⑫。verify.jsx 加 `dumpEffects`（服务后续 ④⑦⑧⑨⑩⑪⑫）。无新 API（组合既有 gated 能力），capindex 不变。
+**Phase 1 叶子 ①②③④ 全 complete（用户验收）**，详见 [showcase/INDEX](showcase/INDEX.md) 账本。沉淀的坑：separated-position 读 0,0 陷阱（[[shape-layer-position-default-offscreen]] Case 2，④⑤ 均撞，显式居中）· `SetLayerTransform.Scale` 单位 percent 需 ×100 · footage-share=各自 solid（无共享 API,render-neutral）· precomp/solid 等 embed-template clone 的 start 须 post-reopen `SetStartTime`（pre-reopen scene 字段无效）。
 
-**comp ④ カクッ ✅（本会话，🔶待用户 review）**：`gen_kakuh.go` 2 shape 层=**stroked rect(1635×810,无 fill,0.8px)+ Trim Paths(Start=97/Offset=5.3)** + 层级 `SetLayerTransform` Scale(2kf 64%→100%)/Opacity(20kf)，L0 加 RotateZ=180。双版本 AE-accept（4 comp 全在、④ 2 层不 drop、2×Stroke+2×Trim 入 DOM、OK）。**三个坑修掉**：①shape 几何是参数化(Rect+Stroke+Trim)非 freeform path（读侧实测）；②`SetLayerTransform.Scale` 单位=**percent 非 fraction**，需 ×100（初版 scale 100× 偏小）；③**层位置**（用户真机反馈）：原工程 Position 是 separated dimensions，parser 读 0,0 但真机居中——照抄 0,0 摆到左上角；修法=显式居中 comp 中心，render 复验 rect 居中。详 [[shape-layer-position-default-offscreen]] 第二 Case（separated-position 读侧陷阱）。Delta 记账：描边色取 AddStroke 默认黑（原 elide 了=AE 建时默认不可恢复，0.8px 细线）·shape wrapper 多套一层(同①)·Scale Z=1 vs 原 0.853(2D 无关)。无新 API。
+**comp ⑤ プリコンポジション 1 ✅（本会话，🔶待 review）**：`gen_precomp1.go` **首遇 precomp 嵌套**——3 个 `NewPrecompLayer` 全引用 comp ①（staggered 三份 glitch）。L0 Position 2kf[778→1204]/L1 Opacity 13kf+居中/L2 静态居中；start 错峰 0.267/0.133/0.167 经 `SetStartTime`。**双版本 AE-accept**：5 comp、⑤ 3 层不 drop、**AE DOM 三层 source 全绑 comp ①**（precomp source-ID 解析正确）。verify.jsx 加 `l.source.name` dump。无新 API。
 
-**下一 = Phase 2 中层 comp**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：**Task 2.1 ⑤ プリコンポジション 1**（3 层均 src=① シェイイイイプ，**首遇 `NewPrecompLayer` 嵌套** + L0 Position(2kf)/L1 Opacity(13kf)）→ ⑥(7 层 src=⑤)→ ⑦(3 层+Glow)→ ⑧(3 层 src=② Fill 色差)→ ⑨(3 层+Trim,2 层 src=④)。
-
-**Booyah 进度**：Phase 1 叶子 ① ✅ ② ✅ ③ ✅(均 complete) ④ ✅(🔶待 review) → Phase 2 中层 ⑤⑥⑦⑧⑨ 待建 → Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
+**下一 = Task 2.2 ⑥ シェイプの塊**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：7 层均 src=⑤（复用 ⑤ 的 `NewPrecompLayer` 建法）+ 各层 Position(2kf)+Opacity(34/41/39/39/39/44 kf,L6 无)，值 oracle 取。→ ⑦(3 层+Glow)→ ⑧(3 层 src=② Fill 色差)→ ⑨(3 层+Trim,2 层 src=④)→ Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 

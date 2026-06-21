@@ -11,8 +11,11 @@ import (
 	aep "github.com/example/aep-parser/internal/aep"
 )
 
+// shapeIiipCompName is comp ①'s name, referenced by precomp layers that nest it (⑤+).
+const shapeIiipCompName = "シェイイイイプ！！！"
+
 func buildShapeIiip(p *aep.Project, orc *oracle) *aep.Composition {
-	const compName = "シェイイイイプ！！！"
+	const compName = shapeIiipCompName
 	// Use 30 fps (not the original's 29.97): NewComposition's cdta time-base
 	// writer is inconsistent for fractional fps (writes a modern scale=1 marker
 	// but legacy tpf/rate bytes), so AE would read a 30720 kf tickrate while we

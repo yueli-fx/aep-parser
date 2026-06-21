@@ -146,8 +146,8 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 
 ## Phase 2 — 中层 comp
 
-### Task 2.1 — ⑤ プリコンポジション 1(id=205,3 层,依赖①)
-3 层均 src=① シェイイイイプ。L0 Position(2kf)、L1 Opacity(13kf)、L2 无动画。`NewPrecompLayer(comp, ①, name)` ×3 + 关键帧。验收。Commit。
+### Task 2.1 — ⑤ プリコンポジション 1(id=205,3 层,依赖①)✅(🔶待 review)
+3 层均 src=① シェイイイイプ。`gen_precomp1.go`:`NewPrecompLayer(⑤, ①, name)` ×3。L0 Position(2kf [778→1204])、L1 Opacity(13kf)+居中、L2 静态居中;层 start 错峰 0.267/0.133/0.167。**两个坑**:①precomp 是 embed-template clone → pre-reopen scene `StartTime` 字段无效,须 post-reopen `SetStartTime`(ldta edit);②L1/L2 又撞 separated-position 读 0,0 → 显式居中(comp ④ 同款)。**验收**:Go round-trip(3 层 srcID 全=①、pos/op/start 全等)+ AE2020≡AE2025(5 comp、⑤ 3 层不 drop、**DOM 三层 source 全绑 comp ①** = precomp 解析正确)。verify.jsx 加 `l.source.name` dump。账本 ⑤=🔶待review。Commit。
 
 ### Task 2.2 — ⑥ シェイプの塊(id=243,7 层,依赖⑤)
 7 层均 src=⑤。各层 Position(2kf)+ Opacity(34/41/39/39/39/44 kf,L6 无)。`NewPrecompLayer` ×7 + 关键帧(oracle 取)。验收。Commit。

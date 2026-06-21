@@ -60,7 +60,9 @@
             w("COMP \"" + it.name + "\" " + it.width + "x" + it.height + " " + it.duration + "s layers=" + it.numLayers);
             for (var li = 1; li <= it.numLayers; li++) {
                 var l = it.layer(li);
-                w("  L" + l.index + " \"" + l.name + "\" blend=" + l.blendingMode);
+                var srcName = "";
+                try { if (l.source && l.source.name) srcName = " src=\"" + l.source.name + "\""; } catch (es) {}
+                w("  L" + l.index + " \"" + l.name + "\" blend=" + l.blendingMode + srcName);
                 try {
                     var contents = l.property("ADBE Root Vectors Group");
                     if (contents) dumpGroup(contents, 2);

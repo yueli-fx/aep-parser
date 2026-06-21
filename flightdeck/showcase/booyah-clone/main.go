@@ -36,6 +36,7 @@ func main() {
 	buildTextKomako(p, orc)  // ② テキスト変えるならココ！ (text layer + SetText)
 	buildFractalMap(p, orc)  // ③ マップ用フラクタルノイズ (comp + 2 solids)
 	buildKakuh(p, orc)       // ④ カクッ (comp + 2 stroked-rect+trim shape layers)
+	buildPrecomp1(p, orc)    // ⑤ プリコンポジション 1 (3 precomp layers → comp ①)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -45,6 +46,7 @@ func main() {
 	finishTextKomako(rp, orc)  // ②
 	finishFractalMap(rp, orc)  // ③
 	finishKakuh(rp, orc)       // ④
+	finishPrecomp1(rp, orc)    // ⑤
 
 	f, err := os.Create(outPath)
 	must(err)
