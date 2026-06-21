@@ -21,7 +21,7 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ## Progress
 
-current: **Task 1.1 comp ① ✅ + Task 1.2 comp ② ✅ 完成**(② 待用户真机 review),进 Task 1.3 ③ マップ用ノイズ。Task 1.2:两文字动画器 gap #2 Tracking + #3 Character Offset 本会话 RE + 双版本 render-gate ship(commit 2add514),`gen_text_komako.go` 拼成 comp ②（text + `SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器），AE2020≡AE2025 接受+render 一致（GLITCH→PURCLQ 字符环移 + tracking 撑开 + opacity flicker）。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
+current: **Task 1.1 ① ✅ + 1.2 ② ✅(用户真机验收) + 1.3 ③ ✅(🔶待 review)完成**,进 Task 1.4 ④ カクッ。Task 1.3 ③ マップ用フラクタルノイズ:`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise,**双版本 AE 接受 + DOM 对账 PASS**(Evolution `time*1200/time*3000` 表达式真启用、Offset Turbulence 2kf→DOM 960,540、UniformScaling off、blend Overlay/Normal、2 层不 drop)。footage-share 实测=各自 solid(无共享 API,render-neutral)。值全 oracle 取。verify.jsx 加 effect-parade dump。Task 1.2:两文字动画器 gap #2 Tracking + #3 Character Offset 本会话 RE + 双版本 render-gate ship(commit 2add514),`gen_text_komako.go` 拼成 comp ②（text + `SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器），AE2020≡AE2025 接受+render 一致（GLITCH→PURCLQ 字符环移 + tracking 撑开 + opacity flicker）。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
 
 **Phase 0（前置 de-risk）全收口:**
 - ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。
@@ -33,7 +33,9 @@ current: **Task 1.1 comp ① ✅ + Task 1.2 comp ② ✅ 完成**(② 待用户�
 **Phase 1 进行中:**
 - ✅ Task 1.1 comp ① シェイイイイプ（e4d266c Go 建 + d03101c tickrate 根因修）：4 rect 精确 kf + fill 色逐值对账 ✓；**AE 2025 render 与原工程像素级一致**（中间帧 0/0/32px）。结构 delta（shape 组嵌套 + transform 默认物化，render-neutral）已记账。残留旁支：AE 2020 render 待补；clone 30fps 绕开 NewComposition 分数 fps cdta bug。
 - ⚠ 首次 AE 验证撞 crash-state cascade，受阻（详 `incidents/ae-automation-occlusion-crashstate.md` Case 2c）：run1 verify.jsx 用 JSON.stringify 在 catch 外抛 → 0 字节 done → ae_run 假 PASS → force-kill → 置崩溃标志；run2 safe-mode 框被前台游戏 foreground-lock 挡住关框 → 超时。已修 verify.jsx（纯字符串、末尾一次写）。注：游戏窗口≠用户在用（operator 在另一台机器），不问用户让机器。
-- ⬜ 然后 Task 1.2-1.4：② テキスト（text+animator）③ マップ用ノイズ（fractal+expr，0.3 已 GO）④ カクッ（shape），按 DAG 上行。
+- ✅ Task 1.2 ② テキスト（text+animator，用户真机验收 complete）。
+- ✅ Task 1.3 ③ マップ用フラクタルノイズ（2 solid + Fractal Noise + Evolution expr，双版本 AE-accept + DOM PASS，🔶待用户 review）。
+- ⬜ Task 1.4 ④ カクッ（2 shape 层，层级 Scale/Opacity），按 DAG 上行。
 
 ---
 
@@ -127,10 +129,10 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 - 共有非默认:Noise Type=1,Uniform Scaling=0(off),Offset Turbulence(2kf),Complexity=1,Evolution `expr="time*1200"`(L0)/`"time*3000\r"`(L1)。
 - L0:Contrast=254,Scale Width=211,Scale Height=12。L1:Contrast=254,Scale Width=2847,Scale Height=12。
 
-- [ ] **Step 1:** 建 comp + 2 层(footage 源:确认 footage 共享建法 —— 一个 footage item 两层引用,或各自 solid;首遇 footage-share,实测确定)。
-- [ ] **Step 2:** 各层 `AddEffect("ADBE Fractal Noise")` + `SetEffectParam` 上述标量(matchName 见 dissect:`ADBE Fractal Noise-0004`=Contrast 等)+ Offset Turbulence `AnimateEffectParam`。
-- [ ] **Step 3:** Evolution 按 Task 0.3 结论:SetExpression 或 keyframe 近似。`SetBlendingMode(Overlay)` on L0。
-- [ ] **Step 4:** 验收。账本 ③。Commit。
+- [x] **Step 1:** 建 comp + 2 层。**footage-share 实测结论**:footage(67) = 黑 solid 1920×1080;无 from-scratch 共享 footage-item API(`SetSource`-retarget 留孤儿 / `DuplicateLayer` 继承 effect 需脆弱二次 reopen)→ **各自 1 黑 solid**(Fractal Noise 自生成像素 → 渲染等同,render-neutral delta)。`NewSolidLayer` 底部追加,建 A 后 B → A=index0(top)/B=index1,序对原工程。
+- [x] **Step 2:** 各层 `AddEffect("ADBE Fractal Noise")` + `SetEffectParam` 标量(`-0002`NoiseType/`-0004`Contrast/`-0009`UniformScaling/`-0011`ScaleW/`-0012`ScaleH/`-0015`Complexity,值从 oracle 取)+ Offset Turbulence(`-0013`,2D 点)`AnimateEffectParamVec`(非 scalar 版)。
+- [x] **Step 3:** Evolution(`-0023`)`SetEffectParam(0)`+`SetExpression(oracle 取)`+`SetExpressionEnabled(true)`(Task 0.3 GO,无需降级)。`SetBlendingMode(Overlay)` on L0。
+- [x] **Step 4:** 验收 4 关全过(Go round-trip 逐值对账 ✓ + **AE2020≡AE2025 接受+DOM 确认**:2 层不 drop、Fractal Noise 32 props、Evolution `expr on`、Offset DOM=960,540、blend 对)。verify.jsx 加 `dumpEffects`(effect parade + 表达式状态,服务后续 ④⑦⑧⑨⑩⑪⑫)。账本 ③=🔶待review。**终帧 render-pixel 归 ⑫**。Commit。
 
 ### Task 1.4 — ④ カクッ(id=337,2 shape 层)
 

@@ -22,6 +22,35 @@
         }
     }
 
+    // dumpEffects walks a layer's Effect Parade: each effect's matchName plus, per
+    // leaf param, its static value and (if expression-able) the expression + enabled
+    // flag. Confirms AE ingested effect params/expressions (comp ③ Fractal Noise etc.).
+    function dumpEffects(layer) {
+        var parade;
+        try { parade = layer.property("ADBE Effect Parade"); } catch (e) { return; }
+        if (!parade || parade.numProperties < 1) return;
+        for (var e = 1; e <= parade.numProperties; e++) {
+            var fx = parade.property(e);
+            w("    [FX] " + fx.matchName + " (" + fx.numProperties + ")");
+            for (var p = 1; p <= fx.numProperties; p++) {
+                var pr;
+                try { pr = fx.property(p); } catch (e0) { continue; }
+                if (pr.propertyType !== PropertyType.PROPERTY) continue;
+                var line = "      [FP] " + pr.matchName;
+                try {
+                    if (pr.canSetExpression && pr.expressionEnabled) {
+                        line += " expr=\"" + pr.expression + "\" on";
+                    } else if (pr.numKeys > 0) {
+                        line += " keys=" + pr.numKeys + " v0=" + String(pr.keyValue(1));
+                    } else {
+                        line += " v=" + String(pr.value);
+                    }
+                } catch (ex) { line += " (val? " + ex.toString() + ")"; }
+                w(line);
+            }
+        }
+    }
+
     try {
         app.open(new File(dir + "booyah-clone.aep"));
         w("items=" + app.project.numItems);
@@ -36,6 +65,7 @@
                     var contents = l.property("ADBE Root Vectors Group");
                     if (contents) dumpGroup(contents, 2);
                 } catch (e) { w("    (no contents: " + e + ")"); }
+                try { dumpEffects(l); } catch (e) { w("    (no fx: " + e + ")"); }
             }
         }
         w("OK");

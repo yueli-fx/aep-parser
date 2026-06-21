@@ -32,15 +32,18 @@ func main() {
 
 	// --- DAG topological order (leaves first) ---
 	// Phase 1: create each comp's base structure (layers / shapes / text).
-	buildShapeIiip(p, orc)  // ① シェイイイイプ！！！ (shape API needs no reopen)
-	buildTextKomako(p, orc) // ② テキスト変えるならココ！ (text layer + SetText)
-	// ③ マップ用フラクタルノイズ / ④ カクッ ... (later tasks)
+	buildShapeIiip(p, orc)   // ① シェイイイイプ！！！ (shape API needs no reopen)
+	buildTextKomako(p, orc)  // ② テキスト変えるならココ！ (text layer + SetText)
+	buildFractalMap(p, orc)  // ③ マップ用フラクタルノイズ (comp + 2 solids)
+	// ④ カクッ ... (later tasks)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
-	// (SetLayerTransform + AddText*Animator can't run on un-Reopened New*-built layers).
+	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
+	// New*-built layers).
 	rp, err := aep.Reopen(p)
 	must(err)
-	finishTextKomako(rp, orc) // ②
+	finishTextKomako(rp, orc)  // ②
+	finishFractalMap(rp, orc)  // ③
 
 	f, err := os.Create(outPath)
 	must(err)
