@@ -15,6 +15,18 @@ implements: specs/2026-06-21-api-doc-tag-schema.md
 
 **Tech Stack:** Go (`go/ast`, `go/parser`, `go/doc`, `regexp`); existing `cmd/capindex` + `cmd/docgen` AST pipelines; `uv`-run flightdeck index script for deck bookkeeping.
 
+> **Progress (2026-06-21, cont.):** facade conversion now **66/77** (batches 1–6 committed;
+> 11 funcs left = AddEssentialProperty, RemoveEffect, AddMask, SetMaskPath, SetMaskPathKeyframes,
+> RemoveMask, DuplicateMask, MoveMask, AddItem, RemoveItem, SetRenderer). All green, `--validate`
+> clean. **Cost lesson:** hand-transcribing each dense legacy comment → English @tag is slow +
+> token-heavy. **Cheaper strategy for the remaining 11 + Step 2 (~25 files / ~400 symbols):** now
+> that `--validate` (strict) + docgen self-validate are a deterministic pass/fail gate, dispatch a
+> **subagent per file/batch** with (a) the field-rule schema, (b) 2–3 converted facade examples as
+> the pattern, (c) the jargon blocklist, (d) instruction to loop `go run ./cmd/capindex --validate`
+> + `go run ./cmd/docgen` + commit until green. The validator is the safety net that makes
+> code-via-subagent safe here (per subagent-guide's "machine truth source" rule). Note the jargon
+> lint also flags `wave-NN` etc. in your OWN @boundary prose — keep boundaries codename-free.
+>
 > **Progress (2026-06-21):** Tasks 1–8 DONE + committed — the full `internal/apidoc`
 > package (parse/schema/validate/jargon), capindex dual-read + `--validate`, docgen
 > read/render/self-validate, and the `tagconvert` tool; all packages green (one
