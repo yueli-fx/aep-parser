@@ -1,7 +1,7 @@
 ---
 status: active
 summary: 实现 Booyah Glitch 全工程复刻:Phase0 前置 spike(表达式 Evolution=time*N + wiggle / 单层 ~21 mask / Curves 曲线数据)→ Phase1-4 按 DAG 叶→根逐 comp 建(extract 值→写 gen_<comp>.go→AE 接受+verify.jsx DOM对账→覆盖账本→commit)→ 终帧 メインコンプ 像素对照原工程。
-last_updated: 2026-06-19
+last_updated: 2026-06-21
 implements: specs/2026-06-19-booyah-glitch-full-replication.md
 ---
 
@@ -21,7 +21,7 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ## Progress
 
-current: Task 1.1 残留 — comp ① 中间帧关键帧保真 + AE 2020 render。✅ 基建(clear_ae_crashstate 工具 67023b6;**ae_run PostMessage 根治 foreground-lock** b411d09——所有 in-run modal 无人值守可消化,arc 全程关键)✅ AE 2025 接受+shape 不 drop ✅ render 两真 bug 修复:层 position (0,0)→中心(4f579d1)+ 层时长满comp→[0,0.901](6091016)→ **t=0/t=1 字节完全一致、t=0.5 差 4B**。🔶残留:中间帧 t=0.3/t=0.8 关键帧插值保真(lhd3 容量已对、全 linear→非分页/插值类型;需逐 rect valueAtTime 细diff,疑 rect center 锚或某 kf 值);AE 2020 侧 render 待补。
+current: **Task 1.1 comp ① ✅ 完成(AE 2025 像素级一致)**,进 Task 1.2 ② テキスト。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
 
 **Phase 0（前置 de-risk）全收口:**
 - ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。
@@ -31,7 +31,7 @@ current: Task 1.1 残留 — comp ① 中间帧关键帧保真 + AE 2020 render�
 - ⛔ 0.5 Curves：曲线数据物理 blocked（arbitrary-data 无 scripting），实例可加 → ⑫ 降级 + 在位验。
 
 **Phase 1 进行中:**
-- 🔶 Task 1.1 comp ① シェイイイイプ（e4d266c，Go 建）：4 rect 精确 kf + fill 色 round-trip 逐值对账原工程 ✓；结构 delta（shape 组嵌套 + transform 默认物化，render-neutral）已记账。AE-accept/render 待验。
+- ✅ Task 1.1 comp ① シェイイイイプ（e4d266c Go 建 + d03101c tickrate 根因修）：4 rect 精确 kf + fill 色逐值对账 ✓；**AE 2025 render 与原工程像素级一致**（中间帧 0/0/32px）。结构 delta（shape 组嵌套 + transform 默认物化，render-neutral）已记账。残留旁支：AE 2020 render 待补；clone 30fps 绕开 NewComposition 分数 fps cdta bug。
 - ⚠ 首次 AE 验证撞 crash-state cascade，受阻（详 `incidents/ae-automation-occlusion-crashstate.md` Case 2c）：run1 verify.jsx 用 JSON.stringify 在 catch 外抛 → 0 字节 done → ae_run 假 PASS → force-kill → 置崩溃标志；run2 safe-mode 框被前台游戏 foreground-lock 挡住关框 → 超时。已修 verify.jsx（纯字符串、末尾一次写）。注：游戏窗口≠用户在用（operator 在另一台机器），不问用户让机器。
 - ⬜ 然后 Task 1.2-1.4：② テキスト（text+animator）③ マップ用ノイズ（fractal+expr，0.3 已 GO）④ カクッ（shape），按 DAG 上行。
 
