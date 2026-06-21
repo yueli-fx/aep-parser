@@ -52,31 +52,45 @@ func finishPrecomp1(rp *aep.Project, orc *oracle) {
 	origComp := orc.mustComp(precomp1CompName)
 	cx, cy := float64(comp.Width)/2, float64(comp.Height)/2
 
+	// Anchor for a precomp layer = the SOURCE's centre. CAUTION: SetLayerTransform
+	// encodes the anchor of an AV / precomp layer as a FRACTION-of-source (0.5 = centre),
+	// NOT pixels like a shape/text layer (comp ②/④). Writing pixels (960,540) makes AE
+	// read 960×1920 / 540×1080 ≈ (1.84M, 0.58M) — the pivot lands millions of px away and
+	// the content renders off-screen (blank). The original elides anchor (AE default =
+	// source centre); NewLayerTransform inits anchor to (0,0), which renders bottom-right
+	// (the 0,0 case hides the ×dim bug since 0×N=0). So write the source-centre FRACTION.
+	// (Library bug — SetLayerTransform's AV-layer anchor units differ from shape/text;
+	// tracked in incidents/setlayertransform-av-anchor-fraction.md.)
+	ax, ay := 0.5, 0.5
+
 	// Start offsets stagger each nested comp ① copy's glitch (SetStartTime = ldta edit).
 	for i, l := range comp.Layers {
 		must(l.SetStartTime(origComp.Layers[i].StartTime))
 	}
 
-	// L0: Position animated 2kf (absolute coords — no centering).
+	// L0: source-centre anchor + Position animated 2kf (absolute coords).
 	otg0 := findGroup(origComp.Layers[0].PropertyTree(), "ADBE Transform Group")
 	tr0 := aep.NewLayerTransform()
+	must(tr0.AnchorPoint().SetStaticValue([2]float64{ax, ay}))
 	for _, kf := range findProp(otg0, "ADBE Position").Keyframes {
 		v := toFloats(kf.Value)
 		must(tr0.Position().AddKeyframeLinear(kf.Time, [2]float64{v[0], v[1]}))
 	}
 	must(aep.SetLayerTransform(comp.Layers[0], tr0))
 
-	// L1: centred Position (separated-read trap) + Opacity 13kf flicker.
+	// L1: source-centre anchor + centred Position (separated-read trap) + Opacity 13kf.
 	otg1 := findGroup(origComp.Layers[1].PropertyTree(), "ADBE Transform Group")
 	tr1 := aep.NewLayerTransform()
+	must(tr1.AnchorPoint().SetStaticValue([2]float64{ax, ay}))
 	must(tr1.Position().SetStaticValue([2]float64{cx, cy}))
 	for _, kf := range findProp(otg1, "ADBE Opacity").Keyframes {
 		must(tr1.Opacity().AddKeyframeLinear(kf.Time, toScalar(kf.Value)*100))
 	}
 	must(aep.SetLayerTransform(comp.Layers[1], tr1))
 
-	// L2: centred Position, static (no animation).
+	// L2: source-centre anchor + centred Position, static (no animation).
 	tr2 := aep.NewLayerTransform()
+	must(tr2.AnchorPoint().SetStaticValue([2]float64{ax, ay}))
 	must(tr2.Position().SetStaticValue([2]float64{cx, cy}))
 	must(aep.SetLayerTransform(comp.Layers[2], tr2))
 

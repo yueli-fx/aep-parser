@@ -10,7 +10,7 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **Phase 1 叶子 ①②③④ 全 complete（用户验收）**，详见 [showcase/INDEX](showcase/INDEX.md) 账本。沉淀的坑：separated-position 读 0,0 陷阱（[[shape-layer-position-default-offscreen]] Case 2，④⑤ 均撞，显式居中）· `SetLayerTransform.Scale` 单位 percent 需 ×100 · footage-share=各自 solid（无共享 API,render-neutral）· precomp/solid 等 embed-template clone 的 start 须 post-reopen `SetStartTime`（pre-reopen scene 字段无效）。
 
-**comp ⑤ プリコンポジション 1 ✅（本会话，🔶待 review）**：`gen_precomp1.go` **首遇 precomp 嵌套**——3 个 `NewPrecompLayer` 全引用 comp ①（staggered 三份 glitch）。L0 Position 2kf[778→1204]/L1 Opacity 13kf+居中/L2 静态居中；start 错峰 0.267/0.133/0.167 经 `SetStartTime`。**双版本 AE-accept**：5 comp、⑤ 3 层不 drop、**AE DOM 三层 source 全绑 comp ①**（precomp source-ID 解析正确）。verify.jsx 加 `l.source.name` dump。无新 API。
+**comp ⑤ プリコンポジション 1 ✅（本会话，🔶待 review；居中 bug 已修+render 眼验）**：`gen_precomp1.go` **首遇 precomp 嵌套**——3 个 `NewPrecompLayer` 全引用 comp ①（staggered 三份 glitch）。L0 Position 2kf[778→1204]/L1 Opacity 13kf+居中/L2 静态居中；start 错峰经 `SetStartTime`。**揪出库 bug**（用户真机反馈"右下角"→bisect）：`SetLayerTransform` 对 **AV/precomp 层 anchor 按「源尺寸分数」编码**（0.5=中心），非 shape/text 像素——写 960,540 被 AE 读成 ×源尺寸(1.84M)→渲染飞出屏全黑（anchor 0,0 不暴露故前版渲右下角）。修法=写分数 `anchor(0.5,0.5)`，AE DOM 实测读回 960,540，render 复验居中。详 [[setlayertransform-av-anchor-fraction]]（库 bug，gen 暂 workaround）。**双版本 AE-accept**（5 comp、3 层不 drop、source 绑 ①）+ AE2025 render 居中眼验。
 
 **下一 = Task 2.2 ⑥ シェイプの塊**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：7 层均 src=⑤（复用 ⑤ 的 `NewPrecompLayer` 建法）+ 各层 Position(2kf)+Opacity(34/41/39/39/39/44 kf,L6 无)，值 oracle 取。→ ⑦(3 层+Glow)→ ⑧(3 层 src=② Fill 色差)→ ⑨(3 层+Trim,2 层 src=④)→ Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
 
