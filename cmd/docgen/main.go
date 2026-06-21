@@ -55,6 +55,13 @@ func generateFile(m *manifest, fm fileManifest) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if errs := validateAnnotations(lps); len(errs) > 0 {
+		var sb strings.Builder
+		for _, e := range errs {
+			fmt.Fprintf(&sb, "  %v\n", e)
+		}
+		return "", fmt.Errorf("annotation validation failed before writing:\n%s", sb.String())
+	}
 	types := withMethodsMulti(extractTypesMulti(lps), lps)
 	for _, d := range dirs {
 		attachExamples(types, d)

@@ -26,3 +26,18 @@ func TestGenerateFile_Golden(t *testing.T) {
 		t.Fatalf("mismatch:\n--- got ---\n%s", got)
 	}
 }
+
+func TestValidateAnnotations_RealTree(t *testing.T) {
+	dirs := []string{
+		"../../internal/aep", "../../internal/scene", "../../internal/codec",
+	}
+	lps, err := loadPackages(dirs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if errs := validateAnnotations(lps); len(errs) != 0 {
+		for _, e := range errs {
+			t.Errorf("docgen self-validate: %v", e)
+		}
+	}
+}
