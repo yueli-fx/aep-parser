@@ -565,8 +565,7 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetbgcolor",
-      "signature": "func (c *Composition) SetBGColor(rgb [3]uint8) error",
-      "summary": "SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. length-preserving (3 bytes)."
+      "signature": "func (c *Composition) SetBGColor(rgb [3]uint8) error"
     },
     "Composition.SetComment": {
       "kind": "method",
@@ -580,56 +579,55 @@
       "file": "composition.md",
       "anchor": "#compositionsetcompmotionblur",
       "signature": "func (c *Composition) SetCompMotionBlur(v bool) error",
-      "summary": "SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B bit 3). Note: this is independent of per-layer `Layer.MotionBlur` — the layer renders motion blur only when both switches are on."
+      "summary": "This switch is independent of the per-layer `Layer.MotionBlur` flag — a layer renders motion blur only when both switches are on."
     },
     "Composition.SetDisplayStartFrame": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetdisplaystartframe",
       "signature": "func (c *Composition) SetDisplayStartFrame(frame int) error",
-      "summary": "SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStartTime. Computes seconds = frame / FrameRate and writes the cdta pair. Errors when FrameRate \u003c= 0."
+      "summary": "A frame-count convenience wrapper around SetDisplayStartTime: computes seconds = frame / FrameRate and delegates the cdta write to it. Errors when FrameRate is not yet set to a positive value."
     },
     "Composition.SetDisplayStartTime": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetdisplaystarttime",
       "signature": "func (c *Composition) SetDisplayStartTime(seconds float64) error",
-      "summary": "SetDisplayStartTime rewrites the comp's display-start-time origin (seconds) at cdta @0xA4 (dividend) / @0xA8 (divisor). length- preserving (8 bytes). Pass 0 to clear back to default."
+      "summary": "The divisor stored is the composition's TickRate (computed from cdta offsets 0x08/0xA8). Passing 0 clears the value back to default by writing both dividend and divisor as 0, matching AE's \"unset\" encoding so re-parsing yields DisplayStartTime == 0. AE 2025 sometimes writes a divisor (e.g. 23976 for 29.97 fps) that doesn't exactly satisfy the ticks-per-frame times frame-count math due to small rounding artifacts; this setter and its getter use the stored pair verbatim so a round trip of a Set call gives back exactly what was set."
     },
     "Composition.SetDraft3D": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetdraft3d",
       "signature": "func (c *Composition) SetDraft3D(v bool) error",
-      "summary": "SetDraft3D toggles the comp's \"Draft 3D\" preview switch (cdta @0x8A bit 0). Disables shadows / motion blur / DOF in viewport for speed."
+      "summary": "Disables shadows, motion blur, and depth of field in the viewport for faster preview playback."
     },
     "Composition.SetDuration": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetduration",
       "signature": "func (c *Composition) SetDuration(seconds float64) error",
-      "summary": "SetDuration writes a new composition duration (seconds) to cdta @0xB0 as a uint32 frame count (= round(seconds × FrameRate)). Requires `FrameRate \u003e 0`. length-preserving (4 bytes)."
+      "summary": "Writes the duration as a uint32 frame count (round(seconds x FrameRate)) and requires FrameRate to already be positive. Do not call this and SetFrameRate on the same composition: SetFrameRate does not rescale the stored duration ticks, so changing the rate afterward makes AE read back a shorter or longer duration than intended."
     },
     "Composition.SetFrameBlending": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetframeblending",
       "signature": "func (c *Composition) SetFrameBlending(v bool) error",
-      "summary": "SetFrameBlending toggles the comp-level frame-blend master switch (cdta @0x8B bit 4). Layers also need their own FrameBlendEnabled on to render with blending."
+      "summary": "Layers also need their own FrameBlendEnabled flag on to actually render with blending."
     },
     "Composition.SetFrameRate": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetframerate",
       "signature": "func (c *Composition) SetFrameRate(fps float64) error",
-      "summary": "SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F. AE splits fps into a uint16 whole part and a uint16 fractional part (numerator over 65536); we use the same encoding so partial frame rates like 29.97 round-trip exactly. length-preserving (4 bytes)."
+      "summary": "AE splits fps into a uint16 whole part and a uint16 fractional part (numerator over 65536); this setter uses the same encoding so partial frame rates like 29.97 round-trip exactly. `Duration` is recomputed from the existing frame count so the in-memory value stays consistent. Do not call this and SetDuration on the same composition: this setter does not rescale the stored duration ticks, so AE will read back the wrong duration at the new rate."
     },
     "Composition.SetHideShyLayers": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsethideshylayers",
-      "signature": "func (c *Composition) SetHideShyLayers(v bool) error",
-      "summary": "SetHideShyLayers toggles \"Hide Shy Layers\" on the comp (cdta @0x8B bit 0)."
+      "signature": "func (c *Composition) SetHideShyLayers(v bool) error"
     },
     "Composition.SetLabel": {
       "kind": "method",
@@ -642,15 +640,13 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetmotionbluradaptivesamplelimit",
-      "signature": "func (c *Composition) SetMotionBlurAdaptiveSampleLimit(limit int32) error",
-      "summary": "SetMotionBlurAdaptiveSampleLimit writes the motion-blur adaptive sample limit (int32 BE, AE default 128) to cdta @0xC4. length-preserving (4 bytes)."
+      "signature": "func (c *Composition) SetMotionBlurAdaptiveSampleLimit(limit int32) error"
     },
     "Composition.SetMotionBlurSamplesPerFrame": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetmotionblursamplesperframe",
-      "signature": "func (c *Composition) SetMotionBlurSamplesPerFrame(n int32) error",
-      "summary": "SetMotionBlurSamplesPerFrame writes the per-frame motion-blur sample count (int32 BE, AE default 16) to cdta @0xC8. length-preserving (4 bytes)."
+      "signature": "func (c *Composition) SetMotionBlurSamplesPerFrame(n int32) error"
     },
     "Composition.SetMotionGraphicsTemplateName": {
       "kind": "method",
@@ -663,29 +659,26 @@
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetname",
-      "signature": "func (c *Composition) SetName(newName string) error",
-      "summary": "SetName rewrites the composition's display name (length-variable Utf8 chunk replacement; WriteAEP recomputes parent Item LIST size). Returns an error if the comp has no Utf8 name chunk (rare)."
+      "signature": "func (c *Composition) SetName(newName string) error"
     },
     "Composition.SetPixelAspect": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetpixelaspect",
       "signature": "func (c *Composition) SetPixelAspect(par float64) error",
-      "summary": "SetPixelAspect writes the pixel aspect ratio (PAR) to cdta as a numerator/denominator pair at @0x90 / @0x94 (uint32 BE each)."
+      "summary": "AE writes simple integer ratios for common presets (1/1 = 1.0, 2/1 = 2.0). For fractional ratios this setter picks num = round(par x 100) and den = 100, which is accurate enough for AE's built-in PAR presets (0.91, 1.09, 1.21, 1.33, 1.46, 1.5, 2.0)."
     },
     "Composition.SetPreserveNestedFrameRate": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetpreservenestedframerate",
-      "signature": "func (c *Composition) SetPreserveNestedFrameRate(v bool) error",
-      "summary": "SetPreserveNestedFrameRate toggles \"Preserve frame rate when nested or in render queue\" on the comp (cdta @0x8B bit 5)."
+      "signature": "func (c *Composition) SetPreserveNestedFrameRate(v bool) error"
     },
     "Composition.SetPreserveNestedResolution": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetpreservenestedresolution",
-      "signature": "func (c *Composition) SetPreserveNestedResolution(v bool) error",
-      "summary": "SetPreserveNestedResolution toggles \"Preserve resolution when nested\" (cdta @0x8B bit 7)."
+      "signature": "func (c *Composition) SetPreserveNestedResolution(v bool) error"
     },
     "Composition.SetResolutionFactor": {
       "kind": "method",
@@ -693,28 +686,26 @@
       "anchor": "#compositionsetresolutionfactor",
       "signature": "func (c *Composition) SetResolutionFactor(x, y uint16) error",
       "example": true,
-      "summary": "SetResolutionFactor writes the comp's preview-resolution downsample factors (X, Y) to cdta @0x00 / @0x02 (two uint16 BE). Mirrors AE Scripting's CompItem.resolutionFactor. [1,1] = Full, [2,2] = Half, [4,4] = Quarter; custom non-square pairs allowed. Both factors must be ≥ 1 (AE clamps; we refuse 0 to surface caller bugs). length-preserving (4 bytes)."
+      "summary": "Mirrors AE Scripting's CompItem.resolutionFactor. [1,1] = Full, [2,2] = Half, [4,4] = Quarter; custom non-square pairs are allowed."
     },
     "Composition.SetShutterAngle": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetshutterangle",
-      "signature": "func (c *Composition) SetShutterAngle(degrees uint16) error",
-      "summary": "SetShutterAngle writes the motion-blur shutter angle (uint16 BE, degrees, AE UI range 0..720, default 180) to cdta @0xAE. length-preserving (2 bytes)."
+      "signature": "func (c *Composition) SetShutterAngle(degrees uint16) error"
     },
     "Composition.SetShutterPhase": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetshutterphase",
       "signature": "func (c *Composition) SetShutterPhase(phase int32) error",
-      "summary": "SetShutterPhase writes the motion-blur shutter phase (int32 BE) to cdta @0xB4. Unit is likely degrees (AE UI shows -90 / +90 / etc.) but not independently UI-verified — caller passes the raw int32 value. length-preserving (4 bytes)."
+      "summary": "Unit is likely degrees (AE UI shows values like -90 / +90) but that has not been independently UI-verified — the caller passes the raw int32 value as-is."
     },
     "Composition.SetSize": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetsize",
-      "signature": "func (c *Composition) SetSize(width, height uint16) error",
-      "summary": "SetSize writes a new canvas pixel size (width, height) to cdta @0x8C / @0x8E (uint16 BE pair). length-preserving (4 bytes). Does not touch pixel aspect ratio at @0x90/@0x94 — set that separately via SetPixelAspect."
+      "signature": "func (c *Composition) SetSize(width, height uint16) error"
     },
     "Composition.SetWorkArea": {
       "kind": "method",
@@ -722,28 +713,28 @@
       "anchor": "#compositionsetworkarea",
       "signature": "func (c *Composition) SetWorkArea(startSeconds, endSeconds float64) error",
       "example": true,
-      "summary": "SetWorkArea writes new work-area start/end times (seconds) to cdta @0x1C-0x2B. Both values are encoded as dividend/divisor pairs; we reuse the existing dividend divisor at @0x20 and @0x28 when non-zero (typically 600 — AE's standard work-area divisor) and pick 600 when the existing divisor is zero."
+      "summary": "Both values are encoded as dividend/divisor pairs; this setter reuses the existing divisors when non-zero (typically 600, AE's standard work-area divisor) and falls back to 600 when the existing divisor is zero. endSeconds may be less than startSeconds — AE allows that visually, giving the work area a zero or negative span — but most workflows want endSeconds greater than startSeconds."
     },
     "Composition.SetWorkAreaDurationFrame": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetworkareadurationframe",
       "signature": "func (c *Composition) SetWorkAreaDurationFrame(frame int) error",
-      "summary": "SetWorkAreaDurationFrame writes the work-area end so that end−start equals the given integer frame span, keeping start fixed."
+      "summary": "Recomputes the work-area end so that end minus start equals the given frame span, keeping start fixed, then delegates to the seconds-based work-area setter."
     },
     "Composition.SetWorkAreaEndFrame": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetworkareaendframe",
       "signature": "func (c *Composition) SetWorkAreaEndFrame(frame int) error",
-      "summary": "SetWorkAreaEndFrame writes the work-area end from an integer frame."
+      "summary": "Converts frame back to seconds via FrameRate, then delegates to the seconds-based work-area setter, preserving the existing start."
     },
     "Composition.SetWorkAreaStartFrame": {
       "kind": "method",
       "file": "composition.md",
       "anchor": "#compositionsetworkareastartframe",
       "signature": "func (c *Composition) SetWorkAreaStartFrame(frame int) error",
-      "summary": "SetWorkAreaStartFrame writes the work-area start from an integer frame, preserving the existing end. Delegates to SetWorkArea."
+      "summary": "Converts frame back to seconds via FrameRate, then delegates to the seconds-based work-area setter, preserving the existing end."
     },
     "Composition.ShapeLayers": {
       "kind": "getter",
@@ -1379,7 +1370,7 @@
       "file": "property.md",
       "anchor": "#keyframesetframetime",
       "signature": "func (k *Keyframe) SetFrameTime(frame int) error",
-      "summary": "SetFrameTime writes the keyframe's time from an integer frame, delegating to SetTime. Returns an error when the owning comp's FrameRate is unknown."
+      "summary": "Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based time setter."
     },
     "Keyframe.SetInInterp": {
       "kind": "method",
@@ -1481,7 +1472,7 @@
       "file": "layer.md",
       "anchor": "#layeraddfont",
       "signature": "func (l *Layer) AddFont(fontName string) (int, error)",
-      "summary": "AddFont appends a new entry to the layer's Fonts table (btdk path /0/1/0) and returns the new font index. Subsequent SetRunFontIndex(runIdx, returnedIndex) calls can reference it."
+      "summary": "Extends the btdk Fonts array (btdk path /0/1/0) by one entry plus its dict wrapper. The new entry is serialized in the same shape AE writes, with the second dict slot marking the font as user-resolved (matching the slot AE writes for non-default fonts). Use the returned index with SetRunFontIndex to point a style run at the new font."
     },
     "Layer.AlternateSource": {
       "kind": "getter",
@@ -1639,7 +1630,7 @@
       "anchor": "#layerclearalternatesource",
       "signature": "func (l *Layer) ClearAlternateSource() error",
       "rw": "read-only",
-      "summary": "ClearAlternateSource removes the media-replacement override (blsi = 0) so AE falls back to the wrapper precomp's default source. Equivalent to SetAlternateSource(nil)."
+      "summary": "Removes the media-replacement override so AE falls back to the wrapper precomp's default source. Equivalent to calling SetAlternateSource with a nil item."
     },
     "Layer.ClearTrackMatteLayer": {
       "kind": "getter",
@@ -1647,7 +1638,7 @@
       "anchor": "#layercleartrackmattelayer",
       "signature": "func (l *Layer) ClearTrackMatteLayer() error",
       "rw": "read-only",
-      "summary": "ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone). Removes the explicit matte source AND the matte mode in one call."
+      "summary": "Shorthand for SetTrackMatteLayer with a zero source ID and TrackMatteNone mode. Removes the explicit matte source and the matte mode in one call."
     },
     "Layer.CollapseTransform": {
       "kind": "field",
@@ -1780,7 +1771,7 @@
       "anchor": "#layerhasalternatesourceslot",
       "signature": "func (l *Layer) HasAlternateSourceSlot() bool",
       "rw": "read-only",
-      "summary": "HasAlternateSourceSlot reports whether this layer has an Essential Properties media-replacement slot in its chunk tree. The slot exists when AE persisted an \"ADBE Layer Overrides\" + \"ADBE Layer Source Alternate\" pattern (typically created by `AVLayer.addToMotionGraphicsTemplateAs()` on the source-side layer + the parent comp using the precomp as a layer). Without the slot, SetAlternateSource cannot length-preservingly write a new id."
+      "summary": "The slot exists when AE persisted an \"ADBE Layer Overrides\" + \"ADBE Layer Source Alternate\" pattern, typically created by calling addToMotionGraphicsTemplateAs() on the source-side layer while the parent composition uses the precomp as a layer. Without the slot, the alternate-source setter cannot length-preservingly write a new id."
     },
     "Layer.HasAudio": {
       "kind": "getter",
@@ -2395,7 +2386,7 @@
       "file": "layer.md",
       "anchor": "#layerreplacesource",
       "signature": "func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error",
-      "summary": "ReplaceSource replaces the layer's source with the given AV item (Composition or Footage). This mirrors py-aep's Layer.ReplaceSource API."
+      "summary": "Internally calls the id-based source setter with the target item's id."
     },
     "Layer.RotateX": {
       "kind": "getter",
@@ -2441,392 +2432,352 @@
       "file": "layer.md",
       "anchor": "#layersetalternatesource",
       "signature": "func (l *Layer) SetAlternateSource(item AVItem) error",
-      "summary": "SetAlternateSource overrides this layer's source via the Essential Properties → Media Replacement slot (4-byte blsi write, length- preserving). Pass nil (or a zero-id item) to clear the override — equivalent to ClearAlternateSource. Mirrors AE script's Property.setAlternateSource."
+      "summary": "Overrides this layer's source through the Essential Properties media-replacement slot. Pass nil (or a zero-id item) to clear the override — equivalent to ClearAlternateSource. Requires the layer to already have an Essential Properties slot: AE only persists the underlying chunk after the source-side layer has been promoted to a motion-graphics template inside its wrapper precomp. If the slot is missing, this errors rather than attempting a structural chunk insertion that would break length-preserving round-trip. When the layer's owning project is known, the item's ID is validated against the project's AV items; an unknown ID returns an error and leaves the bytes untouched. AE additionally rejects items that are not media-replacement compatible (for example a still image standing in for video) at script time; this setter does not replicate that check, and the resulting file still parses cleanly in AE regardless."
     },
     "Layer.SetAnchorPoint": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetanchorpoint",
-      "signature": "func (l *Layer) SetAnchorPoint(v []float64) error",
-      "summary": "SetAnchorPoint writes a new static anchor-point. Length of v must match the property's Components (2 or 3 depending on Is3D)."
+      "signature": "func (l *Layer) SetAnchorPoint(v []float64) error"
     },
     "Layer.SetAudioEnabled": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetaudioenabled",
-      "signature": "func (l *Layer) SetAudioEnabled(v bool) error",
-      "summary": "SetAudioEnabled toggles the layer's audio switch. length-preserving (single bit @ldta 0x27)."
+      "signature": "func (l *Layer) SetAudioEnabled(v bool) error"
     },
     "Layer.SetAudioLevels": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetaudiolevels",
-      "signature": "func (l *Layer) SetAudioLevels(lr []float64) error",
-      "summary": "SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB). Errors when the layer has no audio levels property (i.e. layer has no audio track)."
+      "signature": "func (l *Layer) SetAudioLevels(lr []float64) error"
     },
     "Layer.SetAutoOrient": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetautoorient",
       "signature": "func (l *Layer) SetAutoOrient(t AutoOrientType) error",
-      "summary": "SetAutoOrient writes the layer's auto-orient mode by clearing the three mutually-exclusive bits across ldta @0x25/@0x26 and setting the one matching the requested AutoOrientType. length-preserving (touches 2 bytes)."
+      "summary": "Clears the three mutually-exclusive auto-orient bits spread across ldta offsets 0x25/0x26 and sets the one matching the requested mode. Unknown enum values are treated as None (a no-op clearing of all three bits). The AlongPath mode only has a visible effect when the layer's position has a motion path (keyframes)."
     },
     "Layer.SetBlendingMode": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetblendingmode",
-      "signature": "func (l *Layer) SetBlendingMode(m BlendingMode) error",
-      "summary": "SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. length-preserving (single byte)."
+      "signature": "func (l *Layer) SetBlendingMode(m BlendingMode) error"
     },
     "Layer.SetCameraAperture": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcameraaperture",
-      "signature": "func (l *Layer) SetCameraAperture(v float64) error",
-      "summary": "SetCameraAperture writes the aperture property (pixels)."
+      "signature": "func (l *Layer) SetCameraAperture(v float64) error"
     },
     "Layer.SetCameraBlurLevel": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcamerablurlevel",
-      "signature": "func (l *Layer) SetCameraBlurLevel(v float64) error",
-      "summary": "SetCameraBlurLevel writes the blur-level property (%)."
+      "signature": "func (l *Layer) SetCameraBlurLevel(v float64) error"
     },
     "Layer.SetCameraDepthOfField": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcameradepthoffield",
-      "signature": "func (l *Layer) SetCameraDepthOfField(enabled bool) error",
-      "summary": "SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0)."
+      "signature": "func (l *Layer) SetCameraDepthOfField(enabled bool) error"
     },
     "Layer.SetCameraFocusDistance": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcamerafocusdistance",
-      "signature": "func (l *Layer) SetCameraFocusDistance(v float64) error",
-      "summary": "SetCameraFocusDistance writes the focus-distance property (pixels)."
+      "signature": "func (l *Layer) SetCameraFocusDistance(v float64) error"
     },
     "Layer.SetCameraZoom": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcamerazoom",
-      "signature": "func (l *Layer) SetCameraZoom(v float64) error",
-      "summary": "SetCameraZoom writes a new static value to the camera's Zoom property (pixels). Errors on non-camera layers or keyframed Zoom."
+      "signature": "func (l *Layer) SetCameraZoom(v float64) error"
     },
     "Layer.SetCollapseTransform": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcollapsetransform",
       "signature": "func (l *Layer) SetCollapseTransform(v bool) error",
-      "summary": "SetCollapseTransform toggles \"Collapse Transformations\" (for nested comps) or \"Continuously Rasterize\" (for Illustrator / shape layers). length-preserving (single bit @ldta 0x27)."
+      "summary": "Collapse Transformations applies to nested-comp layers; Continuously Rasterize applies to Illustrator or shape layers. Both share the same underlying switch bit."
     },
     "Layer.SetComment": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetcomment",
       "signature": "func (l *Layer) SetComment(comment string) error",
-      "summary": "SetComment rewrites the layer's comment text (AE's \"Comments\" timeline column / Layer Settings dialog)."
+      "summary": "Mirrors AE's \"Comments\" timeline column / Layer Settings dialog. Encoding mirrors what AE writes: LF becomes CRLF plus a single NUL terminator."
     },
     "Layer.SetEffectsEnabled": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layerseteffectsenabled",
-      "signature": "func (l *Layer) SetEffectsEnabled(v bool) error",
-      "summary": "SetEffectsEnabled toggles the layer's fx switch (whether effects render). length-preserving (single bit @ldta 0x27)."
+      "signature": "func (l *Layer) SetEffectsEnabled(v bool) error"
     },
     "Layer.SetFrameBlendEnabled": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetframeblendenabled",
-      "signature": "func (l *Layer) SetFrameBlendEnabled(v bool) error",
-      "summary": "SetFrameBlendEnabled toggles the layer's frame-blend switch. length-preserving (single bit @ldta 0x27)."
+      "signature": "func (l *Layer) SetFrameBlendEnabled(v bool) error"
     },
     "Layer.SetFrameBlendPixelMotion": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetframeblendpixelmotion",
       "signature": "func (l *Layer) SetFrameBlendPixelMotion(v bool) error",
-      "summary": "SetFrameBlendPixelMotion switches frame blending mode between Frame Mix (false) and Pixel Motion (true). Only relevant when FrameBlendEnabled is also true. length-preserving (single bit @ldta 0x25)."
+      "summary": "Only takes effect when FrameBlendEnabled is also true."
     },
     "Layer.SetFrameInPoint": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetframeinpoint",
       "signature": "func (l *Layer) SetFrameInPoint(frame int) error",
-      "summary": "SetFrameInPoint writes the layer in-point converting the integer frame back to seconds via the owning comp's FrameRate, then delegates to SetInPoint."
+      "summary": "Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based in-point setter. The in-point is source-relative; AE's UI displays startTime plus this value."
     },
     "Layer.SetFrameOutPoint": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetframeoutpoint",
       "signature": "func (l *Layer) SetFrameOutPoint(frame int) error",
-      "summary": "SetFrameOutPoint writes the layer out-point from an integer frame."
+      "summary": "Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based out-point setter. The out-point is source-relative; AE's UI displays startTime plus this value."
     },
     "Layer.SetFrameStartTime": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetframestarttime",
       "signature": "func (l *Layer) SetFrameStartTime(frame int) error",
-      "summary": "SetFrameStartTime writes the layer start-time from an integer frame."
+      "summary": "Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based start-time setter."
     },
     "Layer.SetGeometryBevelDirection": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetgeometrybeveldirection",
-      "signature": "func (l *Layer) SetGeometryBevelDirection(v float64) error",
-      "summary": "SetGeometryBevelDirection writes Bevel Direction enum."
+      "signature": "func (l *Layer) SetGeometryBevelDirection(v float64) error"
     },
     "Layer.SetGeometryPlaneCurvature": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetgeometryplanecurvature",
-      "signature": "func (l *Layer) SetGeometryPlaneCurvature(v float64) error",
-      "summary": "SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1)."
+      "signature": "func (l *Layer) SetGeometryPlaneCurvature(v float64) error"
     },
     "Layer.SetGeometryPlaneSubdivision": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetgeometryplanesubdivision",
-      "signature": "func (l *Layer) SetGeometryPlaneSubdivision(v float64) error",
-      "summary": "SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality)."
+      "signature": "func (l *Layer) SetGeometryPlaneSubdivision(v float64) error"
     },
     "Layer.SetInPoint": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetinpoint",
       "signature": "func (l *Layer) SetInPoint(seconds float64) error",
-      "summary": "SetInPoint writes the layer's source-media in-point (seconds) to ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in). length-preserving (8 bytes)."
+      "summary": "Refreshes Layer.Duration (= out minus in) after the write."
     },
     "Layer.SetIrisAspectRatio": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirisaspectratio",
-      "signature": "func (l *Layer) SetIrisAspectRatio(v float64) error",
-      "summary": "SetIrisAspectRatio writes the Iris Aspect Ratio."
+      "signature": "func (l *Layer) SetIrisAspectRatio(v float64) error"
     },
     "Layer.SetIrisDiffractionFringe": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirisdiffractionfringe",
-      "signature": "func (l *Layer) SetIrisDiffractionFringe(v float64) error",
-      "summary": "SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%)."
+      "signature": "func (l *Layer) SetIrisDiffractionFringe(v float64) error"
     },
     "Layer.SetIrisHighlightGain": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirishighlightgain",
-      "signature": "func (l *Layer) SetIrisHighlightGain(v float64) error",
-      "summary": "SetIrisHighlightGain writes the Iris Highlight Gain."
+      "signature": "func (l *Layer) SetIrisHighlightGain(v float64) error"
     },
     "Layer.SetIrisHighlightSaturation": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirishighlightsaturation",
-      "signature": "func (l *Layer) SetIrisHighlightSaturation(v float64) error",
-      "summary": "SetIrisHighlightSaturation writes the Iris Highlight Saturation."
+      "signature": "func (l *Layer) SetIrisHighlightSaturation(v float64) error"
     },
     "Layer.SetIrisHighlightThreshold": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirishighlightthreshold",
-      "signature": "func (l *Layer) SetIrisHighlightThreshold(v float64) error",
-      "summary": "SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1)."
+      "signature": "func (l *Layer) SetIrisHighlightThreshold(v float64) error"
     },
     "Layer.SetIrisRotation": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirisrotation",
-      "signature": "func (l *Layer) SetIrisRotation(v float64) error",
-      "summary": "SetIrisRotation writes the Iris Rotation (degrees)."
+      "signature": "func (l *Layer) SetIrisRotation(v float64) error"
     },
     "Layer.SetIrisRoundness": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirisroundness",
-      "signature": "func (l *Layer) SetIrisRoundness(v float64) error",
-      "summary": "SetIrisRoundness writes the Iris Roundness (%)."
+      "signature": "func (l *Layer) SetIrisRoundness(v float64) error"
     },
     "Layer.SetIrisShape": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetirisshape",
-      "signature": "func (l *Layer) SetIrisShape(v float64) error",
-      "summary": "SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon)."
+      "signature": "func (l *Layer) SetIrisShape(v float64) error"
     },
     "Layer.SetIs3D": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetis3d",
-      "signature": "func (l *Layer) SetIs3D(v bool) error",
-      "summary": "SetIs3D toggles the layer's 3D-layer switch. length-preserving (single bit @ldta 0x26)."
+      "signature": "func (l *Layer) SetIs3D(v bool) error"
     },
     "Layer.SetIsAdjust": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetisadjust",
-      "signature": "func (l *Layer) SetIsAdjust(v bool) error",
-      "summary": "SetIsAdjust toggles the layer's \"Adjustment Layer\" switch. length-preserving (single bit @ldta 0x26)."
+      "signature": "func (l *Layer) SetIsAdjust(v bool) error"
     },
     "Layer.SetIsGuide": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetisguide",
       "signature": "func (l *Layer) SetIsGuide(v bool) error",
-      "summary": "SetIsGuide toggles the layer's \"Guide Layer\" switch (AE renders it in the comp viewer but excludes it from output). length-preserving (single bit @ldta 0x25)."
+      "summary": "A guide layer renders in the comp viewer but is excluded from rendered output."
     },
     "Layer.SetIsNull": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetisnull",
       "signature": "func (l *Layer) SetIsNull(v bool) error",
-      "summary": "SetIsNull toggles the Null-Object marker bit. AE's UI creates null layers via Layer \u003e New \u003e Null Object; flipping this post-hoc is supported by the byte but produces uncommon AE behavior — set only when you understand the consequences. length-preserving (single bit @ldta 0x26)."
+      "summary": "AE's UI normally creates null layers via its own dedicated command; flipping this bit post-hoc is accepted by AE but produces uncommon results — only set it when you understand the consequences."
     },
     "Layer.SetLabel": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlabel",
       "signature": "func (l *Layer) SetLabel(index uint8) error",
-      "summary": "SetLabel writes a new timeline label-color index (0..16) to ldta @0x3D. Indices outside 0..16 are written verbatim (AE shows index 0 for any unknown value but the byte is preserved on round-trip). length-preserving (single byte)."
+      "summary": "Indices outside the normal 0..16 range are written verbatim; AE shows index 0 for any unknown value but the byte itself is preserved on round-trip."
     },
     "Layer.SetLightCastsShadows": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightcastsshadows",
-      "signature": "func (l *Layer) SetLightCastsShadows(enabled bool) error",
-      "summary": "SetLightCastsShadows toggles the Casts Shadows switch (true=1, false=0)."
+      "signature": "func (l *Layer) SetLightCastsShadows(enabled bool) error"
     },
     "Layer.SetLightColor": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightcolor",
-      "signature": "func (l *Layer) SetLightColor(rgba []float64) error",
-      "summary": "SetLightColor writes the light's Color property. The value's length must match the property's component count (3 for RGB, 4 for RGBA); SetStaticValue enforces this."
+      "signature": "func (l *Layer) SetLightColor(rgba []float64) error"
     },
     "Layer.SetLightConeAngle": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightconeangle",
-      "signature": "func (l *Layer) SetLightConeAngle(v float64) error",
-      "summary": "SetLightConeAngle writes the spotlight cone angle (degrees)."
+      "signature": "func (l *Layer) SetLightConeAngle(v float64) error"
     },
     "Layer.SetLightConeFeather": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightconefeather",
-      "signature": "func (l *Layer) SetLightConeFeather(v float64) error",
-      "summary": "SetLightConeFeather writes the spotlight cone-feather (%)."
+      "signature": "func (l *Layer) SetLightConeFeather(v float64) error"
     },
     "Layer.SetLightFalloffDistance": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightfalloffdistance",
-      "signature": "func (l *Layer) SetLightFalloffDistance(v float64) error",
-      "summary": "SetLightFalloffDistance writes the falloff distance (pixels)."
+      "signature": "func (l *Layer) SetLightFalloffDistance(v float64) error"
     },
     "Layer.SetLightFalloffStart": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightfalloffstart",
-      "signature": "func (l *Layer) SetLightFalloffStart(v float64) error",
-      "summary": "SetLightFalloffStart writes the falloff-start distance (pixels)."
+      "signature": "func (l *Layer) SetLightFalloffStart(v float64) error"
     },
     "Layer.SetLightFalloffType": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightfallofftype",
-      "signature": "func (l *Layer) SetLightFalloffType(v float64) error",
-      "summary": "SetLightFalloffType writes the falloff type enum."
+      "signature": "func (l *Layer) SetLightFalloffType(v float64) error"
     },
     "Layer.SetLightIntensity": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightintensity",
-      "signature": "func (l *Layer) SetLightIntensity(v float64) error",
-      "summary": "SetLightIntensity writes the light intensity (%)."
+      "signature": "func (l *Layer) SetLightIntensity(v float64) error"
     },
     "Layer.SetLightKind": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightkind",
       "signature": "func (l *Layer) SetLightKind(k LightKind) error",
-      "summary": "SetLightKind rewrites the light layer's kind (ldta @0x88, 4 bytes BE uint32). length-preserving. Only meaningful when Type == LayerTypeLight; AE silently accepts the byte change on non-light layers but it has no visual effect."
+      "summary": "Only meaningful when the layer's Type is Light; AE silently accepts the byte change on non-light layers but it has no visual effect. The field is present on older project layouts too, so this setter works across the full supported AE range."
     },
     "Layer.SetLightShadowDarkness": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightshadowdarkness",
-      "signature": "func (l *Layer) SetLightShadowDarkness(v float64) error",
-      "summary": "SetLightShadowDarkness writes the shadow darkness (%)."
+      "signature": "func (l *Layer) SetLightShadowDarkness(v float64) error"
     },
     "Layer.SetLightShadowDiffusion": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightshadowdiffusion",
-      "signature": "func (l *Layer) SetLightShadowDiffusion(v float64) error",
-      "summary": "SetLightShadowDiffusion writes the shadow diffusion (pixels)."
+      "signature": "func (l *Layer) SetLightShadowDiffusion(v float64) error"
     },
     "Layer.SetLightSource": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlightsource",
       "signature": "func (l *Layer) SetLightSource(target *Layer) error",
-      "summary": "SetLightSource writes the environment-light source layer ID for a Light layer (AE 24+). Stored in ldta @0x28 (same slot as AV SourceID; the field is repurposed per Layer.Type). Pass nil to clear — writes sentinel 0xFFFFFFFF. length-preserving (4 bytes)."
+      "summary": "Stored in the same ldta slot used for the AV SourceID; the field is repurposed depending on Layer.Type. Pass nil to clear, which writes the clear sentinel. Validation requires: the layer must be a Light layer; the target, if non-nil, must be in the same composition; the target must not itself be a Light or Camera layer; the target must not be a 3D layer (3D AV layers cannot drive environment lights); and the target must not be the layer itself. On any validation error the bytes are left unmodified."
     },
     "Layer.SetLocked": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetlocked",
       "signature": "func (l *Layer) SetLocked(v bool) error",
-      "summary": "SetLocked toggles the layer's Lock flag (🔒). When locked, AE refuses edits in the timeline UI; the AEP file itself is still mutable. length-preserving (single bit @ldta 0x27)."
+      "summary": "When locked, AE refuses edits in the timeline UI; the underlying file is still mutable through this API."
     },
     "Layer.SetManualKerning": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmanualkerning",
       "signature": "func (l *Layer) SetManualKerning(values []int) error",
-      "summary": "SetManualKerning writes per-character manual kerning values (in 1/1000 em units) into the btdk dict. The values slice length must equal the current per-character count (`len(TextSource.ManualKerning)`)."
+      "summary": "Writes per-character manual kerning values into the btdk dict. The values slice length must equal the current per-character count (len(TextSource.ManualKerning)). For the values to actually render, the matching style run's AutoKernType must be TextAutoKernNoAuto — toggle it independently via SetRunAutoKernType. Mirrors the AE scripting TextDocument.kerning behavior: the first-character value is also written to the sibling /1/1[0]/0/7 slot, the first-char scalar reflected by the scripting API."
     },
     "Layer.SetMarkersLocked": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmarkerslocked",
-      "signature": "func (l *Layer) SetMarkersLocked(v bool) error",
-      "summary": "SetMarkersLocked toggles \"Lock markers\" on the layer. length-preserving (single bit @ldta 0x26)."
+      "signature": "func (l *Layer) SetMarkersLocked(v bool) error"
     },
     "Layer.SetMaterialAcceptsLights": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmaterialacceptslights",
-      "signature": "func (l *Layer) SetMaterialAcceptsLights(enabled bool) error",
-      "summary": "SetMaterialAcceptsLights toggles the Accepts Lights switch."
+      "signature": "func (l *Layer) SetMaterialAcceptsLights(enabled bool) error"
     },
     "Layer.SetMaterialAcceptsShadows": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmaterialacceptsshadows",
-      "signature": "func (l *Layer) SetMaterialAcceptsShadows(enabled bool) error",
-      "summary": "SetMaterialAcceptsShadows toggles the Accepts Shadows switch."
+      "signature": "func (l *Layer) SetMaterialAcceptsShadows(enabled bool) error"
     },
     "Layer.SetMaterialAmbient": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmaterialambient",
-      "signature": "func (l *Layer) SetMaterialAmbient(v float64) error",
-      "summary": "SetMaterialAmbient / Diffuse / Specular / Shininess / Metal / Reflection / Glossiness / Fresnel / Transparency / TranspRolloff / IndexOfRefraction — physically-based material coefficients. All scalar; range varies by field (Ambient/Diffuse/Specular/Metal/Reflection typically 0..1 or 0..100, Shininess 0..150, IndexOfRefraction 1..3+). No range clamping is done; AE will accept any float."
+      "signature": "func (l *Layer) SetMaterialAmbient(v float64) error"
     },
     "Layer.SetMaterialAppearsInReflections": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmaterialappearsinreflections",
-      "signature": "func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error",
-      "summary": "SetMaterialAppearsInReflections toggles whether this layer appears in reflective surfaces of other 3D layers."
+      "signature": "func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error"
     },
     "Layer.SetMaterialCastsShadows": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmaterialcastsshadows",
-      "signature": "func (l *Layer) SetMaterialCastsShadows(mode MaterialCastsShadowsMode) error",
-      "summary": "SetMaterialCastsShadows writes the tri-state Casts Shadows enum (Off/On/Only). Equivalent to SetLightCastsShadows(bool) when called with Off/On; \"Only\" is AV-3D-specific (renders shadows but hides the layer itself)."
+      "signature": "func (l *Layer) SetMaterialCastsShadows(mode MaterialCastsShadowsMode) error"
     },
     "Layer.SetMaterialDiffuse": {
       "kind": "method",
@@ -2856,8 +2807,7 @@
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmateriallighttransmission",
-      "signature": "func (l *Layer) SetMaterialLightTransmission(v float64) error",
-      "summary": "SetMaterialLightTransmission writes light transmission (0..1)."
+      "signature": "func (l *Layer) SetMaterialLightTransmission(v float64) error"
     },
     "Layer.SetMaterialMetal": {
       "kind": "method",
@@ -2875,8 +2825,7 @@
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmaterialshadowcolor",
-      "signature": "func (l *Layer) SetMaterialShadowColor(rgba []float64) error",
-      "summary": "SetMaterialShadowColor writes the shadow color (4-component RGBA)."
+      "signature": "func (l *Layer) SetMaterialShadowColor(rgba []float64) error"
     },
     "Layer.SetMaterialShininess": {
       "kind": "method",
@@ -2906,8 +2855,7 @@
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetmotionblur",
-      "signature": "func (l *Layer) SetMotionBlur(v bool) error",
-      "summary": "SetMotionBlur toggles the layer's motion-blur switch. length-preserving (single bit @ldta 0x27)."
+      "signature": "func (l *Layer) SetMotionBlur(v bool) error"
     },
     "Layer.SetName": {
       "kind": "method",
@@ -2915,133 +2863,128 @@
       "anchor": "#layersetname",
       "signature": "func (l *Layer) SetName(newName string) error",
       "example": true,
-      "summary": "SetName rewrites the layer's display name (the AE timeline label). length-variable — the underlying Utf8 chunk's data slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes."
+      "summary": "Returns an error when the parsed layer has no Utf8 name chunk (unusual — most AE-written layers have one even for default names)."
     },
     "Layer.SetOpacity": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetopacity",
       "signature": "func (l *Layer) SetOpacity(v float64) error",
-      "summary": "SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). Callers that think in percent should divide by 100."
+      "summary": "Callers that think in percent should divide by 100 first."
     },
     "Layer.SetOrientation": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetorientation",
-      "signature": "func (l *Layer) SetOrientation(v []float64) error",
-      "summary": "SetOrientation writes the 3D orientation (3-component degrees per axis). Errors on 2D layers."
+      "signature": "func (l *Layer) SetOrientation(v []float64) error"
     },
     "Layer.SetOutPoint": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetoutpoint",
       "signature": "func (l *Layer) SetOutPoint(seconds float64) error",
-      "summary": "SetOutPoint writes the layer's source-media out-point (seconds) to ldta @0x1C/@0x20, then refreshes `Layer.Duration`. length-preserving (8 bytes)."
+      "summary": "Refreshes Layer.Duration after the write."
     },
     "Layer.SetParagraphAutoHyphenate": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphautohyphenate",
       "signature": "func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error",
-      "summary": "SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx. Default in AE is true. AE 24+ writeable."
+      "summary": "Splices the auto-hyphenate flag into the btdk paragraph body for the given paragraph. AE's default is true."
     },
     "Layer.SetParagraphDirection": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphdirection",
       "signature": "func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) error",
-      "summary": "SetParagraphDirection writes the paragraph reading direction on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). Affects how mixed LTR/RTL text composes."
+      "summary": "Splices a new paragraph-direction value into the btdk paragraph body for the given paragraph (btdk paragraph /33). Affects how mixed left-to-right and right-to-left text composes."
     },
     "Layer.SetParagraphEndIndent": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphendindent",
       "signature": "func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error",
-      "summary": "SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx."
+      "summary": "Splices a new endIndent value into the btdk paragraph body for the given paragraph."
     },
     "Layer.SetParagraphFirstLineIndent": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphfirstlineindent",
       "signature": "func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error",
-      "summary": "SetParagraphFirstLineIndent writes firstLineIndent (em points) on paragraph #paraIdx. AE 24+ writeable (AE 2020 ScriptingAPI no-op on point text)."
+      "summary": "Splices a new firstLineIndent value into the btdk paragraph body for the given paragraph. The AE 2020 scripting API is a no-op for this attribute on point text; it is writeable from AE 24 onward."
     },
     "Layer.SetParagraphHangingRoman": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphhangingroman",
       "signature": "func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error",
-      "summary": "SetParagraphHangingRoman toggles Roman Hanging Punctuation on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). Only meaningful for box-text."
+      "summary": "Splices the hanging-roman flag into the btdk paragraph body for the given paragraph (btdk paragraph /21). Only meaningful for box-text."
     },
     "Layer.SetParagraphJustification": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphjustification",
       "signature": "func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) error",
-      "summary": "SetParagraphJustification writes a new alignment enum on paragraph #paraIdx."
+      "summary": "Splices a new justification value into the btdk PostScript paragraph body for the given paragraph."
     },
     "Layer.SetParagraphLeadingType": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphleadingtype",
       "signature": "func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error",
-      "summary": "SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /8)."
+      "summary": "Splices a new leading-type value into the btdk paragraph body for the given paragraph (btdk paragraph /8)."
     },
     "Layer.SetParagraphSpaceAfter": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphspaceafter",
       "signature": "func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error",
-      "summary": "SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx."
+      "summary": "Splices a new spaceAfter value into the btdk paragraph body for the given paragraph."
     },
     "Layer.SetParagraphSpaceBefore": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphspacebefore",
       "signature": "func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error",
-      "summary": "SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx."
+      "summary": "Splices a new spaceBefore value into the btdk paragraph body for the given paragraph."
     },
     "Layer.SetParagraphStartIndent": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparagraphstartindent",
       "signature": "func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error",
-      "summary": "SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx."
+      "summary": "Splices a new startIndent value into the btdk paragraph body for the given paragraph."
     },
     "Layer.SetParent": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetparent",
       "signature": "func (l *Layer) SetParent(parentID uint32) error",
-      "summary": "SetParent rewrites the layer's parent-layer ID (ldta @0x84) to `parentID`. Pass 0 to clear the parent (= \"no parent\", AE shows \"None\" in the timeline). length-preserving (4 bytes)."
+      "summary": "Pass 0 to clear the parent (\"no parent\", shown as \"None\" in the timeline). When the layer lives inside a composition, the new parent ID is validated against same-comp layers — an ID that doesn't resolve returns an error and leaves the bytes untouched. Cross-comp parenting isn't allowed. Setting parentID equal to the layer's own ID is rejected since it would create a self-parent cycle."
     },
     "Layer.SetPosition": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetposition",
-      "signature": "func (l *Layer) SetPosition(v []float64) error",
-      "summary": "SetPosition writes a new static position. Length of v must match Position's Components (2 or 3)."
+      "signature": "func (l *Layer) SetPosition(v []float64) error"
     },
     "Layer.SetPreserveTransparency": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetpreservetransparency",
-      "signature": "func (l *Layer) SetPreserveTransparency(v bool) error",
-      "summary": "SetPreserveTransparency toggles \"Preserve Underlying Transparency\" (ldta @0x67, single byte 0/1). length-preserving (single byte)."
+      "signature": "func (l *Layer) SetPreserveTransparency(v bool) error"
     },
     "Layer.SetQuality": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetquality",
-      "signature": "func (l *Layer) SetQuality(q LayerQuality) error",
-      "summary": "SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). length-preserving (2 bytes)."
+      "signature": "func (l *Layer) SetQuality(q LayerQuality) error"
     },
     "Layer.SetRotateX": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrotatex",
-      "signature": "func (l *Layer) SetRotateX(deg float64) error",
-      "summary": "SetRotateX / SetRotateY write per-axis 3D rotation (degrees). Error on 2D layers (property not present)."
+      "signature": "func (l *Layer) SetRotateX(deg float64) error"
     },
     "Layer.SetRotateY": {
       "kind": "method",
@@ -3054,238 +2997,235 @@
       "file": "layer.md",
       "anchor": "#layersetrotation",
       "signature": "func (l *Layer) SetRotation(deg float64) error",
-      "summary": "SetRotation writes the Z-axis rotation (degrees). Available on both 2D and 3D layers (it's the only rotation axis 2D layers have)."
+      "summary": "Available on both 2D and 3D layers — it's the only rotation axis 2D layers have."
     },
     "Layer.SetRunApplyStroke": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunapplystroke",
       "signature": "func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error",
-      "summary": "SetRunApplyStroke toggles whether the stroke is rendered on style run #runIdx."
+      "summary": "Splices the apply-stroke flag into the btdk PostScript body for the given run."
     },
     "Layer.SetRunAutoKernType": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunautokerntype",
       "signature": "func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error",
-      "summary": "SetRunAutoKernType writes the auto-kerning mode on style run #runIdx. AE 24+ writeable (btdk style-run /11). Note: setting to TextAutoKernNoAuto without also assigning a manual kerning value will read as \"0 spacing\" in AE — manual kerning lives in a separate per-character sub-tree at btdk /1/1[0]/0/8 which this library does not yet expose for writing."
+      "summary": "Splices a new auto-kern-type value into the btdk PostScript body for the given run (btdk style-run /11). Setting it to TextAutoKernNoAuto without also assigning a manual kerning value reads as zero spacing in AE — manual kerning lives in the separate per-character sub-tree at btdk /1/1[0]/0/8, written via SetManualKerning."
     },
     "Layer.SetRunAutoLeading": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunautoleading",
       "signature": "func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error",
-      "summary": "SetRunAutoLeading toggles AE's \"auto leading\" flag on style run #runIdx. When true, the Leading value is computed by AE (typically FontSize × 1.2); when false, the explicit Leading value applies."
+      "summary": "Splices the auto-leading flag into the btdk PostScript body for the given run. When true, the Leading value is computed by AE (typically FontSize x 1.2); when false, the explicit Leading value applies."
     },
     "Layer.SetRunBaselineOption": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunbaselineoption",
       "signature": "func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error",
-      "summary": "SetRunBaselineOption writes the font baseline option on style run #runIdx. AE 24+ writeable; mirrors subscript / superscript readonly attrs."
+      "summary": "Splices a new baseline-option value into the btdk PostScript body for the given run. Mirrors the subscript / superscript read-only attributes exposed elsewhere."
     },
     "Layer.SetRunBaselineShift": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunbaselineshift",
       "signature": "func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error",
-      "summary": "SetRunBaselineShift writes baseline shift (em points; positive = up) on style run #runIdx."
+      "summary": "Splices a new baseline-shift value into the btdk PostScript body for the given run. Positive values shift the run up."
     },
     "Layer.SetRunCapsOption": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetruncapsoption",
       "signature": "func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error",
-      "summary": "SetRunCapsOption writes the font caps option on style run #runIdx (AE 24+ writeable; underlying btdk byte exists in AE 2020 files too, but AE 2020 ScriptingAPI marks allCaps / smallCaps readonly so fixture generation requires AE 24)."
+      "summary": "Splices a new caps-option value into the btdk PostScript body for the given run. The underlying btdk byte exists in AE 2020 files too, but the AE 2020 scripting API marks allCaps / smallCaps read-only, so the option is only writeable from AE 24 onward."
     },
     "Layer.SetRunDigitSet": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrundigitset",
       "signature": "func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error",
-      "summary": "SetRunDigitSet writes the digit set on style run #runIdx (AE 24+ writeable, btdk style-run /70)."
+      "summary": "Splices a new digit-set value into the btdk PostScript body for the given run (btdk style-run /70)."
     },
     "Layer.SetRunFauxBold": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunfauxbold",
       "signature": "func (l *Layer) SetRunFauxBold(runIdx int, on bool) error",
-      "summary": "SetRunFauxBold toggles synthetic bold on style run #runIdx."
+      "summary": "Splices the faux-bold flag into the btdk PostScript body for the given run."
     },
     "Layer.SetRunFauxItalic": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunfauxitalic",
       "signature": "func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error",
-      "summary": "SetRunFauxItalic toggles synthetic italic on style run #runIdx."
+      "summary": "Splices the faux-italic flag into the btdk PostScript body for the given run."
     },
     "Layer.SetRunFillColor": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunfillcolor",
       "signature": "func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error",
-      "summary": "SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1) on style run #runIdx. Encoded as btdk's [A, R, G, B] array."
+      "summary": "Splices a new fill color into the btdk PostScript body for the given run, encoded as btdk's [A, R, G, B] array."
     },
     "Layer.SetRunFontIndex": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunfontindex",
       "signature": "func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error",
-      "summary": "SetRunFontIndex repoints style run #runIdx at a different entry in the Fonts table (TextSource.Fonts). Caller is responsible for ensuring the index is in range; the underlying psValue is just an integer."
+      "summary": "Splices a new font index into the btdk PostScript body for the given run, referencing an entry in the layer's Fonts table (TextSource.Fonts). The underlying value is a plain integer; the caller is responsible for ensuring the index is in range."
     },
     "Layer.SetRunFontSize": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunfontsize",
       "signature": "func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error",
-      "summary": "SetRunFontSize writes a new font size (em points) to style run #runIdx. length-variable splice in the btdk PostScript body."
+      "summary": "Splices a new font-size value into the btdk PostScript body for the given run."
     },
     "Layer.SetRunHorizontalScale": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunhorizontalscale",
       "signature": "func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error",
-      "summary": "SetRunHorizontalScale / SetRunVerticalScale write the raw scale values used by AE on style run #runIdx. See TextStyleRun docs for the unit notes (AE default is 1; scripted setter range 0..100)."
+      "summary": "Splices a new horizontal-scale value into the btdk PostScript body for the given run. AE default is 1; the scripted setter range is 0..100 (see TextStyleRun for unit notes)."
     },
     "Layer.SetRunLeading": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunleading",
       "signature": "func (l *Layer) SetRunLeading(runIdx int, leading float64) error",
-      "summary": "SetRunLeading writes leading (em points) on style run #runIdx. Note: AE auto-leading is gated by the AutoLeading flag — to use this value the caller should also disable auto-leading via SetRunAutoLeading(runIdx, false), otherwise AE overrides it."
+      "summary": "Splices a new leading value into the btdk PostScript body for the given run. AE auto-leading is gated by the AutoLeading flag — to make this value take effect the caller should also disable auto-leading via SetRunAutoLeading(runIdx, false), otherwise AE overrides it."
     },
     "Layer.SetRunLineJoinType": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunlinejointype",
       "signature": "func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error",
-      "summary": "SetRunLineJoinType writes the stroke corner join style on style run #runIdx (AE 24+ writeable, btdk style-run /62)."
+      "summary": "Splices a new line-join-type value into the btdk PostScript body for the given run (btdk style-run /62)."
     },
     "Layer.SetRunNoBreak": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunnobreak",
       "signature": "func (l *Layer) SetRunNoBreak(runIdx int, on bool) error",
-      "summary": "SetRunNoBreak toggles the \"do not break\" character flag on style run #runIdx (AE 24+ writeable, btdk style-run /52). When true, AE won't allow line breaks to fall inside the run."
+      "summary": "Splices the no-break flag into the btdk PostScript body for the given run (btdk style-run /52). When true, AE won't allow line breaks to fall inside the run."
     },
     "Layer.SetRunStrokeColor": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunstrokecolor",
       "signature": "func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error",
-      "summary": "SetRunStrokeColor writes the stroke paint color [R, G, B, A] on style run #runIdx."
+      "summary": "Splices a new stroke color into the btdk PostScript body for the given run."
     },
     "Layer.SetRunStrokeOverFill": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunstrokeoverfill",
       "signature": "func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error",
-      "summary": "SetRunStrokeOverFill toggles whether the stroke renders over the fill (true) or under it (false) on style run #runIdx. Default in AE is true."
+      "summary": "Splices the stroke-over-fill flag into the btdk PostScript body for the given run. AE's default is true (stroke renders over fill)."
     },
     "Layer.SetRunStrokeWidth": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunstrokewidth",
       "signature": "func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error",
-      "summary": "SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx."
+      "summary": "Splices a new stroke-width value into the btdk PostScript body for the given run."
     },
     "Layer.SetRunTracking": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetruntracking",
       "signature": "func (l *Layer) SetRunTracking(runIdx int, tracking float64) error",
-      "summary": "SetRunTracking writes character tracking (1/1000 em) on style run #runIdx."
+      "summary": "Splices a new tracking value into the btdk PostScript body for the given run."
     },
     "Layer.SetRunTsume": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetruntsume",
       "signature": "func (l *Layer) SetRunTsume(runIdx int, tsume float64) error",
-      "summary": "SetRunTsume writes the CJK character-spacing adjustment (0..100) on style run #runIdx."
+      "summary": "Splices a new tsume value into the btdk PostScript body for the given run. The setter range is 0..100; the DOM range is 0..1."
     },
     "Layer.SetRunVerticalScale": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetrunverticalscale",
       "signature": "func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error",
-      "summary": "SetRunVerticalScale writes the vertical scale value used by AE on style run #runIdx. See TextStyleRun docs for unit notes (AE default is 1; scripted setter range 0..100)."
+      "summary": "Splices a new vertical-scale value into the btdk PostScript body for the given run. AE default is 1; the scripted setter range is 0..100 (see TextStyleRun for unit notes)."
     },
     "Layer.SetSamplingBicubic": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetsamplingbicubic",
-      "signature": "func (l *Layer) SetSamplingBicubic(v bool) error",
-      "summary": "SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling for the layer. length-preserving (single bit @ldta 0x25)."
+      "signature": "func (l *Layer) SetSamplingBicubic(v bool) error"
     },
     "Layer.SetScale": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetscale",
-      "signature": "func (l *Layer) SetScale(v []float64) error",
-      "summary": "SetScale writes a new static scale (normalized 1.0 = 100%). Length of v must match Scale's Components (2 or 3)."
+      "signature": "func (l *Layer) SetScale(v []float64) error"
     },
     "Layer.SetShy": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetshy",
       "signature": "func (l *Layer) SetShy(v bool) error",
-      "summary": "SetShy toggles the layer's Shy flag (hides from the shy-filter view). length-preserving (single bit @ldta 0x27)."
+      "summary": "Shy hides the layer from the shy-filter view in the timeline."
     },
     "Layer.SetSolo": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetsolo",
-      "signature": "func (l *Layer) SetSolo(v bool) error",
-      "summary": "SetSolo toggles the layer's Solo flag. length-preserving (single bit @ldta 0x26)."
+      "signature": "func (l *Layer) SetSolo(v bool) error"
     },
     "Layer.SetSource": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetsource",
       "signature": "func (l *Layer) SetSource(sourceID uint32) error",
-      "summary": "SetSource rewrites the layer's source-item ID (ldta @0x28). For regular AV layers this is the footage or pre-comp ID. length- preserving (4 bytes)."
+      "summary": "For regular AV layers this is the footage or pre-comp ID. When the owning project is known, sourceID is validated to match an existing Composition or Footage item — an ID that doesn't resolve returns an error and leaves the bytes untouched. Pass 0 to clear (rare; usually turns the layer into a Null-like \"no source\" stub). AE caches some source-derived metadata (Width/Height) on the layer at render time rather than in ldta, so changing the source preserves the rest of ldta verbatim."
     },
     "Layer.SetStartTime": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetstarttime",
       "signature": "func (l *Layer) SetStartTime(seconds float64) error",
-      "summary": "SetStartTime writes the layer's start time (seconds) to ldta @0x0C/@0x10. length-preserving (8 bytes)."
+      "summary": "AE allows negative start times (pre-roll). Mirrors the change into Layer.StartTime."
     },
     "Layer.SetStretch": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersetstretch",
       "signature": "func (l *Layer) SetStretch(ratio float64) error",
-      "summary": "SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) to ldta @0x08 (dividend) / @0x6C (divisor). Unlike the other time fields the dividend/divisor pair is **split across the ldta** — dividend lives near the top, divisor in the trailing section. length-preserving (8 bytes total in two 4-byte writes)."
+      "summary": "1.0 is normal speed, 2.0 is 2x slow. Unlike the other time fields, the dividend/divisor pair is split across ldta — the dividend lives near the top, the divisor in the trailing section."
     },
     "Layer.SetText": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersettext",
       "signature": "func (l *Layer) SetText(newText string) error",
-      "summary": "SetText replaces a text layer's user-visible text. The new text may be any length and span any number of paragraphs ('\\n' / '\\r' line breaks): the PostScript string is spliced, the paragraph array is rebuilt with one count-patched entry per paragraph, the style-run array is collapsed to a single run carrying the total count (keeping the first run's style, as AE does on a whole-text replace), and the btdk layout cache is left for AE to recompute on load. Empty text (\"\") is supported (it becomes a single empty paragraph). Replacements that keep both the encoded byte length and the per-paragraph UTF-16 counts are written in place and preserve all runs."
+      "summary": "The new text may be any length and span any number of paragraphs (split on line breaks): the PostScript string is spliced, the paragraph array is rebuilt with one count-patched entry per paragraph, the style-run array is collapsed to a single run carrying the total count (keeping the first run's style, matching how AE handles a whole-text replace), and the layout cache is left for AE to recompute on load. Empty text is supported and becomes a single empty paragraph. Replacements that keep both the encoded byte length and the per-paragraph UTF-16 counts unchanged are written in place and preserve all runs. A per-character manual-kerning table is dropped on a length-changing replacement, again matching AE's own behavior; the only error case for a well-formed text layer is when the layer isn't actually a text layer. Encoding parity with AE: input is split on line-feed characters (each segment becomes a paragraph terminated by AE's carriage-return convention), then encoded as big-endian UTF-16 with a leading byte-order mark, with PostScript special characters escaped at the byte level. After a successful call Layer.TextSource is re-decoded so subsequent reads reflect the new value."
     },
     "Layer.SetTimeRemapEnabled": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersettimeremapenabled",
       "signature": "func (l *Layer) SetTimeRemapEnabled(enabled bool) error",
-      "summary": "SetTimeRemapEnabled enables or disables time remapping on this layer."
+      "summary": "Enabling sets a static value of 0.0 (identity mapping). For full remapping, call TimeRemap().SetStaticValue() or insert keyframes after enabling. Disabling clears the static value."
     },
     "Layer.SetTrackMatte": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersettrackmatte",
       "signature": "func (l *Layer) SetTrackMatte(t TrackMatteType) error",
-      "summary": "SetTrackMatte writes a new track-matte type byte to ldta @0x6B. length-preserving (single byte)."
+      "summary": "AE additionally requires the matte source layer to sit immediately above this layer in the comp; this setter only changes the mode byte and does not reorder layers."
     },
     "Layer.SetTrackMatteLayer": {
       "kind": "method",
       "file": "layer.md",
       "anchor": "#layersettrackmattelayer",
       "signature": "func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error",
-      "summary": "SetTrackMatteLayer rewrites this layer's explicit track matte source (ldta @0xA0, AE 23+) to `sourceID` and updates the track matte mode (ldta @0x6B) to `mode`. Pass sourceID=0 with mode=TrackMatteNone to clear the matte. length-preserving (4 bytes + 1 byte)."
+      "summary": "Pass sourceID=0 with mode=TrackMatteNone to clear the matte. When the layer lives inside a parsed composition, sourceID is validated against same-comp layers — an ID that doesn't resolve returns an error and leaves the bytes untouched; the matte source must live in the same comp. Setting sourceID equal to the layer's own ID is rejected since self-matte is a no-op in AE and usually indicates a mistake. Passing mode=TrackMatteNone together with a non-zero sourceID means \"preserve the target but apply no matte yet\" — the source pointer stays while the matte channel stays disabled. On older project files whose ldta layout is shorter, this call errors because the explicit track-matte slot doesn't exist; re-saving the file through a newer AE version first extends ldta so the setter can succeed."
     },
     "Layer.SetTrackMatteSource": {
       "kind": "method",
@@ -3299,8 +3239,7 @@
       "file": "layer.md",
       "anchor": "#layersetvisible",
       "signature": "func (l *Layer) SetVisible(v bool) error",
-      "example": true,
-      "summary": "SetVisible toggles the layer's video switch (the 👁️ icon). length-preserving (single bit @ldta 0x27)."
+      "example": true
     },
     "Layer.ShapeContentsGroup": {
       "kind": "getter",
@@ -3606,7 +3545,7 @@
       "file": "marker.md",
       "anchor": "#markersetframeduration",
       "signature": "func (m *Marker) SetFrameDuration(frame int) error",
-      "summary": "SetFrameDuration writes the marker's duration from an integer frame."
+      "summary": "Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based duration setter."
     },
     "Marker.SetFrameTarget": {
       "kind": "method",
@@ -3620,7 +3559,7 @@
       "file": "marker.md",
       "anchor": "#markersetframetime",
       "signature": "func (m *Marker) SetFrameTime(frame int) error",
-      "summary": "SetFrameTime writes the marker's time from an integer frame."
+      "summary": "Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based time setter."
     },
     "Marker.SetLabel": {
       "kind": "method",
@@ -3791,7 +3730,7 @@
       "file": "mask.md",
       "anchor": "#masksetclosed",
       "signature": "func (m *Mask) SetClosed(v bool) error",
-      "summary": "SetClosed toggles whether the (first) path is closed (shph @0x14). length-preserving (1 byte). For animated masks this only affects the first snapshot; per-keyframe closed flags aren't exposed yet."
+      "summary": "For animated masks this only affects the first snapshot; per-keyframe closed flags aren't exposed yet."
     },
     "Mask.SetColor": {
       "kind": "method",
@@ -3799,64 +3738,60 @@
       "anchor": "#masksetcolor",
       "signature": "func (m *Mask) SetColor(rgb [3]uint8) error",
       "example": true,
-      "summary": "SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. AE always keeps alpha (0x2C) at 0xFF; this setter does not touch it. length-preserving (3 bytes)."
+      "summary": "AE always keeps the alpha byte at 0xFF; this setter does not touch it."
     },
     "Mask.SetExpansion": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetexpansion",
       "signature": "func (m *Mask) SetExpansion(v float64) error",
-      "summary": "SetExpansion sets the mask's Expansion (AE \"Mask Expansion\", internally `ADBE Mask Offset`) in pixels — positive grows the masked region, negative shrinks it. The leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen."
+      "summary": "Internally this is the `ADBE Mask Offset` property (AE's UI calls it \"Mask Expansion\"). Positive values grow the masked region, negative values shrink it. The leaf is elided by AE when at its default, so setting it materializes the leaf in the mask's atom group."
     },
     "Mask.SetFeather": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetfeather",
       "signature": "func (m *Mask) SetFeather(xy [2]float64) error",
-      "summary": "SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen."
+      "summary": "The `ADBE Mask Feather` leaf is elided by AE when at its default, so setting it materializes the leaf in the mask's atom group."
     },
     "Mask.SetFeatherFalloff": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetfeatherfalloff",
-      "signature": "func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error",
-      "summary": "SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03. Valid values: MaskFeatherFalloffSmooth (0, default), MaskFeatherFalloffLinear (1). length-preserving (1 byte)."
+      "signature": "func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error"
     },
     "Mask.SetInverted": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetinverted",
-      "signature": "func (m *Mask) SetInverted(v bool) error",
-      "summary": "SetInverted toggles the mask Inverted flag (mkif @0x00). length-preserving (1 byte)."
+      "signature": "func (m *Mask) SetInverted(v bool) error"
     },
     "Mask.SetLocked": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetlocked",
       "signature": "func (m *Mask) SetLocked(v bool) error",
-      "summary": "SetLocked toggles the mask's lock flag (mkif @0x01). When locked, AE refuses edits to the mask in the timeline UI; the bytes are still mutable through this library. length-preserving (1 byte)."
+      "summary": "When locked, AE refuses edits to the mask in the timeline UI; the underlying bytes are still mutable through this library."
     },
     "Mask.SetMaskMotionBlur": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetmaskmotionblur",
-      "signature": "func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error",
-      "summary": "SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. Valid values: MaskMotionBlurSameAsLayer (0), MaskMotionBlurOn (2), MaskMotionBlurOff (3). length-preserving (1 byte)."
+      "signature": "func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error"
     },
     "Mask.SetMode": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetmode",
       "signature": "func (m *Mask) SetMode(mode MaskMode) error",
-      "example": true,
-      "summary": "SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04. length-preserving (4 bytes)."
+      "example": true
     },
     "Mask.SetOpacity": {
       "kind": "method",
       "file": "mask.md",
       "anchor": "#masksetopacity",
       "signature": "func (m *Mask) SetOpacity(v float64) error",
-      "summary": "SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). The `ADBE Mask Opacity` leaf is AE-default-elided; setting it materializes the leaf in the mask atom group (synthesis-insert). Requires a mask round-tripped through Reopen (the atom chunk must exist). Mask Opacity scales how strongly the mask reveals/cuts — at 0.5 a reveal shows the layer at half strength."
+      "summary": "Mask Opacity scales how strongly the mask reveals or cuts — at 0.5 a reveal shows the layer at half strength. The `ADBE Mask Opacity` leaf is elided by AE when at its default, so setting it materializes the leaf in the mask's atom group."
     },
     "Mask.ShphRaw": {
       "kind": "field",
@@ -4363,8 +4298,7 @@
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetaudiosamplerate",
-      "signature": "func (p *Project) SetAudioSampleRate(rate float64) error",
-      "summary": "SetAudioSampleRate writes the adfr f64 BE. Refuses unknown rates outside AE's UI-supported set."
+      "signature": "func (p *Project) SetAudioSampleRate(rate float64) error"
     },
     "Project.SetBitsPerChannel": {
       "kind": "method",
@@ -4377,64 +4311,57 @@
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetcolormanagementsystem",
-      "signature": "func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error",
-      "summary": "SetColorManagementSystem sets the color management system. Rejects values other than the defined enum members."
+      "signature": "func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error"
     },
     "Project.SetCompensateForSceneReferredProfiles": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetcompensateforscenereferredprofiles",
-      "signature": "func (p *Project) SetCompensateForSceneReferredProfiles(v bool) error",
-      "summary": "SetCompensateForSceneReferredProfiles writes the acer byte. Refuses when the acer chunk is absent (no slot to mutate; AE 23+ writes it by default — files without it are rare)."
+      "signature": "func (p *Project) SetCompensateForSceneReferredProfiles(v bool) error"
     },
     "Project.SetDisplayStartFrame": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetdisplaystartframe",
       "signature": "func (p *Project) SetDisplayStartFrame(v int) error",
-      "summary": "SetDisplayStartFrame sets the display start frame (0 or 1). This modifies frames_count_type to preserve the value."
+      "summary": "Implemented by modifying frames_count_type, which shares the same nnhd byte 20 written by SetFramesCountType, so the two setters are transitively gated together."
     },
     "Project.SetExpressionEngine": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetexpressionengine",
       "signature": "func (p *Project) SetExpressionEngine(engine string) error",
-      "summary": "SetExpressionEngine writes the ExEn Utf8. Refuses values other than \"extendscript\" / \"javascript-1.0\" — matches py-aep's validator."
+      "summary": "Refuses when the project has no ExEn chunk yet, rather than synthesizing one — adding a new top-level LIST requires its own AE ship-gate verification."
     },
     "Project.SetFeetFramesFilmType": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetfeetframesfilmtype",
-      "signature": "func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error",
-      "summary": "SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7."
+      "signature": "func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error"
     },
     "Project.SetFootageTimecodeDisplayStartType": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetfootagetimecodedisplaystarttype",
-      "signature": "func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error",
-      "summary": "SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9."
+      "signature": "func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error"
     },
     "Project.SetFramesCountType": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetframescounttype",
-      "signature": "func (p *Project) SetFramesCountType(v FramesCountType) error",
-      "summary": "SetFramesCountType writes the frames count type to nnhd byte 20."
+      "signature": "func (p *Project) SetFramesCountType(v FramesCountType) error"
     },
     "Project.SetFramesUseFeetFrames": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetframesusefeetframes",
-      "signature": "func (p *Project) SetFramesUseFeetFrames(v bool) error",
-      "summary": "SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0."
+      "signature": "func (p *Project) SetFramesUseFeetFrames(v bool) error"
     },
     "Project.SetGpuAccelType": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetgpuacceltype",
-      "signature": "func (p *Project) SetGpuAccelType(s string) error",
-      "summary": "SetGpuAccelType replaces the gpuG Utf8 string in-place (length-variable splice; WriteAEP recomputes parent LIST size)."
+      "signature": "func (p *Project) SetGpuAccelType(s string) error"
     },
     "Project.SetLinearBlending": {
       "kind": "method",
@@ -4454,43 +4381,37 @@
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetlutinterpolationmethod",
-      "signature": "func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error",
-      "summary": "SetLutInterpolationMethod sets the LUT interpolation method. Rejects values other than the defined enum members."
+      "signature": "func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error"
     },
     "Project.SetOcioConfigurationFile": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetocioconfigurationfile",
-      "signature": "func (p *Project) SetOcioConfigurationFile(v string) error",
-      "summary": "SetOcioConfigurationFile sets the OCIO configuration file path."
+      "signature": "func (p *Project) SetOcioConfigurationFile(v string) error"
     },
     "Project.SetTimeDisplayType": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsettimedisplaytype",
-      "signature": "func (p *Project) SetTimeDisplayType(v TimeDisplayType) error",
-      "summary": "SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0."
+      "signature": "func (p *Project) SetTimeDisplayType(v TimeDisplayType) error"
     },
     "Project.SetTimecodeDefaultBase": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsettimecodedefaultbase",
-      "signature": "func (p *Project) SetTimecodeDefaultBase(v int) error",
-      "summary": "SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15."
+      "signature": "func (p *Project) SetTimecodeDefaultBase(v int) error"
     },
     "Project.SetTransparencyGridThumbnails": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsettransparencygridthumbnails",
-      "signature": "func (p *Project) SetTransparencyGridThumbnails(v bool) error",
-      "summary": "SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25."
+      "signature": "func (p *Project) SetTransparencyGridThumbnails(v bool) error"
     },
     "Project.SetWorkingGamma": {
       "kind": "method",
       "file": "project.md",
       "anchor": "#projectsetworkinggamma",
-      "signature": "func (p *Project) SetWorkingGamma(gamma float64) error",
-      "summary": "SetWorkingGamma writes the dwga selector byte. Refuses values other than 2.2 and 2.4 (AE's only UI options)."
+      "signature": "func (p *Project) SetWorkingGamma(gamma float64) error"
     },
     "Project.TimeDisplayType": {
       "kind": "getter",

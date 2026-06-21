@@ -48,105 +48,196 @@ func sentinelU16(v int) uint16 {
 
 // --- render settings setters ------------------------------------------------
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="quality,render quality,渲染质量,画质"
-// SetQuality sets the render quality (-1 current / 0 wireframe / 1 draft /
-// 2 best). Alpha.
+// @summary     Set the render quality
+// @param       v  -1 current, 0 wireframe, 1 draft, 2 best
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       quality,render quality,渲染质量,画质
 func (it *RenderQueueItem) SetQuality(v int) {
 	if it.patchU16(codec.RsQuality, sentinelU16(v)) {
 		it.RenderSettings.Quality = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="color depth,bit depth,颜色深度,位深"
-// SetColorDepth sets the color depth (-1 current / 0 8bpc / 1 16bpc / 2 32bpc).
+// @summary     Set the render color depth
+// @param       v  -1 current, 0 8bpc, 1 16bpc, 2 32bpc
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       color depth,bit depth,颜色深度,位深
 func (it *RenderQueueItem) SetColorDepth(v int) {
 	if it.patchU16(codec.RsColorDepth, sentinelU16(v)) {
 		it.RenderSettings.ColorDepth = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="effects,render effects,特效渲染,效果开关"
-// SetEffects sets the effects render setting (0 all-off / 1 all-on / 2 current).
+// @summary     Set the effects render setting
+// @param       v  0 all-off, 1 all-on, 2 current
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       effects,render effects,特效渲染,效果开关
 func (it *RenderQueueItem) SetEffects(v int) {
 	if it.patchU16(codec.RsEffects, sentinelU16(v)) {
 		it.RenderSettings.Effects = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="field render,场渲染,场序,interlace"
-// SetFieldRender sets field rendering (0 off / 1 upper-first / 2 lower-first).
+// @summary     Set the field rendering mode
+// @param       v  0 off, 1 upper-first, 2 lower-first
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       field render,场渲染,场序,interlace
 func (it *RenderQueueItem) SetFieldRender(v int) {
 	if it.patchU16(codec.RsFieldRender, sentinelU16(v)) {
 		it.RenderSettings.FieldRender = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="pulldown,3:2 pulldown,下拉扫描,帧率转换"
-// SetPulldown sets the 3:2 pulldown phase (0 off / 1..5).
+// @summary     Set the 3:2 pulldown phase
+// @param       v  0 off, 1 through 5 select the pulldown phase
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       pulldown,3:2 pulldown,下拉扫描,帧率转换
 func (it *RenderQueueItem) SetPulldown(v int) {
 	if it.patchU16(codec.RsPulldown, sentinelU16(v)) {
 		it.RenderSettings.Pulldown = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="frame blending,帧混合,运动模糊插帧"
-// SetFrameBlending sets frame blending (0 off-all / 1 on-checked / 2 current).
+// @summary     Set the frame blending mode
+// @param       v  0 off for all layers, 1 on for checked layers, 2 current
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       frame blending,帧混合,运动模糊插帧
 func (it *RenderQueueItem) SetFrameBlending(v int) {
 	if it.patchU16(codec.RsFrameBlending, sentinelU16(v)) {
 		it.RenderSettings.FrameBlending = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="motion blur,运动模糊"
-// SetMotionBlur sets motion blur (0 off-all / 1 on-checked / 2 current).
+// @summary     Set the motion blur mode
+// @param       v  0 off for all layers, 1 on for checked layers, 2 current
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       motion blur,运动模糊
 func (it *RenderQueueItem) SetMotionBlur(v int) {
 	if it.patchU16(codec.RsMotionBlur, sentinelU16(v)) {
 		it.RenderSettings.MotionBlur = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="proxy,proxy use,代理,代理使用"
-// SetProxyUse sets proxy use (0 none / 1 all / 2 current / 3 comp-only).
+// @summary     Set proxy use for the render queue item
+// @param       v  0 none, 1 use all proxies, 2 current, 3 comp proxies only
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       proxy,proxy use,代理,代理使用
 func (it *RenderQueueItem) SetProxyUse(v int) {
 	if it.patchU16(codec.RsProxyUse, sentinelU16(v)) {
 		it.RenderSettings.ProxyUse = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="solo switches,独奏开关,solo"
-// SetSoloSwitches sets solo switches (0 off / 2 current).
+// @summary     Set the solo switches setting
+// @param       v  0 off, 2 current
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       solo switches,独奏开关,solo
 func (it *RenderQueueItem) SetSoloSwitches(v int) {
 	if it.patchU16(codec.RsSoloSwitches, sentinelU16(v)) {
 		it.RenderSettings.SoloSwitches = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="guide layers,参考层,辅助层"
-// SetGuideLayers sets guide layers (0 off / 2 current).
+// @summary     Set the guide layers render setting
+// @param       v  0 off, 2 current
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       guide layers,参考层,辅助层
 func (it *RenderQueueItem) SetGuideLayers(v int) {
 	if it.patchU16(codec.RsGuideLayers, sentinelU16(v)) {
 		it.RenderSettings.GuideLayers = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="disk cache,磁盘缓存,缓存"
-// SetDiskCache sets disk cache (0 read-only / 2 current).
+// @summary     Set the disk cache render setting
+// @param       v  0 read-only, 2 current
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       disk cache,磁盘缓存,缓存
 func (it *RenderQueueItem) SetDiskCache(v int) {
 	if it.patchU16(codec.RsDiskCache, sentinelU16(v)) {
 		it.RenderSettings.DiskCache = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="frame rate,帧率,fps"
-// SetFrameRate sets the frame-rate source (0 use comp / 1 use this).
+// @summary     Set the frame-rate source
+// @param       v  0 use comp frame rate, 1 use this item's frame rate
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       frame rate,帧率,fps
 func (it *RenderQueueItem) SetFrameRate(v int) {
 	if it.patchU16(codec.RsUseThisFrameRate, sentinelU16(v)) {
 		it.RenderSettings.FrameRate = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="resolution,分辨率,画面尺寸"
-// SetResolution sets the [x, y] resolution divisors (>= 1).
+// @summary     Set the render resolution divisors
+// @param       x  horizontal resolution divisor (>= 1)
+// @param       y  vertical resolution divisor (>= 1)
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       resolution,分辨率,画面尺寸
 func (it *RenderQueueItem) SetResolution(x, y int) {
 	if x < 1 || y < 1 {
 		return
@@ -156,8 +247,15 @@ func (it *RenderQueueItem) SetResolution(x, y int) {
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="skip existing files,跳过已有文件,增量渲染"
-// SetSkipExistingFiles toggles "skip existing files".
+// @summary     Toggle "skip existing files" for the render queue item
+// @param       v  whether to skip files that already exist on disk
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       skip existing files,跳过已有文件,增量渲染
 func (it *RenderQueueItem) SetSkipExistingFiles(v bool) {
 	n := uint16(0)
 	if v {
@@ -168,10 +266,18 @@ func (it *RenderQueueItem) SetSkipExistingFiles(v bool) {
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险(固定 64B 字段)" alias="name,template name,渲染设置名称,模板名"
-// SetName sets the render-settings template name (template_name @0x5A, a fixed
-// 64-byte windows-1252 NUL-padded field). Names longer than 64 bytes are
-// truncated; non-latin-1 runes are dropped. Length-preserving.
+// @summary     Set the render-settings template name
+// @description The name is stored in a fixed 64-byte windows-1252 NUL-padded
+//   field (template_name @0x5A). Names longer than 64 bytes are truncated;
+//   non-latin-1 runes are dropped.
+// @param       name  the template name to store
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field; length-preserving edit against a fixed 64-byte field is low risk
+// @alias       name,template name,渲染设置名称,模板名
 func (it *RenderQueueItem) SetName(name string) {
 	if it == nil || len(it.settingsBlock) < int(codec.RsTemplateName)+codec.RsTemplateNameLen {
 		return
@@ -193,9 +299,14 @@ func (it *RenderQueueItem) SetName(name string) {
 	it.Name = codec.DecodeWin1252(field)
 }
 
-//aep:cap domain=render-queue tier=alpha verify=roundtrip boundary="Alpha;length-preserving 低风险;AE 接受写入但 resave 清零(AE2020 实勘清 @0x07 bit2,版本相关归一化,非写入 bug;AE2025 保留)→双版本不保 preservation,留 roundtrip(gate TestRenderQueueSettings 实证)" alias="notify,completion notify,完成通知"
-// SetQueueItemNotify toggles the notify-on-completion flag (flag byte @0x07
-// bit 2).
+// @summary     Toggle the notify-on-completion flag (flag byte @0x07 bit 2)
+// @param       v  whether to notify when the render queue item completes
+// @domain      render-queue
+// @stability   alpha
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    AE accepts the written bit, but AE2020 clears it on resave (a version-specific normalization, not a write bug); AE2025 preserves it. Since preservation is not guaranteed across both versions, verification stays at roundtrip
+// @alias       notify,completion notify,完成通知
 func (it *RenderQueueItem) SetQueueItemNotify(v bool) {
 	if it == nil || len(it.settingsBlock) <= int(codec.RsFlagByte) {
 		return
@@ -209,8 +320,15 @@ func (it *RenderQueueItem) SetQueueItemNotify(v bool) {
 	it.QueueItemNotify = v
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="log type,日志类型,渲染日志"
-// SetLogType sets the raw log-type code (@0x50).
+// @summary     Set the raw log-type code (@0x50)
+// @param       v  the raw log-type code
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       log type,日志类型,渲染日志
 func (it *RenderQueueItem) SetLogType(v uint16) {
 	if it.patchU16(codec.RsLogType, v) {
 		it.LogType = v
@@ -250,9 +368,15 @@ func gcdInt64(a, b int64) int64 {
 	return a
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="time span start,render start,开始时间,渲染起点"
-// SetTimeSpanStart sets the render start time (seconds), switching the time
-// span source to CUSTOM. Length-preserving.
+// @summary     Set the render start time, switching the time span to custom
+// @param       seconds  the render start time in seconds
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       time span start,render start,开始时间,渲染起点
 func (it *RenderQueueItem) SetTimeSpanStart(seconds float64) {
 	if seconds < 0 {
 		return
@@ -266,9 +390,15 @@ func (it *RenderQueueItem) SetTimeSpanStart(seconds float64) {
 	it.TimeSpanStart = seconds
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="time span duration,render duration,渲染时长,持续时间"
-// SetTimeSpanDuration sets the render duration (seconds), switching the time
-// span source to CUSTOM. Length-preserving.
+// @summary     Set the render duration, switching the time span to custom
+// @param       seconds  the render duration in seconds
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       time span duration,render duration,渲染时长,持续时间
 func (it *RenderQueueItem) SetTimeSpanDuration(seconds float64) {
 	if seconds <= 0 {
 		return
@@ -282,21 +412,26 @@ func (it *RenderQueueItem) SetTimeSpanDuration(seconds float64) {
 	it.TimeSpanDuration = seconds
 }
 
-//aep:cap domain=render-queue tier=alpha verify=ae-accept gate=TestRenderQueueComment_AEShipGate_AE2020,TestRenderQueueComment_AEShipGate_AE2025 boundary="length-variable(RCom chunk 插入/替换);AE 接受+resave-preservation 已验证;无 ScriptingAPI readback" alias="comment,rq comment,渲染队列注释,备注"
-// SetComment sets the render queue item's comment (shown in the Render Queue
-// panel). length-variable, unlike the fixed-width setters above: the comment
-// lives in an RCom wrapper chunk holding a single Utf8 child. When the item
-// already has an RCom its payload is replaced; otherwise a fresh RCom is
-// inserted into the LItm LIST immediately before the item's settings list
-// (matching AE / py-aep per-item ordering). WriteAEP recomputes the LItm/LRdr
-// LIST sizes. Setting "" on an item with no RCom is a no-op (AE writes no RCom
-// for empty comments).
-//
-// Double-version ship-gated (AE 2020 + AE 2025): both accept the inserted RCom
-// and preserve it byte-identically on resave. The comment is a binary-only
-// field — RenderQueueItem has no `comment` ScriptingAPI in any version — so the
-// gate verifies acceptance + resave-preservation, not script readback. See
-// render_queue_comment_shipgate_test.go.
+// @summary     Set the render queue item's comment shown in the Render Queue panel
+// @description Unlike the fixed-width setters above, this field is
+//   length-variable: the comment lives in an RCom wrapper chunk holding a
+//   single Utf8 child. When the item already has an RCom its payload is
+//   replaced; otherwise a fresh RCom is inserted into the LItm LIST
+//   immediately before the item's settings list, matching AE's per-item
+//   ordering. WriteAEP recomputes the LItm/LRdr LIST sizes. Setting "" on an
+//   item with no RCom is a no-op, since AE writes no RCom for empty comments.
+//   Both AE versions accept the inserted RCom and preserve it byte-identically
+//   on resave. The comment is a binary-only field with no ScriptingAPI in any
+//   version, so the gate verifies acceptance and resave-preservation rather
+//   than script readback.
+// @param       comment  the comment text to store
+// @domain      render-queue
+// @stability   alpha
+// @verify      ae-accept
+// @gate        TestRenderQueueComment_AEShipGate_AE2020,TestRenderQueueComment_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable edit that inserts or replaces an RCom chunk; acceptance and resave-preservation are verified, but there is no ScriptingAPI readback to cross-check against
+// @alias       comment,rq comment,渲染队列注释,备注
 func (it *RenderQueueItem) SetComment(comment string) error {
 	if it == nil || it.back == nil {
 		return fmt.Errorf("render queue item: no chunk backrefs (built outside parser?)")
@@ -356,141 +491,269 @@ func (om *OutputModule) omSetBit(byteOff codec.RenderSettingOffset, bit int, v b
 	return true
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="channels,output channels,输出通道,RGB,RGBA,Alpha"
-// SetChannels sets the output channels (0 RGB / 1 RGBA / 2 Alpha).
+// @summary     Set the output channels
+// @param       v  0 RGB, 1 RGBA, 2 Alpha
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       channels,output channels,输出通道,RGB,RGBA,Alpha
 func (om *OutputModule) SetChannels(v int) {
 	if om.omPatchU8(codec.OmsChannels, byte(v)) {
 		om.Settings.Channels = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="resize quality,缩放质量"
-// SetResizeQuality sets the resize quality.
+// @summary     Set the output resize quality
+// @param       v  the raw resize quality code
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       resize quality,缩放质量
 func (om *OutputModule) SetResizeQuality(v int) {
 	if om.omPatchU8(codec.OmsResizeQuality, byte(v)) {
 		om.Settings.ResizeQuality = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="resize,缩放,输出缩放"
-// SetResize toggles resize.
+// @summary     Toggle output resize
+// @param       v  whether the output module resizes the frame
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       resize,缩放,输出缩放
 func (om *OutputModule) SetResize(v bool) {
 	if om.omPatchU8(codec.OmsResize, boolByte(v)) {
 		om.Settings.Resize = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="lock aspect ratio,锁定宽高比,等比缩放"
-// SetLockAspectRatio toggles lock-aspect-ratio.
+// @summary     Toggle lock-aspect-ratio for output resize
+// @param       v  whether resizing locks the aspect ratio
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       lock aspect ratio,锁定宽高比,等比缩放
 func (om *OutputModule) SetLockAspectRatio(v bool) {
 	if om.omPatchU8(codec.OmsLockAspectRatio, boolByte(v)) {
 		om.Settings.LockAspectRatio = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="crop,裁剪,输出裁剪"
-// SetCrop toggles crop (flag byte @0x1F bit 0).
+// @summary     Toggle output crop (flag byte @0x1F bit 0)
+// @param       v  whether the output module crops the frame
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       crop,裁剪,输出裁剪
 func (om *OutputModule) SetCrop(v bool) {
 	if om.omSetBit(codec.OmsFlagByte22, 0, v) {
 		om.Settings.Crop = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="crop top,上裁剪,顶部裁剪"
-// SetCropTop/Left/Bottom/Right set the crop insets (px).
+// @summary     Set the top crop inset in pixels
+// @param       v  the top crop inset in pixels
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       crop top,上裁剪,顶部裁剪
 func (om *OutputModule) SetCropTop(v int) {
 	if om.omPatchU16BE(codec.OmsCropTop, uint16(v)) {
 		om.Settings.CropTop = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="crop left,左裁剪"
+// @summary     Set the left crop inset in pixels
+// @param       v  the left crop inset in pixels
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       crop left,左裁剪
 func (om *OutputModule) SetCropLeft(v int) {
 	if om.omPatchU16BE(codec.OmsCropLeft, uint16(v)) {
 		om.Settings.CropLeft = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="crop bottom,下裁剪,底部裁剪"
+// @summary     Set the bottom crop inset in pixels
+// @param       v  the bottom crop inset in pixels
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       crop bottom,下裁剪,底部裁剪
 func (om *OutputModule) SetCropBottom(v int) {
 	if om.omPatchU16BE(codec.OmsCropBottom, uint16(v)) {
 		om.Settings.CropBottom = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="crop right,右裁剪"
+// @summary     Set the right crop inset in pixels
+// @param       v  the right crop inset in pixels
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       crop right,右裁剪
 func (om *OutputModule) SetCropRight(v int) {
 	if om.omPatchU16BE(codec.OmsCropRight, uint16(v)) {
 		om.Settings.CropRight = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="include project link,项目链接,嵌入项目链接"
-// SetIncludeProjectLink toggles the "include project link" flag.
+// @summary     Toggle the "include project link" flag
+// @param       v  whether to embed a project link in the output
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       include project link,项目链接,嵌入项目链接
 func (om *OutputModule) SetIncludeProjectLink(v bool) {
 	if om.omPatchU8(codec.OmsIncludeProjectLink, boolByte(v)) {
 		om.Settings.IncludeProjectLink = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="post render action,渲染后操作,完成动作"
-// SetPostRenderAction sets the raw post-render action code.
+// @summary     Set the raw post-render action code
+// @param       v  the raw post-render action code
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       post render action,渲染后操作,完成动作
 func (om *OutputModule) SetPostRenderAction(v uint32) {
 	if om.omPatchU32BE(codec.OmsPostRenderAction, v) {
 		om.Settings.PostRenderAction = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险;raw u8(py-aep derives ON/OFF/AUTO)" alias="output audio,输出音频,渲染音频开关"
-// SetOutputAudio sets the raw output-audio code (OutputModule @0x2A).
+// @summary     Set the raw output-audio code (OutputModule @0x2A)
+// @param       v  the raw output-audio code (encodes on/off/auto)
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit of a raw byte field is low risk
+// @alias       output audio,输出音频,渲染音频开关
 func (om *OutputModule) SetOutputAudio(v int) {
 	if om.omPatchU8(codec.OmsOutputAudio, byte(v)) {
 		om.Settings.OutputAudio = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险;CMS 联动 enum,round-trip 绿不保证 AE 渲染采用" alias="convert to linear,转线性光,linearize output"
-// SetConvertToLinear sets the raw convert-to-linear code (OutputModule @0x5B).
+// @summary     Set the raw convert-to-linear code (OutputModule @0x5B)
+// @param       v  the raw convert-to-linear code
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; this enum interacts with color management, so a green value round-trip does not guarantee AE applies it during rendering
+// @alias       convert to linear,转线性光,linearize output
 func (om *OutputModule) SetConvertToLinear(v int) {
 	if om.omPatchU8(codec.OmsConvertLinear, byte(v)) {
 		om.Settings.ConvertToLinear = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="use comp frame number,使用合成帧编号,帧编号"
-// SetUseCompFrameNumber toggles "use comp frame number" (flag byte @0x07 bit 3).
+// @summary     Toggle "use comp frame number" (flag byte @0x07 bit 3)
+// @param       v  whether output filenames use the comp's frame number
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       use comp frame number,使用合成帧编号,帧编号
 func (om *OutputModule) SetUseCompFrameNumber(v bool) {
 	if om.omSetBit(codec.OmsFlagByte07, 3, v) {
 		om.Settings.UseCompFrameNumber = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="region of interest,ROI,感兴趣区域,局部渲染"
-// SetUseRegionOfInterest toggles "use region of interest" (bit 4).
+// @summary     Toggle "use region of interest" (bit 4)
+// @param       v  whether rendering is limited to the region of interest
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       region of interest,ROI,感兴趣区域,局部渲染
 func (om *OutputModule) SetUseRegionOfInterest(v bool) {
 	if om.omSetBit(codec.OmsFlagByte07, 4, v) {
 		om.Settings.UseRegionOfInterest = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险" alias="XMP,source XMP,XMP元数据,元数据"
-// SetIncludeSourceXMP toggles "include source XMP metadata" (bit 6).
+// @summary     Toggle "include source XMP metadata" (bit 6)
+// @param       v  whether source XMP metadata is embedded in the output
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit is low risk
+// @alias       XMP,source XMP,XMP元数据,元数据
 func (om *OutputModule) SetIncludeSourceXMP(v bool) {
 	if om.omSetBit(codec.OmsFlagByte07, 6, v) {
 		om.Settings.IncludeSourceXMP = v
 	}
 }
 
-//aep:cap domain=render-queue tier=alpha verify=roundtrip boundary="Alpha;length-preserving 低风险;AE 接受写入但 resave 清零(AE2025 实勘,@0x07 bit7 受输出色彩管理上下文 gate,非写入 bug)→不保 preservation,留 roundtrip(gate TestRenderQueueSettings 实证)" alias="preserve RGB,保留RGB,色彩保留"
-// SetPreserveRGB toggles "preserve RGB" (bit 7).
+// @summary     Toggle "preserve RGB" (bit 7)
+// @param       v  whether RGB channels are preserved through color management
+// @domain      render-queue
+// @stability   alpha
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    AE accepts the written bit, but AE2025 clears it on resave when the output's color-management context gates it (not a write bug). Since preservation is not guaranteed, verification stays at roundtrip
+// @alias       preserve RGB,保留RGB,色彩保留
 func (om *OutputModule) SetPreserveRGB(v bool) {
 	if om.omSetBit(codec.OmsFlagByte07, 7, v) {
 		om.Settings.PreserveRGB = v
 	}
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险(roouData 字节)" alias="depth,output depth,输出色深,颜色深度"
-// SetDepth sets the output color depth (Roou @0x47), e.g. 24/32/48/64/96/128.
+// @summary     Set the output color depth (Roou @0x47)
+// @param       v  the output color depth, e.g. 24, 32, 48, 64, 96, or 128
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit of the roou byte is low risk
+// @alias       depth,output depth,输出色深,颜色深度
 func (om *OutputModule) SetDepth(v int) {
 	if om == nil || len(om.roouData) <= int(codec.RouoDepth) {
 		return
@@ -499,8 +762,15 @@ func (om *OutputModule) SetDepth(v int) {
 	om.Settings.Depth = v
 }
 
-//aep:cap domain=render-queue tier=stable verify=ae-accept gate=TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025 boundary="AE 接受+resave-preservation 双版本已验证(无 ScriptingAPI readback,二进制字段);length-preserving 低风险(roouData 字节)" alias="starting number,image sequence start,序列起始帧,帧序号"
-// SetStartingNumber sets the image-sequence starting frame number (Roou @0x10).
+// @summary     Set the image-sequence starting frame number (Roou @0x10)
+// @param       v  the starting frame number for an image sequence
+// @domain      render-queue
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRenderQueueSettings_AEShipGate_AE2020,TestRenderQueueSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepted and resave-preserved on both AE versions; no ScriptingAPI readback exists for this binary field, so the gate verifies acceptance plus resave-preservation; length-preserving edit of the roou bytes is low risk
+// @alias       starting number,image sequence start,序列起始帧,帧序号
 func (om *OutputModule) SetStartingNumber(v uint32) {
 	if om == nil || len(om.roouData) < int(codec.RouoStartingNumber)+4 {
 		return

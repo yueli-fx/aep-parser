@@ -83,11 +83,19 @@ func (l *Layer) FrameInPoint() int {
 	return secondsToFrames(l.InPoint(), l.layerFps())
 }
 
-// SetFrameInPoint writes the layer in-point converting the integer
-// frame back to seconds via the owning comp's FrameRate, then
-// delegates to SetInPoint.
-//
-//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;委托 SetInPoint(source-relative,AE 显示 startTime+此值);需 owning comp FrameRate > 0;双版本 AE gated(layer-xform)" alias="frame in point,入点帧,layer in frame,图层入点"
+// @summary     Set a layer's in-point from an integer frame count
+// @description Converts frame back to seconds via the owning composition's
+//   FrameRate, then delegates to the seconds-based in-point setter. The
+//   in-point is source-relative; AE's UI displays startTime plus this value.
+// @param       frame  the new in-point as a frame count
+// @domain      layer-set
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires the owning composition's
+//   FrameRate to be > 0
+// @alias       frame in point,入点帧,layer in frame,图层入点
 func (l *Layer) SetFrameInPoint(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -101,9 +109,19 @@ func (l *Layer) FrameOutPoint() int {
 	return secondsToFrames(l.OutPoint(), l.layerFps())
 }
 
-// SetFrameOutPoint writes the layer out-point from an integer frame.
-//
-//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;委托 SetOutPoint(source-relative,AE 显示 startTime+此值);需 owning comp FrameRate > 0;双版本 AE gated(layer-xform)" alias="frame out point,出点帧,layer out frame,图层出点"
+// @summary     Set a layer's out-point from an integer frame count
+// @description Converts frame back to seconds via the owning composition's
+//   FrameRate, then delegates to the seconds-based out-point setter. The
+//   out-point is source-relative; AE's UI displays startTime plus this value.
+// @param       frame  the new out-point as a frame count
+// @domain      layer-set
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires the owning composition's
+//   FrameRate to be > 0
+// @alias       frame out point,出点帧,layer out frame,图层出点
 func (l *Layer) SetFrameOutPoint(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -117,9 +135,18 @@ func (l *Layer) FrameStartTime() int {
 	return secondsToFrames(l.StartTime, l.layerFps())
 }
 
-// SetFrameStartTime writes the layer start-time from an integer frame.
-//
-//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025 boundary="length-preserving;委托 SetStartTime;需 owning comp FrameRate > 0;双版本 AE gated(layer-xform)" alias="frame start time,起始帧,layer start frame,图层起始时间"
+// @summary     Set a layer's start time from an integer frame count
+// @description Converts frame back to seconds via the owning composition's
+//   FrameRate, then delegates to the seconds-based start-time setter.
+// @param       frame  the new start time as a frame count
+// @domain      layer-set
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestLayerXform_AEShipGate_AE2020,TestLayerXform_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires the owning composition's
+//   FrameRate to be > 0
+// @alias       frame start time,起始帧,layer start frame,图层起始时间
 func (l *Layer) SetFrameStartTime(frame int) error {
 	fps := l.layerFps()
 	if fps <= 0 {
@@ -144,10 +171,17 @@ func (c *Composition) WorkAreaStartFrame() int {
 	return secondsToFrames(c.WorkAreaStart, c.FrameRate)
 }
 
-// SetWorkAreaStartFrame writes the work-area start from an integer
-// frame, preserving the existing end. Delegates to SetWorkArea.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025 boundary="length-preserving;委托 SetWorkArea(保留 end);需 FrameRate > 0;双版本 AE gated(comp-settings from-scratch fixture)" alias="work area start frame,工作区起始帧,render range start,渲染范围"
+// @summary     Set a composition's work-area start from an integer frame count
+// @description Converts frame back to seconds via FrameRate, then delegates
+//   to the seconds-based work-area setter, preserving the existing end.
+// @param       frame  the new work-area start as a frame count
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires FrameRate to be > 0
+// @alias       work area start frame,工作区起始帧,render range start,渲染范围
 func (c *Composition) SetWorkAreaStartFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaStartFrame requires FrameRate > 0", c.Name)
@@ -161,9 +195,17 @@ func (c *Composition) WorkAreaEndFrame() int {
 	return secondsToFrames(c.WorkAreaEnd, c.FrameRate)
 }
 
-// SetWorkAreaEndFrame writes the work-area end from an integer frame.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025 boundary="length-preserving;委托 SetWorkArea(保留 start);需 FrameRate > 0;双版本 AE gated(comp-settings from-scratch fixture)" alias="work area end frame,工作区结束帧,render range end,渲染结束"
+// @summary     Set a composition's work-area end from an integer frame count
+// @description Converts frame back to seconds via FrameRate, then delegates
+//   to the seconds-based work-area setter, preserving the existing start.
+// @param       frame  the new work-area end as a frame count
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires FrameRate to be > 0
+// @alias       work area end frame,工作区结束帧,render range end,渲染结束
 func (c *Composition) SetWorkAreaEndFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaEndFrame requires FrameRate > 0", c.Name)
@@ -177,10 +219,18 @@ func (c *Composition) WorkAreaDurationFrame() int {
 	return c.WorkAreaEndFrame() - c.WorkAreaStartFrame()
 }
 
-// SetWorkAreaDurationFrame writes the work-area end so that end−start
-// equals the given integer frame span, keeping start fixed.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025 boundary="length-preserving;委托 SetWorkArea(start 固定,end 重算);需 FrameRate > 0;双版本 AE gated(comp-settings from-scratch fixture)" alias="work area duration,工作区时长帧数,render duration frames"
+// @summary     Set a composition's work-area duration from an integer frame count
+// @description Recomputes the work-area end so that end minus start equals
+//   the given frame span, keeping start fixed, then delegates to the
+//   seconds-based work-area setter.
+// @param       frame  the new work-area duration as a frame count
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestCompSettings_AEShipGate_AE2020,TestCompSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires FrameRate to be > 0
+// @alias       work area duration,工作区时长帧数,render duration frames
 func (c *Composition) SetWorkAreaDurationFrame(frame int) error {
 	if c.FrameRate <= 0 {
 		return fmt.Errorf("composition %q: SetWorkAreaDurationFrame requires FrameRate > 0", c.Name)
@@ -212,11 +262,18 @@ func (k *Keyframe) FrameTime() int {
 	return secondsToFrames(k.Time, k.back.FrameRateHz())
 }
 
-// SetFrameTime writes the keyframe's time from an integer frame,
-// delegating to SetTime. Returns an error when the owning comp's
-// FrameRate is unknown.
-//
-//aep:cap domain=keyframe tier=stable verify=ae-accept gate=TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025 boundary="length-preserving;委托 Keyframe.SetTime;需 FrameRate > 0;双版本 AE gated(keyframe_mutate)" alias="keyframe frame time,关键帧帧编号,kf frame,帧时间"
+// @summary     Set a keyframe's time from an integer frame count
+// @description Converts frame back to seconds via the owning composition's
+//   FrameRate, then delegates to the seconds-based time setter.
+// @param       frame  the new keyframe time as a frame count
+// @domain      keyframe
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestKeyframeMutate_AEShipGate_AE2020,TestKeyframeMutate_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires the owning composition's
+//   FrameRate to be known
+// @alias       keyframe frame time,关键帧帧编号,kf frame,帧时间
 func (k *Keyframe) SetFrameTime(frame int) error {
 	if k.back == nil || k.back.FrameRateHz() <= 0 {
 		return fmt.Errorf("keyframe: SetFrameTime requires owning composition FrameRate > 0")
@@ -233,9 +290,18 @@ func (m *Marker) FrameTime() int {
 	return secondsToFrames(m.Time, m.compFps)
 }
 
-// SetFrameTime writes the marker's time from an integer frame.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving;委托 Marker.SetTime;需 compFps > 0;双版本 AE gated(marker-fields;AE DOM keyTime=4.0 实读)" alias="marker frame time,标记帧时间,marker frame,标记帧编号"
+// @summary     Set a marker's time from an integer frame count
+// @description Converts frame back to seconds via the owning composition's
+//   FrameRate, then delegates to the seconds-based time setter.
+// @param       frame  the new marker time as a frame count
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires the owning composition's
+//   FrameRate to be > 0
+// @alias       marker frame time,标记帧时间,marker frame,标记帧编号
 func (m *Marker) SetFrameTime(frame int) error {
 	if m.compFps <= 0 {
 		return fmt.Errorf("marker: SetFrameTime requires owning composition FrameRate > 0")
@@ -249,9 +315,18 @@ func (m *Marker) FrameDuration() int {
 	return secondsToFrames(m.Duration, m.compFps)
 }
 
-// SetFrameDuration writes the marker's duration from an integer frame.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025 boundary="length-preserving;委托 Marker.SetDuration;需 compFps > 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)" alias="marker frame duration,标记时长帧数,cue duration frames"
+// @summary     Set a marker's duration from an integer frame count
+// @description Converts frame back to seconds via the owning composition's
+//   FrameRate, then delegates to the seconds-based duration setter.
+// @param       frame  the new marker duration as a frame count
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMarkerFields_AEShipGate_AE2020,TestMarkerFields_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving; requires the owning composition's
+//   FrameRate to be > 0
+// @alias       marker frame duration,标记时长帧数,cue duration frames
 func (m *Marker) SetFrameDuration(frame int) error {
 	if m.compFps <= 0 {
 		return fmt.Errorf("marker: SetFrameDuration requires owning composition FrameRate > 0")

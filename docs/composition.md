@@ -617,7 +617,11 @@ if comp := proj.CompositionByName("Main"); comp != nil {
 func (c *Composition) SetBGColor(rgb [3]uint8) error
 ```
 
-SetBGColor writes a new background color (R, G, B), each 0..255, to cdta @0x34/@0x35/@0x36. length-preserving (3 bytes).
+Set the composition's background color
+
+| Parameter | Description |
+|---|---|
+| `rgb` | the new background color, each channel 0..255 |
 
 ### Composition.SetComment
 
@@ -633,7 +637,13 @@ SetComment writes a project-panel comment on the composition (Item- level, disti
 func (c *Composition) SetCompMotionBlur(v bool) error
 ```
 
-SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B bit 3). Note: this is independent of per-layer `Layer.MotionBlur` — the layer renders motion blur only when both switches are on.
+Set the composition's motion-blur master switch
+
+This switch is independent of the per-layer `Layer.MotionBlur` flag — a layer renders motion blur only when both switches are on.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Composition.SetDisplayStartFrame
 
@@ -641,7 +651,13 @@ SetCompMotionBlur toggles the comp-level motion-blur master switch (cdta @0x8B b
 func (c *Composition) SetDisplayStartFrame(frame int) error
 ```
 
-SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStartTime. Computes seconds = frame / FrameRate and writes the cdta pair. Errors when FrameRate \<= 0.
+Set the composition's display-start-time origin by frame count
+
+A frame-count convenience wrapper around SetDisplayStartTime: computes seconds = frame / FrameRate and delegates the cdta write to it. Errors when FrameRate is not yet set to a positive value.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new display-start frame count |
 
 ### Composition.SetDisplayStartTime
 
@@ -649,11 +665,13 @@ SetDisplayStartFrame is a frame-count convenience wrapper around SetDisplayStart
 func (c *Composition) SetDisplayStartTime(seconds float64) error
 ```
 
-SetDisplayStartTime rewrites the comp's display-start-time origin (seconds) at cdta @0xA4 (dividend) / @0xA8 (divisor). length- preserving (8 bytes). Pass 0 to clear back to default.
+Set the composition's display-start-time origin
 
-The divisor stored is the comp's TickRate (computed from cdta @0x08 / @0xA8). When seconds == 0, both dividend and divisor are written as 0 (matching AE's "unset" encoding so re-parsing yields DisplayStartTime == 0).
+The divisor stored is the composition's TickRate (computed from cdta offsets 0x08/0xA8). Passing 0 clears the value back to default by writing both dividend and divisor as 0, matching AE's "unset" encoding so re-parsing yields DisplayStartTime == 0. AE 2025 sometimes writes a divisor (e.g. 23976 for 29.97 fps) that doesn't exactly satisfy the ticks-per-frame times frame-count math due to small rounding artifacts; this setter and its getter use the stored pair verbatim so a round trip of a Set call gives back exactly what was set.
 
-AE 25 sometimes writes a divisor (e.g. 23976 for 29.97 fps) that doesn't exactly satisfy ticks_per_frame × frame_count math (small rounding artifacts). The setter / getter use the stored pair verbatim so round-tripping a Set call gives back exactly what was set.
+| Parameter | Description |
+|---|---|
+| `seconds` | the new display-start-time origin in seconds, 0 clears it |
 
 ### Composition.SetDraft3D
 
@@ -661,7 +679,13 @@ AE 25 sometimes writes a divisor (e.g. 23976 for 29.97 fps) that doesn't exactly
 func (c *Composition) SetDraft3D(v bool) error
 ```
 
-SetDraft3D toggles the comp's "Draft 3D" preview switch (cdta @0x8A bit 0). Disables shadows / motion blur / DOF in viewport for speed.
+Set the composition's "Draft 3D" preview switch
+
+Disables shadows, motion blur, and depth of field in the viewport for faster preview playback.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Composition.SetDuration
 
@@ -669,7 +693,13 @@ SetDraft3D toggles the comp's "Draft 3D" preview switch (cdta @0x8A bit 0). Disa
 func (c *Composition) SetDuration(seconds float64) error
 ```
 
-SetDuration writes a new composition duration (seconds) to cdta @0xB0 as a uint32 frame count (= round(seconds × FrameRate)). Requires `FrameRate > 0`. length-preserving (4 bytes).
+Set the composition's duration
+
+Writes the duration as a uint32 frame count (round(seconds x FrameRate)) and requires FrameRate to already be positive. Do not call this and SetFrameRate on the same composition: SetFrameRate does not rescale the stored duration ticks, so changing the rate afterward makes AE read back a shorter or longer duration than intended.
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new duration in seconds, must be non-negative |
 
 ### Composition.SetFrameBlending
 
@@ -677,7 +707,13 @@ SetDuration writes a new composition duration (seconds) to cdta @0xB0 as a uint3
 func (c *Composition) SetFrameBlending(v bool) error
 ```
 
-SetFrameBlending toggles the comp-level frame-blend master switch (cdta @0x8B bit 4). Layers also need their own FrameBlendEnabled on to render with blending.
+Set the composition's frame-blend master switch
+
+Layers also need their own FrameBlendEnabled flag on to actually render with blending.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Composition.SetFrameRate
 
@@ -685,9 +721,13 @@ SetFrameBlending toggles the comp-level frame-blend master switch (cdta @0x8B bi
 func (c *Composition) SetFrameRate(fps float64) error
 ```
 
-SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F. AE splits fps into a uint16 whole part and a uint16 fractional part (numerator over 65536); we use the same encoding so partial frame rates like 29.97 round-trip exactly. length-preserving (4 bytes).
+Set the composition's frame rate
 
-`Duration` is recomputed from the existing frame count so the in-memory value stays consistent.
+AE splits fps into a uint16 whole part and a uint16 fractional part (numerator over 65536); this setter uses the same encoding so partial frame rates like 29.97 round-trip exactly. `Duration` is recomputed from the existing frame count so the in-memory value stays consistent. Do not call this and SetDuration on the same composition: this setter does not rescale the stored duration ticks, so AE will read back the wrong duration at the new rate.
+
+| Parameter | Description |
+|---|---|
+| `fps` | the new frame rate |
 
 ### Composition.SetHideShyLayers
 
@@ -695,7 +735,11 @@ SetFrameRate writes a new frame rate (fps) to cdta @0x9C-0x9F. AE splits fps int
 func (c *Composition) SetHideShyLayers(v bool) error
 ```
 
-SetHideShyLayers toggles "Hide Shy Layers" on the comp (cdta @0x8B bit 0).
+Set the composition's "Hide Shy Layers" toggle
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Composition.SetLabel
 
@@ -711,7 +755,11 @@ SetLabel writes the project-panel color label index (0..16) for the composition 
 func (c *Composition) SetMotionBlurAdaptiveSampleLimit(limit int32) error
 ```
 
-SetMotionBlurAdaptiveSampleLimit writes the motion-blur adaptive sample limit (int32 BE, AE default 128) to cdta @0xC4. length-preserving (4 bytes).
+Set the composition's motion-blur adaptive sample limit
+
+| Parameter | Description |
+|---|---|
+| `limit` | the new adaptive sample limit, AE default 128 |
 
 ### Composition.SetMotionBlurSamplesPerFrame
 
@@ -719,7 +767,11 @@ SetMotionBlurAdaptiveSampleLimit writes the motion-blur adaptive sample limit (i
 func (c *Composition) SetMotionBlurSamplesPerFrame(n int32) error
 ```
 
-SetMotionBlurSamplesPerFrame writes the per-frame motion-blur sample count (int32 BE, AE default 16) to cdta @0xC8. length-preserving (4 bytes).
+Set the composition's per-frame motion-blur sample count
+
+| Parameter | Description |
+|---|---|
+| `n` | the new per-frame sample count, AE default 16 |
 
 ### Composition.SetMotionGraphicsTemplateName
 
@@ -737,7 +789,11 @@ Stable — AE 2020 + AE 2025 ship-gate green (riding the AddEssentialProperty ga
 func (c *Composition) SetName(newName string) error
 ```
 
-SetName rewrites the composition's display name (length-variable Utf8 chunk replacement; WriteAEP recomputes parent Item LIST size). Returns an error if the comp has no Utf8 name chunk (rare).
+Set the composition's display name
+
+| Parameter | Description |
+|---|---|
+| `newName` | the new display name |
 
 ### Composition.SetPixelAspect
 
@@ -745,9 +801,13 @@ SetName rewrites the composition's display name (length-variable Utf8 chunk repl
 func (c *Composition) SetPixelAspect(par float64) error
 ```
 
-SetPixelAspect writes the pixel aspect ratio (PAR) to cdta as a numerator/denominator pair at @0x90 / @0x94 (uint32 BE each).
+Set the composition's pixel aspect ratio
 
-AE writes simple integer ratios for common presets (1/1 = 1.0, 2/1 = 2.0). For fractional ratios this setter picks num = round(par × 100) and den = 100 — accurate enough for AE's built-in PAR list (0.91, 1.09, 1.21, 1.33, 1.46, 1.5, 2.0). length-preserving (8 bytes).
+AE writes simple integer ratios for common presets (1/1 = 1.0, 2/1 = 2.0). For fractional ratios this setter picks num = round(par x 100) and den = 100, which is accurate enough for AE's built-in PAR presets (0.91, 1.09, 1.21, 1.33, 1.46, 1.5, 2.0).
+
+| Parameter | Description |
+|---|---|
+| `par` | the new pixel aspect ratio |
 
 ### Composition.SetPreserveNestedFrameRate
 
@@ -755,7 +815,11 @@ AE writes simple integer ratios for common presets (1/1 = 1.0, 2/1 = 2.0). For f
 func (c *Composition) SetPreserveNestedFrameRate(v bool) error
 ```
 
-SetPreserveNestedFrameRate toggles "Preserve frame rate when nested or in render queue" on the comp (cdta @0x8B bit 5).
+Set the composition's "preserve frame rate when nested" toggle
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Composition.SetPreserveNestedResolution
 
@@ -763,7 +827,11 @@ SetPreserveNestedFrameRate toggles "Preserve frame rate when nested or in render
 func (c *Composition) SetPreserveNestedResolution(v bool) error
 ```
 
-SetPreserveNestedResolution toggles "Preserve resolution when nested" (cdta @0x8B bit 7).
+Set the composition's "Preserve resolution when nested" toggle
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Composition.SetResolutionFactor
 
@@ -771,7 +839,14 @@ SetPreserveNestedResolution toggles "Preserve resolution when nested" (cdta @0x8
 func (c *Composition) SetResolutionFactor(x, y uint16) error
 ```
 
-SetResolutionFactor writes the comp's preview-resolution downsample factors (X, Y) to cdta @0x00 / @0x02 (two uint16 BE). Mirrors AE Scripting's CompItem.resolutionFactor. [1,1] = Full, [2,2] = Half, [4,4] = Quarter; custom non-square pairs allowed. Both factors must be ≥ 1 (AE clamps; we refuse 0 to surface caller bugs). length-preserving (4 bytes).
+Set the composition's preview-resolution downsample factors
+
+Mirrors AE Scripting's CompItem.resolutionFactor. [1,1] = Full, [2,2] = Half, [4,4] = Quarter; custom non-square pairs are allowed.
+
+| Parameter | Description |
+|---|---|
+| `x` | the horizontal downsample factor, must be >= 1 |
+| `y` | the vertical downsample factor, must be >= 1 |
 
 **Example:**
 
@@ -791,7 +866,11 @@ _ = comp.SetResolutionFactor(1, 1)	// back to full
 func (c *Composition) SetShutterAngle(degrees uint16) error
 ```
 
-SetShutterAngle writes the motion-blur shutter angle (uint16 BE, degrees, AE UI range 0..720, default 180) to cdta @0xAE. length-preserving (2 bytes).
+Set the composition's motion-blur shutter angle
+
+| Parameter | Description |
+|---|---|
+| `degrees` | the new shutter angle in degrees, AE UI range 0..720, default 180 |
 
 ### Composition.SetShutterPhase
 
@@ -799,7 +878,13 @@ SetShutterAngle writes the motion-blur shutter angle (uint16 BE, degrees, AE UI 
 func (c *Composition) SetShutterPhase(phase int32) error
 ```
 
-SetShutterPhase writes the motion-blur shutter phase (int32 BE) to cdta @0xB4. Unit is likely degrees (AE UI shows -90 / +90 / etc.) but not independently UI-verified — caller passes the raw int32 value. length-preserving (4 bytes).
+Set the composition's motion-blur shutter phase
+
+Unit is likely degrees (AE UI shows values like -90 / +90) but that has not been independently UI-verified — the caller passes the raw int32 value as-is.
+
+| Parameter | Description |
+|---|---|
+| `phase` | the new shutter phase value |
 
 ### Composition.SetSize
 
@@ -807,7 +892,12 @@ SetShutterPhase writes the motion-blur shutter phase (int32 BE) to cdta @0xB4. U
 func (c *Composition) SetSize(width, height uint16) error
 ```
 
-SetSize writes a new canvas pixel size (width, height) to cdta @0x8C / @0x8E (uint16 BE pair). length-preserving (4 bytes). Does not touch pixel aspect ratio at @0x90/@0x94 — set that separately via SetPixelAspect.
+Set the composition's canvas pixel size
+
+| Parameter | Description |
+|---|---|
+| `width` | the new canvas width in pixels |
+| `height` | the new canvas height in pixels |
 
 ### Composition.SetWorkArea
 
@@ -815,11 +905,14 @@ SetSize writes a new canvas pixel size (width, height) to cdta @0x8C / @0x8E (ui
 func (c *Composition) SetWorkArea(startSeconds, endSeconds float64) error
 ```
 
-SetWorkArea writes new work-area start/end times (seconds) to cdta @0x1C-0x2B. Both values are encoded as dividend/divisor pairs; we reuse the existing dividend divisor at @0x20 and @0x28 when non-zero (typically 600 — AE's standard work-area divisor) and pick 600 when the existing divisor is zero.
+Set the composition's work-area start and end times
 
-startSeconds and endSeconds must be non-negative; endSeconds may be less than startSeconds (AE allows that visually — the work area simply has zero/negative span — but most workflows want endSeconds > startSeconds).
+Both values are encoded as dividend/divisor pairs; this setter reuses the existing divisors when non-zero (typically 600, AE's standard work-area divisor) and falls back to 600 when the existing divisor is zero. endSeconds may be less than startSeconds — AE allows that visually, giving the work area a zero or negative span — but most workflows want endSeconds greater than startSeconds.
 
-length-preserving (16 bytes total).
+| Parameter | Description |
+|---|---|
+| `startSeconds` | the new work-area start time in seconds, must be non-negative |
+| `endSeconds` | the new work-area end time in seconds, must be non-negative |
 
 **Example:**
 
@@ -837,7 +930,13 @@ if comp := proj.CompositionByName("Main"); comp != nil {
 func (c *Composition) SetWorkAreaDurationFrame(frame int) error
 ```
 
-SetWorkAreaDurationFrame writes the work-area end so that end−start equals the given integer frame span, keeping start fixed.
+Set a composition's work-area duration from an integer frame count
+
+Recomputes the work-area end so that end minus start equals the given frame span, keeping start fixed, then delegates to the seconds-based work-area setter.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new work-area duration as a frame count |
 
 ### Composition.SetWorkAreaEndFrame
 
@@ -845,7 +944,13 @@ SetWorkAreaDurationFrame writes the work-area end so that end−start equals the
 func (c *Composition) SetWorkAreaEndFrame(frame int) error
 ```
 
-SetWorkAreaEndFrame writes the work-area end from an integer frame.
+Set a composition's work-area end from an integer frame count
+
+Converts frame back to seconds via FrameRate, then delegates to the seconds-based work-area setter, preserving the existing start.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new work-area end as a frame count |
 
 ### Composition.SetWorkAreaStartFrame
 
@@ -853,7 +958,13 @@ SetWorkAreaEndFrame writes the work-area end from an integer frame.
 func (c *Composition) SetWorkAreaStartFrame(frame int) error
 ```
 
-SetWorkAreaStartFrame writes the work-area start from an integer frame, preserving the existing end. Delegates to SetWorkArea.
+Set a composition's work-area start from an integer frame count
+
+Converts frame back to seconds via FrameRate, then delegates to the seconds-based work-area setter, preserving the existing end.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new work-area start as a frame count |
 
 # Guide object
 

@@ -50,10 +50,20 @@ func (l *Layer) validateRunIdx(runIdx int) error {
 	return nil
 }
 
-// SetRunFontSize writes a new font size (em points) to style run #runIdx.
-// length-variable splice in the btdk PostScript body.
-//
-//aep:cap domain=text tier=stable verify=render-pixel gate=TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point-size key 必须写 REAL(FormatPSReal),写裸整数 AE 读成 16.16 定点→fontSize/65536" alias="font size,字号,字体大小,run font size"
+// @summary     Set the font size of a text style run
+// @description Splices a new font-size value into the btdk PostScript body
+//   for the given run.
+// @param       runIdx   index of the style run to update
+// @param       sizePts  new font size in em points
+// @domain      text
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; the point-size key
+//   must be written as REAL (FormatPSReal) — writing a bare integer makes AE
+//   read it as a 16.16 fixed-point value, dividing fontSize by 65536
+// @alias       font size,字号,字体大小,run font size
 func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -65,9 +75,19 @@ func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error {
 	return nil
 }
 
-// SetRunTracking writes character tracking (1/1000 em) on style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=render-pixel gate=TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;tracking 是真整数键(FormatPSNumber)" alias="tracking,字距,字符间距,character spacing"
+// @summary     Set the character tracking of a text style run
+// @description Splices a new tracking value into the btdk PostScript body
+//   for the given run.
+// @param       runIdx    index of the style run to update
+// @param       tracking  new tracking value in 1/1000 em units
+// @domain      text
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; tracking is a true
+//   integer key (FormatPSNumber)
+// @alias       tracking,字距,字符间距,character spacing
 func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -79,10 +99,21 @@ func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 	return nil
 }
 
-// SetRunBaselineShift writes baseline shift (em points; positive = up)
-// on style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run single-run DOM fixture)" alias="baseline shift,基线偏移,baseline offset"
+// @summary     Set the baseline shift of a text style run
+// @description Splices a new baseline-shift value into the btdk PostScript
+//   body for the given run. Positive values shift the run up.
+// @param       runIdx  index of the style run to update
+// @param       shift   baseline shift in em points (positive = up)
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; the point key
+//   must be written as REAL (FormatPSReal) or AE reads it as a 16.16
+//   fixed-point value; verified against a single-run DOM fixture on both AE
+//   versions
+// @alias       baseline shift,基线偏移,baseline offset
 func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -94,12 +125,24 @@ func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 	return nil
 }
 
-// SetRunLeading writes leading (em points) on style run #runIdx. Note:
-// AE auto-leading is gated by the AutoLeading flag — to use this
-// value the caller should also disable auto-leading via
-// SetRunAutoLeading(runIdx, false), otherwise AE overrides it.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal);需搭配 SetRunAutoLeading(false);双版本 AE gated(DOM 值验 leading=80);⚠ render 仍默认行距(像素未验,见 incident text-style-render-gate-fromscratch-blocked)" alias="leading,行距,line spacing,auto leading"
+// @summary     Set the leading of a text style run
+// @description Splices a new leading value into the btdk PostScript body for
+//   the given run. AE auto-leading is gated by the AutoLeading flag — to make
+//   this value take effect the caller should also disable auto-leading via
+//   SetRunAutoLeading(runIdx, false), otherwise AE overrides it.
+// @param       runIdx   index of the style run to update
+// @param       leading  new leading value in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; the point key
+//   must be written as REAL (FormatPSReal); pair with SetRunAutoLeading(false);
+//   verified against the DOM value (leading=80) on both AE versions; render
+//   still falls back to default leading because the rendered-pixel boundary
+//   for from-scratch text is not yet verified
+// @alias       leading,行距,line spacing,auto leading
 func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -111,11 +154,21 @@ func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 	return nil
 }
 
-// SetRunAutoLeading toggles AE's "auto leading" flag on style run #runIdx.
-// When true, the Leading value is computed by AE (typically FontSize × 1.2);
-// when false, the explicit Leading value applies.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="auto leading,自动行距,leading flag"
+// @summary     Toggle auto-leading on a text style run
+// @description Splices the auto-leading flag into the btdk PostScript body
+//   for the given run. When true, the Leading value is computed by AE
+//   (typically FontSize x 1.2); when false, the explicit Leading value
+//   applies.
+// @param       runIdx  index of the style run to update
+// @param       auto    whether AE should compute leading automatically
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; verified against
+//   a single-run DOM fixture on both AE versions
+// @alias       auto leading,自动行距,leading flag
 func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -127,11 +180,23 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 	return nil
 }
 
-// SetRunFontIndex repoints style run #runIdx at a different entry in
-// the Fonts table (TextSource.Fonts). Caller is responsible for ensuring
-// the index is in range; the underlying psValue is just an integer.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextFont_AEShipGate_AE2020,TestTextFont_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;fontIdx 须在 Fonts 表范围内;双版本 AE gated(text-font:AddFont(ArialMT)+SetRunFontIndex→DOM textDocument.font=ArialMT)" alias="font index,字体索引,switch font,change font"
+// @summary     Repoint a text style run at a different font table entry
+// @description Splices a new font index into the btdk PostScript body for
+//   the given run, referencing an entry in the layer's Fonts table
+//   (TextSource.Fonts). The underlying value is a plain integer; the caller
+//   is responsible for ensuring the index is in range.
+// @param       runIdx   index of the style run to update
+// @param       fontIdx  index into TextSource.Fonts to point the run at
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextFont_AEShipGate_AE2020,TestTextFont_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; fontIdx must be
+//   within the Fonts table range; verified on both AE versions via
+//   AddFont(ArialMT) + SetRunFontIndex producing DOM textDocument.font =
+//   ArialMT
+// @alias       font index,字体索引,switch font,change font
 func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -146,9 +211,19 @@ func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	return nil
 }
 
-// SetRunFauxBold toggles synthetic bold on style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="faux bold,仿粗体,synthetic bold,fake bold"
+// @summary     Toggle synthetic bold on a text style run
+// @description Splices the faux-bold flag into the btdk PostScript body for
+//   the given run.
+// @param       runIdx  index of the style run to update
+// @param       on      whether synthetic bold is enabled
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; verified against
+//   a single-run DOM fixture on both AE versions
+// @alias       faux bold,仿粗体,synthetic bold,fake bold
 func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -160,9 +235,19 @@ func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 	return nil
 }
 
-// SetRunFauxItalic toggles synthetic italic on style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="faux italic,仿斜体,synthetic italic,fake italic"
+// @summary     Toggle synthetic italic on a text style run
+// @description Splices the faux-italic flag into the btdk PostScript body for
+//   the given run.
+// @param       runIdx  index of the style run to update
+// @param       on      whether synthetic italic is enabled
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; verified against
+//   a single-run DOM fixture on both AE versions
+// @alias       faux italic,仿斜体,synthetic italic,fake italic
 func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -174,11 +259,22 @@ func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 	return nil
 }
 
-// SetRunHorizontalScale / SetRunVerticalScale write the raw scale
-// values used by AE on style run #runIdx. See TextStyleRun docs for
-// the unit notes (AE default is 1; scripted setter range 0..100).
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run DOM scale=50 实读)" alias="horizontal scale,水平缩放,text scale,字体缩放"
+// @summary     Set the horizontal scale of a text style run
+// @description Splices a new horizontal-scale value into the btdk
+//   PostScript body for the given run. AE default is 1; the scripted setter
+//   range is 0..100 (see TextStyleRun for unit notes).
+// @param       runIdx  index of the style run to update
+// @param       scale   new horizontal scale value
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; the point key
+//   must be written as REAL (FormatPSReal) or AE reads it as a 16.16
+//   fixed-point value; verified by reading back DOM scale=50 on both AE
+//   versions
+// @alias       horizontal scale,水平缩放,text scale,字体缩放
 func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -190,11 +286,22 @@ func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	return nil
 }
 
-// SetRunVerticalScale writes the vertical scale value used by AE on style
-// run #runIdx. See TextStyleRun docs for unit notes (AE default is 1;
-// scripted setter range 0..100).
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run DOM scale=150 实读)" alias="vertical scale,垂直缩放,text scale,字体缩放"
+// @summary     Set the vertical scale of a text style run
+// @description Splices a new vertical-scale value into the btdk PostScript
+//   body for the given run. AE default is 1; the scripted setter range is
+//   0..100 (see TextStyleRun for unit notes).
+// @param       runIdx  index of the style run to update
+// @param       scale   new vertical scale value
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; the point key
+//   must be written as REAL (FormatPSReal) or AE reads it as a 16.16
+//   fixed-point value; verified by reading back DOM scale=150 on both AE
+//   versions
+// @alias       vertical scale,垂直缩放,text scale,字体缩放
 func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -206,10 +313,21 @@ func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 	return nil
 }
 
-// SetRunTsume writes the CJK character-spacing adjustment (0..100)
-// on style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;CJK 专用;DOM 0..1;⚠ 必须 FormatPSReal(本批修了 FormatPSNumber bug→AE 读成 /65536);双版本 AE gated(text-run DOM tsume=0.5)" alias="tsume,CJK spacing,字间压缩,CJK 字距"
+// @summary     Set the CJK character-spacing adjustment of a text style run
+// @description Splices a new tsume value into the btdk PostScript body for
+//   the given run. The setter range is 0..100; the DOM range is 0..1.
+// @param       runIdx  index of the style run to update
+// @param       tsume   new tsume value in the 0..100 range
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; CJK-only
+//   attribute; the key must be written as REAL (FormatPSReal) — writing it
+//   as a plain number makes AE divide the value by 65536; verified against
+//   DOM tsume=0.5 on both AE versions
+// @alias       tsume,CJK spacing,字间压缩,CJK 字距
 func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -221,10 +339,20 @@ func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 	return nil
 }
 
-// SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1)
-// on style run #runIdx. Encoded as btdk's [A, R, G, B] array.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;双版本 AE gated(text-run single-run DOM fixture)" alias="fill color,填充颜色,text color,字体颜色,font color"
+// @summary     Set the fill color of a text style run
+// @description Splices a new fill color into the btdk PostScript body for
+//   the given run, encoded as btdk's [A, R, G, B] array.
+// @param       runIdx  index of the style run to update
+// @param       rgba    fill color as [R, G, B, A], each component in 0..1
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; each RGBA
+//   component is in 0..1; verified against a single-run DOM fixture on both
+//   AE versions
+// @alias       fill color,填充颜色,text color,字体颜色,font color
 func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -236,10 +364,20 @@ func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 	return nil
 }
 
-// SetRunStrokeColor writes the stroke paint color [R, G, B, A] on
-// style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;RGBA 各分量 0..1;双版本 AE gated(text-run single-run DOM fixture)" alias="stroke color,描边颜色,text stroke,字体描边"
+// @summary     Set the stroke color of a text style run
+// @description Splices a new stroke color into the btdk PostScript body for
+//   the given run.
+// @param       runIdx  index of the style run to update
+// @param       rgba    stroke color as [R, G, B, A], each component in 0..1
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; each RGBA
+//   component is in 0..1; verified against a single-run DOM fixture on both
+//   AE versions
+// @alias       stroke color,描边颜色,text stroke,字体描边
 func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -251,10 +389,19 @@ func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 	return nil
 }
 
-// SetRunApplyStroke toggles whether the stroke is rendered on
-// style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="apply stroke,启用描边,stroke on off,enable stroke"
+// @summary     Toggle whether a text style run renders its stroke
+// @description Splices the apply-stroke flag into the btdk PostScript body
+//   for the given run.
+// @param       runIdx  index of the style run to update
+// @param       apply   whether the stroke is rendered
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; verified against
+//   a single-run DOM fixture on both AE versions
+// @alias       apply stroke,启用描边,stroke on off,enable stroke
 func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -266,9 +413,21 @@ func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 	return nil
 }
 
-// SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;point key 写 REAL(FormatPSReal)否则 AE 读成 16.16 定点;双版本 AE gated(text-run single-run DOM fixture)" alias="stroke width,描边宽度,stroke size,text outline width"
+// @summary     Set the stroke width of a text style run
+// @description Splices a new stroke-width value into the btdk PostScript
+//   body for the given run.
+// @param       runIdx  index of the style run to update
+// @param       width   new stroke width in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; the point key
+//   must be written as REAL (FormatPSReal) or AE reads it as a 16.16
+//   fixed-point value; verified against a single-run DOM fixture on both AE
+//   versions
+// @alias       stroke width,描边宽度,stroke size,text outline width
 func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -280,12 +439,21 @@ func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 	return nil
 }
 
-// SetRunCapsOption writes the font caps option on style run #runIdx
-// (AE 24+ writeable; underlying btdk byte exists in AE 2020 files too,
-// but AE 2020 ScriptingAPI marks allCaps / smallCaps readonly so
-// fixture generation requires AE 24).
-//
-//aep:cap domain=text tier=stable verify=render-pixel gate=TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写" alias="caps option,大写选项,all caps,small caps,uppercase"
+// @summary     Set the caps option of a text style run
+// @description Splices a new caps-option value into the btdk PostScript
+//   body for the given run. The underlying btdk byte exists in AE 2020 files
+//   too, but the AE 2020 scripting API marks allCaps / smallCaps read-only,
+//   so the option is only writeable from AE 24 onward.
+// @param       runIdx  index of the style run to update
+// @param       caps    new caps option
+// @domain      text
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; only writeable
+//   through the AE 24+ scripting API
+// @alias       caps option,大写选项,all caps,small caps,uppercase
 func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -300,10 +468,22 @@ func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 	return nil
 }
 
-// SetRunBaselineOption writes the font baseline option on style run #runIdx.
-// AE 24+ writeable; mirrors subscript / superscript readonly attrs.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 AE24+ enum + AE2025 DOM,resave-preservation)" alias="baseline option,基线选项,subscript,superscript,上标,下标"
+// @summary     Set the baseline option of a text style run
+// @description Splices a new baseline-option value into the btdk PostScript
+//   body for the given run. Mirrors the subscript / superscript read-only
+//   attributes exposed elsewhere.
+// @param       runIdx  index of the style run to update
+// @param       base    new baseline option
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; only writeable
+//   through the AE 24+ scripting API; on AE 2020 the enum round-trips as an
+//   opaque preserved value, while AE 2025 exposes it through the DOM —
+//   verified by re-saving and re-reading on both AE versions
+// @alias       baseline option,基线选项,subscript,superscript,上标,下标
 func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -318,10 +498,20 @@ func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error 
 	return nil
 }
 
-// SetRunStrokeOverFill toggles whether the stroke renders over the fill
-// (true) or under it (false) on style run #runIdx. Default in AE is true.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;双版本 AE gated(text-run single-run DOM fixture)" alias="stroke over fill,描边覆盖填充,stroke order,描边顺序"
+// @summary     Set the stroke/fill render order of a text style run
+// @description Splices the stroke-over-fill flag into the btdk PostScript
+//   body for the given run. AE's default is true (stroke renders over fill).
+// @param       runIdx  index of the style run to update
+// @param       over    true to render the stroke over the fill, false for
+//   under
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextRun_AEShipGate_AE2020,TestTextRun_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; verified against
+//   a single-run DOM fixture on both AE versions
+// @alias       stroke over fill,描边覆盖填充,stroke order,描边顺序
 func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -333,13 +523,26 @@ func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 	return nil
 }
 
-// SetRunAutoKernType writes the auto-kerning mode on style run #runIdx.
-// AE 24+ writeable (btdk style-run /11). Note: setting to TextAutoKernNoAuto
-// without also assigning a manual kerning value will read as "0 spacing"
-// in AE — manual kerning lives in a separate per-character sub-tree at
-// btdk /1/1[0]/0/8 which this library does not yet expose for writing.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;NoAuto 需配合 SetManualKerning 才有效;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="auto kern,自动字距调整,kerning mode,optical kerning,metrics kerning"
+// @summary     Set the auto-kerning mode of a text style run
+// @description Splices a new auto-kern-type value into the btdk PostScript
+//   body for the given run (btdk style-run /11). Setting it to
+//   TextAutoKernNoAuto without also assigning a manual kerning value reads
+//   as zero spacing in AE — manual kerning lives in the separate
+//   per-character sub-tree at btdk /1/1[0]/0/8, written via SetManualKerning.
+// @param       runIdx  index of the style run to update
+// @param       kt      new auto-kern type
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; only writeable
+//   through the AE 24+ scripting API; TextAutoKernNoAuto needs a paired
+//   SetManualKerning call to have a visible effect; on AE 2020 the enum
+//   round-trips as an opaque preserved value, while AE 2025 exposes it
+//   through the DOM — verified by re-saving and re-reading on both AE
+//   versions
+// @alias       auto kern,自动字距调整,kerning mode,optical kerning,metrics kerning
 func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -354,11 +557,22 @@ func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 	return nil
 }
 
-// SetRunNoBreak toggles the "do not break" character flag on style run
-// #runIdx (AE 24+ writeable, btdk style-run /52). When true, AE won't
-// allow line breaks to fall inside the run.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="no break,禁止换行,do not break,word wrap"
+// @summary     Toggle the "do not break" flag on a text style run
+// @description Splices the no-break flag into the btdk PostScript body for
+//   the given run (btdk style-run /52). When true, AE won't allow line
+//   breaks to fall inside the run.
+// @param       runIdx  index of the style run to update
+// @param       on      whether line breaks inside the run are disallowed
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; only writeable
+//   through the AE 24+ scripting API; on AE 2020 the enum round-trips as an
+//   opaque preserved value, while AE 2025 exposes it through the DOM —
+//   verified by re-saving and re-reading on both AE versions
+// @alias       no break,禁止换行,do not break,word wrap
 func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -370,10 +584,21 @@ func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 	return nil
 }
 
-// SetRunLineJoinType writes the stroke corner join style on style run
-// #runIdx (AE 24+ writeable, btdk style-run /62).
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="line join,stroke join,线段连接,描边角点,miter join,bevel join,round join"
+// @summary     Set the stroke corner join style of a text style run
+// @description Splices a new line-join-type value into the btdk PostScript
+//   body for the given run (btdk style-run /62).
+// @param       runIdx  index of the style run to update
+// @param       j       new line join type
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; only writeable
+//   through the AE 24+ scripting API; on AE 2020 the enum round-trips as an
+//   opaque preserved value, while AE 2025 exposes it through the DOM —
+//   verified by re-saving and re-reading on both AE versions
+// @alias       line join,stroke join,线段连接,描边角点,miter join,bevel join,round join
 func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -388,10 +613,21 @@ func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 	return nil
 }
 
-// SetRunDigitSet writes the digit set on style run #runIdx (AE 24+
-// writeable, btdk style-run /70).
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="digit set,数字集,Arabic digits,Hindi digits,阿拉伯数字,印地数字"
+// @summary     Set the digit set of a text style run
+// @description Splices a new digit-set value into the btdk PostScript body
+//   for the given run (btdk style-run /70).
+// @param       runIdx  index of the style run to update
+// @param       d       new digit set
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript body splice; only writeable
+//   through the AE 24+ scripting API; on AE 2020 the enum round-trips as an
+//   opaque preserved value, while AE 2025 exposes it through the DOM —
+//   verified by re-saving and re-reading on both AE versions
+// @alias       digit set,数字集,Arabic digits,Hindi digits,阿拉伯数字,印地数字
 func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
@@ -410,23 +646,25 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 // Font table extension
 // ──────────────────────────────────────────────────────────────────
 
-// AddFont appends a new entry to the layer's Fonts table (btdk path
-// /0/1/0) and returns the new font index. Subsequent
-// SetRunFontIndex(runIdx, returnedIndex) calls can reference it.
-//
-// length-variable: extends the PostScript font array by one entry
-// + its dict wrapper. The new entry is serialized in the same shape
-// AE writes:
-//
-//	<< /0 << /99 /CoolTypeFont /0 << /0 (<FE FF utf16be name>) /2 0 >> >> >>
-//
-// where `/2 0` marks the font as user-resolved (matches the second
-// real-world font slot AE writes for non-default fonts).
-//
-// Returns an error if the layer isn't a text layer or the btdk Fonts
-// array can't be located.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextFont_AEShipGate_AE2020,TestTextFont_AEShipGate_AE2025 boundary="length-variable;btdk 字体表数组扩展一条记录;需搭配 SetRunFontIndex 引用新索引;fontName 须真实已装系统字体的 PostScript 名(如 ArialMT);双版本 AE gated(text-font)" alias="add font,添加字体,font table,字体表,register font"
+// @summary     Append a new entry to the layer's font table
+// @description Extends the btdk Fonts array (btdk path /0/1/0) by one entry
+//   plus its dict wrapper. The new entry is serialized in the same shape AE
+//   writes, with the second dict slot marking the font as user-resolved
+//   (matching the slot AE writes for non-default fonts). Use the returned
+//   index with SetRunFontIndex to point a style run at the new font.
+// @param       fontName  PostScript name of an installed system font (for
+//   example ArialMT)
+// @returns     the index of the newly appended font entry
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextFont_AEShipGate_AE2020,TestTextFont_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable; extends the btdk font table array by one
+//   record; pair with SetRunFontIndex to reference the new index; fontName
+//   must be the PostScript name of a font actually installed on the
+//   rendering system; verified on both AE versions
+// @alias       add font,添加字体,font table,字体表,register font
 func (l *Layer) AddFont(fontName string) (int, error) {
 	if l.back == nil || l.TextSource == nil {
 		return -1, fmt.Errorf("layer %q: not a text layer", l.Name)
@@ -455,10 +693,18 @@ func (l *Layer) validateParaIdx(paraIdx int) error {
 	return nil
 }
 
-// SetParagraphJustification writes a new alignment enum on
-// paragraph #paraIdx.
-//
-//aep:cap domain=text tier=stable verify=render-pixel gate=TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice" alias="justification,对齐,alignment,text align,left align,right align,center,全对齐"
+// @summary     Set the alignment of a text paragraph
+// @description Splices a new justification value into the btdk PostScript
+//   paragraph body for the given paragraph.
+// @param       paraIdx  index of the paragraph to update
+// @param       j        new justification value
+// @domain      text
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGTextStyle_AEShipGate_AE2020,TestMGTextStyle_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript paragraph body splice
+// @alias       justification,对齐,alignment,text align,left align,right align,center,全对齐
 func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -470,10 +716,22 @@ func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) erro
 	return nil
 }
 
-// SetParagraphFirstLineIndent writes firstLineIndent (em points) on
-// paragraph #paraIdx. AE 24+ writeable (AE 2020 ScriptingAPI no-op on point text).
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 FormatPSNumber→AE 读 /65536 bug);双版本 AE gated(text-para;AE2025 DOM firstLineIndent 值验 + 双版本 resave-preservation)" alias="first line indent,首行缩进,paragraph indent,段落缩进"
+// @summary     Set the first-line indent of a text paragraph
+// @description Splices a new firstLineIndent value into the btdk paragraph
+//   body for the given paragraph. The AE 2020 scripting API is a no-op for
+//   this attribute on point text; it is writeable from AE 24 onward.
+// @param       paraIdx  index of the paragraph to update
+// @param       v        first-line indent in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk paragraph splice; the key must be
+//   written as REAL (FormatPSReal) or AE divides the value by 65536;
+//   verified against the DOM firstLineIndent value plus a resave-preservation
+//   check on both AE versions
+// @alias       first line indent,首行缩进,paragraph indent,段落缩进
 func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -485,9 +743,22 @@ func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 	return nil
 }
 
-// SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);AE textDocument 无 leftMargin DOM→双版本 AE gated(text-para resave-preservation,值经 AE 引擎存活)" alias="start indent,左缩进,paragraph start indent,left margin"
+// @summary     Set the start indent of a text paragraph
+// @description Splices a new startIndent value into the btdk paragraph body
+//   for the given paragraph.
+// @param       paraIdx  index of the paragraph to update
+// @param       v        start indent in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk paragraph splice; the key must be
+//   written as REAL (FormatPSReal) or AE divides the value by 65536; the AE
+//   textDocument has no leftMargin DOM property, so this is verified by
+//   resave-preservation — confirming the value survives a round trip
+//   through the AE engine — on both AE versions
+// @alias       start indent,左缩进,paragraph start indent,left margin
 func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -499,9 +770,22 @@ func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 	return nil
 }
 
-// SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);AE textDocument 无 rightMargin DOM→双版本 AE gated(text-para resave-preservation,值经 AE 引擎存活)" alias="end indent,右缩进,paragraph end indent,right margin"
+// @summary     Set the end indent of a text paragraph
+// @description Splices a new endIndent value into the btdk paragraph body
+//   for the given paragraph.
+// @param       paraIdx  index of the paragraph to update
+// @param       v        end indent in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk paragraph splice; the key must be
+//   written as REAL (FormatPSReal) or AE divides the value by 65536; the AE
+//   textDocument has no rightMargin DOM property, so this is verified by
+//   resave-preservation — confirming the value survives a round trip
+//   through the AE engine — on both AE versions
+// @alias       end indent,右缩进,paragraph end indent,right margin
 func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -513,9 +797,21 @@ func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 	return nil
 }
 
-// SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);双版本 AE gated(text-para;AE2025 DOM spaceBefore 值验 + 双版本 resave-preservation)" alias="space before,段前间距,paragraph space before,paragraph spacing"
+// @summary     Set the space-before of a text paragraph
+// @description Splices a new spaceBefore value into the btdk paragraph body
+//   for the given paragraph.
+// @param       paraIdx  index of the paragraph to update
+// @param       v        space before in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk paragraph splice; the key must be
+//   written as REAL (FormatPSReal) or AE divides the value by 65536;
+//   verified against the DOM spaceBefore value plus a resave-preservation
+//   check on both AE versions
+// @alias       space before,段前间距,paragraph space before,paragraph spacing
 func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -527,9 +823,21 @@ func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 	return nil
 }
 
-// SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025 boundary="length-variable;btdk paragraph splice;⚠ 必须 FormatPSReal(本批修了 /65536 bug);双版本 AE gated(text-para;AE2025 DOM spaceAfter 值验 + 双版本 resave-preservation)" alias="space after,段后间距,paragraph space after,paragraph spacing"
+// @summary     Set the space-after of a text paragraph
+// @description Splices a new spaceAfter value into the btdk paragraph body
+//   for the given paragraph.
+// @param       paraIdx  index of the paragraph to update
+// @param       v        space after in em points
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextPara_AEShipGate_AE2020,TestTextPara_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk paragraph splice; the key must be
+//   written as REAL (FormatPSReal) or AE divides the value by 65536;
+//   verified against the DOM spaceAfter value plus a resave-preservation
+//   check on both AE versions
+// @alias       space after,段后间距,paragraph space after,paragraph spacing
 func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -541,10 +849,20 @@ func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 	return nil
 }
 
-// SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx.
-// Default in AE is true. AE 24+ writeable.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2025 DOM autoHyphenate + 双版本 resave-preservation)" alias="auto hyphenate,自动连字,hyphenation,断字"
+// @summary     Toggle auto-hyphenation on a text paragraph
+// @description Splices the auto-hyphenate flag into the btdk paragraph body
+//   for the given paragraph. AE's default is true.
+// @param       paraIdx  index of the paragraph to update
+// @param       on       whether auto-hyphenation is enabled
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript paragraph body splice; only
+//   writeable through the AE 24+ scripting API; verified against the DOM
+//   autoHyphenate value plus a resave-preservation check on both AE versions
+// @alias       auto hyphenate,自动连字,hyphenation,断字
 func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -556,10 +874,22 @@ func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	return nil
 }
 
-// SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx
-// (AE 24+ writeable, btdk paragraph /8).
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="leading type,行距类型,roman leading,Japanese leading,段落行距"
+// @summary     Set the leading type of a text paragraph
+// @description Splices a new leading-type value into the btdk paragraph
+//   body for the given paragraph (btdk paragraph /8).
+// @param       paraIdx  index of the paragraph to update
+// @param       lt       new leading type
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript paragraph body splice; only
+//   writeable through the AE 24+ scripting API; on AE 2020 the enum
+//   round-trips as an opaque preserved value, while AE 2025 exposes it
+//   through the DOM — verified by re-saving and re-reading on both AE
+//   versions
+// @alias       leading type,行距类型,roman leading,Japanese leading,段落行距
 func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -574,11 +904,22 @@ func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 	return nil
 }
 
-// SetParagraphHangingRoman toggles Roman Hanging Punctuation on
-// paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). Only
-// meaningful for box-text.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;仅对 box-text 有意义;双版本 AE gated(text-enum;AE2025 DOM hangingRoman + 双版本 resave-preservation)" alias="hanging roman,悬挂标点,Roman Hanging Punctuation,段落悬挂"
+// @summary     Toggle Roman Hanging Punctuation on a text paragraph
+// @description Splices the hanging-roman flag into the btdk paragraph body
+//   for the given paragraph (btdk paragraph /21). Only meaningful for
+//   box-text.
+// @param       paraIdx  index of the paragraph to update
+// @param       on       whether Roman Hanging Punctuation is enabled
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript paragraph body splice; only
+//   writeable through the AE 24+ scripting API; only meaningful for
+//   box-text; verified against the DOM hangingRoman value plus a
+//   resave-preservation check on both AE versions
+// @alias       hanging roman,悬挂标点,Roman Hanging Punctuation,段落悬挂
 func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -590,11 +931,23 @@ func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	return nil
 }
 
-// SetParagraphDirection writes the paragraph reading direction on
-// paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). Affects
-// how mixed LTR/RTL text composes.
-//
-//aep:cap domain=text tier=stable verify=ae-accept gate=TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025 boundary="length-variable;btdk PostScript paragraph body splice;AE 24+ ScriptingAPI 才可写;双版本 AE gated(text-enum;AE2020 opaque 保留 + AE2025 DOM,resave-preservation)" alias="paragraph direction,段落方向,LTR,RTL,reading direction,阅读方向,从右到左"
+// @summary     Set the reading direction of a text paragraph
+// @description Splices a new paragraph-direction value into the btdk
+//   paragraph body for the given paragraph (btdk paragraph /33). Affects how
+//   mixed left-to-right and right-to-left text composes.
+// @param       paraIdx  index of the paragraph to update
+// @param       d        new paragraph reading direction
+// @domain      text
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestTextEnum_AEShipGate_AE2020,TestTextEnum_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable btdk PostScript paragraph body splice; only
+//   writeable through the AE 24+ scripting API; on AE 2020 the enum
+//   round-trips as an opaque preserved value, while AE 2025 exposes it
+//   through the DOM — verified by re-saving and re-reading on both AE
+//   versions
+// @alias       paragraph direction,段落方向,LTR,RTL,reading direction,阅读方向,从右到左
 func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
@@ -613,26 +966,29 @@ func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) err
 // Manual kerning (per-character)
 // ──────────────────────────────────────────────────────────────────
 
-// SetManualKerning writes per-character manual kerning values (in
-// 1/1000 em units) into the btdk dict. The values slice length must
-// equal the current per-character count (`len(TextSource.ManualKerning)`).
-//
-// Pre-condition: the layer must already have a manual-kerning slot —
-// AE only emits the /1/1[0]/0/8 sub-tree once some run has been set
-// to AutoKernType=NoAuto with a non-zero kerning value. First-time
-// enablement on a layer that lacks the slot is a structural change
-// and is not supported; create the slot from AE first (or set kerning
-// via the AE UI / scripting) and then mutate it here.
-//
-// For the values to actually render, the matching style run's
-// AutoKernType must be TextAutoKernNoAuto — toggle it independently
-// via SetRunAutoKernType.
-//
-// Mirrors AE-script TextDocument.kerning: the first-character value
-// is also written to sibling /1/1[0]/0/7 (the first-char scalar that
-// the script API reflects).
-//
-//aep:cap domain=text tier=stable verify=roundtrip boundary="length-variable;btdk /1/1[0]/0/8 per-char 数组原位重写;需 btdk 已有 manual-kerning slot(首次须先在 AE 中建立);值个数必须等于现有字符数;无专门 AE gate→round-trip" alias="manual kerning,手动字距,kerning values,per-character kerning,字距调整"
+// @summary     Set per-character manual kerning values on a text layer
+// @description Writes per-character manual kerning values into the btdk
+//   dict. The values slice length must equal the current per-character count
+//   (len(TextSource.ManualKerning)). For the values to actually render, the
+//   matching style run's AutoKernType must be TextAutoKernNoAuto — toggle it
+//   independently via SetRunAutoKernType. Mirrors the AE scripting
+//   TextDocument.kerning behavior: the first-character value is also
+//   written to the sibling /1/1[0]/0/7 slot, the first-char scalar reflected
+//   by the scripting API.
+// @param       values  one manual kerning value (1/1000 em units) per
+//   existing character
+// @domain      text
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-variable; rewrites the btdk /1/1[0]/0/8 per-character
+//   array in place; the layer must already have a manual-kerning slot — AE
+//   only emits that sub-tree once some run has been set to
+//   AutoKernType=NoAuto with a non-zero kerning value, so first-time
+//   enablement on a layer that lacks the slot is unsupported here and must
+//   be created from AE first; the values slice length must equal the
+//   existing character count
+// @alias       manual kerning,手动字距,kerning values,per-character kerning,字距调整
 func (l *Layer) SetManualKerning(values []int) error {
 	if l.TextSource == nil {
 		return fmt.Errorf("layer %q: not a text layer", l.Name)

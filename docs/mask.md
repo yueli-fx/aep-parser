@@ -205,7 +205,13 @@ read-only
 func (m *Mask) SetClosed(v bool) error
 ```
 
-SetClosed toggles whether the (first) path is closed (shph @0x14). length-preserving (1 byte). For animated masks this only affects the first snapshot; per-keyframe closed flags aren't exposed yet.
+Set whether a mask's path is closed
+
+For animated masks this only affects the first snapshot; per-keyframe closed flags aren't exposed yet.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new closed state |
 
 ### Mask.SetColor
 
@@ -213,7 +219,13 @@ SetClosed toggles whether the (first) path is closed (shph @0x14). length-preser
 func (m *Mask) SetColor(rgb [3]uint8) error
 ```
 
-SetColor writes the mask timeline label color RGB to mkif @0x2D/@0x2E/@0x2F. AE always keeps alpha (0x2C) at 0xFF; this setter does not touch it. length-preserving (3 bytes).
+Set a mask's timeline label color
+
+AE always keeps the alpha byte at 0xFF; this setter does not touch it.
+
+| Parameter | Description |
+|---|---|
+| `rgb` | the new label color (red, green, blue) |
 
 **Example:**
 
@@ -232,7 +244,13 @@ if layer := comp.LayerByID(1); layer != nil {
 func (m *Mask) SetExpansion(v float64) error
 ```
 
-SetExpansion sets the mask's Expansion (AE "Mask Expansion", internally `ADBE Mask Offset`) in pixels — positive grows the masked region, negative shrinks it. The leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen.
+Set a mask's expansion
+
+Internally this is the `ADBE Mask Offset` property (AE's UI calls it "Mask Expansion"). Positive values grow the masked region, negative values shrink it. The leaf is elided by AE when at its default, so setting it materializes the leaf in the mask's atom group.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new expansion in pixels (positive grows, negative shrinks) |
 
 ### Mask.SetFeather
 
@@ -240,7 +258,13 @@ SetExpansion sets the mask's Expansion (AE "Mask Expansion", internally `ADBE Ma
 func (m *Mask) SetFeather(xy [2]float64) error
 ```
 
-SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Feather` leaf is AE-default-elided; setting it materializes the leaf (synthesis-insert). Requires a mask round-tripped through Reopen.
+Set a mask's feather softness
+
+The `ADBE Mask Feather` leaf is elided by AE when at its default, so setting it materializes the leaf in the mask's atom group.
+
+| Parameter | Description |
+|---|---|
+| `xy` | the new feather softness in pixels (x, y); must be >= 0 |
 
 ### Mask.SetFeatherFalloff
 
@@ -248,7 +272,11 @@ SetFeather sets the mask's Feather softness (X, Y in pixels). The `ADBE Mask Fea
 func (m *Mask) SetFeatherFalloff(falloff MaskFeatherFalloff) error
 ```
 
-SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03. Valid values: MaskFeatherFalloffSmooth (0, default), MaskFeatherFalloffLinear (1). length-preserving (1 byte).
+Set a mask's feather-falloff curve
+
+| Parameter | Description |
+|---|---|
+| `falloff` | the new falloff curve (Smooth or Linear) |
 
 ### Mask.SetInverted
 
@@ -256,7 +284,11 @@ SetFeatherFalloff writes the mask's feather-falloff curve at mkif @0x03. Valid v
 func (m *Mask) SetInverted(v bool) error
 ```
 
-SetInverted toggles the mask Inverted flag (mkif @0x00). length-preserving (1 byte).
+Set a mask's Inverted flag
+
+| Parameter | Description |
+|---|---|
+| `v` | the new inverted state |
 
 ### Mask.SetLocked
 
@@ -264,7 +296,13 @@ SetInverted toggles the mask Inverted flag (mkif @0x00). length-preserving (1 by
 func (m *Mask) SetLocked(v bool) error
 ```
 
-SetLocked toggles the mask's lock flag (mkif @0x01). When locked, AE refuses edits to the mask in the timeline UI; the bytes are still mutable through this library. length-preserving (1 byte).
+Set a mask's lock flag
+
+When locked, AE refuses edits to the mask in the timeline UI; the underlying bytes are still mutable through this library.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new locked state |
 
 ### Mask.SetMaskMotionBlur
 
@@ -272,7 +310,11 @@ SetLocked toggles the mask's lock flag (mkif @0x01). When locked, AE refuses edi
 func (m *Mask) SetMaskMotionBlur(mode MaskMotionBlurMode) error
 ```
 
-SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. Valid values: MaskMotionBlurSameAsLayer (0), MaskMotionBlurOn (2), MaskMotionBlurOff (3). length-preserving (1 byte).
+Set a mask's per-mask motion-blur override
+
+| Parameter | Description |
+|---|---|
+| `mode` | the new motion-blur mode (SameAsLayer, On, or Off) |
 
 ### Mask.SetMode
 
@@ -280,7 +322,11 @@ SetMaskMotionBlur writes the per-mask motion-blur override at mkif @0x02. Valid 
 func (m *Mask) SetMode(mode MaskMode) error
 ```
 
-SetMode writes a new mask Mode enum (uint32 BE) to mkif @0x04. length-preserving (4 bytes).
+Set a mask's blend mode
+
+| Parameter | Description |
+|---|---|
+| `mode` | the new mask mode |
 
 **Example:**
 
@@ -301,7 +347,13 @@ for _, m := range layer.Masks {
 func (m *Mask) SetOpacity(v float64) error
 ```
 
-SetOpacity sets the mask's Opacity (0..1; AE UI shows 0..100%). The `ADBE Mask Opacity` leaf is AE-default-elided; setting it materializes the leaf in the mask atom group (synthesis-insert). Requires a mask round-tripped through Reopen (the atom chunk must exist). Mask Opacity scales how strongly the mask reveals/cuts — at 0.5 a reveal shows the layer at half strength.
+Set a mask's opacity
+
+Mask Opacity scales how strongly the mask reveals or cuts — at 0.5 a reveal shows the layer at half strength. The `ADBE Mask Opacity` leaf is elided by AE when at its default, so setting it materializes the leaf in the mask's atom group.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new opacity, normalized 0..1 (AE's UI shows 0..100%) |
 
 # MaskVertex object
 

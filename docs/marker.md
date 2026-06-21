@@ -174,7 +174,13 @@ SetDuration writes a new marker duration (seconds) to NmHd @0x08. Encoded as uin
 func (m *Marker) SetFrameDuration(frame int) error
 ```
 
-SetFrameDuration writes the marker's duration from an integer frame.
+Set a marker's duration from an integer frame count
+
+Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based duration setter.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new marker duration as a frame count |
 
 ### Marker.SetFrameTarget
 
@@ -190,7 +196,13 @@ SetFrameTarget rewrites the marker's frame-target id (fourth Utf8).
 func (m *Marker) SetFrameTime(frame int) error
 ```
 
-SetFrameTime writes the marker's time from an integer frame.
+Set a marker's time from an integer frame count
+
+Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based time setter.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new marker time as a frame count |
 
 ### Marker.SetLabel
 

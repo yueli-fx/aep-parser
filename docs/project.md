@@ -389,7 +389,11 @@ MarshalJSON serializes the Project as JSON.
 func (p *Project) SetAudioSampleRate(rate float64) error
 ```
 
-SetAudioSampleRate writes the adfr f64 BE. Refuses unknown rates outside AE's UI-supported set.
+Set the project's audio sample rate
+
+| Parameter | Description |
+|---|---|
+| `rate` | the new sample rate in Hz, must be one of AE's UI-supported rates |
 
 ### Project.SetBitsPerChannel
 
@@ -409,7 +413,11 @@ length-preserving (2 bytes total).
 func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error
 ```
 
-SetColorManagementSystem sets the color management system. Rejects values other than the defined enum members.
+Set the project's color management system
+
+| Parameter | Description |
+|---|---|
+| `v` | the new color management system, Adobe or OCIO |
 
 ### Project.SetCompensateForSceneReferredProfiles
 
@@ -417,7 +425,11 @@ SetColorManagementSystem sets the color management system. Rejects values other 
 func (p *Project) SetCompensateForSceneReferredProfiles(v bool) error
 ```
 
-SetCompensateForSceneReferredProfiles writes the acer byte. Refuses when the acer chunk is absent (no slot to mutate; AE 23+ writes it by default — files without it are rare).
+Set whether AE compensates for scene-referred profiles when rendering
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Project.SetDisplayStartFrame
 
@@ -425,7 +437,13 @@ SetCompensateForSceneReferredProfiles writes the acer byte. Refuses when the ace
 func (p *Project) SetDisplayStartFrame(v int) error
 ```
 
-SetDisplayStartFrame sets the display start frame (0 or 1). This modifies frames_count_type to preserve the value.
+Set the project's display start frame
+
+Implemented by modifying frames_count_type, which shares the same nnhd byte 20 written by SetFramesCountType, so the two setters are transitively gated together.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new display start frame, must be 0 or 1 |
 
 ### Project.SetExpressionEngine
 
@@ -433,9 +451,13 @@ SetDisplayStartFrame sets the display start frame (0 or 1). This modifies frames
 func (p *Project) SetExpressionEngine(engine string) error
 ```
 
-SetExpressionEngine writes the ExEn Utf8. Refuses values other than "extendscript" / "javascript-1.0" — matches py-aep's validator.
+Set the project's default expression engine
 
-When the project has no ExEn chunk yet (parser found none), we refuse rather than synthesize one — adding a new top-level LIST requires AE-side ship-gate verification.
+Refuses when the project has no ExEn chunk yet, rather than synthesizing one — adding a new top-level LIST requires its own AE ship-gate verification.
+
+| Parameter | Description |
+|---|---|
+| `engine` | the new engine name, must be "extendscript" or "javascript-1.0" |
 
 ### Project.SetFeetFramesFilmType
 
@@ -443,7 +465,11 @@ When the project has no ExEn chunk yet (parser found none), we refuse rather tha
 func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error
 ```
 
-SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.
+Set the film type used for feet+frames timecode display
+
+| Parameter | Description |
+|---|---|
+| `v` | the new film type, 35mm or 16mm |
 
 ### Project.SetFootageTimecodeDisplayStartType
 
@@ -451,7 +477,11 @@ SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.
 func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error
 ```
 
-SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9.
+Set how timecode is displayed for footage
+
+| Parameter | Description |
+|---|---|
+| `v` | the new display start type |
 
 ### Project.SetFramesCountType
 
@@ -459,7 +489,11 @@ SetFootageTimecodeDisplayStartType writes the timecode display start type to nnh
 func (p *Project) SetFramesCountType(v FramesCountType) error
 ```
 
-SetFramesCountType writes the frames count type to nnhd byte 20.
+Set how frames are counted in the project
+
+| Parameter | Description |
+|---|---|
+| `v` | the new frames count type |
 
 ### Project.SetFramesUseFeetFrames
 
@@ -467,7 +501,11 @@ SetFramesCountType writes the frames count type to nnhd byte 20.
 func (p *Project) SetFramesUseFeetFrames(v bool) error
 ```
 
-SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0.
+Set whether frames use feet+frames display
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Project.SetGpuAccelType
 
@@ -475,7 +513,11 @@ SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, b
 func (p *Project) SetGpuAccelType(s string) error
 ```
 
-SetGpuAccelType replaces the gpuG Utf8 string in-place (length-variable splice; WriteAEP recomputes parent LIST size).
+Set the project's GPU acceleration device id
+
+| Parameter | Description |
+|---|---|
+| `s` | the new device id string |
 
 ### Project.SetLinearBlending
 
@@ -499,7 +541,11 @@ SetLinearizeWorkingSpace toggles the lnrp chunk under root.
 func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error
 ```
 
-SetLutInterpolationMethod sets the LUT interpolation method. Rejects values other than the defined enum members.
+Set the project's LUT interpolation method
+
+| Parameter | Description |
+|---|---|
+| `v` | the new interpolation method, Trilinear or Tetrahedral |
 
 ### Project.SetOcioConfigurationFile
 
@@ -507,7 +553,11 @@ SetLutInterpolationMethod sets the LUT interpolation method. Rejects values othe
 func (p *Project) SetOcioConfigurationFile(v string) error
 ```
 
-SetOcioConfigurationFile sets the OCIO configuration file path.
+Set the project's OCIO configuration file path
+
+| Parameter | Description |
+|---|---|
+| `v` | the new configuration file path |
 
 ### Project.SetTimeDisplayType
 
@@ -515,7 +565,11 @@ SetOcioConfigurationFile sets the OCIO configuration file path.
 func (p *Project) SetTimeDisplayType(v TimeDisplayType) error
 ```
 
-SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0.
+Set how time is displayed in the project
+
+| Parameter | Description |
+|---|---|
+| `v` | the new time display type |
 
 ### Project.SetTimecodeDefaultBase
 
@@ -523,7 +577,11 @@ SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0.
 func (p *Project) SetTimecodeDefaultBase(v int) error
 ```
 
-SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15.
+Set the project's default timecode base
+
+| Parameter | Description |
+|---|---|
+| `v` | the new timecode base, range 1-999 |
 
 ### Project.SetTransparencyGridThumbnails
 
@@ -531,7 +589,11 @@ SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15.
 func (p *Project) SetTransparencyGridThumbnails(v bool) error
 ```
 
-SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25.
+Set whether the transparency grid is shown in thumbnails
+
+| Parameter | Description |
+|---|---|
+| `v` | the new toggle state |
 
 ### Project.SetWorkingGamma
 
@@ -539,7 +601,11 @@ SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nn
 func (p *Project) SetWorkingGamma(gamma float64) error
 ```
 
-SetWorkingGamma writes the dwga selector byte. Refuses values other than 2.2 and 2.4 (AE's only UI options).
+Set the project's working gamma
+
+| Parameter | Description |
+|---|---|
+| `gamma` | the new working gamma, must be 2.2 or 2.4 (AE's only UI options) |
 
 ### Project.WriteAEP
 

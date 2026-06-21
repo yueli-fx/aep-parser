@@ -70,11 +70,16 @@ func (p *Project) CompensateForSceneReferredProfiles() bool {
 	return p.back.CompensateForSceneReferredProfiles()
 }
 
-// SetCompensateForSceneReferredProfiles writes the acer byte. Refuses
-// when the acer chunk is absent (no slot to mutate; AE 23+ writes it
-// by default — files without it are rare).
-//
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险;无专门 AE gate→round-trip;acer chunk 缺失时 refuse" alias="compensate scene referred profiles,场景参考配置文件补偿,acer"
+// @summary     Set whether AE compensates for scene-referred profiles when rendering
+// @param       v  the new toggle state
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving, low risk; refuses when the acer chunk is
+//   absent (no slot to mutate — AE 23+ writes it by default, so files
+//   without it are rare)
+// @alias       compensate scene referred profiles,场景参考配置文件补偿,acer
 func (p *Project) SetCompensateForSceneReferredProfiles(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no acer chunk — cannot SetCompensateForSceneReferredProfiles")
@@ -95,10 +100,15 @@ func (p *Project) AudioSampleRate() float64 {
 	return p.back.AudioSampleRate()
 }
 
-// SetAudioSampleRate writes the adfr f64 BE. Refuses unknown rates
-// outside AE's UI-supported set.
-//
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险;enum 校验(AE UI 支持值);无专门 AE gate→round-trip" alias="audio sample rate,音频采样率,adfr"
+// @summary     Set the project's audio sample rate
+// @param       rate  the new sample rate in Hz, must be one of AE's UI-supported rates
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving, low risk; rejects rates outside AE's
+//   UI-supported set
+// @alias       audio sample rate,音频采样率,adfr
 func (p *Project) SetAudioSampleRate(rate float64) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no adfr chunk — cannot SetAudioSampleRate")
@@ -120,10 +130,14 @@ func (p *Project) WorkingGamma() float64 {
 	return p.back.WorkingGamma()
 }
 
-// SetWorkingGamma writes the dwga selector byte. Refuses values other
-// than 2.2 and 2.4 (AE's only UI options).
-//
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险;enum 校验(2.2/2.4);无专门 AE gate→round-trip" alias="working gamma,工作色彩 gamma,dwga,gamma 2.2,gamma 2.4"
+// @summary     Set the project's working gamma
+// @param       gamma  the new working gamma, must be 2.2 or 2.4 (AE's only UI options)
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving, low risk; rejects values other than 2.2 and 2.4
+// @alias       working gamma,工作色彩 gamma,dwga,gamma 2.2,gamma 2.4
 func (p *Project) SetWorkingGamma(gamma float64) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no dwga chunk — cannot SetWorkingGamma")
@@ -147,10 +161,15 @@ func (p *Project) GpuAccelType() string {
 	return s
 }
 
-// SetGpuAccelType replaces the gpuG Utf8 string in-place
-// (length-variable splice; WriteAEP recomputes parent LIST size).
-//
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-variable splice(WriteAEP 重算父 LIST size);无专门 AE gate→round-trip" alias="gpu acceleration,GPU 加速,gpuG,gpu type,显卡加速"
+// @summary     Set the project's GPU acceleration device id
+// @param       s  the new device id string
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-variable: replaces the gpuG Utf8 string in place and
+//   WriteAEP recomputes the parent LIST size
+// @alias       gpu acceleration,GPU 加速,gpuG,gpu type,显卡加速
 func (p *Project) SetGpuAccelType(s string) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no gpuG/Utf8 chunk — cannot SetGpuAccelType")
@@ -175,14 +194,19 @@ func (p *Project) ExpressionEngine() string {
 	return "extendscript"
 }
 
-// SetExpressionEngine writes the ExEn Utf8. Refuses values other than
-// "extendscript" / "javascript-1.0" — matches py-aep's validator.
-//
-// When the project has no ExEn chunk yet (parser found none), we
-// refuse rather than synthesize one — adding a new top-level LIST
-// requires AE-side ship-gate verification.
-//
-//aep:cap domain=expr tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-variable splice;enum 校验(extendscript/javascript-1.0);ExEn chunk 缺失时 refuse(不合成新 top-level LIST);双版本 AE gated(project_settings,app.project.expressionEngine DOM readback=javascript-1.0)" alias="expression engine,表达式引擎,ExEn,extendscript,javascript-1.0"
+// @summary     Set the project's default expression engine
+// @description Refuses when the project has no ExEn chunk yet, rather than
+//   synthesizing one — adding a new top-level LIST requires its own AE
+//   ship-gate verification.
+// @param       engine  the new engine name, must be "extendscript" or "javascript-1.0"
+// @domain      expr
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-variable splice of the ExEn Utf8 chunk; refuses when the
+//   chunk is absent
+// @alias       expression engine,表达式引擎,ExEn,extendscript,javascript-1.0
 func (p *Project) SetExpressionEngine(engine string) error {
 	switch engine {
 	case "extendscript", "javascript-1.0":
@@ -235,9 +259,16 @@ func (p *Project) FeetFramesFilmType() FeetFramesFilmType {
 	return FeetFramesFilmTypeMM35 // 35mm = 16 frames per foot
 }
 
-// SetFeetFramesFilmType writes the film type to nnhd byte 8, bit 7.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd 固定 40 字节);enum 校验(35mm/16mm);双版本 AE gated(project_settings,app.project.feetFramesFilmType DOM readback=MM16)" alias="feet frames film type,胶片类型,35mm,16mm,nnhd,FPF"
+// @summary     Set the film type used for feet+frames timecode display
+// @param       v  the new film type, 35mm or 16mm
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving, low risk (nnhd is a fixed 40-byte chunk);
+//   writes nnhd byte 8 bit 7
+// @alias       feet frames film type,胶片类型,35mm,16mm,nnhd,FPF
 func (p *Project) SetFeetFramesFilmType(v FeetFramesFilmType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFeetFramesFilmType")
@@ -258,9 +289,15 @@ func (p *Project) FootageTimecodeDisplayStartType() FootageTimecodeDisplayStartT
 	return FootageTimecodeDisplayStartType(b)
 }
 
-// SetFootageTimecodeDisplayStartType writes the timecode display start type to nnhd byte 9.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 9);双版本 AE gated(project_settings,app.project.footageTimecodeDisplayStartType DOM readback=FTCS_USE_SOURCE_MEDIA)" alias="footage timecode display start,素材时间码显示起点,nnhd,timecode start"
+// @summary     Set how timecode is displayed for footage
+// @param       v  the new display start type
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving, low risk; writes nnhd byte 9
+// @alias       footage timecode display start,素材时间码显示起点,nnhd,timecode start
 func (p *Project) SetFootageTimecodeDisplayStartType(v FootageTimecodeDisplayStartType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFootageTimecodeDisplayStartType")
@@ -281,9 +318,15 @@ func (p *Project) TimecodeDefaultBase() int {
 	return int(v)
 }
 
-// SetTimecodeDefaultBase writes the timecode default base to nnhd bytes 14-15.
-//
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd u16 BE bytes 14-15);范围 1-999;无专门 AE gate→round-trip" alias="timecode base,时间码基数,nnhd,timecode default base,fps base"
+// @summary     Set the project's default timecode base
+// @param       v  the new timecode base, range 1-999
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving, low risk; writes a uint16 BE value at nnhd
+//   bytes 14-15
+// @alias       timecode base,时间码基数,nnhd,timecode default base,fps base
 func (p *Project) SetTimecodeDefaultBase(v int) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTimecodeDefaultBase")
@@ -304,9 +347,15 @@ func (p *Project) FramesCountType() FramesCountType {
 	return FramesCountType(b)
 }
 
-// SetFramesCountType writes the frames count type to nnhd byte 20.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 20);双版本 AE gated(project_settings,app.project.framesCountType DOM readback=FC_START_1)" alias="frames count type,帧计数模式,nnhd,start frame,start 0,start 1"
+// @summary     Set how frames are counted in the project
+// @param       v  the new frames count type
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving, low risk; writes nnhd byte 20
+// @alias       frames count type,帧计数模式,nnhd,start frame,start 0,start 1
 func (p *Project) SetFramesCountType(v FramesCountType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesCountType")
@@ -321,10 +370,19 @@ func (p *Project) DisplayStartFrame() int {
 	return int(p.FramesCountType()) % 2
 }
 
-// SetDisplayStartFrame sets the display start frame (0 or 1).
-// This modifies frames_count_type to preserve the value.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险;enum 校验(0/1);经 frames_count_type 修改 nnhd byte 20;双版本 AE gated(project_settings,传递性:与 SetFramesCountType 写同一 nnhd byte 20,gate 验 app.project.displayStartFrame DOM readback=1)" alias="display start frame,起始帧显示,frame offset,start 0,start 1"
+// @summary     Set the project's display start frame
+// @description Implemented by modifying frames_count_type, which shares the
+//   same nnhd byte 20 written by SetFramesCountType, so the two setters are
+//   transitively gated together.
+// @param       v  the new display start frame, must be 0 or 1
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving, low risk; rejects values other than 0 or 1;
+//   writes nnhd byte 20 via frames_count_type
+// @alias       display start frame,起始帧显示,frame offset,start 0,start 1
 func (p *Project) SetDisplayStartFrame(v int) error {
 	if v != 0 && v != 1 {
 		return fmt.Errorf("project: display_start_frame %d invalid; must be 0 or 1", v)
@@ -348,9 +406,15 @@ func (p *Project) FramesUseFeetFrames() bool {
 	return b&0x01 != 0
 }
 
-// SetFramesUseFeetFrames writes the frames_use_feet_frames flag to nnhd byte 11, bit 0.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 11 bit 0);双版本 AE gated(project_settings,app.project.framesUseFeetFrames DOM readback=true)" alias="feet frames,英尺帧,feet+frames,film timecode,nnhd"
+// @summary     Set whether frames use feet+frames display
+// @param       v  the new toggle state
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving, low risk; writes nnhd byte 11 bit 0
+// @alias       feet frames,英尺帧,feet+frames,film timecode,nnhd
 func (p *Project) SetFramesUseFeetFrames(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetFramesUseFeetFrames")
@@ -371,9 +435,15 @@ func (p *Project) TimeDisplayType() TimeDisplayType {
 	return TimeDisplayType(b & 0x7F)
 }
 
-// SetTimeDisplayType writes the time display type to nnhd byte 8, bits 6-0.
-//
-//aep:cap domain=project tier=stable verify=ae-accept gate=TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025 boundary="length-preserving 低风险(nnhd byte 8 bits 6-0);双版本 AE gated(project_settings,app.project.timeDisplayType DOM readback=FRAMES)" alias="time display type,时间显示格式,timecode,frames,nnhd"
+// @summary     Set how time is displayed in the project
+// @param       v  the new time display type
+// @domain      project
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestProjectSettings_AEShipGate_AE2020,TestProjectSettings_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    length-preserving, low risk; writes nnhd byte 8 bits 6-0
+// @alias       time display type,时间显示格式,timecode,frames,nnhd
 func (p *Project) SetTimeDisplayType(v TimeDisplayType) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTimeDisplayType")
@@ -394,9 +464,14 @@ func (p *Project) TransparencyGridThumbnails() bool {
 	return b != 0
 }
 
-// SetTransparencyGridThumbnails writes the transparency grid thumbnails flag to nnhd byte 25.
-//
-//aep:cap domain=project tier=stable verify=roundtrip boundary="length-preserving 低风险(nnhd byte 25);无专门 AE gate→round-trip" alias="transparency grid thumbnails,透明网格缩略图,nnhd,thumbnail grid"
+// @summary     Set whether the transparency grid is shown in thumbnails
+// @param       v  the new toggle state
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    length-preserving, low risk; writes nnhd byte 25
+// @alias       transparency grid thumbnails,透明网格缩略图,nnhd,thumbnail grid
 func (p *Project) SetTransparencyGridThumbnails(v bool) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no nnhd chunk — cannot SetTransparencyGridThumbnails")
@@ -448,10 +523,15 @@ func (p *Project) ColorManagementSystem() ColorManagementSystem {
 	return ColorManagementSystemAdobe
 }
 
-// SetColorManagementSystem sets the color management system.
-// Rejects values other than the defined enum members.
-//
-//aep:cap domain=project tier=stable verify=roundtrip minver=2024 boundary="仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Adobe/OCIO);无独立 AE gate → round-trip" alias="color management,色彩管理,CMS,OCIO,色彩空间"
+// @summary     Set the project's color management system
+// @param       v  the new color management system, Adobe or OCIO
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2025
+// @boundary    writable only on AE 24+ projects that already have a CMS
+//   chunk saved (refuses otherwise); rejects values other than Adobe and OCIO
+// @alias       color management,色彩管理,CMS,OCIO,色彩空间
 func (p *Project) SetColorManagementSystem(v ColorManagementSystem) error {
 	switch v {
 	case ColorManagementSystemAdobe, ColorManagementSystemOCIO:
@@ -477,10 +557,16 @@ func (p *Project) LutInterpolationMethod() LutInterpolationMethod {
 	return LutInterpolationMethodTrilinear
 }
 
-// SetLutInterpolationMethod sets the LUT interpolation method.
-// Rejects values other than the defined enum members.
-//
-//aep:cap domain=project tier=stable verify=roundtrip minver=2024 boundary="仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);enum 校验(Trilinear/Tetrahedral);无专门 AE gate→round-trip" alias="LUT interpolation,LUT 插值,lut interpolation method,trilinear,tetrahedral,色彩映射"
+// @summary     Set the project's LUT interpolation method
+// @param       v  the new interpolation method, Trilinear or Tetrahedral
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2025
+// @boundary    writable only on AE 24+ projects that already have a CMS
+//   chunk saved (refuses otherwise); rejects values other than Trilinear and
+//   Tetrahedral
+// @alias       LUT interpolation,LUT 插值,lut interpolation method,trilinear,tetrahedral,色彩映射
 func (p *Project) SetLutInterpolationMethod(v LutInterpolationMethod) error {
 	switch v {
 	case LutInterpolationMethodTrilinear, LutInterpolationMethodTetrahedral:
@@ -506,9 +592,15 @@ func (p *Project) OcioConfigurationFile() string {
 	return ""
 }
 
-// SetOcioConfigurationFile sets the OCIO configuration file path.
-//
-//aep:cap domain=project tier=stable verify=roundtrip minver=2024 boundary="仅 AE 24+ 已存 CMS chunk 的工程可写(无则 refuse);需 OCIO 工作流;无专门 AE gate→round-trip" alias="OCIO config,OCIO 配置文件,ocio configuration file,色彩配置"
+// @summary     Set the project's OCIO configuration file path
+// @param       v  the new configuration file path
+// @domain      project
+// @stability   stable
+// @verify      roundtrip
+// @since       AE2025
+// @boundary    writable only on AE 24+ projects that already have a CMS
+//   chunk saved (refuses otherwise); only meaningful for an OCIO workflow
+// @alias       OCIO config,OCIO 配置文件,ocio configuration file,色彩配置
 func (p *Project) SetOcioConfigurationFile(v string) error {
 	if p.back == nil {
 		return fmt.Errorf("project: no CMS chunk — cannot set %s (only AE 24+ projects with CMS already saved are supported)", "ocioConfigurationFile")

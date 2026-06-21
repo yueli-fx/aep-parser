@@ -587,7 +587,13 @@ read-only
 func (k *Keyframe) SetFrameTime(frame int) error
 ```
 
-SetFrameTime writes the keyframe's time from an integer frame, delegating to SetTime. Returns an error when the owning comp's FrameRate is unknown.
+Set a keyframe's time from an integer frame count
+
+Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based time setter.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new keyframe time as a frame count |
 
 ### Keyframe.SetInInterp
 

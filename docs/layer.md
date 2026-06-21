@@ -600,7 +600,9 @@ read-only
 func (l *Layer) ClearAlternateSource() error
 ```
 
-ClearAlternateSource removes the media-replacement override (blsi = 0) so AE falls back to the wrapper precomp's default source. Equivalent to SetAlternateSource(nil).
+Clear the layer's media-replacement override
+
+Removes the media-replacement override so AE falls back to the wrapper precomp's default source. Equivalent to calling SetAlternateSource with a nil item.
 
 read-only
 
@@ -610,7 +612,9 @@ read-only
 func (l *Layer) ClearTrackMatteLayer() error
 ```
 
-ClearTrackMatteLayer is a shorthand for SetTrackMatteLayer(0, TrackMatteNone). Removes the explicit matte source AND the matte mode in one call.
+Clear the layer's explicit track-matte source and mode
+
+Shorthand for SetTrackMatteLayer with a zero source ID and TrackMatteNone mode. Removes the explicit matte source and the matte mode in one call.
 
 read-only
 
@@ -710,7 +714,11 @@ read-only
 func (l *Layer) HasAlternateSourceSlot() bool
 ```
 
-HasAlternateSourceSlot reports whether this layer has an Essential Properties media-replacement slot in its chunk tree. The slot exists when AE persisted an "ADBE Layer Overrides" + "ADBE Layer Source Alternate" pattern (typically created by `AVLayer.addToMotionGraphicsTemplateAs()` on the source-side layer + the parent comp using the precomp as a layer). Without the slot, SetAlternateSource cannot length-preservingly write a new id.
+Report whether a layer has an Essential Properties media-replacement slot
+
+The slot exists when AE persisted an "ADBE Layer Overrides" + "ADBE Layer Source Alternate" pattern, typically created by calling addToMotionGraphicsTemplateAs() on the source-side layer while the parent composition uses the precomp as a layer. Without the slot, the alternate-source setter cannot length-preservingly write a new id.
+
+**Returns:** true when the media-replacement slot is present
 
 read-only
 
@@ -1429,15 +1437,15 @@ InPoint/OutPoint come from the layer's existing time fields. Note: our parser al
 func (l *Layer) AddFont(fontName string) (int, error)
 ```
 
-AddFont appends a new entry to the layer's Fonts table (btdk path /0/1/0) and returns the new font index. Subsequent SetRunFontIndex(runIdx, returnedIndex) calls can reference it.
+Append a new entry to the layer's font table
 
-length-variable: extends the PostScript font array by one entry + its dict wrapper. The new entry is serialized in the same shape AE writes:
+Extends the btdk Fonts array (btdk path /0/1/0) by one entry plus its dict wrapper. The new entry is serialized in the same shape AE writes, with the second dict slot marking the font as user-resolved (matching the slot AE writes for non-default fonts). Use the returned index with SetRunFontIndex to point a style run at the new font.
 
-	<< /0 << /99 /CoolTypeFont /0 << /0 (<FE FF utf16be name>) /2 0 >> >> >>
+| Parameter | Description |
+|---|---|
+| `fontName` | PostScript name of an installed system font (for |
 
-where `/2 0` marks the font as user-resolved (matches the second real-world font slot AE writes for non-default fonts).
-
-Returns an error if the layer isn't a text layer or the btdk Fonts array can't be located.
+**Returns:** the index of the newly appended font entry
 
 ### Layer.AudioActiveAtTime
 
@@ -1481,11 +1489,14 @@ PropertyGroupByMatchName returns the top-level subgroup of the layer's property 
 func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error
 ```
 
-ReplaceSource replaces the layer's source with the given AV item (Composition or Footage). This mirrors py-aep's Layer.ReplaceSource API.
+Replace a layer's source with another AV item
 
-The fixExpressions parameter is accepted for API compatibility but not implemented (symbolic execution of expressions is out of scope). When fixExpressions=true, a warning is added to Project.Warnings.
+Internally calls the id-based source setter with the target item's id.
 
-Internally calls SetSource with the item's ID.
+| Parameter | Description |
+|---|---|
+| `target` | the new source (a Composition or Footage) |
+| `fixExpressions` | accepted for API compatibility but not |
 
 ### Layer.SetAlternateSource
 
@@ -1493,11 +1504,13 @@ Internally calls SetSource with the item's ID.
 func (l *Layer) SetAlternateSource(item AVItem) error
 ```
 
-SetAlternateSource overrides this layer's source via the Essential Properties → Media Replacement slot (4-byte blsi write, length- preserving). Pass nil (or a zero-id item) to clear the override — equivalent to ClearAlternateSource. Mirrors AE script's Property.setAlternateSource.
+Override the layer's source via Essential Properties
 
-Requires the layer to already have an Essential Properties slot — AE only persists the blsi chunk after the source-side layer has been promoted via `AVLayer.addToMotionGraphicsTemplateAs()` in the wrapper precomp. If the slot is missing (HasAlternateSourceSlot() == false), this errors instead of attempting structural chunk insertion (which would break length-preserving roundtrip).
+Overrides this layer's source through the Essential Properties media-replacement slot. Pass nil (or a zero-id item) to clear the override — equivalent to ClearAlternateSource. Requires the layer to already have an Essential Properties slot: AE only persists the underlying chunk after the source-side layer has been promoted to a motion-graphics template inside its wrapper precomp. If the slot is missing, this errors rather than attempting a structural chunk insertion that would break length-preserving round-trip. When the layer's owning project is known, the item's ID is validated against the project's AV items; an unknown ID returns an error and leaves the bytes untouched. AE additionally rejects items that are not media-replacement compatible (for example a still image standing in for video) at script time; this setter does not replicate that check, and the resulting file still parses cleanly in AE regardless.
 
-When the layer's owning project is wired up, `item.ItemID()` is validated against the project's AV items; an id unknown to the project returns an error and doesn't touch bytes. AE rejects items whose `isMediaReplacementCompatible == false` (e.g., still images vs. video) at script time — we don't replicate that check; the rendered .aep is still parsed cleanly by AE regardless.
+| Parameter | Description |
+|---|---|
+| `item` | the new alternate source item (nil clears the override) |
 
 ### Layer.SetAnchorPoint
 
@@ -1505,7 +1518,11 @@ When the layer's owning project is wired up, `item.ItemID()` is validated agains
 func (l *Layer) SetAnchorPoint(v []float64) error
 ```
 
-SetAnchorPoint writes a new static anchor-point. Length of v must match the property's Components (2 or 3 depending on Is3D).
+Set a layer's static anchor point
+
+| Parameter | Description |
+|---|---|
+| `v` | the new anchor-point components (2 for 2D, 3 for 3D) |
 
 ### Layer.SetAudioEnabled
 
@@ -1513,7 +1530,11 @@ SetAnchorPoint writes a new static anchor-point. Length of v must match the prop
 func (l *Layer) SetAudioEnabled(v bool) error
 ```
 
-SetAudioEnabled toggles the layer's audio switch. length-preserving (single bit @ldta 0x27).
+Set the layer's audio switch
+
+| Parameter | Description |
+|---|---|
+| `v` | the new audio-enabled state |
 
 ### Layer.SetAudioLevels
 
@@ -1521,7 +1542,11 @@ SetAudioEnabled toggles the layer's audio switch. length-preserving (single bit 
 func (l *Layer) SetAudioLevels(lr []float64) error
 ```
 
-SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB). Errors when the layer has no audio levels property (i.e. layer has no audio track).
+Set a layer's per-channel audio gain
+
+| Parameter | Description |
+|---|---|
+| `lr` | the [left, right] gain in dB |
 
 ### Layer.SetAutoOrient
 
@@ -1529,16 +1554,13 @@ SetAudioLevels writes the per-channel audio gain (`[left, right]` in dB). Errors
 func (l *Layer) SetAutoOrient(t AutoOrientType) error
 ```
 
-SetAutoOrient writes the layer's auto-orient mode by clearing the three mutually-exclusive bits across ldta @0x25/@0x26 and setting the one matching the requested AutoOrientType. length-preserving (touches 2 bytes).
+Set the layer's auto-orient mode
 
-Bit positions (mirroring parse_layer.go's decode):
+Clears the three mutually-exclusive auto-orient bits spread across ldta offsets 0x25/0x26 and sets the one matching the requested mode. Unknown enum values are treated as None (a no-op clearing of all three bits). The AlongPath mode only has a visible effect when the layer's position has a motion path (keyframes).
 
-- CharactersTowardCamera → 0x25 bit 4
-- CameraOrPointOfInterest → 0x26 bit 5
-- AlongPath → 0x26 bit 0
-- None → all three cleared
-
-Unknown enum values are treated as None (= no-op clearing).
+| Parameter | Description |
+|---|---|
+| `t` | the new auto-orient mode |
 
 ### Layer.SetBlendingMode
 
@@ -1546,7 +1568,11 @@ Unknown enum values are treated as None (= no-op clearing).
 func (l *Layer) SetBlendingMode(m BlendingMode) error
 ```
 
-SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. length-preserving (single byte).
+Set the layer's blending mode
+
+| Parameter | Description |
+|---|---|
+| `m` | the new blending mode |
 
 ### Layer.SetCameraAperture
 
@@ -1554,7 +1580,11 @@ SetBlendingMode writes a new blending-mode enum byte to ldta @0x63. length-prese
 func (l *Layer) SetCameraAperture(v float64) error
 ```
 
-SetCameraAperture writes the aperture property (pixels).
+Set the camera's Aperture property
+
+| Parameter | Description |
+|---|---|
+| `v` | the aperture value in pixels |
 
 ### Layer.SetCameraBlurLevel
 
@@ -1562,7 +1592,11 @@ SetCameraAperture writes the aperture property (pixels).
 func (l *Layer) SetCameraBlurLevel(v float64) error
 ```
 
-SetCameraBlurLevel writes the blur-level property (%).
+Set the camera's Blur Level property
+
+| Parameter | Description |
+|---|---|
+| `v` | the blur level as a percentage |
 
 ### Layer.SetCameraDepthOfField
 
@@ -1570,7 +1604,11 @@ SetCameraBlurLevel writes the blur-level property (%).
 func (l *Layer) SetCameraDepthOfField(enabled bool) error
 ```
 
-SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0).
+Toggle the camera's Depth of Field switch
+
+| Parameter | Description |
+|---|---|
+| `enabled` | whether depth of field is enabled |
 
 ### Layer.SetCameraFocusDistance
 
@@ -1578,7 +1616,11 @@ SetCameraDepthOfField toggles the Depth-of-Field switch (true=1, false=0).
 func (l *Layer) SetCameraFocusDistance(v float64) error
 ```
 
-SetCameraFocusDistance writes the focus-distance property (pixels).
+Set the camera's Focus Distance property
+
+| Parameter | Description |
+|---|---|
+| `v` | the focus distance in pixels |
 
 ### Layer.SetCameraZoom
 
@@ -1586,7 +1628,11 @@ SetCameraFocusDistance writes the focus-distance property (pixels).
 func (l *Layer) SetCameraZoom(v float64) error
 ```
 
-SetCameraZoom writes a new static value to the camera's Zoom property (pixels). Errors on non-camera layers or keyframed Zoom.
+Set the camera's Zoom property
+
+| Parameter | Description |
+|---|---|
+| `v` | the zoom value in pixels (equivalent to focal length times |
 
 ### Layer.SetCollapseTransform
 
@@ -1594,7 +1640,13 @@ SetCameraZoom writes a new static value to the camera's Zoom property (pixels). 
 func (l *Layer) SetCollapseTransform(v bool) error
 ```
 
-SetCollapseTransform toggles "Collapse Transformations" (for nested comps) or "Continuously Rasterize" (for Illustrator / shape layers). length-preserving (single bit @ldta 0x27).
+Set "Collapse Transformations" / "Continuously Rasterize"
+
+Collapse Transformations applies to nested-comp layers; Continuously Rasterize applies to Illustrator or shape layers. Both share the same underlying switch bit.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new collapse/rasterize state |
 
 ### Layer.SetComment
 
@@ -1602,9 +1654,13 @@ SetCollapseTransform toggles "Collapse Transformations" (for nested comps) or "C
 func (l *Layer) SetComment(comment string) error
 ```
 
-SetComment rewrites the layer's comment text (AE's "Comments" timeline column / Layer Settings dialog).
+Set the layer's comment text
 
-length-variable — the underlying cmta chunk's data is replaced (or a new cmta chunk is inserted into the Layr LIST when none existed). Encoding mirrors what AE writes: LF → CRLF + a single NUL terminator.
+Mirrors AE's "Comments" timeline column / Layer Settings dialog. Encoding mirrors what AE writes: LF becomes CRLF plus a single NUL terminator.
+
+| Parameter | Description |
+|---|---|
+| `comment` | the new comment text |
 
 ### Layer.SetEffectsEnabled
 
@@ -1612,7 +1668,11 @@ length-variable — the underlying cmta chunk's data is replaced (or a new cmta 
 func (l *Layer) SetEffectsEnabled(v bool) error
 ```
 
-SetEffectsEnabled toggles the layer's fx switch (whether effects render). length-preserving (single bit @ldta 0x27).
+Set the layer's effects (fx) switch
+
+| Parameter | Description |
+|---|---|
+| `v` | whether effects render on this layer |
 
 ### Layer.SetFrameBlendEnabled
 
@@ -1620,7 +1680,11 @@ SetEffectsEnabled toggles the layer's fx switch (whether effects render). length
 func (l *Layer) SetFrameBlendEnabled(v bool) error
 ```
 
-SetFrameBlendEnabled toggles the layer's frame-blend switch. length-preserving (single bit @ldta 0x27).
+Set the layer's frame-blend switch
+
+| Parameter | Description |
+|---|---|
+| `v` | the new frame-blend state |
 
 ### Layer.SetFrameBlendPixelMotion
 
@@ -1628,7 +1692,13 @@ SetFrameBlendEnabled toggles the layer's frame-blend switch. length-preserving (
 func (l *Layer) SetFrameBlendPixelMotion(v bool) error
 ```
 
-SetFrameBlendPixelMotion switches frame blending mode between Frame Mix (false) and Pixel Motion (true). Only relevant when FrameBlendEnabled is also true. length-preserving (single bit @ldta 0x25).
+Switch frame-blend mode between Frame Mix and Pixel Motion
+
+Only takes effect when FrameBlendEnabled is also true.
+
+| Parameter | Description |
+|---|---|
+| `v` | true selects Pixel Motion, false selects Frame Mix |
 
 ### Layer.SetFrameInPoint
 
@@ -1636,7 +1706,13 @@ SetFrameBlendPixelMotion switches frame blending mode between Frame Mix (false) 
 func (l *Layer) SetFrameInPoint(frame int) error
 ```
 
-SetFrameInPoint writes the layer in-point converting the integer frame back to seconds via the owning comp's FrameRate, then delegates to SetInPoint.
+Set a layer's in-point from an integer frame count
+
+Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based in-point setter. The in-point is source-relative; AE's UI displays startTime plus this value.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new in-point as a frame count |
 
 ### Layer.SetFrameOutPoint
 
@@ -1644,7 +1720,13 @@ SetFrameInPoint writes the layer in-point converting the integer frame back to s
 func (l *Layer) SetFrameOutPoint(frame int) error
 ```
 
-SetFrameOutPoint writes the layer out-point from an integer frame.
+Set a layer's out-point from an integer frame count
+
+Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based out-point setter. The out-point is source-relative; AE's UI displays startTime plus this value.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new out-point as a frame count |
 
 ### Layer.SetFrameStartTime
 
@@ -1652,7 +1734,13 @@ SetFrameOutPoint writes the layer out-point from an integer frame.
 func (l *Layer) SetFrameStartTime(frame int) error
 ```
 
-SetFrameStartTime writes the layer start-time from an integer frame.
+Set a layer's start time from an integer frame count
+
+Converts frame back to seconds via the owning composition's FrameRate, then delegates to the seconds-based start-time setter.
+
+| Parameter | Description |
+|---|---|
+| `frame` | the new start time as a frame count |
 
 ### Layer.SetGeometryBevelDirection
 
@@ -1660,7 +1748,11 @@ SetFrameStartTime writes the layer start-time from an integer frame.
 func (l *Layer) SetGeometryBevelDirection(v float64) error
 ```
 
-SetGeometryBevelDirection writes Bevel Direction enum.
+Set the 3D bevel direction enum
+
+| Parameter | Description |
+|---|---|
+| `v` | the bevel direction enum value (default 1) |
 
 ### Layer.SetGeometryPlaneCurvature
 
@@ -1668,7 +1760,11 @@ SetGeometryBevelDirection writes Bevel Direction enum.
 func (l *Layer) SetGeometryPlaneCurvature(v float64) error
 ```
 
-SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1).
+Set the 3D plane curvature (Advanced 3D renderer)
+
+| Parameter | Description |
+|---|---|
+| `v` | the plane curvature value (typically 0..1) |
 
 ### Layer.SetGeometryPlaneSubdivision
 
@@ -1676,7 +1772,11 @@ SetGeometryPlaneCurvature writes Plane Curvature (typically 0..1).
 func (l *Layer) SetGeometryPlaneSubdivision(v float64) error
 ```
 
-SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality).
+Set the 3D plane subdivision (mesh quality)
+
+| Parameter | Description |
+|---|---|
+| `v` | the mesh subdivision level (integer, default 4) |
 
 ### Layer.SetInPoint
 
@@ -1684,7 +1784,13 @@ SetGeometryPlaneSubdivision writes Plane Subdivision (integer mesh quality).
 func (l *Layer) SetInPoint(seconds float64) error
 ```
 
-SetInPoint writes the layer's source-media in-point (seconds) to ldta @0x14/@0x18, then refreshes `Layer.Duration` (= out − in). length-preserving (8 bytes).
+Set the layer's source-media in-point
+
+Refreshes Layer.Duration (= out minus in) after the write.
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new in-point, in seconds |
 
 ### Layer.SetIrisAspectRatio
 
@@ -1692,7 +1798,11 @@ SetInPoint writes the layer's source-media in-point (seconds) to ldta @0x14/@0x1
 func (l *Layer) SetIrisAspectRatio(v float64) error
 ```
 
-SetIrisAspectRatio writes the Iris Aspect Ratio.
+Set the camera's Iris Aspect Ratio property
+
+| Parameter | Description |
+|---|---|
+| `v` | the iris aspect ratio |
 
 ### Layer.SetIrisDiffractionFringe
 
@@ -1700,7 +1810,11 @@ SetIrisAspectRatio writes the Iris Aspect Ratio.
 func (l *Layer) SetIrisDiffractionFringe(v float64) error
 ```
 
-SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%).
+Set the camera's Iris Diffraction Fringe property
+
+| Parameter | Description |
+|---|---|
+| `v` | the diffraction fringe as a percentage |
 
 ### Layer.SetIrisHighlightGain
 
@@ -1708,7 +1822,11 @@ SetIrisDiffractionFringe writes the Iris Diffraction Fringe (%).
 func (l *Layer) SetIrisHighlightGain(v float64) error
 ```
 
-SetIrisHighlightGain writes the Iris Highlight Gain.
+Set the camera's Iris Highlight Gain property
+
+| Parameter | Description |
+|---|---|
+| `v` | the highlight gain value |
 
 ### Layer.SetIrisHighlightSaturation
 
@@ -1716,7 +1834,11 @@ SetIrisHighlightGain writes the Iris Highlight Gain.
 func (l *Layer) SetIrisHighlightSaturation(v float64) error
 ```
 
-SetIrisHighlightSaturation writes the Iris Highlight Saturation.
+Set the camera's Iris Highlight Saturation property
+
+| Parameter | Description |
+|---|---|
+| `v` | the highlight saturation value |
 
 ### Layer.SetIrisHighlightThreshold
 
@@ -1724,7 +1846,11 @@ SetIrisHighlightSaturation writes the Iris Highlight Saturation.
 func (l *Layer) SetIrisHighlightThreshold(v float64) error
 ```
 
-SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1).
+Set the camera's Iris Highlight Threshold property
+
+| Parameter | Description |
+|---|---|
+| `v` | the highlight threshold as a normalized luminance (0..1) |
 
 ### Layer.SetIrisRotation
 
@@ -1732,7 +1858,11 @@ SetIrisHighlightThreshold writes the Iris Highlight Threshold (0..1).
 func (l *Layer) SetIrisRotation(v float64) error
 ```
 
-SetIrisRotation writes the Iris Rotation (degrees).
+Set the camera's Iris Rotation property
+
+| Parameter | Description |
+|---|---|
+| `v` | the iris rotation in degrees |
 
 ### Layer.SetIrisRoundness
 
@@ -1740,7 +1870,11 @@ SetIrisRotation writes the Iris Rotation (degrees).
 func (l *Layer) SetIrisRoundness(v float64) error
 ```
 
-SetIrisRoundness writes the Iris Roundness (%).
+Set the camera's Iris Roundness property
+
+| Parameter | Description |
+|---|---|
+| `v` | the iris roundness as a percentage |
 
 ### Layer.SetIrisShape
 
@@ -1748,7 +1882,11 @@ SetIrisRoundness writes the Iris Roundness (%).
 func (l *Layer) SetIrisShape(v float64) error
 ```
 
-SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon).
+Set the camera's Iris Shape enum
+
+| Parameter | Description |
+|---|---|
+| `v` | the iris shape enum (1 = Fast Rectangle, 3..10 = |
 
 ### Layer.SetIs3D
 
@@ -1756,7 +1894,11 @@ SetIrisShape writes the Iris Shape enum (1=Fast Rect, 3..10 = Triangle..Decagon)
 func (l *Layer) SetIs3D(v bool) error
 ```
 
-SetIs3D toggles the layer's 3D-layer switch. length-preserving (single bit @ldta 0x26).
+Set the layer's 3D-layer switch
+
+| Parameter | Description |
+|---|---|
+| `v` | the new 3D state |
 
 ### Layer.SetIsAdjust
 
@@ -1764,7 +1906,11 @@ SetIs3D toggles the layer's 3D-layer switch. length-preserving (single bit @ldta
 func (l *Layer) SetIsAdjust(v bool) error
 ```
 
-SetIsAdjust toggles the layer's "Adjustment Layer" switch. length-preserving (single bit @ldta 0x26).
+Set the layer's "Adjustment Layer" switch
+
+| Parameter | Description |
+|---|---|
+| `v` | the new adjustment-layer state |
 
 ### Layer.SetIsGuide
 
@@ -1772,7 +1918,13 @@ SetIsAdjust toggles the layer's "Adjustment Layer" switch. length-preserving (si
 func (l *Layer) SetIsGuide(v bool) error
 ```
 
-SetIsGuide toggles the layer's "Guide Layer" switch (AE renders it in the comp viewer but excludes it from output). length-preserving (single bit @ldta 0x25).
+Set the layer's "Guide Layer" switch
+
+A guide layer renders in the comp viewer but is excluded from rendered output.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new guide-layer state |
 
 ### Layer.SetIsNull
 
@@ -1780,7 +1932,13 @@ SetIsGuide toggles the layer's "Guide Layer" switch (AE renders it in the comp v
 func (l *Layer) SetIsNull(v bool) error
 ```
 
-SetIsNull toggles the Null-Object marker bit. AE's UI creates null layers via Layer > New > Null Object; flipping this post-hoc is supported by the byte but produces uncommon AE behavior — set only when you understand the consequences. length-preserving (single bit @ldta 0x26).
+Set the Null-Object marker bit
+
+AE's UI normally creates null layers via its own dedicated command; flipping this bit post-hoc is accepted by AE but produces uncommon results — only set it when you understand the consequences.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new null-object state |
 
 ### Layer.SetLabel
 
@@ -1788,7 +1946,13 @@ SetIsNull toggles the Null-Object marker bit. AE's UI creates null layers via La
 func (l *Layer) SetLabel(index uint8) error
 ```
 
-SetLabel writes a new timeline label-color index (0..16) to ldta @0x3D. Indices outside 0..16 are written verbatim (AE shows index 0 for any unknown value but the byte is preserved on round-trip). length-preserving (single byte).
+Set the layer's timeline label-color index
+
+Indices outside the normal 0..16 range are written verbatim; AE shows index 0 for any unknown value but the byte itself is preserved on round-trip.
+
+| Parameter | Description |
+|---|---|
+| `index` | the new label-color index (0..16) |
 
 ### Layer.SetLightCastsShadows
 
@@ -1796,7 +1960,11 @@ SetLabel writes a new timeline label-color index (0..16) to ldta @0x3D. Indices 
 func (l *Layer) SetLightCastsShadows(enabled bool) error
 ```
 
-SetLightCastsShadows toggles the Casts Shadows switch (true=1, false=0).
+Toggle the light's Casts Shadows switch
+
+| Parameter | Description |
+|---|---|
+| `enabled` | whether the light casts shadows |
 
 ### Layer.SetLightColor
 
@@ -1804,7 +1972,11 @@ SetLightCastsShadows toggles the Casts Shadows switch (true=1, false=0).
 func (l *Layer) SetLightColor(rgba []float64) error
 ```
 
-SetLightColor writes the light's Color property. The value's length must match the property's component count (3 for RGB, 4 for RGBA); SetStaticValue enforces this.
+Set the light's Color property
+
+| Parameter | Description |
+|---|---|
+| `rgba` | the color value; its length must match the property's |
 
 ### Layer.SetLightConeAngle
 
@@ -1812,7 +1984,11 @@ SetLightColor writes the light's Color property. The value's length must match t
 func (l *Layer) SetLightConeAngle(v float64) error
 ```
 
-SetLightConeAngle writes the spotlight cone angle (degrees).
+Set the spotlight's Cone Angle property
+
+| Parameter | Description |
+|---|---|
+| `v` | the cone angle in degrees |
 
 ### Layer.SetLightConeFeather
 
@@ -1820,7 +1996,11 @@ SetLightConeAngle writes the spotlight cone angle (degrees).
 func (l *Layer) SetLightConeFeather(v float64) error
 ```
 
-SetLightConeFeather writes the spotlight cone-feather (%).
+Set the spotlight's Cone Feather property
+
+| Parameter | Description |
+|---|---|
+| `v` | the cone feather as a percentage |
 
 ### Layer.SetLightFalloffDistance
 
@@ -1828,7 +2008,11 @@ SetLightConeFeather writes the spotlight cone-feather (%).
 func (l *Layer) SetLightFalloffDistance(v float64) error
 ```
 
-SetLightFalloffDistance writes the falloff distance (pixels).
+Set the light's Falloff Distance property
+
+| Parameter | Description |
+|---|---|
+| `v` | the falloff distance in pixels |
 
 ### Layer.SetLightFalloffStart
 
@@ -1836,7 +2020,11 @@ SetLightFalloffDistance writes the falloff distance (pixels).
 func (l *Layer) SetLightFalloffStart(v float64) error
 ```
 
-SetLightFalloffStart writes the falloff-start distance (pixels).
+Set the light's Falloff Start distance property
+
+| Parameter | Description |
+|---|---|
+| `v` | the falloff start distance in pixels |
 
 ### Layer.SetLightFalloffType
 
@@ -1844,7 +2032,11 @@ SetLightFalloffStart writes the falloff-start distance (pixels).
 func (l *Layer) SetLightFalloffType(v float64) error
 ```
 
-SetLightFalloffType writes the falloff type enum.
+Set the light's Falloff Type enum
+
+| Parameter | Description |
+|---|---|
+| `v` | the falloff type enum value |
 
 ### Layer.SetLightIntensity
 
@@ -1852,7 +2044,11 @@ SetLightFalloffType writes the falloff type enum.
 func (l *Layer) SetLightIntensity(v float64) error
 ```
 
-SetLightIntensity writes the light intensity (%).
+Set the light's Intensity property
+
+| Parameter | Description |
+|---|---|
+| `v` | the light intensity as a percentage |
 
 ### Layer.SetLightKind
 
@@ -1860,9 +2056,13 @@ SetLightIntensity writes the light intensity (%).
 func (l *Layer) SetLightKind(k LightKind) error
 ```
 
-SetLightKind rewrites the light layer's kind (ldta @0x88, 4 bytes BE uint32). length-preserving. Only meaningful when Type == LayerTypeLight; AE silently accepts the byte change on non-light layers but it has no visual effect.
+Set a Light layer's light kind
 
-On AE 22 / 2020 ldta (160 bytes), @0x88 is still present (parent ID at @0x84 + 4 bytes after = @0x88), so this setter works on older fixtures too.
+Only meaningful when the layer's Type is Light; AE silently accepts the byte change on non-light layers but it has no visual effect. The field is present on older project layouts too, so this setter works across the full supported AE range.
+
+| Parameter | Description |
+|---|---|
+| `k` | the new light kind |
 
 ### Layer.SetLightShadowDarkness
 
@@ -1870,7 +2070,11 @@ On AE 22 / 2020 ldta (160 bytes), @0x88 is still present (parent ID at @0x84 + 4
 func (l *Layer) SetLightShadowDarkness(v float64) error
 ```
 
-SetLightShadowDarkness writes the shadow darkness (%).
+Set the light's Shadow Darkness property
+
+| Parameter | Description |
+|---|---|
+| `v` | the shadow darkness as a percentage |
 
 ### Layer.SetLightShadowDiffusion
 
@@ -1878,7 +2082,11 @@ SetLightShadowDarkness writes the shadow darkness (%).
 func (l *Layer) SetLightShadowDiffusion(v float64) error
 ```
 
-SetLightShadowDiffusion writes the shadow diffusion (pixels).
+Set the light's Shadow Diffusion property
+
+| Parameter | Description |
+|---|---|
+| `v` | the shadow diffusion in pixels |
 
 ### Layer.SetLightSource
 
@@ -1886,17 +2094,13 @@ SetLightShadowDiffusion writes the shadow diffusion (pixels).
 func (l *Layer) SetLightSource(target *Layer) error
 ```
 
-SetLightSource writes the environment-light source layer ID for a Light layer (AE 24+). Stored in ldta @0x28 (same slot as AV SourceID; the field is repurposed per Layer.Type). Pass nil to clear — writes sentinel 0xFFFFFFFF. length-preserving (4 bytes).
+Set the environment-light source layer for a Light layer
 
-Validation (matches py-aep LightLayer.light_source.setter):
+Stored in the same ldta slot used for the AV SourceID; the field is repurposed depending on Layer.Type. Pass nil to clear, which writes the clear sentinel. Validation requires: the layer must be a Light layer; the target, if non-nil, must be in the same composition; the target must not itself be a Light or Camera layer; the target must not be a 3D layer (3D AV layers cannot drive environment lights); and the target must not be the layer itself. On any validation error the bytes are left unmodified.
 
-- layer must be a Light layer (Type == LayerTypeLight)
-- target (if non-nil) must be in the same composition
-- target must not be Light or Camera
-- target must not be 3D (py-aep: 3D AV layers can't drive env lights)
-- target must not be self
-
-On error the bytes are not modified.
+| Parameter | Description |
+|---|---|
+| `target` | the new environment-light source layer (nil clears it) |
 
 ### Layer.SetLocked
 
@@ -1904,7 +2108,13 @@ On error the bytes are not modified.
 func (l *Layer) SetLocked(v bool) error
 ```
 
-SetLocked toggles the layer's Lock flag (🔒). When locked, AE refuses edits in the timeline UI; the AEP file itself is still mutable. length-preserving (single bit @ldta 0x27).
+Set the layer's Lock flag
+
+When locked, AE refuses edits in the timeline UI; the underlying file is still mutable through this API.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new lock state |
 
 ### Layer.SetManualKerning
 
@@ -1912,13 +2122,13 @@ SetLocked toggles the layer's Lock flag (🔒). When locked, AE refuses edits in
 func (l *Layer) SetManualKerning(values []int) error
 ```
 
-SetManualKerning writes per-character manual kerning values (in 1/1000 em units) into the btdk dict. The values slice length must equal the current per-character count (`len(TextSource.ManualKerning)`).
+Set per-character manual kerning values on a text layer
 
-Pre-condition: the layer must already have a manual-kerning slot — AE only emits the /1/1[0]/0/8 sub-tree once some run has been set to AutoKernType=NoAuto with a non-zero kerning value. First-time enablement on a layer that lacks the slot is a structural change and is not supported; create the slot from AE first (or set kerning via the AE UI / scripting) and then mutate it here.
+Writes per-character manual kerning values into the btdk dict. The values slice length must equal the current per-character count (len(TextSource.ManualKerning)). For the values to actually render, the matching style run's AutoKernType must be TextAutoKernNoAuto — toggle it independently via SetRunAutoKernType. Mirrors the AE scripting TextDocument.kerning behavior: the first-character value is also written to the sibling /1/1[0]/0/7 slot, the first-char scalar reflected by the scripting API.
 
-For the values to actually render, the matching style run's AutoKernType must be TextAutoKernNoAuto — toggle it independently via SetRunAutoKernType.
-
-Mirrors AE-script TextDocument.kerning: the first-character value is also written to sibling /1/1[0]/0/7 (the first-char scalar that the script API reflects).
+| Parameter | Description |
+|---|---|
+| `values` | one manual kerning value (1/1000 em units) per |
 
 ### Layer.SetMarkersLocked
 
@@ -1926,7 +2136,11 @@ Mirrors AE-script TextDocument.kerning: the first-character value is also writte
 func (l *Layer) SetMarkersLocked(v bool) error
 ```
 
-SetMarkersLocked toggles "Lock markers" on the layer. length-preserving (single bit @ldta 0x26).
+Set "Lock markers" on the layer
+
+| Parameter | Description |
+|---|---|
+| `v` | the new markers-locked state |
 
 ### Layer.SetMaterialAcceptsLights
 
@@ -1934,7 +2148,11 @@ SetMarkersLocked toggles "Lock markers" on the layer. length-preserving (single 
 func (l *Layer) SetMaterialAcceptsLights(enabled bool) error
 ```
 
-SetMaterialAcceptsLights toggles the Accepts Lights switch.
+Toggle the material's Accepts Lights switch
+
+| Parameter | Description |
+|---|---|
+| `enabled` | whether the layer accepts lighting from light layers |
 
 ### Layer.SetMaterialAcceptsShadows
 
@@ -1942,7 +2160,11 @@ SetMaterialAcceptsLights toggles the Accepts Lights switch.
 func (l *Layer) SetMaterialAcceptsShadows(enabled bool) error
 ```
 
-SetMaterialAcceptsShadows toggles the Accepts Shadows switch.
+Toggle the material's Accepts Shadows switch
+
+| Parameter | Description |
+|---|---|
+| `enabled` | whether the layer accepts shadows from other layers |
 
 ### Layer.SetMaterialAmbient
 
@@ -1950,7 +2172,11 @@ SetMaterialAcceptsShadows toggles the Accepts Shadows switch.
 func (l *Layer) SetMaterialAmbient(v float64) error
 ```
 
-SetMaterialAmbient / Diffuse / Specular / Shininess / Metal / Reflection / Glossiness / Fresnel / Transparency / TranspRolloff / IndexOfRefraction — physically-based material coefficients. All scalar; range varies by field (Ambient/Diffuse/Specular/Metal/Reflection typically 0..1 or 0..100, Shininess 0..150, IndexOfRefraction 1..3+). No range clamping is done; AE will accept any float.
+Set the material's ambient coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the ambient coefficient (typically 0..100); not clamped |
 
 ### Layer.SetMaterialAppearsInReflections
 
@@ -1958,7 +2184,11 @@ SetMaterialAmbient / Diffuse / Specular / Shininess / Metal / Reflection / Gloss
 func (l *Layer) SetMaterialAppearsInReflections(enabled bool) error
 ```
 
-SetMaterialAppearsInReflections toggles whether this layer appears in reflective surfaces of other 3D layers.
+Toggle whether the layer appears in other layers' reflections
+
+| Parameter | Description |
+|---|---|
+| `enabled` | whether the layer is visible in reflective surfaces |
 
 ### Layer.SetMaterialCastsShadows
 
@@ -1966,7 +2196,11 @@ SetMaterialAppearsInReflections toggles whether this layer appears in reflective
 func (l *Layer) SetMaterialCastsShadows(mode MaterialCastsShadowsMode) error
 ```
 
-SetMaterialCastsShadows writes the tri-state Casts Shadows enum (Off/On/Only). Equivalent to SetLightCastsShadows(bool) when called with Off/On; "Only" is AV-3D-specific (renders shadows but hides the layer itself).
+Set the tri-state Casts Shadows mode on a 3D AV layer
+
+| Parameter | Description |
+|---|---|
+| `mode` | the shadow mode (Off, On, or Only) |
 
 ### Layer.SetMaterialDiffuse
 
@@ -1974,11 +2208,23 @@ SetMaterialCastsShadows writes the tri-state Casts Shadows enum (Off/On/Only). E
 func (l *Layer) SetMaterialDiffuse(v float64) error
 ```
 
+Set the material's diffuse coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the diffuse coefficient (typically 0..100); not clamped |
+
 ### Layer.SetMaterialFresnel
 
 ```go
 func (l *Layer) SetMaterialFresnel(v float64) error
 ```
+
+Set the ray-traced material's Fresnel coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the Fresnel coefficient |
 
 ### Layer.SetMaterialGlossiness
 
@@ -1986,11 +2232,23 @@ func (l *Layer) SetMaterialFresnel(v float64) error
 func (l *Layer) SetMaterialGlossiness(v float64) error
 ```
 
+Set the ray-traced material's glossiness coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the glossiness coefficient |
+
 ### Layer.SetMaterialIndexOfRefraction
 
 ```go
 func (l *Layer) SetMaterialIndexOfRefraction(v float64) error
 ```
+
+Set the ray-traced material's index of refraction
+
+| Parameter | Description |
+|---|---|
+| `v` | the index of refraction (typically 1..3+) |
 
 ### Layer.SetMaterialLightTransmission
 
@@ -1998,7 +2256,11 @@ func (l *Layer) SetMaterialIndexOfRefraction(v float64) error
 func (l *Layer) SetMaterialLightTransmission(v float64) error
 ```
 
-SetMaterialLightTransmission writes light transmission (0..1).
+Set the material's light transmission coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the light transmission coefficient (0..1) |
 
 ### Layer.SetMaterialMetal
 
@@ -2006,11 +2268,23 @@ SetMaterialLightTransmission writes light transmission (0..1).
 func (l *Layer) SetMaterialMetal(v float64) error
 ```
 
+Set the material's metal coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the metal coefficient (typically 0..100); not clamped |
+
 ### Layer.SetMaterialReflection
 
 ```go
 func (l *Layer) SetMaterialReflection(v float64) error
 ```
+
+Set the ray-traced material's reflection coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the reflection coefficient |
 
 ### Layer.SetMaterialShadowColor
 
@@ -2018,7 +2292,11 @@ func (l *Layer) SetMaterialReflection(v float64) error
 func (l *Layer) SetMaterialShadowColor(rgba []float64) error
 ```
 
-SetMaterialShadowColor writes the shadow color (4-component RGBA).
+Set the material's shadow color
+
+| Parameter | Description |
+|---|---|
+| `rgba` | the shadow color as 4 RGBA components |
 
 ### Layer.SetMaterialShininess
 
@@ -2026,11 +2304,23 @@ SetMaterialShadowColor writes the shadow color (4-component RGBA).
 func (l *Layer) SetMaterialShininess(v float64) error
 ```
 
+Set the material's shininess coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the shininess coefficient (typically 0..150); not clamped |
+
 ### Layer.SetMaterialSpecular
 
 ```go
 func (l *Layer) SetMaterialSpecular(v float64) error
 ```
+
+Set the material's specular coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the specular coefficient (typically 0..100); not clamped |
 
 ### Layer.SetMaterialTranspRolloff
 
@@ -2038,11 +2328,23 @@ func (l *Layer) SetMaterialSpecular(v float64) error
 func (l *Layer) SetMaterialTranspRolloff(v float64) error
 ```
 
+Set the ray-traced material's transparency rolloff
+
+| Parameter | Description |
+|---|---|
+| `v` | the transparency rolloff coefficient |
+
 ### Layer.SetMaterialTransparency
 
 ```go
 func (l *Layer) SetMaterialTransparency(v float64) error
 ```
+
+Set the ray-traced material's transparency coefficient
+
+| Parameter | Description |
+|---|---|
+| `v` | the transparency coefficient |
 
 ### Layer.SetMotionBlur
 
@@ -2050,7 +2352,11 @@ func (l *Layer) SetMaterialTransparency(v float64) error
 func (l *Layer) SetMotionBlur(v bool) error
 ```
 
-SetMotionBlur toggles the layer's motion-blur switch. length-preserving (single bit @ldta 0x27).
+Set the layer's motion-blur switch
+
+| Parameter | Description |
+|---|---|
+| `v` | the new motion-blur state |
 
 ### Layer.SetName
 
@@ -2058,9 +2364,13 @@ SetMotionBlur toggles the layer's motion-blur switch. length-preserving (single 
 func (l *Layer) SetName(newName string) error
 ```
 
-SetName rewrites the layer's display name (the AE timeline label). length-variable — the underlying Utf8 chunk's data slice is replaced wholesale; WriteAEP recomputes ancestor LIST sizes.
+Set the layer's display name
 
 Returns an error when the parsed layer has no Utf8 name chunk (unusual — most AE-written layers have one even for default names).
+
+| Parameter | Description |
+|---|---|
+| `newName` | the new display name shown in the AE timeline |
 
 **Example:**
 
@@ -2077,7 +2387,13 @@ if l := comp.LayerByName("Logo"); l != nil {
 func (l *Layer) SetOpacity(v float64) error
 ```
 
-SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). Callers that think in percent should divide by 100.
+Set a layer's opacity
+
+Callers that think in percent should divide by 100 first.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new opacity, normalized 0..1 (1 = fully opaque) |
 
 ### Layer.SetOrientation
 
@@ -2085,7 +2401,11 @@ SetOpacity writes the layer's opacity (normalized 0..1; 1 = fully opaque). Calle
 func (l *Layer) SetOrientation(v []float64) error
 ```
 
-SetOrientation writes the 3D orientation (3-component degrees per axis). Errors on 2D layers.
+Set a layer's 3D orientation
+
+| Parameter | Description |
+|---|---|
+| `v` | the new orientation, 3 components in degrees per axis |
 
 ### Layer.SetOutPoint
 
@@ -2093,7 +2413,13 @@ SetOrientation writes the 3D orientation (3-component degrees per axis). Errors 
 func (l *Layer) SetOutPoint(seconds float64) error
 ```
 
-SetOutPoint writes the layer's source-media out-point (seconds) to ldta @0x1C/@0x20, then refreshes `Layer.Duration`. length-preserving (8 bytes).
+Set the layer's source-media out-point
+
+Refreshes Layer.Duration after the write.
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new out-point, in seconds |
 
 ### Layer.SetParagraphAutoHyphenate
 
@@ -2101,7 +2427,14 @@ SetOutPoint writes the layer's source-media out-point (seconds) to ldta @0x1C/@0
 func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error
 ```
 
-SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx. Default in AE is true. AE 24+ writeable.
+Toggle auto-hyphenation on a text paragraph
+
+Splices the auto-hyphenate flag into the btdk paragraph body for the given paragraph. AE's default is true.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `on` | whether auto-hyphenation is enabled |
 
 ### Layer.SetParagraphDirection
 
@@ -2109,7 +2442,14 @@ SetParagraphAutoHyphenate toggles auto-hyphenation on paragraph #paraIdx. Defaul
 func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) error
 ```
 
-SetParagraphDirection writes the paragraph reading direction on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /33). Affects how mixed LTR/RTL text composes.
+Set the reading direction of a text paragraph
+
+Splices a new paragraph-direction value into the btdk paragraph body for the given paragraph (btdk paragraph /33). Affects how mixed left-to-right and right-to-left text composes.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `d` | new paragraph reading direction |
 
 ### Layer.SetParagraphEndIndent
 
@@ -2117,7 +2457,14 @@ SetParagraphDirection writes the paragraph reading direction on paragraph #paraI
 func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error
 ```
 
-SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx.
+Set the end indent of a text paragraph
+
+Splices a new endIndent value into the btdk paragraph body for the given paragraph.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `v` | end indent in em points |
 
 ### Layer.SetParagraphFirstLineIndent
 
@@ -2125,7 +2472,14 @@ SetParagraphEndIndent writes endIndent (em points) on paragraph #paraIdx.
 func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error
 ```
 
-SetParagraphFirstLineIndent writes firstLineIndent (em points) on paragraph #paraIdx. AE 24+ writeable (AE 2020 ScriptingAPI no-op on point text).
+Set the first-line indent of a text paragraph
+
+Splices a new firstLineIndent value into the btdk paragraph body for the given paragraph. The AE 2020 scripting API is a no-op for this attribute on point text; it is writeable from AE 24 onward.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `v` | first-line indent in em points |
 
 ### Layer.SetParagraphHangingRoman
 
@@ -2133,7 +2487,14 @@ SetParagraphFirstLineIndent writes firstLineIndent (em points) on paragraph #par
 func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error
 ```
 
-SetParagraphHangingRoman toggles Roman Hanging Punctuation on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /21). Only meaningful for box-text.
+Toggle Roman Hanging Punctuation on a text paragraph
+
+Splices the hanging-roman flag into the btdk paragraph body for the given paragraph (btdk paragraph /21). Only meaningful for box-text.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `on` | whether Roman Hanging Punctuation is enabled |
 
 ### Layer.SetParagraphJustification
 
@@ -2141,7 +2502,14 @@ SetParagraphHangingRoman toggles Roman Hanging Punctuation on paragraph #paraIdx
 func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) error
 ```
 
-SetParagraphJustification writes a new alignment enum on paragraph #paraIdx.
+Set the alignment of a text paragraph
+
+Splices a new justification value into the btdk PostScript paragraph body for the given paragraph.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `j` | new justification value |
 
 ### Layer.SetParagraphLeadingType
 
@@ -2149,7 +2517,14 @@ SetParagraphJustification writes a new alignment enum on paragraph #paraIdx.
 func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error
 ```
 
-SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx (AE 24+ writeable, btdk paragraph /8).
+Set the leading type of a text paragraph
+
+Splices a new leading-type value into the btdk paragraph body for the given paragraph (btdk paragraph /8).
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `lt` | new leading type |
 
 ### Layer.SetParagraphSpaceAfter
 
@@ -2157,7 +2532,14 @@ SetParagraphLeadingType writes the leading-type enum on paragraph #paraIdx (AE 2
 func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error
 ```
 
-SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx.
+Set the space-after of a text paragraph
+
+Splices a new spaceAfter value into the btdk paragraph body for the given paragraph.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `v` | space after in em points |
 
 ### Layer.SetParagraphSpaceBefore
 
@@ -2165,7 +2547,14 @@ SetParagraphSpaceAfter writes spaceAfter (em points) on paragraph #paraIdx.
 func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error
 ```
 
-SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx.
+Set the space-before of a text paragraph
+
+Splices a new spaceBefore value into the btdk paragraph body for the given paragraph.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `v` | space before in em points |
 
 ### Layer.SetParagraphStartIndent
 
@@ -2173,7 +2562,14 @@ SetParagraphSpaceBefore writes spaceBefore (em points) on paragraph #paraIdx.
 func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error
 ```
 
-SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx.
+Set the start indent of a text paragraph
+
+Splices a new startIndent value into the btdk paragraph body for the given paragraph.
+
+| Parameter | Description |
+|---|---|
+| `paraIdx` | index of the paragraph to update |
+| `v` | start indent in em points |
 
 ### Layer.SetParent
 
@@ -2181,11 +2577,13 @@ SetParagraphStartIndent writes startIndent (em points) on paragraph #paraIdx.
 func (l *Layer) SetParent(parentID uint32) error
 ```
 
-SetParent rewrites the layer's parent-layer ID (ldta @0x84) to `parentID`. Pass 0 to clear the parent (= "no parent", AE shows "None" in the timeline). length-preserving (4 bytes).
+Set the layer's parent-layer ID
 
-When the layer was created via the parser and lives inside a composition, the new parentID is validated against same-comp layers — passing an ID that doesn't resolve returns an error and doesn't touch the bytes. Cross-comp parenting isn't allowed by AE.
+Pass 0 to clear the parent ("no parent", shown as "None" in the timeline). When the layer lives inside a composition, the new parent ID is validated against same-comp layers — an ID that doesn't resolve returns an error and leaves the bytes untouched. Cross-comp parenting isn't allowed. Setting parentID equal to the layer's own ID is rejected since it would create a self-parent cycle.
 
-`parentID == l.ID` is rejected (would create a self-parent cycle).
+| Parameter | Description |
+|---|---|
+| `parentID` | the new parent layer ID (0 clears the parent) |
 
 ### Layer.SetPosition
 
@@ -2193,7 +2591,11 @@ When the layer was created via the parser and lives inside a composition, the ne
 func (l *Layer) SetPosition(v []float64) error
 ```
 
-SetPosition writes a new static position. Length of v must match Position's Components (2 or 3).
+Set a layer's static position
+
+| Parameter | Description |
+|---|---|
+| `v` | the new position components (2 for 2D, 3 for 3D) |
 
 ### Layer.SetPreserveTransparency
 
@@ -2201,7 +2603,11 @@ SetPosition writes a new static position. Length of v must match Position's Comp
 func (l *Layer) SetPreserveTransparency(v bool) error
 ```
 
-SetPreserveTransparency toggles "Preserve Underlying Transparency" (ldta @0x67, single byte 0/1). length-preserving (single byte).
+Set "Preserve Underlying Transparency"
+
+| Parameter | Description |
+|---|---|
+| `v` | the new preserve-transparency state |
 
 ### Layer.SetQuality
 
@@ -2209,7 +2615,11 @@ SetPreserveTransparency toggles "Preserve Underlying Transparency" (ldta @0x67, 
 func (l *Layer) SetQuality(q LayerQuality) error
 ```
 
-SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @0x04 (uint16 BE). length-preserving (2 bytes).
+Set the layer's render-quality (Wireframe/Draft/Best)
+
+| Parameter | Description |
+|---|---|
+| `q` | the new render quality |
 
 ### Layer.SetRotateX
 
@@ -2217,7 +2627,11 @@ SetQuality writes a new render-quality enum (Wireframe / Draft / Best) to ldta @
 func (l *Layer) SetRotateX(deg float64) error
 ```
 
-SetRotateX / SetRotateY write per-axis 3D rotation (degrees). Error on 2D layers (property not present).
+Set a layer's X-axis 3D rotation
+
+| Parameter | Description |
+|---|---|
+| `deg` | the new rotation in degrees |
 
 ### Layer.SetRotateY
 
@@ -2225,13 +2639,25 @@ SetRotateX / SetRotateY write per-axis 3D rotation (degrees). Error on 2D layers
 func (l *Layer) SetRotateY(deg float64) error
 ```
 
+Set a layer's Y-axis 3D rotation
+
+| Parameter | Description |
+|---|---|
+| `deg` | the new rotation in degrees |
+
 ### Layer.SetRotation
 
 ```go
 func (l *Layer) SetRotation(deg float64) error
 ```
 
-SetRotation writes the Z-axis rotation (degrees). Available on both 2D and 3D layers (it's the only rotation axis 2D layers have).
+Set a layer's Z-axis rotation
+
+Available on both 2D and 3D layers — it's the only rotation axis 2D layers have.
+
+| Parameter | Description |
+|---|---|
+| `deg` | the new rotation in degrees |
 
 ### Layer.SetRunApplyStroke
 
@@ -2239,7 +2665,14 @@ SetRotation writes the Z-axis rotation (degrees). Available on both 2D and 3D la
 func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error
 ```
 
-SetRunApplyStroke toggles whether the stroke is rendered on style run #runIdx.
+Toggle whether a text style run renders its stroke
+
+Splices the apply-stroke flag into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `apply` | whether the stroke is rendered |
 
 ### Layer.SetRunAutoKernType
 
@@ -2247,7 +2680,14 @@ SetRunApplyStroke toggles whether the stroke is rendered on style run #runIdx.
 func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error
 ```
 
-SetRunAutoKernType writes the auto-kerning mode on style run #runIdx. AE 24+ writeable (btdk style-run /11). Note: setting to TextAutoKernNoAuto without also assigning a manual kerning value will read as "0 spacing" in AE — manual kerning lives in a separate per-character sub-tree at btdk /1/1[0]/0/8 which this library does not yet expose for writing.
+Set the auto-kerning mode of a text style run
+
+Splices a new auto-kern-type value into the btdk PostScript body for the given run (btdk style-run /11). Setting it to TextAutoKernNoAuto without also assigning a manual kerning value reads as zero spacing in AE — manual kerning lives in the separate per-character sub-tree at btdk /1/1[0]/0/8, written via SetManualKerning.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `kt` | new auto-kern type |
 
 ### Layer.SetRunAutoLeading
 
@@ -2255,7 +2695,14 @@ SetRunAutoKernType writes the auto-kerning mode on style run #runIdx. AE 24+ wri
 func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error
 ```
 
-SetRunAutoLeading toggles AE's "auto leading" flag on style run #runIdx. When true, the Leading value is computed by AE (typically FontSize × 1.2); when false, the explicit Leading value applies.
+Toggle auto-leading on a text style run
+
+Splices the auto-leading flag into the btdk PostScript body for the given run. When true, the Leading value is computed by AE (typically FontSize x 1.2); when false, the explicit Leading value applies.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `auto` | whether AE should compute leading automatically |
 
 ### Layer.SetRunBaselineOption
 
@@ -2263,7 +2710,14 @@ SetRunAutoLeading toggles AE's "auto leading" flag on style run #runIdx. When tr
 func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error
 ```
 
-SetRunBaselineOption writes the font baseline option on style run #runIdx. AE 24+ writeable; mirrors subscript / superscript readonly attrs.
+Set the baseline option of a text style run
+
+Splices a new baseline-option value into the btdk PostScript body for the given run. Mirrors the subscript / superscript read-only attributes exposed elsewhere.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `base` | new baseline option |
 
 ### Layer.SetRunBaselineShift
 
@@ -2271,7 +2725,14 @@ SetRunBaselineOption writes the font baseline option on style run #runIdx. AE 24
 func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error
 ```
 
-SetRunBaselineShift writes baseline shift (em points; positive = up) on style run #runIdx.
+Set the baseline shift of a text style run
+
+Splices a new baseline-shift value into the btdk PostScript body for the given run. Positive values shift the run up.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `shift` | baseline shift in em points (positive = up) |
 
 ### Layer.SetRunCapsOption
 
@@ -2279,7 +2740,14 @@ SetRunBaselineShift writes baseline shift (em points; positive = up) on style ru
 func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error
 ```
 
-SetRunCapsOption writes the font caps option on style run #runIdx (AE 24+ writeable; underlying btdk byte exists in AE 2020 files too, but AE 2020 ScriptingAPI marks allCaps / smallCaps readonly so fixture generation requires AE 24).
+Set the caps option of a text style run
+
+Splices a new caps-option value into the btdk PostScript body for the given run. The underlying btdk byte exists in AE 2020 files too, but the AE 2020 scripting API marks allCaps / smallCaps read-only, so the option is only writeable from AE 24 onward.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `caps` | new caps option |
 
 ### Layer.SetRunDigitSet
 
@@ -2287,7 +2755,14 @@ SetRunCapsOption writes the font caps option on style run #runIdx (AE 24+ writea
 func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error
 ```
 
-SetRunDigitSet writes the digit set on style run #runIdx (AE 24+ writeable, btdk style-run /70).
+Set the digit set of a text style run
+
+Splices a new digit-set value into the btdk PostScript body for the given run (btdk style-run /70).
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `d` | new digit set |
 
 ### Layer.SetRunFauxBold
 
@@ -2295,7 +2770,14 @@ SetRunDigitSet writes the digit set on style run #runIdx (AE 24+ writeable, btdk
 func (l *Layer) SetRunFauxBold(runIdx int, on bool) error
 ```
 
-SetRunFauxBold toggles synthetic bold on style run #runIdx.
+Toggle synthetic bold on a text style run
+
+Splices the faux-bold flag into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `on` | whether synthetic bold is enabled |
 
 ### Layer.SetRunFauxItalic
 
@@ -2303,7 +2785,14 @@ SetRunFauxBold toggles synthetic bold on style run #runIdx.
 func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error
 ```
 
-SetRunFauxItalic toggles synthetic italic on style run #runIdx.
+Toggle synthetic italic on a text style run
+
+Splices the faux-italic flag into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `on` | whether synthetic italic is enabled |
 
 ### Layer.SetRunFillColor
 
@@ -2311,7 +2800,14 @@ SetRunFauxItalic toggles synthetic italic on style run #runIdx.
 func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error
 ```
 
-SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1) on style run #runIdx. Encoded as btdk's [A, R, G, B] array.
+Set the fill color of a text style run
+
+Splices a new fill color into the btdk PostScript body for the given run, encoded as btdk's [A, R, G, B] array.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `rgba` | fill color as [R, G, B, A], each component in 0..1 |
 
 ### Layer.SetRunFontIndex
 
@@ -2319,7 +2815,14 @@ SetRunFillColor writes the fill paint color [R, G, B, A] (each 0..1) on style ru
 func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error
 ```
 
-SetRunFontIndex repoints style run #runIdx at a different entry in the Fonts table (TextSource.Fonts). Caller is responsible for ensuring the index is in range; the underlying psValue is just an integer.
+Repoint a text style run at a different font table entry
+
+Splices a new font index into the btdk PostScript body for the given run, referencing an entry in the layer's Fonts table (TextSource.Fonts). The underlying value is a plain integer; the caller is responsible for ensuring the index is in range.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `fontIdx` | index into TextSource.Fonts to point the run at |
 
 ### Layer.SetRunFontSize
 
@@ -2327,7 +2830,14 @@ SetRunFontIndex repoints style run #runIdx at a different entry in the Fonts tab
 func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error
 ```
 
-SetRunFontSize writes a new font size (em points) to style run #runIdx. length-variable splice in the btdk PostScript body.
+Set the font size of a text style run
+
+Splices a new font-size value into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `sizePts` | new font size in em points |
 
 ### Layer.SetRunHorizontalScale
 
@@ -2335,7 +2845,14 @@ SetRunFontSize writes a new font size (em points) to style run #runIdx. length-v
 func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error
 ```
 
-SetRunHorizontalScale / SetRunVerticalScale write the raw scale values used by AE on style run #runIdx. See TextStyleRun docs for the unit notes (AE default is 1; scripted setter range 0..100).
+Set the horizontal scale of a text style run
+
+Splices a new horizontal-scale value into the btdk PostScript body for the given run. AE default is 1; the scripted setter range is 0..100 (see TextStyleRun for unit notes).
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `scale` | new horizontal scale value |
 
 ### Layer.SetRunLeading
 
@@ -2343,7 +2860,14 @@ SetRunHorizontalScale / SetRunVerticalScale write the raw scale values used by A
 func (l *Layer) SetRunLeading(runIdx int, leading float64) error
 ```
 
-SetRunLeading writes leading (em points) on style run #runIdx. Note: AE auto-leading is gated by the AutoLeading flag — to use this value the caller should also disable auto-leading via SetRunAutoLeading(runIdx, false), otherwise AE overrides it.
+Set the leading of a text style run
+
+Splices a new leading value into the btdk PostScript body for the given run. AE auto-leading is gated by the AutoLeading flag — to make this value take effect the caller should also disable auto-leading via SetRunAutoLeading(runIdx, false), otherwise AE overrides it.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `leading` | new leading value in em points |
 
 ### Layer.SetRunLineJoinType
 
@@ -2351,7 +2875,14 @@ SetRunLeading writes leading (em points) on style run #runIdx. Note: AE auto-lea
 func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error
 ```
 
-SetRunLineJoinType writes the stroke corner join style on style run #runIdx (AE 24+ writeable, btdk style-run /62).
+Set the stroke corner join style of a text style run
+
+Splices a new line-join-type value into the btdk PostScript body for the given run (btdk style-run /62).
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `j` | new line join type |
 
 ### Layer.SetRunNoBreak
 
@@ -2359,7 +2890,14 @@ SetRunLineJoinType writes the stroke corner join style on style run #runIdx (AE 
 func (l *Layer) SetRunNoBreak(runIdx int, on bool) error
 ```
 
-SetRunNoBreak toggles the "do not break" character flag on style run #runIdx (AE 24+ writeable, btdk style-run /52). When true, AE won't allow line breaks to fall inside the run.
+Toggle the "do not break" flag on a text style run
+
+Splices the no-break flag into the btdk PostScript body for the given run (btdk style-run /52). When true, AE won't allow line breaks to fall inside the run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `on` | whether line breaks inside the run are disallowed |
 
 ### Layer.SetRunStrokeColor
 
@@ -2367,7 +2905,14 @@ SetRunNoBreak toggles the "do not break" character flag on style run #runIdx (AE
 func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error
 ```
 
-SetRunStrokeColor writes the stroke paint color [R, G, B, A] on style run #runIdx.
+Set the stroke color of a text style run
+
+Splices a new stroke color into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `rgba` | stroke color as [R, G, B, A], each component in 0..1 |
 
 ### Layer.SetRunStrokeOverFill
 
@@ -2375,7 +2920,14 @@ SetRunStrokeColor writes the stroke paint color [R, G, B, A] on style run #runId
 func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error
 ```
 
-SetRunStrokeOverFill toggles whether the stroke renders over the fill (true) or under it (false) on style run #runIdx. Default in AE is true.
+Set the stroke/fill render order of a text style run
+
+Splices the stroke-over-fill flag into the btdk PostScript body for the given run. AE's default is true (stroke renders over fill).
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `over` | true to render the stroke over the fill, false for |
 
 ### Layer.SetRunStrokeWidth
 
@@ -2383,7 +2935,14 @@ SetRunStrokeOverFill toggles whether the stroke renders over the fill (true) or 
 func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error
 ```
 
-SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx.
+Set the stroke width of a text style run
+
+Splices a new stroke-width value into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `width` | new stroke width in em points |
 
 ### Layer.SetRunTracking
 
@@ -2391,7 +2950,14 @@ SetRunStrokeWidth writes the stroke width (em points) on style run #runIdx.
 func (l *Layer) SetRunTracking(runIdx int, tracking float64) error
 ```
 
-SetRunTracking writes character tracking (1/1000 em) on style run #runIdx.
+Set the character tracking of a text style run
+
+Splices a new tracking value into the btdk PostScript body for the given run.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `tracking` | new tracking value in 1/1000 em units |
 
 ### Layer.SetRunTsume
 
@@ -2399,7 +2965,14 @@ SetRunTracking writes character tracking (1/1000 em) on style run #runIdx.
 func (l *Layer) SetRunTsume(runIdx int, tsume float64) error
 ```
 
-SetRunTsume writes the CJK character-spacing adjustment (0..100) on style run #runIdx.
+Set the CJK character-spacing adjustment of a text style run
+
+Splices a new tsume value into the btdk PostScript body for the given run. The setter range is 0..100; the DOM range is 0..1.
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `tsume` | new tsume value in the 0..100 range |
 
 ### Layer.SetRunVerticalScale
 
@@ -2407,7 +2980,14 @@ SetRunTsume writes the CJK character-spacing adjustment (0..100) on style run #r
 func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error
 ```
 
-SetRunVerticalScale writes the vertical scale value used by AE on style run #runIdx. See TextStyleRun docs for unit notes (AE default is 1; scripted setter range 0..100).
+Set the vertical scale of a text style run
+
+Splices a new vertical-scale value into the btdk PostScript body for the given run. AE default is 1; the scripted setter range is 0..100 (see TextStyleRun for unit notes).
+
+| Parameter | Description |
+|---|---|
+| `runIdx` | index of the style run to update |
+| `scale` | new vertical scale value |
 
 ### Layer.SetSamplingBicubic
 
@@ -2415,7 +2995,11 @@ SetRunVerticalScale writes the vertical scale value used by AE on style run #run
 func (l *Layer) SetSamplingBicubic(v bool) error
 ```
 
-SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling for the layer. length-preserving (single bit @ldta 0x25).
+Switch the layer's sampling between Bilinear and Bicubic
+
+| Parameter | Description |
+|---|---|
+| `v` | true selects Bicubic, false selects Bilinear |
 
 ### Layer.SetScale
 
@@ -2423,7 +3007,11 @@ SetSamplingBicubic switches between Bilinear (false) and Bicubic (true) sampling
 func (l *Layer) SetScale(v []float64) error
 ```
 
-SetScale writes a new static scale (normalized 1.0 = 100%). Length of v must match Scale's Components (2 or 3).
+Set a layer's static scale
+
+| Parameter | Description |
+|---|---|
+| `v` | the new scale components, normalized (1.0 = 100%) |
 
 ### Layer.SetShy
 
@@ -2431,7 +3019,13 @@ SetScale writes a new static scale (normalized 1.0 = 100%). Length of v must mat
 func (l *Layer) SetShy(v bool) error
 ```
 
-SetShy toggles the layer's Shy flag (hides from the shy-filter view). length-preserving (single bit @ldta 0x27).
+Set the layer's Shy flag
+
+Shy hides the layer from the shy-filter view in the timeline.
+
+| Parameter | Description |
+|---|---|
+| `v` | the new shy state |
 
 ### Layer.SetSolo
 
@@ -2439,7 +3033,11 @@ SetShy toggles the layer's Shy flag (hides from the shy-filter view). length-pre
 func (l *Layer) SetSolo(v bool) error
 ```
 
-SetSolo toggles the layer's Solo flag. length-preserving (single bit @ldta 0x26).
+Set the layer's Solo flag
+
+| Parameter | Description |
+|---|---|
+| `v` | the new solo state |
 
 ### Layer.SetSource
 
@@ -2447,11 +3045,13 @@ SetSolo toggles the layer's Solo flag. length-preserving (single bit @ldta 0x26)
 func (l *Layer) SetSource(sourceID uint32) error
 ```
 
-SetSource rewrites the layer's source-item ID (ldta @0x28). For regular AV layers this is the footage or pre-comp ID. length- preserving (4 bytes).
+Set the layer's source-item ID
 
-When the layer was created via the parser and the owning Project is known, `sourceID` is validated to match an existing Composition / Footage item — passing an ID that doesn't resolve returns an error and doesn't touch the bytes. Pass 0 to clear (rare; usually means the layer becomes a Null-like "no source" stub).
+For regular AV layers this is the footage or pre-comp ID. When the owning project is known, sourceID is validated to match an existing Composition or Footage item — an ID that doesn't resolve returns an error and leaves the bytes untouched. Pass 0 to clear (rare; usually turns the layer into a Null-like "no source" stub). AE caches some source-derived metadata (Width/Height) on the layer at render time rather than in ldta, so changing the source preserves the rest of ldta verbatim.
 
-Note: AE caches some source-derived metadata (Width/Height) on the layer at render time, not in ldta. Changing source preserves the rest of ldta verbatim, which is what we want.
+| Parameter | Description |
+|---|---|
+| `sourceID` | the new source-item ID (0 clears it) |
 
 ### Layer.SetStartTime
 
@@ -2459,9 +3059,13 @@ Note: AE caches some source-derived metadata (Width/Height) on the layer at rend
 func (l *Layer) SetStartTime(seconds float64) error
 ```
 
-SetStartTime writes the layer's start time (seconds) to ldta @0x0C/@0x10. length-preserving (8 bytes).
+Set the layer's start time
 
-AE allows negative start times (pre-roll). Mirrors the change to `Layer.StartTime`.
+AE allows negative start times (pre-roll). Mirrors the change into Layer.StartTime.
+
+| Parameter | Description |
+|---|---|
+| `seconds` | the new start time, in seconds |
 
 ### Layer.SetStretch
 
@@ -2469,7 +3073,13 @@ AE allows negative start times (pre-roll). Mirrors the change to `Layer.StartTim
 func (l *Layer) SetStretch(ratio float64) error
 ```
 
-SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) to ldta @0x08 (dividend) / @0x6C (divisor). Unlike the other time fields the dividend/divisor pair is **split across the ldta** — dividend lives near the top, divisor in the trailing section. length-preserving (8 bytes total in two 4-byte writes).
+Set the layer's time-stretch ratio
+
+1\.0 is normal speed, 2.0 is 2x slow. Unlike the other time fields, the dividend/divisor pair is split across ldta — the dividend lives near the top, the divisor in the trailing section.
+
+| Parameter | Description |
+|---|---|
+| `ratio` | the new time-stretch ratio (1.0 = normal speed) |
 
 ### Layer.SetText
 
@@ -2477,13 +3087,13 @@ SetStretch writes the layer's time-stretch ratio (1.0 = normal, 2.0 = 2× slow) 
 func (l *Layer) SetText(newText string) error
 ```
 
-SetText replaces a text layer's user-visible text. The new text may be any length and span any number of paragraphs ('\\n' / '\\r' line breaks): the PostScript string is spliced, the paragraph array is rebuilt with one count-patched entry per paragraph, the style-run array is collapsed to a single run carrying the total count (keeping the first run's style, as AE does on a whole-text replace), and the btdk layout cache is left for AE to recompute on load. Empty text ("") is supported (it becomes a single empty paragraph). Replacements that keep both the encoded byte length and the per-paragraph UTF-16 counts are written in place and preserve all runs.
+Replace a text layer's user-visible text
 
-A per-character manual-kerning table is dropped on a length-changing replacement (as AE does on a whole-text replace); the only error from a well-formed text layer is when the layer isn't actually a text layer.
+The new text may be any length and span any number of paragraphs (split on line breaks): the PostScript string is spliced, the paragraph array is rebuilt with one count-patched entry per paragraph, the style-run array is collapsed to a single run carrying the total count (keeping the first run's style, matching how AE handles a whole-text replace), and the layout cache is left for AE to recompute on load. Empty text is supported and becomes a single empty paragraph. Replacements that keep both the encoded byte length and the per-paragraph UTF-16 counts unchanged are written in place and preserve all runs. A per-character manual-kerning table is dropped on a length-changing replacement, again matching AE's own behavior; the only error case for a well-formed text layer is when the layer isn't actually a text layer. Encoding parity with AE: input is split on line-feed characters (each segment becomes a paragraph terminated by AE's carriage-return convention), then encoded as big-endian UTF-16 with a leading byte-order mark, with PostScript special characters escaped at the byte level. After a successful call Layer.TextSource is re-decoded so subsequent reads reflect the new value.
 
-Encoding parity with AE: input is split on '\\n' (each segment becomes a paragraph terminated by AE's '\\r' convention), then encoded as UTF-16BE with a leading FE FF BOM, with PostScript specials ( ) \\ escaped at the byte level.
-
-After a successful call Layer.TextSource is re-decoded so subsequent reads reflect the new value; Layer.WriteAEP serializes the change.
+| Parameter | Description |
+|---|---|
+| `newText` | the new text content |
 
 ### Layer.SetTimeRemapEnabled
 
@@ -2491,11 +3101,13 @@ After a successful call Layer.TextSource is re-decoded so subsequent reads refle
 func (l *Layer) SetTimeRemapEnabled(enabled bool) error
 ```
 
-SetTimeRemapEnabled enables or disables time remapping on this layer.
+Enable or disable time remapping on a layer
 
 Enabling sets a static value of 0.0 (identity mapping). For full remapping, call TimeRemap().SetStaticValue() or insert keyframes after enabling. Disabling clears the static value.
 
-Returns an error when the layer has no TimeRemap property slot (non-AV layers) or the property has existing keyframes (delete them first before disabling).
+| Parameter | Description |
+|---|---|
+| `enabled` | the new time-remap enabled state |
 
 ### Layer.SetTrackMatte
 
@@ -2503,9 +3115,13 @@ Returns an error when the layer has no TimeRemap property slot (non-AV layers) o
 func (l *Layer) SetTrackMatte(t TrackMatteType) error
 ```
 
-SetTrackMatte writes a new track-matte type byte to ldta @0x6B. length-preserving (single byte).
+Set the layer's classic track-matte type
 
-AE additionally requires the matte source layer to sit immediately above this layer in the comp; this setter only flips the mode byte and does NOT reorder layers.
+AE additionally requires the matte source layer to sit immediately above this layer in the comp; this setter only changes the mode byte and does not reorder layers.
+
+| Parameter | Description |
+|---|---|
+| `t` | the new track-matte type |
 
 ### Layer.SetTrackMatteLayer
 
@@ -2513,13 +3129,14 @@ AE additionally requires the matte source layer to sit immediately above this la
 func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error
 ```
 
-SetTrackMatteLayer rewrites this layer's explicit track matte source (ldta @0xA0, AE 23+) to `sourceID` and updates the track matte mode (ldta @0x6B) to `mode`. Pass sourceID=0 with mode=TrackMatteNone to clear the matte. length-preserving (4 bytes + 1 byte).
+Set the layer's explicit track-matte source and mode
 
-When the layer lives inside a parsed composition, `sourceID` is validated against same-comp layers — passing an ID that doesn't resolve returns an error and doesn't touch the bytes. AE 23+ requires the matte source layer to live in the same comp.
+Pass sourceID=0 with mode=TrackMatteNone to clear the matte. When the layer lives inside a parsed composition, sourceID is validated against same-comp layers — an ID that doesn't resolve returns an error and leaves the bytes untouched; the matte source must live in the same comp. Setting sourceID equal to the layer's own ID is rejected since self-matte is a no-op in AE and usually indicates a mistake. Passing mode=TrackMatteNone together with a non-zero sourceID means "preserve the target but apply no matte yet" — the source pointer stays while the matte channel stays disabled. On older project files whose ldta layout is shorter, this call errors because the explicit track-matte slot doesn't exist; re-saving the file through a newer AE version first extends ldta so the setter can succeed.
 
-`sourceID == l.ID` is rejected (self-matte is a no-op in AE; usually indicates a programmer error). Pass mode=TrackMatteNone with non-zero sourceID for "preserve target, no matte applied yet" — AE allows that (the source pointer stays but the matte channel is disabled).
-
-On AE 2020 / 2022 files (ldta 160 bytes), this call errors — the @0xA0 slot doesn't exist. Re-save the file through AE 23+ first to extend ldta, then this setter works.
+| Parameter | Description |
+|---|---|
+| `sourceID` | the new track-matte source layer ID (0 clears it) |
+| `mode` | the new track-matte mode |
 
 ### Layer.SetTrackMatteSource
 
@@ -2547,7 +3164,11 @@ Pass mode=TrackMatteNone with non-nil src for "preserve target, no matte applied
 func (l *Layer) SetVisible(v bool) error
 ```
 
-SetVisible toggles the layer's video switch (the 👁️ icon). length-preserving (single bit @ldta 0x27).
+Set the layer's video (visibility) switch
+
+| Parameter | Description |
+|---|---|
+| `v` | the new visibility state |
 
 **Example:**
 
