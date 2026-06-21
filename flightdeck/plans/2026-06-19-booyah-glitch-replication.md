@@ -1,7 +1,7 @@
 ---
 status: active
 summary: 实现 Booyah Glitch 全工程复刻:Phase0 前置 spike(表达式 Evolution=time*N + wiggle / 单层 ~21 mask / Curves 曲线数据)→ Phase1-4 按 DAG 叶→根逐 comp 建(extract 值→写 gen_<comp>.go→AE 接受+verify.jsx DOM对账→覆盖账本→commit)→ 终帧 メインコンプ 像素对照原工程。
-last_updated: 2026-06-21
+last_updated: 2026-06-22
 implements: specs/2026-06-19-booyah-glitch-full-replication.md
 ---
 
@@ -21,7 +21,7 @@ implements: specs/2026-06-19-booyah-glitch-full-replication.md
 
 ## Progress
 
-current: **Task 1.1 comp ① ✅ 完成(AE 2025 像素级一致)**,进 Task 1.2 ② テキスト。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
+current: **Task 1.1 comp ① ✅ + Task 1.2 comp ② ✅ 完成**(② 待用户真机 review),进 Task 1.3 ③ マップ用ノイズ。Task 1.2:两文字动画器 gap #2 Tracking + #3 Character Offset 本会话 RE + 双版本 render-gate ship(commit 2add514),`gen_text_komako.go` 拼成 comp ②（text + `SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器），AE2020≡AE2025 接受+render 一致（GLITCH→PURCLQ 字符环移 + tracking 撑开 + opacity flicker）。✅ 基建(clear_ae_crashstate 67023b6;ae_run PostMessage 根治 foreground-lock b411d09)✅ AE 2025 接受+shape 不 drop ✅ render 三真 bug 全修:层 position→中心(4f579d1)·层时长→[0,0.901](6091016)·**中间帧错位根因=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正;cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证根因,**非** kf 值/插值/分页——前一会话猜错方向 → d03101c;详 incident ntsc-tickrate-derive-3x-off)→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff=0/0/32px**。残留旁支:AE 2020 侧 render 待补;clone 用 30fps 绕开 NewComposition 分数 fps cdta 时基 bug(另案)。
 
 **Phase 0（前置 de-risk）全收口:**
 - ✅ 0.1 scaffold（04e57eb）：`showcase/booyah-clone/` 包 + oracle 只读神谕 + 覆盖账本。
@@ -117,9 +117,9 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 
 **风险:** 文字动画器(tracking/char-offset)= text-animator territory(`incidents/text-animator-create-re.md`)。NewTextLayer 仅 SetText。
 
-- [ ] **Step 1:** `NewTextLayer` + `SetText("GLITCH")`;Position/Opacity 关键帧(oracle 取值)。
-- [ ] **Step 2:** Tracking/Character Offset 动画 → 查 capindex 是否有对应 setter;无 → RE(text-animator)或账本标 `待 RE`。**不绕**:tracking 是 btdk/text-animator,先确认可写性。
-- [ ] **Step 3:** 验收。账本 ② = 待review / 部分待RE。Commit。
+- [x] **Step 1:** `NewTextLayer` + `SetText("GLITCH")`;Position(28kf)/Opacity(24kf) 经 `SetLayerTransform`（reopen 后,oracle 取值,opacity ×100 转 percent）。
+- [x] **Step 2:** Tracking/Character Offset = text-animator leaf,本会话 RE（直接从原工程读 = 1D scalar，companion 自动 materialize）+ ship `AddTextTrackingAnimator`/`AddTextCharacterOffsetAnimator` + `AnimateText*`，双版本 render-gate PASS（commit 2add514）。
+- [x] **Step 3:** 验收：Go round-trip 逐值对账 ✓ + AE2020≡AE2025 接受+render（GLITCH→PURCLQ）。账本 ② = 🔶待review。Commit。
 
 ### Task 1.3 — ③ マップ用フラクタルノイズ(id=69,2 Fractal Noise 层)〔依赖 Task 0.3〕
 
