@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **comp ② 用户真机验收 complete**（居中/斜体对、UI 可编辑；连修 4 处含跨-comp 层 ID 撞号库 bug 383bcd2）；下一步 = comp ③ マップ用ノイズ
+Updated: 2026-06-22 · claude · Stage: Booyah **comp ③ マップ用フラクタルノイズ 成**（2 Fractal Noise solid，双版本 AE-accept + DOM 对账 PASS，Evolution 表达式真启用；🔶待用户 review，a0ce40f）；下一步 = comp ④ カクッ（2 shape 层）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,14 +8,11 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-**comp ② ✅ complete（用户真机验收 2026-06-22）**。本会话据真机反馈连修 4 处：①字体/字号/斜体/居中对齐原 text doc（f40cbe3）②竖直居中=anchor 按自身文字框中心（8e7f527）③动画器补 companion leaf（e870062）④**UI 编辑/删层报错根因=跨-comp 用户层 ID 撞号**（comp① shape 与 comp② text 都拿 ID 13 → `allocLayerID` 改全局单调，383bcd2，库级 bug 修复，单-comp gate 字节不变+双版本 PASS，守卫 `TestNewLayer_CrossCompIDsDistinct`）。教训：render+round-trip+脚本全绿 ≠ AE UI 可编辑（UI 走 ID-keyed 查找，脚本走直接引用 → 撞号复现不出）。service 层（2..12）跨-comp 也撞号但**实证良性**（AE 视 comp-内部容忍，用户验收无报错）→ 不必修。详 [[nextitemid-must-include-layer-ids]] 第三回。
+**comp ③ マップ用フラクタルノイズ ✅ 成（本会话 a0ce40f，🔶待用户 review）**：`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise（L0 Overlay / L1 Normal）。**双版本 AE-accept + DOM 对账 PASS**——2 层不 drop、Fractal Noise 32 props 全在、Evolution `expr="time*1200"/"time*3000" on`（AE DOM 确认表达式真启用，红线1 清，非假绿）、Offset Turbulence 2kf→DOM 960,540（parser fraction[0.5,0.5]→AE 像素中心映射对）、UniformScaling off、blend 对。值全 oracle 取（连 L1 `time*3000\r` 尾 CR）。**footage-share 实测结论**：footage(67)=黑 solid，无 from-scratch 共享 footage-item API（SetSource 留孤儿 / DuplicateLayer 继承 effect 需脆弱二次 reopen）→ 各自 1 黑 solid（Fractal Noise 自生成像素，render-neutral delta）。终帧 render-pixel 归 ⑫。verify.jsx 加 `dumpEffects`（服务后续 ④⑦⑧⑨⑩⑪⑫）。无新 API（组合既有 gated 能力），capindex 不变。
 
-**A = 续建 Booyah Phase 1**（Task 1.3/1.4，[plan](plans/2026-06-19-booyah-glitch-replication.md)）：
-1. **③ マップ用フラクタルノイズ**：2 Fractal Noise 层（footage 源共享建法首遇——实测确定）+ Evolution `SetExpression("time*1200"/"time*3000")`（0.3 已 GO）+ Offset Turbulence `AnimateEffectParam` + L0 blend=Overlay。
-2. **④ カクッ**：2 shape 层，层级 Scale(2kf)+Opacity(20kf) + oracle 提取静态 path。
-3. 各走验收四关 + 账本。
+**下一 = Task 1.4 ④ カクッ**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：2 shape 层，层级 Scale(2kf ease)+Opacity(20kf) + oracle 提取静态 path（复用 comp ① shape territory + ② 的 `SetLayerTransform`，应快）。走验收四关 + 账本。
 
-**comp ② 已成（本会话，commit 2add514+377006c）**：两文字动画器 ship（`AddTextTrackingAnimator`/`AddTextCharacterOffsetAnimator`+`AnimateText*`，双版本 render-gate PASS，RE 直接从真实工程读，详 [[text-animator-create-re]] 末 Case）+ `gen_text_komako.go` 拼成 comp ②（`SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器）。capindex 486→490。**fidelity delta**（非阻塞）：kf linear 近似原 ease；字体/字色用默认（原色经 ⑧ RGBズレ 覆写）。⚠AE 装 `E:\adobe\`。
+**Booyah Phase 1 进度**：① ✅(complete) ② ✅(complete) ③ ✅(🔶待review) ④ ⬜ → 然后 Phase 2 中层 comp（⑤⑥⑦⑧⑨）。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
