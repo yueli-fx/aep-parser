@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing/extending text animators (AddTextOpacityAnimator / AnimateTextRangeOffset); adding a new animator property type (Position/Scale/Color); wondering where Text Animators live vs btdk; building a property *Property over a spliced chunk to reuse AnimateScalarKeyframes
 applies_to: [text, text-animator, kinetic-typography, range-selector, ADBE Text Animators, ADBE Text Animator, synthesis-insert, indexed-group, AnimateScalarKeyframes, mutate-text-animator]
-last_updated: 2026-06-16
+last_updated: 2026-06-22
 resolved_by:
 ---
 
@@ -188,7 +188,8 @@ leaf 值静态；这条让 **leaf 值本身关键帧化**——全部被选字�
 
 ## 现状 / 边界
 
-- **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation**、**Fill Color** 动画器、Range Selector（参数化
+- **已 ship**：Opacity、**Position 3D**、**Scale 3D**、**Rotation**、**Fill Color**、**Tracking Amount**、
+  **Character Offset** 动画器、Range Selector（参数化
   Start/End/Offset）、offset 关键帧扫光（reveal / slide-in / shrink-in / spin-in / colour-wipe 通用）、
   **animate leaf 本身（全覆盖：1D scalar `AnimateTextOpacity`/`AnimateTextRotation` + 3D/4D spatial `AnimateTextPosition`/`AnimateTextColor` + 非 spatial 3D `AnimateTextScale`，全字符同步值曲线）**。各双版本渲染 gate PASS。
   **animate-leaf 方向已收口**——每个有 Add\*Animator facade 的 leaf 类型都能 animate。
@@ -373,3 +374,15 @@ Randomize/Seed 改的是「选中哪些字」非简单亮度、Shape/Ease 是 fa
   Color·Skew）双版本渲染 gate PASS（表驱动 + 通用 verify jsx，每 leaf 一个作用面签名，AE2020≡AE2025）；
   Rotation X/Y evidence-based defer（2D 视觉惰性，bbox 三帧全同 → 需逐字 3D；facade 保留+round-trip 自验+标
   Alpha/write-only）。Go 侧抽 2 私有 helper，新 leaf = 抽模板 + 一行 facade。详上节
+- 2026-06-22 Tracking + Character Offset（Booyah comp ② gaps #2/#3，commit 2add514）：两个 1D scalar
+  leaf（`AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` + `AnimateText*` leaf-keyframe），
+  双版本渲染 gate PASS（AE2020≡AE2025 像素逐数字一致）。**新方法：RE 不靠 AE，直接从真实工程读** —— 原
+  Booyah 工程的 GLITCH 文字层已把两 leaf materialize+keyframe 落盘，`tmp_debug` 探针读出 tdb4 db990001
+  =1 分量（确认 1D scalar，套既有 `addTextScalarLeafAnimator`+`overwriteScalarCdat`，零新字节代码）+
+  **companion 自动 materialize**（Tracking Amount→`ADBE Text Track Type`；Character Offset→`ADBE Text
+  Character Change Type`+`ADBE Text Character Range`，同 Rotation X/Y 的伴生 Z，match-name 精确覆写、伴生
+  留默认）。clean 静态模板仍须 AE 实物化（`gen_text_anim_tracking_charoffset_templates.jsx`→extract，
+  伴生默认值→AE 省略，模板只剩驱动 leaf 一个 cdat，比真实工程更干净）。gate 签名：**Tracking→ink bbox
+  宽度**（选中→撑开 612→354）；**Character Offset→frameDiff**（选中段字形被改码重映射，0-2 diff=2157，
+  每帧都有 ink≠掉层，同 wiggly/multi-selector 的 A/B 差分风格而非单调）。⚠AE 装在 `E:\adobe\`（非
+  `C:\Program Files`）——查 AE 可用性别只看默认路径。
