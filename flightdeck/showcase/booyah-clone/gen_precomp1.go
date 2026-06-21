@@ -68,21 +68,38 @@ func finishPrecomp1(rp *aep.Project, orc *oracle) {
 		must(l.SetStartTime(origComp.Layers[i].StartTime))
 	}
 
-	// L0: source-centre anchor + Position animated 2kf (absolute coords).
+	// applyScaleRotation copies the original layer's static Scale (parser reads it
+	// as a fraction; SetLayerTransform.Scale wants percent → ×100) and Rotate Z
+	// (degrees). The original shrinks each nested ① copy (L0 44 %, L1 45 %) and
+	// flips L1 180° — omitting these rendered the copies full-size & un-rotated, so
+	// the composite glitch spread too wide vs the original (user-caught at frame 18).
+	applyScaleRotation := func(tr *aep.LayerTransform, otg *aep.AEPropertyGroup) {
+		if sc := findProp(otg, "ADBE Scale"); sc != nil {
+			s := toFloats(sc.StaticValue)
+			must(tr.Scale().SetStaticValue([2]float64{s[0] * 100, s[1] * 100}))
+		}
+		if r := findProp(otg, "ADBE Rotate Z"); r != nil {
+			must(tr.Rotation().SetStaticValue(toScalar(r.StaticValue)))
+		}
+	}
+
+	// L0: source-centre anchor + scale/rotation + Position animated 2kf (absolute coords).
 	otg0 := findGroup(origComp.Layers[0].PropertyTree(), "ADBE Transform Group")
 	tr0 := aep.NewLayerTransform()
 	must(tr0.AnchorPoint().SetStaticValue([2]float64{ax, ay}))
+	applyScaleRotation(tr0, otg0)
 	for _, kf := range findProp(otg0, "ADBE Position").Keyframes {
 		v := toFloats(kf.Value)
 		must(tr0.Position().AddKeyframeLinear(kf.Time, [2]float64{v[0], v[1]}))
 	}
 	must(aep.SetLayerTransform(comp.Layers[0], tr0))
 
-	// L1: source-centre anchor + centred Position (separated-read trap) + Opacity 13kf.
+	// L1: source-centre anchor + scale/rotation + centred Position (separated-read trap) + Opacity 13kf.
 	otg1 := findGroup(origComp.Layers[1].PropertyTree(), "ADBE Transform Group")
 	tr1 := aep.NewLayerTransform()
 	must(tr1.AnchorPoint().SetStaticValue([2]float64{ax, ay}))
 	must(tr1.Position().SetStaticValue([2]float64{cx, cy}))
+	applyScaleRotation(tr1, otg1)
 	for _, kf := range findProp(otg1, "ADBE Opacity").Keyframes {
 		must(tr1.Opacity().AddKeyframeLinear(kf.Time, toScalar(kf.Value)*100))
 	}
