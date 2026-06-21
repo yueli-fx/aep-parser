@@ -65,8 +65,23 @@ func TestParse_NoTags(t *testing.T) {
 }
 
 func TestParse_UnknownTag(t *testing.T) {
-	if _, err := Parse("@bogus something"); err == nil {
-		t.Fatal("Parse: want error for unknown @tag")
+	// An unknown @tag is a typo only inside a converted block (one with a known
+	// tag); there it must error.
+	if _, err := Parse("@summary do a thing\n@bogus something"); err == nil {
+		t.Fatal("Parse: want error for unknown @tag in a converted block")
+	}
+}
+
+func TestParse_LegacyChunkOffsetProse(t *testing.T) {
+	// A legacy (un-converted) comment whose wrapped lines start with chunk-offset
+	// refs must NOT be mistaken for @tags, and must not be flagged as converted.
+	raw := "SetColor sets the fill color at\n@0x2D/@0x2E/@0x2F. AE keeps alpha at 0xFF.\n\naep:cap domain=mask tier=stable verify=roundtrip"
+	a, err := Parse(raw)
+	if err != nil {
+		t.Fatalf("Parse: %v", err)
+	}
+	if a.HasTags {
+		t.Error("HasTags = true, want false (chunk-offset prose is not a @tag)")
 	}
 }
 

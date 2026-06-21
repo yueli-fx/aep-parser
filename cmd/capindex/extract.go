@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/example/aep-parser/internal/apidoc"
 )
 
 // extractEntries walks the given Go package dirs (skipping _test.go) and returns
@@ -101,8 +104,44 @@ func funcEntry(fset *token.FileSet, d *ast.FuncDecl) (Entry, bool) {
 		Signature: funcSignature(fset, d),
 		Summary:   firstSentence(d.Doc),
 	}
+	pos := fset.Position(d.Pos())
+	e.Pos = fmt.Sprintf("%s:%d", filepath.Base(pos.Filename), pos.Line)
+	e.Params = extractParamNames(d)
+	e.ReturnsNonError = returnsNonError(d)
 	attachCap(&e, d.Doc)
 	return e, true
+}
+
+// extractParamNames returns the non-receiver parameter names of d, in order
+// (unnamed params are skipped — they cannot carry an @param).
+func extractParamNames(d *ast.FuncDecl) []string {
+	var out []string
+	if d.Type.Params == nil {
+		return out
+	}
+	for _, f := range d.Type.Params.List {
+		for _, n := range f.Names {
+			if n.Name != "_" {
+				out = append(out, n.Name)
+			}
+		}
+	}
+	return out
+}
+
+// returnsNonError reports whether d returns at least one result whose type is
+// not the builtin error.
+func returnsNonError(d *ast.FuncDecl) bool {
+	if d.Type.Results == nil {
+		return false
+	}
+	for _, f := range d.Type.Results.List {
+		if id, ok := f.Type.(*ast.Ident); ok && id.Name == "error" {
+			continue
+		}
+		return true
+	}
+	return false
 }
 
 func genEntries(d *ast.GenDecl) []Entry {
@@ -146,15 +185,28 @@ func genEntries(d *ast.GenDecl) []Entry {
 }
 
 func attachCap(e *Entry, cg *ast.CommentGroup) {
-	c, ok, err := parseCapTag(rawCommentText(cg))
+	raw := rawCommentText(cg)
+	ann, err := apidoc.Parse(raw)
 	if err != nil {
-		e.HasCap = true
-		e.parseErr = err
+		e.HasCap, e.parseErr = true, err
+		return
+	}
+	if ann.HasTags {
+		if apidoc.HasLegacyCap(raw) {
+			e.HasCap = true
+			e.parseErr = fmt.Errorf("carries BOTH @tag and legacy aep:cap (single-format invariant)")
+			return
+		}
+		e.HasCap, e.Ann, e.Cap = true, ann, capFromAnnotation(ann)
+		return
+	}
+	c, ok, err := parseCapTag(raw)
+	if err != nil {
+		e.HasCap, e.parseErr = true, err
 		return
 	}
 	if ok {
-		e.HasCap = true
-		e.Cap = *c
+		e.HasCap, e.Cap = true, *c
 	}
 }
 

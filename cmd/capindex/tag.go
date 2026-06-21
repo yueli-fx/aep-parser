@@ -3,7 +3,25 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/example/aep-parser/internal/apidoc"
 )
+
+// capFromAnnotation maps a parsed @tag Annotation onto the legacy Cap shape so
+// the existing crosscheck/render/query code is unchanged. @since "AE2020" maps
+// to the bare MinVer "2020".
+func capFromAnnotation(a *apidoc.Annotation) Cap {
+	return Cap{
+		Domain:   a.Domain,
+		Tier:     a.Stability,
+		Verify:   a.Verify,
+		MinVer:   strings.TrimPrefix(a.Since, "AE"),
+		Gate:     a.Gate,
+		Boundary: a.Boundary,
+		Incident: a.Incident,
+		Alias:    a.Alias,
+	}
+}
 
 var validTiers = map[string]bool{
 	"stable": true, "alpha": true, "planned": true, "missing": true, "negative": true,

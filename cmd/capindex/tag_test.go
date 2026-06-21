@@ -1,6 +1,29 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/example/aep-parser/internal/apidoc"
+)
+
+func TestCapFromAnnotation(t *testing.T) {
+	a := &apidoc.Annotation{
+		Domain: "mask", Stability: "stable", Verify: "ae-accept", Since: "AE2020",
+		Gate: []string{"TestAddMask_AEShipGate_AE2020"}, Boundary: "empty parade ok",
+		Incident: []string{"add-mask-create-re"}, Alias: []string{"add mask"}, HasTags: true,
+	}
+	c := capFromAnnotation(a)
+	if c.Domain != "mask" || c.Tier != "stable" || c.Verify != "ae-accept" || c.MinVer != "2020" {
+		t.Fatalf("cap = %+v", c)
+	}
+	if len(c.Gate) != 1 || c.Boundary != "empty parade ok" || len(c.Incident) != 1 {
+		t.Errorf("cap fields = %+v", c)
+	}
+	// capFromAnnotation output must still satisfy the existing tier/verify rules.
+	if err := validateCap(&c); err != nil {
+		t.Errorf("validateCap on @tag-sourced cap: %v", err)
+	}
+}
 
 func TestParseCapTag(t *testing.T) {
 	// Single-line directive (the contract): placement within the comment is

@@ -1,5 +1,7 @@
 package main
 
+import "github.com/example/aep-parser/internal/apidoc"
+
 // Cap is a parsed `aep:cap` capability directive attached to an exported
 // internal/aep symbol. It is the single source of truth for a capability's
 // maturity/verification status (the docgen pipeline owns signature + prose).
@@ -28,4 +30,9 @@ type Entry struct {
 
 	Pkg      string `json:"-"` // source package basename (aep|scene|codec); drives public-surface gating
 	parseErr error  // unexported: malformed aep:cap directive, surfaced by validateEntries
+
+	Pos             string             `json:"-"` // "file:line" for --validate messages
+	Params          []string           `json:"-"` // non-receiver parameter names
+	ReturnsNonError bool               `json:"-"` // signature returns a non-error value
+	Ann             *apidoc.Annotation `json:"-"` // parsed @tag block (nil for legacy aep:cap)
 }

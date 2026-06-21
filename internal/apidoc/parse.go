@@ -37,47 +37,58 @@ type Annotation struct {
 func Parse(raw string) (*Annotation, error) {
 	a := &Annotation{}
 	cur := "" // current multi-line tag ("" = none)
+	var unknown []string
 	for _, ln := range strings.Split(raw, "\n") {
 		trimmed := strings.TrimSpace(ln)
+		// A "@"-prefixed line is a tag candidate only when its name is alphabetic.
+		// Legacy doc comments wrap chunk-offset refs (e.g. "@0x2D/@0x2E") onto
+		// their own line; those start with a digit and are prose, not tags.
 		if strings.HasPrefix(trimmed, "@") {
-			name, val := splitTag(trimmed)
-			a.HasTags = true
-			cur = ""
-			switch name {
-			case "summary":
-				a.Summary = val
-			case "description":
-				a.Description = val
-				cur = "description"
-			case "param":
-				p, err := parseParam(val)
-				if err != nil {
-					return nil, err
+			if name, val := splitTag(trimmed); isTagName(name) {
+				cur = ""
+				known := true
+				switch name {
+				case "summary":
+					a.Summary = val
+				case "description":
+					a.Description = val
+					cur = "description"
+				case "param":
+					p, err := parseParam(val)
+					if err != nil {
+						return nil, err
+					}
+					a.Params = append(a.Params, p)
+				case "returns":
+					a.Returns = val
+				case "domain":
+					a.Domain = val
+				case "stability":
+					a.Stability = val
+				case "verify":
+					a.Verify = val
+				case "gate":
+					a.Gate = splitList(val)
+				case "since":
+					a.Since = val
+				case "boundary":
+					a.Boundary = val
+					cur = "boundary"
+				case "incident":
+					a.Incident = splitList(val)
+				case "alias":
+					a.Alias = splitList(val)
+				default:
+					known = false
 				}
-				a.Params = append(a.Params, p)
-			case "returns":
-				a.Returns = val
-			case "domain":
-				a.Domain = val
-			case "stability":
-				a.Stability = val
-			case "verify":
-				a.Verify = val
-			case "gate":
-				a.Gate = splitList(val)
-			case "since":
-				a.Since = val
-			case "boundary":
-				a.Boundary = val
-				cur = "boundary"
-			case "incident":
-				a.Incident = splitList(val)
-			case "alias":
-				a.Alias = splitList(val)
-			default:
-				return nil, fmt.Errorf("unknown @tag %q", name)
+				if known {
+					a.HasTags = true
+				} else {
+					unknown = append(unknown, name) // possible typo; reported only if converted
+				}
+				continue
 			}
-			continue
+			// non-alphabetic "@" token (chunk-offset ref) → fall through as prose.
 		}
 		if cur == "" || trimmed == "" {
 			continue
@@ -89,7 +100,27 @@ func Parse(raw string) (*Annotation, error) {
 			a.Boundary += "\n" + trimmed
 		}
 	}
+	// An unknown alphabetic @tag is a typo only inside a genuinely converted
+	// block (≥ 1 known tag). In un-converted legacy prose it is just text.
+	if a.HasTags && len(unknown) > 0 {
+		return nil, fmt.Errorf("unknown @tag %q", unknown[0])
+	}
 	return a, nil
+}
+
+// isTagName reports whether s is a plausible @tag name: a non-empty run of
+// lowercase letters and hyphens. This excludes hex chunk-offset refs (@0x2D)
+// that appear in legacy doc prose.
+func isTagName(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if (r < 'a' || r > 'z') && r != '-' {
+			return false
+		}
+	}
+	return true
 }
 
 // HasLegacyCap reports whether the raw comment carries a legacy aep:cap directive.
