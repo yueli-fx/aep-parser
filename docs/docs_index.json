@@ -13,7 +13,7 @@
       "file": "project.md",
       "anchor": "#additem",
       "signature": "func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error)",
-      "summary": "AddItem appends a render queue item for comp, mirroring ExtendScript RenderQueue.items.add(comp). Alpha / structural."
+      "summary": "Mirrors ExtendScript RenderQueue.items.add(comp). Alpha / structural."
     },
     "AddMarker": {
       "kind": "func",
@@ -27,7 +27,7 @@
       "file": "mask.md",
       "anchor": "#addmask",
       "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
-      "summary": "AddMask appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed *Mask. The mask is created with the given display name (empty → \"Mask N\"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask)."
+      "summary": "Appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed mask. It is created with the given display name (empty becomes \"Mask N\"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask)."
     },
     "AddTextColorAnimator": {
       "kind": "func",
@@ -904,7 +904,7 @@
       "file": "mask.md",
       "anchor": "#duplicatemask",
       "signature": "func DuplicateMask(layer *Layer, m *Mask) (*Mask, error)",
-      "summary": "DuplicateMask inserts a copy of mask m immediately after it in layer's \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-ref)."
+      "summary": "Inserts a copy of mask m immediately after it in the layer's \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-reference)."
     },
     "DuplicatePropertyGroup": {
       "kind": "func",
@@ -4028,7 +4028,7 @@
       "file": "mask.md",
       "anchor": "#movemask",
       "signature": "func MoveMask(layer *Layer, m *Mask, toIndex int) error",
-      "summary": "MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-ref). toIndex == m's current index is a no-op."
+      "summary": "Reorders mask m to position toIndex (0-based) among the layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-reference). toIndex equal to m's current index is a no-op."
     },
     "MovePropertyGroup": {
       "kind": "func",
@@ -4923,14 +4923,14 @@
       "file": "effect.md",
       "anchor": "#removeeffect",
       "signature": "func RemoveEffect(layer *Layer, index int) error",
-      "summary": "RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect. It is a thin, index-validated wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for Effect-Parade child removal). Returns an error if the layer has no Effect Parade or index is out of range."
+      "summary": "The inverse of AddEffect: a thin, index-validated wrapper over generic Effect-Parade child removal. Returns an error if the layer has no Effect Parade or the index is out of range."
     },
     "RemoveItem": {
       "kind": "func",
       "file": "project.md",
       "anchor": "#removeitem",
       "signature": "func RemoveItem(rq *RenderQueue, index int) error",
-      "summary": "RemoveItem deletes the render queue item at index (0-based), mirroring ExtendScript RenderQueueItem.remove(). Alpha / structural."
+      "summary": "Mirrors ExtendScript RenderQueueItem.remove(). Alpha / structural. Free function (not a method) so the implementation can live in internal/serializer; the aep facade re-exports it."
     },
     "RemoveMarker": {
       "kind": "func",
@@ -4944,7 +4944,7 @@
       "file": "mask.md",
       "anchor": "#removemask",
       "signature": "func RemoveMask(layer *Layer, m *Mask) error",
-      "summary": "RemoveMask deletes mask m from layer's \"ADBE Mask Parade\" — the inverse of AddMask. m must be one of layer.Masks obtained from a parsed project; pass the same layer the mask belongs to (masks carry no owning-layer back-ref)."
+      "summary": "The inverse of AddMask. m must be one of layer.Masks obtained from a parsed project; pass the same layer the mask belongs to (masks carry no owning-layer back-reference)."
     },
     "RemovePropertyGroup": {
       "kind": "func",
@@ -5020,14 +5020,14 @@
       "file": "mask.md",
       "anchor": "#setmaskpath",
       "signature": "func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error",
-      "summary": "SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). Unlike the length-preserving Mask.Set* setters, the path is a variable-length subtree, so this rebuilds the \"ADBE Mask Shape\" om-s and swaps it in; WriteAEP recomputes the enclosing LIST sizes. The vertex count may differ from the original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness lhd3/shph patching AddMask uses is reused so AE accepts non-4-vertex masks."
+      "summary": "Replaces a mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). Unlike the length-preserving mask setters, the path is a variable-length subtree, so this rebuilds the \"ADBE Mask Shape\" value and swaps it in; WriteAEP recomputes the enclosing LIST sizes. The vertex count may differ from the original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness patching AddMask uses is reused so AE accepts non-4-vertex masks."
     },
     "SetMaskPathKeyframes": {
       "kind": "func",
       "file": "mask.md",
       "anchor": "#setmaskpathkeyframes",
       "signature": "func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error",
-      "summary": "SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). Vertex counts may differ between keyframes (AE interpolates the outline; the mask-strictness lhd3/shph patching makes non-4-vertex frames safe)."
+      "summary": "Replaces a mask's outline with an animated path — N keyframes (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). Vertex counts may differ between keyframes (AE interpolates the outline; the mask-strictness patching makes non-4-vertex frames safe)."
     },
     "SetMaterialOption": {
       "kind": "func",
@@ -5041,7 +5041,7 @@
       "file": "composition.md",
       "anchor": "#setrenderer",
       "signature": "func SetRenderer(c *Composition, name string) error",
-      "summary": "SetRenderer switches the composition's 3D rendering engine. The name may be either a binary prin match_name (\"ADBE Escher\" / \"ADBE Calder\" / \"ADBE Ernst\" / \"ADBE Picasso\") or an ExtendScript module name (\"ADBE Advanced 3d\" → \"ADBE Escher\"); it is normalized to the binary name. The binary match_name + display name are rewritten in the prin chunk (length-preserving) and the prda chunk is replaced with the engine's default options (structural). Returns an error for an unknown renderer, a comp built outside the parser (no prin/prda back-ref), a comp whose prin is not the expected 104 bytes, or if the mutation surfaces a parser warning (rolled back)."
+      "summary": "The name may be a binary prin match-name (\"ADBE Escher\" / \"ADBE Calder\" / \"ADBE Ernst\" / \"ADBE Picasso\") or an ExtendScript module name (\"ADBE Advanced 3d\" → \"ADBE Escher\"); it is normalized to the binary name. The binary match-name and display name are rewritten in the prin chunk (length-preserving) and the prda chunk is replaced with the engine's default options (structural). Returns an error for an unknown renderer, a comp built outside the parser (no prin/prda back-reference), a comp whose prin is not the expected 104 bytes, or if the mutation surfaces a parser warning (rolled back)."
     },
     "SetTextRangeAdvanced": {
       "kind": "func",

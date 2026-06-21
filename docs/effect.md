@@ -176,9 +176,14 @@ Atomic (snapshot + rollback on any parser warning).
 func RemoveEffect(layer *Layer, index int) error
 ```
 
-RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect. It is a thin, index-validated wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for Effect-Parade child removal). Returns an error if the layer has no Effect Parade or index is out of range.
+Remove the effect at the given index from a layer's Effect Parade
 
-Stable / structural — rides the AE 2020 + AE 2025 ship-gated Effect-Parade child removal. Free function (CLAUDE.md #2 structural-op call-form).
+The inverse of AddEffect: a thin, index-validated wrapper over generic Effect-Parade child removal. Returns an error if the layer has no Effect Parade or the index is out of range.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the layer owning the effect |
+| `index` | the 0-based effect index to remove |
 
 ### SupportedEffects
 

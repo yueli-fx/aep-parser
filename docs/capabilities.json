@@ -741,7 +741,7 @@
     "symbol": "SetRenderer",
     "kind": "func",
     "signature": "func SetRenderer(c *Composition, name string) error",
-    "summary": "SetRenderer switches the composition's 3D rendering engine.",
+    "summary": "@summary     Switch a composition's 3D rendering engine @description The name may be a binary prin match-name (\"ADBE Escher\" /   \"ADBE Calder\" / \"ADBE Ernst\" / \"ADBE Picasso\") or an ExtendScript module   name (\"ADBE Advanced 3d\" → \"ADBE Escher\"); it is normalized to the binary   name.",
     "has_cap": true,
     "cap": {
       "domain": "comp",
@@ -752,7 +752,7 @@
         "TestSetRenderer_AEShipGate_AE2020",
         "TestSetRenderer_AEShipGate_AE2025"
       ],
-      "boundary": "binary 或 ExtendScript 名;各 AE 版本暴露引擎不同",
+      "boundary": "accepts a binary or ExtendScript name; each AE version exposes different engines",
       "incident": null,
       "alias": [
         "renderer",
@@ -1240,7 +1240,7 @@
     "symbol": "RemoveEffect",
     "kind": "func",
     "signature": "func RemoveEffect(layer *Layer, index int) error",
-    "summary": "RemoveEffect removes the effect at the given 0-based index from the layer's Effect Parade — the inverse of AddEffect.",
+    "summary": "@summary     Remove the effect at the given index from a layer's Effect Parade @description The inverse of AddEffect: a thin, index-validated wrapper over   generic Effect-Parade child removal.",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1251,7 +1251,7 @@
         "TestPropStructRemove_AEShipGate_AE2020",
         "TestPropStructRemove_AEShipGate_AE2025"
       ],
-      "boundary": "rides RemovePropertyGroup 的 Effect-Parade gate;无独立 RemoveEffect AE gate",
+      "boundary": "rides the Effect-Parade child-removal gate; no standalone RemoveEffect gate",
       "incident": [
         "property-indexed-group-structural-re"
       ],
@@ -1359,7 +1359,7 @@
     "symbol": "AddEssentialProperty",
     "kind": "func",
     "signature": "func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error)",
-    "summary": "AddEssentialProperty exposes one parameter of an effect on layer in the owning composition's Essential Graphics panel — mirrors AE's \"addProperty to Essential Graphics\" / Property.addToMotionGraphicsTemplate.",
+    "summary": "@summary     Expose an effect parameter in the Essential Graphics panel @description Mirrors AE's \"add to Essential Graphics\" /   Property.addToMotionGraphicsTemplate: the parameter becomes a controller in   the owning composition's Essential Graphics panel and is appended to   Composition.EssentialGraphicsControllers.",
     "has_cap": true,
     "cap": {
       "domain": "eg",
@@ -1370,7 +1370,7 @@
         "TestEGAdd_AEShipGate_AE2020",
         "TestEGAdd_AEShipGate_AE2025"
       ],
-      "boundary": "scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused",
+      "boundary": "scalar/slider/checkbox/color controls supported; point/dropdown/text/Transform deferred; a freshly-built layer not yet reopened is refused",
       "incident": null,
       "alias": [
         "essential graphics",
@@ -5211,7 +5211,7 @@
     "symbol": "AddMask",
     "kind": "func",
     "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
-    "summary": "AddMask appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed *Mask.",
+    "summary": "@summary     Append a vector mask to a layer @description Appends a vector mask to the layer's \"ADBE Mask Parade\" and   returns the parsed mask.",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5222,7 +5222,7 @@
         "TestAddMask_AEShipGate_AE2020",
         "TestAddMask_AEShipGate_AE2025"
       ],
-      "boundary": "camera/light 层 + 未 Reopen 的 fresh 层 refused;Feather/Opacity/Expansion default-elided",
+      "boundary": "camera/light layers and freshly-built layers not yet reopened are refused; Feather/Opacity/Expansion are default-elided",
       "incident": null,
       "alias": [
         "mask",
@@ -5237,7 +5237,7 @@
     "symbol": "DuplicateMask",
     "kind": "func",
     "signature": "func DuplicateMask(layer *Layer, m *Mask) (*Mask, error)",
-    "summary": "DuplicateMask inserts a copy of mask m immediately after it in layer's \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone.",
+    "summary": "@summary     Duplicate a mask in place within a layer's Mask Parade @description Inserts a copy of mask m immediately after it in the layer's   \"ADBE Mask Parade\" — mirroring AE's PropertyBase.duplicate() on a mask — and   returns the clone.",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5248,7 +5248,7 @@
         "TestDuplicateMask_AEShipGate_AE2020",
         "TestDuplicateMask_AEShipGate_AE2025"
       ],
-      "boundary": "mask 须来自 parsed 工程(Reopen)",
+      "boundary": "mask must come from a parsed project (Reopen)",
       "incident": null,
       "alias": [
         "duplicate mask",
@@ -5260,7 +5260,7 @@
     "symbol": "MoveMask",
     "kind": "func",
     "signature": "func MoveMask(layer *Layer, m *Mask, toIndex int) error",
-    "summary": "MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask.",
+    "summary": "@summary     Reorder a mask within a layer's Mask Parade @description Reorders mask m to position toIndex (0-based) among the layer's   masks, the other masks keeping their relative order — mirroring AE's   PropertyBase.moveTo() on a mask.",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5271,7 +5271,7 @@
         "TestMoveMask_AEShipGate_AE2020",
         "TestMoveMask_AEShipGate_AE2025"
       ],
-      "boundary": "mask 须来自 parsed 工程(Reopen)",
+      "boundary": "mask must come from a parsed project (Reopen)",
       "incident": null,
       "alias": [
         "move mask",
@@ -5284,7 +5284,7 @@
     "symbol": "RemoveMask",
     "kind": "func",
     "signature": "func RemoveMask(layer *Layer, m *Mask) error",
-    "summary": "RemoveMask deletes mask m from layer's \"ADBE Mask Parade\" — the inverse of AddMask.",
+    "summary": "@summary     Remove a mask from a layer's Mask Parade @description The inverse of AddMask.",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5295,7 +5295,7 @@
         "TestRemoveMask_AEShipGate_AE2020",
         "TestRemoveMask_AEShipGate_AE2025"
       ],
-      "boundary": "删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程",
+      "boundary": "removing the last mask leaves an empty parade (AE tolerates it); mask must come from a parsed project",
       "incident": null,
       "alias": [
         "remove mask",
@@ -5512,7 +5512,7 @@
     "symbol": "SetMaskPath",
     "kind": "func",
     "signature": "func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error",
-    "summary": "SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts).",
+    "summary": "@summary     Rewrite an existing mask's outline with a new static path @description Replaces a mask's outline in place with a new static path   (layer-pixel coordinates, the same space AddMask accepts).",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5523,7 +5523,7 @@
         "TestMGMaskPath_AEShipGate_AE2020",
         "TestMGMaskPath_AEShipGate_AE2025"
       ],
-      "boundary": "mask 须来自 parsed 工程(Reopen);顶点数可与原不同",
+      "boundary": "mask must come from a parsed project (Reopen); the vertex count may differ from the original",
       "incident": null,
       "alias": [
         "mask path",
@@ -5537,7 +5537,7 @@
     "symbol": "SetMaskPathKeyframes",
     "kind": "func",
     "signature": "func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error",
-    "summary": "SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear).",
+    "summary": "@summary     Replace a mask's outline with an animated, keyframed path @description Replaces a mask's outline with an animated path — N keyframes   (\u003e= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel   space AddMask / SetMaskPath accept), with optional temporal ease per side   (zero = linear).",
     "has_cap": true,
     "cap": {
       "domain": "mask",
@@ -5548,7 +5548,7 @@
         "TestMGMaskPathKf_AEShipGate_AE2020",
         "TestMGMaskPathKf_AEShipGate_AE2025"
       ],
-      "boundary": "\u003e=2 关键帧,gate 实测到 6kf(=2 lhd3 容量页,验 mask 严格性下分页正确,非仅 2kf 单页);逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)",
+      "boundary": "\u003e= 2 keyframes, gate tested to 6 (two capacity pages, verifying pagination under mask strictness, not a single page); per-keyframe vertex counts may differ; mask must come from a parsed project (Reopen)",
       "incident": null,
       "alias": [
         "mask path keyframes",
@@ -6522,7 +6522,7 @@
     "symbol": "AddItem",
     "kind": "func",
     "signature": "func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error)",
-    "summary": "AddItem appends a render queue item for comp, mirroring ExtendScript RenderQueue.items.add(comp).",
+    "summary": "@summary     Append a render queue item for a composition @description Mirrors ExtendScript RenderQueue.items.add(comp).",
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
@@ -6530,7 +6530,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "需队列已有 \u003e=1 item 作模板;输出模块沿用模板路径;未 AE-gate",
+      "boundary": "needs at least one existing item as template; the output module reuses the template path; not AE-gated",
       "incident": [
         "render-queue-delete-mechanics"
       ],
@@ -6547,7 +6547,7 @@
     "symbol": "RemoveItem",
     "kind": "func",
     "signature": "func RemoveItem(rq *RenderQueue, index int) error",
-    "summary": "RemoveItem deletes the render queue item at index (0-based), mirroring ExtendScript RenderQueueItem.remove().",
+    "summary": "@summary     Remove the render queue item at the given index @description Mirrors ExtendScript RenderQueueItem.remove().",
     "has_cap": true,
     "cap": {
       "domain": "render-queue",
@@ -6555,7 +6555,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "仅单输出模块 item 的 Rout RE 覆盖;未 AE-gate",
+      "boundary": "only single-output-module items are covered by the reverse-engineered flags layout; not AE-gated",
       "incident": [
         "render-queue-delete-mechanics"
       ],

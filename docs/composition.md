@@ -1049,13 +1049,16 @@ Atomic: snapshots the root folder, composition list, next-item-ID counter, and w
 func SetRenderer(c *Composition, name string) error
 ```
 
-SetRenderer switches the composition's 3D rendering engine. The name may be either a binary prin match_name ("ADBE Escher" / "ADBE Calder" / "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module name ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary name. The binary match_name + display name are rewritten in the prin chunk (length-preserving) and the prda chunk is replaced with the engine's default options (structural). Returns an error for an unknown renderer, a comp built outside the parser (no prin/prda back-ref), a comp whose prin is not the expected 104 bytes, or if the mutation surfaces a parser warning (rolled back).
+Switch a composition's 3D rendering engine
 
-Which engines a given AE version actually exposes differs (AE 2020: Escher/Ernst + a Standard variant; AE 2025: Calder/Ernst + Picasso; AE 2025 auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary match_name is the stable engine identity — see sketches/2026-06-01-renderer-write-re-findings.md.
+The name may be a binary prin match-name ("ADBE Escher" / "ADBE Calder" / "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module name ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary name. The binary match-name and display name are rewritten in the prin chunk (length-preserving) and the prda chunk is replaced with the engine's default options (structural). Returns an error for an unknown renderer, a comp built outside the parser (no prin/prda back-reference), a comp whose prin is not the expected 104 bytes, or if the mutation surfaces a parser warning (rolled back).
 
-Ship-gated: AE 2025 (4/4) + AE 2020 (Ernst + Escher) green.
+Which engines a given AE version exposes differs (AE 2020: Escher / Ernst plus a Standard variant; AE 2025: Calder / Ernst plus Picasso; AE 2025 auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary match-name is the stable engine identity. Free function (not a method).
 
-Free function (not a method) so the rollback path can reach the concrete comp back-ref (prin/prda chunks) after the M8 split; the aep facade re-exports it. BREAKING vs the former Composition.SetRenderer method form.
+| Parameter | Description |
+|---|---|
+| `c` | the composition to retarget |
+| `name` | the renderer match-name or ExtendScript module name |
 
 ### DeleteLayer
 

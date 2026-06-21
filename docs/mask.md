@@ -487,19 +487,23 @@ const (
 func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)
 ```
 
-AddMask appends a vector mask to the layer's "ADBE Mask Parade" and returns the parsed *Mask. The mask is created with the given display name (empty → "Mask N"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask).
+Append a vector mask to a layer
 
-The path is parameterizable at creation time even though mutating an EXISTING mask's path is refused (structural write): the atom is built from scratch, reusing the ship-gated shape-path encoding for the "ADBE Mask Shape" value (mask paths share the byte layout of "ADBE Vector Shape"). path.Vertices are in layer pixel coordinates; per-vertex tangents are relative to the anchor (AE Shape semantics). path.Closed selects a closed region vs an open polyline. (On disk AE stores mask coordinates as fractions of the SOURCE item's pixel space for footage/solid/precomp layers and as raw pixels for source-less layers (shape/text) — AddMask performs that conversion, so callers always pass pixels.)
+Appends a vector mask to the layer's "ADBE Mask Parade" and returns the parsed mask. It is created with the given display name (empty becomes "Mask N"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask).
 
-Mechanics: AE stores each mask as a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk triple inside the parade — one chunk more than an effect's pair; the 48-byte mkif carries mode / inverted / locked / motion-blur / an internal per-layer index (monotonic, AE keeps gaps) / the label color. AddMask splices a fresh triple in just before the "ADBE Group End" sentinel. LIST sizes grow automatically (rifx recomputes bottom-up on write).
+The path is parameterizable at creation even though mutating an existing mask's path is a separate structural write: the atom is built from scratch, reusing the ship-gated shape-path encoding (mask paths share the byte layout of "ADBE Vector Shape"). path.Vertices are in layer-pixel coordinates; per-vertex tangents are relative to the anchor; path.Closed selects a closed region vs an open polyline. On disk AE stores mask coordinates as fractions of the source item's pixel space for footage/solid/precomp layers and as raw pixels for source-less layers — AddMask performs that conversion, so callers always pass pixels.
 
-Parade auto-create: a parsed layer with no masks has no Mask Parade group at all. AddMask splices an empty parade into the layer's property tree immediately before "ADBE Effect Parade" when present, else before "ADBE Transform Group" (AE's emitted group order — the Mask Parade precedes both).
+Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk triple inside the parade; the 48-byte mkif carries mode / inverted / locked / motion-blur / a monotonic per-layer index / the label color. A fresh triple is spliced in just before the "ADBE Group End" sentinel, and enclosing LIST sizes grow automatically. A parsed layer with no masks has no parade group at all, so an empty one is spliced in first (before "ADBE Effect Parade" when present, else before "ADBE Transform Group").
 
-Refused layers: camera / light layers (AE does not allow masks on them), and layers built by the structural New* APIs that were never parsed — those have no property tree to splice into; call aep.Reopen first and add masks to the re-parsed layer.
+Refused: camera / light layers (AE disallows masks on them) and layers built by the structural New* APIs that were never parsed — call aep.Reopen first and add masks to the re-parsed layer.
 
-Atomic mutation: snapshot parade chunk + scene children + flat Masks slice (+ the pre-auto-create tree state); re-parse the spliced triple to obtain a back-ref-correct *Mask (its Set* setters work immediately); roll back on any parser warning.
+| Parameter | Description |
+|---|---|
+| `layer` | the layer to add the mask to (round-trip via Reopen first) |
+| `name` | the mask display name (empty becomes "Mask N") |
+| `path` | the static outline in layer-pixel coordinates |
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green (4/4: AE-native fixture splice next to an existing Effect Parade, plus a 100% Go-built project; open + closed paths; AE reads names / modes / vertices back exactly and keeps the masks across its own resave); promoted from Alpha in the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op call-form).
+**Returns:** the created mask
 
 ### RemoveMask
 
@@ -507,13 +511,18 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green (4/4: AE-native fixtur
 func RemoveMask(layer *Layer, m *Mask) error
 ```
 
-RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of AddMask. m must be one of layer.Masks obtained from a parsed project; pass the same layer the mask belongs to (masks carry no owning-layer back-ref).
+Remove a mask from a layer's Mask Parade
 
-Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk triple — one chunk more than an effect's pair, which is why the generic indexed-group RemovePropertyGroup refuses a mask atom (its tdgp is preceded by the mkif, not the tdmn). RemoveMask is triple-aware: it anchors on the mask's own mkif, validates the framing "ADBE Mask Atom" tdmn and trailing atom tdgp, and splices all three out, then drops the mask from the scene property tree and the flat layer.Masks slice. LIST sizes shrink automatically (rifx recomputes bottom-up on write). The removed chunks ride out verbatim, so no opaque content is regenerated (CLAUDE.md #5).
+The inverse of AddMask. m must be one of layer.Masks obtained from a parsed project; pass the same layer the mask belongs to (masks carry no owning-layer back-reference).
 
-Refused (project untouched): a nil layer/mask, a mask not in layer.Masks (e.g. already removed), a mask built outside the parser (no mkif back-ref), or a layer with no Mask Parade. Removing the last mask leaves an empty parade group in place (AE tolerates it on reopen); collapsing the parade is a separate slice.
+Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk triple — one chunk more than an effect's pair, which is why the generic indexed-group removal refuses a mask atom. RemoveMask is triple-aware: it anchors on the mask's own mkif, validates the framing "ADBE Mask Atom" tdmn and trailing atom tdgp, splices all three out, and drops the mask from the property tree and the flat layer.Masks slice. LIST sizes shrink automatically. The removed chunks ride out verbatim, so no opaque content is regenerated.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks, remove the middle one, AE accepts the spliced-out triple next to a real Effect Parade and reads back both survivors with geometry intact and the effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+Refused (project untouched): a nil layer/mask, a mask not in layer.Masks (e.g. already removed), a mask built outside the parser (no mkif back-reference), or a layer with no Mask Parade. Removing the last mask leaves an empty parade group in place (AE tolerates it on reopen); collapsing the parade is a separate slice.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the layer owning the mask |
+| `m` | the mask to remove (from a parsed project) |
 
 ### DuplicateMask
 
@@ -521,13 +530,20 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks, re
 func DuplicateMask(layer *Layer, m *Mask) (*Mask, error)
 ```
 
-DuplicateMask inserts a copy of mask m immediately after it in layer's "ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-ref).
+Duplicate a mask in place within a layer's Mask Parade
 
-Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple, so the generic DuplicatePropertyGroup refuses it (its tdgp is preceded by the mkif, not the tdmn). DuplicateMask deep-clones all three chunks (opaque content rides along verbatim — CLAUDE.md #5), bumps only the clone's internal mask index (mkif @0x08) to max+1 so it stays unique, splices the clone in just after the source, and re-parses it into a *Mask whose Set* setters work immediately. The clone keeps the source's name, mode, color, inverted/locked flags and path.
+Inserts a copy of mask m immediately after it in the layer's "ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and returns the clone. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-reference).
 
-Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a mask built outside the parser (no mkif back-ref), or a layer with no Mask Parade.
+Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple, so the generic group duplication refuses it. DuplicateMask deep-clones all three chunks (opaque content rides along verbatim), bumps only the clone's internal mask index (mkif @0x08) to max+1 so it stays unique, splices the clone in just after the source, and re-parses it into a mask whose setters work immediately. The clone keeps the source's name, mode, color, inverted/locked flags, and path.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green (add a mask, duplicate it, AE accepts the cloned triple with a distinct internal index and reads back both masks with geometry intact and the effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a mask built outside the parser (no mkif back-reference), or a layer with no Mask Parade.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the layer owning the mask |
+| `m` | the mask to duplicate (from a parsed project) |
+
+**Returns:** the cloned mask
 
 ### MoveMask
 
@@ -535,13 +551,19 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green (add a mask, duplicate
 func MoveMask(layer *Layer, m *Mask, toIndex int) error
 ```
 
-MoveMask reorders mask m to position toIndex (0-based) among layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-ref). toIndex == m's current index is a no-op.
+Reorder a mask within a layer's Mask Parade
 
-Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every mask's triple by its mkif, re-emits the contiguous triple run in the target order (the same chunk pointers — opaque content rides along unchanged, CLAUDE.md #5), and applies the same permutation to the scene property tree and the flat layer.Masks slice. No chunk is created or destroyed, so no LIST size changes.
+Reorders mask m to position toIndex (0-based) among the layer's masks, the other masks keeping their relative order — mirroring AE's PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed project; pass the layer it belongs to (masks carry no owning-layer back-reference). toIndex equal to m's current index is a no-op.
 
-Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, toIndex out of range, a mask built outside the parser (no mkif back-ref), a layer with no Mask Parade, or a parade whose mask triples are not contiguous.
+Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every mask's triple by its mkif, re-emits the contiguous triple run in the target order (the same chunk pointers — opaque content rides along unchanged), and applies the same permutation to the property tree and the flat layer.Masks slice. No chunk is created or destroyed, so no LIST size changes.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks, move the last to the front, AE accepts the re-emitted triple run and reads the masks back in the new order with the effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
+Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, toIndex out of range, a mask built outside the parser (no mkif back-reference), a layer with no Mask Parade, or a parade whose mask triples are not contiguous.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the layer owning the mask |
+| `m` | the mask to move (from a parsed project) |
+| `toIndex` | the 0-based destination position |
 
 ### SetMaskPath
 
@@ -549,11 +571,17 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks, mo
 func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error
 ```
 
-SetMaskPath rewrites an existing mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). Unlike the length-preserving Mask.Set* setters, the path is a variable-length subtree, so this rebuilds the "ADBE Mask Shape" om-s and swaps it in; WriteAEP recomputes the enclosing LIST sizes. The vertex count may differ from the original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness lhd3/shph patching AddMask uses is reused so AE accepts non-4-vertex masks.
+Rewrite an existing mask's outline with a new static path
 
-mask must be one of layer.Masks obtained from a parsed project (it needs its atom-group chunk back-ref); call aep.Reopen first for masks built by the structural New*/AddMask APIs without an intervening parse.
+Replaces a mask's outline in place with a new static path (layer-pixel coordinates, the same space AddMask accepts). Unlike the length-preserving mask setters, the path is a variable-length subtree, so this rebuilds the "ADBE Mask Shape" value and swaps it in; WriteAEP recomputes the enclosing LIST sizes. The vertex count may differ from the original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness patching AddMask uses is reused so AE accepts non-4-vertex masks.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+mask must be one of layer.Masks obtained from a parsed project (it needs its atom-group chunk back-reference); call aep.Reopen first for masks built by the structural New*/AddMask APIs without an intervening parse.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the layer owning the mask |
+| `mask` | the mask to reshape (from a parsed project) |
+| `path` | the new outline in layer-pixel coordinates |
 
 ### SetMaskPathKeyframes
 
@@ -561,11 +589,17 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE
 func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error
 ```
 
-SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). Vertex counts may differ between keyframes (AE interpolates the outline; the mask-strictness lhd3/shph patching makes non-4-vertex frames safe).
+Replace a mask's outline with an animated, keyframed path
 
-On disk this is byte-isomorphic to AE's own animated mask/shape path: the "ADBE Mask Shape" om-s carries a TIME-table tdbs (one 64-byte block per keyframe) plus one geometry shap per keyframe. WriteAEP recomputes the enclosing LIST sizes. mask must come from a parsed project (it needs its atom-group chunk back-ref); call aep.Reopen first for masks built by the structural New*/AddMask APIs without an intervening parse.
+Replaces a mask's outline with an animated path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal ease per side (zero = linear). Vertex counts may differ between keyframes (AE interpolates the outline; the mask-strictness patching makes non-4-vertex frames safe).
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+On disk this is byte-isomorphic to AE's own animated mask/shape path: the "ADBE Mask Shape" value carries a time-table (one block per keyframe) plus one geometry block per keyframe. WriteAEP recomputes the enclosing LIST sizes. mask must come from a parsed project (it needs its atom-group chunk back-reference); call aep.Reopen first for masks built by the structural New*/AddMask APIs without an intervening parse.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the layer owning the mask |
+| `mask` | the mask to animate (from a parsed project) |
+| `keys` | the path keyframes (>= 2), in seconds, optionally eased |
 
 <!-- Hand-authored notes. -->
 

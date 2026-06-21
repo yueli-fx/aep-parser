@@ -1712,240 +1712,248 @@ func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, er
 	return serializer.SetMaterialOption(layer, matchName, value)
 }
 
-// AddEssentialProperty exposes one parameter of an effect on layer in the
-// owning composition's Essential Graphics panel — mirrors AE's
-// "addProperty to Essential Graphics" / Property.addToMotionGraphicsTemplate.
-// Returns the new controller (Name / Type / UUID), also appended to
-// Composition.EssentialGraphicsControllers.
+// @summary     Expose an effect parameter in the Essential Graphics panel
+// @description Mirrors AE's "add to Essential Graphics" /
+//   Property.addToMotionGraphicsTemplate: the parameter becomes a controller in
+//   the owning composition's Essential Graphics panel and is appended to
+//   Composition.EssentialGraphicsControllers.
 //
-// displayName is the controller's panel label; empty → the parameter's own
-// display name. Supported parameter control types in this first slice:
-// scalar / slider (EG slider controller, min/max from the pard definition),
-// boolean (checkbox), and color (color controller — requires the parameter
-// to have a materialized non-default value, since AE stores no color default
-// in pard; set one first via SetEffectParam). Other types (point, dropdown,
-// text) return an error for now.
+//   Supported control types in this slice: scalar / slider (min and max taken
+//   from the parameter definition), boolean (checkbox), and color (which
+//   requires the parameter to carry a materialized non-default value first,
+//   since AE stores no color default — set one via SetEffectParam). Point,
+//   dropdown, and text return an error for now.
 //
-// Mechanics (RE 2026-06-12, three coordinated chunk sites):
-//   - The comp Item's three EG panel generations (CIFO/CIF2/CIF3 — AE keeps
-//     them byte-identical) each gain a LIST:CCtl entry (localized name,
-//     fresh v4 UUID, CTyp, type-keyed CVal/CDef[/Smin/Smax], and a CPrp
-//     property ref: comp item ID + host layer ID + a JSON matchName path
-//     whose element indexes are 0-based positions within the parent group,
-//     -1 for fixed groups) and a CcCt count bump.
-//   - The host layer's "ADBE Layer Overrides" parade triple (tdmn + OvG2 +
-//     tdgp; auto-created in AE-native empty form when the layer lacks it)
-//     gains an OvG2 CPrp uuid slot and an override value stream — a clone of
-//     the parameter's materialized tdbs, or a template materialization
-//     carrying the current value when the parameter is default-elided.
-//
-// Refused: layers built by the structural New* APIs that were never parsed
-// (no property tree — call aep.Reopen first), comps without the EG panel
-// shell, and parameters absent from the effect's pard definitions.
-//
-// Atomic mutation: every mutated site (3×CIF*, OvG2, override tdgp, scene
-// controller list) is snapshotted; the panel is re-decoded after commit and
-// any mismatch or parser warning rolls everything back.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green on an all-Go-built
-// project (file accepted, panel read back via the scripting API, controller
-// identity preserved across AE's own resave; the gate also covers
-// SetMotionGraphicsTemplateName); promoted from Alpha in the 2026-06-12 audit
-// batch. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=eg tier=stable verify=ae-accept gate=TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025 boundary="scalar/slider/checkbox/color 控件;point/dropdown/text/Transform deferred;未 Reopen 的 fresh 层 refused" alias="essential graphics,主图形,EG,模板控件,addToMotionGraphicsTemplate"
+//   Mechanics (three coordinated chunk sites): the comp item's three Essential
+//   Graphics panel generations each gain a controller entry (localized name,
+//   fresh UUID, a type-keyed value/default, and a property reference made of the
+//   comp item ID, host layer ID, and a JSON match-name path); the host layer's
+//   "ADBE Layer Overrides" parade gains a matching override value stream — a
+//   clone of the parameter's materialized value, or a template carrying the
+//   current value when the parameter is default-elided. Every mutated site is
+//   snapshotted and rolled back on any decode mismatch or parser warning. The
+//   gate also covers SetMotionGraphicsTemplateName.
+// @param       layer           the layer owning the effect (round-trip via Reopen first)
+// @param       fx              the effect whose parameter is exposed
+// @param       paramMatchName  the match-name of the parameter to expose
+// @param       displayName     the panel label (empty uses the parameter's own name)
+// @returns     the created Essential Graphics controller
+// @domain      eg
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestEGAdd_AEShipGate_AE2020,TestEGAdd_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    scalar/slider/checkbox/color controls supported; point/dropdown/text/Transform deferred; a freshly-built layer not yet reopened is refused
+// @alias       essential graphics,主图形,EG,模板控件,addToMotionGraphicsTemplate
 func AddEssentialProperty(layer *Layer, fx *Effect, paramMatchName, displayName string) (*EssentialGraphicsController, error) {
 	return serializer.AddEssentialProperty(layer, fx, paramMatchName, displayName)
 }
 
-// RemoveEffect removes the effect at the given 0-based index from the layer's
-// Effect Parade — the inverse of AddEffect. It is a thin, index-validated
-// wrapper over RemovePropertyGroup (AE 2020 + AE 2025 ship-gate green for
-// Effect-Parade child removal). Returns an error if the layer has no Effect
-// Parade or index is out of range.
-//
-// Stable / structural — rides the AE 2020 + AE 2025 ship-gated Effect-Parade
-// child removal. Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestPropStructRemove_AEShipGate_AE2020,TestPropStructRemove_AEShipGate_AE2025 incident=property-indexed-group-structural-re boundary="rides RemovePropertyGroup 的 Effect-Parade gate;无独立 RemoveEffect AE gate" alias="remove effect,删效果"
+// @summary     Remove the effect at the given index from a layer's Effect Parade
+// @description The inverse of AddEffect: a thin, index-validated wrapper over
+//   generic Effect-Parade child removal. Returns an error if the layer has no
+//   Effect Parade or the index is out of range.
+// @param       layer  the layer owning the effect
+// @param       index  the 0-based effect index to remove
+// @domain      effect
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestPropStructRemove_AEShipGate_AE2020,TestPropStructRemove_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    rides the Effect-Parade child-removal gate; no standalone RemoveEffect gate
+// @incident    property-indexed-group-structural-re
+// @alias       remove effect,删效果
 func RemoveEffect(layer *Layer, index int) error { return serializer.RemoveEffect(layer, index) }
 
-// AddMask appends a vector mask to the layer's "ADBE Mask Parade" and returns
-// the parsed *Mask. The mask is created with the given display name (empty →
-// "Mask N"), the given static Bezier path, and AE defaults everywhere else:
-// mode Add, not inverted, zero feather, full opacity (Feather / Opacity /
-// Expansion are default-elided on disk, exactly as AE persists an untouched
-// mask).
+// @summary     Append a vector mask to a layer
+// @description Appends a vector mask to the layer's "ADBE Mask Parade" and
+//   returns the parsed mask. It is created with the given display name (empty
+//   becomes "Mask N"), the given static Bezier path, and AE defaults everywhere
+//   else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity
+//   / Expansion are default-elided on disk, exactly as AE persists an untouched
+//   mask).
 //
-// The path is parameterizable at creation time even though mutating an
-// EXISTING mask's path is refused (structural write): the atom is built from
-// scratch, reusing the ship-gated shape-path encoding for the "ADBE Mask
-// Shape" value (mask paths share the byte layout of "ADBE Vector Shape").
-// path.Vertices are in layer pixel coordinates; per-vertex tangents are
-// relative to the anchor (AE Shape semantics). path.Closed selects a closed
-// region vs an open polyline. (On disk AE stores mask coordinates as
-// fractions of the SOURCE item's pixel space for footage/solid/precomp
-// layers and as raw pixels for source-less layers (shape/text) — AddMask
-// performs that conversion, so callers always pass pixels.)
+//   The path is parameterizable at creation even though mutating an existing
+//   mask's path is a separate structural write: the atom is built from scratch,
+//   reusing the ship-gated shape-path encoding (mask paths share the byte layout
+//   of "ADBE Vector Shape"). path.Vertices are in layer-pixel coordinates;
+//   per-vertex tangents are relative to the anchor; path.Closed selects a closed
+//   region vs an open polyline. On disk AE stores mask coordinates as fractions
+//   of the source item's pixel space for footage/solid/precomp layers and as raw
+//   pixels for source-less layers — AddMask performs that conversion, so callers
+//   always pass pixels.
 //
-// Mechanics: AE stores each mask as a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp)
-// chunk triple inside the parade — one chunk more than an effect's pair; the
-// 48-byte mkif carries mode / inverted / locked / motion-blur / an internal
-// per-layer index (monotonic, AE keeps gaps) / the label color. AddMask
-// splices a fresh triple in just before the "ADBE Group End" sentinel. LIST
-// sizes grow automatically (rifx recomputes bottom-up on write).
+//   Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
+//   triple inside the parade; the 48-byte mkif carries mode / inverted / locked
+//   / motion-blur / a monotonic per-layer index / the label color. A fresh
+//   triple is spliced in just before the "ADBE Group End" sentinel, and
+//   enclosing LIST sizes grow automatically. A parsed layer with no masks has no
+//   parade group at all, so an empty one is spliced in first (before "ADBE
+//   Effect Parade" when present, else before "ADBE Transform Group").
 //
-// Parade auto-create: a parsed layer with no masks has no Mask Parade group at
-// all. AddMask splices an empty parade into the layer's property tree
-// immediately before "ADBE Effect Parade" when present, else before "ADBE
-// Transform Group" (AE's emitted group order — the Mask Parade precedes both).
-//
-// Refused layers: camera / light layers (AE does not allow masks on them), and
-// layers built by the structural New* APIs that were never parsed — those have
-// no property tree to splice into; call aep.Reopen first and add masks to the
-// re-parsed layer.
-//
-// Atomic mutation: snapshot parade chunk + scene children + flat Masks slice
-// (+ the pre-auto-create tree state); re-parse the spliced triple to obtain a
-// back-ref-correct *Mask (its Set* setters work immediately); roll back on any
-// parser warning.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green (4/4: AE-native
-// fixture splice next to an existing Effect Parade, plus a 100% Go-built
-// project; open + closed paths; AE reads names / modes / vertices back
-// exactly and keeps the masks across its own resave); promoted from Alpha in
-// the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op
-// call-form).
-//
-//aep:cap domain=mask tier=stable verify=ae-accept gate=TestAddMask_AEShipGate_AE2020,TestAddMask_AEShipGate_AE2025 boundary="camera/light 层 + 未 Reopen 的 fresh 层 refused;Feather/Opacity/Expansion default-elided" alias="mask,蒙版,遮罩,vector mask,加蒙版"
+//   Refused: camera / light layers (AE disallows masks on them) and layers built
+//   by the structural New* APIs that were never parsed — call aep.Reopen first
+//   and add masks to the re-parsed layer.
+// @param       layer  the layer to add the mask to (round-trip via Reopen first)
+// @param       name   the mask display name (empty becomes "Mask N")
+// @param       path   the static outline in layer-pixel coordinates
+// @returns     the created mask
+// @domain      mask
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestAddMask_AEShipGate_AE2020,TestAddMask_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    camera/light layers and freshly-built layers not yet reopened are refused; Feather/Opacity/Expansion are default-elided
+// @alias       mask,蒙版,遮罩,vector mask,加蒙版
 func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error) {
 	return serializer.AddMask(layer, name, path)
 }
 
-// SetMaskPath rewrites an existing mask's outline in place with a new static
-// path (layer-pixel coordinates, the same space AddMask accepts). Unlike the
-// length-preserving Mask.Set* setters, the path is a variable-length subtree, so
-// this rebuilds the "ADBE Mask Shape" om-s and swaps it in; WriteAEP recomputes
-// the enclosing LIST sizes. The vertex count may differ from the original (e.g.
-// reshape a 4-point rectangle into a 3-point triangle) — the mask-strictness
-// lhd3/shph patching AddMask uses is reused so AE accepts non-4-vertex masks.
+// @summary     Rewrite an existing mask's outline with a new static path
+// @description Replaces a mask's outline in place with a new static path
+//   (layer-pixel coordinates, the same space AddMask accepts). Unlike the
+//   length-preserving mask setters, the path is a variable-length subtree, so
+//   this rebuilds the "ADBE Mask Shape" value and swaps it in; WriteAEP
+//   recomputes the enclosing LIST sizes. The vertex count may differ from the
+//   original (e.g. reshape a 4-point rectangle into a 3-point triangle) — the
+//   mask-strictness patching AddMask uses is reused so AE accepts non-4-vertex
+//   masks.
 //
-// mask must be one of layer.Masks obtained from a parsed project (it needs its
-// atom-group chunk back-ref); call aep.Reopen first for masks built by the
-// structural New*/AddMask APIs without an intervening parse.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMGMaskPath_AEShipGate_AE2020,TestMGMaskPath_AEShipGate_AE2025 boundary="mask 须来自 parsed 工程(Reopen);顶点数可与原不同" alias="mask path,蒙版路径,改蒙版形状,reshape mask"
+//   mask must be one of layer.Masks obtained from a parsed project (it needs its
+//   atom-group chunk back-reference); call aep.Reopen first for masks built by
+//   the structural New*/AddMask APIs without an intervening parse.
+// @param       layer  the layer owning the mask
+// @param       mask   the mask to reshape (from a parsed project)
+// @param       path   the new outline in layer-pixel coordinates
+// @domain      mask
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMGMaskPath_AEShipGate_AE2020,TestMGMaskPath_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    mask must come from a parsed project (Reopen); the vertex count may differ from the original
+// @alias       mask path,蒙版路径,改蒙版形状,reshape mask
 func SetMaskPath(layer *Layer, mask *Mask, path BezierPath) error {
 	return serializer.SetMaskPath(layer, mask, path)
 }
 
-// SetMaskPathKeyframes replaces an existing mask's outline with an ANIMATED
-// path — N keyframes (>= 2), each a BezierPath snapshot at a time in seconds
-// (the layer-pixel space AddMask / SetMaskPath accept), with optional temporal
-// ease per side (zero = linear). Vertex counts may differ between keyframes
-// (AE interpolates the outline; the mask-strictness lhd3/shph patching makes
-// non-4-vertex frames safe).
+// @summary     Replace a mask's outline with an animated, keyframed path
+// @description Replaces a mask's outline with an animated path — N keyframes
+//   (>= 2), each a BezierPath snapshot at a time in seconds (the layer-pixel
+//   space AddMask / SetMaskPath accept), with optional temporal ease per side
+//   (zero = linear). Vertex counts may differ between keyframes (AE interpolates
+//   the outline; the mask-strictness patching makes non-4-vertex frames safe).
 //
-// On disk this is byte-isomorphic to AE's own animated mask/shape path: the
-// "ADBE Mask Shape" om-s carries a TIME-table tdbs (one 64-byte block per
-// keyframe) plus one geometry shap per keyframe. WriteAEP recomputes the
-// enclosing LIST sizes. mask must come from a parsed project (it needs its
-// atom-group chunk back-ref); call aep.Reopen first for masks built by the
-// structural New*/AddMask APIs without an intervening parse.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=mask tier=stable verify=render-pixel gate=TestMGMaskPathKf_AEShipGate_AE2020,TestMGMaskPathKf_AEShipGate_AE2025 boundary=">=2 关键帧,gate 实测到 6kf(=2 lhd3 容量页,验 mask 严格性下分页正确,非仅 2kf 单页);逐帧顶点数可不同;mask 须来自 parsed 工程(Reopen)" alias="mask path keyframes,蒙版路径动画,animated mask,变形蒙版"
+//   On disk this is byte-isomorphic to AE's own animated mask/shape path: the
+//   "ADBE Mask Shape" value carries a time-table (one block per keyframe) plus
+//   one geometry block per keyframe. WriteAEP recomputes the enclosing LIST
+//   sizes. mask must come from a parsed project (it needs its atom-group chunk
+//   back-reference); call aep.Reopen first for masks built by the structural
+//   New*/AddMask APIs without an intervening parse.
+// @param       layer  the layer owning the mask
+// @param       mask   the mask to animate (from a parsed project)
+// @param       keys   the path keyframes (>= 2), in seconds, optionally eased
+// @domain      mask
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGMaskPathKf_AEShipGate_AE2020,TestMGMaskPathKf_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    >= 2 keyframes, gate tested to 6 (two capacity pages, verifying pagination under mask strictness, not a single page); per-keyframe vertex counts may differ; mask must come from a parsed project (Reopen)
+// @alias       mask path keyframes,蒙版路径动画,animated mask,变形蒙版
 func SetMaskPathKeyframes(layer *Layer, mask *Mask, keys []MaskPathKey) error {
 	return serializer.SetMaskPathKeyframes(layer, mask, keys)
 }
 
-// RemoveMask deletes mask m from layer's "ADBE Mask Parade" — the inverse of
-// AddMask. m must be one of layer.Masks obtained from a parsed project; pass
-// the same layer the mask belongs to (masks carry no owning-layer back-ref).
+// @summary     Remove a mask from a layer's Mask Parade
+// @description The inverse of AddMask. m must be one of layer.Masks obtained
+//   from a parsed project; pass the same layer the mask belongs to (masks carry
+//   no owning-layer back-reference).
 //
-// Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
-// triple — one chunk more than an effect's pair, which is why the generic
-// indexed-group RemovePropertyGroup refuses a mask atom (its tdgp is preceded
-// by the mkif, not the tdmn). RemoveMask is triple-aware: it anchors on the
-// mask's own mkif, validates the framing "ADBE Mask Atom" tdmn and trailing
-// atom tdgp, and splices all three out, then drops the mask from the scene
-// property tree and the flat layer.Masks slice. LIST sizes shrink
-// automatically (rifx recomputes bottom-up on write). The removed chunks ride
-// out verbatim, so no opaque content is regenerated (CLAUDE.md #5).
+//   Mechanics: each mask is a (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) chunk
+//   triple — one chunk more than an effect's pair, which is why the generic
+//   indexed-group removal refuses a mask atom. RemoveMask is triple-aware: it
+//   anchors on the mask's own mkif, validates the framing "ADBE Mask Atom" tdmn
+//   and trailing atom tdgp, splices all three out, and drops the mask from the
+//   property tree and the flat layer.Masks slice. LIST sizes shrink
+//   automatically. The removed chunks ride out verbatim, so no opaque content is
+//   regenerated.
 //
-// Refused (project untouched): a nil layer/mask, a mask not in layer.Masks
-// (e.g. already removed), a mask built outside the parser (no mkif back-ref),
-// or a layer with no Mask Parade. Removing the last mask leaves an empty
-// parade group in place (AE tolerates it on reopen); collapsing the parade is
-// a separate slice.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks,
-// remove the middle one, AE accepts the spliced-out triple next to a real
-// Effect Parade and reads back both survivors with geometry intact and the
-// effects untouched). Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=mask tier=stable verify=ae-accept gate=TestRemoveMask_AEShipGate_AE2020,TestRemoveMask_AEShipGate_AE2025 boundary="删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程" alias="remove mask,删蒙版"
+//   Refused (project untouched): a nil layer/mask, a mask not in layer.Masks
+//   (e.g. already removed), a mask built outside the parser (no mkif
+//   back-reference), or a layer with no Mask Parade. Removing the last mask
+//   leaves an empty parade group in place (AE tolerates it on reopen);
+//   collapsing the parade is a separate slice.
+// @param       layer  the layer owning the mask
+// @param       m      the mask to remove (from a parsed project)
+// @domain      mask
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestRemoveMask_AEShipGate_AE2020,TestRemoveMask_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    removing the last mask leaves an empty parade (AE tolerates it); mask must come from a parsed project
+// @alias       remove mask,删蒙版
 func RemoveMask(layer *Layer, m *Mask) error {
 	return serializer.RemoveMask(layer, m)
 }
 
-// DuplicateMask inserts a copy of mask m immediately after it in layer's "ADBE
-// Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and
-// returns the clone. m must be one of layer.Masks from a parsed project; pass
-// the layer it belongs to (masks carry no owning-layer back-ref).
+// @summary     Duplicate a mask in place within a layer's Mask Parade
+// @description Inserts a copy of mask m immediately after it in the layer's
+//   "ADBE Mask Parade" — mirroring AE's PropertyBase.duplicate() on a mask — and
+//   returns the clone. m must be one of layer.Masks from a parsed project; pass
+//   the layer it belongs to (masks carry no owning-layer back-reference).
 //
-// Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask
-// Atom", mkif, LIST:tdgp) triple, so the generic DuplicatePropertyGroup
-// refuses it (its tdgp is preceded by the mkif, not the tdmn). DuplicateMask
-// deep-clones all three chunks (opaque content rides along verbatim —
-// CLAUDE.md #5), bumps only the clone's internal mask index (mkif @0x08) to
-// max+1 so it stays unique, splices the clone in just after the source, and
-// re-parses it into a *Mask whose Set* setters work immediately. The clone
-// keeps the source's name, mode, color, inverted/locked flags and path.
+//   Mechanics: triple-aware, like RemoveMask. A mask is a (tdmn "ADBE Mask
+//   Atom", mkif, LIST:tdgp) triple, so the generic group duplication refuses it.
+//   DuplicateMask deep-clones all three chunks (opaque content rides along
+//   verbatim), bumps only the clone's internal mask index (mkif @0x08) to max+1
+//   so it stays unique, splices the clone in just after the source, and re-parses
+//   it into a mask whose setters work immediately. The clone keeps the source's
+//   name, mode, color, inverted/locked flags, and path.
 //
-// Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a
-// mask built outside the parser (no mkif back-ref), or a layer with no Mask
-// Parade.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green (add a mask,
-// duplicate it, AE accepts the cloned triple with a distinct internal index
-// and reads back both masks with geometry intact and the effects untouched).
-// Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=mask tier=stable verify=ae-accept gate=TestDuplicateMask_AEShipGate_AE2020,TestDuplicateMask_AEShipGate_AE2025 boundary="mask 须来自 parsed 工程(Reopen)" alias="duplicate mask,复制蒙版"
+//   Refused (project untouched): a nil layer/mask, a mask not in layer.Masks, a
+//   mask built outside the parser (no mkif back-reference), or a layer with no
+//   Mask Parade.
+// @param       layer  the layer owning the mask
+// @param       m      the mask to duplicate (from a parsed project)
+// @returns     the cloned mask
+// @domain      mask
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestDuplicateMask_AEShipGate_AE2020,TestDuplicateMask_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    mask must come from a parsed project (Reopen)
+// @alias       duplicate mask,复制蒙版
 func DuplicateMask(layer *Layer, m *Mask) (*Mask, error) {
 	return serializer.DuplicateMask(layer, m)
 }
 
-// MoveMask reorders mask m to position toIndex (0-based) among layer's masks,
-// the other masks keeping their relative order — mirroring AE's
-// PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed
-// project; pass the layer it belongs to (masks carry no owning-layer back-ref).
-// toIndex == m's current index is a no-op.
+// @summary     Reorder a mask within a layer's Mask Parade
+// @description Reorders mask m to position toIndex (0-based) among the layer's
+//   masks, the other masks keeping their relative order — mirroring AE's
+//   PropertyBase.moveTo() on a mask. m must be one of layer.Masks from a parsed
+//   project; pass the layer it belongs to (masks carry no owning-layer
+//   back-reference). toIndex equal to m's current index is a no-op.
 //
-// Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a
-// (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every
-// mask's triple by its mkif, re-emits the contiguous triple run in the target
-// order (the same chunk pointers — opaque content rides along unchanged,
-// CLAUDE.md #5), and applies the same permutation to the scene property tree
-// and the flat layer.Masks slice. No chunk is created or destroyed, so no LIST
-// size changes.
+//   Mechanics: triple-aware, like RemoveMask / DuplicateMask. Each mask is a
+//   (tdmn "ADBE Mask Atom", mkif, LIST:tdgp) triple; MoveMask locates every
+//   mask's triple by its mkif, re-emits the contiguous triple run in the target
+//   order (the same chunk pointers — opaque content rides along unchanged), and
+//   applies the same permutation to the property tree and the flat layer.Masks
+//   slice. No chunk is created or destroyed, so no LIST size changes.
 //
-// Refused (project untouched): a nil layer/mask, a mask not in layer.Masks,
-// toIndex out of range, a mask built outside the parser (no mkif back-ref), a
-// layer with no Mask Parade, or a parade whose mask triples are not contiguous.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green (build three masks,
-// move the last to the front, AE accepts the re-emitted triple run and reads
-// the masks back in the new order with the effects untouched). Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=mask tier=stable verify=ae-accept gate=TestMoveMask_AEShipGate_AE2020,TestMoveMask_AEShipGate_AE2025 boundary="mask 须来自 parsed 工程(Reopen)" alias="move mask,蒙版排序,reorder mask"
+//   Refused (project untouched): a nil layer/mask, a mask not in layer.Masks,
+//   toIndex out of range, a mask built outside the parser (no mkif
+//   back-reference), a layer with no Mask Parade, or a parade whose mask triples
+//   are not contiguous.
+// @param       layer    the layer owning the mask
+// @param       m        the mask to move (from a parsed project)
+// @param       toIndex  the 0-based destination position
+// @domain      mask
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestMoveMask_AEShipGate_AE2020,TestMoveMask_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    mask must come from a parsed project (Reopen)
+// @alias       move mask,蒙版排序,reorder mask
 func MoveMask(layer *Layer, m *Mask, toIndex int) error {
 	return serializer.MoveMask(layer, m, toIndex)
 }
@@ -2197,78 +2205,85 @@ const (
 	EffectSetChannelsSource4             = serializer.EffectSetChannelsSource4             // Set Channels source 4
 )
 
-// AddItem appends a render queue item for comp, mirroring ExtendScript
-// RenderQueue.items.add(comp). Alpha / structural.
+// @summary     Append a render queue item for a composition
+// @description Mirrors ExtendScript RenderQueue.items.add(comp). Alpha /
+//   structural.
 //
-// Strategy (clone + remap, like InsertLayer): the queue's last item is the
-// template — its 2246B settings block, [LIST:list + 'LOm '] group, and Rout
-// per-item block are deep-cloned, then the clone's comp_id (settings @0x08) is
-// repointed at comp. The settings ldat / Rout / lhd3 count grow in lock-step,
-// mirroring AE's own items.add() delta (REd from a 1-item→2-item diff). The
-// cloned output module keeps the template's path/template (AE accepts it; a
-// fresh add would name it after comp — deferred).
+//   Strategy (clone + remap): the queue's last item is the template — its
+//   settings block, item group, and per-item flags block are deep-cloned, then
+//   the clone's comp ID is repointed at comp. The settings data, flags block,
+//   and item count grow in lock-step, mirroring AE's own items.add() delta. The
+//   cloned output module keeps the template's path/template (AE accepts it; a
+//   fresh add would name it after comp — deferred).
 //
-// Requires at least one existing item to clone from (an empty queue has no
-// template). The clone is taken from the template's scene-owned settingsBlock
-// copy (single source of truth). The grown settings ldat reallocates, so every
-// item's back.settingsSlice alias is re-pointed afterward, and WriteAEP syncs
-// the copies back. See incidents/render-queue-delete-mechanics.md.
-//
-// Free function (not a method) — see RemoveItem. BREAKING vs rq.AddItem(comp).
-//
-//aep:cap domain=render-queue tier=alpha verify=roundtrip incident=render-queue-delete-mechanics boundary="需队列已有 >=1 item 作模板;输出模块沿用模板路径;未 AE-gate" alias="render queue,渲染队列,add item,RQ,导出"
+//   Requires at least one existing item to clone from (an empty queue has no
+//   template). The grown settings data reallocates, so every item's settings
+//   alias is re-pointed afterward, and WriteAEP syncs the copies back. Free
+//   function (not a method).
+// @param       rq    the render queue to append to
+// @param       comp  the composition to enqueue
+// @returns     the created render queue item
+// @domain      render-queue
+// @stability   alpha
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    needs at least one existing item as template; the output module reuses the template path; not AE-gated
+// @incident    render-queue-delete-mechanics
+// @alias       render queue,渲染队列,add item,RQ,导出
 func AddItem(rq *RenderQueue, comp *Composition) (*RenderQueueItem, error) {
 	return serializer.AddItem(rq, comp)
 }
 
-// RemoveItem deletes the render queue item at index (0-based), mirroring
-// ExtendScript RenderQueueItem.remove(). Alpha / structural.
+// @summary     Remove the render queue item at the given index
+// @description Mirrors ExtendScript RenderQueueItem.remove(). Alpha /
+//   structural. Free function (not a method) so the implementation can live in
+//   internal/serializer; the aep facade re-exports it.
 //
-// Free function (not a method) so the impl can live in internal/serializer
-// after the M8 split (CLAUDE.md #2 structural-op call-form carve-out); the aep
-// facade re-exports it. BREAKING vs the former rq.RemoveItem(i) method form.
+//   Byte mechanics (from an AE 2020 2-item to 1-item diff): removing item i
+//   drops, in lock-step,
 //
-// Byte mechanics REd from AE 2020 (test_data/re_rq_delete.jsx, 2-item→1-item
-// diff): removing item i drops, in lock-step,
+//   - the item's group from its container,
+//   - the item's block from the render-settings data (decrementing the settings
+//     count), and
+//   - the item's per-item block from the flags chunk (decrementing its header
+//     proportionally).
 //
-//   - the item's [RCom?] + LIST:list + LIST:'LOm ' from the LItm container,
-//   - the item's 2246-byte block from the LRdr-level settings ldat, and
-//     decrements the settings lhd3 count (@0x08 and @0x0C),
-//   - the item's per-item block from the Rout flags chunk (4-byte header +
-//     uniform per-item stride), decrementing the header proportionally.
-//
-// The scene-side settingsBlock buffers are independent copies (single source of
-// truth); surviving items' back.settingsSlice aliases are re-pointed to their
-// new offsets after the splice, and WriteAEP syncs the copies back.
-//
-// Alpha: structural delete is not yet AE-ship-gated. Only items with one output
-// module are covered by the Rout RE (uniform per-item stride); see
-// incidents/render-queue-delete-mechanics.md.
-//
-//aep:cap domain=render-queue tier=alpha verify=roundtrip incident=render-queue-delete-mechanics boundary="仅单输出模块 item 的 Rout RE 覆盖;未 AE-gate" alias="render queue,渲染队列,remove item"
+//   The settings buffers are independent copies; surviving items' settings
+//   aliases are re-pointed to their new offsets after the splice, and WriteAEP
+//   syncs the copies back.
+// @param       rq     the render queue to remove from
+// @param       index  the 0-based item index to remove
+// @domain      render-queue
+// @stability   alpha
+// @verify      roundtrip
+// @since       AE2020
+// @boundary    only single-output-module items are covered by the reverse-engineered flags layout; not AE-gated
+// @incident    render-queue-delete-mechanics
+// @alias       render queue,渲染队列,remove item
 func RemoveItem(rq *RenderQueue, index int) error { return serializer.RemoveItem(rq, index) }
 
-// SetRenderer switches the composition's 3D rendering engine. The name may be
-// either a binary prin match_name ("ADBE Escher" / "ADBE Calder" /
-// "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module name
-// ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary name.
-// The binary match_name + display name are rewritten in the prin chunk
-// (length-preserving) and the prda chunk is replaced with the engine's default
-// options (structural). Returns an error for an unknown renderer, a comp built
-// outside the parser (no prin/prda back-ref), a comp whose prin is not the
-// expected 104 bytes, or if the mutation surfaces a parser warning (rolled back).
+// @summary     Switch a composition's 3D rendering engine
+// @description The name may be a binary prin match-name ("ADBE Escher" /
+//   "ADBE Calder" / "ADBE Ernst" / "ADBE Picasso") or an ExtendScript module
+//   name ("ADBE Advanced 3d" → "ADBE Escher"); it is normalized to the binary
+//   name. The binary match-name and display name are rewritten in the prin chunk
+//   (length-preserving) and the prda chunk is replaced with the engine's default
+//   options (structural). Returns an error for an unknown renderer, a comp built
+//   outside the parser (no prin/prda back-reference), a comp whose prin is not
+//   the expected 104 bytes, or if the mutation surfaces a parser warning (rolled
+//   back).
 //
-// Which engines a given AE version actually exposes differs (AE 2020:
-// Escher/Ernst + a Standard variant; AE 2025: Calder/Ernst + Picasso; AE 2025
-// auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary
-// match_name is the stable engine identity — see
-// sketches/2026-06-01-renderer-write-re-findings.md.
-//
-// Ship-gated: AE 2025 (4/4) + AE 2020 (Ernst + Escher) green.
-//
-// Free function (not a method) so the rollback path can reach the concrete
-// comp back-ref (prin/prda chunks) after the M8 split; the aep facade
-// re-exports it. BREAKING vs the former Composition.SetRenderer method form.
-//
-//aep:cap domain=comp tier=stable verify=ae-accept gate=TestSetRenderer_AEShipGate_AE2020,TestSetRenderer_AEShipGate_AE2025 boundary="binary 或 ExtendScript 名;各 AE 版本暴露引擎不同" alias="renderer,渲染器,3D 引擎,advanced 3d,cinema 4d"
+//   Which engines a given AE version exposes differs (AE 2020: Escher / Ernst
+//   plus a Standard variant; AE 2025: Calder / Ernst plus Picasso; AE 2025
+//   auto-promotes legacy Escher/Picasso to Advanced 3D on load). The binary
+//   match-name is the stable engine identity. Free function (not a method).
+// @param       c     the composition to retarget
+// @param       name  the renderer match-name or ExtendScript module name
+// @domain      comp
+// @stability   stable
+// @verify      ae-accept
+// @gate        TestSetRenderer_AEShipGate_AE2020,TestSetRenderer_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    accepts a binary or ExtendScript name; each AE version exposes different engines
+// @alias       renderer,渲染器,3D 引擎,advanced 3d,cinema 4d
 func SetRenderer(c *Composition, name string) error { return serializer.SetRenderer(c, name) }
