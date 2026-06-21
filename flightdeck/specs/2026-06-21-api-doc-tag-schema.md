@@ -1,5 +1,6 @@
 ---
 status: active
+graduate: true
 summary: Replace free-prose doc comments + the separate aep:cap directive with ONE swaggo-style @tag block per exported symbol (docgen reads @summary/@description/@param/@returns; capindex reads @domain/@stability/@verify/@gate/@since/@boundary/@incident/@alias). Plus repo-wide cleanup of internal jargon (version codenames V2.2/V3/M8/wave-N, project-file/process refs CLAUDE.md/spec/probe/py-aep) from ALL comments, enforced by lint. Migrate behind a dual-read window (CI green throughout); 486 tags/26 files for schema + ~114 files for cleanup.
 last_updated: 2026-06-21
 ---
@@ -84,6 +85,73 @@ read naturally in `go doc`.
 func AddMask(layer *Layer, path BezierPath) (*Mask, error) { … }
 ```
 
+**The legacy form being replaced** (prose + a separate hidden directive, params described
+inline, machine-data Chinese):
+
+```go
+// AddMask adds a vector mask ... <prose, params buried in sentences> ...
+//
+//aep:cap domain=mask tier=stable verify=ae-accept gate=TestAddMask_AEShipGate_AE2020,TestAddMask_AEShipGate_AE2025 boundary="删最后一个 mask 留空 parade(AE 容忍);mask 须来自 parsed 工程" alias="remove mask,删蒙版"
+```
+
+## Field rules (the validation schema)
+
+Every field has a machine-checkable rule so "clean / consistent / English" stops being a
+subjective reviewer call and becomes a validator pass/fail. Enums are **frozen lists**
+(extending one is a deliberate edit, so typos are caught).
+
+| field | required | type / format | rule |
+|---|---|---|---|
+| `@summary` | yes | single line | imperative-mood opening; **≤ 80 chars**; no trailing period; English; no jargon |
+| `@description` | no | multi-line | English; no jargon (no hard length cap) |
+| `@param <name> <desc>` | one per non-receiver parameter | one line each | `<name>` **must equal a parameter name in the signature**; `<desc>` non-empty, English, ≥ 3 words; the literal `TODO` is rejected |
+| `@returns <desc>` | required iff the func returns ≥ 1 non-`error` value | one line | non-empty, English |
+| `@domain` | yes (write surface) | frozen enum (16) | `shape · layer-set · layer-create · text · mask · effect · gradient · keyframe · comp · project · render-queue · structural · eg · expr · io · meta` |
+| `@stability` | yes (write surface) | enum | `stable · alpha` |
+| `@verify` | yes (write surface) | enum | `ae-accept · render-pixel · roundtrip · none` |
+| `@gate` | required iff `@verify ∈ {ae-accept, render-pixel}` | comma list of test names | each matches `Test\w+` AND exists in test sources (existing crosscheck) |
+| `@since` | yes (write surface) | format `AE<year>` | frozen enum `AE2020 · AE2025` |
+| `@boundary` | no | one or more lines | English; no jargon |
+| `@incident` | no | incidents/ filename (no ext) | file must exist under `flightdeck/incidents/` (or `archive/incidents/`); **maintainer field — docgen does NOT render it** |
+| `@alias` | no | comma list | lowercase tokens; CJK search terms allowed |
+
+"Write surface" is exactly what capindex already defines in `cmd/capindex/surface.go`
+(`requires()`): every `pkg=aep` exported func + every exported method/getter on the
+covered types. The schema-completeness check reuses that predicate verbatim — no new
+definition.
+
+`@since` carries the READ floor (matches the current `aep:cap` single min-version; no
+regression). If a symbol ever needs a distinct write floor, that is a future additive
+field (`@since-write`), not blocked here.
+
+## One-command validation
+
+`go run ./cmd/capindex --validate` — prints every violation with `file:line symbol: msg`
+and exits non-zero; the same checks run under `go test ./cmd/capindex` for CI. Checks:
+
+1. **Completeness:** every write-surface symbol has `@summary @domain @stability @verify
+   @since`.
+2. **Enums/format:** `@domain @stability @verify @since` values legal; `@summary` ≤ 80
+   chars and single line; `@since` matches `AE<year>`.
+3. **`@param` ↔ signature:** the set of `@param` names equals the function's non-receiver
+   parameter names — missing, extra, mis-named, or `TODO` all fail.
+4. **`@returns`:** present when the signature returns a non-`error` value.
+5. **`@gate` existence:** each named test exists (the existing crosscheck) and is present
+   when `@verify` demands it.
+6. **`@incident` existence:** referenced file exists.
+7. **Single-format invariant (migration):** no symbol carries BOTH a legacy `//aep:cap`
+   block and a `@tag` block — the converter replaces in place; this removes any
+   "which wins / they disagree" ambiguity.
+8. **Jargon blocklist:** no comment contains a blocklisted token (see below).
+9. **Exit criteria (gates the format flip):** count of remaining `//aep:cap` blocks and
+   count of `@param … TODO` placeholders — the legacy parser is removed and `--validate`
+   becomes required only when BOTH reach **0**. This is the objective "migration done"
+   judgment the reviewers asked for.
+
+Until the flip, `--validate` runs in **warn mode** for not-yet-converted symbols (reports,
+does not fail) so CI stays green during the two-step migration; converted symbols are held
+to the full schema immediately.
+
 ## Jargon-cleanup rule (repo-wide, all comments)
 
 Comments (doc, implementation, and package comments) must not name project-internal
@@ -105,7 +173,23 @@ Replacements:
   identifiers like chunk IDs are domain, not jargon — kept.)
 - Real, user-facing AE version numbers (`AE 2020`, `AE 2025`) stay.
 
-Enforced by a lint test (token blocklist over all `internal/**/*.go` comments).
+**Deterministic blocklist (not semantic judgment).** The lint matches concrete,
+case-insensitive regexes, covering spelling variants — e.g. `v2[._]?\d`, `\bV3\b`,
+`\bM8\b`, `wave[ _-]?\d`, `phase[ _-]?\d` (codename use), `CLAUDE\.md`, `rules\.md`,
+`flightdeck`, `cockpit`, `py-?aep`, `\(probe\)`, `tmp_debug`, `RE'?d from`. The list lives
+in one file (`cmd/capindex` lint data) so it is auditable and extendable.
+
+**Escape hatch + history distinction.** A comment line ending with `//nolint:jargon`
+is exempt — for the rare case where a token is genuinely required (e.g. a compatibility
+note that must name a real external version). The intent is to ban *meaningless internal
+codenames and process noise*, NOT valuable history: a real RE finding worth keeping goes
+to `@incident <file>`; durable domain history worth a reader's time stays in
+`@description`, rephrased without the codename. If neither fits and the token must stay,
+`//nolint:jargon` makes that an explicit, reviewable decision rather than a silent leak.
+
+**Scope:** codename + process tokens are linted across **all** `internal/**/*.go` comments
+(tests included — `V2.2` is noise everywhere). The `@tag` schema validation itself applies
+only to the non-test write surface (test files carry no exported API tags).
 
 ## Tooling changes
 
@@ -117,37 +201,44 @@ Enforced by a lint test (token blocklist over all `internal/**/*.go` comments).
    surface-coverage, and generated-doc tests keep the same *semantics* (every write-surface
    symbol tagged; verify↔gate consistency); only the source-format changes.
 3. **docgen.** Extend `extract` to read `@summary/@description/@param/@returns`; render
-   `@param` as a parameter table in `docs/*.md`. `Example*` functions unchanged.
-4. **Lint test.** Token-blocklist test for the jargon rule + a "schema completeness" test
-   (every write-surface symbol has `@summary/@domain/@stability`).
+   `@param` as a parameter table in `docs/*.md`. `@incident` is parsed but NOT rendered
+   (maintainer field). `Example*` functions unchanged.
+4. **Validator (`cmd/capindex --validate`).** Implements all checks in *One-command
+   validation* above; exposed as a CLI flag (human "一键校验") and run by
+   `go test ./cmd/capindex` (CI). The jargon blocklist data lives in one auditable file.
+5. **Converter (`tools/debug/tagconvert`).** One-shot, tracked: rewrites a file's
+   `aep:cap` + prose into `@tag` blocks with placeholders, for the manual pass to finish.
 
-## Migration (CI green throughout)
+## Migration — two steps (CI green throughout)
 
-- **Dual-read window.** During migration the shared parser accepts EITHER the legacy
-  `//aep:cap` block OR the new `@tag` block per symbol. capindex/docgen prefer `@tag`
-  when present, fall back to `aep:cap`. Files flip one at a time; CI never breaks.
-- **Mechanical pre-fill converter.** A one-shot tool reads each symbol's existing
-  `aep:cap` + prose and emits a `@tag` block: `@domain/@stability/@verify/@gate/@since/
-  @boundary/@incident/@alias` from `aep:cap` (mechanical), `@summary` from the prose first
-  sentence, `@description` from the remaining prose, and `@param <name> TODO` / `@returns
-  TODO` placeholders (params can't be auto-extracted from free prose).
-- **Manual pass per symbol.** Fill `@param`/`@returns`, translate `@boundary` to English,
-  strip internal jargon, polish `@description`. This is the real labour (~486 symbols).
-- **Flip CI.** When all symbols are converted: remove the legacy `aep:cap` parse path,
-  enable the jargon-blocklist lint + schema-completeness test as required CI.
+A **dual-read window** spans both steps: the shared parser accepts EITHER a legacy
+`//aep:cap` block OR a `@tag` block per symbol (never both — invariant #7). `--validate`
+runs in warn mode for un-converted symbols, full-strict for converted ones, so CI stays
+green while the surface flips incrementally.
 
-## Phasing
+**Step 1 — schema + tooling + facade proof.**
+Shared parser; capindex + docgen both read `@tag` (fall back to `aep:cap`); converter
+tool; `--validate` (warn mode); docgen `@param` table rendering; convert **facade.go**
+(77 funcs, the public API) fully — including translating its ~64 Chinese `boundary`
+fields to English `@boundary` and writing real `@param`/`@returns`. Deliverable: the
+schema, the validator, and one fully-converted file proving the pattern end-to-end.
 
-- **P1 — schema + tooling + proof:** shared parser; dual-read in capindex & docgen;
-  converter tool; `@param` rendering in docgen; convert **facade.go** (77 funcs, the public
-  API) fully (manual `@param` + de-jargon) as the proven pattern. CI green via dual-read.
-- **P2 — bulk migration:** mechanical pre-fill + manual pass over the remaining 25
-  aep:cap files (~400 symbols) and the non-aep:cap files carrying jargon (~114 files total
-  for cleanup; cleanup-only files get the jargon pass, no `@tag` block since they have no
-  write surface).
-- **P3 — flip CI:** drop the legacy `aep:cap` parser; turn on the jargon-blocklist lint
-  and schema-completeness test as required; update CLAUDE.md / rules.md to document the new
-  convention (the doc-source-of-truth section).
+**Step 2 — bulk convert + cleanup + flip.**
+Mechanical pre-fill + manual pass over the remaining ~25 `aep:cap` files (~400 symbols);
+repo-wide jargon cleanup (the codename/process lint, all `internal/**` incl. tests);
+then the **flip**, gated objectively on invariant #9 (remaining `aep:cap` = 0 AND
+`@param … TODO` = 0): remove the legacy `aep:cap` parser, make `--validate` + jargon lint
+required CI, and update the project doc-source-of-truth note.
+
+**Commit hygiene (addresses the rollback concern):** schema-conversion commits and
+jargon-cleanup commits are kept **separate** — a doc/comment-cleanup commit never mixes
+with a `@tag`-conversion commit — so the schema work can be reverted without dragging the
+(large, mechanical) cleanup diff, and vice-versa.
+
+The reviewers' "this is really three projects" critique is real; the response is **strict
+separation by commit stream + objective exit gates**, not a second spec — the three
+threads (schema, validator, cleanup) share one parser and one validator, so splitting the
+*spec* would just fragment one tightly-coupled toolchain.
 
 ## Scope (measured)
 
@@ -156,24 +247,61 @@ Enforced by a lint test (token blocklist over all `internal/**/*.go` comments).
 - Jargon cleanup: **~114 files** (53 with V2.2; 69 non-test .go); **328 doc-comment
   occurrences** + implementation-comment occurrences.
 
-## Risks
+## Why now (benefit)
 
-- **Manual `@param` labour** is the bulk and is not automatable — the converter only
-  placeholders it. Mitigated by phasing (P1 proves the pattern on facade.go before bulk).
-- **capindex is CI-enforced truth source.** Rewriting its parser risks coverage gaps.
-  Mitigated by keeping the *semantics* identical and the dual-read window (tests stay green
-  on every commit; the parser swap is internal).
-- **go/doc visibility** of `@tag` lines (accepted above).
-- **Churn across a working system.** Most fields already exist in `aep:cap`; the genuine
-  new value is `@param`/`@returns` structure + de-jargon. Accepted by the user as worth it
-  for a single consistent annotation.
+The library only grows; a second annotation format and ad-hoc prose get more expensive to
+keep consistent every release. Converging on ONE machine-validated annotation now caps that
+debt: a single `--validate` becomes the gate for *all* doc correctness (params match
+signatures, enums legal, no jargon, gates exist), so future API additions can't drift —
+the cost is paid once, against a surface that is still small enough to convert.
+
+## Risks (and how the schema retires them)
+
+- **Manual editing consistency** (the reviewers' top risk, correctly) — 486 symbols hand-
+  edited invites quality drift. **Retired by the validator:** `@param`↔signature matching,
+  enum legality, `@summary` length, jargon blocklist, and no-`TODO` are all machine-checked,
+  so a sloppy manual edit fails CI rather than slipping through. This is the core reason the
+  strict field schema exists.
+- **capindex parser rewrite** (CI truth source) — mitigated by identical *semantics*
+  (same `requires()` surface, same crosscheck) + the single-format invariant + dual-read;
+  the parser swap is internal and every step keeps tests green.
+- **`go doc` visibility of machine `@tag` lines** — accepted: `internal/aep` is not a
+  pkg.go.dev surface, docgen renders the real docs, and `@summary`/`@description` still read
+  naturally; the trade buys one annotation system instead of two.
+- **Converter covers only mechanical fields** — true; `@param`/`@returns`/English/de-jargon
+  stay manual. Accounted for in Step 1's facade estimate (incl. the ~64 Chinese `boundary`
+  translations) so the proof reflects real per-symbol cost before bulk.
+
+## External-review points folded in
+
+Three independent reviews (do not assume full-context) converged on real gaps; resolutions:
+
+- **Over-bundled / hard rollback** → separate commit streams + objective exit gates (kept
+  one spec since schema/validator/cleanup share one toolchain).
+- **Subjective acceptance ("English", "no jargon", "polish")** → the field-rule schema +
+  `--validate` make every one machine-checkable.
+- **No conflict rule / mixed dual-read** → single-format invariant (#7): never both formats.
+- **No objective "done"** → exit gate (#9): remaining `aep:cap` = 0 AND `@param TODO` = 0.
+- **`@param` could be meaningless** → name-must-match-signature + ≥3-word + no-`TODO` check.
+- **Jargon rules too semantic** → concrete regex blocklist + `//nolint:jargon` escape +
+  `@incident`/rephrase for valuable history.
+- **`@incident` vs no-internal-refs contradiction** → `@incident` is a structured maintainer
+  field (docgen does not render it), not reader prose.
+- **test-file scope contradiction** → codename lint repo-wide incl. tests; schema validation
+  only on the non-test write surface.
+- **`@since` can't split read/write floor** → documented as the read floor (no regression);
+  `@since-write` is a future additive field.
+- **Legacy format shown** → added alongside the new-format example.
+- Not adopted: "split into 3 specs" (one toolchain), "@alias → config" (capindex is a
+  source-inline truth index by design), "use AEP:domain prefix instead of @" (cosmetic).
 
 ## Self-review
 
-- Placeholders: none (P-phases and fields concrete).
-- Consistency: schema fields ↔ capindex fields ↔ migration converter all enumerate the same
-  set; docgen vs capindex consumer split stated once and reused.
-- Scope: one focused convention change; large but single-purpose. Decomposed into P1/P2/P3
-  for the plan.
-- Ambiguity: cleanup boundary fixed to "all comments repo-wide"; `@tag` vs `aep:cap` fixed
-  to "unified, @tag absorbs aep:cap"; spec home = flightdeck/specs.
+- Placeholders: none; every field has a concrete rule and a validator check.
+- Consistency: field-rule table ↔ `--validate` checks ↔ converter output enumerate the same
+  field set; docgen vs capindex consumer split stated once and reused.
+- Scope: one tightly-coupled toolchain (parser + validator + converter) + a cleanup pass;
+  two-step migration, separate commit streams.
+- Ambiguity: cleanup boundary = all comments repo-wide (codename tokens incl. tests);
+  `@tag` absorbs `aep:cap` (unified); single-format invariant during migration; spec home =
+  flightdeck/specs.
