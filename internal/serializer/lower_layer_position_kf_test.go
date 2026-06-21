@@ -16,7 +16,7 @@ func minimalTransformLeaf(body *rifx.Chunk, name string, layout valueLayout) {
 	tdbs.Children = append(tdbs.Children,
 		makeTdsb(),
 		makeTdsn(name),
-		makeTdb4(layout),
+		makeTdb4(layout, 30720),
 		makeCdat(make([]byte, layout.dim*8), layout),
 	)
 	body.Children = append(body.Children, makeTdmn(name), tdbs)

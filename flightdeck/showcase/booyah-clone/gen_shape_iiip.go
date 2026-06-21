@@ -16,15 +16,11 @@ const shapeIiipCompName = "シェイイイイプ！！！"
 
 func buildShapeIiip(p *aep.Project, orc *oracle) *aep.Composition {
 	const compName = shapeIiipCompName
-	// Use 30 fps (not the original's 29.97): NewComposition's cdta time-base
-	// writer is inconsistent for fractional fps (writes a modern scale=1 marker
-	// but legacy tpf/rate bytes), so AE would read a 30720 kf tickrate while we
-	// encode 23976 — compressing every keyframe by 23976/30720. At a clean 30
-	// fps the encoding is self-consistent (30720) and, because keyframe SECONDS
-	// are preserved through a matching tickrate, AE evaluates them at the exact
-	// original comp-times (the ~0.1% 29.97-vs-30 frame-snap is sub-pixel). The
-	// NewComposition fractional-fps cdta bug is tracked separately.
-	comp, err := aep.NewComposition(p, compName, 1920, 1080, 30, 6)
+	// 29.97 fps to match the original exactly (see cloneFps in main.go). The
+	// NewComposition fractional-fps cdta bug that previously forced a 30-fps
+	// approximation is fixed — keyframe SECONDS now map to the original frames
+	// through a matching 23976 tickrate, so the clone lines up frame-for-frame.
+	comp, err := aep.NewComposition(p, compName, 1920, 1080, cloneFps, 6)
 	must(err)
 	sl, err := aep.NewShapeLayer(comp, "シェイプレイヤー 1")
 	must(err)

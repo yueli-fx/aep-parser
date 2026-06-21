@@ -6,8 +6,8 @@
 //
 // Two-phase: buildTextKomako creates the layer (NewTextLayer + SetText) before the
 // project is reopened; finishTextKomako applies SetLayerTransform + the animators,
-// which require a PARSED layer (see the Reopen in main). 30 fps (not the original's
-// 29.97) for the same NewComposition fractional-fps cdta reason as comp ①.
+// which require a PARSED layer (see the Reopen in main). 29.97 fps (cloneFps),
+// matching the original (the NewComposition fractional-fps cdta bug is fixed).
 package main
 
 import (
@@ -19,7 +19,7 @@ import (
 const komakoCompName = "テキスト変えるならココ！"
 
 func buildTextKomako(p *aep.Project, orc *oracle) {
-	comp, err := aep.NewComposition(p, komakoCompName, 1920, 1080, 30, 6)
+	comp, err := aep.NewComposition(p, komakoCompName, 1920, 1080, cloneFps, 6)
 	must(err)
 	tl, err := aep.NewTextLayer(comp, "GLITCH")
 	must(err)

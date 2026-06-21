@@ -87,7 +87,7 @@ func LowerPathStream(ps *PropertyStream[BezierPath], matchName, displayName stri
 	innerTdbs.Children = append(innerTdbs.Children,
 		makeTdsb(),
 		makeTdsn(displayName),
-		makeTdb4(valueLayout{dim: 1, headerByte: 0x00, spatial: false}),
+		makeTdb4(valueLayout{dim: 1, headerByte: 0x00, spatial: false}, ctx.tickRate),
 		&rifx.Chunk{ID: rifx.IDCdat, Data: make([]byte, 4)},
 	)
 	oms.Children = append(oms.Children, innerTdbs)
@@ -198,7 +198,7 @@ func lowerStream[T any](
 	tdbs.Children = append(tdbs.Children,
 		makeTdsb(),
 		makeTdsn(displayName),
-		makeTdb4(layout),
+		makeTdb4(layout, ctx.tickRate),
 	)
 
 	switch mode {
@@ -291,10 +291,18 @@ func makeTdsn(displayName string) *rifx.Chunk {
 //
 // Bytes 0x04..0x05 = 0x0001 (constant); byte 0x06 = headerByte (observed
 // 0x07 for Orientation; 0x00 for scalars; etc.); byte 0x07 = 0x00.
-// The remaining 108 bytes are AE-internal padding + a trailing constant
-// `00 00 78 00` at 0x0C..0x0F (observed everywhere). This implementation
-// emits the canonical 124-byte tdb4 with the head + zero padding to total 124.
-func makeTdb4(layout valueLayout) *rifx.Chunk {
+//
+// @0x0C..0x0F is the property's KEYFRAME TIME BASE (= comp TickRate), NOT a
+// constant: AE divides each keyframe's stored tick (ldat block @0x00) by this
+// field to get its seconds. It reads 0x00007800 (30720) only because every
+// probed fixture was 30 fps (30720 = 1024×30); a 29.97 comp's native tdb4 holds
+// 0x00005DA8 (23976). Hardcoding 30720 made AE evaluate from-scratch NTSC
+// keyframes 30720/23976 = 1.281× too fast (booyah comp ⑤ slid early). See
+// incident ntsc-tickrate-derive-3x-off § tdb4 finding.
+func makeTdb4(layout valueLayout, tickRate float64) *rifx.Chunk {
+	if tickRate <= 0 {
+		tickRate = 30720
+	}
 	d := make([]byte, 124)
 	d[0] = 0xdb
 	d[1] = 0x99
@@ -305,12 +313,8 @@ func makeTdb4(layout valueLayout) *rifx.Chunk {
 	d[6] = layout.headerByte
 	d[7] = 0x00
 	// @0x08..0x0B: observed 0x00000000 (Position_0) or 0xffffffff (Ellipse Size).
-	// AE accepts 0; that's what we emit. The 4-byte trailing constant @0x0C..0x0F = `00 00 78 00`
-	// (observed).
-	d[0x0C] = 0x00
-	d[0x0D] = 0x00
-	d[0x0E] = 0x78
-	d[0x0F] = 0x00
+	// AE accepts 0; that's what we emit.
+	binary.BigEndian.PutUint32(d[0x0C:0x10], uint32(math.Round(tickRate)))
 	// Remaining @0x10..0x7B: zero padding (124 total). @0x78 = expression-disabled byte
 	// (V1 parse_properties.go: `tdb4 @0x78 inverted = ExpressionEnabled`). 0 = enabled.
 	return &rifx.Chunk{ID: rifx.IDtdb4, Data: d}

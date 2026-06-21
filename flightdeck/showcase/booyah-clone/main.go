@@ -15,6 +15,15 @@ import (
 
 const outPath = "flightdeck/showcase/booyah-clone/booyah-clone.aep"
 
+// cloneFps matches the original project's frame rate. Every Booyah comp is 29.97
+// (NTSC; TickRate 23976). Earlier clones used a whole 30 fps to dodge a NewComposition
+// bug that wrote an inconsistent cdta time-base for fractional fps (AE read 30720 while
+// we lowered keyframes at 23976). That bug is now fixed — NewComposition writes the NTSC
+// legacy marker cdta @0xA8 = round(fps×100) so AE evaluates against 23976 — so the clone
+// runs at the true 29.97 and its frames line up with the original frame-for-frame (the
+// 30-fps approximation drifted by ~0.1%/frame, visible on a frame-by-frame diff).
+const cloneFps = 29.97
+
 func must(err error) {
 	if err != nil {
 		panic(err)

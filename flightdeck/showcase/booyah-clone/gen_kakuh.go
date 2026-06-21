@@ -10,7 +10,7 @@
 // is (0,0) too (stored separated; we write a unified (0,0), render-identical), so no
 // centering (unlike comp ①). Stroke colour is the AddStroke default (black): the
 // original elided its stroke colour (AE create-time default), which we can't recover
-// — a logged fidelity delta on a 0.8px element. Native 30 fps.
+// — a logged fidelity delta on a 0.8px element. 29.97 fps (cloneFps).
 //
 // Two-phase: buildKakuh creates the comp + the two shape layers (rect/stroke/trim
 // build pre-reopen); finishKakuh applies SetLayerTransform, which needs a parsed
@@ -30,7 +30,7 @@ const kakuhCompName = "カクッ"
 var kakuhLayerNames = []string{"シェイプレイヤー 3", "シェイプレイヤー 2"}
 
 func buildKakuh(p *aep.Project, orc *oracle) {
-	comp, err := aep.NewComposition(p, kakuhCompName, 1920, 1080, 30, 6)
+	comp, err := aep.NewComposition(p, kakuhCompName, 1920, 1080, cloneFps, 6)
 	must(err)
 	for _, name := range kakuhLayerNames {
 		sl, err := aep.NewShapeLayer(comp, name)

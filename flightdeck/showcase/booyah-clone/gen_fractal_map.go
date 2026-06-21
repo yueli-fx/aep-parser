@@ -10,8 +10,8 @@
 // DuplicateLayer, which inherits the effect and needs a fragile post-duplicate
 // reopen). Since the solid is plain black 1920×1080 and Fractal Noise GENERATES its
 // own pixels, two separate identical solids render identically to one shared solid —
-// a render-neutral structural delta, logged in the ledger. Native 30 fps (the
-// original comp is already 30, not 29.97), so no tickrate fudge (unlike ①/②).
+// a render-neutral structural delta, logged in the ledger. 29.97 fps (cloneFps),
+// matching the original (every Booyah comp is NTSC 29.97).
 //
 // Two-phase: buildFractalMap creates the comp + the two solids before reopen;
 // finishFractalMap adds + tunes the effects, which AddEffect refuses on un-Reopened
@@ -29,7 +29,7 @@ const fractalMapCompName = "マップ用フラクタルノイズ"
 var fractalMapLayerNames = []string{"マップ用フラクタルノイズA", "マップ用フラクタルノイズB"}
 
 func buildFractalMap(p *aep.Project, orc *oracle) {
-	comp, err := aep.NewComposition(p, fractalMapCompName, 1920, 1080, 30, 6)
+	comp, err := aep.NewComposition(p, fractalMapCompName, 1920, 1080, cloneFps, 6)
 	must(err)
 	// Create A then B: NewSolidLayer appends at the bottom of the stack, so A lands
 	// at index 0 (top) and B at index 1 — matching the original (L0=A over L1=B).

@@ -9,7 +9,7 @@
 // but L1 and L2 store Position SEPARATED (Position_0/Position_1, read as 0,0) while
 // being visually centred — the same separated-Position read trap as comp ④
 // ([[shape-layer-position-default-offscreen]] Case 2). So L1/L2 are centred
-// explicitly at comp-centre. Native 30 fps.
+// explicitly at comp-centre. 29.97 fps (cloneFps).
 //
 // Two-phase: buildPrecomp1 creates the comp + the three precomp layers (needs comp ①
 // to already exist in the project — it's built earlier in main); finishPrecomp1
@@ -25,7 +25,7 @@ import (
 const precomp1CompName = "プリコンポジション 1"
 
 func buildPrecomp1(p *aep.Project, orc *oracle) {
-	comp, err := aep.NewComposition(p, precomp1CompName, 1920, 1080, 30, 6)
+	comp, err := aep.NewComposition(p, precomp1CompName, 1920, 1080, cloneFps, 6)
 	must(err)
 	child := p.CompositionByName(shapeIiipCompName) // comp ①, built earlier in main
 	if child == nil {

@@ -536,7 +536,7 @@ func lowerShapeScalar(body *rifx.Chunk, name string, ps *codec.PropertyStream[fl
 		if err != nil {
 			return err
 		}
-		return injectAnimatedStream(body, name, kfList)
+		return injectAnimatedStream(body, name, kfList, ctx.tickRate)
 	}
 	sv, _ := ps.StaticValue()
 	overwriteShapeStreamCdat(body, name, encode1D(sv))
@@ -561,7 +561,7 @@ func injectAnimatedVec2L(body *rifx.Chunk, streamName string, kfs []codec.Stream
 	if err != nil {
 		return err
 	}
-	return injectAnimatedStream(body, streamName, kfList)
+	return injectAnimatedStream(body, streamName, kfList, ctx.tickRate)
 }
 
 // injectAnimatedColor converts a static shape Color stream into an animated
@@ -574,7 +574,7 @@ func injectAnimatedColor(body *rifx.Chunk, streamName string, kfs []codec.Stream
 	if err != nil {
 		return err
 	}
-	return injectAnimatedStream(body, streamName, kfList)
+	return injectAnimatedStream(body, streamName, kfList, ctx.tickRate)
 }
 
 // injectAnimatedStream flips a static shape stream in an embedded body to
@@ -582,7 +582,7 @@ func injectAnimatedColor(body *rifx.Chunk, streamName string, kfs []codec.Stream
 // LIST(tdbs), patches the tdb4 static→animated flags, and replaces the static
 // cdat with the supplied LIST(list)(lhd3+ldat) keyframe container. AE keeps
 // tdsb/tdsn/tdb4/tdum/tduM otherwise unchanged.
-func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chunk) error {
+func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chunk, tickRate float64) error {
 	kids := body.Children
 	for i := 0; i+1 < len(kids); i++ {
 		if kids[i].ID == rifx.IDTdmn && trimChunkNUL(kids[i].Data) == streamName {
@@ -600,6 +600,14 @@ func injectAnimatedStream(body *rifx.Chunk, streamName string, kfList *rifx.Chun
 				tdb4.Data[0x05] &^= 0x01
 				tdb4.Data[0x44] = 0x01
 				tdb4.Data[0x4f] &^= 0x01
+				// @0x0C..0x0F = keyframe time base (= comp TickRate). The embedded
+				// template carries its source fixture's 30 fps value (30720); AE
+				// divides each keyframe tick by this, so leaving 30720 on a 29.97
+				// comp evaluates keyframes 30720/23976× too fast. Stamp the comp's
+				// real TickRate. See ntsc-tickrate-derive-3x-off § tdb4 finding.
+				if tickRate > 0 {
+					binary.BigEndian.PutUint32(tdb4.Data[0x0C:0x10], uint32(math.Round(tickRate)))
+				}
 			}
 			for j, ch := range tdbs.Children {
 				if ch.ID == rifx.IDCdat {

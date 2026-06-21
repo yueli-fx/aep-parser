@@ -456,7 +456,7 @@ func lowerTransformVec2Spatial(body *rifx.Chunk, name string, ps *codec.Property
 		if err != nil {
 			return err
 		}
-		return injectAnimatedStream(body, name, kfList)
+		return injectAnimatedStream(body, name, kfList, ctx.tickRate)
 	}
 	sv, _ := ps.StaticValue()
 	overwriteShapeStreamCdat(body, name, encXYZ(sv))
@@ -473,7 +473,7 @@ func lowerTransformScale(body *rifx.Chunk, ps *codec.PropertyStream[[2]float64],
 		if err != nil {
 			return err
 		}
-		return injectAnimatedStream(body, MatchNameScale, kfList)
+		return injectAnimatedStream(body, MatchNameScale, kfList, ctx.tickRate)
 	}
 	sv, _ := ps.StaticValue()
 	overwriteShapeStreamCdat(body, MatchNameScale, encScale(sv))
@@ -490,7 +490,7 @@ func lowerTransformScalar(body *rifx.Chunk, name string, ps *codec.PropertyStrea
 		if err != nil {
 			return err
 		}
-		return injectAnimatedStream(body, name, kfList)
+		return injectAnimatedStream(body, name, kfList, ctx.tickRate)
 	}
 	sv, _ := ps.StaticValue()
 	overwriteShapeStreamCdat(body, name, enc(sv))
