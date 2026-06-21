@@ -152,6 +152,38 @@ Until the flip, `--validate` runs in **warn mode** for not-yet-converted symbols
 does not fail) so CI stays green during the two-step migration; converted symbols are held
 to the full schema immediately.
 
+## Schema home — one place to change types
+
+All schema knowledge lives in ONE package, `internal/apidoc`, imported by both
+`cmd/capindex` and `cmd/docgen`. No enum or rule is duplicated anywhere else.
+
+- `internal/apidoc/schema.go` — the **single source of truth**, declared as data:
+  - frozen enums as Go slices: `Domains` (the 16), `Stabilities`, `Verifies`,
+    `SinceVersions`;
+  - the field table: for each tag, whether it is required (a predicate over the symbol),
+    its kind, and its validator func;
+  - the path to the jargon blocklist data file.
+- `internal/apidoc/parse.go` — the `@tag`-block → struct parser.
+- `internal/apidoc/validate.go` — the checks, consuming `schema.go`'s enums + rules.
+
+**How to add or remove a type** (the question this answers): editing exactly one slice in
+`internal/apidoc/schema.go` is the whole change. Add a `@domain` → append to `Domains`;
+retire a `@verify` value → remove it from `Verifies`. capindex, docgen, and `--validate`
+all read these slices, so the new/removed type takes effect everywhere at once. A header
+comment in `schema.go` states "this file is the only place to edit the annotation
+vocabulary", and a test asserts no domain/verify/stability string literals exist outside
+this package (so a future edit can't silently fork the enum).
+
+## Generation self-validates
+
+Doc generation does not trust its input. `cmd/docgen` calls `apidoc.Validate` over the
+symbols it is about to render and **fails (non-zero) before writing any file** if an
+annotation violates the schema — so `go generate ./...` / `go run ./cmd/docgen` cannot
+emit docs from invalid or incomplete tags. It is the *same* `apidoc.Validate` that
+`cmd/capindex --validate` and `go test ./cmd/capindex` run — one implementation, enforced
+at generation time AND in CI. (During the migration window `Validate` takes a mode flag:
+warn for un-converted symbols, strict for converted ones and for the final flip.)
+
 ## Jargon-cleanup rule (repo-wide, all comments)
 
 Comments (doc, implementation, and package comments) must not name project-internal
@@ -193,19 +225,21 @@ only to the non-test write surface (test files carry no exported API tags).
 
 ## Tooling changes
 
-1. **Shared `@tag` parser.** One package both capindex and docgen import (candidate:
-   `internal/apidoc` or a small `cmd`-shared lib), parsing a comment block into a struct
-   carrying every field above. Single parse implementation, no duplication.
-2. **capindex.** Replace `parseCapTag` (`//aep:cap …`) with the shared parser reading
+1. **`internal/apidoc` (new, the schema home).** Holds `schema.go` (enums + field rules,
+   the single source of truth — see *Schema home*), `parse.go` (the `@tag`-block parser),
+   and `validate.go` (`apidoc.Validate`). Imported by both `cmd/capindex` and `cmd/docgen`;
+   one parse + one validate implementation, no duplication.
+2. **capindex.** Replace `parseCapTag` (`//aep:cap …`) with `apidoc` reading
    `@domain/@stability/@verify/@gate/@since/@boundary/@incident/@alias`. Crosscheck,
    surface-coverage, and generated-doc tests keep the same *semantics* (every write-surface
    symbol tagged; verify↔gate consistency); only the source-format changes.
 3. **docgen.** Extend `extract` to read `@summary/@description/@param/@returns`; render
-   `@param` as a parameter table in `docs/*.md`. `@incident` is parsed but NOT rendered
-   (maintainer field). `Example*` functions unchanged.
-4. **Validator (`cmd/capindex --validate`).** Implements all checks in *One-command
-   validation* above; exposed as a CLI flag (human "一键校验") and run by
-   `go test ./cmd/capindex` (CI). The jargon blocklist data lives in one auditable file.
+   `@param` as a parameter table in `docs/*.md`; `@incident` parsed but NOT rendered
+   (maintainer field); `Example*` unchanged. **Calls `apidoc.Validate` before writing any
+   file and fails on violation** (see *Generation self-validates*).
+4. **Validator surface.** `cmd/capindex --validate` (human "一键校验") and
+   `go test ./cmd/capindex` (CI) both call `apidoc.Validate` — the same function docgen
+   runs. The jargon blocklist data lives in one auditable file under `internal/apidoc`.
 5. **Converter (`tools/debug/tagconvert`).** One-shot, tracked: rewrites a file's
    `aep:cap` + prose into `@tag` blocks with placeholders, for the manual pass to finish.
 
