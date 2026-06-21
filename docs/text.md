@@ -713,7 +713,13 @@ TextRangeAdvanced holds the "Advanced" sub-params of a text animator's Range Sel
 func TextEncodedByteLen(s string) int
 ```
 
-TextEncodedByteLen returns the encoded byte length SetText would produce for s.
+Report the encoded byte length SetText would produce for a string
+
+| Parameter | Description |
+|---|---|
+| `s` | the text whose encoded byte length to measure |
+
+**Returns:** the number of bytes the string would occupy once encoded
 
 ### AddTextOpacityAnimator
 

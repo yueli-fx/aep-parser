@@ -1496,7 +1496,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddGradientFill() (*GradientFillNode, error)",
-    "summary": "AddGradientFill appends a default-valued GradientFillNode (2-stop black→white linear gradient, fully opaque) and returns it.",
+    "summary": "@summary    Append a gradient fill node to a vector group @description Defaults to a 2-stop black-to-white linear gradient, fully   opaque.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1521,7 +1521,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error",
-    "summary": "AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep along the stroke).",
+    "summary": "@summary    Append an animated gradient-stops keyframe to a stroke @description The full gradient takes effect at the given time and AE   interpolates the stops between keyframes (a color sweep along the stroke).",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1533,7 +1533,9 @@
         "TestGradientStrokeAnim_AEShipGate_AE2025"
       ],
       "boundary": "",
-      "incident": null,
+      "incident": [
+        "gradient-fill-write-re"
+      ],
       "alias": [
         "animated gradient stroke",
         "渐变描边动画",
@@ -1547,7 +1549,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) AddGradientKeyframe(time float64, g *Gradient) error",
-    "summary": "AddGradientKeyframe appends an animated-stops keyframe: the full gradient g (color + alpha stops) takes effect at `time` seconds, and AE interpolates the stops between keyframes (a colour sweep / flow).",
+    "summary": "@summary    Append an animated gradient-stops keyframe @description The full gradient takes effect at the given time and AE   interpolates the stops between keyframes.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1559,7 +1561,9 @@
         "TestGradientAnim_AEShipGate_AE2025"
       ],
       "boundary": "",
-      "incident": null,
+      "incident": [
+        "gradient-fill-write-re"
+      ],
       "alias": [
         "animated gradient",
         "渐变动画",
@@ -1574,7 +1578,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddGradientStroke() (*GradientStrokeNode, error)",
-    "summary": "AddGradientStroke appends a default-valued GradientStrokeNode (2-stop black→white gradient) and returns it.",
+    "summary": "@summary    Append a gradient stroke node to a vector group @description Defaults to a 2-stop black-to-white gradient.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1598,7 +1602,7 @@
     "symbol": "NewGradientFillNode",
     "kind": "func",
     "signature": "func NewGradientFillNode() *GradientFillNode",
-    "summary": "NewGradientFillNode returns a detached gradient-fill shape node.",
+    "summary": "@summary    Create a detached gradient-fill shape node @returns    a new gradient-fill shape node not yet attached to any layer @domain     gradient @stability  stable @verify     render-pixel @gate       TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025 @since      AE2020 @alias      gradient fill,渐变填充,线性渐变,径向渐变",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1623,7 +1627,7 @@
     "symbol": "NewGradientStrokeNode",
     "kind": "func",
     "signature": "func NewGradientStrokeNode() *GradientStrokeNode",
-    "summary": "NewGradientStrokeNode returns a detached gradient-stroke shape node.",
+    "summary": "@summary    Create a detached gradient-stroke shape node @returns    a new gradient-stroke shape node not yet attached to any layer @domain     gradient @stability  stable @verify     render-pixel @gate       TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025,TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 @since      AE2020 @alias      gradient stroke,渐变描边",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1649,7 +1653,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error",
-    "summary": "SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).",
+    "summary": "@summary    Replace the gradient stroke alpha stops @description Requires at least two stops; each value must lie in zero to one.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1674,7 +1678,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error",
-    "summary": "SetAlphaStops replaces the gradient's alpha (opacity) stops.",
+    "summary": "@summary    Replace the gradient alpha stops @description Requires at least two stops; each offset, midpoint and alpha must   lie in zero to one.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1700,7 +1704,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error",
-    "summary": "SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).",
+    "summary": "@summary    Replace the gradient stroke color stops @description Requires at least two stops; each value must lie in zero to one.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1725,7 +1729,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error",
-    "summary": "SetColorStops replaces the gradient's color stops.",
+    "summary": "@summary    Replace the gradient color stops @description Requires at least two stops; each offset, midpoint and color   component must lie in zero to one.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1751,7 +1755,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetEndPoint(v [2]float64) error",
-    "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
+    "summary": "@summary    Set the gradient ramp end point @param      v  the end point in shape-local coordinates @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025 @since      AE2020 @alias      gradient end point,渐变终点,gradient direction,渐变方向",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1777,7 +1781,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error",
-    "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
+    "summary": "@summary    Set the gradient stroke ramp end point @param      v  the end point in shape-local coordinates @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 @since      AE2020 @alias      gradient stroke end point,渐变描边终点,gradient direction",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1802,7 +1806,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetGradientType(t GradientType) error",
-    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
+    "summary": "@summary    Select the gradient ramp shape (linear or radial) @description For radial, StartPoint is the centre and EndPoint sets the outer   radius.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1830,7 +1834,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
-    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
+    "summary": "@summary    Select the gradient stroke ramp shape (linear or radial) @description For radial, StartPoint is the centre and EndPoint sets the outer   radius.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1858,7 +1862,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetHighlightAngle(v float64) error",
-    "summary": "SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset.",
+    "summary": "@summary    Set a radial gradient stroke's highlight offset direction @description Only meaningful together with a non-zero highlight length.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1883,7 +1887,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetHighlightAngle(v float64) error",
-    "summary": "SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight offset.",
+    "summary": "@summary    Set a radial gradient's highlight offset direction @description Only meaningful together with a non-zero highlight length.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1909,7 +1913,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
-    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
+    "summary": "@summary    Offset a radial gradient stroke's bright centre @description Shifts the bright centre off the geometric centre by a percent of   the radius (range -100 to 100; 0 = centred).",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1934,7 +1938,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetHighlightLength(v float64) error",
-    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
+    "summary": "@summary    Offset a radial gradient's bright centre @description Shifts the bright centre off the geometric centre by a percent of   the radius (range -100 to 100; 0 = centred).",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1960,7 +1964,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetLineCap(c StrokeLineCap) error",
-    "summary": "SetLineCap sets the gradient stroke's end-cap style (Butt / Round / Projecting).",
+    "summary": "@summary    Set the gradient stroke end-cap style @param      c  the end-cap style (Butt, Round or Projecting) @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025 @since      AE2020 @alias      gradient stroke line cap,渐变描边端点,line cap,butt,round,projecting",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1988,7 +1992,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetLineJoin(j StrokeLineJoin) error",
-    "summary": "SetLineJoin sets the gradient stroke's corner-join style (Miter / Round / Bevel).",
+    "summary": "@summary    Set the gradient stroke corner-join style @param      j  the corner-join style (Miter, Round or Bevel) @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025 @since      AE2020 @alias      gradient stroke line join,渐变描边接头,line join,miter,round,bevel",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -2016,7 +2020,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetMiterLimit(v float64) error",
-    "summary": "SetMiterLimit sets the gradient stroke's miter limit (only used when LineJoin is Miter; must be ≥ 1).",
+    "summary": "@summary    Set the gradient stroke miter limit @description Only used when the corner join is Miter.",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -2041,7 +2045,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
-    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
+    "summary": "@summary    Set the gradient stroke ramp start point @description The ramp direction is EndPoint minus StartPoint; it defaults to a   horizontal [0,0] to [100,0].",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -2066,7 +2070,7 @@
     "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetStartPoint(v [2]float64) error",
-    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
+    "summary": "@summary    Set the gradient ramp start point @description The ramp direction is EndPoint minus StartPoint; it defaults to a   horizontal [0,0] to [100,0].",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -2092,7 +2096,7 @@
     "kind": "method",
     "recv": "*GradientStrokeNode",
     "signature": "func (n *GradientStrokeNode) SetStrokeWidth(v float64) error",
-    "summary": "SetStrokeWidth sets the gradient stroke's width (pixels; must be ≥ 0).",
+    "summary": "@summary    Set the gradient stroke width @param      v  the stroke width in pixels (must be non-negative) @domain     gradient @stability  stable @verify     render-pixel @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 @since      AE2020 @alias      gradient stroke width,渐变描边宽度,stroke width",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -5614,7 +5618,7 @@
     "symbol": "Capabilities",
     "kind": "func",
     "signature": "func Capabilities(target AETarget) AECapabilities",
-    "summary": "Capabilities returns the AECapabilities matrix for the given AE target.",
+    "summary": "@summary    Report the capability matrix for a given AE target version @param      target  the AE version to query capabilities for @returns    the capability matrix describing what the target version supports @domain     meta @stability  stable @verify     none @since      AE2020 @alias      capabilities,能力矩阵,版本能力,AE target",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5897,7 +5901,7 @@
     "symbol": "TextEncodedByteLen",
     "kind": "func",
     "signature": "func TextEncodedByteLen(s string) int",
-    "summary": "TextEncodedByteLen returns the encoded byte length SetText would produce for s.",
+    "summary": "@summary    Report the encoded byte length SetText would produce for a string @param      s  the text whose encoded byte length to measure @returns    the number of bytes the string would occupy once encoded @domain     meta @stability  stable @verify     none @since      AE2020 @alias      text byte length,编码长度,utf 长度",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -5941,7 +5945,7 @@
     "symbol": "WrapShapeLayer",
     "kind": "func",
     "signature": "func WrapShapeLayer(layer *Layer) *ShapeLayer",
-    "summary": "WrapShapeLayer wraps a parsed shape Layer into a ShapeLayer view.",
+    "summary": "@summary    Wrap a parsed shape layer into a higher-level shape view @param      layer  the parsed shape layer to wrap @returns    a shape view over the given layer @domain     meta @stability  stable @verify     none @since      AE2020 @alias      wrap shape layer,形状层视图,shape layer",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -7553,7 +7557,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddEllipse() (*EllipseNode, error)",
-    "summary": "AddEllipse appends a default-valued EllipseNode and returns it.",
+    "summary": "@summary    Append an ellipse node to a vector group @returns    the created ellipse node @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @alias      add ellipse,椭圆,新增椭圆节点",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7578,7 +7582,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddFill() (*FillNode, error)",
-    "summary": "AddFill appends a default-valued FillNode (white, 100% opacity) and returns it.",
+    "summary": "@summary    Append a fill node to a vector group @description Defaults to white at 100% opacity.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7604,7 +7608,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddMergePaths() (*MergePathsNode, error)",
-    "summary": "AddMergePaths appends a default-valued MergePathsNode (Type=Merge) and returns it.",
+    "summary": "@summary    Append a merge-paths node to a vector group @description Defaults to the Merge mode.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7631,7 +7635,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddOffsetPaths() (*OffsetPathsNode, error)",
-    "summary": "AddOffsetPaths appends a default-valued OffsetPathsNode (Amount=10, AE's default) and returns it.",
+    "summary": "@summary    Append an offset-paths node to a vector group @description Defaults to amount 10.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7659,7 +7663,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddPath() (*PathNode, error)",
-    "summary": "AddPath appends an empty (closed) PathNode and returns it.",
+    "summary": "@summary    Append an empty closed path node to a vector group @description Caller must set vertices to give it geometry (minimum two   vertices).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7685,7 +7689,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddPuckerBloat() (*PuckerBloatNode, error)",
-    "summary": "AddPuckerBloat appends a default-valued PuckerBloatNode (Amount=0, the no-op identity) and returns it.",
+    "summary": "@summary    Append a pucker-and-bloat node to a vector group @description Defaults to amount 0 (no-op identity).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7713,7 +7717,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddRect() (*RectNode, error)",
-    "summary": "AddRect appends a default-valued RectNode and returns it.",
+    "summary": "@summary    Append a rectangle node to a vector group @description The new node is placed at the top of the render stack   (Children[len-1]).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7738,7 +7742,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddRepeater() (*RepeaterNode, error)",
-    "summary": "AddRepeater appends a default-valued RepeaterNode (3 copies, identity transform) and returns it.",
+    "summary": "@summary    Append a repeater node to a vector group @description Defaults to 3 copies with an identity transform.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7765,7 +7769,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddRoundCorners() (*RoundCornersNode, error)",
-    "summary": "AddRoundCorners appends a default-valued RoundCornersNode (Radius=10, AE's default) and returns it.",
+    "summary": "@summary    Append a round-corners node to a vector group @description Defaults to radius 10.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7791,7 +7795,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddStar() (*StarNode, error)",
-    "summary": "AddStar appends a default-valued StarNode (5-point star, OuterRadius=100, InnerRadius=50) and returns it — the canonical star / sparkle / badge MG primitive.",
+    "summary": "@summary    Append a star node to a vector group @description Defaults to a 5-point star (outer radius 100, inner radius 50).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7818,7 +7822,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddStroke() (*StrokeNode, error)",
-    "summary": "AddStroke appends a default-valued StrokeNode (black, width=2, 100% opacity) and returns it.",
+    "summary": "@summary    Append a stroke node to a vector group @description Defaults to black, width 2, 100% opacity.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7844,7 +7848,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddTrim() (*TrimNode, error)",
-    "summary": "AddTrim appends a default-valued TrimNode (Start=0, End=100, Offset=0 — the no-op identity trim) and returns it.",
+    "summary": "@summary    Append a trim-paths node to a vector group @description Defaults to the no-op identity trim (Start 0, End 100, Offset 0).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7871,7 +7875,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddTwist() (*TwistNode, error)",
-    "summary": "AddTwist appends a default-valued TwistNode (Angle=0, the no-op identity) and returns it.",
+    "summary": "@summary    Append a twist node to a vector group @description Defaults to angle 0 (no-op identity).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7897,7 +7901,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddWigglePaths() (*WigglePathsNode, error)",
-    "summary": "AddWigglePaths appends a default-valued WigglePathsNode (Size=0, the no-op identity) and returns it.",
+    "summary": "@summary    Append a wiggle-paths node to a vector group @description Defaults to size 0 (no-op identity).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7925,7 +7929,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddWiggleTransform() (*WiggleTransformNode, error)",
-    "summary": "AddWiggleTransform appends a default-valued WiggleTransformNode (zero amplitudes, the no-op identity) and returns it.",
+    "summary": "@summary    Append a wiggle-transform node to a vector group @description Defaults to zero amplitudes (no-op identity).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7952,7 +7956,7 @@
     "kind": "method",
     "recv": "*VectorGroup",
     "signature": "func (g *VectorGroup) AddZigZag() (*ZigZagNode, error)",
-    "summary": "AddZigZag appends a default-valued ZigZagNode (Size=5, Detail=10 — AE's defaults) and returns it.",
+    "summary": "@summary    Append a zigzag node to a vector group @description Defaults to size 5, detail 10.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -7978,7 +7982,7 @@
     "kind": "method",
     "recv": "*StrokeDashes",
     "signature": "func (d *StrokeDashes) Disable()",
-    "summary": "",
+    "summary": "@summary    Disable dashing on the stroke @description Reverts to a solid stroke.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8004,7 +8008,7 @@
     "kind": "method",
     "recv": "*StrokeDashes",
     "signature": "func (d *StrokeDashes) Enable()",
-    "summary": "Enable turns dashing on (the serializer emits the Dash + Gap slots).",
+    "summary": "@summary    Enable dashing on the stroke @description The serializer emits the Dash and Gap slots.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8029,7 +8033,7 @@
     "symbol": "NewEllipseNode",
     "kind": "func",
     "signature": "func NewEllipseNode() *EllipseNode",
-    "summary": "NewEllipseNode returns a detached ellipse shape node.",
+    "summary": "@summary    Create a detached ellipse shape node @returns    a new ellipse shape node not yet attached to any layer @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @alias      ellipse,椭圆,圆,oval",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8054,7 +8058,7 @@
     "symbol": "NewFillNode",
     "kind": "func",
     "signature": "func NewFillNode() *FillNode",
-    "summary": "NewFillNode returns a detached fill shape node.",
+    "summary": "@summary    Create a detached fill shape node @returns    a new fill shape node not yet attached to any layer @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @boundary   verified by rendered color pixels as part of a shape @alias      fill,填充,纯色填充,solid color",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8065,7 +8069,7 @@
         "TestV2_2_Ellipse_AEShipGate_AE2020",
         "TestV2_2_Ellipse_AEShipGate_AE2025"
       ],
-      "boundary": "fill 随形状渲染验证(颜色像素门禁)",
+      "boundary": "verified by rendered color pixels as part of a shape",
       "incident": null,
       "alias": [
         "fill",
@@ -8079,7 +8083,7 @@
     "symbol": "NewMergePathsNode",
     "kind": "func",
     "signature": "func NewMergePathsNode() *MergePathsNode",
-    "summary": "NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge).",
+    "summary": "@summary     Create a detached Merge Paths filter node @description Returns a Merge Paths filter set to the Merge combine mode.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8108,7 +8112,7 @@
     "symbol": "NewOffsetPathsNode",
     "kind": "func",
     "signature": "func NewOffsetPathsNode() *OffsetPathsNode",
-    "summary": "NewOffsetPathsNode returns a detached Offset Paths filter node (Amount=10).",
+    "summary": "@summary     Create a detached Offset Paths filter node @description Returns an Offset Paths filter with Amount=10 as its starting value.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8137,7 +8141,7 @@
     "symbol": "NewPathNode",
     "kind": "func",
     "signature": "func NewPathNode() *PathNode",
-    "summary": "NewPathNode returns a detached path shape node.",
+    "summary": "@summary    Create a detached path shape node @returns    a new custom-path shape node not yet attached to any layer @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Path_AEShipGate_AE2020,TestV2_2_Path_AEShipGate_AE2025 @since      AE2020 @alias      path,路径,自定义形状,bezier,贝塞尔",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8163,7 +8167,7 @@
     "symbol": "NewPuckerBloatNode",
     "kind": "func",
     "signature": "func NewPuckerBloatNode() *PuckerBloatNode",
-    "summary": "NewPuckerBloatNode returns a detached Pucker \u0026 Bloat filter node (Amount=0, the no-op identity).",
+    "summary": "@summary     Create a detached Pucker \u0026 Bloat filter node @description Returns a Pucker \u0026 Bloat filter with Amount=0, which leaves the   path unchanged until its value is set.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8189,7 +8193,7 @@
     "symbol": "NewRectNode",
     "kind": "func",
     "signature": "func NewRectNode() *RectNode",
-    "summary": "NewRectNode returns a detached rectangle shape node.",
+    "summary": "@summary    Create a detached rectangle shape node @returns    a new rectangle shape node not yet attached to any layer @domain     shape @stability  alpha @verify     render-pixel @gate       TestV2_2_RectKf_AEShipGate_AE2020,TestV2_2_RectKf_AEShipGate_AE2025 @since      AE2020 @boundary   only the keyframed rectangle is render-verified; static rectangle path and stroke embedded bytes are not yet covered @alias      rect,矩形,方块,rectangle",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8200,7 +8204,7 @@
         "TestV2_2_RectKf_AEShipGate_AE2020",
         "TestV2_2_RectKf_AEShipGate_AE2025"
       ],
-      "boundary": "rect via keyframe render-gated;静态 rect Path/Stroke embed bytes deferred",
+      "boundary": "only the keyframed rectangle is render-verified; static rectangle path and stroke embedded bytes are not yet covered",
       "incident": null,
       "alias": [
         "rect",
@@ -8214,7 +8218,7 @@
     "symbol": "NewRepeaterNode",
     "kind": "func",
     "signature": "func NewRepeaterNode() *RepeaterNode",
-    "summary": "NewRepeaterNode returns a detached Repeater filter node (3 copies, identity transform).",
+    "summary": "@summary     Create a detached Repeater filter node @description Returns a Repeater filter that makes 3 copies with an identity   transform, so each copy sits on top of the original until configured.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8243,7 +8247,7 @@
     "symbol": "NewRoundCornersNode",
     "kind": "func",
     "signature": "func NewRoundCornersNode() *RoundCornersNode",
-    "summary": "NewRoundCornersNode returns a detached Round Corners filter node (Radius=10).",
+    "summary": "@summary     Create a detached Round Corners filter node @description Returns a Round Corners filter with Radius=10 as its starting value.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8268,7 +8272,7 @@
     "symbol": "NewStarNode",
     "kind": "func",
     "signature": "func NewStarNode() *StarNode",
-    "summary": "NewStarNode returns a detached Star shape node (default 5-point star).",
+    "summary": "@summary     Create a detached Star shape node @description Returns a Star shape configured as a 5-point star by default.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8296,7 +8300,7 @@
     "symbol": "NewStrokeNode",
     "kind": "func",
     "signature": "func NewStrokeNode() *StrokeNode",
-    "summary": "NewStrokeNode returns a detached stroke shape node.",
+    "summary": "@summary    Create a detached stroke shape node @returns    a new stroke shape node not yet attached to any layer @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 @since      AE2020 @alias      stroke,描边,线条,outline",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8321,7 +8325,7 @@
     "symbol": "NewTrimNode",
     "kind": "func",
     "signature": "func NewTrimNode() *TrimNode",
-    "summary": "NewTrimNode returns a detached Trim Paths filter node (identity: Start=0, End=100, Offset=0).",
+    "summary": "@summary     Create a detached Trim Paths filter node @description Returns the identity Trim Paths filter with Start=0, End=100,   and Offset=0, so it leaves the path unchanged until its values are set.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8349,7 +8353,7 @@
     "symbol": "NewTwistNode",
     "kind": "func",
     "signature": "func NewTwistNode() *TwistNode",
-    "summary": "NewTwistNode returns a detached Twist filter node (Angle=0, the no-op identity).",
+    "summary": "@summary     Create a detached Twist filter node @description Returns a Twist filter with Angle=0, which leaves the path   unchanged until its value is set.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8378,7 +8382,7 @@
     "symbol": "NewVectorGroup",
     "kind": "func",
     "signature": "func NewVectorGroup() *VectorGroup",
-    "summary": "NewVectorGroup returns a detached vector group shape node.",
+    "summary": "@summary     Create a detached vector group shape node @returns     a new vector group shape node not yet attached to any layer @domain      shape @stability   stable @verify      render-pixel @gate        TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since       AE2020 @boundary    a container that holds child shape nodes; verified by rendered pixels as part of a shape @alias       vector group,形状组,shape contents,分组",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8389,7 +8393,7 @@
         "TestV2_2_Ellipse_AEShipGate_AE2020",
         "TestV2_2_Ellipse_AEShipGate_AE2025"
       ],
-      "boundary": "形状内容容器,承载子节点(随形状渲染验证)",
+      "boundary": "a container that holds child shape nodes; verified by rendered pixels as part of a shape",
       "incident": null,
       "alias": [
         "vector group",
@@ -8403,7 +8407,7 @@
     "symbol": "NewWigglePathsNode",
     "kind": "func",
     "signature": "func NewWigglePathsNode() *WigglePathsNode",
-    "summary": "NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the no-op identity).",
+    "summary": "@summary     Create a detached Wiggle Paths filter node @description Returns a Wiggle Paths filter with Size=0, which leaves the path   unchanged until its value is set.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8414,7 +8418,7 @@
         "TestMGWiggle_AEShipGate_AE2020",
         "TestMGWiggle_AEShipGate_AE2025"
       ],
-      "boundary": "基本 render-gated;Correlation/Temporal·Spatial Phase/Roughen Points 调制 evidence-defer",
+      "boundary": "only the basic case is render-verified; Correlation, Temporal and Spatial Phase, and Roughen Points controls are not yet covered",
       "incident": [
         "trim-paths-vector-filter-re"
       ],
@@ -8430,7 +8434,7 @@
     "symbol": "NewWiggleTransformNode",
     "kind": "func",
     "signature": "func NewWiggleTransformNode() *WiggleTransformNode",
-    "summary": "NewWiggleTransformNode returns a detached Wiggle Transform filter node (zero amplitudes, the no-op identity).",
+    "summary": "@summary     Create a detached Wiggle Transform filter node @description Returns a Wiggle Transform filter with zero amplitudes, which   leaves the shape unchanged until its values are set.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8441,7 +8445,7 @@
         "TestMGWiggleTransform_AEShipGate_AE2020",
         "TestMGWiggleTransform_AEShipGate_AE2025"
       ],
-      "boundary": "基本 render-gated;Correlation/Phase 调制 evidence-defer",
+      "boundary": "only the basic case is render-verified; Correlation and Phase controls are not yet covered",
       "incident": [
         "trim-paths-vector-filter-re"
       ],
@@ -8455,7 +8459,7 @@
     "symbol": "NewZigZagNode",
     "kind": "func",
     "signature": "func NewZigZagNode() *ZigZagNode",
-    "summary": "NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10).",
+    "summary": "@summary     Create a detached ZigZag filter node @description Returns a ZigZag filter with Size=5 and Detail=10 as its   starting values.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8484,7 +8488,7 @@
     "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetAmount(v float64) error",
-    "summary": "SetAmount sets the offset amount in pixels (positive grows, negative shrinks).",
+    "summary": "@summary    Set the offset amount @description A positive amount grows the paths, a negative amount shrinks them.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8510,7 +8514,7 @@
     "kind": "method",
     "recv": "*StrokeWave",
     "signature": "func (w *StrokeWave) SetAmount(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke wave amount @param      v  the wave amount in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      wave amount,波浪幅度,stroke wave amount",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8535,7 +8539,7 @@
     "kind": "method",
     "recv": "*PuckerBloatNode",
     "signature": "func (n *PuckerBloatNode) SetAmount(v float64) error",
-    "summary": "SetAmount sets the pucker/bloat amount (percent; negative puckers/concave, positive bloats/convex).",
+    "summary": "@summary    Set the pucker or bloat amount @description A negative amount puckers (concave), a positive amount bloats   (convex).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8561,7 +8565,7 @@
     "kind": "method",
     "recv": "*RepeaterTransform",
     "signature": "func (t *RepeaterTransform) SetAnchor(v [2]float64) error",
-    "summary": "SetAnchor sets the per-copy anchor point (px).",
+    "summary": "@summary    Set the per-copy anchor point @param      v  the per-copy anchor point in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      repeater anchor,重复器锚点,per-copy anchor",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8572,7 +8576,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;match-name `ADBE Vector Repeater Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[15,25])",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "repeater anchor",
@@ -8586,7 +8590,7 @@
     "kind": "method",
     "recv": "*WigglerTransform",
     "signature": "func (t *WigglerTransform) SetAnchor(v [2]float64) error",
-    "summary": "SetAnchor sets the anchor-point wiggle amplitude (pixels).",
+    "summary": "@summary    Set the anchor-point wiggle amplitude @param      v  the anchor-point wiggle amplitude in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      wiggler anchor amplitude,抖动锚点幅度,anchor wiggle",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8597,7 +8601,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;match-name `ADBE Vector Wiggler Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[30,40])",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "wiggler anchor amplitude",
@@ -8611,7 +8615,7 @@
     "kind": "method",
     "recv": "*TwistNode",
     "signature": "func (n *TwistNode) SetAngle(v float64) error",
-    "summary": "SetAngle sets the twist angle (degrees; positive twists clockwise, negative counter-clockwise).",
+    "summary": "@summary    Set the twist angle @description A positive angle twists clockwise, a negative angle   counter-clockwise.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8636,7 +8640,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetBlendMode(v ShapeBlendMode) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke blend mode @param      v  the blend mode as AE's 1-based index @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      stroke blend mode,描边混合模式,blend mode",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8661,7 +8665,7 @@
     "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetBlendMode(v ShapeBlendMode) error",
-    "summary": "",
+    "summary": "@summary    Set the fill blend mode @param      v  the blend mode as AE's 1-based index @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      fill blend mode,填充混合模式,blend mode",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8686,7 +8690,7 @@
     "kind": "method",
     "recv": "*TwistNode",
     "signature": "func (n *TwistNode) SetCenter(c [2]float64) error",
-    "summary": "SetCenter offsets the twist pivot from the path centre (Vec2, shape-local pixels).",
+    "summary": "@summary    Offset the twist pivot from the path centre @description The default [0,0] is AE-default-elided; a non-zero centre   materializes the leaf.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8712,7 +8716,7 @@
     "kind": "method",
     "recv": "*PathNode",
     "signature": "func (p *PathNode) SetClosed(closed bool) error",
-    "summary": "SetClosed toggles the `Closed` flag without disturbing vertices/tangents.",
+    "summary": "@summary    Toggle whether the path is closed @description Vertices and tangents are left undisturbed.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8738,7 +8742,7 @@
     "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetColor(v [4]float64) error",
-    "summary": "",
+    "summary": "@summary    Set the fill color @param      v  the RGBA color, each channel in zero to one @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @alias      fill color,填充颜色,set color,RGBA",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8764,7 +8768,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetColor(v [4]float64) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke color @param      v  the RGBA color, each channel in zero to one @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 @since      AE2020 @alias      stroke color,描边颜色,set color,RGBA",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8790,7 +8794,7 @@
     "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetCompositeOrder(v ShapeCompositeOrder) error",
-    "summary": "",
+    "summary": "@summary    Set the fill composite order @param      v  whether the fill composites above or below the previous @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      fill composite order,填充合成顺序,composite order",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8815,7 +8819,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetCompositeOrder(v ShapeCompositeOrder) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke composite order @param      v  whether the stroke composites above or below the previous @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @alias      stroke composite order,描边合成顺序,composite order",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8840,7 +8844,7 @@
     "kind": "method",
     "recv": "*RepeaterNode",
     "signature": "func (n *RepeaterNode) SetCopies(v float64) error",
-    "summary": "SetCopies sets the number of copies (≥ 1).",
+    "summary": "@summary    Set the number of repeater copies @param      v  the copy count (must be at least one) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025 @since      AE2020 @alias      repeater copies,重复器份数,copies count",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8865,7 +8869,7 @@
     "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetCopies(v float64) error",
-    "summary": "SetCopies sets the number of copies the Offset Paths filter stacks, each offset by a further Amount pixels — N nested outlines growing outward (or inward for a negative Amount).",
+    "summary": "@summary    Set the number of stacked offset copies @description Each copy is offset by a further Amount pixels — N nested   outlines growing outward (or inward for a negative amount).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8891,7 +8895,7 @@
     "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetCopyOffset(v float64) error",
-    "summary": "SetCopyOffset scales the spacing between successive offset copies (only meaningful when Copies \u003e 1).",
+    "summary": "@summary    Scale the spacing between successive offset copies @description Only meaningful when there is more than one copy.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8916,7 +8920,7 @@
     "kind": "method",
     "recv": "*WiggleTransformNode",
     "signature": "func (n *WiggleTransformNode) SetCorrelation(v float64) error",
-    "summary": "SetCorrelation sets how correlated the random transform jitter is between channels/time (`ADBE Vector Correlation`, 0..100; default 50).",
+    "summary": "@summary    Set how correlated the random transform jitter is @description Range 0 to 100 (default 50); a non-default value materializes the   leaf.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8927,7 +8931,7 @@
         "TestMGWiggleModRT_AEShipGate_AE2020",
         "TestMGWiggleModRT_AEShipGate_AE2025"
       ],
-      "boundary": "时变抖动调制,本质不可单帧像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Correlation 值读回)",
+      "boundary": "a time-varying jitter modulation that cannot be single-frame pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle transform correlation",
@@ -8940,7 +8944,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetCorrelation(v float64) error",
-    "summary": "SetCorrelation sets how correlated successive random displacements are (`ADBE Vector Correlation`, 0..100).",
+    "summary": "@summary    Set how correlated successive random displacements are @description Range 0 to 100: 0 means each point jitters independently   (jagged), 100 means neighbours move together (smooth coherent boil).",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8965,7 +8969,7 @@
     "kind": "method",
     "recv": "*StrokeDashes",
     "signature": "func (d *StrokeDashes) SetDash(v float64) error",
-    "summary": "SetDash sets the dash length and enables dashing.",
+    "summary": "@summary    Set the dash length and enable dashing @param      v  the dash length in pixels (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025 @since      AE2020 @alias      dash length,虚线段长度,dash,dashes",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -8991,7 +8995,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetDetail(v float64) error",
-    "summary": "SetDetail sets the wiggle detail (number of segments per path length — higher = finer, more frequent ridges).",
+    "summary": "@summary    Set the wiggle detail @description Higher detail produces finer, more frequent ridges.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9016,7 +9020,7 @@
     "kind": "method",
     "recv": "*ZigZagNode",
     "signature": "func (n *ZigZagNode) SetDetail(v float64) error",
-    "summary": "SetDetail sets the number of ridges per path segment.",
+    "summary": "@summary    Set the number of ridges per path segment @param      v  the ridge count per segment (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 @since      AE2020 @alias      zigzag detail,锯齿密度,ridges per segment",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9041,7 +9045,7 @@
     "kind": "method",
     "recv": "*EllipseNode",
     "signature": "func (e *EllipseNode) SetDirection(v ShapeDirection) error",
-    "summary": "",
+    "summary": "@summary    Set the ellipse path direction @param      v  the path direction (Normal or Reversed) @domain     shape @stability  stable @verify     ae-accept @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the direction and it survives a re-save @alias      ellipse direction,椭圆方向,path direction,正向反向",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9052,7 +9056,7 @@
         "TestV2_2_ShapeEnums_AEShipGate_AE2020",
         "TestV2_2_ShapeEnums_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-enums;同 RectNode SetDirection cdat 路径,AE 接受+存活)",
+      "boundary": "length-preserving; AE accepts the direction and it survives a re-save",
       "incident": null,
       "alias": [
         "ellipse direction",
@@ -9067,7 +9071,7 @@
     "kind": "method",
     "recv": "*RectNode",
     "signature": "func (r *RectNode) SetDirection(v ShapeDirection) error",
-    "summary": "",
+    "summary": "@summary    Set the rectangle path direction @param      v  the path direction (Normal or Reversed) @domain     shape @stability  stable @verify     ae-accept @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts Reversed and it survives a re-save @alias      rect direction,路径方向,shape direction,正向反向",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9078,7 +9082,7 @@
         "TestV2_2_ShapeEnums_AEShipGate_AE2020",
         "TestV2_2_ShapeEnums_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-enums;resave 后 Go-reparse 验 Direction=3 存活)",
+      "boundary": "length-preserving; AE accepts Reversed and it survives a re-save",
       "incident": null,
       "alias": [
         "rect direction",
@@ -9093,7 +9097,7 @@
     "kind": "method",
     "recv": "*TrimNode",
     "signature": "func (n *TrimNode) SetEnd(v float64) error",
-    "summary": "SetEnd sets the trim end percentage (0..100).",
+    "summary": "@summary    Set the trim end percentage @param      v  the end percentage (zero to one hundred) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 @since      AE2020 @alias      trim end,修剪结束,end percentage,line draw reveal",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9119,7 +9123,7 @@
     "kind": "method",
     "recv": "*StrokeTaper",
     "signature": "func (t *StrokeTaper) SetEndEase(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the taper end ease @param      v  the taper end ease in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      taper end ease,渐细结束缓动,end ease",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9144,7 +9148,7 @@
     "kind": "method",
     "recv": "*StrokeTaper",
     "signature": "func (t *StrokeTaper) SetEndLength(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the taper end length @param      v  the taper end length in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      taper end length,渐细结束长度,end taper length",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9169,7 +9173,7 @@
     "kind": "method",
     "recv": "*RepeaterTransform",
     "signature": "func (t *RepeaterTransform) SetEndOpacity(v float64) error",
-    "summary": "SetEndOpacity sets the last copy's opacity (%, 0..100) — falloff to End.",
+    "summary": "@summary    Set the last copy's opacity @description This is the falloff target across copies.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9194,7 +9198,7 @@
     "kind": "method",
     "recv": "*StrokeTaper",
     "signature": "func (t *StrokeTaper) SetEndWidth(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the taper end width @param      v  the taper end width in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      taper end width,渐细结束宽度,end taper width",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9219,7 +9223,7 @@
     "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetFillRule(v FillRule) error",
-    "summary": "SetFillRule sets the winding rule (NonzeroWinding=1 / EvenOdd=2).",
+    "summary": "@summary    Set the fill winding rule @param      v  the winding rule (Nonzero Winding or Even-Odd) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGOffsetCopies_AEShipGate_AE2020,TestMGOffsetCopies_AEShipGate_AE2025 @since      AE2020 @alias      fill rule,填充规则,winding rule,even-odd,non-zero",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9246,7 +9250,7 @@
     "kind": "method",
     "recv": "*StrokeDashes",
     "signature": "func (d *StrokeDashes) SetGap(v float64) error",
-    "summary": "SetGap sets the gap length and enables dashing.",
+    "summary": "@summary    Set the gap length and enable dashing @param      v  the gap length in pixels (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025 @since      AE2020 @alias      gap length,虚线间距,gap,dashes gap",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9272,7 +9276,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetInnerRadius(v float64) error",
-    "summary": "SetInnerRadius sets the inner radius (px, the valley between points).",
+    "summary": "@summary    Set the star inner radius @description The inner radius is the valley between points.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9297,7 +9301,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetInnerRoundness(v float64) error",
-    "summary": "SetInnerRoundness sets the inner-point roundness (percent).",
+    "summary": "@summary    Set the star inner-point roundness @param      v  the inner-point roundness in percent @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      star inner roundness,星形内圆角,inner roundness",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9308,7 +9312,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=40,match-name AE 拼错 Roundess)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "star inner roundness",
@@ -9322,7 +9326,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetLineCap(v StrokeLineCap) error",
-    "summary": "SetLineCap sets the end-cap style.",
+    "summary": "@summary    Set the stroke end-cap style @param      v  the end-cap style (Butt, Round or Projecting) @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 @since      AE2020 @alias      stroke line cap,描边端点,line cap,butt,round,projecting",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9350,7 +9354,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetLineJoin(v StrokeLineJoin) error",
-    "summary": "SetLineJoin sets the corner-join style.",
+    "summary": "@summary    Set the stroke corner-join style @param      v  the corner-join style (Miter, Round or Bevel) @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 @since      AE2020 @alias      stroke line join,描边接头,line join,miter,round,bevel",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9378,7 +9382,7 @@
     "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetLineJoin(j StrokeLineJoin) error",
-    "summary": "SetLineJoin selects the corner join for the offset outline: Miter (sharp point), Round, or Bevel (flat-cut).",
+    "summary": "@summary    Select the corner join for the offset outline @description Miter is a sharp point, Round, and Bevel is a flat cut.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9405,7 +9409,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetMiterLimit(v float64) error",
-    "summary": "SetMiterLimit sets the miter limit.",
+    "summary": "@summary    Set the stroke miter limit @description AE only applies it when the corner join is Miter, but the value   is stored regardless.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9430,7 +9434,7 @@
     "kind": "method",
     "recv": "*OffsetPathsNode",
     "signature": "func (n *OffsetPathsNode) SetMiterLimit(v float64) error",
-    "summary": "SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would extend past limit×width is clipped flat to a bevel.",
+    "summary": "@summary    Set the offset miter clip ratio @description A sharp corner whose miter would extend past limit times width is   clipped flat to a bevel.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9455,7 +9459,7 @@
     "kind": "method",
     "recv": "*RepeaterNode",
     "signature": "func (n *RepeaterNode) SetOffset(v float64) error",
-    "summary": "SetOffset sets the copy-index offset of the first instance.",
+    "summary": "@summary    Set the copy-index offset of the first instance @param      v  the copy-index offset of the first instance @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      repeater offset,重复器偏移,copy offset",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9466,7 +9470,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=2)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "repeater offset",
@@ -9480,7 +9484,7 @@
     "kind": "method",
     "recv": "*TrimNode",
     "signature": "func (n *TrimNode) SetOffset(v float64) error",
-    "summary": "SetOffset sets the trim offset in degrees.",
+    "summary": "@summary    Set the trim offset in degrees @param      v  the trim offset in degrees @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      trim offset,修剪偏移,trim rotation,degrees",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9491,7 +9495,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Offset=15)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "trim offset",
@@ -9506,7 +9510,7 @@
     "kind": "method",
     "recv": "*FillNode",
     "signature": "func (f *FillNode) SetOpacity(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the fill opacity @param      v  the opacity in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_FillKf_AEShipGate_AE2020,TestV2_2_FillKf_AEShipGate_AE2025 @since      AE2020 @alias      fill opacity,填充不透明度,set opacity",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9531,7 +9535,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetOpacity(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke opacity @param      v  the opacity in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeKf_AEShipGate_AE2020,TestV2_2_StrokeKf_AEShipGate_AE2025 @since      AE2020 @alias      stroke opacity,描边不透明度,set opacity",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9556,7 +9560,7 @@
     "kind": "method",
     "recv": "*RepeaterNode",
     "signature": "func (n *RepeaterNode) SetOrder(o RepeaterOrder) error",
-    "summary": "SetOrder selects whether each copy composites Below (default) or Above the previous.",
+    "summary": "@summary    Select whether copies composite below or above the previous @description The Above value materializes a leaf that AE elides at the default.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9583,7 +9587,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetOuterRadius(v float64) error",
-    "summary": "SetOuterRadius sets the outer radius (px, the star tips).",
+    "summary": "@summary    Set the star outer radius @description The outer radius is the distance to the star tips.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9608,7 +9612,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetOuterRoundness(v float64) error",
-    "summary": "SetOuterRoundness sets the outer-point (tip) roundness (percent).",
+    "summary": "@summary    Set the star outer-point roundness @param      v  the outer-point roundness in percent @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      star outer roundness,星形外圆角,outer roundness",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9619,7 +9623,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=60)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "star outer roundness",
@@ -9633,7 +9637,7 @@
     "kind": "method",
     "recv": "*StrokeWave",
     "signature": "func (w *StrokeWave) SetPhase(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke wave phase @param      v  the wave phase in degrees @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      wave phase,波浪相位,stroke wave phase",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9658,7 +9662,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetPoints(v float64) error",
-    "summary": "SetPoints sets the number of star points.",
+    "summary": "@summary    Set the number of star points @param      v  the point count (must be at least three) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025 @since      AE2020 @alias      star points,星形点数,角数,polystar points",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9684,7 +9688,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetPoints(p RoughenPoints) error",
-    "summary": "SetPoints selects Corner (sharp displaced spikes, the default) or Smooth (rounded scalloped bumps).",
+    "summary": "@summary    Select sharp-corner or smooth-bump roughen ridges @description Corner is sharp displaced spikes (the default); Smooth is rounded   scalloped bumps and materializes a leaf that AE elides at the default.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9710,7 +9714,7 @@
     "kind": "method",
     "recv": "*ZigZagNode",
     "signature": "func (n *ZigZagNode) SetPoints(p ZigZagPoints) error",
-    "summary": "SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth (scalloped wave ridges).",
+    "summary": "@summary    Select sharp-corner or smooth-wave ridges @description Corner is sharp sawtooth ridges (the default); Smooth is   scalloped wave ridges and materializes a leaf that AE elides at the default.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9736,7 +9740,7 @@
     "kind": "method",
     "recv": "*RectNode",
     "signature": "func (r *RectNode) SetPosition(v [2]float64) error",
-    "summary": "",
+    "summary": "@summary    Set the rectangle position @param      v  the local position offset in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      rect position,矩形位置,set position",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9747,7 +9751,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "rect position",
@@ -9761,7 +9765,7 @@
     "kind": "method",
     "recv": "*RepeaterTransform",
     "signature": "func (t *RepeaterTransform) SetPosition(v [2]float64) error",
-    "summary": "SetPosition sets the per-copy position offset (px) — the spacing between copies.",
+    "summary": "@summary    Set the per-copy position offset @description This is the spacing between copies — the grid and line knob.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9787,7 +9791,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetPosition(v [2]float64) error",
-    "summary": "SetPosition sets the star's local position offset (px).",
+    "summary": "@summary    Set the star local position offset @param      v  the local position offset in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      star position,星形位置,polystar position",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9798,7 +9802,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[200,150])",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "star position",
@@ -9812,7 +9816,7 @@
     "kind": "method",
     "recv": "*WigglerTransform",
     "signature": "func (t *WigglerTransform) SetPosition(v [2]float64) error",
-    "summary": "SetPosition sets the position wiggle amplitude (pixels).",
+    "summary": "@summary    Set the position wiggle amplitude @param      v  the position wiggle amplitude in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 @since      AE2020 @alias      wiggler position amplitude,抖动位置幅度,position wiggle",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9837,7 +9841,7 @@
     "kind": "method",
     "recv": "*EllipseNode",
     "signature": "func (e *EllipseNode) SetPosition(v [2]float64) error",
-    "summary": "",
+    "summary": "@summary    Set the ellipse position @param      v  the local position offset in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @alias      ellipse position,椭圆位置,set position",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9862,7 +9866,7 @@
     "kind": "method",
     "recv": "*RoundCornersNode",
     "signature": "func (n *RoundCornersNode) SetRadius(v float64) error",
-    "summary": "SetRadius sets the corner radius in pixels.",
+    "summary": "@summary    Set the corner radius @param      v  the corner radius in pixels (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025 @since      AE2020 @alias      round corners radius,圆角半径,corner radius",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9887,7 +9891,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetRandomSeed(v float64) error",
-    "summary": "SetRandomSeed sets the random seed selecting the displacement pattern.",
+    "summary": "@summary    Set the wiggle random seed @description The seed selects which displacement pattern is generated.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9898,7 +9902,7 @@
         "TestMGWiggle_AEShipGate_AE2020",
         "TestMGWiggle_AEShipGate_AE2025"
       ],
-      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Random Seed 值读回)",
+      "boundary": "a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle random seed",
@@ -9912,7 +9916,7 @@
     "kind": "method",
     "recv": "*WiggleTransformNode",
     "signature": "func (n *WiggleTransformNode) SetRandomSeed(v float64) error",
-    "summary": "SetRandomSeed sets the random seed selecting the wiggle pattern.",
+    "summary": "@summary    Set the wiggle-transform random seed @description The seed selects which wiggle pattern is generated.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9923,7 +9927,7 @@
         "TestMGWiggleTransform_AEShipGate_AE2020",
         "TestMGWiggleTransform_AEShipGate_AE2025"
       ],
-      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Random Seed 值读回)",
+      "boundary": "a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle transform random seed",
@@ -9937,7 +9941,7 @@
     "kind": "method",
     "recv": "*RepeaterTransform",
     "signature": "func (t *RepeaterTransform) SetRotation(v float64) error",
-    "summary": "SetRotation sets the per-copy rotation (degrees) — the radial-burst knob.",
+    "summary": "@summary    Set the per-copy rotation @description This is the radial-burst knob.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9948,7 +9952,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=30)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "repeater rotation",
@@ -9963,7 +9967,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetRotation(v float64) error",
-    "summary": "SetRotation sets the star's rotation in degrees.",
+    "summary": "@summary    Set the star rotation in degrees @param      v  the rotation angle in degrees @domain     shape @stability  stable @verify     render-pixel @gate       TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025 @since      AE2020 @alias      star rotation,星形旋转,polystar rotation,旋转角度",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -9989,7 +9993,7 @@
     "kind": "method",
     "recv": "*WigglerTransform",
     "signature": "func (t *WigglerTransform) SetRotation(v float64) error",
-    "summary": "SetRotation sets the rotation wiggle amplitude (degrees).",
+    "summary": "@summary    Set the rotation wiggle amplitude @param      v  the rotation wiggle amplitude in degrees @domain     shape @stability  stable @verify     render-pixel @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 @since      AE2020 @alias      wiggler rotation amplitude,抖动旋转幅度,rotation wiggle",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10014,7 +10018,7 @@
     "kind": "method",
     "recv": "*RectNode",
     "signature": "func (r *RectNode) SetRoundness(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the rectangle corner roundness @param      v  the corner radius in pixels @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      rect roundness,矩形圆角,set roundness",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10025,7 +10029,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "rect roundness",
@@ -10039,7 +10043,7 @@
     "kind": "method",
     "recv": "*WigglerTransform",
     "signature": "func (t *WigglerTransform) SetScale(v [2]float64) error",
-    "summary": "SetScale sets the scale wiggle amplitude (percent).",
+    "summary": "@summary    Set the scale wiggle amplitude @param      v  the scale wiggle amplitude in percent @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      wiggler scale amplitude,抖动缩放幅度,scale wiggle",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10050,7 +10054,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;match-name `ADBE Vector Wiggler Scale`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "wiggler scale amplitude",
@@ -10064,7 +10068,7 @@
     "kind": "method",
     "recv": "*RepeaterTransform",
     "signature": "func (t *RepeaterTransform) SetScale(v [2]float64) error",
-    "summary": "SetScale sets the per-copy scale (%).",
+    "summary": "@summary    Set the per-copy scale @description The scale is cumulative: copy k is scaled k times.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10089,7 +10093,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetSize(v float64) error",
-    "summary": "SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening).",
+    "summary": "@summary    Set the wiggle displacement amplitude @param      v  the displacement amplitude in pixels (0 = no roughening) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 @since      AE2020 @alias      wiggle size,路径抖动幅度,displacement amplitude",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10114,7 +10118,7 @@
     "kind": "method",
     "recv": "*ZigZagNode",
     "signature": "func (n *ZigZagNode) SetSize(v float64) error",
-    "summary": "SetSize sets the zigzag amplitude in pixels.",
+    "summary": "@summary    Set the zigzag amplitude @param      v  the zigzag amplitude in pixels (must be non-negative) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 @since      AE2020 @alias      zigzag size,锯齿幅度,amplitude",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10139,7 +10143,7 @@
     "kind": "method",
     "recv": "*RectNode",
     "signature": "func (r *RectNode) SetSize(v [2]float64) error",
-    "summary": "",
+    "summary": "@summary    Set the rectangle size @param      v  the width and height in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 @since      AE2020 @alias      rect size,矩形尺寸,set size,宽高",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10165,7 +10169,7 @@
     "kind": "method",
     "recv": "*EllipseNode",
     "signature": "func (e *EllipseNode) SetSize(v [2]float64) error",
-    "summary": "",
+    "summary": "@summary    Set the ellipse size @param      v  the width and height in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 @since      AE2020 @alias      ellipse size,椭圆尺寸,set size,宽高",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10191,7 +10195,7 @@
     "kind": "method",
     "recv": "*WiggleTransformNode",
     "signature": "func (n *WiggleTransformNode) SetSpatialPhase(v float64) error",
-    "summary": "SetSpatialPhase sets the spatial phase (degrees) into the transform-wiggle noise field; default 0, non-default materializes the `ADBE Vector Spatial Phase` leaf on lower.",
+    "summary": "@summary    Set the transform-wiggle spatial phase @description This selects a different spatial offset of the seeded random   pattern.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10202,7 +10206,7 @@
         "TestMGWiggleModRT_AEShipGate_AE2020",
         "TestMGWiggleModRT_AEShipGate_AE2025"
       ],
-      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)",
+      "boundary": "a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle transform spatial phase",
@@ -10215,7 +10219,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetSpatialPhase(v float64) error",
-    "summary": "SetSpatialPhase sets the spatial phase (degrees) into the noise field — selecting a different spatial offset of the same seeded random pattern.",
+    "summary": "@summary    Set the spatial phase into the noise field @description This selects a different spatial offset of the same seeded random   pattern.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10226,7 +10230,7 @@
         "TestMGWiggleModRT_AEShipGate_AE2020",
         "TestMGWiggleModRT_AEShipGate_AE2025"
       ],
-      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)",
+      "boundary": "a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle spatial phase",
@@ -10240,7 +10244,7 @@
     "kind": "method",
     "recv": "*StarNode",
     "signature": "func (n *StarNode) SetStarType(t StarType) error",
-    "summary": "SetStarType selects Star (alternating points) or Polygon (convex N-gon).",
+    "summary": "@summary    Select the polystar shape (Star or Polygon) @description For a Polygon the Inner Radius and Inner Roundness are ignored.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10267,7 +10271,7 @@
     "kind": "method",
     "recv": "*TrimNode",
     "signature": "func (n *TrimNode) SetStart(v float64) error",
-    "summary": "SetStart sets the trim start percentage (0..100).",
+    "summary": "@summary    Set the trim start percentage @param      v  the start percentage (zero to one hundred) @domain     shape @stability  stable @verify     ae-accept @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 @since      AE2020 @boundary   length-preserving; AE accepts the value and it survives a re-save @alias      trim start,修剪起始,start percentage",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10278,7 +10282,7 @@
         "TestShapeGeom_AEShipGate_AE2020",
         "TestShapeGeom_AEShipGate_AE2025"
       ],
-      "boundary": "length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Start=20)",
+      "boundary": "length-preserving; AE accepts the value and it survives a re-save",
       "incident": null,
       "alias": [
         "trim start",
@@ -10292,7 +10296,7 @@
     "kind": "method",
     "recv": "*StrokeTaper",
     "signature": "func (t *StrokeTaper) SetStartEase(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the taper start ease @param      v  the taper start ease in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      taper start ease,渐细起始缓动,start ease",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10317,7 +10321,7 @@
     "kind": "method",
     "recv": "*StrokeTaper",
     "signature": "func (t *StrokeTaper) SetStartLength(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the taper start length @param      v  the taper start length in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      taper start length,渐细起始长度,start taper length",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10342,7 +10346,7 @@
     "kind": "method",
     "recv": "*RepeaterTransform",
     "signature": "func (t *RepeaterTransform) SetStartOpacity(v float64) error",
-    "summary": "SetStartOpacity sets the first copy's opacity (%, 0..100).",
+    "summary": "@summary    Set the first copy's opacity @param      v  the start opacity in percent (zero to one hundred) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025 @since      AE2020 @alias      repeater start opacity,重复器起始不透明度,start opacity falloff",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10367,7 +10371,7 @@
     "kind": "method",
     "recv": "*StrokeTaper",
     "signature": "func (t *StrokeTaper) SetStartWidth(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the taper start width @param      v  the taper start width in percent @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      taper start width,渐细起始宽度,start taper width",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10392,7 +10396,7 @@
     "kind": "method",
     "recv": "*WiggleTransformNode",
     "signature": "func (n *WiggleTransformNode) SetTemporalPhase(v float64) error",
-    "summary": "SetTemporalPhase sets the temporal phase (degrees) into the transform-wiggle noise sequence; default 0, non-default materializes the `ADBE Vector Temporal Phase` leaf on lower.",
+    "summary": "@summary    Set the transform-wiggle temporal phase @description This selects a different time-slice of the seeded random pattern.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10403,7 +10407,7 @@
         "TestMGWiggleModRT_AEShipGate_AE2020",
         "TestMGWiggleModRT_AEShipGate_AE2025"
       ],
-      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)",
+      "boundary": "a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle transform temporal phase",
@@ -10416,7 +10420,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetTemporalPhase(v float64) error",
-    "summary": "SetTemporalPhase sets the temporal phase (degrees) into the noise sequence — selecting a different time-slice of the same seeded random pattern.",
+    "summary": "@summary    Set the temporal phase into the noise sequence @description This selects a different time-slice of the same seeded random   pattern.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10427,7 +10431,7 @@
         "TestMGWiggleModRT_AEShipGate_AE2020",
         "TestMGWiggleModRT_AEShipGate_AE2025"
       ],
-      "boundary": "噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)",
+      "boundary": "a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle temporal phase",
@@ -10441,7 +10445,7 @@
     "kind": "method",
     "recv": "*MergePathsNode",
     "signature": "func (n *MergePathsNode) SetType(v MergeType) error",
-    "summary": "SetType sets the boolean merge mode.",
+    "summary": "@summary    Set the boolean merge mode @param      v  the merge mode index (one through five) @domain     shape @stability  stable @verify     render-pixel @gate       TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025 @since      AE2020 @alias      merge type,合并模式,boolean mode,merge,subtract,intersect,exclude",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10470,7 +10474,7 @@
     "kind": "method",
     "recv": "*TrimNode",
     "signature": "func (n *TrimNode) SetType(t TrimType) error",
-    "summary": "SetType selects Simultaneously (all paths as one combined length, the default) or Individually (each path trimmed to the same Start/End%).",
+    "summary": "@summary    Select how the trim treats multiple paths @description Simultaneously trims all paths as one combined length (the   default); Individually trims each path to the same start and end percent.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10498,7 +10502,7 @@
     "kind": "method",
     "recv": "*PathNode",
     "signature": "func (p *PathNode) SetVertices(verts [][2]float64) error",
-    "summary": "SetVertices replaces the path's vertex list with linear segments (tangents zeroed).",
+    "summary": "@summary    Replace the path vertices with linear segments @description Tangents are zeroed and the current Closed flag is preserved.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10524,7 +10528,7 @@
     "kind": "method",
     "recv": "*StrokeWave",
     "signature": "func (w *StrokeWave) SetWavelength(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke wavelength @param      v  the wavelength in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 @since      AE2020 @alias      wave wavelength,波浪波长,stroke wavelength",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10549,7 +10553,7 @@
     "kind": "method",
     "recv": "*StrokeNode",
     "signature": "func (s *StrokeNode) SetWidth(v float64) error",
-    "summary": "",
+    "summary": "@summary    Set the stroke width @param      v  the stroke width in pixels @domain     shape @stability  stable @verify     render-pixel @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 @since      AE2020 @alias      stroke width,描边宽度,set width",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10574,7 +10578,7 @@
     "kind": "method",
     "recv": "*WiggleTransformNode",
     "signature": "func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error",
-    "summary": "SetWigglesPerSecond sets the temporal frequency (how fast the transform churns).",
+    "summary": "@summary    Set the wiggle-transform temporal frequency @description This is how fast the transform churns over time.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10585,7 +10589,7 @@
         "TestMGWiggleTransform_AEShipGate_AE2020",
         "TestMGWiggleTransform_AEShipGate_AE2025"
       ],
-      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Temporal Freq 值读回)",
+      "boundary": "a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle transform frequency",
@@ -10599,7 +10603,7 @@
     "kind": "method",
     "recv": "*WigglePathsNode",
     "signature": "func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error",
-    "summary": "SetWigglesPerSecond sets the temporal frequency (`ADBE Vector Temporal Freq`, the Wiggles/Second control — how fast the random edge churns over time).",
+    "summary": "@summary    Set the wiggle temporal frequency @description This is how fast the random edge churns over time.",
     "has_cap": true,
     "cap": {
       "domain": "shape",
@@ -10610,7 +10614,7 @@
         "TestMGWiggle_AEShipGate_AE2020",
         "TestMGWiggle_AEShipGate_AE2025"
       ],
-      "boundary": "调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Temporal Freq 值读回)",
+      "boundary": "a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value",
       "incident": null,
       "alias": [
         "wiggle frequency",

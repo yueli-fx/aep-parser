@@ -9,8 +9,8 @@ import (
 
 // ShapeNodeKind identifies a shape-graph node's runtime kind. AE match-name
 // strings (`ADBE Vector Shape - Rect` etc.) are intentionally NOT exposed
-// here — they belong to the serializer. Lowering maps Kind → match
-// name via the `shapeMatchNames` table in `lower_shape_node.go`.
+// here — they belong to the serializer, which maps Kind → match name during
+// lowering.
 type ShapeNodeKind int
 
 const (
@@ -19,7 +19,7 @@ const (
 	ShapeKindPath                                 // `ADBE Vector Shape - Group`
 	ShapeKindFill                                 // `ADBE Vector Graphic - Fill`
 	ShapeKindStroke                               // `ADBE Vector Graphic - Stroke`
-	ShapeKindGroup                                // `ADBE Vector Group` (V2.3+ user-created nested group)
+	ShapeKindGroup                                // `ADBE Vector Group` (user-created nested group)
 	ShapeKindGradientFill                         // `ADBE Vector Graphic - G-Fill`
 	ShapeKindGradientStroke                       // `ADBE Vector Graphic - G-Stroke`
 	ShapeKindTrim                                 // `ADBE Vector Filter - Trim`
@@ -33,26 +33,23 @@ const (
 	ShapeKindTwist                                // `ADBE Vector Filter - Twist`
 	ShapeKindWigglePaths                          // `ADBE Vector Filter - Roughen`
 	ShapeKindWiggleTransform                      // `ADBE Vector Filter - Wiggler`
-	// V2.3+ candidates: Transform / nested user groups.
 )
 
 // ShapeNode is the runtime-facing shape-graph node interface. All concrete
 // node types (RectNode / EllipseNode / PathNode / FillNode / StrokeNode and
-// the V2.3+ container VectorGroup) satisfy it.
+// the container VectorGroup) satisfy it.
 type ShapeNode interface {
 	Kind() ShapeNodeKind
-	Properties() *PropertyGroup // escape hatch β; currently returns nil
+	Properties() *PropertyGroup // escape hatch; currently returns nil
 }
 
 // VectorGroup is the shape-graph container node. Every ShapeLayer carries
-// one default RootGroup (constructed by WrapShapeLayer). Children render in
-// order: Children[0] = bottom; Children[len-1] = top / most recently
-// appended (render-order convention).
+// one default RootGroup. Children render in order: Children[0] = bottom;
+// Children[len-1] = top / most recently appended.
 //
-// `Transform` is the group-level Transform PropertyGroup placeholder. V2.2
-// default-serialized form has no `ADBE Vector Transform Group`; the
-// field exists for the escape-hatch / hydration path on user-created nested
-// Vector Groups (V2.3+).
+// Transform is the group-level Transform PropertyGroup placeholder. A
+// default-serialized group has no `ADBE Vector Transform Group`; the field
+// exists for the escape-hatch / hydration path on user-created nested groups.
 type VectorGroup struct {
 	Children  []ShapeNode
 	Transform *PropertyGroup
@@ -63,81 +60,118 @@ func NewVectorGroup() *VectorGroup {
 	return &VectorGroup{Transform: newGroupTransform()}
 }
 
-// AddRect appends a default-valued RectNode and returns it. The new node is
-// placed at the top of the render stack (Children[len-1]).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 alias="add rect,矩形,新增矩形节点"
+// @summary    Append a rectangle node to a vector group
+// @description The new node is placed at the top of the render stack
+//   (Children[len-1]). Call its setters to give it geometry.
+// @returns    the created rectangle node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add rect,矩形,新增矩形节点
 func (g *VectorGroup) AddRect() (*RectNode, error) {
 	r := NewRectNode()
 	g.Children = append(g.Children, r)
 	return r, nil
 }
 
-// AddEllipse appends a default-valued EllipseNode and returns it.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="add ellipse,椭圆,新增椭圆节点"
+// @summary    Append an ellipse node to a vector group
+// @returns    the created ellipse node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add ellipse,椭圆,新增椭圆节点
 func (g *VectorGroup) AddEllipse() (*EllipseNode, error) {
 	e := NewEllipseNode()
 	g.Children = append(g.Children, e)
 	return e, nil
 }
 
-// AddPath appends an empty (closed) PathNode and returns it. Caller must
-// call SetVertices to give it geometry (min 2 vertices).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPentagonPath_AEShipGate_AE2020,TestMGPentagonPath_AEShipGate_AE2025 alias="add path,路径,新增路径节点,bezier"
+// @summary    Append an empty closed path node to a vector group
+// @description Caller must set vertices to give it geometry (minimum two
+//   vertices).
+// @returns    the created path node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPentagonPath_AEShipGate_AE2020,TestMGPentagonPath_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add path,路径,新增路径节点,bezier
 func (g *VectorGroup) AddPath() (*PathNode, error) {
 	p := NewPathNode()
 	g.Children = append(g.Children, p)
 	return p, nil
 }
 
-// AddStar appends a default-valued StarNode (5-point star, OuterRadius=100,
-// InnerRadius=50) and returns it — the canonical star / sparkle / badge MG
-// primitive. V2.2 models the Star type only (not Polygon).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025 alias="add star,星形,多边形,新增星形节点,polystar"
+// @summary    Append a star node to a vector group
+// @description Defaults to a 5-point star (outer radius 100, inner radius 50).
+//   The Star type is modeled; Polygon is selected via the type setter.
+// @returns    the created star node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add star,星形,多边形,新增星形节点,polystar
 func (g *VectorGroup) AddStar() (*StarNode, error) {
 	n := NewStarNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddFill appends a default-valued FillNode (white, 100% opacity) and
-// returns it.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="add fill,填充,新增填充节点,solid fill"
+// @summary    Append a fill node to a vector group
+// @description Defaults to white at 100% opacity.
+// @returns    the created fill node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add fill,填充,新增填充节点,solid fill
 func (g *VectorGroup) AddFill() (*FillNode, error) {
 	f := NewFillNode()
 	g.Children = append(g.Children, f)
 	return f, nil
 }
 
-// AddStroke appends a default-valued StrokeNode (black, width=2, 100%
-// opacity) and returns it.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="add stroke,描边,新增描边节点,outline"
+// @summary    Append a stroke node to a vector group
+// @description Defaults to black, width 2, 100% opacity.
+// @returns    the created stroke node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add stroke,描边,新增描边节点,outline
 func (g *VectorGroup) AddStroke() (*StrokeNode, error) {
 	s := NewStrokeNode()
 	g.Children = append(g.Children, s)
 	return s, nil
 }
 
-// AddGradientFill appends a default-valued GradientFillNode (2-stop black→white
-// linear gradient, fully opaque) and returns it. Set the stops via
-// SetColorStops / SetAlphaStops.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025 alias="add gradient fill,渐变填充,新增渐变填充节点"
+// @summary    Append a gradient fill node to a vector group
+// @description Defaults to a 2-stop black-to-white linear gradient, fully
+//   opaque. Set the stops via the color and alpha stop setters.
+// @returns    the created gradient fill node
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add gradient fill,渐变填充,新增渐变填充节点
 func (g *VectorGroup) AddGradientFill() (*GradientFillNode, error) {
 	n := NewGradientFillNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// BezierPath is the runtime geometry object — NOT a serializer encoding
-// mirror. `Vertices` are the path control points; `InTangents` /
-// `OutTangents` are the per-vertex bezier tangent offsets (zero = linear
-// segment); `Closed` distinguishes closed shapes from open polylines.
+// BezierPath is the runtime geometry object. Vertices are the path control
+// points; InTangents / OutTangents are the per-vertex bezier tangent offsets
+// (zero = linear segment); Closed distinguishes closed shapes from open
+// polylines.
 type BezierPath struct {
 	Vertices    [][2]float64
 	InTangents  [][2]float64
@@ -145,8 +179,6 @@ type BezierPath struct {
 	Closed      bool
 }
 
-// RectNode — `ADBE Vector Shape - Rect`. Default Size=[100,100],
-// Position=[0,0], Roundness=0 (AE elides all three at default).
 // ShapeDirection is the parametric-shape path direction (`ADBE Vector Shape
 // Direction`), shared by Rect/Ellipse. Stored as a float64 enum index.
 type ShapeDirection int
@@ -180,6 +212,8 @@ const (
 	FillRuleEvenOdd        FillRule = 2
 )
 
+// RectNode is a `ADBE Vector Shape - Rect`. Default Size=[100,100],
+// Position=[0,0], Roundness=0 (AE elides all three at default).
 type RectNode struct {
 	size      *codec.PropertyStream[[2]float64]
 	position  *codec.PropertyStream[[2]float64]
@@ -207,22 +241,52 @@ func (r *RectNode) Position() *PropertyStream[[2]float64] { return r.position }
 func (r *RectNode) Roundness() *PropertyStream[float64]   { return r.roundness }
 func (r *RectNode) Direction() ShapeDirection             { return r.direction }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 alias="rect size,矩形尺寸,set size,宽高"
+// @summary    Set the rectangle size
+// @param      v  the width and height in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025
+// @since      AE2020
+// @alias      rect size,矩形尺寸,set size,宽高
 func (r *RectNode) SetSize(v [2]float64) error { return r.size.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])" alias="rect position,矩形位置,set position"
+// @summary    Set the rectangle position
+// @param      v  the local position offset in pixels
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      rect position,矩形位置,set position
 func (r *RectNode) SetPosition(v [2]float64) error { return r.position.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=25)" alias="rect roundness,矩形圆角,set roundness"
+// @summary    Set the rectangle corner roundness
+// @param      v  the corner radius in pixels
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      rect roundness,矩形圆角,set roundness
 func (r *RectNode) SetRoundness(v float64) error { return r.roundness.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-enums;resave 后 Go-reparse 验 Direction=3 存活)" alias="rect direction,路径方向,shape direction,正向反向"
+// @summary    Set the rectangle path direction
+// @param      v  the path direction (Normal or Reversed)
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts Reversed and it survives a re-save
+// @alias      rect direction,路径方向,shape direction,正向反向
 func (r *RectNode) SetDirection(v ShapeDirection) error { return setShapeDirection(&r.direction, v) }
 
-// Properties returns the escape-hatch β view onto this RectNode's streams.
-// Streams returned via PropertyGroup.Vec2Stream / Float64Stream
-// are the same instances as the typed accessors (r.Size() etc.) — mutating
-// one reflects through the other.
+// Properties returns the escape-hatch view onto this RectNode's streams.
+// Streams returned via PropertyGroup accessors are the same instances as the
+// typed accessors — mutating one reflects through the other.
 func (r *RectNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Rect",
@@ -234,9 +298,9 @@ func (r *RectNode) Properties() *PropertyGroup {
 	}
 }
 
-// EllipseNode — `ADBE Vector Shape - Ellipse`. Default Size=[100,100],
-// Position=[0,0]. AE child[1] = `ADBE Vector Shape Direction` —
-// runtime-default CCW; not exposed as a typed setter in V2.2.
+// EllipseNode is a `ADBE Vector Shape - Ellipse`. Default Size=[100,100],
+// Position=[0,0]. AE child[1] is `ADBE Vector Shape Direction`, runtime-default
+// Normal.
 type EllipseNode struct {
 	size, position *codec.PropertyStream[[2]float64]
 	direction      ShapeDirection
@@ -259,13 +323,35 @@ func (e *EllipseNode) Size() *PropertyStream[[2]float64]     { return e.size }
 func (e *EllipseNode) Position() *PropertyStream[[2]float64] { return e.position }
 func (e *EllipseNode) Direction() ShapeDirection             { return e.direction }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="ellipse size,椭圆尺寸,set size,宽高"
+// @summary    Set the ellipse size
+// @param      v  the width and height in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @alias      ellipse size,椭圆尺寸,set size,宽高
 func (e *EllipseNode) SetSize(v [2]float64) error { return e.size.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="ellipse position,椭圆位置,set position"
+// @summary    Set the ellipse position
+// @param      v  the local position offset in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @alias      ellipse position,椭圆位置,set position
 func (e *EllipseNode) SetPosition(v [2]float64) error { return e.position.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-enums;同 RectNode SetDirection cdat 路径,AE 接受+存活)" alias="ellipse direction,椭圆方向,path direction,正向反向"
+// @summary    Set the ellipse path direction
+// @param      v  the path direction (Normal or Reversed)
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the direction and it survives a re-save
+// @alias      ellipse direction,椭圆方向,path direction,正向反向
 func (e *EllipseNode) SetDirection(v ShapeDirection) error { return setShapeDirection(&e.direction, v) }
 
 // setShapeDirection validates and assigns a ShapeDirection (Normal=1 or
@@ -278,7 +364,7 @@ func setShapeDirection(dst *ShapeDirection, v ShapeDirection) error {
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (e *EllipseNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Ellipse",
@@ -301,9 +387,9 @@ const (
 	StarTypePolygon StarType = 2
 )
 
-// StarNode — `ADBE Vector Shape - Star`. A parametric polystar: a Star
-// (alternating outer/inner points) or a Polygon (convex N-gon) per StarType.
-// Defaults match AE: Type=Star, Points=5, Position=[0,0], Rotation=0,
+// StarNode is a `ADBE Vector Shape - Star`: a parametric polystar, either a
+// Star (alternating outer/inner points) or a Polygon (convex N-gon) per
+// StarType. Defaults match AE: Type=Star, Points=5, Position=[0,0], Rotation=0,
 // InnerRadius=50, OuterRadius=100, Inner/OuterRoundness=0. For a Polygon the
 // Inner Radius / Inner Roundness sub-streams have no visual effect (AE hides
 // them), but Points / Position / Rotation / Outer Radius / Outer Roundness apply.
@@ -349,10 +435,15 @@ func (n *StarNode) StarType() StarType { return n.starType }
 // IsPolygon reports whether this polystar is a Polygon (vs a Star).
 func (n *StarNode) IsPolygon() bool { return n.starType == StarTypePolygon }
 
-// SetStarType selects Star (alternating points) or Polygon (convex N-gon). For a
-// Polygon the Inner Radius/Roundness are ignored.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025 alias="star type,星形类型,polygon,多边形,polystar type"
+// @summary    Select the polystar shape (Star or Polygon)
+// @description For a Polygon the Inner Radius and Inner Roundness are ignored.
+// @param      t  the polystar shape (Star or Polygon)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025
+// @since      AE2020
+// @alias      star type,星形类型,polygon,多边形,polystar type
 func (n *StarNode) SetStarType(t StarType) error {
 	if t != StarTypeStar && t != StarTypePolygon {
 		return fmt.Errorf("StarNode.SetStarType: %d out of range (1=star, 2=polygon)", t)
@@ -370,9 +461,14 @@ func (n *StarNode) OuterRadius() *PropertyStream[float64]    { return n.outerRad
 func (n *StarNode) InnerRoundness() *PropertyStream[float64] { return n.innerRoundness }
 func (n *StarNode) OuterRoundness() *PropertyStream[float64] { return n.outerRoundness }
 
-// SetPoints sets the number of star points. Rejects values < 3.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025 alias="star points,星形点数,角数,polystar points"
+// @summary    Set the number of star points
+// @param      v  the point count (must be at least three)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025
+// @since      AE2020
+// @alias      star points,星形点数,角数,polystar points
 func (n *StarNode) SetPoints(v float64) error {
 	if v < 3 {
 		return fmt.Errorf("StarNode.SetPoints: %g out of range (want >= 3)", v)
@@ -380,19 +476,36 @@ func (n *StarNode) SetPoints(v float64) error {
 	return n.points.SetStaticValue(v)
 }
 
-// SetPosition sets the star's local position offset (px).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 2D 值验=[200,150])" alias="star position,星形位置,polystar position"
+// @summary    Set the star local position offset
+// @param      v  the local position offset in pixels
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      star position,星形位置,polystar position
 func (n *StarNode) SetPosition(v [2]float64) error { return n.position.SetStaticValue(v) }
 
-// SetRotation sets the star's rotation in degrees.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025 alias="star rotation,星形旋转,polystar rotation,旋转角度"
+// @summary    Set the star rotation in degrees
+// @param      v  the rotation angle in degrees
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025
+// @since      AE2020
+// @alias      star rotation,星形旋转,polystar rotation,旋转角度
 func (n *StarNode) SetRotation(v float64) error { return n.rotation.SetStaticValue(v) }
 
-// SetInnerRadius sets the inner radius (px, the valley between points). Rejects negatives.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025 alias="star inner radius,星形内半径,inner radius"
+// @summary    Set the star inner radius
+// @description The inner radius is the valley between points.
+// @param      v  the inner radius in pixels (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025
+// @since      AE2020
+// @alias      star inner radius,星形内半径,inner radius
 func (n *StarNode) SetInnerRadius(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("StarNode.SetInnerRadius: %g out of range (want >= 0)", v)
@@ -400,9 +513,15 @@ func (n *StarNode) SetInnerRadius(v float64) error {
 	return n.innerRadius.SetStaticValue(v)
 }
 
-// SetOuterRadius sets the outer radius (px, the star tips). Rejects negatives.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025 alias="star outer radius,星形外半径,outer radius"
+// @summary    Set the star outer radius
+// @description The outer radius is the distance to the star tips.
+// @param      v  the outer radius in pixels (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025
+// @since      AE2020
+// @alias      star outer radius,星形外半径,outer radius
 func (n *StarNode) SetOuterRadius(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("StarNode.SetOuterRadius: %g out of range (want >= 0)", v)
@@ -410,17 +529,29 @@ func (n *StarNode) SetOuterRadius(v float64) error {
 	return n.outerRadius.SetStaticValue(v)
 }
 
-// SetInnerRoundness sets the inner-point roundness (percent).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=40,match-name AE 拼错 Roundess)" alias="star inner roundness,星形内圆角,inner roundness"
+// @summary    Set the star inner-point roundness
+// @param      v  the inner-point roundness in percent
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      star inner roundness,星形内圆角,inner roundness
 func (n *StarNode) SetInnerRoundness(v float64) error { return n.innerRoundness.SetStaticValue(v) }
 
-// SetOuterRoundness sets the outer-point (tip) roundness (percent).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=60)" alias="star outer roundness,星形外圆角,outer roundness"
+// @summary    Set the star outer-point roundness
+// @param      v  the outer-point roundness in percent
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      star outer roundness,星形外圆角,outer roundness
 func (n *StarNode) SetOuterRoundness(v float64) error { return n.outerRoundness.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *StarNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Star",
@@ -436,10 +567,9 @@ func (n *StarNode) Properties() *PropertyGroup {
 	}
 }
 
-// PathNode — `ADBE Vector Shape - Group`. Default = empty Vertices,
-// Closed=true. V2.2 SetVertices builds linear segments (tangents=0); min
-// 2 vertices is enforced runtime-side (conservative invariant — AE itself
-// was not directly probed for 0/1-vertex rejection).
+// PathNode is a `ADBE Vector Shape - Group`. Default = empty Vertices,
+// Closed=true. The vertex setter builds linear segments (tangents=0); a minimum
+// of two vertices is enforced at runtime as a conservative invariant.
 type PathNode struct {
 	path *codec.PropertyStream[BezierPath]
 }
@@ -454,7 +584,7 @@ func NewPathNode() *PathNode {
 func (p *PathNode) Kind() ShapeNodeKind               { return ShapeKindPath }
 func (p *PathNode) Path() *PropertyStream[BezierPath] { return p.path }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (p *PathNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Path",
@@ -464,11 +594,16 @@ func (p *PathNode) Properties() *PropertyGroup {
 	}
 }
 
-// SetVertices replaces the path's vertex list with linear segments
-// (tangents zeroed). Preserves the current `Closed` flag. Requires
-// len(verts) >= 2.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPentagonPath_AEShipGate_AE2020,TestMGPentagonPath_AEShipGate_AE2025 alias="set vertices,顶点,路径顶点,bezier path"
+// @summary    Replace the path vertices with linear segments
+// @description Tangents are zeroed and the current Closed flag is preserved.
+//   Requires at least two vertices.
+// @param      verts  the ordered list of vertices in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPentagonPath_AEShipGate_AE2020,TestMGPentagonPath_AEShipGate_AE2025
+// @since      AE2020
+// @alias      set vertices,顶点,路径顶点,bezier path
 func (p *PathNode) SetVertices(verts [][2]float64) error {
 	if len(verts) < 2 {
 		return fmt.Errorf("PathNode.SetVertices: need >= 2 vertices, got %d", len(verts))
@@ -483,18 +618,24 @@ func (p *PathNode) SetVertices(verts [][2]float64) error {
 	})
 }
 
-// SetClosed toggles the `Closed` flag without disturbing vertices/tangents.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPentagonPath_AEShipGate_AE2020,TestMGPentagonPath_AEShipGate_AE2025 alias="set closed,路径闭合,closed path,开放路径"
+// @summary    Toggle whether the path is closed
+// @description Vertices and tangents are left undisturbed.
+// @param      closed  true to close the path, false to leave it open
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPentagonPath_AEShipGate_AE2020,TestMGPentagonPath_AEShipGate_AE2025
+// @since      AE2020
+// @alias      set closed,路径闭合,closed path,开放路径
 func (p *PathNode) SetClosed(closed bool) error {
 	current, _ := p.path.StaticValue()
 	current.Closed = closed
 	return p.path.SetStaticValue(current)
 }
 
-// FillNode — `ADBE Vector Graphic - Fill`. Default Color=[1,1,1,1] white,
+// FillNode is a `ADBE Vector Graphic - Fill`. Default Color=[1,1,1,1] white,
 // Opacity=100, Blend Mode=Normal, Composite Order=Above Previous, Fill
-// Rule=Nonzero Winding (runtime defaults; AE elides at default).
+// Rule=Nonzero Winding (AE elides at default).
 type FillNode struct {
 	color          *codec.PropertyStream[[4]float64]
 	opacity        *codec.PropertyStream[float64]
@@ -524,23 +665,56 @@ func (f *FillNode) BlendMode() ShapeBlendMode           { return f.blendMode }
 func (f *FillNode) CompositeOrder() ShapeCompositeOrder { return f.compositeOrder }
 func (f *FillNode) FillRule() FillRule                  { return f.fillRule }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="fill color,填充颜色,set color,RGBA"
+// @summary    Set the fill color
+// @param      v  the RGBA color, each channel in zero to one
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @alias      fill color,填充颜色,set color,RGBA
 func (f *FillNode) SetColor(v [4]float64) error { return f.color.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_FillKf_AEShipGate_AE2020,TestV2_2_FillKf_AEShipGate_AE2025 alias="fill opacity,填充不透明度,set opacity"
+// @summary    Set the fill opacity
+// @param      v  the opacity in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_FillKf_AEShipGate_AE2020,TestV2_2_FillKf_AEShipGate_AE2025
+// @since      AE2020
+// @alias      fill opacity,填充不透明度,set opacity
 func (f *FillNode) SetOpacity(v float64) error { return f.opacity.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 alias="fill blend mode,填充混合模式,blend mode"
+// @summary    Set the fill blend mode
+// @param      v  the blend mode as AE's 1-based index
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025
+// @since      AE2020
+// @alias      fill blend mode,填充混合模式,blend mode
 func (f *FillNode) SetBlendMode(v ShapeBlendMode) error { return setShapeBlendMode(&f.blendMode, v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 alias="fill composite order,填充合成顺序,composite order"
+// @summary    Set the fill composite order
+// @param      v  whether the fill composites above or below the previous
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025
+// @since      AE2020
+// @alias      fill composite order,填充合成顺序,composite order
 func (f *FillNode) SetCompositeOrder(v ShapeCompositeOrder) error {
 	return setShapeCompositeOrder(&f.compositeOrder, v)
 }
 
-// SetFillRule sets the winding rule (NonzeroWinding=1 / EvenOdd=2).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffsetCopies_AEShipGate_AE2020,TestMGOffsetCopies_AEShipGate_AE2025 alias="fill rule,填充规则,winding rule,even-odd,non-zero"
+// @summary    Set the fill winding rule
+// @param      v  the winding rule (Nonzero Winding or Even-Odd)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffsetCopies_AEShipGate_AE2020,TestMGOffsetCopies_AEShipGate_AE2025
+// @since      AE2020
+// @alias      fill rule,填充规则,winding rule,even-odd,non-zero
 func (f *FillNode) SetFillRule(v FillRule) error {
 	if v != FillRuleNonzeroWinding && v != FillRuleEvenOdd {
 		return fmt.Errorf("SetFillRule: invalid value %d (want 1=Nonzero or 2=EvenOdd)", v)
@@ -567,7 +741,7 @@ func setShapeCompositeOrder(dst *ShapeCompositeOrder, v ShapeCompositeOrder) err
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (f *FillNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Fill",
@@ -578,22 +752,22 @@ func (f *FillNode) Properties() *PropertyGroup {
 	}
 }
 
-// GradientFillNode — `ADBE Vector Graphic - G-Fill`. Models the gradient's
-// color + alpha stops (`ADBE Vector Grad Colors`) plus the linear ramp direction
-// (`ADBE Vector Grad Start Pt` / `End Pt`). The ramp runs from StartPoint to
-// EndPoint in the shape's local coordinate space (AE default [0,0]→[100,0], a
-// horizontal ramp); set them to a diagonal/vertical pair to rotate the gradient.
+// GradientFillNode is a `ADBE Vector Graphic - G-Fill`. It models the
+// gradient's color and alpha stops (`ADBE Vector Grad Colors`) plus the linear
+// ramp direction (`ADBE Vector Grad Start Pt` / `End Pt`). The ramp runs from
+// StartPoint to EndPoint in the shape's local coordinate space (AE default
+// [0,0]→[100,0], a horizontal ramp); set them to a diagonal/vertical pair to
+// rotate the gradient.
 //
-// `Grad Type` selects linear vs radial (StartPoint = centre, EndPoint = a point
+// Grad Type selects linear vs radial (StartPoint = centre, EndPoint = a point
 // on the radius for radial). For a radial gradient the HiLite controls offset
 // the bright centre (start color) off the geometric centre: HighlightLength is
 // the shift magnitude as a percent of the radius (0 = centred, the default) and
 // HighlightAngle is its direction in degrees. They have no visible effect on a
-// linear gradient. Stops + direction + type + highlight are static (V2.2 does
-// not model animated gradients). The serializer re-encodes the stops to prop.map
-// XML and overwrites the Grad Type / Start Pt / End Pt / HiLite Length / HiLite
-// Angle cdats + GCky/Utf8 chunk (length-variable; rifx recomputes the enclosing
-// LIST sizes).
+// linear gradient. Stops, direction, type and highlight are static (animated
+// gradients are not modeled). The serializer re-encodes the stops to a property
+// map and overwrites the Grad Type / Start Pt / End Pt / HiLite cdats plus the
+// GCky/Utf8 chunk (length-variable; the enclosing LIST sizes are recomputed).
 type GradientFillNode struct {
 	gradient        *codec.Gradient
 	gradientKfs     []GradientKeyframe
@@ -607,7 +781,7 @@ type GradientFillNode struct {
 // GradientKeyframe pairs a time (seconds) with a complete gradient value
 // (color + alpha stops). Animated gradient stops are a list of these — each
 // keyframe carries the full stop set at that time, and AE interpolates the
-// stops between keyframes. See GradientFillNode.AddGradientKeyframe.
+// stops between keyframes.
 type GradientKeyframe struct {
 	Time     float64
 	Gradient *Gradient
@@ -626,10 +800,9 @@ const (
 	GradientRadial GradientType = 2
 )
 
-// NewGradientFillNode constructs a default 2-stop black→white linear gradient
+// NewGradientFillNode constructs a default 2-stop black-to-white linear gradient
 // (fully opaque) with AE's default horizontal ramp ([0,0]→[100,0]). Callers
-// override stops via SetColorStops / SetAlphaStops, direction via
-// SetStartPoint / SetEndPoint, and ramp shape via SetGradientType.
+// override stops, direction and ramp shape via the Set methods.
 func NewGradientFillNode() *GradientFillNode {
 	return &GradientFillNode{
 		gradient:     defaultGradient(),
@@ -645,24 +818,41 @@ func (n *GradientFillNode) StartPoint() [2]float64 { return n.startPoint }
 // EndPoint returns the gradient ramp's end point (shape-local coords).
 func (n *GradientFillNode) EndPoint() [2]float64 { return n.endPoint }
 
-// SetStartPoint sets the gradient ramp's start point (shape-local coords). The
-// ramp direction is EndPoint − StartPoint; defaults to a horizontal [0,0]→[100,0].
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025 alias="gradient start point,渐变起点,gradient direction,渐变方向"
+// @summary    Set the gradient ramp start point
+// @description The ramp direction is EndPoint minus StartPoint; it defaults to a
+//   horizontal [0,0] to [100,0].
+// @param      v  the start point in shape-local coordinates
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient start point,渐变起点,gradient direction,渐变方向
 func (n *GradientFillNode) SetStartPoint(v [2]float64) error { n.startPoint = v; return nil }
 
-// SetEndPoint sets the gradient ramp's end point (shape-local coords).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025 alias="gradient end point,渐变终点,gradient direction,渐变方向"
+// @summary    Set the gradient ramp end point
+// @param      v  the end point in shape-local coordinates
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradientDir_AEShipGate_AE2020,TestMGGradientDir_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient end point,渐变终点,gradient direction,渐变方向
 func (n *GradientFillNode) SetEndPoint(v [2]float64) error { n.endPoint = v; return nil }
 
 // GradientType returns the ramp shape (linear or radial).
 func (n *GradientFillNode) GradientType() GradientType { return n.gradientType }
 
-// SetGradientType selects linear (default) or radial ramp shape. For radial,
-// StartPoint is the centre and EndPoint sets the outer radius.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradientRadial_AEShipGate_AE2020,TestMGGradientRadial_AEShipGate_AE2025 alias="gradient type,渐变类型,linear,radial,线性,径向"
+// @summary    Select the gradient ramp shape (linear or radial)
+// @description For radial, StartPoint is the centre and EndPoint sets the outer
+//   radius.
+// @param      t  the ramp shape (linear or radial)
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradientRadial_AEShipGate_AE2020,TestMGGradientRadial_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient type,渐变类型,linear,radial,线性,径向
 func (n *GradientFillNode) SetGradientType(t GradientType) error {
 	if t != GradientLinear && t != GradientRadial {
 		return fmt.Errorf("gradient type %d out of range (1=linear, 2=radial)", t)
@@ -678,11 +868,17 @@ func (n *GradientFillNode) HighlightLength() float64 { return n.highlightLength 
 // HighlightAngle returns the radial highlight offset direction (degrees).
 func (n *GradientFillNode) HighlightAngle() float64 { return n.highlightAngle }
 
-// SetHighlightLength offsets a radial gradient's bright centre off the geometric
-// centre by the given percent of the radius (-100..100; 0 = centred). No visible
-// effect on a linear gradient. Returns an error if out of range.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradientHilite_AEShipGate_AE2020,TestMGGradientHilite_AEShipGate_AE2025 alias="highlight length,高亮偏移,radial highlight,渐变高亮"
+// @summary    Offset a radial gradient's bright centre
+// @description Shifts the bright centre off the geometric centre by a percent of
+//   the radius (range -100 to 100; 0 = centred). It has no visible effect on a
+//   linear gradient.
+// @param      v  the offset magnitude as a percent of the radius
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradientHilite_AEShipGate_AE2020,TestMGGradientHilite_AEShipGate_AE2025
+// @since      AE2020
+// @alias      highlight length,高亮偏移,radial highlight,渐变高亮
 func (n *GradientFillNode) SetHighlightLength(v float64) error {
 	if v < -100 || v > 100 {
 		return fmt.Errorf("highlight length %g out of range [-100,100]", v)
@@ -691,16 +887,21 @@ func (n *GradientFillNode) SetHighlightLength(v float64) error {
 	return nil
 }
 
-// SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight
-// offset. Only meaningful together with a non-zero HighlightLength.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradientHilite_AEShipGate_AE2020,TestMGGradientHilite_AEShipGate_AE2025 alias="highlight angle,高亮角度,radial highlight angle,渐变高亮角度"
+// @summary    Set a radial gradient's highlight offset direction
+// @description Only meaningful together with a non-zero highlight length.
+// @param      v  the highlight direction in degrees
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradientHilite_AEShipGate_AE2020,TestMGGradientHilite_AEShipGate_AE2025
+// @since      AE2020
+// @alias      highlight angle,高亮角度,radial highlight angle,渐变高亮角度
 func (n *GradientFillNode) SetHighlightAngle(v float64) error {
 	n.highlightAngle = v
 	return nil
 }
 
-// defaultGradient returns a 2-stop black→white gradient with two opaque alpha
+// defaultGradient returns a 2-stop black-to-white gradient with two opaque alpha
 // stops — the values AE shows for a freshly-added gradient fill.
 func defaultGradient() *codec.Gradient {
 	return &codec.Gradient{
@@ -719,39 +920,54 @@ func defaultGradient() *codec.Gradient {
 func (n *GradientFillNode) Kind() ShapeNodeKind { return ShapeKindGradientFill }
 
 // Gradient returns the live gradient (color + alpha stops). Mutating the
-// returned struct's slices directly also works, but prefer SetColorStops /
-// SetAlphaStops for range validation.
+// returned struct's slices directly also works, but prefer the stop setters for
+// range validation.
 func (n *GradientFillNode) Gradient() *Gradient { return n.gradient }
 
-// SetColorStops replaces the gradient's color stops. Requires ≥ 2 stops; each
-// Offset/Midpoint in [0,1] and each Color component in [0,1].
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025 alias="gradient color stops,渐变色标,color stops,渐变颜色"
+// @summary    Replace the gradient color stops
+// @description Requires at least two stops; each offset, midpoint and color
+//   component must lie in zero to one.
+// @param      stops  the ordered list of color stops
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient color stops,渐变色标,color stops,渐变颜色
 func (n *GradientFillNode) SetColorStops(stops []GradientColorStop) error {
 	return setGradientColorStops(n.gradient, stops)
 }
 
-// SetAlphaStops replaces the gradient's alpha (opacity) stops. Requires ≥ 2
-// stops; each Offset/Midpoint/Alpha in [0,1].
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025 alias="gradient alpha stops,渐变透明度色标,alpha stops,渐变不透明度"
+// @summary    Replace the gradient alpha stops
+// @description Requires at least two stops; each offset, midpoint and alpha must
+//   lie in zero to one.
+// @param      stops  the ordered list of alpha stops
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient alpha stops,渐变透明度色标,alpha stops,渐变不透明度
 func (n *GradientFillNode) SetAlphaStops(stops []GradientAlphaStop) error {
 	return setGradientAlphaStops(n.gradient, stops)
 }
 
-// AddGradientKeyframe appends an animated-stops keyframe: the full gradient g
-// (color + alpha stops) takes effect at `time` seconds, and AE interpolates the
-// stops between keyframes (a colour sweep / flow). The first keyframe switches
-// the node to animated mode — the static Gradient() value is then ignored on
-// lower in favour of the keyframe list. Provide keyframes in ascending time.
-// g's stops are validated (≥2 stops; offsets/colours in range).
-//
-// On-disk this writes the `ADBE Vector Grad Colors` stream as a keyframe
-// time-table plus one prop.map-XML leaf per keyframe (see
-// incidents/gradient-fill-write-re.md § animated color stops). Write-only:
-// re-parsing surfaces the first keyframe's stops as the static value.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestGradientAnim_AEShipGate_AE2020,TestGradientAnim_AEShipGate_AE2025 alias="animated gradient,渐变动画,gradient keyframe,渐变关键帧,color sweep"
+// @summary    Append an animated gradient-stops keyframe
+// @description The full gradient takes effect at the given time and AE
+//   interpolates the stops between keyframes. The first keyframe switches the
+//   node to animated mode; the static gradient value is then ignored in favour
+//   of the keyframe list. Provide keyframes in ascending time. The keyframe
+//   stops are validated. This is a write-only path: re-parsing surfaces the
+//   first keyframe's stops as the static value.
+// @param      time  the keyframe time in seconds
+// @param      g     the gradient value (color and alpha stops) at that time
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestGradientAnim_AEShipGate_AE2020,TestGradientAnim_AEShipGate_AE2025
+// @since      AE2020
+// @incident   gradient-fill-write-re
+// @alias      animated gradient,渐变动画,gradient keyframe,渐变关键帧,color sweep
 func (n *GradientFillNode) AddGradientKeyframe(time float64, g *Gradient) error {
 	if g == nil {
 		return fmt.Errorf("AddGradientKeyframe: nil gradient")
@@ -821,18 +1037,17 @@ func checkUnit(what string, i int, v float64) error {
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *GradientFillNode) Properties() *PropertyGroup {
 	return &PropertyGroup{Name: "Gradient Fill"}
 }
 
-// GradientStrokeNode — `ADBE Vector Graphic - G-Stroke`. Models the gradient's
-// color + alpha stops plus the ramp geometry (direction, type, highlight),
-// symmetric to GradientFillNode: StartPoint/EndPoint set the ramp direction
-// (AE default [0,0]→[100,0]), GradientType selects linear vs radial, and the
-// HiLite controls offset a radial gradient's bright centre. Stroke geometry
-// (width / cap / join / dashes / taper / wave) is NOT modeled (kept at the
-// extracted template's values; deferred).
+// GradientStrokeNode is a `ADBE Vector Graphic - G-Stroke`. It models the
+// gradient's color and alpha stops plus the ramp geometry (direction, type,
+// highlight), symmetric to GradientFillNode: StartPoint/EndPoint set the ramp
+// direction (AE default [0,0]→[100,0]), GradientType selects linear vs radial,
+// and the HiLite controls offset a radial gradient's bright centre. Stroke
+// geometry (width / cap / join / dashes / taper / wave) is partially modeled.
 type GradientStrokeNode struct {
 	gradient        *codec.Gradient
 	gradientKfs     []GradientKeyframe
@@ -847,10 +1062,10 @@ type GradientStrokeNode struct {
 	miterLimit      float64
 }
 
-// NewGradientStrokeNode constructs a default 2-stop black→white linear gradient
-// stroke with AE's default horizontal ramp ([0,0]→[100,0]). The stroke geometry
-// (width / cap / join / miter) defaults to the embedded template's baked values
-// (18px, round cap, round join, miter 4); override via the Set* methods.
+// NewGradientStrokeNode constructs a default 2-stop black-to-white linear
+// gradient stroke with AE's default horizontal ramp ([0,0]→[100,0]). The stroke
+// geometry defaults to width 18, round cap, round join and miter 4; override via
+// the Set methods.
 func NewGradientStrokeNode() *GradientStrokeNode {
 	return &GradientStrokeNode{
 		gradient:     defaultGradient(),
@@ -867,9 +1082,14 @@ func NewGradientStrokeNode() *GradientStrokeNode {
 // StrokeWidth returns the gradient stroke's width (pixels).
 func (n *GradientStrokeNode) StrokeWidth() float64 { return n.strokeWidth }
 
-// SetStrokeWidth sets the gradient stroke's width (pixels; must be ≥ 0).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke width,渐变描边宽度,stroke width"
+// @summary    Set the gradient stroke width
+// @param      v  the stroke width in pixels (must be non-negative)
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke width,渐变描边宽度,stroke width
 func (n *GradientStrokeNode) SetStrokeWidth(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("stroke width %g must be ≥ 0", v)
@@ -881,9 +1101,14 @@ func (n *GradientStrokeNode) SetStrokeWidth(v float64) error {
 // LineCap returns the gradient stroke's end-cap style.
 func (n *GradientStrokeNode) LineCap() StrokeLineCap { return n.lineCap }
 
-// SetLineCap sets the gradient stroke's end-cap style (Butt / Round / Projecting).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025 alias="gradient stroke line cap,渐变描边端点,line cap,butt,round,projecting"
+// @summary    Set the gradient stroke end-cap style
+// @param      c  the end-cap style (Butt, Round or Projecting)
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke line cap,渐变描边端点,line cap,butt,round,projecting
 func (n *GradientStrokeNode) SetLineCap(c StrokeLineCap) error {
 	if c < StrokeLineCapButt || c > StrokeLineCapProjecting {
 		return fmt.Errorf("invalid line cap %d (want 1..3)", c)
@@ -895,9 +1120,14 @@ func (n *GradientStrokeNode) SetLineCap(c StrokeLineCap) error {
 // LineJoin returns the gradient stroke's corner-join style.
 func (n *GradientStrokeNode) LineJoin() StrokeLineJoin { return n.lineJoin }
 
-// SetLineJoin sets the gradient stroke's corner-join style (Miter / Round / Bevel).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025 alias="gradient stroke line join,渐变描边接头,line join,miter,round,bevel"
+// @summary    Set the gradient stroke corner-join style
+// @param      j  the corner-join style (Miter, Round or Bevel)
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke line join,渐变描边接头,line join,miter,round,bevel
 func (n *GradientStrokeNode) SetLineJoin(j StrokeLineJoin) error {
 	if j < StrokeLineJoinMiter || j > StrokeLineJoinBevel {
 		return fmt.Errorf("invalid line join %d (want 1..3)", j)
@@ -909,10 +1139,15 @@ func (n *GradientStrokeNode) SetLineJoin(j StrokeLineJoin) error {
 // MiterLimit returns the gradient stroke's miter limit (only used with a miter join).
 func (n *GradientStrokeNode) MiterLimit() float64 { return n.miterLimit }
 
-// SetMiterLimit sets the gradient stroke's miter limit (only used when LineJoin
-// is Miter; must be ≥ 1).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025 alias="gradient stroke miter limit,渐变描边斜接限制,miter limit"
+// @summary    Set the gradient stroke miter limit
+// @description Only used when the corner join is Miter.
+// @param      v  the miter limit ratio (must be at least one)
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeStyle_AEShipGate_AE2020,TestMGGradStrokeStyle_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke miter limit,渐变描边斜接限制,miter limit
 func (n *GradientStrokeNode) SetMiterLimit(v float64) error {
 	if v < 1 {
 		return fmt.Errorf("miter limit %g must be ≥ 1", v)
@@ -929,24 +1164,41 @@ func (n *GradientStrokeNode) StartPoint() [2]float64 { return n.startPoint }
 // EndPoint returns the gradient ramp's end point (shape-local coords).
 func (n *GradientStrokeNode) EndPoint() [2]float64 { return n.endPoint }
 
-// SetStartPoint sets the gradient ramp's start point (shape-local coords). The
-// ramp direction is EndPoint − StartPoint; defaults to a horizontal [0,0]→[100,0].
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke start point,渐变描边起点,gradient direction"
+// @summary    Set the gradient stroke ramp start point
+// @description The ramp direction is EndPoint minus StartPoint; it defaults to a
+//   horizontal [0,0] to [100,0].
+// @param      v  the start point in shape-local coordinates
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke start point,渐变描边起点,gradient direction
 func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error { n.startPoint = v; return nil }
 
-// SetEndPoint sets the gradient ramp's end point (shape-local coords).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke end point,渐变描边终点,gradient direction"
+// @summary    Set the gradient stroke ramp end point
+// @param      v  the end point in shape-local coordinates
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke end point,渐变描边终点,gradient direction
 func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error { n.endPoint = v; return nil }
 
 // GradientType returns the ramp shape (linear or radial).
 func (n *GradientStrokeNode) GradientType() GradientType { return n.gradientType }
 
-// SetGradientType selects linear (default) or radial ramp shape. For radial,
-// StartPoint is the centre and EndPoint sets the outer radius.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke type,渐变描边类型,linear,radial,线性,径向"
+// @summary    Select the gradient stroke ramp shape (linear or radial)
+// @description For radial, StartPoint is the centre and EndPoint sets the outer
+//   radius.
+// @param      t  the ramp shape (linear or radial)
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke type,渐变描边类型,linear,radial,线性,径向
 func (n *GradientStrokeNode) SetGradientType(t GradientType) error {
 	if t != GradientLinear && t != GradientRadial {
 		return fmt.Errorf("gradient type %d out of range (1=linear, 2=radial)", t)
@@ -962,11 +1214,17 @@ func (n *GradientStrokeNode) HighlightLength() float64 { return n.highlightLengt
 // HighlightAngle returns the radial highlight offset direction (degrees).
 func (n *GradientStrokeNode) HighlightAngle() float64 { return n.highlightAngle }
 
-// SetHighlightLength offsets a radial gradient's bright centre off the geometric
-// centre by the given percent of the radius (-100..100; 0 = centred). No visible
-// effect on a linear gradient. Returns an error if out of range.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke highlight length,渐变描边高亮偏移,radial highlight stroke"
+// @summary    Offset a radial gradient stroke's bright centre
+// @description Shifts the bright centre off the geometric centre by a percent of
+//   the radius (range -100 to 100; 0 = centred). It has no visible effect on a
+//   linear gradient.
+// @param      v  the offset magnitude as a percent of the radius
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke highlight length,渐变描边高亮偏移,radial highlight stroke
 func (n *GradientStrokeNode) SetHighlightLength(v float64) error {
 	if v < -100 || v > 100 {
 		return fmt.Errorf("highlight length %g out of range [-100,100]", v)
@@ -975,10 +1233,15 @@ func (n *GradientStrokeNode) SetHighlightLength(v float64) error {
 	return nil
 }
 
-// SetHighlightAngle sets the direction (degrees) of a radial gradient's highlight
-// offset. Only meaningful together with a non-zero HighlightLength.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke highlight angle,渐变描边高亮角度,radial highlight angle stroke"
+// @summary    Set a radial gradient stroke's highlight offset direction
+// @description Only meaningful together with a non-zero highlight length.
+// @param      v  the highlight direction in degrees
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke highlight angle,渐变描边高亮角度,radial highlight angle stroke
 func (n *GradientStrokeNode) SetHighlightAngle(v float64) error {
 	n.highlightAngle = v
 	return nil
@@ -987,32 +1250,49 @@ func (n *GradientStrokeNode) SetHighlightAngle(v float64) error {
 // Gradient returns the live gradient (color + alpha stops).
 func (n *GradientStrokeNode) Gradient() *Gradient { return n.gradient }
 
-// SetColorStops replaces the gradient's color stops (≥2; ranges in [0,1]).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025 alias="gradient stroke color stops,渐变描边色标,color stops"
+// @summary    Replace the gradient stroke color stops
+// @description Requires at least two stops; each value must lie in zero to one.
+// @param      stops  the ordered list of color stops
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke color stops,渐变描边色标,color stops
 func (n *GradientStrokeNode) SetColorStops(stops []GradientColorStop) error {
 	return setGradientColorStops(n.gradient, stops)
 }
 
-// SetAlphaStops replaces the gradient's alpha stops (≥2; ranges in [0,1]).
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025 alias="gradient stroke alpha stops,渐变描边透明度色标,alpha stops"
+// @summary    Replace the gradient stroke alpha stops
+// @description Requires at least two stops; each value must lie in zero to one.
+// @param      stops  the ordered list of alpha stops
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke alpha stops,渐变描边透明度色标,alpha stops
 func (n *GradientStrokeNode) SetAlphaStops(stops []GradientAlphaStop) error {
 	return setGradientAlphaStops(n.gradient, stops)
 }
 
-// AddGradientKeyframe appends an animated-stops keyframe to a gradient STROKE:
-// the full gradient g (color + alpha stops) takes effect at `time` seconds, and
-// AE interpolates the stops between keyframes (a colour sweep along the stroke).
-// The first keyframe switches the node to animated mode — the static Gradient()
-// value is then ignored on lower in favour of the keyframe list. Provide
-// keyframes in ascending time. Identical mechanism to
-// GradientFillNode.AddGradientKeyframe (the `ADBE Vector Grad Colors` stream is
-// the same on fill and stroke); see incidents/gradient-fill-write-re.md §
-// animated color stops. Write-only: re-parsing surfaces the first keyframe's
-// stops as the static value.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestGradientStrokeAnim_AEShipGate_AE2020,TestGradientStrokeAnim_AEShipGate_AE2025 alias="animated gradient stroke,渐变描边动画,gradient stroke keyframe,色标关键帧"
+// @summary    Append an animated gradient-stops keyframe to a stroke
+// @description The full gradient takes effect at the given time and AE
+//   interpolates the stops between keyframes (a color sweep along the stroke).
+//   The first keyframe switches the node to animated mode; the static gradient
+//   value is then ignored in favour of the keyframe list. Provide keyframes in
+//   ascending time. The underlying color stream is the same on fill and stroke.
+//   This is a write-only path: re-parsing surfaces the first keyframe's stops as
+//   the static value.
+// @param      time  the keyframe time in seconds
+// @param      g     the gradient value (color and alpha stops) at that time
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestGradientStrokeAnim_AEShipGate_AE2020,TestGradientStrokeAnim_AEShipGate_AE2025
+// @since      AE2020
+// @incident   gradient-fill-write-re
+// @alias      animated gradient stroke,渐变描边动画,gradient stroke keyframe,色标关键帧
 func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) error {
 	if g == nil {
 		return fmt.Errorf("AddGradientKeyframe: nil gradient")
@@ -1031,160 +1311,211 @@ func (n *GradientStrokeNode) AddGradientKeyframe(time float64, g *Gradient) erro
 // static). Used by the serializer.
 func (n *GradientStrokeNode) GradientKeyframes() []GradientKeyframe { return n.gradientKfs }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *GradientStrokeNode) Properties() *PropertyGroup {
 	return &PropertyGroup{Name: "Gradient Stroke"}
 }
 
-// AddGradientStroke appends a default-valued GradientStrokeNode (2-stop
-// black→white gradient) and returns it. Set stops via SetColorStops /
-// SetAlphaStops.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025 alias="add gradient stroke,渐变描边,新增渐变描边节点"
+// @summary    Append a gradient stroke node to a vector group
+// @description Defaults to a 2-stop black-to-white gradient. Set the stops via
+//   the color and alpha stop setters.
+// @returns    the created gradient stroke node
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add gradient stroke,渐变描边,新增渐变描边节点
 func (g *VectorGroup) AddGradientStroke() (*GradientStrokeNode, error) {
 	n := NewGradientStrokeNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddTrim appends a default-valued TrimNode (Start=0, End=100, Offset=0 — the
-// no-op identity trim) and returns it. A Trim Paths filter reveals only the
-// arc of the preceding paths between Start% and End% (offset by Offset
-// degrees) — the canonical stroke line-draw / dash-reveal MG primitive. Place
-// it AFTER the path-producing shapes it should trim (render order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 alias="add trim,修剪路径,trim paths,新增修剪节点,line draw reveal"
+// @summary    Append a trim-paths node to a vector group
+// @description Defaults to the no-op identity trim (Start 0, End 100, Offset 0).
+//   A Trim Paths filter reveals only the arc of the preceding paths between
+//   Start and End percent, offset by Offset degrees — the stroke line-draw
+//   primitive. Place it after the path-producing shapes it should trim.
+// @returns    the created trim-paths node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add trim,修剪路径,trim paths,新增修剪节点,line draw reveal
 func (g *VectorGroup) AddTrim() (*TrimNode, error) {
 	n := NewTrimNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddRepeater appends a default-valued RepeaterNode (3 copies, identity
-// transform) and returns it. A Repeater duplicates the preceding paths N times,
-// applying its Transform (position offset / rotation / scale / opacity falloff)
-// cumulatively per copy — the canonical radial-burst / grid MG primitive. Place
-// it AFTER the shapes it should duplicate (render order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025 alias="add repeater,重复器,新增重复器节点,radial burst,grid"
+// @summary    Append a repeater node to a vector group
+// @description Defaults to 3 copies with an identity transform. A Repeater
+//   duplicates the preceding paths N times, applying its transform (position,
+//   rotation, scale, opacity falloff) cumulatively per copy. Place it after the
+//   shapes it should duplicate.
+// @returns    the created repeater node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add repeater,重复器,新增重复器节点,radial burst,grid
 func (g *VectorGroup) AddRepeater() (*RepeaterNode, error) {
 	n := NewRepeaterNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddRoundCorners appends a default-valued RoundCornersNode (Radius=10, AE's
-// default) and returns it. A Round Corners filter rounds the corners of the
-// preceding paths by Radius pixels — the canonical "soften the rectangle" MG
-// primitive. Place it AFTER the shapes whose corners it should round (render
-// order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025 alias="add round corners,圆角,新增圆角节点,soften edges"
+// @summary    Append a round-corners node to a vector group
+// @description Defaults to radius 10. A Round Corners filter rounds the corners
+//   of the preceding paths by Radius pixels. Place it after the shapes whose
+//   corners it should round.
+// @returns    the created round-corners node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add round corners,圆角,新增圆角节点,soften edges
 func (g *VectorGroup) AddRoundCorners() (*RoundCornersNode, error) {
 	n := NewRoundCornersNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddOffsetPaths appends a default-valued OffsetPathsNode (Amount=10, AE's
-// default) and returns it. An Offset Paths filter grows (positive) or shrinks
-// (negative) the preceding paths by Amount pixels — the canonical outline /
-// inflate MG primitive. Place it AFTER the shapes it should offset (render
-// order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffset_AEShipGate_AE2020,TestMGOffset_AEShipGate_AE2025 alias="add offset paths,偏移路径,新增偏移路径节点,inflate,grow,shrink"
+// @summary    Append an offset-paths node to a vector group
+// @description Defaults to amount 10. An Offset Paths filter grows (positive) or
+//   shrinks (negative) the preceding paths by Amount pixels. Place it after the
+//   shapes it should offset.
+// @returns    the created offset-paths node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffset_AEShipGate_AE2020,TestMGOffset_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add offset paths,偏移路径,新增偏移路径节点,inflate,grow,shrink
 func (g *VectorGroup) AddOffsetPaths() (*OffsetPathsNode, error) {
 	n := NewOffsetPathsNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddMergePaths appends a default-valued MergePathsNode (Type=Merge) and returns
-// it. A Merge Paths filter boolean-combines all the preceding paths in the group
-// (Merge / Add / Subtract / Intersect / Exclude) into one path — the canonical
-// compound-shape / cut-out MG primitive. Place it AFTER the ≥2 shapes it should
-// combine (render order); the result is painted by the fills/strokes.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025 alias="add merge paths,合并路径,新增合并路径节点,boolean,cut-out"
+// @summary    Append a merge-paths node to a vector group
+// @description Defaults to the Merge mode. A Merge Paths filter boolean-combines
+//   all the preceding paths in the group into one path. Place it after the two
+//   or more shapes it should combine; the result is painted by the fills and
+//   strokes.
+// @returns    the created merge-paths node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add merge paths,合并路径,新增合并路径节点,boolean,cut-out
 func (g *VectorGroup) AddMergePaths() (*MergePathsNode, error) {
 	n := NewMergePathsNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddZigZag appends a default-valued ZigZagNode (Size=5, Detail=10 — AE's
-// defaults) and returns it. A ZigZag filter distorts the preceding paths into a
-// zigzag/wave: Size is the amplitude (px), Detail is the number of ridges per
-// path segment. Place it AFTER the shapes whose edges it should distort (render
-// order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 alias="add zigzag,锯齿,新增锯齿节点,wave distort"
+// @summary    Append a zigzag node to a vector group
+// @description Defaults to size 5, detail 10. A ZigZag filter distorts the
+//   preceding paths into a zigzag wave: Size is the amplitude in pixels, Detail
+//   is the number of ridges per path segment. Place it after the shapes whose
+//   edges it should distort.
+// @returns    the created zigzag node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add zigzag,锯齿,新增锯齿节点,wave distort
 func (g *VectorGroup) AddZigZag() (*ZigZagNode, error) {
 	n := NewZigZagNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddPuckerBloat appends a default-valued PuckerBloatNode (Amount=0, the no-op
-// identity) and returns it. Pucker & Bloat bows the preceding paths' edges
-// inward (negative Amount = pucker, concave) or outward (positive = bloat,
-// convex) — the organic-blob / squish MG primitive. Place it AFTER the shapes it
-// should distort (render order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPuckerBloat_AEShipGate_AE2020,TestMGPuckerBloat_AEShipGate_AE2025 alias="add pucker bloat,向内凹向外凸,新增膨胀收缩节点,pucker,bloat,organic"
+// @summary    Append a pucker-and-bloat node to a vector group
+// @description Defaults to amount 0 (no-op identity). Pucker and Bloat bows the
+//   preceding paths inward (negative Amount = pucker, concave) or outward
+//   (positive = bloat, convex). Place it after the shapes it should distort.
+// @returns    the created pucker-and-bloat node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPuckerBloat_AEShipGate_AE2020,TestMGPuckerBloat_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add pucker bloat,向内凹向外凸,新增膨胀收缩节点,pucker,bloat,organic
 func (g *VectorGroup) AddPuckerBloat() (*PuckerBloatNode, error) {
 	n := NewPuckerBloatNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddTwist appends a default-valued TwistNode (Angle=0, the no-op identity) and
-// returns it. Twist rotates the preceding paths progressively — points farther
-// from the center rotate more — bowing straight edges into spirals. Place it
-// AFTER the shapes it should distort (render order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTwist_AEShipGate_AE2020,TestMGTwist_AEShipGate_AE2025 alias="add twist,扭曲,新增扭曲节点,spiral"
+// @summary    Append a twist node to a vector group
+// @description Defaults to angle 0 (no-op identity). Twist rotates the preceding
+//   paths progressively — points farther from the centre rotate more — bowing
+//   straight edges into spirals. Place it after the shapes it should distort.
+// @returns    the created twist node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTwist_AEShipGate_AE2020,TestMGTwist_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add twist,扭曲,新增扭曲节点,spiral
 func (g *VectorGroup) AddTwist() (*TwistNode, error) {
 	n := NewTwistNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddWigglePaths appends a default-valued WigglePathsNode (Size=0, the no-op
-// identity) and returns it. Wiggle Paths roughens the preceding paths with
-// time-varying random displacement — the classic hand-drawn "boil" jitter.
-// Place it AFTER the shapes it should distort (render order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 alias="add wiggle paths,路径抖动,新增路径抖动节点,roughen,boil,jitter"
+// @summary    Append a wiggle-paths node to a vector group
+// @description Defaults to size 0 (no-op identity). Wiggle Paths roughens the
+//   preceding paths with time-varying random displacement — the hand-drawn boil
+//   jitter. Place it after the shapes it should distort.
+// @returns    the created wiggle-paths node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add wiggle paths,路径抖动,新增路径抖动节点,roughen,boil,jitter
 func (g *VectorGroup) AddWigglePaths() (*WigglePathsNode, error) {
 	n := NewWigglePathsNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// AddWiggleTransform appends a default-valued WiggleTransformNode (zero
-// amplitudes, the no-op identity) and returns it. Wiggle Transform randomly
-// jitters a transform (Anchor/Position/Scale/Rotation) applied to the preceding
-// paths over time — typically placed after a Repeater to scatter its copies.
-// Place it AFTER the shapes it should affect (render order).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 alias="add wiggle transform,变换抖动,新增变换抖动节点,scatter,random jitter"
+// @summary    Append a wiggle-transform node to a vector group
+// @description Defaults to zero amplitudes (no-op identity). Wiggle Transform
+//   randomly jitters a transform (anchor, position, scale, rotation) applied to
+//   the preceding paths over time — typically placed after a Repeater to scatter
+//   its copies. Place it after the shapes it should affect.
+// @returns    the created wiggle-transform node
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025
+// @since      AE2020
+// @alias      add wiggle transform,变换抖动,新增变换抖动节点,scatter,random jitter
 func (g *VectorGroup) AddWiggleTransform() (*WiggleTransformNode, error) {
 	n := NewWiggleTransformNode()
 	g.Children = append(g.Children, n)
 	return n, nil
 }
 
-// TrimNode — `ADBE Vector Filter - Trim` (Trim Paths). A path-filter that
-// reveals only the portion of the preceding paths between Start% and End%,
-// rotated by Offset degrees. Default Start=0, End=100, Offset=0 (identity, no
-// trimming). Start/End are percentages (0..100); Offset is in degrees.
+// TrimNode is a `ADBE Vector Filter - Trim` (Trim Paths). It reveals only the
+// portion of the preceding paths between Start and End percent, rotated by
+// Offset degrees. Default Start=0, End=100, Offset=0 (identity, no trimming).
+// Start/End are percentages (0..100); Offset is in degrees.
 //
-// `Trim Type` (Simultaneously/Individually) is AE-default (Simultaneously) and
-// elided by AE; the serializer materializes the leaf via synthesis-insert when
-// SetType selects Individually. Start/End/Offset are static — animated trim (the
-// actual line-draw reveal) flips the cdat to a keyframe container via the same
-// injectAnimatedStream path as the other shape scalars.
+// Trim Type (Simultaneously/Individually) is AE-default (Simultaneously) and
+// elided by AE; the serializer materializes the leaf when the type setter
+// selects Individually. Start/End/Offset are static — animated trim flips the
+// cdat to a keyframe container.
 type TrimNode struct {
 	start    *codec.PropertyStream[float64]
 	end      *codec.PropertyStream[float64]
@@ -1227,12 +1558,18 @@ func (n *TrimNode) Offset() *PropertyStream[float64] { return n.offset }
 // Type returns how the trim treats multiple paths (Simultaneously / Individually).
 func (n *TrimNode) Type() TrimType { return n.trimType }
 
-// SetType selects Simultaneously (all paths as one combined length, the default)
-// or Individually (each path trimmed to the same Start/End%). The Individually
-// value is AE-default-elided; setting it materializes the `ADBE Vector Trim Type`
-// leaf on lower. Only visible with multiple paths in the trim's group.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrimType_AEShipGate_AE2020,TestMGTrimType_AEShipGate_AE2025 alias="trim type,修剪类型,simultaneously,individually,同时修剪,单独修剪"
+// @summary    Select how the trim treats multiple paths
+// @description Simultaneously trims all paths as one combined length (the
+//   default); Individually trims each path to the same start and end percent.
+//   The Individually value materializes a leaf that AE elides at the default.
+//   Only visible with multiple paths in the trim's group.
+// @param      t  the trim mode (Simultaneously or Individually)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTrimType_AEShipGate_AE2020,TestMGTrimType_AEShipGate_AE2025
+// @since      AE2020
+// @alias      trim type,修剪类型,simultaneously,individually,同时修剪,单独修剪
 func (n *TrimNode) SetType(t TrimType) error {
 	if t != TrimTypeSimultaneously && t != TrimTypeIndividually {
 		return fmt.Errorf("TrimNode.SetType: %d out of range (1=Simultaneously, 2=Individually)", t)
@@ -1241,22 +1578,39 @@ func (n *TrimNode) SetType(t TrimType) error {
 	return nil
 }
 
-// SetStart sets the trim start percentage (0..100).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Start=20)" alias="trim start,修剪起始,start percentage"
+// @summary    Set the trim start percentage
+// @param      v  the start percentage (zero to one hundred)
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      trim start,修剪起始,start percentage
 func (n *TrimNode) SetStart(v float64) error { return n.start.SetStaticValue(v) }
 
-// SetEnd sets the trim end percentage (0..100).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 alias="trim end,修剪结束,end percentage,line draw reveal"
+// @summary    Set the trim end percentage
+// @param      v  the end percentage (zero to one hundred)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025
+// @since      AE2020
+// @alias      trim end,修剪结束,end percentage,line draw reveal
 func (n *TrimNode) SetEnd(v float64) error { return n.end.SetStaticValue(v) }
 
-// SetOffset sets the trim offset in degrees.
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验 Offset=15)" alias="trim offset,修剪偏移,trim rotation,degrees"
+// @summary    Set the trim offset in degrees
+// @param      v  the trim offset in degrees
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      trim offset,修剪偏移,trim rotation,degrees
 func (n *TrimNode) SetOffset(v float64) error { return n.offset.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *TrimNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Trim Paths",
@@ -1268,17 +1622,15 @@ func (n *TrimNode) Properties() *PropertyGroup {
 	}
 }
 
-// RepeaterNode — `ADBE Vector Filter - Repeater` (Repeater). Duplicates the
-// preceding paths `Copies` times, applying `Transform` cumulatively per copy.
-// `Copies` and `Offset` (which copy index the first instance starts at) are
-// animatable scalars; the Transform (Anchor/Position/Scale/Rotation + Start/End
-// Opacity) is static, modeled like StrokeTaper. `Order` (Composite — whether each
-// copy stacks below or above the previous) defaults to Below and is
-// AE-default-elided, materialized by the serializer via synthesis-insert when
-// SetOrder selects Above. Note: with a single-color fill the Order makes no
-// visible difference (compositing same-colour layers is commutative); it matters
-// only when copies are visually distinguishable (e.g. blend modes / strokes
-// occluding fills).
+// RepeaterNode is a `ADBE Vector Filter - Repeater` (Repeater). It duplicates
+// the preceding paths Copies times, applying Transform cumulatively per copy.
+// Copies and Offset (which copy index the first instance starts at) are
+// animatable scalars; the Transform (anchor, position, scale, rotation, start
+// and end opacity) is static. Order (whether each copy stacks below or above the
+// previous) defaults to Below and is AE-default-elided, materialized by the
+// serializer when the order setter selects Above. With a single-color fill the
+// Order makes no visible difference; it matters only when copies are visually
+// distinguishable.
 type RepeaterNode struct {
 	copies    *codec.PropertyStream[float64]
 	offset    *codec.PropertyStream[float64]
@@ -1303,7 +1655,7 @@ const (
 // Transform` group: the per-copy transform applied cumulatively. Anchor /
 // Position / Scale are Vec2 (Scale in %); Rotation is degrees; Start/End
 // Opacity are % applied to the first/last copy with a linear falloff between.
-// All static (V2.2), stored as plain values like StrokeTaper.
+// All static, stored as plain values.
 type RepeaterTransform struct {
 	anchor       [2]float64
 	position     [2]float64
@@ -1345,12 +1697,16 @@ func (n *RepeaterNode) Order() RepeaterOrder { return n.order }
 // OrderSet reports whether SetOrder was called (serializer splice trigger).
 func (n *RepeaterNode) OrderSet() bool { return n.orderSet }
 
-// SetOrder selects whether each copy composites Below (default) or Above the
-// previous. The Above value is AE-default-elided; setting it materializes the
-// `ADBE Vector Repeater Order` leaf on lower. With a single-color fill this has
-// no visible effect (same-color compositing commutes).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025 alias="repeater order,重复器合成顺序,composite order,above,below"
+// @summary    Select whether copies composite below or above the previous
+// @description The Above value materializes a leaf that AE elides at the default.
+//   With a single-color fill this has no visible effect.
+// @param      o  the composite order (Below or Above)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025
+// @since      AE2020
+// @alias      repeater order,重复器合成顺序,composite order,above,below
 func (n *RepeaterNode) SetOrder(o RepeaterOrder) error {
 	if o != RepeaterOrderBelow && o != RepeaterOrderAbove {
 		return fmt.Errorf("RepeaterNode.SetOrder: %d out of range (1=Below, 2=Above)", o)
@@ -1360,9 +1716,14 @@ func (n *RepeaterNode) SetOrder(o RepeaterOrder) error {
 	return nil
 }
 
-// SetCopies sets the number of copies (≥ 1).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025 alias="repeater copies,重复器份数,copies count"
+// @summary    Set the number of repeater copies
+// @param      v  the copy count (must be at least one)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025
+// @since      AE2020
+// @alias      repeater copies,重复器份数,copies count
 func (n *RepeaterNode) SetCopies(v float64) error {
 	if v < 1 {
 		return fmt.Errorf("RepeaterNode.SetCopies: %g out of range (want ≥ 1)", v)
@@ -1370,9 +1731,15 @@ func (n *RepeaterNode) SetCopies(v float64) error {
 	return n.copies.SetStaticValue(v)
 }
 
-// SetOffset sets the copy-index offset of the first instance.
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=2)" alias="repeater offset,重复器偏移,copy offset"
+// @summary    Set the copy-index offset of the first instance
+// @param      v  the copy-index offset of the first instance
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      repeater offset,重复器偏移,copy offset
 func (n *RepeaterNode) SetOffset(v float64) error { return n.offset.SetStaticValue(v) }
 
 func (t *RepeaterTransform) Anchor() [2]float64    { return t.anchor }
@@ -1382,30 +1749,59 @@ func (t *RepeaterTransform) Rotation() float64     { return t.rotation }
 func (t *RepeaterTransform) StartOpacity() float64 { return t.startOpacity }
 func (t *RepeaterTransform) EndOpacity() float64   { return t.endOpacity }
 
-// SetAnchor sets the per-copy anchor point (px).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;match-name `ADBE Vector Repeater Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[15,25])" alias="repeater anchor,重复器锚点,per-copy anchor"
+// @summary    Set the per-copy anchor point
+// @param      v  the per-copy anchor point in pixels
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      repeater anchor,重复器锚点,per-copy anchor
 func (t *RepeaterTransform) SetAnchor(v [2]float64) error { t.anchor = v; return nil }
 
-// SetPosition sets the per-copy position offset (px) — the spacing between
-// copies. The MG grid/line knob.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025 alias="repeater position,重复器位置偏移,spacing,per-copy position"
+// @summary    Set the per-copy position offset
+// @description This is the spacing between copies — the grid and line knob.
+// @param      v  the per-copy position offset in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025
+// @since      AE2020
+// @alias      repeater position,重复器位置偏移,spacing,per-copy position
 func (t *RepeaterTransform) SetPosition(v [2]float64) error { t.position = v; return nil }
 
-// SetScale sets the per-copy scale (%). Cumulative: copy k is scaled k times.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025 alias="repeater scale,重复器缩放,per-copy scale"
+// @summary    Set the per-copy scale
+// @description The scale is cumulative: copy k is scaled k times.
+// @param      v  the per-copy scale in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025
+// @since      AE2020
+// @alias      repeater scale,重复器缩放,per-copy scale
 func (t *RepeaterTransform) SetScale(v [2]float64) error { t.scale = v; return nil }
 
-// SetRotation sets the per-copy rotation (degrees) — the radial-burst knob.
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;双版本 AE gated(shape-geom;resave-preservation 值验=30)" alias="repeater rotation,重复器旋转,radial burst,per-copy rotation"
+// @summary    Set the per-copy rotation
+// @description This is the radial-burst knob.
+// @param      v  the per-copy rotation in degrees
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      repeater rotation,重复器旋转,radial burst,per-copy rotation
 func (t *RepeaterTransform) SetRotation(v float64) error { t.rotation = v; return nil }
 
-// SetStartOpacity sets the first copy's opacity (%, 0..100).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025 alias="repeater start opacity,重复器起始不透明度,start opacity falloff"
+// @summary    Set the first copy's opacity
+// @param      v  the start opacity in percent (zero to one hundred)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025
+// @since      AE2020
+// @alias      repeater start opacity,重复器起始不透明度,start opacity falloff
 func (t *RepeaterTransform) SetStartOpacity(v float64) error {
 	if v < 0 || v > 100 {
 		return fmt.Errorf("SetStartOpacity: %g out of range 0..100", v)
@@ -1414,9 +1810,15 @@ func (t *RepeaterTransform) SetStartOpacity(v float64) error {
 	return nil
 }
 
-// SetEndOpacity sets the last copy's opacity (%, 0..100) — falloff to End.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025 alias="repeater end opacity,重复器结束不透明度,end opacity falloff"
+// @summary    Set the last copy's opacity
+// @description This is the falloff target across copies.
+// @param      v  the end opacity in percent (zero to one hundred)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025
+// @since      AE2020
+// @alias      repeater end opacity,重复器结束不透明度,end opacity falloff
 func (t *RepeaterTransform) SetEndOpacity(v float64) error {
 	if v < 0 || v > 100 {
 		return fmt.Errorf("SetEndOpacity: %g out of range 0..100", v)
@@ -1425,7 +1827,7 @@ func (t *RepeaterTransform) SetEndOpacity(v float64) error {
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *RepeaterNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Repeater",
@@ -1436,11 +1838,11 @@ func (n *RepeaterNode) Properties() *PropertyGroup {
 	}
 }
 
-// RoundCornersNode — `ADBE Vector Filter - RC` (Round Corners). A path-filter
-// that rounds the corners of the preceding paths in the stack by `Radius`
-// pixels. Its single sub-stream `ADBE Vector RoundCorner Radius` is an
-// animatable 1D scalar (default 10, AE's default). Place it AFTER the
-// path-producing shapes whose corners it should round (render order).
+// RoundCornersNode is a `ADBE Vector Filter - RC` (Round Corners). It rounds the
+// corners of the preceding paths in the stack by Radius pixels. Its single
+// sub-stream `ADBE Vector RoundCorner Radius` is an animatable 1D scalar
+// (default 10). Place it after the path-producing shapes whose corners it should
+// round.
 type RoundCornersNode struct {
 	radius *codec.PropertyStream[float64]
 }
@@ -1455,9 +1857,14 @@ func NewRoundCornersNode() *RoundCornersNode {
 func (n *RoundCornersNode) Kind() ShapeNodeKind              { return ShapeKindRoundCorners }
 func (n *RoundCornersNode) Radius() *PropertyStream[float64] { return n.radius }
 
-// SetRadius sets the corner radius in pixels. Rejects negative values.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025 alias="round corners radius,圆角半径,corner radius"
+// @summary    Set the corner radius
+// @param      v  the corner radius in pixels (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025
+// @since      AE2020
+// @alias      round corners radius,圆角半径,corner radius
 func (n *RoundCornersNode) SetRadius(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("RoundCornersNode.SetRadius: %g out of range (want >= 0)", v)
@@ -1465,7 +1872,7 @@ func (n *RoundCornersNode) SetRadius(v float64) error {
 	return n.radius.SetStaticValue(v)
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *RoundCornersNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Round Corners",
@@ -1475,16 +1882,15 @@ func (n *RoundCornersNode) Properties() *PropertyGroup {
 	}
 }
 
-// OffsetPathsNode — `ADBE Vector Filter - Offset` (Offset Paths). A path-filter
-// that grows (positive Amount) or shrinks (negative Amount) the preceding paths
-// in the stack by `Amount` pixels. Its headline sub-stream `ADBE Vector Offset
-// Amount` is an animatable 1D scalar (default 10, AE's default). Place it AFTER
-// the path-producing shapes it should offset (render order).
+// OffsetPathsNode is a `ADBE Vector Filter - Offset` (Offset Paths). It grows
+// (positive Amount) or shrinks (negative Amount) the preceding paths in the
+// stack by Amount pixels. Its headline sub-stream `ADBE Vector Offset Amount` is
+// an animatable 1D scalar (default 10). Place it after the path-producing shapes
+// it should offset.
 //
-// Line Join / Miter Limit / Copies / Copy Offset are AE-default and elided in the
-// extracted Amount-only template (no slot); each is materialized on demand by the
-// serializer (synthesis-insert of its leaf, spliced in canonical order) when its
-// setter is called, mirroring SetMaterialOption for default-elided leaves.
+// Line Join / Miter Limit / Copies / Copy Offset are AE-default and elided in
+// the Amount-only template; each is materialized on demand by the serializer
+// when its setter is called.
 type OffsetPathsNode struct {
 	amount        *codec.PropertyStream[float64]
 	lineJoin      StrokeLineJoin
@@ -1514,9 +1920,15 @@ func NewOffsetPathsNode() *OffsetPathsNode {
 func (n *OffsetPathsNode) Kind() ShapeNodeKind              { return ShapeKindOffsetPaths }
 func (n *OffsetPathsNode) Amount() *PropertyStream[float64] { return n.amount }
 
-// SetAmount sets the offset amount in pixels (positive grows, negative shrinks).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffset_AEShipGate_AE2020,TestMGOffset_AEShipGate_AE2025 alias="offset amount,偏移量,grow shrink,offset paths amount"
+// @summary    Set the offset amount
+// @description A positive amount grows the paths, a negative amount shrinks them.
+// @param      v  the offset amount in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffset_AEShipGate_AE2020,TestMGOffset_AEShipGate_AE2025
+// @since      AE2020
+// @alias      offset amount,偏移量,grow shrink,offset paths amount
 func (n *OffsetPathsNode) SetAmount(v float64) error { return n.amount.SetStaticValue(v) }
 
 // LineJoin returns the corner join used where the grown outline turns
@@ -1526,11 +1938,16 @@ func (n *OffsetPathsNode) LineJoin() StrokeLineJoin { return n.lineJoin }
 // LineJoinSet reports whether SetLineJoin was called (serializer splice trigger).
 func (n *OffsetPathsNode) LineJoinSet() bool { return n.lineJoinSet }
 
-// SetLineJoin selects the corner join for the offset outline: Miter (sharp
-// point), Round, or Bevel (flat-cut). The default Miter is AE-default-elided; a
-// non-default join materializes the `ADBE Vector Offset Line Join` leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025 alias="offset line join,偏移接头,offset corner join,miter,bevel"
+// @summary    Select the corner join for the offset outline
+// @description Miter is a sharp point, Round, and Bevel is a flat cut. The
+//   default Miter materializes a leaf that AE elides at the default.
+// @param      j  the corner join (Miter, Round or Bevel)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025
+// @since      AE2020
+// @alias      offset line join,偏移接头,offset corner join,miter,bevel
 func (n *OffsetPathsNode) SetLineJoin(j StrokeLineJoin) error {
 	if j < StrokeLineJoinMiter || j > StrokeLineJoinBevel {
 		return fmt.Errorf("OffsetPathsNode.SetLineJoin: %d out of range (1=Miter, 2=Round, 3=Bevel)", j)
@@ -1547,12 +1964,17 @@ func (n *OffsetPathsNode) MiterLimit() float64 { return n.miterLimit }
 // MiterLimitSet reports whether SetMiterLimit was called (serializer splice trigger).
 func (n *OffsetPathsNode) MiterLimitSet() bool { return n.miterLimitSet }
 
-// SetMiterLimit sets the miter clip ratio: a sharp corner whose miter would
-// extend past limit×width is clipped flat to a bevel. Must be >= 1. The default 4
-// is AE-default-elided; setting it materializes the `ADBE Vector Offset Miter
-// Limit` leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025 alias="offset miter limit,偏移斜接限制,miter limit"
+// @summary    Set the offset miter clip ratio
+// @description A sharp corner whose miter would extend past limit times width is
+//   clipped flat to a bevel. The default 4 materializes a leaf that AE elides at
+//   the default.
+// @param      v  the miter clip ratio (must be at least one)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025
+// @since      AE2020
+// @alias      offset miter limit,偏移斜接限制,miter limit
 func (n *OffsetPathsNode) SetMiterLimit(v float64) error {
 	if v < 1 {
 		return fmt.Errorf("OffsetPathsNode.SetMiterLimit: %g out of range (want >= 1)", v)
@@ -1565,12 +1987,17 @@ func (n *OffsetPathsNode) SetMiterLimit(v float64) error {
 // Copies returns the number of progressively-offset copies (default 1).
 func (n *OffsetPathsNode) Copies() float64 { return n.copies }
 
-// SetCopies sets the number of copies the Offset Paths filter stacks, each
-// offset by a further Amount pixels — N nested outlines growing outward (or
-// inward for a negative Amount). Must be >= 1. The `ADBE Vector Offset Copies`
-// sub-stream is AE-default-elided; setting it materializes the leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffsetCopies_AEShipGate_AE2020,TestMGOffsetCopies_AEShipGate_AE2025 alias="offset copies,偏移副本数,nested outlines,copies"
+// @summary    Set the number of stacked offset copies
+// @description Each copy is offset by a further Amount pixels — N nested
+//   outlines growing outward (or inward for a negative amount). The sub-stream
+//   is AE-default-elided; setting it materializes the leaf.
+// @param      v  the copy count (must be at least one)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffsetCopies_AEShipGate_AE2020,TestMGOffsetCopies_AEShipGate_AE2025
+// @since      AE2020
+// @alias      offset copies,偏移副本数,nested outlines,copies
 func (n *OffsetPathsNode) SetCopies(v float64) error {
 	if v < 1 {
 		return fmt.Errorf("OffsetPathsNode.SetCopies: %g out of range (want >= 1)", v)
@@ -1590,18 +2017,23 @@ func (n *OffsetPathsNode) CopyOffset() float64 { return n.copyOffset }
 // CopyOffsetSet reports whether SetCopyOffset was called (serializer splice trigger).
 func (n *OffsetPathsNode) CopyOffsetSet() bool { return n.copyOffsetSet }
 
-// SetCopyOffset scales the spacing between successive offset copies (only
-// meaningful when Copies > 1). The default 1 is AE-default-elided; setting it
-// materializes the `ADBE Vector Offset Copy Offset` leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025 alias="offset copy offset,偏移副本间距,copy spacing multiplier"
+// @summary    Scale the spacing between successive offset copies
+// @description Only meaningful when there is more than one copy. The default 1
+//   materializes a leaf that AE elides at the default.
+// @param      v  the per-copy spacing multiplier
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025
+// @since      AE2020
+// @alias      offset copy offset,偏移副本间距,copy spacing multiplier
 func (n *OffsetPathsNode) SetCopyOffset(v float64) error {
 	n.copyOffset = v
 	n.copyOffsetSet = true
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *OffsetPathsNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Offset Paths",
@@ -1623,10 +2055,10 @@ const (
 	MergeTypeExclude   MergeType = 5 // exclude overlapping regions
 )
 
-// MergePathsNode — `ADBE Vector Filter - Merge` (Merge Paths). A path-filter
-// that boolean-combines all the paths below it in the group into a single path
-// per its `Type`. Its only sub-stream `ADBE Vector Merge Type` is a non-animated
-// enum (default Merge); modeled as a plain value like the Fill blend mode.
+// MergePathsNode is a `ADBE Vector Filter - Merge` (Merge Paths). It
+// boolean-combines all the paths below it in the group into a single path per
+// its Type. Its only sub-stream `ADBE Vector Merge Type` is a non-animated enum
+// (default Merge); modeled as a plain value.
 type MergePathsNode struct {
 	mergeType MergeType
 }
@@ -1639,9 +2071,14 @@ func NewMergePathsNode() *MergePathsNode {
 func (n *MergePathsNode) Kind() ShapeNodeKind { return ShapeKindMergePaths }
 func (n *MergePathsNode) Type() MergeType     { return n.mergeType }
 
-// SetType sets the boolean merge mode. Rejects values outside 1..5.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025 alias="merge type,合并模式,boolean mode,merge,subtract,intersect,exclude"
+// @summary    Set the boolean merge mode
+// @param      v  the merge mode index (one through five)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025
+// @since      AE2020
+// @alias      merge type,合并模式,boolean mode,merge,subtract,intersect,exclude
 func (n *MergePathsNode) SetType(v MergeType) error {
 	if v < MergeTypeMerge || v > MergeTypeExclude {
 		return fmt.Errorf("MergePathsNode.SetType: invalid value %d (want 1..5)", v)
@@ -1650,18 +2087,18 @@ func (n *MergePathsNode) SetType(v MergeType) error {
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *MergePathsNode) Properties() *PropertyGroup {
 	return &PropertyGroup{Name: "Merge Paths"}
 }
 
-// ZigZagNode — `ADBE Vector Filter - Zigzag` (ZigZag). A path-filter that
-// distorts the paths below it in the stack into a zigzag/wave. `Size` (amplitude,
-// px) and `Detail` (ridges per path segment) are animatable 1D scalars (defaults
-// 5 / 10, AE's defaults). `Points` (Corner/Smooth) selects whether each ridge is
-// a sharp sawtooth corner (AE default) or a smooth scalloped wave; the non-default
-// Smooth value is AE-default-elided and materialized by the serializer via
-// synthesis-insert when SetPoints selects it.
+// ZigZagNode is a `ADBE Vector Filter - Zigzag` (ZigZag). It distorts the paths
+// below it in the stack into a zigzag wave. Size (amplitude, pixels) and Detail
+// (ridges per path segment) are animatable 1D scalars (defaults 5 / 10). Points
+// (Corner/Smooth) selects whether each ridge is a sharp sawtooth corner (AE
+// default) or a smooth scalloped wave; the non-default Smooth value is
+// AE-default-elided and materialized by the serializer when its setter selects
+// it.
 type ZigZagNode struct {
 	size   *codec.PropertyStream[float64]
 	detail *codec.PropertyStream[float64]
@@ -1696,9 +2133,14 @@ func (n *ZigZagNode) Kind() ShapeNodeKind              { return ShapeKindZigZag 
 func (n *ZigZagNode) Size() *PropertyStream[float64]   { return n.size }
 func (n *ZigZagNode) Detail() *PropertyStream[float64] { return n.detail }
 
-// SetSize sets the zigzag amplitude in pixels. Rejects negative values.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 alias="zigzag size,锯齿幅度,amplitude"
+// @summary    Set the zigzag amplitude
+// @param      v  the zigzag amplitude in pixels (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025
+// @since      AE2020
+// @alias      zigzag size,锯齿幅度,amplitude
 func (n *ZigZagNode) SetSize(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("ZigZagNode.SetSize: %g out of range (want >= 0)", v)
@@ -1706,9 +2148,14 @@ func (n *ZigZagNode) SetSize(v float64) error {
 	return n.size.SetStaticValue(v)
 }
 
-// SetDetail sets the number of ridges per path segment. Rejects negative values.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025 alias="zigzag detail,锯齿密度,ridges per segment"
+// @summary    Set the number of ridges per path segment
+// @param      v  the ridge count per segment (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025
+// @since      AE2020
+// @alias      zigzag detail,锯齿密度,ridges per segment
 func (n *ZigZagNode) SetDetail(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("ZigZagNode.SetDetail: %g out of range (want >= 0)", v)
@@ -1719,11 +2166,16 @@ func (n *ZigZagNode) SetDetail(v float64) error {
 // Points returns whether the ridges are sharp corners or smooth waves.
 func (n *ZigZagNode) Points() ZigZagPoints { return n.points }
 
-// SetPoints selects Corner (sharp sawtooth ridges, the default) or Smooth
-// (scalloped wave ridges). The Smooth value is AE-default-elided; setting it
-// materializes the `ADBE Vector Zigzag Points` leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGZigZagPoints_AEShipGate_AE2020,TestMGZigZagPoints_AEShipGate_AE2025 alias="zigzag points,锯齿形状,corner smooth,wave type"
+// @summary    Select sharp-corner or smooth-wave ridges
+// @description Corner is sharp sawtooth ridges (the default); Smooth is
+//   scalloped wave ridges and materializes a leaf that AE elides at the default.
+// @param      p  the ridge style (Corner or Smooth)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGZigZagPoints_AEShipGate_AE2020,TestMGZigZagPoints_AEShipGate_AE2025
+// @since      AE2020
+// @alias      zigzag points,锯齿形状,corner smooth,wave type
 func (n *ZigZagNode) SetPoints(p ZigZagPoints) error {
 	if p != ZigZagPointsCorner && p != ZigZagPointsSmooth {
 		return fmt.Errorf("ZigZagNode.SetPoints: %d out of range (1=Corner, 2=Smooth)", p)
@@ -1732,7 +2184,7 @@ func (n *ZigZagNode) SetPoints(p ZigZagPoints) error {
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *ZigZagNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "ZigZag",
@@ -1743,11 +2195,11 @@ func (n *ZigZagNode) Properties() *PropertyGroup {
 	}
 }
 
-// PuckerBloatNode — `ADBE Vector Filter - PB` (Pucker & Bloat). A path-filter
-// that bows the paths below it inward (negative Amount = pucker) or outward
-// (positive = bloat). Its single sub-stream `ADBE Vector PuckerBloat Amount` is
-// an animatable 1D scalar (percent; default 0 = no distortion). Place it AFTER
-// the path-producing shapes it should distort (render order).
+// PuckerBloatNode is a `ADBE Vector Filter - PB` (Pucker & Bloat). It bows the
+// paths below it inward (negative Amount = pucker) or outward (positive = bloat).
+// Its single sub-stream `ADBE Vector PuckerBloat Amount` is an animatable 1D
+// scalar (percent; default 0 = no distortion). Place it after the path-producing
+// shapes it should distort.
 type PuckerBloatNode struct {
 	amount *codec.PropertyStream[float64]
 }
@@ -1762,13 +2214,19 @@ func NewPuckerBloatNode() *PuckerBloatNode {
 func (n *PuckerBloatNode) Kind() ShapeNodeKind              { return ShapeKindPuckerBloat }
 func (n *PuckerBloatNode) Amount() *PropertyStream[float64] { return n.amount }
 
-// SetAmount sets the pucker/bloat amount (percent; negative puckers/concave,
-// positive bloats/convex).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPuckerBloat_AEShipGate_AE2020,TestMGPuckerBloat_AEShipGate_AE2025 alias="pucker bloat amount,膨胀收缩量,pucker,bloat"
+// @summary    Set the pucker or bloat amount
+// @description A negative amount puckers (concave), a positive amount bloats
+//   (convex).
+// @param      v  the pucker or bloat amount in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGPuckerBloat_AEShipGate_AE2020,TestMGPuckerBloat_AEShipGate_AE2025
+// @since      AE2020
+// @alias      pucker bloat amount,膨胀收缩量,pucker,bloat
 func (n *PuckerBloatNode) SetAmount(v float64) error { return n.amount.SetStaticValue(v) }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *PuckerBloatNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Pucker & Bloat",
@@ -1778,14 +2236,14 @@ func (n *PuckerBloatNode) Properties() *PropertyGroup {
 	}
 }
 
-// TwistNode — `ADBE Vector Filter - Twist`. A path-filter that rotates the
-// paths below it progressively (more rotation farther from the twist center),
-// bowing straight edges into spirals. Its headline sub-stream `ADBE Vector
-// Twist Angle` is an animatable 1D scalar (degrees; default 0 = no twist).
-// `Center` (Vec2, shape-local pixels relative to the path centre) is the pivot
-// the twist rotates around; it defaults to [0,0] and is AE-default-elided,
-// materialized by the serializer via synthesis-insert when SetCenter offsets it.
-// Place it AFTER the path-producing shapes it should distort (render order).
+// TwistNode is a `ADBE Vector Filter - Twist`. It rotates the paths below it
+// progressively (more rotation farther from the twist centre), bowing straight
+// edges into spirals. Its headline sub-stream `ADBE Vector Twist Angle` is an
+// animatable 1D scalar (degrees; default 0 = no twist). Center (Vec2,
+// shape-local pixels relative to the path centre) is the pivot the twist rotates
+// around; it defaults to [0,0] and is AE-default-elided, materialized by the
+// serializer when its setter offsets it. Place it after the path-producing
+// shapes it should distort.
 type TwistNode struct {
 	angle     *codec.PropertyStream[float64]
 	center    [2]float64
@@ -1802,10 +2260,16 @@ func NewTwistNode() *TwistNode {
 func (n *TwistNode) Kind() ShapeNodeKind             { return ShapeKindTwist }
 func (n *TwistNode) Angle() *PropertyStream[float64] { return n.angle }
 
-// SetAngle sets the twist angle (degrees; positive twists clockwise, negative
-// counter-clockwise).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTwist_AEShipGate_AE2020,TestMGTwist_AEShipGate_AE2025 alias="twist angle,扭曲角度,spiral angle"
+// @summary    Set the twist angle
+// @description A positive angle twists clockwise, a negative angle
+//   counter-clockwise.
+// @param      v  the twist angle in degrees
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTwist_AEShipGate_AE2020,TestMGTwist_AEShipGate_AE2025
+// @since      AE2020
+// @alias      twist angle,扭曲角度,spiral angle
 func (n *TwistNode) SetAngle(v float64) error { return n.angle.SetStaticValue(v) }
 
 // Center returns the twist pivot (Vec2, shape-local pixels relative to the path
@@ -1816,18 +2280,23 @@ func (n *TwistNode) Center() [2]float64 { return n.center }
 // to materialize the otherwise-elided Center leaf).
 func (n *TwistNode) CenterSet() bool { return n.centerSet }
 
-// SetCenter offsets the twist pivot from the path centre (Vec2, shape-local
-// pixels). The default [0,0] is AE-default-elided; a non-zero Center
-// materializes the `ADBE Vector Twist Center` leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTwistCenter_AEShipGate_AE2020,TestMGTwistCenter_AEShipGate_AE2025 alias="twist center,扭曲中心,pivot,twist pivot"
+// @summary    Offset the twist pivot from the path centre
+// @description The default [0,0] is AE-default-elided; a non-zero centre
+//   materializes the leaf.
+// @param      c  the twist pivot in shape-local pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGTwistCenter_AEShipGate_AE2020,TestMGTwistCenter_AEShipGate_AE2025
+// @since      AE2020
+// @alias      twist center,扭曲中心,pivot,twist pivot
 func (n *TwistNode) SetCenter(c [2]float64) error {
 	n.center = c
 	n.centerSet = true
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *TwistNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Twist",
@@ -1837,14 +2306,14 @@ func (n *TwistNode) Properties() *PropertyGroup {
 	}
 }
 
-// WigglePathsNode — `ADBE Vector Filter - Roughen` (Wiggle Paths). A path-filter
-// that roughens the paths below it with time-varying random displacement — the
-// hand-drawn "boil" jitter. Four animatable 1D scalar sub-streams are modeled:
+// WigglePathsNode is a `ADBE Vector Filter - Roughen` (Wiggle Paths). It
+// roughens the paths below it with time-varying random displacement — the
+// hand-drawn boil jitter. Four animatable 1D scalar sub-streams are modeled:
 // Size (displacement amplitude), Detail (segments per unit length),
 // WigglesPerSecond (the temporal frequency, `ADBE Vector Temporal Freq`), and
-// RandomSeed. The Points (enum), Correlation, and Temporal/Spatial Phase
-// sub-streams are left at their defaults and elided. Place it AFTER the
-// path-producing shapes it should distort (render order).
+// RandomSeed. The Points enum plus the Correlation and Temporal/Spatial Phase
+// sub-streams are left at their defaults and elided. Place it after the
+// path-producing shapes it should distort.
 type WigglePathsNode struct {
 	size             *codec.PropertyStream[float64]
 	detail           *codec.PropertyStream[float64]
@@ -1900,45 +2369,72 @@ func (n *WigglePathsNode) RandomSeed() *PropertyStream[float64]       { return n
 
 // Points / Correlation / TemporalPhase / SpatialPhase return the modulation
 // sub-stream values. CorrelationSet / TemporalPhaseSet / SpatialPhaseSet report
-// whether each was explicitly set (controls synthesis-insert on lower).
-func (n *WigglePathsNode) Points() RoughenPoints     { return n.points }
-func (n *WigglePathsNode) Correlation() float64      { return n.correlation }
-func (n *WigglePathsNode) CorrelationSet() bool      { return n.correlationSet }
-func (n *WigglePathsNode) TemporalPhase() float64    { return n.temporalPhase }
-func (n *WigglePathsNode) TemporalPhaseSet() bool    { return n.temporalPhaseSet }
-func (n *WigglePathsNode) SpatialPhase() float64     { return n.spatialPhase }
-func (n *WigglePathsNode) SpatialPhaseSet() bool     { return n.spatialPhaseSet }
+// whether each was explicitly set (controls materialization on lower).
+func (n *WigglePathsNode) Points() RoughenPoints  { return n.points }
+func (n *WigglePathsNode) Correlation() float64   { return n.correlation }
+func (n *WigglePathsNode) CorrelationSet() bool   { return n.correlationSet }
+func (n *WigglePathsNode) TemporalPhase() float64 { return n.temporalPhase }
+func (n *WigglePathsNode) TemporalPhaseSet() bool { return n.temporalPhaseSet }
+func (n *WigglePathsNode) SpatialPhase() float64  { return n.spatialPhase }
+func (n *WigglePathsNode) SpatialPhaseSet() bool  { return n.spatialPhaseSet }
 
-// SetSize sets the wiggle displacement amplitude (pixels; 0 = no roughening).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 alias="wiggle size,路径抖动幅度,displacement amplitude"
+// @summary    Set the wiggle displacement amplitude
+// @param      v  the displacement amplitude in pixels (0 = no roughening)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wiggle size,路径抖动幅度,displacement amplitude
 func (n *WigglePathsNode) SetSize(v float64) error { return n.size.SetStaticValue(v) }
 
-// SetDetail sets the wiggle detail (number of segments per path length — higher
-// = finer, more frequent ridges).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 alias="wiggle detail,路径抖动细节,segments per unit length"
+// @summary    Set the wiggle detail
+// @description Higher detail produces finer, more frequent ridges.
+// @param      v  the number of segments per path length
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wiggle detail,路径抖动细节,segments per unit length
 func (n *WigglePathsNode) SetDetail(v float64) error { return n.detail.SetStaticValue(v) }
 
-// SetWigglesPerSecond sets the temporal frequency (`ADBE Vector Temporal Freq`,
-// the Wiggles/Second control — how fast the random edge churns over time).
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Temporal Freq 值读回)" alias="wiggle frequency,路径抖动频率,wiggles per second,temporal frequency"
+// @summary    Set the wiggle temporal frequency
+// @description This is how fast the random edge churns over time.
+// @param      v  the temporal frequency in wiggles per second
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle frequency,路径抖动频率,wiggles per second,temporal frequency
 func (n *WigglePathsNode) SetWigglesPerSecond(v float64) error {
 	return n.wigglesPerSecond.SetStaticValue(v)
 }
 
-// SetRandomSeed sets the random seed selecting the displacement pattern.
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle DOM Random Seed 值读回)" alias="wiggle random seed,路径抖动随机种子,random seed"
+// @summary    Set the wiggle random seed
+// @description The seed selects which displacement pattern is generated.
+// @param      v  the random seed selecting the displacement pattern
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle random seed,路径抖动随机种子,random seed
 func (n *WigglePathsNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
 
-// SetPoints selects Corner (sharp displaced spikes, the default) or Smooth
-// (rounded scalloped bumps). Smooth is AE-default-elided; setting it
-// materializes the `ADBE Vector Roughen Points` enum leaf on lower
-// (synthesis-insert).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleMod_AEShipGate_AE2020,TestMGWiggleMod_AEShipGate_AE2025 alias="wiggle points,路径抖动形状,corner smooth,roughen points"
+// @summary    Select sharp-corner or smooth-bump roughen ridges
+// @description Corner is sharp displaced spikes (the default); Smooth is rounded
+//   scalloped bumps and materializes a leaf that AE elides at the default.
+// @param      p  the ridge style (Corner or Smooth)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggleMod_AEShipGate_AE2020,TestMGWiggleMod_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wiggle points,路径抖动形状,corner smooth,roughen points
 func (n *WigglePathsNode) SetPoints(p RoughenPoints) error {
 	if p != RoughenPointsCorner && p != RoughenPointsSmooth {
 		return fmt.Errorf("WigglePathsNode.SetPoints: %d out of range (1=Corner, 2=Smooth)", p)
@@ -1947,12 +2443,17 @@ func (n *WigglePathsNode) SetPoints(p RoughenPoints) error {
 	return nil
 }
 
-// SetCorrelation sets how correlated successive random displacements are
-// (`ADBE Vector Correlation`, 0..100). 0 = each point jitters independently
-// (jagged), 100 = neighbours move together (smooth coherent boil). Default 50;
-// non-default materializes the `ADBE Vector Correlation` leaf on lower.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleMod_AEShipGate_AE2020,TestMGWiggleMod_AEShipGate_AE2025 alias="wiggle correlation,路径抖动相关性,roughen correlation"
+// @summary    Set how correlated successive random displacements are
+// @description Range 0 to 100: 0 means each point jitters independently
+//   (jagged), 100 means neighbours move together (smooth coherent boil). The
+//   default 50 is elided; a non-default value materializes the leaf.
+// @param      v  the correlation in percent (zero to one hundred)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggleMod_AEShipGate_AE2020,TestMGWiggleMod_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wiggle correlation,路径抖动相关性,roughen correlation
 func (n *WigglePathsNode) SetCorrelation(v float64) error {
 	if v < 0 || v > 100 {
 		return fmt.Errorf("WigglePathsNode.SetCorrelation: %g out of range (want 0..100)", v)
@@ -1962,33 +2463,45 @@ func (n *WigglePathsNode) SetCorrelation(v float64) error {
 	return nil
 }
 
-// SetTemporalPhase sets the temporal phase (degrees) into the noise sequence
-// — selecting a different time-slice of the same seeded random pattern. Default
-// 0; non-default materializes the `ADBE Vector Temporal Phase` leaf on lower.
-// Like RandomSeed, a phase shift produces a statistically-equivalent alternate
-// random edge with no categorically-correct pixel result, so it is
-// roundtrip-verified (evidence-based: not pixel-gatable).
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)" alias="wiggle temporal phase,路径抖动时间相位,roughen temporal phase"
+// @summary    Set the temporal phase into the noise sequence
+// @description This selects a different time-slice of the same seeded random
+//   pattern. The default is elided; a non-default value materializes the leaf.
+//   Like the random seed, a phase shift produces a statistically-equivalent
+//   alternate edge with no categorically-correct pixel result, so it is
+//   roundtrip-verified.
+// @param      v  the temporal phase in degrees
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle temporal phase,路径抖动时间相位,roughen temporal phase
 func (n *WigglePathsNode) SetTemporalPhase(v float64) error {
 	n.temporalPhase = v
 	n.temporalPhaseSet = true
 	return nil
 }
 
-// SetSpatialPhase sets the spatial phase (degrees) into the noise field —
-// selecting a different spatial offset of the same seeded random pattern.
-// Default 0; non-default materializes the `ADBE Vector Spatial Phase` leaf on
-// lower. Roundtrip-verified for the same reason as TemporalPhase.
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)" alias="wiggle spatial phase,路径抖动空间相位,roughen spatial phase"
+// @summary    Set the spatial phase into the noise field
+// @description This selects a different spatial offset of the same seeded random
+//   pattern. The default is elided; a non-default value materializes the leaf.
+//   Roundtrip-verified for the same reason as the temporal phase.
+// @param      v  the spatial phase in degrees
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle spatial phase,路径抖动空间相位,roughen spatial phase
 func (n *WigglePathsNode) SetSpatialPhase(v float64) error {
 	n.spatialPhase = v
 	n.spatialPhaseSet = true
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *WigglePathsNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Wiggle Paths",
@@ -2001,14 +2514,13 @@ func (n *WigglePathsNode) Properties() *PropertyGroup {
 	}
 }
 
-// WiggleTransformNode — `ADBE Vector Filter - Wiggler` (Wiggle Transform). A
-// filter that randomly jitters a transform applied to the paths below it over
-// time — usually placed after a Repeater to scatter its copies. WigglesPerSecond
-// (the temporal frequency, `ADBE Vector Xform Temporal Freq`) and RandomSeed are
-// animatable 1D scalars; the per-channel wiggle amplitudes live in the nested
-// Transform group (Anchor/Position/Scale Vec2, Rotation degrees) modeled
-// statically like the Repeater Transform. Correlation and Temporal/Spatial Phase
-// are left at their defaults and elided.
+// WiggleTransformNode is a `ADBE Vector Filter - Wiggler` (Wiggle Transform). It
+// randomly jitters a transform applied to the paths below it over time — usually
+// placed after a Repeater to scatter its copies. WigglesPerSecond (the temporal
+// frequency, `ADBE Vector Xform Temporal Freq`) and RandomSeed are animatable 1D
+// scalars; the per-channel wiggle amplitudes live in the nested Transform group
+// (anchor, position, scale as Vec2, rotation in degrees) modeled statically.
+// Correlation and Temporal/Spatial Phase are left at their defaults and elided.
 type WiggleTransformNode struct {
 	wigglesPerSecond *codec.PropertyStream[float64]
 	randomSeed       *codec.PropertyStream[float64]
@@ -2026,7 +2538,7 @@ type WiggleTransformNode struct {
 // Transform` group: the per-channel random wiggle AMPLITUDES (not absolute
 // transform values). Anchor / Position / Scale are Vec2 (Scale amplitude in %),
 // Rotation in degrees. A zero amplitude means that channel does not wiggle. All
-// static (V2.2), stored as plain values like RepeaterTransform.
+// static, stored as plain values.
 type WigglerTransform struct {
 	anchor   [2]float64
 	position [2]float64
@@ -2050,8 +2562,8 @@ func NewWiggleTransformNode() *WiggleTransformNode {
 }
 
 // Correlation / TemporalPhase / SpatialPhase return the modulation sub-stream
-// values; the *Set getters report whether each was explicitly set (controls
-// synthesis-insert on lower).
+// values; the Set getters report whether each was explicitly set (controls
+// materialization on lower).
 func (n *WiggleTransformNode) Correlation() float64   { return n.correlation }
 func (n *WiggleTransformNode) CorrelationSet() bool   { return n.correlationSet }
 func (n *WiggleTransformNode) TemporalPhase() float64 { return n.temporalPhase }
@@ -2073,26 +2585,45 @@ func (n *WiggleTransformNode) RandomSeed() *PropertyStream[float64] { return n.r
 // Transform returns the per-channel wiggle-amplitude group.
 func (n *WiggleTransformNode) Transform() *WigglerTransform { return n.transform }
 
-// SetWigglesPerSecond sets the temporal frequency (how fast the transform churns).
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Temporal Freq 值读回)" alias="wiggle transform frequency,变换抖动频率,wiggles per second"
+// @summary    Set the wiggle-transform temporal frequency
+// @description This is how fast the transform churns over time.
+// @param      v  the temporal frequency in wiggles per second
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle transform frequency,变换抖动频率,wiggles per second
 func (n *WiggleTransformNode) SetWigglesPerSecond(v float64) error {
 	return n.wigglesPerSecond.SetStaticValue(v)
 }
 
-// SetRandomSeed sets the random seed selecting the wiggle pattern.
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 boundary="调制参数,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggletransform DOM Random Seed 值读回)" alias="wiggle transform random seed,变换抖动随机种子,random seed"
+// @summary    Set the wiggle-transform random seed
+// @description The seed selects which wiggle pattern is generated.
+// @param      v  the random seed selecting the wiggle pattern
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural modulation parameter that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle transform random seed,变换抖动随机种子,random seed
 func (n *WiggleTransformNode) SetRandomSeed(v float64) error { return n.randomSeed.SetStaticValue(v) }
 
-// SetCorrelation sets how correlated the random transform jitter is between
-// channels/time (`ADBE Vector Correlation`, 0..100; default 50). Non-default
-// materializes the `ADBE Vector Correlation` leaf on lower. The wiggle is a
-// per-frame random transform offset and Correlation modulates its temporal
-// smoothness, with no single-frame categorically-correct pixel result, so it is
-// roundtrip-verified (evidence-based: not pixel-gatable).
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="时变抖动调制,本质不可单帧像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Correlation 值读回)" alias="wiggle transform correlation,变换抖动相关性"
+// @summary    Set how correlated the random transform jitter is
+// @description Range 0 to 100 (default 50); a non-default value materializes the
+//   leaf. The wiggle is a per-frame random transform offset and correlation
+//   modulates its temporal smoothness, with no single-frame
+//   categorically-correct pixel result, so it is roundtrip-verified.
+// @param      v  the correlation in percent (zero to one hundred)
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a time-varying jitter modulation that cannot be single-frame pixel-gated; AE accepts and reads back the value
+// @alias      wiggle transform correlation,变换抖动相关性
 func (n *WiggleTransformNode) SetCorrelation(v float64) error {
 	if v < 0 || v > 100 {
 		return fmt.Errorf("WiggleTransformNode.SetCorrelation: %g out of range (want 0..100)", v)
@@ -2102,24 +2633,36 @@ func (n *WiggleTransformNode) SetCorrelation(v float64) error {
 	return nil
 }
 
-// SetTemporalPhase sets the temporal phase (degrees) into the transform-wiggle
-// noise sequence; default 0, non-default materializes the `ADBE Vector Temporal
-// Phase` leaf on lower. Roundtrip-verified (noise phase selection, not
-// pixel-gatable).
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Temporal Phase 值读回)" alias="wiggle transform temporal phase,变换抖动时间相位"
+// @summary    Set the transform-wiggle temporal phase
+// @description This selects a different time-slice of the seeded random pattern.
+//   The default is elided; a non-default value materializes the leaf.
+//   Roundtrip-verified (a noise-phase selection, not pixel-gatable).
+// @param      v  the temporal phase in degrees
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle transform temporal phase,变换抖动时间相位
 func (n *WiggleTransformNode) SetTemporalPhase(v float64) error {
 	n.temporalPhase = v
 	n.temporalPhaseSet = true
 	return nil
 }
 
-// SetSpatialPhase sets the spatial phase (degrees) into the transform-wiggle
-// noise field; default 0, non-default materializes the `ADBE Vector Spatial
-// Phase` leaf on lower. Roundtrip-verified (noise phase selection, not
-// pixel-gatable).
-//
-//aep:cap domain=shape tier=alpha verify=ae-accept gate=TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025 boundary="噪声相位采样,本质不可像素门禁(procedural);双版本 AE gated(mg-wiggle-modrt DOM Spatial Phase 值读回)" alias="wiggle transform spatial phase,变换抖动空间相位"
+// @summary    Set the transform-wiggle spatial phase
+// @description This selects a different spatial offset of the seeded random
+//   pattern. The default is elided; a non-default value materializes the leaf.
+//   Roundtrip-verified (a noise-phase selection, not pixel-gatable).
+// @param      v  the spatial phase in degrees
+// @domain     shape
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestMGWiggleModRT_AEShipGate_AE2020,TestMGWiggleModRT_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   a procedural noise-phase sample that cannot be pixel-gated; AE accepts and reads back the value
+// @alias      wiggle transform spatial phase,变换抖动空间相位
 func (n *WiggleTransformNode) SetSpatialPhase(v float64) error {
 	n.spatialPhase = v
 	n.spatialPhaseSet = true
@@ -2132,27 +2675,49 @@ func (t *WigglerTransform) Position() [2]float64 { return t.position }
 func (t *WigglerTransform) Scale() [2]float64    { return t.scale }
 func (t *WigglerTransform) Rotation() float64    { return t.rotation }
 
-// SetAnchor sets the anchor-point wiggle amplitude (pixels).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;match-name `ADBE Vector Wiggler Anchor`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[30,40])" alias="wiggler anchor amplitude,抖动锚点幅度,anchor wiggle"
+// @summary    Set the anchor-point wiggle amplitude
+// @param      v  the anchor-point wiggle amplitude in pixels
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      wiggler anchor amplitude,抖动锚点幅度,anchor wiggle
 func (t *WigglerTransform) SetAnchor(v [2]float64) error { t.anchor = v; return nil }
 
-// SetPosition sets the position wiggle amplitude (pixels).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 alias="wiggler position amplitude,抖动位置幅度,position wiggle"
+// @summary    Set the position wiggle amplitude
+// @param      v  the position wiggle amplitude in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wiggler position amplitude,抖动位置幅度,position wiggle
 func (t *WigglerTransform) SetPosition(v [2]float64) error { t.position = v; return nil }
 
-// SetScale sets the scale wiggle amplitude (percent).
-//
-//aep:cap domain=shape tier=stable verify=ae-accept gate=TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025 boundary="length-preserving 低风险;match-name `ADBE Vector Wiggler Scale`(template-confirmed);双版本 AE gated(shape-geom;resave-preservation 2D 值验=[120,80])" alias="wiggler scale amplitude,抖动缩放幅度,scale wiggle"
+// @summary    Set the scale wiggle amplitude
+// @param      v  the scale wiggle amplitude in percent
+// @domain     shape
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestShapeGeom_AEShipGate_AE2020,TestShapeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   length-preserving; AE accepts the value and it survives a re-save
+// @alias      wiggler scale amplitude,抖动缩放幅度,scale wiggle
 func (t *WigglerTransform) SetScale(v [2]float64) error { t.scale = v; return nil }
 
-// SetRotation sets the rotation wiggle amplitude (degrees).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 alias="wiggler rotation amplitude,抖动旋转幅度,rotation wiggle"
+// @summary    Set the rotation wiggle amplitude
+// @param      v  the rotation wiggle amplitude in degrees
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wiggler rotation amplitude,抖动旋转幅度,rotation wiggle
 func (t *WigglerTransform) SetRotation(v float64) error { t.rotation = v; return nil }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (n *WiggleTransformNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Wiggle Transform",
@@ -2183,7 +2748,7 @@ const (
 	StrokeLineJoinBevel StrokeLineJoin = 3
 )
 
-// StrokeNode — `ADBE Vector Graphic - Stroke`. Default Color=[0,0,0,1]
+// StrokeNode is a `ADBE Vector Graphic - Stroke`. Default Color=[0,0,0,1]
 // black, Width=2, Opacity=100, Line Cap=Butt, Line Join=Miter, Miter Limit=4.
 type StrokeNode struct {
 	color   *codec.PropertyStream[[4]float64]
@@ -2230,13 +2795,34 @@ func (s *StrokeNode) Color() *PropertyStream[[4]float64] { return s.color }
 func (s *StrokeNode) Opacity() *PropertyStream[float64]  { return s.opacity }
 func (s *StrokeNode) Width() *PropertyStream[float64]    { return s.width }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="stroke color,描边颜色,set color,RGBA"
+// @summary    Set the stroke color
+// @param      v  the RGBA color, each channel in zero to one
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke color,描边颜色,set color,RGBA
 func (s *StrokeNode) SetColor(v [4]float64) error { return s.color.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeKf_AEShipGate_AE2020,TestV2_2_StrokeKf_AEShipGate_AE2025 alias="stroke opacity,描边不透明度,set opacity"
+// @summary    Set the stroke opacity
+// @param      v  the opacity in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeKf_AEShipGate_AE2020,TestV2_2_StrokeKf_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke opacity,描边不透明度,set opacity
 func (s *StrokeNode) SetOpacity(v float64) error { return s.opacity.SetStaticValue(v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="stroke width,描边宽度,set width"
+// @summary    Set the stroke width
+// @param      v  the stroke width in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke width,描边宽度,set width
 func (s *StrokeNode) SetWidth(v float64) error { return s.width.SetStaticValue(v) }
 
 func (s *StrokeNode) LineCap() StrokeLineCap              { return s.lineCap }
@@ -2245,17 +2831,36 @@ func (s *StrokeNode) MiterLimit() float64                 { return s.miterLimit 
 func (s *StrokeNode) BlendMode() ShapeBlendMode           { return s.blendMode }
 func (s *StrokeNode) CompositeOrder() ShapeCompositeOrder { return s.compositeOrder }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 alias="stroke blend mode,描边混合模式,blend mode"
+// @summary    Set the stroke blend mode
+// @param      v  the blend mode as AE's 1-based index
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke blend mode,描边混合模式,blend mode
 func (s *StrokeNode) SetBlendMode(v ShapeBlendMode) error { return setShapeBlendMode(&s.blendMode, v) }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025 alias="stroke composite order,描边合成顺序,composite order"
+// @summary    Set the stroke composite order
+// @param      v  whether the stroke composites above or below the previous
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_ShapeEnums_AEShipGate_AE2020,TestV2_2_ShapeEnums_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke composite order,描边合成顺序,composite order
 func (s *StrokeNode) SetCompositeOrder(v ShapeCompositeOrder) error {
 	return setShapeCompositeOrder(&s.compositeOrder, v)
 }
 
-// SetLineCap sets the end-cap style. Rejects values outside {Butt,Round,Projecting}.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="stroke line cap,描边端点,line cap,butt,round,projecting"
+// @summary    Set the stroke end-cap style
+// @param      v  the end-cap style (Butt, Round or Projecting)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke line cap,描边端点,line cap,butt,round,projecting
 func (s *StrokeNode) SetLineCap(v StrokeLineCap) error {
 	if v < StrokeLineCapButt || v > StrokeLineCapProjecting {
 		return fmt.Errorf("StrokeNode.SetLineCap: invalid value %d (want 1..3)", v)
@@ -2264,9 +2869,14 @@ func (s *StrokeNode) SetLineCap(v StrokeLineCap) error {
 	return nil
 }
 
-// SetLineJoin sets the corner-join style. Rejects values outside {Miter,Round,Bevel}.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="stroke line join,描边接头,line join,miter,round,bevel"
+// @summary    Set the stroke corner-join style
+// @param      v  the corner-join style (Miter, Round or Bevel)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke line join,描边接头,line join,miter,round,bevel
 func (s *StrokeNode) SetLineJoin(v StrokeLineJoin) error {
 	if v < StrokeLineJoinMiter || v > StrokeLineJoinBevel {
 		return fmt.Errorf("StrokeNode.SetLineJoin: invalid value %d (want 1..3)", v)
@@ -2275,10 +2885,16 @@ func (s *StrokeNode) SetLineJoin(v StrokeLineJoin) error {
 	return nil
 }
 
-// SetMiterLimit sets the miter limit. AE only applies it when Line Join =
-// Miter, but the value is stored regardless. Rejects values < 1.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="stroke miter limit,描边斜接限制,miter limit"
+// @summary    Set the stroke miter limit
+// @description AE only applies it when the corner join is Miter, but the value
+//   is stored regardless.
+// @param      v  the miter limit ratio (must be at least one)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke miter limit,描边斜接限制,miter limit
 func (s *StrokeNode) SetMiterLimit(v float64) error {
 	if v < 1 {
 		return fmt.Errorf("StrokeNode.SetMiterLimit: %g out of range (want >= 1)", v)
@@ -2296,15 +2912,15 @@ func (s *StrokeNode) Wave() *StrokeWave { return s.wave }
 // Dashes returns the stroke's Dashes group (`ADBE Vector Stroke Dashes`).
 func (s *StrokeNode) Dashes() *StrokeDashes { return s.dashes }
 
-// StrokeTaper models the Stroke "Taper" group's %-mode scalar controls
+// StrokeTaper models the Stroke "Taper" group's percent-mode scalar controls
 // (`ADBE Vector Stroke Taper`): Start/End Length, Start/End Width, Start/End
-// Ease — all plain float64 percentages stored on disk as float64 BE at
-// cdat[0:8]. AE does not animate them in V2.2, so they are stored as values,
-// not PropertyStreams. All default to 0 (no taper).
+// Ease — all plain float64 percentages stored on disk as float64 big-endian at
+// cdat[0:8]. AE does not animate them, so they are stored as values, not
+// PropertyStreams. All default to 0 (no taper).
 //
-// V2.2 supports only the always-active %-mode controls. The Length Units enum
-// and the pixel-mode mirror streams (StartWidthPx/EndWidthPx) are AE-elided at
-// the % default and not modeled — see lowerStrokeNode limitations.
+// Only the always-active percent-mode controls are modeled. The Length Units
+// enum and the pixel-mode mirror streams are AE-elided at the percent default
+// and not modeled.
 type StrokeTaper struct {
 	startLength, endLength float64
 	startWidth, endWidth   float64
@@ -2320,32 +2936,74 @@ func (t *StrokeTaper) EndWidth() float64    { return t.endWidth }
 func (t *StrokeTaper) StartEase() float64   { return t.startEase }
 func (t *StrokeTaper) EndEase() float64     { return t.endEase }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="taper start length,渐细起始长度,start taper length"
+// @summary    Set the taper start length
+// @param      v  the taper start length in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      taper start length,渐细起始长度,start taper length
 func (t *StrokeTaper) SetStartLength(v float64) error { t.startLength = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="taper end length,渐细结束长度,end taper length"
+// @summary    Set the taper end length
+// @param      v  the taper end length in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      taper end length,渐细结束长度,end taper length
 func (t *StrokeTaper) SetEndLength(v float64) error { t.endLength = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="taper start width,渐细起始宽度,start taper width"
+// @summary    Set the taper start width
+// @param      v  the taper start width in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      taper start width,渐细起始宽度,start taper width
 func (t *StrokeTaper) SetStartWidth(v float64) error { t.startWidth = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="taper end width,渐细结束宽度,end taper width"
+// @summary    Set the taper end width
+// @param      v  the taper end width in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      taper end width,渐细结束宽度,end taper width
 func (t *StrokeTaper) SetEndWidth(v float64) error { t.endWidth = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="taper start ease,渐细起始缓动,start ease"
+// @summary    Set the taper start ease
+// @param      v  the taper start ease in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      taper start ease,渐细起始缓动,start ease
 func (t *StrokeTaper) SetStartEase(v float64) error { t.startEase = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="taper end ease,渐细结束缓动,end ease"
+// @summary    Set the taper end ease
+// @param      v  the taper end ease in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      taper end ease,渐细结束缓动,end ease
 func (t *StrokeTaper) SetEndEase(v float64) error { t.endEase = v; return nil }
 
-// StrokeWave models the Stroke "Wave" group's Wavelength-mode scalars
+// StrokeWave models the Stroke "Wave" group's wavelength-mode scalars
 // (`ADBE Vector Stroke Wave`): Amount (%), Wavelength (px), Phase (deg) — stored
-// on disk as float64 BE at cdat[0:8]. Defaults: Amount 0, Wavelength 100,
-// Phase 0.
+// on disk as float64 big-endian at cdat[0:8]. Defaults: Amount 0, Wavelength
+// 100, Phase 0.
 //
-// V2.2 supports only the Wavelength-mode controls. The Units enum (Wavelength
-// vs Cycles) and the Cycles stream are AE-elided at the Wavelength default and
-// not modeled — Wave is always emitted in Wavelength mode.
+// Only the wavelength-mode controls are modeled. The Units enum and the Cycles
+// stream are AE-elided at the wavelength default and not modeled — Wave is
+// always emitted in wavelength mode.
 type StrokeWave struct {
 	amount     float64
 	wavelength float64
@@ -2358,28 +3016,47 @@ func (w *StrokeWave) Amount() float64     { return w.amount }
 func (w *StrokeWave) Wavelength() float64 { return w.wavelength }
 func (w *StrokeWave) Phase() float64      { return w.phase }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="wave amount,波浪幅度,stroke wave amount"
+// @summary    Set the stroke wave amount
+// @param      v  the wave amount in percent
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wave amount,波浪幅度,stroke wave amount
 func (w *StrokeWave) SetAmount(v float64) error { w.amount = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="wave wavelength,波浪波长,stroke wavelength"
+// @summary    Set the stroke wavelength
+// @param      v  the wavelength in pixels
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wave wavelength,波浪波长,stroke wavelength
 func (w *StrokeWave) SetWavelength(v float64) error { w.wavelength = v; return nil }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025 alias="wave phase,波浪相位,stroke wave phase"
+// @summary    Set the stroke wave phase
+// @param      v  the wave phase in degrees
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeTaperWave_AEShipGate_AE2020,TestV2_2_StrokeTaperWave_AEShipGate_AE2025
+// @since      AE2020
+// @alias      wave phase,波浪相位,stroke wave phase
 func (w *StrokeWave) SetPhase(v float64) error { w.phase = v; return nil }
 
 // StrokeDashes models the Stroke "Dashes" group (`ADBE Vector Stroke Dashes`):
-// a single Dash + Gap pair, stored on disk as float64 BE at cdat[0:8] —
+// a single Dash + Gap pair, stored on disk as float64 big-endian at cdat[0:8] —
 // identical encoding to the other stroke scalars, nested one level deeper inside
 // the group's LIST(tdgp). The group is hidden-by-default: a default stroke emits
-// the Dashes group as an empty placeholder (solid line). When Enabled, the
+// the Dashes group as an empty placeholder (solid line). When enabled, the
 // serializer swaps to a dashed stroke-body template that carries the Dash 1 /
 // Gap 1 slots and overwrites them with these values.
 //
-// V2.2 models exactly one Dash + Gap pair (the common dashed/dotted-line case).
-// Deferred: additional Dash 2/3 + Gap 2/3 pairs (AE emits only enabled pairs,
-// each pair is a separate template variant), and Offset — which AE keeps hidden
-// until a dash is enabled and refuses to set via ScriptingAPI, so no template
-// can carry its slot. Dash/Gap are not animated in V2.2.
+// Exactly one Dash + Gap pair is modeled (the common dashed/dotted-line case).
+// Additional Dash/Gap pairs and Offset are not modeled. Dash/Gap are not
+// animated.
 type StrokeDashes struct {
 	enabled   bool
 	dash, gap float64
@@ -2393,18 +3070,34 @@ func (d *StrokeDashes) Enabled() bool { return d.enabled }
 func (d *StrokeDashes) Dash() float64 { return d.dash }
 func (d *StrokeDashes) Gap() float64  { return d.gap }
 
-// Enable turns dashing on (the serializer emits the Dash + Gap slots). Disable
-// reverts to a solid stroke.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025 alias="enable dashes,启用虚线,dashed stroke,enable"
+// @summary    Enable dashing on the stroke
+// @description The serializer emits the Dash and Gap slots.
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025
+// @since      AE2020
+// @alias      enable dashes,启用虚线,dashed stroke,enable
 func (d *StrokeDashes) Enable() { d.enabled = true }
 
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025 alias="disable dashes,禁用虚线,solid stroke,disable"
+// @summary    Disable dashing on the stroke
+// @description Reverts to a solid stroke.
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025
+// @since      AE2020
+// @alias      disable dashes,禁用虚线,solid stroke,disable
 func (d *StrokeDashes) Disable() { d.enabled = false }
 
-// SetDash sets the dash length and enables dashing. Rejects negative values.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025 alias="dash length,虚线段长度,dash,dashes"
+// @summary    Set the dash length and enable dashing
+// @param      v  the dash length in pixels (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025
+// @since      AE2020
+// @alias      dash length,虚线段长度,dash,dashes
 func (d *StrokeDashes) SetDash(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("StrokeDashes.SetDash: %g out of range (want >= 0)", v)
@@ -2414,9 +3107,14 @@ func (d *StrokeDashes) SetDash(v float64) error {
 	return nil
 }
 
-// SetGap sets the gap length and enables dashing. Rejects negative values.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025 alias="gap length,虚线间距,gap,dashes gap"
+// @summary    Set the gap length and enable dashing
+// @param      v  the gap length in pixels (must be non-negative)
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_StrokeDashes_AEShipGate_AE2020,TestV2_2_StrokeDashes_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gap length,虚线间距,gap,dashes gap
 func (d *StrokeDashes) SetGap(v float64) error {
 	if v < 0 {
 		return fmt.Errorf("StrokeDashes.SetGap: %g out of range (want >= 0)", v)
@@ -2426,7 +3124,7 @@ func (d *StrokeDashes) SetGap(v float64) error {
 	return nil
 }
 
-// Properties returns the escape-hatch β view.
+// Properties returns the escape-hatch view.
 func (s *StrokeNode) Properties() *PropertyGroup {
 	return &PropertyGroup{
 		Name: "Stroke",
@@ -2438,28 +3136,27 @@ func (s *StrokeNode) Properties() *PropertyGroup {
 	}
 }
 
-// PropertyGroup is the escape-hatch β surface. Currently the minimal
-// struct — `Name` and the empty `Children` / `streams` maps —
-// so the field exists on VectorGroup.Transform / node Properties() but
-// none of the typed lookup methods (`Float64Stream`, `Vec2Stream`, ...)
+// PropertyGroup is the escape-hatch surface. Currently the minimal struct —
+// Name and the empty Children / streams maps — so the field exists on
+// VectorGroup.Transform / node Properties() but none of the typed lookup methods
 // are wired yet.
 type PropertyGroup struct {
 	Name      string
 	Children  map[string]*PropertyGroup
 	streams   map[string]any
-	Separated bool // false in V2.2; V2.3+ exposes separated dimension setters
+	Separated bool // dimension separation reserved for nested-group support
 }
 
 // newGroupTransform constructs the identity Transform PropertyGroup placeholder
-// for a fresh VectorGroup. RootGroup default-serialized form has no
-// `ADBE Vector Transform Group` — this placeholder stays nil-children
-// until the escape hatch wires it.
+// for a fresh VectorGroup. A RootGroup default-serialized form has no
+// `ADBE Vector Transform Group` — this placeholder stays nil-children until the
+// escape hatch wires it.
 func newGroupTransform() *PropertyGroup {
 	return &PropertyGroup{Name: "Transform"}
 }
 
 // Child returns the nested PropertyGroup by name, or nil if not present.
-// Use for walking deeper-than-leaf escape-hatch trees (V2.3+ nested groups).
+// Use for walking deeper-than-leaf escape-hatch trees.
 func (pg *PropertyGroup) Child(name string) *PropertyGroup {
 	if pg == nil || pg.Children == nil {
 		return nil

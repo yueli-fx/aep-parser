@@ -460,118 +460,255 @@ var NewLayerTransform = scene.NewLayerTransform
 
 // func re-exports (signatures mirror the pre-split aep funcs)
 
-// Capabilities returns the AECapabilities matrix for the given AE target.
-//
-//aep:cap domain=meta tier=stable verify=none alias="capabilities,能力矩阵,版本能力,AE target"
+// @summary    Report the capability matrix for a given AE target version
+// @param      target  the AE version to query capabilities for
+// @returns    the capability matrix describing what the target version supports
+// @domain     meta
+// @stability  stable
+// @verify     none
+// @since      AE2020
+// @alias      capabilities,能力矩阵,版本能力,AE target
 func Capabilities(target AETarget) AECapabilities { return scene.Capabilities(target) }
 
-// NewEllipseNode returns a detached ellipse shape node.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 alias="ellipse,椭圆,圆,oval"
+// @summary    Create a detached ellipse shape node
+// @returns    a new ellipse shape node not yet attached to any layer
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @alias      ellipse,椭圆,圆,oval
 func NewEllipseNode() *EllipseNode { return scene.NewEllipseNode() }
 
-// NewFillNode returns a detached fill shape node.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 boundary="fill 随形状渲染验证(颜色像素门禁)" alias="fill,填充,纯色填充,solid color"
+// @summary    Create a detached fill shape node
+// @returns    a new fill shape node not yet attached to any layer
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   verified by rendered color pixels as part of a shape
+// @alias      fill,填充,纯色填充,solid color
 func NewFillNode() *FillNode { return scene.NewFillNode() }
 
-// NewGradientFillNode returns a detached gradient-fill shape node.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025 alias="gradient fill,渐变填充,线性渐变,径向渐变"
+// @summary    Create a detached gradient-fill shape node
+// @returns    a new gradient-fill shape node not yet attached to any layer
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientFill_AEShipGate_AE2020,TestV2_2_GradientFill_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient fill,渐变填充,线性渐变,径向渐变
 func NewGradientFillNode() *GradientFillNode { return scene.NewGradientFillNode() }
 
-// NewGradientStrokeNode returns a detached gradient-stroke shape node.
-//
-//aep:cap domain=gradient tier=stable verify=render-pixel gate=TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025,TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025 alias="gradient stroke,渐变描边"
+// @summary    Create a detached gradient-stroke shape node
+// @returns    a new gradient-stroke shape node not yet attached to any layer
+// @domain     gradient
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_GradientStroke_AEShipGate_AE2020,TestV2_2_GradientStroke_AEShipGate_AE2025,TestMGGradStrokeGeom_AEShipGate_AE2020,TestMGGradStrokeGeom_AEShipGate_AE2025
+// @since      AE2020
+// @alias      gradient stroke,渐变描边
 func NewGradientStrokeNode() *GradientStrokeNode { return scene.NewGradientStrokeNode() }
 
-// NewPathNode returns a detached path shape node.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Path_AEShipGate_AE2020,TestV2_2_Path_AEShipGate_AE2025 alias="path,路径,自定义形状,bezier,贝塞尔"
+// @summary    Create a detached path shape node
+// @returns    a new custom-path shape node not yet attached to any layer
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Path_AEShipGate_AE2020,TestV2_2_Path_AEShipGate_AE2025
+// @since      AE2020
+// @alias      path,路径,自定义形状,bezier,贝塞尔
 func NewPathNode() *PathNode { return scene.NewPathNode() }
 
-// NewRectNode returns a detached rectangle shape node.
-//
-//aep:cap domain=shape tier=alpha verify=render-pixel gate=TestV2_2_RectKf_AEShipGate_AE2020,TestV2_2_RectKf_AEShipGate_AE2025 boundary="rect via keyframe render-gated;静态 rect Path/Stroke embed bytes deferred" alias="rect,矩形,方块,rectangle"
+// @summary    Create a detached rectangle shape node
+// @returns    a new rectangle shape node not yet attached to any layer
+// @domain     shape
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestV2_2_RectKf_AEShipGate_AE2020,TestV2_2_RectKf_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   only the keyframed rectangle is render-verified; static rectangle path and stroke embedded bytes are not yet covered
+// @alias      rect,矩形,方块,rectangle
 func NewRectNode() *RectNode { return scene.NewRectNode() }
 
-// NewStrokeNode returns a detached stroke shape node.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025 alias="stroke,描边,线条,outline"
+// @summary    Create a detached stroke shape node
+// @returns    a new stroke shape node not yet attached to any layer
+// @domain     shape
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestV2_2_Stroke_AEShipGate_AE2020,TestV2_2_Stroke_AEShipGate_AE2025
+// @since      AE2020
+// @alias      stroke,描边,线条,outline
 func NewStrokeNode() *StrokeNode { return scene.NewStrokeNode() }
 
-// NewTrimNode returns a detached Trim Paths filter node (identity: Start=0,
-// End=100, Offset=0).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="trim paths,修剪路径,描边动画,write-on,线条生长"
+// @summary     Create a detached Trim Paths filter node
+// @description Returns the identity Trim Paths filter with Start=0, End=100,
+//   and Offset=0, so it leaves the path unchanged until its values are set.
+// @returns     a new Trim Paths filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGTrim_AEShipGate_AE2020,TestMGTrim_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       trim paths,修剪路径,描边动画,write-on,线条生长
 func NewTrimNode() *TrimNode { return scene.NewTrimNode() }
 
-// NewRepeaterNode returns a detached Repeater filter node (3 copies, identity
-// transform).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025,TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="repeater,重复,阵列,复制"
+// @summary     Create a detached Repeater filter node
+// @description Returns a Repeater filter that makes 3 copies with an identity
+//   transform, so each copy sits on top of the original until configured.
+// @returns     a new Repeater filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGRepeater_AEShipGate_AE2020,TestMGRepeater_AEShipGate_AE2025,TestMGRepeaterOrder_AEShipGate_AE2020,TestMGRepeaterOrder_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       repeater,重复,阵列,复制
 func NewRepeaterNode() *RepeaterNode { return scene.NewRepeaterNode() }
 
-// NewRoundCornersNode returns a detached Round Corners filter node (Radius=10).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="round corners,圆角"
+// @summary     Create a detached Round Corners filter node
+// @description Returns a Round Corners filter with Radius=10 as its starting value.
+// @returns     a new Round Corners filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGRoundCorners_AEShipGate_AE2020,TestMGRoundCorners_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       round corners,圆角
 func NewRoundCornersNode() *RoundCornersNode { return scene.NewRoundCornersNode() }
 
-// NewOffsetPathsNode returns a detached Offset Paths filter node (Amount=10).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGOffset_AEShipGate_AE2020,TestMGOffset_AEShipGate_AE2025,TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="offset paths,偏移路径,描边膨胀,inflate"
+// @summary     Create a detached Offset Paths filter node
+// @description Returns an Offset Paths filter with Amount=10 as its starting value.
+// @returns     a new Offset Paths filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGOffset_AEShipGate_AE2020,TestMGOffset_AEShipGate_AE2025,TestMGOffsetExtras_AEShipGate_AE2020,TestMGOffsetExtras_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       offset paths,偏移路径,描边膨胀,inflate
 func NewOffsetPathsNode() *OffsetPathsNode { return scene.NewOffsetPathsNode() }
 
-// NewMergePathsNode returns a detached Merge Paths filter node (Type=Merge).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025,TestMGMergeModes_AEShipGate_AE2020,TestMGMergeModes_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="merge paths,合并路径,布尔运算,boolean"
+// @summary     Create a detached Merge Paths filter node
+// @description Returns a Merge Paths filter set to the Merge combine mode.
+// @returns     a new Merge Paths filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGMerge_AEShipGate_AE2020,TestMGMerge_AEShipGate_AE2025,TestMGMergeModes_AEShipGate_AE2020,TestMGMergeModes_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       merge paths,合并路径,布尔运算,boolean
 func NewMergePathsNode() *MergePathsNode { return scene.NewMergePathsNode() }
 
-// NewZigZagNode returns a detached ZigZag filter node (Size=5, Detail=10).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025,TestMGZigZagPoints_AEShipGate_AE2020,TestMGZigZagPoints_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="zigzag,锯齿,波浪边"
+// @summary     Create a detached ZigZag filter node
+// @description Returns a ZigZag filter with Size=5 and Detail=10 as its
+//   starting values.
+// @returns     a new ZigZag filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGZigZag_AEShipGate_AE2020,TestMGZigZag_AEShipGate_AE2025,TestMGZigZagPoints_AEShipGate_AE2020,TestMGZigZagPoints_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       zigzag,锯齿,波浪边
 func NewZigZagNode() *ZigZagNode { return scene.NewZigZagNode() }
 
-// NewStarNode returns a detached Star shape node (default 5-point star).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025,TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025 alias="star,星形,多边形,polygon,五角星"
+// @summary     Create a detached Star shape node
+// @description Returns a Star shape configured as a 5-point star by default.
+// @returns     a new Star shape node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGStar_AEShipGate_AE2020,TestMGStar_AEShipGate_AE2025,TestMGPolygon_AEShipGate_AE2020,TestMGPolygon_AEShipGate_AE2025
+// @since       AE2020
+// @alias       star,星形,多边形,polygon,五角星
 func NewStarNode() *StarNode { return scene.NewStarNode() }
 
-// NewPuckerBloatNode returns a detached Pucker & Bloat filter node (Amount=0,
-// the no-op identity).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGPuckerBloat_AEShipGate_AE2020,TestMGPuckerBloat_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="pucker bloat,缩拢膨胀,尖角圆角"
+// @summary     Create a detached Pucker & Bloat filter node
+// @description Returns a Pucker & Bloat filter with Amount=0, which leaves the
+//   path unchanged until its value is set.
+// @returns     a new Pucker & Bloat filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGPuckerBloat_AEShipGate_AE2020,TestMGPuckerBloat_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       pucker bloat,缩拢膨胀,尖角圆角
 func NewPuckerBloatNode() *PuckerBloatNode { return scene.NewPuckerBloatNode() }
 
-// NewTwistNode returns a detached Twist filter node (Angle=0, the no-op
-// identity).
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestMGTwist_AEShipGate_AE2020,TestMGTwist_AEShipGate_AE2025,TestMGTwistCenter_AEShipGate_AE2020,TestMGTwistCenter_AEShipGate_AE2025 incident=trim-paths-vector-filter-re alias="twist,扭转,旋涡,swirl"
+// @summary     Create a detached Twist filter node
+// @description Returns a Twist filter with Angle=0, which leaves the path
+//   unchanged until its value is set.
+// @returns     a new Twist filter node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestMGTwist_AEShipGate_AE2020,TestMGTwist_AEShipGate_AE2025,TestMGTwistCenter_AEShipGate_AE2020,TestMGTwistCenter_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @alias       twist,扭转,旋涡,swirl
 func NewTwistNode() *TwistNode { return scene.NewTwistNode() }
 
-// NewWigglePathsNode returns a detached Wiggle Paths filter node (Size=0, the
-// no-op identity).
-//
-//aep:cap domain=shape tier=alpha verify=render-pixel gate=TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025 incident=trim-paths-vector-filter-re boundary="基本 render-gated;Correlation/Temporal·Spatial Phase/Roughen Points 调制 evidence-defer" alias="wiggle paths,抖动路径,粗糙化,roughen"
+// @summary     Create a detached Wiggle Paths filter node
+// @description Returns a Wiggle Paths filter with Size=0, which leaves the path
+//   unchanged until its value is set.
+// @returns     a new Wiggle Paths filter node not yet attached to any layer
+// @domain      shape
+// @stability   alpha
+// @verify      render-pixel
+// @gate        TestMGWiggle_AEShipGate_AE2020,TestMGWiggle_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @boundary    only the basic case is render-verified; Correlation, Temporal and Spatial Phase, and Roughen Points controls are not yet covered
+// @alias       wiggle paths,抖动路径,粗糙化,roughen
 func NewWigglePathsNode() *WigglePathsNode { return scene.NewWigglePathsNode() }
 
-// NewWiggleTransformNode returns a detached Wiggle Transform filter node (zero
-// amplitudes, the no-op identity).
-//
-//aep:cap domain=shape tier=alpha verify=render-pixel gate=TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025 incident=trim-paths-vector-filter-re boundary="基本 render-gated;Correlation/Phase 调制 evidence-defer" alias="wiggle transform,抖动变换"
+// @summary     Create a detached Wiggle Transform filter node
+// @description Returns a Wiggle Transform filter with zero amplitudes, which
+//   leaves the shape unchanged until its values are set.
+// @returns     a new Wiggle Transform filter node not yet attached to any layer
+// @domain      shape
+// @stability   alpha
+// @verify      render-pixel
+// @gate        TestMGWiggleTransform_AEShipGate_AE2020,TestMGWiggleTransform_AEShipGate_AE2025
+// @since       AE2020
+// @incident    trim-paths-vector-filter-re
+// @boundary    only the basic case is render-verified; Correlation and Phase controls are not yet covered
+// @alias       wiggle transform,抖动变换
 func NewWiggleTransformNode() *WiggleTransformNode { return scene.NewWiggleTransformNode() }
 
-// NewVectorGroup returns a detached vector group shape node.
-//
-//aep:cap domain=shape tier=stable verify=render-pixel gate=TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025 boundary="形状内容容器,承载子节点(随形状渲染验证)" alias="vector group,形状组,shape contents,分组"
+// @summary     Create a detached vector group shape node
+// @returns     a new vector group shape node not yet attached to any layer
+// @domain      shape
+// @stability   stable
+// @verify      render-pixel
+// @gate        TestV2_2_Ellipse_AEShipGate_AE2020,TestV2_2_Ellipse_AEShipGate_AE2025
+// @since       AE2020
+// @boundary    a container that holds child shape nodes; verified by rendered pixels as part of a shape
+// @alias       vector group,形状组,shape contents,分组
 func NewVectorGroup() *VectorGroup { return scene.NewVectorGroup() }
 
-// TextEncodedByteLen returns the encoded byte length SetText would produce for s.
-//
-//aep:cap domain=meta tier=stable verify=none alias="text byte length,编码长度,utf 长度"
+// @summary    Report the encoded byte length SetText would produce for a string
+// @param      s  the text whose encoded byte length to measure
+// @returns    the number of bytes the string would occupy once encoded
+// @domain     meta
+// @stability  stable
+// @verify     none
+// @since      AE2020
+// @alias      text byte length,编码长度,utf 长度
 func TextEncodedByteLen(s string) int { return scene.TextEncodedByteLen(s) }
 
-// WrapShapeLayer wraps a parsed shape Layer into a ShapeLayer view.
-//
-//aep:cap domain=meta tier=stable verify=none alias="wrap shape layer,形状层视图,shape layer"
+// @summary    Wrap a parsed shape layer into a higher-level shape view
+// @param      layer  the parsed shape layer to wrap
+// @returns    a shape view over the given layer
+// @domain     meta
+// @stability  stable
+// @verify     none
+// @since      AE2020
+// @alias      wrap shape layer,形状层视图,shape layer
 func WrapShapeLayer(layer *Layer) *ShapeLayer { return scene.WrapShapeLayer(layer) }
