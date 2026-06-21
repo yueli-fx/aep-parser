@@ -105,32 +105,6 @@
   {
     "symbol": "SetComment",
     "kind": "method",
-    "recv": "*Marker",
-    "signature": "func (m *Marker) SetComment(s string) error",
-    "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block).",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMarker_AEShipGate_AE2020",
-        "TestMarker_AEShipGate_AE2025"
-      ],
-      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用",
-      "incident": null,
-      "alias": [
-        "marker comment",
-        "标记注释",
-        "cue point comment",
-        "标记文本"
-      ]
-    }
-  },
-  {
-    "symbol": "SetComment",
-    "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetComment(comment string) error",
     "summary": "SetComment writes a project-panel comment on the composition (Item- level, distinct from Layer.SetComment).",
@@ -151,6 +125,32 @@
         "合成备注",
         "项目面板备注",
         "item comment"
+      ]
+    }
+  },
+  {
+    "symbol": "SetComment",
+    "kind": "method",
+    "recv": "*Marker",
+    "signature": "func (m *Marker) SetComment(s string) error",
+    "summary": "SetComment rewrites the marker's primary comment text (first Utf8 child of the Nmrd block).",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMarker_AEShipGate_AE2020",
+        "TestMarker_AEShipGate_AE2025"
+      ],
+      "boundary": "length-variable(Utf8 chunk 替换+父 LIST size 重算);AE gate 在 AddMarker 后调用",
+      "incident": null,
+      "alias": [
+        "marker comment",
+        "标记注释",
+        "cue point comment",
+        "标记文本"
       ]
     }
   },
@@ -282,32 +282,6 @@
   {
     "symbol": "SetDuration",
     "kind": "method",
-    "recv": "*Marker",
-    "signature": "func (m *Marker) SetDuration(seconds float64) error",
-    "summary": "SetDuration writes a new marker duration (seconds) to NmHd @0x08.",
-    "has_cap": true,
-    "cap": {
-      "domain": "comp",
-      "tier": "stable",
-      "verify": "ae-accept",
-      "minver": "2020",
-      "gate": [
-        "TestMarkerFields_AEShipGate_AE2020",
-        "TestMarkerFields_AEShipGate_AE2025"
-      ],
-      "boundary": "length-preserving(4B NmHd);0 → point marker;负值夹至 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)",
-      "incident": null,
-      "alias": [
-        "marker duration",
-        "标记时长",
-        "cue duration",
-        "区间标记"
-      ]
-    }
-  },
-  {
-    "symbol": "SetDuration",
-    "kind": "method",
     "recv": "*Composition",
     "signature": "func (c *Composition) SetDuration(seconds float64) error",
     "summary": "SetDuration writes a new composition duration (seconds) to cdta @0xB0 as a uint32 frame count (= round(seconds × FrameRate)).",
@@ -329,6 +303,32 @@
         "comp duration",
         "时长",
         "持续时间"
+      ]
+    }
+  },
+  {
+    "symbol": "SetDuration",
+    "kind": "method",
+    "recv": "*Marker",
+    "signature": "func (m *Marker) SetDuration(seconds float64) error",
+    "summary": "SetDuration writes a new marker duration (seconds) to NmHd @0x08.",
+    "has_cap": true,
+    "cap": {
+      "domain": "comp",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestMarkerFields_AEShipGate_AE2020",
+        "TestMarkerFields_AEShipGate_AE2025"
+      ],
+      "boundary": "length-preserving(4B NmHd);0 → point marker;负值夹至 0;双版本 AE gated(marker-fields;AE DOM duration=1.5 实读)",
+      "incident": null,
+      "alias": [
+        "marker duration",
+        "标记时长",
+        "cue duration",
+        "区间标记"
       ]
     }
   },
@@ -1749,31 +1749,6 @@
   {
     "symbol": "SetEndPoint",
     "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error",
-    "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke end point",
-        "渐变描边终点",
-        "gradient direction"
-      ]
-    }
-  },
-  {
-    "symbol": "SetEndPoint",
-    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetEndPoint(v [2]float64) error",
     "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
@@ -1798,11 +1773,11 @@
     }
   },
   {
-    "symbol": "SetGradientType",
+    "symbol": "SetEndPoint",
     "kind": "method",
     "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
-    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
+    "signature": "func (n *GradientStrokeNode) SetEndPoint(v [2]float64) error",
+    "summary": "SetEndPoint sets the gradient ramp's end point (shape-local coords).",
     "has_cap": true,
     "cap": {
       "domain": "gradient",
@@ -1816,12 +1791,9 @@
       "boundary": "",
       "incident": null,
       "alias": [
-        "gradient stroke type",
-        "渐变描边类型",
-        "linear",
-        "radial",
-        "线性",
-        "径向"
+        "gradient stroke end point",
+        "渐变描边终点",
+        "gradient direction"
       ]
     }
   },
@@ -1846,6 +1818,34 @@
       "alias": [
         "gradient type",
         "渐变类型",
+        "linear",
+        "radial",
+        "线性",
+        "径向"
+      ]
+    }
+  },
+  {
+    "symbol": "SetGradientType",
+    "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetGradientType(t GradientType) error",
+    "summary": "SetGradientType selects linear (default) or radial ramp shape.",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke type",
+        "渐变描边类型",
         "linear",
         "radial",
         "线性",
@@ -1907,6 +1907,31 @@
   {
     "symbol": "SetHighlightLength",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
+    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke highlight length",
+        "渐变描边高亮偏移",
+        "radial highlight stroke"
+      ]
+    }
+  },
+  {
+    "symbol": "SetHighlightLength",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetHighlightLength(v float64) error",
     "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
@@ -1927,31 +1952,6 @@
         "高亮偏移",
         "radial highlight",
         "渐变高亮"
-      ]
-    }
-  },
-  {
-    "symbol": "SetHighlightLength",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetHighlightLength(v float64) error",
-    "summary": "SetHighlightLength offsets a radial gradient's bright centre off the geometric centre by the given percent of the radius (-100..100; 0 = centred).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke highlight length",
-        "渐变描边高亮偏移",
-        "radial highlight stroke"
       ]
     }
   },
@@ -2039,6 +2039,31 @@
   {
     "symbol": "SetStartPoint",
     "kind": "method",
+    "recv": "*GradientStrokeNode",
+    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
+    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
+    "has_cap": true,
+    "cap": {
+      "domain": "gradient",
+      "tier": "stable",
+      "verify": "render-pixel",
+      "minver": "2020",
+      "gate": [
+        "TestMGGradStrokeGeom_AEShipGate_AE2020",
+        "TestMGGradStrokeGeom_AEShipGate_AE2025"
+      ],
+      "boundary": "",
+      "incident": null,
+      "alias": [
+        "gradient stroke start point",
+        "渐变描边起点",
+        "gradient direction"
+      ]
+    }
+  },
+  {
+    "symbol": "SetStartPoint",
+    "kind": "method",
     "recv": "*GradientFillNode",
     "signature": "func (n *GradientFillNode) SetStartPoint(v [2]float64) error",
     "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
@@ -2059,31 +2084,6 @@
         "渐变起点",
         "gradient direction",
         "渐变方向"
-      ]
-    }
-  },
-  {
-    "symbol": "SetStartPoint",
-    "kind": "method",
-    "recv": "*GradientStrokeNode",
-    "signature": "func (n *GradientStrokeNode) SetStartPoint(v [2]float64) error",
-    "summary": "SetStartPoint sets the gradient ramp's start point (shape-local coords).",
-    "has_cap": true,
-    "cap": {
-      "domain": "gradient",
-      "tier": "stable",
-      "verify": "render-pixel",
-      "minver": "2020",
-      "gate": [
-        "TestMGGradStrokeGeom_AEShipGate_AE2020",
-        "TestMGGradStrokeGeom_AEShipGate_AE2025"
-      ],
-      "boundary": "",
-      "incident": null,
-      "alias": [
-        "gradient stroke start point",
-        "渐变描边起点",
-        "gradient direction"
       ]
     }
   },
@@ -3768,6 +3768,34 @@
         "标签",
         "颜色标签",
         "时间线颜色"
+      ]
+    }
+  },
+  {
+    "symbol": "SetLayerTransform",
+    "kind": "func",
+    "signature": "func SetLayerTransform(layer *Layer, t *LayerTransform) error",
+    "summary": "SetLayerTransform replaces a parsed layer's Transform Group with a lowering of t — the from-scratch path for ANIMATED (or non-default-static) transform on layers that are not V2.2 ShapeLayers (text / precomp / footage / solid / null).",
+    "has_cap": true,
+    "cap": {
+      "domain": "layer-set",
+      "tier": "stable",
+      "verify": "ae-accept",
+      "minver": "2020",
+      "gate": [
+        "TestSetLayerTransform_AEShipGate_AE2020",
+        "TestSetLayerTransform_AEShipGate_AE2025"
+      ],
+      "boundary": "层须 parsed(Reopen);整组替换 Transform Group(物化 default-elided 通道);gate 验 text 层 anchor+pos3kf+op3kf,opacity 单位 percent;Scale/Rotation 走同路未单独 gate",
+      "incident": [
+        "transform-group-default-omission"
+      ],
+      "alias": [
+        "layer transform",
+        "层变换",
+        "animate layer position",
+        "animate layer opacity",
+        "materialize transform"
       ]
     }
   },

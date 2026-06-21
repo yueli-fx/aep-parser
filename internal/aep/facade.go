@@ -212,6 +212,32 @@ func NewTextLayer(c *Composition, name string) (*Layer, error) {
 	return serializer.NewTextLayer(c, name)
 }
 
+// SetLayerTransform replaces a parsed layer's Transform Group with a lowering of
+// t — the from-scratch path for ANIMATED (or non-default-static) transform on
+// layers that are not V2.2 ShapeLayers (text / precomp / footage / solid / null).
+//
+// Why a dedicated call: those layers come from embedded templates whose Transform
+// Group ELIDES default channels (AE default-omission). A fresh NewTextLayer has
+// no "ADBE Position" / "ADBE Opacity" / "ADBE Anchor Point" chunk at all — only
+// Position_0/_1, Orientation, RotateX/Y, Envir — so SetPosition (no materialized
+// property) and AnimateScalarKeyframes / InsertKeyframe (no cdat to convert)
+// cannot reach them. SetLayerTransform lowers the full canonical Transform Group
+// the way V2.2 ShapeLayers do and swaps it in, materializing every channel.
+//
+// Build t with [NewLayerTransform] (defaults anchor 0,0 · position 0,0 · scale
+// 100,100 · rotation 0 · opacity 100), then set static values or keyframes on its
+// streams: t.Position()/AnchorPoint() are pixels, Scale() is percent, Rotation()
+// degrees, Opacity() percent (0–100). Keyframe via the stream's AddKeyframe*.
+// The layer must be parsed (round-trip via [Reopen] for a freshly built layer).
+//
+// Stable: AE 2020 + AE 2025 ship-gate green (text layer; accept + DOM
+// valueAtTime readback of materialized anchor + 3-kf Position + 3-kf Opacity).
+//
+//aep:cap domain=layer-set tier=stable verify=ae-accept gate=TestSetLayerTransform_AEShipGate_AE2020,TestSetLayerTransform_AEShipGate_AE2025 boundary="层须 parsed(Reopen);整组替换 Transform Group(物化 default-elided 通道);gate 验 text 层 anchor+pos3kf+op3kf,opacity 单位 percent;Scale/Rotation 走同路未单独 gate" incident=transform-group-default-omission alias="layer transform,层变换,animate layer position,animate layer opacity,materialize transform"
+func SetLayerTransform(layer *Layer, t *LayerTransform) error {
+	return serializer.SetLayerTransform(layer, t)
+}
+
 // NewSolidLayer adds a new solid-color layer to the composition and returns it.
 //
 // A solid is footage-backed: the call also creates a backing solid footage

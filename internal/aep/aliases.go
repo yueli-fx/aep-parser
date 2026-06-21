@@ -453,6 +453,11 @@ const (
 	TrackMatteNone                                = scene.TrackMatteNone
 )
 
+// NewLayerTransform constructs a default-valued LayerTransform (anchor 0,0 ·
+// position 0,0 · scale 100,100 · rotation 0 · opacity 100) for use with
+// SetLayerTransform. Fill its streams with static values or keyframes.
+var NewLayerTransform = scene.NewLayerTransform
+
 // func re-exports (signatures mirror the pre-split aep funcs)
 
 // Capabilities returns the AECapabilities matrix for the given AE target.
