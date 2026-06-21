@@ -8,7 +8,7 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-Task 1.2 ② テキスト（text 层 "GLITCH" + tracking/char-offset 动画器；先查 capindex 有无 setter，无则 RE text-animator）→ [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支待办：① 补 AE 2020 侧 render（AE 2025 已像素级一致）；修 `NewComposition` 分数 fps（29.97）cdta 时基不一致（详 [[ntsc-tickrate-derive-3x-off]] 第二发现）。
+**高杠杆 gap #1：动画化模板层 transform**（给 text/precomp 等 embed-template 层加 static→animated Position/Opacity 通道，复用 `lowerLayerTransform` 已有的关键帧注入；当前只 ShapeLayer PropertyStream 有，`InsertKeyframe` 需 ≥1 既有 kf、`Animate*` 不覆盖普通层 transform）——解锁 comp ②⑤⑥⑦⑧ 的层级动画。完后再 RE 两个 text 动画器（Tracking / Character Offset 模板字节）→ 拼 comp ② → [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支：① 补 AE 2020 render；修 `NewComposition` 分数 fps cdta 时基（[[ntsc-tickrate-derive-3x-off]] 第二发现）。
 
 ## In Progress
 
