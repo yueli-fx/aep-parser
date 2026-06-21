@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-21 · claude · Stage: 两线并行（Booyah 复刻 comp②；@tag 文档 schema 已设计待实现）
+Updated: 2026-06-21 · claude · Stage: 两线并行（Booyah 复刻 comp②；@tag 文档 schema Step 1 完成,待 Step 2 批量转换）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -10,7 +10,7 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **两条 active 线,下个对话挑一条继续:**
 
-**A. @tag 文档 schema（刚设计完,断在这里）** → spec [2026-06-21-api-doc-tag-schema.md](specs/2026-06-21-api-doc-tag-schema.md)（`graduate:true`,已过 3 家 review + 用户多轮加固:强字段规则 + 一键 validator + docgen 生成期自校验 + `internal/apidoc` 单一词表源 + 2 步迁移分提交流）。**下一步 = 走 `superpowers:writing-plans` 出实现计划**,Step 1：建 `internal/apidoc`(parse+schema+validate)→ capindex 切过去 → docgen 加 @param 渲染+自校验 → 转换器 → facade.go 样板。
+**A. @tag 文档 schema（Step 1 完成,下一步 Step 2）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。**Step 1 全部 DONE**：`internal/apidoc` 工具链(Task 1–8)+ facade.go **77/77** 转完(batch 7 = 末 11 funcs,c3753d4;`grep -c aep:cap facade.go`==0,gate loop 全绿)。**下一步 = Step 2**：其余 ~25 个 `aep:cap` 文件/~400 符号(scene+serializer+codec)批量转换 + 全仓 jargon 清理 + flip(invariant #9:残留 aep:cap==0 且 @param TODO==0)。**先解 negative-tier 问题**(scene 文件用 `tier=planned/missing/negative`,但 @stability 只有 stable/alpha — 见 plan Follow-on)。复用 cheap subagent+validator gate loop。Step 2 落地后整个 plan done → 跑 `/flightdeck:landing`。
 
 **B. Booyah comp ②（gap#1 已解,剩 2 动画器）** → gap #2 Tracking 动画器 + gap #3 Character Offset 动画器:JSX 抓模板字节 → 仿 `AddText*Animator` → 双版本 gate → 拼 comp ②（text + `SetLayerTransform` 层动画 + 2 动画器）→ [plan](plans/2026-06-19-booyah-glitch-replication.md)。旁支：① 补 AE 2020 render；修 `NewComposition` 分数 fps cdta 时基（[[ntsc-tickrate-derive-3x-off]] 第二发现）。
 
@@ -22,6 +22,7 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 - [2026-06-19-booyah-glitch-full-replication.md](specs/2026-06-19-booyah-glitch-full-replication.md) — 把整个 Booyah Glitch 真实工程(12 comp/61 层/~100 mask/wiggle 表达式/Curves)用咱们的 Go API 从零完整…
 - [2026-06-21-api-doc-tag-schema.md](specs/2026-06-21-api-doc-tag-schema.md) — Replace free-prose doc comments + the separate aep:cap directive with ONE swaggo…
 - [2026-06-19-booyah-glitch-replication.md](plans/2026-06-19-booyah-glitch-replication.md) — 实现 Booyah Glitch 全工程复刻:Phase0 前置 spike(表达式 Evolution=time*N + wiggle / 单层 ~21 ma…
+- [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md) — Step 1 of api-doc-tag-schema: build internal/apidoc (parse+schema+validate+jargo…
 <!-- /AUTO -->
 
 ## Key Context

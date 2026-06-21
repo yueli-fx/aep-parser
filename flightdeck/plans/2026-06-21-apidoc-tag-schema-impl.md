@@ -15,17 +15,26 @@ implements: specs/2026-06-21-api-doc-tag-schema.md
 
 **Tech Stack:** Go (`go/ast`, `go/parser`, `go/doc`, `regexp`); existing `cmd/capindex` + `cmd/docgen` AST pipelines; `uv`-run flightdeck index script for deck bookkeeping.
 
-> **Progress (2026-06-21, cont.):** facade conversion now **66/77** (batches 1–6 committed;
-> 11 funcs left = AddEssentialProperty, RemoveEffect, AddMask, SetMaskPath, SetMaskPathKeyframes,
-> RemoveMask, DuplicateMask, MoveMask, AddItem, RemoveItem, SetRenderer). All green, `--validate`
-> clean. **Cost lesson:** hand-transcribing each dense legacy comment → English @tag is slow +
-> token-heavy. **Cheaper strategy for the remaining 11 + Step 2 (~25 files / ~400 symbols):** now
-> that `--validate` (strict) + docgen self-validate are a deterministic pass/fail gate, dispatch a
-> **subagent per file/batch** with (a) the field-rule schema, (b) 2–3 converted facade examples as
-> the pattern, (c) the jargon blocklist, (d) instruction to loop `go run ./cmd/capindex --validate`
-> + `go run ./cmd/docgen` + commit until green. The validator is the safety net that makes
-> code-via-subagent safe here (per subagent-guide's "machine truth source" rule). Note the jargon
-> lint also flags `wave-NN` etc. in your OWN @boundary prose — keep boundaries codename-free.
+> **Progress (2026-06-21, STEP 1 DONE):** facade conversion **77/77** — final batch 7
+> (the last 11 funcs: AddEssentialProperty, RemoveEffect, AddMask, SetMaskPath,
+> SetMaskPathKeyframes, RemoveMask, DuplicateMask, MoveMask, AddItem, RemoveItem,
+> SetRenderer) converted + committed (c3753d4). `grep -c aep:cap internal/aep/facade.go`
+> == 0. Gate loop green: `--validate` clean · docgen + capabilities (486) regenerated ·
+> go vet + apidoc/capindex/docgen tests pass. **Task 9 (Step 1 facade proof) = DONE.**
+> Step 1 (toolchain + facade proof) is complete; remaining work is **Step 2 only**
+> (bulk ~25 files / ~400 symbols + repo-wide jargon cleanup + the flip). Plan stays
+> `active` until Step 2 lands.
+>
+> **Cost lesson (carry into Step 2):** hand-transcribing each dense legacy comment →
+> English @tag is slow + token-heavy. **Cheaper strategy for Step 2:** now that
+> `--validate` (strict) + docgen self-validate are a deterministic pass/fail gate,
+> dispatch a **subagent per file/batch** with (a) the field-rule schema, (b) 2–3
+> converted facade examples as the pattern, (c) the jargon blocklist, (d) instruction to
+> loop `go run ./cmd/capindex --validate` + `go run ./cmd/docgen` + commit until green.
+> The validator is the safety net that makes code-via-subagent safe here. Note the jargon
+> lint also flags `wave-NN` etc. in your OWN @boundary prose — keep boundaries
+> codename-free. (Batch 7 done inline by hand; the 11 were few enough not to warrant a
+> dispatch.)
 >
 > **Progress (2026-06-21):** Tasks 1–8 DONE + committed — the full `internal/apidoc`
 > package (parse/schema/validate/jargon), capindex dual-read + `--validate`, docgen
@@ -40,29 +49,33 @@ implements: specs/2026-06-21-api-doc-tag-schema.md
 
 ## Handoff — next session (start here)
 
-**State:** Step 1 toolchain DONE+committed; facade.go **66/77** converted, all green, `--validate` clean.
+**State:** Step 1 COMPLETE — toolchain DONE+committed; facade.go **77/77** converted (batch 7
+committed c3753d4), `grep -c aep:cap internal/aep/facade.go` == 0, all green, `--validate` clean.
+**Next session starts Step 2.**
 
-**Remaining 11 facade funcs** (still on legacy `//aep:cap`, in `internal/aep/facade.go`):
-AddEssentialProperty · RemoveEffect · AddMask · SetMaskPath · SetMaskPathKeyframes ·
-RemoveMask · DuplicateMask · MoveMask · AddItem · RemoveItem · SetRenderer.
+**Step 2 = the only remaining work** (the other ~25 `aep:cap` files / ~400 symbols + repo-wide
+jargon cleanup + the flip). Same gate-loop + cheap subagent strategy as above; see the Follow-on
+section at the bottom for the full plan. Key reminders before bulk-converting:
 
-**Do this (cheap path — subagent + validator gate):**
-1. `grep -n "aep:cap" internal/aep/facade.go` to find the 11 blocks.
-2. Convert each `//aep:cap …`+prose block to a `@tag` block. **Copy the pattern** from any
-   already-converted func above them in the same file (e.g. `AddEffect`, `AddMarker`,
-   `SetEffectParam`). Rules: `@summary` imperative ≤80 chars no trailing period · one `@param`
-   per non-receiver arg (≥3 words, no `TODO`) · `@returns` only when the func returns a non-error
-   value · machine fields `@domain/@stability/@verify/@since AE2020` (+`@gate` when verify is
-   ae-accept/render-pixel, +`@incident`/`@boundary`/`@alias` carried from the old directive) ·
-   translate Chinese `@boundary` to English · **no jargon in YOUR prose either** (the lint flags
-   `wave-NN`, `V2.2`, `M8`, `CLAUDE.md`, `py-aep`, `tmp_debug` — keep boundaries codename-free).
-   Map old→new: `tier`→`@stability` (stable/alpha) · `minver=N`→`@since AEN` · `gate`/`incident`/
-   `alias` carry as comma lists.
-3. Gate loop until clean: `go run ./cmd/capindex --validate` (must print "validation clean") →
-   `go run ./cmd/docgen -manifest docs/docgen.json` → `go run ./cmd/capindex` (regen
-   docs/capabilities) → `go test ./cmd/capindex/ ./cmd/docgen/`. Then `git add internal/aep/facade.go docs/ && git commit`.
-4. **Done check:** `grep -c aep:cap internal/aep/facade.go` → expect **0**. That completes Task 9
-   (Step 1 facade proof). Flip plan section "Task 9" notion to done and consider `/flightdeck:landing`.
+1. **Find the surface:** `grep -rln "aep:cap" internal/` (facade.go is now 0; the rest are scene
+   + serializer + codec files).
+2. **Cheap path — subagent + validator gate:** one file/batch per dispatch, each given (a) the
+   field-rule schema, (b) 2–3 converted facade funcs as the pattern, (c) the jargon blocklist, (d)
+   loop `go run ./cmd/capindex --validate` → `go run ./cmd/docgen -manifest docs/docgen.json` →
+   `go run ./cmd/capindex` (regen) → `go test ./cmd/capindex/ ./cmd/docgen/` → commit, until green.
+   Per-func rules: `@summary` imperative ≤80 no trailing period · one `@param` per non-receiver arg
+   (≥3 words, no `TODO`) · `@returns` only when the func returns a non-error value · machine fields
+   `@domain/@stability/@verify/@since AE2020` (+`@gate` when verify is ae-accept/render-pixel,
+   +`@incident`/`@boundary`/`@alias` carried) · translate Chinese `@boundary` to English · no jargon
+   in YOUR prose (lint flags `wave-NN`, `V2.2`, `M8`, `CLAUDE.md`, `py-aep`, `tmp_debug`). Map
+   old→new: `tier`→`@stability` · `minver=N`→`@since AEN` · `gate`/`incident`/`alias` as comma lists.
+3. **Resolve the negative-tier question FIRST** (see Follow-on): scene files use
+   `tier=planned/missing/negative` but `@stability` enum is stable/alpha only —
+   `grep -rn 'tier=\(planned\|missing\|negative\)' internal/` to find them.
+4. **Commit hygiene:** keep schema-conversion commits separate from the repo-wide jargon-cleanup
+   commit. **Flip (invariant #9):** remaining `aep:cap` == 0 AND `@param … TODO` == 0 → remove the
+   legacy parser, make `--validate` + jargon lint required CI, update the doc-source-of-truth note.
+   When Step 2 lands, the whole plan is done → run `/flightdeck:landing`.
 
 **For Step 2 (the other ~25 files / ~400 symbols)** — see the Follow-on section at the bottom. Same
 subagent+validator loop, one file per dispatch; keep schema-conversion commits separate from the
