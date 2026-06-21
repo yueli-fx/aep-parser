@@ -747,112 +747,110 @@ func DuplicatePropertyGroup(g *AEPropertyGroup) (*AEPropertyGroup, error) {
 	return serializer.DuplicatePropertyGroup(g)
 }
 
-// AddEffect appends an effect to the layer's "ADBE Effect Parade" and returns
-// the parsed *Effect, so the caller can immediately tune its parameters via
-// Effect.Parameters (Property.SetStaticValue works on effect params — e.g. set
-// "ADBE Gaussian Blur 2-0001" to change Blurriness).
+// @summary    Append a built-in effect to a layer
+// @description Appends an effect to the layer's Effect Parade and returns the
+//   parsed Effect, so the caller can immediately tune its parameters via
+//   SetEffectParam (or the property tree after a Reopen).
 //
-// effectMatchName must be one of SupportedEffects(); the effect's full
-// parameter sub-tree (sspc payload) is supplied from an embedded AE-native
-// template, which is why only RE'd effects are addable. AE looks the effect up
-// by match-name at load, so the named plugin must be installed in the opening
-// AE — the seeded effects are built-ins present since before the AE 2020 read
-// floor and are version-portable (the AE-2020-extracted bytes are accepted by
-// AE 2025).
+//   effectMatchName must be one of SupportedEffects(); the effect's full
+//   parameter sub-tree is supplied from an embedded AE-native template, which is
+//   why only reverse-engineered effects are addable. AE looks the effect up by
+//   match-name at load, so the named plugin must be installed in the opening AE —
+//   the seeded effects are built-ins present since before the AE 2020 read floor
+//   and are version-portable (the AE-2020-extracted bytes are accepted by AE
+//   2025).
 //
-// Mechanics: the parade stores effects as (tdmn, LIST:sspc) pairs terminated by
-// an "ADBE Group End" tdmn sentinel; AddEffect splices a fresh pair in just
-// before that sentinel — the same (tdmn, payload) splice DuplicatePropertyGroup
-// is ship-gate-green with, sourced from a template instead of a sibling. LIST
-// sizes grow automatically (rifx recomputes bottom-up on write).
+//   A parsed layer with no effects has no Effect Parade group at all (AE only
+//   persists the parade once at least one effect exists); AddEffect splices an
+//   empty parade in the AE-native form, then adds the effect into it. Camera and
+//   light layers are refused (AE does not allow effects on them), as are layers
+//   built by the structural New* APIs that were never parsed — call Reopen first
+//   and add effects to the re-parsed layer.
 //
-// Parade auto-create: a parsed layer with no effects has no Effect Parade group
-// at all (AE only persists the parade once ≥1 effect exists). AddEffect splices
-// an empty parade — tdsb + default-name tdsn + Group End, the AE-native form —
-// into the layer's property tree immediately before "ADBE Transform Group"
-// (AE's emitted group order), then adds the effect into it.
-//
-// Refused layers: camera / light layers (AE does not allow effects on them),
-// and layers built by the structural New* APIs that were never parsed — those
-// have no property tree to splice into; call aep.Reopen first and add effects
-// to the re-parsed layer.
-//
-// Atomic mutation: snapshot parade chunk + scene children + flat Effects slice
-// (+ the pre-auto-create tree state); re-parse the spliced pair to obtain a
-// back-ref-correct *Effect; roll back on any parser warning.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green across the full
-// embedded effect library (incl. the 10-effect audio family, which AE only
-// accepts on a layer that has audio), plus the parade auto-create path on a 100%
-// Go-built file. Free function (not a method) so the impl can live in
-// internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
-//
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025,TestAddEffectAudio_AEShipGate_AE2020,TestAddEffectAudio_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025,TestAddEffectWave12_AEShipGate_AE2020,TestAddEffectWave12_AEShipGate_AE2025 incident=add-effect-splice-re boundary="216 内置效果库(ADBE 全家 + Cycore CC 全家 + keying/simulation/utility + 10 个音频效果 Backwards/Bass&Treble/Delay/Flange&Chorus/High-Low Pass/Modulator/Parametric EQ/Reverb/Stereo Mixer/Tone,仅可加到有音频的层、ae-accept 非渲染 + 11 个 layer-ref:Displacement Map/Compound Blur/CC Vector Blur/3D Glasses/Warp Stabilizer/Timewarp/CC Particle World/Texturize/Color Link/Compound Arithmetic/Set Channels(4 源) 用 SetEffectLayerParam 指源;wave12 收回 wave-6 parked 经典(全大写 match-name:BEZMESH/MESH WARP/CHANNEL MIXER/RESHAPE/Vector Paint));未入库:弹文件/字体框的(Apply Color LUT/PS Arbitrary Map/Numbers)+ Vegas/Warp/PS Express 等 AE2020 canAdd=false + 已废弃名;camera/light + 未 Reopen 的 fresh 层 refused;per-effect typed helper 未做" alias="effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像,audio,音频,声音,reverb,delay,eq"
+//   Atomic (snapshot + rollback on any parser warning).
+// @param      layer            the parsed layer to add the effect to
+// @param      effectMatchName  the effect match-name (one of SupportedEffects)
+// @returns    the created Effect
+// @domain     effect
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestAddEffect_AEShipGate_AE2020,TestAddEffect_AEShipGate_AE2025,TestAddEffectWave5_AEShipGate_AE2020,TestAddEffectWave5_AEShipGate_AE2025,TestAddEffectWave6_AEShipGate_AE2020,TestAddEffectWave6_AEShipGate_AE2025,TestAddEffectWave7_AEShipGate_AE2020,TestAddEffectWave7_AEShipGate_AE2025,TestAddEffectWave9_AEShipGate_AE2020,TestAddEffectWave9_AEShipGate_AE2025,TestAddEffectAudio_AEShipGate_AE2020,TestAddEffectAudio_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025,TestAddEffectWave12_AEShipGate_AE2020,TestAddEffectWave12_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   covers the embedded library of 216 built-in effects (ADBE + Cycore CC + keying / simulation / utility + 10 audio effects accepted only on audio layers, plus 11 layer-reference effects whose source is set via SetEffectLayerParam); effects that open a file/font dialog and deprecated names are not included; camera/light and un-Reopened fresh layers are refused; no per-effect typed helpers yet
+// @incident   add-effect-splice-re
+// @alias      effect,特效,加效果,blur,模糊,glow,cc,cycore,lumetri,keying,抠像,audio,音频,声音,reverb,delay,eq
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error) {
 	return serializer.AddEffect(layer, effectMatchName)
 }
 
-// SupportedEffects returns the sorted effect match-names AddEffect can add from
-// an embedded template.
-//
-//aep:cap domain=meta tier=stable verify=none alias="effects,效果列表,supported effects"
+// @summary    List the effect match-names AddEffect can add
+// @description Returns the sorted effect match-names AddEffect can add from an
+//   embedded template.
+// @returns    the sorted list of supported effect match-names
+// @domain     meta
+// @stability  stable
+// @verify     none
+// @since      AE2020
+// @alias      effects,效果列表,supported effects
 func SupportedEffects() []string { return serializer.SupportedEffects() }
 
-// ApplyPseudoEffect splices the pseudo effect carried by an After Effects
-// Animation Preset (.ffx) into the layer's "ADBE Effect Parade" and returns the
-// parsed *Effect. ffxBytes is the raw .ffx file content.
+// @summary    Apply an .ffx Animation Preset pseudo effect to a layer
+// @description Splices the pseudo effect carried by an After Effects Animation
+//   Preset (.ffx) into the layer's Effect Parade and returns the parsed Effect.
+//   ffxBytes is the raw .ffx file content.
 //
-// A Pseudo Effect (built with the Pseudo Effect Maker) is a user-defined effect
-// — a named group of standard controls (Slider / Color / Checkbox / Point /
-// Angle …) that looks like a native effect, with match-name "Pseudo/<uID>/<name>".
-// Unlike a native effect (looked up by match-name in the opening AE), a pseudo
-// effect's full control definition (pard chunks) travels inside the .ffx, so it
-// is self-contained: AE renders it from the saved .aep bytes without the preset
-// ever being registered via applyPreset. This makes ApplyPseudoEffect the
-// offline, pure-Go equivalent of AE's applyPreset — no running AE required (the
-// rendertom/PseudoEffect ExtendScript helper, by contrast, needs AE to "make
-// the match-name live" in a temp comp first).
+//   A pseudo effect (built with the Pseudo Effect Maker) is a user-defined effect
+//   — a named group of standard controls (slider / color / checkbox / point /
+//   angle …) that looks like a native effect. Unlike a native effect (looked up
+//   by match-name in the opening AE), a pseudo effect's full control definition
+//   travels inside the .ffx, so it is self-contained: AE renders it from the
+//   saved .aep bytes without the preset ever being registered. This makes
+//   ApplyPseudoEffect the offline, pure-Go equivalent of AE's applyPreset — no
+//   running AE required.
 //
-// Mechanics: the .ffx is a RIFX "FaFX" form; ApplyPseudoEffect reads it,
-// extracts the effect-unit (the bare match-name + its LIST:sspc payload of
-// pard param-defs + values), and splices the (tdmn, sspc) pair into the parade
-// just before its Group End sentinel — the same atomic, warnings-as-failure,
-// rollback-on-error splice AddEffect uses (parade auto-created for effect-less
-// parsed layers). tdpi host-layer bindings are retargeted to the destination
-// layer.
+//   The effect is spliced with its controls at their defined defaults — the
+//   authored values stored in the .ffx are not yet preserved (AE rejects the raw
+//   .ffx value entries spliced into a parade). All controls are present and
+//   tunable in AE; programmatic tuning via Set* after a Reopen is a future step.
 //
-// Applied at defaults: the pseudo effect is spliced with its controls at their
-// pard-defined defaults — the authored values stored in the .ffx are NOT yet
-// preserved (AE rejects the raw .ffx value entries spliced into a parade as
-// "missing data in file"; the all-defaults value group is what ships green). All
-// controls are present (AE rebuilds them from the pard defs) and tunable in AE;
-// programmatic tuning via Set* after Reopen is a future step (the returned
-// Effect's value group is empty until a value is materialized).
-//
-// Refused (same as AddEffect): camera / light layers, and New*-built layers
-// never parsed (call aep.Reopen first). Returns an error for a malformed .ffx
-// (not RIFX/FaFX, missing besc/sspc, or no extractable match-name).
-//
-// Alpha / structural — AE 2020 + AE 2025 ship-gate green (a fresh, never-
-// registered AE process reads the Go-spliced pseudo effect back live), but the
-// apply-at-defaults scope (no authored-value preservation, no Set* tuning yet)
-// keeps it Alpha. Free function (CLAUDE.md #2 structural-op call-form). See spec
-// 2026-06-20-pseudo-effect-support.
-//
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestApplyPseudoEffect_AEShipGate_AE2020,TestApplyPseudoEffect_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go 离线 splice .ffx(FaFX form)伪效果进 Effect Parade,免开 AE(对比 rendertom 必须 applyPreset 运行时点亮)。AE 2020+2025 ship-gate 绿:全新未注册 AE 进程读回伪效果为活(matchName 对、非 Missing、控件全、enabled)。**以 pard 默认值应用**——.ffx 作者值暂不保留(AE 拒裸 .ffx 值'missing data',只有 all-defaults 值组过 gate),Set* 调参未接(返回 Effect 值组空)。转换=fnam→Utf8+parT 追加 ADBE Effect Built In Params(parn 重算)+tdgp 丢值仅留骨架。camera/light+未 Reopen fresh 层 refused;读侧解 .ffx 进 scene 未做" alias="pseudo effect,pseudoeffect,伪效果,自定义效果,ffx,animation preset,动画预设,applypreset,custom effect"
+//   Refused (same as AddEffect): camera / light layers, and New*-built layers
+//   never parsed (call Reopen first). Returns an error for a malformed .ffx (not
+//   a RIFX FaFX form, missing payload, or no extractable match-name).
+// @param      layer     the parsed layer to apply the pseudo effect to
+// @param      ffxBytes  the raw .ffx Animation Preset file content
+// @returns    the created Effect
+// @domain     effect
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestApplyPseudoEffect_AEShipGate_AE2020,TestApplyPseudoEffect_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   applies controls at their defined defaults — the .ffx authored values are not preserved (AE rejects raw .ffx value entries) and Set* tuning is not yet wired; camera/light and un-Reopened fresh layers refused; reading an .ffx into the scene model is not implemented
+// @incident   add-effect-splice-re
+// @alias      pseudo effect,pseudoeffect,伪效果,自定义效果,ffx,animation preset,动画预设,applypreset,custom effect
 func ApplyPseudoEffect(layer *Layer, ffxBytes []byte) (*Effect, error) {
 	return serializer.ApplyPseudoEffect(layer, ffxBytes)
 }
 
-// ApplyPseudoEffectNamed is ApplyPseudoEffect with a custom effect-instance
-// display name (the label in AE's Effect Controls / timeline). displayName may be
-// any UTF-8 string — including CJK such as "伪效果" — because AE stores the name
-// as a "Utf8" + byte-length + bytes sub-record and we count bytes, not runes, so
-// multi-byte names round-trip exactly (a place naïve byte-pokers trip up). An
-// empty displayName keeps the .ffx's own name. The match-name (AE's ASCII lookup
-// key) is unaffected. All other behaviour matches ApplyPseudoEffect.
-//
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2020,TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2025 incident=add-effect-splice-re boundary="同 ApplyPseudoEffect,额外可设效果实例显示名,支持任意 UTF-8 含中文(显示名落在值组 tdsn,非 fnam——RE 实测;Utf8 子记录按字节长,多字节精确 round-trip);matchName 仍 ASCII 不变。中文名「伪效果」AE 2020+2025 读回 3 字符 U+4F2A/6548/679C(ship-gate 绿)" alias="pseudo effect named,伪效果命名,中文效果名,自定义显示名,cjk effect name,utf8 effect name"
+// @summary    Apply an .ffx pseudo effect with a custom display name
+// @description ApplyPseudoEffect with a custom effect-instance display name (the
+//   label in AE's Effect Controls / timeline). displayName may be any UTF-8
+//   string — including CJK such as "伪效果" — because AE stores the name as a
+//   length-prefixed byte record and the library counts bytes, not runes, so
+//   multi-byte names round-trip exactly. An empty displayName keeps the .ffx's
+//   own name. The match-name (AE's ASCII lookup key) is unaffected. All other
+//   behavior matches ApplyPseudoEffect.
+// @param      layer        the parsed layer to apply the pseudo effect to
+// @param      ffxBytes     the raw .ffx Animation Preset file content
+// @param      displayName  custom instance display name (any UTF-8; empty keeps the .ffx name)
+// @returns    the created Effect
+// @domain     effect
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2020,TestApplyPseudoEffectNamed_CJK_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   same as ApplyPseudoEffect, plus a custom instance display name supporting any UTF-8 (the display name lives in the value group, byte-length counted so multi-byte names round-trip exactly); the match-name stays ASCII
+// @incident   add-effect-splice-re
+// @alias      pseudo effect named,伪效果命名,中文效果名,自定义显示名,cjk effect name,utf8 effect name
 func ApplyPseudoEffectNamed(layer *Layer, ffxBytes []byte, displayName string) (*Effect, error) {
 	return serializer.ApplyPseudoEffectNamed(layer, ffxBytes, displayName)
 }
@@ -893,11 +891,20 @@ type PseudoOption func(*pseudoConfig)
 
 type pseudoConfig struct{ codepage PseudoLabelCodepage }
 
-// WithLabelCodepage sets the ANSI codepage the effect's control labels are
-// encoded in (default PseudoLabelGBK). Pass PseudoLabelShiftJIS for a Japanese
-// effect. ASCII labels are unaffected. See BuildPseudoEffect for the why.
-//
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025 incident=pseudo-control-label-ansi-codepage boundary="BuildPseudoEffect 选项:选控件标签 pard 名的目标 ANSI 码页(GBK 简中默认 / Shift-JIS 日文)。结构 ae-accept(同 BuildPseudoEffect 字节路径,码页只改 name 字段字节、AE 不校验编码);**显示正确性 = byte-equivalence 验**(字节等同 AE 原生该 locale 输出,本西欧码页机不可 ship-gate),仅匹配 locale 的 Windows 显示对——AE 架构限" alias="pseudo label codepage,控件标签码页,日语标签,japanese label,shift-jis,gbk,locale,with label codepage"
+// @summary    Set the ANSI codepage for a pseudo effect's control labels
+// @description Sets the ANSI codepage the effect's control labels are encoded in
+//   (default PseudoLabelGBK). Pass PseudoLabelShiftJIS for a Japanese effect.
+//   ASCII labels are unaffected. See BuildPseudoEffect for the rationale.
+// @param      cp  the target label codepage
+// @returns    a PseudoOption for BuildPseudoEffect
+// @domain     effect
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   selects the target ANSI codepage for control-label names (GBK simplified-Chinese default / Shift-JIS Japanese); structurally AE-accepted (the codepage only changes name-field bytes), but correct display is byte-equivalence-verified against AE's native locale output and only renders correctly on a matching-locale Windows
+// @incident   pseudo-control-label-ansi-codepage
+// @alias      pseudo label codepage,控件标签码页,日语标签,japanese label,shift-jis,gbk,locale,with label codepage
 func WithLabelCodepage(cp PseudoLabelCodepage) PseudoOption {
 	return func(c *pseudoConfig) { c.codepage = cp }
 }
@@ -909,61 +916,53 @@ func WithLabelCodepage(cp PseudoLabelCodepage) PseudoOption {
 // values reproduce AE's plain type defaults.
 type PseudoControl = serializer.PseudoControl
 
-// BuildPseudoEffect builds a Pseudo Effect entirely in Go — no .ffx file and no
-// running AE — and splices it into the layer's "ADBE Effect Parade". This is the
-// authoring direction (what aescripts' Pseudo Effect Maker does in AE's UI),
-// brought into the library and offline: name a set of controls and get a live,
-// AE-accepted custom effect on the layer.
+// @summary    Build a pseudo effect from scratch in Go and apply it
+// @description Builds a Pseudo Effect entirely in Go — no .ffx file and no running
+//   AE — and splices it into the layer's Effect Parade. This is the authoring
+//   direction (what the Pseudo Effect Maker does in AE's UI), brought offline:
+//   name a set of controls and get a live, AE-accepted custom effect on the
+//   layer.
 //
-// uid is the per-effect unique id (the "<uID>" in match-name "Pseudo/<uID>/<name>");
-// name is the match-name segment; displayName is the effect label (any UTF-8,
-// incl. CJK — empty falls back to name); controls are the controls, in order.
-// Every pard is synthesized field-by-field from the RE'd pard layout — no .ffx,
-// no AE, and no cloned template bytes — so the supported kinds are exactly what
-// PseudoControlKind enumerates.
+//   uid is the per-effect unique id (the "<uID>" in match-name
+//   "Pseudo/<uID>/<name>"); name is the match-name segment; displayName is the
+//   effect label (any UTF-8, incl. CJK — empty falls back to name); controls are
+//   the controls in order. Every control definition is synthesized field-by-field
+//   from the reverse-engineered layout, so the supported kinds are exactly what
+//   PseudoControlKind enumerates.
 //
-// Per-control customization (PseudoControl optional fields, written into the
-// pard or a value entry and AE-read-back verified): Slider Min/Max (the slider's
-// valid range — AE's minValue/maxValue) + Default, Angle Default, Checkbox
-// Checked, Color default (RGBA), Dropdown Options + Default (1-based selected
-// index), Point/Point3D PointDefault, Layer LayerID. Their zero values give AE's
-// plain type defaults.
+//   Per-control customization (verified by AE read-back): slider min/max +
+//   default, angle default, checkbox checked, color RGBA, dropdown options +
+//   selected index, point / 3D-point default, and layer-picker binding; zero
+//   values give AE's plain type defaults. A point default is a fraction of the
+//   host layer's coordinate space (e.g. {0.25, 0.125} on a 400×400 source-less
+//   layer reads back as [100, 50]). Group and Label kinds are flat marker
+//   controls — AE's pseudo-effect "groups" are a visual grouping in the Effect
+//   Controls panel, not a nested property group.
 //
-// Point / Point3D PointDefault is a fraction of the host layer's coordinate
-// space — AE stores effect point params as value÷(layer source dim), or ÷(comp
-// dim) for source-less layers (shape/text), z÷height. E.g. {0.25, 0.125} on a
-// 400×400 source-less layer reads back as [100, 50]. nil → origin. Layer LayerID
-// binds the picker to that layer (aep.Layer.ID); 0 resolves to the first layer.
+//   Control labels are written into the name field, which AE decodes in the
+//   viewing machine's system ANSI codepage (not UTF-8). ASCII labels are exact
+//   everywhere; a CJK label is encoded in the codepage chosen by WithLabelCodepage
+//   (default GBK simplified-Chinese; Shift-JIS for Japanese) — byte-identical to
+//   AE's own output on that locale, so it displays correctly on a matching Windows
+//   and mojibakes elsewhere (an AE architecture limit).
 //
-// Dropdown / Group / Label kinds: a Dropdown's items travel in a pdnm string and
-// its selected index reads back live. PseudoGroupStart…PseudoGroupEnd brackets a
-// run of controls, and PseudoLabel emits a static header. Note these are FLAT
-// marker controls — AE's pseudo-effect "groups" are a visual grouping in the
-// Effect Controls panel, not a nested property group (AE's own Pseudo Effect
-// Maker output reads back equally flat: the bracketed controls stay top-level
-// siblings). Only the built-in Compositing Options is a true nested group.
-//
-// Control labels (PseudoControl.Name) are written into the pard name field,
-// which AE decodes in the viewing machine's system ANSI codepage — NOT UTF-8.
-// ASCII labels are exact everywhere. A CJK label is encoded in the codepage
-// chosen by WithLabelCodepage (default PseudoLabelGBK = simplified Chinese; pass
-// PseudoLabelShiftJIS for Japanese) — byte-identical to what AE's own Pseudo
-// Effect Maker writes on that locale, so it displays correctly on a matching
-// Windows. This is verified by byte-equivalence (not ship-gated — the gate
-// machine is Western-codepage) and still mojibakes on a non-matching-locale
-// system: an AE architecture limit, see incidents/pseudo-control-label-ansi-codepage.md.
-//
-// Refused (same as AddEffect): camera / light layers, and New*-built layers
-// never parsed (call aep.Reopen first).
-//
-// Alpha / structural — AE 2020 + AE 2025 ship-gate green: a from-scratch effect
-// with every supported control kind reads back live in AE — the custom slider
-// value 50 / range -100..100, checkbox checked, angle 45°, dropdown selection,
-// Point [100,50] / Point3D [100,50,25] coordinates, and the layer picker bound
-// to the intended layer's index. CJK control labels (byte-equivalence only) keep
-// it Alpha. Free function (CLAUDE.md #2). See spec 2026-06-20-pseudo-effect-support.
-//
-//aep:cap domain=effect tier=alpha verify=ae-accept gate=TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025,TestBuildPseudoEffectRich_AEShipGate_AE2020,TestBuildPseudoEffectRich_AEShipGate_AE2025,TestBuildPseudoEffectValueEntry_AEShipGate_AE2020,TestBuildPseudoEffectValueEntry_AEShipGate_AE2025 incident=add-effect-splice-re boundary="纯 Go **从零合成**伪效果(无需 .ffx、无需 AE、不 clone 模板字节——每个 pard 按 RE 出的布局逐字段拼),splice 进 Effect Parade,AE 2020+2025 读回为活效果。控件类型(全):Slider/Color/Checkbox/Angle/Point/Point3D/Dropdown/Group/Label/Layer。**自定义值(AE 实测回读)**:Slider Min/Max+Default、Angle Default、Checkbox Checked、Color RGBA、Dropdown Options+选中项(以上 pard 级);**Point/Point3D 默认坐标 + Layer 绑定层(以上值条目合成:cdat=坐标空间分数 0.25→100px、tdpi=层内部 ID 读回层索引)**——零值=类型默认。**Group/Label = 扁平标记控件**:AE 伪效果「组」是 Effect Controls 视觉分组非属性树嵌套(原生输出读回同样扁平);仅内置 Compositing Options 真嵌套。**控件标签**:写 pard 名,AE 按系统 ANSI 码页解码(非 UTF-8);ASCII 精确,CJK 走 `WithLabelCodepage` 选的码页(默认 GBK 简中,可选 Shift-JIS 日文)编码——字节等同 AE 原生该 locale 输出,byte-equivalence 验(本西欧码页机不可 ship-gate),非匹配 locale 系统乱码(AE 架构限,详 incidents/pseudo-control-label-ansi-codepage)。camera/light+未 Reopen refused" alias="build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox dropdown group label layer point,slider min max,自定义范围,下拉菜单,分组,标签,图层选择,点坐标,中文标签,cjk label,gbk,离线造伪效果"
+//   Refused (same as AddEffect): camera / light layers, and New*-built layers
+//   never parsed (call Reopen first).
+// @param      layer        the parsed layer to add the pseudo effect to
+// @param      uid          per-effect unique id (the match-name "<uID>" segment)
+// @param      name         the match-name segment
+// @param      displayName  effect label (any UTF-8; empty falls back to name)
+// @param      controls     the controls to build, in order
+// @param      opts         optional effect-wide options (e.g. WithLabelCodepage)
+// @returns    the created Effect
+// @domain     effect
+// @stability  alpha
+// @verify     ae-accept
+// @gate       TestBuildPseudoEffect_AEShipGate_AE2020,TestBuildPseudoEffect_AEShipGate_AE2025,TestBuildPseudoEffectRich_AEShipGate_AE2020,TestBuildPseudoEffectRich_AEShipGate_AE2025,TestBuildPseudoEffectValueEntry_AEShipGate_AE2020,TestBuildPseudoEffectValueEntry_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   synthesizes a pseudo effect from scratch (no .ffx, no AE, no cloned template); all control kinds (slider/color/checkbox/angle/point/point3d/dropdown/group/label/layer) read back live in AE; group/label are flat marker controls (only the built-in Compositing Options is truly nested); CJK labels are byte-equivalence-verified (not ship-gated) and locale-dependent; camera/light and un-Reopened fresh layers refused
+// @incident   add-effect-splice-re
+// @alias      build pseudo effect,从零造伪效果,pseudo effect maker,authoring,造效果,自定义控件,slider color checkbox dropdown group label layer point,slider min max,自定义范围,下拉菜单,分组,标签,图层选择,点坐标,中文标签,cjk label,gbk,离线造伪效果
 func BuildPseudoEffect(layer *Layer, uid, name, displayName string, controls []PseudoControl, opts ...PseudoOption) (*Effect, error) {
 	cfg := pseudoConfig{codepage: PseudoLabelGBK}
 	for _, o := range opts {

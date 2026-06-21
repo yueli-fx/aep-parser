@@ -153,19 +153,22 @@ read-only
 func AddEffect(layer *Layer, effectMatchName string) (*Effect, error)
 ```
 
-AddEffect appends an effect to the layer's "ADBE Effect Parade" and returns the parsed *Effect, so the caller can immediately tune its parameters via Effect.Parameters (Property.SetStaticValue works on effect params — e.g. set "ADBE Gaussian Blur 2-0001" to change Blurriness).
+Append a built-in effect to a layer
 
-effectMatchName must be one of SupportedEffects(); the effect's full parameter sub-tree (sspc payload) is supplied from an embedded AE-native template, which is why only RE'd effects are addable. AE looks the effect up by match-name at load, so the named plugin must be installed in the opening AE — the seeded effects are built-ins present since before the AE 2020 read floor and are version-portable (the AE-2020-extracted bytes are accepted by AE 2025).
+Appends an effect to the layer's Effect Parade and returns the parsed Effect, so the caller can immediately tune its parameters via SetEffectParam (or the property tree after a Reopen).
 
-Mechanics: the parade stores effects as (tdmn, LIST:sspc) pairs terminated by an "ADBE Group End" tdmn sentinel; AddEffect splices a fresh pair in just before that sentinel — the same (tdmn, payload) splice DuplicatePropertyGroup is ship-gate-green with, sourced from a template instead of a sibling. LIST sizes grow automatically (rifx recomputes bottom-up on write).
+effectMatchName must be one of SupportedEffects(); the effect's full parameter sub-tree is supplied from an embedded AE-native template, which is why only reverse-engineered effects are addable. AE looks the effect up by match-name at load, so the named plugin must be installed in the opening AE — the seeded effects are built-ins present since before the AE 2020 read floor and are version-portable (the AE-2020-extracted bytes are accepted by AE 2025).
 
-Parade auto-create: a parsed layer with no effects has no Effect Parade group at all (AE only persists the parade once ≥1 effect exists). AddEffect splices an empty parade — tdsb + default-name tdsn + Group End, the AE-native form — into the layer's property tree immediately before "ADBE Transform Group" (AE's emitted group order), then adds the effect into it.
+A parsed layer with no effects has no Effect Parade group at all (AE only persists the parade once at least one effect exists); AddEffect splices an empty parade in the AE-native form, then adds the effect into it. Camera and light layers are refused (AE does not allow effects on them), as are layers built by the structural New* APIs that were never parsed — call Reopen first and add effects to the re-parsed layer.
 
-Refused layers: camera / light layers (AE does not allow effects on them), and layers built by the structural New* APIs that were never parsed — those have no property tree to splice into; call aep.Reopen first and add effects to the re-parsed layer.
+Atomic (snapshot + rollback on any parser warning).
 
-Atomic mutation: snapshot parade chunk + scene children + flat Effects slice (+ the pre-auto-create tree state); re-parse the spliced pair to obtain a back-ref-correct *Effect; roll back on any parser warning.
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed layer to add the effect to |
+| `effectMatchName` | the effect match-name (one of SupportedEffects) |
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green across the full embedded effect library (incl. the 10-effect audio family, which AE only accepts on a layer that has audio), plus the parade auto-create path on a 100% Go-built file. Free function (not a method) so the impl can live in internal/serializer (CLAUDE.md #2 structural-op call-form carve-out).
+**Returns:** the created Effect
 
 ### RemoveEffect
 
@@ -183,7 +186,11 @@ Stable / structural — rides the AE 2020 + AE 2025 ship-gated Effect-Parade chi
 func SupportedEffects() []string
 ```
 
-SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template.
+List the effect match-names AddEffect can add
+
+Returns the sorted effect match-names AddEffect can add from an embedded template.
+
+**Returns:** the sorted list of supported effect match-names
 
 ### SetEffectParam
 

@@ -6,7 +6,7 @@
       "file": "effect.md",
       "anchor": "#addeffect",
       "signature": "func AddEffect(layer *Layer, effectMatchName string) (*Effect, error)",
-      "summary": "AddEffect appends an effect to the layer's \"ADBE Effect Parade\" and returns the parsed *Effect, so the caller can immediately tune its parameters via Effect.Parameters (Property.SetStaticValue works on effect params — e.g. set \"ADBE Gaussian Blur 2-0001\" to change Blurriness)."
+      "summary": "Appends an effect to the layer's Effect Parade and returns the parsed Effect, so the caller can immediately tune its parameters via SetEffectParam (or the property tree after a Reopen)."
     },
     "AddItem": {
       "kind": "func",
@@ -5204,7 +5204,7 @@
       "file": "effect.md",
       "anchor": "#supportedeffects",
       "signature": "func SupportedEffects() []string",
-      "summary": "SupportedEffects returns the sorted effect match-names AddEffect can add from an embedded template."
+      "summary": "Returns the sorted effect match-names AddEffect can add from an embedded template."
     },
     "TemporalEase": {
       "kind": "type",
