@@ -56,11 +56,20 @@ func finishTextKomako(rp *aep.Project, orc *oracle) {
 	otg := findGroup(orig.PropertyTree(), "ADBE Transform Group")
 
 	// --- layer transform: anchor (static) + Position (28kf) + Opacity (24kf) ---
+	// The original anchors the text by its TEXT-BOX CENTRE (anchor Y -436 ==
+	// its box centre, because its glyphs sit ~380px above the layer origin — a
+	// btdk first-baseline our SetText doesn't reproduce). Our from-scratch text
+	// is a normal point-text layout (baseline at the origin, box centre ≈ -27),
+	// so copying the original's -436 anchor would push the text ~410px low.
+	// Anchor by OUR OWN box centre instead, keeping the original's X; the
+	// original Position keyframes then place that centre, matching the original.
+	const cloneBoxCenterY = -27 // clone text-box centre (AE sourceRectAtTime, GLITCH 110pt)
 	tr := aep.NewLayerTransform()
+	anchorX := 8.98
 	if ap := findProp(otg, "ADBE Anchor Point"); ap != nil && ap.StaticValue != nil {
-		a := toFloats(ap.StaticValue)
-		must(tr.AnchorPoint().SetStaticValue([2]float64{a[0], a[1]}))
+		anchorX = toFloats(ap.StaticValue)[0]
 	}
+	must(tr.AnchorPoint().SetStaticValue([2]float64{anchorX, cloneBoxCenterY}))
 	for _, kf := range findProp(otg, "ADBE Position").Keyframes {
 		v := toFloats(kf.Value)
 		must(tr.Position().AddKeyframeLinear(kf.Time, [2]float64{v[0], v[1]}))
