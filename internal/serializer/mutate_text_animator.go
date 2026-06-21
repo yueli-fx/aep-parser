@@ -87,6 +87,19 @@ var textAnimatorsRotXBody []byte
 //go:embed templates/text/text_animators_roty_body.bin
 var textAnimatorsRotYBody []byte
 
+// Booyah comp ② leaves (1D scalar, RE'd from the real project — both tdb4
+// db990001 = 1 component, same layout as Opacity/Skew). Tracking Amount spaces
+// the selected characters apart; Character Offset shifts each selected glyph's
+// code by an integer. Each body materializes only its driven leaf (companion
+// Track Type / Character Change Type / Character Range stay default → elided).
+// Regen via test_data/gen_text_anim_tracking_charoffset_templates.jsx.
+//
+//go:embed templates/text/text_animators_tracking_body.bin
+var textAnimatorsTrackingBody []byte
+
+//go:embed templates/text/text_animators_charoffset_body.bin
+var textAnimatorsCharOffsetBody []byte
+
 // An AE-native, fully-materialized "ADBE Text Range Advanced" group (all 10
 // params carry a cdat). The Advanced group is otherwise elided on a fresh
 // animator's selector, so SetTextRangeAdvanced replaces the elided group with a
@@ -146,6 +159,8 @@ const (
 	matchNameTextSkew          = "ADBE Text Skew"
 	matchNameTextRotationX     = "ADBE Text Rotation X"
 	matchNameTextRotationY     = "ADBE Text Rotation Y"
+	matchNameTextTrackingAmount  = "ADBE Text Tracking Amount"
+	matchNameTextCharacterOffset = "ADBE Text Character Offset"
 
 	matchNameTextSelectors          = "ADBE Text Selectors"
 	matchNameTextSelector           = "ADBE Text Selector"
@@ -693,6 +708,23 @@ func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset f
 	return addTextScalarLeafAnimator(layer, textAnimatorsSkewBody, matchNameTextSkew, "AddTextSkewAnimator", skew, rangeStart, rangeEnd, rangeOffset)
 }
 
+// AddTextTrackingAnimator adds a per-character Tracking animator + Range Selector
+// to a text layer. tracking is the inter-character spacing (1/1000 em) applied to
+// the selected characters; rangeStart/rangeEnd/rangeOffset are the Range Selector
+// bounds in percent. (Full contract lives on the aep.AddTextTrackingAnimator facade.)
+func AddTextTrackingAnimator(layer *Layer, tracking, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsTrackingBody, matchNameTextTrackingAmount, "AddTextTrackingAnimator", tracking, rangeStart, rangeEnd, rangeOffset)
+}
+
+// AddTextCharacterOffsetAnimator adds a per-character Character Offset animator +
+// Range Selector to a text layer. offset shifts each selected character's code by
+// that many positions through the alphabet (the "scramble" / decode primitive);
+// rangeStart/rangeEnd/rangeOffset are the Range Selector bounds in percent.
+// (Full contract lives on the aep.AddTextCharacterOffsetAnimator facade.)
+func AddTextCharacterOffsetAnimator(layer *Layer, offset, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return addTextScalarLeafAnimator(layer, textAnimatorsCharOffsetBody, matchNameTextCharacterOffset, "AddTextCharacterOffsetAnimator", offset, rangeStart, rangeEnd, rangeOffset)
+}
+
 // AddTextRotationXAnimator adds a per-character Rotation X (3D, about the
 // horizontal axis) animator + Range Selector to a text layer. rotation is the
 // angle in degrees applied to selected characters; rangeStart/rangeEnd/
@@ -1064,6 +1096,24 @@ func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) er
 // (Full contract lives on the aep.AnimateTextRotation facade — docgen source.)
 func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return animateTextScalarLeaf(layer, matchNameTextRotation, "AnimateTextRotation", tickRate, kfs)
+}
+
+// AnimateTextTracking keyframes the Tracking Amount leaf of the layer's first
+// text animator (added via AddTextTrackingAnimator), spreading/closing the
+// selected characters as one synchronized group over time. Needs >= 2 keyframes;
+// tickRate <= 0 uses the comp's.
+// (Full contract lives on the aep.AnimateTextTracking facade — docgen source.)
+func AnimateTextTracking(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextTrackingAmount, "AnimateTextTracking", tickRate, kfs)
+}
+
+// AnimateTextCharacterOffset keyframes the Character Offset leaf of the layer's
+// first text animator (added via AddTextCharacterOffsetAnimator), shifting the
+// selected glyphs' codes over time (the animated "decode/scramble" reveal). Needs
+// >= 2 keyframes; tickRate <= 0 uses the comp's.
+// (Full contract lives on the aep.AnimateTextCharacterOffset facade — docgen source.)
+func AnimateTextCharacterOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return animateTextScalarLeaf(layer, matchNameTextCharacterOffset, "AnimateTextCharacterOffset", tickRate, kfs)
 }
 
 // animateTextVectorLeaf is animateTextScalarLeaf for a 2/3/4-component leaf

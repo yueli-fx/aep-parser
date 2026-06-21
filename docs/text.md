@@ -973,6 +973,46 @@ Adds a per-character Stroke Color animator with a Range Selector — it tints on
 
 **Returns:** a stand-in group node referencing the spliced animator
 
+### AddTextTrackingAnimator
+
+```go
+func AddTextTrackingAnimator(layer *Layer, tracking, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+Add a per-character Tracking animator to a text layer
+
+Adds a per-character Tracking animator with a Range Selector — the kinetic-typography primitive that spreads (or tightens) the spacing between the selected characters. tracking is the inter-character spacing in 1/1000 em applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset, or keyframe the value itself with AnimateTextTracking. Refused on non-text layers and on un-Reopened New*-built text layers.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer to add the animator to |
+| `tracking` | per-character spacing, in 1/1000 em |
+| `rangeStart` | Range Selector start bound, in percent |
+| `rangeEnd` | Range Selector end bound, in percent |
+| `rangeOffset` | Range Selector offset, in percent |
+
+**Returns:** a stand-in group node referencing the spliced animator
+
+### AddTextCharacterOffsetAnimator
+
+```go
+func AddTextCharacterOffsetAnimator(layer *Layer, offset, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)
+```
+
+Add a per-character Character Offset animator to a text layer
+
+Adds a per-character Character Offset animator with a Range Selector — the kinetic-typography primitive that shifts each selected glyph's code through the alphabet (the "scramble" / decode reveal). offset is the number of positions to shift the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Keyframe the value over time with AnimateTextCharacterOffset for an animated decode. Refused on non-text layers and on un-Reopened New*-built text layers.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer to add the animator to |
+| `offset` | per-character code shift (positions through the alphabet) |
+| `rangeStart` | Range Selector start bound, in percent |
+| `rangeEnd` | Range Selector end bound, in percent |
+| `rangeOffset` | Range Selector offset, in percent |
+
+**Returns:** a stand-in group node referencing the spliced animator
+
 ### AddTextRangeSelector
 
 ```go
@@ -1149,3 +1189,35 @@ Keyframes the per-character Scale 3D leaf of a text layer's first animator (adde
 | `layer` | the parsed text layer whose animator to keyframe |
 | `tickRate` | keyframe time base (<= 0 uses the comp's) |
 | `kfs` | the vector keyframes (>= 2; [sx,sy,sz] percent) for the Scale leaf |
+
+### AnimateTextTracking
+
+```go
+func AnimateTextTracking(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
+```
+
+Keyframe a text animator's per-character Tracking
+
+Keyframes the Tracking Amount leaf of a text layer's first animator (added via AddTextTrackingAnimator) — animating the inter-character spacing itself over time, so every selected character shares the curve (e.g. letters spreading apart). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without a Tracking-animator leaf, and an already- animated Tracking leaf.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the scalar keyframes (>= 2) for the Tracking leaf |
+
+### AnimateTextCharacterOffset
+
+```go
+func AnimateTextCharacterOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
+```
+
+Keyframe a text animator's per-character Character Offset
+
+Keyframes the Character Offset leaf of a text layer's first animator (added via AddTextCharacterOffsetAnimator) — animating the glyph-code shift over time, the animated "decode / scramble" reveal (codes settle toward 0). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without a Character-Offset-animator leaf, and an already- animated Character Offset leaf.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the scalar keyframes (>= 2) for the Character Offset leaf |

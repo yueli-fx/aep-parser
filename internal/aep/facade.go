@@ -1214,6 +1214,58 @@ func AddTextSkewAnimator(layer *Layer, skew, rangeStart, rangeEnd, rangeOffset f
 	return serializer.AddTextSkewAnimator(layer, skew, rangeStart, rangeEnd, rangeOffset)
 }
 
+// @summary    Add a per-character Tracking animator to a text layer
+// @description Adds a per-character Tracking animator with a Range Selector — the
+//   kinetic-typography primitive that spreads (or tightens) the spacing between
+//   the selected characters. tracking is the inter-character spacing in 1/1000 em
+//   applied to the selected characters; rangeStart / rangeEnd / rangeOffset are
+//   the Range Selector bounds in percent. Sweep the Range Offset over time with
+//   AnimateTextRangeOffset, or keyframe the value itself with AnimateTextTracking.
+//   Refused on non-text layers and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      tracking     per-character spacing, in 1/1000 em
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextTrackingAnimator_AEShipGate_AE2020,TestTextTrackingAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text tracking,字符间距动画,字间距
+func AddTextTrackingAnimator(layer *Layer, tracking, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextTrackingAnimator(layer, tracking, rangeStart, rangeEnd, rangeOffset)
+}
+
+// @summary    Add a per-character Character Offset animator to a text layer
+// @description Adds a per-character Character Offset animator with a Range Selector
+//   — the kinetic-typography primitive that shifts each selected glyph's code
+//   through the alphabet (the "scramble" / decode reveal). offset is the number of
+//   positions to shift the selected characters; rangeStart / rangeEnd / rangeOffset
+//   are the Range Selector bounds in percent. Keyframe the value over time with
+//   AnimateTextCharacterOffset for an animated decode. Refused on non-text layers
+//   and on un-Reopened New*-built text layers.
+// @param      layer        the parsed text layer to add the animator to
+// @param      offset       per-character code shift (positions through the alphabet)
+// @param      rangeStart   Range Selector start bound, in percent
+// @param      rangeEnd     Range Selector end bound, in percent
+// @param      rangeOffset  Range Selector offset, in percent
+// @returns    a stand-in group node referencing the spliced animator
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextCharOffsetAnimator_AEShipGate_AE2020,TestTextCharOffsetAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused
+// @incident   text-animator-create-re
+// @alias      text character offset,字符偏移动画,scramble,解码
+func AddTextCharacterOffsetAnimator(layer *Layer, offset, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error) {
+	return serializer.AddTextCharacterOffsetAnimator(layer, offset, rangeStart, rangeEnd, rangeOffset)
+}
+
 // @summary    Add a per-character Rotation X animator to a text layer
 // @description Adds a per-character Rotation X animator with a Range Selector — a
 //   3D rotation about each character's horizontal axis (the characters tumble
@@ -1472,6 +1524,48 @@ func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) er
 // @alias      animate text rotation,文字旋转关键帧,同步旋转,持续旋转
 func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextRotation(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Tracking
+// @description Keyframes the Tracking Amount leaf of a text layer's first animator
+//   (added via AddTextTrackingAnimator) — animating the inter-character spacing
+//   itself over time, so every selected character shares the curve (e.g. letters
+//   spreading apart). Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused
+//   on non-text layers, layers without a Tracking-animator leaf, and an already-
+//   animated Tracking leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Tracking leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only
+// @incident   text-animator-create-re
+// @alias      animate text tracking,文字字间距关键帧
+func AnimateTextTracking(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextTracking(layer, tickRate, kfs)
+}
+
+// @summary    Keyframe a text animator's per-character Character Offset
+// @description Keyframes the Character Offset leaf of a text layer's first animator
+//   (added via AddTextCharacterOffsetAnimator) — animating the glyph-code shift
+//   over time, the animated "decode / scramble" reveal (codes settle toward 0).
+//   Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on non-text
+//   layers, layers without a Character-Offset-animator leaf, and an already-
+//   animated Character Offset leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Character Offset leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only
+// @incident   text-animator-create-re
+// @alias      animate text character offset,文字字符偏移关键帧,解码动画
+func AnimateTextCharacterOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
+	return serializer.AnimateTextCharacterOffset(layer, tickRate, kfs)
 }
 
 // @summary    Keyframe a text animator's per-character Position

@@ -29,6 +29,13 @@
       "signature": "func AddMask(layer *Layer, name string, path BezierPath) (*Mask, error)",
       "summary": "Appends a vector mask to the layer's \"ADBE Mask Parade\" and returns the parsed mask. It is created with the given display name (empty becomes \"Mask N\"), the given static Bezier path, and AE defaults everywhere else: mode Add, not inverted, zero feather, full opacity (Feather / Opacity / Expansion are default-elided on disk, exactly as AE persists an untouched mask)."
     },
+    "AddTextCharacterOffsetAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtextcharacteroffsetanimator",
+      "signature": "func AddTextCharacterOffsetAnimator(layer *Layer, offset, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "Adds a per-character Character Offset animator with a Range Selector — the kinetic-typography primitive that shifts each selected glyph's code through the alphabet (the \"scramble\" / decode reveal). offset is the number of positions to shift the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Keyframe the value over time with AnimateTextCharacterOffset for an animated decode. Refused on non-text layers and on un-Reopened New*-built text layers."
+    },
     "AddTextColorAnimator": {
       "kind": "func",
       "file": "text.md",
@@ -127,6 +134,13 @@
       "signature": "func AddTextStrokeWidthAnimator(layer *Layer, width, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
       "summary": "Adds a per-character Stroke Width animator with a Range Selector — it grows / shrinks the glyph stroke. width (pixels) is applied to the selected characters' stroke; the text must carry a stroke (apply-stroke enabled) for the effect to be visible. rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Refused on non-text layers and on un-Reopened New*-built text layers."
     },
+    "AddTextTrackingAnimator": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#addtexttrackinganimator",
+      "signature": "func AddTextTrackingAnimator(layer *Layer, tracking, rangeStart, rangeEnd, rangeOffset float64) (*AEPropertyGroup, error)",
+      "summary": "Adds a per-character Tracking animator with a Range Selector — the kinetic-typography primitive that spreads (or tightens) the spacing between the selected characters. tracking is the inter-character spacing in 1/1000 em applied to the selected characters; rangeStart / rangeEnd / rangeOffset are the Range Selector bounds in percent. Sweep the Range Offset over time with AnimateTextRangeOffset, or keyframe the value itself with AnimateTextTracking. Refused on non-text layers and on un-Reopened New*-built text layers."
+    },
     "AddTextWigglySelector": {
       "kind": "func",
       "file": "text.md",
@@ -147,6 +161,13 @@
       "anchor": "#animateeffectparamvec",
       "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
       "summary": "Keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a time (seconds), a []float64 value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam (a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space, z divided by its height)."
+    },
+    "AnimateTextCharacterOffset": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#animatetextcharacteroffset",
+      "signature": "func AnimateTextCharacterOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
+      "summary": "Keyframes the Character Offset leaf of a text layer's first animator (added via AddTextCharacterOffsetAnimator) — animating the glyph-code shift over time, the animated \"decode / scramble\" reveal (codes settle toward 0). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Character-Offset-animator leaf, and an already- animated Character Offset leaf."
     },
     "AnimateTextColor": {
       "kind": "func",
@@ -189,6 +210,13 @@
       "anchor": "#animatetextscale",
       "signature": "func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
       "summary": "Keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe value is the [sx, sy, sz] scale percent (100 = unchanged). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Scale-animator leaf, and an already-animated Scale leaf."
+    },
+    "AnimateTextTracking": {
+      "kind": "func",
+      "file": "text.md",
+      "anchor": "#animatetexttracking",
+      "signature": "func AnimateTextTracking(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
+      "summary": "Keyframes the Tracking Amount leaf of a text layer's first animator (added via AddTextTrackingAnimator) — animating the inter-character spacing itself over time, so every selected character shares the curve (e.g. letters spreading apart). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Tracking-animator leaf, and an already- animated Tracking leaf."
     },
     "AutoOrientType": {
       "kind": "type",
