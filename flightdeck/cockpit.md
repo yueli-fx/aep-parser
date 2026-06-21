@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah comp ② 文字动画器 gap #2 Tracking + #3 Character Offset **已 ship**（双版本 render-gate PASS，commit 2add514，working tree 净）；下一步 = 拼 comp ② 工程
+Updated: 2026-06-22 · claude · Stage: Booyah **comp ② テキスト 拼成**（GLITCH text + SetLayerTransform 28kf/24kf + Tracking/CharOffset 动画器；AE2020≡AE2025 接受+render；commit 2add514+377006c）；comp ② 待用户真机 review；下一步 = comp ③ マップ用ノイズ
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,11 +8,14 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-**A = 拼 Booyah comp ② テキスト変えるならココ！**（Task 1.2，[plan](plans/2026-06-19-booyah-glitch-replication.md)）。两个文字动画器 gap **已 ship**（见下），现可拼整 comp ②。剩下：
-1. `gen_text_komako.go`：`NewTextLayer`+`SetText("GLITCH")` → 层级 **Position(28kf)+Opacity(24kf)**（`SetLayerTransform`/animate，oracle 取值）→ `AddTextTrackingAnimator`+`AnimateTextTracking`（2kf ease）→ `AddTextCharacterOffsetAnimator`+`AnimateTextCharacterOffset`（2kf ease）。kf times/values 由 oracle 从原工程 L0 "GLITCH" 提取。
-2. 验收四关 + 单独 render 一帧 Read png 自查 + 账本 ② = 待review。Commit。
+**⚠ 待用户真机 review**：`booyah-clone.aep` 的 comp ②「テキスト変えるならココ！」请在真机打开复核（agent 已 AE2020+2025 接受+render 眼验：GLITCH→PURCLQ + tracking + flicker，但 review-gate 须用户验过才能从 待review 翻 complete）。
 
-**已 ship（commit 2add514，本会话）**：`AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` + `AnimateTextTracking` / `AnimateTextCharacterOffset`（alpha，text），**双版本 render-gate PASS**（AE2020≡AE2025：Tracking ink 宽 612→354；CharOffset frameDiff 0-2=2157）。RE 直接从真实工程读（companion 自动 materialize，零新字节代码），详 [[text-animator-create-re]] 末 Case。capindex 486→490。⚠AE 装 `E:\adobe\`。
+**A = 续建 Booyah Phase 1**（Task 1.3/1.4，[plan](plans/2026-06-19-booyah-glitch-replication.md)）：
+1. **③ マップ用フラクタルノイズ**：2 Fractal Noise 层（footage 源共享建法首遇——实测确定）+ Evolution `SetExpression("time*1200"/"time*3000")`（0.3 已 GO）+ Offset Turbulence `AnimateEffectParam` + L0 blend=Overlay。
+2. **④ カクッ**：2 shape 层，层级 Scale(2kf)+Opacity(20kf) + oracle 提取静态 path。
+3. 各走验收四关 + 账本。
+
+**comp ② 已成（本会话，commit 2add514+377006c）**：两文字动画器 ship（`AddTextTrackingAnimator`/`AddTextCharacterOffsetAnimator`+`AnimateText*`，双版本 render-gate PASS，RE 直接从真实工程读，详 [[text-animator-create-re]] 末 Case）+ `gen_text_komako.go` 拼成 comp ②（`SetLayerTransform` 28kf Position/24kf Opacity + 2 动画器）。capindex 486→490。**fidelity delta**（非阻塞）：kf linear 近似原 ease；字体/字色用默认（原色经 ⑧ RGBズレ 覆写）。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
