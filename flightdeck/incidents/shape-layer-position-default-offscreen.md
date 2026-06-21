@@ -1,9 +1,9 @@
 ---
 status: active
-when_to_read: a from-scratch NewShapeLayer renders blank/empty in AE while verify.jsx shows every shape/value correct; shapes appear off-screen (top-left); Layer.SetPosition on a from-scratch shape layer returns "Position property not present"; deciding whether to center a new shape layer; reasoning about layer Transform vs shape-node positions
-applies_to: [shape-layer, new-shape-layer, layer-position, transform-group, off-screen, render-blank, red-line-4, set-position, materialized-property, embed-template, flightdeck/showcase/booyah-clone/gen_shape_iiip.go, internal/serializer/lower_layer.go, internal/scene/scene_layer_accessors.go]
-last_updated: 2026-06-20
-recurrences: 1
+when_to_read: a from-scratch NewShapeLayer renders blank/empty in AE while verify.jsx shows every shape/value correct; shapes appear off-screen (top-left); Layer.SetPosition on a from-scratch shape layer returns "Position property not present"; deciding whether to center a new shape layer; reasoning about layer Transform vs shape-node positions; replicating a layer that uses SEPARATED Position dimensions (Position_0/Position_1) whose parser-read 0,0 disagrees with the original's visually-centered position
+applies_to: [shape-layer, new-shape-layer, layer-position, transform-group, off-screen, render-blank, red-line-4, set-position, materialized-property, embed-template, separated-dimensions, position-0, position-1, read-side, setlayertransform, flightdeck/showcase/booyah-clone/gen_shape_iiip.go, flightdeck/showcase/booyah-clone/gen_kakuh.go, internal/serializer/lower_layer.go, internal/scene/scene_layer_accessors.go]
+last_updated: 2026-06-22
+recurrences: 2
 resolved_by:
 ---
 
@@ -57,3 +57,4 @@ needs a gate sweep, so it's deferred; the gen sets position explicitly for now.
 
 ## Cases
 - 2026-06-20 first — Booyah 复刻 comp ① rendered blank; root-caused to layer Position (0,0) vs comp-center; fixed in gen via Transform().Position().
+- 2026-06-22 second — Booyah 复刻 comp ④ カクッ (2 stroked-rect+trim shape layers). **New twist: this time I DID read the original's position to copy it — and still landed at top-left.** The original's layer Transform stores Position **SEPARATED** (`ADBE Position_0` / `ADBE Position_1`, no unified `ADBE Position`), and the parser surfaces both channels as **0,0** even though the layer is visually centered (user confirmed on the real project). I trusted that read → didn't center → clone's rect (centered at shape-(0,0), (0,0) anchor) rendered with its center at comp (0,0) = top-left (render showed only the bottom-right quadrant's corner). **Fix:** center explicitly via `SetLayerTransform.Position()` = comp-centre (this comp animates Scale/Opacity so it uses the SetLayerTransform path, not `sl.Transform().Position()` like comp ①; both center the same way). After fix, render shows the trimmed rect centered (corners as two opposite brackets, L0's 180° rotation putting its trim-gap corner diagonally opposite L1's). **Read-side open question (not chased):** is this a parser MISREAD of the separated X/Y channels (should be 960,540) or genuine AE semantics (separated 0,0 + comp-centre base)? Needs an AE-DOM `xPosition`/`yPosition` dump of the original to settle. **Lesson:** for a separated-Position layer, do NOT trust the parser's Position_0/Position_1 as the world position during replication — center explicitly (or settle the read-side first). Related write-side: [[separate-dimensions-write-mechanics]].

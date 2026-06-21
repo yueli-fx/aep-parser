@@ -66,6 +66,14 @@ func finishKakuh(rp *aep.Project, orc *oracle) {
 		otg := findGroup(origComp.Layers[i].PropertyTree(), "ADBE Transform Group")
 		tr := aep.NewLayerTransform()
 
+		// Position: centre on the comp. The original's layer is visually centred
+		// (an AE-created shape layer defaults to position = comp-centre), but its
+		// Transform stores Position SEPARATED (Position_0/Position_1) which the
+		// parser surfaces as 0,0 — so trusting that read put our clone's layer at
+		// the top-left corner. Centre explicitly (rect is centred at shape-(0,0) with
+		// a (0,0) anchor, so a comp-centre layer position centres the rect).
+		must(tr.Position().SetStaticValue([2]float64{float64(comp.Width) / 2, float64(comp.Height) / 2}))
+
 		// Scale (2kf, ease in the original → linear approx; 3D value, take X/Y).
 		// Parser reports scale as a fraction (1.0 = 100%); SetLayerTransform's Scale
 		// is percent, so ×100 (same convention as Opacity below).
