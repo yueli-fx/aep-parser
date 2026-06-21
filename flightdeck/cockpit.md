@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **comp ③ マップ用フラクタルノイズ 成**（2 Fractal Noise solid，双版本 AE-accept + DOM 对账 PASS，Evolution 表达式真启用；🔶待用户 review，a0ce40f）；下一步 = comp ④ カクッ（2 shape 层）
+Updated: 2026-06-22 · claude · Stage: Booyah **comp ③ マップ用フラクタルノイズ complete（用户真机验收 2026-06-22）**（2 Fractal Noise solid，双版本 AE-accept + DOM；a0ce40f）；进行中 = comp ④ カクッ（2 shape 层）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -8,11 +8,11 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 ## Next
 
-**comp ③ マップ用フラクタルノイズ ✅ 成（本会话 a0ce40f，🔶待用户 review）**：`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise（L0 Overlay / L1 Normal）。**双版本 AE-accept + DOM 对账 PASS**——2 层不 drop、Fractal Noise 32 props 全在、Evolution `expr="time*1200"/"time*3000" on`（AE DOM 确认表达式真启用，红线1 清，非假绿）、Offset Turbulence 2kf→DOM 960,540（parser fraction[0.5,0.5]→AE 像素中心映射对）、UniformScaling off、blend 对。值全 oracle 取（连 L1 `time*3000\r` 尾 CR）。**footage-share 实测结论**：footage(67)=黑 solid，无 from-scratch 共享 footage-item API（SetSource 留孤儿 / DuplicateLayer 继承 effect 需脆弱二次 reopen）→ 各自 1 黑 solid（Fractal Noise 自生成像素，render-neutral delta）。终帧 render-pixel 归 ⑫。verify.jsx 加 `dumpEffects`（服务后续 ④⑦⑧⑨⑩⑪⑫）。无新 API（组合既有 gated 能力），capindex 不变。
+**comp ③ マップ用フラクタルノイズ ✅ complete（用户真机验收 2026-06-22；a0ce40f）**：`gen_fractal_map.go` 2 黑 solid 各 1 Fractal Noise（L0 Overlay / L1 Normal）。**双版本 AE-accept + DOM 对账 PASS**——2 层不 drop、Fractal Noise 32 props 全在、Evolution `expr="time*1200"/"time*3000" on`（AE DOM 确认表达式真启用，红线1 清，非假绿）、Offset Turbulence 2kf→DOM 960,540（parser fraction[0.5,0.5]→AE 像素中心映射对）、UniformScaling off、blend 对。值全 oracle 取（连 L1 `time*3000\r` 尾 CR）。**footage-share 实测结论**：footage(67)=黑 solid，无 from-scratch 共享 footage-item API（SetSource 留孤儿 / DuplicateLayer 继承 effect 需脆弱二次 reopen）→ 各自 1 黑 solid（Fractal Noise 自生成像素，render-neutral delta）。终帧 render-pixel 归 ⑫。verify.jsx 加 `dumpEffects`（服务后续 ④⑦⑧⑨⑩⑪⑫）。无新 API（组合既有 gated 能力），capindex 不变。
 
 **下一 = Task 1.4 ④ カクッ**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：2 shape 层，层级 Scale(2kf ease)+Opacity(20kf) + oracle 提取静态 path（复用 comp ① shape territory + ② 的 `SetLayerTransform`，应快）。走验收四关 + 账本。
 
-**Booyah Phase 1 进度**：① ✅(complete) ② ✅(complete) ③ ✅(🔶待review) ④ ⬜ → 然后 Phase 2 中层 comp（⑤⑥⑦⑧⑨）。⚠AE 装 `E:\adobe\`。
+**Booyah Phase 1 进度**：① ✅(complete) ② ✅(complete) ③ ✅(complete) ④ 🔧(进行中) → 然后 Phase 2 中层 comp（⑤⑥⑦⑧⑨）。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
