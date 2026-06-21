@@ -106,6 +106,10 @@ Booyah comp ② 全工程复刻（多 comp 从零）暴露同一 scar 的又一�
 **教训**：render-pixel + Go round-trip + ExtendScript 全绿 **≠ AE UI 可编辑** —— UI 校验走 ID 查找比脚本严，
 「结构有效能渲染但 ID 撞号」这类洞唯有**真机 UI 操作**能暴露（红线1 的 UI 变体；详 [[text-animator-create-re]] 末）。
 
+**用户真机验收（2026-06-22）：修用户层 ID 后报错消失。** 故 **service 层（DLay/SLay…2..12）跨-comp 撞号
+= 实证良性**：AE 视 service 层为 comp-内部、不参与全局唯一性校验（仅**用户层** ID 需全局唯一）。所以 NewComposition
+不必 re-ID service 层（一度担心要做的更大改动，证实不需要）。即:全局唯一性只对 c.Layers 里的用户层强制。
+
 ## Related
 
 - 修复 commit: 2026-05-28 V3 Phase 5B（同 commit 一起 ship）
