@@ -139,56 +139,56 @@
       "file": "effect.md",
       "anchor": "#animateeffectparam",
       "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
-      "summary": "AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (\u003e= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}. It materializes the parameter if it is default-elided (like SetEffectParam, from the host effect's pard definition), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe to clone). Returns the animated *Property."
+      "summary": "Keyframes a 1D-scalar effect parameter — N keyframes (\u003e= 2), each a ScalarKeyframe with a time (seconds), value, and optional ease. It materializes the parameter if it is default-elided (like SetEffectParam), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe). Returns the animated Property."
     },
     "AnimateEffectParamVec": {
       "kind": "func",
       "file": "effect.md",
       "anchor": "#animateeffectparamvec",
       "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
-      "summary": "AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a Time (seconds), a []float64 Value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam: a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space (for a source-backed layer divide by the source's w/h, for a source-less layer by the comp's — and z by the same space's height)."
+      "summary": "Keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a time (seconds), a []float64 value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam (a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space, z divided by its height)."
     },
     "AnimateTextColor": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextcolor",
       "signature": "func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-      "summary": "AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven colour itself over time (e.g. a red→blue cycle), which a Range-Offset sweep cannot express. Each keyframe Value is an [r, g, b, a] colour with channels 0..1 (converted internally to the on-disk [A,R,G,B]×255 encoding). Builds a parsed property over the spliced Fill Color slot and delegates to AnimateVectorKeyframes (the 4-channel keyframe block — verified byte-matching the AE-saved text leaf). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+      "summary": "Keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven color over time (e.g. a red→blue cycle). Each keyframe value is an [r, g, b, a] color with channels 0..1. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Fill-Color-animator leaf, an already-animated leaf, and keyframe values that are not 4-channel."
     },
     "AnimateTextOpacity": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextopacity",
       "signature": "func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-      "summary": "AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector. Every selected character shares the opacity curve, so the text fades as one synchronized group (a pulse / blink), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Opacity slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+      "summary": "Keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector, so every selected character shares the curve and the text fades as one synchronized group (a pulse / blink). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without an Opacity-animator leaf, and an already-animated Opacity leaf."
     },
     "AnimateTextPosition": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextposition",
       "signature": "func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-      "summary": "AnimateTextPosition keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself rather than sweeping the Range Selector. Each keyframe Value is the [x, y, z] offset in pixels; every selected character shares the motion curve, so the text glides as one synchronized group. Builds a parsed property over the spliced Position slot and delegates to AnimateVectorKeyframes (the spatial 3-component keyframe block — verified byte-matching the AE-saved text leaf). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+      "summary": "Keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself, so every selected character shares the curve and the text glides as one synchronized group. Each keyframe value is the [x, y, z] offset in pixels. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Position-animator leaf, and an already-animated Position leaf."
     },
     "AnimateTextRangeOffset": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextrangeoffset",
       "signature": "func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-      "summary": "AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time reveals the characters one by one as the selection window (and the invisibility it carries) slides off the text. Operates on the layer's first animator; needs \u003e= 2 keyframes. tickRate \u003c= 0 uses the comp's."
+      "summary": "Keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time reveals the characters one by one as the selection window slides off the text. Operates on the layer's first animator; needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
     },
     "AnimateTextRotation": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextrotation",
       "signature": "func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-      "summary": "AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector. Every selected character shares the rotation curve, so the text spins as one synchronized group (e.g. a continuous 0→360 spin), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Rotation slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+      "summary": "Keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself, so every selected character shares the curve and the text spins as one synchronized group (e.g. a continuous 0→360 spin). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Rotation-animator leaf, and an already-animated Rotation leaf."
     },
     "AnimateTextScale": {
       "kind": "func",
       "file": "text.md",
       "anchor": "#animatetextscale",
       "signature": "func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-      "summary": "AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe Value is the [sx, sy, sz] scale percent (100 = unchanged); every selected character shares the curve. Scale 3D is a non-spatial 3-component leaf, so it uses a different animated keyframe block (value@0x08) than the spatial Position/Color leaves — RE'd byte-matching the AE-saved text Scale leaf. Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's."
+      "summary": "Keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe value is the [sx, sy, sz] scale percent (100 = unchanged). Needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's. Refused on non-text layers, layers without a Scale-animator leaf, and an already-animated Scale leaf."
     },
     "AutoOrientType": {
       "kind": "type",
@@ -5006,14 +5006,14 @@
       "file": "effect.md",
       "anchor": "#seteffectlayerparam",
       "signature": "func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error",
-      "summary": "SetEffectLayerParam points a layer-reference effect parameter at target — e.g. Set Matte's \"Take Matte From Layer\" (paramMatchName \"ADBE Set Matte3-0001\"), which mattes the host layer with another layer's channel. AE stores the reference as target's layer ID in the parameter's tdpi chunk (the same binding the effect's always-present host stream uses, aimed elsewhere), so this is a length-preserving 4-byte rewrite. target must be a layer in the same composition."
+      "summary": "Points a layer-reference effect parameter at target — e.g. Set Matte's \"Take Matte From Layer\", which mattes the host layer with another layer's channel. AE stores the reference as target's layer ID in the parameter's binding chunk, so this is a length-preserving rewrite. target must be a layer in the same composition."
     },
     "SetEffectParam": {
       "kind": "func",
       "file": "effect.md",
       "anchor": "#seteffectparam",
       "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
-      "summary": "SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. \"ADBE Gaussian Blur 2-0001\"), returning the parameter's *Property. It is the typed-parameter entry for AddEffect-style workflows:"
+      "summary": "Sets an effect parameter's static value by full parameter match-name (e.g. \"ADBE Gaussian Blur 2-0001\") and returns the parameter's Property. It is the typed-parameter entry for AddEffect workflows."
     },
     "SetMaskPath": {
       "kind": "func",
@@ -5034,7 +5034,7 @@
       "file": "layer.md",
       "anchor": "#setmaterialoption",
       "signature": "func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error)",
-      "summary": "SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g. \"ADBE Casts Shadows\", \"ADBE Accepts Lights\", \"ADBE Diffuse Coefficient\"), returning the property's *Property. It is the from-scratch entry for material properties — the synthesis-lite sibling of SetEffectParam."
+      "summary": "Sets a 3D layer's Material-Options property by AE match-name (e.g. \"ADBE Casts Shadows\", \"ADBE Accepts Lights\") and returns the Property. It is the from-scratch entry for material properties — the sibling of SetEffectParam."
     },
     "SetRenderer": {
       "kind": "func",
@@ -5048,7 +5048,7 @@
       "file": "text.md",
       "anchor": "#settextrangeadvanced",
       "signature": "func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error",
-      "summary": "SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). The Advanced group is elided on a fresh selector, so this materializes it from an embedded AE-native template, resets every slot to its AE default, then writes adv's values; it is idempotent (re-materializes on each call). Build adv with DefaultTextRangeAdvanced and tweak fields."
+      "summary": "Sets the Range Advanced params on the layer's first text animator's Range Selector — the selector-shaping controls behind a kinetic-typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). The Advanced group is elided on a fresh selector, so this materializes it from an embedded AE-native template, resets every slot to its AE default, then writes adv's values; it is idempotent. Build adv with DefaultTextRangeAdvanced and tweak fields. Refused on non-text layers, un-Reopened New*-built text layers, and layers with no text animator."
     },
     "ShapePath": {
       "kind": "type",
@@ -5197,7 +5197,7 @@
       "file": "effect.md",
       "anchor": "#supportedeffectparams",
       "signature": "func SupportedEffectParams() []string",
-      "summary": "SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless."
+      "summary": "Returns the sorted parameter match-names that have a dedicated per-parameter template. SetEffectParam is not limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic fallback, and already-present params are settable regardless."
     },
     "SupportedEffects": {
       "kind": "func",

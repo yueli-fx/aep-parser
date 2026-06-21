@@ -1384,315 +1384,330 @@ type TextRangeAdvanced = serializer.TextRangeAdvanced
 // @alias      range advanced defaults,默认高级范围
 func DefaultTextRangeAdvanced() TextRangeAdvanced { return serializer.DefaultTextRangeAdvanced() }
 
-// SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text
-// animator's Range Selector — the selector-shaping controls behind a kinetic-
-// typography reveal (how strongly the animator applies via Amount, the selection
-// falloff Shape, the combination Mode for multi-selector setups, etc.). The
-// Advanced group is elided on a fresh selector, so this materializes it from an
-// embedded AE-native template, resets every slot to its AE default, then writes
-// adv's values; it is idempotent (re-materializes on each call). Build adv with
-// DefaultTextRangeAdvanced and tweak fields.
-//
-// Refused: non-text layers, text layers built by New* that were never parsed
-// (call aep.Reopen first), and layers with no text animator (add one first).
-//
-// Alpha / structural — Amount is double-version render-gated; the other params
-// round-trip (write + survive AE) but their visual effect is selector-internal /
-// coupled (Mode needs multiple selectors, Smoothness only affects Shape=Square),
-// so they are not individually render-gated. Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextRangeAdvancedAmount_AEShipGate_AE2020,TestTextRangeAdvancedAmount_AEShipGate_AE2025 incident=text-animator-create-re boundary="Amount render-gated;其余 param(Mode/Shape/Smoothness…)仅 round-trip(选择器内部/耦合)" alias="range advanced,高级范围,amount,shape,mode,ease high"
+// @summary    Set the Range Advanced params on a text animator
+// @description Sets the Range Advanced params on the layer's first text animator's
+//   Range Selector — the selector-shaping controls behind a kinetic-typography
+//   reveal (how strongly the animator applies via Amount, the selection falloff
+//   Shape, the combination Mode for multi-selector setups, etc.). The Advanced
+//   group is elided on a fresh selector, so this materializes it from an embedded
+//   AE-native template, resets every slot to its AE default, then writes adv's
+//   values; it is idempotent. Build adv with DefaultTextRangeAdvanced and tweak
+//   fields. Refused on non-text layers, un-Reopened New*-built text layers, and
+//   layers with no text animator.
+// @param      layer  the parsed text layer whose animator to configure
+// @param      adv    the Range Advanced params to write
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextRangeAdvancedAmount_AEShipGate_AE2020,TestTextRangeAdvancedAmount_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   Amount is render-gated; the other params (Mode/Shape/Smoothness…) only round-trip (selector-internal or coupled effects)
+// @incident   text-animator-create-re
+// @alias      range advanced,高级范围,amount,shape,mode,ease high
 func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error {
 	return serializer.SetTextRangeAdvanced(layer, adv)
 }
 
-// AnimateTextRangeOffset keyframes a text animator's Range Selector Offset,
-// turning a static reveal into an animated sweep — the kinetic-typography
-// payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the
-// Offset 0→100 over time reveals the characters one by one as the selection
-// window (and the invisibility it carries) slides off the text. Operates on the
-// layer's first animator; needs >= 2 keyframes. tickRate <= 0 uses the comp's.
-//
-// Builds a parsed property over the spliced Offset slot and delegates to the
-// same 1D non-spatial static→animated conversion the effect-param / shape-scalar
-// animate paths use (tdb4 flag flip + keyframe-stream synthesis).
-//
-// Alpha / structural — RE'd + double-version render-gated as the reveal sweep.
-// Free function (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextAnimator_AEShipGate_AE2020,TestTextAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="作用于第一个 animator;需 >=2 关键帧;tickRate<=0 用 comp 的" alias="animate range offset,范围偏移动画,逐字揭示,reveal sweep,打字机动画"
+// @summary    Keyframe a text animator's Range Selector Offset
+// @description Keyframes a text animator's Range Selector Offset, turning a static
+//   reveal into an animated sweep — the kinetic-typography payoff. Pair it with an
+//   Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time
+//   reveals the characters one by one as the selection window slides off the text.
+//   Operates on the layer's first animator; needs >= 2 keyframes; tickRate <= 0
+//   uses the comp's.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Range Offset
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextAnimator_AEShipGate_AE2020,TestTextAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   acts on the first animator; needs >= 2 keyframes; tickRate <= 0 uses the comp's
+// @incident   text-animator-create-re
+// @alias      animate range offset,范围偏移动画,逐字揭示,reveal sweep,打字机动画
 func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextRangeOffset(layer, tickRate, kfs)
 }
 
-// AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's
-// first animator (added via AddTextOpacityAnimator) — animating the driven value
-// itself rather than sweeping the Range Selector. Every selected character
-// shares the opacity curve, so the text fades as one synchronized group (a pulse
-// / blink), which the AnimateTextRangeOffset sweep cannot express. Builds a
-// parsed property over the spliced Opacity slot and delegates to the same 1D
-// non-spatial static→animated conversion the effect-param / shape-scalar animate
-// paths use. Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
-//
-// Refused: non-text layers, layers without a text animator carrying an Opacity
-// leaf, and an Opacity leaf that is already animated.
-//
-// Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf
-// path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=roundtrip incident=text-animator-create-re boundary="1D scalar leaf 路径已 render-gated(经 AnimateTextRangeOffset/Rotation);本函数本身仅 round-trip" alias="animate text opacity,文字不透明度关键帧,同步闪烁,pulse"
+// @summary    Keyframe a text animator's per-character Opacity
+// @description Keyframes the per-character Opacity leaf of a text layer's first
+//   animator (added via AddTextOpacityAnimator) — animating the driven value
+//   itself rather than sweeping the Range Selector, so every selected character
+//   shares the curve and the text fades as one synchronized group (a pulse /
+//   blink). Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on
+//   non-text layers, layers without an Opacity-animator leaf, and an
+//   already-animated Opacity leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Opacity leaf
+// @domain     text
+// @stability  alpha
+// @verify     roundtrip
+// @since      AE2020
+// @boundary   the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only
+// @incident   text-animator-create-re
+// @alias      animate text opacity,文字不透明度关键帧,同步闪烁,pulse
 func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextOpacity(layer, tickRate, kfs)
 }
 
-// AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's
-// first animator (added via AddTextRotationAnimator) — animating the driven angle
-// itself rather than sweeping the Range Selector. Every selected character shares
-// the rotation curve, so the text spins as one synchronized group (e.g. a
-// continuous 0→360 spin), which the AnimateTextRangeOffset sweep cannot express.
-// Builds a parsed property over the spliced Rotation slot and delegates to the
-// same 1D non-spatial static→animated conversion the effect-param / shape-scalar
-// animate paths use. Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
-//
-// Refused: non-text layers, layers without a text animator carrying a Rotation
-// leaf, and a Rotation leaf that is already animated.
-//
-// Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf
-// path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextRotLeafAnimator_AEShipGate_AE2020,TestTextRotLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextRotationAnimator;leaf 已动画则 refuse;>=2 关键帧" alias="animate text rotation,文字旋转关键帧,同步旋转,持续旋转"
+// @summary    Keyframe a text animator's per-character Rotation
+// @description Keyframes the per-character Rotation leaf of a text layer's first
+//   animator (added via AddTextRotationAnimator) — animating the driven angle
+//   itself, so every selected character shares the curve and the text spins as one
+//   synchronized group (e.g. a continuous 0→360 spin). Needs >= 2 keyframes;
+//   tickRate <= 0 uses the comp's. Refused on non-text layers, layers without a
+//   Rotation-animator leaf, and an already-animated Rotation leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the scalar keyframes (>= 2) for the Rotation leaf
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextRotLeafAnimator_AEShipGate_AE2020,TestTextRotLeafAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   requires AddTextRotationAnimator first; refuses an already-animated leaf; needs >= 2 keyframes
+// @incident   text-animator-create-re
+// @alias      animate text rotation,文字旋转关键帧,同步旋转,持续旋转
 func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error {
 	return serializer.AnimateTextRotation(layer, tickRate, kfs)
 }
 
-// AnimateTextPosition keyframes the per-character Position 3D leaf of a text
-// layer's first animator (added via AddTextPositionAnimator) — animating the
-// driven offset itself rather than sweeping the Range Selector. Each keyframe
-// Value is the [x, y, z] offset in pixels; every selected character shares the
-// motion curve, so the text glides as one synchronized group. Builds a parsed
-// property over the spliced Position slot and delegates to AnimateVectorKeyframes
-// (the spatial 3-component keyframe block — verified byte-matching the AE-saved
-// text leaf). Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
-//
-// Refused: non-text layers, layers without a text animator carrying a Position
-// leaf, and a Position leaf that is already animated.
-//
-// Alpha / structural — RE'd + double-version render-gated. Free function
-// (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextPositionAnimator;leaf 已动画则 refuse;>=2 关键帧" alias="animate text position,文字位移关键帧,同步滑动"
+// @summary    Keyframe a text animator's per-character Position
+// @description Keyframes the per-character Position 3D leaf of a text layer's first
+//   animator (added via AddTextPositionAnimator) — animating the driven offset
+//   itself, so every selected character shares the curve and the text glides as
+//   one synchronized group. Each keyframe value is the [x, y, z] offset in pixels.
+//   Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on non-text
+//   layers, layers without a Position-animator leaf, and an already-animated
+//   Position leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the vector keyframes (>= 2; [x,y,z] pixels) for the Position leaf
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   requires AddTextPositionAnimator first; refuses an already-animated leaf; needs >= 2 keyframes
+// @incident   text-animator-create-re
+// @alias      animate text position,文字位移关键帧,同步滑动
 func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextPosition(layer, tickRate, kfs)
 }
 
-// AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's
-// first animator (added via AddTextScaleAnimator) — animating the driven scale
-// itself over time (e.g. a pulse / grow), which a Range-Offset sweep cannot
-// express. Each keyframe Value is the [sx, sy, sz] scale percent (100 =
-// unchanged); every selected character shares the curve. Scale 3D is a
-// non-spatial 3-component leaf, so it uses a different animated keyframe block
-// (value@0x08) than the spatial Position/Color leaves — RE'd byte-matching the
-// AE-saved text Scale leaf. Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
-//
-// Refused: non-text layers, layers without a text animator carrying a Scale leaf,
-// and a Scale leaf that is already animated.
-//
-// Alpha / structural — RE'd + double-version render-gated. Free function
-// (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextScaleAnimator;leaf 已动画则 refuse;>=2 关键帧" alias="animate text scale,文字缩放关键帧,同步缩放,pulse"
+// @summary    Keyframe a text animator's per-character Scale
+// @description Keyframes the per-character Scale 3D leaf of a text layer's first
+//   animator (added via AddTextScaleAnimator) — animating the driven scale over
+//   time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each
+//   keyframe value is the [sx, sy, sz] scale percent (100 = unchanged). Needs >= 2
+//   keyframes; tickRate <= 0 uses the comp's. Refused on non-text layers, layers
+//   without a Scale-animator leaf, and an already-animated Scale leaf.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the vector keyframes (>= 2; [sx,sy,sz] percent) for the Scale leaf
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   requires AddTextScaleAnimator first; refuses an already-animated leaf; needs >= 2 keyframes
+// @incident   text-animator-create-re
+// @alias      animate text scale,文字缩放关键帧,同步缩放,pulse
 func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextScale(layer, tickRate, kfs)
 }
 
-// AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's
-// first animator (added via AddTextColorAnimator) — animating the driven colour
-// itself over time (e.g. a red→blue cycle), which a Range-Offset sweep cannot
-// express. Each keyframe Value is an [r, g, b, a] colour with channels 0..1
-// (converted internally to the on-disk [A,R,G,B]×255 encoding). Builds a parsed
-// property over the spliced Fill Color slot and delegates to
-// AnimateVectorKeyframes (the 4-channel keyframe block — verified byte-matching
-// the AE-saved text leaf). Needs >= 2 keyframes; tickRate <= 0 uses the comp's.
-//
-// Refused: non-text layers, layers without a text animator carrying a Fill Color
-// leaf, a Fill Color leaf that is already animated, and keyframe values that are
-// not 4-channel.
-//
-// Alpha / structural — RE'd + double-version render-gated. Free function
-// (CLAUDE.md #2).
-//
-//aep:cap domain=text tier=alpha verify=render-pixel gate=TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025 incident=text-animator-create-re boundary="需先 AddTextColorAnimator;leaf 已动画则 refuse;>=2 关键帧;值须 4 通道" alias="animate text color,文字颜色关键帧,颜色循环,color cycle"
+// @summary    Keyframe a text animator's per-character Fill Color
+// @description Keyframes the per-character Fill Color leaf of a text layer's first
+//   animator (added via AddTextColorAnimator) — animating the driven color over
+//   time (e.g. a red→blue cycle). Each keyframe value is an [r, g, b, a] color with
+//   channels 0..1. Needs >= 2 keyframes; tickRate <= 0 uses the comp's. Refused on
+//   non-text layers, layers without a Fill-Color-animator leaf, an already-animated
+//   leaf, and keyframe values that are not 4-channel.
+// @param      layer     the parsed text layer whose animator to keyframe
+// @param      tickRate  keyframe time base (<= 0 uses the comp's)
+// @param      kfs       the vector keyframes (>= 2; [r,g,b,a] in 0..1) for the Fill Color leaf
+// @domain     text
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestTextColorLeafAnimator_AEShipGate_AE2020,TestTextColorLeafAnimator_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   requires AddTextColorAnimator first; refuses an already-animated leaf; needs >= 2 keyframes; values must be 4-channel
+// @incident   text-animator-create-re
+// @alias      animate text color,文字颜色关键帧,颜色循环,color cycle
 func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error {
 	return serializer.AnimateTextColor(layer, tickRate, kfs)
 }
 
-// SetEffectParam sets an effect parameter's static value by full parameter
-// match-name (e.g. "ADBE Gaussian Blur 2-0001"), returning the parameter's
-// *Property. It is the typed-parameter entry for AddEffect-style workflows:
+// @summary    Set an effect parameter's static value by match-name
+// @description Sets an effect parameter's static value by full parameter match-name
+//   (e.g. "ADBE Gaussian Blur 2-0001") and returns the parameter's Property. It is
+//   the typed-parameter entry for AddEffect workflows.
 //
-//	fx, _ := aep.AddEffect(layer, aep.EffectGaussianBlur)
-//	_, err := aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0001", 25.0)
+//   AE persists an effect parameter only while its value differs from the default,
+//   so on a default instance the tunable params have no value stream at all. When
+//   the parameter is already present, SetEffectParam is exactly a static-value
+//   write; when it is default-elided, the parameter's value stream is first
+//   materialized from an embedded AE-native template (patched from the host
+//   effect's own definition), then the value is written — matching what AE itself
+//   persists for a touched parameter. Any scalar / enum / boolean / angle / color
+//   / 2D-point / 3D-point / slider parameter materializes via the generic path;
+//   rarer control types (curve, layer, …) return an error when elided, but params
+//   already present on the effect are settable regardless.
 //
-// Why this exists: AE persists an effect parameter only while its value
-// differs from the default — on a default instance the tunable params have no
-// value stream at all (only "<effect>-0000" survives), so plain
-// Property.SetStaticValue has nothing to target. When the parameter is
-// already present, SetEffectParam is exactly SetStaticValue. When it is
-// default-elided, the parameter's (tdmn, tdbs) value stream is first
-// materialized from an embedded AE-native template (synthesis-lite) at its
-// definition-order position, then the caller's value is written — matching
-// what AE itself persists for a touched parameter. Any scalar / enum /
-// boolean / angle / color / 2D-point / 3D-point / slider parameter of any
-// effect materializes via the generic per-control-type template, patched
-// (match-name, display name, scalar/slider min/max) from the host effect's
-// own pard definition — parameter definitions are never elided, so the
-// metadata is always in-file. Rarer control types (curve, layer, …) return
-// an error when elided; params already present on the effect are settable
-// regardless of control type.
+//   Values use the property's on-disk encoding: scalar / slider / angle (degrees)
+//   / enum / boolean as float64; color as [A, R, G, B] each 0–255; a 2D/3D point
+//   as fractions of the layer's coordinate space (the source item's pixel size for
+//   footage/solid/precomp layers, the composition's for source-less layers, z
+//   divided by that space's height).
 //
-// Values use the property's on-disk (StaticValue) encoding — the same units
-// a parsed file exposes:
-//   - scalar / slider / angle (degrees) / enum / boolean (0 or 1): float64,
-//     1:1 with the AE UI value;
-//   - color: []float64{A, R, G, B}, each channel 0–255;
-//   - 2D / 3D point: []float64 fractions of the layer's coordinate space —
-//     the SOURCE item's pixel size for footage/solid/precomp layers, the
-//     COMPOSITION's for source-less layers (shape/text); the z component is
-//     divided by the same space's HEIGHT (RE:
-//     test_data/re_effect_param_types_units.aep).
-//
-// The materialized stream carries no tdpi host binding (only the
-// always-present -0000 stream does), so no retarget is needed. Atomic
-// mutation: snapshot value-group chunk children + flat Parameters + warnings;
-// roll back on any parser warning or value-encode failure.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green (per-param and
-// generic materialization, values read back on open and after AE's own
-// resave); promoted from Alpha in the 2026-06-12 audit batch. Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=effect tier=stable verify=ae-accept gate=TestSetEffectParam_AEShipGate_AE2020,TestSetEffectParam_AEShipGate_AE2025 incident=effect-param-elision-synthesis-lite boundary="scalar/enum/bool/angle/color/2D·3D point/slider 泛型物化;curve/layer-ref 类 elided 时 refuse" alias="effect param,效果参数,设参数,blurriness"
+//   Atomic (snapshot + rollback on any parser warning or encode failure).
+// @param      layer           the parsed layer carrying the effect
+// @param      fx              the effect whose parameter to set
+// @param      paramMatchName  the full parameter match-name
+// @param      value           the value, in the parameter's on-disk encoding
+// @returns    the parameter Property
+// @domain     effect
+// @stability  stable
+// @verify     ae-accept
+// @gate       TestSetEffectParam_AEShipGate_AE2020,TestSetEffectParam_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   scalar/enum/bool/angle/color/2D·3D-point/slider materialize generically; curve and layer-reference types are refused when default-elided
+// @incident   effect-param-elision-synthesis-lite
+// @alias      effect param,效果参数,设参数,blurriness
 func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error) {
 	return serializer.SetEffectParam(layer, fx, paramMatchName, value)
 }
 
-// SupportedEffectParams returns the sorted parameter match-names with a
-// dedicated per-param template. SetEffectParam is NOT limited to this list —
-// scalar / enum / boolean / angle / color / 2D / 3D / slider params of any
-// effect materialize via the generic per-control-type fallback, and
-// already-present params are settable regardless.
-//
-//aep:cap domain=meta tier=stable verify=none alias="effect params,参数列表,supported params"
+// @summary    List parameter match-names with a dedicated template
+// @description Returns the sorted parameter match-names that have a dedicated
+//   per-parameter template. SetEffectParam is not limited to this list — scalar /
+//   enum / boolean / angle / color / 2D / 3D / slider params of any effect
+//   materialize via the generic fallback, and already-present params are settable
+//   regardless.
+// @returns    the sorted list of parameter match-names with a dedicated template
+// @domain     meta
+// @stability  stable
+// @verify     none
+// @since      AE2020
+// @alias      effect params,参数列表,supported params
 func SupportedEffectParams() []string { return serializer.SupportedEffectParams() }
 
-// AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N
-// keyframes (>= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}.
-// It materializes the parameter if it is default-elided (like SetEffectParam,
-// from the host effect's pard definition), then converts its static value stream
-// into an animated keyframe container from scratch — the case InsertKeyframe
-// refuses (it requires a pre-existing keyframe to clone). Returns the animated
-// *Property.
+// @summary    Keyframe a 1D-scalar effect parameter over time
+// @description Keyframes a 1D-scalar effect parameter — N keyframes (>= 2), each a
+//   ScalarKeyframe with a time (seconds), value, and optional ease. It
+//   materializes the parameter if it is default-elided (like SetEffectParam), then
+//   converts its static value stream into an animated keyframe container from
+//   scratch — the case InsertKeyframe refuses (it requires a pre-existing
+//   keyframe). Returns the animated Property.
 //
-// On disk the parameter's static cdat is replaced by a LIST(list){lhd3, ldat}
-// keyframe stream (non-spatial 1D layout, byte-matched to an AE-saved animated
-// Gaussian-Blur-Blurriness fixture) and the tdb4 static→animated flags flip;
-// WriteAEP recomputes the enclosing LIST sizes. Drives the classic MG rigs —
-// an animated blur amount, or a Slider Control whose value an expression reads.
-//
-// fx must be on a parsed layer (round-trip through aep.Reopen after the
-// structural New*/AddEffect APIs). Scalar (1D) params only — use
-// AnimateEffectParamVec for color / 2D / 3D point params. Linear interp unless
-// ScalarKeyframe.InEase/OutEase are set.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=effect tier=stable verify=render-pixel gate=TestAnimEffect_AEShipGate_AE2020,TestAnimEffect_AEShipGate_AE2025 boundary="1D scalar only;color/point 用 AnimateEffectParamVec;fx 须在 parsed 层(Reopen)" alias="animate effect,效果关键帧,动画模糊,slider rig"
+//   Drives the classic motion-graphics rigs — an animated blur amount, or a slider
+//   control whose value an expression reads. fx must be on a parsed layer
+//   (round-trip via Reopen after the structural New* / AddEffect APIs). Scalar
+//   (1D) params only — use AnimateEffectParamVec for color / 2D / 3D point params.
+//   Linear interpolation unless the keyframe ease is set.
+// @param      layer           the parsed layer carrying the effect
+// @param      fx              the effect whose parameter to animate
+// @param      paramMatchName  the full parameter match-name (1D scalar)
+// @param      kfs             the scalar keyframes (>= 2)
+// @returns    the animated Property
+// @domain     effect
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestAnimEffect_AEShipGate_AE2020,TestAnimEffect_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   1D scalar only (use AnimateEffectParamVec for color/point); fx must be on a parsed layer (Reopen)
+// @alias      animate effect,效果关键帧,动画模糊,slider rig
 func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error) {
 	return serializer.AnimateEffectParam(layer, fx, paramMatchName, kfs)
 }
 
-// AnimateEffectParamVec keyframes a multi-component effect parameter — the
-// color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each
-// VectorKeyframe carries a Time (seconds), a []float64 Value whose length
-// matches the parameter's component count, and optional ease. Values are in the
-// parameter's on-disk units, identical to SetEffectParam: a color is
-// [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate
-// space (for a source-backed layer divide by the source's w/h, for a
-// source-less layer by the comp's — and z by the same space's height).
+// @summary    Keyframe a multi-component effect parameter over time
+// @description Keyframes a multi-component effect parameter — the color / 2D-point
+//   / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a
+//   time (seconds), a []float64 value whose length matches the parameter's
+//   component count, and optional ease. Values are in the parameter's on-disk
+//   units, identical to SetEffectParam (a color is [A,R,G,B] in 0-255; a 2D/3D
+//   point is a fraction of the layer's coordinate space, z divided by its height).
 //
-// Like the scalar form it materializes the parameter if default-elided, then
-// replaces its static cdat with a keyframe stream — but using the SPATIAL block
-// layout AE writes for animated effect color/point params (value at 0x38, a
-// per-type @0x08 marker: 2 for color, 3 for point), RE'd byte-for-byte from an
-// AE-native fixture. The tdb4 static→animated flip is the same as the scalar /
-// shape paths. Returns the animated *Property.
-//
-// fx must be on a parsed layer (round-trip through aep.Reopen). Components 2/3/4
-// only (use AnimateEffectParam for 1D scalars). Linear interp unless ease is set.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=effect tier=stable verify=render-pixel gate=TestAnimEffectVec_AEShipGate_AE2020,TestAnimEffectVec_AEShipGate_AE2025 boundary="2/3/4 分量(color/point);1D 用 AnimateEffectParam;fx 须在 parsed 层(Reopen)" alias="animate effect color,效果颜色关键帧,point 动画"
+//   Like the scalar form it materializes the parameter if default-elided, then
+//   replaces its static value with the spatial keyframe block layout AE writes for
+//   animated effect color/point params. Returns the animated Property. fx must be
+//   on a parsed layer (Reopen). Components 2/3/4 only (use AnimateEffectParam for
+//   1D scalars). Linear interpolation unless the ease is set.
+// @param      layer           the parsed layer carrying the effect
+// @param      fx              the effect whose parameter to animate
+// @param      paramMatchName  the full parameter match-name (color / 2D / 3D point)
+// @param      kfs             the vector keyframes (>= 2)
+// @returns    the animated Property
+// @domain     effect
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestAnimEffectVec_AEShipGate_AE2020,TestAnimEffectVec_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   2/3/4 components (color/point); use AnimateEffectParam for 1D; fx must be on a parsed layer (Reopen)
+// @alias      animate effect color,效果颜色关键帧,point 动画
 func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error) {
 	return serializer.AnimateEffectParamVec(layer, fx, paramMatchName, kfs)
 }
 
-// SetEffectLayerParam points a layer-reference effect parameter at target —
-// e.g. Set Matte's "Take Matte From Layer" (paramMatchName
-// "ADBE Set Matte3-0001"), which mattes the host layer with another layer's
-// channel. AE stores the reference as target's layer ID in the parameter's tdpi
-// chunk (the same binding the effect's always-present host stream uses, aimed
-// elsewhere), so this is a length-preserving 4-byte rewrite. target must be a
-// layer in the same composition.
+// @summary    Point a layer-reference effect parameter at a target layer
+// @description Points a layer-reference effect parameter at target — e.g. Set
+//   Matte's "Take Matte From Layer", which mattes the host layer with another
+//   layer's channel. AE stores the reference as target's layer ID in the
+//   parameter's binding chunk, so this is a length-preserving rewrite. target must
+//   be a layer in the same composition.
 //
-// fx must be on a parsed layer (round-trip through aep.Reopen). The parameter
-// must already be present in the effect (Set Matte's -0001 ships materialized in
-// the AddEffect template); materializing a default-elided layer-ref param is a
-// follow-up.
-//
-// Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function
-// (CLAUDE.md #2 structural-op call-form).
-//
-//aep:cap domain=effect tier=stable verify=render-pixel gate=TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025,TestLayerRefDispMap_AEShipGate_AE2020,TestLayerRefDispMap_AEShipGate_AE2025,TestLayerRefCompoundBlur_AEShipGate_AE2020,TestLayerRefCompoundBlur_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025,TestAddEffectWave12_AEShipGate_AE2020,TestAddEffectWave12_AEShipGate_AE2025 boundary="参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);wave11 layer-ref(Warp Stabilizer -0046 · 3D Glasses -0001/-0002 · Timewarp -0029/-0031 · CC Particle World -0045) + wave12 layer-ref(Texturize -0001 · Color Link -0001 · Compound Arithmetic -0001 · Set Channels -0001/-0003/-0005/-0007 四源)=accept+readback+resave 双版本 gated(render-pixel deferred:无单帧像素证明面);其它 default-elided layer-ref 物化未做" alias="set matte,layer reference,蒙版层,displacement map,compound blur,vector blur,take matte from layer"
+//   fx must be on a parsed layer (round-trip via Reopen). The parameter must
+//   already be present in the effect (Set Matte's -0001 ships materialized in the
+//   AddEffect template); materializing a default-elided layer-reference parameter
+//   is a follow-up.
+// @param      layer           the parsed layer carrying the effect
+// @param      fx              the effect whose layer-reference parameter to set
+// @param      paramMatchName  the full layer-reference parameter match-name
+// @param      target          the layer to reference (same composition)
+// @domain     effect
+// @stability  stable
+// @verify     render-pixel
+// @gate       TestSetMatte_AEShipGate_AE2020,TestSetMatte_AEShipGate_AE2025,TestLayerRefDispMap_AEShipGate_AE2020,TestLayerRefDispMap_AEShipGate_AE2025,TestLayerRefCompoundBlur_AEShipGate_AE2020,TestLayerRefCompoundBlur_AEShipGate_AE2025,TestAddEffectWave11_AEShipGate_AE2020,TestAddEffectWave11_AEShipGate_AE2025,TestAddEffectWave12_AEShipGate_AE2020,TestAddEffectWave12_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   the parameter must already be materialized (shipped with the template): Set Matte / Displacement Map / Compound Blur / CC Vector Blur and the later layer-reference effects are gated for AE acceptance + read-back (some render-pixel deferred); materializing other default-elided layer-reference params is not done
+// @alias      set matte,layer reference,蒙版层,displacement map,compound blur,vector blur,take matte from layer
 func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error {
 	return serializer.SetEffectLayerParam(layer, fx, paramMatchName, target)
 }
 
-// SetMaterialOption sets a 3D layer's Material-Options property by AE match-name
-// (e.g. "ADBE Casts Shadows", "ADBE Accepts Lights", "ADBE Diffuse Coefficient"),
-// returning the property's *Property. It is the from-scratch entry for material
-// properties — the synthesis-lite sibling of SetEffectParam.
+// @summary    Set a 3D layer's Material-Options property by match-name
+// @description Sets a 3D layer's Material-Options property by AE match-name (e.g.
+//   "ADBE Casts Shadows", "ADBE Accepts Lights") and returns the Property. It is
+//   the from-scratch entry for material properties — the sibling of SetEffectParam.
 //
-// Why this exists: a from-scratch shape/solid layer made 3D (SetIs3D) emits an
-// EMPTY Material Options group — AE materializes the full material tree (all
-// defaults) in its DOM on open, but on disk the leaves are elided, so
-// MaterialCastsShadows() / SetMaterialCastsShadows return "property not present".
-// When the property is already present (a parsed/fixture layer, or a prior
-// splice) SetMaterialOption is exactly SetStaticValue. When it is default-elided,
-// the (tdmn, tdbs) leaf is first materialized from an embedded AE-native template
-// (the 15-leaf material tree from re_material_options.aep) at its canonical
-// position, then the caller's value is written — which is non-default by intent,
-// exactly the state AE itself persists (a default-valued spliced leaf is dropped
-// by AE on open).
+//   A from-scratch shape/solid layer made 3D emits an empty Material Options
+//   group: AE materializes the full material tree in its DOM on open, but on disk
+//   the leaves are elided, so the typed getters/setters report "property not
+//   present". When the property is already present SetMaterialOption is exactly a
+//   static-value write; when default-elided, the leaf is first materialized from
+//   an embedded AE-native template at its canonical position, then the value
+//   (non-default by intent) is written.
 //
-// The headline use is making a from-scratch 3D layer CAST shadows (Casts Shadows
-// defaults Off): SetMaterialOption(caster, "ADBE Casts Shadows", float64(aep.MaterialCastsOn)).
-// The catcher needs nothing — an empty material group accepts shadows + lights by
-// default. The layer must be round-tripped through aep.Reopen first (the material
-// group chunk must exist to splice into).
-//
-// Values use the property's on-disk (StaticValue) encoding: scalar / enum /
-// boolean (0 or 1) as float64; Shadow Color as []float64{A,R,G,B} 0–255. Atomic:
-// snapshots the group chunk children + flat Properties + tree + warnings; rolls
-// back on any parser warning or value-encode failure.
-//
-// Alpha / structural — AE 2020 + AE 2025 render ship-gate green for Casts Shadows
-// (from-scratch 3D caster drops a visible shadow). Free function (CLAUDE.md #2
-// structural-op call-form).
-//
-//aep:cap domain=layer-set tier=alpha verify=render-pixel gate=TestLayer3DShadow_AEShipGate_AE2020,TestLayer3DShadow_AEShipGate_AE2025 boundary="Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate" alias="material option,材质选项,casts shadows,投影,3D 材质"
+//   The headline use is making a from-scratch 3D layer cast shadows (Casts Shadows
+//   defaults Off). The layer must be round-tripped via Reopen first (the material
+//   group chunk must exist to splice into). Values use the property's on-disk
+//   encoding: scalar / enum / boolean as float64; Shadow Color as [A,R,G,B] 0–255.
+//   Atomic (snapshot + rollback on any parser warning or encode failure).
+// @param      layer      the parsed 3D layer to configure (round-trip via Reopen first)
+// @param      matchName  the Material-Options property match-name
+// @param      value      the value, in the property's on-disk encoding
+// @returns    the material Property
+// @domain     layer-set
+// @stability  alpha
+// @verify     render-pixel
+// @gate       TestLayer3DShadow_AEShipGate_AE2020,TestLayer3DShadow_AEShipGate_AE2025
+// @since      AE2020
+// @boundary   Casts Shadows is render-gated; requires Reopen (the material group must exist); other material properties materialize the same way but are not individually gated
+// @alias      material option,材质选项,casts shadows,投影,3D 材质
 func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error) {
 	return serializer.SetMaterialOption(layer, matchName, value)
 }

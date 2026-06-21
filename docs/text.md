@@ -1027,11 +1027,14 @@ Unlike the Range / Wiggly selectors, the Expressible Amount is expression-only �
 func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error
 ```
 
-SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). The Advanced group is elided on a fresh selector, so this materializes it from an embedded AE-native template, resets every slot to its AE default, then writes adv's values; it is idempotent (re-materializes on each call). Build adv with DefaultTextRangeAdvanced and tweak fields.
+Set the Range Advanced params on a text animator
 
-Refused: non-text layers, text layers built by New* that were never parsed (call aep.Reopen first), and layers with no text animator (add one first).
+Sets the Range Advanced params on the layer's first text animator's Range Selector — the selector-shaping controls behind a kinetic-typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.). The Advanced group is elided on a fresh selector, so this materializes it from an embedded AE-native template, resets every slot to its AE default, then writes adv's values; it is idempotent. Build adv with DefaultTextRangeAdvanced and tweak fields. Refused on non-text layers, un-Reopened New*-built text layers, and layers with no text animator.
 
-Alpha / structural — Amount is double-version render-gated; the other params round-trip (write + survive AE) but their visual effect is selector-internal / coupled (Mode needs multiple selectors, Smoothness only affects Shape=Square), so they are not individually render-gated. Free function (CLAUDE.md #2).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to configure |
+| `adv` | the Range Advanced params to write |
 
 ### DefaultTextRangeAdvanced
 
@@ -1051,11 +1054,15 @@ Returns the Range Advanced params at their AE defaults (Units=Percentage, BasedO
 func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
 ```
 
-AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time reveals the characters one by one as the selection window (and the invisibility it carries) slides off the text. Operates on the layer's first animator; needs >= 2 keyframes. tickRate \<= 0 uses the comp's.
+Keyframe a text animator's Range Selector Offset
 
-Builds a parsed property over the spliced Offset slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use (tdb4 flag flip + keyframe-stream synthesis).
+Keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff. Pair it with an Opacity-0 animator (Start=0/End=100): sweeping the Offset 0→100 over time reveals the characters one by one as the selection window slides off the text. Operates on the layer's first animator; needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
 
-Alpha / structural — RE'd + double-version render-gated as the reveal sweep. Free function (CLAUDE.md #2 structural-op call-form).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the scalar keyframes (>= 2) for the Range Offset |
 
 ### AnimateTextOpacity
 
@@ -1063,11 +1070,15 @@ Alpha / structural — RE'd + double-version render-gated as the reveal sweep. F
 func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
 ```
 
-AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector. Every selected character shares the opacity curve, so the text fades as one synchronized group (a pulse / blink), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Opacity slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+Keyframe a text animator's per-character Opacity
 
-Refused: non-text layers, layers without a text animator carrying an Opacity leaf, and an Opacity leaf that is already animated.
+Keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector, so every selected character shares the curve and the text fades as one synchronized group (a pulse / blink). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without an Opacity-animator leaf, and an already-animated Opacity leaf.
 
-Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the scalar keyframes (>= 2) for the Opacity leaf |
 
 ### AnimateTextRotation
 
@@ -1075,11 +1086,15 @@ Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf
 func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error
 ```
 
-AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector. Every selected character shares the rotation curve, so the text spins as one synchronized group (e.g. a continuous 0→360 spin), which the AnimateTextRangeOffset sweep cannot express. Builds a parsed property over the spliced Rotation slot and delegates to the same 1D non-spatial static→animated conversion the effect-param / shape-scalar animate paths use. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+Keyframe a text animator's per-character Rotation
 
-Refused: non-text layers, layers without a text animator carrying a Rotation leaf, and a Rotation leaf that is already animated.
+Keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself, so every selected character shares the curve and the text spins as one synchronized group (e.g. a continuous 0→360 spin). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without a Rotation-animator leaf, and an already-animated Rotation leaf.
 
-Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf path (shared with the Range Offset sweep). Free function (CLAUDE.md #2).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the scalar keyframes (>= 2) for the Rotation leaf |
 
 ### AnimateTextPosition
 
@@ -1087,11 +1102,15 @@ Alpha / structural — RE'd + double-version render-gated via the 1D scalar leaf
 func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error
 ```
 
-AnimateTextPosition keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself rather than sweeping the Range Selector. Each keyframe Value is the [x, y, z] offset in pixels; every selected character shares the motion curve, so the text glides as one synchronized group. Builds a parsed property over the spliced Position slot and delegates to AnimateVectorKeyframes (the spatial 3-component keyframe block — verified byte-matching the AE-saved text leaf). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+Keyframe a text animator's per-character Position
 
-Refused: non-text layers, layers without a text animator carrying a Position leaf, and a Position leaf that is already animated.
+Keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself, so every selected character shares the curve and the text glides as one synchronized group. Each keyframe value is the [x, y, z] offset in pixels. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without a Position-animator leaf, and an already-animated Position leaf.
 
-Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE.md #2).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the vector keyframes (>= 2; [x,y,z] pixels) for the Position leaf |
 
 ### AnimateTextColor
 
@@ -1099,11 +1118,15 @@ Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE
 func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error
 ```
 
-AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven colour itself over time (e.g. a red→blue cycle), which a Range-Offset sweep cannot express. Each keyframe Value is an [r, g, b, a] colour with channels 0..1 (converted internally to the on-disk [A,R,G,B]×255 encoding). Builds a parsed property over the spliced Fill Color slot and delegates to AnimateVectorKeyframes (the 4-channel keyframe block — verified byte-matching the AE-saved text leaf). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+Keyframe a text animator's per-character Fill Color
 
-Refused: non-text layers, layers without a text animator carrying a Fill Color leaf, a Fill Color leaf that is already animated, and keyframe values that are not 4-channel.
+Keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven color over time (e.g. a red→blue cycle). Each keyframe value is an [r, g, b, a] color with channels 0..1. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without a Fill-Color-animator leaf, an already-animated leaf, and keyframe values that are not 4-channel.
 
-Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE.md #2).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the vector keyframes (>= 2; [r,g,b,a] in 0..1) for the Fill Color leaf |
 
 ### AnimateTextScale
 
@@ -1111,8 +1134,12 @@ Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE
 func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error
 ```
 
-AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe Value is the [sx, sy, sz] scale percent (100 = unchanged); every selected character shares the curve. Scale 3D is a non-spatial 3-component leaf, so it uses a different animated keyframe block (value@0x08) than the spatial Position/Color leaves — RE'd byte-matching the AE-saved text Scale leaf. Needs >= 2 keyframes; tickRate \<= 0 uses the comp's.
+Keyframe a text animator's per-character Scale
 
-Refused: non-text layers, layers without a text animator carrying a Scale leaf, and a Scale leaf that is already animated.
+Keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale over time (e.g. a pulse / grow), which a Range-Offset sweep cannot express. Each keyframe value is the [sx, sy, sz] scale percent (100 = unchanged). Needs >= 2 keyframes; tickRate \<= 0 uses the comp's. Refused on non-text layers, layers without a Scale-animator leaf, and an already-animated Scale leaf.
 
-Alpha / structural — RE'd + double-version render-gated. Free function (CLAUDE.md #2).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed text layer whose animator to keyframe |
+| `tickRate` | keyframe time base (<= 0 uses the comp's) |
+| `kfs` | the vector keyframes (>= 2; [sx,sy,sz] percent) for the Scale leaf |

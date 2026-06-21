@@ -198,22 +198,24 @@ Returns the sorted effect match-names AddEffect can add from an embedded templat
 func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)
 ```
 
-SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g. "ADBE Gaussian Blur 2-0001"), returning the parameter's *Property. It is the typed-parameter entry for AddEffect-style workflows:
+Set an effect parameter's static value by match-name
 
-	fx, _ := aep.AddEffect(layer, aep.EffectGaussianBlur)
-	_, err := aep.SetEffectParam(layer, fx, "ADBE Gaussian Blur 2-0001", 25.0)
+Sets an effect parameter's static value by full parameter match-name (e.g. "ADBE Gaussian Blur 2-0001") and returns the parameter's Property. It is the typed-parameter entry for AddEffect workflows.
 
-Why this exists: AE persists an effect parameter only while its value differs from the default — on a default instance the tunable params have no value stream at all (only "\<effect>-0000" survives), so plain Property.SetStaticValue has nothing to target. When the parameter is already present, SetEffectParam is exactly SetStaticValue. When it is default-elided, the parameter's (tdmn, tdbs) value stream is first materialized from an embedded AE-native template (synthesis-lite) at its definition-order position, then the caller's value is written — matching what AE itself persists for a touched parameter. Any scalar / enum / boolean / angle / color / 2D-point / 3D-point / slider parameter of any effect materializes via the generic per-control-type template, patched (match-name, display name, scalar/slider min/max) from the host effect's own pard definition — parameter definitions are never elided, so the metadata is always in-file. Rarer control types (curve, layer, …) return an error when elided; params already present on the effect are settable regardless of control type.
+AE persists an effect parameter only while its value differs from the default, so on a default instance the tunable params have no value stream at all. When the parameter is already present, SetEffectParam is exactly a static-value write; when it is default-elided, the parameter's value stream is first materialized from an embedded AE-native template (patched from the host effect's own definition), then the value is written — matching what AE itself persists for a touched parameter. Any scalar / enum / boolean / angle / color / 2D-point / 3D-point / slider parameter materializes via the generic path; rarer control types (curve, layer, …) return an error when elided, but params already present on the effect are settable regardless.
 
-Values use the property's on-disk (StaticValue) encoding — the same units a parsed file exposes:
+Values use the property's on-disk encoding: scalar / slider / angle (degrees) / enum / boolean as float64; color as [A, R, G, B] each 0–255; a 2D/3D point as fractions of the layer's coordinate space (the source item's pixel size for footage/solid/precomp layers, the composition's for source-less layers, z divided by that space's height).
 
-- scalar / slider / angle (degrees) / enum / boolean (0 or 1): float64, 1:1 with the AE UI value;
-- color: []float64{A, R, G, B}, each channel 0–255;
-- 2D / 3D point: []float64 fractions of the layer's coordinate space — the SOURCE item's pixel size for footage/solid/precomp layers, the COMPOSITION's for source-less layers (shape/text); the z component is divided by the same space's HEIGHT (RE: test_data/re_effect_param_types_units.aep).
+Atomic (snapshot + rollback on any parser warning or encode failure).
 
-The materialized stream carries no tdpi host binding (only the always-present -0000 stream does), so no retarget is needed. Atomic mutation: snapshot value-group chunk children + flat Parameters + warnings; roll back on any parser warning or value-encode failure.
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed layer carrying the effect |
+| `fx` | the effect whose parameter to set |
+| `paramMatchName` | the full parameter match-name |
+| `value` | the value, in the parameter's on-disk encoding |
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green (per-param and generic materialization, values read back on open and after AE's own resave); promoted from Alpha in the 2026-06-12 audit batch. Free function (CLAUDE.md #2 structural-op call-form).
+**Returns:** the parameter Property
 
 ### SupportedEffectParams
 
@@ -221,7 +223,11 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green (per-param and generic
 func SupportedEffectParams() []string
 ```
 
-SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template. SetEffectParam is NOT limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic per-control-type fallback, and already-present params are settable regardless.
+List parameter match-names with a dedicated template
+
+Returns the sorted parameter match-names that have a dedicated per-parameter template. SetEffectParam is not limited to this list — scalar / enum / boolean / angle / color / 2D / 3D / slider params of any effect materialize via the generic fallback, and already-present params are settable regardless.
+
+**Returns:** the sorted list of parameter match-names with a dedicated template
 
 ### AnimateEffectParam
 
@@ -229,13 +235,20 @@ SupportedEffectParams returns the sorted parameter match-names with a dedicated 
 func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)
 ```
 
-AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (>= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}. It materializes the parameter if it is default-elided (like SetEffectParam, from the host effect's pard definition), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe to clone). Returns the animated *Property.
+Keyframe a 1D-scalar effect parameter over time
 
-On disk the parameter's static cdat is replaced by a LIST(list){lhd3, ldat} keyframe stream (non-spatial 1D layout, byte-matched to an AE-saved animated Gaussian-Blur-Blurriness fixture) and the tdb4 static→animated flags flip; WriteAEP recomputes the enclosing LIST sizes. Drives the classic MG rigs — an animated blur amount, or a Slider Control whose value an expression reads.
+Keyframes a 1D-scalar effect parameter — N keyframes (>= 2), each a ScalarKeyframe with a time (seconds), value, and optional ease. It materializes the parameter if it is default-elided (like SetEffectParam), then converts its static value stream into an animated keyframe container from scratch — the case InsertKeyframe refuses (it requires a pre-existing keyframe). Returns the animated Property.
 
-fx must be on a parsed layer (round-trip through aep.Reopen after the structural New*/AddEffect APIs). Scalar (1D) params only — use AnimateEffectParamVec for color / 2D / 3D point params. Linear interp unless ScalarKeyframe.InEase/OutEase are set.
+Drives the classic motion-graphics rigs — an animated blur amount, or a slider control whose value an expression reads. fx must be on a parsed layer (round-trip via Reopen after the structural New* / AddEffect APIs). Scalar (1D) params only — use AnimateEffectParamVec for color / 2D / 3D point params. Linear interpolation unless the keyframe ease is set.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed layer carrying the effect |
+| `fx` | the effect whose parameter to animate |
+| `paramMatchName` | the full parameter match-name (1D scalar) |
+| `kfs` | the scalar keyframes (>= 2) |
+
+**Returns:** the animated Property
 
 ### AnimateEffectParamVec
 
@@ -243,13 +256,20 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE
 func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)
 ```
 
-AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a Time (seconds), a []float64 Value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam: a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space (for a source-backed layer divide by the source's w/h, for a source-less layer by the comp's — and z by the same space's height).
+Keyframe a multi-component effect parameter over time
 
-Like the scalar form it materializes the parameter if default-elided, then replaces its static cdat with a keyframe stream — but using the SPATIAL block layout AE writes for animated effect color/point params (value at 0x38, a per-type @0x08 marker: 2 for color, 3 for point), RE'd byte-for-byte from an AE-native fixture. The tdb4 static→animated flip is the same as the scalar / shape paths. Returns the animated *Property.
+Keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam. Each VectorKeyframe carries a time (seconds), a []float64 value whose length matches the parameter's component count, and optional ease. Values are in the parameter's on-disk units, identical to SetEffectParam (a color is [A,R,G,B] in 0-255; a 2D/3D point is a fraction of the layer's coordinate space, z divided by its height).
 
-fx must be on a parsed layer (round-trip through aep.Reopen). Components 2/3/4 only (use AnimateEffectParam for 1D scalars). Linear interp unless ease is set.
+Like the scalar form it materializes the parameter if default-elided, then replaces its static value with the spatial keyframe block layout AE writes for animated effect color/point params. Returns the animated Property. fx must be on a parsed layer (Reopen). Components 2/3/4 only (use AnimateEffectParam for 1D scalars). Linear interpolation unless the ease is set.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed layer carrying the effect |
+| `fx` | the effect whose parameter to animate |
+| `paramMatchName` | the full parameter match-name (color / 2D / 3D point) |
+| `kfs` | the vector keyframes (>= 2) |
+
+**Returns:** the animated Property
 
 ### SetEffectLayerParam
 
@@ -257,11 +277,18 @@ Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE
 func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error
 ```
 
-SetEffectLayerParam points a layer-reference effect parameter at target — e.g. Set Matte's "Take Matte From Layer" (paramMatchName "ADBE Set Matte3-0001"), which mattes the host layer with another layer's channel. AE stores the reference as target's layer ID in the parameter's tdpi chunk (the same binding the effect's always-present host stream uses, aimed elsewhere), so this is a length-preserving 4-byte rewrite. target must be a layer in the same composition.
+Point a layer-reference effect parameter at a target layer
 
-fx must be on a parsed layer (round-trip through aep.Reopen). The parameter must already be present in the effect (Set Matte's -0001 ships materialized in the AddEffect template); materializing a default-elided layer-ref param is a follow-up.
+Points a layer-reference effect parameter at target — e.g. Set Matte's "Take Matte From Layer", which mattes the host layer with another layer's channel. AE stores the reference as target's layer ID in the parameter's binding chunk, so this is a length-preserving rewrite. target must be a layer in the same composition.
 
-Stable / structural — AE 2020 + AE 2025 ship-gate green. Free function (CLAUDE.md #2 structural-op call-form).
+fx must be on a parsed layer (round-trip via Reopen). The parameter must already be present in the effect (Set Matte's -0001 ships materialized in the AddEffect template); materializing a default-elided layer-reference parameter is a follow-up.
+
+| Parameter | Description |
+|---|---|
+| `layer` | the parsed layer carrying the effect |
+| `fx` | the effect whose layer-reference parameter to set |
+| `paramMatchName` | the full layer-reference parameter match-name |
+| `target` | the layer to reference (same composition) |
 
 <!-- Hand-authored note. -->
 

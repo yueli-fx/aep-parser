@@ -1085,7 +1085,7 @@
     "symbol": "AnimateEffectParam",
     "kind": "func",
     "signature": "func AnimateEffectParam(layer *Layer, fx *Effect, paramMatchName string, kfs []ScalarKeyframe) (*Property, error)",
-    "summary": "AnimateEffectParam keyframes a 1D-scalar effect parameter over time — N keyframes (\u003e= 2), each a ScalarKeyframe{Time (seconds), Value, optional ease}.",
+    "summary": "@summary    Keyframe a 1D-scalar effect parameter over time @description Keyframes a 1D-scalar effect parameter — N keyframes (\u003e= 2), each a   ScalarKeyframe with a time (seconds), value, and optional ease.",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1096,7 +1096,7 @@
         "TestAnimEffect_AEShipGate_AE2020",
         "TestAnimEffect_AEShipGate_AE2025"
       ],
-      "boundary": "1D scalar only;color/point 用 AnimateEffectParamVec;fx 须在 parsed 层(Reopen)",
+      "boundary": "1D scalar only (use AnimateEffectParamVec for color/point); fx must be on a parsed layer (Reopen)",
       "incident": null,
       "alias": [
         "animate effect",
@@ -1110,7 +1110,7 @@
     "symbol": "AnimateEffectParamVec",
     "kind": "func",
     "signature": "func AnimateEffectParamVec(layer *Layer, fx *Effect, paramMatchName string, kfs []VectorKeyframe) (*Property, error)",
-    "summary": "AnimateEffectParamVec keyframes a multi-component effect parameter — the color / 2D-point / 3D-point counterpart of AnimateEffectParam.",
+    "summary": "@summary    Keyframe a multi-component effect parameter over time @description Keyframes a multi-component effect parameter — the color / 2D-point   / 3D-point counterpart of AnimateEffectParam.",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1121,7 +1121,7 @@
         "TestAnimEffectVec_AEShipGate_AE2020",
         "TestAnimEffectVec_AEShipGate_AE2025"
       ],
-      "boundary": "2/3/4 分量(color/point);1D 用 AnimateEffectParam;fx 须在 parsed 层(Reopen)",
+      "boundary": "2/3/4 components (color/point); use AnimateEffectParam for 1D; fx must be on a parsed layer (Reopen)",
       "incident": null,
       "alias": [
         "animate effect color",
@@ -1265,7 +1265,7 @@
     "symbol": "SetEffectLayerParam",
     "kind": "func",
     "signature": "func SetEffectLayerParam(layer *Layer, fx *Effect, paramMatchName string, target *Layer) error",
-    "summary": "SetEffectLayerParam points a layer-reference effect parameter at target — e.g.",
+    "summary": "@summary    Point a layer-reference effect parameter at a target layer @description Points a layer-reference effect parameter at target — e.g.",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1284,7 +1284,7 @@
         "TestAddEffectWave12_AEShipGate_AE2020",
         "TestAddEffectWave12_AEShipGate_AE2025"
       ],
-      "boundary": "参数须已物化(随模板带出):Set Matte -0001 · Displacement Map -0001 · Compound Blur -0001 · CC Vector Blur -0005 均 render-pixel/accept 双版本 gated;CC Vector Blur=accept-only(render-pixel deferred);wave11 layer-ref(Warp Stabilizer -0046 · 3D Glasses -0001/-0002 · Timewarp -0029/-0031 · CC Particle World -0045) + wave12 layer-ref(Texturize -0001 · Color Link -0001 · Compound Arithmetic -0001 · Set Channels -0001/-0003/-0005/-0007 四源)=accept+readback+resave 双版本 gated(render-pixel deferred:无单帧像素证明面);其它 default-elided layer-ref 物化未做",
+      "boundary": "the parameter must already be materialized (shipped with the template): Set Matte / Displacement Map / Compound Blur / CC Vector Blur and the later layer-reference effects are gated for AE acceptance + read-back (some render-pixel deferred); materializing other default-elided layer-reference params is not done",
       "incident": null,
       "alias": [
         "set matte",
@@ -1301,7 +1301,7 @@
     "symbol": "SetEffectParam",
     "kind": "func",
     "signature": "func SetEffectParam(layer *Layer, fx *Effect, paramMatchName string, value any) (*Property, error)",
-    "summary": "SetEffectParam sets an effect parameter's static value by full parameter match-name (e.g.",
+    "summary": "@summary    Set an effect parameter's static value by match-name @description Sets an effect parameter's static value by full parameter match-name   (e.g.",
     "has_cap": true,
     "cap": {
       "domain": "effect",
@@ -1312,7 +1312,7 @@
         "TestSetEffectParam_AEShipGate_AE2020",
         "TestSetEffectParam_AEShipGate_AE2025"
       ],
-      "boundary": "scalar/enum/bool/angle/color/2D·3D point/slider 泛型物化;curve/layer-ref 类 elided 时 refuse",
+      "boundary": "scalar/enum/bool/angle/color/2D·3D-point/slider materialize generically; curve and layer-reference types are refused when default-elided",
       "incident": [
         "effect-param-elision-synthesis-lite"
       ],
@@ -4421,7 +4421,7 @@
     "symbol": "SetMaterialOption",
     "kind": "func",
     "signature": "func SetMaterialOption(layer *Layer, matchName string, value any) (*Property, error)",
-    "summary": "SetMaterialOption sets a 3D layer's Material-Options property by AE match-name (e.g.",
+    "summary": "@summary    Set a 3D layer's Material-Options property by match-name @description Sets a 3D layer's Material-Options property by AE match-name (e.g.",
     "has_cap": true,
     "cap": {
       "domain": "layer-set",
@@ -4432,7 +4432,7 @@
         "TestLayer3DShadow_AEShipGate_AE2020",
         "TestLayer3DShadow_AEShipGate_AE2025"
       ],
-      "boundary": "Casts Shadows render-gated;需 Reopen(material group 须存在);其他 material 属性 synthesis-lite 未逐个 gate",
+      "boundary": "Casts Shadows is render-gated; requires Reopen (the material group must exist); other material properties materialize the same way but are not individually gated",
       "incident": null,
       "alias": [
         "material option",
@@ -5855,7 +5855,7 @@
     "symbol": "SupportedEffectParams",
     "kind": "func",
     "signature": "func SupportedEffectParams() []string",
-    "summary": "SupportedEffectParams returns the sorted parameter match-names with a dedicated per-param template.",
+    "summary": "@summary    List parameter match-names with a dedicated template @description Returns the sorted parameter match-names that have a dedicated   per-parameter template.",
     "has_cap": true,
     "cap": {
       "domain": "meta",
@@ -11391,7 +11391,7 @@
     "symbol": "AnimateTextColor",
     "kind": "func",
     "signature": "func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "AnimateTextColor keyframes the per-character Fill Color leaf of a text layer's first animator (added via AddTextColorAnimator) — animating the driven colour itself over time (e.g.",
+    "summary": "@summary    Keyframe a text animator's per-character Fill Color @description Keyframes the per-character Fill Color leaf of a text layer's first   animator (added via AddTextColorAnimator) — animating the driven color over   time (e.g.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11402,7 +11402,7 @@
         "TestTextColorLeafAnimator_AEShipGate_AE2020",
         "TestTextColorLeafAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "需先 AddTextColorAnimator;leaf 已动画则 refuse;\u003e=2 关键帧;值须 4 通道",
+      "boundary": "requires AddTextColorAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes; values must be 4-channel",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11418,7 +11418,7 @@
     "symbol": "AnimateTextOpacity",
     "kind": "func",
     "signature": "func AnimateTextOpacity(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "AnimateTextOpacity keyframes the per-character Opacity leaf of a text layer's first animator (added via AddTextOpacityAnimator) — animating the driven value itself rather than sweeping the Range Selector.",
+    "summary": "@summary    Keyframe a text animator's per-character Opacity @description Keyframes the per-character Opacity leaf of a text layer's first   animator (added via AddTextOpacityAnimator) — animating the driven value   itself rather than sweeping the Range Selector, so every selected character   shares the curve and the text fades as one synchronized group (a pulse /   blink).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11426,7 +11426,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "1D scalar leaf 路径已 render-gated(经 AnimateTextRangeOffset/Rotation);本函数本身仅 round-trip",
+      "boundary": "the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11442,7 +11442,7 @@
     "symbol": "AnimateTextPosition",
     "kind": "func",
     "signature": "func AnimateTextPosition(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "AnimateTextPosition keyframes the per-character Position 3D leaf of a text layer's first animator (added via AddTextPositionAnimator) — animating the driven offset itself rather than sweeping the Range Selector.",
+    "summary": "@summary    Keyframe a text animator's per-character Position @description Keyframes the per-character Position 3D leaf of a text layer's first   animator (added via AddTextPositionAnimator) — animating the driven offset   itself, so every selected character shares the curve and the text glides as   one synchronized group.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11453,7 +11453,7 @@
         "TestTextColorLeafAnimator_AEShipGate_AE2020",
         "TestTextColorLeafAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "需先 AddTextPositionAnimator;leaf 已动画则 refuse;\u003e=2 关键帧",
+      "boundary": "requires AddTextPositionAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11468,7 +11468,7 @@
     "symbol": "AnimateTextRangeOffset",
     "kind": "func",
     "signature": "func AnimateTextRangeOffset(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "AnimateTextRangeOffset keyframes a text animator's Range Selector Offset, turning a static reveal into an animated sweep — the kinetic-typography payoff.",
+    "summary": "@summary    Keyframe a text animator's Range Selector Offset @description Keyframes a text animator's Range Selector Offset, turning a static   reveal into an animated sweep — the kinetic-typography payoff.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11479,7 +11479,7 @@
         "TestTextAnimator_AEShipGate_AE2020",
         "TestTextAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "作用于第一个 animator;需 \u003e=2 关键帧;tickRate\u003c=0 用 comp 的",
+      "boundary": "acts on the first animator; needs \u003e= 2 keyframes; tickRate \u003c= 0 uses the comp's",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11496,7 +11496,7 @@
     "symbol": "AnimateTextRotation",
     "kind": "func",
     "signature": "func AnimateTextRotation(layer *Layer, tickRate float64, kfs []ScalarKeyframe) error",
-    "summary": "AnimateTextRotation keyframes the per-character Rotation leaf of a text layer's first animator (added via AddTextRotationAnimator) — animating the driven angle itself rather than sweeping the Range Selector.",
+    "summary": "@summary    Keyframe a text animator's per-character Rotation @description Keyframes the per-character Rotation leaf of a text layer's first   animator (added via AddTextRotationAnimator) — animating the driven angle   itself, so every selected character shares the curve and the text spins as one   synchronized group (e.g.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11507,7 +11507,7 @@
         "TestTextRotLeafAnimator_AEShipGate_AE2020",
         "TestTextRotLeafAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "需先 AddTextRotationAnimator;leaf 已动画则 refuse;\u003e=2 关键帧",
+      "boundary": "requires AddTextRotationAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes",
       "incident": [
         "text-animator-create-re"
       ],
@@ -11523,7 +11523,7 @@
     "symbol": "AnimateTextScale",
     "kind": "func",
     "signature": "func AnimateTextScale(layer *Layer, tickRate float64, kfs []VectorKeyframe) error",
-    "summary": "AnimateTextScale keyframes the per-character Scale 3D leaf of a text layer's first animator (added via AddTextScaleAnimator) — animating the driven scale itself over time (e.g.",
+    "summary": "@summary    Keyframe a text animator's per-character Scale @description Keyframes the per-character Scale 3D leaf of a text layer's first   animator (added via AddTextScaleAnimator) — animating the driven scale over   time (e.g.",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -11534,7 +11534,7 @@
         "TestTextColorLeafAnimator_AEShipGate_AE2020",
         "TestTextColorLeafAnimator_AEShipGate_AE2025"
       ],
-      "boundary": "需先 AddTextScaleAnimator;leaf 已动画则 refuse;\u003e=2 关键帧",
+      "boundary": "requires AddTextScaleAnimator first; refuses an already-animated leaf; needs \u003e= 2 keyframes",
       "incident": [
         "text-animator-create-re"
       ],
@@ -12450,7 +12450,7 @@
     "symbol": "SetTextRangeAdvanced",
     "kind": "func",
     "signature": "func SetTextRangeAdvanced(layer *Layer, adv TextRangeAdvanced) error",
-    "summary": "SetTextRangeAdvanced sets the Range Advanced params on the layer's FIRST text animator's Range Selector — the selector-shaping controls behind a kinetic- typography reveal (how strongly the animator applies via Amount, the selection falloff Shape, the combination Mode for multi-selector setups, etc.).",
+    "summary": "@summary    Set the Range Advanced params on a text animator @description Sets the Range Advanced params on the layer's first text animator's   Range Selector — the selector-shaping controls behind a kinetic-typography   reveal (how strongly the animator applies via Amount, the selection falloff   Shape, the combination Mode for multi-selector setups, etc.).",
     "has_cap": true,
     "cap": {
       "domain": "text",
@@ -12461,7 +12461,7 @@
         "TestTextRangeAdvancedAmount_AEShipGate_AE2020",
         "TestTextRangeAdvancedAmount_AEShipGate_AE2025"
       ],
-      "boundary": "Amount render-gated;其余 param(Mode/Shape/Smoothness…)仅 round-trip(选择器内部/耦合)",
+      "boundary": "Amount is render-gated; the other params (Mode/Shape/Smoothness…) only round-trip (selector-internal or coupled effects)",
       "incident": [
         "text-animator-create-re"
       ],
