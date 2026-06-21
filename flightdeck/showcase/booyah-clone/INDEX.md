@@ -38,7 +38,7 @@ regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 re
 | # | comp | status | 备注 |
 |---|---|---|---|
 | ① | シェイイイイプ！！！ | ✅**complete**（用户真机验收 2026-06-21）· AE 2025 render 像素级一致(0/0/32px)· ⚠AE 2020 render 待补 | 4 rect 精确 kf + fill 色逐值对账原工程 ✓(色彩:raw [A,R,G,B]0-255 ↔ SetColor)。**AE 2025 接受、shape 不 drop**。**render 三个真 bug 已修**:① 全空白=层 position 默认 (0,0) 非合成中心([[shape-layer-position-default-offscreen]],4f579d1);② t=1 残留杆=层时长默认满 comp,原层仅 [0,0.901](6091016);③ **中间帧错位=`deriveTickRate` 把 NTSC kf 时间读大 3×**(`×1000/scale` 伪修正,cdta @0x08 才是真 tickrate;AE valueAtTime/keyTime 实证 → d03101c,详 [[ntsc-tickrate-derive-3x-off]])。→ **clone vs orig 中间帧 t=0.3/0.5/0.8 像素 diff = 0/0/32px**(32px=sub-pixel 29.97↔30 帧snap;clone 用 30fps 因 NewComposition 分数 fps cdta 时基不一致,另案见同 incident)。⚠AE 2020 侧 render 待补。 |
-| ② | テキスト変えるならココ！ | ⬜待建 | 1 text 层 "GLITCH" + tracking/char-offset 动画器 |
+| ② | テキスト変えるならココ！ | 🔧blocked(读侧✓/写侧 3 缺口) | 1 text 层 "GLITCH"。读侧全解 ✓(text + 2 animator 结构 + transform + 正确 kf 时间)。**写侧 3 缺口**:**①动画化模板层 transform**(text/precomp 层 Position 28kf/Opacity 24kf 从零打 kf)=高杠杆,`InsertKeyframe` 需 ≥1 既有 kf(lhd3/ldat 从零合成不支持)、`Animate*` 不覆盖普通层 transform、`NewTextLayer`=embed-template 非 ShapeLayer PropertyStream → 影响 ②⑤⑥⑦⑧;**②Tracking 动画器**(`ADBE Text Tracking Amount`+`Track Type`)无 API 需模板 RE;**③Character Offset 动画器**(`ADBE Text Character Offset`+`Character Change Type`+`Character Range`)无 API 需模板 RE。现有 11 个 text animator 不含这俩。 |
 | ③ | マップ用フラクタルノイズ | ⬜待建 | 2 Fractal Noise 层 + Evolution expr(依赖 0.3) |
 | ④ | カクッ | ⬜待建 | 2 shape 层 |
 | ⑤ | プリコンポジション 1 | ⬜待建 | 3 层(需①) |
