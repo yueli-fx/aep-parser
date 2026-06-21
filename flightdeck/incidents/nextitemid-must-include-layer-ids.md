@@ -2,7 +2,7 @@
 status: active
 when_to_read: implementing any allocItemID / monotonic-ID logic; computing max(used IDs) across a parsed project; debugging head-counter collisions after structural mutation; reviewing initDerived or any function summing IDs across project state; AE 2025 rejects a Go-built file with "unexpected match name searched for in group"
 applies_to: [nextItemID, allocItemID, head-counter, id-allocation, initDerived, layer-id, parse, monotonic-id, inv-9, duplicate-layer, new-shape-layer, service-layers, dlay, ae2025-reject]
-last_updated: 2026-06-10
+last_updated: 2026-06-22
 ---
 
 # initDerived must walk LAYER IDs when computing nextItemID
@@ -84,6 +84,27 @@ catch 到）。同字节文件插进 parsed AE-native 工程（nextItemID 高）
 `NewComposition` 落 comp 后同样 bump（盖住 Go-built 路径）。副作用：多 comp
 Go-built 工程的第二个 comp item ID 从 2 变 13（单调性不变，AE 无所谓）；
 受影响 AE gate（V2_1 head counter 字节变化）复跑双版本 PASS。
+
+## 第三回（2026-06-22）：跨-comp 用户层 ID 撞号 —— UI 编辑/删层炸（render/脚本全过）
+
+Booyah comp ② 全工程复刻（多 comp 从零）暴露同一 scar 的又一面：**层 ID 用每-comp 计数**。
+`NewShapeLayer` / `newTemplatedLayer` 用 `maxLayerIDInItemList(thisComp)+1` 发层 ID —— 每个 comp
+的首个用户层都落在 **13**（紧跟模板 service 层 2..12）。一个工程里两个 comp 各有一个从零用户层
+（comp① shape + comp② text）→ **两层共用 ID 13**。
+
+**表象差异（关键）**：与前两回不同，这回 **AE open + render + 所有 ExtendScript op
+（setValue/remove/duplicate/precompose/save）全过**，唯独**真机 UI 编辑文字 / 删图层抛
+`内部验证失败 {unexpected match name searched for in group} (29::0)`**。机理：UI 删/改走
+**ID-keyed 查找**（操作 + undo），撞号 ID 13 解析到**错的那个层**，于是在错层的属性组里搜匹配名搜不到
+→ 报错；而脚本走**直接对象引用**（`comp.layer(1)`）绕过 ID 查找，故自动化复现不出来（坑了好几轮）。
+
+**修复**：新 `allocLayerID(p, itemList)` = 全局单调 `allocItemID` + clamp 到 ≥ 本 comp service 层 max。
+单 comp 工程返回值与旧公式**逐字节相同**（service-max+1），故已 ship 单-comp gate 不变（NewTextLayer
+双版本 gate 复跑 PASS）；多-comp 才改（comp② text 层 13→15）。守卫：`TestNewLayer_CrossCompIDsDistinct`。
+两个 chokepoint：`mutate_layer_new.go::NewShapeLayer` + `mutate_layer_camera.go::newTemplatedLayer`。
+
+**教训**：render-pixel + Go round-trip + ExtendScript 全绿 **≠ AE UI 可编辑** —— UI 校验走 ID 查找比脚本严，
+「结构有效能渲染但 ID 撞号」这类洞唯有**真机 UI 操作**能暴露（红线1 的 UI 变体；详 [[text-animator-create-re]] 末）。
 
 ## Related
 
