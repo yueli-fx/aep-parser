@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1 全 complete（①②③④ 用户验收）+ Phase 2 ⑤ プリコンポジション 1 成**（首遇 NewPrecompLayer 嵌套，3 层→comp ①，双版本 AE-accept + DOM source 绑定确认，🔶待 review）；下一步 = ⑥ シェイプの塊（7 层 src=⑤）
+Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1（①②③④）+ Phase 2 ⑤ プリコンポジション 1 全 complete（用户真机验收 ✅）**；⑤ 复刻揪出并修了**两个独立 bug**（tdb4 关键帧时基 + gen 漏复刻 Scale/Rotation，逐帧像素对齐）；下一步 = ⑥ シェイプの塊（7 层 src=⑤）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -10,13 +10,13 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **Phase 1 叶子 ①②③④ 全 complete（用户验收）**，详见 [showcase/INDEX](showcase/INDEX.md) 账本。沉淀的坑：separated-position 读 0,0 陷阱（[[shape-layer-position-default-offscreen]] Case 2，④⑤ 均撞，显式居中）· `SetLayerTransform.Scale` 单位 percent 需 ×100 · footage-share=各自 solid（无共享 API,render-neutral）· precomp/solid 等 embed-template clone 的 start 须 post-reopen `SetStartTime`（pre-reopen scene 字段无效）。
 
-**comp ⑤ プリコンポジション 1 ✅（本会话，🔶待 review；居中 bug 已修+render 眼验）**：`gen_precomp1.go` **首遇 precomp 嵌套**——3 个 `NewPrecompLayer` 全引用 comp ①（staggered 三份 glitch）。L0 Position 2kf[778→1204]/L1 Opacity 13kf+居中/L2 静态居中；start 错峰经 `SetStartTime`。**揪出库 bug**（用户真机反馈"右下角"→bisect）：`SetLayerTransform` 对 **AV/precomp 层 anchor 按「源尺寸分数」编码**（0.5=中心），非 shape/text 像素——写 960,540 被 AE 读成 ×源尺寸(1.84M)→渲染飞出屏全黑（anchor 0,0 不暴露故前版渲右下角）。修法=写分数 `anchor(0.5,0.5)`，AE DOM 实测读回 960,540，render 复验居中。详 [[setlayertransform-av-anchor-fraction]]（库 bug，gen 暂 workaround）。**双版本 AE-accept**（5 comp、3 层不 drop、source 绑 ①）+ AE2025 render 居中眼验。
+**comp ⑤ プリコンポジション 1 ✅ complete（用户真机验收）**：`gen_precomp1.go`，3 个 `NewPrecompLayer`→comp ①（staggered）。L0 Position 2kf/L1 Opacity 13kf/L2 静态，全居中 + start 错峰。复刻保真逼出**两个独立 bug**（用户逐帧对比 frame18 揪出）：① **tdb4 @0x0C 关键帧时基**（库 bug，commit 39d3c16）——AE 按 tdb4@0x0C 而非 cdta 求值关键帧 tick，硬编码 30720 使 29.97 被压 0.781；修法 makeTdb4/injectAnimatedStream 改用 comp.TickRate，详 [[ntsc-tickrate-derive-3x-off]] § tdb4。② **gen 漏复刻静态 Scale/Rotation**——只搬了 Position/Opacity，原版 L0=44%/L1=45%+180° 被默认成 100%/0°，合成飞散；修法读全 transform 通道，详 [[layer-replication-drops-static-transform-channels]]。两 bug 正交（前者管关键帧 WHEN，后者管静态 transform WHAT）。逐帧 orig-vs-clone 对比工作流 → `checklists/showcase.md`。anchor 分数坑见 [[setlayertransform-av-anchor-fraction]]。
 
 **下一 = Task 2.2 ⑥ シェイプの塊**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：7 层均 src=⑤（复用 ⑤ 的 `NewPrecompLayer` 建法）+ 各层 Position(2kf)+Opacity(34/41/39/39/39/44 kf,L6 无)，值 oracle 取。→ ⑦(3 层+Glow)→ ⑧(3 层 src=② Fill 色差)→ ⑨(3 层+Trim,2 层 src=④)→ Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
-**旁支**：补 comp ① AE 2020 render；修 `NewComposition` 分数 fps cdta 时基（[[ntsc-tickrate-derive-3x-off]] 第二发现）。
+**旁支**：补 comp ① AE 2020 render；**扫 comp ②③④ 图层有无非默认 Scale/Rotation/Anchor 被 gen 漏复刻**（与 ⑤ 同类隐患 [[layer-replication-drops-static-transform-channels]]，用户建议回扫）。（注：原「NewComposition 分数 fps cdta 时基」第二发现已根因化为 tdb4 @0x0C 并修复，见 [[ntsc-tickrate-derive-3x-off]]。）
 
 ## In Progress
 

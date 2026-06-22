@@ -1,8 +1,8 @@
 ---
 status: active
-last_updated: 2026-06-15
-when_to_read: 一个大阶段（独立 plan/spec arc）落地后要产出审核示例；新增一个 showcase 方向文件夹；写或更新 showcase/<方向>/INDEX.md；纠结某次成果算大阶段（必出）还是小阶段（攒批）；想知道 showcase 产物怎么重生成
-applies_to: [showcase, example, user-review, deliverable, big-stage, gen-go, render-jsx, index-format, gitignore, regenerate, from-scratch, ae-render]
+last_updated: 2026-06-22
+when_to_read: 一个大阶段（独立 plan/spec arc）落地后要产出审核示例；新增一个 showcase 方向文件夹；写或更新 showcase/<方向>/INDEX.md；纠结某次成果算大阶段（必出）还是小阶段（攒批）；想知道 showcase 产物怎么重生成；复刻的工程某帧渲染与原版不一样要逐帧/分层对比定位；想导出 原版-vs-clone 逐帧 PNG 给用户对比
+applies_to: [showcase, example, user-review, deliverable, big-stage, gen-go, render-jsx, index-format, gitignore, regenerate, from-scratch, ae-render, orig-vs-clone, per-frame-compare, solo-layer-isolation, render-fidelity, png-naming, render-shape-compare, render-solo-layers, dump-layer-time]
 ---
 
 # showcase 产出规约 — 大阶段示例 + 用户审核
@@ -85,3 +85,20 @@ regenerate: "go run ./flightdeck/showcase/<方向>  +  AE render.jsx"
 ## 交付准则对齐
 
 showcase 里每个能力须已过双版本 ship-gate（`delivery-contract.md`）；showcase「组合工程」本身是独立交付项，**产出必经 AE 实渲眼验**，禁止只验值 round-trip 就宣称示例「能看」。
+
+## 复刻保真：原版 vs clone 逐帧对比渲染（定位「渲染不一样」）
+
+复刻一个真实 .aep 后，用户/你发现某帧「长得不一样」时——**别靠 keyTime/值 dump 占卜，直接渲帧看图**（红线4：值对≠渲染对；本工作流揪出了 comp ⑤ 的 tdb4 时基 bug + Scale/Rotation 漏复刻，详 [[layer-replication-drops-static-transform-channels]]）。三件 tracked 工具（`flightdeck/showcase/booyah-clone/`）：
+
+- **`render_shape_compare.jsx`** — 一趟 AE 里先开原版、再开 clone，把某 comp 的 frame `0..N-1` 各导一张 PNG。sidecar `render_shape_compare.txt`（UTF-8，每行一项）：`原版.aep` / `clone.aep` / `comp 名` / 帧数 / 输出目录 / 源前缀 / clone前缀。跑：`pwsh scripts/ae_run.ps1 -AeExe <AE> -Jsx <这个> -Done <.done>`。
+- **`render_solo_layers.jsx`** — 同一 comp 把每层逐个 `solo` 单独渲一帧（原版 + clone），**隔离是哪一层不对**。sidecar：原/clone/comp/帧号/输出目录。它还顺手把每层 start/opacity 写进 `.done`。
+- **`dump_layer_time.jsx`** — dump 每层 start/in/out/stretch/timeRemap/source（不渲染，快），排除时间属性差异。
+- **`tools/debug/dump_precomp_xform`**（Go）— dump 层的静态 Scale/Rotate Z/Anchor 值（parser 读 Scale 为分数）。
+
+**命名给用户对比**：Windows 按名排序，要让「同帧的 source/copy 相邻」必须**帧号在前**——`NN_source.png` / `NN_copy.png`（或 `NN-source`/`NN_copy`），**不是** `source_fNN`（那样所有 source 排一堆、所有 copy 排一堆没法滑动对比）。1 起始编号（`01`=第1帧）。renamed 例：
+```bash
+for f in $(seq 0 30); do o=$(printf "%02d" $f); n=$(printf "%02d" $((f+1)));
+  mv "source_f${o}.png" "${n}_source.png"; mv "copy_f${o}.png" "${n}_copy.png"; done
+```
+
+**诊断顺序**：① 叶子 comp 逐帧对比（源动画对不对）→ ② 合成 comp 逐帧（哪几帧差）→ ③ solo 每层（哪层差）→ ④ 对差的层 dump transform 值（`dump_precomp_xform`）/ 时间属性（`dump_layer_time`）→ 找到差异字段。**别在「合成差」时就猜时基**——先 solo 缩小到层，再看该层的具体字段（位置/缩放/旋转/不透明度/源时间）。渲染产物进 `tmp_debug/`（gitignored），JSX/Go 工具 tracked。
