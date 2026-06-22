@@ -46,6 +46,7 @@ func main() {
 	buildFractalMap(p, orc)  // ③ マップ用フラクタルノイズ (comp + 2 solids)
 	buildKakuh(p, orc)       // ④ カクッ (comp + 2 stroked-rect+trim shape layers)
 	buildPrecomp1(p, orc)    // ⑤ プリコンポジション 1 (3 precomp layers → comp ①)
+	buildShapeKatamari(p, orc) // ⑥ シェイプの塊 (7 precomp layers → comp ⑤)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -56,6 +57,7 @@ func main() {
 	finishFractalMap(rp, orc)  // ③
 	finishKakuh(rp, orc)       // ④
 	finishPrecomp1(rp, orc)    // ⑤
+	finishShapeKatamari(rp, orc) // ⑥
 
 	f, err := os.Create(outPath)
 	must(err)
