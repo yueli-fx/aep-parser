@@ -1,6 +1,6 @@
 # Cockpit — aep-parser
 
-Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1（①②③④）✅ + Phase 2 ⑤ ✅（用户真机验收）+ ⑥ シェイプの塊 ✅（🔶待 review，7 层 src=⑤，4 关全过 + render 眼验）**；下一步 = Task 2.3 ⑦（3 层 src=⑥ + Glow，新维度 AddEffect 挂 precomp 层）。旁支：本会话另实证了降级器 bug #6（非相邻 track-matte 降级丢绑，incidents/2026-06-09-ae-version-downgrader-re.md）
+Updated: 2026-06-22 · claude · Stage: Booyah **Phase 1（①②③④）✅ + Phase 2 ⑤⑥ ✅（用户真机验收）+ ⑦ ここは開けない ✅（🔶待 review，3 层 src=⑥ + Glow，4 关全过 + orig-vs-clone render 一致）**；下一步 = Task 2.4 ⑧ RGBズレ（3 层 src=② + Fill 色差）。旁支：本会话另实证了降级器 bug #6（非相邻 track-matte 降级丢绑，incidents/2026-06-09-ae-version-downgrader-re.md）
 
 Focus: Booyah Glitch 全工程复刻 = 理解金标准检验 → [spec](specs/2026-06-19-booyah-glitch-full-replication.md)
 
@@ -14,7 +14,9 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **comp ⑥ シェイプの塊 ✅（🔶待 review，commit 6c695b9）**：`gen_shape_katamari.go` 7 层全 src=⑤，复用 ⑤ 的 `NewPrecompLayer` 建法 + **复刻全 transform 通道**（Position 2kf 绝对坐标 541→1340 横滑 + Opacity 34/41/39/39/39/44 kf + 静态 Scale 24/33/75% + RotateZ 90° on L0/L3/L4，anchor 源中心分数 0.5,0.5）。**4 关全过**：Go 结构对账（7 层 srcID 全=⑤、kf 数 + 静态 Scale/Rotation/start 全等）+ AE2020≡AE2025 接受（6 comp、⑥ 7 层不 drop、DOM source 全绑 ⑤）+ render 眼验（t=1.0 渲出缩放 glitch 切片簇，无 blank/飞散/off-screen）。带上 ⑤ 两教训：复刻全 transform 通道（[[layer-replication-drops-static-transform-channels]]）+ AV-anchor 用分数（[[setlayertransform-av-anchor-fraction]]）；本次 Position 是绝对坐标无 separated 0,0 陷阱。无新 API，终帧 render-pixel 归 ⑫。
 
-**下一 = Task 2.3 ⑦ ここは開けない方が身のため**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：3 层 src=⑥（复用 precomp 建法）+ L0 Opacity(25kf)+Glow(`ADBE Glo2` Radius=0/Intensity=0.30)、L1 Opacity(34kf)+Glow(Intensity=0.35)、L2 无。**新维度 = AddEffect(Glow) 挂在 precomp 层上**。→ ⑧(3 层 src=② Fill 色差)→ ⑨(3 层+Trim,2 层 src=④)→ Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
+**comp ⑦ ここは開けない ✅（🔶待 review，commit 见下）**：`gen_hiraku.go` 3 层全 src=⑥（复用 `NewPrecompLayer`）+ **首次把 effect（Glow `ADBE Glo2`）挂在 precomp 层上**（L0 Intensity=0.30、L1=0.35、Radius=0 非默认）+ L0/L1 静态 Position+Scale 101%+Opacity kf、**L2 隐形（Opacity=0）**。4 关全过：Go 结构对账（3 层 srcID=⑥、Position 静态值/Opacity 25·34·L2=0/Glow Radius·Intensity/start 全等）+ AE2020≡AE2025 接受（3 层不 drop、2×Glo2 入 DOM 值对）+ **render orig-vs-clone t=0.5 像素布局一致**（⑦ 中间 comp 孤立看淡=忠实）。无新 API，终帧 render-pixel 归 ⑫。
+
+**下一 = Task 2.4 ⑧ RGBズレ**（[plan](plans/2026-06-19-booyah-glitch-replication.md)）：3 层 src=② テキスト + 各层 `AddEffect("ADBE Fill")` 设不同 Fill Color（L0"B"=[255,0,131]/L1"R"默认色?/L2"G"=[255,0,255,86]）+ Opacity(23/24/25kf)。**新维度 = Fill 色差**（复用 showcase/glitch 的 RGB 色差经验）。→ ⑨(3 层+Trim,2 层 src=④)→ Phase 3 ⑩ 怪物 → Phase 4 ⑪⑫ 顶层+终帧。⚠AE 装 `E:\adobe\`。
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
