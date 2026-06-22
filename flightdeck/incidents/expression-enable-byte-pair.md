@@ -73,6 +73,15 @@ tduM`。修：Utf8 **插在最后一个 cdat（无 cdat 则 tdb4）之后**，td
 
 > 写 AI 生成 MG 表达式时查语义：`flightdeck/references/after-effects-expression-reference/`（docsforadobe，docs/ 按 objects/layer/general/text 分组）。
 
+## 边界缺口：表达式挂在「物化的多关键帧」属性上 → AE drop 层（2026-06-22，booyah ⑧）
+
+**症状**：booyah-clone comp ⑧ RGBズレ 三层的 Opacity（`SetLayerTransform` 物化的 **23/24/25 个关键帧**淡出）上 `SetExpression("wiggle(27,33)")` 后，**AE 双版本静默 drop 整个层**（`it.numLayers` 从 3 → 0；Go round-trip 却显示 3 层 + 表达式俱在 = 假绿，红线 1）。同层的**静态** Position 挂表达式正常、隔壁 ⑤ L2 **静态** Opacity 挂 `wiggle(29,55)` 也正常 ON。bisection 锁定：`RGBEXPR=pos`（仅静态 Position 表达式）→ 层在；`RGBEXPR=op`（仅关键帧 Opacity 表达式）→ 层 drop。
+
+**与已 gate 的「loopOut 叠加在带关键帧属性上」不矛盾**：那条是少量原生关键帧；这里是 **`SetLayerTransform` 物化的多关键帧**（无静态 cdat、tdbs 内是 lhd3 分页 + ldat 关键帧数据，见 [[lhd3-keyframe-capacity-pages]]）。**根因假设**（未 byte-diff 证实）：Utf8 表达式块的插入位逻辑（「cdat 后 / tdum-tduM 前」）对**无 cdat 的关键帧 tdbs** 不适配，插错位破坏关键帧分页 → AE 判层损坏跳过。下次做：先 `difftdb4` 拿 AE 自存「关键帧 opacity + wiggle」fixture 逐字节对账插入位再修。
+
+**当前 workaround**（booyah ⑧）：舍弃 opacity flicker-wiggle，保留淡出关键帧（render-neutral 主效果是 Position X-wiggle）；缺口记 INDEX ⑧ 行。**另一 AE 求值 quirk（与本库无关）**：unified Position 上写 `[wiggle(24,12)[0], value[1], value[2]]` 这类**引用 `value` 重构数组**的表达式，AE 把 wiggle **冻结回 base**（X 恒 960，valueAtTime 全时刻不变）；改用**字面常量** pass-through `[wiggle(24,12)[0], 540, 0]` 才求值。bare `wiggle(24,12)` 也动但 X+Y 都抖（不如 X-only 忠实）。
+
 ## Cases
 - 2026-06-12 首次（MG roadmap S2；第二阶段 disabled-丢文本是修复过程中的次生发现，一并修复）
+- 2026-06-22 booyah ⑧：表达式挂「物化多关键帧 Opacity」→ AE drop 层（边界缺口，见上节）；静态属性表达式正常。配套发现 AE「value 冻结 wiggle」求值 quirk。
 - 2026-06-14 表达式语汇 gate（S2 followup）：loopOut / wiggle / 跨层引用 / effect-param 引用**四** idiom 双版本 ship-gate PASS；Go 侧零改动（机制内容无关），新增 `expr_vocab_shipgate_test.go`。JSX 数组日志须逐元素索引（`v2s()`），直接拼数组对象触发 ExtendScript「数字结果无效（除以零？）」throw（同 `effect-param-elision-synthesis-lite.md` 坑）。effect-param idiom 先误诊为「AddEffect 被 AE drop」，bisection 证伪 → 真因是引用按名失败须改索引（见上节）。

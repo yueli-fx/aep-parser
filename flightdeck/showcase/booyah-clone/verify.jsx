@@ -51,6 +51,32 @@
         }
     }
 
+    // dumpTransformExpr reports whether a layer's Transform Position/Opacity carry an
+    // ENABLED expression (the wiggle RGB jitter on ⑧ / flicker on ⑤ L2). expressionEnabled
+    // is the real AE-acceptance signal for SetExpression (Go round-trip can be a false
+    // green per red-line-1 / incident expression-enable-byte-pair).
+    function dumpTransformExpr(layer) {
+        var tg;
+        try { tg = layer.property("ADBE Transform Group"); } catch (e) { return; }
+        if (!tg) return;
+        var names = ["ADBE Position", "ADBE Opacity"];
+        for (var n = 0; n < names.length; n++) {
+            var pr;
+            try { pr = tg.property(names[n]); } catch (e1) { continue; }
+            if (!pr) continue;
+            try {
+                if (pr.canSetExpression && pr.expressionEnabled) {
+                    var samp = "";
+                    var ts = [0.4, 1.0, 1.7, 2.6];
+                    for (var t = 0; t < ts.length; t++) {
+                        samp += " @" + ts[t] + "=" + String(pr.valueAtTime(ts[t], false));
+                    }
+                    w("    [TX] " + names[n] + " expr=\"" + pr.expression + "\" ON" + samp);
+                }
+            } catch (ex) { w("    [TX] " + names[n] + " (err " + ex.toString() + ")"); }
+        }
+    }
+
     try {
         app.open(new File(dir + "booyah-clone.aep"));
         w("items=" + app.project.numItems);
@@ -68,6 +94,7 @@
                     if (contents) dumpGroup(contents, 2);
                 } catch (e) { w("    (no contents: " + e + ")"); }
                 try { dumpEffects(l); } catch (e) { w("    (no fx: " + e + ")"); }
+                try { dumpTransformExpr(l); } catch (e) { w("    (no tx: " + e + ")"); }
             }
         }
         w("OK");

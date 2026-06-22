@@ -113,3 +113,26 @@ func finishPrecomp1(rp *aep.Project, orc *oracle) {
 
 	fmt.Printf("  ⑤ プリコンポジション 1: 3 precomp layers → comp ① (L0 Position 2kf, L1 Opacity 13kf+centred, L2 static centred)\n")
 }
+
+// finishPrecomp1Expr runs after the second reopen: the original's L2 is not truly
+// static — its Opacity (static 100 %) carries a wiggle(29,55) expression that flickers
+// the third nested glitch copy. SetLayerTransform materialized L2's default Opacity, so
+// after the reopen we can attach the expression (source from the oracle verbatim).
+func finishPrecomp1Expr(rp *aep.Project, orc *oracle) {
+	comp := rp.CompositionByName(precomp1CompName)
+	if comp == nil {
+		panic("comp ⑤: not found after reopen 2")
+	}
+	origComp := orc.mustComp(precomp1CompName)
+	otg := findGroup(origComp.Layers[2].PropertyTree(), "ADBE Transform Group")
+	opOrig := findProp(otg, "ADBE Opacity")
+	if opOrig == nil || opOrig.Expression == "" {
+		panic("comp ⑤ L2: original Opacity expression missing")
+	}
+	op := comp.Layers[2].Opacity()
+	if op == nil {
+		panic("comp ⑤ L2: Opacity not materialized (SetLayerTransform should have)")
+	}
+	must(op.SetExpression(opOrig.Expression))
+	fmt.Printf("  ⑤ プリコンポジション 1: + L2 Opacity %s\n", opOrig.Expression)
+}

@@ -63,9 +63,20 @@ func main() {
 	finishHiraku(rp, orc)        // ⑦
 	finishRgbzure(rp, orc)       // ⑧
 
+	// Phase 3: reopen again so the Position/Opacity channels materialized by
+	// SetLayerTransform are now parsed properties, then attach the wiggle
+	// expressions the original drives them with (SetExpression needs a parsed
+	// *Property). Original uses these for the RGB jitter (⑧) and a flickering
+	// precomp copy (⑤ L2); the easeprobe missed them because it only inspected
+	// keyframe interpolation, not expressions.
+	rp2, err := aep.Reopen(rp)
+	must(err)
+	finishPrecomp1Expr(rp2, orc) // ⑤ L2 Opacity wiggle
+	finishRgbzureExpr(rp2, orc)  // ⑧ Position X-wiggle + Opacity wiggle
+
 	f, err := os.Create(outPath)
 	must(err)
 	defer f.Close()
-	must(rp.WriteAEP(f))
+	must(rp2.WriteAEP(f))
 	fmt.Println("wrote", outPath)
 }
