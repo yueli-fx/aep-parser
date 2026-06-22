@@ -88,7 +88,9 @@
                 var l = it.layer(li);
                 var srcName = "";
                 try { if (l.source && l.source.name) srcName = " src=\"" + l.source.name + "\""; } catch (es) {}
-                w("  L" + l.index + " \"" + l.name + "\" blend=" + l.blendingMode + srcName);
+                var nMasks = 0;
+                try { var mp = l.property("ADBE Mask Parade"); if (mp) nMasks = mp.numProperties; } catch (em) {}
+                w("  L" + l.index + " \"" + l.name + "\" blend=" + l.blendingMode + " masks=" + nMasks + srcName);
                 try {
                     var contents = l.property("ADBE Root Vectors Group");
                     if (contents) dumpGroup(contents, 2);

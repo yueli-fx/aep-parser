@@ -22,7 +22,9 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
+	"math"
 
 	aep "github.com/example/aep-parser/internal/aep"
 )
@@ -92,4 +94,70 @@ func finishGlitchText(rp *aep.Project, orc *oracle) {
 		must(l.SetVisible(ol.Visible))
 	}
 	fmt.Printf("  ⑩ グリッチテキスト: + blend/timing/visibility on %d layers\n", len(comp.Layers))
+}
+
+// finishGlitchTextMasks (STEP 2) rebuilds every original mask on the matching
+// clone layer. All 131 masks in ⑩ are axis-aligned rectangles (audited: 4
+// vertices, Add mode, unit-square ldat) — the tearing slices that gate the
+// displacement/scale glitch. AE stores a mask outline as a bbox (shph @0x04 =
+// L,T,R,B fractions of the SOURCE pixel space) plus a unit-square ldat; the
+// parser's Mask.Vertices surfaces only the normalized ldat (all masks read
+// identically), so the real per-mask geometry must be reconstructed from the
+// shph bbox. We map each bbox to a pixel rectangle and feed it to AddMask, which
+// re-divides by the (1920×1080) source dims back to the original fractions —
+// a faithful round-trip for these rectangular masks.
+func finishGlitchTextMasks(rp *aep.Project, orc *oracle) {
+	comp := rp.CompositionByName(glitchTextCompName)
+	if comp == nil {
+		panic("comp ⑩: not found after reopen (masks)")
+	}
+	orig := orc.mustComp(glitchTextCompName)
+	w, h := float64(comp.Width), float64(comp.Height) // source = own 1920×1080 solid
+	total := 0
+	for i, l := range comp.Layers {
+		total += copyMasksFromOriginal(l, orig.Layers[i], w, h)
+	}
+	fmt.Printf("  ⑩ グリッチテキスト: + %d masks (bbox-rect tearing slices) across L0–L20\n", total)
+}
+
+// copyMasksFromOriginal rebuilds origLayer's masks on newLayer as bbox-rect
+// pixel paths and returns the count added. w/h are the layer source pixel dims.
+func copyMasksFromOriginal(newLayer, origLayer *aep.Layer, w, h float64) int {
+	n := 0
+	for _, om := range origLayer.Masks {
+		rect, ok := maskBBoxRect(om, w, h)
+		if !ok {
+			panic(fmt.Sprintf("comp ⑩: mask %q has no decodable shph bbox", om.Name))
+		}
+		nm, err := aep.AddMask(newLayer, om.Name, rect)
+		must(err)
+		if om.Mode != aep.MaskModeAdd {
+			must(nm.SetMode(om.Mode))
+		}
+		if om.Inverted {
+			must(nm.SetInverted(true))
+		}
+		n++
+	}
+	return n
+}
+
+// maskBBoxRect decodes a mask's shph bounding box (@0x04 = four big-endian
+// float32 L,T,R,B fractions of the source pixel space) into a closed pixel
+// rectangle (top-left → top-right → bottom-right → bottom-left). Returns false
+// when the shph is too short to carry a bbox.
+func maskBBoxRect(m *aep.Mask, w, h float64) (aep.BezierPath, bool) {
+	d := m.ShphRaw
+	if len(d) < 0x14 {
+		return aep.BezierPath{}, false
+	}
+	f := func(off int) float64 {
+		return float64(math.Float32frombits(binary.BigEndian.Uint32(d[off : off+4])))
+	}
+	l, t, r, b := f(0x04), f(0x08), f(0x0C), f(0x10)
+	x0, y0, x1, y1 := l*w, t*h, r*w, b*h
+	return aep.BezierPath{
+		Vertices: [][2]float64{{x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}},
+		Closed:   true,
+	}, true
 }

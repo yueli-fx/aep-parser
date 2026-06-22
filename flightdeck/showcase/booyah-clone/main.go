@@ -66,6 +66,7 @@ func main() {
 	finishRgbzure(rp, orc)       // ⑧
 	finishNanka(rp, orc)         // ⑨
 	finishGlitchText(rp, orc)    // ⑩ blend/timing/visibility (sources anchored)
+	finishGlitchTextMasks(rp, orc) // ⑩ Step 2: 131 bbox-rect tearing-slice masks
 
 	// Phase 3: reopen again so the Position/Opacity channels materialized by
 	// SetLayerTransform are now parsed properties, then attach the wiggle
