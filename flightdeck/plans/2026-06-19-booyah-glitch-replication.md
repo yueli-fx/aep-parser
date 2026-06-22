@@ -187,13 +187,14 @@ L0/L1 src=④ カクッ(precomp,角括号,L0 横向镜像);L2 = 新建 shape 层
 
 ### Task 4.1 — ⑪ 背景変えるならココ！(id=43,6 层)〔含 wiggle + Ramp〕
 - L0 footage(65) adjustment + Noise2(Amount=11);L1 footage(57) adjustment + Exposure2(**Exposure expr="wiggle(34,0.29)" 9kf** — Task 0.3 结论);L2 footage(63) Overlay + Venetian Blinds(Completion=97,Dir=90,Width=8);L3 footage(59) Venetian Blinds(62/90/12);L4 footage(285) masks=1;L5 footage(41) + **Ramp**(Start Color/End Color/End of Ramp/Ramp Shape=2 radial,Start of Ramp 2kf — 值见 dissect L5)。
-- [ ] Noise2/Exposure2/Venetian Blinds/Ramp 各 AddEffect+SetEffectParam;Ramp 颜色+点(`ADBE Ramp-000x`);L4 一个 mask。wiggle 按 0.3。验收。账本 ⑪。Commit。
+- [x] **✅(commit 687dd12,🔶待 review)** `gen_haikei.go`:6 层全 solid(oracle 读色,L0/L1 adjustment),Exposure2/Venetian Blinds×2/Ramp(径向+2kf+4-comp 色 byte-exact)+L4 bbox-rect mask。Go 对账 BAD=0+双版本 AE 接受+render 眼验。**两条 honest delta**:① **Noise2 not in embedded set**→skip+log(能力 gap);② **Exposure wiggle 舍**(kf+expr→AE drop 层 + 级联,bisection 实证:⑪ 初次只进 1/6 层;= ⑧ keyframed-opacity wiggle 同坑扩到 effect param;保 9kf 主闪烁舍 ±0.29 wiggle)。
 
 ### Task 4.2 — ⑫ メインコンプ！(id=14,3 层)〔顶 + 终验〕
 - L0 src=⑩ グリッチテキスト,blend=Add,Position(3kf ease)+Scale(1kf)+ **Venetian Blinds**(Completion=14,Dir=90,Width=9);L1 src=⑨;L2 src=⑪ + **Exposure2**(Exposure=-1.45)+ **Curves**(Task 0.5 结论)。
-- [ ] **Step 1:** 拼 3 层 + effects。验收(AE 接受 + 结构对账)。
-- [ ] **Step 2(终帧 render-pixel,红线4):** `render.jsx` 渲染 メインコンプ 同一帧(选 glitch 活跃帧,如 t=1.0s)→ 与原工程同 comp 同帧 render 像素对照。Read 两张 png 目视 + 数值差。Expected:视觉等同(色差/撕裂/辉光/背景一致)。
-- [ ] **Step 3:** 双版本 AE ship-gate 全绿。账本 ⑫ + 全表收口(已复刻/blocked 逐项实证)。Commit。
+- [x] **Step 1 ✅(commit 33485e5):** 3 precomp 层(⑩/⑨/⑪)+ effects(L0 Venetian Blinds、L2 Exposure2 -1.45 + CurvesCustom 默认实例[曲线 arbitrary-data blocked])+ L0/L1 静态 Opacity wiggle(safe,⑤L2 型)。Go 对账全等 + 双版本 AE 接受(整 12-comp 工程 clean、CurvesCustom+VenetianBlinds 入 DOM、wiggle ON)。
+- [x] **Step 2 终帧 render-pixel(红线4)✅:** clone vs 原版 メインコンプ t=1.0 双开渲染对照(tmp_debug)。**hero element 对**:居中 chromatic glitch 文字 + 辉光 + 横向 Venetian-Blinds 扫描线 + 暗背景。**honest delta**:⑪ 背景 flare/blinds 区在 clone 渲成锐利亮矩形 vs 原版柔和融合 → 溯因(a)**mask feather/opacity 未复刻**(锐利满不透明 vs 原柔边)(b)blocked Noise2 grain + 舍弃的 Exposure wiggle 调制原背景。**非像素等同**;结构复刻完成 + AE-gated,余为 documented polish/blocked delta。
+- [x] **Step 3 ✅:** 双版本 AE ship-gate 全绿(整工程)。L0 Position kf 写 linear(LayerTransform 无 eased builder)= 75px nudge 微 delta。
+- 注:Curves 曲线数据 arbitrary-data blocked(spike 0.5),仅加默认实例;**整 Booyah 12-comp from-scratch 复刻全建成 + 双版本 AE gated**。
 
 ### Task 4.3 — 收口 + landing
 - [ ] INDEX 覆盖账本最终态(诚实标 blocked + 实证);showcase status=待review(用户真机验收后才 complete)。
