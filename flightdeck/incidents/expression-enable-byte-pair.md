@@ -1,8 +1,8 @@
 ---
 status: active
 when_to_read: SetExpression 写入后 AE 不求值/expressionEnabled 读回 false；AE 打开后表达式文本被丢；给 effect param（或任何带 tdum/tduM 的属性）挂表达式后 AE 判损坏跳过该层；touching tdb4 @0x77/@0x78 or SetExpression/SetExpressionEnabled or 表达式 Utf8 在 tdbs 里的插入位置；评估「Go round-trip 绿但 AE 行为不对」的表达式类症状
-applies_to: [expression, expression-enabled, tdb4, 0x77, 0x78, has-expression-marker, utf8-position, tdum-tduM, effect-param-expression, settext, render-dead, mg-roadmap, ship-gate, ae2020, ae2025]
-last_updated: 2026-06-17
+applies_to: [expression, expression-enabled, tdb4, 0x77, 0x78, has-expression-marker, utf8-position, tdum-tduM, effect-param-expression, keyframed-property-drop, cascade-silent-drop, settext, render-dead, mg-roadmap, ship-gate, ae2020, ae2025]
+last_updated: 2026-06-22
 resolved_by:
 ---
 
@@ -81,7 +81,10 @@ tduM`。修：Utf8 **插在最后一个 cdat（无 cdat 则 tdb4）之后**，td
 
 **当前 workaround**（booyah ⑧）：舍弃 opacity flicker-wiggle，保留淡出关键帧（render-neutral 主效果是 Position X-wiggle）；缺口记 INDEX ⑧ 行。**另一 AE 求值 quirk（与本库无关）**：unified Position 上写 `[wiggle(24,12)[0], value[1], value[2]]` 这类**引用 `value` 重构数组**的表达式，AE 把 wiggle **冻结回 base**（X 恒 960，valueAtTime 全时刻不变）；改用**字面常量** pass-through `[wiggle(24,12)[0], 540, 0]` 才求值。bare `wiggle(24,12)` 也动但 X+Y 都抖（不如 X-only 忠实）。
 
+**扩展确认（2026-06-22，booyah ⑪）：坑不限 transform 通道，EFFECT PARAM 同样中招，且会级联 drop**。comp ⑪ 背景 L1 Exposure2 的 `ADBE Exposure2-0003`（9 关键帧亮度闪烁 −10..+6）上 `SetExpression("wiggle(34,0.29)")` 后，**AE 不止 drop 该层，还把它之后的所有层一起 drop**：⑪ 6 层初次只进 1 层（仅 index0 那个无表达式的干净 adjustment 存活，L1–L5 全没）= 多层级联静默 drop（机制同 [[multi-layer-silent-drop]]：首个损坏层的序列化单元让 AE 解析 Layr 列表 desync，后续层全丢）。**判定**：「表达式挂在带关键帧的属性」对 **transform 通道 + effect param 一视同仁** drop，且在多层 comp 里**级联**（不只丢一层）→ 复刻保真时凡遇「kf + expr 同属性」一律 **保 kf 舍 expr**（kf 通常是主视觉，expr 是 garnish），别试图两者兼得。workaround（booyah ⑪）：Exposure 保 9kf 主闪烁、舍 ±0.29 wiggle。
+
 ## Cases
 - 2026-06-12 首次（MG roadmap S2；第二阶段 disabled-丢文本是修复过程中的次生发现，一并修复）
 - 2026-06-22 booyah ⑧：表达式挂「物化多关键帧 Opacity」→ AE drop 层（边界缺口，见上节）；静态属性表达式正常。配套发现 AE「value 冻结 wiggle」求值 quirk。
+- 2026-06-22 booyah ⑪：坑扩到 EFFECT PARAM（`ADBE Exposure2-0003` 9kf + wiggle）→ AE drop 层**并级联** drop 其后所有层（⑪ 6 层→1 层）；bisection 实证。结论统一为「kf+expr 同属性 → 保 kf 舍 expr」（见上节扩展确认）。
 - 2026-06-14 表达式语汇 gate（S2 followup）：loopOut / wiggle / 跨层引用 / effect-param 引用**四** idiom 双版本 ship-gate PASS；Go 侧零改动（机制内容无关），新增 `expr_vocab_shipgate_test.go`。JSX 数组日志须逐元素索引（`v2s()`），直接拼数组对象触发 ExtendScript「数字结果无效（除以零？）」throw（同 `effect-param-elision-synthesis-lite.md` 坑）。effect-param idiom 先误诊为「AddEffect 被 AE drop」，bisection 证伪 → 真因是引用按名失败须改索引（见上节）。
