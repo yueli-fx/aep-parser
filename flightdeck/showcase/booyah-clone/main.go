@@ -49,6 +49,7 @@ func main() {
 	buildShapeKatamari(p, orc) // ⑥ シェイプの塊 (7 precomp layers → comp ⑤)
 	buildHiraku(p, orc)        // ⑦ ここは開けない (3 precomp layers → comp ⑥ + Glow)
 	buildRgbzure(p, orc)       // ⑧ RGBズレ (3 precomp layers → comp ② + Fill RGB shift)
+	buildNanka(p, orc)         // ⑨ なんか周りのやつ (2 precomp ④ + 1 shape層 w/ animated Trim)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -62,6 +63,7 @@ func main() {
 	finishShapeKatamari(rp, orc) // ⑥
 	finishHiraku(rp, orc)        // ⑦
 	finishRgbzure(rp, orc)       // ⑧
+	finishNanka(rp, orc)         // ⑨
 
 	// Phase 3: reopen again so the Position/Opacity channels materialized by
 	// SetLayerTransform are now parsed properties, then attach the wiggle
@@ -73,6 +75,7 @@ func main() {
 	must(err)
 	finishPrecomp1Expr(rp2, orc) // ⑤ L2 Opacity wiggle
 	finishRgbzureExpr(rp2, orc)  // ⑧ Position X-wiggle + Opacity wiggle
+	finishNankaExpr(rp2, orc)    // ⑨ Opacity wiggle (L0/L1/L2)
 
 	f, err := os.Create(outPath)
 	must(err)

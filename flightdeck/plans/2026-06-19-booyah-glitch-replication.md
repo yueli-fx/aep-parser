@@ -158,8 +158,8 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 ### Task 2.4 — ⑧ RGBズレ(id=132,3 层,依赖②)✅(🔶待 review)
 3 层 src=② テキスト。L0"B" Fill Color[A,R,G,B]=[255,0,131,255]+Opacity(23kf);**L1"R" Fill-0002 elided=默认红**(AE DOM 实测 v=1,0,0,1 确认模板默认即红→只 AddEffect 不设色,镜像原 elision);L2"G" Fill Color=[255,0,255,86]+Opacity(25kf)。`gen_rgbzure.go`:`AddEffect("ADBE Fill")`+`SetEffectParam("ADBE Fill-0002", []float64{A,R,G,B})`。**坑**:SetEffectParam 颜色要 `[]float64` len=Components(传 [4]float64 报 unsupported value type);编码 [A,R,G,B] 0-255=parser 读出格式,直接拷 oracle。全 Position 静态[960,540]居中,L2 start=**-0.1335 负值**正确 round-trip。**验收 4 关全过**:Go 结构对账(3 层 srcID=②、Position/Opacity 23·24·25kf/Fill 颜色 L0L2 精确·L1 elided/start 含负全等)+ AE2020≡AE2025 接受(3 层不 drop、3×Fill 入 DOM、颜色 AE 读回对 [A,R,G,B]→AE[R,G,B,A] 验证)+ **render 眼验**(t=1.0 红绿蓝三份文字重叠+相位错峰=RGB 色差)。无新 API。终帧 render-pixel 归 ⑫。账本 ⑧=🔶待review。Commit。
 
-### Task 2.5 — ⑨ なんか周りのやつ(id=355,3 层,依赖④)
-L0/L1 src=④ カクッ(无动画);L2 shape 层 "シェイプレイヤー 1" 带 **Trim Paths** 动画(`ADBE Vector Trim Start` 2kf ease + `ADBE Vector Trim Offset` 2kf ease)。`AddTrim`(`incidents/trim-paths-vector-filter-re.md`)+ animate。验收。Commit。
+### Task 2.5 — ⑨ なんか周りのやつ(id=355,3 层,依赖④)✅(🔶待 review)
+L0/L1 src=④ カクッ(precomp,角括号,L0 横向镜像);L2 = 新建 shape 层 "シェイプレイヤー 1"(Rect 1856×1015)带 **Trim Paths** 动画(Start 2kf 100→0 + Offset 2kf 0→720,**bezier ease 逐值拷**)+ Stroke。`gen_nanka.go`:**首个混合源 comp**(precomp + from-scratch shape)+ **首个非线性关键帧 ease 复刻**(`PropertyStream.AddKeyframeWithEase`,lowerShapeScalar→injectAnimatedStream)。Opacity wiggle(静态 opacity,SetExpression 安全)。**坑/delta**:L0 原 3D Rotate Y=180 → 用 Scale X=-100% 2D 负缩放等价镜像(库有 `SetIs3D`+`SetRotateY` gated 但与 precomp+SetLayerTransform 组合未测,记 mechanism delta)。**验收 4 关全过**:Go round-trip(3 层 src/trim 2kf ease 逐值精确/opacity expr/scale 全等)+ AE2020≡AE2025 接受(9 comp、⑨ 3 层不 drop、3×Trim group 入 DOM、3×Opacity wiggle ON)+ render 眼验(t=0.4 trim 局部 draw-on → t=1.0 闭合 + ④ 角括号镜像)。账本 ⑨=🔶待review。终帧 render-pixel 归 ⑫。Commit。
 
 ---
 
