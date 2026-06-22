@@ -80,7 +80,7 @@ func finishTextKomako(rp *aep.Project, orc *oracle) {
 	}
 	must(aep.SetLayerTransform(layer, tr))
 
-	// --- text animators: Tracking Amount + Character Offset (each 2kf, ease→linear) ---
+	// --- text animators: Tracking Amount + Character Offset (each 2kf, ease copied) ---
 	trackKfs := scalarKfsOf(orig, "ADBE Text Tracking Amount")
 	offKfs := scalarKfsOf(orig, "ADBE Text Character Offset")
 
@@ -92,14 +92,27 @@ func finishTextKomako(rp *aep.Project, orc *oracle) {
 	must(err)
 	must(aep.AnimateTextCharacterOffset(layer, 0, offKfs))
 
+	// Motion blur: the original's GLITCH layer has motion blur ON (the only layer
+	// in the whole project that does). The fast Tracking/Character-Offset animation
+	// then renders smeared — visible standalone AND through every comp that nests ②
+	// (⑧ RGBズレ, ⑩). Both switches are required: the layer flag + the comp master
+	// switch. Without them the clone's text is razor-sharp where the original blurs.
+	must(layer.SetMotionBlur(true))
+	must(comp.SetCompMotionBlur(true))
+
 	fmt.Printf("  ② テキスト変えるならココ: GLITCH text + Position(%dkf)/Opacity(%dkf) + Tracking(%dkf)/CharOffset(%dkf)\n",
 		len(findProp(otg, "ADBE Position").Keyframes), len(findProp(otg, "ADBE Opacity").Keyframes),
 		len(trackKfs), len(offKfs))
 }
 
 // scalarKfsOf pulls a 1D-scalar animator leaf's keyframes (by match-name, anywhere
-// under the layer's Text Animators) into []ScalarKeyframe (linear; the original's
-// ease is approximated — key values/times are exact).
+// under the layer's Text Animators) into []ScalarKeyframe, copying each keyframe's
+// bezier temporal ease (In/Out Speed+Influence) verbatim from the original. The
+// ease is NOT optional fidelity here: the original Tracking/Character Offset ease
+// out hard (out-influence ≈0 at the first kf, in-influence ≈1 at the last) so the
+// scramble resolves to "GLITCH" early and holds; a linear approximation keeps it
+// mid-scramble far longer, which comp ⑧ (3 staggered copies of ②) magnified into
+// three differently-scrambled RGB layers instead of a tight chromatic-aberration.
 func scalarKfsOf(orig *aep.Layer, matchName string) []aep.ScalarKeyframe {
 	tp := findGroup(orig.PropertyTree(), "ADBE Text Properties")
 	animators := findGroup(tp, "ADBE Text Animators")
@@ -119,7 +132,14 @@ func scalarKfsOf(orig *aep.Layer, matchName string) []aep.ScalarKeyframe {
 	}
 	kfs := make([]aep.ScalarKeyframe, 0, len(leaf.Keyframes))
 	for _, kf := range leaf.Keyframes {
-		kfs = append(kfs, aep.ScalarKeyframe{Time: kf.Time, Value: toScalar(kf.Value)})
+		sk := aep.ScalarKeyframe{Time: kf.Time, Value: toScalar(kf.Value)}
+		if len(kf.InTemporalEase) > 0 {
+			sk.InEase = kf.InTemporalEase[0]
+		}
+		if len(kf.OutTemporalEase) > 0 {
+			sk.OutEase = kf.OutTemporalEase[0]
+		}
+		kfs = append(kfs, sk)
 	}
 	return kfs
 }
