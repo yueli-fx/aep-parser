@@ -223,6 +223,54 @@ func TestLayerTimeSetters(t *testing.T) {
 	}
 }
 
+// TestLayerOutPointFractionalFromScratch is a regression for the coarse-divisor
+// snap: a from-scratch layer's out-point is templated as a whole number of
+// seconds (e.g. 6 = 6/1), so the divisor reused by SetOutPoint was 1 and any
+// fractional out-point rounded to integer seconds. SetOutPoint must re-pick a
+// faithful divisor (the comp tick scale) so fractional/frame-aligned trims
+// survive — exercised heavily by the Booyah ⑩ replication's staccato spans.
+func TestLayerOutPointFractionalFromScratch(t *testing.T) {
+	p := aep.NewProject(aep.TargetAE2020)
+	c, err := aep.NewComposition(p, "T", 1920, 1080, 29.97, 6)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	if _, err := aep.NewSolidLayer(c, "S", 1920, 1080, [3]float64{0, 0, 0}); err != nil {
+		t.Fatalf("NewSolidLayer: %v", err)
+	}
+	rp, err := aep.Reopen(p)
+	if err != nil {
+		t.Fatalf("Reopen: %v", err)
+	}
+	l := rp.Compositions[0].Layers[0]
+	const wantIn, wantOut = 1.201201, 2.836170 // frame-aligned NTSC times from the original
+	if err := l.SetInPoint(wantIn); err != nil {
+		t.Fatalf("SetInPoint: %v", err)
+	}
+	if err := l.SetOutPoint(wantOut); err != nil {
+		t.Fatalf("SetOutPoint: %v", err)
+	}
+	if math.Abs(l.OutPoint()-wantOut) > 1e-3 {
+		t.Fatalf("in-mem OutPoint = %g, want %g (coarse-divisor snap?)", l.OutPoint(), wantOut)
+	}
+
+	var buf bytes.Buffer
+	if err := rp.WriteAEP(&buf); err != nil {
+		t.Fatalf("WriteAEP: %v", err)
+	}
+	p2, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		t.Fatalf("re-parse: %v", err)
+	}
+	l2 := p2.Compositions[0].Layers[0]
+	if math.Abs(l2.InPoint()-wantIn) > 1e-3 {
+		t.Errorf("roundtrip InPoint = %g, want %g", l2.InPoint(), wantIn)
+	}
+	if math.Abs(l2.OutPoint()-wantOut) > 1e-3 {
+		t.Errorf("roundtrip OutPoint = %g, want %g", l2.OutPoint(), wantOut)
+	}
+}
+
 // TestLayerSetParentAndSource covers SetParent + SetSource length-
 // preserving 4-byte writes + ID validation.
 func TestLayerSetParentAndSource(t *testing.T) {

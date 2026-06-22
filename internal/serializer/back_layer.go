@@ -328,9 +328,32 @@ func (b *layerBackrefs) setLdtaFrac(off int, seconds float64, label string) (int
 		divisor = 600
 	}
 	dividend := int32(math.Round(seconds * float64(divisor)))
+	// The reused divisor can be too coarse to represent `seconds` faithfully:
+	// an embed-template layer whose out-point happened to be a whole number is
+	// stored as N/1, so any fractional SetOutPoint would snap to integer seconds.
+	// AE recomputes time = dividend/divisor, so any divisor is valid — keep the
+	// existing one when it's already faithful (byte round-trip stability), else
+	// re-pick the comp's tick scale (mirrored in the in-point divisor @0x18).
+	if rel := math.Abs(float64(dividend)/float64(divisor) - seconds); rel > 1e-6 {
+		divisor = b.timeDivisor()
+		dividend = int32(math.Round(seconds * float64(divisor)))
+	}
 	binary.BigEndian.PutUint32(b.ldta.Data[off:off+4], uint32(dividend))
 	binary.BigEndian.PutUint32(b.ldta.Data[off+4:off+8], divisor)
 	return dividend, divisor, nil
+}
+
+// timeDivisor returns a high-resolution divisor for layer time fields. AE writes
+// start/in/out with the composition's tick scale; the in-point divisor (@0x18) is
+// the most reliable in-ldta copy of it. Falls back to 600 (AE's standard layer
+// time base) when that field is also coarse or absent.
+func (b *layerBackrefs) timeDivisor() uint32 {
+	if len(b.ldta.Data) >= 0x1C {
+		if d := binary.BigEndian.Uint32(b.ldta.Data[0x18:0x1C]); d > 1 {
+			return d
+		}
+	}
+	return 600
 }
 
 func (b *layerBackrefs) SetStartTime(seconds float64) error {
