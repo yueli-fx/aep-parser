@@ -20,7 +20,13 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
-**旁支**：补 comp ① AE 2020 render；**「gen 漏复刻层属性/标志」横切回扫（终帧 ⑫ 前做）**——已撞三类：①静态 Scale/Rotation/Anchor（[[layer-replication-drops-static-transform-channels]]）②**motion blur 层标志**（2026-06-22 用户 frame26 揪出 ②，全项目仅 ② "GLITCH" 开，gen 漏→无拖影；已修 `SetMotionBlur`+`SetCompMotionBlur`）③**关键帧 bezier ease**（gen 普遍用 `AddKeyframeLinear`/linear ScalarKeyframe 丢原版 ease；② Tracking/CharOffset 已修拷 `In/OutTemporalEase`，但**各 comp 的 Position/Opacity kf 仍 linear**，⑤⑥⑦⑧ 的运动曲线可能与原版有别——⑫ 终帧前应统一扫一遍 Position/Opacity 是否需补 ease）。（注：原「NewComposition 分数 fps cdta 时基」第二发现已根因化为 tdb4 @0x0C 并修复，见 [[ntsc-tickrate-derive-3x-off]]。）
+**旁支**：补 comp ① AE 2020 render；**「gen 漏复刻层属性/标志」横切回扫（终帧 ⑫ 前做）**——已撞三类：①静态 Scale/Rotation/Anchor（[[layer-replication-drops-static-transform-channels]]）②**motion blur 层标志**（2026-06-22 用户 frame26 揪出 ②，全项目仅 ② "GLITCH" 开，gen 漏→无拖影；已修 `SetMotionBlur`+`SetCompMotionBlur`）③**关键帧 bezier ease**（gen 普遍用 `AddKeyframeLinear`/linear ScalarKeyframe 丢原版 ease；② Tracking/CharOffset 已修拷 `In/OutTemporalEase`，但**各 comp 的 Position/Opacity kf 仍 linear**，⑤⑥⑦⑧ 的运动曲线可能与原版有别）。
+
+  **▶ 进行中（本会话起，用户「可以」批准、未token中断）= 给 ⑤⑥⑦⑧ 的 Position/Opacity 补 ease。已查到的接续点（下会话直接用，别重查）**：
+  - text-animator 那条路（`AnimateScalarKeyframes`/`ScalarKeyframe.InEase/OutEase`）已能拷 ease（② 已用）。
+  - 但 **LayerTransform builder（`NewLayerTransform`→`tr.Position()/Opacity().AddKeyframeLinear`）只暴露 linear 变体**，grep 未见 eased 方法 → Position/Opacity 补 ease 有两条路：(a) **post-reopen 用已存在的 `kf.SetInTemporalEase([]aep.TemporalEase{...})`/`SetOutTemporalEase` 逐 kf 补**（parsed keyframe 上有这俩 setter，见 `internal/aep/keyframe_mutate_test.go`/`keyframe_easing_test.go`）—最省、不动核心 API；(b) 给 LayerTransform builder 加 `AddKeyframeEased`。倾向 (a)。
+  - **下一步先做**：写探针量 ⑤⑥⑦⑧ 原版 Position/Opacity kf 的 `In/OutTemporalEase`（influence 是否≠默认 0.333/非平凡），**非平凡的才值得补**；平凡（接近 linear/默认）的跳过。ease 字节读法见 `Keyframe.InTemporalEase []TemporalEase{Speed,Influence}`（本会话 dump ② 用过的 probe 套路）。
+  - 注意：⑧ 的 Opacity kf 在 t≈2.5-3.5s（淡出段），ease 影响那段；⑥ 的 Opacity 34/41.. kf 是 flicker，ease 影响闪烁手感。（注：原「NewComposition 分数 fps cdta 时基」第二发现已根因化为 tdb4 @0x0C 并修复，见 [[ntsc-tickrate-derive-3x-off]]。）
 
 ## In Progress
 
