@@ -80,6 +80,7 @@ func finishGlitchText(rp *aep.Project, orc *oracle) {
 		panic(fmt.Sprintf("comp ⑩: layer count %d != original %d (silent drop?)", len(comp.Layers), len(orig.Layers)))
 	}
 
+	cx, cy := float64(comp.Width)/2, float64(comp.Height)/2
 	for i, l := range comp.Layers {
 		ol := orig.Layers[i]
 		// Timing: source-offset start (@0x0C) + in/out trim. The short adjustment
@@ -92,8 +93,32 @@ func finishGlitchText(rp *aep.Project, orc *oracle) {
 		must(l.SetBlendingMode(ol.BlendingMode))
 		// Visibility (L24/L25/L26 are hidden — video switch off — in the original).
 		must(l.SetVisible(ol.Visible))
+
+		// Non-default layer opacity. The original dims several layers — L23 横ブラー
+		// (heavily-blurred text) at 9 %, L8 glow at 60 % — and leaving them at 100 %
+		// washes the whole comp into a cyan glow that buries the text. SetLayerTransform
+		// rewrites the entire transform group, so reproduce the centred transform
+		// (anchor = source-centre fraction, position = comp centre — all these layers
+		// sit at [960,540]) alongside the opacity. Skip default-100 %, hidden, and
+		// keyframed/expression opacity (none of the dimmed layers are animated).
+		if !ol.Visible {
+			continue
+		}
+		op := findProp(findGroup(ol.PropertyTree(), "ADBE Transform Group"), "ADBE Opacity")
+		if op == nil || len(op.Keyframes) > 0 || op.Expression != "" || op.StaticValue == nil {
+			continue
+		}
+		pct := toScalar(op.StaticValue) * 100 // parser opacity is 0..1; SetLayerTransform wants percent
+		if pct >= 99.999 {
+			continue // 100 % = default, no-op
+		}
+		tr := aep.NewLayerTransform()
+		must(tr.AnchorPoint().SetStaticValue([2]float64{0.5, 0.5}))
+		must(tr.Position().SetStaticValue([2]float64{cx, cy}))
+		must(tr.Opacity().SetStaticValue(pct))
+		must(aep.SetLayerTransform(l, tr))
 	}
-	fmt.Printf("  ⑩ グリッチテキスト: + blend/timing/visibility on %d layers\n", len(comp.Layers))
+	fmt.Printf("  ⑩ グリッチテキスト: + blend/timing/visibility/opacity on %d layers\n", len(comp.Layers))
 }
 
 // finishGlitchTextMasks (STEP 2) rebuilds every original mask on the matching
@@ -270,6 +295,18 @@ func copyMasksFromOriginal(newLayer, origLayer *aep.Layer, w, h float64) int {
 		}
 		if om.Inverted {
 			must(nm.SetInverted(true))
+		}
+		// Render-affecting mask attributes (omitting these rendered ⑪'s flare as a
+		// hard bright rectangle — its mask has feather [1377,1377]). Feather/expansion
+		// in pixels, opacity 0..1, all copied verbatim from the parsed original.
+		if om.Feather[0] != 0 || om.Feather[1] != 0 {
+			must(nm.SetFeather(om.Feather))
+		}
+		if om.Opacity != 1.0 {
+			must(nm.SetOpacity(om.Opacity))
+		}
+		if om.Expansion != 0 {
+			must(nm.SetExpansion(om.Expansion))
 		}
 		n++
 	}
