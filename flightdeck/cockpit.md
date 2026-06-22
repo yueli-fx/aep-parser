@@ -10,7 +10,9 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **Booyah Glitch 全 12-comp from-scratch 复刻 ✅ 全建成 + 双版本 AE gated**。逐 comp 账本（建法/值/delta/commit）= [showcase/INDEX](showcase/INDEX.md)，进度 = [plan](plans/2026-06-19-booyah-glitch-replication.md) `## Progress`。①②③⑧ 已用户真机验收 complete；④⑤⑥⑦⑨⑩⑪⑫ 🔶待用户真机 review（见 Pending Review）。
 
-**下一**：① **用户真机验收 ⑩⑪⑫**（agent 已 render 自验，按 showcase review-gate 用户验后翻 complete + 关 plan Task 4.3）。② 可选 polish（非阻塞，均 documented delta）：**mask feather/opacity 复刻**（⑫ 终帧 ⑪ flare 渲成锐利亮矩形 vs 原柔和，[[mask-shph-bbox-read-gap]] 末节）· **eased Position kf**（LayerTransform 无 eased builder，⑫ L0 75px nudge 写 linear）· **Noise2 能力补**（不在 embed set，⑪ L0 grain skip）· **Curves 曲线数据**（arbitrary-data blocked）。⚠AE 装 `E:\adobe\`，agent 自跑 `scripts/ae_run.ps1`。
+**⚠ 终帧保真纠偏（2026-06-22，用户揪出「根本没复刻完成」）**：先前误判「全建成=复刻完成」（红线4：结构 round-trip + AE 接受 ≠ 渲染对）。逐 comp orig-vs-clone 隔离（t=1.5）查出**两条 render-affecting 属性漏复刻**，经 12-comp 嵌套放大成大偏差：① **⑩ 层 opacity 没复刻**（原 L23 横ブラー 9%/L8 glow 60%，clone 全 100%→模糊亮文字洗成青光糊住）→ `finishGlitchText` 补静态 opacity（SetLayerTransform）；② **mask feather/opacity 没拷**（⑪ flare mask feather=1377→clone 锐利亮矩形）→ `copyMasksFromOriginal` 补。**修后双版本 AE 接受**（count 不变）+ render：⑪ 亮框→均匀暗扫描线、⑩ 青光糊→可读 chromatic glitch 文字、⑫ 合成→暗扫描线上居中 glitch 文字，**gross 偏差消除**。**仍非像素等同**：撕裂强度、文字色/展幅是更细 delta（commit 见 git log）。
+
+**下一**：① **用户真机验收 ⑩⑪⑫**（修后再验；按 review-gate 用户验后翻 complete + 关 plan Task 4.3）。② 仍可 polish（非阻塞 documented delta）：撕裂强度/文字色细调 · **eased Position kf**（LayerTransform 无 eased builder）· **Noise2 能力补**（不在 embed set）· **Curves 曲线数据**（arbitrary-data blocked）。⚠AE 装 `E:\adobe\`，agent 自跑 `scripts/ae_run.ps1`。
 
 **沉淀（本会话）**：库 fix `setLdtaFrac` 粗 divisor 截断（commit 2886c5e + 回归测试）· incident [[expression-enable-byte-pair]]（kf+expr 坑扩到 effect param + 级联 drop）· incident [[mask-shph-bbox-read-gap]]（mask 真几何在 shph bbox）· Displacement Map tdpi = self-ref（`AddEffect` 默认绑宿主，无需 `SetEffectLayerParam`）。
 

@@ -31,7 +31,7 @@ booyah ⑩ 实测：全 131 个 mask 都是 4 顶点 Add-mode 轴对齐矩形，
 
 ## 边界 / 未覆盖
 - **只对轴对齐矩形 mask 忠实**：bbox 是 AABB，丢掉旋转/非矩形 bezier 的形状（ldat 归一化顶点理论上能恢复非矩形，但需同时套 bbox 变换 + 厘清 ldat 三元组真实布局 `[anchor, out-ctrl, next-in-ctrl]`，本次未做——booyah 全是矩形所以没碰）。
-- **mask feather / opacity / expansion 未复刻**：`copyMasksFromOriginal` 只搬 geometry + mode + inverted。booyah ⑫ 终帧对照发现 ⑪ flare mask 在 clone 渲成**锐利满不透明亮矩形** vs 原版柔和 → 怀疑原 mask 带 feather/低 opacity。补法:加 `m.SetFeather`/`m.SetOpacity`/`m.SetExpansion`（getter 侧 `Mask.Feather/Opacity/Expansion` 已可读）。属 render-fidelity polish。
+- **mask feather / opacity / expansion ✅ 已补（2026-06-22，用户揪出终帧 gap 后）**：`copyMasksFromOriginal` 现 copy feather/opacity/expansion（`m.SetFeather([2]float64 px)`/`m.SetOpacity(0..1)`/`m.SetExpansion(px)`，从 parsed mask 直拷）。**实证**：⑪ flare mask feather=[1377,1377]（巨柔），不补→clone 渲成锐利亮矩形 vs 原版柔和到几乎不可见；补后 clone ⑪ = 原版同款均匀暗扫描线（双版本 AE 接受、mask count 不变）。**教训**：mask 复刻「几何对」≠「渲染对」，feather/opacity 是 render-affecting 必拷（红线4）。
 - **可选库改进**:给 `Mask` 加一个「de-normalized 像素顶点」accessor（套 shph bbox），免每个消费方各自解 ShphRaw；本次走消费侧绕过，库读语义未动。
 
 ## Cases
