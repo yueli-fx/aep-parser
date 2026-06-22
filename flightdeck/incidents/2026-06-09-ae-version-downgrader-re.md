@@ -1,8 +1,8 @@
 ---
 status: active
-when_to_read: 判断某 chunk/字段属于哪个 AE 版本的版本门禁；想用 head 字节判 AE 版本；调查 ldta 160/164 尾长之谜；评估或参考外部 AE 降级工具的可信度与已知 bug；需要 AE ship-gate 自动化的 prefs/occlusion 注意事项
-applies_to: [version-gating, ppSn, pdvc, head-fingerprint, ldta-length, external-tool-re, ship-gate, reference]
-last_updated: 2026-06-09
+when_to_read: 判断某 chunk/字段属于哪个 AE 版本的版本门禁；想用 head 字节判 AE 版本；调查 ldta 160/164 尾长之谜；评估或参考外部 AE 降级工具的可信度与已知 bug；需要 AE ship-gate 自动化的 prefs/occlusion 注意事项；想知道降级器砍 ldta 尾 4 字节会丢什么内容（@0xA0=track-matte 显式源）；自己复现一次降级（head 指纹 2020 + 删 ppSn/pdvc + trim ldta）
+applies_to: [version-gating, ppSn, pdvc, head-fingerprint, ldta-length, external-tool-re, ship-gate, reference, track-matte, trackmattesource, ldta-0xA0, non-adjacent-matte, silent-data-loss, reproduce-downgrade]
+last_updated: 2026-06-22
 resolved_by:
 ---
 
@@ -34,6 +34,7 @@ resolved_by:
 3. 写 2023 时 `head[3]` 写成 **0x09**，真实 2023 存盘是 **0x04**（cosmetic；detect 有 `head[1]-0x47` 兜底不受影响，但写出的字节与真 2023 不符）。
 4. 2018/2019 档删 `mrid`/`idpc`/`iide`/`comr` **不可信**：这些 chunk 在所有真实文件（含 2020）都存在（实测 AE2025 工程 `comr`/`CIF3` 确在），作者自标 experimental/beta。
 5. 2022 目标的 `trimmedLdta` 护栏（找不到 164-ldta 可砍就 throw）**误杀无 shape/layer-ldta 的工程**。
+6. **主流 2025→2020 路径会静默损坏「非相邻显式 track-matte」绑定**（2026-06-22 实证，详下节）。砍掉的 ldta 尾 4 字节 = `@0xA0` track-matte 显式源 ID（AE23+），**不是恒零 padding**。用了 track matte（老功能、2020 支持）且源层非相邻的真实工程，降级后遮罩源被抹、AE 2020 按隐式「相邻上层」规则重绑到错误层——无报错。**这是 bug #1–#5 之外唯一在「主流路径 + 纯老特性内容」下就触发的内容损坏**（#1/#2/#5 是边缘 target/输入护栏误杀，#4 是 2018/2019 偏门档）。
 
 ## 验证方法（三层互证，无矛盾）
 
@@ -41,5 +42,33 @@ resolved_by:
 - live：同 vm 真 fs/path 调真 `convertFile` 对 fixture 副本转换，自写字节 walker diff —— 朴素偏移 `head.dataStart+[1,3,4,5,6,7]`+write-if-different、trimmedLdta 164→160、comr/CIF3/OvdG 删增、bug#1/#2 全部活证。
 - ship-gate：`selection_both_layers`(AE2025, 2 图层)→2020 经 `scripts/ae_run.ps1` 开 AE 2020 → 4 items / Comp 1 / 2 层同名同序，无"损坏/跳过"，**工具主流路径(2025→2020)产出 AE 视为原生且内容无损**。AE 自动化 prefs 注意：脚本跑完让 AE 优雅 `app.quit()` 等几秒再 kill，否则首选项损坏（见 [ae-automation-occlusion-crashstate.md](ae-automation-occlusion-crashstate.md)）。
 
+## 实证：非相邻显式 track-matte 降级后静默丢绑（bug #6，2026-06-22）
+
+把 bug #6 从「逻辑必然推断」升级成**手上可复现的实证**。降级器源码不在磁盘（外部 CEP），故忠实**复现其主流 2025→2020 动作**喂真 AE 2020。
+
+**攻击输入（纯老特性，本仓 API 从零造）**：comp `MATTE` 4 个全屏 solid，层序 top→bottom = `[M, X, Y, T]`；`T.SetTrackMatteSource(M, TrackMatteLuma)` —— 源 M 在最顶、被遮层 T 在最底，**非相邻（中隔 X、Y）**。这正是 `@0xA0` 显式源 ID 存在的理由（2020 隐式规则只能表达「相邻上层」）。luma 取值刻意区分：M=白、Y=黑，使渲染也可分辨。
+
+**复现的降级三步**（`rifx.Parse` → 改 → `Chunk.Write` 自动重算 LIST size）：
+1. `trimmedLdta` 164→160：每个 164-ldta 砍尾 4 字节（丢 `@0xA0..0xA3`）。
+2. head 指纹 2020：把 `head.Data` 的 byte[1],[3],[4],[5],[6],[7] 从真实原生 2020 文件（`test_data/renderer_ae2020_r0.aep`）拷过来（`5d/_/16/0b/0b/86/2d`，对上节版本指纹表 2020 行）。
+3. 删 AE2022+ 门禁 chunk `pdvc`（本例无 `ppSn`）。
+
+**Go 侧字节实证**（同一 parser 读前后）：
+- BEFORE（AE2025，164-ldta）：`T.TrackMatteLayerID = 14 = M.ID` —— **本仓 `SetTrackMatteSource` 正确写 @0xA0，无 0xA0=0 写 bug**（顺手排除了「我们自己也假设 0xA0=0」的疑虑）。`T.TrackMatte(@0x6B)=3`（LUMA）。
+- AFTER（trim 后）：`T.TrackMatteLayerID = 0`（显式源**抹除**），`T.TrackMatte(@0x6B)=3` **存活**（孤儿：模式在、源没了）。
+
+**AE 2020 实测**（v17.7，`scripts/ae_run.ps1` 无人值守开全降级文件 dump DOM）：
+```
+OPENED silently (no corruption dialog)        ← 静默，无报错
+idx=1 M trackMatteType=NONE enabled=true       ← 原显式源 M 沦为普通可见层
+idx=2 X trackMatteType=NONE enabled=true
+idx=3 Y trackMatteType=NONE enabled=true
+idx=4 T trackMatteType=LUMA enabled=true        ← T 仍 luma 遮罩，AE2020 隐式源 = 相邻上层 Y（非 M）
+```
+结论坐实：遮罩**模式存活、显式源丢失** → AE 2020 把 T 的遮罩从「非相邻的 M」静默重绑到「相邻的 Y」，**无任何报错**。设计师天天用的 track matte + 任意层当源（非相邻）= 此工具主流路径的内容损坏硬伤。
+
+**边界诚实**：复现的是降级器**已 RE 的主流路径动作**（非跑真工具，源码不在盘）；故实测证明的是「`@0xA0` 被 trim + 戳成 2020 的文件在 AE 2020 里遮罩重绑」，叠加上节「真工具确做 trimmedLdta 164→160」的 RE 事实，构成完整链条。`enabled=true` on Y 是次要观察（AE 开档未自动关被遮源的 video），不影响主结论。探针 `tmp_debug/downgrade_probe/`（gen + verify.jsx）一次性，findings 落此后删。
+
 ## Cases
 - 2026-06-09 首次：完整 RE + 三层验证；coverage 仅放指针，未将版本门禁表直接融入（用户决策：开本 incident 收口、ldta 线索补进 ldta incident）。
+- 2026-06-22 bug #6 实证：非相邻显式 track-matte 工程经复现的主流 2025→2020 降级后，AE 2020 静默把遮罩源 M→相邻 Y 重绑（DOM dump 实测）；顺带实证本仓 `SetTrackMatteSource` 写 @0xA0 正确。
