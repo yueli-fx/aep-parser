@@ -20,7 +20,7 @@ Pointers: config → rules.md · 通用铁律/风格 → CLAUDE.md · 能力真�
 
 **B. @tag schema flip(c)（可选遗留清理，非阻塞）** → plan [2026-06-21-apidoc-tag-schema-impl.md](plans/2026-06-21-apidoc-tag-schema-impl.md)。删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict required CI + 改文档真相源注脚 → regen → commit flip → plan done → landing。dual-read 现仍工作、aep:cap=0，可随时做。
 
-**旁支**：补 comp ① AE 2020 render；**扫 comp ②③④ 图层有无非默认 Scale/Rotation/Anchor 被 gen 漏复刻**（与 ⑤ 同类隐患 [[layer-replication-drops-static-transform-channels]]，用户建议回扫）。（注：原「NewComposition 分数 fps cdta 时基」第二发现已根因化为 tdb4 @0x0C 并修复，见 [[ntsc-tickrate-derive-3x-off]]。）
+**旁支**：补 comp ① AE 2020 render；**「gen 漏复刻层属性/标志」横切回扫（终帧 ⑫ 前做）**——已撞三类：①静态 Scale/Rotation/Anchor（[[layer-replication-drops-static-transform-channels]]）②**motion blur 层标志**（2026-06-22 用户 frame26 揪出 ②，全项目仅 ② "GLITCH" 开，gen 漏→无拖影；已修 `SetMotionBlur`+`SetCompMotionBlur`）③**关键帧 bezier ease**（gen 普遍用 `AddKeyframeLinear`/linear ScalarKeyframe 丢原版 ease；② Tracking/CharOffset 已修拷 `In/OutTemporalEase`，但**各 comp 的 Position/Opacity kf 仍 linear**，⑤⑥⑦⑧ 的运动曲线可能与原版有别——⑫ 终帧前应统一扫一遍 Position/Opacity 是否需补 ease）。（注：原「NewComposition 分数 fps cdta 时基」第二发现已根因化为 tdb4 @0x0C 并修复，见 [[ntsc-tickrate-derive-3x-off]]。）
 
 ## In Progress
 
