@@ -52,6 +52,7 @@ func main() {
 	buildNanka(p, orc)         // ⑨ なんか周りのやつ (2 precomp ④ + 1 shape層 w/ animated Trim)
 	buildGlitchText(p, orc)    // ⑩ グリッチテキスト (27-layer monster: skeleton sources)
 	buildHaikei(p, orc)        // ⑪ 背景変えるならココ (6 solid/adjustment background layers)
+	buildMainComp(p, orc)      // ⑫ メインコンプ (top comp: 3 precomp layers ⑩/⑨/⑪)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -70,6 +71,7 @@ func main() {
 	finishGlitchTextMasks(rp, orc) // ⑩ Step 2: 131 bbox-rect tearing-slice masks
 	finishGlitchTextFx(rp, orc)    // ⑩ Step 3: effect chains (Geometry2/Glo2/DispMap/GaussBlur/FractalNoise)
 	finishHaikei(rp, orc)          // ⑪ blend + effects (Venetian Blinds/Ramp/Exposure wiggle) + mask
+	finishMainComp(rp, orc)        // ⑫ transforms + blend + effects (VenetianBlinds/Exposure2/Curves)
 
 	// Phase 3: reopen again so the Position/Opacity channels materialized by
 	// SetLayerTransform are now parsed properties, then attach the wiggle
@@ -82,6 +84,7 @@ func main() {
 	finishPrecomp1Expr(rp2, orc) // ⑤ L2 Opacity wiggle
 	finishRgbzureExpr(rp2, orc)  // ⑧ Position X-wiggle + Opacity wiggle
 	finishNankaExpr(rp2, orc)    // ⑨ Opacity wiggle (L0/L1/L2)
+	finishMainCompExpr(rp2, orc) // ⑫ Opacity wiggle (L0/L1, static = AE-safe)
 
 	f, err := os.Create(outPath)
 	must(err)
