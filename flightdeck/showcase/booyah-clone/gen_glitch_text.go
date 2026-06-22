@@ -120,6 +120,122 @@ func finishGlitchTextMasks(rp *aep.Project, orc *oracle) {
 	fmt.Printf("  ⑩ グリッチテキスト: + %d masks (bbox-rect tearing slices) across L0–L20\n", total)
 }
 
+// Curated per-effect tuned-param sets (match-name suffixes). Only real settable
+// params are listed — group/marker leaves (-0000, Sub Settings, Evolution Options,
+// etc.) and the Displacement-Map layer-reference (-0001, a self-ref auto-bound by
+// AddEffect) are deliberately omitted so SetEffectParam never clobbers a group.
+// Params present in the set but ELIDED in the original are skipped (leave default).
+var effectScalarParams = map[string][]string{
+	"ADBE Geometry2":        {"-0003"},                                                                   // Scale Height
+	"ADBE Glo2":             {"-0002", "-0003", "-0004"},                                                 // Threshold, Radius, Intensity
+	"ADBE Gaussian Blur 2":  {"-0001", "-0002"},                                                          // Blurriness, Blur Dimensions
+	"ADBE Displacement Map": {"-0003", "-0005", "-0007"},                                                 // Max H, Max V, Edge Behavior
+	"ADBE Fractal Noise":    {"-0002", "-0004", "-0005", "-0009", "-0010", "-0011", "-0012", "-0015"},    // NoiseType, Contrast, Brightness, UniformScaling, Scale, ScaleW, ScaleH, Complexity
+}
+
+// effectVecParams: multi-component (2D+) animatable params per effect.
+var effectVecParams = map[string][]string{
+	"ADBE Fractal Noise": {"-0013"}, // Offset Turbulence (2D pan)
+}
+
+// effectExprParams: expression-driven params per effect (set value 0 + expr).
+var effectExprParams = map[string][]string{
+	"ADBE Fractal Noise": {"-0023"}, // Evolution = time*N
+}
+
+// ok panics on a non-nil error and returns the value — for (*Property, error)
+// builder calls whose Property we don't need.
+func ok[T any](v T, err error) T { must(err); return v }
+
+// finishGlitchTextFx (STEP 3) rebuilds every layer's effect chain: Geometry2
+// Scale Height (L0–L6) / Glo2 (L7×2, L8) / Displacement Map (L10–L20; the layer
+// reference is a SELF-ref in the original — tdpi==own layer id — which AddEffect
+// binds to the host by default, so no SetEffectLayerParam is needed) / Gaussian
+// Blur (L23, L24) / Fractal Noise with Evolution expression (L24, L26). All via
+// the same SetEffectParam / AnimateEffectParam patterns proven on comps ③ and ⑦.
+func finishGlitchTextFx(rp *aep.Project, orc *oracle) {
+	comp := rp.CompositionByName(glitchTextCompName)
+	if comp == nil {
+		panic("comp ⑩: not found after reopen (fx)")
+	}
+	orig := orc.mustComp(glitchTextCompName)
+	nfx := 0
+	for i, l := range comp.Layers {
+		nfx += applyEffectsFromOriginal(l, orig.Layers[i])
+	}
+	fmt.Printf("  ⑩ グリッチテキスト: + %d effects (Geometry2/Glo2/DisplacementMap[self-ref]/GaussianBlur/FractalNoise)\n", nfx)
+}
+
+// applyEffectsFromOriginal mirrors origLayer's effect parade onto newLayer using
+// the curated param sets, and returns the effect count added.
+func applyEffectsFromOriginal(newLayer, origLayer *aep.Layer) int {
+	for _, of := range origLayer.Effects {
+		fx, err := aep.AddEffect(newLayer, of.MatchName)
+		must(err)
+		mn := of.MatchName
+
+		for _, suf := range effectScalarParams[mn] {
+			op := fxParam(of, mn+suf)
+			if op == nil {
+				continue // elided in original → leave AE default
+			}
+			if len(op.Keyframes) > 0 {
+				ok(aep.AnimateEffectParam(newLayer, fx, mn+suf, scalarKfs(op.Keyframes)))
+			} else if op.StaticValue != nil {
+				ok(aep.SetEffectParam(newLayer, fx, mn+suf, toScalar(op.StaticValue)))
+			}
+		}
+		for _, suf := range effectVecParams[mn] {
+			op := fxParam(of, mn+suf)
+			if op == nil {
+				continue
+			}
+			if len(op.Keyframes) > 0 {
+				ok(aep.AnimateEffectParamVec(newLayer, fx, mn+suf, vecKfs(op.Keyframes)))
+			} else if op.StaticValue != nil {
+				ok(aep.SetEffectParam(newLayer, fx, mn+suf, toFloats(op.StaticValue)))
+			}
+		}
+		for _, suf := range effectExprParams[mn] {
+			op := fxParam(of, mn+suf)
+			if op == nil || op.Expression == "" {
+				continue
+			}
+			pr := ok(aep.SetEffectParam(newLayer, fx, mn+suf, 0.0))
+			must(pr.SetExpression(op.Expression))
+			must(pr.SetExpressionEnabled(true))
+		}
+	}
+	return len(origLayer.Effects)
+}
+
+// scalarKfs converts parsed 1D keyframes to ScalarKeyframe inputs, copying the
+// per-side temporal ease (zero = linear; L19 displacement carries real ease).
+func scalarKfs(kfs []*aep.Keyframe) []aep.ScalarKeyframe {
+	out := make([]aep.ScalarKeyframe, 0, len(kfs))
+	for _, kf := range kfs {
+		sk := aep.ScalarKeyframe{Time: kf.Time, Value: toScalar(kf.Value)}
+		if len(kf.InTemporalEase) > 0 {
+			sk.InEase = kf.InTemporalEase[0]
+		}
+		if len(kf.OutTemporalEase) > 0 {
+			sk.OutEase = kf.OutTemporalEase[0]
+		}
+		out = append(out, sk)
+	}
+	return out
+}
+
+// vecKfs converts parsed multi-component keyframes to VectorKeyframe inputs
+// (linear — the Offset Turbulence pan is a straight 2-kf slide, as in comp ③).
+func vecKfs(kfs []*aep.Keyframe) []aep.VectorKeyframe {
+	out := make([]aep.VectorKeyframe, 0, len(kfs))
+	for _, kf := range kfs {
+		out = append(out, aep.VectorKeyframe{Time: kf.Time, Value: toFloats(kf.Value)})
+	}
+	return out
+}
+
 // copyMasksFromOriginal rebuilds origLayer's masks on newLayer as bbox-rect
 // pixel paths and returns the count added. w/h are the layer source pixel dims.
 func copyMasksFromOriginal(newLayer, origLayer *aep.Layer, w, h float64) int {
