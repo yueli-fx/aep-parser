@@ -1652,10 +1652,13 @@ func AnimateTextColor(layer *Layer, tickRate float64, kfs []VectorKeyframe) erro
 //   already present on the effect are settable regardless.
 //
 //   Values use the property's on-disk encoding: scalar / slider / angle (degrees)
-//   / enum / boolean as float64; color as [A, R, G, B] each 0–255; a 2D/3D point
+//   / enum / boolean as a float64; color as [A, R, G, B] each 0–255; a 2D/3D point
 //   as fractions of the layer's coordinate space (the source item's pixel size for
 //   footage/solid/precomp layers, the composition's for source-less layers, z
-//   divided by that space's height).
+//   divided by that space's height). A multi-component value (color, 2D/3D point)
+//   must be passed as a []float64 slice whose length equals the parameter's
+//   component count — NOT a fixed-size array such as [4]float64, which is rejected
+//   as an unsupported value type.
 //
 //   Atomic (snapshot + rollback on any parser warning or encode failure).
 // @param      layer           the parsed layer carrying the effect
