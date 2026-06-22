@@ -51,6 +51,7 @@ func main() {
 	buildRgbzure(p, orc)       // ⑧ RGBズレ (3 precomp layers → comp ② + Fill RGB shift)
 	buildNanka(p, orc)         // ⑨ なんか周りのやつ (2 precomp ④ + 1 shape層 w/ animated Trim)
 	buildGlitchText(p, orc)    // ⑩ グリッチテキスト (27-layer monster: skeleton sources)
+	buildHaikei(p, orc)        // ⑪ 背景変えるならココ (6 solid/adjustment background layers)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -68,6 +69,7 @@ func main() {
 	finishGlitchText(rp, orc)    // ⑩ blend/timing/visibility (sources anchored)
 	finishGlitchTextMasks(rp, orc) // ⑩ Step 2: 131 bbox-rect tearing-slice masks
 	finishGlitchTextFx(rp, orc)    // ⑩ Step 3: effect chains (Geometry2/Glo2/DispMap/GaussBlur/FractalNoise)
+	finishHaikei(rp, orc)          // ⑪ blend + effects (Venetian Blinds/Ramp/Exposure wiggle) + mask
 
 	// Phase 3: reopen again so the Position/Opacity channels materialized by
 	// SetLayerTransform are now parsed properties, then attach the wiggle

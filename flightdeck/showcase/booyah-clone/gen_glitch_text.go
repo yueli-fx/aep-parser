@@ -126,16 +126,28 @@ func finishGlitchTextMasks(rp *aep.Project, orc *oracle) {
 // AddEffect) are deliberately omitted so SetEffectParam never clobbers a group.
 // Params present in the set but ELIDED in the original are skipped (leave default).
 var effectScalarParams = map[string][]string{
-	"ADBE Geometry2":        {"-0003"},                                                                   // Scale Height
-	"ADBE Glo2":             {"-0002", "-0003", "-0004"},                                                 // Threshold, Radius, Intensity
-	"ADBE Gaussian Blur 2":  {"-0001", "-0002"},                                                          // Blurriness, Blur Dimensions
-	"ADBE Displacement Map": {"-0003", "-0005", "-0007"},                                                 // Max H, Max V, Edge Behavior
-	"ADBE Fractal Noise":    {"-0002", "-0004", "-0005", "-0009", "-0010", "-0011", "-0012", "-0015"},    // NoiseType, Contrast, Brightness, UniformScaling, Scale, ScaleW, ScaleH, Complexity
+	"ADBE Geometry2":        {"-0003"},                                                                // Scale Height
+	"ADBE Glo2":             {"-0002", "-0003", "-0004"},                                              // Threshold, Radius, Intensity
+	"ADBE Gaussian Blur 2":  {"-0001", "-0002"},                                                       // Blurriness, Blur Dimensions
+	"ADBE Displacement Map": {"-0003", "-0005", "-0007"},                                              // Max H, Max V, Edge Behavior
+	"ADBE Fractal Noise":    {"-0002", "-0004", "-0005", "-0009", "-0010", "-0011", "-0012", "-0015"}, // NoiseType, Contrast, Brightness, UniformScaling, Scale, ScaleW, ScaleH, Complexity
+	"ADBE Exposure2":        {"-0003"},                                                                // Exposure (⑪ L1, 9kf; wiggle expr added separately)
+	"ADBE Venetian Blinds":  {"-0001", "-0002", "-0003"},                                              // Completion, Direction, Width
+	"ADBE Ramp":             {"-0005"},                                                                // Ramp Shape (1 = linear, 2 = radial)
 }
 
-// effectVecParams: multi-component (2D+) animatable params per effect.
+// effectVecParams: multi-component (2D point / 4D color) params per effect, static
+// or animated — SetEffectParam (static) / AnimateEffectParamVec (keyframed).
 var effectVecParams = map[string][]string{
-	"ADBE Fractal Noise": {"-0013"}, // Offset Turbulence (2D pan)
+	"ADBE Fractal Noise": {"-0013"},                             // Offset Turbulence (2D pan)
+	"ADBE Ramp":          {"-0001", "-0002", "-0003", "-0004"},  // Start of Ramp (2D anim), Start Color (4D), End of Ramp (2D), End Color (4D)
+}
+
+// unsupportedEffects are effect match-names absent from the embedded template set
+// (AddEffect would refuse them). applyEffectsFromOriginal skips + logs these so the
+// layer still builds; the missing effect is an honest, logged fidelity gap.
+var unsupportedEffects = map[string]bool{
+	"ADBE Noise2": true, // ⑪ L0 grain "微妙なノイズ" — not in the embedded library
 }
 
 // effectExprParams: expression-driven params per effect (set value 0 + expr).
@@ -169,9 +181,15 @@ func finishGlitchTextFx(rp *aep.Project, orc *oracle) {
 // applyEffectsFromOriginal mirrors origLayer's effect parade onto newLayer using
 // the curated param sets, and returns the effect count added.
 func applyEffectsFromOriginal(newLayer, origLayer *aep.Layer) int {
+	added := 0
 	for _, of := range origLayer.Effects {
+		if unsupportedEffects[of.MatchName] {
+			fmt.Printf("    ⚠ skip unsupported effect %s on %q (not in embedded set)\n", of.MatchName, newLayer.Name)
+			continue
+		}
 		fx, err := aep.AddEffect(newLayer, of.MatchName)
 		must(err)
+		added++
 		mn := of.MatchName
 
 		for _, suf := range effectScalarParams[mn] {
@@ -206,7 +224,7 @@ func applyEffectsFromOriginal(newLayer, origLayer *aep.Layer) int {
 			must(pr.SetExpressionEnabled(true))
 		}
 	}
-	return len(origLayer.Effects)
+	return added
 }
 
 // scalarKfs converts parsed 1D keyframes to ScalarKeyframe inputs, copying the
