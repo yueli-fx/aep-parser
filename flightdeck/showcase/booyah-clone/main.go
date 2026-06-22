@@ -48,6 +48,7 @@ func main() {
 	buildPrecomp1(p, orc)    // ⑤ プリコンポジション 1 (3 precomp layers → comp ①)
 	buildShapeKatamari(p, orc) // ⑥ シェイプの塊 (7 precomp layers → comp ⑤)
 	buildHiraku(p, orc)        // ⑦ ここは開けない (3 precomp layers → comp ⑥ + Glow)
+	buildRgbzure(p, orc)       // ⑧ RGBズレ (3 precomp layers → comp ② + Fill RGB shift)
 
 	// Phase 2: reopen once, then apply the mutations that require a PARSED layer
 	// (SetLayerTransform + AddText*Animator + AddEffect can't run on un-Reopened
@@ -60,6 +61,7 @@ func main() {
 	finishPrecomp1(rp, orc)    // ⑤
 	finishShapeKatamari(rp, orc) // ⑥
 	finishHiraku(rp, orc)        // ⑦
+	finishRgbzure(rp, orc)       // ⑧
 
 	f, err := os.Create(outPath)
 	must(err)
