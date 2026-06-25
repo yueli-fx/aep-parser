@@ -1,6 +1,6 @@
-# flightdeck rules — aep-parser
+# flightdeck briefing — aep-parser
 
-## House rules
+## Conventions
 
 ### Project conventions
 
@@ -12,7 +12,7 @@
 
 ### Commit conventions（本仓库专属 — aep-parser；通用规范见订阅的 `knowledge/commits.md`）
 
-通用 commit 规范走全局订阅（`uses.md` → `knowledge/commits.md`）。本仓库在其上叠加：
+通用 commit 规范走全局订阅（见 § Subscriptions 的 `knowledge/commits.md`）。本仓库在其上叠加：
 
 - **type 扩展**：通用 type 表之外，本仓库增加 `re`（纯 RE 探索：新 fixture + 找到新字段位置，但 setter 尚未写）。
 - **type 细化**：`feat` = 新字段 R/W、新 setter、新结构性写 API、新 fixture；`fix` = 错读字段 / setter 写错字节 / round-trip 不一致；`docs` = `docs/` public API 文档 / flightdeck 文档同步。
@@ -51,3 +51,10 @@
 - 永不 push 远端：所有工作 commit 到本地 main 即可，任何流程都不提议或执行 `git push`，本地 commit 历史就是交付记录（you, 2026-06-16）。
 - 文档可自由更新（含破坏性重写、含 CLAUDE.md）：CLAUDE.md / flightdeck deck / docs / doc comment 无需逐次确认即可更新、重组、删改；分级（Alpha↔Stable）等契约表述变更照常在 commit body 说明；代码 API 契约本身仍按 CLAUDE.md #2 执行（you, 2026-06-11）。
 - 大计划完成即归档：代表已 ship 功能 arc 的 work effort 完成时，把它的 design.md/plan.md 从 `flightdeck/work/` 移到冷存 `~/.flightdeck/projects/<slug>/archive/`（plain mv，非 git），并同步 cockpit 的 In flight / Next。判定「大计划」= 有独立 work effort、对应一个可交付 feature/结构性 arc；滚动 reference 矩阵不适用，保持在 work/。
+
+## Subscriptions
+
+<!-- 本项目订阅的全局知识，一行一个 ~/.flightdeck-相对路径 -->
+knowledge/comments.md
+knowledge/commits.md
+knowledge/subagent-guide.md

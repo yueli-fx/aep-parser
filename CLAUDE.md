@@ -2,7 +2,7 @@
 
 Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/aftereffects-aep-parser 重写 + 增量。**读取下限 AE 2020**。
 
-> 项目用 **flightdeck**（deck 在 `flightdeck/`）。会话入口由 SessionStart hook 自动注入接管指令；手动可跑 `/flightdeck:preflight`。第一件事：读 `flightdeck/cockpit.md`（状态/下一步）+ `flightdeck/rules.md`（house rules）+ 按需 derive-listing `flightdeck/knowledge/<域>/`。
+> 项目用 **flightdeck**（deck 在 `flightdeck/`）。会话入口由 SessionStart hook 自动注入接管指令；手动可跑 `/flightdeck:preflight`。第一件事：读 `flightdeck/cockpit.md`（状态/下一步）+ `flightdeck/briefing.md`（house rules + 订阅）+ 按需 derive-listing `flightdeck/knowledge/<域>/`。
 >
 > **本项目不使用 auto-memory 系统**（已于 2026-06-16 退役、迁入本 deck）。新知识只进 flightdeck（陷阱/决策/参考 → `knowledge/<域>/`，文件开头带 routing header：trap=`# ⚠ 标题`、checklist=`# X checklist`、其余=决策/参考笔记；设计+计划 → `work/<effort>/`，完成移冷存 `~/.flightdeck/projects/<slug>/archive/`；vendored 外部资料→`references/`；能力状态→capindex `aep:cap` tag）或 CLAUDE.md（跨切面铁律/工作风格）。**不要写 memory 文件。**
 
@@ -28,7 +28,7 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 1. **写回 default 是 length-preserving**。改字段不准动 chunk 大小；少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。结构性 ops（NewComposition / NewShapeLayer / DeleteLayer 等）走 atomic invariants：warnings-as-failure + rollback to pre-call state + AE 双版本 ship-gate 验证。详 `knowledge/workflow/ae25-acceptance-gate.md`。
 2. **public API 分级**：
    - **Stable（核心 R/W）**: 已通过双版本 ship-gate 的 `Open` / `FromReader` / `WriteAEP` / `WriteJSON` / `Set*` / getter。**签名 / 类型 / JSON 字段不可动**。
-   - **Stable（结构性 op）= 语义稳定、调用形态可变**：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等——**语义契约不变**（chunk byte-structural 等同 + 双版本 gate 持续过），但**调用形态可随物理分包从 scene 方法改为 facade 自由函数**（`comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`；因实现须住 serializer，Go 语义墙详 #3）。此类变更：**commit 标 BREAKING + 同步 `flightdeck/rules.md` § 命令一致性 API 表**，不算违约。核心 R/W 不享此豁免、仍签名稳定。
+   - **Stable（结构性 op）= 语义稳定、调用形态可变**：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等——**语义契约不变**（chunk byte-structural 等同 + 双版本 gate 持续过），但**调用形态可随物理分包从 scene 方法改为 facade 自由函数**（`comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`；因实现须住 serializer，Go 语义墙详 #3）。此类变更：**commit 标 BREAKING + 同步 `flightdeck/briefing.md` § 命令一致性 API 表**，不算违约。核心 R/W 不享此豁免、仍签名稳定。
    - **Alpha**: 显式标 alpha / deferred / 未 ship-gate 的新 API。可改可删，commit message 标 BREAKING。
    - review 时撤销新加但已知 broken 的 API 不算违反此约束。
    - 具体某符号属 Stable / Alpha + 验到几级 + gate + 边界 = **capindex 真相源**(源码内 `aep:cap` tag,CI 强制写面零漏标):`go run ./cmd/capindex -q "<词>"` 或 `docs/capabilities.{json,md}`。
@@ -72,7 +72,7 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 
 - **能力索引（写/做面真相源,秒查）**: `go run ./cmd/capindex -q "<词>"` / `docs/capabilities.{json,md}`（源码内 `aep:cap` tag,CI 强制零漏标。取代退役的 coverage.md 写能力清单）
 - 暂搁 / 不可达 / negative findings（capindex 不覆盖的残值）: 冷存 archive `coverage.md`（已退役为残值）；AE-attribute→Go-field 矩阵: 冷存 archive `coverage-detail.md`（参考；均在 `~/.flightdeck/projects/<slug>/archive/plans/`）
-- API 同步表（改任何 public API 必读）: `flightdeck/rules.md` § 命令一致性
+- API 同步表（改任何 public API 必读）: `flightdeck/briefing.md` § 命令一致性
 - 测试惯例 / 验证流程 / tmp_debug 工具表: `flightdeck/knowledge/workflow/verify.md`
 - JSX RE 工作流 + ship-gate + RE fixture 双轨 + Types-for-Adobe 参考: `flightdeck/knowledge/workflow/re-fixture.md`
 - 当前里程碑 / 进度 / 下一步: `flightdeck/cockpit.md`（不在此留存，避免状态漂移）

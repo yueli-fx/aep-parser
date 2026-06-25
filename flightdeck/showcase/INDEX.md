@@ -1,8 +1,8 @@
 # showcase/ — 从零产出示例总览
 
-每个子文件夹 = 一个**能力方向**的纯 Go 从零生成示例 + AE 实渲产物，供用户逐项审核。规则见 `rules.md` § Showcase + `checklists/showcase.md`。
+每个子文件夹 = 一个**能力方向**的纯 Go 从零生成示例 + AE 实渲产物，供用户逐项审核。规则见 `briefing.md` § Showcase + `knowledge/showcase/showcase.md`。
 
-> **lint 例外（by-design，勿当 drift）**：flightdeck 3.0 的 `KNOWN_FOLDERS` 硬编码、无 allowlist，故 `/flightdeck:walkaround` 与 `flightdeck_lint` 会**恒报**本目录 `unknown directory showcase/ under deck root` 的 stray WARNING。这是 schema 局限、非 deck drift——本目录是项目刻意采用的眼验设施（rules.md § Showcase）。**接受为已知项即可，勿删/勿移**：移动会断开 rules.md / CLAUDE.md / 各 gen.go / render.jsx 里引用的 `flightdeck/showcase/<方向>/` 路径。（背景见 commit 58ebeb8。）
+> **showcase/ 是项目刻意采用的眼验设施（非 deck drift）**：定义见 `briefing.md` § Showcase。最新 `/flightdeck:walkaround`（judgment-based）不再误报本目录；旧版硬编码 `KNOWN_FOLDERS` lint 可能仍报 `unknown directory showcase/` stray WARNING，接受为已知项即可。**勿删/勿移**：移动会断开 briefing.md / CLAUDE.md / 各 gen.go / render.jsx 里引用的 `flightdeck/showcase/<方向>/` 路径。（背景见 commit 58ebeb8。）
 
 **产物 gitignored**：`*.aep` / `*.png` 不进仓库；`INDEX.md` + `gen.go` + `render.jsx` tracked。干净 clone 后重生成：
 
@@ -13,7 +13,7 @@ go run ./flightdeck/showcase/<方向>            # 构建 <方向>.aep
 
 ## 状态说明（review-gate）
 
-**🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `rules.md` § Showcase）。
+**🔍 待review** = agent 已建 + AE 实渲 + 自己眼验，**等用户在真机打开 .aep 复核**；**✅ complete** = **用户真机验收过**。agent 不自标 complete（详 `briefing.md` § Showcase）。
 
 15 个 🖼 可视方向 ✅ complete（2026-06-14 用户真机逐个验收通过；gradient +radial 类型、expressions +四语汇 idiom 的增量同日复核通过）+ [3d-camera] ✅ complete（2026-06-15，3D 图层 + 相机：视差 + 透视 tumble）。**[shape-filters] 当前 🔍 待review**（2026-06-16 扩成 4×4，加 Wiggle 调制对比行 Points/Correlation，等真机复核翻回 complete）。📋 B 类读值档：4 个 from-scratch 可行已补，3 个 from-scratch 不可表达（见末节）。
 
