@@ -2,9 +2,9 @@
 
 Go 实现的 Adobe After Effects `.aep` 二进制解析器，对照 boltframe/aftereffects-aep-parser 重写 + 增量。**读取下限 AE 2020**。
 
-> 项目用 **flightdeck**（deck 在 `flightdeck/`）。会话入口由 SessionStart hook 自动注入接管指令；手动可跑 `/flightdeck:preflight`。第一件事：读 `flightdeck/cockpit.md`（状态/下一步）+ 各 `INDEX.md`。
+> 项目用 **flightdeck**（deck 在 `flightdeck/`）。会话入口由 SessionStart hook 自动注入接管指令；手动可跑 `/flightdeck:preflight`。第一件事：读 `flightdeck/cockpit.md`（状态/下一步）+ `flightdeck/rules.md`（house rules）+ 按需 derive-listing `flightdeck/knowledge/<域>/`。
 >
-> **本项目不使用 auto-memory 系统**（已于 2026-06-16 退役、迁入本 deck）。新知识只进 flightdeck（错误/陷阱→`incidents/`、可复用流程→`checklists/`、外部指针→`references/`、设计→`specs/`、能力状态→capindex `aep:cap` tag）或 CLAUDE.md（跨切面铁律/工作风格）。**不要写 memory 文件。**
+> **本项目不使用 auto-memory 系统**（已于 2026-06-16 退役、迁入本 deck）。新知识只进 flightdeck（陷阱/决策/参考 → `knowledge/<域>/`，文件开头带 routing header：trap=`# ⚠ 标题`、checklist=`# X checklist`、其余=决策/参考笔记；设计+计划 → `work/<effort>/`，完成移冷存 `~/.flightdeck/projects/<slug>/archive/`；vendored 外部资料→`references/`；能力状态→capindex `aep:cap` tag）或 CLAUDE.md（跨切面铁律/工作风格）。**不要写 memory 文件。**
 
 ## 数据流
 
@@ -25,23 +25,23 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 
 ## 硬约束（不可破）
 
-1. **写回 default 是 length-preserving**。改字段不准动 chunk 大小；少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。结构性 ops（NewComposition / NewShapeLayer / DeleteLayer 等）走 atomic invariants：warnings-as-failure + rollback to pre-call state + AE 双版本 ship-gate 验证。详 `incidents/ae25-acceptance-gate.md`。
+1. **写回 default 是 length-preserving**。改字段不准动 chunk 大小；少数 length-variable 例外（name / comment / expression / 字体名 / 文本字符串）`WriteAEP` 会重算父 LIST size + 内嵌 LIST btdk size header。结构性 ops（NewComposition / NewShapeLayer / DeleteLayer 等）走 atomic invariants：warnings-as-failure + rollback to pre-call state + AE 双版本 ship-gate 验证。详 `knowledge/workflow/ae25-acceptance-gate.md`。
 2. **public API 分级**：
    - **Stable（核心 R/W）**: 已通过双版本 ship-gate 的 `Open` / `FromReader` / `WriteAEP` / `WriteJSON` / `Set*` / getter。**签名 / 类型 / JSON 字段不可动**。
-   - **Stable（结构性 op）= 语义稳定、调用形态可变**：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等——**语义契约不变**（chunk byte-structural 等同 + 双版本 gate 持续过），但**调用形态可随物理分包从 scene 方法改为 facade 自由函数**（`comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`；因实现须住 serializer，Go 语义墙详 #3）。此类变更：**commit 标 BREAKING + 同步 `checklists/commits.md` API 表**，不算违约。核心 R/W 不享此豁免、仍签名稳定。
+   - **Stable（结构性 op）= 语义稳定、调用形态可变**：ship-gated 的 `New*` / `Delete*` / `Insert*` / `Move*` / `Duplicate*` / `Add*` / `Remove*` / `SetDimensionsSeparated` 等——**语义契约不变**（chunk byte-structural 等同 + 双版本 gate 持续过），但**调用形态可随物理分包从 scene 方法改为 facade 自由函数**（`comp.DeleteLayer(i)` → `aep.DeleteLayer(comp, i)`；因实现须住 serializer，Go 语义墙详 #3）。此类变更：**commit 标 BREAKING + 同步 `flightdeck/rules.md` § 命令一致性 API 表**，不算违约。核心 R/W 不享此豁免、仍签名稳定。
    - **Alpha**: 显式标 alpha / deferred / 未 ship-gate 的新 API。可改可删，commit message 标 BREAKING。
    - review 时撤销新加但已知 broken 的 API 不算违反此约束。
    - 具体某符号属 Stable / Alpha + 验到几级 + gate + 边界 = **capindex 真相源**(源码内 `aep:cap` tag,CI 强制写面零漏标):`go run ./cmd/capindex -q "<词>"` 或 `docs/capabilities.{json,md}`。
 3. **多包物理分层 `internal/{rifx,codec,scene,serializer}` + `aep` facade**，DAG 依赖单向、禁逆向/成环：
    - **rifx**（叶·通用 RIFX 树，不知 AEP 语义）← **codec**（纯值/字节编解码，禁 import 其它内部包）← **scene**（运行时模型 + accessor + writer 接口 + `WriteJSON`，仅可 import codec；chunk 耦合经 serializer 实现的 writer 接口倒置，**编译期不碰字节**）← **serializer**（`parse_`/`lower_`/`write_`/`back_`/`mutate_`，import scene+codec+rifx，**禁 import aep** 防环）← **aep**（薄 facade，**公共 API 全经此包**）。
    - 公共 R/W 方法（`WriteAEP`/`Set*`）= scene 方法经 writer 接口委托 serializer；结构性 op = facade 自由函数（详 #2）。
-   - 边界守卫：`internal/aep/arch_boundary_test.go`（AST import-DAG 断言，CI 强制）。各包职责细节 + 设计历程详 `specs/2026-06-07-v3-m8-physical-split-design.md`。
+   - 边界守卫：`internal/aep/arch_boundary_test.go`（AST import-DAG 断言，CI 强制）。各包职责细节 + 设计历程详冷存 archive `2026-06-07-v3-m8-physical-split-design.md`（`~/.flightdeck/projects/<slug>/archive/specs/`）。
 4. **嵌入资源目录命名复数**：`internal/serializer/templates/`（非 `template/`）。Go `//go:embed` 限制资源必须在 package 同目录或子目录——M8 物理分包后随 `lower_`/`mutate_` 居 serializer。
 5. **Opaque preservation**（V2.2 教训）：parser 未解的 chunk 必须 byte-identical round-trip。scene types 携带 opaque shard，serializer 原位重发。任何 "regenerate from scene" 路径必须保留它，否则 AE 会 silent-drop。
-6. **AE 接受 gate**：任何新结构性写路径（NewX / DeleteX / DuplicateX / V3 mutation API）必须跑 AE 2020 + AE 2025 双版本 ship-gate 才算 ship。详 `incidents/ae25-acceptance-gate.md` + `checklists/re-fixture.md` § GDI 自动化。
-7. **交付准则（什么算「能用」）**：只有经 AE 双版本 ship-gate 实测 PASS 的能力、且仅在其 gate 覆盖的**规模 + 组合**边界内，才可对外宣称「能用 / 可交付」。四条认知红线：(a) **Go round-trip 0 警告 ≠ AE 接受**（Go parser 宽松，只验字节读回，不验 AE 引擎消化——`SetExpression` 栽在这）；(b) **`Stable` 有覆盖边界**，超出规模/组合（如 gate 只验 2 关键帧、你用 13 个空间关键帧）即退回未验证；(c) **组合 / 端到端是独立交付项**，单点 gate 不为「从零拼完整工程」背书；(d) **「值 round-trip 绿」≠「渲染正确」**——gate 必须验到能力的「作用面」：**渲染类能力（颜色/opacity/可见效果）的 gate 必须验渲染像素**（render 一帧采样像素），只验值 round-trip = 假绿（shape 颜色栽在这：值全对、gate 全绿，AE 渲染成默认红）。演示 / 示例 / 对用户的能力描述**禁止**混入未验证能力（混入必须当场标红）。本库擅长「读真实 .aep + 局部改 + 写回 / 单点结构性写」，**不擅长从零拼复杂工程**（from-scratch 缺省略 / 表达式不认 / 规模未测）。全文详 `checklists/delivery-contract.md`。
+6. **AE 接受 gate**：任何新结构性写路径（NewX / DeleteX / DuplicateX / V3 mutation API）必须跑 AE 2020 + AE 2025 双版本 ship-gate 才算 ship。详 `knowledge/workflow/ae25-acceptance-gate.md` + `knowledge/workflow/re-fixture.md` § GDI 自动化。
+7. **交付准则（什么算「能用」）**：只有经 AE 双版本 ship-gate 实测 PASS 的能力、且仅在其 gate 覆盖的**规模 + 组合**边界内，才可对外宣称「能用 / 可交付」。四条认知红线：(a) **Go round-trip 0 警告 ≠ AE 接受**（Go parser 宽松，只验字节读回，不验 AE 引擎消化——`SetExpression` 栽在这）；(b) **`Stable` 有覆盖边界**，超出规模/组合（如 gate 只验 2 关键帧、你用 13 个空间关键帧）即退回未验证；(c) **组合 / 端到端是独立交付项**，单点 gate 不为「从零拼完整工程」背书；(d) **「值 round-trip 绿」≠「渲染正确」**——gate 必须验到能力的「作用面」：**渲染类能力（颜色/opacity/可见效果）的 gate 必须验渲染像素**（render 一帧采样像素），只验值 round-trip = 假绿（shape 颜色栽在这：值全对、gate 全绿，AE 渲染成默认红）。演示 / 示例 / 对用户的能力描述**禁止**混入未验证能力（混入必须当场标红）。本库擅长「读真实 .aep + 局部改 + 写回 / 单点结构性写」，**不擅长从零拼复杂工程**（from-scratch 缺省略 / 表达式不认 / 规模未测）。全文详 `knowledge/workflow/delivery-contract.md`。
 
-非显然内部不变量（gotcha；逐条详 `flightdeck/incidents/`，入口已加载其 INDEX）：TickRate per-composition（非全局）· Keyframe 两种字节布局必走 `layoutFor` · 所有 Set\* mutate 共享 chunk bytes（调用方自己锁）· chunk ID 大小写敏感（Tdb4 ≠ tdb4）。
+非显然内部不变量（gotcha；逐条详 `flightdeck/knowledge/<域>/` 的 `# ⚠` trap 文件，routing header 决定何时载入）：TickRate per-composition（非全局）· Keyframe 两种字节布局必走 `layoutFor` · 所有 Set\* mutate 共享 chunk bytes（调用方自己锁）· chunk ID 大小写敏感（Tdb4 ≠ tdb4）。
 
 ## 入口命令
 
@@ -49,9 +49,9 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - 单测: `go test ./internal/aep/ -run 'TestX' -v`
 - 能力查询（写/做面真相源）: `go run ./cmd/capindex -q "<词>"`（或 grep `docs/capabilities.json`）
 - **build 不落根目录**：跑工具优先 `go run ./cmd/<x>`；必须 build 时 `go build -o tmp_debug/bin/<x>`（`.gitignore` 已含 `*.exe`，但别在根目录裸 build 留垃圾）
-- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·**一次性 probe/渲染输出/scratch→`tmp_debug/` 或根 `tmp/`(gitignored，用完即删别留)**。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `incidents/` 后删探针。细则 `checklists/verify.md` § 工件该放哪。
+- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·**一次性 probe/渲染输出/scratch→`tmp_debug/` 或根 `tmp/`(gitignored，用完即删别留)**。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `knowledge/<域>/` 后删探针。细则 `knowledge/workflow/verify.md` § 工件该放哪。
 - **多行 commit message**（Bash 工具跑 bash 非 pwsh）：写临时文件 `git commit -F tmpfile`，**勿**用 `@'...'@` here-string（会被 mangle）
-- 详细操作（tmp_debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/checklists/`
+- 详细操作（tmp_debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/knowledge/workflow/`
 
 ## 工作风格
 
@@ -64,15 +64,15 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - **调试纪律**：外部校验器（AE）以**相同错误信号**连拒多个结构性修复 → 停止堆叠，转**最小失败 bisection**（已知 PASS baseline 逐特征加到首个 FAIL）。错误信号每次变化才继续 stack。
 - **渲染类 bug 先看图**：拿到渲染帧先 `Read` PNG 目视（浮雕/overlay/flat 等模式信息 > 像素数值占卜），再做数值断言；showcase 先自渲染 + Read png 自验再呈用户（不替代用户实机验收）。
 - **工具链才是真相源**：判断编译/测试只信 `go build`/`go vet`/`go test`，**不信** IDE/`<new-diagnostics>` 面板（subagent 多文件编辑期会 stale 报假 ✘）或 `gofmt -l`（本仓 core.autocrlf=true，每个 .go 都误报——比 LF/index 形或直接信 go vet）。
-- **AE ship-gate = agent 自跑** `scripts/ae_run.ps1`（无人值守，exit 0/1/2/8），别默认让用户手开 AE；cold-start exit-2 先 warm-retry（≤3 次）+ 跑已知-good fixture 作对照，别当真 FAIL（详 `checklists/re-fixture.md`）。
+- **AE ship-gate = agent 自跑** `scripts/ae_run.ps1`（无人值守，exit 0/1/2/8），别默认让用户手开 AE；cold-start exit-2 先 warm-retry（≤3 次）+ 跑已知-good fixture 作对照，别当真 FAIL（详 `knowledge/workflow/re-fixture.md`）。
 - **真相源优先级**：代码 + ship-gate test > capindex tag（`go run ./cmd/capindex -q`）> docs > spec 正文/backlog（最易漂）。对齐看板前 grep 代码核实，别照搬文档。
 - **内部实现无注释**，除非 WHY 不明显；但**导出 API 的 doc comment = 文档源**（英文为源，`cmd/docgen` 从中生成 `docs/*.md`）。行内实现注释仍禁；导出符号上方的 doc comment 是文档载体，不算违反。
 
 ## 文档地图
 
 - **能力索引（写/做面真相源,秒查）**: `go run ./cmd/capindex -q "<词>"` / `docs/capabilities.{json,md}`（源码内 `aep:cap` tag,CI 强制零漏标。取代退役的 coverage.md 写能力清单）
-- 暂搁 / 不可达 / negative findings（capindex 不覆盖的残值）: `flightdeck/plans/coverage.md`（已退役为残值）；AE-attribute→Go-field 矩阵: `coverage-detail.md`（参考）
-- API 同步表（改任何 public API 必读）: `flightdeck/checklists/commits.md` § 命令一致性
-- 测试惯例 / 验证流程 / tmp_debug 工具表: `flightdeck/checklists/verify.md`
-- JSX RE 工作流 + ship-gate + RE fixture 双轨 + Types-for-Adobe 参考: `flightdeck/checklists/re-fixture.md`
+- 暂搁 / 不可达 / negative findings（capindex 不覆盖的残值）: 冷存 archive `coverage.md`（已退役为残值）；AE-attribute→Go-field 矩阵: 冷存 archive `coverage-detail.md`（参考；均在 `~/.flightdeck/projects/<slug>/archive/plans/`）
+- API 同步表（改任何 public API 必读）: `flightdeck/rules.md` § 命令一致性
+- 测试惯例 / 验证流程 / tmp_debug 工具表: `flightdeck/knowledge/workflow/verify.md`
+- JSX RE 工作流 + ship-gate + RE fixture 双轨 + Types-for-Adobe 参考: `flightdeck/knowledge/workflow/re-fixture.md`
 - 当前里程碑 / 进度 / 下一步: `flightdeck/cockpit.md`（不在此留存，避免状态漂移）
