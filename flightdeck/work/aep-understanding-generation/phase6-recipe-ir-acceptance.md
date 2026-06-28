@@ -180,6 +180,36 @@ Sixth follow-up completed:
     - metadata: status `ok`, AE `25.1x68`
     - PNG outputs: `f000000.png`, `f000060.png`, `f000120.png`
 
+Seventh follow-up completed:
+
+- Text recipes now support a first static text-style slice:
+  - `text_style.font_size` sets `Layer.SetRunFontSize`.
+  - `text_style.tracking` sets `Layer.SetRunTracking`.
+  - `text_style.justification` sets `Layer.SetParagraphJustification`.
+- Optional `run_index` and `paragraph_index` default to `0`; validation
+  rejects negative indexes, non-positive font sizes, and unsupported
+  justifications.
+- `expected_profile.text_styles[]` can assert font size, tracking, and
+  paragraph justification for a named text layer. Justification comparison is
+  enum-like and case-insensitive because profile display values are title case
+  (`Center`) while recipe input is lowercase (`center`).
+- `examples/recipes/minimal-text-shape.json` now styles the `Title` layer and
+  asserts those style values in the embedded profile contract.
+- Verification:
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-textstyle.aep -json` returned
+    valid and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request: `tmp_debug/aeoracle/minimal_text_shape_textstyle/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_textstyle/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs: `f000000.png`, `f000060.png`, `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices,
-starting with text style fields, expression / keyframe coverage, or additional
-shape filters, each gated by embedded profile checks and render-oracle evidence.
+starting with more text style fields, expression / keyframe coverage, or
+additional shape filters, each gated by embedded profile checks and
+render-oracle evidence.

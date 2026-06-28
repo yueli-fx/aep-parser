@@ -116,6 +116,44 @@ func TestValidateReportsShapeDetailCapabilities(t *testing.T) {
 	assertCapability(t, report, "FillNode.SetOpacity")
 }
 
+func TestValidateReportsTextStyleCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
+		FontSize:      ptr(96),
+		Tracking:      ptr(120),
+		Justification: "center",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "Layer.SetRunFontSize")
+	assertCapability(t, report, "Layer.SetRunTracking")
+	assertCapability(t, report, "Layer.SetParagraphJustification")
+}
+
+func TestValidateRejectsInvalidTextStyle(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
+		RunIndex:       -1,
+		ParagraphIndex: -1,
+		FontSize:       ptr(0),
+		Justification:  "middle",
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_text_style_run_index")
+	assertRefusal(t, report, "invalid_text_style_paragraph_index")
+	assertRefusal(t, report, "invalid_text_font_size")
+	assertRefusal(t, report, "invalid_text_justification")
+}
+
 func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Position = []float64{12}

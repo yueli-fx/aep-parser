@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 
 	aep "github.com/example/aep-parser/internal/aep"
 	"github.com/example/aep-parser/internal/profile"
@@ -93,7 +94,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
 		len(expected.Effects) > 0 ||
-		len(expected.Properties) > 0
+		len(expected.Properties) > 0 ||
+		len(expected.TextStyles) > 0
 }
 
 func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []ProfileCheck {
@@ -155,6 +157,33 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		passed := profileValueEqual(expectedProp.Value, prop.StaticValue)
 		add(propPath, expectedProp.Value, prop.StaticValue, passed)
 	}
+	for i, expectedStyle := range expected.TextStyles {
+		stylePath := fmt.Sprintf("expected_profile.text_styles[%d]", i)
+		layer := findProfileLayer(prof, expectedStyle.LayerName)
+		if layer == nil || layer.Text == nil {
+			add(stylePath, "text layer", nil, false)
+			continue
+		}
+		if expectedStyle.FontSize != nil {
+			path := stylePath + ".font_size"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.FontSize
+			})
+			add(path, *expectedStyle.FontSize, actual, ok && math.Abs(actual-*expectedStyle.FontSize) < 1e-9)
+		}
+		if expectedStyle.Tracking != nil {
+			path := stylePath + ".tracking"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.Tracking
+			})
+			add(path, *expectedStyle.Tracking, actual, ok && math.Abs(actual-*expectedStyle.Tracking) < 1e-9)
+		}
+		if expectedStyle.Justification != "" {
+			path := stylePath + ".justification"
+			actual, ok := profileParagraphJustification(layer.Text.Paragraphs, expectedStyle.ParagraphIndex)
+			add(path, expectedStyle.Justification, actual, ok && strings.EqualFold(actual, expectedStyle.Justification))
+		}
+	}
 	return checks
 }
 
@@ -171,15 +200,23 @@ func countProfileLayers(prof *profile.Profile, include func(profile.Layer) bool)
 }
 
 func findProfileEffect(prof *profile.Profile, layerName, matchName string) *profile.Effect {
+	layer := findProfileLayer(prof, layerName)
+	if layer == nil {
+		return nil
+	}
+	for i := range layer.Effects {
+		if layer.Effects[i].MatchName == matchName {
+			return &layer.Effects[i]
+		}
+	}
+	return nil
+}
+
+func findProfileLayer(prof *profile.Profile, layerName string) *profile.Layer {
 	for _, comp := range prof.Comps {
-		for _, layer := range comp.Layers {
-			if layer.Name != layerName {
-				continue
-			}
-			for i := range layer.Effects {
-				if layer.Effects[i].MatchName == matchName {
-					return &layer.Effects[i]
-				}
+		for i := range comp.Layers {
+			if comp.Layers[i].Name == layerName {
+				return &comp.Layers[i]
 			}
 		}
 	}
@@ -203,22 +240,33 @@ func findProfileParam(params []profile.Property, matchName string) *profile.Prop
 }
 
 func findProfileLayerProperty(prof *profile.Profile, layerName, matchName string) *profile.Property {
-	for _, comp := range prof.Comps {
-		for _, layer := range comp.Layers {
-			if layer.Name != layerName {
-				continue
-			}
-			if prop := findProfileParam(layer.Properties, matchName); prop != nil {
-				return prop
-			}
-			for i := range layer.Shapes {
-				if prop := findProfileParam(layer.Shapes[i].Properties, matchName); prop != nil {
-					return prop
-				}
-			}
+	layer := findProfileLayer(prof, layerName)
+	if layer == nil {
+		return nil
+	}
+	if prop := findProfileParam(layer.Properties, matchName); prop != nil {
+		return prop
+	}
+	for i := range layer.Shapes {
+		if prop := findProfileParam(layer.Shapes[i].Properties, matchName); prop != nil {
+			return prop
 		}
 	}
 	return nil
+}
+
+func profileRunFloat(runs []profile.TextStyleRun, index int, value func(profile.TextStyleRun) float64) (float64, bool) {
+	if index < 0 || index >= len(runs) {
+		return 0, false
+	}
+	return value(runs[index]), true
+}
+
+func profileParagraphJustification(paragraphs []profile.TextParagraph, index int) (string, bool) {
+	if index < 0 || index >= len(paragraphs) {
+		return "", false
+	}
+	return paragraphs[index].Justification, true
 }
 
 func profileValueEqual(expected, actual any) bool {
@@ -342,6 +390,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 				return fmt.Errorf("recipe: text layer %q set text: %w", spec.Name, err)
 			}
 		}
+		if spec.TextStyle != nil {
+			if err := applyTextStyle(l, *spec.TextStyle); err != nil {
+				return fmt.Errorf("recipe: text layer %q style: %w", spec.Name, err)
+			}
+		}
 		layer = l
 	case "shape":
 		l, err := aep.NewShapeLayer(comp, spec.Name)
@@ -373,6 +426,42 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 		}
 	}
 	return nil
+}
+
+func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
+	if spec.FontSize != nil {
+		if err := layer.SetRunFontSize(spec.RunIndex, *spec.FontSize); err != nil {
+			return err
+		}
+	}
+	if spec.Tracking != nil {
+		if err := layer.SetRunTracking(spec.RunIndex, *spec.Tracking); err != nil {
+			return err
+		}
+	}
+	if spec.Justification != "" {
+		justification, err := textJustification(spec.Justification)
+		if err != nil {
+			return err
+		}
+		if err := layer.SetParagraphJustification(spec.ParagraphIndex, justification); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func textJustification(value string) (aep.TextJustification, error) {
+	switch value {
+	case "left":
+		return aep.TextJustifyLeft, nil
+	case "right":
+		return aep.TextJustifyRight, nil
+	case "center":
+		return aep.TextJustifyCenter, nil
+	default:
+		return 0, fmt.Errorf("unsupported justification %q", value)
+	}
 }
 
 func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {

@@ -121,12 +121,16 @@ Done:
   rectangle roundness, and fill opacity. The updated shape example again passed
   `go test ./...`, `go vet ./...`, profile checks, and an AE 2025 render oracle
   gate.
+- First text-style recipe slice is implemented for font size, tracking, and
+  paragraph justification, with `expected_profile.text_styles[]` checks. The
+  updated shape/text example passed `go test ./...`, `go vet ./...`, profile
+  checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are text style fields, expression / keyframe coverage, or
+  candidates are more text style fields, expression / keyframe coverage, or
   additional shape filters. Do not start automated correction loops.
 
 ## Open questions
@@ -135,5 +139,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: text style, transform
+- Which recipe field family should enter next: more text style, transform
   keyframe/ease, expression support, or shape filters.

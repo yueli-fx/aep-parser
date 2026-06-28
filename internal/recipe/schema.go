@@ -30,12 +30,21 @@ type CompSpec struct {
 }
 
 type Layer struct {
-	Type      string     `json:"type"`
-	Name      string     `json:"name"`
-	Text      string     `json:"text,omitempty"`
-	Shape     *ShapeSpec `json:"shape,omitempty"`
-	Transform Transform  `json:"transform,omitempty"`
-	Effects   []Effect   `json:"effects,omitempty"`
+	Type      string         `json:"type"`
+	Name      string         `json:"name"`
+	Text      string         `json:"text,omitempty"`
+	TextStyle *TextStyleSpec `json:"text_style,omitempty"`
+	Shape     *ShapeSpec     `json:"shape,omitempty"`
+	Transform Transform      `json:"transform,omitempty"`
+	Effects   []Effect       `json:"effects,omitempty"`
+}
+
+type TextStyleSpec struct {
+	RunIndex       int      `json:"run_index,omitempty"`
+	ParagraphIndex int      `json:"paragraph_index,omitempty"`
+	FontSize       *float64 `json:"font_size,omitempty"`
+	Tracking       *float64 `json:"tracking,omitempty"`
+	Justification  string   `json:"justification,omitempty"`
 }
 
 type ShapeSpec struct {
@@ -79,18 +88,28 @@ type VectorKeyframe struct {
 }
 
 type ExpectedProfile struct {
-	CompCount       *int               `json:"comp_count,omitempty"`
-	LayerCount      *int               `json:"layer_count,omitempty"`
-	TextLayerCount  *int               `json:"text_layer_count,omitempty"`
-	ShapeLayerCount *int               `json:"shape_layer_count,omitempty"`
-	Effects         []ExpectedEffect   `json:"effects,omitempty"`
-	Properties      []ExpectedProperty `json:"properties,omitempty"`
+	CompCount       *int                `json:"comp_count,omitempty"`
+	LayerCount      *int                `json:"layer_count,omitempty"`
+	TextLayerCount  *int                `json:"text_layer_count,omitempty"`
+	ShapeLayerCount *int                `json:"shape_layer_count,omitempty"`
+	Effects         []ExpectedEffect    `json:"effects,omitempty"`
+	Properties      []ExpectedProperty  `json:"properties,omitempty"`
+	TextStyles      []ExpectedTextStyle `json:"text_styles,omitempty"`
 }
 
 type ExpectedProperty struct {
 	LayerName string `json:"layer_name"`
 	MatchName string `json:"match_name"`
 	Value     any    `json:"value,omitempty"`
+}
+
+type ExpectedTextStyle struct {
+	LayerName      string   `json:"layer_name"`
+	RunIndex       int      `json:"run_index,omitempty"`
+	ParagraphIndex int      `json:"paragraph_index,omitempty"`
+	FontSize       *float64 `json:"font_size,omitempty"`
+	Tracking       *float64 `json:"tracking,omitempty"`
+	Justification  string   `json:"justification,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -249,6 +268,24 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			addRefusal("invalid_expected_profile", propPath+".value", "expected property value must be a number, boolean, or numeric array")
 		}
 	}
+	for i, style := range expected.TextStyles {
+		stylePath := fmt.Sprintf("expected_profile.text_styles[%d]", i)
+		if style.LayerName == "" {
+			addRefusal("invalid_expected_profile", stylePath+".layer_name", "layer_name is required")
+		}
+		if style.RunIndex < 0 {
+			addRefusal("invalid_expected_profile", stylePath+".run_index", "run_index must be non-negative")
+		}
+		if style.ParagraphIndex < 0 {
+			addRefusal("invalid_expected_profile", stylePath+".paragraph_index", "paragraph_index must be non-negative")
+		}
+		if style.FontSize != nil && *style.FontSize <= 0 {
+			addRefusal("invalid_expected_profile", stylePath+".font_size", "font_size must be positive")
+		}
+		if style.Justification != "" && !validTextJustification(style.Justification) {
+			addRefusal("invalid_expected_profile", stylePath+".justification", "justification must be left, right, or center")
+		}
+	}
 }
 
 func validateLayer(layer Layer, layerPath string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
@@ -267,6 +304,13 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.Name == "" {
 		addRefusal("missing_layer_name", layerPath+".name", "layer name is required")
+	}
+	if layer.TextStyle != nil {
+		if layer.Type != "text" {
+			addRefusal("text_style_on_non_text_layer", layerPath+".text_style", "text_style is only supported on text layers")
+		} else {
+			validateTextStyle(*layer.TextStyle, layerPath+".text_style", recordCapability, addRefusal)
+		}
 	}
 	if layer.Type == "shape" && layer.Shape != nil {
 		switch layer.Shape.Kind {
@@ -363,6 +407,39 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("unsupported_effect_param_value", paramPath+".value", "effect param value must be a number, boolean, or numeric array")
 			}
 		}
+	}
+}
+
+func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	if style.RunIndex < 0 {
+		addRefusal("invalid_text_style_run_index", stylePath+".run_index", "run_index must be non-negative")
+	}
+	if style.ParagraphIndex < 0 {
+		addRefusal("invalid_text_style_paragraph_index", stylePath+".paragraph_index", "paragraph_index must be non-negative")
+	}
+	if style.FontSize != nil {
+		recordCapability("Layer.SetRunFontSize", stylePath+".font_size")
+		if *style.FontSize <= 0 {
+			addRefusal("invalid_text_font_size", stylePath+".font_size", "font_size must be positive")
+		}
+	}
+	if style.Tracking != nil {
+		recordCapability("Layer.SetRunTracking", stylePath+".tracking")
+	}
+	if style.Justification != "" {
+		recordCapability("Layer.SetParagraphJustification", stylePath+".justification")
+		if !validTextJustification(style.Justification) {
+			addRefusal("invalid_text_justification", stylePath+".justification", "justification must be left, right, or center")
+		}
+	}
+}
+
+func validTextJustification(value string) bool {
+	switch value {
+	case "left", "right", "center":
+		return true
+	default:
+		return false
 	}
 }
 

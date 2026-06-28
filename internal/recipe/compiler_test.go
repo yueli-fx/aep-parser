@@ -107,6 +107,45 @@ func TestCompileToFileSetsShapeDetail(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Fill Opacity", 45.0)
 }
 
+func TestCompileToFileSetsTextStyle(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
+		FontSize:      ptr(96),
+		Tracking:      ptr(120),
+		Justification: "center",
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Title")
+	if layer.Text == nil || len(layer.Text.Runs) == 0 || len(layer.Text.Paragraphs) == 0 {
+		t.Fatalf("text profile missing runs/paragraphs: %+v", layer.Text)
+	}
+	if got := layer.Text.Runs[0].FontSize; got != 96 {
+		t.Fatalf("FontSize = %v, want 96", got)
+	}
+	if got := layer.Text.Runs[0].Tracking; got != 120 {
+		t.Fatalf("Tracking = %v, want 120", got)
+	}
+	if got := layer.Text.Paragraphs[0].Justification; got != "Center" {
+		t.Fatalf("Justification = %q, want Center", got)
+	}
+}
+
 func TestCompileToFileCreatesParentDirectory(t *testing.T) {
 	outPath := filepath.Join(t.TempDir(), "nested", "recipe.aep")
 
@@ -278,6 +317,37 @@ func TestCompileToFileChecksExpectedLayerPropertyProfile(t *testing.T) {
 	}
 	assertProfileCheck(t, report, "expected_profile.properties[0]", true)
 	assertProfileCheck(t, report, "expected_profile.properties[1]", true)
+}
+
+func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
+		FontSize:      ptr(96),
+		Tracking:      ptr(120),
+		Justification: "center",
+	}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		TextStyles: []recipe.ExpectedTextStyle{{
+			LayerName:      "Title",
+			RunIndex:       0,
+			ParagraphIndex: 0,
+			FontSize:       ptr(96),
+			Tracking:       ptr(120),
+			Justification:  "center",
+		}},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].font_size", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].tracking", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].justification", true)
 }
 
 func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {

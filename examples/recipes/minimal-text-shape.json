@@ -16,6 +16,11 @@
           "type": "text",
           "name": "Title",
           "text": "BOOYAH",
+          "text_style": {
+            "font_size": 96,
+            "tracking": 120,
+            "justification": "center"
+          },
           "transform": {
             "position": [960, 540],
             "scale": [100, 100],
@@ -80,6 +85,14 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector Fill Opacity",
         "value": 45
+      }
+    ],
+    "text_styles": [
+      {
+        "layer_name": "Title",
+        "font_size": 96,
+        "tracking": 120,
+        "justification": "center"
       }
     ]
   }
