@@ -92,7 +92,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
-		len(expected.Effects) > 0
+		len(expected.Effects) > 0 ||
+		len(expected.Properties) > 0
 }
 
 func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []ProfileCheck {
@@ -144,6 +145,16 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			add(paramPath, expectedParam.Value, param.StaticValue, passed)
 		}
 	}
+	for i, expectedProp := range expected.Properties {
+		propPath := fmt.Sprintf("expected_profile.properties[%d]", i)
+		prop := findProfileLayerProperty(prof, expectedProp.LayerName, expectedProp.MatchName)
+		if prop == nil {
+			add(propPath, expectedProp.Value, nil, false)
+			continue
+		}
+		passed := profileValueEqual(expectedProp.Value, prop.StaticValue)
+		add(propPath, expectedProp.Value, prop.StaticValue, passed)
+	}
 	return checks
 }
 
@@ -186,6 +197,25 @@ func findProfileParam(params []profile.Property, matchName string) *profile.Prop
 	for i := range params {
 		if params[i].MatchName == matchName {
 			return &params[i]
+		}
+	}
+	return nil
+}
+
+func findProfileLayerProperty(prof *profile.Profile, layerName, matchName string) *profile.Property {
+	for _, comp := range prof.Comps {
+		for _, layer := range comp.Layers {
+			if layer.Name != layerName {
+				continue
+			}
+			if prop := findProfileParam(layer.Properties, matchName); prop != nil {
+				return prop
+			}
+			for i := range layer.Shapes {
+				if prop := findProfileParam(layer.Shapes[i].Properties, matchName); prop != nil {
+					return prop
+				}
+			}
 		}
 	}
 	return nil
@@ -386,6 +416,28 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			return err
 		}
 	}
+	if shape.Stroke != nil {
+		stroke, err := group.AddStroke()
+		if err != nil {
+			return err
+		}
+		if len(shape.Stroke.Color) >= 3 {
+			color := rgbaColor(shape.Stroke.Color)
+			if err := stroke.SetColor(color); err != nil {
+				return err
+			}
+		}
+		if shape.Stroke.Width != nil {
+			if err := stroke.SetWidth(*shape.Stroke.Width); err != nil {
+				return err
+			}
+		}
+		if shape.Stroke.Opacity != nil {
+			if err := stroke.SetOpacity(*shape.Stroke.Opacity); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -429,4 +481,17 @@ func toUnitColor(v float64) float64 {
 		return v / 255
 	}
 	return v
+}
+
+func rgbaColor(values []float64) [4]float64 {
+	alpha := 1.0
+	if len(values) >= 4 {
+		alpha = toUnitColor(values[3])
+	}
+	return [4]float64{
+		toUnitColor(values[0]),
+		toUnitColor(values[1]),
+		toUnitColor(values[2]),
+		alpha,
+	}
 }

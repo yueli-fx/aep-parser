@@ -49,6 +49,36 @@ func TestCompileMinimalTextShapeRecipeBuildsProfile(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsShapeStroke(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
+		Color:   []float64{255, 0, 0, 255},
+		Width:   ptr(6),
+		Opacity: ptr(80),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Color", []float64{255, 255, 0, 0})
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Width", 6.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Opacity", 80.0)
+}
+
 func TestCompileToFileCreatesParentDirectory(t *testing.T) {
 	outPath := filepath.Join(t.TempDir(), "nested", "recipe.aep")
 
@@ -197,6 +227,31 @@ func TestCompileToFileChecksExpectedEffectParamProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.effects[0].params[0]", true)
 }
 
+func TestCompileToFileChecksExpectedLayerPropertyProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
+		Color: []float64{255, 0, 0, 255},
+		Width: ptr(6),
+	}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Properties: []recipe.ExpectedProperty{
+			{LayerName: "Underline", MatchName: "ADBE Vector Stroke Color", Value: []float64{255, 255, 0, 0}},
+			{LayerName: "Underline", MatchName: "ADBE Vector Stroke Width", Value: 6.0},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.properties[0]", true)
+	assertProfileCheck(t, report, "expected_profile.properties[1]", true)
+}
+
 func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {
 	t.Helper()
 	for _, param := range params {
@@ -210,6 +265,61 @@ func assertParamValue(t *testing.T, params []profile.Property, matchName string,
 		return
 	}
 	t.Fatalf("param %q not found in %+v", matchName, params)
+}
+
+func findProfileLayer(t *testing.T, prof *profile.Profile, name string) profile.Layer {
+	t.Helper()
+	for _, comp := range prof.Comps {
+		for _, layer := range comp.Layers {
+			if layer.Name == name {
+				return layer
+			}
+		}
+	}
+	t.Fatalf("layer %q not found in %+v", name, prof.Comps)
+	return profile.Layer{}
+}
+
+func assertLayerPropertyValue(t *testing.T, layer profile.Layer, matchName string, want any) {
+	t.Helper()
+	for _, prop := range layer.Properties {
+		if prop.MatchName == matchName {
+			assertProfileValue(t, matchName, prop.StaticValue, want)
+			return
+		}
+	}
+	for _, shape := range layer.Shapes {
+		for _, prop := range shape.Properties {
+			if prop.MatchName == matchName {
+				assertProfileValue(t, matchName, prop.StaticValue, want)
+				return
+			}
+		}
+	}
+	t.Fatalf("property %q not found on layer %+v", matchName, layer)
+}
+
+func assertProfileValue(t *testing.T, label string, got, want any) {
+	t.Helper()
+	switch want := want.(type) {
+	case float64:
+		gotFloat, ok := got.(float64)
+		if !ok || gotFloat != want {
+			t.Fatalf("%s StaticValue = %v, want %v", label, got, want)
+		}
+	case []float64:
+		gotSlice, ok := got.([]float64)
+		if !ok || len(gotSlice) != len(want) {
+			t.Fatalf("%s StaticValue = %v, want %v", label, got, want)
+		}
+		for i := range want {
+			if gotSlice[i] != want[i] {
+				t.Fatalf("%s StaticValue = %v, want %v", label, got, want)
+			}
+		}
+	default:
+		t.Fatalf("unsupported want type %T", want)
+	}
 }
 
 func assertProfileCheck(t *testing.T, report recipe.Report, path string, passed bool) {

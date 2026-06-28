@@ -28,7 +28,12 @@
           "shape": {
             "kind": "rect",
             "size": [640, 12],
-            "fill_color": [255, 255, 255]
+            "fill_color": [255, 255, 255],
+            "stroke": {
+              "color": [255, 0, 0, 255],
+              "width": 6,
+              "opacity": 80
+            }
           },
           "transform": {
             "position": [960, 650]
@@ -41,6 +46,23 @@
     "comp_count": 1,
     "layer_count": 2,
     "text_layer_count": 1,
-    "shape_layer_count": 1
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Stroke Color",
+        "value": [255, 255, 0, 0]
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Stroke Width",
+        "value": 6
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Stroke Opacity",
+        "value": 80
+      }
+    ]
   }
 }

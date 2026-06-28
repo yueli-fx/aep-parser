@@ -81,6 +81,43 @@ func TestValidateReportsUsedCapabilities(t *testing.T) {
 	}
 }
 
+func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
+		Color:   []float64{255, 0, 0, 255},
+		Width:   ptr(6),
+		Opacity: ptr(80),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddStroke")
+	assertCapability(t, report, "StrokeNode.SetColor")
+	assertCapability(t, report, "StrokeNode.SetWidth")
+	assertCapability(t, report, "StrokeNode.SetOpacity")
+}
+
+func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
+		Color:   []float64{255, 0},
+		Width:   ptr(-1),
+		Opacity: ptr(101),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_stroke_color")
+	assertRefusal(t, report, "invalid_shape_stroke_width")
+	assertRefusal(t, report, "invalid_shape_stroke_opacity")
+}
+
 func TestValidateAcceptsSupportedEffects(t *testing.T) {
 	effects := aep.SupportedEffects()
 	if len(effects) == 0 {

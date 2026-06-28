@@ -118,7 +118,40 @@ Fourth follow-up completed:
   - metadata: status `ok`, AE `25.1x68`
   - PNG outputs: `f000000.png`, `f000030.png`, `f000060.png`
 
+Fifth follow-up completed:
+
+- Shape recipes now support static stroke controls:
+  - `shape.stroke.color` accepts 3/4-channel recipe RGBA color values.
+  - `shape.stroke.width` sets `StrokeNode.SetWidth`.
+  - `shape.stroke.opacity` sets `StrokeNode.SetOpacity`.
+- `internal/recipe` validates stroke color arity/range, non-negative width,
+  and opacity in `0..100`, records these capabilities:
+  - `VectorGroup.AddStroke`
+  - `StrokeNode.SetColor`
+  - `StrokeNode.SetWidth`
+  - `StrokeNode.SetOpacity`
+- `expected_profile.properties[]` can now assert static profile properties on
+  a named layer. The lookup covers both layer-level properties and primitive
+  shape properties.
+- `examples/recipes/minimal-text-shape.json` now includes a red stroke on the
+  underline and asserts stroke color/width/opacity via embedded profile checks.
+  Note: profile color static values are read back in AE profile order; the
+  recipe RGBA red `[255, 0, 0, 255]` appears in the profile as
+  `[255, 255, 0, 0]`.
+- Verification:
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-stroke.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request: `tmp_debug/aeoracle/minimal_text_shape_stroke/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_stroke/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs: `f000000.png`, `f000060.png`, `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices,
-starting with richer shape/text controls, text style fields, or expression /
-keyframe coverage, each gated by embedded profile checks and render-oracle
-evidence.
+starting with more shape controls, text style fields, or expression / keyframe
+coverage, each gated by embedded profile checks and render-oracle evidence.

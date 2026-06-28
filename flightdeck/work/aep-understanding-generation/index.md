@@ -113,12 +113,16 @@ Done:
   reports `profile_checks`, and refuses final output on mismatch. Both recipe
   examples now carry self-contained profile contracts; the effect-contract
   output passed AE 2025 render oracle.
+- Shape recipe stroke controls are implemented for static color/width/opacity.
+  `expected_profile.properties[]` can assert static layer/shape property values,
+  and the updated shape example passed `go test ./...`, `go vet ./...`, profile
+  checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are richer shape/text controls, text style fields, or expression /
+  candidates are more shape controls, text style fields, or expression /
   keyframe coverage. Do not start automated correction loops.
 
 ## Open questions
@@ -127,5 +131,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: text style, shape stroke/detail,
-  transform keyframe/ease, or expression support.
+- Which recipe field family should enter next: text style, additional shape
+  detail, transform keyframe/ease, or expression support.

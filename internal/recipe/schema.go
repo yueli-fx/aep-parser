@@ -39,9 +39,16 @@ type Layer struct {
 }
 
 type ShapeSpec struct {
-	Kind      string    `json:"kind"`
-	Size      []float64 `json:"size,omitempty"`
-	FillColor []float64 `json:"fill_color,omitempty"`
+	Kind      string      `json:"kind"`
+	Size      []float64   `json:"size,omitempty"`
+	FillColor []float64   `json:"fill_color,omitempty"`
+	Stroke    *StrokeSpec `json:"stroke,omitempty"`
+}
+
+type StrokeSpec struct {
+	Color   []float64 `json:"color,omitempty"`
+	Width   *float64  `json:"width,omitempty"`
+	Opacity *float64  `json:"opacity,omitempty"`
 }
 
 type Effect struct {
@@ -69,11 +76,18 @@ type VectorKeyframe struct {
 }
 
 type ExpectedProfile struct {
-	CompCount       *int             `json:"comp_count,omitempty"`
-	LayerCount      *int             `json:"layer_count,omitempty"`
-	TextLayerCount  *int             `json:"text_layer_count,omitempty"`
-	ShapeLayerCount *int             `json:"shape_layer_count,omitempty"`
-	Effects         []ExpectedEffect `json:"effects,omitempty"`
+	CompCount       *int               `json:"comp_count,omitempty"`
+	LayerCount      *int               `json:"layer_count,omitempty"`
+	TextLayerCount  *int               `json:"text_layer_count,omitempty"`
+	ShapeLayerCount *int               `json:"shape_layer_count,omitempty"`
+	Effects         []ExpectedEffect   `json:"effects,omitempty"`
+	Properties      []ExpectedProperty `json:"properties,omitempty"`
+}
+
+type ExpectedProperty struct {
+	LayerName string `json:"layer_name"`
+	MatchName string `json:"match_name"`
+	Value     any    `json:"value,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -220,6 +234,18 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			}
 		}
 	}
+	for i, prop := range expected.Properties {
+		propPath := fmt.Sprintf("expected_profile.properties[%d]", i)
+		if prop.LayerName == "" {
+			addRefusal("invalid_expected_profile", propPath+".layer_name", "layer_name is required")
+		}
+		if prop.MatchName == "" {
+			addRefusal("invalid_expected_profile", propPath+".match_name", "property match_name is required")
+		}
+		if !validEffectParamValue(prop.Value) {
+			addRefusal("invalid_expected_profile", propPath+".value", "expected property value must be a number, boolean, or numeric array")
+		}
+	}
 }
 
 func validateLayer(layer Layer, layerPath string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
@@ -252,6 +278,26 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if len(layer.Shape.FillColor) > 0 {
 			recordCapability("FillNode.SetColor", layerPath+".shape.fill_color")
+		}
+		if layer.Shape.Stroke != nil {
+			strokePath := layerPath + ".shape.stroke"
+			recordCapability("VectorGroup.AddStroke", strokePath)
+			if len(layer.Shape.Stroke.Color) > 0 {
+				recordCapability("StrokeNode.SetColor", strokePath+".color")
+				validateColor(layer.Shape.Stroke.Color, strokePath+".color", "invalid_shape_stroke_color", addRefusal)
+			}
+			if layer.Shape.Stroke.Width != nil {
+				recordCapability("StrokeNode.SetWidth", strokePath+".width")
+				if *layer.Shape.Stroke.Width < 0 {
+					addRefusal("invalid_shape_stroke_width", strokePath+".width", "stroke width must be non-negative")
+				}
+			}
+			if layer.Shape.Stroke.Opacity != nil {
+				recordCapability("StrokeNode.SetOpacity", strokePath+".opacity")
+				if *layer.Shape.Stroke.Opacity < 0 || *layer.Shape.Stroke.Opacity > 100 {
+					addRefusal("invalid_shape_stroke_opacity", strokePath+".opacity", "stroke opacity must be between 0 and 100")
+				}
+			}
 		}
 	}
 	if usesTransform(layer.Transform) {
@@ -310,6 +356,18 @@ func validateVec(values []float64, want int, path string, addRefusal func(string
 	}
 	if len(values) != want {
 		addRefusal("invalid_vector_size", path, fmt.Sprintf("expected %d values", want))
+	}
+}
+
+func validateColor(values []float64, path, code string, addRefusal func(string, string, string)) {
+	if len(values) != 3 && len(values) != 4 {
+		addRefusal(code, path, "color must have 3 or 4 channels")
+		return
+	}
+	for i, value := range values {
+		if value < 0 || value > 255 {
+			addRefusal(code, fmt.Sprintf("%s[%d]", path, i), "color channels must be between 0 and 255")
+		}
 	}
 }
 
