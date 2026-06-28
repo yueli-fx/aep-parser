@@ -19,7 +19,8 @@ yet a stable, reusable pipeline.
 ## Next
 
 Review `design.md`. If accepted, write an implementation plan that starts with
-profile extraction and diff tooling before expanding generation.
+Phase 0 export-surface audit and contract lock before extracting
+`internal/profile` or expanding generation.
 
 ## Read now
 
@@ -35,12 +36,16 @@ profile extraction and diff tooling before expanding generation.
 Done:
 - Direction scoped from current codebase.
 - Existing support and gaps identified.
+- External review feedback triaged into the spec: Phase 0 audit, evidence
+  ladder, stable path contract, profile/export boundary, render oracle limits,
+  and generation readiness gate.
 
 Current:
-- Spec written; no implementation started.
+- Spec revised; no implementation started.
 
 ## Open questions
 
-- Whether the first implementation milestone should target Booyah-only
-  diagnostics or a generic profile/diff CLI from the start. The spec recommends
-  generic core plus Booyah as the fixture.
+- Whether Phase 0 should include one small non-Booyah project immediately or
+  only Booyah plus synthetic fixtures. The spec requires at least one non-Booyah
+  project before generation readiness, but not necessarily before profile
+  extraction.
