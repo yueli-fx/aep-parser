@@ -17,6 +17,7 @@ go run ./cmd/aepslices plan -aep 'samples\motionbox\motion-graphics\circle-anima
 go run ./cmd/aepslices diagnose -expected 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -json -out tmp_debug\aepslices\circle_animation_self.json
 go run ./cmd/aepslices diagnose -expected 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'samples\motionbox\motion-graphics\seabox\seabox.aep' -json -out tmp_debug\aepslices\circle_animation_vs_seabox.json
 go run ./cmd/aeoracle plan -aep 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -out tmp_debug\aeoracle\circle_animation -json
+go run ./cmd/aeoracle render -request tmp_debug\aeoracle\circle_animation\request.json -dry-run
 ```
 
 ## Result
@@ -38,11 +39,21 @@ bespoke project code:
   - 31 `missing_object`
   - 24 `extra_object`
 - Render oracle planning selected 3 sentinel frames: 0, 24, 48.
+- Render dry-run validated the request and emitted the `scripts/ae_run.ps1`
+  invocation.
 
 ## Interpretation
 
 This validates the generic non-Booyah path for profile, slice selection, diff,
-gap ledger generation, and render-frame planning. It does not prove pixel
-fidelity because no AE render was launched in this run. If Phase 6 needs a hard
-render-readiness gate, run `cmd/aeoracle render` against the generated request
-and compare the output images before starting recipe correction loops.
+gap ledger generation, render-frame planning, and render request validation. It
+does not prove pixel fidelity because no AE render was launched in this run.
+
+Actual AE render was intentionally not started because an existing AfterFX
+process was present (`AfterFX`, pid 57036, AE 2020 untitled project). The
+tracked `scripts/ae_run.ps1` guard refuses concurrent AE sessions by default to
+avoid reading the wrong modal windows or disrupting user state. Close or clear
+that AE process before running the hard render gate.
+
+If Phase 6 needs a hard render-readiness gate, run `cmd/aeoracle render` against
+the generated request and compare the output images before starting recipe
+correction loops.

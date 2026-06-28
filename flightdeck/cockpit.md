@@ -12,7 +12,7 @@ Focus: AEP 理解/复刻诊断/生成路线已开新 spec → `work/aep-understa
 
 ## Next
 
-- **aep-understanding-generation Phase 6 前置**：选择其一：①先对 `circle animation.aep` 跑真实 AE render compare；②先写 Phase 6 recipe-IR 实施计划，但 automated correction loops 必须等真实 render compare 后再开。
+- **aep-understanding-generation Phase 6 前置**：`circle animation.aep` 非 Booyah workflow + render dry-run 已过；真实 AE render gate 暂被现有 AfterFX 进程阻塞（pid 57036，AE 2020 untitled）。关闭/清理该进程后再跑 render compare；或先写 Phase 6 recipe-IR 实施计划，但 automated correction loops 必须等真实 render compare 后再开。
 - **用户真机验收 ⑩⑪⑫**（修后再验；按 review-gate 用户验后翻 complete + 关 booyah plan Task 4.3）。⚠AE 装 `E:\adobe\`，agent 自跑 `scripts/ae_run.ps1`。
 - **booyah polish（非阻塞 documented delta）**：撕裂强度/文字色细调 · **eased Position kf**（LayerTransform 无 eased builder）· **Noise2 能力补**（不在 embed set）· **Curves 曲线数据**（arbitrary-data blocked）。
 - **apidoc flip(c)** 可选遗留清理（见 In flight）。
