@@ -5,14 +5,14 @@ Focus: AEP 理解/复刻诊断/生成路线已开新 spec → `work/aep-understa
 ## In flight
 
 - **booyah-glitch-replication** (`work/booyah-glitch-replication/index.md`) — 全 12-comp from-scratch 复刻 ✅ 全建成 + 双版本 AE gated。①②③⑧ 已用户真机验收 complete；④⑤⑥⑦⑨⑩⑪⑫ 🔶待用户真机 review（agent 已 render 自验，按 showcase review-gate 用户验后才翻 complete + 关 plan）。逐 comp 账本（建法/值/delta/commit）= `showcase/INDEX.md`，进度 = `work/booyah-glitch-replication/index.md` → `plan.md`。
-- **aep-understanding-generation** (`work/aep-understanding-generation/index.md`) — 新方向 spec：把 `aepdissect -json` / `Project.WriteJSON` / Booyah 渲染脚本 / 能力表收敛成 profile → diff → render oracle → gap ledger → recipe generation 的长期流水线。Phase 1 已抽 `internal/profile`，`aepdissect -json` 已切到 stable profile builder；自审补齐 track matte refs + parsed in/out points（2051e04）。当前进入 Phase 2：`internal/profilediff` / `cmd/aepdiff` / JSON ignore rules。
+- **aep-understanding-generation** (`work/aep-understanding-generation/index.md`) — 新方向 spec：把 `aepdissect -json` / `Project.WriteJSON` / Booyah 渲染脚本 / 能力表收敛成 profile → diff → render oracle → gap ledger → recipe generation 的长期流水线。Phase 1 已抽 `internal/profile`，`aepdissect -json` 已切到 stable profile builder；自审补齐 track matte refs + parsed in/out points（2051e04）。Phase 2 已实现 `internal/profilediff` / `cmd/aepdiff` / JSON ignore rules，当前做最终验证和提交。
 - **apidoc-tag-schema** (`work/apidoc-tag-schema/index.md`) — @tag 文档 schema 已落地（facade 全转 + dual-read + jargon scrub COMPLETE）。仅剩**可选遗留** flip(c)：删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict CI + 改文档真相源注脚 → regen → commit flip → done。dual-read 现仍工作、aep:cap=0，非阻塞，可随时做。
 - **fx-technique-internalization** (`work/fx-technique-internalization/index.md`) — 上游「理解工程」研究 arc（暂让位）。通用机制：任何参考 .aep → 解析 → 拆角色 → 抽跨域技法原子 → 存两层结构（技法库 `knowledge/techniques/fx-techniques.md` + 现象配方）。火焰=实例#1已验证。下一步见 topic index。
 - **technique-ontology** (`work/technique-ontology/index.md`) — 同上游 arc 的数据骨架：角色/技法/机制三轴本体 + schema v2。已经火焰/闪电/控制器三类压测；未验证大规模（N≫3）词表对齐。
 
 ## Next
 
-- **aep-understanding-generation Phase 2**：按 `work/aep-understanding-generation/phase2-plan.md` 实现 `internal/profilediff` / `cmd/aepdiff`；暂不进入 render oracle、gap ledger 或生成器。
+- **aep-understanding-generation Phase 2 closeout**：提交 `internal/profilediff` / `cmd/aepdiff` 后，下一步才可规划 Phase 3 render oracle；暂不进入 gap ledger 或生成器。
 - **用户真机验收 ⑩⑪⑫**（修后再验；按 review-gate 用户验后翻 complete + 关 booyah plan Task 4.3）。⚠AE 装 `E:\adobe\`，agent 自跑 `scripts/ae_run.ps1`。
 - **booyah polish（非阻塞 documented delta）**：撕裂强度/文字色细调 · **eased Position kf**（LayerTransform 无 eased builder）· **Noise2 能力补**（不在 embed set）· **Curves 曲线数据**（arbitrary-data blocked）。
 - **apidoc flip(c)** 可选遗留清理（见 In flight）。

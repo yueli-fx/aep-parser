@@ -52,13 +52,15 @@ Done:
   stable profile builder.
 - Phase 1 self-review fixed profile gaps for track matte refs and parsed
   in/out points.
+- Phase 2 implemented `internal/profilediff` and `cmd/aepdiff` with JSON ignore
+  rules and deterministic path-level reports.
 
 Current:
-- Phase 2 structural/semantic diff is active.
-- Implement `internal/profilediff`, `cmd/aepdiff`, and JSON ignore rules before
-  any render oracle or generation work.
+- Phase 2 is in final verification before commit.
+- After commit, the next eligible phase is Phase 3 render oracle planning; do
+  not start gap ledger or generation first.
 
 ## Open questions
 
-- How broad the first Booyah diff report should be before Phase 3 render oracle
-  exists.
+- Whether Phase 3 should reuse existing Booyah JSX/PowerShell scripts directly
+  or introduce a smaller sidecar contract first.
