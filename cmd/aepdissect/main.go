@@ -12,7 +12,8 @@
 //     AE elides params equal to default, so a stored param ~= an author decision).
 //
 // Usage:
-//   go run ./cmd/aepdissect [-dict <effects.json>] <file.aep>
+//
+//	go run ./cmd/aepdissect [-dict <effects.json>] <file.aep>
 //
 // Dictionary defaults to data/effects-dict/effects_en_US_25.1x68.json (run from
 // repo root). Missing dict -> falls back to raw matchName output. Build the dict
@@ -33,6 +34,7 @@ import (
 	"strings"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/profile"
 )
 
 var blendName = map[int]string{
@@ -94,6 +96,28 @@ func loadDict(path string) *effectsDict {
 		return nil
 	}
 	return &d
+}
+
+func toProfileDict(d *effectsDict) *profile.EffectDictionary {
+	if d == nil {
+		return nil
+	}
+	out := &profile.EffectDictionary{
+		AEVersion: d.AEVersion,
+		Effects:   map[string]profile.DictEffect{},
+	}
+	for matchName, effect := range d.Effects {
+		params := map[string]profile.DictParam{}
+		for paramMatchName, param := range effect.Params {
+			params[paramMatchName] = profile.DictParam{
+				Name:    param.Name,
+				Type:    param.Type,
+				Default: param.Default,
+			}
+		}
+		out.Effects[matchName] = profile.DictEffect{Name: effect.Name, Params: params}
+	}
+	return out
 }
 
 func toFloat(v any) (float64, bool) {
@@ -462,7 +486,11 @@ func main() {
 	}
 
 	if *jsonOut {
-		prof := buildProfile(path, p, dict, compName)
+		prof, err := profile.Build(p, profile.Options{Path: path, Dict: toProfileDict(dict)})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "profile:", err)
+			os.Exit(1)
+		}
 		b, err := json.MarshalIndent(prof, "", "  ")
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "marshal:", err)

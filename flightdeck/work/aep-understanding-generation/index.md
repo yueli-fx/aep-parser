@@ -30,6 +30,7 @@ Phase 0 export-surface audit and contract lock before extracting
 - `profile-contract.md` — evidence ladder, stable path object, and Phase 1
   entry gate.
 - `plan.md` — Phase 0 execution plan.
+- `phase1-plan.md` — Phase 1 profile extraction plan and verification record.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -46,12 +47,15 @@ Done:
   and generation readiness gate.
 - Phase 0 audit artifacts written: export-surface audit, profile coverage
   matrix, and profile contract.
+- Phase 1 implemented `internal/profile` and moved `aepdissect -json` onto the
+  stable profile builder.
 
 Current:
-- Phase 0 audit artifacts are ready for human review.
-- Stop here before extracting `internal/profile`.
+- Phase 1 profile extraction is ready for human review.
+- Stop here before starting `internal/profilediff`, `cmd/aepdiff`, ignore rules,
+  or render oracle work.
 
 ## Open questions
 
-- Whether to accept the Phase 0 contract and proceed into Phase 1
-  `internal/profile` extraction.
+- Whether to accept the new profile JSON shape and proceed into Phase 2
+  structural/semantic diff tooling.
