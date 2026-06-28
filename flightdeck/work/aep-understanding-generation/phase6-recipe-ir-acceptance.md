@@ -38,7 +38,16 @@ using exported writer APIs, and the generated AEP opens and renders through the
 generic AE oracle. This proves the first deterministic generation slice, not an
 AI correction loop.
 
-The next generation work should improve capability lookup and compile reports:
-wire recipe validation to a reusable capability index behind `cmd/capindex`,
-record used capabilities/downgrades in the report, and only then consider
-broader layer/effect coverage.
+Follow-up completed after this gate:
+
+- `cmd/aeprecipe` now loads `docs/capabilities.json` through reusable
+  `internal/capindex` instead of using a temporary static map.
+- Recipe reports include used capabilities and downgrades.
+- Effect requests are explicitly refused until this recipe compiler slice can
+  materialize them; they are no longer silently dropped.
+- The stale `SetLayerTransform` capability boundary was corrected and
+  `docs/capabilities.{json,md}` were regenerated.
+
+Next generation work should broaden recipe coverage in small proven slices,
+starting with effect materialization or richer shape/text controls, each gated
+by profile and render-oracle evidence.

@@ -1,6 +1,7 @@
 package recipe_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -61,5 +62,27 @@ func TestCompileToFileCreatesParentDirectory(t *testing.T) {
 	}
 	if _, err := aep.Open(outPath); err != nil {
 		t.Fatalf("Open compiled AEP: %v", err)
+	}
+}
+
+func TestCompileToFileRefusesEffectsWithoutWritingPartialAEP(t *testing.T) {
+	effects := aep.SupportedEffects()
+	if len(effects) == 0 {
+		t.Fatal("SupportedEffects is empty")
+	}
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{MatchName: effects[0]}}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if report.Valid {
+		t.Fatalf("report = %+v, want invalid", report)
+	}
+	assertRefusal(t, report, "effect_compile_not_supported")
+	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
+		t.Fatalf("compiled AEP exists despite invalid recipe: %v", err)
 	}
 }

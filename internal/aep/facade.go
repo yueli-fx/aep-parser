@@ -266,16 +266,17 @@ func NewTextLayer(c *Composition, name string) (*Layer, error) {
 //   Build t with NewLayerTransform (defaults: anchor 0,0; position 0,0; scale
 //   100,100; rotation 0; opacity 100), then set static values or keyframes on its
 //   streams: Position and AnchorPoint are pixels, Scale is percent, Rotation is
-//   degrees, Opacity is percent (0–100). The layer must be parsed (round-trip via
-//   Reopen for a freshly built layer).
-// @param      layer  the parsed layer to retarget (round-trip via Reopen first)
+//   degrees, Opacity is percent (0–100). The layer must be backed by a parsed
+//   layer structure; NewTextLayer/NewShapeLayer/NewSolidLayer return layers that
+//   satisfy that contract immediately.
+// @param      layer  the parsed or generated layer to retarget
 // @param      t      the transform to lower into the layer's Transform Group
 // @domain     layer-set
 // @stability  stable
 // @verify     ae-accept
 // @gate       TestSetLayerTransform_AEShipGate_AE2020,TestSetLayerTransform_AEShipGate_AE2025
 // @since      AE2020
-// @boundary   layer must be parsed (Reopen); replaces the whole Transform Group, materializing default-elided channels; gate covers a text layer (anchor + 3-keyframe Position + 3-keyframe Opacity, opacity in percent); Scale/Rotation share the path but are not separately gated
+// @boundary   layer must have parsed/generated layer backing; replaces the whole Transform Group, materializing default-elided channels; gate covers a text layer (anchor + 3-keyframe Position + 3-keyframe Opacity, opacity in percent); Scale/Rotation share the path but are not separately gated
 // @incident   transform-group-default-omission
 // @alias      layer transform,层变换,animate layer position,animate layer opacity,materialize transform
 func SetLayerTransform(layer *Layer, t *LayerTransform) error {

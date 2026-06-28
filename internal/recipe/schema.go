@@ -1,6 +1,10 @@
 package recipe
 
-import "fmt"
+import (
+	"fmt"
+
+	aep "github.com/example/aep-parser/internal/aep"
+)
 
 const SchemaVersion = 1
 
@@ -58,15 +62,29 @@ type VectorKeyframe struct {
 }
 
 type Report struct {
-	SchemaVersion int       `json:"schema_version"`
-	Valid         bool      `json:"valid"`
-	OutputPath    string    `json:"output_path,omitempty"`
-	Refusals      []Refusal `json:"refusals,omitempty"`
+	SchemaVersion int             `json:"schema_version"`
+	Valid         bool            `json:"valid"`
+	OutputPath    string          `json:"output_path,omitempty"`
+	Capabilities  []CapabilityUse `json:"capabilities,omitempty"`
+	Downgrades    []Downgrade     `json:"downgrades,omitempty"`
+	Refusals      []Refusal       `json:"refusals,omitempty"`
 }
 
 type Refusal struct {
 	Code    string `json:"code"`
 	Path    string `json:"path,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
+type CapabilityUse struct {
+	Path string `json:"path,omitempty"`
+	CapabilityLookup
+}
+
+type Downgrade struct {
+	Code    string `json:"code"`
+	Path    string `json:"path,omitempty"`
+	Query   string `json:"query,omitempty"`
 	Message string `json:"message,omitempty"`
 }
 
@@ -83,6 +101,30 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		report.Valid = false
 		report.Refusals = append(report.Refusals, Refusal{Code: code, Path: path, Message: message})
 	}
+	recordCapability := func(query, path string) CapabilityLookup {
+		lookup := caps.Lookup(query)
+		if lookup.Query == "" {
+			lookup.Query = query
+		}
+		report.Capabilities = append(report.Capabilities, CapabilityUse{Path: path, CapabilityLookup: lookup})
+		switch {
+		case lookup.Status == CapabilityUnknown:
+			report.Downgrades = append(report.Downgrades, Downgrade{
+				Code:    "unknown_capability",
+				Path:    path,
+				Query:   query,
+				Message: fmt.Sprintf("capability %q is not present in the loaded index", query),
+			})
+		case lookup.Status == CapabilitySupported && lookup.Tier != "" && lookup.Tier != "stable":
+			report.Downgrades = append(report.Downgrades, Downgrade{
+				Code:    "non_stable_capability",
+				Path:    path,
+				Query:   query,
+				Message: fmt.Sprintf("capability %q is %s", query, lookup.Tier),
+			})
+		}
+		return lookup
+	}
 
 	if rec.SchemaVersion != SchemaVersion {
 		addRefusal("unsupported_schema_version", "schema_version", fmt.Sprintf("schema_version must be %d", SchemaVersion))
@@ -96,6 +138,7 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 	}
 	for ci, comp := range rec.Comps {
 		compPath := fmt.Sprintf("comps[%d]", ci)
+		recordCapability("NewComposition", compPath)
 		if comp.Name == "" {
 			addRefusal("missing_comp_name", compPath+".name", "comp name is required")
 		}
@@ -104,15 +147,23 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		}
 		for li, layer := range comp.Layers {
 			layerPath := fmt.Sprintf("%s.layers[%d]", compPath, li)
-			validateLayer(layer, layerPath, comp.Duration, caps, addRefusal)
+			validateLayer(layer, layerPath, comp.Duration, recordCapability, addRefusal)
 		}
 	}
 	return report
 }
 
-func validateLayer(layer Layer, layerPath string, compDuration float64, caps CapabilityIndex, addRefusal func(string, string, string)) {
+func validateLayer(layer Layer, layerPath string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
 	switch layer.Type {
-	case "solid", "text", "shape":
+	case "solid":
+		recordCapability("NewSolidLayer", layerPath)
+	case "text":
+		recordCapability("NewTextLayer", layerPath)
+		if layer.Text != "" {
+			recordCapability("Layer.SetText", layerPath+".text")
+		}
+	case "shape":
+		recordCapability("NewShapeLayer", layerPath)
 	default:
 		addRefusal("unsupported_layer_type", layerPath+".type", fmt.Sprintf("unsupported layer type %q", layer.Type))
 	}
@@ -122,9 +173,20 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, caps Cap
 	if layer.Type == "shape" && layer.Shape != nil {
 		switch layer.Shape.Kind {
 		case "rect", "ellipse":
+			if layer.Shape.Kind == "rect" {
+				recordCapability("RectNode.SetSize", layerPath+".shape.size")
+			} else {
+				recordCapability("EllipseNode.SetSize", layerPath+".shape.size")
+			}
 		default:
 			addRefusal("unsupported_shape_kind", layerPath+".shape.kind", fmt.Sprintf("unsupported shape kind %q", layer.Shape.Kind))
 		}
+		if len(layer.Shape.FillColor) > 0 {
+			recordCapability("FillNode.SetColor", layerPath+".shape.fill_color")
+		}
+	}
+	if usesTransform(layer.Transform) {
+		recordCapability("SetLayerTransform", layerPath+".transform")
 	}
 	validateVec(layer.Transform.Position, 2, layerPath+".transform.position", addRefusal)
 	validateVec(layer.Transform.Scale, 2, layerPath+".transform.scale", addRefusal)
@@ -138,14 +200,30 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, caps Cap
 	}
 	for i, effect := range layer.Effects {
 		effectPath := fmt.Sprintf("%s.effects[%d]", layerPath, i)
+		lookup := recordCapability("AddEffect", effectPath)
 		if effect.MatchName == "" {
 			addRefusal("missing_effect_match_name", effectPath+".match_name", "effect match_name is required")
 			continue
 		}
-		if caps.Lookup(effect.MatchName) == CapabilityUnsupported {
-			addRefusal("unsupported_effect", effectPath+".match_name", fmt.Sprintf("effect %q is unsupported", effect.MatchName))
+		if lookup.Status == CapabilityUnsupported {
+			addRefusal("unsupported_effect_api", effectPath, "AddEffect is not supported by the loaded capability index")
+			continue
 		}
+		if !supportedEffect(effect.MatchName) {
+			addRefusal("unsupported_effect", effectPath+".match_name", fmt.Sprintf("effect %q is not in SupportedEffects", effect.MatchName))
+			continue
+		}
+		addRefusal("effect_compile_not_supported", effectPath, "recipe compiler does not materialize effects in this slice")
 	}
+}
+
+func usesTransform(t Transform) bool {
+	return len(t.Position) > 0 ||
+		len(t.Scale) > 0 ||
+		len(t.AnchorPoint) > 0 ||
+		t.Rotation != nil ||
+		t.Opacity != nil ||
+		len(t.PositionKeyframes) > 0
 }
 
 func validateVec(values []float64, want int, path string, addRefusal func(string, string, string)) {
@@ -155,4 +233,13 @@ func validateVec(values []float64, want int, path string, addRefusal func(string
 	if len(values) != want {
 		addRefusal("invalid_vector_size", path, fmt.Sprintf("expected %d values", want))
 	}
+}
+
+func supportedEffect(matchName string) bool {
+	for _, effect := range aep.SupportedEffects() {
+		if effect == matchName {
+			return true
+		}
+	}
+	return false
 }

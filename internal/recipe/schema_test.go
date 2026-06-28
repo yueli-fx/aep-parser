@@ -3,6 +3,7 @@ package recipe_test
 import (
 	"testing"
 
+	aep "github.com/example/aep-parser/internal/aep"
 	"github.com/example/aep-parser/internal/recipe"
 )
 
@@ -62,6 +63,41 @@ func TestValidateRefusesUnsupportedEffects(t *testing.T) {
 	assertRefusal(t, report, "unsupported_effect")
 }
 
+func TestValidateReportsUsedCapabilities(t *testing.T) {
+	report := recipe.ValidateWithCapabilities(minimalRecipe(), stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "NewComposition")
+	assertCapability(t, report, "NewTextLayer")
+	assertCapability(t, report, "Layer.SetText")
+	assertCapability(t, report, "NewShapeLayer")
+	assertCapability(t, report, "RectNode.SetSize")
+	assertCapability(t, report, "FillNode.SetColor")
+	assertCapability(t, report, "SetLayerTransform")
+	if len(report.Downgrades) != 0 {
+		t.Fatalf("Downgrades = %+v, want none", report.Downgrades)
+	}
+}
+
+func TestValidateRefusesSupportedEffectsUntilCompilerMaterializesThem(t *testing.T) {
+	effects := aep.SupportedEffects()
+	if len(effects) == 0 {
+		t.Fatal("SupportedEffects is empty")
+	}
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{MatchName: effects[0]}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertCapability(t, report, "AddEffect")
+	assertRefusal(t, report, "effect_compile_not_supported")
+}
+
 func minimalRecipe() recipe.Recipe {
 	return recipe.Recipe{
 		SchemaVersion: recipe.SchemaVersion,
@@ -111,6 +147,29 @@ func assertRefusal(t *testing.T, report recipe.Report, code string) {
 	t.Fatalf("refusal %q not found in %+v", code, report.Refusals)
 }
 
+func assertCapability(t *testing.T, report recipe.Report, query string) {
+	t.Helper()
+	for _, use := range report.Capabilities {
+		if use.Query == query {
+			return
+		}
+	}
+	t.Fatalf("capability %q not found in %+v", query, report.Capabilities)
+}
+
 func ptr(v float64) *float64 {
 	return &v
+}
+
+type stableCapabilityIndex struct{}
+
+func (stableCapabilityIndex) Lookup(query string) recipe.CapabilityLookup {
+	return recipe.CapabilityLookup{
+		Query:  query,
+		Status: recipe.CapabilitySupported,
+		Symbol: query,
+		Domain: "test",
+		Tier:   "stable",
+		Verify: "ae-accept",
+	}
 }

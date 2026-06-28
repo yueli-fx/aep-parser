@@ -98,13 +98,17 @@ Done:
 - Minimal recipe IR implemented: `internal/recipe`, `cmd/aeprecipe`, and
   `examples/recipes/minimal-text-shape.json` compile a one-comp text/shape
   recipe into an AEP. The generated AEP passed AE 2025 render oracle.
+- Recipe capability reporting now uses reusable `internal/capindex` loaded from
+  `docs/capabilities.json`; `cmd/aeprecipe` reports used capabilities and
+  downgrades, and refuses effect requests instead of silently dropping them.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
-- Next: improve recipe capability reporting by moving from the temporary static
-  capability map in `cmd/aeprecipe` to a reusable capability index behind
-  `cmd/capindex`. Do not start automated correction loops.
+- Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
+  candidates are effect materialization for supported built-in effects, richer
+  shape/text controls, or a recipe-to-profile expected-output contract. Do not
+  start automated correction loops.
 
 ## Open questions
 
@@ -112,5 +116,6 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which capability-index package boundary should own the machine-readable
-  support map currently only available through `cmd/capindex`.
+- How to represent effect support at the per-match-name level, because the
+  current capability index proves `AddEffect` as an API but not every requested
+  effect in a recipe.

@@ -5,7 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
+	"github.com/example/aep-parser/internal/capindex"
 	"github.com/example/aep-parser/internal/recipe"
 )
 
@@ -139,19 +142,71 @@ func emitReport(report recipe.Report, jsonOut bool) error {
 		return enc.Encode(report)
 	}
 	if report.Valid {
-		fmt.Println("valid")
+		fmt.Printf("valid capabilities=%d downgrades=%d\n", len(report.Capabilities), len(report.Downgrades))
 		return nil
 	}
-	fmt.Printf("invalid refusals=%d\n", len(report.Refusals))
+	fmt.Printf("invalid capabilities=%d downgrades=%d refusals=%d\n", len(report.Capabilities), len(report.Downgrades), len(report.Refusals))
+	for _, downgrade := range report.Downgrades {
+		fmt.Printf("downgrade %s %s %s\n", downgrade.Code, downgrade.Path, downgrade.Message)
+	}
 	for _, refusal := range report.Refusals {
 		fmt.Printf("%s %s %s\n", refusal.Code, refusal.Path, refusal.Message)
 	}
 	return nil
 }
 
-func defaultCapabilities() recipe.StaticCapabilities {
-	return recipe.StaticCapabilities{
-		"Third Party Magic": recipe.CapabilityUnsupported,
+func defaultCapabilities() recipe.CapabilityIndex {
+	root, err := repoRoot()
+	if err != nil {
+		return recipe.StaticCapabilities{}
+	}
+	idx, err := capindex.Load(filepath.Join(root, "docs", "capabilities.json"))
+	if err != nil {
+		return recipe.StaticCapabilities{}
+	}
+	return capindexRecipeAdapter{idx: idx}
+}
+
+type capindexRecipeAdapter struct {
+	idx *capindex.Index
+}
+
+func (a capindexRecipeAdapter) Lookup(query string) recipe.CapabilityLookup {
+	got := a.idx.Lookup(query)
+	out := recipe.CapabilityLookup{
+		Query:  got.Query,
+		Status: recipe.CapabilityStatus(got.Status),
+	}
+	if got.Entry.Symbol == "" {
+		return out
+	}
+	out.Symbol = got.Entry.Symbol
+	if got.Entry.Recv != "" {
+		out.Symbol = strings.TrimPrefix(got.Entry.Recv, "*") + "." + got.Entry.Symbol
+	}
+	out.Domain = got.Entry.Cap.Domain
+	out.Tier = got.Entry.Cap.Tier
+	out.Verify = got.Entry.Cap.Verify
+	out.MinVer = got.Entry.Cap.MinVer
+	out.Boundary = got.Entry.Cap.Boundary
+	out.Gate = got.Entry.Cap.Gate
+	return out
+}
+
+func repoRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("go.mod not found above %s", dir)
+		}
+		dir = parent
 	}
 }
 
