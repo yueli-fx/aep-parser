@@ -34,6 +34,7 @@ Phase 0 export-surface audit and contract lock before extracting
 - `phase2-plan.md` — Phase 2 structural/semantic diff plan.
 - `phase3-plan.md` — Phase 3 render oracle harness plan.
 - `phase4-plan.md` — Phase 4 gap ledger and capability coupling plan.
+- `phase5-plan.md` — Phase 5 slice replication workflow plan.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -66,6 +67,8 @@ Done:
 Current:
 - Phase 5 slice replication workflow is next: prove a second project can move
   through profile, diff, render, and gaps before recipe generation.
+- Implement `internal/sliceworkflow` and `cmd/aepslices` from
+  `phase5-plan.md`.
 
 ## Open questions
 
