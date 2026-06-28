@@ -32,6 +32,7 @@ Phase 0 export-surface audit and contract lock before extracting
 - `plan.md` — Phase 0 execution plan.
 - `phase1-plan.md` — Phase 1 profile extraction plan and verification record.
 - `phase2-plan.md` — Phase 2 structural/semantic diff plan.
+- `phase3-plan.md` — Phase 3 render oracle harness plan.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -56,11 +57,11 @@ Done:
   rules and deterministic path-level reports.
 
 Current:
-- Phase 2 is in final verification before commit.
-- After commit, the next eligible phase is Phase 3 render oracle planning; do
-  not start gap ledger or generation first.
+- Phase 3 render oracle harness is active.
+- Build sentinel frame selection, sidecar metadata, PNG comparison, and generic
+  AE render invocation before gap ledger or generation work.
 
 ## Open questions
 
-- Whether Phase 3 should reuse existing Booyah JSX/PowerShell scripts directly
-  or introduce a smaller sidecar contract first.
+- Whether Phase 3 should run a real AE render smoke after the dry-run contract
+  passes, or leave AE execution to gated environments.
