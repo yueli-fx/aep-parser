@@ -158,6 +158,13 @@ func NewRenderRequest(aepPath string, compName string, outputDir string, frames 
 	}
 }
 
+func CloneRenderRequest(source RenderRequest, aepPath string, compName string, outputDir string) RenderRequest {
+	if compName == "" {
+		compName = source.CompName
+	}
+	return NewRenderRequest(aepPath, compName, outputDir, source.Frames)
+}
+
 func WriteRequest(path string, req RenderRequest) error {
 	if err := req.Validate(); err != nil {
 		return err

@@ -27,8 +27,12 @@ func run(args []string) int {
 	switch args[0] {
 	case "plan":
 		return runPlan(args[1:])
+	case "clone-request":
+		return runCloneRequest(args[1:])
 	case "compare":
 		return runCompare(args[1:])
+	case "compare-set":
+		return runCompareSet(args[1:])
 	case "render":
 		return runRender(args[1:])
 	default:
@@ -83,6 +87,39 @@ func runPlan(args []string) int {
 	return 0
 }
 
+func runCloneRequest(args []string) int {
+	fs := flag.NewFlagSet("aeoracle clone-request", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	fromPath := fs.String("from", "", "source render request JSON path")
+	aepPath := fs.String("aep", "", "clone AEP path")
+	compName := fs.String("comp", "", "override comp name; empty preserves source request comp")
+	outDir := fs.String("out", "", "output directory for cloned request and renders")
+	jsonOut := fs.Bool("json", false, "print cloned request JSON to stdout")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *fromPath == "" || *aepPath == "" || *outDir == "" {
+		fmt.Fprintln(os.Stderr, "usage: aeoracle clone-request -from request.json -aep clone.aep -out dir [-comp name] [-json]")
+		return 2
+	}
+	source, err := aeoracle.ReadRequest(*fromPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "from:", err)
+		return 2
+	}
+	req := aeoracle.CloneRenderRequest(source, *aepPath, *compName, *outDir)
+	reqPath := filepath.Join(*outDir, "request.json")
+	if err := aeoracle.WriteRequest(reqPath, req); err != nil {
+		fmt.Fprintln(os.Stderr, "write request:", err)
+		return 2
+	}
+	if *jsonOut {
+		return writeJSON(req)
+	}
+	fmt.Printf("request: %s\nframes: %d\n", reqPath, len(req.Frames))
+	return 0
+}
+
 func runCompare(args []string) int {
 	fs := flag.NewFlagSet("aeoracle compare", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -108,6 +145,56 @@ func runCompare(args []string) int {
 	fmt.Printf("pixels: %d different: %d (%.4f%%) max_channel_delta: %d threshold: %d\n",
 		report.TotalPixels, report.DifferentPixels, report.DifferentPercent, report.MaxChannelDelta, report.ChannelThreshold)
 	if report.DifferentPixels > 0 {
+		return 1
+	}
+	return 0
+}
+
+func runCompareSet(args []string) int {
+	fs := flag.NewFlagSet("aeoracle compare-set", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	expectedMeta := fs.String("expected-meta", "", "expected render metadata JSON path")
+	actualMeta := fs.String("actual-meta", "", "actual render metadata JSON path")
+	threshold := fs.Int("threshold", 0, "per-channel threshold 0..255")
+	jsonOut := fs.Bool("json", false, "print JSON report")
+	outPath := fs.String("out", "", "write JSON report to path")
+	if err := fs.Parse(args); err != nil {
+		return 2
+	}
+	if *expectedMeta == "" || *actualMeta == "" || *threshold < 0 || *threshold > 255 {
+		fmt.Fprintln(os.Stderr, "usage: aeoracle compare-set -expected-meta expected.json -actual-meta actual.json [-threshold 0..255] [-json] [-out report.json]")
+		return 2
+	}
+	report, err := aeoracle.CompareFrameSets(*expectedMeta, *actualMeta, aeoracle.CompareOptions{ChannelThreshold: uint8(*threshold)})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "compare-set:", err)
+		return 2
+	}
+	if *outPath != "" {
+		if err := writeJSONFile(*outPath, report); err != nil {
+			fmt.Fprintln(os.Stderr, "write report:", err)
+			return 2
+		}
+	}
+	if *jsonOut {
+		if code := writeJSON(report); code != 0 {
+			return code
+		}
+	} else {
+		fmt.Printf("frames: %d ok: %d different: %d missing_expected: %d missing_actual: %d\n",
+			report.Summary.TotalFrames,
+			report.Summary.OKFrames,
+			report.Summary.DifferentFrames,
+			report.Summary.MissingExpectedFrames,
+			report.Summary.MissingActualFrames)
+		for _, frame := range report.Frames {
+			if frame.Status == aeoracle.FrameStatusOK {
+				continue
+			}
+			fmt.Printf("%s frame=%d seconds=%.6f status=%s\n", frame.Tag, frame.Frame, frame.Seconds, frame.Status)
+		}
+	}
+	if report.Summary.DifferentFrames > 0 || report.Summary.MissingExpectedFrames > 0 || report.Summary.MissingActualFrames > 0 {
 		return 1
 	}
 	return 0
@@ -255,6 +342,17 @@ func writeJSON(v any) int {
 	return 0
 }
 
+func writeJSONFile(path string, v any) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(data, '\n'), 0o644)
+}
+
 func quoteArg(v string) string {
 	if v == "" {
 		return `""`
@@ -274,5 +372,5 @@ func formatCommand(name string, args []string) string {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: aeoracle <plan|render|compare> [flags]")
+	fmt.Fprintln(os.Stderr, "usage: aeoracle <plan|clone-request|render|compare|compare-set> [flags]")
 }

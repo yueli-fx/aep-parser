@@ -36,6 +36,51 @@ func TestRenderRequestRoundTrip(t *testing.T) {
 	}
 }
 
+func TestCloneRenderRequestPreservesFrameTargets(t *testing.T) {
+	source := aeoracle.NewRenderRequest("source.aep", "Main", filepath.Join("tmp", "source"), []aeoracle.FrameTarget{
+		{Frame: 0, Seconds: 0, Tag: "f000000", Reason: "comp_start"},
+		{Frame: 24, Seconds: 1, Tag: "f000024", Reason: "keyframe"},
+	})
+
+	got := aeoracle.CloneRenderRequest(source, "clone.aep", "", filepath.Join("tmp", "clone"))
+
+	if got.AEPPath != "clone.aep" {
+		t.Fatalf("AEPPath = %q", got.AEPPath)
+	}
+	if got.CompName != "Main" {
+		t.Fatalf("CompName = %q, want Main", got.CompName)
+	}
+	if got.OutputDir != filepath.Join("tmp", "clone") {
+		t.Fatalf("OutputDir = %q", got.OutputDir)
+	}
+	if got.DonePath != filepath.Join("tmp", "clone", "aeoracle_render.done") {
+		t.Fatalf("DonePath = %q", got.DonePath)
+	}
+	if got.MetadataPath != filepath.Join("tmp", "clone", "metadata.json") {
+		t.Fatalf("MetadataPath = %q", got.MetadataPath)
+	}
+	if len(got.Frames) != 2 || got.Frames[1].Tag != "f000024" || got.Frames[1].Seconds != 1 {
+		t.Fatalf("Frames = %+v", got.Frames)
+	}
+
+	got.Frames[0].Tag = "changed"
+	if source.Frames[0].Tag != "f000000" {
+		t.Fatalf("CloneRenderRequest aliased source frames: %+v", source.Frames)
+	}
+}
+
+func TestCloneRenderRequestAllowsCompOverride(t *testing.T) {
+	source := aeoracle.NewRenderRequest("source.aep", "Main", "source_out", []aeoracle.FrameTarget{
+		{Frame: 0, Seconds: 0, Tag: "f000000", Reason: "comp_start"},
+	})
+
+	got := aeoracle.CloneRenderRequest(source, "clone.aep", "Clone Main", "clone_out")
+
+	if got.CompName != "Clone Main" {
+		t.Fatalf("CompName = %q, want override", got.CompName)
+	}
+}
+
 func TestRenderRequestValidateRejectsRequiredFields(t *testing.T) {
 	valid := aeoracle.NewRenderRequest("input.aep", "Main", t.TempDir(), []aeoracle.FrameTarget{{Frame: 0, Tag: "f000000"}})
 	cases := []struct {

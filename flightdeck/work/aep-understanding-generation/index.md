@@ -41,6 +41,10 @@ Phase 0 export-surface audit and contract lock before extracting
   acceptance run.
 - `phase6-plan.md` — Phase 6 source-vs-clone render frame-set compare plan
   and recipe-IR readiness gate.
+- `phase6-booyah-render-compare.md` — real Booyah source-vs-clone AE 2025
+  frame-set render compare result.
+- `phase6-recipe-ir-plan.md` — minimal recipe IR/compiler implementation plan,
+  gated by the render compare result.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -84,14 +88,17 @@ Done:
 - Phase 6 render-compare plan written. The first implementation slice is
   source-vs-clone frame-set compare (`clone-request` + `compare-set`) before
   recipe IR or automated correction loops.
+- Phase 6 render-compare implementation executed on Booyah: both source and
+  clone rendered 8 frames for `グリッチテキスト` in AE 2025, `compare-set`
+  produced a valid report with 2 matching frames and 6 differing frames, and
+  `aepslices diagnose -render-set` merged 141 profile gaps with 6 render gaps.
+- Minimal recipe IR plan written; automated correction loops remain blocked.
 
 Current:
-- Phase 5 tooling is complete on tracked fixtures, the real Booyah source
-  project, and one non-Booyah Motionbox project, including a real source render
-  gate.
-- Next: execute `phase6-plan.md` Task 1 through Task 5 to produce a generic
-  source-vs-clone render compare report for Booyah. Do not start recipe IR or
-  automated correction loops before that report exists.
+- Phase 6 render-compare loop is implemented and proven on the real Booyah
+  source plus current clone.
+- Next: execute `phase6-recipe-ir-plan.md` for the first minimal recipe
+  compiler. Do not start automated correction loops.
 
 ## Open questions
 
@@ -99,5 +106,6 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Whether the current Booyah clone can share the source top-comp selection with
-  no manual comp-name override in `aeoracle clone-request`.
+- Whether the minimal recipe compiler should use a static in-process capability
+  index first, then wire to `cmd/capindex`, or directly expose a reusable
+  capability package behind `cmd/capindex`.

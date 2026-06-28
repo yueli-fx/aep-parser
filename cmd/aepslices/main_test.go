@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/example/aep-parser/internal/aeoracle"
 	"github.com/example/aep-parser/internal/sliceworkflow"
 )
 
@@ -58,9 +59,65 @@ func TestRunDiagnoseReturnsOneForDifferentAEPs(t *testing.T) {
 	}
 }
 
+func TestRunDiagnoseMergesRenderSetReport(t *testing.T) {
+	root := repoRoot(t)
+	dir := t.TempDir()
+	renderSetPath := filepath.Join(dir, "render_set.json")
+	writeFrameSetReport(t, renderSetPath)
+	out := filepath.Join(dir, "diagnose.json")
+	fixture := filepath.Join(root, "flightdeck", "showcase", "text", "text.aep")
+	code := run([]string{
+		"diagnose",
+		"-expected", fixture,
+		"-actual", fixture,
+		"-dict", "",
+		"-render-set", renderSetPath,
+		"-json",
+		"-out", out,
+	})
+	if code != 1 {
+		t.Fatalf("run(diagnose render-set) = %d, want 1", code)
+	}
+
+	report := readReport(t, out)
+	if report.Summary.GapCount != 1 || len(report.GapReports) != 1 {
+		t.Fatalf("gap summary = %+v reports=%d, want one render-set gap", report.Summary, len(report.GapReports))
+	}
+}
+
 func TestRunReturnsUsageForMissingSubcommand(t *testing.T) {
 	if code := run(nil); code != 2 {
 		t.Fatalf("run(nil) = %d, want 2", code)
+	}
+}
+
+func writeFrameSetReport(t *testing.T, path string) {
+	t.Helper()
+	report := aeoracle.FrameSetCompareReport{
+		SchemaVersion:   aeoracle.SchemaVersion,
+		ExpectedAEPPath: "expected.aep",
+		ActualAEPPath:   "actual.aep",
+		Frames: []aeoracle.FrameCompareRecord{{
+			Tag:          "f000024",
+			Frame:        24,
+			Seconds:      1,
+			Reason:       "keyframe",
+			ExpectedPath: "expected.png",
+			ActualPath:   "actual.png",
+			Status:       aeoracle.FrameStatusDifferent,
+			Compare: &aeoracle.CompareReport{
+				SchemaVersion:   aeoracle.SchemaVersion,
+				TotalPixels:     4,
+				DifferentPixels: 1,
+			},
+		}},
+	}
+	data, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
 	}
 }
 

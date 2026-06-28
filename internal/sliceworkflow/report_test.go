@@ -103,7 +103,7 @@ func TestBuildDiagnoseReportIncludesDiffAndRenderGaps(t *testing.T) {
 		MaxChannelDelta:  3,
 	}
 
-	report, err := sliceworkflow.BuildDiagnoseReport(source, observed, diffReport, []aeoracle.CompareReport{renderReport}, sliceworkflow.Options{})
+	report, err := sliceworkflow.BuildDiagnoseReport(source, observed, diffReport, []aeoracle.CompareReport{renderReport}, nil, sliceworkflow.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,6 +118,38 @@ func TestBuildDiagnoseReportIncludesDiffAndRenderGaps(t *testing.T) {
 	}
 	if report.Summary.GapCount != 2 {
 		t.Fatalf("Summary.GapCount = %d, want 2", report.Summary.GapCount)
+	}
+}
+
+func TestBuildDiagnoseReportIncludesFrameSetGaps(t *testing.T) {
+	source := testProfile("expected.aep", testComp(1, "Main", textLayer(1, "Title")))
+	observed := testProfile("actual.aep", testComp(1, "Main", textLayer(1, "Title")))
+	frameSet := aeoracle.FrameSetCompareReport{
+		SchemaVersion: aeoracle.SchemaVersion,
+		Frames: []aeoracle.FrameCompareRecord{{
+			Tag:          "f000024",
+			Frame:        24,
+			Seconds:      1,
+			ExpectedPath: "expected.png",
+			ActualPath:   "actual.png",
+			Status:       aeoracle.FrameStatusDifferent,
+			Compare: &aeoracle.CompareReport{
+				SchemaVersion:   aeoracle.SchemaVersion,
+				TotalPixels:     4,
+				DifferentPixels: 1,
+			},
+		}},
+	}
+
+	report, err := sliceworkflow.BuildDiagnoseReport(source, observed, nil, nil, []aeoracle.FrameSetCompareReport{frameSet}, sliceworkflow.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.GapReports) != 1 {
+		t.Fatalf("len(GapReports) = %d, want 1", len(report.GapReports))
+	}
+	if report.Summary.GapCount != 1 {
+		t.Fatalf("Summary.GapCount = %d, want 1", report.Summary.GapCount)
 	}
 }
 

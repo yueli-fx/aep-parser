@@ -92,6 +92,56 @@ func TestFromRenderCompareEmitsRenderGapWithMetrics(t *testing.T) {
 	}
 }
 
+func TestFromFrameSetCompareEmitsFrameGaps(t *testing.T) {
+	report := aeoracle.FrameSetCompareReport{
+		SchemaVersion:   aeoracle.SchemaVersion,
+		ExpectedAEPPath: "original.aep",
+		ActualAEPPath:   "clone.aep",
+		Frames: []aeoracle.FrameCompareRecord{
+			{
+				Tag:          "f000024",
+				Frame:        24,
+				Seconds:      1,
+				Reason:       "keyframe",
+				ExpectedPath: "expected.png",
+				ActualPath:   "actual.png",
+				Status:       aeoracle.FrameStatusDifferent,
+				Compare: &aeoracle.CompareReport{
+					SchemaVersion:    aeoracle.SchemaVersion,
+					ExpectedPath:     "expected.png",
+					ActualPath:       "actual.png",
+					TotalPixels:      4,
+					DifferentPixels:  2,
+					DifferentPercent: 50,
+					MaxChannelDelta:  7,
+				},
+			},
+			{
+				Tag:          "f000048",
+				Frame:        48,
+				Seconds:      2,
+				Reason:       "comp_end",
+				ExpectedPath: "expected_end.png",
+				Status:       aeoracle.FrameStatusMissingActual,
+			},
+		},
+	}
+
+	gaps := gapledger.FromFrameSetCompare(report, gapledger.Context{SourceProject: "original.aep", ObservedIn: "clone.aep"})
+	if len(gaps.Gaps) != 2 {
+		t.Fatalf("len(Gaps) = %d, want 2", len(gaps.Gaps))
+	}
+	if gaps.Gaps[0].Type != gapledger.TypeSemanticGap || gaps.Gaps[0].ActionType != gapledger.ActionRender {
+		t.Fatalf("gap[0] type/action = %q/%q", gaps.Gaps[0].Type, gaps.Gaps[0].ActionType)
+	}
+	if gaps.Gaps[1].Type != gapledger.TypeWriteGap {
+		t.Fatalf("gap[1].Type = %q, want write-gap", gaps.Gaps[1].Type)
+	}
+	if gaps.Gaps[0].Details["frame_tag"] != "f000024" || gaps.Gaps[0].Details["different_pixels"] != 2 {
+		t.Fatalf("gap[0].Details = %+v", gaps.Gaps[0].Details)
+	}
+}
+
 func testDiff(path string, action profilediff.ActionType, severity profilediff.Severity) profilediff.Diff {
 	return profilediff.Diff{
 		Path:       path,

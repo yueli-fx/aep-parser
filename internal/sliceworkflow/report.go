@@ -116,6 +116,7 @@ func BuildDiagnoseReport(
 	observed *profile.Profile,
 	diffReport *profilediff.Report,
 	renderReports []aeoracle.CompareReport,
+	frameSetReports []aeoracle.FrameSetCompareReport,
 	opts Options,
 ) (Report, error) {
 	if observed == nil {
@@ -141,6 +142,14 @@ func BuildDiagnoseReport(
 		}
 		report.Summary.GapCount += renderGapReport.GapCount
 		report.GapReports = append(report.GapReports, renderGapReport)
+	}
+	for _, frameSetReport := range frameSetReports {
+		frameSetGapReport := gapledger.FromFrameSetCompare(frameSetReport, ctx)
+		if frameSetGapReport.GapCount == 0 {
+			continue
+		}
+		report.Summary.GapCount += frameSetGapReport.GapCount
+		report.GapReports = append(report.GapReports, frameSetGapReport)
 	}
 	return report, nil
 }

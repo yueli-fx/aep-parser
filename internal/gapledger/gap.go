@@ -150,6 +150,78 @@ func FromRenderCompare(compare aeoracle.CompareReport, ctx Context) Report {
 	return report
 }
 
+func FromFrameSetCompare(frameSet aeoracle.FrameSetCompareReport, ctx Context) Report {
+	report := Report{
+		SchemaVersion: SchemaVersion,
+		SourceProject: ctx.SourceProject,
+		ObservedIn:    ctx.ObservedIn,
+	}
+	for _, frame := range frameSet.Frames {
+		if frame.Status == aeoracle.FrameStatusOK {
+			continue
+		}
+		gapType, evidenceKind := frameSetGapType(frame.Status)
+		path := fmt.Sprintf("render.frames[%q]", frame.Tag)
+		details := map[string]any{
+			"evidence_kind": evidenceKind,
+			"frame_tag":     frame.Tag,
+			"frame":         frame.Frame,
+			"seconds":       frame.Seconds,
+			"reason":        frame.Reason,
+			"expected_path": frame.ExpectedPath,
+			"actual_path":   frame.ActualPath,
+			"status":        frame.Status,
+		}
+		if frame.Compare != nil {
+			details["width"] = frame.Compare.Width
+			details["height"] = frame.Compare.Height
+			details["total_pixels"] = frame.Compare.TotalPixels
+			details["different_pixels"] = frame.Compare.DifferentPixels
+			details["different_percent"] = frame.Compare.DifferentPercent
+			details["max_channel_delta"] = frame.Compare.MaxChannelDelta
+			details["channel_threshold"] = frame.Compare.ChannelThreshold
+		}
+		report.Gaps = append(report.Gaps, Gap{
+			ID:            gapID(gapType, path),
+			Type:          gapType,
+			ProfilePath:   path,
+			SourceProject: ctx.SourceProject,
+			ObservedIn:    ctx.ObservedIn,
+			Evidence: profile.Evidence{
+				Level:      profile.EvidenceL4Render,
+				Source:     "internal/aeoracle",
+				Confidence: "high",
+			},
+			Severity:   SeverityFidelity,
+			ActionType: ActionRender,
+			HumanNotes: frameSetNote(frame),
+			Details:    details,
+		})
+	}
+	report.GapCount = len(report.Gaps)
+	return report
+}
+
+func frameSetGapType(status string) (GapType, string) {
+	switch status {
+	case aeoracle.FrameStatusDifferent:
+		return TypeSemanticGap, "render_frame_delta"
+	case aeoracle.FrameStatusMissingActual:
+		return TypeWriteGap, "render_frame_missing_actual"
+	case aeoracle.FrameStatusMissingExpected:
+		return TypeInvestigateGap, "render_frame_missing_expected"
+	default:
+		return TypeInvestigateGap, "render_frame_status"
+	}
+}
+
+func frameSetNote(frame aeoracle.FrameCompareRecord) string {
+	if frame.Compare != nil {
+		return fmt.Sprintf("render frame %s differs: %d/%d pixels (%.4f%%), max channel delta %d", frame.Tag, frame.Compare.DifferentPixels, frame.Compare.TotalPixels, frame.Compare.DifferentPercent, frame.Compare.MaxChannelDelta)
+	}
+	return fmt.Sprintf("render frame %s status %s", frame.Tag, frame.Status)
+}
+
 func mapDiffAction(action profilediff.ActionType) (GapType, ActionType) {
 	switch action {
 	case profilediff.ActionParse:

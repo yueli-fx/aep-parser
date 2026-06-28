@@ -80,6 +80,7 @@ func runDiagnose(args []string) int {
 	ignorePath := fs.String("ignore", "", "JSON ignore rules file")
 	expectedPNG := fs.String("expected-png", "", "expected PNG path for optional render gap")
 	actualPNG := fs.String("actual-png", "", "actual PNG path for optional render gap")
+	renderSetPath := fs.String("render-set", "", "frame-set compare report JSON path")
 	threshold := fs.Int("threshold", 0, "per-channel render threshold 0..255")
 	jsonOut := fs.Bool("json", false, "emit JSON workflow report")
 	outPath := fs.String("out", "", "optional output path")
@@ -132,8 +133,17 @@ func runDiagnose(args []string) int {
 		}
 		renderReports = append(renderReports, renderReport)
 	}
+	var frameSetReports []aeoracle.FrameSetCompareReport
+	if *renderSetPath != "" {
+		frameSetReport, err := readFrameSetReport(*renderSetPath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "render-set:", err)
+			return 2
+		}
+		frameSetReports = append(frameSetReports, frameSetReport)
+	}
 
-	report, err := sliceworkflow.BuildDiagnoseReport(expected, actual, diffReport, renderReports, sliceworkflow.Options{
+	report, err := sliceworkflow.BuildDiagnoseReport(expected, actual, diffReport, renderReports, frameSetReports, sliceworkflow.Options{
 		SourceProject: *expectedPath,
 		ObservedIn:    *actualPath,
 		MaxSlices:     *maxSlices,
@@ -165,6 +175,21 @@ func buildProfile(path string, dict *profile.EffectDictionary) (*profile.Profile
 		return nil, fmt.Errorf("open %q: %w", path, err)
 	}
 	return profile.Build(project, profile.Options{Path: path, Dict: dict})
+}
+
+func readFrameSetReport(path string) (aeoracle.FrameSetCompareReport, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return aeoracle.FrameSetCompareReport{}, err
+	}
+	var report aeoracle.FrameSetCompareReport
+	if err := json.Unmarshal(data, &report); err != nil {
+		return aeoracle.FrameSetCompareReport{}, err
+	}
+	if report.SchemaVersion != aeoracle.SchemaVersion {
+		return aeoracle.FrameSetCompareReport{}, fmt.Errorf("unsupported schema_version %d", report.SchemaVersion)
+	}
+	return report, nil
 }
 
 func emitReport(report sliceworkflow.Report, jsonOut bool, outPath string) int {

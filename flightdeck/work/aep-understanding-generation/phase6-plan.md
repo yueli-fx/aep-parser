@@ -100,11 +100,11 @@ Exit semantics:
 - Modify: `cmd/aeoracle/main.go`
 - Modify: `cmd/aeoracle/main_test.go`
 
-- [ ] Add `TestCloneRenderRequestPreservesFrameTargets` in `internal/aeoracle/request_test.go`.
+- [x] Add `TestCloneRenderRequestPreservesFrameTargets` in `internal/aeoracle/request_test.go`.
 
 Expected assertion: cloned request changes `AEPPath`, `OutputDir`, `DonePath`, and `MetadataPath`, preserves all `Frames`, and keeps `CompName` unless overridden.
 
-- [ ] Implement:
+- [x] Implement:
 
 ```go
 func CloneRenderRequest(source RenderRequest, aepPath, compName, outputDir string) RenderRequest
@@ -112,18 +112,19 @@ func CloneRenderRequest(source RenderRequest, aepPath, compName, outputDir strin
 
 Use `NewRenderRequest(aepPath, selectedCompName, outputDir, source.Frames)`, where `selectedCompName` is `compName` if non-empty, otherwise `source.CompName`.
 
-- [ ] Add `aeoracle clone-request` CLI flags:
+- [x] Add `aeoracle clone-request` CLI flags:
   - `-from`
   - `-aep`
   - `-out`
   - `-comp`
   - `-json`
 
-- [ ] Verify:
+- [x] Verify:
 
 ```powershell
 go test ./internal/aeoracle ./cmd/aeoracle
-go run ./cmd/aeoracle clone-request -from tmp_debug\aeoracle\booyah\request.json -aep flightdeck\showcase\booyah-clone\booyah-clone.aep -out tmp_debug\aeoracle\booyah_clone -json
+go run ./cmd/aeoracle plan -aep 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -comp 'グリッチテキスト' -out tmp_debug\aeoracle\booyah_compare\source -json
+go run ./cmd/aeoracle clone-request -from tmp_debug\aeoracle\booyah_compare\source\request.json -aep flightdeck\showcase\booyah-clone\booyah-clone.aep -out tmp_debug\aeoracle\booyah_compare\clone -json
 ```
 
 Expected: `tmp_debug/aeoracle/booyah_clone/request.json` exists and has the same 8 frame tags as the source request.
@@ -134,14 +135,14 @@ Expected: `tmp_debug/aeoracle/booyah_clone/request.json` exists and has the same
 - Create: `internal/aeoracle/frameset.go`
 - Create: `internal/aeoracle/frameset_test.go`
 
-- [ ] Add `TestCompareFrameSetsReportsAllOKForIdenticalPNGs`.
-- [ ] Add `TestCompareFrameSetsReportsDifferentPixels`.
-- [ ] Add `TestCompareFrameSetsReportsMissingActualFrame`.
-- [ ] Add `TestCompareFrameSetsRejectsDuplicateTags`.
+- [x] Add `TestCompareFrameSetsReportsAllOKForIdenticalPNGs`.
+- [x] Add `TestCompareFrameSetsReportsDifferentPixels`.
+- [x] Add `TestCompareFrameSetsReportsMissingActualFrame`.
+- [x] Add `TestCompareFrameSetsRejectsDuplicateTags`.
 
 Use generated 2x2 PNGs in temp dirs, following `internal/aeoracle/pngcompare_test.go`.
 
-- [ ] Implement:
+- [x] Implement:
 
 ```go
 func ReadRenderMetadata(path string) (RenderMetadata, error)
@@ -156,7 +157,7 @@ Rules:
 - Duplicate tags in either metadata are fatal errors.
 - PNG read/size errors are fatal errors because the compare result is not reliable.
 
-- [ ] Verify:
+- [x] Verify:
 
 ```powershell
 go test ./internal/aeoracle
@@ -168,24 +169,24 @@ go test ./internal/aeoracle
 - Modify: `cmd/aeoracle/main.go`
 - Modify: `cmd/aeoracle/main_test.go`
 
-- [ ] Add `compare-set` usage and flags:
+- [x] Add `compare-set` usage and flags:
   - `-expected-meta`
   - `-actual-meta`
   - `-threshold`
   - `-json`
   - `-out`
 
-- [ ] Implement command output:
+- [x] Implement command output:
   - text: one summary line plus one line per non-ok frame.
   - JSON: full `FrameSetCompareReport`.
   - `-out`: write JSON report regardless of `-json`.
 
-- [ ] Implement exit codes:
+- [x] Implement exit codes:
   - 0 when `Summary.DifferentFrames == 0` and missing counts are zero.
   - 1 when report is valid but any frame differs or is missing.
   - 2 on usage or compare error.
 
-- [ ] Verify:
+- [x] Verify:
 
 ```powershell
 go test ./cmd/aeoracle
@@ -201,7 +202,7 @@ go test ./cmd/aeoracle
 - Modify: `cmd/aepslices/main.go`
 - Modify: `cmd/aepslices/main_test.go`
 
-- [ ] Add `gapledger.FromFrameSetCompare(report aeoracle.FrameSetCompareReport) Report`.
+- [x] Add `gapledger.FromFrameSetCompare(report aeoracle.FrameSetCompareReport) Report`.
 
 Mapping:
 - `different` -> `semantic-gap`, evidence kind `render_frame_delta`.
@@ -209,14 +210,14 @@ Mapping:
 - `missing_expected` -> `investigate-gap`, evidence kind `render_frame_missing_expected`.
 - Include frame tag, frame number, seconds, expected path, actual path, different pixel count, and max channel delta in context.
 
-- [ ] Add `aepslices diagnose -render-set <report.json>`.
+- [x] Add `aepslices diagnose -render-set <report.json>`.
 
 Rules:
 - Existing `-expected-png`/`-actual-png` remains supported for one-off PNG compare.
 - `-render-set` may be combined with profile diff.
 - Exit code remains 1 when any gap report has gaps.
 
-- [ ] Verify:
+- [x] Verify:
 
 ```powershell
 go test ./internal/gapledger ./internal/sliceworkflow ./cmd/aepslices
@@ -228,32 +229,32 @@ go test ./internal/gapledger ./internal/sliceworkflow ./cmd/aepslices
 - Modify: `flightdeck/work/aep-understanding-generation/phase5-booyah-acceptance.md`
 - Create: `flightdeck/work/aep-understanding-generation/phase6-booyah-render-compare.md`
 
-- [ ] Generate clone request:
+- [x] Generate clone request:
 
 ```powershell
 go run ./cmd/aeoracle clone-request -from tmp_debug\aeoracle\booyah\request.json -aep flightdeck\showcase\booyah-clone\booyah-clone.aep -out tmp_debug\aeoracle\booyah_clone -json
 ```
 
-- [ ] Render source and clone with AE 2025:
+- [x] Render source and clone with AE 2025:
 
 ```powershell
-go run ./cmd/aeoracle render -request tmp_debug\aeoracle\booyah\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 900
-go run ./cmd/aeoracle render -request tmp_debug\aeoracle\booyah_clone\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 900
+go run ./cmd/aeoracle render -request tmp_debug\aeoracle\booyah_compare\source\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 900
+go run ./cmd/aeoracle render -request tmp_debug\aeoracle\booyah_compare\clone\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 900
 ```
 
-- [ ] Compare frame sets:
+- [x] Compare frame sets:
 
 ```powershell
-go run ./cmd/aeoracle compare-set -expected-meta tmp_debug\aeoracle\booyah\metadata.json -actual-meta tmp_debug\aeoracle\booyah_clone\metadata.json -threshold 0 -json -out tmp_debug\aeoracle\booyah_compare_set.json
+go run ./cmd/aeoracle compare-set -expected-meta tmp_debug\aeoracle\booyah_compare\source\metadata.json -actual-meta tmp_debug\aeoracle\booyah_compare\clone\metadata.json -threshold 0 -json -out tmp_debug\aeoracle\booyah_compare\compare_set.json
 ```
 
-- [ ] Merge profile and render gaps:
+- [x] Merge profile and render gaps:
 
 ```powershell
-go run ./cmd/aepslices diagnose -expected 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -render-set tmp_debug\aeoracle\booyah_compare_set.json -json -out tmp_debug\aepslices\booyah_vs_clone_with_render.json
+go run ./cmd/aepslices diagnose -expected 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -render-set tmp_debug\aeoracle\booyah_compare\compare_set.json -json -out tmp_debug\aepslices\booyah_vs_clone_with_render.json
 ```
 
-- [ ] Record exact AE version, frame count, differing frame count, and top render-gap evidence in `phase6-booyah-render-compare.md`.
+- [x] Record exact AE version, frame count, differing frame count, and top render-gap evidence in `phase6-booyah-render-compare.md`.
 
 ### Task 6: Readiness Decision for Recipe IR
 
@@ -262,7 +263,7 @@ go run ./cmd/aepslices diagnose -expected 'samples\motionbox\glitch\booyah-glitc
 - Modify: `flightdeck/cockpit.md`
 - Create or modify: `flightdeck/work/aep-understanding-generation/phase6-recipe-ir-plan.md`
 
-- [ ] If Booyah compare produces valid frame-set render gaps, write `phase6-recipe-ir-plan.md` for a minimal recipe compiler.
+- [x] If Booyah compare produces valid frame-set render gaps, write `phase6-recipe-ir-plan.md` for a minimal recipe compiler.
 
 Minimum recipe IR scope:
 - project settings,
@@ -273,17 +274,17 @@ Minimum recipe IR scope:
 - effects only when `cmd/capindex -q <effect>` reports supported writer capability,
 - explicit downgrade/refusal records for unsupported requested constructs.
 
-- [ ] Do not start automated correction loops in this phase. Correction loops require a bounded parameter set and a render-delta objective already proven by `compare-set`.
+- [x] Do not start automated correction loops in this phase. Correction loops require a bounded parameter set and a render-delta objective already proven by `compare-set`.
 
 ### Task 7: Verification and Commit
 
-- [ ] Run `go test ./internal/aeoracle ./cmd/aeoracle ./internal/gapledger ./internal/sliceworkflow ./cmd/aepslices`.
-- [ ] Run `go test ./...`.
-- [ ] Run `go vet ./...`.
-- [ ] Run `git diff --check`.
-- [ ] Run the Booyah render compare commands from Task 5.
-- [ ] Update Flightdeck docs.
-- [ ] Commit with `feat(aeoracle): compare render frame sets`.
+- [x] Run `go test ./internal/aeoracle ./cmd/aeoracle ./internal/gapledger ./internal/sliceworkflow ./cmd/aepslices`.
+- [x] Run `go test ./...`.
+- [x] Run `go vet ./...`.
+- [x] Run `git diff --check`.
+- [x] Run the Booyah render compare commands from Task 5.
+- [x] Update Flightdeck docs.
+- [x] Commit with `feat(aeoracle): compare render frame sets`.
 
 ## Stop Rule
 
