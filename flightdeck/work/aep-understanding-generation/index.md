@@ -59,13 +59,17 @@ Done:
 - Phase 3 implemented `internal/aeoracle`, `cmd/aeoracle`, and
   `scripts/aeoracle_render.jsx` for sentinel frame planning, render sidecars,
   PNG comparison, and AE dry-run invocation.
+- Phase 4 implemented `internal/gapledger` and `cmd/aepgaps` for structured
+  diff/render gap reports with stable IDs, evidence, severity, action type,
+  and context fields.
 
 Current:
-- Phase 4 gap ledger is active.
-- Build structured gap reports from `aepdiff` and `aeoracle compare` results
-  before slice replication or generation work.
+- Phase 5 slice replication workflow is next: prove a second project can move
+  through profile, diff, render, and gaps before recipe generation.
 
 ## Open questions
 
 - How much capability linking can be automated from current profile paths
   before a richer path-to-capability index exists.
+- What the smallest Phase 5 replication slice should be, so it exercises both
+  structural and render gaps without forcing a full-project rebuild first.
