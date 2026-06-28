@@ -126,6 +126,77 @@ func TestCompileToFileSetsEffectParams(t *testing.T) {
 	assertParamValue(t, params, "ADBE Gaussian Blur 2-0003", 1.0)
 }
 
+func TestCompileToFileChecksExpectedProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		CompCount:       intPtr(1),
+		LayerCount:      intPtr(2),
+		TextLayerCount:  intPtr(1),
+		ShapeLayerCount: intPtr(1),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.layer_count", true)
+}
+
+func TestCompileToFileRefusesExpectedProfileMismatch(t *testing.T) {
+	rec := minimalRecipe()
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		LayerCount: intPtr(3),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if report.Valid {
+		t.Fatalf("report = %+v, want invalid", report)
+	}
+	assertRefusal(t, report, "profile_contract_mismatch")
+	assertProfileCheck(t, report, "expected_profile.layer_count", false)
+	if _, err := aep.Open(outPath); err == nil {
+		t.Fatal("AEP was written despite expected-profile mismatch")
+	}
+}
+
+func TestCompileToFileChecksExpectedEffectParamProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Gaussian Blur 2",
+		Params: []recipe.EffectParam{
+			{MatchName: "ADBE Gaussian Blur 2-0001", Value: 25.0},
+		},
+	}}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Effects: []recipe.ExpectedEffect{{
+			LayerName: "Title",
+			MatchName: "ADBE Gaussian Blur 2",
+			Params: []recipe.ExpectedEffectParam{{
+				MatchName: "ADBE Gaussian Blur 2-0001",
+				Value:     25.0,
+			}},
+		}},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.effects[0].params[0]", true)
+}
+
 func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {
 	t.Helper()
 	for _, param := range params {
@@ -139,4 +210,18 @@ func assertParamValue(t *testing.T, params []profile.Property, matchName string,
 		return
 	}
 	t.Fatalf("param %q not found in %+v", matchName, params)
+}
+
+func assertProfileCheck(t *testing.T, report recipe.Report, path string, passed bool) {
+	t.Helper()
+	for _, check := range report.ProfileChecks {
+		if check.Path == path && check.Passed == passed {
+			return
+		}
+	}
+	t.Fatalf("profile check %q passed=%v not found in %+v", path, passed, report.ProfileChecks)
+}
+
+func intPtr(v int) *int {
+	return &v
 }

@@ -9,9 +9,10 @@ import (
 const SchemaVersion = 1
 
 type Recipe struct {
-	SchemaVersion int         `json:"schema_version"`
-	Project       ProjectSpec `json:"project"`
-	Comps         []CompSpec  `json:"comps"`
+	SchemaVersion   int             `json:"schema_version"`
+	Project         ProjectSpec     `json:"project"`
+	Comps           []CompSpec      `json:"comps"`
+	ExpectedProfile ExpectedProfile `json:"expected_profile,omitempty"`
 }
 
 type ProjectSpec struct {
@@ -67,12 +68,32 @@ type VectorKeyframe struct {
 	Value []float64 `json:"value"`
 }
 
+type ExpectedProfile struct {
+	CompCount       *int             `json:"comp_count,omitempty"`
+	LayerCount      *int             `json:"layer_count,omitempty"`
+	TextLayerCount  *int             `json:"text_layer_count,omitempty"`
+	ShapeLayerCount *int             `json:"shape_layer_count,omitempty"`
+	Effects         []ExpectedEffect `json:"effects,omitempty"`
+}
+
+type ExpectedEffect struct {
+	LayerName string                `json:"layer_name"`
+	MatchName string                `json:"match_name"`
+	Params    []ExpectedEffectParam `json:"params,omitempty"`
+}
+
+type ExpectedEffectParam struct {
+	MatchName string `json:"match_name"`
+	Value     any    `json:"value,omitempty"`
+}
+
 type Report struct {
 	SchemaVersion int             `json:"schema_version"`
 	Valid         bool            `json:"valid"`
 	OutputPath    string          `json:"output_path,omitempty"`
 	Capabilities  []CapabilityUse `json:"capabilities,omitempty"`
 	Downgrades    []Downgrade     `json:"downgrades,omitempty"`
+	ProfileChecks []ProfileCheck  `json:"profile_checks,omitempty"`
 	Refusals      []Refusal       `json:"refusals,omitempty"`
 }
 
@@ -92,6 +113,14 @@ type Downgrade struct {
 	Path    string `json:"path,omitempty"`
 	Query   string `json:"query,omitempty"`
 	Message string `json:"message,omitempty"`
+}
+
+type ProfileCheck struct {
+	Path     string `json:"path"`
+	Passed   bool   `json:"passed"`
+	Expected any    `json:"expected,omitempty"`
+	Actual   any    `json:"actual,omitempty"`
+	Message  string `json:"message,omitempty"`
 }
 
 func Validate(rec Recipe) Report {
@@ -142,6 +171,7 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
+	validateExpectedProfile(rec.ExpectedProfile, addRefusal)
 	for ci, comp := range rec.Comps {
 		compPath := fmt.Sprintf("comps[%d]", ci)
 		recordCapability("NewComposition", compPath)
@@ -157,6 +187,39 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		}
 	}
 	return report
+}
+
+func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, string, string)) {
+	if expected.CompCount != nil && *expected.CompCount < 0 {
+		addRefusal("invalid_expected_profile", "expected_profile.comp_count", "expected count must be non-negative")
+	}
+	if expected.LayerCount != nil && *expected.LayerCount < 0 {
+		addRefusal("invalid_expected_profile", "expected_profile.layer_count", "expected count must be non-negative")
+	}
+	if expected.TextLayerCount != nil && *expected.TextLayerCount < 0 {
+		addRefusal("invalid_expected_profile", "expected_profile.text_layer_count", "expected count must be non-negative")
+	}
+	if expected.ShapeLayerCount != nil && *expected.ShapeLayerCount < 0 {
+		addRefusal("invalid_expected_profile", "expected_profile.shape_layer_count", "expected count must be non-negative")
+	}
+	for i, effect := range expected.Effects {
+		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)
+		if effect.LayerName == "" {
+			addRefusal("invalid_expected_profile", effectPath+".layer_name", "layer_name is required")
+		}
+		if effect.MatchName == "" {
+			addRefusal("invalid_expected_profile", effectPath+".match_name", "effect match_name is required")
+		}
+		for pi, param := range effect.Params {
+			paramPath := fmt.Sprintf("%s.params[%d]", effectPath, pi)
+			if param.MatchName == "" {
+				addRefusal("invalid_expected_profile", paramPath+".match_name", "param match_name is required")
+			}
+			if !validEffectParamValue(param.Value) {
+				addRefusal("invalid_expected_profile", paramPath+".value", "expected param value must be a number, boolean, or numeric array")
+			}
+		}
+	}
 }
 
 func validateLayer(layer Layer, layerPath string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {

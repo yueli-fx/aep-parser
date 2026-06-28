@@ -43,5 +43,30 @@
         }
       ]
     }
-  ]
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "text_layer_count": 1,
+    "effects": [
+      {
+        "layer_name": "Blurred Title",
+        "match_name": "ADBE Gaussian Blur 2",
+        "params": [
+          {
+            "match_name": "ADBE Gaussian Blur 2-0001",
+            "value": 25
+          },
+          {
+            "match_name": "ADBE Gaussian Blur 2-0002",
+            "value": 2
+          },
+          {
+            "match_name": "ADBE Gaussian Blur 2-0003",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
 }

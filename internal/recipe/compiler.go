@@ -1,11 +1,14 @@
 package recipe
 
 import (
+	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 
 	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/example/aep-parser/internal/profile"
 )
 
 func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, error) {
@@ -37,6 +40,26 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, err
 		}
 	}
+	if hasExpectedProfile(rec.ExpectedProfile) {
+		prof, err := buildWrittenProfile(project, outPath)
+		if err != nil {
+			return report, fmt.Errorf("recipe: build profile for expected_profile: %w", err)
+		}
+		report.ProfileChecks = checkExpectedProfile(rec.ExpectedProfile, prof)
+		for _, check := range report.ProfileChecks {
+			if !check.Passed {
+				report.Valid = false
+				report.Refusals = append(report.Refusals, Refusal{
+					Code:    "profile_contract_mismatch",
+					Path:    check.Path,
+					Message: check.Message,
+				})
+			}
+		}
+		if !report.Valid {
+			return report, nil
+		}
+	}
 
 	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
 		return report, err
@@ -50,6 +73,151 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 		return report, err
 	}
 	return report, nil
+}
+
+func buildWrittenProfile(project *aep.Project, outPath string) (*profile.Profile, error) {
+	var buf bytes.Buffer
+	if err := project.WriteAEP(&buf); err != nil {
+		return nil, err
+	}
+	reopened, err := aep.FromReader(bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		return nil, err
+	}
+	return profile.Build(reopened, profile.Options{Path: outPath})
+}
+
+func hasExpectedProfile(expected ExpectedProfile) bool {
+	return expected.CompCount != nil ||
+		expected.LayerCount != nil ||
+		expected.TextLayerCount != nil ||
+		expected.ShapeLayerCount != nil ||
+		len(expected.Effects) > 0
+}
+
+func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []ProfileCheck {
+	var checks []ProfileCheck
+	add := func(path string, expected, actual any, passed bool) {
+		msg := ""
+		if !passed {
+			msg = fmt.Sprintf("%s expected %v, got %v", path, expected, actual)
+		}
+		checks = append(checks, ProfileCheck{
+			Path:     path,
+			Passed:   passed,
+			Expected: expected,
+			Actual:   actual,
+			Message:  msg,
+		})
+	}
+	if expected.CompCount != nil {
+		actual := prof.Fingerprint.CompCount
+		add("expected_profile.comp_count", *expected.CompCount, actual, actual == *expected.CompCount)
+	}
+	if expected.LayerCount != nil {
+		actual := prof.Fingerprint.LayerCount
+		add("expected_profile.layer_count", *expected.LayerCount, actual, actual == *expected.LayerCount)
+	}
+	if expected.TextLayerCount != nil {
+		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return layer.Text != nil })
+		add("expected_profile.text_layer_count", *expected.TextLayerCount, actual, actual == *expected.TextLayerCount)
+	}
+	if expected.ShapeLayerCount != nil {
+		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
+		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	for i, expectedEffect := range expected.Effects {
+		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)
+		effect := findProfileEffect(prof, expectedEffect.LayerName, expectedEffect.MatchName)
+		add(effectPath, expectedEffect.MatchName, effectMatchName(effect), effect != nil)
+		if effect == nil {
+			continue
+		}
+		for pi, expectedParam := range expectedEffect.Params {
+			paramPath := fmt.Sprintf("%s.params[%d]", effectPath, pi)
+			param := findProfileParam(effect.Params, expectedParam.MatchName)
+			if param == nil {
+				add(paramPath, expectedParam.Value, nil, false)
+				continue
+			}
+			passed := profileValueEqual(expectedParam.Value, param.StaticValue)
+			add(paramPath, expectedParam.Value, param.StaticValue, passed)
+		}
+	}
+	return checks
+}
+
+func countProfileLayers(prof *profile.Profile, include func(profile.Layer) bool) int {
+	var count int
+	for _, comp := range prof.Comps {
+		for _, layer := range comp.Layers {
+			if include(layer) {
+				count++
+			}
+		}
+	}
+	return count
+}
+
+func findProfileEffect(prof *profile.Profile, layerName, matchName string) *profile.Effect {
+	for _, comp := range prof.Comps {
+		for _, layer := range comp.Layers {
+			if layer.Name != layerName {
+				continue
+			}
+			for i := range layer.Effects {
+				if layer.Effects[i].MatchName == matchName {
+					return &layer.Effects[i]
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func effectMatchName(effect *profile.Effect) any {
+	if effect == nil {
+		return nil
+	}
+	return effect.MatchName
+}
+
+func findProfileParam(params []profile.Property, matchName string) *profile.Property {
+	for i := range params {
+		if params[i].MatchName == matchName {
+			return &params[i]
+		}
+	}
+	return nil
+}
+
+func profileValueEqual(expected, actual any) bool {
+	expected, err := normalizeEffectParamValue(expected)
+	if err != nil {
+		return false
+	}
+	actual, err = normalizeEffectParamValue(actual)
+	if err != nil {
+		return false
+	}
+	switch e := expected.(type) {
+	case float64:
+		a, ok := actual.(float64)
+		return ok && math.Abs(e-a) < 1e-9
+	case []float64:
+		a, ok := actual.([]float64)
+		if !ok || len(e) != len(a) {
+			return false
+		}
+		for i := range e {
+			if math.Abs(e[i]-a[i]) >= 1e-9 {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
+	}
 }
 
 func hasEffects(comp CompSpec) bool {

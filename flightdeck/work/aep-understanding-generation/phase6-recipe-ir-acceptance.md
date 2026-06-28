@@ -90,6 +90,35 @@ Third follow-up completed:
   - metadata: status `ok`, AE `25.1x68`
   - PNG outputs: `f000000.png`, `f000030.png`, `f000060.png`
 
+Fourth follow-up completed:
+
+- Recipes now support an embedded `expected_profile` contract. The compiler
+  builds a profile from the exact AEP bytes it is about to write, records
+  `profile_checks` in the report, and refuses to write the final output when a
+  profile contract check fails.
+- Covered checks:
+  - `comp_count`
+  - `layer_count`
+  - `text_layer_count`
+  - `shape_layer_count`
+  - expected effect on a named layer
+  - expected static effect parameter values
+- `examples/recipes/minimal-text-shape.json` now asserts comp/layer/text/shape
+  counts.
+- `examples/recipes/minimal-text-effect.json` now asserts comp/layer/text
+  counts plus `ADBE Gaussian Blur 2` and its three static params.
+- Example compiles:
+  - `tmp_debug/recipes/minimal-text-shape-contract.aep`
+  - `tmp_debug/recipes/minimal-text-effect-contract.aep`
+- AE 2025 render oracle passed for the effect contract output:
+  - request: `tmp_debug/aeoracle/minimal_text_effect_contract/request.json`
+  - done marker:
+    `tmp_debug/aeoracle/minimal_text_effect_contract/aeoracle_render.done` =
+    `ok`
+  - metadata: status `ok`, AE `25.1x68`
+  - PNG outputs: `f000000.png`, `f000030.png`, `f000060.png`
+
 Next generation work should broaden recipe coverage in small proven slices,
-starting with a recipe-to-profile expected-output contract or richer shape/text
-controls, each gated by profile and render-oracle evidence.
+starting with richer shape/text controls, text style fields, or expression /
+keyframe coverage, each gated by embedded profile checks and render-oracle
+evidence.

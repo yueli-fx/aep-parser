@@ -108,13 +108,18 @@ Done:
 - Recipe effect params now support static scalar/bool/numeric-array values via
   `SetEffectParam`; the Gaussian Blur example passed profile inspection and AE
   2025 render oracle with params `25`, `2`, and `1`.
+- Recipes now support embedded `expected_profile` checks. `cmd/aeprecipe
+  compile` builds a profile from the exact AEP bytes it is about to write,
+  reports `profile_checks`, and refuses final output on mismatch. Both recipe
+  examples now carry self-contained profile contracts; the effect-contract
+  output passed AE 2025 render oracle.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are a recipe-to-profile expected-output contract or richer
-  shape/text controls. Do not start automated correction loops.
+  candidates are richer shape/text controls, text style fields, or expression /
+  keyframe coverage. Do not start automated correction loops.
 
 ## Open questions
 
@@ -122,6 +127,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Whether the next safety rail should be expected-profile assertions for recipe
-  examples, so future generation changes cannot silently lose layers, effects,
-  params, text, or shape nodes.
+- Which recipe field family should enter next: text style, shape stroke/detail,
+  transform keyframe/ease, or expression support.
