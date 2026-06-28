@@ -27,6 +27,6 @@ step("fresh_project", function () {
 });
 ```
 
-写新 fixture 用 `checklists/re-fixture.md` 的模板，已经包了这一步。
+写新 fixture 时固定做这一步：每次 rerun 前删除旧 comp 或新建工程，避免历史 comp 留在项目里污染 Go test。
 
 Bug-fix 类 RE 改 JSX 后重跑前最好 `rm -f test_data/<name>.aep` 强制从零生成。

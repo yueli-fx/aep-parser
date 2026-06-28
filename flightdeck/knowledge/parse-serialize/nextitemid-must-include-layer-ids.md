@@ -5,7 +5,7 @@ READ WHEN: implementing any allocItemID / monotonic-ID logic; computing max(used
 
 ---
 
-V3 Phase 5B 暴露的隐患：`Project.initDerived` 只走 `Compositions / Footage / Folders` 求 `max(ID) + 1` 当 `nextItemID`，**漏了 layer**。AE 把 layer ID 也分配在同一个 head counter 下 —— 一个 comp 内 layer ID 普遍 `> footage ID`（因为 AE 添加 solid 时是先建 footage 再建 layer，layer 拿后一个号），所以 `max(layer)` 可能 `>` `max(folder/comp/footage)`。
+显式 track matte duplicate 暴露的隐患：`Project.initDerived` 只走 `Compositions / Footage / Folders` 求 `max(ID) + 1` 当 `nextItemID`，**漏了 layer**。AE 把 layer ID 也分配在同一个 head counter 下 —— 一个 comp 内 layer ID 普遍 `> footage ID`（因为 AE 添加 solid 时是先建 footage 再建 layer，layer 拿后一个号），所以 `max(layer)` 可能 `>` `max(folder/comp/footage)`。
 
 ## 表象
 
@@ -43,7 +43,7 @@ for _, c := range p.Compositions {
 }
 ```
 
-固定在 `parse.go::initDerived` 里，跟 footage / folder 三个 loop 合一处。Phase 5B 的 `TestDuplicateLayer_ExplicitMatte_RoundTrip` 是 first triggering case；以前的 dup 测试用 `re_delete_layer_baseline.aep`（max(layer) ≤ max(footage)）所以没暴露。
+固定在 `parse.go::initDerived` 里，跟 footage / folder 三个 loop 合一处。`TestDuplicateLayer_ExplicitMatte_RoundTrip` 是 first triggering case；以前的 dup 测试用 `re_delete_layer_baseline.aep`（max(layer) <= max(footage)）所以没暴露。
 
 ## 适用范围
 
@@ -110,7 +110,6 @@ Booyah comp ② 全工程复刻（多 comp 从零）暴露同一 scar 的又一�
 
 ## Related
 
-- 修复 commit: 2026-05-28 V3 Phase 5B（同 commit 一起 ship）
-- Phase 5B plan: [`../plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../archive/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md)
+- 修复 commit: 2026-05-28 显式 track matte duplicate 修复批次（同 commit 一起 ship）
 - 受影响代码: `internal/serializer/parse.go::initDerived`
-- 受影响 invariant: Inv-9 (monotonic ID alloc, no reuse) in `incidents/ae25-acceptance-gate.md`
+- 受影响 invariant: monotonic ID allocation, no reuse of live item/layer IDs

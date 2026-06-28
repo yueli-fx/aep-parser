@@ -1,7 +1,7 @@
 # showcase 产出规约 — 大阶段示例 + 用户审核 — checklist
 
 SUMMARY: showcase 产出规约 — 大阶段示例 + 用户审核
-READ WHEN: 一个大阶段（独立 plan/spec arc）落地后要产出审核示例；新增一个 showcase 方向文件夹；写或更新 showcase/<方向>/INDEX.md；纠结某次成果算大阶段（必出）还是小阶段（攒批）；想知道 showcase 产物怎么重生成；复刻的工程某帧渲染与原版不一样要逐帧/分层对比定位；想导出 原版-vs-clone 逐帧 PNG 给用户对比
+READ WHEN: 一个大阶段（独立 work effort / 可交付 feature arc）落地后要产出审核示例；新增一个 showcase 方向文件夹；写或更新 showcase/<方向>/INDEX.md；纠结某次成果算大阶段（必出）还是小阶段（攒批）；想知道 showcase 产物怎么重生成；复刻的工程某帧渲染与原版不一样要逐帧/分层对比定位；想导出 原版-vs-clone 逐帧 PNG 给用户对比
 
 ---
 
@@ -9,7 +9,7 @@ READ WHEN: 一个大阶段（独立 plan/spec arc）落地后要产出审核示�
 
 ## 何时出（大阶段 vs 小阶段）
 
-- **大阶段（必出 / 必通知用户审核）** = 有独立 plan/spec arc 的可交付 feature。例：矢量滤镜家族整体、新 layer 类型组（Solid/Null/Camera/Light…）、expression 激活、precomp 嵌套、gradient 体系。
+- **大阶段（必出 / 必通知用户审核）** = 有独立 work effort、能作为一个 feature arc 交付的能力方向。例：矢量滤镜家族整体、新 layer 类型组（Solid/Null/Camera/Light…）、expression 激活、precomp 嵌套、gradient 体系。
 - **小阶段（不单独出，攒批）** = 单 slice：单个滤镜、单个 `Set*` 字段、单个 enum。落地时只更新所属方向 showcase 的 `gen.go` + `INDEX.md`，不新建文件夹、不单独通知。
 
 ## 目录形态（按能力方向分区）

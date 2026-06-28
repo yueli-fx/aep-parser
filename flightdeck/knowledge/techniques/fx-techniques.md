@@ -6,12 +6,12 @@ RECHECK WHEN: 新增/验证一个技法原子;某技法发现新实现效果(等
 
 ---
 
-> **这是什么**:`specs/2026-06-18-technique-ontology.md` 三轴本体的**技法层**实例库——按冻结 schema v2 组织的跨域可复用技法原子。现象配方(`checklists/build-<现象>.md`)由这些原子**有序组合**而成。每喂一个参考模版,新技法按 schema 追加、已有技法标新 `proven_transfers`(交叉链越用越强)。
+> **这是什么**:三轴本体的**技法层**实例库——按冻结 schema v2 组织的跨域可复用技法原子。现象配方由这些原子**有序组合**而成。每喂一个参考模版,新技法按 schema 追加、已有技法标新 `proven_transfers`(交叉链越用越强)。
 >
-> **schema/字段定义见 spec**;本文件是 instance 库(schema 闭、instance 开)。**解析工具** `go run ./cmd/aepdissect <file.aep>` = 内化流水线 PARSE 步。
+> **schema/字段定义写在本文件条目形态里**；本文件是 instance 库(schema 闭、instance 开)。**解析工具** `go run ./cmd/aepdissect <file.aep>` = 内化流水线 PARSE 步。
 >
 > **confidence 约定**:`validated`=经 AE gate(火焰双版本 gate 链内的技法)· `observed`=样本实证用到、未单独渲验 · `hypothesized`=推断/库里有但没渲过。**reproducibility.mechanism 取 any_of 里最可达的**(有 native 实现即标 native;cycore/第三方为增强或替代)。
-> **第三方插件是一等公民(2026-06-18)**:技法可以**纯靠插件**(如 Twitch glitch 跳变,无 native 等价),照立 `third-party` 条、照抽——`third-party` = 「可支持:读✓/写靠 embed-template 采样本 chunk/渲染需装插件」,**不是跳过**。`plugin-free` 仅 procedural-fx-generator 产品优先。详 `checklists/techniques/understand-a-project.md` §第三方插件。
+> **第三方插件是一等公民(2026-06-18)**:技法可以**纯靠插件**(如 Twitch glitch 跳变,无 native 等价),照立 `third-party` 条、照抽——`third-party` = 「可支持:读✓/写靠 embed-template 采样本 chunk/渲染需装插件」,**不是跳过**。`plugin-free` 仅 procedural-fx-generator 产品优先。
 
 ## 两类元素:程序化 vs 素材+装配(aepdissect 自动判别)
 
@@ -211,7 +211,7 @@ reproducibility: {mechanism: lib-blocked, requires_asset: none}
 proven_transfers: [lightning]
 hypothesized_transfers: [transition, energy]
 not_this: "把值烤死进各效果(那是放弃联动,不是控制器)"
-evidence: [samples/LightningPack, incidents/expression-enable-byte-pair.md]
+evidence: [samples/LightningPack, expression enable byte-pair finding]
 confidence: observed
 # ⚠本库表达式 AE 不求值→做不出活联动 Customizer;只能烤死值。这是 lib-blocked 的典型。
 ```
@@ -304,7 +304,7 @@ hypothesized_transfers: [smoke, clouds, energy, water]
 not_this: "单层直接循环(演化参数在端点不连续=可见跳帧)"
 evidence: [samples/ColorfulFireBall]
 confidence: observed
-# 本库:time-remap 需关键帧(见 incidents/layer-settimeremapenabled-needs-keyframes)+ opacity 关键帧交叉淡入。未单独 build/render 验过。
+# 本库:time-remap 需关键帧 + opacity 关键帧交叉淡入；未单独 build/render 验过。
 ```
 
 ### T16 rgb-channel-split(RGB 通道分离/色差)⭐glitch 催生
@@ -373,7 +373,7 @@ confidence: observed
 
 | 现象 | 配方 | 技法(id) |
 |---|---|---|
-| 火焰 | `checklists/techniques/build-good-fire.md` | ①程序化:noise-as-material → seamless-loop → displacement-distortion → luminance-color → silhouette-shape → additive-multilayer-depth(嵌套式 pass) → emissive-glow → time-evolution (+particle-emit/final-grade) |
+| 火焰 | `build-good-fire.md` | ①程序化:noise-as-material → seamless-loop → displacement-distortion → luminance-color → silhouette-shape → additive-multilayer-depth(嵌套式 pass) → emissive-glow → time-evolution (+particle-emit/final-grade) |
 | 闪电(素材包) | 实证#2 Lightning Pack | ②素材+装配:footage-recolor + drop-shadow-as-glow + emissive-glow + mosaic-stylize + customizer-controller-rig。**电弧本体=外部素材** |
 | 闪电(程序化) | (待建,可行) | ①程序化:fractal-branch(ADBE Lightning 2) + emissive-glow + time-evolution。纯生成不靠素材 |
 | 风 | (待建) | noise-as-material + displacement-distortion(方向) + time-evolution + 运动模糊 |
@@ -382,11 +382,11 @@ confidence: observed
 | glitch(纯 native·可复刻) | (待建,Booyah 实证可行) | ①程序化:rgb-channel-split + displacement-distortion(块状噪声驱动) + scanlines-crt + temporal-glitch(Posterize Time) + emissive-glow。Booyah Glitch 全 native |
 | glitch(重度/datamosh) | 实证 GlitchText | 招牌跳变=**Videocopilot Twitch**(third-party,**可经 embed-template 采样本支持**,渲染需装)+ PEDG/Colorama 等;native 部分=temporal-glitch + rgb-channel-split + displacement(纯 native 也能自成一路,见上行) |
 
-> 新增现象:`aepdissect` 解析 → 拆角色 → 按 schema 在此登记新技法/标已有技法新 `proven_transfers` → 写 `checklists/build-<现象>.md` 配方(负责技法间顺序)→ AE gate 验证升 confidence。
+> 新增现象:`aepdissect` 解析 → 拆角色 → 按 schema 在此登记新技法/标已有技法新 `proven_transfers` → 写自包含的 `build-<现象>.md` 配方(负责技法间顺序)→ AE gate 验证升 confidence。
 
 ---
 
-## 重构发现(反馈给 spec,2026-06-18)
+## 重构发现(2026-06-18)
 
 迁 T1–T14 时撞到一个 schema v2 没覆盖的张力,已按"先用着"原则定规(2026-06-18 fire 重解析又增 T15 seamless-loop):
-- **any_of 内可复刻性不齐**(T2 = Turbulent Displace[native] + PEDX[third-party];T9 含 native+Lumetri):**技法级 `reproducibility.mechanism` 取 any_of 里最可达的**(有一个 native 即技法可复刻),更强但需插件的实现记备注。语义=回答"这技法能否被复刻"而非"每种实现各自如何"。若将来需要 per-effect 可复刻性再下沉到 mechanism 项(spec §8 候选)。
+- **any_of 内可复刻性不齐**(T2 = Turbulent Displace[native] + PEDX[third-party];T9 含 native+Lumetri):**技法级 `reproducibility.mechanism` 取 any_of 里最可达的**(有一个 native 即技法可复刻),更强但需插件的实现记备注。语义=回答"这技法能否被复刻"而非"每种实现各自如何"。若将来需要更细粒度，再把 per-effect 可复刻性下沉到 mechanism 项。

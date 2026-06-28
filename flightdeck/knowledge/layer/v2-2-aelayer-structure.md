@@ -597,7 +597,7 @@ Phase 5 ship gate **全闭环**。这是 V2.2 从开发到 AE 接受的 mileston
 3. **AE saved fixtures 是 ship-gate-class V2.x 项目的核心资源**。tolerance.aep 一个 fixture 解了 Layr Transform + Rect + Fill body 三处 silent drop。V2.2.1/V3 work 需要更多 fixtures (Ellipse / Path / Stroke / etc each AE-saved). 抽 + embed 流水 (`extract_*` tools) 是 reusable infrastructure。
 4. **V2.x alpha 限制 ≠ 失败**。Phase 5 ship gate 全闭环但 keyframes / 其它 shape kinds 不持久化 — 这是合理的 V2.2 alpha scope。docs 声明清楚 + V2.2.1 subplan 接力, 项目可以**先 ship 后扩展**, 而不是因为追求完整就 6 轮死循环。
 
-## 永久教训 → CLAUDE.md / scars
+## 永久教训
 
 V2.2 Phase 4 Go roundtrip PASS **不代表 AE 接受**。Go parser 写 tolerant，AE parse 严格。下次类似 "writer + ship gate" 流程 phase 顺序要把 ship gate 提前。
 

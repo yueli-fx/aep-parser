@@ -39,7 +39,7 @@ JSX `cam.cameraOption.filmSize = 50` 不报错但 no-op（ExtendScript 允许任
 
 ## 结论
 
-跟 `incidents/variable-fonts-write-noop.md` 同模式：AE 把字段持久化到 .aep 但 ScriptingAPI 把它隐藏。**只能读，不能 length-preservingly 写**（除非直接修 ldta 字节，但没 fixture 验证就上未免太冒险）。
+跟 variable-font axes 的脚本限制同模式：AE 把字段持久化到 .aep 但 ScriptingAPI 把它隐藏。**只能读，不能 length-preservingly 写**（除非直接修 ldta 字节，但没 fixture 验证就上未免太冒险）。
 
 若用户真要写 Film Size：
 

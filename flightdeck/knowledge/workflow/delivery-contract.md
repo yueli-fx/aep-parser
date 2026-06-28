@@ -19,7 +19,7 @@ READ WHEN: 把任何能力/产物对外宣称「能用」之前；做演示/示�
 | **Go-roundtrip-only** | 仅 Go 解析器往返自洽（`WriteAEP`→`Open` 无警告），AE 接受性未知 | ❌ 默认**不可用**；必须显式标「未验证」；禁止用于交付 / 演示 / 示例 |
 | **未测** | 既无 AE gate 也无明确 round-trip 证据 | ❌ 无交付资格 |
 
-库里的 `Stable` ≈ Verified，`Alpha` ≈ Go-roundtrip-only（详 CLAUDE.md #2 + `plans/coverage.md`）。**但 `Stable` 不等于无条件可用**——见红线 2。
+库里的 `Stable` ≈ Verified，`Alpha` ≈ Go-roundtrip-only。**但 `Stable` 不等于无条件可用**——见红线 2。
 
 **单版本 ae-accept 例外（2026-06-18 用户授权）**：默认 ae-accept 须双版本（AE2020+AE2025）。但当一个能力**物理上双版本不可达**——典型：AE23+ 专属字节（如 explicit track-matte 的 ldta @0xA0 slot），仅 `TargetAE2025` 产出该 slot、其 fingerprint 又被更低 AE forward-compat 拒、且无中间 target 可桥接——则**允许凭单版本(AE2025)实测 PASS mint ae-accept**（这是真 AE 接受、非假绿，不算降级）。**硬性要求**：tag/boundary 必须**写清版本下限**（`minver=` + boundary 首句 `ae-accept=AE2025+ 单版本验证(双版本物理不可达非降级)`），让消费者一眼看出它不是双版本保证。**适用判据**：双版本不可达必须是**物理/forward-compat 限制**的实证结论，不是「懒得造低版本载体」——后者仍须双版本。首例：批26 explicit track-matte 4 setter（SetTrackMatteLayer/SetTrackMatteSource/ClearTrackMatteLayer/RemoveTrackMatte）。
 
@@ -66,5 +66,5 @@ READ WHEN: 把任何能力/产物对外宣称「能用」之前；做演示/示�
 
 ## 与既有规范的关系
 
-- CLAUDE.md #6（AE 接受 gate）= 本准则的「单点结构性写」部分；本准则把它**扩展到组合 / 端到端 / 演示 / 对外描述**。
-- CLAUDE.md #2（API 分级 Stable/Alpha）= 验证级别的 API 契约视角；本准则补上「Stable 有覆盖边界」「组合需独立 gate」「演示禁用未验证能力」三条。
+- AE 接受 gate 覆盖「单点结构性写」；本准则把它**扩展到组合 / 端到端 / 演示 / 对外描述**。
+- API 分级 Stable/Alpha 是验证级别的 API 契约视角；本准则补上「Stable 有覆盖边界」「组合需独立 gate」「演示禁用未验证能力」三条。

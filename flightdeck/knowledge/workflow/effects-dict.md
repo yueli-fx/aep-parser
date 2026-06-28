@@ -73,7 +73,7 @@ AE ExtendScript **没有"列出所有已装效果"的 API**。本方案用一份
    ```
    Glow Threshold = 50   [默认 153 → 用户调低了]   ← 配方关键旋钮
    ```
-   一个效果 29 个参数,用户只动了 3 个 → 那 3 个非默认值就是这个技法的关键。这是把"读字节"变成"读懂意图"的核心,服务于从工程提取配方/技法。(注:也有少数参数因 synthesis/物化被强制写出,见 `incidents/effect-param-elision-synthesis-lite.md`,所以"出现≈调过"是强信号非铁律。)
+   一个效果 29 个参数,用户只动了 3 个 → 那 3 个非默认值就是这个技法的关键。这是把"读字节"变成"读懂意图"的核心,服务于从工程提取配方/技法。(注:也有少数参数因 synthesis/物化被强制写出,所以"出现≈调过"是强信号非铁律。)
 
 3. **跨语言 / 跨版本 join** —— `matchName` 是**语言无关 + 跨版本稳定**的 key。三语显示名 = 拿同一 matchName 在 `effects_en_US` / `effects_zh_CN`(/ yozya 的 ja)里各取 `name` 拼。版本差异 = 两个版本字典按 matchName 集合 / 参数数 diff。
 
@@ -85,7 +85,7 @@ AE ExtendScript **没有"列出所有已装效果"的 API**。本方案用一份
 
 ## 交叉链接
 
-- 字典价值的缘起 + 1w 工程学习方法论:见 `specs/2026-06-18-fx-technique-internalization.md`(字典是 PARSE→理解 那步的基础设施)。
-- elision / 物化使"出现≈调过"非绝对:`incidents/effect-param-elision-synthesis-lite.md`。
+- 字典价值：它把 matchName 和默认值翻译成可比较的语义层，是 PARSE→理解 那步的基础设施。
+- elision / 物化使"出现≈调过"非绝对；遇到默认参数未写、非默认参数被物化、或 effect param 需要合成时，要用 AE DOM/fixture 对照确认。
 - 消费字典的工具:`cmd/aepdissect`(当前读 matchName + 值;接字典后可翻译 + 标非默认 = 待做)。
 - yozya 三语基准 JSON(交叉验证用):`E:\projects\yozya\glossary\src\stores\effects_data.json`(2025、原生+Cycore、无第三方;本库 dumper 多了类型 + 子组递归 + 分版本 + 含本机第三方)。

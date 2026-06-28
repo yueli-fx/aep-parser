@@ -104,7 +104,7 @@ characterRange(AE 24+) 故最低 AE-24 stamped，AE 2020 前向拒开（「使�
 版本打开」，非我方字节问题）；AE 2020 也无 multi-run scripting API 造不出 2020-openable
 fixture。`buildEntryArray` 机制另由段落 case（T3 双版本含 2020 PASS）跨版本证过。
 （**AE 2024 2026-06-12 解锁** = 给 24+ 引入字段补「24+ 但非 25」第二门禁版本，详
-`checklists/re-fixture.md` § Adobe 软件路径。）
+AE 软件路径按当前仓库自动化约定走 `scripts/ae_run.ps1`。）
 
 ## 修法 — v4 已 SHIP（2026-06-12，手动 kerning 解封 = 零 refuse）
 

@@ -60,9 +60,9 @@ New L2 itself: trackMatteType=5013 (copied), but now no layer above → matte in
 - **(b) Mirror AE quirk**: detect matte → place clone at "above matte source" position. Adds ~30 LOC of special-case logic for a niche scenario.
 - **(c) Naive same-index insertion**: matches simple cases; breaks original's matte in this scenario silently (user discovers at render time). Worst UX.
 
-Strategy spec § (TBD) picks (a) for Phase 3 MVP.
+Implementation uses (a) for the first shipped path: refuse implicit-matte duplication unless the caller clears matte intent first.
 
-**Phase 5B amendment (2026-05-28)**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed in Phase 5B). AE 2025 ship-gate via `ge_duplicate_layer_explicit_matte.aep` (uses `re_trackmatte_ae24.aep` as source). See [`plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md`](../archive/plans/2026-05-28-v3-phase5b-duplicatelayer-explicit-matte-plan.md).
+**2026-05-28 amendment**: F2 quirk applies ONLY to **implicit** "layer-above" matte (positional source). For AE 23+ **explicit** matte (`TrackMatteLayerID != 0` in ldta `@0xA0`), the matte source is decoupled from layer order — duplicating is safe with verbatim byte-copy of `@0xA0` + `@0x6B`. DuplicateLayer refuse-case split: implicit (still refused per F2) vs explicit (allowed). AE 2025 ship-gate via `ge_duplicate_layer_explicit_matte.aep` (uses `re_trackmatte_ae24.aep` as source).
 
 ---
 
@@ -95,11 +95,11 @@ Both L2 instances point to **footage item id=16** (shared). AE doesn't duplicate
 
 ## Finding 5: itemList growth = +16 chunks per duplicate (mirrors F4 from delete RE)
 
-Baseline (3 layers) itemList: 237 children. All 4 dup fixtures: 253 children. Δ = **+16 per duplicate**, matching the "delete unit = 16 chunks" finding from DeleteLayer RE (`incidents/ae-deletelayer-re.md` F4).
+Baseline (3 layers) itemList: 237 children. All 4 dup fixtures: 253 children. Delta = **+16 per duplicate**, matching the DeleteLayer finding that a serialized layer unit is 16 contiguous chunks.
 
 The 16-chunk block = `Layr + Ewst + 14 followers (fvdv/fiop/ftts/foac/fiac/fipc/fifl ×2 repeats)`.
 
-**Impl rule**: cloning a layer = clone the entire 16-chunk block. Splice into itemList at the insertion position (Finding 1). Each chunk's `Data` slice MUST be a fresh `append([]byte(nil), src.Data...)` copy — sharing the slice violates `incidents/concurrency-unsafe-shared-chunk-bytes.md`.
+**Impl rule**: cloning a layer = clone the entire 16-chunk block. Splice into itemList at the insertion position (Finding 1). Each chunk's `Data` slice MUST be a fresh `append([]byte(nil), src.Data...)` copy — sharing the slice lets later mutations on the clone overwrite the source layer bytes.
 
 **Open**: are the 14 followers byte-identical between source and clone, or does AE mutate some? Naive byte-clone assumption pending byte-diff verification in Task 2. Likely byte-identical (followers look like rendering knobs, not layer-bound IDs) — if not, Task 2 RE round-2 needed.
 
@@ -176,22 +176,21 @@ ScriptingAPI's `layer.duplicate()` does NOT add " 2" / " (copy)" suffix. Both L2
 
 **Impl conclusion**: cloning a layer's 16-chunk block = byte-copy every chunk, then mutate ONLY ldta @0x00..0x03 to the new layer ID. Everything else (source ID @0x28, ParentID @0x84, TrackMatte @0x6B, all follower leaves) stays as source.
 
-Per-chunk Data slice MUST be a fresh `append([]byte(nil), src.Data...)` copy (NOT slice-share) so subsequent mutations on clone don't touch source bytes. See `incidents/concurrency-unsafe-shared-chunk-bytes.md`.
+Per-chunk Data slice MUST be a fresh `append([]byte(nil), src.Data...)` copy (NOT slice-share) so subsequent mutations on clone don't touch source bytes.
 
 ---
 
 ## Open / not RE'd (deferred)
 
-- **AE 23+ explicit TrackMatteLayerID (ldta @0xA0)**: needs an AE 2025 RE run with explicit setTrackMatte before duplicate. Phase 3 covers implicit (AE 2020) path via Finding 8.
-- **Shape / text source clone**: non-AV layers refused in Phase 3 (per plan non-goals). Future phase.
-- **Multi-select duplicate**: AE GUI allows Ctrl+D on multiple selected layers. Out of scope; `DuplicateLayers([]int)` wrapper is Phase 4+ if demand surfaces.
+- **AE 23+ explicit TrackMatteLayerID (ldta @0xA0)**: covered by the 2026-05-28 amendment above.
+- **Shape / text source clone**: non-AV layers are refused in the shipped path.
+- **Multi-select duplicate**: AE GUI allows Ctrl+D on multiple selected layers. Out of scope; add `DuplicateLayers([]int)` only if demand surfaces.
 - **Effects / property animations**: cloned tdgp/property bytes presumed verbatim, but no per-property RE in this scope. Will need follow-up if dup'd animated layers misbehave in AE.
 
 ---
 
 ## Related
 
-- Plan: [`../plans/2026-05-28-v3-phase3-duplicatelayer-plan.md`](../archive/plans/2026-05-28-v3-phase3-duplicatelayer-plan.md)
 - Predecessor scar: [`ae-deletelayer-re.md`](ae-deletelayer-re.md) — F4 (16-chunk per-layer block) is what we clone
 - AE acceptance gate: [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)
 - Fixture JSX: `test_data/re_duplicate_layer.jsx`

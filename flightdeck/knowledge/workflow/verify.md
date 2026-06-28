@@ -88,7 +88,7 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 | vfx / showcase 生成器 | `flightdeck/showcase/<方向>/gen.go` | ✅ tracked |
 | **一次性 probe / 渲染输出 / scratch** | `tmp_debug/`（或根 `tmp/`） | ❌ gitignored,**用完即删,别留** |
 
-原则:**有用→进 git(提到上面某个 tracked 家);没用→删;只 RE 一次的探针 findings 进 `incidents/` 后删探针。** 不放进 `internal/aep`,避免污染 public API。
+原则:**有用→进 git(提到上面某个 tracked 家);没用→删;只 RE 一次但会改变未来行动的 findings 进 `flightdeck/knowledge/<domain>/` 后删探针。** 不放进 `internal/aep`,避免污染 public API。
 
 ## 重构脚本
 

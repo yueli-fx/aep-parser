@@ -68,4 +68,4 @@ transform is).
 ## Cases
 - 2026-06-22 first seen — booyah comp ⑤; user caught Scale/Rotation diff in the AE transform
   panel after a long (mis-aimed) nested-time bisection. Fixed by copying static Scale+Rotate Z.
-  Verification workflow (per-frame orig-vs-clone PNG + solo-layer isolation) → `checklists/showcase.md`.
+  Verification workflow: render per-frame orig-vs-clone PNGs, then solo suspect layers to isolate whether the delta comes from transform, visibility, mask, effect, or source binding.

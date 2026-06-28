@@ -201,7 +201,7 @@ shape rect，mask 先建全 rect（reveal 全部）再 `SetMaskPath` 成三角�
 三角内白 2/2 + **原 rect 角（旧 full-rect mask 内、三角外）暗 3/3**（若 path 没改写这些角会白）；
 resave 经本库 parser 读回 mask 顶点=3。Go round-trip `mask_path_test.go`（rect→triangle 顶点数
 变 + apex 归一化 + <2 顶点拒绝）。verify_mg_mask_path.jsx + mg_mask_path_shipgate_test.go。
-**facade 自由函数**（CLAUDE.md #2 结构性 op 调用形态）。
+**facade 自由函数**（结构性 op 调用形态）。
 
 ## SetMaskPathKeyframes — animated mask path（2026-06-15, Stable）✅
 

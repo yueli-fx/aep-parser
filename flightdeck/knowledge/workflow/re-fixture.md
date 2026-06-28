@@ -31,7 +31,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 
 ## 新 fixture 默认走 AE 2020
 
-项目读取下限 = AE 2020（CLAUDE.md "读取下限 AE 2020"）。**新 RE fixture 默认用 AE 2020 跑**，理由：
+项目读取下限 = AE 2020。**新 RE fixture 默认用 AE 2020 跑**，理由：
 
 1. AE 2020 = 项目语义基线，behavior 跟低版本读路径一致
 2. AE 24+ 引入的字段（`fontCapsOption / strokeOverFill / autoHyphenate / trackMatteLayer / setTrackMatte` etc）在 AE 2020 跑会 throw 或 no-op，反而暴露不出来
@@ -106,7 +106,7 @@ length-preserving 单字段（cdta 单 offset 改 / ldta flag bit 改）roundtri
 
 | 模式 | 信号 | 处理 |
 |---|---|---|
-| **1. 完全崩溃** | `tasklist`/Get-Process 看不到 AfterFX.exe；没有 `.done`；exit code 非 0 | builder 写的字段触发 AE 内部 sanity-check fail (e.g. cdta timing 空)。看 `incidents/ae25-acceptance-gate.md` Stage 1 / 4 类 |
+| **1. 完全崩溃** | `tasklist`/Get-Process 看不到 AfterFX.exe；没有 `.done`；exit code 非 0 | builder 写的字段触发 AE 内部 sanity-check fail (e.g. cdta timing 空)。先最小化生成工程，再逐字段二分定位触发字节。 |
 | **2. 打开但需转换** | GUI 弹 "Convert?" 对话框 → JSX 跑不到 `app.open` 返回，要么 catch 到 error，要么 hang。`.done` 含 ERR 信息（或根本写不出） | 用 `scripts/ae_run.ps1` wrapper 自动消化 convert 对话框；裸 `AfterFX -r` 仍需版本匹配 |
 | **3. 打开但报数据损坏** | JSX 跑通；`app.open(...)` 在 try/catch 里 throw "After Effects 错误: 文件数据丢失" 类错误字符串 | builder chunk 写法 / 位置 / 大小破坏 AE 检查。这是最常见且最有 RE 价值的 — bisect 隔离哪个 setter 触发 |
 
@@ -230,7 +230,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 - JSX 渲染每个 comp 用**唯一 time**（`comp.saveFrameToPng(job.time, png)`，Go 端逐 comp 给开 ≥0.5s 的不同 time）→ run 内每 comp 唯一缓存键。
 - Go harness 渲染前**清磁盘缓存**：删 `Temp\Adobe\After Effects\*\Disk Cache*.noindex`（= AE「Empty Disk Cache」按钮，缓存会自动重建，无数据丢失）→ 消除跨会话/历史中毒帧。仅做唯一 time 不够：被历史 `t=0` run 污染的桶仍会喂旧帧。
 
-参考实现：`internal/aep/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/verify_mg_text_style.jsx`。根因 forensics：`archive/incidents/text-style-render-gate-fromscratch-blocked.md`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。
+参考实现：`internal/aep/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/verify_mg_text_style.jsx`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。如果多张 PNG 内容一样，优先怀疑 AE disk cache / stale-frame，而不是 setter 立即失败。
 
 ## AE 退出不弹框（关键陷阱）
 
@@ -291,9 +291,9 @@ step("probe_app_fonts", function () {
 });
 ```
 
-输出在 `.done` 里。常见教训：ExtendScript 允许对任意 key 赋值不报错（即使 key 不存在），所以"不抛错 ≠ 真生效"，必须 dump btdk 字节确认。详见 `incidents/variable-fonts-write-noop.md`。
+输出在 `.done` 里。常见教训：ExtendScript 允许对任意 key 赋值不报错（即使 key 不存在），所以"不抛错 ≠ 真生效"，必须 dump btdk 字节确认。
 
-**⚠ 数组值日志拼接陷阱**：`"" + prop.value` 对 AE **color** 数组值会抛 `数字结果无效（除以零？）`（valueOf 走数值转换）——看起来像数据 reject，实为 JSX 日志行炸了。数组一律显式 `value.toString()` / `value.join(",")` 再拼。详 `incidents/effect-param-elision-synthesis-lite.md` finding 4。
+**⚠ 数组值日志拼接陷阱**：`"" + prop.value` 对 AE **color** 数组值会抛 `数字结果无效（除以零？）`（valueOf 走数值转换）——看起来像数据 reject，实为 JSX 日志行炸了。数组一律显式 `value.toString()` / `value.join(",")` 再拼。
 
 ## 字节 diff
 

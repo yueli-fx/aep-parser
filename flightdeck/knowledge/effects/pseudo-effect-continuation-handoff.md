@@ -5,7 +5,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 
 ---
 
-> 冷启动顺序:先读本篇 → `specs/2026-06-20-pseudo-effect-support.md`(§9 = 从零生成全 RE)→ `incidents/pseudo-control-label-ansi-codepage.md`(CJK 限制)→ `incidents/add-effect-splice-re.md`(splice 机制)。能力真相源:`go run ./cmd/capindex -q "pseudo"`。
+> 冷启动顺序:先读本篇即可恢复 pseudo-effect 支线结论；从零生成 RE 布局、CJK 标签限制、splice 机制的关键结论都已在下文摘录。能力真相源:`go run ./cmd/capindex -q "pseudo"`。
 
 ## 0. 支线收口(2026-06-20,commit 4fa4a5c + d661bb9)
 
@@ -17,7 +17,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
   - **Layer-picker**:pard type 0x00(同 header)+@0x30=2;绑定在值条目 `tdpi`=目标层内部 ID(`aep.Layer.ID`),0→AE 解析为第一层。gate 绑第二层、AE 读回该层索引。
   - per-type tdb4(124B)逐字节抄金样本(@0x10 块=per-dim 常量,非值相关);新增 rifx `IDTdps`。
 
-**唯一未解 = CJK 控件标签**(AE 架构限,详 `incidents/pseudo-control-label-ansi-codepage.md`):标签=pard @0x10 名,按查看机系统 ANSI 码页解码,GBK-pard-name 仅 byte-equivalence 验(本西欧码页机不可 ship-gate)。非缺口、是 AE 限制。
+**唯一未解 = CJK 控件标签**:标签=pard @0x10 名,按查看机系统 ANSI 码页解码；GBK-pard-name 仅 byte-equivalence 验(本西欧码页机不可 ship-gate)。非缺口、是 AE 限制。
 
 ---
 
@@ -103,7 +103,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 - **本机码页**:cp1252(西欧),**渲染不了 GBK**——CJK 控件标签**无法在本机 ship-gate**,只能 byte-equivalence 单测 + 用户中文 AE 实机验。CJK demo 给用户:`go run ./tmp_debug/pseudo-spike/cjkdemo` → `tmp/pseudo_cjk_demo.aep`。
 - **决定性 RE 法**:同一文件两种读法结果不同时,bisect 到单变量(minValue 坑就是这么定位的:probe 先碰 hasMin 报 -100、gate 冷读报 100)。
 
-## 6. 红线提醒(CLAUDE.md)
+## 6. 红线提醒
 
 - 红线7:只有**双版本 AE ship-gate PASS** 的能力才能宣称"能用",且仅在 gate 覆盖的规模/组合内。CJK 标签是例外(不可 gate,已诚实标 byte-equiv-only)。
 - 红线4:渲染类能力 gate 必须验像素。伪效果控件是**参数容器不直接渲染**,值/范围 round-trip 是对的作用面(但 color 默认值我只验了字节布局、没验渲染——如果后续要宣称 color 默认"渲染对"需补像素验)。

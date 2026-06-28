@@ -5,11 +5,11 @@ READ WHEN: 被要求从零造火焰/烟/能量类程序化 FX；要重做火焰 
 
 ---
 
-> **这份文档的用途**：跨会话固化「怎么用本库从零造一个**好**火焰」的知识。下一个会话开场 preflight 会把 `checklists/INDEX.md` 读进上下文，所以这条会被自动看到。配合 cockpit Active focus（火焰 Phase 2）即可接力，不必重新解析样本。
+> **这份文档的用途**：跨会话固化「怎么用本库从零造一个**好**火焰」的知识。preflight 会通过本文件的 routing header 把它纳入知识地图；触发条件命中时直接读本文件即可接力，不必重新解析样本。
 
 ## ⚠ 成熟度（诚实前提，别当已验证流程用）
 
-- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tools/debug/dump_tdmn`）。详 `specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
+- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tools/debug/dump_tdmn`）。本文件保留可执行结论，不依赖旧 spec/plan。
 - **✅ 已升级为「验证配方」（2026-06-18）**：**v3 多层合成**（黑底+3 火层+同心 mask 温度分区+Add+Glo2，运动共相）经 **`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 gate 绿（逐像素一致）+ 用户真机验收过**。这条多层配方现在是验证过的,可照搬。
 - 历程：v1 被否（单层 Tint）→ v2（单层 Tritone+Glo2,修色温/Glow 但无层次）→ **v3 多层合成出层次（通过）**。下面参数表/步骤为 v3 实际值。
 
@@ -45,15 +45,15 @@ project_profile:   # Colorful Fire Ball (by Plugin Everything)
 ```
 
 **两条比旧读法更新的认知**：
-1. **深度 = 嵌套式 pass，不是平铺。** `additive-multilayer-depth` 在这工程的真实形态是「每个预合成贡献一个 displaced+recolored pass，外层用 Add/Difference/Divide 累积」——见 `docs/fx-techniques.md` T3（已据此 refine）。
+1. **深度 = 嵌套式 pass，不是平铺。** `additive-multilayer-depth` 在这工程的真实形态是「每个预合成贡献一个 displaced+recolored pass，外层用 Add/Difference/Divide 累积」。
 2. **"Negative Fire" 是实证不是假设。** `Whole fire animation` 里真有一层名为 "Negative Fire"、blend=Difference、加 Warp(Bend −100) + Hue/Sat —— Difference 叠暗筋这条从「猜测」升为 proven。
-3. **新技法 `seamless-loop`**：`Noise 1 looped` = 把演化中的噪声源复制 2 份、时间错位 + opacity 交叉淡入 + SilhouetteAlpha matte → 无缝循环。跨域（烟/云/能量/水任何演化噪声都可循环）。已登记 `docs/fx-techniques.md` T15。
+3. **新技法 `seamless-loop`**：`Noise 1 looped` = 把演化中的噪声源复制 2 份、时间错位 + opacity 交叉淡入 + SilhouetteAlpha matte → 无缝循环。跨域（烟/云/能量/水任何演化噪声都可循环）。
 
 ## ⭐ 效果用途词典 —— 什么效果干什么用（按角色，比参数表重要）
 
 这是生成器真正需要的知识：**按「角色/功能」理解每个效果在火焰里的作用**（AI 层是按角色拼装，不是抄参数）。源自 Colorful Fire Ball 解析。
 
-> **跨域技法原子在 `docs/fx-techniques.md`**（技法库）。本表是火焰这个**现象**怎么组合那些技法；技法本身(噪声造质料/位移扭曲/多层Add叠深度…)跨火/烟/风/雨/雷电/转场复用。解析任意模版用 `go run ./cmd/aepdissect <file.aep>`。
+> **跨域技法原子在 `fx-techniques.md`**（同目录技法库）。本表是火焰这个**现象**怎么组合那些技法；技法本身(噪声造质料/位移扭曲/多层Add叠深度…)跨火/烟/风/雨/雷电/转场复用。解析任意模版用 `go run ./cmd/aepdissect <file.aep>`。
 
 | 角色（要解决的问题） | 用什么效果/技术 | 怎么起作用 |
 |---|---|---|
@@ -86,7 +86,7 @@ project_profile:   # Colorful Fire Ball (by Plugin Everything)
 
 5 层结构(builder=`flightdeck/showcase/procedural-fx/gen.go`，tracked)：黑底 + **3 个 Fractal Noise→Tritone→Turbulent Displace 火层**(不同噪声 scale=不同细节频率，越内层 Tritone 越热) + 顶部 Glo2 调整层。双版本 AE 实渲 + 用户验收：清晰的**径向色温分层**——外深红 wispy → 中橙 → **内黄白热芯柱**，有舔动有翻腾，明显比 v2 有深度。
 
-**两个关键踩坑 → 解法**(都记进 `docs/fx-techniques.md` T3):
+**两个关键踩坑 → 解法**:
 1. **团块**：3 层 Add **共用同一 mask** → streak 并集填满成"发光团块"。**解法=同心 mask**(`scalePath` 缩 f=0.5/0.76/1.0,核层小/外层全)+ 各层 Tritone 越内越热 → 温度分区(外红中橙内白)而非实心。
 2. **抖动**(用户在 ~3s 处发现):3 层各用**不同动画速率** → 逐渐失相,Add+Glow 出拍频闪烁,越后越抖。**解法=层运动共相**(shared evolution/offset 速率),只让静态属性(scale/色/mask)分层。修复后 t=3.2/3.6 平稳。
 
@@ -147,7 +147,7 @@ project_profile:   # Colorful Fire Ball (by Plugin Everything)
 
 ## 来源 / 交叉链接
 
-- 样本解析全文（渲染图 + 效果用量 + blend 解码）：`specs/2026-06-18-procedural-fx-generator.md` § 样本解析 #1。
+- 样本解析的可执行结论已沉淀在本文件；若要重新审计原始样本，直接跑 `go run ./cmd/aepdissect <file>`。
 - 教训（手搓只到「可辨认」、需真实样本）：[[procedural-fx-over-vector]] Case 2。
 - v1 实现（被否，保留作对照）：`flightdeck/showcase/procedural-fx/`（status ❌质量未过）。
 - 动画走关键帧不走表达式的原因：[[expression-enable-byte-pair]]。

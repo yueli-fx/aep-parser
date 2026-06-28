@@ -9,7 +9,7 @@ READ WHEN: implementing or extending AddEffect / the effect-template library; ad
 `ADBE Effect Parade`. Shipped 2026-06-10 (two commits: core mechanic + 12-effect
 library). AE 2020 + AE 2025 ship-gate 24/24 across the full 12-effect library
 (2026-06-11; initially shipped 2026-06-10 on a 5-effect payload-size sample).
-Promoted Alpha → Stable (structural op, CLAUDE.md #2) on the full-library gate,
+Promoted Alpha → Stable as a structural op on the full-library gate,
 together with RemoveEffect (rides the gated Effect-Parade child removal).
 
 ## Effect chunk structure (RE'd from re_property_struct_baseline.aep)
@@ -271,7 +271,7 @@ Concrete findings kept for reference:
    shape layer's parade are discarded at write** — effects must be emitted by
    `lowerShapeLayer` from **scene** state, not patched into the chunk (unlike
    Phase 1, which patches a *parsed* layer's chunk that is never re-lowered).
-4. **Scene can't hold rifx chunks** (CLAUDE.md #3: scene 禁 import rifx). So the
+4. **Scene can't hold rifx chunks** (scene 禁 import rifx). So the
    effect's sspc payload (and any tuned param values) can't live on the scene
    `*Effect`. Emitting effect *parameter values* set on a fresh layer therefore
    needs either (a) generic effect-param lowering (re-encode `Effect.Parameters`

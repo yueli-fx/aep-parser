@@ -9,6 +9,7 @@
 - commit 拆分按逻辑单元：代码 + 其配套测试/fixture/文档同步算一个 commit；无关的 meta/文档改动单独 commit。commit body 可英文按既有惯例。
 - **`data/` 是合法测试数据,勿提议清理**：`data/项目/`（含中文名目录 `001_项目A/` `#ep资产/` 等）已由用户确认非敏感（2026-05-17 closed decision）；勿在代码审计中再提 git-purge / gitignore / 换合成 fixture。新出现的路径（如有人丢 `Downloads/xxx.aep`）是另案。
 - **导出 API doc comment = 文档源（docgen）**：`docs/*.md` 由 `cmd/docgen` 从 `internal/aep` 导出符号的 doc comment 自动生成（Swagger 式，唯一源=注释）。**doc comment 用英文为源**（中文可后续一键翻译）；prose 写描述、`Example*` 测试函数写示例、概念表走 `docs/_includes/*.head.md`/`*.tail.md`。改导出符号的 doc comment 后须重生成（`go generate ./cmd/docgen` 或 `go run ./cmd/docgen -manifest docs/docgen.json`）。`docs/*.gen.md` 头有 `DO NOT EDIT` —— 不手改生成物。区分点：**内部实现行内注释仍禁**（CLAUDE.md 铁律），导出符号上方的 doc comment 是文档载体不算违反。
+- **知识库必须自包含**：`flightdeck/knowledge/**` 是未来行动规则/陷阱/流程的稳定层，不把 `spec` / `plan` / 临时 work 文件当必读依赖。历史来源可一句话说明，但关键结论、触发条件、修法要写在知识正文里；若需要补充引用，优先指向同属知识库的条目，并保证不读链接也能执行。
 
 ### Commit conventions（本仓库专属 — aep-parser；通用规范见订阅的 `knowledge/commits.md`）
 

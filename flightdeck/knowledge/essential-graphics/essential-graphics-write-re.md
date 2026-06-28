@@ -5,7 +5,7 @@ READ WHEN: extending AddEssentialProperty (point/dropdown/text/Transform-sourced
 
 ---
 
-来源：2026-06-12 纯代码 RE（`tmp_debug/eg_uuid_scan` / `eg_dump` / `eg_gobuilt_probe` 扫 `test_data/eg_*.aep` AE-native fixtures），零 AE 调用解开全部格式；双版本 ship-gate `TestEGAdd_AEShipGate_AE2020/_AE2025` PASS 验证。完整设计史：`archive/plans/2026-06-12-essential-graphics-write.md`。实现：`internal/serializer/mutate_essential_graphics.go` + `write_essential_graphics.go`。
+来源：2026-06-12 纯代码 RE（`tmp_debug/eg_uuid_scan` / `eg_dump` / `eg_gobuilt_probe` 扫 `test_data/eg_*.aep` AE-native fixtures），零 AE 调用解开全部格式；双版本 ship-gate `TestEGAdd_AEShipGate_AE2020/_AE2025` PASS 验证。实现：`internal/serializer/mutate_essential_graphics.go` + `write_essential_graphics.go`。
 
 ## 绑定拓扑（三处协同，UUID 是关联键）
 

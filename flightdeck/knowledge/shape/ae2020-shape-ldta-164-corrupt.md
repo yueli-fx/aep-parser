@@ -24,7 +24,7 @@ V2.2 的 AE-2020 shape ship-gate（`TestV2_2_AEShipGate_AE2020`）**一直是 `t
 
 ## How to apply
 
-- 任何 `NewX` 结构性写路径必须 **AE 2020 + AE 2025 双版本 ship-gate** 真跑（CLAUDE.md 硬约束 #6）——skip 的 gate 等于没验证。
+- 任何 `NewX` 结构性写路径必须 **AE 2020 + AE 2025 双版本 ship-gate** 真跑——skip 的 gate 等于没验证。
 - ldta 尺寸走 `ctx.capabilities.LdtaSize`（capability matrix），勿硬编码。新版本 target 加进 `Capabilities()`。
 - 调 AE 2020 "损坏/跳过" 类问题：先取 **AE-2020-native 参考**（让 AE 2020 存同款），dump 对比 chunk 尺寸；optical OCR 在共享桌面会被遮挡，用 **PrintWindow**（PW_RENDERFULLCONTENT，遮挡免疫）抓对话框，或 Win32 枚举子控件。
 - 此修复同时解锁了 V2.2 Rect+Fill 在 AE 2020（同 ldta 路径，之前同样 broken）。

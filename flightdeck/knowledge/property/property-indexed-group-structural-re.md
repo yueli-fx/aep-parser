@@ -73,7 +73,7 @@ Effect Parade tdgp 直接 children 布局：
 
 实现策略 `rebuildIndexedGroupChunk`：按 mutate 后的 scene `Children` 顺序重发
 parent.chunk.Children，保留 prefix（tdsb/tdsn）+ suffix（Group End），每个 child
-复用**原 chunk 指针对** → opaque 内容原样带走（CLAUDE.md #5）。
+复用**原 chunk 指针对** → opaque 内容原样带走。
 
 ## Duplicate 的 display-name 后缀（slice 2 已解 2026-06-03）
 

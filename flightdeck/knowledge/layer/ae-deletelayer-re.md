@@ -130,7 +130,7 @@ After delete:
 - parent: L1=19, L3=15 (same)
 - matte: L2=17, L3=15 (L1.id=19 gone, NOT reused)
 
-Confirms CLAUDE.md Invariant #9 (monotonic, no reuse). **No need to down-adjust the head chunk's nextItemID counter** after delete.
+Confirms the monotonic-ID invariant (allocate forward, no reuse). **No need to down-adjust the head chunk's nextItemID counter** after delete.
 
 **Impl rule**: leave `proj.back.head.nextItemID` alone after DeleteLayer.
 
@@ -138,7 +138,7 @@ Confirms CLAUDE.md Invariant #9 (monotonic, no reuse). **No need to down-adjust 
 
 ## Open / Not RE'd
 
-- **Q6 (expression / render queue string refs to deleted layer ID)**: not investigated. Plan accepts this as out-of-scope for Phase 2 — user responsibility. Add doc warning on `DeleteLayer`.
+- **Q6 (expression / render queue string refs to deleted layer ID)**: not investigated. Shipped behavior leaves these references as user responsibility. Add doc warning on `DeleteLayer`.
 - **Multi-version cross-check for matte**: matte fixture is AE 2025 only. AE 2020 + `l2.trackMatteType = ALPHA` would NOT write `TrackMatteLayerID` (field is AE 23+), so the explicit-ID cleanup path is untested on AE 2020 saves. Our DeleteLayer needs to handle both: when opening an AE 2020 file, `TrackMatteLayerID` is 0 from the start (no orphan to clear); when opening AE 23+ file with explicit ID set, clear it per Finding 3.
 - **Multi-pseudo-layer-type delete**: refuse, but not formally tested by trying to delete DLay/SLay etc via JSX. Refuse-by-FormType-check is the conservative path.
 
@@ -146,7 +146,7 @@ Confirms CLAUDE.md Invariant #9 (monotonic, no reuse). **No need to down-adjust 
 
 ## Related
 
-- Plan: [`../plans/2026-05-28-v3-phase2-deletelayer-plan.md`](../archive/plans/2026-05-28-v3-phase2-deletelayer-plan.md)
+- Historical implementation plan is archived; this knowledge file is the recovery source for DeleteLayer behavior.
 - Fixture JSX: `test_data/re_delete_layer.jsx`
 - Dump tool: `tools/debug/dump_layers/main.go`
 - Ship-gate scar (when AE rejects what we wrote): [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)

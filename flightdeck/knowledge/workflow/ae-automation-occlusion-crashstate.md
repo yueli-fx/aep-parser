@@ -14,8 +14,8 @@ READ WHEN: running AE ship-gates in an interactive session and hitting ae_run.ps
 warm-up + 跑已知-good 对照确认环境，再 warm-retry)。批22 footage gate 首撞:
 cold-start splash「正在初始化本地化设置」+ 前台挂游戏 → exit 2,我误判为用户机器
 占用并发问；用户纠正后跑 clear_ae_crashstate + comp_idta 对照(13s 绿)→ footage
-gate 双版本即过。教训:CLAUDE.md「AE ship-gate = agent 自跑…别默认让用户手开 AE;
-cold-start exit-2 先 warm-retry + 跑已知-good 对照」是铁律,exit-2 别第一反应甩给
+gate 双版本即过。教训:AE ship-gate = agent 自跑；别默认让用户手开 AE；
+cold-start exit-2 先 warm-retry + 跑已知-good 对照。exit-2 别第一反应甩给
 用户。**另**:用户「经常看你卡在另存为界面」——任何 verify jsx 必须纯 DOM
 readback、`close(DO_NOT_SAVE)+quit`,**禁 resave**(弹 Save 框 = OCR 无规则 → hang;
 comp_idta/footage_idta 均已去 resave)。
@@ -125,4 +125,4 @@ Layer C 的 OCR 后端(`scripts/ocr_helper.ps1` + `AeRun.Lib.ps1`)有两个独�
 ### Case OCR-2 — Windows.Media.Ocr 给 CJK 每字插空格
 OCR 把 `"修复选项"` 返回成 `"修 复 选 项"`(`OcrResult.Text` = 按 word 空格 join;CJK 每字一个 word)→ `IndexOf("修复选项")` 失败。**修法**:`ae_dialog_rules.json` 里 CJK pattern 写**连续**(`"修复选项"`);`AeRun.Lib.ps1::Match-Rule` 的 `_matchAnyOcr` 先直配(英文),再 fallback 比 `($text -replace '\s+','')` vs `($pattern -replace '\s+','')`(CJK)。规则作者按 UI 原样写,matcher 透明归一。**Pester 回归**:`ae_run.Tests.ps1` 有 CJK 空格用例(别删,否则 CJK fallback 静默退化)。**坑中坑**:OCR console 输出经 cp936 渲染 UTF-8 是 mojibake(字节对、终端骗你)——存疑时 dump 文件按 UTF-8 读 codepoint,别从 console 诊断;forensics dump 保留原始带空格版(stripping 仅 match-time)。
 
-> 相关:`specs/2026-05-27-ae-run-wrapper-design.md` §3.3/§3.5 · `checklists/re-fixture.md` § GDI 自动化 · [[jsx-state-leak]](JSX fixture 工作流,正交主题,未并)。
+> 相关结论：GDI/OCR 自动化必须优先窗口句柄截图；JSX fixture 重跑前要清理或新建工程，避免状态泄漏。
