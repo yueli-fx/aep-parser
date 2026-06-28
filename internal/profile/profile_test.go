@@ -1,6 +1,7 @@
 package profile_test
 
 import (
+	"math"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -121,6 +122,127 @@ func TestBuildEffectsFixtureIncludesEffectUsageAndTunedParams(t *testing.T) {
 	if !strings.Contains(blurriness.Path.Path, ".params.by_match_name") {
 		t.Fatalf("param path = %q, want effect params path", blurriness.Path.Path)
 	}
+}
+
+func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Matte Comp", 1920, 1080, 30, 3)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	matte, err := aep.NewSolidLayer(comp, "Matte Source", 1920, 1080, [3]float64{1, 1, 1})
+	if err != nil {
+		t.Fatalf("NewSolidLayer matte: %v", err)
+	}
+	fill, err := aep.NewSolidLayer(comp, "Fill", 1920, 1080, [3]float64{0, 0, 1})
+	if err != nil {
+		t.Fatalf("NewSolidLayer fill: %v", err)
+	}
+	if err := fill.SetTrackMatte(aep.TrackMatteAlpha); err != nil {
+		t.Fatalf("SetTrackMatte: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	layer := findProfileLayer(t, prof, "Fill")
+	if layer.Flags.TrackMatte != uint8(aep.TrackMatteAlpha) {
+		t.Fatalf("TrackMatte = %d, want %d", layer.Flags.TrackMatte, aep.TrackMatteAlpha)
+	}
+	if layer.MatteRef == nil {
+		t.Fatal("MatteRef = nil, want matte source layer")
+	}
+	if layer.MatteRef.ID != matte.ID || layer.MatteRef.Name != matte.Name {
+		t.Fatalf("MatteRef = %+v, want ID=%d Name=%q", layer.MatteRef, matte.ID, matte.Name)
+	}
+}
+
+func TestBuildSyntheticProjectIncludesExplicitTrackMatteRef(t *testing.T) {
+	project := aep.NewProject(aep.TargetAE2025)
+	comp, err := aep.NewComposition(project, "Explicit Matte Comp", 1920, 1080, 30, 3)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	fill, err := aep.NewSolidLayer(comp, "Fill", 1920, 1080, [3]float64{0, 0, 1})
+	if err != nil {
+		t.Fatalf("NewSolidLayer fill: %v", err)
+	}
+	matte, err := aep.NewSolidLayer(comp, "Explicit Matte", 1920, 1080, [3]float64{1, 1, 1})
+	if err != nil {
+		t.Fatalf("NewSolidLayer matte: %v", err)
+	}
+	if err := fill.SetTrackMatteSource(matte, aep.TrackMatteLuma); err != nil {
+		t.Fatalf("SetTrackMatteSource: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	layer := findProfileLayer(t, prof, "Fill")
+	if layer.Flags.TrackMatte != uint8(aep.TrackMatteLuma) {
+		t.Fatalf("TrackMatte = %d, want %d", layer.Flags.TrackMatte, aep.TrackMatteLuma)
+	}
+	if layer.MatteRef == nil {
+		t.Fatal("MatteRef = nil, want explicit matte source layer")
+	}
+	if layer.MatteRef.ID != matte.ID || layer.MatteRef.Name != matte.Name {
+		t.Fatalf("MatteRef = %+v, want ID=%d Name=%q", layer.MatteRef, matte.ID, matte.Name)
+	}
+}
+
+func TestBuildSyntheticProjectUsesParsedInOutPoints(t *testing.T) {
+	project := aep.NewProject(aep.TargetAE2020)
+	comp, err := aep.NewComposition(project, "Timing Comp", 1920, 1080, 30, 5)
+	if err != nil {
+		t.Fatalf("NewComposition: %v", err)
+	}
+	layer, err := aep.NewSolidLayer(comp, "Timed", 1920, 1080, [3]float64{0.5, 0.5, 0.5})
+	if err != nil {
+		t.Fatalf("NewSolidLayer: %v", err)
+	}
+	if err := layer.SetStartTime(1.25); err != nil {
+		t.Fatalf("SetStartTime: %v", err)
+	}
+	if err := layer.SetInPoint(0.5); err != nil {
+		t.Fatalf("SetInPoint: %v", err)
+	}
+	if err := layer.SetOutPoint(3.75); err != nil {
+		t.Fatalf("SetOutPoint: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	got := findProfileLayer(t, prof, "Timed").Timing
+	if math.Abs(got.InPoint-0.5) > 1e-4 {
+		t.Fatalf("InPoint = %g, want 0.5", got.InPoint)
+	}
+	if math.Abs(got.OutPoint-3.75) > 1e-4 {
+		t.Fatalf("OutPoint = %g, want 3.75", got.OutPoint)
+	}
+	if math.Abs(got.StartTime-1.25) > 1e-4 {
+		t.Fatalf("StartTime = %g, want 1.25", got.StartTime)
+	}
+}
+
+func findProfileLayer(t *testing.T, prof *profile.Profile, name string) *profile.Layer {
+	t.Helper()
+	for ci := range prof.Comps {
+		for li := range prof.Comps[ci].Layers {
+			layer := &prof.Comps[ci].Layers[li]
+			if layer.Name == name {
+				return layer
+			}
+		}
+	}
+	t.Fatalf("profile layer %q not found", name)
+	return nil
 }
 
 func containsString(values []string, want string) bool {

@@ -135,6 +135,8 @@ type LayerFlags struct {
 	Visible              bool   `json:"visible"`
 	Blend                uint8  `json:"blend"`
 	BlendName            string `json:"blend_name,omitempty"`
+	TrackMatte           uint8  `json:"track_matte,omitempty"`
+	TrackMatteName       string `json:"track_matte_name,omitempty"`
 	Is3D                 bool   `json:"is_3d,omitempty"`
 	Solo                 bool   `json:"solo,omitempty"`
 	Shy                  bool   `json:"shy,omitempty"`
@@ -322,7 +324,7 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 	}
 
 	pluginSeen := map[string]bool{}
-	for _, c := range jp.Compositions {
+	for ci, c := range jp.Compositions {
 		cp := Composition{
 			ID: c.ID, Name: c.Name, Width: c.Width, Height: c.Height,
 			FrameRate: c.FrameRate, Duration: c.Duration, TickRate: c.TickRate,
@@ -338,11 +340,19 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			Evidence: parsedEvidence(),
 		}
 		layerByID := map[uint32]*aep.JSONLayer{}
+		layerByIndex := map[int]*aep.JSONLayer{}
 		for _, l := range c.Layers {
 			layerByID[l.ID] = l
+			layerByIndex[l.Index] = l
 		}
-		for _, l := range c.Layers {
-			lp := buildLayer(c, l, layerByID, compItems, footageItems, prof.Fingerprint.EffectUsage, pluginSeen, opts.Dict)
+		var sceneComp *aep.Composition
+		if ci < len(project.Compositions) {
+			sceneComp = project.Compositions[ci]
+		}
+		sceneLayerByID, sceneLayerByIndex := indexSceneLayers(sceneComp)
+		for li, l := range c.Layers {
+			sceneLayer := sceneLayerFor(l, li, sceneLayerByID, sceneLayerByIndex)
+			lp := buildLayer(c, l, sceneLayer, layerByID, layerByIndex, compItems, footageItems, prof.Fingerprint.EffectUsage, pluginSeen, opts.Dict)
 			prof.Fingerprint.LayerCount++
 			cp.Layers = append(cp.Layers, lp)
 		}
@@ -361,7 +371,9 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 func buildLayer(
 	c *aep.JSONComposition,
 	l *aep.JSONLayer,
+	sceneLayer *aep.Layer,
 	layerByID map[uint32]*aep.JSONLayer,
+	layerByIndex map[int]*aep.JSONLayer,
 	compItems map[uint32]string,
 	footageItems map[uint32]string,
 	effectUsage map[string]int,
@@ -376,14 +388,16 @@ func buildLayer(
 		Timing: LayerTiming{
 			StartTime: l.StartTime,
 			Duration:  l.Duration,
-			InPoint:   l.StartTime,
-			OutPoint:  l.StartTime + l.Duration,
+			InPoint:   layerInPoint(l, sceneLayer),
+			OutPoint:  layerOutPoint(l, sceneLayer),
 			Stretch:   l.Stretch,
 		},
 		Flags: LayerFlags{
 			Visible:              l.Visible,
 			Blend:                l.BlendingMode,
 			BlendName:            blendName(int(l.BlendingMode)),
+			TrackMatte:           l.TrackMatte,
+			TrackMatteName:       trackMatteName(int(l.TrackMatte)),
 			Is3D:                 l.Is3D,
 			Solo:                 l.Solo,
 			Shy:                  l.Shy,
@@ -406,6 +420,9 @@ func buildLayer(
 	}
 	if l.ParentID != 0 {
 		lp.ParentRef = layerRef(l.ParentID, layerByID)
+	}
+	if l.TrackMatte != 0 {
+		lp.MatteRef = matteRef(l, sceneLayer, layerByID, layerByIndex)
 	}
 	for i, fx := range l.Effects {
 		effectUsage[fx.MatchName]++
@@ -599,6 +616,44 @@ func sourceRef(id uint32, comps, footage map[uint32]string) *ItemRef {
 	return &ItemRef{ID: id, Kind: "unknown"}
 }
 
+func indexSceneLayers(c *aep.Composition) (map[uint32]*aep.Layer, map[int]*aep.Layer) {
+	byID := map[uint32]*aep.Layer{}
+	byIndex := map[int]*aep.Layer{}
+	if c == nil {
+		return byID, byIndex
+	}
+	for _, l := range c.Layers {
+		if l == nil {
+			continue
+		}
+		if l.ID != 0 {
+			byID[l.ID] = l
+		}
+		byIndex[l.Index] = l
+	}
+	return byID, byIndex
+}
+
+func sceneLayerFor(
+	l *aep.JSONLayer,
+	occurrence int,
+	byID map[uint32]*aep.Layer,
+	byIndex map[int]*aep.Layer,
+) *aep.Layer {
+	if l == nil {
+		return nil
+	}
+	if l.ID != 0 {
+		if layer := byID[l.ID]; layer != nil {
+			return layer
+		}
+	}
+	if layer := byIndex[l.Index]; layer != nil {
+		return layer
+	}
+	return byIndex[occurrence]
+}
+
 func layerRef(id uint32, layers map[uint32]*aep.JSONLayer) *LayerRef {
 	ref := &LayerRef{ID: id}
 	if l, ok := layers[id]; ok {
@@ -606,6 +661,50 @@ func layerRef(id uint32, layers map[uint32]*aep.JSONLayer) *LayerRef {
 		ref.Name = l.Name
 	}
 	return ref
+}
+
+func jsonLayerRef(l *aep.JSONLayer) *LayerRef {
+	if l == nil {
+		return nil
+	}
+	return &LayerRef{ID: l.ID, Index: l.Index, Name: l.Name}
+}
+
+func matteRef(
+	l *aep.JSONLayer,
+	sceneLayer *aep.Layer,
+	layerByID map[uint32]*aep.JSONLayer,
+	layerByIndex map[int]*aep.JSONLayer,
+) *LayerRef {
+	if sceneLayer != nil && sceneLayer.TrackMatteLayerID != 0 {
+		return layerRef(sceneLayer.TrackMatteLayerID, layerByID)
+	}
+	if l == nil || l.TrackMatte == 0 {
+		return nil
+	}
+	return jsonLayerRef(layerByIndex[l.Index-1])
+}
+
+func layerInPoint(l *aep.JSONLayer, sceneLayer *aep.Layer) float64 {
+	if sceneLayer != nil {
+		in := sceneLayer.InPoint()
+		out := sceneLayer.OutPoint()
+		if out != 0 || in != 0 {
+			return in
+		}
+	}
+	return l.StartTime
+}
+
+func layerOutPoint(l *aep.JSONLayer, sceneLayer *aep.Layer) float64 {
+	if sceneLayer != nil {
+		in := sceneLayer.InPoint()
+		out := sceneLayer.OutPoint()
+		if out != 0 || in != 0 {
+			return out
+		}
+	}
+	return l.StartTime + l.Duration
 }
 
 func compPath(c *aep.JSONComposition) PathRef {
@@ -745,4 +844,21 @@ func blendName(mode int) string {
 		return name
 	}
 	return fmt.Sprintf("blend#%d", mode)
+}
+
+var trackMatteNames = map[int]string{
+	1: "Alpha",
+	2: "AlphaInverse",
+	3: "Luma",
+	4: "LumaInverse",
+}
+
+func trackMatteName(mode int) string {
+	if mode == 0 {
+		return ""
+	}
+	if name, ok := trackMatteNames[mode]; ok {
+		return name
+	}
+	return fmt.Sprintf("track_matte#%d", mode)
 }
