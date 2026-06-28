@@ -10,7 +10,7 @@
 ## 文档
 
 - **API 参考**：[docs/](docs/) —— 每个核心类型一个 markdown，由 `cmd/docgen` 从导出符号的 doc comment **自动生成**（`go generate ./cmd/docgen`）。
-- **能力覆盖矩阵 / 暂搁 / 不可达 / negative findings**：[flightdeck/plans/coverage.md](flightdeck/plans/coverage.md)。
+- **能力覆盖矩阵 / 暂搁 / 不可达 / negative findings**：[docs/capabilities.md](docs/capabilities.md)。
 
 ## 原理与分层
 

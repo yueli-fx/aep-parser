@@ -2,6 +2,7 @@ package apidoc
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -127,7 +128,7 @@ func Validate(ann *Annotation, sym Symbol, ctx Context, mode Mode) []error {
 	// @incident existence.
 	for _, slug := range ann.Incident {
 		if ctx.IncidentsDir != "" && !incidentExists(ctx.IncidentsDir, slug) {
-			add("@incident %q not found under incidents/", slug)
+			add("@incident %q not found under incidents/ or knowledge/", slug)
 		}
 	}
 
@@ -172,5 +173,18 @@ func incidentExists(dir, slug string) bool {
 			return true
 		}
 	}
-	return false
+
+	knowledgeRoot := filepath.Join(filepath.Dir(dir), "knowledge")
+	found := false
+	_ = filepath.WalkDir(knowledgeRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d == nil || d.IsDir() {
+			return nil
+		}
+		if d.Name() == slug+".md" {
+			found = true
+			return fs.SkipAll
+		}
+		return nil
+	})
+	return found
 }

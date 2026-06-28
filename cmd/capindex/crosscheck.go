@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -36,11 +37,39 @@ func validateEntries(entries []Entry, gates map[string]bool, incidentsDir string
 			}
 		}
 		for _, slug := range c.Incident {
-			path := filepath.Join(incidentsDir, slug+".md")
-			if _, err := os.Stat(path); err != nil {
-				errs = append(errs, fmt.Errorf("%s: incident %q not found (%s)", e.Symbol, slug, path))
+			if path, ok := incidentPath(incidentsDir, slug); !ok {
+				errs = append(errs, fmt.Errorf("%s: incident %q not found under incidents/ or knowledge/ (%s)", e.Symbol, slug, path))
 			}
 		}
 	}
 	return errs
+}
+
+func incidentPath(incidentsDir, slug string) (string, bool) {
+	candidates := []string{
+		filepath.Join(incidentsDir, slug+".md"),
+		filepath.Join(filepath.Dir(incidentsDir), "archive", "incidents", slug+".md"),
+	}
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			return p, true
+		}
+	}
+
+	knowledgeRoot := filepath.Join(filepath.Dir(incidentsDir), "knowledge")
+	found := ""
+	_ = filepath.WalkDir(knowledgeRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d == nil || d.IsDir() {
+			return nil
+		}
+		if d.Name() == slug+".md" {
+			found = path
+			return fs.SkipAll
+		}
+		return nil
+	})
+	if found != "" {
+		return found, true
+	}
+	return filepath.Join(knowledgeRoot, "**", slug+".md"), false
 }

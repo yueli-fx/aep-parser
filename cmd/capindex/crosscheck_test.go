@@ -43,3 +43,32 @@ func TestValidateEntries_ParseErr(t *testing.T) {
 		t.Error("expected parseErr to surface")
 	}
 }
+
+func TestValidateEntries_IncidentUnderKnowledgeTree(t *testing.T) {
+	root := t.TempDir()
+	knowledgeDir := filepath.Join(root, "flightdeck", "knowledge", "effects")
+	if err := os.MkdirAll(knowledgeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(knowledgeDir, "known-incident.md"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	entry := Entry{
+		Symbol: "Sym",
+		HasCap: true,
+		Cap: Cap{
+			Domain:   "layer-create",
+			Tier:     "stable",
+			Verify:   "ae-accept",
+			Gate:     []string{"TestGood"},
+			Incident: []string{"known-incident"},
+		},
+	}
+	gates := map[string]bool{"TestGood": false}
+	incidentsDir := filepath.Join(root, "flightdeck", "incidents")
+
+	if errs := validateEntries([]Entry{entry}, gates, incidentsDir); len(errs) != 0 {
+		t.Fatalf("expected knowledge-tree incident to validate, got %v", errs)
+	}
+}

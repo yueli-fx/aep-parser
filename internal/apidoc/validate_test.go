@@ -1,6 +1,8 @@
 package apidoc
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -100,6 +102,26 @@ func TestValidate_GateRequiredAndExists(t *testing.T) {
 	a.Gate = []string{"TestNonexistent"}
 	if errs := Validate(a, goodSym(), ctx(), ModeStrict); !strings.Contains(msgs(errs), "not found") {
 		t.Errorf("want gate-existence error, got:\n%s", msgs(errs))
+	}
+}
+
+func TestValidate_IncidentUnderKnowledgeTree(t *testing.T) {
+	root := t.TempDir()
+	knowledgeDir := filepath.Join(root, "flightdeck", "knowledge", "effects")
+	if err := os.MkdirAll(knowledgeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(knowledgeDir, "known-incident.md"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	a := goodAnn()
+	a.Incident = []string{"known-incident"}
+	c := ctx()
+	c.IncidentsDir = filepath.Join(root, "flightdeck", "incidents")
+
+	if errs := Validate(a, goodSym(), c, ModeStrict); len(errs) != 0 {
+		t.Fatalf("expected knowledge-tree incident to validate, got:\n%s", msgs(errs))
 	}
 }
 

@@ -23,8 +23,8 @@ func TestPardNameBytes_GBKMatchesAENative(t *testing.T) {
 		name    string
 		wantHex string // verbatim from pseudo_rich_demo.aep pard @0x10
 	}{
-		{"颜色", "d1d5c9ab"},     // AE color pard 0003
-		{"角度", "bdc7b6c8"},     // AE angle pard 0001
+		{"颜色", "d1d5c9ab"},               // AE color pard 0003
+		{"角度", "bdc7b6c8"},               // AE angle pard 0001
 		{"Strength", "537472656e677468"}, // ASCII passthrough
 	}
 	for _, tc := range cases {
@@ -45,8 +45,8 @@ func TestPardNameBytes_ShiftJIS(t *testing.T) {
 		name    string
 		wantHex string
 	}{
-		{"色", "9046"},             // kanji
-		{"ア", "8341"},             // katakana
+		{"色", "9046"},           // kanji
+		{"ア", "8341"},           // katakana
 		{"Color", "436f6c6f72"}, // ASCII passthrough (unchanged across codepages)
 	}
 	for _, tc := range cases {
@@ -116,7 +116,7 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 		}
 	})
 
-	// Label: a group-start with the label flag (@0x04=0x20) immediately closed
+	// Label: a group-start immediately closed
 	// by a generated group-end — golden 0004 (label "标签") + 0005 (group-end).
 	t.Run("label", func(t *testing.T) {
 		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLabel, Name: "Note"}, PseudoLabelGBK, 0)
@@ -124,12 +124,20 @@ func TestSynthControlEntries_PardLayout(t *testing.T) {
 			t.Fatalf("label: got %d entries, want 2 (start+end)", len(es))
 		}
 		start := es[0].pard.Data
-		if start[0x0F] != 0x0d || be32(start, 0x04) != 0x20 || be32(start, 0x30) != 2 {
-			t.Errorf("label start @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0d/0x20/0x2", start[0x0F], be32(start, 0x04), be32(start, 0x30))
+		if start[0x0F] != 0x0d || be32(start, 0x04) != 0 || be32(start, 0x30) != 2 {
+			t.Errorf("label start @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0d/0x0/0x2", start[0x0F], be32(start, 0x04), be32(start, 0x30))
 		}
 		end := es[1].pard.Data
 		if end[0x0F] != 0x0e || be32(end, 0x04) != 0x08 {
 			t.Errorf("label end @0x0F/@0x04 = %#x/%#x, want 0x0e/0x08", end[0x0F], be32(end, 0x04))
+		}
+	})
+
+	t.Run("dimmed-label", func(t *testing.T) {
+		es, _ := synthControlEntries(PseudoControl{Kind: PseudoLabel, Name: "Note", Dimmed: true}, PseudoLabelGBK, 0)
+		start := es[0].pard.Data
+		if start[0x0F] != 0x0d || be32(start, 0x04) != 0x20 || be32(start, 0x30) != 2 {
+			t.Errorf("dimmed label start @0x0F/@0x04/@0x30 = %#x/%#x/%#x, want 0x0d/0x20/0x2", start[0x0F], be32(start, 0x04), be32(start, 0x30))
 		}
 	})
 }

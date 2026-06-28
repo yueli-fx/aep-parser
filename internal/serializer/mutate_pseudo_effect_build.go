@@ -63,7 +63,7 @@ var pardControlType = map[PseudoControlKind]byte{
 	PseudoDropdown:   0x07,
 	PseudoSlider:     0x0a,
 	PseudoGroupStart: 0x0d,
-	PseudoLabel:      0x0d, // same control type as group-start; distinguished by the @0x04 flag
+	PseudoLabel:      0x0d, // same control type as group-start; emitted as a self-closing label pair
 	PseudoGroupEnd:   0x0e,
 	PseudoLayer:      0x00, // same control type as the effect header; distinguished by position (not first)
 	PseudoPoint3D:    0x12,
@@ -225,7 +225,7 @@ type pardEntry struct {
 
 // synthControlEntries expands one PseudoControl into the parT pard entries it
 // occupies. Most controls are a single pard; a Checkbox/Dropdown carries a
-// trailing pdnm string; a Label is a group-start (label flag) + group-end pair.
+// trailing pdnm string; a Label is a group-start + group-end pair.
 func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage, hostLayerID uint32) ([]pardEntry, error) {
 	pard, err := synthControlPard(c, cp)
 	if err != nil {
@@ -240,8 +240,8 @@ func synthControlEntries(c PseudoControl, cp PseudoLabelCodepage, hostLayerID ui
 		// The menu items travel in a trailing pdnm as "opt1|opt2|..".
 		return []pardEntry{{pard: pard, trailing: []*rifx.Chunk{pdnmChunk(strings.Join(c.Options, "|"))}}}, nil
 	case PseudoLabel:
-		// A label is a 0x0d group-start (label flag, @0x04=0x20) immediately
-		// closed by a 0x0e group-end. Both build from the pard alone — no value
+		// A label is a 0x0d group-start immediately closed by a 0x0e group-end.
+		// Both build from the pard alone — no value
 		// entry. AE's own minimal form gives the value group only to the binding
 		// controls (effect header + layer pickers); a synthesized scaffold entry
 		// for a label/group corrupted AE's handling of a later binding control.
