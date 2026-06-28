@@ -66,61 +66,61 @@ Classification values:
 
 ### Task 1: RED/GREEN Slice Classification
 
-- [ ] Add `internal/sliceworkflow/report_test.go`.
-- [ ] Write `TestBuildReportClassifiesProceduralComp` with a hand-built profile containing one text layer and one shape layer, no footage, no third-party effects.
-- [ ] Run `go test ./internal/sliceworkflow` and confirm it fails because the package does not exist.
-- [ ] Create `internal/sliceworkflow/report.go`.
-- [ ] Implement `BuildReport(prof *profile.Profile, opts Options) (Report, error)`.
-- [ ] Implement classification helpers:
+- [x] Add `internal/sliceworkflow/report_test.go`.
+- [x] Write `TestBuildReportClassifiesProceduralComp` with a hand-built profile containing one text layer and one shape layer, no footage, no third-party effects.
+- [x] Run `go test ./internal/sliceworkflow` and confirm it fails because the package does not exist.
+- [x] Create `internal/sliceworkflow/report.go`.
+- [x] Implement `BuildReport(prof *profile.Profile, opts Options) (Report, error)`.
+- [x] Implement classification helpers:
   - count text layers with `Layer.Text != nil`
   - count shape layers with `len(Layer.Shapes) > 0`
   - count footage layers where `Layer.SourceRef.Kind == "footage"`
   - count effects from `Layer.Effects`
   - count plugin deps where `Effect.DependencyClass == "third_party"`
-- [ ] A procedural comp should include reasons `text-layer` and `shape-layer` when those signals exist.
-- [ ] Run `go test ./internal/sliceworkflow` and confirm it passes.
+- [x] A procedural comp should include reasons `text-layer` and `shape-layer` when those signals exist.
+- [x] Run `go test ./internal/sliceworkflow` and confirm it passes.
 
 ### Task 2: RED/GREEN Representative Selection
 
-- [ ] Add `TestBuildReportSelectsDeterministicRepresentativeSlices`.
-- [ ] Build a profile with four comps: procedural, footage-assembly, plugin-dependent, and another procedural.
-- [ ] Set `Options{MaxSlices: 3}`.
-- [ ] Assert selected slices are sorted by descending score, then comp ID, then name.
-- [ ] Assert plugin-dependent comps score higher than footage-assembly, and footage-assembly scores higher than simple procedural comps.
-- [ ] Implement `scoreSlice`.
-- [ ] Implement max-slice capping; `MaxSlices <= 0` should default to 3.
-- [ ] Run `go test ./internal/sliceworkflow`.
+- [x] Add `TestBuildReportSelectsDeterministicRepresentativeSlices`.
+- [x] Build a profile with four comps: procedural, footage-assembly, plugin-dependent, and another procedural.
+- [x] Set `Options{MaxSlices: 3}`.
+- [x] Assert selected slices are sorted by descending score, then comp ID, then name.
+- [x] Assert plugin-dependent comps score higher than footage-assembly, and footage-assembly scores higher than simple procedural comps.
+- [x] Implement `scoreSlice`.
+- [x] Implement max-slice capping; `MaxSlices <= 0` should default to 3.
+- [x] Run `go test ./internal/sliceworkflow`.
 
 ### Task 3: RED/GREEN Gap Report Coupling
 
-- [ ] Add `TestBuildDiagnoseReportIncludesDiffAndRenderGaps`.
-- [ ] Build one `profilediff.Report` with a write diff and one `aeoracle.CompareReport` with `DifferentPixels > 0`.
-- [ ] Implement `BuildDiagnoseReport(source *profile.Profile, observed *profile.Profile, diffReport *profilediff.Report, renderReports []aeoracle.CompareReport, opts Options) (Report, error)`.
-- [ ] Convert the diff report with `gapledger.FromDiffReport`.
-- [ ] Convert each render compare report with `gapledger.FromRenderCompare`.
-- [ ] Omit empty gap reports.
-- [ ] Set `Mode` to `diagnose`; `BuildReport` should set `Mode` to `plan`.
-- [ ] Run `go test ./internal/sliceworkflow`.
+- [x] Add `TestBuildDiagnoseReportIncludesDiffAndRenderGaps`.
+- [x] Build one `profilediff.Report` with a write diff and one `aeoracle.CompareReport` with `DifferentPixels > 0`.
+- [x] Implement `BuildDiagnoseReport(source *profile.Profile, observed *profile.Profile, diffReport *profilediff.Report, renderReports []aeoracle.CompareReport, opts Options) (Report, error)`.
+- [x] Convert the diff report with `gapledger.FromDiffReport`.
+- [x] Convert each render compare report with `gapledger.FromRenderCompare`.
+- [x] Omit empty gap reports.
+- [x] Set `Mode` to `diagnose`; `BuildReport` should set `Mode` to `plan`.
+- [x] Run `go test ./internal/sliceworkflow`.
 
 ### Task 4: CLI Plan
 
-- [ ] Create `cmd/aepslices/main.go`.
-- [ ] Implement `plan` flags:
+- [x] Create `cmd/aepslices/main.go`.
+- [x] Implement `plan` flags:
   - `-aep`
   - `-max`
   - `-dict`
   - `-json`
   - `-out`
-- [ ] Open the AEP through `internal/aep`, build a profile, call `sliceworkflow.BuildReport`.
-- [ ] Exit 0 on success, exit 2 on usage/errors.
-- [ ] Text output should show project path, selected slice count, and one line per slice: `classification score comp_id name`.
-- [ ] JSON output should include schema version, mode, summary, slices, commands, and no gaps.
-- [ ] Add `cmd/aepslices/main_test.go` for JSON emit and usage failure using a tiny hand-written report through the emitter helper.
-- [ ] Verify with `go run ./cmd/aepslices plan -aep flightdeck/showcase/text/text.aep -json`.
+- [x] Open the AEP through `internal/aep`, build a profile, call `sliceworkflow.BuildReport`.
+- [x] Exit 0 on success, exit 2 on usage/errors.
+- [x] Text output should show project path, selected slice count, and one line per slice: `classification score comp_id name`.
+- [x] JSON output should include schema version, mode, summary, slices, commands, and no gaps.
+- [x] Add `cmd/aepslices/main_test.go` for JSON emit and usage failure using command-level fixture tests.
+- [x] Verify with `go run ./cmd/aepslices plan -aep flightdeck/showcase/text/text.aep -json`.
 
 ### Task 5: CLI Diagnose
 
-- [ ] Implement `diagnose` flags:
+- [x] Implement `diagnose` flags:
   - `-expected`
   - `-actual`
   - `-max`
@@ -131,28 +131,36 @@ Classification values:
   - `-threshold`
   - `-json`
   - `-out`
-- [ ] Build expected and actual profiles.
-- [ ] Run `profilediff.Compare`.
-- [ ] If both PNG flags are provided, run `aeoracle.ComparePNG`.
-- [ ] Call `sliceworkflow.BuildDiagnoseReport`.
-- [ ] Exit 0 when total gap count is zero, exit 1 when any gap exists, exit 2 on usage/errors.
-- [ ] Verify identical AEP pair returns 0 and no gaps.
-- [ ] Verify different fixture pair returns 1 and gap reports.
-- [ ] Verify optional PNG pair returns render gap.
+- [x] Build expected and actual profiles.
+- [x] Run `profilediff.Compare`.
+- [x] If both PNG flags are provided, run `aeoracle.ComparePNG`.
+- [x] Call `sliceworkflow.BuildDiagnoseReport`.
+- [x] Exit 0 when total gap count is zero, exit 1 when any gap exists, exit 2 on usage/errors.
+- [x] Verify identical AEP pair returns 0 and no gaps.
+- [x] Verify different fixture pair returns 1 and gap reports.
+- [x] Verify optional PNG pair returns render gap.
 
 ### Task 6: Verification and Commit
 
-- [ ] Run `go test ./internal/sliceworkflow ./cmd/aepslices`.
-- [ ] Run `go test ./...`.
-- [ ] Run `go vet ./...`.
-- [ ] Run `git diff --check`.
-- [ ] Run reserved-word scan on touched files.
-- [ ] Run `go run ./cmd/aepslices plan -aep flightdeck/showcase/text/text.aep -json`.
-- [ ] Run `go run ./cmd/aepslices diagnose -expected flightdeck/showcase/text/text.aep -actual flightdeck/showcase/text/text.aep -json`.
-- [ ] Run `go run ./cmd/aepslices diagnose -expected flightdeck/showcase/text/text.aep -actual flightdeck/showcase/effects/effects.aep`.
-- [ ] Run `go run ./cmd/aepslices diagnose` with generated or existing 2x2 PNGs and confirm exit code 1.
-- [ ] Update Flightdeck status.
-- [ ] Commit with `feat(sliceworkflow): add replication slice reports`.
+- [x] Run `go test ./internal/sliceworkflow ./cmd/aepslices`.
+- [x] Run `go test ./...`.
+- [x] Run `go vet ./...`.
+- [x] Run `git diff --check`.
+- [x] Run reserved-word scan on touched files.
+- [x] Run `go run ./cmd/aepslices plan -aep flightdeck/showcase/text/text.aep -json`.
+- [x] Run `go run ./cmd/aepslices diagnose -expected flightdeck/showcase/text/text.aep -actual flightdeck/showcase/text/text.aep -json`.
+- [x] Run `go run ./cmd/aepslices diagnose -expected flightdeck/showcase/text/text.aep -actual flightdeck/showcase/effects/effects.aep`.
+- [x] Run `go run ./cmd/aepslices diagnose` with generated or existing 2x2 PNGs and confirm exit code 1.
+- [x] Update Flightdeck status.
+- [x] Commit with `feat(sliceworkflow): add replication slice reports`.
+
+## Verification Notes
+
+- `plan` on `flightdeck/showcase/text/text.aep` selected `TextShowcase` as one procedural slice with text and shape signals.
+- `diagnose` on the same AEP returned exit 0 and no gaps.
+- `diagnose` from text fixture to effects fixture returned exit 1 with 16 structural gaps.
+- `diagnose` on identical AEPs plus existing 2x2 PNGs returned exit 1 with one render gap.
+- This validates the generic workflow mechanics on tracked fixtures. A true external, non-Booyah project still needs to run through the same command before Phase 6 recipe IR should be treated as ready.
 
 ## Stop Rule
 

@@ -63,12 +63,14 @@ Done:
 - Phase 4 implemented `internal/gapledger` and `cmd/aepgaps` for structured
   diff/render gap reports with stable IDs, evidence, severity, action type,
   and context fields.
+- Phase 5 implemented `internal/sliceworkflow` and `cmd/aepslices` for generic
+  slice planning and combined profile/render gap workflow reports.
 
 Current:
-- Phase 5 slice replication workflow is next: prove a second project can move
-  through profile, diff, render, and gaps before recipe generation.
-- Implement `internal/sliceworkflow` and `cmd/aepslices` from
-  `phase5-plan.md`.
+- Phase 5 tooling is complete on tracked fixtures.
+- Before Phase 6 recipe IR, run `cmd/aepslices` on a true external, non-Booyah
+  project and record whether profile, diff, render, and gap output are all
+  meaningful without bespoke project code.
 
 ## Open questions
 
@@ -76,3 +78,4 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
+- Which external AEP should become the first non-Booyah Phase 5 acceptance run.
