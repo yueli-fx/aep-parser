@@ -28,7 +28,10 @@
           "shape": {
             "kind": "rect",
             "size": [640, 12],
+            "position": [12, -6],
+            "roundness": 18,
             "fill_color": [255, 255, 255],
+            "fill_opacity": 45,
             "stroke": {
               "color": [255, 0, 0, 255],
               "width": 6,
@@ -62,6 +65,21 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector Stroke Opacity",
         "value": 80
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Rect Position",
+        "value": [12, -6]
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Rect Roundness",
+        "value": 18
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Fill Opacity",
+        "value": 45
       }
     ]
   }

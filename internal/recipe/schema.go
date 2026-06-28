@@ -39,10 +39,13 @@ type Layer struct {
 }
 
 type ShapeSpec struct {
-	Kind      string      `json:"kind"`
-	Size      []float64   `json:"size,omitempty"`
-	FillColor []float64   `json:"fill_color,omitempty"`
-	Stroke    *StrokeSpec `json:"stroke,omitempty"`
+	Kind        string      `json:"kind"`
+	Size        []float64   `json:"size,omitempty"`
+	Position    []float64   `json:"position,omitempty"`
+	Roundness   *float64    `json:"roundness,omitempty"`
+	FillColor   []float64   `json:"fill_color,omitempty"`
+	FillOpacity *float64    `json:"fill_opacity,omitempty"`
+	Stroke      *StrokeSpec `json:"stroke,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -270,14 +273,36 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		case "rect", "ellipse":
 			if layer.Shape.Kind == "rect" {
 				recordCapability("RectNode.SetSize", layerPath+".shape.size")
+				if len(layer.Shape.Position) > 0 {
+					recordCapability("RectNode.SetPosition", layerPath+".shape.position")
+				}
+				if layer.Shape.Roundness != nil {
+					recordCapability("RectNode.SetRoundness", layerPath+".shape.roundness")
+					if *layer.Shape.Roundness < 0 {
+						addRefusal("invalid_shape_roundness", layerPath+".shape.roundness", "shape roundness must be non-negative")
+					}
+				}
 			} else {
 				recordCapability("EllipseNode.SetSize", layerPath+".shape.size")
+				if len(layer.Shape.Position) > 0 {
+					recordCapability("EllipseNode.SetPosition", layerPath+".shape.position")
+				}
+				if layer.Shape.Roundness != nil {
+					addRefusal("unsupported_shape_roundness", layerPath+".shape.roundness", "roundness is only supported for rect shapes")
+				}
 			}
 		default:
 			addRefusal("unsupported_shape_kind", layerPath+".shape.kind", fmt.Sprintf("unsupported shape kind %q", layer.Shape.Kind))
 		}
+		validateVec(layer.Shape.Position, 2, layerPath+".shape.position", addRefusal)
 		if len(layer.Shape.FillColor) > 0 {
 			recordCapability("FillNode.SetColor", layerPath+".shape.fill_color")
+		}
+		if layer.Shape.FillOpacity != nil {
+			recordCapability("FillNode.SetOpacity", layerPath+".shape.fill_opacity")
+			if *layer.Shape.FillOpacity < 0 || *layer.Shape.FillOpacity > 100 {
+				addRefusal("invalid_shape_fill_opacity", layerPath+".shape.fill_opacity", "fill opacity must be between 0 and 100")
+			}
 		}
 		if layer.Shape.Stroke != nil {
 			strokePath := layerPath + ".shape.stroke"

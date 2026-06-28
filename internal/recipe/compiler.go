@@ -387,6 +387,16 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if len(shape.Position) == 2 {
+			if err := rect.SetPosition([2]float64{shape.Position[0], shape.Position[1]}); err != nil {
+				return err
+			}
+		}
+		if shape.Roundness != nil {
+			if err := rect.SetRoundness(*shape.Roundness); err != nil {
+				return err
+			}
+		}
 	case "ellipse":
 		ellipse, err := group.AddEllipse()
 		if err != nil {
@@ -397,23 +407,26 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if len(shape.Position) == 2 {
+			if err := ellipse.SetPosition([2]float64{shape.Position[0], shape.Position[1]}); err != nil {
+				return err
+			}
+		}
 	}
-	if len(shape.FillColor) >= 3 {
+	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil {
 		fill, err := group.AddFill()
 		if err != nil {
 			return err
 		}
-		alpha := 1.0
-		if len(shape.FillColor) >= 4 {
-			alpha = toUnitColor(shape.FillColor[3])
+		if len(shape.FillColor) >= 3 {
+			if err := fill.SetColor(rgbaColor(shape.FillColor)); err != nil {
+				return err
+			}
 		}
-		if err := fill.SetColor([4]float64{
-			toUnitColor(shape.FillColor[0]),
-			toUnitColor(shape.FillColor[1]),
-			toUnitColor(shape.FillColor[2]),
-			alpha,
-		}); err != nil {
-			return err
+		if shape.FillOpacity != nil {
+			if err := fill.SetOpacity(*shape.FillOpacity); err != nil {
+				return err
+			}
 		}
 	}
 	if shape.Stroke != nil {

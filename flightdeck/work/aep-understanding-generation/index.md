@@ -117,13 +117,17 @@ Done:
   `expected_profile.properties[]` can assert static layer/shape property values,
   and the updated shape example passed `go test ./...`, `go vet ./...`, profile
   checks, and an AE 2025 render oracle gate.
+- Additional shape detail controls are implemented for local primitive position,
+  rectangle roundness, and fill opacity. The updated shape example again passed
+  `go test ./...`, `go vet ./...`, profile checks, and an AE 2025 render oracle
+  gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are more shape controls, text style fields, or expression /
-  keyframe coverage. Do not start automated correction loops.
+  candidates are text style fields, expression / keyframe coverage, or
+  additional shape filters. Do not start automated correction loops.
 
 ## Open questions
 
@@ -131,5 +135,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: text style, additional shape
-  detail, transform keyframe/ease, or expression support.
+- Which recipe field family should enter next: text style, transform
+  keyframe/ease, expression support, or shape filters.

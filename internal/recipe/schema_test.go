@@ -100,6 +100,38 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	assertCapability(t, report, "StrokeNode.SetOpacity")
 }
 
+func TestValidateReportsShapeDetailCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Position = []float64{12, -6}
+	rec.Comps[0].Layers[1].Shape.Roundness = ptr(18)
+	rec.Comps[0].Layers[1].Shape.FillOpacity = ptr(45)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "RectNode.SetPosition")
+	assertCapability(t, report, "RectNode.SetRoundness")
+	assertCapability(t, report, "FillNode.SetOpacity")
+}
+
+func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Position = []float64{12}
+	rec.Comps[0].Layers[1].Shape.Roundness = ptr(-1)
+	rec.Comps[0].Layers[1].Shape.FillOpacity = ptr(101)
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_roundness")
+	assertRefusal(t, report, "invalid_shape_fill_opacity")
+}
+
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
