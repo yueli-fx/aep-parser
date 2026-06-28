@@ -55,6 +55,6 @@
 ## Subscriptions
 
 <!-- 本项目订阅的全局知识，一行一个 ~/.flightdeck-相对路径 -->
-knowledge/comments.md
-knowledge/commits.md
-knowledge/subagent-guide.md
+knowledge/coding/comments.md
+knowledge/git/commits.md
+knowledge/agents/subagent-guide.md

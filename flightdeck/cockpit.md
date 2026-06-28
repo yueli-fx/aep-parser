@@ -1,13 +1,13 @@
 # Cockpit — aep-parser
 
-Focus: Booyah Glitch 全工程从零复刻 = 理解金标准检验 → `work/booyah-glitch-replication/`。全 12-comp 已建成 + 双版本 AE gated；待用户真机验收 ⑩⑪⑫。
+Focus: Booyah Glitch 全工程从零复刻 = 理解金标准检验 → `work/booyah-glitch-replication/index.md`。全 12-comp 已建成 + 双版本 AE gated；待用户真机验收 ⑩⑪⑫。
 
 ## In flight
 
-- **booyah-glitch-replication** (`work/booyah-glitch-replication/`) — 全 12-comp from-scratch 复刻 ✅ 全建成 + 双版本 AE gated。①②③⑧ 已用户真机验收 complete；④⑤⑥⑦⑨⑩⑪⑫ 🔶待用户真机 review（agent 已 render 自验，按 showcase review-gate 用户验后才翻 complete + 关 plan）。逐 comp 账本（建法/值/delta/commit）= `showcase/INDEX.md`，进度 = `work/booyah-glitch-replication/plan.md` `## Progress`。
-- **apidoc-tag-schema** (`work/apidoc-tag-schema/`) — @tag 文档 schema 已落地（facade 全转 + dual-read + jargon scrub COMPLETE）。仅剩**可选遗留** flip(c)：删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict CI + 改文档真相源注脚 → regen → commit flip → done。dual-read 现仍工作、aep:cap=0，非阻塞，可随时做。
-- **fx-technique-internalization** (`work/fx-technique-internalization.md`) — 上游「理解工程」研究 arc（暂让位）。通用机制：任何参考 .aep → 解析 → 拆角色 → 抽跨域技法原子 → 存两层结构（技法库 `knowledge/techniques/fx-techniques.md` + 现象配方）。火焰=实例#1已验证。下一步见文件 § 现状与下一步。
-- **technique-ontology** (`work/technique-ontology.md`) — 同上游 arc 的数据骨架：角色/技法/机制三轴本体 + schema v2。已经火焰/闪电/控制器三类压测；未验证大规模（N≫3）词表对齐。
+- **booyah-glitch-replication** (`work/booyah-glitch-replication/index.md`) — 全 12-comp from-scratch 复刻 ✅ 全建成 + 双版本 AE gated。①②③⑧ 已用户真机验收 complete；④⑤⑥⑦⑨⑩⑪⑫ 🔶待用户真机 review（agent 已 render 自验，按 showcase review-gate 用户验后才翻 complete + 关 plan）。逐 comp 账本（建法/值/delta/commit）= `showcase/INDEX.md`，进度 = `work/booyah-glitch-replication/index.md` → `plan.md`。
+- **apidoc-tag-schema** (`work/apidoc-tag-schema/index.md`) — @tag 文档 schema 已落地（facade 全转 + dual-read + jargon scrub COMPLETE）。仅剩**可选遗留** flip(c)：删 `extract.go` `parseCapTag` 旧读路径 + `tag.go` 旧枚举 map + 守卫测试 + `--validate` strict CI + 改文档真相源注脚 → regen → commit flip → done。dual-read 现仍工作、aep:cap=0，非阻塞，可随时做。
+- **fx-technique-internalization** (`work/fx-technique-internalization/index.md`) — 上游「理解工程」研究 arc（暂让位）。通用机制：任何参考 .aep → 解析 → 拆角色 → 抽跨域技法原子 → 存两层结构（技法库 `knowledge/techniques/fx-techniques.md` + 现象配方）。火焰=实例#1已验证。下一步见 topic index。
+- **technique-ontology** (`work/technique-ontology/index.md`) — 同上游 arc 的数据骨架：角色/技法/机制三轴本体 + schema v2。已经火焰/闪电/控制器三类压测；未验证大规模（N≫3）词表对齐。
 
 ## Next
 
