@@ -213,7 +213,6 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			addRefusal("unsupported_effect", effectPath+".match_name", fmt.Sprintf("effect %q is not in SupportedEffects", effect.MatchName))
 			continue
 		}
-		addRefusal("effect_compile_not_supported", effectPath, "recipe compiler does not materialize effects in this slice")
 	}
 }
 

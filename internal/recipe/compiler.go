@@ -31,6 +31,12 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, err
 		}
 	}
+	if hasEffects(compSpec) {
+		project, err = materializeEffects(project, compSpec)
+		if err != nil {
+			return report, err
+		}
+	}
 
 	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
 		return report, err
@@ -44,6 +50,41 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 		return report, err
 	}
 	return report, nil
+}
+
+func hasEffects(comp CompSpec) bool {
+	for _, layer := range comp.Layers {
+		if len(layer.Effects) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
+	reopened, err := aep.Reopen(project)
+	if err != nil {
+		return nil, fmt.Errorf("recipe: reopen for effects: %w", err)
+	}
+	if len(reopened.Compositions) == 0 {
+		return nil, fmt.Errorf("recipe: reopen for effects: no compositions")
+	}
+	comp := reopened.Compositions[0]
+	for i, layerSpec := range compSpec.Layers {
+		if len(layerSpec.Effects) == 0 {
+			continue
+		}
+		if i >= len(comp.Layers) {
+			return nil, fmt.Errorf("recipe: reopen for effects: layer index %d missing", i)
+		}
+		layer := comp.Layers[i]
+		for _, effect := range layerSpec.Effects {
+			if _, err := aep.AddEffect(layer, effect.MatchName); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q add effect %q: %w", layerSpec.Name, effect.MatchName, err)
+			}
+		}
+	}
+	return reopened, nil
 }
 
 func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {

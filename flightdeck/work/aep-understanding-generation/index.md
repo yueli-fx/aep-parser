@@ -101,14 +101,18 @@ Done:
 - Recipe capability reporting now uses reusable `internal/capindex` loaded from
   `docs/capabilities.json`; `cmd/aeprecipe` reports used capabilities and
   downgrades, and refuses effect requests instead of silently dropping them.
+- Recipe effect materialization now supports adding built-in effects from
+  `SupportedEffects()` by compiling the base project, reopening it, then calling
+  `AddEffect` on parsed layers. The `minimal-text-effect` recipe passed profile
+  inspection and AE 2025 render oracle.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are effect materialization for supported built-in effects, richer
-  shape/text controls, or a recipe-to-profile expected-output contract. Do not
-  start automated correction loops.
+  candidates are effect parameter setting, richer shape/text controls, or a
+  recipe-to-profile expected-output contract. Do not start automated correction
+  loops.
 
 ## Open questions
 
@@ -116,6 +120,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- How to represent effect support at the per-match-name level, because the
-  current capability index proves `AddEffect` as an API but not every requested
-  effect in a recipe.
+- How much effect parameter typing should enter the recipe schema before the
+  generation layer has a stable recipe-to-profile expected-output contract.

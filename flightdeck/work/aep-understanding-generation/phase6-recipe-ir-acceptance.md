@@ -43,11 +43,30 @@ Follow-up completed after this gate:
 - `cmd/aeprecipe` now loads `docs/capabilities.json` through reusable
   `internal/capindex` instead of using a temporary static map.
 - Recipe reports include used capabilities and downgrades.
-- Effect requests are explicitly refused until this recipe compiler slice can
-  materialize them; they are no longer silently dropped.
+- At this follow-up point, effect requests were explicitly refused instead of
+  silently dropped until the next slice materialized them.
 - The stale `SetLayerTransform` capability boundary was corrected and
   `docs/capabilities.{json,md}` were regenerated.
 
+Second follow-up completed:
+
+- `examples/recipes/minimal-text-effect.json` adds a supported built-in effect
+  (`ADBE Gaussian Blur 2`) to a text layer.
+- `internal/recipe` now compiles effects with a two-stage path: build the base
+  project, `Reopen` it to materialize parsed layer backing, then call
+  `AddEffect` on the indexed parsed layer.
+- `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-effect.json -out
+  tmp_debug\recipes\minimal-text-effect.aep -json` returned valid.
+- `cmd/aepdissect -json tmp_debug\recipes\minimal-text-effect.aep` showed
+  `ADBE Gaussian Blur 2` on `Blurred Title`.
+- AE 2025 render oracle passed:
+  - request: `tmp_debug/aeoracle/minimal_text_effect/request.json`
+  - done marker: `tmp_debug/aeoracle/minimal_text_effect/aeoracle_render.done`
+    = `ok`
+  - metadata: status `ok`, AE `25.1x68`
+  - PNG outputs: `f000000.png`, `f000030.png`, `f000060.png`
+
 Next generation work should broaden recipe coverage in small proven slices,
-starting with effect materialization or richer shape/text controls, each gated
-by profile and render-oracle evidence.
+starting with effect parameter setting, richer shape/text controls, or a
+recipe-to-profile expected-output contract, each gated by profile and
+render-oracle evidence.

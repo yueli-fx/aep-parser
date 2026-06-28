@@ -81,7 +81,7 @@ func TestValidateReportsUsedCapabilities(t *testing.T) {
 	}
 }
 
-func TestValidateRefusesSupportedEffectsUntilCompilerMaterializesThem(t *testing.T) {
+func TestValidateAcceptsSupportedEffects(t *testing.T) {
 	effects := aep.SupportedEffects()
 	if len(effects) == 0 {
 		t.Fatal("SupportedEffects is empty")
@@ -91,11 +91,10 @@ func TestValidateRefusesSupportedEffectsUntilCompilerMaterializesThem(t *testing
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
 
-	if report.Valid {
-		t.Fatal("Valid = true, want false")
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
 	}
 	assertCapability(t, report, "AddEffect")
-	assertRefusal(t, report, "effect_compile_not_supported")
 }
 
 func minimalRecipe() recipe.Recipe {

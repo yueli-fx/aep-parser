@@ -1,7 +1,6 @@
 package recipe_test
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -65,7 +64,7 @@ func TestCompileToFileCreatesParentDirectory(t *testing.T) {
 	}
 }
 
-func TestCompileToFileRefusesEffectsWithoutWritingPartialAEP(t *testing.T) {
+func TestCompileToFileMaterializesSupportedEffects(t *testing.T) {
 	effects := aep.SupportedEffects()
 	if len(effects) == 0 {
 		t.Fatal("SupportedEffects is empty")
@@ -78,11 +77,18 @@ func TestCompileToFileRefusesEffectsWithoutWritingPartialAEP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CompileToFile: %v", err)
 	}
-	if report.Valid {
-		t.Fatalf("report = %+v, want invalid", report)
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
 	}
-	assertRefusal(t, report, "effect_compile_not_supported")
-	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
-		t.Fatalf("compiled AEP exists despite invalid recipe: %v", err)
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	if got := prof.Comps[0].Layers[0].Effects; len(got) != 1 || got[0].MatchName != effects[0] {
+		t.Fatalf("Effects = %+v, want %q", got, effects[0])
 	}
 }

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal text effect"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 2,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Blurred Title",
+          "text": "BOOYAH",
+          "transform": {
+            "position": [960, 540],
+            "scale": [100, 100],
+            "opacity": 100
+          },
+          "effects": [
+            {
+              "match_name": "ADBE Gaussian Blur 2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
