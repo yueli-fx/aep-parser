@@ -105,14 +105,16 @@ Done:
   `SupportedEffects()` by compiling the base project, reopening it, then calling
   `AddEffect` on parsed layers. The `minimal-text-effect` recipe passed profile
   inspection and AE 2025 render oracle.
+- Recipe effect params now support static scalar/bool/numeric-array values via
+  `SetEffectParam`; the Gaussian Blur example passed profile inspection and AE
+  2025 render oracle with params `25`, `2`, and `1`.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are effect parameter setting, richer shape/text controls, or a
-  recipe-to-profile expected-output contract. Do not start automated correction
-  loops.
+  candidates are a recipe-to-profile expected-output contract or richer
+  shape/text controls. Do not start automated correction loops.
 
 ## Open questions
 
@@ -120,5 +122,6 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- How much effect parameter typing should enter the recipe schema before the
-  generation layer has a stable recipe-to-profile expected-output contract.
+- Whether the next safety rail should be expected-profile assertions for recipe
+  examples, so future generation changes cannot silently lose layers, effects,
+  params, text, or shape nodes.

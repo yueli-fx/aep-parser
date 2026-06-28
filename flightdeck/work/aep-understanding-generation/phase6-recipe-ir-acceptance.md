@@ -66,7 +66,30 @@ Second follow-up completed:
   - metadata: status `ok`, AE `25.1x68`
   - PNG outputs: `f000000.png`, `f000030.png`, `f000060.png`
 
+Third follow-up completed:
+
+- `Effect.params[]` supports static parameter values:
+  - numeric scalar
+  - boolean, normalized to `1.0` / `0.0`
+  - numeric arrays, normalized from JSON arrays to `[]float64`
+- `internal/recipe` validates param match names and value types, records
+  `SetEffectParam` in capability reports, and rejects unsupported value types
+  such as strings.
+- `examples/recipes/minimal-text-effect.json` now sets Gaussian Blur params:
+  - `ADBE Gaussian Blur 2-0001` = `25`
+  - `ADBE Gaussian Blur 2-0002` = `2`
+  - `ADBE Gaussian Blur 2-0003` = `true` → `1`
+- `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-effect.json -out
+  tmp_debug\recipes\minimal-text-effect-params.aep -json` returned valid.
+- `cmd/aepdissect -json tmp_debug\recipes\minimal-text-effect-params.aep`
+  showed the three static values as `25`, `2`, and `1`.
+- AE 2025 render oracle passed:
+  - request: `tmp_debug/aeoracle/minimal_text_effect_params/request.json`
+  - done marker:
+    `tmp_debug/aeoracle/minimal_text_effect_params/aeoracle_render.done` = `ok`
+  - metadata: status `ok`, AE `25.1x68`
+  - PNG outputs: `f000000.png`, `f000030.png`, `f000060.png`
+
 Next generation work should broaden recipe coverage in small proven slices,
-starting with effect parameter setting, richer shape/text controls, or a
-recipe-to-profile expected-output contract, each gated by profile and
-render-oracle evidence.
+starting with a recipe-to-profile expected-output contract or richer shape/text
+controls, each gated by profile and render-oracle evidence.

@@ -23,7 +23,21 @@
           },
           "effects": [
             {
-              "match_name": "ADBE Gaussian Blur 2"
+              "match_name": "ADBE Gaussian Blur 2",
+              "params": [
+                {
+                  "match_name": "ADBE Gaussian Blur 2-0001",
+                  "value": 25
+                },
+                {
+                  "match_name": "ADBE Gaussian Blur 2-0002",
+                  "value": 2
+                },
+                {
+                  "match_name": "ADBE Gaussian Blur 2-0003",
+                  "value": true
+                }
+              ]
             }
           ]
         }

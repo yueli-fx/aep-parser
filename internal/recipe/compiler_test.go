@@ -92,3 +92,51 @@ func TestCompileToFileMaterializesSupportedEffects(t *testing.T) {
 		t.Fatalf("Effects = %+v, want %q", got, effects[0])
 	}
 }
+
+func TestCompileToFileSetsEffectParams(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Gaussian Blur 2",
+		Params: []recipe.EffectParam{
+			{MatchName: "ADBE Gaussian Blur 2-0001", Value: 25.0},
+			{MatchName: "ADBE Gaussian Blur 2-0002", Value: 2.0},
+			{MatchName: "ADBE Gaussian Blur 2-0003", Value: true},
+		},
+	}}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	params := prof.Comps[0].Layers[0].Effects[0].Params
+	assertParamValue(t, params, "ADBE Gaussian Blur 2-0001", 25.0)
+	assertParamValue(t, params, "ADBE Gaussian Blur 2-0002", 2.0)
+	assertParamValue(t, params, "ADBE Gaussian Blur 2-0003", 1.0)
+}
+
+func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {
+	t.Helper()
+	for _, param := range params {
+		if param.MatchName != matchName {
+			continue
+		}
+		got, ok := param.StaticValue.(float64)
+		if !ok || got != want {
+			t.Fatalf("%s StaticValue = %v, want %v", matchName, param.StaticValue, want)
+		}
+		return
+	}
+	t.Fatalf("param %q not found in %+v", matchName, params)
+}

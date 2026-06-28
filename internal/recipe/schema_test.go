@@ -97,6 +97,41 @@ func TestValidateAcceptsSupportedEffects(t *testing.T) {
 	assertCapability(t, report, "AddEffect")
 }
 
+func TestValidateAcceptsSupportedEffectParams(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Gaussian Blur 2",
+		Params: []recipe.EffectParam{
+			{MatchName: "ADBE Gaussian Blur 2-0001", Value: 25.0},
+			{MatchName: "ADBE Gaussian Blur 2-0003", Value: true},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "SetEffectParam")
+}
+
+func TestValidateRejectsUnsupportedEffectParamValue(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Gaussian Blur 2",
+		Params: []recipe.EffectParam{
+			{MatchName: "ADBE Gaussian Blur 2-0001", Value: "high"},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "unsupported_effect_param_value")
+}
+
 func minimalRecipe() recipe.Recipe {
 	return recipe.Recipe{
 		SchemaVersion: recipe.SchemaVersion,

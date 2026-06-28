@@ -79,12 +79,56 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 		}
 		layer := comp.Layers[i]
 		for _, effect := range layerSpec.Effects {
-			if _, err := aep.AddEffect(layer, effect.MatchName); err != nil {
+			fx, err := aep.AddEffect(layer, effect.MatchName)
+			if err != nil {
 				return nil, fmt.Errorf("recipe: layer %q add effect %q: %w", layerSpec.Name, effect.MatchName, err)
+			}
+			for _, param := range effect.Params {
+				value, err := normalizeEffectParamValue(param.Value)
+				if err != nil {
+					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+				}
+				if _, err := aep.SetEffectParam(layer, fx, param.MatchName, value); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+				}
 			}
 		}
 	}
 	return reopened, nil
+}
+
+func normalizeEffectParamValue(value any) (any, error) {
+	switch v := value.(type) {
+	case float64:
+		return v, nil
+	case int:
+		return float64(v), nil
+	case bool:
+		if v {
+			return 1.0, nil
+		}
+		return 0.0, nil
+	case []float64:
+		if len(v) == 0 {
+			return nil, fmt.Errorf("empty numeric array")
+		}
+		return v, nil
+	case []any:
+		if len(v) == 0 {
+			return nil, fmt.Errorf("empty numeric array")
+		}
+		out := make([]float64, 0, len(v))
+		for i, item := range v {
+			n, ok := item.(float64)
+			if !ok {
+				return nil, fmt.Errorf("array item %d is %T, want number", i, item)
+			}
+			out = append(out, n)
+		}
+		return out, nil
+	default:
+		return nil, fmt.Errorf("unsupported value type %T", value)
+	}
 }
 
 func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {

@@ -44,7 +44,13 @@ type ShapeSpec struct {
 }
 
 type Effect struct {
+	MatchName string        `json:"match_name"`
+	Params    []EffectParam `json:"params,omitempty"`
+}
+
+type EffectParam struct {
 	MatchName string `json:"match_name"`
+	Value     any    `json:"value,omitempty"`
 }
 
 type Transform struct {
@@ -213,6 +219,16 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			addRefusal("unsupported_effect", effectPath+".match_name", fmt.Sprintf("effect %q is not in SupportedEffects", effect.MatchName))
 			continue
 		}
+		for pi, param := range effect.Params {
+			paramPath := fmt.Sprintf("%s.params[%d]", effectPath, pi)
+			recordCapability("SetEffectParam", paramPath)
+			if param.MatchName == "" {
+				addRefusal("missing_effect_param_match_name", paramPath+".match_name", "effect param match_name is required")
+			}
+			if !validEffectParamValue(param.Value) {
+				addRefusal("unsupported_effect_param_value", paramPath+".value", "effect param value must be a number, boolean, or numeric array")
+			}
+		}
 	}
 }
 
@@ -231,6 +247,27 @@ func validateVec(values []float64, want int, path string, addRefusal func(string
 	}
 	if len(values) != want {
 		addRefusal("invalid_vector_size", path, fmt.Sprintf("expected %d values", want))
+	}
+}
+
+func validEffectParamValue(value any) bool {
+	switch v := value.(type) {
+	case float64, int, bool:
+		return true
+	case []float64:
+		return len(v) > 0
+	case []any:
+		if len(v) == 0 {
+			return false
+		}
+		for _, item := range v {
+			if _, ok := item.(float64); !ok {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
 	}
 }
 
