@@ -37,6 +37,8 @@ Phase 0 export-surface audit and contract lock before extracting
 - `phase5-plan.md` — Phase 5 slice replication workflow plan.
 - `phase5-booyah-acceptance.md` — real Booyah source vs current clone Phase 5
   acceptance run.
+- `phase5-non-booyah-acceptance.md` — non-Booyah Motionbox sample Phase 5
+  acceptance run.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -71,13 +73,18 @@ Done:
   `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep` against the current
   clone and produced actionable write gaps after fixing layer-index fallback in
   `profilediff`.
+- Phase 5 non-Booyah acceptance run processed
+  `samples/motionbox/motion-graphics/circle-animation/circle animation.aep`,
+  selected representative slices, produced zero self-diff gaps, produced
+  cross-project gap output against `seabox.aep`, and generated a render-oracle
+  sentinel plan.
 
 Current:
-- Phase 5 tooling is complete on tracked fixtures and the real Booyah source
-  project.
-- Before Phase 6 recipe IR, run `cmd/aepslices` on a non-Booyah project and
-  record whether profile, diff, render, and gap output are all meaningful
-  without bespoke project code.
+- Phase 5 tooling is complete on tracked fixtures, the real Booyah source
+  project, and one non-Booyah Motionbox project.
+- Next decision: either run a real AE render gate for the non-Booyah sample, or
+  write the Phase 6 recipe-IR implementation plan. Do not start automated
+  correction loops before a real render compare exists.
 
 ## Open questions
 
@@ -85,4 +92,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which external AEP should become the first non-Booyah Phase 5 acceptance run.
+- Whether Phase 6 should require a real AE render compare before recipe IR
+  starts, or only before recipe correction loops.
