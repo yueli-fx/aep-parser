@@ -31,6 +31,7 @@ Phase 0 export-surface audit and contract lock before extracting
   entry gate.
 - `plan.md` — Phase 0 execution plan.
 - `phase1-plan.md` — Phase 1 profile extraction plan and verification record.
+- `phase2-plan.md` — Phase 2 structural/semantic diff plan.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -49,13 +50,15 @@ Done:
   matrix, and profile contract.
 - Phase 1 implemented `internal/profile` and moved `aepdissect -json` onto the
   stable profile builder.
+- Phase 1 self-review fixed profile gaps for track matte refs and parsed
+  in/out points.
 
 Current:
-- Phase 1 profile extraction is ready for human review.
-- Stop here before starting `internal/profilediff`, `cmd/aepdiff`, ignore rules,
-  or render oracle work.
+- Phase 2 structural/semantic diff is active.
+- Implement `internal/profilediff`, `cmd/aepdiff`, and JSON ignore rules before
+  any render oracle or generation work.
 
 ## Open questions
 
-- Whether to accept the new profile JSON shape and proceed into Phase 2
-  structural/semantic diff tooling.
+- How broad the first Booyah diff report should be before Phase 3 render oracle
+  exists.
