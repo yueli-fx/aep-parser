@@ -128,40 +128,121 @@ func runRender(args []string) int {
 		fmt.Fprintln(os.Stderr, "usage: aeoracle render -request request.json [-ae AfterFX.exe] [-jsx scripts/aeoracle_render.jsx] [-timeout-sec n] [-dry-run]")
 		return 2
 	}
-	req, err := aeoracle.ReadRequest(*requestPath)
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "cwd:", err)
+		return 2
+	}
+	requestAbs, err := filepath.Abs(*requestPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "request path:", err)
+		return 2
+	}
+	req, err := aeoracle.ReadRequest(requestAbs)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "request:", err)
 		return 2
 	}
+	req, err = resolveRenderRequestPaths(req, cwd)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "request paths:", err)
+		return 2
+	}
+	jsxAbs, err := resolvePath(*jsxPath, cwd)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "jsx path:", err)
+		return 2
+	}
+	runScript, err := resolvePath(filepath.Join("scripts", "ae_run.ps1"), cwd)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "runner path:", err)
+		return 2
+	}
+	aeExe := *aePath
+	if aeExe != "" {
+		aeExe, err = resolvePath(aeExe, cwd)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "ae path:", err)
+			return 2
+		}
+	}
 	if *dryRun {
-		fmt.Println(formatCommand("pwsh", renderCommand(*aePath, *jsxPath, req.DonePath, *timeout)))
+		fmt.Printf("AEORACLE_REQUEST=%s\nAEORACLE_CWD=%s\n%s\n", requestAbs, cwd, formatCommand("pwsh", renderCommand(runScript, aeExe, jsxAbs, req.DonePath, *timeout)))
 		return 0
 	}
-	if *aePath == "" {
+	if aeExe == "" {
 		fmt.Fprintln(os.Stderr, "render: -ae is required unless -dry-run is set")
 		return 2
 	}
-	cmdArgs := renderCommand(*aePath, *jsxPath, req.DonePath, *timeout)
+	cmdArgs := renderCommand(runScript, aeExe, jsxAbs, req.DonePath, *timeout)
 	cmd := exec.Command("pwsh", cmdArgs...)
-	cmd.Env = append(os.Environ(), "AEORACLE_REQUEST="+*requestPath)
+	cmd.Env = append(os.Environ(), "AEORACLE_REQUEST="+requestAbs, "AEORACLE_CWD="+cwd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "render:", err)
 		return 2
 	}
+	status, err := readRenderDoneStatus(req.DonePath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "render status:", err)
+		return 2
+	}
+	if status != "ok" {
+		fmt.Fprintf(os.Stderr, "render: AE reported status %q\n", status)
+		return 2
+	}
 	return 0
 }
 
-func renderCommand(aePath, jsxPath, donePath string, timeout int) []string {
+func renderCommand(runScript, aePath, jsxPath, donePath string, timeout int) []string {
 	return []string{
 		"-NoProfile",
-		"-File", "scripts/ae_run.ps1",
+		"-File", runScript,
 		"-AeExe", aePath,
 		"-Jsx", jsxPath,
 		"-Done", donePath,
 		"-TimeoutSec", strconv.Itoa(timeout),
 	}
+}
+
+func resolveRenderRequestPaths(req aeoracle.RenderRequest, baseDir string) (aeoracle.RenderRequest, error) {
+	var err error
+	if req.AEPPath, err = resolvePath(req.AEPPath, baseDir); err != nil {
+		return aeoracle.RenderRequest{}, err
+	}
+	if req.OutputDir, err = resolvePath(req.OutputDir, baseDir); err != nil {
+		return aeoracle.RenderRequest{}, err
+	}
+	if req.DonePath == "" {
+		req.DonePath = filepath.Join(req.OutputDir, "aeoracle_render.done")
+	} else if req.DonePath, err = resolvePath(req.DonePath, baseDir); err != nil {
+		return aeoracle.RenderRequest{}, err
+	}
+	if req.MetadataPath == "" {
+		req.MetadataPath = filepath.Join(req.OutputDir, "metadata.json")
+	} else if req.MetadataPath, err = resolvePath(req.MetadataPath, baseDir); err != nil {
+		return aeoracle.RenderRequest{}, err
+	}
+	return req, nil
+}
+
+func resolvePath(path string, baseDir string) (string, error) {
+	if path == "" {
+		return "", nil
+	}
+	if filepath.IsAbs(path) {
+		return filepath.Clean(path), nil
+	}
+	return filepath.Abs(filepath.Join(baseDir, path))
+}
+
+func readRenderDoneStatus(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(data)), nil
 }
 
 func writeJSON(v any) int {

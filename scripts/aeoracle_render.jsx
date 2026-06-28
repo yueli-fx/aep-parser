@@ -4,11 +4,77 @@
 // If the variable is absent, falls back to aeoracle_request.json beside this JSX.
 // Intended to run through scripts/ae_run.ps1, which watches request.done_path.
 (function () {
+    function installJSON() {
+        if (typeof JSON === "undefined") JSON = {};
+        if (typeof JSON.parse !== "function") {
+            JSON.parse = function (text) {
+                return eval("(" + text + ")");
+            };
+        }
+        if (typeof JSON.stringify === "function") return;
+
+        function repeat(text, count) {
+            var out = "";
+            for (var i = 0; i < count; i++) out += text;
+            return out;
+        }
+
+        function quote(text) {
+            return "\"" + String(text)
+                .replace(/\\/g, "\\\\")
+                .replace(/"/g, "\\\"")
+                .replace(/\r/g, "\\r")
+                .replace(/\n/g, "\\n")
+                .replace(/\t/g, "\\t") + "\"";
+        }
+
+        function encode(value, indent, depth) {
+            if (value === null) return "null";
+            var kind = typeof value;
+            if (kind === "string") return quote(value);
+            if (kind === "number") return isFinite(value) ? String(value) : "null";
+            if (kind === "boolean") return value ? "true" : "false";
+            if (kind === "undefined" || kind === "function") return undefined;
+
+            var gap = indent ? repeat(indent, depth) : "";
+            var nextGap = indent ? repeat(indent, depth + 1) : "";
+            var parts = [];
+            var i;
+            if (value instanceof Array) {
+                for (i = 0; i < value.length; i++) {
+                    var item = encode(value[i], indent, depth + 1);
+                    parts.push(item === undefined ? "null" : item);
+                }
+                if (!indent) return "[" + parts.join(",") + "]";
+                return "[\n" + nextGap + parts.join(",\n" + nextGap) + "\n" + gap + "]";
+            }
+
+            for (var key in value) {
+                if (!value.hasOwnProperty(key)) continue;
+                var encoded = encode(value[key], indent, depth + 1);
+                if (encoded === undefined) continue;
+                parts.push(quote(key) + (indent ? ": " : ":") + encoded);
+            }
+            if (!indent) return "{" + parts.join(",") + "}";
+            return "{\n" + nextGap + parts.join(",\n" + nextGap) + "\n" + gap + "}";
+        }
+
+        JSON.stringify = function (value, replacer, space) {
+            var indent = "";
+            if (typeof space === "number") indent = repeat(" ", Math.min(space, 10));
+            else if (typeof space === "string") indent = space.substring(0, 10);
+            return encode(value, indent, 0);
+        };
+    }
+
+    installJSON();
+
     var requestPath = $.getenv("AEORACLE_REQUEST");
     if (!requestPath) {
         var self = new File($.fileName);
         requestPath = self.parent.fsName + "/aeoracle_request.json";
     }
+    var baseDir = $.getenv("AEORACLE_CWD") || (new File(requestPath)).parent.fsName;
 
     function readText(path) {
         var f = new File(path);
@@ -39,6 +105,18 @@
         return dir + name;
     }
 
+    function isAbsolutePath(path) {
+        path = slash(path);
+        return /^[A-Za-z]:\//.test(path) || path.indexOf("//") === 0 || path.charAt(0) === "/";
+    }
+
+    function resolvePath(path) {
+        if (!path) return path;
+        path = String(path);
+        if (isAbsolutePath(path)) return path;
+        return joinPath(baseDir, path);
+    }
+
     function findComp(name) {
         var first = null;
         for (var i = 1; i <= app.project.numItems; i++) {
@@ -60,6 +138,10 @@
 
     try {
         req = JSON.parse(readText(requestPath));
+        req.aep_path = resolvePath(req.aep_path);
+        req.output_dir = resolvePath(req.output_dir);
+        req.done_path = resolvePath(req.done_path);
+        req.metadata_path = resolvePath(req.metadata_path);
         metadata.aep_path = req.aep_path;
         metadata.comp_name = req.comp_name || "";
         metadata.output_dir = req.output_dir;

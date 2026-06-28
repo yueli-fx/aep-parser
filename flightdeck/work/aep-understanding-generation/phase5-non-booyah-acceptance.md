@@ -18,6 +18,7 @@ go run ./cmd/aepslices diagnose -expected 'samples\motionbox\motion-graphics\cir
 go run ./cmd/aepslices diagnose -expected 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'samples\motionbox\motion-graphics\seabox\seabox.aep' -json -out tmp_debug\aepslices\circle_animation_vs_seabox.json
 go run ./cmd/aeoracle plan -aep 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -out tmp_debug\aeoracle\circle_animation -json
 go run ./cmd/aeoracle render -request tmp_debug\aeoracle\circle_animation\request.json -dry-run
+go run ./cmd/aeoracle render -request tmp_debug\aeoracle\circle_animation\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 600
 ```
 
 ## Result
@@ -40,20 +41,24 @@ bespoke project code:
   - 24 `extra_object`
 - Render oracle planning selected 3 sentinel frames: 0, 24, 48.
 - Render dry-run validated the request and emitted the `scripts/ae_run.ps1`
-  invocation.
+  invocation with absolute runner, JSX, and `.done` paths.
+- Hard AE render gate passed on After Effects `25.1x68`:
+  - `.done`: `tmp_debug/aeoracle/circle_animation/aeoracle_render.done` = `ok`
+  - metadata: `tmp_debug/aeoracle/circle_animation/metadata.json`, status `ok`
+  - PNG outputs: `f000000.png`, `f000024.png`, `f000048.png`
+- Render gate fix recorded in code:
+  - `scripts/aeoracle_render.jsx` injects a small JSON parser/stringifier because
+    this AE ExtendScript runtime does not provide global `JSON`.
+  - `cmd/aeoracle render` resolves request/runner/JSX/done paths against the
+    invocation cwd and treats non-`ok` `.done` content as failure.
 
 ## Interpretation
 
 This validates the generic non-Booyah path for profile, slice selection, diff,
-gap ledger generation, render-frame planning, and render request validation. It
-does not prove pixel fidelity because no AE render was launched in this run.
+gap ledger generation, render-frame planning, render request validation, and
+hard AE frame extraction.
 
-Actual AE render was intentionally not started because an existing AfterFX
-process was present (`AfterFX`, pid 57036, AE 2020 untitled project). The
-tracked `scripts/ae_run.ps1` guard refuses concurrent AE sessions by default to
-avoid reading the wrong modal windows or disrupting user state. Close or clear
-that AE process before running the hard render gate.
-
-If Phase 6 needs a hard render-readiness gate, run `cmd/aeoracle render` against
-the generated request and compare the output images before starting recipe
-correction loops.
+This still does not prove clone pixel fidelity by itself: the current hard gate
+renders sentinel frames from the source project. Phase 6 should pair this with
+generated-clone rendering and `cmd/aeoracle compare` before starting automated
+recipe correction loops.
