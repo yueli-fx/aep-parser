@@ -39,6 +39,8 @@ Phase 0 export-surface audit and contract lock before extracting
   acceptance run.
 - `phase5-non-booyah-acceptance.md` — non-Booyah Motionbox sample Phase 5
   acceptance run.
+- `phase6-plan.md` — Phase 6 source-vs-clone render frame-set compare plan
+  and recipe-IR readiness gate.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -76,15 +78,20 @@ Done:
 - Phase 5 non-Booyah acceptance run processed
   `samples/motionbox/motion-graphics/circle-animation/circle animation.aep`,
   selected representative slices, produced zero self-diff gaps, produced
-  cross-project gap output against `seabox.aep`, and generated a render-oracle
-  sentinel plan.
+  cross-project gap output against `seabox.aep`, generated a render-oracle
+  sentinel plan, and passed a real AE 2025 hard render gate after hardening
+  `cmd/aeoracle render` and `scripts/aeoracle_render.jsx`.
+- Phase 6 render-compare plan written. The first implementation slice is
+  source-vs-clone frame-set compare (`clone-request` + `compare-set`) before
+  recipe IR or automated correction loops.
 
 Current:
 - Phase 5 tooling is complete on tracked fixtures, the real Booyah source
-  project, and one non-Booyah Motionbox project.
-- Next decision: either run a real AE render gate for the non-Booyah sample, or
-  write the Phase 6 recipe-IR implementation plan. Do not start automated
-  correction loops before a real render compare exists.
+  project, and one non-Booyah Motionbox project, including a real source render
+  gate.
+- Next: execute `phase6-plan.md` Task 1 through Task 5 to produce a generic
+  source-vs-clone render compare report for Booyah. Do not start recipe IR or
+  automated correction loops before that report exists.
 
 ## Open questions
 
@@ -92,5 +99,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Whether Phase 6 should require a real AE render compare before recipe IR
-  starts, or only before recipe correction loops.
+- Whether the current Booyah clone can share the source top-comp selection with
+  no manual comp-name override in `aeoracle clone-request`.
