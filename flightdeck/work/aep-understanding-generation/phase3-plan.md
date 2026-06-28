@@ -25,72 +25,78 @@
 
 ### Task 1: RED/GREEN Sentinel Frame Selection
 
-- [ ] Add `internal/aeoracle/frames_test.go`.
-- [ ] Test `SelectFrames` includes first and last comp frames for a simple comp.
-- [ ] Test keyframe times from admitted layer properties/effect params are included.
-- [ ] Test long quiet spans add midpoints between selected keyframes.
-- [ ] Test `MaxFrames` caps output deterministically and always keeps endpoints.
-- [ ] Implement `internal/aeoracle/frames.go`.
-- [ ] Run `go test ./internal/aeoracle`.
+- [x] Add `internal/aeoracle/frames_test.go`.
+- [x] Test `SelectFrames` includes first and last comp frames for a simple comp.
+- [x] Test keyframe times from admitted layer properties/effect params are included.
+- [x] Test long quiet spans add midpoints between selected keyframes.
+- [x] Test `MaxFrames` caps output deterministically and always keeps endpoints.
+- [x] Implement `internal/aeoracle/frames.go`.
+- [x] Run `go test ./internal/aeoracle`.
 
 ### Task 2: RED/GREEN Request and Metadata Contract
 
-- [ ] Add tests for JSON round-trip of `RenderRequest`:
+- [x] Add tests for JSON round-trip of `RenderRequest`:
   - schema version
   - AEP path
   - comp name
   - output directory
   - frame list with frame index, seconds, tag, and reason
-- [ ] Implement `WriteRequest(path string, req RenderRequest) error` and `ReadRequest(path string) (RenderRequest, error)`.
-- [ ] Validate request rejects empty AEP path, empty output dir, and empty frame list.
-- [ ] Run `go test ./internal/aeoracle`.
+- [x] Implement `WriteRequest(path string, req RenderRequest) error` and `ReadRequest(path string) (RenderRequest, error)`.
+- [x] Validate request rejects empty AEP path, empty output dir, and empty frame list.
+- [x] Run `go test ./internal/aeoracle`.
 
 ### Task 3: RED/GREEN PNG Comparison
 
-- [ ] Add tests that generate tiny PNGs in a temp dir.
-- [ ] Assert identical images produce `DifferentPixels=0`.
-- [ ] Assert one changed pixel is counted with exact threshold.
-- [ ] Assert a per-channel tolerance can ignore small deltas.
-- [ ] Implement `ComparePNG(expectedPath, actualPath string, opts CompareOptions) (CompareReport, error)`.
-- [ ] Include width/height mismatch as a structured error.
-- [ ] Run `go test ./internal/aeoracle`.
+- [x] Add tests that generate tiny PNGs in a temp dir.
+- [x] Assert identical images produce `DifferentPixels=0`.
+- [x] Assert one changed pixel is counted with exact threshold.
+- [x] Assert a per-channel tolerance can ignore small deltas.
+- [x] Implement `ComparePNG(expectedPath, actualPath string, opts CompareOptions) (CompareReport, error)`.
+- [x] Include width/height mismatch as a structured error.
+- [x] Run `go test ./internal/aeoracle`.
 
 ### Task 4: CLI Dry-Run and Compare
 
-- [ ] Create `cmd/aeoracle/main.go`.
-- [ ] Implement `plan`:
+- [x] Create `cmd/aeoracle/main.go`.
+- [x] Implement `plan`:
   - flags: `-aep`, `-comp`, `-out`, `-max-frames`, `-json`
   - opens AEP, builds profile, selects frames, prints or writes JSON request
-- [ ] Implement `compare`:
+- [x] Implement `compare`:
   - flags: `-expected`, `-actual`, `-threshold`, `-json`
   - prints compact metric or JSON
-- [ ] Implement `render`:
+- [x] Implement `render`:
   - flags: `-request`, `-ae`, `-jsx`, `-timeout-sec`, `-dry-run`
   - dry-run validates request and prints the `ae_run.ps1` command without launching AE
   - non-dry-run invokes PowerShell `scripts/ae_run.ps1`
-- [ ] Run command-level smoke tests without launching AE.
+- [x] Run command-level smoke tests without launching AE.
 
 ### Task 5: Generic JSX Renderer
 
-- [ ] Create `scripts/aeoracle_render.jsx`.
-- [ ] Read JSON request path from `AEORACLE_REQUEST` environment variable first; fall back to `aeoracle_request.json` beside the JSX.
-- [ ] Open requested AEP, find requested comp by exact name or first comp when comp name is empty.
-- [ ] Set 8bpc, purge caches, render each frame to deterministic PNG names under output dir.
-- [ ] Write metadata JSON with AE version, project path, comp name, frame records, output paths, and status.
-- [ ] Write a done marker path from request when provided; otherwise `aeoracle_render.done` beside the request.
+- [x] Create `scripts/aeoracle_render.jsx`.
+- [x] Read JSON request path from `AEORACLE_REQUEST` environment variable first; fall back to `aeoracle_request.json` beside the JSX.
+- [x] Open requested AEP, find requested comp by exact name or first comp when comp name is empty.
+- [x] Set 8bpc, purge caches, render each frame to deterministic PNG names under output dir.
+- [x] Write metadata JSON with AE version, project path, comp name, frame records, output paths, and status.
+- [x] Write a done marker path from request when provided; otherwise `aeoracle_render.done` beside the request.
 
 ### Task 6: Verification and Commit
 
-- [ ] Run `go test ./internal/aeoracle ./cmd/aeoracle`.
-- [ ] Run `go test ./...`.
-- [ ] Run `go vet ./...`.
-- [ ] Run `git diff --check`.
-- [ ] Run reserved-word scan on touched files.
-- [ ] Run `go run ./cmd/aeoracle plan -aep flightdeck/showcase/text/text.aep -out tmp_debug/aeoracle/text -json`.
-- [ ] Run `go run ./cmd/aeoracle render -request tmp_debug/aeoracle/text/request.json -dry-run`.
-- [ ] Run `go run ./cmd/aeoracle compare` against generated test PNGs or document that package tests cover it.
-- [ ] Update Flightdeck status.
-- [ ] Commit with `feat(aeoracle): add sentinel render harness`.
+- [x] Run `go test ./internal/aeoracle ./cmd/aeoracle`.
+- [x] Run `go test ./...`.
+- [x] Run `go vet ./...`.
+- [x] Run `git diff --check`.
+- [x] Run reserved-word scan on touched files.
+- [x] Run `go run ./cmd/aeoracle plan -aep flightdeck/showcase/text/text.aep -out tmp_debug/aeoracle/text -json`.
+- [x] Run `go run ./cmd/aeoracle render -request tmp_debug/aeoracle/text/request.json -dry-run`.
+- [x] Run `go run ./cmd/aeoracle compare` against generated test PNGs or document that package tests cover it.
+- [x] Update Flightdeck status.
+- [x] Commit with `feat(aeoracle): add sentinel render harness`.
+
+## Verification Notes
+
+- `plan` generated `tmp_debug/aeoracle/text/request.json` with frames 0, 45, and 90 for `flightdeck/showcase/text/text.aep`.
+- `render -dry-run` validated the request and printed the `scripts/ae_run.ps1` invocation without launching AE.
+- `compare` against generated 2x2 PNGs returned exit code 1 and reported 1 different pixel.
 
 ## Stop Rule
 

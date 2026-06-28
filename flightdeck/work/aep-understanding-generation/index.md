@@ -55,13 +55,15 @@ Done:
   in/out points.
 - Phase 2 implemented `internal/profilediff` and `cmd/aepdiff` with JSON ignore
   rules and deterministic path-level reports.
+- Phase 3 implemented `internal/aeoracle`, `cmd/aeoracle`, and
+  `scripts/aeoracle_render.jsx` for sentinel frame planning, render sidecars,
+  PNG comparison, and AE dry-run invocation.
 
 Current:
-- Phase 3 render oracle harness is active.
-- Build sentinel frame selection, sidecar metadata, PNG comparison, and generic
-  AE render invocation before gap ledger or generation work.
+- Phase 3 is in final verification before commit.
+- After commit, stop before Phase 4 gap ledger planning.
 
 ## Open questions
 
-- Whether Phase 3 should run a real AE render smoke after the dry-run contract
-  passes, or leave AE execution to gated environments.
+- Whether Phase 4 should consume raw `aepdiff` plus `aeoracle compare` output
+  directly, or introduce an intermediate run report first.
