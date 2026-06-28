@@ -35,6 +35,8 @@ Phase 0 export-surface audit and contract lock before extracting
 - `phase3-plan.md` — Phase 3 render oracle harness plan.
 - `phase4-plan.md` — Phase 4 gap ledger and capability coupling plan.
 - `phase5-plan.md` — Phase 5 slice replication workflow plan.
+- `phase5-booyah-acceptance.md` — real Booyah source vs current clone Phase 5
+  acceptance run.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -65,12 +67,17 @@ Done:
   and context fields.
 - Phase 5 implemented `internal/sliceworkflow` and `cmd/aepslices` for generic
   slice planning and combined profile/render gap workflow reports.
+- Phase 5 Booyah acceptance run processed the real source project at
+  `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep` against the current
+  clone and produced actionable write gaps after fixing layer-index fallback in
+  `profilediff`.
 
 Current:
-- Phase 5 tooling is complete on tracked fixtures.
-- Before Phase 6 recipe IR, run `cmd/aepslices` on a true external, non-Booyah
-  project and record whether profile, diff, render, and gap output are all
-  meaningful without bespoke project code.
+- Phase 5 tooling is complete on tracked fixtures and the real Booyah source
+  project.
+- Before Phase 6 recipe IR, run `cmd/aepslices` on a non-Booyah project and
+  record whether profile, diff, render, and gap output are all meaningful
+  without bespoke project code.
 
 ## Open questions
 

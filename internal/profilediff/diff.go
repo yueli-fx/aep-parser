@@ -161,9 +161,10 @@ func compareComp(
 
 	actualLayerPaths := layerPathMap(actual.Layers)
 	actualLayerKeys := layerKeyMap(actual.Layers)
+	actualLayerIndexes := layerIndexMap(actual.Layers)
 	usedLayers := map[int]bool{}
 	for _, el := range expected.Layers {
-		al, ai, ok := matchLayer(el, actual.Layers, actualLayerPaths, actualLayerKeys, usedLayers)
+		al, ai, ok := matchLayer(el, actual.Layers, actualLayerPaths, actualLayerKeys, actualLayerIndexes, usedLayers)
 		path := layerObjectPath(el)
 		if !ok {
 			add(path, KindMissingObject, SeverityFidelity, ActionWrite, el.Name, nil)
@@ -186,7 +187,7 @@ func compareLayer(
 ) {
 	base := expected.Path.Path
 	compareValue(base+".type", expected.Type, actual.Type, SeverityFidelity, ActionWrite)
-	compareValue(base+".source_ref", expected.SourceRef, actual.SourceRef, SeverityFidelity, ActionWrite)
+	compareRefValue(base+".source_ref", expected.SourceRef, actual.SourceRef, SeverityFidelity, ActionWrite, compareValue)
 	compareValue(base+".parent_ref", expected.ParentRef, actual.ParentRef, SeverityFidelity, ActionWrite)
 	compareValue(base+".matte_ref", expected.MatteRef, actual.MatteRef, SeverityFidelity, ActionWrite)
 	compareValue(base+".timing.start_time_seconds", expected.Timing.StartTime, actual.Timing.StartTime, SeverityFidelity, ActionWrite)
@@ -224,6 +225,30 @@ func compareLayer(
 	compareValue(base+".text", expected.Text, actual.Text, SeverityFidelity, ActionWrite)
 	compareValue(base+".masks", len(expected.Masks), len(actual.Masks), SeverityFidelity, ActionWrite)
 	compareValue(base+".shapes", len(expected.Shapes), len(actual.Shapes), SeverityFidelity, ActionWrite)
+}
+
+func compareRefValue(
+	path string,
+	expected *profile.ItemRef,
+	actual *profile.ItemRef,
+	severity Severity,
+	action ActionType,
+	compareValue func(string, any, any, Severity, ActionType),
+) {
+	if itemRefsEqual(expected, actual) {
+		return
+	}
+	compareValue(path, expected, actual, severity, action)
+}
+
+func itemRefsEqual(expected, actual *profile.ItemRef) bool {
+	if expected == nil || actual == nil {
+		return expected == actual
+	}
+	if expected.Kind == actual.Kind && expected.Name != "" && actual.Name != "" {
+		return expected.Name == actual.Name
+	}
+	return reflect.DeepEqual(expected, actual)
 }
 
 func compareEffect(
@@ -321,6 +346,22 @@ func layerKeyMap(layers []profile.Layer) map[string]int {
 	})
 }
 
+func layerIndexMap(layers []profile.Layer) map[int]int {
+	out := map[int]int{}
+	dupes := map[int]bool{}
+	for i, layer := range layers {
+		if _, ok := out[layer.Index]; ok {
+			dupes[layer.Index] = true
+			continue
+		}
+		out[layer.Index] = i
+	}
+	for index := range dupes {
+		delete(out, index)
+	}
+	return out
+}
+
 func effectKeyMap(effects []profile.Effect) map[string]int {
 	return uniqueIndexMap(len(effects), func(i int) string {
 		return fmt.Sprintf("%s#%d", effects[i].MatchName, effects[i].Occurrence)
@@ -374,6 +415,7 @@ func matchLayer(
 	actual []profile.Layer,
 	byPath map[string]int,
 	byKey map[string]int,
+	byIndex map[int]int,
 	used map[int]bool,
 ) (profile.Layer, int, bool) {
 	if i, ok := byPath[layerObjectPath(expected)]; ok && !used[i] {
@@ -381,6 +423,9 @@ func matchLayer(
 	}
 	key := fmt.Sprintf("%d:%s", expected.Index, expected.Name)
 	if i, ok := byKey[key]; ok && !used[i] {
+		return actual[i], i, true
+	}
+	if i, ok := byIndex[expected.Index]; ok && !used[i] {
 		return actual[i], i, true
 	}
 	return profile.Layer{}, 0, false

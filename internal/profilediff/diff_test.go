@@ -94,6 +94,41 @@ func TestCompareMatchesCloneObjectsByNameAndIndexWhenIDsDiffer(t *testing.T) {
 	assertNoDiff(t, report, "comps.by_id[99].layers.by_id[88]", profilediff.KindExtraObject)
 }
 
+func TestCompareFallsBackToUniqueLayerIndexWhenGeneratedNamesDiffer(t *testing.T) {
+	expected := testProfile(testLayer(10, "", func(l *profile.Layer) {
+		l.Index = 3
+		l.Timing.OutPoint = 3
+	}))
+	actual := testProfile(testLayer(88, "L03", func(l *profile.Layer) {
+		l.Index = 3
+		l.Path = profile.PathRef{Path: "comps.by_id[1].layers.by_id[88]"}
+		l.Timing.OutPoint = 4
+	}))
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	assertDiff(t, report, "comps.by_id[1].layers.by_id[10].timing.out_point_seconds", profilediff.KindWrongValue)
+	assertNoDiff(t, report, "comps.by_id[1].layers.by_id[10]", profilediff.KindMissingObject)
+	assertNoDiff(t, report, "comps.by_id[1].layers.by_id[88]", profilediff.KindExtraObject)
+}
+
+func TestCompareSourceRefsByKindAndNameWhenIDsDiffer(t *testing.T) {
+	expected := testProfile(testLayer(10, "Precomp", func(l *profile.Layer) {
+		l.SourceRef = &profile.ItemRef{ID: 27, Kind: "composition", Name: "Child"}
+	}))
+	actual := testProfile(testLayer(10, "Precomp", func(l *profile.Layer) {
+		l.SourceRef = &profile.ItemRef{ID: 99, Kind: "composition", Name: "Child"}
+	}))
+
+	report, err := profilediff.Compare(expected, actual, profilediff.Options{})
+	if err != nil {
+		t.Fatalf("Compare: %v", err)
+	}
+	assertNoDiff(t, report, "comps.by_id[1].layers.by_id[10].source_ref", profilediff.KindWrongValue)
+}
+
 func TestCompareAppliesIgnoreRules(t *testing.T) {
 	expected := testProfile(testLayer(10, "Hero", func(l *profile.Layer) {
 		l.Flags.Visible = true
