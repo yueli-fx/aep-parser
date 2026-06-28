@@ -106,18 +106,18 @@ Validation rules:
 
 ### Task 1: RED/GREEN Schema Validation
 
-- [ ] Create `internal/recipe/schema.go`.
-- [ ] Create `internal/recipe/schema_test.go`.
-- [ ] Add `TestValidateAcceptsMinimalTextShapeRecipe`.
-- [ ] Add `TestValidateRejectsUnsupportedLayerType`.
-- [ ] Add `TestValidateRejectsOutOfRangeKeyframes`.
-- [ ] Implement `Validate(recipe Recipe) Report`.
-- [ ] Run `go test ./internal/recipe`.
+- [x] Create `internal/recipe/schema.go`.
+- [x] Create `internal/recipe/schema_test.go`.
+- [x] Add `TestValidateAcceptsMinimalTextShapeRecipe`.
+- [x] Add `TestValidateRejectsUnsupportedLayerType`.
+- [x] Add `TestValidateRejectsOutOfRangeKeyframes`.
+- [x] Implement `Validate(recipe Recipe) Report`.
+- [x] Run `go test ./internal/recipe`.
 
 ### Task 2: RED/GREEN Capability Gate
 
-- [ ] Create `internal/recipe/capability.go`.
-- [ ] Add `CapabilityIndex` interface:
+- [x] Create `internal/recipe/capability.go`.
+- [x] Add `CapabilityIndex` interface:
 
 ```go
 type CapabilityIndex interface {
@@ -125,67 +125,67 @@ type CapabilityIndex interface {
 }
 ```
 
-- [ ] Add statuses: `supported`, `unsupported`, `unknown`.
-- [ ] Add `TestValidateRefusesUnsupportedEffects`.
-- [ ] Make validation produce refusal records for unsupported effect requests.
-- [ ] Run `go test ./internal/recipe`.
+- [x] Add statuses: `supported`, `unsupported`, `unknown`.
+- [x] Add `TestValidateRefusesUnsupportedEffects`.
+- [x] Make validation produce refusal records for unsupported effect requests.
+- [x] Run `go test ./internal/recipe`.
 
 ### Task 3: RED/GREEN Compiler
 
-- [ ] Create `internal/recipe/compiler.go`.
-- [ ] Create `internal/recipe/compiler_test.go`.
-- [ ] Add `TestCompileMinimalTextShapeRecipeBuildsProfile`.
-- [ ] Compile one comp with a text layer and one shape layer through exported `internal/aep` APIs.
-- [ ] Write the output AEP to a temp dir.
-- [ ] Re-open the AEP and build `internal/profile`.
-- [ ] Assert the profile has one comp, two layers, one text layer, and one shape layer.
-- [ ] Run `go test ./internal/recipe`.
+- [x] Create `internal/recipe/compiler.go`.
+- [x] Create `internal/recipe/compiler_test.go`.
+- [x] Add `TestCompileMinimalTextShapeRecipeBuildsProfile`.
+- [x] Compile one comp with a text layer and one shape layer through exported `internal/aep` APIs.
+- [x] Write the output AEP to a temp dir.
+- [x] Re-open the AEP and build `internal/profile`.
+- [x] Assert the profile has one comp, two layers, one text layer, and one shape layer.
+- [x] Run `go test ./internal/recipe`.
 
 ### Task 4: CLI Validate and Compile
 
-- [ ] Create `cmd/aeprecipe/main.go`.
-- [ ] Implement `validate -recipe file.json [-json]`.
-- [ ] Implement `compile -recipe file.json -out out.aep [-json]`.
-- [ ] Implement `explain -recipe file.json [-json]`, which prints used capabilities and refusals without writing an AEP.
-- [ ] Create `cmd/aeprecipe/main_test.go`.
-- [ ] Add command tests:
+- [x] Create `cmd/aeprecipe/main.go`.
+- [x] Implement `validate -recipe file.json [-json]`.
+- [x] Implement `compile -recipe file.json -out out.aep [-json]`.
+- [x] Implement `explain -recipe file.json [-json]`, which prints used capabilities and refusals without writing an AEP.
+- [x] Create `cmd/aeprecipe/main_test.go`.
+- [x] Add command tests:
   - valid recipe returns exit 0,
   - unsupported effect returns exit 1 with refusal records,
   - malformed JSON returns exit 2.
-- [ ] Run `go test ./cmd/aeprecipe`.
+- [x] Run `go test ./cmd/aeprecipe`.
 
 ### Task 5: Example Recipe and Render Gate
 
-- [ ] Create `examples/recipes/minimal-text-shape.json`.
-- [ ] Compile it:
+- [x] Create `examples/recipes/minimal-text-shape.json`.
+- [x] Compile it:
 
 ```powershell
 go run ./cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json -out tmp_debug\recipes\minimal-text-shape.aep -json
 ```
 
-- [ ] Plan render frames:
+- [x] Plan render frames:
 
 ```powershell
 go run ./cmd/aeoracle plan -aep tmp_debug\recipes\minimal-text-shape.aep -out tmp_debug\aeoracle\minimal_recipe -json
 ```
 
-- [ ] Render with AE 2025:
+- [x] Render with AE 2025:
 
 ```powershell
 go run ./cmd/aeoracle render -request tmp_debug\aeoracle\minimal_recipe\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 600
 ```
 
-- [ ] Record generated AEP path, metadata path, PNG outputs, and any warnings in `flightdeck/work/aep-understanding-generation/phase6-recipe-ir-acceptance.md`.
+- [x] Record generated AEP path, metadata path, PNG outputs, and any warnings in `flightdeck/work/aep-understanding-generation/phase6-recipe-ir-acceptance.md`.
 
 ### Task 6: Verification and Commit
 
-- [ ] Run `go test ./internal/recipe ./cmd/aeprecipe`.
-- [ ] Run `go test ./...`.
-- [ ] Run `go vet ./...`.
-- [ ] Run `git diff --check`.
-- [ ] Run the example compile and render commands from Task 5.
-- [ ] Update Flightdeck status.
-- [ ] Commit with `feat(recipe): add minimal AEP recipe compiler`.
+- [x] Run `go test ./internal/recipe ./cmd/aeprecipe`.
+- [x] Run `go test ./...`.
+- [x] Run `go vet ./...`.
+- [x] Run `git diff --check`.
+- [x] Run the example compile and render commands from Task 5.
+- [x] Update Flightdeck status.
+- [x] Commit with `feat(recipe): add minimal AEP recipe compiler`.
 
 ## Stop Rule
 

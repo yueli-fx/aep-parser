@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal title card"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 4,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "BOOYAH",
+          "transform": {
+            "position": [960, 540],
+            "scale": [100, 100],
+            "opacity": 100
+          }
+        },
+        {
+          "type": "shape",
+          "name": "Underline",
+          "shape": {
+            "kind": "rect",
+            "size": [640, 12],
+            "fill_color": [255, 255, 255]
+          },
+          "transform": {
+            "position": [960, 650]
+          }
+        }
+      ]
+    }
+  ]
+}

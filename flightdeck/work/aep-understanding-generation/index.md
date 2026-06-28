@@ -45,6 +45,8 @@ Phase 0 export-surface audit and contract lock before extracting
   frame-set render compare result.
 - `phase6-recipe-ir-plan.md` — minimal recipe IR/compiler implementation plan,
   gated by the render compare result.
+- `phase6-recipe-ir-acceptance.md` — minimal recipe compile + AE 2025 render
+  acceptance result.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -93,12 +95,16 @@ Done:
   produced a valid report with 2 matching frames and 6 differing frames, and
   `aepslices diagnose -render-set` merged 141 profile gaps with 6 render gaps.
 - Minimal recipe IR plan written; automated correction loops remain blocked.
+- Minimal recipe IR implemented: `internal/recipe`, `cmd/aeprecipe`, and
+  `examples/recipes/minimal-text-shape.json` compile a one-comp text/shape
+  recipe into an AEP. The generated AEP passed AE 2025 render oracle.
 
 Current:
-- Phase 6 render-compare loop is implemented and proven on the real Booyah
-  source plus current clone.
-- Next: execute `phase6-recipe-ir-plan.md` for the first minimal recipe
-  compiler. Do not start automated correction loops.
+- Phase 6 render-compare loop and minimal recipe IR are implemented and proven
+  with AE 2025 render gates.
+- Next: improve recipe capability reporting by moving from the temporary static
+  capability map in `cmd/aeprecipe` to a reusable capability index behind
+  `cmd/capindex`. Do not start automated correction loops.
 
 ## Open questions
 
@@ -106,6 +112,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Whether the minimal recipe compiler should use a static in-process capability
-  index first, then wire to `cmd/capindex`, or directly expose a reusable
-  capability package behind `cmd/capindex`.
+- Which capability-index package boundary should own the machine-readable
+  support map currently only available through `cmd/capindex`.
