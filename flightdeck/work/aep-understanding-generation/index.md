@@ -33,6 +33,7 @@ Phase 0 export-surface audit and contract lock before extracting
 - `phase1-plan.md` — Phase 1 profile extraction plan and verification record.
 - `phase2-plan.md` — Phase 2 structural/semantic diff plan.
 - `phase3-plan.md` — Phase 3 render oracle harness plan.
+- `phase4-plan.md` — Phase 4 gap ledger and capability coupling plan.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -60,10 +61,11 @@ Done:
   PNG comparison, and AE dry-run invocation.
 
 Current:
-- Phase 3 is in final verification before commit.
-- After commit, stop before Phase 4 gap ledger planning.
+- Phase 4 gap ledger is active.
+- Build structured gap reports from `aepdiff` and `aeoracle compare` results
+  before slice replication or generation work.
 
 ## Open questions
 
-- Whether Phase 4 should consume raw `aepdiff` plus `aeoracle compare` output
-  directly, or introduce an intermediate run report first.
+- How much capability linking can be automated from current profile paths
+  before a richer path-to-capability index exists.
