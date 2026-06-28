@@ -25,6 +25,11 @@ Phase 0 export-surface audit and contract lock before extracting
 ## Read now
 
 - `design.md` — full spec and phased direction.
+- `phase0-audit.md` — current export-surface audit.
+- `profile-coverage.md` — coverage matrix and Phase 1 field admission list.
+- `profile-contract.md` — evidence ladder, stable path object, and Phase 1
+  entry gate.
+- `plan.md` — Phase 0 execution plan.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -39,13 +44,14 @@ Done:
 - External review feedback triaged into the spec: Phase 0 audit, evidence
   ladder, stable path contract, profile/export boundary, render oracle limits,
   and generation readiness gate.
+- Phase 0 audit artifacts written: export-surface audit, profile coverage
+  matrix, and profile contract.
 
 Current:
-- Spec revised; no implementation started.
+- Phase 0 audit artifacts are ready for human review.
+- Stop here before extracting `internal/profile`.
 
 ## Open questions
 
-- Whether Phase 0 should include one small non-Booyah project immediately or
-  only Booyah plus synthetic fixtures. The spec requires at least one non-Booyah
-  project before generation readiness, but not necessarily before profile
-  extraction.
+- Whether to accept the Phase 0 contract and proceed into Phase 1
+  `internal/profile` extraction.
