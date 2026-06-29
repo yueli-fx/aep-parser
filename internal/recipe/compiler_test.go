@@ -649,6 +649,42 @@ func TestCompileToFileSetsCameraAperture(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCameraBlurLevel(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Camera blur level"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "camera", "name": "Camera", "camera": {"blur_level": 120}},
+				{"type": "text", "name": "Title", "text": "Camera blur", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0].CameraBlurLevel()
+	if got == nil || got.StaticValue != 120.0 {
+		t.Fatalf("camera blur_level = %+v, want 120", got)
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
