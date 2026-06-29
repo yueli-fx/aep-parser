@@ -27,6 +27,9 @@
               "color": [255, 128, 0],
               "motion_blur": "off",
               "feather_falloff": "linear",
+              "opacity": 0.5,
+              "feather": [12, 8],
+              "expansion": -4,
               "closed": true,
               "vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
             }
@@ -56,6 +59,9 @@
         "color": [255, 128, 0],
         "motion_blur": "off",
         "feather_falloff": "linear",
+        "opacity": 0.5,
+        "feather": [12, 8],
+        "expansion": -4,
         "closed": true,
         "vertex_count": 4
       }

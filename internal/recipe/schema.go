@@ -103,6 +103,9 @@ type MaskSpec struct {
 	Color          []float64   `json:"color,omitempty"`
 	MotionBlur     string      `json:"motion_blur,omitempty"`
 	FeatherFalloff string      `json:"feather_falloff,omitempty"`
+	Opacity        *float64    `json:"opacity,omitempty"`
+	Feather        []float64   `json:"feather,omitempty"`
+	Expansion      *float64    `json:"expansion,omitempty"`
 	Closed         *bool       `json:"closed,omitempty"`
 	Vertices       [][]float64 `json:"vertices"`
 }
@@ -510,6 +513,9 @@ type ExpectedMask struct {
 	Color          []float64 `json:"color,omitempty"`
 	MotionBlur     string    `json:"motion_blur,omitempty"`
 	FeatherFalloff string    `json:"feather_falloff,omitempty"`
+	Opacity        *float64  `json:"opacity,omitempty"`
+	Feather        []float64 `json:"feather,omitempty"`
+	Expansion      *float64  `json:"expansion,omitempty"`
 	Closed         *bool     `json:"closed,omitempty"`
 	VertexCount    *int      `json:"vertex_count,omitempty"`
 }
@@ -854,6 +860,10 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if mask.FeatherFalloff != "" && !validMaskFeatherFalloff(mask.FeatherFalloff) {
 			addRefusal("invalid_expected_profile", maskPath+".feather_falloff", "mask feather_falloff is not supported")
 		}
+		if mask.Opacity != nil && (*mask.Opacity < 0 || *mask.Opacity > 1) {
+			addRefusal("invalid_expected_profile", maskPath+".opacity", "mask opacity must be between 0 and 1")
+		}
+		validateMaskFeather(mask.Feather, maskPath+".feather", "invalid_expected_profile", addRefusal)
 		if mask.VertexCount != nil && *mask.VertexCount < 0 {
 			addRefusal("invalid_expected_profile", maskPath+".vertex_count", "vertex_count must be non-negative")
 		}
@@ -1701,6 +1711,19 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("invalid_mask_feather_falloff", maskPath+".feather_falloff", "mask feather_falloff must be smooth or linear")
 			}
 		}
+		if mask.Opacity != nil {
+			recordCapability("Mask.SetOpacity", maskPath+".opacity")
+			if *mask.Opacity < 0 || *mask.Opacity > 1 {
+				addRefusal("invalid_mask_opacity", maskPath+".opacity", "mask opacity must be between 0 and 1")
+			}
+		}
+		if len(mask.Feather) > 0 {
+			recordCapability("Mask.SetFeather", maskPath+".feather")
+			validateMaskFeather(mask.Feather, maskPath+".feather", "invalid_mask_feather", addRefusal)
+		}
+		if mask.Expansion != nil {
+			recordCapability("Mask.SetExpansion", maskPath+".expansion")
+		}
 		if len(mask.Vertices) < 3 {
 			addRefusal("invalid_mask_vertices", maskPath+".vertices", "mask vertices must include at least 3 points")
 		}
@@ -2018,6 +2041,21 @@ func validMaskFeatherFalloff(value string) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func validateMaskFeather(values []float64, path, code string, addRefusal func(string, string, string)) {
+	if len(values) == 0 {
+		return
+	}
+	if len(values) != 2 {
+		addRefusal(code, path, "mask feather must have 2 values")
+		return
+	}
+	for i, value := range values {
+		if value < 0 {
+			addRefusal(code, fmt.Sprintf("%s[%d]", path, i), "mask feather values must be non-negative")
+		}
 	}
 }
 

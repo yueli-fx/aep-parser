@@ -4031,6 +4031,9 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 					"color": [255, 128, 0],
 					"motion_blur": "off",
 					"feather_falloff": "linear",
+					"opacity": 0.5,
+					"feather": [12, 8],
+					"expansion": -4,
 					"closed": true,
 					"vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
 				}]
@@ -4052,6 +4055,9 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 				"color": [255, 128, 0],
 				"motion_blur": "off",
 				"feather_falloff": "linear",
+				"opacity": 0.5,
+				"feather": [12, 8],
+				"expansion": -4,
 				"closed": true,
 				"vertex_count": 4
 			}]
@@ -4073,6 +4079,9 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.masks[0].color", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].motion_blur", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].feather_falloff", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].opacity", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].feather", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].expansion", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].vertex_count", true)
 }
 

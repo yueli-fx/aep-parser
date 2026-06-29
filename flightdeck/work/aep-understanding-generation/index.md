@@ -284,6 +284,11 @@ Done:
   locked state, timeline color, motion-blur override, and feather-falloff mode.
   `profile.Mask` and scene JSON expose those parsed values, and
   `minimal-layer-mask.json` asserts them through `expected_profile.masks[]`.
+- Mask recipe/profile coverage now includes mask property-style options:
+  opacity, feather, and expansion. The same `minimal-layer-mask.json` baseline
+  compiles these through stable mask setters and asserts their parsed profile
+  values, raising the recipe profile verifier coverage to 20 checks for that
+  recipe.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

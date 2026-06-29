@@ -484,6 +484,15 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		if expectedMask.FeatherFalloff != "" {
 			add(maskPath+".feather_falloff", expectedMask.FeatherFalloff, mask.FeatherFalloff, mask.FeatherFalloff == expectedMask.FeatherFalloff)
 		}
+		if expectedMask.Opacity != nil {
+			add(maskPath+".opacity", *expectedMask.Opacity, mask.Opacity, math.Abs(mask.Opacity-*expectedMask.Opacity) < 1e-9)
+		}
+		if len(expectedMask.Feather) > 0 {
+			add(maskPath+".feather", expectedMask.Feather, mask.Feather, profileValueEqual(expectedMask.Feather, mask.Feather))
+		}
+		if expectedMask.Expansion != nil {
+			add(maskPath+".expansion", *expectedMask.Expansion, mask.Expansion, math.Abs(mask.Expansion-*expectedMask.Expansion) < 1e-9)
+		}
 		if expectedMask.Closed != nil {
 			add(maskPath+".closed", *expectedMask.Closed, mask.Closed, mask.Closed == *expectedMask.Closed)
 		}
@@ -950,6 +959,21 @@ func materializeMasks(project *aep.Project, compSpec CompSpec) (*aep.Project, er
 				}
 				if err := mask.SetFeatherFalloff(falloff); err != nil {
 					return nil, fmt.Errorf("recipe: layer %q mask %q feather_falloff: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if maskSpec.Opacity != nil {
+				if err := mask.SetOpacity(*maskSpec.Opacity); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q opacity: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if len(maskSpec.Feather) == 2 {
+				if err := mask.SetFeather([2]float64{maskSpec.Feather[0], maskSpec.Feather[1]}); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q feather: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if maskSpec.Expansion != nil {
+				if err := mask.SetExpansion(*maskSpec.Expansion); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q expansion: %w", layerSpec.Name, maskSpec.Name, err)
 				}
 			}
 		}

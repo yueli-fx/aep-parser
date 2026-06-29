@@ -225,6 +225,9 @@ type Mask struct {
 	Color          []float64          `json:"color,omitempty"`
 	MotionBlur     string             `json:"motion_blur,omitempty"`
 	FeatherFalloff string             `json:"feather_falloff,omitempty"`
+	Opacity        float64            `json:"opacity,omitempty"`
+	Feather        []float64          `json:"feather,omitempty"`
+	Expansion      float64            `json:"expansion,omitempty"`
 	Closed         bool               `json:"closed"`
 	Vertices       []MaskVertex       `json:"vertices,omitempty"`
 	PathKeyframes  []MaskPathKeyframe `json:"path_keyframes,omitempty"`
@@ -608,6 +611,9 @@ func buildMask(c *aep.JSONComposition, l *aep.JSONLayer, m *aep.JSONMask, occurr
 		Color:          maskColor(m.Color),
 		MotionBlur:     m.MotionBlur,
 		FeatherFalloff: m.FeatherFalloff,
+		Opacity:        m.Opacity,
+		Feather:        []float64{m.Feather[0], m.Feather[1]},
+		Expansion:      m.Expansion,
 		Closed:         m.Closed,
 		Vertices:       maskVertices(m.Vertices),
 		Path:           maskPath(c, l, occurrence, m.Name),

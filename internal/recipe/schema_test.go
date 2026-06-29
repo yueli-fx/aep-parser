@@ -788,6 +788,9 @@ func TestValidateReportsMaskCapabilities(t *testing.T) {
 		Color:          []float64{255, 128, 0},
 		MotionBlur:     "off",
 		FeatherFalloff: "linear",
+		Opacity:        ptr(0.5),
+		Feather:        []float64{12, 8},
+		Expansion:      ptr(-4),
 		Vertices:       [][]float64{{10, 10}, {190, 10}, {190, 190}, {10, 190}},
 	}}
 
@@ -803,6 +806,9 @@ func TestValidateReportsMaskCapabilities(t *testing.T) {
 	assertCapability(t, report, "Mask.SetColor")
 	assertCapability(t, report, "Mask.SetMaskMotionBlur")
 	assertCapability(t, report, "Mask.SetFeatherFalloff")
+	assertCapability(t, report, "Mask.SetOpacity")
+	assertCapability(t, report, "Mask.SetFeather")
+	assertCapability(t, report, "Mask.SetExpansion")
 }
 
 func TestValidateRejectsInvalidMask(t *testing.T) {
@@ -812,6 +818,8 @@ func TestValidateRejectsInvalidMask(t *testing.T) {
 		Color:          []float64{256, 0, 0},
 		MotionBlur:     "sometimes",
 		FeatherFalloff: "hard",
+		Opacity:        ptr(1.5),
+		Feather:        []float64{-1, 2},
 		Vertices:       [][]float64{{10, 10}, {190, 10}},
 	}}
 	rec.Comps[0].Layers = append(rec.Comps[0].Layers, recipe.Layer{
@@ -831,6 +839,8 @@ func TestValidateRejectsInvalidMask(t *testing.T) {
 	assertRefusal(t, report, "invalid_mask_color")
 	assertRefusal(t, report, "invalid_mask_motion_blur")
 	assertRefusal(t, report, "invalid_mask_feather_falloff")
+	assertRefusal(t, report, "invalid_mask_opacity")
+	assertRefusal(t, report, "invalid_mask_feather")
 	assertRefusal(t, report, "invalid_mask_vertices")
 	assertRefusal(t, report, "mask_on_unsupported_layer_type")
 }
