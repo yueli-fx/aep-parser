@@ -160,6 +160,12 @@ Done:
   `AddKeyframeWithEase` only for eased keyframes. Focused recipe tests reopen
   the compiled AEP and verify Bezier interpolation plus temporal ease speed /
   influence on Position and Opacity.
+- Recipe transform properties now accept `transform.expressions` for position,
+  anchor point, scale, rotation, and opacity. Compilation writes the base
+  transform first, reopens the generated project to obtain parsed property
+  backrefs, then applies `Property.SetExpression` and optional
+  `Property.SetExpressionEnabled`. `expected_profile.properties[]` can now
+  assert property expression source strings.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

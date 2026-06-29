@@ -319,16 +319,17 @@ type EffectParam struct {
 }
 
 type Transform struct {
-	Position             []float64        `json:"position,omitempty"`
-	Scale                []float64        `json:"scale,omitempty"`
-	AnchorPoint          []float64        `json:"anchor_point,omitempty"`
-	Rotation             *float64         `json:"rotation,omitempty"`
-	Opacity              *float64         `json:"opacity,omitempty"`
-	PositionKeyframes    []VectorKeyframe `json:"position_keyframes,omitempty"`
-	AnchorPointKeyframes []VectorKeyframe `json:"anchor_point_keyframes,omitempty"`
-	ScaleKeyframes       []VectorKeyframe `json:"scale_keyframes,omitempty"`
-	RotationKeyframes    []ScalarKeyframe `json:"rotation_keyframes,omitempty"`
-	OpacityKeyframes     []ScalarKeyframe `json:"opacity_keyframes,omitempty"`
+	Position             []float64            `json:"position,omitempty"`
+	Scale                []float64            `json:"scale,omitempty"`
+	AnchorPoint          []float64            `json:"anchor_point,omitempty"`
+	Rotation             *float64             `json:"rotation,omitempty"`
+	Opacity              *float64             `json:"opacity,omitempty"`
+	PositionKeyframes    []VectorKeyframe     `json:"position_keyframes,omitempty"`
+	AnchorPointKeyframes []VectorKeyframe     `json:"anchor_point_keyframes,omitempty"`
+	ScaleKeyframes       []VectorKeyframe     `json:"scale_keyframes,omitempty"`
+	RotationKeyframes    []ScalarKeyframe     `json:"rotation_keyframes,omitempty"`
+	OpacityKeyframes     []ScalarKeyframe     `json:"opacity_keyframes,omitempty"`
+	Expressions          TransformExpressions `json:"expressions,omitempty"`
 }
 
 type VectorKeyframe struct {
@@ -348,6 +349,19 @@ type ScalarKeyframe struct {
 type TemporalEase struct {
 	Speed     float64 `json:"speed,omitempty"`
 	Influence float64 `json:"influence"`
+}
+
+type TransformExpressions struct {
+	Position    *ExpressionSpec `json:"position,omitempty"`
+	AnchorPoint *ExpressionSpec `json:"anchor_point,omitempty"`
+	Scale       *ExpressionSpec `json:"scale,omitempty"`
+	Rotation    *ExpressionSpec `json:"rotation,omitempty"`
+	Opacity     *ExpressionSpec `json:"opacity,omitempty"`
+}
+
+type ExpressionSpec struct {
+	Source  string `json:"source"`
+	Enabled *bool  `json:"enabled,omitempty"`
 }
 
 type ExpectedProfile struct {
@@ -377,9 +391,10 @@ type ExpectedMotionBlurSpec struct {
 }
 
 type ExpectedProperty struct {
-	LayerName string `json:"layer_name"`
-	MatchName string `json:"match_name"`
-	Value     any    `json:"value,omitempty"`
+	LayerName  string `json:"layer_name"`
+	MatchName  string `json:"match_name"`
+	Value      any    `json:"value,omitempty"`
+	Expression string `json:"expression,omitempty"`
 }
 
 type ExpectedTextStyle struct {
@@ -619,7 +634,10 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if prop.MatchName == "" {
 			addRefusal("invalid_expected_profile", propPath+".match_name", "property match_name is required")
 		}
-		if !validEffectParamValue(prop.Value) {
+		if prop.Expression == "" && prop.Value == nil {
+			addRefusal("invalid_expected_profile", propPath, "expected property value or expression is required")
+		}
+		if prop.Value != nil && !validEffectParamValue(prop.Value) {
 			addRefusal("invalid_expected_profile", propPath+".value", "expected property value must be a number, boolean, or numeric array")
 		}
 	}
@@ -1459,6 +1477,7 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	if usesTransform(layer.Transform) {
 		recordCapability("SetLayerTransform", layerPath+".transform")
 	}
+	validateTransformExpressions(layer.Transform.Expressions, layerPath+".transform.expressions", recordCapability, addRefusal)
 	validateVec(layer.Transform.Position, 2, layerPath+".transform.position", addRefusal)
 	validateVec(layer.Transform.Scale, 2, layerPath+".transform.scale", addRefusal)
 	validateVec(layer.Transform.AnchorPoint, 2, layerPath+".transform.anchor_point", addRefusal)
@@ -1729,6 +1748,27 @@ func validateKeyframeEase(ease *TemporalEase, path string, addRefusal func(strin
 	}
 	if ease.Influence <= 0 || ease.Influence > 1 {
 		addRefusal("invalid_keyframe_ease_influence", path+".influence", "keyframe ease influence must be greater than 0 and at most 1")
+	}
+}
+
+func validateTransformExpressions(expressions TransformExpressions, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	validateTransformExpression(expressions.Position, path+".position", recordCapability, addRefusal)
+	validateTransformExpression(expressions.AnchorPoint, path+".anchor_point", recordCapability, addRefusal)
+	validateTransformExpression(expressions.Scale, path+".scale", recordCapability, addRefusal)
+	validateTransformExpression(expressions.Rotation, path+".rotation", recordCapability, addRefusal)
+	validateTransformExpression(expressions.Opacity, path+".opacity", recordCapability, addRefusal)
+}
+
+func validateTransformExpression(expression *ExpressionSpec, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	if expression == nil {
+		return
+	}
+	recordCapability("Property.SetExpression", path+".source")
+	if expression.Source == "" {
+		addRefusal("missing_transform_expression_source", path+".source", "transform expression source is required")
+	}
+	if expression.Enabled != nil {
+		recordCapability("Property.SetExpressionEnabled", path+".enabled")
 	}
 }
 

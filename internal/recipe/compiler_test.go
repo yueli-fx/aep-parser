@@ -2911,6 +2911,114 @@ func TestCompileToFileSetsTransformKeyframeEase(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsTransformExpressions(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Transform expressions"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 2,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "Expr",
+				"transform": {
+					"position": [960, 540],
+					"opacity": 100,
+					"expressions": {
+						"position": {"source": "[value[0] + time * 10, value[1], value[2]]"},
+						"opacity": {"source": "time * 50", "enabled": false}
+					}
+				}
+			}]
+		}]
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	layer := project.Compositions[0].LayerByName("Title")
+	if layer == nil {
+		t.Fatal("layer Title not found")
+	}
+	position := layer.Position()
+	if position == nil {
+		t.Fatal("Position property = nil")
+	}
+	if got := position.Expression; got != "[value[0] + time * 10, value[1], value[2]]" {
+		t.Fatalf("position expression = %q, want source", got)
+	}
+	if !position.ExpressionEnabled {
+		t.Fatal("position expression enabled = false, want true default")
+	}
+	opacity := layer.Opacity()
+	if opacity == nil {
+		t.Fatal("Opacity property = nil")
+	}
+	if got := opacity.Expression; got != "time * 50" {
+		t.Fatalf("opacity expression = %q, want time * 50", got)
+	}
+	if opacity.ExpressionEnabled {
+		t.Fatal("opacity expression enabled = true, want false")
+	}
+}
+
+func TestCompileToFileChecksExpectedPropertyExpressionProfile(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Expected expression"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 2,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "Expr",
+				"transform": {
+					"position": [960, 540],
+					"expressions": {
+						"position": {"source": "[value[0] + time * 10, value[1], value[2]]"}
+					}
+				}
+			}]
+		}],
+		"expected_profile": {
+			"properties": [{
+				"layer_name": "Title",
+				"match_name": "ADBE Position",
+				"expression": "[value[0] + time * 10, value[1], value[2]]"
+			}]
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.properties[0].expression", true)
+}
+
 func TestCompileToFileChecksExpectedOpacityKeyframeProfile(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Transform.Opacity = nil

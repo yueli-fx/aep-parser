@@ -107,6 +107,12 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, err
 		}
 	}
+	if hasTransformExpressions(compSpec) {
+		project, err = materializeTransformExpressions(project, compSpec)
+		if err != nil {
+			return report, err
+		}
+	}
 	project, err = applyCompItemSettings(project, compSpec)
 	if err != nil {
 		return report, fmt.Errorf("recipe: comp %q item settings: %w", compSpec.Name, err)
@@ -241,8 +247,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			add(propPath, expectedProp.Value, nil, false)
 			continue
 		}
-		passed := profileValueEqual(expectedProp.Value, prop.StaticValue)
-		add(propPath, expectedProp.Value, prop.StaticValue, passed)
+		if expectedProp.Value != nil {
+			passed := profileValueEqual(expectedProp.Value, prop.StaticValue)
+			add(propPath, expectedProp.Value, prop.StaticValue, passed)
+		}
+		if expectedProp.Expression != "" {
+			add(propPath+".expression", expectedProp.Expression, prop.Expression, prop.Expression == expectedProp.Expression)
+		}
 	}
 	for i, expectedStyle := range expected.TextStyles {
 		stylePath := fmt.Sprintf("expected_profile.text_styles[%d]", i)
@@ -518,6 +529,23 @@ func hasEffects(comp CompSpec) bool {
 	return false
 }
 
+func hasTransformExpressions(comp CompSpec) bool {
+	for _, layer := range comp.Layers {
+		if hasLayerTransformExpressions(layer.Transform.Expressions) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasLayerTransformExpressions(expressions TransformExpressions) bool {
+	return expressions.Position != nil ||
+		expressions.AnchorPoint != nil ||
+		expressions.Scale != nil ||
+		expressions.Rotation != nil ||
+		expressions.Opacity != nil
+}
+
 func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
 	reopened, err := aep.Reopen(project)
 	if err != nil {
@@ -552,6 +580,87 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 		}
 	}
 	return reopened, nil
+}
+
+func materializeTransformExpressions(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
+	reopened, err := aep.Reopen(project)
+	if err != nil {
+		return nil, fmt.Errorf("recipe: reopen for expressions: %w", err)
+	}
+	if len(reopened.Compositions) == 0 {
+		return nil, fmt.Errorf("recipe: reopen for expressions: no compositions")
+	}
+	comp := reopened.Compositions[0]
+	for i, layerSpec := range compSpec.Layers {
+		if !hasLayerTransformExpressions(layerSpec.Transform.Expressions) {
+			continue
+		}
+		if i >= len(comp.Layers) {
+			return nil, fmt.Errorf("recipe: reopen for expressions: layer index %d missing", i)
+		}
+		if err := applyTransformExpressions(comp.Layers[i], layerSpec.Transform.Expressions); err != nil {
+			return nil, fmt.Errorf("recipe: layer %q transform.expressions: %w", layerSpec.Name, err)
+		}
+	}
+	return reopened, nil
+}
+
+func applyTransformExpressions(layer *aep.Layer, expressions TransformExpressions) error {
+	if err := applyTransformExpression(layer, "position", expressions.Position); err != nil {
+		return err
+	}
+	if err := applyTransformExpression(layer, "anchor_point", expressions.AnchorPoint); err != nil {
+		return err
+	}
+	if err := applyTransformExpression(layer, "scale", expressions.Scale); err != nil {
+		return err
+	}
+	if err := applyTransformExpression(layer, "rotation", expressions.Rotation); err != nil {
+		return err
+	}
+	if err := applyTransformExpression(layer, "opacity", expressions.Opacity); err != nil {
+		return err
+	}
+	return nil
+}
+
+func applyTransformExpression(layer *aep.Layer, name string, expression *ExpressionSpec) error {
+	if expression == nil {
+		return nil
+	}
+	property, err := transformExpressionProperty(layer, name)
+	if err != nil {
+		return err
+	}
+	if property == nil {
+		return fmt.Errorf("%s property missing", name)
+	}
+	if err := property.SetExpression(expression.Source); err != nil {
+		return fmt.Errorf("%s source: %w", name, err)
+	}
+	if expression.Enabled != nil {
+		if err := property.SetExpressionEnabled(*expression.Enabled); err != nil {
+			return fmt.Errorf("%s enabled: %w", name, err)
+		}
+	}
+	return nil
+}
+
+func transformExpressionProperty(layer *aep.Layer, name string) (*aep.Property, error) {
+	switch name {
+	case "position":
+		return layer.Position(), nil
+	case "anchor_point":
+		return layer.AnchorPoint(), nil
+	case "scale":
+		return layer.Scale(), nil
+	case "rotation":
+		return layer.Rotation(), nil
+	case "opacity":
+		return layer.Opacity(), nil
+	default:
+		return nil, fmt.Errorf("unsupported transform expression property %q", name)
+	}
 }
 
 func applyCompItemSettings(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {

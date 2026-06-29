@@ -106,6 +106,39 @@ func TestValidateRejectsInvalidKeyframeEaseInfluence(t *testing.T) {
 	assertRefusal(t, report, "invalid_keyframe_ease_influence")
 }
 
+func TestValidateRejectsTransformExpressionWithoutSource(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Expression source"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "Expr",
+				"transform": {
+					"position": [960, 540],
+					"expressions": {
+						"position": {"enabled": true}
+					}
+				}
+			}]
+		}]
+	}`)
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "missing_transform_expression_source")
+}
+
 func TestValidateRejectsUnsortedOpacityKeyframes(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Transform.OpacityKeyframes = []recipe.ScalarKeyframe{
