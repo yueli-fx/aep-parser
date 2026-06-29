@@ -101,6 +101,7 @@ type LightSpec struct {
 	FalloffStart    *float64  `json:"falloff_start,omitempty"`
 	FalloffDistance *float64  `json:"falloff_distance,omitempty"`
 	ConeAngle       *float64  `json:"cone_angle,omitempty"`
+	ConeFeather     *float64  `json:"cone_feather,omitempty"`
 }
 
 type CameraSpec struct {
@@ -869,6 +870,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Light.ConeAngle != nil {
 			recordCapability("SetLightConeAngle", layerPath+".light.cone_angle")
+		}
+		if layer.Light.ConeFeather != nil {
+			recordCapability("SetLightConeFeather", layerPath+".light.cone_feather")
 		}
 	}
 	if layer.StartTime != nil {

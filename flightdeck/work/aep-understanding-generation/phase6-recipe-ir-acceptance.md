@@ -2399,6 +2399,34 @@ Seventy-ninth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eightieth follow-up completed:
+
+- Light layer recipes now support:
+  - `light.cone_feather` -> `Layer.SetLightConeFeather`
+- Boundary: `light` options remain valid only on `type: "light"` layers. This
+  slice adds Cone Feather; it is only visually meaningful for spot lights.
+  Other light options remain separate recipe slices.
+- `examples/recipes/minimal-light-cone-feather.json` is a dedicated two-layer
+  recipe: a `Light` layer with `cone_feather: 35` plus a visible text layer. The
+  embedded expected profile checks `ADBE Light Cone Feather 2 = 35`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-cone-feather.json -out
+    tmp_debug\recipes\minimal-light-cone-feather.aep -json` returned valid and
+    all `profile_checks` passed, including `ADBE Light Cone Feather 2 = 35`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_cone_feather\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_cone_feather\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
