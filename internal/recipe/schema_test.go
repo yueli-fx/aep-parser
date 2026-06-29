@@ -634,6 +634,29 @@ func TestValidateReportsCameraZoomCapability(t *testing.T) {
 	assertCapability(t, report, "Layer.SetCameraZoom")
 }
 
+func TestValidateReportsCameraDepthOfFieldCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Camera depth of field"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "camera", "name": "Camera", "camera": {"depth_of_field": false}},
+				{"type": "text", "name": "Title", "text": "Camera DOF", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetCameraDepthOfField")
+}
+
 func TestValidateRejectsCameraOptionsOnNonCameraLayer(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

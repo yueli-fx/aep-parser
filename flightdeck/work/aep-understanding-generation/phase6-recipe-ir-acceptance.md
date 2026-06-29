@@ -1820,6 +1820,32 @@ Fifty-eighth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-ninth follow-up completed:
+
+- Camera layer recipes now support a second camera option:
+  - `camera.depth_of_field` -> `Layer.SetCameraDepthOfField`
+- Boundary: `camera` options remain valid only on `type: "camera"` layers.
+  This slice covers the Depth of Field toggle only; focus distance, aperture,
+  iris, and other camera options remain separate recipe slices.
+- `examples/recipes/minimal-camera-depth-of-field.json` is a dedicated
+  two-layer recipe: a `Camera` layer with depth of field disabled plus a visible
+  text layer. See `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-depth-of-field.json -out
+    tmp_debug\recipes\minimal-camera-depth-of-field.aep -json` returned valid
+    and all `profile_checks` passed, including
+    `ADBE Camera Depth of Field = 0`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_depth_of_field\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_depth_of_field\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

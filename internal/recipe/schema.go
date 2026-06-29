@@ -91,7 +91,8 @@ type Layer struct {
 }
 
 type CameraSpec struct {
-	Zoom *float64 `json:"zoom,omitempty"`
+	Zoom         *float64 `json:"zoom,omitempty"`
+	DepthOfField *bool    `json:"depth_of_field,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -775,6 +776,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Camera.Zoom != nil {
 			recordCapability("Layer.SetCameraZoom", layerPath+".camera.zoom")
+		}
+		if layer.Camera.DepthOfField != nil {
+			recordCapability("Layer.SetCameraDepthOfField", layerPath+".camera.depth_of_field")
 		}
 	}
 	if layer.StartTime != nil {
