@@ -471,6 +471,33 @@ func TestCompileToFileChecksLightObjectProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksLightSourceProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-light-source.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	for _, path := range []string{
+		"expected_profile.layers[0].name",
+		"expected_profile.layers[0].type",
+		"expected_profile.layers[0].light_kind",
+		"expected_profile.layers[0].light_source",
+		"expected_profile.layers[1].name",
+		"expected_profile.layers[1].type",
+	} {
+		assertProfileCheck(t, report, path, true)
+	}
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)

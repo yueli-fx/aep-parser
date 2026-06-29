@@ -41,6 +41,18 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 3,
-    "text_layer_count": 1
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Light",
+        "type": "light",
+        "light_kind": "ambient",
+        "light_source": "Source"
+      },
+      {
+        "name": "Source",
+        "type": "av"
+      }
+    ]
   }
 }

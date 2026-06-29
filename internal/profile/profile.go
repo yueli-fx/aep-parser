@@ -106,28 +106,29 @@ type MotionBlurSettings struct {
 }
 
 type Layer struct {
-	ID           uint32      `json:"id,omitempty"`
-	Index        int         `json:"index"`
-	Name         string      `json:"name"`
-	Type         string      `json:"type"`
-	Label        uint8       `json:"label,omitempty"`
-	Comment      string      `json:"comment,omitempty"`
-	Quality      string      `json:"quality,omitempty"`
-	BlendingMode string      `json:"blending_mode,omitempty"`
-	AutoOrient   string      `json:"auto_orient,omitempty"`
-	LightKind    string      `json:"light_kind,omitempty"`
-	SourceRef    *ItemRef    `json:"source_ref,omitempty"`
-	ParentRef    *LayerRef   `json:"parent_ref,omitempty"`
-	MatteRef     *LayerRef   `json:"matte_ref,omitempty"`
-	Timing       LayerTiming `json:"timing"`
-	Flags        LayerFlags  `json:"flags"`
-	Effects      []Effect    `json:"effects,omitempty"`
-	Properties   []Property  `json:"properties,omitempty"`
-	Masks        []Mask      `json:"masks,omitempty"`
-	Shapes       []Shape     `json:"shapes,omitempty"`
-	Text         *TextSource `json:"text,omitempty"`
-	Path         PathRef     `json:"path"`
-	Evidence     Evidence    `json:"evidence"`
+	ID             uint32      `json:"id,omitempty"`
+	Index          int         `json:"index"`
+	Name           string      `json:"name"`
+	Type           string      `json:"type"`
+	Label          uint8       `json:"label,omitempty"`
+	Comment        string      `json:"comment,omitempty"`
+	Quality        string      `json:"quality,omitempty"`
+	BlendingMode   string      `json:"blending_mode,omitempty"`
+	AutoOrient     string      `json:"auto_orient,omitempty"`
+	LightKind      string      `json:"light_kind,omitempty"`
+	SourceRef      *ItemRef    `json:"source_ref,omitempty"`
+	LightSourceRef *LayerRef   `json:"light_source_ref,omitempty"`
+	ParentRef      *LayerRef   `json:"parent_ref,omitempty"`
+	MatteRef       *LayerRef   `json:"matte_ref,omitempty"`
+	Timing         LayerTiming `json:"timing"`
+	Flags          LayerFlags  `json:"flags"`
+	Effects        []Effect    `json:"effects,omitempty"`
+	Properties     []Property  `json:"properties,omitempty"`
+	Masks          []Mask      `json:"masks,omitempty"`
+	Shapes         []Shape     `json:"shapes,omitempty"`
+	Text           *TextSource `json:"text,omitempty"`
+	Path           PathRef     `json:"path"`
+	Evidence       Evidence    `json:"evidence"`
 }
 
 type ItemRef struct {
@@ -484,8 +485,11 @@ func buildLayer(
 		Path:     layerPath(c, l),
 		Evidence: parsedEvidence(),
 	}
-	if l.SourceID != 0 {
+	if l.SourceID != 0 && l.Type != "light" {
 		lp.SourceRef = sourceRef(l.SourceID, compItems, footageItems)
+	}
+	if sceneLayer != nil {
+		lp.LightSourceRef = sceneLayerRef(sceneLayer.LightSource())
 	}
 	if l.ParentID != 0 {
 		lp.ParentRef = layerRef(l.ParentID, layerByID)
@@ -730,6 +734,13 @@ func layerRef(id uint32, layers map[uint32]*aep.JSONLayer) *LayerRef {
 		ref.Name = l.Name
 	}
 	return ref
+}
+
+func sceneLayerRef(l *aep.Layer) *LayerRef {
+	if l == nil {
+		return nil
+	}
+	return &LayerRef{ID: l.ID, Index: l.Index, Name: l.Name}
 }
 
 func jsonLayerRef(l *aep.JSONLayer) *LayerRef {
