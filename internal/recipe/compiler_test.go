@@ -517,6 +517,39 @@ func TestCompileToFileChecksExpectedRotationKeyframeProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[2]", true)
 }
 
+func TestCompileToFileChecksExpectedAnchorPointKeyframeProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.AnchorPoint = nil
+	rec.Comps[0].Layers[0].Transform.AnchorPointKeyframes = []recipe.VectorKeyframe{
+		{Time: 0, Value: []float64{0, 0}},
+		{Time: 1, Value: []float64{120, -40}},
+		{Time: 2, Value: []float64{-60, 30}},
+	}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Keyframes: []recipe.ExpectedKeyframedProperty{{
+			LayerName: "Title",
+			MatchName: "ADBE Anchor Point",
+			Keyframes: []recipe.ExpectedKeyframe{
+				{Time: 0, Value: []float64{0, 0, 0}},
+				{Time: 1, Value: []float64{120, -40, 0}},
+				{Time: 2, Value: []float64{-60, 30, 0}},
+			},
+		}},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[0]", true)
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[2]", true)
+}
+
 func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {
 	t.Helper()
 	for _, param := range params {

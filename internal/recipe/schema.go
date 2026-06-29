@@ -80,15 +80,16 @@ type EffectParam struct {
 }
 
 type Transform struct {
-	Position          []float64        `json:"position,omitempty"`
-	Scale             []float64        `json:"scale,omitempty"`
-	AnchorPoint       []float64        `json:"anchor_point,omitempty"`
-	Rotation          *float64         `json:"rotation,omitempty"`
-	Opacity           *float64         `json:"opacity,omitempty"`
-	PositionKeyframes []VectorKeyframe `json:"position_keyframes,omitempty"`
-	ScaleKeyframes    []VectorKeyframe `json:"scale_keyframes,omitempty"`
-	RotationKeyframes []ScalarKeyframe `json:"rotation_keyframes,omitempty"`
-	OpacityKeyframes  []ScalarKeyframe `json:"opacity_keyframes,omitempty"`
+	Position             []float64        `json:"position,omitempty"`
+	Scale                []float64        `json:"scale,omitempty"`
+	AnchorPoint          []float64        `json:"anchor_point,omitempty"`
+	Rotation             *float64         `json:"rotation,omitempty"`
+	Opacity              *float64         `json:"opacity,omitempty"`
+	PositionKeyframes    []VectorKeyframe `json:"position_keyframes,omitempty"`
+	AnchorPointKeyframes []VectorKeyframe `json:"anchor_point_keyframes,omitempty"`
+	ScaleKeyframes       []VectorKeyframe `json:"scale_keyframes,omitempty"`
+	RotationKeyframes    []ScalarKeyframe `json:"rotation_keyframes,omitempty"`
+	OpacityKeyframes     []ScalarKeyframe `json:"opacity_keyframes,omitempty"`
 }
 
 type VectorKeyframe struct {
@@ -450,6 +451,16 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
 	}
+	for i, kf := range layer.Transform.AnchorPointKeyframes {
+		kfPath := fmt.Sprintf("%s.transform.anchor_point_keyframes[%d]", layerPath, i)
+		if kf.Time < 0 || kf.Time > compDuration {
+			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be within comp duration")
+		}
+		if i > 0 && kf.Time < layer.Transform.AnchorPointKeyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+		}
+		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
+	}
 	for i, kf := range layer.Transform.ScaleKeyframes {
 		kfPath := fmt.Sprintf("%s.transform.scale_keyframes[%d]", layerPath, i)
 		if kf.Time < 0 || kf.Time > compDuration {
@@ -572,6 +583,7 @@ func usesTransform(t Transform) bool {
 		t.Rotation != nil ||
 		t.Opacity != nil ||
 		len(t.PositionKeyframes) > 0 ||
+		len(t.AnchorPointKeyframes) > 0 ||
 		len(t.ScaleKeyframes) > 0 ||
 		len(t.RotationKeyframes) > 0 ||
 		len(t.OpacityKeyframes) > 0

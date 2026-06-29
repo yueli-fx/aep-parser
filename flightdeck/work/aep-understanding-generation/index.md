@@ -149,6 +149,11 @@ Done:
   `expected_profile.keyframes[]` checks against profile degree values. The
   updated shape/text example passed `go test ./...`, `go vet ./...`, profile
   checks, and an AE 2025 render oracle gate.
+- Recipe transform keyframes now also support
+  `transform.anchor_point_keyframes[]` in 2D authoring units, with validation
+  and `ADBE Anchor Point` `expected_profile.keyframes[]` checks against profile
+  3D `[x,y,0]` values. The updated shape/text example passed `go test ./...`,
+  `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

@@ -359,6 +359,35 @@ Twelfth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Thirteenth follow-up completed:
+
+- Recipes now support `transform.anchor_point_keyframes[]` as 2D vector
+  keyframes.
+- Validation rejects anchor point keyframes outside the comp duration, unsorted
+  anchor point keyframes, and malformed anchor point vectors.
+- `expected_profile.keyframes[]` now exercises Position, Anchor Point, Scale,
+  Rotation, and Opacity on the updated shape/text example. Note: recipe Anchor
+  Point keyframes are authored as 2D `[x,y]`, while profile
+  `ADBE Anchor Point` keyframe values read back as 3D `[x,y,0]`; see
+  `knowledge/layer/recipe-anchor-point-keyframe-profile-3d.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-anchor-keyframes.aep -json`
+    returned valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_anchor_keyframes/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_anchor_keyframes/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

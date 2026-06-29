@@ -36,6 +36,11 @@
               { "time": 2, "value": [960, 500] },
               { "time": 4, "value": [1020, 540] }
             ],
+            "anchor_point_keyframes": [
+              { "time": 0, "value": [0, 0] },
+              { "time": 2, "value": [120, -40] },
+              { "time": 4, "value": [-60, 30] }
+            ],
             "scale_keyframes": [
               { "time": 0, "value": [80, 80] },
               { "time": 2, "value": [100, 120] },
@@ -135,6 +140,15 @@
           { "time": 0, "value": [900, 540, 0] },
           { "time": 2, "value": [960, 500, 0] },
           { "time": 4, "value": [1020, 540, 0] }
+        ]
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Anchor Point",
+        "keyframes": [
+          { "time": 0, "value": [0, 0, 0] },
+          { "time": 2, "value": [120, -40, 0] },
+          { "time": 4, "value": [-60, 30, 0] }
         ]
       },
       {

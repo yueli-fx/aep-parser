@@ -155,6 +155,37 @@ func TestValidateRejectsUnsortedRotationKeyframes(t *testing.T) {
 	assertRefusal(t, report, "keyframes_not_sorted")
 }
 
+func TestValidateRejectsInvalidAnchorPointKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.AnchorPointKeyframes = []recipe.VectorKeyframe{
+		{Time: 5, Value: []float64{0, 0}},
+		{Time: 1, Value: []float64{10}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframe_time_out_of_range")
+	assertRefusal(t, report, "invalid_vector_size")
+}
+
+func TestValidateRejectsUnsortedAnchorPointKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.AnchorPointKeyframes = []recipe.VectorKeyframe{
+		{Time: 1, Value: []float64{20, 10}},
+		{Time: 0, Value: []float64{0, 0}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframes_not_sorted")
+}
+
 func TestValidateAcceptsExpectedKeyframes(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{
