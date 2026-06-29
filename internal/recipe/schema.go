@@ -20,16 +20,17 @@ type ProjectSpec struct {
 }
 
 type CompSpec struct {
-	Name            string              `json:"name"`
-	Width           int                 `json:"width"`
-	Height          int                 `json:"height"`
-	FrameRate       float64             `json:"frame_rate"`
-	Duration        float64             `json:"duration"`
-	BackgroundColor []float64           `json:"background_color,omitempty"`
-	Renderer        string              `json:"renderer,omitempty"`
-	MotionBlur      *CompMotionBlurSpec `json:"motion_blur,omitempty"`
-	WorkArea        *CompWorkAreaSpec   `json:"work_area,omitempty"`
-	Layers          []Layer             `json:"layers,omitempty"`
+	Name             string              `json:"name"`
+	Width            int                 `json:"width"`
+	Height           int                 `json:"height"`
+	FrameRate        float64             `json:"frame_rate"`
+	Duration         float64             `json:"duration"`
+	BackgroundColor  []float64           `json:"background_color,omitempty"`
+	Renderer         string              `json:"renderer,omitempty"`
+	ResolutionFactor []float64           `json:"resolution_factor,omitempty"`
+	MotionBlur       *CompMotionBlurSpec `json:"motion_blur,omitempty"`
+	WorkArea         *CompWorkAreaSpec   `json:"work_area,omitempty"`
+	Layers           []Layer             `json:"layers,omitempty"`
 }
 
 type CompWorkAreaSpec struct {
@@ -401,6 +402,10 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.Renderer != "" {
 			recordCapability("SetRenderer", compPath+".renderer")
 		}
+		if len(comp.ResolutionFactor) > 0 {
+			recordCapability("SetResolutionFactor", compPath+".resolution_factor")
+			validateResolutionFactor(comp.ResolutionFactor, compPath+".resolution_factor", addRefusal)
+		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)
 		}
@@ -546,6 +551,18 @@ func validateCompWorkArea(spec *CompWorkAreaSpec, path string, compDuration floa
 	}
 	if *spec.Start < 0 || *spec.End < *spec.Start || *spec.End > compDuration {
 		addRefusal("invalid_comp_work_area", path, "work_area must satisfy 0 <= start <= end <= comp duration")
+	}
+}
+
+func validateResolutionFactor(values []float64, path string, addRefusal func(string, string, string)) {
+	if len(values) != 2 {
+		addRefusal("invalid_comp_resolution_factor", path, "resolution_factor must have exactly two values")
+		return
+	}
+	for i, value := range values {
+		if value <= 0 || value > 65535 || !isWholeNumber(value) {
+			addRefusal("invalid_comp_resolution_factor", fmt.Sprintf("%s[%d]", path, i), "resolution_factor values must be positive integers in uint16 range")
+		}
 	}
 }
 

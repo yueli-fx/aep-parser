@@ -40,6 +40,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q renderer: %w", compSpec.Name, err)
 		}
 	}
+	if len(compSpec.ResolutionFactor) == 2 {
+		if err := comp.SetResolutionFactor(uint16(compSpec.ResolutionFactor[0]), uint16(compSpec.ResolutionFactor[1])); err != nil {
+			return report, fmt.Errorf("recipe: comp %q resolution_factor: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.MotionBlur != nil {
 		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)

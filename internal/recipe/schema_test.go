@@ -401,6 +401,15 @@ func TestValidateReportsCompRendererCapability(t *testing.T) {
 	assertCapability(t, report, "SetRenderer")
 }
 
+func TestValidateReportsCompResolutionFactorCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].ResolutionFactor = []float64{2, 2}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetResolutionFactor")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
@@ -426,6 +435,18 @@ func TestValidateRejectsInvalidCompWorkArea(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_comp_work_area")
+}
+
+func TestValidateRejectsInvalidCompResolutionFactor(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].ResolutionFactor = []float64{2, 0}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_comp_resolution_factor")
 }
 
 func TestValidateRejectsInvalidCompMotionBlur(t *testing.T) {

@@ -246,6 +246,11 @@ Done:
   The dedicated `examples/recipes/minimal-comp-renderer.json` example asserts
   the profile-visible renderer match name and passes an AE 2025 render oracle
   gate.
+- Fifth comp-level recipe settings slice is implemented for
+  `comp.resolution_factor`. The dedicated
+  `examples/recipes/minimal-comp-resolution-factor.json` example compiles a
+  half-resolution preview comp, passes compiled AEP readback, and passes an AE
+  2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
