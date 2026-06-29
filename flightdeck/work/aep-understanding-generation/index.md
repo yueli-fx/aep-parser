@@ -265,6 +265,11 @@ Done:
   `examples/recipes/minimal-comp-frame-blending.json` example compiles a comp
   master frame-blending switch, passes compiled AEP `cdta` flag readback, and
   passes an AE 2025 render oracle gate.
+- Ninth comp-level recipe settings slice is implemented for
+  `comp.hide_shy_layers`. The dedicated
+  `examples/recipes/minimal-comp-hide-shy-layers.json` example compiles a comp
+  master Hide Shy Layers switch, passes compiled AEP `cdta` flag readback, and
+  passes an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

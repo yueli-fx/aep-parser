@@ -60,6 +60,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q frame_blending: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.HideShyLayers != nil {
+		if err := comp.SetHideShyLayers(*compSpec.HideShyLayers); err != nil {
+			return report, fmt.Errorf("recipe: comp %q hide_shy_layers: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.MotionBlur != nil {
 		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)

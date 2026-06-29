@@ -31,6 +31,7 @@ type CompSpec struct {
 	PixelAspect      *float64            `json:"pixel_aspect,omitempty"`
 	DisplayStartTime *float64            `json:"display_start_time,omitempty"`
 	FrameBlending    *bool               `json:"frame_blending,omitempty"`
+	HideShyLayers    *bool               `json:"hide_shy_layers,omitempty"`
 	MotionBlur       *CompMotionBlurSpec `json:"motion_blur,omitempty"`
 	WorkArea         *CompWorkAreaSpec   `json:"work_area,omitempty"`
 	Layers           []Layer             `json:"layers,omitempty"`
@@ -419,6 +420,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		}
 		if comp.FrameBlending != nil {
 			recordCapability("SetFrameBlending", compPath+".frame_blending")
+		}
+		if comp.HideShyLayers != nil {
+			recordCapability("SetHideShyLayers", compPath+".hide_shy_layers")
 		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)

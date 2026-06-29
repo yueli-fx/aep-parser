@@ -437,6 +437,15 @@ func TestValidateReportsCompFrameBlendingCapability(t *testing.T) {
 	assertCapability(t, report, "SetFrameBlending")
 }
 
+func TestValidateReportsCompHideShyLayersCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].HideShyLayers = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetHideShyLayers")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
