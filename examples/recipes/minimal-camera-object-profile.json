@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal camera object profile"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "camera",
+          "name": "Camera",
+          "camera": {
+            "zoom": 850,
+            "depth_of_field": false,
+            "focus_distance": 1200,
+            "aperture": 180,
+            "blur_level": 120,
+            "iris_shape": 4,
+            "iris_rotation": 25,
+            "iris_roundness": 60,
+            "iris_aspect_ratio": 1.8,
+            "iris_diffraction_fringe": 30,
+            "iris_highlight_gain": 40,
+            "iris_highlight_threshold": 0.7,
+            "iris_highlight_saturation": 50
+          }
+        },
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Camera object profile",
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Camera",
+        "type": "camera"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Camera Zoom",
+        "value": 850
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Camera Depth of Field",
+        "value": 0
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Camera Focus Distance",
+        "value": 1200
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Camera Aperture",
+        "value": 180
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Camera Blur Level",
+        "value": 120
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Shape",
+        "value": 4
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Rotation",
+        "value": 25
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Roundness",
+        "value": 60
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Aspect Ratio",
+        "value": 1.8
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Diffraction Fringe",
+        "value": 30
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Highlight Gain",
+        "value": 40
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Highlight Threshold",
+        "value": 0.7
+      },
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Iris Hightlight Saturation",
+        "value": 50
+      }
+    ]
+  }
+}

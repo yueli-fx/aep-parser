@@ -224,6 +224,9 @@ Done:
 - Camera and light base recipes now assert layer object identity through
   `expected_profile.layers[]`; option values remain covered by their
   `expected_profile.properties[]` recipe family.
+- Camera option coverage now has a consolidated object/profile baseline:
+  `minimal-camera-object-profile.json` sets zoom, DOF/focus/aperture/blur, and
+  iris controls together and asserts all profile-visible properties.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -369,7 +372,8 @@ Current:
   `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
   blocked until recipe target-version handling is explicit, so continue with
   the next recipe-owned family; the consolidated layer object baseline now
-  includes render/sampling flags. Do not start automated correction loops.
+  includes render/sampling flags, and camera options now have a consolidated
+  baseline. Do not start automated correction loops.
 
 ## Open questions
 

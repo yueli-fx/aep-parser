@@ -67,7 +67,8 @@ flags, and refs.
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
-| Camera/light options | `camera.*` / `light.*` | camera/light setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
+| Camera options | `camera.*` | camera setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | done in consolidated camera baseline |
+| Light options | `light.*` | light setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 
 ## Preferred Execution Order
 
@@ -175,6 +176,10 @@ Layer render/sampling flags are now part of the consolidated object baseline:
 Camera and light layer creation now has object identity coverage in
 `minimal-camera-layer.json` and `minimal-light-layer.json`; parameter values
 remain in the property-based camera/light recipe family.
+
+Camera option values now also have a consolidated baseline:
+`minimal-camera-object-profile.json` sets and asserts zoom, depth of field,
+focus distance, aperture, blur level, and the iris controls in one recipe.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
