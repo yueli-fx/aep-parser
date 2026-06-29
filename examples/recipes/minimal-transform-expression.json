@@ -47,12 +47,14 @@
       {
         "layer_name": "Title",
         "match_name": "ADBE Position",
-        "expression": "[value[0] + time * 10, value[1], value[2]]"
+        "expression": "[value[0] + time * 10, value[1], value[2]]",
+        "expression_enabled": true
       },
       {
         "layer_name": "Title",
         "match_name": "ADBE Opacity",
-        "expression": "time * 50"
+        "expression": "time * 50",
+        "expression_enabled": false
       }
     ]
   }

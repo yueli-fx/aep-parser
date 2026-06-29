@@ -252,11 +252,12 @@ type JSONTextParagraph struct {
 
 // JSONProperty is the JSON representation of a Property.
 type JSONProperty struct {
-	Name        string          `json:"name"`
-	MatchName   string          `json:"match_name,omitempty"`
-	Keyframes   []*JSONKeyframe `json:"keyframes,omitempty"`
-	StaticValue interface{}     `json:"static_value,omitempty"`
-	Expression  string          `json:"expression,omitempty"`
+	Name              string          `json:"name"`
+	MatchName         string          `json:"match_name,omitempty"`
+	Keyframes         []*JSONKeyframe `json:"keyframes,omitempty"`
+	StaticValue       interface{}     `json:"static_value,omitempty"`
+	Expression        string          `json:"expression,omitempty"`
+	ExpressionEnabled *bool           `json:"expression_enabled,omitempty"`
 }
 
 // JSONKeyframe is the JSON representation of a Keyframe (extended).
@@ -743,6 +744,10 @@ func propertyToJSON(prop *Property) *JSONProperty {
 		MatchName:   prop.MatchName,
 		StaticValue: prop.StaticValue,
 		Expression:  prop.Expression,
+	}
+	if prop.Expression != "" {
+		enabled := prop.ExpressionEnabled
+		jp.ExpressionEnabled = &enabled
 	}
 	for _, kf := range prop.Keyframes {
 		jkf := &JSONKeyframe{

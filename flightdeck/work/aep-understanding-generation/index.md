@@ -112,6 +112,9 @@ Done:
 - Recipe effect params now support static scalar/bool/numeric-array values via
   `SetEffectParam`; the Gaussian Blur example passed profile inspection and AE
   2025 render oracle with params `25`, `2`, and `1`.
+- Recipe profiles now expose property expression enabled state, and
+  `expected_profile` can assert it for both layer properties and effect
+  parameters.
 - Recipes now support embedded `expected_profile` checks. `cmd/aeprecipe
   compile` builds a profile from the exact AEP bytes it is about to write,
   reports `profile_checks`, and refuses final output on mismatch. Both recipe

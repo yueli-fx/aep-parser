@@ -3877,7 +3877,7 @@ func TestCompileToFileChecksExpectedEffectParamExpressionProfile(t *testing.T) {
 					"params": [{
 						"match_name": "ADBE Gaussian Blur 2-0001",
 						"value": 0,
-						"expression": {"source": "time * 40"}
+						"expression": {"source": "time * 40", "enabled": false}
 					}]
 				}]
 			}]
@@ -3888,7 +3888,8 @@ func TestCompileToFileChecksExpectedEffectParamExpressionProfile(t *testing.T) {
 				"match_name": "ADBE Gaussian Blur 2",
 				"params": [{
 					"match_name": "ADBE Gaussian Blur 2-0001",
-					"expression": "time * 40"
+					"expression": "time * 40",
+					"expression_enabled": false
 				}]
 			}]
 		}
@@ -3903,6 +3904,7 @@ func TestCompileToFileChecksExpectedEffectParamExpressionProfile(t *testing.T) {
 		t.Fatalf("report = %+v, want valid", report)
 	}
 	assertProfileCheck(t, report, "expected_profile.effects[0].params[0].expression", true)
+	assertProfileCheck(t, report, "expected_profile.effects[0].params[0].expression_enabled", true)
 }
 
 func TestCompileToFileChecksExpectedLayerPropertyProfile(t *testing.T) {
@@ -4282,7 +4284,8 @@ func TestCompileToFileChecksExpectedPropertyExpressionProfile(t *testing.T) {
 			"properties": [{
 				"layer_name": "Title",
 				"match_name": "ADBE Position",
-				"expression": "[value[0] + time * 10, value[1], value[2]]"
+				"expression": "[value[0] + time * 10, value[1], value[2]]",
+				"expression_enabled": true
 			}]
 		}
 	}`)
@@ -4296,6 +4299,7 @@ func TestCompileToFileChecksExpectedPropertyExpressionProfile(t *testing.T) {
 		t.Fatalf("report = %+v, want valid", report)
 	}
 	assertProfileCheck(t, report, "expected_profile.properties[0].expression", true)
+	assertProfileCheck(t, report, "expected_profile.properties[0].expression_enabled", true)
 }
 
 func TestCompileToFileChecksExpectedOpacityKeyframeProfile(t *testing.T) {

@@ -14,8 +14,8 @@ detailed `WriteJSON` export.
 | Layer flags | visible/blend only | broad flags and switches | Admit visible, blend, 3D, solo, shy, locked, adjustment/null/guide, motion blur, effects enabled, audio, frame blend, collapse | L1_parsed | Flags frequently explain render deltas. |
 | Source refs | precomp/footage display label | raw source ID plus footage table | Admit source ID and resolved display label | L1_parsed | Display label is annotation, not identity. |
 | Effects | match name/class/name/tuned/params | match name/name/parameters | Admit match name, display name, occurrence, dependency class, params, tuned params, unknown params | L1_parsed | `tuned_params` remains hint, not proof of semantic importance. |
-| Effect params | static value/default/changed/expression | full property shape through parameters | Admit static value, expression, keyframes, interpolation/ease when present | L1_parsed | Defaults from dict are advisory metadata. |
-| Transform/property tree | animated summary only | full `properties` list | Admit stable property paths, static values, keyframes, interpolation/ease, expression | L1_parsed | Summaries can remain fingerprint fields. |
+| Effect params | static value/default/changed/expression | full property shape through parameters | Admit static value, expression, expression enabled state, keyframes, interpolation/ease when present | L1_parsed | Defaults from dict are advisory metadata. |
+| Transform/property tree | animated summary only | full `properties` list | Admit stable property paths, static values, keyframes, interpolation/ease, expression, expression enabled state | L1_parsed | Summaries can remain fingerprint fields. |
 | Keyframes | count/motion/start/end | values/interp/ease/tangents | Admit full keyframe timeline for admitted properties | L1_parsed | Required before diff and sentinel frames. |
 | Expressions | expression refs from effect params | expression + enabled state per property | Admit expression text, enabled state, and parsed refs where available | L1_parsed | Expression reference extraction is heuristic unless parser-backed. |
 | Masks | absent | masks, vertices, path keyframes, interp/ease | Admit mask metadata and path timeline; mark geometry evidence carefully | L1_parsed | Existing knowledge says some mask geometry may be partial. |
@@ -40,7 +40,7 @@ Admit immediately:
 - effect match name/display name/dependency class/occurrence/params/tuned
   params/unknown params
 - property match name/path/static value/keyframes/interpolation/ease/spatial
-  tangents/expression
+  tangents/expression/expression enabled state
 - masks with metadata/path timeline
 - shapes with path/primitive summaries
 - text source and style run summaries

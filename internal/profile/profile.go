@@ -194,16 +194,17 @@ type Effect struct {
 }
 
 type Property struct {
-	Name        string     `json:"name,omitempty"`
-	MatchName   string     `json:"match_name,omitempty"`
-	Occurrence  int        `json:"occurrence,omitempty"`
-	StaticValue any        `json:"static_value,omitempty"`
-	Default     any        `json:"default,omitempty"`
-	Changed     bool       `json:"changed,omitempty"`
-	Expression  string     `json:"expression,omitempty"`
-	Keyframes   []Keyframe `json:"keyframes,omitempty"`
-	Path        PathRef    `json:"path"`
-	Evidence    Evidence   `json:"evidence"`
+	Name              string     `json:"name,omitempty"`
+	MatchName         string     `json:"match_name,omitempty"`
+	Occurrence        int        `json:"occurrence,omitempty"`
+	StaticValue       any        `json:"static_value,omitempty"`
+	Default           any        `json:"default,omitempty"`
+	Changed           bool       `json:"changed,omitempty"`
+	Expression        string     `json:"expression,omitempty"`
+	ExpressionEnabled *bool      `json:"expression_enabled,omitempty"`
+	Keyframes         []Keyframe `json:"keyframes,omitempty"`
+	Path              PathRef    `json:"path"`
+	Evidence          Evidence   `json:"evidence"`
 }
 
 type Keyframe struct {
@@ -662,6 +663,10 @@ func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int) Property {
 		Expression:  p.Expression,
 		Path:        path,
 		Evidence:    parsedEvidence(),
+	}
+	if p.ExpressionEnabled != nil {
+		enabled := *p.ExpressionEnabled
+		pp.ExpressionEnabled = &enabled
 	}
 	for _, kf := range p.Keyframes {
 		pp.Keyframes = append(pp.Keyframes, Keyframe{

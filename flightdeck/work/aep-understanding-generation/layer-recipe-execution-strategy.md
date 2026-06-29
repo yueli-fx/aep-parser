@@ -64,7 +64,7 @@ flags, and refs.
 | Explicit matte refs | not recipe-owned yet | `Layer.SetTrackMatteSource` / `SetTrackMatteLayer` | `layers[].matte_ref` | planned when writer enters recipe scope | L3 AE2025-only | blocked |
 | Transform statics | `transform.position` / `scale` / `anchor_point` / `rotation` / `opacity` | `SetLayerTransform` | `properties[]` | `expected_profile.properties[]` | L3 | keep separate |
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
-| Transform expressions | `transform.expressions.*` | `Property.SetExpression` | `properties[].expression` | `expected_profile.properties[].expression` | L3 | keep separate |
+| Transform expressions | `transform.expressions.*` | `Property.SetExpression` / `Property.SetExpressionEnabled` | `properties[].expression` / `expression_enabled` | `expected_profile.properties[].expression` / `expression_enabled` | L3 | keep separate |
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
@@ -223,6 +223,12 @@ The guard counts authored transform keyframe streams and fails examples that
 do not assert at least that many keyframed profile entries; this caught and
 fixed `minimal-layer-auto-orient.json`, whose Position keyframes are required
 for the `along_path` behavior.
+
+Expression examples now assert enabled state as part of the property contract.
+`minimal-transform-expression.json` checks both default-enabled Position and
+disabled Opacity expressions through `expected_profile.properties[]`, while
+`minimal-effect-param-expression.json` checks disabled Gaussian Blur parameter
+expression state through `expected_profile.effects[].params[]`.
 
 Nested content examples also require the matching expected-profile family:
 shape/camera/light property content must assert `properties[]`, text style

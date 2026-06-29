@@ -2870,6 +2870,30 @@ Ninety-third follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Ninety-fourth follow-up completed:
+
+- Recipe profiles now expose property expression enabled state:
+  - scene JSON emits `properties[].expression_enabled` when an expression is
+    present.
+  - `profile.Property.ExpressionEnabled` carries the value as `*bool` so
+    disabled expressions survive JSON `omitempty`.
+  - `expected_profile.properties[]` and
+    `expected_profile.effects[].params[]` can assert `expression_enabled`.
+- `minimal-transform-expression.json` now asserts default-enabled Position and
+  disabled Opacity expressions. `minimal-effect-param-expression.json` now
+  asserts the disabled Gaussian Blur parameter expression.
+- Verification:
+  - RED was observed with
+    `go test ./internal/recipe -run "TestCompileToFileChecksExpected(PropertyExpression|EffectParamExpression)Profile" -count=1`:
+    both new `expression_enabled` profile check paths were missing.
+  - Focused recipe tests passed after implementation.
+  - `go test ./internal/scene ./internal/profile ./internal/recipe -count=1`
+    passed.
+  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+    89 recipes, 89 passed, 0 failed, 149 covered profile paths.
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

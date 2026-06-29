@@ -387,6 +387,15 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			if expectedParam.Expression != "" {
 				add(paramPath+".expression", expectedParam.Expression, param.Expression, param.Expression == expectedParam.Expression)
 			}
+			if expectedParam.ExpressionEnabled != nil {
+				var actual any
+				passed := false
+				if param.ExpressionEnabled != nil {
+					actual = *param.ExpressionEnabled
+					passed = *param.ExpressionEnabled == *expectedParam.ExpressionEnabled
+				}
+				add(paramPath+".expression_enabled", *expectedParam.ExpressionEnabled, actual, passed)
+			}
 		}
 	}
 	for i, expectedProp := range expected.Properties {
@@ -402,6 +411,15 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		}
 		if expectedProp.Expression != "" {
 			add(propPath+".expression", expectedProp.Expression, prop.Expression, prop.Expression == expectedProp.Expression)
+		}
+		if expectedProp.ExpressionEnabled != nil {
+			var actual any
+			passed := false
+			if prop.ExpressionEnabled != nil {
+				actual = *prop.ExpressionEnabled
+				passed = *prop.ExpressionEnabled == *expectedProp.ExpressionEnabled
+			}
+			add(propPath+".expression_enabled", *expectedProp.ExpressionEnabled, actual, passed)
 		}
 	}
 	for i, expectedStyle := range expected.TextStyles {

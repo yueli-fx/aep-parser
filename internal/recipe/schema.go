@@ -483,10 +483,11 @@ type ExpectedMotionBlurSpec struct {
 }
 
 type ExpectedProperty struct {
-	LayerName  string `json:"layer_name"`
-	MatchName  string `json:"match_name"`
-	Value      any    `json:"value,omitempty"`
-	Expression string `json:"expression,omitempty"`
+	LayerName         string `json:"layer_name"`
+	MatchName         string `json:"match_name"`
+	Value             any    `json:"value,omitempty"`
+	Expression        string `json:"expression,omitempty"`
+	ExpressionEnabled *bool  `json:"expression_enabled,omitempty"`
 }
 
 type ExpectedTextStyle struct {
@@ -544,9 +545,10 @@ type ExpectedEffect struct {
 }
 
 type ExpectedEffectParam struct {
-	MatchName  string `json:"match_name"`
-	Value      any    `json:"value,omitempty"`
-	Expression string `json:"expression,omitempty"`
+	MatchName         string `json:"match_name"`
+	Value             any    `json:"value,omitempty"`
+	Expression        string `json:"expression,omitempty"`
+	ExpressionEnabled *bool  `json:"expression_enabled,omitempty"`
 }
 
 type Report struct {
@@ -798,8 +800,8 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			if param.MatchName == "" {
 				addRefusal("invalid_expected_profile", paramPath+".match_name", "param match_name is required")
 			}
-			if param.Expression == "" && param.Value == nil {
-				addRefusal("invalid_expected_profile", paramPath, "expected param value or expression is required")
+			if param.Expression == "" && param.ExpressionEnabled == nil && param.Value == nil {
+				addRefusal("invalid_expected_profile", paramPath, "expected param value, expression, or expression_enabled is required")
 			}
 			if param.Value != nil && !validEffectParamValue(param.Value) {
 				addRefusal("invalid_expected_profile", paramPath+".value", "expected param value must be a number, boolean, or numeric array")
@@ -814,8 +816,8 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if prop.MatchName == "" {
 			addRefusal("invalid_expected_profile", propPath+".match_name", "property match_name is required")
 		}
-		if prop.Expression == "" && prop.Value == nil {
-			addRefusal("invalid_expected_profile", propPath, "expected property value or expression is required")
+		if prop.Expression == "" && prop.ExpressionEnabled == nil && prop.Value == nil {
+			addRefusal("invalid_expected_profile", propPath, "expected property value, expression, or expression_enabled is required")
 		}
 		if prop.Value != nil && !validEffectParamValue(prop.Value) {
 			addRefusal("invalid_expected_profile", propPath+".value", "expected property value must be a number, boolean, or numeric array")
