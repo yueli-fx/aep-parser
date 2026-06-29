@@ -12,7 +12,7 @@ package scene
 // ContainingComp returns the composition this layer belongs to, or nil
 // when the layer was built outside the parser (no owning comp wired up).
 func (l *Layer) ContainingComp() *Composition {
-	return l.comp
+	return l.runtime.comp
 }
 
 // HasVideo reports whether the layer has a visual component. True for
@@ -81,8 +81,8 @@ func (l *Layer) ActiveAtTime(t float64) bool {
 func (l *Layer) layerTimeRange() (float64, float64) {
 	in := l.StartTime
 	out := in + l.Duration
-	if l.Duration <= 0 && l.comp != nil {
-		out = in + l.comp.Duration
+	if l.Duration <= 0 && l.runtime.comp != nil {
+		out = in + l.runtime.comp.Duration
 	}
 	return in, out
 }
@@ -98,8 +98,8 @@ func (l *Layer) Width() int {
 	if f := l.SourceFootage(); f != nil {
 		return int(f.Width)
 	}
-	if l.comp != nil {
-		return int(l.comp.Width)
+	if l.runtime.comp != nil {
+		return int(l.runtime.comp.Width)
 	}
 	return 0
 }
@@ -112,8 +112,8 @@ func (l *Layer) Height() int {
 	if f := l.SourceFootage(); f != nil {
 		return int(f.Height)
 	}
-	if l.comp != nil {
-		return int(l.comp.Height)
+	if l.runtime.comp != nil {
+		return int(l.runtime.comp.Height)
 	}
 	return 0
 }
@@ -128,10 +128,10 @@ func (l *Layer) HasTrackMatte() bool {
 // other layer in the same composition. Walks the comp's layers to find
 // references; O(n) on the comp's layer count.
 func (l *Layer) IsTrackMatte() bool {
-	if l.comp == nil || l.ID == 0 {
+	if l.runtime.comp == nil || l.ID == 0 {
 		return false
 	}
-	for _, other := range l.comp.Layers {
+	for _, other := range l.runtime.comp.Layers {
 		if other == l {
 			continue
 		}

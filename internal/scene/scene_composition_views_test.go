@@ -39,10 +39,10 @@ func TestCompositionSourceViewsUseLocalSourceIndex(t *testing.T) {
 		Footage:      []*Footage{file, solid, placeholder},
 	}
 	comp := &Composition{Name: "main", proj: proj}
-	compLayer := &Layer{Name: "comp", SourceID: precomp.ID, comp: comp}
-	fileLayer := &Layer{Name: "file", SourceID: file.ID, comp: comp}
-	solidLayer := &Layer{Name: "solid", SourceID: solid.ID, comp: comp}
-	placeholderLayer := &Layer{Name: "placeholder", SourceID: placeholder.ID, comp: comp}
+	compLayer := &Layer{Name: "comp", SourceID: precomp.ID, runtime: layerRuntimeState{comp: comp}}
+	fileLayer := &Layer{Name: "file", SourceID: file.ID, runtime: layerRuntimeState{comp: comp}}
+	solidLayer := &Layer{Name: "solid", SourceID: solid.ID, runtime: layerRuntimeState{comp: comp}}
+	placeholderLayer := &Layer{Name: "placeholder", SourceID: placeholder.ID, runtime: layerRuntimeState{comp: comp}}
 	unwiredLayer := &Layer{Name: "unwired", SourceID: file.ID}
 	comp.Layers = []*Layer{compLayer, fileLayer, solidLayer, placeholderLayer, unwiredLayer}
 

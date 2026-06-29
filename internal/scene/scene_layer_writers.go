@@ -26,10 +26,10 @@ import (
 // @boundary    length-preserving, a single bit at ldta offset 0x27
 // @alias       visible,visibility,显示,隐藏,视频开关,eye toggle
 func (l *Layer) SetVisible(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetVisible(v); err != nil {
+	if err := l.runtime.back.SetVisible(v); err != nil {
 		return err
 	}
 	l.Visible = v
@@ -46,10 +46,10 @@ func (l *Layer) SetVisible(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x26
 // @alias       solo,独奏,单独显示
 func (l *Layer) SetSolo(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetSolo(v); err != nil {
+	if err := l.runtime.back.SetSolo(v); err != nil {
 		return err
 	}
 	l.Solo = v
@@ -67,10 +67,10 @@ func (l *Layer) SetSolo(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x27
 // @alias       shy,羞涩,隐藏图层,shy filter
 func (l *Layer) SetShy(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetShy(v); err != nil {
+	if err := l.runtime.back.SetShy(v); err != nil {
 		return err
 	}
 	l.Shy = v
@@ -89,10 +89,10 @@ func (l *Layer) SetShy(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x27
 // @alias       locked,lock,锁定,锁,图层锁定
 func (l *Layer) SetLocked(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetLocked(v); err != nil {
+	if err := l.runtime.back.SetLocked(v); err != nil {
 		return err
 	}
 	l.Locked = v
@@ -109,10 +109,10 @@ func (l *Layer) SetLocked(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x27
 // @alias       effects enabled,fx switch,特效开关,效果启用
 func (l *Layer) SetEffectsEnabled(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetEffectsEnabled(v); err != nil {
+	if err := l.runtime.back.SetEffectsEnabled(v); err != nil {
 		return err
 	}
 	l.EffectsEnabled = v
@@ -129,10 +129,10 @@ func (l *Layer) SetEffectsEnabled(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x27
 // @alias       motion blur,运动模糊,模糊开关
 func (l *Layer) SetMotionBlur(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetMotionBlur(v); err != nil {
+	if err := l.runtime.back.SetMotionBlur(v); err != nil {
 		return err
 	}
 	l.MotionBlur = v
@@ -151,10 +151,10 @@ func (l *Layer) SetMotionBlur(v bool) error {
 //   audioEnabled property rather than a rendered pixel
 // @alias       audio enabled,audio switch,音频开关,静音
 func (l *Layer) SetAudioEnabled(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetAudioEnabled(v); err != nil {
+	if err := l.runtime.back.SetAudioEnabled(v); err != nil {
 		return err
 	}
 	l.AudioEnabled = v
@@ -172,10 +172,10 @@ func (l *Layer) SetAudioEnabled(v bool) error {
 //   effect on layers with time-based frames (video footage or nested comps)
 // @alias       frame blend,帧混合,帧融合,frame blending
 func (l *Layer) SetFrameBlendEnabled(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetFrameBlendEnabled(v); err != nil {
+	if err := l.runtime.back.SetFrameBlendEnabled(v); err != nil {
 		return err
 	}
 	l.FrameBlendEnabled = v
@@ -195,10 +195,10 @@ func (l *Layer) SetFrameBlendEnabled(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x27
 // @alias       collapse transform,continuously rasterize,折叠变换,连续栅格化
 func (l *Layer) SetCollapseTransform(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetCollapseTransform(v); err != nil {
+	if err := l.runtime.back.SetCollapseTransform(v); err != nil {
 		return err
 	}
 	l.CollapseTransform = v
@@ -215,10 +215,10 @@ func (l *Layer) SetCollapseTransform(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x26
 // @alias       3D layer,3D开关,三维图层,enable 3D
 func (l *Layer) SetIs3D(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetIs3D(v); err != nil {
+	if err := l.runtime.back.SetIs3D(v); err != nil {
 		return err
 	}
 	l.Is3D = v
@@ -235,10 +235,10 @@ func (l *Layer) SetIs3D(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x26
 // @alias       adjustment layer,调整图层,调节层
 func (l *Layer) SetIsAdjust(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetIsAdjust(v); err != nil {
+	if err := l.runtime.back.SetIsAdjust(v); err != nil {
 		return err
 	}
 	l.IsAdjust = v
@@ -257,10 +257,10 @@ func (l *Layer) SetIsAdjust(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x25
 // @alias       guide layer,参考线图层,辅助线
 func (l *Layer) SetIsGuide(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetIsGuide(v); err != nil {
+	if err := l.runtime.back.SetIsGuide(v); err != nil {
 		return err
 	}
 	l.IsGuide = v
@@ -280,10 +280,10 @@ func (l *Layer) SetIsGuide(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x26
 // @alias       null layer,空对象,null object
 func (l *Layer) SetIsNull(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetIsNull(v); err != nil {
+	if err := l.runtime.back.SetIsNull(v); err != nil {
 		return err
 	}
 	l.IsNull = v
@@ -299,10 +299,10 @@ func (l *Layer) SetIsNull(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x26
 // @alias       markers locked,标记锁定,lock markers
 func (l *Layer) SetMarkersLocked(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetMarkersLocked(v); err != nil {
+	if err := l.runtime.back.SetMarkersLocked(v); err != nil {
 		return err
 	}
 	l.MarkersLocked = v
@@ -319,10 +319,10 @@ func (l *Layer) SetMarkersLocked(v bool) error {
 // @boundary    length-preserving, a single bit at ldta offset 0x25
 // @alias       sampling bicubic,bicubic,bilinear,采样方式,图像质量
 func (l *Layer) SetSamplingBicubic(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetSamplingBicubic(v); err != nil {
+	if err := l.runtime.back.SetSamplingBicubic(v); err != nil {
 		return err
 	}
 	l.SamplingBicubic = v
@@ -341,10 +341,10 @@ func (l *Layer) SetSamplingBicubic(v bool) error {
 //   FrameBlendEnabled=true to have any visible effect
 // @alias       pixel motion,frame mix,帧混合模式,像素运动
 func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetFrameBlendPixelMotion(v); err != nil {
+	if err := l.runtime.back.SetFrameBlendPixelMotion(v); err != nil {
 		return err
 	}
 	l.FrameBlendPixelMotion = v
@@ -364,10 +364,10 @@ func (l *Layer) SetFrameBlendPixelMotion(v bool) error {
 // @boundary    length-preserving, a single byte at ldta offset 0x63
 // @alias       blending mode,混合模式,叠加模式,blend mode
 func (l *Layer) SetBlendingMode(m BlendingMode) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetBlendingMode(m); err != nil {
+	if err := l.runtime.back.SetBlendingMode(m); err != nil {
 		return err
 	}
 	l.BlendingMode = m
@@ -388,10 +388,10 @@ func (l *Layer) SetBlendingMode(m BlendingMode) error {
 //   auto-migrates classic track mattes to the explicit form on load
 // @alias       track matte,matte type,遮罩,轨道遮罩,alpha matte,luma matte
 func (l *Layer) SetTrackMatte(t TrackMatteType) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetTrackMatte(t); err != nil {
+	if err := l.runtime.back.SetTrackMatte(t); err != nil {
 		return err
 	}
 	l.TrackMatte = t
@@ -411,10 +411,10 @@ func (l *Layer) SetTrackMatte(t TrackMatteType) error {
 // @boundary    length-preserving, a single byte at ldta offset 0x3D
 // @alias       label,label color,标签,颜色标签,时间线颜色
 func (l *Layer) SetLabel(index uint8) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetLabel(index); err != nil {
+	if err := l.runtime.back.SetLabel(index); err != nil {
 		return err
 	}
 	l.Label = index
@@ -431,10 +431,10 @@ func (l *Layer) SetLabel(index uint8) error {
 // @boundary    length-preserving, a big-endian uint16 at ldta offset 0x04
 // @alias       quality,render quality,渲染质量,线框,草图,最佳质量
 func (l *Layer) SetQuality(q LayerQuality) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetQuality(q); err != nil {
+	if err := l.runtime.back.SetQuality(q); err != nil {
 		return err
 	}
 	l.Quality = q
@@ -457,18 +457,18 @@ func (l *Layer) SetQuality(q LayerQuality) error {
 // @boundary    length-preserving, a 4-byte field at ldta offset 0x84
 // @alias       parent,parent layer,父图层,父级,layer parenting
 func (l *Layer) SetParent(parentID uint32) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
 	if parentID != 0 && parentID == l.ID {
 		return fmt.Errorf("layer %q: self-parenting (parentID == own ID = %d) not allowed", l.Name, l.ID)
 	}
-	if parentID != 0 && l.comp != nil {
-		if l.comp.LayerByID(parentID) == nil {
-			return fmt.Errorf("layer %q: parentID %d not found in comp %q", l.Name, parentID, l.comp.Name)
+	if parentID != 0 && l.runtime.comp != nil {
+		if l.runtime.comp.LayerByID(parentID) == nil {
+			return fmt.Errorf("layer %q: parentID %d not found in comp %q", l.Name, parentID, l.runtime.comp.Name)
 		}
 	}
-	if err := l.back.SetParent(parentID); err != nil {
+	if err := l.runtime.back.SetParent(parentID); err != nil {
 		return err
 	}
 	l.ParentID = parentID
@@ -493,16 +493,16 @@ func (l *Layer) SetParent(parentID uint32) error {
 // @boundary    length-preserving, a 4-byte field at ldta offset 0x28
 // @alias       source,source id,footage source,替换素材,层来源
 func (l *Layer) SetSource(sourceID uint32) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if sourceID != 0 && l.comp != nil && l.comp.proj != nil {
-		p := l.comp.proj
+	if sourceID != 0 && l.runtime.comp != nil && l.runtime.comp.proj != nil {
+		p := l.runtime.comp.proj
 		if p.CompositionByID(sourceID) == nil && !footageWithID(p, sourceID) {
 			return fmt.Errorf("layer %q: sourceID %d not found in project items", l.Name, sourceID)
 		}
 	}
-	if err := l.back.SetSource(sourceID); err != nil {
+	if err := l.runtime.back.SetSource(sourceID); err != nil {
 		return err
 	}
 	l.SourceID = sourceID
@@ -536,10 +536,10 @@ func footageWithID(p *Project, id uint32) bool {
 //   spread across ldta offsets 0x25 and 0x26
 // @alias       auto orient,自动旋转,沿路径旋转,朝向摄像机
 func (l *Layer) SetAutoOrient(t AutoOrientType) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetAutoOrient(t); err != nil {
+	if err := l.runtime.back.SetAutoOrient(t); err != nil {
 		return err
 	}
 	l.AutoOrient = t
@@ -556,10 +556,10 @@ func (l *Layer) SetAutoOrient(t AutoOrientType) error {
 // @boundary    length-preserving, a single byte at ldta offset 0x67
 // @alias       preserve transparency,保留透明度,alpha preservation
 func (l *Layer) SetPreserveTransparency(v bool) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetPreserveTransparency(v); err != nil {
+	if err := l.runtime.back.SetPreserveTransparency(v); err != nil {
 		return err
 	}
 	l.PreserveTransparency = v
@@ -586,10 +586,10 @@ func (l *Layer) SetPreserveTransparency(v bool) error {
 //   offsets 0x0C/0x10; negative values (pre-roll) are supported
 // @alias       start time,开始时间,图层入点,layer offset
 func (l *Layer) SetStartTime(seconds float64) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetStartTime(seconds); err != nil {
+	if err := l.runtime.back.SetStartTime(seconds); err != nil {
 		return err
 	}
 	l.StartTime = l.readLdtaFrac(0x0C)
@@ -608,10 +608,10 @@ func (l *Layer) SetStartTime(seconds float64) error {
 //   offsets 0x14/0x18
 // @alias       in point,入点,开始帧,trim start
 func (l *Layer) SetInPoint(seconds float64) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetInPoint(seconds); err != nil {
+	if err := l.runtime.back.SetInPoint(seconds); err != nil {
 		return err
 	}
 	l.recomputeDurationFromLdta()
@@ -630,10 +630,10 @@ func (l *Layer) SetInPoint(seconds float64) error {
 //   offsets 0x1C/0x20
 // @alias       out point,出点,结束帧,trim end
 func (l *Layer) SetOutPoint(seconds float64) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetOutPoint(seconds); err != nil {
+	if err := l.runtime.back.SetOutPoint(seconds); err != nil {
 		return err
 	}
 	l.recomputeDurationFromLdta()
@@ -644,11 +644,11 @@ func (l *Layer) SetOutPoint(seconds float64) error {
 // updates `Layer.Duration`. Called by SetInPoint / SetOutPoint so the
 // in-memory Duration stays consistent with the underlying bytes.
 func (l *Layer) recomputeDurationFromLdta() {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return
 	}
-	in, okIn := l.back.LdtaFrac(0x14)
-	out, okOut := l.back.LdtaFrac(0x1C)
+	in, okIn := l.runtime.back.LdtaFrac(0x14)
+	out, okOut := l.runtime.back.LdtaFrac(0x1C)
 	if !okIn || !okOut {
 		return
 	}
@@ -672,13 +672,13 @@ func (l *Layer) recomputeDurationFromLdta() {
 // @incident    layer-setstretch-ae-recomputes-span
 // @alias       stretch,time stretch,速度,时间拉伸,慢动作,快放
 func (l *Layer) SetStretch(ratio float64) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetStretch(ratio); err != nil {
+	if err := l.runtime.back.SetStretch(ratio); err != nil {
 		return err
 	}
-	if v, ok := l.back.StretchFrac(); ok {
+	if v, ok := l.runtime.back.StretchFrac(); ok {
 		l.Stretch = v
 	}
 	return nil
@@ -698,10 +698,10 @@ func (l *Layer) SetStretch(ratio float64) error {
 //   replaced wholesale and ancestor LIST sizes are recomputed on write
 // @alias       layer name,图层名,重命名,rename layer
 func (l *Layer) SetName(newName string) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no Utf8 name chunk to mutate", l.Name)
 	}
-	if err := l.back.SetName(newName); err != nil {
+	if err := l.runtime.back.SetName(newName); err != nil {
 		return err
 	}
 	l.Name = newName
@@ -726,10 +726,10 @@ func (l *Layer) SetName(newName string) error {
 // @incident    layer-setcomment-cmta-append-position
 // @alias       comment,注释,备注,layer comment,图层注释
 func (l *Layer) SetComment(comment string) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no chunk backrefs (built outside parser?)", l.Name)
 	}
-	if err := l.back.SetComment(comment); err != nil {
+	if err := l.runtime.back.SetComment(comment); err != nil {
 		return err
 	}
 	l.Comment = comment
@@ -764,18 +764,18 @@ func (l *Layer) SetComment(comment string) error {
 //   compatibility check, so a two-version gate is not reachable
 // @alias       track matte layer,matte source,遮罩来源,轨道遮罩图层
 func (l *Layer) SetTrackMatteLayer(sourceID uint32, mode TrackMatteType) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
 	if sourceID != 0 && sourceID == l.ID {
 		return fmt.Errorf("layer %q: self-matte (sourceID == own ID = %d) not allowed", l.Name, l.ID)
 	}
-	if sourceID != 0 && l.comp != nil {
-		if l.comp.LayerByID(sourceID) == nil {
-			return fmt.Errorf("layer %q: sourceID %d not found in comp %q", l.Name, sourceID, l.comp.Name)
+	if sourceID != 0 && l.runtime.comp != nil {
+		if l.runtime.comp.LayerByID(sourceID) == nil {
+			return fmt.Errorf("layer %q: sourceID %d not found in comp %q", l.Name, sourceID, l.runtime.comp.Name)
 		}
 	}
-	if err := l.back.SetTrackMatteLayer(sourceID, mode); err != nil {
+	if err := l.runtime.back.SetTrackMatteLayer(sourceID, mode); err != nil {
 		return err
 	}
 	l.TrackMatteLayerID = sourceID
@@ -813,10 +813,10 @@ func (l *Layer) ClearTrackMatteLayer() error {
 // @boundary    length-preserving, a big-endian uint32 at ldta offset 0x88
 // @alias       light kind,light type,灯光类型,平行光,点光源,聚光灯,环境光
 func (l *Layer) SetLightKind(k LightKind) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
-	if err := l.back.SetLightKind(k); err != nil {
+	if err := l.runtime.back.SetLightKind(k); err != nil {
 		return err
 	}
 	l.LightKind = k
@@ -841,14 +841,14 @@ func (l *Layer) SetLightKind(k LightKind) error {
 //   only applies to environment lights on newer AE versions
 // @alias       light source,environment light,环境光源,灯光来源
 func (l *Layer) SetLightSource(target *Layer) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no ldta chunk", l.Name)
 	}
 	if l.Type != LayerTypeLight {
 		return fmt.Errorf("layer %q: SetLightSource only valid for Light layers (Type=%q)", l.Name, l.Type)
 	}
 	if target == nil {
-		if err := l.back.SetLightSource(nil); err != nil {
+		if err := l.runtime.back.SetLightSource(nil); err != nil {
 			return err
 		}
 		l.SourceID = codec.LightSourceUndefined
@@ -860,7 +860,7 @@ func (l *Layer) SetLightSource(target *Layer) error {
 	if target.ID == 0 {
 		return fmt.Errorf("layer %q: SetLightSource target has zero ID", l.Name)
 	}
-	if l.comp != nil && target.comp != nil && target.comp != l.comp {
+	if l.runtime.comp != nil && target.runtime.comp != nil && target.runtime.comp != l.runtime.comp {
 		return fmt.Errorf("layer %q: SetLightSource target must be in same composition", l.Name)
 	}
 	if target.Type == LayerTypeLight || target.Type == LayerTypeCamera {
@@ -869,7 +869,7 @@ func (l *Layer) SetLightSource(target *Layer) error {
 	if target.Is3D {
 		return fmt.Errorf("layer %q: SetLightSource target cannot be a 3D layer", l.Name)
 	}
-	if err := l.back.SetLightSource(target); err != nil {
+	if err := l.runtime.back.SetLightSource(target); err != nil {
 		return err
 	}
 	l.SourceID = target.ID
@@ -900,19 +900,19 @@ func (l *Layer) SetLightSource(target *Layer) error {
 //   Essential Properties media-replacement slot or the call errors
 // @alias       alternate source,media replacement,素材替换,动态图形模板,essential properties,EG 替换
 func (l *Layer) SetAlternateSource(item AVItem) error {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return fmt.Errorf("layer %q: no Essential Properties media-replacement slot (call addToMotionGraphicsTemplateAs in AE first)", l.Name)
 	}
 	var newID uint32
 	if item != nil {
 		newID = item.ItemID()
 	}
-	if newID != 0 && l.comp != nil && l.comp.proj != nil {
-		if l.comp.proj.AVItemByID(newID) == nil {
+	if newID != 0 && l.runtime.comp != nil && l.runtime.comp.proj != nil {
+		if l.runtime.comp.proj.AVItemByID(newID) == nil {
 			return fmt.Errorf("layer %q: alternate source item id %d not in project", l.Name, newID)
 		}
 	}
-	if err := l.back.SetAlternateSource(item); err != nil {
+	if err := l.runtime.back.SetAlternateSource(item); err != nil {
 		return err
 	}
 	l.AlternateSourceID = newID
@@ -966,8 +966,8 @@ func (l *Layer) SetText(newText string) error {
 	if l.TextSource == nil || l.TextSourceRaw == nil {
 		return fmt.Errorf("layer %q: not a text layer (or text source failed to decode)", l.Name)
 	}
-	if l.back != nil {
-		if err := l.back.SetText(newText); err != nil {
+	if l.runtime.back != nil {
+		if err := l.runtime.back.SetText(newText); err != nil {
 			return fmt.Errorf("layer %q: %w", l.Name, err)
 		}
 		l.resyncTextSource()

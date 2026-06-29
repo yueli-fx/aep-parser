@@ -32,17 +32,17 @@ const (
 // nil for layers built outside the parser. The root has empty MatchName /
 // Name; its Children are the named top-level groups AE writes under the
 // Layr (Transform, Mask Parade, Effect Parade, etc.).
-func (l *Layer) PropertyTree() *AEPropertyGroup { return l.propertyTree }
+func (l *Layer) PropertyTree() *AEPropertyGroup { return l.propertyRuntime.tree }
 
 // PropertyGroupByMatchName returns the top-level subgroup of the layer's
 // property tree whose match-name equals name. Equivalent to
 // `l.PropertyTree().Group(name)`. Returns nil when the layer has no tree
 // or the named subgroup isn't present.
 func (l *Layer) PropertyGroupByMatchName(matchName string) *AEPropertyGroup {
-	if l.propertyTree == nil {
+	if l.propertyRuntime.tree == nil {
 		return nil
 	}
-	return l.propertyTree.Group(matchName)
+	return l.propertyRuntime.tree.Group(matchName)
 }
 
 // PropertyByPath walks the property hierarchy following each match-name
@@ -54,10 +54,10 @@ func (l *Layer) PropertyGroupByMatchName(matchName string) *AEPropertyGroup {
 //
 //	pos := layer.PropertyByPath("ADBE Transform Group", "ADBE Position")
 func (l *Layer) PropertyByPath(matchNames ...string) *Property {
-	if l.propertyTree == nil {
+	if l.propertyRuntime.tree == nil {
 		return nil
 	}
-	return l.propertyTree.PropertyByPath(matchNames...)
+	return l.propertyRuntime.tree.PropertyByPath(matchNames...)
 }
 
 // TransformGroup returns the layer's "ADBE Transform Group" subgroup, or

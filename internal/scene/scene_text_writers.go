@@ -20,10 +20,10 @@ import "fmt"
 // Layer.TextSource from the (possibly re-spliced) btds chunk bytes.
 // Called after a back-side splice so scene reads stay accurate.
 func (l *Layer) resyncTextSource() {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return
 	}
-	newRaw := l.back.BtdsData()
+	newRaw := l.runtime.back.BtdsData()
 	if newRaw == nil {
 		return
 	}
@@ -68,7 +68,7 @@ func (l *Layer) SetRunFontSize(runIdx int, sizePts float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunFontSize(runIdx, sizePts); err != nil {
+	if err := l.runtime.back.SetRunFontSize(runIdx, sizePts); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -92,7 +92,7 @@ func (l *Layer) SetRunTracking(runIdx int, tracking float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunTracking(runIdx, tracking); err != nil {
+	if err := l.runtime.back.SetRunTracking(runIdx, tracking); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -118,7 +118,7 @@ func (l *Layer) SetRunBaselineShift(runIdx int, shift float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunBaselineShift(runIdx, shift); err != nil {
+	if err := l.runtime.back.SetRunBaselineShift(runIdx, shift); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -147,7 +147,7 @@ func (l *Layer) SetRunLeading(runIdx int, leading float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunLeading(runIdx, leading); err != nil {
+	if err := l.runtime.back.SetRunLeading(runIdx, leading); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -173,7 +173,7 @@ func (l *Layer) SetRunAutoLeading(runIdx int, auto bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunAutoLeading(runIdx, auto); err != nil {
+	if err := l.runtime.back.SetRunAutoLeading(runIdx, auto); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -204,7 +204,7 @@ func (l *Layer) SetRunFontIndex(runIdx, fontIdx int) error {
 	if l.TextSource != nil && (fontIdx < 0 || fontIdx >= len(l.TextSource.Fonts)) {
 		return fmt.Errorf("layer %q: font index %d out of range [0,%d)", l.Name, fontIdx, len(l.TextSource.Fonts))
 	}
-	if err := l.back.SetRunFontIndex(runIdx, fontIdx); err != nil {
+	if err := l.runtime.back.SetRunFontIndex(runIdx, fontIdx); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -228,7 +228,7 @@ func (l *Layer) SetRunFauxBold(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunFauxBold(runIdx, on); err != nil {
+	if err := l.runtime.back.SetRunFauxBold(runIdx, on); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -252,7 +252,7 @@ func (l *Layer) SetRunFauxItalic(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunFauxItalic(runIdx, on); err != nil {
+	if err := l.runtime.back.SetRunFauxItalic(runIdx, on); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -279,7 +279,7 @@ func (l *Layer) SetRunHorizontalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunHorizontalScale(runIdx, scale); err != nil {
+	if err := l.runtime.back.SetRunHorizontalScale(runIdx, scale); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -306,7 +306,7 @@ func (l *Layer) SetRunVerticalScale(runIdx int, scale float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunVerticalScale(runIdx, scale); err != nil {
+	if err := l.runtime.back.SetRunVerticalScale(runIdx, scale); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -332,7 +332,7 @@ func (l *Layer) SetRunTsume(runIdx int, tsume float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunTsume(runIdx, tsume); err != nil {
+	if err := l.runtime.back.SetRunTsume(runIdx, tsume); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -357,7 +357,7 @@ func (l *Layer) SetRunFillColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunFillColor(runIdx, rgba); err != nil {
+	if err := l.runtime.back.SetRunFillColor(runIdx, rgba); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -382,7 +382,7 @@ func (l *Layer) SetRunStrokeColor(runIdx int, rgba [4]float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunStrokeColor(runIdx, rgba); err != nil {
+	if err := l.runtime.back.SetRunStrokeColor(runIdx, rgba); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -406,7 +406,7 @@ func (l *Layer) SetRunApplyStroke(runIdx int, apply bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunApplyStroke(runIdx, apply); err != nil {
+	if err := l.runtime.back.SetRunApplyStroke(runIdx, apply); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -432,7 +432,7 @@ func (l *Layer) SetRunStrokeWidth(runIdx int, width float64) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunStrokeWidth(runIdx, width); err != nil {
+	if err := l.runtime.back.SetRunStrokeWidth(runIdx, width); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -461,7 +461,7 @@ func (l *Layer) SetRunCapsOption(runIdx int, caps TextCapsOption) error {
 	if caps < TextCapsNormal || caps > TextCapsAllSmall {
 		return fmt.Errorf("layer %q: invalid TextCapsOption %d", l.Name, int(caps))
 	}
-	if err := l.back.SetRunCapsOption(runIdx, caps); err != nil {
+	if err := l.runtime.back.SetRunCapsOption(runIdx, caps); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -491,7 +491,7 @@ func (l *Layer) SetRunBaselineOption(runIdx int, base TextBaselineOption) error 
 	if base < TextBaselineNormal || base > TextBaselineSubscript {
 		return fmt.Errorf("layer %q: invalid TextBaselineOption %d", l.Name, int(base))
 	}
-	if err := l.back.SetRunBaselineOption(runIdx, base); err != nil {
+	if err := l.runtime.back.SetRunBaselineOption(runIdx, base); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -516,7 +516,7 @@ func (l *Layer) SetRunStrokeOverFill(runIdx int, over bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunStrokeOverFill(runIdx, over); err != nil {
+	if err := l.runtime.back.SetRunStrokeOverFill(runIdx, over); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -550,7 +550,7 @@ func (l *Layer) SetRunAutoKernType(runIdx int, kt TextAutoKernType) error {
 	if kt < TextAutoKernNoAuto || kt > TextAutoKernOptical {
 		return fmt.Errorf("layer %q: invalid TextAutoKernType %d", l.Name, int(kt))
 	}
-	if err := l.back.SetRunAutoKernType(runIdx, kt); err != nil {
+	if err := l.runtime.back.SetRunAutoKernType(runIdx, kt); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -577,7 +577,7 @@ func (l *Layer) SetRunNoBreak(runIdx int, on bool) error {
 	if err := l.validateRunIdx(runIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetRunNoBreak(runIdx, on); err != nil {
+	if err := l.runtime.back.SetRunNoBreak(runIdx, on); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -606,7 +606,7 @@ func (l *Layer) SetRunLineJoinType(runIdx int, j TextLineJoinType) error {
 	if j < TextLineJoinMiter || j > TextLineJoinBevel {
 		return fmt.Errorf("layer %q: invalid TextLineJoinType %d", l.Name, int(j))
 	}
-	if err := l.back.SetRunLineJoinType(runIdx, j); err != nil {
+	if err := l.runtime.back.SetRunLineJoinType(runIdx, j); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -635,7 +635,7 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 	if d < TextDigitSetDefault || d > TextDigitSetArabicRTL {
 		return fmt.Errorf("layer %q: invalid TextDigitSet %d", l.Name, int(d))
 	}
-	if err := l.back.SetRunDigitSet(runIdx, d); err != nil {
+	if err := l.runtime.back.SetRunDigitSet(runIdx, d); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -666,10 +666,10 @@ func (l *Layer) SetRunDigitSet(runIdx int, d TextDigitSet) error {
 //   rendering system; verified on both AE versions
 // @alias       add font,添加字体,font table,字体表,register font
 func (l *Layer) AddFont(fontName string) (int, error) {
-	if l.back == nil || l.TextSource == nil {
+	if l.runtime.back == nil || l.TextSource == nil {
 		return -1, fmt.Errorf("layer %q: not a text layer", l.Name)
 	}
-	idx, err := l.back.AddFont(fontName)
+	idx, err := l.runtime.back.AddFont(fontName)
 	if err != nil {
 		return -1, err
 	}
@@ -709,7 +709,7 @@ func (l *Layer) SetParagraphJustification(paraIdx int, j TextJustification) erro
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphJustification(paraIdx, j); err != nil {
+	if err := l.runtime.back.SetParagraphJustification(paraIdx, j); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -736,7 +736,7 @@ func (l *Layer) SetParagraphFirstLineIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphFirstLineIndent(paraIdx, v); err != nil {
+	if err := l.runtime.back.SetParagraphFirstLineIndent(paraIdx, v); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -763,7 +763,7 @@ func (l *Layer) SetParagraphStartIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphStartIndent(paraIdx, v); err != nil {
+	if err := l.runtime.back.SetParagraphStartIndent(paraIdx, v); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -790,7 +790,7 @@ func (l *Layer) SetParagraphEndIndent(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphEndIndent(paraIdx, v); err != nil {
+	if err := l.runtime.back.SetParagraphEndIndent(paraIdx, v); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -816,7 +816,7 @@ func (l *Layer) SetParagraphSpaceBefore(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphSpaceBefore(paraIdx, v); err != nil {
+	if err := l.runtime.back.SetParagraphSpaceBefore(paraIdx, v); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -842,7 +842,7 @@ func (l *Layer) SetParagraphSpaceAfter(paraIdx int, v float64) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphSpaceAfter(paraIdx, v); err != nil {
+	if err := l.runtime.back.SetParagraphSpaceAfter(paraIdx, v); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -867,7 +867,7 @@ func (l *Layer) SetParagraphAutoHyphenate(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphAutoHyphenate(paraIdx, on); err != nil {
+	if err := l.runtime.back.SetParagraphAutoHyphenate(paraIdx, on); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -897,7 +897,7 @@ func (l *Layer) SetParagraphLeadingType(paraIdx int, lt TextLeadingType) error {
 	if lt < TextLeadingRoman || lt > TextLeadingJapanese {
 		return fmt.Errorf("layer %q: invalid TextLeadingType %d", l.Name, int(lt))
 	}
-	if err := l.back.SetParagraphLeadingType(paraIdx, lt); err != nil {
+	if err := l.runtime.back.SetParagraphLeadingType(paraIdx, lt); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -924,7 +924,7 @@ func (l *Layer) SetParagraphHangingRoman(paraIdx int, on bool) error {
 	if err := l.validateParaIdx(paraIdx); err != nil {
 		return err
 	}
-	if err := l.back.SetParagraphHangingRoman(paraIdx, on); err != nil {
+	if err := l.runtime.back.SetParagraphHangingRoman(paraIdx, on); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -955,7 +955,7 @@ func (l *Layer) SetParagraphDirection(paraIdx int, d TextParagraphDirection) err
 	if d < TextDirectionLeftToRight || d > TextDirectionRightToLeft {
 		return fmt.Errorf("layer %q: invalid TextParagraphDirection %d", l.Name, int(d))
 	}
-	if err := l.back.SetParagraphDirection(paraIdx, d); err != nil {
+	if err := l.runtime.back.SetParagraphDirection(paraIdx, d); err != nil {
 		return err
 	}
 	l.resyncTextSource()
@@ -1003,7 +1003,7 @@ func (l *Layer) SetManualKerning(values []int) error {
 		return fmt.Errorf("layer %q: SetManualKerning: got %d values, want %d (one per existing char)",
 			l.Name, len(values), n)
 	}
-	if err := l.back.SetManualKerning(values); err != nil {
+	if err := l.runtime.back.SetManualKerning(values); err != nil {
 		return err
 	}
 	l.resyncTextSource()

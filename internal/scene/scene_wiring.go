@@ -15,8 +15,8 @@ func CompositionBack(c *Composition) CompositionWriter                    { retu
 func SetCompositionBack(c *Composition, w CompositionWriter)              { c.back = w }
 func CompositionProj(c *Composition) *Project                             { return c.proj }
 func SetCompositionProj(c *Composition, p *Project)                       { c.proj = p }
-func LayerBack(l *Layer) LayerWriter                                      { return l.back }
-func SetLayerBack(l *Layer, w LayerWriter)                                { l.back = w }
+func LayerBack(l *Layer) LayerWriter                                      { return l.runtime.back }
+func SetLayerBack(l *Layer, w LayerWriter)                                { l.runtime.back = w }
 func FootageBack(f *Footage) FootageWriter                                { return f.back }
 func SetFootageBack(f *Footage, w FootageWriter)                          { f.back = w }
 func PropertyBack(p *Property) PropertyWriter                             { return p.back }
@@ -68,16 +68,16 @@ func SetProjectTarget(p *Project, t AETarget)    { p.target = t }
 
 // --- Layer runtime-graph + owning-comp fields ------------------------------
 
-func LayerComp(l *Layer) *Composition                    { return l.comp }
-func SetLayerComp(l *Layer, c *Composition)              { l.comp = c }
-func LayerPropertyTree(l *Layer) *AEPropertyGroup        { return l.propertyTree }
-func SetLayerPropertyTree(l *Layer, g *AEPropertyGroup)  { l.propertyTree = g }
-func LayerShapeRootGroup(l *Layer) *VectorGroup          { return l.shapeRootGroup }
-func SetLayerShapeRootGroup(l *Layer, g *VectorGroup)    { l.shapeRootGroup = g }
-func LayerShapeTransform(l *Layer) *LayerTransform       { return l.shapeTransform }
-func SetLayerShapeTransform(l *Layer, t *LayerTransform) { l.shapeTransform = t }
-func LayerShapeDirty(l *Layer) bool                      { return l.shapeDirty }
-func SetLayerShapeDirty(l *Layer, v bool)                { l.shapeDirty = v }
+func LayerComp(l *Layer) *Composition                    { return l.runtime.comp }
+func SetLayerComp(l *Layer, c *Composition)              { l.runtime.comp = c }
+func LayerPropertyTree(l *Layer) *AEPropertyGroup        { return l.propertyRuntime.tree }
+func SetLayerPropertyTree(l *Layer, g *AEPropertyGroup)  { l.propertyRuntime.tree = g }
+func LayerShapeRootGroup(l *Layer) *VectorGroup          { return l.shapeRuntime.rootGroup }
+func SetLayerShapeRootGroup(l *Layer, g *VectorGroup)    { l.shapeRuntime.rootGroup = g }
+func LayerShapeTransform(l *Layer) *LayerTransform       { return l.shapeRuntime.transform }
+func SetLayerShapeTransform(l *Layer, t *LayerTransform) { l.shapeRuntime.transform = t }
+func LayerShapeDirty(l *Layer) bool                      { return l.shapeRuntime.dirty }
+func SetLayerShapeDirty(l *Layer, v bool)                { l.shapeRuntime.dirty = v }
 
 // --- Guide scene-owned block ------------------------------------------------
 

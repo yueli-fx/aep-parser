@@ -27,14 +27,14 @@ func (l *Layer) SetTrackMatteSource(src *Layer, mode TrackMatteType) error {
 	if src == nil {
 		return fmt.Errorf("SetTrackMatteSource: matte source is nil")
 	}
-	if l.comp == nil {
+	if l.runtime.comp == nil {
 		return fmt.Errorf("SetTrackMatteSource: layer %q has no comp back-ref (built outside parser?)", l.Name)
 	}
-	if src.comp == nil {
+	if src.runtime.comp == nil {
 		return fmt.Errorf("SetTrackMatteSource: matte source %q has no comp back-ref (built outside parser?)", src.Name)
 	}
-	if l.comp != src.comp {
-		return fmt.Errorf("SetTrackMatteSource: cross-comp matte not allowed — src in %q, layer in %q", src.comp.Name, l.comp.Name)
+	if l.runtime.comp != src.runtime.comp {
+		return fmt.Errorf("SetTrackMatteSource: cross-comp matte not allowed — src in %q, layer in %q", src.runtime.comp.Name, l.runtime.comp.Name)
 	}
 	if src.ID == l.ID {
 		return fmt.Errorf("SetTrackMatteSource: self-matte (sourceID == own ID = %d) not allowed", l.ID)

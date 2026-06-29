@@ -56,20 +56,20 @@ func (index compositionSourceIndex) footage(id uint32) *Footage {
 }
 
 func (index compositionSourceIndex) layerComposition(l *Layer) *Composition {
-	if l == nil || l.comp == nil || l.comp.proj == nil {
+	if l == nil || l.runtime.comp == nil || l.runtime.comp.proj == nil {
 		return nil
 	}
-	if l.comp.proj != index.proj {
+	if l.runtime.comp.proj != index.proj {
 		return l.SourceComposition()
 	}
 	return index.composition(l.SourceID)
 }
 
 func (index compositionSourceIndex) layerFootage(l *Layer) *Footage {
-	if l == nil || l.comp == nil || l.comp.proj == nil {
+	if l == nil || l.runtime.comp == nil || l.runtime.comp.proj == nil {
 		return nil
 	}
-	if l.comp.proj != index.proj {
+	if l.runtime.comp.proj != index.proj {
 		return l.SourceFootage()
 	}
 	return index.footage(l.SourceID)

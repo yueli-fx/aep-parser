@@ -87,34 +87,13 @@ type Layer struct {
 	// LF for Go-friendly multi-line strings.
 	Comment string
 
-	// comp is the owning composition, set by parseComposition after the
-	// layer is appended. Used by Parent() to resolve ParentID to a *Layer.
-	// Unexported to keep the public API minimal; nil for layers built
-	// without going through the parser.
-	comp *Composition
+	// runtime holds parser/serializer ownership state. Nil fields are
+	// expected for layers built outside parser/writeback paths.
+	runtime layerRuntimeState
 
-	// back holds the underlying RIFX chunk refs that power length-preserving
-	// writes. Nil for layers built outside the parser. See back_layer.go.
-	back LayerWriter
-
-	// shapeRootGroup is the runtime VectorGroup tree for LayerTypeShape
-	// layers. Populated by parseLayer (via hydrateShapeNodes) when a Layr
-	// is parsed; lazily initialized by WrapShapeLayer on first wrap of a
-	// freshly-built layer. The wrapper does NOT own this — mutations
-	// persist across wrap calls and feed the write-time sync.
-	shapeRootGroup *VectorGroup
-
-	// shapeTransform is the runtime Layer-level Transform for shape
-	// layers. Same ownership rules as shapeRootGroup.
-	shapeTransform *LayerTransform
-
-	// shapeDirty gates write-time sync (syncShapeLayerChunks). True for
-	// layers built via NewShapeLayer (the lowered chunk is initially a
-	// placeholder; sync must rewrite it with the user's mutations).
-	// False for parser-loaded layers (the on-disk chunks ARE the source
-	// of truth; re-lowering would lose content our hydrators don't yet
-	// understand — nested VectorGroup, ADBE Vector Transform Group, etc).
-	shapeDirty bool
+	// shapeRuntime holds the typed shape-layer runtime graph used by
+	// WrapShapeLayer and write-time sync.
+	shapeRuntime layerShapeRuntime
 
 	// AlternateSourceID is the AVItem id overriding this layer's source via
 	// the Essential Properties → Media Replacement workflow (AE 18+). 0
@@ -126,11 +105,38 @@ type Layer struct {
 	// AlternateSource() to resolve to the *Composition / *Footage item.
 	AlternateSourceID uint32
 
-	// propertyTree is the hierarchical mirror of the layer's tdgp property
-	// tree (P2c PropertyGroup hierarchy). Built by buildPropertyGroupTree
-	// alongside the flat Layer.Properties slice; nil for layers built
-	// outside the parser. See AEPropertyGroup in property_group.go.
-	propertyTree *AEPropertyGroup
+	// propertyRuntime holds the hierarchical tdgp mirror built alongside
+	// the flat Layer.Properties slice.
+	propertyRuntime layerPropertyRuntime
+}
+
+type layerRuntimeState struct {
+	// comp is the owning composition, set by parseComposition after the
+	// layer is appended. Used by Parent() to resolve ParentID to a *Layer.
+	comp *Composition
+
+	// back holds the underlying RIFX chunk refs that power length-preserving
+	// writes. Nil for layers built outside the parser. See back_layer.go.
+	back LayerWriter
+}
+
+type layerShapeRuntime struct {
+	// rootGroup is the runtime VectorGroup tree for LayerTypeShape layers.
+	// Populated by parseLayer/hydrateShapeNodes; lazily initialized by
+	// WrapShapeLayer. The wrapper does not own this state.
+	rootGroup *VectorGroup
+
+	// transform is the runtime Layer-level Transform for shape layers.
+	transform *LayerTransform
+
+	// dirty gates write-time sync. True for layers built via NewShapeLayer;
+	// false for parser-loaded layers unless the typed shape API is used.
+	dirty bool
+}
+
+type layerPropertyRuntime struct {
+	// tree is the hierarchical mirror of the layer's tdgp property tree.
+	tree *AEPropertyGroup
 }
 
 // Parent returns the layer's parent layer, or nil if this layer has no
@@ -140,10 +146,10 @@ type Layer struct {
 // lookup is not performed. Returns the immediate parent only — call
 // Parent() on the result to walk the chain.
 func (l *Layer) Parent() *Layer {
-	if l.comp == nil {
+	if l.runtime.comp == nil {
 		return nil
 	}
-	return l.comp.LayerByID(l.ParentID)
+	return l.runtime.comp.LayerByID(l.ParentID)
 }
 
 // SourceComposition returns the composition this layer references as its
@@ -153,10 +159,10 @@ func (l *Layer) Parent() *Layer {
 // owning comp/project wired up). Use Project.CompositionByID directly for
 // arbitrary lookups.
 func (l *Layer) SourceComposition() *Composition {
-	if l.comp == nil || l.comp.proj == nil {
+	if l.runtime.comp == nil || l.runtime.comp.proj == nil {
 		return nil
 	}
-	return l.comp.proj.CompositionByID(l.SourceID)
+	return l.runtime.comp.proj.CompositionByID(l.SourceID)
 }
 
 // SourceFootage returns the footage item this layer references as its
@@ -164,10 +170,10 @@ func (l *Layer) SourceComposition() *Composition {
 // is a composition / no source / outside the parser. Use Project.FootageByName
 // or iterate Project.Footage for arbitrary lookups.
 func (l *Layer) SourceFootage() *Footage {
-	if l.comp == nil || l.comp.proj == nil || l.SourceID == 0 {
+	if l.runtime.comp == nil || l.runtime.comp.proj == nil || l.SourceID == 0 {
 		return nil
 	}
-	for _, f := range l.comp.proj.Footage {
+	for _, f := range l.runtime.comp.proj.Footage {
 		if f.ID == l.SourceID {
 			return f
 		}
@@ -187,10 +193,10 @@ func (l *Layer) SourceFootage() *Footage {
 // Pair with TrackMatte (the matte mode at ldta @0x6B). If TrackMatte
 // is None, the result of this call is meaningless even when non-nil.
 func (l *Layer) TrackMatteLayer() *Layer {
-	if l.comp == nil || l.TrackMatteLayerID == 0 {
+	if l.runtime.comp == nil || l.TrackMatteLayerID == 0 {
 		return nil
 	}
-	return l.comp.LayerByID(l.TrackMatteLayerID)
+	return l.runtime.comp.LayerByID(l.TrackMatteLayerID)
 }
 
 // Property match-names for the five standard Transform properties.
@@ -257,11 +263,11 @@ type ShapeLayer struct {
 // initializes the runtime shape state on the Layer itself so all wrappers of
 // the same Layer share the same state — the wrapper is a thin façade.
 func WrapShapeLayer(layer *Layer) *ShapeLayer {
-	if layer.shapeRootGroup == nil {
-		layer.shapeRootGroup = NewVectorGroup()
+	if layer.shapeRuntime.rootGroup == nil {
+		layer.shapeRuntime.rootGroup = NewVectorGroup()
 	}
-	if layer.shapeTransform == nil {
-		layer.shapeTransform = NewLayerTransform()
+	if layer.shapeRuntime.transform == nil {
+		layer.shapeRuntime.transform = NewLayerTransform()
 	}
 	// WrapShapeLayer is the opt-in: callers signal "I'm going to use the
 	// typed mutation APIs (RootGroup / Transform)". Mark dirty so write-time
@@ -270,35 +276,35 @@ func WrapShapeLayer(layer *Layer) *ShapeLayer {
 	// unaffected. Caveat: re-lowering loses on-disk content the typed
 	// hydration doesn't preserve (unsupported shape kinds, per-group
 	// transforms with non-default values, opaque material settings).
-	layer.shapeDirty = true
+	layer.shapeRuntime.dirty = true
 	return &ShapeLayer{Layer: layer}
 }
 
 // RootGroup returns the default RootGroup. Newly attached nodes go to the
 // end of `RootGroup().Children` (top of render stack).
-func (s *ShapeLayer) RootGroup() *VectorGroup { return s.shapeRootGroup }
+func (s *ShapeLayer) RootGroup() *VectorGroup { return s.shapeRuntime.rootGroup }
 
 // Transform returns the typed Layer-level Transform surface.
-func (s *ShapeLayer) Transform() *LayerTransform { return s.shapeTransform }
+func (s *ShapeLayer) Transform() *LayerTransform { return s.shapeRuntime.transform }
 
 // AnchorPoint is shorthand for s.Transform().AnchorPoint().
 func (s *ShapeLayer) AnchorPoint() *PropertyStream[[2]float64] {
-	return s.shapeTransform.anchorPoint
+	return s.shapeRuntime.transform.anchorPoint
 }
 
 // Position is shorthand for s.Transform().Position(). ShapeLayer is
 // currently 2D-only (a future 3D ShapeLayer would be a separate type);
 // returns the 2D stream.
-func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.shapeTransform.position }
+func (s *ShapeLayer) Position() *PropertyStream[[2]float64] { return s.shapeRuntime.transform.position }
 
 // Scale is shorthand for s.Transform().Scale().
-func (s *ShapeLayer) Scale() *PropertyStream[[2]float64] { return s.shapeTransform.scale }
+func (s *ShapeLayer) Scale() *PropertyStream[[2]float64] { return s.shapeRuntime.transform.scale }
 
 // Rotation is shorthand for s.Transform().Rotation().
-func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.shapeTransform.rotation }
+func (s *ShapeLayer) Rotation() *PropertyStream[float64] { return s.shapeRuntime.transform.rotation }
 
 // Opacity is shorthand for s.Transform().Opacity().
-func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeTransform.opacity }
+func (s *ShapeLayer) Opacity() *PropertyStream[float64] { return s.shapeRuntime.transform.opacity }
 
 // LayerTransform is the typed wrapper for a layer's Transform property
 // group. ShapeLayer is currently 2D, so Position / Scale /

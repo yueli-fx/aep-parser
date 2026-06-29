@@ -44,7 +44,7 @@ ongoing state inconsistency, but also do not break callers for cosmetic moves.
 - [x] Confirmed persistent Project indexes are not safe with current public
       mutable slices.
 - [x] Added local source indexes for composition source views.
-- [ ] Group Layer private state.
+- [x] Group Layer private state.
 - [ ] Split shape graph / shape lowering files.
 - [ ] Design structured warning migration.
 

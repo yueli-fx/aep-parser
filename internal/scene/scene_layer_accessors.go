@@ -10,10 +10,10 @@ import (
 // layer has no ldta. Read-only access for debugging / RE tools — the
 // underlying byte slice is the live chunk data; do not mutate.
 func (l *Layer) LdtaRawBytes() []byte {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return nil
 	}
-	return l.back.LdtaRaw()
+	return l.runtime.back.LdtaRaw()
 }
 
 // This file adds typed convenience accessors for properties unique to
@@ -412,7 +412,7 @@ func (l *Layer) SetOpacity(v float64) error {
 // @returns     true when the media-replacement slot is present
 // @alias       alternate source slot,EG 媒体替换槽,essential properties
 func (l *Layer) HasAlternateSourceSlot() bool {
-	return l.back != nil && l.back.HasAlternateSourceSlot()
+	return l.runtime.back != nil && l.runtime.back.HasAlternateSourceSlot()
 }
 
 // AlternateSource returns the AVItem (*Composition or *Footage) used as
@@ -427,10 +427,10 @@ func (l *Layer) AlternateSource() AVItem {
 	if l.AlternateSourceID == 0 {
 		return nil
 	}
-	if l.comp == nil || l.comp.proj == nil {
+	if l.runtime.comp == nil || l.runtime.comp.proj == nil {
 		return nil
 	}
-	return l.comp.proj.AVItemByID(l.AlternateSourceID)
+	return l.runtime.comp.proj.AVItemByID(l.AlternateSourceID)
 }
 
 // LightSource returns the layer used as the environment-light source for
@@ -443,14 +443,14 @@ func (l *Layer) AlternateSource() AVItem {
 // when Type == LayerTypeLight and LightKind == LightKindAmbient (the
 // "Environment" light in AE 24+).
 func (l *Layer) LightSource() *Layer {
-	if l.Type != LayerTypeLight || l.comp == nil {
+	if l.Type != LayerTypeLight || l.runtime.comp == nil {
 		return nil
 	}
 	sid := l.SourceID
 	if sid == 0 || sid == codec.LightSourceUndefined {
 		return nil
 	}
-	return l.comp.LayerByID(sid)
+	return l.runtime.comp.LayerByID(sid)
 }
 
 // setScalarProperty centralizes the nil-check + delegation logic shared
@@ -466,10 +466,10 @@ func setScalarProperty(p *Property, layerName, propName string, v float64) error
 // Footage), or nil when SourceID is 0 or the layer was built outside
 // the parser.
 func (l *Layer) AVSource() AVItem {
-	if l.SourceID == 0 || l.comp == nil || l.comp.proj == nil {
+	if l.SourceID == 0 || l.runtime.comp == nil || l.runtime.comp.proj == nil {
 		return nil
 	}
-	return l.comp.proj.AVItemByID(l.SourceID)
+	return l.runtime.comp.proj.AVItemByID(l.SourceID)
 }
 
 // CanSetCollapseTransformation reports whether AE will let the user
@@ -531,8 +531,8 @@ func (l *Layer) ReplaceSource(target AVItem, fixExpressions bool) error {
 	if target == nil {
 		return fmt.Errorf("layer %q: target is nil", l.Name)
 	}
-	if fixExpressions && l.comp != nil && l.comp.proj != nil {
-		l.comp.proj.Warnings = append(l.comp.proj.Warnings,
+	if fixExpressions && l.runtime.comp != nil && l.runtime.comp.proj != nil {
+		l.runtime.comp.proj.Warnings = append(l.runtime.comp.proj.Warnings,
 			fmt.Sprintf("layer %q: fixExpressions=true not implemented (expressions not auto-updated)", l.Name))
 	}
 	return l.SetSource(target.ItemID())

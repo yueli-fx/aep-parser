@@ -60,20 +60,20 @@ func (l *Layer) OutPoint() float64 {
 // at the given offset (8 bytes total) and returns dividend/divisor.
 // Returns 0 when ldta is nil, too short, or the divisor is zero.
 func (l *Layer) readLdtaFrac(off int) float64 {
-	if l.back == nil {
+	if l.runtime.back == nil {
 		return 0
 	}
-	v, _ := l.back.LdtaFrac(off)
+	v, _ := l.runtime.back.LdtaFrac(off)
 	return v
 }
 
 // layerFps returns the layer's owning composition FrameRate, or 0 when
 // the layer was built outside the parser (no owning comp).
 func (l *Layer) layerFps() float64 {
-	if l.comp == nil {
+	if l.runtime.comp == nil {
 		return 0
 	}
-	return l.comp.FrameRate
+	return l.runtime.comp.FrameRate
 }
 
 // FrameInPoint returns the layer in-point as an integer frame count
