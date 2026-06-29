@@ -52,6 +52,10 @@
       {
         "name": "Source",
         "type": "av"
+      },
+      {
+        "name": "Title",
+        "type": "text"
       }
     ]
   }

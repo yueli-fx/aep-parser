@@ -265,7 +265,8 @@ Done:
   count-only smoke checks.
 - All recipe examples that author layers now include
   `expected_profile.layers[]` object identity checks. A recipe test guard fails
-  any future authored-layer example that omits the layer object contract.
+  any future authored-layer example that omits the layer object contract or
+  asserts fewer layer entries than it authored.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

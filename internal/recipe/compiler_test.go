@@ -108,36 +108,42 @@ func TestRecipeExamplesWithLayersAssertLayerProfiles(t *testing.T) {
 			if err := json.Unmarshal(raw, &doc); err != nil {
 				t.Fatalf("Unmarshal: %v", err)
 			}
-			if !recipeExampleHasAuthoredLayers(doc) {
+			authoredLayerCount := recipeExampleAuthoredLayerCount(doc)
+			if authoredLayerCount == 0 {
 				return
 			}
 			expectedProfile, ok := doc["expected_profile"].(map[string]any)
 			if !ok {
 				t.Fatal("expected_profile is required")
 			}
-			if _, ok := expectedProfile["layers"]; !ok {
+			expectedLayers, ok := expectedProfile["layers"].([]any)
+			if !ok {
 				t.Fatal("expected_profile.layers is required when recipe authors layers")
+			}
+			if len(expectedLayers) < authoredLayerCount {
+				t.Fatalf("expected_profile.layers has %d entries, want at least %d", len(expectedLayers), authoredLayerCount)
 			}
 		})
 	}
 }
 
-func recipeExampleHasAuthoredLayers(doc map[string]any) bool {
+func recipeExampleAuthoredLayerCount(doc map[string]any) int {
 	comps, ok := doc["comps"].([]any)
 	if !ok {
-		return false
+		return 0
 	}
+	var count int
 	for _, rawComp := range comps {
 		comp, ok := rawComp.(map[string]any)
 		if !ok {
 			continue
 		}
 		layers, ok := comp["layers"].([]any)
-		if ok && len(layers) > 0 {
-			return true
+		if ok {
+			count += len(layers)
 		}
 	}
-	return false
+	return count
 }
 
 func TestCompileToFileSetsCompBackgroundColor(t *testing.T) {

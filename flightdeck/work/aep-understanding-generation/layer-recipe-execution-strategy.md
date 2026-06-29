@@ -214,7 +214,8 @@ the property list.
 
 Shape, text/effect, transform, and comp-draft examples that author layers now
 also assert `expected_profile.layers[]`. The recipe test suite includes a guard
-that fails any authored-layer example missing an object-level layer contract.
+that fails any authored-layer example missing an object-level layer contract or
+asserting fewer layer entries than it authored.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
