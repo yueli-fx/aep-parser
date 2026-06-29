@@ -598,6 +598,18 @@ func TestValidateReportsCameraLayerCapability(t *testing.T) {
 	assertCapability(t, report, "NewCameraLayer")
 }
 
+func TestValidateReportsLightLayerCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "light",
+		Name: "Light",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "NewLightLayer")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

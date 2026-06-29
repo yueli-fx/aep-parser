@@ -1770,6 +1770,31 @@ Fifty-sixth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-seventh follow-up completed:
+
+- Layer recipes now support a high-level light layer type:
+  - `type: "light"` -> `NewLightLayer`
+- Boundary: this slice covers light creation only. Recipe transform validation
+  still requires 2-value vectors, so 3D light placement and light option
+  setters remain deferred to separate recipe slices.
+- `examples/recipes/minimal-light-layer.json` is a dedicated two-layer recipe:
+  a `Light` layer plus a visible text layer. See
+  `knowledge/layer/recipe-light-layer.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-layer.json -out
+    tmp_debug\recipes\minimal-light-layer.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_layer\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_layer\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
