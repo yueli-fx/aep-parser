@@ -1664,6 +1664,45 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.GradientStroke != nil {
+		stroke, err := group.AddGradientStroke()
+		if err != nil {
+			return err
+		}
+		if shape.GradientStroke.Type != "" {
+			typ, err := gradientType(shape.GradientStroke.Type)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetGradientType(typ); err != nil {
+				return err
+			}
+		}
+		if len(shape.GradientStroke.StartPoint) == 2 {
+			if err := stroke.SetStartPoint([2]float64{shape.GradientStroke.StartPoint[0], shape.GradientStroke.StartPoint[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.GradientStroke.EndPoint) == 2 {
+			if err := stroke.SetEndPoint([2]float64{shape.GradientStroke.EndPoint[0], shape.GradientStroke.EndPoint[1]}); err != nil {
+				return err
+			}
+		}
+		if shape.GradientStroke.Width != nil {
+			if err := stroke.SetStrokeWidth(*shape.GradientStroke.Width); err != nil {
+				return err
+			}
+		}
+		if len(shape.GradientStroke.ColorStops) > 0 {
+			stops, err := gradientColorStops(shape.GradientStroke.ColorStops)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetColorStops(stops); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Stroke != nil {
 		stroke, err := group.AddStroke()
 		if err != nil {

@@ -417,6 +417,33 @@ func TestValidateReportsShapeGradientFillHighlightCapabilities(t *testing.T) {
 	assertCapability(t, report, "GradientFillNode.SetHighlightAngle")
 }
 
+func TestValidateReportsShapeGradientStrokeCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientStroke = &recipe.GradientStrokeSpec{
+		Type:       "radial",
+		StartPoint: []float64{0, 0},
+		EndPoint:   []float64{240, 0},
+		Width:      ptr(18),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddGradientStroke")
+	assertCapability(t, report, "GradientStrokeNode.SetGradientType")
+	assertCapability(t, report, "GradientStrokeNode.SetStartPoint")
+	assertCapability(t, report, "GradientStrokeNode.SetEndPoint")
+	assertCapability(t, report, "GradientStrokeNode.SetStrokeWidth")
+	assertCapability(t, report, "GradientStrokeNode.SetColorStops")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1892,6 +1919,29 @@ func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_gradient_fill_highlight_length")
 	assertRefusal(t, report, "invalid_shape_gradient_fill_color_stops")
+}
+
+func TestValidateRejectsInvalidShapeGradientStroke(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.GradientStroke = &recipe.GradientStrokeSpec{
+		Type:       "conic",
+		StartPoint: []float64{0},
+		EndPoint:   []float64{240},
+		Width:      ptr(-1),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: -0.1, Color: []float64{255, 0}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_type")
+	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_width")
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_color_stops")
 }
 
 func TestValidateRejectsInvalidShapeStar(t *testing.T) {

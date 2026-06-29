@@ -2657,6 +2657,46 @@ Eighty-seventh follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-eighth follow-up completed:
+
+- Shape recipes now support:
+  - `shape.gradient_stroke` -> `VectorGroup.AddGradientStroke`
+  - `shape.gradient_stroke.type` -> `GradientStrokeNode.SetGradientType`
+  - `shape.gradient_stroke.start_point` -> `GradientStrokeNode.SetStartPoint`
+  - `shape.gradient_stroke.end_point` -> `GradientStrokeNode.SetEndPoint`
+  - `shape.gradient_stroke.width` -> `GradientStrokeNode.SetStrokeWidth`
+  - `shape.gradient_stroke.color_stops` -> `GradientStrokeNode.SetColorStops`
+- Boundary: `gradient_stroke.type` is `linear` or `radial`; start/end points are
+  two-value shape-local vectors; `width` is non-negative; `color_stops` requires
+  at least two stops with unit offsets/midpoints and RGB channels in recipe
+  0..255 space.
+- `examples/recipes/minimal-shape-gradient-stroke.json` is a dedicated one-layer
+  shape recipe with a radial red-to-blue gradient stroke. The embedded expected
+  profile checks `ADBE Vector Grad Type = 2`, `ADBE Vector Grad Start Pt =
+  [0,0]`, `ADBE Vector Grad End Pt = [240,0]`, and
+  `ADBE Vector Stroke Width = 18`.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled profile had no
+    `ADBE Vector Grad Type`, `VectorGroup.AddGradientStroke` was absent, and
+    invalid gradient stroke inputs were not refused.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-gradient-stroke.json -out
+    tmp_debug\recipes\minimal-shape-gradient-stroke.aep -json` returned valid,
+    reported the gradient stroke capabilities, and all embedded
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_gradient_stroke\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_gradient_stroke\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
