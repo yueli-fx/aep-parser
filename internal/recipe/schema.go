@@ -94,13 +94,14 @@ type VectorKeyframe struct {
 }
 
 type ExpectedProfile struct {
-	CompCount       *int                `json:"comp_count,omitempty"`
-	LayerCount      *int                `json:"layer_count,omitempty"`
-	TextLayerCount  *int                `json:"text_layer_count,omitempty"`
-	ShapeLayerCount *int                `json:"shape_layer_count,omitempty"`
-	Effects         []ExpectedEffect    `json:"effects,omitempty"`
-	Properties      []ExpectedProperty  `json:"properties,omitempty"`
-	TextStyles      []ExpectedTextStyle `json:"text_styles,omitempty"`
+	CompCount       *int                        `json:"comp_count,omitempty"`
+	LayerCount      *int                        `json:"layer_count,omitempty"`
+	TextLayerCount  *int                        `json:"text_layer_count,omitempty"`
+	ShapeLayerCount *int                        `json:"shape_layer_count,omitempty"`
+	Effects         []ExpectedEffect            `json:"effects,omitempty"`
+	Properties      []ExpectedProperty          `json:"properties,omitempty"`
+	TextStyles      []ExpectedTextStyle         `json:"text_styles,omitempty"`
+	Keyframes       []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
 }
 
 type ExpectedProperty struct {
@@ -122,6 +123,17 @@ type ExpectedTextStyle struct {
 	StrokeColor    []float64 `json:"stroke_color,omitempty"`
 	StrokeWidth    *float64  `json:"stroke_width,omitempty"`
 	Justification  string    `json:"justification,omitempty"`
+}
+
+type ExpectedKeyframedProperty struct {
+	LayerName string             `json:"layer_name"`
+	MatchName string             `json:"match_name"`
+	Keyframes []ExpectedKeyframe `json:"keyframes"`
+}
+
+type ExpectedKeyframe struct {
+	Time  float64 `json:"time"`
+	Value any     `json:"value,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -307,6 +319,30 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			addRefusal("invalid_expected_profile", stylePath+".justification", "justification must be left, right, or center")
 		}
 	}
+	for i, keyframed := range expected.Keyframes {
+		kfPropPath := fmt.Sprintf("expected_profile.keyframes[%d]", i)
+		if keyframed.LayerName == "" {
+			addRefusal("invalid_expected_profile", kfPropPath+".layer_name", "layer_name is required")
+		}
+		if keyframed.MatchName == "" {
+			addRefusal("invalid_expected_profile", kfPropPath+".match_name", "property match_name is required")
+		}
+		if len(keyframed.Keyframes) == 0 {
+			addRefusal("invalid_expected_profile", kfPropPath+".keyframes", "at least one keyframe is required")
+		}
+		for ki, kf := range keyframed.Keyframes {
+			kfPath := fmt.Sprintf("%s.keyframes[%d]", kfPropPath, ki)
+			if kf.Time < 0 {
+				addRefusal("invalid_expected_profile", kfPath+".time", "keyframe time must be non-negative")
+			}
+			if ki > 0 && kf.Time < keyframed.Keyframes[ki-1].Time {
+				addRefusal("invalid_expected_profile", kfPath+".time", "keyframes must be sorted by time")
+			}
+			if !validEffectParamValue(kf.Value) {
+				addRefusal("invalid_expected_profile", kfPath+".value", "expected keyframe value must be a number, boolean, or numeric array")
+			}
+		}
+	}
 }
 
 func validateLayer(layer Layer, layerPath string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
@@ -400,6 +436,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		kfPath := fmt.Sprintf("%s.transform.position_keyframes[%d]", layerPath, i)
 		if kf.Time < 0 || kf.Time > compDuration {
 			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be within comp duration")
+		}
+		if i > 0 && kf.Time < layer.Transform.PositionKeyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
 	}

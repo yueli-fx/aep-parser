@@ -240,7 +240,40 @@ Eighth follow-up completed:
     - metadata: status `ok`, AE `25.1x68`
     - PNG outputs: `f000000.png`, `f000060.png`, `f000120.png`
 
-Next generation work should broaden recipe coverage in small proven slices,
-starting with expression / keyframe coverage or additional shape filters. More
-text style fields can continue in the same pattern when the profile exposes
-them.
+Ninth follow-up completed:
+
+- Recipe embedded profile contracts now support `expected_profile.keyframes[]`
+  for property keyframe checks:
+  - lookup by `layer_name` + property `match_name`;
+  - checks keyframe count;
+  - checks each expected keyframe's time and value.
+- Recipe validation now rejects unsorted `transform.position_keyframes`, matching
+  the original schema rule that keyframes must be sorted by time.
+- `examples/recipes/minimal-text-shape.json` now animates the `Title` layer's
+  Position across three keyframes and asserts the parsed `ADBE Position`
+  keyframes in `expected_profile.keyframes[]`.
+- Note: recipe Position keyframes are authored as 2D `[x,y]`, while profile
+  `ADBE Position` keyframe values read back as 3D `[x,y,0]`; see
+  `knowledge/layer/recipe-position-keyframe-profile-3d.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-keyframes.aep -json` returned
+    valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_keyframes/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_keyframes/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
+Next generation work should broaden recipe coverage in small proven slices:
+additional transform keyframe channels already covered by `SetLayerTransform`
+gates, expression support, or shape filters. Do not start automated correction
+loops.

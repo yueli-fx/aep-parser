@@ -95,7 +95,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.ShapeLayerCount != nil ||
 		len(expected.Effects) > 0 ||
 		len(expected.Properties) > 0 ||
-		len(expected.TextStyles) > 0
+		len(expected.TextStyles) > 0 ||
+		len(expected.Keyframes) > 0
 }
 
 func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []ProfileCheck {
@@ -224,6 +225,29 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			path := stylePath + ".justification"
 			actual, ok := profileParagraphJustification(layer.Text.Paragraphs, expectedStyle.ParagraphIndex)
 			add(path, expectedStyle.Justification, actual, ok && strings.EqualFold(actual, expectedStyle.Justification))
+		}
+	}
+	for i, expectedKeyframes := range expected.Keyframes {
+		kfPropPath := fmt.Sprintf("expected_profile.keyframes[%d]", i)
+		prop := findProfileLayerProperty(prof, expectedKeyframes.LayerName, expectedKeyframes.MatchName)
+		if prop == nil {
+			add(kfPropPath, expectedKeyframes.MatchName, nil, false)
+			continue
+		}
+		add(kfPropPath+".count", len(expectedKeyframes.Keyframes), len(prop.Keyframes), len(prop.Keyframes) == len(expectedKeyframes.Keyframes))
+		for ki, expectedKF := range expectedKeyframes.Keyframes {
+			kfPath := fmt.Sprintf("%s.keyframes[%d]", kfPropPath, ki)
+			if ki >= len(prop.Keyframes) {
+				add(kfPath, expectedKF.Value, nil, false)
+				continue
+			}
+			actualKF := prop.Keyframes[ki]
+			timeOK := math.Abs(actualKF.Time-expectedKF.Time) < 1e-6
+			valueOK := profileValueEqual(expectedKF.Value, actualKF.Value)
+			add(kfPath, expectedKF.Value, actualKF.Value, timeOK && valueOK)
+			if !timeOK {
+				add(kfPath+".time", expectedKF.Time, actualKF.Time, false)
+			}
 		}
 	}
 	return checks

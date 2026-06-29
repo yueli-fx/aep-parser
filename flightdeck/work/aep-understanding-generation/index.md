@@ -130,14 +130,19 @@ Done:
   `expected_profile.text_styles[]` checks. The updated shape/text example
   passed `go test ./...`, `go vet ./...`, profile checks, and an AE 2025
   render oracle gate.
+- Recipe embedded profile contracts now support `expected_profile.keyframes[]`
+  for property keyframe count/time/value checks. The updated shape/text example
+  animates the title Position across three keyframes, passed `go test ./...`,
+  `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are expression / keyframe coverage or additional shape filters.
-  More text style fields can continue only when they are profile-visible. Do
-  not start automated correction loops.
+  candidates are additional transform keyframe channels already covered by
+  `SetLayerTransform` gates, expression support, or shape filters. More text
+  style fields can continue only when they are profile-visible. Do not start
+  automated correction loops.
 
 ## Open questions
 

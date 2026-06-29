@@ -388,6 +388,36 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].justification", true)
 }
 
+func TestCompileToFileChecksExpectedKeyframeProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.Position = nil
+	rec.Comps[0].Layers[0].Transform.PositionKeyframes = []recipe.VectorKeyframe{
+		{Time: 0, Value: []float64{900, 540}},
+		{Time: 1, Value: []float64{1020, 540}},
+	}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Keyframes: []recipe.ExpectedKeyframedProperty{{
+			LayerName: "Title",
+			MatchName: "ADBE Position",
+			Keyframes: []recipe.ExpectedKeyframe{
+				{Time: 0, Value: []float64{900, 540, 0}},
+				{Time: 1, Value: []float64{1020, 540, 0}},
+			},
+		}},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[0]", true)
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
+}
+
 func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {
 	t.Helper()
 	for _, param := range params {

@@ -49,6 +49,61 @@ func TestValidateRejectsOutOfRangeKeyframes(t *testing.T) {
 	assertRefusal(t, report, "keyframe_time_out_of_range")
 }
 
+func TestValidateRejectsUnsortedKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.PositionKeyframes = []recipe.VectorKeyframe{
+		{Time: 1, Value: []float64{960, 540}},
+		{Time: 0, Value: []float64{900, 540}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframes_not_sorted")
+}
+
+func TestValidateAcceptsExpectedKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Keyframes: []recipe.ExpectedKeyframedProperty{{
+			LayerName: "Title",
+			MatchName: "ADBE Position",
+			Keyframes: []recipe.ExpectedKeyframe{
+				{Time: 0, Value: []float64{900, 540}},
+				{Time: 1, Value: []float64{1020, 540}},
+			},
+		}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+}
+
+func TestValidateRejectsInvalidExpectedKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Keyframes: []recipe.ExpectedKeyframedProperty{{
+			LayerName: "",
+			MatchName: "",
+			Keyframes: []recipe.ExpectedKeyframe{
+				{Time: -1, Value: []float64{}},
+			},
+		}},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_expected_profile")
+}
+
 func TestValidateRefusesUnsupportedEffects(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{MatchName: "Third Party Magic"}}

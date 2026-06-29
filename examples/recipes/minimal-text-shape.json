@@ -30,7 +30,12 @@
           "transform": {
             "position": [960, 540],
             "scale": [100, 100],
-            "opacity": 100
+            "opacity": 100,
+            "position_keyframes": [
+              { "time": 0, "value": [900, 540] },
+              { "time": 2, "value": [960, 500] },
+              { "time": 4, "value": [1020, 540] }
+            ]
           }
         },
         {
@@ -105,6 +110,17 @@
         "stroke_color": [1, 0.12549019607843137, 0.25098039215686274, 1],
         "stroke_width": 8,
         "justification": "center"
+      }
+    ],
+    "keyframes": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Position",
+        "keyframes": [
+          { "time": 0, "value": [900, 540, 0] },
+          { "time": 2, "value": [960, 500, 0] },
+          { "time": 4, "value": [1020, 540, 0] }
+        ]
       }
     ]
   }
