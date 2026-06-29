@@ -240,6 +240,53 @@ func TestCompileToFileSetsLayerCommonSwitches(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerAdvancedSwitches(t *testing.T) {
+	rec := minimalRecipe()
+	layer := &rec.Comps[0].Layers[0]
+	layer.CollapseTransform = boolPtr(true)
+	layer.Is3D = boolPtr(true)
+	layer.IsAdjust = boolPtr(true)
+	layer.IsGuide = boolPtr(true)
+	layer.SamplingBicubic = boolPtr(true)
+	layer.FrameBlendPixelMotion = boolPtr(true)
+	layer.PreserveTransparency = boolPtr(true)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if !got.CollapseTransform {
+		t.Fatal("layer collapse_transform = false, want true")
+	}
+	if !got.Is3D {
+		t.Fatal("layer is_3d = false, want true")
+	}
+	if !got.IsAdjust {
+		t.Fatal("layer is_adjust = false, want true")
+	}
+	if !got.IsGuide {
+		t.Fatal("layer is_guide = false, want true")
+	}
+	if !got.SamplingBicubic {
+		t.Fatal("layer sampling_bicubic = false, want true")
+	}
+	if !got.FrameBlendPixelMotion {
+		t.Fatal("layer frame_blend_pixel_motion = false, want true")
+	}
+	if !got.PreserveTransparency {
+		t.Fatal("layer preserve_transparency = false, want true")
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

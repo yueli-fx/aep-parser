@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal layer advanced switches"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "collapse_transform": true,
+          "is_3d": true,
+          "is_adjust": true,
+          "is_guide": true,
+          "sampling_bicubic": true,
+          "frame_blend_enabled": true,
+          "frame_blend_pixel_motion": true,
+          "preserve_transparency": true,
+          "text": "Layer advanced switches",
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "text_layer_count": 1
+  }
+}

@@ -55,23 +55,30 @@ type CompMotionBlurSpec struct {
 }
 
 type Layer struct {
-	Type              string         `json:"type"`
-	Name              string         `json:"name"`
-	Label             *float64       `json:"label,omitempty"`
-	Comment           string         `json:"comment,omitempty"`
-	Visible           *bool          `json:"visible,omitempty"`
-	Solo              *bool          `json:"solo,omitempty"`
-	Locked            *bool          `json:"locked,omitempty"`
-	MotionBlur        *bool          `json:"motion_blur,omitempty"`
-	Shy               *bool          `json:"shy,omitempty"`
-	EffectsEnabled    *bool          `json:"effects_enabled,omitempty"`
-	AudioEnabled      *bool          `json:"audio_enabled,omitempty"`
-	FrameBlendEnabled *bool          `json:"frame_blend_enabled,omitempty"`
-	Text              string         `json:"text,omitempty"`
-	TextStyle         *TextStyleSpec `json:"text_style,omitempty"`
-	Shape             *ShapeSpec     `json:"shape,omitempty"`
-	Transform         Transform      `json:"transform,omitempty"`
-	Effects           []Effect       `json:"effects,omitempty"`
+	Type                  string         `json:"type"`
+	Name                  string         `json:"name"`
+	Label                 *float64       `json:"label,omitempty"`
+	Comment               string         `json:"comment,omitempty"`
+	Visible               *bool          `json:"visible,omitempty"`
+	Solo                  *bool          `json:"solo,omitempty"`
+	Locked                *bool          `json:"locked,omitempty"`
+	MotionBlur            *bool          `json:"motion_blur,omitempty"`
+	Shy                   *bool          `json:"shy,omitempty"`
+	EffectsEnabled        *bool          `json:"effects_enabled,omitempty"`
+	AudioEnabled          *bool          `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled     *bool          `json:"frame_blend_enabled,omitempty"`
+	CollapseTransform     *bool          `json:"collapse_transform,omitempty"`
+	Is3D                  *bool          `json:"is_3d,omitempty"`
+	IsAdjust              *bool          `json:"is_adjust,omitempty"`
+	IsGuide               *bool          `json:"is_guide,omitempty"`
+	SamplingBicubic       *bool          `json:"sampling_bicubic,omitempty"`
+	FrameBlendPixelMotion *bool          `json:"frame_blend_pixel_motion,omitempty"`
+	PreserveTransparency  *bool          `json:"preserve_transparency,omitempty"`
+	Text                  string         `json:"text,omitempty"`
+	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
+	Shape                 *ShapeSpec     `json:"shape,omitempty"`
+	Transform             Transform      `json:"transform,omitempty"`
+	Effects               []Effect       `json:"effects,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -686,6 +693,27 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.FrameBlendEnabled != nil {
 		recordCapability("Layer.SetFrameBlendEnabled", layerPath+".frame_blend_enabled")
+	}
+	if layer.CollapseTransform != nil {
+		recordCapability("Layer.SetCollapseTransform", layerPath+".collapse_transform")
+	}
+	if layer.Is3D != nil {
+		recordCapability("Layer.SetIs3D", layerPath+".is_3d")
+	}
+	if layer.IsAdjust != nil {
+		recordCapability("Layer.SetIsAdjust", layerPath+".is_adjust")
+	}
+	if layer.IsGuide != nil {
+		recordCapability("Layer.SetIsGuide", layerPath+".is_guide")
+	}
+	if layer.SamplingBicubic != nil {
+		recordCapability("Layer.SetSamplingBicubic", layerPath+".sampling_bicubic")
+	}
+	if layer.FrameBlendPixelMotion != nil {
+		recordCapability("Layer.SetFrameBlendPixelMotion", layerPath+".frame_blend_pixel_motion")
+	}
+	if layer.PreserveTransparency != nil {
+		recordCapability("Layer.SetPreserveTransparency", layerPath+".preserve_transparency")
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

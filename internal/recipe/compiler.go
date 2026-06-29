@@ -737,6 +737,41 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 				return fmt.Errorf("recipe: layer %q frame_blend_enabled: %w", spec.Name, err)
 			}
 		}
+		if spec.CollapseTransform != nil {
+			if err := layer.SetCollapseTransform(*spec.CollapseTransform); err != nil {
+				return fmt.Errorf("recipe: layer %q collapse_transform: %w", spec.Name, err)
+			}
+		}
+		if spec.Is3D != nil {
+			if err := layer.SetIs3D(*spec.Is3D); err != nil {
+				return fmt.Errorf("recipe: layer %q is_3d: %w", spec.Name, err)
+			}
+		}
+		if spec.IsAdjust != nil {
+			if err := layer.SetIsAdjust(*spec.IsAdjust); err != nil {
+				return fmt.Errorf("recipe: layer %q is_adjust: %w", spec.Name, err)
+			}
+		}
+		if spec.IsGuide != nil {
+			if err := layer.SetIsGuide(*spec.IsGuide); err != nil {
+				return fmt.Errorf("recipe: layer %q is_guide: %w", spec.Name, err)
+			}
+		}
+		if spec.SamplingBicubic != nil {
+			if err := layer.SetSamplingBicubic(*spec.SamplingBicubic); err != nil {
+				return fmt.Errorf("recipe: layer %q sampling_bicubic: %w", spec.Name, err)
+			}
+		}
+		if spec.FrameBlendPixelMotion != nil {
+			if err := layer.SetFrameBlendPixelMotion(*spec.FrameBlendPixelMotion); err != nil {
+				return fmt.Errorf("recipe: layer %q frame_blend_pixel_motion: %w", spec.Name, err)
+			}
+		}
+		if spec.PreserveTransparency != nil {
+			if err := layer.SetPreserveTransparency(*spec.PreserveTransparency); err != nil {
+				return fmt.Errorf("recipe: layer %q preserve_transparency: %w", spec.Name, err)
+			}
+		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
 			return fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
 		}

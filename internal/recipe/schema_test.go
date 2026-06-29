@@ -437,6 +437,28 @@ func TestValidateReportsLayerCommonSwitchCapabilities(t *testing.T) {
 	assertCapability(t, report, "Layer.SetFrameBlendEnabled")
 }
 
+func TestValidateReportsLayerAdvancedSwitchCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	layer := &rec.Comps[0].Layers[0]
+	layer.CollapseTransform = boolPtr(true)
+	layer.Is3D = boolPtr(true)
+	layer.IsAdjust = boolPtr(true)
+	layer.IsGuide = boolPtr(true)
+	layer.SamplingBicubic = boolPtr(true)
+	layer.FrameBlendPixelMotion = boolPtr(true)
+	layer.PreserveTransparency = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetCollapseTransform")
+	assertCapability(t, report, "Layer.SetIs3D")
+	assertCapability(t, report, "Layer.SetIsAdjust")
+	assertCapability(t, report, "Layer.SetIsGuide")
+	assertCapability(t, report, "Layer.SetSamplingBicubic")
+	assertCapability(t, report, "Layer.SetFrameBlendPixelMotion")
+	assertCapability(t, report, "Layer.SetPreserveTransparency")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

@@ -1516,6 +1516,42 @@ Forty-seventh follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-eighth follow-up completed:
+
+- Layer recipes now support advanced switches:
+  - `collapse_transform` -> `Layer.SetCollapseTransform`
+  - `is_3d` -> `Layer.SetIs3D`
+  - `is_adjust` -> `Layer.SetIsAdjust`
+  - `is_guide` -> `Layer.SetIsGuide`
+  - `sampling_bicubic` -> `Layer.SetSamplingBicubic`
+  - `frame_blend_pixel_motion` -> `Layer.SetFrameBlendPixelMotion`
+  - `preserve_transparency` -> `Layer.SetPreserveTransparency`
+- Boundary: these are length-preserving layer switches in `ldta`.
+  `frame_blend_pixel_motion` requires frame blending to have a visible effect,
+  so the dedicated recipe enables `frame_blend_enabled` too. `is_guide`
+  excludes the layer from rendered output, so the oracle PNGs are expected to
+  be black while still proving AE open/render acceptance. `markers_locked` is
+  intentionally excluded because its current capability verification is
+  `roundtrip`, not `ae-accept`.
+- `examples/recipes/minimal-layer-advanced-switches.json` is a dedicated
+  one-text-layer recipe covering all seven switches. See
+  `knowledge/layer/recipe-advanced-switches.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-advanced-switches.json -out
+    tmp_debug\recipes\minimal-layer-advanced-switches.aep -json` returned
+    valid and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_advanced_switches\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_advanced_switches\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
