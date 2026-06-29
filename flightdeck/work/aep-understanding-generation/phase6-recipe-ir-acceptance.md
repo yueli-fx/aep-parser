@@ -1373,6 +1373,33 @@ Forty-second follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-third follow-up completed:
+
+- Layer recipes now support `label`:
+  - integer `0..16` -> `Layer.SetLabel`
+- Capability reporting records:
+  - `Layer.SetLabel`
+- Boundary: layer labels are `ldta` item metadata at offset `0x3D`. The
+  current stable profile schema does not expose layer labels, so this slice
+  uses schema capability reporting, compiled AEP readback in tests, and AE
+  render/open acceptance for the dedicated example.
+- `examples/recipes/minimal-layer-label.json` is a dedicated one-text-layer
+  recipe with `label: 10`. See `knowledge/layer/recipe-label.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-label.json -out
+    tmp_debug\recipes\minimal-layer-label.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_label\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_label\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

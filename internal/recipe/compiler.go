@@ -687,6 +687,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 		return fmt.Errorf("recipe: unsupported layer type %q", spec.Type)
 	}
 	if layer != nil {
+		if spec.Label != nil {
+			if err := layer.SetLabel(uint8(*spec.Label)); err != nil {
+				return fmt.Errorf("recipe: layer %q label: %w", spec.Name, err)
+			}
+		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
 			return fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
 		}

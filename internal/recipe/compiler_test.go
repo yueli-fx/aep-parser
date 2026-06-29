@@ -113,6 +113,27 @@ func TestCompileToFileSetsCompComment(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerLabel(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Label = ptr(10)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].Layers[0].Label; got != 10 {
+		t.Fatalf("layer label = %d, want 10", got)
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

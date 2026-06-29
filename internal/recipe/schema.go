@@ -57,6 +57,7 @@ type CompMotionBlurSpec struct {
 type Layer struct {
 	Type      string         `json:"type"`
 	Name      string         `json:"name"`
+	Label     *float64       `json:"label,omitempty"`
 	Text      string         `json:"text,omitempty"`
 	TextStyle *TextStyleSpec `json:"text_style,omitempty"`
 	Shape     *ShapeSpec     `json:"shape,omitempty"`
@@ -623,6 +624,12 @@ func validateCompLabel(value float64, path string, addRefusal func(string, strin
 	}
 }
 
+func validateLayerLabel(value float64, path string, addRefusal func(string, string, string)) {
+	if value < 0 || value > 16 || !isWholeNumber(value) {
+		addRefusal("invalid_layer_label", path, "label must be an integer between 0 and 16")
+	}
+}
+
 func validateLayer(layer Layer, layerPath string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
 	switch layer.Type {
 	case "solid":
@@ -639,6 +646,10 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.Name == "" {
 		addRefusal("missing_layer_name", layerPath+".name", "layer name is required")
+	}
+	if layer.Label != nil {
+		recordCapability("Layer.SetLabel", layerPath+".label")
+		validateLayerLabel(*layer.Label, layerPath+".label", addRefusal)
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

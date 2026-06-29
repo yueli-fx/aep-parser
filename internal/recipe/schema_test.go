@@ -381,6 +381,15 @@ func TestValidateReportsCompCommentCapability(t *testing.T) {
 	assertCapability(t, report, "SetComment")
 }
 
+func TestValidateReportsLayerLabelCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Label = ptr(10)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetLabel")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
@@ -506,6 +515,18 @@ func TestValidateRejectsInvalidCompLabel(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_comp_label")
+}
+
+func TestValidateRejectsInvalidLayerLabel(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Label = ptr(17)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_layer_label")
 }
 
 func TestValidateRejectsInvalidCompWorkArea(t *testing.T) {
