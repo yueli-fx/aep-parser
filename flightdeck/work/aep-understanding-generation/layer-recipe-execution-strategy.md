@@ -58,7 +58,7 @@ flags, and refs.
 | Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
 | Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
 | Source refs | solid/precomp source layer creation | layer constructors / `Layer.SetSource` | `layers[].source_ref` | `expected_profile.layers[].source` / `source_kind` | L3 | done for solid footage source |
-| Masks | `layers[].masks[]` static path/name/mode/inverted/options | `AddMask` after Reopen plus `Mask.Set*` option setters | `layers[].masks[]` | `expected_profile.masks[]` | L3 | static + options done |
+| Masks | `layers[].masks[]` static path/name/mode/inverted/options/path keyframes | `AddMask` after Reopen plus `Mask.Set*` option setters and `SetMaskPathKeyframes` | `layers[].masks[]` | `expected_profile.masks[]` | L3 | static + options + path keyframes done |
 | Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | `expected_profile.layers[].parent` | L3 | done |
 | Classic matte refs | `track_matte` | `Layer.SetTrackMatte` | `layers[].flags.track_matte_name` / `matte_ref` | `expected_profile.layers[].track_matte` / `matte` | L3 | done |
 | Explicit matte refs | not recipe-owned yet | `Layer.SetTrackMatteSource` / `SetTrackMatteLayer` | `layers[].matte_ref` | planned when writer enters recipe scope | L3 AE2025-only | blocked |
@@ -237,8 +237,11 @@ setters, and asserts the parsed mask object with `expected_profile.masks[]`.
 The same baseline now also covers byte-level mask options: locked state,
 timeline color, motion-blur override, and feather-falloff mode. Mask
 opacity, feather, and expansion are now covered in the same recipe/profile
-family through stable mask setters. Mask path keyframes remain a separate
-future slice.
+family through stable mask setters. Mask path keyframes are also covered in the
+same baseline through `path_keyframes[]` authoring and
+`expected_profile.masks[].path_keyframes[]` count/time/vertex-count checks.
+Per-keyframe interpolation/ease and tangent detail remain future work only when
+the parser/profile can expose a defensible contract.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the

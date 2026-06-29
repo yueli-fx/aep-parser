@@ -96,18 +96,24 @@ type Layer struct {
 }
 
 type MaskSpec struct {
-	Name           string      `json:"name,omitempty"`
-	Mode           string      `json:"mode,omitempty"`
-	Inverted       *bool       `json:"inverted,omitempty"`
-	Locked         *bool       `json:"locked,omitempty"`
-	Color          []float64   `json:"color,omitempty"`
-	MotionBlur     string      `json:"motion_blur,omitempty"`
-	FeatherFalloff string      `json:"feather_falloff,omitempty"`
-	Opacity        *float64    `json:"opacity,omitempty"`
-	Feather        []float64   `json:"feather,omitempty"`
-	Expansion      *float64    `json:"expansion,omitempty"`
-	Closed         *bool       `json:"closed,omitempty"`
-	Vertices       [][]float64 `json:"vertices"`
+	Name           string                 `json:"name,omitempty"`
+	Mode           string                 `json:"mode,omitempty"`
+	Inverted       *bool                  `json:"inverted,omitempty"`
+	Locked         *bool                  `json:"locked,omitempty"`
+	Color          []float64              `json:"color,omitempty"`
+	MotionBlur     string                 `json:"motion_blur,omitempty"`
+	FeatherFalloff string                 `json:"feather_falloff,omitempty"`
+	Opacity        *float64               `json:"opacity,omitempty"`
+	Feather        []float64              `json:"feather,omitempty"`
+	Expansion      *float64               `json:"expansion,omitempty"`
+	Closed         *bool                  `json:"closed,omitempty"`
+	Vertices       [][]float64            `json:"vertices"`
+	PathKeyframes  []MaskPathKeyframeSpec `json:"path_keyframes,omitempty"`
+}
+
+type MaskPathKeyframeSpec struct {
+	Time     float64     `json:"time"`
+	Vertices [][]float64 `json:"vertices"`
 }
 
 type LightSpec struct {
@@ -505,19 +511,25 @@ type ExpectedKeyframe struct {
 }
 
 type ExpectedMask struct {
-	LayerName      string    `json:"layer_name"`
-	Name           string    `json:"name,omitempty"`
-	Mode           string    `json:"mode,omitempty"`
-	Inverted       *bool     `json:"inverted,omitempty"`
-	Locked         *bool     `json:"locked,omitempty"`
-	Color          []float64 `json:"color,omitempty"`
-	MotionBlur     string    `json:"motion_blur,omitempty"`
-	FeatherFalloff string    `json:"feather_falloff,omitempty"`
-	Opacity        *float64  `json:"opacity,omitempty"`
-	Feather        []float64 `json:"feather,omitempty"`
-	Expansion      *float64  `json:"expansion,omitempty"`
-	Closed         *bool     `json:"closed,omitempty"`
-	VertexCount    *int      `json:"vertex_count,omitempty"`
+	LayerName      string                     `json:"layer_name"`
+	Name           string                     `json:"name,omitempty"`
+	Mode           string                     `json:"mode,omitempty"`
+	Inverted       *bool                      `json:"inverted,omitempty"`
+	Locked         *bool                      `json:"locked,omitempty"`
+	Color          []float64                  `json:"color,omitempty"`
+	MotionBlur     string                     `json:"motion_blur,omitempty"`
+	FeatherFalloff string                     `json:"feather_falloff,omitempty"`
+	Opacity        *float64                   `json:"opacity,omitempty"`
+	Feather        []float64                  `json:"feather,omitempty"`
+	Expansion      *float64                   `json:"expansion,omitempty"`
+	Closed         *bool                      `json:"closed,omitempty"`
+	VertexCount    *int                       `json:"vertex_count,omitempty"`
+	PathKeyframes  []ExpectedMaskPathKeyframe `json:"path_keyframes,omitempty"`
+}
+
+type ExpectedMaskPathKeyframe struct {
+	Time        float64 `json:"time"`
+	VertexCount *int    `json:"vertex_count,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -866,6 +878,18 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		validateMaskFeather(mask.Feather, maskPath+".feather", "invalid_expected_profile", addRefusal)
 		if mask.VertexCount != nil && *mask.VertexCount < 0 {
 			addRefusal("invalid_expected_profile", maskPath+".vertex_count", "vertex_count must be non-negative")
+		}
+		for ki, kf := range mask.PathKeyframes {
+			kfPath := fmt.Sprintf("%s.path_keyframes[%d]", maskPath, ki)
+			if kf.Time < 0 {
+				addRefusal("invalid_expected_profile", kfPath+".time", "mask path keyframe time must be non-negative")
+			}
+			if ki > 0 && kf.Time < mask.PathKeyframes[ki-1].Time {
+				addRefusal("invalid_expected_profile", kfPath+".time", "mask path keyframes must be sorted by time")
+			}
+			if kf.VertexCount != nil && *kf.VertexCount < 0 {
+				addRefusal("invalid_expected_profile", kfPath+".vertex_count", "vertex_count must be non-negative")
+			}
 		}
 	}
 }
@@ -1729,6 +1753,27 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		for vi, vertex := range mask.Vertices {
 			validateVec(vertex, 2, fmt.Sprintf("%s.vertices[%d]", maskPath, vi), addRefusal)
+		}
+		if len(mask.PathKeyframes) > 0 {
+			recordCapability("SetMaskPathKeyframes", maskPath+".path_keyframes")
+			if len(mask.PathKeyframes) < 2 {
+				addRefusal("invalid_mask_path_keyframes", maskPath+".path_keyframes", "mask path_keyframes must include at least 2 keyframes")
+			}
+		}
+		for ki, kf := range mask.PathKeyframes {
+			kfPath := fmt.Sprintf("%s.path_keyframes[%d]", maskPath, ki)
+			if kf.Time < 0 || kf.Time > compDuration {
+				addRefusal("mask_path_keyframe_time_out_of_range", kfPath+".time", "mask path keyframe time must be within comp duration")
+			}
+			if ki > 0 && kf.Time < mask.PathKeyframes[ki-1].Time {
+				addRefusal("mask_path_keyframes_not_sorted", kfPath+".time", "mask path keyframes must be sorted by time")
+			}
+			if len(kf.Vertices) < 3 {
+				addRefusal("invalid_mask_path_keyframe_vertices", kfPath+".vertices", "mask path keyframe vertices must include at least 3 points")
+			}
+			for vi, vertex := range kf.Vertices {
+				validateVec(vertex, 2, fmt.Sprintf("%s.vertices[%d]", kfPath, vi), addRefusal)
+			}
 		}
 	}
 	if usesTransform(layer.Transform) {

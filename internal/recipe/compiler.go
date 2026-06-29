@@ -499,6 +499,23 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		if expectedMask.VertexCount != nil {
 			add(maskPath+".vertex_count", *expectedMask.VertexCount, len(mask.Vertices), len(mask.Vertices) == *expectedMask.VertexCount)
 		}
+		if len(expectedMask.PathKeyframes) > 0 {
+			add(maskPath+".path_keyframes.count", len(expectedMask.PathKeyframes), len(mask.PathKeyframes), len(mask.PathKeyframes) == len(expectedMask.PathKeyframes))
+		}
+		for ki, expectedKF := range expectedMask.PathKeyframes {
+			kfPath := fmt.Sprintf("%s.path_keyframes[%d]", maskPath, ki)
+			if ki >= len(mask.PathKeyframes) {
+				add(kfPath, expectedKF.Time, nil, false)
+				continue
+			}
+			actualKF := mask.PathKeyframes[ki]
+			timeOK := math.Abs(actualKF.Time-expectedKF.Time) < 1e-6
+			vertexCountOK := expectedKF.VertexCount == nil || len(actualKF.Vertices) == *expectedKF.VertexCount
+			add(kfPath, expectedKF.Time, actualKF.Time, timeOK && vertexCountOK)
+			if expectedKF.VertexCount != nil {
+				add(kfPath+".vertex_count", *expectedKF.VertexCount, len(actualKF.Vertices), len(actualKF.Vertices) == *expectedKF.VertexCount)
+			}
+		}
 	}
 	return checks
 }
@@ -862,6 +879,27 @@ func maskBezierPath(spec MaskSpec) aep.BezierPath {
 	return aep.BezierPath{Vertices: vertices, Closed: closed}
 }
 
+func maskPathKeys(spec MaskSpec) []aep.MaskPathKey {
+	keys := make([]aep.MaskPathKey, 0, len(spec.PathKeyframes))
+	closed := true
+	if spec.Closed != nil {
+		closed = *spec.Closed
+	}
+	for _, kf := range spec.PathKeyframes {
+		path := aep.BezierPath{
+			Vertices: make([][2]float64, 0, len(kf.Vertices)),
+			Closed:   closed,
+		}
+		for _, vertex := range kf.Vertices {
+			if len(vertex) >= 2 {
+				path.Vertices = append(path.Vertices, [2]float64{vertex[0], vertex[1]})
+			}
+		}
+		keys = append(keys, aep.MaskPathKey{Time: kf.Time, Path: path})
+	}
+	return keys
+}
+
 func hasEffects(comp CompSpec) bool {
 	for _, layer := range comp.Layers {
 		if len(layer.Effects) > 0 {
@@ -974,6 +1012,11 @@ func materializeMasks(project *aep.Project, compSpec CompSpec) (*aep.Project, er
 			if maskSpec.Expansion != nil {
 				if err := mask.SetExpansion(*maskSpec.Expansion); err != nil {
 					return nil, fmt.Errorf("recipe: layer %q mask %q expansion: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if len(maskSpec.PathKeyframes) > 0 {
+				if err := aep.SetMaskPathKeyframes(layer, mask, maskPathKeys(maskSpec)); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q path_keyframes: %w", layerSpec.Name, maskSpec.Name, err)
 				}
 			}
 		}

@@ -4035,7 +4035,11 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 					"feather": [12, 8],
 					"expansion": -4,
 					"closed": true,
-					"vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
+					"vertices": [[10, 10], [190, 10], [190, 190], [10, 190]],
+					"path_keyframes": [
+						{"time": 0, "vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]},
+						{"time": 1, "vertices": [[40, 40], [160, 20], [180, 160], [20, 180]]}
+					]
 				}]
 			}]
 		}],
@@ -4059,7 +4063,11 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 				"feather": [12, 8],
 				"expansion": -4,
 				"closed": true,
-				"vertex_count": 4
+				"vertex_count": 4,
+				"path_keyframes": [
+					{"time": 0, "vertex_count": 4},
+					{"time": 1, "vertex_count": 4}
+				]
 			}]
 		}
 	}`)
@@ -4083,6 +4091,9 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.masks[0].feather", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].expansion", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].vertex_count", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].path_keyframes.count", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].path_keyframes[0]", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].path_keyframes[1]", true)
 }
 
 func TestCompileToFileSetsTransformKeyframeEase(t *testing.T) {

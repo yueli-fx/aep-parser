@@ -289,6 +289,11 @@ Done:
   compiles these through stable mask setters and asserts their parsed profile
   values, raising the recipe profile verifier coverage to 20 checks for that
   recipe.
+- Mask path keyframes are now recipe/profile covered. `layers[].masks[]`
+  accepts `path_keyframes[]`, compiles them through `SetMaskPathKeyframes`, and
+  `expected_profile.masks[].path_keyframes[]` asserts keyframe count, time, and
+  vertex count through `minimal-layer-mask.json`, raising that recipe's profile
+  coverage to 25 checks.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
