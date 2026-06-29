@@ -267,6 +267,14 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 		LineCap:    "projecting",
 		LineJoin:   "bevel",
 		MiterLimit: ptr(10),
+		Taper: &recipe.StrokeTaperSpec{
+			StartLength: ptr(30),
+			EndLength:   ptr(40),
+			StartWidth:  ptr(55),
+			EndWidth:    ptr(65),
+			StartEase:   ptr(35),
+			EndEase:     ptr(50),
+		},
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(18),
 			Gap:  ptr(7),
@@ -285,6 +293,12 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	assertCapability(t, report, "StrokeNode.SetLineCap")
 	assertCapability(t, report, "StrokeNode.SetLineJoin")
 	assertCapability(t, report, "StrokeNode.SetMiterLimit")
+	assertCapability(t, report, "StrokeTaper.SetStartLength")
+	assertCapability(t, report, "StrokeTaper.SetEndLength")
+	assertCapability(t, report, "StrokeTaper.SetStartWidth")
+	assertCapability(t, report, "StrokeTaper.SetEndWidth")
+	assertCapability(t, report, "StrokeTaper.SetStartEase")
+	assertCapability(t, report, "StrokeTaper.SetEndEase")
 	assertCapability(t, report, "StrokeDashes.SetDash")
 	assertCapability(t, report, "StrokeDashes.SetGap")
 }

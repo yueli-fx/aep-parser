@@ -1010,6 +1010,39 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.Stroke.Taper != nil {
+			taper := stroke.Taper()
+			if shape.Stroke.Taper.StartLength != nil {
+				if err := taper.SetStartLength(*shape.Stroke.Taper.StartLength); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Taper.EndLength != nil {
+				if err := taper.SetEndLength(*shape.Stroke.Taper.EndLength); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Taper.StartWidth != nil {
+				if err := taper.SetStartWidth(*shape.Stroke.Taper.StartWidth); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Taper.EndWidth != nil {
+				if err := taper.SetEndWidth(*shape.Stroke.Taper.EndWidth); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Taper.StartEase != nil {
+				if err := taper.SetStartEase(*shape.Stroke.Taper.StartEase); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Taper.EndEase != nil {
+				if err := taper.SetEndEase(*shape.Stroke.Taper.EndEase); err != nil {
+					return err
+				}
+			}
+		}
 		if shape.Stroke.Dashes != nil {
 			dashes := stroke.Dashes()
 			if shape.Stroke.Dashes.Dash != nil {

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal stroke taper"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Tapered",
+          "shape": {
+            "kind": "ellipse",
+            "size": [520, 260],
+            "stroke": {
+              "color": [255, 255, 255],
+              "width": 24,
+              "opacity": 100,
+              "taper": {
+                "start_length": 30,
+                "end_length": 40,
+                "start_width": 55,
+                "end_width": 65,
+                "start_ease": 35,
+                "end_ease": 50
+              }
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Tapered",
+        "match_name": "ADBE Vector Taper Start Length",
+        "value": 30
+      },
+      {
+        "layer_name": "Tapered",
+        "match_name": "ADBE Vector Taper End Length",
+        "value": 40
+      },
+      {
+        "layer_name": "Tapered",
+        "match_name": "ADBE Vector Taper Start Width",
+        "value": 55
+      },
+      {
+        "layer_name": "Tapered",
+        "match_name": "ADBE Vector Taper End Width",
+        "value": 65
+      },
+      {
+        "layer_name": "Tapered",
+        "match_name": "ADBE Vector Taper Start Ease",
+        "value": 35
+      },
+      {
+        "layer_name": "Tapered",
+        "match_name": "ADBE Vector Taper End Ease",
+        "value": 50
+      }
+    ]
+  }
+}

@@ -58,6 +58,14 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 		LineCap:    "projecting",
 		LineJoin:   "bevel",
 		MiterLimit: ptr(10),
+		Taper: &recipe.StrokeTaperSpec{
+			StartLength: ptr(30),
+			EndLength:   ptr(40),
+			StartWidth:  ptr(55),
+			EndWidth:    ptr(65),
+			StartEase:   ptr(35),
+			EndEase:     ptr(50),
+		},
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(18),
 			Gap:  ptr(7),
@@ -87,6 +95,12 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Line Cap", 3.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Line Join", 3.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Miter Limit", 10.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Start Length", 30.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper End Length", 40.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Start Width", 55.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper End Width", 65.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Start Ease", 35.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper End Ease", 50.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Dash 1", 18.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Gap 1", 7.0)
 }

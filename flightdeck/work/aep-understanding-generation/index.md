@@ -218,6 +218,11 @@ Done:
   `examples/recipes/minimal-shape-stroke-style.json` example asserts the three
   `ADBE Vector Stroke ...` style properties, passed profile checks, and passed
   an AE 2025 render oracle gate.
+- Fourteenth shape recipe slice is implemented for `shape.stroke.taper`
+  percent-mode controls. The dedicated
+  `examples/recipes/minimal-shape-stroke-taper.json` example asserts all six
+  `ADBE Vector Taper ...` properties, passed profile checks, and passed an AE
+  2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

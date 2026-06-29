@@ -86,7 +86,17 @@ type StrokeSpec struct {
 	LineCap    string            `json:"line_cap,omitempty"`
 	LineJoin   string            `json:"line_join,omitempty"`
 	MiterLimit *float64          `json:"miter_limit,omitempty"`
+	Taper      *StrokeTaperSpec  `json:"taper,omitempty"`
 	Dashes     *StrokeDashesSpec `json:"dashes,omitempty"`
+}
+
+type StrokeTaperSpec struct {
+	StartLength *float64 `json:"start_length,omitempty"`
+	EndLength   *float64 `json:"end_length,omitempty"`
+	StartWidth  *float64 `json:"start_width,omitempty"`
+	EndWidth    *float64 `json:"end_width,omitempty"`
+	StartEase   *float64 `json:"start_ease,omitempty"`
+	EndEase     *float64 `json:"end_ease,omitempty"`
 }
 
 type StrokeDashesSpec struct {
@@ -584,6 +594,27 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("StrokeNode.SetMiterLimit", strokePath+".miter_limit")
 				if *layer.Shape.Stroke.MiterLimit < 1 {
 					addRefusal("invalid_shape_stroke_miter_limit", strokePath+".miter_limit", "stroke miter_limit must be at least 1")
+				}
+			}
+			if layer.Shape.Stroke.Taper != nil {
+				taperPath := strokePath + ".taper"
+				if layer.Shape.Stroke.Taper.StartLength != nil {
+					recordCapability("StrokeTaper.SetStartLength", taperPath+".start_length")
+				}
+				if layer.Shape.Stroke.Taper.EndLength != nil {
+					recordCapability("StrokeTaper.SetEndLength", taperPath+".end_length")
+				}
+				if layer.Shape.Stroke.Taper.StartWidth != nil {
+					recordCapability("StrokeTaper.SetStartWidth", taperPath+".start_width")
+				}
+				if layer.Shape.Stroke.Taper.EndWidth != nil {
+					recordCapability("StrokeTaper.SetEndWidth", taperPath+".end_width")
+				}
+				if layer.Shape.Stroke.Taper.StartEase != nil {
+					recordCapability("StrokeTaper.SetStartEase", taperPath+".start_ease")
+				}
+				if layer.Shape.Stroke.Taper.EndEase != nil {
+					recordCapability("StrokeTaper.SetEndEase", taperPath+".end_ease")
 				}
 			}
 			if layer.Shape.Stroke.Dashes != nil {
