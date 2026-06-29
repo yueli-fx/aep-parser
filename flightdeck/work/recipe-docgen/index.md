@@ -396,10 +396,11 @@ Done:
 - Boundary chosen: recipe docs are independent from API docs but can join
   capability details through capindex.
 - Implementation plan written in `plan.md`.
+- First implementation slice landed.
 
 Current:
 
-- Awaiting plan execution.
+- Ready for next metadata expansion or editor integration.
 
 ## Open questions
 

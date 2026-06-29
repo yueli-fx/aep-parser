@@ -6,10 +6,12 @@
   "properties": {
     "expected_profile": {
       "type": "object",
+      "description": "Optional assertions used to compare the generated project against expected structure.",
       "x-aep-path": "expected_profile"
     },
     "project": {
       "type": "object",
+      "description": "Project-level metadata used when materializing the recipe.",
       "x-aep-path": "project"
     },
     "schema_version": {
@@ -43,7 +45,7 @@
       "go_type": "recipe.ProjectSpec",
       "object_type": "ProjectSpec",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Project-level metadata used when materializing the recipe."
     },
     {
       "x-aep-path": "project.name",
@@ -64,7 +66,7 @@
       "element": "recipe.CompSpec",
       "object_type": "CompSpec",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition definitions to create or validate."
     },
     {
       "x-aep-path": "comps[].name",
@@ -152,7 +154,7 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition label color index."
     },
     {
       "x-aep-path": "comps[].comment",
@@ -161,7 +163,7 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition comment text."
     },
     {
       "x-aep-path": "comps[].renderer",
@@ -170,6 +172,7 @@
       "source_field": "Renderer",
       "type": "string",
       "go_type": "string",
+      "description": "Composition renderer identifier.",
       "x-aep-capabilities": [
         {
           "key": "comp.set_renderer",
@@ -185,8 +188,7 @@
             "TestSetRenderer_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].resolution_factor",
@@ -196,7 +198,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition preview resolution factor."
     },
     {
       "x-aep-path": "comps[].pixel_aspect",
@@ -205,7 +207,7 @@
       "source_field": "PixelAspect",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition pixel aspect ratio."
     },
     {
       "x-aep-path": "comps[].display_start_time",
@@ -214,7 +216,7 @@
       "source_field": "DisplayStartTime",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition display start time in seconds."
     },
     {
       "x-aep-path": "comps[].frame_blending",
@@ -223,7 +225,7 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition frame blending switch."
     },
     {
       "x-aep-path": "comps[].draft_3d",
@@ -232,7 +234,7 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition draft 3D switch."
     },
     {
       "x-aep-path": "comps[].hide_shy_layers",
@@ -241,7 +243,7 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition shy layer visibility switch."
     },
     {
       "x-aep-path": "comps[].preserve_nested_frame_rate",
@@ -250,7 +252,7 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition nested frame-rate preservation switch."
     },
     {
       "x-aep-path": "comps[].preserve_nested_resolution",
@@ -259,7 +261,7 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition nested resolution preservation switch."
     },
     {
       "x-aep-path": "comps[].motion_blur",
@@ -269,7 +271,7 @@
       "type": "object",
       "go_type": "*recipe.CompMotionBlurSpec",
       "object_type": "CompMotionBlurSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition motion blur settings."
     },
     {
       "x-aep-path": "comps[].motion_blur.enabled",
@@ -278,7 +280,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition motion blur enable switch."
     },
     {
       "x-aep-path": "comps[].motion_blur.shutter_angle",
@@ -287,7 +289,7 @@
       "source_field": "ShutterAngle",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition motion blur shutter angle."
     },
     {
       "x-aep-path": "comps[].motion_blur.shutter_phase",
@@ -296,7 +298,7 @@
       "source_field": "ShutterPhase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition motion blur shutter phase."
     },
     {
       "x-aep-path": "comps[].motion_blur.adaptive_sample_limit",
@@ -305,7 +307,7 @@
       "source_field": "AdaptiveSampleLimit",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition motion blur adaptive sample limit."
     },
     {
       "x-aep-path": "comps[].motion_blur.samples_per_frame",
@@ -314,7 +316,7 @@
       "source_field": "SamplesPerFrame",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition motion blur samples per frame."
     },
     {
       "x-aep-path": "comps[].work_area",
@@ -324,7 +326,7 @@
       "type": "object",
       "go_type": "*recipe.CompWorkAreaSpec",
       "object_type": "CompWorkAreaSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition work area range."
     },
     {
       "x-aep-path": "comps[].work_area.start",
@@ -333,7 +335,7 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition work area start time in seconds."
     },
     {
       "x-aep-path": "comps[].work_area.end",
@@ -342,7 +344,7 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition work area end time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[]",
@@ -353,7 +355,7 @@
       "go_type": "[]recipe.Layer",
       "element": "recipe.Layer",
       "object_type": "Layer",
-      "x-aep-missing-semantic-summary": true
+      "description": "Composition layer definitions."
     },
     {
       "x-aep-path": "comps[].layers[].type",
@@ -486,7 +488,7 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer label color index."
     },
     {
       "x-aep-path": "comps[].layers[].comment",
@@ -495,7 +497,7 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer comment text."
     },
     {
       "x-aep-path": "comps[].layers[].visible",
@@ -504,7 +506,7 @@
       "source_field": "Visible",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer video visibility switch."
     },
     {
       "x-aep-path": "comps[].layers[].solo",
@@ -513,7 +515,7 @@
       "source_field": "Solo",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer solo switch."
     },
     {
       "x-aep-path": "comps[].layers[].locked",
@@ -522,7 +524,7 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer lock switch."
     },
     {
       "x-aep-path": "comps[].layers[].motion_blur",
@@ -531,7 +533,7 @@
       "source_field": "MotionBlur",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer motion blur switch."
     },
     {
       "x-aep-path": "comps[].layers[].shy",
@@ -540,7 +542,7 @@
       "source_field": "Shy",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer shy switch."
     },
     {
       "x-aep-path": "comps[].layers[].effects_enabled",
@@ -549,7 +551,7 @@
       "source_field": "EffectsEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer effects enable switch."
     },
     {
       "x-aep-path": "comps[].layers[].audio_enabled",
@@ -558,7 +560,7 @@
       "source_field": "AudioEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer audio enable switch."
     },
     {
       "x-aep-path": "comps[].layers[].frame_blend_enabled",
@@ -567,7 +569,7 @@
       "source_field": "FrameBlendEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer frame blending switch."
     },
     {
       "x-aep-path": "comps[].layers[].markers_locked",
@@ -576,7 +578,7 @@
       "source_field": "MarkersLocked",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer marker lock switch."
     },
     {
       "x-aep-path": "comps[].layers[].collapse_transform",
@@ -585,7 +587,7 @@
       "source_field": "CollapseTransform",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer collapse transformations switch."
     },
     {
       "x-aep-path": "comps[].layers[].is_3d",
@@ -594,7 +596,7 @@
       "source_field": "Is3D",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer 3D switch."
     },
     {
       "x-aep-path": "comps[].layers[].is_adjust",
@@ -603,7 +605,7 @@
       "source_field": "IsAdjust",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Adjustment-layer switch."
     },
     {
       "x-aep-path": "comps[].layers[].is_null",
@@ -612,7 +614,7 @@
       "source_field": "IsNull",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Null-layer switch."
     },
     {
       "x-aep-path": "comps[].layers[].is_guide",
@@ -621,7 +623,7 @@
       "source_field": "IsGuide",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Guide-layer switch."
     },
     {
       "x-aep-path": "comps[].layers[].sampling_bicubic",
@@ -630,7 +632,7 @@
       "source_field": "SamplingBicubic",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Bicubic sampling switch."
     },
     {
       "x-aep-path": "comps[].layers[].frame_blend_pixel_motion",
@@ -639,7 +641,7 @@
       "source_field": "FrameBlendPixelMotion",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Pixel-motion frame blending switch."
     },
     {
       "x-aep-path": "comps[].layers[].preserve_transparency",
@@ -648,7 +650,7 @@
       "source_field": "PreserveTransparency",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Preserve transparency switch."
     },
     {
       "x-aep-path": "comps[].layers[].quality",
@@ -657,7 +659,7 @@
       "source_field": "Quality",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer quality mode."
     },
     {
       "x-aep-path": "comps[].layers[].blending_mode",
@@ -666,7 +668,7 @@
       "source_field": "BlendingMode",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer blending mode."
     },
     {
       "x-aep-path": "comps[].layers[].track_matte",
@@ -675,7 +677,7 @@
       "source_field": "TrackMatte",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer track matte mode."
     },
     {
       "x-aep-path": "comps[].layers[].auto_orient",
@@ -684,7 +686,7 @@
       "source_field": "AutoOrient",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer auto-orientation mode."
     },
     {
       "x-aep-path": "comps[].layers[].start_time",
@@ -693,7 +695,7 @@
       "source_field": "StartTime",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer start time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].in_point",
@@ -702,7 +704,7 @@
       "source_field": "InPoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer in point in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].out_point",
@@ -711,7 +713,7 @@
       "source_field": "OutPoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer out point in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].parent",
@@ -720,7 +722,7 @@
       "source_field": "Parent",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Parent layer name."
     },
     {
       "x-aep-path": "comps[].layers[].text",
@@ -729,7 +731,7 @@
       "source_field": "Text",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Source text for a text layer."
     },
     {
       "x-aep-path": "comps[].layers[].text_style",
@@ -739,7 +741,7 @@
       "type": "object",
       "go_type": "*recipe.TextStyleSpec",
       "object_type": "TextStyleSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Text layer style overrides."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.run_index",
@@ -748,7 +750,7 @@
       "source_field": "RunIndex",
       "type": "number",
       "go_type": "int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style text run index."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.paragraph_index",
@@ -757,7 +759,7 @@
       "source_field": "ParagraphIndex",
       "type": "number",
       "go_type": "int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style paragraph index."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.font_size",
@@ -766,7 +768,7 @@
       "source_field": "FontSize",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style font size."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.fill_color",
@@ -776,7 +778,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style fill color as RGB channels."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.tracking",
@@ -785,7 +787,7 @@
       "source_field": "Tracking",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style character tracking amount."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_bold",
@@ -794,7 +796,7 @@
       "source_field": "FauxBold",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style faux bold switch."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.faux_italic",
@@ -803,7 +805,7 @@
       "source_field": "FauxItalic",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style faux italic switch."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.apply_stroke",
@@ -812,7 +814,7 @@
       "source_field": "ApplyStroke",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style stroke enable switch."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.stroke_color",
@@ -822,7 +824,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style stroke color as RGB channels."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.stroke_width",
@@ -831,7 +833,7 @@
       "source_field": "StrokeWidth",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style stroke width."
     },
     {
       "x-aep-path": "comps[].layers[].text_style.justification",
@@ -840,7 +842,7 @@
       "source_field": "Justification",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer text style paragraph justification mode."
     },
     {
       "x-aep-path": "comps[].layers[].camera",
@@ -850,7 +852,7 @@
       "type": "object",
       "go_type": "*recipe.CameraSpec",
       "object_type": "CameraSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera layer options."
     },
     {
       "x-aep-path": "comps[].layers[].camera.zoom",
@@ -859,7 +861,7 @@
       "source_field": "Zoom",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera zoom value."
     },
     {
       "x-aep-path": "comps[].layers[].camera.depth_of_field",
@@ -868,7 +870,7 @@
       "source_field": "DepthOfField",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Depth of field enable switch."
     },
     {
       "x-aep-path": "comps[].layers[].camera.focus_distance",
@@ -877,7 +879,7 @@
       "source_field": "FocusDistance",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera focus distance."
     },
     {
       "x-aep-path": "comps[].layers[].camera.aperture",
@@ -886,7 +888,7 @@
       "source_field": "Aperture",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera aperture."
     },
     {
       "x-aep-path": "comps[].layers[].camera.blur_level",
@@ -895,7 +897,7 @@
       "source_field": "BlurLevel",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera blur level."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_shape",
@@ -904,7 +906,7 @@
       "source_field": "IrisShape",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris shape."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_rotation",
@@ -913,7 +915,7 @@
       "source_field": "IrisRotation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris rotation."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_roundness",
@@ -922,7 +924,7 @@
       "source_field": "IrisRoundness",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris roundness."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_aspect_ratio",
@@ -931,7 +933,7 @@
       "source_field": "IrisAspectRatio",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris aspect ratio."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_diffraction_fringe",
@@ -940,7 +942,7 @@
       "source_field": "IrisDiffractionFringe",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris diffraction fringe amount."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_gain",
@@ -949,7 +951,7 @@
       "source_field": "IrisHighlightGain",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris highlight gain."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_threshold",
@@ -958,7 +960,7 @@
       "source_field": "IrisHighlightThreshold",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris highlight threshold."
     },
     {
       "x-aep-path": "comps[].layers[].camera.iris_highlight_saturation",
@@ -967,7 +969,7 @@
       "source_field": "IrisHighlightSaturation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Camera iris highlight saturation."
     },
     {
       "x-aep-path": "comps[].layers[].light",
@@ -977,7 +979,7 @@
       "type": "object",
       "go_type": "*recipe.LightSpec",
       "object_type": "LightSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light layer options."
     },
     {
       "x-aep-path": "comps[].layers[].light.kind",
@@ -986,7 +988,7 @@
       "source_field": "Kind",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light type."
     },
     {
       "x-aep-path": "comps[].layers[].light.source_layer",
@@ -995,7 +997,7 @@
       "source_field": "SourceLayer",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Source layer for environment light data."
     },
     {
       "x-aep-path": "comps[].layers[].light.intensity",
@@ -1004,7 +1006,7 @@
       "source_field": "Intensity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light intensity."
     },
     {
       "x-aep-path": "comps[].layers[].light.color",
@@ -1014,7 +1016,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light color as RGB channels."
     },
     {
       "x-aep-path": "comps[].layers[].light.casts_shadows",
@@ -1023,7 +1025,7 @@
       "source_field": "CastsShadows",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light shadow-casting switch."
     },
     {
       "x-aep-path": "comps[].layers[].light.shadow_darkness",
@@ -1032,7 +1034,7 @@
       "source_field": "ShadowDarkness",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light shadow darkness."
     },
     {
       "x-aep-path": "comps[].layers[].light.shadow_diffusion",
@@ -1041,7 +1043,7 @@
       "source_field": "ShadowDiffusion",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light shadow diffusion."
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_type",
@@ -1050,7 +1052,7 @@
       "source_field": "FalloffType",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light falloff type."
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_start",
@@ -1059,7 +1061,7 @@
       "source_field": "FalloffStart",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light falloff start distance."
     },
     {
       "x-aep-path": "comps[].layers[].light.falloff_distance",
@@ -1068,7 +1070,7 @@
       "source_field": "FalloffDistance",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Light falloff distance."
     },
     {
       "x-aep-path": "comps[].layers[].light.cone_angle",
@@ -1077,7 +1079,7 @@
       "source_field": "ConeAngle",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Spotlight cone angle."
     },
     {
       "x-aep-path": "comps[].layers[].light.cone_feather",
@@ -1086,7 +1088,7 @@
       "source_field": "ConeFeather",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Spotlight cone feather amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape",
@@ -1096,7 +1098,7 @@
       "type": "object",
       "go_type": "*recipe.ShapeSpec",
       "object_type": "ShapeSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Shape layer primitive and operators."
     },
     {
       "x-aep-path": "comps[].layers[].shape.kind",
@@ -1106,7 +1108,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Shape primitive type."
     },
     {
       "x-aep-path": "comps[].layers[].shape.size",
@@ -1116,7 +1118,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Shape size vector."
     },
     {
       "x-aep-path": "comps[].layers[].shape.position",
@@ -1126,7 +1128,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Shape local position vector."
     },
     {
       "x-aep-path": "comps[].layers[].shape.roundness",
@@ -1135,7 +1137,7 @@
       "source_field": "Roundness",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rectangle corner roundness."
     },
     {
       "x-aep-path": "comps[].layers[].shape.points",
@@ -1144,7 +1146,7 @@
       "source_field": "Points",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Star or polygon point count."
     },
     {
       "x-aep-path": "comps[].layers[].shape.rotation",
@@ -1153,7 +1155,7 @@
       "source_field": "Rotation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Shape local rotation."
     },
     {
       "x-aep-path": "comps[].layers[].shape.inner_radius",
@@ -1162,7 +1164,7 @@
       "source_field": "InnerRadius",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Star inner radius."
     },
     {
       "x-aep-path": "comps[].layers[].shape.outer_radius",
@@ -1171,7 +1173,7 @@
       "source_field": "OuterRadius",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Star or polygon outer radius."
     },
     {
       "x-aep-path": "comps[].layers[].shape.inner_roundness",
@@ -1180,7 +1182,7 @@
       "source_field": "InnerRoundness",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Star inner roundness."
     },
     {
       "x-aep-path": "comps[].layers[].shape.outer_roundness",
@@ -1189,7 +1191,7 @@
       "source_field": "OuterRoundness",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Star or polygon outer roundness."
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_color",
@@ -1199,7 +1201,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Solid fill color as RGB channels."
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_opacity",
@@ -1208,7 +1210,7 @@
       "source_field": "FillOpacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Solid fill opacity."
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_blend_mode",
@@ -1217,7 +1219,7 @@
       "source_field": "FillBlendMode",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Solid fill blend mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_composite_order",
@@ -1226,7 +1228,7 @@
       "source_field": "FillCompositeOrder",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Solid fill composite order."
     },
     {
       "x-aep-path": "comps[].layers[].shape.fill_rule",
@@ -1235,7 +1237,7 @@
       "source_field": "FillRule",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Solid fill rule."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill",
@@ -1245,7 +1247,7 @@
       "type": "object",
       "go_type": "*recipe.GradientFillSpec",
       "object_type": "GradientFillSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.type",
@@ -1254,7 +1256,7 @@
       "source_field": "Type",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill type."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.start_point",
@@ -1264,7 +1266,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill start point."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.end_point",
@@ -1274,7 +1276,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill end point."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.highlight_length",
@@ -1283,7 +1285,7 @@
       "source_field": "HighlightLength",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Radial gradient fill highlight length."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.highlight_angle",
@@ -1292,7 +1294,7 @@
       "source_field": "HighlightAngle",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Radial gradient fill highlight angle."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[]",
@@ -1303,7 +1305,7 @@
       "go_type": "[]recipe.GradientColorStopSpec",
       "element": "recipe.GradientColorStopSpec",
       "object_type": "GradientColorStopSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill color stops."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[].offset",
@@ -1313,7 +1315,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill color stop offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[].midpoint",
@@ -1322,7 +1324,7 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill color stop midpoint."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.color_stops[].color",
@@ -1333,7 +1335,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill color stop RGB color."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[]",
@@ -1344,7 +1346,7 @@
       "go_type": "[]recipe.GradientAlphaStopSpec",
       "element": "recipe.GradientAlphaStopSpec",
       "object_type": "GradientAlphaStopSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill alpha stops."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[].offset",
@@ -1354,7 +1356,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill alpha stop offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint",
@@ -1363,7 +1365,7 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill alpha stop midpoint."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_fill.alpha_stops[].alpha",
@@ -1373,7 +1375,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient fill alpha stop opacity value."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke",
@@ -1383,7 +1385,7 @@
       "type": "object",
       "go_type": "*recipe.GradientStrokeSpec",
       "object_type": "GradientStrokeSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.type",
@@ -1392,7 +1394,7 @@
       "source_field": "Type",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke type."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.start_point",
@@ -1402,7 +1404,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke start point."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.end_point",
@@ -1412,7 +1414,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke end point."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.highlight_length",
@@ -1421,7 +1423,7 @@
       "source_field": "HighlightLength",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Radial gradient stroke highlight length."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.highlight_angle",
@@ -1430,7 +1432,7 @@
       "source_field": "HighlightAngle",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Radial gradient stroke highlight angle."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.width",
@@ -1439,7 +1441,7 @@
       "source_field": "Width",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke width."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.line_cap",
@@ -1448,7 +1450,7 @@
       "source_field": "LineCap",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke line cap mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.line_join",
@@ -1457,7 +1459,7 @@
       "source_field": "LineJoin",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke line join mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.miter_limit",
@@ -1466,7 +1468,7 @@
       "source_field": "MiterLimit",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke miter limit."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[]",
@@ -1477,7 +1479,7 @@
       "go_type": "[]recipe.GradientColorStopSpec",
       "element": "recipe.GradientColorStopSpec",
       "object_type": "GradientColorStopSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke color stops."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[].offset",
@@ -1487,7 +1489,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke color stop offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[].midpoint",
@@ -1496,7 +1498,7 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke color stop midpoint."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.color_stops[].color",
@@ -1507,7 +1509,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke color stop RGB color."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[]",
@@ -1518,7 +1520,7 @@
       "go_type": "[]recipe.GradientAlphaStopSpec",
       "element": "recipe.GradientAlphaStopSpec",
       "object_type": "GradientAlphaStopSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke alpha stops."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].offset",
@@ -1528,7 +1530,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke alpha stop offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint",
@@ -1537,7 +1539,7 @@
       "source_field": "Midpoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke alpha stop midpoint."
     },
     {
       "x-aep-path": "comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha",
@@ -1547,7 +1549,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Gradient stroke alpha stop opacity value."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke",
@@ -1557,7 +1559,7 @@
       "type": "object",
       "go_type": "*recipe.StrokeSpec",
       "object_type": "StrokeSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Solid stroke settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.color",
@@ -1567,7 +1569,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke color as RGB channels."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.width",
@@ -1576,7 +1578,7 @@
       "source_field": "Width",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke width."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.opacity",
@@ -1585,7 +1587,7 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke opacity."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.line_cap",
@@ -1594,7 +1596,7 @@
       "source_field": "LineCap",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke line cap mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.line_join",
@@ -1603,7 +1605,7 @@
       "source_field": "LineJoin",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke line join mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.miter_limit",
@@ -1612,7 +1614,7 @@
       "source_field": "MiterLimit",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke miter limit."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.composite_order",
@@ -1621,7 +1623,7 @@
       "source_field": "CompositeOrder",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke composite order."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper",
@@ -1631,7 +1633,7 @@
       "type": "object",
       "go_type": "*recipe.StrokeTaperSpec",
       "object_type": "StrokeTaperSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.start_length",
@@ -1640,7 +1642,7 @@
       "source_field": "StartLength",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper start length."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.end_length",
@@ -1649,7 +1651,7 @@
       "source_field": "EndLength",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper end length."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.start_width",
@@ -1658,7 +1660,7 @@
       "source_field": "StartWidth",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper start width."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.end_width",
@@ -1667,7 +1669,7 @@
       "source_field": "EndWidth",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper end width."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.start_ease",
@@ -1676,7 +1678,7 @@
       "source_field": "StartEase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper start ease."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.taper.end_ease",
@@ -1685,7 +1687,7 @@
       "source_field": "EndEase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke taper end ease."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave",
@@ -1695,7 +1697,7 @@
       "type": "object",
       "go_type": "*recipe.StrokeWaveSpec",
       "object_type": "StrokeWaveSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke wave settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave.amount",
@@ -1704,7 +1706,7 @@
       "source_field": "Amount",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke wave amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave.wavelength",
@@ -1713,7 +1715,7 @@
       "source_field": "Wavelength",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke wave wavelength."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.wave.phase",
@@ -1722,7 +1724,7 @@
       "source_field": "Phase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke wave phase."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.dashes",
@@ -1732,7 +1734,7 @@
       "type": "object",
       "go_type": "*recipe.StrokeDashesSpec",
       "object_type": "StrokeDashesSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke dash pattern settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.dashes.dash",
@@ -1741,7 +1743,7 @@
       "source_field": "Dash",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke dash length."
     },
     {
       "x-aep-path": "comps[].layers[].shape.stroke.dashes.gap",
@@ -1750,7 +1752,7 @@
       "source_field": "Gap",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Stroke gap length."
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim",
@@ -1760,7 +1762,7 @@
       "type": "object",
       "go_type": "*recipe.TrimSpec",
       "object_type": "TrimSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Trim paths operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim.start",
@@ -1769,7 +1771,7 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Trim paths start percentage."
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim.end",
@@ -1778,7 +1780,7 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Trim paths end percentage."
     },
     {
       "x-aep-path": "comps[].layers[].shape.trim.offset",
@@ -1787,7 +1789,7 @@
       "source_field": "Offset",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Trim paths offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.round_corners",
@@ -1797,7 +1799,7 @@
       "type": "object",
       "go_type": "*recipe.RoundCornersSpec",
       "object_type": "RoundCornersSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Round corners operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.round_corners.radius",
@@ -1806,7 +1808,7 @@
       "source_field": "Radius",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Round corners radius."
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths",
@@ -1816,7 +1818,7 @@
       "type": "object",
       "go_type": "*recipe.OffsetPathsSpec",
       "object_type": "OffsetPathsSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Offset paths operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.amount",
@@ -1825,7 +1827,7 @@
       "source_field": "Amount",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Offset paths amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.line_join",
@@ -1834,7 +1836,7 @@
       "source_field": "LineJoin",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Offset paths line join mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.miter_limit",
@@ -1843,7 +1845,7 @@
       "source_field": "MiterLimit",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Offset paths miter limit."
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.copies",
@@ -1852,7 +1854,7 @@
       "source_field": "Copies",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Offset paths copy count."
     },
     {
       "x-aep-path": "comps[].layers[].shape.offset_paths.copy_offset",
@@ -1861,7 +1863,7 @@
       "source_field": "CopyOffset",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Offset paths copy offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater",
@@ -1871,7 +1873,7 @@
       "type": "object",
       "go_type": "*recipe.RepeaterSpec",
       "object_type": "RepeaterSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.copies",
@@ -1880,7 +1882,7 @@
       "source_field": "Copies",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater copy count."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.offset",
@@ -1889,7 +1891,7 @@
       "source_field": "Offset",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater copy offset."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.order",
@@ -1898,7 +1900,7 @@
       "source_field": "Order",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater composite order."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.anchor",
@@ -1908,7 +1910,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater transform anchor point."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.position",
@@ -1918,7 +1920,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater transform position."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.scale",
@@ -1928,7 +1930,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater transform scale."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.rotation",
@@ -1937,7 +1939,7 @@
       "source_field": "Rotation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater transform rotation."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.start_opacity",
@@ -1946,7 +1948,7 @@
       "source_field": "StartOpacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater starting opacity."
     },
     {
       "x-aep-path": "comps[].layers[].shape.repeater.end_opacity",
@@ -1955,7 +1957,7 @@
       "source_field": "EndOpacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Repeater ending opacity."
     },
     {
       "x-aep-path": "comps[].layers[].shape.merge_paths",
@@ -1965,7 +1967,7 @@
       "type": "object",
       "go_type": "*recipe.MergePathsSpec",
       "object_type": "MergePathsSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Merge paths operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.merge_paths.type",
@@ -1974,7 +1976,7 @@
       "source_field": "Type",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Merge paths mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag",
@@ -1984,7 +1986,7 @@
       "type": "object",
       "go_type": "*recipe.ZigZagSpec",
       "object_type": "ZigZagSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Zig Zag operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag.size",
@@ -1993,7 +1995,7 @@
       "source_field": "Size",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Zig Zag size."
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag.detail",
@@ -2002,7 +2004,7 @@
       "source_field": "Detail",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Zig Zag detail."
     },
     {
       "x-aep-path": "comps[].layers[].shape.zigzag.points",
@@ -2011,7 +2013,7 @@
       "source_field": "Points",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Zig Zag point mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.pucker_bloat",
@@ -2021,7 +2023,7 @@
       "type": "object",
       "go_type": "*recipe.PuckerBloatSpec",
       "object_type": "PuckerBloatSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Pucker and Bloat operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.pucker_bloat.amount",
@@ -2030,7 +2032,7 @@
       "source_field": "Amount",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Pucker and Bloat amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.twist",
@@ -2040,7 +2042,7 @@
       "type": "object",
       "go_type": "*recipe.TwistSpec",
       "object_type": "TwistSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Twist operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.twist.angle",
@@ -2049,7 +2051,7 @@
       "source_field": "Angle",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Twist angle."
     },
     {
       "x-aep-path": "comps[].layers[].shape.twist.center",
@@ -2059,7 +2061,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Twist center point."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths",
@@ -2069,7 +2071,7 @@
       "type": "object",
       "go_type": "*recipe.WigglePathsSpec",
       "object_type": "WigglePathsSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.size",
@@ -2078,7 +2080,7 @@
       "source_field": "Size",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths size."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.detail",
@@ -2087,7 +2089,7 @@
       "source_field": "Detail",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths detail."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.wiggles_per_second",
@@ -2096,7 +2098,7 @@
       "source_field": "WigglesPerSecond",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths frequency."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.random_seed",
@@ -2105,7 +2107,7 @@
       "source_field": "RandomSeed",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths random seed."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.points",
@@ -2114,7 +2116,7 @@
       "source_field": "Points",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths point mode."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.correlation",
@@ -2123,7 +2125,7 @@
       "source_field": "Correlation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths correlation."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.temporal_phase",
@@ -2132,7 +2134,7 @@
       "source_field": "TemporalPhase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths temporal phase."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_paths.spatial_phase",
@@ -2141,7 +2143,7 @@
       "source_field": "SpatialPhase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Paths spatial phase."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform",
@@ -2151,7 +2153,7 @@
       "type": "object",
       "go_type": "*recipe.WiggleTransformSpec",
       "object_type": "WiggleTransformSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform operator settings."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.anchor",
@@ -2161,7 +2163,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform anchor amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.position",
@@ -2171,7 +2173,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform position amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.scale",
@@ -2181,7 +2183,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform scale amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.rotation",
@@ -2190,7 +2192,7 @@
       "source_field": "Rotation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform rotation amount."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.wiggles_per_second",
@@ -2199,7 +2201,7 @@
       "source_field": "WigglesPerSecond",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform frequency."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.random_seed",
@@ -2208,7 +2210,7 @@
       "source_field": "RandomSeed",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform random seed."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.correlation",
@@ -2217,7 +2219,7 @@
       "source_field": "Correlation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform correlation."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.temporal_phase",
@@ -2226,7 +2228,7 @@
       "source_field": "TemporalPhase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform temporal phase."
     },
     {
       "x-aep-path": "comps[].layers[].shape.wiggle_transform.spatial_phase",
@@ -2235,7 +2237,7 @@
       "source_field": "SpatialPhase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Wiggle Transform spatial phase."
     },
     {
       "x-aep-path": "comps[].layers[].masks[]",
@@ -2246,7 +2248,7 @@
       "go_type": "[]recipe.MaskSpec",
       "element": "recipe.MaskSpec",
       "object_type": "MaskSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer masks."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].name",
@@ -2255,7 +2257,7 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask name."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].mode",
@@ -2264,7 +2266,7 @@
       "source_field": "Mode",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask mode."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].inverted",
@@ -2273,7 +2275,7 @@
       "source_field": "Inverted",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask inverted switch."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].locked",
@@ -2282,7 +2284,7 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask lock switch."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].color",
@@ -2292,7 +2294,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask UI color as RGB channels."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].motion_blur",
@@ -2301,7 +2303,7 @@
       "source_field": "MotionBlur",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask motion blur mode."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].feather_falloff",
@@ -2310,7 +2312,7 @@
       "source_field": "FeatherFalloff",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask feather falloff mode."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].opacity",
@@ -2319,7 +2321,7 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask opacity."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].feather",
@@ -2329,7 +2331,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask feather vector."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].expansion",
@@ -2338,7 +2340,7 @@
       "source_field": "Expansion",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask expansion."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].closed",
@@ -2347,7 +2349,7 @@
       "source_field": "Closed",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask closed path switch."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].vertices",
@@ -2358,7 +2360,7 @@
       "go_type": "[][]float64",
       "element": "[]float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask path vertices."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[]",
@@ -2369,7 +2371,7 @@
       "go_type": "[]recipe.MaskPathKeyframeSpec",
       "element": "recipe.MaskPathKeyframeSpec",
       "object_type": "MaskPathKeyframeSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask path keyframes."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[].time",
@@ -2379,7 +2381,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask path keyframe time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].masks[].path_keyframes[].vertices",
@@ -2390,7 +2392,7 @@
       "go_type": "[][]float64",
       "element": "[]float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer mask path keyframe vertices."
     },
     {
       "x-aep-path": "comps[].layers[].transform",
@@ -2426,7 +2428,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Static position value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale",
@@ -2436,7 +2438,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Static scale value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point",
@@ -2446,7 +2448,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Static anchor point value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation",
@@ -2455,7 +2457,7 @@
       "source_field": "Rotation",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Static rotation value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity",
@@ -2464,7 +2466,7 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Static opacity value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[]",
@@ -2475,7 +2477,7 @@
       "go_type": "[]recipe.VectorKeyframe",
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe list."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].time",
@@ -2485,7 +2487,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].value",
@@ -2496,7 +2498,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe vector value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].in_ease",
@@ -2506,7 +2508,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe incoming temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].in_ease.speed",
@@ -2515,7 +2517,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe incoming ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].in_ease.influence",
@@ -2525,7 +2527,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe incoming ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].out_ease",
@@ -2535,7 +2537,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe outgoing temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].out_ease.speed",
@@ -2544,7 +2546,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe outgoing ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.position_keyframes[].out_ease.influence",
@@ -2554,7 +2556,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Position keyframe outgoing ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[]",
@@ -2565,7 +2567,7 @@
       "go_type": "[]recipe.VectorKeyframe",
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe list."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].time",
@@ -2575,7 +2577,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].value",
@@ -2586,7 +2588,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe vector value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease",
@@ -2596,7 +2598,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe incoming temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed",
@@ -2605,7 +2607,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe incoming ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence",
@@ -2615,7 +2617,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe incoming ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease",
@@ -2625,7 +2627,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe outgoing temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed",
@@ -2634,7 +2636,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe outgoing ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence",
@@ -2644,7 +2646,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point keyframe outgoing ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[]",
@@ -2655,7 +2657,7 @@
       "go_type": "[]recipe.VectorKeyframe",
       "element": "recipe.VectorKeyframe",
       "object_type": "VectorKeyframe",
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe list."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].time",
@@ -2665,7 +2667,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].value",
@@ -2676,7 +2678,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe vector value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].in_ease",
@@ -2686,7 +2688,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe incoming temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].in_ease.speed",
@@ -2695,7 +2697,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe incoming ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].in_ease.influence",
@@ -2705,7 +2707,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe incoming ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].out_ease",
@@ -2715,7 +2717,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe outgoing temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].out_ease.speed",
@@ -2724,7 +2726,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe outgoing ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].out_ease.influence",
@@ -2734,7 +2736,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale keyframe outgoing ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[]",
@@ -2745,7 +2747,7 @@
       "go_type": "[]recipe.ScalarKeyframe",
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe list."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].time",
@@ -2755,7 +2757,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].value",
@@ -2765,7 +2767,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].in_ease",
@@ -2775,7 +2777,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe incoming temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].in_ease.speed",
@@ -2784,7 +2786,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe incoming ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].in_ease.influence",
@@ -2794,7 +2796,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe incoming ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].out_ease",
@@ -2804,7 +2806,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe outgoing temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].out_ease.speed",
@@ -2813,7 +2815,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe outgoing ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].out_ease.influence",
@@ -2823,7 +2825,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation keyframe outgoing ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[]",
@@ -2834,7 +2836,7 @@
       "go_type": "[]recipe.ScalarKeyframe",
       "element": "recipe.ScalarKeyframe",
       "object_type": "ScalarKeyframe",
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe list."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].time",
@@ -2844,7 +2846,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe time in seconds."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].value",
@@ -2854,7 +2856,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe value."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].in_ease",
@@ -2864,7 +2866,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe incoming temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].in_ease.speed",
@@ -2873,7 +2875,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe incoming ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].in_ease.influence",
@@ -2883,7 +2885,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe incoming ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].out_ease",
@@ -2893,7 +2895,7 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe outgoing temporal ease."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].out_ease.speed",
@@ -2902,7 +2904,7 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe outgoing ease speed."
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[].out_ease.influence",
@@ -2912,7 +2914,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity keyframe outgoing ease influence."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions",
@@ -2922,7 +2924,7 @@
       "type": "object",
       "go_type": "recipe.TransformExpressions",
       "object_type": "TransformExpressions",
-      "x-aep-missing-semantic-summary": true
+      "description": "Transform property expressions."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.position",
@@ -2932,7 +2934,7 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Position expression settings."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.position.source",
@@ -2942,6 +2944,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
+      "description": "position transform expression source code.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -2959,8 +2962,7 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.position.enabled",
@@ -2969,6 +2971,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
+      "description": "position transform expression enable switch.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression_enabled",
@@ -2980,8 +2983,7 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.anchor_point",
@@ -2991,7 +2993,7 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Anchor point expression settings."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.anchor_point.source",
@@ -3001,6 +3003,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
+      "description": "anchor_point transform expression source code.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -3018,8 +3021,7 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.anchor_point.enabled",
@@ -3028,6 +3030,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
+      "description": "anchor_point transform expression enable switch.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression_enabled",
@@ -3039,8 +3042,7 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.scale",
@@ -3050,7 +3052,7 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Scale expression settings."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.scale.source",
@@ -3060,6 +3062,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
+      "description": "scale transform expression source code.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -3077,8 +3080,7 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.scale.enabled",
@@ -3087,6 +3089,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
+      "description": "scale transform expression enable switch.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression_enabled",
@@ -3098,8 +3101,7 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.rotation",
@@ -3109,7 +3111,7 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Rotation expression settings."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.rotation.source",
@@ -3119,6 +3121,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
+      "description": "rotation transform expression source code.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -3136,8 +3139,7 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.rotation.enabled",
@@ -3146,6 +3148,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
+      "description": "rotation transform expression enable switch.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression_enabled",
@@ -3157,8 +3160,7 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.opacity",
@@ -3168,7 +3170,7 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Opacity expression settings."
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.opacity.source",
@@ -3178,6 +3180,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
+      "description": "opacity transform expression source code.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -3195,8 +3198,7 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.opacity.enabled",
@@ -3205,6 +3207,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
+      "description": "opacity transform expression enable switch.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression_enabled",
@@ -3216,8 +3219,7 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].effects[]",
@@ -3268,7 +3270,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer effect match name."
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[]",
@@ -3279,6 +3281,7 @@
       "go_type": "[]recipe.EffectParam",
       "element": "recipe.EffectParam",
       "object_type": "EffectParam",
+      "description": "Layer effect parameter assignments.",
       "x-aep-capabilities": [
         {
           "key": "effect.set_param",
@@ -3294,8 +3297,7 @@
             "TestSetEffectParam_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].match_name",
@@ -3305,7 +3307,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Effect parameter match name."
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].value",
@@ -3314,7 +3316,7 @@
       "source_field": "Value",
       "type": "object",
       "go_type": "interface {}",
-      "x-aep-missing-semantic-summary": true
+      "description": "Effect parameter value."
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression",
@@ -3324,7 +3326,7 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Effect parameter expression settings."
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression.source",
@@ -3334,6 +3336,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
+      "description": "effect parameter expression source code.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression",
@@ -3351,8 +3354,7 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression.enabled",
@@ -3361,6 +3363,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
+      "description": "effect parameter expression enable switch.",
       "x-aep-capabilities": [
         {
           "key": "property.set_expression_enabled",
@@ -3372,8 +3375,7 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ],
-      "x-aep-missing-semantic-summary": true
+      ]
     },
     {
       "x-aep-path": "expected_profile",
@@ -3383,7 +3385,7 @@
       "type": "object",
       "go_type": "recipe.ExpectedProfile",
       "object_type": "ExpectedProfile",
-      "x-aep-missing-semantic-summary": true
+      "description": "Optional assertions used to compare the generated project against expected structure."
     },
     {
       "x-aep-path": "expected_profile.comp_count",
@@ -3392,7 +3394,7 @@
       "source_field": "CompCount",
       "type": "number",
       "go_type": "*int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected number of compositions."
     },
     {
       "x-aep-path": "expected_profile.layer_count",
@@ -3401,7 +3403,7 @@
       "source_field": "LayerCount",
       "type": "number",
       "go_type": "*int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected total number of layers."
     },
     {
       "x-aep-path": "expected_profile.text_layer_count",
@@ -3410,7 +3412,7 @@
       "source_field": "TextLayerCount",
       "type": "number",
       "go_type": "*int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected number of text layers."
     },
     {
       "x-aep-path": "expected_profile.shape_layer_count",
@@ -3419,7 +3421,7 @@
       "source_field": "ShapeLayerCount",
       "type": "number",
       "go_type": "*int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected number of shape layers."
     },
     {
       "x-aep-path": "expected_profile.name",
@@ -3428,7 +3430,7 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition display name."
     },
     {
       "x-aep-path": "expected_profile.width",
@@ -3437,7 +3439,7 @@
       "source_field": "Width",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition width in pixels."
     },
     {
       "x-aep-path": "expected_profile.height",
@@ -3446,7 +3448,7 @@
       "source_field": "Height",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition height in pixels."
     },
     {
       "x-aep-path": "expected_profile.frame_rate",
@@ -3455,7 +3457,7 @@
       "source_field": "FrameRate",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition frame rate in frames per second."
     },
     {
       "x-aep-path": "expected_profile.duration",
@@ -3464,7 +3466,7 @@
       "source_field": "Duration",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition duration in seconds."
     },
     {
       "x-aep-path": "expected_profile.label",
@@ -3473,7 +3475,7 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition label color index."
     },
     {
       "x-aep-path": "expected_profile.comment",
@@ -3482,7 +3484,7 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition comment text."
     },
     {
       "x-aep-path": "expected_profile.background_color",
@@ -3492,7 +3494,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition background color as RGB channels."
     },
     {
       "x-aep-path": "expected_profile.resolution_factor",
@@ -3502,7 +3504,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition preview resolution factor."
     },
     {
       "x-aep-path": "expected_profile.pixel_aspect",
@@ -3511,7 +3513,7 @@
       "source_field": "PixelAspect",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition pixel aspect ratio."
     },
     {
       "x-aep-path": "expected_profile.display_start_time",
@@ -3520,7 +3522,7 @@
       "source_field": "DisplayStartTime",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition display start time in seconds."
     },
     {
       "x-aep-path": "expected_profile.renderer",
@@ -3529,7 +3531,7 @@
       "source_field": "Renderer",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition renderer identifier."
     },
     {
       "x-aep-path": "expected_profile.draft_3d",
@@ -3538,7 +3540,7 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition draft 3D switch."
     },
     {
       "x-aep-path": "expected_profile.frame_blending",
@@ -3547,7 +3549,7 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition frame blending switch."
     },
     {
       "x-aep-path": "expected_profile.hide_shy_layers",
@@ -3556,7 +3558,7 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition shy layer visibility switch."
     },
     {
       "x-aep-path": "expected_profile.preserve_nested_frame_rate",
@@ -3565,7 +3567,7 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition nested frame-rate preservation switch."
     },
     {
       "x-aep-path": "expected_profile.preserve_nested_resolution",
@@ -3574,7 +3576,7 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition nested resolution preservation switch."
     },
     {
       "x-aep-path": "expected_profile.motion_blur",
@@ -3584,7 +3586,7 @@
       "type": "object",
       "go_type": "*recipe.ExpectedMotionBlurSpec",
       "object_type": "ExpectedMotionBlurSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition motion blur settings."
     },
     {
       "x-aep-path": "expected_profile.motion_blur.enabled",
@@ -3593,7 +3595,7 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition motion blur enable switch."
     },
     {
       "x-aep-path": "expected_profile.motion_blur.shutter_angle",
@@ -3602,7 +3604,7 @@
       "source_field": "ShutterAngle",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition motion blur shutter angle."
     },
     {
       "x-aep-path": "expected_profile.motion_blur.shutter_phase",
@@ -3611,7 +3613,7 @@
       "source_field": "ShutterPhase",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition motion blur shutter phase."
     },
     {
       "x-aep-path": "expected_profile.motion_blur.adaptive_sample_limit",
@@ -3620,7 +3622,7 @@
       "source_field": "AdaptiveSampleLimit",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition motion blur adaptive sample limit."
     },
     {
       "x-aep-path": "expected_profile.motion_blur.samples_per_frame",
@@ -3629,7 +3631,7 @@
       "source_field": "SamplesPerFrame",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition motion blur samples per frame."
     },
     {
       "x-aep-path": "expected_profile.work_area",
@@ -3639,7 +3641,7 @@
       "type": "object",
       "go_type": "*recipe.ExpectedWorkAreaSpec",
       "object_type": "ExpectedWorkAreaSpec",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition work area range."
     },
     {
       "x-aep-path": "expected_profile.work_area.start",
@@ -3648,7 +3650,7 @@
       "source_field": "Start",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition work area start time in seconds."
     },
     {
       "x-aep-path": "expected_profile.work_area.end",
@@ -3657,7 +3659,7 @@
       "source_field": "End",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition work area end time in seconds."
     },
     {
       "x-aep-path": "expected_profile.layers[]",
@@ -3668,7 +3670,7 @@
       "go_type": "[]recipe.ExpectedLayer",
       "element": "recipe.ExpectedLayer",
       "object_type": "ExpectedLayer",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected composition layer definitions."
     },
     {
       "x-aep-path": "expected_profile.layers[].name",
@@ -3678,7 +3680,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer name."
     },
     {
       "x-aep-path": "expected_profile.layers[].type",
@@ -3687,7 +3689,7 @@
       "source_field": "Type",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer type."
     },
     {
       "x-aep-path": "expected_profile.layers[].quality",
@@ -3696,7 +3698,7 @@
       "source_field": "Quality",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer quality mode."
     },
     {
       "x-aep-path": "expected_profile.layers[].blending_mode",
@@ -3705,7 +3707,7 @@
       "source_field": "BlendingMode",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer blending mode."
     },
     {
       "x-aep-path": "expected_profile.layers[].auto_orient",
@@ -3714,7 +3716,7 @@
       "source_field": "AutoOrient",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer auto-orientation mode."
     },
     {
       "x-aep-path": "expected_profile.layers[].light_kind",
@@ -3723,7 +3725,7 @@
       "source_field": "LightKind",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected light type."
     },
     {
       "x-aep-path": "expected_profile.layers[].source",
@@ -3732,7 +3734,7 @@
       "source_field": "Source",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected source item name."
     },
     {
       "x-aep-path": "expected_profile.layers[].source_kind",
@@ -3741,7 +3743,7 @@
       "source_field": "SourceKind",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected source item type."
     },
     {
       "x-aep-path": "expected_profile.layers[].light_source",
@@ -3750,7 +3752,7 @@
       "source_field": "LightSource",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected source layer for light data."
     },
     {
       "x-aep-path": "expected_profile.layers[].parent",
@@ -3759,7 +3761,7 @@
       "source_field": "Parent",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected parent layer name."
     },
     {
       "x-aep-path": "expected_profile.layers[].track_matte",
@@ -3768,7 +3770,7 @@
       "source_field": "TrackMatte",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected track matte mode."
     },
     {
       "x-aep-path": "expected_profile.layers[].matte",
@@ -3777,7 +3779,7 @@
       "source_field": "Matte",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected matte layer name."
     },
     {
       "x-aep-path": "expected_profile.layers[].label",
@@ -3786,7 +3788,7 @@
       "source_field": "Label",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer label color index."
     },
     {
       "x-aep-path": "expected_profile.layers[].comment",
@@ -3795,7 +3797,7 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer comment text."
     },
     {
       "x-aep-path": "expected_profile.layers[].timing",
@@ -3805,7 +3807,7 @@
       "type": "object",
       "go_type": "*recipe.ExpectedLayerTiming",
       "object_type": "ExpectedLayerTiming",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer timing checks."
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.start_time",
@@ -3814,7 +3816,7 @@
       "source_field": "StartTime",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer start time in seconds."
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.in_point",
@@ -3823,7 +3825,7 @@
       "source_field": "InPoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer in point in seconds."
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.out_point",
@@ -3832,7 +3834,7 @@
       "source_field": "OutPoint",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer out point in seconds."
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.duration",
@@ -3841,7 +3843,7 @@
       "source_field": "Duration",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer duration in seconds."
     },
     {
       "x-aep-path": "expected_profile.layers[].timing.stretch",
@@ -3850,7 +3852,7 @@
       "source_field": "Stretch",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer stretch percentage."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags",
@@ -3860,7 +3862,7 @@
       "type": "object",
       "go_type": "*recipe.ExpectedLayerFlags",
       "object_type": "ExpectedLayerFlags",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer switch checks."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.visible",
@@ -3869,7 +3871,7 @@
       "source_field": "Visible",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer video visibility switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.solo",
@@ -3878,7 +3880,7 @@
       "source_field": "Solo",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer solo switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.shy",
@@ -3887,7 +3889,7 @@
       "source_field": "Shy",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer shy switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.locked",
@@ -3896,7 +3898,7 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer lock switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_3d",
@@ -3905,7 +3907,7 @@
       "source_field": "Is3D",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer 3D switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_adjustment",
@@ -3914,7 +3916,7 @@
       "source_field": "IsAdjustment",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected adjustment-layer switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_null",
@@ -3923,7 +3925,7 @@
       "source_field": "IsNull",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected null-layer switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.is_guide",
@@ -3932,7 +3934,7 @@
       "source_field": "IsGuide",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected guide-layer switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.motion_blur",
@@ -3941,7 +3943,7 @@
       "source_field": "MotionBlur",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer motion blur switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.effects_enabled",
@@ -3950,7 +3952,7 @@
       "source_field": "EffectsEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer effects enable switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.audio_enabled",
@@ -3959,7 +3961,7 @@
       "source_field": "AudioEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer audio enable switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.frame_blend_enabled",
@@ -3968,7 +3970,7 @@
       "source_field": "FrameBlendEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer frame blending switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.markers_locked",
@@ -3977,7 +3979,7 @@
       "source_field": "MarkersLocked",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected layer marker lock switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.frame_blend_pixel_motion",
@@ -3986,7 +3988,7 @@
       "source_field": "FrameBlendPixelMotion",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected pixel-motion frame blending switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.collapse_transform",
@@ -3995,7 +3997,7 @@
       "source_field": "CollapseTransform",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected collapse transformations switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.sampling_bicubic",
@@ -4004,7 +4006,7 @@
       "source_field": "SamplingBicubic",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected bicubic sampling switch."
     },
     {
       "x-aep-path": "expected_profile.layers[].flags.preserve_transparency",
@@ -4013,7 +4015,7 @@
       "source_field": "PreserveTransparency",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected preserve transparency switch."
     },
     {
       "x-aep-path": "expected_profile.effects[]",
@@ -4024,7 +4026,7 @@
       "go_type": "[]recipe.ExpectedEffect",
       "element": "recipe.ExpectedEffect",
       "object_type": "ExpectedEffect",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect checks."
     },
     {
       "x-aep-path": "expected_profile.effects[].layer_name",
@@ -4034,7 +4036,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer name to inspect for the expected effect."
     },
     {
       "x-aep-path": "expected_profile.effects[].match_name",
@@ -4044,7 +4046,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect match name."
     },
     {
       "x-aep-path": "expected_profile.effects[].params[]",
@@ -4055,7 +4057,7 @@
       "go_type": "[]recipe.ExpectedEffectParam",
       "element": "recipe.ExpectedEffectParam",
       "object_type": "ExpectedEffectParam",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect parameter checks."
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].match_name",
@@ -4065,7 +4067,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect parameter match name."
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].value",
@@ -4074,7 +4076,7 @@
       "source_field": "Value",
       "type": "object",
       "go_type": "interface {}",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect parameter value."
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].expression",
@@ -4083,7 +4085,7 @@
       "source_field": "Expression",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect parameter expression source."
     },
     {
       "x-aep-path": "expected_profile.effects[].params[].expression_enabled",
@@ -4092,7 +4094,7 @@
       "source_field": "ExpressionEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected effect parameter expression enable switch."
     },
     {
       "x-aep-path": "expected_profile.properties[]",
@@ -4103,7 +4105,7 @@
       "go_type": "[]recipe.ExpectedProperty",
       "element": "recipe.ExpectedProperty",
       "object_type": "ExpectedProperty",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property checks."
     },
     {
       "x-aep-path": "expected_profile.properties[].layer_name",
@@ -4113,7 +4115,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property layer name."
     },
     {
       "x-aep-path": "expected_profile.properties[].match_name",
@@ -4123,7 +4125,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property match name."
     },
     {
       "x-aep-path": "expected_profile.properties[].value",
@@ -4132,7 +4134,7 @@
       "source_field": "Value",
       "type": "object",
       "go_type": "interface {}",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property value."
     },
     {
       "x-aep-path": "expected_profile.properties[].expression",
@@ -4141,7 +4143,7 @@
       "source_field": "Expression",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property expression source."
     },
     {
       "x-aep-path": "expected_profile.properties[].expression_enabled",
@@ -4150,7 +4152,7 @@
       "source_field": "ExpressionEnabled",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property expression enable switch."
     },
     {
       "x-aep-path": "expected_profile.text_styles[]",
@@ -4161,7 +4163,7 @@
       "go_type": "[]recipe.ExpectedTextStyle",
       "element": "recipe.ExpectedTextStyle",
       "object_type": "ExpectedTextStyle",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style checks."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].layer_name",
@@ -4171,7 +4173,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer name to inspect for the expected text style."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].run_index",
@@ -4180,7 +4182,7 @@
       "source_field": "RunIndex",
       "type": "number",
       "go_type": "int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style text run index."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].paragraph_index",
@@ -4189,7 +4191,7 @@
       "source_field": "ParagraphIndex",
       "type": "number",
       "go_type": "int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style paragraph index."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].font_size",
@@ -4198,7 +4200,7 @@
       "source_field": "FontSize",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style font size."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].fill_color",
@@ -4208,7 +4210,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style fill color as RGB channels."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].tracking",
@@ -4217,7 +4219,7 @@
       "source_field": "Tracking",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style character tracking amount."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].faux_bold",
@@ -4226,7 +4228,7 @@
       "source_field": "FauxBold",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style faux bold switch."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].faux_italic",
@@ -4235,7 +4237,7 @@
       "source_field": "FauxItalic",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style faux italic switch."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].apply_stroke",
@@ -4244,7 +4246,7 @@
       "source_field": "ApplyStroke",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style stroke enable switch."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].stroke_color",
@@ -4254,7 +4256,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style stroke color as RGB channels."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].stroke_width",
@@ -4263,7 +4265,7 @@
       "source_field": "StrokeWidth",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style stroke width."
     },
     {
       "x-aep-path": "expected_profile.text_styles[].justification",
@@ -4272,7 +4274,7 @@
       "source_field": "Justification",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected text style paragraph justification mode."
     },
     {
       "x-aep-path": "expected_profile.keyframes[]",
@@ -4293,7 +4295,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer name to inspect for expected keyframes."
     },
     {
       "x-aep-path": "expected_profile.keyframes[].match_name",
@@ -4303,7 +4305,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected keyframed property match name."
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[]",
@@ -4315,7 +4317,7 @@
       "element": "recipe.ExpectedKeyframe",
       "object_type": "ExpectedKeyframe",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property keyframes."
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[].time",
@@ -4325,7 +4327,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property keyframe time in seconds."
     },
     {
       "x-aep-path": "expected_profile.keyframes[].keyframes[].value",
@@ -4334,7 +4336,7 @@
       "source_field": "Value",
       "type": "object",
       "go_type": "interface {}",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected property keyframe value."
     },
     {
       "x-aep-path": "expected_profile.masks[]",
@@ -4345,7 +4347,7 @@
       "go_type": "[]recipe.ExpectedMask",
       "element": "recipe.ExpectedMask",
       "object_type": "ExpectedMask",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask checks."
     },
     {
       "x-aep-path": "expected_profile.masks[].layer_name",
@@ -4355,7 +4357,7 @@
       "type": "string",
       "go_type": "string",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Layer name to inspect for the expected mask."
     },
     {
       "x-aep-path": "expected_profile.masks[].name",
@@ -4364,7 +4366,7 @@
       "source_field": "Name",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask name."
     },
     {
       "x-aep-path": "expected_profile.masks[].mode",
@@ -4373,7 +4375,7 @@
       "source_field": "Mode",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask mode."
     },
     {
       "x-aep-path": "expected_profile.masks[].inverted",
@@ -4382,7 +4384,7 @@
       "source_field": "Inverted",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask inverted switch."
     },
     {
       "x-aep-path": "expected_profile.masks[].locked",
@@ -4391,7 +4393,7 @@
       "source_field": "Locked",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask lock switch."
     },
     {
       "x-aep-path": "expected_profile.masks[].color",
@@ -4401,7 +4403,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask UI color as RGB channels."
     },
     {
       "x-aep-path": "expected_profile.masks[].motion_blur",
@@ -4410,7 +4412,7 @@
       "source_field": "MotionBlur",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask motion blur mode."
     },
     {
       "x-aep-path": "expected_profile.masks[].feather_falloff",
@@ -4419,7 +4421,7 @@
       "source_field": "FeatherFalloff",
       "type": "string",
       "go_type": "string",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask feather falloff mode."
     },
     {
       "x-aep-path": "expected_profile.masks[].opacity",
@@ -4428,7 +4430,7 @@
       "source_field": "Opacity",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask opacity."
     },
     {
       "x-aep-path": "expected_profile.masks[].feather",
@@ -4438,7 +4440,7 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask feather vector."
     },
     {
       "x-aep-path": "expected_profile.masks[].expansion",
@@ -4447,7 +4449,7 @@
       "source_field": "Expansion",
       "type": "number",
       "go_type": "*float64",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask expansion."
     },
     {
       "x-aep-path": "expected_profile.masks[].closed",
@@ -4456,7 +4458,7 @@
       "source_field": "Closed",
       "type": "boolean",
       "go_type": "*bool",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask closed path switch."
     },
     {
       "x-aep-path": "expected_profile.masks[].vertex_count",
@@ -4465,7 +4467,7 @@
       "source_field": "VertexCount",
       "type": "number",
       "go_type": "*int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask vertex count."
     },
     {
       "x-aep-path": "expected_profile.masks[].path_keyframes[]",
@@ -4476,7 +4478,7 @@
       "go_type": "[]recipe.ExpectedMaskPathKeyframe",
       "element": "recipe.ExpectedMaskPathKeyframe",
       "object_type": "ExpectedMaskPathKeyframe",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask path keyframes."
     },
     {
       "x-aep-path": "expected_profile.masks[].path_keyframes[].time",
@@ -4486,7 +4488,7 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask path keyframe time in seconds."
     },
     {
       "x-aep-path": "expected_profile.masks[].path_keyframes[].vertex_count",
@@ -4495,7 +4497,7 @@
       "source_field": "VertexCount",
       "type": "number",
       "go_type": "*int",
-      "x-aep-missing-semantic-summary": true
+      "description": "Expected mask path keyframe vertex count."
     }
   ]
 }

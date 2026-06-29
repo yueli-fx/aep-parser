@@ -1,6 +1,9 @@
 package recipedoc
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestBuildDocumentRejectsUnknownRegistryPath(t *testing.T) {
 	_, err := buildDocumentWithRegistries(registries{
@@ -35,5 +38,24 @@ func TestBuildDocumentJoinsFieldMetadata(t *testing.T) {
 	}
 	if len(field.Capabilities) == 0 || field.Capabilities[0].Key != "comp.set_background_color" {
 		t.Fatalf("capabilities not joined: %+v", field.Capabilities)
+	}
+}
+
+func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var missing []string
+	for _, field := range doc.Fields {
+		if field.MissingSemanticSummary {
+			if _, ok := allowedMissingSemanticSummary[field.Path]; !ok {
+				missing = append(missing, field.Path)
+			}
+		}
+	}
+	if len(missing) > 0 {
+		t.Fatalf("unexpected missing semantic summaries:\n%s", strings.Join(missing, "\n"))
 	}
 }

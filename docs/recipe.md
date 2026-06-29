@@ -9,9 +9,9 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
 | `schema_version` | `number` | structural | Recipe schema version. | Must equal the supported recipe schema version. | - |
-| `project` | `object<ProjectSpec>` | structural | missing semantic summary | - | - |
-| `comps[]` | `array<recipe.CompSpec>` | structural | missing semantic summary | - | - |
-| `expected_profile` | `object<ExpectedProfile>` | - | missing semantic summary | - | - |
+| `project` | `object<ProjectSpec>` | structural | Project-level metadata used when materializing the recipe. | - | - |
+| `comps[]` | `array<recipe.CompSpec>` | structural | Composition definitions to create or validate. | - | - |
+| `expected_profile` | `object<ExpectedProfile>` | - | Optional assertions used to compare the generated project against expected structure. | - | - |
 
 ## ProjectSpec
 
@@ -29,37 +29,37 @@ This reference is generated from the canonical recipe field model.
 | `comps[].frame_rate` | `number` | structural | Composition frame rate in frames per second. | - | - |
 | `comps[].duration` | `number` | structural | Composition duration in seconds. | - | - |
 | `comps[].background_color` | `array<float64>` | - | Composition background color as RGB channels. | RGB color must contain exactly three channels in the 0..255 range. | `comp.set_background_color` (`SetBGColor`) |
-| `comps[].label` | `number` | - | missing semantic summary | - | - |
-| `comps[].comment` | `string` | - | missing semantic summary | - | - |
-| `comps[].renderer` | `string` | - | missing semantic summary | - | `comp.set_renderer` (`SetRenderer`) |
-| `comps[].resolution_factor` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].pixel_aspect` | `number` | - | missing semantic summary | - | - |
-| `comps[].display_start_time` | `number` | - | missing semantic summary | - | - |
-| `comps[].frame_blending` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].draft_3d` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].hide_shy_layers` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].preserve_nested_frame_rate` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].preserve_nested_resolution` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].motion_blur` | `object<CompMotionBlurSpec>` | - | missing semantic summary | - | - |
-| `comps[].work_area` | `object<CompWorkAreaSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[]` | `array<recipe.Layer>` | - | missing semantic summary | - | - |
+| `comps[].label` | `number` | - | Composition label color index. | - | - |
+| `comps[].comment` | `string` | - | Composition comment text. | - | - |
+| `comps[].renderer` | `string` | - | Composition renderer identifier. | - | `comp.set_renderer` (`SetRenderer`) |
+| `comps[].resolution_factor` | `array<float64>` | - | Composition preview resolution factor. | - | - |
+| `comps[].pixel_aspect` | `number` | - | Composition pixel aspect ratio. | - | - |
+| `comps[].display_start_time` | `number` | - | Composition display start time in seconds. | - | - |
+| `comps[].frame_blending` | `boolean` | - | Composition frame blending switch. | - | - |
+| `comps[].draft_3d` | `boolean` | - | Composition draft 3D switch. | - | - |
+| `comps[].hide_shy_layers` | `boolean` | - | Composition shy layer visibility switch. | - | - |
+| `comps[].preserve_nested_frame_rate` | `boolean` | - | Composition nested frame-rate preservation switch. | - | - |
+| `comps[].preserve_nested_resolution` | `boolean` | - | Composition nested resolution preservation switch. | - | - |
+| `comps[].motion_blur` | `object<CompMotionBlurSpec>` | - | Composition motion blur settings. | - | - |
+| `comps[].work_area` | `object<CompWorkAreaSpec>` | - | Composition work area range. | - | - |
+| `comps[].layers[]` | `array<recipe.Layer>` | - | Composition layer definitions. | - | - |
 
 ## CompMotionBlurSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].motion_blur.enabled` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].motion_blur.shutter_angle` | `number` | - | missing semantic summary | - | - |
-| `comps[].motion_blur.shutter_phase` | `number` | - | missing semantic summary | - | - |
-| `comps[].motion_blur.adaptive_sample_limit` | `number` | - | missing semantic summary | - | - |
-| `comps[].motion_blur.samples_per_frame` | `number` | - | missing semantic summary | - | - |
+| `comps[].motion_blur.enabled` | `boolean` | - | Composition motion blur enable switch. | - | - |
+| `comps[].motion_blur.shutter_angle` | `number` | - | Composition motion blur shutter angle. | - | - |
+| `comps[].motion_blur.shutter_phase` | `number` | - | Composition motion blur shutter phase. | - | - |
+| `comps[].motion_blur.adaptive_sample_limit` | `number` | - | Composition motion blur adaptive sample limit. | - | - |
+| `comps[].motion_blur.samples_per_frame` | `number` | - | Composition motion blur samples per frame. | - | - |
 
 ## CompWorkAreaSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].work_area.start` | `number` | - | missing semantic summary | - | - |
-| `comps[].work_area.end` | `number` | - | missing semantic summary | - | - |
+| `comps[].work_area.start` | `number` | - | Composition work area start time in seconds. | - | - |
+| `comps[].work_area.end` | `number` | - | Composition work area end time in seconds. | - | - |
 
 ## Layer
 
@@ -67,39 +67,39 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].type` | `string` | structural | Layer creation type. | Supported values create the corresponding layer type. | `layer.create_text` (`NewTextLayer`)<br>`layer.create_shape` (`NewShapeLayer`)<br>`layer.create_solid` (`NewSolidLayer`)<br>`layer.create_camera` (`NewCameraLayer`)<br>`layer.create_light` (`NewLightLayer`)<br>`layer.create_null` (`NewNullLayer`)<br>`layer.create_adjustment` (`NewAdjustmentLayer`) |
 | `comps[].layers[].name` | `string` | structural | Layer display name. | - | - |
-| `comps[].layers[].label` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].comment` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].visible` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].solo` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].locked` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].motion_blur` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].shy` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].effects_enabled` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].audio_enabled` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].frame_blend_enabled` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].markers_locked` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].collapse_transform` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].is_3d` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].is_adjust` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].is_null` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].is_guide` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].sampling_bicubic` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].frame_blend_pixel_motion` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].preserve_transparency` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].quality` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].blending_mode` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].track_matte` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].auto_orient` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].start_time` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].in_point` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].out_point` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].parent` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].text` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera` | `object<CameraSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].light` | `object<LightSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape` | `object<ShapeSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].label` | `number` | - | Layer label color index. | - | - |
+| `comps[].layers[].comment` | `string` | - | Layer comment text. | - | - |
+| `comps[].layers[].visible` | `boolean` | - | Layer video visibility switch. | - | - |
+| `comps[].layers[].solo` | `boolean` | - | Layer solo switch. | - | - |
+| `comps[].layers[].locked` | `boolean` | - | Layer lock switch. | - | - |
+| `comps[].layers[].motion_blur` | `boolean` | - | Layer motion blur switch. | - | - |
+| `comps[].layers[].shy` | `boolean` | - | Layer shy switch. | - | - |
+| `comps[].layers[].effects_enabled` | `boolean` | - | Layer effects enable switch. | - | - |
+| `comps[].layers[].audio_enabled` | `boolean` | - | Layer audio enable switch. | - | - |
+| `comps[].layers[].frame_blend_enabled` | `boolean` | - | Layer frame blending switch. | - | - |
+| `comps[].layers[].markers_locked` | `boolean` | - | Layer marker lock switch. | - | - |
+| `comps[].layers[].collapse_transform` | `boolean` | - | Layer collapse transformations switch. | - | - |
+| `comps[].layers[].is_3d` | `boolean` | - | Layer 3D switch. | - | - |
+| `comps[].layers[].is_adjust` | `boolean` | - | Adjustment-layer switch. | - | - |
+| `comps[].layers[].is_null` | `boolean` | - | Null-layer switch. | - | - |
+| `comps[].layers[].is_guide` | `boolean` | - | Guide-layer switch. | - | - |
+| `comps[].layers[].sampling_bicubic` | `boolean` | - | Bicubic sampling switch. | - | - |
+| `comps[].layers[].frame_blend_pixel_motion` | `boolean` | - | Pixel-motion frame blending switch. | - | - |
+| `comps[].layers[].preserve_transparency` | `boolean` | - | Preserve transparency switch. | - | - |
+| `comps[].layers[].quality` | `string` | - | Layer quality mode. | - | - |
+| `comps[].layers[].blending_mode` | `string` | - | Layer blending mode. | - | - |
+| `comps[].layers[].track_matte` | `string` | - | Layer track matte mode. | - | - |
+| `comps[].layers[].auto_orient` | `string` | - | Layer auto-orientation mode. | - | - |
+| `comps[].layers[].start_time` | `number` | - | Layer start time in seconds. | - | - |
+| `comps[].layers[].in_point` | `number` | - | Layer in point in seconds. | - | - |
+| `comps[].layers[].out_point` | `number` | - | Layer out point in seconds. | - | - |
+| `comps[].layers[].parent` | `string` | - | Parent layer name. | - | - |
+| `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | - |
+| `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - |
+| `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - |
+| `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | - | - |
+| `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - |
+| `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | - | - |
 | `comps[].layers[].transform` | `object<Transform>` | - | Layer transform block. | - | `layer.set_transform` (`SetLayerTransform`) |
 | `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | - | `effect.add_builtin` (`AddEffect`) |
 
@@ -107,593 +107,593 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].text_style.run_index` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.paragraph_index` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.font_size` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.fill_color` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.tracking` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.faux_bold` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.faux_italic` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.apply_stroke` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.stroke_width` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].text_style.justification` | `string` | - | missing semantic summary | - | - |
+| `comps[].layers[].text_style.run_index` | `number` | - | Layer text style text run index. | - | - |
+| `comps[].layers[].text_style.paragraph_index` | `number` | - | Layer text style paragraph index. | - | - |
+| `comps[].layers[].text_style.font_size` | `number` | - | Layer text style font size. | - | - |
+| `comps[].layers[].text_style.fill_color` | `array<float64>` | - | Layer text style fill color as RGB channels. | - | - |
+| `comps[].layers[].text_style.tracking` | `number` | - | Layer text style character tracking amount. | - | - |
+| `comps[].layers[].text_style.faux_bold` | `boolean` | - | Layer text style faux bold switch. | - | - |
+| `comps[].layers[].text_style.faux_italic` | `boolean` | - | Layer text style faux italic switch. | - | - |
+| `comps[].layers[].text_style.apply_stroke` | `boolean` | - | Layer text style stroke enable switch. | - | - |
+| `comps[].layers[].text_style.stroke_color` | `array<float64>` | - | Layer text style stroke color as RGB channels. | - | - |
+| `comps[].layers[].text_style.stroke_width` | `number` | - | Layer text style stroke width. | - | - |
+| `comps[].layers[].text_style.justification` | `string` | - | Layer text style paragraph justification mode. | - | - |
 
 ## CameraSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].camera.zoom` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.depth_of_field` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.focus_distance` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.aperture` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.blur_level` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_shape` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_rotation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_roundness` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_aspect_ratio` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_diffraction_fringe` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_highlight_gain` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_highlight_threshold` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].camera.iris_highlight_saturation` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].camera.zoom` | `number` | - | Camera zoom value. | - | - |
+| `comps[].layers[].camera.depth_of_field` | `boolean` | - | Depth of field enable switch. | - | - |
+| `comps[].layers[].camera.focus_distance` | `number` | - | Camera focus distance. | - | - |
+| `comps[].layers[].camera.aperture` | `number` | - | Camera aperture. | - | - |
+| `comps[].layers[].camera.blur_level` | `number` | - | Camera blur level. | - | - |
+| `comps[].layers[].camera.iris_shape` | `number` | - | Camera iris shape. | - | - |
+| `comps[].layers[].camera.iris_rotation` | `number` | - | Camera iris rotation. | - | - |
+| `comps[].layers[].camera.iris_roundness` | `number` | - | Camera iris roundness. | - | - |
+| `comps[].layers[].camera.iris_aspect_ratio` | `number` | - | Camera iris aspect ratio. | - | - |
+| `comps[].layers[].camera.iris_diffraction_fringe` | `number` | - | Camera iris diffraction fringe amount. | - | - |
+| `comps[].layers[].camera.iris_highlight_gain` | `number` | - | Camera iris highlight gain. | - | - |
+| `comps[].layers[].camera.iris_highlight_threshold` | `number` | - | Camera iris highlight threshold. | - | - |
+| `comps[].layers[].camera.iris_highlight_saturation` | `number` | - | Camera iris highlight saturation. | - | - |
 
 ## LightSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].light.kind` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.source_layer` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.intensity` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.color` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.casts_shadows` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.shadow_darkness` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.shadow_diffusion` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.falloff_type` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.falloff_start` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.falloff_distance` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.cone_angle` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].light.cone_feather` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].light.kind` | `string` | - | Light type. | - | - |
+| `comps[].layers[].light.source_layer` | `string` | - | Source layer for environment light data. | - | - |
+| `comps[].layers[].light.intensity` | `number` | - | Light intensity. | - | - |
+| `comps[].layers[].light.color` | `array<float64>` | - | Light color as RGB channels. | - | - |
+| `comps[].layers[].light.casts_shadows` | `boolean` | - | Light shadow-casting switch. | - | - |
+| `comps[].layers[].light.shadow_darkness` | `number` | - | Light shadow darkness. | - | - |
+| `comps[].layers[].light.shadow_diffusion` | `number` | - | Light shadow diffusion. | - | - |
+| `comps[].layers[].light.falloff_type` | `number` | - | Light falloff type. | - | - |
+| `comps[].layers[].light.falloff_start` | `number` | - | Light falloff start distance. | - | - |
+| `comps[].layers[].light.falloff_distance` | `number` | - | Light falloff distance. | - | - |
+| `comps[].layers[].light.cone_angle` | `number` | - | Spotlight cone angle. | - | - |
+| `comps[].layers[].light.cone_feather` | `number` | - | Spotlight cone feather amount. | - | - |
 
 ## ShapeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.kind` | `string` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.size` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.position` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.roundness` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.points` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.rotation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.inner_radius` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.outer_radius` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.inner_roundness` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.outer_roundness` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.fill_color` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.fill_opacity` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.fill_blend_mode` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.fill_composite_order` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.fill_rule` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill` | `object<GradientFillSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke` | `object<GradientStrokeSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke` | `object<StrokeSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.trim` | `object<TrimSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.round_corners` | `object<RoundCornersSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.offset_paths` | `object<OffsetPathsSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater` | `object<RepeaterSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.merge_paths` | `object<MergePathsSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.zigzag` | `object<ZigZagSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.pucker_bloat` | `object<PuckerBloatSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.twist` | `object<TwistSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths` | `object<WigglePathsSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform` | `object<WiggleTransformSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | - | - |
+| `comps[].layers[].shape.size` | `array<float64>` | - | Shape size vector. | - | - |
+| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | - | - |
+| `comps[].layers[].shape.roundness` | `number` | - | Rectangle corner roundness. | - | - |
+| `comps[].layers[].shape.points` | `number` | - | Star or polygon point count. | - | - |
+| `comps[].layers[].shape.rotation` | `number` | - | Shape local rotation. | - | - |
+| `comps[].layers[].shape.inner_radius` | `number` | - | Star inner radius. | - | - |
+| `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | - | - |
+| `comps[].layers[].shape.inner_roundness` | `number` | - | Star inner roundness. | - | - |
+| `comps[].layers[].shape.outer_roundness` | `number` | - | Star or polygon outer roundness. | - | - |
+| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | - |
+| `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | - | - |
+| `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | - | - |
+| `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | - | - |
+| `comps[].layers[].shape.fill_rule` | `string` | - | Solid fill rule. | - | - |
+| `comps[].layers[].shape.gradient_fill` | `object<GradientFillSpec>` | - | Gradient fill settings. | - | - |
+| `comps[].layers[].shape.gradient_stroke` | `object<GradientStrokeSpec>` | - | Gradient stroke settings. | - | - |
+| `comps[].layers[].shape.stroke` | `object<StrokeSpec>` | - | Solid stroke settings. | - | - |
+| `comps[].layers[].shape.trim` | `object<TrimSpec>` | - | Trim paths operator settings. | - | - |
+| `comps[].layers[].shape.round_corners` | `object<RoundCornersSpec>` | - | Round corners operator settings. | - | - |
+| `comps[].layers[].shape.offset_paths` | `object<OffsetPathsSpec>` | - | Offset paths operator settings. | - | - |
+| `comps[].layers[].shape.repeater` | `object<RepeaterSpec>` | - | Repeater operator settings. | - | - |
+| `comps[].layers[].shape.merge_paths` | `object<MergePathsSpec>` | - | Merge paths operator settings. | - | - |
+| `comps[].layers[].shape.zigzag` | `object<ZigZagSpec>` | - | Zig Zag operator settings. | - | - |
+| `comps[].layers[].shape.pucker_bloat` | `object<PuckerBloatSpec>` | - | Pucker and Bloat operator settings. | - | - |
+| `comps[].layers[].shape.twist` | `object<TwistSpec>` | - | Twist operator settings. | - | - |
+| `comps[].layers[].shape.wiggle_paths` | `object<WigglePathsSpec>` | - | Wiggle Paths operator settings. | - | - |
+| `comps[].layers[].shape.wiggle_transform` | `object<WiggleTransformSpec>` | - | Wiggle Transform operator settings. | - | - |
 
 ## GradientFillSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.type` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.start_point` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.end_point` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.highlight_length` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.highlight_angle` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.gradient_fill.type` | `string` | - | Gradient fill type. | - | - |
+| `comps[].layers[].shape.gradient_fill.start_point` | `array<float64>` | - | Gradient fill start point. | - | - |
+| `comps[].layers[].shape.gradient_fill.end_point` | `array<float64>` | - | Gradient fill end point. | - | - |
+| `comps[].layers[].shape.gradient_fill.highlight_length` | `number` | - | Radial gradient fill highlight length. | - | - |
+| `comps[].layers[].shape.gradient_fill.highlight_angle` | `number` | - | Radial gradient fill highlight angle. | - | - |
+| `comps[].layers[].shape.gradient_fill.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient fill color stops. | - | - |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient fill alpha stops. | - | - |
 
 ## GradientColorStopSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.color_stops[].offset` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.color_stops[].midpoint` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.color_stops[].color` | `array<float64>` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.color_stops[].offset` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.color_stops[].midpoint` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.color_stops[].color` | `array<float64>` | structural | missing semantic summary | - | - |
+| `comps[].layers[].shape.gradient_fill.color_stops[].offset` | `number` | structural | Gradient fill color stop offset. | - | - |
+| `comps[].layers[].shape.gradient_fill.color_stops[].midpoint` | `number` | - | Gradient fill color stop midpoint. | - | - |
+| `comps[].layers[].shape.gradient_fill.color_stops[].color` | `array<float64>` | structural | Gradient fill color stop RGB color. | - | - |
+| `comps[].layers[].shape.gradient_stroke.color_stops[].offset` | `number` | structural | Gradient stroke color stop offset. | - | - |
+| `comps[].layers[].shape.gradient_stroke.color_stops[].midpoint` | `number` | - | Gradient stroke color stop midpoint. | - | - |
+| `comps[].layers[].shape.gradient_stroke.color_stops[].color` | `array<float64>` | structural | Gradient stroke color stop RGB color. | - | - |
 
 ## GradientAlphaStopSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[].offset` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[].alpha` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[].offset` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha` | `number` | structural | missing semantic summary | - | - |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[].offset` | `number` | structural | Gradient fill alpha stop offset. | - | - |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[].midpoint` | `number` | - | Gradient fill alpha stop midpoint. | - | - |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[].alpha` | `number` | structural | Gradient fill alpha stop opacity value. | - | - |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[].offset` | `number` | structural | Gradient stroke alpha stop offset. | - | - |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[].midpoint` | `number` | - | Gradient stroke alpha stop midpoint. | - | - |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[].alpha` | `number` | structural | Gradient stroke alpha stop opacity value. | - | - |
 
 ## GradientStrokeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_stroke.type` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.start_point` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.end_point` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.highlight_length` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.highlight_angle` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.width` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.line_cap` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.line_join` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.miter_limit` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.gradient_stroke.type` | `string` | - | Gradient stroke type. | - | - |
+| `comps[].layers[].shape.gradient_stroke.start_point` | `array<float64>` | - | Gradient stroke start point. | - | - |
+| `comps[].layers[].shape.gradient_stroke.end_point` | `array<float64>` | - | Gradient stroke end point. | - | - |
+| `comps[].layers[].shape.gradient_stroke.highlight_length` | `number` | - | Radial gradient stroke highlight length. | - | - |
+| `comps[].layers[].shape.gradient_stroke.highlight_angle` | `number` | - | Radial gradient stroke highlight angle. | - | - |
+| `comps[].layers[].shape.gradient_stroke.width` | `number` | - | Gradient stroke width. | - | - |
+| `comps[].layers[].shape.gradient_stroke.line_cap` | `string` | - | Gradient stroke line cap mode. | - | - |
+| `comps[].layers[].shape.gradient_stroke.line_join` | `string` | - | Gradient stroke line join mode. | - | - |
+| `comps[].layers[].shape.gradient_stroke.miter_limit` | `number` | - | Gradient stroke miter limit. | - | - |
+| `comps[].layers[].shape.gradient_stroke.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient stroke color stops. | - | - |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient stroke alpha stops. | - | - |
 
 ## StrokeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.color` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.width` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.opacity` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.line_cap` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.line_join` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.miter_limit` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.composite_order` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.taper` | `object<StrokeTaperSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.wave` | `object<StrokeWaveSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.dashes` | `object<StrokeDashesSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.stroke.color` | `array<float64>` | - | Stroke color as RGB channels. | - | - |
+| `comps[].layers[].shape.stroke.width` | `number` | - | Stroke width. | - | - |
+| `comps[].layers[].shape.stroke.opacity` | `number` | - | Stroke opacity. | - | - |
+| `comps[].layers[].shape.stroke.line_cap` | `string` | - | Stroke line cap mode. | - | - |
+| `comps[].layers[].shape.stroke.line_join` | `string` | - | Stroke line join mode. | - | - |
+| `comps[].layers[].shape.stroke.miter_limit` | `number` | - | Stroke miter limit. | - | - |
+| `comps[].layers[].shape.stroke.composite_order` | `string` | - | Stroke composite order. | - | - |
+| `comps[].layers[].shape.stroke.taper` | `object<StrokeTaperSpec>` | - | Stroke taper settings. | - | - |
+| `comps[].layers[].shape.stroke.wave` | `object<StrokeWaveSpec>` | - | Stroke wave settings. | - | - |
+| `comps[].layers[].shape.stroke.dashes` | `object<StrokeDashesSpec>` | - | Stroke dash pattern settings. | - | - |
 
 ## StrokeTaperSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.taper.start_length` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.taper.end_length` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.taper.start_width` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.taper.end_width` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.taper.start_ease` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.taper.end_ease` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.stroke.taper.start_length` | `number` | - | Stroke taper start length. | - | - |
+| `comps[].layers[].shape.stroke.taper.end_length` | `number` | - | Stroke taper end length. | - | - |
+| `comps[].layers[].shape.stroke.taper.start_width` | `number` | - | Stroke taper start width. | - | - |
+| `comps[].layers[].shape.stroke.taper.end_width` | `number` | - | Stroke taper end width. | - | - |
+| `comps[].layers[].shape.stroke.taper.start_ease` | `number` | - | Stroke taper start ease. | - | - |
+| `comps[].layers[].shape.stroke.taper.end_ease` | `number` | - | Stroke taper end ease. | - | - |
 
 ## StrokeWaveSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.wave.amount` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.wave.wavelength` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.wave.phase` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.stroke.wave.amount` | `number` | - | Stroke wave amount. | - | - |
+| `comps[].layers[].shape.stroke.wave.wavelength` | `number` | - | Stroke wave wavelength. | - | - |
+| `comps[].layers[].shape.stroke.wave.phase` | `number` | - | Stroke wave phase. | - | - |
 
 ## StrokeDashesSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.dashes.dash` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.stroke.dashes.gap` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.stroke.dashes.dash` | `number` | - | Stroke dash length. | - | - |
+| `comps[].layers[].shape.stroke.dashes.gap` | `number` | - | Stroke gap length. | - | - |
 
 ## TrimSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.trim.start` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.trim.end` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.trim.offset` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.trim.start` | `number` | - | Trim paths start percentage. | - | - |
+| `comps[].layers[].shape.trim.end` | `number` | - | Trim paths end percentage. | - | - |
+| `comps[].layers[].shape.trim.offset` | `number` | - | Trim paths offset. | - | - |
 
 ## RoundCornersSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.round_corners.radius` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.round_corners.radius` | `number` | - | Round corners radius. | - | - |
 
 ## OffsetPathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.offset_paths.amount` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.offset_paths.line_join` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.offset_paths.miter_limit` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.offset_paths.copies` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.offset_paths.copy_offset` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.offset_paths.amount` | `number` | - | Offset paths amount. | - | - |
+| `comps[].layers[].shape.offset_paths.line_join` | `string` | - | Offset paths line join mode. | - | - |
+| `comps[].layers[].shape.offset_paths.miter_limit` | `number` | - | Offset paths miter limit. | - | - |
+| `comps[].layers[].shape.offset_paths.copies` | `number` | - | Offset paths copy count. | - | - |
+| `comps[].layers[].shape.offset_paths.copy_offset` | `number` | - | Offset paths copy offset. | - | - |
 
 ## RepeaterSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.repeater.copies` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.offset` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.order` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.anchor` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.position` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.scale` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.rotation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.start_opacity` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.repeater.end_opacity` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.repeater.copies` | `number` | - | Repeater copy count. | - | - |
+| `comps[].layers[].shape.repeater.offset` | `number` | - | Repeater copy offset. | - | - |
+| `comps[].layers[].shape.repeater.order` | `string` | - | Repeater composite order. | - | - |
+| `comps[].layers[].shape.repeater.anchor` | `array<float64>` | - | Repeater transform anchor point. | - | - |
+| `comps[].layers[].shape.repeater.position` | `array<float64>` | - | Repeater transform position. | - | - |
+| `comps[].layers[].shape.repeater.scale` | `array<float64>` | - | Repeater transform scale. | - | - |
+| `comps[].layers[].shape.repeater.rotation` | `number` | - | Repeater transform rotation. | - | - |
+| `comps[].layers[].shape.repeater.start_opacity` | `number` | - | Repeater starting opacity. | - | - |
+| `comps[].layers[].shape.repeater.end_opacity` | `number` | - | Repeater ending opacity. | - | - |
 
 ## MergePathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.merge_paths.type` | `string` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.merge_paths.type` | `string` | - | Merge paths mode. | - | - |
 
 ## ZigZagSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.zigzag.size` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.zigzag.detail` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.zigzag.points` | `string` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.zigzag.size` | `number` | - | Zig Zag size. | - | - |
+| `comps[].layers[].shape.zigzag.detail` | `number` | - | Zig Zag detail. | - | - |
+| `comps[].layers[].shape.zigzag.points` | `string` | - | Zig Zag point mode. | - | - |
 
 ## PuckerBloatSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.pucker_bloat.amount` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.pucker_bloat.amount` | `number` | - | Pucker and Bloat amount. | - | - |
 
 ## TwistSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.twist.angle` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.twist.center` | `array<float64>` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.twist.angle` | `number` | - | Twist angle. | - | - |
+| `comps[].layers[].shape.twist.center` | `array<float64>` | - | Twist center point. | - | - |
 
 ## WigglePathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.wiggle_paths.size` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.detail` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.wiggles_per_second` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.random_seed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.points` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.correlation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.temporal_phase` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_paths.spatial_phase` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.wiggle_paths.size` | `number` | - | Wiggle Paths size. | - | - |
+| `comps[].layers[].shape.wiggle_paths.detail` | `number` | - | Wiggle Paths detail. | - | - |
+| `comps[].layers[].shape.wiggle_paths.wiggles_per_second` | `number` | - | Wiggle Paths frequency. | - | - |
+| `comps[].layers[].shape.wiggle_paths.random_seed` | `number` | - | Wiggle Paths random seed. | - | - |
+| `comps[].layers[].shape.wiggle_paths.points` | `string` | - | Wiggle Paths point mode. | - | - |
+| `comps[].layers[].shape.wiggle_paths.correlation` | `number` | - | Wiggle Paths correlation. | - | - |
+| `comps[].layers[].shape.wiggle_paths.temporal_phase` | `number` | - | Wiggle Paths temporal phase. | - | - |
+| `comps[].layers[].shape.wiggle_paths.spatial_phase` | `number` | - | Wiggle Paths spatial phase. | - | - |
 
 ## WiggleTransformSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.wiggle_transform.anchor` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.position` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.scale` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.rotation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.wiggles_per_second` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.random_seed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.correlation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.temporal_phase` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].shape.wiggle_transform.spatial_phase` | `number` | - | missing semantic summary | - | - |
+| `comps[].layers[].shape.wiggle_transform.anchor` | `array<float64>` | - | Wiggle Transform anchor amount. | - | - |
+| `comps[].layers[].shape.wiggle_transform.position` | `array<float64>` | - | Wiggle Transform position amount. | - | - |
+| `comps[].layers[].shape.wiggle_transform.scale` | `array<float64>` | - | Wiggle Transform scale amount. | - | - |
+| `comps[].layers[].shape.wiggle_transform.rotation` | `number` | - | Wiggle Transform rotation amount. | - | - |
+| `comps[].layers[].shape.wiggle_transform.wiggles_per_second` | `number` | - | Wiggle Transform frequency. | - | - |
+| `comps[].layers[].shape.wiggle_transform.random_seed` | `number` | - | Wiggle Transform random seed. | - | - |
+| `comps[].layers[].shape.wiggle_transform.correlation` | `number` | - | Wiggle Transform correlation. | - | - |
+| `comps[].layers[].shape.wiggle_transform.temporal_phase` | `number` | - | Wiggle Transform temporal phase. | - | - |
+| `comps[].layers[].shape.wiggle_transform.spatial_phase` | `number` | - | Wiggle Transform spatial phase. | - | - |
 
 ## MaskSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].masks[].name` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].mode` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].inverted` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].locked` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].color` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].motion_blur` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].feather_falloff` | `string` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].opacity` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].feather` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].expansion` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].closed` | `boolean` | - | missing semantic summary | - | - |
-| `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | missing semantic summary | - | - |
-| `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].masks[].name` | `string` | - | Layer mask name. | - | - |
+| `comps[].layers[].masks[].mode` | `string` | - | Layer mask mode. | - | - |
+| `comps[].layers[].masks[].inverted` | `boolean` | - | Layer mask inverted switch. | - | - |
+| `comps[].layers[].masks[].locked` | `boolean` | - | Layer mask lock switch. | - | - |
+| `comps[].layers[].masks[].color` | `array<float64>` | - | Layer mask UI color as RGB channels. | - | - |
+| `comps[].layers[].masks[].motion_blur` | `string` | - | Layer mask motion blur mode. | - | - |
+| `comps[].layers[].masks[].feather_falloff` | `string` | - | Layer mask feather falloff mode. | - | - |
+| `comps[].layers[].masks[].opacity` | `number` | - | Layer mask opacity. | - | - |
+| `comps[].layers[].masks[].feather` | `array<float64>` | - | Layer mask feather vector. | - | - |
+| `comps[].layers[].masks[].expansion` | `number` | - | Layer mask expansion. | - | - |
+| `comps[].layers[].masks[].closed` | `boolean` | - | Layer mask closed path switch. | - | - |
+| `comps[].layers[].masks[].vertices` | `array<[]float64>` | structural | Layer mask path vertices. | - | - |
+| `comps[].layers[].masks[].path_keyframes[]` | `array<recipe.MaskPathKeyframeSpec>` | - | Layer mask path keyframes. | - | - |
 
 ## MaskPathKeyframeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].masks[].path_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].masks[].path_keyframes[].vertices` | `array<[]float64>` | structural | missing semantic summary | - | - |
+| `comps[].layers[].masks[].path_keyframes[].time` | `number` | structural | Layer mask path keyframe time in seconds. | - | - |
+| `comps[].layers[].masks[].path_keyframes[].vertices` | `array<[]float64>` | structural | Layer mask path keyframe vertices. | - | - |
 
 ## Transform
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.position` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point` | `array<float64>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[]` | `array<recipe.VectorKeyframe>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[]` | `array<recipe.VectorKeyframe>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[]` | `array<recipe.VectorKeyframe>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.expressions` | `object<TransformExpressions>` | - | missing semantic summary | - | - |
+| `comps[].layers[].transform.position` | `array<float64>` | - | Static position value. | - | - |
+| `comps[].layers[].transform.scale` | `array<float64>` | - | Static scale value. | - | - |
+| `comps[].layers[].transform.anchor_point` | `array<float64>` | - | Static anchor point value. | - | - |
+| `comps[].layers[].transform.rotation` | `number` | - | Static rotation value. | - | - |
+| `comps[].layers[].transform.opacity` | `number` | - | Static opacity value. | - | - |
+| `comps[].layers[].transform.position_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Position keyframe list. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Anchor point keyframe list. | - | - |
+| `comps[].layers[].transform.scale_keyframes[]` | `array<recipe.VectorKeyframe>` | - | Scale keyframe list. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Rotation keyframe list. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Opacity keyframe list. | - | - |
+| `comps[].layers[].transform.expressions` | `object<TransformExpressions>` | - | Transform property expressions. | - | - |
 
 ## VectorKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.position_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[].value` | `array<float64>` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[].in_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[].out_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].value` | `array<float64>` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].in_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].out_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].value` | `array<float64>` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].in_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].out_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
+| `comps[].layers[].transform.position_keyframes[].time` | `number` | structural | Position keyframe time in seconds. | - | - |
+| `comps[].layers[].transform.position_keyframes[].value` | `array<float64>` | structural | Position keyframe vector value. | - | - |
+| `comps[].layers[].transform.position_keyframes[].in_ease` | `object<TemporalEase>` | - | Position keyframe incoming temporal ease. | - | - |
+| `comps[].layers[].transform.position_keyframes[].out_ease` | `object<TemporalEase>` | - | Position keyframe outgoing temporal ease. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].time` | `number` | structural | Anchor point keyframe time in seconds. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].value` | `array<float64>` | structural | Anchor point keyframe vector value. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].in_ease` | `object<TemporalEase>` | - | Anchor point keyframe incoming temporal ease. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].out_ease` | `object<TemporalEase>` | - | Anchor point keyframe outgoing temporal ease. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].time` | `number` | structural | Scale keyframe time in seconds. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].value` | `array<float64>` | structural | Scale keyframe vector value. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].in_ease` | `object<TemporalEase>` | - | Scale keyframe incoming temporal ease. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].out_ease` | `object<TemporalEase>` | - | Scale keyframe outgoing temporal ease. | - | - |
 
 ## TemporalEase
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.position_keyframes[].in_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[].in_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[].out_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.position_keyframes[].out_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].in_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].in_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].out_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.scale_keyframes[].out_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].in_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].in_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].out_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].out_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].in_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].in_ease.influence` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].out_ease.speed` | `number` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | missing semantic summary | - | - |
+| `comps[].layers[].transform.position_keyframes[].in_ease.speed` | `number` | - | Position keyframe incoming ease speed. | - | - |
+| `comps[].layers[].transform.position_keyframes[].in_ease.influence` | `number` | structural | Position keyframe incoming ease influence. | - | - |
+| `comps[].layers[].transform.position_keyframes[].out_ease.speed` | `number` | - | Position keyframe outgoing ease speed. | - | - |
+| `comps[].layers[].transform.position_keyframes[].out_ease.influence` | `number` | structural | Position keyframe outgoing ease influence. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed` | `number` | - | Anchor point keyframe incoming ease speed. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence` | `number` | structural | Anchor point keyframe incoming ease influence. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed` | `number` | - | Anchor point keyframe outgoing ease speed. | - | - |
+| `comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence` | `number` | structural | Anchor point keyframe outgoing ease influence. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].in_ease.speed` | `number` | - | Scale keyframe incoming ease speed. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].in_ease.influence` | `number` | structural | Scale keyframe incoming ease influence. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].out_ease.speed` | `number` | - | Scale keyframe outgoing ease speed. | - | - |
+| `comps[].layers[].transform.scale_keyframes[].out_ease.influence` | `number` | structural | Scale keyframe outgoing ease influence. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].in_ease.speed` | `number` | - | Rotation keyframe incoming ease speed. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].in_ease.influence` | `number` | structural | Rotation keyframe incoming ease influence. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].out_ease.speed` | `number` | - | Rotation keyframe outgoing ease speed. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].out_ease.influence` | `number` | structural | Rotation keyframe outgoing ease influence. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].in_ease.speed` | `number` | - | Opacity keyframe incoming ease speed. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].in_ease.influence` | `number` | structural | Opacity keyframe incoming ease influence. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].out_ease.speed` | `number` | - | Opacity keyframe outgoing ease speed. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].out_ease.influence` | `number` | structural | Opacity keyframe outgoing ease influence. | - | - |
 
 ## ScalarKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].value` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].in_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.rotation_keyframes[].out_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].value` | `number` | structural | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].in_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.opacity_keyframes[].out_ease` | `object<TemporalEase>` | - | missing semantic summary | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | Rotation keyframe time in seconds. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].value` | `number` | structural | Rotation keyframe value. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].in_ease` | `object<TemporalEase>` | - | Rotation keyframe incoming temporal ease. | - | - |
+| `comps[].layers[].transform.rotation_keyframes[].out_ease` | `object<TemporalEase>` | - | Rotation keyframe outgoing temporal ease. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].time` | `number` | structural | Opacity keyframe time in seconds. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].value` | `number` | structural | Opacity keyframe value. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].in_ease` | `object<TemporalEase>` | - | Opacity keyframe incoming temporal ease. | - | - |
+| `comps[].layers[].transform.opacity_keyframes[].out_ease` | `object<TemporalEase>` | - | Opacity keyframe outgoing temporal ease. | - | - |
 
 ## TransformExpressions
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.expressions.position` | `object<ExpressionSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.expressions.anchor_point` | `object<ExpressionSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.expressions.scale` | `object<ExpressionSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.expressions.rotation` | `object<ExpressionSpec>` | - | missing semantic summary | - | - |
-| `comps[].layers[].transform.expressions.opacity` | `object<ExpressionSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].transform.expressions.position` | `object<ExpressionSpec>` | - | Position expression settings. | - | - |
+| `comps[].layers[].transform.expressions.anchor_point` | `object<ExpressionSpec>` | - | Anchor point expression settings. | - | - |
+| `comps[].layers[].transform.expressions.scale` | `object<ExpressionSpec>` | - | Scale expression settings. | - | - |
+| `comps[].layers[].transform.expressions.rotation` | `object<ExpressionSpec>` | - | Rotation expression settings. | - | - |
+| `comps[].layers[].transform.expressions.opacity` | `object<ExpressionSpec>` | - | Opacity expression settings. | - | - |
 
 ## ExpressionSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].transform.expressions.position.source` | `string` | structural | missing semantic summary | - | `property.set_expression` (`Property.SetExpression`) |
-| `comps[].layers[].transform.expressions.position.enabled` | `boolean` | - | missing semantic summary | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
-| `comps[].layers[].transform.expressions.anchor_point.source` | `string` | structural | missing semantic summary | - | `property.set_expression` (`Property.SetExpression`) |
-| `comps[].layers[].transform.expressions.anchor_point.enabled` | `boolean` | - | missing semantic summary | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
-| `comps[].layers[].transform.expressions.scale.source` | `string` | structural | missing semantic summary | - | `property.set_expression` (`Property.SetExpression`) |
-| `comps[].layers[].transform.expressions.scale.enabled` | `boolean` | - | missing semantic summary | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
-| `comps[].layers[].transform.expressions.rotation.source` | `string` | structural | missing semantic summary | - | `property.set_expression` (`Property.SetExpression`) |
-| `comps[].layers[].transform.expressions.rotation.enabled` | `boolean` | - | missing semantic summary | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
-| `comps[].layers[].transform.expressions.opacity.source` | `string` | structural | missing semantic summary | - | `property.set_expression` (`Property.SetExpression`) |
-| `comps[].layers[].transform.expressions.opacity.enabled` | `boolean` | - | missing semantic summary | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
-| `comps[].layers[].effects[].params[].expression.source` | `string` | structural | missing semantic summary | - | `property.set_expression` (`Property.SetExpression`) |
-| `comps[].layers[].effects[].params[].expression.enabled` | `boolean` | - | missing semantic summary | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
+| `comps[].layers[].transform.expressions.position.source` | `string` | structural | position transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].transform.expressions.position.enabled` | `boolean` | - | position transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
+| `comps[].layers[].transform.expressions.anchor_point.source` | `string` | structural | anchor_point transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].transform.expressions.anchor_point.enabled` | `boolean` | - | anchor_point transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
+| `comps[].layers[].transform.expressions.scale.source` | `string` | structural | scale transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].transform.expressions.scale.enabled` | `boolean` | - | scale transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
+| `comps[].layers[].transform.expressions.rotation.source` | `string` | structural | rotation transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].transform.expressions.rotation.enabled` | `boolean` | - | rotation transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
+| `comps[].layers[].transform.expressions.opacity.source` | `string` | structural | opacity transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].transform.expressions.opacity.enabled` | `boolean` | - | opacity transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
+| `comps[].layers[].effects[].params[].expression.source` | `string` | structural | effect parameter expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].effects[].params[].expression.enabled` | `boolean` | - | effect parameter expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
 
 ## Effect
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].effects[].match_name` | `string` | structural | missing semantic summary | - | - |
-| `comps[].layers[].effects[].params[]` | `array<recipe.EffectParam>` | - | missing semantic summary | - | `effect.set_param` (`SetEffectParam`) |
+| `comps[].layers[].effects[].match_name` | `string` | structural | Layer effect match name. | - | - |
+| `comps[].layers[].effects[].params[]` | `array<recipe.EffectParam>` | - | Layer effect parameter assignments. | - | `effect.set_param` (`SetEffectParam`) |
 
 ## EffectParam
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].effects[].params[].match_name` | `string` | structural | missing semantic summary | - | - |
-| `comps[].layers[].effects[].params[].value` | `any` | - | missing semantic summary | - | - |
-| `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | missing semantic summary | - | - |
+| `comps[].layers[].effects[].params[].match_name` | `string` | structural | Effect parameter match name. | - | - |
+| `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | - | - |
+| `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | Effect parameter expression settings. | - | - |
 
 ## ExpectedProfile
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.comp_count` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.layer_count` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.text_layer_count` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.shape_layer_count` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.name` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.width` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.height` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.frame_rate` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.duration` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.label` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.comment` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.background_color` | `array<float64>` | - | missing semantic summary | - | - |
-| `expected_profile.resolution_factor` | `array<float64>` | - | missing semantic summary | - | - |
-| `expected_profile.pixel_aspect` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.display_start_time` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.renderer` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.draft_3d` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.frame_blending` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.hide_shy_layers` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.preserve_nested_frame_rate` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.preserve_nested_resolution` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.motion_blur` | `object<ExpectedMotionBlurSpec>` | - | missing semantic summary | - | - |
-| `expected_profile.work_area` | `object<ExpectedWorkAreaSpec>` | - | missing semantic summary | - | - |
-| `expected_profile.layers[]` | `array<recipe.ExpectedLayer>` | - | missing semantic summary | - | - |
-| `expected_profile.effects[]` | `array<recipe.ExpectedEffect>` | - | missing semantic summary | - | - |
-| `expected_profile.properties[]` | `array<recipe.ExpectedProperty>` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[]` | `array<recipe.ExpectedTextStyle>` | - | missing semantic summary | - | - |
+| `expected_profile.comp_count` | `number` | - | Expected number of compositions. | - | - |
+| `expected_profile.layer_count` | `number` | - | Expected total number of layers. | - | - |
+| `expected_profile.text_layer_count` | `number` | - | Expected number of text layers. | - | - |
+| `expected_profile.shape_layer_count` | `number` | - | Expected number of shape layers. | - | - |
+| `expected_profile.name` | `string` | - | Expected composition display name. | - | - |
+| `expected_profile.width` | `number` | - | Expected composition width in pixels. | - | - |
+| `expected_profile.height` | `number` | - | Expected composition height in pixels. | - | - |
+| `expected_profile.frame_rate` | `number` | - | Expected composition frame rate in frames per second. | - | - |
+| `expected_profile.duration` | `number` | - | Expected composition duration in seconds. | - | - |
+| `expected_profile.label` | `number` | - | Expected composition label color index. | - | - |
+| `expected_profile.comment` | `string` | - | Expected composition comment text. | - | - |
+| `expected_profile.background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | - | - |
+| `expected_profile.resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | - | - |
+| `expected_profile.pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | - | - |
+| `expected_profile.display_start_time` | `number` | - | Expected composition display start time in seconds. | - | - |
+| `expected_profile.renderer` | `string` | - | Expected composition renderer identifier. | - | - |
+| `expected_profile.draft_3d` | `boolean` | - | Expected composition draft 3D switch. | - | - |
+| `expected_profile.frame_blending` | `boolean` | - | Expected composition frame blending switch. | - | - |
+| `expected_profile.hide_shy_layers` | `boolean` | - | Expected composition shy layer visibility switch. | - | - |
+| `expected_profile.preserve_nested_frame_rate` | `boolean` | - | Expected composition nested frame-rate preservation switch. | - | - |
+| `expected_profile.preserve_nested_resolution` | `boolean` | - | Expected composition nested resolution preservation switch. | - | - |
+| `expected_profile.motion_blur` | `object<ExpectedMotionBlurSpec>` | - | Expected composition motion blur settings. | - | - |
+| `expected_profile.work_area` | `object<ExpectedWorkAreaSpec>` | - | Expected composition work area range. | - | - |
+| `expected_profile.layers[]` | `array<recipe.ExpectedLayer>` | - | Expected composition layer definitions. | - | - |
+| `expected_profile.effects[]` | `array<recipe.ExpectedEffect>` | - | Expected effect checks. | - | - |
+| `expected_profile.properties[]` | `array<recipe.ExpectedProperty>` | - | Expected property checks. | - | - |
+| `expected_profile.text_styles[]` | `array<recipe.ExpectedTextStyle>` | - | Expected text style checks. | - | - |
 | `expected_profile.keyframes[]` | `array<recipe.ExpectedKeyframedProperty>` | - | Expected keyframes for a layer property. | - | - |
-| `expected_profile.masks[]` | `array<recipe.ExpectedMask>` | - | missing semantic summary | - | - |
+| `expected_profile.masks[]` | `array<recipe.ExpectedMask>` | - | Expected mask checks. | - | - |
 
 ## ExpectedMotionBlurSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.motion_blur.enabled` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.motion_blur.shutter_angle` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.motion_blur.shutter_phase` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.motion_blur.adaptive_sample_limit` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.motion_blur.samples_per_frame` | `number` | - | missing semantic summary | - | - |
+| `expected_profile.motion_blur.enabled` | `boolean` | - | Expected composition motion blur enable switch. | - | - |
+| `expected_profile.motion_blur.shutter_angle` | `number` | - | Expected composition motion blur shutter angle. | - | - |
+| `expected_profile.motion_blur.shutter_phase` | `number` | - | Expected composition motion blur shutter phase. | - | - |
+| `expected_profile.motion_blur.adaptive_sample_limit` | `number` | - | Expected composition motion blur adaptive sample limit. | - | - |
+| `expected_profile.motion_blur.samples_per_frame` | `number` | - | Expected composition motion blur samples per frame. | - | - |
 
 ## ExpectedWorkAreaSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.work_area.start` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.work_area.end` | `number` | - | missing semantic summary | - | - |
+| `expected_profile.work_area.start` | `number` | - | Expected composition work area start time in seconds. | - | - |
+| `expected_profile.work_area.end` | `number` | - | Expected composition work area end time in seconds. | - | - |
 
 ## ExpectedLayer
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.layers[].name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.layers[].type` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].quality` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].blending_mode` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].auto_orient` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].light_kind` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].source` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].source_kind` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].light_source` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].parent` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].track_matte` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].matte` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].label` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].comment` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].timing` | `object<ExpectedLayerTiming>` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags` | `object<ExpectedLayerFlags>` | - | missing semantic summary | - | - |
+| `expected_profile.layers[].name` | `string` | structural | Expected layer name. | - | - |
+| `expected_profile.layers[].type` | `string` | - | Expected layer type. | - | - |
+| `expected_profile.layers[].quality` | `string` | - | Expected layer quality mode. | - | - |
+| `expected_profile.layers[].blending_mode` | `string` | - | Expected layer blending mode. | - | - |
+| `expected_profile.layers[].auto_orient` | `string` | - | Expected layer auto-orientation mode. | - | - |
+| `expected_profile.layers[].light_kind` | `string` | - | Expected light type. | - | - |
+| `expected_profile.layers[].source` | `string` | - | Expected source item name. | - | - |
+| `expected_profile.layers[].source_kind` | `string` | - | Expected source item type. | - | - |
+| `expected_profile.layers[].light_source` | `string` | - | Expected source layer for light data. | - | - |
+| `expected_profile.layers[].parent` | `string` | - | Expected parent layer name. | - | - |
+| `expected_profile.layers[].track_matte` | `string` | - | Expected track matte mode. | - | - |
+| `expected_profile.layers[].matte` | `string` | - | Expected matte layer name. | - | - |
+| `expected_profile.layers[].label` | `number` | - | Expected layer label color index. | - | - |
+| `expected_profile.layers[].comment` | `string` | - | Expected layer comment text. | - | - |
+| `expected_profile.layers[].timing` | `object<ExpectedLayerTiming>` | - | Expected layer timing checks. | - | - |
+| `expected_profile.layers[].flags` | `object<ExpectedLayerFlags>` | - | Expected layer switch checks. | - | - |
 
 ## ExpectedLayerTiming
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.layers[].timing.start_time` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].timing.in_point` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].timing.out_point` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].timing.duration` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].timing.stretch` | `number` | - | missing semantic summary | - | - |
+| `expected_profile.layers[].timing.start_time` | `number` | - | Expected layer start time in seconds. | - | - |
+| `expected_profile.layers[].timing.in_point` | `number` | - | Expected layer in point in seconds. | - | - |
+| `expected_profile.layers[].timing.out_point` | `number` | - | Expected layer out point in seconds. | - | - |
+| `expected_profile.layers[].timing.duration` | `number` | - | Expected layer duration in seconds. | - | - |
+| `expected_profile.layers[].timing.stretch` | `number` | - | Expected layer stretch percentage. | - | - |
 
 ## ExpectedLayerFlags
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.layers[].flags.visible` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.solo` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.shy` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.locked` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.is_3d` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.is_adjustment` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.is_null` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.is_guide` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.motion_blur` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.effects_enabled` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.audio_enabled` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.frame_blend_enabled` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.markers_locked` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.frame_blend_pixel_motion` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.collapse_transform` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.sampling_bicubic` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.layers[].flags.preserve_transparency` | `boolean` | - | missing semantic summary | - | - |
+| `expected_profile.layers[].flags.visible` | `boolean` | - | Expected layer video visibility switch. | - | - |
+| `expected_profile.layers[].flags.solo` | `boolean` | - | Expected layer solo switch. | - | - |
+| `expected_profile.layers[].flags.shy` | `boolean` | - | Expected layer shy switch. | - | - |
+| `expected_profile.layers[].flags.locked` | `boolean` | - | Expected layer lock switch. | - | - |
+| `expected_profile.layers[].flags.is_3d` | `boolean` | - | Expected layer 3D switch. | - | - |
+| `expected_profile.layers[].flags.is_adjustment` | `boolean` | - | Expected adjustment-layer switch. | - | - |
+| `expected_profile.layers[].flags.is_null` | `boolean` | - | Expected null-layer switch. | - | - |
+| `expected_profile.layers[].flags.is_guide` | `boolean` | - | Expected guide-layer switch. | - | - |
+| `expected_profile.layers[].flags.motion_blur` | `boolean` | - | Expected layer motion blur switch. | - | - |
+| `expected_profile.layers[].flags.effects_enabled` | `boolean` | - | Expected layer effects enable switch. | - | - |
+| `expected_profile.layers[].flags.audio_enabled` | `boolean` | - | Expected layer audio enable switch. | - | - |
+| `expected_profile.layers[].flags.frame_blend_enabled` | `boolean` | - | Expected layer frame blending switch. | - | - |
+| `expected_profile.layers[].flags.markers_locked` | `boolean` | - | Expected layer marker lock switch. | - | - |
+| `expected_profile.layers[].flags.frame_blend_pixel_motion` | `boolean` | - | Expected pixel-motion frame blending switch. | - | - |
+| `expected_profile.layers[].flags.collapse_transform` | `boolean` | - | Expected collapse transformations switch. | - | - |
+| `expected_profile.layers[].flags.sampling_bicubic` | `boolean` | - | Expected bicubic sampling switch. | - | - |
+| `expected_profile.layers[].flags.preserve_transparency` | `boolean` | - | Expected preserve transparency switch. | - | - |
 
 ## ExpectedEffect
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.effects[].layer_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.effects[].match_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.effects[].params[]` | `array<recipe.ExpectedEffectParam>` | - | missing semantic summary | - | - |
+| `expected_profile.effects[].layer_name` | `string` | structural | Layer name to inspect for the expected effect. | - | - |
+| `expected_profile.effects[].match_name` | `string` | structural | Expected effect match name. | - | - |
+| `expected_profile.effects[].params[]` | `array<recipe.ExpectedEffectParam>` | - | Expected effect parameter checks. | - | - |
 
 ## ExpectedEffectParam
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.effects[].params[].match_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.effects[].params[].value` | `any` | - | missing semantic summary | - | - |
-| `expected_profile.effects[].params[].expression` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.effects[].params[].expression_enabled` | `boolean` | - | missing semantic summary | - | - |
+| `expected_profile.effects[].params[].match_name` | `string` | structural | Expected effect parameter match name. | - | - |
+| `expected_profile.effects[].params[].value` | `any` | - | Expected effect parameter value. | - | - |
+| `expected_profile.effects[].params[].expression` | `string` | - | Expected effect parameter expression source. | - | - |
+| `expected_profile.effects[].params[].expression_enabled` | `boolean` | - | Expected effect parameter expression enable switch. | - | - |
 
 ## ExpectedProperty
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.properties[].layer_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.properties[].match_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.properties[].value` | `any` | - | missing semantic summary | - | - |
-| `expected_profile.properties[].expression` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.properties[].expression_enabled` | `boolean` | - | missing semantic summary | - | - |
+| `expected_profile.properties[].layer_name` | `string` | structural | Expected property layer name. | - | - |
+| `expected_profile.properties[].match_name` | `string` | structural | Expected property match name. | - | - |
+| `expected_profile.properties[].value` | `any` | - | Expected property value. | - | - |
+| `expected_profile.properties[].expression` | `string` | - | Expected property expression source. | - | - |
+| `expected_profile.properties[].expression_enabled` | `boolean` | - | Expected property expression enable switch. | - | - |
 
 ## ExpectedTextStyle
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.text_styles[].layer_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.text_styles[].run_index` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].paragraph_index` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].font_size` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].fill_color` | `array<float64>` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].tracking` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].faux_bold` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].faux_italic` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].apply_stroke` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].stroke_color` | `array<float64>` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].stroke_width` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.text_styles[].justification` | `string` | - | missing semantic summary | - | - |
+| `expected_profile.text_styles[].layer_name` | `string` | structural | Layer name to inspect for the expected text style. | - | - |
+| `expected_profile.text_styles[].run_index` | `number` | - | Expected text style text run index. | - | - |
+| `expected_profile.text_styles[].paragraph_index` | `number` | - | Expected text style paragraph index. | - | - |
+| `expected_profile.text_styles[].font_size` | `number` | - | Expected text style font size. | - | - |
+| `expected_profile.text_styles[].fill_color` | `array<float64>` | - | Expected text style fill color as RGB channels. | - | - |
+| `expected_profile.text_styles[].tracking` | `number` | - | Expected text style character tracking amount. | - | - |
+| `expected_profile.text_styles[].faux_bold` | `boolean` | - | Expected text style faux bold switch. | - | - |
+| `expected_profile.text_styles[].faux_italic` | `boolean` | - | Expected text style faux italic switch. | - | - |
+| `expected_profile.text_styles[].apply_stroke` | `boolean` | - | Expected text style stroke enable switch. | - | - |
+| `expected_profile.text_styles[].stroke_color` | `array<float64>` | - | Expected text style stroke color as RGB channels. | - | - |
+| `expected_profile.text_styles[].stroke_width` | `number` | - | Expected text style stroke width. | - | - |
+| `expected_profile.text_styles[].justification` | `string` | - | Expected text style paragraph justification mode. | - | - |
 
 ## ExpectedKeyframedProperty
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.keyframes[].layer_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.keyframes[].match_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.keyframes[].keyframes[]` | `array<recipe.ExpectedKeyframe>` | structural | missing semantic summary | - | - |
+| `expected_profile.keyframes[].layer_name` | `string` | structural | Layer name to inspect for expected keyframes. | - | - |
+| `expected_profile.keyframes[].match_name` | `string` | structural | Expected keyframed property match name. | - | - |
+| `expected_profile.keyframes[].keyframes[]` | `array<recipe.ExpectedKeyframe>` | structural | Expected property keyframes. | - | - |
 
 ## ExpectedKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.keyframes[].keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `expected_profile.keyframes[].keyframes[].value` | `any` | - | missing semantic summary | - | - |
+| `expected_profile.keyframes[].keyframes[].time` | `number` | structural | Expected property keyframe time in seconds. | - | - |
+| `expected_profile.keyframes[].keyframes[].value` | `any` | - | Expected property keyframe value. | - | - |
 
 ## ExpectedMask
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.masks[].layer_name` | `string` | structural | missing semantic summary | - | - |
-| `expected_profile.masks[].name` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].mode` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].inverted` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].locked` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].color` | `array<float64>` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].motion_blur` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].feather_falloff` | `string` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].opacity` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].feather` | `array<float64>` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].expansion` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].closed` | `boolean` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].vertex_count` | `number` | - | missing semantic summary | - | - |
-| `expected_profile.masks[].path_keyframes[]` | `array<recipe.ExpectedMaskPathKeyframe>` | - | missing semantic summary | - | - |
+| `expected_profile.masks[].layer_name` | `string` | structural | Layer name to inspect for the expected mask. | - | - |
+| `expected_profile.masks[].name` | `string` | - | Expected mask name. | - | - |
+| `expected_profile.masks[].mode` | `string` | - | Expected mask mode. | - | - |
+| `expected_profile.masks[].inverted` | `boolean` | - | Expected mask inverted switch. | - | - |
+| `expected_profile.masks[].locked` | `boolean` | - | Expected mask lock switch. | - | - |
+| `expected_profile.masks[].color` | `array<float64>` | - | Expected mask UI color as RGB channels. | - | - |
+| `expected_profile.masks[].motion_blur` | `string` | - | Expected mask motion blur mode. | - | - |
+| `expected_profile.masks[].feather_falloff` | `string` | - | Expected mask feather falloff mode. | - | - |
+| `expected_profile.masks[].opacity` | `number` | - | Expected mask opacity. | - | - |
+| `expected_profile.masks[].feather` | `array<float64>` | - | Expected mask feather vector. | - | - |
+| `expected_profile.masks[].expansion` | `number` | - | Expected mask expansion. | - | - |
+| `expected_profile.masks[].closed` | `boolean` | - | Expected mask closed path switch. | - | - |
+| `expected_profile.masks[].vertex_count` | `number` | - | Expected mask vertex count. | - | - |
+| `expected_profile.masks[].path_keyframes[]` | `array<recipe.ExpectedMaskPathKeyframe>` | - | Expected mask path keyframes. | - | - |
 
 ## ExpectedMaskPathKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.masks[].path_keyframes[].time` | `number` | structural | missing semantic summary | - | - |
-| `expected_profile.masks[].path_keyframes[].vertex_count` | `number` | - | missing semantic summary | - | - |
+| `expected_profile.masks[].path_keyframes[].time` | `number` | structural | Expected mask path keyframe time in seconds. | - | - |
+| `expected_profile.masks[].path_keyframes[].vertex_count` | `number` | - | Expected mask path keyframe vertex count. | - | - |
 
