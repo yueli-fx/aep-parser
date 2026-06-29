@@ -1429,6 +1429,34 @@ Forty-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-fifth follow-up completed:
+
+- Layer recipes now support `motion_blur`:
+  - boolean -> `Layer.SetMotionBlur`
+- Capability reporting records:
+  - `Layer.SetMotionBlur`
+- Boundary: layer motion blur is a length-preserving bit in `ldta` offset
+  `0x27`. Visible blur still depends on the composition motion blur switch and
+  settings; the dedicated example enables the comp switch too.
+- `examples/recipes/minimal-layer-motion-blur.json` is a dedicated
+  one-text-layer recipe with `motion_blur: true`. See
+  `knowledge/layer/recipe-motion-blur.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-motion-blur.json -out
+    tmp_debug\recipes\minimal-layer-motion-blur.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_motion_blur\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_motion_blur\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

@@ -55,15 +55,16 @@ type CompMotionBlurSpec struct {
 }
 
 type Layer struct {
-	Type      string         `json:"type"`
-	Name      string         `json:"name"`
-	Label     *float64       `json:"label,omitempty"`
-	Comment   string         `json:"comment,omitempty"`
-	Text      string         `json:"text,omitempty"`
-	TextStyle *TextStyleSpec `json:"text_style,omitempty"`
-	Shape     *ShapeSpec     `json:"shape,omitempty"`
-	Transform Transform      `json:"transform,omitempty"`
-	Effects   []Effect       `json:"effects,omitempty"`
+	Type       string         `json:"type"`
+	Name       string         `json:"name"`
+	Label      *float64       `json:"label,omitempty"`
+	Comment    string         `json:"comment,omitempty"`
+	MotionBlur *bool          `json:"motion_blur,omitempty"`
+	Text       string         `json:"text,omitempty"`
+	TextStyle  *TextStyleSpec `json:"text_style,omitempty"`
+	Shape      *ShapeSpec     `json:"shape,omitempty"`
+	Transform  Transform      `json:"transform,omitempty"`
+	Effects    []Effect       `json:"effects,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -654,6 +655,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.Comment != "" {
 		recordCapability("Layer.SetComment", layerPath+".comment")
+	}
+	if layer.MotionBlur != nil {
+		recordCapability("Layer.SetMotionBlur", layerPath+".motion_blur")
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

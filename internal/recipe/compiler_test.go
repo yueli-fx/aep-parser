@@ -155,6 +155,27 @@ func TestCompileToFileSetsLayerComment(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerMotionBlur(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].MotionBlur = boolPtr(true)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].Layers[0].MotionBlur; !got {
+		t.Fatal("layer motion_blur = false, want true")
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
