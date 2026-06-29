@@ -212,14 +212,13 @@ The completed metadata slice added profile/expected-profile coverage for comp
 contracts use the comp object as the assertion target while `profile.Items`
 is an inventory/index surface.
 
-The next slice should be **comp object consolidation**:
+The completed object consolidation slice expanded
+`minimal-comp-object-profile.json` into a no-layer comp baseline that asserts
+display, flag, motion-blur, work-area, renderer, and metadata fields together.
 
-- Create or update one object-level comp recipe that exercises the completed
-  display, flag, motion-blur, work-area, renderer, and metadata fields without
-  becoming unreadable.
-- Keep dedicated examples for fields that carry historical AE render gates or
-  evidence caveats.
-- Do not add new authoring syntax in this slice; it is consolidation only.
+The next object-level planning slice should create the same kind of execution
+strategy for layer-level recipe/profile work, so layer fields stop advancing as
+unconnected single-field slices.
 
 ## Self-Review
 

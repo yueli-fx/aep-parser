@@ -192,6 +192,9 @@ Done:
 - Comp item metadata now has an object-level profile contract: `label` and
   `comment` are exposed directly on `profile.Composition`, asserted through
   `expected_profile`, and covered by `minimal-comp-metadata-profile.json`.
+- The consolidated `minimal-comp-object-profile.json` now exercises the
+  completed comp display, flag, motion-blur, work-area, renderer, and metadata
+  profile contracts together as a no-layer object-level baseline.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -331,7 +334,9 @@ Current:
   candidates are remaining comp settings, shape filters, expression support,
   transform keyframe/ease where writer support exists, or more profile-visible
   text style. For comp work, follow `comp-recipe-execution-strategy.md` instead
-  of asking for per-field direction. Do not start automated correction loops.
+  of asking for per-field direction. Next object-level planning candidate is a
+  layer recipe/profile execution strategy. Do not start automated correction
+  loops.
 
 ## Open questions
 

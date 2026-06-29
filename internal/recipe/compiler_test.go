@@ -2,6 +2,7 @@ package recipe_test
 
 import (
 	"math"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -266,6 +267,45 @@ func TestCompileToFileChecksCompMetadataProfile(t *testing.T) {
 	}
 	assertProfileCheck(t, report, "expected_profile.label", true)
 	assertProfileCheck(t, report, "expected_profile.comment", true)
+}
+
+func TestCompileToFileChecksCompObjectProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-comp-object-profile.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	for _, path := range []string{
+		"expected_profile.background_color",
+		"expected_profile.resolution_factor",
+		"expected_profile.pixel_aspect",
+		"expected_profile.display_start_time",
+		"expected_profile.renderer",
+		"expected_profile.frame_blending",
+		"expected_profile.hide_shy_layers",
+		"expected_profile.preserve_nested_frame_rate",
+		"expected_profile.preserve_nested_resolution",
+		"expected_profile.motion_blur.enabled",
+		"expected_profile.motion_blur.shutter_angle",
+		"expected_profile.motion_blur.shutter_phase",
+		"expected_profile.motion_blur.adaptive_sample_limit",
+		"expected_profile.motion_blur.samples_per_frame",
+		"expected_profile.work_area.start",
+		"expected_profile.work_area.end",
+		"expected_profile.label",
+		"expected_profile.comment",
+	} {
+		assertProfileCheck(t, report, path, true)
+	}
 }
 
 func TestCompileToFileSetsLayerLabel(t *testing.T) {

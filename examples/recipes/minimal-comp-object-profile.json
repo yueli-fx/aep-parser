@@ -11,9 +11,27 @@
       "frame_rate": 24,
       "duration": 3,
       "background_color": [12, 34, 56],
+      "label": 12,
+      "comment": "reviewed recipe comp",
+      "renderer": "ADBE Escher",
       "resolution_factor": [2, 2],
       "pixel_aspect": 2,
       "display_start_time": 0.5,
+      "frame_blending": true,
+      "hide_shy_layers": true,
+      "preserve_nested_frame_rate": true,
+      "preserve_nested_resolution": true,
+      "motion_blur": {
+        "enabled": true,
+        "shutter_angle": 360,
+        "shutter_phase": -90,
+        "adaptive_sample_limit": 256,
+        "samples_per_frame": 32
+      },
+      "work_area": {
+        "start": 0.5,
+        "end": 2.5
+      },
       "layers": []
     }
   ],
@@ -21,8 +39,26 @@
     "comp_count": 1,
     "layer_count": 0,
     "background_color": [12, 34, 56],
+    "label": 12,
+    "comment": "reviewed recipe comp",
+    "renderer": "ADBE Escher",
     "resolution_factor": [2, 2],
     "pixel_aspect": 2,
-    "display_start_time": 0.5
+    "display_start_time": 0.5,
+    "frame_blending": true,
+    "hide_shy_layers": true,
+    "preserve_nested_frame_rate": true,
+    "preserve_nested_resolution": true,
+    "motion_blur": {
+      "enabled": true,
+      "shutter_angle": 360,
+      "shutter_phase": -90,
+      "adaptive_sample_limit": 256,
+      "samples_per_frame": 32
+    },
+    "work_area": {
+      "start": 0.5,
+      "end": 2.5
+    }
   }
 }
