@@ -30,6 +30,7 @@ tmp/
 
 test_data/
 tmp_debug/
+_tmp_debug/
 
 flightdeck/references
 flightdeck/archive
