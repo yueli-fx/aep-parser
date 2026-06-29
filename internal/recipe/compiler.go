@@ -174,6 +174,10 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
+		len(expected.BackgroundColor) > 0 ||
+		len(expected.ResolutionFactor) > 0 ||
+		expected.PixelAspect != nil ||
+		expected.DisplayStartTime != nil ||
 		expected.Renderer != "" ||
 		expected.Draft3D != nil ||
 		expected.MotionBlur != nil ||
@@ -214,6 +218,34 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	if expected.ShapeLayerCount != nil {
 		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
 		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	if len(expected.BackgroundColor) > 0 {
+		actual := []float64(nil)
+		if len(prof.Comps) > 0 {
+			actual = rgbToFloatSlice(prof.Comps[0].BackgroundColor)
+		}
+		add("expected_profile.background_color", expected.BackgroundColor, actual, profileValueEqual(expected.BackgroundColor, actual))
+	}
+	if len(expected.ResolutionFactor) > 0 {
+		actual := []float64(nil)
+		if len(prof.Comps) > 0 {
+			actual = uint16PairToFloatSlice(prof.Comps[0].ResolutionFactor)
+		}
+		add("expected_profile.resolution_factor", expected.ResolutionFactor, actual, profileValueEqual(expected.ResolutionFactor, actual))
+	}
+	if expected.PixelAspect != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].PixelAspect
+		}
+		add("expected_profile.pixel_aspect", *expected.PixelAspect, actual, math.Abs(actual-*expected.PixelAspect) < 1e-6)
+	}
+	if expected.DisplayStartTime != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].DisplayStartTime
+		}
+		add("expected_profile.display_start_time", *expected.DisplayStartTime, actual, math.Abs(actual-*expected.DisplayStartTime) < 1e-6)
 	}
 	if expected.Renderer != "" {
 		actual := ""
@@ -536,6 +568,14 @@ func profileValueEqual(expected, actual any) bool {
 	default:
 		return false
 	}
+}
+
+func rgbToFloatSlice(rgb [3]uint8) []float64 {
+	return []float64{float64(rgb[0]), float64(rgb[1]), float64(rgb[2])}
+}
+
+func uint16PairToFloatSlice(pair [2]uint16) []float64 {
+	return []float64{float64(pair[0]), float64(pair[1])}
 }
 
 func hasEffects(comp CompSpec) bool {

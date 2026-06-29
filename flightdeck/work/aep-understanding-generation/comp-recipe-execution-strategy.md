@@ -35,10 +35,10 @@
 | Identity | `comps[].name` | `aep.NewComposition` / `Composition.SetName` | `comps[].name` | L3 | base create done; rename recipe not planned yet |
 | Geometry | `comps[].width` / `height` | `aep.NewComposition` / `Composition.SetSize` | `comps[].width` / `height` | L3 | base create done; resize recipe not planned yet |
 | Timing | `comps[].frame_rate` / `duration` | `aep.NewComposition` / `SetFrameRate` / `SetDuration` | `comps[].frame_rate` / `duration_seconds` | L3 | base create done; mutation recipe not planned yet |
-| Display | `background_color` | `Composition.SetBGColor` | `comps[].background_color` | L3 | recipe done; profile contract missing |
-| Display | `resolution_factor` | `Composition.SetResolutionFactor` | `comps[].resolution_factor` | L3 | recipe done; profile contract missing |
-| Display | `pixel_aspect` | `Composition.SetPixelAspect` | `comps[].pixel_aspect` | L3 | recipe done; profile contract missing |
-| Display | `display_start_time` | `Composition.SetDisplayStartTime` | `comps[].display_start_time` | L3 | recipe done; profile contract missing |
+| Display | `background_color` | `Composition.SetBGColor` | `comps[].background_color` | L3 | done |
+| Display | `resolution_factor` | `Composition.SetResolutionFactor` | `comps[].resolution_factor` | L3 | done |
+| Display | `pixel_aspect` | `Composition.SetPixelAspect` | `comps[].pixel_aspect` | L3 | done |
+| Display | `display_start_time` | `Composition.SetDisplayStartTime` | `comps[].display_start_time` | L3 | done |
 | Display | `renderer` | `aep.SetRenderer` | `comps[].renderer` | L3 | done |
 | Preview flags | `frame_blending` | `Composition.SetFrameBlending` | `comps[].frame_blending` | L3 | recipe done; profile contract missing |
 | Preview flags | `draft_3d` | `Composition.SetDraft3D` | `comps[].draft_3d` | L2 | done |
@@ -196,12 +196,20 @@ Use a more specific commit message when the slice is a named group, for example 
 
 ## Next Concrete Slice
 
-The next slice should be **comp display profile checks**:
+The completed display slice added profile/expected-profile coverage for
+`background_color`, `resolution_factor`, `pixel_aspect`, and
+`display_start_time`.
 
-- Add profile/expected-profile coverage for `background_color`, `resolution_factor`, `pixel_aspect`, and `display_start_time`.
+The next slice should be **comp flag profile checks**:
+
+- Add profile/expected-profile coverage for `frame_blending`,
+  `hide_shy_layers`, `preserve_nested_frame_rate`,
+  `preserve_nested_resolution`, and `motion_blur.enabled`.
 - Do not change recipe authoring syntax; these fields already exist in `CompSpec`.
 - Use one object-level recipe if the JSON remains readable.
-- Keep render oracle optional for this slice because prior dedicated field examples already carried AE 2025 gates; the required gate is compile-time profile check plus full Go verification.
+- Keep render oracle optional for this slice because prior dedicated field
+  examples already carried AE 2025 gates; the required gate is compile-time
+  profile check plus full Go verification.
 
 ## Self-Review
 

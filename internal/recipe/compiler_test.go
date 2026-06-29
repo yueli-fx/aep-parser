@@ -148,6 +148,45 @@ func TestCompileToFileSetsCompDraft3D(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.draft_3d", true)
 }
 
+func TestCompileToFileChecksCompDisplayProfile(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Comp display profile"},
+		"comps": [{
+			"name": "Main",
+			"width": 1280,
+			"height": 720,
+			"frame_rate": 24,
+			"duration": 3,
+			"background_color": [12, 34, 56],
+			"resolution_factor": [2, 2],
+			"pixel_aspect": 2,
+			"display_start_time": 0.5
+		}],
+		"expected_profile": {
+			"comp_count": 1,
+			"layer_count": 0,
+			"background_color": [12, 34, 56],
+			"resolution_factor": [2, 2],
+			"pixel_aspect": 2,
+			"display_start_time": 0.5
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.background_color", true)
+	assertProfileCheck(t, report, "expected_profile.resolution_factor", true)
+	assertProfileCheck(t, report, "expected_profile.pixel_aspect", true)
+	assertProfileCheck(t, report, "expected_profile.display_start_time", true)
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)

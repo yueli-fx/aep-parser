@@ -367,18 +367,22 @@ type ExpressionSpec struct {
 }
 
 type ExpectedProfile struct {
-	CompCount       *int                        `json:"comp_count,omitempty"`
-	LayerCount      *int                        `json:"layer_count,omitempty"`
-	TextLayerCount  *int                        `json:"text_layer_count,omitempty"`
-	ShapeLayerCount *int                        `json:"shape_layer_count,omitempty"`
-	Renderer        string                      `json:"renderer,omitempty"`
-	Draft3D         *bool                       `json:"draft_3d,omitempty"`
-	MotionBlur      *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
-	WorkArea        *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
-	Effects         []ExpectedEffect            `json:"effects,omitempty"`
-	Properties      []ExpectedProperty          `json:"properties,omitempty"`
-	TextStyles      []ExpectedTextStyle         `json:"text_styles,omitempty"`
-	Keyframes       []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
+	CompCount        *int                        `json:"comp_count,omitempty"`
+	LayerCount       *int                        `json:"layer_count,omitempty"`
+	TextLayerCount   *int                        `json:"text_layer_count,omitempty"`
+	ShapeLayerCount  *int                        `json:"shape_layer_count,omitempty"`
+	BackgroundColor  []float64                   `json:"background_color,omitempty"`
+	ResolutionFactor []float64                   `json:"resolution_factor,omitempty"`
+	PixelAspect      *float64                    `json:"pixel_aspect,omitempty"`
+	DisplayStartTime *float64                    `json:"display_start_time,omitempty"`
+	Renderer         string                      `json:"renderer,omitempty"`
+	Draft3D          *bool                       `json:"draft_3d,omitempty"`
+	MotionBlur       *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
+	WorkArea         *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
+	Effects          []ExpectedEffect            `json:"effects,omitempty"`
+	Properties       []ExpectedProperty          `json:"properties,omitempty"`
+	TextStyles       []ExpectedTextStyle         `json:"text_styles,omitempty"`
+	Keyframes        []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
 }
 
 type ExpectedWorkAreaSpec struct {
@@ -614,6 +618,18 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	}
 	if expected.ShapeLayerCount != nil && *expected.ShapeLayerCount < 0 {
 		addRefusal("invalid_expected_profile", "expected_profile.shape_layer_count", "expected count must be non-negative")
+	}
+	if len(expected.BackgroundColor) > 0 {
+		validateRGBColor(expected.BackgroundColor, "expected_profile.background_color", "invalid_expected_profile", addRefusal)
+	}
+	if len(expected.ResolutionFactor) > 0 {
+		validateResolutionFactor(expected.ResolutionFactor, "expected_profile.resolution_factor", addRefusal)
+	}
+	if expected.PixelAspect != nil {
+		validatePixelAspect(*expected.PixelAspect, "expected_profile.pixel_aspect", addRefusal)
+	}
+	if expected.DisplayStartTime != nil {
+		validateDisplayStartTime(*expected.DisplayStartTime, "expected_profile.display_start_time", addRefusal)
 	}
 	for i, effect := range expected.Effects {
 		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)

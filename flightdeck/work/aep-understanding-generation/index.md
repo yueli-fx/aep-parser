@@ -180,6 +180,10 @@ Done:
 - Comp-level recipe/profile work now has an object-level execution strategy:
   field order, evidence level, profile target, test shape, verification, and
   commit rules are captured in `comp-recipe-execution-strategy.md`.
+- Comp display settings now have object-level profile contracts:
+  `background_color`, `resolution_factor`, `pixel_aspect`, and
+  `display_start_time` are exposed on `profile.Composition`, asserted through
+  `expected_profile`, and covered by `minimal-comp-object-profile.json`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

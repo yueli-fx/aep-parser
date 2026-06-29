@@ -66,20 +66,24 @@ type Item struct {
 }
 
 type Composition struct {
-	ID         uint32             `json:"id"`
-	Name       string             `json:"name"`
-	Width      uint16             `json:"width"`
-	Height     uint16             `json:"height"`
-	FrameRate  float64            `json:"frame_rate"`
-	Duration   float64            `json:"duration_seconds"`
-	TickRate   float64            `json:"tick_rate,omitempty"`
-	Renderer   string             `json:"renderer,omitempty"`
-	Draft3D    bool               `json:"draft_3d,omitempty"`
-	WorkArea   WorkArea           `json:"work_area"`
-	MotionBlur MotionBlurSettings `json:"motion_blur"`
-	Layers     []Layer            `json:"layers,omitempty"`
-	Path       PathRef            `json:"path"`
-	Evidence   Evidence           `json:"evidence"`
+	ID               uint32             `json:"id"`
+	Name             string             `json:"name"`
+	Width            uint16             `json:"width"`
+	Height           uint16             `json:"height"`
+	FrameRate        float64            `json:"frame_rate"`
+	Duration         float64            `json:"duration_seconds"`
+	TickRate         float64            `json:"tick_rate,omitempty"`
+	BackgroundColor  [3]uint8           `json:"background_color"`
+	ResolutionFactor [2]uint16          `json:"resolution_factor"`
+	PixelAspect      float64            `json:"pixel_aspect"`
+	DisplayStartTime float64            `json:"display_start_time"`
+	Renderer         string             `json:"renderer,omitempty"`
+	Draft3D          bool               `json:"draft_3d,omitempty"`
+	WorkArea         WorkArea           `json:"work_area"`
+	MotionBlur       MotionBlurSettings `json:"motion_blur"`
+	Layers           []Layer            `json:"layers,omitempty"`
+	Path             PathRef            `json:"path"`
+	Evidence         Evidence           `json:"evidence"`
 }
 
 type WorkArea struct {
@@ -331,12 +335,28 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		if ci < len(project.Compositions) {
 			sceneComp = project.Compositions[ci]
 		}
+		var (
+			backgroundColor  [3]uint8
+			resolutionFactor = c.ResolutionFactor
+			pixelAspect      float64
+			displayStartTime float64
+		)
+		if sceneComp != nil {
+			backgroundColor = sceneComp.BGColor
+			resolutionFactor = sceneComp.ResolutionFactor
+			pixelAspect = sceneComp.PixelAspect
+			displayStartTime = sceneComp.DisplayStartTime
+		}
 		cp := Composition{
 			ID: c.ID, Name: c.Name, Width: c.Width, Height: c.Height,
 			FrameRate: c.FrameRate, Duration: c.Duration, TickRate: c.TickRate,
-			Renderer: c.Renderer,
-			Draft3D:  compositionDraft3D(sceneComp),
-			WorkArea: WorkArea{Start: c.WorkAreaStart, End: c.WorkAreaEnd},
+			BackgroundColor:  backgroundColor,
+			ResolutionFactor: resolutionFactor,
+			PixelAspect:      pixelAspect,
+			DisplayStartTime: displayStartTime,
+			Renderer:         c.Renderer,
+			Draft3D:          compositionDraft3D(sceneComp),
+			WorkArea:         WorkArea{Start: c.WorkAreaStart, End: c.WorkAreaEnd},
 			MotionBlur: MotionBlurSettings{
 				ShutterAngle:        c.ShutterAngle,
 				ShutterPhase:        c.ShutterPhase,
