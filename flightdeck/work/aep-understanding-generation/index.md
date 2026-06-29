@@ -154,6 +154,12 @@ Done:
   and `ADBE Anchor Point` `expected_profile.keyframes[]` checks against profile
   3D `[x,y,0]` values. The updated shape/text example passed `go test ./...`,
   `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
+- Recipe transform keyframes now accept optional `in_ease` / `out_ease`
+  objects on position, anchor point, scale, rotation, and opacity keyframes.
+  The compiler preserves the old linear path when no ease is supplied and uses
+  `AddKeyframeWithEase` only for eased keyframes. Focused recipe tests reopen
+  the compiled AEP and verify Bezier interpolation plus temporal ease speed /
+  influence on Position and Opacity.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

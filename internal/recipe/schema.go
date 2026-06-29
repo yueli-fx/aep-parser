@@ -332,13 +332,22 @@ type Transform struct {
 }
 
 type VectorKeyframe struct {
-	Time  float64   `json:"time"`
-	Value []float64 `json:"value"`
+	Time    float64       `json:"time"`
+	Value   []float64     `json:"value"`
+	InEase  *TemporalEase `json:"in_ease,omitempty"`
+	OutEase *TemporalEase `json:"out_ease,omitempty"`
 }
 
 type ScalarKeyframe struct {
-	Time  float64 `json:"time"`
-	Value float64 `json:"value"`
+	Time    float64       `json:"time"`
+	Value   float64       `json:"value"`
+	InEase  *TemporalEase `json:"in_ease,omitempty"`
+	OutEase *TemporalEase `json:"out_ease,omitempty"`
+}
+
+type TemporalEase struct {
+	Speed     float64 `json:"speed,omitempty"`
+	Influence float64 `json:"influence"`
 }
 
 type ExpectedProfile struct {
@@ -1462,6 +1471,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 	}
 	for i, kf := range layer.Transform.AnchorPointKeyframes {
 		kfPath := fmt.Sprintf("%s.transform.anchor_point_keyframes[%d]", layerPath, i)
@@ -1472,6 +1483,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 	}
 	for i, kf := range layer.Transform.ScaleKeyframes {
 		kfPath := fmt.Sprintf("%s.transform.scale_keyframes[%d]", layerPath, i)
@@ -1482,6 +1495,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 	}
 	for i, kf := range layer.Transform.RotationKeyframes {
 		kfPath := fmt.Sprintf("%s.transform.rotation_keyframes[%d]", layerPath, i)
@@ -1491,6 +1506,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		if i > 0 && kf.Time < layer.Transform.RotationKeyframes[i-1].Time {
 			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
 		}
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 	}
 	for i, kf := range layer.Transform.OpacityKeyframes {
 		kfPath := fmt.Sprintf("%s.transform.opacity_keyframes[%d]", layerPath, i)
@@ -1503,6 +1520,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		if kf.Value < 0 || kf.Value > 100 {
 			addRefusal("invalid_opacity_keyframe_value", kfPath+".value", "opacity keyframe value must be between 0 and 100")
 		}
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 	}
 	for i, effect := range layer.Effects {
 		effectPath := fmt.Sprintf("%s.effects[%d]", layerPath, i)
@@ -1701,6 +1720,15 @@ func validateVec(values []float64, want int, path string, addRefusal func(string
 	}
 	if len(values) != want {
 		addRefusal("invalid_vector_size", path, fmt.Sprintf("expected %d values", want))
+	}
+}
+
+func validateKeyframeEase(ease *TemporalEase, path string, addRefusal func(string, string, string)) {
+	if ease == nil {
+		return
+	}
+	if ease.Influence <= 0 || ease.Influence > 1 {
+		addRefusal("invalid_keyframe_ease_influence", path+".influence", "keyframe ease influence must be greater than 0 and at most 1")
 	}
 }
 

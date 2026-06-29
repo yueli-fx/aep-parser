@@ -2822,6 +2822,95 @@ func TestCompileToFileChecksExpectedKeyframeProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
 }
 
+func TestCompileToFileSetsTransformKeyframeEase(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.Position = nil
+	rec.Comps[0].Layers[0].Transform.Opacity = nil
+	rec.Comps[0].Layers[0].Transform.PositionKeyframes = []recipe.VectorKeyframe{
+		{
+			Time:    0,
+			Value:   []float64{900, 540},
+			OutEase: &recipe.TemporalEase{Speed: 0, Influence: 0.8},
+		},
+		{
+			Time:   1,
+			Value:  []float64{1020, 540},
+			InEase: &recipe.TemporalEase{Speed: 0, Influence: 0.35},
+		},
+	}
+	rec.Comps[0].Layers[0].Transform.OpacityKeyframes = []recipe.ScalarKeyframe{
+		{
+			Time:    0,
+			Value:   20,
+			OutEase: &recipe.TemporalEase{Speed: 2.5, Influence: 0.6},
+		},
+		{
+			Time:   1,
+			Value:  100,
+			InEase: &recipe.TemporalEase{Speed: 1.5, Influence: 0.25},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	layer := project.Compositions[0].Layers[0]
+	position := layer.Position()
+	if position == nil || len(position.Keyframes) != 2 {
+		t.Fatalf("Position keyframes = %+v, want 2", position)
+	}
+	if position.Keyframes[0].OutInterp != aep.InterpBezier {
+		t.Fatalf("position kf0 OutInterp = %s, want bezier", position.Keyframes[0].OutInterp)
+	}
+	if len(position.Keyframes[0].OutTemporalEase) != 1 {
+		t.Fatalf("position kf0 OutTemporalEase length = %d, want 1", len(position.Keyframes[0].OutTemporalEase))
+	}
+	if got := position.Keyframes[0].OutTemporalEase[0].Influence; math.Abs(got-0.8) > 1e-9 {
+		t.Fatalf("position kf0 out influence = %g, want 0.8", got)
+	}
+	if position.Keyframes[1].InInterp != aep.InterpBezier {
+		t.Fatalf("position kf1 InInterp = %s, want bezier", position.Keyframes[1].InInterp)
+	}
+	if len(position.Keyframes[1].InTemporalEase) != 1 {
+		t.Fatalf("position kf1 InTemporalEase length = %d, want 1", len(position.Keyframes[1].InTemporalEase))
+	}
+	if got := position.Keyframes[1].InTemporalEase[0].Influence; math.Abs(got-0.35) > 1e-9 {
+		t.Fatalf("position kf1 in influence = %g, want 0.35", got)
+	}
+
+	opacity := layer.Opacity()
+	if opacity == nil || len(opacity.Keyframes) != 2 {
+		t.Fatalf("Opacity keyframes = %+v, want 2", opacity)
+	}
+	if opacity.Keyframes[0].OutInterp != aep.InterpBezier {
+		t.Fatalf("opacity kf0 OutInterp = %s, want bezier", opacity.Keyframes[0].OutInterp)
+	}
+	if len(opacity.Keyframes[0].OutTemporalEase) != 1 {
+		t.Fatalf("opacity kf0 OutTemporalEase length = %d, want 1", len(opacity.Keyframes[0].OutTemporalEase))
+	}
+	if got := opacity.Keyframes[0].OutTemporalEase[0]; math.Abs(got.Speed-2.5) > 1e-9 || math.Abs(got.Influence-0.6) > 1e-9 {
+		t.Fatalf("opacity kf0 out ease = %+v, want speed=2.5 influence=0.6", got)
+	}
+	if opacity.Keyframes[1].InInterp != aep.InterpBezier {
+		t.Fatalf("opacity kf1 InInterp = %s, want bezier", opacity.Keyframes[1].InInterp)
+	}
+	if len(opacity.Keyframes[1].InTemporalEase) != 1 {
+		t.Fatalf("opacity kf1 InTemporalEase length = %d, want 1", len(opacity.Keyframes[1].InTemporalEase))
+	}
+	if got := opacity.Keyframes[1].InTemporalEase[0]; math.Abs(got.Speed-1.5) > 1e-9 || math.Abs(got.Influence-0.25) > 1e-9 {
+		t.Fatalf("opacity kf1 in ease = %+v, want speed=1.5 influence=0.25", got)
+	}
+}
+
 func TestCompileToFileChecksExpectedOpacityKeyframeProfile(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Transform.Opacity = nil

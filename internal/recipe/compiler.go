@@ -2074,31 +2074,68 @@ func applyTransform(layer *aep.Layer, spec Transform) error {
 		}
 	}
 	for _, kf := range spec.PositionKeyframes {
-		if err := t.Position().AddKeyframeLinear(kf.Time, [2]float64{kf.Value[0], kf.Value[1]}); err != nil {
+		value := [2]float64{kf.Value[0], kf.Value[1]}
+		if hasKeyframeEase(kf.InEase, kf.OutEase) {
+			if err := t.Position().AddKeyframeWithEase(kf.Time, value, temporalEase(kf.InEase), temporalEase(kf.OutEase)); err != nil {
+				return err
+			}
+		} else if err := t.Position().AddKeyframeLinear(kf.Time, value); err != nil {
 			return err
 		}
 	}
 	for _, kf := range spec.AnchorPointKeyframes {
-		if err := t.AnchorPoint().AddKeyframeLinear(kf.Time, [2]float64{kf.Value[0], kf.Value[1]}); err != nil {
+		value := [2]float64{kf.Value[0], kf.Value[1]}
+		if hasKeyframeEase(kf.InEase, kf.OutEase) {
+			if err := t.AnchorPoint().AddKeyframeWithEase(kf.Time, value, temporalEase(kf.InEase), temporalEase(kf.OutEase)); err != nil {
+				return err
+			}
+		} else if err := t.AnchorPoint().AddKeyframeLinear(kf.Time, value); err != nil {
 			return err
 		}
 	}
 	for _, kf := range spec.ScaleKeyframes {
-		if err := t.Scale().AddKeyframeLinear(kf.Time, [2]float64{kf.Value[0], kf.Value[1]}); err != nil {
+		value := [2]float64{kf.Value[0], kf.Value[1]}
+		if hasKeyframeEase(kf.InEase, kf.OutEase) {
+			if err := t.Scale().AddKeyframeWithEase(kf.Time, value, temporalEase(kf.InEase), temporalEase(kf.OutEase)); err != nil {
+				return err
+			}
+		} else if err := t.Scale().AddKeyframeLinear(kf.Time, value); err != nil {
 			return err
 		}
 	}
 	for _, kf := range spec.RotationKeyframes {
-		if err := t.Rotation().AddKeyframeLinear(kf.Time, kf.Value); err != nil {
+		if hasKeyframeEase(kf.InEase, kf.OutEase) {
+			if err := t.Rotation().AddKeyframeWithEase(kf.Time, kf.Value, temporalEase(kf.InEase), temporalEase(kf.OutEase)); err != nil {
+				return err
+			}
+		} else if err := t.Rotation().AddKeyframeLinear(kf.Time, kf.Value); err != nil {
 			return err
 		}
 	}
 	for _, kf := range spec.OpacityKeyframes {
-		if err := t.Opacity().AddKeyframeLinear(kf.Time, kf.Value); err != nil {
+		if hasKeyframeEase(kf.InEase, kf.OutEase) {
+			if err := t.Opacity().AddKeyframeWithEase(kf.Time, kf.Value, temporalEase(kf.InEase), temporalEase(kf.OutEase)); err != nil {
+				return err
+			}
+		} else if err := t.Opacity().AddKeyframeLinear(kf.Time, kf.Value); err != nil {
 			return err
 		}
 	}
 	return aep.SetLayerTransform(layer, t)
+}
+
+func hasKeyframeEase(in, out *TemporalEase) bool {
+	return in != nil || out != nil
+}
+
+func temporalEase(ease *TemporalEase) aep.TemporalEase {
+	if ease == nil {
+		return aep.TemporalEase{}
+	}
+	return aep.TemporalEase{
+		Speed:     ease.Speed,
+		Influence: ease.Influence,
+	}
 }
 
 func toUnitColor(v float64) float64 {

@@ -81,6 +81,31 @@ func TestValidateRejectsOutOfRangeOpacityKeyframes(t *testing.T) {
 	assertRefusal(t, report, "invalid_opacity_keyframe_value")
 }
 
+func TestValidateRejectsInvalidKeyframeEaseInfluence(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.PositionKeyframes = []recipe.VectorKeyframe{
+		{
+			Time:    0,
+			Value:   []float64{960, 540},
+			OutEase: &recipe.TemporalEase{Influence: 1.2},
+		},
+	}
+	rec.Comps[0].Layers[0].Transform.OpacityKeyframes = []recipe.ScalarKeyframe{
+		{
+			Time:   0,
+			Value:  100,
+			InEase: &recipe.TemporalEase{Influence: 0},
+		},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_keyframe_ease_influence")
+}
+
 func TestValidateRejectsUnsortedOpacityKeyframes(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Transform.OpacityKeyframes = []recipe.ScalarKeyframe{
