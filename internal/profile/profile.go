@@ -34,6 +34,7 @@ type Profile struct {
 	Fingerprint   Fingerprint   `json:"fingerprint"`
 	Items         Items         `json:"items"`
 	Comps         []Composition `json:"comps"`
+	RenderQueue   *RenderQueue  `json:"render_queue,omitempty"`
 	Unknowns      []Unknown     `json:"unknowns,omitempty"`
 }
 
@@ -244,6 +245,25 @@ type EGController struct {
 	Evidence Evidence `json:"evidence"`
 }
 
+type RenderQueue struct {
+	NumItems int               `json:"num_items"`
+	Items    []RenderQueueItem `json:"items,omitempty"`
+	Path     PathRef           `json:"path"`
+	Evidence Evidence          `json:"evidence"`
+}
+
+type RenderQueueItem struct {
+	CompName          string   `json:"comp_name,omitempty"`
+	Status            uint32   `json:"status"`
+	Name              string   `json:"name,omitempty"`
+	Comment           string   `json:"comment,omitempty"`
+	TimeSpanStart     float64  `json:"time_span_start_seconds"`
+	TimeSpanDuration  float64  `json:"time_span_duration_seconds"`
+	OutputModuleCount int      `json:"output_module_count"`
+	Path              PathRef  `json:"path"`
+	Evidence          Evidence `json:"evidence"`
+}
+
 type TemporalEase struct {
 	Speed     float64 `json:"speed"`
 	Influence float64 `json:"influence"`
@@ -384,6 +404,9 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			Path:     itemPath("folder", f.ID, f.Name),
 			Evidence: parsedEvidence(),
 		})
+	}
+	if jp.RenderQueue != nil {
+		prof.RenderQueue = buildRenderQueue(jp.RenderQueue)
 	}
 
 	pluginSeen := map[string]bool{}
@@ -690,6 +713,36 @@ func buildEGController(ctrl *aep.JSONEGController, path PathRef) EGController {
 	}
 }
 
+func buildRenderQueue(rq *aep.JSONRenderQueue) *RenderQueue {
+	out := &RenderQueue{
+		NumItems: rq.NumItems,
+		Path:     renderQueuePath(),
+		Evidence: parsedEvidence(),
+	}
+	for i, item := range rq.Items {
+		out.Items = append(out.Items, buildRenderQueueItem(item, i))
+	}
+	return out
+}
+
+func buildRenderQueueItem(item *aep.JSONRenderQueueItem, occurrence int) RenderQueueItem {
+	path := renderQueueItemPath(occurrence)
+	if item == nil {
+		return RenderQueueItem{Path: path, Evidence: parsedEvidence()}
+	}
+	return RenderQueueItem{
+		CompName:          item.CompName,
+		Status:            item.Status,
+		Name:              item.Name,
+		Comment:           item.Comment,
+		TimeSpanStart:     item.TimeSpanStart,
+		TimeSpanDuration:  item.TimeSpanDuration,
+		OutputModuleCount: len(item.OutputModules),
+		Path:              path,
+		Evidence:          parsedEvidence(),
+	}
+}
+
 func buildMask(c *aep.JSONComposition, l *aep.JSONLayer, m *aep.JSONMask, occurrence int) Mask {
 	mp := Mask{
 		Name:           m.Name,
@@ -913,6 +966,21 @@ func itemPath(kind string, id uint32, name string) PathRef {
 		Path:        fmt.Sprintf("items.%s.by_id[%d]", kind, id),
 		DisplayPath: fmt.Sprintf("items.%s[%q]", kind, name),
 		Identity:    map[string]any{"item_id": id, "item_type": kind},
+	}
+}
+
+func renderQueuePath() PathRef {
+	return PathRef{
+		Path:        "render_queue",
+		DisplayPath: "render_queue",
+	}
+}
+
+func renderQueueItemPath(occurrence int) PathRef {
+	return PathRef{
+		Path:        fmt.Sprintf("render_queue.items[%d]", occurrence),
+		DisplayPath: fmt.Sprintf("render_queue.items[%d]", occurrence),
+		Identity:    map[string]any{"render_queue_item_occurrence": occurrence},
 	}
 }
 

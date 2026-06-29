@@ -309,6 +309,10 @@ Done:
   controller summaries with parsed name, type, UUID, paths, and evidence.
   `eg_multiple_controllers.aep` covers multi-controller profile output; EG
   authoring remains out of recipe scope.
+- Stable profile output now includes render queue item summaries with parsed
+  comp name, status, label/comment, time span, output-module count, paths, and
+  evidence. `rq_numitems_1.aep` covers the queue summary; full render/output
+  module settings remain detail-only.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

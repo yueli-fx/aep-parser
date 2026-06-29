@@ -244,6 +244,46 @@ func TestBuildEssentialGraphicsFixtureIncludesCompControllers(t *testing.T) {
 	}
 }
 
+func TestBuildRenderQueueFixtureIncludesQueueSummary(t *testing.T) {
+	path := repoPath(t, "test_data", "fixtures", "rq_numitems_1.aep")
+	project, err := aep.Open(path)
+	if err != nil {
+		t.Fatalf("open fixture: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{Path: path})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	if prof.RenderQueue == nil {
+		t.Fatal("RenderQueue = nil, want summary")
+	}
+	if prof.RenderQueue.NumItems != 1 {
+		t.Fatalf("RenderQueue.NumItems = %d, want 1", prof.RenderQueue.NumItems)
+	}
+	if len(prof.RenderQueue.Items) != 1 {
+		t.Fatalf("RenderQueue.Items = %d, want 1", len(prof.RenderQueue.Items))
+	}
+
+	item := prof.RenderQueue.Items[0]
+	if item.CompName != "TestComp" {
+		t.Fatalf("render_queue.items[0].comp_name = %q, want TestComp", item.CompName)
+	}
+	if item.OutputModuleCount != 1 {
+		t.Fatalf("render_queue.items[0].output_module_count = %d, want 1", item.OutputModuleCount)
+	}
+	if math.Abs(item.TimeSpanStart) > 1e-3 {
+		t.Fatalf("render_queue.items[0].time_span_start = %g, want 0", item.TimeSpanStart)
+	}
+	if math.Abs(item.TimeSpanDuration-10) > 1e-3 {
+		t.Fatalf("render_queue.items[0].time_span_duration = %g, want 10", item.TimeSpanDuration)
+	}
+	if item.Path.Path == "" || item.Evidence.Level != profile.EvidenceL1Parsed {
+		t.Fatalf("render queue item path/evidence missing: %+v", item)
+	}
+}
+
 func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
 	project := aep.NewProject(aep.TargetAE2020)
 	comp, err := aep.NewComposition(project, "Matte Comp", 1920, 1080, 30, 3)
