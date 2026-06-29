@@ -280,6 +280,10 @@ Done:
   Reopen + `AddMask` path, supports mode and inverted controls, and
   `expected_profile.masks[]` asserts mask name, mode, inverted, closed, and
   vertex count through the parsed profile.
+- Mask recipe/profile coverage now also includes byte-level mask options:
+  locked state, timeline color, motion-blur override, and feather-falloff mode.
+  `profile.Mask` and scene JSON expose those parsed values, and
+  `minimal-layer-mask.json` asserts them through `expected_profile.masks[]`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

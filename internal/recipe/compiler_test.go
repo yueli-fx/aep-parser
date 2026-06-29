@@ -4027,6 +4027,10 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 					"name": "Window",
 					"mode": "subtract",
 					"inverted": true,
+					"locked": true,
+					"color": [255, 128, 0],
+					"motion_blur": "off",
+					"feather_falloff": "linear",
 					"closed": true,
 					"vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
 				}]
@@ -4044,6 +4048,10 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 				"name": "Window",
 				"mode": "subtract",
 				"inverted": true,
+				"locked": true,
+				"color": [255, 128, 0],
+				"motion_blur": "off",
+				"feather_falloff": "linear",
 				"closed": true,
 				"vertex_count": 4
 			}]
@@ -4061,6 +4069,10 @@ func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.masks[0]", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].mode", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].inverted", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].locked", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].color", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].motion_blur", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].feather_falloff", true)
 	assertProfileCheck(t, report, "expected_profile.masks[0].vertex_count", true)
 }
 

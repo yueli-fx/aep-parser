@@ -217,15 +217,19 @@ type TemporalEase struct {
 }
 
 type Mask struct {
-	Name          string             `json:"name,omitempty"`
-	Index         uint32             `json:"index,omitempty"`
-	Mode          string             `json:"mode,omitempty"`
-	Inverted      bool               `json:"inverted,omitempty"`
-	Closed        bool               `json:"closed"`
-	Vertices      []MaskVertex       `json:"vertices,omitempty"`
-	PathKeyframes []MaskPathKeyframe `json:"path_keyframes,omitempty"`
-	Path          PathRef            `json:"path"`
-	Evidence      Evidence           `json:"evidence"`
+	Name           string             `json:"name,omitempty"`
+	Index          uint32             `json:"index,omitempty"`
+	Mode           string             `json:"mode,omitempty"`
+	Inverted       bool               `json:"inverted,omitempty"`
+	Locked         bool               `json:"locked,omitempty"`
+	Color          []float64          `json:"color,omitempty"`
+	MotionBlur     string             `json:"motion_blur,omitempty"`
+	FeatherFalloff string             `json:"feather_falloff,omitempty"`
+	Closed         bool               `json:"closed"`
+	Vertices       []MaskVertex       `json:"vertices,omitempty"`
+	PathKeyframes  []MaskPathKeyframe `json:"path_keyframes,omitempty"`
+	Path           PathRef            `json:"path"`
+	Evidence       Evidence           `json:"evidence"`
 }
 
 type MaskPathKeyframe struct {
@@ -596,14 +600,18 @@ func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int) Property {
 
 func buildMask(c *aep.JSONComposition, l *aep.JSONLayer, m *aep.JSONMask, occurrence int) Mask {
 	mp := Mask{
-		Name:     m.Name,
-		Index:    m.Index,
-		Mode:     m.Mode,
-		Inverted: m.Inverted,
-		Closed:   m.Closed,
-		Vertices: maskVertices(m.Vertices),
-		Path:     maskPath(c, l, occurrence, m.Name),
-		Evidence: parsedEvidence(),
+		Name:           m.Name,
+		Index:          m.Index,
+		Mode:           m.Mode,
+		Inverted:       m.Inverted,
+		Locked:         m.Locked,
+		Color:          maskColor(m.Color),
+		MotionBlur:     m.MotionBlur,
+		FeatherFalloff: m.FeatherFalloff,
+		Closed:         m.Closed,
+		Vertices:       maskVertices(m.Vertices),
+		Path:           maskPath(c, l, occurrence, m.Name),
+		Evidence:       parsedEvidence(),
 	}
 	for _, kf := range m.PathKeyframes {
 		mp.PathKeyframes = append(mp.PathKeyframes, MaskPathKeyframe{
@@ -616,6 +624,14 @@ func buildMask(c *aep.JSONComposition, l *aep.JSONLayer, m *aep.JSONMask, occurr
 		})
 	}
 	return mp
+}
+
+func maskColor(value string) []float64 {
+	var r, g, b int
+	if _, err := fmt.Sscanf(value, "#%02X%02X%02X", &r, &g, &b); err != nil {
+		return nil
+	}
+	return []float64{float64(r), float64(g), float64(b)}
 }
 
 func buildShapePrimitive(c *aep.JSONComposition, l *aep.JSONLayer, prim *aep.JSONShapePrimitive, occurrence int) Shape {

@@ -23,6 +23,10 @@
               "name": "Window",
               "mode": "subtract",
               "inverted": true,
+              "locked": true,
+              "color": [255, 128, 0],
+              "motion_blur": "off",
+              "feather_falloff": "linear",
               "closed": true,
               "vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
             }
@@ -48,6 +52,10 @@
         "name": "Window",
         "mode": "subtract",
         "inverted": true,
+        "locked": true,
+        "color": [255, 128, 0],
+        "motion_blur": "off",
+        "feather_falloff": "linear",
         "closed": true,
         "vertex_count": 4
       }

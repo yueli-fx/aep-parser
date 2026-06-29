@@ -781,10 +781,14 @@ func TestValidateRejectsInvalidLayerQualityAndBlendingMode(t *testing.T) {
 func TestValidateReportsMaskCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Masks = []recipe.MaskSpec{{
-		Name:     "Window",
-		Mode:     "subtract",
-		Inverted: boolPtr(true),
-		Vertices: [][]float64{{10, 10}, {190, 10}, {190, 190}, {10, 190}},
+		Name:           "Window",
+		Mode:           "subtract",
+		Inverted:       boolPtr(true),
+		Locked:         boolPtr(true),
+		Color:          []float64{255, 128, 0},
+		MotionBlur:     "off",
+		FeatherFalloff: "linear",
+		Vertices:       [][]float64{{10, 10}, {190, 10}, {190, 190}, {10, 190}},
 	}}
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
@@ -795,13 +799,20 @@ func TestValidateReportsMaskCapabilities(t *testing.T) {
 	assertCapability(t, report, "AddMask")
 	assertCapability(t, report, "Mask.SetMode")
 	assertCapability(t, report, "Mask.SetInverted")
+	assertCapability(t, report, "Mask.SetLocked")
+	assertCapability(t, report, "Mask.SetColor")
+	assertCapability(t, report, "Mask.SetMaskMotionBlur")
+	assertCapability(t, report, "Mask.SetFeatherFalloff")
 }
 
 func TestValidateRejectsInvalidMask(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Masks = []recipe.MaskSpec{{
-		Mode:     "screen",
-		Vertices: [][]float64{{10, 10}, {190, 10}},
+		Mode:           "screen",
+		Color:          []float64{256, 0, 0},
+		MotionBlur:     "sometimes",
+		FeatherFalloff: "hard",
+		Vertices:       [][]float64{{10, 10}, {190, 10}},
 	}}
 	rec.Comps[0].Layers = append(rec.Comps[0].Layers, recipe.Layer{
 		Type: "camera",
@@ -817,6 +828,9 @@ func TestValidateRejectsInvalidMask(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_mask_mode")
+	assertRefusal(t, report, "invalid_mask_color")
+	assertRefusal(t, report, "invalid_mask_motion_blur")
+	assertRefusal(t, report, "invalid_mask_feather_falloff")
 	assertRefusal(t, report, "invalid_mask_vertices")
 	assertRefusal(t, report, "mask_on_unsupported_layer_type")
 }

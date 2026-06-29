@@ -472,6 +472,18 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		if expectedMask.Inverted != nil {
 			add(maskPath+".inverted", *expectedMask.Inverted, mask.Inverted, mask.Inverted == *expectedMask.Inverted)
 		}
+		if expectedMask.Locked != nil {
+			add(maskPath+".locked", *expectedMask.Locked, mask.Locked, mask.Locked == *expectedMask.Locked)
+		}
+		if len(expectedMask.Color) > 0 {
+			add(maskPath+".color", expectedMask.Color, mask.Color, profileValueEqual(expectedMask.Color, mask.Color))
+		}
+		if expectedMask.MotionBlur != "" {
+			add(maskPath+".motion_blur", expectedMask.MotionBlur, mask.MotionBlur, mask.MotionBlur == expectedMask.MotionBlur)
+		}
+		if expectedMask.FeatherFalloff != "" {
+			add(maskPath+".feather_falloff", expectedMask.FeatherFalloff, mask.FeatherFalloff, mask.FeatherFalloff == expectedMask.FeatherFalloff)
+		}
 		if expectedMask.Closed != nil {
 			add(maskPath+".closed", *expectedMask.Closed, mask.Closed, mask.Closed == *expectedMask.Closed)
 		}
@@ -910,6 +922,34 @@ func materializeMasks(project *aep.Project, compSpec CompSpec) (*aep.Project, er
 			if maskSpec.Inverted != nil {
 				if err := mask.SetInverted(*maskSpec.Inverted); err != nil {
 					return nil, fmt.Errorf("recipe: layer %q mask %q inverted: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if maskSpec.Locked != nil {
+				if err := mask.SetLocked(*maskSpec.Locked); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q locked: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if len(maskSpec.Color) > 0 {
+				if err := mask.SetColor(rgb8Color(maskSpec.Color)); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q color: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if maskSpec.MotionBlur != "" {
+				mode, err := maskMotionBlur(maskSpec.MotionBlur)
+				if err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q motion_blur: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+				if err := mask.SetMaskMotionBlur(mode); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q motion_blur: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if maskSpec.FeatherFalloff != "" {
+				falloff, err := maskFeatherFalloff(maskSpec.FeatherFalloff)
+				if err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q feather_falloff: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+				if err := mask.SetFeatherFalloff(falloff); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q feather_falloff: %w", layerSpec.Name, maskSpec.Name, err)
 				}
 			}
 		}
@@ -1655,6 +1695,30 @@ func maskMode(value string) (aep.MaskMode, error) {
 		return aep.MaskModeDifference, nil
 	default:
 		return 0, fmt.Errorf("unsupported mask mode %q", value)
+	}
+}
+
+func maskMotionBlur(value string) (aep.MaskMotionBlurMode, error) {
+	switch value {
+	case "same_as_layer":
+		return aep.MaskMotionBlurSameAsLayer, nil
+	case "on":
+		return aep.MaskMotionBlurOn, nil
+	case "off":
+		return aep.MaskMotionBlurOff, nil
+	default:
+		return 0, fmt.Errorf("unsupported mask motion_blur %q", value)
+	}
+}
+
+func maskFeatherFalloff(value string) (aep.MaskFeatherFalloff, error) {
+	switch value {
+	case "smooth":
+		return aep.MaskFeatherFalloffSmooth, nil
+	case "linear":
+		return aep.MaskFeatherFalloffLinear, nil
+	default:
+		return 0, fmt.Errorf("unsupported mask feather_falloff %q", value)
 	}
 }
 

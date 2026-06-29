@@ -282,17 +282,20 @@ type JSONMarker struct {
 
 // JSONMask is the JSON representation of a Mask.
 type JSONMask struct {
-	Name          string                  `json:"name,omitempty"`
-	Index         uint32                  `json:"index,omitempty"`
-	Mode          string                  `json:"mode,omitempty"`
-	Inverted      bool                    `json:"inverted,omitempty"`
-	Color         string                  `json:"color,omitempty"` // "#RRGGBB"
-	Closed        bool                    `json:"closed"`
-	Feather       [2]float64              `json:"feather,omitempty"`
-	Opacity       float64                 `json:"opacity,omitempty"`
-	Expansion     float64                 `json:"expansion,omitempty"`
-	Vertices      []JSONMaskVertex        `json:"vertices,omitempty"`
-	PathKeyframes []*JSONMaskPathKeyframe `json:"path_keyframes,omitempty"`
+	Name           string                  `json:"name,omitempty"`
+	Index          uint32                  `json:"index,omitempty"`
+	Mode           string                  `json:"mode,omitempty"`
+	Inverted       bool                    `json:"inverted,omitempty"`
+	Locked         bool                    `json:"locked,omitempty"`
+	Color          string                  `json:"color,omitempty"` // "#RRGGBB"
+	MotionBlur     string                  `json:"motion_blur,omitempty"`
+	FeatherFalloff string                  `json:"feather_falloff,omitempty"`
+	Closed         bool                    `json:"closed"`
+	Feather        [2]float64              `json:"feather,omitempty"`
+	Opacity        float64                 `json:"opacity,omitempty"`
+	Expansion      float64                 `json:"expansion,omitempty"`
+	Vertices       []JSONMaskVertex        `json:"vertices,omitempty"`
+	PathKeyframes  []*JSONMaskPathKeyframe `json:"path_keyframes,omitempty"`
 }
 
 // JSONMaskPathKeyframe mirrors MaskPathKeyframe.
@@ -644,15 +647,18 @@ func layerToJSON(l *Layer) *JSONLayer {
 	}
 	for _, m := range l.Masks {
 		jm := &JSONMask{
-			Name:      m.Name,
-			Index:     m.Index,
-			Mode:      m.Mode.String(),
-			Inverted:  m.Inverted,
-			Color:     fmt.Sprintf("#%02X%02X%02X", m.Color[0], m.Color[1], m.Color[2]),
-			Closed:    m.Closed,
-			Feather:   m.Feather,
-			Opacity:   m.Opacity,
-			Expansion: m.Expansion,
+			Name:           m.Name,
+			Index:          m.Index,
+			Mode:           m.Mode.String(),
+			Inverted:       m.Inverted,
+			Locked:         m.Locked,
+			Color:          fmt.Sprintf("#%02X%02X%02X", m.Color[0], m.Color[1], m.Color[2]),
+			MotionBlur:     maskMotionBlurName(m.MotionBlur),
+			FeatherFalloff: maskFeatherFalloffName(m.FeatherFalloff),
+			Closed:         m.Closed,
+			Feather:        m.Feather,
+			Opacity:        m.Opacity,
+			Expansion:      m.Expansion,
 		}
 		for _, v := range m.Vertices {
 			jm.Vertices = append(jm.Vertices, JSONMaskVertex{
@@ -756,6 +762,26 @@ func propertyToJSON(prop *Property) *JSONProperty {
 		jp.Keyframes = append(jp.Keyframes, jkf)
 	}
 	return jp
+}
+
+func maskMotionBlurName(value MaskMotionBlurMode) string {
+	switch value {
+	case MaskMotionBlurOn:
+		return "on"
+	case MaskMotionBlurOff:
+		return "off"
+	default:
+		return "same_as_layer"
+	}
+}
+
+func maskFeatherFalloffName(value MaskFeatherFalloff) string {
+	switch value {
+	case MaskFeatherFalloffLinear:
+		return "linear"
+	default:
+		return "smooth"
+	}
 }
 
 func footageToJSON(f *Footage) *JSONFootage {

@@ -96,11 +96,15 @@ type Layer struct {
 }
 
 type MaskSpec struct {
-	Name     string      `json:"name,omitempty"`
-	Mode     string      `json:"mode,omitempty"`
-	Inverted *bool       `json:"inverted,omitempty"`
-	Closed   *bool       `json:"closed,omitempty"`
-	Vertices [][]float64 `json:"vertices"`
+	Name           string      `json:"name,omitempty"`
+	Mode           string      `json:"mode,omitempty"`
+	Inverted       *bool       `json:"inverted,omitempty"`
+	Locked         *bool       `json:"locked,omitempty"`
+	Color          []float64   `json:"color,omitempty"`
+	MotionBlur     string      `json:"motion_blur,omitempty"`
+	FeatherFalloff string      `json:"feather_falloff,omitempty"`
+	Closed         *bool       `json:"closed,omitempty"`
+	Vertices       [][]float64 `json:"vertices"`
 }
 
 type LightSpec struct {
@@ -498,12 +502,16 @@ type ExpectedKeyframe struct {
 }
 
 type ExpectedMask struct {
-	LayerName   string `json:"layer_name"`
-	Name        string `json:"name,omitempty"`
-	Mode        string `json:"mode,omitempty"`
-	Inverted    *bool  `json:"inverted,omitempty"`
-	Closed      *bool  `json:"closed,omitempty"`
-	VertexCount *int   `json:"vertex_count,omitempty"`
+	LayerName      string    `json:"layer_name"`
+	Name           string    `json:"name,omitempty"`
+	Mode           string    `json:"mode,omitempty"`
+	Inverted       *bool     `json:"inverted,omitempty"`
+	Locked         *bool     `json:"locked,omitempty"`
+	Color          []float64 `json:"color,omitempty"`
+	MotionBlur     string    `json:"motion_blur,omitempty"`
+	FeatherFalloff string    `json:"feather_falloff,omitempty"`
+	Closed         *bool     `json:"closed,omitempty"`
+	VertexCount    *int      `json:"vertex_count,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -836,6 +844,15 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		}
 		if mask.Mode != "" && !validMaskMode(mask.Mode) {
 			addRefusal("invalid_expected_profile", maskPath+".mode", "mask mode is not supported")
+		}
+		if len(mask.Color) > 0 {
+			validateRGBColor(mask.Color, maskPath+".color", "invalid_expected_profile", addRefusal)
+		}
+		if mask.MotionBlur != "" && !validMaskMotionBlur(mask.MotionBlur) {
+			addRefusal("invalid_expected_profile", maskPath+".motion_blur", "mask motion_blur is not supported")
+		}
+		if mask.FeatherFalloff != "" && !validMaskFeatherFalloff(mask.FeatherFalloff) {
+			addRefusal("invalid_expected_profile", maskPath+".feather_falloff", "mask feather_falloff is not supported")
 		}
 		if mask.VertexCount != nil && *mask.VertexCount < 0 {
 			addRefusal("invalid_expected_profile", maskPath+".vertex_count", "vertex_count must be non-negative")
@@ -1665,6 +1682,25 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		if mask.Inverted != nil {
 			recordCapability("Mask.SetInverted", maskPath+".inverted")
 		}
+		if mask.Locked != nil {
+			recordCapability("Mask.SetLocked", maskPath+".locked")
+		}
+		if len(mask.Color) > 0 {
+			recordCapability("Mask.SetColor", maskPath+".color")
+			validateRGBColor(mask.Color, maskPath+".color", "invalid_mask_color", addRefusal)
+		}
+		if mask.MotionBlur != "" {
+			recordCapability("Mask.SetMaskMotionBlur", maskPath+".motion_blur")
+			if !validMaskMotionBlur(mask.MotionBlur) {
+				addRefusal("invalid_mask_motion_blur", maskPath+".motion_blur", "mask motion_blur must be same_as_layer, on, or off")
+			}
+		}
+		if mask.FeatherFalloff != "" {
+			recordCapability("Mask.SetFeatherFalloff", maskPath+".feather_falloff")
+			if !validMaskFeatherFalloff(mask.FeatherFalloff) {
+				addRefusal("invalid_mask_feather_falloff", maskPath+".feather_falloff", "mask feather_falloff must be smooth or linear")
+			}
+		}
 		if len(mask.Vertices) < 3 {
 			addRefusal("invalid_mask_vertices", maskPath+".vertices", "mask vertices must include at least 3 points")
 		}
@@ -1961,6 +1997,24 @@ func validateKeyframeEase(ease *TemporalEase, path string, addRefusal func(strin
 func validMaskMode(value string) bool {
 	switch value {
 	case "none", "add", "subtract", "intersect", "lighten", "darken", "difference":
+		return true
+	default:
+		return false
+	}
+}
+
+func validMaskMotionBlur(value string) bool {
+	switch value {
+	case "same_as_layer", "on", "off":
+		return true
+	default:
+		return false
+	}
+}
+
+func validMaskFeatherFalloff(value string) bool {
+	switch value {
+	case "smooth", "linear":
 		return true
 	default:
 		return false
