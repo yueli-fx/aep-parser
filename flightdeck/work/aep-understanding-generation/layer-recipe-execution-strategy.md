@@ -237,6 +237,13 @@ disabled Opacity expressions through `expected_profile.properties[]`, while
 `minimal-effect-param-expression.json` checks disabled Gaussian Blur parameter
 expression state through `expected_profile.effects[].params[]`.
 
+Text style now has a dedicated minimal recipe/profile baseline:
+`minimal-text-style.json` authors font size, fill color, tracking, faux bold,
+faux italic, stroke enable/color/width, and paragraph justification on one text
+layer, and asserts them through `expected_profile.text_styles[]`. The larger
+`minimal-text-shape.json` still exercises text style in a mixed content scene,
+but it is no longer the only profile contract for text style.
+
 Nested content examples also require the matching expected-profile family:
 shape/camera/light property content must assert `properties[]`, text style
 content must assert `text_styles[]`, and effect content must assert

@@ -2924,6 +2924,30 @@ Next generation work should broaden recipe coverage in small proven slices:
 remaining recipe-owned families with existing parser/profile contracts. Do not
 start automated correction loops.
 
+Ninety-seventh follow-up completed:
+
+- Added `minimal-text-style.json` as a dedicated text style baseline. It
+  authors font size, fill color, tracking, faux bold, faux italic, stroke
+  enable/color/width, and paragraph justification on one text layer.
+- Added `TestCompileToFileChecksTextStyleProfileExample` so this example
+  remains anchored to its `expected_profile.layers[]` and
+  `expected_profile.text_styles[]` checks instead of relying only on the larger
+  mixed `minimal-text-shape.json` baseline.
+- Verification:
+  - RED was observed with
+    `go test ./internal/recipe -run TestCompileToFileChecksTextStyleProfileExample -count=1`:
+    `minimal-text-style.json` was missing.
+  - The focused text style profile test passed after adding the recipe.
+  - `go test ./internal/recipe -count=1` passed.
+  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+    97 recipes, 97 passed, 0 failed, 149 covered profile paths.
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
+Next generation work should broaden recipe coverage in small proven slices:
+remaining recipe-owned families with existing parser/profile contracts. Do not
+start automated correction loops.
+
 Ninety-sixth follow-up completed:
 
 - Added `minimal-transform-keyframes.json` as the complete transform keyframe

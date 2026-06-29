@@ -712,6 +712,38 @@ func TestCompileToFileChecksTransformKeyframeProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksTextStyleProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-text-style.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	for _, path := range []string{
+		"expected_profile.layers[0].name",
+		"expected_profile.layers[0].type",
+		"expected_profile.text_styles[0].font_size",
+		"expected_profile.text_styles[0].fill_color",
+		"expected_profile.text_styles[0].tracking",
+		"expected_profile.text_styles[0].faux_bold",
+		"expected_profile.text_styles[0].faux_italic",
+		"expected_profile.text_styles[0].apply_stroke",
+		"expected_profile.text_styles[0].stroke_color",
+		"expected_profile.text_styles[0].stroke_width",
+		"expected_profile.text_styles[0].justification",
+	} {
+		assertProfileCheck(t, report, path, true)
+	}
+}
+
 func TestCompileToFileChecksShapeFilterProfileExamples(t *testing.T) {
 	cases := []struct {
 		recipe string

@@ -459,10 +459,12 @@ Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are remaining comp settings, more profile-visible text style, or
-  the next recipe-owned family with an existing parser/profile contract.
-  Transform keyframe coverage now has a complete five-channel baseline in
-  `minimal-transform-keyframes.json`, plus the existing ease baseline. Use
+  candidates are remaining comp settings or the next recipe-owned family with
+  an existing parser/profile contract. Transform keyframe coverage now has a
+  complete five-channel baseline in `minimal-transform-keyframes.json`, plus
+  the existing ease baseline. Text style coverage now has a dedicated
+  `minimal-text-style.json` baseline instead of relying only on the larger
+  text/shape recipe. Use
   `scripts/verify_recipe_profiles.ps1` for whole-recipe
   validation/compile/profile-check coverage instead of manual per-field
   spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
@@ -483,5 +485,6 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: more profile-visible text style
-  or a new recipe-owned family with a proven parser/profile surface.
+- Which recipe field family should enter next: a new recipe-owned family with
+  a proven parser/profile surface, or a comp setting still missing a dedicated
+  recipe/profile slice.
