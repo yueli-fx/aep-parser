@@ -380,7 +380,7 @@ The design is ready to implement when:
 
 ## Next
 
-If this spec is accepted, write a task plan for the first implementation slice:
+Execute `plan.md` for the first implementation slice:
 
 1. Build `internal/recipedoc` reflection model and tests.
 2. Add split metadata registries for the highest-value fields.
@@ -395,10 +395,11 @@ Done:
 - Spec written after recipe compiler/schema were split into smaller files.
 - Boundary chosen: recipe docs are independent from API docs but can join
   capability details through capindex.
+- Implementation plan written in `plan.md`.
 
 Current:
 
-- Awaiting implementation plan.
+- Awaiting plan execution.
 
 ## Open questions
 
