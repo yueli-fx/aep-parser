@@ -1586,7 +1586,7 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
-	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil {
+	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil || shape.FillCompositeOrder != "" {
 		fill, err := group.AddFill()
 		if err != nil {
 			return err
@@ -1598,6 +1598,15 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 		}
 		if shape.FillOpacity != nil {
 			if err := fill.SetOpacity(*shape.FillOpacity); err != nil {
+				return err
+			}
+		}
+		if shape.FillCompositeOrder != "" {
+			order, err := shapeCompositeOrder(shape.FillCompositeOrder)
+			if err != nil {
+				return err
+			}
+			if err := fill.SetCompositeOrder(order); err != nil {
 				return err
 			}
 		}
@@ -1750,6 +1759,17 @@ func strokeLineJoin(value string) (aep.StrokeLineJoin, error) {
 		return aep.StrokeLineJoinBevel, nil
 	default:
 		return 0, fmt.Errorf("unsupported stroke line_join %q", value)
+	}
+}
+
+func shapeCompositeOrder(value string) (aep.ShapeCompositeOrder, error) {
+	switch value {
+	case "above_previous":
+		return aep.ShapeCompositeOrderAbovePrevious, nil
+	case "below_previous":
+		return aep.ShapeCompositeOrderBelowPrevious, nil
+	default:
+		return 0, fmt.Errorf("unsupported shape composite order %q", value)
 	}
 }
 

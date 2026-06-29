@@ -137,29 +137,30 @@ type TextStyleSpec struct {
 }
 
 type ShapeSpec struct {
-	Kind            string               `json:"kind"`
-	Size            []float64            `json:"size,omitempty"`
-	Position        []float64            `json:"position,omitempty"`
-	Roundness       *float64             `json:"roundness,omitempty"`
-	Points          *float64             `json:"points,omitempty"`
-	Rotation        *float64             `json:"rotation,omitempty"`
-	InnerRadius     *float64             `json:"inner_radius,omitempty"`
-	OuterRadius     *float64             `json:"outer_radius,omitempty"`
-	InnerRoundness  *float64             `json:"inner_roundness,omitempty"`
-	OuterRoundness  *float64             `json:"outer_roundness,omitempty"`
-	FillColor       []float64            `json:"fill_color,omitempty"`
-	FillOpacity     *float64             `json:"fill_opacity,omitempty"`
-	Stroke          *StrokeSpec          `json:"stroke,omitempty"`
-	Trim            *TrimSpec            `json:"trim,omitempty"`
-	RoundCorners    *RoundCornersSpec    `json:"round_corners,omitempty"`
-	OffsetPaths     *OffsetPathsSpec     `json:"offset_paths,omitempty"`
-	Repeater        *RepeaterSpec        `json:"repeater,omitempty"`
-	MergePaths      *MergePathsSpec      `json:"merge_paths,omitempty"`
-	ZigZag          *ZigZagSpec          `json:"zigzag,omitempty"`
-	PuckerBloat     *PuckerBloatSpec     `json:"pucker_bloat,omitempty"`
-	Twist           *TwistSpec           `json:"twist,omitempty"`
-	WigglePaths     *WigglePathsSpec     `json:"wiggle_paths,omitempty"`
-	WiggleTransform *WiggleTransformSpec `json:"wiggle_transform,omitempty"`
+	Kind               string               `json:"kind"`
+	Size               []float64            `json:"size,omitempty"`
+	Position           []float64            `json:"position,omitempty"`
+	Roundness          *float64             `json:"roundness,omitempty"`
+	Points             *float64             `json:"points,omitempty"`
+	Rotation           *float64             `json:"rotation,omitempty"`
+	InnerRadius        *float64             `json:"inner_radius,omitempty"`
+	OuterRadius        *float64             `json:"outer_radius,omitempty"`
+	InnerRoundness     *float64             `json:"inner_roundness,omitempty"`
+	OuterRoundness     *float64             `json:"outer_roundness,omitempty"`
+	FillColor          []float64            `json:"fill_color,omitempty"`
+	FillOpacity        *float64             `json:"fill_opacity,omitempty"`
+	FillCompositeOrder string               `json:"fill_composite_order,omitempty"`
+	Stroke             *StrokeSpec          `json:"stroke,omitempty"`
+	Trim               *TrimSpec            `json:"trim,omitempty"`
+	RoundCorners       *RoundCornersSpec    `json:"round_corners,omitempty"`
+	OffsetPaths        *OffsetPathsSpec     `json:"offset_paths,omitempty"`
+	Repeater           *RepeaterSpec        `json:"repeater,omitempty"`
+	MergePaths         *MergePathsSpec      `json:"merge_paths,omitempty"`
+	ZigZag             *ZigZagSpec          `json:"zigzag,omitempty"`
+	PuckerBloat        *PuckerBloatSpec     `json:"pucker_bloat,omitempty"`
+	Twist              *TwistSpec           `json:"twist,omitempty"`
+	WigglePaths        *WigglePathsSpec     `json:"wiggle_paths,omitempty"`
+	WiggleTransform    *WiggleTransformSpec `json:"wiggle_transform,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -985,6 +986,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("invalid_shape_fill_opacity", layerPath+".shape.fill_opacity", "fill opacity must be between 0 and 100")
 			}
 		}
+		if layer.Shape.FillCompositeOrder != "" {
+			recordCapability("FillNode.SetCompositeOrder", layerPath+".shape.fill_composite_order")
+			if !validShapeCompositeOrder(layer.Shape.FillCompositeOrder) {
+				addRefusal("invalid_shape_fill_composite_order", layerPath+".shape.fill_composite_order", "fill_composite_order must be above_previous or below_previous")
+			}
+		}
 		if layer.Shape.Stroke != nil {
 			strokePath := layerPath + ".shape.stroke"
 			recordCapability("VectorGroup.AddStroke", strokePath)
@@ -1449,6 +1456,15 @@ func validStrokeLineCap(value string) bool {
 func validStrokeLineJoin(value string) bool {
 	switch value {
 	case "miter", "round", "bevel":
+		return true
+	default:
+		return false
+	}
+}
+
+func validShapeCompositeOrder(value string) bool {
+	switch value {
+	case "above_previous", "below_previous":
 		return true
 	default:
 		return false

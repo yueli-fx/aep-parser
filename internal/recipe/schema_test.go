@@ -328,6 +328,18 @@ func TestValidateReportsShapeDetailCapabilities(t *testing.T) {
 	assertCapability(t, report, "FillNode.SetOpacity")
 }
 
+func TestValidateReportsShapeFillCompositeOrderCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillCompositeOrder = "below_previous"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "FillNode.SetCompositeOrder")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1767,6 +1779,7 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	rec.Comps[0].Layers[1].Shape.Position = []float64{12}
 	rec.Comps[0].Layers[1].Shape.Roundness = ptr(-1)
 	rec.Comps[0].Layers[1].Shape.FillOpacity = ptr(101)
+	rec.Comps[0].Layers[1].Shape.FillCompositeOrder = "middle"
 
 	report := recipe.Validate(rec)
 
@@ -1776,6 +1789,7 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_roundness")
 	assertRefusal(t, report, "invalid_shape_fill_opacity")
+	assertRefusal(t, report, "invalid_shape_fill_composite_order")
 }
 
 func TestValidateRejectsInvalidShapeStar(t *testing.T) {
