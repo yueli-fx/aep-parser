@@ -2697,6 +2697,43 @@ Eighty-eighth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-ninth follow-up completed:
+
+- Shape gradient stroke recipes now support:
+  - `shape.gradient_stroke.highlight_length` ->
+    `GradientStrokeNode.SetHighlightLength`
+  - `shape.gradient_stroke.highlight_angle` ->
+    `GradientStrokeNode.SetHighlightAngle`
+- Boundary: `highlight_length` is a radial highlight offset percentage and
+  must be between `-100` and `100`; `highlight_angle` is a scalar angle in
+  degrees.
+- `examples/recipes/minimal-shape-gradient-stroke-highlight.json` is a
+  dedicated one-layer radial gradient stroke recipe with highlight length `65`
+  and angle `40`. The embedded expected profile checks
+  `ADBE Vector Grad HiLite Length` and `ADBE Vector Grad HiLite Angle`.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled profile still
+    read `ADBE Vector Grad HiLite Length = 0`, highlight capabilities were
+    absent, and invalid highlight length was not refused.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-gradient-stroke-highlight.json -out
+    tmp_debug\recipes\minimal-shape-gradient-stroke-highlight.aep -json`
+    returned valid, reported `GradientStrokeNode.SetHighlightLength` and
+    `GradientStrokeNode.SetHighlightAngle`, and all embedded `profile_checks`
+    passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_gradient_stroke_highlight\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_gradient_stroke_highlight\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

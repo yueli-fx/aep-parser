@@ -1688,6 +1688,16 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.GradientStroke.HighlightLength != nil {
+			if err := stroke.SetHighlightLength(*shape.GradientStroke.HighlightLength); err != nil {
+				return err
+			}
+		}
+		if shape.GradientStroke.HighlightAngle != nil {
+			if err := stroke.SetHighlightAngle(*shape.GradientStroke.HighlightAngle); err != nil {
+				return err
+			}
+		}
 		if shape.GradientStroke.Width != nil {
 			if err := stroke.SetStrokeWidth(*shape.GradientStroke.Width); err != nil {
 				return err

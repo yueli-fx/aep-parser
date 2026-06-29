@@ -182,11 +182,13 @@ type GradientColorStopSpec struct {
 }
 
 type GradientStrokeSpec struct {
-	Type       string                  `json:"type,omitempty"`
-	StartPoint []float64               `json:"start_point,omitempty"`
-	EndPoint   []float64               `json:"end_point,omitempty"`
-	Width      *float64                `json:"width,omitempty"`
-	ColorStops []GradientColorStopSpec `json:"color_stops,omitempty"`
+	Type            string                  `json:"type,omitempty"`
+	StartPoint      []float64               `json:"start_point,omitempty"`
+	EndPoint        []float64               `json:"end_point,omitempty"`
+	HighlightLength *float64                `json:"highlight_length,omitempty"`
+	HighlightAngle  *float64                `json:"highlight_angle,omitempty"`
+	Width           *float64                `json:"width,omitempty"`
+	ColorStops      []GradientColorStopSpec `json:"color_stops,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -1072,6 +1074,15 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			if len(layer.Shape.GradientStroke.EndPoint) > 0 {
 				recordCapability("GradientStrokeNode.SetEndPoint", gradientPath+".end_point")
 				validateVec(layer.Shape.GradientStroke.EndPoint, 2, gradientPath+".end_point", addRefusal)
+			}
+			if layer.Shape.GradientStroke.HighlightLength != nil {
+				recordCapability("GradientStrokeNode.SetHighlightLength", gradientPath+".highlight_length")
+				if *layer.Shape.GradientStroke.HighlightLength < -100 || *layer.Shape.GradientStroke.HighlightLength > 100 {
+					addRefusal("invalid_shape_gradient_stroke_highlight_length", gradientPath+".highlight_length", "gradient_stroke highlight_length must be between -100 and 100")
+				}
+			}
+			if layer.Shape.GradientStroke.HighlightAngle != nil {
+				recordCapability("GradientStrokeNode.SetHighlightAngle", gradientPath+".highlight_angle")
 			}
 			if layer.Shape.GradientStroke.Width != nil {
 				recordCapability("GradientStrokeNode.SetStrokeWidth", gradientPath+".width")
