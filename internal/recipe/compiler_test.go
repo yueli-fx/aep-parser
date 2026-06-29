@@ -402,6 +402,34 @@ func TestCompileToFileSetsLayerParent(t *testing.T) {
 	}
 }
 
+func TestCompileToFileCreatesNullLayer(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "null",
+		Name: "Controller",
+		Transform: recipe.Transform{
+			Position: []float64{960, 540},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if !got.IsNull {
+		t.Fatal("layer is_null = false, want true")
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

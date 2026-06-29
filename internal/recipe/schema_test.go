@@ -562,6 +562,18 @@ func TestValidateRejectsMissingLayerParent(t *testing.T) {
 	assertRefusal(t, report, "unknown_layer_parent")
 }
 
+func TestValidateReportsNullLayerCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "null",
+		Name: "Controller",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "NewNullLayer")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

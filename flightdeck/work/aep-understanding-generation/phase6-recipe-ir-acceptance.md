@@ -1695,6 +1695,31 @@ Fifty-third follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-fourth follow-up completed:
+
+- Layer recipes now support a high-level null layer type:
+  - `type: "null"` -> `NewNullLayer`
+- Boundary: `type: "null"` creates the standard solid-backed null helper via
+  the library creation API. This differs from `is_null`, which only flips the
+  low-level Null-Object marker bit on a layer created by another recipe type.
+- `examples/recipes/minimal-null-layer.json` is a dedicated two-layer recipe:
+  a `Controller` null layer plus a text child parented to it. See
+  `knowledge/layer/recipe-null-layer.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-null-layer.json -out
+    tmp_debug\recipes\minimal-null-layer.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_null_layer\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_null_layer\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
