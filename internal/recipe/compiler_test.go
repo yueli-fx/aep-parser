@@ -1,6 +1,7 @@
 package recipe_test
 
 import (
+	"math"
 	"path/filepath"
 	"testing"
 
@@ -106,6 +107,37 @@ func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	if comp.ShutterAngle != 360 || comp.ShutterPhase != -90 || comp.MotionBlurAdaptiveSampleLimit != 256 || comp.MotionBlurSamplesPerFrame != 32 {
 		t.Fatalf("motion blur = angle %d phase %d adaptive %d samples %d, want 360 -90 256 32",
 			comp.ShutterAngle, comp.ShutterPhase, comp.MotionBlurAdaptiveSampleLimit, comp.MotionBlurSamplesPerFrame)
+	}
+}
+
+func TestCompileToFileSetsCompWorkArea(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].WorkArea = &recipe.CompWorkAreaSpec{
+		Start: ptr(1.5),
+		End:   ptr(3.5),
+	}
+	rec.ExpectedProfile.WorkArea = &recipe.ExpectedWorkAreaSpec{
+		Start: ptr(1.5),
+		End:   ptr(3.5),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.work_area.start", true)
+	assertProfileCheck(t, report, "expected_profile.work_area.end", true)
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	comp := project.Compositions[0]
+	if math.Abs(comp.WorkAreaStart-1.5) > 1e-6 || math.Abs(comp.WorkAreaEnd-3.5) > 1e-6 {
+		t.Fatalf("work area = (%g, %g), want (1.5, 3.5)", comp.WorkAreaStart, comp.WorkAreaEnd)
 	}
 }
 

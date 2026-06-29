@@ -238,14 +238,18 @@ Done:
   `examples/recipes/minimal-comp-motion-blur.json` example asserts all four
   profile-visible motion blur settings and passes an AE 2025 render oracle
   gate.
+- Third comp-level recipe settings slice is implemented for `comp.work_area`
+  second-based start/end settings. The dedicated
+  `examples/recipes/minimal-comp-work-area.json` example asserts both
+  profile-visible work area fields and passes an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are remaining shape filters, expression support, transform
-  keyframe/ease where writer support exists, or more profile-visible text style.
-  Do not start automated correction loops.
+  candidates are remaining comp settings, shape filters, expression support,
+  transform keyframe/ease where writer support exists, or more profile-visible
+  text style. Do not start automated correction loops.
 
 ## Open questions
 

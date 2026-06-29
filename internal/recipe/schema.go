@@ -27,7 +27,13 @@ type CompSpec struct {
 	Duration        float64             `json:"duration"`
 	BackgroundColor []float64           `json:"background_color,omitempty"`
 	MotionBlur      *CompMotionBlurSpec `json:"motion_blur,omitempty"`
+	WorkArea        *CompWorkAreaSpec   `json:"work_area,omitempty"`
 	Layers          []Layer             `json:"layers,omitempty"`
+}
+
+type CompWorkAreaSpec struct {
+	Start *float64 `json:"start,omitempty"`
+	End   *float64 `json:"end,omitempty"`
 }
 
 type CompMotionBlurSpec struct {
@@ -230,10 +236,16 @@ type ExpectedProfile struct {
 	TextLayerCount  *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount *int                        `json:"shape_layer_count,omitempty"`
 	MotionBlur      *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
+	WorkArea        *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
 	Effects         []ExpectedEffect            `json:"effects,omitempty"`
 	Properties      []ExpectedProperty          `json:"properties,omitempty"`
 	TextStyles      []ExpectedTextStyle         `json:"text_styles,omitempty"`
 	Keyframes       []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
+}
+
+type ExpectedWorkAreaSpec struct {
+	Start *float64 `json:"start,omitempty"`
+	End   *float64 `json:"end,omitempty"`
 }
 
 type ExpectedMotionBlurSpec struct {
@@ -387,6 +399,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)
 		}
+		if comp.WorkArea != nil {
+			validateCompWorkArea(comp.WorkArea, compPath+".work_area", comp.Duration, recordCapability, addRefusal)
+		}
 		for li, layer := range comp.Layers {
 			layerPath := fmt.Sprintf("%s.layers[%d]", compPath, li)
 			validateLayer(layer, layerPath, comp.Duration, recordCapability, addRefusal)
@@ -515,6 +530,17 @@ func validateCompMotionBlur(spec *CompMotionBlurSpec, path string, recordCapabil
 		if *spec.SamplesPerFrame < 0 || !isWholeNumber(*spec.SamplesPerFrame) {
 			addRefusal("invalid_comp_motion_blur_samples_per_frame", path+".samples_per_frame", "motion_blur samples_per_frame must be a non-negative integer")
 		}
+	}
+}
+
+func validateCompWorkArea(spec *CompWorkAreaSpec, path string, compDuration float64, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	recordCapability("SetWorkArea", path)
+	if spec.Start == nil || spec.End == nil {
+		addRefusal("invalid_comp_work_area", path, "work_area start and end are required")
+		return
+	}
+	if *spec.Start < 0 || *spec.End < *spec.Start || *spec.End > compDuration {
+		addRefusal("invalid_comp_work_area", path, "work_area must satisfy 0 <= start <= end <= comp duration")
 	}
 }
 

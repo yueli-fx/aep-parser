@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal comp work area"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 4,
+      "background_color": [0, 0, 0],
+      "work_area": {
+        "start": 1.5,
+        "end": 3.5
+      },
+      "layers": []
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0,
+    "work_area": {
+      "start": 1.5,
+      "end": 3.5
+    }
+  }
+}

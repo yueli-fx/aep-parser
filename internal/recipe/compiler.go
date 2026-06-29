@@ -40,6 +40,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.WorkArea != nil {
+		if err := comp.SetWorkArea(*compSpec.WorkArea.Start, *compSpec.WorkArea.End); err != nil {
+			return report, fmt.Errorf("recipe: comp %q work_area: %w", compSpec.Name, err)
+		}
+	}
 	for _, layerSpec := range compSpec.Layers {
 		if err := compileLayer(comp, layerSpec, compSpec); err != nil {
 			return report, err
@@ -104,6 +109,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
 		expected.MotionBlur != nil ||
+		expected.WorkArea != nil ||
 		len(expected.Effects) > 0 ||
 		len(expected.Properties) > 0 ||
 		len(expected.TextStyles) > 0 ||
@@ -143,6 +149,9 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	if expected.MotionBlur != nil {
 		checkExpectedMotionBlur(expected.MotionBlur, prof, add)
+	}
+	if expected.WorkArea != nil {
+		checkExpectedWorkArea(expected.WorkArea, prof, add)
 	}
 	for i, expectedEffect := range expected.Effects {
 		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)
@@ -291,6 +300,23 @@ func checkExpectedMotionBlur(expected *ExpectedMotionBlurSpec, prof *profile.Pro
 	if expected.SamplesPerFrame != nil {
 		got := float64(actual.SamplesPerFrame)
 		add("expected_profile.motion_blur.samples_per_frame", *expected.SamplesPerFrame, got, got == *expected.SamplesPerFrame)
+	}
+}
+
+func checkExpectedWorkArea(expected *ExpectedWorkAreaSpec, prof *profile.Profile, add func(string, any, any, bool)) {
+	if expected == nil {
+		return
+	}
+	if len(prof.Comps) == 0 {
+		add("expected_profile.work_area", "composition", nil, false)
+		return
+	}
+	actual := prof.Comps[0].WorkArea
+	if expected.Start != nil {
+		add("expected_profile.work_area.start", *expected.Start, actual.Start, math.Abs(actual.Start-*expected.Start) < 1e-6)
+	}
+	if expected.End != nil {
+		add("expected_profile.work_area.end", *expected.End, actual.End, math.Abs(actual.End-*expected.End) < 1e-6)
 	}
 }
 

@@ -1016,6 +1016,36 @@ Thirtieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Thirty-first follow-up completed:
+
+- Composition recipes now support `work_area` second-based start/end settings:
+  - `start` -> profile `work_area.start_seconds`
+  - `end` -> profile `work_area.end_seconds`
+- Capability reporting records:
+  - `SetWorkArea`
+- Validation requires both values and rejects ranges outside
+  `0 <= start <= end <= comp.duration`.
+- Boundary: this slice models second-based work area authoring only. Frame-based
+  work area setters remain lower-level `aep` APIs for now.
+- `examples/recipes/minimal-comp-work-area.json` is a dedicated no-layer comp
+  recipe that asserts both `expected_profile.work_area` fields. See
+  `knowledge/composition/recipe-work-area.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-work-area.json -out
+    tmp_debug\recipes\minimal-comp-work-area.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_work_area\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_work_area\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
