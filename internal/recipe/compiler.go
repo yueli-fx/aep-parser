@@ -65,6 +65,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q hide_shy_layers: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.PreserveNestedFrameRate != nil {
+		if err := comp.SetPreserveNestedFrameRate(*compSpec.PreserveNestedFrameRate); err != nil {
+			return report, fmt.Errorf("recipe: comp %q preserve_nested_frame_rate: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.MotionBlur != nil {
 		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)

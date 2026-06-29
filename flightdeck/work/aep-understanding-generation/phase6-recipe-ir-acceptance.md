@@ -1224,6 +1224,36 @@ Thirty-seventh follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Thirty-eighth follow-up completed:
+
+- Composition recipes now support `preserve_nested_frame_rate`:
+  - boolean -> `SetPreserveNestedFrameRate`
+- Capability reporting records:
+  - `SetPreserveNestedFrameRate`
+- Boundary: this is the composition "preserve frame rate when nested" toggle.
+  It affects behavior when this comp is used as a nested/precomp source. The
+  current stable profile schema does not expose this comp flag, so this slice
+  uses compiled AEP `cdta @0x8B bit 0x20` readback in tests plus AE render
+  acceptance for the dedicated example.
+- `examples/recipes/minimal-comp-preserve-nested-frame-rate.json` is a
+  dedicated no-layer comp recipe with `preserve_nested_frame_rate: true`. See
+  `knowledge/composition/recipe-preserve-nested-frame-rate.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-preserve-nested-frame-rate.json -out
+    tmp_debug\recipes\minimal-comp-preserve-nested-frame-rate.aep -json`
+    returned valid and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_preserve_nested_frame_rate\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_preserve_nested_frame_rate\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

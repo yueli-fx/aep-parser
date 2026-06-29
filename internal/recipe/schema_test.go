@@ -446,6 +446,15 @@ func TestValidateReportsCompHideShyLayersCapability(t *testing.T) {
 	assertCapability(t, report, "SetHideShyLayers")
 }
 
+func TestValidateReportsCompPreserveNestedFrameRateCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].PreserveNestedFrameRate = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetPreserveNestedFrameRate")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
