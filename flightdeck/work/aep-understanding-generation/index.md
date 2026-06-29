@@ -167,6 +167,10 @@ Done:
   shape/text example asserts all five `ADBE Vector Offset ...` properties,
   passed `go test ./...`, `go vet ./...`, profile checks, and an AE 2025
   render oracle gate.
+- Fourth shape-filter recipe slice is implemented for `shape.zigzag` size,
+  detail, and points. The updated shape/text example asserts all three
+  `ADBE Vector Zigzag ...` properties, passed `go test ./...`,
+  `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

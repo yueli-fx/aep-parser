@@ -87,6 +87,11 @@
               "miter_limit": 2,
               "copies": 3,
               "copy_offset": 1.5
+            },
+            "zigzag": {
+              "size": 40,
+              "detail": 8,
+              "points": "smooth"
             }
           },
           "transform": {
@@ -176,6 +181,21 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector Offset Copy Offset",
         "value": 1.5
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Zigzag Size",
+        "value": 40
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Zigzag Detail",
+        "value": 8
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Zigzag Points",
+        "value": 2
       }
     ],
     "text_styles": [

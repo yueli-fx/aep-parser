@@ -347,6 +347,25 @@ func TestValidateReportsShapeOffsetPathsCapabilities(t *testing.T) {
 	assertCapability(t, report, "OffsetPathsNode.SetCopyOffset")
 }
 
+func TestValidateReportsShapeZigZagCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.ZigZag = &recipe.ZigZagSpec{
+		Size:   ptr(40),
+		Detail: ptr(8),
+		Points: "smooth",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddZigZag")
+	assertCapability(t, report, "ZigZagNode.SetSize")
+	assertCapability(t, report, "ZigZagNode.SetDetail")
+	assertCapability(t, report, "ZigZagNode.SetPoints")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
@@ -465,6 +484,24 @@ func TestValidateRejectsInvalidShapeOffsetPaths(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_offset_line_join")
 	assertRefusal(t, report, "invalid_shape_offset_miter_limit")
 	assertRefusal(t, report, "invalid_shape_offset_copies")
+}
+
+func TestValidateRejectsInvalidShapeZigZag(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.ZigZag = &recipe.ZigZagSpec{
+		Size:   ptr(-1),
+		Detail: ptr(-1),
+		Points: "sharp",
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_zigzag_size")
+	assertRefusal(t, report, "invalid_shape_zigzag_detail")
+	assertRefusal(t, report, "invalid_shape_zigzag_points")
 }
 
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {

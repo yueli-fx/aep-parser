@@ -659,6 +659,31 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.ZigZag != nil {
+		zigZag, err := group.AddZigZag()
+		if err != nil {
+			return err
+		}
+		if shape.ZigZag.Size != nil {
+			if err := zigZag.SetSize(*shape.ZigZag.Size); err != nil {
+				return err
+			}
+		}
+		if shape.ZigZag.Detail != nil {
+			if err := zigZag.SetDetail(*shape.ZigZag.Detail); err != nil {
+				return err
+			}
+		}
+		if shape.ZigZag.Points != "" {
+			points, err := zigZagPoints(shape.ZigZag.Points)
+			if err != nil {
+				return err
+			}
+			if err := zigZag.SetPoints(points); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {
@@ -731,6 +756,17 @@ func offsetLineJoin(value string) (aep.StrokeLineJoin, error) {
 		return aep.StrokeLineJoinBevel, nil
 	default:
 		return 0, fmt.Errorf("unsupported offset line_join %q", value)
+	}
+}
+
+func zigZagPoints(value string) (aep.ZigZagPoints, error) {
+	switch value {
+	case "corner":
+		return aep.ZigZagPointsCorner, nil
+	case "smooth":
+		return aep.ZigZagPointsSmooth, nil
+	default:
+		return 0, fmt.Errorf("unsupported zigzag points %q", value)
 	}
 }
 

@@ -197,6 +197,36 @@ func TestCompileToFileSetsShapeOffsetPaths(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Offset Copy Offset", 1.5)
 }
 
+func TestCompileToFileSetsShapeZigZag(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.ZigZag = &recipe.ZigZagSpec{
+		Size:   ptr(40),
+		Detail: ptr(8),
+		Points: "smooth",
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Zigzag Size", 40.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Zigzag Detail", 8.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Zigzag Points", 2.0)
+}
+
 func TestCompileToFileSetsTextStyle(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{

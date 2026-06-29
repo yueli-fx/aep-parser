@@ -64,6 +64,7 @@ type ShapeSpec struct {
 	Trim         *TrimSpec         `json:"trim,omitempty"`
 	RoundCorners *RoundCornersSpec `json:"round_corners,omitempty"`
 	OffsetPaths  *OffsetPathsSpec  `json:"offset_paths,omitempty"`
+	ZigZag       *ZigZagSpec       `json:"zigzag,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -88,6 +89,12 @@ type OffsetPathsSpec struct {
 	MiterLimit *float64 `json:"miter_limit,omitempty"`
 	Copies     *float64 `json:"copies,omitempty"`
 	CopyOffset *float64 `json:"copy_offset,omitempty"`
+}
+
+type ZigZagSpec struct {
+	Size   *float64 `json:"size,omitempty"`
+	Detail *float64 `json:"detail,omitempty"`
+	Points string   `json:"points,omitempty"`
 }
 
 type Effect struct {
@@ -503,6 +510,28 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("OffsetPathsNode.SetCopyOffset", offsetPath+".copy_offset")
 			}
 		}
+		if layer.Shape.ZigZag != nil {
+			zigZagPath := layerPath + ".shape.zigzag"
+			recordCapability("VectorGroup.AddZigZag", zigZagPath)
+			if layer.Shape.ZigZag.Size != nil {
+				recordCapability("ZigZagNode.SetSize", zigZagPath+".size")
+				if *layer.Shape.ZigZag.Size < 0 {
+					addRefusal("invalid_shape_zigzag_size", zigZagPath+".size", "zigzag size must be non-negative")
+				}
+			}
+			if layer.Shape.ZigZag.Detail != nil {
+				recordCapability("ZigZagNode.SetDetail", zigZagPath+".detail")
+				if *layer.Shape.ZigZag.Detail < 0 {
+					addRefusal("invalid_shape_zigzag_detail", zigZagPath+".detail", "zigzag detail must be non-negative")
+				}
+			}
+			if layer.Shape.ZigZag.Points != "" {
+				recordCapability("ZigZagNode.SetPoints", zigZagPath+".points")
+				if !validZigZagPoints(layer.Shape.ZigZag.Points) {
+					addRefusal("invalid_shape_zigzag_points", zigZagPath+".points", "zigzag points must be corner or smooth")
+				}
+			}
+		}
 	}
 	if usesTransform(layer.Transform) {
 		recordCapability("SetLayerTransform", layerPath+".transform")
@@ -648,6 +677,15 @@ func validTextJustification(value string) bool {
 func validOffsetLineJoin(value string) bool {
 	switch value {
 	case "miter", "round", "bevel":
+		return true
+	default:
+		return false
+	}
+}
+
+func validZigZagPoints(value string) bool {
+	switch value {
+	case "corner", "smooth":
 		return true
 	default:
 		return false

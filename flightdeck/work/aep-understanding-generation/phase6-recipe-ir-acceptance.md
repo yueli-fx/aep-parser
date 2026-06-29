@@ -485,6 +485,42 @@ Sixteenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Seventeenth follow-up completed:
+
+- Shape recipes now support `shape.zigzag`, including:
+  - `size` -> `ADBE Vector Zigzag Size`
+  - `detail` -> `ADBE Vector Zigzag Detail`
+  - `points` -> `ADBE Vector Zigzag Points`
+- Validation rejects negative size/detail values and unsupported `points`
+  values; valid points are `corner` and `smooth`.
+- Capability reporting records:
+  - `VectorGroup.AddZigZag`
+  - `ZigZagNode.SetSize`
+  - `ZigZagNode.SetDetail`
+  - `ZigZagNode.SetPoints`
+- `examples/recipes/minimal-text-shape.json` now includes ZigZag on the
+  `Underline` layer and asserts all three ZigZag profile properties. Note:
+  recipe `points` is authored as a string, while profile
+  `ADBE Vector Zigzag Points` reads back as numeric enum `1/2`; see
+  `knowledge/shape/recipe-zigzag-profile-enums.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-zigzag.aep -json` returned
+    valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_zigzag/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_zigzag/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
