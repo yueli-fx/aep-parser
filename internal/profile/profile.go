@@ -115,6 +115,7 @@ type Layer struct {
 	Quality      string      `json:"quality,omitempty"`
 	BlendingMode string      `json:"blending_mode,omitempty"`
 	AutoOrient   string      `json:"auto_orient,omitempty"`
+	LightKind    string      `json:"light_kind,omitempty"`
 	SourceRef    *ItemRef    `json:"source_ref,omitempty"`
 	ParentRef    *LayerRef   `json:"parent_ref,omitempty"`
 	MatteRef     *LayerRef   `json:"matte_ref,omitempty"`
@@ -450,6 +451,7 @@ func buildLayer(
 		Quality:      qualityName(int(l.Quality)),
 		BlendingMode: blendRecipeName(int(l.BlendingMode)),
 		AutoOrient:   autoOrientName(l.AutoOrient),
+		LightKind:    l.LightKind,
 		Timing: LayerTiming{
 			StartTime: l.StartTime,
 			Duration:  l.Duration,

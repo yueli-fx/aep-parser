@@ -47,7 +47,8 @@
     "layers": [
       {
         "name": "Light",
-        "type": "light"
+        "type": "light",
+        "light_kind": "spot"
       }
     ],
     "properties": [

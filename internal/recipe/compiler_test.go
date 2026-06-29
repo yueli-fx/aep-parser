@@ -455,6 +455,7 @@ func TestCompileToFileChecksLightObjectProfileExample(t *testing.T) {
 	for _, path := range []string{
 		"expected_profile.layers[0].name",
 		"expected_profile.layers[0].type",
+		"expected_profile.layers[0].light_kind",
 		"expected_profile.properties[0]",
 		"expected_profile.properties[1]",
 		"expected_profile.properties[2]",

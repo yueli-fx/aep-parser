@@ -181,6 +181,7 @@ type JSONLayer struct {
 	Label                uint8  `json:"label,omitempty"`
 	BlendingMode         uint8  `json:"blending_mode,omitempty"`
 	TrackMatte           uint8  `json:"track_matte,omitempty"`
+	LightKind            string `json:"light_kind,omitempty"`
 	PreserveTransparency bool   `json:"preserve_transparency,omitempty"`
 	AutoOrient           string `json:"auto_orient,omitempty"`
 	Comment              string `json:"comment,omitempty"`
@@ -565,13 +566,19 @@ func layerToJSON(l *Layer) *JSONLayer {
 			}
 			return ""
 		}(),
-		StartTime:            roundFloat(l.StartTime, 4),
-		Duration:             roundFloat(l.Duration, 4),
-		Stretch:              roundFloat(l.Stretch, 4),
-		Quality:              uint16(l.Quality),
-		Label:                l.Label,
-		BlendingMode:         uint8(l.BlendingMode),
-		TrackMatte:           uint8(l.TrackMatte),
+		StartTime:    roundFloat(l.StartTime, 4),
+		Duration:     roundFloat(l.Duration, 4),
+		Stretch:      roundFloat(l.Stretch, 4),
+		Quality:      uint16(l.Quality),
+		Label:        l.Label,
+		BlendingMode: uint8(l.BlendingMode),
+		TrackMatte:   uint8(l.TrackMatte),
+		LightKind: func() string {
+			if l.Type != LayerTypeLight {
+				return ""
+			}
+			return l.LightKind.String()
+		}(),
 		PreserveTransparency: l.PreserveTransparency,
 		Comment:              l.Comment,
 		AutoOrient: func() string {
@@ -776,9 +783,7 @@ func (p *Project) MarshalJSON() ([]byte, error) {
 // @stability   stable
 // @verify      roundtrip
 // @since       AE2020
-// @boundary    one-way export — there is no corresponding ReadJSON. Output is
-//   deterministic and checked against golden fixtures; this path does not
-//   involve AE.
+// @boundary    one-way export — there is no corresponding ReadJSON. Output is deterministic and checked against golden fixtures; this path does not involve AE.
 // @alias       write json,json 导出,export json,序列化
 func (p *Project) WriteJSON(w io.Writer) error {
 	enc := json.NewEncoder(w)

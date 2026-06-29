@@ -399,6 +399,7 @@ type ExpectedLayer struct {
 	Quality      string               `json:"quality,omitempty"`
 	BlendingMode string               `json:"blending_mode,omitempty"`
 	AutoOrient   string               `json:"auto_orient,omitempty"`
+	LightKind    string               `json:"light_kind,omitempty"`
 	Parent       string               `json:"parent,omitempty"`
 	TrackMatte   string               `json:"track_matte,omitempty"`
 	Matte        string               `json:"matte,omitempty"`

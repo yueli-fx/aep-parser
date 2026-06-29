@@ -557,6 +557,9 @@ func checkExpectedLayer(index int, expected ExpectedLayer, prof *profile.Profile
 	if expected.AutoOrient != "" {
 		add(layerPath+".auto_orient", expected.AutoOrient, layer.AutoOrient, layer.AutoOrient == expected.AutoOrient)
 	}
+	if expected.LightKind != "" {
+		add(layerPath+".light_kind", expected.LightKind, layer.LightKind, layer.LightKind == expected.LightKind)
+	}
 	if expected.Parent != "" {
 		actual := ""
 		if layer.ParentRef != nil {

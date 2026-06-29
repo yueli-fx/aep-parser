@@ -228,8 +228,9 @@ Done:
   `minimal-camera-object-profile.json` sets zoom, DOF/focus/aperture/blur, and
   iris controls together and asserts all profile-visible properties.
 - Light option coverage now has a consolidated object/profile baseline:
-  `minimal-light-object-profile.json` sets intensity, color, shadow, falloff,
-  and cone controls together and asserts all profile-visible properties.
+  `minimal-light-object-profile.json` sets light kind, intensity, color,
+  shadow, falloff, and cone controls together and asserts all profile-visible
+  layer/property fields.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

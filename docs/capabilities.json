@@ -2208,7 +2208,7 @@
       "verify": "roundtrip",
       "minver": "2020",
       "gate": null,
-      "boundary": "one-way export — there is no corresponding ReadJSON. Output is\ndeterministic and checked against golden fixtures; this path does not\ninvolve AE.",
+      "boundary": "one-way export — there is no corresponding ReadJSON. Output is deterministic and checked against golden fixtures; this path does not involve AE.",
       "incident": null,
       "alias": [
         "write json",

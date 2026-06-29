@@ -68,7 +68,7 @@ flags, and refs.
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
 | Camera options | `camera.*` | camera setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | done in consolidated camera baseline |
-| Light options | `light.*` | light setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | done in consolidated light baseline for profile-visible properties |
+| Light options | `light.kind` / `light.*` | light setters | `layers[].light_kind` / `properties[]` | `expected_profile.layers[].light_kind` / `expected_profile.properties[]` | L3/L4 | done in consolidated light baseline for profile-visible properties |
 
 ## Preferred Execution Order
 
@@ -182,9 +182,9 @@ Camera option values now also have a consolidated baseline:
 focus distance, aperture, blur level, and the iris controls in one recipe.
 
 Light option values now also have a consolidated baseline:
-`minimal-light-object-profile.json` sets and asserts intensity, color, shadow,
-falloff, and cone controls in one recipe. `light.kind` and `light.source_layer`
-remain writer/capability-covered but do not yet have stable profile fields.
+`minimal-light-object-profile.json` sets and asserts light kind, intensity,
+color, shadow, falloff, and cone controls in one recipe. `light.source_layer`
+remains writer/capability-covered but does not yet have a stable profile field.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the

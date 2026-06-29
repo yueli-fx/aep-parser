@@ -186,9 +186,7 @@ empty, so the cmta chunk is inserted right after that empty Utf8 chunk. |
 0..16 are written verbatim and AE displays them as index 0. |
 | `*Project.WriteAEP` | 🟢stable | roundtrip | 2020 |  | @summary     Serialize the project back to RIFX binary form @description Sizes are recomputed from the current chunk data, so   mutations such as Footage.SetPath that change byte lengths are handled   correctly. ⚠this is the core write-back path, indirectly covered by every
 structural ship gate; no single AE gate exercises it in isolation |
-| `*Project.WriteJSON` | 🟢stable | roundtrip | 2020 |  | @summary     Write the project as indented JSON @param       w  the destination writer @domain      io @stability   stable @verify      roundtrip @since       AE2020 @boundary    one-way export — there is no corresponding ReadJSON. ⚠one-way export — there is no corresponding ReadJSON. Output is
-deterministic and checked against golden fixtures; this path does not
-involve AE. |
+| `*Project.WriteJSON` | 🟢stable | roundtrip | 2020 |  | @summary     Write the project as indented JSON @param       w  the destination writer @domain      io @stability   stable @verify      roundtrip @since       AE2020 @boundary    one-way export — there is no corresponding ReadJSON. ⚠one-way export — there is no corresponding ReadJSON. Output is deterministic and checked against golden fixtures; this path does not involve AE. |
 
 ## keyframe
 
