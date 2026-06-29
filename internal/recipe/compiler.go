@@ -866,6 +866,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q camera.iris_shape: %w", spec.Name, err)
 			}
 		}
+		if spec.Camera != nil && spec.Camera.IrisRotation != nil {
+			if err := layer.SetIrisRotation(*spec.Camera.IrisRotation); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q camera.iris_rotation: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)
