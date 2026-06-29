@@ -120,7 +120,13 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
 		FontSize:      ptr(96),
+		FillColor:     []float64{64, 128, 255, 255},
 		Tracking:      ptr(120),
+		FauxBold:      boolPtr(true),
+		FauxItalic:    boolPtr(true),
+		ApplyStroke:   boolPtr(true),
+		StrokeColor:   []float64{255, 32, 64, 255},
+		StrokeWidth:   ptr(8),
 		Justification: "center",
 	}
 
@@ -130,7 +136,13 @@ func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 		t.Fatalf("Valid = false, report=%+v", report)
 	}
 	assertCapability(t, report, "Layer.SetRunFontSize")
+	assertCapability(t, report, "Layer.SetRunFillColor")
 	assertCapability(t, report, "Layer.SetRunTracking")
+	assertCapability(t, report, "Layer.SetRunFauxBold")
+	assertCapability(t, report, "Layer.SetRunFauxItalic")
+	assertCapability(t, report, "Layer.SetRunApplyStroke")
+	assertCapability(t, report, "Layer.SetRunStrokeColor")
+	assertCapability(t, report, "Layer.SetRunStrokeWidth")
 	assertCapability(t, report, "Layer.SetParagraphJustification")
 }
 
@@ -140,6 +152,9 @@ func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 		RunIndex:       -1,
 		ParagraphIndex: -1,
 		FontSize:       ptr(0),
+		FillColor:      []float64{255, 0},
+		StrokeColor:    []float64{255, 0, 300},
+		StrokeWidth:    ptr(-1),
 		Justification:  "middle",
 	}
 
@@ -151,6 +166,9 @@ func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 	assertRefusal(t, report, "invalid_text_style_run_index")
 	assertRefusal(t, report, "invalid_text_style_paragraph_index")
 	assertRefusal(t, report, "invalid_text_font_size")
+	assertRefusal(t, report, "invalid_text_fill_color")
+	assertRefusal(t, report, "invalid_text_stroke_color")
+	assertRefusal(t, report, "invalid_text_stroke_width")
 	assertRefusal(t, report, "invalid_text_justification")
 }
 
@@ -299,6 +317,10 @@ func assertCapability(t *testing.T, report recipe.Report, query string) {
 }
 
 func ptr(v float64) *float64 {
+	return &v
+}
+
+func boolPtr(v bool) *bool {
 	return &v
 }
 

@@ -125,13 +125,19 @@ Done:
   paragraph justification, with `expected_profile.text_styles[]` checks. The
   updated shape/text example passed `go test ./...`, `go vet ./...`, profile
   checks, and an AE 2025 render oracle gate.
+- Additional text-style recipe controls are implemented for fill color, faux
+  bold/italic, apply stroke, stroke color, and stroke width, with
+  `expected_profile.text_styles[]` checks. The updated shape/text example
+  passed `go test ./...`, `go vet ./...`, profile checks, and an AE 2025
+  render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are more text style fields, expression / keyframe coverage, or
-  additional shape filters. Do not start automated correction loops.
+  candidates are expression / keyframe coverage or additional shape filters.
+  More text style fields can continue only when they are profile-visible. Do
+  not start automated correction loops.
 
 ## Open questions
 

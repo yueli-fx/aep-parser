@@ -40,11 +40,17 @@ type Layer struct {
 }
 
 type TextStyleSpec struct {
-	RunIndex       int      `json:"run_index,omitempty"`
-	ParagraphIndex int      `json:"paragraph_index,omitempty"`
-	FontSize       *float64 `json:"font_size,omitempty"`
-	Tracking       *float64 `json:"tracking,omitempty"`
-	Justification  string   `json:"justification,omitempty"`
+	RunIndex       int       `json:"run_index,omitempty"`
+	ParagraphIndex int       `json:"paragraph_index,omitempty"`
+	FontSize       *float64  `json:"font_size,omitempty"`
+	FillColor      []float64 `json:"fill_color,omitempty"`
+	Tracking       *float64  `json:"tracking,omitempty"`
+	FauxBold       *bool     `json:"faux_bold,omitempty"`
+	FauxItalic     *bool     `json:"faux_italic,omitempty"`
+	ApplyStroke    *bool     `json:"apply_stroke,omitempty"`
+	StrokeColor    []float64 `json:"stroke_color,omitempty"`
+	StrokeWidth    *float64  `json:"stroke_width,omitempty"`
+	Justification  string    `json:"justification,omitempty"`
 }
 
 type ShapeSpec struct {
@@ -104,12 +110,18 @@ type ExpectedProperty struct {
 }
 
 type ExpectedTextStyle struct {
-	LayerName      string   `json:"layer_name"`
-	RunIndex       int      `json:"run_index,omitempty"`
-	ParagraphIndex int      `json:"paragraph_index,omitempty"`
-	FontSize       *float64 `json:"font_size,omitempty"`
-	Tracking       *float64 `json:"tracking,omitempty"`
-	Justification  string   `json:"justification,omitempty"`
+	LayerName      string    `json:"layer_name"`
+	RunIndex       int       `json:"run_index,omitempty"`
+	ParagraphIndex int       `json:"paragraph_index,omitempty"`
+	FontSize       *float64  `json:"font_size,omitempty"`
+	FillColor      []float64 `json:"fill_color,omitempty"`
+	Tracking       *float64  `json:"tracking,omitempty"`
+	FauxBold       *bool     `json:"faux_bold,omitempty"`
+	FauxItalic     *bool     `json:"faux_italic,omitempty"`
+	ApplyStroke    *bool     `json:"apply_stroke,omitempty"`
+	StrokeColor    []float64 `json:"stroke_color,omitempty"`
+	StrokeWidth    *float64  `json:"stroke_width,omitempty"`
+	Justification  string    `json:"justification,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -282,6 +294,15 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		if style.FontSize != nil && *style.FontSize <= 0 {
 			addRefusal("invalid_expected_profile", stylePath+".font_size", "font_size must be positive")
 		}
+		if len(style.FillColor) > 0 {
+			validateColor(style.FillColor, stylePath+".fill_color", "invalid_expected_profile", addRefusal)
+		}
+		if len(style.StrokeColor) > 0 {
+			validateColor(style.StrokeColor, stylePath+".stroke_color", "invalid_expected_profile", addRefusal)
+		}
+		if style.StrokeWidth != nil && *style.StrokeWidth < 0 {
+			addRefusal("invalid_expected_profile", stylePath+".stroke_width", "stroke_width must be non-negative")
+		}
 		if style.Justification != "" && !validTextJustification(style.Justification) {
 			addRefusal("invalid_expected_profile", stylePath+".justification", "justification must be left, right, or center")
 		}
@@ -423,8 +444,31 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 			addRefusal("invalid_text_font_size", stylePath+".font_size", "font_size must be positive")
 		}
 	}
+	if len(style.FillColor) > 0 {
+		recordCapability("Layer.SetRunFillColor", stylePath+".fill_color")
+		validateColor(style.FillColor, stylePath+".fill_color", "invalid_text_fill_color", addRefusal)
+	}
 	if style.Tracking != nil {
 		recordCapability("Layer.SetRunTracking", stylePath+".tracking")
+	}
+	if style.FauxBold != nil {
+		recordCapability("Layer.SetRunFauxBold", stylePath+".faux_bold")
+	}
+	if style.FauxItalic != nil {
+		recordCapability("Layer.SetRunFauxItalic", stylePath+".faux_italic")
+	}
+	if style.ApplyStroke != nil {
+		recordCapability("Layer.SetRunApplyStroke", stylePath+".apply_stroke")
+	}
+	if len(style.StrokeColor) > 0 {
+		recordCapability("Layer.SetRunStrokeColor", stylePath+".stroke_color")
+		validateColor(style.StrokeColor, stylePath+".stroke_color", "invalid_text_stroke_color", addRefusal)
+	}
+	if style.StrokeWidth != nil {
+		recordCapability("Layer.SetRunStrokeWidth", stylePath+".stroke_width")
+		if *style.StrokeWidth < 0 {
+			addRefusal("invalid_text_stroke_width", stylePath+".stroke_width", "stroke_width must be non-negative")
+		}
 	}
 	if style.Justification != "" {
 		recordCapability("Layer.SetParagraphJustification", stylePath+".justification")

@@ -171,12 +171,54 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			})
 			add(path, *expectedStyle.FontSize, actual, ok && math.Abs(actual-*expectedStyle.FontSize) < 1e-9)
 		}
+		if len(expectedStyle.FillColor) > 0 {
+			path := stylePath + ".fill_color"
+			actual, ok := profileRunColor(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) [4]float64 {
+				return run.FillColor
+			})
+			add(path, expectedStyle.FillColor, actual, ok && profileValueEqual(expectedStyle.FillColor, actual))
+		}
 		if expectedStyle.Tracking != nil {
 			path := stylePath + ".tracking"
 			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
 				return run.Tracking
 			})
 			add(path, *expectedStyle.Tracking, actual, ok && math.Abs(actual-*expectedStyle.Tracking) < 1e-9)
+		}
+		if expectedStyle.FauxBold != nil {
+			path := stylePath + ".faux_bold"
+			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
+				return run.FauxBold
+			})
+			add(path, *expectedStyle.FauxBold, actual, ok && actual == *expectedStyle.FauxBold)
+		}
+		if expectedStyle.FauxItalic != nil {
+			path := stylePath + ".faux_italic"
+			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
+				return run.FauxItalic
+			})
+			add(path, *expectedStyle.FauxItalic, actual, ok && actual == *expectedStyle.FauxItalic)
+		}
+		if expectedStyle.ApplyStroke != nil {
+			path := stylePath + ".apply_stroke"
+			actual, ok := profileRunBool(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) bool {
+				return run.ApplyStroke
+			})
+			add(path, *expectedStyle.ApplyStroke, actual, ok && actual == *expectedStyle.ApplyStroke)
+		}
+		if len(expectedStyle.StrokeColor) > 0 {
+			path := stylePath + ".stroke_color"
+			actual, ok := profileRunColor(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) [4]float64 {
+				return run.StrokeColor
+			})
+			add(path, expectedStyle.StrokeColor, actual, ok && profileValueEqual(expectedStyle.StrokeColor, actual))
+		}
+		if expectedStyle.StrokeWidth != nil {
+			path := stylePath + ".stroke_width"
+			actual, ok := profileRunFloat(layer.Text.Runs, expectedStyle.RunIndex, func(run profile.TextStyleRun) float64 {
+				return run.StrokeWidth
+			})
+			add(path, *expectedStyle.StrokeWidth, actual, ok && math.Abs(actual-*expectedStyle.StrokeWidth) < 1e-9)
 		}
 		if expectedStyle.Justification != "" {
 			path := stylePath + ".justification"
@@ -260,6 +302,21 @@ func profileRunFloat(runs []profile.TextStyleRun, index int, value func(profile.
 		return 0, false
 	}
 	return value(runs[index]), true
+}
+
+func profileRunBool(runs []profile.TextStyleRun, index int, value func(profile.TextStyleRun) bool) (bool, bool) {
+	if index < 0 || index >= len(runs) {
+		return false, false
+	}
+	return value(runs[index]), true
+}
+
+func profileRunColor(runs []profile.TextStyleRun, index int, value func(profile.TextStyleRun) [4]float64) ([]float64, bool) {
+	if index < 0 || index >= len(runs) {
+		return nil, false
+	}
+	color := value(runs[index])
+	return []float64{color[0], color[1], color[2], color[3]}, true
 }
 
 func profileParagraphJustification(paragraphs []profile.TextParagraph, index int) (string, bool) {
@@ -434,8 +491,38 @@ func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {
 			return err
 		}
 	}
+	if len(spec.FillColor) >= 3 {
+		if err := layer.SetRunFillColor(spec.RunIndex, rgbaColor(spec.FillColor)); err != nil {
+			return err
+		}
+	}
 	if spec.Tracking != nil {
 		if err := layer.SetRunTracking(spec.RunIndex, *spec.Tracking); err != nil {
+			return err
+		}
+	}
+	if spec.FauxBold != nil {
+		if err := layer.SetRunFauxBold(spec.RunIndex, *spec.FauxBold); err != nil {
+			return err
+		}
+	}
+	if spec.FauxItalic != nil {
+		if err := layer.SetRunFauxItalic(spec.RunIndex, *spec.FauxItalic); err != nil {
+			return err
+		}
+	}
+	if spec.ApplyStroke != nil {
+		if err := layer.SetRunApplyStroke(spec.RunIndex, *spec.ApplyStroke); err != nil {
+			return err
+		}
+	}
+	if len(spec.StrokeColor) >= 3 {
+		if err := layer.SetRunStrokeColor(spec.RunIndex, rgbaColor(spec.StrokeColor)); err != nil {
+			return err
+		}
+	}
+	if spec.StrokeWidth != nil {
+		if err := layer.SetRunStrokeWidth(spec.RunIndex, *spec.StrokeWidth); err != nil {
 			return err
 		}
 	}

@@ -209,7 +209,38 @@ Seventh follow-up completed:
     - metadata: status `ok`, AE `25.1x68`
     - PNG outputs: `f000000.png`, `f000060.png`, `f000120.png`
 
+Eighth follow-up completed:
+
+- Text recipes now support additional static text-style controls:
+  - `text_style.fill_color` sets `Layer.SetRunFillColor`.
+  - `text_style.faux_bold` sets `Layer.SetRunFauxBold`.
+  - `text_style.faux_italic` sets `Layer.SetRunFauxItalic`.
+  - `text_style.apply_stroke` sets `Layer.SetRunApplyStroke`.
+  - `text_style.stroke_color` sets `Layer.SetRunStrokeColor`.
+  - `text_style.stroke_width` sets `Layer.SetRunStrokeWidth`.
+- `expected_profile.text_styles[]` can assert fill color, faux bold/italic,
+  apply stroke, stroke color, and stroke width in addition to the earlier font
+  size, tracking, and paragraph justification checks. Text-style colors compare
+  against the profile's normalized `0..1` RGBA values.
+- `examples/recipes/minimal-text-shape.json` now exercises blue text fill,
+  faux bold/italic, and magenta text stroke with embedded profile checks.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-textstyle2.aep -json` returned
+    valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_textstyle2/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_textstyle2/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs: `f000000.png`, `f000060.png`, `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices,
-starting with more text style fields, expression / keyframe coverage, or
-additional shape filters, each gated by embedded profile checks and
-render-oracle evidence.
+starting with expression / keyframe coverage or additional shape filters. More
+text style fields can continue in the same pattern when the profile exposes
+them.

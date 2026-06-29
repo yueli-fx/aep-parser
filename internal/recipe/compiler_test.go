@@ -111,7 +111,13 @@ func TestCompileToFileSetsTextStyle(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
 		FontSize:      ptr(96),
+		FillColor:     []float64{64, 128, 255, 255},
 		Tracking:      ptr(120),
+		FauxBold:      boolPtr(true),
+		FauxItalic:    boolPtr(true),
+		ApplyStroke:   boolPtr(true),
+		StrokeColor:   []float64{255, 32, 64, 255},
+		StrokeWidth:   ptr(8),
 		Justification: "center",
 	}
 	outPath := filepath.Join(t.TempDir(), "recipe.aep")
@@ -138,8 +144,22 @@ func TestCompileToFileSetsTextStyle(t *testing.T) {
 	if got := layer.Text.Runs[0].FontSize; got != 96 {
 		t.Fatalf("FontSize = %v, want 96", got)
 	}
+	assertFloatArray(t, "FillColor", layer.Text.Runs[0].FillColor[:], []float64{64.0 / 255.0, 128.0 / 255.0, 1, 1})
 	if got := layer.Text.Runs[0].Tracking; got != 120 {
 		t.Fatalf("Tracking = %v, want 120", got)
+	}
+	if !layer.Text.Runs[0].FauxBold {
+		t.Fatal("FauxBold = false, want true")
+	}
+	if !layer.Text.Runs[0].FauxItalic {
+		t.Fatal("FauxItalic = false, want true")
+	}
+	if !layer.Text.Runs[0].ApplyStroke {
+		t.Fatal("ApplyStroke = false, want true")
+	}
+	assertFloatArray(t, "StrokeColor", layer.Text.Runs[0].StrokeColor[:], []float64{1, 32.0 / 255.0, 64.0 / 255.0, 1})
+	if got := layer.Text.Runs[0].StrokeWidth; got != 8 {
+		t.Fatalf("StrokeWidth = %v, want 8", got)
 	}
 	if got := layer.Text.Paragraphs[0].Justification; got != "Center" {
 		t.Fatalf("Justification = %q, want Center", got)
@@ -323,7 +343,13 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
 		FontSize:      ptr(96),
+		FillColor:     []float64{64, 128, 255, 255},
 		Tracking:      ptr(120),
+		FauxBold:      boolPtr(true),
+		FauxItalic:    boolPtr(true),
+		ApplyStroke:   boolPtr(true),
+		StrokeColor:   []float64{255, 32, 64, 255},
+		StrokeWidth:   ptr(8),
 		Justification: "center",
 	}
 	rec.ExpectedProfile = recipe.ExpectedProfile{
@@ -332,7 +358,13 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 			RunIndex:       0,
 			ParagraphIndex: 0,
 			FontSize:       ptr(96),
+			FillColor:      []float64{64.0 / 255.0, 128.0 / 255.0, 1, 1},
 			Tracking:       ptr(120),
+			FauxBold:       boolPtr(true),
+			FauxItalic:     boolPtr(true),
+			ApplyStroke:    boolPtr(true),
+			StrokeColor:    []float64{1, 32.0 / 255.0, 64.0 / 255.0, 1},
+			StrokeWidth:    ptr(8),
 			Justification:  "center",
 		}},
 	}
@@ -346,7 +378,13 @@ func TestCompileToFileChecksExpectedTextStyleProfile(t *testing.T) {
 		t.Fatalf("report = %+v, want valid", report)
 	}
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].font_size", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].fill_color", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].tracking", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_bold", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].faux_italic", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].apply_stroke", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].stroke_color", true)
+	assertProfileCheck(t, report, "expected_profile.text_styles[0].stroke_width", true)
 	assertProfileCheck(t, report, "expected_profile.text_styles[0].justification", true)
 }
 
@@ -417,6 +455,18 @@ func assertProfileValue(t *testing.T, label string, got, want any) {
 		}
 	default:
 		t.Fatalf("unsupported want type %T", want)
+	}
+}
+
+func assertFloatArray(t *testing.T, label string, got, want []float64) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("%s = %v, want %v", label, got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("%s = %v, want %v", label, got, want)
+		}
 	}
 }
 

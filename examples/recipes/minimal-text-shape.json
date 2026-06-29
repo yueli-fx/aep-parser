@@ -18,7 +18,13 @@
           "text": "BOOYAH",
           "text_style": {
             "font_size": 96,
+            "fill_color": [64, 128, 255, 255],
             "tracking": 120,
+            "faux_bold": true,
+            "faux_italic": true,
+            "apply_stroke": true,
+            "stroke_color": [255, 32, 64, 255],
+            "stroke_width": 8,
             "justification": "center"
           },
           "transform": {
@@ -91,7 +97,13 @@
       {
         "layer_name": "Title",
         "font_size": 96,
+        "fill_color": [0.25098039215686274, 0.5019607843137255, 1, 1],
         "tracking": 120,
+        "faux_bold": true,
+        "faux_italic": true,
+        "apply_stroke": true,
+        "stroke_color": [1, 0.12549019607843137, 0.25098039215686274, 1],
+        "stroke_width": 8,
         "justification": "center"
       }
     ]
