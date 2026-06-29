@@ -35,6 +35,11 @@
               { "time": 0, "value": [900, 540] },
               { "time": 2, "value": [960, 500] },
               { "time": 4, "value": [1020, 540] }
+            ],
+            "opacity_keyframes": [
+              { "time": 0, "value": 20 },
+              { "time": 2, "value": 100 },
+              { "time": 4, "value": 45 }
             ]
           }
         },
@@ -120,6 +125,15 @@
           { "time": 0, "value": [900, 540, 0] },
           { "time": 2, "value": [960, 500, 0] },
           { "time": 4, "value": [1020, 540, 0] }
+        ]
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Opacity",
+        "keyframes": [
+          { "time": 0, "value": 0.2 },
+          { "time": 2, "value": 1 },
+          { "time": 4, "value": 0.45 }
         ]
       }
     ]

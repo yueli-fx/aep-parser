@@ -64,6 +64,37 @@ func TestValidateRejectsUnsortedKeyframes(t *testing.T) {
 	assertRefusal(t, report, "keyframes_not_sorted")
 }
 
+func TestValidateRejectsOutOfRangeOpacityKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.OpacityKeyframes = []recipe.ScalarKeyframe{
+		{Time: 5, Value: 50},
+		{Time: 1, Value: 101},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframe_time_out_of_range")
+	assertRefusal(t, report, "invalid_opacity_keyframe_value")
+}
+
+func TestValidateRejectsUnsortedOpacityKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.OpacityKeyframes = []recipe.ScalarKeyframe{
+		{Time: 1, Value: 100},
+		{Time: 0, Value: 50},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframes_not_sorted")
+}
+
 func TestValidateAcceptsExpectedKeyframes(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{

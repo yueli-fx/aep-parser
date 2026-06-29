@@ -86,11 +86,17 @@ type Transform struct {
 	Rotation          *float64         `json:"rotation,omitempty"`
 	Opacity           *float64         `json:"opacity,omitempty"`
 	PositionKeyframes []VectorKeyframe `json:"position_keyframes,omitempty"`
+	OpacityKeyframes  []ScalarKeyframe `json:"opacity_keyframes,omitempty"`
 }
 
 type VectorKeyframe struct {
 	Time  float64   `json:"time"`
 	Value []float64 `json:"value"`
+}
+
+type ScalarKeyframe struct {
+	Time  float64 `json:"time"`
+	Value float64 `json:"value"`
 }
 
 type ExpectedProfile struct {
@@ -442,6 +448,18 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
 	}
+	for i, kf := range layer.Transform.OpacityKeyframes {
+		kfPath := fmt.Sprintf("%s.transform.opacity_keyframes[%d]", layerPath, i)
+		if kf.Time < 0 || kf.Time > compDuration {
+			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be within comp duration")
+		}
+		if i > 0 && kf.Time < layer.Transform.OpacityKeyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+		}
+		if kf.Value < 0 || kf.Value > 100 {
+			addRefusal("invalid_opacity_keyframe_value", kfPath+".value", "opacity keyframe value must be between 0 and 100")
+		}
+	}
 	for i, effect := range layer.Effects {
 		effectPath := fmt.Sprintf("%s.effects[%d]", layerPath, i)
 		lookup := recordCapability("AddEffect", effectPath)
@@ -532,7 +550,8 @@ func usesTransform(t Transform) bool {
 		len(t.AnchorPoint) > 0 ||
 		t.Rotation != nil ||
 		t.Opacity != nil ||
-		len(t.PositionKeyframes) > 0
+		len(t.PositionKeyframes) > 0 ||
+		len(t.OpacityKeyframes) > 0
 }
 
 func validateVec(values []float64, want int, path string, addRefusal func(string, string, string)) {

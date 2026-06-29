@@ -134,15 +134,20 @@ Done:
   for property keyframe count/time/value checks. The updated shape/text example
   animates the title Position across three keyframes, passed `go test ./...`,
   `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
+- Recipe transform keyframes now also support `transform.opacity_keyframes[]`
+  in percent authoring units, with validation and `ADBE Opacity`
+  `expected_profile.keyframes[]` checks against profile unit opacity values.
+  The updated shape/text example passed `go test ./...`, `go vet ./...`,
+  profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are additional transform keyframe channels already covered by
-  `SetLayerTransform` gates, expression support, or shape filters. More text
-  style fields can continue only when they are profile-visible. Do not start
-  automated correction loops.
+  candidates are additional transform keyframe channels/ease where writer
+  support exists, expression support, or shape filters. More text style fields
+  can continue only when they are profile-visible. Do not start automated
+  correction loops.
 
 ## Open questions
 
@@ -150,5 +155,5 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: more text style, transform
-  keyframe/ease, expression support, or shape filters.
+- Which recipe field family should enter next: transform keyframe/ease,
+  expression support, shape filters, or more profile-visible text style.
