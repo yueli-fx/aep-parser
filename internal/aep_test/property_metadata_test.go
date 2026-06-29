@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aeptest"
 	"github.com/yueli-fx/aep-parser/internal/codec"
 	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
@@ -91,8 +92,8 @@ func TestPropertyControlType_Derivation(t *testing.T) {
 			if tt.noValue {
 				noValByte = 0x01
 			}
-			tdb4 := aep.MakeTdb4(uint16(tt.dims), spatialByte, 0x02, noValByte, typeByte)
-			p := aep.NewTestProperty("test", tt.dims, tdb4, nil, nil, nil)
+			tdb4 := aeptest.MakeTdb4(uint16(tt.dims), spatialByte, 0x02, noValByte, typeByte)
+			p := aeptest.NewTestProperty("test", tt.dims, tdb4, nil, nil, nil)
 
 			gotPCT := p.ControlType()
 			if gotPCT != tt.wantPCT {
@@ -173,8 +174,8 @@ func TestMinValue_MaxValue_Synthetic(t *testing.T) {
 		tduMData[7] = 0x00
 		tduM := &rifx.Chunk{ID: rifx.IDtduM, Size: 8, Data: tduMData}
 
-		tdb4 := aep.MakeTdb4(1, 0, 0x02, 0, 0x08) // vector=1, dims=1
-		p := aep.NewTestProperty("test", 1, tdb4, nil, tdum, tduM)
+		tdb4 := aeptest.MakeTdb4(1, 0, 0x02, 0, 0x08) // vector=1, dims=1
+		p := aeptest.NewTestProperty("test", 1, tdb4, nil, tdum, tduM)
 
 		min := p.MinValue()
 		if min != 0.0 {
@@ -187,8 +188,8 @@ func TestMinValue_MaxValue_Synthetic(t *testing.T) {
 	})
 
 	t.Run("nil_when_absent", func(t *testing.T) {
-		tdb4 := aep.MakeTdb4(1, 0, 0x02, 0, 0x08)
-		p := aep.NewTestProperty("test", 1, tdb4, nil, nil, nil)
+		tdb4 := aeptest.MakeTdb4(1, 0, 0x02, 0, 0x08)
+		p := aeptest.NewTestProperty("test", 1, tdb4, nil, nil, nil)
 		if p.MinValue() != nil {
 			t.Errorf("MinValue() with no tdum = %v, want nil", p.MinValue())
 		}
@@ -205,8 +206,8 @@ func TestMinValue_MaxValue_Synthetic(t *testing.T) {
 		tduMData := []byte{0x00, 0x00, 0x00, 0x0A}
 		tduM := &rifx.Chunk{ID: rifx.IDtduM, Size: 4, Data: tduMData}
 
-		tdb4 := aep.MakeTdb4(1, 0, 0x02, 0, 0x04) // integer=1, dims=1
-		p := aep.NewTestProperty("test", 1, tdb4, nil, tdum, tduM)
+		tdb4 := aeptest.MakeTdb4(1, 0, 0x02, 0, 0x04) // integer=1, dims=1
+		p := aeptest.NewTestProperty("test", 1, tdb4, nil, tdum, tduM)
 
 		min := p.MinValue()
 		if min != 0.0 {
@@ -230,8 +231,8 @@ func TestMinValue_MaxValue_Synthetic(t *testing.T) {
 		}
 		tduM := &rifx.Chunk{ID: rifx.IDtduM, Size: 16, Data: tduMData}
 
-		tdb4 := aep.MakeTdb4(1, 0, 0x02, 0, 0x01) // color=1
-		p := aep.NewTestProperty("test", 4, tdb4, nil, tdum, tduM)
+		tdb4 := aeptest.MakeTdb4(1, 0, 0x02, 0, 0x01) // color=1
+		p := aeptest.NewTestProperty("test", 4, tdb4, nil, tdum, tduM)
 
 		min := p.MinValue()
 		if min == nil {
@@ -277,7 +278,7 @@ func TestUnitsText(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.matchName, func(t *testing.T) {
-			p := aep.NewTestProperty(tt.matchName, 1, nil, nil, nil, nil)
+			p := aeptest.NewTestProperty(tt.matchName, 1, nil, nil, nil, nil)
 			got := p.UnitsText()
 			if got != tt.want {
 				t.Errorf("UnitsText() = %q, want %q", got, tt.want)
@@ -293,7 +294,7 @@ func TestUnitsText_AngleFallback(t *testing.T) {
 	// (which doesn't trigger angle fallback). The angle fallback only works
 	// when ControlType() == PCTLAngle, which requires specific tdb4 flags
 	// we can't easily synthesize. Just test the empty case.
-	p := aep.NewTestProperty("unknown prop", 1, nil, nil, nil, nil)
+	p := aeptest.NewTestProperty("unknown prop", 1, nil, nil, nil, nil)
 	if got := p.UnitsText(); got != "" {
 		t.Errorf("UnitsText() for unknown = %q, want empty", got)
 	}
@@ -352,7 +353,7 @@ func TestPropertyIndex_PropertyDepth_Fixture(t *testing.T) {
 // TestPropertyIndex_NoParent verifies that PropertyIndex returns -1 for
 // properties without a parent tree group.
 func TestPropertyIndex_NoParent(t *testing.T) {
-	p := aep.NewTestProperty("test", 1, nil, nil, nil, nil)
+	p := aeptest.NewTestProperty("test", 1, nil, nil, nil, nil)
 	if got := p.PropertyIndex(); got != -1 {
 		t.Errorf("PropertyIndex() = %d, want -1", got)
 	}
@@ -487,7 +488,7 @@ func TestGradient_ParseEmpty(t *testing.T) {
 // TestDefaultValue_NonTransform verifies that non-transform properties
 // do NOT get DefaultValue assigned (stays nil).
 func TestDefaultValue_NonTransform(t *testing.T) {
-	p := aep.NewTestProperty("ADBE Gaussian Blur 2-0001", 1, nil, nil, nil, nil)
+	p := aeptest.NewTestProperty("ADBE Gaussian Blur 2-0001", 1, nil, nil, nil, nil)
 	if p.DefaultValue != nil {
 		t.Errorf("Non-transform DefaultValue = %v; want nil", p.DefaultValue)
 	}

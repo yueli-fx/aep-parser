@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aeptest"
 )
 
 // manualAEPPath lets you point the test at a real .aep file from the command line:
@@ -313,11 +314,11 @@ func TestProjectInitDerived_EmptyProject(t *testing.T) {
 			maxExisting = f.ID
 		}
 	}
-	got := aep.NextItemIDForTest(proj)
+	got := aeptest.NextItemID(proj)
 	if got <= maxExisting {
 		t.Errorf("nextItemID = %d, want > max existing %d", got, maxExisting)
 	}
-	if aep.RootFoldForTest(proj) == nil {
+	if aeptest.RootFold(proj) == nil {
 		t.Error("rootFold not cached after parseProject")
 	}
 }

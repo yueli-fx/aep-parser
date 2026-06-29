@@ -63,7 +63,7 @@ func generateFile(m *manifest, fm fileManifest) (string, error) {
 		return "", fmt.Errorf("annotation validation failed before writing:\n%s", sb.String())
 	}
 	types := withMethodsMulti(extractTypesMulti(lps), lps)
-	for _, d := range dirs {
+	for _, d := range m.exampleDirs() {
 		attachExamples(types, d)
 	}
 

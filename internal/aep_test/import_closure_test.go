@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aeptest"
 )
 
 // openXProjPair opens the re_duplicate_item baseline TWICE, yielding two
@@ -71,11 +72,11 @@ func TestImportHelpers_DestFootageByPath(t *testing.T) {
 	if withPath == nil {
 		t.Skip("fixture has no file-backed footage to match")
 	}
-	got := aep.DestFootageByPathForTest(destProj, withPath.Path)
+	got := aeptest.DestFootageByPath(destProj, withPath.Path)
 	if got == nil || got.ID != withPath.ID {
 		t.Fatalf("DestFootageByPath(%q) = %v, want footage id %d", withPath.Path, got, withPath.ID)
 	}
-	if aep.DestFootageByPathForTest(destProj, `\\no\such\path.xyz`) != nil {
+	if aeptest.DestFootageByPath(destProj, `\\no\such\path.xyz`) != nil {
 		t.Errorf("DestFootageByPath of unknown path should be nil")
 	}
 }
@@ -85,11 +86,11 @@ func TestImportHelpers_LocateItemBlockByID(t *testing.T) {
 	if srcProj == nil {
 		return
 	}
-	start, end := aep.LocateItemBlockByIDForTest(srcProj, srcMain.ID)
+	start, end := aeptest.LocateItemBlockByID(srcProj, srcMain.ID)
 	if start < 0 || end <= start {
 		t.Fatalf("LocateItemBlockByID(compA_main id=%d) = (%d,%d), want a valid range", srcMain.ID, start, end)
 	}
-	if s2, _ := aep.LocateItemBlockByIDForTest(srcProj, 0xFFFFFF); s2 != -1 {
+	if s2, _ := aeptest.LocateItemBlockByID(srcProj, 0xFFFFFF); s2 != -1 {
 		t.Errorf("LocateItemBlockByID(unknown) start = %d, want -1", s2)
 	}
 
@@ -103,7 +104,7 @@ func TestImportHelpers_LocateItemBlockByID(t *testing.T) {
 		}
 	}
 	if nested != nil {
-		if s, _ := aep.LocateItemBlockByIDForTest(srcProj, nested.ID); s < 0 {
+		if s, _ := aeptest.LocateItemBlockByID(srcProj, nested.ID); s < 0 {
 			t.Errorf("nested solid footage id=%d not located — recursion into folder Sfdr failed", nested.ID)
 		}
 	}
@@ -172,7 +173,7 @@ func TestInsertLayerXProj_RefuseDestNoRootFold(t *testing.T) {
 		t.Skip("no AV layer in fixture")
 	}
 	_, _, _, realDest := openXProjPair(t)
-	aep.SetCompProjForTest(realDest, &aep.Project{}) // bare Project: back == nil
+	aeptest.SetCompProj(realDest, &aep.Project{}) // bare Project: back == nil
 	_, err := aep.InsertLayer(realDest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "root Fold") {
 		t.Fatalf("want 'root Fold' refuse, got %v", err)
@@ -353,21 +354,21 @@ func TestImportFootageBlock(t *testing.T) {
 		}
 	}
 	destProj.Footage = kept
-	if aep.DestFootageByPathForTest(destProj, srcF.Path) != nil {
+	if aeptest.DestFootageByPath(destProj, srcF.Path) != nil {
 		t.Fatalf("precondition: dest still has footage with path %q", srcF.Path)
 	}
 
 	preCount := len(destProj.Footage)
-	preNext := aep.NextItemIDForTest(destProj)
-	destID, err := aep.ImportFootageBlockForTest(destProj, srcProj, srcF.ID, srcF.Name)
+	preNext := aeptest.NextItemID(destProj)
+	destID, err := aeptest.ImportFootageBlock(destProj, srcProj, srcF.ID, srcF.Name)
 	if err != nil {
 		t.Fatalf("importFootageBlock: %v", err)
 	}
 	if destID != preNext {
 		t.Errorf("imported footage destID = %d, want %d (head counter)", destID, preNext)
 	}
-	if aep.NextItemIDForTest(destProj) != preNext+1 {
-		t.Errorf("nextItemID = %d, want %d (+1)", aep.NextItemIDForTest(destProj), preNext+1)
+	if aeptest.NextItemID(destProj) != preNext+1 {
+		t.Errorf("nextItemID = %d, want %d (+1)", aeptest.NextItemID(destProj), preNext+1)
 	}
 	if len(destProj.Footage) != preCount+1 {
 		t.Errorf("destProj.Footage count = %d, want %d", len(destProj.Footage), preCount+1)

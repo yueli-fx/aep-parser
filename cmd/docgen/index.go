@@ -39,7 +39,7 @@ func buildIndex(m *manifest) (string, error) {
 		return "", err
 	}
 	types := withMethodsMulti(extractTypesMulti(lps), lps)
-	for _, d := range dirs {
+	for _, d := range m.exampleDirs() {
 		attachExamples(types, d)
 	}
 	for _, fm := range m.Files {

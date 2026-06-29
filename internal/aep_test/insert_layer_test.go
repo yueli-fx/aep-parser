@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aeptest"
 )
 
 const insertLayerFixtureDir = "../../test_data/generated/fixtures"
@@ -53,7 +54,7 @@ func TestInsertLayer_RefuseDestMissingItemList(t *testing.T) {
 	dest := &aep.Composition{Layers: []*aep.Layer{}}
 	srcComp := &aep.Composition{}
 	src := &aep.Layer{ID: 10, Type: aep.LayerTypeAV}
-	aep.SetLayerCompForTest(src, srcComp)
+	aeptest.SetLayerComp(src, srcComp)
 	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "itemList back-ref") {
 		t.Fatalf("want 'itemList back-ref' error, got %v", err)
@@ -68,7 +69,7 @@ func TestInsertLayer_RefuseDestMissingProject(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	aep.SetCompProjForTest(dest, nil)
+	aeptest.SetCompProj(dest, nil)
 	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "project back-ref") {
 		t.Fatalf("want 'project back-ref' error, got %v", err)
@@ -181,7 +182,7 @@ func TestInsertLayer_RefuseSrcMissingLayrList(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	aep.ClearLayerLayrListForTest(src)
+	aeptest.ClearLayerLayrList(src)
 	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "Layr chunk back-ref") {
 		t.Fatalf("want 'Layr chunk back-ref' error, got %v", err)
@@ -194,7 +195,7 @@ func TestInsertLayer_RefuseStructuralCorruption(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	aep.CorruptSrcLayrFormTypeForTest(src)
+	aeptest.CorruptSrcLayrFormType(src)
 	_, err := aep.InsertLayer(dest, src, 0)
 	if err == nil || !strings.Contains(err.Error(), "non-Layr") {
 		t.Fatalf("want 'non-Layr' corruption error, got %v", err)
@@ -210,8 +211,8 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 	srcName := src.Name
 	srcSourceID := src.SourceID
 	preLen := len(dest.Layers)
-	preChildCount := len(aep.ItemListForTest(dest).Children)
-	preNextItemID := aep.NextItemIDForTest(aep.ProjForTest(dest))
+	preChildCount := len(aeptest.ItemList(dest).Children)
+	preNextItemID := aeptest.NextItemID(aeptest.Proj(dest))
 
 	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
@@ -247,11 +248,11 @@ func TestInsertLayer_HappyPath_Basic_AtIdxZero(t *testing.T) {
 	if clone.TrackMatte != aep.TrackMatteNone {
 		t.Errorf("clone.TrackMatte: got %d, want TrackMatteNone (reset for cross-comp)", clone.TrackMatte)
 	}
-	postChildCount := len(aep.ItemListForTest(dest).Children)
+	postChildCount := len(aeptest.ItemList(dest).Children)
 	if postChildCount <= preChildCount {
 		t.Errorf("dest itemList children should grow; pre=%d post=%d", preChildCount, postChildCount)
 	}
-	postNextItemID := aep.NextItemIDForTest(aep.ProjForTest(dest))
+	postNextItemID := aeptest.NextItemID(aeptest.Proj(dest))
 	if postNextItemID != preNextItemID+1 {
 		t.Errorf("proj.nextItemID: got %d, want %d (pre+1)", postNextItemID, preNextItemID+1)
 	}
@@ -320,22 +321,22 @@ func TestInsertLayer_FreshDataSlices(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	srcLdtaBefore := append([]byte(nil), aep.LdtaForTest(src).Data...)
+	srcLdtaBefore := append([]byte(nil), aeptest.Ldta(src).Data...)
 	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)
 	}
-	cloneLdta := aep.LdtaForTest(clone)
+	cloneLdta := aeptest.Ldta(clone)
 	if cloneLdta == nil {
 		t.Fatal("clone has no ldta backref")
 	}
-	if &cloneLdta.Data[0] == &aep.LdtaForTest(src).Data[0] {
+	if &cloneLdta.Data[0] == &aeptest.Ldta(src).Data[0] {
 		t.Fatal("clone ldta shares Data slice header with src — must be fresh allocation")
 	}
 	for i := 4; i < len(cloneLdta.Data); i++ {
 		cloneLdta.Data[i] ^= 0xFF
 	}
-	if !bytes.Equal(srcLdtaBefore, aep.LdtaForTest(src).Data) {
+	if !bytes.Equal(srcLdtaBefore, aeptest.Ldta(src).Data) {
 		t.Fatal("src ldta bytes changed after mutating clone — Data slice sharing detected")
 	}
 }
@@ -345,7 +346,7 @@ func TestInsertLayer_RoundTrip(t *testing.T) {
 	if dest == nil {
 		return
 	}
-	proj := aep.ProjForTest(dest)
+	proj := aeptest.Proj(dest)
 	clone, err := aep.InsertLayer(dest, src, 0)
 	if err != nil {
 		t.Fatalf("InsertLayer: %v", err)

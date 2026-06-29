@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aeptest"
 )
 
 // All tests use re_delete_layer_*.aep produced by test_data/generators/re_delete_layer.jsx
@@ -121,7 +122,7 @@ func TestDeleteLayer_MiddleSplice(t *testing.T) {
 		t.Fatalf("baseline fixture: want 3 layers, got %d", len(c.Layers))
 	}
 	preL1, preL3 := c.Layers[0], c.Layers[2] // L2_mid is at index 1
-	itemList := aep.ItemListForTest(c)
+	itemList := aeptest.ItemList(c)
 	if itemList == nil {
 		t.Fatal("itemList back-ref nil")
 	}
@@ -172,7 +173,7 @@ func TestDeleteLayer_ResetsParentIDOnNeighbor(t *testing.T) {
 	if l1.ParentID != 0 {
 		t.Errorf("l1.ParentID after delete: got %d, want 0", l1.ParentID)
 	}
-	ldta := aep.LdtaForTest(l1)
+	ldta := aeptest.Ldta(l1)
 	if ldta == nil {
 		t.Fatal("l1 ldta nil")
 	}
@@ -189,7 +190,7 @@ func TestDeleteLayer_ResetsTrackMatteIDButPreservesTypeByte(t *testing.T) {
 	c := proj.Compositions[0]
 
 	l1, l3 := c.Layers[0], c.Layers[2]
-	if aep.LdtaForTest(l1) == nil || len(aep.LdtaForTest(l1).Data) < 0xA4 {
+	if aeptest.Ldta(l1) == nil || len(aeptest.Ldta(l1).Data) < 0xA4 {
 		t.Skip("L1 ldta too short for TrackMatteLayerID write (AE 2020 baseline — field is AE 23+); RE'd in matte fixture instead")
 	}
 	if err := l1.SetTrackMatteLayer(l3.ID, aep.TrackMatteAlpha); err != nil {
@@ -199,7 +200,7 @@ func TestDeleteLayer_ResetsTrackMatteIDButPreservesTypeByte(t *testing.T) {
 		t.Fatalf("setup: l1.TrackMatteLayerID = %d, want %d", l1.TrackMatteLayerID, l3.ID)
 	}
 
-	typeByteBefore := aep.LdtaForTest(l1).Data[0x6B]
+	typeByteBefore := aeptest.Ldta(l1).Data[0x6B]
 	if typeByteBefore != byte(aep.TrackMatteAlpha) {
 		t.Fatalf("setup: l1 ldta @0x6B = 0x%02x, want 0x%02x", typeByteBefore, byte(aep.TrackMatteAlpha))
 	}
@@ -211,11 +212,11 @@ func TestDeleteLayer_ResetsTrackMatteIDButPreservesTypeByte(t *testing.T) {
 	if l1.TrackMatteLayerID != 0 {
 		t.Errorf("l1.TrackMatteLayerID after delete: got %d, want 0", l1.TrackMatteLayerID)
 	}
-	if got := binary.BigEndian.Uint32(aep.LdtaForTest(l1).Data[0xA0:0xA4]); got != 0 {
+	if got := binary.BigEndian.Uint32(aeptest.Ldta(l1).Data[0xA0:0xA4]); got != 0 {
 		t.Errorf("l1 ldta @0xA0..0xA3: got %d, want 0", got)
 	}
 	// F3 finding — type byte STAYS SET after matte source is deleted.
-	if got := aep.LdtaForTest(l1).Data[0x6B]; got != typeByteBefore {
+	if got := aeptest.Ldta(l1).Data[0x6B]; got != typeByteBefore {
 		t.Errorf("l1 ldta @0x6B (TrackMatte type): got 0x%02x, want 0x%02x (unchanged per F3)", got, typeByteBefore)
 	}
 }
@@ -234,7 +235,7 @@ func TestDeleteLayer_ResetsTrackMatteID_AE25(t *testing.T) {
 		t.Fatalf("matte fixture: want 2 surviving layers, got %d", len(c.Layers))
 	}
 	l2, l3 := c.Layers[0], c.Layers[1] // matte fixture post-AE-delete: L2, L3
-	if aep.LdtaForTest(l2) == nil || len(aep.LdtaForTest(l2).Data) < 0xA4 {
+	if aeptest.Ldta(l2) == nil || len(aeptest.Ldta(l2).Data) < 0xA4 {
 		t.Fatalf("matte fixture L2 ldta too short for @0xA0..0xA3 (AE 25 should write 224B ldta)")
 	}
 
@@ -244,7 +245,7 @@ func TestDeleteLayer_ResetsTrackMatteID_AE25(t *testing.T) {
 	if l2.TrackMatteLayerID != l3.ID {
 		t.Fatalf("setup: l2.TrackMatteLayerID = %d, want %d", l2.TrackMatteLayerID, l3.ID)
 	}
-	typeByteBefore := aep.LdtaForTest(l2).Data[0x6B]
+	typeByteBefore := aeptest.Ldta(l2).Data[0x6B]
 
 	// L3 is at index 1; deleting it would leave 1 layer in c.Layers —
 	// but the refuse fires only at len==1, so a 2→1 delete is OK.
@@ -255,10 +256,10 @@ func TestDeleteLayer_ResetsTrackMatteID_AE25(t *testing.T) {
 	if l2.TrackMatteLayerID != 0 {
 		t.Errorf("l2.TrackMatteLayerID after delete: got %d, want 0", l2.TrackMatteLayerID)
 	}
-	if got := binary.BigEndian.Uint32(aep.LdtaForTest(l2).Data[0xA0:0xA4]); got != 0 {
+	if got := binary.BigEndian.Uint32(aeptest.Ldta(l2).Data[0xA0:0xA4]); got != 0 {
 		t.Errorf("l2 ldta @0xA0..0xA3: got %d, want 0", got)
 	}
-	if got := aep.LdtaForTest(l2).Data[0x6B]; got != typeByteBefore {
+	if got := aeptest.Ldta(l2).Data[0x6B]; got != typeByteBefore {
 		t.Errorf("l2 ldta @0x6B (TrackMatte type): got 0x%02x, want 0x%02x (unchanged per F3)", got, typeByteBefore)
 	}
 }
@@ -297,8 +298,8 @@ func TestDeleteLayer_StructuralEquivalence_Middle(t *testing.T) {
 		}
 	}
 
-	goChildren := aep.ItemListForTest(cb).Children
-	aeChildren := aep.ItemListForTest(cm).Children
+	goChildren := aeptest.ItemList(cb).Children
+	aeChildren := aeptest.ItemList(cm).Children
 
 	if len(goChildren) != len(aeChildren) {
 		t.Fatalf("itemList children count: Go=%d, AE-middle=%d", len(goChildren), len(aeChildren))

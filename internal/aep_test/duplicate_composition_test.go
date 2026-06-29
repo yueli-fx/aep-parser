@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aeptest"
 )
 
 const dupItemFixtureDir = "../../test_data/generated/fixtures"
@@ -88,7 +89,7 @@ func TestDuplicateComposition_HappyPath(t *testing.T) {
 		return
 	}
 	preComps := len(proj.Compositions)
-	preNextID := aep.NextItemIDForTest(proj)
+	preNextID := aeptest.NextItemID(proj)
 	srcIDs := compLayerIDs(src)
 	srcLayerCount := len(src.Layers)
 	if srcLayerCount != 3 {
@@ -162,9 +163,9 @@ func TestDuplicateComposition_HappyPath(t *testing.T) {
 		t.Errorf("fixture precondition: expected a src layer with ParentID != 0")
 	}
 
-	if aep.NextItemIDForTest(proj) != preNextID+uint32(srcLayerCount)+1 {
+	if aeptest.NextItemID(proj) != preNextID+uint32(srcLayerCount)+1 {
 		t.Errorf("nextItemID = %d, want %d (+1 comp +%d layers)",
-			aep.NextItemIDForTest(proj), preNextID+uint32(srcLayerCount)+1, srcLayerCount)
+			aeptest.NextItemID(proj), preNextID+uint32(srcLayerCount)+1, srcLayerCount)
 	}
 }
 
@@ -234,7 +235,7 @@ func TestDuplicateComposition_FreshDataSlices(t *testing.T) {
 		return
 	}
 	// Capture src's first layer ldta bytes.
-	srcLdta := aep.LdtaForTest(src.Layers[0])
+	srcLdta := aeptest.Ldta(src.Layers[0])
 	if srcLdta == nil {
 		t.Skip("src layer has no ldta backref")
 	}
@@ -244,7 +245,7 @@ func TestDuplicateComposition_FreshDataSlices(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DuplicateComposition: %v", err)
 	}
-	dupLdta := aep.LdtaForTest(dup.Layers[0])
+	dupLdta := aeptest.Ldta(dup.Layers[0])
 	if dupLdta == nil {
 		t.Fatal("dup layer has no ldta backref")
 	}

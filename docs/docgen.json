@@ -1,6 +1,7 @@
 {
   "pkg": "../internal/aep",
   "pkgs": ["../internal/scene", "../internal/codec"],
+  "example_pkgs": ["../internal/aep_test"],
   "index": "docs_index.json",
   "files": [
     {
