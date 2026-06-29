@@ -703,6 +703,12 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 			return nil, fmt.Errorf("recipe: adjustment layer %q: %w", spec.Name, err)
 		}
 		layer = l
+	case "camera":
+		l, err := aep.NewCameraLayer(comp, spec.Name)
+		if err != nil {
+			return nil, fmt.Errorf("recipe: camera layer %q: %w", spec.Name, err)
+		}
+		layer = l
 	default:
 		return nil, fmt.Errorf("recipe: unsupported layer type %q", spec.Type)
 	}

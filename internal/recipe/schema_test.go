@@ -23,8 +23,8 @@ func TestValidateAcceptsMinimalTextShapeRecipe(t *testing.T) {
 func TestValidateRejectsUnsupportedLayerType(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers = append(rec.Comps[0].Layers, recipe.Layer{
-		Type: "camera",
-		Name: "Camera 1",
+		Type: "unsupported",
+		Name: "Unsupported",
 	})
 
 	report := recipe.Validate(rec)
@@ -584,6 +584,18 @@ func TestValidateReportsAdjustmentLayerCapability(t *testing.T) {
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
 
 	assertCapability(t, report, "NewAdjustmentLayer")
+}
+
+func TestValidateReportsCameraLayerCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "camera",
+		Name: "Camera",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "NewCameraLayer")
 }
 
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {

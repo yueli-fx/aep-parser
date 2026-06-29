@@ -455,6 +455,31 @@ func TestCompileToFileCreatesAdjustmentLayer(t *testing.T) {
 	}
 }
 
+func TestCompileToFileCreatesCameraLayer(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "camera",
+		Name: "Camera",
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if got.Type != aep.LayerTypeCamera {
+		t.Fatalf("layer type = %v, want camera", got.Type)
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
