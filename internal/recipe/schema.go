@@ -150,6 +150,7 @@ type ShapeSpec struct {
 	FillColor          []float64            `json:"fill_color,omitempty"`
 	FillOpacity        *float64             `json:"fill_opacity,omitempty"`
 	FillCompositeOrder string               `json:"fill_composite_order,omitempty"`
+	FillRule           string               `json:"fill_rule,omitempty"`
 	Stroke             *StrokeSpec          `json:"stroke,omitempty"`
 	Trim               *TrimSpec            `json:"trim,omitempty"`
 	RoundCorners       *RoundCornersSpec    `json:"round_corners,omitempty"`
@@ -993,6 +994,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("invalid_shape_fill_composite_order", layerPath+".shape.fill_composite_order", "fill_composite_order must be above_previous or below_previous")
 			}
 		}
+		if layer.Shape.FillRule != "" {
+			recordCapability("FillNode.SetFillRule", layerPath+".shape.fill_rule")
+			if !validFillRule(layer.Shape.FillRule) {
+				addRefusal("invalid_shape_fill_rule", layerPath+".shape.fill_rule", "fill_rule must be nonzero_winding or even_odd")
+			}
+		}
 		if layer.Shape.Stroke != nil {
 			strokePath := layerPath + ".shape.stroke"
 			recordCapability("VectorGroup.AddStroke", strokePath)
@@ -1472,6 +1479,15 @@ func validStrokeLineJoin(value string) bool {
 func validShapeCompositeOrder(value string) bool {
 	switch value {
 	case "above_previous", "below_previous":
+		return true
+	default:
+		return false
+	}
+}
+
+func validFillRule(value string) bool {
+	switch value {
+	case "nonzero_winding", "even_odd":
 		return true
 	default:
 		return false

@@ -356,6 +356,18 @@ func TestValidateReportsShapeFillCompositeOrderCapability(t *testing.T) {
 	assertCapability(t, report, "FillNode.SetCompositeOrder")
 }
 
+func TestValidateReportsShapeFillRuleCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillRule = "even_odd"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "FillNode.SetFillRule")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1796,6 +1808,7 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	rec.Comps[0].Layers[1].Shape.Roundness = ptr(-1)
 	rec.Comps[0].Layers[1].Shape.FillOpacity = ptr(101)
 	rec.Comps[0].Layers[1].Shape.FillCompositeOrder = "middle"
+	rec.Comps[0].Layers[1].Shape.FillRule = "alternate"
 
 	report := recipe.Validate(rec)
 
@@ -1806,6 +1819,7 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_roundness")
 	assertRefusal(t, report, "invalid_shape_fill_opacity")
 	assertRefusal(t, report, "invalid_shape_fill_composite_order")
+	assertRefusal(t, report, "invalid_shape_fill_rule")
 }
 
 func TestValidateRejectsInvalidShapeStar(t *testing.T) {

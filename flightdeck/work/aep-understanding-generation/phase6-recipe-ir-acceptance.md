@@ -2554,6 +2554,35 @@ Eighty-fourth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-fifth follow-up completed:
+
+- Shape recipes now support:
+  - `shape.fill_rule` -> `FillNode.SetFillRule`
+- Boundary: `shape.fill_rule` is a string enum with `nonzero_winding` and
+  `even_odd`. Validation rejects other values before compile.
+- `examples/recipes/minimal-shape-fill-rule.json` is a dedicated one-layer
+  shape recipe with a rect fill set to `even_odd`. The embedded expected
+  profile checks `ADBE Vector Fill Rule = 2`.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled profile still
+    read `ADBE Vector Fill Rule = 1`, capability `FillNode.SetFillRule` was
+    absent, and the invalid enum refusal was missing.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-fill-rule.json -out
+    tmp_debug\recipes\minimal-shape-fill-rule.aep -json` returned valid,
+    reported `FillNode.SetFillRule`, and all embedded `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_fill_rule\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_fill_rule\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

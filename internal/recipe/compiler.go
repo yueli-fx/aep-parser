@@ -1586,7 +1586,7 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
-	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil || shape.FillCompositeOrder != "" {
+	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil || shape.FillCompositeOrder != "" || shape.FillRule != "" {
 		fill, err := group.AddFill()
 		if err != nil {
 			return err
@@ -1607,6 +1607,15 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 			if err := fill.SetCompositeOrder(order); err != nil {
+				return err
+			}
+		}
+		if shape.FillRule != "" {
+			rule, err := fillRule(shape.FillRule)
+			if err != nil {
+				return err
+			}
+			if err := fill.SetFillRule(rule); err != nil {
 				return err
 			}
 		}
@@ -1779,6 +1788,17 @@ func shapeCompositeOrder(value string) (aep.ShapeCompositeOrder, error) {
 		return aep.ShapeCompositeOrderBelowPrevious, nil
 	default:
 		return 0, fmt.Errorf("unsupported shape composite order %q", value)
+	}
+}
+
+func fillRule(value string) (aep.FillRule, error) {
+	switch value {
+	case "nonzero_winding":
+		return aep.FillRuleNonzeroWinding, nil
+	case "even_odd":
+		return aep.FillRuleEvenOdd, nil
+	default:
+		return 0, fmt.Errorf("unsupported fill rule %q", value)
 	}
 }
 
