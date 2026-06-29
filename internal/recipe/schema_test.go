@@ -574,6 +574,18 @@ func TestValidateReportsNullLayerCapability(t *testing.T) {
 	assertCapability(t, report, "NewNullLayer")
 }
 
+func TestValidateReportsAdjustmentLayerCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "adjustment",
+		Name: "Grade",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "NewAdjustmentLayer")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

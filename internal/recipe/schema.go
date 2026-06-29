@@ -679,6 +679,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		recordCapability("NewShapeLayer", layerPath)
 	case "null":
 		recordCapability("NewNullLayer", layerPath)
+	case "adjustment":
+		recordCapability("NewAdjustmentLayer", layerPath)
 	default:
 		addRefusal("unsupported_layer_type", layerPath+".type", fmt.Sprintf("unsupported layer type %q", layer.Type))
 	}

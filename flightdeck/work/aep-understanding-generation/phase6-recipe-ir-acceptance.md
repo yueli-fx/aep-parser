@@ -1720,6 +1720,31 @@ Fifty-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-fifth follow-up completed:
+
+- Layer recipes now support a high-level adjustment layer type:
+  - `type: "adjustment"` -> `NewAdjustmentLayer`
+- Boundary: `type: "adjustment"` creates a comp-sized adjustment layer via the
+  library creation API. This differs from `is_adjust`, which only flips the
+  low-level adjustment marker bit on a layer created by another recipe type.
+- `examples/recipes/minimal-adjustment-layer.json` is a dedicated two-layer
+  recipe: a `Grade` adjustment layer with Gaussian Blur plus a text layer. See
+  `knowledge/layer/recipe-adjustment-layer.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-adjustment-layer.json -out
+    tmp_debug\recipes\minimal-adjustment-layer.aep -json` returned valid and
+    all `profile_checks` passed, including effect and effect-param checks.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_adjustment_layer\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_adjustment_layer\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

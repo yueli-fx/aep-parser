@@ -697,6 +697,12 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 			return nil, fmt.Errorf("recipe: null layer %q: %w", spec.Name, err)
 		}
 		layer = l
+	case "adjustment":
+		l, err := aep.NewAdjustmentLayer(comp, spec.Name)
+		if err != nil {
+			return nil, fmt.Errorf("recipe: adjustment layer %q: %w", spec.Name, err)
+		}
+		layer = l
 	default:
 		return nil, fmt.Errorf("recipe: unsupported layer type %q", spec.Type)
 	}
