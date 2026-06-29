@@ -193,6 +193,11 @@ Generic layer source refs are now covered by `minimal-layer-source-ref.json`,
 which asserts a generated solid layer's footage source through
 `expected_profile.layers[].source` and `source_kind`.
 
+Null and adjustment base recipes now assert their object identity and type
+flags through `expected_profile.layers[]`: `minimal-null-layer.json` covers the
+null controller plus child parent ref, and `minimal-adjustment-layer.json`
+covers the adjustment layer flag alongside its effect contract.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

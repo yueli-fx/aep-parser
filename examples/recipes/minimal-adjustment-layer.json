@@ -42,6 +42,15 @@
     "comp_count": 1,
     "layer_count": 2,
     "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Grade",
+        "type": "adjustment",
+        "flags": {
+          "is_adjustment": true
+        }
+      }
+    ],
     "effects": [
       {
         "layer_name": "Grade",

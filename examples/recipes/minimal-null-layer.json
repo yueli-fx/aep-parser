@@ -34,6 +34,20 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 2,
-    "text_layer_count": 1
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Controller",
+        "type": "null",
+        "flags": {
+          "is_null": true
+        }
+      },
+      {
+        "name": "Child",
+        "type": "text",
+        "parent": "Controller"
+      }
+    ]
   }
 }

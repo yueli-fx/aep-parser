@@ -243,6 +243,10 @@ Done:
 - Layer object timing baseline now also asserts parsed `duration` and
   `stretch`; with `in_point: 0.1` and `out_point: 0.9`, the expected parsed
   span is `duration: 0.8`.
+- Null and adjustment base layer recipes now assert layer object identity and
+  type flags through `expected_profile.layers[]`; `minimal-null-layer.json`
+  also checks the child parent ref, while `minimal-adjustment-layer.json`
+  keeps its effect contract.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -388,9 +392,9 @@ Current:
   `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
   blocked until recipe target-version handling is explicit, so continue with
   the next recipe-owned family; the consolidated layer object baseline now
-  includes render/sampling flags, and camera/light options now have
-  consolidated baselines for profile-visible properties. Do not start automated
-  correction loops.
+  includes render/sampling flags, base null/adjustment recipes assert type
+  flags, and camera/light options now have consolidated baselines for
+  profile-visible properties. Do not start automated correction loops.
 
 ## Open questions
 
