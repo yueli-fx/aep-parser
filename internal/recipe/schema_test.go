@@ -372,6 +372,15 @@ func TestValidateReportsCompLabelCapability(t *testing.T) {
 	assertCapability(t, report, "SetLabel")
 }
 
+func TestValidateReportsCompCommentCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Comment = "reviewed recipe comp"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetComment")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

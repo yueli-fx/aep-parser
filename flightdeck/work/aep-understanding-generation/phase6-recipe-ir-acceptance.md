@@ -1343,6 +1343,36 @@ Forty-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-second follow-up completed:
+
+- Composition recipes now support `comment`:
+  - non-empty string -> `SetComment`
+- Capability reporting records:
+  - `SetComment`
+- Boundary: composition comments are project-panel item-level fields, not cdta
+  comp settings. The comment setter is length-variable and depends on the item
+  `cmta` payload plus the idta has-comment flag, so recipe compilation applies
+  it after reopening the base project. The current stable profile schema does
+  not expose comments, so this slice uses compiled AEP readback in tests plus
+  AE render/open acceptance for the dedicated example.
+- `examples/recipes/minimal-comp-comment.json` is a dedicated no-layer comp
+  recipe with `comment: "reviewed recipe comp"`. See
+  `knowledge/composition/recipe-comment.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-comment.json -out
+    tmp_debug\recipes\minimal-comp-comment.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_comment\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_comment\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

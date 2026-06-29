@@ -27,6 +27,7 @@ type CompSpec struct {
 	Duration                 float64             `json:"duration"`
 	BackgroundColor          []float64           `json:"background_color,omitempty"`
 	Label                    *float64            `json:"label,omitempty"`
+	Comment                  string              `json:"comment,omitempty"`
 	Renderer                 string              `json:"renderer,omitempty"`
 	ResolutionFactor         []float64           `json:"resolution_factor,omitempty"`
 	PixelAspect              *float64            `json:"pixel_aspect,omitempty"`
@@ -410,6 +411,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.Label != nil {
 			recordCapability("SetLabel", compPath+".label")
 			validateCompLabel(*comp.Label, compPath+".label", addRefusal)
+		}
+		if comp.Comment != "" {
+			recordCapability("SetComment", compPath+".comment")
 		}
 		if comp.Renderer != "" {
 			recordCapability("SetRenderer", compPath+".renderer")

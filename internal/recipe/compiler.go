@@ -544,7 +544,7 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 }
 
 func applyCompItemSettings(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
-	if compSpec.Label == nil {
+	if compSpec.Label == nil && compSpec.Comment == "" {
 		return project, nil
 	}
 	reopened, err := aep.Reopen(project)
@@ -558,6 +558,11 @@ func applyCompItemSettings(project *aep.Project, compSpec CompSpec) (*aep.Projec
 	if compSpec.Label != nil {
 		if err := comp.SetLabel(uint8(*compSpec.Label)); err != nil {
 			return nil, fmt.Errorf("label: %w", err)
+		}
+	}
+	if compSpec.Comment != "" {
+		if err := comp.SetComment(compSpec.Comment); err != nil {
+			return nil, fmt.Errorf("comment: %w", err)
 		}
 	}
 	return reopened, nil
