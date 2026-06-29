@@ -5,6 +5,76 @@ package scene
 // once and returns a filtered slice. Results are computed on every call; if
 // you need to iterate the same view repeatedly, cache it locally.
 
+type compositionSourceIndex struct {
+	proj         *Project
+	compositions map[uint32]*Composition
+	footages     map[uint32]*Footage
+}
+
+func newCompositionSourceIndex(c *Composition) compositionSourceIndex {
+	if c == nil || c.proj == nil {
+		return compositionSourceIndex{}
+	}
+	index := compositionSourceIndex{proj: c.proj}
+	if len(c.proj.Compositions) > 0 {
+		index.compositions = make(map[uint32]*Composition, len(c.proj.Compositions))
+		for _, item := range c.proj.Compositions {
+			if item == nil || item.ID == 0 {
+				continue
+			}
+			if _, exists := index.compositions[item.ID]; !exists {
+				index.compositions[item.ID] = item
+			}
+		}
+	}
+	if len(c.proj.Footage) > 0 {
+		index.footages = make(map[uint32]*Footage, len(c.proj.Footage))
+		for _, item := range c.proj.Footage {
+			if item == nil || item.ID == 0 {
+				continue
+			}
+			if _, exists := index.footages[item.ID]; !exists {
+				index.footages[item.ID] = item
+			}
+		}
+	}
+	return index
+}
+
+func (index compositionSourceIndex) composition(id uint32) *Composition {
+	if id == 0 || index.compositions == nil {
+		return nil
+	}
+	return index.compositions[id]
+}
+
+func (index compositionSourceIndex) footage(id uint32) *Footage {
+	if id == 0 || index.footages == nil {
+		return nil
+	}
+	return index.footages[id]
+}
+
+func (index compositionSourceIndex) layerComposition(l *Layer) *Composition {
+	if l == nil || l.comp == nil || l.comp.proj == nil {
+		return nil
+	}
+	if l.comp.proj != index.proj {
+		return l.SourceComposition()
+	}
+	return index.composition(l.SourceID)
+}
+
+func (index compositionSourceIndex) layerFootage(l *Layer) *Footage {
+	if l == nil || l.comp == nil || l.comp.proj == nil {
+		return nil
+	}
+	if l.comp.proj != index.proj {
+		return l.SourceFootage()
+	}
+	return index.footage(l.SourceID)
+}
+
 // TextLayers returns all text layers in the composition.
 func (c *Composition) TextLayers() []*Layer {
 	out := make([]*Layer, 0)
@@ -113,8 +183,9 @@ func (c *Composition) SoloLayers() []*Layer {
 // AVItem source).
 func (c *Composition) AVLayers() []*Layer {
 	out := make([]*Layer, 0)
+	sources := newCompositionSourceIndex(c)
 	for _, l := range c.Layers {
-		if l.SourceID != 0 && (l.SourceComposition() != nil || l.SourceFootage() != nil) {
+		if l.SourceID != 0 && (sources.layerComposition(l) != nil || sources.layerFootage(l) != nil) {
 			out = append(out, l)
 		}
 	}
@@ -125,8 +196,9 @@ func (c *Composition) AVLayers() []*Layer {
 // (pre-comp layers).
 func (c *Composition) CompositionLayers() []*Layer {
 	out := make([]*Layer, 0)
+	sources := newCompositionSourceIndex(c)
 	for _, l := range c.Layers {
-		if l.SourceComposition() != nil {
+		if sources.layerComposition(l) != nil {
 			out = append(out, l)
 		}
 	}
@@ -137,8 +209,9 @@ func (c *Composition) CompositionLayers() []*Layer {
 // (file / solid / placeholder).
 func (c *Composition) FootageLayers() []*Layer {
 	out := make([]*Layer, 0)
+	sources := newCompositionSourceIndex(c)
 	for _, l := range c.Layers {
-		if l.SourceFootage() != nil {
+		if sources.layerFootage(l) != nil {
 			out = append(out, l)
 		}
 	}
@@ -149,8 +222,9 @@ func (c *Composition) FootageLayers() []*Layer {
 // (not a solid and not a placeholder).
 func (c *Composition) FileLayers() []*Layer {
 	out := make([]*Layer, 0)
+	sources := newCompositionSourceIndex(c)
 	for _, l := range c.Layers {
-		f := l.SourceFootage()
+		f := sources.layerFootage(l)
 		if f != nil && !f.IsSolid && !f.IsPlaceholder {
 			out = append(out, l)
 		}
@@ -161,8 +235,9 @@ func (c *Composition) FileLayers() []*Layer {
 // SolidLayers returns layers whose source is a solid footage item.
 func (c *Composition) SolidLayers() []*Layer {
 	out := make([]*Layer, 0)
+	sources := newCompositionSourceIndex(c)
 	for _, l := range c.Layers {
-		f := l.SourceFootage()
+		f := sources.layerFootage(l)
 		if f != nil && f.IsSolid {
 			out = append(out, l)
 		}
@@ -174,8 +249,9 @@ func (c *Composition) SolidLayers() []*Layer {
 // item (AE's "Missing Footage" placeholder, opti tag = "Plac").
 func (c *Composition) PlaceholderLayers() []*Layer {
 	out := make([]*Layer, 0)
+	sources := newCompositionSourceIndex(c)
 	for _, l := range c.Layers {
-		f := l.SourceFootage()
+		f := sources.layerFootage(l)
 		if f != nil && f.IsPlaceholder {
 			out = append(out, l)
 		}
