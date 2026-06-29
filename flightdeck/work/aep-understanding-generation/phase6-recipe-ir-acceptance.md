@@ -2112,6 +2112,34 @@ Sixty-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Seventieth follow-up completed:
+
+- Camera layer recipes now support a thirteenth camera option:
+  - `camera.iris_highlight_saturation` -> `Layer.SetIrisHighlightSaturation`
+- Boundary: `camera` options remain valid only on `type: "camera"` layers.
+  This slice covers Iris Highlight Saturation. The profile match name keeps
+  Adobe's on-disk misspelling: `ADBE Iris Hightlight Saturation`.
+- `examples/recipes/minimal-camera-iris-highlight-saturation.json` is a
+  dedicated two-layer recipe: a `Camera` layer with iris highlight saturation
+  `50` plus a visible text layer. See
+  `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-iris-highlight-saturation.json -out
+    tmp_debug\recipes\minimal-camera-iris-highlight-saturation.aep -json`
+    returned valid and all `profile_checks` passed, including
+    `ADBE Iris Hightlight Saturation = 50`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_iris_highlight_saturation\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_iris_highlight_saturation\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

@@ -12,7 +12,8 @@ Context: recipe camera option support, starting with
 `examples/recipes/minimal-camera-iris-aspect-ratio.json` and
 `examples/recipes/minimal-camera-iris-diffraction-fringe.json` and
 `examples/recipes/minimal-camera-iris-highlight-gain.json` and
-`examples/recipes/minimal-camera-iris-highlight-threshold.json`.
+`examples/recipes/minimal-camera-iris-highlight-threshold.json` and
+`examples/recipes/minimal-camera-iris-highlight-saturation.json`.
 
 Recipe authoring:
 
@@ -41,6 +42,8 @@ Recipe authoring:
   through `Layer.SetIrisHighlightGain`.
 - `camera.iris_highlight_threshold` sets the camera's Iris Highlight Threshold
   property through `Layer.SetIrisHighlightThreshold`.
+- `camera.iris_highlight_saturation` sets the camera's Iris Highlight
+  Saturation property through `Layer.SetIrisHighlightSaturation`.
 
 Writer capability:
 
@@ -56,14 +59,18 @@ Writer capability:
 - `SetIrisDiffractionFringe`
 - `SetIrisHighlightGain`
 - `SetIrisHighlightThreshold`
+- `SetIrisHighlightSaturation`
 
 Boundary:
 
 - `camera` options are only valid on `type: "camera"` layers.
 - Current coverage includes `zoom`, `depth_of_field`, `focus_distance`,
   `aperture`, `blur_level`, `iris_shape`, `iris_rotation`, and
-  `iris_roundness`, `iris_aspect_ratio`, and `iris_diffraction_fringe`. Other
-  iris and camera options, including highlight saturation, remain separate
-  recipe slices.
+  `iris_roundness`, `iris_aspect_ratio`, `iris_diffraction_fringe`,
+  `iris_highlight_gain`, `iris_highlight_threshold`, and
+  `iris_highlight_saturation`. Remaining camera options should continue as
+  separate recipe slices.
+- The profile match name for highlight saturation intentionally uses Adobe's
+  on-disk misspelling: `ADBE Iris Hightlight Saturation`.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

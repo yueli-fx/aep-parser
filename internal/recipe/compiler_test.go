@@ -937,6 +937,42 @@ func TestCompileToFileSetsCameraIrisHighlightThreshold(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCameraIrisHighlightSaturation(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Camera iris highlight saturation"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "camera", "name": "Camera", "camera": {"iris_highlight_saturation": 50}},
+				{"type": "text", "name": "Title", "text": "Camera iris", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0].IrisHighlightSaturation()
+	if got == nil || got.StaticValue != 50.0 {
+		t.Fatalf("camera iris_highlight_saturation = %+v, want 50", got)
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
