@@ -5,7 +5,8 @@ Context: recipe camera option support, starting with
 `examples/recipes/minimal-camera-depth-of-field.json` and
 `examples/recipes/minimal-camera-focus-distance.json` and
 `examples/recipes/minimal-camera-aperture.json` and
-`examples/recipes/minimal-camera-blur-level.json`.
+`examples/recipes/minimal-camera-blur-level.json` and
+`examples/recipes/minimal-camera-iris-shape.json`.
 
 Recipe authoring:
 
@@ -20,6 +21,8 @@ Recipe authoring:
   `Layer.SetCameraAperture`.
 - `camera.blur_level` sets the camera's Blur Level property through
   `Layer.SetCameraBlurLevel`.
+- `camera.iris_shape` sets the camera's Iris Shape enum through
+  `Layer.SetIrisShape`.
 
 Writer capability:
 
@@ -28,12 +31,13 @@ Writer capability:
 - `Layer.SetCameraFocusDistance`
 - `Layer.SetCameraAperture`
 - `Layer.SetCameraBlurLevel`
+- `SetIrisShape`
 
 Boundary:
 
 - `camera` options are only valid on `type: "camera"` layers.
 - Current coverage includes `zoom`, `depth_of_field`, `focus_distance`,
-  `aperture`, and `blur_level`. Iris and other camera options remain separate
-  recipe slices.
+  `aperture`, `blur_level`, and `iris_shape`. Other iris and camera options
+  remain separate recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

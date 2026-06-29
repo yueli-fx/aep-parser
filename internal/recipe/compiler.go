@@ -861,6 +861,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q camera.blur_level: %w", spec.Name, err)
 			}
 		}
+		if spec.Camera != nil && spec.Camera.IrisShape != nil {
+			if err := layer.SetIrisShape(*spec.Camera.IrisShape); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q camera.iris_shape: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)
