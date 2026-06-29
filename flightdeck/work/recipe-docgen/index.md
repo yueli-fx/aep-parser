@@ -61,7 +61,21 @@ artifacts belong in `docs/` after implementation.
 
 ## Source Model
 
-The generator should use two sources of truth.
+The generator should build one canonical field model, then render every output
+from that model.
+
+Pipeline:
+
+1. reflect recipe structs into structural field facts
+2. join recipe-owned semantic registries by stable recipe path
+3. join capability details by stable recipe capability key
+4. produce a canonical `FieldModel`
+5. render JSON schema and markdown from the same `FieldModel`
+
+Markdown is only a renderer. It must not have a separate data source or a
+markdown-specific field registry.
+
+The generator should use these sources of truth.
 
 ### Structural Source
 
@@ -73,6 +87,9 @@ Reflection over `internal/recipe` exported structs provides:
 - `omitempty`
 - pointer-vs-value optionality
 - slices and nested struct relationships
+
+Reflection also owns type, array, object, and structural requiredness. No
+registry is allowed to repeat those facts.
 
 Reflection must ignore output/report structs unless explicitly included. The
 first include set should be:
@@ -90,8 +107,8 @@ first include set should be:
 
 ### Metadata Registry
 
-A recipe-owned registry should provide all semantic notes that reflection cannot
-know safely:
+Recipe-owned registries should provide only semantic notes that reflection
+cannot know safely:
 
 - short summary
 - validation note
@@ -99,21 +116,27 @@ know safely:
 - numeric range
 - array length rules
 - required-if rules
-- capability queries triggered by the field
 - examples or example references
 
-Recommended package shape:
+Do not store these in metadata registries:
+
+- path, except as the map key
+- Go type
+- JSON type
+- required/optional state derived from struct shape
+- array/object shape
+- field ordering
+
+Recommended registry shape:
 
 ```go
 package recipedoc
 
 type FieldMeta struct {
-    Path          string
-    Summary       string
-    Validation    string
-    Enum          []string
-    Capability    []string
-    Example       string
+    Summary    string
+    Validation string
+    Enum       []string
+    Example    string
 }
 ```
 
@@ -128,29 +151,90 @@ The registry should key by stable recipe path, for example:
 This keeps documentation intent explicit and reviewable. It also avoids brittle
 logic that tries to infer all constraints by parsing `ValidateWithCapabilities`.
 
+To keep review small as the field count grows, metadata should be split by
+purpose:
+
+- `summary_registry.go`
+- `validation_registry.go`
+- `capability_registry.go`
+- `example_registry.go`
+
+Each registry should use the same stable recipe path keys, but own only its
+specific concern.
+
+## Stable Identifiers
+
+Recipe paths are public stable identifiers.
+
+Once a path appears in `docs/recipe_schema.json`, it should remain valid unless
+the recipe schema version changes. Renaming a Go struct or field must not by
+itself rename the recipe path. A JSON field rename is a schema change and must
+be handled as a compatibility decision, not as a mechanical refactor.
+
+Examples:
+
+- `comps[].layers[].effects[].params[]` remains stable even if the Go type
+  `EffectParam` is later renamed.
+- `expected_profile.keyframes[].keyframes[].value` remains stable even if the
+  backing Go type is moved to another file.
+
+The drift gate must check both directions:
+
+- every included recipe field has a generated schema entry
+- every registry key references an existing generated recipe path
+
 ## Capability Mapping Rules
 
 Recipe docs should reference capability queries, not duplicate capability
 truth.
 
-Example mappings:
+Recipe-facing capability references should use stable recipe capability keys,
+not raw Go symbol names. A separate mapping layer resolves those keys to
+capindex queries.
 
-- `comps[].background_color` -> `Composition.SetBGColor`
-- `comps[].renderer` -> `SetRenderer`
-- `comps[].layers[].type=text` -> `NewTextLayer`
-- `comps[].layers[].transform` -> `SetLayerTransform`
-- `comps[].layers[].effects[]` -> `AddEffect`
-- `comps[].layers[].effects[].params[]` -> `SetEffectParam`
+Example stable keys:
+
+- `comp.set_background_color`
+- `comp.set_renderer`
+- `layer.create_text`
+- `layer.set_transform`
+- `effect.add_builtin`
+- `effect.set_param`
+- `property.set_expression`
+
+Example mapping layer:
+
+```go
+type CapabilityMeta struct {
+    Key      string
+    Query    string
+    Summary  string
+}
+```
+
+The registry key is the stable recipe contract. `Query` is the current capindex
+lookup string and may use Go API naming internally.
+
+Example field-to-capability mappings:
+
+- `comps[].background_color` -> `comp.set_background_color`
+- `comps[].renderer` -> `comp.set_renderer`
+- `comps[].layers[].type=text` -> `layer.create_text`
+- `comps[].layers[].transform` -> `layer.set_transform`
+- `comps[].layers[].effects[]` -> `effect.add_builtin`
+- `comps[].layers[].effects[].params[]` -> `effect.set_param`
 - `comps[].layers[].effects[].params[].expression.source` ->
-  `Property.SetExpression`
+  `property.set_expression`
 
 At generation time, capability details should be joined from
 `docs/capabilities.json` through the existing `internal/capindex` lookup. The
-recipe registry owns only the query string; capindex owns status, domain,
-verify level, min version, boundary, and gate tests.
+recipe registry owns stable recipe capability keys; the capability registry maps
+those keys to capindex query strings. Capindex owns status, domain, verify
+level, min version, boundary, and gate tests.
 
-When a query is not found, the generated docs should mark it as unknown and the
-drift test should fail unless the field metadata explicitly allows unknown.
+When a capability key has no mapping, or a mapped query is not found in
+capindex, the drift test should fail unless the capability metadata explicitly
+allows unknown.
 
 ## Documentation Rules
 
@@ -167,11 +251,14 @@ and capability traceability, not long tutorials.
 Fields should be grouped by object type and ordered in source struct order.
 Nested object sections should be linked from parent fields.
 
-Required fields should be derived conservatively:
+Required fields should be described as two separate concepts:
 
-- no `omitempty` and non-pointer means required at the JSON shape level
-- validation may impose additional required-if rules
-- required-if rules must come from metadata registry
+- structural requiredness: no `omitempty` and non-pointer in the Go shape
+- validation requiredness: required by `ValidateWithCapabilities`
+
+Docs should avoid the plain label "required" unless it names which kind.
+Defaultable fields must be documented as optional in the authoring sense even
+when they are represented by non-pointer Go fields.
 
 ## Validation And Drift Gates
 
@@ -182,6 +269,7 @@ checks:
   `recipe_schema.json`.
 - Every field with a validation branch has a registry entry, starting with a
   curated first set rather than all branches.
+- Every registry key references an existing generated recipe path.
 - Every capability query in registry resolves against `docs/capabilities.json`,
   unless explicitly marked `allow_unknown`.
 - `docs/recipe_schema.json` and `docs/recipe.md` are up to date.
@@ -201,13 +289,20 @@ go vet ./...
 Preferred package layout:
 
 - `internal/recipedoc/model.go`
-  - schema structs and field model
+  - canonical field model and generated document model
 - `internal/recipedoc/reflect.go`
   - reflection walker for recipe structs
-- `internal/recipedoc/registry.go`
-  - explicit metadata registry
+- `internal/recipedoc/summary_registry.go`
+  - field summaries by stable recipe path
+- `internal/recipedoc/validation_registry.go`
+  - validation notes, enum values, ranges, and required-if rules
+- `internal/recipedoc/capability_registry.go`
+  - field-path to stable recipe capability keys, and capability-key to capindex
+    query mapping
+- `internal/recipedoc/example_registry.go`
+  - inline examples or example file references
 - `internal/recipedoc/render_json.go`
-  - deterministic JSON schema rendering
+  - deterministic JSON Schema-like rendering
 - `internal/recipedoc/render_md.go`
   - markdown field reference rendering
 - `cmd/recipedocgen/main.go`
@@ -217,6 +312,36 @@ Preferred package layout:
 
 This mirrors the existing split between `cmd/docgen` and `internal/apidoc`,
 but keeps recipe metadata separate from API annotation metadata.
+
+## JSON Schema Shape
+
+`docs/recipe_schema.json` should be JSON Schema-like rather than a custom
+format invented from scratch.
+
+The first version does not need to implement the full JSON Schema vocabulary,
+but it should align with familiar field names where possible:
+
+- `$schema`
+- `$id`
+- `title`
+- `type`
+- `properties`
+- `items`
+- `required`
+- `enum`
+- `description`
+- custom extension fields under `x-aep-*`
+
+Recipe-specific data should live under extension keys such as:
+
+- `x-aep-path`
+- `x-aep-structural-required`
+- `x-aep-validation-required`
+- `x-aep-capabilities`
+- `x-aep-examples`
+
+This keeps the output consumable by editors, LLM tooling, and future VSCode
+integration without pretending to be a complete JSON Schema implementation.
 
 ## First-Slice Scope
 
@@ -246,16 +371,20 @@ The design is ready to implement when:
   reading `internal/recipe`.
 - Capability status shown in recipe docs is loaded from `docs/capabilities.json`,
   not copied by hand.
+- Recipe capability keys are stable and are mapped to capindex queries in one
+  registry.
 - Running the generator twice produces identical output.
 - Drift tests fail when a new recipe JSON field is added without doc coverage.
+- Drift tests fail when a registry key references a removed or renamed recipe
+  path.
 
 ## Next
 
 If this spec is accepted, write a task plan for the first implementation slice:
 
 1. Build `internal/recipedoc` reflection model and tests.
-2. Add a small metadata registry for the highest-value fields.
-3. Render `recipe_schema.json`.
+2. Add split metadata registries for the highest-value fields.
+3. Render JSON Schema-like `recipe_schema.json`.
 4. Render `recipe.md`.
 5. Add drift tests and wire `go generate`.
 
