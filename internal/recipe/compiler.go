@@ -613,6 +613,27 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.Trim != nil {
+		trim, err := group.AddTrim()
+		if err != nil {
+			return err
+		}
+		if shape.Trim.Start != nil {
+			if err := trim.SetStart(*shape.Trim.Start); err != nil {
+				return err
+			}
+		}
+		if shape.Trim.End != nil {
+			if err := trim.SetEnd(*shape.Trim.End); err != nil {
+				return err
+			}
+		}
+		if shape.Trim.Offset != nil {
+			if err := trim.SetOffset(*shape.Trim.Offset); err != nil {
+				return err
+			}
+		}
+	}
 	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil {
 		fill, err := group.AddFill()
 		if err != nil {

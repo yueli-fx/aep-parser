@@ -61,12 +61,19 @@ type ShapeSpec struct {
 	FillColor   []float64   `json:"fill_color,omitempty"`
 	FillOpacity *float64    `json:"fill_opacity,omitempty"`
 	Stroke      *StrokeSpec `json:"stroke,omitempty"`
+	Trim        *TrimSpec   `json:"trim,omitempty"`
 }
 
 type StrokeSpec struct {
 	Color   []float64 `json:"color,omitempty"`
 	Width   *float64  `json:"width,omitempty"`
 	Opacity *float64  `json:"opacity,omitempty"`
+}
+
+type TrimSpec struct {
+	Start  *float64 `json:"start,omitempty"`
+	End    *float64 `json:"end,omitempty"`
+	Offset *float64 `json:"offset,omitempty"`
 }
 
 type Effect struct {
@@ -432,6 +439,16 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				if *layer.Shape.Stroke.Opacity < 0 || *layer.Shape.Stroke.Opacity > 100 {
 					addRefusal("invalid_shape_stroke_opacity", strokePath+".opacity", "stroke opacity must be between 0 and 100")
 				}
+			}
+		}
+		if layer.Shape.Trim != nil {
+			trimPath := layerPath + ".shape.trim"
+			recordCapability("VectorGroup.AddTrim", trimPath)
+			if layer.Shape.Trim.Start != nil && (*layer.Shape.Trim.Start < 0 || *layer.Shape.Trim.Start > 100) {
+				addRefusal("invalid_shape_trim_start", trimPath+".start", "trim start must be between 0 and 100")
+			}
+			if layer.Shape.Trim.End != nil && (*layer.Shape.Trim.End < 0 || *layer.Shape.Trim.End > 100) {
+				addRefusal("invalid_shape_trim_end", trimPath+".end", "trim end must be between 0 and 100")
 			}
 		}
 	}

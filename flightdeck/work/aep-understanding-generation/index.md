@@ -154,15 +154,18 @@ Done:
   and `ADBE Anchor Point` `expected_profile.keyframes[]` checks against profile
   3D `[x,y,0]` values. The updated shape/text example passed `go test ./...`,
   `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
+- First shape-filter recipe slice is implemented for `shape.trim` static
+  start/end/offset controls. The updated shape/text example asserts
+  `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
+  profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are additional transform keyframe channels/ease where writer
-  support exists, expression support, or shape filters. More text style fields
-  can continue only when they are profile-visible. Do not start automated
-  correction loops.
+  candidates are additional shape filters, expression support, transform
+  keyframe/ease where writer support exists, or more profile-visible text style.
+  Do not start automated correction loops.
 
 ## Open questions
 
@@ -170,6 +173,6 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: remaining transform
-  keyframe/ease channels, expression support, shape filters, or more
-  profile-visible text style.
+- Which recipe field family should enter next: additional shape filters,
+  expression support, transform keyframe/ease, or more profile-visible text
+  style.

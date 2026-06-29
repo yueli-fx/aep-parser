@@ -388,6 +388,33 @@ Thirteenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Fourteenth follow-up completed:
+
+- Shape recipes now support a first shape-filter slice:
+  - `shape.trim.start` sets `ADBE Vector Trim Start`.
+  - `shape.trim.end` sets `ADBE Vector Trim End`.
+  - `shape.trim.offset` sets `ADBE Vector Trim Offset`.
+- Validation rejects trim start/end outside `0..100`; trim offset intentionally
+  has no value range limit.
+- `examples/recipes/minimal-text-shape.json` now includes Trim Paths on the
+  `Underline` layer and asserts the three Trim properties through
+  `expected_profile.properties[]`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-trim.aep -json` returned valid
+    and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request: `tmp_debug/aeoracle/minimal_text_shape_trim/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_trim/aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

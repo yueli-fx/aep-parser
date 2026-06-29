@@ -72,6 +72,11 @@
               "color": [255, 0, 0, 255],
               "width": 6,
               "opacity": 80
+            },
+            "trim": {
+              "start": 10,
+              "end": 85,
+              "offset": 15
             }
           },
           "transform": {
@@ -116,6 +121,21 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector Fill Opacity",
         "value": 45
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Trim Start",
+        "value": 10
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Trim End",
+        "value": 85
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Trim Offset",
+        "value": 15
       }
     ],
     "text_styles": [
