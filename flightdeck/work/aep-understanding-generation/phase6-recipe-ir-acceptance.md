@@ -980,6 +980,42 @@ Twenty-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Thirtieth follow-up completed:
+
+- Composition recipes now support `motion_blur` shutter/sample settings:
+  - `shutter_angle` -> profile `motion_blur.shutter_angle_degrees`
+  - `shutter_phase` -> profile `motion_blur.shutter_phase`
+  - `adaptive_sample_limit` -> profile `motion_blur.adaptive_sample_limit`
+  - `samples_per_frame` -> profile `motion_blur.samples_per_frame`
+- Capability reporting records:
+  - `SetShutterAngle`
+  - `SetShutterPhase`
+  - `SetMotionBlurAdaptiveSampleLimit`
+  - `SetMotionBlurSamplesPerFrame`
+- Validation rejects non-integer values, `shutter_angle` outside `0..720`, and
+  negative sample settings.
+- Boundary: this slice models profile-visible shutter/sample settings only; the
+  comp motion blur enable flag is not exposed in the current stable profile
+  schema and is not modeled here.
+- `examples/recipes/minimal-comp-motion-blur.json` is a dedicated no-layer
+  comp recipe that asserts all four `expected_profile.motion_blur` fields. See
+  `knowledge/composition/recipe-motion-blur-settings.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-motion-blur.json -out
+    tmp_debug\recipes\minimal-comp-motion-blur.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_motion_blur\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_motion_blur\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

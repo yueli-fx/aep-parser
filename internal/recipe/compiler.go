@@ -35,6 +35,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q background_color: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.MotionBlur != nil {
+		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
+			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)
+		}
+	}
 	for _, layerSpec := range compSpec.Layers {
 		if err := compileLayer(comp, layerSpec, compSpec); err != nil {
 			return report, err
@@ -98,6 +103,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
+		expected.MotionBlur != nil ||
 		len(expected.Effects) > 0 ||
 		len(expected.Properties) > 0 ||
 		len(expected.TextStyles) > 0 ||
@@ -134,6 +140,9 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	if expected.ShapeLayerCount != nil {
 		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
 		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	if expected.MotionBlur != nil {
+		checkExpectedMotionBlur(expected.MotionBlur, prof, add)
 	}
 	for i, expectedEffect := range expected.Effects {
 		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)
@@ -256,6 +265,33 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		}
 	}
 	return checks
+}
+
+func checkExpectedMotionBlur(expected *ExpectedMotionBlurSpec, prof *profile.Profile, add func(string, any, any, bool)) {
+	if expected == nil {
+		return
+	}
+	if len(prof.Comps) == 0 {
+		add("expected_profile.motion_blur", "composition", nil, false)
+		return
+	}
+	actual := prof.Comps[0].MotionBlur
+	if expected.ShutterAngle != nil {
+		got := float64(actual.ShutterAngle)
+		add("expected_profile.motion_blur.shutter_angle", *expected.ShutterAngle, got, got == *expected.ShutterAngle)
+	}
+	if expected.ShutterPhase != nil {
+		got := float64(actual.ShutterPhase)
+		add("expected_profile.motion_blur.shutter_phase", *expected.ShutterPhase, got, got == *expected.ShutterPhase)
+	}
+	if expected.AdaptiveSampleLimit != nil {
+		got := float64(actual.AdaptiveSampleLimit)
+		add("expected_profile.motion_blur.adaptive_sample_limit", *expected.AdaptiveSampleLimit, got, got == *expected.AdaptiveSampleLimit)
+	}
+	if expected.SamplesPerFrame != nil {
+		got := float64(actual.SamplesPerFrame)
+		add("expected_profile.motion_blur.samples_per_frame", *expected.SamplesPerFrame, got, got == *expected.SamplesPerFrame)
+	}
 }
 
 func countProfileLayers(prof *profile.Profile, include func(profile.Layer) bool) int {
@@ -427,6 +463,33 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 		}
 	}
 	return reopened, nil
+}
+
+func applyCompMotionBlur(comp *aep.Composition, spec *CompMotionBlurSpec) error {
+	if spec == nil {
+		return nil
+	}
+	if spec.ShutterAngle != nil {
+		if err := comp.SetShutterAngle(uint16(*spec.ShutterAngle)); err != nil {
+			return err
+		}
+	}
+	if spec.ShutterPhase != nil {
+		if err := comp.SetShutterPhase(int32(*spec.ShutterPhase)); err != nil {
+			return err
+		}
+	}
+	if spec.AdaptiveSampleLimit != nil {
+		if err := comp.SetMotionBlurAdaptiveSampleLimit(int32(*spec.AdaptiveSampleLimit)); err != nil {
+			return err
+		}
+	}
+	if spec.SamplesPerFrame != nil {
+		if err := comp.SetMotionBlurSamplesPerFrame(int32(*spec.SamplesPerFrame)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func normalizeEffectParamValue(value any) (any, error) {

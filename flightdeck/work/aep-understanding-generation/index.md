@@ -233,6 +233,11 @@ Done:
   `examples/recipes/minimal-comp-background-color.json` example compiles a
   no-layer colored comp, passes profile count checks, and passes an AE 2025
   render oracle gate.
+- Second comp-level recipe settings slice is implemented for
+  `comp.motion_blur` shutter/sample settings. The dedicated
+  `examples/recipes/minimal-comp-motion-blur.json` example asserts all four
+  profile-visible motion blur settings and passes an AE 2025 render oracle
+  gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

@@ -20,13 +20,21 @@ type ProjectSpec struct {
 }
 
 type CompSpec struct {
-	Name            string    `json:"name"`
-	Width           int       `json:"width"`
-	Height          int       `json:"height"`
-	FrameRate       float64   `json:"frame_rate"`
-	Duration        float64   `json:"duration"`
-	BackgroundColor []float64 `json:"background_color,omitempty"`
-	Layers          []Layer   `json:"layers,omitempty"`
+	Name            string              `json:"name"`
+	Width           int                 `json:"width"`
+	Height          int                 `json:"height"`
+	FrameRate       float64             `json:"frame_rate"`
+	Duration        float64             `json:"duration"`
+	BackgroundColor []float64           `json:"background_color,omitempty"`
+	MotionBlur      *CompMotionBlurSpec `json:"motion_blur,omitempty"`
+	Layers          []Layer             `json:"layers,omitempty"`
+}
+
+type CompMotionBlurSpec struct {
+	ShutterAngle        *float64 `json:"shutter_angle,omitempty"`
+	ShutterPhase        *float64 `json:"shutter_phase,omitempty"`
+	AdaptiveSampleLimit *float64 `json:"adaptive_sample_limit,omitempty"`
+	SamplesPerFrame     *float64 `json:"samples_per_frame,omitempty"`
 }
 
 type Layer struct {
@@ -221,10 +229,18 @@ type ExpectedProfile struct {
 	LayerCount      *int                        `json:"layer_count,omitempty"`
 	TextLayerCount  *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount *int                        `json:"shape_layer_count,omitempty"`
+	MotionBlur      *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
 	Effects         []ExpectedEffect            `json:"effects,omitempty"`
 	Properties      []ExpectedProperty          `json:"properties,omitempty"`
 	TextStyles      []ExpectedTextStyle         `json:"text_styles,omitempty"`
 	Keyframes       []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
+}
+
+type ExpectedMotionBlurSpec struct {
+	ShutterAngle        *float64 `json:"shutter_angle,omitempty"`
+	ShutterPhase        *float64 `json:"shutter_phase,omitempty"`
+	AdaptiveSampleLimit *float64 `json:"adaptive_sample_limit,omitempty"`
+	SamplesPerFrame     *float64 `json:"samples_per_frame,omitempty"`
 }
 
 type ExpectedProperty struct {
@@ -368,6 +384,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			recordCapability("SetBGColor", compPath+".background_color")
 			validateRGBColor(comp.BackgroundColor, compPath+".background_color", "invalid_comp_background_color", addRefusal)
 		}
+		if comp.MotionBlur != nil {
+			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)
+		}
 		for li, layer := range comp.Layers {
 			layerPath := fmt.Sprintf("%s.layers[%d]", compPath, li)
 			validateLayer(layer, layerPath, comp.Duration, recordCapability, addRefusal)
@@ -468,6 +487,33 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			if !validEffectParamValue(kf.Value) {
 				addRefusal("invalid_expected_profile", kfPath+".value", "expected keyframe value must be a number, boolean, or numeric array")
 			}
+		}
+	}
+}
+
+func validateCompMotionBlur(spec *CompMotionBlurSpec, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	if spec.ShutterAngle != nil {
+		recordCapability("SetShutterAngle", path+".shutter_angle")
+		if *spec.ShutterAngle < 0 || *spec.ShutterAngle > 720 || !isWholeNumber(*spec.ShutterAngle) {
+			addRefusal("invalid_comp_motion_blur_shutter_angle", path+".shutter_angle", "motion_blur shutter_angle must be an integer between 0 and 720")
+		}
+	}
+	if spec.ShutterPhase != nil {
+		recordCapability("SetShutterPhase", path+".shutter_phase")
+		if !isWholeNumber(*spec.ShutterPhase) {
+			addRefusal("invalid_comp_motion_blur_shutter_phase", path+".shutter_phase", "motion_blur shutter_phase must be an integer")
+		}
+	}
+	if spec.AdaptiveSampleLimit != nil {
+		recordCapability("SetMotionBlurAdaptiveSampleLimit", path+".adaptive_sample_limit")
+		if *spec.AdaptiveSampleLimit < 0 || !isWholeNumber(*spec.AdaptiveSampleLimit) {
+			addRefusal("invalid_comp_motion_blur_adaptive_sample_limit", path+".adaptive_sample_limit", "motion_blur adaptive_sample_limit must be a non-negative integer")
+		}
+	}
+	if spec.SamplesPerFrame != nil {
+		recordCapability("SetMotionBlurSamplesPerFrame", path+".samples_per_frame")
+		if *spec.SamplesPerFrame < 0 || !isWholeNumber(*spec.SamplesPerFrame) {
+			addRefusal("invalid_comp_motion_blur_samples_per_frame", path+".samples_per_frame", "motion_blur samples_per_frame must be a non-negative integer")
 		}
 	}
 }
@@ -1120,6 +1166,10 @@ func validateRGBColor(values []float64, path, code string, addRefusal func(strin
 			addRefusal(code, fmt.Sprintf("%s[%d]", path, i), "color channels must be between 0 and 255")
 		}
 	}
+}
+
+func isWholeNumber(value float64) bool {
+	return value == float64(int64(value))
 }
 
 func validEffectParamValue(value any) bool {

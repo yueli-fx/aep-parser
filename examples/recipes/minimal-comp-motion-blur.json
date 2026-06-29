@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal comp motion blur"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "motion_blur": {
+        "shutter_angle": 360,
+        "shutter_phase": -90,
+        "adaptive_sample_limit": 256,
+        "samples_per_frame": 32
+      },
+      "layers": []
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0,
+    "motion_blur": {
+      "shutter_angle": 360,
+      "shutter_phase": -90,
+      "adaptive_sample_limit": 256,
+      "samples_per_frame": 32
+    }
+  }
+}

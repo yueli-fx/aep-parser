@@ -70,6 +70,45 @@ func TestCompileToFileSetsCompBackgroundColor(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
+		ShutterAngle:        ptr(360),
+		ShutterPhase:        ptr(-90),
+		AdaptiveSampleLimit: ptr(256),
+		SamplesPerFrame:     ptr(32),
+	}
+	rec.ExpectedProfile.MotionBlur = &recipe.ExpectedMotionBlurSpec{
+		ShutterAngle:        ptr(360),
+		ShutterPhase:        ptr(-90),
+		AdaptiveSampleLimit: ptr(256),
+		SamplesPerFrame:     ptr(32),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.motion_blur.shutter_angle", true)
+	assertProfileCheck(t, report, "expected_profile.motion_blur.shutter_phase", true)
+	assertProfileCheck(t, report, "expected_profile.motion_blur.adaptive_sample_limit", true)
+	assertProfileCheck(t, report, "expected_profile.motion_blur.samples_per_frame", true)
+
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	comp := project.Compositions[0]
+	if comp.ShutterAngle != 360 || comp.ShutterPhase != -90 || comp.MotionBlurAdaptiveSampleLimit != 256 || comp.MotionBlurSamplesPerFrame != 32 {
+		t.Fatalf("motion blur = angle %d phase %d adaptive %d samples %d, want 360 -90 256 32",
+			comp.ShutterAngle, comp.ShutterPhase, comp.MotionBlurAdaptiveSampleLimit, comp.MotionBlurSamplesPerFrame)
+	}
+}
+
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{

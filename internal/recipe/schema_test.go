@@ -363,6 +363,23 @@ func TestValidateReportsCompBackgroundColorCapability(t *testing.T) {
 	assertCapability(t, report, "SetBGColor")
 }
 
+func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
+		ShutterAngle:        ptr(360),
+		ShutterPhase:        ptr(-90),
+		AdaptiveSampleLimit: ptr(256),
+		SamplesPerFrame:     ptr(32),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetShutterAngle")
+	assertCapability(t, report, "SetShutterPhase")
+	assertCapability(t, report, "SetMotionBlurAdaptiveSampleLimit")
+	assertCapability(t, report, "SetMotionBlurSamplesPerFrame")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
@@ -373,6 +390,24 @@ func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_comp_background_color")
+}
+
+func TestValidateRejectsInvalidCompMotionBlur(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
+		ShutterAngle:        ptr(721),
+		AdaptiveSampleLimit: ptr(-1),
+		SamplesPerFrame:     ptr(-1),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_comp_motion_blur_shutter_angle")
+	assertRefusal(t, report, "invalid_comp_motion_blur_adaptive_sample_limit")
+	assertRefusal(t, report, "invalid_comp_motion_blur_samples_per_frame")
 }
 
 func TestValidateReportsShapeTrimCapabilities(t *testing.T) {
