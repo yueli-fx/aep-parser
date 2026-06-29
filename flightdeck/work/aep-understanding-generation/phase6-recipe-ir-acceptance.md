@@ -590,6 +590,65 @@ Nineteenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Twentieth follow-up completed:
+
+- Shape recipes now support `shape.wiggle_paths`, including:
+  - `size` -> `ADBE Vector Roughen Size`
+  - `detail` -> `ADBE Vector Roughen Detail`
+  - `wiggles_per_second` -> `ADBE Vector Temporal Freq`
+  - `random_seed` -> `ADBE Vector Random Seed`
+  - `points` -> `ADBE Vector Roughen Points`
+  - `correlation` -> `ADBE Vector Correlation`
+  - `temporal_phase` -> `ADBE Vector Temporal Phase`
+  - `spatial_phase` -> `ADBE Vector Spatial Phase`
+- Validation rejects invalid `points` values and out-of-range `correlation`
+  values. Other scalar fields intentionally follow the underlying writer's
+  looser bounds.
+- Capability reporting records:
+  - `VectorGroup.AddWigglePaths`
+  - `WigglePathsNode.SetSize`
+  - `WigglePathsNode.SetDetail`
+  - `WigglePathsNode.SetWigglesPerSecond`
+  - `WigglePathsNode.SetRandomSeed`
+  - `WigglePathsNode.SetPoints`
+  - `WigglePathsNode.SetCorrelation`
+  - `WigglePathsNode.SetTemporalPhase`
+  - `WigglePathsNode.SetSpatialPhase`
+- `examples/recipes/minimal-shape-wiggle-paths.json` is a dedicated Wiggle
+  Paths recipe example and asserts all eight profile properties. Do not stack
+  every path filter into `minimal-text-shape.json`; the combined filter set can
+  make AE 2025 fail to produce `saveFrameToPng` output for the first frame.
+- During Wiggle Paths AE validation, the generic render oracle exposed two
+  harness gaps:
+  - `scripts/aeoracle_render.jsx` used a hard-coded 30-second per-frame PNG
+    wait despite the CLI having a much larger `-timeout-sec`; render requests
+    now carry `frame_timeout_ms` with a 120-second default.
+  - AE's long-running `Executing Script ...` progress dialog was treated as an
+    unknown modal; `scripts/ae_dialog_rules.json` now classifies it as a known
+    `Ignore` dialog. The same rules file also classifies the
+    `Scripting plugin is not installed` dialog as `Abort` instead of blindly
+    pressing OK.
+  See `knowledge/workflow/aeoracle-slow-frame-script-progress.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe ./internal/aeoracle
+    ./cmd/aeoracle` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - `Invoke-Pester scripts\ae_run.Tests.ps1` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-wiggle-paths.json -out
+    tmp_debug\recipes\minimal-shape-wiggle-paths.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_wiggle_paths/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_wiggle_paths/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

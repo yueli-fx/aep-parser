@@ -153,6 +153,8 @@
         req.output_dir = resolvePath(req.output_dir);
         req.done_path = resolvePath(req.done_path);
         req.metadata_path = resolvePath(req.metadata_path);
+        var frameTimeoutMs = Number(req.frame_timeout_ms || 120000);
+        if (!isFinite(frameTimeoutMs) || frameTimeoutMs <= 0) frameTimeoutMs = 120000;
         metadata.aep_path = req.aep_path;
         metadata.comp_name = req.comp_name || "";
         metadata.output_dir = req.output_dir;
@@ -175,7 +177,7 @@
                 app.purge(PurgeTarget.ALL_CACHES);
             } catch (purgeErr) {}
             comp.saveFrameToPng(frame.seconds, new File(outPath));
-            if (!waitForNonEmptyFile(outPath, 30000)) {
+            if (!waitForNonEmptyFile(outPath, frameTimeoutMs)) {
                 throw new Error("rendered frame missing or empty: " + outPath);
             }
             metadata.frames.push({

@@ -180,6 +180,12 @@ Done:
   `ADBE Vector Twist Center`, passed `go test ./...`, `go vet ./...`, profile
   checks, and an AE 2025 render oracle gate after hardening the generic
   aeoracle renderer to wait for and validate PNG outputs.
+- Seventh shape-filter recipe slice is implemented for `shape.wiggle_paths`
+  size, detail, wiggles per second, random seed, points, correlation, temporal
+  phase, and spatial phase. The dedicated
+  `examples/recipes/minimal-shape-wiggle-paths.json` example asserts all eight
+  `ADBE Vector Roughen ...` / modulation properties, passed profile checks, and
+  passed an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

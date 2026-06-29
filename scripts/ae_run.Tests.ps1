@@ -26,6 +26,11 @@ Describe 'Test-FileStable' {
             }
         } -ArgumentList $script:tmp
 
+        $deadline = (Get-Date).AddSeconds(2)
+        while ((Get-Item -Path $script:tmp).Length -eq 1 -and (Get-Date) -lt $deadline) {
+            Start-Sleep -Milliseconds 20
+        }
+
         Test-FileStable -Path $script:tmp -WindowMs 300 -PollMs 50 | Should -Be $false
 
         Wait-Job $job | Out-Null
@@ -374,5 +379,18 @@ Describe 'Shipped dialog rules (scripts/ae_dialog_rules.json)' {
         $info = @{ Title = ''; Class = ''; Ocr = '崩 溃 修 复 选 项 我 们 检 测 到 您 的 上 次 会 话 发 生 崩 溃' }
         $m = Match-Rule -HwndInfo $info -Rules $script:shipped
         $m.rule.name | Should -Be 'ae-safe-mode-recovery'
+    }
+
+    It 'scripting plugin unavailable dialog aborts with a specific rule' {
+        $info = @{ Title = 'After Effects'; Class = '#32770'; Ocr = 'Unable to execute script. The Scripting plugin is not installed.' }
+        $m = Match-Rule -HwndInfo $info -Rules $script:shipped
+        $m.rule.name | Should -Be 'scripting-plugin-unavailable'
+        $m.rule.action | Should -Be 'Abort'
+    }
+
+    It 'generic script alert is not mistaken for scripting plugin unavailable' {
+        $info = @{ Title = 'Script Alert'; Class = '#32770'; Ocr = '脚 本 警 告' }
+        $m = Match-Rule -HwndInfo $info -Rules $script:shipped
+        $m.rule.name | Should -Be 'script-alert'
     }
 }

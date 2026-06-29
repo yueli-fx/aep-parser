@@ -101,6 +101,17 @@
     "comment": "JSX threw 'Unable to execute script at line N. Permission denied' — the per-version preference is off (fresh AE install / prefs reset). No keystroke fixes this; Abort with exit 7 so the operator enables the pref instead of burning TimeoutSec. First seen 2026-06-11 on AE 2025 after its prefs were recreated."
   },
   {
+    "name": "scripting-plugin-unavailable",
+    "windowTitle": ["After Effects", "Adobe After Effects"],
+    "windowClass": [],
+    "ocrMatch": ["Unable to execute script", "Scripting plugin is not installed", "脚本插件未安装", "未安装脚本插件"],
+    "action": "Abort",
+    "keys": "",
+    "message": "AE 无法执行 JSX，报 Scripting plugin is not installed。先关闭残留 AfterFX 进程并重启 AE；若复现，检查/修复该 AE 安装的脚本插件（Support Files/Plug-ins/Keyframe/Scripting.aex 与 Required/Expressions and Scripting Palette.aex）。",
+    "cooldownMs": 2000,
+    "comment": "AE shows this before any JSX can run, so no .done file can be written and pressing OK would only hide an environment/launch failure. First observed 2026-06-29 after an interrupted AE ship gate; plugin files existed on disk and Plugin Loading.log listed the scripting palette, so classify as abort-with-forensics rather than a data reject."
+  },
+  {
     "name": "kbar-evalscript-timeout",
     "windowTitle": ["KBar"],
     "windowClass": [],
@@ -119,6 +130,16 @@
     "keys": "{ENTER}",
     "cooldownMs": 2000,
     "comment": "ExtendScript alert() popup — Enter clicks OK. RE fixture JSX should write .done instead of alert(), but this is the defensive fallback for legacy scripts (see test_data/re_gradient.jsx)"
+  },
+  {
+    "name": "executing-script-progress",
+    "windowTitle": ["Executing Script"],
+    "windowClass": [],
+    "ocrMatch": ["Executing Script", "Script execution", "script execution"],
+    "action": "Ignore",
+    "keys": "",
+    "cooldownMs": 5000,
+    "comment": "AE progress dialog shown while a long-running JSX is active. Slow frames can keep it visible beyond the unknown-modal grace; ignore it and keep waiting for the .done marker bounded by TimeoutSec."
   },
   {
     "name": "startup-splash",

@@ -711,6 +711,56 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.WigglePaths != nil {
+		wigglePaths, err := group.AddWigglePaths()
+		if err != nil {
+			return err
+		}
+		if shape.WigglePaths.Size != nil {
+			if err := wigglePaths.SetSize(*shape.WigglePaths.Size); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.Detail != nil {
+			if err := wigglePaths.SetDetail(*shape.WigglePaths.Detail); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.WigglesPerSecond != nil {
+			if err := wigglePaths.SetWigglesPerSecond(*shape.WigglePaths.WigglesPerSecond); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.RandomSeed != nil {
+			if err := wigglePaths.SetRandomSeed(*shape.WigglePaths.RandomSeed); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.Points != "" {
+			points, err := roughenPoints(shape.WigglePaths.Points)
+			if err != nil {
+				return err
+			}
+			if err := wigglePaths.SetPoints(points); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.Correlation != nil {
+			if err := wigglePaths.SetCorrelation(*shape.WigglePaths.Correlation); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.TemporalPhase != nil {
+			if err := wigglePaths.SetTemporalPhase(*shape.WigglePaths.TemporalPhase); err != nil {
+				return err
+			}
+		}
+		if shape.WigglePaths.SpatialPhase != nil {
+			if err := wigglePaths.SetSpatialPhase(*shape.WigglePaths.SpatialPhase); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {
@@ -794,6 +844,17 @@ func zigZagPoints(value string) (aep.ZigZagPoints, error) {
 		return aep.ZigZagPointsSmooth, nil
 	default:
 		return 0, fmt.Errorf("unsupported zigzag points %q", value)
+	}
+}
+
+func roughenPoints(value string) (aep.RoughenPoints, error) {
+	switch value {
+	case "corner":
+		return aep.RoughenPointsCorner, nil
+	case "smooth":
+		return aep.RoughenPointsSmooth, nil
+	default:
+		return 0, fmt.Errorf("unsupported wiggle_paths points %q", value)
 	}
 }
 

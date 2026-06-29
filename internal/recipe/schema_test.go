@@ -398,6 +398,35 @@ func TestValidateReportsShapeTwistCapabilities(t *testing.T) {
 	assertCapability(t, report, "TwistNode.SetCenter")
 }
 
+func TestValidateReportsShapeWigglePathsCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.WigglePaths = &recipe.WigglePathsSpec{
+		Size:             ptr(60),
+		Detail:           ptr(30),
+		WigglesPerSecond: ptr(4),
+		RandomSeed:       ptr(9),
+		Points:           "smooth",
+		Correlation:      ptr(80),
+		TemporalPhase:    ptr(45),
+		SpatialPhase:     ptr(20),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddWigglePaths")
+	assertCapability(t, report, "WigglePathsNode.SetSize")
+	assertCapability(t, report, "WigglePathsNode.SetDetail")
+	assertCapability(t, report, "WigglePathsNode.SetWigglesPerSecond")
+	assertCapability(t, report, "WigglePathsNode.SetRandomSeed")
+	assertCapability(t, report, "WigglePathsNode.SetPoints")
+	assertCapability(t, report, "WigglePathsNode.SetCorrelation")
+	assertCapability(t, report, "WigglePathsNode.SetTemporalPhase")
+	assertCapability(t, report, "WigglePathsNode.SetSpatialPhase")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
@@ -548,6 +577,22 @@ func TestValidateRejectsInvalidShapeTwist(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_vector_size")
+}
+
+func TestValidateRejectsInvalidShapeWigglePaths(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.WigglePaths = &recipe.WigglePathsSpec{
+		Points:      "rounded",
+		Correlation: ptr(101),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_wiggle_paths_points")
+	assertRefusal(t, report, "invalid_shape_wiggle_paths_correlation")
 }
 
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {

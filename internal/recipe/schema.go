@@ -67,6 +67,7 @@ type ShapeSpec struct {
 	ZigZag       *ZigZagSpec       `json:"zigzag,omitempty"`
 	PuckerBloat  *PuckerBloatSpec  `json:"pucker_bloat,omitempty"`
 	Twist        *TwistSpec        `json:"twist,omitempty"`
+	WigglePaths  *WigglePathsSpec  `json:"wiggle_paths,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -106,6 +107,17 @@ type PuckerBloatSpec struct {
 type TwistSpec struct {
 	Angle  *float64  `json:"angle,omitempty"`
 	Center []float64 `json:"center,omitempty"`
+}
+
+type WigglePathsSpec struct {
+	Size             *float64 `json:"size,omitempty"`
+	Detail           *float64 `json:"detail,omitempty"`
+	WigglesPerSecond *float64 `json:"wiggles_per_second,omitempty"`
+	RandomSeed       *float64 `json:"random_seed,omitempty"`
+	Points           string   `json:"points,omitempty"`
+	Correlation      *float64 `json:"correlation,omitempty"`
+	TemporalPhase    *float64 `json:"temporal_phase,omitempty"`
+	SpatialPhase     *float64 `json:"spatial_phase,omitempty"`
 }
 
 type Effect struct {
@@ -561,6 +573,40 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				validateVec(layer.Shape.Twist.Center, 2, twistPath+".center", addRefusal)
 			}
 		}
+		if layer.Shape.WigglePaths != nil {
+			wigglePath := layerPath + ".shape.wiggle_paths"
+			recordCapability("VectorGroup.AddWigglePaths", wigglePath)
+			if layer.Shape.WigglePaths.Size != nil {
+				recordCapability("WigglePathsNode.SetSize", wigglePath+".size")
+			}
+			if layer.Shape.WigglePaths.Detail != nil {
+				recordCapability("WigglePathsNode.SetDetail", wigglePath+".detail")
+			}
+			if layer.Shape.WigglePaths.WigglesPerSecond != nil {
+				recordCapability("WigglePathsNode.SetWigglesPerSecond", wigglePath+".wiggles_per_second")
+			}
+			if layer.Shape.WigglePaths.RandomSeed != nil {
+				recordCapability("WigglePathsNode.SetRandomSeed", wigglePath+".random_seed")
+			}
+			if layer.Shape.WigglePaths.Points != "" {
+				recordCapability("WigglePathsNode.SetPoints", wigglePath+".points")
+				if !validRoughenPoints(layer.Shape.WigglePaths.Points) {
+					addRefusal("invalid_shape_wiggle_paths_points", wigglePath+".points", "wiggle_paths points must be corner or smooth")
+				}
+			}
+			if layer.Shape.WigglePaths.Correlation != nil {
+				recordCapability("WigglePathsNode.SetCorrelation", wigglePath+".correlation")
+				if *layer.Shape.WigglePaths.Correlation < 0 || *layer.Shape.WigglePaths.Correlation > 100 {
+					addRefusal("invalid_shape_wiggle_paths_correlation", wigglePath+".correlation", "wiggle_paths correlation must be between 0 and 100")
+				}
+			}
+			if layer.Shape.WigglePaths.TemporalPhase != nil {
+				recordCapability("WigglePathsNode.SetTemporalPhase", wigglePath+".temporal_phase")
+			}
+			if layer.Shape.WigglePaths.SpatialPhase != nil {
+				recordCapability("WigglePathsNode.SetSpatialPhase", wigglePath+".spatial_phase")
+			}
+		}
 	}
 	if usesTransform(layer.Transform) {
 		recordCapability("SetLayerTransform", layerPath+".transform")
@@ -713,6 +759,15 @@ func validOffsetLineJoin(value string) bool {
 }
 
 func validZigZagPoints(value string) bool {
+	switch value {
+	case "corner", "smooth":
+		return true
+	default:
+		return false
+	}
+}
+
+func validRoughenPoints(value string) bool {
 	switch value {
 	case "corner", "smooth":
 		return true

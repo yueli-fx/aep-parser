@@ -31,6 +31,9 @@ func TestRenderRequestRoundTrip(t *testing.T) {
 	if got.DonePath == "" || got.MetadataPath == "" {
 		t.Fatalf("DonePath/MetadataPath not populated: %+v", got)
 	}
+	if got.FrameTimeoutMS != 120000 {
+		t.Fatalf("FrameTimeoutMS = %d, want 120000", got.FrameTimeoutMS)
+	}
 	if len(got.Frames) != 2 || got.Frames[1].Tag != "f000030" {
 		t.Fatalf("Frames = %+v", got.Frames)
 	}

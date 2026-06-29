@@ -12,6 +12,7 @@ import (
 )
 
 const SchemaVersion = 1
+const DefaultFrameTimeoutMS = 120000
 
 type FrameOptions struct {
 	CompName  string
@@ -26,13 +27,14 @@ type FrameTarget struct {
 }
 
 type RenderRequest struct {
-	SchemaVersion int           `json:"schema_version"`
-	AEPPath       string        `json:"aep_path"`
-	CompName      string        `json:"comp_name,omitempty"`
-	OutputDir     string        `json:"output_dir"`
-	DonePath      string        `json:"done_path,omitempty"`
-	MetadataPath  string        `json:"metadata_path,omitempty"`
-	Frames        []FrameTarget `json:"frames"`
+	SchemaVersion  int           `json:"schema_version"`
+	AEPPath        string        `json:"aep_path"`
+	CompName       string        `json:"comp_name,omitempty"`
+	OutputDir      string        `json:"output_dir"`
+	DonePath       string        `json:"done_path,omitempty"`
+	MetadataPath   string        `json:"metadata_path,omitempty"`
+	FrameTimeoutMS int           `json:"frame_timeout_ms,omitempty"`
+	Frames         []FrameTarget `json:"frames"`
 }
 
 type RenderMetadata struct {
@@ -148,13 +150,14 @@ func SelectFrames(prof *profile.Profile, opts FrameOptions) ([]FrameTarget, erro
 
 func NewRenderRequest(aepPath string, compName string, outputDir string, frames []FrameTarget) RenderRequest {
 	return RenderRequest{
-		SchemaVersion: SchemaVersion,
-		AEPPath:       aepPath,
-		CompName:      compName,
-		OutputDir:     outputDir,
-		DonePath:      filepath.Join(outputDir, "aeoracle_render.done"),
-		MetadataPath:  filepath.Join(outputDir, "metadata.json"),
-		Frames:        append([]FrameTarget(nil), frames...),
+		SchemaVersion:  SchemaVersion,
+		AEPPath:        aepPath,
+		CompName:       compName,
+		OutputDir:      outputDir,
+		DonePath:       filepath.Join(outputDir, "aeoracle_render.done"),
+		MetadataPath:   filepath.Join(outputDir, "metadata.json"),
+		FrameTimeoutMS: DefaultFrameTimeoutMS,
+		Frames:         append([]FrameTarget(nil), frames...),
 	}
 }
 
@@ -206,6 +209,9 @@ func (r RenderRequest) Validate() error {
 	}
 	if len(r.Frames) == 0 {
 		return fmt.Errorf("aeoracle: request frames are required")
+	}
+	if r.FrameTimeoutMS < 0 {
+		return fmt.Errorf("aeoracle: request frame_timeout_ms must be non-negative")
 	}
 	return nil
 }

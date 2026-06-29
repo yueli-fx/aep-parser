@@ -281,6 +281,46 @@ func TestCompileToFileSetsShapeTwist(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Twist Center", []float64{24, -12})
 }
 
+func TestCompileToFileSetsShapeWigglePaths(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.WigglePaths = &recipe.WigglePathsSpec{
+		Size:             ptr(60),
+		Detail:           ptr(30),
+		WigglesPerSecond: ptr(4),
+		RandomSeed:       ptr(9),
+		Points:           "smooth",
+		Correlation:      ptr(80),
+		TemporalPhase:    ptr(45),
+		SpatialPhase:     ptr(20),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Roughen Size", 60.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Roughen Detail", 30.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Temporal Freq", 4.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Random Seed", 9.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Roughen Points", 2.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Correlation", 80.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Temporal Phase", 45.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Spatial Phase", 20.0)
+}
+
 func TestCompileToFileSetsTextStyle(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
