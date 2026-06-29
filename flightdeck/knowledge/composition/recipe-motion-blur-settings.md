@@ -5,6 +5,7 @@ Context: recipe `comp.motion_blur` support, proven with
 
 Recipe authoring:
 
+- `enabled` -> `SetCompMotionBlur`, boolean comp master switch
 - `shutter_angle` -> `SetShutterAngle`, integer degrees in `0..720`
 - `shutter_phase` -> `SetShutterPhase`, integer raw phase value
 - `adaptive_sample_limit` -> `SetMotionBlurAdaptiveSampleLimit`, non-negative integer
@@ -21,4 +22,5 @@ Boundary:
 
 - This slice covers the profile-visible shutter/sample settings.
 - The composition motion blur enable flag is not exposed in the current stable
-  profile schema and is not modeled in recipe IR here.
+  profile schema; `enabled` is verified through compiled AEP `cdta` bit
+  readback plus AE render acceptance in a dedicated example.

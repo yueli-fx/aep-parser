@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal comp motion blur enabled"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "motion_blur": {
+        "enabled": true
+      },
+      "layers": []
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0
+  }
+}

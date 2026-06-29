@@ -1284,6 +1284,36 @@ Thirty-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fortieth follow-up completed:
+
+- Composition recipes now support `motion_blur.enabled`:
+  - boolean -> `SetCompMotionBlur`
+- Capability reporting records:
+  - `SetCompMotionBlur`
+- Boundary: this is the composition motion-blur master switch only. Layers
+  still need their own per-layer motion-blur flag to render motion blur. The
+  current stable profile schema does not expose this comp flag, so this slice
+  uses compiled AEP `cdta @0x8B bit 0x08` readback in tests plus AE render
+  acceptance for the dedicated example.
+- `examples/recipes/minimal-comp-motion-blur-enabled.json` is a dedicated
+  no-layer comp recipe with `motion_blur.enabled: true`. See
+  `knowledge/composition/recipe-motion-blur-enabled.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-motion-blur-enabled.json -out
+    tmp_debug\recipes\minimal-comp-motion-blur-enabled.aep -json` returned
+    valid and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_motion_blur_enabled\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_motion_blur_enabled\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

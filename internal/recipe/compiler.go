@@ -543,6 +543,11 @@ func applyCompMotionBlur(comp *aep.Composition, spec *CompMotionBlurSpec) error 
 	if spec == nil {
 		return nil
 	}
+	if spec.Enabled != nil {
+		if err := comp.SetCompMotionBlur(*spec.Enabled); err != nil {
+			return err
+		}
+	}
 	if spec.ShutterAngle != nil {
 		if err := comp.SetShutterAngle(uint16(*spec.ShutterAngle)); err != nil {
 			return err

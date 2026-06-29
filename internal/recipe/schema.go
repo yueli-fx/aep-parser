@@ -45,6 +45,7 @@ type CompWorkAreaSpec struct {
 }
 
 type CompMotionBlurSpec struct {
+	Enabled             *bool    `json:"enabled,omitempty"`
 	ShutterAngle        *float64 `json:"shutter_angle,omitempty"`
 	ShutterPhase        *float64 `json:"shutter_phase,omitempty"`
 	AdaptiveSampleLimit *float64 `json:"adaptive_sample_limit,omitempty"`
@@ -543,6 +544,9 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 }
 
 func validateCompMotionBlur(spec *CompMotionBlurSpec, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	if spec.Enabled != nil {
+		recordCapability("SetCompMotionBlur", path+".enabled")
+	}
 	if spec.ShutterAngle != nil {
 		recordCapability("SetShutterAngle", path+".shutter_angle")
 		if *spec.ShutterAngle < 0 || *spec.ShutterAngle > 720 || !isWholeNumber(*spec.ShutterAngle) {

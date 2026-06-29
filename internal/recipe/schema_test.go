@@ -366,6 +366,7 @@ func TestValidateReportsCompBackgroundColorCapability(t *testing.T) {
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
+		Enabled:             boolPtr(true),
 		ShutterAngle:        ptr(360),
 		ShutterPhase:        ptr(-90),
 		AdaptiveSampleLimit: ptr(256),
@@ -374,6 +375,7 @@ func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
 
+	assertCapability(t, report, "SetCompMotionBlur")
 	assertCapability(t, report, "SetShutterAngle")
 	assertCapability(t, report, "SetShutterPhase")
 	assertCapability(t, report, "SetMotionBlurAdaptiveSampleLimit")

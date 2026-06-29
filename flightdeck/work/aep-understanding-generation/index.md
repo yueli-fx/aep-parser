@@ -280,6 +280,11 @@ Done:
   `examples/recipes/minimal-comp-preserve-nested-resolution.json` example
   compiles the nested-resolution preservation switch, passes compiled AEP
   `cdta` flag readback, and passes an AE 2025 render oracle gate.
+- Twelfth comp-level recipe settings slice is implemented for
+  `comp.motion_blur.enabled`. The dedicated
+  `examples/recipes/minimal-comp-motion-blur-enabled.json` example compiles the
+  comp motion-blur master switch, passes compiled AEP `cdta` flag readback, and
+  passes an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
