@@ -870,6 +870,41 @@ func TestCompileToFileSetsLightConeFeather(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLightKind(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Light kind"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"kind": "point"}},
+				{"type": "text", "name": "Title", "text": "Light kind", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].Layers[0].LightKind; got != aep.LightKindPoint {
+		t.Fatalf("light kind = %v, want point", got)
+	}
+}
+
 func TestCompileToFileSetsCameraZoom(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

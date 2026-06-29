@@ -10,7 +10,8 @@ Context: recipe light option support, starting with
 `examples/recipes/minimal-light-falloff-start.json` /
 `examples/recipes/minimal-light-falloff-distance.json` /
 `examples/recipes/minimal-light-cone-angle.json` /
-`examples/recipes/minimal-light-cone-feather.json`.
+`examples/recipes/minimal-light-cone-feather.json` /
+`examples/recipes/minimal-light-kind.json`.
 
 Recipe authoring:
 
@@ -38,6 +39,8 @@ Recipe authoring:
   `Layer.SetLightConeAngle`. It is only meaningful for spot lights.
 - `light.cone_feather` sets the spotlight Cone Feather percentage through
   `Layer.SetLightConeFeather`. It is only meaningful for spot lights.
+- `light.kind` sets the light kind through `Layer.SetLightKind`. Supported
+  strings are `parallel`, `spot`, `point`, and `ambient`.
 
 Writer capability:
 
@@ -51,13 +54,14 @@ Writer capability:
 - `SetLightFalloffDistance`
 - `SetLightConeAngle`
 - `SetLightConeFeather`
+- `SetLightKind`
 
 Boundary:
 
 - `light` options are only valid on `type: "light"` layers.
 - Current coverage includes `intensity`, `color`, `casts_shadows`, and
   `shadow_darkness` / `shadow_diffusion` plus `falloff_type` /
-  `falloff_start` / `falloff_distance` plus `cone_angle` / `cone_feather`.
-  Other light options remain separate recipe slices.
+  `falloff_start` / `falloff_distance` plus `cone_angle` / `cone_feather` plus
+  `kind`. Light source and other light options remain separate recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

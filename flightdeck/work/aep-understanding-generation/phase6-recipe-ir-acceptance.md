@@ -2427,6 +2427,36 @@ Eightieth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-first follow-up completed:
+
+- Light layer recipes now support:
+  - `light.kind` -> `Layer.SetLightKind`
+- Boundary: `light` options remain valid only on `type: "light"` layers. This
+  slice supports `parallel`, `spot`, `point`, and `ambient` string values. The
+  writer stores the kind in `ldta` rather than a property-tree match-name, so
+  contract coverage uses compiled AEP readback plus AE render/open acceptance;
+  embedded expected-profile checks cover the shared comp/layer/text counts.
+- `examples/recipes/minimal-light-kind.json` is a dedicated two-layer recipe:
+  a `Light` layer with `kind: "point"` plus a visible text layer.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled light kind
+    remained default `ambient`, and capability `SetLightKind` was absent.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-kind.json -out
+    tmp_debug\recipes\minimal-light-kind.aep -json` returned valid, reported
+    `SetLightKind`, and all embedded `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_kind\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_kind\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

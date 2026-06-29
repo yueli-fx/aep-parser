@@ -92,6 +92,7 @@ type Layer struct {
 }
 
 type LightSpec struct {
+	Kind            string    `json:"kind,omitempty"`
 	Intensity       *float64  `json:"intensity,omitempty"`
 	Color           []float64 `json:"color,omitempty"`
 	CastsShadows    *bool     `json:"casts_shadows,omitempty"`
@@ -842,6 +843,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	if layer.Light != nil {
 		if layer.Type != "light" {
 			addRefusal("light_options_on_non_light_layer", layerPath+".light", "light options require type light")
+		}
+		if layer.Light.Kind != "" {
+			recordCapability("SetLightKind", layerPath+".light.kind")
 		}
 		if layer.Light.Intensity != nil {
 			recordCapability("SetLightIntensity", layerPath+".light.intensity")

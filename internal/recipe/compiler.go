@@ -901,6 +901,15 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q camera.iris_highlight_saturation: %w", spec.Name, err)
 			}
 		}
+		if spec.Light != nil && spec.Light.Kind != "" {
+			kind, err := lightKind(spec.Light.Kind)
+			if err != nil {
+				return nil, fmt.Errorf("recipe: layer %q light.kind: %w", spec.Name, err)
+			}
+			if err := layer.SetLightKind(kind); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q light.kind: %w", spec.Name, err)
+			}
+		}
 		if spec.Light != nil && spec.Light.Intensity != nil {
 			if err := layer.SetLightIntensity(*spec.Light.Intensity); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q light.intensity: %w", spec.Name, err)
@@ -1164,6 +1173,21 @@ func layerBlendingMode(value string) (aep.BlendingMode, error) {
 		return aep.BlendingModeDivide, nil
 	default:
 		return 0, fmt.Errorf("unsupported blending_mode %q", value)
+	}
+}
+
+func lightKind(value string) (aep.LightKind, error) {
+	switch strings.ToLower(value) {
+	case "parallel":
+		return aep.LightKindParallel, nil
+	case "spot":
+		return aep.LightKindSpot, nil
+	case "point":
+		return aep.LightKindPoint, nil
+	case "ambient":
+		return aep.LightKindAmbient, nil
+	default:
+		return 0, fmt.Errorf("unsupported kind %q", value)
 	}
 }
 
