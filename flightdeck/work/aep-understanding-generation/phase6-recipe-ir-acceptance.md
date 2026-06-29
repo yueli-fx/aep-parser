@@ -1132,6 +1132,37 @@ Thirty-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Thirty-fifth follow-up completed:
+
+- Composition recipes now support `display_start_time`:
+  - seconds -> `SetDisplayStartTime`
+- Capability reporting records:
+  - `SetDisplayStartTime`
+- Validation rejects negative values.
+- Boundary: this slice models second-based display start only; frame-based
+  display start remains a lower-level `aep` API for now. The current stable
+  profile schema does not expose display start time, so this slice uses
+  compiled AEP readback in tests plus AE render acceptance for the dedicated
+  example.
+- `examples/recipes/minimal-comp-display-start-time.json` is a dedicated
+  no-layer comp recipe with `display_start_time: 0.5`. See
+  `knowledge/composition/recipe-display-start-time.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-display-start-time.json -out
+    tmp_debug\recipes\minimal-comp-display-start-time.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_display_start_time\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_display_start_time\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

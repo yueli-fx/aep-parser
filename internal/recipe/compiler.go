@@ -50,6 +50,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q pixel_aspect: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.DisplayStartTime != nil {
+		if err := comp.SetDisplayStartTime(*compSpec.DisplayStartTime); err != nil {
+			return report, fmt.Errorf("recipe: comp %q display_start_time: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.MotionBlur != nil {
 		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)

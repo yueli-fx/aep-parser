@@ -255,6 +255,11 @@ Done:
   The dedicated `examples/recipes/minimal-comp-pixel-aspect.json` example
   compiles a non-square pixel comp, passes compiled AEP readback, and passes an
   AE 2025 render oracle gate.
+- Seventh comp-level recipe settings slice is implemented for
+  `comp.display_start_time`. The dedicated
+  `examples/recipes/minimal-comp-display-start-time.json` example compiles a
+  shifted timeline origin comp, passes compiled AEP readback, and passes an AE
+  2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

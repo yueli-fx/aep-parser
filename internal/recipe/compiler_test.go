@@ -206,6 +206,27 @@ func TestCompileToFileSetsCompPixelAspect(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompDisplayStartTime(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].DisplayStartTime = ptr(0.5)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].DisplayStartTime; math.Abs(got-0.5) > 1e-6 {
+		t.Fatalf("display start time = %g, want 0.5", got)
+	}
+}
+
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{

@@ -29,6 +29,7 @@ type CompSpec struct {
 	Renderer         string              `json:"renderer,omitempty"`
 	ResolutionFactor []float64           `json:"resolution_factor,omitempty"`
 	PixelAspect      *float64            `json:"pixel_aspect,omitempty"`
+	DisplayStartTime *float64            `json:"display_start_time,omitempty"`
 	MotionBlur       *CompMotionBlurSpec `json:"motion_blur,omitempty"`
 	WorkArea         *CompWorkAreaSpec   `json:"work_area,omitempty"`
 	Layers           []Layer             `json:"layers,omitempty"`
@@ -411,6 +412,10 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			recordCapability("SetPixelAspect", compPath+".pixel_aspect")
 			validatePixelAspect(*comp.PixelAspect, compPath+".pixel_aspect", addRefusal)
 		}
+		if comp.DisplayStartTime != nil {
+			recordCapability("SetDisplayStartTime", compPath+".display_start_time")
+			validateDisplayStartTime(*comp.DisplayStartTime, compPath+".display_start_time", addRefusal)
+		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)
 		}
@@ -574,6 +579,12 @@ func validateResolutionFactor(values []float64, path string, addRefusal func(str
 func validatePixelAspect(value float64, path string, addRefusal func(string, string, string)) {
 	if value <= 0 {
 		addRefusal("invalid_comp_pixel_aspect", path, "pixel_aspect must be positive")
+	}
+}
+
+func validateDisplayStartTime(value float64, path string, addRefusal func(string, string, string)) {
+	if value < 0 {
+		addRefusal("invalid_comp_display_start_time", path, "display_start_time must be non-negative")
 	}
 }
 

@@ -419,6 +419,15 @@ func TestValidateReportsCompPixelAspectCapability(t *testing.T) {
 	assertCapability(t, report, "SetPixelAspect")
 }
 
+func TestValidateReportsCompDisplayStartTimeCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].DisplayStartTime = ptr(0.5)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetDisplayStartTime")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
@@ -468,6 +477,18 @@ func TestValidateRejectsInvalidCompPixelAspect(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_comp_pixel_aspect")
+}
+
+func TestValidateRejectsInvalidCompDisplayStartTime(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].DisplayStartTime = ptr(-0.5)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_comp_display_start_time")
 }
 
 func TestValidateRejectsInvalidCompMotionBlur(t *testing.T) {
