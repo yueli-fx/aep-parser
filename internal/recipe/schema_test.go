@@ -261,9 +261,12 @@ func TestValidateReportsUsedCapabilities(t *testing.T) {
 func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
-		Color:   []float64{255, 0, 0, 255},
-		Width:   ptr(6),
-		Opacity: ptr(80),
+		Color:      []float64{255, 0, 0, 255},
+		Width:      ptr(6),
+		Opacity:    ptr(80),
+		LineCap:    "projecting",
+		LineJoin:   "bevel",
+		MiterLimit: ptr(10),
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(18),
 			Gap:  ptr(7),
@@ -279,6 +282,9 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	assertCapability(t, report, "StrokeNode.SetColor")
 	assertCapability(t, report, "StrokeNode.SetWidth")
 	assertCapability(t, report, "StrokeNode.SetOpacity")
+	assertCapability(t, report, "StrokeNode.SetLineCap")
+	assertCapability(t, report, "StrokeNode.SetLineJoin")
+	assertCapability(t, report, "StrokeNode.SetMiterLimit")
 	assertCapability(t, report, "StrokeDashes.SetDash")
 	assertCapability(t, report, "StrokeDashes.SetGap")
 }
@@ -783,9 +789,12 @@ func TestValidateRejectsInvalidShapeWiggleTransform(t *testing.T) {
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
-		Color:   []float64{255, 0},
-		Width:   ptr(-1),
-		Opacity: ptr(101),
+		Color:      []float64{255, 0},
+		Width:      ptr(-1),
+		Opacity:    ptr(101),
+		LineCap:    "square",
+		LineJoin:   "corner",
+		MiterLimit: ptr(0),
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(-1),
 			Gap:  ptr(-1),
@@ -800,6 +809,9 @@ func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_stroke_color")
 	assertRefusal(t, report, "invalid_shape_stroke_width")
 	assertRefusal(t, report, "invalid_shape_stroke_opacity")
+	assertRefusal(t, report, "invalid_shape_stroke_line_cap")
+	assertRefusal(t, report, "invalid_shape_stroke_line_join")
+	assertRefusal(t, report, "invalid_shape_stroke_miter_limit")
 	assertRefusal(t, report, "invalid_shape_stroke_dash")
 	assertRefusal(t, report, "invalid_shape_stroke_gap")
 }

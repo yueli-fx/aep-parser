@@ -987,6 +987,29 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.Stroke.LineCap != "" {
+			lineCap, err := strokeLineCap(shape.Stroke.LineCap)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetLineCap(lineCap); err != nil {
+				return err
+			}
+		}
+		if shape.Stroke.LineJoin != "" {
+			lineJoin, err := strokeLineJoin(shape.Stroke.LineJoin)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetLineJoin(lineJoin); err != nil {
+				return err
+			}
+		}
+		if shape.Stroke.MiterLimit != nil {
+			if err := stroke.SetMiterLimit(*shape.Stroke.MiterLimit); err != nil {
+				return err
+			}
+		}
 		if shape.Stroke.Dashes != nil {
 			dashes := stroke.Dashes()
 			if shape.Stroke.Dashes.Dash != nil {
@@ -1014,6 +1037,32 @@ func offsetLineJoin(value string) (aep.StrokeLineJoin, error) {
 		return aep.StrokeLineJoinBevel, nil
 	default:
 		return 0, fmt.Errorf("unsupported offset line_join %q", value)
+	}
+}
+
+func strokeLineCap(value string) (aep.StrokeLineCap, error) {
+	switch value {
+	case "butt":
+		return aep.StrokeLineCapButt, nil
+	case "round":
+		return aep.StrokeLineCapRound, nil
+	case "projecting":
+		return aep.StrokeLineCapProjecting, nil
+	default:
+		return 0, fmt.Errorf("unsupported stroke line_cap %q", value)
+	}
+}
+
+func strokeLineJoin(value string) (aep.StrokeLineJoin, error) {
+	switch value {
+	case "miter":
+		return aep.StrokeLineJoinMiter, nil
+	case "round":
+		return aep.StrokeLineJoinRound, nil
+	case "bevel":
+		return aep.StrokeLineJoinBevel, nil
+	default:
+		return 0, fmt.Errorf("unsupported stroke line_join %q", value)
 	}
 }
 

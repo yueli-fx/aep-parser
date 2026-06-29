@@ -213,6 +213,11 @@ Done:
   support. The dedicated `examples/recipes/minimal-shape-stroke-dashes.json`
   example asserts `ADBE Vector Stroke Dash 1` and `ADBE Vector Stroke Gap 1`,
   passed profile checks, and passed an AE 2025 render oracle gate.
+- Thirteenth shape recipe slice is implemented for `shape.stroke` line cap,
+  line join, and miter limit. The dedicated
+  `examples/recipes/minimal-shape-stroke-style.json` example asserts the three
+  `ADBE Vector Stroke ...` style properties, passed profile checks, and passed
+  an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

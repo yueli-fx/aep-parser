@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal stroke style"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Angle",
+          "shape": {
+            "kind": "rect",
+            "size": [520, 260],
+            "stroke": {
+              "color": [255, 255, 255],
+              "width": 18,
+              "opacity": 100,
+              "line_cap": "projecting",
+              "line_join": "bevel",
+              "miter_limit": 10
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Angle",
+        "match_name": "ADBE Vector Stroke Line Cap",
+        "value": 3
+      },
+      {
+        "layer_name": "Angle",
+        "match_name": "ADBE Vector Stroke Line Join",
+        "value": 3
+      },
+      {
+        "layer_name": "Angle",
+        "match_name": "ADBE Vector Stroke Miter Limit",
+        "value": 10
+      }
+    ]
+  }
+}

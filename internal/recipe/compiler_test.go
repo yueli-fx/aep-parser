@@ -52,9 +52,12 @@ func TestCompileMinimalTextShapeRecipeBuildsProfile(t *testing.T) {
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
-		Color:   []float64{255, 0, 0, 255},
-		Width:   ptr(6),
-		Opacity: ptr(80),
+		Color:      []float64{255, 0, 0, 255},
+		Width:      ptr(6),
+		Opacity:    ptr(80),
+		LineCap:    "projecting",
+		LineJoin:   "bevel",
+		MiterLimit: ptr(10),
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(18),
 			Gap:  ptr(7),
@@ -81,6 +84,9 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Color", []float64{255, 255, 0, 0})
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Width", 6.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Opacity", 80.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Line Cap", 3.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Line Join", 3.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Miter Limit", 10.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Dash 1", 18.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Gap 1", 7.0)
 }

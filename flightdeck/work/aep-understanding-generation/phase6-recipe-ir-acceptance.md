@@ -851,6 +851,39 @@ Twenty-fifth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-sixth follow-up completed:
+
+- Shape stroke recipes now support line style fields:
+  - `line_cap` -> `ADBE Vector Stroke Line Cap`
+  - `line_join` -> `ADBE Vector Stroke Line Join`
+  - `miter_limit` -> `ADBE Vector Stroke Miter Limit`
+- Valid `line_cap` values are `butt`, `round`, and `projecting`.
+- Valid `line_join` values are `miter`, `round`, and `bevel`.
+- Validation rejects unsupported line cap / line join values and
+  `miter_limit < 1`.
+- Capability reporting records:
+  - `StrokeNode.SetLineCap`
+  - `StrokeNode.SetLineJoin`
+  - `StrokeNode.SetMiterLimit`
+- `examples/recipes/minimal-shape-stroke-style.json` is a dedicated stroke
+  style recipe example and asserts all three profile-visible stroke style
+  properties. See `knowledge/shape/recipe-stroke-style-profile-enums.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-stroke-style.json -out
+    tmp_debug\recipes\minimal-shape-stroke-style.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_stroke_style/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_stroke_style/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

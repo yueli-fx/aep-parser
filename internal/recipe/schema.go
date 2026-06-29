@@ -80,10 +80,13 @@ type ShapeSpec struct {
 }
 
 type StrokeSpec struct {
-	Color   []float64         `json:"color,omitempty"`
-	Width   *float64          `json:"width,omitempty"`
-	Opacity *float64          `json:"opacity,omitempty"`
-	Dashes  *StrokeDashesSpec `json:"dashes,omitempty"`
+	Color      []float64         `json:"color,omitempty"`
+	Width      *float64          `json:"width,omitempty"`
+	Opacity    *float64          `json:"opacity,omitempty"`
+	LineCap    string            `json:"line_cap,omitempty"`
+	LineJoin   string            `json:"line_join,omitempty"`
+	MiterLimit *float64          `json:"miter_limit,omitempty"`
+	Dashes     *StrokeDashesSpec `json:"dashes,omitempty"`
 }
 
 type StrokeDashesSpec struct {
@@ -565,6 +568,24 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 					addRefusal("invalid_shape_stroke_opacity", strokePath+".opacity", "stroke opacity must be between 0 and 100")
 				}
 			}
+			if layer.Shape.Stroke.LineCap != "" {
+				recordCapability("StrokeNode.SetLineCap", strokePath+".line_cap")
+				if !validStrokeLineCap(layer.Shape.Stroke.LineCap) {
+					addRefusal("invalid_shape_stroke_line_cap", strokePath+".line_cap", "stroke line_cap must be butt, round, or projecting")
+				}
+			}
+			if layer.Shape.Stroke.LineJoin != "" {
+				recordCapability("StrokeNode.SetLineJoin", strokePath+".line_join")
+				if !validStrokeLineJoin(layer.Shape.Stroke.LineJoin) {
+					addRefusal("invalid_shape_stroke_line_join", strokePath+".line_join", "stroke line_join must be miter, round, or bevel")
+				}
+			}
+			if layer.Shape.Stroke.MiterLimit != nil {
+				recordCapability("StrokeNode.SetMiterLimit", strokePath+".miter_limit")
+				if *layer.Shape.Stroke.MiterLimit < 1 {
+					addRefusal("invalid_shape_stroke_miter_limit", strokePath+".miter_limit", "stroke miter_limit must be at least 1")
+				}
+			}
 			if layer.Shape.Stroke.Dashes != nil {
 				dashesPath := strokePath + ".dashes"
 				if layer.Shape.Stroke.Dashes.Dash != nil {
@@ -939,6 +960,24 @@ func validTextJustification(value string) bool {
 }
 
 func validOffsetLineJoin(value string) bool {
+	switch value {
+	case "miter", "round", "bevel":
+		return true
+	default:
+		return false
+	}
+}
+
+func validStrokeLineCap(value string) bool {
+	switch value {
+	case "butt", "round", "projecting":
+		return true
+	default:
+		return false
+	}
+}
+
+func validStrokeLineJoin(value string) bool {
 	switch value {
 	case "miter", "round", "bevel":
 		return true
