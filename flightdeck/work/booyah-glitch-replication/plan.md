@@ -41,7 +41,7 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 
 **Files:**
 - Create: `flightdeck/showcase/booyah-clone/main.go`(package main,空 `func main()` 先写出 `booyah-clone.aep` 一个空 project)
-- Create: `flightdeck/showcase/booyah-clone/oracle.go`(`openOriginal()` 用 `aep.Open` 打开 `samples/.../Booyah Glitch.aep`,返回 `*aep.Project`)
+- Create: `flightdeck/showcase/booyah-clone/oracle.go`(`openOriginal()` 用 `aep.Open` 打开 `data/samples/.../Booyah Glitch.aep`,返回 `*aep.Project`)
 - Create: `flightdeck/showcase/booyah-clone/render.jsx`(照 `showcase/glitch/render.jsx` 改 outPath;支持渲染指定 comp 名)
 - Create: `flightdeck/showcase/booyah-clone/verify.jsx`(打开 .aep,dump 指定 comp 的 DOM 值为 JSON 到 stdout/文件)
 - Create: `flightdeck/showcase/booyah-clone/INDEX.md`(frontmatter `showcase: booyah-clone` / `status: 待建` + **覆盖账本表**:每 comp/每未知特征 一行 status=待建)

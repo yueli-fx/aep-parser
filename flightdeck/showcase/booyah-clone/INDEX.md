@@ -10,7 +10,7 @@ regenerate: "go run ./flightdeck/showcase/booyah-clone  +  scripts/ae_run.ps1 re
 
 # booyah-clone — Booyah Glitch 全工程复刻(理解金标准)
 
-照 `specs/2026-06-19-booyah-glitch-full-replication.md` + `plans/2026-06-19-booyah-glitch-replication.md`。原工程 = `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`。
+照 `specs/2026-06-19-booyah-glitch-full-replication.md` + `plans/2026-06-19-booyah-glitch-replication.md`。原工程 = `data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`。
 
 ## 产物
 

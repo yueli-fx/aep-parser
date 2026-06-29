@@ -15,7 +15,7 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
-const originalPath = "samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep"
+const originalPath = "data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep"
 
 // oracle wraps the parsed original for value lookups during reconstruction.
 type oracle struct {

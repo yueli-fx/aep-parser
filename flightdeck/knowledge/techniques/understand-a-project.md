@@ -58,7 +58,7 @@ READ WHEN: 拿到一个参考 .aep 要「理解/内化」它(抽可复用技法,
 - **从零写（AddEffect 插件效果）**：可行路 = **embed-template**（同 native 效果，关键机制是从用了它的**真实样本 .aep 采该效果 chunk**：sspc/tdmn/参数 → 嵌入 → splice 进目标，参数按 index 戳值）。产物 AE 能打开；**装了插件才渲对**（没装 = AE 显示 missing-effect 占位）。**尚未实现，是可行的下一能力。**
 - **`reproducibility.mechanism` 语义重定**：`third-party` = **「可支持——读✓ / 写靠采模板 / 渲染需装插件」**，**不**等于不可做。真正做不了的是 `lib-blocked`（表达式 AE 不求值，见 [[expression-enable-byte-pair]]）。
 - **与交付准则的关系**：`plugin-free` 仍是 **procedural-fx-generator 产品**的优先（网页用户没装 Twitch）；但**学习库 + 装了插件的用户 + 我们自己的分析**里，插件技法是一等公民、可建，**诚实标注渲染依赖**即可（别声称无插件能渲）。
-- **采模板金矿** = `samples/motionbox/`（含真实 Twitch/Colorama/PEDG 用法），正好当 embed-template 采集源。
+- **采模板金矿** = `data/samples/motionbox/`（含真实 Twitch/Colorama/PEDG 用法），正好当 embed-template 采集源。
 
 ## 易错（红线）
 

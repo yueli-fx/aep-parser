@@ -2,8 +2,8 @@
 
 ## Inputs
 
-- Primary project: `samples/motionbox/motion-graphics/circle-animation/circle animation.aep`
-- Cross-diff project: `samples/motionbox/motion-graphics/seabox/seabox.aep`
+- Primary project: `data/samples/motionbox/motion-graphics/circle-animation/circle animation.aep`
+- Cross-diff project: `data/samples/motionbox/motion-graphics/seabox/seabox.aep`
 - Reports:
   - `tmp_debug/aepslices/circle_animation_plan.json`
   - `tmp_debug/aepslices/circle_animation_self.json`
@@ -13,10 +13,10 @@
 ## Commands
 
 ```powershell
-go run ./cmd/aepslices plan -aep 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -json -out tmp_debug\aepslices\circle_animation_plan.json
-go run ./cmd/aepslices diagnose -expected 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -json -out tmp_debug\aepslices\circle_animation_self.json
-go run ./cmd/aepslices diagnose -expected 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'samples\motionbox\motion-graphics\seabox\seabox.aep' -json -out tmp_debug\aepslices\circle_animation_vs_seabox.json
-go run ./cmd/aeoracle plan -aep 'samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -out tmp_debug\aeoracle\circle_animation -json
+go run ./cmd/aepslices plan -aep 'data\samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -json -out tmp_debug\aepslices\circle_animation_plan.json
+go run ./cmd/aepslices diagnose -expected 'data\samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'data\samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -json -out tmp_debug\aepslices\circle_animation_self.json
+go run ./cmd/aepslices diagnose -expected 'data\samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -actual 'data\samples\motionbox\motion-graphics\seabox\seabox.aep' -json -out tmp_debug\aepslices\circle_animation_vs_seabox.json
+go run ./cmd/aeoracle plan -aep 'data\samples\motionbox\motion-graphics\circle-animation\circle animation.aep' -out tmp_debug\aeoracle\circle_animation -json
 go run ./cmd/aeoracle render -request tmp_debug\aeoracle\circle_animation\request.json -dry-run
 go run ./cmd/aeoracle render -request tmp_debug\aeoracle\circle_animation\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 600
 ```

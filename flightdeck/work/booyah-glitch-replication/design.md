@@ -2,7 +2,7 @@
 
 ## 1. 背景 / 为什么
 
-「理解一个工程」研究 arc 的金标准:能不能用咱们的 Go API **从零重搭出一个真实工程**。round-trip 只证「读得回字节」;**从零重建证「真的懂每个 chunk 怎么来的」**。目标工程 = `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`(用户指定;我们 glitch showcase 就是照它拆的,先验理解最足、全 native 无插件)。
+「理解一个工程」研究 arc 的金标准:能不能用咱们的 Go API **从零重搭出一个真实工程**。round-trip 只证「读得回字节」;**从零重建证「真的懂每个 chunk 怎么来的」**。目标工程 = `data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`(用户指定;我们 glitch showcase 就是照它拆的,先验理解最足、全 native 无插件)。
 
 用户铁律:**不逃避未知字段**——撞到库不支持的 effect 参数 / chunk / 编码,走 RE 流水线实现,而不是 skip 或近似糊弄;物理不可写的(无 scripting API)给实证负结论。
 
@@ -38,7 +38,7 @@
 - `render.jsx`(saveFrameToPng 终帧)+ `verify.jsx`(dump DOM 值对账)
 - `INDEX.md`(frontmatter + **覆盖账本**,见 §8)
 
-原工程留 `samples/`。`*.aep`/`*.png` gitignored,`gen.go`/`*.jsx`/`INDEX.md` tracked,干净 clone 可一键重生成。
+原工程留 `data/samples/`。`*.aep`/`*.png` gitignored,`gen.go`/`*.jsx`/`INDEX.md` tracked,干净 clone 可一键重生成。
 
 ## 6. DAG 拓扑序(叶→根,逐 comp 单独 AE 验过再上层)
 

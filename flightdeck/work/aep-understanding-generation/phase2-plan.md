@@ -104,7 +104,7 @@
 
 - Identical fixture: `go run ./cmd/aepdiff -json flightdeck/showcase/text/text.aep flightdeck/showcase/text/text.aep` returned `diff_count: 0`.
 - Different small fixtures: `text.aep` vs `effects.aep` returned exit code 1 with 16 path-level diffs.
-- Booyah smoke run: original `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep` vs clone `flightdeck/showcase/booyah-clone/booyah-clone.aep` returned exit code 1 with 123 path-level diffs. The first implementation originally over-reported comp-level ID differences; Phase 2 now separates matching identity from report paths and falls back to comp name plus layer index/name for from-scratch clones.
+- Booyah smoke run: original `data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep` vs clone `flightdeck/showcase/booyah-clone/booyah-clone.aep` returned exit code 1 with 123 path-level diffs. The first implementation originally over-reported comp-level ID differences; Phase 2 now separates matching identity from report paths and falls back to comp name plus layer index/name for from-scratch clones.
 
 ## Stop Rule
 

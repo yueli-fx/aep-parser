@@ -78,11 +78,11 @@ Done:
 - Phase 5 implemented `internal/sliceworkflow` and `cmd/aepslices` for generic
   slice planning and combined profile/render gap workflow reports.
 - Phase 5 Booyah acceptance run processed the real source project at
-  `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep` against the current
+  `data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep` against the current
   clone and produced actionable write gaps after fixing layer-index fallback in
   `profilediff`.
 - Phase 5 non-Booyah acceptance run processed
-  `samples/motionbox/motion-graphics/circle-animation/circle animation.aep`,
+  `data/samples/motionbox/motion-graphics/circle-animation/circle animation.aep`,
   selected representative slices, produced zero self-diff gaps, produced
   cross-project gap output against `seabox.aep`, generated a render-oracle
   sentinel plan, and passed a real AE 2025 hard render gate after hardening

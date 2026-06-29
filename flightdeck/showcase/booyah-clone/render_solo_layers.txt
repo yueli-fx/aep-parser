@@ -1,4 +1,4 @@
-e:/projects/tools/aep-parser/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep
+e:/projects/tools/aep-parser/data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep
 e:/projects/tools/aep-parser/flightdeck/showcase/booyah-clone/booyah-clone.aep
 プリコンポジション 1
 18

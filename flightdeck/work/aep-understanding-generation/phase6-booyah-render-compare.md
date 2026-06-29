@@ -2,7 +2,7 @@
 
 ## Inputs
 
-- Original: `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`
+- Original: `data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`
 - Current clone: `flightdeck/showcase/booyah-clone/booyah-clone.aep`
 - Compared comp: `グリッチテキスト`
 - AE executable: `E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe`
@@ -11,12 +11,12 @@
 ## Commands
 
 ```powershell
-go run ./cmd/aeoracle plan -aep 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -comp 'グリッチテキスト' -out tmp_debug\aeoracle\booyah_compare\source -json
+go run ./cmd/aeoracle plan -aep 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -comp 'グリッチテキスト' -out tmp_debug\aeoracle\booyah_compare\source -json
 go run ./cmd/aeoracle clone-request -from tmp_debug\aeoracle\booyah_compare\source\request.json -aep flightdeck\showcase\booyah-clone\booyah-clone.aep -out tmp_debug\aeoracle\booyah_compare\clone -json
 go run ./cmd/aeoracle render -request tmp_debug\aeoracle\booyah_compare\source\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 900
 go run ./cmd/aeoracle render -request tmp_debug\aeoracle\booyah_compare\clone\request.json -ae 'E:\adobe\Adobe After Effects 2025\Support Files\AfterFX.exe' -timeout-sec 900
 go run ./cmd/aeoracle compare-set -expected-meta tmp_debug\aeoracle\booyah_compare\source\metadata.json -actual-meta tmp_debug\aeoracle\booyah_compare\clone\metadata.json -threshold 0 -json -out tmp_debug\aeoracle\booyah_compare\compare_set.json
-go run ./cmd/aepslices diagnose -expected 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -render-set tmp_debug\aeoracle\booyah_compare\compare_set.json -json -out tmp_debug\aepslices\booyah_vs_clone_with_render.json
+go run ./cmd/aepslices diagnose -expected 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -render-set tmp_debug\aeoracle\booyah_compare\compare_set.json -json -out tmp_debug\aepslices\booyah_vs_clone_with_render.json
 ```
 
 `compare-set` and final `diagnose` return exit 1 because they produced valid

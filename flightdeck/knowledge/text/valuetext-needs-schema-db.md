@@ -28,7 +28,7 @@ per-effect × per-AE-version 的 (matchName, index) → label 表。**Adobe 不�
 ## 旁证
 
 - **py-aep 自己也没实现 valueText** —— 在它 `docs/extendscript_coverage.md` 的 Property missing 🚧 列表里
-  （`alternateSource, ..., valueText`）。它 `samples/versions/ae2026/complete.json` 里的 `"valueText": "Multiply"`
+  （`alternateSource, ..., valueText`）。它 `data/samples/versions/ae2026/complete.json` 里的 `"valueText": "Multiply"`
   是 AE 26 ScriptingAPI **导出的 golden**，不是 py-aep 的解析能力。所以 parity 目标本身不要求我们做。
 - valueText 是 AE 26.0-only，远超本项目 AE 2020 读取下限。
 

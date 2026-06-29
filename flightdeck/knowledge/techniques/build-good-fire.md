@@ -9,7 +9,7 @@ READ WHEN: 被要求从零造火焰/烟/能量类程序化 FX；要重做火焰 
 
 ## ⚠ 成熟度（诚实前提，别当已验证流程用）
 
-- **参数→效果对照表 = 事实**：从真实样本 `samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tools/debug/dump_tdmn`）。本文件保留可执行结论，不依赖旧 spec/plan。
+- **参数→效果对照表 = 事实**：从真实样本 `data/samples/Colorful Fire Ball`（by Plugin Everything）用 parser 解析读出（`go run ./cmd/aepdissect <file>` + `tools/debug/dump_tdmn`）。本文件保留可执行结论，不依赖旧 spec/plan。
 - **✅ 已升级为「验证配方」（2026-06-18）**：**v3 多层合成**（黑底+3 火层+同心 mask 温度分区+Add+Glo2，运动共相）经 **`TestFlameDemo_AEShipGate_AE2020/AE2025` 双版本 gate 绿（逐像素一致）+ 用户真机验收过**。这条多层配方现在是验证过的,可照搬。
 - 历程：v1 被否（单层 Tint）→ v2（单层 Tritone+Glo2,修色温/Glow 但无层次）→ **v3 多层合成出层次（通过）**。下面参数表/步骤为 v3 实际值。
 
@@ -19,7 +19,7 @@ READ WHEN: 被要求从零造火焰/烟/能量类程序化 FX；要重做火焰 
 
 ## 源工程真实结构 — aepdissect 三轴重解析（2026-06-18）
 
-> `go run ./cmd/aepdissect "samples/fx/Fire/Colorful Fire Ball/Colorful fire AE 2023.aep"`。比早先读法**深一层**：深度不是「单 comp 平铺 3–4 个 Add 层」，而是 **5 级预合成嵌套**，每级一个 displaced/recolored pass，再用 Add/Difference/Divide 重组。
+> `go run ./cmd/aepdissect "data/samples/fx/Fire/Colorful Fire Ball/Colorful fire AE 2023.aep"`。比早先读法**深一层**：深度不是「单 comp 平铺 3–4 个 Add 层」，而是 **5 级预合成嵌套**，每级一个 displaced/recolored pass，再用 Add/Difference/Divide 重组。
 
 ```yaml
 project_profile:   # Colorful Fire Ball (by Plugin Everything)
@@ -134,7 +134,7 @@ project_profile:   # Colorful Fire Ball (by Plugin Everything)
 | 火球外形 | `CC Sphere`(Cycore 自带) + `PEDX`=Displacer Pro(**第三方**·需装+GPU) | ⚠ 第三方违反「人人可开」；native 径向近似 or 砍 |
 | 火星/迸射 | `CC Particle World`(Cycore 自带) | ⚠ 无原生粒子替代；自带能渲但未 gate |
 
-**第三方插件二进制**（`.aex`/`.plugin`）留 `samples/`（gitignore），**不进 `internal/serializer/templates/`**——产出 .aep 依赖插件就违反交付准则。
+**第三方插件二进制**（`.aex`/`.plugin`）留 `data/samples/`（gitignore），**不进 `internal/serializer/templates/`**——产出 .aep 依赖插件就违反交付准则。
 
 ## v1 被否对照（别再犯）
 

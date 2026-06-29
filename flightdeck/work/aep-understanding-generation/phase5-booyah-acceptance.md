@@ -2,7 +2,7 @@
 
 ## Inputs
 
-- Original: `samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`
+- Original: `data/samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep`
 - Current clone: `flightdeck/showcase/booyah-clone/booyah-clone.aep`
 - Reports:
   - `tmp_debug/aepslices/booyah_plan.json`
@@ -12,9 +12,9 @@
 ## Commands
 
 ```powershell
-go run ./cmd/aepslices plan -aep 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -json -out tmp_debug\aepslices\booyah_plan.json
-go run ./cmd/aeoracle plan -aep 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -out tmp_debug\aeoracle\booyah -json
-go run ./cmd/aepslices diagnose -expected 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -json -out tmp_debug\aepslices\booyah_vs_clone_after_ref_fallback.json
+go run ./cmd/aepslices plan -aep 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -json -out tmp_debug\aepslices\booyah_plan.json
+go run ./cmd/aeoracle plan -aep 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -out tmp_debug\aeoracle\booyah -json
+go run ./cmd/aepslices diagnose -expected 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -json -out tmp_debug\aepslices\booyah_vs_clone_after_ref_fallback.json
 ```
 
 ## Result

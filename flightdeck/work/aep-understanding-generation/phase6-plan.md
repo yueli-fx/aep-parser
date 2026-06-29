@@ -123,7 +123,7 @@ Use `NewRenderRequest(aepPath, selectedCompName, outputDir, source.Frames)`, whe
 
 ```powershell
 go test ./internal/aeoracle ./cmd/aeoracle
-go run ./cmd/aeoracle plan -aep 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -comp 'グリッチテキスト' -out tmp_debug\aeoracle\booyah_compare\source -json
+go run ./cmd/aeoracle plan -aep 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -comp 'グリッチテキスト' -out tmp_debug\aeoracle\booyah_compare\source -json
 go run ./cmd/aeoracle clone-request -from tmp_debug\aeoracle\booyah_compare\source\request.json -aep flightdeck\showcase\booyah-clone\booyah-clone.aep -out tmp_debug\aeoracle\booyah_compare\clone -json
 ```
 
@@ -251,7 +251,7 @@ go run ./cmd/aeoracle compare-set -expected-meta tmp_debug\aeoracle\booyah_compa
 - [x] Merge profile and render gaps:
 
 ```powershell
-go run ./cmd/aepslices diagnose -expected 'samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -render-set tmp_debug\aeoracle\booyah_compare\compare_set.json -json -out tmp_debug\aepslices\booyah_vs_clone_with_render.json
+go run ./cmd/aepslices diagnose -expected 'data\samples\motionbox\glitch\booyah-glitch\Booyah Glitch.aep' -actual 'flightdeck\showcase\booyah-clone\booyah-clone.aep' -render-set tmp_debug\aeoracle\booyah_compare\compare_set.json -json -out tmp_debug\aepslices\booyah_vs_clone_with_render.json
 ```
 
 - [x] Record exact AE version, frame count, differing frame count, and top render-gap evidence in `phase6-booyah-render-compare.md`.

@@ -62,7 +62,7 @@ proven_transfers: [fire, glitch]
 hypothesized_transfers: [wind, water, transition]
 not_this: "整层平移(那是位置动画,不是逐像素扭曲)"
 # glitch 用法:高对比/块状噪声驱动 → 横向块状撕裂(Booyah Displacement Map ×12 / GlitchText ×20);火焰用法=MaxV 拉火舌。
-evidence: [showcase/procedural-fx, samples/ColorfulFireBall]
+evidence: [showcase/procedural-fx, data/samples/ColorfulFireBall]
 confidence: validated
 # 备注:Displacement Map=主力(ColorfulFireBall 用 ×6,MaxV 最大 280),需用另一层当源(SetEffectLayerParam);
 #       WRPMESH(Warp/Bend)在 "Negative Fire" 层作整体弯曲;PEDX=Displacer Pro 更强但⚠第三方(native DispMap 可替)
@@ -80,7 +80,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [fire]
 hypothesized_transfers: [smoke, energy, magic]
 not_this: "单层调高对比假装有层次(v2 被否)"
-evidence: [showcase/procedural-fx, samples/ColorfulFireBall]
+evidence: [showcase/procedural-fx, data/samples/ColorfulFireBall]
 confidence: validated
 # 三种 blend 各司其职(ColorfulFireBall 实证):Add=亮叠出白热芯 / Difference=负相暗筋("Negative Fire"层,proven) / Divide=压外层(particles)。Screen=叠亮不溢(备选)。
 # ⚠防团块:N 层共用同一 mask→并集填满成团块。解法=同心 mask(内小外大)+各层越内越热=温度分区。
@@ -124,7 +124,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [fire, lightning, glitch]
 hypothesized_transfers: [neon, energy, magic]
 not_this: "整体提亮(无阈值=不是选择性辉光)"
-evidence: [showcase/procedural-fx, samples/LightningPack]
+evidence: [showcase/procedural-fx, data/samples/LightningPack]
 confidence: validated
 # 常在多个图层分别用。
 ```
@@ -176,7 +176,7 @@ reproducibility: {mechanism: cycore, requires_asset: none}
 proven_transfers: [fire]
 hypothesized_transfers: [rain, snow, transition]
 not_this: "噪声+阈值近似(弱替代,非真粒子)"
-evidence: [samples/ColorfulFireBall]
+evidence: [data/samples/ColorfulFireBall]
 confidence: observed
 # ⚠Cycore 自带(人人能渲)但非 native、未 gate;plugin-free 无原生粒子替代。
 ```
@@ -194,7 +194,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: []
 hypothesized_transfers: [fire, lightning, transition]
 not_this: "单层局部调色(收尾=全局,常在调整层)"
-evidence: [samples/bondbond]
+evidence: [data/samples/bondbond]
 confidence: observed
 # 备注:Vignette 用 native 径向遮罩替代(CS Vignette=第三方)。
 ```
@@ -211,7 +211,7 @@ reproducibility: {mechanism: lib-blocked, requires_asset: none}
 proven_transfers: [lightning]
 hypothesized_transfers: [transition, energy]
 not_this: "把值烤死进各效果(那是放弃联动,不是控制器)"
-evidence: [samples/LightningPack, expression enable byte-pair finding]
+evidence: [data/samples/LightningPack, expression enable byte-pair finding]
 confidence: observed
 # ⚠本库表达式 AE 不求值→做不出活联动 Customizer;只能烤死值。这是 lib-blocked 的典型。
 ```
@@ -232,7 +232,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [lightning]
 hypothesized_transfers: [neon, text-fx]
 not_this: "真投影(有距离=阴影不是辉光)"
-evidence: [samples/LightningPack]
+evidence: [data/samples/LightningPack]
 confidence: observed
 # 常叠多个;比 Glow 更可控方向/颜色。
 ```
@@ -250,7 +250,7 @@ reproducibility: {mechanism: native, requires_asset: footage}
 proven_transfers: [lightning]
 hypothesized_transfers: [light-fx, smoke-footage, particle-seq]
 not_this: "给生成的 solid 上色(那走 luminance-color;此条专指素材重上色)"
-evidence: [samples/LightningPack]
+evidence: [data/samples/LightningPack]
 confidence: observed
 ```
 
@@ -267,7 +267,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [lightning]
 hypothesized_transfers: [transition, glitch]
 not_this: "降分辨率(Mosaic 是块化风格,不是渲染质量)"
-evidence: [samples/LightningPack]
+evidence: [data/samples/LightningPack]
 confidence: observed
 # 常配 Checkbox Control 开关切换变体。
 ```
@@ -302,7 +302,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [fire]
 hypothesized_transfers: [smoke, clouds, energy, water]
 not_this: "单层直接循环(演化参数在端点不连续=可见跳帧)"
-evidence: [samples/ColorfulFireBall]
+evidence: [data/samples/ColorfulFireBall]
 confidence: observed
 # 本库:time-remap 需关键帧 + opacity 关键帧交叉淡入；未单独 build/render 验过。
 ```
@@ -321,7 +321,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [glitch]
 hypothesized_transfers: [cyberpunk, retro-crt, transition, text-fx]
 not_this: "整体 Hue 偏移(那是调色,不是把 R/G/B 拆开各自位移)"
-evidence: [samples/motionbox/glitch/booyah-glitch, samples/motionbox/glitch/glitchtext, showcase/glitch]
+evidence: [data/samples/motionbox/glitch/booyah-glitch, data/samples/motionbox/glitch/glitchtext, showcase/glitch]
 confidence: observed
 # 三层 Fill 路最可控(纯 native);Set Channels/Channel Blur 是单效果近似。配 time-evolution 让错位闪烁。
 # ✅ showcase/glitch 实渲验证(2026-06-18,AE2025):3 形状 bar Fill R/G/B + Add → 青/橙红色差肉眼可见、纯 native。待用户真机 + TestGlitch ship-gate 升 validated。
@@ -340,7 +340,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [glitch]
 hypothesized_transfers: [retro-crt, hologram, hud, surveillance]
 not_this: "整体降噪/模糊(扫描线是规律横纹叠加,不是噪点)"
-evidence: [samples/motionbox/glitch/booyah-glitch]
+evidence: [data/samples/motionbox/glitch/booyah-glitch]
 confidence: observed
 # Booyah 用 Venetian Blinds ×3 做 HUD 行栅。
 # ⚠ showcase/glitch 曾试渲(2026-06-18,AE2025:暗 solid + Venetian Blinds 完成度34/宽5/横向,
@@ -361,7 +361,7 @@ reproducibility: {mechanism: native, requires_asset: none}
 proven_transfers: [glitch]
 hypothesized_transfers: [datamosh, music-video, transition]
 not_this: "空间位移(那是 displacement-distortion;此条是时间轴抽帧/涂抹)"
-evidence: [samples/motionbox/glitch/glitchtext]
+evidence: [data/samples/motionbox/glitch/glitchtext]
 confidence: observed
 # Posterize Time=降帧率出卡顿;Time Displacement=按亮度图错时间出涂抹(GlitchText Max Displacement Time=2s)。
 # ⚠ GlitchText 招牌跳变靠第三方 Videocopilot Twitch;纯 native 用 Posterize Time + Displacement Map(块状噪声驱动)近似。

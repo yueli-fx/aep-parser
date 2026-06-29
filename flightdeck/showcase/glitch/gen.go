@@ -1,6 +1,6 @@
 // flightdeck/showcase/glitch/gen.go — from-scratch (no AE) PLUGIN-FREE glitch on
 // readable "GLITCH" text, following the all-native Booyah Glitch recipe
-// (samples/motionbox/glitch/booyah-glitch). Validates glitch technique atoms
+// (data/samples/motionbox/glitch/booyah-glitch). Validates glitch technique atoms
 // (docs/fx-techniques.md) on rendered pixels (delivery contract red line 4):
 //   T16 rgb-channel-split   — text pre-comp instanced 3×, Fill'd pure R/G/B, offset
 //                             via a Transform effect, Add-blended => chromatic split

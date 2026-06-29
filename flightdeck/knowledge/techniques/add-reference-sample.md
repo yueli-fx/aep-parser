@@ -1,7 +1,7 @@
-# 往 samples/ 加参考工程 — 文件夹约定 + 分类 — checklist
+# 往 data/samples/ 加参考工程 — 文件夹约定 + 分类 — checklist
 
-SUMMARY: 往 samples/ 加参考工程 — 文件夹约定 + 分类
-READ WHEN: 往 samples/ 加参考工程当学习样本（建文件夹该长啥样、放哪些文件、怎么分类、readme 写啥）；批量采集后做归置；纠结某工程算哪个题材
+SUMMARY: 往 data/samples/ 加参考工程 — 文件夹约定 + 分类
+READ WHEN: 往 data/samples/ 加参考工程当学习样本（建文件夹该长啥样、放哪些文件、怎么分类、readme 写啥）；批量采集后做归置；纠结某工程算哪个题材
 
 ---
 
@@ -10,15 +10,15 @@ READ WHEN: 往 samples/ 加参考工程当学习样本（建文件夹该长啥�
 ## 目录形态（一项目一文件夹）
 
 ```
-samples/<来源>/<题材>/<项目slug>/
+data/samples/<来源>/<题材>/<项目slug>/
     <原名>.aep        # 工程（保留原始文件名，日文 OK；zip 只取 .aep）
     cover.gif         # 封面（站点缩略图 / 预览首帧）
     readme.md         # 见下模板
-samples/<来源>/README.md   # 该来源总表：来源站点 + 采集方式指针 + 按题材列全部项目
+data/samples/<来源>/README.md   # 该来源总表：来源站点 + 采集方式指针 + 按题材列全部项目
 ```
 
 - `slug` = 标题转 ascii（小写、非字母数字→`-`、截 ~48 字符）；纯非 ascii 标题则用站点 `id` 兜底。
-- `<来源>` 按出处命名（如 `motionbox/`）。`/samples/` **整体 gitignore** = 纯本地、不随仓库分发（尊重转载授权）。
+- `<来源>` 按出处命名（如 `motionbox/`）。`/data/samples/` **整体 gitignore** = 纯本地、不随仓库分发（尊重转载授权）。
 
 ## readme.md 模板（每项目）
 

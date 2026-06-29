@@ -46,4 +46,4 @@ regenerate: "go run ./flightdeck/showcase/glitch  +  scripts/ae_run.ps1 render.j
 
 ## 来源 / 配方
 
-照 `samples/motionbox/glitch/booyah-glitch`（全 native）的角色拆解。技法原子定义见 `docs/fx-techniques.md` T16/T2/T5；理解流程 `checklists/techniques/understand-a-project.md`（扫描线 T17 见样本，本配方已弃）。
+照 `data/samples/motionbox/glitch/booyah-glitch`（全 native）的角色拆解。技法原子定义见 `docs/fx-techniques.md` T16/T2/T5；理解流程 `checklists/techniques/understand-a-project.md`（扫描线 T17 见样本，本配方已弃）。
