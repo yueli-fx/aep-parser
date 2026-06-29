@@ -728,6 +728,29 @@ func TestValidateReportsLightShadowDarknessCapability(t *testing.T) {
 	assertCapability(t, report, "SetLightShadowDarkness")
 }
 
+func TestValidateReportsLightShadowDiffusionCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Light shadow diffusion"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"shadow_diffusion": 18}},
+				{"type": "text", "name": "Title", "text": "Light shadow diffusion", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetLightShadowDiffusion")
+}
+
 func TestValidateRejectsLightOptionsOnNonLightLayer(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,
