@@ -60,6 +60,7 @@ type Layer struct {
 	Label      *float64       `json:"label,omitempty"`
 	Comment    string         `json:"comment,omitempty"`
 	MotionBlur *bool          `json:"motion_blur,omitempty"`
+	Shy        *bool          `json:"shy,omitempty"`
 	Text       string         `json:"text,omitempty"`
 	TextStyle  *TextStyleSpec `json:"text_style,omitempty"`
 	Shape      *ShapeSpec     `json:"shape,omitempty"`
@@ -658,6 +659,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.MotionBlur != nil {
 		recordCapability("Layer.SetMotionBlur", layerPath+".motion_blur")
+	}
+	if layer.Shy != nil {
+		recordCapability("Layer.SetShy", layerPath+".shy")
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

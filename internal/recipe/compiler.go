@@ -702,6 +702,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 				return fmt.Errorf("recipe: layer %q motion_blur: %w", spec.Name, err)
 			}
 		}
+		if spec.Shy != nil {
+			if err := layer.SetShy(*spec.Shy); err != nil {
+				return fmt.Errorf("recipe: layer %q shy: %w", spec.Name, err)
+			}
+		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
 			return fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
 		}

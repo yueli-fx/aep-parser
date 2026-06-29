@@ -408,6 +408,15 @@ func TestValidateReportsLayerMotionBlurCapability(t *testing.T) {
 	assertCapability(t, report, "Layer.SetMotionBlur")
 }
 
+func TestValidateReportsLayerShyCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Shy = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetShy")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

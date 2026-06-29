@@ -1457,6 +1457,32 @@ Forty-fifth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-sixth follow-up completed:
+
+- Layer recipes now support `shy`:
+  - boolean -> `Layer.SetShy`
+- Capability reporting records:
+  - `Layer.SetShy`
+- Boundary: layer shy is a length-preserving bit in `ldta` offset `0x27`.
+  Hiding shy layers still depends on the composition `hide_shy_layers` switch;
+  this slice covers the layer flag itself.
+- `examples/recipes/minimal-layer-shy.json` is a dedicated one-text-layer
+  recipe with `shy: true`. See `knowledge/layer/recipe-shy.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-shy.json -out
+    tmp_debug\recipes\minimal-layer-shy.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_shy\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_shy\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
