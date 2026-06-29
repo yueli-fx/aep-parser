@@ -203,6 +203,27 @@ Describe 'Cooldown set' {
     }
 }
 
+Describe 'Startup splash wrapper detection' {
+    It 'recognizes the empty outer #32770 window that encloses a known startup splash' {
+        $outer = [pscustomobject]@{
+            Hwnd  = [IntPtr]0x1AF0A66
+            Pid   = 55384
+            Title = ''
+            Class = '#32770'
+            Rect  = [pscustomobject]@{ Left = 1306; Top = 462; Right = 2072; Bottom = 978 }
+        }
+        $inner = [pscustomobject]@{
+            Hwnd  = [IntPtr]0x690E1E
+            Pid   = 55384
+            Title = ''
+            Class = '#32770'
+            Rect  = [pscustomobject]@{ Left = 1330; Top = 486; Right = 1626; Bottom = 936 }
+        }
+
+        Test-StartupSplashWrapperModal -Candidate $outer -KnownStartupSplashModals @($inner) | Should -Be $true
+    }
+}
+
 Describe 'Initialize-Win32' {
     It 'creates the AeRunWin32 type and is idempotent' {
         Initialize-Win32

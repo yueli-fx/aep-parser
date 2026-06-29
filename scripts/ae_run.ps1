@@ -123,6 +123,8 @@ try {
 
         $persistentUnknownHwnd = $null
         $persistentUnknownInfo = $null
+        $knownStartupSplashModals = @()
+        $unknownModalsThisTick = @()
 
         foreach ($m in $modals) {
             # Layer B — title/class
@@ -140,21 +142,10 @@ try {
             }
 
             if (-not $match) {
-                # Track first-seen for grace-period escalation. Splash + transient
-                # AE startup windows naturally dismiss well within $unknownGraceSec.
-                $hwndKey = '0x{0:X}' -f [int64]$m.Hwnd
-                if (-not $unknownFirstSeen.ContainsKey($hwndKey)) {
-                    $unknownFirstSeen[$hwndKey] = Get-Date
-                    Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal-seen' -Data @{
-                        hwnd  = $hwndKey
-                        title = $m.Title; class = $m.Class
-                        ocr   = if ($usedOcr) { ($info.Ocr -replace "`n", ' / ') } else { '<not-attempted>' }
-                    }
-                }
-                $age = ((Get-Date) - $unknownFirstSeen[$hwndKey]).TotalSeconds
-                if ($age -ge $unknownGraceSec) {
-                    $persistentUnknownHwnd = $hwndKey
-                    $persistentUnknownInfo = $info
+                $unknownModalsThisTick += [pscustomobject]@{
+                    Modal   = $m
+                    Info    = $info
+                    UsedOcr = $usedOcr
                 }
                 continue
             }
@@ -174,6 +165,9 @@ try {
             # send keys, don't escalate — let it clear on its own (bounded by
             # TimeoutSec). Cooldown suppresses per-tick log spam.
             if ($match.rule.action -eq 'Ignore') {
+                if ($match.rule.name -eq 'startup-splash') {
+                    $knownStartupSplashModals += $m
+                }
                 Add-Cooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule $match.rule.name -DurationMs $match.rule.cooldownMs
                 continue
             }
@@ -222,6 +216,42 @@ try {
         }
 
         if ($exitCode -ne 0) { break }   # Abort rule fired inside the foreach
+
+        foreach ($u in $unknownModalsThisTick) {
+            $m = $u.Modal
+            $info = $u.Info
+            $hwndKey = '0x{0:X}' -f [int64]$m.Hwnd
+
+            if (Test-StartupSplashWrapperModal -Candidate $m -KnownStartupSplashModals $knownStartupSplashModals) {
+                if ($unknownFirstSeen.ContainsKey($hwndKey)) {
+                    $unknownFirstSeen.Remove($hwndKey) | Out-Null
+                }
+                if (-not (Test-InCooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule 'startup-splash-wrapper')) {
+                    Write-ActionLog -DumpDir $dumpDir -Event 'rule-match-derived' -Data @{
+                        hwnd = $hwndKey
+                        name = 'startup-splash-wrapper'
+                    }
+                    Add-Cooldown -Cooldown $cooldown -Hwnd $m.Hwnd -Rule 'startup-splash-wrapper' -DurationMs 3000
+                }
+                continue
+            }
+
+            # Track first-seen for grace-period escalation. Splash + transient
+            # AE startup windows naturally dismiss well within $unknownGraceSec.
+            if (-not $unknownFirstSeen.ContainsKey($hwndKey)) {
+                $unknownFirstSeen[$hwndKey] = Get-Date
+                Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal-seen' -Data @{
+                    hwnd  = $hwndKey
+                    title = $m.Title; class = $m.Class
+                    ocr   = if ($u.UsedOcr) { ($info.Ocr -replace "`n", ' / ') } else { '<not-attempted>' }
+                }
+            }
+            $age = ((Get-Date) - $unknownFirstSeen[$hwndKey]).TotalSeconds
+            if ($age -ge $unknownGraceSec) {
+                $persistentUnknownHwnd = $hwndKey
+                $persistentUnknownInfo = $info
+            }
+        }
 
         if ($persistentUnknownHwnd) {
             Write-ActionLog -DumpDir $dumpDir -Event 'unknown-modal-persistent' -Data @{

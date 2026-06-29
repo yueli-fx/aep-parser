@@ -99,6 +99,44 @@ function Match-Rule {
     return $null
 }
 
+function Test-RectContains {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]$Outer,
+        [Parameter(Mandatory)]$Inner
+    )
+
+    if (-not $Outer -or -not $Inner) { return $false }
+    return (
+        $Outer.Left -le $Inner.Left -and
+        $Outer.Top -le $Inner.Top -and
+        $Outer.Right -ge $Inner.Right -and
+        $Outer.Bottom -ge $Inner.Bottom
+    )
+}
+
+function Test-StartupSplashWrapperModal {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]$Candidate,
+        $KnownStartupSplashModals = @()
+    )
+
+    if (-not $Candidate) { return $false }
+    if ($Candidate.Class -ne '#32770') { return $false }
+    if (-not [string]::IsNullOrEmpty([string]$Candidate.Title)) { return $false }
+
+    foreach ($splash in @($KnownStartupSplashModals)) {
+        if (-not $splash) { continue }
+        if ($Candidate.Pid -ne $splash.Pid) { continue }
+        if ([int64]$Candidate.Hwnd -eq [int64]$splash.Hwnd) { continue }
+        if (Test-RectContains -Outer $Candidate.Rect -Inner $splash.Rect) {
+            return $true
+        }
+    }
+    return $false
+}
+
 function New-Cooldown {
     return @{}
 }
