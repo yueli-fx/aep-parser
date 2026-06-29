@@ -392,6 +392,15 @@ func TestValidateReportsCompWorkAreaCapability(t *testing.T) {
 	assertCapability(t, report, "SetWorkArea")
 }
 
+func TestValidateReportsCompRendererCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Renderer = "ADBE Escher"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetRenderer")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}

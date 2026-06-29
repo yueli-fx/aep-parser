@@ -141,6 +141,29 @@ func TestCompileToFileSetsCompWorkArea(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompRenderer(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Renderer = "ADBE Escher"
+	rec.ExpectedProfile.Renderer = "ADBE Escher"
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.renderer", true)
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].Renderer; got != "ADBE Escher" {
+		t.Fatalf("renderer = %q, want ADBE Escher", got)
+	}
+}
+
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{

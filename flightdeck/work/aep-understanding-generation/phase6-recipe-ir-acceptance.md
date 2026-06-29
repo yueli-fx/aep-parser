@@ -1046,6 +1046,33 @@ Thirty-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Thirty-second follow-up completed:
+
+- Composition recipes now support `renderer`:
+  - `renderer` -> profile `renderer`
+- Capability reporting records:
+  - `SetRenderer`
+- Boundary: recipe examples and contracts use binary renderer match names (for
+  example `ADBE Escher`) because `SetRenderer` may normalize known
+  ExtendScript module aliases.
+- `examples/recipes/minimal-comp-renderer.json` is a dedicated no-layer comp
+  recipe that asserts `expected_profile.renderer`. See
+  `knowledge/composition/recipe-renderer.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-renderer.json -out
+    tmp_debug\recipes\minimal-comp-renderer.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_renderer\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_renderer\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

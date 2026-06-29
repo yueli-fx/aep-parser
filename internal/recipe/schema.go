@@ -26,6 +26,7 @@ type CompSpec struct {
 	FrameRate       float64             `json:"frame_rate"`
 	Duration        float64             `json:"duration"`
 	BackgroundColor []float64           `json:"background_color,omitempty"`
+	Renderer        string              `json:"renderer,omitempty"`
 	MotionBlur      *CompMotionBlurSpec `json:"motion_blur,omitempty"`
 	WorkArea        *CompWorkAreaSpec   `json:"work_area,omitempty"`
 	Layers          []Layer             `json:"layers,omitempty"`
@@ -235,6 +236,7 @@ type ExpectedProfile struct {
 	LayerCount      *int                        `json:"layer_count,omitempty"`
 	TextLayerCount  *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount *int                        `json:"shape_layer_count,omitempty"`
+	Renderer        string                      `json:"renderer,omitempty"`
 	MotionBlur      *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
 	WorkArea        *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
 	Effects         []ExpectedEffect            `json:"effects,omitempty"`
@@ -395,6 +397,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if len(comp.BackgroundColor) > 0 {
 			recordCapability("SetBGColor", compPath+".background_color")
 			validateRGBColor(comp.BackgroundColor, compPath+".background_color", "invalid_comp_background_color", addRefusal)
+		}
+		if comp.Renderer != "" {
+			recordCapability("SetRenderer", compPath+".renderer")
 		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)

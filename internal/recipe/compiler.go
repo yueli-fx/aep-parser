@@ -35,6 +35,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q background_color: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.Renderer != "" {
+		if err := aep.SetRenderer(comp, compSpec.Renderer); err != nil {
+			return report, fmt.Errorf("recipe: comp %q renderer: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.MotionBlur != nil {
 		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)
@@ -108,6 +113,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
+		expected.Renderer != "" ||
 		expected.MotionBlur != nil ||
 		expected.WorkArea != nil ||
 		len(expected.Effects) > 0 ||
@@ -146,6 +152,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	if expected.ShapeLayerCount != nil {
 		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
 		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	if expected.Renderer != "" {
+		actual := ""
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].Renderer
+		}
+		add("expected_profile.renderer", expected.Renderer, actual, actual == expected.Renderer)
 	}
 	if expected.MotionBlur != nil {
 		checkExpectedMotionBlur(expected.MotionBlur, prof, add)

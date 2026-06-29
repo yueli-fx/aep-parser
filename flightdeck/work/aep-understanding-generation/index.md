@@ -242,6 +242,10 @@ Done:
   second-based start/end settings. The dedicated
   `examples/recipes/minimal-comp-work-area.json` example asserts both
   profile-visible work area fields and passes an AE 2025 render oracle gate.
+- Fourth comp-level recipe settings slice is implemented for `comp.renderer`.
+  The dedicated `examples/recipes/minimal-comp-renderer.json` example asserts
+  the profile-visible renderer match name and passes an AE 2025 render oracle
+  gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
