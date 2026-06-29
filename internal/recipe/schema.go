@@ -55,17 +55,23 @@ type CompMotionBlurSpec struct {
 }
 
 type Layer struct {
-	Type       string         `json:"type"`
-	Name       string         `json:"name"`
-	Label      *float64       `json:"label,omitempty"`
-	Comment    string         `json:"comment,omitempty"`
-	MotionBlur *bool          `json:"motion_blur,omitempty"`
-	Shy        *bool          `json:"shy,omitempty"`
-	Text       string         `json:"text,omitempty"`
-	TextStyle  *TextStyleSpec `json:"text_style,omitempty"`
-	Shape      *ShapeSpec     `json:"shape,omitempty"`
-	Transform  Transform      `json:"transform,omitempty"`
-	Effects    []Effect       `json:"effects,omitempty"`
+	Type              string         `json:"type"`
+	Name              string         `json:"name"`
+	Label             *float64       `json:"label,omitempty"`
+	Comment           string         `json:"comment,omitempty"`
+	Visible           *bool          `json:"visible,omitempty"`
+	Solo              *bool          `json:"solo,omitempty"`
+	Locked            *bool          `json:"locked,omitempty"`
+	MotionBlur        *bool          `json:"motion_blur,omitempty"`
+	Shy               *bool          `json:"shy,omitempty"`
+	EffectsEnabled    *bool          `json:"effects_enabled,omitempty"`
+	AudioEnabled      *bool          `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled *bool          `json:"frame_blend_enabled,omitempty"`
+	Text              string         `json:"text,omitempty"`
+	TextStyle         *TextStyleSpec `json:"text_style,omitempty"`
+	Shape             *ShapeSpec     `json:"shape,omitempty"`
+	Transform         Transform      `json:"transform,omitempty"`
+	Effects           []Effect       `json:"effects,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -657,11 +663,29 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	if layer.Comment != "" {
 		recordCapability("Layer.SetComment", layerPath+".comment")
 	}
+	if layer.Visible != nil {
+		recordCapability("Layer.SetVisible", layerPath+".visible")
+	}
+	if layer.Solo != nil {
+		recordCapability("Layer.SetSolo", layerPath+".solo")
+	}
+	if layer.Locked != nil {
+		recordCapability("Layer.SetLocked", layerPath+".locked")
+	}
 	if layer.MotionBlur != nil {
 		recordCapability("Layer.SetMotionBlur", layerPath+".motion_blur")
 	}
 	if layer.Shy != nil {
 		recordCapability("Layer.SetShy", layerPath+".shy")
+	}
+	if layer.EffectsEnabled != nil {
+		recordCapability("Layer.SetEffectsEnabled", layerPath+".effects_enabled")
+	}
+	if layer.AudioEnabled != nil {
+		recordCapability("Layer.SetAudioEnabled", layerPath+".audio_enabled")
+	}
+	if layer.FrameBlendEnabled != nil {
+		recordCapability("Layer.SetFrameBlendEnabled", layerPath+".frame_blend_enabled")
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

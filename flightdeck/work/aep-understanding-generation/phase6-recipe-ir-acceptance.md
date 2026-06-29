@@ -1483,6 +1483,39 @@ Forty-sixth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-seventh follow-up completed:
+
+- Layer recipes now support common switches:
+  - `visible` -> `Layer.SetVisible`
+  - `solo` -> `Layer.SetSolo`
+  - `locked` -> `Layer.SetLocked`
+  - `effects_enabled` -> `Layer.SetEffectsEnabled`
+  - `audio_enabled` -> `Layer.SetAudioEnabled`
+  - `frame_blend_enabled` -> `Layer.SetFrameBlendEnabled`
+- Boundary: these are length-preserving layer switches in `ldta`; solo uses
+  offset `0x26`, the others are in the common flag region around offset
+  `0x27`. Some switches only affect rendering with matching layer context
+  (`effects_enabled`, `audio_enabled`, `frame_blend_enabled`), so this slice
+  asserts byte/readback behavior and AE open/render acceptance.
+- `examples/recipes/minimal-layer-common-switches.json` is a dedicated
+  one-text-layer recipe covering all six switches. See
+  `knowledge/layer/recipe-common-switches.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-common-switches.json -out
+    tmp_debug\recipes\minimal-layer-common-switches.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_common_switches\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_common_switches\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

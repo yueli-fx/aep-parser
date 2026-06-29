@@ -697,6 +697,21 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 				return fmt.Errorf("recipe: layer %q comment: %w", spec.Name, err)
 			}
 		}
+		if spec.Visible != nil {
+			if err := layer.SetVisible(*spec.Visible); err != nil {
+				return fmt.Errorf("recipe: layer %q visible: %w", spec.Name, err)
+			}
+		}
+		if spec.Solo != nil {
+			if err := layer.SetSolo(*spec.Solo); err != nil {
+				return fmt.Errorf("recipe: layer %q solo: %w", spec.Name, err)
+			}
+		}
+		if spec.Locked != nil {
+			if err := layer.SetLocked(*spec.Locked); err != nil {
+				return fmt.Errorf("recipe: layer %q locked: %w", spec.Name, err)
+			}
+		}
 		if spec.MotionBlur != nil {
 			if err := layer.SetMotionBlur(*spec.MotionBlur); err != nil {
 				return fmt.Errorf("recipe: layer %q motion_blur: %w", spec.Name, err)
@@ -705,6 +720,21 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 		if spec.Shy != nil {
 			if err := layer.SetShy(*spec.Shy); err != nil {
 				return fmt.Errorf("recipe: layer %q shy: %w", spec.Name, err)
+			}
+		}
+		if spec.EffectsEnabled != nil {
+			if err := layer.SetEffectsEnabled(*spec.EffectsEnabled); err != nil {
+				return fmt.Errorf("recipe: layer %q effects_enabled: %w", spec.Name, err)
+			}
+		}
+		if spec.AudioEnabled != nil {
+			if err := layer.SetAudioEnabled(*spec.AudioEnabled); err != nil {
+				return fmt.Errorf("recipe: layer %q audio_enabled: %w", spec.Name, err)
+			}
+		}
+		if spec.FrameBlendEnabled != nil {
+			if err := layer.SetFrameBlendEnabled(*spec.FrameBlendEnabled); err != nil {
+				return fmt.Errorf("recipe: layer %q frame_blend_enabled: %w", spec.Name, err)
 			}
 		}
 		if err := applyTransform(layer, spec.Transform); err != nil {

@@ -417,6 +417,26 @@ func TestValidateReportsLayerShyCapability(t *testing.T) {
 	assertCapability(t, report, "Layer.SetShy")
 }
 
+func TestValidateReportsLayerCommonSwitchCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	layer := &rec.Comps[0].Layers[0]
+	layer.Visible = boolPtr(false)
+	layer.Solo = boolPtr(true)
+	layer.Locked = boolPtr(true)
+	layer.EffectsEnabled = boolPtr(false)
+	layer.AudioEnabled = boolPtr(false)
+	layer.FrameBlendEnabled = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetVisible")
+	assertCapability(t, report, "Layer.SetSolo")
+	assertCapability(t, report, "Layer.SetLocked")
+	assertCapability(t, report, "Layer.SetEffectsEnabled")
+	assertCapability(t, report, "Layer.SetAudioEnabled")
+	assertCapability(t, report, "Layer.SetFrameBlendEnabled")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

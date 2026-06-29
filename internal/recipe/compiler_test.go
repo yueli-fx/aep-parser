@@ -197,6 +197,49 @@ func TestCompileToFileSetsLayerShy(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerCommonSwitches(t *testing.T) {
+	rec := minimalRecipe()
+	layer := &rec.Comps[0].Layers[0]
+	layer.Visible = boolPtr(false)
+	layer.Solo = boolPtr(true)
+	layer.Locked = boolPtr(true)
+	layer.EffectsEnabled = boolPtr(false)
+	layer.AudioEnabled = boolPtr(false)
+	layer.FrameBlendEnabled = boolPtr(true)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if got.Visible {
+		t.Fatal("layer visible = true, want false")
+	}
+	if !got.Solo {
+		t.Fatal("layer solo = false, want true")
+	}
+	if !got.Locked {
+		t.Fatal("layer locked = false, want true")
+	}
+	if got.EffectsEnabled {
+		t.Fatal("layer effects_enabled = true, want false")
+	}
+	if got.AudioEnabled {
+		t.Fatal("layer audio_enabled = true, want false")
+	}
+	if !got.FrameBlendEnabled {
+		t.Fatal("layer frame_blend_enabled = false, want true")
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
