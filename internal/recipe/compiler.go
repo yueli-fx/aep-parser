@@ -1586,7 +1586,7 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
-	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil || shape.FillCompositeOrder != "" || shape.FillRule != "" {
+	if len(shape.FillColor) >= 3 || shape.FillOpacity != nil || shape.FillBlendMode != nil || shape.FillCompositeOrder != "" || shape.FillRule != "" {
 		fill, err := group.AddFill()
 		if err != nil {
 			return err
@@ -1598,6 +1598,15 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 		}
 		if shape.FillOpacity != nil {
 			if err := fill.SetOpacity(*shape.FillOpacity); err != nil {
+				return err
+			}
+		}
+		if shape.FillBlendMode != nil {
+			mode, err := shapeBlendMode(*shape.FillBlendMode)
+			if err != nil {
+				return err
+			}
+			if err := fill.SetBlendMode(mode); err != nil {
 				return err
 			}
 		}
@@ -1917,6 +1926,13 @@ func shapeCompositeOrder(value string) (aep.ShapeCompositeOrder, error) {
 	default:
 		return 0, fmt.Errorf("unsupported shape composite order %q", value)
 	}
+}
+
+func shapeBlendMode(value float64) (aep.ShapeBlendMode, error) {
+	if value < 1 || !isWholeNumber(value) {
+		return 0, fmt.Errorf("shape blend mode must be an integer of at least 1, got %g", value)
+	}
+	return aep.ShapeBlendMode(value), nil
 }
 
 func fillRule(value string) (aep.FillRule, error) {

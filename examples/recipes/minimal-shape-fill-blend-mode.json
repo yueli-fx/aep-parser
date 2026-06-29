@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal shape fill blend mode"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Blend Fill Card",
+          "shape": {
+            "kind": "rect",
+            "size": [520, 280],
+            "fill_color": [255, 255, 255],
+            "fill_blend_mode": 3
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Blend Fill Card",
+        "match_name": "ADBE Vector Blend Mode",
+        "value": 3
+      }
+    ]
+  }
+}

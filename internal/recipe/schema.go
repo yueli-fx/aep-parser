@@ -149,6 +149,7 @@ type ShapeSpec struct {
 	OuterRoundness     *float64             `json:"outer_roundness,omitempty"`
 	FillColor          []float64            `json:"fill_color,omitempty"`
 	FillOpacity        *float64             `json:"fill_opacity,omitempty"`
+	FillBlendMode      *float64             `json:"fill_blend_mode,omitempty"`
 	FillCompositeOrder string               `json:"fill_composite_order,omitempty"`
 	FillRule           string               `json:"fill_rule,omitempty"`
 	GradientFill       *GradientFillSpec    `json:"gradient_fill,omitempty"`
@@ -1026,6 +1027,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("invalid_shape_fill_opacity", layerPath+".shape.fill_opacity", "fill opacity must be between 0 and 100")
 			}
 		}
+		if layer.Shape.FillBlendMode != nil {
+			recordCapability("FillNode.SetBlendMode", layerPath+".shape.fill_blend_mode")
+			if !validShapeBlendMode(*layer.Shape.FillBlendMode) {
+				addRefusal("invalid_shape_fill_blend_mode", layerPath+".shape.fill_blend_mode", "fill_blend_mode must be an integer of at least 1")
+			}
+		}
 		if layer.Shape.FillCompositeOrder != "" {
 			recordCapability("FillNode.SetCompositeOrder", layerPath+".shape.fill_composite_order")
 			if !validShapeCompositeOrder(layer.Shape.FillCompositeOrder) {
@@ -1615,6 +1622,10 @@ func validShapeCompositeOrder(value string) bool {
 	default:
 		return false
 	}
+}
+
+func validShapeBlendMode(value float64) bool {
+	return value >= 1 && isWholeNumber(value)
 }
 
 func validFillRule(value string) bool {

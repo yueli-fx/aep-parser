@@ -2838,6 +2838,38 @@ Ninety-second follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Ninety-third follow-up completed:
+
+- Shape fill recipes now support:
+  - `shape.fill_blend_mode` -> `FillNode.SetBlendMode`
+- Boundary: `fill_blend_mode` is AE's 1-based shape blend mode index and must
+  be an integer of at least `1`. This recipe field intentionally keeps the
+  numeric AE enum instead of inventing string aliases for the full blend-mode
+  table.
+- `examples/recipes/minimal-shape-fill-blend-mode.json` is a dedicated
+  one-layer shape recipe with a white fill and `fill_blend_mode: 3`. The
+  embedded expected profile checks `ADBE Vector Blend Mode = 3`.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled profile still
+    read `ADBE Vector Blend Mode = 1`, capability `FillNode.SetBlendMode` was
+    absent, and invalid blend mode `0` was not refused.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-fill-blend-mode.json -out
+    tmp_debug\recipes\minimal-shape-fill-blend-mode.aep -json` returned valid,
+    reported `FillNode.SetBlendMode`, and all embedded `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_fill_blend_mode\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_fill_blend_mode\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
