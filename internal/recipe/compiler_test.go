@@ -2046,6 +2046,46 @@ func TestCompileToFileSetsShapeGradientStrokeStyle(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Miter Limit", 9.0)
 }
 
+func TestCompileToFileSetsShapeGradientStrokeAlphaStops(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientStroke = &recipe.GradientStrokeSpec{
+		Type:       "linear",
+		StartPoint: []float64{-240, 0},
+		EndPoint:   []float64{240, 0},
+		Width:      ptr(20),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+		AlphaStops: []recipe.GradientAlphaStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Alpha: 1},
+			{Offset: 1, Midpoint: ptr(0.5), Alpha: 0.25},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	stroke := findGradientStrokeNode(t, project.Compositions[0].Layers[1])
+	stops := stroke.Gradient().AlphaStops
+	if len(stops) != 2 {
+		t.Fatalf("alpha stops = %d, want 2", len(stops))
+	}
+	if math.Abs(stops[1].Alpha-0.25) > 1e-9 {
+		t.Fatalf("alpha stop 1 alpha = %g, want 0.25", stops[1].Alpha)
+	}
+}
+
 func TestCompileToFileSetsShapeStar(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -2877,6 +2917,18 @@ func findProfileLayer(t *testing.T, prof *profile.Profile, name string) profile.
 	}
 	t.Fatalf("layer %q not found in %+v", name, prof.Comps)
 	return profile.Layer{}
+}
+
+func findGradientStrokeNode(t *testing.T, layer *aep.Layer) *aep.GradientStrokeNode {
+	t.Helper()
+	shapeLayer := aep.WrapShapeLayer(layer)
+	for _, child := range shapeLayer.RootGroup().Children {
+		if stroke, ok := child.(*aep.GradientStrokeNode); ok {
+			return stroke
+		}
+	}
+	t.Fatalf("gradient stroke node not found on layer %q", layer.Name)
+	return nil
 }
 
 func assertLayerPropertyValue(t *testing.T, layer profile.Layer, matchName string, want any) {

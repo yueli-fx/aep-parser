@@ -496,6 +496,32 @@ func TestValidateReportsShapeGradientStrokeStyleCapabilities(t *testing.T) {
 	assertCapability(t, report, "GradientStrokeNode.SetMiterLimit")
 }
 
+func TestValidateReportsShapeGradientStrokeAlphaStopCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientStroke = &recipe.GradientStrokeSpec{
+		Type:       "linear",
+		StartPoint: []float64{-240, 0},
+		EndPoint:   []float64{240, 0},
+		Width:      ptr(20),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+		AlphaStops: []recipe.GradientAlphaStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Alpha: 1},
+			{Offset: 1, Midpoint: ptr(0.5), Alpha: 0.25},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "GradientStrokeNode.SetAlphaStops")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1987,6 +2013,9 @@ func TestValidateRejectsInvalidShapeGradientStroke(t *testing.T) {
 		ColorStops: []recipe.GradientColorStopSpec{
 			{Offset: -0.1, Color: []float64{255, 0}},
 		},
+		AlphaStops: []recipe.GradientAlphaStopSpec{
+			{Offset: -0.1, Alpha: 1.2},
+		},
 	}
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
@@ -2002,6 +2031,7 @@ func TestValidateRejectsInvalidShapeGradientStroke(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_gradient_stroke_line_join")
 	assertRefusal(t, report, "invalid_shape_gradient_stroke_miter_limit")
 	assertRefusal(t, report, "invalid_shape_gradient_stroke_color_stops")
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_alpha_stops")
 }
 
 func TestValidateRejectsInvalidShapeStar(t *testing.T) {

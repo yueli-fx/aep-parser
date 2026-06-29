@@ -1735,6 +1735,12 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if len(shape.GradientStroke.AlphaStops) > 0 {
+			stops := gradientAlphaStops(shape.GradientStroke.AlphaStops)
+			if err := stroke.SetAlphaStops(stops); err != nil {
+				return err
+			}
+		}
 	}
 	if shape.Stroke != nil {
 		stroke, err := group.AddStroke()
@@ -1950,6 +1956,22 @@ func gradientColorStops(specs []GradientColorStopSpec) ([]aep.GradientColorStop,
 		})
 	}
 	return stops, nil
+}
+
+func gradientAlphaStops(specs []GradientAlphaStopSpec) []aep.GradientAlphaStop {
+	stops := make([]aep.GradientAlphaStop, 0, len(specs))
+	for _, spec := range specs {
+		midpoint := 0.5
+		if spec.Midpoint != nil {
+			midpoint = *spec.Midpoint
+		}
+		stops = append(stops, aep.GradientAlphaStop{
+			Offset:   spec.Offset,
+			Midpoint: midpoint,
+			Alpha:    spec.Alpha,
+		})
+	}
+	return stops
 }
 
 func repeaterOrder(value string) (aep.RepeaterOrder, error) {

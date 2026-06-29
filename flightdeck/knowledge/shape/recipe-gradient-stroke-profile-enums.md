@@ -15,6 +15,9 @@ Recipe authoring:
 - `gradient_stroke.highlight_angle` is the radial highlight direction in
   degrees.
 - `gradient_stroke.width` is a non-negative stroke width in pixels.
+- `gradient_stroke.alpha_stops[]` requires at least two stops. Stop offsets and
+  midpoints are unit values from `0` to `1`; alpha values are unit opacity from
+  `0` to `1`.
 - `gradient_stroke.line_cap` is a string enum:
   - `"butt"` -> `StrokeLineCapButt`
   - `"round"` -> `StrokeLineCapRound`
@@ -38,6 +41,9 @@ Profile readback:
 - `ADBE Vector Grad HiLite Length` and `ADBE Vector Grad HiLite Angle` read back
   as numeric scalar properties.
 - `ADBE Vector Stroke Width` reads back as a numeric scalar.
+- Alpha stops are stored in the gradient XML payload; recipe coverage asserts
+  them through compiled AEP readback (`Gradient().AlphaStops`) plus AE render
+  oracle instead of `expected_profile.properties[]`.
 - `ADBE Vector Stroke Line Cap` and `ADBE Vector Stroke Line Join` read back as
   numeric enum indexes.
 - `ADBE Vector Stroke Miter Limit` reads back as a numeric scalar.
@@ -48,6 +54,8 @@ Validation:
 - `start_point` and `end_point` must contain two numbers when present.
 - `highlight_length` must be between `-100` and `100` when present.
 - `width` must be non-negative when present.
+- `alpha_stops` must include at least two stops when present; offset, midpoint,
+  and alpha must be between `0` and `1`.
 - `line_cap` must be `butt`, `round`, or `projecting`.
 - `line_join` must be `miter`, `round`, or `bevel`.
 - `miter_limit` must be at least `1`.

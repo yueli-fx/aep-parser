@@ -181,6 +181,12 @@ type GradientColorStopSpec struct {
 	Color    []float64 `json:"color"`
 }
 
+type GradientAlphaStopSpec struct {
+	Offset   float64  `json:"offset"`
+	Midpoint *float64 `json:"midpoint,omitempty"`
+	Alpha    float64  `json:"alpha"`
+}
+
 type GradientStrokeSpec struct {
 	Type            string                  `json:"type,omitempty"`
 	StartPoint      []float64               `json:"start_point,omitempty"`
@@ -192,6 +198,7 @@ type GradientStrokeSpec struct {
 	LineJoin        string                  `json:"line_join,omitempty"`
 	MiterLimit      *float64                `json:"miter_limit,omitempty"`
 	ColorStops      []GradientColorStopSpec `json:"color_stops,omitempty"`
+	AlphaStops      []GradientAlphaStopSpec `json:"alpha_stops,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -1115,6 +1122,10 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("GradientStrokeNode.SetColorStops", gradientPath+".color_stops")
 				validateGradientColorStops(layer.Shape.GradientStroke.ColorStops, gradientPath+".color_stops", "invalid_shape_gradient_stroke_color_stops", "gradient_stroke", addRefusal)
 			}
+			if len(layer.Shape.GradientStroke.AlphaStops) > 0 {
+				recordCapability("GradientStrokeNode.SetAlphaStops", gradientPath+".alpha_stops")
+				validateGradientAlphaStops(layer.Shape.GradientStroke.AlphaStops, gradientPath+".alpha_stops", "invalid_shape_gradient_stroke_alpha_stops", "gradient_stroke", addRefusal)
+			}
 		}
 		if layer.Shape.Stroke != nil {
 			strokePath := layerPath + ".shape.stroke"
@@ -1702,6 +1713,24 @@ func validateGradientColorStops(stops []GradientColorStopSpec, path, code, label
 			addRefusal(code, stopPath+".midpoint", label+" stop midpoint must be between 0 and 1")
 		}
 		validateColor(stop.Color, stopPath+".color", code, addRefusal)
+	}
+}
+
+func validateGradientAlphaStops(stops []GradientAlphaStopSpec, path, code, label string, addRefusal func(string, string, string)) {
+	if len(stops) < 2 {
+		addRefusal(code, path, label+" alpha_stops must include at least 2 stops")
+	}
+	for i, stop := range stops {
+		stopPath := fmt.Sprintf("%s[%d]", path, i)
+		if stop.Offset < 0 || stop.Offset > 1 {
+			addRefusal(code, stopPath+".offset", label+" alpha stop offset must be between 0 and 1")
+		}
+		if stop.Midpoint != nil && (*stop.Midpoint < 0 || *stop.Midpoint > 1) {
+			addRefusal(code, stopPath+".midpoint", label+" alpha stop midpoint must be between 0 and 1")
+		}
+		if stop.Alpha < 0 || stop.Alpha > 1 {
+			addRefusal(code, stopPath+".alpha", label+" alpha stop alpha must be between 0 and 1")
+		}
 	}
 }
 

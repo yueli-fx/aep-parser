@@ -2770,6 +2770,40 @@ Ninetieth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Ninety-first follow-up completed:
+
+- Shape gradient stroke recipes now support:
+  - `shape.gradient_stroke.alpha_stops` -> `GradientStrokeNode.SetAlphaStops`
+- Boundary: `alpha_stops` requires at least two stops when present. Stop
+  `offset`, `midpoint`, and `alpha` are unit values from `0` to `1`.
+- `examples/recipes/minimal-shape-gradient-stroke-alpha-stops.json` is a
+  dedicated one-layer linear gradient stroke recipe with an alpha ramp from
+  `1` to `0.25`. The embedded expected profile checks cover the visible
+  gradient stroke type and width; alpha stops are asserted through compiled AEP
+  readback because they live inside the gradient XML payload.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled AEP readback
+    still returned default alpha `1`, capability
+    `GradientStrokeNode.SetAlphaStops` was absent, and invalid alpha stops were
+    not refused.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-gradient-stroke-alpha-stops.json -out
+    tmp_debug\recipes\minimal-shape-gradient-stroke-alpha-stops.aep -json`
+    returned valid, reported `GradientStrokeNode.SetAlphaStops`, and all
+    embedded `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_gradient_stroke_alpha_stops\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_gradient_stroke_alpha_stops\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
