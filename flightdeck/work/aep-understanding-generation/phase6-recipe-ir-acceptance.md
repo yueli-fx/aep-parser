@@ -1846,6 +1846,32 @@ Fifty-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Sixtieth follow-up completed:
+
+- Camera layer recipes now support a third camera option:
+  - `camera.focus_distance` -> `Layer.SetCameraFocusDistance`
+- Boundary: `camera` options remain valid only on `type: "camera"` layers.
+  This slice covers Focus Distance only; aperture, iris, and other camera
+  options remain separate recipe slices.
+- `examples/recipes/minimal-camera-focus-distance.json` is a dedicated
+  two-layer recipe: a `Camera` layer with focus distance `1200` plus a visible
+  text layer. See `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-focus-distance.json -out
+    tmp_debug\recipes\minimal-camera-focus-distance.aep -json` returned valid
+    and all `profile_checks` passed, including
+    `ADBE Camera Focus Distance = 1200`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_focus_distance\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_focus_distance\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
