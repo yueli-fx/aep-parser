@@ -171,6 +171,10 @@ Done:
   `Property.SetExpression` and optional `Property.SetExpressionEnabled` on the
   returned effect-param property, and `expected_profile.effects[].params[]` can
   assert expression source strings.
+- Recipe comp settings now support `draft_3d`. Profile composition output now
+  exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
+  assert it. This remains a roundtrip/profile contract because AE 2025 DOM
+  readback does not reliably reflect the Draft 3D preview switch.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

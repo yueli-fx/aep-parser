@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 const SchemaVersion = 1
@@ -73,6 +74,7 @@ type Composition struct {
 	Duration   float64            `json:"duration_seconds"`
 	TickRate   float64            `json:"tick_rate,omitempty"`
 	Renderer   string             `json:"renderer,omitempty"`
+	Draft3D    bool               `json:"draft_3d,omitempty"`
 	WorkArea   WorkArea           `json:"work_area"`
 	MotionBlur MotionBlurSettings `json:"motion_blur"`
 	Layers     []Layer            `json:"layers,omitempty"`
@@ -325,10 +327,15 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 
 	pluginSeen := map[string]bool{}
 	for ci, c := range jp.Compositions {
+		var sceneComp *aep.Composition
+		if ci < len(project.Compositions) {
+			sceneComp = project.Compositions[ci]
+		}
 		cp := Composition{
 			ID: c.ID, Name: c.Name, Width: c.Width, Height: c.Height,
 			FrameRate: c.FrameRate, Duration: c.Duration, TickRate: c.TickRate,
 			Renderer: c.Renderer,
+			Draft3D:  compositionDraft3D(sceneComp),
 			WorkArea: WorkArea{Start: c.WorkAreaStart, End: c.WorkAreaEnd},
 			MotionBlur: MotionBlurSettings{
 				ShutterAngle:        c.ShutterAngle,
@@ -344,10 +351,6 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		for _, l := range c.Layers {
 			layerByID[l.ID] = l
 			layerByIndex[l.Index] = l
-		}
-		var sceneComp *aep.Composition
-		if ci < len(project.Compositions) {
-			sceneComp = project.Compositions[ci]
 		}
 		sceneLayerByID, sceneLayerByIndex := indexSceneLayers(sceneComp)
 		for li, l := range c.Layers {
@@ -366,6 +369,14 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		prof.Fingerprint.EffectUsage = nil
 	}
 	return prof, nil
+}
+
+func compositionDraft3D(comp *aep.Composition) bool {
+	if comp == nil {
+		return false
+	}
+	cdta := comp.CdtaRawBytes()
+	return len(cdta) > codec.CdtaFlagsByte8A && cdta[codec.CdtaFlagsByte8A]&0x01 != 0
 }
 
 func buildLayer(

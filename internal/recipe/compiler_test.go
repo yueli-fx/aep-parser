@@ -113,6 +113,41 @@ func TestCompileToFileSetsCompComment(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompDraft3D(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Draft 3D"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"draft_3d": true,
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "Draft 3D",
+				"transform": {"position": [960, 540]}
+			}]
+		}],
+		"expected_profile": {
+			"draft_3d": true
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.draft_3d", true)
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)

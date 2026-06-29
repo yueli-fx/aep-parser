@@ -1652,6 +1652,27 @@ func TestValidateReportsCompFrameBlendingCapability(t *testing.T) {
 	assertCapability(t, report, "SetFrameBlending")
 }
 
+func TestValidateReportsCompDraft3DCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Draft 3D"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"draft_3d": true,
+			"layers": []
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetDraft3D")
+}
+
 func TestValidateReportsCompHideShyLayersCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].HideShyLayers = boolPtr(true)

@@ -33,6 +33,7 @@ type CompSpec struct {
 	PixelAspect              *float64            `json:"pixel_aspect,omitempty"`
 	DisplayStartTime         *float64            `json:"display_start_time,omitempty"`
 	FrameBlending            *bool               `json:"frame_blending,omitempty"`
+	Draft3D                  *bool               `json:"draft_3d,omitempty"`
 	HideShyLayers            *bool               `json:"hide_shy_layers,omitempty"`
 	PreserveNestedFrameRate  *bool               `json:"preserve_nested_frame_rate,omitempty"`
 	PreserveNestedResolution *bool               `json:"preserve_nested_resolution,omitempty"`
@@ -371,6 +372,7 @@ type ExpectedProfile struct {
 	TextLayerCount  *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount *int                        `json:"shape_layer_count,omitempty"`
 	Renderer        string                      `json:"renderer,omitempty"`
+	Draft3D         *bool                       `json:"draft_3d,omitempty"`
 	MotionBlur      *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
 	WorkArea        *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
 	Effects         []ExpectedEffect            `json:"effects,omitempty"`
@@ -558,6 +560,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		}
 		if comp.FrameBlending != nil {
 			recordCapability("SetFrameBlending", compPath+".frame_blending")
+		}
+		if comp.Draft3D != nil {
+			recordCapability("SetDraft3D", compPath+".draft_3d")
 		}
 		if comp.HideShyLayers != nil {
 			recordCapability("SetHideShyLayers", compPath+".hide_shy_layers")

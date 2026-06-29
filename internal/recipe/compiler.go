@@ -60,6 +60,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q frame_blending: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.Draft3D != nil {
+		if err := comp.SetDraft3D(*compSpec.Draft3D); err != nil {
+			return report, fmt.Errorf("recipe: comp %q draft_3d: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.HideShyLayers != nil {
 		if err := comp.SetHideShyLayers(*compSpec.HideShyLayers); err != nil {
 			return report, fmt.Errorf("recipe: comp %q hide_shy_layers: %w", compSpec.Name, err)
@@ -170,6 +175,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
 		expected.Renderer != "" ||
+		expected.Draft3D != nil ||
 		expected.MotionBlur != nil ||
 		expected.WorkArea != nil ||
 		len(expected.Effects) > 0 ||
@@ -215,6 +221,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			actual = prof.Comps[0].Renderer
 		}
 		add("expected_profile.renderer", expected.Renderer, actual, actual == expected.Renderer)
+	}
+	if expected.Draft3D != nil {
+		actual := false
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].Draft3D
+		}
+		add("expected_profile.draft_3d", *expected.Draft3D, actual, actual == *expected.Draft3D)
 	}
 	if expected.MotionBlur != nil {
 		checkExpectedMotionBlur(expected.MotionBlur, prof, add)
