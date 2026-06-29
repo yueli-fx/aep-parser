@@ -68,6 +68,7 @@ type Layer struct {
 	EffectsEnabled        *bool          `json:"effects_enabled,omitempty"`
 	AudioEnabled          *bool          `json:"audio_enabled,omitempty"`
 	FrameBlendEnabled     *bool          `json:"frame_blend_enabled,omitempty"`
+	MarkersLocked         *bool          `json:"markers_locked,omitempty"`
 	CollapseTransform     *bool          `json:"collapse_transform,omitempty"`
 	Is3D                  *bool          `json:"is_3d,omitempty"`
 	IsAdjust              *bool          `json:"is_adjust,omitempty"`
@@ -433,6 +434,7 @@ type ExpectedLayerFlags struct {
 	EffectsEnabled        *bool `json:"effects_enabled,omitempty"`
 	AudioEnabled          *bool `json:"audio_enabled,omitempty"`
 	FrameBlendEnabled     *bool `json:"frame_blend_enabled,omitempty"`
+	MarkersLocked         *bool `json:"markers_locked,omitempty"`
 	FrameBlendPixelMotion *bool `json:"frame_blend_pixel_motion,omitempty"`
 	CollapseTransform     *bool `json:"collapse_transform,omitempty"`
 	SamplingBicubic       *bool `json:"sampling_bicubic,omitempty"`
@@ -960,6 +962,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.FrameBlendEnabled != nil {
 		recordCapability("Layer.SetFrameBlendEnabled", layerPath+".frame_blend_enabled")
+	}
+	if layer.MarkersLocked != nil {
+		recordCapability("Layer.SetMarkersLocked", layerPath+".markers_locked")
 	}
 	if layer.CollapseTransform != nil {
 		recordCapability("Layer.SetCollapseTransform", layerPath+".collapse_transform")

@@ -168,6 +168,7 @@ type LayerFlags struct {
 	EffectsEnabled        bool   `json:"effects_enabled,omitempty"`
 	AudioEnabled          bool   `json:"audio_enabled,omitempty"`
 	FrameBlendEnabled     bool   `json:"frame_blend_enabled,omitempty"`
+	MarkersLocked         bool   `json:"markers_locked,omitempty"`
 	FrameBlendPixelMotion bool   `json:"frame_blend_pixel_motion,omitempty"`
 	CollapseTransform     bool   `json:"collapse_transform,omitempty"`
 	SamplingBicubic       bool   `json:"sampling_bicubic,omitempty"`
@@ -477,6 +478,7 @@ func buildLayer(
 			EffectsEnabled:        l.EffectsEnabled,
 			AudioEnabled:          l.AudioEnabled,
 			FrameBlendEnabled:     l.FrameBlendEnabled,
+			MarkersLocked:         l.MarkersLocked,
 			FrameBlendPixelMotion: l.FrameBlendPixelMotion,
 			CollapseTransform:     l.CollapseTransform,
 			SamplingBicubic:       l.SamplingBicubic,

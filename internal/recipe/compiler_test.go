@@ -342,6 +342,7 @@ func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 		"expected_profile.layers[0].flags.effects_enabled",
 		"expected_profile.layers[0].flags.audio_enabled",
 		"expected_profile.layers[0].flags.frame_blend_enabled",
+		"expected_profile.layers[0].flags.markers_locked",
 		"expected_profile.layers[0].flags.frame_blend_pixel_motion",
 		"expected_profile.layers[0].flags.collapse_transform",
 		"expected_profile.layers[0].flags.is_3d",
@@ -658,6 +659,7 @@ func TestCompileToFileSetsLayerAdvancedSwitches(t *testing.T) {
 	layer.IsAdjust = boolPtr(true)
 	layer.IsNull = boolPtr(true)
 	layer.IsGuide = boolPtr(true)
+	layer.MarkersLocked = boolPtr(true)
 	layer.SamplingBicubic = boolPtr(true)
 	layer.FrameBlendPixelMotion = boolPtr(true)
 	layer.PreserveTransparency = boolPtr(true)
@@ -689,6 +691,9 @@ func TestCompileToFileSetsLayerAdvancedSwitches(t *testing.T) {
 	}
 	if !got.IsGuide {
 		t.Fatal("layer is_guide = false, want true")
+	}
+	if !got.MarkersLocked {
+		t.Fatal("layer markers_locked = false, want true")
 	}
 	if !got.SamplingBicubic {
 		t.Fatal("layer sampling_bicubic = false, want true")

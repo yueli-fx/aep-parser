@@ -237,6 +237,9 @@ Done:
 - Generic layer source refs now have a profile contract:
   `minimal-layer-source-ref.json` asserts a solid layer's footage
   `source_ref` through `expected_profile.layers[].source` and `source_kind`.
+- Layer object flags now include `markers_locked`; the consolidated
+  `minimal-layer-object-profile.json` asserts it through
+  `expected_profile.layers[].flags.markers_locked`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

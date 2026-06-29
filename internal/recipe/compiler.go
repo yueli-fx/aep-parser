@@ -650,6 +650,7 @@ func checkExpectedLayerFlags(path string, expected *ExpectedLayerFlags, actual p
 	addBool("effects_enabled", expected.EffectsEnabled, actual.EffectsEnabled)
 	addBool("audio_enabled", expected.AudioEnabled, actual.AudioEnabled)
 	addBool("frame_blend_enabled", expected.FrameBlendEnabled, actual.FrameBlendEnabled)
+	addBool("markers_locked", expected.MarkersLocked, actual.MarkersLocked)
 	addBool("frame_blend_pixel_motion", expected.FrameBlendPixelMotion, actual.FrameBlendPixelMotion)
 	addBool("collapse_transform", expected.CollapseTransform, actual.CollapseTransform)
 	addBool("sampling_bicubic", expected.SamplingBicubic, actual.SamplingBicubic)
@@ -1148,6 +1149,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 		if spec.FrameBlendEnabled != nil {
 			if err := layer.SetFrameBlendEnabled(*spec.FrameBlendEnabled); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q frame_blend_enabled: %w", spec.Name, err)
+			}
+		}
+		if spec.MarkersLocked != nil {
+			if err := layer.SetMarkersLocked(*spec.MarkersLocked); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q markers_locked: %w", spec.Name, err)
 			}
 		}
 		if spec.CollapseTransform != nil {
