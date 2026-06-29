@@ -624,6 +624,41 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.OffsetPaths != nil {
+		offsetPaths, err := group.AddOffsetPaths()
+		if err != nil {
+			return err
+		}
+		if shape.OffsetPaths.Amount != nil {
+			if err := offsetPaths.SetAmount(*shape.OffsetPaths.Amount); err != nil {
+				return err
+			}
+		}
+		if shape.OffsetPaths.LineJoin != "" {
+			lineJoin, err := offsetLineJoin(shape.OffsetPaths.LineJoin)
+			if err != nil {
+				return err
+			}
+			if err := offsetPaths.SetLineJoin(lineJoin); err != nil {
+				return err
+			}
+		}
+		if shape.OffsetPaths.MiterLimit != nil {
+			if err := offsetPaths.SetMiterLimit(*shape.OffsetPaths.MiterLimit); err != nil {
+				return err
+			}
+		}
+		if shape.OffsetPaths.Copies != nil {
+			if err := offsetPaths.SetCopies(*shape.OffsetPaths.Copies); err != nil {
+				return err
+			}
+		}
+		if shape.OffsetPaths.CopyOffset != nil {
+			if err := offsetPaths.SetCopyOffset(*shape.OffsetPaths.CopyOffset); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {
@@ -684,6 +719,19 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 		}
 	}
 	return nil
+}
+
+func offsetLineJoin(value string) (aep.StrokeLineJoin, error) {
+	switch value {
+	case "miter":
+		return aep.StrokeLineJoinMiter, nil
+	case "round":
+		return aep.StrokeLineJoinRound, nil
+	case "bevel":
+		return aep.StrokeLineJoinBevel, nil
+	default:
+		return 0, fmt.Errorf("unsupported offset line_join %q", value)
+	}
 }
 
 func applyTransform(layer *aep.Layer, spec Transform) error {

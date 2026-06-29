@@ -162,6 +162,11 @@ Done:
   `shape.round_corners.radius`. The updated shape/text example asserts
   `ADBE Vector RoundCorner Radius`, passed `go test ./...`, `go vet ./...`,
   profile checks, and an AE 2025 render oracle gate.
+- Third shape-filter recipe slice is implemented for `shape.offset_paths`
+  amount, line join, miter limit, copies, and copy offset. The updated
+  shape/text example asserts all five `ADBE Vector Offset ...` properties,
+  passed `go test ./...`, `go vet ./...`, profile checks, and an AE 2025
+  render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

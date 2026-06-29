@@ -63,6 +63,7 @@ type ShapeSpec struct {
 	Stroke       *StrokeSpec       `json:"stroke,omitempty"`
 	Trim         *TrimSpec         `json:"trim,omitempty"`
 	RoundCorners *RoundCornersSpec `json:"round_corners,omitempty"`
+	OffsetPaths  *OffsetPathsSpec  `json:"offset_paths,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -79,6 +80,14 @@ type TrimSpec struct {
 
 type RoundCornersSpec struct {
 	Radius *float64 `json:"radius,omitempty"`
+}
+
+type OffsetPathsSpec struct {
+	Amount     *float64 `json:"amount,omitempty"`
+	LineJoin   string   `json:"line_join,omitempty"`
+	MiterLimit *float64 `json:"miter_limit,omitempty"`
+	Copies     *float64 `json:"copies,omitempty"`
+	CopyOffset *float64 `json:"copy_offset,omitempty"`
 }
 
 type Effect struct {
@@ -466,6 +475,34 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				}
 			}
 		}
+		if layer.Shape.OffsetPaths != nil {
+			offsetPath := layerPath + ".shape.offset_paths"
+			recordCapability("VectorGroup.AddOffsetPaths", offsetPath)
+			if layer.Shape.OffsetPaths.Amount != nil {
+				recordCapability("OffsetPathsNode.SetAmount", offsetPath+".amount")
+			}
+			if layer.Shape.OffsetPaths.LineJoin != "" {
+				recordCapability("OffsetPathsNode.SetLineJoin", offsetPath+".line_join")
+				if !validOffsetLineJoin(layer.Shape.OffsetPaths.LineJoin) {
+					addRefusal("invalid_shape_offset_line_join", offsetPath+".line_join", "offset line_join must be miter, round, or bevel")
+				}
+			}
+			if layer.Shape.OffsetPaths.MiterLimit != nil {
+				recordCapability("OffsetPathsNode.SetMiterLimit", offsetPath+".miter_limit")
+				if *layer.Shape.OffsetPaths.MiterLimit < 1 {
+					addRefusal("invalid_shape_offset_miter_limit", offsetPath+".miter_limit", "offset miter_limit must be at least 1")
+				}
+			}
+			if layer.Shape.OffsetPaths.Copies != nil {
+				recordCapability("OffsetPathsNode.SetCopies", offsetPath+".copies")
+				if *layer.Shape.OffsetPaths.Copies < 1 {
+					addRefusal("invalid_shape_offset_copies", offsetPath+".copies", "offset copies must be at least 1")
+				}
+			}
+			if layer.Shape.OffsetPaths.CopyOffset != nil {
+				recordCapability("OffsetPathsNode.SetCopyOffset", offsetPath+".copy_offset")
+			}
+		}
 	}
 	if usesTransform(layer.Transform) {
 		recordCapability("SetLayerTransform", layerPath+".transform")
@@ -602,6 +639,15 @@ func validateTextStyle(style TextStyleSpec, stylePath string, recordCapability f
 func validTextJustification(value string) bool {
 	switch value {
 	case "left", "right", "center":
+		return true
+	default:
+		return false
+	}
+}
+
+func validOffsetLineJoin(value string) bool {
+	switch value {
+	case "miter", "round", "bevel":
 		return true
 	default:
 		return false

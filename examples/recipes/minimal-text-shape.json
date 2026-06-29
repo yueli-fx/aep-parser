@@ -80,6 +80,13 @@
             },
             "round_corners": {
               "radius": 18
+            },
+            "offset_paths": {
+              "amount": 24,
+              "line_join": "bevel",
+              "miter_limit": 2,
+              "copies": 3,
+              "copy_offset": 1.5
             }
           },
           "transform": {
@@ -144,6 +151,31 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector RoundCorner Radius",
         "value": 18
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Offset Amount",
+        "value": 24
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Offset Line Join",
+        "value": 3
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Offset Miter Limit",
+        "value": 2
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Offset Copies",
+        "value": 3
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Offset Copy Offset",
+        "value": 1.5
       }
     ],
     "text_styles": [

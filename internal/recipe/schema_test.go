@@ -324,6 +324,29 @@ func TestValidateReportsShapeRoundCornersCapabilities(t *testing.T) {
 	assertCapability(t, report, "RoundCornersNode.SetRadius")
 }
 
+func TestValidateReportsShapeOffsetPathsCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.OffsetPaths = &recipe.OffsetPathsSpec{
+		Amount:     ptr(24),
+		LineJoin:   "bevel",
+		MiterLimit: ptr(2),
+		Copies:     ptr(3),
+		CopyOffset: ptr(1.5),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddOffsetPaths")
+	assertCapability(t, report, "OffsetPathsNode.SetAmount")
+	assertCapability(t, report, "OffsetPathsNode.SetLineJoin")
+	assertCapability(t, report, "OffsetPathsNode.SetMiterLimit")
+	assertCapability(t, report, "OffsetPathsNode.SetCopies")
+	assertCapability(t, report, "OffsetPathsNode.SetCopyOffset")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
@@ -424,6 +447,24 @@ func TestValidateRejectsInvalidShapeRoundCorners(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_shape_round_corners_radius")
+}
+
+func TestValidateRejectsInvalidShapeOffsetPaths(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.OffsetPaths = &recipe.OffsetPathsSpec{
+		LineJoin:   "square",
+		MiterLimit: ptr(0),
+		Copies:     ptr(0),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_offset_line_join")
+	assertRefusal(t, report, "invalid_shape_offset_miter_limit")
+	assertRefusal(t, report, "invalid_shape_offset_copies")
 }
 
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {

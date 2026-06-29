@@ -444,6 +444,47 @@ Fifteenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Sixteenth follow-up completed:
+
+- Shape recipes now support `shape.offset_paths`, including:
+  - `amount` -> `ADBE Vector Offset Amount`
+  - `line_join` -> `ADBE Vector Offset Line Join`
+  - `miter_limit` -> `ADBE Vector Offset Miter Limit`
+  - `copies` -> `ADBE Vector Offset Copies`
+  - `copy_offset` -> `ADBE Vector Offset Copy Offset`
+- Validation rejects unsupported `line_join` values, `miter_limit < 1`, and
+  `copies < 1`; offset amount and copy offset intentionally have no recipe
+  range limit beyond the underlying writer.
+- Capability reporting records:
+  - `VectorGroup.AddOffsetPaths`
+  - `OffsetPathsNode.SetAmount`
+  - `OffsetPathsNode.SetLineJoin`
+  - `OffsetPathsNode.SetMiterLimit`
+  - `OffsetPathsNode.SetCopies`
+  - `OffsetPathsNode.SetCopyOffset`
+- `examples/recipes/minimal-text-shape.json` now includes Offset Paths on the
+  `Underline` layer and asserts all five Offset Paths profile properties.
+  Note: recipe `line_join` is authored as a string, while profile
+  `ADBE Vector Offset Line Join` reads back as numeric enum `1/2/3`; see
+  `knowledge/shape/recipe-offset-paths-profile-enums.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-offset-paths.aep -json`
+    returned valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_offset_paths/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_offset_paths/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
