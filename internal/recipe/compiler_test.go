@@ -107,6 +107,44 @@ func TestCompileToFileSetsShapeDetail(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Fill Opacity", 45.0)
 }
 
+func TestCompileToFileSetsShapeStar(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
+	rec.Comps[0].Layers[1].Shape.Points = ptr(6)
+	rec.Comps[0].Layers[1].Shape.Position = []float64{20, -10}
+	rec.Comps[0].Layers[1].Shape.Rotation = ptr(30)
+	rec.Comps[0].Layers[1].Shape.InnerRadius = ptr(45)
+	rec.Comps[0].Layers[1].Shape.OuterRadius = ptr(120)
+	rec.Comps[0].Layers[1].Shape.InnerRoundness = ptr(10)
+	rec.Comps[0].Layers[1].Shape.OuterRoundness = ptr(20)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Type", 2.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Points", 6.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Position", []float64{20, -10})
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Rotation", 30.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Inner Radius", 45.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Outer Radius", 120.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Inner Roundess", 10.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Star Outer Roundess", 20.0)
+}
+
 func TestCompileToFileSetsShapeTrim(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Trim = &recipe.TrimSpec{

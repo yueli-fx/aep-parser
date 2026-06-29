@@ -203,6 +203,12 @@ Done:
   2025 render oracle gate. Current recipe IR still has one primitive per shape
   layer; visible multi-path boolean recipes need a later multi-shape or
   vector-group structure.
+- Eleventh shape recipe slice is implemented for `shape.kind: star` /
+  `polygon` plus polystar points, position, rotation, inner/outer radius, and
+  inner/outer roundness. The dedicated
+  `examples/recipes/minimal-shape-polystar.json` example asserts all eight
+  `ADBE Vector Star ...` properties, passed profile checks, and passed an AE
+  2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

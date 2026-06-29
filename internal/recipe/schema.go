@@ -58,6 +58,12 @@ type ShapeSpec struct {
 	Size            []float64            `json:"size,omitempty"`
 	Position        []float64            `json:"position,omitempty"`
 	Roundness       *float64             `json:"roundness,omitempty"`
+	Points          *float64             `json:"points,omitempty"`
+	Rotation        *float64             `json:"rotation,omitempty"`
+	InnerRadius     *float64             `json:"inner_radius,omitempty"`
+	OuterRadius     *float64             `json:"outer_radius,omitempty"`
+	InnerRoundness  *float64             `json:"inner_roundness,omitempty"`
+	OuterRoundness  *float64             `json:"outer_roundness,omitempty"`
 	FillColor       []float64            `json:"fill_color,omitempty"`
 	FillOpacity     *float64             `json:"fill_opacity,omitempty"`
 	Stroke          *StrokeSpec          `json:"stroke,omitempty"`
@@ -482,6 +488,44 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				if layer.Shape.Roundness != nil {
 					addRefusal("unsupported_shape_roundness", layerPath+".shape.roundness", "roundness is only supported for rect shapes")
 				}
+			}
+		case "star", "polygon":
+			recordCapability("VectorGroup.AddStar", layerPath+".shape.kind")
+			if layer.Shape.Kind == "polygon" {
+				recordCapability("StarNode.SetStarType", layerPath+".shape.kind")
+			}
+			if layer.Shape.Points != nil {
+				recordCapability("StarNode.SetPoints", layerPath+".shape.points")
+				if *layer.Shape.Points < 3 {
+					addRefusal("invalid_shape_star_points", layerPath+".shape.points", "star points must be at least 3")
+				}
+			}
+			if len(layer.Shape.Position) > 0 {
+				recordCapability("StarNode.SetPosition", layerPath+".shape.position")
+			}
+			if layer.Shape.Rotation != nil {
+				recordCapability("StarNode.SetRotation", layerPath+".shape.rotation")
+			}
+			if layer.Shape.InnerRadius != nil {
+				recordCapability("StarNode.SetInnerRadius", layerPath+".shape.inner_radius")
+				if *layer.Shape.InnerRadius < 0 {
+					addRefusal("invalid_shape_star_inner_radius", layerPath+".shape.inner_radius", "star inner_radius must be non-negative")
+				}
+			}
+			if layer.Shape.OuterRadius != nil {
+				recordCapability("StarNode.SetOuterRadius", layerPath+".shape.outer_radius")
+				if *layer.Shape.OuterRadius < 0 {
+					addRefusal("invalid_shape_star_outer_radius", layerPath+".shape.outer_radius", "star outer_radius must be non-negative")
+				}
+			}
+			if layer.Shape.InnerRoundness != nil {
+				recordCapability("StarNode.SetInnerRoundness", layerPath+".shape.inner_roundness")
+			}
+			if layer.Shape.OuterRoundness != nil {
+				recordCapability("StarNode.SetOuterRoundness", layerPath+".shape.outer_roundness")
+			}
+			if layer.Shape.Roundness != nil {
+				addRefusal("unsupported_shape_roundness", layerPath+".shape.roundness", "roundness is only supported for rect shapes")
 			}
 		default:
 			addRefusal("unsupported_shape_kind", layerPath+".shape.kind", fmt.Sprintf("unsupported shape kind %q", layer.Shape.Kind))

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal polystar"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Badge",
+          "shape": {
+            "kind": "polygon",
+            "points": 6,
+            "position": [20, -10],
+            "rotation": 30,
+            "inner_radius": 45,
+            "outer_radius": 120,
+            "inner_roundness": 10,
+            "outer_roundness": 20,
+            "fill_color": [255, 255, 255]
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Type",
+        "value": 2
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Points",
+        "value": 6
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Position",
+        "value": [20, -10]
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Rotation",
+        "value": 30
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Inner Radius",
+        "value": 45
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Outer Radius",
+        "value": 120
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Inner Roundess",
+        "value": 10
+      },
+      {
+        "layer_name": "Badge",
+        "match_name": "ADBE Vector Star Outer Roundess",
+        "value": 20
+      }
+    ]
+  }
+}

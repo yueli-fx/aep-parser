@@ -612,6 +612,51 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+	case "star", "polygon":
+		star, err := group.AddStar()
+		if err != nil {
+			return err
+		}
+		if shape.Kind == "polygon" {
+			if err := star.SetStarType(aep.StarTypePolygon); err != nil {
+				return err
+			}
+		}
+		if shape.Points != nil {
+			if err := star.SetPoints(*shape.Points); err != nil {
+				return err
+			}
+		}
+		if len(shape.Position) == 2 {
+			if err := star.SetPosition([2]float64{shape.Position[0], shape.Position[1]}); err != nil {
+				return err
+			}
+		}
+		if shape.Rotation != nil {
+			if err := star.SetRotation(*shape.Rotation); err != nil {
+				return err
+			}
+		}
+		if shape.InnerRadius != nil {
+			if err := star.SetInnerRadius(*shape.InnerRadius); err != nil {
+				return err
+			}
+		}
+		if shape.OuterRadius != nil {
+			if err := star.SetOuterRadius(*shape.OuterRadius); err != nil {
+				return err
+			}
+		}
+		if shape.InnerRoundness != nil {
+			if err := star.SetInnerRoundness(*shape.InnerRoundness); err != nil {
+				return err
+			}
+		}
+		if shape.OuterRoundness != nil {
+			if err := star.SetOuterRoundness(*shape.OuterRoundness); err != nil {
+				return err
+			}
+		}
 	}
 	if shape.RoundCorners != nil {
 		roundCorners, err := group.AddRoundCorners()

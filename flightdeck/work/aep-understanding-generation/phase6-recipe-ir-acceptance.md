@@ -776,6 +776,50 @@ Twenty-third follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-fourth follow-up completed:
+
+- Shape recipes now support polystar geometry through `shape.kind`:
+  - `star` -> default `ADBE Vector Shape - Star`
+  - `polygon` -> `ADBE Vector Star Type` = `2`
+- Supported polystar fields:
+  - `points` -> `ADBE Vector Star Points`
+  - `position` -> `ADBE Vector Star Position`
+  - `rotation` -> `ADBE Vector Star Rotation`
+  - `inner_radius` -> `ADBE Vector Star Inner Radius`
+  - `outer_radius` -> `ADBE Vector Star Outer Radius`
+  - `inner_roundness` -> `ADBE Vector Star Inner Roundess`
+  - `outer_roundness` -> `ADBE Vector Star Outer Roundess`
+- Validation rejects `points < 3`, malformed `position`, negative radii, and
+  legacy rect-only `roundness` on polystar shapes.
+- Capability reporting records:
+  - `VectorGroup.AddStar`
+  - `StarNode.SetStarType`
+  - `StarNode.SetPoints`
+  - `StarNode.SetPosition`
+  - `StarNode.SetRotation`
+  - `StarNode.SetInnerRadius`
+  - `StarNode.SetOuterRadius`
+  - `StarNode.SetInnerRoundness`
+  - `StarNode.SetOuterRoundness`
+- `examples/recipes/minimal-shape-polystar.json` is a dedicated polystar
+  recipe example and asserts all eight profile-visible `ADBE Vector Star ...`
+  properties. See `knowledge/shape/recipe-polystar-profile-fields.md` for enum
+  and profile spelling notes.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-polystar.json -out
+    tmp_debug\recipes\minimal-shape-polystar.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_polystar/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_polystar/aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

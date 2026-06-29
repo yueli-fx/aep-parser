@@ -293,6 +293,33 @@ func TestValidateReportsShapeDetailCapabilities(t *testing.T) {
 	assertCapability(t, report, "FillNode.SetOpacity")
 }
 
+func TestValidateReportsShapeStarCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
+	rec.Comps[0].Layers[1].Shape.Points = ptr(6)
+	rec.Comps[0].Layers[1].Shape.Position = []float64{20, -10}
+	rec.Comps[0].Layers[1].Shape.Rotation = ptr(30)
+	rec.Comps[0].Layers[1].Shape.InnerRadius = ptr(45)
+	rec.Comps[0].Layers[1].Shape.OuterRadius = ptr(120)
+	rec.Comps[0].Layers[1].Shape.InnerRoundness = ptr(10)
+	rec.Comps[0].Layers[1].Shape.OuterRoundness = ptr(20)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddStar")
+	assertCapability(t, report, "StarNode.SetStarType")
+	assertCapability(t, report, "StarNode.SetPoints")
+	assertCapability(t, report, "StarNode.SetPosition")
+	assertCapability(t, report, "StarNode.SetRotation")
+	assertCapability(t, report, "StarNode.SetInnerRadius")
+	assertCapability(t, report, "StarNode.SetOuterRadius")
+	assertCapability(t, report, "StarNode.SetInnerRoundness")
+	assertCapability(t, report, "StarNode.SetOuterRoundness")
+}
+
 func TestValidateReportsShapeTrimCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Trim = &recipe.TrimSpec{
@@ -574,6 +601,25 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_roundness")
 	assertRefusal(t, report, "invalid_shape_fill_opacity")
+}
+
+func TestValidateRejectsInvalidShapeStar(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Kind = "star"
+	rec.Comps[0].Layers[1].Shape.Points = ptr(2)
+	rec.Comps[0].Layers[1].Shape.Position = []float64{12}
+	rec.Comps[0].Layers[1].Shape.InnerRadius = ptr(-1)
+	rec.Comps[0].Layers[1].Shape.OuterRadius = ptr(-1)
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_star_points")
+	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_star_inner_radius")
+	assertRefusal(t, report, "invalid_shape_star_outer_radius")
 }
 
 func TestValidateRejectsInvalidShapeTrim(t *testing.T) {
