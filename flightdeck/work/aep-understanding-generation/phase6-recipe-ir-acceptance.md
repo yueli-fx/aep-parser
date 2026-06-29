@@ -1582,6 +1582,35 @@ Forty-ninth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fiftieth follow-up completed:
+
+- Layer recipes now support timing controls:
+  - `start_time` -> `Layer.SetStartTime`
+  - `in_point` -> `Layer.SetInPoint`
+  - `out_point` -> `Layer.SetOutPoint`
+- Boundary: `start_time` is allowed to be negative for pre-roll, while
+  `in_point` and `out_point` are validated within comp duration and
+  `out_point >= in_point`. `stretch` is intentionally excluded because its
+  current writer capability is alpha/roundtrip-only and AE recomputes the span
+  from coordinated timing fields.
+- `examples/recipes/minimal-layer-timing.json` is a dedicated one-text-layer
+  recipe with `start_time: 0.25`, `in_point: 0.1`, and `out_point: 0.9`. See
+  `knowledge/layer/recipe-timing.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-timing.json -out
+    tmp_debug\recipes\minimal-layer-timing.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_timing\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_timing\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000003.png`, `f000027.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

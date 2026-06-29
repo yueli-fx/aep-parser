@@ -76,6 +76,9 @@ type Layer struct {
 	PreserveTransparency  *bool          `json:"preserve_transparency,omitempty"`
 	Quality               string         `json:"quality,omitempty"`
 	BlendingMode          string         `json:"blending_mode,omitempty"`
+	StartTime             *float64       `json:"start_time,omitempty"`
+	InPoint               *float64       `json:"in_point,omitempty"`
+	OutPoint              *float64       `json:"out_point,omitempty"`
 	Text                  string         `json:"text,omitempty"`
 	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
 	Shape                 *ShapeSpec     `json:"shape,omitempty"`
@@ -727,6 +730,24 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		recordCapability("Layer.SetBlendingMode", layerPath+".blending_mode")
 		if _, err := layerBlendingMode(layer.BlendingMode); err != nil {
 			addRefusal("invalid_layer_blending_mode", layerPath+".blending_mode", "blending_mode is not supported")
+		}
+	}
+	if layer.StartTime != nil {
+		recordCapability("Layer.SetStartTime", layerPath+".start_time")
+	}
+	if layer.InPoint != nil {
+		recordCapability("Layer.SetInPoint", layerPath+".in_point")
+		if *layer.InPoint < 0 || *layer.InPoint > compDuration {
+			addRefusal("invalid_layer_in_point", layerPath+".in_point", "in_point must be between 0 and comp duration")
+		}
+	}
+	if layer.OutPoint != nil {
+		recordCapability("Layer.SetOutPoint", layerPath+".out_point")
+		if *layer.OutPoint < 0 || *layer.OutPoint > compDuration {
+			addRefusal("invalid_layer_out_point", layerPath+".out_point", "out_point must be between 0 and comp duration")
+		}
+		if layer.InPoint != nil && *layer.OutPoint < *layer.InPoint {
+			addRefusal("invalid_layer_out_point", layerPath+".out_point", "out_point must be greater than or equal to in_point")
 		}
 	}
 	if layer.TextStyle != nil {

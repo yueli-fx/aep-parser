@@ -484,6 +484,33 @@ func TestValidateRejectsInvalidLayerQualityAndBlendingMode(t *testing.T) {
 	assertRefusal(t, report, "invalid_layer_blending_mode")
 }
 
+func TestValidateReportsLayerTimingCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].StartTime = ptr(0.25)
+	rec.Comps[0].Layers[0].InPoint = ptr(0.1)
+	rec.Comps[0].Layers[0].OutPoint = ptr(0.9)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetStartTime")
+	assertCapability(t, report, "Layer.SetInPoint")
+	assertCapability(t, report, "Layer.SetOutPoint")
+}
+
+func TestValidateRejectsInvalidLayerTiming(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].InPoint = ptr(-0.1)
+	rec.Comps[0].Layers[0].OutPoint = ptr(10)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_layer_in_point")
+	assertRefusal(t, report, "invalid_layer_out_point")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

@@ -313,6 +313,36 @@ func TestCompileToFileSetsLayerQualityAndBlendingMode(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerTiming(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].StartTime = ptr(0.25)
+	rec.Comps[0].Layers[0].InPoint = ptr(0.1)
+	rec.Comps[0].Layers[0].OutPoint = ptr(0.9)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if math.Abs(got.StartTime-0.25) > 1e-6 {
+		t.Fatalf("layer start_time = %g, want 0.25", got.StartTime)
+	}
+	if math.Abs(got.InPoint()-0.1) > 1e-6 {
+		t.Fatalf("layer in_point = %g, want 0.1", got.InPoint())
+	}
+	if math.Abs(got.OutPoint()-0.9) > 1e-6 {
+		t.Fatalf("layer out_point = %g, want 0.9", got.OutPoint())
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

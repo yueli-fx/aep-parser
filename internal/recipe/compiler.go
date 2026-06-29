@@ -790,6 +790,21 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 				return fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
 			}
 		}
+		if spec.StartTime != nil {
+			if err := layer.SetStartTime(*spec.StartTime); err != nil {
+				return fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)
+			}
+		}
+		if spec.InPoint != nil {
+			if err := layer.SetInPoint(*spec.InPoint); err != nil {
+				return fmt.Errorf("recipe: layer %q in_point: %w", spec.Name, err)
+			}
+		}
+		if spec.OutPoint != nil {
+			if err := layer.SetOutPoint(*spec.OutPoint); err != nil {
+				return fmt.Errorf("recipe: layer %q out_point: %w", spec.Name, err)
+			}
+		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
 			return fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
 		}
