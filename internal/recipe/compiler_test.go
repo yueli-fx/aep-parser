@@ -1,6 +1,7 @@
 package recipe_test
 
 import (
+	"encoding/json"
 	"math"
 	"os"
 	"path/filepath"
@@ -48,6 +49,44 @@ func TestCompileMinimalTextShapeRecipeBuildsProfile(t *testing.T) {
 	}
 	if textLayers != 1 || shapeLayers != 1 {
 		t.Fatalf("textLayers=%d shapeLayers=%d, want 1/1; layers=%+v", textLayers, shapeLayers, prof.Comps[0].Layers)
+	}
+}
+
+func TestRecipeExamplesExpectedProfilesAreNotCountOnly(t *testing.T) {
+	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
+	if err != nil {
+		t.Fatalf("Glob recipe examples: %v", err)
+	}
+	if len(recipePaths) == 0 {
+		t.Fatal("no recipe examples found")
+	}
+	countKeys := map[string]bool{
+		"comp_count":        true,
+		"layer_count":       true,
+		"text_layer_count":  true,
+		"shape_layer_count": true,
+	}
+	for _, recipePath := range recipePaths {
+		t.Run(filepath.Base(recipePath), func(t *testing.T) {
+			raw, err := os.ReadFile(recipePath)
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			var doc map[string]any
+			if err := json.Unmarshal(raw, &doc); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			expectedProfile, ok := doc["expected_profile"].(map[string]any)
+			if !ok {
+				t.Fatal("expected_profile is required")
+			}
+			for key := range expectedProfile {
+				if !countKeys[key] {
+					return
+				}
+			}
+			t.Fatal("expected_profile must include at least one non-count check")
+		})
 	}
 }
 
