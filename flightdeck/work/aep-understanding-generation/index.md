@@ -221,6 +221,9 @@ Done:
   `profile.Layer.flags`, and `expected_profile.layers[].flags`.
   `minimal-layer-object-profile.json` asserts `frame_blend_pixel_motion` and
   `sampling_bicubic` alongside the existing object-level layer flags.
+- Camera and light base recipes now assert layer object identity through
+  `expected_profile.layers[]`; option values remain covered by their
+  `expected_profile.properties[]` recipe family.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

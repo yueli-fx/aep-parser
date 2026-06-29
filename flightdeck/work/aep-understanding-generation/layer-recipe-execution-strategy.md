@@ -66,6 +66,7 @@ flags, and refs.
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
+| Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
 | Camera/light options | `camera.*` / `light.*` | camera/light setters | `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 
 ## Preferred Execution Order
@@ -170,6 +171,10 @@ Layer render/sampling flags are now part of the consolidated object baseline:
 `minimal-layer-object-profile.json` asserts both
 `expected_profile.layers[].flags.frame_blend_pixel_motion` and
 `expected_profile.layers[].flags.sampling_bicubic`.
+
+Camera and light layer creation now has object identity coverage in
+`minimal-camera-layer.json` and `minimal-light-layer.json`; parameter values
+remain in the property-based camera/light recipe family.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the

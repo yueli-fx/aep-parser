@@ -354,6 +354,53 @@ func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksCameraAndLightLayerProfileExamples(t *testing.T) {
+	cases := []struct {
+		recipe string
+		paths  []string
+	}{
+		{
+			recipe: "minimal-camera-layer.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[1].name",
+				"expected_profile.layers[1].type",
+			},
+		},
+		{
+			recipe: "minimal-light-layer.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[1].name",
+				"expected_profile.layers[1].type",
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.recipe, func(t *testing.T) {
+			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", tc.recipe))
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			rec := mustUnmarshalRecipe(t, string(raw))
+			outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+			report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+			if err != nil {
+				t.Fatalf("CompileToFile: %v", err)
+			}
+			if !report.Valid {
+				t.Fatalf("report = %+v, want valid", report)
+			}
+			for _, path := range tc.paths {
+				assertProfileCheck(t, report, path, true)
+			}
+		})
+	}
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)
