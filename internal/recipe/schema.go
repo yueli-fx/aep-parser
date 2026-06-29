@@ -91,17 +91,18 @@ type Layer struct {
 }
 
 type CameraSpec struct {
-	Zoom                  *float64 `json:"zoom,omitempty"`
-	DepthOfField          *bool    `json:"depth_of_field,omitempty"`
-	FocusDistance         *float64 `json:"focus_distance,omitempty"`
-	Aperture              *float64 `json:"aperture,omitempty"`
-	BlurLevel             *float64 `json:"blur_level,omitempty"`
-	IrisShape             *float64 `json:"iris_shape,omitempty"`
-	IrisRotation          *float64 `json:"iris_rotation,omitempty"`
-	IrisRoundness         *float64 `json:"iris_roundness,omitempty"`
-	IrisAspectRatio       *float64 `json:"iris_aspect_ratio,omitempty"`
-	IrisDiffractionFringe *float64 `json:"iris_diffraction_fringe,omitempty"`
-	IrisHighlightGain     *float64 `json:"iris_highlight_gain,omitempty"`
+	Zoom                   *float64 `json:"zoom,omitempty"`
+	DepthOfField           *bool    `json:"depth_of_field,omitempty"`
+	FocusDistance          *float64 `json:"focus_distance,omitempty"`
+	Aperture               *float64 `json:"aperture,omitempty"`
+	BlurLevel              *float64 `json:"blur_level,omitempty"`
+	IrisShape              *float64 `json:"iris_shape,omitempty"`
+	IrisRotation           *float64 `json:"iris_rotation,omitempty"`
+	IrisRoundness          *float64 `json:"iris_roundness,omitempty"`
+	IrisAspectRatio        *float64 `json:"iris_aspect_ratio,omitempty"`
+	IrisDiffractionFringe  *float64 `json:"iris_diffraction_fringe,omitempty"`
+	IrisHighlightGain      *float64 `json:"iris_highlight_gain,omitempty"`
+	IrisHighlightThreshold *float64 `json:"iris_highlight_threshold,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -815,6 +816,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Camera.IrisHighlightGain != nil {
 			recordCapability("SetIrisHighlightGain", layerPath+".camera.iris_highlight_gain")
+		}
+		if layer.Camera.IrisHighlightThreshold != nil {
+			recordCapability("SetIrisHighlightThreshold", layerPath+".camera.iris_highlight_threshold")
 		}
 	}
 	if layer.StartTime != nil {

@@ -891,6 +891,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q camera.iris_highlight_gain: %w", spec.Name, err)
 			}
 		}
+		if spec.Camera != nil && spec.Camera.IrisHighlightThreshold != nil {
+			if err := layer.SetIrisHighlightThreshold(*spec.Camera.IrisHighlightThreshold); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q camera.iris_highlight_threshold: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)

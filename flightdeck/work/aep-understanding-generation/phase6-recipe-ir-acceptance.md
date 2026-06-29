@@ -2084,6 +2084,34 @@ Sixty-eighth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Sixty-ninth follow-up completed:
+
+- Camera layer recipes now support a twelfth camera option:
+  - `camera.iris_highlight_threshold` -> `Layer.SetIrisHighlightThreshold`
+- Boundary: `camera` options remain valid only on `type: "camera"` layers.
+  This slice covers Iris Highlight Threshold only; highlight saturation and
+  other camera options remain separate recipe slices.
+- `examples/recipes/minimal-camera-iris-highlight-threshold.json` is a
+  dedicated two-layer recipe: a `Camera` layer with iris highlight threshold
+  `0.7` plus a visible text layer. See
+  `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-iris-highlight-threshold.json -out
+    tmp_debug\recipes\minimal-camera-iris-highlight-threshold.aep -json`
+    returned valid and all `profile_checks` passed, including
+    `ADBE Iris Highlight Threshold = 0.7`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_iris_highlight_threshold\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_iris_highlight_threshold\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

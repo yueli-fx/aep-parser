@@ -11,7 +11,8 @@ Context: recipe camera option support, starting with
 `examples/recipes/minimal-camera-iris-roundness.json` and
 `examples/recipes/minimal-camera-iris-aspect-ratio.json` and
 `examples/recipes/minimal-camera-iris-diffraction-fringe.json` and
-`examples/recipes/minimal-camera-iris-highlight-gain.json`.
+`examples/recipes/minimal-camera-iris-highlight-gain.json` and
+`examples/recipes/minimal-camera-iris-highlight-threshold.json`.
 
 Recipe authoring:
 
@@ -38,6 +39,8 @@ Recipe authoring:
   property through `Layer.SetIrisDiffractionFringe`.
 - `camera.iris_highlight_gain` sets the camera's Iris Highlight Gain property
   through `Layer.SetIrisHighlightGain`.
+- `camera.iris_highlight_threshold` sets the camera's Iris Highlight Threshold
+  property through `Layer.SetIrisHighlightThreshold`.
 
 Writer capability:
 
@@ -52,6 +55,7 @@ Writer capability:
 - `SetIrisAspectRatio`
 - `SetIrisDiffractionFringe`
 - `SetIrisHighlightGain`
+- `SetIrisHighlightThreshold`
 
 Boundary:
 
@@ -59,7 +63,7 @@ Boundary:
 - Current coverage includes `zoom`, `depth_of_field`, `focus_distance`,
   `aperture`, `blur_level`, `iris_shape`, `iris_rotation`, and
   `iris_roundness`, `iris_aspect_ratio`, and `iris_diffraction_fringe`. Other
-  iris and camera options, including highlight threshold/saturation, remain
-  separate recipe slices.
+  iris and camera options, including highlight saturation, remain separate
+  recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.
