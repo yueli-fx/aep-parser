@@ -275,6 +275,11 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 			StartEase:   ptr(35),
 			EndEase:     ptr(50),
 		},
+		Wave: &recipe.StrokeWaveSpec{
+			Amount:     ptr(20),
+			Wavelength: ptr(70),
+			Phase:      ptr(45),
+		},
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(18),
 			Gap:  ptr(7),
@@ -299,6 +304,9 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	assertCapability(t, report, "StrokeTaper.SetEndWidth")
 	assertCapability(t, report, "StrokeTaper.SetStartEase")
 	assertCapability(t, report, "StrokeTaper.SetEndEase")
+	assertCapability(t, report, "StrokeWave.SetAmount")
+	assertCapability(t, report, "StrokeWave.SetWavelength")
+	assertCapability(t, report, "StrokeWave.SetPhase")
 	assertCapability(t, report, "StrokeDashes.SetDash")
 	assertCapability(t, report, "StrokeDashes.SetGap")
 }

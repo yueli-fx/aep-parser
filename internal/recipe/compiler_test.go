@@ -66,6 +66,11 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 			StartEase:   ptr(35),
 			EndEase:     ptr(50),
 		},
+		Wave: &recipe.StrokeWaveSpec{
+			Amount:     ptr(20),
+			Wavelength: ptr(70),
+			Phase:      ptr(45),
+		},
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(18),
 			Gap:  ptr(7),
@@ -101,6 +106,9 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Taper End Width", 65.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Start Ease", 35.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Taper End Ease", 50.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Wave Amount", 20.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Wavelength", 70.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Taper Wave Phase", 45.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Dash 1", 18.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Gap 1", 7.0)
 }

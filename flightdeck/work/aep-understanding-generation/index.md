@@ -223,6 +223,11 @@ Done:
   `examples/recipes/minimal-shape-stroke-taper.json` example asserts all six
   `ADBE Vector Taper ...` properties, passed profile checks, and passed an AE
   2025 render oracle gate.
+- Fifteenth shape recipe slice is implemented for `shape.stroke.wave`
+  wavelength-mode controls. The dedicated
+  `examples/recipes/minimal-shape-stroke-wave.json` example asserts all three
+  `ADBE Vector Taper Wave...` / wavelength properties, passed profile checks,
+  and passed an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

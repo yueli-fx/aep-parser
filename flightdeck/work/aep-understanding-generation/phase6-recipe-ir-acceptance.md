@@ -921,6 +921,37 @@ Twenty-seventh follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-eighth follow-up completed:
+
+- Shape stroke recipes now support `shape.stroke.wave`, including:
+  - `amount` -> `ADBE Vector Taper Wave Amount`
+  - `wavelength` -> `ADBE Vector Taper Wavelength`
+  - `phase` -> `ADBE Vector Taper Wave Phase`
+- Capability reporting records:
+  - `StrokeWave.SetAmount`
+  - `StrokeWave.SetWavelength`
+  - `StrokeWave.SetPhase`
+- Boundary: the writer models the wavelength-mode stroke wave controls;
+  pixel-mode mirror streams and the wave unit enum are not in recipe IR yet.
+- `examples/recipes/minimal-shape-stroke-wave.json` is a dedicated stroke wave
+  recipe example and asserts all three profile-visible wave properties. See
+  `knowledge/shape/recipe-stroke-wave-profile-fields.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-stroke-wave.json -out
+    tmp_debug\recipes\minimal-shape-stroke-wave.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_stroke_wave\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_stroke_wave\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

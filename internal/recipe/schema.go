@@ -87,6 +87,7 @@ type StrokeSpec struct {
 	LineJoin   string            `json:"line_join,omitempty"`
 	MiterLimit *float64          `json:"miter_limit,omitempty"`
 	Taper      *StrokeTaperSpec  `json:"taper,omitempty"`
+	Wave       *StrokeWaveSpec   `json:"wave,omitempty"`
 	Dashes     *StrokeDashesSpec `json:"dashes,omitempty"`
 }
 
@@ -97,6 +98,12 @@ type StrokeTaperSpec struct {
 	EndWidth    *float64 `json:"end_width,omitempty"`
 	StartEase   *float64 `json:"start_ease,omitempty"`
 	EndEase     *float64 `json:"end_ease,omitempty"`
+}
+
+type StrokeWaveSpec struct {
+	Amount     *float64 `json:"amount,omitempty"`
+	Wavelength *float64 `json:"wavelength,omitempty"`
+	Phase      *float64 `json:"phase,omitempty"`
 }
 
 type StrokeDashesSpec struct {
@@ -615,6 +622,18 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				}
 				if layer.Shape.Stroke.Taper.EndEase != nil {
 					recordCapability("StrokeTaper.SetEndEase", taperPath+".end_ease")
+				}
+			}
+			if layer.Shape.Stroke.Wave != nil {
+				wavePath := strokePath + ".wave"
+				if layer.Shape.Stroke.Wave.Amount != nil {
+					recordCapability("StrokeWave.SetAmount", wavePath+".amount")
+				}
+				if layer.Shape.Stroke.Wave.Wavelength != nil {
+					recordCapability("StrokeWave.SetWavelength", wavePath+".wavelength")
+				}
+				if layer.Shape.Stroke.Wave.Phase != nil {
+					recordCapability("StrokeWave.SetPhase", wavePath+".phase")
 				}
 			}
 			if layer.Shape.Stroke.Dashes != nil {

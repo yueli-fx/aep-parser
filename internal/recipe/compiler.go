@@ -1043,6 +1043,24 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				}
 			}
 		}
+		if shape.Stroke.Wave != nil {
+			wave := stroke.Wave()
+			if shape.Stroke.Wave.Amount != nil {
+				if err := wave.SetAmount(*shape.Stroke.Wave.Amount); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Wave.Wavelength != nil {
+				if err := wave.SetWavelength(*shape.Stroke.Wave.Wavelength); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Wave.Phase != nil {
+				if err := wave.SetPhase(*shape.Stroke.Wave.Phase); err != nil {
+					return err
+				}
+			}
+		}
 		if shape.Stroke.Dashes != nil {
 			dashes := stroke.Dashes()
 			if shape.Stroke.Dashes.Dash != nil {
