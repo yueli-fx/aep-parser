@@ -2,7 +2,8 @@
 
 Context: recipe light option support, starting with
 `examples/recipes/minimal-light-intensity.json` and
-`examples/recipes/minimal-light-color.json`.
+`examples/recipes/minimal-light-color.json`, plus
+`examples/recipes/minimal-light-casts-shadows.json`.
 
 Recipe authoring:
 
@@ -13,16 +14,20 @@ Recipe authoring:
 - Color values use the underlying light color channel order `[A, R, G, B]` in
   the 0..255 range. Three-channel values are also allowed by the writer API
   when the target property has three components.
+- `light.casts_shadows` toggles the light's Casts Shadows property through
+  `Layer.SetLightCastsShadows`.
 
 Writer capability:
 
 - `SetLightIntensity`
 - `SetLightColor`
+- `SetLightCastsShadows`
 
 Boundary:
 
 - `light` options are only valid on `type: "light"` layers.
-- Current coverage includes `intensity` and `color`. Cone, falloff, shadow, and
-  other light options remain separate recipe slices.
+- Current coverage includes `intensity`, `color`, and `casts_shadows`. Cone,
+  falloff, shadow darkness/diffusion, and other light options remain separate
+  recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

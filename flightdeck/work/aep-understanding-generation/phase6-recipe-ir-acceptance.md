@@ -2193,6 +2193,34 @@ Seventy-second follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Seventy-third follow-up completed:
+
+- Light layer recipes now support:
+  - `light.casts_shadows` -> `Layer.SetLightCastsShadows`
+- Boundary: `light` options remain valid only on `type: "light"` layers. This
+  slice adds the Casts Shadows toggle; cone, falloff, shadow
+  darkness/diffusion, and other light options remain separate recipe slices.
+- `examples/recipes/minimal-light-casts-shadows.json` is a dedicated two-layer
+  recipe: a `Light` layer with `casts_shadows: true` plus a visible text layer.
+  The embedded expected profile checks `ADBE Casts Shadows = 1`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-casts-shadows.json -out
+    tmp_debug\recipes\minimal-light-casts-shadows.aep -json` returned valid
+    and all `profile_checks` passed, including `ADBE Casts Shadows = 1`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_casts_shadows\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_casts_shadows\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
