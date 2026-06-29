@@ -297,6 +297,11 @@ Done:
   `expected_profile.masks[].path_keyframes[]` asserts keyframe count, time, and
   vertex count through `minimal-layer-mask.json`, raising that recipe's profile
   coverage to 25 checks.
+- Stable profile output now includes comp/layer marker payloads with parsed
+  time, duration, label, comment, chapter, URL, frame target, cue-point name,
+  paths, and evidence. `re_compmarker.aep` covers comp-marker profile output;
+  recipe marker authoring remains out of scope until the AddMarker seed-template
+  boundary is designed.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

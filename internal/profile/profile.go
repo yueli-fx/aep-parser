@@ -87,6 +87,7 @@ type Composition struct {
 	PreserveNestedResolution bool               `json:"preserve_nested_resolution"`
 	WorkArea                 WorkArea           `json:"work_area"`
 	MotionBlur               MotionBlurSettings `json:"motion_blur"`
+	Markers                  []Marker           `json:"markers,omitempty"`
 	Layers                   []Layer            `json:"layers,omitempty"`
 	Path                     PathRef            `json:"path"`
 	Evidence                 Evidence           `json:"evidence"`
@@ -124,6 +125,7 @@ type Layer struct {
 	Flags          LayerFlags  `json:"flags"`
 	Effects        []Effect    `json:"effects,omitempty"`
 	Properties     []Property  `json:"properties,omitempty"`
+	Markers        []Marker    `json:"markers,omitempty"`
 	Masks          []Mask      `json:"masks,omitempty"`
 	Shapes         []Shape     `json:"shapes,omitempty"`
 	Text           *TextSource `json:"text,omitempty"`
@@ -209,6 +211,19 @@ type Keyframe struct {
 	OutSpatialTangent []float64      `json:"out_spatial_tangent,omitempty"`
 	InTemporalEase    []TemporalEase `json:"in_temporal_ease,omitempty"`
 	OutTemporalEase   []TemporalEase `json:"out_temporal_ease,omitempty"`
+}
+
+type Marker struct {
+	Time         float64  `json:"time_seconds"`
+	Duration     float64  `json:"duration_seconds,omitempty"`
+	Label        uint8    `json:"label,omitempty"`
+	Comment      string   `json:"comment,omitempty"`
+	Chapter      string   `json:"chapter,omitempty"`
+	URL          string   `json:"url,omitempty"`
+	FrameTarget  string   `json:"frame_target,omitempty"`
+	CuePointName string   `json:"cue_point_name,omitempty"`
+	Path         PathRef  `json:"path"`
+	Evidence     Evidence `json:"evidence"`
 }
 
 type TemporalEase struct {
@@ -401,6 +416,9 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			Path:     compPath(c),
 			Evidence: parsedEvidence(),
 		}
+		for i, marker := range c.Markers {
+			cp.Markers = append(cp.Markers, buildMarker(marker, markerPath(cp.Path.Path, cp.Path.DisplayPath, i)))
+		}
 		layerByID := map[uint32]*aep.JSONLayer{}
 		layerByIndex := map[int]*aep.JSONLayer{}
 		for _, l := range c.Layers {
@@ -554,6 +572,9 @@ func buildLayer(
 		propSeen[p.MatchName] = occ + 1
 		lp.Properties = append(lp.Properties, buildProperty(p, propertyPath(lp.Path.Path, lp.Path.DisplayPath, p.MatchName, occ, p.Name), occ))
 	}
+	for i, marker := range l.Markers {
+		lp.Markers = append(lp.Markers, buildMarker(marker, markerPath(lp.Path.Path, lp.Path.DisplayPath, i)))
+	}
 	for i, m := range l.Masks {
 		lp.Masks = append(lp.Masks, buildMask(c, l, m, i))
 	}
@@ -599,6 +620,24 @@ func buildProperty(p *aep.JSONProperty, path PathRef, occurrence int) Property {
 		})
 	}
 	return pp
+}
+
+func buildMarker(m *aep.JSONMarker, path PathRef) Marker {
+	if m == nil {
+		return Marker{Path: path, Evidence: parsedEvidence()}
+	}
+	return Marker{
+		Time:         m.Time,
+		Duration:     m.Duration,
+		Label:        m.Label,
+		Comment:      m.Comment,
+		Chapter:      m.Chapter,
+		URL:          m.URL,
+		FrameTarget:  m.FrameTarget,
+		CuePointName: m.CuePointName,
+		Path:         path,
+		Evidence:     parsedEvidence(),
+	}
 }
 
 func buildMask(c *aep.JSONComposition, l *aep.JSONLayer, m *aep.JSONMask, occurrence int) Mask {
@@ -866,6 +905,14 @@ func propertyPath(parentPath, parentDisplay, matchName string, occurrence int, n
 		Path:        fmt.Sprintf("%s.properties.by_match_name[%q]#%d", parentPath, matchName, occurrence),
 		DisplayPath: fmt.Sprintf("%s.properties[%d:%q]", parentDisplay, occurrence, label),
 		Identity:    map[string]any{"property_match_name": matchName, "property_occurrence": occurrence},
+	}
+}
+
+func markerPath(parentPath, parentDisplay string, occurrence int) PathRef {
+	return PathRef{
+		Path:        fmt.Sprintf("%s.markers[%d]", parentPath, occurrence),
+		DisplayPath: fmt.Sprintf("%s.markers[%d]", parentDisplay, occurrence),
+		Identity:    map[string]any{"marker_occurrence": occurrence},
 	}
 }
 

@@ -124,6 +124,42 @@ func TestBuildEffectsFixtureIncludesEffectUsageAndTunedParams(t *testing.T) {
 	}
 }
 
+func TestBuildMarkerFixtureIncludesCompMarkers(t *testing.T) {
+	path := repoPath(t, "test_data", "fixtures", "re_compmarker.aep")
+	project, err := aep.Open(path)
+	if err != nil {
+		t.Fatalf("open fixture: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{Path: path})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	comp := findProfileComp(t, prof, "RE_CM")
+	if len(comp.Markers) != 2 {
+		t.Fatalf("markers = %d, want 2", len(comp.Markers))
+	}
+	if comp.Markers[0].Comment != "comp marker A" {
+		t.Fatalf("marker[0].comment = %q", comp.Markers[0].Comment)
+	}
+	if math.Abs(comp.Markers[0].Time-1.0) > 1e-3 {
+		t.Fatalf("marker[0].time = %g, want 1.0", comp.Markers[0].Time)
+	}
+	if comp.Markers[1].Comment != "second marker" {
+		t.Fatalf("marker[1].comment = %q", comp.Markers[1].Comment)
+	}
+	if math.Abs(comp.Markers[1].Time-2.5) > 1e-3 {
+		t.Fatalf("marker[1].time = %g, want 2.5", comp.Markers[1].Time)
+	}
+	if comp.Markers[1].Chapter != "chap-X" {
+		t.Fatalf("marker[1].chapter = %q, want chap-X", comp.Markers[1].Chapter)
+	}
+	if comp.Markers[1].Path.Path == "" || comp.Markers[1].Evidence.Level != profile.EvidenceL1Parsed {
+		t.Fatalf("marker[1] path/evidence missing: %+v", comp.Markers[1])
+	}
+}
+
 func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
 	project := aep.NewProject(aep.TargetAE2020)
 	comp, err := aep.NewComposition(project, "Matte Comp", 1920, 1080, 30, 3)
@@ -229,6 +265,18 @@ func TestBuildSyntheticProjectUsesParsedInOutPoints(t *testing.T) {
 	if math.Abs(got.StartTime-1.25) > 1e-4 {
 		t.Fatalf("StartTime = %g, want 1.25", got.StartTime)
 	}
+}
+
+func findProfileComp(t *testing.T, prof *profile.Profile, name string) *profile.Composition {
+	t.Helper()
+	for i := range prof.Comps {
+		comp := &prof.Comps[i]
+		if comp.Name == name {
+			return comp
+		}
+	}
+	t.Fatalf("profile comp %q not found", name)
+	return nil
 }
 
 func findProfileLayer(t *testing.T, prof *profile.Profile, name string) *profile.Layer {
