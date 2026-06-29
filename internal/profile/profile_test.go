@@ -199,6 +199,51 @@ func TestBuildGuidesFixtureIncludesCompGuides(t *testing.T) {
 	}
 }
 
+func TestBuildEssentialGraphicsFixtureIncludesCompControllers(t *testing.T) {
+	path := repoPath(t, "test_data", "fixtures", "eg_multiple_controllers.aep")
+	project, err := aep.Open(path)
+	if err != nil {
+		t.Fatalf("open fixture: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{Path: path})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	comp := findProfileComp(t, prof, "primary")
+	if comp.MotionGraphicsTemplateName != "Untitled" {
+		t.Fatalf("motion graphics template name = %q, want Untitled", comp.MotionGraphicsTemplateName)
+	}
+	if len(comp.EssentialGraphics) != 3 {
+		t.Fatalf("essential graphics controllers = %d, want 3", len(comp.EssentialGraphics))
+	}
+
+	want := []struct {
+		name string
+		typ  string
+	}{
+		{"Brightness", "slider"},
+		{"Layer Opacity", "slider"},
+		{"Background Color", "color"},
+	}
+	for i, w := range want {
+		got := comp.EssentialGraphics[i]
+		if got.Name != w.name {
+			t.Fatalf("essential_graphics[%d].name = %q, want %q", i, got.Name, w.name)
+		}
+		if got.Type != w.typ {
+			t.Fatalf("essential_graphics[%d].type = %q, want %q", i, got.Type, w.typ)
+		}
+		if got.UUID == "" {
+			t.Fatalf("essential_graphics[%d].uuid is empty", i)
+		}
+		if got.Path.Path == "" || got.Evidence.Level != profile.EvidenceL1Parsed {
+			t.Fatalf("essential_graphics[%d] path/evidence missing: %+v", i, got)
+		}
+	}
+}
+
 func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
 	project := aep.NewProject(aep.TargetAE2020)
 	comp, err := aep.NewComposition(project, "Matte Comp", 1920, 1080, 30, 3)

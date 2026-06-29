@@ -66,32 +66,34 @@ type Item struct {
 }
 
 type Composition struct {
-	ID                       uint32             `json:"id"`
-	Name                     string             `json:"name"`
-	Width                    uint16             `json:"width"`
-	Height                   uint16             `json:"height"`
-	FrameRate                float64            `json:"frame_rate"`
-	Duration                 float64            `json:"duration_seconds"`
-	TickRate                 float64            `json:"tick_rate,omitempty"`
-	Label                    uint8              `json:"label,omitempty"`
-	Comment                  string             `json:"comment,omitempty"`
-	BackgroundColor          [3]uint8           `json:"background_color"`
-	ResolutionFactor         [2]uint16          `json:"resolution_factor"`
-	PixelAspect              float64            `json:"pixel_aspect"`
-	DisplayStartTime         float64            `json:"display_start_time"`
-	Renderer                 string             `json:"renderer,omitempty"`
-	Draft3D                  bool               `json:"draft_3d,omitempty"`
-	FrameBlending            bool               `json:"frame_blending"`
-	HideShyLayers            bool               `json:"hide_shy_layers"`
-	PreserveNestedFrameRate  bool               `json:"preserve_nested_frame_rate"`
-	PreserveNestedResolution bool               `json:"preserve_nested_resolution"`
-	WorkArea                 WorkArea           `json:"work_area"`
-	MotionBlur               MotionBlurSettings `json:"motion_blur"`
-	Markers                  []Marker           `json:"markers,omitempty"`
-	Guides                   []Guide            `json:"guides,omitempty"`
-	Layers                   []Layer            `json:"layers,omitempty"`
-	Path                     PathRef            `json:"path"`
-	Evidence                 Evidence           `json:"evidence"`
+	ID                         uint32             `json:"id"`
+	Name                       string             `json:"name"`
+	Width                      uint16             `json:"width"`
+	Height                     uint16             `json:"height"`
+	FrameRate                  float64            `json:"frame_rate"`
+	Duration                   float64            `json:"duration_seconds"`
+	TickRate                   float64            `json:"tick_rate,omitempty"`
+	Label                      uint8              `json:"label,omitempty"`
+	Comment                    string             `json:"comment,omitempty"`
+	BackgroundColor            [3]uint8           `json:"background_color"`
+	ResolutionFactor           [2]uint16          `json:"resolution_factor"`
+	PixelAspect                float64            `json:"pixel_aspect"`
+	DisplayStartTime           float64            `json:"display_start_time"`
+	Renderer                   string             `json:"renderer,omitempty"`
+	Draft3D                    bool               `json:"draft_3d,omitempty"`
+	FrameBlending              bool               `json:"frame_blending"`
+	HideShyLayers              bool               `json:"hide_shy_layers"`
+	PreserveNestedFrameRate    bool               `json:"preserve_nested_frame_rate"`
+	PreserveNestedResolution   bool               `json:"preserve_nested_resolution"`
+	WorkArea                   WorkArea           `json:"work_area"`
+	MotionBlur                 MotionBlurSettings `json:"motion_blur"`
+	Markers                    []Marker           `json:"markers,omitempty"`
+	Guides                     []Guide            `json:"guides,omitempty"`
+	MotionGraphicsTemplateName string             `json:"motion_graphics_template_name,omitempty"`
+	EssentialGraphics          []EGController     `json:"essential_graphics,omitempty"`
+	Layers                     []Layer            `json:"layers,omitempty"`
+	Path                       PathRef            `json:"path"`
+	Evidence                   Evidence           `json:"evidence"`
 }
 
 type WorkArea struct {
@@ -232,6 +234,14 @@ type Guide struct {
 	Position    float64  `json:"position"`
 	Path        PathRef  `json:"path"`
 	Evidence    Evidence `json:"evidence"`
+}
+
+type EGController struct {
+	Name     string   `json:"name"`
+	Type     string   `json:"type"`
+	UUID     string   `json:"uuid,omitempty"`
+	Path     PathRef  `json:"path"`
+	Evidence Evidence `json:"evidence"`
 }
 
 type TemporalEase struct {
@@ -429,6 +439,10 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		}
 		for i, guide := range c.Guides {
 			cp.Guides = append(cp.Guides, buildGuide(guide, guidePath(cp.Path.Path, cp.Path.DisplayPath, i)))
+		}
+		cp.MotionGraphicsTemplateName = c.MotionGraphicsTemplateName
+		for i, controller := range c.EssentialGraphics {
+			cp.EssentialGraphics = append(cp.EssentialGraphics, buildEGController(controller, egControllerPath(cp.Path.Path, cp.Path.DisplayPath, i)))
 		}
 		layerByID := map[uint32]*aep.JSONLayer{}
 		layerByIndex := map[int]*aep.JSONLayer{}
@@ -660,6 +674,19 @@ func buildGuide(g *aep.JSONGuide, path PathRef) Guide {
 		Position:    g.Position,
 		Path:        path,
 		Evidence:    parsedEvidence(),
+	}
+}
+
+func buildEGController(ctrl *aep.JSONEGController, path PathRef) EGController {
+	if ctrl == nil {
+		return EGController{Path: path, Evidence: parsedEvidence()}
+	}
+	return EGController{
+		Name:     ctrl.Name,
+		Type:     ctrl.Type,
+		UUID:     ctrl.UUID,
+		Path:     path,
+		Evidence: parsedEvidence(),
 	}
 }
 
@@ -944,6 +971,14 @@ func guidePath(parentPath, parentDisplay string, occurrence int) PathRef {
 		Path:        fmt.Sprintf("%s.guides[%d]", parentPath, occurrence),
 		DisplayPath: fmt.Sprintf("%s.guides[%d]", parentDisplay, occurrence),
 		Identity:    map[string]any{"guide_occurrence": occurrence},
+	}
+}
+
+func egControllerPath(parentPath, parentDisplay string, occurrence int) PathRef {
+	return PathRef{
+		Path:        fmt.Sprintf("%s.essential_graphics[%d]", parentPath, occurrence),
+		DisplayPath: fmt.Sprintf("%s.essential_graphics[%d]", parentDisplay, occurrence),
+		Identity:    map[string]any{"essential_graphics_occurrence": occurrence},
 	}
 }
 

@@ -305,6 +305,10 @@ Done:
 - Stable profile output now includes comp guide payloads with parsed
   orientation, position, paths, and evidence. `guides.aep` covers the
   multi-guide comp profile output; guide authoring remains out of recipe scope.
+- Stable profile output now includes Essential Graphics template names and
+  controller summaries with parsed name, type, UUID, paths, and evidence.
+  `eg_multiple_controllers.aep` covers multi-controller profile output; EG
+  authoring remains out of recipe scope.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
