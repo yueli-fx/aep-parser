@@ -47,6 +47,8 @@ Phase 0 export-surface audit and contract lock before extracting
   gated by the render compare result.
 - `phase6-recipe-ir-acceptance.md` — minimal recipe compile + AE 2025 render
   acceptance result.
+- `comp-recipe-execution-strategy.md` — object-level comp recipe/profile
+  execution strategy and field matrix.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -175,6 +177,9 @@ Done:
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
   assert it. This remains a roundtrip/profile contract because AE 2025 DOM
   readback does not reliably reflect the Draft 3D preview switch.
+- Comp-level recipe/profile work now has an object-level execution strategy:
+  field order, evidence level, profile target, test shape, verification, and
+  commit rules are captured in `comp-recipe-execution-strategy.md`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -313,7 +318,8 @@ Current:
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
   candidates are remaining comp settings, shape filters, expression support,
   transform keyframe/ease where writer support exists, or more profile-visible
-  text style. Do not start automated correction loops.
+  text style. For comp work, follow `comp-recipe-execution-strategy.md` instead
+  of asking for per-field direction. Do not start automated correction loops.
 
 ## Open questions
 
