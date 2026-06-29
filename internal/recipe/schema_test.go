@@ -820,6 +820,29 @@ func TestValidateReportsLightFalloffDistanceCapability(t *testing.T) {
 	assertCapability(t, report, "SetLightFalloffDistance")
 }
 
+func TestValidateReportsLightConeAngleCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Light cone angle"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"cone_angle": 72}},
+				{"type": "text", "name": "Title", "text": "Light cone angle", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetLightConeAngle")
+}
+
 func TestValidateRejectsLightOptionsOnNonLightLayer(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

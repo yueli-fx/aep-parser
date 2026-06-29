@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal light cone angle"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "light",
+          "name": "Light",
+          "light": {
+            "cone_angle": 72
+          }
+        },
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Light cone angle",
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "text_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Cone Angle",
+        "value": 72
+      }
+    ]
+  }
+}
