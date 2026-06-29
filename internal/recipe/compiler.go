@@ -98,6 +98,9 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 	if err := applyLayerParents(compSpec, layersByName); err != nil {
 		return report, err
 	}
+	if err := applyLightSources(compSpec, layersByName); err != nil {
+		return report, err
+	}
 	if hasEffects(compSpec) {
 		project, err = materializeEffects(project, compSpec)
 		if err != nil {
@@ -994,6 +997,23 @@ func applyLayerParents(compSpec CompSpec, layersByName map[string]*aep.Layer) er
 		}
 		if err := layer.SetParent(parent.ID); err != nil {
 			return fmt.Errorf("recipe: layer %q parent: %w", layerSpec.Name, err)
+		}
+	}
+	return nil
+}
+
+func applyLightSources(compSpec CompSpec, layersByName map[string]*aep.Layer) error {
+	for _, layerSpec := range compSpec.Layers {
+		if layerSpec.Light == nil || layerSpec.Light.SourceLayer == "" {
+			continue
+		}
+		layer := layersByName[layerSpec.Name]
+		target := layersByName[layerSpec.Light.SourceLayer]
+		if layer == nil || target == nil {
+			return fmt.Errorf("recipe: layer %q light.source_layer %q not found", layerSpec.Name, layerSpec.Light.SourceLayer)
+		}
+		if err := layer.SetLightSource(target); err != nil {
+			return fmt.Errorf("recipe: layer %q light.source_layer: %w", layerSpec.Name, err)
 		}
 	}
 	return nil

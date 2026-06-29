@@ -889,6 +889,55 @@ func TestValidateReportsLightKindCapability(t *testing.T) {
 	assertCapability(t, report, "SetLightKind")
 }
 
+func TestValidateReportsLightSourceCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Light source"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"kind": "ambient", "source_layer": "Source"}},
+				{"type": "solid", "name": "Source", "shape": {"fill_color": [64, 128, 255]}},
+				{"type": "text", "name": "Title", "text": "Light source", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetLightSource")
+}
+
+func TestValidateRejectsUnknownLightSource(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Unknown light source"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"source_layer": "Missing"}},
+				{"type": "text", "name": "Title", "text": "Unknown light source", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "unknown_light_source")
+}
+
 func TestValidateRejectsLightOptionsOnNonLightLayer(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

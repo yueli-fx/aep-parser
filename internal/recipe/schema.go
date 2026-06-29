@@ -93,6 +93,7 @@ type Layer struct {
 
 type LightSpec struct {
 	Kind            string    `json:"kind,omitempty"`
+	SourceLayer     string    `json:"source_layer,omitempty"`
 	Intensity       *float64  `json:"intensity,omitempty"`
 	Color           []float64 `json:"color,omitempty"`
 	CastsShadows    *bool     `json:"casts_shadows,omitempty"`
@@ -520,6 +521,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 					addRefusal("unknown_layer_parent", layerPath+".parent", fmt.Sprintf("parent layer %q was not found in the comp", layer.Parent))
 				}
 			}
+			if layer.Light != nil && layer.Light.SourceLayer != "" && !layerNames[layer.Light.SourceLayer] {
+				addRefusal("unknown_light_source", layerPath+".light.source_layer", fmt.Sprintf("source layer %q was not found in the comp", layer.Light.SourceLayer))
+			}
 		}
 	}
 	return report
@@ -846,6 +850,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Light.Kind != "" {
 			recordCapability("SetLightKind", layerPath+".light.kind")
+		}
+		if layer.Light.SourceLayer != "" {
+			recordCapability("SetLightSource", layerPath+".light.source_layer")
 		}
 		if layer.Light.Intensity != nil {
 			recordCapability("SetLightIntensity", layerPath+".light.intensity")

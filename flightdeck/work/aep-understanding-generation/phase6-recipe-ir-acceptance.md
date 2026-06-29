@@ -2457,6 +2457,38 @@ Eighty-first follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-second follow-up completed:
+
+- Light layer recipes now support:
+  - `light.source_layer` -> `Layer.SetLightSource`
+- Boundary: `light.source_layer` names another layer in the same comp and is
+  intended for AE 2025 environment-light source wiring. The writer rejects
+  self-source, Light/Camera targets, and 3D targets. Recipe validation now also
+  rejects an unknown source layer before compile.
+- `examples/recipes/minimal-light-source.json` is a dedicated three-layer
+  recipe: an ambient `Light` with `source_layer: "Source"`, a solid `Source`
+  layer, and a visible text layer. Embedded expected-profile checks cover the
+  shared comp/layer/text counts because light source is stored in `ldta` rather
+  than a property-tree match-name.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled
+    `LightSource()` was nil and capability `SetLightSource` was absent.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-source.json -out
+    tmp_debug\recipes\minimal-light-source.aep -json` returned valid, reported
+    `SetLightSource`, and all embedded `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_source\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_source\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
