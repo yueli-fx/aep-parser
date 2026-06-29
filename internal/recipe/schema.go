@@ -28,6 +28,7 @@ type CompSpec struct {
 	BackgroundColor  []float64           `json:"background_color,omitempty"`
 	Renderer         string              `json:"renderer,omitempty"`
 	ResolutionFactor []float64           `json:"resolution_factor,omitempty"`
+	PixelAspect      *float64            `json:"pixel_aspect,omitempty"`
 	MotionBlur       *CompMotionBlurSpec `json:"motion_blur,omitempty"`
 	WorkArea         *CompWorkAreaSpec   `json:"work_area,omitempty"`
 	Layers           []Layer             `json:"layers,omitempty"`
@@ -406,6 +407,10 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			recordCapability("SetResolutionFactor", compPath+".resolution_factor")
 			validateResolutionFactor(comp.ResolutionFactor, compPath+".resolution_factor", addRefusal)
 		}
+		if comp.PixelAspect != nil {
+			recordCapability("SetPixelAspect", compPath+".pixel_aspect")
+			validatePixelAspect(*comp.PixelAspect, compPath+".pixel_aspect", addRefusal)
+		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)
 		}
@@ -563,6 +568,12 @@ func validateResolutionFactor(values []float64, path string, addRefusal func(str
 		if value <= 0 || value > 65535 || !isWholeNumber(value) {
 			addRefusal("invalid_comp_resolution_factor", fmt.Sprintf("%s[%d]", path, i), "resolution_factor values must be positive integers in uint16 range")
 		}
+	}
+}
+
+func validatePixelAspect(value float64, path string, addRefusal func(string, string, string)) {
+	if value <= 0 {
+		addRefusal("invalid_comp_pixel_aspect", path, "pixel_aspect must be positive")
 	}
 }
 

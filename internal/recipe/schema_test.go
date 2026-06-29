@@ -410,6 +410,15 @@ func TestValidateReportsCompResolutionFactorCapability(t *testing.T) {
 	assertCapability(t, report, "SetResolutionFactor")
 }
 
+func TestValidateReportsCompPixelAspectCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].PixelAspect = ptr(2.0)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetPixelAspect")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
@@ -447,6 +456,18 @@ func TestValidateRejectsInvalidCompResolutionFactor(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_comp_resolution_factor")
+}
+
+func TestValidateRejectsInvalidCompPixelAspect(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].PixelAspect = ptr(0)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_comp_pixel_aspect")
 }
 
 func TestValidateRejectsInvalidCompMotionBlur(t *testing.T) {

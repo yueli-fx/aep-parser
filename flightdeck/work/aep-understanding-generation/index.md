@@ -251,6 +251,10 @@ Done:
   `examples/recipes/minimal-comp-resolution-factor.json` example compiles a
   half-resolution preview comp, passes compiled AEP readback, and passes an AE
   2025 render oracle gate.
+- Sixth comp-level recipe settings slice is implemented for `comp.pixel_aspect`.
+  The dedicated `examples/recipes/minimal-comp-pixel-aspect.json` example
+  compiles a non-square pixel comp, passes compiled AEP readback, and passes an
+  AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

@@ -185,6 +185,27 @@ func TestCompileToFileSetsCompResolutionFactor(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompPixelAspect(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].PixelAspect = ptr(2.0)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].PixelAspect; math.Abs(got-2.0) > 1e-6 {
+		t.Fatalf("pixel aspect = %g, want 2", got)
+	}
+}
+
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
