@@ -9,7 +9,8 @@ Context: recipe camera option support, starting with
 `examples/recipes/minimal-camera-iris-shape.json` and
 `examples/recipes/minimal-camera-iris-rotation.json` and
 `examples/recipes/minimal-camera-iris-roundness.json` and
-`examples/recipes/minimal-camera-iris-aspect-ratio.json`.
+`examples/recipes/minimal-camera-iris-aspect-ratio.json` and
+`examples/recipes/minimal-camera-iris-diffraction-fringe.json`.
 
 Recipe authoring:
 
@@ -32,6 +33,8 @@ Recipe authoring:
   `Layer.SetIrisRoundness`.
 - `camera.iris_aspect_ratio` sets the camera's Iris Aspect Ratio property
   through `Layer.SetIrisAspectRatio`.
+- `camera.iris_diffraction_fringe` sets the camera's Iris Diffraction Fringe
+  property through `Layer.SetIrisDiffractionFringe`.
 
 Writer capability:
 
@@ -44,13 +47,14 @@ Writer capability:
 - `SetIrisRotation`
 - `SetIrisRoundness`
 - `SetIrisAspectRatio`
+- `SetIrisDiffractionFringe`
 
 Boundary:
 
 - `camera` options are only valid on `type: "camera"` layers.
 - Current coverage includes `zoom`, `depth_of_field`, `focus_distance`,
   `aperture`, `blur_level`, `iris_shape`, `iris_rotation`, and
-  `iris_roundness`, and `iris_aspect_ratio`. Other iris and camera options
-  remain separate recipe slices.
+  `iris_roundness`, `iris_aspect_ratio`, and `iris_diffraction_fringe`. Other
+  iris and camera options remain separate recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

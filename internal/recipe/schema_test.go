@@ -818,6 +818,29 @@ func TestValidateReportsCameraIrisAspectRatioCapability(t *testing.T) {
 	assertCapability(t, report, "SetIrisAspectRatio")
 }
 
+func TestValidateReportsCameraIrisDiffractionFringeCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Camera iris diffraction fringe"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "camera", "name": "Camera", "camera": {"iris_diffraction_fringe": 30}},
+				{"type": "text", "name": "Title", "text": "Camera iris", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetIrisDiffractionFringe")
+}
+
 func TestValidateRejectsCameraOptionsOnNonCameraLayer(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,
