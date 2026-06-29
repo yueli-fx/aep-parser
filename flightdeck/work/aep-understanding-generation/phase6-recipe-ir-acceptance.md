@@ -331,6 +331,34 @@ Eleventh follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Twelfth follow-up completed:
+
+- Recipes now support `transform.rotation_keyframes[]` as scalar keyframes in
+  degree units.
+- Validation rejects rotation keyframes outside the comp duration and unsorted
+  rotation keyframes. Rotation values intentionally have no value range limit,
+  matching AE angle behavior.
+- `expected_profile.keyframes[]` now exercises Position, Scale, Rotation, and
+  Opacity on the updated shape/text example. `ADBE Rotate Z` profile keyframe
+  values read back in degrees, matching recipe input.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-rotation-keyframes.aep -json`
+    returned valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_rotation_keyframes/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_rotation_keyframes/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

@@ -126,6 +126,35 @@ func TestValidateRejectsUnsortedScaleKeyframes(t *testing.T) {
 	assertRefusal(t, report, "keyframes_not_sorted")
 }
 
+func TestValidateRejectsOutOfRangeRotationKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.RotationKeyframes = []recipe.ScalarKeyframe{
+		{Time: 5, Value: 45},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframe_time_out_of_range")
+}
+
+func TestValidateRejectsUnsortedRotationKeyframes(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.RotationKeyframes = []recipe.ScalarKeyframe{
+		{Time: 1, Value: 45},
+		{Time: 0, Value: 0},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "keyframes_not_sorted")
+}
+
 func TestValidateAcceptsExpectedKeyframes(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{

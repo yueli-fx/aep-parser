@@ -144,6 +144,11 @@ Done:
   `expected_profile.keyframes[]` checks against profile 3D unit scale values.
   The updated shape/text example passed `go test ./...`, `go vet ./...`,
   profile checks, and an AE 2025 render oracle gate.
+- Recipe transform keyframes now also support `transform.rotation_keyframes[]`
+  in degree authoring units, with validation and `ADBE Rotate Z`
+  `expected_profile.keyframes[]` checks against profile degree values. The
+  updated shape/text example passed `go test ./...`, `go vet ./...`, profile
+  checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
