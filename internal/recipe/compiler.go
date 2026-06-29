@@ -564,6 +564,17 @@ func checkExpectedLayer(index int, expected ExpectedLayer, prof *profile.Profile
 		}
 		add(layerPath+".parent", expected.Parent, actual, actual == expected.Parent)
 	}
+	if expected.TrackMatte != "" {
+		actual := trackMatteProfileName(layer.Flags.TrackMatteName)
+		add(layerPath+".track_matte", expected.TrackMatte, actual, actual == expected.TrackMatte)
+	}
+	if expected.Matte != "" {
+		actual := ""
+		if layer.MatteRef != nil {
+			actual = layer.MatteRef.Name
+		}
+		add(layerPath+".matte", expected.Matte, actual, actual == expected.Matte)
+	}
 	if expected.Label != nil {
 		actual := float64(layer.Label)
 		add(layerPath+".label", *expected.Label, actual, actual == *expected.Label)
@@ -631,6 +642,21 @@ func profileLayerName(layer *profile.Layer) any {
 		return nil
 	}
 	return layer.Name
+}
+
+func trackMatteProfileName(value string) string {
+	switch value {
+	case "Alpha":
+		return "alpha"
+	case "AlphaInverse":
+		return "alpha_inverse"
+	case "Luma":
+		return "luma"
+	case "LumaInverse":
+		return "luma_inverse"
+	default:
+		return value
+	}
 }
 
 func findProfileParam(params []profile.Property, matchName string) *profile.Property {
@@ -1156,6 +1182,15 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
 			}
 		}
+		if spec.TrackMatte != "" {
+			trackMatte, err := layerTrackMatte(spec.TrackMatte)
+			if err != nil {
+				return nil, fmt.Errorf("recipe: layer %q track_matte: %w", spec.Name, err)
+			}
+			if err := layer.SetTrackMatte(trackMatte); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q track_matte: %w", spec.Name, err)
+			}
+		}
 		if spec.AutoOrient != "" {
 			autoOrient, err := layerAutoOrient(spec.AutoOrient)
 			if err != nil {
@@ -1436,6 +1471,23 @@ func layerAutoOrient(value string) (aep.AutoOrientType, error) {
 		return aep.AutoOrientCharactersTowardCamera, nil
 	default:
 		return 0, fmt.Errorf("unsupported auto_orient %q", value)
+	}
+}
+
+func layerTrackMatte(value string) (aep.TrackMatteType, error) {
+	switch value {
+	case "none":
+		return aep.TrackMatteNone, nil
+	case "alpha":
+		return aep.TrackMatteAlpha, nil
+	case "alpha_inverse":
+		return aep.TrackMatteAlphaInverse, nil
+	case "luma":
+		return aep.TrackMatteLuma, nil
+	case "luma_inverse":
+		return aep.TrackMatteLumaInverse, nil
+	default:
+		return 0, fmt.Errorf("unsupported track_matte %q", value)
 	}
 }
 

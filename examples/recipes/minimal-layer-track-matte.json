@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal layer track matte"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "solid",
+          "name": "Matte",
+          "shape": {
+            "fill_color": [255, 255, 255]
+          }
+        },
+        {
+          "type": "solid",
+          "name": "Fill",
+          "track_matte": "alpha",
+          "shape": {
+            "fill_color": [64, 128, 255]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "layers": [
+      {
+        "name": "Matte",
+        "type": "av"
+      },
+      {
+        "name": "Fill",
+        "type": "av",
+        "track_matte": "alpha",
+        "matte": "Matte"
+      }
+    ]
+  }
+}

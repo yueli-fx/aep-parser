@@ -58,7 +58,8 @@ flags, and refs.
 | Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
 | Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
 | Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | `expected_profile.layers[].parent` | L3 | done |
-| Matte refs | track matte writer currently not recipe-owned | `layers[].matte_ref` | planned when writer enters recipe scope | L2/L3 | blocked |
+| Classic matte refs | `track_matte` | `Layer.SetTrackMatte` | `layers[].flags.track_matte_name` / `matte_ref` | `expected_profile.layers[].track_matte` / `matte` | L3 | done |
+| Explicit matte refs | not recipe-owned yet | `Layer.SetTrackMatteSource` / `SetTrackMatteLayer` | `layers[].matte_ref` | planned when writer enters recipe scope | L3 AE2025-only | blocked |
 | Transform statics | `transform.position` / `scale` / `anchor_point` / `rotation` / `opacity` | `SetLayerTransform` | `properties[]` | `expected_profile.properties[]` | L3 | keep separate |
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
 | Transform expressions | `transform.expressions.*` | `Property.SetExpression` | `properties[].expression` | `expected_profile.properties[].expression` | L3 | keep separate |
@@ -73,8 +74,7 @@ flags, and refs.
    flags in one readable baseline recipe.
 2. Add missing profile-visible layer state for quality, blend, and auto-orient.
 3. Add parent-ref object checks using a two-layer baseline.
-4. Review matte refs separately because writer ownership is not in the current
-   recipe surface.
+4. Add classic track-matte mode checks with a two-layer baseline.
 5. Keep transform, text, shape, effect, camera, and light checks in their
    existing nested expected-profile families.
 
@@ -161,9 +161,15 @@ Add parent-ref object checks using `expected_profile.layers[].parent`, because
 recipe writer support and `profile.Layer.parent_ref` already exist. Completed
 in `minimal-layer-parent.json`.
 
-Next, review matte refs separately because writer ownership is not in the
-current recipe surface. If no writer path exists, keep it blocked and move to
-the next recipe-owned family instead of inventing a profile-only recipe check.
+Classic `track_matte` mode is now recipe-owned and covered by
+`minimal-layer-track-matte.json`: the fill layer asserts both
+`expected_profile.layers[].track_matte` and the inferred classic matte source
+through `expected_profile.layers[].matte`.
+
+Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
+blocked until recipe target-version handling is explicit. Continue with the
+next recipe-owned family instead of mixing AE2025-only layout requirements into
+the AE2020-targeted recipe compiler.
 
 ## Self-Review
 

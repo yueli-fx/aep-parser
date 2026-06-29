@@ -213,6 +213,10 @@ Done:
 - Parent refs now have an object-level recipe/profile contract:
   `expected_profile.layers[].parent` asserts `profile.Layer.parent_ref.name`,
   and `minimal-layer-parent.json` covers the two-layer parent relationship.
+- Classic track matte mode is now recipe-owned through `layers[].track_matte`.
+  `expected_profile.layers[].track_matte` asserts the profile matte mode and
+  `expected_profile.layers[].matte` asserts the inferred classic matte source;
+  `minimal-layer-track-matte.json` covers the two-layer alpha matte baseline.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -355,9 +359,9 @@ Current:
   validation/compile/profile-check coverage instead of manual per-field
   spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
   instead of asking for per-field direction. For layer work, follow
-  `layer-recipe-execution-strategy.md`; next review matte refs separately
-  because current recipe writer ownership is unclear, then continue with the
-  next recipe-owned family. Do not start automated correction loops.
+  `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
+  blocked until recipe target-version handling is explicit, so continue with
+  the next recipe-owned family. Do not start automated correction loops.
 
 ## Open questions
 

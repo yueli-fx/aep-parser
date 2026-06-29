@@ -78,6 +78,7 @@ type Layer struct {
 	PreserveTransparency  *bool          `json:"preserve_transparency,omitempty"`
 	Quality               string         `json:"quality,omitempty"`
 	BlendingMode          string         `json:"blending_mode,omitempty"`
+	TrackMatte            string         `json:"track_matte,omitempty"`
 	AutoOrient            string         `json:"auto_orient,omitempty"`
 	StartTime             *float64       `json:"start_time,omitempty"`
 	InPoint               *float64       `json:"in_point,omitempty"`
@@ -399,6 +400,8 @@ type ExpectedLayer struct {
 	BlendingMode string               `json:"blending_mode,omitempty"`
 	AutoOrient   string               `json:"auto_orient,omitempty"`
 	Parent       string               `json:"parent,omitempty"`
+	TrackMatte   string               `json:"track_matte,omitempty"`
+	Matte        string               `json:"matte,omitempty"`
 	Label        *float64             `json:"label,omitempty"`
 	Comment      string               `json:"comment,omitempty"`
 	Timing       *ExpectedLayerTiming `json:"timing,omitempty"`
@@ -698,6 +701,11 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 				addRefusal("invalid_expected_profile", layerPath+".blending_mode", "blending_mode is not supported")
 			}
 		}
+		if layer.TrackMatte != "" {
+			if _, err := layerTrackMatte(layer.TrackMatte); err != nil {
+				addRefusal("invalid_expected_profile", layerPath+".track_matte", "track_matte must be none, alpha, alpha_inverse, luma, or luma_inverse")
+			}
+		}
 		if layer.AutoOrient != "" {
 			if _, err := layerAutoOrient(layer.AutoOrient); err != nil {
 				addRefusal("invalid_expected_profile", layerPath+".auto_orient", "auto_orient must be none, along_path, camera_or_point_of_interest, or characters_toward_camera")
@@ -981,6 +989,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		recordCapability("Layer.SetBlendingMode", layerPath+".blending_mode")
 		if _, err := layerBlendingMode(layer.BlendingMode); err != nil {
 			addRefusal("invalid_layer_blending_mode", layerPath+".blending_mode", "blending_mode is not supported")
+		}
+	}
+	if layer.TrackMatte != "" {
+		recordCapability("Layer.SetTrackMatte", layerPath+".track_matte")
+		if _, err := layerTrackMatte(layer.TrackMatte); err != nil {
+			addRefusal("invalid_layer_track_matte", layerPath+".track_matte", "track_matte must be none, alpha, alpha_inverse, luma, or luma_inverse")
 		}
 	}
 	if layer.AutoOrient != "" {
