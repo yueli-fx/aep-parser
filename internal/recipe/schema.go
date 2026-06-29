@@ -79,6 +79,7 @@ type Layer struct {
 	StartTime             *float64       `json:"start_time,omitempty"`
 	InPoint               *float64       `json:"in_point,omitempty"`
 	OutPoint              *float64       `json:"out_point,omitempty"`
+	Parent                string         `json:"parent,omitempty"`
 	Text                  string         `json:"text,omitempty"`
 	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
 	Shape                 *ShapeSpec     `json:"shape,omitempty"`
@@ -470,9 +471,21 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.WorkArea != nil {
 			validateCompWorkArea(comp.WorkArea, compPath+".work_area", comp.Duration, recordCapability, addRefusal)
 		}
+		layerNames := map[string]bool{}
+		for _, layer := range comp.Layers {
+			if layer.Name != "" {
+				layerNames[layer.Name] = true
+			}
+		}
 		for li, layer := range comp.Layers {
 			layerPath := fmt.Sprintf("%s.layers[%d]", compPath, li)
 			validateLayer(layer, layerPath, comp.Duration, recordCapability, addRefusal)
+			if layer.Parent != "" {
+				recordCapability("Layer.SetParent", layerPath+".parent")
+				if !layerNames[layer.Parent] {
+					addRefusal("unknown_layer_parent", layerPath+".parent", fmt.Sprintf("parent layer %q was not found in the comp", layer.Parent))
+				}
+			}
 		}
 	}
 	return report

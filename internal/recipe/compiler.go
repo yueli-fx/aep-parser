@@ -85,10 +85,18 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q work_area: %w", compSpec.Name, err)
 		}
 	}
+	layersByName := map[string]*aep.Layer{}
 	for _, layerSpec := range compSpec.Layers {
-		if err := compileLayer(comp, layerSpec, compSpec); err != nil {
+		layer, err := compileLayer(comp, layerSpec, compSpec)
+		if err != nil {
 			return report, err
 		}
+		if layerSpec.Name != "" {
+			layersByName[layerSpec.Name] = layer
+		}
+	}
+	if err := applyLayerParents(compSpec, layersByName); err != nil {
+		return report, err
 	}
 	if hasEffects(compSpec) {
 		project, err = materializeEffects(project, compSpec)
@@ -643,33 +651,33 @@ func normalizeEffectParamValue(value any) (any, error) {
 	}
 }
 
-func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
+func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.Layer, error) {
 	var layer *aep.Layer
 	switch spec.Type {
 	case "text":
 		l, err := aep.NewTextLayer(comp, spec.Name)
 		if err != nil {
-			return fmt.Errorf("recipe: text layer %q: %w", spec.Name, err)
+			return nil, fmt.Errorf("recipe: text layer %q: %w", spec.Name, err)
 		}
 		if spec.Text != "" {
 			if err := l.SetText(spec.Text); err != nil {
-				return fmt.Errorf("recipe: text layer %q set text: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: text layer %q set text: %w", spec.Name, err)
 			}
 		}
 		if spec.TextStyle != nil {
 			if err := applyTextStyle(l, *spec.TextStyle); err != nil {
-				return fmt.Errorf("recipe: text layer %q style: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: text layer %q style: %w", spec.Name, err)
 			}
 		}
 		layer = l
 	case "shape":
 		l, err := aep.NewShapeLayer(comp, spec.Name)
 		if err != nil {
-			return fmt.Errorf("recipe: shape layer %q: %w", spec.Name, err)
+			return nil, fmt.Errorf("recipe: shape layer %q: %w", spec.Name, err)
 		}
 		if spec.Shape != nil {
 			if err := compileShape(l.RootGroup(), *spec.Shape); err != nil {
-				return fmt.Errorf("recipe: shape layer %q: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: shape layer %q: %w", spec.Name, err)
 			}
 		}
 		layer = l.Layer
@@ -680,133 +688,150 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 		}
 		l, err := aep.NewSolidLayer(comp, spec.Name, compSpec.Width, compSpec.Height, color)
 		if err != nil {
-			return fmt.Errorf("recipe: solid layer %q: %w", spec.Name, err)
+			return nil, fmt.Errorf("recipe: solid layer %q: %w", spec.Name, err)
 		}
 		layer = l
 	default:
-		return fmt.Errorf("recipe: unsupported layer type %q", spec.Type)
+		return nil, fmt.Errorf("recipe: unsupported layer type %q", spec.Type)
 	}
 	if layer != nil {
 		if spec.Label != nil {
 			if err := layer.SetLabel(uint8(*spec.Label)); err != nil {
-				return fmt.Errorf("recipe: layer %q label: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q label: %w", spec.Name, err)
 			}
 		}
 		if spec.Comment != "" {
 			if err := layer.SetComment(spec.Comment); err != nil {
-				return fmt.Errorf("recipe: layer %q comment: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q comment: %w", spec.Name, err)
 			}
 		}
 		if spec.Visible != nil {
 			if err := layer.SetVisible(*spec.Visible); err != nil {
-				return fmt.Errorf("recipe: layer %q visible: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q visible: %w", spec.Name, err)
 			}
 		}
 		if spec.Solo != nil {
 			if err := layer.SetSolo(*spec.Solo); err != nil {
-				return fmt.Errorf("recipe: layer %q solo: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q solo: %w", spec.Name, err)
 			}
 		}
 		if spec.Locked != nil {
 			if err := layer.SetLocked(*spec.Locked); err != nil {
-				return fmt.Errorf("recipe: layer %q locked: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q locked: %w", spec.Name, err)
 			}
 		}
 		if spec.MotionBlur != nil {
 			if err := layer.SetMotionBlur(*spec.MotionBlur); err != nil {
-				return fmt.Errorf("recipe: layer %q motion_blur: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q motion_blur: %w", spec.Name, err)
 			}
 		}
 		if spec.Shy != nil {
 			if err := layer.SetShy(*spec.Shy); err != nil {
-				return fmt.Errorf("recipe: layer %q shy: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q shy: %w", spec.Name, err)
 			}
 		}
 		if spec.EffectsEnabled != nil {
 			if err := layer.SetEffectsEnabled(*spec.EffectsEnabled); err != nil {
-				return fmt.Errorf("recipe: layer %q effects_enabled: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q effects_enabled: %w", spec.Name, err)
 			}
 		}
 		if spec.AudioEnabled != nil {
 			if err := layer.SetAudioEnabled(*spec.AudioEnabled); err != nil {
-				return fmt.Errorf("recipe: layer %q audio_enabled: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q audio_enabled: %w", spec.Name, err)
 			}
 		}
 		if spec.FrameBlendEnabled != nil {
 			if err := layer.SetFrameBlendEnabled(*spec.FrameBlendEnabled); err != nil {
-				return fmt.Errorf("recipe: layer %q frame_blend_enabled: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q frame_blend_enabled: %w", spec.Name, err)
 			}
 		}
 		if spec.CollapseTransform != nil {
 			if err := layer.SetCollapseTransform(*spec.CollapseTransform); err != nil {
-				return fmt.Errorf("recipe: layer %q collapse_transform: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q collapse_transform: %w", spec.Name, err)
 			}
 		}
 		if spec.Is3D != nil {
 			if err := layer.SetIs3D(*spec.Is3D); err != nil {
-				return fmt.Errorf("recipe: layer %q is_3d: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q is_3d: %w", spec.Name, err)
 			}
 		}
 		if spec.IsAdjust != nil {
 			if err := layer.SetIsAdjust(*spec.IsAdjust); err != nil {
-				return fmt.Errorf("recipe: layer %q is_adjust: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q is_adjust: %w", spec.Name, err)
 			}
 		}
 		if spec.IsGuide != nil {
 			if err := layer.SetIsGuide(*spec.IsGuide); err != nil {
-				return fmt.Errorf("recipe: layer %q is_guide: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q is_guide: %w", spec.Name, err)
 			}
 		}
 		if spec.SamplingBicubic != nil {
 			if err := layer.SetSamplingBicubic(*spec.SamplingBicubic); err != nil {
-				return fmt.Errorf("recipe: layer %q sampling_bicubic: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q sampling_bicubic: %w", spec.Name, err)
 			}
 		}
 		if spec.FrameBlendPixelMotion != nil {
 			if err := layer.SetFrameBlendPixelMotion(*spec.FrameBlendPixelMotion); err != nil {
-				return fmt.Errorf("recipe: layer %q frame_blend_pixel_motion: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q frame_blend_pixel_motion: %w", spec.Name, err)
 			}
 		}
 		if spec.PreserveTransparency != nil {
 			if err := layer.SetPreserveTransparency(*spec.PreserveTransparency); err != nil {
-				return fmt.Errorf("recipe: layer %q preserve_transparency: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q preserve_transparency: %w", spec.Name, err)
 			}
 		}
 		if spec.Quality != "" {
 			quality, err := layerQuality(spec.Quality)
 			if err != nil {
-				return fmt.Errorf("recipe: layer %q quality: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q quality: %w", spec.Name, err)
 			}
 			if err := layer.SetQuality(quality); err != nil {
-				return fmt.Errorf("recipe: layer %q quality: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q quality: %w", spec.Name, err)
 			}
 		}
 		if spec.BlendingMode != "" {
 			blendingMode, err := layerBlendingMode(spec.BlendingMode)
 			if err != nil {
-				return fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
 			}
 			if err := layer.SetBlendingMode(blendingMode); err != nil {
-				return fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
 			}
 		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
-				return fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)
 			}
 		}
 		if spec.InPoint != nil {
 			if err := layer.SetInPoint(*spec.InPoint); err != nil {
-				return fmt.Errorf("recipe: layer %q in_point: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q in_point: %w", spec.Name, err)
 			}
 		}
 		if spec.OutPoint != nil {
 			if err := layer.SetOutPoint(*spec.OutPoint); err != nil {
-				return fmt.Errorf("recipe: layer %q out_point: %w", spec.Name, err)
+				return nil, fmt.Errorf("recipe: layer %q out_point: %w", spec.Name, err)
 			}
 		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
-			return fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
+			return nil, fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
+		}
+	}
+	return layer, nil
+}
+
+func applyLayerParents(compSpec CompSpec, layersByName map[string]*aep.Layer) error {
+	for _, layerSpec := range compSpec.Layers {
+		if layerSpec.Parent == "" {
+			continue
+		}
+		layer := layersByName[layerSpec.Name]
+		parent := layersByName[layerSpec.Parent]
+		if layer == nil || parent == nil {
+			return fmt.Errorf("recipe: layer %q parent %q not found", layerSpec.Name, layerSpec.Parent)
+		}
+		if err := layer.SetParent(parent.ID); err != nil {
+			return fmt.Errorf("recipe: layer %q parent: %w", layerSpec.Name, err)
 		}
 	}
 	return nil

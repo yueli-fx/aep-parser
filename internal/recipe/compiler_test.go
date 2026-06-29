@@ -343,6 +343,39 @@ func TestCompileToFileSetsLayerTiming(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerParent(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers = append([]recipe.Layer{
+		{
+			Type: "text",
+			Name: "Parent",
+			Text: "Parent",
+			Transform: recipe.Transform{
+				Position: []float64{960, 540},
+			},
+		},
+	}, rec.Comps[0].Layers...)
+	rec.Comps[0].Layers[1].Parent = "Parent"
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	gotParent := project.Compositions[0].Layers[0]
+	gotChild := project.Compositions[0].Layers[1]
+	if gotChild.ParentID != gotParent.ID {
+		t.Fatalf("child ParentID = %d, want parent ID %d", gotChild.ParentID, gotParent.ID)
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

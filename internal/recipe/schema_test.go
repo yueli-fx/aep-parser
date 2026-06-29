@@ -511,6 +511,34 @@ func TestValidateRejectsInvalidLayerTiming(t *testing.T) {
 	assertRefusal(t, report, "invalid_layer_out_point")
 }
 
+func TestValidateReportsLayerParentCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers = append([]recipe.Layer{
+		{
+			Type: "text",
+			Name: "Parent",
+			Text: "Parent",
+		},
+	}, rec.Comps[0].Layers...)
+	rec.Comps[0].Layers[1].Parent = "Parent"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetParent")
+}
+
+func TestValidateRejectsMissingLayerParent(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Parent = "Missing"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "unknown_layer_parent")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

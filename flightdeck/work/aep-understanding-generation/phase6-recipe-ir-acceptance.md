@@ -1611,6 +1611,33 @@ Fiftieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000003.png`, `f000027.png`
 
+Fifty-first follow-up completed:
+
+- Layer recipes now support same-comp parenting:
+  - `parent` (layer name) -> `Layer.SetParent`
+- Boundary: recipe input uses a layer name instead of a raw AE layer ID because
+  layer IDs are generated during compilation. Parent links are applied after
+  all layers in the comp are created, so the referenced parent may appear
+  before or after the child in the recipe. Unknown parent names are refused
+  during validation.
+- `examples/recipes/minimal-layer-parent.json` is a dedicated two-text-layer
+  recipe with `Child.parent: "Parent"`. See
+  `knowledge/layer/recipe-parent.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-parent.json -out
+    tmp_debug\recipes\minimal-layer-parent.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_parent\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_parent\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
