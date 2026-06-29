@@ -84,9 +84,14 @@ type Layer struct {
 	Parent                string         `json:"parent,omitempty"`
 	Text                  string         `json:"text,omitempty"`
 	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
+	Camera                *CameraSpec    `json:"camera,omitempty"`
 	Shape                 *ShapeSpec     `json:"shape,omitempty"`
 	Transform             Transform      `json:"transform,omitempty"`
 	Effects               []Effect       `json:"effects,omitempty"`
+}
+
+type CameraSpec struct {
+	Zoom *float64 `json:"zoom,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -762,6 +767,14 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		recordCapability("Layer.SetAutoOrient", layerPath+".auto_orient")
 		if _, err := layerAutoOrient(layer.AutoOrient); err != nil {
 			addRefusal("invalid_layer_auto_orient", layerPath+".auto_orient", "auto_orient must be none, along_path, camera_or_point_of_interest, or characters_toward_camera")
+		}
+	}
+	if layer.Camera != nil {
+		if layer.Type != "camera" {
+			addRefusal("camera_options_on_non_camera_layer", layerPath+".camera", "camera options require type camera")
+		}
+		if layer.Camera.Zoom != nil {
+			recordCapability("Layer.SetCameraZoom", layerPath+".camera.zoom")
 		}
 	}
 	if layer.StartTime != nil {

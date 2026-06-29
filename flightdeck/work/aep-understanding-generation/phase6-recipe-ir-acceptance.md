@@ -1795,6 +1795,31 @@ Fifty-seventh follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-eighth follow-up completed:
+
+- Camera layer recipes now support the first camera option:
+  - `camera.zoom` -> `Layer.SetCameraZoom`
+- Boundary: `camera` options are valid only on `type: "camera"` layers. This
+  slice covers zoom only; depth of field, focus distance, aperture, iris, and
+  other camera options remain separate recipe slices.
+- `examples/recipes/minimal-camera-zoom.json` is a dedicated two-layer recipe:
+  a `Camera` layer with zoom `850` plus a visible text layer. See
+  `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-zoom.json -out
+    tmp_debug\recipes\minimal-camera-zoom.aep -json` returned valid and all
+    `profile_checks` passed, including `ADBE Camera Zoom = 850`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_zoom\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_zoom\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

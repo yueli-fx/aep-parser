@@ -1,6 +1,7 @@
 package recipe_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	aep "github.com/example/aep-parser/internal/aep"
@@ -608,6 +609,54 @@ func TestValidateReportsLightLayerCapability(t *testing.T) {
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
 
 	assertCapability(t, report, "NewLightLayer")
+}
+
+func TestValidateReportsCameraZoomCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Camera zoom"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "camera", "name": "Camera", "camera": {"zoom": 850}},
+				{"type": "text", "name": "Title", "text": "Camera zoom", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetCameraZoom")
+}
+
+func TestValidateRejectsCameraOptionsOnNonCameraLayer(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Invalid camera options"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "text", "name": "Title", "text": "Bad", "camera": {"zoom": 850}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatalf("Valid = true, want false")
+	}
+	assertRefusal(t, report, "camera_options_on_non_camera_layer")
 }
 
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
@@ -1418,6 +1467,15 @@ func ptr(v float64) *float64 {
 
 func boolPtr(v bool) *bool {
 	return &v
+}
+
+func mustUnmarshalRecipe(t *testing.T, raw string) recipe.Recipe {
+	t.Helper()
+	var rec recipe.Recipe
+	if err := json.Unmarshal([]byte(raw), &rec); err != nil {
+		t.Fatalf("unmarshal recipe: %v", err)
+	}
+	return rec
 }
 
 type stableCapabilityIndex struct{}
