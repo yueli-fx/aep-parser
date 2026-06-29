@@ -901,6 +901,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q camera.iris_highlight_saturation: %w", spec.Name, err)
 			}
 		}
+		if spec.Light != nil && spec.Light.Intensity != nil {
+			if err := layer.SetLightIntensity(*spec.Light.Intensity); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q light.intensity: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)

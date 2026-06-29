@@ -85,9 +85,14 @@ type Layer struct {
 	Text                  string         `json:"text,omitempty"`
 	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
 	Camera                *CameraSpec    `json:"camera,omitempty"`
+	Light                 *LightSpec     `json:"light,omitempty"`
 	Shape                 *ShapeSpec     `json:"shape,omitempty"`
 	Transform             Transform      `json:"transform,omitempty"`
 	Effects               []Effect       `json:"effects,omitempty"`
+}
+
+type LightSpec struct {
+	Intensity *float64 `json:"intensity,omitempty"`
 }
 
 type CameraSpec struct {
@@ -823,6 +828,14 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Camera.IrisHighlightSaturation != nil {
 			recordCapability("SetIrisHighlightSaturation", layerPath+".camera.iris_highlight_saturation")
+		}
+	}
+	if layer.Light != nil {
+		if layer.Type != "light" {
+			addRefusal("light_options_on_non_light_layer", layerPath+".light", "light options require type light")
+		}
+		if layer.Light.Intensity != nil {
+			recordCapability("SetLightIntensity", layerPath+".light.intensity")
 		}
 	}
 	if layer.StartTime != nil {

@@ -2140,6 +2140,31 @@ Seventieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Seventy-first follow-up completed:
+
+- Light layer recipes now support the first light option:
+  - `light.intensity` -> `Layer.SetLightIntensity`
+- Boundary: `light` options are valid only on `type: "light"` layers. This
+  slice covers Intensity only; other light options remain separate recipe
+  slices.
+- `examples/recipes/minimal-light-intensity.json` is a dedicated two-layer
+  recipe: a `Light` layer with intensity `140` plus a visible text layer. See
+  `knowledge/layer/recipe-light-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-intensity.json -out
+    tmp_debug\recipes\minimal-light-intensity.aep -json` returned valid and
+    all `profile_checks` passed, including `ADBE Light Intensity = 140`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_intensity\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_intensity\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

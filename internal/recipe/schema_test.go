@@ -611,6 +611,54 @@ func TestValidateReportsLightLayerCapability(t *testing.T) {
 	assertCapability(t, report, "NewLightLayer")
 }
 
+func TestValidateReportsLightIntensityCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Light intensity"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"intensity": 140}},
+				{"type": "text", "name": "Title", "text": "Light intensity", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetLightIntensity")
+}
+
+func TestValidateRejectsLightOptionsOnNonLightLayer(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Invalid light options"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "text", "name": "Title", "text": "Bad", "light": {"intensity": 140}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatalf("Valid = true, want false")
+	}
+	assertRefusal(t, report, "light_options_on_non_light_layer")
+}
+
 func TestValidateReportsCameraZoomCapability(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,
