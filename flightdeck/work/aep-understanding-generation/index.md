@@ -236,6 +236,9 @@ Done:
   `minimal-light-object-profile.json` sets light kind, intensity, color,
   shadow, falloff, and cone controls together and asserts all profile-visible
   layer/property fields.
+- The standalone `minimal-light-kind.json` recipe now also asserts light layer
+  identity and `expected_profile.layers[].light_kind`, clearing the remaining
+  count-only recipe profile contract.
 - Light source refs now have a profile contract: `profile.Layer` exposes
   `light_source_ref`, and `minimal-light-source.json` asserts
   `expected_profile.layers[].light_source`.

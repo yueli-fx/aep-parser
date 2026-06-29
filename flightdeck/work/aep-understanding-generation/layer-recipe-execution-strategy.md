@@ -203,6 +203,10 @@ motion blur, shy, advanced switches, quality/blending, auto-orient, and null
 flag now also assert their `expected_profile.layers[]` object contracts instead
 of remaining count-only smoke tests.
 
+`minimal-light-kind.json` now asserts the light layer identity and
+`expected_profile.layers[].light_kind`, clearing the last count-only recipe
+profile contract.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

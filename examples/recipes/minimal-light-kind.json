@@ -33,6 +33,17 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 2,
-    "text_layer_count": 1
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Light",
+        "type": "light",
+        "light_kind": "point"
+      },
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ]
   }
 }
