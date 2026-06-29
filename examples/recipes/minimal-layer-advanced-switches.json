@@ -34,6 +34,22 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 1,
-    "text_layer_count": 1
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text",
+        "flags": {
+          "collapse_transform": true,
+          "is_3d": true,
+          "is_adjustment": true,
+          "is_guide": true,
+          "frame_blend_enabled": true,
+          "frame_blend_pixel_motion": true,
+          "sampling_bicubic": true,
+          "preserve_transparency": true
+        }
+      }
+    ]
   }
 }

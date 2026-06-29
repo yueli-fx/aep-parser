@@ -32,6 +32,20 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 1,
-    "text_layer_count": 1
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text",
+        "flags": {
+          "visible": false,
+          "solo": true,
+          "locked": true,
+          "effects_enabled": false,
+          "audio_enabled": false,
+          "frame_blend_enabled": true
+        }
+      }
+    ]
   }
 }

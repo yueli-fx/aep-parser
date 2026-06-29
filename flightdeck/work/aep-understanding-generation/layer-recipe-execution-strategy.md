@@ -198,6 +198,11 @@ flags through `expected_profile.layers[]`: `minimal-null-layer.json` covers the
 null controller plus child parent ref, and `minimal-adjustment-layer.json`
 covers the adjustment layer flag alongside its effect contract.
 
+The older standalone layer recipes for label, comment, timing, common switches,
+motion blur, shy, advanced switches, quality/blending, auto-orient, and null
+flag now also assert their `expected_profile.layers[]` object contracts instead
+of remaining count-only smoke tests.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

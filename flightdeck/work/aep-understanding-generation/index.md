@@ -247,6 +247,10 @@ Done:
   type flags through `expected_profile.layers[]`; `minimal-null-layer.json`
   also checks the child parent ref, while `minimal-adjustment-layer.json`
   keeps its effect contract.
+- Standalone layer recipes for label, comment, timing, common switches, motion
+  blur, shy, advanced switches, quality/blending, auto-orient, and null flag
+  now assert object-level `expected_profile.layers[]` contracts instead of
+  count-only smoke checks.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -392,9 +396,10 @@ Current:
   `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
   blocked until recipe target-version handling is explicit, so continue with
   the next recipe-owned family; the consolidated layer object baseline now
-  includes render/sampling flags, base null/adjustment recipes assert type
-  flags, and camera/light options now have consolidated baselines for
-  profile-visible properties. Do not start automated correction loops.
+  includes render/sampling flags, base null/adjustment and standalone layer
+  recipes assert object-level layer contracts, and camera/light options now
+  have consolidated baselines for profile-visible properties. Do not start
+  automated correction loops.
 
 ## Open questions
 

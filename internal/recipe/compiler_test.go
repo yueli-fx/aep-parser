@@ -450,6 +450,136 @@ func TestCompileToFileChecksNullAndAdjustmentLayerProfileExamples(t *testing.T) 
 	}
 }
 
+func TestCompileToFileChecksStandaloneLayerProfileExamples(t *testing.T) {
+	cases := []struct {
+		recipe string
+		paths  []string
+	}{
+		{
+			recipe: "minimal-layer-label.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].label",
+			},
+		},
+		{
+			recipe: "minimal-layer-comment.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].comment",
+			},
+		},
+		{
+			recipe: "minimal-layer-timing.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].timing.start_time",
+				"expected_profile.layers[0].timing.in_point",
+				"expected_profile.layers[0].timing.out_point",
+				"expected_profile.layers[0].timing.duration",
+				"expected_profile.layers[0].timing.stretch",
+			},
+		},
+		{
+			recipe: "minimal-layer-common-switches.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].flags.visible",
+				"expected_profile.layers[0].flags.solo",
+				"expected_profile.layers[0].flags.locked",
+				"expected_profile.layers[0].flags.effects_enabled",
+				"expected_profile.layers[0].flags.audio_enabled",
+				"expected_profile.layers[0].flags.frame_blend_enabled",
+			},
+		},
+		{
+			recipe: "minimal-layer-motion-blur.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].flags.motion_blur",
+			},
+		},
+		{
+			recipe: "minimal-layer-shy.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].flags.shy",
+			},
+		},
+		{
+			recipe: "minimal-layer-advanced-switches.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].flags.collapse_transform",
+				"expected_profile.layers[0].flags.is_3d",
+				"expected_profile.layers[0].flags.is_adjustment",
+				"expected_profile.layers[0].flags.is_guide",
+				"expected_profile.layers[0].flags.frame_blend_enabled",
+				"expected_profile.layers[0].flags.frame_blend_pixel_motion",
+				"expected_profile.layers[0].flags.sampling_bicubic",
+				"expected_profile.layers[0].flags.preserve_transparency",
+			},
+		},
+		{
+			recipe: "minimal-layer-quality-blending.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].quality",
+				"expected_profile.layers[0].blending_mode",
+			},
+		},
+		{
+			recipe: "minimal-layer-auto-orient.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].auto_orient",
+			},
+		},
+		{
+			recipe: "minimal-layer-null-flag.json",
+			paths: []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[0].flags.visible",
+				"expected_profile.layers[0].flags.is_null",
+				"expected_profile.layers[1].name",
+				"expected_profile.layers[1].type",
+				"expected_profile.layers[1].parent",
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.recipe, func(t *testing.T) {
+			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", tc.recipe))
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			rec := mustUnmarshalRecipe(t, string(raw))
+			outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+			report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+			if err != nil {
+				t.Fatalf("CompileToFile: %v", err)
+			}
+			if !report.Valid {
+				t.Fatalf("report = %+v, want valid", report)
+			}
+			for _, path := range tc.paths {
+				assertProfileCheck(t, report, path, true)
+			}
+		})
+	}
+}
+
 func TestCompileToFileChecksCameraObjectProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-camera-object-profile.json"))
 	if err != nil {

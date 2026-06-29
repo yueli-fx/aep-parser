@@ -29,6 +29,19 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 1,
-    "text_layer_count": 1
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text",
+        "timing": {
+          "start_time": 0.25,
+          "in_point": 0.1,
+          "out_point": 0.9,
+          "duration": 0.8,
+          "stretch": 1
+        }
+      }
+    ]
   }
 }
