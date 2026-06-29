@@ -1872,6 +1872,31 @@ Sixtieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Sixty-first follow-up completed:
+
+- Camera layer recipes now support a fourth camera option:
+  - `camera.aperture` -> `Layer.SetCameraAperture`
+- Boundary: `camera` options remain valid only on `type: "camera"` layers.
+  This slice covers Aperture only; iris and other camera options remain separate
+  recipe slices.
+- `examples/recipes/minimal-camera-aperture.json` is a dedicated two-layer
+  recipe: a `Camera` layer with aperture `180` plus a visible text layer. See
+  `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-aperture.json -out
+    tmp_debug\recipes\minimal-camera-aperture.aep -json` returned valid and all
+    `profile_checks` passed, including `ADBE Camera Aperture = 180`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_aperture\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_aperture\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

@@ -94,6 +94,7 @@ type CameraSpec struct {
 	Zoom          *float64 `json:"zoom,omitempty"`
 	DepthOfField  *bool    `json:"depth_of_field,omitempty"`
 	FocusDistance *float64 `json:"focus_distance,omitempty"`
+	Aperture      *float64 `json:"aperture,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -783,6 +784,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Camera.FocusDistance != nil {
 			recordCapability("Layer.SetCameraFocusDistance", layerPath+".camera.focus_distance")
+		}
+		if layer.Camera.Aperture != nil {
+			recordCapability("Layer.SetCameraAperture", layerPath+".camera.aperture")
 		}
 	}
 	if layer.StartTime != nil {

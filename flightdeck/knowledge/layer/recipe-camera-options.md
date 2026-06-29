@@ -3,7 +3,8 @@
 Context: recipe camera option support, starting with
 `examples/recipes/minimal-camera-zoom.json` and
 `examples/recipes/minimal-camera-depth-of-field.json` and
-`examples/recipes/minimal-camera-focus-distance.json`.
+`examples/recipes/minimal-camera-focus-distance.json` and
+`examples/recipes/minimal-camera-aperture.json`.
 
 Recipe authoring:
 
@@ -14,17 +15,20 @@ Recipe authoring:
   `Layer.SetCameraDepthOfField`.
 - `camera.focus_distance` sets the camera's Focus Distance property through
   `Layer.SetCameraFocusDistance`.
+- `camera.aperture` sets the camera's Aperture property through
+  `Layer.SetCameraAperture`.
 
 Writer capability:
 
 - `Layer.SetCameraZoom`
 - `Layer.SetCameraDepthOfField`
 - `Layer.SetCameraFocusDistance`
+- `Layer.SetCameraAperture`
 
 Boundary:
 
 - `camera` options are only valid on `type: "camera"` layers.
-- Current coverage includes `zoom`, `depth_of_field`, and `focus_distance`.
-  Aperture, iris, and other camera options remain separate recipe slices.
+- Current coverage includes `zoom`, `depth_of_field`, `focus_distance`, and
+  `aperture`. Iris and other camera options remain separate recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

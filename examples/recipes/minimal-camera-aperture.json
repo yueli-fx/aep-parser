@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal camera aperture"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "camera",
+          "name": "Camera",
+          "camera": {
+            "aperture": 180
+          }
+        },
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Camera aperture",
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "text_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Camera",
+        "match_name": "ADBE Camera Aperture",
+        "value": 180
+      }
+    ]
+  }
+}
