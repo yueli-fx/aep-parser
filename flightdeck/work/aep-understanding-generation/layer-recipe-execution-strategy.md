@@ -224,6 +224,13 @@ do not assert at least that many keyframed profile entries; this caught and
 fixed `minimal-layer-auto-orient.json`, whose Position keyframes are required
 for the `along_path` behavior.
 
+Transform keyframes now have a complete minimal object-family baseline:
+`minimal-transform-keyframes.json` authors Position, Anchor Point, Scale,
+Rotation, and Opacity keyframe streams on one text layer and asserts every
+stream through `expected_profile.keyframes[]`. The existing
+`minimal-transform-keyframe-ease.json` remains the dedicated temporal-ease
+slice for Position and Opacity.
+
 Expression examples now assert enabled state as part of the property contract.
 `minimal-transform-expression.json` checks both default-enabled Position and
 disabled Opacity expressions through `expected_profile.properties[]`, while

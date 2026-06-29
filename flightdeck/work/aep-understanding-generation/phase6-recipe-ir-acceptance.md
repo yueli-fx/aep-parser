@@ -2921,5 +2921,30 @@ Ninety-fifth follow-up completed:
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
 Next generation work should broaden recipe coverage in small proven slices:
-additional transform keyframe channels/ease where writer support exists or
-remaining recipe-owned families. Do not start automated correction loops.
+remaining recipe-owned families with existing parser/profile contracts. Do not
+start automated correction loops.
+
+Ninety-sixth follow-up completed:
+
+- Added `minimal-transform-keyframes.json` as the complete transform keyframe
+  object-family baseline. It authors Position, Anchor Point, Scale, Rotation,
+  and Opacity keyframe streams on one text layer and asserts all five parsed
+  streams through `expected_profile.keyframes[]`.
+- Added `TestCompileToFileChecksTransformKeyframeProfileExample` so the
+  complete transform keyframe example cannot disappear or lose any of its five
+  keyframed profile contracts.
+- Verification:
+  - RED was observed with
+    `go test ./internal/recipe -run TestCompileToFileChecksTransformKeyframeProfileExample -count=1`:
+    `minimal-transform-keyframes.json` was missing.
+  - The focused transform keyframe profile test passed after adding the
+    recipe.
+  - `go test ./internal/recipe -count=1` passed.
+  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+    96 recipes, 96 passed, 0 failed, 149 covered profile paths.
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
+Next generation work should broaden recipe coverage in small proven slices:
+remaining recipe-owned families with existing parser/profile contracts. Do not
+start automated correction loops.

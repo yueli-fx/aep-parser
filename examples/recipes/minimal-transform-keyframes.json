@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal transform keyframes"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 2,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Keyframes",
+          "transform": {
+            "position_keyframes": [
+              { "time": 0, "value": [760, 540] },
+              { "time": 1, "value": [960, 420] },
+              { "time": 2, "value": [1160, 540] }
+            ],
+            "anchor_point_keyframes": [
+              { "time": 0, "value": [0, 0] },
+              { "time": 1, "value": [120, -40] },
+              { "time": 2, "value": [-60, 30] }
+            ],
+            "scale_keyframes": [
+              { "time": 0, "value": [80, 80] },
+              { "time": 1, "value": [100, 120] },
+              { "time": 2, "value": [130, 90] }
+            ],
+            "rotation_keyframes": [
+              { "time": 0, "value": 0 },
+              { "time": 1, "value": 45 },
+              { "time": 2, "value": -30 }
+            ],
+            "opacity_keyframes": [
+              { "time": 0, "value": 20 },
+              { "time": 1, "value": 100 },
+              { "time": 2, "value": 40 }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ],
+    "keyframes": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Position",
+        "keyframes": [
+          { "time": 0, "value": [760, 540, 0] },
+          { "time": 1, "value": [960, 420, 0] },
+          { "time": 2, "value": [1160, 540, 0] }
+        ]
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Anchor Point",
+        "keyframes": [
+          { "time": 0, "value": [0, 0, 0] },
+          { "time": 1, "value": [120, -40, 0] },
+          { "time": 2, "value": [-60, 30, 0] }
+        ]
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Scale",
+        "keyframes": [
+          { "time": 0, "value": [0.8, 0.8, 1] },
+          { "time": 1, "value": [1, 1.2, 1] },
+          { "time": 2, "value": [1.3, 0.9, 1] }
+        ]
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Rotate Z",
+        "keyframes": [
+          { "time": 0, "value": 0 },
+          { "time": 1, "value": 45 },
+          { "time": 2, "value": -30 }
+        ]
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Opacity",
+        "keyframes": [
+          { "time": 0, "value": 0.2 },
+          { "time": 1, "value": 1 },
+          { "time": 2, "value": 0.4 }
+        ]
+      }
+    ]
+  }
+}
