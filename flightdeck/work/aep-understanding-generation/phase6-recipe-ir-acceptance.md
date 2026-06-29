@@ -1638,6 +1638,36 @@ Fifty-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-second follow-up completed:
+
+- Layer recipes now support auto-orient mode:
+  - `auto_orient` -> `Layer.SetAutoOrient`
+- Supported recipe values are `none`, `along_path`,
+  `camera_or_point_of_interest`, and `characters_toward_camera`. Invalid
+  strings are refused during validation.
+- Boundary: auto-orient is a mutually-exclusive bit group spread across `ldta`
+  offsets `0x25` and `0x26`. `along_path` only has visible meaning when the
+  layer has a motion path, so the dedicated recipe includes Position
+  keyframes.
+- `examples/recipes/minimal-layer-auto-orient.json` is a dedicated text-layer
+  recipe with `auto_orient: "along_path"`. See
+  `knowledge/layer/recipe-auto-orient.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-auto-orient.json -out
+    tmp_debug\recipes\minimal-layer-auto-orient.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_auto_orient\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_auto_orient\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

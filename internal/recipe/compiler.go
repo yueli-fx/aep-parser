@@ -798,6 +798,15 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
 			}
 		}
+		if spec.AutoOrient != "" {
+			autoOrient, err := layerAutoOrient(spec.AutoOrient)
+			if err != nil {
+				return nil, fmt.Errorf("recipe: layer %q auto_orient: %w", spec.Name, err)
+			}
+			if err := layer.SetAutoOrient(autoOrient); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q auto_orient: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)
@@ -913,6 +922,21 @@ func layerQuality(value string) (aep.LayerQuality, error) {
 		return aep.LayerQualityBest, nil
 	default:
 		return 0, fmt.Errorf("unsupported quality %q", value)
+	}
+}
+
+func layerAutoOrient(value string) (aep.AutoOrientType, error) {
+	switch value {
+	case "none":
+		return aep.AutoOrientNone, nil
+	case "along_path":
+		return aep.AutoOrientAlongPath, nil
+	case "camera_or_point_of_interest":
+		return aep.AutoOrientCameraOrPointOfInterest, nil
+	case "characters_toward_camera":
+		return aep.AutoOrientCharactersTowardCamera, nil
+	default:
+		return 0, fmt.Errorf("unsupported auto_orient %q", value)
 	}
 }
 

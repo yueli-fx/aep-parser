@@ -76,6 +76,7 @@ type Layer struct {
 	PreserveTransparency  *bool          `json:"preserve_transparency,omitempty"`
 	Quality               string         `json:"quality,omitempty"`
 	BlendingMode          string         `json:"blending_mode,omitempty"`
+	AutoOrient            string         `json:"auto_orient,omitempty"`
 	StartTime             *float64       `json:"start_time,omitempty"`
 	InPoint               *float64       `json:"in_point,omitempty"`
 	OutPoint              *float64       `json:"out_point,omitempty"`
@@ -743,6 +744,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		recordCapability("Layer.SetBlendingMode", layerPath+".blending_mode")
 		if _, err := layerBlendingMode(layer.BlendingMode); err != nil {
 			addRefusal("invalid_layer_blending_mode", layerPath+".blending_mode", "blending_mode is not supported")
+		}
+	}
+	if layer.AutoOrient != "" {
+		recordCapability("Layer.SetAutoOrient", layerPath+".auto_orient")
+		if _, err := layerAutoOrient(layer.AutoOrient); err != nil {
+			addRefusal("invalid_layer_auto_orient", layerPath+".auto_orient", "auto_orient must be none, along_path, camera_or_point_of_interest, or characters_toward_camera")
 		}
 	}
 	if layer.StartTime != nil {

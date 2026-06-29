@@ -313,6 +313,28 @@ func TestCompileToFileSetsLayerQualityAndBlendingMode(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerAutoOrient(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].AutoOrient = "along_path"
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if got.AutoOrient != aep.AutoOrientAlongPath {
+		t.Fatalf("layer auto_orient = %v, want along_path", got.AutoOrient)
+	}
+}
+
 func TestCompileToFileSetsLayerTiming(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].StartTime = ptr(0.25)

@@ -484,6 +484,27 @@ func TestValidateRejectsInvalidLayerQualityAndBlendingMode(t *testing.T) {
 	assertRefusal(t, report, "invalid_layer_blending_mode")
 }
 
+func TestValidateReportsLayerAutoOrientCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].AutoOrient = "along_path"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetAutoOrient")
+}
+
+func TestValidateRejectsInvalidLayerAutoOrient(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].AutoOrient = "spin"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_layer_auto_orient")
+}
+
 func TestValidateReportsLayerTimingCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].StartTime = ptr(0.25)
