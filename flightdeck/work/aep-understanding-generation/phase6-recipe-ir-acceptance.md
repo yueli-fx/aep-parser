@@ -2165,6 +2165,34 @@ Seventy-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Seventy-second follow-up completed:
+
+- Light layer recipes now support:
+  - `light.color` -> `Layer.SetLightColor`
+- Boundary: `light` options remain valid only on `type: "light"` layers. This
+  slice adds Color; cone, falloff, shadow, and other light options remain
+  separate recipe slices.
+- `examples/recipes/minimal-light-color.json` is a dedicated two-layer recipe:
+  a `Light` layer with color `[255, 51, 102, 204]` plus a visible text layer.
+  The light color follows the underlying raw channel order `[A, R, G, B]` in
+  the 0..255 range. See `knowledge/layer/recipe-light-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-light-color.json -out
+    tmp_debug\recipes\minimal-light-color.aep -json` returned valid and all
+    `profile_checks` passed, including `ADBE Light Color = [255, 51, 102, 204]`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_light_color\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_light_color\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

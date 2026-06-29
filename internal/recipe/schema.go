@@ -92,7 +92,8 @@ type Layer struct {
 }
 
 type LightSpec struct {
-	Intensity *float64 `json:"intensity,omitempty"`
+	Intensity *float64  `json:"intensity,omitempty"`
+	Color     []float64 `json:"color,omitempty"`
 }
 
 type CameraSpec struct {
@@ -836,6 +837,10 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Light.Intensity != nil {
 			recordCapability("SetLightIntensity", layerPath+".light.intensity")
+		}
+		if len(layer.Light.Color) > 0 {
+			recordCapability("SetLightColor", layerPath+".light.color")
+			validateColor(layer.Light.Color, layerPath+".light.color", "invalid_light_color", addRefusal)
 		}
 	}
 	if layer.StartTime != nil {
