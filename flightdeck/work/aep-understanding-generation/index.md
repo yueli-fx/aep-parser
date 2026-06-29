@@ -186,6 +186,12 @@ Done:
   `examples/recipes/minimal-shape-wiggle-paths.json` example asserts all eight
   `ADBE Vector Roughen ...` / modulation properties, passed profile checks, and
   passed an AE 2025 render oracle gate.
+- Eighth shape-filter recipe slice is implemented for `shape.wiggle_transform`
+  anchor, position, scale, rotation, wiggles per second, random seed,
+  correlation, temporal phase, and spatial phase. The dedicated
+  `examples/recipes/minimal-shape-wiggle-transform.json` example asserts all
+  nine `ADBE Vector Wiggler ...` / modulation properties, passed profile
+  checks, and passed an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

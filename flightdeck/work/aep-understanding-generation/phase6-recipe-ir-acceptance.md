@@ -649,6 +649,53 @@ Twentieth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-first follow-up completed:
+
+- Shape recipes now support `shape.wiggle_transform`, including:
+  - `anchor` -> `ADBE Vector Wiggler Anchor`
+  - `position` -> `ADBE Vector Wiggler Position`
+  - `scale` -> `ADBE Vector Wiggler Scale`
+  - `rotation` -> `ADBE Vector Wiggler Rotation`
+  - `wiggles_per_second` -> `ADBE Vector Xform Temporal Freq`
+  - `random_seed` -> `ADBE Vector Random Seed`
+  - `correlation` -> `ADBE Vector Correlation`
+  - `temporal_phase` -> `ADBE Vector Temporal Phase`
+  - `spatial_phase` -> `ADBE Vector Spatial Phase`
+- Validation rejects malformed 2D vector fields and out-of-range
+  `correlation`; amplitude scalars otherwise follow the underlying writer.
+- Capability reporting records:
+  - `VectorGroup.AddWiggleTransform`
+  - `WigglerTransform.SetAnchor`
+  - `WigglerTransform.SetPosition`
+  - `WigglerTransform.SetScale`
+  - `WigglerTransform.SetRotation`
+  - `WiggleTransformNode.SetWigglesPerSecond`
+  - `WiggleTransformNode.SetRandomSeed`
+  - `WiggleTransformNode.SetCorrelation`
+  - `WiggleTransformNode.SetTemporalPhase`
+  - `WiggleTransformNode.SetSpatialPhase`
+- `examples/recipes/minimal-shape-wiggle-transform.json` is a dedicated Wiggle
+  Transform recipe example and asserts all nine profile properties. The profile
+  names intentionally mix `ADBE Vector Wiggler ...`, `ADBE Vector Xform
+  Temporal Freq`, and shared modulation names; see
+  `knowledge/shape/recipe-wiggle-transform-profile-names.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-wiggle-transform.json -out
+    tmp_debug\recipes\minimal-shape-wiggle-transform.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_wiggle_transform/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_wiggle_transform/aeoracle_render.done`
+      = `ok`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

@@ -427,6 +427,37 @@ func TestValidateReportsShapeWigglePathsCapabilities(t *testing.T) {
 	assertCapability(t, report, "WigglePathsNode.SetSpatialPhase")
 }
 
+func TestValidateReportsShapeWiggleTransformCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.WiggleTransform = &recipe.WiggleTransformSpec{
+		Anchor:           []float64{10, 12},
+		Position:         []float64{80, 60},
+		Scale:            []float64{20, 30},
+		Rotation:         ptr(25),
+		WigglesPerSecond: ptr(4),
+		RandomSeed:       ptr(9),
+		Correlation:      ptr(80),
+		TemporalPhase:    ptr(45),
+		SpatialPhase:     ptr(20),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddWiggleTransform")
+	assertCapability(t, report, "WigglerTransform.SetAnchor")
+	assertCapability(t, report, "WigglerTransform.SetPosition")
+	assertCapability(t, report, "WigglerTransform.SetScale")
+	assertCapability(t, report, "WigglerTransform.SetRotation")
+	assertCapability(t, report, "WiggleTransformNode.SetWigglesPerSecond")
+	assertCapability(t, report, "WiggleTransformNode.SetRandomSeed")
+	assertCapability(t, report, "WiggleTransformNode.SetCorrelation")
+	assertCapability(t, report, "WiggleTransformNode.SetTemporalPhase")
+	assertCapability(t, report, "WiggleTransformNode.SetSpatialPhase")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
@@ -593,6 +624,24 @@ func TestValidateRejectsInvalidShapeWigglePaths(t *testing.T) {
 	}
 	assertRefusal(t, report, "invalid_shape_wiggle_paths_points")
 	assertRefusal(t, report, "invalid_shape_wiggle_paths_correlation")
+}
+
+func TestValidateRejectsInvalidShapeWiggleTransform(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.WiggleTransform = &recipe.WiggleTransformSpec{
+		Anchor:      []float64{10},
+		Position:    []float64{80},
+		Scale:       []float64{20},
+		Correlation: ptr(101),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_wiggle_transform_correlation")
 }
 
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {

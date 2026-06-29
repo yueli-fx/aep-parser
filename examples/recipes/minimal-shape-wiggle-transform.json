@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal wiggle transform"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Card",
+          "shape": {
+            "kind": "rect",
+            "size": [400, 400],
+            "fill_color": [255, 255, 255],
+            "wiggle_transform": {
+              "anchor": [10, 12],
+              "position": [80, 60],
+              "scale": [20, 30],
+              "rotation": 25,
+              "wiggles_per_second": 4,
+              "random_seed": 9,
+              "correlation": 80,
+              "temporal_phase": 45,
+              "spatial_phase": 20
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Wiggler Anchor",
+        "value": [10, 12]
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Wiggler Position",
+        "value": [80, 60]
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Wiggler Scale",
+        "value": [20, 30]
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Wiggler Rotation",
+        "value": 25
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Xform Temporal Freq",
+        "value": 4
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Random Seed",
+        "value": 9
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Correlation",
+        "value": 80
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Temporal Phase",
+        "value": 45
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Spatial Phase",
+        "value": 20
+      }
+    ]
+  }
+}

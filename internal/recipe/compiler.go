@@ -761,6 +761,58 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.WiggleTransform != nil {
+		wiggleTransform, err := group.AddWiggleTransform()
+		if err != nil {
+			return err
+		}
+		transform := wiggleTransform.Transform()
+		if len(shape.WiggleTransform.Anchor) == 2 {
+			if err := transform.SetAnchor([2]float64{shape.WiggleTransform.Anchor[0], shape.WiggleTransform.Anchor[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.WiggleTransform.Position) == 2 {
+			if err := transform.SetPosition([2]float64{shape.WiggleTransform.Position[0], shape.WiggleTransform.Position[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.WiggleTransform.Scale) == 2 {
+			if err := transform.SetScale([2]float64{shape.WiggleTransform.Scale[0], shape.WiggleTransform.Scale[1]}); err != nil {
+				return err
+			}
+		}
+		if shape.WiggleTransform.Rotation != nil {
+			if err := transform.SetRotation(*shape.WiggleTransform.Rotation); err != nil {
+				return err
+			}
+		}
+		if shape.WiggleTransform.WigglesPerSecond != nil {
+			if err := wiggleTransform.SetWigglesPerSecond(*shape.WiggleTransform.WigglesPerSecond); err != nil {
+				return err
+			}
+		}
+		if shape.WiggleTransform.RandomSeed != nil {
+			if err := wiggleTransform.SetRandomSeed(*shape.WiggleTransform.RandomSeed); err != nil {
+				return err
+			}
+		}
+		if shape.WiggleTransform.Correlation != nil {
+			if err := wiggleTransform.SetCorrelation(*shape.WiggleTransform.Correlation); err != nil {
+				return err
+			}
+		}
+		if shape.WiggleTransform.TemporalPhase != nil {
+			if err := wiggleTransform.SetTemporalPhase(*shape.WiggleTransform.TemporalPhase); err != nil {
+				return err
+			}
+		}
+		if shape.WiggleTransform.SpatialPhase != nil {
+			if err := wiggleTransform.SetSpatialPhase(*shape.WiggleTransform.SpatialPhase); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {

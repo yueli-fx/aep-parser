@@ -54,20 +54,21 @@ type TextStyleSpec struct {
 }
 
 type ShapeSpec struct {
-	Kind         string            `json:"kind"`
-	Size         []float64         `json:"size,omitempty"`
-	Position     []float64         `json:"position,omitempty"`
-	Roundness    *float64          `json:"roundness,omitempty"`
-	FillColor    []float64         `json:"fill_color,omitempty"`
-	FillOpacity  *float64          `json:"fill_opacity,omitempty"`
-	Stroke       *StrokeSpec       `json:"stroke,omitempty"`
-	Trim         *TrimSpec         `json:"trim,omitempty"`
-	RoundCorners *RoundCornersSpec `json:"round_corners,omitempty"`
-	OffsetPaths  *OffsetPathsSpec  `json:"offset_paths,omitempty"`
-	ZigZag       *ZigZagSpec       `json:"zigzag,omitempty"`
-	PuckerBloat  *PuckerBloatSpec  `json:"pucker_bloat,omitempty"`
-	Twist        *TwistSpec        `json:"twist,omitempty"`
-	WigglePaths  *WigglePathsSpec  `json:"wiggle_paths,omitempty"`
+	Kind            string               `json:"kind"`
+	Size            []float64            `json:"size,omitempty"`
+	Position        []float64            `json:"position,omitempty"`
+	Roundness       *float64             `json:"roundness,omitempty"`
+	FillColor       []float64            `json:"fill_color,omitempty"`
+	FillOpacity     *float64             `json:"fill_opacity,omitempty"`
+	Stroke          *StrokeSpec          `json:"stroke,omitempty"`
+	Trim            *TrimSpec            `json:"trim,omitempty"`
+	RoundCorners    *RoundCornersSpec    `json:"round_corners,omitempty"`
+	OffsetPaths     *OffsetPathsSpec     `json:"offset_paths,omitempty"`
+	ZigZag          *ZigZagSpec          `json:"zigzag,omitempty"`
+	PuckerBloat     *PuckerBloatSpec     `json:"pucker_bloat,omitempty"`
+	Twist           *TwistSpec           `json:"twist,omitempty"`
+	WigglePaths     *WigglePathsSpec     `json:"wiggle_paths,omitempty"`
+	WiggleTransform *WiggleTransformSpec `json:"wiggle_transform,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -118,6 +119,18 @@ type WigglePathsSpec struct {
 	Correlation      *float64 `json:"correlation,omitempty"`
 	TemporalPhase    *float64 `json:"temporal_phase,omitempty"`
 	SpatialPhase     *float64 `json:"spatial_phase,omitempty"`
+}
+
+type WiggleTransformSpec struct {
+	Anchor           []float64 `json:"anchor,omitempty"`
+	Position         []float64 `json:"position,omitempty"`
+	Scale            []float64 `json:"scale,omitempty"`
+	Rotation         *float64  `json:"rotation,omitempty"`
+	WigglesPerSecond *float64  `json:"wiggles_per_second,omitempty"`
+	RandomSeed       *float64  `json:"random_seed,omitempty"`
+	Correlation      *float64  `json:"correlation,omitempty"`
+	TemporalPhase    *float64  `json:"temporal_phase,omitempty"`
+	SpatialPhase     *float64  `json:"spatial_phase,omitempty"`
 }
 
 type Effect struct {
@@ -605,6 +618,43 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			}
 			if layer.Shape.WigglePaths.SpatialPhase != nil {
 				recordCapability("WigglePathsNode.SetSpatialPhase", wigglePath+".spatial_phase")
+			}
+		}
+		if layer.Shape.WiggleTransform != nil {
+			wigglePath := layerPath + ".shape.wiggle_transform"
+			recordCapability("VectorGroup.AddWiggleTransform", wigglePath)
+			if len(layer.Shape.WiggleTransform.Anchor) > 0 {
+				recordCapability("WigglerTransform.SetAnchor", wigglePath+".anchor")
+				validateVec(layer.Shape.WiggleTransform.Anchor, 2, wigglePath+".anchor", addRefusal)
+			}
+			if len(layer.Shape.WiggleTransform.Position) > 0 {
+				recordCapability("WigglerTransform.SetPosition", wigglePath+".position")
+				validateVec(layer.Shape.WiggleTransform.Position, 2, wigglePath+".position", addRefusal)
+			}
+			if len(layer.Shape.WiggleTransform.Scale) > 0 {
+				recordCapability("WigglerTransform.SetScale", wigglePath+".scale")
+				validateVec(layer.Shape.WiggleTransform.Scale, 2, wigglePath+".scale", addRefusal)
+			}
+			if layer.Shape.WiggleTransform.Rotation != nil {
+				recordCapability("WigglerTransform.SetRotation", wigglePath+".rotation")
+			}
+			if layer.Shape.WiggleTransform.WigglesPerSecond != nil {
+				recordCapability("WiggleTransformNode.SetWigglesPerSecond", wigglePath+".wiggles_per_second")
+			}
+			if layer.Shape.WiggleTransform.RandomSeed != nil {
+				recordCapability("WiggleTransformNode.SetRandomSeed", wigglePath+".random_seed")
+			}
+			if layer.Shape.WiggleTransform.Correlation != nil {
+				recordCapability("WiggleTransformNode.SetCorrelation", wigglePath+".correlation")
+				if *layer.Shape.WiggleTransform.Correlation < 0 || *layer.Shape.WiggleTransform.Correlation > 100 {
+					addRefusal("invalid_shape_wiggle_transform_correlation", wigglePath+".correlation", "wiggle_transform correlation must be between 0 and 100")
+				}
+			}
+			if layer.Shape.WiggleTransform.TemporalPhase != nil {
+				recordCapability("WiggleTransformNode.SetTemporalPhase", wigglePath+".temporal_phase")
+			}
+			if layer.Shape.WiggleTransform.SpatialPhase != nil {
+				recordCapability("WiggleTransformNode.SetSpatialPhase", wigglePath+".spatial_phase")
 			}
 		}
 	}
