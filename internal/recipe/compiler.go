@@ -772,6 +772,24 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) error {
 				return fmt.Errorf("recipe: layer %q preserve_transparency: %w", spec.Name, err)
 			}
 		}
+		if spec.Quality != "" {
+			quality, err := layerQuality(spec.Quality)
+			if err != nil {
+				return fmt.Errorf("recipe: layer %q quality: %w", spec.Name, err)
+			}
+			if err := layer.SetQuality(quality); err != nil {
+				return fmt.Errorf("recipe: layer %q quality: %w", spec.Name, err)
+			}
+		}
+		if spec.BlendingMode != "" {
+			blendingMode, err := layerBlendingMode(spec.BlendingMode)
+			if err != nil {
+				return fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
+			}
+			if err := layer.SetBlendingMode(blendingMode); err != nil {
+				return fmt.Errorf("recipe: layer %q blending_mode: %w", spec.Name, err)
+			}
+		}
 		if err := applyTransform(layer, spec.Transform); err != nil {
 			return fmt.Errorf("recipe: layer %q transform: %w", spec.Name, err)
 		}
@@ -842,6 +860,102 @@ func textJustification(value string) (aep.TextJustification, error) {
 		return aep.TextJustifyCenter, nil
 	default:
 		return 0, fmt.Errorf("unsupported justification %q", value)
+	}
+}
+
+func layerQuality(value string) (aep.LayerQuality, error) {
+	switch value {
+	case "wireframe":
+		return aep.LayerQualityWireframe, nil
+	case "draft":
+		return aep.LayerQualityDraft, nil
+	case "best":
+		return aep.LayerQualityBest, nil
+	default:
+		return 0, fmt.Errorf("unsupported quality %q", value)
+	}
+}
+
+func layerBlendingMode(value string) (aep.BlendingMode, error) {
+	switch value {
+	case "normal_camera":
+		return aep.BlendingModeNormalCamera, nil
+	case "normal":
+		return aep.BlendingModeNormal, nil
+	case "dissolve":
+		return aep.BlendingModeDissolve, nil
+	case "add":
+		return aep.BlendingModeAdd, nil
+	case "multiply":
+		return aep.BlendingModeMultiply, nil
+	case "screen":
+		return aep.BlendingModeScreen, nil
+	case "overlay":
+		return aep.BlendingModeOverlay, nil
+	case "soft_light":
+		return aep.BlendingModeSoftLight, nil
+	case "hard_light":
+		return aep.BlendingModeHardLight, nil
+	case "darken":
+		return aep.BlendingModeDarken, nil
+	case "lighten":
+		return aep.BlendingModeLighten, nil
+	case "classic_difference":
+		return aep.BlendingModeClassicDifference, nil
+	case "hue":
+		return aep.BlendingModeHue, nil
+	case "saturation":
+		return aep.BlendingModeSaturation, nil
+	case "color":
+		return aep.BlendingModeColor, nil
+	case "luminosity":
+		return aep.BlendingModeLuminosity, nil
+	case "stencil_alpha":
+		return aep.BlendingModeStencilAlpha, nil
+	case "stencil_luma":
+		return aep.BlendingModeStencilLuma, nil
+	case "silhouette_alpha":
+		return aep.BlendingModeSilhouetteAlpha, nil
+	case "silhouette_luma":
+		return aep.BlendingModeSilhouetteLuma, nil
+	case "luminescent_premul":
+		return aep.BlendingModeLuminescentPremul, nil
+	case "alpha_add":
+		return aep.BlendingModeAlphaAdd, nil
+	case "classic_color_dodge":
+		return aep.BlendingModeClassicColorDodge, nil
+	case "classic_color_burn":
+		return aep.BlendingModeClassicColorBurn, nil
+	case "exclusion":
+		return aep.BlendingModeExclusion, nil
+	case "difference":
+		return aep.BlendingModeDifference, nil
+	case "color_dodge":
+		return aep.BlendingModeColorDodge, nil
+	case "color_burn":
+		return aep.BlendingModeColorBurn, nil
+	case "linear_dodge":
+		return aep.BlendingModeLinearDodge, nil
+	case "linear_burn":
+		return aep.BlendingModeLinearBurn, nil
+	case "linear_light":
+		return aep.BlendingModeLinearLight, nil
+	case "vivid_light":
+		return aep.BlendingModeVividLight, nil
+	case "pin_light":
+		return aep.BlendingModePinLight, nil
+	case "hard_mix":
+		return aep.BlendingModeHardMix, nil
+	case "lighter_color":
+		return aep.BlendingModeLighterColor, nil
+	case "darker_color":
+		return aep.BlendingModeDarkerColor, nil
+	case "subtract":
+		return aep.BlendingModeSubtract, nil
+	case "divide":
+		return aep.BlendingModeDivide, nil
+	default:
+		return 0, fmt.Errorf("unsupported blending_mode %q", value)
 	}
 }
 

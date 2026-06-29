@@ -74,6 +74,8 @@ type Layer struct {
 	SamplingBicubic       *bool          `json:"sampling_bicubic,omitempty"`
 	FrameBlendPixelMotion *bool          `json:"frame_blend_pixel_motion,omitempty"`
 	PreserveTransparency  *bool          `json:"preserve_transparency,omitempty"`
+	Quality               string         `json:"quality,omitempty"`
+	BlendingMode          string         `json:"blending_mode,omitempty"`
 	Text                  string         `json:"text,omitempty"`
 	TextStyle             *TextStyleSpec `json:"text_style,omitempty"`
 	Shape                 *ShapeSpec     `json:"shape,omitempty"`
@@ -714,6 +716,18 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	}
 	if layer.PreserveTransparency != nil {
 		recordCapability("Layer.SetPreserveTransparency", layerPath+".preserve_transparency")
+	}
+	if layer.Quality != "" {
+		recordCapability("Layer.SetQuality", layerPath+".quality")
+		if _, err := layerQuality(layer.Quality); err != nil {
+			addRefusal("invalid_layer_quality", layerPath+".quality", "quality must be wireframe, draft, or best")
+		}
+	}
+	if layer.BlendingMode != "" {
+		recordCapability("Layer.SetBlendingMode", layerPath+".blending_mode")
+		if _, err := layerBlendingMode(layer.BlendingMode); err != nil {
+			addRefusal("invalid_layer_blending_mode", layerPath+".blending_mode", "blending_mode is not supported")
+		}
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

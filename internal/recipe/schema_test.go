@@ -459,6 +459,31 @@ func TestValidateReportsLayerAdvancedSwitchCapabilities(t *testing.T) {
 	assertCapability(t, report, "Layer.SetPreserveTransparency")
 }
 
+func TestValidateReportsLayerQualityAndBlendingModeCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Quality = "draft"
+	rec.Comps[0].Layers[0].BlendingMode = "multiply"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetQuality")
+	assertCapability(t, report, "Layer.SetBlendingMode")
+}
+
+func TestValidateRejectsInvalidLayerQualityAndBlendingMode(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Quality = "preview"
+	rec.Comps[0].Layers[0].BlendingMode = "sparkle"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_layer_quality")
+	assertRefusal(t, report, "invalid_layer_blending_mode")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{

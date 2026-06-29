@@ -287,6 +287,32 @@ func TestCompileToFileSetsLayerAdvancedSwitches(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsLayerQualityAndBlendingMode(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Quality = "draft"
+	rec.Comps[0].Layers[0].BlendingMode = "multiply"
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	got := project.Compositions[0].Layers[0]
+	if got.Quality != aep.LayerQualityDraft {
+		t.Fatalf("layer quality = %v, want draft", got.Quality)
+	}
+	if got.BlendingMode != aep.BlendingModeMultiply {
+		t.Fatalf("layer blending_mode = %v, want multiply", got.BlendingMode)
+	}
+}
+
 func TestCompileToFileSetsCompMotionBlur(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
