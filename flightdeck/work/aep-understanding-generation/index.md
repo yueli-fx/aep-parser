@@ -217,6 +217,10 @@ Done:
   `expected_profile.layers[].track_matte` asserts the profile matte mode and
   `expected_profile.layers[].matte` asserts the inferred classic matte source;
   `minimal-layer-track-matte.json` covers the two-layer alpha matte baseline.
+- Layer render/sampling flags now flow through `scene.JSONLayer`,
+  `profile.Layer.flags`, and `expected_profile.layers[].flags`.
+  `minimal-layer-object-profile.json` asserts `frame_blend_pixel_motion` and
+  `sampling_bicubic` alongside the existing object-level layer flags.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -361,7 +365,8 @@ Current:
   instead of asking for per-field direction. For layer work, follow
   `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
   blocked until recipe target-version handling is explicit, so continue with
-  the next recipe-owned family. Do not start automated correction loops.
+  the next recipe-owned family; the consolidated layer object baseline now
+  includes render/sampling flags. Do not start automated correction loops.
 
 ## Open questions
 

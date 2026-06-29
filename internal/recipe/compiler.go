@@ -626,7 +626,9 @@ func checkExpectedLayerFlags(path string, expected *ExpectedLayerFlags, actual p
 	addBool("effects_enabled", expected.EffectsEnabled, actual.EffectsEnabled)
 	addBool("audio_enabled", expected.AudioEnabled, actual.AudioEnabled)
 	addBool("frame_blend_enabled", expected.FrameBlendEnabled, actual.FrameBlendEnabled)
+	addBool("frame_blend_pixel_motion", expected.FrameBlendPixelMotion, actual.FrameBlendPixelMotion)
 	addBool("collapse_transform", expected.CollapseTransform, actual.CollapseTransform)
+	addBool("sampling_bicubic", expected.SamplingBicubic, actual.SamplingBicubic)
 	addBool("preserve_transparency", expected.PreserveTransparency, actual.PreserveTransparency)
 }
 

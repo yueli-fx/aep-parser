@@ -53,7 +53,7 @@ flags, and refs.
 | Metadata | `label` / `comment` | `Layer.SetLabel` / `SetComment` | `layers[].label` / `comment` | `expected_profile.layers[].label` / `comment` | L3 | done |
 | Timing | `start_time` / `in_point` / `out_point` | `Layer.SetStartTime` / `SetInPoint` / `SetOutPoint` | `layers[].timing.*` | `expected_profile.layers[].timing.*` | L3 | done |
 | Basic flags | `visible` / `solo` / `locked` / `shy` / `motion_blur` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
-| AV flags | `effects_enabled` / `audio_enabled` / `frame_blend_enabled` / `collapse_transform` / `preserve_transparency` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
+| AV flags | `effects_enabled` / `audio_enabled` / `frame_blend_enabled` / `frame_blend_pixel_motion` / `collapse_transform` / `sampling_bicubic` / `preserve_transparency` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | Type flags | `is_3d` / `is_adjust` / `is_null` / `is_guide` | `Layer.Set*` plus type constructors | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
 | Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
@@ -152,8 +152,8 @@ as an object-level contract:
 - timing: `start_time`, `in_point`, `out_point`
 - flags: `visible`, `solo`, `locked`, `shy`, `motion_blur`,
   `effects_enabled`, `audio_enabled`, `frame_blend_enabled`,
-  `collapse_transform`, `is_3d`, `is_adjustment`, `is_guide`, and
-  `preserve_transparency`
+  `frame_blend_pixel_motion`, `collapse_transform`, `sampling_bicubic`,
+  `is_3d`, `is_adjustment`, `is_guide`, and `preserve_transparency`
 
 ## Next Concrete Slice
 
@@ -165,6 +165,11 @@ Classic `track_matte` mode is now recipe-owned and covered by
 `minimal-layer-track-matte.json`: the fill layer asserts both
 `expected_profile.layers[].track_matte` and the inferred classic matte source
 through `expected_profile.layers[].matte`.
+
+Layer render/sampling flags are now part of the consolidated object baseline:
+`minimal-layer-object-profile.json` asserts both
+`expected_profile.layers[].flags.frame_blend_pixel_motion` and
+`expected_profile.layers[].flags.sampling_bicubic`.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the

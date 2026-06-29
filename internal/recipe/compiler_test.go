@@ -342,10 +342,12 @@ func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 		"expected_profile.layers[0].flags.effects_enabled",
 		"expected_profile.layers[0].flags.audio_enabled",
 		"expected_profile.layers[0].flags.frame_blend_enabled",
+		"expected_profile.layers[0].flags.frame_blend_pixel_motion",
 		"expected_profile.layers[0].flags.collapse_transform",
 		"expected_profile.layers[0].flags.is_3d",
 		"expected_profile.layers[0].flags.is_adjustment",
 		"expected_profile.layers[0].flags.is_guide",
+		"expected_profile.layers[0].flags.sampling_bicubic",
 		"expected_profile.layers[0].flags.preserve_transparency",
 	} {
 		assertProfileCheck(t, report, path, true)

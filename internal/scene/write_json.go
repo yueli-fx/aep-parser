@@ -185,29 +185,31 @@ type JSONLayer struct {
 	AutoOrient           string `json:"auto_orient,omitempty"`
 	Comment              string `json:"comment,omitempty"`
 
-	Is3D              bool                  `json:"is_3d,omitempty"`
-	Solo              bool                  `json:"solo,omitempty"`
-	Shy               bool                  `json:"shy,omitempty"`
-	Locked            bool                  `json:"locked,omitempty"`
-	Visible           bool                  `json:"visible"`
-	IsAdjust          bool                  `json:"is_adjustment,omitempty"`
-	IsNull            bool                  `json:"is_null,omitempty"`
-	IsGuide           bool                  `json:"is_guide,omitempty"`
-	MarkersLocked     bool                  `json:"markers_locked,omitempty"`
-	MotionBlur        bool                  `json:"motion_blur,omitempty"`
-	EffectsEnabled    bool                  `json:"effects_enabled,omitempty"`
-	AudioEnabled      bool                  `json:"audio_enabled,omitempty"`
-	FrameBlendEnabled bool                  `json:"frame_blend_enabled,omitempty"`
-	CollapseTransform bool                  `json:"collapse_transform,omitempty"`
-	IsShapeLayer      bool                  `json:"is_shape_layer,omitempty"`
-	Properties        []*JSONProperty       `json:"properties,omitempty"`
-	Effects           []*JSONEffect         `json:"effects,omitempty"`
-	Markers           []*JSONMarker         `json:"markers,omitempty"`
-	Masks             []*JSONMask           `json:"masks,omitempty"`
-	ShapePaths        []*JSONShapePath      `json:"shape_paths,omitempty"`
-	ShapePrimitives   []*JSONShapePrimitive `json:"shape_primitives,omitempty"`
-	HasTextSource     bool                  `json:"has_text_source,omitempty"`
-	TextSource        *JSONTextSource       `json:"text_source,omitempty"`
+	Is3D                  bool                  `json:"is_3d,omitempty"`
+	Solo                  bool                  `json:"solo,omitempty"`
+	Shy                   bool                  `json:"shy,omitempty"`
+	Locked                bool                  `json:"locked,omitempty"`
+	Visible               bool                  `json:"visible"`
+	IsAdjust              bool                  `json:"is_adjustment,omitempty"`
+	IsNull                bool                  `json:"is_null,omitempty"`
+	IsGuide               bool                  `json:"is_guide,omitempty"`
+	MarkersLocked         bool                  `json:"markers_locked,omitempty"`
+	MotionBlur            bool                  `json:"motion_blur,omitempty"`
+	EffectsEnabled        bool                  `json:"effects_enabled,omitempty"`
+	AudioEnabled          bool                  `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled     bool                  `json:"frame_blend_enabled,omitempty"`
+	FrameBlendPixelMotion bool                  `json:"frame_blend_pixel_motion,omitempty"`
+	CollapseTransform     bool                  `json:"collapse_transform,omitempty"`
+	SamplingBicubic       bool                  `json:"sampling_bicubic,omitempty"`
+	IsShapeLayer          bool                  `json:"is_shape_layer,omitempty"`
+	Properties            []*JSONProperty       `json:"properties,omitempty"`
+	Effects               []*JSONEffect         `json:"effects,omitempty"`
+	Markers               []*JSONMarker         `json:"markers,omitempty"`
+	Masks                 []*JSONMask           `json:"masks,omitempty"`
+	ShapePaths            []*JSONShapePath      `json:"shape_paths,omitempty"`
+	ShapePrimitives       []*JSONShapePrimitive `json:"shape_primitives,omitempty"`
+	HasTextSource         bool                  `json:"has_text_source,omitempty"`
+	TextSource            *JSONTextSource       `json:"text_source,omitempty"`
 }
 
 // JSONTextSource is the JSON view of a decoded TextSource.
@@ -578,22 +580,24 @@ func layerToJSON(l *Layer) *JSONLayer {
 			}
 			return l.AutoOrient.String()
 		}(),
-		Is3D:              l.Is3D,
-		Solo:              l.Solo,
-		Shy:               l.Shy,
-		Locked:            l.Locked,
-		Visible:           l.Visible,
-		IsAdjust:          l.IsAdjust,
-		IsNull:            l.IsNull,
-		IsGuide:           l.IsGuide,
-		MarkersLocked:     l.MarkersLocked,
-		MotionBlur:        l.MotionBlur,
-		EffectsEnabled:    l.EffectsEnabled,
-		AudioEnabled:      l.AudioEnabled,
-		FrameBlendEnabled: l.FrameBlendEnabled,
-		CollapseTransform: l.CollapseTransform,
-		IsShapeLayer:      l.IsShapeLayer,
-		HasTextSource:     l.TextSourceRaw != nil,
+		Is3D:                  l.Is3D,
+		Solo:                  l.Solo,
+		Shy:                   l.Shy,
+		Locked:                l.Locked,
+		Visible:               l.Visible,
+		IsAdjust:              l.IsAdjust,
+		IsNull:                l.IsNull,
+		IsGuide:               l.IsGuide,
+		MarkersLocked:         l.MarkersLocked,
+		MotionBlur:            l.MotionBlur,
+		EffectsEnabled:        l.EffectsEnabled,
+		AudioEnabled:          l.AudioEnabled,
+		FrameBlendEnabled:     l.FrameBlendEnabled,
+		FrameBlendPixelMotion: l.FrameBlendPixelMotion,
+		CollapseTransform:     l.CollapseTransform,
+		SamplingBicubic:       l.SamplingBicubic,
+		IsShapeLayer:          l.IsShapeLayer,
+		HasTextSource:         l.TextSourceRaw != nil,
 	}
 	if l.TextSource != nil {
 		jts := &JSONTextSource{

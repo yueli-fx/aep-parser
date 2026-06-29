@@ -32,6 +32,8 @@
           "is_3d": true,
           "is_adjust": true,
           "is_guide": true,
+          "sampling_bicubic": true,
+          "frame_blend_pixel_motion": true,
           "preserve_transparency": true,
           "start_time": 0.25,
           "in_point": 0.1,
@@ -71,10 +73,12 @@
           "effects_enabled": false,
           "audio_enabled": false,
           "frame_blend_enabled": true,
+          "frame_blend_pixel_motion": true,
           "collapse_transform": true,
           "is_3d": true,
           "is_adjustment": true,
           "is_guide": true,
+          "sampling_bicubic": true,
           "preserve_transparency": true
         }
       }

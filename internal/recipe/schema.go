@@ -417,20 +417,22 @@ type ExpectedLayerTiming struct {
 }
 
 type ExpectedLayerFlags struct {
-	Visible              *bool `json:"visible,omitempty"`
-	Solo                 *bool `json:"solo,omitempty"`
-	Shy                  *bool `json:"shy,omitempty"`
-	Locked               *bool `json:"locked,omitempty"`
-	Is3D                 *bool `json:"is_3d,omitempty"`
-	IsAdjustment         *bool `json:"is_adjustment,omitempty"`
-	IsNull               *bool `json:"is_null,omitempty"`
-	IsGuide              *bool `json:"is_guide,omitempty"`
-	MotionBlur           *bool `json:"motion_blur,omitempty"`
-	EffectsEnabled       *bool `json:"effects_enabled,omitempty"`
-	AudioEnabled         *bool `json:"audio_enabled,omitempty"`
-	FrameBlendEnabled    *bool `json:"frame_blend_enabled,omitempty"`
-	CollapseTransform    *bool `json:"collapse_transform,omitempty"`
-	PreserveTransparency *bool `json:"preserve_transparency,omitempty"`
+	Visible               *bool `json:"visible,omitempty"`
+	Solo                  *bool `json:"solo,omitempty"`
+	Shy                   *bool `json:"shy,omitempty"`
+	Locked                *bool `json:"locked,omitempty"`
+	Is3D                  *bool `json:"is_3d,omitempty"`
+	IsAdjustment          *bool `json:"is_adjustment,omitempty"`
+	IsNull                *bool `json:"is_null,omitempty"`
+	IsGuide               *bool `json:"is_guide,omitempty"`
+	MotionBlur            *bool `json:"motion_blur,omitempty"`
+	EffectsEnabled        *bool `json:"effects_enabled,omitempty"`
+	AudioEnabled          *bool `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled     *bool `json:"frame_blend_enabled,omitempty"`
+	FrameBlendPixelMotion *bool `json:"frame_blend_pixel_motion,omitempty"`
+	CollapseTransform     *bool `json:"collapse_transform,omitempty"`
+	SamplingBicubic       *bool `json:"sampling_bicubic,omitempty"`
+	PreserveTransparency  *bool `json:"preserve_transparency,omitempty"`
 }
 
 type ExpectedWorkAreaSpec struct {

@@ -150,24 +150,26 @@ type LayerTiming struct {
 }
 
 type LayerFlags struct {
-	Visible              bool   `json:"visible"`
-	Blend                uint8  `json:"blend"`
-	BlendName            string `json:"blend_name,omitempty"`
-	TrackMatte           uint8  `json:"track_matte,omitempty"`
-	TrackMatteName       string `json:"track_matte_name,omitempty"`
-	Is3D                 bool   `json:"is_3d,omitempty"`
-	Solo                 bool   `json:"solo,omitempty"`
-	Shy                  bool   `json:"shy,omitempty"`
-	Locked               bool   `json:"locked,omitempty"`
-	IsAdjustment         bool   `json:"is_adjustment,omitempty"`
-	IsNull               bool   `json:"is_null,omitempty"`
-	IsGuide              bool   `json:"is_guide,omitempty"`
-	MotionBlur           bool   `json:"motion_blur,omitempty"`
-	EffectsEnabled       bool   `json:"effects_enabled,omitempty"`
-	AudioEnabled         bool   `json:"audio_enabled,omitempty"`
-	FrameBlendEnabled    bool   `json:"frame_blend_enabled,omitempty"`
-	CollapseTransform    bool   `json:"collapse_transform,omitempty"`
-	PreserveTransparency bool   `json:"preserve_transparency,omitempty"`
+	Visible               bool   `json:"visible"`
+	Blend                 uint8  `json:"blend"`
+	BlendName             string `json:"blend_name,omitempty"`
+	TrackMatte            uint8  `json:"track_matte,omitempty"`
+	TrackMatteName        string `json:"track_matte_name,omitempty"`
+	Is3D                  bool   `json:"is_3d,omitempty"`
+	Solo                  bool   `json:"solo,omitempty"`
+	Shy                   bool   `json:"shy,omitempty"`
+	Locked                bool   `json:"locked,omitempty"`
+	IsAdjustment          bool   `json:"is_adjustment,omitempty"`
+	IsNull                bool   `json:"is_null,omitempty"`
+	IsGuide               bool   `json:"is_guide,omitempty"`
+	MotionBlur            bool   `json:"motion_blur,omitempty"`
+	EffectsEnabled        bool   `json:"effects_enabled,omitempty"`
+	AudioEnabled          bool   `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled     bool   `json:"frame_blend_enabled,omitempty"`
+	FrameBlendPixelMotion bool   `json:"frame_blend_pixel_motion,omitempty"`
+	CollapseTransform     bool   `json:"collapse_transform,omitempty"`
+	SamplingBicubic       bool   `json:"sampling_bicubic,omitempty"`
+	PreserveTransparency  bool   `json:"preserve_transparency,omitempty"`
 }
 
 type Effect struct {
@@ -456,24 +458,26 @@ func buildLayer(
 			Stretch:   l.Stretch,
 		},
 		Flags: LayerFlags{
-			Visible:              l.Visible,
-			Blend:                l.BlendingMode,
-			BlendName:            blendName(int(l.BlendingMode)),
-			TrackMatte:           l.TrackMatte,
-			TrackMatteName:       trackMatteName(int(l.TrackMatte)),
-			Is3D:                 l.Is3D,
-			Solo:                 l.Solo,
-			Shy:                  l.Shy,
-			Locked:               l.Locked,
-			IsAdjustment:         l.IsAdjust,
-			IsNull:               l.IsNull,
-			IsGuide:              l.IsGuide,
-			MotionBlur:           l.MotionBlur,
-			EffectsEnabled:       l.EffectsEnabled,
-			AudioEnabled:         l.AudioEnabled,
-			FrameBlendEnabled:    l.FrameBlendEnabled,
-			CollapseTransform:    l.CollapseTransform,
-			PreserveTransparency: l.PreserveTransparency,
+			Visible:               l.Visible,
+			Blend:                 l.BlendingMode,
+			BlendName:             blendName(int(l.BlendingMode)),
+			TrackMatte:            l.TrackMatte,
+			TrackMatteName:        trackMatteName(int(l.TrackMatte)),
+			Is3D:                  l.Is3D,
+			Solo:                  l.Solo,
+			Shy:                   l.Shy,
+			Locked:                l.Locked,
+			IsAdjustment:          l.IsAdjust,
+			IsNull:                l.IsNull,
+			IsGuide:               l.IsGuide,
+			MotionBlur:            l.MotionBlur,
+			EffectsEnabled:        l.EffectsEnabled,
+			AudioEnabled:          l.AudioEnabled,
+			FrameBlendEnabled:     l.FrameBlendEnabled,
+			FrameBlendPixelMotion: l.FrameBlendPixelMotion,
+			CollapseTransform:     l.CollapseTransform,
+			SamplingBicubic:       l.SamplingBicubic,
+			PreserveTransparency:  l.PreserveTransparency,
 		},
 		Path:     layerPath(c, l),
 		Evidence: parsedEvidence(),
