@@ -90,6 +90,56 @@ func TestRecipeExamplesExpectedProfilesAreNotCountOnly(t *testing.T) {
 	}
 }
 
+func TestRecipeExamplesWithLayersAssertLayerProfiles(t *testing.T) {
+	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
+	if err != nil {
+		t.Fatalf("Glob recipe examples: %v", err)
+	}
+	if len(recipePaths) == 0 {
+		t.Fatal("no recipe examples found")
+	}
+	for _, recipePath := range recipePaths {
+		t.Run(filepath.Base(recipePath), func(t *testing.T) {
+			raw, err := os.ReadFile(recipePath)
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			var doc map[string]any
+			if err := json.Unmarshal(raw, &doc); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			if !recipeExampleHasAuthoredLayers(doc) {
+				return
+			}
+			expectedProfile, ok := doc["expected_profile"].(map[string]any)
+			if !ok {
+				t.Fatal("expected_profile is required")
+			}
+			if _, ok := expectedProfile["layers"]; !ok {
+				t.Fatal("expected_profile.layers is required when recipe authors layers")
+			}
+		})
+	}
+}
+
+func recipeExampleHasAuthoredLayers(doc map[string]any) bool {
+	comps, ok := doc["comps"].([]any)
+	if !ok {
+		return false
+	}
+	for _, rawComp := range comps {
+		comp, ok := rawComp.(map[string]any)
+		if !ok {
+			continue
+		}
+		layers, ok := comp["layers"].([]any)
+		if ok && len(layers) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func TestCompileToFileSetsCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 56}

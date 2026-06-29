@@ -212,6 +212,10 @@ identity through `expected_profile.layers[]` alongside their property value
 checks, so those examples are anchored to the object contract instead of only
 the property list.
 
+Shape, text/effect, transform, and comp-draft examples that author layers now
+also assert `expected_profile.layers[]`. The recipe test suite includes a guard
+that fails any authored-layer example missing an object-level layer contract.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

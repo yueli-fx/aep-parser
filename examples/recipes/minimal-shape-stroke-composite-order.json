@@ -35,6 +35,12 @@
     "comp_count": 1,
     "layer_count": 1,
     "shape_layer_count": 1,
+    "layers": [
+      {
+        "name": "Frame",
+        "type": "shape"
+      }
+    ],
     "properties": [
       {
         "layer_name": "Frame",

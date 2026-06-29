@@ -263,6 +263,9 @@ Done:
   blur, shy, advanced switches, quality/blending, auto-orient, and null flag
   now assert object-level `expected_profile.layers[]` contracts instead of
   count-only smoke checks.
+- All recipe examples that author layers now include
+  `expected_profile.layers[]` object identity checks. A recipe test guard fails
+  any future authored-layer example that omits the layer object contract.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -410,9 +413,10 @@ Current:
   blocked until recipe target-version handling is explicit, so continue with
   the next recipe-owned family; the consolidated layer object baseline now
   includes render/sampling flags, base null/adjustment and standalone layer
-  recipes assert object-level layer contracts, and camera/light options now
-  have consolidated baselines for profile-visible properties. Do not start
-  automated correction loops.
+  recipes assert object-level layer contracts, every authored-layer recipe now
+  has `expected_profile.layers[]`, and camera/light options now have
+  consolidated baselines for profile-visible properties. Do not start automated
+  correction loops.
 
 ## Open questions
 

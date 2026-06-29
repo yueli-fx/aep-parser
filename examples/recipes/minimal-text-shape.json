@@ -113,6 +113,16 @@
     "layer_count": 2,
     "text_layer_count": 1,
     "shape_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      },
+      {
+        "name": "Underline",
+        "type": "shape"
+      }
+    ],
     "properties": [
       {
         "layer_name": "Underline",

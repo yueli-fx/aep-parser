@@ -37,6 +37,12 @@
     "comp_count": 1,
     "layer_count": 1,
     "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ],
     "properties": [
       {
         "layer_name": "Title",
