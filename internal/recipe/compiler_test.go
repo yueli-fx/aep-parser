@@ -437,6 +437,39 @@ func TestCompileToFileChecksCameraObjectProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksLightObjectProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-light-object-profile.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	for _, path := range []string{
+		"expected_profile.layers[0].name",
+		"expected_profile.layers[0].type",
+		"expected_profile.properties[0]",
+		"expected_profile.properties[1]",
+		"expected_profile.properties[2]",
+		"expected_profile.properties[3]",
+		"expected_profile.properties[4]",
+		"expected_profile.properties[5]",
+		"expected_profile.properties[6]",
+		"expected_profile.properties[7]",
+		"expected_profile.properties[8]",
+		"expected_profile.properties[9]",
+	} {
+		assertProfileCheck(t, report, path, true)
+	}
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)

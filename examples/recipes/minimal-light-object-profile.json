@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal light object profile"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "light",
+          "name": "Light",
+          "light": {
+            "kind": "spot",
+            "intensity": 140,
+            "color": [255, 51, 102, 204],
+            "casts_shadows": true,
+            "shadow_darkness": 75,
+            "shadow_diffusion": 18,
+            "falloff_type": 2,
+            "falloff_start": 100,
+            "falloff_distance": 750,
+            "cone_angle": 72,
+            "cone_feather": 35
+          }
+        },
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Light object profile",
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 2,
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Light",
+        "type": "light"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Intensity",
+        "value": 140
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Color",
+        "value": [255, 51, 102, 204]
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Casts Shadows",
+        "value": 1
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Shadow Darkness",
+        "value": 75
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Shadow Diffusion",
+        "value": 18
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Falloff Type",
+        "value": 2
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Falloff Start",
+        "value": 100
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Falloff Distance",
+        "value": 750
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Cone Angle",
+        "value": 72
+      },
+      {
+        "layer_name": "Light",
+        "match_name": "ADBE Light Cone Feather 2",
+        "value": 35
+      }
+    ]
+  }
+}
