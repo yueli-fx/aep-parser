@@ -715,6 +715,21 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.MergePaths != nil {
+		mergePaths, err := group.AddMergePaths()
+		if err != nil {
+			return err
+		}
+		if shape.MergePaths.Type != "" {
+			mergeType, err := mergePathsType(shape.MergePaths.Type)
+			if err != nil {
+				return err
+			}
+			if err := mergePaths.SetType(mergeType); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.ZigZag != nil {
 		zigZag, err := group.AddZigZag()
 		if err != nil {
@@ -952,6 +967,23 @@ func repeaterOrder(value string) (aep.RepeaterOrder, error) {
 		return aep.RepeaterOrderAbove, nil
 	default:
 		return 0, fmt.Errorf("unsupported repeater order %q", value)
+	}
+}
+
+func mergePathsType(value string) (aep.MergeType, error) {
+	switch value {
+	case "merge":
+		return aep.MergeTypeMerge, nil
+	case "add":
+		return aep.MergeTypeAdd, nil
+	case "subtract":
+		return aep.MergeTypeSubtract, nil
+	case "intersect":
+		return aep.MergeTypeIntersect, nil
+	case "exclude":
+		return aep.MergeTypeExclude, nil
+	default:
+		return 0, fmt.Errorf("unsupported merge_paths type %q", value)
 	}
 }
 

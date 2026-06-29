@@ -197,6 +197,12 @@ Done:
   opacity. The dedicated `examples/recipes/minimal-shape-repeater.json`
   example asserts all nine `ADBE Vector Repeater ...` properties, passed
   profile checks, and passed an AE 2025 render oracle gate.
+- Tenth shape-filter recipe slice is implemented for `shape.merge_paths.type`.
+  The dedicated `examples/recipes/minimal-shape-merge-paths.json` example
+  asserts `ADBE Vector Merge Type`, passed profile checks, and passed an AE
+  2025 render oracle gate. Current recipe IR still has one primitive per shape
+  layer; visible multi-path boolean recipes need a later multi-shape or
+  vector-group structure.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

@@ -744,6 +744,38 @@ Twenty-second follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-third follow-up completed:
+
+- Shape recipes now support `shape.merge_paths`, including:
+  - `type` -> `ADBE Vector Merge Type`
+- Valid `type` values are `merge`, `add`, `subtract`, `intersect`, and
+  `exclude`; validation rejects unsupported values.
+- Capability reporting records:
+  - `VectorGroup.AddMergePaths`
+  - `MergePathsNode.SetType`
+- `examples/recipes/minimal-shape-merge-paths.json` is a dedicated Merge Paths
+  recipe example and asserts `ADBE Vector Merge Type`. Recipe `type` is
+  authored as a string enum, while profile readback is numeric `1..5`; see
+  `knowledge/shape/recipe-merge-paths-profile-enums.md`.
+- Boundary: current recipe IR has one `shape` primitive per shape layer, so
+  this slice proves node/type generation and AE acceptance; visible multi-path
+  boolean composition needs a later multi-shape or vector-group recipe shape.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-merge-paths.json -out
+    tmp_debug\recipes\minimal-shape-merge-paths.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_merge_paths/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_merge_paths/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

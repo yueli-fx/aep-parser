@@ -239,6 +239,32 @@ func TestCompileToFileSetsShapeRepeater(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Repeater Opacity 2", 25.0)
 }
 
+func TestCompileToFileSetsShapeMergePaths(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.MergePaths = &recipe.MergePathsSpec{
+		Type: "subtract",
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Merge Type", 3.0)
+}
+
 func TestCompileToFileSetsShapeZigZag(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.ZigZag = &recipe.ZigZagSpec{

@@ -65,6 +65,7 @@ type ShapeSpec struct {
 	RoundCorners    *RoundCornersSpec    `json:"round_corners,omitempty"`
 	OffsetPaths     *OffsetPathsSpec     `json:"offset_paths,omitempty"`
 	Repeater        *RepeaterSpec        `json:"repeater,omitempty"`
+	MergePaths      *MergePathsSpec      `json:"merge_paths,omitempty"`
 	ZigZag          *ZigZagSpec          `json:"zigzag,omitempty"`
 	PuckerBloat     *PuckerBloatSpec     `json:"pucker_bloat,omitempty"`
 	Twist           *TwistSpec           `json:"twist,omitempty"`
@@ -106,6 +107,10 @@ type RepeaterSpec struct {
 	Rotation     *float64  `json:"rotation,omitempty"`
 	StartOpacity *float64  `json:"start_opacity,omitempty"`
 	EndOpacity   *float64  `json:"end_opacity,omitempty"`
+}
+
+type MergePathsSpec struct {
+	Type string `json:"type,omitempty"`
 }
 
 type ZigZagSpec struct {
@@ -605,6 +610,16 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				}
 			}
 		}
+		if layer.Shape.MergePaths != nil {
+			mergePath := layerPath + ".shape.merge_paths"
+			recordCapability("VectorGroup.AddMergePaths", mergePath)
+			if layer.Shape.MergePaths.Type != "" {
+				recordCapability("MergePathsNode.SetType", mergePath+".type")
+				if !validMergePathsType(layer.Shape.MergePaths.Type) {
+					addRefusal("invalid_shape_merge_paths_type", mergePath+".type", "merge_paths type must be merge, add, subtract, intersect, or exclude")
+				}
+			}
+		}
 		if layer.Shape.ZigZag != nil {
 			zigZagPath := layerPath + ".shape.zigzag"
 			recordCapability("VectorGroup.AddZigZag", zigZagPath)
@@ -870,6 +885,15 @@ func validOffsetLineJoin(value string) bool {
 func validRepeaterOrder(value string) bool {
 	switch value {
 	case "below", "above":
+		return true
+	default:
+		return false
+	}
+}
+
+func validMergePathsType(value string) bool {
+	switch value {
+	case "merge", "add", "subtract", "intersect", "exclude":
 		return true
 	default:
 		return false

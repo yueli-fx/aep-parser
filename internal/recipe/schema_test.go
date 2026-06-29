@@ -378,6 +378,21 @@ func TestValidateReportsShapeRepeaterCapabilities(t *testing.T) {
 	assertCapability(t, report, "RepeaterTransform.SetEndOpacity")
 }
 
+func TestValidateReportsShapeMergePathsCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.MergePaths = &recipe.MergePathsSpec{
+		Type: "subtract",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddMergePaths")
+	assertCapability(t, report, "MergePathsNode.SetType")
+}
+
 func TestValidateReportsShapeZigZagCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.ZigZag = &recipe.ZigZagSpec{
@@ -631,6 +646,20 @@ func TestValidateRejectsInvalidShapeRepeater(t *testing.T) {
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_repeater_start_opacity")
 	assertRefusal(t, report, "invalid_shape_repeater_end_opacity")
+}
+
+func TestValidateRejectsInvalidShapeMergePaths(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.MergePaths = &recipe.MergePathsSpec{
+		Type: "mask",
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_merge_paths_type")
 }
 
 func TestValidateRejectsInvalidShapeZigZag(t *testing.T) {

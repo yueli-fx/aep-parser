@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal merge paths"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Card",
+          "shape": {
+            "kind": "rect",
+            "size": [400, 400],
+            "fill_color": [255, 255, 255],
+            "merge_paths": {
+              "type": "subtract"
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Merge Type",
+        "value": 3
+      }
+    ]
+  }
+}
