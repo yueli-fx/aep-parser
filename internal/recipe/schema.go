@@ -393,12 +393,15 @@ type ExpectedProfile struct {
 }
 
 type ExpectedLayer struct {
-	Name    string               `json:"name"`
-	Type    string               `json:"type,omitempty"`
-	Label   *float64             `json:"label,omitempty"`
-	Comment string               `json:"comment,omitempty"`
-	Timing  *ExpectedLayerTiming `json:"timing,omitempty"`
-	Flags   *ExpectedLayerFlags  `json:"flags,omitempty"`
+	Name         string               `json:"name"`
+	Type         string               `json:"type,omitempty"`
+	Quality      string               `json:"quality,omitempty"`
+	BlendingMode string               `json:"blending_mode,omitempty"`
+	AutoOrient   string               `json:"auto_orient,omitempty"`
+	Label        *float64             `json:"label,omitempty"`
+	Comment      string               `json:"comment,omitempty"`
+	Timing       *ExpectedLayerTiming `json:"timing,omitempty"`
+	Flags        *ExpectedLayerFlags  `json:"flags,omitempty"`
 }
 
 type ExpectedLayerTiming struct {
@@ -683,6 +686,21 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 		}
 		if layer.Label != nil {
 			validateLayerLabel(*layer.Label, layerPath+".label", addRefusal)
+		}
+		if layer.Quality != "" {
+			if _, err := layerQuality(layer.Quality); err != nil {
+				addRefusal("invalid_expected_profile", layerPath+".quality", "quality must be wireframe, draft, or best")
+			}
+		}
+		if layer.BlendingMode != "" {
+			if _, err := layerBlendingMode(layer.BlendingMode); err != nil {
+				addRefusal("invalid_expected_profile", layerPath+".blending_mode", "blending_mode is not supported")
+			}
+		}
+		if layer.AutoOrient != "" {
+			if _, err := layerAutoOrient(layer.AutoOrient); err != nil {
+				addRefusal("invalid_expected_profile", layerPath+".auto_orient", "auto_orient must be none, along_path, camera_or_point_of_interest, or characters_toward_camera")
+			}
 		}
 		if layer.Timing != nil {
 			validateExpectedLayerTiming(layer.Timing, layerPath+".timing", addRefusal)

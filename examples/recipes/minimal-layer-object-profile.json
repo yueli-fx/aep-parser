@@ -17,6 +17,9 @@
           "name": "Title",
           "label": 10,
           "comment": "reviewed recipe layer",
+          "quality": "draft",
+          "blending_mode": "multiply",
+          "auto_orient": "along_path",
           "visible": false,
           "solo": true,
           "locked": true,
@@ -49,6 +52,9 @@
       {
         "name": "Title",
         "type": "text",
+        "quality": "draft",
+        "blending_mode": "multiply",
+        "auto_orient": "along_path",
         "label": 10,
         "comment": "reviewed recipe layer",
         "timing": {

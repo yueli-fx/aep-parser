@@ -106,24 +106,27 @@ type MotionBlurSettings struct {
 }
 
 type Layer struct {
-	ID         uint32      `json:"id,omitempty"`
-	Index      int         `json:"index"`
-	Name       string      `json:"name"`
-	Type       string      `json:"type"`
-	Label      uint8       `json:"label,omitempty"`
-	Comment    string      `json:"comment,omitempty"`
-	SourceRef  *ItemRef    `json:"source_ref,omitempty"`
-	ParentRef  *LayerRef   `json:"parent_ref,omitempty"`
-	MatteRef   *LayerRef   `json:"matte_ref,omitempty"`
-	Timing     LayerTiming `json:"timing"`
-	Flags      LayerFlags  `json:"flags"`
-	Effects    []Effect    `json:"effects,omitempty"`
-	Properties []Property  `json:"properties,omitempty"`
-	Masks      []Mask      `json:"masks,omitempty"`
-	Shapes     []Shape     `json:"shapes,omitempty"`
-	Text       *TextSource `json:"text,omitempty"`
-	Path       PathRef     `json:"path"`
-	Evidence   Evidence    `json:"evidence"`
+	ID           uint32      `json:"id,omitempty"`
+	Index        int         `json:"index"`
+	Name         string      `json:"name"`
+	Type         string      `json:"type"`
+	Label        uint8       `json:"label,omitempty"`
+	Comment      string      `json:"comment,omitempty"`
+	Quality      string      `json:"quality,omitempty"`
+	BlendingMode string      `json:"blending_mode,omitempty"`
+	AutoOrient   string      `json:"auto_orient,omitempty"`
+	SourceRef    *ItemRef    `json:"source_ref,omitempty"`
+	ParentRef    *LayerRef   `json:"parent_ref,omitempty"`
+	MatteRef     *LayerRef   `json:"matte_ref,omitempty"`
+	Timing       LayerTiming `json:"timing"`
+	Flags        LayerFlags  `json:"flags"`
+	Effects      []Effect    `json:"effects,omitempty"`
+	Properties   []Property  `json:"properties,omitempty"`
+	Masks        []Mask      `json:"masks,omitempty"`
+	Shapes       []Shape     `json:"shapes,omitempty"`
+	Text         *TextSource `json:"text,omitempty"`
+	Path         PathRef     `json:"path"`
+	Evidence     Evidence    `json:"evidence"`
 }
 
 type ItemRef struct {
@@ -436,12 +439,15 @@ func buildLayer(
 	dict *EffectDictionary,
 ) Layer {
 	lp := Layer{
-		ID:      l.ID,
-		Index:   l.Index,
-		Name:    l.Name,
-		Type:    l.Type,
-		Label:   l.Label,
-		Comment: l.Comment,
+		ID:           l.ID,
+		Index:        l.Index,
+		Name:         l.Name,
+		Type:         l.Type,
+		Label:        l.Label,
+		Comment:      l.Comment,
+		Quality:      qualityName(int(l.Quality)),
+		BlendingMode: blendRecipeName(int(l.BlendingMode)),
+		AutoOrient:   autoOrientName(l.AutoOrient),
 		Timing: LayerTiming{
 			StartTime: l.StartTime,
 			Duration:  l.Duration,
@@ -901,6 +907,51 @@ func blendName(mode int) string {
 		return name
 	}
 	return fmt.Sprintf("blend#%d", mode)
+}
+
+var blendRecipeNames = map[int]string{
+	0: "normal_camera", 2: "normal", 3: "dissolve", 4: "add", 5: "multiply",
+	6: "screen", 7: "overlay", 8: "soft_light", 9: "hard_light", 10: "darken",
+	11: "lighten", 12: "classic_difference", 13: "hue", 14: "saturation", 15: "color",
+	16: "luminosity", 17: "stencil_alpha", 18: "stencil_luma", 19: "silhouette_alpha",
+	20: "silhouette_luma", 21: "luminescent_premul", 22: "alpha_add", 23: "classic_color_dodge",
+	24: "classic_color_burn", 25: "exclusion", 26: "difference", 27: "color_dodge",
+	28: "color_burn", 29: "linear_dodge", 30: "linear_burn", 31: "linear_light",
+	32: "vivid_light", 33: "pin_light", 34: "hard_mix", 35: "lighter_color",
+	36: "darker_color", 37: "subtract", 38: "divide",
+}
+
+func blendRecipeName(mode int) string {
+	if name, ok := blendRecipeNames[mode]; ok {
+		return name
+	}
+	return fmt.Sprintf("blend_%d", mode)
+}
+
+func qualityName(quality int) string {
+	switch quality {
+	case 0:
+		return "wireframe"
+	case 1:
+		return "draft"
+	case 2:
+		return "best"
+	default:
+		return fmt.Sprintf("quality_%d", quality)
+	}
+}
+
+func autoOrientName(value string) string {
+	switch value {
+	case "along-path":
+		return "along_path"
+	case "camera-or-point-of-interest":
+		return "camera_or_point_of_interest"
+	case "characters-toward-camera":
+		return "characters_toward_camera"
+	default:
+		return value
+	}
 }
 
 var trackMatteNames = map[int]string{

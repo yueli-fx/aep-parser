@@ -55,8 +55,8 @@ flags, and refs.
 | Basic flags | `visible` / `solo` / `locked` / `shy` / `motion_blur` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | AV flags | `effects_enabled` / `audio_enabled` / `frame_blend_enabled` / `collapse_transform` / `preserve_transparency` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | Type flags | `is_3d` / `is_adjust` / `is_null` / `is_guide` | `Layer.Set*` plus type constructors | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
-| Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | missing from `profile.Layer` | planned `layers[].quality` / `flags.blend_name` | L3 | planned |
-| Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | missing from `profile.Layer` | planned `layers[].auto_orient` | L3 | planned |
+| Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
+| Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
 | Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | planned `expected_profile.layers[].parent` | L3 | planned |
 | Matte refs | track matte writer currently not recipe-owned | `layers[].matte_ref` | planned when writer enters recipe scope | L2/L3 | blocked |
 | Transform statics | `transform.position` / `scale` / `anchor_point` / `rotation` / `opacity` | `SetLayerTransform` | `properties[]` | `expected_profile.properties[]` | L3 | keep separate |
@@ -147,6 +147,7 @@ Commit each completed field group locally. Do not push.
 as an object-level contract:
 
 - identity: `name`, `type`
+- display/mode: `quality`, `blending_mode`, `auto_orient`
 - metadata: `label`, `comment`
 - timing: `start_time`, `in_point`, `out_point`
 - flags: `visible`, `solo`, `locked`, `shy`, `motion_blur`,
@@ -156,10 +157,9 @@ as an object-level contract:
 
 ## Next Concrete Slice
 
-Add `quality`, `blending_mode` / `blend_name`, and `auto_orient` to
-`profile.Layer` plus `expected_profile.layers[]` checks, because recipe writer
-support already exists but the layer object profile contract does not expose
-these values yet.
+Add parent-ref object checks using `expected_profile.layers[].parent`, because
+recipe writer support and `profile.Layer.parent_ref` already exist but the
+object-level expected-profile contract does not assert refs yet.
 
 ## Self-Review
 

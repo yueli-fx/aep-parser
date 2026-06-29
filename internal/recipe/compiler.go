@@ -548,6 +548,15 @@ func checkExpectedLayer(index int, expected ExpectedLayer, prof *profile.Profile
 	if expected.Type != "" {
 		add(layerPath+".type", expected.Type, layer.Type, layer.Type == expected.Type)
 	}
+	if expected.Quality != "" {
+		add(layerPath+".quality", expected.Quality, layer.Quality, layer.Quality == expected.Quality)
+	}
+	if expected.BlendingMode != "" {
+		add(layerPath+".blending_mode", expected.BlendingMode, layer.BlendingMode, layer.BlendingMode == expected.BlendingMode)
+	}
+	if expected.AutoOrient != "" {
+		add(layerPath+".auto_orient", expected.AutoOrient, layer.AutoOrient, layer.AutoOrient == expected.AutoOrient)
+	}
 	if expected.Label != nil {
 		actual := float64(layer.Label)
 		add(layerPath+".label", *expected.Label, actual, actual == *expected.Label)

@@ -206,6 +206,10 @@ Done:
   `label`/`comment`, and `minimal-layer-object-profile.json` asserts one text
   layer's name, type, label, comment, start/in/out times, and common flags as a
   single object-level baseline.
+- Layer object profile contracts now also include `quality`, `blending_mode`,
+  and `auto_orient` as recipe-friendly strings on `profile.Layer` and
+  `expected_profile.layers[]`; `minimal-layer-object-profile.json` covers them
+  in the same baseline.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -348,9 +352,9 @@ Current:
   validation/compile/profile-check coverage instead of manual per-field
   spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
   instead of asking for per-field direction. For layer work, follow
-  `layer-recipe-execution-strategy.md`; the next concrete slice is
-  layer quality/blend/auto-orient profile exposure and object checks. Do not
-  start automated correction loops.
+  `layer-recipe-execution-strategy.md`; the next concrete slice is parent-ref
+  object checks through `expected_profile.layers[].parent`. Do not start
+  automated correction loops.
 
 ## Open questions
 

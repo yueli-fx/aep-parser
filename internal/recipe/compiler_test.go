@@ -326,6 +326,9 @@ func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 	for _, path := range []string{
 		"expected_profile.layers[0].name",
 		"expected_profile.layers[0].type",
+		"expected_profile.layers[0].quality",
+		"expected_profile.layers[0].blending_mode",
+		"expected_profile.layers[0].auto_orient",
 		"expected_profile.layers[0].label",
 		"expected_profile.layers[0].comment",
 		"expected_profile.layers[0].timing.start_time",
