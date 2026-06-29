@@ -164,6 +164,41 @@ func TestRecipeExamplesWithTransformKeyframesAssertKeyframeProfiles(t *testing.T
 	}
 }
 
+func TestRecipeExamplesWithNestedContentAssertProfileFamilies(t *testing.T) {
+	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
+	if err != nil {
+		t.Fatalf("Glob recipe examples: %v", err)
+	}
+	if len(recipePaths) == 0 {
+		t.Fatal("no recipe examples found")
+	}
+	for _, recipePath := range recipePaths {
+		t.Run(filepath.Base(recipePath), func(t *testing.T) {
+			raw, err := os.ReadFile(recipePath)
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			var doc map[string]any
+			if err := json.Unmarshal(raw, &doc); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			requirements := recipeExampleNestedProfileRequirements(doc)
+			if len(requirements) == 0 {
+				return
+			}
+			expectedProfile, ok := doc["expected_profile"].(map[string]any)
+			if !ok {
+				t.Fatal("expected_profile is required")
+			}
+			for _, key := range requirements {
+				if expectedProfileListLen(expectedProfile, key) == 0 {
+					t.Fatalf("expected_profile.%s is required for nested recipe content", key)
+				}
+			}
+		})
+	}
+}
+
 func recipeExampleAuthoredLayerCount(doc map[string]any) int {
 	comps, ok := doc["comps"].([]any)
 	if !ok {
@@ -181,6 +216,82 @@ func recipeExampleAuthoredLayerCount(doc map[string]any) int {
 		}
 	}
 	return count
+}
+
+func recipeExampleNestedProfileRequirements(doc map[string]any) []string {
+	comps, ok := doc["comps"].([]any)
+	if !ok {
+		return nil
+	}
+	required := map[string]bool{}
+	for _, rawComp := range comps {
+		comp, ok := rawComp.(map[string]any)
+		if !ok {
+			continue
+		}
+		layers, ok := comp["layers"].([]any)
+		if !ok {
+			continue
+		}
+		for _, rawLayer := range layers {
+			layer, ok := rawLayer.(map[string]any)
+			if !ok {
+				continue
+			}
+			if textStyle, ok := layer["text_style"].(map[string]any); ok && len(textStyle) > 0 {
+				required["text_styles"] = true
+			}
+			if effects, ok := layer["effects"].([]any); ok && len(effects) > 0 {
+				required["effects"] = true
+			}
+			if shape, ok := layer["shape"].(map[string]any); ok && shapeRequiresPropertyProfile(layer, shape) {
+				required["properties"] = true
+			}
+			if camera, ok := layer["camera"].(map[string]any); ok && len(camera) > 0 {
+				required["properties"] = true
+			}
+			if light, ok := layer["light"].(map[string]any); ok && lightRequiresPropertyProfile(light) {
+				required["properties"] = true
+			}
+		}
+	}
+	keys := make([]string, 0, len(required))
+	for key := range required {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func shapeRequiresPropertyProfile(layer map[string]any, shape map[string]any) bool {
+	if len(shape) == 0 {
+		return false
+	}
+	if layer["type"] != "solid" {
+		return true
+	}
+	for key := range shape {
+		if key != "fill_color" {
+			return true
+		}
+	}
+	return false
+}
+
+func lightRequiresPropertyProfile(light map[string]any) bool {
+	for key := range light {
+		if key != "kind" && key != "source_layer" {
+			return true
+		}
+	}
+	return false
+}
+
+func expectedProfileListLen(expectedProfile map[string]any, key string) int {
+	values, ok := expectedProfile[key].([]any)
+	if !ok {
+		return 0
+	}
+	return len(values)
 }
 
 func recipeExampleAuthoredTransformKeyframeStreams(doc map[string]any) int {

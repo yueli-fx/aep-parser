@@ -223,6 +223,12 @@ do not assert at least that many keyframed profile entries; this caught and
 fixed `minimal-layer-auto-orient.json`, whose Position keyframes are required
 for the `along_path` behavior.
 
+Nested content examples also require the matching expected-profile family:
+shape/camera/light property content must assert `properties[]`, text style
+content must assert `text_styles[]`, and effect content must assert
+`effects[]`. A solid layer's `shape.fill_color` remains source-generation
+metadata and is not treated as shape-layer property content.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

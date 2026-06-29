@@ -271,6 +271,10 @@ Done:
   `expected_profile.keyframes[]` contracts. The auto-orient recipe now asserts
   the Position keyframes it uses for `along_path`, preventing animation streams
   from becoming visual-only setup with no profile check.
+- Recipe examples with nested content now have a profile-family guard:
+  shape/camera/light property content requires `expected_profile.properties[]`,
+  text style content requires `expected_profile.text_styles[]`, and effect
+  content requires `expected_profile.effects[]`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
