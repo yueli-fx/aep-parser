@@ -95,6 +95,10 @@
             },
             "pucker_bloat": {
               "amount": 100
+            },
+            "twist": {
+              "angle": 150,
+              "center": [24, -12]
             }
           },
           "transform": {
@@ -204,6 +208,16 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector PuckerBloat Amount",
         "value": 100
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Twist Angle",
+        "value": 150
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector Twist Center",
+        "value": [24, -12]
       }
     ],
     "text_styles": [

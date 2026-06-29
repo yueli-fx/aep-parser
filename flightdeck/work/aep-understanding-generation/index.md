@@ -175,6 +175,11 @@ Done:
   `shape.pucker_bloat.amount`. The updated shape/text example asserts
   `ADBE Vector PuckerBloat Amount`, passed `go test ./...`,
   `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
+- Sixth shape-filter recipe slice is implemented for `shape.twist` angle and
+  center. The updated shape/text example asserts `ADBE Vector Twist Angle` and
+  `ADBE Vector Twist Center`, passed `go test ./...`, `go vet ./...`, profile
+  checks, and an AE 2025 render oracle gate after hardening the generic
+  aeoracle renderer to wait for and validate PNG outputs.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

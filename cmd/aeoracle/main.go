@@ -279,6 +279,10 @@ func runRender(args []string) int {
 		fmt.Fprintf(os.Stderr, "render: AE reported status %q\n", status)
 		return 2
 	}
+	if err := validateRenderOutputs(req); err != nil {
+		fmt.Fprintln(os.Stderr, "render outputs:", err)
+		return 2
+	}
 	return 0
 }
 
@@ -330,6 +334,29 @@ func readRenderDoneStatus(path string) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(data)), nil
+}
+
+func validateRenderOutputs(req aeoracle.RenderRequest) error {
+	if req.MetadataPath != "" {
+		meta, err := aeoracle.ReadRenderMetadata(req.MetadataPath)
+		if err != nil {
+			return fmt.Errorf("metadata: %w", err)
+		}
+		if meta.Status != "ok" {
+			return fmt.Errorf("metadata status %q", meta.Status)
+		}
+	}
+	for _, frame := range req.Frames {
+		path := filepath.Join(req.OutputDir, frame.Tag+".png")
+		info, err := os.Stat(path)
+		if err != nil {
+			return fmt.Errorf("frame %s: %w", frame.Tag, err)
+		}
+		if info.Size() == 0 {
+			return fmt.Errorf("frame %s: empty PNG %s", frame.Tag, path)
+		}
+	}
+	return nil
 }
 
 func writeJSON(v any) int {

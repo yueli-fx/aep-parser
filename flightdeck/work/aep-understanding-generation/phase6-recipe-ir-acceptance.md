@@ -552,6 +552,44 @@ Eighteenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Nineteenth follow-up completed:
+
+- Shape recipes now support `shape.twist`, including:
+  - `angle` -> `ADBE Vector Twist Angle`
+  - `center` -> `ADBE Vector Twist Center`
+- Validation rejects malformed `center` vectors; angle values intentionally
+  have no recipe range limit, matching AE angle behavior.
+- Capability reporting records:
+  - `VectorGroup.AddTwist`
+  - `TwistNode.SetAngle`
+  - `TwistNode.SetCenter`
+- `examples/recipes/minimal-text-shape.json` now includes Twist on the
+  `Underline` layer and asserts both Twist profile properties.
+- During Twist AE validation, the generic render oracle exposed a harness bug:
+  metadata could say five frames were rendered while only two PNG files existed.
+  Root cause: `scripts/aeoracle_render.jsx` did not wait for
+  `saveFrameToPng` output files, and `cmd/aeoracle render` did not validate
+  requested frame artifacts after `done_path = ok`. The harness now waits for
+  each PNG and the CLI verifies all requested PNG files exist and are non-empty;
+  see `knowledge/workflow/aeoracle-saveframe-output-validation.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe ./cmd/aeoracle` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-twist.aep -json` returned valid
+    and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed after harness hardening:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_twist_retry/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_twist_retry/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

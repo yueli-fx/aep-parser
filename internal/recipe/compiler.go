@@ -695,6 +695,22 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.Twist != nil {
+		twist, err := group.AddTwist()
+		if err != nil {
+			return err
+		}
+		if shape.Twist.Angle != nil {
+			if err := twist.SetAngle(*shape.Twist.Angle); err != nil {
+				return err
+			}
+		}
+		if len(shape.Twist.Center) == 2 {
+			if err := twist.SetCenter([2]float64{shape.Twist.Center[0], shape.Twist.Center[1]}); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {

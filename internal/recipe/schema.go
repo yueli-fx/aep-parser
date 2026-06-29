@@ -66,6 +66,7 @@ type ShapeSpec struct {
 	OffsetPaths  *OffsetPathsSpec  `json:"offset_paths,omitempty"`
 	ZigZag       *ZigZagSpec       `json:"zigzag,omitempty"`
 	PuckerBloat  *PuckerBloatSpec  `json:"pucker_bloat,omitempty"`
+	Twist        *TwistSpec        `json:"twist,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -100,6 +101,11 @@ type ZigZagSpec struct {
 
 type PuckerBloatSpec struct {
 	Amount *float64 `json:"amount,omitempty"`
+}
+
+type TwistSpec struct {
+	Angle  *float64  `json:"angle,omitempty"`
+	Center []float64 `json:"center,omitempty"`
 }
 
 type Effect struct {
@@ -542,6 +548,17 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			recordCapability("VectorGroup.AddPuckerBloat", puckerBloatPath)
 			if layer.Shape.PuckerBloat.Amount != nil {
 				recordCapability("PuckerBloatNode.SetAmount", puckerBloatPath+".amount")
+			}
+		}
+		if layer.Shape.Twist != nil {
+			twistPath := layerPath + ".shape.twist"
+			recordCapability("VectorGroup.AddTwist", twistPath)
+			if layer.Shape.Twist.Angle != nil {
+				recordCapability("TwistNode.SetAngle", twistPath+".angle")
+			}
+			if len(layer.Shape.Twist.Center) > 0 {
+				recordCapability("TwistNode.SetCenter", twistPath+".center")
+				validateVec(layer.Shape.Twist.Center, 2, twistPath+".center", addRefusal)
 			}
 		}
 	}

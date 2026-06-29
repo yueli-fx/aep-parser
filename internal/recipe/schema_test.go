@@ -381,6 +381,23 @@ func TestValidateReportsShapePuckerBloatCapabilities(t *testing.T) {
 	assertCapability(t, report, "PuckerBloatNode.SetAmount")
 }
 
+func TestValidateReportsShapeTwistCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Twist = &recipe.TwistSpec{
+		Angle:  ptr(150),
+		Center: []float64{24, -12},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddTwist")
+	assertCapability(t, report, "TwistNode.SetAngle")
+	assertCapability(t, report, "TwistNode.SetCenter")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
@@ -517,6 +534,20 @@ func TestValidateRejectsInvalidShapeZigZag(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_zigzag_size")
 	assertRefusal(t, report, "invalid_shape_zigzag_detail")
 	assertRefusal(t, report, "invalid_shape_zigzag_points")
+}
+
+func TestValidateRejectsInvalidShapeTwist(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Twist = &recipe.TwistSpec{
+		Center: []float64{24},
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_vector_size")
 }
 
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {

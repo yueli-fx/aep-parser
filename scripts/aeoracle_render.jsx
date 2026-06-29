@@ -117,6 +117,17 @@
         return joinPath(baseDir, path);
     }
 
+    function waitForNonEmptyFile(path, timeoutMs) {
+        var deadline = (new Date()).getTime() + timeoutMs;
+        var f = new File(path);
+        while ((new Date()).getTime() < deadline) {
+            if (f.exists && f.length > 0) return true;
+            $.sleep(250);
+            f = new File(path);
+        }
+        return f.exists && f.length > 0;
+    }
+
     function findComp(name) {
         var first = null;
         for (var i = 1; i <= app.project.numItems; i++) {
@@ -164,7 +175,9 @@
                 app.purge(PurgeTarget.ALL_CACHES);
             } catch (purgeErr) {}
             comp.saveFrameToPng(frame.seconds, new File(outPath));
-            $.sleep(500);
+            if (!waitForNonEmptyFile(outPath, 30000)) {
+                throw new Error("rendered frame missing or empty: " + outPath);
+            }
             metadata.frames.push({
                 frame: frame.frame,
                 seconds: frame.seconds,

@@ -95,6 +95,40 @@ func TestReadRenderDoneStatusKeepsErrorStatus(t *testing.T) {
 	}
 }
 
+func TestValidateRenderOutputsRejectsMissingPNG(t *testing.T) {
+	dir := t.TempDir()
+	req := aeoracle.NewRenderRequest("input.aep", "Main", dir, []aeoracle.FrameTarget{
+		{Frame: 0, Seconds: 0, Tag: "f000000", Reason: "comp_start"},
+		{Frame: 30, Seconds: 1, Tag: "f000030", Reason: "keyframe"},
+	})
+	writeCmdRenderMetadata(t, dir, "metadata.json", filepath.Join(dir, "f000000.png"))
+	if err := os.WriteFile(filepath.Join(dir, "f000000.png"), []byte("png"), 0o644); err != nil {
+		t.Fatalf("WriteFile PNG: %v", err)
+	}
+
+	if err := validateRenderOutputs(req); err == nil {
+		t.Fatal("validateRenderOutputs error = nil, want missing PNG error")
+	}
+}
+
+func TestValidateRenderOutputsAcceptsRenderedPNGs(t *testing.T) {
+	dir := t.TempDir()
+	req := aeoracle.NewRenderRequest("input.aep", "Main", dir, []aeoracle.FrameTarget{
+		{Frame: 0, Seconds: 0, Tag: "f000000", Reason: "comp_start"},
+		{Frame: 30, Seconds: 1, Tag: "f000030", Reason: "keyframe"},
+	})
+	writeCmdRenderMetadata(t, dir, "metadata.json", filepath.Join(dir, "f000000.png"))
+	for _, frame := range req.Frames {
+		if err := os.WriteFile(filepath.Join(dir, frame.Tag+".png"), []byte("png"), 0o644); err != nil {
+			t.Fatalf("WriteFile PNG: %v", err)
+		}
+	}
+
+	if err := validateRenderOutputs(req); err != nil {
+		t.Fatalf("validateRenderOutputs: %v", err)
+	}
+}
+
 func TestRunCloneRequestWritesRequest(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "source_request.json")
