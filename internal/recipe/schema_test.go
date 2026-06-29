@@ -393,6 +393,30 @@ func TestValidateReportsShapeGradientFillCapabilities(t *testing.T) {
 	assertCapability(t, report, "GradientFillNode.SetColorStops")
 }
 
+func TestValidateReportsShapeGradientFillHighlightCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
+		Type:            "radial",
+		StartPoint:      []float64{0, 0},
+		EndPoint:        []float64{220, 0},
+		HighlightLength: ptr(70),
+		HighlightAngle:  ptr(35),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "GradientFillNode.SetHighlightLength")
+	assertCapability(t, report, "GradientFillNode.SetHighlightAngle")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1850,9 +1874,10 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
-		Type:       "conic",
-		StartPoint: []float64{0},
-		EndPoint:   []float64{220},
+		Type:            "conic",
+		StartPoint:      []float64{0},
+		EndPoint:        []float64{220},
+		HighlightLength: ptr(101),
 		ColorStops: []recipe.GradientColorStopSpec{
 			{Offset: -0.1, Color: []float64{255, 0}},
 		},
@@ -1865,6 +1890,7 @@ func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
 	}
 	assertRefusal(t, report, "invalid_shape_gradient_fill_type")
 	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_gradient_fill_highlight_length")
 	assertRefusal(t, report, "invalid_shape_gradient_fill_color_stops")
 }
 

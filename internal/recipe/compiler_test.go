@@ -1897,6 +1897,42 @@ func TestCompileToFileSetsShapeGradientFill(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Grad End Pt", []float64{220, 0})
 }
 
+func TestCompileToFileSetsShapeGradientFillHighlight(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
+		Type:            "radial",
+		StartPoint:      []float64{0, 0},
+		EndPoint:        []float64{220, 0},
+		HighlightLength: ptr(70),
+		HighlightAngle:  ptr(35),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Grad HiLite Length", 70.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Grad HiLite Angle", 35.0)
+}
+
 func TestCompileToFileSetsShapeStar(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"

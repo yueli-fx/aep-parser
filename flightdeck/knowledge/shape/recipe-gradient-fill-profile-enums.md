@@ -10,6 +10,9 @@ Recipe authoring:
   - `"radial"` -> `GradientRadial`
 - `gradient_fill.start_point` and `gradient_fill.end_point` are two-value
   shape-local vectors.
+- `gradient_fill.highlight_length` is a radial highlight offset percentage from
+  `-100` to `100`; `0` is centered.
+- `gradient_fill.highlight_angle` is the radial highlight direction in degrees.
 - `gradient_fill.color_stops[]` requires at least two stops. Stop offsets and
   midpoints are unit values from `0` to `1`; colors are recipe RGB values from
   `0` to `255`.
@@ -21,9 +24,12 @@ Profile readback:
   - `2` = radial
 - `ADBE Vector Grad Start Pt` and `ADBE Vector Grad End Pt` read back as
   two-value vectors.
+- `ADBE Vector Grad HiLite Length` and `ADBE Vector Grad HiLite Angle` read back
+  as numeric scalar properties.
 
 Validation:
 
 - `gradient_fill.type` must be `linear` or `radial`.
 - `start_point` and `end_point` must contain two numbers when present.
+- `highlight_length` must be between `-100` and `100` when present.
 - `color_stops` must include at least two valid stops when present.

@@ -1644,6 +1644,16 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.GradientFill.HighlightLength != nil {
+			if err := fill.SetHighlightLength(*shape.GradientFill.HighlightLength); err != nil {
+				return err
+			}
+		}
+		if shape.GradientFill.HighlightAngle != nil {
+			if err := fill.SetHighlightAngle(*shape.GradientFill.HighlightAngle); err != nil {
+				return err
+			}
+		}
 		if len(shape.GradientFill.ColorStops) > 0 {
 			stops, err := gradientColorStops(shape.GradientFill.ColorStops)
 			if err != nil {
