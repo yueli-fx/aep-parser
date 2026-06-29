@@ -2804,6 +2804,40 @@ Ninety-first follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Ninety-second follow-up completed:
+
+- Shape gradient fill recipes now support:
+  - `shape.gradient_fill.alpha_stops` -> `GradientFillNode.SetAlphaStops`
+- Boundary: `alpha_stops` requires at least two stops when present. Stop
+  `offset`, `midpoint`, and `alpha` are unit values from `0` to `1`.
+- `examples/recipes/minimal-shape-gradient-fill-alpha-stops.json` is a
+  dedicated one-layer linear gradient fill recipe with an alpha ramp from `1`
+  to `0.35`. The embedded expected profile checks cover gradient type and ramp
+  geometry; alpha stops are asserted through compiled AEP readback because they
+  live inside the gradient XML payload.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled AEP readback
+    still returned default alpha `1`, capability
+    `GradientFillNode.SetAlphaStops` was absent, and invalid alpha stops were
+    not refused.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-gradient-fill-alpha-stops.json -out
+    tmp_debug\recipes\minimal-shape-gradient-fill-alpha-stops.aep -json`
+    returned valid, reported `GradientFillNode.SetAlphaStops`, and all embedded
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_gradient_fill_alpha_stops\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_gradient_fill_alpha_stops\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

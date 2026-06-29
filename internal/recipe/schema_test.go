@@ -417,6 +417,31 @@ func TestValidateReportsShapeGradientFillHighlightCapabilities(t *testing.T) {
 	assertCapability(t, report, "GradientFillNode.SetHighlightAngle")
 }
 
+func TestValidateReportsShapeGradientFillAlphaStopCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
+		Type:       "linear",
+		StartPoint: []float64{-220, 0},
+		EndPoint:   []float64{220, 0},
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+		AlphaStops: []recipe.GradientAlphaStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Alpha: 1},
+			{Offset: 1, Midpoint: ptr(0.5), Alpha: 0.35},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "GradientFillNode.SetAlphaStops")
+}
+
 func TestValidateReportsShapeGradientStrokeCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.FillColor = nil
@@ -1986,6 +2011,9 @@ func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
 		ColorStops: []recipe.GradientColorStopSpec{
 			{Offset: -0.1, Color: []float64{255, 0}},
 		},
+		AlphaStops: []recipe.GradientAlphaStopSpec{
+			{Offset: -0.1, Alpha: 1.2},
+		},
 	}
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
@@ -1997,6 +2025,7 @@ func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_gradient_fill_highlight_length")
 	assertRefusal(t, report, "invalid_shape_gradient_fill_color_stops")
+	assertRefusal(t, report, "invalid_shape_gradient_fill_alpha_stops")
 }
 
 func TestValidateRejectsInvalidShapeGradientStroke(t *testing.T) {

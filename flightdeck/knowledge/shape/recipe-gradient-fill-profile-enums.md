@@ -16,6 +16,9 @@ Recipe authoring:
 - `gradient_fill.color_stops[]` requires at least two stops. Stop offsets and
   midpoints are unit values from `0` to `1`; colors are recipe RGB values from
   `0` to `255`.
+- `gradient_fill.alpha_stops[]` requires at least two stops. Stop offsets and
+  midpoints are unit values from `0` to `1`; alpha values are unit opacity from
+  `0` to `1`.
 
 Profile readback:
 
@@ -26,6 +29,9 @@ Profile readback:
   two-value vectors.
 - `ADBE Vector Grad HiLite Length` and `ADBE Vector Grad HiLite Angle` read back
   as numeric scalar properties.
+- Alpha stops are stored in the gradient XML payload; recipe coverage asserts
+  them through compiled AEP readback (`Gradient().AlphaStops`) plus AE render
+  oracle instead of `expected_profile.properties[]`.
 
 Validation:
 
@@ -33,3 +39,5 @@ Validation:
 - `start_point` and `end_point` must contain two numbers when present.
 - `highlight_length` must be between `-100` and `100` when present.
 - `color_stops` must include at least two valid stops when present.
+- `alpha_stops` must include at least two stops when present; offset, midpoint,
+  and alpha must be between `0` and `1`.

@@ -1933,6 +1933,45 @@ func TestCompileToFileSetsShapeGradientFillHighlight(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Grad HiLite Angle", 35.0)
 }
 
+func TestCompileToFileSetsShapeGradientFillAlphaStops(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
+		Type:       "linear",
+		StartPoint: []float64{-220, 0},
+		EndPoint:   []float64{220, 0},
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+		AlphaStops: []recipe.GradientAlphaStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Alpha: 1},
+			{Offset: 1, Midpoint: ptr(0.5), Alpha: 0.35},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	fill := findGradientFillNode(t, project.Compositions[0].Layers[1])
+	stops := fill.Gradient().AlphaStops
+	if len(stops) != 2 {
+		t.Fatalf("alpha stops = %d, want 2", len(stops))
+	}
+	if math.Abs(stops[1].Alpha-0.35) > 1e-9 {
+		t.Fatalf("alpha stop 1 alpha = %g, want 0.35", stops[1].Alpha)
+	}
+}
+
 func TestCompileToFileSetsShapeGradientStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.FillColor = nil
@@ -2928,6 +2967,18 @@ func findGradientStrokeNode(t *testing.T, layer *aep.Layer) *aep.GradientStrokeN
 		}
 	}
 	t.Fatalf("gradient stroke node not found on layer %q", layer.Name)
+	return nil
+}
+
+func findGradientFillNode(t *testing.T, layer *aep.Layer) *aep.GradientFillNode {
+	t.Helper()
+	shapeLayer := aep.WrapShapeLayer(layer)
+	for _, child := range shapeLayer.RootGroup().Children {
+		if fill, ok := child.(*aep.GradientFillNode); ok {
+			return fill
+		}
+	}
+	t.Fatalf("gradient fill node not found on layer %q", layer.Name)
 	return nil
 }
 

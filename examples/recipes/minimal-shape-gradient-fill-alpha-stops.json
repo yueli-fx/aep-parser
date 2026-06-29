@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal gradient fill alpha stops"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Alpha Fill Card",
+          "shape": {
+            "kind": "rect",
+            "size": [520, 280],
+            "gradient_fill": {
+              "type": "linear",
+              "start_point": [-220, 0],
+              "end_point": [220, 0],
+              "color_stops": [
+                {
+                  "offset": 0,
+                  "midpoint": 0.5,
+                  "color": [255, 0, 0]
+                },
+                {
+                  "offset": 1,
+                  "midpoint": 0.5,
+                  "color": [0, 0, 255]
+                }
+              ],
+              "alpha_stops": [
+                {
+                  "offset": 0,
+                  "midpoint": 0.5,
+                  "alpha": 1
+                },
+                {
+                  "offset": 1,
+                  "midpoint": 0.5,
+                  "alpha": 0.35
+                }
+              ]
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Alpha Fill Card",
+        "match_name": "ADBE Vector Grad Type",
+        "value": 1
+      },
+      {
+        "layer_name": "Alpha Fill Card",
+        "match_name": "ADBE Vector Grad Start Pt",
+        "value": [-220, 0]
+      },
+      {
+        "layer_name": "Alpha Fill Card",
+        "match_name": "ADBE Vector Grad End Pt",
+        "value": [220, 0]
+      }
+    ]
+  }
+}

@@ -1663,6 +1663,12 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if len(shape.GradientFill.AlphaStops) > 0 {
+			stops := gradientAlphaStops(shape.GradientFill.AlphaStops)
+			if err := fill.SetAlphaStops(stops); err != nil {
+				return err
+			}
+		}
 	}
 	if shape.GradientStroke != nil {
 		stroke, err := group.AddGradientStroke()

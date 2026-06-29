@@ -173,6 +173,7 @@ type GradientFillSpec struct {
 	HighlightLength *float64                `json:"highlight_length,omitempty"`
 	HighlightAngle  *float64                `json:"highlight_angle,omitempty"`
 	ColorStops      []GradientColorStopSpec `json:"color_stops,omitempty"`
+	AlphaStops      []GradientAlphaStopSpec `json:"alpha_stops,omitempty"`
 }
 
 type GradientColorStopSpec struct {
@@ -1066,6 +1067,10 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			if len(layer.Shape.GradientFill.ColorStops) > 0 {
 				recordCapability("GradientFillNode.SetColorStops", gradientPath+".color_stops")
 				validateGradientColorStops(layer.Shape.GradientFill.ColorStops, gradientPath+".color_stops", "invalid_shape_gradient_fill_color_stops", "gradient_fill", addRefusal)
+			}
+			if len(layer.Shape.GradientFill.AlphaStops) > 0 {
+				recordCapability("GradientFillNode.SetAlphaStops", gradientPath+".alpha_stops")
+				validateGradientAlphaStops(layer.Shape.GradientFill.AlphaStops, gradientPath+".alpha_stops", "invalid_shape_gradient_fill_alpha_stops", "gradient_fill", addRefusal)
 			}
 		}
 		if layer.Shape.GradientStroke != nil {
