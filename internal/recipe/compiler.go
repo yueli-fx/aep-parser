@@ -174,6 +174,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
+		expected.Label != nil ||
+		expected.Comment != "" ||
 		len(expected.BackgroundColor) > 0 ||
 		len(expected.ResolutionFactor) > 0 ||
 		expected.PixelAspect != nil ||
@@ -222,6 +224,20 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	if expected.ShapeLayerCount != nil {
 		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
 		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	if expected.Label != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = float64(prof.Comps[0].Label)
+		}
+		add("expected_profile.label", *expected.Label, actual, actual == *expected.Label)
+	}
+	if expected.Comment != "" {
+		actual := ""
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].Comment
+		}
+		add("expected_profile.comment", expected.Comment, actual, actual == expected.Comment)
 	}
 	if len(expected.BackgroundColor) > 0 {
 		actual := []float64(nil)

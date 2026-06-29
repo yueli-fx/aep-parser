@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal comp metadata profile"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1280,
+      "height": 720,
+      "frame_rate": 24,
+      "duration": 3,
+      "background_color": [0, 0, 0],
+      "label": 12,
+      "comment": "reviewed recipe comp",
+      "layers": []
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0,
+    "label": 12,
+    "comment": "reviewed recipe comp"
+  }
+}

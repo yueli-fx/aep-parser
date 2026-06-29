@@ -234,6 +234,40 @@ func TestCompileToFileChecksCompFlagProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.motion_blur.enabled", true)
 }
 
+func TestCompileToFileChecksCompMetadataProfile(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Comp metadata profile"},
+		"comps": [{
+			"name": "Main",
+			"width": 1280,
+			"height": 720,
+			"frame_rate": 24,
+			"duration": 3,
+			"background_color": [0, 0, 0],
+			"label": 12,
+			"comment": "reviewed recipe comp"
+		}],
+		"expected_profile": {
+			"comp_count": 1,
+			"layer_count": 0,
+			"label": 12,
+			"comment": "reviewed recipe comp"
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.label", true)
+	assertProfileCheck(t, report, "expected_profile.comment", true)
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)

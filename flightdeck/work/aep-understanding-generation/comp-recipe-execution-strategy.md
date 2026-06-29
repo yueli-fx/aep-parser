@@ -51,8 +51,8 @@
 | Motion blur | `motion_blur.adaptive_sample_limit` | `Composition.SetMotionBlurAdaptiveSampleLimit` | `comps[].motion_blur.adaptive_sample_limit` | L3 | done |
 | Motion blur | `motion_blur.samples_per_frame` | `Composition.SetMotionBlurSamplesPerFrame` | `comps[].motion_blur.samples_per_frame` | L3 | done |
 | Work area | `work_area.start` / `end` | `Composition.SetWorkArea` | `comps[].work_area.start_seconds` / `end_seconds` | L3 | done |
-| Item metadata | `label` | item label writer through `applyCompItemSettings` | `items.comps[].label` or `comps[].label` | L3 | recipe done; profile contract missing |
-| Item metadata | `comment` | item comment writer through `applyCompItemSettings` | `items.comps[].comment` or `comps[].comment` | L3 | recipe done; profile contract missing |
+| Item metadata | `label` | item label writer through `applyCompItemSettings` | `comps[].label` | L3 | done |
+| Item metadata | `comment` | item comment writer through `applyCompItemSettings` | `comps[].comment` | L3 | done |
 
 ## Preferred Execution Order
 
@@ -206,13 +206,20 @@ The completed flag slice added profile/expected-profile coverage for
 
 The next slice should be **comp item metadata profile checks**:
 
-- Add profile/expected-profile coverage for comp `label` and `comment`.
-- Do not change recipe authoring syntax; these fields already exist in
-  `CompSpec`.
-- Use one object-level metadata recipe if the JSON remains readable.
-- Confirm whether metadata belongs directly on `profile.Composition`, on
-  `profile.Item`, or both before implementation; prefer one stable profile
-  location and document the decision.
+The completed metadata slice added profile/expected-profile coverage for comp
+`label` and `comment`. Decision: expose these directly on
+`profile.Composition`, not only on `profile.Items`, because comp recipe
+contracts use the comp object as the assertion target while `profile.Items`
+is an inventory/index surface.
+
+The next slice should be **comp object consolidation**:
+
+- Create or update one object-level comp recipe that exercises the completed
+  display, flag, motion-blur, work-area, renderer, and metadata fields without
+  becoming unreadable.
+- Keep dedicated examples for fields that carry historical AE render gates or
+  evidence caveats.
+- Do not add new authoring syntax in this slice; it is consolidation only.
 
 ## Self-Review
 

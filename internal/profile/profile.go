@@ -73,6 +73,8 @@ type Composition struct {
 	FrameRate                float64            `json:"frame_rate"`
 	Duration                 float64            `json:"duration_seconds"`
 	TickRate                 float64            `json:"tick_rate,omitempty"`
+	Label                    uint8              `json:"label,omitempty"`
+	Comment                  string             `json:"comment,omitempty"`
 	BackgroundColor          [3]uint8           `json:"background_color"`
 	ResolutionFactor         [2]uint16          `json:"resolution_factor"`
 	PixelAspect              float64            `json:"pixel_aspect"`
@@ -345,16 +347,22 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			resolutionFactor = c.ResolutionFactor
 			pixelAspect      float64
 			displayStartTime float64
+			label            uint8
+			comment          string
 		)
 		if sceneComp != nil {
 			backgroundColor = sceneComp.BGColor
 			resolutionFactor = sceneComp.ResolutionFactor
 			pixelAspect = sceneComp.PixelAspect
 			displayStartTime = sceneComp.DisplayStartTime
+			label = sceneComp.Label
+			comment = sceneComp.Comment
 		}
 		cp := Composition{
 			ID: c.ID, Name: c.Name, Width: c.Width, Height: c.Height,
 			FrameRate: c.FrameRate, Duration: c.Duration, TickRate: c.TickRate,
+			Label:                    label,
+			Comment:                  comment,
 			BackgroundColor:          backgroundColor,
 			ResolutionFactor:         resolutionFactor,
 			PixelAspect:              pixelAspect,

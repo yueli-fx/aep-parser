@@ -189,6 +189,9 @@ Done:
   `preserve_nested_resolution`, and `motion_blur.enabled` are exposed through
   `profile.Composition`, asserted through `expected_profile`, and covered by
   `minimal-comp-flag-profile.json`.
+- Comp item metadata now has an object-level profile contract: `label` and
+  `comment` are exposed directly on `profile.Composition`, asserted through
+  `expected_profile`, and covered by `minimal-comp-metadata-profile.json`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

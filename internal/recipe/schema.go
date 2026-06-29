@@ -371,6 +371,8 @@ type ExpectedProfile struct {
 	LayerCount               *int                        `json:"layer_count,omitempty"`
 	TextLayerCount           *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount          *int                        `json:"shape_layer_count,omitempty"`
+	Label                    *float64                    `json:"label,omitempty"`
+	Comment                  string                      `json:"comment,omitempty"`
 	BackgroundColor          []float64                   `json:"background_color,omitempty"`
 	ResolutionFactor         []float64                   `json:"resolution_factor,omitempty"`
 	PixelAspect              *float64                    `json:"pixel_aspect,omitempty"`
@@ -623,6 +625,9 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	}
 	if expected.ShapeLayerCount != nil && *expected.ShapeLayerCount < 0 {
 		addRefusal("invalid_expected_profile", "expected_profile.shape_layer_count", "expected count must be non-negative")
+	}
+	if expected.Label != nil {
+		validateCompLabel(*expected.Label, "expected_profile.label", addRefusal)
 	}
 	if len(expected.BackgroundColor) > 0 {
 		validateRGBColor(expected.BackgroundColor, "expected_profile.background_color", "invalid_expected_profile", addRefusal)
