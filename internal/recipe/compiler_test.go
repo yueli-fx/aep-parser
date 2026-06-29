@@ -2647,6 +2647,66 @@ func TestCompileToFileSetsEffectParams(t *testing.T) {
 	assertParamValue(t, params, "ADBE Gaussian Blur 2-0003", 1.0)
 }
 
+func TestCompileToFileSetsEffectParamExpression(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Effect param expression"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 2,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "Expr FX",
+				"transform": {"position": [960, 540]},
+				"effects": [{
+					"match_name": "ADBE Gaussian Blur 2",
+					"params": [{
+						"match_name": "ADBE Gaussian Blur 2-0001",
+						"value": 0,
+						"expression": {"source": "time * 40", "enabled": false}
+					}]
+				}]
+			}]
+		}]
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	params := prof.Comps[0].Layers[0].Effects[0].Params
+	assertParamExpression(t, params, "ADBE Gaussian Blur 2-0001", "time * 40")
+
+	layer := project.Compositions[0].LayerByName("Title")
+	if layer == nil || len(layer.Effects) == 0 {
+		t.Fatalf("Title effect missing: %+v", layer)
+	}
+	param := findEffectParam(t, layer.Effects[0], "ADBE Gaussian Blur 2-0001")
+	if param == nil {
+		t.Fatal("effect param ADBE Gaussian Blur 2-0001 = nil")
+	}
+	if param.ExpressionEnabled {
+		t.Fatal("effect param expression enabled = true, want false")
+	}
+}
+
 func TestCompileToFileChecksExpectedProfile(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{
@@ -2716,6 +2776,55 @@ func TestCompileToFileChecksExpectedEffectParamProfile(t *testing.T) {
 		t.Fatalf("report = %+v, want valid", report)
 	}
 	assertProfileCheck(t, report, "expected_profile.effects[0].params[0]", true)
+}
+
+func TestCompileToFileChecksExpectedEffectParamExpressionProfile(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Expected effect param expression"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 2,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "text",
+				"name": "Title",
+				"text": "Expr FX",
+				"transform": {"position": [960, 540]},
+				"effects": [{
+					"match_name": "ADBE Gaussian Blur 2",
+					"params": [{
+						"match_name": "ADBE Gaussian Blur 2-0001",
+						"value": 0,
+						"expression": {"source": "time * 40"}
+					}]
+				}]
+			}]
+		}],
+		"expected_profile": {
+			"effects": [{
+				"layer_name": "Title",
+				"match_name": "ADBE Gaussian Blur 2",
+				"params": [{
+					"match_name": "ADBE Gaussian Blur 2-0001",
+					"expression": "time * 40"
+				}]
+			}]
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.effects[0].params[0].expression", true)
 }
 
 func TestCompileToFileChecksExpectedLayerPropertyProfile(t *testing.T) {
@@ -3164,6 +3273,31 @@ func assertParamValue(t *testing.T, params []profile.Property, matchName string,
 		return
 	}
 	t.Fatalf("param %q not found in %+v", matchName, params)
+}
+
+func assertParamExpression(t *testing.T, params []profile.Property, matchName string, want string) {
+	t.Helper()
+	for _, param := range params {
+		if param.MatchName != matchName {
+			continue
+		}
+		if param.Expression != want {
+			t.Fatalf("%s Expression = %q, want %q", matchName, param.Expression, want)
+		}
+		return
+	}
+	t.Fatalf("param %q not found in %+v", matchName, params)
+}
+
+func findEffectParam(t *testing.T, effect *aep.Effect, matchName string) *aep.Property {
+	t.Helper()
+	for _, param := range effect.Parameters {
+		if param.MatchName == matchName {
+			return param
+		}
+	}
+	t.Fatalf("effect param %q not found in %+v", matchName, effect.Parameters)
+	return nil
 }
 
 func findProfileLayer(t *testing.T, prof *profile.Profile, name string) profile.Layer {

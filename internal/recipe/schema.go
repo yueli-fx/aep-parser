@@ -314,8 +314,9 @@ type Effect struct {
 }
 
 type EffectParam struct {
-	MatchName string `json:"match_name"`
-	Value     any    `json:"value,omitempty"`
+	MatchName  string          `json:"match_name"`
+	Value      any             `json:"value,omitempty"`
+	Expression *ExpressionSpec `json:"expression,omitempty"`
 }
 
 type Transform struct {
@@ -430,8 +431,9 @@ type ExpectedEffect struct {
 }
 
 type ExpectedEffectParam struct {
-	MatchName string `json:"match_name"`
-	Value     any    `json:"value,omitempty"`
+	MatchName  string `json:"match_name"`
+	Value      any    `json:"value,omitempty"`
+	Expression string `json:"expression,omitempty"`
 }
 
 type Report struct {
@@ -621,7 +623,10 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			if param.MatchName == "" {
 				addRefusal("invalid_expected_profile", paramPath+".match_name", "param match_name is required")
 			}
-			if !validEffectParamValue(param.Value) {
+			if param.Expression == "" && param.Value == nil {
+				addRefusal("invalid_expected_profile", paramPath, "expected param value or expression is required")
+			}
+			if param.Value != nil && !validEffectParamValue(param.Value) {
 				addRefusal("invalid_expected_profile", paramPath+".value", "expected param value must be a number, boolean, or numeric array")
 			}
 		}
@@ -1565,6 +1570,15 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			}
 			if !validEffectParamValue(param.Value) {
 				addRefusal("unsupported_effect_param_value", paramPath+".value", "effect param value must be a number, boolean, or numeric array")
+			}
+			if param.Expression != nil {
+				recordCapability("Property.SetExpression", paramPath+".expression.source")
+				if param.Expression.Source == "" {
+					addRefusal("missing_effect_param_expression_source", paramPath+".expression.source", "effect param expression source is required")
+				}
+				if param.Expression.Enabled != nil {
+					recordCapability("Property.SetExpressionEnabled", paramPath+".expression.enabled")
+				}
 			}
 		}
 	}

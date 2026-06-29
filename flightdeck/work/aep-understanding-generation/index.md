@@ -166,6 +166,11 @@ Done:
   backrefs, then applies `Property.SetExpression` and optional
   `Property.SetExpressionEnabled`. `expected_profile.properties[]` can now
   assert property expression source strings.
+- Recipe effect params now accept optional `expression` objects after their
+  `value` materializes the parameter with `SetEffectParam`. The compiler writes
+  `Property.SetExpression` and optional `Property.SetExpressionEnabled` on the
+  returned effect-param property, and `expected_profile.effects[].params[]` can
+  assert expression source strings.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

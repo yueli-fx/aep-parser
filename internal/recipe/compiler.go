@@ -236,8 +236,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 				add(paramPath, expectedParam.Value, nil, false)
 				continue
 			}
-			passed := profileValueEqual(expectedParam.Value, param.StaticValue)
-			add(paramPath, expectedParam.Value, param.StaticValue, passed)
+			if expectedParam.Value != nil {
+				passed := profileValueEqual(expectedParam.Value, param.StaticValue)
+				add(paramPath, expectedParam.Value, param.StaticValue, passed)
+			}
+			if expectedParam.Expression != "" {
+				add(paramPath+".expression", expectedParam.Expression, param.Expression, param.Expression == expectedParam.Expression)
+			}
 		}
 	}
 	for i, expectedProp := range expected.Properties {
@@ -573,8 +578,14 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 				if err != nil {
 					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
 				}
-				if _, err := aep.SetEffectParam(layer, fx, param.MatchName, value); err != nil {
+				property, err := aep.SetEffectParam(layer, fx, param.MatchName, value)
+				if err != nil {
 					return nil, fmt.Errorf("recipe: layer %q effect %q param %q: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+				}
+				if param.Expression != nil {
+					if err := applyPropertyExpression(property, *param.Expression); err != nil {
+						return nil, fmt.Errorf("recipe: layer %q effect %q param %q expression: %w", layerSpec.Name, effect.MatchName, param.MatchName, err)
+					}
 				}
 			}
 		}
@@ -624,6 +635,21 @@ func applyTransformExpressions(layer *aep.Layer, expressions TransformExpression
 	return nil
 }
 
+func applyPropertyExpression(property *aep.Property, expression ExpressionSpec) error {
+	if property == nil {
+		return fmt.Errorf("property missing")
+	}
+	if err := property.SetExpression(expression.Source); err != nil {
+		return fmt.Errorf("source: %w", err)
+	}
+	if expression.Enabled != nil {
+		if err := property.SetExpressionEnabled(*expression.Enabled); err != nil {
+			return fmt.Errorf("enabled: %w", err)
+		}
+	}
+	return nil
+}
+
 func applyTransformExpression(layer *aep.Layer, name string, expression *ExpressionSpec) error {
 	if expression == nil {
 		return nil
@@ -632,16 +658,8 @@ func applyTransformExpression(layer *aep.Layer, name string, expression *Express
 	if err != nil {
 		return err
 	}
-	if property == nil {
-		return fmt.Errorf("%s property missing", name)
-	}
-	if err := property.SetExpression(expression.Source); err != nil {
-		return fmt.Errorf("%s source: %w", name, err)
-	}
-	if expression.Enabled != nil {
-		if err := property.SetExpressionEnabled(*expression.Enabled); err != nil {
-			return fmt.Errorf("%s enabled: %w", name, err)
-		}
+	if err := applyPropertyExpression(property, *expression); err != nil {
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	return nil
 }

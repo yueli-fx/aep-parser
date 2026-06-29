@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal effect param expression"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 2,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "Expr FX",
+          "transform": {
+            "position": [960, 540]
+          },
+          "effects": [
+            {
+              "match_name": "ADBE Gaussian Blur 2",
+              "params": [
+                {
+                  "match_name": "ADBE Gaussian Blur 2-0001",
+                  "value": 0,
+                  "expression": {
+                    "source": "time * 40",
+                    "enabled": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "text_layer_count": 1,
+    "effects": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Gaussian Blur 2",
+        "params": [
+          {
+            "match_name": "ADBE Gaussian Blur 2-0001",
+            "value": 0,
+            "expression": "time * 40"
+          }
+        ]
+      }
+    ]
+  }
+}
