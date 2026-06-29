@@ -1,7 +1,7 @@
 # 验证流程 — checklist
 
 SUMMARY: 验证流程
-READ WHEN: preparing to commit; verifying tests + vet pass; reconciling PASS count against cockpit.md; writing a new test (conventions for fixture / corruption / AE 24 fields); needing a tmp_debug tool to inspect chunks / layers / properties
+READ WHEN: preparing to commit; verifying tests + vet pass; reconciling PASS count against cockpit.md; writing a new test (conventions for fixture / corruption / AE 24 fields); needing a debug tool to inspect chunks / layers / properties; deciding where temporary outputs belong
 
 ---
 
@@ -86,7 +86,9 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 | 可复用调试工具 | `tools/debug/<name>/` | ✅ tracked |
 | 用户面工具 | `cmd/<name>/` | ✅ tracked |
 | vfx / showcase 生成器 | `flightdeck/showcase/<方向>/gen.go` | ✅ tracked |
-| **一次性 probe / 渲染输出 / scratch** | `tmp_debug/`（或根 `tmp/`） | ❌ gitignored,**用完即删,别留** |
+| AE / 渲染 / gate 输出 | `tmp_debug/` | ❌ gitignored,**不放 `.go`, 用完即删** |
+| 一次性 Go probe | `_tmp_debug/<name>/` | ❌ gitignored,`go test ./...` 跳过,用完即删 |
+| 下载缓存 / 普通杂输出 | `tmp/` | ❌ gitignored,用完即删 |
 
 原则:**有用→进 git(提到上面某个 tracked 家);没用→删;只 RE 一次但会改变未来行动的 findings 进 `flightdeck/knowledge/<domain>/` 后删探针。** 不放进 `internal/aep`,避免污染 public API。
 

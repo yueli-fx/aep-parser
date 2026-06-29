@@ -11,6 +11,12 @@ regardless of whether those paths are tracked by git. A directory named
 
 For disposable Go probes, prefer a path Go skips by convention, such as a
 directory whose name starts with `_` or `.`, or put the probe under `testdata/`
-when it is fixture material. If a scratch directory must stay under a normal
-name, keep its imports current with the module path and expect it to participate
-in full-package verification.
+when it is fixture material. Current repo convention:
+
+- `tmp_debug/` is for AE/render/gate outputs only; do not leave `.go` files there.
+- `_tmp_debug/` is for disposable Go probes that should not participate in
+  `go test ./...`.
+- `tools/debug/<name>/` is for reusable debug tools that should be tracked.
+
+If a scratch directory must stay under a normal name, keep its imports current
+with the module path and expect it to participate in full-package verification.

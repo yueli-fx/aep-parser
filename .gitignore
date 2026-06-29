@@ -17,20 +17,20 @@
 .DS_Store
 Thumbs.db
 
-# AE auxiliary
+# AE auxiliary / generated test sidecars
 *.done
 test_data/v2_1_args.json
+test_data/
 
-# Local temp
+# Local scratch/cache.
+# tmp/ is disposable cache/output; tmp_debug/ is AE/render output only; _tmp_debug/ is disposable Go probes skipped by ./...
 tmp/
+tmp_debug/
+_tmp_debug/
 /image.png
 
 
 .claude
-
-test_data/
-tmp_debug/
-_tmp_debug/
 
 flightdeck/references
 flightdeck/archive

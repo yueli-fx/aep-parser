@@ -48,10 +48,10 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - 校验: `go vet ./... && go test ./...`
 - 单测: `go test ./internal/aep/ -run 'TestX' -v`
 - 能力查询（写/做面真相源）: `go run ./cmd/capindex -q "<词>"`（或 grep `docs/capabilities.json`）
-- **build 不落根目录**：跑工具优先 `go run ./cmd/<x>`；必须 build 时 `go build -o tmp_debug/bin/<x>`（`.gitignore` 已含 `*.exe`，但别在根目录裸 build 留垃圾）
-- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·**一次性 probe/渲染输出/scratch→`tmp_debug/` 或根 `tmp/`(gitignored，用完即删别留)**。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `knowledge/<域>/` 后删探针。细则 `knowledge/workflow/verify.md` § 工件该放哪。
+- **build 不落根目录**：跑工具优先 `go run ./cmd/<x>`；必须 build 时 `go build -o tmp/bin/<x>.exe`（`.gitignore` 已含 `*.exe`，但别在根目录裸 build 留垃圾）
+- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·AE/渲染/gate 输出→`tmp_debug/`(gitignored, 不放 `.go`)·一次性 Go probe→`_tmp_debug/`(gitignored, `go test ./...` 会跳过)·普通缓存/下载/杂输出→`tmp/`(gitignored)。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `knowledge/<域>/` 后删探针。细则 `knowledge/workflow/verify.md` § 工件该放哪。
 - **多行 commit message**（Bash 工具跑 bash 非 pwsh）：写临时文件 `git commit -F tmpfile`，**勿**用 `@'...'@` here-string（会被 mangle）
-- 详细操作（tmp_debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/knowledge/workflow/`
+- 详细操作（debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/knowledge/workflow/`
 
 ## 工作风格
 
@@ -73,6 +73,6 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - **能力索引（写/做面真相源,秒查）**: `go run ./cmd/capindex -q "<词>"` / `docs/capabilities.{json,md}`（源码内 `aep:cap` tag,CI 强制零漏标。取代退役的 coverage.md 写能力清单）
 - 暂搁 / 不可达 / negative findings（capindex 不覆盖的残值）: 冷存 archive `coverage.md`（已退役为残值）；AE-attribute→Go-field 矩阵: 冷存 archive `coverage-detail.md`（参考；均在 `~/.flightdeck/projects/<slug>/archive/plans/`）
 - API 同步表（改任何 public API 必读）: `flightdeck/briefing.md` § 命令一致性
-- 测试惯例 / 验证流程 / tmp_debug 工具表: `flightdeck/knowledge/workflow/verify.md`
+- 测试惯例 / 验证流程 / debug 工具表: `flightdeck/knowledge/workflow/verify.md`
 - JSX RE 工作流 + ship-gate + RE fixture 双轨 + Types-for-Adobe 参考: `flightdeck/knowledge/workflow/re-fixture.md`
 - 当前里程碑 / 进度 / 下一步: `flightdeck/cockpit.md`（不在此留存，避免状态漂移）
