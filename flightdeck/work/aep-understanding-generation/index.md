@@ -195,6 +195,10 @@ Done:
 - The consolidated `minimal-comp-object-profile.json` now exercises the
   completed comp display, flag, motion-blur, work-area, renderer, and metadata
   profile contracts together as a no-layer object-level baseline.
+- Added `scripts/verify_recipe_profiles.ps1` as the one-command recipe profile
+  verifier. It builds `cmd/aeprecipe` once, validates and compiles all selected
+  recipes, summarizes `profile_checks` coverage/failures, and exits non-zero on
+  validation, compile, invalid-report, or profile-check failures.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -333,10 +337,12 @@ Current:
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
   candidates are remaining comp settings, shape filters, expression support,
   transform keyframe/ease where writer support exists, or more profile-visible
-  text style. For comp work, follow `comp-recipe-execution-strategy.md` instead
-  of asking for per-field direction. Next object-level planning candidate is a
-  layer recipe/profile execution strategy. Do not start automated correction
-  loops.
+  text style. Use `scripts/verify_recipe_profiles.ps1` for whole-recipe
+  validation/compile/profile-check coverage instead of manual per-field
+  spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
+  instead of asking for per-field direction. Next object-level planning
+  candidate is a layer recipe/profile execution strategy. Do not start
+  automated correction loops.
 
 ## Open questions
 
