@@ -557,6 +557,13 @@ func checkExpectedLayer(index int, expected ExpectedLayer, prof *profile.Profile
 	if expected.AutoOrient != "" {
 		add(layerPath+".auto_orient", expected.AutoOrient, layer.AutoOrient, layer.AutoOrient == expected.AutoOrient)
 	}
+	if expected.Parent != "" {
+		actual := ""
+		if layer.ParentRef != nil {
+			actual = layer.ParentRef.Name
+		}
+		add(layerPath+".parent", expected.Parent, actual, actual == expected.Parent)
+	}
 	if expected.Label != nil {
 		actual := float64(layer.Label)
 		add(layerPath+".label", *expected.Label, actual, actual == *expected.Label)

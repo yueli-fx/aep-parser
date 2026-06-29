@@ -35,6 +35,17 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 2,
-    "text_layer_count": 2
+    "text_layer_count": 2,
+    "layers": [
+      {
+        "name": "Parent",
+        "type": "text"
+      },
+      {
+        "name": "Child",
+        "type": "text",
+        "parent": "Parent"
+      }
+    ]
   }
 }

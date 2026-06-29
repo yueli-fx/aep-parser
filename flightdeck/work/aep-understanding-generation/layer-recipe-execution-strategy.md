@@ -57,7 +57,7 @@ flags, and refs.
 | Type flags | `is_3d` / `is_adjust` / `is_null` / `is_guide` | `Layer.Set*` plus type constructors | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
 | Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
-| Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | planned `expected_profile.layers[].parent` | L3 | planned |
+| Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | `expected_profile.layers[].parent` | L3 | done |
 | Matte refs | track matte writer currently not recipe-owned | `layers[].matte_ref` | planned when writer enters recipe scope | L2/L3 | blocked |
 | Transform statics | `transform.position` / `scale` / `anchor_point` / `rotation` / `opacity` | `SetLayerTransform` | `properties[]` | `expected_profile.properties[]` | L3 | keep separate |
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
@@ -158,8 +158,12 @@ as an object-level contract:
 ## Next Concrete Slice
 
 Add parent-ref object checks using `expected_profile.layers[].parent`, because
-recipe writer support and `profile.Layer.parent_ref` already exist but the
-object-level expected-profile contract does not assert refs yet.
+recipe writer support and `profile.Layer.parent_ref` already exist. Completed
+in `minimal-layer-parent.json`.
+
+Next, review matte refs separately because writer ownership is not in the
+current recipe surface. If no writer path exists, keep it blocked and move to
+the next recipe-owned family instead of inventing a profile-only recipe check.
 
 ## Self-Review
 

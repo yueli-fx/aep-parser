@@ -398,6 +398,7 @@ type ExpectedLayer struct {
 	Quality      string               `json:"quality,omitempty"`
 	BlendingMode string               `json:"blending_mode,omitempty"`
 	AutoOrient   string               `json:"auto_orient,omitempty"`
+	Parent       string               `json:"parent,omitempty"`
 	Label        *float64             `json:"label,omitempty"`
 	Comment      string               `json:"comment,omitempty"`
 	Timing       *ExpectedLayerTiming `json:"timing,omitempty"`
