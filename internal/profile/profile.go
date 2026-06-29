@@ -253,15 +253,23 @@ type RenderQueue struct {
 }
 
 type RenderQueueItem struct {
-	CompName          string   `json:"comp_name,omitempty"`
-	Status            uint32   `json:"status"`
-	Name              string   `json:"name,omitempty"`
-	Comment           string   `json:"comment,omitempty"`
-	TimeSpanStart     float64  `json:"time_span_start_seconds"`
-	TimeSpanDuration  float64  `json:"time_span_duration_seconds"`
-	OutputModuleCount int      `json:"output_module_count"`
-	Path              PathRef  `json:"path"`
-	Evidence          Evidence `json:"evidence"`
+	CompName          string         `json:"comp_name,omitempty"`
+	Status            uint32         `json:"status"`
+	Name              string         `json:"name,omitempty"`
+	Comment           string         `json:"comment,omitempty"`
+	TimeSpanStart     float64        `json:"time_span_start_seconds"`
+	TimeSpanDuration  float64        `json:"time_span_duration_seconds"`
+	OutputModuleCount int            `json:"output_module_count"`
+	OutputModules     []OutputModule `json:"output_modules,omitempty"`
+	Path              PathRef        `json:"path"`
+	Evidence          Evidence       `json:"evidence"`
+}
+
+type OutputModule struct {
+	Name         string   `json:"name,omitempty"`
+	FileTemplate string   `json:"file_template,omitempty"`
+	Path         PathRef  `json:"path"`
+	Evidence     Evidence `json:"evidence"`
 }
 
 type TemporalEase struct {
@@ -730,7 +738,7 @@ func buildRenderQueueItem(item *aep.JSONRenderQueueItem, occurrence int) RenderQ
 	if item == nil {
 		return RenderQueueItem{Path: path, Evidence: parsedEvidence()}
 	}
-	return RenderQueueItem{
+	out := RenderQueueItem{
 		CompName:          item.CompName,
 		Status:            item.Status,
 		Name:              item.Name,
@@ -740,6 +748,22 @@ func buildRenderQueueItem(item *aep.JSONRenderQueueItem, occurrence int) RenderQ
 		OutputModuleCount: len(item.OutputModules),
 		Path:              path,
 		Evidence:          parsedEvidence(),
+	}
+	for i, output := range item.OutputModules {
+		out.OutputModules = append(out.OutputModules, buildOutputModule(output, outputModulePath(path.Path, path.DisplayPath, i)))
+	}
+	return out
+}
+
+func buildOutputModule(output *aep.JSONOutputModule, path PathRef) OutputModule {
+	if output == nil {
+		return OutputModule{Path: path, Evidence: parsedEvidence()}
+	}
+	return OutputModule{
+		Name:         output.Name,
+		FileTemplate: output.FileTemplate,
+		Path:         path,
+		Evidence:     parsedEvidence(),
 	}
 }
 
@@ -981,6 +1005,14 @@ func renderQueueItemPath(occurrence int) PathRef {
 		Path:        fmt.Sprintf("render_queue.items[%d]", occurrence),
 		DisplayPath: fmt.Sprintf("render_queue.items[%d]", occurrence),
 		Identity:    map[string]any{"render_queue_item_occurrence": occurrence},
+	}
+}
+
+func outputModulePath(parentPath, parentDisplay string, occurrence int) PathRef {
+	return PathRef{
+		Path:        fmt.Sprintf("%s.output_modules[%d]", parentPath, occurrence),
+		DisplayPath: fmt.Sprintf("%s.output_modules[%d]", parentDisplay, occurrence),
+		Identity:    map[string]any{"output_module_occurrence": occurrence},
 	}
 }
 

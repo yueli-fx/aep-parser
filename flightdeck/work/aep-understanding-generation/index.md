@@ -313,6 +313,9 @@ Done:
   comp name, status, label/comment, time span, output-module count, paths, and
   evidence. `rq_numitems_1.aep` covers the queue summary; full render/output
   module settings remain detail-only.
+- Render queue profile summaries now include output module name/file-template
+  entries with paths and evidence, still excluding full output module settings
+  and format options.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

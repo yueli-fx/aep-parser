@@ -22,7 +22,7 @@ detailed `WriteJSON` export.
 | Shapes | absent | shape paths and primitives | Admit shape paths/primitives for shape-layer diff | L1_parsed | Avoid full graph overreach until path identity is stable. |
 | Text | absent | text source, fonts, runs, paragraphs, justification | Admit text source summary and style runs | L1_parsed | Font availability becomes render oracle metadata later. |
 | Markers/guides/EG | absent | present | Admit comp/layer marker payloads, comp guide payloads, and EG controller summaries with stable paths | L1_parsed | Marker, guide, and EG fixtures now prove profile value without changing core identity model. |
-| Render queue | absent | present | Admit queue/item summary with count, linked comp name, status, label/comment, time span, and output-module count; keep full settings detail-only | L1_parsed | Generation/replication first targets comps, but queue presence can explain workflow intent. |
+| Render queue | absent | present | Admit queue/item summary with count, linked comp name, status, label/comment, time span, output-module count, and output-module name/template; keep full settings detail-only | L1_parsed | Generation/replication first targets comps, but queue presence can explain workflow intent. |
 | Unknown/raw escapes | absent | limited by scene model | Admit explicit `unknowns` records where parser exposes uncertainty | L0_raw/L1_parsed | Do not silently omit unsupported structures. |
 
 ## Phase 1 Field Admission List
@@ -48,6 +48,7 @@ Admit immediately:
 - comp guide payloads
 - essential graphics controller summaries
 - render queue item summaries
+- output module name/template summaries
 - evidence records and unknown records
 
 Keep detail-only for Phase 1:

@@ -273,6 +273,19 @@ func TestBuildRenderQueueFixtureIncludesQueueSummary(t *testing.T) {
 	if item.OutputModuleCount != 1 {
 		t.Fatalf("render_queue.items[0].output_module_count = %d, want 1", item.OutputModuleCount)
 	}
+	if len(item.OutputModules) != 1 {
+		t.Fatalf("render_queue.items[0].output_modules = %d, want 1", len(item.OutputModules))
+	}
+	output := item.OutputModules[0]
+	if output.Name != "H.264 - Match Render Settings - 15 Mbps" {
+		t.Fatalf("output_modules[0].name = %q", output.Name)
+	}
+	if output.FileTemplate != "[compName].[fileextension]" {
+		t.Fatalf("output_modules[0].file_template = %q", output.FileTemplate)
+	}
+	if output.Path.Path == "" || output.Evidence.Level != profile.EvidenceL1Parsed {
+		t.Fatalf("output module path/evidence missing: %+v", output)
+	}
 	if math.Abs(item.TimeSpanStart) > 1e-3 {
 		t.Fatalf("render_queue.items[0].time_span_start = %g, want 0", item.TimeSpanStart)
 	}
