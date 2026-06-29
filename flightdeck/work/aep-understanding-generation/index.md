@@ -302,6 +302,9 @@ Done:
   paths, and evidence. `re_compmarker.aep` covers comp-marker profile output;
   recipe marker authoring remains out of scope until the AddMarker seed-template
   boundary is designed.
+- Stable profile output now includes comp guide payloads with parsed
+  orientation, position, paths, and evidence. `guides.aep` covers the
+  multi-guide comp profile output; guide authoring remains out of recipe scope.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

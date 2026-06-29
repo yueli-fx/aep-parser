@@ -160,6 +160,45 @@ func TestBuildMarkerFixtureIncludesCompMarkers(t *testing.T) {
 	}
 }
 
+func TestBuildGuidesFixtureIncludesCompGuides(t *testing.T) {
+	path := repoPath(t, "test_data", "fixtures", "guides.aep")
+	project, err := aep.Open(path)
+	if err != nil {
+		t.Fatalf("open fixture: %v", err)
+	}
+
+	prof, err := profile.Build(project, profile.Options{Path: path})
+	if err != nil {
+		t.Fatalf("build profile: %v", err)
+	}
+
+	comp := findProfileComp(t, prof, "guides_both")
+	if len(comp.Guides) != 3 {
+		t.Fatalf("guides = %d, want 3", len(comp.Guides))
+	}
+
+	want := []struct {
+		orientation string
+		position    float64
+	}{
+		{"horizontal", 270},
+		{"horizontal", 810},
+		{"vertical", 960},
+	}
+	for i, w := range want {
+		got := comp.Guides[i]
+		if got.Orientation != w.orientation {
+			t.Fatalf("guide[%d].orientation = %q, want %q", i, got.Orientation, w.orientation)
+		}
+		if math.Abs(got.Position-w.position) > 1e-3 {
+			t.Fatalf("guide[%d].position = %g, want %g", i, got.Position, w.position)
+		}
+		if got.Path.Path == "" || got.Evidence.Level != profile.EvidenceL1Parsed {
+			t.Fatalf("guide[%d] path/evidence missing: %+v", i, got)
+		}
+	}
+}
+
 func TestBuildSyntheticProjectIncludesTrackMatteRef(t *testing.T) {
 	project := aep.NewProject(aep.TargetAE2020)
 	comp, err := aep.NewComposition(project, "Matte Comp", 1920, 1080, 30, 3)

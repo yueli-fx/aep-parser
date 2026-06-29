@@ -8,7 +8,7 @@ detailed `WriteJSON` export.
 | Project identity | `project` path | absent as explicit path | Admit `meta.path`, `meta.schema_version`, `meta.parse_warnings` | L1_parsed | Add schema version in Phase 1. |
 | Project item graph | precomp/footage source labels only | `compositions`, `footage`, `folders` with IDs | Admit normalized item table with IDs, names, type, parent/folder where available | L1_parsed | Needed for source refs and generation inventory. |
 | Effect usage fingerprint | `effectUsage`, `thirdParty` | effects nested per layer | Admit summarized effect usage and plugin dependency list | L1_parsed | Keep detailed params per path under effects. |
-| Composition settings | ID/name/size/fps/duration | plus tick rate, renderer, work area, bg, shutter/motion blur, markers/guides/EG | Admit ID/name/size/fps/duration/tick/render/work area/motion blur and comp markers; detail-only guides/EG until diff needs them | L1_parsed | Renderer/work area affect render and slice selection. |
+| Composition settings | ID/name/size/fps/duration | plus tick rate, renderer, work area, bg, shutter/motion blur, markers/guides/EG | Admit ID/name/size/fps/duration/tick/render/work area/motion blur, comp markers, and comp guides; detail-only EG until diff needs it | L1_parsed | Renderer/work area affect render and slice selection. |
 | Layer identity | index/name/type | index/name/type/ID/source ID/parent ID | Admit ID, index, name, type, source ref, parent ref, matte ref | L1_parsed | Stable path uses ID where present plus index/occurrence fallback. |
 | Layer timing | in/out points | start/duration/stretch | Admit normalized in/out/start/duration/stretch | L1_parsed | Required for active intervals and render sentinel selection. |
 | Layer flags | visible/blend only | broad flags and switches | Admit visible, blend, 3D, solo, shy, locked, adjustment/null/guide, motion blur, effects enabled, audio, frame blend, collapse | L1_parsed | Flags frequently explain render deltas. |
@@ -21,7 +21,7 @@ detailed `WriteJSON` export.
 | Masks | absent | masks, vertices, path keyframes, interp/ease | Admit mask metadata and path timeline; mark geometry evidence carefully | L1_parsed | Existing knowledge says some mask geometry may be partial. |
 | Shapes | absent | shape paths and primitives | Admit shape paths/primitives for shape-layer diff | L1_parsed | Avoid full graph overreach until path identity is stable. |
 | Text | absent | text source, fonts, runs, paragraphs, justification | Admit text source summary and style runs | L1_parsed | Font availability becomes render oracle metadata later. |
-| Markers/guides/EG | absent | present | Admit comp/layer marker payloads with stable paths; keep guides/EG detail-only until fixture proves clone/diff need | L1_parsed | Marker fixtures now prove profile value without changing core identity model. |
+| Markers/guides/EG | absent | present | Admit comp/layer marker payloads and comp guide payloads with stable paths; keep EG detail-only until fixture proves clone/diff need | L1_parsed | Marker and guide fixtures now prove profile value without changing core identity model. |
 | Render queue | absent | present | Detail-only for Phase 1; profile fingerprint may include presence/count | L1_parsed | Generation/replication first targets comps, not render queue. |
 | Unknown/raw escapes | absent | limited by scene model | Admit explicit `unknowns` records where parser exposes uncertainty | L0_raw/L1_parsed | Do not silently omit unsupported structures. |
 
@@ -45,12 +45,12 @@ Admit immediately:
 - shapes with path/primitive summaries
 - text source and style run summaries
 - comp/layer marker payloads
+- comp guide payloads
 - evidence records and unknown records
 
 Keep detail-only for Phase 1:
 
 - render queue full settings
-- guides
 - essential graphics controllers
 - detailed output module format options
 

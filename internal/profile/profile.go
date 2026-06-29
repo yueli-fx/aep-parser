@@ -88,6 +88,7 @@ type Composition struct {
 	WorkArea                 WorkArea           `json:"work_area"`
 	MotionBlur               MotionBlurSettings `json:"motion_blur"`
 	Markers                  []Marker           `json:"markers,omitempty"`
+	Guides                   []Guide            `json:"guides,omitempty"`
 	Layers                   []Layer            `json:"layers,omitempty"`
 	Path                     PathRef            `json:"path"`
 	Evidence                 Evidence           `json:"evidence"`
@@ -224,6 +225,13 @@ type Marker struct {
 	CuePointName string   `json:"cue_point_name,omitempty"`
 	Path         PathRef  `json:"path"`
 	Evidence     Evidence `json:"evidence"`
+}
+
+type Guide struct {
+	Orientation string   `json:"orientation"`
+	Position    float64  `json:"position"`
+	Path        PathRef  `json:"path"`
+	Evidence    Evidence `json:"evidence"`
 }
 
 type TemporalEase struct {
@@ -418,6 +426,9 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		}
 		for i, marker := range c.Markers {
 			cp.Markers = append(cp.Markers, buildMarker(marker, markerPath(cp.Path.Path, cp.Path.DisplayPath, i)))
+		}
+		for i, guide := range c.Guides {
+			cp.Guides = append(cp.Guides, buildGuide(guide, guidePath(cp.Path.Path, cp.Path.DisplayPath, i)))
 		}
 		layerByID := map[uint32]*aep.JSONLayer{}
 		layerByIndex := map[int]*aep.JSONLayer{}
@@ -637,6 +648,18 @@ func buildMarker(m *aep.JSONMarker, path PathRef) Marker {
 		CuePointName: m.CuePointName,
 		Path:         path,
 		Evidence:     parsedEvidence(),
+	}
+}
+
+func buildGuide(g *aep.JSONGuide, path PathRef) Guide {
+	if g == nil {
+		return Guide{Path: path, Evidence: parsedEvidence()}
+	}
+	return Guide{
+		Orientation: g.Orientation,
+		Position:    g.Position,
+		Path:        path,
+		Evidence:    parsedEvidence(),
 	}
 }
 
@@ -913,6 +936,14 @@ func markerPath(parentPath, parentDisplay string, occurrence int) PathRef {
 		Path:        fmt.Sprintf("%s.markers[%d]", parentPath, occurrence),
 		DisplayPath: fmt.Sprintf("%s.markers[%d]", parentDisplay, occurrence),
 		Identity:    map[string]any{"marker_occurrence": occurrence},
+	}
+}
+
+func guidePath(parentPath, parentDisplay string, occurrence int) PathRef {
+	return PathRef{
+		Path:        fmt.Sprintf("%s.guides[%d]", parentPath, occurrence),
+		DisplayPath: fmt.Sprintf("%s.guides[%d]", parentDisplay, occurrence),
+		Identity:    map[string]any{"guide_occurrence": occurrence},
 	}
 }
 
