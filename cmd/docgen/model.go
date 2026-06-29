@@ -1,6 +1,6 @@
 package main
 
-import "github.com/example/aep-parser/internal/apidoc"
+import "github.com/yueli-fx/aep-parser/internal/apidoc"
 
 type symKind int
 

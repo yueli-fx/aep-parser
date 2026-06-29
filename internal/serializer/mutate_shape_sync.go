@@ -12,7 +12,7 @@ package serializer
 import (
 	"fmt"
 
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // syncShapeLayerChunks re-lowers every shape layer that has a runtime

@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // ffxFormType is the RIFX form-type of an After Effects Animation Preset (.ffx)

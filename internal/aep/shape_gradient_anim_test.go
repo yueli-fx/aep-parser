@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // gradAnim builds a project with one shape layer whose gradient fill has

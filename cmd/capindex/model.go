@@ -1,6 +1,6 @@
 package main
 
-import "github.com/example/aep-parser/internal/apidoc"
+import "github.com/yueli-fx/aep-parser/internal/apidoc"
 
 // Cap is a parsed `aep:cap` capability directive attached to an exported
 // internal/aep symbol. It is the single source of truth for a capability's

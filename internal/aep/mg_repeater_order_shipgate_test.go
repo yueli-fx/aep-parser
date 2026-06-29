@@ -32,7 +32,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // repeaterOrderCard adds a Rect150 + white Fill + Repeater (5 copies, overlapping

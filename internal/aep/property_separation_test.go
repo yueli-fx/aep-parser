@@ -3,7 +3,7 @@ package aep_test
 import (
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // findProp walks every comp/layer for the first property with matchName.

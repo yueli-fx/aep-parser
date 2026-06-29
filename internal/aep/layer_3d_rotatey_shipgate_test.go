@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // colHeight returns the count of near-white pixels in column x (the box's

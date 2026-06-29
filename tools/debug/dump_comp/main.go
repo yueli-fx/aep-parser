@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 func walk(c *rifx.Chunk, depth int, breadcrumb string) {

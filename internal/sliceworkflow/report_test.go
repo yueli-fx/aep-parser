@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/example/aep-parser/internal/aeoracle"
-	"github.com/example/aep-parser/internal/profile"
-	"github.com/example/aep-parser/internal/profilediff"
-	"github.com/example/aep-parser/internal/sliceworkflow"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/profilediff"
+	"github.com/yueli-fx/aep-parser/internal/sliceworkflow"
 )
 
 func TestBuildReportClassifiesProceduralComp(t *testing.T) {

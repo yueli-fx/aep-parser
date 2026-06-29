@@ -15,7 +15,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 //go:embed templates/layers/layer_precomp_body.bin

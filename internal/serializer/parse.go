@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // Open parses an .aep file by path and returns the Project.

@@ -3,7 +3,7 @@ package aep_test
 import (
 	"os"
 
-	"github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Doc example for docgen (compile-checked, no "// Output:").

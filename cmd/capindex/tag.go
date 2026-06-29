@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // capFromAnnotation maps a parsed @tag Annotation onto the legacy Cap shape so

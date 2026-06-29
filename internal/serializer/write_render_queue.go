@@ -1,6 +1,6 @@
 package serializer
 
-import "github.com/example/aep-parser/internal/scene"
+import "github.com/yueli-fx/aep-parser/internal/scene"
 
 // syncRenderQueue copies every render-queue item's scene-owned settings buffers
 // back into the owning RIFX chunks before serialization (single source of truth

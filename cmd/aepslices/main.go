@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/example/aep-parser/internal/aeoracle"
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/profile"
-	"github.com/example/aep-parser/internal/profilediff"
-	"github.com/example/aep-parser/internal/sliceworkflow"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/profilediff"
+	"github.com/yueli-fx/aep-parser/internal/sliceworkflow"
 )
 
 const defaultDictPath = "data/effects-dict/effects_en_US_25.1x68.json"

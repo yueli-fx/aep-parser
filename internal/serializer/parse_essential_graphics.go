@@ -3,7 +3,7 @@ package serializer
 import (
 	"encoding/binary"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // parse_essential_graphics.go — decode the Essential Graphics panel from a

@@ -30,7 +30,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // whiteRuns returns the [start,end] x-extents of contiguous near-white runs on

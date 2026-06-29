@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 func TestRenderSymbol_ParamTable(t *testing.T) {

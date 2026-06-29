@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/profile"
 )
 
 func repoPath(t *testing.T, parts ...string) string {

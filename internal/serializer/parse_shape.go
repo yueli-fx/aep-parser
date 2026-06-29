@@ -1,7 +1,7 @@
 package serializer
 
 import (
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // collectShapePaths walks a shape layer's property tree and decodes every

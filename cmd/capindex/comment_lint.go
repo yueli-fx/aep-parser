@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // machineTagLine reports whether a comment line is a machine @-field (@gate /

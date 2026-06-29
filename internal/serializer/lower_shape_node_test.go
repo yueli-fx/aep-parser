@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 func TestLowerRectNode_HasTdmnAndSubProps(t *testing.T) {

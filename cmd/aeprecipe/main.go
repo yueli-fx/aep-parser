@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/example/aep-parser/internal/capindex"
-	"github.com/example/aep-parser/internal/recipe"
+	"github.com/yueli-fx/aep-parser/internal/capindex"
+	"github.com/yueli-fx/aep-parser/internal/recipe"
 )
 
 func main() {

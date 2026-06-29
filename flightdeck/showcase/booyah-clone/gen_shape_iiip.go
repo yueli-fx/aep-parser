@@ -8,7 +8,7 @@ package main
 import (
 	"fmt"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // shapeIiipCompName is comp ①'s name, referenced by precomp layers that nest it (⑤+).

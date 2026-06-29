@@ -36,7 +36,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // rowWidth returns the count of near-white pixels in row y (the box's horizontal

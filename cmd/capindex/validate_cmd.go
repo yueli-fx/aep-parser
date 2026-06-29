@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // runValidate validates the parsed entries against the apidoc schema. A converted

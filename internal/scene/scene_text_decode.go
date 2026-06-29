@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // Text-layer "btds" payload is two stacked sub-LISTs:

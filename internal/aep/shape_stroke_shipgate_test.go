@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // runV2_2StrokeShipGate is the V2.2.1 focused Stroke gate: one ShapeLayer with

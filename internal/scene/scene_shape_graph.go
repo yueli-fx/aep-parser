@@ -4,7 +4,7 @@ package scene
 import (
 	"fmt"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // ShapeNodeKind identifies a shape-graph node's runtime kind. AE match-name

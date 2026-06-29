@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func TestV2_2_NestedGroup_Preservation(t *testing.T) {

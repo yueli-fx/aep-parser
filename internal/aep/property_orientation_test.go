@@ -3,7 +3,7 @@ package aep_test
 import (
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // 3D-layer Orientation is stored in an otst wrapper (tdbs + otky), and its

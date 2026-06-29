@@ -21,8 +21,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // DuplicateMask inserts a copy of mask m immediately after it in the layer's

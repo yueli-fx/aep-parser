@@ -1,6 +1,6 @@
 package serializer
 
-import "github.com/example/aep-parser/internal/codec"
+import "github.com/yueli-fx/aep-parser/internal/codec"
 
 // Gradient holds parsed gradient color data from a gradient fill/stroke
 // property ("ADBE Vector Grad Colors"). The XML is stored in the cdat chunk as

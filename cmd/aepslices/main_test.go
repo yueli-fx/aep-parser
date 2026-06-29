@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/example/aep-parser/internal/aeoracle"
-	"github.com/example/aep-parser/internal/sliceworkflow"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/sliceworkflow"
 )
 
 func TestRunPlanWritesJSONReport(t *testing.T) {

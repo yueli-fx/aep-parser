@@ -3,8 +3,8 @@ package aeoracle_test
 import (
 	"testing"
 
-	"github.com/example/aep-parser/internal/aeoracle"
-	"github.com/example/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/profile"
 )
 
 func TestSelectFramesIncludesEndpointsKeyframesAndMidpoints(t *testing.T) {

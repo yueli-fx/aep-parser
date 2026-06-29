@@ -19,7 +19,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // buildTrackMatteClassic: comp with matte "M" above target "T"; SetTrackMatte

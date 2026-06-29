@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"math"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Mask-atom builders for synthetic RIFX fixtures. Used by mask_test.go

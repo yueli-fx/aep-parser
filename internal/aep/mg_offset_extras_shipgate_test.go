@@ -34,7 +34,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // cornerCard adds a Rect200 + white Fill + Offset(Amount=60) card at (cx,cy);

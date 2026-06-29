@@ -5,7 +5,7 @@
 
 package serializer
 
-import "github.com/example/aep-parser/internal/scene"
+import "github.com/yueli-fx/aep-parser/internal/scene"
 
 type (
 	AECapabilities                  = scene.AECapabilities

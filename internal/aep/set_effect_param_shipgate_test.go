@@ -16,7 +16,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarget) {

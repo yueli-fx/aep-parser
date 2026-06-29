@@ -24,7 +24,7 @@ import (
 	"testing"
 	"unicode/utf16"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // jsStringEscape renders s as a double-quoted ExtendScript string literal with

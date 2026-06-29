@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 const outPath = "flightdeck/showcase/3d-camera/3d_camera.aep"

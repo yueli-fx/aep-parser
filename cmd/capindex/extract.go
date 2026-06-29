@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // extractEntries walks the given Go package dirs (skipping _test.go) and returns

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/example/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
 )
 
 func TestRenderRequestRoundTrip(t *testing.T) {

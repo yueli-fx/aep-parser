@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // boxWidth3D returns the width (px) of the white box band on scanline y.

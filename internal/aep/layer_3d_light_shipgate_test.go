@@ -29,7 +29,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // avgLuma returns the mean red-channel (=luma on a gray fill) brightness over

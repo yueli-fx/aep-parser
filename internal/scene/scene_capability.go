@@ -1,7 +1,7 @@
 // internal/aep/capability_matrix.go
 package scene
 
-import "github.com/example/aep-parser/internal/codec"
+import "github.com/yueli-fx/aep-parser/internal/codec"
 
 // AECapabilities describes the serializer-affecting traits of a target AE
 // version. This struct ships deliberately EMPTY — the escape hatch

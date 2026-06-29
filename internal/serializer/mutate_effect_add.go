@@ -33,8 +33,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // effectTemplateFS holds the embedded effect templates. Each is a LIST(tdgp)

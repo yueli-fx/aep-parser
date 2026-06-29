@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // write_render_queue.go — length-preserving setters for render queue item +

@@ -12,8 +12,8 @@ import (
 	"reflect"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // btdkCounter reads the UTF-16 character counter at the given btdk path from

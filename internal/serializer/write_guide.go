@@ -1,8 +1,8 @@
 package serializer
 
 import (
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // syncGuides copies each composition's scene-owned guide buffers back into the

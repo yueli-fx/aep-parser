@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // DeleteLayer removes the layer at the given 0-based index in c.Layers.

@@ -1,6 +1,6 @@
 package scene
 
-import "github.com/example/aep-parser/internal/codec"
+import "github.com/yueli-fx/aep-parser/internal/codec"
 
 // LayerType classifies the kind of layer.
 type LayerType string

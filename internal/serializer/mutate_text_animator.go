@@ -32,8 +32,8 @@ import (
 	"math"
 	"sync"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // Each embedded body is an AE-native "ADBE Text Animators" group carrying ONE

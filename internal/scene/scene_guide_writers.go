@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"math"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // Guide length-preserving setters. Each patches the guide's 16-byte scene-owned

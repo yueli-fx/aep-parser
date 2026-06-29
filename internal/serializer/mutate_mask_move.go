@@ -19,7 +19,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // maskTriple holds one mask atom's three consecutive parade chunks plus the

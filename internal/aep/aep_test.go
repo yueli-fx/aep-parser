@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // manualAEPPath lets you point the test at a real .aep file from the command line:

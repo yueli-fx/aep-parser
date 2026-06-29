@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func runPropStructShipGate(t *testing.T, aeExe, label string, mutate func(*aep.Layer) error, expect []string) {

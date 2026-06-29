@@ -1,8 +1,8 @@
 package serializer
 
 import (
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // Property-tree parse stage: builds the hierarchical AEPropertyGroup mirror

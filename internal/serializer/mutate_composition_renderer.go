@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // mutate_composition_renderer.go — SetRenderer switches a comp's 3D rendering

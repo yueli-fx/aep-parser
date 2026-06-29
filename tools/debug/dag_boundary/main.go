@@ -17,7 +17,7 @@ func directImports(pkg string) ([]string, error) {
 }
 
 func main() {
-	const base = "github.com/example/aep-parser/internal/"
+	const base = "github.com/yueli-fx/aep-parser/internal/"
 	type rule struct {
 		pkg    string
 		banned []string

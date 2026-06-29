@@ -27,7 +27,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 const footageIdtaComment = "HELLO_FOOTAGE_COMMENT"

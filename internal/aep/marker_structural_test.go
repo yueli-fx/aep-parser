@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // findRECM returns the "RE_CM" composition from a parsed re_compmarker

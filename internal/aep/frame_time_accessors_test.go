@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Frame-time accessors are pure conversions over existing time fields,

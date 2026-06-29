@@ -3,7 +3,7 @@ package scene
 import (
 	"fmt"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // Layer setters covered in this file are all length-preserving single-byte

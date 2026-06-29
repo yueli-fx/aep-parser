@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // layerWithEffects is defined in property_structural_shipgate_test.go.

@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 func TestNTSCCanonicalRoundtrip(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // solidFixture builds a project with one solid layer and returns the

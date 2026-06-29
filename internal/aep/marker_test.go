@@ -6,7 +6,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // nmhdMeta describes the per-marker NmHd values a synthetic marker should

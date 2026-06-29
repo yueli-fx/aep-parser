@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 var probeChunkID = rifx.ChunkID{'u', 'M', 'D', '1'}

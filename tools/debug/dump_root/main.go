@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // parseTdsnName extracts the embedded Utf8 record name from a tdsn payload.

@@ -12,8 +12,8 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 func TestGradientXML_EncodeDecodeRoundtrip(t *testing.T) {

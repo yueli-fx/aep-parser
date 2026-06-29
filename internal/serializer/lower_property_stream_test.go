@@ -9,8 +9,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 func TestLowerFloat64Stream_Static(t *testing.T) {

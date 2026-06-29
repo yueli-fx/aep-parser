@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/example/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/profile"
 )
 
 const SchemaVersion = 1

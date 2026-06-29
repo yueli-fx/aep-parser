@@ -5,8 +5,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // minimalTransformLeaf builds a tdmn(name) + LIST(tdbs)(tdsb+tdsn+tdb4+cdat)

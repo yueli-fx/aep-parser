@@ -1,5 +1,5 @@
 package main
-import ("fmt";"os";"strings";"github.com/example/aep-parser/internal/rifx")
+import ("fmt";"os";"strings";"github.com/yueli-fx/aep-parser/internal/rifx")
 func main(){
  f,_:=os.Open(os.Args[1]); defer f.Close()
  root,_:=rifx.Parse(f)

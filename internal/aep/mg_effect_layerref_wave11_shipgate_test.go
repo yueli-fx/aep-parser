@@ -27,7 +27,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // wave11Effects in apply order; wave11LayerParams maps each to its layer-ref

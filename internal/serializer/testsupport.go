@@ -7,8 +7,8 @@ package serializer
 // is not importable outside the module, so this does not widen the public API.
 
 import (
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // ProjectRootFold returns the project's cached root Fold LIST chunk, or nil.

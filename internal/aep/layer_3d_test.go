@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // TestGeometryOptionsTypedSettersRoundtrip exercises Layer.Geometry*

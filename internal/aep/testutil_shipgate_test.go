@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // runAeRunShipGate dispatches AE via scripts/ae_run.ps1 (drop-in for AfterFX -r).

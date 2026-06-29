@@ -3,7 +3,7 @@ package serializer
 import (
 	"testing"
 
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 func TestGradientStroke_RoundTrip(t *testing.T) {

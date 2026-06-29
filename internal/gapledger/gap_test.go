@@ -3,10 +3,10 @@ package gapledger_test
 import (
 	"testing"
 
-	"github.com/example/aep-parser/internal/aeoracle"
-	"github.com/example/aep-parser/internal/gapledger"
-	"github.com/example/aep-parser/internal/profile"
-	"github.com/example/aep-parser/internal/profilediff"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/gapledger"
+	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/profilediff"
 )
 
 func TestFromDiffReportMapsActionTypes(t *testing.T) {

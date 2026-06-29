@@ -1,8 +1,8 @@
 package serializer
 
 import (
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // propertyGroupBackrefs holds the rifx.Chunk reference behind an

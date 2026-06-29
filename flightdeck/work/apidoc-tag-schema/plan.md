@@ -82,7 +82,7 @@ session commits.
 
 ## Global Constraints
 
-- **Module import path:** `github.com/example/aep-parser/internal/apidoc` (matches the `github.com/example/aep-parser/...` paths already used in `cmd/docgen/extract.go`).
+- **Module import path:** `github.com/yueli-fx/aep-parser/internal/apidoc` (matches the `github.com/yueli-fx/aep-parser/...` paths already used in `cmd/docgen/extract.go`).
 - **Frozen enums live in exactly one place** — `internal/apidoc/schema.go`. No `@domain`/`@stability`/`@verify`/`@since` string literal may be re-declared in `cmd/capindex` or `cmd/docgen` once converted (the legacy `cmd/capindex/tag.go` maps are tolerated only until the Step-2 flip).
 - **`@domain` frozen enum (16):** `shape · layer-set · layer-create · text · mask · effect · gradient · keyframe · comp · project · render-queue · structural · eg · expr · io · meta`.
 - **`@stability` enum:** `stable · alpha`. **`@verify` enum:** `ae-accept · render-pixel · roundtrip · none`. **`@since` enum:** `AE2020 · AE2025` (format `AE<year>`).
@@ -908,7 +908,7 @@ func TestCapFromAnnotation(t *testing.T) {
 }
 ```
 
-Add `"github.com/example/aep-parser/internal/apidoc"` to the test file's imports.
+Add `"github.com/yueli-fx/aep-parser/internal/apidoc"` to the test file's imports.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
@@ -917,7 +917,7 @@ Expected: build failure — `undefined: capFromAnnotation`.
 
 - [ ] **Step 3: Extend `Entry` in `model.go`**
 
-Add the import `"github.com/example/aep-parser/internal/apidoc"` and these fields to `Entry`:
+Add the import `"github.com/yueli-fx/aep-parser/internal/apidoc"` and these fields to `Entry`:
 
 ```go
 	Pos             string                `json:"-"` // "file:line" for --validate messages
@@ -946,7 +946,7 @@ func capFromAnnotation(a *apidoc.Annotation) Cap {
 }
 ```
 
-Add `"github.com/example/aep-parser/internal/apidoc"` to `tag.go` imports (it already imports `strings`).
+Add `"github.com/yueli-fx/aep-parser/internal/apidoc"` to `tag.go` imports (it already imports `strings`).
 
 - [ ] **Step 5: Rewrite `attachCap` + add signature extraction in `extract.go`**
 
@@ -980,7 +980,7 @@ func attachCap(e *Entry, cg *ast.CommentGroup) {
 }
 ```
 
-Add to imports of `extract.go`: `"fmt"` and `"github.com/example/aep-parser/internal/apidoc"`.
+Add to imports of `extract.go`: `"fmt"` and `"github.com/yueli-fx/aep-parser/internal/apidoc"`.
 
 In `funcEntry`, after building `e`, capture signature facts + position:
 
@@ -1067,7 +1067,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 func TestRunValidate_ConvertedSymbolStrict(t *testing.T) {
@@ -1120,7 +1120,7 @@ Expected: build failure — `undefined: runValidate`.
 package main
 
 import (
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // runValidate validates the parsed entries against the apidoc schema. A converted
@@ -1205,7 +1205,7 @@ After `entries, err := extractEntries(...)` and before the `*coverage` branch, a
 	}
 ```
 
-Add `"github.com/example/aep-parser/internal/apidoc"` to `main.go` imports.
+Add `"github.com/yueli-fx/aep-parser/internal/apidoc"` to `main.go` imports.
 
 - [ ] **Step 5: Add a CI test that `--validate` (warn mode) passes on the real tree**
 
@@ -1301,7 +1301,7 @@ func TestRenderSymbol_ParamTable(t *testing.T) {
 }
 ```
 
-Add `"github.com/example/aep-parser/internal/apidoc"` to the test imports.
+Add `"github.com/yueli-fx/aep-parser/internal/apidoc"` to the test imports.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
@@ -1310,7 +1310,7 @@ Expected: build failure — `symbol` has no field `annotated`/`summary`/`params`
 
 - [ ] **Step 3: Extend `symbol` in `model.go`**
 
-Add the import `"github.com/example/aep-parser/internal/apidoc"` and these fields to `symbol`:
+Add the import `"github.com/yueli-fx/aep-parser/internal/apidoc"` and these fields to `symbol`:
 
 ```go
 	summary   string          // @summary line (annotated symbols)
@@ -1374,7 +1374,7 @@ func funcSymbol(lp *loadedPackage, fn *doc.Func) *symbol {
 
 In `withMethods`, where the method `sym` is built (the `for _, fn := range ty.Methods` loop), replace `doc: directiveStrippedText(rawDoc),` with `applyAnnotation(&sym, rawDoc)` after constructing `sym` (keep `name` + `signature`).
 
-Add `"github.com/example/aep-parser/internal/apidoc"` to `extract.go` imports.
+Add `"github.com/yueli-fx/aep-parser/internal/apidoc"` to `extract.go` imports.
 
 - [ ] **Step 5: Render summary/param/returns in `render.go`**
 
@@ -1408,7 +1408,7 @@ func renderParams(b *strings.Builder, params []apidoc.Param) {
 }
 ```
 
-Apply the same summary/param/returns block to `renderFuncs` (package-level functions) right after the signature fence. Add `"github.com/example/aep-parser/internal/apidoc"` to `render.go` imports.
+Apply the same summary/param/returns block to `renderFuncs` (package-level functions) right after the signature fence. Add `"github.com/yueli-fx/aep-parser/internal/apidoc"` to `render.go` imports.
 
 - [ ] **Step 6: Run the docgen tests**
 
@@ -1476,7 +1476,7 @@ import (
 	"go/ast"
 	"go/doc"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // validateAnnotations runs apidoc.Validate over every annotated package-level

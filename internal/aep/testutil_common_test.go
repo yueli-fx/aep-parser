@@ -1,9 +1,9 @@
 package aep
 
 import (
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
-	"github.com/example/aep-parser/internal/serializer"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 )
 
 // White-box accessors for unexported back-ref fields, kept here so the many

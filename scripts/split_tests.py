@@ -157,7 +157,7 @@ def render_imports(imps: list[str]) -> str:
     if has_aep:
         if std:
             lines.append("")
-        lines.append('\taep "github.com/example/aep-parser/internal/aep"')
+        lines.append('\t"github.com/yueli-fx/aep-parser/internal/aep"')
     lines.append(")")
     return "\n".join(lines)
 

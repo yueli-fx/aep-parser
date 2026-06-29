@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/profile"
 )
 
 func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, error) {

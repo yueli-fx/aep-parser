@@ -3,7 +3,7 @@ package scene
 import (
 	"fmt"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // LdtaRawBytes returns the layer's ldta chunk Data slice, or nil if the

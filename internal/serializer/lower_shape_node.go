@@ -16,8 +16,8 @@ import (
 	"math"
 	"sync"
 
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // Tolerance shape body bytes used as boilerplate skeleton. Transplant tests

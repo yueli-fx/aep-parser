@@ -1,8 +1,8 @@
 package aep
 
 import (
-	"github.com/example/aep-parser/internal/scene"
-	"github.com/example/aep-parser/internal/serializer"
+	"github.com/yueli-fx/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 )
 
 // SetLayerCompForTest assigns the back-ref used by InsertLayer's R5 check.

@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 //go:embed templates/options/mask_option_leaves.bin

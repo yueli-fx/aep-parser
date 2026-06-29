@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // dominantChannel reports which of R/G/B is the largest at (px,py), as 'R'/'G'/'B'.

@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // ShapeLayer Transform Group body — byte-exact extracted from

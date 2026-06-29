@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"go/doc"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // validateAnnotations runs apidoc.Validate over every annotated package-level

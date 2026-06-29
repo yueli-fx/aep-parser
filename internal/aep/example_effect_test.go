@@ -1,6 +1,6 @@
 package aep_test
 
-import "github.com/example/aep-parser/internal/aep"
+import "github.com/yueli-fx/aep-parser/internal/aep"
 
 // Doc example for docgen (compile-checked, no "// Output:"). Attaches to the
 // Effect.Parameters attribute via the Example<Type>_<Field> naming.

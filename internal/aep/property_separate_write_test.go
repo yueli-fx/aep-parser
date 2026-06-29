@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // reopenWritten round-trips proj through WriteAEP → Open so tests can assert

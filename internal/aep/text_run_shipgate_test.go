@@ -17,7 +17,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func runTextRunGate(t *testing.T, aeExe, ver string, target aep.AETarget) {

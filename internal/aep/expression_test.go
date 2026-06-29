@@ -6,7 +6,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // buildEffectParade wraps one effect (with one float parameter) into an

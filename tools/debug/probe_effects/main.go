@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func main() {

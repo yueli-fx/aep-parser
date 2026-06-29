@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // TestSetLayerTransform_TemplatedLayer_Animated verifies the from-scratch

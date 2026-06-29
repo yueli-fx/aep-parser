@@ -33,7 +33,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func addGradStrokeRect(t *testing.T, comp *aep.Composition, name string, center [2]float64) *aep.GradientStrokeNode {

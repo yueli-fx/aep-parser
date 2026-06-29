@@ -6,7 +6,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // TestCompositionBGColorRegression locks in the bug-fix: prior to this

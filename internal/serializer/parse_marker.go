@@ -3,8 +3,8 @@ package serializer
 import (
 	"encoding/binary"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // parseMarkers decodes the "ADBE Marker" mrst wrapper into one Marker per

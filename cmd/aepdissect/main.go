@@ -33,8 +33,8 @@ import (
 	"sort"
 	"strings"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/profile"
 )
 
 var blendName = map[int]string{

@@ -32,7 +32,7 @@ IMPORT_RULES = [
     ("unicode/utf16", re.compile(r"\butf16\.")),
     ("unicode/utf8", re.compile(r"\butf8\.")),
     (
-        "github.com/example/aep-parser/internal/rifx",
+        "github.com/yueli-fx/aep-parser/internal/rifx",
         re.compile(r"\brifx\."),
     ),
 ]

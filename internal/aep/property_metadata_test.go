@@ -3,9 +3,9 @@ package aep_test
 import (
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // TestPropertyControlType_Derivation verifies ControlType() derivation

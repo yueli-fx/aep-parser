@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"os"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 const outPath = "flightdeck/showcase/keyframes-ease/keyframes_ease.aep"

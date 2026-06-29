@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 func trimNUL(b []byte) string {

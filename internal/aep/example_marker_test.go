@@ -3,7 +3,7 @@ package aep_test
 import (
 	"fmt"
 
-	"github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Doc examples for docgen (compile-checked, no "// Output:" so `go test` does

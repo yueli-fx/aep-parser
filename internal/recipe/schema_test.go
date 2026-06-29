@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/recipe"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/recipe"
 )
 
 func TestValidateAcceptsMinimalTextShapeRecipe(t *testing.T) {

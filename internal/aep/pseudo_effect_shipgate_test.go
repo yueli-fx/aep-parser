@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // TestApplyPseudoEffect_AEShipGate_* verifies that AE accepts a pseudo effect

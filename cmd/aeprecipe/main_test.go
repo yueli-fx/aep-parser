@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/example/aep-parser/internal/recipe"
+	"github.com/yueli-fx/aep-parser/internal/recipe"
 )
 
 func TestRunValidateReturnsZeroForValidRecipe(t *testing.T) {

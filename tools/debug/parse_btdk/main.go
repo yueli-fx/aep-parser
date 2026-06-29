@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Token kinds.

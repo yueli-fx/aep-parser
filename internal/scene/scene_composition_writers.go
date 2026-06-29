@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 // Composition setters live here. All length-preserving — they delegate byte

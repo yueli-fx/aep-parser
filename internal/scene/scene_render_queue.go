@@ -1,6 +1,6 @@
 package scene
 
-import "github.com/example/aep-parser/internal/codec"
+import "github.com/yueli-fx/aep-parser/internal/codec"
 
 // Render queue runtime model (read-only). Models AE's
 // RenderQueue / RenderQueueItem / OutputModule, exposing only the fields that

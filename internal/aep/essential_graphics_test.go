@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Golden cross-checked against py-aep samples/models/essential_graphics/*.json

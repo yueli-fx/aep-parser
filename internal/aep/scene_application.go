@@ -3,7 +3,7 @@ package aep
 import (
 	"io"
 
-	"github.com/example/aep-parser/internal/serializer"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 )
 
 // Application wraps a parsed Project, providing a top-level

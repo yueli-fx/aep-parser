@@ -7,8 +7,8 @@ package aep_test
 import (
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 func TestShapeLayer_NewWithEmptyName_DoesNotPolluteComp(t *testing.T) {

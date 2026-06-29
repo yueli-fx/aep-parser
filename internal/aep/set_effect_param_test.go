@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // gbDefaultInstanceLayer returns a layer carrying a default Gaussian Blur

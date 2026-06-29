@@ -86,7 +86,7 @@ IMPORT_RULES = [
     ("strings", re.compile(r"\bstrings\.\w")),
     ("unicode/utf16", re.compile(r"\butf16\.\w")),
     (
-        "github.com/example/aep-parser/internal/rifx",
+        "github.com/yueli-fx/aep-parser/internal/rifx",
         re.compile(r"\brifx\.\w"),
     ),
 ]

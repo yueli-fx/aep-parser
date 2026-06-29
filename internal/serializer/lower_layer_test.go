@@ -6,7 +6,7 @@ package serializer
 import (
 	"testing"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 func TestLowerShapeLayer_EmptyHasLayrChunk(t *testing.T) {

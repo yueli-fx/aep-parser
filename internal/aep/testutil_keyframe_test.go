@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"math"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Keyframe block builders + rifxBuilder leaf helpers used across tests.

@@ -3,7 +3,7 @@ package aep_test
 import (
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // AE 24+ fixture openers. Each one skips the test when its .aep is

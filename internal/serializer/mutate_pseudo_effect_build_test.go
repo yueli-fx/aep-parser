@@ -7,7 +7,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // TestPardNameBytes_GBKMatchesAENative is the byte-equivalence proof for CJK

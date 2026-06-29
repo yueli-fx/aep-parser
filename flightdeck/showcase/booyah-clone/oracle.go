@@ -12,7 +12,7 @@ package main
 import (
 	"fmt"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 const originalPath = "samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep"

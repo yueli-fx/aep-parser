@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // runV2_2PathShipGate is the V2.2.1 focused Path gate: one ShapeLayer with a

@@ -29,7 +29,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // buildWiggleModCard adds a ShapeLayer: Rect 300 + white Fill + Wiggle Paths

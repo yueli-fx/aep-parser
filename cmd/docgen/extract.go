@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/example/aep-parser/internal/apidoc"
+	"github.com/yueli-fx/aep-parser/internal/apidoc"
 )
 
 // loadedPackage 捆绑 go/doc 视图 + 共享 fset（签名打印 / 注释定位都要 fset）。
@@ -49,7 +49,7 @@ func loadPackage(dir string) (*loadedPackage, error) {
 				return true
 			})
 		}
-		dpkg, err := doc.NewFromFiles(fset, files, "github.com/example/aep-parser/"+dir, doc.AllDecls)
+		dpkg, err := doc.NewFromFiles(fset, files, "github.com/yueli-fx/aep-parser/"+dir, doc.AllDecls)
 		if err != nil {
 			return nil, fmt.Errorf("doc.NewFromFiles: %w", err)
 		}

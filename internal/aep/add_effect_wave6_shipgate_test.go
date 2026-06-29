@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // wave6Effects is in parade (insertion) order — the order verify_property_struct.jsx

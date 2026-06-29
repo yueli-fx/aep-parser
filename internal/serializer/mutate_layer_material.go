@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/example/aep-parser/internal/rifx"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 //go:embed templates/options/material_options_leaves.bin

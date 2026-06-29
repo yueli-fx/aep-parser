@@ -3,7 +3,7 @@ package serializer
 import (
 	"fmt"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // write_essential_graphics.go — Essential Graphics panel writes on the comp's

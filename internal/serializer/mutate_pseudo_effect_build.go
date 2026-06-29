@@ -10,7 +10,7 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/simplifiedchinese"
 
-	"github.com/example/aep-parser/internal/rifx"
+	"github.com/yueli-fx/aep-parser/internal/rifx"
 )
 
 // PseudoLabelCodepage selects the ANSI codepage a pseudo effect's control labels

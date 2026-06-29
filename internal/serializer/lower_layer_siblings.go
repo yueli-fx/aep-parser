@@ -13,7 +13,7 @@
 // item-sibling primitive in lower_item_siblings.go.
 package serializer
 
-import "github.com/example/aep-parser/internal/rifx"
+import "github.com/yueli-fx/aep-parser/internal/rifx"
 
 // lowerLayerSiblings returns the 14 sibling chunks (two 7-chunk groups) that
 // follow each user Layr's Ewst inside a comp Item LIST.

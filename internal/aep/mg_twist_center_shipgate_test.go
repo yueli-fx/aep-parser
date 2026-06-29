@@ -31,7 +31,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // buildTwistCenterCard adds a ShapeLayer with a Rect + white Fill + Twist

@@ -1,6 +1,6 @@
 package aep_test
 
-import "github.com/example/aep-parser/internal/aep"
+import "github.com/yueli-fx/aep-parser/internal/aep"
 
 // Doc examples for docgen (compile-checked, no "// Output:").
 

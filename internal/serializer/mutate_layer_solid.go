@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 //go:embed templates/project/solidnull_2020.aep

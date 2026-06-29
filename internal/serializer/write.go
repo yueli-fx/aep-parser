@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // syncHeadCounters 把 root head chunk 里的两个 32-bit counter 同步到至少

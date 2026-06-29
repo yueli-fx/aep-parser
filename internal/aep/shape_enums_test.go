@@ -10,7 +10,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func TestShapeEnums_DefaultsAndValidation(t *testing.T) {

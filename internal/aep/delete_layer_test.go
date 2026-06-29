@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // All tests use re_delete_layer_*.aep produced by test_data/re_delete_layer.jsx

@@ -3,7 +3,7 @@ package aep_test
 import (
 	"testing"
 
-	"github.com/example/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/codec"
 )
 
 func TestPropertyStream_InitialStaticMode(t *testing.T) {

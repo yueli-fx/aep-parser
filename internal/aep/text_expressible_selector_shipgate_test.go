@@ -29,7 +29,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // inkCentroidX returns the mean x of "ink" pixels (luma well above the dark BG)

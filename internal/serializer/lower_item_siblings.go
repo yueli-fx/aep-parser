@@ -14,7 +14,7 @@
 // per call so mutation doesn't leak.
 package serializer
 
-import "github.com/example/aep-parser/internal/rifx"
+import "github.com/yueli-fx/aep-parser/internal/rifx"
 
 // lowerItemSiblings returns deep-clones of the Fold-level sibling chunks AE
 // expects after each Item LIST. ctx is reserved (a future version may key off

@@ -1,4 +1,4 @@
-module github.com/example/aep-parser
+module github.com/yueli-fx/aep-parser
 
 go 1.25.1
 

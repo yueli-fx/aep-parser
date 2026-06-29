@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // openXProjPair opens the re_duplicate_item baseline TWICE, yielding two

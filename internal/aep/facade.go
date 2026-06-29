@@ -10,7 +10,7 @@ package aep
 import (
 	"io"
 
-	"github.com/example/aep-parser/internal/serializer"
+	"github.com/yueli-fx/aep-parser/internal/serializer"
 )
 
 // @summary    Parse an .aep file by path

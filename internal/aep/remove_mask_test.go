@@ -12,7 +12,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // addThreeMasks adds masks A/B/C to the baseline's effect layer and returns it.

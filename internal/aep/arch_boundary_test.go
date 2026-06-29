@@ -22,7 +22,7 @@ import (
 //
 // scene's chunk-freeness (no rifx) is the load-bearing invariant from the V3
 // arc; it is now a package boundary rather than a per-file whitelist.
-const modBase = "github.com/example/aep-parser/internal/"
+const modBase = "github.com/yueli-fx/aep-parser/internal/"
 
 // bannedImports maps each package (by dir, relative to this test's internal/aep
 // working dir) to the internal packages it must not import.

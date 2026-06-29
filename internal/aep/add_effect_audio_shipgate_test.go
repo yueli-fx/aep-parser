@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // audioEffectSample is the full wave-10 audio template set, in apply order.

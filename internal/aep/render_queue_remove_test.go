@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // TestRenderQueueRemoveItem removes one of two render queue items and confirms

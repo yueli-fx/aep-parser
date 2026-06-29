@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/example/aep-parser/internal/aeoracle"
-	"github.com/example/aep-parser/internal/profile"
-	"github.com/example/aep-parser/internal/profilediff"
+	"github.com/yueli-fx/aep-parser/internal/aeoracle"
+	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/profilediff"
 )
 
 const SchemaVersion = 1

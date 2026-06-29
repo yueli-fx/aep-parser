@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
-	"github.com/example/aep-parser/internal/profile"
-	"github.com/example/aep-parser/internal/recipe"
+	"github.com/yueli-fx/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/profile"
+	"github.com/yueli-fx/aep-parser/internal/recipe"
 )
 
 func TestCompileMinimalTextShapeRecipeBuildsProfile(t *testing.T) {

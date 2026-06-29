@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func runLayer3DEnableProbe(t *testing.T, aeExe, ver string, target aep.AETarget) {

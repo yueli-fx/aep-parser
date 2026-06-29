@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func runCompSettingsGate(t *testing.T, aeExe, ver string, target aep.AETarget) {

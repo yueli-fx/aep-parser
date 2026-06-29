@@ -11,7 +11,7 @@ import (
 	"bytes"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // buildSolidTrio creates a fresh project with one comp holding a solid + null

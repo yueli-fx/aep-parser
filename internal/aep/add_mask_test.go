@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // rectPath is the canonical test path: a 10..190 square in a 200×200 layer,

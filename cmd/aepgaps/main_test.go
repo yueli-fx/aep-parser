@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/example/aep-parser/internal/gapledger"
+	"github.com/yueli-fx/aep-parser/internal/gapledger"
 )
 
 func TestRunRenderReturnsZeroForMatchingPNGs(t *testing.T) {

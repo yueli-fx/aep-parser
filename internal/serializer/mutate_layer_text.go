@@ -13,7 +13,7 @@ package serializer
 import (
 	_ "embed"
 
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 //go:embed templates/layers/layer_text_body.bin

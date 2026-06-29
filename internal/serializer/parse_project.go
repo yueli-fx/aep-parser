@@ -1,6 +1,6 @@
 package serializer
 
-import "github.com/example/aep-parser/internal/rifx"
+import "github.com/yueli-fx/aep-parser/internal/rifx"
 
 // Project-level chunk navigation helpers. These read the root RIFX tree
 // directly; the scene_ accessors that expose them (Project.EffectNames, …)

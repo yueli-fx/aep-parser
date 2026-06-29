@@ -3,8 +3,8 @@ package serializer
 import (
 	"testing"
 
-	"github.com/example/aep-parser/internal/codec"
-	"github.com/example/aep-parser/internal/scene"
+	"github.com/yueli-fx/aep-parser/internal/codec"
+	"github.com/yueli-fx/aep-parser/internal/scene"
 )
 
 // TestParseAttachCompleteness asserts that after Open() every scene object that

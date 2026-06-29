@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 const audioLevelsFixture = `e:/projects/tools/aep-parser/test_data/re_audio_levels.aep`

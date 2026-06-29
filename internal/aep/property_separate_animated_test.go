@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // kfExp is one expected per-axis follower keyframe after an animated Position

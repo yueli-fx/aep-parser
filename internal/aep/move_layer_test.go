@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 // Tests reuse the DeleteLayer baseline fixture (re_delete_layer_baseline.aep,

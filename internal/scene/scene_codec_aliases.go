@@ -1,6 +1,6 @@
 package scene
 
-import "github.com/example/aep-parser/internal/codec"
+import "github.com/yueli-fx/aep-parser/internal/codec"
 
 // Codec type aliases used by scene runtime types. These mirror the public aep
 // facade aliases (facade_codec.go) but live here so scene compiles importing

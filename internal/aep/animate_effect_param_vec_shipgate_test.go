@@ -30,7 +30,7 @@ import (
 	"strings"
 	"testing"
 
-	aep "github.com/example/aep-parser/internal/aep"
+	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
 func buildVecAnimRenderDemo(t *testing.T, target aep.AETarget) *aep.Project {
