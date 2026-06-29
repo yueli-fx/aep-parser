@@ -2583,6 +2583,43 @@ Eighty-fifth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-sixth follow-up completed:
+
+- Shape recipes now support:
+  - `shape.gradient_fill` -> `VectorGroup.AddGradientFill`
+  - `shape.gradient_fill.type` -> `GradientFillNode.SetGradientType`
+  - `shape.gradient_fill.start_point` -> `GradientFillNode.SetStartPoint`
+  - `shape.gradient_fill.end_point` -> `GradientFillNode.SetEndPoint`
+  - `shape.gradient_fill.color_stops` -> `GradientFillNode.SetColorStops`
+- Boundary: `gradient_fill.type` is `linear` or `radial`; start/end points are
+  two-value shape-local vectors; `color_stops` requires at least two stops with
+  unit offsets/midpoints and RGB channels in recipe 0..255 space.
+- `examples/recipes/minimal-shape-gradient-fill.json` is a dedicated one-layer
+  shape recipe with a radial red-to-blue gradient fill. The embedded expected
+  profile checks `ADBE Vector Grad Type = 2`, `ADBE Vector Grad Start Pt =
+  [0,0]`, and `ADBE Vector Grad End Pt = [220,0]`.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled profile had no
+    `ADBE Vector Grad Type`, `VectorGroup.AddGradientFill` was absent, and
+    invalid gradient fill inputs were not refused.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-gradient-fill.json -out
+    tmp_debug\recipes\minimal-shape-gradient-fill.aep -json` returned valid,
+    reported the gradient fill capabilities, and all embedded `profile_checks`
+    passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_gradient_fill\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_gradient_fill\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

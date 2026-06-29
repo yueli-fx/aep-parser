@@ -368,6 +368,31 @@ func TestValidateReportsShapeFillRuleCapability(t *testing.T) {
 	assertCapability(t, report, "FillNode.SetFillRule")
 }
 
+func TestValidateReportsShapeGradientFillCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
+		Type:       "radial",
+		StartPoint: []float64{0, 0},
+		EndPoint:   []float64{220, 0},
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddGradientFill")
+	assertCapability(t, report, "GradientFillNode.SetGradientType")
+	assertCapability(t, report, "GradientFillNode.SetStartPoint")
+	assertCapability(t, report, "GradientFillNode.SetEndPoint")
+	assertCapability(t, report, "GradientFillNode.SetColorStops")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1820,6 +1845,27 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_fill_opacity")
 	assertRefusal(t, report, "invalid_shape_fill_composite_order")
 	assertRefusal(t, report, "invalid_shape_fill_rule")
+}
+
+func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
+		Type:       "conic",
+		StartPoint: []float64{0},
+		EndPoint:   []float64{220},
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: -0.1, Color: []float64{255, 0}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_gradient_fill_type")
+	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_gradient_fill_color_stops")
 }
 
 func TestValidateRejectsInvalidShapeStar(t *testing.T) {

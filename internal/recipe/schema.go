@@ -151,6 +151,7 @@ type ShapeSpec struct {
 	FillOpacity        *float64             `json:"fill_opacity,omitempty"`
 	FillCompositeOrder string               `json:"fill_composite_order,omitempty"`
 	FillRule           string               `json:"fill_rule,omitempty"`
+	GradientFill       *GradientFillSpec    `json:"gradient_fill,omitempty"`
 	Stroke             *StrokeSpec          `json:"stroke,omitempty"`
 	Trim               *TrimSpec            `json:"trim,omitempty"`
 	RoundCorners       *RoundCornersSpec    `json:"round_corners,omitempty"`
@@ -162,6 +163,19 @@ type ShapeSpec struct {
 	Twist              *TwistSpec           `json:"twist,omitempty"`
 	WigglePaths        *WigglePathsSpec     `json:"wiggle_paths,omitempty"`
 	WiggleTransform    *WiggleTransformSpec `json:"wiggle_transform,omitempty"`
+}
+
+type GradientFillSpec struct {
+	Type       string                  `json:"type,omitempty"`
+	StartPoint []float64               `json:"start_point,omitempty"`
+	EndPoint   []float64               `json:"end_point,omitempty"`
+	ColorStops []GradientColorStopSpec `json:"color_stops,omitempty"`
+}
+
+type GradientColorStopSpec struct {
+	Offset   float64   `json:"offset"`
+	Midpoint *float64  `json:"midpoint,omitempty"`
+	Color    []float64 `json:"color"`
 }
 
 type StrokeSpec struct {
@@ -1000,6 +1014,28 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("invalid_shape_fill_rule", layerPath+".shape.fill_rule", "fill_rule must be nonzero_winding or even_odd")
 			}
 		}
+		if layer.Shape.GradientFill != nil {
+			gradientPath := layerPath + ".shape.gradient_fill"
+			recordCapability("VectorGroup.AddGradientFill", gradientPath)
+			if layer.Shape.GradientFill.Type != "" {
+				recordCapability("GradientFillNode.SetGradientType", gradientPath+".type")
+				if !validGradientType(layer.Shape.GradientFill.Type) {
+					addRefusal("invalid_shape_gradient_fill_type", gradientPath+".type", "gradient_fill type must be linear or radial")
+				}
+			}
+			if len(layer.Shape.GradientFill.StartPoint) > 0 {
+				recordCapability("GradientFillNode.SetStartPoint", gradientPath+".start_point")
+				validateVec(layer.Shape.GradientFill.StartPoint, 2, gradientPath+".start_point", addRefusal)
+			}
+			if len(layer.Shape.GradientFill.EndPoint) > 0 {
+				recordCapability("GradientFillNode.SetEndPoint", gradientPath+".end_point")
+				validateVec(layer.Shape.GradientFill.EndPoint, 2, gradientPath+".end_point", addRefusal)
+			}
+			if len(layer.Shape.GradientFill.ColorStops) > 0 {
+				recordCapability("GradientFillNode.SetColorStops", gradientPath+".color_stops")
+				validateGradientColorStops(layer.Shape.GradientFill.ColorStops, gradientPath+".color_stops", addRefusal)
+			}
+		}
 		if layer.Shape.Stroke != nil {
 			strokePath := layerPath + ".shape.stroke"
 			recordCapability("VectorGroup.AddStroke", strokePath)
@@ -1494,6 +1530,15 @@ func validFillRule(value string) bool {
 	}
 }
 
+func validGradientType(value string) bool {
+	switch value {
+	case "linear", "radial":
+		return true
+	default:
+		return false
+	}
+}
+
 func validRepeaterOrder(value string) bool {
 	switch value {
 	case "below", "above":
@@ -1561,6 +1606,22 @@ func validateColor(values []float64, path, code string, addRefusal func(string, 
 		if value < 0 || value > 255 {
 			addRefusal(code, fmt.Sprintf("%s[%d]", path, i), "color channels must be between 0 and 255")
 		}
+	}
+}
+
+func validateGradientColorStops(stops []GradientColorStopSpec, path string, addRefusal func(string, string, string)) {
+	if len(stops) < 2 {
+		addRefusal("invalid_shape_gradient_fill_color_stops", path, "gradient_fill color_stops must include at least 2 stops")
+	}
+	for i, stop := range stops {
+		stopPath := fmt.Sprintf("%s[%d]", path, i)
+		if stop.Offset < 0 || stop.Offset > 1 {
+			addRefusal("invalid_shape_gradient_fill_color_stops", stopPath+".offset", "gradient_fill stop offset must be between 0 and 1")
+		}
+		if stop.Midpoint != nil && (*stop.Midpoint < 0 || *stop.Midpoint > 1) {
+			addRefusal("invalid_shape_gradient_fill_color_stops", stopPath+".midpoint", "gradient_fill stop midpoint must be between 0 and 1")
+		}
+		validateColor(stop.Color, stopPath+".color", "invalid_shape_gradient_fill_color_stops", addRefusal)
 	}
 }
 

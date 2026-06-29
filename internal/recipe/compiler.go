@@ -1620,6 +1620,40 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.GradientFill != nil {
+		fill, err := group.AddGradientFill()
+		if err != nil {
+			return err
+		}
+		if shape.GradientFill.Type != "" {
+			typ, err := gradientType(shape.GradientFill.Type)
+			if err != nil {
+				return err
+			}
+			if err := fill.SetGradientType(typ); err != nil {
+				return err
+			}
+		}
+		if len(shape.GradientFill.StartPoint) == 2 {
+			if err := fill.SetStartPoint([2]float64{shape.GradientFill.StartPoint[0], shape.GradientFill.StartPoint[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.GradientFill.EndPoint) == 2 {
+			if err := fill.SetEndPoint([2]float64{shape.GradientFill.EndPoint[0], shape.GradientFill.EndPoint[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.GradientFill.ColorStops) > 0 {
+			stops, err := gradientColorStops(shape.GradientFill.ColorStops)
+			if err != nil {
+				return err
+			}
+			if err := fill.SetColorStops(stops); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Stroke != nil {
 		stroke, err := group.AddStroke()
 		if err != nil {
@@ -1800,6 +1834,40 @@ func fillRule(value string) (aep.FillRule, error) {
 	default:
 		return 0, fmt.Errorf("unsupported fill rule %q", value)
 	}
+}
+
+func gradientType(value string) (aep.GradientType, error) {
+	switch value {
+	case "linear":
+		return aep.GradientLinear, nil
+	case "radial":
+		return aep.GradientRadial, nil
+	default:
+		return 0, fmt.Errorf("unsupported gradient type %q", value)
+	}
+}
+
+func gradientColorStops(specs []GradientColorStopSpec) ([]aep.GradientColorStop, error) {
+	stops := make([]aep.GradientColorStop, 0, len(specs))
+	for i, spec := range specs {
+		if len(spec.Color) < 3 {
+			return nil, fmt.Errorf("gradient color stop %d needs at least 3 color channels", i)
+		}
+		midpoint := 0.5
+		if spec.Midpoint != nil {
+			midpoint = *spec.Midpoint
+		}
+		stops = append(stops, aep.GradientColorStop{
+			Offset:   spec.Offset,
+			Midpoint: midpoint,
+			Color: [3]float64{
+				toUnitColor(spec.Color[0]),
+				toUnitColor(spec.Color[1]),
+				toUnitColor(spec.Color[2]),
+			},
+		})
+	}
+	return stops, nil
 }
 
 func repeaterOrder(value string) (aep.RepeaterOrder, error) {
