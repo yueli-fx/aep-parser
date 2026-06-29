@@ -38,6 +38,16 @@
         "type": "text",
         "auto_orient": "along_path"
       }
+    ],
+    "keyframes": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Position",
+        "keyframes": [
+          { "time": 0, "value": [760, 540, 0] },
+          { "time": 1, "value": [1160, 540, 0] }
+        ]
+      }
     ]
   }
 }

@@ -267,6 +267,10 @@ Done:
   `expected_profile.layers[]` object identity checks. A recipe test guard fails
   any future authored-layer example that omits the layer object contract or
   asserts fewer layer entries than it authored.
+- Recipe examples that author transform keyframes now must include
+  `expected_profile.keyframes[]` contracts. The auto-orient recipe now asserts
+  the Position keyframes it uses for `along_path`, preventing animation streams
+  from becoming visual-only setup with no profile check.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

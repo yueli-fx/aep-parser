@@ -217,6 +217,12 @@ also assert `expected_profile.layers[]`. The recipe test suite includes a guard
 that fails any authored-layer example missing an object-level layer contract or
 asserting fewer layer entries than it authored.
 
+Transform keyframe examples now also require `expected_profile.keyframes[]`.
+The guard counts authored transform keyframe streams and fails examples that
+do not assert at least that many keyframed profile entries; this caught and
+fixed `minimal-layer-auto-orient.json`, whose Position keyframes are required
+for the `along_path` behavior.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

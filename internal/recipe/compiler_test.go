@@ -127,6 +127,43 @@ func TestRecipeExamplesWithLayersAssertLayerProfiles(t *testing.T) {
 	}
 }
 
+func TestRecipeExamplesWithTransformKeyframesAssertKeyframeProfiles(t *testing.T) {
+	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
+	if err != nil {
+		t.Fatalf("Glob recipe examples: %v", err)
+	}
+	if len(recipePaths) == 0 {
+		t.Fatal("no recipe examples found")
+	}
+	for _, recipePath := range recipePaths {
+		t.Run(filepath.Base(recipePath), func(t *testing.T) {
+			raw, err := os.ReadFile(recipePath)
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			var doc map[string]any
+			if err := json.Unmarshal(raw, &doc); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			authoredKeyframeStreams := recipeExampleAuthoredTransformKeyframeStreams(doc)
+			if authoredKeyframeStreams == 0 {
+				return
+			}
+			expectedProfile, ok := doc["expected_profile"].(map[string]any)
+			if !ok {
+				t.Fatal("expected_profile is required")
+			}
+			expectedKeyframes, ok := expectedProfile["keyframes"].([]any)
+			if !ok {
+				t.Fatal("expected_profile.keyframes is required when recipe authors transform keyframes")
+			}
+			if len(expectedKeyframes) < authoredKeyframeStreams {
+				t.Fatalf("expected_profile.keyframes has %d entries, want at least %d", len(expectedKeyframes), authoredKeyframeStreams)
+			}
+		})
+	}
+}
+
 func recipeExampleAuthoredLayerCount(doc map[string]any) int {
 	comps, ok := doc["comps"].([]any)
 	if !ok {
@@ -141,6 +178,48 @@ func recipeExampleAuthoredLayerCount(doc map[string]any) int {
 		layers, ok := comp["layers"].([]any)
 		if ok {
 			count += len(layers)
+		}
+	}
+	return count
+}
+
+func recipeExampleAuthoredTransformKeyframeStreams(doc map[string]any) int {
+	comps, ok := doc["comps"].([]any)
+	if !ok {
+		return 0
+	}
+	keyframeFields := map[string]bool{
+		"position_keyframes":     true,
+		"anchor_point_keyframes": true,
+		"scale_keyframes":        true,
+		"rotation_keyframes":     true,
+		"opacity_keyframes":      true,
+	}
+	var count int
+	for _, rawComp := range comps {
+		comp, ok := rawComp.(map[string]any)
+		if !ok {
+			continue
+		}
+		layers, ok := comp["layers"].([]any)
+		if !ok {
+			continue
+		}
+		for _, rawLayer := range layers {
+			layer, ok := rawLayer.(map[string]any)
+			if !ok {
+				continue
+			}
+			transform, ok := layer["transform"].(map[string]any)
+			if !ok {
+				continue
+			}
+			for field := range keyframeFields {
+				values, ok := transform[field].([]any)
+				if ok && len(values) > 0 {
+					count++
+				}
+			}
 		}
 	}
 	return count
