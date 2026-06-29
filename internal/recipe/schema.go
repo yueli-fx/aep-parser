@@ -20,22 +20,23 @@ type ProjectSpec struct {
 }
 
 type CompSpec struct {
-	Name                    string              `json:"name"`
-	Width                   int                 `json:"width"`
-	Height                  int                 `json:"height"`
-	FrameRate               float64             `json:"frame_rate"`
-	Duration                float64             `json:"duration"`
-	BackgroundColor         []float64           `json:"background_color,omitempty"`
-	Renderer                string              `json:"renderer,omitempty"`
-	ResolutionFactor        []float64           `json:"resolution_factor,omitempty"`
-	PixelAspect             *float64            `json:"pixel_aspect,omitempty"`
-	DisplayStartTime        *float64            `json:"display_start_time,omitempty"`
-	FrameBlending           *bool               `json:"frame_blending,omitempty"`
-	HideShyLayers           *bool               `json:"hide_shy_layers,omitempty"`
-	PreserveNestedFrameRate *bool               `json:"preserve_nested_frame_rate,omitempty"`
-	MotionBlur              *CompMotionBlurSpec `json:"motion_blur,omitempty"`
-	WorkArea                *CompWorkAreaSpec   `json:"work_area,omitempty"`
-	Layers                  []Layer             `json:"layers,omitempty"`
+	Name                     string              `json:"name"`
+	Width                    int                 `json:"width"`
+	Height                   int                 `json:"height"`
+	FrameRate                float64             `json:"frame_rate"`
+	Duration                 float64             `json:"duration"`
+	BackgroundColor          []float64           `json:"background_color,omitempty"`
+	Renderer                 string              `json:"renderer,omitempty"`
+	ResolutionFactor         []float64           `json:"resolution_factor,omitempty"`
+	PixelAspect              *float64            `json:"pixel_aspect,omitempty"`
+	DisplayStartTime         *float64            `json:"display_start_time,omitempty"`
+	FrameBlending            *bool               `json:"frame_blending,omitempty"`
+	HideShyLayers            *bool               `json:"hide_shy_layers,omitempty"`
+	PreserveNestedFrameRate  *bool               `json:"preserve_nested_frame_rate,omitempty"`
+	PreserveNestedResolution *bool               `json:"preserve_nested_resolution,omitempty"`
+	MotionBlur               *CompMotionBlurSpec `json:"motion_blur,omitempty"`
+	WorkArea                 *CompWorkAreaSpec   `json:"work_area,omitempty"`
+	Layers                   []Layer             `json:"layers,omitempty"`
 }
 
 type CompWorkAreaSpec struct {
@@ -427,6 +428,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		}
 		if comp.PreserveNestedFrameRate != nil {
 			recordCapability("SetPreserveNestedFrameRate", compPath+".preserve_nested_frame_rate")
+		}
+		if comp.PreserveNestedResolution != nil {
+			recordCapability("SetPreserveNestedResolution", compPath+".preserve_nested_resolution")
 		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)

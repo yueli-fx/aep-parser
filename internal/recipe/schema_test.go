@@ -455,6 +455,15 @@ func TestValidateReportsCompPreserveNestedFrameRateCapability(t *testing.T) {
 	assertCapability(t, report, "SetPreserveNestedFrameRate")
 }
 
+func TestValidateReportsCompPreserveNestedResolutionCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].PreserveNestedResolution = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetPreserveNestedResolution")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}

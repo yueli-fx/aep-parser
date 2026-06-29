@@ -302,6 +302,31 @@ func TestCompileToFileSetsCompPreserveNestedFrameRate(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompPreserveNestedResolution(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].PreserveNestedResolution = boolPtr(true)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	cdta := project.Compositions[0].CdtaRawBytes()
+	if len(cdta) <= 0x8B {
+		t.Fatalf("cdta len = %d, want > 0x8B", len(cdta))
+	}
+	if cdta[0x8B]&0x80 == 0 {
+		t.Fatalf("cdta[0x8B] = 0x%02x, want preserve nested resolution bit 0x80 set", cdta[0x8B])
+	}
+}
+
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{

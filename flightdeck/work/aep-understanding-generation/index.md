@@ -275,6 +275,11 @@ Done:
   `examples/recipes/minimal-comp-preserve-nested-frame-rate.json` example
   compiles the nested-frame-rate preservation switch, passes compiled AEP
   `cdta` flag readback, and passes an AE 2025 render oracle gate.
+- Eleventh comp-level recipe settings slice is implemented for
+  `comp.preserve_nested_resolution`. The dedicated
+  `examples/recipes/minimal-comp-preserve-nested-resolution.json` example
+  compiles the nested-resolution preservation switch, passes compiled AEP
+  `cdta` flag readback, and passes an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

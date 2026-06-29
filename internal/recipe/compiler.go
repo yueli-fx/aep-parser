@@ -70,6 +70,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q preserve_nested_frame_rate: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.PreserveNestedResolution != nil {
+		if err := comp.SetPreserveNestedResolution(*compSpec.PreserveNestedResolution); err != nil {
+			return report, fmt.Errorf("recipe: comp %q preserve_nested_resolution: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.MotionBlur != nil {
 		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
 			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)
