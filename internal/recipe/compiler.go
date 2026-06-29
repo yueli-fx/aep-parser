@@ -560,6 +560,20 @@ func checkExpectedLayer(index int, expected ExpectedLayer, prof *profile.Profile
 	if expected.LightKind != "" {
 		add(layerPath+".light_kind", expected.LightKind, layer.LightKind, layer.LightKind == expected.LightKind)
 	}
+	if expected.Source != "" {
+		actual := ""
+		if layer.SourceRef != nil {
+			actual = layer.SourceRef.Name
+		}
+		add(layerPath+".source", expected.Source, actual, actual == expected.Source)
+	}
+	if expected.SourceKind != "" {
+		actual := ""
+		if layer.SourceRef != nil {
+			actual = layer.SourceRef.Kind
+		}
+		add(layerPath+".source_kind", expected.SourceKind, actual, actual == expected.SourceKind)
+	}
 	if expected.LightSource != "" {
 		actual := ""
 		if layer.LightSourceRef != nil {

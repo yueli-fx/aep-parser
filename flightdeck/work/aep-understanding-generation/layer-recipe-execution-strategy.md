@@ -57,6 +57,7 @@ flags, and refs.
 | Type flags | `is_3d` / `is_adjust` / `is_null` / `is_guide` | `Layer.Set*` plus type constructors | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
 | Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
+| Source refs | solid/precomp source layer creation | layer constructors / `Layer.SetSource` | `layers[].source_ref` | `expected_profile.layers[].source` / `source_kind` | L3 | done for solid footage source |
 | Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | `expected_profile.layers[].parent` | L3 | done |
 | Classic matte refs | `track_matte` | `Layer.SetTrackMatte` | `layers[].flags.track_matte_name` / `matte_ref` | `expected_profile.layers[].track_matte` / `matte` | L3 | done |
 | Explicit matte refs | not recipe-owned yet | `Layer.SetTrackMatteSource` / `SetTrackMatteLayer` | `layers[].matte_ref` | planned when writer enters recipe scope | L3 AE2025-only | blocked |
@@ -186,6 +187,10 @@ Light option values now also have a consolidated baseline:
 color, shadow, falloff, and cone controls in one recipe. Light source refs are
 covered by `minimal-light-source.json` through
 `expected_profile.layers[].light_source`.
+
+Generic layer source refs are now covered by `minimal-layer-source-ref.json`,
+which asserts a generated solid layer's footage source through
+`expected_profile.layers[].source` and `source_kind`.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the

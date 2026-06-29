@@ -234,6 +234,9 @@ Done:
 - Light source refs now have a profile contract: `profile.Layer` exposes
   `light_source_ref`, and `minimal-light-source.json` asserts
   `expected_profile.layers[].light_source`.
+- Generic layer source refs now have a profile contract:
+  `minimal-layer-source-ref.json` asserts a solid layer's footage
+  `source_ref` through `expected_profile.layers[].source` and `source_kind`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
