@@ -49,7 +49,7 @@ internal/aep         ── 薄 facade (公共 API：Open / FromReader / New* / 
 - 单测: `go test ./internal/aep/ -run 'TestX' -v`
 - 能力查询（写/做面真相源）: `go run ./cmd/capindex -q "<词>"`（或 grep `docs/capabilities.json`）
 - **build 不落根目录**：跑工具优先 `go run ./cmd/<x>`；必须 build 时 `go build -o tmp/bin/<x>.exe`（`.gitignore` 已含 `*.exe`，但别在根目录裸 build 留垃圾）
-- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·AE/渲染/gate 输出→`tmp_debug/`(gitignored, 不放 `.go`)·一次性 Go probe→`_tmp_debug/`(gitignored, `go test ./...` 会跳过)·普通缓存/下载/杂输出→`tmp/`(gitignored)。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `knowledge/<域>/` 后删探针。细则 `knowledge/workflow/verify.md` § 工件该放哪。
+- **工件该放哪（别再堆 junk drawer）**：可复用调试工具→`tools/debug/<name>/`(tracked)·用户面工具→`cmd/<name>/`(tracked)·vfx/showcase 生成器→`flightdeck/showcase/<方向>/gen.go`(tracked)·知识/计划长期引用的小型取证材料→`data/reference/<topic>/`(tracked)·AE/渲染/gate 输出→`tmp_debug/`(gitignored, 不放 `.go`)·一次性 Go probe→`_tmp_debug/`(gitignored, `go test ./...` 会跳过)·普通缓存/下载/杂输出→`tmp/`(gitignored)。原则：有用→进 git；没用→删；只 RE 一次的探针 findings 进 `knowledge/<域>/` 后删探针。细则 `knowledge/workflow/verify.md` § 工件该放哪。
 - **多行 commit message**（Bash 工具跑 bash 非 pwsh）：写临时文件 `git commit -F tmpfile`，**勿**用 `@'...'@` here-string（会被 mangle）
 - 详细操作（debug 工具表 / fixture 验证 / ship-gate）: `flightdeck/knowledge/workflow/`
 

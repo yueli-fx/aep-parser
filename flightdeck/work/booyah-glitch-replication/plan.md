@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go(internal/aep facade)· AE 2020+2025 ship-gate(`scripts/ae_run.ps1`)· `render.jsx`/`verify.jsx`(ExtendScript)。
 
-**真相源:** 每 comp 结构/值取自 `tmp/booyah_dissect.txt`(完整画像)+ 执行时 `aep.Open` 实读。本 plan 内联的是**已知标量参数 + API 调用骨架**;mask 路径 / 关键帧值这类批量数据由 `oracle.go` 程序化提取,不内联。
+**真相源:** 每 comp 结构/值取自 `data/reference/booyah-glitch/booyah_dissect.txt`(完整画像)+ 执行时 `aep.Open` 实读。本 plan 内联的是**已知标量参数 + API 调用骨架**;mask 路径 / 关键帧值这类批量数据由 `oracle.go` 程序化提取,不内联。
 
 ---
 
@@ -57,7 +57,7 @@ de-risk 原则:表达式/many-mask/curves 三个未知一旦 blocked,会改变�
 
 **Files:** Modify `oracle.go`(加 typed 访问:layer 列表/类型/blend/transform、effect matchName+param 值、mask path bezier、keyframe times+values、表达式文本)。
 
-- [ ] **Step 1:** 对 `グリッチテキスト` L0 跑访问器,打印它的 effects+params+mask 数+keyframe;比对 `tmp/booyah_dissect.txt` L0 值一致。
+- [ ] **Step 1:** 对 `グリッチテキスト` L0 跑访问器,打印它的 effects+params+mask 数+keyframe;比对 `data/reference/booyah-glitch/booyah_dissect.txt` L0 值一致。
 - [ ] **Step 2:** 逐项确认可读:mask bezier 顶点(`Mask` getter)· keyframe 值与缓动 · effect param 标量/颜色/点 · 表达式文本。**读不出的登记 INDEX 账本 `待 RE(read)`**(预期:Curves 曲线数据)。
 - [ ] **Step 3:** `go vet` 绿。Commit `feat(showcase/booyah-clone): value-oracle over original (read-side)`。
 

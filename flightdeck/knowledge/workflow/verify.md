@@ -86,6 +86,7 @@ go test ./internal/aep -run TestManualFile -aep "C:/path/to/your.aep" -v
 | 可复用调试工具 | `tools/debug/<name>/` | ✅ tracked |
 | 用户面工具 | `cmd/<name>/` | ✅ tracked |
 | vfx / showcase 生成器 | `flightdeck/showcase/<方向>/gen.go` | ✅ tracked |
+| 知识 / 计划长期引用的小型取证材料 | `data/reference/<topic>/` | ✅ tracked |
 | AE / 渲染 / gate 输出 | `tmp_debug/` | ❌ gitignored,**不放 `.go`, 用完即删** |
 | 一次性 Go probe | `_tmp_debug/<name>/` | ❌ gitignored,`go test ./...` 跳过,用完即删 |
 | 下载缓存 / 普通杂输出 | `tmp/` | ❌ gitignored,用完即删 |

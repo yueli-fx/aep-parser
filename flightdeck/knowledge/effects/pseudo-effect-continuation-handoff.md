@@ -100,7 +100,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 - **AE exe**:2020=`E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe`;2025 同构。
 - **ExtendScript minValue 坑**:刚 fetch 的伪 slider 属性,直接读 `p.minValue` 返回 stale(=maxValue);**必须先碰 `p.hasMin`** 再读(maxValue 先碰 hasMax)。verify JSX 已处理。
 - **属性访问**:用 `fx.property(index)` 比 `fx.property(matchName)` 稳(后者 minValue 也踩坑)。
-- **本机码页**:cp1252(西欧),**渲染不了 GBK**——CJK 控件标签**无法在本机 ship-gate**,只能 byte-equivalence 单测 + 用户中文 AE 实机验。CJK demo 给用户:`go run ./tmp_debug/pseudo-spike/cjkdemo` → `tmp/pseudo_cjk_demo.aep`。
+- **本机码页**:cp1252(西欧),**渲染不了 GBK**——CJK 控件标签**无法在本机 ship-gate**,只能 byte-equivalence 单测 + 用户中文 AE 实机验。CJK demo reference: `data/reference/pseudo-effect/pseudo_cjk_demo.aep`。
 - **决定性 RE 法**:同一文件两种读法结果不同时,bisect 到单变量(minValue 坑就是这么定位的:probe 先碰 hasMin 报 -100、gate 冷读报 100)。
 
 ## 6. 红线提醒

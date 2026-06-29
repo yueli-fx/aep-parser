@@ -1,0 +1,478 @@
+=== PROJECT: samples/motionbox/glitch/booyah-glitch/Booyah Glitch.aep ===
+compositions: 12
+dict: data/effects-dict/effects_en_US_25.1x68.json (AE 25.1x68, 430 effects)
+
+=== EFFECT USAGE (11 distinct) ===
+    12  ADBE Displacement Map        [native]  "Displacement Map"
+     7  ADBE Geometry2               [native]  "Transform"
+     5  ADBE Glo2                    [native]  "Glow"
+     4  ADBE Fractal Noise           [native]  "Fractal Noise"
+     3  ADBE Fill                    [native]  "Fill"
+     3  ADBE Gaussian Blur 2         [native]  "Gaussian Blur"
+     3  ADBE Venetian Blinds         [native]  "Venetian Blinds"
+     2  ADBE Exposure2               [native]  "Exposure"
+     1  ADBE CurvesCustom            [native]  "Curves"
+     1  ADBE Noise2                  [native]  "Noise"
+     1  ADBE Ramp                    [native]  "Gradient Ramp"
+
+=== RENDER DEPENDENCIES (third-party = output needs install) ===
+  none — all effects native or Cycore-bundled (renders on stock AE)
+
+=== PRECOMP NESTING (comp -> precomp sources) ===
+  "RGBズレ" -> [テキスト変えるならココ！]
+  "グリッチテキスト" -> [ここは開けない方が身のため テキスト変えるならココ！ RGBズレ マップ用フラクタルノイズ]
+  "ここは開けない方が身のため" -> [シェイプの塊]
+  "シェイプの塊" -> [プリコンポジション 1]
+  "なんか周りのやつ" -> [カクッ]
+  "プリコンポジション 1" -> [シェイイイイプ！！！]
+  "メインコンプ！" -> [グリッチテキスト なんか周りのやつ 背景変えるならココ！]
+
+=== PER-COMP DETAIL (✎=changed vs default · ?=no dict · ~=animated · act=[in→out]s) ===
+
+--- COMP "RGBズレ" (id=132, 1920x1080, 30fps, 6.0s, 3 layers) ---
+  L[0] "B"                av         blend=Normal        vis=true  src=PRECOMP テキスト変えるならココ！ act=[0.0→3.6] masks=0 fx=1
+        ~ Opacity                  [ANIM 23kf linear  8.2→10.6s]
+        FX ADBE Fill                  "Fill" [native]
+         ? ADBE Fill-0000             = 0
+         ✎ Color                      = [255 0 131.2734255194664 255]  (default [1 0 0 1])
+           → tuned: Color
+  L[1] "R"                av         blend=Normal        vis=true  src=PRECOMP テキスト変えるならココ！ act=[0.0→3.5] masks=0 fx=1
+        ~ Opacity                  [ANIM 24kf linear  7.7→10.4s]
+        FX ADBE Fill                  "Fill" [native]
+         ? ADBE Fill-0000             = 0
+  L[2] "G"                av         blend=Normal        vis=true  src=PRECOMP テキスト変えるならココ！ act=[0.1→3.4] masks=0 fx=1
+        ~ Opacity                  [ANIM 25kf linear  7.5→10.2s]
+        FX ADBE Fill                  "Fill" [native]
+         ? ADBE Fill-0000             = 0
+         ✎ Color                      = [255 0 255 86.01561203598976]  (default [1 0 0 1])
+           → tuned: Color
+
+--- COMP "カクッ" (id=337, 1920x1080, 30fps, 6.0s, 2 layers) ---
+  L[0] "シェイプレイヤー 3"       shape      blend=Normal        vis=true  src=-                    act=[0.0→6.0] masks=0 fx=0
+        ~ Scale                    [ANIM 2kf ease  0.4→3.4s]
+        ~ Opacity                  [ANIM 20kf linear  0.0→3.4s]
+  L[1] "シェイプレイヤー 2"       shape      blend=Normal        vis=true  src=-                    act=[0.0→6.0] masks=0 fx=0
+        ~ Scale                    [ANIM 2kf ease  0.4→3.4s]
+        ~ Opacity                  [ANIM 20kf linear  0.0→3.4s]
+
+--- COMP "グリッチテキスト" (id=85, 1920x1080, 30fps, 6.0s, 27 layers) ---
+  L[0] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[1.2→1.3] masks=16 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         · Scale Height                [ANIM 7kf linear 3.2→3.8s]
+           → tuned: Scale Height
+  L[1] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[1.1→1.1] masks=16 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         · Scale Height                [ANIM 7kf linear 3.2→3.8s]
+           → tuned: Scale Height
+  L[2] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[0.7→0.8] masks=12 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         ✎ Scale Height               = 157  (default 100)
+           → tuned: Scale Height
+  L[3] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[0.4→0.5] masks=21 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         ✎ Scale Height               = 248  (default 100)
+           → tuned: Scale Height
+  L[4] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[0.3→0.4] masks=14 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         ✎ Scale Height               = 144  (default 100)
+           → tuned: Scale Height
+  L[5] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[0.2→0.2] masks=9 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         ✎ Scale Height               = 144  (default 100)
+           → tuned: Scale Height
+  L[6] ""                 adjustment blend=Normal        vis=true  src=footage(319)         act=[0.1→0.2] masks=12 fx=1
+        FX ADBE Geometry2             "Transform" [native]
+         ? ADBE Geometry2-0000        = 0
+         ✎ Scale Height               = 144  (default 100)
+           → tuned: Scale Height
+  L[7] ""                 adjustment blend=Add           vis=true  src=footage(110)         act=[0.0→6.0] masks=0 fx=2
+        FX ADBE Glo2                  "Glow" [native]
+         ? ADBE Glo2-0000             = 0
+         ✎ Glow Threshold             = 173  (default 153)
+         ✎ Glow Radius                = 313  (default 10)
+         ✎ Glow Intensity             = 0.22000000000000003  (default 1)
+           → tuned: Glow Threshold, Glow Radius, Glow Intensity
+        FX ADBE Glo2                  "Glow" [native]
+         ? ADBE Glo2-0000             = 0
+         ✎ Glow Threshold             = 173  (default 153)
+         ✎ Glow Radius                = 46  (default 10)
+         ✎ Glow Intensity             = 0.15  (default 1)
+           → tuned: Glow Threshold, Glow Radius, Glow Intensity
+  L[8] ""                 adjustment blend=Normal        vis=true  src=footage(110)         act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Glo2                  "Glow" [native]
+         ? ADBE Glo2-0000             = 0
+         ✎ Glow Threshold             = 180  (default 153)
+         ✎ Glow Radius                = 421  (default 10)
+         ✎ Glow Intensity             = 0.5700000000000001  (default 1)
+           → tuned: Glow Threshold, Glow Radius, Glow Intensity
+  L[9] ""                 av         blend=Normal        vis=true  src=PRECOMP ここは開けない方が身のため act=[0.0→6.0] masks=0 fx=0
+  L[10] ""                 adjustment blend=Normal        vis=true  src=footage(376)         act=[2.1→2.8] masks=1 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 7  (default 5)
+         ✎ Max Vertical Displacement  = 27  (default 5)
+         ✎ Edge Behavior              = 1  (default 0)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement, Edge Behavior
+  L[11] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[1.7→1.7] masks=8 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 56.13333333333333  (default 5)
+         ✎ Max Vertical Displacement  = 12  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[12] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[1.6→1.6] masks=6 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 56.13333333333333  (default 5)
+         ✎ Max Vertical Displacement  = 12  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[13] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[1.3→1.4] masks=3 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 56.13333333333333  (default 5)
+         ✎ Max Vertical Displacement  = 12  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[14] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[1.3→1.3] masks=0 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 56.13333333333333  (default 5)
+         ✎ Max Vertical Displacement  = 12  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[15] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[1.2→1.2] masks=4 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 56.13333333333333  (default 5)
+         ✎ Max Vertical Displacement  = 12  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[16] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[0.8→0.8] masks=3 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 66.2  (default 5)
+         ✎ Max Vertical Displacement  = 0  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[17] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[0.7→0.7] masks=3 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 66.2  (default 5)
+         ✎ Max Vertical Displacement  = 0  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[18] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[0.4→0.5] masks=3 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         ✎ Max Horizontal Displacement = 66.2  (default 5)
+         ✎ Max Vertical Displacement  = 0  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[19] ""                 adjustment blend=Normal        vis=true  src=footage(169)         act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         · Max Horizontal Displacement  [ANIM 4kf ease 0.3→8.2s]
+         ✎ Max Vertical Displacement  = 0  (default 5)
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[20] ""                 adjustment blend=Normal        vis=true  src=footage(100)         act=[0.0→6.0] masks=0 fx=2
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         · Max Horizontal Displacement  [ANIM 20kf linear 0.0→5.9s]
+         · Max Vertical Displacement   [ANIM 17kf linear 0.0→5.9s]
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+        FX ADBE Displacement Map      "Displacement Map" [native]
+         ? ADBE Displacement Map-0000 = 0
+         ✎ Displacement Map Layer     = 0  (default 1)
+         · Max Horizontal Displacement  [ANIM 4kf linear 0.8→2.6s]
+         · Max Vertical Displacement   [ANIM 7kf linear 0.8→2.3s]
+           → tuned: Displacement Map Layer, Max Horizontal Displacement, Max Vertical Displacement
+  L[21] ""                 av         blend=Normal        vis=true  src=PRECOMP テキスト変えるならココ！ act=[0.0→6.0] masks=0 fx=0
+  L[22] ""                 av         blend=Normal        vis=true  src=PRECOMP RGBズレ        act=[0.0→6.0] masks=0 fx=0
+  L[23] "横ブラー"             av         blend=Normal        vis=true  src=PRECOMP テキスト変えるならココ！ act=[0.0→6.0] masks=0 fx=2
+        FX ADBE Gaussian Blur 2       "Gaussian Blur" [native]
+         ? ADBE Gaussian Blur 2-0000  = 0
+         ✎ Blurriness                 = 201.60000000000002  (default 0)
+         ✎ Blur Dimensions            = 2  (default 1)
+           → tuned: Blurriness, Blur Dimensions
+        FX ADBE Gaussian Blur 2       "Gaussian Blur" [native]
+         ? ADBE Gaussian Blur 2-0000  = 0
+         ✎ Blurriness                 = 3.3  (default 0)
+         ✎ Blur Dimensions            = 3  (default 1)
+           → tuned: Blurriness, Blur Dimensions
+  L[24] "マップ用フラクタルノイズさぶ"   av         blend=Normal        vis=false src=footage(165)         act=[0.0→6.0] masks=0 fx=2
+        ~ Opacity                  [ANIM 6kf linear  1.7→2.5s]
+        FX ADBE Fractal Noise         "Fractal Noise" [native]
+         ? ADBE Fractal Noise-0000    = 0
+         ✎ Noise Type                 = 1  (default 3)
+         ✎ Contrast                   = 331  (default 100)
+         · Brightness                  [ANIM 20kf linear 0.0→8.0s]
+         · Transform                  = 0
+         ✎ Uniform Scaling            = 0  (default 1)
+         ✎ Scale Width                = 1184  (default 100)
+         ✎ Scale Height               = 8  (default 100)
+         · Offset Turbulence           [ANIM 2kf linear 0.0→17.9s]
+         · ADBE Fractal Noise-0014    = 0
+         ✎ Complexity                 = 2  (default 6)
+         · Sub Settings               = 0
+         · ADBE Fractal Noise-0022    = 0
+         = Evolution                  = 0  expr="time*3000"
+         · Evolution Options          = 0
+         · Random Seed                = 0
+           → tuned: Noise Type, Contrast, Brightness, Uniform Scaling, Scale Width, Scale Height, Offset Turbulence, Complexity
+        FX ADBE Gaussian Blur 2       "Gaussian Blur" [native]
+         ? ADBE Gaussian Blur 2-0000  = 0
+         ✎ Blurriness                 = 85.00000000000001  (default 0)
+         ✎ Blur Dimensions            = 2  (default 1)
+           → tuned: Blurriness, Blur Dimensions
+  L[25] ""                 av         blend=Normal        vis=false src=PRECOMP マップ用フラクタルノイズ act=[0.0→6.0] masks=0 fx=0
+  L[26] ""                 av         blend=Normal        vis=false src=footage(374)         act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Fractal Noise         "Fractal Noise" [native]
+         ? ADBE Fractal Noise-0000    = 0
+         ✎ Noise Type                 = 1  (default 3)
+         ✎ Contrast                   = 213  (default 100)
+         · Transform                  = 0
+         ✎ Uniform Scaling            = 0  (default 1)
+         ✎ Scale                      = 111  (default 100)
+         ✎ Scale Width                = 18  (default 100)
+         ✎ Scale Height               = 114  (default 100)
+         · Offset Turbulence           [ANIM 2kf linear 0.0→17.9s]
+         · ADBE Fractal Noise-0014    = 0
+         ✎ Complexity                 = 1.9500000000000008  (default 6)
+         · Sub Settings               = 0
+         · ADBE Fractal Noise-0022    = 0
+         = Evolution                  = 0  expr="time*2000"
+         · Evolution Options          = 0
+         · Random Seed                = 0
+           → tuned: Noise Type, Contrast, Uniform Scaling, Scale, Scale Width, Scale Height, Offset Turbulence, Complexity
+
+--- COMP "ここは開けない方が身のため" (id=287, 1920x1080, 30fps, 6.0s, 3 layers) ---
+  L[0] ""                 av         blend=Normal        vis=true  src=PRECOMP シェイプの塊       act=[0.0→6.0] masks=0 fx=1
+        ~ Opacity                  [ANIM 25kf linear  0.0→2.6s]
+        FX ADBE Glo2                  "Glow" [native]
+         ? ADBE Glo2-0000             = 0
+         ✎ Glow Radius                = 0  (default 10)
+         ✎ Glow Intensity             = 0.2999999999999998  (default 1)
+           → tuned: Glow Radius, Glow Intensity
+  L[1] ""                 av         blend=Normal        vis=true  src=PRECOMP シェイプの塊       act=[0.0→6.0] masks=0 fx=1
+        ~ Opacity                  [ANIM 34kf linear  0.0→3.4s]
+        FX ADBE Glo2                  "Glow" [native]
+         ? ADBE Glo2-0000             = 0
+         ✎ Glow Radius                = 0  (default 10)
+         ✎ Glow Intensity             = 0.34999999999999987  (default 1)
+           → tuned: Glow Radius, Glow Intensity
+  L[2] ""                 av         blend=Normal        vis=true  src=PRECOMP シェイプの塊       act=[0.0→6.0] masks=0 fx=0
+
+--- COMP "シェイイイイプ！！！" (id=173, 1920x1080, 30fps, 6.0s, 1 layers) ---
+  L[0] "シェイプレイヤー 1"       shape      blend=Normal        vis=true  src=-                    act=[0.0→0.9] masks=0 fx=0
+        ~ ADBE Vector Rect Size    [ANIM 3kf linear  0.0→1.1s]
+        ~ ADBE Vector Rect Position [ANIM 2kf linear  0.0→1.1s]
+        ~ ADBE Vector Rect Size    [ANIM 3kf linear  0.7→1.8s]
+        ~ ADBE Vector Rect Position [ANIM 2kf linear  0.7→1.8s]
+        ~ ADBE Vector Rect Size    [ANIM 11kf linear  0.8→2.4s]
+        ~ ADBE Vector Rect Position [ANIM 3kf linear  0.8→2.4s]
+        ~ ADBE Vector Rect Size    [ANIM 8kf linear  0.5→2.7s]
+        ~ ADBE Vector Rect Position [ANIM 2kf linear  0.5→2.7s]
+
+--- COMP "シェイプの塊" (id=243, 1920x1080, 30fps, 6.0s, 7 layers) ---
+  L[0] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→3.9s]
+        ~ Opacity                  [ANIM 34kf linear  0.0→3.4s]
+  L[1] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→3.9s]
+        ~ Opacity                  [ANIM 41kf linear  0.0→4.1s]
+  L[2] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→3.9s]
+        ~ Opacity                  [ANIM 39kf linear  0.0→3.8s]
+  L[3] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→3.9s]
+        ~ Opacity                  [ANIM 39kf linear  0.0→3.8s]
+  L[4] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→3.9s]
+        ~ Opacity                  [ANIM 39kf linear  0.0→3.8s]
+  L[5] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→3.9s]
+        ~ Opacity                  [ANIM 44kf linear  0.0→4.4s]
+  L[6] ""                 av         blend=Normal        vis=true  src=PRECOMP プリコンポジション 1  act=[0.0→6.0] masks=0 fx=0
+
+--- COMP "テキスト変えるならココ！" (id=27, 1920x1080, 30fps, 6.0s, 1 layers) ---
+  L[0] "GLITCH"           text       blend=Normal        vis=true  src=-                    act=[0.0→6.0] masks=0 fx=0
+        ~ ADBE Text Tracking Amount [ANIM 2kf ease  0.0→4.1s]
+        ~ ADBE Text Character Offset [ANIM 2kf ease  0.0→4.1s]
+        ~ Position                 [ANIM 28kf linear  0.0→2.7s]
+        ~ Opacity                  [ANIM 24kf linear  0.0→2.3s]
+
+--- COMP "なんか周りのやつ" (id=355, 1920x1080, 30fps, 6.0s, 3 layers) ---
+  L[0] ""                 av         blend=Normal        vis=true  src=PRECOMP カクッ          act=[0.0→6.0] masks=0 fx=0
+  L[1] ""                 av         blend=Normal        vis=true  src=PRECOMP カクッ          act=[0.0→6.0] masks=0 fx=0
+  L[2] "シェイプレイヤー 1"       shape      blend=Normal        vis=true  src=-                    act=[0.0→6.0] masks=0 fx=0
+        ~ ADBE Vector Trim Start   [ANIM 2kf ease  0.0→3.1s]
+        ~ ADBE Vector Trim Offset  [ANIM 2kf ease  0.0→3.1s]
+
+--- COMP "プリコンポジション 1" (id=205, 1920x1080, 30fps, 6.0s, 3 layers) ---
+  L[0] ""                 av         blend=Normal        vis=true  src=PRECOMP シェイイイイプ！！！   act=[0.0→6.0] masks=0 fx=0
+        ~ Position                 [ANIM 2kf linear  0.0→2.7s]
+  L[1] ""                 av         blend=Normal        vis=true  src=PRECOMP シェイイイイプ！！！   act=[0.0→6.0] masks=0 fx=0
+        ~ Opacity                  [ANIM 13kf linear  0.0→1.6s]
+  L[2] ""                 av         blend=Normal        vis=true  src=PRECOMP シェイイイイプ！！！   act=[0.0→6.0] masks=0 fx=0
+
+--- COMP "マップ用フラクタルノイズ" (id=69, 1920x1080, 30fps, 6.0s, 2 layers) ---
+  L[0] "マップ用フラクタルノイズA"    av         blend=Overlay       vis=true  src=footage(67)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Fractal Noise         "Fractal Noise" [native]
+         ? ADBE Fractal Noise-0000    = 0
+         ✎ Noise Type                 = 1  (default 3)
+         ✎ Contrast                   = 254  (default 100)
+         · Transform                  = 0
+         ✎ Uniform Scaling            = 0  (default 1)
+         ✎ Scale Width                = 211  (default 100)
+         ✎ Scale Height               = 12  (default 100)
+         · Offset Turbulence           [ANIM 2kf linear 0.0→17.9s]
+         · ADBE Fractal Noise-0014    = 0
+         ✎ Complexity                 = 1  (default 6)
+         · Sub Settings               = 0
+         · ADBE Fractal Noise-0022    = 0
+         = Evolution                  = 0  expr="time*1200"
+         · Evolution Options          = 0
+         · Random Seed                = 0
+           → tuned: Noise Type, Contrast, Uniform Scaling, Scale Width, Scale Height, Offset Turbulence, Complexity
+  L[1] "マップ用フラクタルノイズB"    av         blend=Normal        vis=true  src=footage(67)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Fractal Noise         "Fractal Noise" [native]
+         ? ADBE Fractal Noise-0000    = 0
+         ✎ Noise Type                 = 1  (default 3)
+         ✎ Contrast                   = 254  (default 100)
+         · Transform                  = 0
+         ✎ Uniform Scaling            = 0  (default 1)
+         ✎ Scale Width                = 2847  (default 100)
+         ✎ Scale Height               = 12  (default 100)
+         · Offset Turbulence           [ANIM 2kf linear 0.0→17.9s]
+         · ADBE Fractal Noise-0014    = 0
+         ✎ Complexity                 = 1  (default 6)
+         · Sub Settings               = 0
+         · ADBE Fractal Noise-0022    = 0
+         = Evolution                  = 0  expr="time*3000\r"
+         · Evolution Options          = 0
+         · Random Seed                = 0
+           → tuned: Noise Type, Contrast, Uniform Scaling, Scale Width, Scale Height, Offset Turbulence, Complexity
+
+--- COMP "メインコンプ！" (id=14, 1920x1080, 30fps, 6.0s, 3 layers) ---
+  L[0] ""                 av         blend=Add           vis=true  src=PRECOMP グリッチテキスト     act=[0.0→6.0] masks=0 fx=1
+        ~ Position                 [ANIM 3kf ease  0.0→8.2s]
+        ~ Scale                    [ANIM 1kf linear  0.1→0.1s]
+        FX ADBE Venetian Blinds       "Venetian Blinds" [native]
+         ? ADBE Venetian Blinds-0000  = 0
+         ✎ Transition Completion      = 14  (default 0)
+         ✎ Direction                  = 90  (default 0)
+         ✎ Width                      = 9  (default 20)
+           → tuned: Transition Completion, Direction, Width
+  L[1] ""                 av         blend=Normal        vis=true  src=PRECOMP なんか周りのやつ     act=[0.0→6.0] masks=0 fx=0
+  L[2] ""                 av         blend=Normal        vis=true  src=PRECOMP 背景変えるならココ！   act=[0.0→6.0] masks=0 fx=2
+        FX ADBE Exposure2             "Exposure" [native]
+         ? ADBE Exposure2-0000        = 0
+         · Master                     = 0
+         ✎ Exposure                   = -1.4500000000000008  (default 0)
+         · Master                     = 0
+         · Red                        = 0
+         · Red                        = 0
+         · Green                      = 0
+         · Green                      = 0
+         · Blue                       = 0
+         · Blue                       = 0
+           → tuned: Exposure
+        FX ADBE CurvesCustom          "Curves" [native]
+         ? ADBE CurvesCustom-0000     = 0
+
+--- COMP "背景変えるならココ！" (id=43, 1920x1080, 30fps, 6.0s, 6 layers) ---
+  L[0] ""                 adjustment blend=Normal        vis=true  src=footage(65)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Noise2                "Noise" [native]
+         ? ADBE Noise2-0000           = 0
+         ✎ Amount of Noise            = 11  (default 0)
+           → tuned: Amount of Noise
+  L[1] ""                 adjustment blend=Normal        vis=true  src=footage(57)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Exposure2             "Exposure" [native]
+         ? ADBE Exposure2-0000        = 0
+         · Master                     = 0
+         · Exposure                    [ANIM 9kf linear 0.0→0.9s]  expr="wiggle(34,0.29)"
+         · Master                     = 0
+         · Red                        = 0
+         · Red                        = 0
+         · Green                      = 0
+         · Green                      = 0
+         · Blue                       = 0
+         · Blue                       = 0
+           → tuned: Exposure
+  L[2] ""                 av         blend=Overlay       vis=true  src=footage(63)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Venetian Blinds       "Venetian Blinds" [native]
+         ? ADBE Venetian Blinds-0000  = 0
+         ✎ Transition Completion      = 97  (default 0)
+         ✎ Direction                  = 90  (default 0)
+         ✎ Width                      = 8  (default 20)
+           → tuned: Transition Completion, Direction, Width
+  L[3] ""                 av         blend=Normal        vis=true  src=footage(59)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Venetian Blinds       "Venetian Blinds" [native]
+         ? ADBE Venetian Blinds-0000  = 0
+         ✎ Transition Completion      = 62  (default 0)
+         ✎ Direction                  = 90  (default 0)
+         ✎ Width                      = 12  (default 20)
+           → tuned: Transition Completion, Direction, Width
+  L[4] ""                 av         blend=Normal        vis=true  src=footage(285)         act=[0.0→6.0] masks=1 fx=0
+  L[5] ""                 av         blend=Normal        vis=true  src=footage(41)          act=[0.0→6.0] masks=0 fx=1
+        FX ADBE Ramp                  "Gradient Ramp" [native]
+         ? ADBE Ramp-0000             = 0
+         · Start of Ramp               [ANIM 2kf ease 0.0→17.9s]
+         ✎ Start Color                = [255 0.8710411540232599 42.00723610818386 58.140623196959496]  (default [0 0 0 1])
+         ✎ End of Ramp                = [0.5 1.6305555555555555]  (default [32 64])
+         ✎ End Color                  = [255 6.339502399787307 12.785155903548002 12.628753446042538]  (default [1 1 1 1])
+         ✎ Ramp Shape                 = 2  (default 1)
+         · ADBE Ramp-0008             = 0
+           → tuned: Start of Ramp, Start Color, End of Ramp, End Color, Ramp Shape
+
+=== DEPENDENCY GRAPH (parent / matte / source / expr-ref edges) ===
+
+--- COMP "RGBズレ" ---
+  L[0] "B"                --source--> precomp "テキスト変えるならココ！"
+  L[1] "R"                --source--> precomp "テキスト変えるならココ！"
+  L[2] "G"                --source--> precomp "テキスト変えるならココ！"
+
+--- COMP "グリッチテキスト" ---
+  L[9] ""                 --source--> precomp "ここは開けない方が身のため"
+  L[21] ""                 --source--> precomp "テキスト変えるならココ！"
+  L[22] ""                 --source--> precomp "RGBズレ"
+  L[23] "横ブラー"             --source--> precomp "テキスト変えるならココ！"
+  L[25] ""                 --source--> precomp "マップ用フラクタルノイズ"
+
+--- COMP "ここは開けない方が身のため" ---
+  L[0] ""                 --source--> precomp "シェイプの塊"
+  L[1] ""                 --source--> precomp "シェイプの塊"
+  L[2] ""                 --source--> precomp "シェイプの塊"
+
+--- COMP "シェイプの塊" ---
+  L[0] ""                 --source--> precomp "プリコンポジション 1"
+  L[1] ""                 --source--> precomp "プリコンポジション 1"
+  L[2] ""                 --source--> precomp "プリコンポジション 1"
+  L[3] ""                 --source--> precomp "プリコンポジション 1"
+  L[4] ""                 --source--> precomp "プリコンポジション 1"
+  L[5] ""                 --source--> precomp "プリコンポジション 1"
+  L[6] ""                 --source--> precomp "プリコンポジション 1"
+
+--- COMP "なんか周りのやつ" ---
+  L[0] ""                 --source--> precomp "カクッ"
+  L[1] ""                 --source--> precomp "カクッ"
+
+--- COMP "プリコンポジション 1" ---
+  L[0] ""                 --source--> precomp "シェイイイイプ！！！"
+  L[1] ""                 --source--> precomp "シェイイイイプ！！！"
+  L[2] ""                 --source--> precomp "シェイイイイプ！！！"
+
+--- COMP "メインコンプ！" ---
+  L[0] ""                 --source--> precomp "グリッチテキスト"
+  L[1] ""                 --source--> precomp "なんか周りのやつ"
+  L[2] ""                 --source--> precomp "背景変えるならココ！"
