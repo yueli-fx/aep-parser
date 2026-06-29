@@ -363,6 +363,15 @@ func TestValidateReportsCompBackgroundColorCapability(t *testing.T) {
 	assertCapability(t, report, "SetBGColor")
 }
 
+func TestValidateReportsCompLabelCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Label = ptr(12)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetLabel")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
@@ -476,6 +485,18 @@ func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 		t.Fatal("Valid = true, want false")
 	}
 	assertRefusal(t, report, "invalid_comp_background_color")
+}
+
+func TestValidateRejectsInvalidCompLabel(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Label = ptr(17)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_comp_label")
 }
 
 func TestValidateRejectsInvalidCompWorkArea(t *testing.T) {

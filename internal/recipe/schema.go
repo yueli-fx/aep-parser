@@ -26,6 +26,7 @@ type CompSpec struct {
 	FrameRate                float64             `json:"frame_rate"`
 	Duration                 float64             `json:"duration"`
 	BackgroundColor          []float64           `json:"background_color,omitempty"`
+	Label                    *float64            `json:"label,omitempty"`
 	Renderer                 string              `json:"renderer,omitempty"`
 	ResolutionFactor         []float64           `json:"resolution_factor,omitempty"`
 	PixelAspect              *float64            `json:"pixel_aspect,omitempty"`
@@ -406,6 +407,10 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			recordCapability("SetBGColor", compPath+".background_color")
 			validateRGBColor(comp.BackgroundColor, compPath+".background_color", "invalid_comp_background_color", addRefusal)
 		}
+		if comp.Label != nil {
+			recordCapability("SetLabel", compPath+".label")
+			validateCompLabel(*comp.Label, compPath+".label", addRefusal)
+		}
 		if comp.Renderer != "" {
 			recordCapability("SetRenderer", compPath+".renderer")
 		}
@@ -605,6 +610,12 @@ func validatePixelAspect(value float64, path string, addRefusal func(string, str
 func validateDisplayStartTime(value float64, path string, addRefusal func(string, string, string)) {
 	if value < 0 {
 		addRefusal("invalid_comp_display_start_time", path, "display_start_time must be non-negative")
+	}
+}
+
+func validateCompLabel(value float64, path string, addRefusal func(string, string, string)) {
+	if value < 0 || value > 16 || !isWholeNumber(value) {
+		addRefusal("invalid_comp_label", path, "label must be an integer between 0 and 16")
 	}
 }
 

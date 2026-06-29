@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal comp label"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "label": 12,
+      "layers": []
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0
+  }
+}

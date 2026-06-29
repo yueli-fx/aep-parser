@@ -96,6 +96,10 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, err
 		}
 	}
+	project, err = applyCompItemSettings(project, compSpec)
+	if err != nil {
+		return report, fmt.Errorf("recipe: comp %q item settings: %w", compSpec.Name, err)
+	}
 	if hasExpectedProfile(rec.ExpectedProfile) {
 		prof, err := buildWrittenProfile(project, outPath)
 		if err != nil {
@@ -537,6 +541,35 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 		}
 	}
 	return reopened, nil
+}
+
+func applyCompItemSettings(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
+	if compSpec.Label == nil {
+		return project, nil
+	}
+	reopened, err := aep.Reopen(project)
+	if err != nil {
+		return nil, fmt.Errorf("reopen: %w", err)
+	}
+	comp := findProjectComp(reopened, compSpec.Name)
+	if comp == nil {
+		return nil, fmt.Errorf("comp %q not found after reopen", compSpec.Name)
+	}
+	if compSpec.Label != nil {
+		if err := comp.SetLabel(uint8(*compSpec.Label)); err != nil {
+			return nil, fmt.Errorf("label: %w", err)
+		}
+	}
+	return reopened, nil
+}
+
+func findProjectComp(project *aep.Project, name string) *aep.Composition {
+	for _, comp := range project.Compositions {
+		if comp.Name == name {
+			return comp
+		}
+	}
+	return nil
 }
 
 func applyCompMotionBlur(comp *aep.Composition, spec *CompMotionBlurSpec) error {
