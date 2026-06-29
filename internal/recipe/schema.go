@@ -80,9 +80,15 @@ type ShapeSpec struct {
 }
 
 type StrokeSpec struct {
-	Color   []float64 `json:"color,omitempty"`
-	Width   *float64  `json:"width,omitempty"`
-	Opacity *float64  `json:"opacity,omitempty"`
+	Color   []float64         `json:"color,omitempty"`
+	Width   *float64          `json:"width,omitempty"`
+	Opacity *float64          `json:"opacity,omitempty"`
+	Dashes  *StrokeDashesSpec `json:"dashes,omitempty"`
+}
+
+type StrokeDashesSpec struct {
+	Dash *float64 `json:"dash,omitempty"`
+	Gap  *float64 `json:"gap,omitempty"`
 }
 
 type TrimSpec struct {
@@ -557,6 +563,21 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("StrokeNode.SetOpacity", strokePath+".opacity")
 				if *layer.Shape.Stroke.Opacity < 0 || *layer.Shape.Stroke.Opacity > 100 {
 					addRefusal("invalid_shape_stroke_opacity", strokePath+".opacity", "stroke opacity must be between 0 and 100")
+				}
+			}
+			if layer.Shape.Stroke.Dashes != nil {
+				dashesPath := strokePath + ".dashes"
+				if layer.Shape.Stroke.Dashes.Dash != nil {
+					recordCapability("StrokeDashes.SetDash", dashesPath+".dash")
+					if *layer.Shape.Stroke.Dashes.Dash < 0 {
+						addRefusal("invalid_shape_stroke_dash", dashesPath+".dash", "stroke dash must be non-negative")
+					}
+				}
+				if layer.Shape.Stroke.Dashes.Gap != nil {
+					recordCapability("StrokeDashes.SetGap", dashesPath+".gap")
+					if *layer.Shape.Stroke.Dashes.Gap < 0 {
+						addRefusal("invalid_shape_stroke_gap", dashesPath+".gap", "stroke gap must be non-negative")
+					}
 				}
 			}
 		}

@@ -264,6 +264,10 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 		Color:   []float64{255, 0, 0, 255},
 		Width:   ptr(6),
 		Opacity: ptr(80),
+		Dashes: &recipe.StrokeDashesSpec{
+			Dash: ptr(18),
+			Gap:  ptr(7),
+		},
 	}
 
 	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
@@ -275,6 +279,8 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	assertCapability(t, report, "StrokeNode.SetColor")
 	assertCapability(t, report, "StrokeNode.SetWidth")
 	assertCapability(t, report, "StrokeNode.SetOpacity")
+	assertCapability(t, report, "StrokeDashes.SetDash")
+	assertCapability(t, report, "StrokeDashes.SetGap")
 }
 
 func TestValidateReportsShapeDetailCapabilities(t *testing.T) {
@@ -780,6 +786,10 @@ func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 		Color:   []float64{255, 0},
 		Width:   ptr(-1),
 		Opacity: ptr(101),
+		Dashes: &recipe.StrokeDashesSpec{
+			Dash: ptr(-1),
+			Gap:  ptr(-1),
+		},
 	}
 
 	report := recipe.Validate(rec)
@@ -790,6 +800,8 @@ func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_stroke_color")
 	assertRefusal(t, report, "invalid_shape_stroke_width")
 	assertRefusal(t, report, "invalid_shape_stroke_opacity")
+	assertRefusal(t, report, "invalid_shape_stroke_dash")
+	assertRefusal(t, report, "invalid_shape_stroke_gap")
 }
 
 func TestValidateAcceptsSupportedEffects(t *testing.T) {

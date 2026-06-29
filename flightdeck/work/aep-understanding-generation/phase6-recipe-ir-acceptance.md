@@ -820,6 +820,37 @@ Twenty-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-fifth follow-up completed:
+
+- Shape stroke recipes now support `shape.stroke.dashes`, including:
+  - `dash` -> `ADBE Vector Stroke Dash 1`
+  - `gap` -> `ADBE Vector Stroke Gap 1`
+- Setting either value enables the writer's Dashes group. The current writer
+  models exactly one Dash/Gap pair; additional pairs and dash offset are not
+  modeled yet.
+- Validation rejects negative `dash` and `gap` values.
+- Capability reporting records:
+  - `StrokeDashes.SetDash`
+  - `StrokeDashes.SetGap`
+- `examples/recipes/minimal-shape-stroke-dashes.json` is a dedicated dashed
+  stroke recipe example and asserts the profile-visible Dash 1 / Gap 1
+  properties. See `knowledge/shape/recipe-stroke-dashes-profile-fields.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-stroke-dashes.json -out
+    tmp_debug\recipes\minimal-shape-stroke-dashes.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_stroke_dashes/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_stroke_dashes/aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

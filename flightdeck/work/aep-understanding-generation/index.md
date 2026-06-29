@@ -209,6 +209,10 @@ Done:
   `examples/recipes/minimal-shape-polystar.json` example asserts all eight
   `ADBE Vector Star ...` properties, passed profile checks, and passed an AE
   2025 render oracle gate.
+- Twelfth shape recipe slice is implemented for `shape.stroke.dashes` dash/gap
+  support. The dedicated `examples/recipes/minimal-shape-stroke-dashes.json`
+  example asserts `ADBE Vector Stroke Dash 1` and `ADBE Vector Stroke Gap 1`,
+  passed profile checks, and passed an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

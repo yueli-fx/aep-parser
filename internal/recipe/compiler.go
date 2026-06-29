@@ -987,6 +987,19 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.Stroke.Dashes != nil {
+			dashes := stroke.Dashes()
+			if shape.Stroke.Dashes.Dash != nil {
+				if err := dashes.SetDash(*shape.Stroke.Dashes.Dash); err != nil {
+					return err
+				}
+			}
+			if shape.Stroke.Dashes.Gap != nil {
+				if err := dashes.SetGap(*shape.Stroke.Dashes.Gap); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }

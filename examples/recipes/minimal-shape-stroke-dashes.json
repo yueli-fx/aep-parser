@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal stroke dashes"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Frame",
+          "shape": {
+            "kind": "rect",
+            "size": [520, 260],
+            "stroke": {
+              "color": [255, 255, 255],
+              "width": 10,
+              "opacity": 100,
+              "dashes": {
+                "dash": 18,
+                "gap": 7
+              }
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Frame",
+        "match_name": "ADBE Vector Stroke Width",
+        "value": 10
+      },
+      {
+        "layer_name": "Frame",
+        "match_name": "ADBE Vector Stroke Opacity",
+        "value": 100
+      },
+      {
+        "layer_name": "Frame",
+        "match_name": "ADBE Vector Stroke Dash 1",
+        "value": 18
+      },
+      {
+        "layer_name": "Frame",
+        "match_name": "ADBE Vector Stroke Gap 1",
+        "value": 7
+      }
+    ]
+  }
+}

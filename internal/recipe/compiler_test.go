@@ -55,6 +55,10 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 		Color:   []float64{255, 0, 0, 255},
 		Width:   ptr(6),
 		Opacity: ptr(80),
+		Dashes: &recipe.StrokeDashesSpec{
+			Dash: ptr(18),
+			Gap:  ptr(7),
+		},
 	}
 	outPath := filepath.Join(t.TempDir(), "recipe.aep")
 
@@ -77,6 +81,8 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Color", []float64{255, 255, 0, 0})
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Width", 6.0)
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Opacity", 80.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Dash 1", 18.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Gap 1", 7.0)
 }
 
 func TestCompileToFileSetsShapeDetail(t *testing.T) {
