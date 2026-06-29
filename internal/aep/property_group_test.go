@@ -10,7 +10,7 @@ import (
 // PropertyGroup tree built alongside flat Layer.Properties for a known
 // fixture with Camera + Light + Solid layers.
 func TestPropertyTree_CameralightFixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -92,7 +92,7 @@ func TestPropertyTree_CameralightFixture(t *testing.T) {
 // "ADBE Effect Parade" subgroup exists and exposes one child group per
 // effect.
 func TestPropertyTree_EffectsParade_TreeMirrorsEffectsSlice(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestPropertyTree_StandaloneLayer(t *testing.T) {
 // TestAEPropertyGroup_PropertyByPath_NotFound verifies graceful nil
 // return when path doesn't resolve.
 func TestAEPropertyGroup_PropertyByPath_NotFound(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -167,7 +167,7 @@ func TestAEPropertyGroup_PropertyByPath_NotFound(t *testing.T) {
 // TestAEPropertyGroup_ParentGroupBackRef verifies a leaf's ParentGroup()
 // resolves back to the group that lists it as a Child.
 func TestAEPropertyGroup_ParentGroupBackRef(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -215,7 +215,7 @@ func TestAEPropertyGroup_ParentGroupBackRef(t *testing.T) {
 // identity), so mutations through the flat API are visible through the
 // tree and vice versa.
 func TestAEPropertyGroup_LeafResolutionByTdbsIdentity(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

@@ -13,7 +13,7 @@ import (
 // TestPardNameBytes_GBKMatchesAENative is the byte-equivalence proof for CJK
 // control labels. AE reads a pseudo control's pard @0x10 name in the system ANSI
 // codepage, and AE's own Pseudo Effect Maker writes it GBK-encoded. We assert
-// pardNameBytes produces the exact bytes AE wrote in test_data/pseudo_rich_demo.aep
+// pardNameBytes produces the exact bytes AE wrote in test_data/fixtures/pseudo_rich_demo.aep
 // (color pard @0x10 = d1d5c9ab = "颜色"; angle pard @0x10 = bdc7b6c8 = "角度"),
 // so a CJK label displays correctly on a simplified-Chinese system. This can't
 // be ship-gated on a Western-codepage machine — byte-equivalence to AE-authored
@@ -67,7 +67,7 @@ func be32(d []byte, off int) uint32 { return binary.BigEndian.Uint32(d[off:]) }
 
 // TestSynthControlEntries_PardLayout asserts the synthesized pard bytes for the
 // newly-supported control kinds match the field values RE'd from AE's own
-// Pseudo Effect Maker output (test_data/pseudo_rich_demo.aep): dropdown 0009,
+// Pseudo Effect Maker output (test_data/fixtures/pseudo_rich_demo.aep): dropdown 0009,
 // group-start 0011, label 0004 + group-end 0005.
 func TestSynthControlEntries_PardLayout(t *testing.T) {
 	// Dropdown: 2 options, default selection 2 — golden 0009 had @0x38=2,

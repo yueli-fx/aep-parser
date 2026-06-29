@@ -81,7 +81,7 @@ func (c *parseCtx) warn(format string, args ...any) {
 //
 // cdta layout (204 bytes in CC2020+ .aep files). Sources:
 //   - "ref" = the reference parser's binary/composition_chunks.py CdtaChunk
-//   - "fixture" = hex-dumped from test_data/re_tickrate.aep
+//   - "fixture" = hex-dumped from test_data/fixtures/re_tickrate.aep
 //   - "local" = derived from observation only, no external source
 //
 // Offsets used here are big-endian unless otherwise noted.

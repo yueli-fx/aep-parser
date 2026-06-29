@@ -103,7 +103,7 @@ func runTrackMatteGate(t *testing.T, aeExe, ver, kind, jsxName string, build fun
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	argsPath := `e:/projects/tools/aep-parser/test_data/` + kind + `_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/` + kind + `_args.json`
 	jsxPath := `E:/projects/tools/aep-parser/test_data/` + jsxName
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -126,7 +126,7 @@ func runTrackMatteGate(t *testing.T, aeExe, ver, kind, jsxName string, build fun
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

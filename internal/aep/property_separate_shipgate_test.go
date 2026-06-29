@@ -34,8 +34,8 @@ func runSepDimShipGate(t *testing.T, aeExe, baseFixture string, separate, is3D b
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/separate_dims_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_separate_dims.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/separate_dims_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_separate_dims.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	proj, err := aep.Open(baseFixture)
@@ -97,7 +97,7 @@ func runSepDimShipGate(t *testing.T, aeExe, baseFixture string, separate, is3D b
 		argsJSON = fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"mode":%q,"x":%g,"y":%g,"z":%g}`,
 			toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), mode, wantX, wantY, wantZ)
 	}
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -178,22 +178,22 @@ func ae2024() string {
 }
 
 func TestSeparateDims_AEShipGate_AE2020(t *testing.T) {
-	runSepDimShipGate(t, ae2020(), "../../test_data/re_separate_dims_before.aep", true, true)
+	runSepDimShipGate(t, ae2020(), "../../test_data/fixtures/re_separate_dims_before.aep", true, true)
 }
 func TestSeparateDims_AEShipGate_AE2025(t *testing.T) {
-	runSepDimShipGate(t, ae2025(), "../../test_data/re_separate_dims_before.aep", true, true)
+	runSepDimShipGate(t, ae2025(), "../../test_data/fixtures/re_separate_dims_before.aep", true, true)
 }
 
 func TestMergeDims_AEShipGate_AE2020(t *testing.T) {
-	runSepDimShipGate(t, ae2020(), "../../test_data/re_sepdim_merge_before.aep", false, true)
+	runSepDimShipGate(t, ae2020(), "../../test_data/fixtures/re_sepdim_merge_before.aep", false, true)
 }
 func TestMergeDims_AEShipGate_AE2025(t *testing.T) {
-	runSepDimShipGate(t, ae2025(), "../../test_data/re_sepdim_merge_before.aep", false, true)
+	runSepDimShipGate(t, ae2025(), "../../test_data/fixtures/re_sepdim_merge_before.aep", false, true)
 }
 
 func TestSeparate2D_AEShipGate_AE2020(t *testing.T) {
-	runSepDimShipGate(t, ae2020(), "../../test_data/re_sepdim_2d_before.aep", true, false)
+	runSepDimShipGate(t, ae2020(), "../../test_data/fixtures/re_sepdim_2d_before.aep", true, false)
 }
 func TestSeparate2D_AEShipGate_AE2025(t *testing.T) {
-	runSepDimShipGate(t, ae2025(), "../../test_data/re_sepdim_2d_before.aep", true, false)
+	runSepDimShipGate(t, ae2025(), "../../test_data/fixtures/re_sepdim_2d_before.aep", true, false)
 }

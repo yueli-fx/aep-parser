@@ -277,8 +277,8 @@ func buildNeighborDemo(t *testing.T, target aep.AETarget, compName, text string,
 }
 
 func runOneNeighborGate(t *testing.T, aeExe, ver string, target aep.AETarget, sp neighborSpec) {
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_animator_neighbor_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_animator_neighbor.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_animator_neighbor_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_animator_neighbor.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	compName := "TXNB_" + sp.key
@@ -304,7 +304,7 @@ func runOneNeighborGate(t *testing.T, aeExe, ver string, target aep.AETarget, sp
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png0":%q,"png1":%q,"png2":%q,"comp":%q%s}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png0), toFwd(png1), toFwd(png2), compName, sp.args)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

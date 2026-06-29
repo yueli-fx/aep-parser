@@ -10,9 +10,9 @@ import (
 // TestRenderQueueRemoveItem removes one of two render queue items and confirms
 // the survivor + its settings/comp linkage stay coherent across WriteAEP.
 func TestRenderQueueRemoveItem(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_rq_delete_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_rq_delete_before.aep")
 	if err != nil {
-		t.Skipf("re_rq_delete_before.aep not present; run test_data/re_rq_delete.jsx in AE 2020")
+		t.Skipf("re_rq_delete_before.aep not present; run test_data/generators/re_rq_delete.jsx in AE 2020")
 	}
 	rq := proj.RenderQueue
 	if rq == nil || rq.NumItems() != 2 {
@@ -72,9 +72,9 @@ func compByName(proj *aep.Project, name string) *aep.Composition {
 // TestRenderQueueAddItem clones the queue's last item for a second comp and
 // confirms the new item + comp linkage survive WriteAEP.
 func TestRenderQueueAddItem(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_rq_add_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_rq_add_before.aep")
 	if err != nil {
-		t.Skipf("re_rq_add_before.aep not present; run test_data/re_rq_add.jsx in AE 2020")
+		t.Skipf("re_rq_add_before.aep not present; run test_data/generators/re_rq_add.jsx in AE 2020")
 	}
 	rq := proj.RenderQueue
 	if rq == nil || rq.NumItems() != 1 {
@@ -127,7 +127,7 @@ func TestRenderQueueAddItem(t *testing.T) {
 
 // TestRenderQueueAddItem_Refuse covers nil-comp + empty-queue guards.
 func TestRenderQueueAddItem_Refuse(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_rq_add_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_rq_add_before.aep")
 	if err != nil {
 		t.Skipf("re_rq_add_before.aep not present")
 	}
@@ -138,7 +138,7 @@ func TestRenderQueueAddItem_Refuse(t *testing.T) {
 
 // TestRenderQueueRemoveItem_Refuse covers out-of-range + missing-backref guards.
 func TestRenderQueueRemoveItem_Refuse(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_rq_delete_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_rq_delete_before.aep")
 	if err != nil {
 		t.Skipf("re_rq_delete_before.aep not present")
 	}

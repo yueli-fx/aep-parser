@@ -12,11 +12,11 @@
 // One isolated shape layer per concern so a single bad setter never masks the
 // rest:
 //   - EASE: SetOutInterp/SetInInterp (→Bezier) + SetOutTemporalEase/
-//           SetInTemporalEase — AE reads keyOut/InInterpolationType=BEZIER and
-//           keyOut/InTemporalEase influence.
+//     SetInTemporalEase — AE reads keyOut/InInterpolationType=BEZIER and
+//     keyOut/InTemporalEase influence.
 //   - VALT: SetTime + SetValue + SetFrameTime — AE reads keyTime/keyValue.
 //   - TAN:  SetOutSpatialTangent/SetInSpatialTangent (bezier path) — AE reads
-//           keyOut/InSpatialTangent.
+//     keyOut/InSpatialTangent.
 //   - STAT: Property.SetStaticValue on a non-keyframed Position — AE reads value.
 //   - INS:  InsertKeyframe 2→3 — AE reads numKeys.
 //   - DEL:  DeleteKeyframe 3→2 — AE reads numKeys.
@@ -124,7 +124,7 @@ func buildKFMutateDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	}
 	// Layer Position parses as 3D (z=0) even on a 2D layer; AE's DOM still
 	// returns 2-element arrays, so value/tangent slices are length 3 here.
-	mustMut("VALT SetTime", vk[1].SetTime(1.6))          // stays between kf0 (0) and kf2
+	mustMut("VALT SetTime", vk[1].SetTime(1.6)) // stays between kf0 (0) and kf2
 	mustMut("VALT SetValue", vk[1].SetValue([]float64{850, 560, 0}))
 	mustMut("VALT SetFrameTime", vk[2].SetFrameTime(90)) // 90/30fps = 3.0s
 
@@ -170,8 +170,8 @@ func runKFMutateGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/kf_mutate_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_kf_mutate.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/kf_mutate_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_kf_mutate.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildKFMutateDemo(t, target)
@@ -193,7 +193,7 @@ func runKFMutateGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

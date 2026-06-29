@@ -164,7 +164,7 @@ func TestShapePathExcludesMasks(t *testing.T) {
 // decoding against the AE 2020 fixture re_shapes.aep (built by
 // /tmp/re_shapes.jsx). Skips silently if absent.
 func TestShapePrimitivesReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_shapes.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_shapes.aep")
 	if err != nil {
 		t.Skipf("re_shapes.aep not present; rerun re_shapes.jsx")
 	}

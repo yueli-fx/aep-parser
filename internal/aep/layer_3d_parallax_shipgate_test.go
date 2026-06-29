@@ -8,9 +8,9 @@
 // Per delivery-contract red line 4 the gate renders the frame and asserts on
 // pixels that depth drives apparent size:
 //
-//   NEAR (z=-800) renders LARGE (~300px wide), FAR (z=+1200) renders SMALL
-//   (~99px) — a >2× ratio between two identically-sized layers is the proof
-//   per-layer Z is written and AE honours it (a 2D layer would ignore Z).
+//	NEAR (z=-800) renders LARGE (~300px wide), FAR (z=+1200) renders SMALL
+//	(~99px) — a >2× ratio between two identically-sized layers is the proof
+//	per-layer Z is written and AE honours it (a 2D layer would ignore Z).
 //
 // Per-layer Z needs ZERO new write code: the from-scratch shape Position is
 // already a 3-component spatial slot (lowerTransformVec2Spatial encode3D), so
@@ -59,8 +59,8 @@ func runLayer3DParallaxGate(t *testing.T, aeExe, ver string, target aep.AETarget
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/3d_parallax_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_3d_parallax.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/3d_parallax_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_3d_parallax.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -133,7 +133,7 @@ func runLayer3DParallaxGate(t *testing.T, aeExe, ver string, target aep.AETarget
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

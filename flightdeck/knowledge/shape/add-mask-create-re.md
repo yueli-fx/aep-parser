@@ -15,7 +15,7 @@ READ WHEN: implementing or extending AddMask / mask-atom creation; debugging AE 
 template; first structural write where every chunk is Go-built), spliced into
 `ADBE Mask Parade`. Shipped 2026-06-11, AE 2020 + AE 2025 ship-gate 4/4
 (AE-native fixture + 100% Go-built project, closed + open paths, exact vertex
-readback, resave preservation). Ground-truth fixture: `test_data/re_mask_open.aep`
+readback, resave preservation). Ground-truth fixture: `test_data/fixtures/re_mask_open.aep`
 (+ `.jsx`), AE-2020-saved masks across solid/shape layers × open/closed.
 
 ## Atom 结构（与 effect 的差异）

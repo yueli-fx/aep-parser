@@ -18,7 +18,7 @@ import (
 //   - GpuAccelType     = "7ee0ab59-822d-44cc-ac10-16279d041016"
 //   - ExpressionEngine = "javascript-1.0"
 func TestProjectSettings_Read(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -53,7 +53,7 @@ func TestProjectSettings_Read(t *testing.T) {
 // Excludes Revision (R only) and the two toggle flag chunks (covered
 // in a separate test).
 func TestProjectSettings_RoundtripWrite(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -104,7 +104,7 @@ func TestProjectSettings_RoundtripWrite(t *testing.T) {
 // TestProjectSettings_ToggleFlagChunks adds + removes lnrb / lnrp,
 // roundtrips, and verifies the chunk presence change persists.
 func TestProjectSettings_ToggleFlagChunks(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestProjectSettings_ToggleFlagChunks(t *testing.T) {
 }
 
 func TestProjectSettings_Validation(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestProjectSettings_StandaloneProject(t *testing.T) {
 // TestProjectSettings_NnhdRead verifies nnhd field readers against
 // re_cameralight.aep (AE 2020 project).
 func TestProjectSettings_NnhdRead(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -238,7 +238,7 @@ func TestProjectSettings_NnhdRead(t *testing.T) {
 
 // TestProjectSettings_NnhdRoundtrip verifies nnhd field writers roundtrip correctly.
 func TestProjectSettings_NnhdRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -308,7 +308,7 @@ func TestProjectSettings_NnhdRoundtrip(t *testing.T) {
 
 // TestProjectSettings_NnhdValidation verifies nnhd field validation.
 func TestProjectSettings_NnhdValidation(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -370,7 +370,7 @@ func TestProjectSettings_NnhdStandalone(t *testing.T) {
 
 // TestProjectSettings_CmsRead verifies CMS field readers.
 func TestProjectSettings_CmsRead(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -399,10 +399,9 @@ func TestProjectSettings_CmsRefuseWhenAbsent(t *testing.T) {
 	}
 }
 
-
 // TestProjectSettings_CmsRoundtrip verifies CMS field writers roundtrip correctly.
 func TestProjectSettings_CmsRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

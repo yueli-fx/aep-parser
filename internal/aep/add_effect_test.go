@@ -17,7 +17,7 @@ import (
 // layerWithEffects is defined in property_structural_shipgate_test.go.
 
 func TestAddEffect_RoundTrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestAddEffect_RoundTrip(t *testing.T) {
 func TestAddEffect_AllTemplates_RoundTrip(t *testing.T) {
 	for _, name := range aep.SupportedEffects() {
 		t.Run(name, func(t *testing.T) {
-			proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+			proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 			if err != nil {
 				t.Skipf("baseline not present: %v", err)
 			}
@@ -147,7 +147,7 @@ func TestAddEffect_AllTemplates_RoundTrip(t *testing.T) {
 }
 
 func TestRemoveEffect_RoundTrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -177,7 +177,7 @@ func TestRemoveEffect_RoundTrip(t *testing.T) {
 }
 
 func TestRemoveEffect_Refuse(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestRemoveEffect_Refuse(t *testing.T) {
 }
 
 func TestAddEffect_Unsupported(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -331,7 +331,7 @@ func TestAddEffect_AutoCreateParade_ReopenedFreshLayer(t *testing.T) {
 // AE-native effect-less layer (real AE sibling-group layout around the splice
 // anchor), then proves write → re-parse survival.
 func TestAddEffect_AutoCreateParade_ParsedFixtureLayer(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text.aep")
 	if err != nil {
 		t.Skipf("re_text.aep not present: %v", err)
 	}

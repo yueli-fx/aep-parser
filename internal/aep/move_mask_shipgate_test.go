@@ -17,7 +17,7 @@ import (
 )
 
 func runMoveMaskGate(t *testing.T, aeExe, ver string) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("re_property_struct_baseline.aep not present: %v", err)
 	}

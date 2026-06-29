@@ -75,12 +75,12 @@ func TestTextSourceDecodeSynthetic(t *testing.T) {
 }
 
 // TestTextSourceDecodeReal exercises the decoder against the real AE
-// 2020 fixture built by test_data/re_text.jsx. Skips silently if the
+// 2020 fixture built by test_data/generators/re_text.jsx. Skips silently if the
 // file isn't present (CI / fresh clones won't have it).
 func TestTextSourceDecodeReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text.aep")
 	if err != nil {
-		t.Skipf("re_text.aep not present; run test_data/re_text.jsx in AE to generate")
+		t.Skipf("re_text.aep not present; run test_data/generators/re_text.jsx in AE to generate")
 	}
 	// Find the RE_TEXT comp with the largest layer count (newest run wins
 	// when multiple sessions left stale comps behind).
@@ -234,7 +234,7 @@ func TestTextSourceDecodeReal(t *testing.T) {
 			}
 		}
 	} else {
-		t.Error("box_text variant missing — regenerate test_data/re_text.aep")
+		t.Error("box_text variant missing — regenerate test_data/fixtures/re_text.aep")
 	}
 }
 
@@ -242,7 +242,7 @@ func TestTextSourceDecodeReal(t *testing.T) {
 // fields (BaselineShift / VerticalScale / Tsume) against the AE 2020
 // fixture built by /tmp/re_text2.jsx. Skips if absent.
 func TestTextSourceExtendedFieldsReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text2.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text2.aep")
 	if err != nil {
 		t.Skipf("re_text2.aep not present")
 	}

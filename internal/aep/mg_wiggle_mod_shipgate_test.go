@@ -5,6 +5,7 @@
 //   - Wiggle Paths `ADBE Vector Roughen Points` (Corner=1 default / Smooth=2)
 //   - Wiggle Paths `ADBE Vector Correlation` (0 = jagged independent jitter /
 //     100 = coherent smooth boil)
+//
 // Both are AE-default-elided and materialized via synthesis-insert
 // (spliceShapeLeafBefore, mirroring ZigZag Points / Twist Center).
 //
@@ -132,12 +133,13 @@ func buildMGWiggleModDemo(t *testing.T, target aep.AETarget) *aep.Project {
 
 // wiggleEdgeStats scans the top edge of a card centred at cx (Rect 300 → edge
 // spans cx±150; scan the middle cx±90 to skip the corner loops). Returns:
-//   spread = (max-min) of topmost-white-y across columns — proves wiggle active,
-//            and collapses to ~0 under full Correlation (rigid offset).
-//   jag    = mean |Δy| between adjacent columns — high-frequency roughness.
-//   curv   = mean chord deviation |y[i]-(y[i-d]+y[i+d])/2| at baseline d — low on
-//            straight Corner ramps (points on the chord), high on curved Smooth
-//            arcs (points bow off the chord). The Corner/Smooth discriminator.
+//
+//	spread = (max-min) of topmost-white-y across columns — proves wiggle active,
+//	         and collapses to ~0 under full Correlation (rigid offset).
+//	jag    = mean |Δy| between adjacent columns — high-frequency roughness.
+//	curv   = mean chord deviation |y[i]-(y[i-d]+y[i+d])/2| at baseline d — low on
+//	         straight Corner ramps (points on the chord), high on curved Smooth
+//	         arcs (points bow off the chord). The Corner/Smooth discriminator.
 func wiggleEdgeStats(img image.Image, cx int) (spread int, jag, curv float64, samples int) {
 	xLo, xHi := cx-90, cx+90
 	var ys []int
@@ -212,8 +214,8 @@ func runMGWiggleModGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_wiggle_mod_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_wiggle_mod.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_wiggle_mod_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_wiggle_mod.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildMGWiggleModDemo(t, target)
@@ -236,7 +238,7 @@ func runMGWiggleModGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

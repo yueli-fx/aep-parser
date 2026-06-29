@@ -18,8 +18,8 @@ import (
 // Strings prefixed with the BOM `FE FF` are UTF-16BE.
 //
 // Reverse-engineered key paths (verified against AE 2020 fixtures —
-// see test_data/re_text.jsx — and AE 24+ fixtures —
-// see test_data/re_text_caps_ae24.jsx):
+// see test_data/generators/re_text.jsx — and AE 24+ fixtures —
+// see test_data/generators/re_text_caps_ae24.jsx):
 //
 //	/0/1/0[i]/0/0/0      — font name (UTF-16BE) for font resource i
 //	/1/1[0]/0/0          — paragraph text string (UTF-16BE, trailing CR per line)

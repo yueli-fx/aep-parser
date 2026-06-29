@@ -37,8 +37,8 @@ func runGradientStrokeAnimGate(t *testing.T, aeExe, ver string, target aep.AETar
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/grad_stroke_anim_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_grad_stroke_anim.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/grad_stroke_anim_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_grad_stroke_anim.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildGradStrokeAnim(t, target)
@@ -62,7 +62,7 @@ func runGradientStrokeAnimGate(t *testing.T, aeExe, ver string, target aep.AETar
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png0":%q,"png1":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png0), toFwd(png1))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

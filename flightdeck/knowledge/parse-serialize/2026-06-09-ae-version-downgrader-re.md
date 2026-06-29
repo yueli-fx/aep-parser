@@ -47,7 +47,7 @@ READ WHEN: 判断某 chunk/字段属于哪个 AE 版本的版本门禁；想用 
 
 **复现的降级三步**（`rifx.Parse` → 改 → `Chunk.Write` 自动重算 LIST size）：
 1. `trimmedLdta` 164→160：每个 164-ldta 砍尾 4 字节（丢 `@0xA0..0xA3`）。
-2. head 指纹 2020：把 `head.Data` 的 byte[1],[3],[4],[5],[6],[7] 从真实原生 2020 文件（`test_data/renderer_ae2020_r0.aep`）拷过来（`5d/_/16/0b/0b/86/2d`，对上节版本指纹表 2020 行）。
+2. head 指纹 2020：把 `head.Data` 的 byte[1],[3],[4],[5],[6],[7] 从真实原生 2020 文件（`test_data/fixtures/renderer_ae2020_r0.aep`）拷过来（`5d/_/16/0b/0b/86/2d`，对上节版本指纹表 2020 行）。
 3. 删 AE2022+ 门禁 chunk `pdvc`（本例无 `ppSn`）。
 
 **Go 侧字节实证**（同一 parser 读前后）：

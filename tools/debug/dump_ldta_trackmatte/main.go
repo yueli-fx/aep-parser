@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	path := "test_data/re_trackmatte_ae24.aep"
+	path := "test_data/fixtures/re_trackmatte_ae24.aep"
 	if len(os.Args) > 1 {
 		path = os.Args[1]
 	}

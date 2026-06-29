@@ -2,14 +2,14 @@
 //
 // AE ship gate for length-variable SetText. Two gates:
 //
-//   runSetTextGate — 100% Go-built project whose text layers' strings were
-//   replaced with different shapes than the template's 1-char "A": ASCII
-//   1→17 units, CJK 1→5, a three-paragraph block (paragraph-array rebuild),
-//   and an empty string (single "\r" paragraph).
+//	runSetTextGate — 100% Go-built project whose text layers' strings were
+//	replaced with different shapes than the template's 1-char "A": ASCII
+//	1→17 units, CJK 1→5, a three-paragraph block (paragraph-array rebuild),
+//	and an empty string (single "\r" paragraph).
 //
-//   runSetTextMultiRunGate — loads re_text_multirun.aep (a two-style-run doc
-//   built by AE) and replaces its text, exercising the run-array collapse
-//   (2 runs → 1) that a from-scratch single-run template can't reach.
+//	runSetTextMultiRunGate — loads re_text_multirun.aep (a two-style-run doc
+//	built by AE) and replaces its text, exercising the run-array collapse
+//	(2 runs → 1) that a from-scratch single-run template can't reach.
 //
 // Both prove AE accepts the spliced string + rebuilt entry arrays with the
 // stale layout cache, reads back every string exactly, and keeps them across
@@ -52,8 +52,8 @@ func jsStringEscape(s string) string {
 // \n→\r mapping AE's sourceText.value.text uses.
 func textVerifyInAE(t *testing.T, aeExe, ver string, p *aep.Project, expect map[string]string) *aep.Project {
 	t.Helper()
-	const argsPath = `e:/projects/tools/aep-parser/test_data/set_text_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_set_text.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/set_text_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_set_text.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	tempDir := t.TempDir()
@@ -78,7 +78,7 @@ func textVerifyInAE(t *testing.T, aeExe, ver string, p *aep.Project, expect map[
 	}
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expect":{%s}}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), strings.Join(expectParts, ","))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -158,10 +158,10 @@ func runSetTextMultiRunGate(t *testing.T, aeExe, ver string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const fixture = `e:/projects/tools/aep-parser/test_data/re_text_multirun.aep`
+	const fixture = `e:/projects/tools/aep-parser/test_data/fixtures/re_text_multirun.aep`
 	proj, err := aep.Open(fixture)
 	if err != nil {
-		t.Skipf("re_text_multirun.aep not present; run test_data/re_text_multirun.jsx in AE 2025")
+		t.Skipf("re_text_multirun.aep not present; run test_data/generators/re_text_multirun.jsx in AE 2025")
 	}
 	src := textLayerByName(proj, "multirun_src")
 	if src == nil || src.TextSource == nil {
@@ -196,10 +196,10 @@ func runSetTextKerningGate(t *testing.T, aeExe, ver string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const fixture = `e:/projects/tools/aep-parser/test_data/re_text_kern_resize.aep`
+	const fixture = `e:/projects/tools/aep-parser/test_data/fixtures/re_text_kern_resize.aep`
 	proj, err := aep.Open(fixture)
 	if err != nil {
-		t.Skipf("re_text_kern_resize.aep not present; run test_data/re_text_kern_resize.jsx in AE 2024")
+		t.Skipf("re_text_kern_resize.aep not present; run test_data/generators/re_text_kern_resize.jsx in AE 2024")
 	}
 	src := textLayerByName(proj, "kern_src")
 	if src == nil || src.TextSource == nil {

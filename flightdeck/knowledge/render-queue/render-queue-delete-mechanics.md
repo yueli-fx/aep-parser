@@ -5,7 +5,7 @@ READ WHEN: implementing RenderQueue add/insert; debugging Rout chunk layout; ext
 
 ---
 
-`RenderQueue.RemoveItem(index)`（P3 §3A，结构性）。RE 来源：AE 2020 受控 2-item→1-item（`test_data/re_rq_delete.jsx`，`renderQueue.item(2).remove()`），`tmp_debug/dump_lrdr` diff。
+`RenderQueue.RemoveItem(index)`（P3 §3A，结构性）。RE 来源：AE 2020 受控 2-item→1-item（`test_data/generators/re_rq_delete.jsx`，`renderQueue.item(2).remove()`），`tmp_debug/dump_lrdr` diff。
 
 ## LRdr 容器结构（root 直接子 LIST:LRdr）
 

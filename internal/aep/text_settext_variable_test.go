@@ -191,9 +191,9 @@ func TestSetTextVariable_MultiParagraphAndEmpty(t *testing.T) {
 }
 
 func TestSetTextVariable_MultiRunCollapse(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text_multirun.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text_multirun.aep")
 	if err != nil {
-		t.Skipf("re_text_multirun.aep not present; run test_data/re_text_multirun.jsx in AE 2025")
+		t.Skipf("re_text_multirun.aep not present; run test_data/generators/re_text_multirun.jsx in AE 2025")
 	}
 	src := textLayerByName(proj, "multirun_src")
 	if src == nil || src.TextSource == nil {
@@ -235,9 +235,9 @@ func TestSetTextVariable_MultiRunCollapse(t *testing.T) {
 }
 
 func TestSetTextVariable_DropsManualKerning(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text_kern_resize.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text_kern_resize.aep")
 	if err != nil {
-		t.Skipf("re_text_kern_resize.aep not present; run test_data/re_text_kern_resize.jsx in AE 2024")
+		t.Skipf("re_text_kern_resize.aep not present; run test_data/generators/re_text_kern_resize.jsx in AE 2024")
 	}
 	src := textLayerByName(proj, "kern_src")
 	if src == nil || src.TextSource == nil {
@@ -276,9 +276,9 @@ func TestSetTextVariable_DropsManualKerning(t *testing.T) {
 }
 
 func TestSetTextVariable_ParsedFixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text.aep")
 	if err != nil {
-		t.Skipf("re_text.aep not present; run test_data/re_text.jsx in AE")
+		t.Skipf("re_text.aep not present; run test_data/generators/re_text.jsx in AE")
 	}
 	// re_text.aep carries historic duplicate RE_TEXT comps (the generator JSX
 	// predates the fresh_project guard — see incidents/jsx-state-leak.md), so

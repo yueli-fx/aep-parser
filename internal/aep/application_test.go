@@ -8,7 +8,7 @@ import (
 )
 
 func TestApplication_Parse(t *testing.T) {
-	app, err := aep.Parse("../../test_data/re_cameralight.aep")
+	app, err := aep.Parse("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -21,7 +21,7 @@ func TestApplication_Parse(t *testing.T) {
 }
 
 func TestApplication_ParseReader(t *testing.T) {
-	f, err := os.Open("../../test_data/re_cameralight.aep")
+	f, err := os.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -36,7 +36,7 @@ func TestApplication_ParseReader(t *testing.T) {
 }
 
 func TestApplication_Version(t *testing.T) {
-	app, err := aep.Parse("../../test_data/re_cameralight.aep")
+	app, err := aep.Parse("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

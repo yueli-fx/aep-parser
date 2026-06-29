@@ -22,7 +22,7 @@ READ WHEN: building / debugging ShapeLayer write path; AE accepts file but layer
 ```bash
 go run tmp_debug/gen_canonical_failing/main.go
 go run tools/debug/dump_chunks/main.go tmp_debug/v2_2_canonical_failing.aep > tmp_debug/dump_failing.txt
-go run tools/debug/dump_chunks/main.go test_data/v2_2_shape_tolerance.aep > tmp_debug/dump_tolerance.txt
+go run tools/debug/dump_chunks/main.go test_data/fixtures/v2_2_shape_tolerance.aep > tmp_debug/dump_tolerance.txt
 ```
 
 tolerance.aep 是 AE 自己存的 nested-Rect+Fill ShapeLayer fixture (Task 5.3 出)，结构 AE 认。Diff 二者即看 V2.2 lowering 哪里跟 AE 不一致。
@@ -282,7 +282,7 @@ AE 的拒接有**两种独立失败模式**，需要不同 JSX 验证：
 | hard reject | `app.open()` 抛异常 | 文件结构 fatal corruption — parser 在 chunk-level fail |
 | silent drop | `app.open()` 不抛，但 `comp.layers.length` 少了我们加的层 | 文件 parser 接受 chunk 结构，但 AE 内部某 layer-validation 把我们的 layer 当 deleted/invalid/phantom 丢弃 |
 
-`test_data/verify_v2_2.jsx` (Phase 5 Task 5.1) 只验 PASS/FAIL 不验 silent drop。`test_data/verify_open.jsx` (iter 4 新写) 显式 dump `items[i].typeName / layers.length / layers[k].name` 才暴露 silent drop。
+`test_data/generators/verify_v2_2.jsx` (Phase 5 Task 5.1) 只验 PASS/FAIL 不验 silent drop。`test_data/generators/verify_open.jsx` (iter 4 新写) 显式 dump `items[i].typeName / layers.length / layers[k].name` 才暴露 silent drop。
 
 未来 ship gate / 任何 JSX driver **必须打印 layers.length + 每层 name**，不然 silent drop 假阳性 PASS 难抓。
 
@@ -455,7 +455,7 @@ GPT 给的具体 3 步法救了项目:
 ### 3 步 semantic RE
 
 1. **排除 epistemic hole** — 验证 measurement pipeline 是否可信。Tolerance.aep 用同一个 JSX probe 跑一遍, 看 layers.length 是否 = 1。
-   - 写 `test_data/verify_baseline.jsx` + `tmp_debug/verify_baseline/main.go` (dump 完整 metrics: items count / comp count / activeItem / selection / per-item class+typeName / per-comp layers + 每 layer class+enabled+index)
+   - 写 `test_data/generators/verify_baseline.jsx` + `tmp_debug/verify_baseline/main.go` (dump 完整 metrics: items count / comp count / activeItem / selection / per-item class+typeName / per-comp layers + 每 layer class+enabled+index)
    - tolerance 跑出 `comp.layers.length=1, layer[1]: name=Nested class=ShapeLayer enabled=true` ✓ → measurement sound, silent drop 真问题
    
 2. **Transplant 法 isolate 触发器** — 不 byte-diff, 直接 swap chunk 看 AE 反应。逐级缩小范围:

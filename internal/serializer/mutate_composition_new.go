@@ -64,7 +64,7 @@ func buildCompIdpc() *rifx.Chunk {
 }
 
 // idtaCompDefaultBytes: 84 字节 idta default，从 AE 2025 saved 1-comp fixture
-// (test_data/fdta_probe/AE2025_1comp.aep) verbatim 拷贝。Builder 只 overwrite
+// (test_data/fixtures/fdta_probe/AE2025_1comp.aep) verbatim 拷贝。Builder 只 overwrite
 // @0x10 (Item ID) + 显式归零 @0x3A (Label)；其余字节保持 AE-default 不动（含
 // @0x14..0x17 const 0x20、@0x3A 在 fixture 中残留=0x0F 我们 reset 为 0、
 // @0x50 session token 等未完全语义化字段）。
@@ -301,7 +301,7 @@ func deepCloneChunk(c *rifx.Chunk) *rifx.Chunk {
 
 // buildCompItem 包成完整 LIST formType=Item。
 // Children 顺序（按 AE 2025 saved fixture 实测，见
-// test_data/comp_item_children.golden.txt）：
+// test_data/fixtures/comp_item_children.golden.txt）：
 //
 //	iide / idpc / idta / Utf8 / LIST(dats) / cdta / cdrp / comr /
 //	LIST(PRin) / LIST(DLay) ... / LIST(Layr)

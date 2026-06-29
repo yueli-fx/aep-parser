@@ -9,7 +9,7 @@ import (
 // TestCanSetCollapseTransformation_Fixture verifies py-aep capability
 // query semantics against fixtures with comp / solid / file sources.
 func TestCanSetCollapseTransformation_Fixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestCanSetCollapseTransformation_Fixture(t *testing.T) {
 }
 
 func TestCanSetTimeRemapEnabled_Fixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

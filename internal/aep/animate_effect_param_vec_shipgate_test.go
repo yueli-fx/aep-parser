@@ -5,20 +5,20 @@
 // AnimateEffectParam gate. Per delivery-contract red line 4, both are verified
 // at the render surface across time, on a 100% Go-built file:
 //
-//   FILLANIM comp: white solid + Fill effect, Fill Color animated
-//     red([A,R,G,B]=255,255,0,0) @0s -> blue(255,0,0,255) @2s.
-//     frame t=0 center = RED, frame t=2 center = BLUE.
+//	FILLANIM comp: white solid + Fill effect, Fill Color animated
+//	  red([A,R,G,B]=255,255,0,0) @0s -> blue(255,0,0,255) @2s.
+//	  frame t=0 center = RED, frame t=2 center = BLUE.
 //
-//   RAMPANIM comp: solid + Gradient Ramp (Start Color white, End Color black,
-//     Radial), Start-of-Ramp POINT animated left(0.25,0.5) @0s -> right
-//     (0.75,0.5) @2s. The bright radial centre sweeps L->R:
-//     t=0 left bright / right dark, t=2 left dark / right bright.
+//	RAMPANIM comp: solid + Gradient Ramp (Start Color white, End Color black,
+//	  Radial), Start-of-Ramp POINT animated left(0.25,0.5) @0s -> right
+//	  (0.75,0.5) @2s. The bright radial centre sweeps L->R:
+//	  t=0 left bright / right dark, t=2 left dark / right bright.
 //
 // Sampling two times proves AE evaluated each multi-component param's keyframes
 // over time (not just that the stream round-tripped). Resave reopen proves the
 // animated streams survive AE's re-encode.
 //
-// Gated by AE_SHIP_GATE. Uses test_data/verify_anim_effect_vec.jsx.
+// Gated by AE_SHIP_GATE. Uses test_data/generators/verify_anim_effect_vec.jsx.
 package aep_test
 
 import (
@@ -86,10 +86,10 @@ func buildVecAnimRenderDemo(t *testing.T, target aep.AETarget) *aep.Project {
 			t.Fatalf("SetEffectParam(%s): %v", mn, err)
 		}
 	}
-	set("ADBE Ramp-0002", []float64{255, 255, 255, 255})  // Start Color white
-	set("ADBE Ramp-0004", []float64{255, 0, 0, 0})        // End Color black
-	set("ADBE Ramp-0005", 2.0)                            // Ramp Shape = Radial
-	set("ADBE Ramp-0003", []float64{0.5, 1.0})            // End of Ramp = (960,1080) → radius
+	set("ADBE Ramp-0002", []float64{255, 255, 255, 255}) // Start Color white
+	set("ADBE Ramp-0004", []float64{255, 0, 0, 0})       // End Color black
+	set("ADBE Ramp-0005", 2.0)                           // Ramp Shape = Radial
+	set("ADBE Ramp-0003", []float64{0.5, 1.0})           // End of Ramp = (960,1080) → radius
 	if _, err := aep.AnimateEffectParamVec(rl, rfx, "ADBE Ramp-0001", []aep.VectorKeyframe{
 		{Time: 0, Value: []float64{0.25, 0.5}}, // left  (480,540)
 		{Time: 2, Value: []float64{0.75, 0.5}}, // right (1440,540)
@@ -103,8 +103,8 @@ func runVecAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/anim_effect_vec_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_anim_effect_vec.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/anim_effect_vec_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_anim_effect_vec.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildVecAnimRenderDemo(t, target)
@@ -132,7 +132,7 @@ func runVecAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		`"fill_t0":%q,"fill_t2":%q,"ramp_t0":%q,"ramp_t2":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP),
 		toFwd(fillT0), toFwd(fillT2), toFwd(rampT0), toFwd(rampT2))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

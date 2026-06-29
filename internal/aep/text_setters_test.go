@@ -74,7 +74,7 @@ func TestSetTextLengthPreserving(t *testing.T) {
 // tracking / leading / baseline shift / justification, round-trip via
 // WriteAEP, and confirm the decoded TextSource reflects the new values.
 func TestTextPerRunSetters(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text.aep")
 	if err != nil {
 		t.Skipf("re_text.aep not present; rerun re_text.jsx")
 	}

@@ -15,7 +15,7 @@ READ WHEN: 实现/调试 project 显示设置 setter（SetTimeDisplayType / SetF
 
 showcase project-settings 的 AE-DOM readback 查出：`SetTimeDisplayType(Frames)` / `SetFramesCountType(Start1)` / `SetFeetFramesFilmType(MM16)` 写完字节 Go round-trip 全绿，但 AE 打开后 `app.project.*` 读回**默认值**，我方写入完全被忽略（红线4a false green）。`SetFootageTimecodeDisplayStartType`（nnhd byte9）当时「看似通过」实为**巧合**（我方 from-scratch seed 的 nhed[9] 恰好 = 设的值）。
 
-复现：`go run ./tmp_debug/nnhd_verify_gen`（建 4 设置的工程）→ `scripts/ae_run.ps1` 跑 `test_data/verify_nnhd.jsx` 读 DOM → `verify_nnhd.done` 显示 `NO ... got=<default>`。
+复现：`go run ./tmp_debug/nnhd_verify_gen`（建 4 设置的工程）→ `scripts/ae_run.ps1` 跑 `test_data/generators/verify_nnhd.jsx` 读 DOM → `verify_nnhd.done` 显示 `NO ... got=<default>`。
 
 ## 根因
 
@@ -52,7 +52,7 @@ AE 2020 新建工程 DOM 默认：timeDisplayType=Frames、framesCountType=Start
 - `go run ./tmp_debug/nnhd_verify_gen` → AE2020 **和** AE2025 跑 `verify_nnhd.jsx`，4 字段全 `OK`（2026-06-14 双版本实测 PASS）。
 - 回归测试：`internal/serializer/project_settings_internal_test.go::TestProjectSettings_NhedNnhdMirror`（合成 nhed+nnhd chunk，断言每个 setter 双写正确 offset）。
 
-RE 工具（本地，`tmp_debug/` + `test_data/` 均 gitignored，按本文从零可重建）：`tmp_debug/dump_nhed_nnhd.go`（同 dump 两头）· `tmp_debug/nnhd_verify_gen/`（建验证工程）· `test_data/re_nnhd_settings.jsx`（AE 自存两值变体供 byte-diff）· `test_data/verify_nnhd.jsx`（DOM readback gate）。永久回归走 `TestProjectSettings_NhedNnhdMirror`（tracked）。
+RE 工具（本地，`tmp_debug/` + `test_data/` 均 gitignored，按本文从零可重建）：`tmp_debug/dump_nhed_nnhd.go`（同 dump 两头）· `tmp_debug/nnhd_verify_gen/`（建验证工程）· `test_data/generators/re_nnhd_settings.jsx`（AE 自存两值变体供 byte-diff）· `test_data/generators/verify_nnhd.jsx`（DOM readback gate）。永久回归走 `TestProjectSettings_NhedNnhdMirror`（tracked）。
 
 ## Cases
 - 2026-06-14 首次：showcase project-settings AE-DOM readback 暴露；RE 出 nhed-primary + frames-per-foot 双根因；7 个 display setter 全改双写；AE2020+2025 双版本 DOM gate 全绿。commit 见 git log。

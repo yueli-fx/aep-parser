@@ -60,11 +60,11 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 
 | 类 | 路径 | 用途 |
 |---|---|---|
-| **RE 真相源** | `test_data/pseudo_rich_demo.aep` | 用户 AE-2022 出的 13 控件金样本,**所有字节布局的神谕**(force-add tracked) |
+| **RE 真相源** | `test_data/fixtures/pseudo_rich_demo.aep` | 用户 AE-2022 出的 13 控件金样本,**所有字节布局的神谕**(force-add tracked) |
 | 代码主体 | `internal/serializer/mutate_pseudo_effect_build.go` | `BuildPseudoEffect`/`synthPseudoSspc`/`synthControlPard`/`synthPard`/`pardNameBytes` |
 | facade | `internal/aep/facade.go` | `BuildPseudoEffect` + `PseudoControl`/`PseudoControlKind` 别名 + cap tag |
 | ship-gate test | `internal/aep/pseudo_effect_shipgate_test.go` | `TestBuildPseudoEffect_AEShipGate_AE2020/2025` 模板,照抄加新 test |
-| verify JSX | `test_data/verify_pseudo_effect.jsx` | 通用回读校验,支持 `checks:[{idx,prop,expect}]`(value/min/max)+ nameCodes |
+| verify JSX | `test_data/generators/verify_pseudo_effect.jsx` | 通用回读校验,支持 `checks:[{idx,prop,expect}]`(value/min/max)+ nameCodes |
 | 单测 | `internal/serializer/mutate_pseudo_effect_build_test.go` | GBK byte-equiv(`TestPardNameBytes_GBKMatchesAENative`) |
 | **probe 工具**(gitignored,可复用) | `tmp_debug/pseudo-spike/pardfull/` | dump pard 字节(`go run ./tmp_debug/pseudo-spike/pardfull <aep> [matchname过滤]`) |
 | | `tmp_debug/pseudo-spike/valdump/` | dump 值组 tdgp 树 |
@@ -91,7 +91,7 @@ READ WHEN: 维护 BuildPseudoEffect、新增伪控件类型、或复用 pard/val
 - dim4(color):`db990004 0007 0001 0002 ff04 0000 5da8` + @0x30尾 `0101 0000`
 - dim2(point):`db990002 000f 0003 ffff ff04 0000 5da8` + `…0406 0000`
 - dim3(3dpoint):`db990003 000f 0003 ffff ff04 0000 5da8`
-- 全量 hex 重抓:`go run ./tmp_debug/pseudo-spike/fulltdb4 test_data/pseudo_rich_demo.aep "Pseudo/711536-NNNN"`
+- 全量 hex 重抓:`go run ./tmp_debug/pseudo-spike/fulltdb4 test_data/fixtures/pseudo_rich_demo.aep "Pseudo/711536-NNNN"`
 
 ## 5. ship-gate 技巧 / 坑(踩过的)
 

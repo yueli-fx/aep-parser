@@ -5,7 +5,7 @@
 // Path() stream carries N keyframes (time + denormalized geometry), not N
 // separate static PathNodes.
 //
-// Fixture: test_data/re_path_anim.jsx (3 LINEAR keyframes, distinct vertex
+// Fixture: test_data/generators/re_path_anim.jsx (3 LINEAR keyframes, distinct vertex
 // count + bbox per frame). See incident-reports/path-keyframe-write-re.md.
 package aep_test
 
@@ -17,9 +17,9 @@ import (
 )
 
 func TestPathKeyframe_HydrateAnimated(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_path_anim.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_path_anim.aep")
 	if err != nil {
-		t.Skipf("re_path_anim.aep not present; run test_data/re_path_anim.jsx in AE")
+		t.Skipf("re_path_anim.aep not present; run test_data/generators/re_path_anim.jsx in AE")
 	}
 	if len(proj.Compositions) == 0 {
 		t.Fatal("no compositions")

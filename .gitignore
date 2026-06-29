@@ -19,8 +19,9 @@ Thumbs.db
 
 # AE auxiliary / generated test sidecars
 *.done
-test_data/v2_1_args.json
-test_data/
+test_data/generated/
+test_data/**/*.done
+test_data/**/*.done.fail/
 
 # Local scratch/cache.
 # tmp/ is disposable cache/output; tmp_debug/ is AE/render output only; _tmp_debug/ is disposable Go probes skipped by ./...

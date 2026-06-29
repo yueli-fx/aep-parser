@@ -64,7 +64,7 @@ var textAnimatorsColorBody []byte
 // Fill Color). Each body materializes only its own leaf (AE elides the rest);
 // the Rotation X/Y bodies additionally carry an inert companion Rotation (Z=0,
 // default) that AE auto-adds — overwriteScalarCdat targets the X/Y match-name so
-// the companion stays default. Regen via test_data/gen_text_anim_neighbor_templates.jsx.
+// the companion stays default. Regen via test_data/generators/gen_text_anim_neighbor_templates.jsx.
 //
 //go:embed templates/text/text_animators_fillopacity_body.bin
 var textAnimatorsFillOpacityBody []byte
@@ -92,7 +92,7 @@ var textAnimatorsRotYBody []byte
 // the selected characters apart; Character Offset shifts each selected glyph's
 // code by an integer. Each body materializes only its driven leaf (companion
 // Track Type / Character Change Type / Character Range stay default → elided).
-// Regen via test_data/gen_text_anim_tracking_charoffset_templates.jsx.
+// Regen via test_data/generators/gen_text_anim_tracking_charoffset_templates.jsx.
 //
 //go:embed templates/text/text_animators_tracking_body.bin
 var textAnimatorsTrackingBody []byte
@@ -106,7 +106,7 @@ var textAnimatorsCharOffsetBody []byte
 // clone of this, resets every slot to its AE default, then overwrites the
 // caller's params. RE'd from re_text_range_advanced.aep (AE 2020); Smoothness is //nolint:jargon
 // hidden in the AE UI unless Shape=Square but its slot still materializes when
-// Shape is non-default. Regen via test_data/gen_text_range_advanced_template.jsx.
+// Shape is non-default. Regen via test_data/generators/gen_text_range_advanced_template.jsx.
 //
 //go:embed templates/text/text_range_advanced_body.bin
 var textRangeAdvancedBody []byte

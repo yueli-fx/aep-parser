@@ -14,13 +14,13 @@ import (
 // 3 solid layers L1_top / L2_mid / L3_bot, no refs) — pure structural
 // reorder doesn't depend on layer types or references.
 
-const moveLayerFixtureDir = "../../test_data"
+const moveLayerFixtureDir = "../../test_data/generated/fixtures"
 
 func openMoveBaseline(t *testing.T) *aep.Project {
 	t.Helper()
 	path := filepath.Join(moveLayerFixtureDir, "re_delete_layer_baseline.aep")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		t.Skipf("fixture missing: %s (3-solid baseline; produced by test_data/re_delete_layer.jsx RE_DELETE_MODE=baseline)", path)
+		t.Skipf("fixture missing: %s (3-solid baseline; produced by test_data/generators/re_delete_layer.jsx RE_DELETE_MODE=baseline)", path)
 		return nil
 	}
 	proj, err := aep.Open(path)

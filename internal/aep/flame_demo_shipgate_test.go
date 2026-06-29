@@ -178,8 +178,8 @@ func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/flame_demo_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_flame_demo.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/flame_demo_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_flame_demo.jsx`
 	toFwd := func(s string) string { return strings.ReplaceAll(s, `\`, `/`) }
 
 	p := buildFlameDemo(t, target)
@@ -202,7 +202,7 @@ func runFlameDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"png":%q,"t":1.0,"png2":%q,"t2":3.0}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(framePNG), toFwd(framePNG2))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

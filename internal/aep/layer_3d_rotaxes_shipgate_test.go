@@ -8,14 +8,14 @@
 // overwrites a cdat length-preservingly. Per delivery-contract red line 4 each
 // axis renders the frame and asserts on pixels:
 //
-//   Rotate X=50°       box rotates about the horizontal axis; under perspective
-//                      the top and bottom EDGES foreshorten to different WIDTHS
-//                      (trapezoid on its side). A flat rect has topW ≈ botW.
-//   Orientation Y=50°  same Y-axis tumble as Rotate Y: the near vertical edge
-//                      renders TALLER than the far edge (trapezoid). leftH ≠ rightH.
-//   Rotate Z=45°       in-plane spin: the axis-aligned square becomes a DIAMOND,
-//                      so the center column is far taller than the near-edge
-//                      columns. A non-rotated square has near-constant column heights.
+//	Rotate X=50°       box rotates about the horizontal axis; under perspective
+//	                   the top and bottom EDGES foreshorten to different WIDTHS
+//	                   (trapezoid on its side). A flat rect has topW ≈ botW.
+//	Orientation Y=50°  same Y-axis tumble as Rotate Y: the near vertical edge
+//	                   renders TALLER than the far edge (trapezoid). leftH ≠ rightH.
+//	Rotate Z=45°       in-plane spin: the axis-aligned square becomes a DIAMOND,
+//	                   so the center column is far taller than the near-edge
+//	                   columns. A non-rotated square has near-constant column heights.
 //
 // DISK-CACHE GOTCHA (see mg_text_style_shipgate_test.go / re-fixture.md): a
 // from-scratch single-comp project always gets comp.id=1, and saveFrameToPng keys
@@ -70,12 +70,12 @@ func whiteRowRange(img image.Image) (int, int) {
 }
 
 type rot3DAxis struct {
-	comp   string                     // composition name (also the disk-cache isolation handle)
-	prop   string                     // transform-group matchname for JSX readback
-	idx    int                        // array index for multi-component props (Orientation); 0 for scalars
-	expect float64                    // expected readback value
-	time   float64                    // unique render time (disk-cache key isolation)
-	apply  func(b *aep.Layer) error   // the per-axis setter under test (after Reopen)
+	comp   string                   // composition name (also the disk-cache isolation handle)
+	prop   string                   // transform-group matchname for JSX readback
+	idx    int                      // array index for multi-component props (Orientation); 0 for scalars
+	expect float64                  // expected readback value
+	time   float64                  // unique render time (disk-cache key isolation)
+	apply  func(b *aep.Layer) error // the per-axis setter under test (after Reopen)
 	check  func(t *testing.T, ver string, img image.Image)
 }
 
@@ -83,8 +83,8 @@ func runLayer3DRotAxisGate(t *testing.T, aeExe, ver string, target aep.AETarget,
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/3d_rotaxes_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_3d_rotaxes.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/3d_rotaxes_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_3d_rotaxes.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -150,7 +150,7 @@ func runLayer3DRotAxisGate(t *testing.T, aeExe, ver string, target aep.AETarget,
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q,"comp":%q,"prop":%q,"idx":%d,"expect":%g,"time":%g}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png),
 		ax.comp, ax.prop, ax.idx, ax.expect, ax.time)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

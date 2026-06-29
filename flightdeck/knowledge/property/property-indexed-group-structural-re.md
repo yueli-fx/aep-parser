@@ -5,7 +5,7 @@ READ WHEN: implementing PropertyBase.Remove / Duplicate / MoveTo or any structur
 
 ---
 
-RE'd 2026-06-03 (AE 2020, `17.7x45`) via `test_data/re_property_struct.jsx`
+RE'd 2026-06-03 (AE 2020, `17.7x45`) via `test_data/generators/re_property_struct.jsx`
 （modes: baseline / remove / duplicate / move）。目标域 = canonical indexed
 group **ADBE Effect Parade**（最常用，3 effects: Gaussian Blur / Tint / Fill）。
 

@@ -55,8 +55,12 @@ func mgTextStyleComps() []tsComp {
 		{"TS_FS_BIG", "Ag", func(t *testing.T, l *aep.Layer) { mustText(t, "size", l.SetRunFontSize(0, 160)) }},
 		{"TS_TRK_TIGHT", "MMMM", func(t *testing.T, l *aep.Layer) { mustText(t, "trk", l.SetRunTracking(0, 0)) }},
 		{"TS_TRK_WIDE", "MMMM", func(t *testing.T, l *aep.Layer) { mustText(t, "trk", l.SetRunTracking(0, 1200)) }},
-		{"TS_JL", "ABCD", func(t *testing.T, l *aep.Layer) { mustText(t, "j", l.SetParagraphJustification(0, aep.TextJustifyLeft)) }},
-		{"TS_JC", "ABCD", func(t *testing.T, l *aep.Layer) { mustText(t, "j", l.SetParagraphJustification(0, aep.TextJustifyCenter)) }},
+		{"TS_JL", "ABCD", func(t *testing.T, l *aep.Layer) {
+			mustText(t, "j", l.SetParagraphJustification(0, aep.TextJustifyLeft))
+		}},
+		{"TS_JC", "ABCD", func(t *testing.T, l *aep.Layer) {
+			mustText(t, "j", l.SetParagraphJustification(0, aep.TextJustifyCenter))
+		}},
 		// Leading is intentionally NOT render-gated: SetRunLeading round-trips
 		// (DOM reads back 70/220) but AE renders default line spacing for a
 		// from-scratch text layer regardless (220 vs 70 both render the two
@@ -206,8 +210,8 @@ func runMGTextStyleGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 	clearAEDiskCache(t)
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_text_style_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_text_style.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_text_style_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_text_style.jsx`
 	pngDir := `e:/projects/tools/aep-parser/tmp_debug`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -250,7 +254,7 @@ func runMGTextStyleGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		doneC := filepath.Join(tempDir, c.name+".done")
 		argsJSON := fmt.Sprintf(`{"done":%q,"ver":%q,"jobs":[{"name":%q,"input":%q,"png":%q,"time":%g}]}`,
 			toFwd(doneC), ver, c.name, toFwd(inputAEP), pngPath, renderTime)
-		if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+		if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 			t.Fatal(err)
 		}
 		os.Remove(doneC)

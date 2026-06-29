@@ -188,8 +188,8 @@ func TestTextAnimatorStruct_RoundTrip(t *testing.T) {
 }
 
 func runTextAnimatorStructGate(t *testing.T, aeExe, ver string, target aep.AETarget, v structVariant) {
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_animator_struct_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_animator_struct.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_animator_struct_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_animator_struct.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	rp := buildTextStruct3(t, target)
@@ -219,7 +219,7 @@ func runTextAnimatorStructGate(t *testing.T, aeExe, ver string, target aep.AETar
 	expectJSON := `["` + strings.Join(v.expect, `","`) + `"]`
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expect":%s}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), expectJSON)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

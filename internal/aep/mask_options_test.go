@@ -16,7 +16,7 @@ import (
 )
 
 func TestMaskOptions_RoundTrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -69,7 +69,7 @@ func TestMaskOptions_RoundTrip(t *testing.T) {
 
 // Idempotent overwrite: setting opacity twice must not splice a second leaf.
 func TestMaskOptions_OverwriteNoDuplicate(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}

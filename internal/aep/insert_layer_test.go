@@ -10,7 +10,7 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
-const insertLayerFixtureDir = "../../test_data"
+const insertLayerFixtureDir = "../../test_data/generated/fixtures"
 
 // openInsertPair opens the baseline that contains 2 sibling comps in
 // one Project (compA = src holder, compB = dest), returns (dest=compB, src=compA.Layers[0]).
@@ -19,7 +19,7 @@ func openInsertPair(t *testing.T) (*aep.Composition, *aep.Layer) {
 	t.Helper()
 	path := filepath.Join(insertLayerFixtureDir, "re_insert_layer_basic_before.aep")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		t.Skipf("fixture missing: %s (run test_data/re_insert_layer.jsx with RE_INSERT_MODE=basic_before)", path)
+		t.Skipf("fixture missing: %s (run test_data/generators/re_insert_layer.jsx with RE_INSERT_MODE=basic_before)", path)
 		return nil, nil
 	}
 	proj, err := aep.Open(path)

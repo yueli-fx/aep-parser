@@ -7,7 +7,8 @@
 // chunk survived. Positions probed:
 //   - ROOT: direct child of the RIFX root (sibling of Fold).
 //   - ITEM: inside the comp's Item LIST (sibling of idta/cdta/Layr — a
-//           container AE fully models).
+//     container AE fully models).
+//
 // Either outcome is a valid finding:
 //   - SURVIVED → AE round-trips an unknown chunk there (a real metadata stash).
 //   - DROPPED  → AE rebuilds from its object model and discards it.
@@ -50,8 +51,8 @@ func runCustomChunkProbe(t *testing.T, aeExe, ver, pos string, inject func(*test
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/chunk_probe_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_chunk_probe.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/chunk_probe_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_chunk_probe.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	// 1. Minimal openable project.
@@ -102,7 +103,7 @@ func runCustomChunkProbe(t *testing.T, aeExe, ver, pos string, inject func(*test
 	// 4. AE open + resave.
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

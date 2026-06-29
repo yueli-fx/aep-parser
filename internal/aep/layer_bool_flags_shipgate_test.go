@@ -4,9 +4,9 @@
 // (so a from-scratch shape layer carries them), capped at verify=roundtrip:
 //
 //   - SetAutoOrient      → AE layer.autoOrient (enum; AlongPath needs a path,
-//                          so the carrier gets position keyframes)
+//     so the carrier gets position keyframes)
 //   - SetCollapseTransform → AE layer.collapseTransformation (shape =
-//                          continuously rasterize)
+//     continuously rasterize)
 //
 // These are ldta-byte/bit writes (not property-tree), so unlike the transform
 // statics they don't need a materialized property — a bare layer works.
@@ -90,8 +90,8 @@ func runLayerBoolGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/layer_bool_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_layer_bool.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/layer_bool_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_layer_bool.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildLayerBoolDemo(t, target)
@@ -113,7 +113,7 @@ func runLayerBoolGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

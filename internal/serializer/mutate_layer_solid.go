@@ -27,7 +27,7 @@ import (
 //go:embed templates/project/solidnull_2020.aep
 var solidLibraryBytes []byte
 
-// opti "Soli" layout (RE: test_data/re_solidnull.aep, AE 2020; 282-byte chunk):
+// opti "Soli" layout (RE: test_data/fixtures/re_solidnull.aep, AE 2020; 282-byte chunk):
 // tag "Soli" @0x00, ARGB 4×float32 BE @0x0A (alpha always 1.0), display name
 // @0x1A (NUL-terminated UTF-8 inside the fixed tail buffer). sspc offsets match
 // parseFootage's real-AE layout (u16 BE width/height @0x20/@0x24).

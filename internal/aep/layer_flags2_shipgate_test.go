@@ -3,8 +3,8 @@
 // AE ship gate for layer-set flags that need a real carrier (verify=roundtrip):
 //
 //   - SetEffectsEnabled   → AE effectsActive (read-only = switch ON && ≥1 enabled
-//                           effect). EON: effect + switch on → true; EOFF: effect
-//                           + SetEffectsEnabled(false) → false (contrast).
+//     effect). EON: effect + switch on → true; EOFF: effect
+//   - SetEffectsEnabled(false) → false (contrast).
 //   - SetIsNull           → AE nullLayer (flip a solid's null bit).
 //
 // SetTimeRemapEnabled is NOT here — confirmed false-green: it sets a static value
@@ -73,8 +73,8 @@ func runLayerFlags2Gate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/layer_flags2_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_layer_flags2.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/layer_flags2_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_layer_flags2.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildLayerFlags2Demo(t, target)
@@ -96,7 +96,7 @@ func runLayerFlags2Gate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

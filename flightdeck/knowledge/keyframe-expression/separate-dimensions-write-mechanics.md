@@ -5,7 +5,7 @@ READ WHEN: implementing SetDimensionsSeparated merge direction / 2D / animated; 
 
 ---
 
-`Property.SetDimensionsSeparated(true)`（P3 §3C）不是翻一个 bit，是带**值迁移 + 默认合成 + 组件数分支**的结构性重构。RE 来源：AE 2020 受控 before/after（`test_data/re_separate_dims.jsx` 同一工程 toggle 一次，存两份），`tools/debug/list_item_chunks` diff。
+`Property.SetDimensionsSeparated(true)`（P3 §3C）不是翻一个 bit，是带**值迁移 + 默认合成 + 组件数分支**的结构性重构。RE 来源：AE 2020 受控 before/after（`test_data/generators/re_separate_dims.jsx` 同一工程 toggle 一次，存两份），`tools/debug/list_item_chunks` diff。
 
 ## 字节 delta（merged → separated，静态 3D Position）
 

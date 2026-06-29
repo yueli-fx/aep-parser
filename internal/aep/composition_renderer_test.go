@@ -10,10 +10,10 @@ import (
 // rendererFixtures maps a test_data fixture to its expected baseline renderer
 // match-name (RE'd from py-aep's renderer samples).
 var rendererFixtures = map[string]string{
-	"../../test_data/renderer_classic_3d.aep":  "ADBE Escher",
-	"../../test_data/renderer_advanced_3d.aep": "ADBE Calder",
-	"../../test_data/renderer_cinema_4d.aep":   "ADBE Ernst",
-	"../../test_data/renderer_ray_traced.aep":  "ADBE Picasso",
+	"../../test_data/fixtures/renderer_classic_3d.aep":  "ADBE Escher",
+	"../../test_data/fixtures/renderer_advanced_3d.aep": "ADBE Calder",
+	"../../test_data/fixtures/renderer_cinema_4d.aep":   "ADBE Ernst",
+	"../../test_data/fixtures/renderer_ray_traced.aep":  "ADBE Picasso",
 }
 
 // expected prda lengths per renderer (template sizes).
@@ -44,7 +44,7 @@ func TestCompositionRendererRead(t *testing.T) {
 // TestSetRendererRoundTrip switches each fixture to every other engine and
 // verifies the match-name + prda length persist through WriteAEP + re-parse.
 func TestSetRendererRoundTrip(t *testing.T) {
-	const src = "../../test_data/renderer_classic_3d.aep"
+	const src = "../../test_data/fixtures/renderer_classic_3d.aep"
 	targets := []string{"ADBE Calder", "ADBE Ernst", "ADBE Picasso", "ADBE Escher"}
 
 	for _, target := range targets {
@@ -81,7 +81,7 @@ func TestSetRendererRoundTrip(t *testing.T) {
 // TestSetRendererExtendscriptAlias accepts the ExtendScript module name
 // "ADBE Advanced 3d" and normalizes it to the binary match_name "ADBE Escher".
 func TestSetRendererExtendscriptAlias(t *testing.T) {
-	const src = "../../test_data/renderer_cinema_4d.aep"
+	const src = "../../test_data/fixtures/renderer_cinema_4d.aep"
 	proj, err := aep.Open(src)
 	if err != nil {
 		t.Skipf("%s not present: %v", src, err)
@@ -100,7 +100,7 @@ func TestSetRendererExtendscriptAlias(t *testing.T) {
 
 // TestSetRendererUnknown rejects an unknown match-name without mutating.
 func TestSetRendererUnknown(t *testing.T) {
-	const src = "../../test_data/renderer_classic_3d.aep"
+	const src = "../../test_data/fixtures/renderer_classic_3d.aep"
 	proj, err := aep.Open(src)
 	if err != nil {
 		t.Skipf("%s not present: %v", src, err)

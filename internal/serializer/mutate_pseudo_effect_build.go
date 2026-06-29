@@ -52,7 +52,7 @@ const (
 )
 
 // pardControlType maps a kind to the pard control_type byte (@0x0F), RE'd from a //nolint:jargon
-// real Pseudo Effect Maker output (test_data/pseudo_rich_demo.aep): angle 0x03,
+// real Pseudo Effect Maker output (test_data/fixtures/pseudo_rich_demo.aep): angle 0x03,
 // checkbox 0x04, color 0x05, point 0x06, dropdown 0x07, slider 0x0a, group-start
 // & label 0x0d, group-end 0x0e, 3D point 0x12.
 var pardControlType = map[PseudoControlKind]byte{

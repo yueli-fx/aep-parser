@@ -66,8 +66,8 @@ func runBuildPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_pseudo_effect.jsx`
 	const matchName = "Pseudo/aepgo01/Demo"
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -126,7 +126,7 @@ func runBuildPseudoEffectGate(t *testing.T, aeExe string, target aep.AETarget) {
 		`{"idx":4,"prop":"value","expect":45}]`
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":6,"checks":%s}`,
 		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -160,8 +160,8 @@ func runBuildPseudoEffectRichGate(t *testing.T, aeExe string, target aep.AETarge
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_pseudo_effect.jsx`
 	const matchName = "Pseudo/aepgo02/Rich"
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -222,7 +222,7 @@ func runBuildPseudoEffectRichGate(t *testing.T, aeExe string, target aep.AETarge
 		`{"idx":2,"prop":"value","expect":2}]`
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":4,"checks":%s}`,
 		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -257,8 +257,8 @@ func runBuildPseudoEffectValueEntryGate(t *testing.T, aeExe string, target aep.A
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_pseudo_effect.jsx`
 	const matchName = "Pseudo/aepgo03/P2"
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -324,7 +324,7 @@ func runBuildPseudoEffectValueEntryGate(t *testing.T, aeExe string, target aep.A
 		`{"idx":3,"prop":"value","expect":%d}]`, target2.Index+1)
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":3,"checks":%s}`,
 		toFwd(inputAEP), toFwd(doneFile), matchName, checks)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -347,9 +347,9 @@ func runApplyPseudoEffectGateImpl(t *testing.T, aeExe string, target aep.AETarge
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const ffxPath = `e:/projects/tools/aep-parser/test_data/pseudo_scribe.ffx`
-	const argsPath = `e:/projects/tools/aep-parser/test_data/pseudo_effect_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_pseudo_effect.jsx`
+	const ffxPath = `e:/projects/tools/aep-parser/test_data/fixtures/pseudo_scribe.ffx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/pseudo_effect_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_pseudo_effect.jsx`
 	const matchName = "Pseudo/9db0uID/Scribe"
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -409,7 +409,7 @@ func runApplyPseudoEffectGateImpl(t *testing.T, aeExe string, target aep.AETarge
 	}
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"matchName":%q,"minParams":8%s}`,
 		toFwd(inputAEP), toFwd(doneFile), matchName, nameCodesJSON)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

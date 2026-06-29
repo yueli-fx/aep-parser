@@ -17,13 +17,13 @@ import (
 // state (DuplicateLayer JSX only saves the post-dup state per fixture).
 // Tests are skipped when the fixture is absent.
 
-const dupLayerFixtureDir = "../../test_data"
+const dupLayerFixtureDir = "../../test_data/generated/fixtures"
 
 func openDupBaseline(t *testing.T) *aep.Project {
 	t.Helper()
 	path := filepath.Join(dupLayerFixtureDir, "re_delete_layer_baseline.aep")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		t.Skipf("fixture missing: %s (3-solid baseline; produced by test_data/re_delete_layer.jsx RE_DELETE_MODE=baseline)", path)
+		t.Skipf("fixture missing: %s (3-solid baseline; produced by test_data/generators/re_delete_layer.jsx RE_DELETE_MODE=baseline)", path)
 		return nil
 	}
 	proj, err := aep.Open(path)
@@ -37,7 +37,7 @@ func openDupFixture(t *testing.T, mode string) *aep.Project {
 	t.Helper()
 	path := filepath.Join(dupLayerFixtureDir, "re_duplicate_layer_"+mode+".aep")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		t.Skipf("fixture missing: %s (run test_data/re_duplicate_layer.jsx with RE_DUP_MODE=%s)", path, mode)
+		t.Skipf("fixture missing: %s (run test_data/generators/re_duplicate_layer.jsx with RE_DUP_MODE=%s)", path, mode)
 		return nil
 	}
 	proj, err := aep.Open(path)

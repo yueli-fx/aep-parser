@@ -8,11 +8,13 @@
 // double-version ae-accept path.
 //
 // Layout (decoupled so displayStart never collides with workArea):
-//   CfgA — scalars/bools + SetWorkArea(seconds)
-//   CfgB — SetWorkAreaStartFrame + SetWorkAreaEndFrame
-//   CfgC — SetWorkAreaDurationFrame
-//   CfgD — SetDisplayStartFrame
-//   CfgE — SetDisplayStartTime
+//
+//	CfgA — scalars/bools + SetWorkArea(seconds)
+//	CfgB — SetWorkAreaStartFrame + SetWorkAreaEndFrame
+//	CfgC — SetWorkAreaDurationFrame
+//	CfgD — SetDisplayStartFrame
+//	CfgE — SetDisplayStartTime
+//
 // SetComment is NOT here (item-comment idta flag needs its own RE — see plan).
 //
 // Gated by AE_SHIP_GATE.
@@ -32,8 +34,8 @@ func runCompSettingsGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/comp_settings_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_comp_settings.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/comp_settings_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_comp_settings.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -124,7 +126,7 @@ func runCompSettingsGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

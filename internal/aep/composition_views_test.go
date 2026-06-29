@@ -12,7 +12,7 @@ import (
 //   - "RE_CL":   3 layers (2 light, 1 camera) — all Is3D=true
 //   - "RE_TEXT": 12 text layers
 func TestCompositionViews_ReCameraLight(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

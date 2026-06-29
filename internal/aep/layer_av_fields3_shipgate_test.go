@@ -36,7 +36,7 @@ func runLayerAVFields3ShipGate(t *testing.T, target aep.AETarget, aeExe string) 
 	inputAEP := filepath.Join(tempDir, "layer_av_fields3.aep")
 	resavedAEP := filepath.Join(tempDir, "layer_av_fields3.resaved.aep")
 	doneFile := filepath.Join(tempDir, "layer_av_fields3.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/layer_av_fields3_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/layer_av_fields3_args.json`
 
 	p := aep.NewProject(target)
 	comp, err := aep.NewComposition(p, "Main", 1280, 720, 30, 5)
@@ -92,13 +92,13 @@ func runLayerAVFields3ShipGate(t *testing.T, target aep.AETarget, aeExe string) 
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	jsxPath := `E:/projects/tools/aep-parser/test_data/verify_layer_av_fields3.jsx`
+	jsxPath := `E:/projects/tools/aep-parser/test_data/generators/verify_layer_av_fields3.jsx`
 	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)

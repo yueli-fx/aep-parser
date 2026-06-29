@@ -20,7 +20,7 @@ $env:MY_VAR = "value"   # 如果 JSX 用 $.getenv() 读 mode
 Remove-Item -ErrorAction SilentlyContinue test_data/re_X.done
 pwsh -NoProfile -File scripts/ae_run.ps1 `
     -AeExe "E:\adobe\Adobe After Effects 2020\Support Files\AfterFX.exe" `
-    -Jsx   "E:\projects\tools\aep-parser\test_data\re_X.jsx" `
+    -Jsx   "E:\projects\tools\aep-parser\test_data\generators\re_X.jsx" `
     -Done  "E:\projects\tools\aep-parser\test_data\re_X.done" `
     -TimeoutSec 180
 ```
@@ -181,7 +181,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 
 ```js
 (function () {
-    var outFile = new File("e:/projects/tools/aep-parser/test_data/re_<name>.aep");
+    var outFile = new File("e:/projects/tools/aep-parser/test_data/fixtures/re_<name>.aep");
     var log = [];
     function step(name, fn) {
         try { fn(); log.push("OK  " + name); }
@@ -230,7 +230,7 @@ pwsh -NoProfile -File scripts/ae_run.ps1 `
 - JSX 渲染每个 comp 用**唯一 time**（`comp.saveFrameToPng(job.time, png)`，Go 端逐 comp 给开 ≥0.5s 的不同 time）→ run 内每 comp 唯一缓存键。
 - Go harness 渲染前**清磁盘缓存**：删 `Temp\Adobe\After Effects\*\Disk Cache*.noindex`（= AE「Empty Disk Cache」按钮，缓存会自动重建，无数据丢失）→ 消除跨会话/历史中毒帧。仅做唯一 time 不够：被历史 `t=0` run 污染的桶仍会喂旧帧。
 
-参考实现：`internal/aep/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/verify_mg_text_style.jsx`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。如果多张 PNG 内容一样，优先怀疑 AE disk cache / stale-frame，而不是 setter 立即失败。
+参考实现：`internal/aep/mg_text_style_shipgate_test.go`（`clearAEDiskCache` helper）+ `test_data/generators/verify_mg_text_style.jsx`。**自验铁律**：gate 跑完逐张 `md5sum` 应**全不同**、并 `Read` 几张 PNG 目视确认渲的是各自 comp（红线4：值对 ≠ 渲染对）。如果多张 PNG 内容一样，优先怀疑 AE disk cache / stale-frame，而不是 setter 立即失败。
 
 ## AE 退出不弹框（关键陷阱）
 
@@ -266,7 +266,7 @@ tasklist 2>/dev/null | grep -i afterfx  # 应该返空
 
 ```bash
 rm -f test_data/re_<name>.done
-"E:/adobe/Adobe After Effects 2025/Support Files/AfterFX.exe" -r "E:/projects/tools/aep-parser/test_data/re_<name>.jsx"
+"E:/adobe/Adobe After Effects 2025/Support Files/AfterFX.exe" -r "E:/projects/tools/aep-parser/test_data/generators/re_<name>.jsx"
 
 # 等 .done 出现（不要 sleep 死循环）
 until [ -f test_data/re_<name>.done ]; do sleep 2; done
@@ -298,8 +298,8 @@ step("probe_app_fonts", function () {
 ## 字节 diff
 
 ```bash
-go run ./tools/debug/parse_btdk test_data/re_<name>.aep <layer_filter> > /tmp/dump_a.txt
-go run ./tools/debug/parse_btdk test_data/re_<name>.aep <other_layer> > /tmp/dump_b.txt
+go run ./tools/debug/parse_btdk test_data/fixtures/re_<name>.aep <layer_filter> > /tmp/dump_a.txt
+go run ./tools/debug/parse_btdk test_data/fixtures/re_<name>.aep <other_layer> > /tmp/dump_b.txt
 diff /tmp/dump_a.txt /tmp/dump_b.txt
 ```
 
@@ -310,9 +310,9 @@ diff /tmp/dump_a.txt /tmp/dump_b.txt
 新字段读 RE 完，加测试时复用现有 fixture：
 
 ```go
-proj, err := aep.Open("../../test_data/re_<name>.aep")
+proj, err := aep.Open("../../test_data/fixtures/re_<name>.aep")
 if err != nil {
-    t.Skipf("re_<name>.aep not present; run test_data/re_<name>.jsx in AE")
+    t.Skipf("re_<name>.aep not present; run test_data/generators/re_<name>.jsx in AE")
 }
 ```
 

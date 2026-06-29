@@ -21,7 +21,7 @@ func TestProperty_Orientation3D(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.fixture, func(t *testing.T) {
-			proj, err := aep.Open("../../test_data/" + c.fixture + ".aep")
+			proj, err := aep.Open("../../test_data/fixtures/" + c.fixture + ".aep")
 			if err != nil {
 				t.Skipf("%s.aep not present: %v", c.fixture, err)
 			}
@@ -48,7 +48,7 @@ func TestProperty_Orientation3D(t *testing.T) {
 // kf0 = [5,0,0], kf1 = [0,0,0]. (Easing/tangents not asserted — not yet
 // validated for orientation; see parseOrientationProperty.)
 func TestProperty_OrientationKeyframes(t *testing.T) {
-	proj, err := aep.Open("../../test_data/orientation_with_keyframes.aep")
+	proj, err := aep.Open("../../test_data/fixtures/orientation_with_keyframes.aep")
 	if err != nil {
 		t.Skipf("orientation_with_keyframes.aep not present: %v", err)
 	}

@@ -28,7 +28,7 @@ func findProp(proj *aep.Project, matchName string) *aep.Property {
 // see incidents/transform-group-default-omission.md). The assertions below
 // only touch the properties actually present (Position leader + Position_0/1).
 func TestProperty_DimensionsSeparated(t *testing.T) {
-	sep, err := aep.Open("../../test_data/transform_separated.aep")
+	sep, err := aep.Open("../../test_data/fixtures/transform_separated.aep")
 	if err != nil {
 		t.Skipf("transform_separated.aep not present: %v", err)
 	}

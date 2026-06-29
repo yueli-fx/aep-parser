@@ -7,7 +7,7 @@ READ WHEN: implementing Composition.DuplicateLayer or any layer-clone mutation; 
 
 V3 Phase 3 DuplicateLayer 实现 reference。**数字来自 AE 2020 17.7x45 自己 save 的 4 个 fixture diff**。
 
-Fixtures: `test_data/re_duplicate_layer_{solo,dup_parent,dup_child,dup_matted}.aep`（全 AE 2020）。JSX harness: `test_data/re_duplicate_layer.jsx`（4 mode via `$.getenv("RE_DUP_MODE")`）。
+Fixtures: `test_data/re_duplicate_layer_{solo,dup_parent,dup_child,dup_matted}.aep`（全 AE 2020）。JSX harness: `test_data/generators/re_duplicate_layer.jsx`（4 mode via `$.getenv("RE_DUP_MODE")`）。
 
 ## Layout (constant across modes)
 
@@ -170,7 +170,7 @@ ScriptingAPI's `layer.duplicate()` does NOT add " 2" / " (copy)" suffix. Both L2
 
 ## Finding 10: 14 followers + ldta-body are byte-identical clone (verified)
 
-`tmp_debug/diff_dup_blocks test_data/re_duplicate_layer_solo.aep 25 41` (clone block vs source block) — all 14 follower leaves (fvdv/fiop/ftts/foac/fiac/fipc/fifl ×2) **BYTE-IDENTICAL**. AE does NOT mutate follower content.
+`tmp_debug/diff_dup_blocks test_data/generated/fixtures/re_duplicate_layer_solo.aep 25 41` (clone block vs source block) — all 14 follower leaves (fvdv/fiop/ftts/foac/fiac/fipc/fifl ×2) **BYTE-IDENTICAL**. AE does NOT mutate follower content.
 
 `tmp_debug/probe_ldta` — ldta inside Layr LIST differs **ONLY at @0x00..0x03 (layer ID)** for the clone. @0x04 onward is verbatim copy (verified for solo + dup_child fixtures). In dup_child specifically, @0x84..0x87 (ParentID) reads `00 00 00 11` on BOTH original L1 and clone L1 (= L2's id 17). So clone's ParentID @0x84 is byte-copy of source's ParentID. Symmetric for @0x6B (TrackMatte byte) per Finding 8.
 
@@ -193,5 +193,5 @@ Per-chunk Data slice MUST be a fresh `append([]byte(nil), src.Data...)` copy (NO
 
 - Predecessor scar: [`ae-deletelayer-re.md`](ae-deletelayer-re.md) — F4 (16-chunk per-layer block) is what we clone
 - AE acceptance gate: [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)
-- Fixture JSX: `test_data/re_duplicate_layer.jsx`
+- Fixture JSX: `test_data/generators/re_duplicate_layer.jsx`
 - Dump tool: `tools/debug/dump_layers/main.go` (reused from Phase 2)

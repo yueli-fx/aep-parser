@@ -2,14 +2,14 @@
 //
 // AE ship gate for ANIMATED gradient color stops (roadmap priority 1, the
 // fixture-blocked item — unblocked by a user-authored AE oracle,
-// test_data/v2_2_gradient_anim_src.aep). Builds a from-scratch shape layer with
+// test_data/fixtures/v2_2_gradient_anim_src.aep). Builds a from-scratch shape layer with
 // a gradient fill whose stops are keyframed (kf0@0s = R/B/G left→right, kf1@1s =
 // G/R/B), then renders BOTH frames and asserts on actual pixels (red line 4)
 // that the stop colours swap over time:
 //
-//   horizontal ramp, left edge = offset 0%, centre = 50%, right edge = 100%.
-//   t=0:  left=RED   centre=BLUE  right=GREEN
-//   t=1s: left=GREEN centre=RED   right=BLUE
+//	horizontal ramp, left edge = offset 0%, centre = 50%, right edge = 100%.
+//	t=0:  left=RED   centre=BLUE  right=GREEN
+//	t=1s: left=GREEN centre=RED   right=BLUE
 //
 // The left-edge RED→GREEN swap between two frames of the SAME layer is the
 // animation proof. Resave confirms the Grad Colors stream keeps 2 keyframes.
@@ -46,8 +46,8 @@ func runGradientAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/grad_anim_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_grad_anim.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/grad_anim_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_grad_anim.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildGradAnim(t, target)
@@ -71,7 +71,7 @@ func runGradientAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png0":%q,"png1":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png0), toFwd(png1))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

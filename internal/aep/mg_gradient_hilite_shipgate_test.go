@@ -89,8 +89,8 @@ func runMGGradientHiliteGate(t *testing.T, aeExe, ver string, target aep.AETarge
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_gradient_hilite_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_gradient_hilite.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_gradient_hilite_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_gradient_hilite.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildMGGradientHiliteDemo(t, target)
@@ -113,7 +113,7 @@ func runMGGradientHiliteGate(t *testing.T, aeExe, ver string, target aep.AETarge
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -145,10 +145,10 @@ func runMGGradientHiliteGate(t *testing.T, aeExe, ver string, target aep.AETarge
 		t.Fatalf("%s decode rendered frame: %v", ver, err)
 	}
 	const win = 10
-	lR, lG, lB := avgRGB(img, 830, 540, win) // left
+	lR, lG, lB := avgRGB(img, 830, 540, win)  // left
 	rR, rG, rB := avgRGB(img, 1090, 540, win) // right
-	uR, uG, uB := avgRGB(img, 960, 410, win) // up
-	dR, dG, dB := avgRGB(img, 960, 670, win) // down
+	uR, uG, uB := avgRGB(img, 960, 410, win)  // up
+	dR, dG, dB := avgRGB(img, 960, 670, win)  // down
 	t.Logf("%s hilite: L(r=%d,g=%d,b=%d) R(r=%d,g=%d,b=%d) U(r=%d,g=%d,b=%d) D(r=%d,g=%d,b=%d)",
 		ver, lR, lG, lB, rR, rG, rB, uR, uG, uB, dR, dG, dB)
 

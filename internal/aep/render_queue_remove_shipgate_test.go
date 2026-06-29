@@ -7,7 +7,7 @@
 // data-loss / corrupt) and reads back exactly one item with the right comp.
 // Resaves so the Go side confirms the deletion stuck (NumItems == 1).
 //
-// Gated by AE_SHIP_GATE. Fixture built by test_data/re_rq_delete.jsx.
+// Gated by AE_SHIP_GATE. Fixture built by test_data/generators/re_rq_delete.jsx.
 package aep_test
 
 import (
@@ -26,8 +26,8 @@ func runRQRemoveShipGate(t *testing.T, aeExe, baseFixture string) {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/rq_delete_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_rq_delete.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/rq_delete_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_rq_delete.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	proj, err := aep.Open(baseFixture)
@@ -63,7 +63,7 @@ func runRQRemoveShipGate(t *testing.T, aeExe, baseFixture string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expectItems":1,"survivorComp":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), survivor)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -92,10 +92,10 @@ func runRQRemoveShipGate(t *testing.T, aeExe, baseFixture string) {
 }
 
 func TestRQRemove_AEShipGate_AE2020(t *testing.T) {
-	runRQRemoveShipGate(t, ae2020(), "../../test_data/re_rq_delete_before.aep")
+	runRQRemoveShipGate(t, ae2020(), "../../test_data/fixtures/re_rq_delete_before.aep")
 }
 func TestRQRemove_AEShipGate_AE2025(t *testing.T) {
-	runRQRemoveShipGate(t, ae2025(), "../../test_data/re_rq_delete_before.aep")
+	runRQRemoveShipGate(t, ae2025(), "../../test_data/fixtures/re_rq_delete_before.aep")
 }
 
 // runRQAddShipGate clones the queue's lone item for comp "RQB" via AddItem and
@@ -105,8 +105,8 @@ func runRQAddShipGate(t *testing.T, aeExe, baseFixture string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/rq_add_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_rq_add.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/rq_add_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_rq_add.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	proj, err := aep.Open(baseFixture)
@@ -147,7 +147,7 @@ func runRQAddShipGate(t *testing.T, aeExe, baseFixture string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expectItems":2,"addedComp":"RQB"}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -175,8 +175,8 @@ func runRQAddShipGate(t *testing.T, aeExe, baseFixture string) {
 }
 
 func TestRQAdd_AEShipGate_AE2020(t *testing.T) {
-	runRQAddShipGate(t, ae2020(), "../../test_data/re_rq_add_before.aep")
+	runRQAddShipGate(t, ae2020(), "../../test_data/fixtures/re_rq_add_before.aep")
 }
 func TestRQAdd_AEShipGate_AE2025(t *testing.T) {
-	runRQAddShipGate(t, ae2025(), "../../test_data/re_rq_add_before.aep")
+	runRQAddShipGate(t, ae2025(), "../../test_data/fixtures/re_rq_add_before.aep")
 }

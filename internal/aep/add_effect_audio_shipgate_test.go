@@ -4,7 +4,7 @@
 // Bass & Treble, Delay, Flange & Chorus, High-Low Pass, Modulator, Parametric
 // EQ, Reverb, Stereo Mixer, Tone). Unlike every other effect these can only be
 // applied to a layer that HAS audio, so the gate starts from a base fixture with
-// an imported-mp3 audio layer (test_data/re_audio_base.aep, authored by
+// an imported-mp3 audio layer (test_data/fixtures/re_audio_base.aep, authored by
 // re_audio_base.jsx) and Go-adds all ten audio effects to it, then has AE open
 // the mutated file and read back the parade. Audio effects are NON-VISUAL — there
 // are no render pixels to sample — so the acceptance proof is: AE opens without
@@ -43,7 +43,7 @@ var audioEffectSample = []string{
 	aep.EffectAudioTone,
 }
 
-const audioBaseFixture = `e:/projects/tools/aep-parser/test_data/re_audio_base.aep`
+const audioBaseFixture = `e:/projects/tools/aep-parser/test_data/fixtures/re_audio_base.aep`
 
 func runAudioEffectGate(t *testing.T, aeExe, ver string) {
 	t.Helper()
@@ -54,8 +54,8 @@ func runAudioEffectGate(t *testing.T, aeExe, ver string) {
 		t.Skipf("audio base fixture missing (%s) — author it with re_audio_base.jsx", audioBaseFixture)
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/property_struct_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_property_struct.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/property_struct_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_property_struct.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	rp, err := aep.Open(audioBaseFixture)
@@ -96,7 +96,7 @@ func runAudioEffectGate(t *testing.T, aeExe, ver string) {
 	}
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expect":[%s]}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), strings.Join(quoted, ","))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

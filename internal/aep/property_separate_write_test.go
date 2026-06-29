@@ -33,9 +33,9 @@ func scalarVal(v any) (float64, bool) {
 // bit + resets to default [w/2,h/2,0]; the real value migrates into the
 // Position_0/1/2 followers; a Position_2 follower is created for the 3D Z axis.
 func TestSetDimensionsSeparated_3D(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_separate_dims_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_separate_dims_before.aep")
 	if err != nil {
-		t.Skipf("re_separate_dims_before.aep not present; run test_data/re_separate_dims.jsx in AE 2020")
+		t.Skipf("re_separate_dims_before.aep not present; run test_data/generators/re_separate_dims.jsx in AE 2020")
 	}
 
 	pos := findProp(proj, aep.MatchNamePosition)
@@ -109,9 +109,9 @@ func TestSetDimensionsSeparated_3D(t *testing.T) {
 // TestSetDimensionsSeparated_Merge collapses a separated 3D Position back to
 // merged: leader takes the [X,Y,Z] value, all Position_0/1/2 followers vanish.
 func TestSetDimensionsSeparated_Merge(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_sepdim_merge_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_sepdim_merge_before.aep")
 	if err != nil {
-		t.Skipf("re_sepdim_merge_before.aep not present; run test_data/re_separate_dims_ext.jsx in AE 2020")
+		t.Skipf("re_sepdim_merge_before.aep not present; run test_data/generators/re_separate_dims_ext.jsx in AE 2020")
 	}
 	pos := findProp(proj, aep.MatchNamePosition)
 	if pos == nil || !pos.DimensionsSeparated() {
@@ -155,9 +155,9 @@ func TestSetDimensionsSeparated_Merge(t *testing.T) {
 // TestSetDimensionsSeparated_2D separates a 2D layer's Position: only X/Y
 // followers appear (no Position_2 — that is 3D-only).
 func TestSetDimensionsSeparated_2D(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_sepdim_2d_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_sepdim_2d_before.aep")
 	if err != nil {
-		t.Skipf("re_sepdim_2d_before.aep not present; run test_data/re_separate_dims_ext.jsx in AE 2020")
+		t.Skipf("re_sepdim_2d_before.aep not present; run test_data/generators/re_separate_dims_ext.jsx in AE 2020")
 	}
 	pos := findProp(proj, aep.MatchNamePosition)
 	if pos == nil || pos.DimensionsSeparated() {
@@ -193,7 +193,7 @@ func TestSetDimensionsSeparated_2D(t *testing.T) {
 // TestSetDimensionsSeparated_IdempotentRefuse verifies double-separate and
 // non-leader calls are refused without mutating state.
 func TestSetDimensionsSeparated_Refuse(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_separate_dims_before.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_separate_dims_before.aep")
 	if err != nil {
 		t.Skipf("re_separate_dims_before.aep not present")
 	}

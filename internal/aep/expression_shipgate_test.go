@@ -86,7 +86,7 @@ func buildExpressionDemo(t *testing.T, target aep.AETarget) *aep.Project {
 			t.Fatalf("%s Position: %v", name, err)
 		}
 	}
-	addEccentricDot("ON", [4]float64{1.0, 0.55, 0.1, 1}, 660)   // amber
+	addEccentricDot("ON", [4]float64{1.0, 0.55, 0.1, 1}, 660)    // amber
 	addEccentricDot("OFF", [4]float64{0.25, 0.85, 1.0, 1}, 1260) // cyan
 
 	// Expressions need parsed back-refs (tdbs); attach after Reopen.
@@ -120,8 +120,8 @@ func runExpressionGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/expression_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_expression.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/expression_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_expression.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildExpressionDemo(t, target)
@@ -144,7 +144,7 @@ func runExpressionGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

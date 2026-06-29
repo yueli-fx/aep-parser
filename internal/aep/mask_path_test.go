@@ -14,7 +14,7 @@ import (
 )
 
 func TestSetMaskPath_RectToTriangle_RoundTrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestSetMaskPath_RectToTriangle_RoundTrip(t *testing.T) {
 }
 
 func TestSetMaskPathKeyframes_RectToTriangle_RoundTrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -136,7 +136,7 @@ func TestSetMaskPathKeyframes_RectToTriangle_RoundTrip(t *testing.T) {
 }
 
 func TestSetMaskPathKeyframes_RefuseTooFew(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -154,7 +154,7 @@ func TestSetMaskPathKeyframes_RefuseTooFew(t *testing.T) {
 }
 
 func TestSetMaskPath_RefuseFewVertices(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}

@@ -63,7 +63,7 @@ func maskParadeLayer(proj *aep.Project, id uint32) *aep.Layer {
 }
 
 func TestAddMask_RoundTrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -144,7 +144,7 @@ func TestAddMask_RoundTrip(t *testing.T) {
 }
 
 func TestAddMask_SecondMask_IndexAndOrder(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -184,7 +184,7 @@ func TestAddMask_SecondMask_IndexAndOrder(t *testing.T) {
 }
 
 func TestAddMask_OpenPath(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -311,7 +311,7 @@ func TestAddMask_RefuseCameraLight(t *testing.T) {
 }
 
 func TestAddMask_EmptyPathRefused(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}

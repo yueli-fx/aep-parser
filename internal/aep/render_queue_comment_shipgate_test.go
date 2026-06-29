@@ -6,7 +6,7 @@
 // mutated file: proves AE ACCEPTS the inserted RCom (no data-loss / corrupt) and
 // reads the comment back. Resaves so the Go side confirms the RCom survived.
 //
-// Gated by AE_SHIP_GATE. Base fixture built by test_data/build_rq_ae2020.jsx.
+// Gated by AE_SHIP_GATE. Base fixture built by test_data/generators/build_rq_ae2020.jsx.
 package aep_test
 
 import (
@@ -30,8 +30,8 @@ func runRQCommentShipGate(t *testing.T, aeExe, baseFixture string) {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/rq_comment_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_rq_comment.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/rq_comment_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_rq_comment.jsx`
 	const expected = "ship gate insert comment"
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
@@ -67,7 +67,7 @@ func runRQCommentShipGate(t *testing.T, aeExe, baseFixture string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expected":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), expected)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -117,7 +117,7 @@ func TestRenderQueueComment_AEShipGate_AE2020(t *testing.T) {
 	if aeExe == "" {
 		aeExe = `E:/adobe/Adobe After Effects 2020/Support Files/AfterFX.exe`
 	}
-	runRQCommentShipGate(t, aeExe, "../../test_data/rq_ae2020_base.aep")
+	runRQCommentShipGate(t, aeExe, "../../test_data/fixtures/rq_ae2020_base.aep")
 }
 
 func TestRenderQueueComment_AEShipGate_AE2025(t *testing.T) {
@@ -126,5 +126,5 @@ func TestRenderQueueComment_AEShipGate_AE2025(t *testing.T) {
 		aeExe = `E:/adobe/Adobe After Effects 2025/Support Files/AfterFX.exe`
 	}
 	// AE 2025 opens the AE-2020-native base via the auto-dismissed convert dialog.
-	runRQCommentShipGate(t, aeExe, "../../test_data/rq_ae2020_base.aep")
+	runRQCommentShipGate(t, aeExe, "../../test_data/fixtures/rq_ae2020_base.aep")
 }

@@ -147,9 +147,9 @@ func TestSetManualKerningRejectsInvalid(t *testing.T) {
 }
 
 func TestFontAxesReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_varfont_ae24.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_varfont_ae24.aep")
 	if err != nil {
-		t.Skipf("re_varfont_ae24.aep not present; run test_data/re_varfont_ae24.jsx in AE: %v", err)
+		t.Skipf("re_varfont_ae24.aep not present; run test_data/generators/re_varfont_ae24.jsx in AE: %v", err)
 	}
 	cases := []struct {
 		layer       string

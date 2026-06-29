@@ -1,6 +1,6 @@
 // Dump cdta hex for every named composition; useful for diffing
 // fixture variants that differ only by a flag.
-// Usage: go run ./tmp_debug/dump_cdta test_data/re_batch.aep [name_prefix]
+// Usage: go run ./tmp_debug/dump_cdta test_data/fixtures/re_batch.aep [name_prefix]
 package main
 
 import (

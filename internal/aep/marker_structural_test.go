@@ -25,7 +25,7 @@ func findRECM(t *testing.T, proj *aep.Project) *aep.Composition {
 // re_compmarker.aep and verifies the survivor round-trips through WriteAEP
 // with its fields intact and the marker count dropped to one.
 func TestMarkerRemoveRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
 	}
@@ -80,7 +80,7 @@ func TestMarkerRemoveRoundtrip(t *testing.T) {
 // TestMarkerRemoveAllRoundtrip removes every composition marker and verifies
 // the empty marker set round-trips to zero markers (count decremented to 0).
 func TestMarkerRemoveAllRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
 	}
@@ -116,7 +116,7 @@ func TestMarkerRemoveAllRoundtrip(t *testing.T) {
 // sets its comment, and verifies all three round-trip with the new marker a
 // clean point marker (duration 0, label 0) at the requested time.
 func TestMarkerAddRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
 	}
@@ -177,7 +177,7 @@ func TestMarkerAddRoundtrip(t *testing.T) {
 // TestMarkerAddIntoEmptyRejects confirms AddMarker refuses an empty marker set
 // (the canonical-seed path is a separate, not-yet-implemented slice).
 func TestMarkerAddIntoEmptyRejects(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
 	}
@@ -204,7 +204,7 @@ func TestMarkerRemoveRejectsStandalone(t *testing.T) {
 // TestMarkerRemoveTwiceRejects ensures a marker already detached from its list
 // cannot be removed a second time.
 func TestMarkerRemoveTwiceRejects(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
 	}

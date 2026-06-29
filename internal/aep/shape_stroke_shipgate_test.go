@@ -31,7 +31,7 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	inputAEP := filepath.Join(tempDir, "v2_2_stroke.aep")
 	resavedAEP := filepath.Join(tempDir, "v2_2_stroke.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_2_stroke.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_stroke_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_2_stroke_args.json`
 
 	color := [4]float64{1, 0, 0, 1} // red, distinct from embed fixture's [0,0,1,1]
 	width, opacity := 4.0, 60.0
@@ -79,13 +79,13 @@ func runV2_2StrokeShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	jsxPath := `E:/projects/tools/aep-parser/test_data/verify_v2_2_stroke.jsx`
+	jsxPath := `E:/projects/tools/aep-parser/test_data/generators/verify_v2_2_stroke.jsx`
 	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)

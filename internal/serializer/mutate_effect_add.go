@@ -40,7 +40,7 @@ import (
 // effectTemplateFS holds the embedded effect templates. Each is a LIST(tdgp)
 // wrapper around an effect's (tdmn match-name, LIST:sspc payload) pair,
 // extracted verbatim from an AE-2020-saved layer that had the full curated set
-// applied (test_data/re_effect_library.aep + re_effect_library2.aep, generated
+// applied (test_data/generated/fixtures/re_effect_library.aep + re_effect_library2.aep, generated
 // by re_effect_library.jsx / re_effect_library2.jsx; Point3D Control from
 // re_effect_param_types.aep — all extracted by a one-off extraction script).
 // All are built-in effects present well before the 2020 read floor; their

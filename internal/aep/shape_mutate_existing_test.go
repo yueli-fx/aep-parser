@@ -14,7 +14,7 @@ import (
 )
 
 func TestV2_2_MutateExistingShape(t *testing.T) {
-	p, err := aep.Open("../../test_data/v2_2_shape_tolerance.aep")
+	p, err := aep.Open("../../test_data/fixtures/v2_2_shape_tolerance.aep")
 	if err != nil {
 		t.Skipf("v2_2_shape_tolerance.aep not present: %v (produced via AE)", err)
 	}

@@ -18,7 +18,7 @@ import (
 // addThreeMasks adds masks A/B/C to the baseline's effect layer and returns it.
 func addThreeMasks(t *testing.T) (*aep.Project, *aep.Layer) {
 	t.Helper()
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestRemoveMask_Middle_RoundTrip(t *testing.T) {
 }
 
 func TestRemoveMask_LastMask_LeavesEmptyParade(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}

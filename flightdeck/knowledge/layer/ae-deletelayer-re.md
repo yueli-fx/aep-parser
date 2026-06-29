@@ -21,7 +21,7 @@ index 2 (mid): L2_mid  id=17   ← matted target / parent in matte/parent modes
 index 3 (bot): L3_bot  id=15   ← child of L2 in parent mode
 ```
 
-Variable names match indices because the JSX adds in REVERSE order (`addSolid` puts new layer at index 1; see `test_data/re_delete_layer.jsx`).
+Variable names match indices because the JSX adds in REVERSE order (`addSolid` puts new layer at index 1; see `test_data/generators/re_delete_layer.jsx`).
 
 ---
 
@@ -147,6 +147,6 @@ Confirms the monotonic-ID invariant (allocate forward, no reuse). **No need to d
 ## Related
 
 - Historical implementation plan is archived; this knowledge file is the recovery source for DeleteLayer behavior.
-- Fixture JSX: `test_data/re_delete_layer.jsx`
+- Fixture JSX: `test_data/generators/re_delete_layer.jsx`
 - Dump tool: `tools/debug/dump_layers/main.go`
 - Ship-gate scar (when AE rejects what we wrote): [`ae25-acceptance-gate.md`](ae25-acceptance-gate.md)

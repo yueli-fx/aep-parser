@@ -103,9 +103,9 @@ func buildLayerXformDemo(t *testing.T, target aep.AETarget) *aep.Project {
 	mustMut("SetOpacity", L.SetOpacity(0.6))                   // 0.6 → AE 60%
 	// in/out are source-relative (trim); AE's comp-absolute inPoint/outPoint =
 	// startTime + these. With startTime 0.5: AE shows in 1.5, out 5.5.
-	mustMut("SetFrameStartTime", L.SetFrameStartTime(15))      // 15/30 = 0.5s
-	mustMut("SetFrameInPoint", L.SetFrameInPoint(30))          // 30/30 = 1.0s rel
-	mustMut("SetFrameOutPoint", L.SetFrameOutPoint(150))       // 150/30 = 5.0s rel
+	mustMut("SetFrameStartTime", L.SetFrameStartTime(15)) // 15/30 = 0.5s
+	mustMut("SetFrameInPoint", L.SetFrameInPoint(30))     // 30/30 = 1.0s rel
+	mustMut("SetFrameOutPoint", L.SetFrameOutPoint(150))  // 150/30 = 5.0s rel
 
 	return rp
 }
@@ -114,8 +114,8 @@ func runLayerXformGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/layer_xform_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_layer_xform.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/layer_xform_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_layer_xform.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildLayerXformDemo(t, target)
@@ -137,7 +137,7 @@ func runLayerXformGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

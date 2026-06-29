@@ -53,7 +53,7 @@ fvdv fiop ftts foac fiac fipc fifl   ← 第 2 组（重复）
 - `internal/serializer/mutate_layer_new.go` — `NewShapeLayer` 插入单元从 `[Layr, Ewst]` 改为 `[Layr, Ewst] + lowerLayerSiblings()`（16 chunk），shift tail by n。
 - `internal/serializer/new_shape_layer_test.go` — `TestNewShapeLayer_MultiLayer_EmitsLayerSiblings` 断言每个 user Layr 后跟 `Ewst + 14 siblings`。
 
-双版本 ship-gate PASS（AE 2020 + 2025，3-layer + 8-layer 单合成均 `comp.layers == N`）。RE fixture：`test_data/re_multi_shape_layer.jsx`（AE 自建 3 shape layer baseline）。
+双版本 ship-gate PASS（AE 2020 + 2025，3-layer + 8-layer 单合成均 `comp.layers == N`）。RE fixture：`test_data/generators/re_multi_shape_layer.jsx`（AE 自建 3 shape layer baseline）。
 
 ## 教训
 

@@ -27,9 +27,9 @@ func runMarkerShipGate(t *testing.T, aeExe string) {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const base = "../../test_data/re_compmarker.aep"
-	const argsPath = `e:/projects/tools/aep-parser/test_data/marker_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_marker.jsx`
+	const base = "../../test_data/fixtures/re_compmarker.aep"
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/marker_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_marker.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	proj, err := aep.Open(base)
@@ -82,7 +82,7 @@ func runMarkerShipGate(t *testing.T, aeExe string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"compName":"RE_CM","expectMarkers":2,"addedComment":"shipgate added","addedTime":4.0,"survComment":"second marker"}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

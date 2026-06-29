@@ -8,6 +8,7 @@
 //     running left→right (Start=[-100,0] End=[100,0]). The left stroke band must
 //     render red, the right band blue — proving SetStartPoint/SetEndPoint steer
 //     the stroke's ramp direction.
+//
 //   - GSRAD: a 200×200 rect with an 18px gradient STROKE, red→blue RADIAL ramp
 //     centred at the rect centre with radius 200 (End=[200,0]). The four
 //     edge-midpoints of the stroke ring sit at equal radius (100 = 0.5·radius) →
@@ -125,8 +126,8 @@ func runMGGradStrokeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarge
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_gradstroke_geom_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_gradstroke_geom.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_gradstroke_geom_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_gradstroke_geom.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildMGGradStrokeGeomDemo(t, target)
@@ -149,7 +150,7 @@ func runMGGradStrokeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarge
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

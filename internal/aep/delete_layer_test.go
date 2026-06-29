@@ -11,19 +11,19 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
-// All tests use re_delete_layer_*.aep produced by test_data/re_delete_layer.jsx
+// All tests use re_delete_layer_*.aep produced by test_data/generators/re_delete_layer.jsx
 // (see scars/ae-deletelayer-re.md). Fixtures are gitignored; t.Skipf when missing.
 // To regenerate: set $env:RE_DELETE_MODE = "baseline"/"middle"/"parent"/"matte"
 // then run scripts/ae_run.ps1 against the JSX (baseline/middle/parent under
 // AE 2020; matte under AE 2025 — TrackMatteLayerID field is AE 23+).
 
-const deleteLayerFixtureDir = "../../test_data"
+const deleteLayerFixtureDir = "../../test_data/generated/fixtures"
 
 func openDeleteLayerFixture(t *testing.T, mode string) *aep.Project {
 	t.Helper()
 	path := filepath.Join(deleteLayerFixtureDir, "re_delete_layer_"+mode+".aep")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		t.Skipf("fixture missing: %s (run test_data/re_delete_layer.jsx with RE_DELETE_MODE=%s)", path, mode)
+		t.Skipf("fixture missing: %s (run test_data/generators/re_delete_layer.jsx with RE_DELETE_MODE=%s)", path, mode)
 		return nil
 	}
 	proj, err := aep.Open(path)

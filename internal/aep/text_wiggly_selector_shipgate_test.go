@@ -147,8 +147,8 @@ func runTextWigglyGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_render3_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_render3.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_render3_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_render3.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildTextWigglyDemo(t, target)
@@ -173,7 +173,7 @@ func runTextWigglyGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png0":%q,"png1":%q,"png2":%q,"comp":"TXWIG","fontSize":140,"posX":120,"posY":420}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png0), toFwd(png1), toFwd(png2))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

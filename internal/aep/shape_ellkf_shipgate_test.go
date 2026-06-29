@@ -30,7 +30,7 @@ func runV2_2EllKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	inputAEP := filepath.Join(tempDir, "v2_2_ellkf.aep")
 	resavedAEP := filepath.Join(tempDir, "v2_2_ellkf.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_2_ellkf.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_ellkf_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_2_ellkf_args.json`
 
 	p := aep.NewProject(target)
 	comp, _ := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
@@ -52,13 +52,13 @@ func runV2_2EllKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`, toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/verify_v2_2_ellkf.jsx`, doneFile, 180)
+	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/generators/verify_v2_2_ellkf.jsx`, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)
 	if err != nil {

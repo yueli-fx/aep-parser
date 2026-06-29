@@ -2,7 +2,7 @@
 //
 // Tier 3 nested-group semantic preservation.
 //
-// Fixture `test_data/v2_2_shape_tolerance.aep` is produced
+// Fixture `test_data/fixtures/v2_2_shape_tolerance.aep` is produced
 // via tmp_debug/gen_shape_tolerance.jsx (requires AE). Until
 // the fixture lands the test SKIPs cleanly per V1 pattern.
 //
@@ -22,7 +22,7 @@ import (
 )
 
 func TestV2_2_NestedGroup_Preservation(t *testing.T) {
-	p, err := aep.Open("../../test_data/v2_2_shape_tolerance.aep")
+	p, err := aep.Open("../../test_data/fixtures/v2_2_shape_tolerance.aep")
 	if err != nil {
 		t.Skipf("fixture v2_2_shape_tolerance.aep missing: %v (produced via AE)", err)
 	}

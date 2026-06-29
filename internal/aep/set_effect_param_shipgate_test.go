@@ -6,7 +6,7 @@
 // default-elided before the call), AE must open without corruption, read back
 // the three materialized values, and keep them across its own resave.
 //
-// Gated by AE_SHIP_GATE. Uses test_data/verify_effect_param.jsx.
+// Gated by AE_SHIP_GATE. Uses test_data/generators/verify_effect_param.jsx.
 package aep_test
 
 import (
@@ -25,8 +25,8 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/effect_param_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_effect_param.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/effect_param_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_effect_param.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -128,7 +128,7 @@ func runSetEffectParamGate(t *testing.T, aeExe, label string, target aep.AETarge
 		`{"effect":"ADBE Point3D Control","param":"ADBE Point3D Control-0001","value":[480,810,540]},`+
 		`{"effect":"ADBE Slider Control","param":"ADBE Slider Control-0001","value":12.25}]}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

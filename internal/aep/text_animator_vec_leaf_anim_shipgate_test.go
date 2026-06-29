@@ -112,8 +112,8 @@ func reopenMoveBG(t *testing.T, p *aep.Project) *aep.Project {
 func runVecLeafGate(t *testing.T, aeExe, ver, compName, leaf string, baseWhite bool, p *aep.Project,
 	checkFrames func(t *testing.T, ver string, f0, f1, f2 image.Image)) {
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_animator_vecleaf_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_animator_vecleaf.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_animator_vecleaf_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_animator_vecleaf.jsx`
 	toFwd := func(s string) string { return strings.ReplaceAll(s, `\`, `/`) }
 
 	tempDir := t.TempDir()
@@ -136,7 +136,7 @@ func runVecLeafGate(t *testing.T, aeExe, ver, compName, leaf string, baseWhite b
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png0":%q,"png1":%q,"png2":%q,"comp":%q,"leaf":%q,"basewhite":%t}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png0), toFwd(png1), toFwd(png2), compName, leaf, baseWhite)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

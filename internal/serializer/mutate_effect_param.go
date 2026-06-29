@@ -29,7 +29,7 @@ import (
 // effectParamTemplateFS holds embedded materialized-parameter templates: each
 // a LIST(tdgp) wrapper around one (tdmn, LIST:tdbs) pair, extracted from an
 // AE-2020-saved instance with the param touched
-// (test_data/re_effect_param_elision.aep via a one-off extraction script).
+// (test_data/generated/fixtures/re_effect_param_elision.aep via a one-off extraction script).
 //
 //go:embed templates/effects/effectparam_adbe_gaussian_blur_2_0001.bin templates/effects/effectparam_adbe_gaussian_blur_2_0002.bin templates/effects/effectparam_adbe_gaussian_blur_2_0003.bin
 //go:embed templates/effects/effectparam_adbe_angle_control_0001.bin templates/effects/effectparam_adbe_color_control_0001.bin templates/effects/effectparam_adbe_point_control_0001.bin templates/effects/effectparam_adbe_point3d_control_0001.bin templates/effects/effectparam_adbe_slider_control_0001.bin

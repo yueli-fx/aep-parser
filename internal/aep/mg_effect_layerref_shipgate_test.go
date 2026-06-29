@@ -4,21 +4,21 @@
 // (Displacement Map / Compound Blur / CC Vector Blur via SetEffectLayerParam —
 // same tdpi-rewrite mechanism as Set Matte). On a 100% Go-built file:
 //
-//   HOST shape = white rect covering the LEFT half (sharp white|black vertical
-//   seam at x=960, right half transparent→black). MAP shape = white rect over
-//   the BOTTOM half, video OFF (referenced by the effect but not composited).
-//   The effect's layer-ref param points at MAP, so the effect acts only where
-//   MAP is white (bottom) — proving the reference took spatially:
-//     · Displacement Map: the bottom seam shifts horizontally vs the (untouched)
-//       top seam → big top/bottom luminance delta along the seam columns.
-//     · Compound Blur: the bottom seam blurs (white bleeds into the black side)
-//       while the top seam stays sharp → black-side bottom brighter than top.
-//   Without the layer ref the effect would act uniformly (top==bottom) — red line 4.
+//	HOST shape = white rect covering the LEFT half (sharp white|black vertical
+//	seam at x=960, right half transparent→black). MAP shape = white rect over
+//	the BOTTOM half, video OFF (referenced by the effect but not composited).
+//	The effect's layer-ref param points at MAP, so the effect acts only where
+//	MAP is white (bottom) — proving the reference took spatially:
+//	  · Displacement Map: the bottom seam shifts horizontally vs the (untouched)
+//	    top seam → big top/bottom luminance delta along the seam columns.
+//	  · Compound Blur: the bottom seam blurs (white bleeds into the black side)
+//	    while the top seam stays sharp → black-side bottom brighter than top.
+//	Without the layer ref the effect would act uniformly (top==bottom) — red line 4.
 //
 // CC Vector Blur ships accept+round-trip+resave only (its gradient-driven blur
 // has no clean spatial pixel proof here); render-pixel is honestly deferred.
 //
-// Gated by AE_SHIP_GATE. Uses test_data/verify_effect_layerref.jsx.
+// Gated by AE_SHIP_GATE. Uses test_data/generators/verify_effect_layerref.jsx.
 package aep_test
 
 import (
@@ -164,8 +164,8 @@ func runLayerRefGate(t *testing.T, aeExe, ver string, target aep.AETarget, compN
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/effect_layerref_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_effect_layerref.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/effect_layerref_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_effect_layerref.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	rp, _ := buildLayerRefDemo(t, target, compName, fxMatch, refParam, amtParam, amtVal)
@@ -188,7 +188,7 @@ func runLayerRefGate(t *testing.T, aeExe, ver string, target aep.AETarget, compN
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q,"comp":%q,"host":"HOST","param":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG), compName, refParam)
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -259,9 +259,9 @@ func dispMapPixelCheck(t *testing.T, img image.Image, ver string) {
 // side (x=1010 lifts above pure black) and the white side dims (x=910 drops
 // below pure white). A dead effect leaves a hard seam (1010=0, 910=255).
 func compoundBlurPixelCheck(t *testing.T, img image.Image, ver string) {
-	fr, fg, fb := avgRGB(img, 300, 540, 10)   // far white, sanity
-	wr, wg, wb := avgRGB(img, 910, 540, 8)    // white side near seam
-	br, bg, bb := avgRGB(img, 1010, 540, 8)   // black side near seam
+	fr, fg, fb := avgRGB(img, 300, 540, 10) // far white, sanity
+	wr, wg, wb := avgRGB(img, 910, 540, 8)  // white side near seam
+	br, bg, bb := avgRGB(img, 1010, 540, 8) // black side near seam
 	farWhite := lum(fr, fg, fb)
 	nearWhite := lum(wr, wg, wb)
 	nearBlack := lum(br, bg, bb)

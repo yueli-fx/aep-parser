@@ -38,7 +38,7 @@ func TestEssentialGraphics(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.fixture, func(t *testing.T) {
-			proj, err := aep.Open("../../test_data/" + c.fixture + ".aep")
+			proj, err := aep.Open("../../test_data/fixtures/" + c.fixture + ".aep")
 			if err != nil {
 				t.Skipf("%s.aep not present: %v", c.fixture, err)
 			}
@@ -70,7 +70,7 @@ func TestEssentialGraphics(t *testing.T) {
 
 // A comp with no EG panel reports the AE default name and no controllers.
 func TestEssentialGraphics_Default(t *testing.T) {
-	proj, err := aep.Open("../../test_data/eg_slider_controller.aep")
+	proj, err := aep.Open("../../test_data/fixtures/eg_slider_controller.aep")
 	if err != nil {
 		t.Skipf("fixture not present: %v", err)
 	}
@@ -93,7 +93,7 @@ func TestEssentialGraphics_Default(t *testing.T) {
 // three persisted panel generations (CIFO/CIF2/CIF3 × CpS2+CapS = 6 slots) and
 // the controller must survive untouched.
 func TestSetMotionGraphicsTemplateName(t *testing.T) {
-	proj, err := aep.Open("../../test_data/eg_custom_template_name.aep")
+	proj, err := aep.Open("../../test_data/fixtures/eg_custom_template_name.aep")
 	if err != nil {
 		t.Skipf("fixture not present: %v", err)
 	}
@@ -247,7 +247,7 @@ func TestAddEssentialProperty_GoBuilt(t *testing.T) {
 // Fixture-mutate flow: append a controller to an AE-native panel that already
 // has three, and verify count + order + existing controllers survive.
 func TestAddEssentialProperty_FixtureAppend(t *testing.T) {
-	proj, err := aep.Open("../../test_data/eg_multiple_controllers.aep")
+	proj, err := aep.Open("../../test_data/fixtures/eg_multiple_controllers.aep")
 	if err != nil {
 		t.Skipf("fixture not present: %v", err)
 	}
@@ -302,7 +302,7 @@ func TestAddEssentialProperty_FixtureAppend(t *testing.T) {
 // Refuse set: unknown param, color without a materialized value, effect not
 // on the layer.
 func TestAddEssentialProperty_Refusals(t *testing.T) {
-	proj, err := aep.Open("../../test_data/eg_multiple_controllers.aep")
+	proj, err := aep.Open("../../test_data/fixtures/eg_multiple_controllers.aep")
 	if err != nil {
 		t.Skipf("fixture not present: %v", err)
 	}
@@ -332,7 +332,7 @@ func TestAddEssentialProperty_Refusals(t *testing.T) {
 }
 
 func TestEssentialGraphicsJSON(t *testing.T) {
-	proj, err := aep.Open("../../test_data/eg_multiple_controllers.aep")
+	proj, err := aep.Open("../../test_data/fixtures/eg_multiple_controllers.aep")
 	if err != nil {
 		t.Skipf("fixture not present: %v", err)
 	}

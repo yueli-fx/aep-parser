@@ -125,8 +125,8 @@ func runTextAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_animator_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_animator.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_animator_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_animator.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildTextAnimDemo(t, target)
@@ -151,7 +151,7 @@ func runTextAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png0":%q,"png1":%q,"png2":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png0), toFwd(png1), toFwd(png2))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

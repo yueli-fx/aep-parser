@@ -102,7 +102,7 @@ func TestPropertySetExpression(t *testing.T) {
 // disabled-flag toggle against the AE 2020 fixture re_batch2.aep.
 // Skips when the fixture is absent.
 func TestPropertySetExpressionEnabled(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch2.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch2.aep")
 	if err != nil {
 		t.Skipf("re_batch2.aep not present; rerun /tmp/re_batch2.jsx in AE")
 	}

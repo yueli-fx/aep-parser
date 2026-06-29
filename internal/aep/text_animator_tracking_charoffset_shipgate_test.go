@@ -10,10 +10,10 @@
 // glyphs (offset 0→100 over t=0..2):
 //
 //   - Tracking Amount  → glyph ink bbox WIDTH (selected chars spread apart →
-//                        wide at t0, normal at t2)
+//     wide at t0, normal at t2)
 //   - Character Offset → frameDiff between frames (selected glyphs are remapped
-//                        to other letters at t0, original letters at t2 — the
-//                        rendered glyph shapes differ, while every frame keeps ink)
+//     to other letters at t0, original letters at t2 — the
+//     rendered glyph shapes differ, while every frame keeps ink)
 //
 // Reuses buildNeighborDemo / runOneNeighborGate + verify_text_animator_neighbor.jsx
 // from text_animator_neighbor_shipgate_test.go. Gated by AE_SHIP_GATE.

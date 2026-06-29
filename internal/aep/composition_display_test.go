@@ -11,7 +11,7 @@ import (
 // TestPixelAspectReadReal verifies the cdta @0x90/@0x94 PAR read
 // against re_batch3.aep's RE_B3_D_pixelAspect comp (PAR=2.0).
 func TestPixelAspectReadReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch3.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch3.aep")
 	if err != nil {
 		t.Skipf("re_batch3.aep not present")
 	}
@@ -30,9 +30,9 @@ func TestPixelAspectReadReal(t *testing.T) {
 // re_cdta_probe.aep, where comps were explicitly set to varying
 // resolutionFactor pairs.
 func TestResolutionFactorReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cdta_probe.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cdta_probe.aep")
 	if err != nil {
-		t.Skipf("re_cdta_probe.aep not present; run test_data/re_cdta_probe.jsx in AE")
+		t.Skipf("re_cdta_probe.aep not present; run test_data/generators/re_cdta_probe.jsx in AE")
 	}
 	want := map[string][2]uint16{
 		"A_baseline":           {1, 1},
@@ -102,9 +102,9 @@ func TestSetResolutionFactorRoundtrip(t *testing.T) {
 // from PRin LIST → prin chunk @offset 4 (ASCII NUL-padded match-name)
 // against re_renderer.aep, which has 3 comps with different renderers.
 func TestCompositionRendererReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_renderer.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_renderer.aep")
 	if err != nil {
-		t.Skipf("re_renderer.aep not present; run test_data/re_renderer.jsx in AE")
+		t.Skipf("re_renderer.aep not present; run test_data/generators/re_renderer.jsx in AE")
 	}
 	// In AE 2025, "ADBE Standard 3d" (Classic) and "ADBE Picasso" (Advanced)
 	// both end up as "ADBE Escher" internally; "ADBE Ernst" stays Cinema 4D.
@@ -125,7 +125,7 @@ func TestCompositionRendererReal(t *testing.T) {
 // TestCompositionActiveCamera verifies ActiveCamera() picks the
 // topmost enabled camera layer using re_cameralight.aep.
 func TestCompositionActiveCamera(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present")
 	}

@@ -11,7 +11,7 @@
 // ae-accept is the ceiling for a non-visual domain). Both setters mutate an
 // EXISTING property/bit, and a default audio layer ELIDES Audio Levels
 // (default-omission), so the gate starts from a carrier fixture
-// (test_data/re_audio_levels.aep, authored by build_re_audio_levels.jsx with
+// (test_data/fixtures/re_audio_levels.aep, authored by build_re_audio_levels.jsx with
 // AE2020) whose audio layer already has Audio Levels materialized at a NON-default
 // placeholder [3,3] — distinct from the gate's [-8,-8] target so a no-op mutate
 // would be caught. The carrier embeds an mp3, so it is gitignored; the gate skips
@@ -29,7 +29,7 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
-const audioLevelsFixture = `e:/projects/tools/aep-parser/test_data/re_audio_levels.aep`
+const audioLevelsFixture = `e:/projects/tools/aep-parser/test_data/fixtures/re_audio_levels.aep`
 
 func runLayerAudioGate(t *testing.T, aeExe, ver string) {
 	t.Helper()
@@ -40,8 +40,8 @@ func runLayerAudioGate(t *testing.T, aeExe, ver string) {
 		t.Skipf("audio-levels carrier missing (%s) — author it with build_re_audio_levels.jsx", audioLevelsFixture)
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/audio_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_audio.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/audio_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_audio.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	rp, err := aep.Open(audioLevelsFixture)
@@ -77,7 +77,7 @@ func runLayerAudioGate(t *testing.T, aeExe, ver string) {
 	out.Close()
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q}`, toFwd(inputAEP), toFwd(doneFile))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

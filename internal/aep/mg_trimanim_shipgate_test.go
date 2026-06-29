@@ -10,8 +10,8 @@
 //
 //   - t=0  (End=0):   ring absent everywhere (trim cuts the whole stroke).
 //   - t=2  (End=50):  AE's ellipse path starts at top and winds clockwise, so
-//                     0..50% reveals the RIGHT half (top→right→bottom present,
-//                     left absent).
+//     0..50% reveals the RIGHT half (top→right→bottom present,
+//     left absent).
 //   - t=4  (End=100): a complete ring (left AND right present).
 //
 // The monotonic left-side reveal (absent→absent→present) across three frames
@@ -119,8 +119,8 @@ func runMGTrimAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_trimanim_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_trimanim.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_trimanim_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_trimanim.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildMGTrimAnimDemo(t, target)
@@ -145,7 +145,7 @@ func runMGTrimAnimGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"pngEarly":%q,"pngMid":%q,"pngFull":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(pngEarly), toFwd(pngMid), toFwd(pngFull))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

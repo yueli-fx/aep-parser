@@ -5,7 +5,7 @@ capabilities: [build-pseudo-effect, pseudo-slider, pseudo-color, pseudo-checkbox
 gates: [TestBuildPseudoEffect_AEShipGate_AE2020, TestBuildPseudoEffect_AEShipGate_AE2025, TestBuildPseudoEffectRich_AEShipGate_AE2020, TestBuildPseudoEffectRich_AEShipGate_AE2025, TestBuildPseudoEffectValueEntry_AEShipGate_AE2020, TestBuildPseudoEffectValueEntry_AEShipGate_AE2025]
 status: 待review
 last_updated: 2026-06-20
-regenerate: "go run ./flightdeck/showcase/pseudo-effect  (B 类读值：AE 打开看 Effect Controls 面板，或跑 test_data/verify_pseudo_effect.jsx 结构 dump)"
+regenerate: "go run ./flightdeck/showcase/pseudo-effect  (B 类读值：AE 打开看 Effect Controls 面板，或跑 test_data/generators/verify_pseudo_effect.jsx 结构 dump)"
 ---
 
 # pseudo-effect — showcase（B 类 读值档）

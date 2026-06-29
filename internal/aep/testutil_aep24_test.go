@@ -12,7 +12,7 @@ import (
 
 func openCapsAE24(t *testing.T) (*aep.Project, *aep.Composition, *aep.Composition) {
 	t.Helper()
-	proj, err := aep.Open("../../test_data/re_text_caps_ae24.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text_caps_ae24.aep")
 	if err != nil {
 		t.Skipf("re_text_caps_ae24.aep not present; rerun re_text_caps_ae24.jsx in AE 24+")
 	}
@@ -33,7 +33,7 @@ func openCapsAE24(t *testing.T) (*aep.Project, *aep.Composition, *aep.Compositio
 
 func openTrackMatteAE24(t *testing.T) (*aep.Project, *aep.Composition) {
 	t.Helper()
-	proj, err := aep.Open("../../test_data/re_trackmatte_ae24.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_trackmatte_ae24.aep")
 	if err != nil {
 		t.Skipf("re_trackmatte_ae24.aep not present; rerun re_trackmatte_ae24.jsx in AE 23+")
 	}
@@ -52,7 +52,7 @@ func openTrackMatteAE24(t *testing.T) (*aep.Project, *aep.Composition) {
 
 func openWave2AE24(t *testing.T) *aep.Project {
 	t.Helper()
-	proj, err := aep.Open("../../test_data/re_wave2_ae24.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_wave2_ae24.aep")
 	if err != nil {
 		t.Skipf("re_wave2_ae24.aep not present; rerun re_wave2_ae24.jsx in AE 24+")
 	}
@@ -61,7 +61,7 @@ func openWave2AE24(t *testing.T) *aep.Project {
 
 func openTextAE24More(t *testing.T) *aep.Project {
 	t.Helper()
-	p, err := aep.Open("../../test_data/re_text_ae24_more.aep")
+	p, err := aep.Open("../../test_data/fixtures/re_text_ae24_more.aep")
 	if err != nil {
 		t.Skipf("re_text_ae24_more.aep not present; rerun re_text_ae24_more.jsx in AE 24+")
 	}
@@ -70,7 +70,7 @@ func openTextAE24More(t *testing.T) *aep.Project {
 
 func openAlternateSourceAE24(t *testing.T) (*aep.Project, *aep.Composition) {
 	t.Helper()
-	proj, err := aep.Open("../../test_data/re_altsource_ae24.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_altsource_ae24.aep")
 	if err != nil {
 		t.Skipf("re_altsource_ae24.aep not present; rerun re_altsource_ae24.jsx in AE 18+")
 	}

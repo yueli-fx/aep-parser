@@ -420,7 +420,7 @@ func lowerLayerTransform(t *LayerTransform, ctx *lowerCtx) (*rifx.Chunk, error) 
 		return nil, err
 	}
 	// Each transform channel is persisted to disk in its RE'd on-disk encoding
-	// (test_data/v2_2_transform_kf_re.aep): Anchor/Position are 3D spatial //nolint:jargon
+	// (test_data/fixtures/v2_2_transform_kf_re.aep): Anchor/Position are 3D spatial //nolint:jargon
 	// motion-path ([x,y,0]); Scale is 3D non-spatial (÷100, Z=1.0); Rotation is
 	// 1D non-spatial (degrees); Opacity is 1D non-spatial (÷100). Animated →
 	// inject keyframes; otherwise overwrite the embedded template's static cdat.

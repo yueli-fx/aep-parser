@@ -29,7 +29,7 @@ func runV2_2RectSubKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	inputAEP := filepath.Join(tempDir, "v2_2_rectsubkf.aep")
 	resavedAEP := filepath.Join(tempDir, "v2_2_rectsubkf.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_2_rectsubkf.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_rectsubkf_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_2_rectsubkf_args.json`
 
 	p := aep.NewProject(target)
 	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
@@ -55,13 +55,13 @@ func runV2_2RectSubKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`, toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/verify_v2_2_rectsubkf.jsx`, doneFile, 180)
+	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/generators/verify_v2_2_rectsubkf.jsx`, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)
 	if err != nil {
@@ -120,7 +120,7 @@ func runV2_2StrokeKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	inputAEP := filepath.Join(tempDir, "v2_2_strokekf.aep")
 	resavedAEP := filepath.Join(tempDir, "v2_2_strokekf.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_2_strokekf.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_strokekf_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_2_strokekf_args.json`
 
 	p := aep.NewProject(target)
 	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
@@ -147,13 +147,13 @@ func runV2_2StrokeKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`, toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/verify_v2_2_strokekf.jsx`, doneFile, 180)
+	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/generators/verify_v2_2_strokekf.jsx`, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)
 	if err != nil {
@@ -208,7 +208,7 @@ func runV2_2FillOpKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	inputAEP := filepath.Join(tempDir, "v2_2_fillopkf.aep")
 	resavedAEP := filepath.Join(tempDir, "v2_2_fillopkf.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_2_fillopkf.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_fillopkf_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_2_fillopkf_args.json`
 
 	p := aep.NewProject(target)
 	comp, err := aep.NewComposition(p, "Main", 1920, 1080, 30, 5)
@@ -233,13 +233,13 @@ func runV2_2FillOpKfShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`, toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/verify_v2_2_fillopkf.jsx`, doneFile, 180)
+	runAeRunShipGate(t, aeExe, `E:/projects/tools/aep-parser/test_data/generators/verify_v2_2_fillopkf.jsx`, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)
 	if err != nil {

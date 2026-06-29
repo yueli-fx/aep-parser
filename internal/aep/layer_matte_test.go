@@ -30,9 +30,9 @@ func TestTrackMatteLayerReal(t *testing.T) {
 	}
 
 	type matteCase struct {
-		layerSource    string // identify dependent layer by its source name
-		wantMode       aep.TrackMatteType
-		wantMatteSrc   string // source footage name of the matte-source layer
+		layerSource  string // identify dependent layer by its source name
+		wantMode     aep.TrackMatteType
+		wantMatteSrc string // source footage name of the matte-source layer
 	}
 	cases := []matteCase{
 		{"mt_alpha_to_solidA", aep.TrackMatteAlpha, "solidA"},
@@ -61,7 +61,12 @@ func TestTrackMatteLayerReal(t *testing.T) {
 		if wantSrc == nil || src.ID != wantSrc.ID {
 			t.Errorf("%s TrackMatteLayer().ID = %d, want layer with source=%q (id=%d)",
 				c.layerSource, src.ID, c.wantMatteSrc,
-				func() uint32 { if wantSrc != nil { return wantSrc.ID }; return 0 }())
+				func() uint32 {
+					if wantSrc != nil {
+						return wantSrc.ID
+					}
+					return 0
+				}())
 		}
 	}
 }

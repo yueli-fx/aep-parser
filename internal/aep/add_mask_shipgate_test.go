@@ -12,7 +12,7 @@
 //     Reopen → AddMask ×2) — closed rect + open polyline, indexes 1 / 2, both
 //     read back and kept across AE's own resave.
 //
-// Gated by AE_SHIP_GATE. Baseline built by test_data/re_property_struct.jsx.
+// Gated by AE_SHIP_GATE. Baseline built by test_data/generators/re_property_struct.jsx.
 package aep_test
 
 import (
@@ -56,8 +56,8 @@ func runMaskShipGate(t *testing.T, aeExe, label string, proj *aep.Project, layer
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mask_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mask.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mask_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mask.jsx`
 
 	tempDir := t.TempDir()
 	inputAEP := filepath.Join(tempDir, label+"_in.aep")
@@ -74,7 +74,7 @@ func runMaskShipGate(t *testing.T, aeExe, label string, proj *aep.Project, layer
 	}
 	out.Close()
 
-	if err := os.WriteFile(argsPath, []byte(maskArgsJSON(inputAEP, doneFile, resavedAEP, effectCount, expect)), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(maskArgsJSON(inputAEP, doneFile, resavedAEP, effectCount, expect)), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -117,7 +117,7 @@ func runMaskShipGate(t *testing.T, aeExe, label string, proj *aep.Project, layer
 }
 
 func runMaskBaselineGate(t *testing.T, aeExe, ver string) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("re_property_struct_baseline.aep not present: %v", err)
 	}

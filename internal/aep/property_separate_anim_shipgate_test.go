@@ -11,7 +11,7 @@
 //   - separate animated (re_sepdim_anim_before.aep, merged animated 3D)
 //   - merge    animated (re_sepdim_anim_after.aep,  separated animated 3D)
 //
-// Gated by AE_SHIP_GATE. Fixtures built by test_data/re_separate_dims_anim.jsx.
+// Gated by AE_SHIP_GATE. Fixtures built by test_data/generators/re_separate_dims_anim.jsx.
 package aep_test
 
 import (
@@ -33,8 +33,8 @@ func runSepDimAnimShipGate(t *testing.T, aeExe, baseFixture string, separate boo
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/sepdim_anim_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_sepdim_anim.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/sepdim_anim_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_sepdim_anim.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	proj, err := aep.Open(baseFixture)
@@ -102,7 +102,7 @@ func runSepDimAnimShipGate(t *testing.T, aeExe, baseFixture string, separate boo
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"mode":%q,"n":%d,"times":%s,"vx":%s,"vy":%s,"vz":%s}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), mode, len(times),
 		jsonFloats(times), jsonFloats(vx), jsonFloats(vy), jsonFloats(vz))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -150,30 +150,30 @@ func jsonFloats(fs []float64) string {
 }
 
 func TestSeparateDimsAnim_AEShipGate_AE2020(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2020(), "../../test_data/re_sepdim_anim_before.aep", true)
+	runSepDimAnimShipGate(t, ae2020(), "../../test_data/generated/fixtures/re_sepdim_anim_before.aep", true)
 }
 func TestSeparateDimsAnim_AEShipGate_AE2025(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim_before.aep", true)
+	runSepDimAnimShipGate(t, ae2025(), "../../test_data/generated/fixtures/re_sepdim_anim_before.aep", true)
 }
 
 func TestMergeDimsAnim_AEShipGate_AE2020(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2020(), "../../test_data/re_sepdim_anim_after.aep", false)
+	runSepDimAnimShipGate(t, ae2020(), "../../test_data/generated/fixtures/re_sepdim_anim_after.aep", false)
 }
 func TestMergeDimsAnim_AEShipGate_AE2025(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim_after.aep", false)
+	runSepDimAnimShipGate(t, ae2025(), "../../test_data/generated/fixtures/re_sepdim_anim_after.aep", false)
 }
 
 // Non-uniform keyframe spacing (0.5/1.0/1.5s, 4 keyframes) — exercises the
 // timing-dependent influence (0.01/segDur) + central-difference speed mapping.
 func TestSeparateDimsAnimNonUniform_AEShipGate_AE2020(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2020(), "../../test_data/re_sepdim_anim2_before.aep", true)
+	runSepDimAnimShipGate(t, ae2020(), "../../test_data/generated/fixtures/re_sepdim_anim2_before.aep", true)
 }
 func TestSeparateDimsAnimNonUniform_AEShipGate_AE2025(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim2_before.aep", true)
+	runSepDimAnimShipGate(t, ae2025(), "../../test_data/generated/fixtures/re_sepdim_anim2_before.aep", true)
 }
 func TestMergeDimsAnimNonUniform_AEShipGate_AE2020(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2020(), "../../test_data/re_sepdim_anim2_after.aep", false)
+	runSepDimAnimShipGate(t, ae2020(), "../../test_data/generated/fixtures/re_sepdim_anim2_after.aep", false)
 }
 func TestMergeDimsAnimNonUniform_AEShipGate_AE2025(t *testing.T) {
-	runSepDimAnimShipGate(t, ae2025(), "../../test_data/re_sepdim_anim2_after.aep", false)
+	runSepDimAnimShipGate(t, ae2025(), "../../test_data/generated/fixtures/re_sepdim_anim2_after.aep", false)
 }

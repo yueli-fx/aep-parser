@@ -14,7 +14,7 @@ import (
 
 // TestBuildCompItemMatchesGoldenStructure 是占位 stub。
 // 完整验证 builder 输出 Item LIST children 顺序 / 类型跟 AE 2025 saved 1-comp
-// fixture (test_data/comp_item_children.golden.txt) 一致，需要 NewComposition
+// fixture (test_data/fixtures/comp_item_children.golden.txt) 一致，需要 NewComposition
 // 入口建出 *Composition 才能拿到 itemList chunk 对比。
 //
 // 当前 builders 已经实现完整 buildCompItem 链路，但 unexported；
@@ -169,7 +169,7 @@ func TestNewComposition_RejectsInvalid(t *testing.T) {
 }
 
 func TestNewComposition_OnOpenedProject_NoIDCollision(t *testing.T) {
-	p, err := aep.Open("../../test_data/re_batch.aep")
+	p, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present: %v", err)
 	}
@@ -236,7 +236,7 @@ func runAEShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	resavedAEP := filepath.Join(tempDir, "v2_1_test.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_1_test.done")
 	// args.json 路径必须跟 verify_v2_1.jsx 里 hardcoded 路径一致
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_1_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_1_args.json`
 
 	// 1. 构造 + write
 	p := aep.NewProject(target)
@@ -263,14 +263,14 @@ func runAEShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile) // 防上轮残留
 
 	// 3. ae_run.ps1 (drop-in for AfterFX -r — handles convert / save-changes / data-loss modals)
-	jsxPath := `E:/projects/tools/aep-parser/test_data/verify_v2_1.jsx`
+	jsxPath := `E:/projects/tools/aep-parser/test_data/generators/verify_v2_1.jsx`
 	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
 
 	// 4. read + assert PASS (.done guaranteed to exist after ps1 exit 0)

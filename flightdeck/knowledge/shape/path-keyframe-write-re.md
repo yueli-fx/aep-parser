@@ -5,7 +5,7 @@ READ WHEN: implementing shape-path keyframe write (animated ADBE Vector Shape); 
 
 ---
 
-逐帧 bezier path 动画的磁盘结构。fixture `test_data/re_path_anim.jsx`（3 个 LINEAR 关键帧，各帧顶点数/bbox 不同）→ AE 2020 + AE 2025 双版本存盘 → `tmp_debug/dump_path_anim`。
+逐帧 bezier path 动画的磁盘结构。fixture `test_data/generators/re_path_anim.jsx`（3 个 LINEAR 关键帧，各帧顶点数/bbox 不同）→ AE 2020 + AE 2025 双版本存盘 → `tmp_debug/dump_path_anim`。
 
 ## 结论速览
 

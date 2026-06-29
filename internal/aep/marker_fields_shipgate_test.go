@@ -24,13 +24,13 @@ func runMarkerFieldsGate(t *testing.T, aeExe, ver string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/marker_fields_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_marker_fields.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/marker_fields_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_marker_fields.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	// AddMarker needs an existing marker to clone (no from-scratch seed), so open
 	// the marker fixture (RE_CM, 2 markers, AE2020-openable) and mutate it.
-	p, err := aep.Open("../../test_data/re_compmarker.aep")
+	p, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present: %v", err)
 	}
@@ -95,7 +95,7 @@ func runMarkerFieldsGate(t *testing.T, aeExe, ver string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

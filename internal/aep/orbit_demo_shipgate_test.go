@@ -153,11 +153,11 @@ var orbitPixelChecks = []struct {
 	x, y int
 	want [3]uint8
 }{
-	{"BG-indigo", 200, 540, [3]uint8{18, 20, 46}},     // gradient stop 0 (0.07,0.08,0.18)
-	{"Ring-cyan", 630, 540, [3]uint8{64, 217, 255}},   // stroke (0.25,0.85,1)
-	{"Dot1-amber", 960, 230, [3]uint8{255, 140, 26}},  // fill (1,0.55,0.1)
+	{"BG-indigo", 200, 540, [3]uint8{18, 20, 46}},       // gradient stop 0 (0.07,0.08,0.18)
+	{"Ring-cyan", 630, 540, [3]uint8{64, 217, 255}},     // stroke (0.25,0.85,1)
+	{"Dot1-amber", 960, 230, [3]uint8{255, 140, 26}},    // fill (1,0.55,0.1)
 	{"Dot2-magenta", 1228, 695, [3]uint8{255, 51, 140}}, // fill (1,0.2,0.55)
-	{"Dot3-teal", 692, 695, [3]uint8{51, 255, 179}},   // fill (0.2,1,0.7)
+	{"Dot3-teal", 692, 695, [3]uint8{51, 255, 179}},     // fill (0.2,1,0.7)
 }
 
 func checkOrbitRenderedPixels(t *testing.T, ver, pngPath string) {
@@ -191,8 +191,8 @@ func runOrbitDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/orbit_demo_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_orbit_demo.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/orbit_demo_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_orbit_demo.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildOrbitDemo(t, target)
@@ -215,7 +215,7 @@ func runOrbitDemoGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

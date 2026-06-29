@@ -109,7 +109,7 @@ func TestPropertyControlType_Derivation(t *testing.T) {
 // TestPropertyControlType_Fixture verifies ControlType/ValuePropertyType
 // against parsed fixture properties.
 func TestPropertyControlType_Fixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present: %v", err)
 	}
@@ -302,7 +302,7 @@ func TestUnitsText_AngleFallback(t *testing.T) {
 // TestPropertyIndex_PropertyDepth_Fixture verifies PropertyIndex and
 // PropertyDepth on a parsed fixture.
 func TestPropertyIndex_PropertyDepth_Fixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -364,7 +364,7 @@ func TestPropertyIndex_NoParent(t *testing.T) {
 // TestDefaultValue_Transform verifies that transform properties get
 // DefaultValue assigned during parse.
 func TestDefaultValue_Transform(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -496,7 +496,7 @@ func TestDefaultValue_NonTransform(t *testing.T) {
 // TestEffectPardMetadata_Fixture verifies that effect parameters get
 // DefaultValue/LastValue/NbOptions from pard chunks.
 func TestEffectPardMetadata_Fixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present: %v", err)
 	}

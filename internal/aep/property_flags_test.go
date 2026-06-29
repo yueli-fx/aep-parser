@@ -13,7 +13,7 @@ import (
 // when the property cannot be located — fixture content drift should
 // not block the suite.
 func TestProperty_Tdb4Flags(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present: %v", err)
 	}

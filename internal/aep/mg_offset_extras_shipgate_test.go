@@ -10,14 +10,15 @@
 // Verified at the capability's surface per delivery-contract red line 4 with one
 // frame of five cards on a dark BG:
 //   - MITER    : Rect200 + Offset Amount=60 (default Miter join, limit 4) — the
-//                outward offset extends each 90° corner to a sharp MITER POINT, so
-//                the corner-tip pixel just past the original corner is WHITE.
+//     outward offset extends each 90° corner to a sharp MITER POINT, so
+//     the corner-tip pixel just past the original corner is WHITE.
 //   - BEVEL    : same + Line Join=Bevel — the corner is cut flat, tip DARK.
 //   - MITERLIM : same Miter join + Miter Limit=1 — the miter exceeds the limit and
-//                is clipped to a bevel, tip DARK.
+//     is clipped to a bevel, tip DARK.
 //   - COPY1/2  : Rect160 + Amount=30 + Copies=3, Copy Offset 1 (default) vs 2 —
-//                a larger Copy Offset widens the per-copy step, so the outermost
-//                outline (white extent) reaches farther for COPY2.
+//     a larger Copy Offset widens the per-copy step, so the outermost
+//     outline (white extent) reaches farther for COPY2.
+//
 // Asserting the corner-tip fill (MITER white, BEVEL+MITERLIM dark) and the offset
 // extent (COPY2 > COPY1) proves the spliced leaves changed AE's render, not just
 // that the values round-tripped.
@@ -199,8 +200,8 @@ func runMGOffsetExtrasGate(t *testing.T, aeExe, ver string, target aep.AETarget)
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_offset_extras_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_offset_extras.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_offset_extras_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_offset_extras.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildMGOffsetExtrasDemo(t, target)
@@ -223,7 +224,7 @@ func runMGOffsetExtrasGate(t *testing.T, aeExe, ver string, target aep.AETarget)
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

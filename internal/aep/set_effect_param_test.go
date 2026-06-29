@@ -150,7 +150,7 @@ func TestSetEffectParam_Refusals(t *testing.T) {
 }
 
 func TestSetEffectParam_ParsedFixtureLayer(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("baseline not present: %v", err)
 	}

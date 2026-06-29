@@ -111,7 +111,7 @@ func buildExtendedAEP(textPayload []byte, markerTimes []float64, markerComments 
 // effect-specific API needed. Covers scalar (Gaussian Blur Blurriness)
 // and 4D (Tritone color) cases.
 func TestEffectParamSetStaticValueRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present")
 	}
@@ -201,7 +201,7 @@ func TestEffectParamSetStaticValueRoundtrip(t *testing.T) {
 // confirming the same path as direct-property keyframe edit works on
 // effects too.
 func TestEffectParamKeyframeSetValueRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present")
 	}

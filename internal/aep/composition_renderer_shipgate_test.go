@@ -35,8 +35,8 @@ func runRendererShipGate(t *testing.T, aeExe, baseFixture string, targets []stri
 	}
 
 	srcFixture := baseFixture
-	const argsPath = `e:/projects/tools/aep-parser/test_data/renderer_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_renderer.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/renderer_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_renderer.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	for _, target := range targets {
@@ -67,7 +67,7 @@ func runRendererShipGate(t *testing.T, aeExe, baseFixture string, targets []stri
 
 			argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expected":%q}`,
 				toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), target)
-			if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+			if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 				t.Fatal(err)
 			}
 			defer os.Remove(argsPath)
@@ -105,7 +105,7 @@ func TestSetRenderer_AEShipGate_AE2025(t *testing.T) {
 	// AE 2025 base (saved by AE 2025) + all four binary engines. AE 2025
 	// auto-promotes legacy Escher/Picasso to Advanced 3D on load (still PASS).
 	runRendererShipGate(t, aeExe,
-		"../../test_data/renderer_classic_3d.aep",
+		"../../test_data/fixtures/renderer_classic_3d.aep",
 		[]string{"ADBE Calder", "ADBE Ernst", "ADBE Picasso", "ADBE Escher"})
 }
 
@@ -115,9 +115,9 @@ func TestSetRenderer_AEShipGate_AE2020(t *testing.T) {
 		aeExe = `E:/adobe/Adobe After Effects 2020/Support Files/AfterFX.exe`
 	}
 	// AE 2020 can't open AE-2025-saved files, so use an AE-2020-native base
-	// (built by test_data/build_renderer_ae2020.jsx). AE 2020 exposes Escher
+	// (built by test_data/generators/build_renderer_ae2020.jsx). AE 2020 exposes Escher
 	// (Advanced 3D) + Ernst (Cinema 4D); Calder/Picasso aren't AE 2020 engines.
 	runRendererShipGate(t, aeExe,
-		"../../test_data/renderer_ae2020_r0.aep",
+		"../../test_data/fixtures/renderer_ae2020_r0.aep",
 		[]string{"ADBE Ernst", "ADBE Escher"})
 }

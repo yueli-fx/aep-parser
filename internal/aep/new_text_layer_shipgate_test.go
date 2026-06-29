@@ -9,7 +9,7 @@
 // PASS certifies AE recomputes layout on load (groundwork for a future
 // length-variable text write). Resaves so the Go side confirms preservation.
 //
-// Gated by AE_SHIP_GATE. Template extracted from test_data/re_text.aep.
+// Gated by AE_SHIP_GATE. Template extracted from test_data/fixtures/re_text.aep.
 package aep_test
 
 import (
@@ -26,8 +26,8 @@ func runTextLayerGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_layer_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_layer.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_layer_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_layer.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -63,7 +63,7 @@ func runTextLayerGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

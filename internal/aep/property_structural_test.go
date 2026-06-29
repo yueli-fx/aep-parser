@@ -72,9 +72,9 @@ func aeParadeOrder(t *testing.T, path string) []string {
 
 func loadFxLayer(t *testing.T) (*aep.Project, *aep.Layer) {
 	t.Helper()
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
-		t.Skipf("re_property_struct_baseline.aep not present; run test_data/re_property_struct.jsx (RE_PROP_MODE=baseline) in AE 2020")
+		t.Skipf("re_property_struct_baseline.aep not present; run test_data/generators/re_property_struct.jsx (RE_PROP_MODE=baseline) in AE 2020")
 	}
 	l := layerWithEffects(proj)
 	if l == nil {
@@ -123,7 +123,7 @@ func TestPropertyGroup_Remove_Effect(t *testing.T) {
 	}
 
 	// Cross-check against AE's own remove output.
-	if ae := aeParadeOrder(t, "../../test_data/re_property_struct_remove.aep"); ae != nil {
+	if ae := aeParadeOrder(t, "../../test_data/generated/fixtures/re_property_struct_remove.aep"); ae != nil {
 		if !eq(paradeChildNames(rl), ae) {
 			t.Errorf("round-trip parade %v != AE-removed %v", paradeChildNames(rl), ae)
 		}
@@ -153,7 +153,7 @@ func TestPropertyGroup_MoveTo_Effect(t *testing.T) {
 		t.Errorf("round-trip parade = %v, want %v", got, wantAfter)
 	}
 
-	if ae := aeParadeOrder(t, "../../test_data/re_property_struct_move.aep"); ae != nil {
+	if ae := aeParadeOrder(t, "../../test_data/generated/fixtures/re_property_struct_move.aep"); ae != nil {
 		if !eq(paradeChildNames(rl), ae) {
 			t.Errorf("round-trip parade %v != AE-moved %v", paradeChildNames(rl), ae)
 		}
@@ -211,7 +211,7 @@ func TestPropertyGroup_Duplicate_Effect(t *testing.T) {
 	// localized display-name suffix on the clone (we don't — see
 	// mutate_property_structural.go Duplicate doc); the match-name order is
 	// identical.
-	if ae := aeParadeOrder(t, "../../test_data/re_property_struct_duplicate.aep"); ae != nil {
+	if ae := aeParadeOrder(t, "../../test_data/generated/fixtures/re_property_struct_duplicate.aep"); ae != nil {
 		if !eq(paradeChildNames(rl), ae) {
 			t.Errorf("round-trip parade %v != AE-duplicated %v", paradeChildNames(rl), ae)
 		}

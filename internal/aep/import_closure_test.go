@@ -17,12 +17,12 @@ import (
 // the fixture is missing.
 func openXProjPair(t *testing.T) (*aep.Project, *aep.Composition, *aep.Project, *aep.Composition) {
 	t.Helper()
-	path := filepath.Join("../../test_data", "re_duplicate_item_before.aep")
+	path := filepath.Join("../../test_data/generated/fixtures", "re_duplicate_item_before.aep")
 	if _, err := os.Stat(path); err != nil {
-		path = filepath.Join("../../test_data", "re_duplicate_item_after.aep")
+		path = filepath.Join("../../test_data/generated/fixtures", "re_duplicate_item_after.aep")
 	}
 	if _, err := os.Stat(path); err != nil {
-		t.Skipf("fixture missing: re_duplicate_item_{before,after}.aep (run test_data/re_duplicate_item.jsx)")
+		t.Skipf("fixture missing: re_duplicate_item_{before,after}.aep (run test_data/generators/re_duplicate_item.jsx)")
 		return nil, nil, nil, nil
 	}
 	open := func() (*aep.Project, *aep.Composition) {
@@ -272,7 +272,7 @@ func TestInsertLayerXProj_RoundTrip(t *testing.T) {
 // (file footage) via openFileBacked; SKIPs if no comp layer sources file footage
 // there (the ship-gate covers dedup definitively with purpose-built fixtures).
 func TestInsertLayerXProj_FootageDedup(t *testing.T) {
-	srcProj, destProj := openFileBacked(t, "../../test_data/re_batch.aep")
+	srcProj, destProj := openFileBacked(t, "../../test_data/fixtures/re_batch.aep")
 	if srcProj == nil {
 		t.Skip("re_batch.aep absent or has no file-backed footage")
 	}
@@ -328,7 +328,7 @@ func TestImportFootageBlock(t *testing.T) {
 	// file-backed footage (the !IsSolid filter above leaves srcF nil here), so
 	// fall back to re_batch.aep which has file-backed footage.
 	if srcF == nil {
-		batchPath := filepath.Join("../../test_data", "re_batch.aep")
+		batchPath := filepath.Join("../../test_data/fixtures", "re_batch.aep")
 		srcProj, destProj = openFileBacked(t, batchPath)
 		if srcProj == nil {
 			t.Skip("no file-backed footage in any available fixture")

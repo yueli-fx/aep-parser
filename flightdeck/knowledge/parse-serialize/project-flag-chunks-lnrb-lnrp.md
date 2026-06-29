@@ -68,6 +68,6 @@ Ship gate validated: bisect 8/8 PASS, full modified.aep ship_gate_1d.done shows 
 | `internal/serializer/back_project.go` | `setRootFlagChunk` + `flagChunkInsertPosition` + `chunkIDCpid` 锚 |
 | `tmp_debug/ship_gate_1d_bisect/` | per-setter 隔离 ship-gate runner (8 个 variant) |
 | `tools/debug/dump_root_compare/` | root chunk children 序列 byte-diff 工具 |
-| `test_data/re_linear_blending.jsx` | AE 自己写 lnrb=true 的 RE fixture driver |
-| `test_data/re_linearize_workspace.jsx` | 同 lnrp |
-| `test_data/ship_gate_1d.jsx` | 全 8 setter combined ship-gate driver |
+| `test_data/generators/re_linear_blending.jsx` | AE 自己写 lnrb=true 的 RE fixture driver |
+| `test_data/generators/re_linearize_workspace.jsx` | 同 lnrp |
+| `test_data/generators/ship_gate_1d.jsx` | 全 8 setter combined ship-gate driver |

@@ -7,7 +7,7 @@ import (
 )
 
 func TestProjectViews_ReBatch(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch.aep")
 	if err != nil {
 		t.Skipf("re_batch.aep not present: %v", err)
 	}

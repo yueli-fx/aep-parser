@@ -12,7 +12,7 @@ import (
 // a real fixture.
 
 func TestFrameAccessors_Layer(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -44,7 +44,7 @@ func TestFrameAccessors_Layer(t *testing.T) {
 }
 
 func TestFrameAccessors_LayerSetters(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestFrameAccessors_LayerSetters(t *testing.T) {
 }
 
 func TestFrameAccessors_Composition(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestFrameAccessors_Composition(t *testing.T) {
 }
 
 func TestFrameAccessors_KeyframeMarker(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

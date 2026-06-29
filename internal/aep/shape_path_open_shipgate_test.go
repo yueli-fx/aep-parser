@@ -33,7 +33,7 @@ func runV2_2PathOpenShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	inputAEP := filepath.Join(tempDir, "v2_2_path_open.aep")
 	resavedAEP := filepath.Join(tempDir, "v2_2_path_open.resaved.aep")
 	doneFile := filepath.Join(tempDir, "v2_2_path_open.done")
-	argsPath := `e:/projects/tools/aep-parser/test_data/v2_2_path_open_args.json`
+	argsPath := `e:/projects/tools/aep-parser/test_data/generated/args/v2_2_path_open_args.json`
 
 	verts := [][2]float64{{100, 100}, {300, 200}, {200, 400}} // open polyline, n=3
 
@@ -74,13 +74,13 @@ func runV2_2PathOpenShipGate(t *testing.T, target aep.AETarget, aeExe string) {
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
 	os.Remove(doneFile)
 
-	jsxPath := `E:/projects/tools/aep-parser/test_data/verify_v2_2_path_open.jsx`
+	jsxPath := `E:/projects/tools/aep-parser/test_data/generators/verify_v2_2_path_open.jsx`
 	runAeRunShipGate(t, aeExe, jsxPath, doneFile, 180)
 
 	content, err := os.ReadFile(doneFile)

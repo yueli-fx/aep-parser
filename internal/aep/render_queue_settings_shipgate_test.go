@@ -22,7 +22,7 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
-const rqSettingsFixture = "../../test_data/rq_ae2020_base.aep"
+const rqSettingsFixture = "../../test_data/fixtures/rq_ae2020_base.aep"
 
 func runRQSettingsGate(t *testing.T, aeExe, ver string) {
 	t.Helper()
@@ -83,8 +83,8 @@ func runRQSettingsGate(t *testing.T, aeExe, ver string) {
 	om.SetDepth(64)
 	om.SetStartingNumber(42)
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/rq_settings_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_rq_settings.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/rq_settings_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_rq_settings.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	tempDir := t.TempDir()
@@ -104,7 +104,7 @@ func runRQSettingsGate(t *testing.T, aeExe, ver string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

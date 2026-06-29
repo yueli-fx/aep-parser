@@ -47,7 +47,7 @@ func f64At(b []byte, off int) float64 {
 
 // TestLowerTransformVec2Spatial_Bpk128 pins Anchor/Position encoding (combined
 // 3D spatial motion-path, bpk-128) against the RE'd fixture
-// (test_data/v2_2_transform_kf_re.aep / v2_2_shape_kf_re.aep): value@0x38 X/Y/Z
+// (test_data/fixtures/v2_2_transform_kf_re.aep / v2_2_shape_kf_re.aep): value@0x38 X/Y/Z
 // (Z=0), motion-path marker@0x08, header@0x07=0x07. KF2 = (500,300) at t=2s.
 func TestLowerTransformVec2Spatial_Bpk128(t *testing.T) {
 	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
@@ -105,7 +105,7 @@ func TestLowerTransformScale_Bpk128NonSpatial(t *testing.T) {
 
 // TestLowerShapeRectSubProps pins Rect Position (spatial Vec2 motion-path,
 // bpk-104, value@0x38, like Ellipse Position) + Roundness (1D non-spatial,
-// bpk-48) — RE'd from test_data/v2_2_rect_subprops.aep. KF2: pos=(40,50), rnd=20.
+// bpk-48) — RE'd from test_data/fixtures/v2_2_rect_subprops.aep. KF2: pos=(40,50), rnd=20.
 func TestLowerShapeRectSubProps(t *testing.T) {
 	body := &rifx.Chunk{ID: rifx.IDList, FormType: rifx.IDTdgp}
 	minimalTransformLeaf(body, "ADBE Vector Rect Position", valueLayout{dim: 2, headerByte: 0x07, spatial: true})

@@ -4,14 +4,14 @@
 // (SetEffectLayerParam). AE stores the matte source as the target layer's ID in
 // the effect param's tdpi (RE: re_set_matte.aep). On a 100% Go-built file:
 //
-//   SETMATTE comp: MATTE shape (white rect covering the LEFT half, right half
-//   transparent) at the bottom + a full-frame RED solid FX on top carrying Set
-//   Matte (ADBE Set Matte3) whose "Take Matte From Layer" (-0001) points at
-//   MATTE. The matte gates FX by MATTE's channel: FX red shows only on the LEFT
-//   (matte on), the RIGHT goes transparent → black. Without the layer ref FX
-//   would be full-frame red, so sampling right=black proves the reference took.
+//	SETMATTE comp: MATTE shape (white rect covering the LEFT half, right half
+//	transparent) at the bottom + a full-frame RED solid FX on top carrying Set
+//	Matte (ADBE Set Matte3) whose "Take Matte From Layer" (-0001) points at
+//	MATTE. The matte gates FX by MATTE's channel: FX red shows only on the LEFT
+//	(matte on), the RIGHT goes transparent → black. Without the layer ref FX
+//	would be full-frame red, so sampling right=black proves the reference took.
 //
-// Gated by AE_SHIP_GATE. Uses test_data/verify_set_matte.jsx.
+// Gated by AE_SHIP_GATE. Uses test_data/generators/verify_set_matte.jsx.
 package aep_test
 
 import (
@@ -142,8 +142,8 @@ func runSetMatteGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/set_matte_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_set_matte.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/set_matte_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_set_matte.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	rp, _ := buildSetMatteDemo(t, target)
@@ -166,7 +166,7 @@ func runSetMatteGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

@@ -154,14 +154,14 @@ func TestCompositionCDTAFields(t *testing.T) {
 	}
 }
 
-// TestCompositionCDTARealFixture parses the real test_data/re_tickrate.aep
+// TestCompositionCDTARealFixture parses the real test_data/fixtures/re_tickrate.aep
 // and asserts the CDTA tail values match what we hex-dumped from the file
 // (shutter angle 180°, motion blur defaults). All 3 comps were exported
 // from AE with default render settings, so their CDTA values are AE's
 // own defaults — a strong indicator the parser is honoring real-world
 // bytes, not just our synthetic ones.
 func TestCompositionCDTARealFixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_tickrate.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_tickrate.aep")
 	if err != nil {
 		t.Fatalf("Open re_tickrate.aep: %v", err)
 	}

@@ -21,7 +21,7 @@ import (
 // own comp model rather than py-aep's golden seconds. Exact ldat decode is
 // covered by the CUSTOM-source test below, which is comp-independent.
 func TestRenderQueueReaderNumItems1(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_numitems_1.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -71,7 +71,7 @@ func TestRenderQueueReaderNumItems1(t *testing.T) {
 // CUSTOM time span source: start/duration come straight from the settings
 // ldat dividends, independent of comp parsing. 24s13f @ 24fps = 24 + 13/24.
 func TestRenderQueueReaderCustomTimeSpan(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_custom_timespan.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_custom_timespan.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestRenderQueueReaderCustomTimeSpan(t *testing.T) {
 }
 
 func TestRenderQueueReaderComment(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_comment.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_comment.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestRenderQueueReaderComment(t *testing.T) {
 }
 
 func TestRenderQueueReaderNumItems2(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_numitems_2.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_numitems_2.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -115,7 +115,7 @@ func TestRenderQueueReaderNumItems2(t *testing.T) {
 }
 
 func TestRenderQueueJSON(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_numitems_1.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestRenderQueueJSON(t *testing.T) {
 // Reading the render queue must not perturb byte-identical round-trip
 // (opaque preservation): the LRdr subtree is untouched leaves/lists.
 func TestRenderQueueRoundTripByteIdentical(t *testing.T) {
-	const path = "../../test_data/rq_numitems_1.aep"
+	const path = "../../test_data/fixtures/rq_numitems_1.aep"
 	orig, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
@@ -161,7 +161,7 @@ func TestRenderQueueRoundTripByteIdentical(t *testing.T) {
 // renderqueue/numItems_1.json "settings" — these enum values equal the raw
 // binary values (0xFFFF -> -1 sentinel for "current settings").
 func TestRenderQueueRenderSettings(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_numitems_1.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -222,7 +222,7 @@ func TestRenderQueueRenderSettingsVariants(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.fixture, func(t *testing.T) {
-			proj, err := aep.Open("../../test_data/" + c.fixture)
+			proj, err := aep.Open("../../test_data/fixtures/" + c.fixture)
 			if err != nil {
 				t.Fatalf("Open: %v", err)
 			}
@@ -249,7 +249,7 @@ func TestRenderQueueRenderSettingsVariants(t *testing.T) {
 // Output module settings (slice-3): 128B OutputModuleSettingsItem + 154B Roou.
 // Golden from renderqueue/numItems_1.json outputModules[0].settings.
 func TestRenderQueueOutputModuleSettings(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_numitems_1.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -317,7 +317,7 @@ func TestRenderQueueOutputModuleFlags(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.fixture, func(t *testing.T) {
-			proj, err := aep.Open("../../test_data/" + c.fixture)
+			proj, err := aep.Open("../../test_data/fixtures/" + c.fixture)
 			if err != nil {
 				t.Fatalf("Open: %v", err)
 			}
@@ -337,7 +337,7 @@ func TestRenderQueueOutputModuleFlags(t *testing.T) {
 // normalized (253/255). Offsets verified against format_options/cineon/*.
 func TestRenderQueueFormatOptionsCineon(t *testing.T) {
 	first := func(fixture string) *aep.FormatOptions {
-		proj, err := aep.Open("../../test_data/" + fixture)
+		proj, err := aep.Open("../../test_data/fixtures/" + fixture)
 		if err != nil {
 			t.Fatalf("Open %s: %v", fixture, err)
 		}
@@ -367,7 +367,7 @@ func TestRenderQueueFormatOptionsCineon(t *testing.T) {
 // Render settings writes (slice-5): length-preserving in-place ldat patches.
 // Set values, WriteAEP, re-parse, confirm persisted (incl -1 sentinel).
 func TestRenderQueueRenderSettingsWriteRoundTrip(t *testing.T) {
-	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	orig, err := os.ReadFile("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}
@@ -420,7 +420,7 @@ func TestRenderQueueRenderSettingsWriteRoundTrip(t *testing.T) {
 // Output module settings writes (slice-6): in-place patches to the 128B block
 // (incl flag bits) and the Roou chunk. Round-trip through WriteAEP.
 func TestRenderQueueOutputModuleWriteRoundTrip(t *testing.T) {
-	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	orig, err := os.ReadFile("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}
@@ -481,7 +481,7 @@ func TestRenderQueueOutputModuleWriteRoundTrip(t *testing.T) {
 // Item-level scalar writes (slice-7): template name (64B fixed), notify flag
 // bit, log type. All length-preserving; round-trip.
 func TestRenderQueueItemScalarWriteRoundTrip(t *testing.T) {
-	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	orig, err := os.ReadFile("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}
@@ -517,7 +517,7 @@ func TestRenderQueueItemScalarWriteRoundTrip(t *testing.T) {
 // Time span writes (slice-8): switch source to CUSTOM and write start/duration
 // as reduced fractions. Round-trip exact for decimal values.
 func TestRenderQueueTimeSpanWriteRoundTrip(t *testing.T) {
-	orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+	orig, err := os.ReadFile("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}
@@ -552,7 +552,7 @@ func TestRenderQueueTimeSpanWriteRoundTrip(t *testing.T) {
 // list) when the item has none. WriteAEP recomputes the LItm/LRdr LIST sizes.
 func TestRenderQueueCommentWriteRoundTrip(t *testing.T) {
 	t.Run("replace", func(t *testing.T) {
-		orig, err := os.ReadFile("../../test_data/rq_comment.aep")
+		orig, err := os.ReadFile("../../test_data/fixtures/rq_comment.aep")
 		if err != nil {
 			t.Fatalf("ReadFile: %v", err)
 		}
@@ -584,7 +584,7 @@ func TestRenderQueueCommentWriteRoundTrip(t *testing.T) {
 	})
 
 	t.Run("insert", func(t *testing.T) {
-		orig, err := os.ReadFile("../../test_data/rq_numitems_1.aep")
+		orig, err := os.ReadFile("../../test_data/fixtures/rq_numitems_1.aep")
 		if err != nil {
 			t.Fatalf("ReadFile: %v", err)
 		}
@@ -622,7 +622,7 @@ func TestRenderQueueCommentWriteRoundTrip(t *testing.T) {
 	})
 
 	t.Run("same-value-byte-identical", func(t *testing.T) {
-		orig, err := os.ReadFile("../../test_data/rq_comment.aep")
+		orig, err := os.ReadFile("../../test_data/fixtures/rq_comment.aep")
 		if err != nil {
 			t.Fatalf("ReadFile: %v", err)
 		}
@@ -644,7 +644,7 @@ func TestRenderQueueCommentWriteRoundTrip(t *testing.T) {
 }
 
 func TestRenderQueueReaderEmpty(t *testing.T) {
-	proj, err := aep.Open("../../test_data/rq_empty.aep")
+	proj, err := aep.Open("../../test_data/fixtures/rq_empty.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}

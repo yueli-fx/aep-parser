@@ -27,9 +27,9 @@ type kfExp struct {
 // bezier both sides). See TestSetDimensionsSeparated_Animated_NonUniform for
 // the timing-dependent influence.
 func TestSetDimensionsSeparated_Animated(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_sepdim_anim_before.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_sepdim_anim_before.aep")
 	if err != nil {
-		t.Skipf("re_sepdim_anim_before.aep not present; run test_data/re_separate_dims_anim.jsx in AE 2020")
+		t.Skipf("re_sepdim_anim_before.aep not present; run test_data/generators/re_separate_dims_anim.jsx in AE 2020")
 	}
 
 	pos := findProp(proj, aep.MatchNamePosition)
@@ -139,9 +139,9 @@ func TestSetDimensionsSeparated_Animated(t *testing.T) {
 // the timing-dependent rule that a constant-0.01 mapping would get wrong. Guards
 // the central-difference + per-side-influence generalization fix.
 func TestSetDimensionsSeparated_Animated_NonUniform(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_sepdim_anim2_before.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_sepdim_anim2_before.aep")
 	if err != nil {
-		t.Skipf("re_sepdim_anim2_before.aep not present; run test_data/re_sepdim_anim2.jsx in AE 2020")
+		t.Skipf("re_sepdim_anim2_before.aep not present; run test_data/generators/re_sepdim_anim2.jsx in AE 2020")
 	}
 	pos := findProp(proj, aep.MatchNamePosition)
 	if pos == nil || pos.DimensionsSeparated() || !pos.IsAnimated() {
@@ -198,9 +198,9 @@ func TestSetDimensionsSeparated_Animated_NonUniform(t *testing.T) {
 // recovers its keyframe values + spatial tangents (in/out tangent = ∓follower
 // speed / 100) and the per-axis followers are gone.
 func TestSetDimensionsSeparated_Merge_Animated(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_sepdim_anim_after.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_sepdim_anim_after.aep")
 	if err != nil {
-		t.Skipf("re_sepdim_anim_after.aep not present; run test_data/re_separate_dims_anim.jsx in AE 2020")
+		t.Skipf("re_sepdim_anim_after.aep not present; run test_data/generators/re_separate_dims_anim.jsx in AE 2020")
 	}
 	pos := findProp(proj, aep.MatchNamePosition)
 	if pos == nil {

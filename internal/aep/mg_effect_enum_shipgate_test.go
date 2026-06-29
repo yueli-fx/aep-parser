@@ -22,7 +22,7 @@
 // each distinct enum value — gamma-robust around the 128 midpoint. The resave
 // reopen proves the materialized enum survives AE's own re-encode.
 //
-// Gated by AE_SHIP_GATE. Uses test_data/verify_effect_enum.jsx.
+// Gated by AE_SHIP_GATE. Uses test_data/generators/verify_effect_enum.jsx.
 package aep_test
 
 import (
@@ -104,8 +104,8 @@ func runMGEffectEnumGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/effect_enum_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_effect_enum.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/effect_enum_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_effect_enum.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildEffectEnumDemo(t, target)
@@ -130,7 +130,7 @@ func runMGEffectEnumGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 		`{"layer":"RED","param":"ADBE Invert-0001","value":2},`+
 		`{"layer":"GRN","param":"ADBE Invert-0001","value":3}]}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

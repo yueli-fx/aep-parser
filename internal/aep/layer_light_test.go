@@ -132,11 +132,11 @@ func TestTimeRemapEnabledReal(t *testing.T) {
 }
 
 // TestCameraLightAccessorsReal exercises Layer.CameraZoom() and friends
-// against test_data/re_cameralight.aep (built by /tmp/re_cameralight.jsx
+// against test_data/fixtures/re_cameralight.aep (built by /tmp/re_cameralight.jsx
 // in AE 2020 — see CLAUDE.md for fixture regeneration). Skips silently
 // if the fixture is absent.
 func TestCameraLightAccessorsReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present")
 	}
@@ -206,7 +206,7 @@ func TestCameraLightAccessorsReal(t *testing.T) {
 // added in layer_accessors.go against re_cameralight.aep, verifying both
 // in-memory update and roundtrip persistence.
 func TestCameraLightTypedSettersRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present")
 	}

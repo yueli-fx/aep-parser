@@ -22,7 +22,7 @@ surface-level symptom).
 
 ## 根因 — AE persists params by VALUE≠DEFAULT, not by touched-flag
 
-RE probe `test_data/re_effect_param_elision.jsx` (AE 2020, fixture
+RE probe `test_data/generators/re_effect_param_elision.jsx` (AE 2020, fixture
 `re_effect_param_elision.aep`, 3 Gaussian Blur instances; dump via
 `tools/debug/probe_effects` + `dump_chunks`):
 
@@ -94,7 +94,7 @@ accepted without).
 
 ## 控件类型补齐 (2026-06-12) — all 8 types gated
 
-Touch-all fixture `test_data/re_effect_param_types.aep` (AE 2020, one
+Touch-all fixture `test_data/generated/fixtures/re_effect_param_types.aep` (AE 2020, one
 expression-control effect per missing type, each -0001 touched) yielded the
 remaining generic templates via `tmp_debug/extract_effect_params`: **angle /
 color / 2D point / 3D point / slider** (`effectparam_adbe_*_control_0001.bin`,
@@ -109,7 +109,7 @@ carries tdum/tduM; angle/color/point are unbounded (no patch needed).
 
 ### Finding 3 — point-param cdat units = fraction of the layer's coord space
 
-(RE `test_data/re_effect_param_types_units.aep`: 200×100 solid + shape layer,
+(RE `test_data/generated/fixtures/re_effect_param_types_units.aep`: 200×100 solid + shape layer,
 Point [123,45] / Point3D [123,45,67].) 2D/3D point params store cdat as
 **fractions**: layers with a source item divide by the SOURCE's w/h
 (solid 200×100 → [0.615, 0.45]); source-less layers (shape/text) divide by
@@ -179,7 +179,7 @@ lum 0→62）、numKeys=2 读回、resave 保 2 kf。Go round-trip `animate_effe
 
 `aep.AnimateEffectParamVec(layer, fx, paramMatchName, []VectorKeyframe)`——把动画 effect param
 从 1D scalar 扩到 color(4D)/point(2D·3D)。RE（`tmp_debug/dump_anim_effect` ←
-`test_data/re_anim_effect_colorpoint.jsx` AE-native fixture）确认这三类**不是** scalar 的
+`test_data/generators/re_anim_effect_colorpoint.jsx` AE-native fixture）确认这三类**不是** scalar 的
 non-spatial 布局，而是 **SPATIAL keyframe block**（value@0x38）：
 
 | 控件 | Components | bpk | block hdr@0x07 | @0x08 marker | value@0x38 单位 |
@@ -208,7 +208,7 @@ radial 亮心 t0 L=251/R=0 → t2 L=0/R=174 L↔R swap）。Go round-trip + 结�
 ## Cases
 - 2026-06-15 **AnimateEffectParamVec**（animated color/point 扩展；SPATIAL block bpk 152/104/128 +
   per-type marker 2/3；tdb4 flip type-agnostic 实证；双版本 render gate FILL+RAMP；
-  fixture `test_data/re_anim_effect_colorpoint.jsx` + `tmp_debug/dump_anim_effect`）
+  fixture `test_data/generators/re_anim_effect_colorpoint.jsx` + `tmp_debug/dump_anim_effect`）
 - 2026-06-15 **AnimateEffectParam**（from-scratch 标量关键帧合成；byte-identical AE-native；双版本 render gate；解 effects 最大缺口）
 - 2026-06-11 首次（board「AddEffect 参数化」可行性 RE → 同日 synthesis-lite
   ship；fixture + probe 落 `test_data/re_effect_param_elision.*`（manifest
@@ -216,5 +216,5 @@ radial 亮心 t0 L=251/R=0 → t2 L=0/R=174 L↔R swap）。Go round-trip + 结�
 - 2026-06-12 控件类型补齐（angle/color/2D/3D/slider 泛型模板 + Point3D
   Control 扩库；fixtures `re_effect_param_types.*` +
   `re_effect_param_types_units.*` 已登记 manifest；bisect 工具
-  `tmp_debug/ge_setparam_bisect` + probe JSX `test_data/re_setparam_bisect.jsx`
+  `tmp_debug/ge_setparam_bisect` + probe JSX `test_data/generators/re_setparam_bisect.jsx`
   留存可复用）

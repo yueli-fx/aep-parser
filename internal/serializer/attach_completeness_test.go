@@ -15,7 +15,7 @@ import (
 // The test PASSES today because Parse already attaches everything. If it ever
 // FAILS, that means Parse has a real missing-attach bug — do not paper over.
 func TestParseAttachCompleteness(t *testing.T) {
-	proj, err := Open("../../test_data/re_compmarker.aep")
+	proj, err := Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func walkAndAssertAttached(t *testing.T, proj *Project) {
 // equal length. syncRenderQueue silently no-ops on a length mismatch, so a lost
 // attach would not be localized by the byte-identical round-trip alone.
 func TestParseAttachCompletenessRenderQueue(t *testing.T) {
-	proj, err := Open("../../test_data/rq_numitems_1.aep")
+	proj, err := Open("../../test_data/fixtures/rq_numitems_1.aep")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestParseAttachCompletenessRenderQueue(t *testing.T) {
 // scene-owned 16B copy (syncGuides pairs guides to the live Gide ldat by index
 // at WriteAEP time — a missing copy would be silently skipped).
 func TestParseAttachCompletenessGuides(t *testing.T) {
-	proj, err := Open("../../test_data/guides.aep")
+	proj, err := Open("../../test_data/fixtures/guides.aep")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -59,8 +59,8 @@ cdta 总 204 字节，但 parser 历史只读 ~16 个关键字段（W/H/fps/dura
 整数 fps 下两者相等，NTSC 下不等。AE display duration = @0x2C / tickRate 算出来的秒数 —— 跟 @0xB0 / fps_actual 算的对得上是因为 nominalTickRate / tickRate ≈ 1。
 
 **Fixture sources**:
-- `test_data/re_tickrate.aep` RE_fps_* — 每个 canonical fps 的 cdta 字节
-- `test_data/re_cdta_probe.aep` A_baseline (29.97, 10s) — masterTicks 公式实证
+- `test_data/fixtures/re_tickrate.aep` RE_fps_* — 每个 canonical fps 的 cdta 字节
+- `test_data/fixtures/re_cdta_probe.aep` A_baseline (29.97, 10s) — masterTicks 公式实证
 - `internal/serializer/templates/2020_dummy_comp.aep` — 默认 30fps 12s seed
 
 ## Stage 2 详: head counters
@@ -142,5 +142,5 @@ JSX 末尾写 `.done` marker；Go 端轮询等。
 | `internal/serializer/write.go` | `syncHeadCounters` (Stage 2) |
 | `internal/serializer/templates/2020_dummy_comp.aep` | 唯一 canonical seed |
 | `tmp_debug/gen_dummy_comp.jsx` | JSX 工具：让任意 AE 版本写一个 dummy_comp |
-| `test_data/verify_v2_1.jsx` | AE-side ship gate driver |
+| `test_data/generators/verify_v2_1.jsx` | AE-side ship gate driver |
 | `internal/aep/new_composition_test.go` | `runAEShipGate` + `TestV2_1_AEShipGate_AE2020/2025` |

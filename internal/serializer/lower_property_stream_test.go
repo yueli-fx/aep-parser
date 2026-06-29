@@ -123,7 +123,7 @@ func TestLowerPathStream_Static_EmitsOmS(t *testing.T) {
 }
 
 // TestEncodeBezier_LdatMatchesAELayout pins the ldat per-vertex layout RE'd
-// from AE-native fixtures (test_data/v2_2_shape_path_re.aep, decoded via
+// from AE-native fixtures (test_data/fixtures/v2_2_shape_path_re.aep, decoded via
 // tmp_debug/decode_path_ldat): each vertex stores 6 f32 (bbox-normalized) =
 //
 //	[ anchor_i , anchor_i+outTangent_i , anchor_{(i+1)%n}+inTangent_{(i+1)%n} ]

@@ -118,11 +118,11 @@ func TestMarkerNmHdDecode(t *testing.T) {
 	}
 }
 
-// TestMarkerNmHdRealFixture is a smoke test: parses test_data/re_tickrate.aep,
+// TestMarkerNmHdRealFixture is a smoke test: parses test_data/fixtures/re_tickrate.aep,
 // walks every layer for markers, and asserts NmHd fields surface
 // consistently with the fixture's actual bytes.
 func TestMarkerNmHdRealFixture(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_tickrate.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_tickrate.aep")
 	if err != nil {
 		t.Fatalf("Open re_tickrate.aep: %v", err)
 	}
@@ -147,10 +147,10 @@ func TestMarkerNmHdRealFixture(t *testing.T) {
 }
 
 // TestCompositionMarkersReal exercises composition-level marker decoding
-// against test_data/re_compmarker.aep (built by /tmp/re_compmarker.jsx
+// against test_data/fixtures/re_compmarker.aep (built by /tmp/re_compmarker.jsx
 // in AE 2020). Skips silently when the fixture is absent.
 func TestCompositionMarkersReal(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE to regenerate")
 	}
@@ -198,9 +198,9 @@ func TestCompositionMarkersReal(t *testing.T) {
 // TestMarkerSetters covers Marker.SetTime / SetDuration / SetLabel
 // (length-preserving) + SetComment / SetChapter / SetURL (length-
 // variable Utf8 chunk replacement). Drives them through the real
-// test_data/re_compmarker.aep fixture and round-trips via WriteAEP.
+// test_data/fixtures/re_compmarker.aep fixture and round-trips via WriteAEP.
 func TestMarkerSetters(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_compmarker.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_compmarker.aep")
 	if err != nil {
 		t.Skipf("re_compmarker.aep not present; rerun the JSX in AE")
 	}

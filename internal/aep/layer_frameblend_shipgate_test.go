@@ -9,8 +9,10 @@
 // precomp/comp layers. A solid/still cannot frame-blend, so the carrier uses
 // PRECOMP layers (comp-as-layer), which build entirely from-scratch in Go and need
 // no external video file. MAIN holds two precomp layers sourcing inner comp SRC:
-//   LMIX → enabled + !pixelMotion → AE FrameBlendingType.FRAME_MIX
-//   LPXM → enabled +  pixelMotion → AE FrameBlendingType.PIXEL_MOTION
+//
+//	LMIX → enabled + !pixelMotion → AE FrameBlendingType.FRAME_MIX
+//	LPXM → enabled +  pixelMotion → AE FrameBlendingType.PIXEL_MOTION
+//
 // The FRAME_MIX vs PIXEL_MOTION contrast proves BOTH bits (a no-op or a single-bit
 // error would collapse to NO_FRAME_BLEND or the wrong mode). DOM-readback only, no
 // resave (idta-batch lesson). Gated by AE_SHIP_GATE.
@@ -77,8 +79,8 @@ func runLayerFrameBlendGate(t *testing.T, aeExe, ver string, target aep.AETarget
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/frameblend_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_frameblend.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/frameblend_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_frameblend.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildFrameBlendDemo(t, target)
@@ -98,7 +100,7 @@ func runLayerFrameBlendGate(t *testing.T, aeExe, ver string, target aep.AETarget
 	out.Close()
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q}`, toFwd(inputAEP), toFwd(doneFile))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

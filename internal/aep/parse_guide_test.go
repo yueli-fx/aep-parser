@@ -16,7 +16,7 @@ import (
 // .String() bridges the two. Comp "guides_both" 1920x1080: two horizontal
 // guides (top offsets 270/810) + one vertical (left offset 960).
 func TestGuidesReader(t *testing.T) {
-	proj, err := aep.Open("../../test_data/guides.aep")
+	proj, err := aep.Open("../../test_data/fixtures/guides.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -62,7 +62,7 @@ func TestGuidesReader(t *testing.T) {
 }
 
 func TestGuidesJSON(t *testing.T) {
-	proj, err := aep.Open("../../test_data/guides.aep")
+	proj, err := aep.Open("../../test_data/fixtures/guides.aep")
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestGuidesJSON(t *testing.T) {
 // Reading guides must not perturb byte-identical round-trip: the Gide subtree
 // is untouched leaves/lists (opaque preservation).
 func TestGuidesRoundTripByteIdentical(t *testing.T) {
-	const path = "../../test_data/guides.aep"
+	const path = "../../test_data/fixtures/guides.aep"
 	orig, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
@@ -107,7 +107,7 @@ func TestGuidesRoundTripByteIdentical(t *testing.T) {
 // Length-preserving guide setters: patch position/orientation in place, write,
 // re-parse, confirm persisted.
 func TestGuidesWriteRoundTrip(t *testing.T) {
-	orig, err := os.ReadFile("../../test_data/guides.aep")
+	orig, err := os.ReadFile("../../test_data/fixtures/guides.aep")
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}

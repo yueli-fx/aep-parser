@@ -173,7 +173,7 @@ func TestSetAlternateSourceRejectsInvalid(t *testing.T) {
 // new index via SetRunFontIndex. Round-trip via WriteAEP to confirm
 // the new font appears in re-parsed TextSource.Fonts.
 func TestLayerAddFontAndUse(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_text.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_text.aep")
 	if err != nil {
 		t.Skipf("re_text.aep not present")
 	}

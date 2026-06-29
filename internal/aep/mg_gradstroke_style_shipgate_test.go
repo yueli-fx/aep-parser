@@ -87,8 +87,8 @@ func runMGGradStrokeStyleGate(t *testing.T, aeExe, ver string, target aep.AETarg
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/mg_gradstroke_style_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_mg_gradstroke_style.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/mg_gradstroke_style_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_mg_gradstroke_style.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildMGGradStrokeStyleDemo(t, target)
@@ -111,7 +111,7 @@ func runMGGradStrokeStyleGate(t *testing.T, aeExe, ver string, target aep.AETarg
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(framePNG))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -141,7 +141,7 @@ func runMGGradStrokeStyleGate(t *testing.T, aeExe, ver string, target aep.AETarg
 	// Rect centre 960,540, size 300 → left path edge at comp x=810. A 60px stroke
 	// band spans 780..840; an 18px default band would span 801..819.
 	const win = 3
-	inR, _, inB := avgRGB(img, 785, 540, win)  // 25px outside edge → inside 60px band
+	inR, _, inB := avgRGB(img, 785, 540, win)   // 25px outside edge → inside 60px band
 	outR, _, outB := avgRGB(img, 768, 540, win) // 42px outside edge → beyond the band
 	t.Logf("%s width: inBand(r=%d,b=%d) beyond(r=%d,b=%d)", ver, inR, inB, outR, outB)
 	if inR < 120 || inR-inB < 60 {

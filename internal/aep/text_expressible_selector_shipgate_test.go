@@ -132,8 +132,8 @@ func runTextExpressibleGate(t *testing.T, aeExe, ver string, target aep.AETarget
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/text_expressible_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_text_expressible.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/text_expressible_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_text_expressible.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := buildExpressibleDemo(t, target)
@@ -157,7 +157,7 @@ func runTextExpressibleGate(t *testing.T, aeExe, ver string, target aep.AETarget
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"compL":"TXEXP_L","compR":"TXEXP_R","pngL":%q,"pngR":%q,"fontSize":140,"posX":120,"posY":420}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(pngL), toFwd(pngR))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

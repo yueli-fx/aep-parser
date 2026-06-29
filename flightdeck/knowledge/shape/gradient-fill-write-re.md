@@ -219,7 +219,7 @@ AE25-sourced template serves both gate versions.
 The 子项⑭ "animated gradients deferred" blocker is **unblocked**: the user
 hand-authored an animated-stops fixture in the AE GUI (the one thing JSX can't do
 — `Grad Colors` has no typed setValue, so the 颜色 property's stopwatch must be
-clicked by hand). Saved as `test_data/v2_2_gradient_anim_src.aep`: a 1000×1000
+clicked by hand). Saved as `test_data/fixtures/v2_2_gradient_anim_src.aep`: a 1000×1000
 rect, linear gradient, **kf0@t=0 = R(0%)→B(50%)→G(100%)**, **kf1@t=1s =
 G(0%)→R(50%)→B(100%)** (`tmp_debug/dump_gradient` + `tmp_debug/grad_kf_probe`).
 

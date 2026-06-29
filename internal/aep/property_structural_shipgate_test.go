@@ -10,7 +10,7 @@
 //   - remove middle  (Tint)  -> [Gaussian Blur, Fill]
 //   - move last to front (Fill -> 0) -> [Fill, Gaussian Blur, Tint]
 //
-// Gated by AE_SHIP_GATE. Baseline built by test_data/re_property_struct.jsx.
+// Gated by AE_SHIP_GATE. Baseline built by test_data/generators/re_property_struct.jsx.
 package aep_test
 
 import (
@@ -29,11 +29,11 @@ func runPropStructShipGate(t *testing.T, aeExe, label string, mutate func(*aep.L
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
 
-	const argsPath = `e:/projects/tools/aep-parser/test_data/property_struct_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_property_struct.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/property_struct_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_property_struct.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
-	proj, err := aep.Open("../../test_data/re_property_struct_baseline.aep")
+	proj, err := aep.Open("../../test_data/generated/fixtures/re_property_struct_baseline.aep")
 	if err != nil {
 		t.Skipf("re_property_struct_baseline.aep not present: %v", err)
 	}
@@ -66,7 +66,7 @@ func runPropStructShipGate(t *testing.T, aeExe, label string, mutate func(*aep.L
 	}
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"expect":[%s]}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), strings.Join(quoted, ","))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

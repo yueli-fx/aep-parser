@@ -9,9 +9,9 @@
 // preserving). Per delivery-contract red line 4 the gate renders the frame and
 // asserts on pixels that the box becomes a foreshortened TRAPEZOID:
 //
-//   RotateY=50° turns the box's right edge away from the camera, so the
-//   left (near) edge renders TALLER than the right (far) edge. A 2D layer (or a
-//   dropped RotateY) would render an axis-aligned rectangle (equal heights).
+//	RotateY=50° turns the box's right edge away from the camera, so the
+//	left (near) edge renders TALLER than the right (far) edge. A 2D layer (or a
+//	dropped RotateY) would render an axis-aligned rectangle (equal heights).
 //
 // Gated by AE_SHIP_GATE.
 package aep_test
@@ -62,8 +62,8 @@ func runLayer3DRotateYGate(t *testing.T, aeExe, ver string, target aep.AETarget)
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/3d_roty_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_3d_roty.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/3d_roty_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_3d_roty.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -128,7 +128,7 @@ func runLayer3DRotateYGate(t *testing.T, aeExe, ver string, target aep.AETarget)
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q,"png":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP), toFwd(png))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

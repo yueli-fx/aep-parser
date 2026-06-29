@@ -13,7 +13,7 @@ import (
 // Advanced 3D renderer enabled in fixture; Plane Curvature / Plane
 // Subdivision / Bevel Direction present.
 func TestGeometryOptionsTypedSettersRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_geometry_options.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_geometry_options.aep")
 	if err != nil {
 		t.Skipf("re_geometry_options.aep not present")
 	}
@@ -79,7 +79,7 @@ func TestGeometryOptionsTypedSettersRoundtrip(t *testing.T) {
 // getters/setters against re_material_options.aep, which has 3D-enabled
 // solids carrying the full 17-property materialOption tree.
 func TestMaterialOptionsTypedSettersRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_material_options.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_material_options.aep")
 	if err != nil {
 		t.Skipf("re_material_options.aep not present")
 	}
@@ -209,7 +209,7 @@ func TestMaterialOptionsTypedSettersRoundtrip(t *testing.T) {
 // typed setters against re_cameralight.aep. MyCamera is 3D-enabled in
 // the fixture, so RotateX/Y/Orientation are present too.
 func TestTransformTypedSettersRoundtrip(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_cameralight.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present")
 	}

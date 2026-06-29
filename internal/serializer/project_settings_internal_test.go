@@ -59,7 +59,7 @@ func TestProjectSettings_CmsMalformedJsonWarns(t *testing.T) {
 // trailing data and survives a WriteAEP roundtrip.
 func TestProject_XmpPacket_RoundtripFromFixture(t *testing.T) {
 	// Use any real fixture; XMP is the trailing UTF-8 after RIFX.
-	proj, err := Open("../../test_data/re_cameralight.aep")
+	proj, err := Open("../../test_data/fixtures/re_cameralight.aep")
 	if err != nil {
 		t.Skipf("re_cameralight.aep not present: %v", err)
 	}

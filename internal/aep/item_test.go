@@ -99,9 +99,9 @@ func TestProjectSetBitsPerChannel(t *testing.T) {
 		file string
 		bpc  aep.BitsPerChannel
 	}{
-		{"../../test_data/re_bpc_8.aep", aep.BPC8},
-		{"../../test_data/re_bpc_16.aep", aep.BPC16},
-		{"../../test_data/re_bpc_32.aep", aep.BPC32},
+		{"../../test_data/fixtures/re_bpc_8.aep", aep.BPC8},
+		{"../../test_data/fixtures/re_bpc_16.aep", aep.BPC16},
+		{"../../test_data/fixtures/re_bpc_32.aep", aep.BPC32},
 	}
 	for _, tc := range cases {
 		proj, err := aep.Open(tc.file)
@@ -143,7 +143,7 @@ func TestProjectSetBitsPerChannel(t *testing.T) {
 // The synthetic buildMinimalAEP's 20-byte idta is too short for
 // the @0x3A label byte write, hence the real-file fixture.
 func TestItemCommentAndLabel(t *testing.T) {
-	proj, err := aep.Open("../../test_data/re_batch3.aep")
+	proj, err := aep.Open("../../test_data/fixtures/re_batch3.aep")
 	if err != nil {
 		t.Skipf("re_batch3.aep not present")
 	}

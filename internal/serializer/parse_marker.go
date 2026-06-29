@@ -113,7 +113,7 @@ func bindMarkerListOwner(field *[]*Marker) {
 //
 // Sources:
 //   - "ref" = the reference parser's binary/misc_chunks.py NmhdChunk
-//   - "fixture" = hex-dumped from test_data/re_tickrate.aep
+//   - "fixture" = hex-dumped from test_data/fixtures/re_tickrate.aep
 //
 // Layout (ref verified; fixture is consistent for zero/label only —
 // see ⚠ note below):

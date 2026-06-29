@@ -10,7 +10,7 @@ import (
 	"github.com/yueli-fx/aep-parser/internal/aep"
 )
 
-const dupItemFixtureDir = "../../test_data"
+const dupItemFixtureDir = "../../test_data/generated/fixtures"
 
 // openDupItemProject opens the RE baseline that holds compA_main (3 AV layers:
 // A_precomp→compC, A_footage→F1, A_solid with A_solid.parent = A_precomp) plus
@@ -35,7 +35,7 @@ func openDupItemProject(t *testing.T) (*aep.Project, *aep.Composition) {
 		}
 		t.Fatalf("fixture %s: comp 'compA_main' not found", path)
 	}
-	t.Skipf("fixture missing: re_duplicate_item_{before,after}.aep (run test_data/re_duplicate_item.jsx)")
+	t.Skipf("fixture missing: re_duplicate_item_{before,after}.aep (run test_data/generators/re_duplicate_item.jsx)")
 	return nil, nil
 }
 

@@ -5,7 +5,7 @@ READ WHEN: implementing Stroke Line Cap / Line Join / Miter Limit setters; enric
 
 ---
 
-RE'd via `test_data/re_stroke_linecap.jsx` (AE 2020) → `re_stroke_linecap.aep`.
+RE'd via `test_data/generators/re_stroke_linecap.jsx` (AE 2020) → `re_stroke_linecap.aep`.
 Dump tool: `go run ./tmp_debug/dump_named_cdat <aep> "Stroke Line Cap" ...`.
 
 ## Corrects an earlier wrong groundwork note
@@ -87,7 +87,7 @@ one combined `v2_2_shape_all_full.aep`; all shape ship-gates re-run dual-version
 
 ## Addendum (2026-05-31): Stroke Taper + Wave nested groups
 
-RE'd via `test_data/re_stroke_dtw.jsx` (AE 2020) — a probe+set fixture that
+RE'd via `test_data/generators/re_stroke_dtw.jsx` (AE 2020) — a probe+set fixture that
 enumerates each group's children and sets them non-default. Three nested groups
 hang off the stroke (`ADBE Vector Stroke Dashes / Taper / Wave`); the old stroke
 template carried them as **empty placeholders** (`tdmn` immediately followed by

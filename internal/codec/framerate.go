@@ -14,7 +14,7 @@ type FrameRateEncoding struct {
 // ntscCanonical: 容差 < ntscTolerance 内的用户 fps 都映射到这些 canonical 值。
 // Frac 值实证来源:
 //
-//	29.97 / 59.94 来自 test_data/re_tickrate.aep RE_fps_29_97 / RE_fps_59_94 cdta @0x9E
+//	29.97 / 59.94 来自 test_data/fixtures/re_tickrate.aep RE_fps_29_97 / RE_fps_59_94 cdta @0x9E
 //	23.976 数学计算 (24000/1001 - 23) * 65536 ≈ 63962 = 0xF9DA (无 fixture 实证但容差内安全)
 const ntscTolerance = 1e-3
 
@@ -61,8 +61,8 @@ func DecodeFrameRate(enc FrameRateEncoding) float64 {
 // 存 actual TickRate（per RE_fps_29_97 / A_baseline 实证）。
 //
 // 字段 RE 来源:
-//   - test_data/re_tickrate.aep 各 RE_fps_* comp 的 cdta @0x04..@0x33（actual TickRate）
-//   - test_data/re_cdta_probe.aep A_baseline / F_shutter_angle_360（10s comps，验证
+//   - test_data/fixtures/re_tickrate.aep 各 RE_fps_* comp 的 cdta @0x04..@0x33（actual TickRate）
+//   - test_data/fixtures/re_cdta_probe.aep A_baseline / F_shutter_angle_360（10s comps，验证
 //     NominalTickRate × duration 公式）
 type FpsTiming struct {
 	TicksPerFrame   uint16 // cdta @0x06 (uint16 BE)

@@ -34,8 +34,8 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/shape_geom_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_shape_geom.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/shape_geom_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_shape_geom.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -119,7 +119,7 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)
@@ -163,8 +163,8 @@ func runShapeGeomGate(t *testing.T, aeExe, ver string, target aep.AETarget) {
 	}
 	// 2D points: cdat carries x at off 0, y at off 8.
 	for _, c := range []struct {
-		name   string
-		x, y   float64
+		name string
+		x, y float64
 	}{
 		{"ADBE Vector Rect Position", 120, 80},
 		{"ADBE Vector Star Position", 200, 150},

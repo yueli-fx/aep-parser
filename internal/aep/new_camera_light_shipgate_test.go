@@ -6,7 +6,7 @@
 // corrupt) and reports them as CameraLayer / LightLayer with the right names.
 // Resaves so the Go side confirms AE kept them.
 //
-// Gated by AE_SHIP_GATE. Templates extracted from test_data/re_cameralight.aep.
+// Gated by AE_SHIP_GATE. Templates extracted from test_data/fixtures/re_cameralight.aep.
 package aep_test
 
 import (
@@ -23,8 +23,8 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 	if os.Getenv("AE_SHIP_GATE") == "" {
 		t.Skip("set AE_SHIP_GATE=1 with AE installed to run")
 	}
-	const argsPath = `e:/projects/tools/aep-parser/test_data/camera_light_args.json`
-	const jsxPath = `E:/projects/tools/aep-parser/test_data/verify_camera_light.jsx`
+	const argsPath = `e:/projects/tools/aep-parser/test_data/generated/args/camera_light_args.json`
+	const jsxPath = `E:/projects/tools/aep-parser/test_data/generators/verify_camera_light.jsx`
 	toFwd := func(p string) string { return strings.ReplaceAll(p, `\`, `/`) }
 
 	p := aep.NewProject(target)
@@ -100,7 +100,7 @@ func runCameraLightGate(t *testing.T, target aep.AETarget, aeExe, ver string) {
 
 	argsJSON := fmt.Sprintf(`{"input":%q,"done":%q,"resaved":%q}`,
 		toFwd(inputAEP), toFwd(doneFile), toFwd(resavedAEP))
-	if err := os.WriteFile(argsPath, []byte(argsJSON), 0644); err != nil {
+	if err := writeGeneratedArgs(argsPath, []byte(argsJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(argsPath)

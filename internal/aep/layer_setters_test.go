@@ -399,7 +399,7 @@ func TestLayerSetNameAndComment(t *testing.T) {
 	}
 
 	// Now a layer with a real Utf8 chunk: re_text.aep variants.
-	rp, err := aep.Open("../../test_data/re_text.aep")
+	rp, err := aep.Open("../../test_data/fixtures/re_text.aep")
 	if err != nil {
 		t.Skipf("re_text.aep not present; rerun JSX")
 	}

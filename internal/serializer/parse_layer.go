@@ -36,12 +36,12 @@ import (
 //	0x84 : uint32 BE  — parent layer ID (0 = no parent)
 //	0x88 : uint32 BE  — light kind (only on light layers): 0=Parallel,
 //	                    1=Spot, 2=Point, 3=Ambient. RE'd via
-//	                    test_data/re_wave2_ae24.aep (RE_LIGHTS comp). //nolint:jargon
+//	                    test_data/fixtures/re_wave2_ae24.aep (RE_LIGHTS comp). //nolint:jargon
 //	                    On non-light layers this slot is 0.
 //	0xA0 : uint32 BE  — track matte SOURCE layer ID (AE 23+ explicit; 0 if
 //	                    no explicit matte source — AE <= 22 used implicit
 //	                    "layer immediately above" convention). RE'd via
-//	                    test_data/re_trackmatte_ae24.aep.
+//	                    test_data/fixtures/re_trackmatte_ae24.aep.
 //
 // LayerAttrBits (3 bytes, per the reference parser):
 //
