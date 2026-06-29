@@ -246,6 +246,7 @@ func TestCompileToFileSetsLayerAdvancedSwitches(t *testing.T) {
 	layer.CollapseTransform = boolPtr(true)
 	layer.Is3D = boolPtr(true)
 	layer.IsAdjust = boolPtr(true)
+	layer.IsNull = boolPtr(true)
 	layer.IsGuide = boolPtr(true)
 	layer.SamplingBicubic = boolPtr(true)
 	layer.FrameBlendPixelMotion = boolPtr(true)
@@ -272,6 +273,9 @@ func TestCompileToFileSetsLayerAdvancedSwitches(t *testing.T) {
 	}
 	if !got.IsAdjust {
 		t.Fatal("layer is_adjust = false, want true")
+	}
+	if !got.IsNull {
+		t.Fatal("layer is_null = false, want true")
 	}
 	if !got.IsGuide {
 		t.Fatal("layer is_guide = false, want true")

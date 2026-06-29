@@ -760,6 +760,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q is_adjust: %w", spec.Name, err)
 			}
 		}
+		if spec.IsNull != nil {
+			if err := layer.SetIsNull(*spec.IsNull); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q is_null: %w", spec.Name, err)
+			}
+		}
 		if spec.IsGuide != nil {
 			if err := layer.SetIsGuide(*spec.IsGuide); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q is_guide: %w", spec.Name, err)

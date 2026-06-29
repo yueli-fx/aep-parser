@@ -1668,6 +1668,33 @@ Fifty-second follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Fifty-third follow-up completed:
+
+- Layer recipes now support the null-object marker flag:
+  - `is_null` -> `Layer.SetIsNull`
+- Boundary: this exposes AE's low-level Null-Object marker bit on an existing
+  recipe layer. It is not the same as AE's UI command or the library's
+  higher-level `NewNullLayer`, which creates a standard 100x100 solid-backed
+  null helper.
+- `examples/recipes/minimal-layer-null-flag.json` is a dedicated two-layer
+  recipe: a hidden solid `Controller` with `is_null: true`, plus a text child
+  parented to it. See `knowledge/layer/recipe-null-flag.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-null-flag.json -out
+    tmp_debug\recipes\minimal-layer-null-flag.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_null_flag\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_null_flag\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
