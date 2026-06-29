@@ -106,6 +106,12 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 	if err := applyLightSources(compSpec, layersByName); err != nil {
 		return report, err
 	}
+	if hasMasks(compSpec) {
+		project, err = materializeMasks(project, compSpec)
+		if err != nil {
+			return report, err
+		}
+	}
 	if hasEffects(compSpec) {
 		project, err = materializeEffects(project, compSpec)
 		if err != nil {
@@ -192,7 +198,8 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		len(expected.Effects) > 0 ||
 		len(expected.Properties) > 0 ||
 		len(expected.TextStyles) > 0 ||
-		len(expected.Keyframes) > 0
+		len(expected.Keyframes) > 0 ||
+		len(expected.Masks) > 0
 }
 
 func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []ProfileCheck {
@@ -449,6 +456,29 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			}
 		}
 	}
+	for i, expectedMask := range expected.Masks {
+		maskPath := fmt.Sprintf("expected_profile.masks[%d]", i)
+		mask := findProfileMask(prof, expectedMask.LayerName, expectedMask.Name)
+		add(maskPath, expectedMask.Name, profileMaskName(mask), mask != nil)
+		if mask == nil {
+			continue
+		}
+		if expectedMask.Name != "" {
+			add(maskPath+".name", expectedMask.Name, mask.Name, mask.Name == expectedMask.Name)
+		}
+		if expectedMask.Mode != "" {
+			add(maskPath+".mode", expectedMask.Mode, mask.Mode, mask.Mode == expectedMask.Mode)
+		}
+		if expectedMask.Inverted != nil {
+			add(maskPath+".inverted", *expectedMask.Inverted, mask.Inverted, mask.Inverted == *expectedMask.Inverted)
+		}
+		if expectedMask.Closed != nil {
+			add(maskPath+".closed", *expectedMask.Closed, mask.Closed, mask.Closed == *expectedMask.Closed)
+		}
+		if expectedMask.VertexCount != nil {
+			add(maskPath+".vertex_count", *expectedMask.VertexCount, len(mask.Vertices), len(mask.Vertices) == *expectedMask.VertexCount)
+		}
+	}
 	return checks
 }
 
@@ -530,6 +560,19 @@ func findProfileLayer(prof *profile.Profile, layerName string) *profile.Layer {
 			if comp.Layers[i].Name == layerName {
 				return &comp.Layers[i]
 			}
+		}
+	}
+	return nil
+}
+
+func findProfileMask(prof *profile.Profile, layerName, maskName string) *profile.Mask {
+	layer := findProfileLayer(prof, layerName)
+	if layer == nil {
+		return nil
+	}
+	for i := range layer.Masks {
+		if maskName == "" || layer.Masks[i].Name == maskName {
+			return &layer.Masks[i]
 		}
 	}
 	return nil
@@ -671,6 +714,13 @@ func profileLayerName(layer *profile.Layer) any {
 	return layer.Name
 }
 
+func profileMaskName(mask *profile.Mask) any {
+	if mask == nil {
+		return nil
+	}
+	return mask.Name
+}
+
 func trackMatteProfileName(value string) string {
 	switch value {
 	case "Alpha":
@@ -777,9 +827,32 @@ func uint16PairToFloatSlice(pair [2]uint16) []float64 {
 	return []float64{float64(pair[0]), float64(pair[1])}
 }
 
+func maskBezierPath(spec MaskSpec) aep.BezierPath {
+	vertices := make([][2]float64, 0, len(spec.Vertices))
+	for _, vertex := range spec.Vertices {
+		if len(vertex) >= 2 {
+			vertices = append(vertices, [2]float64{vertex[0], vertex[1]})
+		}
+	}
+	closed := true
+	if spec.Closed != nil {
+		closed = *spec.Closed
+	}
+	return aep.BezierPath{Vertices: vertices, Closed: closed}
+}
+
 func hasEffects(comp CompSpec) bool {
 	for _, layer := range comp.Layers {
 		if len(layer.Effects) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func hasMasks(comp CompSpec) bool {
+	for _, layer := range comp.Layers {
+		if len(layer.Masks) > 0 {
 			return true
 		}
 	}
@@ -801,6 +874,47 @@ func hasLayerTransformExpressions(expressions TransformExpressions) bool {
 		expressions.Scale != nil ||
 		expressions.Rotation != nil ||
 		expressions.Opacity != nil
+}
+
+func materializeMasks(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
+	reopened, err := aep.Reopen(project)
+	if err != nil {
+		return nil, fmt.Errorf("recipe: reopen for masks: %w", err)
+	}
+	if len(reopened.Compositions) == 0 {
+		return nil, fmt.Errorf("recipe: reopen for masks: no compositions")
+	}
+	comp := reopened.Compositions[0]
+	for i, layerSpec := range compSpec.Layers {
+		if len(layerSpec.Masks) == 0 {
+			continue
+		}
+		if i >= len(comp.Layers) {
+			return nil, fmt.Errorf("recipe: reopen for masks: layer index %d missing", i)
+		}
+		layer := comp.Layers[i]
+		for mi, maskSpec := range layerSpec.Masks {
+			mask, err := aep.AddMask(layer, maskSpec.Name, maskBezierPath(maskSpec))
+			if err != nil {
+				return nil, fmt.Errorf("recipe: layer %q add mask %d: %w", layerSpec.Name, mi, err)
+			}
+			if maskSpec.Mode != "" {
+				mode, err := maskMode(maskSpec.Mode)
+				if err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q mode: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+				if err := mask.SetMode(mode); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q mode: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+			if maskSpec.Inverted != nil {
+				if err := mask.SetInverted(*maskSpec.Inverted); err != nil {
+					return nil, fmt.Errorf("recipe: layer %q mask %q inverted: %w", layerSpec.Name, maskSpec.Name, err)
+				}
+			}
+		}
+	}
+	return reopened, nil
 }
 
 func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {
@@ -1520,6 +1634,27 @@ func layerTrackMatte(value string) (aep.TrackMatteType, error) {
 		return aep.TrackMatteLumaInverse, nil
 	default:
 		return 0, fmt.Errorf("unsupported track_matte %q", value)
+	}
+}
+
+func maskMode(value string) (aep.MaskMode, error) {
+	switch value {
+	case "none":
+		return aep.MaskModeNone, nil
+	case "add":
+		return aep.MaskModeAdd, nil
+	case "subtract":
+		return aep.MaskModeSubtract, nil
+	case "intersect":
+		return aep.MaskModeIntersect, nil
+	case "lighten":
+		return aep.MaskModeLighten, nil
+	case "darken":
+		return aep.MaskModeDarken, nil
+	case "difference":
+		return aep.MaskModeDifference, nil
+	default:
+		return 0, fmt.Errorf("unsupported mask mode %q", value)
 	}
 }
 

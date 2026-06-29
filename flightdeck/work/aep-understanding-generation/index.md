@@ -275,6 +275,11 @@ Done:
   shape/camera/light property content requires `expected_profile.properties[]`,
   text style content requires `expected_profile.text_styles[]`, and effect
   content requires `expected_profile.effects[]`.
+- First mask recipe slice is implemented for static vector masks on non-camera
+  / non-light layers. `layers[].masks[]` now compiles through the existing
+  Reopen + `AddMask` path, supports mode and inverted controls, and
+  `expected_profile.masks[]` asserts mask name, mode, inverted, closed, and
+  vertex count through the parsed profile.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

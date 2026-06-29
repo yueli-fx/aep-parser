@@ -778,6 +778,49 @@ func TestValidateRejectsInvalidLayerQualityAndBlendingMode(t *testing.T) {
 	assertRefusal(t, report, "invalid_layer_blending_mode")
 }
 
+func TestValidateReportsMaskCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Masks = []recipe.MaskSpec{{
+		Name:     "Window",
+		Mode:     "subtract",
+		Inverted: boolPtr(true),
+		Vertices: [][]float64{{10, 10}, {190, 10}, {190, 190}, {10, 190}},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "AddMask")
+	assertCapability(t, report, "Mask.SetMode")
+	assertCapability(t, report, "Mask.SetInverted")
+}
+
+func TestValidateRejectsInvalidMask(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Masks = []recipe.MaskSpec{{
+		Mode:     "screen",
+		Vertices: [][]float64{{10, 10}, {190, 10}},
+	}}
+	rec.Comps[0].Layers = append(rec.Comps[0].Layers, recipe.Layer{
+		Type: "camera",
+		Name: "Camera",
+		Masks: []recipe.MaskSpec{{
+			Vertices: [][]float64{{0, 0}, {10, 0}, {10, 10}},
+		}},
+	})
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_mask_mode")
+	assertRefusal(t, report, "invalid_mask_vertices")
+	assertRefusal(t, report, "mask_on_unsupported_layer_type")
+}
+
 func TestValidateReportsLayerAutoOrientCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].AutoOrient = "along_path"

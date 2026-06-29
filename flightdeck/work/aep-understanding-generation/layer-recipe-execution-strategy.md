@@ -58,6 +58,7 @@ flags, and refs.
 | Quality/blend | `quality` / `blending_mode` | `Layer.SetQuality` / `SetBlendingMode` | `layers[].quality` / `blending_mode` | `expected_profile.layers[].quality` / `blending_mode` | L3 | done |
 | Auto-orient | `auto_orient` | `Layer.SetAutoOrient` | `layers[].auto_orient` | `expected_profile.layers[].auto_orient` | L3 | done |
 | Source refs | solid/precomp source layer creation | layer constructors / `Layer.SetSource` | `layers[].source_ref` | `expected_profile.layers[].source` / `source_kind` | L3 | done for solid footage source |
+| Masks | `layers[].masks[]` static path/name/mode/inverted | `AddMask` after Reopen plus `Mask.SetMode` / `Mask.SetInverted` | `layers[].masks[]` | `expected_profile.masks[]` | L3 | first static slice done |
 | Parent refs | `parent` | `Layer.SetParent` | `layers[].parent_ref` | `expected_profile.layers[].parent` | L3 | done |
 | Classic matte refs | `track_matte` | `Layer.SetTrackMatte` | `layers[].flags.track_matte_name` / `matte_ref` | `expected_profile.layers[].track_matte` / `matte` | L3 | done |
 | Explicit matte refs | not recipe-owned yet | `Layer.SetTrackMatteSource` / `SetTrackMatteLayer` | `layers[].matte_ref` | planned when writer enters recipe scope | L3 AE2025-only | blocked |
@@ -228,6 +229,13 @@ shape/camera/light property content must assert `properties[]`, text style
 content must assert `text_styles[]`, and effect content must assert
 `effects[]`. A solid layer's `shape.fill_color` remains source-generation
 metadata and is not treated as shape-layer property content.
+
+Static vector masks now have a first recipe/profile slice:
+`minimal-layer-mask.json` authors `layers[].masks[]`, materializes it through
+the existing Reopen + `AddMask` path, applies mode/inverted through stable mask
+setters, and asserts the parsed mask object with `expected_profile.masks[]`.
+Mask opacity/feather/expansion and path keyframes remain separate future
+slices.
 
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the

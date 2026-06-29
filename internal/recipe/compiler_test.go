@@ -247,6 +247,9 @@ func recipeExampleNestedProfileRequirements(doc map[string]any) []string {
 			if shape, ok := layer["shape"].(map[string]any); ok && shapeRequiresPropertyProfile(layer, shape) {
 				required["properties"] = true
 			}
+			if masks, ok := layer["masks"].([]any); ok && len(masks) > 0 {
+				required["masks"] = true
+			}
 			if camera, ok := layer["camera"].(map[string]any); ok && len(camera) > 0 {
 				required["properties"] = true
 			}
@@ -3999,6 +4002,66 @@ func TestCompileToFileChecksExpectedKeyframeProfile(t *testing.T) {
 	}
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[0]", true)
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
+}
+
+func TestCompileToFileChecksExpectedMaskProfile(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Mask profile"},
+		"comps": [{
+			"name": "Main",
+			"width": 200,
+			"height": 200,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [{
+				"type": "shape",
+				"name": "Masked Shape",
+				"shape": {
+					"kind": "rect",
+					"size": [160, 160],
+					"fill_color": [255, 255, 255]
+				},
+				"masks": [{
+					"name": "Window",
+					"mode": "subtract",
+					"inverted": true,
+					"closed": true,
+					"vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
+				}]
+			}]
+		}],
+		"expected_profile": {
+			"comp_count": 1,
+			"layer_count": 1,
+			"shape_layer_count": 1,
+			"layers": [
+				{"name": "Masked Shape", "type": "shape"}
+			],
+			"masks": [{
+				"layer_name": "Masked Shape",
+				"name": "Window",
+				"mode": "subtract",
+				"inverted": true,
+				"closed": true,
+				"vertex_count": 4
+			}]
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.masks[0]", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].mode", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].inverted", true)
+	assertProfileCheck(t, report, "expected_profile.masks[0].vertex_count", true)
 }
 
 func TestCompileToFileSetsTransformKeyframeEase(t *testing.T) {

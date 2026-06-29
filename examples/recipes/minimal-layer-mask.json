@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal layer mask"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 200,
+      "height": 200,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "solid",
+          "name": "Plate",
+          "shape": {
+            "fill_color": [64, 128, 255]
+          },
+          "masks": [
+            {
+              "name": "Window",
+              "mode": "subtract",
+              "inverted": true,
+              "closed": true,
+              "vertices": [[10, 10], [190, 10], [190, 190], [10, 190]]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Plate",
+        "type": "av",
+        "source": "Plate",
+        "source_kind": "footage"
+      }
+    ],
+    "masks": [
+      {
+        "layer_name": "Plate",
+        "name": "Window",
+        "mode": "subtract",
+        "inverted": true,
+        "closed": true,
+        "vertex_count": 4
+      }
+    ]
+  }
+}

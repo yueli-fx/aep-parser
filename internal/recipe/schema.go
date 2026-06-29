@@ -90,8 +90,17 @@ type Layer struct {
 	Camera                *CameraSpec    `json:"camera,omitempty"`
 	Light                 *LightSpec     `json:"light,omitempty"`
 	Shape                 *ShapeSpec     `json:"shape,omitempty"`
+	Masks                 []MaskSpec     `json:"masks,omitempty"`
 	Transform             Transform      `json:"transform,omitempty"`
 	Effects               []Effect       `json:"effects,omitempty"`
+}
+
+type MaskSpec struct {
+	Name     string      `json:"name,omitempty"`
+	Mode     string      `json:"mode,omitempty"`
+	Inverted *bool       `json:"inverted,omitempty"`
+	Closed   *bool       `json:"closed,omitempty"`
+	Vertices [][]float64 `json:"vertices"`
 }
 
 type LightSpec struct {
@@ -392,6 +401,7 @@ type ExpectedProfile struct {
 	Properties               []ExpectedProperty          `json:"properties,omitempty"`
 	TextStyles               []ExpectedTextStyle         `json:"text_styles,omitempty"`
 	Keyframes                []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
+	Masks                    []ExpectedMask              `json:"masks,omitempty"`
 }
 
 type ExpectedLayer struct {
@@ -485,6 +495,15 @@ type ExpectedKeyframedProperty struct {
 type ExpectedKeyframe struct {
 	Time  float64 `json:"time"`
 	Value any     `json:"value,omitempty"`
+}
+
+type ExpectedMask struct {
+	LayerName   string `json:"layer_name"`
+	Name        string `json:"name,omitempty"`
+	Mode        string `json:"mode,omitempty"`
+	Inverted    *bool  `json:"inverted,omitempty"`
+	Closed      *bool  `json:"closed,omitempty"`
+	VertexCount *int   `json:"vertex_count,omitempty"`
 }
 
 type ExpectedEffect struct {
@@ -808,6 +827,18 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 			if !validEffectParamValue(kf.Value) {
 				addRefusal("invalid_expected_profile", kfPath+".value", "expected keyframe value must be a number, boolean, or numeric array")
 			}
+		}
+	}
+	for i, mask := range expected.Masks {
+		maskPath := fmt.Sprintf("expected_profile.masks[%d]", i)
+		if mask.LayerName == "" {
+			addRefusal("invalid_expected_profile", maskPath+".layer_name", "layer_name is required")
+		}
+		if mask.Mode != "" && !validMaskMode(mask.Mode) {
+			addRefusal("invalid_expected_profile", maskPath+".mode", "mask mode is not supported")
+		}
+		if mask.VertexCount != nil && *mask.VertexCount < 0 {
+			addRefusal("invalid_expected_profile", maskPath+".vertex_count", "vertex_count must be non-negative")
 		}
 	}
 }
@@ -1619,6 +1650,28 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			}
 		}
 	}
+	for i, mask := range layer.Masks {
+		maskPath := fmt.Sprintf("%s.masks[%d]", layerPath, i)
+		recordCapability("AddMask", maskPath)
+		if layer.Type == "camera" || layer.Type == "light" {
+			addRefusal("mask_on_unsupported_layer_type", maskPath, "masks are not supported on camera or light layers")
+		}
+		if mask.Mode != "" {
+			recordCapability("Mask.SetMode", maskPath+".mode")
+			if !validMaskMode(mask.Mode) {
+				addRefusal("invalid_mask_mode", maskPath+".mode", "mask mode must be add, subtract, intersect, lighten, darken, difference, or none")
+			}
+		}
+		if mask.Inverted != nil {
+			recordCapability("Mask.SetInverted", maskPath+".inverted")
+		}
+		if len(mask.Vertices) < 3 {
+			addRefusal("invalid_mask_vertices", maskPath+".vertices", "mask vertices must include at least 3 points")
+		}
+		for vi, vertex := range mask.Vertices {
+			validateVec(vertex, 2, fmt.Sprintf("%s.vertices[%d]", maskPath, vi), addRefusal)
+		}
+	}
 	if usesTransform(layer.Transform) {
 		recordCapability("SetLayerTransform", layerPath+".transform")
 	}
@@ -1902,6 +1955,15 @@ func validateKeyframeEase(ease *TemporalEase, path string, addRefusal func(strin
 	}
 	if ease.Influence <= 0 || ease.Influence > 1 {
 		addRefusal("invalid_keyframe_ease_influence", path+".influence", "keyframe ease influence must be greater than 0 and at most 1")
+	}
+}
+
+func validMaskMode(value string) bool {
+	switch value {
+	case "none", "add", "subtract", "intersect", "lighten", "darken", "difference":
+		return true
+	default:
+		return false
 	}
 }
 
