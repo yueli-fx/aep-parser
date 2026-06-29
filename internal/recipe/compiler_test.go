@@ -308,6 +308,79 @@ func TestCompileToFileChecksCompObjectProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksStandaloneCompProfileExamples(t *testing.T) {
+	cases := []struct {
+		recipe string
+		paths  []string
+	}{
+		{
+			recipe: "minimal-comp-background-color.json",
+			paths:  []string{"expected_profile.background_color"},
+		},
+		{
+			recipe: "minimal-comp-label.json",
+			paths:  []string{"expected_profile.label"},
+		},
+		{
+			recipe: "minimal-comp-comment.json",
+			paths:  []string{"expected_profile.comment"},
+		},
+		{
+			recipe: "minimal-comp-resolution-factor.json",
+			paths:  []string{"expected_profile.resolution_factor"},
+		},
+		{
+			recipe: "minimal-comp-pixel-aspect.json",
+			paths:  []string{"expected_profile.pixel_aspect"},
+		},
+		{
+			recipe: "minimal-comp-display-start-time.json",
+			paths:  []string{"expected_profile.display_start_time"},
+		},
+		{
+			recipe: "minimal-comp-frame-blending.json",
+			paths:  []string{"expected_profile.frame_blending"},
+		},
+		{
+			recipe: "minimal-comp-hide-shy-layers.json",
+			paths:  []string{"expected_profile.hide_shy_layers"},
+		},
+		{
+			recipe: "minimal-comp-preserve-nested-frame-rate.json",
+			paths:  []string{"expected_profile.preserve_nested_frame_rate"},
+		},
+		{
+			recipe: "minimal-comp-preserve-nested-resolution.json",
+			paths:  []string{"expected_profile.preserve_nested_resolution"},
+		},
+		{
+			recipe: "minimal-comp-motion-blur-enabled.json",
+			paths:  []string{"expected_profile.motion_blur.enabled"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.recipe, func(t *testing.T) {
+			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", tc.recipe))
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			rec := mustUnmarshalRecipe(t, string(raw))
+			outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+			report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+			if err != nil {
+				t.Fatalf("CompileToFile: %v", err)
+			}
+			if !report.Valid {
+				t.Fatalf("report = %+v, want valid", report)
+			}
+			for _, path := range tc.paths {
+				assertProfileCheck(t, report, path, true)
+			}
+		})
+	}
+}
+
 func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-layer-object-profile.json"))
 	if err != nil {

@@ -17,6 +17,7 @@
   ],
   "expected_profile": {
     "comp_count": 1,
-    "layer_count": 0
+    "layer_count": 0,
+    "pixel_aspect": 2
   }
 }

@@ -197,6 +197,11 @@ Done:
 - The consolidated `minimal-comp-object-profile.json` now exercises the
   completed comp display, flag, motion-blur, work-area, renderer, and metadata
   profile contracts together as a no-layer object-level baseline.
+- Standalone comp recipes for background color, label, comment, resolution
+  factor, pixel aspect, display start time, frame blending, hide shy layers,
+  preserve nested frame rate, preserve nested resolution, and motion blur
+  enabled now assert their own profile-visible fields instead of count-only
+  smoke checks.
 - Added `scripts/verify_recipe_profiles.ps1` as the one-command recipe profile
   verifier. It builds `cmd/aeprecipe` once, validates and compiles all selected
   recipes, summarizes `profile_checks` coverage/failures, and exits non-zero on
@@ -392,7 +397,8 @@ Current:
   text style. Use `scripts/verify_recipe_profiles.ps1` for whole-recipe
   validation/compile/profile-check coverage instead of manual per-field
   spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
-  instead of asking for per-field direction. For layer work, follow
+  instead of asking for per-field direction; standalone comp examples now carry
+  field-level profile checks. For layer work, follow
   `layer-recipe-execution-strategy.md`; explicit AE2025 source mattes remain
   blocked until recipe target-version handling is explicit, so continue with
   the next recipe-owned family; the consolidated layer object baseline now

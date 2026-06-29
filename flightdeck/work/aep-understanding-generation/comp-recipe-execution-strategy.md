@@ -216,6 +216,12 @@ The completed object consolidation slice expanded
 `minimal-comp-object-profile.json` into a no-layer comp baseline that asserts
 display, flag, motion-blur, work-area, renderer, and metadata fields together.
 
+The standalone comp recipes for background color, label, comment, resolution
+factor, pixel aspect, display start time, frame blending, hide shy layers,
+preserve nested frame rate, preserve nested resolution, and motion blur enabled
+now also assert their own field-level `expected_profile` contracts instead of
+remaining count-only smoke tests.
+
 The next object-level planning slice should create the same kind of execution
 strategy for layer-level recipe/profile work, so layer fields stop advancing as
 unconnected single-field slices.
