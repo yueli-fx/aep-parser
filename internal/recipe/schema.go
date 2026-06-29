@@ -58,6 +58,7 @@ type Layer struct {
 	Type      string         `json:"type"`
 	Name      string         `json:"name"`
 	Label     *float64       `json:"label,omitempty"`
+	Comment   string         `json:"comment,omitempty"`
 	Text      string         `json:"text,omitempty"`
 	TextStyle *TextStyleSpec `json:"text_style,omitempty"`
 	Shape     *ShapeSpec     `json:"shape,omitempty"`
@@ -650,6 +651,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	if layer.Label != nil {
 		recordCapability("Layer.SetLabel", layerPath+".label")
 		validateLayerLabel(*layer.Label, layerPath+".label", addRefusal)
+	}
+	if layer.Comment != "" {
+		recordCapability("Layer.SetComment", layerPath+".comment")
 	}
 	if layer.TextStyle != nil {
 		if layer.Type != "text" {

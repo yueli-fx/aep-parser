@@ -1400,6 +1400,35 @@ Forty-third follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Forty-fourth follow-up completed:
+
+- Layer recipes now support `comment`:
+  - non-empty string -> `Layer.SetComment`
+- Capability reporting records:
+  - `Layer.SetComment`
+- Boundary: layer comments are length-variable `cmta` metadata. The writer
+  must keep the `cmta` double-NUL terminator and `ldta` offset `0x3C`
+  has-comment flag in sync. The current stable profile schema does not expose
+  layer comments, so this slice uses schema capability reporting, compiled AEP
+  readback in tests, and AE render/open acceptance for the dedicated example.
+- `examples/recipes/minimal-layer-comment.json` is a dedicated one-text-layer
+  recipe with `comment: "reviewed recipe layer"`. See
+  `knowledge/layer/recipe-comment.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-layer-comment.json -out
+    tmp_debug\recipes\minimal-layer-comment.aep -json` returned valid and all
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_layer_comment\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_layer_comment\aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

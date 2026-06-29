@@ -390,6 +390,15 @@ func TestValidateReportsLayerLabelCapability(t *testing.T) {
 	assertCapability(t, report, "Layer.SetLabel")
 }
 
+func TestValidateReportsLayerCommentCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Comment = "reviewed recipe layer"
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Layer.SetComment")
+}
+
 func TestValidateReportsCompMotionBlurCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].MotionBlur = &recipe.CompMotionBlurSpec{
