@@ -49,6 +49,8 @@ Phase 0 export-surface audit and contract lock before extracting
   acceptance result.
 - `comp-recipe-execution-strategy.md` — object-level comp recipe/profile
   execution strategy and field matrix.
+- `layer-recipe-execution-strategy.md` — object-level layer recipe/profile
+  execution strategy and field matrix.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -199,6 +201,11 @@ Done:
   verifier. It builds `cmd/aeprecipe` once, validates and compiles all selected
   recipes, summarizes `profile_checks` coverage/failures, and exits non-zero on
   validation, compile, invalid-report, or profile-check failures.
+- Layer object profile contracts now support `expected_profile.layers[]` for
+  layer identity, metadata, timing, and flags. `profile.Layer` exposes
+  `label`/`comment`, and `minimal-layer-object-profile.json` asserts one text
+  layer's name, type, label, comment, start/in/out times, and common flags as a
+  single object-level baseline.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
@@ -340,9 +347,10 @@ Current:
   text style. Use `scripts/verify_recipe_profiles.ps1` for whole-recipe
   validation/compile/profile-check coverage instead of manual per-field
   spot-checking. For comp work, follow `comp-recipe-execution-strategy.md`
-  instead of asking for per-field direction. Next object-level planning
-  candidate is a layer recipe/profile execution strategy. Do not start
-  automated correction loops.
+  instead of asking for per-field direction. For layer work, follow
+  `layer-recipe-execution-strategy.md`; the next concrete slice is
+  layer quality/blend/auto-orient profile exposure and object checks. Do not
+  start automated correction loops.
 
 ## Open questions
 

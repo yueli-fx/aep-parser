@@ -385,10 +385,45 @@ type ExpectedProfile struct {
 	PreserveNestedResolution *bool                       `json:"preserve_nested_resolution,omitempty"`
 	MotionBlur               *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
 	WorkArea                 *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
+	Layers                   []ExpectedLayer             `json:"layers,omitempty"`
 	Effects                  []ExpectedEffect            `json:"effects,omitempty"`
 	Properties               []ExpectedProperty          `json:"properties,omitempty"`
 	TextStyles               []ExpectedTextStyle         `json:"text_styles,omitempty"`
 	Keyframes                []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
+}
+
+type ExpectedLayer struct {
+	Name    string               `json:"name"`
+	Type    string               `json:"type,omitempty"`
+	Label   *float64             `json:"label,omitempty"`
+	Comment string               `json:"comment,omitempty"`
+	Timing  *ExpectedLayerTiming `json:"timing,omitempty"`
+	Flags   *ExpectedLayerFlags  `json:"flags,omitempty"`
+}
+
+type ExpectedLayerTiming struct {
+	StartTime *float64 `json:"start_time,omitempty"`
+	InPoint   *float64 `json:"in_point,omitempty"`
+	OutPoint  *float64 `json:"out_point,omitempty"`
+	Duration  *float64 `json:"duration,omitempty"`
+	Stretch   *float64 `json:"stretch,omitempty"`
+}
+
+type ExpectedLayerFlags struct {
+	Visible              *bool `json:"visible,omitempty"`
+	Solo                 *bool `json:"solo,omitempty"`
+	Shy                  *bool `json:"shy,omitempty"`
+	Locked               *bool `json:"locked,omitempty"`
+	Is3D                 *bool `json:"is_3d,omitempty"`
+	IsAdjustment         *bool `json:"is_adjustment,omitempty"`
+	IsNull               *bool `json:"is_null,omitempty"`
+	IsGuide              *bool `json:"is_guide,omitempty"`
+	MotionBlur           *bool `json:"motion_blur,omitempty"`
+	EffectsEnabled       *bool `json:"effects_enabled,omitempty"`
+	AudioEnabled         *bool `json:"audio_enabled,omitempty"`
+	FrameBlendEnabled    *bool `json:"frame_blend_enabled,omitempty"`
+	CollapseTransform    *bool `json:"collapse_transform,omitempty"`
+	PreserveTransparency *bool `json:"preserve_transparency,omitempty"`
 }
 
 type ExpectedWorkAreaSpec struct {
@@ -641,6 +676,18 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	if expected.DisplayStartTime != nil {
 		validateDisplayStartTime(*expected.DisplayStartTime, "expected_profile.display_start_time", addRefusal)
 	}
+	for i, layer := range expected.Layers {
+		layerPath := fmt.Sprintf("expected_profile.layers[%d]", i)
+		if layer.Name == "" {
+			addRefusal("invalid_expected_profile", layerPath+".name", "layer name is required")
+		}
+		if layer.Label != nil {
+			validateLayerLabel(*layer.Label, layerPath+".label", addRefusal)
+		}
+		if layer.Timing != nil {
+			validateExpectedLayerTiming(layer.Timing, layerPath+".timing", addRefusal)
+		}
+	}
 	for i, effect := range expected.Effects {
 		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)
 		if effect.LayerName == "" {
@@ -727,6 +774,24 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 				addRefusal("invalid_expected_profile", kfPath+".value", "expected keyframe value must be a number, boolean, or numeric array")
 			}
 		}
+	}
+}
+
+func validateExpectedLayerTiming(timing *ExpectedLayerTiming, path string, addRefusal func(string, string, string)) {
+	if timing.StartTime != nil && *timing.StartTime < 0 {
+		addRefusal("invalid_expected_profile", path+".start_time", "start_time must be non-negative")
+	}
+	if timing.InPoint != nil && *timing.InPoint < 0 {
+		addRefusal("invalid_expected_profile", path+".in_point", "in_point must be non-negative")
+	}
+	if timing.OutPoint != nil && *timing.OutPoint < 0 {
+		addRefusal("invalid_expected_profile", path+".out_point", "out_point must be non-negative")
+	}
+	if timing.InPoint != nil && timing.OutPoint != nil && *timing.OutPoint < *timing.InPoint {
+		addRefusal("invalid_expected_profile", path+".out_point", "out_point must be greater than or equal to in_point")
+	}
+	if timing.Duration != nil && *timing.Duration < 0 {
+		addRefusal("invalid_expected_profile", path+".duration", "duration must be non-negative")
 	}
 }
 

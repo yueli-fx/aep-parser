@@ -188,6 +188,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.PreserveNestedResolution != nil ||
 		expected.MotionBlur != nil ||
 		expected.WorkArea != nil ||
+		len(expected.Layers) > 0 ||
 		len(expected.Effects) > 0 ||
 		len(expected.Properties) > 0 ||
 		len(expected.TextStyles) > 0 ||
@@ -314,6 +315,9 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	}
 	if expected.WorkArea != nil {
 		checkExpectedWorkArea(expected.WorkArea, prof, add)
+	}
+	for i, expectedLayer := range expected.Layers {
+		checkExpectedLayer(i, expectedLayer, prof, add)
 	}
 	for i, expectedEffect := range expected.Effects {
 		effectPath := fmt.Sprintf("expected_profile.effects[%d]", i)
@@ -531,11 +535,86 @@ func findProfileLayer(prof *profile.Profile, layerName string) *profile.Layer {
 	return nil
 }
 
+func checkExpectedLayer(index int, expected ExpectedLayer, prof *profile.Profile, add func(string, any, any, bool)) {
+	layerPath := fmt.Sprintf("expected_profile.layers[%d]", index)
+	layer := findProfileLayer(prof, expected.Name)
+	add(layerPath, expected.Name, profileLayerName(layer), layer != nil)
+	if layer == nil {
+		return
+	}
+	if expected.Name != "" {
+		add(layerPath+".name", expected.Name, layer.Name, layer.Name == expected.Name)
+	}
+	if expected.Type != "" {
+		add(layerPath+".type", expected.Type, layer.Type, layer.Type == expected.Type)
+	}
+	if expected.Label != nil {
+		actual := float64(layer.Label)
+		add(layerPath+".label", *expected.Label, actual, actual == *expected.Label)
+	}
+	if expected.Comment != "" {
+		add(layerPath+".comment", expected.Comment, layer.Comment, layer.Comment == expected.Comment)
+	}
+	if expected.Timing != nil {
+		checkExpectedLayerTiming(layerPath+".timing", expected.Timing, layer.Timing, add)
+	}
+	if expected.Flags != nil {
+		checkExpectedLayerFlags(layerPath+".flags", expected.Flags, layer.Flags, add)
+	}
+}
+
+func checkExpectedLayerTiming(path string, expected *ExpectedLayerTiming, actual profile.LayerTiming, add func(string, any, any, bool)) {
+	if expected.StartTime != nil {
+		add(path+".start_time", *expected.StartTime, actual.StartTime, math.Abs(actual.StartTime-*expected.StartTime) < 1e-6)
+	}
+	if expected.InPoint != nil {
+		add(path+".in_point", *expected.InPoint, actual.InPoint, math.Abs(actual.InPoint-*expected.InPoint) < 1e-6)
+	}
+	if expected.OutPoint != nil {
+		add(path+".out_point", *expected.OutPoint, actual.OutPoint, math.Abs(actual.OutPoint-*expected.OutPoint) < 1e-6)
+	}
+	if expected.Duration != nil {
+		add(path+".duration", *expected.Duration, actual.Duration, math.Abs(actual.Duration-*expected.Duration) < 1e-6)
+	}
+	if expected.Stretch != nil {
+		add(path+".stretch", *expected.Stretch, actual.Stretch, math.Abs(actual.Stretch-*expected.Stretch) < 1e-6)
+	}
+}
+
+func checkExpectedLayerFlags(path string, expected *ExpectedLayerFlags, actual profile.LayerFlags, add func(string, any, any, bool)) {
+	addBool := func(name string, expected *bool, actual bool) {
+		if expected != nil {
+			add(path+"."+name, *expected, actual, actual == *expected)
+		}
+	}
+	addBool("visible", expected.Visible, actual.Visible)
+	addBool("solo", expected.Solo, actual.Solo)
+	addBool("shy", expected.Shy, actual.Shy)
+	addBool("locked", expected.Locked, actual.Locked)
+	addBool("is_3d", expected.Is3D, actual.Is3D)
+	addBool("is_adjustment", expected.IsAdjustment, actual.IsAdjustment)
+	addBool("is_null", expected.IsNull, actual.IsNull)
+	addBool("is_guide", expected.IsGuide, actual.IsGuide)
+	addBool("motion_blur", expected.MotionBlur, actual.MotionBlur)
+	addBool("effects_enabled", expected.EffectsEnabled, actual.EffectsEnabled)
+	addBool("audio_enabled", expected.AudioEnabled, actual.AudioEnabled)
+	addBool("frame_blend_enabled", expected.FrameBlendEnabled, actual.FrameBlendEnabled)
+	addBool("collapse_transform", expected.CollapseTransform, actual.CollapseTransform)
+	addBool("preserve_transparency", expected.PreserveTransparency, actual.PreserveTransparency)
+}
+
 func effectMatchName(effect *profile.Effect) any {
 	if effect == nil {
 		return nil
 	}
 	return effect.MatchName
+}
+
+func profileLayerName(layer *profile.Layer) any {
+	if layer == nil {
+		return nil
+	}
+	return layer.Name
 }
 
 func findProfileParam(params []profile.Property, matchName string) *profile.Property {

@@ -308,6 +308,47 @@ func TestCompileToFileChecksCompObjectProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-layer-object-profile.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	for _, path := range []string{
+		"expected_profile.layers[0].name",
+		"expected_profile.layers[0].type",
+		"expected_profile.layers[0].label",
+		"expected_profile.layers[0].comment",
+		"expected_profile.layers[0].timing.start_time",
+		"expected_profile.layers[0].timing.in_point",
+		"expected_profile.layers[0].timing.out_point",
+		"expected_profile.layers[0].flags.visible",
+		"expected_profile.layers[0].flags.solo",
+		"expected_profile.layers[0].flags.locked",
+		"expected_profile.layers[0].flags.shy",
+		"expected_profile.layers[0].flags.motion_blur",
+		"expected_profile.layers[0].flags.effects_enabled",
+		"expected_profile.layers[0].flags.audio_enabled",
+		"expected_profile.layers[0].flags.frame_blend_enabled",
+		"expected_profile.layers[0].flags.collapse_transform",
+		"expected_profile.layers[0].flags.is_3d",
+		"expected_profile.layers[0].flags.is_adjustment",
+		"expected_profile.layers[0].flags.is_guide",
+		"expected_profile.layers[0].flags.preserve_transparency",
+	} {
+		assertProfileCheck(t, report, path, true)
+	}
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal layer object profile"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "label": 10,
+          "comment": "reviewed recipe layer",
+          "visible": false,
+          "solo": true,
+          "locked": true,
+          "motion_blur": true,
+          "shy": true,
+          "effects_enabled": false,
+          "audio_enabled": false,
+          "frame_blend_enabled": true,
+          "collapse_transform": true,
+          "is_3d": true,
+          "is_adjust": true,
+          "is_guide": true,
+          "preserve_transparency": true,
+          "start_time": 0.25,
+          "in_point": 0.1,
+          "out_point": 0.9,
+          "text": "Layer object profile",
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "text_layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text",
+        "label": 10,
+        "comment": "reviewed recipe layer",
+        "timing": {
+          "start_time": 0.25,
+          "in_point": 0.1,
+          "out_point": 0.9
+        },
+        "flags": {
+          "visible": false,
+          "solo": true,
+          "locked": true,
+          "shy": true,
+          "motion_blur": true,
+          "effects_enabled": false,
+          "audio_enabled": false,
+          "frame_blend_enabled": true,
+          "collapse_transform": true,
+          "is_3d": true,
+          "is_adjustment": true,
+          "is_guide": true,
+          "preserve_transparency": true
+        }
+      }
+    ]
+  }
+}

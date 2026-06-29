@@ -110,6 +110,8 @@ type Layer struct {
 	Index      int         `json:"index"`
 	Name       string      `json:"name"`
 	Type       string      `json:"type"`
+	Label      uint8       `json:"label,omitempty"`
+	Comment    string      `json:"comment,omitempty"`
 	SourceRef  *ItemRef    `json:"source_ref,omitempty"`
 	ParentRef  *LayerRef   `json:"parent_ref,omitempty"`
 	MatteRef   *LayerRef   `json:"matte_ref,omitempty"`
@@ -434,10 +436,12 @@ func buildLayer(
 	dict *EffectDictionary,
 ) Layer {
 	lp := Layer{
-		ID:    l.ID,
-		Index: l.Index,
-		Name:  l.Name,
-		Type:  l.Type,
+		ID:      l.ID,
+		Index:   l.Index,
+		Name:    l.Name,
+		Type:    l.Type,
+		Label:   l.Label,
+		Comment: l.Comment,
 		Timing: LayerTiming{
 			StartTime: l.StartTime,
 			Duration:  l.Duration,
