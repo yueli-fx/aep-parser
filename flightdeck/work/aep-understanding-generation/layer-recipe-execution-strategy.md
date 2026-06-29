@@ -51,7 +51,7 @@ flags, and refs.
 | --- | --- | --- | --- | --- | --- | --- |
 | Identity | `layers[].name` / `type` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
 | Metadata | `label` / `comment` | `Layer.SetLabel` / `SetComment` | `layers[].label` / `comment` | `expected_profile.layers[].label` / `comment` | L3 | done |
-| Timing | `start_time` / `in_point` / `out_point` | `Layer.SetStartTime` / `SetInPoint` / `SetOutPoint` | `layers[].timing.*` | `expected_profile.layers[].timing.*` | L3 | done |
+| Timing | `start_time` / `in_point` / `out_point` / parsed `duration` / `stretch` | `Layer.SetStartTime` / `SetInPoint` / `SetOutPoint`; duration/stretch parsed from resulting layer span | `layers[].timing.*` | `expected_profile.layers[].timing.*` | L3/L2 | done |
 | Basic flags | `visible` / `solo` / `locked` / `shy` / `motion_blur` / `markers_locked` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | AV flags | `effects_enabled` / `audio_enabled` / `frame_blend_enabled` / `frame_blend_pixel_motion` / `collapse_transform` / `sampling_bicubic` / `preserve_transparency` | `Layer.Set*` | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
 | Type flags | `is_3d` / `is_adjust` / `is_null` / `is_guide` | `Layer.Set*` plus type constructors | `layers[].flags.*` | `expected_profile.layers[].flags.*` | L3 | done |
@@ -152,7 +152,8 @@ as an object-level contract:
 - identity: `name`, `type`
 - display/mode: `quality`, `blending_mode`, `auto_orient`
 - metadata: `label`, `comment`
-- timing: `start_time`, `in_point`, `out_point`
+- timing: `start_time`, `in_point`, `out_point`, parsed span `duration`, and
+  `stretch`
 - flags: `visible`, `solo`, `locked`, `shy`, `motion_blur`,
   `markers_locked`, `effects_enabled`, `audio_enabled`, `frame_blend_enabled`,
   `frame_blend_pixel_motion`, `collapse_transform`, `sampling_bicubic`,

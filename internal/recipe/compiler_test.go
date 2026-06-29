@@ -334,6 +334,8 @@ func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 		"expected_profile.layers[0].timing.start_time",
 		"expected_profile.layers[0].timing.in_point",
 		"expected_profile.layers[0].timing.out_point",
+		"expected_profile.layers[0].timing.duration",
+		"expected_profile.layers[0].timing.stretch",
 		"expected_profile.layers[0].flags.visible",
 		"expected_profile.layers[0].flags.solo",
 		"expected_profile.layers[0].flags.locked",

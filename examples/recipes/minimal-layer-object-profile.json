@@ -63,7 +63,9 @@
         "timing": {
           "start_time": 0.25,
           "in_point": 0.1,
-          "out_point": 0.9
+          "out_point": 0.9,
+          "duration": 0.8,
+          "stretch": 1
         },
         "flags": {
           "visible": false,

@@ -240,6 +240,9 @@ Done:
 - Layer object flags now include `markers_locked`; the consolidated
   `minimal-layer-object-profile.json` asserts it through
   `expected_profile.layers[].flags.markers_locked`.
+- Layer object timing baseline now also asserts parsed `duration` and
+  `stretch`; with `in_point: 0.1` and `out_point: 0.9`, the expected parsed
+  span is `duration: 0.8`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
