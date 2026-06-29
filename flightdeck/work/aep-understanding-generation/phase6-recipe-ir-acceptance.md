@@ -1976,6 +1976,32 @@ Sixty-fourth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Sixty-fifth follow-up completed:
+
+- Camera layer recipes now support an eighth camera option:
+  - `camera.iris_roundness` -> `Layer.SetIrisRoundness`
+- Boundary: `camera` options remain valid only on `type: "camera"` layers.
+  This slice covers Iris Roundness only; other iris and camera options remain
+  separate recipe slices.
+- `examples/recipes/minimal-camera-iris-roundness.json` is a dedicated
+  two-layer recipe: a `Camera` layer with iris roundness `60` plus a visible
+  text layer. See `knowledge/layer/recipe-camera-options.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-camera-iris-roundness.json -out
+    tmp_debug\recipes\minimal-camera-iris-roundness.aep -json` returned valid
+    and all `profile_checks` passed, including `ADBE Iris Roundness = 60`.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_camera_iris_roundness\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_camera_iris_roundness\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

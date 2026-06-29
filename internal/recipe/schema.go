@@ -98,6 +98,7 @@ type CameraSpec struct {
 	BlurLevel     *float64 `json:"blur_level,omitempty"`
 	IrisShape     *float64 `json:"iris_shape,omitempty"`
 	IrisRotation  *float64 `json:"iris_rotation,omitempty"`
+	IrisRoundness *float64 `json:"iris_roundness,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -799,6 +800,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Camera.IrisRotation != nil {
 			recordCapability("SetIrisRotation", layerPath+".camera.iris_rotation")
+		}
+		if layer.Camera.IrisRoundness != nil {
+			recordCapability("SetIrisRoundness", layerPath+".camera.iris_roundness")
 		}
 	}
 	if layer.StartTime != nil {
