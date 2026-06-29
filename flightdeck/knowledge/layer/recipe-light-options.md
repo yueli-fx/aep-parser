@@ -6,7 +6,8 @@ Context: recipe light option support, starting with
 `examples/recipes/minimal-light-casts-shadows.json` and
 `examples/recipes/minimal-light-shadow-darkness.json` /
 `examples/recipes/minimal-light-shadow-diffusion.json` /
-`examples/recipes/minimal-light-falloff-type.json`.
+`examples/recipes/minimal-light-falloff-type.json` /
+`examples/recipes/minimal-light-falloff-start.json`.
 
 Recipe authoring:
 
@@ -25,6 +26,9 @@ Recipe authoring:
   through `Layer.SetLightShadowDiffusion`.
 - `light.falloff_type` sets the light's Falloff Type enum through
   `Layer.SetLightFalloffType`.
+- `light.falloff_start` sets the light's Falloff Start distance in pixels
+  through `Layer.SetLightFalloffStart`. It is only meaningful when
+  `falloff_type` is not the none/default mode.
 
 Writer capability:
 
@@ -34,12 +38,14 @@ Writer capability:
 - `SetLightShadowDarkness`
 - `SetLightShadowDiffusion`
 - `SetLightFalloffType`
+- `SetLightFalloffStart`
 
 Boundary:
 
 - `light` options are only valid on `type: "light"` layers.
 - Current coverage includes `intensity`, `color`, `casts_shadows`, and
-  `shadow_darkness` / `shadow_diffusion` plus `falloff_type`. Cone, falloff
-  distances, and other light options remain separate recipe slices.
+  `shadow_darkness` / `shadow_diffusion` plus `falloff_type` /
+  `falloff_start`. Cone, falloff distance, and other light options remain
+  separate recipe slices.
 - Contract coverage uses schema capability reporting, compiled AEP readback,
   embedded expected-profile property checks, and AE render/open acceptance.

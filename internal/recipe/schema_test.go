@@ -774,6 +774,29 @@ func TestValidateReportsLightFalloffTypeCapability(t *testing.T) {
 	assertCapability(t, report, "SetLightFalloffType")
 }
 
+func TestValidateReportsLightFalloffStartCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Light falloff start"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"background_color": [0, 0, 0],
+			"layers": [
+				{"type": "light", "name": "Light", "light": {"falloff_type": 2, "falloff_start": 100}},
+				{"type": "text", "name": "Title", "text": "Light falloff start", "transform": {"position": [960, 540]}}
+			]
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetLightFalloffStart")
+}
+
 func TestValidateRejectsLightOptionsOnNonLightLayer(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

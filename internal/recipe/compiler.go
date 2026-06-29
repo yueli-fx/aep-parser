@@ -931,6 +931,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q light.falloff_type: %w", spec.Name, err)
 			}
 		}
+		if spec.Light != nil && spec.Light.FalloffStart != nil {
+			if err := layer.SetLightFalloffStart(*spec.Light.FalloffStart); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q light.falloff_start: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)

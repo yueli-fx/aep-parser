@@ -98,6 +98,7 @@ type LightSpec struct {
 	ShadowDarkness  *float64  `json:"shadow_darkness,omitempty"`
 	ShadowDiffusion *float64  `json:"shadow_diffusion,omitempty"`
 	FalloffType     *float64  `json:"falloff_type,omitempty"`
+	FalloffStart    *float64  `json:"falloff_start,omitempty"`
 }
 
 type CameraSpec struct {
@@ -857,6 +858,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Light.FalloffType != nil {
 			recordCapability("SetLightFalloffType", layerPath+".light.falloff_type")
+		}
+		if layer.Light.FalloffStart != nil {
+			recordCapability("SetLightFalloffStart", layerPath+".light.falloff_start")
 		}
 	}
 	if layer.StartTime != nil {
