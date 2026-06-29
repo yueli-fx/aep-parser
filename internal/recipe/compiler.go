@@ -1655,6 +1655,15 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.Stroke.CompositeOrder != "" {
+			order, err := shapeCompositeOrder(shape.Stroke.CompositeOrder)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetCompositeOrder(order); err != nil {
+				return err
+			}
+		}
 		if shape.Stroke.Taper != nil {
 			taper := stroke.Taper()
 			if shape.Stroke.Taper.StartLength != nil {

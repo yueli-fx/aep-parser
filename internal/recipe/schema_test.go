@@ -312,6 +312,22 @@ func TestValidateReportsShapeStrokeCapabilities(t *testing.T) {
 	assertCapability(t, report, "StrokeDashes.SetGap")
 }
 
+func TestValidateReportsShapeStrokeCompositeOrderCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
+		Color:          []float64{255, 255, 255},
+		Width:          ptr(18),
+		CompositeOrder: "below_previous",
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "StrokeNode.SetCompositeOrder")
+}
+
 func TestValidateReportsShapeDetailCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Position = []float64{12, -6}
@@ -1966,12 +1982,13 @@ func TestValidateRejectsInvalidShapeWiggleTransform(t *testing.T) {
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
-		Color:      []float64{255, 0},
-		Width:      ptr(-1),
-		Opacity:    ptr(101),
-		LineCap:    "square",
-		LineJoin:   "corner",
-		MiterLimit: ptr(0),
+		Color:          []float64{255, 0},
+		Width:          ptr(-1),
+		Opacity:        ptr(101),
+		LineCap:        "square",
+		LineJoin:       "corner",
+		MiterLimit:     ptr(0),
+		CompositeOrder: "middle",
 		Dashes: &recipe.StrokeDashesSpec{
 			Dash: ptr(-1),
 			Gap:  ptr(-1),
@@ -1989,6 +2006,7 @@ func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_stroke_line_cap")
 	assertRefusal(t, report, "invalid_shape_stroke_line_join")
 	assertRefusal(t, report, "invalid_shape_stroke_miter_limit")
+	assertRefusal(t, report, "invalid_shape_stroke_composite_order")
 	assertRefusal(t, report, "invalid_shape_stroke_dash")
 	assertRefusal(t, report, "invalid_shape_stroke_gap")
 }

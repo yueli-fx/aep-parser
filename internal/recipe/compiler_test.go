@@ -1757,6 +1757,35 @@ func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Gap 1", 7.0)
 }
 
+func TestCompileToFileSetsShapeStrokeCompositeOrder(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{
+		Color:          []float64{255, 255, 255},
+		Width:          ptr(18),
+		CompositeOrder: "below_previous",
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Composite Order", 2.0)
+}
+
 func TestCompileToFileSetsShapeDetail(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Position = []float64{12, -6}

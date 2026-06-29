@@ -164,15 +164,16 @@ type ShapeSpec struct {
 }
 
 type StrokeSpec struct {
-	Color      []float64         `json:"color,omitempty"`
-	Width      *float64          `json:"width,omitempty"`
-	Opacity    *float64          `json:"opacity,omitempty"`
-	LineCap    string            `json:"line_cap,omitempty"`
-	LineJoin   string            `json:"line_join,omitempty"`
-	MiterLimit *float64          `json:"miter_limit,omitempty"`
-	Taper      *StrokeTaperSpec  `json:"taper,omitempty"`
-	Wave       *StrokeWaveSpec   `json:"wave,omitempty"`
-	Dashes     *StrokeDashesSpec `json:"dashes,omitempty"`
+	Color          []float64         `json:"color,omitempty"`
+	Width          *float64          `json:"width,omitempty"`
+	Opacity        *float64          `json:"opacity,omitempty"`
+	LineCap        string            `json:"line_cap,omitempty"`
+	LineJoin       string            `json:"line_join,omitempty"`
+	MiterLimit     *float64          `json:"miter_limit,omitempty"`
+	CompositeOrder string            `json:"composite_order,omitempty"`
+	Taper          *StrokeTaperSpec  `json:"taper,omitempty"`
+	Wave           *StrokeWaveSpec   `json:"wave,omitempty"`
+	Dashes         *StrokeDashesSpec `json:"dashes,omitempty"`
 }
 
 type StrokeTaperSpec struct {
@@ -1027,6 +1028,12 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("StrokeNode.SetMiterLimit", strokePath+".miter_limit")
 				if *layer.Shape.Stroke.MiterLimit < 1 {
 					addRefusal("invalid_shape_stroke_miter_limit", strokePath+".miter_limit", "stroke miter_limit must be at least 1")
+				}
+			}
+			if layer.Shape.Stroke.CompositeOrder != "" {
+				recordCapability("StrokeNode.SetCompositeOrder", strokePath+".composite_order")
+				if !validShapeCompositeOrder(layer.Shape.Stroke.CompositeOrder) {
+					addRefusal("invalid_shape_stroke_composite_order", strokePath+".composite_order", "stroke composite_order must be above_previous or below_previous")
 				}
 			}
 			if layer.Shape.Stroke.Taper != nil {

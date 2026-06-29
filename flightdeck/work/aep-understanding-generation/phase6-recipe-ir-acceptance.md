@@ -2520,6 +2520,40 @@ Eighty-third follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Eighty-fourth follow-up completed:
+
+- Shape recipes now support:
+  - `shape.stroke.composite_order` -> `StrokeNode.SetCompositeOrder`
+- Boundary: `shape.stroke.composite_order` is a string enum with
+  `above_previous` and `below_previous`. Validation rejects other values before
+  compile.
+- `examples/recipes/minimal-shape-stroke-composite-order.json` is a dedicated
+  one-layer shape recipe with a rect stroke set to `below_previous`. The
+  embedded expected profile checks `ADBE Vector Composite Order = 2`; the
+  recipe avoids a fill so the same profile match-name is unambiguous.
+- Verification:
+  - RED was observed with `go test ./internal/recipe`: compiled profile still
+    read `ADBE Vector Composite Order = 1`, capability
+    `StrokeNode.SetCompositeOrder` was absent, and the invalid enum refusal was
+    missing.
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-stroke-composite-order.json -out
+    tmp_debug\recipes\minimal-shape-stroke-composite-order.aep -json` returned
+    valid, reported `StrokeNode.SetCompositeOrder`, and all embedded
+    `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_shape_stroke_composite_order\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_shape_stroke_composite_order\aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.
