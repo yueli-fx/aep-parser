@@ -302,6 +302,35 @@ Tenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Eleventh follow-up completed:
+
+- Recipes now support `transform.scale_keyframes[]` as 2D vector keyframes in
+  AE-style percent units `[x,y]`.
+- Validation rejects scale keyframes outside the comp duration, unsorted scale
+  keyframes, and malformed scale keyframe vectors.
+- `expected_profile.keyframes[]` now exercises Position, Scale, and Opacity on
+  the updated shape/text example. Note: recipe Scale keyframes are authored as
+  2D percent values, while profile `ADBE Scale` keyframe values read back as
+  3D unit scale `[x/100,y/100,1]`; see
+  `knowledge/layer/recipe-scale-keyframe-profile-units.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-scale-keyframes.aep -json`
+    returned valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_scale_keyframes/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_scale_keyframes/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

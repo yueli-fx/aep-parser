@@ -139,6 +139,11 @@ Done:
   `expected_profile.keyframes[]` checks against profile unit opacity values.
   The updated shape/text example passed `go test ./...`, `go vet ./...`,
   profile checks, and an AE 2025 render oracle gate.
+- Recipe transform keyframes now also support `transform.scale_keyframes[]` in
+  2D percent authoring units, with validation and `ADBE Scale`
+  `expected_profile.keyframes[]` checks against profile 3D unit scale values.
+  The updated shape/text example passed `go test ./...`, `go vet ./...`,
+  profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
@@ -155,5 +160,6 @@ Current:
   before a richer path-to-capability index exists.
 - What the smallest Phase 5 replication slice should be, so it exercises both
   structural and render gaps without forcing a full-project rebuild first.
-- Which recipe field family should enter next: transform keyframe/ease,
-  expression support, shape filters, or more profile-visible text style.
+- Which recipe field family should enter next: remaining transform
+  keyframe/ease channels, expression support, shape filters, or more
+  profile-visible text style.

@@ -451,6 +451,39 @@ func TestCompileToFileChecksExpectedOpacityKeyframeProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[2]", true)
 }
 
+func TestCompileToFileChecksExpectedScaleKeyframeProfile(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Transform.Scale = nil
+	rec.Comps[0].Layers[0].Transform.ScaleKeyframes = []recipe.VectorKeyframe{
+		{Time: 0, Value: []float64{80, 80}},
+		{Time: 1, Value: []float64{100, 120}},
+		{Time: 2, Value: []float64{130, 90}},
+	}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Keyframes: []recipe.ExpectedKeyframedProperty{{
+			LayerName: "Title",
+			MatchName: "ADBE Scale",
+			Keyframes: []recipe.ExpectedKeyframe{
+				{Time: 0, Value: []float64{0.8, 0.8, 1}},
+				{Time: 1, Value: []float64{1, 1.2, 1}},
+				{Time: 2, Value: []float64{1.3, 0.9, 1}},
+			},
+		}},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[0]", true)
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[2]", true)
+}
+
 func assertParamValue(t *testing.T, params []profile.Property, matchName string, want float64) {
 	t.Helper()
 	for _, param := range params {

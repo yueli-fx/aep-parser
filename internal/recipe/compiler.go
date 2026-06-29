@@ -686,6 +686,11 @@ func applyTransform(layer *aep.Layer, spec Transform) error {
 			return err
 		}
 	}
+	for _, kf := range spec.ScaleKeyframes {
+		if err := t.Scale().AddKeyframeLinear(kf.Time, [2]float64{kf.Value[0], kf.Value[1]}); err != nil {
+			return err
+		}
+	}
 	for _, kf := range spec.OpacityKeyframes {
 		if err := t.Opacity().AddKeyframeLinear(kf.Time, kf.Value); err != nil {
 			return err

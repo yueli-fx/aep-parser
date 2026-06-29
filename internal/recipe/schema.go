@@ -86,6 +86,7 @@ type Transform struct {
 	Rotation          *float64         `json:"rotation,omitempty"`
 	Opacity           *float64         `json:"opacity,omitempty"`
 	PositionKeyframes []VectorKeyframe `json:"position_keyframes,omitempty"`
+	ScaleKeyframes    []VectorKeyframe `json:"scale_keyframes,omitempty"`
 	OpacityKeyframes  []ScalarKeyframe `json:"opacity_keyframes,omitempty"`
 }
 
@@ -448,6 +449,16 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
 	}
+	for i, kf := range layer.Transform.ScaleKeyframes {
+		kfPath := fmt.Sprintf("%s.transform.scale_keyframes[%d]", layerPath, i)
+		if kf.Time < 0 || kf.Time > compDuration {
+			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be within comp duration")
+		}
+		if i > 0 && kf.Time < layer.Transform.ScaleKeyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+		}
+		validateVec(kf.Value, 2, kfPath+".value", addRefusal)
+	}
 	for i, kf := range layer.Transform.OpacityKeyframes {
 		kfPath := fmt.Sprintf("%s.transform.opacity_keyframes[%d]", layerPath, i)
 		if kf.Time < 0 || kf.Time > compDuration {
@@ -551,6 +562,7 @@ func usesTransform(t Transform) bool {
 		t.Rotation != nil ||
 		t.Opacity != nil ||
 		len(t.PositionKeyframes) > 0 ||
+		len(t.ScaleKeyframes) > 0 ||
 		len(t.OpacityKeyframes) > 0
 }
 
