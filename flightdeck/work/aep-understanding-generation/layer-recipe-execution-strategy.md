@@ -207,6 +207,11 @@ of remaining count-only smoke tests.
 `expected_profile.layers[].light_kind`, clearing the last count-only recipe
 profile contract.
 
+Camera and light single-option recipes now also assert camera/light layer
+identity through `expected_profile.layers[]` alongside their property value
+checks, so those examples are anchored to the object contract instead of only
+the property list.
+
 Next, leave explicit AE2025 `SetTrackMatteSource` / `SetTrackMatteLayer`
 blocked until recipe target-version handling is explicit. Continue with the
 next recipe-owned family instead of mixing AE2025-only layout requirements into

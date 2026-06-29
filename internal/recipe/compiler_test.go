@@ -788,6 +788,60 @@ func TestCompileToFileChecksLightKindProfileExample(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksCameraAndLightOptionProfileExamples(t *testing.T) {
+	cases := []string{
+		"minimal-camera-aperture.json",
+		"minimal-camera-blur-level.json",
+		"minimal-camera-depth-of-field.json",
+		"minimal-camera-focus-distance.json",
+		"minimal-camera-iris-aspect-ratio.json",
+		"minimal-camera-iris-diffraction-fringe.json",
+		"minimal-camera-iris-highlight-gain.json",
+		"minimal-camera-iris-highlight-saturation.json",
+		"minimal-camera-iris-highlight-threshold.json",
+		"minimal-camera-iris-rotation.json",
+		"minimal-camera-iris-roundness.json",
+		"minimal-camera-iris-shape.json",
+		"minimal-camera-zoom.json",
+		"minimal-light-casts-shadows.json",
+		"minimal-light-color.json",
+		"minimal-light-cone-angle.json",
+		"minimal-light-cone-feather.json",
+		"minimal-light-falloff-distance.json",
+		"minimal-light-falloff-start.json",
+		"minimal-light-falloff-type.json",
+		"minimal-light-intensity.json",
+		"minimal-light-shadow-darkness.json",
+		"minimal-light-shadow-diffusion.json",
+	}
+	for _, recipeName := range cases {
+		t.Run(recipeName, func(t *testing.T) {
+			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", recipeName))
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			rec := mustUnmarshalRecipe(t, string(raw))
+			outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+			report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+			if err != nil {
+				t.Fatalf("CompileToFile: %v", err)
+			}
+			if !report.Valid {
+				t.Fatalf("report = %+v, want valid", report)
+			}
+			for _, path := range []string{
+				"expected_profile.layers[0].name",
+				"expected_profile.layers[0].type",
+				"expected_profile.layers[1].name",
+				"expected_profile.layers[1].type",
+			} {
+				assertProfileCheck(t, report, path, true)
+			}
+		})
+	}
+}
+
 func TestCompileToFileChecksLightSourceProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-light-source.json"))
 	if err != nil {

@@ -232,10 +232,14 @@ Done:
 - Camera option coverage now has a consolidated object/profile baseline:
   `minimal-camera-object-profile.json` sets zoom, DOF/focus/aperture/blur, and
   iris controls together and asserts all profile-visible properties.
+- Camera single-option recipes now also assert camera/text layer identity
+  through `expected_profile.layers[]` alongside their property checks.
 - Light option coverage now has a consolidated object/profile baseline:
   `minimal-light-object-profile.json` sets light kind, intensity, color,
   shadow, falloff, and cone controls together and asserts all profile-visible
   layer/property fields.
+- Light single-option recipes now also assert light/text layer identity through
+  `expected_profile.layers[]` alongside their property checks.
 - The standalone `minimal-light-kind.json` recipe now also asserts light layer
   identity and `expected_profile.layers[].light_kind`, clearing the remaining
   count-only recipe profile contract.
