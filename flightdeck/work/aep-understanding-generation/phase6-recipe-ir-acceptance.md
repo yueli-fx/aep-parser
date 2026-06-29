@@ -1163,6 +1163,36 @@ Thirty-fifth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Thirty-sixth follow-up completed:
+
+- Composition recipes now support `frame_blending`:
+  - boolean -> `SetFrameBlending`
+- Capability reporting records:
+  - `SetFrameBlending`
+- Boundary: this is the composition master frame-blending switch only. Visible
+  frame interpolation still requires suitable layers with layer frame-blend
+  flags/modes enabled. The current stable profile schema does not expose this
+  comp flag, so this slice uses compiled AEP `cdta @0x8B bit 0x10` readback in
+  tests plus AE render acceptance for the dedicated example.
+- `examples/recipes/minimal-comp-frame-blending.json` is a dedicated no-layer
+  comp recipe with `frame_blending: true`. See
+  `knowledge/composition/recipe-frame-blending.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-frame-blending.json -out
+    tmp_debug\recipes\minimal-comp-frame-blending.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_frame_blending\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_frame_blending\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

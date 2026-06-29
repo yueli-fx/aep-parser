@@ -30,6 +30,7 @@ type CompSpec struct {
 	ResolutionFactor []float64           `json:"resolution_factor,omitempty"`
 	PixelAspect      *float64            `json:"pixel_aspect,omitempty"`
 	DisplayStartTime *float64            `json:"display_start_time,omitempty"`
+	FrameBlending    *bool               `json:"frame_blending,omitempty"`
 	MotionBlur       *CompMotionBlurSpec `json:"motion_blur,omitempty"`
 	WorkArea         *CompWorkAreaSpec   `json:"work_area,omitempty"`
 	Layers           []Layer             `json:"layers,omitempty"`
@@ -415,6 +416,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.DisplayStartTime != nil {
 			recordCapability("SetDisplayStartTime", compPath+".display_start_time")
 			validateDisplayStartTime(*comp.DisplayStartTime, compPath+".display_start_time", addRefusal)
+		}
+		if comp.FrameBlending != nil {
+			recordCapability("SetFrameBlending", compPath+".frame_blending")
 		}
 		if comp.MotionBlur != nil {
 			validateCompMotionBlur(comp.MotionBlur, compPath+".motion_blur", recordCapability, addRefusal)

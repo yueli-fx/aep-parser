@@ -428,6 +428,15 @@ func TestValidateReportsCompDisplayStartTimeCapability(t *testing.T) {
 	assertCapability(t, report, "SetDisplayStartTime")
 }
 
+func TestValidateReportsCompFrameBlendingCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].FrameBlending = boolPtr(true)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetFrameBlending")
+}
+
 func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}

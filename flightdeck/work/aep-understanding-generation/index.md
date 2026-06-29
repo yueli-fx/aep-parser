@@ -260,6 +260,11 @@ Done:
   `examples/recipes/minimal-comp-display-start-time.json` example compiles a
   shifted timeline origin comp, passes compiled AEP readback, and passes an AE
   2025 render oracle gate.
+- Eighth comp-level recipe settings slice is implemented for
+  `comp.frame_blending`. The dedicated
+  `examples/recipes/minimal-comp-frame-blending.json` example compiles a comp
+  master frame-blending switch, passes compiled AEP `cdta` flag readback, and
+  passes an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
