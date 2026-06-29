@@ -952,6 +952,34 @@ Twenty-eighth follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-ninth follow-up completed:
+
+- Composition recipes now honor `background_color`.
+- Validation requires exactly three RGB channels in 0..255 units.
+- Capability reporting records:
+  - `SetBGColor`
+- Boundary: composition background color is not exposed in the current stable
+  profile schema, so the contract uses compiled AEP readback plus AE render
+  acceptance rather than `expected_profile.properties[]`.
+- `examples/recipes/minimal-comp-background-color.json` is a dedicated
+  no-layer comp recipe with a non-black background. See
+  `knowledge/composition/recipe-background-color.md`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-comp-background-color.json -out
+    tmp_debug\recipes\minimal-comp-background-color.aep -json` returned valid
+    and all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug\aeoracle\minimal_comp_background_color\request.json`
+    - done marker:
+      `tmp_debug\aeoracle\minimal_comp_background_color\aeoracle_render.done` =
+      `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

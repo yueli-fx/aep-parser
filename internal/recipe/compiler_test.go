@@ -49,6 +49,27 @@ func TestCompileMinimalTextShapeRecipeBuildsProfile(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsCompBackgroundColor(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].BackgroundColor = []float64{12, 34, 56}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got, want := project.Compositions[0].BGColor, ([3]uint8{12, 34, 56}); got != want {
+		t.Fatalf("BGColor = %v, want %v", got, want)
+	}
+}
+
 func TestCompileToFileSetsShapeStroke(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Stroke = &recipe.StrokeSpec{

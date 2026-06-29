@@ -30,6 +30,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 	if err != nil {
 		return report, fmt.Errorf("recipe: create comp: %w", err)
 	}
+	if len(compSpec.BackgroundColor) == 3 {
+		if err := comp.SetBGColor(rgb8Color(compSpec.BackgroundColor)); err != nil {
+			return report, fmt.Errorf("recipe: comp %q background_color: %w", compSpec.Name, err)
+		}
+	}
 	for _, layerSpec := range compSpec.Layers {
 		if err := compileLayer(comp, layerSpec, compSpec); err != nil {
 			return report, err
@@ -1240,4 +1245,8 @@ func rgbaColor(values []float64) [4]float64 {
 		toUnitColor(values[2]),
 		alpha,
 	}
+}
+
+func rgb8Color(values []float64) [3]uint8 {
+	return [3]uint8{uint8(values[0]), uint8(values[1]), uint8(values[2])}
 }

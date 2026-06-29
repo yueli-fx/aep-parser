@@ -364,6 +364,10 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.Width <= 0 || comp.Height <= 0 || comp.FrameRate <= 0 || comp.Duration <= 0 {
 			addRefusal("invalid_comp_timing_or_size", compPath, "width, height, frame_rate, and duration must be positive")
 		}
+		if len(comp.BackgroundColor) > 0 {
+			recordCapability("SetBGColor", compPath+".background_color")
+			validateRGBColor(comp.BackgroundColor, compPath+".background_color", "invalid_comp_background_color", addRefusal)
+		}
 		for li, layer := range comp.Layers {
 			layerPath := fmt.Sprintf("%s.layers[%d]", compPath, li)
 			validateLayer(layer, layerPath, comp.Duration, recordCapability, addRefusal)
@@ -1097,6 +1101,18 @@ func validateVec(values []float64, want int, path string, addRefusal func(string
 func validateColor(values []float64, path, code string, addRefusal func(string, string, string)) {
 	if len(values) != 3 && len(values) != 4 {
 		addRefusal(code, path, "color must have 3 or 4 channels")
+		return
+	}
+	for i, value := range values {
+		if value < 0 || value > 255 {
+			addRefusal(code, fmt.Sprintf("%s[%d]", path, i), "color channels must be between 0 and 255")
+		}
+	}
+}
+
+func validateRGBColor(values []float64, path, code string, addRefusal func(string, string, string)) {
+	if len(values) != 3 {
+		addRefusal(code, path, "color must have 3 channels")
 		return
 	}
 	for i, value := range values {

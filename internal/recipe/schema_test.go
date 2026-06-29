@@ -354,6 +354,27 @@ func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	assertCapability(t, report, "StarNode.SetOuterRoundness")
 }
 
+func TestValidateReportsCompBackgroundColorCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].BackgroundColor = []float64{12, 34, 56}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "SetBGColor")
+}
+
+func TestValidateRejectsInvalidCompBackgroundColor(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].BackgroundColor = []float64{12, 34, 256}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_comp_background_color")
+}
+
 func TestValidateReportsShapeTrimCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Trim = &recipe.TrimSpec{
