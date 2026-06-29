@@ -347,6 +347,37 @@ func TestValidateReportsShapeOffsetPathsCapabilities(t *testing.T) {
 	assertCapability(t, report, "OffsetPathsNode.SetCopyOffset")
 }
 
+func TestValidateReportsShapeRepeaterCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Repeater = &recipe.RepeaterSpec{
+		Copies:       ptr(5),
+		Offset:       ptr(2),
+		Order:        "above",
+		Anchor:       []float64{15, 25},
+		Position:     []float64{120, 0},
+		Scale:        []float64{80, 90},
+		Rotation:     ptr(30),
+		StartOpacity: ptr(100),
+		EndOpacity:   ptr(25),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddRepeater")
+	assertCapability(t, report, "RepeaterNode.SetCopies")
+	assertCapability(t, report, "RepeaterNode.SetOffset")
+	assertCapability(t, report, "RepeaterNode.SetOrder")
+	assertCapability(t, report, "RepeaterTransform.SetAnchor")
+	assertCapability(t, report, "RepeaterTransform.SetPosition")
+	assertCapability(t, report, "RepeaterTransform.SetScale")
+	assertCapability(t, report, "RepeaterTransform.SetRotation")
+	assertCapability(t, report, "RepeaterTransform.SetStartOpacity")
+	assertCapability(t, report, "RepeaterTransform.SetEndOpacity")
+}
+
 func TestValidateReportsShapeZigZagCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.ZigZag = &recipe.ZigZagSpec{
@@ -576,6 +607,30 @@ func TestValidateRejectsInvalidShapeOffsetPaths(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_offset_line_join")
 	assertRefusal(t, report, "invalid_shape_offset_miter_limit")
 	assertRefusal(t, report, "invalid_shape_offset_copies")
+}
+
+func TestValidateRejectsInvalidShapeRepeater(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Repeater = &recipe.RepeaterSpec{
+		Copies:       ptr(0),
+		Order:        "front",
+		Anchor:       []float64{15},
+		Position:     []float64{120},
+		Scale:        []float64{80},
+		StartOpacity: ptr(-1),
+		EndOpacity:   ptr(101),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_repeater_copies")
+	assertRefusal(t, report, "invalid_shape_repeater_order")
+	assertRefusal(t, report, "invalid_vector_size")
+	assertRefusal(t, report, "invalid_shape_repeater_start_opacity")
+	assertRefusal(t, report, "invalid_shape_repeater_end_opacity")
 }
 
 func TestValidateRejectsInvalidShapeZigZag(t *testing.T) {

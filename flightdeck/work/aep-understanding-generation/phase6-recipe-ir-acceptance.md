@@ -696,6 +696,54 @@ Twenty-first follow-up completed:
     - PNG outputs:
       `f000000.png`, `f000015.png`, `f000030.png`
 
+Twenty-second follow-up completed:
+
+- Shape recipes now support `shape.repeater`, including:
+  - `copies` -> `ADBE Vector Repeater Copies`
+  - `offset` -> `ADBE Vector Repeater Offset`
+  - `order` -> `ADBE Vector Repeater Order`
+  - `anchor` -> `ADBE Vector Repeater Anchor`
+  - `position` -> `ADBE Vector Repeater Position`
+  - `scale` -> `ADBE Vector Repeater Scale`
+  - `rotation` -> `ADBE Vector Repeater Rotation`
+  - `start_opacity` -> `ADBE Vector Repeater Opacity 1`
+  - `end_opacity` -> `ADBE Vector Repeater Opacity 2`
+- Validation rejects `copies < 1`, unsupported `order` values, malformed 2D
+  transform vectors, and start/end opacity outside `0..100`.
+- Capability reporting records:
+  - `VectorGroup.AddRepeater`
+  - `RepeaterNode.SetCopies`
+  - `RepeaterNode.SetOffset`
+  - `RepeaterNode.SetOrder`
+  - `RepeaterTransform.SetAnchor`
+  - `RepeaterTransform.SetPosition`
+  - `RepeaterTransform.SetScale`
+  - `RepeaterTransform.SetRotation`
+  - `RepeaterTransform.SetStartOpacity`
+  - `RepeaterTransform.SetEndOpacity`
+- `examples/recipes/minimal-shape-repeater.json` is a dedicated Repeater
+  recipe example and asserts all nine profile properties. Recipe `order` is
+  authored as `below` / `above`, while profile readback is numeric `1` / `2`;
+  see `knowledge/shape/recipe-repeater-profile-enums.md`.
+- The AE 2025 run did not reproduce the earlier `Scripting plugin is not
+  installed` modal. Current `scripts/ae_dialog_rules.json` already classifies
+  that dialog as `Abort`, so a recurrence exits fast with forensics instead of
+  dismissing the environment failure.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe
+    examples\recipes\minimal-shape-repeater.json -out
+    tmp_debug\recipes\minimal-shape-repeater.aep -json` returned valid and
+    all `profile_checks` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_shape_repeater/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_shape_repeater/aeoracle_render.done` = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000015.png`, `f000030.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

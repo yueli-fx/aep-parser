@@ -64,6 +64,7 @@ type ShapeSpec struct {
 	Trim            *TrimSpec            `json:"trim,omitempty"`
 	RoundCorners    *RoundCornersSpec    `json:"round_corners,omitempty"`
 	OffsetPaths     *OffsetPathsSpec     `json:"offset_paths,omitempty"`
+	Repeater        *RepeaterSpec        `json:"repeater,omitempty"`
 	ZigZag          *ZigZagSpec          `json:"zigzag,omitempty"`
 	PuckerBloat     *PuckerBloatSpec     `json:"pucker_bloat,omitempty"`
 	Twist           *TwistSpec           `json:"twist,omitempty"`
@@ -93,6 +94,18 @@ type OffsetPathsSpec struct {
 	MiterLimit *float64 `json:"miter_limit,omitempty"`
 	Copies     *float64 `json:"copies,omitempty"`
 	CopyOffset *float64 `json:"copy_offset,omitempty"`
+}
+
+type RepeaterSpec struct {
+	Copies       *float64  `json:"copies,omitempty"`
+	Offset       *float64  `json:"offset,omitempty"`
+	Order        string    `json:"order,omitempty"`
+	Anchor       []float64 `json:"anchor,omitempty"`
+	Position     []float64 `json:"position,omitempty"`
+	Scale        []float64 `json:"scale,omitempty"`
+	Rotation     *float64  `json:"rotation,omitempty"`
+	StartOpacity *float64  `json:"start_opacity,omitempty"`
+	EndOpacity   *float64  `json:"end_opacity,omitempty"`
 }
 
 type ZigZagSpec struct {
@@ -546,6 +559,52 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("OffsetPathsNode.SetCopyOffset", offsetPath+".copy_offset")
 			}
 		}
+		if layer.Shape.Repeater != nil {
+			repeaterPath := layerPath + ".shape.repeater"
+			recordCapability("VectorGroup.AddRepeater", repeaterPath)
+			if layer.Shape.Repeater.Copies != nil {
+				recordCapability("RepeaterNode.SetCopies", repeaterPath+".copies")
+				if *layer.Shape.Repeater.Copies < 1 {
+					addRefusal("invalid_shape_repeater_copies", repeaterPath+".copies", "repeater copies must be at least 1")
+				}
+			}
+			if layer.Shape.Repeater.Offset != nil {
+				recordCapability("RepeaterNode.SetOffset", repeaterPath+".offset")
+			}
+			if layer.Shape.Repeater.Order != "" {
+				recordCapability("RepeaterNode.SetOrder", repeaterPath+".order")
+				if !validRepeaterOrder(layer.Shape.Repeater.Order) {
+					addRefusal("invalid_shape_repeater_order", repeaterPath+".order", "repeater order must be below or above")
+				}
+			}
+			if len(layer.Shape.Repeater.Anchor) > 0 {
+				recordCapability("RepeaterTransform.SetAnchor", repeaterPath+".anchor")
+				validateVec(layer.Shape.Repeater.Anchor, 2, repeaterPath+".anchor", addRefusal)
+			}
+			if len(layer.Shape.Repeater.Position) > 0 {
+				recordCapability("RepeaterTransform.SetPosition", repeaterPath+".position")
+				validateVec(layer.Shape.Repeater.Position, 2, repeaterPath+".position", addRefusal)
+			}
+			if len(layer.Shape.Repeater.Scale) > 0 {
+				recordCapability("RepeaterTransform.SetScale", repeaterPath+".scale")
+				validateVec(layer.Shape.Repeater.Scale, 2, repeaterPath+".scale", addRefusal)
+			}
+			if layer.Shape.Repeater.Rotation != nil {
+				recordCapability("RepeaterTransform.SetRotation", repeaterPath+".rotation")
+			}
+			if layer.Shape.Repeater.StartOpacity != nil {
+				recordCapability("RepeaterTransform.SetStartOpacity", repeaterPath+".start_opacity")
+				if *layer.Shape.Repeater.StartOpacity < 0 || *layer.Shape.Repeater.StartOpacity > 100 {
+					addRefusal("invalid_shape_repeater_start_opacity", repeaterPath+".start_opacity", "repeater start_opacity must be between 0 and 100")
+				}
+			}
+			if layer.Shape.Repeater.EndOpacity != nil {
+				recordCapability("RepeaterTransform.SetEndOpacity", repeaterPath+".end_opacity")
+				if *layer.Shape.Repeater.EndOpacity < 0 || *layer.Shape.Repeater.EndOpacity > 100 {
+					addRefusal("invalid_shape_repeater_end_opacity", repeaterPath+".end_opacity", "repeater end_opacity must be between 0 and 100")
+				}
+			}
+		}
 		if layer.Shape.ZigZag != nil {
 			zigZagPath := layerPath + ".shape.zigzag"
 			recordCapability("VectorGroup.AddZigZag", zigZagPath)
@@ -802,6 +861,15 @@ func validTextJustification(value string) bool {
 func validOffsetLineJoin(value string) bool {
 	switch value {
 	case "miter", "round", "bevel":
+		return true
+	default:
+		return false
+	}
+}
+
+func validRepeaterOrder(value string) bool {
+	switch value {
+	case "below", "above":
 		return true
 	default:
 		return false

@@ -192,12 +192,17 @@ Done:
   `examples/recipes/minimal-shape-wiggle-transform.json` example asserts all
   nine `ADBE Vector Wiggler ...` / modulation properties, passed profile
   checks, and passed an AE 2025 render oracle gate.
+- Ninth shape-filter recipe slice is implemented for `shape.repeater` copies,
+  offset, order, transform anchor/position/scale/rotation, and start/end
+  opacity. The dedicated `examples/recipes/minimal-shape-repeater.json`
+  example asserts all nine `ADBE Vector Repeater ...` properties, passed
+  profile checks, and passed an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
   with AE 2025 render gates.
 - Next: broaden recipe coverage in narrow, evidence-gated slices. Strong
-  candidates are additional shape filters, expression support, transform
+  candidates are remaining shape filters, expression support, transform
   keyframe/ease where writer support exists, or more profile-visible text style.
   Do not start automated correction loops.
 

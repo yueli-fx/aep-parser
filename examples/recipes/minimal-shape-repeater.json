@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal repeater"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Card",
+          "shape": {
+            "kind": "rect",
+            "size": [80, 80],
+            "fill_color": [255, 255, 255],
+            "repeater": {
+              "copies": 5,
+              "offset": 2,
+              "order": "above",
+              "anchor": [15, 25],
+              "position": [120, 0],
+              "scale": [80, 90],
+              "rotation": 30,
+              "start_opacity": 100,
+              "end_opacity": 25
+            }
+          },
+          "transform": {
+            "position": [600, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "properties": [
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Copies",
+        "value": 5
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Offset",
+        "value": 2
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Order",
+        "value": 2
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Anchor",
+        "value": [15, 25]
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Position",
+        "value": [120, 0]
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Scale",
+        "value": [80, 90]
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Rotation",
+        "value": 30
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Opacity 1",
+        "value": 100
+      },
+      {
+        "layer_name": "Card",
+        "match_name": "ADBE Vector Repeater Opacity 2",
+        "value": 25
+      }
+    ]
+  }
+}

@@ -659,6 +659,62 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.Repeater != nil {
+		repeater, err := group.AddRepeater()
+		if err != nil {
+			return err
+		}
+		if shape.Repeater.Copies != nil {
+			if err := repeater.SetCopies(*shape.Repeater.Copies); err != nil {
+				return err
+			}
+		}
+		if shape.Repeater.Offset != nil {
+			if err := repeater.SetOffset(*shape.Repeater.Offset); err != nil {
+				return err
+			}
+		}
+		if shape.Repeater.Order != "" {
+			order, err := repeaterOrder(shape.Repeater.Order)
+			if err != nil {
+				return err
+			}
+			if err := repeater.SetOrder(order); err != nil {
+				return err
+			}
+		}
+		transform := repeater.Transform()
+		if len(shape.Repeater.Anchor) == 2 {
+			if err := transform.SetAnchor([2]float64{shape.Repeater.Anchor[0], shape.Repeater.Anchor[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.Repeater.Position) == 2 {
+			if err := transform.SetPosition([2]float64{shape.Repeater.Position[0], shape.Repeater.Position[1]}); err != nil {
+				return err
+			}
+		}
+		if len(shape.Repeater.Scale) == 2 {
+			if err := transform.SetScale([2]float64{shape.Repeater.Scale[0], shape.Repeater.Scale[1]}); err != nil {
+				return err
+			}
+		}
+		if shape.Repeater.Rotation != nil {
+			if err := transform.SetRotation(*shape.Repeater.Rotation); err != nil {
+				return err
+			}
+		}
+		if shape.Repeater.StartOpacity != nil {
+			if err := transform.SetStartOpacity(*shape.Repeater.StartOpacity); err != nil {
+				return err
+			}
+		}
+		if shape.Repeater.EndOpacity != nil {
+			if err := transform.SetEndOpacity(*shape.Repeater.EndOpacity); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.ZigZag != nil {
 		zigZag, err := group.AddZigZag()
 		if err != nil {
@@ -885,6 +941,17 @@ func offsetLineJoin(value string) (aep.StrokeLineJoin, error) {
 		return aep.StrokeLineJoinBevel, nil
 	default:
 		return 0, fmt.Errorf("unsupported offset line_join %q", value)
+	}
+}
+
+func repeaterOrder(value string) (aep.RepeaterOrder, error) {
+	switch value {
+	case "below":
+		return aep.RepeaterOrderBelow, nil
+	case "above":
+		return aep.RepeaterOrderAbove, nil
+	default:
+		return 0, fmt.Errorf("unsupported repeater order %q", value)
 	}
 }
 
