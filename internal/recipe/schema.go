@@ -65,6 +65,7 @@ type ShapeSpec struct {
 	RoundCorners *RoundCornersSpec `json:"round_corners,omitempty"`
 	OffsetPaths  *OffsetPathsSpec  `json:"offset_paths,omitempty"`
 	ZigZag       *ZigZagSpec       `json:"zigzag,omitempty"`
+	PuckerBloat  *PuckerBloatSpec  `json:"pucker_bloat,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -95,6 +96,10 @@ type ZigZagSpec struct {
 	Size   *float64 `json:"size,omitempty"`
 	Detail *float64 `json:"detail,omitempty"`
 	Points string   `json:"points,omitempty"`
+}
+
+type PuckerBloatSpec struct {
+	Amount *float64 `json:"amount,omitempty"`
 }
 
 type Effect struct {
@@ -530,6 +535,13 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				if !validZigZagPoints(layer.Shape.ZigZag.Points) {
 					addRefusal("invalid_shape_zigzag_points", zigZagPath+".points", "zigzag points must be corner or smooth")
 				}
+			}
+		}
+		if layer.Shape.PuckerBloat != nil {
+			puckerBloatPath := layerPath + ".shape.pucker_bloat"
+			recordCapability("VectorGroup.AddPuckerBloat", puckerBloatPath)
+			if layer.Shape.PuckerBloat.Amount != nil {
+				recordCapability("PuckerBloatNode.SetAmount", puckerBloatPath+".amount")
 			}
 		}
 	}

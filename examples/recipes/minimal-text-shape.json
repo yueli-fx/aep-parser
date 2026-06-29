@@ -92,6 +92,9 @@
               "size": 40,
               "detail": 8,
               "points": "smooth"
+            },
+            "pucker_bloat": {
+              "amount": 100
             }
           },
           "transform": {
@@ -196,6 +199,11 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector Zigzag Points",
         "value": 2
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector PuckerBloat Amount",
+        "value": 100
       }
     ],
     "text_styles": [

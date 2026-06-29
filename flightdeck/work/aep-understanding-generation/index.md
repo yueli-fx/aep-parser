@@ -171,6 +171,10 @@ Done:
   detail, and points. The updated shape/text example asserts all three
   `ADBE Vector Zigzag ...` properties, passed `go test ./...`,
   `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
+- Fifth shape-filter recipe slice is implemented for
+  `shape.pucker_bloat.amount`. The updated shape/text example asserts
+  `ADBE Vector PuckerBloat Amount`, passed `go test ./...`,
+  `go vet ./...`, profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

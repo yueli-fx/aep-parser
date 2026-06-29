@@ -521,6 +521,37 @@ Seventeenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Eighteenth follow-up completed:
+
+- Shape recipes now support `shape.pucker_bloat.amount`, mapped to
+  `ADBE Vector PuckerBloat Amount`.
+- The Pucker & Bloat amount is intentionally unrestricted at recipe validation
+  level, matching the underlying writer; negative values pucker and positive
+  values bloat.
+- Capability reporting records:
+  - `VectorGroup.AddPuckerBloat`
+  - `PuckerBloatNode.SetAmount`
+- `examples/recipes/minimal-text-shape.json` now includes Pucker & Bloat on
+  the `Underline` layer and asserts `ADBE Vector PuckerBloat Amount` through
+  `expected_profile.properties[]`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-pucker-bloat.aep -json`
+    returned valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_pucker_bloat/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_pucker_bloat/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

@@ -684,6 +684,17 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.PuckerBloat != nil {
+		puckerBloat, err := group.AddPuckerBloat()
+		if err != nil {
+			return err
+		}
+		if shape.PuckerBloat.Amount != nil {
+			if err := puckerBloat.SetAmount(*shape.PuckerBloat.Amount); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {

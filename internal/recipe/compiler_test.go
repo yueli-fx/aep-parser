@@ -227,6 +227,32 @@ func TestCompileToFileSetsShapeZigZag(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Zigzag Points", 2.0)
 }
 
+func TestCompileToFileSetsShapePuckerBloat(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.PuckerBloat = &recipe.PuckerBloatSpec{
+		Amount: ptr(100),
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector PuckerBloat Amount", 100.0)
+}
+
 func TestCompileToFileSetsTextStyle(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{

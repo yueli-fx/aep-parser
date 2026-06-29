@@ -366,6 +366,21 @@ func TestValidateReportsShapeZigZagCapabilities(t *testing.T) {
 	assertCapability(t, report, "ZigZagNode.SetPoints")
 }
 
+func TestValidateReportsShapePuckerBloatCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.PuckerBloat = &recipe.PuckerBloatSpec{
+		Amount: ptr(100),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddPuckerBloat")
+	assertCapability(t, report, "PuckerBloatNode.SetAmount")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
