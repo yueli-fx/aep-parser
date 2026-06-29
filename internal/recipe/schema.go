@@ -188,6 +188,9 @@ type GradientStrokeSpec struct {
 	HighlightLength *float64                `json:"highlight_length,omitempty"`
 	HighlightAngle  *float64                `json:"highlight_angle,omitempty"`
 	Width           *float64                `json:"width,omitempty"`
+	LineCap         string                  `json:"line_cap,omitempty"`
+	LineJoin        string                  `json:"line_join,omitempty"`
+	MiterLimit      *float64                `json:"miter_limit,omitempty"`
 	ColorStops      []GradientColorStopSpec `json:"color_stops,omitempty"`
 }
 
@@ -1088,6 +1091,24 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				recordCapability("GradientStrokeNode.SetStrokeWidth", gradientPath+".width")
 				if *layer.Shape.GradientStroke.Width < 0 {
 					addRefusal("invalid_shape_gradient_stroke_width", gradientPath+".width", "gradient_stroke width must be non-negative")
+				}
+			}
+			if layer.Shape.GradientStroke.LineCap != "" {
+				recordCapability("GradientStrokeNode.SetLineCap", gradientPath+".line_cap")
+				if !validStrokeLineCap(layer.Shape.GradientStroke.LineCap) {
+					addRefusal("invalid_shape_gradient_stroke_line_cap", gradientPath+".line_cap", "gradient_stroke line_cap must be butt, round, or projecting")
+				}
+			}
+			if layer.Shape.GradientStroke.LineJoin != "" {
+				recordCapability("GradientStrokeNode.SetLineJoin", gradientPath+".line_join")
+				if !validStrokeLineJoin(layer.Shape.GradientStroke.LineJoin) {
+					addRefusal("invalid_shape_gradient_stroke_line_join", gradientPath+".line_join", "gradient_stroke line_join must be miter, round, or bevel")
+				}
+			}
+			if layer.Shape.GradientStroke.MiterLimit != nil {
+				recordCapability("GradientStrokeNode.SetMiterLimit", gradientPath+".miter_limit")
+				if *layer.Shape.GradientStroke.MiterLimit < 1 {
+					addRefusal("invalid_shape_gradient_stroke_miter_limit", gradientPath+".miter_limit", "gradient_stroke miter_limit must be at least 1")
 				}
 			}
 			if len(layer.Shape.GradientStroke.ColorStops) > 0 {

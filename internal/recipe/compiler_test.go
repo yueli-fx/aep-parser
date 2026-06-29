@@ -2007,6 +2007,45 @@ func TestCompileToFileSetsShapeGradientStrokeHighlight(t *testing.T) {
 	assertLayerPropertyValue(t, layer, "ADBE Vector Grad HiLite Angle", 40.0)
 }
 
+func TestCompileToFileSetsShapeGradientStrokeStyle(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientStroke = &recipe.GradientStrokeSpec{
+		Type:       "linear",
+		StartPoint: []float64{-240, 0},
+		EndPoint:   []float64{240, 0},
+		Width:      ptr(18),
+		LineCap:    "projecting",
+		LineJoin:   "bevel",
+		MiterLimit: ptr(9),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	layer := findProfileLayer(t, prof, "Underline")
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Line Cap", 3.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Line Join", 3.0)
+	assertLayerPropertyValue(t, layer, "ADBE Vector Stroke Miter Limit", 9.0)
+}
+
 func TestCompileToFileSetsShapeStar(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"

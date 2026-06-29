@@ -469,6 +469,33 @@ func TestValidateReportsShapeGradientStrokeHighlightCapabilities(t *testing.T) {
 	assertCapability(t, report, "GradientStrokeNode.SetHighlightAngle")
 }
 
+func TestValidateReportsShapeGradientStrokeStyleCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.FillColor = nil
+	rec.Comps[0].Layers[1].Shape.GradientStroke = &recipe.GradientStrokeSpec{
+		Type:       "linear",
+		StartPoint: []float64{-240, 0},
+		EndPoint:   []float64{240, 0},
+		Width:      ptr(18),
+		LineCap:    "projecting",
+		LineJoin:   "bevel",
+		MiterLimit: ptr(9),
+		ColorStops: []recipe.GradientColorStopSpec{
+			{Offset: 0, Midpoint: ptr(0.5), Color: []float64{255, 0, 0}},
+			{Offset: 1, Midpoint: ptr(0.5), Color: []float64{0, 0, 255}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "GradientStrokeNode.SetLineCap")
+	assertCapability(t, report, "GradientStrokeNode.SetLineJoin")
+	assertCapability(t, report, "GradientStrokeNode.SetMiterLimit")
+}
+
 func TestValidateReportsShapeStarCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.Kind = "polygon"
@@ -1954,6 +1981,9 @@ func TestValidateRejectsInvalidShapeGradientStroke(t *testing.T) {
 		EndPoint:        []float64{240},
 		HighlightLength: ptr(101),
 		Width:           ptr(-1),
+		LineCap:         "square",
+		LineJoin:        "corner",
+		MiterLimit:      ptr(0),
 		ColorStops: []recipe.GradientColorStopSpec{
 			{Offset: -0.1, Color: []float64{255, 0}},
 		},
@@ -1968,6 +1998,9 @@ func TestValidateRejectsInvalidShapeGradientStroke(t *testing.T) {
 	assertRefusal(t, report, "invalid_vector_size")
 	assertRefusal(t, report, "invalid_shape_gradient_stroke_highlight_length")
 	assertRefusal(t, report, "invalid_shape_gradient_stroke_width")
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_line_cap")
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_line_join")
+	assertRefusal(t, report, "invalid_shape_gradient_stroke_miter_limit")
 	assertRefusal(t, report, "invalid_shape_gradient_stroke_color_stops")
 }
 

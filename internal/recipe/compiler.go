@@ -1703,6 +1703,29 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 				return err
 			}
 		}
+		if shape.GradientStroke.LineCap != "" {
+			lineCap, err := strokeLineCap(shape.GradientStroke.LineCap)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetLineCap(lineCap); err != nil {
+				return err
+			}
+		}
+		if shape.GradientStroke.LineJoin != "" {
+			lineJoin, err := strokeLineJoin(shape.GradientStroke.LineJoin)
+			if err != nil {
+				return err
+			}
+			if err := stroke.SetLineJoin(lineJoin); err != nil {
+				return err
+			}
+		}
+		if shape.GradientStroke.MiterLimit != nil {
+			if err := stroke.SetMiterLimit(*shape.GradientStroke.MiterLimit); err != nil {
+				return err
+			}
+		}
 		if len(shape.GradientStroke.ColorStops) > 0 {
 			stops, err := gradientColorStops(shape.GradientStroke.ColorStops)
 			if err != nil {
