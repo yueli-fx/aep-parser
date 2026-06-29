@@ -886,6 +886,11 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 				return nil, fmt.Errorf("recipe: layer %q camera.iris_diffraction_fringe: %w", spec.Name, err)
 			}
 		}
+		if spec.Camera != nil && spec.Camera.IrisHighlightGain != nil {
+			if err := layer.SetIrisHighlightGain(*spec.Camera.IrisHighlightGain); err != nil {
+				return nil, fmt.Errorf("recipe: layer %q camera.iris_highlight_gain: %w", spec.Name, err)
+			}
+		}
 		if spec.StartTime != nil {
 			if err := layer.SetStartTime(*spec.StartTime); err != nil {
 				return nil, fmt.Errorf("recipe: layer %q start_time: %w", spec.Name, err)

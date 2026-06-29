@@ -101,6 +101,7 @@ type CameraSpec struct {
 	IrisRoundness         *float64 `json:"iris_roundness,omitempty"`
 	IrisAspectRatio       *float64 `json:"iris_aspect_ratio,omitempty"`
 	IrisDiffractionFringe *float64 `json:"iris_diffraction_fringe,omitempty"`
+	IrisHighlightGain     *float64 `json:"iris_highlight_gain,omitempty"`
 }
 
 type TextStyleSpec struct {
@@ -811,6 +812,9 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 		}
 		if layer.Camera.IrisDiffractionFringe != nil {
 			recordCapability("SetIrisDiffractionFringe", layerPath+".camera.iris_diffraction_fringe")
+		}
+		if layer.Camera.IrisHighlightGain != nil {
+			recordCapability("SetIrisHighlightGain", layerPath+".camera.iris_highlight_gain")
 		}
 	}
 	if layer.StartTime != nil {
