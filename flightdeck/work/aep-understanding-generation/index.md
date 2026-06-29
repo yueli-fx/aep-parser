@@ -281,6 +281,10 @@ Done:
   shape/camera/light property content requires `expected_profile.properties[]`,
   text style content requires `expected_profile.text_styles[]`, and effect
   content requires `expected_profile.effects[]`.
+- Shape filter coverage now has dedicated minimal recipes for trim paths, round
+  corners, offset paths, zigzag, pucker/bloat, and twist. The recipes assert
+  their parsed filter properties directly instead of relying only on the larger
+  `minimal-text-shape.json` baseline.
 - First mask recipe slice is implemented for static vector masks on non-camera
   / non-light layers. `layers[].masks[]` now compiles through the existing
   Reopen + `AddMask` path, supports mode and inverted controls, and

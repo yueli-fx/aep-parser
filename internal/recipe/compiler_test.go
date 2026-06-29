@@ -674,6 +674,76 @@ func TestCompileToFileChecksStandaloneCompProfileExamples(t *testing.T) {
 	}
 }
 
+func TestCompileToFileChecksShapeFilterProfileExamples(t *testing.T) {
+	cases := []struct {
+		recipe string
+		paths  []string
+	}{
+		{
+			recipe: "minimal-shape-trim.json",
+			paths: []string{
+				"expected_profile.properties[0]",
+				"expected_profile.properties[1]",
+				"expected_profile.properties[2]",
+			},
+		},
+		{
+			recipe: "minimal-shape-round-corners.json",
+			paths:  []string{"expected_profile.properties[0]"},
+		},
+		{
+			recipe: "minimal-shape-offset-paths.json",
+			paths: []string{
+				"expected_profile.properties[0]",
+				"expected_profile.properties[1]",
+				"expected_profile.properties[2]",
+				"expected_profile.properties[3]",
+				"expected_profile.properties[4]",
+			},
+		},
+		{
+			recipe: "minimal-shape-zigzag.json",
+			paths: []string{
+				"expected_profile.properties[0]",
+				"expected_profile.properties[1]",
+				"expected_profile.properties[2]",
+			},
+		},
+		{
+			recipe: "minimal-shape-pucker-bloat.json",
+			paths:  []string{"expected_profile.properties[0]"},
+		},
+		{
+			recipe: "minimal-shape-twist.json",
+			paths: []string{
+				"expected_profile.properties[0]",
+				"expected_profile.properties[1]",
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.recipe, func(t *testing.T) {
+			raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", tc.recipe))
+			if err != nil {
+				t.Fatalf("ReadFile: %v", err)
+			}
+			rec := mustUnmarshalRecipe(t, string(raw))
+			outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+			report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+			if err != nil {
+				t.Fatalf("CompileToFile: %v", err)
+			}
+			if !report.Valid {
+				t.Fatalf("report = %+v, want valid", report)
+			}
+			for _, path := range tc.paths {
+				assertProfileCheck(t, report, path, true)
+			}
+		})
+	}
+}
+
 func TestCompileToFileChecksLayerObjectProfileExample(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-layer-object-profile.json"))
 	if err != nil {

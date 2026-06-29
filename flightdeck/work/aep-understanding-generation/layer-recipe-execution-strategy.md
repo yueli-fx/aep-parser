@@ -236,6 +236,14 @@ content must assert `text_styles[]`, and effect content must assert
 `effects[]`. A solid layer's `shape.fill_color` remains source-generation
 metadata and is not treated as shape-layer property content.
 
+Shape filter coverage has been split into dedicated minimal recipes for the
+stable filter families that were previously exercised mainly through the larger
+`minimal-text-shape.json` baseline: `minimal-shape-trim.json`,
+`minimal-shape-round-corners.json`, `minimal-shape-offset-paths.json`,
+`minimal-shape-zigzag.json`, `minimal-shape-pucker-bloat.json`, and
+`minimal-shape-twist.json`. `TestCompileToFileChecksShapeFilterProfileExamples`
+keeps these examples anchored to their `expected_profile.properties[]` checks.
+
 Static vector masks now have a first recipe/profile slice:
 `minimal-layer-mask.json` authors `layers[].masks[]`, materializes it through
 the existing Reopen + `AddMask` path, applies mode/inverted through stable mask

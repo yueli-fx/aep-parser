@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal shape zigzag"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Zigzag",
+          "shape": {
+            "kind": "rect",
+            "size": [400, 400],
+            "stroke_color": [255, 255, 255],
+            "stroke_width": 12,
+            "zigzag": {
+              "size": 40,
+              "detail": 8,
+              "points": "smooth"
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "layers": [
+      {
+        "name": "Zigzag",
+        "type": "shape"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Zigzag",
+        "match_name": "ADBE Vector Zigzag Size",
+        "value": 40
+      },
+      {
+        "layer_name": "Zigzag",
+        "match_name": "ADBE Vector Zigzag Detail",
+        "value": 8
+      },
+      {
+        "layer_name": "Zigzag",
+        "match_name": "ADBE Vector Zigzag Points",
+        "value": 2
+      }
+    ]
+  }
+}

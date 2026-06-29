@@ -2894,6 +2894,32 @@ Ninety-fourth follow-up completed:
   - Full gate passed: `go test ./...`, `go vet ./...`,
     `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
 
+Ninety-fifth follow-up completed:
+
+- Dedicated minimal shape-filter recipes now cover stable filter families that
+  were previously mostly asserted through the larger `minimal-text-shape.json`
+  baseline:
+  - `minimal-shape-trim.json`
+  - `minimal-shape-round-corners.json`
+  - `minimal-shape-offset-paths.json`
+  - `minimal-shape-zigzag.json`
+  - `minimal-shape-pucker-bloat.json`
+  - `minimal-shape-twist.json`
+- `TestCompileToFileChecksShapeFilterProfileExamples` locks these examples to
+  their `expected_profile.properties[]` checks so each filter has a small
+  compile/profile contract.
+- Verification:
+  - RED was observed with
+    `go test ./internal/recipe -run TestCompileToFileChecksShapeFilterProfileExamples -count=1`:
+    first for missing `minimal-shape-trim.json`, then for the other missing
+    dedicated filter recipes.
+  - Focused shape filter profile tests passed after adding the recipes.
+  - `go test ./internal/recipe -count=1` passed.
+  - `pwsh -NoProfile -File scripts\verify_recipe_profiles.ps1` passed:
+    95 recipes, 95 passed, 0 failed, 149 covered profile paths.
+  - Full gate passed: `go test ./...`, `go vet ./...`,
+    `Invoke-Pester -Path scripts\ae_run.Tests.ps1`, and `git diff --check`.
+
 Next generation work should broaden recipe coverage in small proven slices:
-additional transform keyframe channels/ease where writer support exists,
-expression support, or shape filters. Do not start automated correction loops.
+additional transform keyframe channels/ease where writer support exists or
+remaining recipe-owned families. Do not start automated correction loops.

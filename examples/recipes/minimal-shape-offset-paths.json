@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal shape offset paths"
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 1,
+      "background_color": [0, 0, 0],
+      "layers": [
+        {
+          "type": "shape",
+          "name": "Offset",
+          "shape": {
+            "kind": "rect",
+            "size": [360, 360],
+            "fill_color": [255, 255, 255],
+            "offset_paths": {
+              "amount": 24,
+              "line_join": "bevel",
+              "miter_limit": 2,
+              "copies": 3,
+              "copy_offset": 1.5
+            }
+          },
+          "transform": {
+            "position": [960, 540]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "shape_layer_count": 1,
+    "layers": [
+      {
+        "name": "Offset",
+        "type": "shape"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Offset",
+        "match_name": "ADBE Vector Offset Amount",
+        "value": 24
+      },
+      {
+        "layer_name": "Offset",
+        "match_name": "ADBE Vector Offset Line Join",
+        "value": 3
+      },
+      {
+        "layer_name": "Offset",
+        "match_name": "ADBE Vector Offset Miter Limit",
+        "value": 2
+      },
+      {
+        "layer_name": "Offset",
+        "match_name": "ADBE Vector Offset Copies",
+        "value": 3
+      },
+      {
+        "layer_name": "Offset",
+        "match_name": "ADBE Vector Offset Copy Offset",
+        "value": 1.5
+      }
+    ]
+  }
+}
