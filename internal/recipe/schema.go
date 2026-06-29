@@ -367,22 +367,26 @@ type ExpressionSpec struct {
 }
 
 type ExpectedProfile struct {
-	CompCount        *int                        `json:"comp_count,omitempty"`
-	LayerCount       *int                        `json:"layer_count,omitempty"`
-	TextLayerCount   *int                        `json:"text_layer_count,omitempty"`
-	ShapeLayerCount  *int                        `json:"shape_layer_count,omitempty"`
-	BackgroundColor  []float64                   `json:"background_color,omitempty"`
-	ResolutionFactor []float64                   `json:"resolution_factor,omitempty"`
-	PixelAspect      *float64                    `json:"pixel_aspect,omitempty"`
-	DisplayStartTime *float64                    `json:"display_start_time,omitempty"`
-	Renderer         string                      `json:"renderer,omitempty"`
-	Draft3D          *bool                       `json:"draft_3d,omitempty"`
-	MotionBlur       *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
-	WorkArea         *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
-	Effects          []ExpectedEffect            `json:"effects,omitempty"`
-	Properties       []ExpectedProperty          `json:"properties,omitempty"`
-	TextStyles       []ExpectedTextStyle         `json:"text_styles,omitempty"`
-	Keyframes        []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
+	CompCount                *int                        `json:"comp_count,omitempty"`
+	LayerCount               *int                        `json:"layer_count,omitempty"`
+	TextLayerCount           *int                        `json:"text_layer_count,omitempty"`
+	ShapeLayerCount          *int                        `json:"shape_layer_count,omitempty"`
+	BackgroundColor          []float64                   `json:"background_color,omitempty"`
+	ResolutionFactor         []float64                   `json:"resolution_factor,omitempty"`
+	PixelAspect              *float64                    `json:"pixel_aspect,omitempty"`
+	DisplayStartTime         *float64                    `json:"display_start_time,omitempty"`
+	Renderer                 string                      `json:"renderer,omitempty"`
+	Draft3D                  *bool                       `json:"draft_3d,omitempty"`
+	FrameBlending            *bool                       `json:"frame_blending,omitempty"`
+	HideShyLayers            *bool                       `json:"hide_shy_layers,omitempty"`
+	PreserveNestedFrameRate  *bool                       `json:"preserve_nested_frame_rate,omitempty"`
+	PreserveNestedResolution *bool                       `json:"preserve_nested_resolution,omitempty"`
+	MotionBlur               *ExpectedMotionBlurSpec     `json:"motion_blur,omitempty"`
+	WorkArea                 *ExpectedWorkAreaSpec       `json:"work_area,omitempty"`
+	Effects                  []ExpectedEffect            `json:"effects,omitempty"`
+	Properties               []ExpectedProperty          `json:"properties,omitempty"`
+	TextStyles               []ExpectedTextStyle         `json:"text_styles,omitempty"`
+	Keyframes                []ExpectedKeyframedProperty `json:"keyframes,omitempty"`
 }
 
 type ExpectedWorkAreaSpec struct {
@@ -391,6 +395,7 @@ type ExpectedWorkAreaSpec struct {
 }
 
 type ExpectedMotionBlurSpec struct {
+	Enabled             *bool    `json:"enabled,omitempty"`
 	ShutterAngle        *float64 `json:"shutter_angle,omitempty"`
 	ShutterPhase        *float64 `json:"shutter_phase,omitempty"`
 	AdaptiveSampleLimit *float64 `json:"adaptive_sample_limit,omitempty"`

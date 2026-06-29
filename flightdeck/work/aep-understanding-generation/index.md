@@ -184,6 +184,11 @@ Done:
   `background_color`, `resolution_factor`, `pixel_aspect`, and
   `display_start_time` are exposed on `profile.Composition`, asserted through
   `expected_profile`, and covered by `minimal-comp-object-profile.json`.
+- Comp flag settings now have object-level profile contracts:
+  `frame_blending`, `hide_shy_layers`, `preserve_nested_frame_rate`,
+  `preserve_nested_resolution`, and `motion_blur.enabled` are exposed through
+  `profile.Composition`, asserted through `expected_profile`, and covered by
+  `minimal-comp-flag-profile.json`.
 - First shape-filter recipe slice is implemented for `shape.trim` static
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,

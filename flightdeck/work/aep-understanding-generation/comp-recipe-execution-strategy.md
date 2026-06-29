@@ -40,12 +40,12 @@
 | Display | `pixel_aspect` | `Composition.SetPixelAspect` | `comps[].pixel_aspect` | L3 | done |
 | Display | `display_start_time` | `Composition.SetDisplayStartTime` | `comps[].display_start_time` | L3 | done |
 | Display | `renderer` | `aep.SetRenderer` | `comps[].renderer` | L3 | done |
-| Preview flags | `frame_blending` | `Composition.SetFrameBlending` | `comps[].frame_blending` | L3 | recipe done; profile contract missing |
+| Preview flags | `frame_blending` | `Composition.SetFrameBlending` | `comps[].frame_blending` | L3 | done |
 | Preview flags | `draft_3d` | `Composition.SetDraft3D` | `comps[].draft_3d` | L2 | done |
-| Preview flags | `hide_shy_layers` | `Composition.SetHideShyLayers` | `comps[].hide_shy_layers` | L3 | recipe done; profile contract missing |
-| Nesting flags | `preserve_nested_frame_rate` | `Composition.SetPreserveNestedFrameRate` | `comps[].preserve_nested_frame_rate` | L3 | recipe done; profile contract missing |
-| Nesting flags | `preserve_nested_resolution` | `Composition.SetPreserveNestedResolution` | `comps[].preserve_nested_resolution` | L3 | recipe done; profile contract missing |
-| Motion blur | `motion_blur.enabled` | `Composition.SetCompMotionBlur` | `comps[].motion_blur.enabled` | L3 | recipe done; profile contract missing |
+| Preview flags | `hide_shy_layers` | `Composition.SetHideShyLayers` | `comps[].hide_shy_layers` | L3 | done |
+| Nesting flags | `preserve_nested_frame_rate` | `Composition.SetPreserveNestedFrameRate` | `comps[].preserve_nested_frame_rate` | L3 | done |
+| Nesting flags | `preserve_nested_resolution` | `Composition.SetPreserveNestedResolution` | `comps[].preserve_nested_resolution` | L3 | done |
+| Motion blur | `motion_blur.enabled` | `Composition.SetCompMotionBlur` | `comps[].motion_blur.enabled` | L3 | done |
 | Motion blur | `motion_blur.shutter_angle` | `Composition.SetShutterAngle` | `comps[].motion_blur.shutter_angle_degrees` | L3 | done |
 | Motion blur | `motion_blur.shutter_phase` | `Composition.SetShutterPhase` | `comps[].motion_blur.shutter_phase` | L3 | done |
 | Motion blur | `motion_blur.adaptive_sample_limit` | `Composition.SetMotionBlurAdaptiveSampleLimit` | `comps[].motion_blur.adaptive_sample_limit` | L3 | done |
@@ -200,16 +200,19 @@ The completed display slice added profile/expected-profile coverage for
 `background_color`, `resolution_factor`, `pixel_aspect`, and
 `display_start_time`.
 
-The next slice should be **comp flag profile checks**:
+The completed flag slice added profile/expected-profile coverage for
+`frame_blending`, `hide_shy_layers`, `preserve_nested_frame_rate`,
+`preserve_nested_resolution`, and `motion_blur.enabled`.
 
-- Add profile/expected-profile coverage for `frame_blending`,
-  `hide_shy_layers`, `preserve_nested_frame_rate`,
-  `preserve_nested_resolution`, and `motion_blur.enabled`.
-- Do not change recipe authoring syntax; these fields already exist in `CompSpec`.
-- Use one object-level recipe if the JSON remains readable.
-- Keep render oracle optional for this slice because prior dedicated field
-  examples already carried AE 2025 gates; the required gate is compile-time
-  profile check plus full Go verification.
+The next slice should be **comp item metadata profile checks**:
+
+- Add profile/expected-profile coverage for comp `label` and `comment`.
+- Do not change recipe authoring syntax; these fields already exist in
+  `CompSpec`.
+- Use one object-level metadata recipe if the JSON remains readable.
+- Confirm whether metadata belongs directly on `profile.Composition`, on
+  `profile.Item`, or both before implementation; prefer one stable profile
+  location and document the decision.
 
 ## Self-Review
 

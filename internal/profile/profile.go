@@ -66,24 +66,28 @@ type Item struct {
 }
 
 type Composition struct {
-	ID               uint32             `json:"id"`
-	Name             string             `json:"name"`
-	Width            uint16             `json:"width"`
-	Height           uint16             `json:"height"`
-	FrameRate        float64            `json:"frame_rate"`
-	Duration         float64            `json:"duration_seconds"`
-	TickRate         float64            `json:"tick_rate,omitempty"`
-	BackgroundColor  [3]uint8           `json:"background_color"`
-	ResolutionFactor [2]uint16          `json:"resolution_factor"`
-	PixelAspect      float64            `json:"pixel_aspect"`
-	DisplayStartTime float64            `json:"display_start_time"`
-	Renderer         string             `json:"renderer,omitempty"`
-	Draft3D          bool               `json:"draft_3d,omitempty"`
-	WorkArea         WorkArea           `json:"work_area"`
-	MotionBlur       MotionBlurSettings `json:"motion_blur"`
-	Layers           []Layer            `json:"layers,omitempty"`
-	Path             PathRef            `json:"path"`
-	Evidence         Evidence           `json:"evidence"`
+	ID                       uint32             `json:"id"`
+	Name                     string             `json:"name"`
+	Width                    uint16             `json:"width"`
+	Height                   uint16             `json:"height"`
+	FrameRate                float64            `json:"frame_rate"`
+	Duration                 float64            `json:"duration_seconds"`
+	TickRate                 float64            `json:"tick_rate,omitempty"`
+	BackgroundColor          [3]uint8           `json:"background_color"`
+	ResolutionFactor         [2]uint16          `json:"resolution_factor"`
+	PixelAspect              float64            `json:"pixel_aspect"`
+	DisplayStartTime         float64            `json:"display_start_time"`
+	Renderer                 string             `json:"renderer,omitempty"`
+	Draft3D                  bool               `json:"draft_3d,omitempty"`
+	FrameBlending            bool               `json:"frame_blending"`
+	HideShyLayers            bool               `json:"hide_shy_layers"`
+	PreserveNestedFrameRate  bool               `json:"preserve_nested_frame_rate"`
+	PreserveNestedResolution bool               `json:"preserve_nested_resolution"`
+	WorkArea                 WorkArea           `json:"work_area"`
+	MotionBlur               MotionBlurSettings `json:"motion_blur"`
+	Layers                   []Layer            `json:"layers,omitempty"`
+	Path                     PathRef            `json:"path"`
+	Evidence                 Evidence           `json:"evidence"`
 }
 
 type WorkArea struct {
@@ -92,6 +96,7 @@ type WorkArea struct {
 }
 
 type MotionBlurSettings struct {
+	Enabled             bool   `json:"enabled"`
 	ShutterAngle        uint16 `json:"shutter_angle_degrees"`
 	ShutterPhase        int32  `json:"shutter_phase"`
 	AdaptiveSampleLimit int32  `json:"adaptive_sample_limit"`
@@ -350,14 +355,19 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 		cp := Composition{
 			ID: c.ID, Name: c.Name, Width: c.Width, Height: c.Height,
 			FrameRate: c.FrameRate, Duration: c.Duration, TickRate: c.TickRate,
-			BackgroundColor:  backgroundColor,
-			ResolutionFactor: resolutionFactor,
-			PixelAspect:      pixelAspect,
-			DisplayStartTime: displayStartTime,
-			Renderer:         c.Renderer,
-			Draft3D:          compositionDraft3D(sceneComp),
-			WorkArea:         WorkArea{Start: c.WorkAreaStart, End: c.WorkAreaEnd},
+			BackgroundColor:          backgroundColor,
+			ResolutionFactor:         resolutionFactor,
+			PixelAspect:              pixelAspect,
+			DisplayStartTime:         displayStartTime,
+			Renderer:                 c.Renderer,
+			Draft3D:                  compositionDraft3D(sceneComp),
+			FrameBlending:            compositionCdtaFlag(sceneComp, codec.CdtaFlagsByte8B, 0x10),
+			HideShyLayers:            compositionCdtaFlag(sceneComp, codec.CdtaFlagsByte8B, 0x01),
+			PreserveNestedFrameRate:  compositionCdtaFlag(sceneComp, codec.CdtaFlagsByte8B, 0x20),
+			PreserveNestedResolution: compositionCdtaFlag(sceneComp, codec.CdtaFlagsByte8B, 0x80),
+			WorkArea:                 WorkArea{Start: c.WorkAreaStart, End: c.WorkAreaEnd},
 			MotionBlur: MotionBlurSettings{
+				Enabled:             compositionCdtaFlag(sceneComp, codec.CdtaFlagsByte8B, 0x08),
 				ShutterAngle:        c.ShutterAngle,
 				ShutterPhase:        c.ShutterPhase,
 				AdaptiveSampleLimit: c.MotionBlurAdaptiveSampleLimit,
@@ -392,11 +402,15 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 }
 
 func compositionDraft3D(comp *aep.Composition) bool {
+	return compositionCdtaFlag(comp, codec.CdtaFlagsByte8A, 0x01)
+}
+
+func compositionCdtaFlag(comp *aep.Composition, offset int, mask byte) bool {
 	if comp == nil {
 		return false
 	}
 	cdta := comp.CdtaRawBytes()
-	return len(cdta) > codec.CdtaFlagsByte8A && cdta[codec.CdtaFlagsByte8A]&0x01 != 0
+	return len(cdta) > offset && cdta[offset]&mask != 0
 }
 
 func buildLayer(

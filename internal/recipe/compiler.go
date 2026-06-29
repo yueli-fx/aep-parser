@@ -180,6 +180,10 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.DisplayStartTime != nil ||
 		expected.Renderer != "" ||
 		expected.Draft3D != nil ||
+		expected.FrameBlending != nil ||
+		expected.HideShyLayers != nil ||
+		expected.PreserveNestedFrameRate != nil ||
+		expected.PreserveNestedResolution != nil ||
 		expected.MotionBlur != nil ||
 		expected.WorkArea != nil ||
 		len(expected.Effects) > 0 ||
@@ -260,6 +264,34 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			actual = prof.Comps[0].Draft3D
 		}
 		add("expected_profile.draft_3d", *expected.Draft3D, actual, actual == *expected.Draft3D)
+	}
+	if expected.FrameBlending != nil {
+		actual := false
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].FrameBlending
+		}
+		add("expected_profile.frame_blending", *expected.FrameBlending, actual, actual == *expected.FrameBlending)
+	}
+	if expected.HideShyLayers != nil {
+		actual := false
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].HideShyLayers
+		}
+		add("expected_profile.hide_shy_layers", *expected.HideShyLayers, actual, actual == *expected.HideShyLayers)
+	}
+	if expected.PreserveNestedFrameRate != nil {
+		actual := false
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].PreserveNestedFrameRate
+		}
+		add("expected_profile.preserve_nested_frame_rate", *expected.PreserveNestedFrameRate, actual, actual == *expected.PreserveNestedFrameRate)
+	}
+	if expected.PreserveNestedResolution != nil {
+		actual := false
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].PreserveNestedResolution
+		}
+		add("expected_profile.preserve_nested_resolution", *expected.PreserveNestedResolution, actual, actual == *expected.PreserveNestedResolution)
 	}
 	if expected.MotionBlur != nil {
 		checkExpectedMotionBlur(expected.MotionBlur, prof, add)
@@ -409,6 +441,9 @@ func checkExpectedMotionBlur(expected *ExpectedMotionBlurSpec, prof *profile.Pro
 		return
 	}
 	actual := prof.Comps[0].MotionBlur
+	if expected.Enabled != nil {
+		add("expected_profile.motion_blur.enabled", *expected.Enabled, actual.Enabled, actual.Enabled == *expected.Enabled)
+	}
 	if expected.ShutterAngle != nil {
 		got := float64(actual.ShutterAngle)
 		add("expected_profile.motion_blur.shutter_angle", *expected.ShutterAngle, got, got == *expected.ShutterAngle)

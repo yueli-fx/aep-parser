@@ -187,6 +187,53 @@ func TestCompileToFileChecksCompDisplayProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.display_start_time", true)
 }
 
+func TestCompileToFileChecksCompFlagProfile(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "Comp flag profile"},
+		"comps": [{
+			"name": "Main",
+			"width": 1280,
+			"height": 720,
+			"frame_rate": 24,
+			"duration": 3,
+			"background_color": [0, 0, 0],
+			"frame_blending": true,
+			"hide_shy_layers": true,
+			"preserve_nested_frame_rate": true,
+			"preserve_nested_resolution": true,
+			"motion_blur": {
+				"enabled": true
+			}
+		}],
+		"expected_profile": {
+			"comp_count": 1,
+			"layer_count": 0,
+			"frame_blending": true,
+			"hide_shy_layers": true,
+			"preserve_nested_frame_rate": true,
+			"preserve_nested_resolution": true,
+			"motion_blur": {
+				"enabled": true
+			}
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.frame_blending", true)
+	assertProfileCheck(t, report, "expected_profile.hide_shy_layers", true)
+	assertProfileCheck(t, report, "expected_profile.preserve_nested_frame_rate", true)
+	assertProfileCheck(t, report, "expected_profile.preserve_nested_resolution", true)
+	assertProfileCheck(t, report, "expected_profile.motion_blur.enabled", true)
+}
+
 func TestCompileToFileSetsLayerLabel(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)
