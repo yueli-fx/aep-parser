@@ -1,6 +1,11 @@
 package recipedoc
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/yueli-fx/aep-parser/internal/capindex"
+)
 
 type registries struct {
 	Summary            map[string]string
@@ -12,6 +17,46 @@ type registries struct {
 
 func BuildDocument() (Document, error) {
 	return buildDocumentWithRegistries(registries{})
+}
+
+func BuildDocumentWithCapabilities(capabilitiesPath string) (Document, error) {
+	doc, err := BuildDocument()
+	if err != nil {
+		return Document{}, err
+	}
+	idx, err := capindex.Load(capabilitiesPath)
+	if err != nil {
+		return Document{}, err
+	}
+	metaByKey := capabilityRegistry
+	for i := range doc.Fields {
+		for j := range doc.Fields[i].Capabilities {
+			capRef := &doc.Fields[i].Capabilities[j]
+			meta, ok := metaByKey[capRef.Key]
+			if !ok {
+				return Document{}, fmt.Errorf("recipe doc capability key %q is not registered", capRef.Key)
+			}
+			got := idx.Lookup(meta.Query)
+			if got.Entry.Symbol == "" {
+				if meta.AllowUnknown {
+					continue
+				}
+				return Document{}, fmt.Errorf("recipe doc capability query %q for key %q not found", meta.Query, capRef.Key)
+			}
+			capRef.Query = got.Query
+			capRef.Status = string(got.Status)
+			capRef.Symbol = got.Entry.Symbol
+			if got.Entry.Recv != "" {
+				capRef.Symbol = strings.TrimPrefix(got.Entry.Recv, "*") + "." + got.Entry.Symbol
+			}
+			capRef.Domain = got.Entry.Cap.Domain
+			capRef.Verify = got.Entry.Cap.Verify
+			capRef.MinVer = got.Entry.Cap.MinVer
+			capRef.Boundary = got.Entry.Cap.Boundary
+			capRef.Gate = append([]string(nil), got.Entry.Cap.Gate...)
+		}
+	}
+	return doc, nil
 }
 
 func buildDocumentWithRegistries(overrides registries) (Document, error) {
