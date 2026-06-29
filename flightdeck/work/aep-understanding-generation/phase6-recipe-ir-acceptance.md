@@ -415,6 +415,35 @@ Fourteenth follow-up completed:
       `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
       `f000120.png`
 
+Fifteenth follow-up completed:
+
+- Shape recipes now support `shape.round_corners.radius`, a static Round
+  Corners filter control.
+- Validation rejects negative round-corners radius values.
+- Capability reporting records both:
+  - `VectorGroup.AddRoundCorners`
+  - `RoundCornersNode.SetRadius`
+- `examples/recipes/minimal-text-shape.json` now includes Round Corners on the
+  `Underline` layer and asserts `ADBE Vector RoundCorner Radius` through
+  `expected_profile.properties[]`.
+- Verification:
+  - `go test ./internal/recipe ./cmd/aeprecipe` passed.
+  - `cmd/aeprecipe compile -recipe examples\recipes\minimal-text-shape.json
+    -out tmp_debug\recipes\minimal-text-shape-round-corners.aep -json`
+    returned valid and all `profile_checks` passed.
+  - `go test ./...` passed.
+  - `go vet ./...` passed.
+  - AE 2025 render oracle passed:
+    - request:
+      `tmp_debug/aeoracle/minimal_text_shape_round_corners/request.json`
+    - done marker:
+      `tmp_debug/aeoracle/minimal_text_shape_round_corners/aeoracle_render.done`
+      = `ok`
+    - metadata: status `ok`, AE `25.1x68`
+    - PNG outputs:
+      `f000000.png`, `f000030.png`, `f000060.png`, `f000090.png`,
+      `f000120.png`
+
 Next generation work should broaden recipe coverage in small proven slices:
 additional transform keyframe channels/ease where writer support exists,
 expression support, or shape filters. Do not start automated correction loops.

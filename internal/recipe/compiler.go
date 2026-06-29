@@ -613,6 +613,17 @@ func compileShape(group *aep.VectorGroup, shape ShapeSpec) error {
 			}
 		}
 	}
+	if shape.RoundCorners != nil {
+		roundCorners, err := group.AddRoundCorners()
+		if err != nil {
+			return err
+		}
+		if shape.RoundCorners.Radius != nil {
+			if err := roundCorners.SetRadius(*shape.RoundCorners.Radius); err != nil {
+				return err
+			}
+		}
+	}
 	if shape.Trim != nil {
 		trim, err := group.AddTrim()
 		if err != nil {

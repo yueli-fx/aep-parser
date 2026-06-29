@@ -54,14 +54,15 @@ type TextStyleSpec struct {
 }
 
 type ShapeSpec struct {
-	Kind        string      `json:"kind"`
-	Size        []float64   `json:"size,omitempty"`
-	Position    []float64   `json:"position,omitempty"`
-	Roundness   *float64    `json:"roundness,omitempty"`
-	FillColor   []float64   `json:"fill_color,omitempty"`
-	FillOpacity *float64    `json:"fill_opacity,omitempty"`
-	Stroke      *StrokeSpec `json:"stroke,omitempty"`
-	Trim        *TrimSpec   `json:"trim,omitempty"`
+	Kind         string            `json:"kind"`
+	Size         []float64         `json:"size,omitempty"`
+	Position     []float64         `json:"position,omitempty"`
+	Roundness    *float64          `json:"roundness,omitempty"`
+	FillColor    []float64         `json:"fill_color,omitempty"`
+	FillOpacity  *float64          `json:"fill_opacity,omitempty"`
+	Stroke       *StrokeSpec       `json:"stroke,omitempty"`
+	Trim         *TrimSpec         `json:"trim,omitempty"`
+	RoundCorners *RoundCornersSpec `json:"round_corners,omitempty"`
 }
 
 type StrokeSpec struct {
@@ -74,6 +75,10 @@ type TrimSpec struct {
 	Start  *float64 `json:"start,omitempty"`
 	End    *float64 `json:"end,omitempty"`
 	Offset *float64 `json:"offset,omitempty"`
+}
+
+type RoundCornersSpec struct {
+	Radius *float64 `json:"radius,omitempty"`
 }
 
 type Effect struct {
@@ -449,6 +454,16 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 			}
 			if layer.Shape.Trim.End != nil && (*layer.Shape.Trim.End < 0 || *layer.Shape.Trim.End > 100) {
 				addRefusal("invalid_shape_trim_end", trimPath+".end", "trim end must be between 0 and 100")
+			}
+		}
+		if layer.Shape.RoundCorners != nil {
+			roundPath := layerPath + ".shape.round_corners"
+			recordCapability("VectorGroup.AddRoundCorners", roundPath)
+			if layer.Shape.RoundCorners.Radius != nil {
+				recordCapability("RoundCornersNode.SetRadius", roundPath+".radius")
+				if *layer.Shape.RoundCorners.Radius < 0 {
+					addRefusal("invalid_shape_round_corners_radius", roundPath+".radius", "round corners radius must be non-negative")
+				}
 			}
 		}
 	}

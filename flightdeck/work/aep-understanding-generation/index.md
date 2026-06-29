@@ -158,6 +158,10 @@ Done:
   start/end/offset controls. The updated shape/text example asserts
   `ADBE Vector Trim Start/End/Offset`, passed `go test ./...`, `go vet ./...`,
   profile checks, and an AE 2025 render oracle gate.
+- Second shape-filter recipe slice is implemented for
+  `shape.round_corners.radius`. The updated shape/text example asserts
+  `ADBE Vector RoundCorner Radius`, passed `go test ./...`, `go vet ./...`,
+  profile checks, and an AE 2025 render oracle gate.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

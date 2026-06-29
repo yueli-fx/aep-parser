@@ -77,6 +77,9 @@
               "start": 10,
               "end": 85,
               "offset": 15
+            },
+            "round_corners": {
+              "radius": 18
             }
           },
           "transform": {
@@ -136,6 +139,11 @@
         "layer_name": "Underline",
         "match_name": "ADBE Vector Trim Offset",
         "value": 15
+      },
+      {
+        "layer_name": "Underline",
+        "match_name": "ADBE Vector RoundCorner Radius",
+        "value": 18
       }
     ],
     "text_styles": [

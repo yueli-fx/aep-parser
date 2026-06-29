@@ -309,6 +309,21 @@ func TestValidateReportsShapeTrimCapabilities(t *testing.T) {
 	assertCapability(t, report, "VectorGroup.AddTrim")
 }
 
+func TestValidateReportsShapeRoundCornersCapabilities(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.RoundCorners = &recipe.RoundCornersSpec{
+		Radius: ptr(18),
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "VectorGroup.AddRoundCorners")
+	assertCapability(t, report, "RoundCornersNode.SetRadius")
+}
+
 func TestValidateReportsTextStyleCapabilities(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{
@@ -395,6 +410,20 @@ func TestValidateRejectsInvalidShapeTrim(t *testing.T) {
 	}
 	assertRefusal(t, report, "invalid_shape_trim_start")
 	assertRefusal(t, report, "invalid_shape_trim_end")
+}
+
+func TestValidateRejectsInvalidShapeRoundCorners(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.RoundCorners = &recipe.RoundCornersSpec{
+		Radius: ptr(-1),
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_shape_round_corners_radius")
 }
 
 func TestValidateRejectsInvalidShapeStroke(t *testing.T) {
