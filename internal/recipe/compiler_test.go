@@ -573,6 +573,11 @@ func TestCompileToFileChecksCompObjectProfileExample(t *testing.T) {
 		t.Fatalf("report = %+v, want valid", report)
 	}
 	for _, path := range []string{
+		"expected_profile.name",
+		"expected_profile.width",
+		"expected_profile.height",
+		"expected_profile.frame_rate",
+		"expected_profile.duration",
 		"expected_profile.background_color",
 		"expected_profile.resolution_factor",
 		"expected_profile.pixel_aspect",

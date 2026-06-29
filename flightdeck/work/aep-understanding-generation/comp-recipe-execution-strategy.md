@@ -32,9 +32,9 @@
 
 | Group | Recipe path | Current write path | Profile path target | Evidence | Status |
 | --- | --- | --- | --- | --- | --- |
-| Identity | `comps[].name` | `aep.NewComposition` / `Composition.SetName` | `comps[].name` | L3 | base create done; rename recipe not planned yet |
-| Geometry | `comps[].width` / `height` | `aep.NewComposition` / `Composition.SetSize` | `comps[].width` / `height` | L3 | base create done; resize recipe not planned yet |
-| Timing | `comps[].frame_rate` / `duration` | `aep.NewComposition` / `SetFrameRate` / `SetDuration` | `comps[].frame_rate` / `duration_seconds` | L3 | base create done; mutation recipe not planned yet |
+| Identity | `comps[].name` | `aep.NewComposition` / `Composition.SetName` | `comps[].name` | L3 | base create + expected_profile done; rename recipe not planned yet |
+| Geometry | `comps[].width` / `height` | `aep.NewComposition` / `Composition.SetSize` | `comps[].width` / `height` | L3 | base create + expected_profile done; resize recipe not planned yet |
+| Timing | `comps[].frame_rate` / `duration` | `aep.NewComposition` / `SetFrameRate` / `SetDuration` | `comps[].frame_rate` / `duration_seconds` | L3 | base create + expected_profile done; mutation recipe not planned yet |
 | Display | `background_color` | `Composition.SetBGColor` | `comps[].background_color` | L3 | done |
 | Display | `resolution_factor` | `Composition.SetResolutionFactor` | `comps[].resolution_factor` | L3 | done |
 | Display | `pixel_aspect` | `Composition.SetPixelAspect` | `comps[].pixel_aspect` | L3 | done |
@@ -215,6 +215,8 @@ is an inventory/index surface.
 The completed object consolidation slice expanded
 `minimal-comp-object-profile.json` into a no-layer comp baseline that asserts
 display, flag, motion-blur, work-area, renderer, and metadata fields together.
+It now also asserts the base constructor-backed comp object fields: `name`,
+`width`, `height`, `frame_rate`, and `duration`.
 
 The standalone comp recipes for background color, label, comment, resolution
 factor, pixel aspect, display start time, frame blending, hide shy layers,

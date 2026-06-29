@@ -395,6 +395,11 @@ type ExpectedProfile struct {
 	LayerCount               *int                        `json:"layer_count,omitempty"`
 	TextLayerCount           *int                        `json:"text_layer_count,omitempty"`
 	ShapeLayerCount          *int                        `json:"shape_layer_count,omitempty"`
+	Name                     string                      `json:"name,omitempty"`
+	Width                    *float64                    `json:"width,omitempty"`
+	Height                   *float64                    `json:"height,omitempty"`
+	FrameRate                *float64                    `json:"frame_rate,omitempty"`
+	Duration                 *float64                    `json:"duration,omitempty"`
 	Label                    *float64                    `json:"label,omitempty"`
 	Comment                  string                      `json:"comment,omitempty"`
 	BackgroundColor          []float64                   `json:"background_color,omitempty"`
@@ -735,6 +740,18 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	}
 	if expected.DisplayStartTime != nil {
 		validateDisplayStartTime(*expected.DisplayStartTime, "expected_profile.display_start_time", addRefusal)
+	}
+	if expected.Width != nil && (*expected.Width <= 0 || !isWholeNumber(*expected.Width)) {
+		addRefusal("invalid_expected_profile", "expected_profile.width", "width must be a positive integer")
+	}
+	if expected.Height != nil && (*expected.Height <= 0 || !isWholeNumber(*expected.Height)) {
+		addRefusal("invalid_expected_profile", "expected_profile.height", "height must be a positive integer")
+	}
+	if expected.FrameRate != nil && *expected.FrameRate <= 0 {
+		addRefusal("invalid_expected_profile", "expected_profile.frame_rate", "frame_rate must be positive")
+	}
+	if expected.Duration != nil && *expected.Duration <= 0 {
+		addRefusal("invalid_expected_profile", "expected_profile.duration", "duration must be positive")
 	}
 	for i, layer := range expected.Layers {
 		layerPath := fmt.Sprintf("expected_profile.layers[%d]", i)

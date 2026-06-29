@@ -197,6 +197,9 @@ Done:
 - The consolidated `minimal-comp-object-profile.json` now exercises the
   completed comp display, flag, motion-blur, work-area, renderer, and metadata
   profile contracts together as a no-layer object-level baseline.
+- The consolidated comp object baseline now also asserts constructor-backed
+  identity/geometry/timing fields through `expected_profile`: `name`, `width`,
+  `height`, `frame_rate`, and `duration`.
 - Standalone comp recipes for background color, label, comment, resolution
   factor, pixel aspect, display start time, frame blending, hide shy layers,
   preserve nested frame rate, preserve nested resolution, and motion blur

@@ -268,6 +268,10 @@ func TestValidateAcceptsExpectedKeyframes(t *testing.T) {
 func TestValidateRejectsInvalidExpectedKeyframes(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{
+		Width:     ptr(-1),
+		Height:    ptr(0),
+		FrameRate: ptr(-24),
+		Duration:  ptr(0),
 		Keyframes: []recipe.ExpectedKeyframedProperty{{
 			LayerName: "",
 			MatchName: "",

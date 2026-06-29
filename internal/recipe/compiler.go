@@ -180,6 +180,11 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.LayerCount != nil ||
 		expected.TextLayerCount != nil ||
 		expected.ShapeLayerCount != nil ||
+		expected.Name != "" ||
+		expected.Width != nil ||
+		expected.Height != nil ||
+		expected.FrameRate != nil ||
+		expected.Duration != nil ||
 		expected.Label != nil ||
 		expected.Comment != "" ||
 		len(expected.BackgroundColor) > 0 ||
@@ -232,6 +237,41 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 	if expected.ShapeLayerCount != nil {
 		actual := countProfileLayers(prof, func(layer profile.Layer) bool { return len(layer.Shapes) > 0 })
 		add("expected_profile.shape_layer_count", *expected.ShapeLayerCount, actual, actual == *expected.ShapeLayerCount)
+	}
+	if expected.Name != "" {
+		actual := ""
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].Name
+		}
+		add("expected_profile.name", expected.Name, actual, actual == expected.Name)
+	}
+	if expected.Width != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = float64(prof.Comps[0].Width)
+		}
+		add("expected_profile.width", *expected.Width, actual, actual == *expected.Width)
+	}
+	if expected.Height != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = float64(prof.Comps[0].Height)
+		}
+		add("expected_profile.height", *expected.Height, actual, actual == *expected.Height)
+	}
+	if expected.FrameRate != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].FrameRate
+		}
+		add("expected_profile.frame_rate", *expected.FrameRate, actual, math.Abs(actual-*expected.FrameRate) < 1e-6)
+	}
+	if expected.Duration != nil {
+		actual := 0.0
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].Duration
+		}
+		add("expected_profile.duration", *expected.Duration, actual, math.Abs(actual-*expected.Duration) < 1e-6)
 	}
 	if expected.Label != nil {
 		actual := 0.0

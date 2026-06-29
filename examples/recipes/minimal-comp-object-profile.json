@@ -38,6 +38,11 @@
   "expected_profile": {
     "comp_count": 1,
     "layer_count": 0,
+    "name": "Main",
+    "width": 1280,
+    "height": 720,
+    "frame_rate": 24,
+    "duration": 3,
     "background_color": [12, 34, 56],
     "label": 12,
     "comment": "reviewed recipe comp",
