@@ -622,7 +622,7 @@ try {
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Learning Signals</h2>")
     [void]$outcomeHtml.AppendLine("<h3>Study Queue</h3><table><thead><tr><th>Rank</th><th>Project</th><th>Patterns</th></tr></thead><tbody>")
     foreach ($row in @($studyRows | Select-Object -First 3)) {
-        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.rank)</td><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.patterns)</td></tr>")
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.rank)</td><td>$(Escape-Html $row.path)</td><td>$(Escape-Html $row.patterns)</td></tr>")
     }
     [void]$outcomeHtml.AppendLine("</tbody></table>")
     [void]$outcomeHtml.AppendLine("<h3>Learning Actions</h3><table><thead><tr><th>Pattern</th><th>Action</th><th>Risk</th></tr></thead><tbody>")
@@ -1045,6 +1045,13 @@ try {
     }
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Learning Actions" -Quiet)) {
         throw "latest outcome html missing Learning Actions"
+    }
+    $topStudyPath = ""
+    if ($studyRows.Count -gt 0) {
+        $topStudyPath = [string]$studyRows[0].path
+    }
+    if ($topStudyPath -ne "" -and -not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern ([regex]::Escape($topStudyPath)) -Quiet)) {
+        throw "latest outcome html missing top study path: $topStudyPath"
     }
     Require-LatestIndexLink -Label "latest outcome html" -RelativePath "latest_outcome.html"
     if (-not (Test-Path -LiteralPath $latestEffectivenessJsonPath)) {
