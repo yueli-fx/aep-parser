@@ -68,6 +68,7 @@ type CompMotionBlurSpec struct {
 type Layer struct {
 	Type                  string             `json:"type"`
 	Name                  string             `json:"name"`
+	Source                string             `json:"source,omitempty"`
 	Label                 *float64           `json:"label,omitempty"`
 	Comment               string             `json:"comment,omitempty"`
 	Visible               *bool              `json:"visible,omitempty"`

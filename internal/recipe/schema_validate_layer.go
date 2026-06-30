@@ -8,6 +8,8 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	switch layer.Type {
 	case "solid":
 		recordCapability("NewSolidLayer", layerPath)
+	case "precomp":
+		recordCapability("NewPrecompLayer", layerPath)
 	case "text":
 		recordCapability("NewTextLayer", layerPath)
 		if layer.Text != "" {

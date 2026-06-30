@@ -50,6 +50,7 @@
     "comps[].layers[]",
     "comps[].layers[].type",
     "comps[].layers[].name",
+    "comps[].layers[].source",
     "comps[].layers[].label",
     "comps[].layers[].comment",
     "comps[].layers[].visible",
@@ -3420,6 +3421,20 @@
       ],
       "example": "examples/recipes/minimal-layer-common-switches.json"
     },
+    "comps[].layers[].source": {
+      "path": "comps[].layers[].source",
+      "json_name": "source",
+      "source_type": "Layer",
+      "source_field": "Source",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Source comp name for a precomp layer.",
+      "validation": "Required for precomp layers and must name a different comp declared in comps[].",
+      "capability_keys": [
+        "layer.create_precomp"
+      ],
+      "example": "examples/recipes/minimal-precomp-layer.json"
+    },
     "comps[].layers[].start_time": {
       "path": "comps[].layers[].start_time",
       "json_name": "start_time",
@@ -5027,6 +5042,7 @@
         "solid",
         "text",
         "shape",
+        "precomp",
         "camera",
         "light",
         "null",
@@ -5036,6 +5052,7 @@
         "layer.create_text",
         "layer.create_shape",
         "layer.create_solid",
+        "layer.create_precomp",
         "layer.create_camera",
         "layer.create_light",
         "layer.create_null",
@@ -7722,6 +7739,7 @@
     "Layer": [
       "comps[].layers[].type",
       "comps[].layers[].name",
+      "comps[].layers[].source",
       "comps[].layers[].label",
       "comps[].layers[].comment",
       "comps[].layers[].visible",

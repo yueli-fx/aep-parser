@@ -57,7 +57,10 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"comps[].layers[].type": {
 		Validation: "Supported values create the corresponding layer type.",
-		Enum:       []string{"solid", "text", "shape", "camera", "light", "null", "adjustment"},
+		Enum:       []string{"solid", "text", "shape", "precomp", "camera", "light", "null", "adjustment"},
+	},
+	"comps[].layers[].source": {
+		Validation: "Required for precomp layers and must name a different comp declared in comps[].",
 	},
 	"comps[].layers[].text_animators[].property": {
 		Validation: "Supported values create the corresponding text animator property.",

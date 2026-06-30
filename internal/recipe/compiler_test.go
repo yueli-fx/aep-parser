@@ -52,6 +52,71 @@ func TestCompileMinimalTextShapeRecipeBuildsProfile(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSupportsMultipleCompsAndPrecompLayer(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps = []recipe.CompSpec{
+		{
+			Name:      "Source",
+			Width:     640,
+			Height:    360,
+			FrameRate: 24,
+			Duration:  2,
+			Layers: []recipe.Layer{{
+				Type: "text",
+				Name: "Source Title",
+				Text: "Nested source",
+			}},
+		},
+		{
+			Name:      "Main",
+			Width:     1280,
+			Height:    720,
+			FrameRate: 24,
+			Duration:  3,
+			Layers: []recipe.Layer{{
+				Type:   "precomp",
+				Name:   "Nested",
+				Source: "Source",
+			}},
+		},
+	}
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		CompCount:  intPtr(2),
+		LayerCount: intPtr(2),
+		Layers: []recipe.ExpectedLayer{{
+			Name:       "Nested",
+			Type:       "av",
+			Source:     "Source",
+			SourceKind: "composition",
+		}},
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report.Valid = false, refusals=%+v checks=%+v", report.Refusals, report.ProfileChecks)
+	}
+
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	prof, err := profile.Build(project, profile.Options{Path: outPath})
+	if err != nil {
+		t.Fatalf("profile.Build: %v", err)
+	}
+	if prof.Fingerprint.CompCount != 2 {
+		t.Fatalf("CompCount = %d, want 2", prof.Fingerprint.CompCount)
+	}
+	layer := findProfileLayer(t, prof, "Nested")
+	if layer.SourceRef == nil || layer.SourceRef.Name != "Source" || layer.SourceRef.Kind != "composition" {
+		t.Fatalf("SourceRef = %+v, want Source composition", layer.SourceRef)
+	}
+}
+
 func TestRecipeExamplesExpectedProfilesAreNotCountOnly(t *testing.T) {
 	recipePaths, err := filepath.Glob(filepath.Join("..", "..", "examples", "recipes", "*.json"))
 	if err != nil {

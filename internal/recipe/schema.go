@@ -125,15 +125,20 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 	if rec.Project.TransparencyGridThumbnails != nil {
 		recordCapability("Project.SetTransparencyGridThumbnails", "project.transparency_grid_thumbnails")
 	}
-	if len(rec.Comps) > 1 {
-		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
-	}
 	validateExpectedProfile(rec.ExpectedProfile, addRefusal)
+	compNames := map[string]int{}
+	for _, comp := range rec.Comps {
+		if comp.Name != "" {
+			compNames[comp.Name]++
+		}
+	}
 	for ci, comp := range rec.Comps {
 		compPath := fmt.Sprintf("comps[%d]", ci)
 		recordCapability("NewComposition", compPath)
 		if comp.Name == "" {
 			addRefusal("missing_comp_name", compPath+".name", "comp name is required")
+		} else if compNames[comp.Name] > 1 {
+			addRefusal("duplicate_comp_name", compPath+".name", fmt.Sprintf("comp name %q is duplicated", comp.Name))
 		}
 		if comp.Width <= 0 || comp.Height <= 0 || comp.FrameRate <= 0 || comp.Duration <= 0 {
 			addRefusal("invalid_comp_timing_or_size", compPath, "width, height, frame_rate, and duration must be positive")
@@ -197,6 +202,17 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		for li, layer := range comp.Layers {
 			layerPath := fmt.Sprintf("%s.layers[%d]", compPath, li)
 			validateLayer(layer, layerPath, comp.Duration, recordCapability, addRefusal)
+			if layer.Type == "precomp" {
+				if layer.Source == "" {
+					addRefusal("missing_precomp_source", layerPath+".source", "precomp layers require a source comp name")
+				} else if compNames[layer.Source] == 0 {
+					addRefusal("unknown_precomp_source", layerPath+".source", fmt.Sprintf("source comp %q was not found", layer.Source))
+				} else if layer.Source == comp.Name {
+					addRefusal("self_precomp_source", layerPath+".source", "precomp layer cannot use its owning comp as source")
+				}
+			} else if layer.Source != "" {
+				addRefusal("source_on_unsupported_layer_type", layerPath+".source", "source is currently supported only on precomp layers")
+			}
 			if layer.Parent != "" {
 				recordCapability("Layer.SetParent", layerPath+".parent")
 				if !layerNames[layer.Parent] {

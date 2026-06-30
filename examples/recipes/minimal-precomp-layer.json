@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal precomp layer"
+  },
+  "comps": [
+    {
+      "name": "Source",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "layers": [
+        {
+          "type": "text",
+          "name": "Source Title",
+          "text": "Nested source",
+          "transform": {
+            "position": [320, 180]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Main",
+      "width": 1280,
+      "height": 720,
+      "frame_rate": 24,
+      "duration": 3,
+      "layers": [
+        {
+          "type": "precomp",
+          "name": "Nested",
+          "source": "Source",
+          "transform": {
+            "position": [640, 360]
+          }
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 2,
+    "layer_count": 2,
+    "layers": [
+      {
+        "name": "Source Title",
+        "type": "text"
+      },
+      {
+        "name": "Nested",
+        "type": "av",
+        "source": "Source",
+        "source_kind": "composition"
+      }
+    ]
+  }
+}

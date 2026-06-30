@@ -81,10 +81,10 @@ func materializeMasks(project *aep.Project, compSpec CompSpec) (*aep.Project, er
 	if err != nil {
 		return nil, fmt.Errorf("recipe: reopen for masks: %w", err)
 	}
-	if len(reopened.Compositions) == 0 {
-		return nil, fmt.Errorf("recipe: reopen for masks: no compositions")
+	comp := findProjectComp(reopened, compSpec.Name)
+	if comp == nil {
+		return nil, fmt.Errorf("recipe: reopen for masks: comp %q not found", compSpec.Name)
 	}
-	comp := reopened.Compositions[0]
 	for i, layerSpec := range compSpec.Layers {
 		if len(layerSpec.Masks) == 0 {
 			continue
@@ -170,10 +170,10 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 	if err != nil {
 		return nil, fmt.Errorf("recipe: reopen for effects: %w", err)
 	}
-	if len(reopened.Compositions) == 0 {
-		return nil, fmt.Errorf("recipe: reopen for effects: no compositions")
+	comp := findProjectComp(reopened, compSpec.Name)
+	if comp == nil {
+		return nil, fmt.Errorf("recipe: reopen for effects: comp %q not found", compSpec.Name)
 	}
-	comp := reopened.Compositions[0]
 	for i, layerSpec := range compSpec.Layers {
 		if len(layerSpec.Effects) == 0 {
 			continue
@@ -284,10 +284,10 @@ func materializeTransformExpressions(project *aep.Project, compSpec CompSpec) (*
 	if err != nil {
 		return nil, fmt.Errorf("recipe: reopen for expressions: %w", err)
 	}
-	if len(reopened.Compositions) == 0 {
-		return nil, fmt.Errorf("recipe: reopen for expressions: no compositions")
+	comp := findProjectComp(reopened, compSpec.Name)
+	if comp == nil {
+		return nil, fmt.Errorf("recipe: reopen for expressions: comp %q not found", compSpec.Name)
 	}
-	comp := reopened.Compositions[0]
 	for i, layerSpec := range compSpec.Layers {
 		if !hasLayerTransformExpressions(layerSpec.Transform.Expressions) {
 			continue

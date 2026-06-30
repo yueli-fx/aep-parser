@@ -80,6 +80,7 @@ func addLayerSummaries(out map[string]string, prefix string) {
 	addSummaries(out, prefix, map[string]string{
 		"type":                          "Layer creation type.",
 		"name":                          "Layer display name.",
+		"source":                        "Source comp name for a precomp layer.",
 		"label":                         "Layer label color index.",
 		"comment":                       "Layer comment text.",
 		"visible":                       "Layer video visibility switch.",

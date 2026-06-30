@@ -81,8 +81,9 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].type` | `string` | structural | Layer creation type. | Supported values create the corresponding layer type. | `layer.create_text` (`NewTextLayer`)<br>`layer.create_shape` (`NewShapeLayer`)<br>`layer.create_solid` (`NewSolidLayer`)<br>`layer.create_camera` (`NewCameraLayer`)<br>`layer.create_light` (`NewLightLayer`)<br>`layer.create_null` (`NewNullLayer`)<br>`layer.create_adjustment` (`NewAdjustmentLayer`) | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].type` | `string` | structural | Layer creation type. | Supported values create the corresponding layer type. | `layer.create_text` (`NewTextLayer`)<br>`layer.create_shape` (`NewShapeLayer`)<br>`layer.create_solid` (`NewSolidLayer`)<br>`layer.create_precomp` (`NewPrecompLayer`)<br>`layer.create_camera` (`NewCameraLayer`)<br>`layer.create_light` (`NewLightLayer`)<br>`layer.create_null` (`NewNullLayer`)<br>`layer.create_adjustment` (`NewAdjustmentLayer`) | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].name` | `string` | structural | Layer display name. | - | - | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].source` | `string` | - | Source comp name for a precomp layer. | Required for precomp layers and must name a different comp declared in comps[]. | `layer.create_precomp` (`NewPrecompLayer`) | examples/recipes/minimal-precomp-layer.json |
 | `comps[].layers[].label` | `number` | - | Layer label color index. | - | `layer.set_label` (`Layer.SetLabel`) | examples/recipes/minimal-layer-label.json |
 | `comps[].layers[].comment` | `string` | - | Layer comment text. | - | `layer.set_comment` (`Layer.SetComment`) | examples/recipes/minimal-layer-comment.json |
 | `comps[].layers[].visible` | `boolean` | - | Layer video visibility switch. | - | `layer.set_visible` (`Layer.SetVisible`) | examples/recipes/minimal-layer-common-switches.json |

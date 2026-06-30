@@ -21,6 +21,54 @@ func TestValidateAcceptsMinimalTextShapeRecipe(t *testing.T) {
 	}
 }
 
+func TestValidateReportsPrecompLayerCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps = []recipe.CompSpec{
+		{
+			Name:      "Source",
+			Width:     640,
+			Height:    360,
+			FrameRate: 24,
+			Duration:  2,
+		},
+		{
+			Name:      "Main",
+			Width:     1280,
+			Height:    720,
+			FrameRate: 24,
+			Duration:  3,
+			Layers: []recipe.Layer{{
+				Type:   "precomp",
+				Name:   "Nested",
+				Source: "Source",
+			}},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "NewPrecompLayer")
+}
+
+func TestValidateRejectsUnknownPrecompSource(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type:   "precomp",
+		Name:   "Nested",
+		Source: "Missing",
+	}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "unknown_precomp_source")
+}
+
 func TestValidateReportsProjectBitsPerChannelCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Project.BitsPerChannel = "16"

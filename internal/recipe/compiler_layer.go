@@ -5,10 +5,13 @@ import (
 	"strings"
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
-	"github.com/yueli-fx/aep-parser/internal/projectindex"
 )
 
 func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.Layer, error) {
+	return compileLayerWithSources(comp, spec, compSpec, nil)
+}
+
+func compileLayerWithSources(comp *aep.Composition, spec Layer, compSpec CompSpec, compsByName map[string]*aep.Composition) (*aep.Layer, error) {
 	var layer *aep.Layer
 	switch spec.Type {
 	case "text":
@@ -30,6 +33,16 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 			if err := applyTextAnimators(l, spec.TextAnimators); err != nil {
 				return nil, fmt.Errorf("recipe: text layer %q animators: %w", spec.Name, err)
 			}
+		}
+		layer = l
+	case "precomp":
+		source := compsByName[spec.Source]
+		if source == nil {
+			return nil, fmt.Errorf("recipe: precomp layer %q source %q not found", spec.Name, spec.Source)
+		}
+		l, err := aep.NewPrecompLayer(comp, source, spec.Name)
+		if err != nil {
+			return nil, fmt.Errorf("recipe: precomp layer %q: %w", spec.Name, err)
 		}
 		layer = l
 	case "shape":
@@ -363,13 +376,13 @@ func compileLayer(comp *aep.Composition, spec Layer, compSpec CompSpec) (*aep.La
 	return layer, nil
 }
 
-func applyLayerParents(compSpec CompSpec, idx *projectindex.Index) error {
+func applyLayerParents(comp *aep.Composition, compSpec CompSpec) error {
 	for _, layerSpec := range compSpec.Layers {
 		if layerSpec.Parent == "" {
 			continue
 		}
-		layer := recipeLayerByName(idx, layerSpec.Name)
-		parent := recipeLayerByName(idx, layerSpec.Parent)
+		layer := recipeLayerByNameInComp(comp, layerSpec.Name)
+		parent := recipeLayerByNameInComp(comp, layerSpec.Parent)
 		if layer == nil || parent == nil {
 			return fmt.Errorf("recipe: layer %q parent %q not found", layerSpec.Name, layerSpec.Parent)
 		}
@@ -380,13 +393,13 @@ func applyLayerParents(compSpec CompSpec, idx *projectindex.Index) error {
 	return nil
 }
 
-func applyExplicitMattes(compSpec CompSpec, idx *projectindex.Index) error {
+func applyExplicitMattes(comp *aep.Composition, compSpec CompSpec) error {
 	for _, layerSpec := range compSpec.Layers {
 		if layerSpec.Matte == "" {
 			continue
 		}
-		layer := recipeLayerByName(idx, layerSpec.Name)
-		matte := recipeLayerByName(idx, layerSpec.Matte)
+		layer := recipeLayerByNameInComp(comp, layerSpec.Name)
+		matte := recipeLayerByNameInComp(comp, layerSpec.Matte)
 		if layer == nil || matte == nil {
 			return fmt.Errorf("recipe: layer %q matte %q not found", layerSpec.Name, layerSpec.Matte)
 		}
@@ -401,13 +414,13 @@ func applyExplicitMattes(compSpec CompSpec, idx *projectindex.Index) error {
 	return nil
 }
 
-func applyLightSources(compSpec CompSpec, idx *projectindex.Index) error {
+func applyLightSources(comp *aep.Composition, compSpec CompSpec) error {
 	for _, layerSpec := range compSpec.Layers {
 		if layerSpec.Light == nil || layerSpec.Light.SourceLayer == "" {
 			continue
 		}
-		layer := recipeLayerByName(idx, layerSpec.Name)
-		target := recipeLayerByName(idx, layerSpec.Light.SourceLayer)
+		layer := recipeLayerByNameInComp(comp, layerSpec.Name)
+		target := recipeLayerByNameInComp(comp, layerSpec.Light.SourceLayer)
 		if layer == nil || target == nil {
 			return fmt.Errorf("recipe: layer %q light.source_layer %q not found", layerSpec.Name, layerSpec.Light.SourceLayer)
 		}
@@ -418,12 +431,16 @@ func applyLightSources(compSpec CompSpec, idx *projectindex.Index) error {
 	return nil
 }
 
-func recipeLayerByName(idx *projectindex.Index, name string) *aep.Layer {
-	layers := idx.LayersByName(name)
-	if len(layers) == 0 {
+func recipeLayerByNameInComp(comp *aep.Composition, name string) *aep.Layer {
+	if comp == nil || name == "" {
 		return nil
 	}
-	return layers[len(layers)-1]
+	for i := len(comp.Layers) - 1; i >= 0; i-- {
+		if comp.Layers[i] != nil && comp.Layers[i].Name == name {
+			return comp.Layers[i]
+		}
+	}
+	return nil
 }
 
 func applyTextStyle(layer *aep.Layer, spec TextStyleSpec) error {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/yueli-fx/aep-parser/internal/aep"
 	"github.com/yueli-fx/aep-parser/internal/profile"
-	"github.com/yueli-fx/aep-parser/internal/projectindex"
 )
 
 func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, error) {
@@ -122,112 +121,60 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: project transparency_grid_thumbnails: %w", err)
 		}
 	}
-	compSpec := rec.Comps[0]
-	comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
-	if err != nil {
-		return report, fmt.Errorf("recipe: create comp: %w", err)
-	}
-	if len(compSpec.BackgroundColor) == 3 {
-		if err := comp.SetBGColor(rgb8Color(compSpec.BackgroundColor)); err != nil {
-			return report, fmt.Errorf("recipe: comp %q background_color: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.MotionGraphicsTemplateName != "" {
-		if err := comp.SetMotionGraphicsTemplateName(compSpec.MotionGraphicsTemplateName); err != nil {
-			return report, fmt.Errorf("recipe: comp %q motion_graphics_template_name: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.Renderer != "" {
-		if err := aep.SetRenderer(comp, compSpec.Renderer); err != nil {
-			return report, fmt.Errorf("recipe: comp %q renderer: %w", compSpec.Name, err)
-		}
-	}
-	if len(compSpec.ResolutionFactor) == 2 {
-		if err := comp.SetResolutionFactor(uint16(compSpec.ResolutionFactor[0]), uint16(compSpec.ResolutionFactor[1])); err != nil {
-			return report, fmt.Errorf("recipe: comp %q resolution_factor: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.PixelAspect != nil {
-		if err := comp.SetPixelAspect(*compSpec.PixelAspect); err != nil {
-			return report, fmt.Errorf("recipe: comp %q pixel_aspect: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.DisplayStartTime != nil {
-		if err := comp.SetDisplayStartTime(*compSpec.DisplayStartTime); err != nil {
-			return report, fmt.Errorf("recipe: comp %q display_start_time: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.FrameBlending != nil {
-		if err := comp.SetFrameBlending(*compSpec.FrameBlending); err != nil {
-			return report, fmt.Errorf("recipe: comp %q frame_blending: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.Draft3D != nil {
-		if err := comp.SetDraft3D(*compSpec.Draft3D); err != nil {
-			return report, fmt.Errorf("recipe: comp %q draft_3d: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.HideShyLayers != nil {
-		if err := comp.SetHideShyLayers(*compSpec.HideShyLayers); err != nil {
-			return report, fmt.Errorf("recipe: comp %q hide_shy_layers: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.PreserveNestedFrameRate != nil {
-		if err := comp.SetPreserveNestedFrameRate(*compSpec.PreserveNestedFrameRate); err != nil {
-			return report, fmt.Errorf("recipe: comp %q preserve_nested_frame_rate: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.PreserveNestedResolution != nil {
-		if err := comp.SetPreserveNestedResolution(*compSpec.PreserveNestedResolution); err != nil {
-			return report, fmt.Errorf("recipe: comp %q preserve_nested_resolution: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.MotionBlur != nil {
-		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
-			return report, fmt.Errorf("recipe: comp %q motion_blur: %w", compSpec.Name, err)
-		}
-	}
-	if compSpec.WorkArea != nil {
-		if err := comp.SetWorkArea(*compSpec.WorkArea.Start, *compSpec.WorkArea.End); err != nil {
-			return report, fmt.Errorf("recipe: comp %q work_area: %w", compSpec.Name, err)
-		}
-	}
-	for _, layerSpec := range compSpec.Layers {
-		if _, err := compileLayer(comp, layerSpec, compSpec); err != nil {
-			return report, err
-		}
-	}
-	idx := projectindex.Build(project)
-	if err := applyLayerParents(compSpec, idx); err != nil {
-		return report, err
-	}
-	if err := applyExplicitMattes(compSpec, idx); err != nil {
-		return report, err
-	}
-	if err := applyLightSources(compSpec, idx); err != nil {
-		return report, err
-	}
-	if hasMasks(compSpec) {
-		project, err = materializeMasks(project, compSpec)
+	compsByName := map[string]*aep.Composition{}
+	for _, compSpec := range rec.Comps {
+		comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
 		if err != nil {
+			return report, fmt.Errorf("recipe: create comp %q: %w", compSpec.Name, err)
+		}
+		compsByName[compSpec.Name] = comp
+	}
+	for _, compSpec := range rec.Comps {
+		comp := compsByName[compSpec.Name]
+		if err := applyCompSettings(comp, compSpec); err != nil {
+			return report, fmt.Errorf("recipe: comp %q: %w", compSpec.Name, err)
+		}
+		for _, layerSpec := range compSpec.Layers {
+			if _, err := compileLayerWithSources(comp, layerSpec, compSpec, compsByName); err != nil {
+				return report, err
+			}
+		}
+	}
+	for _, compSpec := range rec.Comps {
+		comp := compsByName[compSpec.Name]
+		if err := applyLayerParents(comp, compSpec); err != nil {
+			return report, err
+		}
+		if err := applyExplicitMattes(comp, compSpec); err != nil {
+			return report, err
+		}
+		if err := applyLightSources(comp, compSpec); err != nil {
 			return report, err
 		}
 	}
-	if hasEffects(compSpec) {
-		project, err = materializeEffects(project, compSpec)
+	for _, compSpec := range rec.Comps {
+		if hasMasks(compSpec) {
+			project, err = materializeMasks(project, compSpec)
+			if err != nil {
+				return report, err
+			}
+		}
+		if hasEffects(compSpec) {
+			project, err = materializeEffects(project, compSpec)
+			if err != nil {
+				return report, err
+			}
+		}
+		if hasTransformExpressions(compSpec) {
+			project, err = materializeTransformExpressions(project, compSpec)
+			if err != nil {
+				return report, err
+			}
+		}
+		project, err = applyCompItemSettings(project, compSpec)
 		if err != nil {
-			return report, err
+			return report, fmt.Errorf("recipe: comp %q item settings: %w", compSpec.Name, err)
 		}
-	}
-	if hasTransformExpressions(compSpec) {
-		project, err = materializeTransformExpressions(project, compSpec)
-		if err != nil {
-			return report, err
-		}
-	}
-	project, err = applyCompItemSettings(project, compSpec)
-	if err != nil {
-		return report, fmt.Errorf("recipe: comp %q item settings: %w", compSpec.Name, err)
 	}
 	if hasExpectedProfile(rec.ExpectedProfile) {
 		prof, err := buildWrittenProfile(project, outPath)
@@ -274,4 +221,73 @@ func buildWrittenProfile(project *aep.Project, outPath string) (*profile.Profile
 		return nil, err
 	}
 	return profile.Build(reopened, profile.Options{Path: outPath})
+}
+
+func applyCompSettings(comp *aep.Composition, compSpec CompSpec) error {
+	if len(compSpec.BackgroundColor) == 3 {
+		if err := comp.SetBGColor(rgb8Color(compSpec.BackgroundColor)); err != nil {
+			return fmt.Errorf("background_color: %w", err)
+		}
+	}
+	if compSpec.MotionGraphicsTemplateName != "" {
+		if err := comp.SetMotionGraphicsTemplateName(compSpec.MotionGraphicsTemplateName); err != nil {
+			return fmt.Errorf("motion_graphics_template_name: %w", err)
+		}
+	}
+	if compSpec.Renderer != "" {
+		if err := aep.SetRenderer(comp, compSpec.Renderer); err != nil {
+			return fmt.Errorf("renderer: %w", err)
+		}
+	}
+	if len(compSpec.ResolutionFactor) == 2 {
+		if err := comp.SetResolutionFactor(uint16(compSpec.ResolutionFactor[0]), uint16(compSpec.ResolutionFactor[1])); err != nil {
+			return fmt.Errorf("resolution_factor: %w", err)
+		}
+	}
+	if compSpec.PixelAspect != nil {
+		if err := comp.SetPixelAspect(*compSpec.PixelAspect); err != nil {
+			return fmt.Errorf("pixel_aspect: %w", err)
+		}
+	}
+	if compSpec.DisplayStartTime != nil {
+		if err := comp.SetDisplayStartTime(*compSpec.DisplayStartTime); err != nil {
+			return fmt.Errorf("display_start_time: %w", err)
+		}
+	}
+	if compSpec.FrameBlending != nil {
+		if err := comp.SetFrameBlending(*compSpec.FrameBlending); err != nil {
+			return fmt.Errorf("frame_blending: %w", err)
+		}
+	}
+	if compSpec.Draft3D != nil {
+		if err := comp.SetDraft3D(*compSpec.Draft3D); err != nil {
+			return fmt.Errorf("draft_3d: %w", err)
+		}
+	}
+	if compSpec.HideShyLayers != nil {
+		if err := comp.SetHideShyLayers(*compSpec.HideShyLayers); err != nil {
+			return fmt.Errorf("hide_shy_layers: %w", err)
+		}
+	}
+	if compSpec.PreserveNestedFrameRate != nil {
+		if err := comp.SetPreserveNestedFrameRate(*compSpec.PreserveNestedFrameRate); err != nil {
+			return fmt.Errorf("preserve_nested_frame_rate: %w", err)
+		}
+	}
+	if compSpec.PreserveNestedResolution != nil {
+		if err := comp.SetPreserveNestedResolution(*compSpec.PreserveNestedResolution); err != nil {
+			return fmt.Errorf("preserve_nested_resolution: %w", err)
+		}
+	}
+	if compSpec.MotionBlur != nil {
+		if err := applyCompMotionBlur(comp, compSpec.MotionBlur); err != nil {
+			return fmt.Errorf("motion_blur: %w", err)
+		}
+	}
+	if compSpec.WorkArea != nil {
+		if err := comp.SetWorkArea(*compSpec.WorkArea.Start, *compSpec.WorkArea.End); err != nil {
+			return fmt.Errorf("work_area: %w", err)
+		}
+	}
+	return nil
 }

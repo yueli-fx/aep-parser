@@ -1150,6 +1150,7 @@
         "solid",
         "text",
         "shape",
+        "precomp",
         "camera",
         "light",
         "null",
@@ -1194,6 +1195,19 @@
           "gate": [
             "TestNewSolidNull_AEShipGate_AE2020",
             "TestNewSolidNull_AEShipGate_AE2025"
+          ]
+        },
+        {
+          "key": "layer.create_precomp",
+          "query": "NewPrecompLayer",
+          "status": "supported",
+          "symbol": "NewPrecompLayer",
+          "domain": "layer-create",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestMGPrecomp_AEShipGate_AE2020",
+            "TestMGPrecomp_AEShipGate_AE2025"
           ]
         },
         {
@@ -1261,6 +1275,32 @@
       "x-aep-structural-required": true,
       "description": "Layer display name.",
       "x-aep-example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].source",
+      "json_name": "source",
+      "source_type": "Layer",
+      "source_field": "Source",
+      "type": "string",
+      "go_type": "string",
+      "description": "Source comp name for a precomp layer.",
+      "x-aep-validation": "Required for precomp layers and must name a different comp declared in comps[].",
+      "x-aep-capabilities": [
+        {
+          "key": "layer.create_precomp",
+          "query": "NewPrecompLayer",
+          "status": "supported",
+          "symbol": "NewPrecompLayer",
+          "domain": "layer-create",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "gate": [
+            "TestMGPrecomp_AEShipGate_AE2020",
+            "TestMGPrecomp_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "comps[].layers[].label",
