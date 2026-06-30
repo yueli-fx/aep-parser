@@ -240,6 +240,7 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 	if layer.Type == "shape" && layer.Shape != nil {
 		switch layer.Shape.Kind {
 		case "rect", "ellipse":
+			validateVec(layer.Shape.Size, 2, layerPath+".shape.size", addRefusal)
 			if layer.Shape.Kind == "rect" {
 				recordCapability("RectNode.SetSize", layerPath+".shape.size")
 				if len(layer.Shape.Position) > 0 {

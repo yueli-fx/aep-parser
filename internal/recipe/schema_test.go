@@ -3036,6 +3036,18 @@ func TestValidateRejectsInvalidShapeDetail(t *testing.T) {
 	assertRefusal(t, report, "invalid_shape_fill_rule")
 }
 
+func TestValidateRejectsInvalidShapeSize(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[1].Shape.Size = []float64{640}
+
+	report := recipe.Validate(rec)
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusalAt(t, report, "invalid_vector_size", "comps[0].layers[1].shape.size")
+}
+
 func TestValidateRejectsInvalidShapeGradientFill(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[1].Shape.GradientFill = &recipe.GradientFillSpec{
@@ -3577,6 +3589,16 @@ func assertRefusal(t *testing.T, report recipe.Report, code string) {
 		}
 	}
 	t.Fatalf("refusal %q not found in %+v", code, report.Refusals)
+}
+
+func assertRefusalAt(t *testing.T, report recipe.Report, code, path string) {
+	t.Helper()
+	for _, refusal := range report.Refusals {
+		if refusal.Code == code && refusal.Path == path {
+			return
+		}
+	}
+	t.Fatalf("refusal %q at %q not found in %+v", code, path, report.Refusals)
 }
 
 func assertCapability(t *testing.T, report recipe.Report, query string) {

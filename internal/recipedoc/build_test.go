@@ -361,6 +361,7 @@ func TestBuildDocumentIncludesShapePaintValidationMetadata(t *testing.T) {
 
 	tests := []string{
 		"comps[].layers[].shape.kind",
+		"comps[].layers[].shape.size",
 		"comps[].layers[].shape.position",
 		"comps[].layers[].shape.roundness",
 		"comps[].layers[].shape.points",

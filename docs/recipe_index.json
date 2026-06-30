@@ -2933,6 +2933,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Shape size vector.",
+      "validation": "When present, shape size must contain exactly two numeric values.",
       "capability_keys": [
         "shape.rect.set_size",
         "shape.ellipse.set_size"

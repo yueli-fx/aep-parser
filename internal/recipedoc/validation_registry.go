@@ -345,6 +345,9 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Shape kind must use a supported primitive type.",
 		Enum:       []string{"rect", "ellipse", "star", "polygon"},
 	},
+	"comps[].layers[].shape.size": {
+		Validation: "When present, shape size must contain exactly two numeric values.",
+	},
 	"comps[].layers[].shape.position": {
 		Validation: "When present, shape position must contain exactly two numeric values.",
 	},
