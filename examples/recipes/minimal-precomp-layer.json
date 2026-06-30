@@ -10,6 +10,30 @@
       "height": 360,
       "frame_rate": 24,
       "duration": 2,
+      "background_color": [18, 36, 54],
+      "label": 10,
+      "comment": "source comp profile",
+      "motion_graphics_template_name": "Nested Source",
+      "renderer": "ADBE Escher",
+      "resolution_factor": [2, 2],
+      "pixel_aspect": 1.5,
+      "display_start_time": 0.25,
+      "frame_blending": true,
+      "draft_3d": true,
+      "hide_shy_layers": true,
+      "preserve_nested_frame_rate": true,
+      "preserve_nested_resolution": true,
+      "motion_blur": {
+        "enabled": true,
+        "shutter_angle": 360,
+        "shutter_phase": -90,
+        "adaptive_sample_limit": 128,
+        "samples_per_frame": 24
+      },
+      "work_area": {
+        "start": 0.25,
+        "end": 1.75
+      },
       "layers": [
         {
           "type": "text",
@@ -48,7 +72,31 @@
         "width": 640,
         "height": 360,
         "frame_rate": 24,
-        "duration": 2
+        "duration": 2,
+        "background_color": [18, 36, 54],
+        "label": 10,
+        "comment": "source comp profile",
+        "motion_graphics_template_name": "Nested Source",
+        "renderer": "ADBE Escher",
+        "resolution_factor": [2, 2],
+        "pixel_aspect": 1.5,
+        "display_start_time": 0.25,
+        "frame_blending": true,
+        "draft_3d": true,
+        "hide_shy_layers": true,
+        "preserve_nested_frame_rate": true,
+        "preserve_nested_resolution": true,
+        "motion_blur": {
+          "enabled": true,
+          "shutter_angle": 360,
+          "shutter_phase": -90,
+          "adaptive_sample_limit": 128,
+          "samples_per_frame": 24
+        },
+        "work_area": {
+          "start": 0.25,
+          "end": 1.75
+        }
       },
       {
         "name": "Main",

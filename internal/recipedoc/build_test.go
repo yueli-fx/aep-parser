@@ -219,6 +219,35 @@ func TestBuildDocumentWithExampleDirDiscoversAdditionalExamples(t *testing.T) {
 	if background.Example != "examples/recipes/minimal-comp-background-color.json" {
 		t.Fatalf("explicit background example was overwritten: %q", background.Example)
 	}
+
+	expectedCompFields := []string{
+		"expected_profile.comps[].label",
+		"expected_profile.comps[].comment",
+		"expected_profile.comps[].motion_graphics_template_name",
+		"expected_profile.comps[].background_color",
+		"expected_profile.comps[].resolution_factor",
+		"expected_profile.comps[].pixel_aspect",
+		"expected_profile.comps[].display_start_time",
+		"expected_profile.comps[].renderer",
+		"expected_profile.comps[].draft_3d",
+		"expected_profile.comps[].frame_blending",
+		"expected_profile.comps[].hide_shy_layers",
+		"expected_profile.comps[].preserve_nested_frame_rate",
+		"expected_profile.comps[].preserve_nested_resolution",
+		"expected_profile.comps[].motion_blur.enabled",
+		"expected_profile.comps[].motion_blur.shutter_angle",
+		"expected_profile.comps[].motion_blur.shutter_phase",
+		"expected_profile.comps[].motion_blur.adaptive_sample_limit",
+		"expected_profile.comps[].motion_blur.samples_per_frame",
+		"expected_profile.comps[].work_area.start",
+		"expected_profile.comps[].work_area.end",
+	}
+	for _, path := range expectedCompFields {
+		field := requireField(t, doc, path)
+		if field.Example == "" {
+			t.Fatalf("%s example should be discovered", path)
+		}
+	}
 }
 
 func TestBuildDocumentExampleReferencesExist(t *testing.T) {

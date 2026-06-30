@@ -5428,7 +5428,8 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected composition background color as RGB channels.",
-      "validation": "Expected composition RGB color must contain exactly three channels in the 0..255 range."
+      "validation": "Expected composition RGB color must contain exactly three channels in the 0..255 range.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].comment": {
       "path": "expected_profile.comps[].comment",
@@ -5437,7 +5438,8 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected composition comment text."
+      "summary": "Expected composition comment text.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].display_start_time": {
       "path": "expected_profile.comps[].display_start_time",
@@ -5447,7 +5449,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition display start time in seconds.",
-      "validation": "Expected composition display start time must be non-negative."
+      "validation": "Expected composition display start time must be non-negative.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].draft_3d": {
       "path": "expected_profile.comps[].draft_3d",
@@ -5456,7 +5459,8 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition draft 3D switch."
+      "summary": "Expected composition draft 3D switch.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].duration": {
       "path": "expected_profile.comps[].duration",
@@ -5476,7 +5480,8 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition frame blending switch."
+      "summary": "Expected composition frame blending switch.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].frame_rate": {
       "path": "expected_profile.comps[].frame_rate",
@@ -5507,7 +5512,8 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition shy layer visibility switch."
+      "summary": "Expected composition shy layer visibility switch.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].label": {
       "path": "expected_profile.comps[].label",
@@ -5517,7 +5523,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition label color index.",
-      "validation": "Expected composition label must be a valid AE label index."
+      "validation": "Expected composition label must be a valid AE label index.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_blur": {
       "path": "expected_profile.comps[].motion_blur",
@@ -5526,7 +5533,8 @@
       "source_field": "MotionBlur",
       "type": "object\u003cExpectedMotionBlurSpec\u003e",
       "go_type": "*recipe.ExpectedMotionBlurSpec",
-      "summary": "Expected composition motion blur settings."
+      "summary": "Expected composition motion blur settings.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_blur.adaptive_sample_limit": {
       "path": "expected_profile.comps[].motion_blur.adaptive_sample_limit",
@@ -5536,7 +5544,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur adaptive sample limit.",
-      "validation": "Expected composition motion blur adaptive sample limit must be a non-negative integer."
+      "validation": "Expected composition motion blur adaptive sample limit must be a non-negative integer.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_blur.enabled": {
       "path": "expected_profile.comps[].motion_blur.enabled",
@@ -5545,7 +5554,8 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition motion blur enable switch."
+      "summary": "Expected composition motion blur enable switch.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_blur.samples_per_frame": {
       "path": "expected_profile.comps[].motion_blur.samples_per_frame",
@@ -5555,7 +5565,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur samples per frame.",
-      "validation": "Expected composition motion blur samples per frame must be a non-negative integer."
+      "validation": "Expected composition motion blur samples per frame must be a non-negative integer.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_blur.shutter_angle": {
       "path": "expected_profile.comps[].motion_blur.shutter_angle",
@@ -5565,7 +5576,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur shutter angle.",
-      "validation": "Expected composition motion blur shutter angle must be an integer between 0 and 720."
+      "validation": "Expected composition motion blur shutter angle must be an integer between 0 and 720.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_blur.shutter_phase": {
       "path": "expected_profile.comps[].motion_blur.shutter_phase",
@@ -5575,7 +5587,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition motion blur shutter phase.",
-      "validation": "Expected composition motion blur shutter phase must be an integer."
+      "validation": "Expected composition motion blur shutter phase must be an integer.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].motion_graphics_template_name": {
       "path": "expected_profile.comps[].motion_graphics_template_name",
@@ -5584,7 +5597,8 @@
       "source_field": "MotionGraphicsTemplateName",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected composition Motion Graphics template name."
+      "summary": "Expected composition Motion Graphics template name.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].name": {
       "path": "expected_profile.comps[].name",
@@ -5608,7 +5622,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition pixel aspect ratio.",
-      "validation": "Expected composition pixel aspect ratio must be positive."
+      "validation": "Expected composition pixel aspect ratio must be positive.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].preserve_nested_frame_rate": {
       "path": "expected_profile.comps[].preserve_nested_frame_rate",
@@ -5617,7 +5632,8 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition nested frame-rate preservation switch."
+      "summary": "Expected composition nested frame-rate preservation switch.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].preserve_nested_resolution": {
       "path": "expected_profile.comps[].preserve_nested_resolution",
@@ -5626,7 +5642,8 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "summary": "Expected composition nested resolution preservation switch."
+      "summary": "Expected composition nested resolution preservation switch.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].renderer": {
       "path": "expected_profile.comps[].renderer",
@@ -5635,7 +5652,8 @@
       "source_field": "Renderer",
       "type": "string",
       "go_type": "string",
-      "summary": "Expected composition renderer identifier."
+      "summary": "Expected composition renderer identifier.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].resolution_factor": {
       "path": "expected_profile.comps[].resolution_factor",
@@ -5645,7 +5663,8 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Expected composition preview resolution factor.",
-      "validation": "Expected composition resolution factor must contain two positive integer factors."
+      "validation": "Expected composition resolution factor must contain two positive integer factors.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].width": {
       "path": "expected_profile.comps[].width",
@@ -5665,7 +5684,8 @@
       "source_field": "WorkArea",
       "type": "object\u003cExpectedWorkAreaSpec\u003e",
       "go_type": "*recipe.ExpectedWorkAreaSpec",
-      "summary": "Expected composition work area range."
+      "summary": "Expected composition work area range.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].work_area.end": {
       "path": "expected_profile.comps[].work_area.end",
@@ -5675,7 +5695,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition work area end time in seconds.",
-      "validation": "Expected composition work area end must be non-negative and greater than or equal to start when both are present."
+      "validation": "Expected composition work area end must be non-negative and greater than or equal to start when both are present.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.comps[].work_area.start": {
       "path": "expected_profile.comps[].work_area.start",
@@ -5685,7 +5706,8 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Expected composition work area start time in seconds.",
-      "validation": "Expected composition work area start must be non-negative."
+      "validation": "Expected composition work area start must be non-negative.",
+      "example": "examples/recipes/minimal-precomp-layer.json"
     },
     "expected_profile.display_start_time": {
       "path": "expected_profile.display_start_time",

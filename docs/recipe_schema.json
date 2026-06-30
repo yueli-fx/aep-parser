@@ -9071,7 +9071,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition label color index.",
-      "x-aep-validation": "Expected composition label must be a valid AE label index."
+      "x-aep-validation": "Expected composition label must be a valid AE label index.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].comment",
@@ -9080,7 +9081,8 @@
       "source_field": "Comment",
       "type": "string",
       "go_type": "string",
-      "description": "Expected composition comment text."
+      "description": "Expected composition comment text.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_graphics_template_name",
@@ -9089,7 +9091,8 @@
       "source_field": "MotionGraphicsTemplateName",
       "type": "string",
       "go_type": "string",
-      "description": "Expected composition Motion Graphics template name."
+      "description": "Expected composition Motion Graphics template name.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].background_color",
@@ -9100,7 +9103,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected composition background color as RGB channels.",
-      "x-aep-validation": "Expected composition RGB color must contain exactly three channels in the 0..255 range."
+      "x-aep-validation": "Expected composition RGB color must contain exactly three channels in the 0..255 range.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].resolution_factor",
@@ -9111,7 +9115,8 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Expected composition preview resolution factor.",
-      "x-aep-validation": "Expected composition resolution factor must contain two positive integer factors."
+      "x-aep-validation": "Expected composition resolution factor must contain two positive integer factors.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].pixel_aspect",
@@ -9121,7 +9126,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition pixel aspect ratio.",
-      "x-aep-validation": "Expected composition pixel aspect ratio must be positive."
+      "x-aep-validation": "Expected composition pixel aspect ratio must be positive.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].display_start_time",
@@ -9131,7 +9137,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition display start time in seconds.",
-      "x-aep-validation": "Expected composition display start time must be non-negative."
+      "x-aep-validation": "Expected composition display start time must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].renderer",
@@ -9140,7 +9147,8 @@
       "source_field": "Renderer",
       "type": "string",
       "go_type": "string",
-      "description": "Expected composition renderer identifier."
+      "description": "Expected composition renderer identifier.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].draft_3d",
@@ -9149,7 +9157,8 @@
       "source_field": "Draft3D",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition draft 3D switch."
+      "description": "Expected composition draft 3D switch.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].frame_blending",
@@ -9158,7 +9167,8 @@
       "source_field": "FrameBlending",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition frame blending switch."
+      "description": "Expected composition frame blending switch.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].hide_shy_layers",
@@ -9167,7 +9177,8 @@
       "source_field": "HideShyLayers",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition shy layer visibility switch."
+      "description": "Expected composition shy layer visibility switch.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].preserve_nested_frame_rate",
@@ -9176,7 +9187,8 @@
       "source_field": "PreserveNestedFrameRate",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition nested frame-rate preservation switch."
+      "description": "Expected composition nested frame-rate preservation switch.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].preserve_nested_resolution",
@@ -9185,7 +9197,8 @@
       "source_field": "PreserveNestedResolution",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition nested resolution preservation switch."
+      "description": "Expected composition nested resolution preservation switch.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_blur",
@@ -9195,7 +9208,8 @@
       "type": "object",
       "go_type": "*recipe.ExpectedMotionBlurSpec",
       "object_type": "ExpectedMotionBlurSpec",
-      "description": "Expected composition motion blur settings."
+      "description": "Expected composition motion blur settings.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_blur.enabled",
@@ -9204,7 +9218,8 @@
       "source_field": "Enabled",
       "type": "boolean",
       "go_type": "*bool",
-      "description": "Expected composition motion blur enable switch."
+      "description": "Expected composition motion blur enable switch.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_blur.shutter_angle",
@@ -9214,7 +9229,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition motion blur shutter angle.",
-      "x-aep-validation": "Expected composition motion blur shutter angle must be an integer between 0 and 720."
+      "x-aep-validation": "Expected composition motion blur shutter angle must be an integer between 0 and 720.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_blur.shutter_phase",
@@ -9224,7 +9240,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition motion blur shutter phase.",
-      "x-aep-validation": "Expected composition motion blur shutter phase must be an integer."
+      "x-aep-validation": "Expected composition motion blur shutter phase must be an integer.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_blur.adaptive_sample_limit",
@@ -9234,7 +9251,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition motion blur adaptive sample limit.",
-      "x-aep-validation": "Expected composition motion blur adaptive sample limit must be a non-negative integer."
+      "x-aep-validation": "Expected composition motion blur adaptive sample limit must be a non-negative integer.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].motion_blur.samples_per_frame",
@@ -9244,7 +9262,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition motion blur samples per frame.",
-      "x-aep-validation": "Expected composition motion blur samples per frame must be a non-negative integer."
+      "x-aep-validation": "Expected composition motion blur samples per frame must be a non-negative integer.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].work_area",
@@ -9254,7 +9273,8 @@
       "type": "object",
       "go_type": "*recipe.ExpectedWorkAreaSpec",
       "object_type": "ExpectedWorkAreaSpec",
-      "description": "Expected composition work area range."
+      "description": "Expected composition work area range.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].work_area.start",
@@ -9264,7 +9284,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition work area start time in seconds.",
-      "x-aep-validation": "Expected composition work area start must be non-negative."
+      "x-aep-validation": "Expected composition work area start must be non-negative.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.comps[].work_area.end",
@@ -9274,7 +9295,8 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Expected composition work area end time in seconds.",
-      "x-aep-validation": "Expected composition work area end must be non-negative and greater than or equal to start when both are present."
+      "x-aep-validation": "Expected composition work area end must be non-negative and greater than or equal to start when both are present.",
+      "x-aep-example": "examples/recipes/minimal-precomp-layer.json"
     },
     {
       "x-aep-path": "expected_profile.name",
