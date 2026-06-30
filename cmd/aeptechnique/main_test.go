@@ -219,6 +219,21 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 			t.Fatalf("pattern examples[%s][0] = %+v", id, examples[0])
 		}
 	}
+	if len(summary.PatternProfiles) == 0 {
+		t.Fatalf("pattern profiles = %+v", summary.PatternProfiles)
+	}
+	for id, count := range summary.PatternCounts {
+		profile := summary.PatternProfiles[id]
+		if profile == nil {
+			t.Fatalf("pattern profile %s missing from %+v", id, summary.PatternProfiles)
+		}
+		if profile.Count != count || len(profile.Examples) == 0 {
+			t.Fatalf("pattern profile %s = %+v, count=%d", id, profile, count)
+		}
+		if len(profile.EffectCounts)+len(profile.ShapeFamilies)+len(profile.TextAnimators) == 0 {
+			t.Fatalf("pattern profile %s has no mechanism counts: %+v", id, profile)
+		}
+	}
 	if len(summary.ReadinessCounts) == 0 {
 		t.Fatalf("readiness counts = %+v", summary.ReadinessCounts)
 	}

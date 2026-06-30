@@ -174,6 +174,41 @@ try {
         return @()
     }
 
+    function Get-PatternProfile {
+        param(
+            [object]$Summary,
+            [string]$PatternID
+        )
+        if ($null -eq $Summary -or $null -eq $Summary.pattern_profiles) {
+            return $null
+        }
+        foreach ($property in @($Summary.pattern_profiles.PSObject.Properties)) {
+            if ($property.Name -eq $PatternID) {
+                return $property.Value
+            }
+        }
+        return $null
+    }
+
+    function Convert-CountRows {
+        param([array]$Rows)
+        return @($Rows | ForEach-Object {
+            [ordered]@{
+                name  = [string]$_.Name
+                count = [int]$_.Value
+            }
+        })
+    }
+
+    function Format-CountList {
+        param([array]$Rows)
+        $items = @($Rows | Select-Object -First 5 | ForEach-Object { "$($_.name) ($($_.count))" })
+        if ($items.Count -eq 0) {
+            return ""
+        }
+        return $items -join ", "
+    }
+
     function Get-ReadinessProjects {
         param(
             [array]$Records,
@@ -245,6 +280,19 @@ try {
             representatives = @(Get-RepresentativeProjects -Records $records -ArchetypeID $row.Name -Max 5)
         }
     }
+    $digestPatterns = @()
+    foreach ($row in $patternRows) {
+        $profile = Get-PatternProfile -Summary $summary -PatternID $row.Name
+        $digestPatterns += [ordered]@{
+            id              = [string]$row.Name
+            count           = [int]$row.Value
+            representatives = @(Get-PatternExamples -Summary $summary -PatternID $row.Name -Max 5)
+            readiness       = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.readiness_counts -Max 5))
+            effects         = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.effect_counts -Max 8))
+            shape_families  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.shape_families -Max 8))
+            text_animators  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.text_animators -Max 8))
+        }
+    }
     $digestReadiness = @()
     foreach ($row in $readinessRows) {
         $digestReadiness += [ordered]@{
@@ -258,13 +306,7 @@ try {
         project_count = [int]$summary.project_count
         error_count   = [int]$errorCount
         archetypes    = $digestArchetypes
-        patterns      = @($patternRows | ForEach-Object {
-            [ordered]@{
-                id              = [string]$_.Name
-                count           = [int]$_.Value
-                representatives = @(Get-PatternExamples -Summary $summary -PatternID $_.Name -Max 5)
-            }
-        })
+        patterns      = $digestPatterns
         readiness     = $digestReadiness
     }
     $digest | ConvertTo-Json -Depth 10 | Set-Content -Path $digestPath -Encoding UTF8
@@ -288,6 +330,16 @@ try {
     foreach ($group in @($digest.patterns)) {
         [void]$b.AppendLine("### $($group.id)")
         [void]$b.AppendLine("")
+        foreach ($line in @(
+            @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
+            @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
+            @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+        )) {
+            if ($line.Value) {
+                [void]$b.AppendLine("- $($line.Label): $($line.Value)")
+            }
+        }
         foreach ($project in @($group.representatives)) {
             [void]$b.AppendLine("- ``$($project.path)`` score=$($project.score) readiness=$($project.readiness)")
             if ($project.summary) {
@@ -384,6 +436,16 @@ try {
         [void]$h.AppendLine("<section class=""representative"">")
         [void]$h.AppendLine("<h3>$(Escape-Html $group.id)</h3>")
         [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")
+        foreach ($line in @(
+            @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
+            @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
+            @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+        )) {
+            if ($line.Value) {
+                [void]$h.AppendLine("<div class=""small""><strong>$(Escape-Html $line.Label)</strong>: $(Escape-Html $line.Value)</div>")
+            }
+        }
         [void]$h.AppendLine("<ul class=""compact"">")
         foreach ($project in @($group.representatives | Select-Object -First 5)) {
             [void]$h.AppendLine("<li><code>$(Escape-Html $project.path)</code><div class=""small"">score=$($project.score) · readiness=$(Escape-Html $project.readiness)</div></li>")

@@ -87,6 +87,7 @@ type corpusSummary struct {
 	ArchetypeCounts    map[string]int               `json:"archetype_counts,omitempty"`
 	PatternCounts      map[string]int               `json:"pattern_counts,omitempty"`
 	PatternExamples    map[string][]corpusExample   `json:"pattern_examples,omitempty"`
+	PatternProfiles    map[string]*corpusPattern    `json:"pattern_profiles,omitempty"`
 	ReadinessCounts    map[string]int               `json:"readiness_counts,omitempty"`
 	PluginEffectCounts map[string]int               `json:"plugin_effect_counts"`
 	EffectCounts       map[string]int               `json:"effect_counts"`
@@ -104,6 +105,16 @@ type corpusExample struct {
 	Summary   string `json:"summary,omitempty"`
 }
 
+type corpusPattern struct {
+	Count           int             `json:"count"`
+	Examples        []corpusExample `json:"examples,omitempty"`
+	ReadinessCounts map[string]int  `json:"readiness_counts,omitempty"`
+	EffectCounts    map[string]int  `json:"effect_counts,omitempty"`
+	ShapeFamilies   map[string]int  `json:"shape_families,omitempty"`
+	TextAnimators   map[string]int  `json:"text_animators,omitempty"`
+	ArchetypeCounts map[string]int  `json:"archetype_counts,omitempty"`
+}
+
 func newCorpusSummary(mode string) *corpusSummary {
 	return &corpusSummary{
 		SchemaVersion: technique.SchemaVersion,
@@ -115,6 +126,7 @@ func newCorpusSummary(mode string) *corpusSummary {
 		ArchetypeCounts:    map[string]int{},
 		PatternCounts:      map[string]int{},
 		PatternExamples:    map[string][]corpusExample{},
+		PatternProfiles:    map[string]*corpusPattern{},
 		ReadinessCounts:    map[string]int{},
 		PluginEffectCounts: map[string]int{},
 		EffectCounts:       map[string]int{},
@@ -210,7 +222,7 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 				}
 				for _, pattern := range value.Patterns {
 					summary.PatternCounts[pattern.ID]++
-					addPatternExample(summary, pattern, value, path)
+					addPatternProfile(summary, pattern, value, path)
 				}
 				if value.RecreationReadiness.Status != "" {
 					summary.ReadinessCounts[value.RecreationReadiness.Status]++
@@ -237,10 +249,32 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 	return 0
 }
 
-func addPatternExample(summary *corpusSummary, pattern technique.ProjectPattern, explanation *technique.Explanation, path string) {
+func addPatternProfile(summary *corpusSummary, pattern technique.ProjectPattern, explanation *technique.Explanation, path string) {
 	if summary == nil || pattern.ID == "" {
 		return
 	}
+	profile := summary.PatternProfiles[pattern.ID]
+	if profile == nil {
+		profile = &corpusPattern{
+			ReadinessCounts: map[string]int{},
+			EffectCounts:    map[string]int{},
+			ShapeFamilies:   map[string]int{},
+			TextAnimators:   map[string]int{},
+			ArchetypeCounts: map[string]int{},
+		}
+		summary.PatternProfiles[pattern.ID] = profile
+	}
+	profile.Count++
+	if explanation.RecreationReadiness.Status != "" {
+		profile.ReadinessCounts[explanation.RecreationReadiness.Status]++
+	}
+	for _, archetype := range pattern.Archetypes {
+		profile.ArchetypeCounts[archetype]++
+	}
+	addCounts(profile.EffectCounts, explanation.Portrait.Mechanisms.EffectMatchCounts)
+	addCounts(profile.ShapeFamilies, explanation.Portrait.Mechanisms.ShapeFamilyCounts)
+	addCounts(profile.TextAnimators, explanation.Portrait.Mechanisms.TextAnimatorKindCounts)
+
 	example := corpusExample{
 		Path:      path,
 		Label:     pattern.Label,
@@ -248,7 +282,7 @@ func addPatternExample(summary *corpusSummary, pattern technique.ProjectPattern,
 		Readiness: explanation.RecreationReadiness.Status,
 		Summary:   pattern.Summary,
 	}
-	examples := append(summary.PatternExamples[pattern.ID], example)
+	examples := append(profile.Examples, example)
 	sort.SliceStable(examples, func(i, j int) bool {
 		if examples[i].Score != examples[j].Score {
 			return examples[i].Score > examples[j].Score
@@ -258,6 +292,7 @@ func addPatternExample(summary *corpusSummary, pattern technique.ProjectPattern,
 	if len(examples) > 5 {
 		examples = examples[:5]
 	}
+	profile.Examples = examples
 	summary.PatternExamples[pattern.ID] = examples
 }
 
