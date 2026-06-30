@@ -619,6 +619,22 @@ try {
     [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$(Escape-Html $historyDelta.technique_patterns_delta)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Batch passed</td><td>$(Escape-Html $historyDelta.batch_passed_delta)</td></tr>")
     [void]$outcomeHtml.AppendLine("</tbody></table></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Learning Signals</h2>")
+    [void]$outcomeHtml.AppendLine("<h3>Study Queue</h3><table><thead><tr><th>Rank</th><th>Project</th><th>Patterns</th></tr></thead><tbody>")
+    foreach ($row in @($studyRows | Select-Object -First 3)) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.rank)</td><td>$(Escape-Html $row.project_path)</td><td>$(Escape-Html $row.patterns)</td></tr>")
+    }
+    [void]$outcomeHtml.AppendLine("</tbody></table>")
+    [void]$outcomeHtml.AppendLine("<h3>Learning Actions</h3><table><thead><tr><th>Pattern</th><th>Action</th><th>Risk</th></tr></thead><tbody>")
+    foreach ($row in @($learningActionRows | Select-Object -First 3)) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.pattern)</td><td>$(Escape-Html $row.action)</td><td>$(Escape-Html $row.risk)</td></tr>")
+    }
+    [void]$outcomeHtml.AppendLine("</tbody></table>")
+    [void]$outcomeHtml.AppendLine("<h3>Coverage Summary</h3><table><thead><tr><th>Artifact</th><th>Count</th><th>Status</th></tr></thead><tbody>")
+    foreach ($row in @($coverageScorecardRows | Select-Object -First 5)) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.artifact)</td><td>$(Escape-Html $row.actual_count)</td><td>$(Escape-Html $row.status)</td></tr>")
+    }
+    [void]$outcomeHtml.AppendLine("</tbody></table></section>")
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Links</h2><div class=""links"">")
     [void]$outcomeHtml.AppendLine("<a href=""latest_index.html"">Latest full index</a>")
     [void]$outcomeHtml.AppendLine("<a href=""latest_outcome.md"">Latest outcome markdown</a>")
@@ -1020,6 +1036,15 @@ try {
     }
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Outcome Status" -Quiet)) {
         throw "latest outcome html missing Outcome Status"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Learning Signals" -Quiet)) {
+        throw "latest outcome html missing Learning Signals"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Study Queue" -Quiet)) {
+        throw "latest outcome html missing Study Queue"
+    }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Learning Actions" -Quiet)) {
+        throw "latest outcome html missing Learning Actions"
     }
     Require-LatestIndexLink -Label "latest outcome html" -RelativePath "latest_outcome.html"
     if (-not (Test-Path -LiteralPath $latestEffectivenessJsonPath)) {

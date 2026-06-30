@@ -192,7 +192,8 @@ those compiled `.aep` files with `aeptechnique`, and writes `acceptance.json` pl
 `latest_run.txt`, `latest_outcome.html`, `latest_outcome.md`, `latest_effectiveness.md`, `latest_effectiveness.json`,
 `latest_acceptance.md`, `latest_index.html`, `history.jsonl`, and `history.csv`
 at the selected output root so the most recent result and trend history have
-stable paths. `latest_outcome.html` is the shortest browser-readable outcome,
+stable paths. `latest_outcome.html` is the shortest browser-readable outcome
+with status, headline counters, trend delta, and next learning signals,
 `latest_outcome.md` is the shortest human-readable outcome,
 `latest_effectiveness.md` is the fuller human-readable outcome summary, while
 `latest_effectiveness.json` is the script/frontend-friendly version of the same effectiveness snapshot,
