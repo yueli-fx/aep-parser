@@ -11,9 +11,9 @@ keep `Project.Compositions`, `Project.Footage`, `Project.Folders`, and
 add persistent indexes inside `Project` while callers can mutate those public
 slices directly.
 
-This package is the answer to the real performance needs that remain:
-recipe compilation, profile/diff/clone matching, global search, and large
-corpus learning should build explicit snapshot indexes at workflow boundaries.
+Authoritative decision: recipe compilation, profile/diff/clone matching, global
+search, and large-corpus pattern extraction should build explicit snapshot
+indexes at workflow boundaries.
 
 ## Motivation
 
@@ -24,7 +24,7 @@ linear lookup inside higher-level loops:
 - profile and diff matching layers, sources, effects, and properties
 - clone/replication workflows comparing original and generated projects
 - global search for effects, expressions, sources, fonts, and properties
-- corpus learning over hundreds or thousands of `.aep` projects
+- corpus pattern extraction over hundreds or thousands of `.aep` projects
 
 These workflows need stable, reusable lookup structures. They do not need the
 core parser object graph to become a mutable indexed store.
@@ -35,7 +35,16 @@ Create an index package outside `internal/scene`, tentatively:
 
 - `internal/projectindex`
 
-The index is a snapshot:
+Terminology:
+
+- **Snapshot** means the index reflects the project graph as observed during
+  `Build`. It is not kept in sync with later project mutations.
+- **Index** means the concrete lookup object containing maps/inverted indexes.
+  Every `projectindex.Index` is a snapshot. Lazy secondary maps built inside the
+  same `Index` are part of that same snapshot and must read only from the
+  captured project graph.
+
+The single-project index has this lifecycle:
 
 - Built from one parsed `*aep.Project`.
 - Fast to query for the duration of one workflow.
@@ -45,10 +54,15 @@ The index is a snapshot:
   indexed fields. Examples include adding/removing comps or layers, changing a
   layer name, changing `Layer.SourceID`, changing layer effects, or replacing
   footage identity. Callers are responsible for rebuilding it.
-- `Build(nil)` returns a non-nil empty index so callers can query safely without
-  nil checks.
+- There is no stale-check API in the first slice because `Project` has no
+  mutation version and its public slices/fields are directly writable. Workflow
+  owners must rebuild by scope: after they mutate indexed fields or after they
+  receive a fresh project from `aep.Reopen`.
+- `Build(project *aep.Project) *Index` accepts nil. `Build(nil)` returns a
+  non-nil empty index so callers can query safely without nil checks.
 - Implementations may build secondary indexes lazily if behavior remains
   deterministic and query results do not mutate the project.
+- The index stores pointers to existing project objects, not deep copies.
 
 This keeps `Project` simple and AST-like while giving analysis and generation
 code the indexing tools they need.
@@ -67,7 +81,7 @@ func Build(project *aep.Project) *Index
 func (idx *Index) CompositionByID(id uint32) *aep.Composition
 func (idx *Index) FootageByID(id uint32) *aep.Footage
 func (idx *Index) AVItemByID(id uint32) aep.AVItem
-func (idx *Index) LayersByID(id uint32) []*aep.Layer
+func (idx *Index) LayersByLayerID(id uint32) []*aep.Layer
 func (idx *Index) LayersByName(name string) []*aep.Layer
 func (idx *Index) LayersBySourceID(sourceID uint32) []*aep.Layer
 func (idx *Index) LayersByEffect(matchName string) []*aep.Layer
@@ -75,15 +89,35 @@ func (idx *Index) LayersByEffect(matchName string) []*aep.Layer
 
 Rules:
 
-- ID lookups for project items preserve existing first-match semantics where the
-  current public API already does so.
+- Project item ID lookups are deterministic:
+  - `CompositionByID` returns the first matching item in `Project.Compositions`
+    slice order.
+  - `FootageByID` returns the first matching item in `Project.Footage` slice
+    order.
+  - `AVItemByID` matches `scene.Project.AVItemByID`: scan compositions first in
+    `Project.Compositions` slice order, then footage in `Project.Footage` slice
+    order. Folders are not AV items.
 - Layer names are not unique, so layer-name queries return slices.
+- Layer IDs are not treated as globally unique in the project-index API; use
+  `LayersByLayerID` and handle zero or more results.
 - Effect and source lookups are inverted indexes and return all matching layers.
+  The first slice indexes effects by match name only. Display-name search belongs
+  to the later search layer once real query shapes are known.
 - The index must tolerate nil projects, nil comps, nil layers, and ID `0`.
+  Single-result queries return nil for missing/invalid input. Multi-result
+  queries return zero results; callers must not rely on nil-vs-empty slice
+  identity.
 - The index must not mutate the project.
 - The source project pointer is kept private. Query callers should use index
   methods instead of reaching back through `idx.Project`, which would encourage
   stale-index bugs.
+- The first slice exposes lookup primitives only. Callers that need project
+  fields outside those primitives should keep their own `*aep.Project` reference
+  from the original workflow, not retrieve it through the index.
+- Building the index is best-effort over the parsed object graph. Malformed or
+  partial projects are represented by nil/missing entries, not build errors.
+  The first slice does not follow references recursively, so circular references
+  are not an index-build error.
 
 ## Later Slices
 
@@ -112,8 +146,8 @@ Use indexes for:
 
 Add a query layer over a single `Index`:
 
-- effects by match name / display name
-- properties by match name / display name
+- effects by match name, and later display name when needed
+- properties by match name, and later display name when needed
 - expressions containing text
 - text layers using a font
 - layers referencing a source item
@@ -122,7 +156,10 @@ This can power CLI search and future project browsers.
 
 ### Corpus index
 
-Add a corpus-level index only after the single-project index proves useful:
+Add a corpus-level index only after the single-project index proves useful.
+Corpus-level indexing means extracting reusable evidence/pattern facts from many
+projects for search, statistics, clustering, and technique discovery. It is not
+an ML training plan by itself.
 
 ```go
 type Corpus struct {
@@ -134,14 +171,24 @@ Corpus queries should return project path + comp/layer/effect/property evidence,
 not raw pointers alone. This is the likely foundation for learning from 1000+
 projects.
 
+The first corpus design must account for memory pressure. It may stream projects,
+shard indexes, keep only summarized facts, or lazily load per-project indexes.
+Do not assume 1000 full `Project` graphs plus 1000 full `Index` snapshots should
+stay resident at once.
+
 ## Non-Goals
 
 - Do not make `scene.Project` maintain persistent maps in this phase.
 - Do not privatize public slices as part of the first index package.
-- Do not make the snapshot index concurrency-safe until a caller needs shared
-  cross-goroutine access.
+- Do not add locks in the first slice. An `Index` is immutable after build and
+  can be shared for concurrent read-only queries once safely published. It is
+  not safe to mutate the underlying project concurrently with index queries.
 - Do not hide duplicate names or duplicate IDs; expose deterministic behavior
   and multi-result APIs where identity is not unique.
+- Do not add batch query combinators until a real recipe/profile/search caller
+  needs one.
+- Do not add stale detection until `Project` has a mutation version or a wrapper
+  owns all mutations.
 
 ## Execution Order
 
@@ -149,8 +196,9 @@ projects.
 2. Wire the recipe compiler to use the index in one repeated lookup hotspot.
 3. Wire profile/diff expected-profile matching where it currently builds ad hoc
    indexes.
-4. Add single-project search APIs once real query shapes are confirmed.
-5. Add corpus-level indexing for batch learning after single-project search is
+4. Add benchmarks for repeated lookup hotspots before broad integration.
+5. Add single-project search APIs once real query shapes are confirmed.
+6. Add corpus-level indexing for batch learning after single-project search is
    stable.
 
 ## Progress
