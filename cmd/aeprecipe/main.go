@@ -100,19 +100,29 @@ func runExplain(args []string) int {
 	fs.SetOutput(os.Stderr)
 	recipePath := fs.String("recipe", "", "recipe JSON path")
 	fieldPath := fs.String("field", "", "recipe field path to explain")
+	searchTerm := fs.String("search", "", "search recipe field paths and metadata")
 	jsonOut := fs.Bool("json", false, "print JSON report")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
-	if *recipePath != "" && *fieldPath != "" {
-		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain [-recipe recipe.json | -field recipe.path] [-json]")
+	selected := 0
+	for _, value := range []string{*recipePath, *fieldPath, *searchTerm} {
+		if value != "" {
+			selected++
+		}
+	}
+	if selected > 1 {
+		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain [-recipe recipe.json | -field recipe.path | -search term] [-json]")
 		return 2
 	}
 	if *fieldPath != "" {
 		return runExplainField(*fieldPath, *jsonOut)
 	}
+	if *searchTerm != "" {
+		return runExplainSearch(*searchTerm, *jsonOut)
+	}
 	if *recipePath == "" {
-		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain [-recipe recipe.json | -field recipe.path] [-json]")
+		fmt.Fprintln(os.Stderr, "usage: aeprecipe explain [-recipe recipe.json | -field recipe.path | -search term] [-json]")
 		return 2
 	}
 	rec, err := readRecipe(*recipePath)
@@ -132,6 +142,7 @@ func runExplain(args []string) int {
 }
 
 type recipeIndexFile struct {
+	Paths  []string                    `json:"paths"`
 	Fields map[string]recipeIndexEntry `json:"fields"`
 }
 
@@ -194,6 +205,65 @@ func runExplainField(fieldPath string, jsonOut bool) int {
 		fmt.Printf("example %s\n", entry.Example)
 	}
 	return 0
+}
+
+func runExplainSearch(term string, jsonOut bool) int {
+	index, err := readRecipeIndex()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "recipe index:", err)
+		return 2
+	}
+	var matches []recipeIndexEntry
+	for _, path := range index.Paths {
+		entry, ok := index.Fields[path]
+		if !ok {
+			continue
+		}
+		if recipeIndexEntryMatches(entry, term) {
+			matches = append(matches, entry)
+		}
+	}
+	if len(matches) == 0 {
+		fmt.Fprintf(os.Stderr, "recipe search %q found no fields\n", term)
+		return 1
+	}
+	if jsonOut {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(matches); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 2
+		}
+		return 0
+	}
+	for _, entry := range matches {
+		fmt.Printf("%s\t%s\t%s\n", entry.Path, entry.Type, entry.Summary)
+	}
+	return 0
+}
+
+func recipeIndexEntryMatches(entry recipeIndexEntry, term string) bool {
+	needle := strings.ToLower(term)
+	values := []string{
+		entry.Path,
+		entry.JSONName,
+		entry.SourceType,
+		entry.SourceField,
+		entry.Type,
+		entry.GoType,
+		entry.Summary,
+		entry.Validation,
+		entry.Example,
+	}
+	values = append(values, entry.Requiredness...)
+	values = append(values, entry.Enum...)
+	values = append(values, entry.CapabilityKeys...)
+	for _, value := range values {
+		if strings.Contains(strings.ToLower(value), needle) {
+			return true
+		}
+	}
+	return false
 }
 
 func readRecipeIndex() (recipeIndexFile, error) {

@@ -422,6 +422,9 @@ Done:
   `examples/recipes/*.json` for fields not explicitly listed in
   `example_registry.go`; generated docs now expose example references for 399
   recipe fields without expanding the manual registry.
+- `cmd/aeprecipe explain -search <term>` now searches
+  `docs/recipe_index.json` across field paths, summaries, validation notes,
+  capability keys, enums, and examples.
 
 Current:
 

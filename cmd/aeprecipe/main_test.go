@@ -84,6 +84,30 @@ func TestRunExplainFieldReturnsOneForUnknownField(t *testing.T) {
 	}
 }
 
+func TestRunExplainSearchPrintsMatchingRecipeFields(t *testing.T) {
+	output, code := captureStdout(t, func() int {
+		return run([]string{"explain", "-search", "background"})
+	})
+
+	if code != 0 {
+		t.Fatalf("run explain -search = %d, want 0", code)
+	}
+	if !strings.Contains(output, "comps[].background_color") {
+		t.Fatalf("output missing background color field:\n%s", output)
+	}
+	if !strings.Contains(output, "expected_profile.background_color") {
+		t.Fatalf("output missing expected profile background field:\n%s", output)
+	}
+}
+
+func TestRunExplainSearchReturnsOneForNoMatches(t *testing.T) {
+	code := run([]string{"explain", "-search", "definitely-no-such-recipe-field", "-json"})
+
+	if code != 1 {
+		t.Fatalf("run explain no-match search = %d, want 1", code)
+	}
+}
+
 func minimalCLIRecipe() recipe.Recipe {
 	return recipe.Recipe{
 		SchemaVersion: recipe.SchemaVersion,
