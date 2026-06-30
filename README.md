@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts\compare_technique_reports.ps1 -BaseDir tmp\old_rep
 pwsh -NoProfile -File scripts\verify_technique_selfhost.ps1 -OutRoot tmp\technique_selfhost_gate
 ```
 
-想跑完后立刻查看浏览器入口，可以加 `-Open`。验收完成后也可直接打开 `tmp\technique_selfhost_gate\latest_effectiveness.md`、`tmp\technique_selfhost_gate\latest_effectiveness.json`、`tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；`latest_effectiveness.md` 是最快的人工成效摘要，`latest_effectiveness.json` 是给脚本、前端和批处理消费的同一份成效快照，HTML 入口会直接显示 Study Queue、Pattern Playbook、Coverage Scorecard、Reconstruction Blueprint 和 Recipe Draft 预览，并链接一个由 recipe draft 自动 validate/compile 出来的 `.aep` smoke artifact 以及该 AEP 的重新解析结果。
+想跑完后立刻查看浏览器入口，可以加 `-Open`。验收完成后也可直接打开 `tmp\technique_selfhost_gate\latest_effectiveness.md`、`tmp\technique_selfhost_gate\latest_effectiveness.json`、`tmp\technique_selfhost_gate\latest_index.html` 或 `tmp\technique_selfhost_gate\latest_acceptance.md` 查看最近一次结果；`latest_effectiveness.md` 是最快的人工成效摘要，`latest_effectiveness.json` 是给脚本、前端和批处理消费的同一份成效快照，包含语料统计、闭环复刻结果、关键 artifact 路径和下一步学习信号。HTML 入口会直接显示 Study Queue、Pattern Playbook、Coverage Scorecard、Reconstruction Blueprint 和 Recipe Draft 预览，并链接一个由 recipe draft 自动 validate/compile 出来的 `.aep` smoke artifact 以及该 AEP 的重新解析结果。
 
 ## 原理与分层
 

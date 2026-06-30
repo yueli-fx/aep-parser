@@ -283,6 +283,46 @@ try {
             compiled_draft_facts = Join-Path $recipeDraftReparseDir "compiled_facts.json"
             reparse_summary = Join-Path $recipeDraftReparseDir "reparse_summary.json"
         }
+        learning_signals = [ordered]@{
+            study_queue_top = @($studyRows | ForEach-Object {
+                [ordered]@{
+                    rank = [int]$_.rank
+                    project_path = $_.path
+                    readiness = $_.readiness
+                    study_score = [int]$_.study_score
+                    patterns = $_.patterns
+                    archetypes = $_.archetypes
+                    recreation_steps = $_.recreation_steps
+                    top_effects = $_.top_effects
+                    top_plugin_effects = $_.top_plugin_effects
+                    readiness_blockers = $_.readiness_blockers
+                }
+            })
+            learning_actions_top = @($learningActionRows | ForEach-Object {
+                [ordered]@{
+                    priority = [int]$_.priority
+                    pattern = $_.pattern
+                    count = [int]$_.count
+                    action = $_.action
+                    representative_project = $_.representative_project
+                    representative_readiness = $_.representative_readiness
+                    recreation_steps = $_.recreation_steps
+                    top_effects = $_.top_effects
+                    top_plugin_effects = $_.top_plugin_effects
+                    risk = $_.risk
+                }
+            })
+            coverage_summary = @($coverageScorecardRows | ForEach-Object {
+                [ordered]@{
+                    artifact = $_.artifact
+                    metric = $_.metric
+                    expected_count = [int]$_.expected_count
+                    actual_count = [int]$_.actual_count
+                    status = $_.status
+                    notes = $_.notes
+                }
+            })
+        }
         steps = @($steps)
     }
     $effectiveness | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $effectivenessJsonPath -Encoding UTF8
@@ -643,6 +683,19 @@ try {
         throw "latest effectiveness json missing: $latestEffectivenessJsonPath"
     }
     Require-LatestIndexLink -Label "latest effectiveness json" -RelativePath "latest_effectiveness.json"
+    $latestEffectivenessJson = Get-Content -Raw -LiteralPath $latestEffectivenessJsonPath | ConvertFrom-Json
+    if ($null -eq $latestEffectivenessJson.learning_signals) {
+        throw "latest effectiveness json missing learning_signals"
+    }
+    if ($null -eq $latestEffectivenessJson.learning_signals.study_queue_top) {
+        throw "latest effectiveness json missing learning_signals.study_queue_top"
+    }
+    if ($null -eq $latestEffectivenessJson.learning_signals.learning_actions_top) {
+        throw "latest effectiveness json missing learning_signals.learning_actions_top"
+    }
+    if ($null -eq $latestEffectivenessJson.learning_signals.coverage_summary) {
+        throw "latest effectiveness json missing learning_signals.coverage_summary"
+    }
 
     Write-Host "acceptance json: $acceptanceJsonPath"
     Write-Host "acceptance md:   $acceptanceMdPath"

@@ -193,7 +193,10 @@ that compiled `.aep` with `aeptechnique`, and writes `acceptance.json` plus
 `latest_acceptance.md`, and `latest_index.html` at the selected output root so
 the most recent result has a stable path. `latest_effectiveness.md` is the
 shortest human-readable outcome summary, while `latest_effectiveness.json` is
-the script/frontend-friendly version of the same effectiveness snapshot.
+the script/frontend-friendly version of the same effectiveness snapshot,
+including corpus counters, closed-loop reconstruction smoke results, primary
+artifact paths, and top learning signals from the study queue, learning actions,
+and coverage scorecard.
 Passing `-Open` opens the latest HTML index after the gate finishes.
 
 ## Non-Goals
