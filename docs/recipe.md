@@ -158,46 +158,46 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | - | - |
-| `comps[].layers[].shape.size` | `array<float64>` | - | Shape size vector. | - | - |
-| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | - | - |
-| `comps[].layers[].shape.roundness` | `number` | - | Rectangle corner roundness. | - | - |
-| `comps[].layers[].shape.points` | `number` | - | Star or polygon point count. | - | - |
-| `comps[].layers[].shape.rotation` | `number` | - | Shape local rotation. | - | - |
-| `comps[].layers[].shape.inner_radius` | `number` | - | Star inner radius. | - | - |
-| `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | - | - |
-| `comps[].layers[].shape.inner_roundness` | `number` | - | Star inner roundness. | - | - |
-| `comps[].layers[].shape.outer_roundness` | `number` | - | Star or polygon outer roundness. | - | - |
-| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | - |
-| `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | - | - |
-| `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | - | - |
-| `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | - | - |
-| `comps[].layers[].shape.fill_rule` | `string` | - | Solid fill rule. | - | - |
-| `comps[].layers[].shape.gradient_fill` | `object<GradientFillSpec>` | - | Gradient fill settings. | - | - |
-| `comps[].layers[].shape.gradient_stroke` | `object<GradientStrokeSpec>` | - | Gradient stroke settings. | - | - |
-| `comps[].layers[].shape.stroke` | `object<StrokeSpec>` | - | Solid stroke settings. | - | - |
-| `comps[].layers[].shape.trim` | `object<TrimSpec>` | - | Trim paths operator settings. | - | - |
-| `comps[].layers[].shape.round_corners` | `object<RoundCornersSpec>` | - | Round corners operator settings. | - | - |
-| `comps[].layers[].shape.offset_paths` | `object<OffsetPathsSpec>` | - | Offset paths operator settings. | - | - |
-| `comps[].layers[].shape.repeater` | `object<RepeaterSpec>` | - | Repeater operator settings. | - | - |
-| `comps[].layers[].shape.merge_paths` | `object<MergePathsSpec>` | - | Merge paths operator settings. | - | - |
-| `comps[].layers[].shape.zigzag` | `object<ZigZagSpec>` | - | Zig Zag operator settings. | - | - |
-| `comps[].layers[].shape.pucker_bloat` | `object<PuckerBloatSpec>` | - | Pucker and Bloat operator settings. | - | - |
-| `comps[].layers[].shape.twist` | `object<TwistSpec>` | - | Twist operator settings. | - | - |
-| `comps[].layers[].shape.wiggle_paths` | `object<WigglePathsSpec>` | - | Wiggle Paths operator settings. | - | - |
-| `comps[].layers[].shape.wiggle_transform` | `object<WiggleTransformSpec>` | - | Wiggle Transform operator settings. | - | - |
+| `comps[].layers[].shape.kind` | `string` | structural | Shape primitive type. | - | `shape.star.add` (`VectorGroup.AddStar`)<br>`shape.star.set_type` (`StarNode.SetStarType`) |
+| `comps[].layers[].shape.size` | `array<float64>` | - | Shape size vector. | - | `shape.rect.set_size` (`RectNode.SetSize`)<br>`shape.ellipse.set_size` (`EllipseNode.SetSize`) |
+| `comps[].layers[].shape.position` | `array<float64>` | - | Shape local position vector. | - | `shape.rect.set_position` (`RectNode.SetPosition`)<br>`shape.ellipse.set_position` (`EllipseNode.SetPosition`)<br>`shape.star.set_position` (`StarNode.SetPosition`) |
+| `comps[].layers[].shape.roundness` | `number` | - | Rectangle corner roundness. | - | `shape.rect.set_roundness` (`RectNode.SetRoundness`) |
+| `comps[].layers[].shape.points` | `number` | - | Star or polygon point count. | - | `shape.star.set_points` (`StarNode.SetPoints`) |
+| `comps[].layers[].shape.rotation` | `number` | - | Shape local rotation. | - | `shape.star.set_rotation` (`StarNode.SetRotation`) |
+| `comps[].layers[].shape.inner_radius` | `number` | - | Star inner radius. | - | `shape.star.set_inner_radius` (`StarNode.SetInnerRadius`) |
+| `comps[].layers[].shape.outer_radius` | `number` | - | Star or polygon outer radius. | - | `shape.star.set_outer_radius` (`StarNode.SetOuterRadius`) |
+| `comps[].layers[].shape.inner_roundness` | `number` | - | Star inner roundness. | - | `shape.star.set_inner_roundness` (`StarNode.SetInnerRoundness`) |
+| `comps[].layers[].shape.outer_roundness` | `number` | - | Star or polygon outer roundness. | - | `shape.star.set_outer_roundness` (`StarNode.SetOuterRoundness`) |
+| `comps[].layers[].shape.fill_color` | `array<float64>` | - | Solid fill color as RGB channels. | - | `shape.fill.set_color` (`FillNode.SetColor`) |
+| `comps[].layers[].shape.fill_opacity` | `number` | - | Solid fill opacity. | - | `shape.fill.set_opacity` (`FillNode.SetOpacity`) |
+| `comps[].layers[].shape.fill_blend_mode` | `number` | - | Solid fill blend mode. | - | `shape.fill.set_blend_mode` (`FillNode.SetBlendMode`) |
+| `comps[].layers[].shape.fill_composite_order` | `string` | - | Solid fill composite order. | - | `shape.fill.set_composite_order` (`FillNode.SetCompositeOrder`) |
+| `comps[].layers[].shape.fill_rule` | `string` | - | Solid fill rule. | - | `shape.fill.set_fill_rule` (`FillNode.SetFillRule`) |
+| `comps[].layers[].shape.gradient_fill` | `object<GradientFillSpec>` | - | Gradient fill settings. | - | `shape.gradient_fill.add` (`VectorGroup.AddGradientFill`) |
+| `comps[].layers[].shape.gradient_stroke` | `object<GradientStrokeSpec>` | - | Gradient stroke settings. | - | `shape.gradient_stroke.add` (`VectorGroup.AddGradientStroke`) |
+| `comps[].layers[].shape.stroke` | `object<StrokeSpec>` | - | Solid stroke settings. | - | `shape.stroke.add` (`VectorGroup.AddStroke`) |
+| `comps[].layers[].shape.trim` | `object<TrimSpec>` | - | Trim paths operator settings. | - | `shape.trim.add` (`VectorGroup.AddTrim`) |
+| `comps[].layers[].shape.round_corners` | `object<RoundCornersSpec>` | - | Round corners operator settings. | - | `shape.round_corners.add` (`VectorGroup.AddRoundCorners`) |
+| `comps[].layers[].shape.offset_paths` | `object<OffsetPathsSpec>` | - | Offset paths operator settings. | - | `shape.offset_paths.add` (`VectorGroup.AddOffsetPaths`) |
+| `comps[].layers[].shape.repeater` | `object<RepeaterSpec>` | - | Repeater operator settings. | - | `shape.repeater.add` (`VectorGroup.AddRepeater`) |
+| `comps[].layers[].shape.merge_paths` | `object<MergePathsSpec>` | - | Merge paths operator settings. | - | `shape.merge_paths.add` (`VectorGroup.AddMergePaths`) |
+| `comps[].layers[].shape.zigzag` | `object<ZigZagSpec>` | - | Zig Zag operator settings. | - | `shape.zigzag.add` (`VectorGroup.AddZigZag`) |
+| `comps[].layers[].shape.pucker_bloat` | `object<PuckerBloatSpec>` | - | Pucker and Bloat operator settings. | - | `shape.pucker_bloat.add` (`VectorGroup.AddPuckerBloat`) |
+| `comps[].layers[].shape.twist` | `object<TwistSpec>` | - | Twist operator settings. | - | `shape.twist.add` (`VectorGroup.AddTwist`) |
+| `comps[].layers[].shape.wiggle_paths` | `object<WigglePathsSpec>` | - | Wiggle Paths operator settings. | - | `shape.wiggle_paths.add` (`VectorGroup.AddWigglePaths`) |
+| `comps[].layers[].shape.wiggle_transform` | `object<WiggleTransformSpec>` | - | Wiggle Transform operator settings. | - | `shape.wiggle_transform.add` (`VectorGroup.AddWiggleTransform`) |
 
 ## GradientFillSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_fill.type` | `string` | - | Gradient fill type. | - | - |
-| `comps[].layers[].shape.gradient_fill.start_point` | `array<float64>` | - | Gradient fill start point. | - | - |
-| `comps[].layers[].shape.gradient_fill.end_point` | `array<float64>` | - | Gradient fill end point. | - | - |
-| `comps[].layers[].shape.gradient_fill.highlight_length` | `number` | - | Radial gradient fill highlight length. | - | - |
-| `comps[].layers[].shape.gradient_fill.highlight_angle` | `number` | - | Radial gradient fill highlight angle. | - | - |
-| `comps[].layers[].shape.gradient_fill.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient fill color stops. | - | - |
-| `comps[].layers[].shape.gradient_fill.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient fill alpha stops. | - | - |
+| `comps[].layers[].shape.gradient_fill.type` | `string` | - | Gradient fill type. | - | `shape.gradient_fill.set_type` (`GradientFillNode.SetGradientType`) |
+| `comps[].layers[].shape.gradient_fill.start_point` | `array<float64>` | - | Gradient fill start point. | - | `shape.gradient_fill.set_start_point` (`GradientFillNode.SetStartPoint`) |
+| `comps[].layers[].shape.gradient_fill.end_point` | `array<float64>` | - | Gradient fill end point. | - | `shape.gradient_fill.set_end_point` (`GradientFillNode.SetEndPoint`) |
+| `comps[].layers[].shape.gradient_fill.highlight_length` | `number` | - | Radial gradient fill highlight length. | - | `shape.gradient_fill.set_highlight_length` (`GradientFillNode.SetHighlightLength`) |
+| `comps[].layers[].shape.gradient_fill.highlight_angle` | `number` | - | Radial gradient fill highlight angle. | - | `shape.gradient_fill.set_highlight_angle` (`GradientFillNode.SetHighlightAngle`) |
+| `comps[].layers[].shape.gradient_fill.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient fill color stops. | - | `shape.gradient_fill.set_color_stops` (`GradientFillNode.SetColorStops`) |
+| `comps[].layers[].shape.gradient_fill.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient fill alpha stops. | - | `shape.gradient_fill.set_alpha_stops` (`GradientFillNode.SetAlphaStops`) |
 
 ## GradientColorStopSpec
 
@@ -225,29 +225,29 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.gradient_stroke.type` | `string` | - | Gradient stroke type. | - | - |
-| `comps[].layers[].shape.gradient_stroke.start_point` | `array<float64>` | - | Gradient stroke start point. | - | - |
-| `comps[].layers[].shape.gradient_stroke.end_point` | `array<float64>` | - | Gradient stroke end point. | - | - |
-| `comps[].layers[].shape.gradient_stroke.highlight_length` | `number` | - | Radial gradient stroke highlight length. | - | - |
-| `comps[].layers[].shape.gradient_stroke.highlight_angle` | `number` | - | Radial gradient stroke highlight angle. | - | - |
-| `comps[].layers[].shape.gradient_stroke.width` | `number` | - | Gradient stroke width. | - | - |
-| `comps[].layers[].shape.gradient_stroke.line_cap` | `string` | - | Gradient stroke line cap mode. | - | - |
-| `comps[].layers[].shape.gradient_stroke.line_join` | `string` | - | Gradient stroke line join mode. | - | - |
-| `comps[].layers[].shape.gradient_stroke.miter_limit` | `number` | - | Gradient stroke miter limit. | - | - |
-| `comps[].layers[].shape.gradient_stroke.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient stroke color stops. | - | - |
-| `comps[].layers[].shape.gradient_stroke.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient stroke alpha stops. | - | - |
+| `comps[].layers[].shape.gradient_stroke.type` | `string` | - | Gradient stroke type. | - | `shape.gradient_stroke.set_type` (`GradientStrokeNode.SetGradientType`) |
+| `comps[].layers[].shape.gradient_stroke.start_point` | `array<float64>` | - | Gradient stroke start point. | - | `shape.gradient_stroke.set_start_point` (`GradientStrokeNode.SetStartPoint`) |
+| `comps[].layers[].shape.gradient_stroke.end_point` | `array<float64>` | - | Gradient stroke end point. | - | `shape.gradient_stroke.set_end_point` (`GradientStrokeNode.SetEndPoint`) |
+| `comps[].layers[].shape.gradient_stroke.highlight_length` | `number` | - | Radial gradient stroke highlight length. | - | `shape.gradient_stroke.set_highlight_length` (`GradientStrokeNode.SetHighlightLength`) |
+| `comps[].layers[].shape.gradient_stroke.highlight_angle` | `number` | - | Radial gradient stroke highlight angle. | - | `shape.gradient_stroke.set_highlight_angle` (`GradientStrokeNode.SetHighlightAngle`) |
+| `comps[].layers[].shape.gradient_stroke.width` | `number` | - | Gradient stroke width. | - | `shape.gradient_stroke.set_width` (`GradientStrokeNode.SetStrokeWidth`) |
+| `comps[].layers[].shape.gradient_stroke.line_cap` | `string` | - | Gradient stroke line cap mode. | - | `shape.gradient_stroke.set_line_cap` (`GradientStrokeNode.SetLineCap`) |
+| `comps[].layers[].shape.gradient_stroke.line_join` | `string` | - | Gradient stroke line join mode. | - | `shape.gradient_stroke.set_line_join` (`GradientStrokeNode.SetLineJoin`) |
+| `comps[].layers[].shape.gradient_stroke.miter_limit` | `number` | - | Gradient stroke miter limit. | - | `shape.gradient_stroke.set_miter_limit` (`GradientStrokeNode.SetMiterLimit`) |
+| `comps[].layers[].shape.gradient_stroke.color_stops[]` | `array<recipe.GradientColorStopSpec>` | - | Gradient stroke color stops. | - | `shape.gradient_stroke.set_color_stops` (`GradientStrokeNode.SetColorStops`) |
+| `comps[].layers[].shape.gradient_stroke.alpha_stops[]` | `array<recipe.GradientAlphaStopSpec>` | - | Gradient stroke alpha stops. | - | `shape.gradient_stroke.set_alpha_stops` (`GradientStrokeNode.SetAlphaStops`) |
 
 ## StrokeSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.color` | `array<float64>` | - | Stroke color as RGB channels. | - | - |
-| `comps[].layers[].shape.stroke.width` | `number` | - | Stroke width. | - | - |
-| `comps[].layers[].shape.stroke.opacity` | `number` | - | Stroke opacity. | - | - |
-| `comps[].layers[].shape.stroke.line_cap` | `string` | - | Stroke line cap mode. | - | - |
-| `comps[].layers[].shape.stroke.line_join` | `string` | - | Stroke line join mode. | - | - |
-| `comps[].layers[].shape.stroke.miter_limit` | `number` | - | Stroke miter limit. | - | - |
-| `comps[].layers[].shape.stroke.composite_order` | `string` | - | Stroke composite order. | - | - |
+| `comps[].layers[].shape.stroke.color` | `array<float64>` | - | Stroke color as RGB channels. | - | `shape.stroke.set_color` (`StrokeNode.SetColor`) |
+| `comps[].layers[].shape.stroke.width` | `number` | - | Stroke width. | - | `shape.stroke.set_width` (`StrokeNode.SetWidth`) |
+| `comps[].layers[].shape.stroke.opacity` | `number` | - | Stroke opacity. | - | `shape.stroke.set_opacity` (`StrokeNode.SetOpacity`) |
+| `comps[].layers[].shape.stroke.line_cap` | `string` | - | Stroke line cap mode. | - | `shape.stroke.set_line_cap` (`StrokeNode.SetLineCap`) |
+| `comps[].layers[].shape.stroke.line_join` | `string` | - | Stroke line join mode. | - | `shape.stroke.set_line_join` (`StrokeNode.SetLineJoin`) |
+| `comps[].layers[].shape.stroke.miter_limit` | `number` | - | Stroke miter limit. | - | `shape.stroke.set_miter_limit` (`StrokeNode.SetMiterLimit`) |
+| `comps[].layers[].shape.stroke.composite_order` | `string` | - | Stroke composite order. | - | `shape.stroke.set_composite_order` (`StrokeNode.SetCompositeOrder`) |
 | `comps[].layers[].shape.stroke.taper` | `object<StrokeTaperSpec>` | - | Stroke taper settings. | - | - |
 | `comps[].layers[].shape.stroke.wave` | `object<StrokeWaveSpec>` | - | Stroke wave settings. | - | - |
 | `comps[].layers[].shape.stroke.dashes` | `object<StrokeDashesSpec>` | - | Stroke dash pattern settings. | - | - |
@@ -256,27 +256,27 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.taper.start_length` | `number` | - | Stroke taper start length. | - | - |
-| `comps[].layers[].shape.stroke.taper.end_length` | `number` | - | Stroke taper end length. | - | - |
-| `comps[].layers[].shape.stroke.taper.start_width` | `number` | - | Stroke taper start width. | - | - |
-| `comps[].layers[].shape.stroke.taper.end_width` | `number` | - | Stroke taper end width. | - | - |
-| `comps[].layers[].shape.stroke.taper.start_ease` | `number` | - | Stroke taper start ease. | - | - |
-| `comps[].layers[].shape.stroke.taper.end_ease` | `number` | - | Stroke taper end ease. | - | - |
+| `comps[].layers[].shape.stroke.taper.start_length` | `number` | - | Stroke taper start length. | - | `shape.stroke_taper.set_start_length` (`StrokeTaper.SetStartLength`) |
+| `comps[].layers[].shape.stroke.taper.end_length` | `number` | - | Stroke taper end length. | - | `shape.stroke_taper.set_end_length` (`StrokeTaper.SetEndLength`) |
+| `comps[].layers[].shape.stroke.taper.start_width` | `number` | - | Stroke taper start width. | - | `shape.stroke_taper.set_start_width` (`StrokeTaper.SetStartWidth`) |
+| `comps[].layers[].shape.stroke.taper.end_width` | `number` | - | Stroke taper end width. | - | `shape.stroke_taper.set_end_width` (`StrokeTaper.SetEndWidth`) |
+| `comps[].layers[].shape.stroke.taper.start_ease` | `number` | - | Stroke taper start ease. | - | `shape.stroke_taper.set_start_ease` (`StrokeTaper.SetStartEase`) |
+| `comps[].layers[].shape.stroke.taper.end_ease` | `number` | - | Stroke taper end ease. | - | `shape.stroke_taper.set_end_ease` (`StrokeTaper.SetEndEase`) |
 
 ## StrokeWaveSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.wave.amount` | `number` | - | Stroke wave amount. | - | - |
-| `comps[].layers[].shape.stroke.wave.wavelength` | `number` | - | Stroke wave wavelength. | - | - |
-| `comps[].layers[].shape.stroke.wave.phase` | `number` | - | Stroke wave phase. | - | - |
+| `comps[].layers[].shape.stroke.wave.amount` | `number` | - | Stroke wave amount. | - | `shape.stroke_wave.set_amount` (`StrokeWave.SetAmount`) |
+| `comps[].layers[].shape.stroke.wave.wavelength` | `number` | - | Stroke wave wavelength. | - | `shape.stroke_wave.set_wavelength` (`StrokeWave.SetWavelength`) |
+| `comps[].layers[].shape.stroke.wave.phase` | `number` | - | Stroke wave phase. | - | `shape.stroke_wave.set_phase` (`StrokeWave.SetPhase`) |
 
 ## StrokeDashesSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.stroke.dashes.dash` | `number` | - | Stroke dash length. | - | - |
-| `comps[].layers[].shape.stroke.dashes.gap` | `number` | - | Stroke gap length. | - | - |
+| `comps[].layers[].shape.stroke.dashes.dash` | `number` | - | Stroke dash length. | - | `shape.stroke_dashes.set_dash` (`StrokeDashes.SetDash`) |
+| `comps[].layers[].shape.stroke.dashes.gap` | `number` | - | Stroke gap length. | - | `shape.stroke_dashes.set_gap` (`StrokeDashes.SetGap`) |
 
 ## TrimSpec
 
@@ -290,85 +290,85 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.round_corners.radius` | `number` | - | Round corners radius. | - | - |
+| `comps[].layers[].shape.round_corners.radius` | `number` | - | Round corners radius. | - | `shape.round_corners.set_radius` (`RoundCornersNode.SetRadius`) |
 
 ## OffsetPathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.offset_paths.amount` | `number` | - | Offset paths amount. | - | - |
-| `comps[].layers[].shape.offset_paths.line_join` | `string` | - | Offset paths line join mode. | - | - |
-| `comps[].layers[].shape.offset_paths.miter_limit` | `number` | - | Offset paths miter limit. | - | - |
-| `comps[].layers[].shape.offset_paths.copies` | `number` | - | Offset paths copy count. | - | - |
-| `comps[].layers[].shape.offset_paths.copy_offset` | `number` | - | Offset paths copy offset. | - | - |
+| `comps[].layers[].shape.offset_paths.amount` | `number` | - | Offset paths amount. | - | `shape.offset_paths.set_amount` (`OffsetPathsNode.SetAmount`) |
+| `comps[].layers[].shape.offset_paths.line_join` | `string` | - | Offset paths line join mode. | - | `shape.offset_paths.set_line_join` (`OffsetPathsNode.SetLineJoin`) |
+| `comps[].layers[].shape.offset_paths.miter_limit` | `number` | - | Offset paths miter limit. | - | `shape.offset_paths.set_miter_limit` (`OffsetPathsNode.SetMiterLimit`) |
+| `comps[].layers[].shape.offset_paths.copies` | `number` | - | Offset paths copy count. | - | `shape.offset_paths.set_copies` (`OffsetPathsNode.SetCopies`) |
+| `comps[].layers[].shape.offset_paths.copy_offset` | `number` | - | Offset paths copy offset. | - | `shape.offset_paths.set_copy_offset` (`OffsetPathsNode.SetCopyOffset`) |
 
 ## RepeaterSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.repeater.copies` | `number` | - | Repeater copy count. | - | - |
-| `comps[].layers[].shape.repeater.offset` | `number` | - | Repeater copy offset. | - | - |
-| `comps[].layers[].shape.repeater.order` | `string` | - | Repeater composite order. | - | - |
-| `comps[].layers[].shape.repeater.anchor` | `array<float64>` | - | Repeater transform anchor point. | - | - |
-| `comps[].layers[].shape.repeater.position` | `array<float64>` | - | Repeater transform position. | - | - |
-| `comps[].layers[].shape.repeater.scale` | `array<float64>` | - | Repeater transform scale. | - | - |
-| `comps[].layers[].shape.repeater.rotation` | `number` | - | Repeater transform rotation. | - | - |
-| `comps[].layers[].shape.repeater.start_opacity` | `number` | - | Repeater starting opacity. | - | - |
-| `comps[].layers[].shape.repeater.end_opacity` | `number` | - | Repeater ending opacity. | - | - |
+| `comps[].layers[].shape.repeater.copies` | `number` | - | Repeater copy count. | - | `shape.repeater.set_copies` (`RepeaterNode.SetCopies`) |
+| `comps[].layers[].shape.repeater.offset` | `number` | - | Repeater copy offset. | - | `shape.repeater.set_offset` (`RepeaterNode.SetOffset`) |
+| `comps[].layers[].shape.repeater.order` | `string` | - | Repeater composite order. | - | `shape.repeater.set_order` (`RepeaterNode.SetOrder`) |
+| `comps[].layers[].shape.repeater.anchor` | `array<float64>` | - | Repeater transform anchor point. | - | `shape.repeater_transform.set_anchor` (`RepeaterTransform.SetAnchor`) |
+| `comps[].layers[].shape.repeater.position` | `array<float64>` | - | Repeater transform position. | - | `shape.repeater_transform.set_position` (`RepeaterTransform.SetPosition`) |
+| `comps[].layers[].shape.repeater.scale` | `array<float64>` | - | Repeater transform scale. | - | `shape.repeater_transform.set_scale` (`RepeaterTransform.SetScale`) |
+| `comps[].layers[].shape.repeater.rotation` | `number` | - | Repeater transform rotation. | - | `shape.repeater_transform.set_rotation` (`RepeaterTransform.SetRotation`) |
+| `comps[].layers[].shape.repeater.start_opacity` | `number` | - | Repeater starting opacity. | - | `shape.repeater_transform.set_start_opacity` (`RepeaterTransform.SetStartOpacity`) |
+| `comps[].layers[].shape.repeater.end_opacity` | `number` | - | Repeater ending opacity. | - | `shape.repeater_transform.set_end_opacity` (`RepeaterTransform.SetEndOpacity`) |
 
 ## MergePathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.merge_paths.type` | `string` | - | Merge paths mode. | - | - |
+| `comps[].layers[].shape.merge_paths.type` | `string` | - | Merge paths mode. | - | `shape.merge_paths.set_type` (`MergePathsNode.SetType`) |
 
 ## ZigZagSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.zigzag.size` | `number` | - | Zig Zag size. | - | - |
-| `comps[].layers[].shape.zigzag.detail` | `number` | - | Zig Zag detail. | - | - |
-| `comps[].layers[].shape.zigzag.points` | `string` | - | Zig Zag point mode. | - | - |
+| `comps[].layers[].shape.zigzag.size` | `number` | - | Zig Zag size. | - | `shape.zigzag.set_size` (`ZigZagNode.SetSize`) |
+| `comps[].layers[].shape.zigzag.detail` | `number` | - | Zig Zag detail. | - | `shape.zigzag.set_detail` (`ZigZagNode.SetDetail`) |
+| `comps[].layers[].shape.zigzag.points` | `string` | - | Zig Zag point mode. | - | `shape.zigzag.set_points` (`ZigZagNode.SetPoints`) |
 
 ## PuckerBloatSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.pucker_bloat.amount` | `number` | - | Pucker and Bloat amount. | - | - |
+| `comps[].layers[].shape.pucker_bloat.amount` | `number` | - | Pucker and Bloat amount. | - | `shape.pucker_bloat.set_amount` (`PuckerBloatNode.SetAmount`) |
 
 ## TwistSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.twist.angle` | `number` | - | Twist angle. | - | - |
-| `comps[].layers[].shape.twist.center` | `array<float64>` | - | Twist center point. | - | - |
+| `comps[].layers[].shape.twist.angle` | `number` | - | Twist angle. | - | `shape.twist.set_angle` (`TwistNode.SetAngle`) |
+| `comps[].layers[].shape.twist.center` | `array<float64>` | - | Twist center point. | - | `shape.twist.set_center` (`TwistNode.SetCenter`) |
 
 ## WigglePathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.wiggle_paths.size` | `number` | - | Wiggle Paths size. | - | - |
-| `comps[].layers[].shape.wiggle_paths.detail` | `number` | - | Wiggle Paths detail. | - | - |
-| `comps[].layers[].shape.wiggle_paths.wiggles_per_second` | `number` | - | Wiggle Paths frequency. | - | - |
-| `comps[].layers[].shape.wiggle_paths.random_seed` | `number` | - | Wiggle Paths random seed. | - | - |
-| `comps[].layers[].shape.wiggle_paths.points` | `string` | - | Wiggle Paths point mode. | - | - |
-| `comps[].layers[].shape.wiggle_paths.correlation` | `number` | - | Wiggle Paths correlation. | - | - |
-| `comps[].layers[].shape.wiggle_paths.temporal_phase` | `number` | - | Wiggle Paths temporal phase. | - | - |
-| `comps[].layers[].shape.wiggle_paths.spatial_phase` | `number` | - | Wiggle Paths spatial phase. | - | - |
+| `comps[].layers[].shape.wiggle_paths.size` | `number` | - | Wiggle Paths size. | - | `shape.wiggle_paths.set_size` (`WigglePathsNode.SetSize`) |
+| `comps[].layers[].shape.wiggle_paths.detail` | `number` | - | Wiggle Paths detail. | - | `shape.wiggle_paths.set_detail` (`WigglePathsNode.SetDetail`) |
+| `comps[].layers[].shape.wiggle_paths.wiggles_per_second` | `number` | - | Wiggle Paths frequency. | - | `shape.wiggle_paths.set_wiggles_per_second` (`WigglePathsNode.SetWigglesPerSecond`) |
+| `comps[].layers[].shape.wiggle_paths.random_seed` | `number` | - | Wiggle Paths random seed. | - | `shape.wiggle_paths.set_random_seed` (`WigglePathsNode.SetRandomSeed`) |
+| `comps[].layers[].shape.wiggle_paths.points` | `string` | - | Wiggle Paths point mode. | - | `shape.wiggle_paths.set_points` (`WigglePathsNode.SetPoints`) |
+| `comps[].layers[].shape.wiggle_paths.correlation` | `number` | - | Wiggle Paths correlation. | - | `shape.wiggle_paths.set_correlation` (`WigglePathsNode.SetCorrelation`) |
+| `comps[].layers[].shape.wiggle_paths.temporal_phase` | `number` | - | Wiggle Paths temporal phase. | - | `shape.wiggle_paths.set_temporal_phase` (`WigglePathsNode.SetTemporalPhase`) |
+| `comps[].layers[].shape.wiggle_paths.spatial_phase` | `number` | - | Wiggle Paths spatial phase. | - | `shape.wiggle_paths.set_spatial_phase` (`WigglePathsNode.SetSpatialPhase`) |
 
 ## WiggleTransformSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.wiggle_transform.anchor` | `array<float64>` | - | Wiggle Transform anchor amount. | - | - |
-| `comps[].layers[].shape.wiggle_transform.position` | `array<float64>` | - | Wiggle Transform position amount. | - | - |
-| `comps[].layers[].shape.wiggle_transform.scale` | `array<float64>` | - | Wiggle Transform scale amount. | - | - |
-| `comps[].layers[].shape.wiggle_transform.rotation` | `number` | - | Wiggle Transform rotation amount. | - | - |
-| `comps[].layers[].shape.wiggle_transform.wiggles_per_second` | `number` | - | Wiggle Transform frequency. | - | - |
-| `comps[].layers[].shape.wiggle_transform.random_seed` | `number` | - | Wiggle Transform random seed. | - | - |
-| `comps[].layers[].shape.wiggle_transform.correlation` | `number` | - | Wiggle Transform correlation. | - | - |
-| `comps[].layers[].shape.wiggle_transform.temporal_phase` | `number` | - | Wiggle Transform temporal phase. | - | - |
-| `comps[].layers[].shape.wiggle_transform.spatial_phase` | `number` | - | Wiggle Transform spatial phase. | - | - |
+| `comps[].layers[].shape.wiggle_transform.anchor` | `array<float64>` | - | Wiggle Transform anchor amount. | - | `shape.wiggler_transform.set_anchor` (`WigglerTransform.SetAnchor`) |
+| `comps[].layers[].shape.wiggle_transform.position` | `array<float64>` | - | Wiggle Transform position amount. | - | `shape.wiggler_transform.set_position` (`WigglerTransform.SetPosition`) |
+| `comps[].layers[].shape.wiggle_transform.scale` | `array<float64>` | - | Wiggle Transform scale amount. | - | `shape.wiggler_transform.set_scale` (`WigglerTransform.SetScale`) |
+| `comps[].layers[].shape.wiggle_transform.rotation` | `number` | - | Wiggle Transform rotation amount. | - | `shape.wiggler_transform.set_rotation` (`WigglerTransform.SetRotation`) |
+| `comps[].layers[].shape.wiggle_transform.wiggles_per_second` | `number` | - | Wiggle Transform frequency. | - | `shape.wiggle_transform.set_wiggles_per_second` (`WiggleTransformNode.SetWigglesPerSecond`) |
+| `comps[].layers[].shape.wiggle_transform.random_seed` | `number` | - | Wiggle Transform random seed. | - | `shape.wiggle_transform.set_random_seed` (`WiggleTransformNode.SetRandomSeed`) |
+| `comps[].layers[].shape.wiggle_transform.correlation` | `number` | - | Wiggle Transform correlation. | - | `shape.wiggle_transform.set_correlation` (`WiggleTransformNode.SetCorrelation`) |
+| `comps[].layers[].shape.wiggle_transform.temporal_phase` | `number` | - | Wiggle Transform temporal phase. | - | `shape.wiggle_transform.set_temporal_phase` (`WiggleTransformNode.SetTemporalPhase`) |
+| `comps[].layers[].shape.wiggle_transform.spatial_phase` | `number` | - | Wiggle Transform spatial phase. | - | `shape.wiggle_transform.set_spatial_phase` (`WiggleTransformNode.SetSpatialPhase`) |
 
 ## MaskSpec
 

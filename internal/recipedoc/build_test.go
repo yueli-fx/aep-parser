@@ -70,6 +70,32 @@ func TestBuildDocumentIncludesCoreCapabilityMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesShapeCapabilityMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := map[string]string{
+		"comps[].layers[].shape.size":                                "shape.rect.set_size",
+		"comps[].layers[].shape.kind":                                "shape.star.add",
+		"comps[].layers[].shape.fill_color":                          "shape.fill.set_color",
+		"comps[].layers[].shape.gradient_fill.color_stops[]":         "shape.gradient_fill.set_color_stops",
+		"comps[].layers[].shape.gradient_stroke.line_join":           "shape.gradient_stroke.set_line_join",
+		"comps[].layers[].shape.stroke.taper.start_length":           "shape.stroke_taper.set_start_length",
+		"comps[].layers[].shape.repeater.position":                   "shape.repeater_transform.set_position",
+		"comps[].layers[].shape.merge_paths.type":                    "shape.merge_paths.set_type",
+		"comps[].layers[].shape.wiggle_paths.wiggles_per_second":     "shape.wiggle_paths.set_wiggles_per_second",
+		"comps[].layers[].shape.wiggle_transform.wiggles_per_second": "shape.wiggle_transform.set_wiggles_per_second",
+	}
+	for path, key := range tests {
+		field := requireField(t, doc, path)
+		if !hasCapability(field, key) {
+			t.Fatalf("%s capabilities = %+v, want key %q", path, field.Capabilities, key)
+		}
+	}
+}
+
 func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

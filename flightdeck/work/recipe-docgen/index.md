@@ -400,11 +400,13 @@ Done:
 - Core capability metadata expanded for comp settings, layer switches/timing,
   text style fields, camera options, and light options; generated docs now join
   capability details for 99 recipe fields.
+- Shape capability metadata expanded for primitives, fills, gradients, strokes,
+  stroke detail, and shape operators; generated docs now join capability
+  details for 202 recipe fields.
 
 Current:
 
-- Ready for shape/effect/expected-profile metadata expansion or editor
-  integration.
+- Ready for effect/expected-profile metadata expansion or editor integration.
 
 ## Open questions
 
