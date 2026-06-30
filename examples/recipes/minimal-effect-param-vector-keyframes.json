@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "project": {"name": "minimal-effect-param-vector-keyframes"},
+  "comps": [{
+    "name": "Effect Param Vector Keyframes",
+    "width": 640,
+    "height": 360,
+    "frame_rate": 24,
+    "duration": 3,
+    "layers": [{
+      "type": "text",
+      "name": "Title",
+      "text": "FX",
+      "effects": [{
+        "match_name": "ADBE Point Control",
+        "params": [{
+          "match_name": "ADBE Point Control-0001",
+          "keyframes": [
+            {"time": 0, "value": [0.25, 0.35]},
+            {"time": 2, "value": [0.75, 0.65]}
+          ]
+        }]
+      }]
+    }]
+  }],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [{"name": "Title", "type": "text"}],
+    "effects": [{
+      "layer_name": "Title",
+      "match_name": "ADBE Point Control"
+    }],
+    "keyframes": [{
+      "layer_name": "Title",
+      "match_name": "ADBE Point Control-0001",
+      "keyframes": [
+        {"time": 0, "value": [0.25, 0.35]},
+        {"time": 2, "value": [0.75, 0.65]}
+      ]
+    }]
+  }
+}

@@ -7377,11 +7377,11 @@
       "source_type": "EffectParam",
       "source_field": "Keyframes",
       "type": "array",
-      "go_type": "[]recipe.ScalarKeyframe",
-      "element": "recipe.ScalarKeyframe",
-      "object_type": "ScalarKeyframe",
+      "go_type": "[]recipe.ValueKeyframe",
+      "element": "recipe.ValueKeyframe",
+      "object_type": "ValueKeyframe",
       "description": "Effect parameter keyframe list.",
-      "x-aep-validation": "When present, requires at least 2 scalar keyframes sorted by non-negative time.",
+      "x-aep-validation": "When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
       "x-aep-capabilities": [
         {
           "key": "effect.animate_param",
@@ -7396,14 +7396,28 @@
             "TestAnimEffect_AEShipGate_AE2020",
             "TestAnimEffect_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "effect.animate_param_vec",
+          "query": "AnimateEffectParamVec",
+          "status": "supported",
+          "symbol": "AnimateEffectParamVec",
+          "domain": "effect",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "2/3/4 components (color/point); use AnimateEffectParam for 1D; fx must be on a parsed layer (Reopen)",
+          "gate": [
+            "TestAnimEffectVec_AEShipGate_AE2020",
+            "TestAnimEffectVec_AEShipGate_AE2025"
+          ]
         }
       ],
-      "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].time",
       "json_name": "time",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Time",
       "type": "number",
       "go_type": "float64",
@@ -7414,10 +7428,10 @@
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].value",
       "json_name": "value",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Value",
-      "type": "number",
-      "go_type": "float64",
+      "type": "object",
+      "go_type": "interface {}",
       "x-aep-structural-required": true,
       "description": "Effect parameter keyframe value.",
       "x-aep-example": "examples/recipes/minimal-effect-param-keyframes.json"
@@ -7425,7 +7439,7 @@
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].in_ease",
       "json_name": "in_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "InEase",
       "type": "object",
       "go_type": "*recipe.TemporalEase",
@@ -7454,7 +7468,7 @@
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease",
       "json_name": "out_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "OutEase",
       "type": "object",
       "go_type": "*recipe.TemporalEase",

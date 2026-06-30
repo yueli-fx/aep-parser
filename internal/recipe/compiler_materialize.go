@@ -205,22 +205,58 @@ func materializeEffects(project *aep.Project, compSpec CompSpec) (*aep.Project, 
 
 func applyEffectParam(layer *aep.Layer, fx *aep.Effect, param EffectParam) (*aep.Property, error) {
 	if len(param.Keyframes) > 0 {
-		keyframes := make([]aep.ScalarKeyframe, 0, len(param.Keyframes))
-		for _, kf := range param.Keyframes {
-			keyframes = append(keyframes, aep.ScalarKeyframe{
-				Time:    kf.Time,
-				Value:   kf.Value,
-				InEase:  temporalEase(kf.InEase),
-				OutEase: temporalEase(kf.OutEase),
-			})
+		if _, ok := numericValue(param.Keyframes[0].Value); ok {
+			keyframes, err := effectParamScalarKeyframes(param.Keyframes)
+			if err != nil {
+				return nil, err
+			}
+			return aep.AnimateEffectParam(layer, fx, param.MatchName, keyframes)
 		}
-		return aep.AnimateEffectParam(layer, fx, param.MatchName, keyframes)
+		keyframes, err := effectParamVectorKeyframes(param.Keyframes)
+		if err != nil {
+			return nil, err
+		}
+		return aep.AnimateEffectParamVec(layer, fx, param.MatchName, keyframes)
 	}
 	value, err := normalizeEffectParamValue(param.Value)
 	if err != nil {
 		return nil, err
 	}
 	return aep.SetEffectParam(layer, fx, param.MatchName, value)
+}
+
+func effectParamScalarKeyframes(in []ValueKeyframe) ([]aep.ScalarKeyframe, error) {
+	out := make([]aep.ScalarKeyframe, 0, len(in))
+	for i, kf := range in {
+		value, ok := numericValue(kf.Value)
+		if !ok {
+			return nil, fmt.Errorf("effects[].params[].keyframes[%d].value must be a number", i)
+		}
+		out = append(out, aep.ScalarKeyframe{
+			Time:    kf.Time,
+			Value:   value,
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	return out, nil
+}
+
+func effectParamVectorKeyframes(in []ValueKeyframe) ([]aep.VectorKeyframe, error) {
+	out := make([]aep.VectorKeyframe, 0, len(in))
+	for i, kf := range in {
+		value, ok := numericSliceValue(kf.Value)
+		if !ok || len(value) < 2 || len(value) > 4 {
+			return nil, fmt.Errorf("effects[].params[].keyframes[%d].value must be a 2-, 3-, or 4-number array", i)
+		}
+		out = append(out, aep.VectorKeyframe{
+			Time:    kf.Time,
+			Value:   value,
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	return out, nil
 }
 
 func materializeTransformExpressions(project *aep.Project, compSpec CompSpec) (*aep.Project, error) {

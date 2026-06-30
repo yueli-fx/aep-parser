@@ -56,7 +56,7 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present.",
 	},
 	"comps[].layers[].effects[].params[].keyframes[]": {
-		Validation: "When present, requires at least 2 scalar keyframes sorted by non-negative time.",
+		Validation: "When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
 	},
 	"comps[].layers[].effects[].params[].expression.source": {
 		Validation: "Expression source is applied only when non-empty.",

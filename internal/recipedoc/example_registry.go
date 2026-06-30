@@ -14,6 +14,7 @@ var fieldExamples = map[string]string{
 	"comps[].layers[].transform.position_keyframes[]":        "examples/recipes/minimal-transform-keyframes.json",
 	"comps[].layers[].transform.expressions.position.source": "examples/recipes/minimal-transform-expression.json",
 	"comps[].layers[].effects[]":                             "examples/recipes/minimal-text-effect.json",
+	"comps[].layers[].effects[].params[].keyframes[]":        "examples/recipes/minimal-effect-param-vector-keyframes.json",
 	"comps[].layers[].effects[].params[].expression.source":  "examples/recipes/minimal-effect-param-expression.json",
 	"expected_profile.background_color":                      "examples/recipes/minimal-comp-background-color.json",
 	"expected_profile.layers[]":                              "examples/recipes/minimal-layer-object-profile.json",

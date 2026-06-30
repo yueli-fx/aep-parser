@@ -958,19 +958,20 @@
       "json_name": "keyframes",
       "source_type": "EffectParam",
       "source_field": "Keyframes",
-      "type": "array\u003crecipe.ScalarKeyframe\u003e",
-      "go_type": "[]recipe.ScalarKeyframe",
+      "type": "array\u003crecipe.ValueKeyframe\u003e",
+      "go_type": "[]recipe.ValueKeyframe",
       "summary": "Effect parameter keyframe list.",
-      "validation": "When present, requires at least 2 scalar keyframes sorted by non-negative time.",
+      "validation": "When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays.",
       "capability_keys": [
-        "effect.animate_param"
+        "effect.animate_param",
+        "effect.animate_param_vec"
       ],
-      "example": "examples/recipes/minimal-effect-param-keyframes.json"
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].in_ease": {
       "path": "comps[].layers[].effects[].params[].keyframes[].in_ease",
       "json_name": "in_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
@@ -1000,7 +1001,7 @@
     "comps[].layers[].effects[].params[].keyframes[].out_ease": {
       "path": "comps[].layers[].effects[].params[].keyframes[].out_ease",
       "json_name": "out_ease",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
@@ -1030,7 +1031,7 @@
     "comps[].layers[].effects[].params[].keyframes[].time": {
       "path": "comps[].layers[].effects[].params[].keyframes[].time",
       "json_name": "time",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Time",
       "type": "number",
       "go_type": "float64",
@@ -1043,10 +1044,10 @@
     "comps[].layers[].effects[].params[].keyframes[].value": {
       "path": "comps[].layers[].effects[].params[].keyframes[].value",
       "json_name": "value",
-      "source_type": "ScalarKeyframe",
+      "source_type": "ValueKeyframe",
       "source_field": "Value",
-      "type": "number",
-      "go_type": "float64",
+      "type": "any",
+      "go_type": "interface {}",
       "requiredness": [
         "structural"
       ],
@@ -6548,11 +6549,7 @@
       "comps[].layers[].transform.opacity_keyframes[].time",
       "comps[].layers[].transform.opacity_keyframes[].value",
       "comps[].layers[].transform.opacity_keyframes[].in_ease",
-      "comps[].layers[].transform.opacity_keyframes[].out_ease",
-      "comps[].layers[].effects[].params[].keyframes[].time",
-      "comps[].layers[].effects[].params[].keyframes[].value",
-      "comps[].layers[].effects[].params[].keyframes[].in_ease",
-      "comps[].layers[].effects[].params[].keyframes[].out_ease"
+      "comps[].layers[].transform.opacity_keyframes[].out_ease"
     ],
     "ShapeSpec": [
       "comps[].layers[].shape.kind",
@@ -6702,7 +6699,11 @@
       "comps[].layers[].text_animators[].value_keyframes[].time",
       "comps[].layers[].text_animators[].value_keyframes[].value",
       "comps[].layers[].text_animators[].value_keyframes[].in_ease",
-      "comps[].layers[].text_animators[].value_keyframes[].out_ease"
+      "comps[].layers[].text_animators[].value_keyframes[].out_ease",
+      "comps[].layers[].effects[].params[].keyframes[].time",
+      "comps[].layers[].effects[].params[].keyframes[].value",
+      "comps[].layers[].effects[].params[].keyframes[].in_ease",
+      "comps[].layers[].effects[].params[].keyframes[].out_ease"
     ],
     "VectorKeyframe": [
       "comps[].layers[].transform.position_keyframes[].time",

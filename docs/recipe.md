@@ -150,10 +150,6 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].transform.opacity_keyframes[].value` | `number` | structural | Opacity keyframe value. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.opacity_keyframes[].in_ease` | `object<TemporalEase>` | - | Opacity keyframe incoming temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.opacity_keyframes[].out_ease` | `object<TemporalEase>` | - | Opacity keyframe outgoing temporal ease. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
-| `comps[].layers[].effects[].params[].keyframes[].time` | `number` | structural | Effect parameter keyframe time in seconds. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
-| `comps[].layers[].effects[].params[].keyframes[].value` | `number` | structural | Effect parameter keyframe value. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
-| `comps[].layers[].effects[].params[].keyframes[].in_ease` | `object<TemporalEase>` | - | Effect parameter keyframe incoming temporal ease. | - | - | - |
-| `comps[].layers[].effects[].params[].keyframes[].out_ease` | `object<TemporalEase>` | - | Effect parameter keyframe outgoing temporal ease. | - | - | - |
 
 ## TemporalEase
 
@@ -200,6 +196,10 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].value_keyframes[].value` | `any` | structural | Text animator value keyframe value. | - | - | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
 | `comps[].layers[].text_animators[].value_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | - |
 | `comps[].layers[].text_animators[].value_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | - |
+| `comps[].layers[].effects[].params[].keyframes[].time` | `number` | structural | Effect parameter keyframe time in seconds. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].value` | `any` | structural | Effect parameter keyframe value. | - | - | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[].in_ease` | `object<TemporalEase>` | - | Effect parameter keyframe incoming temporal ease. | - | - | - |
+| `comps[].layers[].effects[].params[].keyframes[].out_ease` | `object<TemporalEase>` | - | Effect parameter keyframe outgoing temporal ease. | - | - | - |
 
 ## CameraSpec
 
@@ -550,7 +550,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].effects[].params[].match_name` | `string` | structural | Effect parameter match name. | Must match a parameter exposed by the chosen effect. | - | examples/recipes/minimal-adjustment-layer.json |
 | `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present. | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].effects[].params[].keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Effect parameter keyframe list. | When present, requires at least 2 scalar keyframes sorted by non-negative time. | `effect.animate_param` (`AnimateEffectParam`) | examples/recipes/minimal-effect-param-keyframes.json |
+| `comps[].layers[].effects[].params[].keyframes[]` | `array<recipe.ValueKeyframe>` | - | Effect parameter keyframe list. | When present, requires at least 2 keyframes sorted by non-negative time. Values must be all scalar numbers or all 2-, 3-, or 4-number arrays. | `effect.animate_param` (`AnimateEffectParam`)<br>`effect.animate_param_vec` (`AnimateEffectParamVec`) | examples/recipes/minimal-effect-param-vector-keyframes.json |
 | `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | Effect parameter expression settings. | - | - | examples/recipes/minimal-effect-param-expression.json |
 
 ## ExpectedProfile

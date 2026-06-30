@@ -480,10 +480,10 @@ func addEffectSummaries(out map[string]string, prefix, label string) {
 		"params[]":             label + " parameter assignments.",
 		"params[].match_name":  "Effect parameter match name.",
 		"params[].value":       "Effect parameter value.",
-		"params[].keyframes[]": "Effect parameter scalar keyframes.",
+		"params[].keyframes[]": "Effect parameter scalar or vector keyframes.",
 		"params[].expression":  "Effect parameter expression settings.",
 	})
-	addKeyframeSummaries(out, prefix+".params[].keyframes[]", "Effect parameter keyframe", "scalar")
+	addKeyframeSummaries(out, prefix+".params[].keyframes[]", "Effect parameter keyframe", "scalar/vector")
 	addExpressionSummaries(out, prefix+".params[].expression", "effect parameter expression")
 }
 

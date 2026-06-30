@@ -888,8 +888,7 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				addRefusal("missing_effect_param_match_name", paramPath+".match_name", "effect param match_name is required")
 			}
 			if len(param.Keyframes) > 0 {
-				recordCapability("AnimateEffectParam", paramPath+".keyframes")
-				validateScalarKeyframes(param.Keyframes, paramPath+".keyframes", "keyframes", addRefusal)
+				validateEffectParamKeyframes(param.Keyframes, paramPath+".keyframes", recordCapability, addRefusal)
 			} else if !validEffectParamValue(param.Value) {
 				addRefusal("unsupported_effect_param_value", paramPath+".value", "effect param value must be a number, boolean, or numeric array")
 			}
@@ -903,5 +902,48 @@ func validateLayer(layer Layer, layerPath string, compDuration float64, recordCa
 				}
 			}
 		}
+	}
+}
+
+func validateEffectParamKeyframes(keyframes []ValueKeyframe, path string, recordCapability func(string, string) CapabilityLookup, addRefusal func(string, string, string)) {
+	kind := "unknown"
+	for i, kf := range keyframes {
+		kfPath := fmt.Sprintf("%s[%d]", path, i)
+		if kf.Time < 0 {
+			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be non-negative")
+		}
+		if i > 0 && kf.Time < keyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+		}
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
+
+		if _, ok := numericValue(kf.Value); ok {
+			if kind == "vector" {
+				addRefusal("invalid_effect_param_keyframe_value", kfPath+".value", "effect param keyframe values must not mix scalar and vector values")
+			}
+			kind = "scalar"
+			continue
+		}
+		values, ok := numericSliceValue(kf.Value)
+		if !ok || len(values) < 2 || len(values) > 4 {
+			addRefusal("invalid_effect_param_keyframe_value", kfPath+".value", "effect param keyframe value must be a number or a 2-, 3-, or 4-number array")
+			continue
+		}
+		if kind == "scalar" {
+			addRefusal("invalid_effect_param_keyframe_value", kfPath+".value", "effect param keyframe values must not mix scalar and vector values")
+		}
+		kind = "vector"
+	}
+	if len(keyframes) < 2 {
+		addRefusal("invalid_effect_param_keyframes", path, "effect param keyframes must include at least 2 keyframes")
+	}
+	switch kind {
+	case "scalar":
+		recordCapability("AnimateEffectParam", path)
+	case "vector":
+		recordCapability("AnimateEffectParamVec", path)
+	default:
+		recordCapability("AnimateEffectParam", path)
 	}
 }

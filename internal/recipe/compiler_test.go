@@ -4387,6 +4387,25 @@ func TestCompileToFileChecksEffectParamKeyframesProfileExample(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
 }
 
+func TestCompileToFileChecksEffectParamVectorKeyframesProfileExample(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "recipes", "minimal-effect-param-vector-keyframes.json"))
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	rec := mustUnmarshalRecipe(t, string(raw))
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[0]", true)
+	assertProfileCheck(t, report, "expected_profile.keyframes[0].keyframes[1]", true)
+}
+
 func TestCompileToFileChecksExpectedProfile(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{

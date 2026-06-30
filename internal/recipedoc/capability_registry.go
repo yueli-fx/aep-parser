@@ -212,7 +212,7 @@ var capabilitiesByPath = map[string][]string{
 	"comps[].layers[].transform":                                  {"layer.set_transform"},
 	"comps[].layers[].effects[]":                                  {"effect.add_builtin"},
 	"comps[].layers[].effects[].params[]":                         {"effect.set_param"},
-	"comps[].layers[].effects[].params[].keyframes[]":             {"effect.animate_param"},
+	"comps[].layers[].effects[].params[].keyframes[]":             {"effect.animate_param", "effect.animate_param_vec"},
 	"comps[].layers[].effects[].params[].expression.source":       {"property.set_expression"},
 	"comps[].layers[].transform.expressions.position.source":      {"property.set_expression"},
 	"comps[].layers[].transform.expressions.anchor_point.source":  {"property.set_expression"},
@@ -492,6 +492,7 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"effect.add_builtin":              {Query: "AddEffect", Summary: "Add a supported built-in effect."},
 	"effect.set_param":                {Query: "SetEffectParam", Summary: "Set an effect parameter value."},
 	"effect.animate_param":            {Query: "AnimateEffectParam", Summary: "Keyframe a scalar effect parameter."},
+	"effect.animate_param_vec":        {Query: "AnimateEffectParamVec", Summary: "Keyframe a vector effect parameter."},
 	"property.set_expression":         {Query: "Property.SetExpression", Summary: "Set a property expression."},
 	"property.set_expression_enabled": {Query: "Property.SetExpressionEnabled", Summary: "Toggle property expression evaluation."},
 }

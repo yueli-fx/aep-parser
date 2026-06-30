@@ -181,6 +181,11 @@ Done:
 - Recipe effect params now support scalar `keyframes[]` through
   `AnimateEffectParam`. `minimal-effect-param-keyframes.json` asserts Gaussian
   Blur blurriness keyframes through `expected_profile.keyframes[]`.
+- Recipe effect param `keyframes[]` now also support 2/3/4 component vector
+  values through `AnimateEffectParamVec`. The field remains a single
+  scalar-or-vector keyframe list, and
+  `minimal-effect-param-vector-keyframes.json` asserts Point Control keyframes
+  through `expected_profile.keyframes[]`.
 - Recipe comp settings now support `draft_3d`. Profile composition output now
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
   assert it. This remains a roundtrip/profile contract because AE 2025 DOM

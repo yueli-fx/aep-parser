@@ -3023,7 +3023,7 @@ func TestValidateReportsEffectParamKeyframesCapability(t *testing.T) {
 		Params: []recipe.EffectParam{
 			{
 				MatchName: "ADBE Gaussian Blur 2-0001",
-				Keyframes: []recipe.ScalarKeyframe{
+				Keyframes: []recipe.ValueKeyframe{
 					{Time: 0, Value: 0},
 					{Time: 2, Value: 50},
 				},
@@ -3037,6 +3037,52 @@ func TestValidateReportsEffectParamKeyframesCapability(t *testing.T) {
 		t.Fatalf("Valid = false, report=%+v", report)
 	}
 	assertCapability(t, report, "AnimateEffectParam")
+}
+
+func TestValidateReportsEffectParamVectorKeyframesCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Point Control",
+		Params: []recipe.EffectParam{
+			{
+				MatchName: "ADBE Point Control-0001",
+				Keyframes: []recipe.ValueKeyframe{
+					{Time: 0, Value: []float64{0.25, 0.35}},
+					{Time: 2, Value: []float64{0.75, 0.65}},
+				},
+			},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, report=%+v", report)
+	}
+	assertCapability(t, report, "AnimateEffectParamVec")
+}
+
+func TestValidateRejectsMixedEffectParamKeyframeValues(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0].Effects = []recipe.Effect{{
+		MatchName: "ADBE Point Control",
+		Params: []recipe.EffectParam{
+			{
+				MatchName: "ADBE Point Control-0001",
+				Keyframes: []recipe.ValueKeyframe{
+					{Time: 0, Value: []float64{0.25, 0.35}},
+					{Time: 2, Value: 0.75},
+				},
+			},
+		},
+	}}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if report.Valid {
+		t.Fatal("Valid = true, want false")
+	}
+	assertRefusal(t, report, "invalid_effect_param_keyframe_value")
 }
 
 func TestValidateRejectsUnsupportedEffectParamValue(t *testing.T) {
