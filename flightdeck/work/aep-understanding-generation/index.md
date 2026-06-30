@@ -195,6 +195,11 @@ Done:
   exposes `draft_3d` from the cdta flag, and `expected_profile.draft_3d` can
   assert it. This remains a roundtrip/profile contract because AE 2025 DOM
   readback does not reliably reflect the Draft 3D preview switch.
+- Recipe comp settings now support `motion_graphics_template_name` via
+  `Composition.SetMotionGraphicsTemplateName`. Profile composition output
+  already exposes the parsed Essential Graphics template name, and
+  `expected_profile.motion_graphics_template_name` asserts it. The minimal
+  coverage recipe is `examples/recipes/minimal-motion-graphics-template-name.json`.
 - Comp-level recipe/profile work now has an object-level execution strategy:
   field order, evidence level, profile target, test shape, verification, and
   commit rules are captured in `comp-recipe-execution-strategy.md`.

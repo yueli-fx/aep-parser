@@ -20,6 +20,7 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.Duration != nil ||
 		expected.Label != nil ||
 		expected.Comment != "" ||
+		expected.MotionGraphicsTemplateName != "" ||
 		len(expected.BackgroundColor) > 0 ||
 		len(expected.ResolutionFactor) > 0 ||
 		expected.PixelAspect != nil ||
@@ -119,6 +120,13 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 			actual = prof.Comps[0].Comment
 		}
 		add("expected_profile.comment", expected.Comment, actual, actual == expected.Comment)
+	}
+	if expected.MotionGraphicsTemplateName != "" {
+		actual := ""
+		if len(prof.Comps) > 0 {
+			actual = prof.Comps[0].MotionGraphicsTemplateName
+		}
+		add("expected_profile.motion_graphics_template_name", expected.MotionGraphicsTemplateName, actual, actual == expected.MotionGraphicsTemplateName)
 	}
 	if len(expected.BackgroundColor) > 0 {
 		actual := []float64(nil)

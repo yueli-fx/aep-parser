@@ -6,6 +6,7 @@ var capabilitiesByPath = map[string][]string{
 	"comps[].background_color":                                    {"comp.set_background_color"},
 	"comps[].label":                                               {"comp.set_label"},
 	"comps[].comment":                                             {"comp.set_comment"},
+	"comps[].motion_graphics_template_name":                       {"comp.set_motion_graphics_template_name"},
 	"comps[].renderer":                                            {"comp.set_renderer"},
 	"comps[].resolution_factor":                                   {"comp.set_resolution_factor"},
 	"comps[].pixel_aspect":                                        {"comp.set_pixel_aspect"},
@@ -229,11 +230,15 @@ var capabilitiesByPath = map[string][]string{
 }
 
 var capabilityRegistry = map[string]CapabilityMeta{
-	"project.create_target":       {Query: "NewProject", Summary: "Create a project from a target AE template."},
-	"comp.create":                 {Query: "NewComposition", Summary: "Create a composition."},
-	"comp.set_background_color":   {Query: "Composition.SetBGColor", Summary: "Set composition background color."},
-	"comp.set_label":              {Query: "Composition.SetLabel", Summary: "Set composition label color."},
-	"comp.set_comment":            {Query: "Composition.SetComment", Summary: "Set composition comment."},
+	"project.create_target":     {Query: "NewProject", Summary: "Create a project from a target AE template."},
+	"comp.create":               {Query: "NewComposition", Summary: "Create a composition."},
+	"comp.set_background_color": {Query: "Composition.SetBGColor", Summary: "Set composition background color."},
+	"comp.set_label":            {Query: "Composition.SetLabel", Summary: "Set composition label color."},
+	"comp.set_comment":          {Query: "Composition.SetComment", Summary: "Set composition comment."},
+	"comp.set_motion_graphics_template_name": {
+		Query:   "Composition.SetMotionGraphicsTemplateName",
+		Summary: "Set composition Motion Graphics template name.",
+	},
 	"comp.set_renderer":           {Query: "SetRenderer", Summary: "Set composition renderer."},
 	"comp.set_resolution_factor":  {Query: "Composition.SetResolutionFactor", Summary: "Set composition preview resolution factor."},
 	"comp.set_pixel_aspect":       {Query: "Composition.SetPixelAspect", Summary: "Set composition pixel aspect ratio."},

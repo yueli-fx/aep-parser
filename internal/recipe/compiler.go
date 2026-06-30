@@ -38,6 +38,11 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: comp %q background_color: %w", compSpec.Name, err)
 		}
 	}
+	if compSpec.MotionGraphicsTemplateName != "" {
+		if err := comp.SetMotionGraphicsTemplateName(compSpec.MotionGraphicsTemplateName); err != nil {
+			return report, fmt.Errorf("recipe: comp %q motion_graphics_template_name: %w", compSpec.Name, err)
+		}
+	}
 	if compSpec.Renderer != "" {
 		if err := aep.SetRenderer(comp, compSpec.Renderer); err != nil {
 			return report, fmt.Errorf("recipe: comp %q renderer: %w", compSpec.Name, err)

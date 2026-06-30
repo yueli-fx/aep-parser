@@ -17,6 +17,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].background_color": {
 		Validation: "RGB color must contain exactly three channels in the 0..255 range.",
 	},
+	"comps[].motion_graphics_template_name": {
+		Validation: "When present, must be non-empty. Empty strings are treated as omitted.",
+	},
 	"comps[].layers[].type": {
 		Validation: "Supported values create the corresponding layer type.",
 		Enum:       []string{"solid", "text", "shape", "camera", "light", "null", "adjustment"},
@@ -93,6 +96,9 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"expected_profile.background_color": {
 		Validation: "Expected RGB color must contain exactly three channels in the 0..255 range.",
+	},
+	"expected_profile.motion_graphics_template_name": {
+		Validation: "When present, checks the first profiled composition's Motion Graphics template name.",
 	},
 	"expected_profile.resolution_factor": {
 		Validation: "Expected resolution factor must contain two positive integer factors.",

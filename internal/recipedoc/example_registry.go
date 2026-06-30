@@ -2,6 +2,7 @@ package recipedoc
 
 var fieldExamples = map[string]string{
 	"comps[].background_color":                               "examples/recipes/minimal-comp-background-color.json",
+	"comps[].motion_graphics_template_name":                  "examples/recipes/minimal-motion-graphics-template-name.json",
 	"comps[].renderer":                                       "examples/recipes/minimal-comp-renderer.json",
 	"comps[].work_area":                                      "examples/recipes/minimal-comp-work-area.json",
 	"comps[].layers[].text_style.font_size":                  "examples/recipes/minimal-text-style.json",
@@ -18,6 +19,7 @@ var fieldExamples = map[string]string{
 	"comps[].layers[].effects[].params[].target_layer":       "examples/recipes/minimal-effect-layer-param.json",
 	"comps[].layers[].effects[].params[].expression.source":  "examples/recipes/minimal-effect-param-expression.json",
 	"expected_profile.background_color":                      "examples/recipes/minimal-comp-background-color.json",
+	"expected_profile.motion_graphics_template_name":         "examples/recipes/minimal-motion-graphics-template-name.json",
 	"expected_profile.layers[]":                              "examples/recipes/minimal-layer-object-profile.json",
 	"expected_profile.effects[]":                             "examples/recipes/minimal-text-effect.json",
 	"expected_profile.effects[].params[]":                    "examples/recipes/minimal-effect-param-expression.json",

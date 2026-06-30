@@ -80,6 +80,9 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 		if comp.Comment != "" {
 			recordCapability("SetComment", compPath+".comment")
 		}
+		if comp.MotionGraphicsTemplateName != "" {
+			recordCapability("Composition.SetMotionGraphicsTemplateName", compPath+".motion_graphics_template_name")
+		}
 		if comp.Renderer != "" {
 			recordCapability("SetRenderer", compPath+".renderer")
 		}

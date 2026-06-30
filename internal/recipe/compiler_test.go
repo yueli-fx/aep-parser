@@ -419,6 +419,41 @@ func TestCompileToFileSetsCompComment(t *testing.T) {
 	}
 }
 
+func TestCompileToFileSetsMotionGraphicsTemplateName(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "EG template"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"motion_graphics_template_name": "Lower Third Pack"
+		}],
+		"expected_profile": {
+			"motion_graphics_template_name": "Lower Third Pack"
+		}
+	}`)
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	project, err := aep.Open(outPath)
+	if err != nil {
+		t.Fatalf("Open compiled AEP: %v", err)
+	}
+	if got := project.Compositions[0].MotionGraphicsTemplateName; got != "Lower Third Pack" {
+		t.Fatalf("MotionGraphicsTemplateName = %q, want Lower Third Pack", got)
+	}
+	assertProfileCheck(t, report, "expected_profile.motion_graphics_template_name", true)
+}
+
 func TestCompileToFileSetsCompDraft3D(t *testing.T) {
 	rec := mustUnmarshalRecipe(t, `{
 		"schema_version": 1,

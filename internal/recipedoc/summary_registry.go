@@ -39,6 +39,7 @@ func addCompSummaries(out map[string]string, prefix, label string) {
 		"background_color":                  label + " background color as RGB channels.",
 		"label":                             label + " label color index.",
 		"comment":                           label + " comment text.",
+		"motion_graphics_template_name":     label + " Motion Graphics template name.",
 		"renderer":                          label + " renderer identifier.",
 		"resolution_factor":                 label + " preview resolution factor.",
 		"pixel_aspect":                      label + " pixel aspect ratio.",

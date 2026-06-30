@@ -32,6 +32,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].background_color` | `array<float64>` | - | Composition background color as RGB channels. | RGB color must contain exactly three channels in the 0..255 range. | `comp.set_background_color` (`Composition.SetBGColor`) | examples/recipes/minimal-comp-background-color.json |
 | `comps[].label` | `number` | - | Composition label color index. | - | `comp.set_label` (`Composition.SetLabel`) | examples/recipes/minimal-comp-label.json |
 | `comps[].comment` | `string` | - | Composition comment text. | - | `comp.set_comment` (`Composition.SetComment`) | examples/recipes/minimal-comp-comment.json |
+| `comps[].motion_graphics_template_name` | `string` | - | Composition Motion Graphics template name. | When present, must be non-empty. Empty strings are treated as omitted. | `comp.set_motion_graphics_template_name` (`Composition.SetMotionGraphicsTemplateName`) | examples/recipes/minimal-motion-graphics-template-name.json |
 | `comps[].renderer` | `string` | - | Composition renderer identifier. | - | `comp.set_renderer` (`SetRenderer`) | examples/recipes/minimal-comp-renderer.json |
 | `comps[].resolution_factor` | `array<float64>` | - | Composition preview resolution factor. | - | `comp.set_resolution_factor` (`Composition.SetResolutionFactor`) | examples/recipes/minimal-comp-object-profile.json |
 | `comps[].pixel_aspect` | `number` | - | Composition pixel aspect ratio. | - | `comp.set_pixel_aspect` (`Composition.SetPixelAspect`) | examples/recipes/minimal-comp-object-profile.json |
@@ -569,6 +570,7 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.duration` | `number` | - | Expected composition duration in seconds. | Expected duration must be positive. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.label` | `number` | - | Expected composition label color index. | Expected label must be a valid AE label index. | - | examples/recipes/minimal-comp-label.json |
 | `expected_profile.comment` | `string` | - | Expected composition comment text. | - | - | examples/recipes/minimal-comp-comment.json |
+| `expected_profile.motion_graphics_template_name` | `string` | - | Expected composition Motion Graphics template name. | When present, checks the first profiled composition's Motion Graphics template name. | - | examples/recipes/minimal-motion-graphics-template-name.json |
 | `expected_profile.background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | Expected RGB color must contain exactly three channels in the 0..255 range. | - | examples/recipes/minimal-comp-background-color.json |
 | `expected_profile.resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | Expected resolution factor must contain two positive integer factors. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | Expected pixel aspect ratio must be positive. | - | examples/recipes/minimal-comp-object-profile.json |

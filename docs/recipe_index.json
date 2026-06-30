@@ -14,6 +14,7 @@
     "comps[].background_color",
     "comps[].label",
     "comps[].comment",
+    "comps[].motion_graphics_template_name",
     "comps[].renderer",
     "comps[].resolution_factor",
     "comps[].pixel_aspect",
@@ -362,6 +363,7 @@
     "expected_profile.duration",
     "expected_profile.label",
     "expected_profile.comment",
+    "expected_profile.motion_graphics_template_name",
     "expected_profile.background_color",
     "expected_profile.resolution_factor",
     "expected_profile.pixel_aspect",
@@ -4670,6 +4672,20 @@
       ],
       "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
+    "comps[].motion_graphics_template_name": {
+      "path": "comps[].motion_graphics_template_name",
+      "json_name": "motion_graphics_template_name",
+      "source_type": "CompSpec",
+      "source_field": "MotionGraphicsTemplateName",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Composition Motion Graphics template name.",
+      "validation": "When present, must be non-empty. Empty strings are treated as omitted.",
+      "capability_keys": [
+        "comp.set_motion_graphics_template_name"
+      ],
+      "example": "examples/recipes/minimal-motion-graphics-template-name.json"
+    },
     "comps[].name": {
       "path": "comps[].name",
       "json_name": "name",
@@ -5800,6 +5816,17 @@
       "summary": "Expected composition motion blur shutter phase.",
       "example": "examples/recipes/minimal-comp-motion-blur.json"
     },
+    "expected_profile.motion_graphics_template_name": {
+      "path": "expected_profile.motion_graphics_template_name",
+      "json_name": "motion_graphics_template_name",
+      "source_type": "ExpectedProfile",
+      "source_field": "MotionGraphicsTemplateName",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected composition Motion Graphics template name.",
+      "validation": "When present, checks the first profiled composition's Motion Graphics template name.",
+      "example": "examples/recipes/minimal-motion-graphics-template-name.json"
+    },
     "expected_profile.name": {
       "path": "expected_profile.name",
       "json_name": "name",
@@ -6227,6 +6254,7 @@
       "comps[].background_color",
       "comps[].label",
       "comps[].comment",
+      "comps[].motion_graphics_template_name",
       "comps[].renderer",
       "comps[].resolution_factor",
       "comps[].pixel_aspect",
@@ -6359,6 +6387,7 @@
       "expected_profile.duration",
       "expected_profile.label",
       "expected_profile.comment",
+      "expected_profile.motion_graphics_template_name",
       "expected_profile.background_color",
       "expected_profile.resolution_factor",
       "expected_profile.pixel_aspect",

@@ -258,6 +258,33 @@
       "x-aep-example": "examples/recipes/minimal-comp-comment.json"
     },
     {
+      "x-aep-path": "comps[].motion_graphics_template_name",
+      "json_name": "motion_graphics_template_name",
+      "source_type": "CompSpec",
+      "source_field": "MotionGraphicsTemplateName",
+      "type": "string",
+      "go_type": "string",
+      "description": "Composition Motion Graphics template name.",
+      "x-aep-validation": "When present, must be non-empty. Empty strings are treated as omitted.",
+      "x-aep-capabilities": [
+        {
+          "key": "comp.set_motion_graphics_template_name",
+          "query": "Composition.SetMotionGraphicsTemplateName",
+          "status": "supported",
+          "symbol": "Composition.SetMotionGraphicsTemplateName",
+          "domain": "eg",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "mirrors AE's CompItem.motionGraphicsTemplateName setter. The\nname is rewritten in every persisted panel generation — AE stores three\n(CIFO, CIF2, CIF3), each holding the name twice — and the write is\nlength-variable, so WriteAEP recomputes the parent LIST sizes. Rejects\nan empty name and rejects comps with no Essential Graphics panel shell\n(comps saved by AE, and comps created by NewComposition, always have\none). The renamed template reads back via the scripting API and\nsurvives AE's own resave.",
+          "gate": [
+            "TestEGAdd_AEShipGate_AE2020",
+            "TestEGAdd_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-motion-graphics-template-name.json"
+    },
+    {
       "x-aep-path": "comps[].renderer",
       "json_name": "renderer",
       "source_type": "CompSpec",
@@ -7721,6 +7748,17 @@
       "go_type": "string",
       "description": "Expected composition comment text.",
       "x-aep-example": "examples/recipes/minimal-comp-comment.json"
+    },
+    {
+      "x-aep-path": "expected_profile.motion_graphics_template_name",
+      "json_name": "motion_graphics_template_name",
+      "source_type": "ExpectedProfile",
+      "source_field": "MotionGraphicsTemplateName",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected composition Motion Graphics template name.",
+      "x-aep-validation": "When present, checks the first profiled composition's Motion Graphics template name.",
+      "x-aep-example": "examples/recipes/minimal-motion-graphics-template-name.json"
     },
     {
       "x-aep-path": "expected_profile.background_color",

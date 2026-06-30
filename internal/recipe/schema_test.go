@@ -675,6 +675,25 @@ func TestValidateReportsCompCommentCapability(t *testing.T) {
 	assertCapability(t, report, "SetComment")
 }
 
+func TestValidateReportsMotionGraphicsTemplateNameCapability(t *testing.T) {
+	rec := mustUnmarshalRecipe(t, `{
+		"schema_version": 1,
+		"project": {"name": "EG template"},
+		"comps": [{
+			"name": "Main",
+			"width": 1920,
+			"height": 1080,
+			"frame_rate": 30,
+			"duration": 1,
+			"motion_graphics_template_name": "Lower Third Pack"
+		}]
+	}`)
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	assertCapability(t, report, "Composition.SetMotionGraphicsTemplateName")
+}
+
 func TestValidateReportsLayerLabelCapability(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].Label = ptr(10)
