@@ -2557,6 +2557,35 @@ func TestValidateReportsTextAnimatorRangeOffsetCapability(t *testing.T) {
 	assertCapability(t, report, "AnimateTextRangeOffset")
 }
 
+func TestValidateReportsTextAnimatorOpacityValueKeyframesCapability(t *testing.T) {
+	rec := minimalRecipe()
+	rec.Comps[0].Layers[0] = recipe.Layer{
+		Type: "text",
+		Name: "Title",
+		Text: "HELLO",
+		TextAnimators: []recipe.TextAnimatorSpec{
+			{
+				Property:    "opacity",
+				Value:       100.0,
+				RangeStart:  ptr(0),
+				RangeEnd:    ptr(100),
+				RangeOffset: ptr(0),
+				ValueKeyframes: []recipe.ScalarKeyframe{
+					{Time: 0, Value: 100},
+					{Time: 2, Value: 0},
+				},
+			},
+		},
+	}
+
+	report := recipe.ValidateWithCapabilities(rec, stableCapabilityIndex{})
+
+	if !report.Valid {
+		t.Fatalf("Valid = false, refusals = %+v", report.Refusals)
+	}
+	assertCapability(t, report, "AnimateTextOpacity")
+}
+
 func TestValidateRejectsInvalidTextStyle(t *testing.T) {
 	rec := minimalRecipe()
 	rec.Comps[0].Layers[0].TextStyle = &recipe.TextStyleSpec{

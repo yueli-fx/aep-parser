@@ -325,20 +325,33 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 	}
 	if len(animator.RangeOffsetKeyframes) > 0 {
 		recordCapability("AnimateTextRangeOffset", path+".range_offset_keyframes")
-		if len(animator.RangeOffsetKeyframes) < 2 {
-			addRefusal("invalid_text_animator_range_offset_keyframes", path+".range_offset_keyframes", "range_offset_keyframes must include at least 2 keyframes")
+		validateScalarKeyframes(animator.RangeOffsetKeyframes, path+".range_offset_keyframes", "range_offset_keyframes", addRefusal)
+	}
+	if len(animator.ValueKeyframes) > 0 {
+		switch animator.Property {
+		case "opacity":
+			recordCapability("AnimateTextOpacity", path+".value_keyframes")
+		default:
+			addRefusal("unsupported_text_animator_value_keyframes", path+".value_keyframes", "value_keyframes currently support opacity text animators")
 		}
-		for i, kf := range animator.RangeOffsetKeyframes {
-			kfPath := fmt.Sprintf("%s.range_offset_keyframes[%d]", path, i)
-			if kf.Time < 0 {
-				addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be non-negative")
-			}
-			if i > 0 && kf.Time < animator.RangeOffsetKeyframes[i-1].Time {
-				addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
-			}
-			validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
-			validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
+		validateScalarKeyframes(animator.ValueKeyframes, path+".value_keyframes", "value_keyframes", addRefusal)
+	}
+}
+
+func validateScalarKeyframes(keyframes []ScalarKeyframe, path, label string, addRefusal func(string, string, string)) {
+	if len(keyframes) < 2 {
+		addRefusal("invalid_text_animator_keyframes", path, label+" must include at least 2 keyframes")
+	}
+	for i, kf := range keyframes {
+		kfPath := fmt.Sprintf("%s[%d]", path, i)
+		if kf.Time < 0 {
+			addRefusal("keyframe_time_out_of_range", kfPath+".time", "keyframe time must be non-negative")
 		}
+		if i > 0 && kf.Time < keyframes[i-1].Time {
+			addRefusal("keyframes_not_sorted", kfPath+".time", "keyframes must be sorted by time")
+		}
+		validateKeyframeEase(kf.InEase, kfPath+".in_ease", addRefusal)
+		validateKeyframeEase(kf.OutEase, kfPath+".out_ease", addRefusal)
 	}
 }
 

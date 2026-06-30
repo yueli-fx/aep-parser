@@ -165,6 +165,7 @@ type TextAnimatorSpec struct {
 	RangeEnd             *float64         `json:"range_end,omitempty"`
 	RangeOffset          *float64         `json:"range_offset,omitempty"`
 	RangeOffsetKeyframes []ScalarKeyframe `json:"range_offset_keyframes,omitempty"`
+	ValueKeyframes       []ScalarKeyframe `json:"value_keyframes,omitempty"`
 }
 
 type ShapeSpec struct {

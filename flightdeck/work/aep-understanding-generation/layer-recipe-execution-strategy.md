@@ -66,7 +66,7 @@ flags, and refs.
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
 | Transform expressions | `transform.expressions.*` | `Property.SetExpression` / `Property.SetExpressionEnabled` | `properties[].expression` / `expression_enabled` | `expected_profile.properties[].expression` / `expression_enabled` | L3 | keep separate |
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
-| Text animators | `text_animators[].property: opacity/position/scale/rotation/color/tracking/character_offset/fill_opacity/stroke_opacity/stroke_width/skew/rotation_x/rotation_y/stroke_color` static Range Selector + `range_offset_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AddTextRotationAnimator` / `AddTextColorAnimator` / `AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` / `AddTextFillOpacityAnimator` / `AddTextStrokeOpacityAnimator` / `AddTextStrokeWidthAnimator` / `AddTextSkewAnimator` / `AddTextRotationXAnimator` / `AddTextRotationYAnimator` / `AddTextStrokeColorAnimator` / `AnimateTextRangeOffset` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | static animator properties + range offset done |
+| Text animators | `text_animators[].property: opacity/position/scale/rotation/color/tracking/character_offset/fill_opacity/stroke_opacity/stroke_width/skew/rotation_x/rotation_y/stroke_color` static Range Selector + `range_offset_keyframes` + opacity `value_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AddTextRotationAnimator` / `AddTextColorAnimator` / `AddTextTrackingAnimator` / `AddTextCharacterOffsetAnimator` / `AddTextFillOpacityAnimator` / `AddTextStrokeOpacityAnimator` / `AddTextStrokeWidthAnimator` / `AddTextSkewAnimator` / `AddTextRotationXAnimator` / `AddTextRotationYAnimator` / `AddTextStrokeColorAnimator` / `AnimateTextRangeOffset` / `AnimateTextOpacity` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | static animator properties + range offset + opacity value keyframes done |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
@@ -285,6 +285,9 @@ through `range_offset_keyframes` and asserts `ADBE Text Percent Offset` through
 `expected_profile.keyframes[]`. Later text animator slices should extend this
 family by property kind only when the expected-profile property/keyframe
 contract stays explicit.
+`minimal-text-animator-opacity-value-keyframes.json` adds opacity
+`value_keyframes` and asserts `ADBE Text Opacity` through
+`expected_profile.keyframes[]`.
 
 Nested content examples also require the matching expected-profile family:
 shape/camera/light property content must assert `properties[]`, text style

@@ -516,6 +516,11 @@ Done:
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles
   `range_offset_keyframes`, asserts `ADBE Text Percent Offset` keyframes through
   `expected_profile.keyframes[]`, and passes recipe profile verification.
+- Text animator opacity value-keyframe recipe support is implemented. The
+  dedicated
+  `examples/recipes/minimal-text-animator-opacity-value-keyframes.json` example
+  compiles `value_keyframes` and asserts `ADBE Text Opacity` keyframes through
+  `expected_profile.keyframes[]`.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven

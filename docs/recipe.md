@@ -132,6 +132,7 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].range_end` | `number` | - | Text animator range selector end percentage. | Range selector end is required. | - | examples/recipes/minimal-text-animator-character-offset.json |
 | `comps[].layers[].text_animators[].range_offset` | `number` | - | Text animator range selector offset percentage. | Range selector offset is required. | - | examples/recipes/minimal-text-animator-character-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Range selector offset keyframes. | When present, requires at least 2 keyframes sorted by non-negative time. | `text_animator.animate_range_offset` (`AnimateTextRangeOffset`) | examples/recipes/minimal-text-animator-range-offset.json |
+| `comps[].layers[].text_animators[].value_keyframes[]` | `array<recipe.ScalarKeyframe>` | - | Text animator value keyframes. | When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity text animators. | `text_animator.animate_opacity` (`AnimateTextOpacity`) | examples/recipes/minimal-text-animator-opacity-value-keyframes.json |
 
 ## ScalarKeyframe
 
@@ -141,6 +142,10 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].range_offset_keyframes[].value` | `number` | structural | Range selector offset keyframe value. | - | - | examples/recipes/minimal-text-animator-range-offset.json |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | - |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].time` | `number` | structural | Text animator value keyframe time in seconds. | - | - | examples/recipes/minimal-text-animator-opacity-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].value` | `number` | structural | Text animator value keyframe value. | - | - | examples/recipes/minimal-text-animator-opacity-value-keyframes.json |
+| `comps[].layers[].text_animators[].value_keyframes[].in_ease` | `object<TemporalEase>` | - | Incoming temporal ease for the keyframe. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].out_ease` | `object<TemporalEase>` | - | Outgoing temporal ease for the keyframe. | - | - | - |
 | `comps[].layers[].transform.rotation_keyframes[].time` | `number` | structural | Rotation keyframe time in seconds. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.rotation_keyframes[].value` | `number` | structural | Rotation keyframe value. | - | - | examples/recipes/minimal-text-shape.json |
 | `comps[].layers[].transform.rotation_keyframes[].in_ease` | `object<TemporalEase>` | - | Rotation keyframe incoming temporal ease. | - | - | - |
@@ -158,6 +163,10 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence` | `number` | structural | Incoming temporal ease influence percentage. | - | - | - |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed` | `number` | - | Outgoing temporal ease speed. | - | - | - |
 | `comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].in_ease.speed` | `number` | - | Incoming temporal ease speed. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].in_ease.influence` | `number` | structural | Incoming temporal ease influence percentage. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].out_ease.speed` | `number` | - | Outgoing temporal ease speed. | - | - | - |
+| `comps[].layers[].text_animators[].value_keyframes[].out_ease.influence` | `number` | structural | Outgoing temporal ease influence percentage. | - | - | - |
 | `comps[].layers[].transform.position_keyframes[].in_ease.speed` | `number` | - | Position keyframe incoming ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.position_keyframes[].in_ease.influence` | `number` | structural | Position keyframe incoming ease influence. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |
 | `comps[].layers[].transform.position_keyframes[].out_ease.speed` | `number` | - | Position keyframe outgoing ease speed. | - | - | examples/recipes/minimal-transform-keyframe-ease.json |

@@ -2245,6 +2245,111 @@
       "description": "Outgoing temporal ease influence percentage."
     },
     {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[]",
+      "json_name": "value_keyframes",
+      "source_type": "TextAnimatorSpec",
+      "source_field": "ValueKeyframes",
+      "type": "array",
+      "go_type": "[]recipe.ScalarKeyframe",
+      "element": "recipe.ScalarKeyframe",
+      "object_type": "ScalarKeyframe",
+      "description": "Text animator value keyframes.",
+      "x-aep-validation": "When present, requires at least 2 keyframes sorted by non-negative time. Currently supported for opacity text animators.",
+      "x-aep-capabilities": [
+        {
+          "key": "text_animator.animate_opacity",
+          "query": "AnimateTextOpacity",
+          "status": "supported",
+          "symbol": "AnimateTextOpacity",
+          "domain": "text",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "the shared 1D scalar leaf path is render-gated via AnimateTextRangeOffset / AnimateTextRotation; this function itself is round-trip-verified only"
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].time",
+      "json_name": "time",
+      "source_type": "ScalarKeyframe",
+      "source_field": "Time",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Text animator value keyframe time in seconds.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].value",
+      "json_name": "value",
+      "source_type": "ScalarKeyframe",
+      "source_field": "Value",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Text animator value keyframe value.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-opacity-value-keyframes.json"
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease",
+      "json_name": "in_ease",
+      "source_type": "ScalarKeyframe",
+      "source_field": "InEase",
+      "type": "object",
+      "go_type": "*recipe.TemporalEase",
+      "object_type": "TemporalEase",
+      "description": "Incoming temporal ease for the keyframe."
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease.speed",
+      "json_name": "speed",
+      "source_type": "TemporalEase",
+      "source_field": "Speed",
+      "type": "number",
+      "go_type": "float64",
+      "description": "Incoming temporal ease speed."
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease.influence",
+      "json_name": "influence",
+      "source_type": "TemporalEase",
+      "source_field": "Influence",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Incoming temporal ease influence percentage."
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease",
+      "json_name": "out_ease",
+      "source_type": "ScalarKeyframe",
+      "source_field": "OutEase",
+      "type": "object",
+      "go_type": "*recipe.TemporalEase",
+      "object_type": "TemporalEase",
+      "description": "Outgoing temporal ease for the keyframe."
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease.speed",
+      "json_name": "speed",
+      "source_type": "TemporalEase",
+      "source_field": "Speed",
+      "type": "number",
+      "go_type": "float64",
+      "description": "Outgoing temporal ease speed."
+    },
+    {
+      "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease.influence",
+      "json_name": "influence",
+      "source_type": "TemporalEase",
+      "source_field": "Influence",
+      "type": "number",
+      "go_type": "float64",
+      "x-aep-structural-required": true,
+      "description": "Outgoing temporal ease influence percentage."
+    },
+    {
       "x-aep-path": "comps[].layers[].camera",
       "json_name": "camera",
       "source_type": "Layer",

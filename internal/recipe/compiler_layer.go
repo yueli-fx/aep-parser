@@ -491,6 +491,9 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+			if err := applyTextValueKeyframes(layer, animator); err != nil {
+				return err
+			}
 		case "position":
 			value, ok := numericSliceValue(animator.Value)
 			if !ok || len(value) != 3 {
@@ -696,6 +699,27 @@ func applyTextRangeOffsetKeyframes(layer *aep.Layer, animator TextAnimatorSpec) 
 		})
 	}
 	return aep.AnimateTextRangeOffset(layer, 0, keyframes)
+}
+
+func applyTextValueKeyframes(layer *aep.Layer, animator TextAnimatorSpec) error {
+	if len(animator.ValueKeyframes) == 0 {
+		return nil
+	}
+	keyframes := make([]aep.ScalarKeyframe, 0, len(animator.ValueKeyframes))
+	for _, kf := range animator.ValueKeyframes {
+		keyframes = append(keyframes, aep.ScalarKeyframe{
+			Time:    kf.Time,
+			Value:   kf.Value,
+			InEase:  temporalEase(kf.InEase),
+			OutEase: temporalEase(kf.OutEase),
+		})
+	}
+	switch animator.Property {
+	case "opacity":
+		return aep.AnimateTextOpacity(layer, 0, keyframes)
+	default:
+		return fmt.Errorf("text_animators[].value_keyframes are not supported for property %q", animator.Property)
+	}
 }
 
 func textJustification(value string) (aep.TextJustification, error) {
