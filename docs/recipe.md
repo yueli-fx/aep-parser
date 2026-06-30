@@ -10,7 +10,7 @@ This reference is generated from the canonical recipe field model.
 | --- | --- | --- | --- | --- | --- | --- |
 | `schema_version` | `number` | structural | Recipe schema version. | Must equal the supported recipe schema version. | - | examples/recipes/minimal-adjustment-layer.json |
 | `project` | `object<ProjectSpec>` | structural | Project-level metadata used when materializing the recipe. | - | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[]` | `array<recipe.CompSpec>` | structural | Composition definitions to create or validate. | - | `comp.create` (`NewComposition`) | examples/recipes/minimal-adjustment-layer.json |
+| `comps[]` | `array<recipe.CompSpec>` | structural | Composition definitions to create or validate. | Recipe must include at least one composition. | `comp.create` (`NewComposition`) | examples/recipes/minimal-adjustment-layer.json |
 | `expected_profile` | `object<ExpectedProfile>` | - | Optional assertions used to compare the generated project against expected structure. | - | - | examples/recipes/minimal-adjustment-layer.json |
 
 ## ProjectSpec
@@ -114,14 +114,14 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].stretch` | `number` | - | Layer time stretch ratio. | Layer stretch must be greater than 0. | `layer.set_stretch` (`Layer.SetStretch`) | examples/recipes/minimal-layer-timing.json |
 | `comps[].layers[].parent` | `string` | - | Parent layer name. | - | `layer.set_parent` (`Layer.SetParent`) | examples/recipes/minimal-layer-null-flag.json |
 | `comps[].layers[].text` | `string` | - | Source text for a text layer. | - | `layer.set_text` (`Layer.SetText`) | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | - | - | examples/recipes/minimal-text-shape.json |
-| `comps[].layers[].text_animators[]` | `array<recipe.TextAnimatorSpec>` | - | Text animator definitions. | - | `text_animator.add_opacity` (`AddTextOpacityAnimator`)<br>`text_animator.add_position` (`AddTextPositionAnimator`)<br>`text_animator.add_scale` (`AddTextScaleAnimator`)<br>`text_animator.add_rotation` (`AddTextRotationAnimator`)<br>`text_animator.add_color` (`AddTextColorAnimator`)<br>`text_animator.add_tracking` (`AddTextTrackingAnimator`)<br>`text_animator.add_character_offset` (`AddTextCharacterOffsetAnimator`)<br>`text_animator.add_fill_opacity` (`AddTextFillOpacityAnimator`)<br>`text_animator.add_stroke_opacity` (`AddTextStrokeOpacityAnimator`)<br>`text_animator.add_stroke_width` (`AddTextStrokeWidthAnimator`)<br>`text_animator.add_skew` (`AddTextSkewAnimator`)<br>`text_animator.add_rotation_x` (`AddTextRotationXAnimator`)<br>`text_animator.add_rotation_y` (`AddTextRotationYAnimator`)<br>`text_animator.add_stroke_color` (`AddTextStrokeColorAnimator`) | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
-| `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | - | - | examples/recipes/minimal-camera-aperture.json |
+| `comps[].layers[].text_style` | `object<TextStyleSpec>` | - | Text layer style overrides. | Text style overrides are supported only on text layers. | - | examples/recipes/minimal-text-shape.json |
+| `comps[].layers[].text_animators[]` | `array<recipe.TextAnimatorSpec>` | - | Text animator definitions. | Text animators are supported only on text layers. | `text_animator.add_opacity` (`AddTextOpacityAnimator`)<br>`text_animator.add_position` (`AddTextPositionAnimator`)<br>`text_animator.add_scale` (`AddTextScaleAnimator`)<br>`text_animator.add_rotation` (`AddTextRotationAnimator`)<br>`text_animator.add_color` (`AddTextColorAnimator`)<br>`text_animator.add_tracking` (`AddTextTrackingAnimator`)<br>`text_animator.add_character_offset` (`AddTextCharacterOffsetAnimator`)<br>`text_animator.add_fill_opacity` (`AddTextFillOpacityAnimator`)<br>`text_animator.add_stroke_opacity` (`AddTextStrokeOpacityAnimator`)<br>`text_animator.add_stroke_width` (`AddTextStrokeWidthAnimator`)<br>`text_animator.add_skew` (`AddTextSkewAnimator`)<br>`text_animator.add_rotation_x` (`AddTextRotationXAnimator`)<br>`text_animator.add_rotation_y` (`AddTextRotationYAnimator`)<br>`text_animator.add_stroke_color` (`AddTextStrokeColorAnimator`) | examples/recipes/minimal-text-animator-character-offset-value-keyframes.json |
+| `comps[].layers[].camera` | `object<CameraSpec>` | - | Camera layer options. | Camera options require a layer with type camera. | - | examples/recipes/minimal-camera-aperture.json |
 | `comps[].layers[].light` | `object<LightSpec>` | - | Light layer options. | Light options require a layer with type light. | - | examples/recipes/minimal-light-casts-shadows.json |
 | `comps[].layers[].shape` | `object<ShapeSpec>` | - | Shape layer primitive and operators. | - | - | examples/recipes/minimal-effect-layer-param.json |
 | `comps[].layers[].masks[]` | `array<recipe.MaskSpec>` | - | Layer masks. | Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks. | `mask.add` (`AddMask`) | examples/recipes/minimal-layer-mask.json |
 | `comps[].layers[].transform` | `object<Transform>` | - | Layer transform block. | - | `layer.set_transform` (`SetLayerTransform`) | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | - | `effect.add_builtin` (`AddEffect`) | examples/recipes/minimal-text-effect.json |
+| `comps[].layers[].effects[]` | `array<recipe.Effect>` | - | Built-in effect instance to add to the layer. | Each effect requires a supported match_name. | `effect.add_builtin` (`AddEffect`) | examples/recipes/minimal-text-effect.json |
 
 ## TextStyleSpec
 
@@ -581,7 +581,7 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].effects[].match_name` | `string` | structural | Layer effect match name. | Must be a supported effect match name for recipe compilation. | - | examples/recipes/minimal-adjustment-layer.json |
-| `comps[].layers[].effects[].params[]` | `array<recipe.EffectParam>` | - | Layer effect parameter assignments. | - | `effect.set_param` (`SetEffectParam`) | examples/recipes/minimal-adjustment-layer.json |
+| `comps[].layers[].effects[].params[]` | `array<recipe.EffectParam>` | - | Layer effect parameter assignments. | Each effect parameter requires match_name. Layer-reference params cannot also set value, keyframes, or expression. | `effect.set_param` (`SetEffectParam`) | examples/recipes/minimal-adjustment-layer.json |
 
 ## EffectParam
 

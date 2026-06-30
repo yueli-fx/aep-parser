@@ -491,6 +491,7 @@
       "object_type": "CompSpec",
       "x-aep-structural-required": true,
       "description": "Composition definitions to create or validate.",
+      "x-aep-validation": "Recipe must include at least one composition.",
       "x-aep-capabilities": [
         {
           "key": "comp.create",
@@ -2124,6 +2125,7 @@
       "go_type": "*recipe.TextStyleSpec",
       "object_type": "TextStyleSpec",
       "description": "Text layer style overrides.",
+      "x-aep-validation": "Text style overrides are supported only on text layers.",
       "x-aep-example": "examples/recipes/minimal-text-shape.json"
     },
     {
@@ -3020,6 +3022,7 @@
       "element": "recipe.TextAnimatorSpec",
       "object_type": "TextAnimatorSpec",
       "description": "Text animator definitions.",
+      "x-aep-validation": "Text animators are supported only on text layers.",
       "x-aep-capabilities": [
         {
           "key": "text_animator.add_opacity",
@@ -3603,6 +3606,7 @@
       "go_type": "*recipe.CameraSpec",
       "object_type": "CameraSpec",
       "description": "Camera layer options.",
+      "x-aep-validation": "Camera options require a layer with type camera.",
       "x-aep-example": "examples/recipes/minimal-camera-aperture.json"
     },
     {
@@ -8687,6 +8691,7 @@
       "element": "recipe.Effect",
       "object_type": "Effect",
       "description": "Built-in effect instance to add to the layer.",
+      "x-aep-validation": "Each effect requires a supported match_name.",
       "x-aep-capabilities": [
         {
           "key": "effect.add_builtin",
@@ -8741,6 +8746,7 @@
       "element": "recipe.EffectParam",
       "object_type": "EffectParam",
       "description": "Layer effect parameter assignments.",
+      "x-aep-validation": "Each effect parameter requires match_name. Layer-reference params cannot also set value, keyframes, or expression.",
       "x-aep-capabilities": [
         {
           "key": "effect.set_param",

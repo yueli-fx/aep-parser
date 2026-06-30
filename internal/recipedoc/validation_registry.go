@@ -43,6 +43,9 @@ var fieldValidation = map[string]FieldMeta{
 	"project.timecode_default_base": {
 		Validation: "Must be an integer between 1 and 999.",
 	},
+	"comps[]": {
+		Validation: "Recipe must include at least one composition.",
+	},
 	"comps[].name": {
 		Validation: "Composition name is required and must be unique within comps[].",
 	},
@@ -133,6 +136,9 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"comps[].layers[].stretch": {
 		Validation: "Layer stretch must be greater than 0.",
+	},
+	"comps[].layers[].camera": {
+		Validation: "Camera options require a layer with type camera.",
 	},
 	"comps[].layers[].transform.position": {
 		Validation: "When present, position must contain exactly two numeric values.",
@@ -276,6 +282,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_animators[].value_keyframes[].out_ease.influence": {
 		Validation: "Keyframe ease influence must be greater than 0 and at most 1.",
 	},
+	"comps[].layers[].text_style": {
+		Validation: "Text style overrides are supported only on text layers.",
+	},
 	"comps[].layers[].text_style.run_index": {
 		Validation: "Text style run_index must be non-negative.",
 	},
@@ -328,6 +337,9 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].text_style.paragraph_direction": {
 		Validation: "Text paragraph direction must use a supported value.",
 		Enum:       []string{"ltr", "rtl"},
+	},
+	"comps[].layers[].text_animators[]": {
+		Validation: "Text animators are supported only on text layers.",
 	},
 	"comps[].layers[].shape.kind": {
 		Validation: "Shape kind must use a supported primitive type.",
@@ -612,8 +624,14 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].effects[].match_name": {
 		Validation: "Must be a supported effect match name for recipe compilation.",
 	},
+	"comps[].layers[].effects[]": {
+		Validation: "Each effect requires a supported match_name.",
+	},
 	"comps[].layers[].effects[].params[].match_name": {
 		Validation: "Must match a parameter exposed by the chosen effect.",
+	},
+	"comps[].layers[].effects[].params[]": {
+		Validation: "Each effect parameter requires match_name. Layer-reference params cannot also set value, keyframes, or expression.",
 	},
 	"comps[].layers[].effects[].params[].value": {
 		Validation: "Supported values are numbers, booleans, or numeric arrays. Optional when keyframes are present.",

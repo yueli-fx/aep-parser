@@ -593,6 +593,7 @@
         "structural"
       ],
       "summary": "Composition definitions to create or validate.",
+      "validation": "Recipe must include at least one composition.",
       "capability_keys": [
         "comp.create"
       ],
@@ -799,6 +800,7 @@
       "type": "object\u003cCameraSpec\u003e",
       "go_type": "*recipe.CameraSpec",
       "summary": "Camera layer options.",
+      "validation": "Camera options require a layer with type camera.",
       "example": "examples/recipes/minimal-camera-aperture.json"
     },
     "comps[].layers[].camera.aperture": {
@@ -1004,6 +1006,7 @@
       "type": "array\u003crecipe.Effect\u003e",
       "go_type": "[]recipe.Effect",
       "summary": "Built-in effect instance to add to the layer.",
+      "validation": "Each effect requires a supported match_name.",
       "capability_keys": [
         "effect.add_builtin"
       ],
@@ -1031,6 +1034,7 @@
       "type": "array\u003crecipe.EffectParam\u003e",
       "go_type": "[]recipe.EffectParam",
       "summary": "Layer effect parameter assignments.",
+      "validation": "Each effect parameter requires match_name. Layer-reference params cannot also set value, keyframes, or expression.",
       "capability_keys": [
         "effect.set_param"
       ],
@@ -3723,6 +3727,7 @@
       "type": "array\u003crecipe.TextAnimatorSpec\u003e",
       "go_type": "[]recipe.TextAnimatorSpec",
       "summary": "Text animator definitions.",
+      "validation": "Text animators are supported only on text layers.",
       "capability_keys": [
         "text_animator.add_opacity",
         "text_animator.add_position",
@@ -4049,6 +4054,7 @@
       "type": "object\u003cTextStyleSpec\u003e",
       "go_type": "*recipe.TextStyleSpec",
       "summary": "Text layer style overrides.",
+      "validation": "Text style overrides are supported only on text layers.",
       "example": "examples/recipes/minimal-text-shape.json"
     },
     "comps[].layers[].text_style.apply_stroke": {

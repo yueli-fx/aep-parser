@@ -264,6 +264,28 @@ func TestBuildDocumentIncludesKeyframeValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesRecipeObjectValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[]",
+		"comps[].layers[].camera",
+		"comps[].layers[].text_style",
+		"comps[].layers[].text_animators[]",
+		"comps[].layers[].effects[]",
+		"comps[].layers[].effects[].params[]",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesTextStyleValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {
