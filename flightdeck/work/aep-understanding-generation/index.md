@@ -487,6 +487,10 @@ Done:
   `examples/recipes/minimal-text-animator-character-offset.json` example
   compiles a character offset text animator and asserts the
   `ADBE Text Character Offset` profile property.
+- Text animator fill-opacity recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-fill-opacity.json` example compiles a
+  fill opacity text animator and asserts the `ADBE Text Fill Opacity` profile
+  property.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles

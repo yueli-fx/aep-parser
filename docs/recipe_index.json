@@ -3218,7 +3218,8 @@
         "text_animator.add_rotation",
         "text_animator.add_color",
         "text_animator.add_tracking",
-        "text_animator.add_character_offset"
+        "text_animator.add_character_offset",
+        "text_animator.add_fill_opacity"
       ],
       "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -3241,7 +3242,8 @@
         "rotation",
         "color",
         "tracking",
-        "character_offset"
+        "character_offset",
+        "fill_opacity"
       ],
       "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -3386,7 +3388,7 @@
       "type": "any",
       "go_type": "interface {}",
       "summary": "Text animator property value.",
-      "validation": "Opacity, rotation, tracking, and character_offset values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "validation": "Opacity, rotation, tracking, character_offset, and fill_opacity values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
       "example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     "comps[].layers[].text_style": {

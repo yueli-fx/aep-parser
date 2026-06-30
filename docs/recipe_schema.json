@@ -1969,6 +1969,20 @@
             "TestTextCharOffsetAnimator_AEShipGate_AE2020",
             "TestTextCharOffsetAnimator_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_fill_opacity",
+          "query": "AddTextFillOpacityAnimator",
+          "status": "supported",
+          "symbol": "AddTextFillOpacityAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextNeighborAnimators_AEShipGate_AE2020",
+            "TestTextNeighborAnimators_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
@@ -1990,7 +2004,8 @@
         "rotation",
         "color",
         "tracking",
-        "character_offset"
+        "character_offset",
+        "fill_opacity"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -2002,7 +2017,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity, rotation, tracking, and character_offset values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "x-aep-validation": "Opacity, rotation, tracking, character_offset, and fill_opacity values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
