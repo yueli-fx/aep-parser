@@ -638,7 +638,7 @@ Current:
 - `cmd/aeptechnique -mode explain` now adds deterministic project explanations
   with recreation readiness, archetypes, repeated pattern catalog entries,
   deterministic recreation steps, representative projects, mechanism profiles,
-  and plugin-effect blockers.
+  pattern-level recreation-step profiles, and plugin-effect blockers.
 - `scripts\technique_showcase_report.ps1` is the self-hosted corpus dashboard.
   It runs explain-mode corpus analysis once with `-summary-out`, then writes
   `summary.json`, `corpus.jsonl`, `digest.json`, `learning.md`, `projects.csv`,
@@ -651,7 +651,8 @@ Current:
 - `report.html` now links all generated artifacts, shows scan timing, supports
   path/readiness/pattern/effect/plugin filtering, and displays per-project top
   effects, plugin effects, shape families, text animator mechanisms, and
-  deterministic recreation steps.
+  deterministic recreation steps. Pattern playbooks now include the common
+  recreation-step distribution for each repeated technique pattern.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

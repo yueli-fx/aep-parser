@@ -20,7 +20,7 @@
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -InputPath data\samples -OutDir tmp\technique_samples_report -Verify
 ```
 
-输出包括 `learning.md`、`report.html`、`projects.csv`、`patterns.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin 搜索，并展示每个项目的确定性复刻步骤；`learning.md` 是更短的人工学习索引；CSV 文件适合直接用表格筛项目、技法模式和复刻步骤。
+输出包括 `learning.md`、`report.html`、`projects.csv`、`patterns.csv`、`digest.json`、`summary.json`、`corpus.jsonl` 和 `report.md`。`report.html` 是自包含入口，支持按路径、readiness、pattern、effect、plugin 搜索，并展示每个项目的确定性复刻步骤；`learning.md` 是更短的人工学习索引；CSV 文件适合直接用表格筛项目、技法模式和 pattern 级复刻步骤分布。
 
 ## 原理与分层
 

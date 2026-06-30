@@ -233,6 +233,9 @@ func TestRunEmitsCorpusExplanationSummary(t *testing.T) {
 		if len(profile.EffectCounts)+len(profile.ShapeFamilies)+len(profile.TextAnimators) == 0 {
 			t.Fatalf("pattern profile %s has no mechanism counts: %+v", id, profile)
 		}
+		if len(profile.RecreationStepCounts) == 0 {
+			t.Fatalf("pattern profile %s has no recreation step counts: %+v", id, profile)
+		}
 	}
 	if len(summary.ReadinessCounts) == 0 {
 		t.Fatalf("readiness counts = %+v", summary.ReadinessCounts)

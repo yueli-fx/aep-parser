@@ -40,6 +40,7 @@ mode the embedded portrait is used for aggregate counts:
 - pattern counts for repeated technique combinations in explain mode
 - pattern representative projects for high-signal examples in explain mode
 - pattern mechanism profiles for readiness, effects, plugin effects, shapes, and text animators
+- pattern recreation-step profiles for common reconstruction order
 - third-party plugin effect counts for explain mode
 - hint counts
 - effect match counts
@@ -96,7 +97,8 @@ keep representative projects per pattern, archetype, and readiness bucket so a
 large run can be inspected before reading every project record. `projects.csv`
 and `patterns.csv` provide spreadsheet-friendly indexes for filtering projects
 and repeated technique patterns outside the HTML report. `projects.csv` includes
-the stable recreation step IDs for each project.
+the stable recreation step IDs for each project; `patterns.csv` includes the
+step distribution for each repeated pattern.
 
 ## Non-Goals
 

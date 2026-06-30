@@ -68,8 +68,16 @@ $recordsWithSteps = @($corpusRecords | Where-Object {
 if ($summary.project_count -gt 0 -and $recordsWithSteps.Count -eq 0) {
     throw "corpus has no explanation.recreation_steps entries"
 }
+$patternsWithSteps = @(@($digest.patterns) | Where-Object {
+    $null -ne $_.recreation_steps -and
+    @($_.recreation_steps).Count -gt 0
+})
+if (@($digest.patterns).Count -gt 0 -and $patternsWithSteps.Count -eq 0) {
+    throw "digest patterns have no recreation_steps entries"
+}
 
 Require-Text -Path $learningPath -Pattern "^## Pattern Playbook$"
+Require-Text -Path $learningPath -Pattern "recreation steps"
 Require-Text -Path $learningPath -Pattern "^## Plugin Risk Queue$"
 Require-Text -Path $learningPath -Pattern "^## Readiness Queue$"
 Require-Text -Path $reportPath -Pattern "^## Pattern Representatives$"

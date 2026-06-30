@@ -298,6 +298,7 @@ try {
             plugin_effects  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.plugin_effect_counts -Max 8))
             shape_families  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.shape_families -Max 8))
             text_animators  = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.text_animators -Max 8))
+            recreation_steps = @(Convert-CountRows -Rows (Get-CountRows -Counts $profile.recreation_step_counts -Max 8))
         }
     }
     $digestReadiness = @()
@@ -327,6 +328,7 @@ try {
             top_plugin_effects      = Format-CountList -Rows $_.plugin_effects
             top_shape_families      = Format-CountList -Rows $_.shape_families
             top_text_animators      = Format-CountList -Rows $_.text_animators
+            recreation_steps        = Format-CountList -Rows $_.recreation_steps
             representative_projects = ((@($_.representatives) | Select-Object -First 5 | ForEach-Object { [string]$_.path }) -join "; ")
         }
     })
@@ -382,7 +384,8 @@ try {
             @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
             @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
             @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
-            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators },
+            @{ Label = "recreation steps"; Value = Format-CountList -Rows $group.recreation_steps }
         )) {
             if ($line.Value) {
                 [void]$learn.AppendLine("- $($line.Label): $($line.Value)")
@@ -439,7 +442,8 @@ try {
             @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
             @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
             @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
-            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators },
+            @{ Label = "recreation steps"; Value = Format-CountList -Rows $group.recreation_steps }
         )) {
             if ($line.Value) {
                 [void]$b.AppendLine("- $($line.Label): $($line.Value)")
@@ -569,7 +573,8 @@ try {
             @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
             @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
             @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
-            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators },
+            @{ Label = "recreation steps"; Value = Format-CountList -Rows $group.recreation_steps }
         )) {
             if ($line.Value) {
                 [void]$h.AppendLine("<div class=""small""><strong>$(Escape-Html $line.Label)</strong>: $(Escape-Html $line.Value)</div>")

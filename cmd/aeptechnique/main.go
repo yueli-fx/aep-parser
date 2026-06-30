@@ -107,14 +107,15 @@ type corpusExample struct {
 }
 
 type corpusPattern struct {
-	Count              int             `json:"count"`
-	Examples           []corpusExample `json:"examples,omitempty"`
-	ReadinessCounts    map[string]int  `json:"readiness_counts,omitempty"`
-	EffectCounts       map[string]int  `json:"effect_counts,omitempty"`
-	PluginEffectCounts map[string]int  `json:"plugin_effect_counts,omitempty"`
-	ShapeFamilies      map[string]int  `json:"shape_families,omitempty"`
-	TextAnimators      map[string]int  `json:"text_animators,omitempty"`
-	ArchetypeCounts    map[string]int  `json:"archetype_counts,omitempty"`
+	Count                int             `json:"count"`
+	Examples             []corpusExample `json:"examples,omitempty"`
+	ReadinessCounts      map[string]int  `json:"readiness_counts,omitempty"`
+	EffectCounts         map[string]int  `json:"effect_counts,omitempty"`
+	PluginEffectCounts   map[string]int  `json:"plugin_effect_counts,omitempty"`
+	ShapeFamilies        map[string]int  `json:"shape_families,omitempty"`
+	TextAnimators        map[string]int  `json:"text_animators,omitempty"`
+	RecreationStepCounts map[string]int  `json:"recreation_step_counts,omitempty"`
+	ArchetypeCounts      map[string]int  `json:"archetype_counts,omitempty"`
 }
 
 func newCorpusSummary(mode string) *corpusSummary {
@@ -278,12 +279,13 @@ func addPatternProfile(summary *corpusSummary, pattern technique.ProjectPattern,
 	profile := summary.PatternProfiles[pattern.ID]
 	if profile == nil {
 		profile = &corpusPattern{
-			ReadinessCounts:    map[string]int{},
-			EffectCounts:       map[string]int{},
-			PluginEffectCounts: map[string]int{},
-			ShapeFamilies:      map[string]int{},
-			TextAnimators:      map[string]int{},
-			ArchetypeCounts:    map[string]int{},
+			ReadinessCounts:      map[string]int{},
+			EffectCounts:         map[string]int{},
+			PluginEffectCounts:   map[string]int{},
+			ShapeFamilies:        map[string]int{},
+			TextAnimators:        map[string]int{},
+			RecreationStepCounts: map[string]int{},
+			ArchetypeCounts:      map[string]int{},
 		}
 		summary.PatternProfiles[pattern.ID] = profile
 	}
@@ -298,6 +300,11 @@ func addPatternProfile(summary *corpusSummary, pattern technique.ProjectPattern,
 	addCounts(profile.PluginEffectCounts, explanation.Portrait.Mechanisms.ThirdPartyEffectMatchCounts)
 	addCounts(profile.ShapeFamilies, explanation.Portrait.Mechanisms.ShapeFamilyCounts)
 	addCounts(profile.TextAnimators, explanation.Portrait.Mechanisms.TextAnimatorKindCounts)
+	for _, step := range explanation.RecreationSteps {
+		if step.ID != "" {
+			profile.RecreationStepCounts[step.ID]++
+		}
+	}
 
 	example := corpusExample{
 		Path:      path,
