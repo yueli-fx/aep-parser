@@ -62,6 +62,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 
 - `summary.json`
 - `corpus.jsonl`
+- `digest.json`
 - `report.md`
 - `report.html`
 
@@ -70,6 +71,10 @@ Passing `-Open` opens the generated HTML report after writing all files.
 The report script now uses `-mode explain`, so per-project cards include
 deterministic recreation readiness, archetype labels, and technique notes in
 addition to raw portrait counts.
+
+`digest.json` is the compact learning entry point for larger corpora. It keeps
+representative projects per archetype and readiness bucket so a large run can
+be inspected before reading every project record.
 
 ## Non-Goals
 

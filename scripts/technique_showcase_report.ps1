@@ -13,6 +13,7 @@ try {
     New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
     $summaryPath = Join-Path $OutDir "summary.json"
     $corpusPath = Join-Path $OutDir "corpus.jsonl"
+    $digestPath = Join-Path $OutDir "digest.json"
     $reportPath = Join-Path $OutDir "report.md"
     $htmlPath = Join-Path $OutDir "report.html"
 
@@ -116,8 +117,74 @@ try {
         [void]$Builder.AppendLine("</section>")
     }
 
+    function Get-RepresentativeProjects {
+        param(
+            [array]$Records,
+            [string]$ArchetypeID,
+            [int]$Max = 5
+        )
+        $rows = @()
+        foreach ($record in $Records) {
+            $explanation = $record.explanation
+            if ($null -eq $explanation) {
+                continue
+            }
+            foreach ($archetype in @($explanation.archetypes)) {
+                if ($archetype.id -ne $ArchetypeID) {
+                    continue
+                }
+                $overview = ""
+                if ($null -ne $explanation.overview -and $explanation.overview.Count -gt 0) {
+                    $overview = [string]$explanation.overview[0]
+                }
+                $readiness = ""
+                if ($null -ne $explanation.recreation_readiness) {
+                    $readiness = [string]$explanation.recreation_readiness.status
+                }
+                $rows += [pscustomobject]@{
+                    path      = [string]$record.path
+                    score     = [int]$archetype.score
+                    label     = [string]$archetype.label
+                    readiness = $readiness
+                    summary   = [string]$archetype.summary
+                    overview  = $overview
+                }
+            }
+        }
+        return @($rows | Sort-Object @{ Expression = { $_.score }; Descending = $true }, path | Select-Object -First $Max)
+    }
+
+    function Get-ReadinessProjects {
+        param(
+            [array]$Records,
+            [string]$Status,
+            [int]$Max = 5
+        )
+        $rows = @()
+        foreach ($record in $Records) {
+            $explanation = $record.explanation
+            if ($null -eq $explanation -or $null -eq $explanation.recreation_readiness) {
+                continue
+            }
+            if ($explanation.recreation_readiness.status -ne $Status) {
+                continue
+            }
+            $blockers = @()
+            if ($null -ne $explanation.recreation_readiness.blockers) {
+                $blockers = @($explanation.recreation_readiness.blockers)
+            }
+            $rows += [pscustomobject]@{
+                path     = [string]$record.path
+                status   = [string]$Status
+                summary  = [string]$explanation.recreation_readiness.summary
+                blockers = $blockers
+            }
+        }
+        return @($rows | Sort-Object path | Select-Object -First $Max)
+    }
+
     $b = [System.Text.StringBuilder]::new()
-    [void]$b.AppendLine("# Technique Showcase Report")
+    [void]$b.AppendLine("# Technique Corpus Report")
     [void]$b.AppendLine("")
     [void]$b.AppendLine("- input: ``$InputPath``")
     [void]$b.AppendLine("- projects: $($summary.project_count)")
@@ -143,6 +210,61 @@ try {
         $records = @(Get-Content -Path $corpusPath | Where-Object { $_.Trim() -ne "" } | ForEach-Object {
             $_ | ConvertFrom-Json
         })
+    }
+
+    $archetypeRows = Get-CountRows -Counts $summary.archetype_counts -Max 12
+    $readinessRows = Get-CountRows -Counts $summary.readiness_counts -Max 12
+    $digestArchetypes = @()
+    foreach ($row in $archetypeRows) {
+        $digestArchetypes += [ordered]@{
+            id              = [string]$row.Name
+            count           = [int]$row.Value
+            representatives = @(Get-RepresentativeProjects -Records $records -ArchetypeID $row.Name -Max 5)
+        }
+    }
+    $digestReadiness = @()
+    foreach ($row in $readinessRows) {
+        $digestReadiness += [ordered]@{
+            status = [string]$row.Name
+            count  = [int]$row.Value
+            projects = @(Get-ReadinessProjects -Records $records -Status $row.Name -Max 5)
+        }
+    }
+    $digest = [ordered]@{
+        input         = $InputPath
+        project_count = [int]$summary.project_count
+        error_count   = [int]$errorCount
+        archetypes    = $digestArchetypes
+        readiness     = $digestReadiness
+    }
+    $digest | ConvertTo-Json -Depth 10 | Set-Content -Path $digestPath -Encoding UTF8
+
+    [void]$b.AppendLine("## Representative Projects")
+    [void]$b.AppendLine("")
+    foreach ($group in $digestArchetypes) {
+        [void]$b.AppendLine("### $($group.id)")
+        [void]$b.AppendLine("")
+        foreach ($project in @($group.representatives)) {
+            [void]$b.AppendLine("- ``$($project.path)`` score=$($project.score) readiness=$($project.readiness)")
+            if ($project.overview) {
+                [void]$b.AppendLine("  $($project.overview)")
+            }
+        }
+        [void]$b.AppendLine("")
+    }
+
+    [void]$b.AppendLine("## Readiness Drilldown")
+    [void]$b.AppendLine("")
+    foreach ($group in $digestReadiness) {
+        [void]$b.AppendLine("### $($group.status)")
+        [void]$b.AppendLine("")
+        foreach ($project in @($group.projects)) {
+            [void]$b.AppendLine("- ``$($project.path)``")
+            if ($project.blockers.Count -gt 0) {
+                [void]$b.AppendLine("  blockers: $($project.blockers -join '; ')")
+            }
+        }
+        [void]$b.AppendLine("")
     }
 
     [void]$b.AppendLine("## Project Explanations")
@@ -177,11 +299,11 @@ try {
     [void]$h.AppendLine("<head>")
     [void]$h.AppendLine("<meta charset=""utf-8"">")
     [void]$h.AppendLine("<meta name=""viewport"" content=""width=device-width, initial-scale=1"">")
-    [void]$h.AppendLine("<title>Technique Showcase Report</title>")
+    [void]$h.AppendLine("<title>Technique Corpus Report</title>")
     [void]$h.AppendLine("<style>")
-    [void]$h.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f5f7fa;color:#1f2937}main{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}h2{font-size:16px;margin:0 0 12px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}.metric,.panel,.project{background:white;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric .value{font-size:28px;font-weight:700;margin-top:6px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.projects{display:grid;gap:14px;margin-top:18px}.project h3{margin:0 0 10px;font-size:17px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;font-size:12px}.chip.warn{background:#fff7ed;color:#9a3412}.notes{display:grid;gap:8px;margin-top:10px}.note{border-left:3px solid #4f46e5;background:#f8fafc;padding:8px 10px}.note strong{display:block;margin-bottom:3px}.layers{font-size:12px;color:#475467;margin-top:8px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.empty{color:#98a2b3}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
+    [void]$h.AppendLine("body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f5f7fa;color:#1f2937}main{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:28px;margin:0 0 8px}h2{font-size:16px;margin:0 0 12px}.muted{color:#667085}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:22px 0}.metric,.panel,.project,.representative{background:white;border:1px solid #d8dee8;border-radius:8px;padding:16px}.metric .value{font-size:28px;font-weight:700;margin-top:6px}.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.projects,.representatives{display:grid;gap:14px;margin-top:18px}.representatives{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}.project h3,.representative h3{margin:0 0 10px;font-size:17px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{background:#eef2ff;color:#3730a3;border-radius:999px;padding:4px 9px;font-size:12px}.chip.warn{background:#fff7ed;color:#9a3412}.notes{display:grid;gap:8px;margin-top:10px}.note{border-left:3px solid #4f46e5;background:#f8fafc;padding:8px 10px}.note strong{display:block;margin-bottom:3px}.layers,.small{font-size:12px;color:#475467;margin-top:8px}ul.compact{margin:8px 0 0;padding-left:18px}ul.compact li{margin:5px 0}table{width:100%;border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #e5e7eb;padding:7px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.empty{color:#98a2b3}code{background:#eef2f7;padding:2px 5px;border-radius:4px}</style>")
     [void]$h.AppendLine("</head><body><main>")
-    [void]$h.AppendLine("<h1>Technique Showcase Report</h1>")
+    [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
@@ -206,6 +328,38 @@ try {
     Write-HtmlCountTable -Builder $h -Title "Text Animators" -Counts $summary.text_animators
     Write-HtmlCountTable -Builder $h -Title "Layer Roles" -Counts $summary.layer_roles
     Write-HtmlCountTable -Builder $h -Title "Graph Edges" -Counts $summary.graph_edges
+    [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Representative Projects</h2>")
+    [void]$h.AppendLine("<div class=""representatives"">")
+    foreach ($group in $digestArchetypes) {
+        [void]$h.AppendLine("<section class=""representative"">")
+        [void]$h.AppendLine("<h3>$(Escape-Html $group.id)</h3>")
+        [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")
+        [void]$h.AppendLine("<ul class=""compact"">")
+        foreach ($project in @($group.representatives | Select-Object -First 5)) {
+            [void]$h.AppendLine("<li><code>$(Escape-Html $project.path)</code><div class=""small"">score=$($project.score) · readiness=$(Escape-Html $project.readiness)</div></li>")
+        }
+        [void]$h.AppendLine("</ul>")
+        [void]$h.AppendLine("</section>")
+    }
+    [void]$h.AppendLine("</div>")
+    [void]$h.AppendLine("<h2 style=""margin-top:28px"">Readiness Drilldown</h2>")
+    [void]$h.AppendLine("<div class=""representatives"">")
+    foreach ($group in $digestReadiness) {
+        [void]$h.AppendLine("<section class=""representative"">")
+        [void]$h.AppendLine("<h3>$(Escape-Html $group.status)</h3>")
+        [void]$h.AppendLine("<p class=""muted"">$($group.count) projects</p>")
+        [void]$h.AppendLine("<ul class=""compact"">")
+        foreach ($project in @($group.projects | Select-Object -First 5)) {
+            [void]$h.AppendLine("<li><code>$(Escape-Html $project.path)</code>")
+            if ($project.blockers.Count -gt 0) {
+                [void]$h.AppendLine("<div class=""small"">$(Escape-Html ($project.blockers -join '; '))</div>")
+            }
+            [void]$h.AppendLine("</li>")
+        }
+        [void]$h.AppendLine("</ul>")
+        [void]$h.AppendLine("</section>")
+    }
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Projects</h2>")
     [void]$h.AppendLine("<div class=""projects"">")
@@ -265,6 +419,7 @@ try {
 
     Write-Host "summary: $summaryPath"
     Write-Host "corpus:  $corpusPath"
+    Write-Host "digest:  $digestPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
     if ($Open) {
