@@ -550,6 +550,15 @@ try {
             })
         }
         history_delta = $historyDelta
+        history_recent = @($historyPreviewRows | ForEach-Object {
+            [ordered]@{
+                run_id = $_.run_id
+                parsed_projects = [int]$_.parsed_projects
+                technique_patterns = [int]$_.technique_patterns
+                batch_passed = [int]$_.batch_passed
+                batch_attempted = [int]$_.batch_attempted
+            }
+        })
         outcome_status = $outcomeStatusInfo
         steps = @($steps)
     }
@@ -651,6 +660,11 @@ try {
     [void]$outcomeHtml.AppendLine("<tr><td>Projects</td><td>$(Escape-Html $historyDelta.parsed_projects_delta)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Patterns</td><td>$(Escape-Html $historyDelta.technique_patterns_delta)</td></tr>")
     [void]$outcomeHtml.AppendLine("<tr><td>Batch passed</td><td>$(Escape-Html $historyDelta.batch_passed_delta)</td></tr>")
+    [void]$outcomeHtml.AppendLine("</tbody></table></section>")
+    [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Recent Runs</h2><table><thead><tr><th>Run</th><th>Projects</th><th>Patterns</th><th>Batch</th></tr></thead><tbody>")
+    foreach ($row in $historyPreviewRows) {
+        [void]$outcomeHtml.AppendLine("<tr><td>$(Escape-Html $row.run_id)</td><td>$(Escape-Html $row.parsed_projects)</td><td>$(Escape-Html $row.technique_patterns)</td><td>$(Escape-Html $row.batch_passed) / $(Escape-Html $row.batch_attempted)</td></tr>")
+    }
     [void]$outcomeHtml.AppendLine("</tbody></table></section>")
     [void]$outcomeHtml.AppendLine("<section class=""panel""><h2>Learning Signals</h2>")
     [void]$outcomeHtml.AppendLine("<h3>Study Queue</h3><table><thead><tr><th>Rank</th><th>Project</th><th>Patterns</th></tr></thead><tbody>")
@@ -1085,6 +1099,9 @@ try {
     if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Recreation Blockers" -Quiet)) {
         throw "latest outcome html missing Recreation Blockers"
     }
+    if (-not (Select-String -LiteralPath $latestOutcomeHtmlPath -Pattern "Recent Runs" -Quiet)) {
+        throw "latest outcome html missing Recent Runs"
+    }
     $topStudyPath = ""
     if ($studyRows.Count -gt 0) {
         $topStudyPath = [string]$studyRows[0].path
@@ -1124,6 +1141,9 @@ try {
     }
     if ($null -eq $latestEffectivenessJson.history_delta.parsed_projects_delta) {
         throw "latest effectiveness json missing history_delta.parsed_projects_delta"
+    }
+    if ($null -eq $latestEffectivenessJson.history_recent) {
+        throw "latest effectiveness json missing history_recent"
     }
     if ($null -eq $latestEffectivenessJson.stable_outputs.open_target) {
         throw "latest effectiveness json missing stable_outputs.open_target"
