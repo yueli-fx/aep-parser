@@ -490,7 +490,7 @@ try {
     }
     [void]$h.AppendLine("</div>")
     [void]$h.AppendLine("<h2 style=""margin-top:28px"">Projects</h2>")
-    [void]$h.AppendLine("<div class=""toolbar""><input id=""projectFilter"" type=""search"" aria-label=""Filter projects"" placeholder=""Filter by path, readiness, archetype, hint""><span id=""projectCount"" class=""muted""></span></div>")
+    [void]$h.AppendLine("<div class=""toolbar""><input id=""projectFilter"" type=""search"" aria-label=""Filter projects"" placeholder=""Filter by path, readiness, pattern, effect, plugin""><span id=""projectCount"" class=""muted""></span></div>")
     [void]$h.AppendLine("<div class=""projects"">")
     foreach ($record in $records) {
         $explanation = $record.explanation
@@ -517,6 +517,20 @@ try {
         if (($null -ne $portrait) -and ($null -ne $portrait.technique_hints)) {
             foreach ($hint in @($portrait.technique_hints)) {
                 $searchTerms += [string]$hint.id
+            }
+        }
+        if (($null -ne $portrait) -and ($null -ne $portrait.mechanisms)) {
+            foreach ($row in @(Get-CountRows -Counts $portrait.mechanisms.effect_match_counts -Max 80)) {
+                $searchTerms += [string]$row.Name
+            }
+            foreach ($row in @(Get-CountRows -Counts $portrait.mechanisms.third_party_effect_match_counts -Max 120)) {
+                $searchTerms += [string]$row.Name
+            }
+            foreach ($row in @(Get-CountRows -Counts $portrait.mechanisms.shape_family_counts -Max 80)) {
+                $searchTerms += [string]$row.Name
+            }
+            foreach ($row in @(Get-CountRows -Counts $portrait.mechanisms.text_animator_kind_counts -Max 80)) {
+                $searchTerms += [string]$row.Name
             }
         }
         $searchText = (($searchTerms | Where-Object { $_ }) -join " ").ToLowerInvariant()
