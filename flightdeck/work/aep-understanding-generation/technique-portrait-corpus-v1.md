@@ -72,6 +72,7 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `summary.json`
 - `corpus.jsonl`
 - `digest.json`
+- `learning.md`
 - `report.md`
 - `report.html`
 
@@ -81,9 +82,10 @@ The report script now uses `-mode explain`, so per-project cards include
 deterministic recreation readiness, archetype labels, and technique notes in
 addition to raw portrait counts.
 
-`digest.json` is the compact learning entry point for larger corpora. It keeps
-representative projects per archetype and readiness bucket so a large run can
-be inspected before reading every project record.
+`digest.json` is the compact machine-readable learning entry point for larger
+corpora. `learning.md` is the compact human-readable learning entry point. They
+keep representative projects per pattern, archetype, and readiness bucket so a
+large run can be inspected before reading every project record.
 
 ## Non-Goals
 

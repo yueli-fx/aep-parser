@@ -14,6 +14,7 @@ try {
     $summaryPath = Join-Path $OutDir "summary.json"
     $corpusPath = Join-Path $OutDir "corpus.jsonl"
     $digestPath = Join-Path $OutDir "digest.json"
+    $learningPath = Join-Path $OutDir "learning.md"
     $reportPath = Join-Path $OutDir "report.md"
     $htmlPath = Join-Path $OutDir "report.html"
 
@@ -310,6 +311,56 @@ try {
     }
     $digest | ConvertTo-Json -Depth 10 | Set-Content -Path $digestPath -Encoding UTF8
 
+    $learn = [System.Text.StringBuilder]::new()
+    [void]$learn.AppendLine("# Technique Learning Index")
+    [void]$learn.AppendLine("")
+    [void]$learn.AppendLine("- input: ``$InputPath``")
+    [void]$learn.AppendLine("- projects: $($summary.project_count)")
+    [void]$learn.AppendLine("- errors: $errorCount")
+    [void]$learn.AppendLine("")
+    [void]$learn.AppendLine("## Pattern Playbook")
+    [void]$learn.AppendLine("")
+    foreach ($group in @($digest.patterns)) {
+        [void]$learn.AppendLine("### $($group.id) ($($group.count))")
+        [void]$learn.AppendLine("")
+        foreach ($line in @(
+            @{ Label = "readiness"; Value = Format-CountList -Rows $group.readiness },
+            @{ Label = "effects"; Value = Format-CountList -Rows $group.effects },
+            @{ Label = "plugin effects"; Value = Format-CountList -Rows $group.plugin_effects },
+            @{ Label = "shape families"; Value = Format-CountList -Rows $group.shape_families },
+            @{ Label = "text animators"; Value = Format-CountList -Rows $group.text_animators }
+        )) {
+            if ($line.Value) {
+                [void]$learn.AppendLine("- $($line.Label): $($line.Value)")
+            }
+        }
+        [void]$learn.AppendLine("- representative projects:")
+        foreach ($project in @($group.representatives | Select-Object -First 5)) {
+            [void]$learn.AppendLine("  - ``$($project.path)`` score=$($project.score) readiness=$($project.readiness)")
+        }
+        [void]$learn.AppendLine("")
+    }
+    [void]$learn.AppendLine("## Plugin Risk Queue")
+    [void]$learn.AppendLine("")
+    foreach ($row in @(Get-CountRows -Counts $summary.plugin_effect_counts -Max 20)) {
+        [void]$learn.AppendLine("- $($row.Name): $($row.Value)")
+    }
+    [void]$learn.AppendLine("")
+    [void]$learn.AppendLine("## Readiness Queue")
+    [void]$learn.AppendLine("")
+    foreach ($group in $digestReadiness) {
+        [void]$learn.AppendLine("### $($group.status) ($($group.count))")
+        [void]$learn.AppendLine("")
+        foreach ($project in @($group.projects | Select-Object -First 5)) {
+            [void]$learn.AppendLine("- ``$($project.path)``")
+            if ($project.blockers.Count -gt 0) {
+                [void]$learn.AppendLine("  blockers: $($project.blockers -join '; ')")
+            }
+        }
+        [void]$learn.AppendLine("")
+    }
+    $learn.ToString() | Set-Content -Path $learningPath -Encoding UTF8
+
     [void]$b.AppendLine("## Representative Projects")
     [void]$b.AppendLine("")
     foreach ($group in $digestArchetypes) {
@@ -602,6 +653,7 @@ try {
     Write-Host "summary: $summaryPath"
     Write-Host "corpus:  $corpusPath"
     Write-Host "digest:  $digestPath"
+    Write-Host "learn:   $learningPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
     if ($Open) {
