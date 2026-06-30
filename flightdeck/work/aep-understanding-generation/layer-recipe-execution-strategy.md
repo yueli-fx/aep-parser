@@ -66,7 +66,7 @@ flags, and refs.
 | Transform keyframes/ease | `transform.*_keyframes` | `SetLayerTransform` | `properties[].keyframes[]` | `expected_profile.keyframes[]` | L3 | keep separate |
 | Transform expressions | `transform.expressions.*` | `Property.SetExpression` / `Property.SetExpressionEnabled` | `properties[].expression` / `expression_enabled` | `expected_profile.properties[].expression` / `expression_enabled` | L3 | keep separate |
 | Text style | `text_style.*` | text run/paragraph setters | `layers[].text.*` | `expected_profile.text_styles[]` | L3 | keep separate |
-| Text animators | `text_animators[].property: opacity/position/scale` static Range Selector + `range_offset_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AnimateTextRangeOffset` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | opacity + position + scale + range offset done |
+| Text animators | `text_animators[].property: opacity/position/scale/rotation` static Range Selector + `range_offset_keyframes` | `AddTextOpacityAnimator` / `AddTextPositionAnimator` / `AddTextScaleAnimator` / `AddTextRotationAnimator` / `AnimateTextRangeOffset` | `properties[]` / `properties[].keyframes[]` | `expected_profile.properties[]` / `expected_profile.keyframes[]` | L3/L4 | opacity + position + scale + rotation + range offset done |
 | Shape contents | `shape.*` | vector group writers | `layers[].shapes[]` / `properties[]` | `expected_profile.properties[]` | L3/L4 | keep separate |
 | Effects | `effects[]` | `AddEffect` / `SetEffectParam` | `layers[].effects[]` | `expected_profile.effects[]` | L3/L4 | keep separate |
 | Camera/light layer identity | `type: camera` / `type: light` | layer constructors | `layers[].name` / `type` | `expected_profile.layers[].name` / `type` | L3 | done |
@@ -253,6 +253,8 @@ through `layers[].text_animators[]` and asserts the resulting
 and asserts `ADBE Text Position 3D` through `expected_profile.properties[]`.
 `minimal-text-animator-scale.json` authors a static 3D scale text animator and
 asserts `ADBE Text Scale 3D` through `expected_profile.properties[]`.
+`minimal-text-animator-rotation.json` authors a static rotation text animator
+and asserts `ADBE Text Rotation` through `expected_profile.properties[]`.
 `minimal-text-animator-range-offset.json` adds animated Range Selector Offset
 through `range_offset_keyframes` and asserts `ADBE Text Percent Offset` through
 `expected_profile.keyframes[]`. Later text animator slices should extend this

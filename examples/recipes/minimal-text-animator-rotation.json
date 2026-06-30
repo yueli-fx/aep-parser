@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "minimal-text-animator-rotation"
+  },
+  "comps": [
+    {
+      "name": "Text Animator Rotation",
+      "width": 640,
+      "height": 360,
+      "frame_rate": 24,
+      "duration": 2,
+      "layers": [
+        {
+          "type": "text",
+          "name": "Title",
+          "text": "HELLO",
+          "text_animators": [
+            {
+              "property": "rotation",
+              "value": 45,
+              "range_start": 0,
+              "range_end": 100,
+              "range_offset": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 1,
+    "layers": [
+      {
+        "name": "Title",
+        "type": "text"
+      }
+    ],
+    "properties": [
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Text Rotation",
+        "value": 45
+      }
+    ]
+  }
+}

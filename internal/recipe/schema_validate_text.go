@@ -258,8 +258,10 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		recordCapability("AddTextPositionAnimator", path)
 	case "scale":
 		recordCapability("AddTextScaleAnimator", path)
+	case "rotation":
+		recordCapability("AddTextRotationAnimator", path)
 	default:
-		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, or scale")
+		addRefusal("unsupported_text_animator_property", path+".property", "text animator property must be opacity, position, scale, or rotation")
 	}
 	if animator.Value == nil {
 		addRefusal("missing_text_animator_value", path+".value", "text animator value is required")
@@ -268,6 +270,10 @@ func validateTextAnimator(animator TextAnimatorSpec, path string, recordCapabili
 		case "opacity":
 			if _, ok := animator.Value.(float64); !ok {
 				addRefusal("invalid_text_animator_value", path+".value", "text animator opacity value must be a number")
+			}
+		case "rotation":
+			if _, ok := animator.Value.(float64); !ok {
+				addRefusal("invalid_text_animator_value", path+".value", "text animator rotation value must be a number")
 			}
 		case "position":
 			values, ok := numericSliceValue(animator.Value)

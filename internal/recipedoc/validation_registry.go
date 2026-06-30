@@ -23,10 +23,10 @@ var fieldValidation = map[string]FieldMeta{
 	},
 	"comps[].layers[].text_animators[].property": {
 		Validation: "Supported values create the corresponding text animator property.",
-		Enum:       []string{"opacity", "position", "scale"},
+		Enum:       []string{"opacity", "position", "scale", "rotation"},
 	},
 	"comps[].layers[].text_animators[].value": {
-		Validation: "Opacity value must be a number; position and scale values must be 3-number arrays.",
+		Validation: "Opacity and rotation values must be numbers; position and scale values must be 3-number arrays.",
 	},
 	"comps[].layers[].text_animators[].range_start": {
 		Validation: "Range selector start is required.",

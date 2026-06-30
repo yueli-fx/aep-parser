@@ -1913,6 +1913,20 @@
             "TestTextScaleAnimator_AEShipGate_AE2020",
             "TestTextScaleAnimator_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_rotation",
+          "query": "AddTextRotationAnimator",
+          "status": "supported",
+          "symbol": "AddTextRotationAnimator",
+          "domain": "text",
+          "verify": "render-pixel",
+          "minver": "2020",
+          "boundary": "typed parameter accessors are not yet wired (tune via Reopen); un-Reopened fresh layers are refused",
+          "gate": [
+            "TestTextRotAnimator_AEShipGate_AE2020",
+            "TestTextRotAnimator_AEShipGate_AE2025"
+          ]
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
@@ -1930,7 +1944,8 @@
       "enum": [
         "opacity",
         "position",
-        "scale"
+        "scale",
+        "rotation"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
     },
@@ -1942,7 +1957,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity value must be a number; position and scale values must be 3-number arrays.",
+      "x-aep-validation": "Opacity and rotation values must be numbers; position and scale values must be 3-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-opacity.json"
     },
     {
