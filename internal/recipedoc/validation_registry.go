@@ -474,6 +474,83 @@ var fieldValidation = map[string]FieldMeta{
 	"comps[].layers[].shape.stroke.dashes.gap": {
 		Validation: "Stroke gap must be non-negative.",
 	},
+	"comps[].layers[].shape.trim.start": {
+		Validation: "Trim start must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.trim.end": {
+		Validation: "Trim end must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.round_corners.radius": {
+		Validation: "Round corners radius must be non-negative.",
+	},
+	"comps[].layers[].shape.offset_paths.line_join": {
+		Validation: "Offset paths line_join must use a supported value.",
+		Enum:       []string{"miter", "round", "bevel"},
+	},
+	"comps[].layers[].shape.offset_paths.miter_limit": {
+		Validation: "Offset paths miter_limit must be at least 1.",
+	},
+	"comps[].layers[].shape.offset_paths.copies": {
+		Validation: "Offset paths copies must be at least 1.",
+	},
+	"comps[].layers[].shape.repeater.copies": {
+		Validation: "Repeater copies must be at least 1.",
+	},
+	"comps[].layers[].shape.repeater.order": {
+		Validation: "Repeater order must use a supported value.",
+		Enum:       []string{"below", "above"},
+	},
+	"comps[].layers[].shape.repeater.anchor": {
+		Validation: "Repeater anchor must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.repeater.position": {
+		Validation: "Repeater position must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.repeater.scale": {
+		Validation: "Repeater scale must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.repeater.start_opacity": {
+		Validation: "Repeater start_opacity must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.repeater.end_opacity": {
+		Validation: "Repeater end_opacity must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.merge_paths.type": {
+		Validation: "Merge paths type must use a supported value.",
+		Enum:       []string{"merge", "add", "subtract", "intersect", "exclude"},
+	},
+	"comps[].layers[].shape.zigzag.size": {
+		Validation: "Zigzag size must be non-negative.",
+	},
+	"comps[].layers[].shape.zigzag.detail": {
+		Validation: "Zigzag detail must be non-negative.",
+	},
+	"comps[].layers[].shape.zigzag.points": {
+		Validation: "Zigzag points must use a supported value.",
+		Enum:       []string{"corner", "smooth"},
+	},
+	"comps[].layers[].shape.twist.center": {
+		Validation: "Twist center must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.wiggle_paths.points": {
+		Validation: "Wiggle paths points must use a supported value.",
+		Enum:       []string{"corner", "smooth"},
+	},
+	"comps[].layers[].shape.wiggle_paths.correlation": {
+		Validation: "Wiggle paths correlation must be between 0 and 100.",
+	},
+	"comps[].layers[].shape.wiggle_transform.anchor": {
+		Validation: "Wiggle transform anchor must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.wiggle_transform.position": {
+		Validation: "Wiggle transform position must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.wiggle_transform.scale": {
+		Validation: "Wiggle transform scale must contain exactly two numeric values.",
+	},
+	"comps[].layers[].shape.wiggle_transform.correlation": {
+		Validation: "Wiggle transform correlation must be between 0 and 100.",
+	},
 	"comps[].layers[].masks[]": {
 		Validation: "Masks are supported on AV, text, shape, solid, null, adjustment, and precomp layers; camera and light layers reject masks.",
 	},

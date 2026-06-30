@@ -5993,6 +5993,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Trim paths start percentage.",
+      "x-aep-validation": "Trim start must be between 0 and 100.",
       "x-aep-example": "examples/recipes/minimal-shape-trim.json"
     },
     {
@@ -6003,6 +6004,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Trim paths end percentage.",
+      "x-aep-validation": "Trim end must be between 0 and 100.",
       "x-aep-example": "examples/recipes/minimal-shape-trim.json"
     },
     {
@@ -6049,6 +6051,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Round corners radius.",
+      "x-aep-validation": "Round corners radius must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.round_corners.set_radius",
@@ -6125,6 +6128,12 @@
       "type": "string",
       "go_type": "string",
       "description": "Offset paths line join mode.",
+      "x-aep-validation": "Offset paths line_join must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.offset_paths.set_line_join",
@@ -6150,6 +6159,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Offset paths miter limit.",
+      "x-aep-validation": "Offset paths miter_limit must be at least 1.",
       "x-aep-capabilities": [
         {
           "key": "shape.offset_paths.set_miter_limit",
@@ -6175,6 +6185,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Offset paths copy count.",
+      "x-aep-validation": "Offset paths copies must be at least 1.",
       "x-aep-capabilities": [
         {
           "key": "shape.offset_paths.set_copies",
@@ -6251,6 +6262,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Repeater copy count.",
+      "x-aep-validation": "Repeater copies must be at least 1.",
       "x-aep-capabilities": [
         {
           "key": "shape.repeater.set_copies",
@@ -6302,6 +6314,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Repeater composite order.",
+      "x-aep-validation": "Repeater order must use a supported value.",
+      "enum": [
+        "below",
+        "above"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.repeater.set_order",
@@ -6328,6 +6345,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Repeater transform anchor point.",
+      "x-aep-validation": "Repeater anchor must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.repeater_transform.set_anchor",
@@ -6355,6 +6373,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Repeater transform position.",
+      "x-aep-validation": "Repeater position must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.repeater_transform.set_position",
@@ -6381,6 +6400,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Repeater transform scale.",
+      "x-aep-validation": "Repeater scale must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.repeater_transform.set_scale",
@@ -6432,6 +6452,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Repeater starting opacity.",
+      "x-aep-validation": "Repeater start_opacity must be between 0 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.repeater_transform.set_start_opacity",
@@ -6457,6 +6478,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Repeater ending opacity.",
+      "x-aep-validation": "Repeater end_opacity must be between 0 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.repeater_transform.set_end_opacity",
@@ -6508,6 +6530,14 @@
       "type": "string",
       "go_type": "string",
       "description": "Merge paths mode.",
+      "x-aep-validation": "Merge paths type must use a supported value.",
+      "enum": [
+        "merge",
+        "add",
+        "subtract",
+        "intersect",
+        "exclude"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.merge_paths.set_type",
@@ -6559,6 +6589,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Zig Zag size.",
+      "x-aep-validation": "Zigzag size must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.zigzag.set_size",
@@ -6584,6 +6615,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Zig Zag detail.",
+      "x-aep-validation": "Zigzag detail must be non-negative.",
       "x-aep-capabilities": [
         {
           "key": "shape.zigzag.set_detail",
@@ -6609,6 +6641,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Zig Zag point mode.",
+      "x-aep-validation": "Zigzag points must use a supported value.",
+      "enum": [
+        "corner",
+        "smooth"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.zigzag.set_points",
@@ -6737,6 +6774,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Twist center point.",
+      "x-aep-validation": "Twist center must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.twist.set_center",
@@ -6890,6 +6928,11 @@
       "type": "string",
       "go_type": "string",
       "description": "Wiggle Paths point mode.",
+      "x-aep-validation": "Wiggle paths points must use a supported value.",
+      "enum": [
+        "corner",
+        "smooth"
+      ],
       "x-aep-capabilities": [
         {
           "key": "shape.wiggle_paths.set_points",
@@ -6915,6 +6958,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Wiggle Paths correlation.",
+      "x-aep-validation": "Wiggle paths correlation must be between 0 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.wiggle_paths.set_correlation",
@@ -7019,6 +7063,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Wiggle Transform anchor amount.",
+      "x-aep-validation": "Wiggle transform anchor must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.wiggler_transform.set_anchor",
@@ -7046,6 +7091,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Wiggle Transform position amount.",
+      "x-aep-validation": "Wiggle transform position must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.wiggler_transform.set_position",
@@ -7072,6 +7118,7 @@
       "go_type": "[]float64",
       "element": "float64",
       "description": "Wiggle Transform scale amount.",
+      "x-aep-validation": "Wiggle transform scale must contain exactly two numeric values.",
       "x-aep-capabilities": [
         {
           "key": "shape.wiggler_transform.set_scale",
@@ -7175,6 +7222,7 @@
       "type": "number",
       "go_type": "*float64",
       "description": "Wiggle Transform correlation.",
+      "x-aep-validation": "Wiggle transform correlation must be between 0 and 100.",
       "x-aep-capabilities": [
         {
           "key": "shape.wiggle_transform.set_correlation",

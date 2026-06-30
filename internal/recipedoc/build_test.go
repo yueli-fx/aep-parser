@@ -371,6 +371,46 @@ func TestBuildDocumentIncludesShapePaintValidationMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesShapeOperatorValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"comps[].layers[].shape.trim.start",
+		"comps[].layers[].shape.trim.end",
+		"comps[].layers[].shape.round_corners.radius",
+		"comps[].layers[].shape.offset_paths.line_join",
+		"comps[].layers[].shape.offset_paths.miter_limit",
+		"comps[].layers[].shape.offset_paths.copies",
+		"comps[].layers[].shape.repeater.copies",
+		"comps[].layers[].shape.repeater.order",
+		"comps[].layers[].shape.repeater.anchor",
+		"comps[].layers[].shape.repeater.position",
+		"comps[].layers[].shape.repeater.scale",
+		"comps[].layers[].shape.repeater.start_opacity",
+		"comps[].layers[].shape.repeater.end_opacity",
+		"comps[].layers[].shape.merge_paths.type",
+		"comps[].layers[].shape.zigzag.size",
+		"comps[].layers[].shape.zigzag.detail",
+		"comps[].layers[].shape.zigzag.points",
+		"comps[].layers[].shape.twist.center",
+		"comps[].layers[].shape.wiggle_paths.points",
+		"comps[].layers[].shape.wiggle_paths.correlation",
+		"comps[].layers[].shape.wiggle_transform.anchor",
+		"comps[].layers[].shape.wiggle_transform.position",
+		"comps[].layers[].shape.wiggle_transform.scale",
+		"comps[].layers[].shape.wiggle_transform.correlation",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

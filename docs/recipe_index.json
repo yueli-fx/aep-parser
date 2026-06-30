@@ -2543,6 +2543,14 @@
       "type": "string",
       "go_type": "string",
       "summary": "Merge paths mode.",
+      "validation": "Merge paths type must use a supported value.",
+      "enum": [
+        "merge",
+        "add",
+        "subtract",
+        "intersect",
+        "exclude"
+      ],
       "capability_keys": [
         "shape.merge_paths.set_type"
       ],
@@ -2582,6 +2590,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Offset paths copy count.",
+      "validation": "Offset paths copies must be at least 1.",
       "capability_keys": [
         "shape.offset_paths.set_copies"
       ],
@@ -2608,6 +2617,12 @@
       "type": "string",
       "go_type": "string",
       "summary": "Offset paths line join mode.",
+      "validation": "Offset paths line_join must use a supported value.",
+      "enum": [
+        "miter",
+        "round",
+        "bevel"
+      ],
       "capability_keys": [
         "shape.offset_paths.set_line_join"
       ],
@@ -2621,6 +2636,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Offset paths miter limit.",
+      "validation": "Offset paths miter_limit must be at least 1.",
       "capability_keys": [
         "shape.offset_paths.set_miter_limit"
       ],
@@ -2730,6 +2746,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Repeater transform anchor point.",
+      "validation": "Repeater anchor must contain exactly two numeric values.",
       "capability_keys": [
         "shape.repeater_transform.set_anchor"
       ],
@@ -2743,6 +2760,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Repeater copy count.",
+      "validation": "Repeater copies must be at least 1.",
       "capability_keys": [
         "shape.repeater.set_copies"
       ],
@@ -2756,6 +2774,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Repeater ending opacity.",
+      "validation": "Repeater end_opacity must be between 0 and 100.",
       "capability_keys": [
         "shape.repeater_transform.set_end_opacity"
       ],
@@ -2782,6 +2801,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Repeater composite order.",
+      "validation": "Repeater order must use a supported value.",
+      "enum": [
+        "below",
+        "above"
+      ],
       "capability_keys": [
         "shape.repeater.set_order"
       ],
@@ -2795,6 +2819,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Repeater transform position.",
+      "validation": "Repeater position must contain exactly two numeric values.",
       "capability_keys": [
         "shape.repeater_transform.set_position"
       ],
@@ -2821,6 +2846,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Repeater transform scale.",
+      "validation": "Repeater scale must contain exactly two numeric values.",
       "capability_keys": [
         "shape.repeater_transform.set_scale"
       ],
@@ -2834,6 +2860,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Repeater starting opacity.",
+      "validation": "Repeater start_opacity must be between 0 and 100.",
       "capability_keys": [
         "shape.repeater_transform.set_start_opacity"
       ],
@@ -2873,6 +2900,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Round corners radius.",
+      "validation": "Round corners radius must be non-negative.",
       "capability_keys": [
         "shape.round_corners.set_radius"
       ],
@@ -3227,6 +3255,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Trim paths end percentage.",
+      "validation": "Trim end must be between 0 and 100.",
       "example": "examples/recipes/minimal-shape-trim.json"
     },
     "comps[].layers[].shape.trim.offset": {
@@ -3247,6 +3276,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Trim paths start percentage.",
+      "validation": "Trim start must be between 0 and 100.",
       "example": "examples/recipes/minimal-shape-trim.json"
     },
     "comps[].layers[].shape.twist": {
@@ -3283,6 +3313,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Twist center point.",
+      "validation": "Twist center must contain exactly two numeric values.",
       "capability_keys": [
         "shape.twist.set_center"
       ],
@@ -3309,6 +3340,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Wiggle Paths correlation.",
+      "validation": "Wiggle paths correlation must be between 0 and 100.",
       "capability_keys": [
         "shape.wiggle_paths.set_correlation"
       ],
@@ -3335,6 +3367,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Wiggle Paths point mode.",
+      "validation": "Wiggle paths points must use a supported value.",
+      "enum": [
+        "corner",
+        "smooth"
+      ],
       "capability_keys": [
         "shape.wiggle_paths.set_points"
       ],
@@ -3426,6 +3463,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Wiggle Transform anchor amount.",
+      "validation": "Wiggle transform anchor must contain exactly two numeric values.",
       "capability_keys": [
         "shape.wiggler_transform.set_anchor"
       ],
@@ -3439,6 +3477,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Wiggle Transform correlation.",
+      "validation": "Wiggle transform correlation must be between 0 and 100.",
       "capability_keys": [
         "shape.wiggle_transform.set_correlation"
       ],
@@ -3452,6 +3491,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Wiggle Transform position amount.",
+      "validation": "Wiggle transform position must contain exactly two numeric values.",
       "capability_keys": [
         "shape.wiggler_transform.set_position"
       ],
@@ -3491,6 +3531,7 @@
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
       "summary": "Wiggle Transform scale amount.",
+      "validation": "Wiggle transform scale must contain exactly two numeric values.",
       "capability_keys": [
         "shape.wiggler_transform.set_scale"
       ],
@@ -3556,6 +3597,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Zig Zag detail.",
+      "validation": "Zigzag detail must be non-negative.",
       "capability_keys": [
         "shape.zigzag.set_detail"
       ],
@@ -3569,6 +3611,11 @@
       "type": "string",
       "go_type": "string",
       "summary": "Zig Zag point mode.",
+      "validation": "Zigzag points must use a supported value.",
+      "enum": [
+        "corner",
+        "smooth"
+      ],
       "capability_keys": [
         "shape.zigzag.set_points"
       ],
@@ -3582,6 +3629,7 @@
       "type": "number",
       "go_type": "*float64",
       "summary": "Zig Zag size.",
+      "validation": "Zigzag size must be non-negative.",
       "capability_keys": [
         "shape.zigzag.set_size"
       ],

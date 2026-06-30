@@ -403,53 +403,53 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.trim.start` | `number` | - | Trim paths start percentage. | - | - | examples/recipes/minimal-shape-trim.json |
-| `comps[].layers[].shape.trim.end` | `number` | - | Trim paths end percentage. | - | - | examples/recipes/minimal-shape-trim.json |
+| `comps[].layers[].shape.trim.start` | `number` | - | Trim paths start percentage. | Trim start must be between 0 and 100. | - | examples/recipes/minimal-shape-trim.json |
+| `comps[].layers[].shape.trim.end` | `number` | - | Trim paths end percentage. | Trim end must be between 0 and 100. | - | examples/recipes/minimal-shape-trim.json |
 | `comps[].layers[].shape.trim.offset` | `number` | - | Trim paths offset. | - | - | examples/recipes/minimal-shape-trim.json |
 
 ## RoundCornersSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.round_corners.radius` | `number` | - | Round corners radius. | - | `shape.round_corners.set_radius` (`RoundCornersNode.SetRadius`) | examples/recipes/minimal-shape-round-corners.json |
+| `comps[].layers[].shape.round_corners.radius` | `number` | - | Round corners radius. | Round corners radius must be non-negative. | `shape.round_corners.set_radius` (`RoundCornersNode.SetRadius`) | examples/recipes/minimal-shape-round-corners.json |
 
 ## OffsetPathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].shape.offset_paths.amount` | `number` | - | Offset paths amount. | - | `shape.offset_paths.set_amount` (`OffsetPathsNode.SetAmount`) | examples/recipes/minimal-shape-offset-paths.json |
-| `comps[].layers[].shape.offset_paths.line_join` | `string` | - | Offset paths line join mode. | - | `shape.offset_paths.set_line_join` (`OffsetPathsNode.SetLineJoin`) | examples/recipes/minimal-shape-offset-paths.json |
-| `comps[].layers[].shape.offset_paths.miter_limit` | `number` | - | Offset paths miter limit. | - | `shape.offset_paths.set_miter_limit` (`OffsetPathsNode.SetMiterLimit`) | examples/recipes/minimal-shape-offset-paths.json |
-| `comps[].layers[].shape.offset_paths.copies` | `number` | - | Offset paths copy count. | - | `shape.offset_paths.set_copies` (`OffsetPathsNode.SetCopies`) | examples/recipes/minimal-shape-offset-paths.json |
+| `comps[].layers[].shape.offset_paths.line_join` | `string` | - | Offset paths line join mode. | Offset paths line_join must use a supported value. | `shape.offset_paths.set_line_join` (`OffsetPathsNode.SetLineJoin`) | examples/recipes/minimal-shape-offset-paths.json |
+| `comps[].layers[].shape.offset_paths.miter_limit` | `number` | - | Offset paths miter limit. | Offset paths miter_limit must be at least 1. | `shape.offset_paths.set_miter_limit` (`OffsetPathsNode.SetMiterLimit`) | examples/recipes/minimal-shape-offset-paths.json |
+| `comps[].layers[].shape.offset_paths.copies` | `number` | - | Offset paths copy count. | Offset paths copies must be at least 1. | `shape.offset_paths.set_copies` (`OffsetPathsNode.SetCopies`) | examples/recipes/minimal-shape-offset-paths.json |
 | `comps[].layers[].shape.offset_paths.copy_offset` | `number` | - | Offset paths copy offset. | - | `shape.offset_paths.set_copy_offset` (`OffsetPathsNode.SetCopyOffset`) | examples/recipes/minimal-shape-offset-paths.json |
 
 ## RepeaterSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.repeater.copies` | `number` | - | Repeater copy count. | - | `shape.repeater.set_copies` (`RepeaterNode.SetCopies`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.copies` | `number` | - | Repeater copy count. | Repeater copies must be at least 1. | `shape.repeater.set_copies` (`RepeaterNode.SetCopies`) | examples/recipes/minimal-shape-repeater.json |
 | `comps[].layers[].shape.repeater.offset` | `number` | - | Repeater copy offset. | - | `shape.repeater.set_offset` (`RepeaterNode.SetOffset`) | examples/recipes/minimal-shape-repeater.json |
-| `comps[].layers[].shape.repeater.order` | `string` | - | Repeater composite order. | - | `shape.repeater.set_order` (`RepeaterNode.SetOrder`) | examples/recipes/minimal-shape-repeater.json |
-| `comps[].layers[].shape.repeater.anchor` | `array<float64>` | - | Repeater transform anchor point. | - | `shape.repeater_transform.set_anchor` (`RepeaterTransform.SetAnchor`) | examples/recipes/minimal-shape-repeater.json |
-| `comps[].layers[].shape.repeater.position` | `array<float64>` | - | Repeater transform position. | - | `shape.repeater_transform.set_position` (`RepeaterTransform.SetPosition`) | examples/recipes/minimal-shape-repeater.json |
-| `comps[].layers[].shape.repeater.scale` | `array<float64>` | - | Repeater transform scale. | - | `shape.repeater_transform.set_scale` (`RepeaterTransform.SetScale`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.order` | `string` | - | Repeater composite order. | Repeater order must use a supported value. | `shape.repeater.set_order` (`RepeaterNode.SetOrder`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.anchor` | `array<float64>` | - | Repeater transform anchor point. | Repeater anchor must contain exactly two numeric values. | `shape.repeater_transform.set_anchor` (`RepeaterTransform.SetAnchor`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.position` | `array<float64>` | - | Repeater transform position. | Repeater position must contain exactly two numeric values. | `shape.repeater_transform.set_position` (`RepeaterTransform.SetPosition`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.scale` | `array<float64>` | - | Repeater transform scale. | Repeater scale must contain exactly two numeric values. | `shape.repeater_transform.set_scale` (`RepeaterTransform.SetScale`) | examples/recipes/minimal-shape-repeater.json |
 | `comps[].layers[].shape.repeater.rotation` | `number` | - | Repeater transform rotation. | - | `shape.repeater_transform.set_rotation` (`RepeaterTransform.SetRotation`) | examples/recipes/minimal-shape-repeater.json |
-| `comps[].layers[].shape.repeater.start_opacity` | `number` | - | Repeater starting opacity. | - | `shape.repeater_transform.set_start_opacity` (`RepeaterTransform.SetStartOpacity`) | examples/recipes/minimal-shape-repeater.json |
-| `comps[].layers[].shape.repeater.end_opacity` | `number` | - | Repeater ending opacity. | - | `shape.repeater_transform.set_end_opacity` (`RepeaterTransform.SetEndOpacity`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.start_opacity` | `number` | - | Repeater starting opacity. | Repeater start_opacity must be between 0 and 100. | `shape.repeater_transform.set_start_opacity` (`RepeaterTransform.SetStartOpacity`) | examples/recipes/minimal-shape-repeater.json |
+| `comps[].layers[].shape.repeater.end_opacity` | `number` | - | Repeater ending opacity. | Repeater end_opacity must be between 0 and 100. | `shape.repeater_transform.set_end_opacity` (`RepeaterTransform.SetEndOpacity`) | examples/recipes/minimal-shape-repeater.json |
 
 ## MergePathsSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.merge_paths.type` | `string` | - | Merge paths mode. | - | `shape.merge_paths.set_type` (`MergePathsNode.SetType`) | examples/recipes/minimal-shape-merge-paths.json |
+| `comps[].layers[].shape.merge_paths.type` | `string` | - | Merge paths mode. | Merge paths type must use a supported value. | `shape.merge_paths.set_type` (`MergePathsNode.SetType`) | examples/recipes/minimal-shape-merge-paths.json |
 
 ## ZigZagSpec
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.zigzag.size` | `number` | - | Zig Zag size. | - | `shape.zigzag.set_size` (`ZigZagNode.SetSize`) | examples/recipes/minimal-shape-zigzag.json |
-| `comps[].layers[].shape.zigzag.detail` | `number` | - | Zig Zag detail. | - | `shape.zigzag.set_detail` (`ZigZagNode.SetDetail`) | examples/recipes/minimal-shape-zigzag.json |
-| `comps[].layers[].shape.zigzag.points` | `string` | - | Zig Zag point mode. | - | `shape.zigzag.set_points` (`ZigZagNode.SetPoints`) | examples/recipes/minimal-shape-zigzag.json |
+| `comps[].layers[].shape.zigzag.size` | `number` | - | Zig Zag size. | Zigzag size must be non-negative. | `shape.zigzag.set_size` (`ZigZagNode.SetSize`) | examples/recipes/minimal-shape-zigzag.json |
+| `comps[].layers[].shape.zigzag.detail` | `number` | - | Zig Zag detail. | Zigzag detail must be non-negative. | `shape.zigzag.set_detail` (`ZigZagNode.SetDetail`) | examples/recipes/minimal-shape-zigzag.json |
+| `comps[].layers[].shape.zigzag.points` | `string` | - | Zig Zag point mode. | Zigzag points must use a supported value. | `shape.zigzag.set_points` (`ZigZagNode.SetPoints`) | examples/recipes/minimal-shape-zigzag.json |
 
 ## PuckerBloatSpec
 
@@ -462,7 +462,7 @@ This reference is generated from the canonical recipe field model.
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
 | `comps[].layers[].shape.twist.angle` | `number` | - | Twist angle. | - | `shape.twist.set_angle` (`TwistNode.SetAngle`) | examples/recipes/minimal-shape-twist.json |
-| `comps[].layers[].shape.twist.center` | `array<float64>` | - | Twist center point. | - | `shape.twist.set_center` (`TwistNode.SetCenter`) | examples/recipes/minimal-shape-twist.json |
+| `comps[].layers[].shape.twist.center` | `array<float64>` | - | Twist center point. | Twist center must contain exactly two numeric values. | `shape.twist.set_center` (`TwistNode.SetCenter`) | examples/recipes/minimal-shape-twist.json |
 
 ## WigglePathsSpec
 
@@ -472,8 +472,8 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].shape.wiggle_paths.detail` | `number` | - | Wiggle Paths detail. | - | `shape.wiggle_paths.set_detail` (`WigglePathsNode.SetDetail`) | examples/recipes/minimal-shape-wiggle-paths.json |
 | `comps[].layers[].shape.wiggle_paths.wiggles_per_second` | `number` | - | Wiggle Paths frequency. | - | `shape.wiggle_paths.set_wiggles_per_second` (`WigglePathsNode.SetWigglesPerSecond`) | examples/recipes/minimal-shape-wiggle-paths.json |
 | `comps[].layers[].shape.wiggle_paths.random_seed` | `number` | - | Wiggle Paths random seed. | - | `shape.wiggle_paths.set_random_seed` (`WigglePathsNode.SetRandomSeed`) | examples/recipes/minimal-shape-wiggle-paths.json |
-| `comps[].layers[].shape.wiggle_paths.points` | `string` | - | Wiggle Paths point mode. | - | `shape.wiggle_paths.set_points` (`WigglePathsNode.SetPoints`) | examples/recipes/minimal-shape-wiggle-paths.json |
-| `comps[].layers[].shape.wiggle_paths.correlation` | `number` | - | Wiggle Paths correlation. | - | `shape.wiggle_paths.set_correlation` (`WigglePathsNode.SetCorrelation`) | examples/recipes/minimal-shape-wiggle-paths.json |
+| `comps[].layers[].shape.wiggle_paths.points` | `string` | - | Wiggle Paths point mode. | Wiggle paths points must use a supported value. | `shape.wiggle_paths.set_points` (`WigglePathsNode.SetPoints`) | examples/recipes/minimal-shape-wiggle-paths.json |
+| `comps[].layers[].shape.wiggle_paths.correlation` | `number` | - | Wiggle Paths correlation. | Wiggle paths correlation must be between 0 and 100. | `shape.wiggle_paths.set_correlation` (`WigglePathsNode.SetCorrelation`) | examples/recipes/minimal-shape-wiggle-paths.json |
 | `comps[].layers[].shape.wiggle_paths.temporal_phase` | `number` | - | Wiggle Paths temporal phase. | - | `shape.wiggle_paths.set_temporal_phase` (`WigglePathsNode.SetTemporalPhase`) | examples/recipes/minimal-shape-wiggle-paths.json |
 | `comps[].layers[].shape.wiggle_paths.spatial_phase` | `number` | - | Wiggle Paths spatial phase. | - | `shape.wiggle_paths.set_spatial_phase` (`WigglePathsNode.SetSpatialPhase`) | examples/recipes/minimal-shape-wiggle-paths.json |
 
@@ -481,13 +481,13 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability | Example |
 | --- | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].shape.wiggle_transform.anchor` | `array<float64>` | - | Wiggle Transform anchor amount. | - | `shape.wiggler_transform.set_anchor` (`WigglerTransform.SetAnchor`) | examples/recipes/minimal-shape-wiggle-transform.json |
-| `comps[].layers[].shape.wiggle_transform.position` | `array<float64>` | - | Wiggle Transform position amount. | - | `shape.wiggler_transform.set_position` (`WigglerTransform.SetPosition`) | examples/recipes/minimal-shape-wiggle-transform.json |
-| `comps[].layers[].shape.wiggle_transform.scale` | `array<float64>` | - | Wiggle Transform scale amount. | - | `shape.wiggler_transform.set_scale` (`WigglerTransform.SetScale`) | examples/recipes/minimal-shape-wiggle-transform.json |
+| `comps[].layers[].shape.wiggle_transform.anchor` | `array<float64>` | - | Wiggle Transform anchor amount. | Wiggle transform anchor must contain exactly two numeric values. | `shape.wiggler_transform.set_anchor` (`WigglerTransform.SetAnchor`) | examples/recipes/minimal-shape-wiggle-transform.json |
+| `comps[].layers[].shape.wiggle_transform.position` | `array<float64>` | - | Wiggle Transform position amount. | Wiggle transform position must contain exactly two numeric values. | `shape.wiggler_transform.set_position` (`WigglerTransform.SetPosition`) | examples/recipes/minimal-shape-wiggle-transform.json |
+| `comps[].layers[].shape.wiggle_transform.scale` | `array<float64>` | - | Wiggle Transform scale amount. | Wiggle transform scale must contain exactly two numeric values. | `shape.wiggler_transform.set_scale` (`WigglerTransform.SetScale`) | examples/recipes/minimal-shape-wiggle-transform.json |
 | `comps[].layers[].shape.wiggle_transform.rotation` | `number` | - | Wiggle Transform rotation amount. | - | `shape.wiggler_transform.set_rotation` (`WigglerTransform.SetRotation`) | examples/recipes/minimal-shape-wiggle-transform.json |
 | `comps[].layers[].shape.wiggle_transform.wiggles_per_second` | `number` | - | Wiggle Transform frequency. | - | `shape.wiggle_transform.set_wiggles_per_second` (`WiggleTransformNode.SetWigglesPerSecond`) | examples/recipes/minimal-shape-wiggle-transform.json |
 | `comps[].layers[].shape.wiggle_transform.random_seed` | `number` | - | Wiggle Transform random seed. | - | `shape.wiggle_transform.set_random_seed` (`WiggleTransformNode.SetRandomSeed`) | examples/recipes/minimal-shape-wiggle-transform.json |
-| `comps[].layers[].shape.wiggle_transform.correlation` | `number` | - | Wiggle Transform correlation. | - | `shape.wiggle_transform.set_correlation` (`WiggleTransformNode.SetCorrelation`) | examples/recipes/minimal-shape-wiggle-transform.json |
+| `comps[].layers[].shape.wiggle_transform.correlation` | `number` | - | Wiggle Transform correlation. | Wiggle transform correlation must be between 0 and 100. | `shape.wiggle_transform.set_correlation` (`WiggleTransformNode.SetCorrelation`) | examples/recipes/minimal-shape-wiggle-transform.json |
 | `comps[].layers[].shape.wiggle_transform.temporal_phase` | `number` | - | Wiggle Transform temporal phase. | - | `shape.wiggle_transform.set_temporal_phase` (`WiggleTransformNode.SetTemporalPhase`) | examples/recipes/minimal-shape-wiggle-transform.json |
 | `comps[].layers[].shape.wiggle_transform.spatial_phase` | `number` | - | Wiggle Transform spatial phase. | - | `shape.wiggle_transform.set_spatial_phase` (`WiggleTransformNode.SetSpatialPhase`) | examples/recipes/minimal-shape-wiggle-transform.json |
 
