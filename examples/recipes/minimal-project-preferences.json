@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Minimal project preferences",
+    "expression_engine": "javascript-1.0",
+    "audio_sample_rate": 44100,
+    "working_gamma": 2.4,
+    "compensate_for_scene_referred_profiles": false
+  },
+  "comps": [
+    {
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "frame_rate": 30,
+      "duration": 2
+    }
+  ],
+  "expected_profile": {
+    "comp_count": 1,
+    "layer_count": 0,
+    "expression_engine": "javascript-1.0",
+    "audio_sample_rate": 44100,
+    "working_gamma": 2.4,
+    "compensate_for_scene_referred_profiles": false
+  }
+}

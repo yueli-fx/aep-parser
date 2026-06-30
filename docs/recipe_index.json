@@ -13,6 +13,10 @@
     "project.frames_use_feet_frames",
     "project.feet_frames_film_type",
     "project.footage_timecode_display_start_type",
+    "project.expression_engine",
+    "project.audio_sample_rate",
+    "project.working_gamma",
+    "project.compensate_for_scene_referred_profiles",
     "comps[]",
     "comps[].name",
     "comps[].width",
@@ -396,6 +400,10 @@
     "expected_profile.frames_use_feet_frames",
     "expected_profile.feet_frames_film_type",
     "expected_profile.footage_timecode_display_start_type",
+    "expected_profile.expression_engine",
+    "expected_profile.audio_sample_rate",
+    "expected_profile.working_gamma",
+    "expected_profile.compensate_for_scene_referred_profiles",
     "expected_profile.name",
     "expected_profile.width",
     "expected_profile.height",
@@ -5260,6 +5268,24 @@
       "summary": "Optional assertions used to compare the generated project against expected structure.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
     },
+    "expected_profile.audio_sample_rate": {
+      "path": "expected_profile.audio_sample_rate",
+      "json_name": "audio_sample_rate",
+      "source_type": "ExpectedProfile",
+      "source_field": "AudioSampleRate",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected project audio sample rate.",
+      "validation": "Expected project audio sample rate must be one of AE's supported rates.",
+      "enum": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "96000"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
+    },
     "expected_profile.background_color": {
       "path": "expected_profile.background_color",
       "json_name": "background_color",
@@ -5310,6 +5336,16 @@
       "summary": "Expected number of compositions.",
       "validation": "Expected count must be non-negative.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    "expected_profile.compensate_for_scene_referred_profiles": {
+      "path": "expected_profile.compensate_for_scene_referred_profiles",
+      "json_name": "compensate_for_scene_referred_profiles",
+      "source_type": "ExpectedProfile",
+      "source_field": "CompensateForSceneReferredProfiles",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Expected project scene-referred profile compensation switch.",
+      "example": "examples/recipes/minimal-project-preferences.json"
     },
     "expected_profile.display_start_time": {
       "path": "expected_profile.display_start_time",
@@ -5493,6 +5529,21 @@
         "unknown"
       ],
       "example": "examples/recipes/minimal-essential-graphics-checkbox-controller.json"
+    },
+    "expected_profile.expression_engine": {
+      "path": "expected_profile.expression_engine",
+      "json_name": "expression_engine",
+      "source_type": "ExpectedProfile",
+      "source_field": "ExpressionEngine",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Expected project expression engine.",
+      "validation": "Expected project expression engine must be supported.",
+      "enum": [
+        "extendscript",
+        "javascript-1.0"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
     },
     "expected_profile.feet_frames_film_type": {
       "path": "expected_profile.feet_frames_film_type",
@@ -7019,6 +7070,21 @@
       "summary": "Expected composition work area start time in seconds.",
       "example": "examples/recipes/minimal-comp-object-profile.json"
     },
+    "expected_profile.working_gamma": {
+      "path": "expected_profile.working_gamma",
+      "json_name": "working_gamma",
+      "source_type": "ExpectedProfile",
+      "source_field": "WorkingGamma",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Expected project working gamma.",
+      "validation": "Expected project working gamma must be 2.2 or 2.4.",
+      "enum": [
+        "2.2",
+        "2.4"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
+    },
     "project": {
       "path": "project",
       "json_name": "project",
@@ -7031,6 +7097,27 @@
       ],
       "summary": "Project-level metadata used when materializing the recipe.",
       "example": "examples/recipes/minimal-adjustment-layer.json"
+    },
+    "project.audio_sample_rate": {
+      "path": "project.audio_sample_rate",
+      "json_name": "audio_sample_rate",
+      "source_type": "ProjectSpec",
+      "source_field": "AudioSampleRate",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Project audio sample rate.",
+      "validation": "Must be one of AE's supported audio sample rates.",
+      "enum": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "96000"
+      ],
+      "capability_keys": [
+        "project.set_audio_sample_rate"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
     },
     "project.bits_per_channel": {
       "path": "project.bits_per_channel",
@@ -7053,6 +7140,37 @@
         "project.set_bits_per_channel"
       ],
       "example": "examples/recipes/minimal-project-bits-per-channel.json"
+    },
+    "project.compensate_for_scene_referred_profiles": {
+      "path": "project.compensate_for_scene_referred_profiles",
+      "json_name": "compensate_for_scene_referred_profiles",
+      "source_type": "ProjectSpec",
+      "source_field": "CompensateForSceneReferredProfiles",
+      "type": "boolean",
+      "go_type": "*bool",
+      "summary": "Project scene-referred profile compensation switch.",
+      "capability_keys": [
+        "project.set_compensate_for_scene_referred_profiles"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
+    },
+    "project.expression_engine": {
+      "path": "project.expression_engine",
+      "json_name": "expression_engine",
+      "source_type": "ProjectSpec",
+      "source_field": "ExpressionEngine",
+      "type": "string",
+      "go_type": "string",
+      "summary": "Project expression engine.",
+      "validation": "Must be extendscript or javascript-1.0.",
+      "enum": [
+        "extendscript",
+        "javascript-1.0"
+      ],
+      "capability_keys": [
+        "project.set_expression_engine"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
     },
     "project.feet_frames_film_type": {
       "path": "project.feet_frames_film_type",
@@ -7194,6 +7312,24 @@
         "project.set_time_display_type"
       ],
       "example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    "project.working_gamma": {
+      "path": "project.working_gamma",
+      "json_name": "working_gamma",
+      "source_type": "ProjectSpec",
+      "source_field": "WorkingGamma",
+      "type": "number",
+      "go_type": "*float64",
+      "summary": "Project working gamma.",
+      "validation": "Must be 2.2 or 2.4.",
+      "enum": [
+        "2.2",
+        "2.4"
+      ],
+      "capability_keys": [
+        "project.set_working_gamma"
+      ],
+      "example": "examples/recipes/minimal-project-preferences.json"
     },
     "schema_version": {
       "path": "schema_version",
@@ -7384,6 +7520,10 @@
       "expected_profile.frames_use_feet_frames",
       "expected_profile.feet_frames_film_type",
       "expected_profile.footage_timecode_display_start_type",
+      "expected_profile.expression_engine",
+      "expected_profile.audio_sample_rate",
+      "expected_profile.working_gamma",
+      "expected_profile.compensate_for_scene_referred_profiles",
       "expected_profile.name",
       "expected_profile.width",
       "expected_profile.height",
@@ -7605,7 +7745,11 @@
       "project.frames_count_type",
       "project.frames_use_feet_frames",
       "project.feet_frames_film_type",
-      "project.footage_timecode_display_start_type"
+      "project.footage_timecode_display_start_type",
+      "project.expression_engine",
+      "project.audio_sample_rate",
+      "project.working_gamma",
+      "project.compensate_for_scene_referred_profiles"
     ],
     "PuckerBloatSpec": [
       "comps[].layers[].shape.pucker_bloat.amount"

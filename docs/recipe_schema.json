@@ -326,6 +326,116 @@
       "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
     },
     {
+      "x-aep-path": "project.expression_engine",
+      "json_name": "expression_engine",
+      "source_type": "ProjectSpec",
+      "source_field": "ExpressionEngine",
+      "type": "string",
+      "go_type": "string",
+      "description": "Project expression engine.",
+      "x-aep-validation": "Must be extendscript or javascript-1.0.",
+      "enum": [
+        "extendscript",
+        "javascript-1.0"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_expression_engine",
+          "query": "Project.SetExpressionEngine",
+          "status": "supported",
+          "symbol": "Project.SetExpressionEngine",
+          "domain": "expr",
+          "verify": "ae-accept",
+          "minver": "2020",
+          "boundary": "length-variable splice of the ExEn Utf8 chunk; refuses when the\nchunk is absent",
+          "gate": [
+            "TestProjectSettings_AEShipGate_AE2020",
+            "TestProjectSettings_AEShipGate_AE2025"
+          ]
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "project.audio_sample_rate",
+      "json_name": "audio_sample_rate",
+      "source_type": "ProjectSpec",
+      "source_field": "AudioSampleRate",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Project audio sample rate.",
+      "x-aep-validation": "Must be one of AE's supported audio sample rates.",
+      "enum": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "96000"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_audio_sample_rate",
+          "query": "Project.SetAudioSampleRate",
+          "status": "supported",
+          "symbol": "Project.SetAudioSampleRate",
+          "domain": "project",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; rejects rates outside AE's\nUI-supported set"
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "project.working_gamma",
+      "json_name": "working_gamma",
+      "source_type": "ProjectSpec",
+      "source_field": "WorkingGamma",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Project working gamma.",
+      "x-aep-validation": "Must be 2.2 or 2.4.",
+      "enum": [
+        "2.2",
+        "2.4"
+      ],
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_working_gamma",
+          "query": "Project.SetWorkingGamma",
+          "status": "supported",
+          "symbol": "Project.SetWorkingGamma",
+          "domain": "project",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; rejects values other than 2.2 and 2.4"
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "project.compensate_for_scene_referred_profiles",
+      "json_name": "compensate_for_scene_referred_profiles",
+      "source_type": "ProjectSpec",
+      "source_field": "CompensateForSceneReferredProfiles",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Project scene-referred profile compensation switch.",
+      "x-aep-capabilities": [
+        {
+          "key": "project.set_compensate_for_scene_referred_profiles",
+          "query": "Project.SetCompensateForSceneReferredProfiles",
+          "status": "supported",
+          "symbol": "Project.SetCompensateForSceneReferredProfiles",
+          "domain": "project",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "length-preserving, low risk; refuses when the acer chunk is\nabsent (no slot to mutate — AE 23+ writes it by default, so files\nwithout it are rare)"
+        }
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
       "x-aep-path": "comps[]",
       "json_name": "comps",
       "source_type": "Recipe",
@@ -8698,6 +8808,64 @@
         "source_media"
       ],
       "x-aep-example": "examples/recipes/minimal-project-display-settings.json"
+    },
+    {
+      "x-aep-path": "expected_profile.expression_engine",
+      "json_name": "expression_engine",
+      "source_type": "ExpectedProfile",
+      "source_field": "ExpressionEngine",
+      "type": "string",
+      "go_type": "string",
+      "description": "Expected project expression engine.",
+      "x-aep-validation": "Expected project expression engine must be supported.",
+      "enum": [
+        "extendscript",
+        "javascript-1.0"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "expected_profile.audio_sample_rate",
+      "json_name": "audio_sample_rate",
+      "source_type": "ExpectedProfile",
+      "source_field": "AudioSampleRate",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected project audio sample rate.",
+      "x-aep-validation": "Expected project audio sample rate must be one of AE's supported rates.",
+      "enum": [
+        "22050",
+        "32000",
+        "44100",
+        "48000",
+        "96000"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "expected_profile.working_gamma",
+      "json_name": "working_gamma",
+      "source_type": "ExpectedProfile",
+      "source_field": "WorkingGamma",
+      "type": "number",
+      "go_type": "*float64",
+      "description": "Expected project working gamma.",
+      "x-aep-validation": "Expected project working gamma must be 2.2 or 2.4.",
+      "enum": [
+        "2.2",
+        "2.4"
+      ],
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
+    },
+    {
+      "x-aep-path": "expected_profile.compensate_for_scene_referred_profiles",
+      "json_name": "compensate_for_scene_referred_profiles",
+      "source_type": "ExpectedProfile",
+      "source_field": "CompensateForSceneReferredProfiles",
+      "type": "boolean",
+      "go_type": "*bool",
+      "description": "Expected project scene-referred profile compensation switch.",
+      "x-aep-example": "examples/recipes/minimal-project-preferences.json"
     },
     {
       "x-aep-path": "expected_profile.name",

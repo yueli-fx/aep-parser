@@ -28,6 +28,18 @@ var fieldValidation = map[string]FieldMeta{
 		Validation: "Must be start_0 or source_media.",
 		Enum:       []string{"start_0", "source_media"},
 	},
+	"project.expression_engine": {
+		Validation: "Must be extendscript or javascript-1.0.",
+		Enum:       []string{"extendscript", "javascript-1.0"},
+	},
+	"project.audio_sample_rate": {
+		Validation: "Must be one of AE's supported audio sample rates.",
+		Enum:       []string{"22050", "32000", "44100", "48000", "96000"},
+	},
+	"project.working_gamma": {
+		Validation: "Must be 2.2 or 2.4.",
+		Enum:       []string{"2.2", "2.4"},
+	},
 	"comps[].width": {
 		Validation: "Pixel width must fit the composition writer's uint16 range.",
 	},
@@ -309,6 +321,18 @@ var fieldValidation = map[string]FieldMeta{
 	"expected_profile.footage_timecode_display_start_type": {
 		Validation: "Expected project footage timecode display start mode must be supported.",
 		Enum:       []string{"start_0", "source_media"},
+	},
+	"expected_profile.expression_engine": {
+		Validation: "Expected project expression engine must be supported.",
+		Enum:       []string{"extendscript", "javascript-1.0"},
+	},
+	"expected_profile.audio_sample_rate": {
+		Validation: "Expected project audio sample rate must be one of AE's supported rates.",
+		Enum:       []string{"22050", "32000", "44100", "48000", "96000"},
+	},
+	"expected_profile.working_gamma": {
+		Validation: "Expected project working gamma must be 2.2 or 2.4.",
+		Enum:       []string{"2.2", "2.4"},
 	},
 	"expected_profile.keyframes[].layer_name": {
 		Validation: "Keyframe profile checks require a target layer name.",

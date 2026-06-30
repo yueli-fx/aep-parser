@@ -149,6 +149,33 @@ func projectFootageTimecodeDisplayStartTypeProfileValue(value string) (string, e
 	}
 }
 
+func projectExpressionEngine(value string) (string, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "extendscript", "javascript-1.0":
+		return strings.ToLower(strings.TrimSpace(value)), nil
+	default:
+		return "", fmt.Errorf("expression_engine must be extendscript or javascript-1.0")
+	}
+}
+
+func projectAudioSampleRate(value float64) error {
+	switch value {
+	case 22050, 32000, 44100, 48000, 96000:
+		return nil
+	default:
+		return fmt.Errorf("audio_sample_rate must be one of 22050, 32000, 44100, 48000, or 96000")
+	}
+}
+
+func projectWorkingGamma(value float64) error {
+	switch value {
+	case 2.2, 2.4:
+		return nil
+	default:
+		return fmt.Errorf("working_gamma must be 2.2 or 2.4")
+	}
+}
+
 func (target recipeProjectTarget) aepTarget() aep.AETarget {
 	switch target {
 	case aepTargetAE2022:

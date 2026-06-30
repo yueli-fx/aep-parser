@@ -4612,6 +4612,35 @@ func TestCompileToFileChecksProjectDisplayProfile(t *testing.T) {
 	assertProfileCheck(t, report, "expected_profile.footage_timecode_display_start_type", true)
 }
 
+func TestCompileToFileChecksProjectPreferenceProfile(t *testing.T) {
+	rec := minimalRecipe()
+	disabled := false
+	rec.Project.ExpressionEngine = "javascript-1.0"
+	rec.Project.AudioSampleRate = floatPtr(44100)
+	rec.Project.WorkingGamma = floatPtr(2.4)
+	rec.Project.CompensateForSceneReferredProfiles = &disabled
+	rec.ExpectedProfile = recipe.ExpectedProfile{
+		CompCount:                          intPtr(1),
+		ExpressionEngine:                   "javascript-1.0",
+		AudioSampleRate:                    floatPtr(44100),
+		WorkingGamma:                       floatPtr(2.4),
+		CompensateForSceneReferredProfiles: &disabled,
+	}
+	outPath := filepath.Join(t.TempDir(), "recipe.aep")
+
+	report, err := recipe.CompileToFile(rec, outPath, stableCapabilityIndex{})
+	if err != nil {
+		t.Fatalf("CompileToFile: %v", err)
+	}
+	if !report.Valid {
+		t.Fatalf("report = %+v, want valid", report)
+	}
+	assertProfileCheck(t, report, "expected_profile.expression_engine", true)
+	assertProfileCheck(t, report, "expected_profile.audio_sample_rate", true)
+	assertProfileCheck(t, report, "expected_profile.working_gamma", true)
+	assertProfileCheck(t, report, "expected_profile.compensate_for_scene_referred_profiles", true)
+}
+
 func TestCompileToFileRefusesExpectedProfileMismatch(t *testing.T) {
 	rec := minimalRecipe()
 	rec.ExpectedProfile = recipe.ExpectedProfile{
@@ -5449,5 +5478,9 @@ func assertProfileCheck(t *testing.T, report recipe.Report, path string, passed 
 }
 
 func intPtr(v int) *int {
+	return &v
+}
+
+func floatPtr(v float64) *float64 {
 	return &v
 }

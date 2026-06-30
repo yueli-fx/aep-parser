@@ -27,6 +27,10 @@ This reference is generated from the canonical recipe field model.
 | `project.frames_use_feet_frames` | `boolean` | - | Project feet+frames display switch. | - | `project.set_frames_use_feet_frames` (`Project.SetFramesUseFeetFrames`) | examples/recipes/minimal-project-display-settings.json |
 | `project.feet_frames_film_type` | `string` | - | Project feet+frames film type. | Must be 35mm or 16mm. | `project.set_feet_frames_film_type` (`Project.SetFeetFramesFilmType`) | examples/recipes/minimal-project-display-settings.json |
 | `project.footage_timecode_display_start_type` | `string` | - | Project footage timecode display start mode. | Must be start_0 or source_media. | `project.set_footage_timecode_display_start_type` (`Project.SetFootageTimecodeDisplayStartType`) | examples/recipes/minimal-project-display-settings.json |
+| `project.expression_engine` | `string` | - | Project expression engine. | Must be extendscript or javascript-1.0. | `project.set_expression_engine` (`Project.SetExpressionEngine`) | examples/recipes/minimal-project-preferences.json |
+| `project.audio_sample_rate` | `number` | - | Project audio sample rate. | Must be one of AE's supported audio sample rates. | `project.set_audio_sample_rate` (`Project.SetAudioSampleRate`) | examples/recipes/minimal-project-preferences.json |
+| `project.working_gamma` | `number` | - | Project working gamma. | Must be 2.2 or 2.4. | `project.set_working_gamma` (`Project.SetWorkingGamma`) | examples/recipes/minimal-project-preferences.json |
+| `project.compensate_for_scene_referred_profiles` | `boolean` | - | Project scene-referred profile compensation switch. | - | `project.set_compensate_for_scene_referred_profiles` (`Project.SetCompensateForSceneReferredProfiles`) | examples/recipes/minimal-project-preferences.json |
 
 ## CompSpec
 
@@ -608,6 +612,10 @@ This reference is generated from the canonical recipe field model.
 | `expected_profile.frames_use_feet_frames` | `boolean` | - | Expected project feet+frames display switch. | - | - | examples/recipes/minimal-project-display-settings.json |
 | `expected_profile.feet_frames_film_type` | `string` | - | Expected project feet+frames film type. | Expected project feet+frames film type must be supported. | - | examples/recipes/minimal-project-display-settings.json |
 | `expected_profile.footage_timecode_display_start_type` | `string` | - | Expected project footage timecode display start mode. | Expected project footage timecode display start mode must be supported. | - | examples/recipes/minimal-project-display-settings.json |
+| `expected_profile.expression_engine` | `string` | - | Expected project expression engine. | Expected project expression engine must be supported. | - | examples/recipes/minimal-project-preferences.json |
+| `expected_profile.audio_sample_rate` | `number` | - | Expected project audio sample rate. | Expected project audio sample rate must be one of AE's supported rates. | - | examples/recipes/minimal-project-preferences.json |
+| `expected_profile.working_gamma` | `number` | - | Expected project working gamma. | Expected project working gamma must be 2.2 or 2.4. | - | examples/recipes/minimal-project-preferences.json |
+| `expected_profile.compensate_for_scene_referred_profiles` | `boolean` | - | Expected project scene-referred profile compensation switch. | - | - | examples/recipes/minimal-project-preferences.json |
 | `expected_profile.name` | `string` | - | Expected composition display name. | - | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.width` | `number` | - | Expected composition width in pixels. | Expected width must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |
 | `expected_profile.height` | `number` | - | Expected composition height in pixels. | Expected height must be a positive integer. | - | examples/recipes/minimal-comp-object-profile.json |

@@ -21,6 +21,10 @@ func hasExpectedProfile(expected ExpectedProfile) bool {
 		expected.FramesUseFeetFrames != nil ||
 		expected.FeetFramesFilmType != "" ||
 		expected.FootageTimecodeDisplayStartType != "" ||
+		expected.ExpressionEngine != "" ||
+		expected.AudioSampleRate != nil ||
+		expected.WorkingGamma != nil ||
+		expected.CompensateForSceneReferredProfiles != nil ||
 		expected.Name != "" ||
 		expected.Width != nil ||
 		expected.Height != nil ||
@@ -129,6 +133,23 @@ func checkExpectedProfile(expected ExpectedProfile, prof *profile.Profile) []Pro
 		} else {
 			add("expected_profile.footage_timecode_display_start_type", expectedValue, prof.Meta.FootageTimecodeStart, prof.Meta.FootageTimecodeStart == expectedValue)
 		}
+	}
+	if expected.ExpressionEngine != "" {
+		expectedValue, err := projectExpressionEngine(expected.ExpressionEngine)
+		if err != nil {
+			add("expected_profile.expression_engine", expected.ExpressionEngine, prof.Meta.ExpressionEngine, false)
+		} else {
+			add("expected_profile.expression_engine", expectedValue, prof.Meta.ExpressionEngine, prof.Meta.ExpressionEngine == expectedValue)
+		}
+	}
+	if expected.AudioSampleRate != nil {
+		add("expected_profile.audio_sample_rate", *expected.AudioSampleRate, prof.Meta.AudioSampleRate, math.Abs(prof.Meta.AudioSampleRate-*expected.AudioSampleRate) < 1e-9)
+	}
+	if expected.WorkingGamma != nil {
+		add("expected_profile.working_gamma", *expected.WorkingGamma, prof.Meta.WorkingGamma, math.Abs(prof.Meta.WorkingGamma-*expected.WorkingGamma) < 1e-9)
+	}
+	if expected.CompensateForSceneReferredProfiles != nil {
+		add("expected_profile.compensate_for_scene_referred_profiles", *expected.CompensateForSceneReferredProfiles, prof.Meta.CompensateSceneProfiles, prof.Meta.CompensateSceneProfiles == *expected.CompensateForSceneReferredProfiles)
 	}
 	if expected.Name != "" {
 		actual := ""

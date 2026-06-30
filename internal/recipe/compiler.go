@@ -88,6 +88,30 @@ func CompileToFile(rec Recipe, outPath string, caps CapabilityIndex) (Report, er
 			return report, fmt.Errorf("recipe: project footage_timecode_display_start_type: %w", err)
 		}
 	}
+	if rec.Project.ExpressionEngine != "" {
+		v, err := projectExpressionEngine(rec.Project.ExpressionEngine)
+		if err != nil {
+			return report, nil
+		}
+		if err := project.SetExpressionEngine(v); err != nil {
+			return report, fmt.Errorf("recipe: project expression_engine: %w", err)
+		}
+	}
+	if rec.Project.AudioSampleRate != nil {
+		if err := project.SetAudioSampleRate(*rec.Project.AudioSampleRate); err != nil {
+			return report, fmt.Errorf("recipe: project audio_sample_rate: %w", err)
+		}
+	}
+	if rec.Project.WorkingGamma != nil {
+		if err := project.SetWorkingGamma(*rec.Project.WorkingGamma); err != nil {
+			return report, fmt.Errorf("recipe: project working_gamma: %w", err)
+		}
+	}
+	if rec.Project.CompensateForSceneReferredProfiles != nil {
+		if err := project.SetCompensateForSceneReferredProfiles(*rec.Project.CompensateForSceneReferredProfiles); err != nil {
+			return report, fmt.Errorf("recipe: project compensate_for_scene_referred_profiles: %w", err)
+		}
+	}
 	compSpec := rec.Comps[0]
 	comp, err := aep.NewComposition(project, compSpec.Name, uint16(compSpec.Width), uint16(compSpec.Height), compSpec.FrameRate, compSpec.Duration)
 	if err != nil {

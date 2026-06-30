@@ -95,6 +95,27 @@ func ValidateWithCapabilities(rec Recipe, caps CapabilityIndex) Report {
 			addRefusal("invalid_project_footage_timecode_display_start_type", "project.footage_timecode_display_start_type", err.Error())
 		}
 	}
+	if rec.Project.ExpressionEngine != "" {
+		recordCapability("Project.SetExpressionEngine", "project.expression_engine")
+		if _, err := projectExpressionEngine(rec.Project.ExpressionEngine); err != nil {
+			addRefusal("invalid_project_expression_engine", "project.expression_engine", err.Error())
+		}
+	}
+	if rec.Project.AudioSampleRate != nil {
+		recordCapability("Project.SetAudioSampleRate", "project.audio_sample_rate")
+		if err := projectAudioSampleRate(*rec.Project.AudioSampleRate); err != nil {
+			addRefusal("invalid_project_audio_sample_rate", "project.audio_sample_rate", err.Error())
+		}
+	}
+	if rec.Project.WorkingGamma != nil {
+		recordCapability("Project.SetWorkingGamma", "project.working_gamma")
+		if err := projectWorkingGamma(*rec.Project.WorkingGamma); err != nil {
+			addRefusal("invalid_project_working_gamma", "project.working_gamma", err.Error())
+		}
+	}
+	if rec.Project.CompensateForSceneReferredProfiles != nil {
+		recordCapability("Project.SetCompensateForSceneReferredProfiles", "project.compensate_for_scene_referred_profiles")
+	}
 	if len(rec.Comps) > 1 {
 		addRefusal("too_many_comps", "comps", "first recipe slice supports exactly one comp")
 	}
@@ -239,6 +260,21 @@ func validateExpectedProfile(expected ExpectedProfile, addRefusal func(string, s
 	if expected.FootageTimecodeDisplayStartType != "" {
 		if _, err := projectFootageTimecodeDisplayStartType(expected.FootageTimecodeDisplayStartType); err != nil {
 			addRefusal("invalid_expected_profile", "expected_profile.footage_timecode_display_start_type", err.Error())
+		}
+	}
+	if expected.ExpressionEngine != "" {
+		if _, err := projectExpressionEngine(expected.ExpressionEngine); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.expression_engine", err.Error())
+		}
+	}
+	if expected.AudioSampleRate != nil {
+		if err := projectAudioSampleRate(*expected.AudioSampleRate); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.audio_sample_rate", err.Error())
+		}
+	}
+	if expected.WorkingGamma != nil {
+		if err := projectWorkingGamma(*expected.WorkingGamma); err != nil {
+			addRefusal("invalid_expected_profile", "expected_profile.working_gamma", err.Error())
 		}
 	}
 	if expected.Label != nil {

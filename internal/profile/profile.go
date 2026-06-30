@@ -51,6 +51,10 @@ type Meta struct {
 	FramesUseFeetFrames     bool               `json:"frames_use_feet_frames"`
 	FeetFramesFilmType      string             `json:"feet_frames_film_type"`
 	FootageTimecodeStart    string             `json:"footage_timecode_display_start_type"`
+	ExpressionEngine        string             `json:"expression_engine"`
+	AudioSampleRate         float64            `json:"audio_sample_rate"`
+	WorkingGamma            float64            `json:"working_gamma"`
+	CompensateSceneProfiles bool               `json:"compensate_for_scene_referred_profiles"`
 }
 
 type Fingerprint struct {
@@ -422,6 +426,10 @@ func Build(project *aep.Project, opts Options) (*Profile, error) {
 			FramesUseFeetFrames:     project.FramesUseFeetFrames(),
 			FeetFramesFilmType:      projectFeetFramesFilmTypeProfileValue(project.FeetFramesFilmType()),
 			FootageTimecodeStart:    projectFootageTimecodeStartProfileValue(project.FootageTimecodeDisplayStartType()),
+			ExpressionEngine:        project.ExpressionEngine(),
+			AudioSampleRate:         project.AudioSampleRate(),
+			WorkingGamma:            project.WorkingGamma(),
+			CompensateSceneProfiles: project.CompensateForSceneReferredProfiles(),
 		},
 		Fingerprint: Fingerprint{
 			CompCount:    len(project.Compositions),

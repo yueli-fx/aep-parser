@@ -1,15 +1,19 @@
 package recipedoc
 
 var capabilitiesByPath = map[string][]string{
-	"project.target_version":                      {"project.create_target"},
-	"project.bits_per_channel":                    {"project.set_bits_per_channel"},
-	"project.linear_blending":                     {"project.set_linear_blending"},
-	"project.linearize_working_space":             {"project.set_linearize_working_space"},
-	"project.time_display_type":                   {"project.set_time_display_type"},
-	"project.frames_count_type":                   {"project.set_frames_count_type"},
-	"project.frames_use_feet_frames":              {"project.set_frames_use_feet_frames"},
-	"project.feet_frames_film_type":               {"project.set_feet_frames_film_type"},
-	"project.footage_timecode_display_start_type": {"project.set_footage_timecode_display_start_type"},
+	"project.target_version":                         {"project.create_target"},
+	"project.bits_per_channel":                       {"project.set_bits_per_channel"},
+	"project.linear_blending":                        {"project.set_linear_blending"},
+	"project.linearize_working_space":                {"project.set_linearize_working_space"},
+	"project.time_display_type":                      {"project.set_time_display_type"},
+	"project.frames_count_type":                      {"project.set_frames_count_type"},
+	"project.frames_use_feet_frames":                 {"project.set_frames_use_feet_frames"},
+	"project.feet_frames_film_type":                  {"project.set_feet_frames_film_type"},
+	"project.footage_timecode_display_start_type":    {"project.set_footage_timecode_display_start_type"},
+	"project.expression_engine":                      {"project.set_expression_engine"},
+	"project.audio_sample_rate":                      {"project.set_audio_sample_rate"},
+	"project.working_gamma":                          {"project.set_working_gamma"},
+	"project.compensate_for_scene_referred_profiles": {"project.set_compensate_for_scene_referred_profiles"},
 	"comps[]":                                                     {"comp.create"},
 	"comps[].background_color":                                    {"comp.set_background_color"},
 	"comps[].label":                                               {"comp.set_label"},
@@ -294,6 +298,22 @@ var capabilityRegistry = map[string]CapabilityMeta{
 	"project.set_footage_timecode_display_start_type": {
 		Query:   "Project.SetFootageTimecodeDisplayStartType",
 		Summary: "Set footage timecode display start mode.",
+	},
+	"project.set_expression_engine": {
+		Query:   "Project.SetExpressionEngine",
+		Summary: "Set project expression engine.",
+	},
+	"project.set_audio_sample_rate": {
+		Query:   "Project.SetAudioSampleRate",
+		Summary: "Set project audio sample rate.",
+	},
+	"project.set_working_gamma": {
+		Query:   "Project.SetWorkingGamma",
+		Summary: "Set project working gamma.",
+	},
+	"project.set_compensate_for_scene_referred_profiles": {
+		Query:   "Project.SetCompensateForSceneReferredProfiles",
+		Summary: "Toggle scene-referred profile compensation.",
 	},
 	"comp.create":               {Query: "NewComposition", Summary: "Create a composition."},
 	"comp.set_background_color": {Query: "Composition.SetBGColor", Summary: "Set composition background color."},

@@ -245,6 +245,11 @@ Done:
   `footage_timecode_display_start_type`. Profile metadata exposes stable
   snake-case values for the same settings, `expected_profile` asserts them,
   and `examples/recipes/minimal-project-display-settings.json` covers the group.
+- Recipe project preferences now support `expression_engine`,
+  `audio_sample_rate`, `working_gamma`, and
+  `compensate_for_scene_referred_profiles`. Profile metadata exposes the same
+  values, `expected_profile` asserts them, and
+  `examples/recipes/minimal-project-preferences.json` covers the group.
 - Comp-level recipe/profile work now has an object-level execution strategy:
   field order, evidence level, profile target, test shape, verification, and
   commit rules are captured in `comp-recipe-execution-strategy.md`.
