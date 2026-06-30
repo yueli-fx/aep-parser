@@ -96,6 +96,33 @@ func TestBuildDocumentIncludesShapeCapabilityMetadata(t *testing.T) {
 	}
 }
 
+func TestBuildDocumentIncludesExpectedProfileValidationMetadata(t *testing.T) {
+	doc, err := BuildDocument()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []string{
+		"expected_profile.comp_count",
+		"expected_profile.width",
+		"expected_profile.background_color",
+		"expected_profile.layers[].quality",
+		"expected_profile.layers[].track_matte",
+		"expected_profile.effects[].params[]",
+		"expected_profile.effects[].params[].value",
+		"expected_profile.properties[].value",
+		"expected_profile.text_styles[].justification",
+		"expected_profile.keyframes[].keyframes[]",
+		"expected_profile.masks[].opacity",
+	}
+	for _, path := range tests {
+		field := requireField(t, doc, path)
+		if field.Validation == "" && len(field.Enum) == 0 {
+			t.Fatalf("%s has no validation metadata: %+v", path, field)
+		}
+	}
+}
+
 func TestNoUnexpectedMissingSemanticSummaries(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

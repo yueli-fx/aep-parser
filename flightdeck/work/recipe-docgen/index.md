@@ -403,10 +403,12 @@ Done:
 - Shape capability metadata expanded for primitives, fills, gradients, strokes,
   stroke detail, and shape operators; generated docs now join capability
   details for 202 recipe fields.
+- Effect and expected-profile validation metadata expanded; generated docs now
+  include validation notes/enums for 57 recipe fields.
 
 Current:
 
-- Ready for effect/expected-profile metadata expansion or editor integration.
+- Ready for mask capability metadata expansion or editor integration.
 
 ## Open questions
 

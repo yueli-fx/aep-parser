@@ -490,42 +490,42 @@ This reference is generated from the canonical recipe field model.
 | `comps[].layers[].transform.expressions.rotation.enabled` | `boolean` | - | rotation transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
 | `comps[].layers[].transform.expressions.opacity.source` | `string` | structural | opacity transform expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
 | `comps[].layers[].transform.expressions.opacity.enabled` | `boolean` | - | opacity transform expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
-| `comps[].layers[].effects[].params[].expression.source` | `string` | structural | effect parameter expression source code. | - | `property.set_expression` (`Property.SetExpression`) |
+| `comps[].layers[].effects[].params[].expression.source` | `string` | structural | effect parameter expression source code. | Expression source is applied only when non-empty. | `property.set_expression` (`Property.SetExpression`) |
 | `comps[].layers[].effects[].params[].expression.enabled` | `boolean` | - | effect parameter expression enable switch. | - | `property.set_expression_enabled` (`Property.SetExpressionEnabled`) |
 
 ## Effect
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].effects[].match_name` | `string` | structural | Layer effect match name. | - | - |
+| `comps[].layers[].effects[].match_name` | `string` | structural | Layer effect match name. | Must be a supported effect match name for recipe compilation. | - |
 | `comps[].layers[].effects[].params[]` | `array<recipe.EffectParam>` | - | Layer effect parameter assignments. | - | `effect.set_param` (`SetEffectParam`) |
 
 ## EffectParam
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `comps[].layers[].effects[].params[].match_name` | `string` | structural | Effect parameter match name. | - | - |
-| `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | - | - |
+| `comps[].layers[].effects[].params[].match_name` | `string` | structural | Effect parameter match name. | Must match a parameter exposed by the chosen effect. | - |
+| `comps[].layers[].effects[].params[].value` | `any` | - | Effect parameter value. | Supported values are numbers, booleans, or numeric arrays. | - |
 | `comps[].layers[].effects[].params[].expression` | `object<ExpressionSpec>` | - | Effect parameter expression settings. | - | - |
 
 ## ExpectedProfile
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.comp_count` | `number` | - | Expected number of compositions. | - | - |
-| `expected_profile.layer_count` | `number` | - | Expected total number of layers. | - | - |
-| `expected_profile.text_layer_count` | `number` | - | Expected number of text layers. | - | - |
-| `expected_profile.shape_layer_count` | `number` | - | Expected number of shape layers. | - | - |
+| `expected_profile.comp_count` | `number` | - | Expected number of compositions. | Expected count must be non-negative. | - |
+| `expected_profile.layer_count` | `number` | - | Expected total number of layers. | Expected count must be non-negative. | - |
+| `expected_profile.text_layer_count` | `number` | - | Expected number of text layers. | Expected count must be non-negative. | - |
+| `expected_profile.shape_layer_count` | `number` | - | Expected number of shape layers. | Expected count must be non-negative. | - |
 | `expected_profile.name` | `string` | - | Expected composition display name. | - | - |
-| `expected_profile.width` | `number` | - | Expected composition width in pixels. | - | - |
-| `expected_profile.height` | `number` | - | Expected composition height in pixels. | - | - |
-| `expected_profile.frame_rate` | `number` | - | Expected composition frame rate in frames per second. | - | - |
-| `expected_profile.duration` | `number` | - | Expected composition duration in seconds. | - | - |
-| `expected_profile.label` | `number` | - | Expected composition label color index. | - | - |
+| `expected_profile.width` | `number` | - | Expected composition width in pixels. | Expected width must be a positive integer. | - |
+| `expected_profile.height` | `number` | - | Expected composition height in pixels. | Expected height must be a positive integer. | - |
+| `expected_profile.frame_rate` | `number` | - | Expected composition frame rate in frames per second. | Expected frame rate must be positive. | - |
+| `expected_profile.duration` | `number` | - | Expected composition duration in seconds. | Expected duration must be positive. | - |
+| `expected_profile.label` | `number` | - | Expected composition label color index. | Expected label must be a valid AE label index. | - |
 | `expected_profile.comment` | `string` | - | Expected composition comment text. | - | - |
-| `expected_profile.background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | - | - |
-| `expected_profile.resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | - | - |
-| `expected_profile.pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | - | - |
+| `expected_profile.background_color` | `array<float64>` | - | Expected composition background color as RGB channels. | Expected RGB color must contain exactly three channels in the 0..255 range. | - |
+| `expected_profile.resolution_factor` | `array<float64>` | - | Expected composition preview resolution factor. | Expected resolution factor must contain two positive integer factors. | - |
+| `expected_profile.pixel_aspect` | `number` | - | Expected composition pixel aspect ratio. | Expected pixel aspect ratio must be positive. | - |
 | `expected_profile.display_start_time` | `number` | - | Expected composition display start time in seconds. | - | - |
 | `expected_profile.renderer` | `string` | - | Expected composition renderer identifier. | - | - |
 | `expected_profile.draft_3d` | `boolean` | - | Expected composition draft 3D switch. | - | - |
@@ -563,19 +563,19 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.layers[].name` | `string` | structural | Expected layer name. | - | - |
+| `expected_profile.layers[].name` | `string` | structural | Expected layer name. | Layer profile checks require a target layer name. | - |
 | `expected_profile.layers[].type` | `string` | - | Expected layer type. | - | - |
-| `expected_profile.layers[].quality` | `string` | - | Expected layer quality mode. | - | - |
-| `expected_profile.layers[].blending_mode` | `string` | - | Expected layer blending mode. | - | - |
-| `expected_profile.layers[].auto_orient` | `string` | - | Expected layer auto-orientation mode. | - | - |
+| `expected_profile.layers[].quality` | `string` | - | Expected layer quality mode. | Expected layer quality must use a supported recipe quality value. | - |
+| `expected_profile.layers[].blending_mode` | `string` | - | Expected layer blending mode. | Expected blending mode must use a supported recipe blending mode value. | - |
+| `expected_profile.layers[].auto_orient` | `string` | - | Expected layer auto-orientation mode. | Expected auto-orient mode must use a supported recipe auto-orient value. | - |
 | `expected_profile.layers[].light_kind` | `string` | - | Expected light type. | - | - |
 | `expected_profile.layers[].source` | `string` | - | Expected source item name. | - | - |
 | `expected_profile.layers[].source_kind` | `string` | - | Expected source item type. | - | - |
 | `expected_profile.layers[].light_source` | `string` | - | Expected source layer for light data. | - | - |
 | `expected_profile.layers[].parent` | `string` | - | Expected parent layer name. | - | - |
-| `expected_profile.layers[].track_matte` | `string` | - | Expected track matte mode. | - | - |
+| `expected_profile.layers[].track_matte` | `string` | - | Expected track matte mode. | Expected track matte must use a supported recipe track matte value. | - |
 | `expected_profile.layers[].matte` | `string` | - | Expected matte layer name. | - | - |
-| `expected_profile.layers[].label` | `number` | - | Expected layer label color index. | - | - |
+| `expected_profile.layers[].label` | `number` | - | Expected layer label color index. | Expected layer label must be a valid AE label index. | - |
 | `expected_profile.layers[].comment` | `string` | - | Expected layer comment text. | - | - |
 | `expected_profile.layers[].timing` | `object<ExpectedLayerTiming>` | - | Expected layer timing checks. | - | - |
 | `expected_profile.layers[].flags` | `object<ExpectedLayerFlags>` | - | Expected layer switch checks. | - | - |
@@ -616,16 +616,16 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.effects[].layer_name` | `string` | structural | Layer name to inspect for the expected effect. | - | - |
-| `expected_profile.effects[].match_name` | `string` | structural | Expected effect match name. | - | - |
-| `expected_profile.effects[].params[]` | `array<recipe.ExpectedEffectParam>` | - | Expected effect parameter checks. | - | - |
+| `expected_profile.effects[].layer_name` | `string` | structural | Layer name to inspect for the expected effect. | Effect profile checks require a target layer name. | - |
+| `expected_profile.effects[].match_name` | `string` | structural | Expected effect match name. | Effect profile checks require an effect match name. | - |
+| `expected_profile.effects[].params[]` | `array<recipe.ExpectedEffectParam>` | - | Expected effect parameter checks. | Each expected effect parameter needs at least one of value, expression, or expression_enabled. | - |
 
 ## ExpectedEffectParam
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.effects[].params[].match_name` | `string` | structural | Expected effect parameter match name. | - | - |
-| `expected_profile.effects[].params[].value` | `any` | - | Expected effect parameter value. | - | - |
+| `expected_profile.effects[].params[].match_name` | `string` | structural | Expected effect parameter match name. | Expected effect parameter checks require a parameter match name. | - |
+| `expected_profile.effects[].params[].value` | `any` | - | Expected effect parameter value. | Expected parameter value must be a number, boolean, or numeric array. | - |
 | `expected_profile.effects[].params[].expression` | `string` | - | Expected effect parameter expression source. | - | - |
 | `expected_profile.effects[].params[].expression_enabled` | `boolean` | - | Expected effect parameter expression enable switch. | - | - |
 
@@ -633,9 +633,9 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.properties[].layer_name` | `string` | structural | Expected property layer name. | - | - |
-| `expected_profile.properties[].match_name` | `string` | structural | Expected property match name. | - | - |
-| `expected_profile.properties[].value` | `any` | - | Expected property value. | - | - |
+| `expected_profile.properties[].layer_name` | `string` | structural | Expected property layer name. | Property profile checks require a target layer name. | - |
+| `expected_profile.properties[].match_name` | `string` | structural | Expected property match name. | Property profile checks require a property match name. | - |
+| `expected_profile.properties[].value` | `any` | - | Expected property value. | Expected property value must be a number, boolean, or numeric array. | - |
 | `expected_profile.properties[].expression` | `string` | - | Expected property expression source. | - | - |
 | `expected_profile.properties[].expression_enabled` | `boolean` | - | Expected property expression enable switch. | - | - |
 
@@ -643,57 +643,57 @@ This reference is generated from the canonical recipe field model.
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.text_styles[].layer_name` | `string` | structural | Layer name to inspect for the expected text style. | - | - |
-| `expected_profile.text_styles[].run_index` | `number` | - | Expected text style text run index. | - | - |
-| `expected_profile.text_styles[].paragraph_index` | `number` | - | Expected text style paragraph index. | - | - |
-| `expected_profile.text_styles[].font_size` | `number` | - | Expected text style font size. | - | - |
-| `expected_profile.text_styles[].fill_color` | `array<float64>` | - | Expected text style fill color as RGB channels. | - | - |
+| `expected_profile.text_styles[].layer_name` | `string` | structural | Layer name to inspect for the expected text style. | Text style profile checks require a target layer name. | - |
+| `expected_profile.text_styles[].run_index` | `number` | - | Expected text style text run index. | Expected text style run index must be non-negative. | - |
+| `expected_profile.text_styles[].paragraph_index` | `number` | - | Expected text style paragraph index. | Expected text style paragraph index must be non-negative. | - |
+| `expected_profile.text_styles[].font_size` | `number` | - | Expected text style font size. | Expected font size must be positive. | - |
+| `expected_profile.text_styles[].fill_color` | `array<float64>` | - | Expected text style fill color as RGB channels. | Expected fill color must contain RGB or RGBA channels in the 0..1 range. | - |
 | `expected_profile.text_styles[].tracking` | `number` | - | Expected text style character tracking amount. | - | - |
 | `expected_profile.text_styles[].faux_bold` | `boolean` | - | Expected text style faux bold switch. | - | - |
 | `expected_profile.text_styles[].faux_italic` | `boolean` | - | Expected text style faux italic switch. | - | - |
 | `expected_profile.text_styles[].apply_stroke` | `boolean` | - | Expected text style stroke enable switch. | - | - |
-| `expected_profile.text_styles[].stroke_color` | `array<float64>` | - | Expected text style stroke color as RGB channels. | - | - |
-| `expected_profile.text_styles[].stroke_width` | `number` | - | Expected text style stroke width. | - | - |
-| `expected_profile.text_styles[].justification` | `string` | - | Expected text style paragraph justification mode. | - | - |
+| `expected_profile.text_styles[].stroke_color` | `array<float64>` | - | Expected text style stroke color as RGB channels. | Expected stroke color must contain RGB or RGBA channels in the 0..1 range. | - |
+| `expected_profile.text_styles[].stroke_width` | `number` | - | Expected text style stroke width. | Expected stroke width must be non-negative. | - |
+| `expected_profile.text_styles[].justification` | `string` | - | Expected text style paragraph justification mode. | Expected justification must use a supported text justification value. | - |
 
 ## ExpectedKeyframedProperty
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.keyframes[].layer_name` | `string` | structural | Layer name to inspect for expected keyframes. | - | - |
-| `expected_profile.keyframes[].match_name` | `string` | structural | Expected keyframed property match name. | - | - |
-| `expected_profile.keyframes[].keyframes[]` | `array<recipe.ExpectedKeyframe>` | structural | Expected property keyframes. | - | - |
+| `expected_profile.keyframes[].layer_name` | `string` | structural | Layer name to inspect for expected keyframes. | Keyframe profile checks require a target layer name. | - |
+| `expected_profile.keyframes[].match_name` | `string` | structural | Expected keyframed property match name. | Keyframe profile checks require a property match name. | - |
+| `expected_profile.keyframes[].keyframes[]` | `array<recipe.ExpectedKeyframe>` | structural | Expected property keyframes. | Expected keyframes must contain at least one keyframe and be sorted by time. | - |
 
 ## ExpectedKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.keyframes[].keyframes[].time` | `number` | structural | Expected property keyframe time in seconds. | - | - |
-| `expected_profile.keyframes[].keyframes[].value` | `any` | - | Expected property keyframe value. | - | - |
+| `expected_profile.keyframes[].keyframes[].time` | `number` | structural | Expected property keyframe time in seconds. | Expected keyframe time must be non-negative and sorted in ascending order. | - |
+| `expected_profile.keyframes[].keyframes[].value` | `any` | - | Expected property keyframe value. | Expected keyframe value must be a number, boolean, or numeric array. | - |
 
 ## ExpectedMask
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.masks[].layer_name` | `string` | structural | Layer name to inspect for the expected mask. | - | - |
+| `expected_profile.masks[].layer_name` | `string` | structural | Layer name to inspect for the expected mask. | Mask profile checks require a target layer name. | - |
 | `expected_profile.masks[].name` | `string` | - | Expected mask name. | - | - |
-| `expected_profile.masks[].mode` | `string` | - | Expected mask mode. | - | - |
+| `expected_profile.masks[].mode` | `string` | - | Expected mask mode. | Expected mask mode must use a supported mask mode value. | - |
 | `expected_profile.masks[].inverted` | `boolean` | - | Expected mask inverted switch. | - | - |
 | `expected_profile.masks[].locked` | `boolean` | - | Expected mask lock switch. | - | - |
-| `expected_profile.masks[].color` | `array<float64>` | - | Expected mask UI color as RGB channels. | - | - |
-| `expected_profile.masks[].motion_blur` | `string` | - | Expected mask motion blur mode. | - | - |
-| `expected_profile.masks[].feather_falloff` | `string` | - | Expected mask feather falloff mode. | - | - |
-| `expected_profile.masks[].opacity` | `number` | - | Expected mask opacity. | - | - |
+| `expected_profile.masks[].color` | `array<float64>` | - | Expected mask UI color as RGB channels. | Expected mask color must contain exactly three channels in the 0..255 range. | - |
+| `expected_profile.masks[].motion_blur` | `string` | - | Expected mask motion blur mode. | Expected mask motion blur must use a supported mask motion blur value. | - |
+| `expected_profile.masks[].feather_falloff` | `string` | - | Expected mask feather falloff mode. | Expected mask feather falloff must use a supported feather falloff value. | - |
+| `expected_profile.masks[].opacity` | `number` | - | Expected mask opacity. | Expected mask opacity must be between 0 and 1. | - |
 | `expected_profile.masks[].feather` | `array<float64>` | - | Expected mask feather vector. | - | - |
 | `expected_profile.masks[].expansion` | `number` | - | Expected mask expansion. | - | - |
 | `expected_profile.masks[].closed` | `boolean` | - | Expected mask closed path switch. | - | - |
-| `expected_profile.masks[].vertex_count` | `number` | - | Expected mask vertex count. | - | - |
+| `expected_profile.masks[].vertex_count` | `number` | - | Expected mask vertex count. | Expected mask vertex count must be non-negative. | - |
 | `expected_profile.masks[].path_keyframes[]` | `array<recipe.ExpectedMaskPathKeyframe>` | - | Expected mask path keyframes. | - | - |
 
 ## ExpectedMaskPathKeyframe
 
 | Field Path | Type | Requiredness | Summary | Validation | Capability |
 | --- | --- | --- | --- | --- | --- |
-| `expected_profile.masks[].path_keyframes[].time` | `number` | structural | Expected mask path keyframe time in seconds. | - | - |
-| `expected_profile.masks[].path_keyframes[].vertex_count` | `number` | - | Expected mask path keyframe vertex count. | - | - |
+| `expected_profile.masks[].path_keyframes[].time` | `number` | structural | Expected mask path keyframe time in seconds. | Expected mask path keyframe time must be non-negative and sorted in ascending order. | - |
+| `expected_profile.masks[].path_keyframes[].vertex_count` | `number` | - | Expected mask path keyframe vertex count. | Expected mask path keyframe vertex count must be non-negative. | - |
 
