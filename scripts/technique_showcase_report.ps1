@@ -16,6 +16,8 @@ try {
     $corpusPath = Join-Path $OutDir "corpus.jsonl"
     $digestPath = Join-Path $OutDir "digest.json"
     $learningPath = Join-Path $OutDir "learning.md"
+    $projectsCsvPath = Join-Path $OutDir "projects.csv"
+    $patternsCsvPath = Join-Path $OutDir "patterns.csv"
     $reportPath = Join-Path $OutDir "report.md"
     $htmlPath = Join-Path $OutDir "report.html"
 
@@ -316,6 +318,51 @@ try {
     }
     $digest | ConvertTo-Json -Depth 10 | Set-Content -Path $digestPath -Encoding UTF8
 
+    $patternRowsForCsv = @($digest.patterns | ForEach-Object {
+        [pscustomobject]@{
+            id                      = [string]$_.id
+            count                   = [int]$_.count
+            readiness               = Format-CountList -Rows $_.readiness
+            top_effects             = Format-CountList -Rows $_.effects
+            top_plugin_effects      = Format-CountList -Rows $_.plugin_effects
+            top_shape_families      = Format-CountList -Rows $_.shape_families
+            top_text_animators      = Format-CountList -Rows $_.text_animators
+            representative_projects = ((@($_.representatives) | Select-Object -First 5 | ForEach-Object { [string]$_.path }) -join "; ")
+        }
+    })
+    $patternRowsForCsv | Export-Csv -LiteralPath $patternsCsvPath -NoTypeInformation -Encoding UTF8
+
+    $projectRowsForCsv = @()
+    foreach ($record in $records) {
+        $explanation = $record.explanation
+        if ($null -eq $explanation) {
+            continue
+        }
+        $portrait = $explanation.portrait
+        $readiness = ""
+        if ($null -ne $explanation.recreation_readiness) {
+            $readiness = [string]$explanation.recreation_readiness.status
+        }
+        $projectRowsForCsv += [pscustomobject]@{
+            path                 = [string]$record.path
+            readiness            = $readiness
+            comps                = [int]$portrait.fingerprint.comp_count
+            layers               = [int]$portrait.fingerprint.layer_count
+            effects              = [int]$portrait.fingerprint.effect_count
+            text_animators       = [int]$portrait.fingerprint.text_animator_count
+            shape_operators      = [int]$portrait.fingerprint.shape_operator_count
+            dependency_edges     = [int]$portrait.fingerprint.dependency_count
+            archetypes           = ((@($explanation.archetypes) | ForEach-Object { [string]$_.id }) -join "; ")
+            patterns             = ((@($explanation.patterns) | ForEach-Object { [string]$_.id }) -join "; ")
+            top_effects          = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.effect_match_counts -Max 5))
+            top_plugin_effects   = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.third_party_effect_match_counts -Max 5))
+            top_shape_families   = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.shape_family_counts -Max 5))
+            top_text_animators   = Format-CountList -Rows (Convert-CountRows -Rows (Get-CountRows -Counts $portrait.mechanisms.text_animator_kind_counts -Max 5))
+            readiness_blockers   = ((@($explanation.recreation_readiness.blockers) | ForEach-Object { [string]$_ }) -join "; ")
+        }
+    }
+    $projectRowsForCsv | Export-Csv -LiteralPath $projectsCsvPath -NoTypeInformation -Encoding UTF8
+
     $learn = [System.Text.StringBuilder]::new()
     [void]$learn.AppendLine("# Technique Learning Index")
     [void]$learn.AppendLine("")
@@ -461,7 +508,7 @@ try {
     [void]$h.AppendLine("</head><body><main>")
     [void]$h.AppendLine("<h1>Technique Corpus Report</h1>")
     [void]$h.AppendLine("<p class=""muted"">input <code>$(Escape-Html $InputPath)</code></p>")
-    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""learning.md"">learning.md</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
+    [void]$h.AppendLine("<p class=""muted"">artifacts <a href=""learning.md"">learning.md</a> · <a href=""projects.csv"">projects.csv</a> · <a href=""patterns.csv"">patterns.csv</a> · <a href=""digest.json"">digest.json</a> · <a href=""summary.json"">summary.json</a> · <a href=""corpus.jsonl"">corpus.jsonl</a> · <a href=""report.md"">report.md</a></p>")
     [void]$h.AppendLine("<div class=""grid"">")
     foreach ($metric in @(
         @{ Label = "Projects"; Value = $summary.project_count },
@@ -662,6 +709,8 @@ try {
     Write-Host "corpus:  $corpusPath"
     Write-Host "digest:  $digestPath"
     Write-Host "learn:   $learningPath"
+    Write-Host "projects csv: $projectsCsvPath"
+    Write-Host "patterns csv: $patternsCsvPath"
     Write-Host "report:  $reportPath"
     Write-Host "html:    $htmlPath"
     if ($Verify) {

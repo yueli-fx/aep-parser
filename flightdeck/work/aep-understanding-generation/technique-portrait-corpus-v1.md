@@ -75,6 +75,8 @@ It defaults to `flightdeck\showcase` and writes generated output under
 - `corpus.jsonl`
 - `digest.json`
 - `learning.md`
+- `projects.csv`
+- `patterns.csv`
 - `report.md`
 - `report.html`
 
@@ -91,7 +93,9 @@ addition to raw portrait counts.
 `digest.json` is the compact machine-readable learning entry point for larger
 corpora. `learning.md` is the compact human-readable learning entry point. They
 keep representative projects per pattern, archetype, and readiness bucket so a
-large run can be inspected before reading every project record.
+large run can be inspected before reading every project record. `projects.csv`
+and `patterns.csv` provide spreadsheet-friendly indexes for filtering projects
+and repeated technique patterns outside the HTML report.
 
 ## Non-Goals
 
