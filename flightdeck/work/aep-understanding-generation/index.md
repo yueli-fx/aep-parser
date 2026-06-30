@@ -502,6 +502,11 @@ Done:
 - Text animator skew recipe support is implemented. The dedicated
   `examples/recipes/minimal-text-animator-skew.json` example compiles a skew
   text animator and asserts the `ADBE Text Skew` profile property.
+- Text animator rotation-x/y recipe support is implemented. The dedicated
+  `examples/recipes/minimal-text-animator-rotation-x.json` and
+  `examples/recipes/minimal-text-animator-rotation-y.json` examples compile 3D
+  rotation text animators and assert the `ADBE Text Rotation X/Y` profile
+  properties.
 - Text animator Range Selector Offset keyframe recipe support is implemented.
   The dedicated
   `examples/recipes/minimal-text-animator-range-offset.json` example compiles

@@ -632,6 +632,34 @@ func applyTextAnimators(layer *aep.Layer, animators []TextAnimatorSpec) error {
 			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
 				return err
 			}
+		case "rotation_x":
+			value, ok := animator.Value.(float64)
+			if !ok {
+				return fmt.Errorf("text_animators[%d].value must be a number", i)
+			}
+			if animator.RangeStart == nil || animator.RangeEnd == nil || animator.RangeOffset == nil {
+				return fmt.Errorf("text_animators[%d] range_start, range_end, and range_offset are required", i)
+			}
+			if _, err := aep.AddTextRotationXAnimator(layer, value, *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
+				return err
+			}
+			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
+		case "rotation_y":
+			value, ok := animator.Value.(float64)
+			if !ok {
+				return fmt.Errorf("text_animators[%d].value must be a number", i)
+			}
+			if animator.RangeStart == nil || animator.RangeEnd == nil || animator.RangeOffset == nil {
+				return fmt.Errorf("text_animators[%d] range_start, range_end, and range_offset are required", i)
+			}
+			if _, err := aep.AddTextRotationYAnimator(layer, value, *animator.RangeStart, *animator.RangeEnd, *animator.RangeOffset); err != nil {
+				return err
+			}
+			if err := applyTextRangeOffsetKeyframes(layer, animator); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("text_animators[%d].property %q is not supported", i, animator.Property)
 		}

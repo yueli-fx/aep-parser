@@ -2025,6 +2025,26 @@
             "TestTextNeighborAnimators_AEShipGate_AE2020",
             "TestTextNeighborAnimators_AEShipGate_AE2025"
           ]
+        },
+        {
+          "key": "text_animator.add_rotation_x",
+          "query": "AddTextRotationXAnimator",
+          "status": "supported",
+          "symbol": "AddTextRotationXAnimator",
+          "domain": "text",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated"
+        },
+        {
+          "key": "text_animator.add_rotation_y",
+          "query": "AddTextRotationYAnimator",
+          "status": "supported",
+          "symbol": "AddTextRotationYAnimator",
+          "domain": "text",
+          "verify": "roundtrip",
+          "minver": "2020",
+          "boundary": "visually inert on a plain 2D text layer (needs per-character 3D, not yet supported); value is write-only round-trip, not render-gated"
         }
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
@@ -2050,7 +2070,9 @@
         "fill_opacity",
         "stroke_opacity",
         "stroke_width",
-        "skew"
+        "skew",
+        "rotation_x",
+        "rotation_y"
       ],
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
@@ -2062,7 +2084,7 @@
       "type": "object",
       "go_type": "interface {}",
       "description": "Text animator property value.",
-      "x-aep-validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, and skew values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
+      "x-aep-validation": "Opacity, rotation, tracking, character_offset, fill_opacity, stroke_opacity, stroke_width, skew, rotation_x, and rotation_y values must be numbers; position and scale values must be 3-number arrays; color values must be 3- or 4-number arrays.",
       "x-aep-example": "examples/recipes/minimal-text-animator-character-offset.json"
     },
     {
