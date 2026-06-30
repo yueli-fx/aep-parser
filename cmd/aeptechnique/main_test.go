@@ -318,6 +318,43 @@ func TestRunWritesCorpusSummaryOutputFile(t *testing.T) {
 	}
 }
 
+func TestRunWritesCorpusJSONLAndSummaryInOnePass(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "one.aep"))
+	writeFixtureCopy(t, fixture, filepath.Join(root, "two.aep"))
+	outDir := t.TempDir()
+	corpusPath := filepath.Join(outDir, "corpus.jsonl")
+	summaryPath := filepath.Join(outDir, "summary.json")
+	var stdout, stderr bytes.Buffer
+
+	code := run([]string{
+		"-in", root,
+		"-mode", "explain",
+		"-corpus",
+		"-recursive",
+		"-out", corpusPath,
+		"-summary-out", summaryPath,
+	}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+	if stdout.Len() != 0 {
+		t.Fatalf("stdout = %s, want empty when -out is used", stdout.String())
+	}
+	lines := nonEmptyLines(string(mustReadFile(t, corpusPath)))
+	if len(lines) != 2 {
+		t.Fatalf("jsonl lines = %d, want 2\n%s", len(lines), strings.Join(lines, "\n"))
+	}
+	var summary corpusSummary
+	if err := json.Unmarshal(mustReadFile(t, summaryPath), &summary); err != nil {
+		t.Fatalf("json.Unmarshal summary: %v", err)
+	}
+	if summary.Mode != "explain" || summary.ProjectCount != 2 || len(summary.PatternCounts) == 0 {
+		t.Fatalf("summary = %+v", summary)
+	}
+}
+
 func writeFixtureCopy(t *testing.T, src, dst string) {
 	t.Helper()
 	data, err := os.ReadFile(src)
@@ -327,6 +364,15 @@ func writeFixtureCopy(t *testing.T, src, dst string) {
 	if err := os.WriteFile(dst, data, 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
+}
+
+func mustReadFile(t *testing.T, path string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile %s: %v", path, err)
+	}
+	return data
 }
 
 func nonEmptyLines(text string) []string {

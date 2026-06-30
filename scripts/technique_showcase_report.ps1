@@ -28,12 +28,7 @@ try {
         $baseArgs += @("-limit", "$Limit")
     }
 
-    & go @baseArgs "-summary" "-out" $summaryPath
-    if ($LASTEXITCODE -ne 0) {
-        throw "aeptechnique summary failed with exit code $LASTEXITCODE"
-    }
-
-    & go @baseArgs "-out" $corpusPath
+    & go @baseArgs "-out" $corpusPath "-summary-out" $summaryPath
     if ($LASTEXITCODE -ne 0) {
         throw "aeptechnique corpus failed with exit code $LASTEXITCODE"
     }

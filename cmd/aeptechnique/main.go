@@ -31,6 +31,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	limit := fs.Int("limit", 0, "maximum number of discovered projects to process; 0 means no limit")
 	summaryMode := fs.Bool("summary", false, "emit a single aggregate JSON summary in corpus mode")
 	outPath := fs.String("out", "", "optional output file")
+	summaryOutPath := fs.String("summary-out", "", "optional aggregate summary output file in corpus JSONL mode")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -46,7 +47,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if *corpusMode {
-		return runCorpus(*input, *mode, *recursive, *limit, *summaryMode, *outPath, stdout, stderr)
+		return runCorpus(*input, *mode, *recursive, *limit, *summaryMode, *outPath, *summaryOutPath, stdout, stderr)
 	}
 
 	output, code := buildOutput(*input, *mode, stderr)
@@ -182,7 +183,7 @@ func buildOutput(input, mode string, stderr io.Writer) (any, int) {
 	}
 }
 
-func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, outPath string, stdout, stderr io.Writer) int {
+func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, outPath, summaryOutPath string, stdout, stderr io.Writer) int {
 	paths, err := discoverAEPs(input, recursive)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -238,9 +239,14 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 		}
 	}
 	if summaryMode {
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(summary); err != nil {
+		if err := writeIndentedJSON(out, summary); err != nil {
 			fmt.Fprintf(stderr, "json: %v\n", err)
+			return 1
+		}
+	}
+	if summaryOutPath != "" {
+		if err := writeJSONFile(summaryOutPath, summary); err != nil {
+			fmt.Fprintf(stderr, "summary json: %v\n", err)
 			return 1
 		}
 	}
@@ -248,6 +254,21 @@ func runCorpus(input, mode string, recursive bool, limit int, summaryMode bool, 
 		return 1
 	}
 	return 0
+}
+
+func writeJSONFile(path string, value any) error {
+	out, closeOut, err := outputWriter(path, io.Discard)
+	if err != nil {
+		return err
+	}
+	defer closeOut()
+	return writeIndentedJSON(out, value)
+}
+
+func writeIndentedJSON(out io.Writer, value any) error {
+	enc := json.NewEncoder(out)
+	enc.SetIndent("", "  ")
+	return enc.Encode(value)
 }
 
 func addPatternProfile(summary *corpusSummary, pattern technique.ProjectPattern, explanation *technique.Explanation, path string) {

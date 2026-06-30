@@ -12,6 +12,7 @@ Extend `cmd/aeptechnique` with corpus JSONL mode:
 ```powershell
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive
 go run ./cmd/aeptechnique -in <dir-or-file> -mode portrait -corpus -recursive -summary
+go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive -out corpus.jsonl -summary-out summary.json
 go run ./cmd/aeptechnique -in <dir-or-file> -mode explain -corpus -recursive
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Limit 3
 pwsh -NoProfile -File scripts\technique_showcase_report.ps1 -Open
@@ -47,6 +48,10 @@ mode the embedded portrait is used for aggregate counts:
 
 The command should continue after per-file failures and return exit code `1`
 when any record has an error. Usage or flag errors still return `2`.
+
+With `-summary-out`, corpus JSONL mode writes records to `-out` and writes the
+same aggregate summary to a second file in one parse pass. The showcase report
+script uses this path so large corpora are not parsed twice.
 
 ## Rules
 
