@@ -21,6 +21,7 @@ try {
     $compareSelfDir = Join-Path $runRoot "compare_self"
     $comparePartialDir = Join-Path $runRoot "compare_partial_to_full"
     $recipeDraftCompileDir = Join-Path $runRoot "recipe_draft_compile"
+    $recipeDraftReparseDir = Join-Path $runRoot "recipe_draft_reparse"
     $acceptanceJsonPath = Join-Path $runRoot "acceptance.json"
     $acceptanceMdPath = Join-Path $runRoot "acceptance.md"
     $latestRunPath = Join-Path $OutRoot "latest_run.txt"
@@ -119,6 +120,43 @@ try {
             exit 1
         }
     }
+    Invoke-GateStep -Name "compiled recipe draft reparse smoke" -Body {
+        New-Item -ItemType Directory -Force -Path $recipeDraftReparseDir | Out-Null
+        $reparseFacts = Join-Path $recipeDraftReparseDir "compiled_facts.json"
+        $reparseSummaryPath = Join-Path $recipeDraftReparseDir "reparse_summary.json"
+        $compiledAEP = Join-Path $recipeDraftCompileDir "recipe_draft.aep"
+        $draftRecipePath = Join-Path $recipeDraftCompileDir "recipe_draft.json"
+        & go run ./cmd/aeptechnique -in $compiledAEP -mode facts -out $reparseFacts
+        $reparseExit = $LASTEXITCODE
+        if ($reparseExit -ne 0) {
+            Write-Error "compiled recipe draft reparse failed with exit code $reparseExit"
+            exit $reparseExit
+        }
+        $facts = Get-Content -Raw -LiteralPath $reparseFacts | ConvertFrom-Json
+        $draftRecipe = Get-Content -Raw -LiteralPath $draftRecipePath | ConvertFrom-Json
+        $expectedCompCount = [int]$draftRecipe.expected_profile.comp_count
+        $expectedLayerCount = 0
+        if ($null -ne $draftRecipe.expected_profile.layer_count) {
+            $expectedLayerCount = [int]$draftRecipe.expected_profile.layer_count
+        }
+        $actualCompCount = [int]$facts.summary.comp_count
+        $actualLayerCount = [int]$facts.summary.layer_count
+        $summary = [ordered]@{
+            schema_version       = 1
+            compiled_aep         = $compiledAEP
+            facts_json           = $reparseFacts
+            expected_comp_count  = $expectedCompCount
+            actual_comp_count    = $actualCompCount
+            expected_layer_count = $expectedLayerCount
+            actual_layer_count   = $actualLayerCount
+            passed               = ($expectedCompCount -eq $actualCompCount -and $expectedLayerCount -eq $actualLayerCount)
+        }
+        $summary | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $reparseSummaryPath -Encoding UTF8
+        if (-not $summary.passed) {
+            Write-Error "compiled recipe draft reparse mismatch: comps $actualCompCount/$expectedCompCount layers $actualLayerCount/$expectedLayerCount"
+            exit 1
+        }
+    }
 
     $fullManifest = Get-Content -Raw -LiteralPath (Join-Path $fullReportDir "manifest.json") | ConvertFrom-Json
     $partialManifest = Get-Content -Raw -LiteralPath (Join-Path $partialReportDir "manifest.json") | ConvertFrom-Json
@@ -126,6 +164,7 @@ try {
     $comparePartial = Get-Content -Raw -LiteralPath (Join-Path $comparePartialDir "compare.json") | ConvertFrom-Json
     $recipeDraftCompileJson = Get-Content -Raw -LiteralPath (Join-Path $recipeDraftCompileDir "compile.json") | ConvertFrom-Json
     $compiledRecipeDraftAEP = Get-Item -LiteralPath (Join-Path $recipeDraftCompileDir "recipe_draft.aep")
+    $recipeDraftReparseSummary = Get-Content -Raw -LiteralPath (Join-Path $recipeDraftReparseDir "reparse_summary.json") | ConvertFrom-Json
     $studyRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "study_queue.csv") | Select-Object -First 5)
     $projectPlaybookRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "project_playbooks.csv") | Select-Object -First 5)
     $compositionRows = @(Import-Csv -LiteralPath (Join-Path $fullReportDir "compositions.csv") | Select-Object -First 5)
@@ -187,6 +226,16 @@ try {
             compile_json = Join-Path $recipeDraftCompileDir "compile.json"
             valid = [bool]$recipeDraftCompileJson.valid
         }
+        recipe_draft_reparse = [ordered]@{
+            path = $recipeDraftReparseDir
+            facts_json = Join-Path $recipeDraftReparseDir "compiled_facts.json"
+            summary_json = Join-Path $recipeDraftReparseDir "reparse_summary.json"
+            passed = [bool]$recipeDraftReparseSummary.passed
+            expected_comp_count = [int]$recipeDraftReparseSummary.expected_comp_count
+            actual_comp_count = [int]$recipeDraftReparseSummary.actual_comp_count
+            expected_layer_count = [int]$recipeDraftReparseSummary.expected_layer_count
+            actual_layer_count = [int]$recipeDraftReparseSummary.actual_layer_count
+        }
         steps = @($steps)
     }
     $acceptance | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $acceptanceJsonPath -Encoding UTF8
@@ -204,6 +253,8 @@ try {
     [void]$b.AppendLine("- partial-to-full count diffs: $partialCountDiffs")
     [void]$b.AppendLine("- recipe draft compile: ``$recipeDraftCompileDir``")
     [void]$b.AppendLine("- compiled recipe draft bytes: $($compiledRecipeDraftAEP.Length)")
+    [void]$b.AppendLine("- compiled recipe draft reparse: ``$recipeDraftReparseDir``")
+    [void]$b.AppendLine("- reparse comp/layer counts: $($recipeDraftReparseSummary.actual_comp_count)/$($recipeDraftReparseSummary.expected_comp_count) comps, $($recipeDraftReparseSummary.actual_layer_count)/$($recipeDraftReparseSummary.expected_layer_count) layers")
     [void]$b.AppendLine("")
     [void]$b.AppendLine("## Steps")
     [void]$b.AppendLine("")
@@ -343,6 +394,10 @@ try {
     [void]$index.AppendLine("<tr><td>compiled bytes</td><td>$($compiledRecipeDraftAEP.Length)</td></tr>")
     [void]$index.AppendLine("<tr><td>output</td><td>$(Escape-Html $compiledRecipeDraftAEP.FullName)</td></tr>")
     [void]$index.AppendLine("</tbody></table></section>")
+    [void]$index.AppendLine("<section class=""panel"" style=""margin-top:16px""><h2>Compiled Draft Reparse Smoke</h2><table><thead><tr><th>Check</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead><tbody>")
+    [void]$index.AppendLine("<tr><td>compositions</td><td>$($recipeDraftReparseSummary.expected_comp_count)</td><td>$($recipeDraftReparseSummary.actual_comp_count)</td><td>$(Escape-Html $recipeDraftReparseSummary.passed)</td></tr>")
+    [void]$index.AppendLine("<tr><td>layers</td><td>$($recipeDraftReparseSummary.expected_layer_count)</td><td>$($recipeDraftReparseSummary.actual_layer_count)</td><td>$(Escape-Html $recipeDraftReparseSummary.passed)</td></tr>")
+    [void]$index.AppendLine("</tbody></table></section>")
     [void]$index.AppendLine("<section class=""panel""><h2>Artifacts</h2><div class=""links"">")
     [void]$index.AppendLine("<a href=""$runRel/full_report/report.html"">Full report HTML</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/learning.md"">Learning index</a>")
@@ -368,6 +423,8 @@ try {
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/recipe_draft.aep"">Compiled recipe draft AEP</a>")
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/validate.json"">Recipe draft validate JSON</a>")
     [void]$index.AppendLine("<a href=""$runRel/recipe_draft_compile/compile.json"">Recipe draft compile JSON</a>")
+    [void]$index.AppendLine("<a href=""$runRel/recipe_draft_reparse/compiled_facts.json"">Compiled draft facts JSON</a>")
+    [void]$index.AppendLine("<a href=""$runRel/recipe_draft_reparse/reparse_summary.json"">Compiled draft reparse summary</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/projects.csv"">Projects CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/patterns.csv"">Patterns CSV</a>")
     [void]$index.AppendLine("<a href=""$runRel/full_report/errors.csv"">Errors CSV</a>")
@@ -438,6 +495,9 @@ try {
     if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Recipe Draft Compile Smoke" -Quiet)) {
         throw "latest index missing Recipe Draft Compile Smoke"
     }
+    if (-not (Select-String -LiteralPath $latestIndexPath -Pattern "Compiled Draft Reparse Smoke" -Quiet)) {
+        throw "latest index missing Compiled Draft Reparse Smoke"
+    }
     Require-LatestIndexLink -Label "full report" -RelativePath "$runRel/full_report/report.html"
     Require-LatestIndexLink -Label "learning index" -RelativePath "$runRel/full_report/learning.md"
     Require-LatestIndexLink -Label "project playbooks" -RelativePath "$runRel/full_report/project_playbooks.csv"
@@ -462,6 +522,8 @@ try {
     Require-LatestIndexLink -Label "compiled recipe draft aep" -RelativePath "$runRel/recipe_draft_compile/recipe_draft.aep"
     Require-LatestIndexLink -Label "recipe draft validate json" -RelativePath "$runRel/recipe_draft_compile/validate.json"
     Require-LatestIndexLink -Label "recipe draft compile json" -RelativePath "$runRel/recipe_draft_compile/compile.json"
+    Require-LatestIndexLink -Label "compiled draft facts json" -RelativePath "$runRel/recipe_draft_reparse/compiled_facts.json"
+    Require-LatestIndexLink -Label "compiled draft reparse summary" -RelativePath "$runRel/recipe_draft_reparse/reparse_summary.json"
     Require-LatestIndexLink -Label "partial report" -RelativePath "$runRel/partial_report/report.html"
     Require-LatestIndexLink -Label "partial compare" -RelativePath "$runRel/compare_partial_to_full/compare.md"
 
