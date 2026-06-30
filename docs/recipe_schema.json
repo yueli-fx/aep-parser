@@ -2092,7 +2092,8 @@
       "source_field": "RunIndex",
       "type": "number",
       "go_type": "int",
-      "description": "Layer text style text run index."
+      "description": "Layer text style text run index.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.paragraph_index",
@@ -2101,7 +2102,8 @@
       "source_field": "ParagraphIndex",
       "type": "number",
       "go_type": "int",
-      "description": "Layer text style paragraph index."
+      "description": "Layer text style paragraph index.",
+      "x-aep-example": "examples/recipes/minimal-text-style.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_style.font_size",
@@ -3298,7 +3300,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Incoming temporal ease for the keyframe."
+      "description": "Incoming temporal ease for the keyframe.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed",
@@ -3307,7 +3310,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Incoming temporal ease speed."
+      "description": "Incoming temporal ease speed.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence",
@@ -3317,7 +3321,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Incoming temporal ease influence percentage."
+      "description": "Incoming temporal ease influence percentage.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease",
@@ -3327,7 +3332,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Outgoing temporal ease for the keyframe."
+      "description": "Outgoing temporal ease for the keyframe.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed",
@@ -3336,7 +3342,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Outgoing temporal ease speed."
+      "description": "Outgoing temporal ease speed.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence",
@@ -3346,7 +3353,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Outgoing temporal ease influence percentage."
+      "description": "Outgoing temporal ease influence percentage.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[]",
@@ -3479,7 +3487,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Incoming temporal ease for the keyframe."
+      "description": "Incoming temporal ease for the keyframe.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease.speed",
@@ -3488,7 +3497,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Incoming temporal ease speed."
+      "description": "Incoming temporal ease speed.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].in_ease.influence",
@@ -3498,7 +3508,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Incoming temporal ease influence percentage."
+      "description": "Incoming temporal ease influence percentage.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease",
@@ -3508,7 +3519,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Outgoing temporal ease for the keyframe."
+      "description": "Outgoing temporal ease for the keyframe.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease.speed",
@@ -3517,7 +3529,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Outgoing temporal ease speed."
+      "description": "Outgoing temporal ease speed.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].text_animators[].value_keyframes[].out_ease.influence",
@@ -3527,7 +3540,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Outgoing temporal ease influence percentage."
+      "description": "Outgoing temporal ease influence percentage.",
+      "x-aep-example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].camera",
@@ -7563,7 +7577,8 @@
       "type": "array",
       "go_type": "[]float64",
       "element": "float64",
-      "description": "Static anchor point value."
+      "description": "Static anchor point value.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation",
@@ -7572,7 +7587,8 @@
       "source_field": "Rotation",
       "type": "number",
       "go_type": "*float64",
-      "description": "Static rotation value."
+      "description": "Static rotation value.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity",
@@ -7726,7 +7742,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Anchor point keyframe incoming temporal ease."
+      "description": "Anchor point keyframe incoming temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed",
@@ -7735,7 +7752,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Anchor point keyframe incoming ease speed."
+      "description": "Anchor point keyframe incoming ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence",
@@ -7745,7 +7763,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Anchor point keyframe incoming ease influence."
+      "description": "Anchor point keyframe incoming ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease",
@@ -7755,7 +7774,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Anchor point keyframe outgoing temporal ease."
+      "description": "Anchor point keyframe outgoing temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed",
@@ -7764,7 +7784,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Anchor point keyframe outgoing ease speed."
+      "description": "Anchor point keyframe outgoing ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence",
@@ -7774,7 +7795,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Anchor point keyframe outgoing ease influence."
+      "description": "Anchor point keyframe outgoing ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[]",
@@ -7819,7 +7841,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Scale keyframe incoming temporal ease."
+      "description": "Scale keyframe incoming temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].in_ease.speed",
@@ -7828,7 +7851,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Scale keyframe incoming ease speed."
+      "description": "Scale keyframe incoming ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].in_ease.influence",
@@ -7838,7 +7862,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Scale keyframe incoming ease influence."
+      "description": "Scale keyframe incoming ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].out_ease",
@@ -7848,7 +7873,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Scale keyframe outgoing temporal ease."
+      "description": "Scale keyframe outgoing temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].out_ease.speed",
@@ -7857,7 +7883,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Scale keyframe outgoing ease speed."
+      "description": "Scale keyframe outgoing ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.scale_keyframes[].out_ease.influence",
@@ -7867,7 +7894,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Scale keyframe outgoing ease influence."
+      "description": "Scale keyframe outgoing ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[]",
@@ -7911,7 +7939,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Rotation keyframe incoming temporal ease."
+      "description": "Rotation keyframe incoming temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].in_ease.speed",
@@ -7920,7 +7949,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Rotation keyframe incoming ease speed."
+      "description": "Rotation keyframe incoming ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].in_ease.influence",
@@ -7930,7 +7960,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Rotation keyframe incoming ease influence."
+      "description": "Rotation keyframe incoming ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].out_ease",
@@ -7940,7 +7971,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Rotation keyframe outgoing temporal ease."
+      "description": "Rotation keyframe outgoing temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].out_ease.speed",
@@ -7949,7 +7981,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Rotation keyframe outgoing ease speed."
+      "description": "Rotation keyframe outgoing ease speed.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.rotation_keyframes[].out_ease.influence",
@@ -7959,7 +7992,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Rotation keyframe outgoing ease influence."
+      "description": "Rotation keyframe outgoing ease influence.",
+      "x-aep-example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.opacity_keyframes[]",
@@ -8129,7 +8163,8 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.anchor_point",
@@ -8139,7 +8174,8 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "description": "Anchor point expression settings."
+      "description": "Anchor point expression settings.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.anchor_point.source",
@@ -8167,7 +8203,8 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.anchor_point.enabled",
@@ -8188,7 +8225,8 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.scale",
@@ -8198,7 +8236,8 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "description": "Scale expression settings."
+      "description": "Scale expression settings.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.scale.source",
@@ -8226,7 +8265,8 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.scale.enabled",
@@ -8247,7 +8287,8 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.rotation",
@@ -8257,7 +8298,8 @@
       "type": "object",
       "go_type": "*recipe.ExpressionSpec",
       "object_type": "ExpressionSpec",
-      "description": "Rotation expression settings."
+      "description": "Rotation expression settings.",
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.rotation.source",
@@ -8285,7 +8327,8 @@
             "TestExprEffect_AEShipGate_AE2025"
           ]
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.rotation.enabled",
@@ -8306,7 +8349,8 @@
           "minver": "2020",
           "boundary": "length-preserving, 1 byte at tdb4 offset 0x77 (the disabled\nflag; 0 = AE evaluates, 1 = expression kept but off). The neighboring\noffset 0x78 is a separate has-expression marker kept in sync by\nSetExpression — the two bytes are distinct and must not be conflated.\nRequires the property's tdbs to contain a tdb4 chunk, which is always\npresent for properties parsed from real files; returns an error\notherwise."
         }
-      ]
+      ],
+      "x-aep-example": "examples/recipes/minimal-transform-expression.json"
     },
     {
       "x-aep-path": "comps[].layers[].transform.expressions.opacity",
@@ -8583,7 +8627,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Effect parameter keyframe incoming temporal ease."
+      "description": "Effect parameter keyframe incoming temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].in_ease.speed",
@@ -8592,7 +8637,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Effect parameter keyframe incoming ease speed."
+      "description": "Effect parameter keyframe incoming ease speed.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].in_ease.influence",
@@ -8602,7 +8648,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Effect parameter keyframe incoming ease influence."
+      "description": "Effect parameter keyframe incoming ease influence.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease",
@@ -8612,7 +8659,8 @@
       "type": "object",
       "go_type": "*recipe.TemporalEase",
       "object_type": "TemporalEase",
-      "description": "Effect parameter keyframe outgoing temporal ease."
+      "description": "Effect parameter keyframe outgoing temporal ease.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease.speed",
@@ -8621,7 +8669,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "description": "Effect parameter keyframe outgoing ease speed."
+      "description": "Effect parameter keyframe outgoing ease speed.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].keyframes[].out_ease.influence",
@@ -8631,7 +8680,8 @@
       "type": "number",
       "go_type": "float64",
       "x-aep-structural-required": true,
-      "description": "Effect parameter keyframe outgoing ease influence."
+      "description": "Effect parameter keyframe outgoing ease influence.",
+      "x-aep-example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     {
       "x-aep-path": "comps[].layers[].effects[].params[].expression",

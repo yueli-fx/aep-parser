@@ -16,8 +16,16 @@
         "params": [{
           "match_name": "ADBE Point Control-0001",
           "keyframes": [
-            {"time": 0, "value": [0.25, 0.35]},
-            {"time": 2, "value": [0.75, 0.65]}
+            {
+              "time": 0,
+              "value": [0.25, 0.35],
+              "out_ease": { "speed": 0, "influence": 0.5 }
+            },
+            {
+              "time": 2,
+              "value": [0.75, 0.65],
+              "in_ease": { "speed": 0, "influence": 0.35 }
+            }
           ]
         }]
       }]

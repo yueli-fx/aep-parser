@@ -267,6 +267,23 @@ func TestBuildDocumentWithExampleDirCoversExpectedProfileExamples(t *testing.T) 
 	}
 }
 
+func TestBuildDocumentWithExampleDirCoversAllRecipeExamples(t *testing.T) {
+	doc, err := BuildDocumentWithExampleDir(filepath.Join("..", "..", "examples", "recipes"), "examples/recipes")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var missing []string
+	for _, field := range doc.Fields {
+		if field.Example == "" {
+			missing = append(missing, field.Path)
+		}
+	}
+	if len(missing) > 0 {
+		t.Fatalf("recipe fields without examples: %s", strings.Join(missing, ", "))
+	}
+}
+
 func TestBuildDocumentExampleReferencesExist(t *testing.T) {
 	doc, err := BuildDocument()
 	if err != nil {

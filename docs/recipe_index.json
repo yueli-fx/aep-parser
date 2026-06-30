@@ -1114,7 +1114,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Effect parameter keyframe incoming temporal ease."
+      "summary": "Effect parameter keyframe incoming temporal ease.",
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].in_ease.influence": {
       "path": "comps[].layers[].effects[].params[].keyframes[].in_ease.influence",
@@ -1126,7 +1127,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Effect parameter keyframe incoming ease influence."
+      "summary": "Effect parameter keyframe incoming ease influence.",
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].in_ease.speed": {
       "path": "comps[].layers[].effects[].params[].keyframes[].in_ease.speed",
@@ -1135,7 +1137,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Effect parameter keyframe incoming ease speed."
+      "summary": "Effect parameter keyframe incoming ease speed.",
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].out_ease": {
       "path": "comps[].layers[].effects[].params[].keyframes[].out_ease",
@@ -1144,7 +1147,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Effect parameter keyframe outgoing temporal ease."
+      "summary": "Effect parameter keyframe outgoing temporal ease.",
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].out_ease.influence": {
       "path": "comps[].layers[].effects[].params[].keyframes[].out_ease.influence",
@@ -1156,7 +1160,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Effect parameter keyframe outgoing ease influence."
+      "summary": "Effect parameter keyframe outgoing ease influence.",
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].out_ease.speed": {
       "path": "comps[].layers[].effects[].params[].keyframes[].out_ease.speed",
@@ -1165,7 +1170,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Effect parameter keyframe outgoing ease speed."
+      "summary": "Effect parameter keyframe outgoing ease speed.",
+      "example": "examples/recipes/minimal-effect-param-vector-keyframes.json"
     },
     "comps[].layers[].effects[].params[].keyframes[].time": {
       "path": "comps[].layers[].effects[].params[].keyframes[].time",
@@ -3601,7 +3607,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Incoming temporal ease for the keyframe."
+      "summary": "Incoming temporal ease for the keyframe.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.influence",
@@ -3613,7 +3620,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Incoming temporal ease influence percentage."
+      "summary": "Incoming temporal ease influence percentage.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[].in_ease.speed",
@@ -3622,7 +3630,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Incoming temporal ease speed."
+      "summary": "Incoming temporal ease speed.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease",
@@ -3631,7 +3640,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Outgoing temporal ease for the keyframe."
+      "summary": "Outgoing temporal ease for the keyframe.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.influence",
@@ -3643,7 +3653,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Outgoing temporal ease influence percentage."
+      "summary": "Outgoing temporal ease influence percentage.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[].out_ease.speed",
@@ -3652,7 +3663,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Outgoing temporal ease speed."
+      "summary": "Outgoing temporal ease speed.",
+      "example": "examples/recipes/minimal-text-animator-range-offset.json"
     },
     "comps[].layers[].text_animators[].range_offset_keyframes[].time": {
       "path": "comps[].layers[].text_animators[].range_offset_keyframes[].time",
@@ -3729,7 +3741,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Incoming temporal ease for the keyframe."
+      "summary": "Incoming temporal ease for the keyframe.",
+      "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].in_ease.influence",
@@ -3741,7 +3754,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Incoming temporal ease influence percentage."
+      "summary": "Incoming temporal ease influence percentage.",
+      "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].in_ease.speed",
@@ -3750,7 +3764,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Incoming temporal ease speed."
+      "summary": "Incoming temporal ease speed.",
+      "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].out_ease": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].out_ease",
@@ -3759,7 +3774,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Outgoing temporal ease for the keyframe."
+      "summary": "Outgoing temporal ease for the keyframe.",
+      "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].out_ease.influence",
@@ -3771,7 +3787,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Outgoing temporal ease influence percentage."
+      "summary": "Outgoing temporal ease influence percentage.",
+      "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].out_ease.speed",
@@ -3780,7 +3797,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Outgoing temporal ease speed."
+      "summary": "Outgoing temporal ease speed.",
+      "example": "examples/recipes/minimal-text-animator-position-value-keyframes.json"
     },
     "comps[].layers[].text_animators[].value_keyframes[].time": {
       "path": "comps[].layers[].text_animators[].value_keyframes[].time",
@@ -4162,7 +4180,8 @@
       "source_field": "ParagraphIndex",
       "type": "number",
       "go_type": "int",
-      "summary": "Layer text style paragraph index."
+      "summary": "Layer text style paragraph index.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.run_index": {
       "path": "comps[].layers[].text_style.run_index",
@@ -4171,7 +4190,8 @@
       "source_field": "RunIndex",
       "type": "number",
       "go_type": "int",
-      "summary": "Layer text style text run index."
+      "summary": "Layer text style text run index.",
+      "example": "examples/recipes/minimal-text-style.json"
     },
     "comps[].layers[].text_style.space_after": {
       "path": "comps[].layers[].text_style.space_after",
@@ -4326,7 +4346,8 @@
       "source_field": "AnchorPoint",
       "type": "array\u003cfloat64\u003e",
       "go_type": "[]float64",
-      "summary": "Static anchor point value."
+      "summary": "Static anchor point value.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[]": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[]",
@@ -4345,7 +4366,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Anchor point keyframe incoming temporal ease."
+      "summary": "Anchor point keyframe incoming temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease.influence",
@@ -4357,7 +4379,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Anchor point keyframe incoming ease influence."
+      "summary": "Anchor point keyframe incoming ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].in_ease.speed",
@@ -4366,7 +4389,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Anchor point keyframe incoming ease speed."
+      "summary": "Anchor point keyframe incoming ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].out_ease": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease",
@@ -4375,7 +4399,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Anchor point keyframe outgoing temporal ease."
+      "summary": "Anchor point keyframe outgoing temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease.influence",
@@ -4387,7 +4412,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Anchor point keyframe outgoing ease influence."
+      "summary": "Anchor point keyframe outgoing ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].out_ease.speed",
@@ -4396,7 +4422,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Anchor point keyframe outgoing ease speed."
+      "summary": "Anchor point keyframe outgoing ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.anchor_point_keyframes[].time": {
       "path": "comps[].layers[].transform.anchor_point_keyframes[].time",
@@ -4441,7 +4468,8 @@
       "source_field": "AnchorPoint",
       "type": "object\u003cExpressionSpec\u003e",
       "go_type": "*recipe.ExpressionSpec",
-      "summary": "Anchor point expression settings."
+      "summary": "Anchor point expression settings.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.anchor_point.enabled": {
       "path": "comps[].layers[].transform.expressions.anchor_point.enabled",
@@ -4453,7 +4481,8 @@
       "summary": "anchor_point transform expression enable switch.",
       "capability_keys": [
         "property.set_expression_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.anchor_point.source": {
       "path": "comps[].layers[].transform.expressions.anchor_point.source",
@@ -4468,7 +4497,8 @@
       "summary": "anchor_point transform expression source code.",
       "capability_keys": [
         "property.set_expression"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.opacity": {
       "path": "comps[].layers[].transform.expressions.opacity",
@@ -4529,7 +4559,8 @@
       "summary": "position transform expression enable switch.",
       "capability_keys": [
         "property.set_expression_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.position.source": {
       "path": "comps[].layers[].transform.expressions.position.source",
@@ -4554,7 +4585,8 @@
       "source_field": "Rotation",
       "type": "object\u003cExpressionSpec\u003e",
       "go_type": "*recipe.ExpressionSpec",
-      "summary": "Rotation expression settings."
+      "summary": "Rotation expression settings.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.rotation.enabled": {
       "path": "comps[].layers[].transform.expressions.rotation.enabled",
@@ -4566,7 +4598,8 @@
       "summary": "rotation transform expression enable switch.",
       "capability_keys": [
         "property.set_expression_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.rotation.source": {
       "path": "comps[].layers[].transform.expressions.rotation.source",
@@ -4581,7 +4614,8 @@
       "summary": "rotation transform expression source code.",
       "capability_keys": [
         "property.set_expression"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.scale": {
       "path": "comps[].layers[].transform.expressions.scale",
@@ -4590,7 +4624,8 @@
       "source_field": "Scale",
       "type": "object\u003cExpressionSpec\u003e",
       "go_type": "*recipe.ExpressionSpec",
-      "summary": "Scale expression settings."
+      "summary": "Scale expression settings.",
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.scale.enabled": {
       "path": "comps[].layers[].transform.expressions.scale.enabled",
@@ -4602,7 +4637,8 @@
       "summary": "scale transform expression enable switch.",
       "capability_keys": [
         "property.set_expression_enabled"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.expressions.scale.source": {
       "path": "comps[].layers[].transform.expressions.scale.source",
@@ -4617,7 +4653,8 @@
       "summary": "scale transform expression source code.",
       "capability_keys": [
         "property.set_expression"
-      ]
+      ],
+      "example": "examples/recipes/minimal-transform-expression.json"
     },
     "comps[].layers[].transform.opacity": {
       "path": "comps[].layers[].transform.opacity",
@@ -4850,7 +4887,8 @@
       "source_field": "Rotation",
       "type": "number",
       "go_type": "*float64",
-      "summary": "Static rotation value."
+      "summary": "Static rotation value.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[]": {
       "path": "comps[].layers[].transform.rotation_keyframes[]",
@@ -4869,7 +4907,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Rotation keyframe incoming temporal ease."
+      "summary": "Rotation keyframe incoming temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].transform.rotation_keyframes[].in_ease.influence",
@@ -4881,7 +4920,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Rotation keyframe incoming ease influence."
+      "summary": "Rotation keyframe incoming ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].transform.rotation_keyframes[].in_ease.speed",
@@ -4890,7 +4930,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Rotation keyframe incoming ease speed."
+      "summary": "Rotation keyframe incoming ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].out_ease": {
       "path": "comps[].layers[].transform.rotation_keyframes[].out_ease",
@@ -4899,7 +4940,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Rotation keyframe outgoing temporal ease."
+      "summary": "Rotation keyframe outgoing temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].transform.rotation_keyframes[].out_ease.influence",
@@ -4911,7 +4953,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Rotation keyframe outgoing ease influence."
+      "summary": "Rotation keyframe outgoing ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].transform.rotation_keyframes[].out_ease.speed",
@@ -4920,7 +4963,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Rotation keyframe outgoing ease speed."
+      "summary": "Rotation keyframe outgoing ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.rotation_keyframes[].time": {
       "path": "comps[].layers[].transform.rotation_keyframes[].time",
@@ -4975,7 +5019,8 @@
       "source_field": "InEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Scale keyframe incoming temporal ease."
+      "summary": "Scale keyframe incoming temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].in_ease.influence": {
       "path": "comps[].layers[].transform.scale_keyframes[].in_ease.influence",
@@ -4987,7 +5032,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Scale keyframe incoming ease influence."
+      "summary": "Scale keyframe incoming ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].in_ease.speed": {
       "path": "comps[].layers[].transform.scale_keyframes[].in_ease.speed",
@@ -4996,7 +5042,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Scale keyframe incoming ease speed."
+      "summary": "Scale keyframe incoming ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].out_ease": {
       "path": "comps[].layers[].transform.scale_keyframes[].out_ease",
@@ -5005,7 +5052,8 @@
       "source_field": "OutEase",
       "type": "object\u003cTemporalEase\u003e",
       "go_type": "*recipe.TemporalEase",
-      "summary": "Scale keyframe outgoing temporal ease."
+      "summary": "Scale keyframe outgoing temporal ease.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].out_ease.influence": {
       "path": "comps[].layers[].transform.scale_keyframes[].out_ease.influence",
@@ -5017,7 +5065,8 @@
       "requiredness": [
         "structural"
       ],
-      "summary": "Scale keyframe outgoing ease influence."
+      "summary": "Scale keyframe outgoing ease influence.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].out_ease.speed": {
       "path": "comps[].layers[].transform.scale_keyframes[].out_ease.speed",
@@ -5026,7 +5075,8 @@
       "source_field": "Speed",
       "type": "number",
       "go_type": "float64",
-      "summary": "Scale keyframe outgoing ease speed."
+      "summary": "Scale keyframe outgoing ease speed.",
+      "example": "examples/recipes/minimal-transform-keyframe-ease.json"
     },
     "comps[].layers[].transform.scale_keyframes[].time": {
       "path": "comps[].layers[].transform.scale_keyframes[].time",

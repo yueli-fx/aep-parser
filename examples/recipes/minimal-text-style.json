@@ -17,6 +17,8 @@
           "name": "Title",
           "text": "Style",
           "text_style": {
+            "run_index": 0,
+            "paragraph_index": 0,
             "font_size": 96,
             "fill_color": [64, 128, 255, 255],
             "auto_leading": false,

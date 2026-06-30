@@ -21,7 +21,20 @@
             "opacity": 100,
             "expressions": {
               "position": {
-                "source": "[value[0] + time * 10, value[1], value[2]]"
+                "source": "[value[0] + time * 10, value[1], value[2]]",
+                "enabled": true
+              },
+              "anchor_point": {
+                "source": "[value[0], value[1], value[2]]",
+                "enabled": true
+              },
+              "scale": {
+                "source": "[value[0], value[1], value[2]]",
+                "enabled": true
+              },
+              "rotation": {
+                "source": "value + time * 5",
+                "enabled": true
               },
               "opacity": {
                 "source": "time * 50",
@@ -48,6 +61,24 @@
         "layer_name": "Title",
         "match_name": "ADBE Position",
         "expression": "[value[0] + time * 10, value[1], value[2]]",
+        "expression_enabled": true
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Anchor Point",
+        "expression": "[value[0], value[1], value[2]]",
+        "expression_enabled": true
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Scale",
+        "expression": "[value[0], value[1], value[2]]",
+        "expression_enabled": true
+      },
+      {
+        "layer_name": "Title",
+        "match_name": "ADBE Rotate Z",
+        "expression": "value + time * 5",
         "expression_enabled": true
       },
       {

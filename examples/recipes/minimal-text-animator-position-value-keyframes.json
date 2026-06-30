@@ -18,8 +18,16 @@
         "range_end": 100,
         "range_offset": 0,
         "value_keyframes": [
-          {"time": 0, "value": [0, -80, 0]},
-          {"time": 2, "value": [120, 20, 0]}
+          {
+            "time": 0,
+            "value": [0, -80, 0],
+            "out_ease": { "speed": 0, "influence": 0.5 }
+          },
+          {
+            "time": 2,
+            "value": [120, 20, 0],
+            "in_ease": { "speed": 0, "influence": 0.35 }
+          }
         ]
       }]
     }]

@@ -23,8 +23,16 @@
               "range_end": 100,
               "range_offset": 0,
               "range_offset_keyframes": [
-                {"time": 0, "value": 0},
-                {"time": 2, "value": 100}
+                {
+                  "time": 0,
+                  "value": 0,
+                  "out_ease": { "speed": 0, "influence": 0.55 }
+                },
+                {
+                  "time": 2,
+                  "value": 100,
+                  "in_ease": { "speed": 0, "influence": 0.4 }
+                }
               ]
             }
           ]
