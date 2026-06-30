@@ -59,6 +59,8 @@ Phase 0 export-surface audit and contract lock before extracting
   over Technique Facts.
 - `technique-portrait-v1-plan.md` — implementation plan and verification
   record for portrait generation and CLI mode support.
+- `technique-portrait-corpus-v1.md` — JSONL batch mode for generating facts or
+  portraits across many `.aep` files.
 - `flightdeck/knowledge/techniques/understand-a-project.md` — existing
   reference-project internalization workflow.
 - `flightdeck/knowledge/techniques/fx-techniques.md` — current technique
@@ -615,6 +617,10 @@ Done:
   produces fingerprint, signal-layer, mechanism, graph, unknown, and conservative
   technique-hint summaries; `cmd/aeptechnique -mode portrait` and `-portrait`
   emit the portrait JSON.
+- `cmd/aeptechnique` corpus mode is implemented:
+  `-in <dir-or-file> -mode portrait -corpus -recursive [-limit N]` emits
+  deterministic JSONL records, one per `.aep`, and continues across per-file
+  build failures.
 
 Current:
 - Phase 6 render-compare loop and minimal recipe IR are implemented and proven
@@ -626,6 +632,11 @@ Current:
 - `cmd/aeptechnique -mode portrait -in <file.aep>` now provides a compact
   corpus-facing project image suitable for comparing many projects without
   retaining the full fact dump.
+- `cmd/aeptechnique -in flightdeck\showcase -mode portrait -corpus -recursive
+  -limit 3` produces JSONL portraits; the Booyah showcase record currently
+  surfaces 12 comps, 61 layers, 41 effects, 109 dependency edges, and
+  `kinetic_text` / `precomp_assembly` / `effect_driven_layer` /
+  `shape_operator_stack` / `controller_rig` hints.
 - Recipe IR coverage for the current comp and layer strategy matrices is
   complete: comp settings have object-level and field-level profile checks,
   authored-layer examples carry `expected_profile.layers[]`, camera/light

@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/yueli-fx/aep-parser/internal/technique"
@@ -86,4 +88,71 @@ func TestRunAcceptsPortraitFlag(t *testing.T) {
 	if portrait.Fingerprint.LayerCount == 0 {
 		t.Fatalf("portrait fingerprint = %+v", portrait.Fingerprint)
 	}
+}
+
+func TestRunEmitsCorpusPortraitJSONL(t *testing.T) {
+	fixture := filepath.Join("..", "..", "flightdeck", "showcase", "text", "text.aep")
+	root := t.TempDir()
+	writeFixtureCopy(t, fixture, filepath.Join(root, "b.aep"))
+	nested := filepath.Join(root, "nested")
+	if err := os.Mkdir(nested, 0o755); err != nil {
+		t.Fatalf("Mkdir: %v", err)
+	}
+	writeFixtureCopy(t, fixture, filepath.Join(nested, "a.aep"))
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"-in", root, "-mode", "portrait", "-corpus", "-recursive"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("run exit = %d, stderr=%s", code, stderr.String())
+	}
+
+	lines := nonEmptyLines(stdout.String())
+	if len(lines) != 2 {
+		t.Fatalf("jsonl lines = %d, stdout=%s", len(lines), stdout.String())
+	}
+	var first, second corpusRecord
+	if err := json.Unmarshal([]byte(lines[0]), &first); err != nil {
+		t.Fatalf("unmarshal first: %v\n%s", err, lines[0])
+	}
+	if err := json.Unmarshal([]byte(lines[1]), &second); err != nil {
+		t.Fatalf("unmarshal second: %v\n%s", err, lines[1])
+	}
+	if !strings.HasSuffix(first.Path, "b.aep") || !strings.HasSuffix(second.Path, filepath.Join("nested", "a.aep")) {
+		t.Fatalf("records not sorted by path: first=%s second=%s", first.Path, second.Path)
+	}
+	if first.Mode != "portrait" || first.Portrait == nil || first.Portrait.Fingerprint.LayerCount == 0 {
+		t.Fatalf("first record = %+v", first)
+	}
+}
+
+func TestRunRejectsDirectoryCorpusWithoutRecursive(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"-in", t.TempDir(), "-mode", "portrait", "-corpus"}, &stdout, &stderr)
+	if code != 2 {
+		t.Fatalf("run exit = %d, stderr=%s stdout=%s", code, stderr.String(), stdout.String())
+	}
+	if !strings.Contains(stderr.String(), "requires -recursive") {
+		t.Fatalf("stderr = %s, want requires -recursive", stderr.String())
+	}
+}
+
+func writeFixtureCopy(t *testing.T, src, dst string) {
+	t.Helper()
+	data, err := os.ReadFile(src)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	if err := os.WriteFile(dst, data, 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+}
+
+func nonEmptyLines(text string) []string {
+	var out []string
+	for _, line := range strings.Split(text, "\n") {
+		if strings.TrimSpace(line) != "" {
+			out = append(out, line)
+		}
+	}
+	return out
 }
